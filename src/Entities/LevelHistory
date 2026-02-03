@@ -1,0 +1,39 @@
+{
+  "name": "LevelHistory",
+  "type": "object",
+  "properties": {
+    "card_id": {
+      "type": "string",
+      "description": "\u30ab\u30fc\u30c9ID"
+    },
+    "changed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u5909\u66f4\u65e5\u6642"
+    },
+    "from_level": {
+      "type": "number",
+      "description": "\u5909\u66f4\u524d\u30ec\u30d9\u30eb"
+    },
+    "to_level": {
+      "type": "number",
+      "description": "\u5909\u66f4\u5f8c\u30ec\u30d9\u30eb"
+    },
+    "reason": {
+      "type": "string",
+      "enum": [
+        "correct",
+        "incorrect",
+        "manual"
+      ],
+      "description": "\u5909\u66f4\u7406\u7531"
+    }
+  },
+  "required": [
+    "card_id",
+    "from_level",
+    "to_level",
+    "reason"
+  ],
+  "rls": {}
+}

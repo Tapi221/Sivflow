@@ -1,0 +1,37 @@
+
+> flashcard-master@0.0.0 build
+> vite build
+
+[36mvite v7.3.1 [32mbuilding client environment for production...[36m[39m
+transforming...
+src/services/logic/TelemetryService.ts (1:9): "ITelemetryService" is not exported by "src/types/telemetry.ts", imported by "src/services/logic/TelemetryService.ts".
+src/services/logic/TelemetryService.ts (1:28): "LogLevel" is not exported by "src/types/telemetry.ts", imported by "src/services/logic/TelemetryService.ts".
+src/services/logic/TelemetryService.ts (1:38): "LogContext" is not exported by "src/types/telemetry.ts", imported by "src/services/logic/TelemetryService.ts".
+src/services/logic/TelemetryService.ts (1:50): "SyncLogEntry" is not exported by "src/types/telemetry.ts", imported by "src/services/logic/TelemetryService.ts".
+src/services/logic/QueueManager.ts (1:9): "IQueueManager" is not exported by "src/services/interfaces/ISyncService.ts", imported by "src/services/logic/QueueManager.ts".
+src/services/logic/QueueManager.ts (1:24): "BatchConstraint" is not exported by "src/services/interfaces/ISyncService.ts", imported by "src/services/logic/QueueManager.ts".
+src/services/logic/QueueManager.ts (1:41): "SyncTask" is not exported by "src/services/interfaces/ISyncService.ts", imported by "src/services/logic/QueueManager.ts".
+src/services/logic/NetworkMonitor.ts (1:9): "INetworkMonitor" is not exported by "src/services/interfaces/ISyncService.ts", imported by "src/services/logic/NetworkMonitor.ts".
+src/services/logic/NetworkMonitor.ts (1:26): "BatchConstraint" is not exported by "src/services/interfaces/ISyncService.ts", imported by "src/services/logic/NetworkMonitor.ts".
+src/services/logic/NetworkMonitor.ts (2:9): "NetworkStatus" is not exported by "src/types/telemetry.ts", imported by "src/services/logic/NetworkMonitor.ts".
+src/services/logic/NetworkMonitor.ts (2:24): "SyncContextSource" is not exported by "src/types/telemetry.ts", imported by "src/services/logic/NetworkMonitor.ts".
+src/services/logic/DiffEngine.ts (1:9): "IDiffEngine" is not exported by "src/services/interfaces/ISyncService.ts", imported by "src/services/logic/DiffEngine.ts".
+src/services/NotificationService.ts (1:9): "Notification" is not exported by "src/types/notification.ts", imported by "src/services/NotificationService.ts".
+src/services/NotificationService.ts (1:23): "NotificationLevel" is not exported by "src/types/notification.ts", imported by "src/services/NotificationService.ts".
+src/services/NotificationService.ts (1:42): "NotificationOptions" is not exported by "src/types/notification.ts", imported by "src/services/NotificationService.ts".
+src/Components/notifications/NotificationProvider.tsx (2:9): "Notification" is not exported by "src/types/notification.ts", imported by "src/Components/notifications/NotificationProvider.tsx".
+src/utils/imageValidation.ts (1:9): "UploadedImage" is not exported by "src/types/index.ts", imported by "src/utils/imageValidation.ts".
+[32m笨・[39m 4115 modules transformed.
+笨・[39m Build failed in 29.22s
+error during build:
+[vite:prepare-out-dir] EPERM: operation not permitted, lstat 'C:\FlashcardMaster\dist\assets\vendor-firebase-BFNxIaBM.js'
+    at lstatSync (node:fs:1656:25)
+    at rimrafSync (node:internal/fs/rimraf:182:13)
+    at node:internal/fs/rimraf:255:9
+    at Array.forEach (<anonymous>)
+    at _rmdirSync (node:internal/fs/rimraf:252:7)
+    at fixWinEPERMSync (node:internal/fs/rimraf:306:5)
+    at rimrafSync (node:internal/fs/rimraf:202:14)
+    at Object.rmSync (node:fs:1263:10)
+    at emptyDir (file:///C:/FlashcardMaster/node_modules/vite/dist/node/chunks/config.js:2167:11)
+    at prepareOutDir (file:///C:/FlashcardMaster/node_modules/vite/dist/node/chunks/config.js:33325:55)

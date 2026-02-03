@@ -1,0 +1,111 @@
+{
+  "name": "Card",
+  "type": "object",
+  "properties": {
+    "folder_id": {
+      "type": "string",
+      "description": "\u6240\u5c5e\u30d5\u30a9\u30eb\u30c0ID"
+    },
+    "order_index": {
+      "type": "number",
+      "description": "\u30d5\u30a9\u30eb\u30c0\u5185\u4e26\u3073\u9806"
+    },
+    "title": {
+      "type": "string",
+      "description": "\u4efb\u610f\u306e\u554f\u984c\u540d"
+    },
+    "is_draft": {
+      "type": "boolean",
+      "default": false,
+      "description": "\u4f5c\u6210\u4e2d\u30d5\u30e9\u30b0"
+    },
+    "has_uncertainty": {
+      "type": "boolean",
+      "default": false,
+      "description": "\u4e0d\u78ba\u5b9f\u30d5\u30e9\u30b0\uff08\uff1f\uff09"
+    },
+    "question_text": {
+      "type": "string",
+      "description": "\u554f\u984c\u30c6\u30ad\u30b9\u30c8\uff08LaTeX\u5bfe\u5fdc\uff09"
+    },
+    "question_images": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u554f\u984c\u753b\u50cfURL\u914d\u5217"
+    },
+    "question_audios": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u554f\u984c\u97f3\u58f0URL\u914d\u5217"
+    },
+    "question_memo": {
+      "type": "string",
+      "description": "\u554f\u984c\u30e1\u30e2"
+    },
+    "answer_text": {
+      "type": "string",
+      "description": "\u56de\u7b54\u30c6\u30ad\u30b9\u30c8\uff08LaTeX\u5bfe\u5fdc\uff09"
+    },
+    "answer_images": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u56de\u7b54\u753b\u50cfURL\u914d\u5217"
+    },
+    "answer_audios": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u56de\u7b54\u97f3\u58f0URL\u914d\u5217"
+    },
+    "answer_memo": {
+      "type": "string",
+      "description": "\u56de\u7b54\u30e1\u30e2"
+    },
+    "level": {
+      "type": "number",
+      "default": 0,
+      "description": "\u73fe\u5728\u306e\u30ec\u30d9\u30eb"
+    },
+    "next_review_date": {
+      "type": "string",
+      "format": "date",
+      "description": "\u6b21\u56de\u5fa9\u7fd2\u65e5"
+    },
+    "last_studied_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u6700\u7d42\u5b66\u7fd2\u65e5\u6642"
+    },
+    "is_deleted": {
+      "type": "boolean",
+      "default": false,
+      "description": "\u3054\u307f\u7bb1\u30d5\u30e9\u30b0"
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u524a\u9664\u65e5\u6642"
+    },
+    "question_blocks": {
+      "type": "array",
+      "items": { "type": "object" },
+      "description": "ブロック形式の問題コンテンツ"
+    },
+    "answer_blocks": {
+      "type": "array",
+      "items": { "type": "object" },
+      "description": "ブロック形式の回答コンテンツ"
+    }
+  },
+  "required": [
+    "folder_id"
+  ],
+  "rls": {}
+}

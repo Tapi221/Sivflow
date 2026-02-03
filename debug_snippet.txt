@@ -1,0 +1,172 @@
+case 'study':
+        return (
+            <div className="space-y-8 animate-in fade-in duration-300">
+                <div className="space-y-2">
+                    <h2 className="text-xl font-bold text-slate-800">学習設定</h2>
+                    <p className="text-sm text-slate-400">学習カードの表示や挙動を管理します</p>
+                </div>
+
+                <div className="bg-[#F8FAFB] p-6 rounded-xl space-y-6">
+                    <div>
+
+
+                         <div className="flex items-center justify-between pt-4 border-t border-slate-100 mt-4">
+                            <div>
+                                <div className="font-bold text-slate-600 text-sm">カード編集時のプレビュー初期値</div>
+                                <div className="text-xs text-slate-400">編集画面を開いた時のプレビューのデフォルト状態を設定します</div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className={cn("text-[10px] font-bold", (settings?.defaultPreviewEnabled ?? false) ? 'text-primary-600' : 'text-slate-300')}>
+                                    {(settings?.defaultPreviewEnabled ?? false) ? 'ON' : 'OFF'}
+                                </span>
+                                <Switch 
+                                    checked={settings?.defaultPreviewEnabled ?? false}
+                                    onCheckedChange={(checked) => updateSettings({ defaultPreviewEnabled: checked })}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex items-center justify-between pt-4 border-t border-slate-100 mt-4">
+                            <div>
+                                <div className="font-bold text-slate-600 text-sm">オートセーブ（自動下書き）</div>
+                                <div className="text-xs text-slate-400">編集中の内容を一時的に保存し、リロード時に復元します</div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className={cn("text-[10px] font-bold", (settings?.autoSaveEnabled ?? true) ? 'text-primary-600' : 'text-slate-300')}>
+                                    {(settings?.autoSaveEnabled ?? true) ? 'ON' : 'OFF'}
+                                </span>
+                                <Switch 
+                                    checked={settings?.autoSaveEnabled ?? true}
+                                    onCheckedChange={(checked) => updateSettings({ autoSaveEnabled: checked })}
+                                />
+                            </div>
+                        </div>
+
+                        </div>
+                    </div>
+
+                    <div className="pt-6 border-t border-slate-100">
+                        <div className="font-bold text-slate-700 text-sm mb-4">レビューボタン表示設定</div>
+                        <div className="space-y-4">
+                            {/* 0: 忘れた (Forgot) - Always shown */}
+                            <div className="flex items-start gap-4 p-4 rounded-xl bg-white border border-slate-100">
+                                <div className="mt-1">
+                                    <FaceIcons.Forgot size={32} />
+                                </div>
+                                <div className="flex-1">
+                                    <div className="flex items-center justify-between mb-1">
+                                        <div className="font-bold text-slate-700 text-sm">忘れた</div>
+                                    </div>
+                                    <div className="text-xs text-slate-400 leading-relaxed">
+                                        思い出せなかったカード。復習間隔はほぼリセットされ、しっかり復習が必要です。
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 1: あいまい (Vague/Hard) - Toggleable */}
+                            <div className="flex items-start gap-4 p-4 rounded-xl bg-white border border-slate-100">
+                                <div className="mt-1">
+                                    <FaceIcons.Vague size={32} />
+                                </div>
+                                <div className="flex-1">
+                                    <div className="flex items-center justify-between mb-1">
+                                        <div className="font-bold text-slate-700 text-sm">あいまい</div>
+                                        <Switch 
+                                            checked={settings?.showReviewHard ?? true}
+                                            onCheckedChange={(checked) => updateSettings({ showReviewHard: checked })}
+                                        />
+                                    </div>
+                                    <div className="text-xs text-slate-400 leading-relaxed">
+                                        覚えかけのカード。復習間隔は控えめに伸び、段階的に強化されます。
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 2: 覚えた (Good) - Always shown */}
+                            <div className="flex items-start gap-4 p-4 rounded-xl bg-white border border-slate-100">
+                                <div className="mt-1">
+                                    <FaceIcons.Good size={32} />
+                                </div>
+                                <div className="flex-1">
+                                    <div className="flex items-center justify-between mb-1">
+                                        <div className="font-bold text-slate-700 text-sm">覚えた</div>
+                                    </div>
+                                    <div className="text-xs text-slate-400 leading-relaxed">
+                                        正解したカード。少しずつ復習間隔が伸び、安定的に覚えられます。
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 3: 余裕 (Easy) - Toggleable */}
+                            <div className="flex items-start gap-4 p-4 rounded-xl bg-white border border-slate-100">
+                                <div className="mt-1">
+                                    <FaceIcons.Easy size={32} />
+                                </div>
+                                <div className="flex-1">
+                                    <div className="flex items-center justify-between mb-1">
+                                        <div className="font-bold text-slate-700 text-sm">余裕</div>
+                                        <Switch 
+                                            checked={settings?.showReviewEasy ?? true}
+                                            onCheckedChange={(checked) => updateSettings({ showReviewEasy: checked })}
+                                        />
+                                    </div>
+                                    <div className="text-xs text-slate-400 leading-relaxed">
+                                        簡単なカード。次回復習までの間隔を大きく伸ばせます。効率的に復習可能。
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="pt-6 border-t border-slate-100">
+                         <div className="font-bold text-slate-700 text-sm mb-4">スケジュール設定</div>
+                         <div className="flex items-center justify-between">
+                            <div>
+                                <div className="font-bold text-slate-600 text-sm">未消化カードの自動繰越</div>
+                                <div className="text-xs text-slate-400">期限切れのカードを翌日の「今日の復習」に含めます</div>
+                            </div>
+                            <Switch 
+                                checked={settings?.autoCarryOver ?? true}
+                                onCheckedChange={(checked) => updateSettings({ autoCarryOver: checked })}
+                            />
+                        </div>
+                        <div className="flex items-center justify-between mt-4">
+                            <div>
+                                <div className="font-bold text-slate-600 text-sm">遅延ボーナス</div>
+                                <div className="text-xs text-slate-400">遅れても思い出せた場合、復習間隔を通常より長くします</div>
+                            </div>
+                            <Switch 
+                                checked={settings?.delayBonusEnabled ?? false}
+                                onCheckedChange={(checked) => updateSettings({ delayBonusEnabled: checked })}
+                            />
+                        </div>
+                        <div className="flex items-center justify-between mt-4">
+                            <div>
+                                <div className="font-bold text-slate-600 text-sm">下書き自動判定</div>
+                                <div className="text-xs text-slate-400">問題や解答が空の場合に、自動的に下書き（作成中）として保存します</div>
+                            </div>
+                            <Switch 
+                                checked={settings?.autoDraftEnabled ?? true}
+                                onCheckedChange={(checked) => updateSettings({ autoDraftEnabled: checked })}
+                            />
+                        </div>
+
+                         <div className="flex items-center justify-between mt-4 border-t border-slate-100 pt-4">
+                            <div>
+                                <div className="font-bold text-slate-600 text-sm">復習開始日</div>
+                                <div className="text-xs text-slate-400">作成したカードの初回の復習をいつから始めるか設定します</div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className={cn("text-[10px] font-bold", !(settings?.reviewStartNextDay ?? true) ? 'text-primary-600' : 'text-slate-300')}>当日</span>
+                                <Switch 
+                                    checked={settings?.reviewStartNextDay ?? true}
+                                    onCheckedChange={handleReviewStartDayChange}
+                                />
+                                <span className={cn("text-[10px] font-bold", (settings?.reviewStartNextDay ?? true) ? 'text-primary-600' : 'text-slate-300')}>翌日</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+      

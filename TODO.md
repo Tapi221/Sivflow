@@ -1,0 +1,2 @@
+- [x] Replace non-existent lucide-react icons in CardViewer.tsx (ArrowLeft -> ChevronLeft, ArrowRight -> ChevronRight, PlayCircle -> Play, PauseCircle -> Pause)
+- [x] Fix audio ref callback in AudioPlayer component to not return a value

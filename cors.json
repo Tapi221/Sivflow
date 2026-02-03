@@ -1,0 +1,8 @@
+[
+  {
+    "origin": ["https://anki-70f73.web.app", "https://anki-70f73.firebaseapp.com", "http://localhost:5173"],
+    "method": ["GET", "PUT", "POST", "DELETE", "HEAD", "OPTIONS"],
+    "maxAgeSeconds": 3600,
+    "responseHeader": ["Content-Type", "Authorization", "Content-Length", "User-Agent", "x-goog-resumable"]
+  }
+]

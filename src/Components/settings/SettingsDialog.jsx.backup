@@ -1,0 +1,1165 @@
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { 
+  User, 
+  Moon, 
+  Tag, 
+  Volume2, 
+  Database, 
+  LogOut, 
+  X,
+  Check,
+  Folder,
+  Layers,
+  Camera,
+  Loader2,
+  Search,
+  Trash2,
+  RefreshCw,
+  Calendar,
+  ChevronRight,
+  Sun,
+  Monitor
+} from 'lucide-react';
+import { db as localDB } from '@/services/localDB';
+import { Dialog, DialogContent, DialogTitle } from '@/Components/ui/dialog';
+import { Button } from '@/Components/ui/button';
+import { Switch } from '@/Components/ui/switch';
+import { Input } from '@/Components/ui/input';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/Components/ui/select';
+import { useAuth } from '@/contexts/AuthContext';
+import { useFolders } from '@/hooks/useFolders';
+import { cn } from '@/lib/utils';
+import { signOut } from 'firebase/auth';
+import { auth, storage } from '@/services/firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { useNavigate } from 'react-router-dom';
+import { useReliableFileUpload } from '@/hooks/useReliableFileUpload';
+import { Slider } from '@/Components/ui/slider';
+import { useUserSettings } from '@/hooks/useUserSettings';
+import { BookOpen } from 'lucide-react';
+import { FaceIcons } from '@/Components/ui/FaceIcons';
+import { StorageManager } from './StorageManager';
+import { 
+  createUploadedImage, 
+  createFailedUploadedImage, 
+  isHeicFile, 
+  convertHeicToJpeg, 
+  compressAndConvertToBase64 
+} from '@/utils/imageUtils';
+import { UploadProgress } from '@/Components/ui/UploadProgress';
+import { getAvatarColors, getInitials } from '@/utils/avatarUtils';
+import { useTags, DEFAULT_COLORS } from '@/hooks/useTags';
+import { Popover, PopoverContent, PopoverTrigger } from '@/Components/ui/popover';
+import DataRescuePanel from '@/Components/settings/DataRescuePanel';
+import { DeviceSyncSettings } from '@/Components/settings/DeviceSyncSettings';
+import { useSyncSettings } from '@/hooks/useSyncSettings';
+import { validateUsername, truncateUsername, countUnicodeCharacters } from '@/utils/userValidation';
+
+const sidebarItems = [
+  { id: 'account', label: 'アカウント', icon: User },
+  { id: 'study', label: '学習設定', icon: BookOpen },
+  { id: 'theme', label: 'テーマ', icon: Moon },
+  { id: 'tags', label: 'タグ管理', icon: Tag },
+  { id: 'voice', label: '音声設定', icon: Volume2 },
+  { id: 'sync', label: '同期設定', icon: RefreshCw },
+  { id: 'data', label: 'データ', icon: Database },
+];
+
+const mockTags = [
+  {
+    folder: '線形代数',
+    tags: [
+      { name: '重要', colors: ['#FFE4E6', '#FEE2E2', '#FEF3C7', '#DBEAFE', '#F3E8FF', '#F3F4F6'] }, // Red, Orange, Yellow, Blue, Purple, Gray (faded)
+    ]
+  },
+  {
+    folder: '基礎',
+    tags: [
+        { name: '基礎', colors: ['#FFE4E6', '#FEE2E2', '#FEF3C7', '#DBEAFE', '#F3E8FF', '#F3F4F6'] }
+    ]
+  },
+  {
+      folder: '試験に出る',
+      tags: [
+          { name: '試験に出る', colors: ['#FFE4E6', '#FEE2E2', '#FEF3C7', '#DBEAFE', '#F3E8FF', '#F3F4F6'] }
+      ]
+  },
+  {
+      folder: '計算',
+      tags: [
+          { name: '計算', colors: ['#FFE4E6', '#FEE2E2', '#FEF3C7', '#DBEAFE', '#F3E8FF', '#F3F4F6'] }
+      ]
+  },
+  {
+      folder: '公式',
+      tags: [
+          { name: '公式', colors: ['#FFE4E6', '#FEE2E2', '#FEF3C7', '#DBEAFE', '#F3E8FF', '#F3F4F6'] }
+      ]
+  },
+    {
+      folder: '暗記',
+      tags: [
+          { name: '暗記', colors: ['#FFE4E6', '#FEE2E2', '#FEF3C7', '#DBEAFE', '#F3E8FF', '#F3F4F6'] }
+      ]
+  },
+  {
+    folder: '微積分',
+    tags: [
+      { name: '応用', colors: ['#FFE4E6', '#FEE2E2', '#FEF3C7', '#DBEAFE', '#F3E8FF', '#F3F4F6'] },
+    ]
+  }
+];
+
+const voiceOptions = [
+    { id: 'kore', label: 'Kore' },
+    { id: 'puck', label: 'Puck' },
+    { id: 'charon', label: 'Charon' },
+    { id: 'fenrir', label: 'Fenrir' },
+    { id: 'zephyr', label: 'Zephyr' },
+];
+
+export default function SettingsDialog({ open, onOpenChange }) {
+  const [activeTab, setActiveTab] = useState('account');
+  const [selectedFolderId, setSelectedFolderId] = useState('all');
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [editingName, setEditingName] = useState(false);
+  const [tempDisplayName, setTempDisplayName] = useState('');
+  const [nameError, setNameError] = useState('');
+  const [selectedRootFolderId, setSelectedRootFolderId] = useState('');
+  const fileInputRef = useRef(null);
+  const { currentUser, syncStatus, lastSyncTime, triggerSync } = useAuth();
+  const navigate = useNavigate();
+  const { folders = [], updateFolder } = useFolders();
+  const { settings, updateSettings } = useUserSettings();
+
+  const rootFolders = folders.filter(f => !f.parentFolderId && !f.parent_folder_id);
+
+  // Initialize selectedRootFolderId when folders are ready
+  useEffect(() => {
+    if (rootFolders.length > 0 && !selectedRootFolderId) {
+      setSelectedRootFolderId(rootFolders[0].id);
+    }
+  }, [rootFolders, selectedRootFolderId]);
+
+  // Hoist hooks
+  const { tags: allTags = [], updateTagColor, deleteTag } = useTags();
+  const [tagSearchTerm, setTagSearchTerm] = useState('');
+
+
+  const filteredTags = selectedFolderId === 'all' 
+    ? mockTags 
+    : mockTags.filter(group => {
+        const folder = folders.find(f => f.id === selectedFolderId);
+        return folder ? group.folder === (folder.folderName || folder.folder_name) : false;
+    });
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigate('/login');
+    } catch (error) {
+      console.error('ログアウトエラー:', error);
+    }
+  };
+
+  const { uploadFile, uploadProgress, uploadStatus, error: uploadError, reset } = useReliableFileUpload();
+
+  // Helper storage path generator
+  const getStoragePath = (uid) => (fileName) => `profile-images/${uid}/${fileName}`;
+
+  const handleImageUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    console.log('画像アップロード開始:', file.name, file.type, file.size);
+    
+    try {
+      let processedFile = file;
+      
+      // Convert HEIC to JPEG if needed
+      if (isHeicFile(file)) {
+        console.log('HEIC形式を検出、JPEG に変換中...');
+        processedFile = await convertHeicToJpeg(file);
+        console.log('JPEG変換完了');
+      }
+
+      // Create uploaded image object with uploading status
+      // createUploadedImage handles URL.createObjectURL internally
+      const uploadedImage = createUploadedImage(processedFile);
+      
+      // Update settings with uploading status - THIS SHOWS THE IMAGE IMMEDIATELY
+      await updateSettings({ profileImage: uploadedImage });
+      console.log('設定を更新（アップロード中）');
+      console.log('📤 Profile image status:', uploadedImage.status, 'localUrl:', uploadedImage.localUrl?.substring(0, 50));
+
+      if (!currentUser?.uid) {
+        throw new Error('ユーザーIDが見つかりません');
+      }
+
+      try {
+         // Use the shared hook for reliable upload (runs in background)
+         const result = await uploadFile(
+             processedFile, 
+             getStoragePath(currentUser.uid),
+             { type: 'profile' }
+         );
+         
+         // Ensure icon is visible for at least 1 second
+         await new Promise(resolve => setTimeout(resolve, 1000));
+         
+         const finalImage = {
+            ...uploadedImage,
+            remoteUrl: result.url || null,
+            status: 'ready',
+            storagePath: result.storagePath || null,
+            contentType: processedFile.type || null,
+            size: processedFile.size || null,
+            source: result.source || null,
+            fallbackReason: result.fallbackReason || null
+         };
+
+         await updateSettings({ profileImage: finalImage });
+         console.log('プロフィール画像の設定完了');
+         console.log('✅ Upload complete. Status:', finalImage.status, 'source:', finalImage.source);
+      } catch (uploadError) {
+         console.error('Upload failed via hook:', uploadError);
+         throw uploadError;
+      }
+    } catch (error) {
+      console.error('画像処理・全体エラー:', error);
+      console.error('エラー詳細:', error.message, error.code);
+      
+      try {
+        const failedImage = createFailedUploadedImage(file);
+        await updateSettings({ profileImage: failedImage });
+      } catch (e) {
+         console.error('Failed to set failed status', e);
+      }
+    }
+    // Removed: finally block with setUploadingImage(false)
+    // Reset file input
+    if (event.target) {
+      event.target.value = '';
+    }
+  };
+
+  const handleNameEdit = () => {
+    setTempDisplayName(settings?.displayName || 'UserName');
+    setEditingName(true);
+  };
+
+  const handleNameSave = async () => {
+    const result = validateUsername(tempDisplayName);
+    if (!result.isValid) {
+      setNameError(result.message);
+      return;
+    }
+    
+    await updateSettings({ displayName: tempDisplayName.trim() });
+    setEditingName(false);
+    setNameError('');
+  };
+
+  const handleNameCancel = () => {
+    setEditingName(false);
+    setTempDisplayName('');
+    setNameError('');
+  };
+
+  const { settings: syncPrefs, updateSettings: updateSyncPrefs } = useSyncSettings();
+
+  const handleReviewStartDayChange = async (checked) => {
+    // 1. Update setting
+    await updateSettings({ reviewStartNextDay: checked });
+
+    // 2. Retroactively update TODAY's new cards (0 reviews)
+    try {
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+
+        // Fetch cards created today
+        const cards = await localDB.cards
+            .where('createdAt')
+            .aboveOrEqual(todayStart)
+            .toArray();
+
+        const cardsToUpdate = cards.filter(c => {
+             // Only fresh cards
+             const reviews = c.reviewCount ?? c.review_count ?? 0;
+             if (reviews > 0) return false;
+             return true;
+        });
+
+        if (cardsToUpdate.length > 0) {
+             const updates = cardsToUpdate.map(c => {
+                 const newDate = new Date(); // Today
+                 if (checked) {
+                     // Switch to Tomorrow
+                     newDate.setDate(newDate.getDate() + 1);
+                 }
+                 newDate.setHours(0, 0, 0, 0);
+                 
+                 return {
+                     ...c,
+                     nextReviewDate: newDate,
+                     updatedAt: new Date()
+                 };
+             });
+             
+             await localDB.cards.bulkPut(updates);
+             console.log(`[Settings] Updated schedule for ${updates.length} cards to ${checked ? 'Tomorrow' : 'Today'}`);
+        }
+    } catch (e) {
+        console.error('Failed to retroactively update card schedules', e);
+    }
+  };
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'account':
+        const profileImageUrl = settings?.profileImage?.remoteUrl || settings?.profileImage?.localUrl;
+        const displayName = settings?.displayName || 'UserName';
+        
+        console.log('🎨 Rendering profile. Image status:', settings?.profileImage?.status, 'source:', settings?.profileImage?.source);
+        
+        const { bg: avatarBg, text: avatarText } = getAvatarColors(settings?.displayName);
+
+        return (
+          <div className="space-y-8 animate-in fade-in duration-300">
+            <h2 className="text-xl font-bold text-slate-800">プロフィール</h2>
+            
+            {/* Profile Image Section */}
+            <div className="space-y-4">
+              <div className="text-sm font-bold text-slate-600">プロフィール画像</div>
+              <div className="flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-6">
+                <div className="relative group">
+                  <div 
+                    style={{ backgroundColor: avatarBg }}
+                    className="w-24 h-24 rounded-full flex items-center justify-center text-3xl font-bold overflow-hidden border-4 border-white shadow-lg relative"
+                  >
+                    {profileImageUrl && settings?.profileImage?.status !== 'failed' ? (
+                      <img 
+                        src={profileImageUrl} 
+                        alt="Profile" 
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                             console.error('[Settings] Profile image load failed.', e);
+                             e.currentTarget.style.display = 'none'; // Immediate hide
+                             if (settings?.profileImage) {
+                                 updateSettings({ 
+                                     profileImage: { ...settings.profileImage, status: 'failed' } 
+                                 });
+                             }
+                        }}
+                      />
+                    ) : (
+                       <span style={{ color: avatarText }}>
+                         {getInitials(displayName)}
+                       </span>
+                     )}
+                    
+                    {/* Status Badge */}
+
+                    {settings?.profileImage?.source === 'local_fallback' && (
+                        <div className="absolute bottom-0 right-0 p-1 bg-white rounded-full shadow-md z-10" title="Saved locally (Cloud unavailable)">
+                             <Database className="w-4 h-4 text-amber-500" />
+                        </div>
+                    )}
+                  </div>
+                  
+                  {/* Upload overlay - Non-blocking */}
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/30 flex items-center justify-center transition-all cursor-pointer"
+                  >
+                     <Camera className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-md" />
+                  </button>
+                  
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*,.heic"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                </div>
+                
+                <div className="flex-1 space-y-4">
+                  <Button
+                    onClick={() => fileInputRef.current?.click()}
+                    variant="outline"
+                    className="rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50 font-bold text-sm"
+                    disabled={uploadStatus === 'uploading'}
+                  >
+                    <Camera className="w-4 h-4 mr-2" />
+                    画像を変更
+                  </Button>
+                  
+                  {/* Upload Progress Bar */}
+                  {(uploadStatus === 'uploading' || uploadStatus === 'failed') && (
+                      <UploadProgress 
+                          fileName="プロフィール画像"
+                          progress={uploadProgress}
+                          status={uploadStatus}
+                          error={uploadError}
+                          onRetry={() => {
+                              reset();
+                              fileInputRef.current?.click();
+                          }}
+                      />
+                  )}
+
+                  <p className="text-xs text-slate-400">
+                    JPG、PNG、HEIC形式に対応しています (最大10MB)
+                    {settings?.profileImage?.source === 'local_fallback' && (
+                        <span className="block text-amber-500 mt-1 font-bold">
+                            オフライン保存（クラウド同期待機中）
+                        </span>
+                    )}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Username Section */}
+            <div className="space-y-4">
+              <div className="text-sm font-bold text-slate-600 flex justify-between items-center">
+                <span>ユーザー名</span>
+                {editingName && (
+                  <span className={cn(
+                    "text-[10px] font-mono font-bold",
+                    countUnicodeCharacters(tempDisplayName.trim()) > 20 ? "text-red-500" : "text-slate-400"
+                  )}>
+                    {countUnicodeCharacters(tempDisplayName.trim())} / 20
+                  </span>
+                )}
+              </div>
+              {editingName ? (
+                <div className="space-y-2">
+                  <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
+                    <Input
+                      value={tempDisplayName}
+                      onChange={(e) => {
+                        setTempDisplayName(e.target.value);
+                        if (nameError) setNameError('');
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && tempDisplayName.trim()) handleNameSave();
+                        if (e.key === 'Escape') handleNameCancel();
+                      }}
+                      placeholder="ユーザー名を入力"
+                      className={cn(
+                        "flex-1 rounded-xl border-slate-200",
+                        nameError && "border-red-300 focus-visible:ring-red-400"
+                      )}
+                      autoFocus
+                    />
+                    <Button
+                      onClick={handleNameSave}
+                      size="sm"
+                      disabled={!tempDisplayName.trim()}
+                      className="bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:bg-primary-600 text-white rounded-xl font-bold"
+                    >
+                      <Check className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      onClick={handleNameCancel}
+                      size="sm"
+                      variant="outline"
+                      className="rounded-xl border-slate-200 text-slate-600 font-bold"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  {nameError && (
+                    <p className="text-[11px] font-bold text-red-500 animate-in fade-in slide-in-from-top-1 duration-200 px-1">
+                      {nameError}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div className="bg-[#F8FAFB] rounded-xl p-4 flex items-center justify-between group hover:bg-slate-50 transition-colors">
+                  <div className="min-w-0 flex-1 mr-4">
+                    <div className="font-bold text-lg text-slate-800 truncate" title={displayName}>
+                      {truncateUsername(displayName)}
+                    </div>
+                    <div className="text-slate-400 text-sm truncate">{currentUser?.email || 'email@example.com'}</div>
+                  </div>
+                  <Button
+                    onClick={handleNameEdit}
+                    variant="ghost"
+                    size="sm"
+                    className="opacity-0 group-hover:opacity-100 transition-opacity text-primary-600 hover:text-primary-700 hover:bg-primary-50 rounded-xl font-bold shrink-0"
+                  >
+                    編集
+                  </Button>
+                </div>
+
+              )}
+
+              {/* Logout Button */}
+              <div className="pt-6 border-t border-slate-100">
+                <Button 
+                    variant="ghost" 
+                    className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 rounded-xl"
+                    onClick={handleLogout}
+                >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    ログアウト
+                </Button>
+              </div>
+            </div>
+
+            <div className="pt-6 border-t border-slate-100">
+                 <h3 className="font-bold text-slate-800 mb-4 px-1">ストレージ管理</h3>
+                 <StorageManager />
+            </div>
+          </div>
+        );
+
+      case 'tags':
+        // Hooks moved to top level for stability
+        
+        // Filter tags by selected root folder
+        const currentFolderTags = (allTags || []).filter(t => t.rootFolderId === selectedRootFolderId);
+        const filteredRealTags = currentFolderTags.filter(t => t?.name?.toLowerCase().includes(tagSearchTerm.toLowerCase()));
+
+        return (
+          <div className="space-y-6 animate-in fade-in duration-300">
+              <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 md:gap-0">
+                <div>
+                  <h2 className="text-xl font-bold text-slate-800">タグ管理</h2>
+                  <p className="text-[10px] text-slate-400 font-medium mt-1">※ここで設定したタグは、選択したフォルダとその配下のすべてのフォルダで使用できます</p>
+                </div>
+                <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 md:gap-4">
+                    {/* Root Folder Selector */}
+                    <Select value={selectedRootFolderId} onValueChange={setSelectedRootFolderId}>
+                        <SelectTrigger className="w-full md:w-[180px] bg-slate-50 border-slate-200 rounded-xl font-bold text-sm">
+                            <SelectValue placeholder="フォルダを選択" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl border-slate-100 shadow-xl bg-white max-h-[300px]">
+                            {rootFolders.map(f => (
+                                <SelectItem key={f.id} value={f.id} className="cursor-pointer font-bold">
+                                    {f.folderName}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                        <Input 
+                            className="pl-9 w-full md:w-[200px] bg-slate-50 border-slate-200 rounded-xl" 
+                            placeholder="タグを検索..." 
+                            value={tagSearchTerm}
+                            onChange={(e) => setTagSearchTerm(e.target.value)}
+                        />
+                    </div>
+                </div>
+              </div>
+            
+            <div className="space-y-4 h-[400px] overflow-y-auto pr-2 custom-scrollbar pb-20">
+                {filteredRealTags.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-20 text-slate-400">
+                        <Tag className="w-12 h-12 mb-4 opacity-20" />
+                        <p className="font-bold">
+                            {tagSearchTerm ? '一致するタグがありません' : 'このフォルダにはタグがありません'}
+                        </p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 gap-3">
+                        {filteredRealTags.map((tag) => (
+                            <div key={tag.name} className="bg-white border border-slate-100 rounded-xl p-4 flex items-center justify-between group hover:shadow-sm hover:border-slate-200 transition-all">
+                                <div className="flex items-center gap-3">
+                                    {/* Color Indicator / Picker */}
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <button 
+                                                className={cn(
+                                                    "w-8 h-8 rounded-full border border-slate-200 shadow-sm transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-400",
+                                                    (tag.color || '').split(' ')[0] // bg class
+                                                )}
+                                            />
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-64 p-3 rounded-xl">
+                                            <div className="text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">カラーを選択</div>
+                                            <div className="flex flex-wrap gap-2">
+                                                {DEFAULT_COLORS.map((color) => (
+                                                    <button
+                                                        key={color}
+                                                        className={cn(
+                                                            "w-8 h-8 rounded-full border border-slate-200 transition-all",
+                                                            (color || '').split(' ')[0],
+                                                            tag.color === color ? "ring-2 ring-offset-2 ring-slate-400 scale-110" : "hover:scale-110"
+                                                        )}
+                                                        onClick={() => updateTagColor(tag.name, color, selectedRootFolderId)}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </PopoverContent>
+                                    </Popover>
+                                    
+                                    <span className="font-bold text-slate-700 text-sm">{tag.name}</span>
+                                </div>
+
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => {
+                                        if (confirm(`タグ「${tag.name}」を削除しますか？`)) {
+                                            deleteTag(tag.name, selectedRootFolderId);
+                                        }
+                                    }}
+                                    className="text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </Button>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+          </div>
+        );
+      case 'voice':
+        return (
+            <div className="space-y-8 animate-in fade-in duration-300">
+                <div className="space-y-2">
+                    <h2 className="text-xl font-bold text-slate-800">音声設定</h2>
+                    <p className="text-sm text-slate-400">学習時の自動音声再生を管理します</p>
+                </div>
+
+                <div className="space-y-4">
+                    <div className="bg-[#F8FAFB] p-4 md:p-6 rounded-xl flex items-center justify-between gap-4">
+                        <div>
+                            <div className="font-bold text-slate-700 text-sm">自動音声再生 (問題)</div>
+                            <div className="text-xs text-slate-400 mt-1">カードが表示された瞬間に問いかけを読み上げます</div>
+                        </div>
+                        <Switch />
+                    </div>
+                    <div className="bg-[#F8FAFB] p-4 md:p-6 rounded-xl flex items-center justify-between gap-4">
+                        <div>
+                            <div className="font-bold text-slate-700 text-sm">自動音声再生 (解答)</div>
+                            <div className="text-xs text-slate-400 mt-1">答えを表示した瞬間に解説を読み上げます</div>
+                        </div>
+                        <Switch />
+                    </div>
+                </div>
+
+                <div className="space-y-4">
+                    <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">使用する音声 (GEMINI TTS)</div>
+                    <div className="grid grid-cols-2 gap-4">
+                        {voiceOptions.map((voice) => (
+                            <div 
+                                key={voice.id} 
+                                className={cn(
+                                    "p-4 rounded-xl border-2 cursor-pointer transition-all font-bold text-sm flex items-center justify-between",
+                                    voice.id === 'kore' 
+                                        ? "border-primary-600 bg-primary-50 text-primary-600" 
+                                        : "border-slate-100 bg-white text-slate-600 hover:border-slate-200"
+                                )}
+                            >
+                                {voice.label}
+                                {voice.id === 'kore' && <Check className="w-4 h-4" />}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+      case 'study':
+        return (
+            <div className="space-y-8 animate-in fade-in duration-300">
+                <div className="space-y-2">
+                    <h2 className="text-xl font-bold text-slate-800">学習設定</h2>
+                    <p className="text-sm text-slate-400">学習カードの表示や挙動を管理します</p>
+                </div>
+
+                <div className="bg-[#F8FAFB] p-6 rounded-xl space-y-6">
+                    <div>
+
+
+                         <div className="flex items-center justify-between pt-4 border-t border-slate-100 mt-4">
+                            <div>
+                                <div className="font-bold text-slate-600 text-sm">カード編集時のプレビュー初期値</div>
+                                <div className="text-xs text-slate-400">編集画面を開いた時のプレビューのデフォルト状態を設定します</div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className={cn("text-[10px] font-bold", (settings?.defaultPreviewEnabled ?? false) ? 'text-primary-600' : 'text-slate-300')}>
+                                    {(settings?.defaultPreviewEnabled ?? false) ? 'ON' : 'OFF'}
+                                </span>
+                                <Switch 
+                                    checked={settings?.defaultPreviewEnabled ?? false}
+                                    onCheckedChange={(checked) => updateSettings({ defaultPreviewEnabled: checked })}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex items-center justify-between pt-4 border-t border-slate-100 mt-4">
+                            <div>
+                                <div className="font-bold text-slate-600 text-sm">オートセーブ（自動下書き）</div>
+                                <div className="text-xs text-slate-400">編集中の内容を一時的に保存し、リロード時に復元します</div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className={cn("text-[10px] font-bold", (settings?.autoSaveEnabled ?? true) ? 'text-primary-600' : 'text-slate-300')}>
+                                    {(settings?.autoSaveEnabled ?? true) ? 'ON' : 'OFF'}
+                                </span>
+                                <Switch 
+                                    checked={settings?.autoSaveEnabled ?? true}
+                                    onCheckedChange={(checked) => updateSettings({ autoSaveEnabled: checked })}
+                                />
+                            </div>
+                        </div>
+
+                        </div>
+                    </div>
+
+                    <div className="pt-6 border-t border-slate-100">
+                        <div className="font-bold text-slate-700 text-sm mb-4">レビューボタン表示設定</div>
+                        <div className="space-y-4">
+                            {/* 0: 忘れた (Forgot) - Always shown */}
+                            <div className="flex items-start gap-4 p-4 rounded-xl bg-white border border-slate-100">
+                                <div className="mt-1">
+                                    <FaceIcons.Forgot size={32} />
+                                </div>
+                                <div className="flex-1">
+                                    <div className="flex items-center justify-between mb-1">
+                                        <div className="font-bold text-slate-700 text-sm">忘れた</div>
+                                    </div>
+                                    <div className="text-xs text-slate-400 leading-relaxed">
+                                        思い出せなかったカード。復習間隔はほぼリセットされ、しっかり復習が必要です。
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 1: あいまい (Vague/Hard) - Toggleable */}
+                            <div className="flex items-start gap-4 p-4 rounded-xl bg-white border border-slate-100">
+                                <div className="mt-1">
+                                    <FaceIcons.Vague size={32} />
+                                </div>
+                                <div className="flex-1">
+                                    <div className="flex items-center justify-between mb-1">
+                                        <div className="font-bold text-slate-700 text-sm">あいまい</div>
+                                        <Switch 
+                                            checked={settings?.showReviewHard ?? true}
+                                            onCheckedChange={(checked) => updateSettings({ showReviewHard: checked })}
+                                        />
+                                    </div>
+                                    <div className="text-xs text-slate-400 leading-relaxed">
+                                        覚えかけのカード。復習間隔は控えめに伸び、段階的に強化されます。
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 2: 覚えた (Good) - Always shown */}
+                            <div className="flex items-start gap-4 p-4 rounded-xl bg-white border border-slate-100">
+                                <div className="mt-1">
+                                    <FaceIcons.Good size={32} />
+                                </div>
+                                <div className="flex-1">
+                                    <div className="flex items-center justify-between mb-1">
+                                        <div className="font-bold text-slate-700 text-sm">覚えた</div>
+                                    </div>
+                                    <div className="text-xs text-slate-400 leading-relaxed">
+                                        正解したカード。少しずつ復習間隔が伸び、安定的に覚えられます。
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 3: 余裕 (Easy) - Toggleable */}
+                            <div className="flex items-start gap-4 p-4 rounded-xl bg-white border border-slate-100">
+                                <div className="mt-1">
+                                    <FaceIcons.Easy size={32} />
+                                </div>
+                                <div className="flex-1">
+                                    <div className="flex items-center justify-between mb-1">
+                                        <div className="font-bold text-slate-700 text-sm">余裕</div>
+                                        <Switch 
+                                            checked={settings?.showReviewEasy ?? true}
+                                            onCheckedChange={(checked) => updateSettings({ showReviewEasy: checked })}
+                                        />
+                                    </div>
+                                    <div className="text-xs text-slate-400 leading-relaxed">
+                                        簡単なカード。次回復習までの間隔を大きく伸ばせます。効率的に復習可能。
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="pt-6 border-t border-slate-100">
+                         <div className="font-bold text-slate-700 text-sm mb-4">スケジュール設定</div>
+                         <div className="flex items-center justify-between">
+                            <div>
+                                <div className="font-bold text-slate-600 text-sm">未消化カードの自動繰越</div>
+                                <div className="text-xs text-slate-400">期限切れのカードを翌日の「今日の復習」に含めます</div>
+                            </div>
+                            <Switch 
+                                checked={settings?.autoCarryOver ?? true}
+                                onCheckedChange={(checked) => updateSettings({ autoCarryOver: checked })}
+                            />
+                        </div>
+                        <div className="flex items-center justify-between mt-4">
+                            <div>
+                                <div className="font-bold text-slate-600 text-sm">遅延ボーナス</div>
+                                <div className="text-xs text-slate-400">遅れても思い出せた場合、復習間隔を通常より長くします</div>
+                            </div>
+                            <Switch 
+                                checked={settings?.delayBonusEnabled ?? false}
+                                onCheckedChange={(checked) => updateSettings({ delayBonusEnabled: checked })}
+                            />
+                        </div>
+                        <div className="flex items-center justify-between mt-4">
+                            <div>
+                                <div className="font-bold text-slate-600 text-sm">下書き自動判定</div>
+                                <div className="text-xs text-slate-400">問題や解答が空の場合に、自動的に下書き（作成中）として保存します</div>
+                            </div>
+                            <Switch 
+                                checked={settings?.autoDraftEnabled ?? true}
+                                onCheckedChange={(checked) => updateSettings({ autoDraftEnabled: checked })}
+                            />
+                        </div>
+
+                         <div className="flex items-center justify-between mt-4 border-t border-slate-100 pt-4">
+                            <div>
+                                <div className="font-bold text-slate-600 text-sm">復習開始日</div>
+                                <div className="text-xs text-slate-400">作成したカードの初回の復習をいつから始めるか設定します</div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className={cn("text-[10px] font-bold", !(settings?.reviewStartNextDay ?? true) ? 'text-primary-600' : 'text-slate-300')}>当日</span>
+                                <Switch 
+                                    checked={settings?.reviewStartNextDay ?? true}
+                                    onCheckedChange={handleReviewStartDayChange}
+                                />
+                                <span className={cn("text-[10px] font-bold", (settings?.reviewStartNextDay ?? true) ? 'text-primary-600' : 'text-slate-300')}>翌日</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+      case 'theme':
+        return (
+          <div className="space-y-8 animate-in fade-in duration-300">
+            <div className="space-y-2">
+                <h2 className="text-xl font-bold text-slate-800">テーマ設定</h2>
+                <p className="text-sm text-slate-400">アプリの表示設定を管理します</p>
+            </div>
+
+            <div className="space-y-6">
+                {/* Theme Mode */}
+                <div className="space-y-4">
+                    <div className="text-sm font-bold text-slate-600">外観モード</div>
+                    <div className="grid grid-cols-3 gap-4">
+                        {[
+                            { value: 'light', label: 'ライト', icon: Sun },
+                            { value: 'dark', label: 'ダーク', icon: Moon },
+                            { value: 'system', label: 'システム', icon: Monitor },
+                        ].map((mode) => (
+                            <div 
+                                key={mode.value}
+                                onClick={() => updateSettings({ theme: mode.value })}
+                                className={cn(
+                                    "p-4 rounded-xl border-2 cursor-pointer transition-all flex flex-col items-center gap-2",
+                                    settings?.theme === mode.value 
+                                        ? "border-primary-600 bg-primary-50/50 text-slate-800 shadow-sm" 
+                                        : "border-slate-100 bg-white text-slate-500 hover:border-slate-200 hover:bg-slate-50"
+                                )}
+                            >
+                                <mode.icon className={cn(
+                                    "w-6 h-6",
+                                    settings?.theme === mode.value ? "text-primary-600" : "text-slate-400"
+                                )} />
+                                <span className={cn(
+                                    "font-bold text-sm",
+                                    settings?.theme === mode.value ? "text-primary-700" : "text-slate-500"
+                                )}>{mode.label}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Accent Color Settings */}
+                 <div className="pt-6 border-t border-slate-100 space-y-4">
+                    <div className="text-sm font-bold text-slate-600">アクセントカラー</div>
+                    <div className="bg-[#F8FAFB] p-6 rounded-xl flex items-center justify-center border border-slate-100">
+                         <div className="flex flex-wrap gap-6 md:gap-8">
+                            {(() => {
+                                const baseOptions = [
+                                    { color: 'var(--color-primary-600-hex, #689A98)', isDark: true },
+                                    { color: '#BDC9EA', isDark: false },
+                                    { color: '#E5BABD', isDark: false },
+                                ];
+                                
+                                // Unique colors logic to prevent duplication
+                                const uniqueOptions = [...baseOptions];
+                                
+                                // Normalize color for comparison (simple check)
+                                const isDefaultColor = baseOptions.some(opt => 
+                                    opt.color === settings?.accentColor
+                                );
+
+                                if (!isDefaultColor && settings?.accentColor) {
+                                    uniqueOptions.push({ color: settings.accentColor, isDark: false }); // Assume unknown is light or we could calculate
+                                }
+
+                                return uniqueOptions.map((theme) => (
+                                    <button
+                                        key={theme.color}
+                                        onClick={() => updateSettings({ accentColor: theme.color })}
+                                        className="group relative transition-all"
+                                    >
+                                        <div 
+                                            className={cn(
+                                                "w-12 h-12 rounded-full shadow-sm transition-all flex items-center justify-center border-2 border-white",
+                                                settings?.accentColor === theme.color 
+                                                    ? "ring-4 ring-offset-2 ring-primary-200 scale-110 shadow-md" 
+                                                    : "hover:scale-110 hover:shadow-md"
+                                            )}
+                                            style={{ backgroundColor: theme.color }}
+                                        >
+                                            {settings?.accentColor === theme.color && (
+                                                <Check className={cn(
+                                                    "w-6 h-6 drop-shadow-md",
+                                                    theme.isDark ? "text-white" : "text-slate-800"
+                                                )} />
+                                            )}
+                                        </div>
+                                    </button>
+                                ));
+                            })()}
+                        </div>
+                    </div>
+                 </div>
+
+                {/* Calendar Settings */}
+                <div className="pt-6 border-t border-slate-100 space-y-4">
+                    <div className="text-sm font-bold text-slate-600">カレンダー設定</div>
+                    <div className="bg-[#F8FAFB] p-4 md:p-6 rounded-xl flex items-center justify-between gap-4">
+                        <div>
+                            <div className="font-bold text-slate-700 text-sm">週の始まり</div>
+                            <div className="text-xs text-slate-400 mt-1">カレンダーの開始曜日を設定します</div>
+                        </div>
+                        <Select 
+                            value={settings?.weekStartDay || 'monday'} 
+                            onValueChange={(val) => updateSettings({ weekStartDay: val })}
+                        >
+                            <SelectTrigger className="w-[140px] bg-white border-slate-200 font-bold text-sm rounded-xl">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-xl border-slate-100 cursor-pointer">
+                                <SelectItem value="sunday" className="font-bold">日曜日</SelectItem>
+                                <SelectItem value="monday" className="font-bold">月曜日</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+            </div>
+          </div>
+        );
+      case 'sync':
+        return (
+          <div className="space-y-6 animate-in fade-in duration-300">
+             <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold text-slate-800">同期設定</h2>
+             </div>
+
+             {/* Status Card */}
+             <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100">
+                <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                        <div className={`p-3 rounded-full ${syncStatus === 'syncing' ? 'bg-blue-100 text-blue-600' : (syncStatus === 'error' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600')}`}>
+                            <RefreshCw className={`w-6 h-6 ${syncStatus === 'syncing' ? 'animate-spin' : ''}`} />
+                        </div>
+                        <div>
+                            <div className="font-bold text-slate-700">
+                                {syncStatus === 'syncing' ? '同期中...' : (syncStatus === 'error' ? '同期エラー' : '同期ステータス')}
+                            </div>
+                            <div className="text-xs text-slate-400 font-mono mt-1">
+                                最終同期: {!lastSyncTime ? '未同期' : new Date(lastSyncTime).toLocaleString('ja-JP')}
+                            </div>
+                        </div>
+                    </div>
+                    <Button 
+                        onClick={triggerSync} 
+                        disabled={syncStatus === 'syncing' || !navigator.onLine}
+                        className="bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 shadow-sm"
+                    >
+                        {syncStatus === 'syncing' ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <RefreshCw className="w-4 h-4 mr-2" />}
+                        今すぐ同期
+                    </Button>
+                </div>
+                {!navigator.onLine && (
+                    <div className="text-xs text-red-500 font-bold bg-red-50 p-2 rounded-lg text-center">
+                        現在オフラインです。インターネット接続を確認してください。
+                    </div>
+
+
+                )}
+             </div>
+
+             {/* Primary Sync Settings */}
+             <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm space-y-6">
+                {/* Sync Interval */}
+                <div className="space-y-3">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 md:gap-0">
+                        <div>
+                            <h3 className="text-sm font-bold text-slate-700">同期間隔</h3>
+                            <p className="text-[10px] text-slate-400 mt-1">バッテリー消費を抑えたい場合は間隔を長くしてください</p>
+                        </div>
+                        <Select 
+                            value={String(syncPrefs.intervalMinutes)} 
+                            onValueChange={(val) => updateSyncPrefs({ intervalMinutes: Number(val) })}
+                        >
+                            <SelectTrigger className="w-full md:w-[180px] bg-slate-50 border-slate-200 rounded-xl font-bold text-sm">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-xl border-slate-100 bg-white">
+                                <SelectItem value="5" className="font-bold">5分ごと</SelectItem>
+                                <SelectItem value="15" className="font-bold">15分ごと</SelectItem>
+                                <SelectItem value="30" className="font-bold">30分ごと</SelectItem>
+                                <SelectItem value="60" className="font-bold">1時間ごと</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+
+                <div className="h-px bg-slate-50 w-full" />
+
+                {/* WiFi Only Toggle */}
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h3 className="text-sm font-bold text-slate-700">WiFi接続時のみ同期</h3>
+                        <p className="text-[10px] text-slate-400 mt-1">モバイルデータ通信量を節約できます</p>
+                    </div>
+                    <Switch 
+                        checked={syncPrefs.wifiOnly} 
+                        onCheckedChange={(checked) => updateSyncPrefs({ wifiOnly: checked })}
+                    />
+                </div>
+             </div>
+
+             {/* Folder Sync Settings */}
+             <div className="pt-6 border-t border-slate-100">
+                <h3 className="text-xs font-bold text-slate-400 mb-4 px-1 uppercase tracking-widest">フォルダごとの同期設定</h3>
+                <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                    {rootFolders.map(folder => (
+                        <div key={folder.id} className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-xl hover:border-slate-200 transition-colors">
+                            <div className="flex items-center gap-3">
+                                <Folder className={cn("w-5 h-5", folder.cloudSyncEnabled ? 'text-primary-600' : 'text-slate-300')} />
+                                <div className="flex flex-col">
+                                    <span className={`text-sm font-bold ${folder.cloudSyncEnabled ? 'text-slate-700' : 'text-slate-400'}`}>
+                                        {folder.folderName}
+                                    </span>
+                                    <span className="text-[10px] text-slate-400">
+                                        {folder.cloudSyncEnabled ? 'クラウド同期: 有効' : 'このデバイスのみに保存'}
+                                    </span>
+                                </div>
+                            </div>
+                            <Switch 
+                                checked={folder.cloudSyncEnabled !== false} 
+                                onCheckedChange={(checked) => updateFolder(folder.id || folder.folderId, { cloudSyncEnabled: checked })}
+                            />
+                        </div>
+                    ))}
+                    {rootFolders.length === 0 && (
+                        <div className="text-center py-8 text-slate-400 text-xs font-bold">
+                            フォルダがありません
+                        </div>
+                    )}
+                </div>
+             </div>
+
+             {/* Device & Storage Management */}
+             <div className="pt-8 border-t border-slate-100">
+                <DeviceSyncSettings />
+             </div>
+          </div>
+        );
+      case 'data':
+        return (
+          <div className="space-y-8 animate-in fade-in duration-300">
+            <div className="space-y-2">
+                <h2 className="text-xl font-bold text-slate-800">データ管理</h2>
+                <p className="text-sm text-slate-400">データのバックアップや修復を行います</p>
+            </div>
+            <DataRescuePanel />
+          </div>
+        );
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-[900px] w-[95%] md:w-full h-[85vh] md:h-[85vh] max-h-[85vh] md:max-h-[650px] p-0 gap-0 border-none rounded-2xl md:rounded-[24px] bg-white shadow-2xl flex flex-col overflow-hidden data-[state=open]:duration-300">
+        <div className="flex flex-col md:flex-row h-full min-h-0">
+          <DialogTitle className="sr-only">設定</DialogTitle>
+          {/* Sidebar / Top Nav */}
+          <div className="w-full md:w-[260px] bg-[#F8FAFB] flex flex-col justify-start border-b md:border-b-0 md:border-r border-slate-100 shrink-0 sticky top-0 md:static z-10 p-0 md:p-6 relative">
+              
+             {/* Mobile Header Title & Close (Fixed above tabs) */}
+             <div className="md:hidden flex items-center justify-between w-full p-4 pb-2">
+                  <h2 className="text-xl font-bold text-slate-800">設定</h2>
+                  <button 
+                      onClick={() => onOpenChange(false)}
+                      className="p-2 bg-slate-100 rounded-full text-slate-500 hover:bg-slate-200 transition-colors"
+                  >
+                      <X className="w-5 h-5" />
+                  </button>
+             </div>
+             
+             {/* Scrollable Tabs Wrapper */}
+             <div className="w-full overflow-x-auto md:overflow-y-auto no-scrollbar snap-x snap-mandatory p-2 md:p-0">
+                 {/* Gradient Mask for Scroll Hint (Mobile) */}
+                 <div className="absolute top-[60px] right-0 bottom-0 w-8 bg-gradient-to-l from-[#F8FAFB] to-transparent pointer-events-none md:hidden z-20" />
+
+                <div className="flex flex-row md:flex-col gap-1 md:gap-6 w-auto md:w-full min-w-full md:min-w-0 pr-8 md:pr-0">
+                  <h2 className="text-xl font-bold text-slate-800 px-2 hidden md:block">設定</h2>
+              
+              <div className="flex flex-row md:flex-col gap-1 md:gap-1 w-auto md:w-full select-none pr-8 md:pr-0">
+                {sidebarItems.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveTab(item.id)}
+                    className={cn(
+                      "flex items-center gap-2 md:gap-3 px-3 py-2 md:px-4 md:py-3 rounded-xl transition-all text-xs md:text-sm font-bold text-left whitespace-nowrap snap-start",
+                      activeTab === item.id 
+                        ? "bg-white text-primary-600 shadow-sm ring-1 ring-black/5" 
+                        : "text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+                    )}
+                  >
+                    <item.icon className={cn("w-4 h-4 md:w-5 md:h-5", activeTab === item.id && "text-primary-600")} strokeWidth={2.5} />
+                    <span className="block">{item.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="hidden md:block">
+              <button 
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 md:gap-3 px-4 py-2.5 md:px-4 md:py-3 rounded-xl transition-all text-sm font-bold text-red-500 hover:bg-red-50 hover:text-red-600 whitespace-nowrap"
+              >
+                  <LogOut className="w-5 h-5" strokeWidth={2} />
+                  <span className="block">ログアウト</span>
+              </button>
+            </div>
+            </div>
+          </div>
+           
+           {/* Main Content */}
+          <div className="flex-1 h-full min-h-0 overflow-y-auto overflow-x-hidden p-4 md:p-10 pb-24 md:pb-32 bg-white relative">
+             {/* Mobile Close Button (Overlay) - Optional but helpful if standard X is hard to reach */}
+            {renderContent()}
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}

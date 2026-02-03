@@ -1,0 +1,59 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ヘルパー関数
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function willBeOwner(userId) {
+      return isAuthenticated() && request.resource.data.userId == userId;
+    }
+
+    // users コレクション
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && willBeOwner(userId);
+      allow update: if isOwner(userId);
+      allow delete: if false; // ユーザー削除は管理画面のみ
+    }
+
+    // folders コレクション
+    match /folders/{folderId} {
+      allow read: if isOwner(resource.data.userId);
+      allow create: if isOwner(request.resource.data.userId) && willBeOwner(request.resource.data.userId);
+      allow update: if isOwner(resource.data.userId) && resource.data.userId == request.resource.data.userId;
+      allow delete: if isOwner(resource.data.userId);
+    }
+
+    // cards コレクション
+    match /cards/{cardId} {
+      allow read: if isOwner(resource.data.userId);
+      allow create: if isOwner(request.resource.data.userId) && willBeOwner(request.resource.data.userId);
+      allow update: if isOwner(resource.data.userId) && resource.data.userId == request.resource.data.userId;
+      allow delete: if isOwner(resource.data.userId);
+    }
+
+    // studyLogs コレクション
+    match /studyLogs/{logId} {
+      allow read: if isOwner(resource.data.userId);
+      allow create: if isOwner(request.resource.data.userId) && willBeOwner(request.resource.data.userId);
+      allow update: if false; // ログは作成のみ、更新不可
+      allow delete: if false; // ログは削除不可（データ整合性保護）
+    }
+
+    // levelHistory コレクション
+    match /levelHistory/{historyId} {
+      allow read: if isOwner(resource.data.userId);
+      allow create: if isOwner(request.resource.data.userId) && willBeOwner(request.resource.data.userId);
+      allow update: if false; // 履歴は作成のみ、更新不可
+      allow delete: if false; // 履歴は削除不可
+    }
+  }
+}

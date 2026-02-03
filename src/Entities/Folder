@@ -1,0 +1,53 @@
+{
+  "name": "Folder",
+  "type": "object",
+  "properties": {
+    "folder_name": {
+      "type": "string",
+      "description": "\u30d5\u30a9\u30eb\u30c0\u540d"
+    },
+    "parent_folder_id": {
+      "type": "string",
+      "description": "\u89aa\u30d5\u30a9\u30eb\u30c0ID\uff08null\u306e\u5834\u5408\u306f\u30eb\u30fc\u30c8\uff09"
+    },
+    "order_index": {
+      "type": "number",
+      "description": "\u4e26\u3073\u9806",
+      "default": 0
+    },
+    "is_silent": {
+      "type": "boolean",
+      "default": false,
+      "description": "\u30b5\u30a4\u30ec\u30f3\u30c8\u30e2\u30fc\u30c9\uff08\u901a\u77e5OFF\uff09"
+    },
+    "is_timed": {
+      "type": "boolean",
+      "default": true,
+      "description": "\u6642\u9593\u8a08\u6e2c\u30e2\u30fc\u30c9"
+    },
+    "memo_text": {
+      "type": "string",
+      "description": "\u30d5\u30a9\u30eb\u30c0\u30e1\u30e2"
+    },
+    "memo_images": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u30e1\u30e2\u753b\u50cfURL\u914d\u5217"
+    },
+    "is_deleted": {
+      "type": "boolean",
+      "default": false,
+      "description": "\u3054\u307f\u7bb1\u30d5\u30e9\u30b0"
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u524a\u9664\u65e5\u6642"
+    }
+  },
+  "required": [
+    "folder_name"
+  ]
+}

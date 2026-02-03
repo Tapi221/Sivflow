@@ -1,0 +1,88 @@
+export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+
+export type SyncContextSource = 'user_initiated' | 'background' | 'periodic' | 'force_resync' | 'system';
+
+export type NetworkStatus = 'excellent' | 'good' | 'poor' | 'offline';
+
+export interface LogContext {
+  userId?: string;
+  deviceId?: string;
+  networkStatus?: NetworkStatus;
+  syncContext?: SyncContextSource;
+  batteryLevel?: number;
+  isBackground?: boolean;
+  [key: string]: any;
+}
+
+// System SLIs (Technical Health)
+export interface SystemMetrics {
+  syncAvailability: number; // 1 = success, 0 = 5xx error
+  throughput: number;       // records / sec
+  memoryUsage?: number;     // MB
+}
+
+// User Experience SLIs (Perceived Quality)
+export interface UserMetrics {
+  perceivedLatency: number; // ms (Action to UI feedback)
+  consistencyRate: number;  // 1 = consistent, 0 = inconsistent
+  isSilentFailure: boolean; // true if failed without user notification
+}
+
+export interface SyncLogEntry {
+  timestamp: string;
+  level: LogLevel;
+  message: string;
+  context: LogContext;
+  error?: Error;
+  metrics?: SystemMetrics | UserMetrics;
+  
+  // Fallback Tracking
+  fallbackReason?: 'version_mismatch' | 'conflict_unresolvable' | 'checksum_error';
+  isFallback?: boolean;
+}
+
+export interface ITelemetryService {
+  log(level: LogLevel, message: string, context?: LogContext, error?: Error): void;
+  recordMetric(name: string, value: number, tags?: Record<string, string>): void;
+  startTransaction(name: string): { end: (status: 'success' | 'failure') => void };
+}
+
+export type SecurityEventType = 
+  | 'LOGIN_SUCCESS'         // ログイン成功
+  | 'LOGIN_FAILED'          // ログイン失敗
+  | 'DEVICE_REVOKED'        // デバイスの登録解除（自分/他端末操作）
+  | 'ACCESS_DENIED_REVOKED' // 無効化端末からのアクセス拒否
+  | 'SYNC_AUTH_ERROR'       // 同期時の認証エラー
+  | 'SENSITIVE_OP_REVOKED'  // 重要な操作（削除等）の失敗
+  | 'DEVICE_NEW_REGISTER'   // 新規デバイス登録
+  | 'LOCK_CONTENTION_EXCESS' // ロック奪取過多
+  | 'SYNC_CONFLICT_EXCESS'   // 競合過多
+  // Admin Ops
+  | 'ADMIN_DEVICE_REVOKE'   // 管理者による端末解除
+  | 'ADMIN_ACCOUNT_LOCK'    // 管理者によるアカウントロック
+  | 'ADMIN_LOG_EXPORT';     // 監査ログのエクスポート
+
+export interface SecurityMetadata {
+  ipAddress?: string; // (serverのみ信頼可能)
+  userAgent?: string;
+  path?: string;      // アクセスしようとしたリソース
+  reason?: string;    // エラー詳細
+  [key: string]: any;
+}
+
+export interface SecurityLog {
+  logId: string;       // UUID
+  userId: string;
+  deviceId: string;    // アクセス元デバイスID (不明な場合は 'unknown')
+  deviceName?: string; // 記録時点でのデバイス名
+  
+  eventType: SecurityEventType;
+  severity: 'info' | 'warning' | 'critical';
+  source: 'client' | 'server'; // ログの信頼度区分 (client=参考値, server=確定事実)
+  isUserVisible: boolean;      // UIに表示するかどうか
+  
+  description: string; // ログ詳細（日本語可）
+  metadata?: SecurityMetadata;
+  
+  occurredAt: any; // Timestamp or Date
+}

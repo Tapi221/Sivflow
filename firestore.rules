@@ -1,0 +1,130 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ユーザー認証状態チェック
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    // ユーザー
+    match /users/{userId} {
+      allow read, write: if isAuthenticated() && isOwner(userId);
+    }
+
+    // ユーザーアップロード
+    match /users/{userId}/uploads/{uploadId} {
+      allow read, write: if isAuthenticated() && isOwner(userId);
+    }
+    
+    // ユーザー設定
+    match /userSettings/{settingId} {
+      allow read: if isAuthenticated() && 
+        (resource == null || resource.data.userId == request.auth.uid);
+      allow create: if isAuthenticated() && 
+        request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && 
+        resource.data.userId == request.auth.uid;
+    }
+    
+    // ユーザー統計
+    match /userStats/{statId} {
+      allow read: if isAuthenticated() && 
+        (resource == null || resource.data.userId == request.auth.uid);
+      // 書き込みはシステム（Cloud Functions）または管理プロセスのみを想定し、クライアントからは読み取り専用に
+    }
+    
+    // フォルダ
+    match /folders/{folderId} {
+      allow read: if isAuthenticated() && 
+        (resource == null || resource.data.userId == request.auth.uid);
+      allow create: if isAuthenticated() && 
+        request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && 
+        resource.data.userId == request.auth.uid;
+    }
+    
+    // カード
+    match /cards/{cardId} {
+      allow read: if isAuthenticated() && 
+        (resource == null || resource.data.userId == request.auth.uid);
+      allow create: if isAuthenticated() && 
+        request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && 
+        resource.data.userId == request.auth.uid;
+    }
+    
+    // 学習ログ
+    match /studyLogs/{logId} {
+      allow read: if isAuthenticated() && 
+        resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && 
+        request.resource.data.userId == request.auth.uid;
+    }
+    
+    // 訓練ログ
+    match /trainingLogs/{logId} {
+      allow read: if isAuthenticated() && 
+        resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && 
+        request.resource.data.userId == request.auth.uid;
+    }
+    
+    // 削除アイテム（ごみ箱）
+    match /deletedItems/{itemId} {
+      allow read: if isAuthenticated() && 
+        resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && 
+        request.resource.data.userId == request.auth.uid;
+      allow delete: if isAuthenticated() && 
+        resource.data.userId == request.auth.uid;
+    }
+    
+    // 共有リンク
+    match /shareLinks/{shareLinkId} {
+      allow read: if isAuthenticated() && 
+        resource.data.ownerUserId == request.auth.uid;
+      allow create: if isAuthenticated() && 
+        request.resource.data.ownerUserId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && 
+        resource.data.ownerUserId == request.auth.uid;
+      // 公開共有リンクの読み取り（共有用）
+      allow read: if resource.data.isActive == true;
+    }
+    
+    // 共有フォルダ
+    match /sharedFolders/{sharedFolderId} {
+      allow read: if isAuthenticated() && 
+        (resource.data.originalOwnerUserId == request.auth.uid ||
+         resource.data.importedByUserId == request.auth.uid);
+      allow create: if isAuthenticated() && 
+        request.resource.data.importedByUserId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && 
+        resource.data.importedByUserId == request.auth.uid;
+    }
+    
+    // ログイン履歴
+    match /loginHistory/{historyId} {
+      allow read: if isAuthenticated() && 
+        resource.data.userId == request.auth.uid;
+      // 書き込みは Cloud Functions のみ
+    }
+
+    // 同期ロック（高度な同期システム）
+    match /sync_locks/{userId} {
+      allow read, write: if isAuthenticated() && isOwner(userId);
+    }
+
+    // 同期メタデータ（デバイス情報など）
+    match /sync_metadata/{userId} {
+      allow read: if isAuthenticated() && isOwner(userId);
+      
+      match /devices/{deviceId} {
+        allow read, write: if isAuthenticated() && isOwner(userId);
+      }
+    }
+  }
+}
