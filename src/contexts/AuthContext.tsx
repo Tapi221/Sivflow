@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, useRef, useCallback, type ReactNode } from 'react';
 import { type User as FirebaseUser, onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../services/firebase';
-import { initializeDB, localDb } from '../services/localDB';
+import { getLocalDb, initializeDB } from '../services/localDB';
 import { SyncServiceFactory } from '../services/SyncServiceFactory';
 import type { ISyncService } from '../services/interfaces/ISyncService';
 import type { SyncSettings } from '../types/sync';
@@ -132,7 +132,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       // 旧 UI 互換のため、戻り値がある synchronize() を使用
       const result = await syncService.synchronize();
-      const currentLastSync = await localDb.getLastSyncTime(currentUser.uid);
+      const db = await getLocalDb();
+      const currentLastSync = await db.getLastSyncTime(currentUser.uid);
       setLastSyncTime(currentLastSync);
       
       // 競合がある場合は'error'状態（ユーザーの注意を引くため）
@@ -169,7 +170,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (user) {
         try {
           // 1. Initialize user-specific DB
-          initializeDB(user.uid);
+          await initializeDB(user.uid);
 
           // 🔥 2. ブラウザストレージ健全性チェック（Phase 1-3）
           // - IndexedDB の健全性チェック
@@ -183,19 +184,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setSyncService(service);
           
           // 4. 履歴とエラーのクリーンアップ（起動時に1回）
-          await localDb.cleanupSyncHistory();
-          await localDb.cleanupSyncErrors();
+          const db = await getLocalDb();
+          await db.cleanupSyncHistory();
+          await db.cleanupSyncErrors();
 
           // [Auto-Fix] データ整合性の修復とオーナー権限の修正
           // エミュレータ⇄本番の切り替え時にデータの所有権を現ユーザーに統一し、同期対象にする
           console.log('[Auth] Running data integrity repair...');
-          await localDb.repairDataIntegrity(user.uid);
+          await db.repairDataIntegrity(user.uid);
           
           // 5. 同期設定を読み込み
           const settings = await service.loadSettings();
           syncSettingsRef.current = settings;
           
-          const lastSync = await localDb.getLastSyncTime(user.uid);
+          const lastSync = await db.getLastSyncTime(user.uid);
 
           // 6. Decide sync strategy
           setSyncStatus('syncing');
@@ -215,7 +217,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             
             // Initialization Success Path
             // Correctly fetch lastSyncTime from syncMetadata table
-            const currentLastSync = await localDb.getLastSyncTime(user.uid);
+            const currentLastSync = await db.getLastSyncTime(user.uid);
             setLastSyncTime(currentLastSync);
             
             // 初回同期未実行の場合は 'idle'、実行済みの場合は 'success'
@@ -235,7 +237,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             // Strict Rule: If lastSyncTime is null (fresh install/user), do NOT set error state.
             // Remain 'idle' so UI shows "Not Executed".
             // If we had a lastSyncTime (previous success), then it's a regression/error.
-            const existingLastSync = await localDb.getLastSyncTime(user.uid);
+            const existingLastSync = await db.getLastSyncTime(user.uid);
             // Strict logic: If we have a previous sync time, it's an error. If not, it's idle.
             setSyncStatus(existingLastSync ? 'error' : 'idle');
           }
@@ -253,8 +255,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
           // 開発中のデータ消失を防ぐため、ログアウト時のデータ消去を無効化
           // await localDb.clearAllData();
           // console.log('[Auth] User logged out. Local data cleared.');
+          
+          // 匿名DBに切り替え (シングルトンパターンにより古いユーザーDBは閉じられる)
+          await initializeDB('anonymous');
         } catch (error) {
-          console.error("[Auth] Failed to clear local data on logout:", error);
+          console.error("[Auth] Failed to reset DB on logout:", error);
         }
         setCurrentUser(null);
         setLoading(false);

@@ -1,4 +1,4 @@
-import { LocalDB, initializeDB, getLocalDb } from './localDB';
+import { getLocalDb } from './localDB';
 import { IndexedDBMetadataService } from './IndexedDBMetadataService';
 import { IndexedDBRebuildOrchestrator } from './IndexedDBRebuildOrchestrator';
 import { notificationService } from './NotificationService';
@@ -51,8 +51,7 @@ export class AppInitializer {
       }
     );
     
-    initializeDB(userId);
-    const db = getLocalDb();
+    const db = await getLocalDb();
     const metaService = new IndexedDBMetadataService(db, userId);
     
     // 🔥 Phase 1: 健全性チェック（前回のセッションの状態を確認）
@@ -133,8 +132,7 @@ export class AppInitializer {
   private static async rebuild(userId: string, reason?: string): Promise<void> {
     console.log(`[AppInit:${userId}] Rebuilding IndexedDB...`);
     
-    initializeDB(userId);
-    let db = getLocalDb();
+    const db = await getLocalDb(userId);
     let metaService = new IndexedDBMetadataService(db, userId);
     
     // 再構築回数をインクリメント
@@ -143,14 +141,21 @@ export class AppInitializer {
     // 即破棄
     await db.delete();
     
-    // 再構築
-    await IndexedDBRebuildOrchestrator.rebuild(userId, reason);
+    // 🔥 重要: 削除後に新しいインスタンスを取得
+    await getLocalDb(userId);
+    
+    try {
+      // 再構築
+      await IndexedDBRebuildOrchestrator.rebuild(userId, reason);
+    } catch (error: any) {
+      console.error(`[AppInit:${userId}] Rebuild FAILED:`, error.message || error);
+      throw error; // 上位で捕捉されることを期待
+    }
     
     // 🔥 再構築 + 同期完了後に CLEAN をマーク
     // 新しい DB インスタンスを作成（削除後のため）
-    initializeDB(userId);
-    db = getLocalDb();
-    metaService = new IndexedDBMetadataService(db, userId);
+    const newDb = await getLocalDb(userId);
+    metaService = new IndexedDBMetadataService(newDb, userId);
     await metaService.markClean();
   }
   

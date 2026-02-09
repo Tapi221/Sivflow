@@ -123,8 +123,14 @@ export const normalizeCard = (raw: any) => {
     completedDate: normalizeDate(raw?.completedDate ?? raw?.completed_date),
     tags: raw?.tags ?? [],
     reviewCount: raw?.reviewCount ?? raw?.review_count ?? 0,
-    questionBlocks: raw?.questionBlocks ?? raw?.question_blocks ?? [],
-    answerBlocks: raw?.answerBlocks ?? raw?.answer_blocks ?? [],
+    questionBlocks: (raw?.questionBlocks ?? raw?.question_blocks ?? []).filter((b: any) => {
+      if (b.type === 'math' && !b.math?.latex?.trim()) return false;
+      return true;
+    }),
+    answerBlocks: (raw?.answerBlocks ?? raw?.answer_blocks ?? []).filter((b: any) => {
+      if (b.type === 'math' && !b.math?.latex?.trim()) return false;
+      return true;
+    }),
     _rescueRaw: raw?._rescueRaw ?? undefined,
   };
 
@@ -157,16 +163,6 @@ export const normalizeCard = (raw: any) => {
   }
   if (!normalized.answerText && normalized.answerBlocks.length > 0) {
     normalized.answerText = extractTextFromBlocks(normalized.answerBlocks);
-  }
-
-  // タイトルが空の場合のフォールバック
-  if (!normalized.title) {
-    const preview = normalized.questionText.trim();
-    if (preview) {
-      normalized.title = preview.length > 20 ? preview.substring(0, 20) + '...' : preview;
-    } else {
-      normalized.title = '無題のカード';
-    }
   }
 
   return normalized;
@@ -207,7 +203,9 @@ export const normalizeFolder = (raw: any) => {
     memoText: raw?.memoText ?? raw?.memo_text ?? '',
     memoImages: normalizeUploadedImages(raw?.memoImages ?? raw?.memo_images ?? []),
     notePdfs: raw?.notePdfs ?? raw?.note_pdfs ?? [],
+    lastAccessAt: normalizeDate(raw?.lastAccessAt ?? raw?.last_access_at),
     createdAt: normalizeDate(raw?.createdAt ?? raw?.created_at) ?? new Date(),
     updatedAt: normalizeDate(raw?.updatedAt ?? raw?.updated_at) ?? new Date(),
   };
+
 };

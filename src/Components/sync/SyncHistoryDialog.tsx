@@ -7,8 +7,8 @@ import {
   DialogDescription,
 } from '@/Components/ui/dialog';
 import { Badge } from '@/Components/ui/badge';
-import { Clock, ArrowUpDown, CheckCircle2 as CheckCircle, AlertTriangle, AlertCircle as XCircle, WifiOff } from 'lucide-react';
-import { localDb } from '@/services/localDB';
+import { Clock, ArrowUpDown, CheckCircle2 as CheckCircle, AlertTriangle, AlertCircle as XCircle, ChevronUp, ChevronDown } from 'lucide-react';
+import { getLocalDb } from '@/services/localDB';
 import type { SyncHistory } from '@/types/sync';
 
 interface SyncHistoryDialogProps {
@@ -28,7 +28,8 @@ export function SyncHistoryDialog({ open, onClose }: SyncHistoryDialogProps) {
 
   const loadHistories = useCallback(async () => {
     try {
-      const allHistories = await localDb.syncHistory
+      const db = await getLocalDb();
+      const allHistories = await db.syncHistory
         .orderBy('finishedAt')
         .reverse()
         .limit(30)
@@ -49,34 +50,33 @@ export function SyncHistoryDialog({ open, onClose }: SyncHistoryDialogProps) {
     switch (result) {
       case 'success':
         return (
-          <Badge className="bg-green-500 hover:bg-green-600">
+          <Badge className="bg-green-500 hover:bg-green-600" variant="secondary">
             <CheckCircle className="w-3 h-3 mr-1" />
             成功
           </Badge>
         );
       case 'partial':
         return (
-          <Badge className="bg-yellow-500 hover:bg-yellow-600">
+          <Badge className="bg-yellow-500 hover:bg-yellow-600" variant="secondary">
             <AlertTriangle className="w-3 h-3 mr-1" />
             部分成功
           </Badge>
         );
       case 'failed':
         return (
-          <Badge className="bg-red-500 hover:bg-red-600">
+          <Badge className="bg-red-500 hover:bg-red-600" variant="destructive">
             <XCircle className="w-3 h-3 mr-1" />
             失敗
           </Badge>
         );
-      case 'skipped_wifi':
+       case 'skipped_wifi':
         return (
-          <Badge className="bg-gray-500 hover:bg-gray-600">
-            <WifiOff className="w-3 h-3 mr-1" />
+          <Badge className="bg-gray-500 hover:bg-gray-600" variant="secondary">
             WiFi待機
           </Badge>
         );
       default:
-        return <Badge className="bg-gray-200 text-gray-800">{result}</Badge>;
+        return <Badge className="bg-gray-200 text-gray-800" variant="secondary">{result}</Badge>;
     }
   };
 
@@ -160,13 +160,13 @@ export function SyncHistoryDialog({ open, onClose }: SyncHistoryDialogProps) {
                     <div className="flex items-center gap-4 text-sm text-gray-700 dark:text-gray-300">
                       {/* アップロード件数 */}
                       <div className="flex items-center gap-1" title="アップロード">
-                        <ArrowUp className="w-4 h-4 text-blue-500" />
+                        <ChevronUp className="w-4 h-4 text-blue-500" />
                         <span>{history.uploaded}件</span>
                       </div>
 
                       {/* ダウンロード件数 */}
                       <div className="flex items-center gap-1" title="ダウンロード">
-                        <ArrowDown className="w-4 h-4 text-green-500" />
+                        <ChevronDown className="w-4 h-4 text-green-500" />
                         <span>{history.downloaded}件</span>
                       </div>
 

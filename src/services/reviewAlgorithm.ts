@@ -10,6 +10,9 @@ export type ReviewAlgorithmInput = {
     lastReviewAt?: Date | Timestamp | null;
     recoveryRemaining?: number | null;
     reviewCount?: number | null; // Added
+
+    // ✅ Added: difficulty (0..1). Higher = more error-prone / harder for this user.
+    difficulty?: number | null;
   };
   subjectiveScore: SubjectiveScore;
   now?: Date;
@@ -24,12 +27,25 @@ export type ReviewAlgorithmResult = {
   intervalDays: number;
   delayDays: number;
   reviewCount: number; // Added
+
+  // ✅ Added
+  difficulty: number;
 };
 
 // Constants
 const MIN_STABILITY = 0.01;  // Prevent division by zero
 const MAX_STABILITY = 1.0;
 const MAX_INTERVAL_DAYS = 90;
+
+// ✅ Difficulty constants (pragmatic defaults)
+const MIN_DIFFICULTY = 0.0;
+const MAX_DIFFICULTY = 1.0;
+
+// EMA smoothing factor (smaller = more stable, larger = more reactive)
+const DIFFICULTY_ALPHA = 0.10;
+
+// Interval brake strength (0.0..1.0). Example: 0.30 => max 30% shorter at difficulty=1
+const DIFFICULTY_INTERVAL_BRAKE = 0.30;
 
 // Helper: Convert Firestore Timestamp or Date to Date
 const toDate = (value?: Date | Timestamp | null): Date | null => {
@@ -50,6 +66,16 @@ const diffDays = (a: Date, b: Date): number => {
 // Clamp stability to valid range (0, 1]
 const clampStability = (s: number): number => {
   return Math.max(MIN_STABILITY, Math.min(MAX_STABILITY, s));
+};
+
+// ✅ Clamp to [0,1]
+const clamp01 = (x: number): number => {
+  return Math.max(0, Math.min(1, x));
+};
+
+// ✅ Clamp difficulty to [0,1]
+const clampDifficulty = (d: number): number => {
+  return Math.max(MIN_DIFFICULTY, Math.min(MAX_DIFFICULTY, d));
 };
 
 // Normalize legacy level (0-5) to new stability (0-1)
@@ -74,14 +100,36 @@ export const getInitialStability = (
       return clampStability((memoryStability - 5) / 95);
     }
   }
-  
+
   // Fall back to legacy level if available
   if (typeof legacyLevel === 'number' && Number.isFinite(legacyLevel)) {
     return legacyLevelToStability(legacyLevel);
   }
-  
+
   // Default: 30% stability for new cards
   return 0.30;
+};
+
+// ✅ Initial difficulty (0..1)
+// “測る”んじゃなくて、カードの挙動から“推定する”ための初期値。
+// 既存値があればそれを採用。なければ stability から雑に推定（新規でも極端にならないように弱める）。
+export const getInitialDifficulty = (
+  difficulty?: number | null,
+  stability?: number | null
+): number => {
+  if (typeof difficulty === 'number' && Number.isFinite(difficulty)) {
+    return clampDifficulty(difficulty);
+  }
+
+  // Derive a conservative default from stability if available:
+  // Higher stability => lower difficulty, but dampened so new cards aren't instantly "hardest".
+  if (typeof stability === 'number' && Number.isFinite(stability)) {
+    const derived = (1 - clamp01(stability)) * 0.6; // 0..0.6 range
+    return clampDifficulty(derived);
+  }
+
+  // Neutral-ish default
+  return 0.35;
 };
 
 /**
@@ -95,18 +143,17 @@ const calculateIntervalDays = (stability: number): number => {
 
 /**
  * Update stability based on subjective score
- * 
+ *
  * Score 0 (忘れた): S' = S × 0.5
- * Score 1 (あいまい): S' = S × 0.8  
+ * Score 1 (あいまい): S' = S × 0.8
  * Score 2 (OK): S' = S + (1-S) × 0.1
  * Score 3 (余裕): S' = S + (1-S) × 0.25
  */
 const updateStability = (currentStability: number, score: SubjectiveScore): number => {
   let newStability: number;
-  
+
   switch (score) {
     case 0: // 忘れた - 50% decrease (Factor 0.5)
-      // Updated to 0.5 based on strict user request
       newStability = currentStability * 0.5;
       break;
     case 1: // あいまい - 20% decrease
@@ -121,46 +168,83 @@ const updateStability = (currentStability: number, score: SubjectiveScore): numb
     default:
       newStability = currentStability;
   }
-  
+
   return clampStability(newStability);
+};
+
+// ✅ Subjective score -> "fail-ish" (0..1)
+// This is NOT truth, just a pragmatic signal.
+// 0 (Forgot) : 1.0
+// 1 (Hard)   : 0.6
+// 2 (Good)   : 0.2
+// 3 (Easy)   : 0.0
+const scoreToFailish = (score: SubjectiveScore): number => {
+  switch (score) {
+    case 0: return 1.0;
+    case 1: return 0.6;
+    case 2: return 0.2;
+    case 3: return 0.0;
+    default: return 0.2;
+  }
+};
+
+// ✅ Update difficulty via EMA:
+// d' = d*(1-α) + failish*α
+const updateDifficulty = (currentDifficulty: number, score: SubjectiveScore): number => {
+  const failish = scoreToFailish(score);
+  const next = currentDifficulty * (1 - DIFFICULTY_ALPHA) + failish * DIFFICULTY_ALPHA;
+  return clampDifficulty(next);
+};
+
+// ✅ Apply difficulty as a mild interval brake (safe and explainable internally)
+const applyDifficultyBrakeToInterval = (baseIntervalDays: number, difficulty: number): number => {
+  const factor = 1 - DIFFICULTY_INTERVAL_BRAKE * clampDifficulty(difficulty); // [1-k, 1]
+  const adjusted = Math.round(baseIntervalDays * factor);
+  return Math.max(1, Math.min(MAX_INTERVAL_DAYS, adjusted));
 };
 
 /**
  * Main review algorithm
  */
-export const computeNextReview = ({ 
-  card, 
-  subjectiveScore, 
+export const computeNextReview = ({
+  card,
+  subjectiveScore,
   now = new Date(),
   delayBonusEnabled = false
 }: ReviewAlgorithmInput & { delayBonusEnabled?: boolean }): ReviewAlgorithmResult => {
   // Get current stability (with legacy conversion)
   const legacyLevel = card.currentLevel ?? card.level ?? null;
   const currentStability = getInitialStability(card.memoryStability ?? null, legacyLevel);
-  
-  // Calculate delay (days overdue) - Used for reference/metrics but NOT logic if following strict spec
+
+  // ✅ Get current difficulty
+  const currentDifficulty = getInitialDifficulty(card.difficulty ?? null, currentStability);
+
+  // Calculate delay (days overdue)
   const plannedDate = toDate(card.nextReviewDate ?? null);
   const diff = plannedDate ? diffDays(now, plannedDate) : 0;
   const delayDays = Math.max(0, diff);
-  
+
   // Update stability based on review result
-  // Note: Strict adherence to specification image - No decay penalty for delay.
   let newStability = updateStability(currentStability, subjectiveScore);
 
   // Delay Bonus Logic
   if (delayBonusEnabled && delayDays > 0) {
-     // Formula: S' = S' * (1 + log2(1 + L))
-     const bonusFactor = 1 + Math.log2(1 + delayDays);
-     newStability = clampStability(newStability * bonusFactor);
+    // Formula: S' = S' * (1 + log2(1 + D))
+    const bonusFactor = 1 + Math.log2(1 + delayDays);
+    newStability = clampStability(newStability * bonusFactor);
   }
-  
-  // Recovery Mode Removed as per user request (Step 1281)
-  // recoveryRemaining is kept in type/return for schema compatibility but logic is disabled.
-  // Recovery Mode Removed
+
+  // ✅ Update difficulty AFTER seeing the result (and independent from delay to avoid "busy life" pollution)
+  const newDifficulty = updateDifficulty(currentDifficulty, subjectiveScore);
+
+  // Recovery Mode Removed (kept for schema compatibility)
   const recoveryRemaining = 0;
-  
-  // Calculate next interval
-  const intervalDays = calculateIntervalDays(newStability);
+
+  // Calculate next interval (stability base)
+  const baseIntervalDays = calculateIntervalDays(newStability);
+
+  // ✅ Apply difficulty brake (mild encourage for “problem cards”)
+  const intervalDays = applyDifficultyBrakeToInterval(baseIntervalDays, newDifficulty);
 
   // Calculate next review date
   const nextReviewDate = new Date(now);
@@ -170,7 +254,7 @@ export const computeNextReview = ({
   // Increment review count
   const currentReviewCount = card.reviewCount ?? 0;
   const reviewCount = currentReviewCount + 1;
-  
+
   return {
     memoryStability: newStability,
     nextReviewDate,
@@ -179,14 +263,17 @@ export const computeNextReview = ({
     recoveryRemaining,
     intervalDays,
     delayDays,
-    reviewCount, // Return new count
+    reviewCount,
+
+    // ✅ Return difficulty so caller can persist it
+    difficulty: newDifficulty,
   };
 };
 
 /**
  * Calculate recall probability based on time elapsed
  * Formula: R(t) = e^(-t/S)
- * 
+ *
  * @param stability Current stability (0-1)
  * @param daysSinceReview Days since last review
  * @returns Recall probability (0-1)
@@ -194,9 +281,8 @@ export const computeNextReview = ({
 export const calculateRecallProbability = (stability: number, daysSinceReview: number): number => {
   if (stability <= 0) return 0;
   if (daysSinceReview <= 0) return 1;
-  
+
   // Scale stability for the exponential formula
-  // stability=1 should give ~50% recall after ~70 days
   const scaledStability = stability * 100;
   return Math.exp(-daysSinceReview / scaledStability);
 };

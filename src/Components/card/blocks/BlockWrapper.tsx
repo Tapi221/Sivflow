@@ -10,6 +10,7 @@ interface BlockWrapperProps {
   onDelete: () => void;
   onDuplicate: () => void;
   dragHandleProps?: any;
+  dragHandleClassName?: string;
   className?: string;
   label?: string;
   icon?: React.ElementType;
@@ -21,6 +22,7 @@ export const BlockWrapper = ({
   onDelete, 
   onDuplicate, 
   dragHandleProps,
+  dragHandleClassName,
   className,
   label,
   icon: Icon,
@@ -36,11 +38,18 @@ export const BlockWrapper = ({
         borderColor: accentColor ? `${accentColor}40` : undefined, // 25% opacity for subtle look
       }}
     >
-      {/* 操作メニュー (ホバー時に表示、またはモバイル時は常に表示) */}
-      <div className="absolute -right-2 top-4 md:-right-12 flex md:flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+      {/* 操作メニュー (ホバー時に表示、またはモバイル時はタップで表示) */}
+      <div className="absolute -right-2 top-4 md:-right-12 flex md:flex-col gap-1 opacity-0 pointer-events-none
+        group-hover:opacity-100 group-hover:pointer-events-auto
+        group-focus-within:opacity-100 group-focus-within:pointer-events-auto
+        data-[active=true]:opacity-100 data-[active=true]:pointer-events-auto
+        transition-opacity duration-150 z-10">
         <div 
           {...dragHandleProps}
-          className="p-2 bg-white border border-slate-100 rounded-full text-slate-400 hover:text-primary-600 hover:border-primary-100 cursor-grab active:cursor-grabbing shadow-sm"
+          className={cn(
+            "p-2 bg-white border border-slate-100 rounded-full text-slate-400 hover:text-primary-600 hover:border-primary-100 cursor-grab active:cursor-grabbing shadow-sm",
+            dragHandleClassName
+          )}
         >
           <GripIcon className="w-4 h-4" />
         </div>

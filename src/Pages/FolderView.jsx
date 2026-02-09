@@ -1,29 +1,24 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useCards } from '@/hooks/useCards';
 import { useFolders } from '@/hooks/useFolders';
 import { useAuth } from '@/contexts/AuthContext';
-import { storage } from '@/services/firebase';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useReliableFileUpload } from '@/hooks/useReliableFileUpload';
+import { useTags } from '@/hooks/useTags'; // Added
+import { Checkbox } from '@/Components/ui/checkbox'; // Added
 import { Button } from '@/Components/ui/button';
 import { UploadProgress } from '@/Components/ui/UploadProgress';
-import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/card';
 import { Skeleton } from '@/Components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/Components/ui/tabs';
 import { 
   ArrowLeft, 
   Plus, 
-  BookOpen, 
-  BarChart3,
-  Bell,
   BellOff,
 
   ArrowUpDown,
   Calendar,
   Percent,
-  Clock,
   FileText,
   X,
   Check,
@@ -31,15 +26,26 @@ import {
   MoreVertical,
   Edit,
   Trash2,
-  Tag
+  Tag,
+  LayoutGrid, // Added
+  List, // Added
+  Filter, // Added
+  AlignJustify, // Added
+  LayoutDashboard, // Added
+  Waypoints, // Added
+  Table,
+  Maximize2,
+  Newspaper,
+  StickyNote,
+  Minus,
+  ChevronRight, // Added
+  Folder // Added
 } from 'lucide-react';
 import EyeIcon from 'lucide-react/dist/esm/icons/eye';
 import FolderOpen from 'lucide-react/dist/esm/icons/folder-open';
-import MapIcon from 'lucide-react/dist/esm/icons/map';
 import { createPageUrl } from '@/utils';
 import { firestoreDb } from '@/services/firebase';
 import { useToast } from '@/contexts/ToastContext';
-import { normalizeMemoryStability } from '@/utils/reviewUtils';
 import { calculateResistanceScore } from '@/utils/reviewMetrics';
 import { useUserSettings } from '@/hooks/useUserSettings';
 import CardList from '@/Components/card/CardList';
@@ -48,7 +54,6 @@ import FolderDialog from '@/Components/folder/FolderDialog';
 import MapList from '@/Components/map/MapList';
 import CreateCardSelectionDialog from '@/Components/card/CreateCardSelectionDialog';
 import CreationModeDialog from '@/Components/card/CreationModeDialog';
-import { Toggle } from '@/Components/ui/toggle';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -59,17 +64,29 @@ import {
 } from "@/Components/ui/dropdown-menu";
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 
+const getFolderId = (f) => (f?.id ?? f?.folderId ?? null);
+const getParentFolderId = (f) => (f?.parentFolderId ?? f?.parent_folder_id ?? null);
+const getCardFolderId = (c) => (c?.folderId ?? c?.folder_id ?? null);
+
+const isDeletedEntity = (x) => Boolean(x?.isDeleted ?? x?.is_deleted ?? false);
+
+const getCreatedAtMs = (x) => {
+  const v = x?.createdAt ?? x?.created_at;
+  if (!v) return 0;
+  if (typeof v === 'object' && typeof v.seconds === 'number') return v.seconds * 1000;
+  const t = new Date(v).getTime();
+  return Number.isFinite(t) ? t : 0;
+};
+
 export default function FolderView() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { currentUser } = useAuth();
   
   const folderId = searchParams.get('id');
-  
-  const { settings } = useUserSettings();
+
+  useUserSettings();
   const [activeTab, setActiveTab] = useState('cards');
-  const [tabOrder, setTabOrder] = useState(['cards', 'memo', 'notes']);
-  const [draggingTab, setDraggingTab] = useState(null);
   const [notePdfs, setNotePdfs] = useState([]);
   const [isPdfUploading, setIsPdfUploading] = useState(false);
 
@@ -78,10 +95,20 @@ export default function FolderView() {
   const [isCreationModeDialogOpen, setIsCreationModeDialogOpen] = useState(false);
   
   // Filter state: 'all' | 'crowned' | 'uncrowned'
-  const [filterMode, setFilterMode] = useState('all');
+  const [filterMode] = useState('all');
   
   // Sort state: 'custom' | 'stability_asc' | 'stability_desc' | 'created_asc' | 'created_desc'
   const [sortMode, setSortMode] = useState('custom');
+  
+  // View state: 'grid' | 'list'
+  const [viewMode, setViewMode] = useState('grid');
+  
+  // Tag Filter state
+  const [selectedTags, setSelectedTags] = useState([]);
+
+  // Folder Sort state: 'created_desc' | 'created_asc' | 'name_asc' | 'name_desc'
+  const [folderSortMode] = useState('created_desc');
+
   
   // useCardsフックから必要な関数とデータを取得
   const { 
@@ -90,7 +117,7 @@ export default function FolderView() {
     updateCard, 
     deleteCard 
   } = useCards();
-  const { folders = [], loading: foldersLoading, updateFolder } = useFolders();
+  const { folders = [], loading: foldersLoading, updateFolder, createFolder } = useFolders();
   
   const folder = folders.find(f => f.id === folderId || f.folderId === folderId);
   const isSilent = folder?.isSilent ?? folder?.is_silent ?? false;
@@ -101,61 +128,101 @@ export default function FolderView() {
   useEffect(() => {
     setNotePdfs(folder?.notePdfs ?? folder?.note_pdfs ?? []);
   }, [folder]);
+
+  const lastAccessUpdatedRef = useRef(null);
   
+  // フォルダアクセス時に lastAccessAt を更新
+  useEffect(() => {
+    const updateLastAccess = async () => {
+      if (!folderId || !folder || !updateFolder) return;
+      if (lastAccessUpdatedRef.current === folderId) return;
+
+      lastAccessUpdatedRef.current = folderId;
+
+      try {
+        const now = new Date();
+        await updateFolder(folderId, { lastAccessAt: now, last_access_at: now });
+      } catch (error) {
+        console.error('Failed to update lastAccessAt:', error);
+      }
+    };
+    
+    updateLastAccess();
+  }, [folderId, folder, updateFolder]);
+  
+  // Root Folder Resolution for Tags
+  const rootFolder = useMemo(() => {
+    if (!folder) return null;
+    let current = folder;
+    // Safety break to prevent infinite loops in cyclic references (though unlikely)
+    let depth = 0;
+    while (current && depth < 50) {
+      const parentId = current.parentFolderId ?? current.parent_folder_id;
+      if (!parentId) return current; // Found root
+      
+      const parent = folders.find(f => (f.id === parentId) || (f.folderId === parentId));
+      if (!parent) return current; // Parent not found in loaded folders, treat current as root accessible
+      
+      current = parent;
+      depth++;
+    }
+    return current;
+  }, [folder, folders]);
+
+  const rootFolderId = rootFolder?.id || rootFolder?.folderId;
+  const { tags: availableTags } = useTags(rootFolderId);
+  const tagList = useMemo(() => Array.from(new Set(availableTags.map(t => t.name))).sort(), [availableTags]);
+
   const folderCards = useMemo(() => {
-    return allCards.filter(c => c.folderId === folderId);
+    return allCards.filter(c => {
+      if (isDeletedEntity(c)) return false;
+      return getCardFolderId(c) === folderId;
+    });
   }, [allCards, folderId]);
 
   const sortedCards = useMemo(() => {
     let result = [...folderCards].sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
-    
-    // Apply Crown Filter
-    if (filterMode === 'all') {
-        return result;
+
+    // Crown filter: bookmark を王冠扱い
+    if (filterMode === 'crowned') {
+      result = result.filter(c => (c.isBookmarked ?? c.is_bookmarked) === true);
+    } else if (filterMode === 'uncrowned') {
+      result = result.filter(c => (c.isBookmarked ?? c.is_bookmarked) !== true);
     }
-    return result;
-    
-    // Sorting
+
+    // Tag filter
+    if (selectedTags.length > 0) {
+      result = result.filter(card => {
+        const cardTags = card.tags || [];
+        return cardTags.some((tag) => selectedTags.includes(tag));
+      });
+    }
+
+    // Sort
     if (sortMode === 'custom') {
-        // Default: Sort by orderIndex
-        // result is already sorted by orderIndex at the beginning
+      // orderIndex のまま
     } else if (sortMode === 'stability_asc') {
-        result.sort((a, b) => {
-             const scoreA = calculateResistanceScore(a.interval || 0);
-             const scoreB = calculateResistanceScore(b.interval || 0);
-             return scoreA - scoreB;
-        });
+      result.sort((a, b) => calculateResistanceScore(a.interval || 0) - calculateResistanceScore(b.interval || 0));
     } else if (sortMode === 'stability_desc') {
-        result.sort((a, b) => {
-             const scoreA = calculateResistanceScore(a.interval || 0);
-             const scoreB = calculateResistanceScore(b.interval || 0);
-             return scoreB - scoreA;
-        });
+      result.sort((a, b) => calculateResistanceScore(b.interval || 0) - calculateResistanceScore(a.interval || 0));
     } else if (sortMode === 'created_asc') {
-        result.sort((a, b) => {
-             const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-             const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-             return dateA - dateB;
-        });
+      result.sort((a, b) => getCreatedAtMs(a) - getCreatedAtMs(b));
     } else if (sortMode === 'created_desc') {
-        result.sort((a, b) => {
-             const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-             const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-             return dateB - dateA;
-        });
+      result.sort((a, b) => getCreatedAtMs(b) - getCreatedAtMs(a));
     }
-    
+
     return result;
-  }, [folderCards, filterMode, sortMode]);
+  }, [folderCards, filterMode, sortMode, selectedTags]);
+
   
   const handleReorder = async (reorderedCards) => {
-    // Update orderIndex for each card
+    const updates = [];
     for (let i = 0; i < reorderedCards.length; i++) {
-        // Only update if index changed
-        if (reorderedCards[i].orderIndex !== i) {
-            await updateCard(reorderedCards[i].id, { orderIndex: i });
-        }
+      if (reorderedCards[i].orderIndex !== i) {
+        updates.push(updateCard(reorderedCards[i].id, { orderIndex: i }));
+      }
     }
+    await Promise.all(updates);
   };
   
   const handleViewCard = (card) => {
@@ -191,6 +258,20 @@ export default function FolderView() {
           queryParams.set('hideTitle', 'true');
         }
         navigate(`/one-qa-mode?${queryParams.toString()}`);
+        return;
+      }
+      
+      if (modeId === 'choice') {
+        const queryParams = new URLSearchParams();
+        queryParams.set('folderId', folderId);
+        navigate(`/four-choice-mode?${queryParams.toString()}`);
+        return;
+      }
+
+      if (modeId === 'pair') {
+        const queryParams = new URLSearchParams();
+        queryParams.set('folderId', folderId);
+        navigate(`/pair-mode?${queryParams.toString()}`);
         return;
       }
 
@@ -264,70 +345,116 @@ export default function FolderView() {
     }
   };
   
-  // Build breadcrumb path
-  const getBreadcrumbs = () => {
+  const folderById = useMemo(() => {
+    const m = new Map();
+    for (const f of folders) {
+      const id = getFolderId(f);
+      if (id) m.set(id, f);
+    }
+    return m;
+  }, [folders]);
+
+  const breadcrumbs = useMemo(() => {
     if (!folder) return [];
-    
     const path = [];
-    let current = folder;
+    let cur = folder;
+    const visited = new Set();
+
+    while (cur) {
+      const id = getFolderId(cur);
+      if (id && visited.has(id)) break;
+      if (id) visited.add(id);
+
+      path.unshift(cur);
+
+      const pid = getParentFolderId(cur);
+      if (!pid) break;
+
+      cur = folderById.get(pid);
+    }
+
+    return path;
+  }, [folder, folderById]);
+
+  const cardCountByFolderId = useMemo(() => {
+    const m = new Map();
+    for (const c of allCards) {
+      const fid = getCardFolderId(c);
+      if (!fid) continue;
+      if (isDeletedEntity(c)) continue;
+      m.set(fid, (m.get(fid) || 0) + 1);
+    }
+    return m;
+  }, [allCards]);
+
+  const getFolderCardCountFast = useCallback(
+    (targetFolderId) => cardCountByFolderId.get(targetFolderId) || 0,
+    [cardCountByFolderId]
+  );
+
+  const childFolders = useMemo(() => {
+    return folders.filter(f => {
+      if (isDeletedEntity(f)) return false;
+      return getParentFolderId(f) === folderId;
+    });
+  }, [folders, folderId]);
+
+  const sortedChildFolders = useMemo(() => {
+    let result = [...childFolders];
     
-    while (current) {
-      path.unshift(current);
-      current = folders.find(f => (f.id === current.parentFolderId) || (f.folderId === current.parentFolderId));
+    if (folderSortMode === 'created_desc') {
+      result.sort((a, b) => getCreatedAtMs(b) - getCreatedAtMs(a));
+    } else if (folderSortMode === 'created_asc') {
+      result.sort((a, b) => getCreatedAtMs(a) - getCreatedAtMs(b));
+    } else if (folderSortMode === 'name_asc') {
+      result.sort((a, b) => (a.folderName || "").localeCompare(b.folderName || ""));
+    } else if (folderSortMode === 'name_desc') {
+      result.sort((a, b) => (b.folderName || "").localeCompare(a.folderName || ""));
     }
     
-    return path;
-  };
-  
-  const breadcrumbs = getBreadcrumbs();
-  const childFolders = folders.filter(f => {
-    const parentId = f.parentFolderId ?? f.parent_folder_id ?? null;
-    const isDeleted = f.isDeleted ?? f.is_deleted;
-    return parentId === folderId && (isDeleted === undefined || isDeleted === false);
-  });
-  
-  // 各フォルダのカード数を計算
-  const getFolderCardCount = (targetFolderId) => {
-    return allCards.filter(c => {
-      const cardFolderId = c.folderId ?? c.folder_id;
-      const isDeleted = c.isDeleted ?? c.is_deleted;
-      return cardFolderId === targetFolderId && (isDeleted === undefined || isDeleted === false);
-    }).length;
-  };
+    return result;
+  }, [childFolders, folderSortMode]);
 
-  // 現在のフォルダとそのサブフォルダに含まれる全カード数を計算
+  const childrenByParentId = useMemo(() => {
+    const m = new Map();
+    for (const f of folders) {
+      if (isDeletedEntity(f)) continue;
+      const pid = getParentFolderId(f);
+      const id = getFolderId(f);
+      if (!pid || !id) continue;
+      if (!m.has(pid)) m.set(pid, []);
+      const arr = m.get(pid);
+      if (arr) arr.push(f);
+    }
+    return m;
+  }, [folders]);
+
   const totalDescendantCardCount = useMemo(() => {
     if (!folderId) return 0;
-    
-    // 再帰的に子孫フォルダIDを取得
-    const getDescendantIds = (rootId) => {
-        let ids = [rootId];
-        // foldersはuseFoldersフックから取得済み
-        const children = folders.filter(f => {
-            const pid = f.parentFolderId ?? f.parent_folder_id;
-            const isDel = f.isDeleted ?? f.is_deleted;
-            return pid === rootId && !isDel;
-        });
-        
-        children.forEach(child => {
-            const childId = child.id ?? child.folderId;
-            if (childId) {
-                ids = [...ids, ...getDescendantIds(childId)];
-            }
-        });
-        return ids;
-    };
-    
-    const targetFolderIds = getDescendantIds(folderId);
-    
-    return allCards.filter(c => {
-        const cid = c.folderId ?? c.folder_id;
-        const isDel = c.isDeleted ?? c.is_deleted;
-        return targetFolderIds.includes(cid) && !isDel;
-    }).length;
-  }, [folderId, folders, allCards]);
+
+    const ids = new Set();
+    const stack = [folderId];
+
+    while (stack.length) {
+      const id = stack.pop();
+      if (!id || ids.has(id)) continue;
+      ids.add(id);
+
+      const children = childrenByParentId.get(id) || [];
+      for (const ch of children) {
+        const cid = getFolderId(ch);
+        if (cid) stack.push(cid);
+      }
+    }
+
+    let total = 0;
+    for (const id of ids) total += getFolderCardCountFast(id);
+    return total;
+  }, [folderId, childrenByParentId, getFolderCardCountFast]);
   
   const isLoading = loading || cardsLoading;
+
+  const canDragReorder = sortMode === 'custom' && selectedTags.length === 0 && filterMode === 'all';
 
   const handleToggleSilent = async () => {
     if (!folderId) return;
@@ -336,7 +463,6 @@ export default function FolderView() {
   };
   
   const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
-  const { createFolder } = useFolders();
   const { error: toastError, success: toastSuccess } = useToast();
 
   const handleCreateFolder = async (data) => {
@@ -399,34 +525,72 @@ export default function FolderView() {
   
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-    <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto p-4 md:p-8 ml-0 md:ml-12">
+    <div className="min-h-screen bg-[#F8FAFB] transition-colors duration-500">
+      <div className="max-w-7xl mx-auto px-4 pt-1 pb-4 md:px-8 md:pt-1 md:pb-8 ml-0 md:ml-12">
+
+
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 mb-2">
+          {/* Back Button - Extreme left */}
+          <div className="shrink-0">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => navigate(createPageUrl('Folders'))}
-              className="text-slate-400 hover:text-slate-600 hover:bg-slate-50"
+              className="text-slate-400 hover:text-slate-600 hover:bg-slate-50 h-8 w-8"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-4 h-4" />
             </Button>
-            {isLoading ? (
-              <Skeleton className="h-8 w-48" />
-            ) : (
-                <div className="flex items-center gap-3">
-                    <h1 className="text-xl md:text-2xl font-bold text-slate-800 truncate max-w-[150px] md:max-w-none">
-                        {folder?.folderName || 'フォルダ'}
-                    </h1>
-                    {isSilent && (
-                        <BellOff className="w-5 h-5 text-slate-400" />
-                    )}
-                </div>
-            )}
           </div>
-          
-          <div className="flex items-center gap-1 md:gap-3">
+
+          {/* Breadcrumbs - Left side, next to back button */}
+          <div className="flex-1 min-w-0 overflow-hidden">
+             {isLoading ? (
+               <Skeleton className="h-6 w-32" />
+             ) : (
+               <div className="flex items-center gap-1 overflow-x-auto no-scrollbar whitespace-nowrap mask-image-scroll-fade py-1">
+                  <button 
+                      onClick={() => navigate('/Folders')}
+                      className="flex items-center gap-1 text-[10px] font-bold text-slate-400 hover:text-slate-600 hover:bg-slate-100 px-1.5 py-0.5 rounded-md transition-all select-none"
+                  >
+                      <Folder className="w-3 h-3" />
+                      <span className="hidden sm:inline">フォルダ一覧</span>
+                  </button>
+                  
+                  {breadcrumbs.map((crumb, index) => {
+                      const isLast = index === breadcrumbs.length - 1;
+                      return (
+                          <React.Fragment key={crumb.id || crumb.folderId}>
+                              <ChevronRight className="w-3 h-3 text-slate-300 flex-shrink-0" />
+                              <button 
+                                  onClick={() => !isLast && navigate(`/FolderView?id=${crumb.id || crumb.folderId}`)}
+                                  disabled={isLast}
+                                  className={cn(
+                                      "flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-md transition-all select-none max-w-[120px] truncate",
+                                      isLast 
+                                          ? "text-slate-600 cursor-default" 
+                                          : "text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                                  )}
+                              >
+                                  {isLast ? (
+                                      <FolderOpen className="w-3 h-3 text-slate-400" />
+                                  ) : (
+                                      <Folder className="w-3 h-3" />
+                                  )}
+                                  <span className="truncate">{crumb.folderName || crumb.folder_name}</span>
+                              </button>
+                          </React.Fragment>
+                      );
+                  })}
+                  {isSilent && (
+                      <BellOff className="w-3 h-3 text-slate-400 ml-1" />
+                  )}
+               </div>
+             )}
+          </div>
+
+          {/* Actions Area - Extreme right */}
+          <div className="flex items-center gap-1 md:gap-2 shrink-0">
              {/* Selection Mode Toggle */}
              <Button
                 variant="ghost"
@@ -477,8 +641,8 @@ export default function FolderView() {
                 </DropdownMenuContent>
              </DropdownMenu>
 
-             {/* Desktop Buttons (Hidden on Mobile if needed, but keeping for now) */}
-             <div className="hidden md:flex items-center gap-3 ml-2">
+             {/* Desktop Buttons */}
+             <div className="hidden md:flex items-center gap-3 ml-2 mr-32">
                 <Button
                   variant="outline"
                   onClick={() => setIsCreateCardDialogOpen(true)}
@@ -498,29 +662,22 @@ export default function FolderView() {
           </div>
         </div>
 
-        <div className="border-t border-slate-100 w-full mb-8"></div>
-        
-        {/* Sub Folders Section */}
-        <div className="mb-10">
-            <div className="flex items-center justify-between mb-4">
-                 <h3 className="text-xs font-bold text-slate-300 tracking-wider uppercase flex items-center gap-2 select-none">
-                    <div className="w-8 h-[1px] bg-slate-200"></div>
-                    階層構造 (SUB FOLDERS)
-                </h3>
-            </div>
-           
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+        {/* Sub Folders Section - Compact & Headerless */}
+        <div className="mb-1 flex items-center gap-4 bg-slate-50/50 p-2 md:p-3 rounded-2xl border border-slate-100/50 mt-0.5">
+            <div className="flex-1 overflow-hidden">
+                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-2 -mx-4 px-4 md:mx-0 md:px-0 mask-image-scroll-fade">
                 {/* New Folder Button */}
                  <button
-                    className="group border border-dashed border-slate-200 rounded-2xl h-16 flex items-center justify-center gap-2 text-slate-400 hover:text-slate-600 hover:border-slate-300 hover:bg-slate-50 transition-all select-none"
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-50 hover:bg-white rounded-full border border-dashed border-slate-300 hover:border-primary-600 hover:text-primary-600 transition-all whitespace-nowrap flex-shrink-0 text-slate-400 font-bold text-[10px] group"
                     onClick={() => setIsCreateFolderOpen(true)}
                   >
-                    <Plus className="w-4 h-4" />
-                    <span className="text-sm font-medium">新規フォルダ</span>
+                    <Plus className="w-3 h-3 group-hover:scale-110 transition-transform" />
+                    <span>新規フォルダ</span>
                   </button>
 
-              {childFolders.map(childFolder => {
-                const cardCount = getFolderCardCount(childFolder.id ?? childFolder.folderId);
+              {sortedChildFolders.map(childFolder => {
+                const cardCount = getFolderCardCountFast(childFolder.id ?? childFolder.folderId);
                 const targetId = childFolder.id ?? childFolder.folderId;
                 
                 return (
@@ -530,38 +687,39 @@ export default function FolderView() {
                         ref={provided.innerRef}
                         {...provided.droppableProps}
                         className={cn(
-                             "group flex items-center px-4 h-16 bg-white rounded-2xl border shadow-sm transition-all duration-200 select-none text-left relative overflow-hidden",
-                             snapshot.isDraggingOver ? "border-primary-600 ring-2 ring-primary-600/20 bg-primary-600/5" : "border-slate-100 hover:shadow-md hover:border-slate-200 cursor-pointer"
+                             "group flex items-center gap-1.5 px-2.5 py-1.5 bg-white rounded-full border border-slate-200 border-b-2 border-b-slate-300 shadow-sm transition-all duration-300 select-none cursor-pointer flex-shrink-0 relative overflow-hidden",
+                             // ホバー時の浮き上がり効果
+                             "hover:-translate-y-0.5 hover:shadow-md hover:border-primary-600/40 hover:text-primary-600",
+                             snapshot.isDraggingOver ? "border-primary-600 ring-2 ring-primary-600/20 bg-primary-600/5 text-primary-600" : ""
                         )}
                         onClick={() => {
                           if (targetId) navigate(`/FolderView?id=${targetId}`);
                         }}
                       >
                          {/* Visual Content */}
-                        <div className="w-8 h-8 rounded-lg bg-primary-600/10 flex items-center justify-center mr-3 group-hover:bg-primary-600/20 transition-colors z-10">
-                          <FolderOpen className="w-4 h-4 text-primary-600" />
-                        </div>
-                        <div className="flex-1 min-w-0 z-10">
-                              <div className="flex items-center gap-2 truncate">
-                                <span className="text-sm font-bold text-slate-700 truncate group-hover:text-primary-600 transition-colors">
-                                    {childFolder.folderName ?? childFolder.folder_name}
-                                </span>
-                                {(childFolder.isSilent ?? childFolder.is_silent) && (
-                                    <BellOff className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                                )}
-                              </div>
-                            <span className="text-[10px] text-slate-400">
-                                 {cardCount} items
-                            </span>
-                        </div>
+                        <FolderOpen className={cn(
+                            "w-3 h-3 transition-colors",
+                            snapshot.isDraggingOver ? "text-primary-600" : "text-slate-400 group-hover:text-primary-600"
+                        )} />
+                        
+                        <span className="text-[10px] font-bold truncate max-w-[150px]">
+                            {childFolder.folderName ?? childFolder.folder_name}
+                        </span>
+                        
+                        {(childFolder.isSilent ?? childFolder.is_silent) && (
+                            <BellOff className="w-2.5 h-2.5 text-slate-300" />
+                        )}
+
+                        <span className={cn(
+                            "ml-0.5 text-[9px] font-bold px-1 py-0 rounded-full transition-colors",
+                            snapshot.isDraggingOver ? "bg-primary-600/20 text-primary-700" : "bg-slate-100 text-slate-400 group-hover:bg-primary-50 group-hover:text-primary-600"
+                        )}>
+                            {cardCount}
+                        </span>
                         
                         {/* Drag Overlay Hint */}
                         {snapshot.isDraggingOver && (
-                             <div className="absolute inset-0 flex items-center justify-end pr-4 pointer-events-none">
-                                 <div className="bg-primary-600 text-white text-[10px] font-bold px-2 py-1 rounded-full animate-pulse">
-                                     移動
-                                 </div>
-                             </div>
+                             <div className="absolute inset-0 bg-primary-600/10 z-10" />
                         )}
                         
                         {/* Hidden placeholder mandated by Droppable */}
@@ -572,8 +730,9 @@ export default function FolderView() {
                 );
               })}
             </div>
-        </div>
-        
+            </div>
+        </div>   
+
         {/* Tabs and Content */}
         <Tabs defaultValue="cards" className="w-full" onValueChange={setActiveTab}>
           <div className="border-b border-slate-200 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -594,7 +753,176 @@ export default function FolderView() {
 
             {activeTab === 'cards' && (
                 <div className="flex items-center gap-1 mb-1 pl-4 border-l border-slate-200">
+                    {/* View Mode Toggle */}
+                    <div className="flex bg-slate-100 rounded-lg p-0.5 mr-2">
+                        <button
+                            onClick={() => setViewMode('grid')}
+                            className={cn(
+                                "p-1.5 rounded-md transition-all",
+                                viewMode === 'grid' ? "bg-white shadow-sm text-primary-600" : "text-slate-400 hover:text-slate-600"
+                            )}
+                            title="グリッド表示"
+                        >
+                            <LayoutGrid className="w-4 h-4" />
+                        </button>
+                        <button
+                            onClick={() => setViewMode('list')}
+                            className={cn(
+                                "p-1.5 rounded-md transition-all",
+                                viewMode === 'list' ? "bg-white shadow-sm text-primary-600" : "text-slate-400 hover:text-slate-600"
+                            )}
+                            title="リスト表示"
+                        >
+                            <List className="w-4 h-4" />
+                        </button>
+                         <button
+                            onClick={() => setViewMode('compact')}
+                            className={cn(
+                                "p-1.5 rounded-md transition-all",
+                                viewMode === 'compact' ? "bg-white shadow-sm text-primary-600" : "text-slate-400 hover:text-slate-600"
+                            )}
+                            title="コンパクト表示"
+                        >
+                            <AlignJustify className="w-4 h-4" />
+                        </button>
+                         <button
+                            onClick={() => setViewMode('gallery')}
+                            className={cn(
+                                "p-1.5 rounded-md transition-all",
+                                viewMode === 'gallery' ? "bg-white shadow-sm text-primary-600" : "text-slate-400 hover:text-slate-600"
+                            )}
+                            title="ギャラリー表示"
+                        >
+                            <LayoutDashboard className="w-4 h-4" />
+                        </button>
+                         <button
+                            onClick={() => setViewMode('timeline')}
+                            className={cn(
+                                "p-1.5 rounded-md transition-all",
+                                viewMode === 'timeline' ? "bg-white shadow-sm text-primary-600" : "text-slate-400 hover:text-slate-600"
+                            )}
+                            title="タイムライン表示"
+                        >
+                            <Waypoints className="w-4 h-4" />
+                        </button>
+                         <button
+                            onClick={() => setViewMode('table')}
+                            className={cn(
+                                "p-1.5 rounded-md transition-all",
+                                viewMode === 'table' ? "bg-white shadow-sm text-primary-600" : "text-slate-400 hover:text-slate-600"
+                            )}
+                            title="テーブル表示"
+                        >
+                            <Table className="w-4 h-4" />
+                        </button>
+                         <button
+                            onClick={() => setViewMode('hero')}
+                            className={cn(
+                                "p-1.5 rounded-md transition-all",
+                                viewMode === 'hero' ? "bg-white shadow-sm text-primary-600" : "text-slate-400 hover:text-slate-600"
+                            )}
+                            title="ヒーロー表示"
+                        >
+                            <Maximize2 className="w-4 h-4" />
+                        </button>
+                         <button
+                            onClick={() => setViewMode('magazine')}
+                            className={cn(
+                                "p-1.5 rounded-md transition-all",
+                                viewMode === 'magazine' ? "bg-white shadow-sm text-primary-600" : "text-slate-400 hover:text-slate-600"
+                            )}
+                            title="マガジン表示"
+                        >
+                            <Newspaper className="w-4 h-4" />
+                        </button>
+                         <button
+                            onClick={() => setViewMode('sticky')}
+                            className={cn(
+                                "p-1.5 rounded-md transition-all",
+                                viewMode === 'sticky' ? "bg-white shadow-sm text-primary-600" : "text-slate-400 hover:text-slate-600"
+                            )}
+                            title="付箋表示"
+                        >
+                            <StickyNote className="w-4 h-4" />
+                        </button>
+                         <button
+                            onClick={() => setViewMode('bullet')}
+                            className={cn(
+                                "p-1.5 rounded-md transition-all",
+                                viewMode === 'bullet' ? "bg-white shadow-sm text-primary-600" : "text-slate-400 hover:text-slate-600"
+                            )}
+                            title="バレット表示"
+                        >
+                            <Minus className="w-4 h-4" />
+                        </button>
+                    </div>
 
+                    <DropdownMenu>
+                       <DropdownMenuTrigger asChild>
+                           <Button
+                               variant="ghost"
+                               className={cn(
+                                   "p-1.5 rounded-md transition-all mr-2",
+                                   selectedTags.length > 0 ? "bg-primary-50 text-primary-600 shadow-sm" : "text-slate-400 hover:text-slate-600"
+                               )}
+                               title="タグで絞り込み"
+                           >
+                               <Filter className={cn("w-4 h-4", selectedTags.length > 0 && "fill-current")} />
+                               {selectedTags.length > 0 && (
+                                   <span className="ml-1 text-[10px] font-bold">{selectedTags.length}</span>
+                               )}
+                           </Button>
+                       </DropdownMenuTrigger>
+                       <DropdownMenuContent align="end" className="w-56 p-2 max-h-[300px] overflow-y-auto">
+                           <DropdownMenuLabel>タグフィルター</DropdownMenuLabel>
+                           <DropdownMenuSeparator />
+                           {tagList.length === 0 ? (
+                               <div className="p-2 text-xs text-slate-400 text-center">タグが見つかりません</div>
+                           ) : (
+                               <>
+                                   <div className="mb-2 px-2">
+                                       <Button 
+                                           variant="outline" 
+                                           size="sm" 
+                                           className="w-full text-xs h-7"
+                                           onClick={() => setSelectedTags([])}
+                                           disabled={selectedTags.length === 0}
+                                       >
+                                           全選択解除
+                                       </Button>
+                                   </div>
+                                   {tagList.map(tag => (
+                                       <div key={tag} className="flex items-center space-x-2 p-2 hover:bg-slate-50 rounded-md cursor-pointer" onClick={() => {
+                                            if (selectedTags.includes(tag)) {
+                                                setSelectedTags(prev => prev.filter(t => t !== tag));
+                                            } else {
+                                                setSelectedTags(prev => [...prev, tag]);
+                                            }
+                                       }}>
+                                           <Checkbox 
+                                               id={`filter-tag-${tag}`} 
+                                               checked={selectedTags.includes(tag)}
+                                               onCheckedChange={(checked) => {
+                                                   if (checked) {
+                                                       setSelectedTags(prev => [...prev, tag]);
+                                                   } else {
+                                                       setSelectedTags(prev => prev.filter(t => t !== tag));
+                                                   }
+                                               }}
+                                           />
+                                           <label 
+                                               htmlFor={`filter-tag-${tag}`} 
+                                               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-1"
+                                               onClick={(e) => e.preventDefault()} // Prevent double toggle due to parent click
+                                           >
+                                               {tag}
+                                           </label>
+                                       </div>
+                                   ))}
+                               </>
+                           )}
+                       </DropdownMenuContent>
+                    </DropdownMenu>
 
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -672,8 +1000,9 @@ export default function FolderView() {
                         await updateCard(card.id, { isDraft: false });
                       }
                     }}
-                    enableDrag={true}
+                    enableDrag={canDragReorder}
                     droppableId="cards"
+                    viewMode={viewMode}
                   />
                 )}
           </TabsContent>
@@ -787,9 +1116,7 @@ export default function FolderView() {
           </TabsContent>
 
           <TabsContent value="map" className="mt-0">
-          <TabsContent value="map" className="mt-0">
              <MapList folderId={folderId} totalCardCount={totalDescendantCardCount} />
-          </TabsContent>
           </TabsContent>
         </Tabs>
 
@@ -799,6 +1126,17 @@ export default function FolderView() {
           parentFolderId={folderId}
           onSave={handleCreateFolder}
         />
+
+        {/* Mobile Floating Action Button for New Card */}
+        <div className="md:hidden fixed bottom-20 right-4 z-40">
+            <Button
+                size="icon"
+                className="w-14 h-14 rounded-full shadow-lg bg-primary-600 hover:bg-primary-700 text-white transition-transform active:scale-95"
+                onClick={() => setIsCreateCardDialogOpen(true)}
+            >
+                <Plus className="w-6 h-6" />
+            </Button>
+        </div>
 
         <CreateCardSelectionDialog
             open={isCreateCardDialogOpen}

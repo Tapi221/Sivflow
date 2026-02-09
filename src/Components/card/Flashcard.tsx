@@ -3,11 +3,15 @@ import { Button } from '@/Components/ui/button';
 import { Badge } from '@/Components/ui/badge';
 import { Card, CardContent } from '@/Components/ui/card';
 import { ChevronLeft, ChevronRight, HelpCircle, Pencil, RotateCcw, Volume2, Play, Pause, Bookmark, Tag } from 'lucide-react';
-import MathRenderer from '@/Components/math/MathRender';
+import { MathRenderer } from './blocks/MathRenderer';
 import { cn } from '@/lib/utils';
 import { CodeRenderer } from './CodeRenderer';
 import { AudioPlayer, ImageGallery } from './CardMedia';
 import { useTags } from '@/hooks/useTags';
+import { ReferencePopup } from './ReferencePopup';
+import LinkIcon from 'lucide-react/dist/esm/icons/link';
+import type { CardBlock, ReferenceBlockData } from '@/types';
+import { normalizeCard } from '@/utils';
 
 interface FlashcardProps {
   card: any;
@@ -46,24 +50,48 @@ function TagBadge({ tag }: { tag: string }) {
 
 export function Flashcard({
   card,
-  isFlipped = false,
+  isFlipped,
   onFlip,
   onEdit,
   onToggleUncertainty,
   onToggleBookmark,
+  onTagClick,
   className,
+  showNavigation,
   onNext,
   onPrev,
   hasNext,
   hasPrev,
   currentIndex,
   totalCards,
-  previewMode = false,
+  previewMode,
   extraHeaderLeft,
   extraHeaderRight,
   extraFooter
 }: FlashcardProps) {
+  // データを正規化してレガシーフィールドとブロックの両方を確実に扱う
+  const normalizedCard = React.useMemo(() => normalizeCard(card), [card]);
+  
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [isReferencePopupOpen, setIsReferencePopupOpen] = useState(false);
+
+  // 以下、normalizedCard を使用するように変数を再定義
+  const cardData = normalizedCard;
+
+
+  // 全てのブロックからリファレンスを抽出
+  const allReferences = React.useMemo(() => {
+    const refs: ReferenceBlockData[] = [];
+    const qBlocks: CardBlock[] = card?.questionBlocks ?? [];
+    const aBlocks: CardBlock[] = card?.answerBlocks ?? [];
+    
+    [...qBlocks, ...aBlocks].forEach(block => {
+      if (block.type === 'reference' && block.references) {
+        refs.push(...block.references);
+      }
+    });
+    return refs.filter(r => r.url); // URLがあるもののみ
+  }, [card]);
 
   // 安全なプロパティアクセス（異なる命名規則への対応）
   const isDraft = card?.is_draft ?? card?.isDraft ?? false;
@@ -90,8 +118,63 @@ export function Flashcard({
     .map((image: any) => image?.remoteUrl ?? image?.localUrl ?? image?.url ?? image)
     .filter(Boolean);
 
-  const hasQuestionContent = questionText || questionImageUrls.length > 0 || questionAudios.length > 0 || questionCode?.code;
-  const hasAnswerContent = answerText || answerImageUrls.length > 0 || answerAudios.length > 0 || answerCode?.code;
+  // 判定ロジックの強化：ブロックがあるか、またはレガシーコンテンツがあるか
+  const hasQuestionContent = (cardData.questionBlocks?.length > 0) || questionText || questionImageUrls.length > 0 || questionAudios.length > 0 || questionCode?.code;
+  const hasAnswerContent = (cardData.answerBlocks?.length > 0) || answerText || answerImageUrls.length > 0 || answerAudios.length > 0 || answerCode?.code;
+
+  // ブロックを描画するヘルパー
+  const renderBlocks = (blocks: CardBlock[]) => {
+    if (!blocks || blocks.length === 0) return null;
+    return (
+      <div className="space-y-6 w-full">
+        {blocks.map((block) => (
+          <div key={block.id} className="w-full min-w-0">
+            {block.type === 'text' && block.content && (
+              <div className="w-full max-w-2xl mx-auto text-left">
+                <MathRenderer 
+                  latex={block.content} 
+                  displayMode="inline"
+                  className="text-[clamp(1.125rem,4vw,1.5rem)] md:text-2xl font-medium text-slate-700 leading-relaxed font-serif break-all"
+                />
+              </div>
+            )}
+            {block.type === 'code' && block.code?.code && (
+              <div className="text-left w-full max-w-2xl mx-auto">
+                <CodeRenderer code={block.code.code} language={block.code.language} />
+              </div>
+            )}
+            {block.type === 'image' && block.images && block.images.length > 0 && (
+              <ImageGallery 
+                urls={block.images.map((img: any) => img.remoteUrl || img.localUrl || img.url || img)} 
+                onFullscreenChange={handleGalleryFullscreenChange} 
+              />
+            )}
+            {block.type === 'audio' && block.audios && block.audios.length > 0 && (
+              <div className="flex justify-center">
+                <AudioPlayer urls={block.audios.map((audio: any) => audio.remoteUrl || audio.localUrl || audio.url || audio)} />
+              </div>
+            )}
+            {block.type === 'memo' && block.content && (
+              <div className="p-4 bg-slate-50 rounded-2xl text-sm text-slate-600 text-left whitespace-pre-wrap break-all border border-slate-100/50">
+                 <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Memo</div>
+                 {block.content}
+              </div>
+            )}
+            {block.type === 'math' && block.math && (
+              <div className="py-2 flex justify-center">
+                <MathRenderer 
+                  latex={block.math.latex || ''} 
+                  displayMode={block.math.displayMode || 'block'}
+                  className="text-slate-800"
+                />
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
 
   const handleFlip = (e?: React.MouseEvent) => {
     if (isImageModalOpen) return;
@@ -108,18 +191,45 @@ export function Flashcard({
   if (!card) return <div className="text-center py-12 text-gray-500">No Card Data</div>;
 
   return (
-    <div className={cn("w-full h-full flex flex-col", className)}>
+    <div className={cn("w-full h-full flex flex-col select-none", className)}>
+      {/* カード外ヘッダー（右上要素の移動先） */}
+      <div className="w-full flex justify-end px-2 pb-2 min-h-[40px]">
+        <div className="flex flex-col items-end gap-2">
+             {extraHeaderRight}
+            {isFlipped && !previewMode && (
+                <Button 
+                    variant="ghost" 
+                    className="text-[10px] font-bold tracking-widest text-slate-400 hover:text-slate-600 uppercase flex items-center gap-2 mb-1 bg-slate-50/50 px-3 py-1 rounded-full"
+                    onClick={handleFlip}
+                >
+                    <RotateCcw className="w-3 h-3" />
+                    Back to Question
+                </Button>
+            )}
+            
+            {/* タグ表示 */}
+            {card?.tags && card.tags.length > 0 && (
+                <div className="flex flex-wrap justify-end gap-1.5 animate-in fade-in slide-in-from-right-2 duration-500 delay-150 max-w-[200px] md:max-w-xs">
+                    {card.tags.map((tag: string, i: number) => (
+                         <TagBadge key={i} tag={tag} />
+                    ))}
+                </div>
+            )}
+        </div>
+      </div>
+
       <Card 
         className={cn(
           "min-h-[450px] md:min-h-[600px] border-none shadow-[0_4px_30px_-8px_rgba(0,0,0,0.08)] rounded-[32px] md:rounded-[40px] bg-white flex flex-col relative overflow-hidden transition-all duration-300 ring-1 ring-slate-100",
-          !previewMode && "cursor-pointer hover:shadow-[0_8px_40px_-12px_rgba(0,0,0,0.12)]"
+          !previewMode && "hover:shadow-[0_8px_40px_-12px_rgba(0,0,0,0.12)]",
+          "cursor-pointer"
         )}
-        onClick={!previewMode ? handleFlip : undefined}
+        onClick={handleFlip}
       >
-        <CardContent className="p-6 md:p-10 flex-1 flex flex-col relative">
+        <CardContent className="p-1 md:p-2 flex-1 flex flex-col relative">
           
           {/* 左上：曖昧・編集・ブックマークボタン */}
-          <div className="absolute top-6 md:top-8 left-6 md:top-8 md:left-8 flex gap-2 md:gap-3 z-10">
+          <div className="absolute top-2 md:top-3 left-2 md:left-3 flex gap-2 md:gap-3 z-10">
              {extraHeaderLeft}
              <Button
                 variant={hasUncertainty ? "default" : "ghost"}
@@ -129,10 +239,10 @@ export function Flashcard({
                     if(onToggleUncertainty) onToggleUncertainty(card);
                 }}
                 className={cn(
-                    "rounded-full w-10 h-10 md:w-12 md:h-12 transition-colors",
+                    "rounded-full w-9 h-9 md:w-11 md:h-11 transition-colors",
                     hasUncertainty 
                         ? "bg-amber-400 hover:bg-amber-500 text-white shadow-md border-none" 
-                        : "bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-600 border border-transparent"
+                        : "bg-slate-50/80 text-slate-400 hover:bg-slate-100 hover:text-slate-600 border border-transparent"
                 )}
                 title="曖昧/要復習"
              >
@@ -147,10 +257,10 @@ export function Flashcard({
                     if(onToggleBookmark) onToggleBookmark(card);
                 }}
                 className={cn(
-                    "rounded-full w-10 h-10 md:w-12 md:h-12 transition-colors",
+                    "rounded-full w-9 h-9 md:w-11 md:h-11 transition-colors",
                     isBookmarked 
                         ? "bg-primary-600 hover:bg-primary-700 text-white shadow-md border-none" 
-                        : "bg-slate-50 text-slate-400 hover:bg-primary-600/10 hover:text-primary-600 border border-transparent"
+                        : "bg-slate-50/80 text-slate-400 hover:bg-primary-600/10 hover:text-primary-600 border border-transparent"
                 )}
                 title="ブックマーク"
              >
@@ -165,7 +275,7 @@ export function Flashcard({
                         e.stopPropagation();
                         onEdit(card);
                     }}
-                    className="rounded-full w-10 h-10 md:w-12 md:h-12 bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+                    className="rounded-full w-9 h-9 md:w-11 md:h-11 bg-slate-50/80 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
                     title="編集"
                 >
                     <Pencil className="w-5 h-5 md:w-5 md:h-5 scale-90 md:scale-100" />
@@ -173,121 +283,140 @@ export function Flashcard({
              )}
           </div>
           
-          {/* 右上：タグ & 表面へ戻る & 追加要素 */}
-          <div className="absolute top-6 md:top-8 right-6 md:right-8 z-10 flex flex-col items-end gap-2">
-             {extraHeaderRight}
-            {isFlipped && (
-                <Button 
-                    variant="ghost" 
-                    className="text-[10px] font-bold tracking-widest text-slate-300 hover:text-slate-500 uppercase flex items-center gap-2 mb-2"
-                    onClick={handleFlip}
-                >
-                    <RotateCcw className="w-3 h-3" />
-                    Back to Question
-                </Button>
-            )}
-            
-            {/* タグ表示 */}
-            {card?.tags && card.tags.length > 0 && (
-                <div className="flex flex-wrap justify-end gap-2 animate-in fade-in slide-in-from-right-2 duration-500 delay-150 max-w-[300px]">
-                    {card.tags.map((tag: string, i: number) => (
-                         <TagBadge key={i} tag={tag} />
-                    ))}
-                </div>
-            )}
-          </div>
+
+          {/* 右上：タグ & 表面へ戻る & 追加要素（削除：カード外へ移動） */}
+
 
           {/* コンテンツエリア - 中央配置 */}
-          <div className="flex-1 flex flex-col items-center justify-center text-center max-w-2xl mx-auto w-full py-12">
-            
-            {/* 回答表示状態 */}
+          <div className="flex-1 flex flex-col items-center justify-center text-center max-w-none mx-auto w-full py-8">
             {isFlipped ? (
-                <div className="animate-in fade-in zoom-in-95 duration-300 w-full">
-                  <Badge variant="outline" className="mb-6 border-primary-600 text-primary-600 bg-primary-600/5 px-4 py-1.5 rounded-full mx-auto w-fit block">
-                    ANSWER
-                  </Badge>
-                  
-                  {answerText && (
-                    <MathRenderer 
-                      content={answerText} 
-                      className="text-[clamp(1.125rem,4vw,1.5rem)] md:text-2xl font-medium text-slate-800 leading-relaxed font-serif"
-                    />
-                  )}
-                  
-                  {answerCode?.code && (
-                    <div className="mt-6 w-full text-left">
-                        <CodeRenderer code={answerCode.code} language={answerCode.language} />
+                /* 回答表示状態 */
+                <div className="animate-in fade-in zoom-in-95 duration-300 w-full px-2">
+                  {cardData.answerBlocks?.length > 0 ? (
+                    <div className="w-full min-w-0">
+                      {renderBlocks(cardData.answerBlocks)}
                     </div>
-                  )}
+                  ) : (
+                    <div className="space-y-4">
+                      {answerText && (
+                        <div className="w-full max-w-2xl mx-auto text-left">
+                            <MathRenderer 
+                            latex={answerText} 
+                            displayMode="inline"
+                            className="text-[clamp(1.125rem,4vw,1.5rem)] md:text-2xl font-medium text-slate-800 leading-relaxed font-serif break-all"
+                            />
+                        </div>
+                      )}
+                      
+                      {answerCode?.code && (
+                        <div className="mt-4 w-full max-w-2xl mx-auto text-left">
+                            <CodeRenderer code={answerCode.code} language={answerCode.language} />
+                        </div>
+                      )}
 
-                  <div className="mt-8 w-full">
-                     <ImageGallery urls={answerImageUrls} onFullscreenChange={handleGalleryFullscreenChange} />
-                  </div>
-                  
-                  <div className="mt-4 flex justify-center">
-                     <AudioPlayer urls={answerAudios} />
-                  </div>
+                      <div className="mt-6 w-full">
+                        <ImageGallery urls={answerImageUrls} onFullscreenChange={handleGalleryFullscreenChange} />
+                      </div>
+                      
+                      <div className="mt-4 flex justify-center">
+                        <AudioPlayer urls={answerAudios} />
+                      </div>
 
-                  {answerMemo && (
-                    <div className="mt-8 p-4 bg-slate-50 rounded-2xl text-sm text-slate-600 text-left whitespace-pre-wrap break-words max-h-[300px] overflow-y-auto w-full border border-slate-100/50">
-                        <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Memo</div>
-                        {answerMemo}
+                      {answerMemo && (
+                        <div className="mt-6 p-4 bg-slate-50 rounded-2xl text-sm text-slate-600 text-left whitespace-pre-wrap break-all max-h-[300px] overflow-y-auto w-full border border-slate-100/50 max-w-2xl mx-auto">
+                            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Memo</div>
+                            {answerMemo}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
             ) : (
-                /* 問題表示状態 */
-                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
-                  {questionText ? (
-                    <MathRenderer 
-                      content={questionText} 
-                      className="text-[clamp(1.125rem,4vw,1.5rem)] md:text-2xl font-medium text-slate-700 leading-relaxed font-serif"
-                    />
-                  ) : (
-                    !hasQuestionContent && <span className="text-slate-300 italic">No question content</span>
-                  )}
-                  
-                  {questionCode?.code && (
-                    <div className="mt-6 w-full text-left">
-                        <CodeRenderer code={questionCode.code} language={questionCode.language} />
-                    </div>
-                  )}
+                /* 質問表示状態 */
+                <div className="animate-in fade-in zoom-in-95 duration-300 w-full px-2">
+                  <div className="space-y-4 w-full">
+                    
+                    {cardData.questionBlocks?.length > 0 ? (
+                        <div className="w-full min-w-0">
+                            {renderBlocks(cardData.questionBlocks)}
+                        </div>
+                    ) : (
+                        <div className="space-y-4 min-w-0">
+                            {questionText && (
+                                <div className="w-full max-w-2xl mx-auto text-left">
+                                    <MathRenderer 
+                                        latex={questionText} 
+                                        displayMode="inline"
+                                        className="text-[clamp(1.125rem,4vw,1.825rem)] md:text-3xl font-bold text-slate-800 leading-tight tracking-tight font-serif break-all"
+                                    />
+                                </div>
+                            )}
+                            
+                            {questionCode?.code && (
+                                <div className="mt-4 w-full max-w-2xl mx-auto text-left">
+                                    <CodeRenderer code={questionCode.code} language={questionCode.language} />
+                                </div>
+                            )}
 
-                  <div className="mt-8 w-full">
-                     <ImageGallery urls={questionImageUrls} onFullscreenChange={handleGalleryFullscreenChange} />
-                  </div>
-                  
-                  <div className="mt-4 flex justify-center">
-                      <AudioPlayer urls={questionAudios} />
-                  </div>
+                            <div className="mt-6 w-full">
+                                <ImageGallery urls={questionImageUrls} onFullscreenChange={handleGalleryFullscreenChange} />
+                            </div>
+                            
+                            <div className="mt-4 flex justify-center">
+                                <AudioPlayer urls={questionAudios} />
+                            </div>
 
-                  {questionMemo && (
-                    <div className="mt-8 p-4 bg-slate-50 rounded-2xl text-sm text-slate-600 text-left whitespace-pre-wrap break-words max-h-[300px] overflow-y-auto w-full border border-slate-100/50">
-                        <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Memo</div>
-                        {questionMemo}
-                    </div>
-                  )}
+                            {questionMemo && (
+                                <div className="mt-6 p-4 bg-slate-50 rounded-2xl text-sm text-slate-600 text-left whitespace-pre-wrap break-all max-h-[300px] overflow-y-auto w-full border border-slate-100/50 max-w-2xl mx-auto">
+                                    <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Memo</div>
+                                    {questionMemo}
+                                </div>
+                            )}
+                        </div>
+                    )}
+                  </div>
                 </div>
             )}
           </div>
-          
+
           {/* フッターエリア */}
-          <div className="mt-auto pt-8 border-t border-slate-50 text-center">
+          <div className="mt-auto pt-4 text-center">
              {extraFooter}
              {!isFlipped && !previewMode && (
                  <p className="text-sm text-slate-400 animate-pulse">Click card to reveal answer</p>
              )}
              {previewMode && (
                 <div className="flex gap-4 justify-center">
-                    <Button variant="outline" size="sm" onClick={handleFlip}>
-                        {isFlipped ? "問題を表示" : "答えを表示"}
-                    </Button>
+                    {/* ボタン削除 */}
                 </div>
              )}
           </div>
+          
+          {/* 参考リンクインジケータ (右下) */}
+          {allReferences.length > 0 && (
+            <div className="absolute bottom-1.5 right-1.5 md:bottom-2 md:right-2 z-10">
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsReferencePopupOpen(true);
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-600 text-white shadow-[0_2px_0_#1e293b] active:shadow-none active:translate-y-[2px] transition-all hover:bg-primary-500 hover:shadow-[0_2px_0_#1e293b]"
+                title="参考リンクを表示"
+              >
+                <LinkIcon className="w-3.5 h-3.5 stroke-[2.5]" />
+                <span className="text-[11px] font-bold">x{allReferences.length}</span>
+              </button>
+            </div>
+          )}
 
         </CardContent>
       </Card>
+
+      <ReferencePopup 
+        isOpen={isReferencePopupOpen}
+        onClose={() => setIsReferencePopupOpen(false)}
+        references={allReferences}
+      />
 
       {/* ナビゲーション（オプション） */}
       {(onNext || onPrev || (currentIndex !== undefined && totalCards !== undefined)) && (

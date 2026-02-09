@@ -5,7 +5,25 @@ import { assertImageArrayInvariant } from '../utils/imageAssertions';
 import Dexie from 'dexie';
 import { nanoid } from 'nanoid';
 import { Timestamp } from 'firebase/firestore';
-import type { Folder, Card, User, UserSettings, UserStats, SyncMetadata, SyncError, SyncHistory, SyncSettings, SyncQueueItem, SyncConflict, UploadedImage, CardRelation, ProjectMap } from '../types';
+
+import type {
+  Folder,
+  Card,
+  Document, // ✅追加（types側で export したエイリアス）
+  User,
+  UserSettings,
+  UserStats,
+  SyncMetadata,
+  SyncError,
+  SyncHistory,
+  SyncSettings,
+  SyncQueueItem,
+  SyncConflict,
+  UploadedImage,
+  CardRelation,
+  ProjectMap
+} from '../types';
+
 
 const denormalizeCardForStorage = (card: any) => {
   if (!card) return card;
@@ -17,13 +35,6 @@ const denormalizeCardForStorage = (card: any) => {
     // 元々 null/undefined/空 の場合のみ上書きする（または常に同期するか検討）
     // 設計方針に従い、常にブロックから同期してデータの整合性を保つ
     result.questionText = extractedQ;
-    
-    // タイトルの同期・補完
-    if (!card.title || card.title === '無題のカード') {
-      if (extractedQ) {
-        result.title = extractedQ.length > 20 ? extractedQ.substring(0, 20) + '...' : extractedQ;
-      }
-    }
   }
 
   if (card.answerBlocks !== undefined) {
@@ -107,27 +118,36 @@ export class LocalDB extends Dexie {
   // テーブルの型定義
   folders!: Dexie.Table<Folder, string>;
   cards!: Dexie.Table<Card, string>;
+
+  // ✅ PDF/Document テーブル（テーブル名は documents で統一）
+  documents!: Dexie.Table<Document, string>;
+
   users!: Dexie.Table<User, string>;
   userSettings!: Dexie.Table<UserSettings, string>;
   userStats!: Dexie.Table<UserStats, string>;
-  syncMetadata!: Dexie.Table<SyncMetadata, string>;
+  // ✅ typo修正: Tabel -> Table
+  syncMetadata!: Dexie.Table<SyncMetadata, string>; // ✅ Table のtypo修正
   levelHistories!: Dexie.Table<any, string>;
   deviceMeta!: Dexie.Table<any, string>;
-  
+
   // 同期システム高度化テーブル
   syncErrors!: Dexie.Table<SyncError, string>;
   syncHistory!: Dexie.Table<SyncHistory, string>;
   syncSettings!: Dexie.Table<SyncSettings, string>;
   syncQueue!: Dexie.Table<SyncQueueItem, string>;
   conflicts!: Dexie.Table<SyncConflict, string>;
-  
+
   // ブラウザストレージ設計準拠テーブル
   metadata!: Dexie.Table<any, string>; // IndexedDB 健全性管理用
   images!: Dexie.Table<UploadedImage, string>; // 画像・音声のメタデータ管理用
-  
+
   // Phase 3: Map Feature
   cardRelations!: Dexie.Table<CardRelation, string>;
   projectMaps!: Dexie.Table<ProjectMap, string>;
+
+  // Tags (Legacy + V2)
+  tags!: Dexie.Table<{ name: string; color: string; userId: string; rootFolderId: string; updatedAt: Date }, [string, string]>;
+  tags_v2!: Dexie.Table<{ name: string; color: string; userId: string; rootFolderId: string; updatedAt: Date }, [string, string]>;
 
   // Public userId for global access
   public userId?: string;
@@ -239,6 +259,7 @@ export class LocalDB extends Dexie {
     sourceDb.version(1).stores({
       folders: 'id',
       cards: 'id',
+      documents: 'id',
       users: 'id',
       userSettings: 'id',
       userStats: 'id',
@@ -268,21 +289,21 @@ export class LocalDB extends Dexie {
       };
 
       // 2. Read all data
-      const [folders, cards, userSettings, userStats, levelHistories, syncSettings, tags, studyLogs, cardRelations, projectMaps] = await Promise.all([
+      const [folders, cards, documents, userSettings, userStats, levelHistories, syncSettings, tags, studyLogs, cardRelations, projectMaps] = await Promise.all([
         safeRead('folders'),
         safeRead('cards'),
+        safeRead('documents'),
         safeRead('userSettings'),
         safeRead('userStats'),
         safeRead('levelHistories'),
         safeRead('syncSettings'),
-        safeRead('tags'),
         safeRead('tags'),
         safeRead('studyLogs'),
         safeRead('cardRelations'),
         safeRead('projectMaps'),
       ]);
       
-      console.log(`[Rescue] Found: ${folders.length} folders, ${cards.length} cards, ${cardRelations.length} relations`);
+      console.log(`[Rescue] Found: ${folders.length} folders, ${cards.length} cards, ${documents.length} documents, ${cardRelations.length} relations`);
 
       // 3. Transform and Insert into current DB
       
@@ -316,6 +337,25 @@ export class LocalDB extends Dexie {
         });
         await this.cards.bulkPut(newCards);
       }
+
+
+      // Documents (PDF)
+      if (documents.length > 0) {
+        const newDocs = documents.map((d: any) => {
+          const id = d.id || d.documentId || d.docId || crypto.randomUUID();
+          return {
+            ...d,
+            id,
+            userId: currentUserId,
+            folderId: d.folderId || d.folder_id || 'RESCUE_ORPHANS_FOLDER',
+            updatedAt: rescueTime,
+            isDeleted: d.isDeleted ?? d.is_deleted ?? false,
+            _rescueOrigin: sourceDbName,
+          };
+        });
+        await this.documents.bulkPut(newDocs);
+      }
+
       
       // User Stats (Streaks etc)
       if (userStats.length > 0) {
@@ -428,7 +468,7 @@ export class LocalDB extends Dexie {
   }
 
   // Tags
-  tags!: Dexie.Table<{ name: string; color: string; userId: string; rootFolderId: string; updatedAt: Date }, [string, string]>;
+  // tags property definition removed (duplicate)
 
   /**
    * Firestore SDKの内部データベースからキャッシュされているドキュメントを抽出します
@@ -443,6 +483,8 @@ export class LocalDB extends Dexie {
     console.log(`[Rescue] Attempting Raw Native Extraction: ${sourceDbName}`);
     onProgress?.('ネイティブ接続を試行中...');
     
+    let nativeDb: IDBDatabase | null = null;
+
     return new Promise((resolve, reject) => {
       const rescueTime = new Date();
       const recoveredFolders: any[] = [];
@@ -462,7 +504,8 @@ export class LocalDB extends Dexie {
 
        request.onsuccess = async () => {
          clearTimeout(timeout);
-         const db = request.result;
+         nativeDb = request.result;
+         const db = nativeDb;
          try {
            const tableNames = Array.from(db.objectStoreNames);
            console.log(`[Rescue] Native Tables: ${tableNames.join(', ')}`);
@@ -472,7 +515,7 @@ export class LocalDB extends Dexie {
            const targetTable = tableNames.find(n => n.startsWith('remoteDocuments'));
            if (!targetTable) {
              onProgress?.('対象テーブルが見つかりません (Native)');
-             db.close();
+             try { nativeDb?.close(); } catch {}
              return resolve({ cards: 0, folders: 0, firstCardKeys: [] });
            }
 
@@ -582,17 +625,17 @@ export class LocalDB extends Dexie {
                this.finalizeRawImport(recoveredFolders, recoveredCards, currentUserId, onProgress)
                  .then(resolve)
                  .catch(reject)
-                 .finally(() => db.close());
+                 .finally(() => { try { nativeDb?.close(); } catch {} });
              }
            };
 
            cursorRequest.onerror = () => {
-               db.close();
+               try { nativeDb?.close(); } catch {}
                reject(new Error('Cursor error'));
            };
 
          } catch (err) {
-           db.close();
+           try { nativeDb?.close(); } catch {}
            reject(err);
          }
        };
@@ -874,14 +917,18 @@ export class LocalDB extends Dexie {
     return { folders: folderUpdates.length, cards: cardUpdates.length, canonicalId };
   }
 
-  constructor(userId?: string) {
-    // Prevent direct construction from browser code; enforce using getLocalDb()/initializeDB()
+  private static instance: LocalDB | null = null;
+  private static currentUserId: string | null = null;
+  private static isInitializing = false;
+
+  private constructor(userId?: string) {
+    // Prevent direct construction from browser code; enforce using LocalDB.getInstance()
     if (typeof window !== 'undefined') {
       try {
         const allow = (globalThis as any).__ALLOW_LOCAL_DB_CONSTRUCTION;
         if (!allow) {
-          console.error('[LocalDB] Direct construction forbidden in browser. Use getLocalDb()/initializeDB() instead.');
-          throw new Error('Direct LocalDB construction forbidden in browser. Use getLocalDb()/initializeDB() instead.');
+          console.error('[LocalDB] Direct construction forbidden in browser. Use LocalDB.getInstance() instead.');
+          throw new Error('Direct LocalDB construction forbidden in browser. Use LocalDB.getInstance() instead.');
         }
       } finally {
         // clear the flag to avoid accidental reuse
@@ -897,7 +944,7 @@ export class LocalDB extends Dexie {
     try {
       console.log('[LocalDB] constructor created', { name: this.name, userId: this.userId });
       // include stack to help locate call sites that create instances
-      console.log(new Error('[LocalDB] constructor stack').stack);
+      console.debug('[LocalDB] constructor stack (info only):', new Error().stack);
     } catch (e) {
       // swallow logging errors to avoid interfering with initialization
     }
@@ -1119,6 +1166,124 @@ export class LocalDB extends Dexie {
       cardRelations: 'id, userId, fromCardId, toCardId, updatedAt, [userId+updatedAt]',
       projectMaps: 'id, userId, folderId, updatedAt, [userId+updatedAt]',
     });
+
+    // Version 16: Globalize tags (Unified across all folders)
+    this.version(16).stores({
+      folders: 'id, userId, parentFolderId, updatedAt, cloudSyncEnabled, isDeleted, [userId+updatedAt], [userId+isDeleted]',
+      cards: 'id, userId, folderId, updatedAt, nextReviewDate, isDeleted, [userId+updatedAt], [userId+isDeleted]',
+      users: 'id, userId, updatedAt',
+      userSettings: 'id, userId, updatedAt, isDeleted, [userId+updatedAt]',
+      userStats: 'id, userId, updatedAt, isDeleted, [userId+updatedAt]',
+      syncMetadata: 'userId, deviceId',
+      levelHistories: 'id, userId, cardId, changedAt',
+      deviceMeta: 'deviceId, userId',
+      syncErrors: 'id, occurredAt, phase, retryable',
+      syncHistory: 'id, finishedAt',
+      syncSettings: 'id',
+      syncQueue: 'id, targetId, status, priority, [status+priority], [targetId+status], idempotencyKey, &migrationKey', 
+      conflicts: 'id, entityId',
+      tags: '[rootFolderId+name], rootFolderId, userId, updatedAt', // 🛠️ Reverted PK to fix Dexie UpgradeError
+      tags_v2: '[userId+name], userId, updatedAt', // 🚀 NEW Global Tags table
+      studyLogs: 'id, userId, cardId, studiedAt',
+      metadata: 'key',
+      images: 'id, userId, status, [userId+status]',
+      cardRelations: 'id, userId, fromCardId, toCardId, updatedAt, [userId+updatedAt]',
+      projectMaps: 'id, userId, folderId, updatedAt, [userId+updatedAt]',
+    }).upgrade(async tx => {
+      // Tag consolidation migration: old tags -> tags_v2
+      const oldTags = await tx.table('tags').toArray();
+      if (oldTags.length === 0) return;
+
+      const consolidatedMap = new Map<string, any>();
+      oldTags.forEach(tag => {
+          const key = `${tag.userId}_${tag.name}`;
+          const existing = consolidatedMap.get(key);
+          if (!existing || new Date(tag.updatedAt) > new Date(existing.updatedAt)) {
+              consolidatedMap.set(key, { ...tag, rootFolderId: 'GLOBAL' });
+          }
+      });
+
+      // Clear new table first if it's already used or for safety
+      await tx.table('tags_v2').clear();
+      await tx.table('tags_v2').bulkAdd(Array.from(consolidatedMap.values()));
+      console.log(`[Migration] Consolidated ${oldTags.length} tags into ${consolidatedMap.size} global tags in tags_v2.`);
+    });
+
+    // Version 17: Documents (PDF) support
+    this.version(17).stores({
+      folders: 'id, userId, parentFolderId, updatedAt, cloudSyncEnabled, isDeleted, [userId+updatedAt], [userId+isDeleted]',
+      cards: 'id, userId, folderId, updatedAt, nextReviewDate, isDeleted, difficulty, reviewCount, [userId+updatedAt], [userId+isDeleted], [userId+nextReviewDate]',
+      documents: 'id, userId, folderId, updatedAt, isDeleted, [userId+updatedAt], [userId+folderId]', // ✅追加
+      users: 'id, userId, updatedAt',
+      userSettings: 'id, userId, updatedAt, isDeleted, [userId+updatedAt]',
+      userStats: 'id, userId, updatedAt, isDeleted, [userId+updatedAt]',
+      syncMetadata: 'userId, deviceId',
+      levelHistories: 'id, userId, cardId, changedAt',
+      deviceMeta: 'deviceId, userId',
+      syncErrors: 'id, occurredAt, phase, retryable',
+      syncHistory: 'id, finishedAt',
+      syncSettings: 'id',
+      syncQueue: 'id, targetId, status, priority, [status+priority], [targetId+status], idempotencyKey, &migrationKey',
+      conflicts: 'id, entityId',
+      tags: '[rootFolderId+name], rootFolderId, userId, updatedAt',
+      tags_v2: '[userId+name], userId, updatedAt',
+      studyLogs: 'id, userId, cardId, studiedAt',
+      metadata: 'key',
+      images: 'id, userId, status, [userId+status]',
+      cardRelations: 'id, userId, fromCardId, toCardId, updatedAt, [userId+updatedAt]',
+      projectMaps: 'id, userId, folderId, updatedAt, [userId+updatedAt]',
+    }).upgrade(async tx => {
+      // 既存カードに difficulty / reviewCount が無い場合は補完する（破壊的変更なし）
+      const cards = tx.table('cards');
+
+      await cards.toCollection().modify((c: any) => {
+        if (typeof c.difficulty !== 'number' || !Number.isFinite(c.difficulty)) {
+          c.difficulty = 0.35; // 初期値（安全寄り）
+        } else {
+          // clamp 0..1
+          c.difficulty = Math.max(0, Math.min(1, c.difficulty));
+        }
+
+        if (typeof c.reviewCount !== 'number' || !Number.isFinite(c.reviewCount)) {
+          c.reviewCount = c.review_count ?? 0;
+        }
+      });
+    });
+
+    // Version 18: cards difficulty / reviewCount index追加（正しいマイグレーション）
+    this.version(18).stores({
+      folders: 'id, userId, parentFolderId, updatedAt, cloudSyncEnabled, isDeleted, [userId+updatedAt], [userId+isDeleted]',
+      cards: 'id, userId, folderId, updatedAt, nextReviewDate, isDeleted, difficulty, reviewCount, [userId+updatedAt], [userId+isDeleted], [userId+nextReviewDate]',
+      documents: 'id, userId, folderId, updatedAt, isDeleted, [userId+updatedAt], [userId+folderId]',
+      users: 'id, userId, updatedAt',
+      userSettings: 'id, userId, updatedAt, isDeleted, [userId+updatedAt]',
+      userStats: 'id, userId, updatedAt, isDeleted, [userId+updatedAt]',
+      syncMetadata: 'userId, deviceId',
+      levelHistories: 'id, userId, cardId, changedAt',
+      deviceMeta: 'deviceId, userId',
+      syncErrors: 'id, occurredAt, phase, retryable',
+      syncHistory: 'id, finishedAt',
+      syncSettings: 'id',
+      syncQueue: 'id, targetId, status, priority, [status+priority], [targetId+status], idempotencyKey, &migrationKey',
+      conflicts: 'id, entityId',
+      tags: '[rootFolderId+name], rootFolderId, userId, updatedAt',
+      tags_v2: '[userId+name], userId, updatedAt',
+      studyLogs: 'id, userId, cardId, studiedAt',
+      metadata: 'key',
+      images: 'id, userId, status, [userId+status]',
+      cardRelations: 'id, userId, fromCardId, toCardId, updatedAt, [userId+updatedAt]',
+      projectMaps: 'id, userId, folderId, updatedAt, [userId+updatedAt]',
+    }).upgrade(async tx => {
+      const cards = tx.table('cards');
+      await cards.toCollection().modify((c: any) => {
+        if (typeof c.difficulty !== 'number' || !Number.isFinite(c.difficulty)) c.difficulty = 0.35;
+        c.difficulty = Math.max(0, Math.min(1, c.difficulty));
+        if (typeof c.reviewCount !== 'number' || !Number.isFinite(c.reviewCount)) {
+          c.reviewCount = c.review_count ?? 0;
+        }
+      });
+    });
+
   }
 
   async getItem(table: string, id: string): Promise<any> {
@@ -1151,6 +1316,9 @@ export class LocalDB extends Dexie {
       console.error('[Diagnostic] CRITICAL: addItem called on non-LocalDB instance!', this);
     }
     console.log(`[LocalDB] addItem START -> table=${table} id=${payload.id ?? '<generated>'} skipSync=${skipSync}`);
+    if (table === 'cards') {
+      console.log(`[LocalDB] addItem CARD_CONTENT -> Q_Blocks=${payload.questionBlocks?.length ?? 0}, A_Blocks=${payload.answerBlocks?.length ?? 0}, Q_Text="${payload.questionText?.substring(0, 30)}..."`);
+    }
     try {
       const id = await (this as any).table(table).add(payload);
       // Immediately verify the saved record is readable from THIS instance.
@@ -1188,6 +1356,10 @@ export class LocalDB extends Dexie {
   async updateItem(table: string, id: string, changes: object, skipSync = false): Promise<number> {
     const payload = table === 'cards' ? denormalizeCardForStorage(changes) : table === 'folders' ? denormalizeFolderForStorage(changes) : changes;
     console.log(`[LocalDB] updateItem -> table=${table} id=${id} skipSync=${skipSync} changesKeys=${Object.keys(changes).join(',')}`);
+    if (table === 'cards') {
+      const c = payload as any;
+      console.log(`[LocalDB] updateItem CARD_CHANGES -> Q_Blocks=${c.questionBlocks?.length}, A_Blocks=${c.answerBlocks?.length}, hasQText=${!!c.questionText}`);
+    }
     const result = await (this as any).table(table).update(id, payload);
     
     // 変更後の全データを取得してエンキュー
@@ -1237,9 +1409,9 @@ export class LocalDB extends Dexie {
   }
 
   async getAllCards(): Promise<Card[]> {
-  // Return raw objects to preserve _rescueRaw and other fields for integrity repair
-  return await this.cards.toArray() as Card[];
-}
+    // Return raw objects to preserve _rescueRaw and other fields for integrity repair
+    return await this.cards.toArray() as Card[];
+  }
 
   async getAllFolders(): Promise<Folder[]> {
     const folders = await this.folders.toArray();
@@ -1272,13 +1444,25 @@ export class LocalDB extends Dexie {
 
   async clearAllData(): Promise<void> {
     await Promise.all([
-      this.folders.clear(), this.cards.clear(), this.users.clear(), this.userSettings.clear(), 
-      this.userStats.clear(), this.syncMetadata.clear(), this.levelHistories.clear(), 
-      this.deviceMeta.clear(), this.syncErrors.clear(), this.syncHistory.clear(), 
-      this.syncSettings.clear(), this.syncQueue.clear(), this.conflicts.clear(), 
-      (this as any).tags.clear(), (this as any).table('studyLogs').clear(),
+      this.folders.clear(),
+      this.cards.clear(),
+      this.documents.clear(), 
+      this.users.clear(),
+      this.userSettings.clear(),
+      this.userStats.clear(),
+      this.syncMetadata.clear(),
+      this.levelHistories.clear(),
+      this.deviceMeta.clear(),
+      this.syncErrors.clear(),
+      this.syncHistory.clear(),
+      this.syncSettings.clear(),
+      this.syncQueue.clear(),
+      this.conflicts.clear(),
+      (this as any).tags.clear(),
+      (this as any).table('studyLogs').clear(),
     ]);
   }
+
 
   async cleanupSyncHistory(): Promise<void> {
     const now = Date.now();
@@ -1352,15 +1536,15 @@ export class LocalDB extends Dexie {
     // 既に同じIDのタスクが pending で存在する場合は上書きを検討すべきだが、
     // シンプルにするため毎回追加（QueueManager が適切に処理することを期待）
     const now = Date.now();
-    const task: any = {
+    const task: SyncQueueItem = {
       id: nanoid(),
       idempotencyKey: nanoid(),
-      targetId: payload.id, // バージョン15のインデックス用
-      type,
-      operationType: type === 'upload' ? 'update' : 'update', // 簡易的に update として扱う（CloudAdapter側で吸収可能）
-      entity: entityNameMap[tableName],
+      targetId: payload.id, 
+      type, // 'upload' | 'download'
+      entity: entityNameMap[tableName] as any,
+      operationType: type === 'upload' ? 'update' : 'create', // CloudAdapter側で吸収可能
       payload,
-      priority: 'normal',
+      priority: 'high', // 既存の 'normal' を 'high' にマッピング
       createdAt: now,
       updatedAt: now,
       status: 'pending',
@@ -1385,41 +1569,130 @@ export class LocalDB extends Dexie {
       console.warn('[Diagnostic] enqueueSync -> No syncTrigger registered!');
     }
   }
-}
 
-let _localDb: LocalDB | null = null;
-export function getLocalDb(): LocalDB {
-  if (!_localDb) {
+  static async getInstance(userId?: string): Promise<LocalDB> {
+    // 初期化中の場合は待機
+    while (LocalDB.isInitializing) {
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+
+    const newUserId = userId || 'anonymous';
+    
+    try {
+      LocalDB.isInitializing = true;
+
+      if (LocalDB.instance && LocalDB.currentUserId !== newUserId) {
+        console.log(`[LocalDB] Switching DB from ${LocalDB.currentUserId} to ${newUserId}`);
+        if (LocalDB.instance.isOpen()) {
+          await LocalDB.instance.close();
+        }
+        LocalDB.instance = null;
+        LocalDB.currentUserId = null;
+      }
+      
+      if (!LocalDB.instance) {
+        console.log(`[LocalDB] Creating new instance for ${newUserId}`);
+        LocalDB.instance = LocalDB.internalCreate(newUserId);
+        LocalDB.currentUserId = newUserId;
+        
+        // 安全なオープン処理
+        if (!LocalDB.instance.isOpen()) {
+          await LocalDB.instance.open();
+        }
+      }
+      
+      // グローバルデバッグ変数は削除（直接参照は `getLocalDb()` を使用）
+      
+      return LocalDB.instance;
+    } catch (error) {
+      console.error('[LocalDB] getInstance failed:', error);
+      // エラー時は状態をリセット
+      LocalDB.instance = null;
+      LocalDB.currentUserId = null;
+      throw error;
+    } finally {
+      LocalDB.isInitializing = false;
+    }
+  }
+
+  static getInstanceUserId(): string | null {
+    return LocalDB.currentUserId;
+  }
+
+  /**
+   * シングルトンインスタンスを明示的に破棄します。
+   * DBのリビルド時やユーザー切り替え時に、古い接続を完全に閉じるために使用します。
+   */
+  static clearInstance() {
+    if (LocalDB.instance) {
+      try {
+        if (LocalDB.instance.isOpen()) {
+          LocalDB.instance.close();
+        }
+        console.log(`[LocalDB] Instance for ${LocalDB.currentUserId} cleared via clearInstance()`);
+      } catch (e) {
+        console.error('[LocalDB] Error closing instance during clear:', e);
+      } finally {
+        LocalDB.instance = null;
+        LocalDB.currentUserId = null;
+      }
+    }
+  }
+
+  private static internalCreate(userId?: string): LocalDB {
     try {
       (globalThis as any).__ALLOW_LOCAL_DB_CONSTRUCTION = true;
-      _localDb = new LocalDB();
+      return new LocalDB(userId);
     } finally {
       try { delete (globalThis as any).__ALLOW_LOCAL_DB_CONSTRUCTION; } catch (e) {}
     }
   }
-  return _localDb;
 }
 
-// backward-compatible exported variable
-export let localDb: LocalDB = getLocalDb();
+let cachedInstance: LocalDB | null = null;
+
+/**
+ * データベースインスタンスを非同期で取得します。
+ * (循環参照を避けるため、トップレベルでの呼び出しを禁止しています)
+ */
+export async function getLocalDb(userId?: string): Promise<LocalDB> {
+  if (!cachedInstance || (userId && LocalDB.getInstanceUserId() !== userId)) {
+    cachedInstance = await LocalDB.getInstance(userId);
+  }
+  return cachedInstance;
+}
+
+/**
+ * 下位互換性のための同期取得（非推奨：初期化後にのみ使用可能）
+ */
+export function getLocalDbSync(): LocalDB {
+  if (!cachedInstance) {
+    throw new Error('[LocalDB] Database accessed before async initialization. Use await getLocalDb() first.');
+  }
+  return cachedInstance;
+}
+
 if (typeof window !== 'undefined') {
-  (window as any).dbInstance = localDb;
-}
-let currentInitializedUserId: string | null = null;
-
-export function initializeDB(userId: string): void {
-  if (currentInitializedUserId === userId) return;
+  // Allow overwriting to prevent "Cannot set property... which has only a getter" errors
+  // This supports legacy code or debugging tools that might try to assign to it
   try {
-    (globalThis as any).__ALLOW_LOCAL_DB_CONSTRUCTION = true;
-    _localDb = new LocalDB(userId);
-  } finally {
-    try { delete (globalThis as any).__ALLOW_LOCAL_DB_CONSTRUCTION; } catch (e) {}
+    Object.defineProperty(window, 'dbInstance', {
+      get: () => {
+        try { return getLocalDbSync(); } catch(e) { return null; }
+      },
+      set: (_) => {
+        // No-op setter to handle unexpected assignments without crashing
+        // console.debug('[LocalDB] window.dbInstance setter ignored');
+      },
+      configurable: true
+    });
+  } catch (e) {
+     console.warn('[LocalDB] Failed to define window.dbInstance', e);
   }
-  localDb = _localDb;
-  if (typeof window !== 'undefined') {
-    (window as any).dbInstance = localDb;
-  }
-  currentInitializedUserId = userId;
+}
+
+export async function initializeDB(userId: string): Promise<void> {
+  await getLocalDb(userId);
 }
 
 // DevTools helper: call `dbDebug()` in Console to dump LocalDB and syncQueue
@@ -1427,13 +1700,20 @@ if (typeof window !== 'undefined') {
   (window as any).dbDebug = async () => {
     console.group('--- LocalDB / syncQueue Debug ---');
     try {
-      console.log('DB name:', localDb?.name);
+      const db = await getLocalDb();
+      console.log('DB name:', db?.name);
       console.log('Folders:');
-      try { console.table(await localDb.getAllFolders()); } catch (e) { console.warn('Failed to read folders', e); }
+      try { console.table(await db.getAllFolders()); } catch (e) { console.warn('Failed to read folders', e); }
       console.log('Cards:');
-      try { console.table(await localDb.getAllCards()); } catch (e) { console.warn('Failed to read cards', e); }
+      try { console.table(await db.getAllCards()); } catch (e) { console.warn('Failed to read cards', e); }
       console.log('SyncQueue:');
-      try { console.table(await localDb.syncQueue.toArray()); } catch (e) { console.warn('Failed to read syncQueue', e); }
+      try {
+        const rows = await db.syncQueue.toArray();
+        console.log('syncQueue rows length:', rows?.length);
+        console.table(rows);
+      } catch (e) {
+        console.warn('Failed to read syncQueue', e);
+      }
     } catch (err) {
       console.error('dbDebug error', err);
     } finally {
@@ -1442,12 +1722,12 @@ if (typeof window !== 'undefined') {
   };
 }
 
-// DevTools helper methods that operate on the internal `localDb` instance
+// DevTools helper methods
 if (typeof window !== 'undefined') {
   (window as any).__dbHelpers = {
     addDebugFolder: async (data: any) => {
       try {
-        // Use addItem to ensure enqueueSync is triggered and denormalization runs
+        const db = await getLocalDb();
         const payload = {
           id: data.id || 'debug-folder-' + Date.now(),
           userId: data.userId || ((window as any).auth?.currentUser?.uid === 'string' ? (window as any).auth.currentUser.uid : 'debug-user'),
@@ -1461,7 +1741,7 @@ if (typeof window !== 'undefined') {
           isDeleted: data.isDeleted ?? false
         };
         console.log('[__dbHelpers] addDebugFolder -> payload', payload);
-        const id = await localDb.addItem('folders', payload as any);
+        const id = await db.addItem('folders', payload as any);
         console.log('[__dbHelpers] addDebugFolder SUCCESS id=', id);
         return id;
       } catch (e) {
@@ -1472,6 +1752,6 @@ if (typeof window !== 'undefined') {
     dump: async () => {
       return await (window as any).dbDebug();
     },
-    rawDB: () => localDb
+    rawDB: async () => await getLocalDb()
   };
 }

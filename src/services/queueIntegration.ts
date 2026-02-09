@@ -1,8 +1,8 @@
 // Operation Queue の既存システムへの統合ヘルパー
 // LocalDB との連携を強化
 
-import { OperationQueueService } from './operationQueue';
-import { LocalDB, initializeDB, getLocalDb } from './localDB';
+import { operationQueue } from './operationQueue';
+import { getLocalDb } from './localDB';
 import type { Card, Folder } from '../types';
 
 /**
@@ -11,33 +11,33 @@ import type { Card, Folder } from '../types';
  */
 export class QueueIntegrationService {
   private userId: string;
-  private localDB: LocalDB;
 
   constructor(userId: string) {
     this.userId = userId;
-    initializeDB(userId);
-    this.localDB = getLocalDb();
-  }
-
-  /**
-   * 初期化
-   */
-  async initialize(): Promise<void> {
-    await OperationQueueService.initialize();
   }
 
   /**
    * カード作成（Queue統合版）
    */
   async createCard(cardData: Partial<Card>): Promise<Card> {
+    const db = await getLocalDb(this.userId);
     // 1. ローカルDBに即座に反映（楽観的更新）
-    const localCard = await this.localDB.addCard(cardData as Card);
+    // addItem returns the ID string
+    const id = await db.addItem('cards', cardData as Card);
+    const localCard = await db.cards.get(id);
+
+    if (!localCard) {
+      throw new Error('Failed to create local card');
+    }
 
     // 2. Operation Queueに追加（バックグラウンド同期）
-    await OperationQueueService.enqueue('createCard', {
-      ...cardData,
-      localId: localCard.id, // ローカルIDを紐付け
-    });
+    await operationQueue.enqueueChange(
+      'card',
+      localCard.id,
+      'create',
+      localCard,
+      'medium'
+    );
 
     return localCard;
   }
@@ -46,27 +46,39 @@ export class QueueIntegrationService {
    * カード更新（Queue統合版）
    */
   async updateCard(cardId: string, updates: Partial<Card>): Promise<void> {
+    const db = await getLocalDb(this.userId);
     // 1. ローカルDBに即座に反映
-    await this.localDB.updateCard(cardId, updates);
+    await db.updateItem('cards', cardId, updates);
 
     // 2. Operation Queueに追加
-    await OperationQueueService.enqueue('updateCard', {
-      cardId,
-      ...updates,
-    });
+    const updated = await db.cards.get(cardId);
+    if (updated) {
+      await operationQueue.enqueueChange(
+        'card',
+        cardId,
+        'update',
+        updated,
+        'medium'
+      );
+    }
   }
 
   /**
    * カード削除（Queue統合版）
    */
   async deleteCard(cardId: string): Promise<void> {
+    const db = await getLocalDb(this.userId);
     // 1. ローカルDBに即座に反映
-    await this.localDB.deleteCard(cardId);
+    await db.softDelete('cards', cardId);
 
     // 2. Operation Queueに追加
-    await OperationQueueService.enqueue('deleteCard', {
+    await operationQueue.enqueueChange(
+      'card',
       cardId,
-    });
+      'delete',
+      { id: cardId, isDeleted: true },
+      'medium'
+    );
   }
 
   /**
@@ -74,28 +86,20 @@ export class QueueIntegrationService {
    * オンライン復帰時やバックグラウンドで定期的に呼び出す
    */
   async processQueue(): Promise<void> {
-    await OperationQueueService.processQueue();
-  }
-
-  /**
-   * ResyncRequired 発生時の処理
-   * Operation Queue 側で自動的にハンドリングされる
-   */
-  async handleResyncRequired(): Promise<void> {
-    // このメソッドは通常使用されない
-    // OperationQueueService 内部で自動的に処理される
-    console.warn('ResyncRequired detected in QueueIntegrationService');
+    await operationQueue.processQueue();
   }
 }
 
 /**
  * グローバルインスタンス管理
  */
-let queueIntegration: QueueIntegrationService | null = null;
+let _instance: QueueIntegrationService | null = null;
+let _currentUserId: string | null = null;
 
 export function getQueueIntegration(userId: string): QueueIntegrationService {
-  if (!queueIntegration || queueIntegration['userId'] !== userId) {
-    queueIntegration = new QueueIntegrationService(userId);
+  if (!_instance || _currentUserId !== userId) {
+    _instance = new QueueIntegrationService(userId);
+    _currentUserId = userId;
   }
-  return queueIntegration;
+  return _instance;
 }

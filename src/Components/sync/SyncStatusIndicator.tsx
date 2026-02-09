@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/Components/ui/button';
 import { Badge } from '@/Components/ui/badge';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,11 +29,6 @@ import { ConflictResolutionDialog } from './ConflictResolutionDialog';
 
 /**
  * 同期状態を表示し、手動同期をトリガーできるコンポーネント
- * 高度化機能:
- * - エラーダイアログへのアクセス
- * - 履歴ダイアログへのアクセス
- * - 競合解決ダイアログへのアクセス
- * - キュー件数表示
  */
 
 interface SyncStatusIndicatorProps {
@@ -44,32 +40,37 @@ interface SyncStatusIndicatorProps {
 
 export function SyncStatusIndicator({ 
   className, 
-  showText, 
+  showText: showTextProp, 
   dropdownAlign = "end", 
   dropdownSide = "bottom" 
 }: SyncStatusIndicatorProps) {
   const { syncStatus, lastSyncTime, triggerSync, queueCount, conflictCount } = useAuth();
   
+  // 折りたたみ状態
+  const [isExpanded, setIsExpanded] = useState(false);
+  
+  // 同期中やエラー時は自動で展開する
+  useEffect(() => {
+    if (syncStatus === 'syncing' || syncStatus === 'error' || conflictCount > 0) {
+      setIsExpanded(true);
+    }
+  }, [syncStatus, conflictCount]);
+
   // ダイアログ状態
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
   const [conflictDialogOpen, setConflictDialogOpen] = useState(false);
 
-  // ... (existing helper functions getStatusIcon, getStatusText, getStatusColor)
-  // Re-declare them here or keep them if they were inside component. 
-  // Since I am replacing the top part, I need to be careful to keep the internal logic.
-  // Actually, I should use a smaller replace block to just change the signature and add props usage.
-
   const getStatusIcon = () => {
     switch (syncStatus) {
       case 'syncing':
-        return <RefreshCw className="w-4 h-4 animate-spin" />;
+        return <RefreshCw className="w-4 h-4 animate-spin text-blue-500" />;
       case 'success':
         return <Check className="w-4 h-4 text-primary-600" />;
       case 'error':
         return <AlertCircle className="w-4 h-4 text-red-500" />;
       default:
-        return <Cloud className="w-4 h-4" />;
+        return <Cloud className="w-4 h-4 text-slate-400" />;
     }
   };
 
@@ -117,125 +118,133 @@ export function SyncStatusIndicator({
     }
   };
 
-  const handleStatusClick = () => {
-    if (syncStatus === 'error') {
-      setErrorDialogOpen(true);
-    }
-  };
-
-  // Logic to determine if text should be shown
-  // If showText is undefined, use existing logic (hidden lg:inline)
-  // If provided, use it.
-  const textClass = showText === undefined 
-      ? "hidden lg:inline text-[11px] font-medium tracking-tight"
-      : showText 
-          ? "text-[11px] font-medium tracking-tight" 
-          : "hidden";
-
   return (
     <>
-    <div className={cn("flex items-center gap-1", className)}>
-      {/* 状態表示 */}
+    <div className={cn(
+      "flex items-center p-0.5 rounded-full cursor-pointer transition-all duration-300",
+      "bg-white/20 backdrop-blur-xl border border-white/30 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)]",
+      className
+    )}>
+      {/* メインのアイコン＆ステータス部分 */}
       <div
-        onClick={handleStatusClick}
-        title={getStatusText()}
+        onClick={() => setIsExpanded(!isExpanded)}
+        title={isExpanded ? "詳細を閉じる" : "詳細を表示（クリック）"}
         className={cn(
-          'flex items-center gap-1.5 px-2 py-1.5 rounded-md transition-all duration-200',
-          getStatusColor(),
-          syncStatus === 'error' ? 'cursor-pointer hover:bg-red-50 dark:hover:bg-red-900/20' : 'cursor-default'
+          'flex items-center gap-2 px-2.5 py-1.5 rounded-full transition-all duration-300',
+          getStatusColor()
         )}
       >
-        <div className="relative flex items-center justify-center">
+        <div className="relative flex items-center justify-center shrink-0">
           {getStatusIcon()}
           {syncStatus === 'syncing' && (
             <span className="absolute inset-0 animate-ping rounded-full bg-blue-400 opacity-20"></span>
           )}
         </div>
-        <span className={textClass}>
-          {getStatusText()}
-        </span>
-      </div>
 
-      {/* オフライン表示 */}
-      {!navigator.onLine && (
-        <div 
-          className="flex items-center gap-1 px-2 py-1.5 text-orange-600 dark:text-orange-400"
-          title="オフライン状態です"
-        >
-          <CloudOff className="w-3.5 h-3.5" />
-        </div>
-      )}
-
-      {/* キュー/競合表示 (バッジ) */}
-      {(queueCount > 0 || conflictCount > 0) && (
-        <div className="flex items-center gap-1 ml-1">
-          {queueCount > 0 && (
-            <Badge variant="secondary" className="h-5 px-1.5 text-[10px] bg-slate-100 text-slate-600 border-none">
-              {queueCount}
-            </Badge>
-          )}
-          {conflictCount > 0 && (
-            <Badge
-              variant="destructive"
-              className="h-5 px-1.5 text-[10px] cursor-pointer animate-pulse"
-              onClick={() => setConflictDialogOpen(true)}
-              title={`${conflictCount}件の競合があります`}
+        <AnimatePresence mode="wait">
+          {isExpanded && (
+            <motion.div
+              layout
+              initial={{ width: 0, opacity: 0 }}
+              animate={{ width: 'auto', opacity: 1 }}
+              exit={{ width: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: "circOut" }}
+              className="overflow-hidden whitespace-nowrap flex items-center gap-2"
             >
-              <AlertTriangle className="w-2.5 h-2.5 mr-0.5" />
-              {conflictCount}
-            </Badge>
+              <span className="text-[11px] font-bold tracking-tight">
+                {getStatusText()}
+              </span>
+
+              {/* オフライン表示 */}
+              {!navigator.onLine && (
+                <div 
+                  className="flex items-center gap-1 px-1 text-orange-600 dark:text-orange-400"
+                  title="オフライン状態です"
+                >
+                  <CloudOff className="w-3.5 h-3.5" />
+                </div>
+              )}
+
+              {/* キュー/競合表示 (バッジ) */}
+              {(queueCount > 0 || conflictCount > 0) && (
+                <div className="flex items-center gap-1 px-1">
+                  {queueCount > 0 && (
+                    <Badge variant="secondary" className="h-5 px-1.5 text-[10px] bg-white/40 text-slate-600 border-none shadow-sm">
+                      {queueCount}
+                    </Badge>
+                  )}
+                  {conflictCount > 0 && (
+                    <Badge
+                      variant="destructive"
+                      className="h-5 px-1.5 text-[10px] cursor-pointer animate-pulse"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setConflictDialogOpen(true);
+                      }}
+                      title={`${conflictCount}件の競合があります`}
+                    >
+                      <AlertTriangle className="w-2.5 h-2.5 mr-0.5" />
+                      {conflictCount}
+                    </Badge>
+                  )}
+                </div>
+              )}
+
+              {/* セパレーター */}
+              <div className="w-[1px] h-3 bg-white/30 mx-1" />
+
+              {/* アクション群 */}
+              <div className="flex items-center gap-0.5" onClick={(e) => e.stopPropagation()}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={triggerSync}
+                  disabled={syncStatus === 'syncing' || !navigator.onLine}
+                  className="h-7 w-7 text-slate-500 hover:text-primary-600 hover:bg-white/30 rounded-full transition-colors"
+                  title="今すぐ同期"
+                >
+                  <RefreshCw
+                    className={cn(
+                      'w-3.5 h-3.5',
+                      syncStatus === 'syncing' && 'animate-spin'
+                    )}
+                  />
+                </Button>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-500 hover:text-slate-700 hover:bg-white/30 rounded-full">
+                      <MoreVertical className="w-3.5 h-3.5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align={dropdownAlign} side={dropdownSide} className="w-48">
+                    <DropdownMenuItem onClick={() => setHistoryDialogOpen(true)}>
+                      <History className="w-4 h-4 mr-2" />
+                      同期履歴
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setErrorDialogOpen(true)}>
+                      <AlertCircle className="w-4 h-4 mr-2" />
+                      エラー詳細
+                    </DropdownMenuItem>
+                    {conflictCount > 0 && (
+                      <DropdownMenuItem onClick={() => setConflictDialogOpen(true)}>
+                        <AlertTriangle className="w-4 h-4 mr-2" />
+                        競合解決 ({conflictCount}件)
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link to="/sync-settings">
+                        <Settings className="w-4 h-4 mr-2" />
+                        同期設定
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </motion.div>
           )}
-        </div>
-      )}
-
-      {/* アクション群 */}
-      <div className="flex items-center ml-1">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={triggerSync}
-          disabled={syncStatus === 'syncing' || !navigator.onLine}
-          className="h-8 w-8 text-slate-400 hover:text-primary-600 hover:bg-primary-50 transition-colors"
-          title="今すぐ同期"
-        >
-          <RefreshCw
-            className={cn(
-              'w-3.5 h-3.5',
-              syncStatus === 'syncing' && 'animate-spin'
-            )}
-          />
-        </Button>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-600">
-              <MoreVertical className="w-3.5 h-3.5" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align={dropdownAlign} side={dropdownSide} className="w-48">
-            <DropdownMenuItem onClick={() => setHistoryDialogOpen(true)}>
-              <History className="w-4 h-4 mr-2" />
-              同期履歴
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setErrorDialogOpen(true)}>
-              <AlertCircle className="w-4 h-4 mr-2" />
-              エラー詳細
-            </DropdownMenuItem>
-            {conflictCount > 0 && (
-              <DropdownMenuItem onClick={() => setConflictDialogOpen(true)}>
-                <AlertTriangle className="w-4 h-4 mr-2" />
-                競合解決 ({conflictCount}件)
-              </DropdownMenuItem>
-            )}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link to="/sync-settings">
-                <Settings className="w-4 h-4 mr-2" />
-                同期設定
-              </Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        </AnimatePresence>
       </div>
     </div>
 

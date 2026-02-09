@@ -1,8 +1,8 @@
-import { localDb } from './localDB';
+import { getLocalDb } from './localDB';
 import type { SyncQueueItem } from '../types/sync';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 
-export type QueuePriority = 'high' | 'normal' | 'background';
+export type QueuePriority = 'critical' | 'high' | 'medium' | 'low';
 export type OperationType = 'create' | 'update' | 'delete';
 
 // 'completed' | 'failed' are reserved for future audit logs.
@@ -58,14 +58,14 @@ export class OperationQueueService {
     targetId: string, 
     operationType: OperationType, 
     data: any, 
-    priority: QueuePriority = 'normal'
+    priority: QueuePriority = 'medium'
   ): Promise<void> {
-
-    await localDb.transaction('rw', [localDb.syncQueue], async () => {
+    const db = await getLocalDb();
+    await db.transaction('rw', [db.syncQueue], async () => {
         // 1. Find existing Pending item
         // Items in 'processing' status are EXCLUDED from compression to preserve execution integrity.
         // We use the composite index [targetId+status] implicitly via where clause.
-        const existingItem = await localDb.syncQueue
+        const existingItem = await db.syncQueue
             .where({ targetId: targetId })
             .filter(item => item.status === 'pending')
             .first();
@@ -77,7 +77,7 @@ export class OperationQueueService {
 
             // 2-a. Discard (e.g. Create + Delete)
             if (resultOp === 'discard') {
-                await localDb.syncQueue.delete(existingItem.id);
+                await db.syncQueue.delete(existingItem.id);
                 console.log(`[Queue] Discarded operation for ${targetId} (${existingOp}+${operationType})`);
                 return;
             }
@@ -92,7 +92,7 @@ export class OperationQueueService {
 
             // 2-c. Update (Compression)
             // Preserve IdempotencyKey, Replace Payload, Merge Priority
-            await localDb.syncQueue.update(existingItem.id, {
+            await db.syncQueue.update(existingItem.id, {
                 operationType: resultOp as OperationType,
                 payload: data, // Snapshot Replacement
                 priority: this.resolvePriority(existingItem.priority, priority),
@@ -129,6 +129,7 @@ export class OperationQueueService {
           entity,
           operationType: op,
           action: op, // Legacy compatibility
+          type: 'upload',
           payload: data,
           priority,
           status: 'pending',
@@ -136,7 +137,8 @@ export class OperationQueueService {
           updatedAt: Date.now(),
           retryCount: 0
       };
-      await localDb.syncQueue.add(newItem);
+      const db = await getLocalDb();
+      await db.syncQueue.add(newItem);
   }
 
   /**
@@ -144,11 +146,12 @@ export class OperationQueueService {
    * Safe to call concurrently (Re-entrant safe).
    */
   async processQueue(): Promise<void> {
+    const db = await getLocalDb();
     // 0. Cleanup Stale Items (Self-Healing)
     await this.cleanupStaleProcessing();
 
     // 1. Global Concurrency Check
-    const processingCount = await localDb.syncQueue
+    const processingCount = await db.syncQueue
         .where('status').equals('processing')
         .count();
         
@@ -165,7 +168,7 @@ export class OperationQueueService {
     // Helper to fetch
     const fetchByPriority = async (p: QueuePriority, limit: number) => {
         if (limit <= 0) return [];
-        return await localDb.syncQueue
+        return await db.syncQueue
             .where('[status+priority]')
             .equals(['pending', p])
             .filter(item => !item.nextRetryAt || item.nextRetryAt <= now)
@@ -177,13 +180,13 @@ export class OperationQueueService {
     const highs = await fetchByPriority('high', fetchLimit);
     candidates = [...candidates, ...highs];
     
-    // b. Normal
-    const normals = await fetchByPriority('normal', fetchLimit - candidates.length);
-    candidates = [...candidates, ...normals];
-
-    // c. Background
-    const backgrounds = await fetchByPriority('background', fetchLimit - candidates.length);
-    candidates = [...candidates, ...backgrounds];
+    // b. Medium (Normal)
+    const mediums = await fetchByPriority('medium', fetchLimit - candidates.length);
+    candidates = [...candidates, ...mediums];
+    
+    // c. Low (Background)
+    const lows = await fetchByPriority('low', fetchLimit - candidates.length);
+    candidates = [...candidates, ...lows];
 
     if (candidates.length === 0) return;
 
@@ -191,12 +194,12 @@ export class OperationQueueService {
     // Process items in parallel (limited by the fact we just fetched limited batch)
     await Promise.all(candidates.map(async (item) => {
         // 3-a. Transactional Lock (CAS)
-        const lockedItem = await localDb.transaction('rw', [localDb.syncQueue], async () => {
-             const current = await localDb.syncQueue.get(item.id);
+        const lockedItem = await db.transaction('rw', [db.syncQueue], async () => {
+             const current = await db.syncQueue.get(item.id);
              if (!current || current.status !== 'pending') return null;
              
               // Update to processing
-              await localDb.syncQueue.update(item.id, { 
+              await db.syncQueue.update(item.id, { 
                   status: 'processing',
                   processingStartedAt: Date.now()
               });
@@ -210,7 +213,7 @@ export class OperationQueueService {
             await this.performSyncOperation(lockedItem);
             
             // Success: Delete Immediately (Delete on Success)
-            await localDb.syncQueue.delete(lockedItem.id);
+            await db.syncQueue.delete(lockedItem.id);
             
         } catch (error) {
             await this.handleFailure(lockedItem, error);
@@ -224,7 +227,7 @@ export class OperationQueueService {
   }
 
   private resolvePriority(p1: QueuePriority, p2: QueuePriority): QueuePriority {
-    const scores = { high: 3, normal: 2, background: 1 };
+    const scores = { critical: 4, high: 3, medium: 2, low: 1 };
     return scores[p1] >= scores[p2] ? p1 : p2;
   }
 
@@ -248,13 +251,14 @@ export class OperationQueueService {
       const jitter = cappedDelay * (this.JITTER_FACTOR * (Math.random() * 2 - 1));
       const nextDelay = Math.max(0, cappedDelay + jitter);
 
-      // Revert to pending with delay
-      await localDb.syncQueue.update(item.id, {
-          status: 'pending', 
-          retryCount: newRetryCount,
-          lastError: String(error),
-          nextRetryAt: Date.now() + nextDelay
-      });
+        const db = await getLocalDb();
+        // Revert to pending with delay
+        await db.syncQueue.update(item.id, {
+            status: 'pending', 
+            retryCount: newRetryCount,
+            lastError: String(error),
+            nextRetryAt: Date.now() + nextDelay
+        });
   }
 
   /**
@@ -271,8 +275,9 @@ export class OperationQueueService {
       // We will create a skeleton for 'syncErrors' table usage if defined, or just log hard.
       // Luckily we have 'syncErrors' table in localDB from previous versions!
       
+      const db = await getLocalDb();
       try {
-        await localDb.syncErrors.add({
+        await db.syncErrors.add({
             id: crypto.randomUUID(),
             occurredAt: Date.now(),
             phase: 'queue_dlq',
@@ -290,7 +295,7 @@ export class OperationQueueService {
         console.error('Failed to save to DLQ/SyncErrors', e);
       }
 
-      await localDb.syncQueue.delete(item.id);
+      await db.syncQueue.delete(item.id);
   }
   
   private async performSyncOperation(item: SyncQueueItem): Promise<void> {
@@ -319,10 +324,11 @@ export class OperationQueueService {
       const now = Date.now();
       const staleThreshold = now - this.STALE_TIMEOUT_MS;
 
+      const db = await getLocalDb();
       // Scanning all 'processing' items
       // Since max concurrency is low (5), this scan is cheap.
       try {
-          const staleItems = await localDb.syncQueue
+          const staleItems = await db.syncQueue
               .where('status').equals('processing')
               .filter(item => {
                   // If processingStartedAt is missing, treat as stale immediately (legacy/bug)
@@ -335,9 +341,9 @@ export class OperationQueueService {
           if (staleItems.length > 0) {
               console.warn(`[Queue] Found ${staleItems.length} stale processing items. Recovering...`);
               
-              await localDb.transaction('rw', [localDb.syncQueue], async () => {
+              await db.transaction('rw', [db.syncQueue], async () => {
                   for (const item of staleItems) {
-                       await localDb.syncQueue.update(item.id, {
+                       await db.syncQueue.update(item.id, {
                            status: 'pending',
                            // processingStartedAt: undefined, // Optional cleanup
                            retryCount: (item.retryCount || 0) + 1,

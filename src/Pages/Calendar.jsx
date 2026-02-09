@@ -4,7 +4,7 @@ import React, {
   useEffect 
 } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { localDb } from '@/services/localDB';
+import { getLocalDb } from '../services/localDB';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCards } from '@/hooks/useCards';
 import { useFolders } from '@/hooks/useFolders';
@@ -233,14 +233,17 @@ export default function Calendar() {
                             key={dateStr}
                             onClick={() => setSelectedDate(dayItem)}
                             className={cn(
-                                "min-h-[48px] md:min-h-[80px] flex flex-col items-center pt-2 md:pt-4 cursor-pointer transition-all relative group rounded-xl",
-                                !isCurrentMonth && "opacity-20 grayscale",
-                                isSelected && "bg-white shadow-sm ring-2 ring-primary-600/20 z-10 scale-105"
+                                "calendar-day-base cursor-pointer group min-h-[56px] md:min-h-[88px]", // Height increased for 3D bottom border
+                                !isCurrentMonth && "opacity-30 grayscale",
+                                isSelected 
+                                    ? "calendar-day-selected" 
+                                    : "calendar-day-flat",
+                                isTodayDate && !isSelected && "calendar-day-today"
                             )}
                         >
                             {/* Date Number */}
                             <span className={cn(
-                                "text-sm font-bold mb-1 md:mb-2 transition-colors",
+                                "text-sm font-bold mb-1 md:mb-1 transition-colors calendar-date-text",
                                 isSelected ? "text-primary-600" : "text-slate-400 group-hover:text-slate-600",
                                 isTodayDate && !isSelected && "text-primary-600"
                             )}>
@@ -248,29 +251,29 @@ export default function Calendar() {
                             </span>
 
                             {/* Intensity Visual (Dots or Bar) */}
-                            {hasCards && (
-                                <div className="flex flex-col items-center mt-1 gap-1">
+                            {hasCards ? (
+                                <div className="flex flex-col items-center mt-0 gap-1 w-full">
                                     <span className={cn(
                                         "text-lg md:text-xl font-black leading-none tracking-tight",
                                         dayCards.some(c => c.is_overdue) ? "text-[#FF5A65]" : "text-primary-600"
                                     )}>
                                         {dayCards.length}
                                     </span>
-                                    <div className="hidden md:flex gap-0.5">
+                                    <div className="hidden md:flex gap-1 justify-center w-full px-2">
                                         {Array.from({ length: intensity }).map((_, i) => (
                                             <div key={i} className={cn(
-                                                "w-1 h-1 rounded-full",
-                                                dayCards.some(c => c.is_overdue) ? "bg-[#FF5A65]" : "bg-primary-600/60"
+                                                "w-1.5 h-1.5 rounded-full calendar-dot-3d",
+                                                dayCards.some(c => c.is_overdue) ? "bg-[#FF5A65]" : "bg-primary-400"
                                             )} />
                                         ))}
                                     </div>
                                 </div>
+                            ) : (
+                                /* Empty State Check (Today) */
+                                isTodayDate && (
+                                    <div className="mt-2 text-[9px] font-bold text-primary-300">TODAY</div>
+                                )
                             )}
-
-                             {/* Bottom Line for 'Today' */}
-                             {isTodayDate && (
-                                 <div className="absolute bottom-1 md:bottom-2 w-6 md:w-8 h-0.5 md:h-1 rounded-full bg-primary-600/20" />
-                             )}
                         </div>
                     );
                 })}
@@ -282,10 +285,7 @@ export default function Calendar() {
   return (
     <div className="min-h-screen bg-[#F5F7FA] text-slate-800 font-sans selection:bg-indigo-100 selection:text-indigo-900 p-4 md:p-8 flex flex-col">
         {/* Top Header */}
-        <div className="flex flex-col sm:flex-row items-center sm:items-center justify-between mb-2 md:mb-6 w-full max-w-[1400px] mx-auto gap-4">
-            <div className="hidden md:block">
-            </div>
-
+        <div className="flex flex-col sm:flex-row items-center sm:items-center justify-start mb-2 md:mb-6 w-full max-w-[1400px] mx-auto gap-4">
             <div className="flex items-center gap-4 w-full md:w-auto">
                 <Button 
                     variant="outline" 

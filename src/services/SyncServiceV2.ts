@@ -6,6 +6,7 @@ import { doc, getDoc, updateDoc, collection, query, getDocs, deleteDoc, Timestam
 import { firestoreDb } from './firebase';
 import { TelemetryService } from './logic/TelemetryService';
 import { SecurityMonitor } from './logic/SecurityMonitor';
+import { LocalDB, getLocalDb } from './localDB';
 
 /**
  * SyncServiceV2: オーケストレーターとしての同期サービス
@@ -19,14 +20,14 @@ export class SyncServiceV2 implements ISyncService {
   private cloudAdapter: ICloudSyncAdapter;
   private telemetry: TelemetryService;
   private securityMonitor: SecurityMonitor;
-  private localDB: any; // Added
+  private localDB: LocalDB;
   
   private isSyncing = false;
   private fallbackCount = 0;
 
   constructor(
     private userId: string,
-    localDB: any, // localDB: LocalDB (型回避のため any)
+    localDB: LocalDB,
     queueManager: IQueueManager,
     networkMonitor: INetworkMonitor,
     diffEngine: IDiffEngine,
@@ -99,39 +100,39 @@ export class SyncServiceV2 implements ISyncService {
       // 0. デバイスステータスをチェック (Security Guard)
       await this.checkDeviceStatus();
       
-      // セーフモードのチェック
-      const securityStatus = this.securityMonitor.getSecurityStatus();
-      if (securityStatus.isSafeMode) {
-        this.telemetry.log('warn', 'Device is in Safe Mode. Sync is read-only or restricted.');
-        // 必要に応じて処理を分岐（例: 読み取り専用モードにするなど、現状は警告のみ）
-      }
-
       // 1. ネットワーク状態をチェック
       if (this.networkMonitor.status === 'offline') {
-        this.telemetry.log('warn', 'Offline, sync deferred to queue accumulation');
+        this.telemetry.log('warn', 'Offline, sync deferred');
         return;
       }
       
-      // 【正常遷移: Network Poor → Queue Accumulation】
-      // 低速ネットワーク時は同期を抑制し、キュー蓄積を優先する
       if (this.networkMonitor.status === 'poor') {
-        this.telemetry.log('info', 'Network poor, deferring heavy sync to avoid timeout. Changes will accumulate in queue.');
+        this.telemetry.log('info', 'Network poor, deferring heavy sync');
         return;
       }
 
-      // 2. バッチ制約を取得
+      // 2. クラウドからの差分取得 (Pull)
+      this.telemetry.log('info', 'Checking for remote changes (Pull)');
+      const lastSyncTime = await this.localDB.getLastSyncTime(this.userId);
+      const lastSyncTimestamp = lastSyncTime ? lastSyncTime.getTime() : 0;
+
+      const { changes, serverTime } = await this.cloudAdapter.pullDiff(lastSyncTimestamp);
+      if (changes.length > 0) {
+        this.telemetry.log('info', `Applying ${changes.length} remote changes`);
+        await this.applyRemoteChanges(changes);
+      }
+
+      // 3. ローカルの変更を送信 (Push)
       const constraint = this.networkMonitor.getBatchConstraint(source);
-      
-      // 3. キューからタスクを取得
       const tasks = await this.queueManager.peekBatch(constraint);
       
-      if (tasks.length === 0) {
-        this.telemetry.log('info', 'No tasks in queue');
-        return;
+      if (tasks.length > 0) {
+        this.telemetry.log('info', `Pushing ${tasks.length} local changes`);
+        await this.processBatch(tasks);
       }
 
-      // 4. タスクを処理
-      await this.processBatch(tasks);
+      // 4. 同期時刻を更新 (成功時のみ)
+      await this.localDB.updateLastSyncTime(this.userId, new Date(serverTime));
 
       transaction.end('success');
     } catch (error) {
@@ -259,9 +260,25 @@ export class SyncServiceV2 implements ISyncService {
    * リモートの変更をローカルDBに適用
    */
   private async applyRemoteChanges(changes: any[]): Promise<void> {
+    // フォルダの循環参照チェック用に全フォルダを一度取得
+    const allFolders = await this.localDB.folders.toArray();
+
     for (const change of changes) {
       const table = `${change.type}s`; // e.g., 'card' -> 'cards'
       const remoteData = change.data;
+
+      // フォルダの場合、循環参照をチェックして防止
+      if (change.type === 'folder') {
+        const parentId = remoteData.parentFolderId ?? remoteData.parent_folder_id ?? null;
+        if (this.diffEngine.detectCycle(change.id, parentId, allFolders)) {
+          this.telemetry.log('error', 'Circular reference detected during applyRemoteChanges, healing by setting parent to null', { 
+            folderId: change.id,
+            parentId 
+          });
+          remoteData.parentFolderId = null;
+          remoteData.parent_folder_id = null;
+        }
+      }
       
       // IDが一致する既存データを取得
       const localData = await this.localDB.getItem(table, change.id);
@@ -306,6 +323,8 @@ export class SyncServiceV2 implements ISyncService {
 
   /**
    * 強制フル同期（トラブルシューティング用）
+   * クラウド上のデータをマスターとして、ローカルDBの全データを再構築します。
+   * ※ ローカルにのみ存在する変更は失われる可能性があります。
    */
   async forceFullResync(): Promise<void> {
     this.telemetry.log('warn', 'Force full resync initiated');
@@ -318,12 +337,43 @@ export class SyncServiceV2 implements ISyncService {
     this.telemetry.recordMetric('sync_fallback_count', this.fallbackCount);
     
     try {
-      // 全データを再取得（実装は省略）
+      // 1. クラウドから全データを取得 (since=0)
       const diff = await this.cloudAdapter.pullDiff(0);
       
-      this.telemetry.log('info', 'Full resync completed', { 
+      this.telemetry.log('info', 'Pulling all data for resync', { 
         changesCount: diff.changes.length 
       });
+
+      // 2. ローカルDBをトランザクション内で更新
+      // 主なエンティティをリセットしてクラウドデータで埋める
+      const tables = ['folders', 'cards', 'cardRelations', 'projectMaps'];
+      
+      await this.localDB.transaction('rw', tables, async () => {
+        // すべてのデータを一旦削除（ソフトデリートではなく物理削除して再構築）
+        for (const table of tables) {
+          await (this.localDB as any)[table].clear();
+        }
+
+        // 取得したデータを投入
+        for (const change of diff.changes) {
+          const tableName = `${change.type}s`;
+          if (tables.includes(tableName)) {
+            await (this.localDB as any)[tableName].put(change.data);
+          }
+        }
+      });
+
+      // 3. 同期メタデータを更新 (最後の同期時刻をクラウドの最新に合わせる)
+      // 次回の差分同期はここから始まる
+      if (diff.serverTime) {
+          await this.localDB.upsert('syncMetadata', {
+              id: 'lastSync',
+              timestamp: diff.serverTime,
+              updatedAt: new Date().getTime() // タイムスタンプとして数値で保存
+          }, true);
+      }
+      
+      this.telemetry.log('info', 'Full resync completed successfully');
     } catch (error) {
       this.telemetry.log('error', 'Full resync failed', {}, error as Error);
       throw error;
@@ -338,7 +388,7 @@ export class SyncServiceV2 implements ISyncService {
     this.telemetry.log('info', 'Revoking device access', { deviceId });
     if (!firestoreDb) {
       this.telemetry.log('error', 'Security Alert: firestoreDb is undefined during removeDevice');
-      throw new Error('Firebase Firestore is not initialized.');
+      return; // サイレントに失敗させるか、上位でハンドリング
     }
     const deviceRef = doc(firestoreDb, `sync_metadata/${this.userId}/devices/${deviceId}`);
     
@@ -399,7 +449,10 @@ export class SyncServiceV2 implements ISyncService {
    */
   async updateDeviceName(deviceId: string, newName: string): Promise<void> {
     this.telemetry.log('info', 'Updating device name', { deviceId, newName });
-    if (!firestoreDb) throw new Error('Firebase Firestore is not initialized.');
+    if (!firestoreDb) {
+      console.warn('[SyncServiceV2] firestoreDb is not initialized. Skipping updateDeviceName.');
+      return;
+    }
     const deviceRef = doc(firestoreDb, `sync_metadata/${this.userId}/devices/${deviceId}`);
     await updateDoc(deviceRef, { deviceName: newName });
   }
@@ -410,11 +463,14 @@ export class SyncServiceV2 implements ISyncService {
    */
   async cleanupInactiveDevices(): Promise<number> {
     this.telemetry.log('info', 'Cleaning up inactive devices');
-    if (!firestoreDb) throw new Error('Firebase Firestore is not initialized.');
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    if (!firestoreDb) {
+      console.warn('[SyncServiceV2] firestoreDb is not initialized. Skipping cleanup.');
+      return 0;
+    }
+    const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
     const q = query(
       collection(firestoreDb, `sync_metadata/${this.userId}/devices`),
-      where('lastSyncTime', '<', Timestamp.fromDate(twentyFourHoursAgo))
+      where('lastSyncTime', '<', Timestamp.fromDate(sixtyDaysAgo))
     );
     
     const snapshot = await getDocs(q);

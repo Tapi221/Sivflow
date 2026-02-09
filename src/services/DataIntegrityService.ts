@@ -7,7 +7,7 @@
  * - 修復より隔離を優先
  */
 
-import { localDb } from './localDB';
+import { getLocalDb } from './localDB';
 import { normalizeCard, normalizeFolder } from '@/utils';
 
 export interface IntegrityIssue {
@@ -35,8 +35,9 @@ class DataIntegrityService {
     const issues: IntegrityIssue[] = [];
     
     try {
-      const allCards = await localDb.getAllCards();
-      const allFolders = await localDb.getAllFolders();
+      const db = await getLocalDb();
+      const allCards = await db.getAllCards();
+      const allFolders = await db.getAllFolders();
       
       const cards = allCards.map(normalizeCard);
       const folders = allFolders.map(normalizeFolder);
@@ -174,9 +175,10 @@ class DataIntegrityService {
       .map(i => i.itemId);
 
     let count = 0;
+    const db = await getLocalDb();
     for (const cardId of orphanedCardIds) {
       try {
-        await localDb.softDelete('cards', cardId);
+        await db.softDelete('cards', cardId);
         count++;
       } catch (e) {
         console.error(`Failed to quarantine card ${cardId}:`, e);

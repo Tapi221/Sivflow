@@ -1,10 +1,50 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { VitePWA } from 'vite-plugin-pwa'
 import path from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      injectRegister: 'auto',
+      manifestFilename: 'manifest.webmanifest',
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+      devOptions: {
+        enabled: false, // 開発環境ではPWA無効化（manifest生成は行われる）
+        type: 'module',
+      },
+      manifest: {
+        name: 'Flashcard Master',
+        short_name: 'Flashcard',
+        description: 'Advanced flashcard app for serious learners',
+        theme_color: '#689A98',
+        background_color: '#F8FAFB',
+        display: 'standalone',
+        orientation: 'portrait',
+        icons: [
+          {
+            src: 'icon-192.png',
+            sizes: '192x192',
+            type: 'image/png'
+          },
+          {
+            src: 'icon-512.png',
+            sizes: '512x512',
+            type: 'image/png'
+          },
+          {
+            src: 'icon-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any maskable'
+          }
+        ]
+      }
+    })
+  ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -20,6 +60,7 @@ export default defineConfig({
     },
   },
   build: {
+    sourcemap: true,
     // チャンクサイズ警告の閾値を緩和（実用的なライン）
     chunkSizeWarningLimit: 1000,
     

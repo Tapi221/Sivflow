@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { localDb } from '../services/localDB';
+import { getLocalDb } from '../services/localDB';
 import { useAuth } from '../contexts/AuthContext';
 
 export interface Tag {
   name: string;
   color: string;
   userId: string;
-  rootFolderId: string;
   updatedAt: Date;
+  rootFolderId?: string; // Legacy/Compat
 }
 
 export const DEFAULT_COLORS = [
@@ -30,58 +30,63 @@ export const DEFAULT_COLORS = [
   'bg-rose-50 text-rose-600 border-rose-200',
 ];
 
-export function useTags(rootFolderId?: string) {
+/**
+ * useTags: ユーザー単位で共通管理されるタグを操作するホック
+ */
+export function useTags(_rootFolderId?: string) {
   const { currentUser } = useAuth();
 
   const tags = useLiveQuery(
     async () => {
       if (!currentUser) return [];
-      if (rootFolderId) {
-          return await localDb.tags.where({ rootFolderId }).toArray();
-      }
-      return await localDb.tags.toArray();
+      const db = await getLocalDb();
+      // ユーザーIDのみでフィルタ。rootFolderId は無視
+      return await db.tags_v2.where('userId').equals(currentUser.uid).toArray();
     },
-    [currentUser, rootFolderId],
+    [currentUser],
     []
   );
 
-  const getTagColor = (tagName: string, targetRootFolderId?: string) => {
-    // try to find exact match
-    const tag = tags?.find(t => t.name === tagName && (!targetRootFolderId || t.rootFolderId === targetRootFolderId));
-    // Fallback: if we just want color by name (legacy support or cross-folder view), pick the first one
-    return tag?.color || tags?.find(t => t.name === tagName)?.color || DEFAULT_COLORS[0];
+  const getTagColor = (tagName: string) => {
+    const tag = tags?.find(t => t.name === tagName);
+    return tag?.color || DEFAULT_COLORS[0];
   };
 
-  const addTag = async (name: string, color: string = DEFAULT_COLORS[0], targetRootFolderId: string) => {
-    if (!currentUser || !targetRootFolderId) return;
+  /**
+   * タグを追加または取得。既に存在すれば色は変更等を行わず、存在しなければ新規作成。
+   */
+  const addTag = async (name: string, color: string = DEFAULT_COLORS[0], _targetRootFolderId?: string) => {
+    if (!currentUser) return;
     
-    // Check if exists
-    const existing = await localDb.tags.get({ rootFolderId: targetRootFolderId, name });
+    const db = await getLocalDb();
+    const existing = await db.tags_v2.get([currentUser.uid, name]);
     
     if (existing) {
        if (existing.color !== color) {
-           await localDb.tags.update([targetRootFolderId, name], { color, updatedAt: new Date() });
+           await db.tags_v2.update([currentUser.uid, name], { color, updatedAt: new Date() });
        }
        return;
     }
 
-    await localDb.tags.add({
+    await db.tags_v2.add({
       name,
       color,
       userId: currentUser.uid,
-      rootFolderId: targetRootFolderId,
+      rootFolderId: 'GLOBAL', 
       updatedAt: new Date()
     });
   };
 
-  const updateTagColor = async (name: string, color: string, targetRootFolderId: string) => {
-      if (!currentUser || !targetRootFolderId) return;
-      await localDb.tags.update([targetRootFolderId, name], { color, updatedAt: new Date() });
+  const updateTagColor = async (name: string, color: string, _targetRootFolderId?: string) => {
+      if (!currentUser) return;
+      const db = await getLocalDb();
+      await db.tags_v2.update([currentUser.uid, name], { color, updatedAt: new Date() });
   };
 
-  const deleteTag = async (name: string, targetRootFolderId: string) => {
-      if (!currentUser || !targetRootFolderId) return;
-      await localDb.tags.delete([targetRootFolderId, name]);
+  const deleteTag = async (name: string, _targetRootFolderId?: string) => {
+      if (!currentUser) return;
+      const db = await getLocalDb();
+      await db.tags_v2.delete([currentUser.uid, name]);
   };
 
   return {

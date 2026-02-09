@@ -64,9 +64,13 @@ npm run dev
 src/
 ├── Components/          # Feature-based Component Structure
 │   ├── ui/             # Generic UI (Button, Input) - No logic
-│   ├── card/           # Card domain components
-│   └── stats/          # Statistics domain components
+│   ├── card/           # Card domain (Editor, Block, etc.)
+│   ├── folder/         # Folder domain (Tree, View, Dialog)
+│   ├── explorer/       # Sidebar Explorer (Tabs, Recent, Favorites)
+│   ├── tag/            # Tag management & Filtering
+│   ├── stats/          # Statistics & Graphs
+│   └── settings/       # App Settings
 ├── Pages/              # Route handling & Data wiring
 ├── services/           # External boundaries (Firebase, Storage, Algo)
-└── hooks/              # Business Logic (useCards, useSync)
+└── hooks/              # Business Logic (useCards, useFolders, useExplorerStore)
 ```

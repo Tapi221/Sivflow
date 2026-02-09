@@ -21,7 +21,13 @@ export const StorageManager = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!currentUser) return;
+    if (!currentUser || !firestoreDb) {
+      if (!firestoreDb) {
+        console.warn('[StorageManager] firestoreDb is not initialized.');
+        setLoading(false);
+      }
+      return;
+    }
 
     const q = query(
       collection(firestoreDb, `users/${currentUser.uid}/uploads`),
@@ -83,7 +89,11 @@ export const StorageManager = () => {
       }
 
       // 2. Delete metadata from Firestore
-      await deleteDoc(doc(firestoreDb, `users/${currentUser.uid}/uploads`, file.id));
+      if (firestoreDb) {
+        await deleteDoc(doc(firestoreDb, `users/${currentUser.uid}/uploads`, file.id));
+      } else {
+        console.warn('[StorageManager] firestoreDb not initialized. Metadata remains.');
+      }
       
     } catch (e) {
       console.error("Delete failed", e);

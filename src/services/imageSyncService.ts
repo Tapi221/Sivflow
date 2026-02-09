@@ -1,8 +1,9 @@
 import { storage, firestoreDb as db } from './firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
-import { LocalDB, initializeDB, getLocalDb } from './localDB';
+import { getLocalDb, type LocalDB } from './localDB';
 import type { UploadedImage } from '../types';
+import { createStorageUrl } from '../types/branded';
 
 const MAX_QUOTA = 500 * 1024 * 1024; // 500MB
 const MAX_RETRIES = 5;
@@ -10,9 +11,8 @@ const MAX_RETRIES = 5;
 export class ImageSyncService {
   private localDB: LocalDB;
 
-  constructor(userId: string) {
-    initializeDB(userId);
-    this.localDB = getLocalDb();
+  constructor(userId: string, localDB: LocalDB) {
+    this.localDB = localDB;
   }
 
   private async getStorageUsage(): Promise<number> {
@@ -173,8 +173,8 @@ export class ImageSyncService {
       
       return {
         ...image,
-        remoteUrl: existingUrl,
-        thumbnailUrl: thumbUrl,
+        remoteUrl: createStorageUrl(existingUrl),
+        thumbnailUrl: createStorageUrl(thumbUrl),
         remoteId: image.id,
         storagePath: highResPath,
         status: 'ready',
@@ -219,8 +219,8 @@ export class ImageSyncService {
 
         return {
           ...image,
-          remoteUrl: highResUrl,
-          thumbnailUrl: thumbnailUrl,
+          remoteUrl: createStorageUrl(highResUrl),
+          thumbnailUrl: createStorageUrl(thumbnailUrl),
           remoteId: image.id,
           storagePath: highResPath,
           status: 'ready',

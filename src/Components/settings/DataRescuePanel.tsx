@@ -3,9 +3,9 @@ import Dexie from 'dexie';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Button } from '@/Components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/Components/ui/card';
-import { localDb, LocalDB, initializeDB, getLocalDb } from '@/services/localDB';
+import { LocalDB, initializeDB, getLocalDb } from '@/services/localDB';
 import { useAuth } from '@/contexts/AuthContext';
-import { Clock, RefreshCw, AlertTriangle, CheckCircle, Loader2, Database, Folder, FileText, ChevronDown, ChevronRight, Wrench, HardDrive } from 'lucide-react';
+import { Clock, RefreshCw, AlertTriangle, CheckCircle, Loader2, Folder, FileText, ChevronDown, ChevronRight } from 'lucide-react';
 import { useToast } from '@/contexts/ToastContext';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/Components/ui/collapsible';
 
@@ -25,8 +25,9 @@ export default function DataRescuePanel() {
   // Live Stats for Summary Section
   const currentStats = useLiveQuery(async () => {
     if (!currentUser) return { folders: 0, cards: 0 };
-    const folders = await localDb.folders.count();
-    const cards = await localDb.cards.count();
+    const db = await getLocalDb();
+    const folders = await db.folders.count();
+    const cards = await db.cards.count();
     return { folders, cards };
   }, [currentUser], { folders: 0, cards: 0 });
 
@@ -35,7 +36,8 @@ export default function DataRescuePanel() {
     setScanResult('データベース一覧を取得中...');
       try {
         const dbs = await LocalDB.listDatabases();
-        const currentDbName = localDb.name;
+        const db = await getLocalDb();
+        const currentDbName = db.name;
         
         const enriched: any[] = [];
         console.log(`[Rescue] Scanning ${dbs.length} databases...`);
@@ -128,7 +130,7 @@ export default function DataRescuePanel() {
       addLog(`復元開始: ${targetDbName}`);
       try {
       initializeDB(currentUser.uid);
-      const targetUserDb = getLocalDb();
+      const targetUserDb = await getLocalDb();
 
       const result = await targetUserDb.importFromDatabase(targetDbName, currentUser.uid, (msg) => {
           setProgressMsg(msg);
@@ -150,26 +152,26 @@ export default function DataRescuePanel() {
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
         
-        {/* 1. Summary Section */}
+      {/* 1. Summary Section */}
         <div className="grid grid-cols-2 gap-4">
-            <Card className="bg-white border-slate-100 shadow-sm">
+            <Card className="bg-white/5 border-white/10 shadow-sm rounded-xl">
                 <CardContent className="p-6 flex items-center gap-4">
-                    <div className="p-3 bg-emerald-50 rounded-full text-emerald-600">
+                    <div className="p-3 bg-emerald-500/10 rounded-full text-emerald-400">
                         <Folder className="w-6 h-6" />
                     </div>
                     <div>
-                        <div className="text-2xl font-bold text-slate-800">{currentStats?.folders || 0}</div>
+                        <div className="text-2xl font-bold text-white">{currentStats?.folders || 0}</div>
                         <div className="text-xs font-bold text-slate-400">作成済みフォルダ</div>
                     </div>
                 </CardContent>
             </Card>
-            <Card className="bg-white border-slate-100 shadow-sm">
+            <Card className="bg-white/5 border-white/10 shadow-sm rounded-xl">
                 <CardContent className="p-6 flex items-center gap-4">
-                    <div className="p-3 bg-blue-50 rounded-full text-blue-600">
+                    <div className="p-3 bg-blue-500/10 rounded-full text-blue-400">
                         <FileText className="w-6 h-6" />
                     </div>
                     <div>
-                        <div className="text-2xl font-bold text-slate-800">{currentStats?.cards || 0}</div>
+                        <div className="text-2xl font-bold text-white">{currentStats?.cards || 0}</div>
                         <div className="text-xs font-bold text-slate-400">作成済みカード</div>
                     </div>
                 </CardContent>
@@ -180,7 +182,7 @@ export default function DataRescuePanel() {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
             <div>
-                <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                <h3 className="text-lg font-bold text-slate-200 flex items-center gap-2">
                     <HistoryIcon className="w-5 h-5 text-slate-400" />
                     バックアップからの復元
                 </h3>
@@ -188,35 +190,35 @@ export default function DataRescuePanel() {
                     このブラウザに保存されている過去のデータから復元できます
                 </p>
             </div>
-            <Button variant="ghost" size="sm" onClick={refreshList} disabled={loading} className="text-slate-400 hover:text-emerald-600">
+            <Button variant="ghost" size="sm" onClick={refreshList} disabled={loading} className="text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg">
                 <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
                 再スキャン
             </Button>
         </div>
 
         {databases.length === 0 && !loading ? (
-             <Card className="border-dashed border-slate-200 bg-slate-50/50">
+             <Card className="border-dashed border-white/20 bg-white/5 rounded-xl">
                 <CardContent className="flex flex-col items-center justify-center py-12 text-slate-400">
-                    <HardDrive className="w-12 h-12 mb-4 opacity-20" />
+                    <Folder className="w-12 h-12 mb-4 opacity-50" />
                     <p className="text-sm">復元可能なバックアップは見つかりませんでした</p>
                 </CardContent>
             </Card>
         ) : (
             <div className="grid gap-3">
                 {databases.filter(d => !d.isCurrent).map(d => (
-                    <Card key={d.name} className="overflow-hidden border-slate-200 hover:border-emerald-200 transition-colors group">
+                    <Card key={d.name} className="overflow-hidden border-white/10 hover:border-emerald-500/50 bg-white/5 transition-colors group rounded-xl">
                         <CardContent className="p-0">
-                            <div className="flex items-center justify-between p-4">
+                            <div className="flex items-center justify-between p-4 bg-white/5 backdrop-blur-md">
                                 <div className="flex items-center gap-4">
-                                    <div className="p-2 bg-slate-100 rounded-lg text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
-                                        <Database className="w-5 h-5" />
+                                    <div className="p-2 bg-white/10 rounded-lg text-slate-400 group-hover:bg-emerald-500/20 group-hover:text-emerald-400 transition-colors">
+                                        <Folder className="w-5 h-5" />
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-2">
-                                            <span className="font-bold text-slate-700 text-sm">
+                                            <span className="font-bold text-slate-200 text-sm">
                                                 Backup Data
                                             </span>
-                                            <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-mono">
+                                            <span className="text-[10px] bg-white/10 text-slate-400 px-1.5 py-0.5 rounded font-mono border border-white/10">
                                                 {d.name?.slice(-8)}
                                             </span>
                                         </div>
@@ -228,7 +230,7 @@ export default function DataRescuePanel() {
                                 </div>
                                 <Button 
                                     size="sm" 
-                                    className="bg-slate-800 hover:bg-emerald-600 text-white transition-colors"
+                                    className="bg-slate-700/50 hover:bg-emerald-600 text-white transition-colors border border-white/10 backdrop-blur-sm"
                                     onClick={() => handleImport(d.name || '')}
                                     disabled={importing !== null}
                                 >
@@ -250,11 +252,11 @@ export default function DataRescuePanel() {
       </div>
 
       {/* 3. Advanced Tools (Collapsible) */}
-      <Collapsible open={isAdvancedOpen} onOpenChange={setIsAdvancedOpen} className="border-t border-slate-100 pt-6">
+      <Collapsible open={isAdvancedOpen} onOpenChange={setIsAdvancedOpen} className="border-t border-white/10 pt-6">
         <CollapsibleTrigger asChild>
-            <Button variant="ghost" className="w-full flex justify-between text-slate-400 hover:text-slate-600 h-12">
+            <Button variant="ghost" className="w-full flex justify-between text-slate-400 hover:text-white hover:bg-white/5 h-12 rounded-xl">
                 <span className="flex items-center gap-2 text-xs font-bold">
-                    <Wrench className="w-4 h-4" />
+                    <RefreshCw className="w-4 h-4" />
                     高度な機能 / トラブルシューティング
                 </span>
                 {isAdvancedOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
@@ -263,26 +265,26 @@ export default function DataRescuePanel() {
         <CollapsibleContent className="space-y-4 pt-4">
             
             {/* Integrity Repair */}
-            <Card className="border-sky-100 bg-sky-50/50">
+            <Card className="border-sky-500/20 bg-sky-500/10 rounded-xl">
                 <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-bold text-sky-800 flex items-center gap-2">
+                    <CardTitle className="text-sm font-bold text-sky-300 flex items-center gap-2">
                         <CheckCircle className="w-4 h-4" />
                         データの正規化 (Normalization)
                     </CardTitle>
-                    <CardDescription className="text-xs text-sky-700">
+                    <CardDescription className="text-xs text-sky-200/70">
                         重複してしまったフォルダなどを整理し、データを正しい状態に修復します。
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Button 
                         size="sm" 
-                        className="bg-sky-600 hover:bg-sky-700 text-white w-full"
+                        className="bg-sky-600 hover:bg-sky-500 text-white w-full border border-sky-400/30"
                         onClick={async () => {
                                 if (!currentUser) return;
                             setLoading(true);
                             try {
                                 initializeDB(currentUser.uid);
-                                const userDb = getLocalDb();
+                                const userDb = await getLocalDb();
                                 const result = await userDb.repairDataIntegrity(currentUser.uid, setProgressMsg);
                                 success(`修復完了: ${result.folders}個のフォルダ、${result.cards}件のカードを整理しました。`);
                                 window.location.reload();
@@ -294,20 +296,20 @@ export default function DataRescuePanel() {
                         }}
                         disabled={loading}
                     >
-                        {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Wrench className="w-4 h-4 mr-2" />}
+                        {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <RefreshCw className="w-4 h-4 mr-2" />}
                         修復を実行
                     </Button>
                 </CardContent>
             </Card>
 
             {/* Forensic Audit */}
-            <Card className="border-red-100 bg-red-50/50">
+            <Card className="border-red-500/20 bg-red-500/10 rounded-xl">
                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-bold text-red-800 flex items-center gap-2">
+                    <CardTitle className="text-sm font-bold text-red-300 flex items-center gap-2">
                         <AlertTriangle className="w-4 h-4" />
                         詳細スキャン (Forensic Audit)
                     </CardTitle>
-                    <CardDescription className="text-xs text-red-700">
+                    <CardDescription className="text-xs text-red-200/70">
                         ブラウザ内の全ての領域を強制スキャンし、隠れたデータを探します（上級者向け）。
                     </CardDescription>
                 </CardHeader>
@@ -315,7 +317,7 @@ export default function DataRescuePanel() {
                     <Button 
                         size="sm" 
                         variant="destructive" 
-                        className="w-full"
+                        className="w-full bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 backdrop-blur-sm"
                         onClick={async () => {
                             if (!confirm("大量のログが出力されますがよろしいですか？")) return;
                             try {
@@ -333,7 +335,7 @@ export default function DataRescuePanel() {
             
             {/* Logs Area */}
             {logs.length > 0 && (
-                <div className="p-3 bg-slate-900 rounded-lg border border-slate-800 font-mono text-[9px] text-emerald-400 max-h-40 overflow-y-auto">
+                <div className="p-3 bg-black/40 rounded-lg border border-white/10 font-mono text-[9px] text-emerald-400 max-h-40 overflow-y-auto custom-scrollbar">
                     {logs.map((log, i) => (
                         <div key={i}>{log}</div>
                     ))}

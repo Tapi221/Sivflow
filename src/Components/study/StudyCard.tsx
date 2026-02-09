@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useSwipeable } from 'react-swipeable';
 import { Button } from '@/Components/ui/button';
 import { Badge } from '@/Components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/Components/ui/tooltip";
@@ -17,12 +18,14 @@ export default function StudyCard({
   const [studyPhase, setStudyPhase] = useState('timing'); // timing: 問題表示中, answer: 解答表示中
   const [startTime, setStartTime] = useState(Date.now());
   const [elapsedTime, setElapsedTime] = useState(0);
+  const [swipeDir, setSwipeDir] = useState(null);
   const timerRef = useRef(null);
   
   useEffect(() => {
     setStudyPhase('timing');
     setStartTime(Date.now());
     setElapsedTime(0);
+    setSwipeDir(null);
     if (timerRef.current) {
       clearInterval(timerRef.current);
     }
@@ -62,6 +65,28 @@ export default function StudyCard({
       setStudyPhase('timing');
     }
   };
+
+  // スワイプ設定
+  const handlers = useSwipeable({
+    onSwipedLeft: () => {
+      if (studyPhase === 'answer') {
+        handleResult(2); // 覚えた
+      }
+    },
+    onSwipedRight: () => {
+      if (studyPhase === 'answer') {
+        handleResult(0); // 忘れた
+      }
+    },
+    onSwiping: (e) => {
+      if (studyPhase === 'answer') {
+        setSwipeDir(e.dir);
+      }
+    },
+    onSwiped: () => setSwipeDir(null),
+    preventScrollOnSwipe: true,
+    trackMouse: true
+  });
   
   if (!card) {
     return (
@@ -72,34 +97,39 @@ export default function StudyCard({
   }
   
   return (
-    <div className="flex flex-col gap-6 w-full max-w-3xl mx-auto">
-      <Flashcard 
-         card={card}
-         isFlipped={studyPhase === 'answer'}
-         onFlip={handleFlip}
-         extraHeaderLeft={
-            <Button size="icon" variant="ghost" className="rounded-full w-12 h-12 bg-slate-50 text-primary-600 hover:bg-primary-50 hover:text-primary-700">
-                <Volume2 className="w-5 h-5" />
-            </Button>
-         }
-         extraHeaderRight={
-            <div className="flex flex-col items-end pointer-events-none mb-2">
-                {(card.reviewCount !== undefined && card.reviewCount >= 0) && (
-                    <Badge variant="outline" className="text-[10px] text-slate-400 border-slate-200 bg-slate-50/50 backdrop-blur-sm whitespace-nowrap tabular-nums font-bold">
-                        {card.reviewCount + 1}回目の復習
-                    </Badge>
-                )}
-            </div>
-         }
-         extraFooter={
-            studyPhase === 'timing' && (
-                <div className="text-center">
-                    <p className="text-sm text-slate-400 animate-pulse">カードをクリックして解答を表示</p>
-                </div>
-            )
-         }
-         onToggleUncertainty={onToggleUncertainty}
-      />
+    <div className="flex flex-col gap-6 w-full max-w-3xl mx-auto" {...handlers}>
+      <div className={`transition-all duration-200 ${
+        swipeDir === 'Left' ? 'opacity-50 -translate-x-4 border-blue-400' : 
+        swipeDir === 'Right' ? 'opacity-50 translate-x-4 border-red-400' : ''
+      }`}>
+        <Flashcard 
+           card={card}
+           isFlipped={studyPhase === 'answer'}
+           onFlip={handleFlip}
+           extraHeaderLeft={
+              <Button size="icon" variant="ghost" className="rounded-full w-12 h-12 bg-slate-50 text-primary-600 hover:bg-primary-50 hover:text-primary-700">
+                  <Volume2 className="w-5 h-5" />
+              </Button>
+           }
+           extraHeaderRight={
+              <div className="flex flex-col items-end pointer-events-none mb-2">
+                  {(card.reviewCount !== undefined && card.reviewCount >= 0) && (
+                      <Badge variant="outline" className="text-[10px] text-slate-400 border-slate-200 bg-slate-50/50 backdrop-blur-sm whitespace-nowrap tabular-nums font-bold">
+                          {card.reviewCount + 1}回目の復習
+                      </Badge>
+                  )}
+              </div>
+           }
+           extraFooter={
+              studyPhase === 'timing' && (
+                  <div className="text-center">
+                      <p className="text-sm text-slate-400 animate-pulse">カードをクリックまたはスワイプして解答を表示</p>
+                  </div>
+              )
+           }
+           onToggleUncertainty={onToggleUncertainty}
+        />
+      </div>
 
       {/* 回答ボタン（解答表示時のみ） */}
       {studyPhase === 'answer' && (
@@ -109,7 +139,9 @@ export default function StudyCard({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
-                      className="w-16 h-20 md:w-20 md:h-24 rounded-2xl bg-white border border-slate-100 shadow-sm hover:border-red-100 hover:bg-[#FFF5F6] flex flex-col items-center justify-center gap-1 md:gap-2 transition-all hover:-translate-y-1 active:scale-95 group"
+                      className={`w-16 h-20 md:w-20 md:h-24 rounded-2xl bg-white border shadow-sm flex flex-col items-center justify-center gap-1 md:gap-2 transition-all hover:-translate-y-1 active:scale-95 group ${
+                        swipeDir === 'Right' ? 'border-red-500 bg-red-50 scale-105' : 'border-slate-100'
+                      }`}
                       onClick={(e) => { e.stopPropagation(); handleResult(0); }}
                   >
                       <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-red-50 flex items-center justify-center text-[#FF5A65] group-hover:scale-110 transition-transform">
@@ -124,7 +156,7 @@ export default function StudyCard({
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="max-w-[200px] text-center bg-slate-800 text-white border-slate-700">
-                  <p>思い出せなかったカード。復習間隔はほぼリセットされ、しっかり復習が必要です。</p>
+                  <p>（右スワイプ）思い出せなかったカード。</p>
                 </TooltipContent>
               </Tooltip>
 
@@ -147,7 +179,7 @@ export default function StudyCard({
                       </button>
                     </TooltipTrigger>
                     <TooltipContent side="bottom" className="max-w-[200px] text-center bg-slate-800 text-white border-slate-700">
-                      <p>覚えかけのカード。復習間隔は控えめに伸び、段階的に強化されます。</p>
+                      <p>覚えかけのカード。</p>
                     </TooltipContent>
                   </Tooltip>
               )}
@@ -156,7 +188,9 @@ export default function StudyCard({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
-                      className="w-16 h-20 md:w-20 md:h-24 rounded-2xl bg-white border border-slate-100 shadow-sm hover:border-blue-100 hover:bg-[#F0F9FF] flex flex-col items-center justify-center gap-1 md:gap-2 transition-all hover:-translate-y-1 active:scale-95 group"
+                      className={`w-16 h-20 md:w-20 md:h-24 rounded-2xl bg-white border shadow-sm flex flex-col items-center justify-center gap-1 md:gap-2 transition-all hover:-translate-y-1 active:scale-95 group ${
+                        swipeDir === 'Left' ? 'border-blue-500 bg-blue-50 scale-105' : 'border-slate-100'
+                      }`}
                       onClick={(e) => { e.stopPropagation(); handleResult(2); }}
                   >
                       <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-blue-50 flex items-center justify-center text-[#00A3FF] group-hover:scale-110 transition-transform">
@@ -170,7 +204,7 @@ export default function StudyCard({
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="max-w-[200px] text-center bg-slate-800 text-white border-slate-700">
-                  <p>正解したカード。少しずつ復習間隔が伸び、安定的に覚えられます。</p>
+                  <p>（左スワイプ）正解したカード。</p>
                 </TooltipContent>
               </Tooltip>
 
@@ -193,7 +227,7 @@ export default function StudyCard({
                       </button>
                     </TooltipTrigger>
                     <TooltipContent side="bottom" className="max-w-[200px] text-center bg-slate-800 text-white border-slate-700">
-                      <p>簡単なカード。次回復習までの間隔を大きく伸ばせます。効率的に復習可能。</p>
+                      <p>簡単なカード。</p>
                     </TooltipContent>
                   </Tooltip>
               )}

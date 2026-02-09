@@ -1,4 +1,4 @@
-import { Notification, NotificationLevel, NotificationOptions } from '../types/notification';
+import type { Notification, NotificationLevel, NotificationOptions } from '../types/notification';
 
 /**
  * 通知サービス

@@ -4,6 +4,10 @@ import type { SyncResult } from '../../types/sync';
 // Domain Entities
 export interface SyncTask {
   id: string;
+  idempotencyKey?: string; // Added for compatibility
+  targetId?: string;       // Added for compatibility
+  operationType?: 'create' | 'update' | 'delete'; // Added for compatibility
+  
   type: 'upload' | 'download';
   entity: 'card' | 'folder' | 'cardRelation' | 'projectMap';
   payload: any;
@@ -42,6 +46,7 @@ export interface IDiffEngine {
     conflict: boolean;
   };
   validateConsistency(local: any, remote: any): boolean;
+  detectCycle(targetId: string, newParentId: string | null, allFolders: any[]): boolean;
 }
 
 // 4. Cloud Sync Adapter Interface

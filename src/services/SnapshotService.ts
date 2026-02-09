@@ -8,7 +8,7 @@
  * - エクスポートは人間に優しく、内部は厳密
  */
 
-import { localDb } from './localDB';
+import { getLocalDb } from './localDB';
 import type { 
   AppSnapshot, 
   SnapshotMetadata, 
@@ -49,9 +49,10 @@ class SnapshotService {
    * 現在のデータから完全なスナップショットを作成
    */
   async createSnapshot(userId: string): Promise<AppSnapshot> {
+    const db = await getLocalDb(userId);
     // 全データを取得（差分ではなく完全コピー）
-    const allCards = await localDb.getAllCards();
-    const allFolders = await localDb.getAllFolders();
+    const allCards = await db.getAllCards();
+    const allFolders = await db.getAllFolders();
     
     // 正規化
     const cards = allCards.map(normalizeCard);

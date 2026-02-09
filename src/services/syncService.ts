@@ -1,5 +1,5 @@
 import { firestoreDb } from './firebase';
-import { LocalDB, localDb } from './localDB';
+import { getLocalDb, type LocalDB } from './localDB';
 import type { ICloudProvider } from './cloudProvider';
 import { FirebaseCloudProvider } from './cloudProvider';
 import { ImageSyncService } from './imageSyncService';
@@ -45,15 +45,15 @@ export class SyncService {
   // Phase 1: Sync Isolation
   public static isSyncing: boolean = false;
 
-  constructor(userId: string, cloudProvider?: ICloudProvider) {
+  constructor(userId: string, localDB: LocalDB, cloudProvider?: ICloudProvider) {
     if (!userId) {
       throw new Error('SyncService requires a user ID.');
     }
     this.userId = userId;
-    // ユーザーごとにLocalDBインスタンスを作成
-    this.localDB = localDb;
+    // 注入されたLocalDBインスタンスを使用
+    this.localDB = localDB;
     this.cloudProvider = cloudProvider || new FirebaseCloudProvider();
-    this.imageSyncService = new ImageSyncService(userId);
+    this.imageSyncService = new ImageSyncService(userId, localDB);
     this.deviceId = getOrCreateDeviceId();
 
     // オンライン復帰時の自動同期
@@ -169,12 +169,12 @@ export class SyncService {
 
   private async checkDeviceLimit(): Promise<{ ok: boolean; count: number }> {
     const devicesRef = collection(firestoreDb, `sync_metadata/${this.userId}/devices`);
-    const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
     
     const q = query(
       devicesRef, 
       where('isActive', '==', true),
-      where('lastSyncTime', '>', Timestamp.fromDate(dayAgo))
+      where('lastSyncTime', '>', Timestamp.fromDate(sixtyDaysAgo))
     );
     const snapshot = await getDocs(q);
     return { ok: true, count: snapshot.size };
@@ -185,12 +185,12 @@ export class SyncService {
    */
   async cleanupInactiveDevices(): Promise<number> {
     const devicesRef = collection(firestoreDb, `sync_metadata/${this.userId}/devices`);
-    const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
     
     const q = query(
       devicesRef, 
       where('isActive', '==', true),
-      where('lastSyncTime', '<=', Timestamp.fromDate(dayAgo))
+      where('lastSyncTime', '<=', Timestamp.fromDate(sixtyDaysAgo))
     );
     
     const snapshot = await getDocs(q);

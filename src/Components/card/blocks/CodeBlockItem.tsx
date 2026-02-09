@@ -10,15 +10,17 @@ interface CodeBlockItemProps {
   onDelete: () => void;
   onDuplicate: () => void;
   dragHandleProps?: any;
+  dragHandleClassName?: string;
   accentColor?: string;
 }
 
-export const CodeBlockItem = ({ data, onChange, onDelete, onDuplicate, dragHandleProps, accentColor }: CodeBlockItemProps) => {
+export const CodeBlockItem = ({ data, onChange, onDelete, onDuplicate, dragHandleProps, dragHandleClassName, accentColor }: CodeBlockItemProps) => {
   return (
     <BlockWrapper 
       onDelete={onDelete} 
       onDuplicate={onDuplicate} 
       dragHandleProps={dragHandleProps}
+      dragHandleClassName={dragHandleClassName}
       label="Code"
       icon={CodeIcon}
       accentColor={accentColor}
