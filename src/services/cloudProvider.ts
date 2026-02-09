@@ -2,6 +2,7 @@ import { firestoreDb } from './firebase';
 import { collection, doc, setDoc, deleteDoc, query, where, getDocs, Timestamp } from 'firebase/firestore';
 import type { Folder, Card } from '../types';
 import { denormalizeUploadedImages, normalizeUploadedImages } from '../utils/imageUtils';
+import { foldersPathSegments, folderDocPathSegments, cardsPathSegments, cardDocPathSegments } from './firestorePaths';
 
 const denormalizeCardForCloud = (card: Card) => {
   const questionImages = normalizeUploadedImages((card as any).questionImages ?? (card as any).question_images ?? []);
@@ -32,8 +33,8 @@ export interface ICloudProvider {
     lastSyncTime: Date,
     userId: string
   ): Promise<{ folders: Folder[]; cards: Card[] }>;
-  deleteFolder(folderId: string): Promise<void>;
-  deleteCard(cardId: string): Promise<void>;
+  deleteFolder(folderId: string, userId: string): Promise<void>;
+  deleteCard(cardId: string, userId: string): Promise<void>;
 }
 
 /**
@@ -41,7 +42,8 @@ export interface ICloudProvider {
  */
 export class FirebaseCloudProvider implements ICloudProvider {
   async upsertFolder(folder: Folder): Promise<void> {
-    const docRef = doc(firestoreDb, 'folders', folder.id);
+    if (!folder.userId) throw new Error('userId is required for upsertFolder');
+    const docRef = doc(firestoreDb, ...folderDocPathSegments(folder.userId, folder.id));
     const data = {
       ...denormalizeFolderForCloud(folder),
       updatedAt: Timestamp.now()
@@ -50,7 +52,8 @@ export class FirebaseCloudProvider implements ICloudProvider {
   }
 
   async upsertCard(card: Card): Promise<void> {
-    const docRef = doc(firestoreDb, 'cards', card.id);
+    if (!card.userId) throw new Error('userId is required for upsertCard');
+    const docRef = doc(firestoreDb, ...cardDocPathSegments(card.userId, card.id));
     const data = {
       ...denormalizeCardForCloud(card),
       updatedAt: Timestamp.now()
@@ -62,10 +65,11 @@ export class FirebaseCloudProvider implements ICloudProvider {
     lastSyncTime: Date,
     userId: string
   ): Promise<{ folders: Folder[]; cards: Card[] }> {
+    if (!userId) throw new Error('userId is required for fetchUpdatedDataSince');
+    
     // フォルダの取得
     const foldersQuery = query(
-      collection(firestoreDb, 'folders'),
-      where('userId', '==', userId),
+      collection(firestoreDb, ...foldersPathSegments(userId)),
       where('updatedAt', '>', Timestamp.fromDate(lastSyncTime))
     );
 
@@ -77,8 +81,7 @@ export class FirebaseCloudProvider implements ICloudProvider {
 
     // カードの取得（フォルダに関わらずユーザー単位で取得）
     const cardsQuery = query(
-      collection(firestoreDb, 'cards'),
-      where('userId', '==', userId),
+      collection(firestoreDb, ...cardsPathSegments(userId)),
       where('updatedAt', '>', Timestamp.fromDate(lastSyncTime))
     );
 
@@ -91,13 +94,15 @@ export class FirebaseCloudProvider implements ICloudProvider {
     return { folders, cards };
   }
 
-  async deleteFolder(folderId: string): Promise<void> {
-    const docRef = doc(firestoreDb, 'folders', folderId);
+  async deleteFolder(folderId: string, userId: string): Promise<void> {
+    if (!userId) throw new Error('userId is required for deleteFolder');
+    const docRef = doc(firestoreDb, ...folderDocPathSegments(userId, folderId));
     await setDoc(docRef, { isDeleted: true, updatedAt: Timestamp.now() }, { merge: true });
   }
 
-  async deleteCard(cardId: string): Promise<void> {
-    const docRef = doc(firestoreDb, 'cards', cardId);
+  async deleteCard(cardId: string, userId: string): Promise<void> {
+    if (!userId) throw new Error('userId is required for deleteCard');
+    const docRef = doc(firestoreDb, ...cardDocPathSegments(userId, cardId));
     await setDoc(docRef, { isDeleted: true, updatedAt: Timestamp.now() }, { merge: true });
   }
 }

@@ -34,6 +34,7 @@ import { ja } from 'date-fns/locale';
 import { getLocalDb } from '../services/localDB';
 import { firestoreDb } from '@/services/firebase';
 import { updateDoc, deleteDoc, doc, Timestamp } from 'firebase/firestore';
+import { folderDocPathSegments, cardDocPathSegments } from '@/services/firestorePaths';
 
 export default function Trash() {
   const navigate = useNavigate();
@@ -203,7 +204,7 @@ export default function Trash() {
         await localDb.restore('folders', id);
         
         // Firestore も更新
-        const folderRef = doc(firestoreDb, 'folders', id);
+        const folderRef = doc(firestoreDb, ...folderDocPathSegments(currentUser.uid, id));
         await updateDoc(folderRef, {
           isDeleted: false,
           deletedAt: null,
@@ -217,7 +218,7 @@ export default function Trash() {
         await localDb.restore('cards', id);
         
         // Firestore も更新
-        const cardRef = doc(firestoreDb, 'cards', id);
+        const cardRef = doc(firestoreDb, ...cardDocPathSegments(currentUser.uid, id));
         await updateDoc(cardRef, {
           isDeleted: false,
           deletedAt: null,
@@ -264,7 +265,7 @@ export default function Trash() {
       await localDb.restore('folders', folderId);
       
       // Firestore も更新
-      const folderRef = doc(firestoreDb, 'folders', folderId);
+      const folderRef = doc(firestoreDb, ...folderDocPathSegments(currentUser.uid, folderId));
       await updateDoc(folderRef, {
         isDeleted: false,
         deletedAt: null,
@@ -291,7 +292,7 @@ export default function Trash() {
         
         // Firestore からも削除
         try {
-          const folderRef = doc(firestoreDb, 'folders', id);
+          const folderRef = doc(firestoreDb, ...folderDocPathSegments(currentUser.uid, id));
           await deleteDoc(folderRef);
         } catch (firestoreError) {
           console.warn(`Firestore delete failed for folder ${id}:`, firestoreError);
@@ -307,7 +308,7 @@ export default function Trash() {
         
         // Firestore からも削除
         try {
-          const cardRef = doc(firestoreDb, 'cards', id);
+          const cardRef = doc(firestoreDb, ...cardDocPathSegments(currentUser.uid, id));
           await deleteDoc(cardRef);
         } catch (firestoreError) {
           console.warn(`Firestore delete failed for card ${id}:`, firestoreError);
@@ -532,7 +533,7 @@ export default function Trash() {
                                   await localDb.restore('cards', card.id);
                                   // Firestore も更新
                                   try {
-                                    const cardRef = doc(firebaseDb, 'cards', card.id);
+                                    const cardRef = doc(firestoreDb, ...cardDocPathSegments(currentUser.uid, card.id));
                                     await updateDoc(cardRef, {
                                       isDeleted: false,
                                       deletedAt: null,
@@ -653,7 +654,7 @@ export default function Trash() {
                                 await localDb.restore('cards', card.id);
                                 // Firestore も更新
                                 try {
-                                  const cardRef = doc(firebaseDb, 'cards', card.id);
+                                  const cardRef = doc(firestoreDb, ...cardDocPathSegments(currentUser.uid, card.id));
                                   await updateDoc(cardRef, {
                                     isDeleted: false,
                                     deletedAt: null,

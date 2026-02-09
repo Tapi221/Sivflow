@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { firestoreDb } from '@/services/firebase';
 import { collection, getDocs, limit, query, where, doc, getDoc } from 'firebase/firestore';
+import { cardsPathSegments } from '@/services/firestorePaths';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/Components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/card';
@@ -91,7 +92,7 @@ export default function ImageDiagnostics() {
 
       // 2. Check Cards (Current User Only)
       // Must filter by userId to pass rules
-      const cardsSnap = await getDocs(query(collection(firestoreDb, 'cards'), where('userId', '==', currentUser.uid), limit(50)));
+          const cardsSnap = await getDocs(query(collection(firestoreDb, ...cardsPathSegments(currentUser.uid)), limit(50)));
       
       for (const doc of cardsSnap.docs) {
         const data = doc.data();

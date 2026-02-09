@@ -159,7 +159,7 @@ export class SyncService {
         // フォルダの変更をバッチに追加
         for (const folder of dirtyFolders) {
             if (folder.cloudSyncEnabled) {
-                const docRef = doc(db, `folders/${folder.id}`);
+              const docRef = doc(db, `users/${this.userId}/folders/${folder.id}`);
                 batch.set(docRef, folder);
             }
         }
@@ -168,7 +168,7 @@ export class SyncService {
         for (const card of dirtyCards) {
             const parentFolder = await this.localDB.folders.get(card.folderId);
             if (parentFolder?.cloudSyncEnabled) {
-                const docRef = doc(db, `cards/${card.id}`);
+              const docRef = doc(db, `users/${this.userId}/cards/${card.id}`);
                 batch.set(docRef, card);
             }
         }

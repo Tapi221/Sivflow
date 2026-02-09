@@ -15,17 +15,41 @@
  *   --verbose: 詳細ログを出力（skip理由など）
  */
 
-import * as admin from 'firebase-admin';
+import { initializeApp, cert } from 'firebase-admin/app';
+import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 import * as fs from 'fs';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // サービスアカウントキーのパス
 const SERVICE_ACCOUNT_PATH = path.join(__dirname, '..', 'serviceAccountKey.json');
 
 // コマンドライン引数
 const args = process.argv.slice(2);
-const DRY_RUN = args.includes('--dry-run');
-const VERBOSE = args.includes('--verbose');
+const isHelp = args.includes('--help');
+const isDryRun = args.includes('--dry-run');
+const isVerbose = args.includes('--verbose');
+
+if (isHelp) {
+  console.log(`
+Usage:
+  npx tsx scripts/migrateFirestoreToSubcollections.ts [options]
+
+Options:
+  --dry-run     書き込みを行わず、移行対象のみ表示
+  --verbose     詳細ログを表示
+  --help        このヘルプを表示
+
+⚠️ オプションなしの場合は本番書き込みを行います
+`);
+  process.exit(0);
+}
+
+const DRY_RUN = isDryRun;
+const VERBOSE = isVerbose;
 
 // 統計情報
 interface MigrationStats {
@@ -62,8 +86,8 @@ function initializeFirebase() {
 
   const serviceAccount = JSON.parse(fs.readFileSync(SERVICE_ACCOUNT_PATH, 'utf8'));
 
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
+  initializeApp({
+    credential: cert(serviceAccount)
   });
 
   console.log('✅ Firebase Admin SDK 初期化完了\n');
@@ -75,7 +99,7 @@ function initializeFirebase() {
 async function migrateFolders() {
   console.log('📁 フォルダの移行を開始...\n');
 
-  const db = admin.firestore();
+  const db = getFirestore();
   const oldFoldersRef = db.collection('folders');
   const snapshot = await oldFoldersRef.get();
 
@@ -130,7 +154,7 @@ async function migrateFolders() {
       } else {
         await newFolderRef.set({
           ...data,
-          migratedAt: admin.firestore.FieldValue.serverTimestamp(),
+          migratedAt: FieldValue.serverTimestamp(),
           migratedFrom: 'top-level-collection'
         });
         stats.folders.migrated++;
@@ -152,7 +176,7 @@ async function migrateFolders() {
 async function migrateCards() {
   console.log('🃏 カードの移行を開始...\n');
 
-  const db = admin.firestore();
+  const db = getFirestore();
   const oldCardsRef = db.collection('cards');
   const snapshot = await oldCardsRef.get();
 
@@ -207,7 +231,7 @@ async function migrateCards() {
       } else {
         await newCardRef.set({
           ...data,
-          migratedAt: admin.firestore.FieldValue.serverTimestamp(),
+          migratedAt: FieldValue.serverTimestamp(),
           migratedFrom: 'top-level-collection'
         });
         stats.cards.migrated++;
