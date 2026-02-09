@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { localDb } from '../services/localDB';
+import { getLocalDb } from '../services/localDB';
 import { QueueManager } from '../services/logic/QueueManager';
 import { useAuth } from '../contexts/AuthContext';
 import type { ProjectMap } from '../types';
@@ -9,14 +9,13 @@ export function useProjectMap(folderId?: string) {
   const { currentUser } = useAuth();
   const [error, setError] = useState<string | null>(null);
 
-  const queueManager = useMemo(() => new QueueManager(localDb), []);
-
   const rawMaps = useLiveQuery(
     async () => {
       try {
         if (!currentUser) return [];
+        const db = await getLocalDb();
         // fetch all maps for user
-        const maps = await localDb.projectMaps.where('userId').equals(currentUser.uid).toArray();
+        const maps = await db.projectMaps.where('userId').equals(currentUser.uid).toArray();
         return maps;
       } catch (err: any) {
         console.error(`[useProjectMap] Error: ${err.message}`);
@@ -40,6 +39,9 @@ export function useProjectMap(folderId?: string) {
   const createMap = async (mapData: Partial<ProjectMap>) => {
     if (!currentUser) throw new Error('Authentication required');
 
+    const db = await getLocalDb();
+    const queueManager = new QueueManager(db);
+
     const now = new Date();
     const id = crypto.randomUUID();
 
@@ -56,7 +58,7 @@ export function useProjectMap(folderId?: string) {
         ...mapData
     } as ProjectMap;
 
-    await localDb.projectMaps.put(newMap);
+    await db.projectMaps.put(newMap);
 
     await queueManager.enqueue({
         id: crypto.randomUUID(),
@@ -73,14 +75,17 @@ export function useProjectMap(folderId?: string) {
   const updateMap = async (id: string, updates: Partial<ProjectMap>) => {
     if (!currentUser) throw new Error('Authentication required');
 
+    const db = await getLocalDb();
+    const queueManager = new QueueManager(db);
+
     const updatedData = {
         ...updates,
         updatedAt: new Date()
     };
 
-    await localDb.projectMaps.update(id, updatedData);
+    await db.projectMaps.update(id, updatedData);
 
-    const current = await localDb.projectMaps.get(id);
+    const current = await db.projectMaps.get(id);
     if (current) {
         const payload = { ...current, ...updatedData };
         await queueManager.enqueue({
@@ -97,8 +102,11 @@ export function useProjectMap(folderId?: string) {
   const deleteMap = async (id: string) => {
     if (!currentUser) throw new Error('Authentication required');
 
+    const db = await getLocalDb();
+    const queueManager = new QueueManager(db);
+
     const now = new Date();
-    await localDb.projectMaps.update(id, { isDeleted: true, updatedAt: now });
+    await db.projectMaps.update(id, { isDeleted: true, updatedAt: now });
 
     await queueManager.enqueue({
         id: crypto.randomUUID(),

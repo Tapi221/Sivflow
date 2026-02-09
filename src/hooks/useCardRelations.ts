@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { localDb } from '../services/localDB';
+import { getLocalDb } from '../services/localDB';
 import { QueueManager } from '../services/logic/QueueManager';
 import { useAuth } from '../contexts/AuthContext';
 import type { CardRelation } from '../types';
@@ -14,9 +14,6 @@ export function useCardRelations(relatedCardId?: string) {
   const { currentUser } = useAuth();
   const [error, setError] = useState<string | null>(null);
 
-  /** QueueManagerインスタンス（Dexie用キュー管理） */
-  const queueManager = useMemo(() => new QueueManager(localDb), []);
-
   /**
    * ローカルDBからカード関連をリアルタイム取得
    * useLiveQueryでcurrentUserの変更に応じて再取得される
@@ -25,7 +22,8 @@ export function useCardRelations(relatedCardId?: string) {
     async () => {
       try {
         if (!currentUser) return [];
-        return await localDb.cardRelations
+        const db = await getLocalDb();
+        return await db.cardRelations
           .where('userId')
           .equals(currentUser.uid)
           .toArray();
@@ -63,6 +61,9 @@ export function useCardRelations(relatedCardId?: string) {
   const createRelation = async (relationData: Partial<CardRelation>) => {
     if (!currentUser) throw new Error('Authentication required');
 
+    const db = await getLocalDb();
+    const queueManager = new QueueManager(db);
+
     const now = new Date();
     const id = crypto.randomUUID();
 
@@ -81,7 +82,7 @@ export function useCardRelations(relatedCardId?: string) {
       ...relationData
     } as CardRelation;
 
-    await localDb.cardRelations.put(newRelation);
+    await db.cardRelations.put(newRelation);
 
     await queueManager.enqueue({
       id: crypto.randomUUID(),
@@ -105,11 +106,14 @@ export function useCardRelations(relatedCardId?: string) {
   const updateRelation = async (id: string, updates: Partial<CardRelation>) => {
     if (!currentUser) throw new Error('Authentication required');
 
+    const db = await getLocalDb();
+    const queueManager = new QueueManager(db);
+
     const updatedData = { ...updates, updatedAt: new Date() };
 
-    await localDb.cardRelations.update(id, updatedData);
+    await db.cardRelations.update(id, updatedData);
 
-    const current = await localDb.cardRelations.get(id);
+    const current = await db.cardRelations.get(id);
     if (current) {
       const payload = { ...current, ...updatedData };
       await queueManager.enqueue({
@@ -132,8 +136,11 @@ export function useCardRelations(relatedCardId?: string) {
   const deleteRelation = async (id: string) => {
     if (!currentUser) throw new Error('Authentication required');
 
+    const db = await getLocalDb();
+    const queueManager = new QueueManager(db);
+
     const now = new Date();
-    await localDb.cardRelations.update(id, { isDeleted: true, updatedAt: now });
+    await db.cardRelations.update(id, { isDeleted: true, updatedAt: now });
 
     await queueManager.enqueue({
       id: crypto.randomUUID(),

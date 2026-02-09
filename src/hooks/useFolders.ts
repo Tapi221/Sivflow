@@ -1,11 +1,10 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Timestamp } from 'firebase/firestore';
 import { nanoid } from 'nanoid';
-import { localDb, getLocalDb } from '../services/localDB'; // Unified LocalDB
+import { getLocalDb } from '../services/localDB';
 import { useAuth } from '../contexts/AuthContext';
 import type { Folder } from '../types';
 import { normalizeFolder } from '../utils';
-import { denormalizeUploadedImages } from '../utils/imageUtils';
 
 export function useFolders() {
   const { currentUser } = useAuth();
@@ -13,7 +12,7 @@ export function useFolders() {
   const folders = useLiveQuery(
     async () => {
       if (!currentUser) return [];
-      const db = getLocalDb();
+      const db = await getLocalDb();
       console.log(`[Diagnostic] useFolders: Fetching from DB ${db.name}`);
       const rawFolders = await db.folders.toArray();
 
@@ -27,7 +26,7 @@ export function useFolders() {
 
       return filtered.map(normalizeFolder);
     },
-    [currentUser?.uid, localDb?.name]
+    [currentUser?.uid]
   );
 
   const createFolder = async (
@@ -38,7 +37,7 @@ export function useFolders() {
   ) => {
     if (!currentUser) throw new Error('認証が必要です');
 
-    const db = getLocalDb();
+    const db = await getLocalDb();
     console.log('[Diagnostic] createFolder START. localDb instance type:', db?.constructor?.name);
     console.log('[createFolder] START', { folderName: name, parentId, dbName: db?.name });
 
@@ -98,16 +97,12 @@ export function useFolders() {
     const now = Timestamp.now();
     const payload = {
       ...data,
-      memoImages: data.memoImages ? denormalizeUploadedImages(data.memoImages, { case: 'camel', stripUndefined: true }) : undefined,
-      updatedAt: now,
-    } as any;
-
-    if (payload.memoImages === undefined) {
-      delete payload.memoImages;
-    }
+      updatedAt: now.toDate(),
+    };
 
     // 1. LocalDB更新 (Local First & Sync Queued)
-    await localDb.updateItem('folders', folderId, payload);
+    const db = await getLocalDb();
+    await db.updateItem('folders', folderId, payload);
   };
 
   const reorderFolders = async (folderIds: string[], parentId: string | null = null) => {
@@ -116,8 +111,9 @@ export function useFolders() {
     const now = Timestamp.now();
     
     // 1. LocalDB Updates (Sync Queued for each)
+    const db = await getLocalDb();
     const updates = folderIds.map((folderId, index) => {
-        return localDb.updateItem('folders', folderId, {
+        return db.updateItem('folders', folderId, {
             orderIndex: index,
             updatedAt: now.toDate()
         });
@@ -130,7 +126,8 @@ export function useFolders() {
     
     const now = Timestamp.now();
     // 1. LocalDB softDelete (Sync Queued)
-    await localDb.softDelete('folders', folderId);
+    const db = await getLocalDb();
+    await db.softDelete('folders', folderId);
     
     // Recursive delete
     const currentFolders = folders || [];

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { SyncService } from '../services/syncService';
+import { SyncServiceFactory } from '../services/SyncServiceFactory';
 import type { SyncSettings } from '../types';
 import { DEFAULT_SYNC_SETTINGS } from '../types';
 import { useAuth } from '../contexts/AuthContext';
@@ -13,11 +13,12 @@ export const useSyncSettings = () => {
     if (!currentUser) return;
     setLoading(true);
     try {
-      const syncService = new SyncService(currentUser.uid);
+      const syncService = await SyncServiceFactory.getInstance(currentUser.uid);
       const s = await syncService.loadSettings();
-      setSettings(s);
+      setSettings(s || DEFAULT_SYNC_SETTINGS);
     } catch (error) {
       console.error('[useSyncSettings] Failed to load settings:', error);
+      setSettings(DEFAULT_SYNC_SETTINGS);
     } finally {
       setLoading(false);
     }
@@ -26,7 +27,7 @@ export const useSyncSettings = () => {
   const updateSettings = useCallback(async (newSettings: Partial<SyncSettings>) => {
     if (!currentUser) return;
     try {
-      const syncService = new SyncService(currentUser.uid);
+      const syncService = await SyncServiceFactory.getInstance(currentUser.uid);
       const updated = { ...settings, ...newSettings };
       await syncService.saveSettings(updated);
       setSettings(updated);

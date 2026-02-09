@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { localDb } from '../services/localDB';
+import { getLocalDb } from '../services/localDB';
 import { useAuth } from '../contexts/AuthContext';
 import { normalizeCard } from '../utils';
 
@@ -14,7 +14,8 @@ export function useAllDescendantCards(rootFolderId?: string) {
   const allFolders = useLiveQuery(
     async () => {
       if (!currentUser) return [];
-      return await localDb.folders.where('userId').equals(currentUser.uid).toArray();
+      const db = await getLocalDb();
+      return await db.folders.where('userId').equals(currentUser.uid).toArray();
     },
     [currentUser]
   );
@@ -23,7 +24,8 @@ export function useAllDescendantCards(rootFolderId?: string) {
   const rawCards = useLiveQuery(
     async () => {
       if (!currentUser) return [];
-      return await localDb.getAllCards();
+      const db = await getLocalDb();
+      return await db.getAllCards();
     },
     [currentUser]
   );
