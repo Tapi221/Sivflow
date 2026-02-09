@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect, useRef } from 'react';
+import React, { useCallback, useState, useEffect, useRef, useId } from 'react';
 import { Button } from '@/Components/ui/button';
 import { Upload, X, Menu, ChevronDown, Play, Pause, Loader2, RotateCcw, Cloud, Check } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
@@ -8,6 +8,8 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import type { UploadedImage } from '@/types';
 import { createUploadedImage, createFailedUploadedImage, isHeicFile, convertHeicToJpeg, compressAndConvertToBase64 } from '@/utils/imageUtils';
+import type { UploadedImageStatus } from '@/types';
+import type { BlobUrl, StorageUrl } from '@/types/branded';
 import { useReliableFileUpload } from '@/hooks/useReliableFileUpload';
 
 function ImageItem({ item, index, onRemove, onDownload, onRetry }) {
@@ -19,7 +21,7 @@ function ImageItem({ item, index, onRemove, onDownload, onRetry }) {
   
   return (
     <>
-      <Draggable draggableId={`img-${index}`} index={index}>
+      <Draggable draggableId={`draggable-img-${item.id || index}-${index}`} index={index}>
         {(provided) => (
           <div
             ref={provided.innerRef}
@@ -37,18 +39,21 @@ function ImageItem({ item, index, onRemove, onDownload, onRetry }) {
               <img
                 src={displayUrl}
                 alt={`Image ${index + 1}`}
-                className="w-full h-32 object-contain cursor-pointer bg-white"
+                className="w-full h-24 object-contain cursor-pointer bg-white"
                 onClick={() => setShowFullscreen(true)}
               />
             ) : (
-              <div className="w-full h-32 bg-white" />
+              <div className="w-full h-24 bg-white" />
             )}
 
             {/* Optimistic Status Badges & Progress */}
             <div className="absolute inset-x-2 bottom-2 z-20">
                  {item.status === 'uploading' && item.progress !== undefined && item.progress < 100 && (
                      <div className="bg-white/90 rounded-full h-1 overflow-hidden shadow-sm">
-                        <div className="bg-primary-600 h-full transition-all duration-300" style={{ width: `${item.progress}%` }} />
+                        <div 
+                          className="h-full progress-bar-fill" 
+                          style={{ '--progress': `${item.progress}%`, '--progress-color': 'var(--primary-color)' } as React.CSSProperties} 
+                        />
                      </div>
                  )}
             </div>
@@ -167,12 +172,25 @@ function AudioItem({ url, index, onRemove }) {
   );
 }
 
+interface MediaUploaderProps {
+  type?: 'image' | 'audio';
+  urls?: (string | UploadedImage)[];
+  onChange: (urls: (string | UploadedImage)[]) => void;
+  maxFiles?: number;
+  initialFile?: File;
+  onConsumeInitialFile?: () => void;
+  onFilesExcess?: (files: File[]) => void;
+}
+
 export default function MediaUploader({ 
   type = 'image', 
   urls = [], 
   onChange,
-  maxFiles = 10
-}) {
+  maxFiles = 10,
+  initialFile,
+  onConsumeInitialFile,
+  onFilesExcess
+}: MediaUploaderProps) {
   const { currentUser } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
@@ -181,6 +199,19 @@ export default function MediaUploader({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
+  const uniqueId = useId();
+  const inputId = `file-${type}-${uniqueId}`;
+
+  // Handle initialFile (pending upload from overflow)
+  useEffect(() => {
+    if (initialFile && onConsumeInitialFile) {
+        // Automatically start uploading the file
+        handleUpload([initialFile]);
+        // Notify parent that the file has been consumed so it can be cleared from state
+        onConsumeInitialFile();
+    }
+  }, [initialFile]);
+
   useEffect(() => {
     latestItemsRef.current = urls;
   }, [urls]);
@@ -188,6 +219,8 @@ export default function MediaUploader({
   const accept = type === 'image'
     ? 'image/png,image/jpeg,image/jpg,image/heic,image/heif'
     : 'audio/*';
+
+  const ariaLabel = type === 'image' ? '画像をアップロード' : '音声をアップロード';
 
   const { uploadFile } = useReliableFileUpload();
 
@@ -205,8 +238,31 @@ export default function MediaUploader({
     }
 
     const isImage = type === 'image';
-    const limit = Math.max(0, maxFiles - urls.length);
-    const filesArray = Array.from(files).slice(0, limit);
+    const currentCount = urls.length;
+    let limit = Math.max(0, maxFiles - currentCount);
+    
+    // Convert to array
+    const allFiles = Array.from(files);
+    
+    // Split into current vs excess
+    const filesToUpload = allFiles.slice(0, limit);
+    const filesExcess = allFiles.slice(limit);
+    
+    // Notify parent about excess files
+    if (filesExcess.length > 0 && onFilesExcess) {
+        onFilesExcess(filesExcess);
+    }
+    
+    // Even if limit is 0 (full), we might have just consumed the initialFile which calls this function.
+    // However, if we are full and handleUpload is called, limit is 0.
+    // BUT, initialFile logic calls handleUpload([file]). At that point, the block is likely empty (newly created).
+    // So 'limit' should be correct (1-0=1).
+    
+    if (filesToUpload.length === 0) {
+        return;
+    }
+
+    const filesArray = filesToUpload;
 
     console.log('[MediaUploader] Processing files:', filesArray.length, 'isImage:', isImage);
 
@@ -219,13 +275,20 @@ export default function MediaUploader({
             });
         };
 
-        const results = await Promise.allSettled(filesArray.map(uploadAudioWrapper));
+        // maxFiles=1 の場合は最初の1ファイルのみ処理
+        const filesToUpload = maxFiles === 1 ? filesArray.slice(0, 1) : filesArray;
+        const results = await Promise.allSettled(filesToUpload.map(uploadAudioWrapper));
         const uploadedUrls = results
           .filter(result => result.status === 'fulfilled')
           .map((result: any) => result.value.url);
 
         if (uploadedUrls.length > 0) {
-          onChange([...(urls as string[]), ...uploadedUrls]);
+          if (maxFiles === 1) {
+            // 単一ファイル制限の場合は置き換え
+            onChange([uploadedUrls[0]]);
+          } else {
+            onChange([...(urls as string[]), ...uploadedUrls]);
+          }
         }
 
         const failures = results.filter(r => r.status === 'rejected');
@@ -306,9 +369,9 @@ export default function MediaUploader({
             return {
               ...item,
               localUrl: null,
-              remoteUrl: result.url || null,
+              remoteUrl: (result.url || null) as StorageUrl | null,
               storagePath: result.storagePath || null,
-              status: 'ready',
+              status: 'ready' as UploadedImageStatus,
               source: result.source || null,
               fallbackReason: result.fallbackReason || null,
             progress: 100 // completed
@@ -321,7 +384,7 @@ export default function MediaUploader({
           console.error('[MediaUploader] Image upload error for:', image.id, error);
           const current = (latestItemsRef.current as UploadedImage[]) || [];
           const updated = current.map(item =>
-            item.id === image.id ? { ...item, status: 'failed', error: error.message } : item
+            item.id === image.id ? { ...item, status: 'failed' as UploadedImageStatus, error: error.message } : item
           );
           latestItemsRef.current = updated; // 最新の状態を保存
           onChange(updated);
@@ -354,7 +417,7 @@ export default function MediaUploader({
 
     try {
       const targetFile = isHeicFile(file) ? await convertHeicToJpeg(file) : file;
-      const newImage = createUploadedImage(targetFile);
+      const newImage = createUploadedImage(targetFile) as UploadedImage;
       const replaced = current.map((item, i) => (i === index ? newImage : item));
       onChange(replaced);
 
@@ -371,9 +434,9 @@ export default function MediaUploader({
         return {
           ...item,
           localUrl: null,
-          remoteUrl: result.url || null,
+          remoteUrl: (result.url || null) as StorageUrl | null,
           storagePath: result.storagePath || null,
-          status: 'ready',
+          status: 'ready' as UploadedImageStatus,
           source: result.source || null,
           fallbackReason: result.fallbackReason || null
         };
@@ -382,7 +445,7 @@ export default function MediaUploader({
     } catch (error: any) {
       console.warn('Retry failed', error);
       // Fallback failed or hook threw
-      const failedImage = createFailedUploadedImage(file);
+      const failedImage = createFailedUploadedImage(file) as UploadedImage;
       const replaced = current.map((item, i) => (i === index ? failedImage : item));
       onChange(replaced);
     }
@@ -419,36 +482,36 @@ export default function MediaUploader({
     setDragOver(false);
   };
   
-  // Handle paste for images
+  // Handle paste for images and audio
   const handlePaste = useCallback(async (e) => {
-    if (type !== 'image') return;
-    
     // Only handle paste if mouse is hovering over this uploader instance
     if (!containerRef.current?.matches(':hover')) return;
     
     const items = e.clipboardData?.items;
     if (!items) return;
     
-    const imageFiles = [];
+    const files = [];
     for (const item of items) {
-      if (item.type.startsWith('image/')) {
+      if (type === 'image' && item.type.startsWith('image/')) {
         const file = item.getAsFile();
-        if (file) imageFiles.push(file);
+        if (file) files.push(file);
+      } else if (type === 'audio' && item.type.startsWith('audio/')) {
+        const file = item.getAsFile();
+        if (file) files.push(file);
       }
     }
     
-    if (imageFiles.length > 0) {
+    // We pass ALL files to handleUpload, which now knows how to split them.
+    if (files.length > 0) {
       e.preventDefault();
-      await handleUpload(imageFiles);
+      await handleUpload(files);
     }
-  }, [urls, type]);
+  }, [urls, type, maxFiles, onFilesExcess]);
   
   useEffect(() => {
-    if (type === 'image') {
-      document.addEventListener('paste', handlePaste);
-      return () => document.removeEventListener('paste', handlePaste);
-    }
-  }, [handlePaste, type]);
+    document.addEventListener('paste', handlePaste);
+    return () => document.removeEventListener('paste', handlePaste);
+  }, [handlePaste]);
   
   const handleRemove = (index: number) => {
     if (type === 'image') {
@@ -482,54 +545,71 @@ export default function MediaUploader({
   
   return (
     <div className="space-y-3" ref={containerRef}>
-      <div
-        className={cn(
-          "border-2 border-dashed rounded-[24px] p-8 text-center transition-all duration-300 cursor-pointer group/upload",
-          dragOver ? "border-indigo-400 bg-indigo-50/50" : "border-slate-200 hover:border-slate-300 hover:bg-slate-50/30"
-        )}
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onClick={() => {
-          setRetryIndex(null);
-          fileInputRef.current?.click();
-        }}
-      >
+      {/* 
+          urls が空の場合のみ、大きなアップロードエリアを表示する。
+          画像や音声が既に1つ以上ある場合は、この巨大なエリアは隠して
+          コンテンツリストの末尾に小さな「追加」ボタンを表示する。
+      */}
+      {urls.length === 0 && (
+        <div
+          className={cn(
+            "border-2 border-dashed rounded-[24px] p-5 text-center transition-all duration-300 cursor-pointer group/upload",
+            dragOver ? "border-indigo-400 bg-indigo-50/50" : "border-slate-200 hover:border-slate-300 hover:bg-slate-50/30"
+          )}
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onClick={() => {
+            setRetryIndex(null);
+            fileInputRef.current?.click();
+          }}
+        >
+          <input
+            id={inputId}
+            type="file"
+            accept={accept}
+            multiple
+            className="hidden"
+            ref={fileInputRef}
+            onChange={handleFileInputChange}
+            aria-label={ariaLabel}
+          />
+          
+          {isUploading ? (
+            <div className="flex items-center justify-center gap-2 text-indigo-600">
+              <Upload className="w-6 h-6 mx-auto mb-1.5 opacity-50" />
+              <p className="text-sm">
+                 アップロード中...
+              </p>
+            </div>
+          ) : (
+            <div className="text-slate-400 group-hover/upload:text-slate-500 transition-colors select-none">
+              <Upload className="w-6 h-6 mx-auto mb-2 opacity-60" />
+              <p className="text-[10px] font-bold tracking-widest uppercase">
+                ドラッグ＆ドロップ、クリック、または Ctrl+V で
+                {type === 'image' ? '画像を' : '音声を'}アップロード
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 
+          隠し input 要素: 
+          大きなエリアを隠しても、追加ボタンからクリックイベントを発火させるために必要。
+      */}
+      {urls.length > 0 && (
         <input
-          id={`file-${type}`}
+          id={`${inputId}-hidden`}
           type="file"
           accept={accept}
           multiple
           className="hidden"
           ref={fileInputRef}
           onChange={handleFileInputChange}
+          aria-label={ariaLabel}
         />
-        
-        {isUploading ? (
-          <div className="flex items-center justify-center gap-2 text-indigo-600">
-             {/* Optimistic UI: We allow adding more files even while uploading. 
-                 But to avoid confusion, we just show standard dropzone with a small busy indicator if strictly needed.
-                 However, requirement says "Avoid Process Narration". 
-                 So we revert to standard upload prompt, maybe with a small side note or just standard.
-                 Actually, isUploading state blocks the input in some UIs. 
-                 Here we want to allow continuous work. 
-                 Let's keep the dropzone active.
-             */}
-            <Upload className="w-8 h-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">
-               続けてアップロード可能
-            </p>
-          </div>
-        ) : (
-          <div className="text-slate-400 group-hover/upload:text-slate-500 transition-colors">
-            <Upload className="w-8 h-8 mx-auto mb-3 opacity-60" />
-            <p className="text-xs font-bold tracking-widest uppercase">
-              ドラッグ＆ドロップまたはクリックして<br/>
-              {type === 'image' ? '画像' : '音声'}をアップロード
-            </p>
-          </div>
-        )}
-      </div>
+      )}
       
       {urls.length > 0 && (
         <DragDropContext onDragEnd={handleReorder}>
@@ -547,7 +627,7 @@ export default function MediaUploader({
                 {urls.map((item, index) => (
                   type === 'image' ? (
                     <ImageItem
-                      key={`img-${(item as UploadedImage).id ?? index}`}
+                      key={`img-${(item as UploadedImage).id ?? index}-${index}`}
                       item={item as UploadedImage}
                       index={index}
                       onRemove={handleRemove}
@@ -563,6 +643,38 @@ export default function MediaUploader({
                     />
                   )
                 ))}
+                
+                {/* 
+                    追加ボタンを表示するタイル: 
+                    画像リストまたは音声リストの末尾に配置される。
+                */}
+                {urls.length < maxFiles && (
+                  type === 'image' ? (
+                    <div
+                      className="flex flex-col items-center justify-center h-24 border-2 border-dashed border-slate-200 rounded-lg cursor-pointer hover:border-slate-300 hover:bg-slate-50 transition-all text-slate-400"
+                      onClick={() => {
+                        setRetryIndex(null);
+                        fileInputRef.current?.click();
+                      }}
+                    >
+                      <Upload className="w-5 h-5 mb-1" />
+                      <span className="text-[10px] font-bold uppercase tracking-tighter">追加</span>
+                    </div>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      className="w-full flex items-center justify-center gap-2 border-dashed text-slate-500 py-2.5 h-auto"
+                      onClick={() => {
+                        setRetryIndex(null);
+                        fileInputRef.current?.click();
+                      }}
+                    >
+                      <Upload className="w-4 h-4" />
+                      <span className="text-xs uppercase font-bold">音声を追加</span>
+                    </Button>
+                  )
+                )}
+
                 {provided.placeholder}
               </div>
             )}

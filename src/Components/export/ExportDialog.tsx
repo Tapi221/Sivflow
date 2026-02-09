@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { localDb } from '@/services/localDB';
+import { getLocalDb } from '@/services/localDB';
 import { snapshotService } from '@/services/SnapshotService';
 import {
   Dialog,
@@ -34,7 +34,8 @@ export default function ExportDialog({ open, onOpenChange }: ExportDialogProps) 
   const folders = useLiveQuery(
     async () => {
       if (!currentUser) return [];
-      const allFolders = await localDb.getAllFolders();
+      const db = await getLocalDb();
+      const allFolders = await db.getAllFolders();
       return allFolders.filter(f => !f.isDeleted);
     },
     [currentUser],

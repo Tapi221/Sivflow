@@ -5,7 +5,7 @@ import { useCards } from '@/hooks/useCards';
 import { useFolders } from '@/hooks/useFolders';
 import { useMutation } from '@tanstack/react-query';
 import { addDoc, collection, Timestamp } from 'firebase/firestore';
-import { localDb } from '@/services/localDB';
+import { getLocalDb } from '../services/localDB';
 import { firestoreDb } from '@/services/firebase';
 
 import { useAuth } from '@/contexts/AuthContext';
@@ -38,7 +38,13 @@ export default function StudyMode() {
   const { folders = [], loading: foldersLoading } = useFolders();
   
   const createStudyLogMutation = useMutation({
-    mutationFn: (data) => addDoc(collection(firestoreDb, 'studyLogs'), data),
+    mutationFn: (data) => {
+      if (!firestoreDb) {
+        console.warn('[StudyMode] firestoreDb not initialized. Skipping cloud log.');
+        return Promise.resolve();
+      }
+      return addDoc(collection(firestoreDb, 'studyLogs'), data);
+    },
   });
   
   const createLevelHistoryMutation = useMutation({
@@ -95,6 +101,25 @@ export default function StudyMode() {
     
     return cards.sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
   }, [allCards, folderId, folders, foldersLoading, settings]);
+  
+  // フォルダで学習開始時に lastAccessAt を更新
+  const { updateFolder } = useFolders();
+  useEffect(() => {
+    const updateLastAccess = async () => {
+      if (folderId && updateFolder) {
+        try {
+          await updateFolder(folderId, { 
+            lastAccessAt: new Date(),
+            last_access_at: new Date()
+          });
+        } catch (error) {
+          console.error('Failed to update lastAccessAt:', error);
+        }
+      }
+    };
+    
+    updateLastAccess();
+  }, [folderId]); // folderId が変わった時のみ実行
   
   // Trigger confetti when study is completed
   useEffect(() => {

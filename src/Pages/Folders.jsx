@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCards } from '@/hooks/useCards';
 import { useFolders } from '@/hooks/useFolders';
+import { useDocuments } from '@/hooks/useDocuments'; // ✅追加
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { localDb } from '@/services/localDB';
+import { getLocalDb } from '../services/localDB';
 import { firestoreDb } from '@/services/firebase';
 import { useToast } from '@/contexts/ToastContext';
 import { Button } from '@/Components/ui/button';
@@ -11,8 +12,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/card';
 import { Skeleton } from '@/Components/ui/skeleton';
 import { Checkbox } from '@/Components/ui/checkbox';
 import FolderTree from '@/Components/folder/FolderTree';
+import ColumnNavigator from '@/Components/folder/ColumnNavigator';
+import TreeViewLayout from '@/Components/folder/TreeViewLayout';
 import FolderDialog from '@/Components/folder/FolderDialog';
-import DeleteFolderDialog from '@/Components/folder/DeleteFolderDialog';
 import TagManagerDialog from '@/Components/tag/TagManagerDialog';
 import {
   DropdownMenu,
@@ -21,33 +23,58 @@ import {
   DropdownMenuTrigger,
 } from '@/Components/ui/dropdown-menu';
 import { MoreVertical, Settings, Tag, Trash2, Plus, BellOff, Bell, ArrowLeft, ChevronRight, Edit, X } from 'lucide-react';
-import FolderPlus from 'lucide-react/dist/esm/icons/folder-plus';
 import EyeOffIcon from 'lucide-react/dist/esm/icons/eye-off';
 import { cn } from '@/lib/utils';
 import { createPageUrl } from '@/utils';
+import backgroundImage from '@/assets/background.jpg';
 
 export default function Folders() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  
+  // 選択状態
   const [selectedFolderId, setSelectedFolderId] = useState(null);
+  const [selectedItem, setSelectedItem] = useState(null); // { type: 'card' | 'document', id: string } | null加
   const [folderDialogOpen, setFolderDialogOpen] = useState(false);
   const [editingFolder, setEditingFolder] = useState(null);
   const [parentFolderId, setParentFolderId] = useState(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [deletingFolder, setDeletingFolder] = useState(null);
   const [selectedFolderIds, setSelectedFolderIds] = useState([]);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false); // モバイル専用の編集モード
+  const [viewMode, setViewMode] = useState(() => {
+    const saved = localStorage.getItem('folderViewMode');
+    return saved !== null ? saved : 'tree';
+  });
+
+  // 範囲選択用の状態
+  const [selectionRect, setSelectionRect] = useState(null);
+  const [dragStart, setDragStart] = useState(null);
+  const containerRef = useRef(null);
+
+  // 表示モードが変更されたらlocalStorageに保存
+  useEffect(() => {
+    localStorage.setItem('folderViewMode', viewMode);
+  }, [viewMode]);
+
+  // 作業モード時、html要素にno-page-scrollクラスを追加してページ全体のスクロールを無効化
+  useEffect(() => {
+    if (viewMode === 'work') {
+      document.documentElement.classList.add('no-page-scroll');
+    } else {
+      document.documentElement.classList.remove('no-page-scroll');
+    }
+    // cleanup: コンポーネントがアンマウントされた時にクラスを削除
+    return () => {
+      document.documentElement.classList.remove('no-page-scroll');
+    };
+  }, [viewMode]);
 
   const [isHiddenOpen, setIsHiddenOpen] = useState(false);
   const [tagManagerOpen, setTagManagerOpen] = useState(false);
   
   const { folders = [], loading: foldersLoading, error: foldersError } = useFolders();
   const { cards = [], loading: cardsLoading, error: cardsError } = useCards();
+  const { documents = [] } = useDocuments(); // ✅追加
   const [displayFolders, setDisplayFolders] = useState([]);
-  
-
   
   const { createFolder, updateFolder, deleteFolder } = useFolders();
   const { success, error: toastError } = useToast();
@@ -58,6 +85,41 @@ export default function Folders() {
   
   const handleSelectFolder = (folderId) => {
     navigate(createPageUrl(`FolderView?id=${folderId}`));
+  };
+
+  const handleSelectCard = (cardId) => {
+    navigate(createPageUrl(`CardView?id=${cardId}`));
+  };
+  
+  // --- 選択ハンドラ (Workモード用) ---
+  const handleSelectFolderInWork = (folderId) => {
+    setSelectedFolderId(folderId);
+    setSelectedItem(null);
+  };
+
+  const handleSelectCardInWork = (cardId) => {
+    // フォルダは解除せず、アイテムのみ更新
+    setSelectedItem({ type: 'card', id: cardId });
+  };
+
+  // ✅追加: ドキュメント選択時の処理
+  const handleSelectDocumentInWork = (docId) => {
+    setSelectedItem({ type: 'document', id: docId });
+    
+    // PDFを開く（FolderTreeWithCards 側でも実行しているが、一貫性のため）
+    const doc = documents.find(d => (d.id || d.documentId) === docId);
+    if (doc?.downloadUrl) {
+      window.open(doc.downloadUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  const handleSelectItemInWork = (item) => {
+    if (!item) {
+      setSelectedItem(null);
+      return;
+    }
+    if (item.type === 'card') handleSelectCardInWork(item.id);
+    else if (item.type === 'document') handleSelectDocumentInWork(item.id);
   };
   
   const handleCreateCard = (folderId) => {
@@ -77,15 +139,17 @@ export default function Folders() {
   };
   
   const handleDeleteFolder = (folder) => {
-    setDeletingFolder(folder);
-    setDeleteDialogOpen(true);
+    handleConfirmDelete(folder);
   };
 
   const handleHideFolder = async (folder) => {
     const targetFolderId = folder.folderId ?? folder.id;
     if (!targetFolderId) return;
 
-    const getDescendantIds = (parentId) => {
+    const getDescendantIds = (parentId, visited = new Set()) => {
+      if (visited.has(parentId)) return [];
+      visited.add(parentId);
+
       const children = folders.filter(f => {
         const parent = f.parentFolderId ?? f.parent_folder_id ?? null;
         const isDeleted = f.isDeleted ?? f.is_deleted;
@@ -96,7 +160,7 @@ export default function Folders() {
         const childId = child.folderId ?? child.id;
         if (childId) {
           ids.push(childId);
-          ids = [...ids, ...getDescendantIds(childId)];
+          ids = [...ids, ...getDescendantIds(childId, visited)];
         }
       });
       return ids;
@@ -211,36 +275,82 @@ export default function Folders() {
       console.error("Delete operation failed:", error);
     }
   };
-  
-  const getDescendantStats = (folderId) => {
-    const getDescendantIds = (parentId) => {
-      const children = folders.filter(f => {
-        const parent = f.parentFolderId ?? f.parent_folder_id ?? null;
-        const isDeleted = f.isDeleted ?? f.is_deleted;
-        return parent === parentId && (isDeleted === undefined || isDeleted === false);
-      });
-      let ids = [];
-      children.forEach(child => {
-        const childId = child.folderId ?? child.id;
-        ids.push(childId);
-        ids = [...ids, ...getDescendantIds(childId)];
-      });
-      return ids;
-    };
+
+  // 範囲選択のマウスイベント
+  const handleMouseDown = (e) => {
+    // 作業モードでは範囲選択を無効化
+    if (viewMode === 'work') {
+      return;
+    }
     
-    const descendantFolderIds = getDescendantIds(folderId);
-    const allFolderIds = [folderId, ...descendantFolderIds];
-    const cardCount = cards.filter(c => {
-      const folderIdForCard = c.folderId ?? c.folder_id;
-      const isDeleted = c.isDeleted ?? c.is_deleted;
-      return allFolderIds.includes(folderIdForCard) && (isDeleted === undefined || isDeleted === false);
-    }).length;
-    
-    return {
-      subfolderCount: descendantFolderIds.length,
-      cardCount
-    };
+    // ボタンや入力要素、または既にチェックボックスをクリックしている場合は無視
+    if (e.target.closest('button') || e.target.closest('input') || e.target.closest('[role="button"]')) {
+      return;
+    }
+
+    // 選択モードがオフ、かつシングルクリックでないことを期待（ドラッグ開始のみ）
+    setDragStart({ x: e.clientX, y: e.clientY });
   };
+
+  useEffect(() => {
+    const handleGlobalMouseMove = (e) => {
+      if (!dragStart) return;
+
+      const x = Math.min(dragStart.x, e.clientX);
+      const y = Math.min(dragStart.y, e.clientY);
+      const width = Math.abs(dragStart.x - e.clientX);
+      const height = Math.abs(dragStart.y - e.clientY);
+
+      // 一定距離（5px以上）ドラッグした場合のみ矩形を表示
+      if (width > 5 || height > 5) {
+        setSelectionRect({ x, y, width, height });
+        if (!isSelectionMode) setIsSelectionMode(true);
+      }
+    };
+
+    const handleGlobalMouseUp = () => {
+      if (dragStart && selectionRect) {
+        // 矩形内のアイテムを選択
+        const elements = document.querySelectorAll('[data-selectable-id^="folder:"]');
+        const newlySelectedIds = [];
+
+        elements.forEach(el => {
+          const rect = el.getBoundingClientRect();
+          const overlap = !(
+            rect.right < selectionRect.x ||
+            rect.left > selectionRect.x + selectionRect.width ||
+            rect.bottom < selectionRect.y ||
+            rect.top > selectionRect.y + selectionRect.height
+          );
+
+          if (overlap) {
+            const id = el.getAttribute('data-selectable-id').replace('folder:', '');
+            newlySelectedIds.push(id);
+          }
+        });
+
+        if (newlySelectedIds.length > 0) {
+          setSelectedFolderIds(prev => {
+            const next = new Set([...prev, ...newlySelectedIds]);
+            return Array.from(next);
+          });
+        }
+      }
+
+      setDragStart(null);
+      setSelectionRect(null);
+    };
+
+    if (dragStart) {
+      window.addEventListener('mousemove', handleGlobalMouseMove);
+      window.addEventListener('mouseup', handleGlobalMouseUp);
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handleGlobalMouseMove);
+      window.removeEventListener('mouseup', handleGlobalMouseUp);
+    };
+  }, [dragStart, selectionRect, isSelectionMode]);
   
   useEffect(() => {
     setDisplayFolders(folders);
@@ -261,29 +371,65 @@ export default function Folders() {
   const hasSyncError = foldersError || cardsError;
   
   return (
-    <div className="min-h-screen bg-[#F8FAFB]">
-      <div className="max-w-[1400px] mx-auto p-4 md:p-14">
+    <div className={cn(
+      "bg-[#F8FAFB] transition-colors duration-500",
+      viewMode === 'work' ? 'h-screen overflow-hidden' : 'min-h-screen'
+    )}>
+      <div className={cn(
+        "w-full mx-auto",
+        viewMode !== 'work' && "p-2 md:p-4"
+      )}>
         {/* Header */}
-        <Card className="rounded-[32px] border-none shadow-[0_4px_40px_-10px_rgba(0,0,0,0.02)] bg-white overflow-hidden">
-          <CardContent className="p-4 md:p-8">
+        <div className={cn(
+          "bg-white rounded-2xl shadow-sm border border-slate-100 p-4 md:p-6",
+          viewMode !== 'work' && "mb-4"
+        )}>
             <div className="flex items-center justify-end mb-2 md:mb-4">
 
               <div className="flex items-center gap-2">
+                {/* 表示切り替えボタン (Desktop) */}
+                <div className="hidden md:flex items-center bg-slate-50/50 rounded-xl p-1 gap-1 border border-slate-100/50 mr-2">
+                  <Button
+                    variant={viewMode === 'tree' ? 'default' : 'ghost'}
+                    size="sm"
+                    className={`h-8 px-3 rounded-lg text-xs font-bold ${viewMode === 'tree' ? 'bg-primary-600 text-white' : 'text-slate-400 hover:text-slate-600'}`}
+                    onClick={() => setViewMode('tree')}
+                  >
+                    ツリー
+                  </Button>
+                  <Button
+                    variant={viewMode === 'column' ? 'default' : 'ghost'}
+                    size="sm"
+                    className={`h-8 px-3 rounded-lg text-xs font-bold ${viewMode === 'column' ? 'bg-primary-600 text-white' : 'text-slate-400 hover:text-slate-600'}`}
+                    onClick={() => setViewMode('column')}
+                  >
+                    カラム
+                  </Button>
+                  <Button
+                    variant={viewMode === 'work' ? 'default' : 'ghost'}
+                    size="sm"
+                    className={`h-8 px-3 rounded-lg text-xs font-bold ${viewMode === 'work' ? 'bg-primary-600 text-white' : 'text-slate-400 hover:text-slate-600'}`}
+                    onClick={() => setViewMode('work')}
+                  >
+                    作業
+                  </Button>
+                </div>
+
                 {/* Desktop Tools */}
-                <div className="hidden md:flex items-center bg-white rounded-xl shadow-sm border border-slate-50 p-0.5">
+                <div className="hidden md:flex items-center bg-slate-50/50 rounded-xl p-1 gap-1 border border-slate-100/50">
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="w-9 h-9 rounded-lg text-slate-300 hover:bg-primary-50 hover:text-primary-600"
+                      className="w-9 h-9 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
                       onClick={() => setTagManagerOpen(true)}
                     >
                       <Tag className="w-4.5 h-4.5" />
                     </Button>
-                    <div className="w-[1px] h-5 bg-slate-100 mx-0.5"></div>
+                    <div className="w-[1px] h-5 bg-slate-200 mx-0.5"></div>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="w-9 h-9 rounded-lg text-slate-300 hover:bg-primary-50 hover:text-primary-600 relative"
+                      className="w-9 h-9 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 relative"
                       onClick={() => navigate(createPageUrl('SyncSettings'))}
                     >
                       <Settings className="w-4.5 h-4.5" />
@@ -294,7 +440,7 @@ export default function Folders() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="w-9 h-9 rounded-lg text-slate-300 hover:bg-primary-50 hover:text-primary-600"
+                      className="w-9 h-9 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
                       onClick={() => navigate(createPageUrl('Trash'))}
                     >
                       <Trash2 className="w-4.5 h-4.5" />
@@ -310,7 +456,7 @@ export default function Folders() {
                           <MoreVertical className="w-5 h-5" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="rounded-2xl shadow-xl p-2 min-w-[160px]">
+                      <DropdownMenuContent align="end" className="p-2 min-w-[160px] liquid-glass rounded-[20px] shadow-2xl border-none">
                         <DropdownMenuItem onClick={() => setTagManagerOpen(true)} className="rounded-xl py-3">
                           <Tag className="w-4 h-4 mr-3 text-slate-400" />
                           <span>タグ管理</span>
@@ -370,18 +516,10 @@ export default function Folders() {
                   <div className="hidden md:flex items-center gap-2">
                     <Button
                         variant="ghost"
-                        className="h-10 px-6 bg-white text-slate-400 font-bold text-xs rounded-xl shadow-sm border border-slate-50"
+                        className="h-10 px-6 text-slate-500 font-bold text-xs rounded-xl hover:bg-slate-100 border border-slate-200"
                         onClick={() => setIsSelectionMode(true)}
                     >
                         選択
-                    </Button>
-
-                    <Button 
-                        onClick={() => handleCreateFolder(null)} 
-                        className="h-10 px-6 bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs rounded-xl shadow-md border-none flex items-center gap-2"
-                    >
-                      <Plus className="w-4 h-4" />
-                      新規フォルダ
                     </Button>
                   </div>
                 )}
@@ -396,111 +534,270 @@ export default function Folders() {
               </div>
             )}
             
-            {/* Folder Tree */}
-            {isLoading ? (
-              <div className="space-y-2">
-                {[1,2,3,4,5].map(i => <Skeleton key={i} className="h-10 w-full" />)}
-              </div>
-            ) : activeFolders.length === 0 ? (
-              <div className="text-center py-12 text-gray-500">
-                <FolderPlus className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                <p className="text-lg mb-2">フォルダがありません</p>
-                <p className="text-sm mb-4">最初のフォルダを作成しましょう</p>
-
+            {/* Folder Tree / Column Navigator */}
+            <div 
+              ref={containerRef}
+              onMouseDown={handleMouseDown}
+              className={cn(
+                "min-h-[400px]",
+                viewMode !== 'work' && "mb-20 md:mb-0"
+              )}
+            >
+              {isLoading ? (
+              <div className="space-y-3">
+                {[...Array(3)].map((_, i) => (
+                  <Skeleton key={i} className="h-16 w-full rounded-2xl" />
+                ))}
               </div>
             ) : (
-              <FolderTree
-                folders={activeFolders}
-                allFolders={folders}
-                cards={cards}
-                selectedFolderId={selectedFolderId}
-                onSelect={handleSelectFolder}
-                onCreateCard={handleCreateCard}
-                onCreateFolder={handleCreateFolder}
-                onEditFolder={handleEditFolder}
-                onDeleteFolder={handleDeleteFolder}
-                onHideFolder={handleHideFolder}
-                isSelectionMode={isSelectionMode}
-                selectedFolderIds={selectedFolderIds}
-                onToggleSelection={handleToggleSelection}
-                onToggleSilent={async (folder) => {
-                  const currentSilent = folder.isSilent ?? folder.is_silent ?? false;
-                  const nextSilent = !currentSilent;
-                  await updateFolderMutation.mutateAsync({
-                    id: folder.id,
-                    data: { isSilent: nextSilent, is_silent: nextSilent }
-                  });
-                }}
-                onReorder={async (reorderedFolders, parentId, shouldUpdateUI = true) => {
-                  // UI即時反映（最後の呼び出しのみ）
-                  if (shouldUpdateUI) {
-                    setDisplayFolders(prev => {
-                      const newFolders = [...prev];
-                      reorderedFolders.forEach((f, i) => {
-                        const key = f.id ?? f.folderId;
-                        const index = newFolders.findIndex(nf => (nf.id ?? nf.folderId) === key);
-                        if (index !== -1) {
-                          newFolders[index] = {
-                            ...newFolders[index],
-                            orderIndex: i,
-                            order_index: i,
-                            parentFolderId: parentId,
-                            parent_folder_id: parentId,
+              <>
+                {/* PC: 表示モードに応じて切り替え */}
+                <div className="hidden md:block">
+                  {viewMode === 'work' ? (
+                    <TreeViewLayout
+                      folders={displayFolders}
+                      cards={cards}
+                      documents={documents}
+                      selectedFolderId={selectedFolderId}
+                      selectedItem={selectedItem}
+                      onFolderSelect={handleSelectFolderInWork}
+                      onItemSelect={handleSelectItemInWork}
+                      onCardUpdated={() => {
+                        // カード更新後の処理(必要に応じて)
+                      }}
+                    />
+                  ) : viewMode === 'column' ? (
+                  <ColumnNavigator
+                    folders={activeFolders}
+                    allFolders={folders}
+                    cards={cards}
+                    onSelect={handleSelectFolder}
+                    onCardSelect={handleSelectCard}
+                    onCreateCard={handleCreateCard}
+                    onCreateFolder={handleCreateFolder}
+                    onQuickCreateFolder={async (name, parentId) => {
+                      try {
+                        await createFolder(name, parentId);
+                        success('フォルダを作成しました');
+                      } catch (err) {
+                        console.error('Quick create failed:', err);
+                        toastError('フォルダの作成に失敗しました');
+                      }
+                    }}
+                    onEdit={handleEditFolder}
+                    onDelete={handleDeleteFolder}
+                    onHide={handleHideFolder}
+                    onToggleSilent={async (folder) => {
+                      const targetFolderId = folder.folderId ?? folder.id;
+                      const currentSilent = folder.isSilent ?? folder.is_silent ?? false;
+                      if (!targetFolderId) return;
+                      await updateFolder(targetFolderId, { isSilent: !currentSilent });
+                    }}
+                    onReorder={async (reorderedFolders, parentId, shouldUpdateUI = true) => {
+                      // UI即時反映(最後の呼び出しのみ)
+                      if (shouldUpdateUI) {
+                        setDisplayFolders(prev => {
+                          const newFolders = [...prev];
+                          reorderedFolders.forEach((f, i) => {
+                            const key = f.id ?? f.folderId;
+                            const index = newFolders.findIndex(nf => (nf.id ?? nf.folderId) === key);
+                            if (index !== -1) {
+                              newFolders[index] = {
+                                ...newFolders[index],
+                                orderIndex: i,
+                                order_index: i,
+                                parentFolderId: parentId,
+                                parent_folder_id: parentId,
+                              };
+                            }
+                          });
+                          return newFolders;
+                        });
+                      }
+
+                      // バックグラウンドで差分更新
+                      const updates = reorderedFolders
+                        .map((folder, i) => {
+                          const currentOrder = folder.orderIndex ?? folder.order_index ?? 0;
+                          const currentParent = folder.parentFolderId ?? folder.parent_folder_id ?? null;
+                          if (currentOrder === i && currentParent === parentId) return null;
+                          return {
+                            id: folder.id ?? folder.folderId,
+                            data: {
+                              orderIndex: i,
+                              parentFolderId: parentId,
+                              order_index: i,
+                              parent_folder_id: parentId,
+                            }
                           };
-                        }
+                        })
+                        .filter(Boolean);
+
+                      if (updates.length === 0) return;
+                      Promise.all(updates.map(u => updateFolderMutation.mutateAsync(u))).catch(err => {
+                        console.error('フォルダ並び替え更新に失敗:', err);
                       });
-                      return newFolders;
-                    });
-                  }
-
-                  // バックグラウンドで差分更新
-                  const updates = reorderedFolders
-                    .map((folder, i) => {
-                      const currentOrder = folder.orderIndex ?? folder.order_index ?? 0;
-                      const currentParent = folder.parentFolderId ?? folder.parent_folder_id ?? null;
-                      if (currentOrder === i && currentParent === parentId) return null;
-                      return {
-                        id: folder.id ?? folder.folderId,
-                        data: {
-                          orderIndex: i,
-                          parentFolderId: parentId,
-                          order_index: i,
-                          parent_folder_id: parentId,
+                    }}
+                    isEditMode={isEditMode}
+                    isSelectionMode={isSelectionMode}
+                    selectedFolderIds={selectedFolderIds}
+                    onToggleSelection={handleToggleSelection}
+                  />
+                  ) : (
+                    <FolderTree
+                      folders={displayFolders}
+                      allFolders={folders}
+                      cards={cards}
+                      onSelect={handleSelectFolder}
+                      onCreateCard={handleCreateCard}
+                      onCreateSubfolder={handleCreateFolder}
+                      onEdit={handleEditFolder}
+                      onDelete={handleDeleteFolder}
+                      onHide={handleHideFolder}
+                      onToggleSilent={async (folder) => {
+                        const targetFolderId = folder.folderId ?? folder.id;
+                        const currentSilent = folder.isSilent ?? folder.is_silent ?? false;
+                        if (!targetFolderId) return;
+                        await updateFolder(targetFolderId, { isSilent: !currentSilent });
+                      }}
+                      onReorder={async (reorderedFolders, parentId, shouldUpdateUI = true) => {
+                        // UI即時反映(最後の呼び出しのみ)
+                        if (shouldUpdateUI) {
+                          setDisplayFolders(prev => {
+                            const newFolders = [...prev];
+                            reorderedFolders.forEach((f, i) => {
+                              const key = f.id ?? f.folderId;
+                              const index = newFolders.findIndex(nf => (nf.id ?? nf.folderId) === key);
+                              if (index !== -1) {
+                                newFolders[index] = {
+                                  ...newFolders[index],
+                                  orderIndex: i,
+                                  order_index: i,
+                                  parentFolderId: parentId,
+                                  parent_folder_id: parentId,
+                                };
+                              }
+                            });
+                            return newFolders;
+                          });
                         }
-                      };
-                    })
-                    .filter(Boolean);
 
-                  if (updates.length === 0) return;
-                  Promise.all(updates.map(u => updateFolderMutation.mutateAsync(u))).catch(err => {
-                    console.error('フォルダ並び替え更新に失敗:', err);
-                  });
-                }}
-                isEditMode={isEditMode}
-              />
+                        // バックグラウンドで差分更新
+                        const updates = reorderedFolders
+                          .map((folder, i) => {
+                            const currentOrder = folder.orderIndex ?? folder.order_index ?? 0;
+                            const currentParent = folder.parentFolderId ?? folder.parent_folder_id ?? null;
+                            if (currentOrder === i && currentParent === parentId) return null;
+                            return {
+                              id: folder.id ?? folder.folderId,
+                              data: {
+                                orderIndex: i,
+                                parentFolderId: parentId,
+                                order_index: i,
+                                parent_folder_id: parentId,
+                              }
+                            };
+                          })
+                          .filter(Boolean);
+
+                        if (updates.length === 0) return;
+                        Promise.all(updates.map(u => updateFolderMutation.mutateAsync(u))).catch(err => {
+                          console.error('フォルダ並び替え更新に失敗:', err);
+                        });
+                      }}
+                      isEditMode={isEditMode}
+                      isSelectionMode={isSelectionMode}
+                      selectedFolderIds={selectedFolderIds}
+                      onToggleSelection={handleToggleSelection}
+                    />
+                  )}
+                </div>
+                
+                {/* モバイル: 既存のツリー型 */}
+                <div className="md:hidden">
+                  <FolderTree
+                    folders={displayFolders}
+                    allFolders={folders}
+                    cards={cards}
+                    onSelect={handleSelectFolder}
+                    onCreateCard={handleCreateCard}
+                    onCreateSubfolder={handleCreateFolder}
+                    onEdit={handleEditFolder}
+                    onDelete={handleDeleteFolder}
+                    onHide={handleHideFolder}
+                    onToggleSilent={async (folder) => {
+                      const targetFolderId = folder.folderId ?? folder.id;
+                      const currentSilent = folder.isSilent ?? folder.is_silent ?? false;
+                      if (!targetFolderId) return;
+                      await updateFolder(targetFolderId, { isSilent: !currentSilent });
+                    }}
+                    onReorder={async (reorderedFolders, parentId, shouldUpdateUI = true) => {
+                      // UI即時反映(最後の呼び出しのみ)
+                      if (shouldUpdateUI) {
+                        setDisplayFolders(prev => {
+                          const newFolders = [...prev];
+                          reorderedFolders.forEach((f, i) => {
+                            const key = f.id ?? f.folderId;
+                            const index = newFolders.findIndex(nf => (nf.id ?? nf.folderId) === key);
+                            if (index !== -1) {
+                              newFolders[index] = {
+                                ...newFolders[index],
+                                orderIndex: i,
+                                order_index: i,
+                                parentFolderId: parentId,
+                                parent_folder_id: parentId,
+                              };
+                            }
+                          });
+                          return newFolders;
+                        });
+                      }
+
+                      // バックグラウンドで差分更新
+                      const updates = reorderedFolders
+                        .map((folder, i) => {
+                          const currentOrder = folder.orderIndex ?? folder.order_index ?? 0;
+                          const currentParent = folder.parentFolderId ?? folder.parent_folder_id ?? null;
+                          if (currentOrder === i && currentParent === parentId) return null;
+                          return {
+                            id: folder.id ?? folder.folderId,
+                            data: {
+                              orderIndex: i,
+                              parentFolderId: parentId,
+                              order_index: i,
+                              parent_folder_id: parentId,
+                            }
+                          };
+                        })
+                        .filter(Boolean);
+
+                      if (updates.length === 0) return;
+                      Promise.all(updates.map(u => updateFolderMutation.mutateAsync(u))).catch(err => {
+                        console.error('フォルダ並び替え更新に失敗:', err);
+                      });
+                    }}
+                    isEditMode={isEditMode}
+                    isSelectionMode={isSelectionMode}
+                    selectedFolderIds={selectedFolderIds}
+                    onToggleSelection={handleToggleSelection}
+                  />
+                </div>
+              </>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        {/* Floating Action Button (Mobile) */}
-        {!isSelectionMode && (
-          <Button
-            onClick={() => handleCreateFolder(null)}
-            className="md:hidden fixed bottom-24 right-6 w-14 h-14 rounded-full bg-primary-600 hover:bg-primary-700 text-white shadow-lg flex items-center justify-center border-none z-50 transition-transform active:scale-95"
-          >
-            <Plus className="w-6 h-6" />
-          </Button>
-        )}
+
 
         {/* Hidden Folders */}
         <div className="mt-6 mb-20 md:mb-0">
             <button
                 type="button"
                 onClick={() => setIsHiddenOpen(prev => !prev)}
-                className="w-full h-16 flex items-center justify-between px-8 rounded-[24px] bg-white shadow-sm border border-slate-50 transition-all hover:shadow-md relative z-10 hidden-folders-section"
+                className="w-full h-16 flex items-center justify-between px-8 liquid-glass-header transition-all hover:shadow-md relative z-10 hidden-folders-section"
             >
                 <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-300">
+                    <div className="w-8 h-8 liquid-glass-chip flex items-center justify-center text-liquid-low">
                         <EyeOffIcon className="w-4 h-4" />
                     </div>
                     <span className="text-[12px] font-bold text-slate-400">
@@ -539,6 +836,7 @@ export default function Folders() {
             </div>
           )}
         </div>
+      </div>
         
         {/* Dialogs */}
         <FolderDialog
@@ -549,21 +847,28 @@ export default function Folders() {
           onSave={handleSaveFolder}
         />
         
-        {deletingFolder && (
-          <DeleteFolderDialog
-            open={deleteDialogOpen}
-            onOpenChange={setDeleteDialogOpen}
-            folder={deletingFolder}
-            {...getDescendantStats(deletingFolder.id)}
-            onConfirm={handleConfirmDelete}
-          />
-        )}
-        
         <TagManagerDialog 
             open={tagManagerOpen}
             onOpenChange={setTagManagerOpen}
         />
+
+        {/* 範囲選択の描画オーバーレイ */}
+        {selectionRect && (
+          <div
+            style={{
+              position: 'fixed',
+              left: selectionRect.x,
+              top: selectionRect.y,
+              width: selectionRect.width,
+              height: selectionRect.height,
+              backgroundColor: 'rgba(59, 130, 246, 0.15)',
+              border: '1px solid rgba(59, 130, 246, 0.5)',
+              borderRadius: '2px',
+              zIndex: 9999,
+              pointerEvents: 'none',
+            }}
+          />
+        )}
       </div>
-    </div>
   );
 }

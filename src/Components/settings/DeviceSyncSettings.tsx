@@ -6,7 +6,7 @@ import type { SyncMetadata } from '../../types';
 import { format } from 'date-fns';
 import { ja } from 'date-fns/locale';
 import { SyncService } from '../../services/syncService';
-import { LocalDB } from '../../services/localDB';
+import { initializeDB, getLocalDb } from '../../services/localDB';
 import { RefreshCw, Pencil, Check, X, Trash2 } from 'lucide-react';
 import Smartphone from 'lucide-react/dist/esm/icons/smartphone';
 import { SyncServiceFactory } from '../../services/SyncServiceFactory';
@@ -29,8 +29,8 @@ export const DeviceSyncSettings: React.FC = () => {
   const fetchStats = async () => {
     if (!currentUser) return;
     initializeDB(currentUser.uid);
-    const localDB = getLocalDb();
-    const s = await localDB.userStats.get('current') || await localDB.userStats.toCollection().first();
+    const db = await getLocalDb();
+    const s = await db.userStats.get('current') || await db.userStats.toCollection().first();
     setStats(s || null);
   };
 
@@ -73,7 +73,7 @@ export const DeviceSyncSettings: React.FC = () => {
 
   const handleCleanup = async () => {
     if (!currentUser) return;
-    if (!window.confirm('24時間以上同期がない古いセッションを一括解除しますか？\n(シークレットモード等の残骸を掃除します)')) return;
+    if (!window.confirm('60日以上同期がない古いセッションを一括解除しますか？\n(シークレットモード等の残骸を掃除します)')) return;
 
     setCleaning(true);
     try {
@@ -139,21 +139,21 @@ export const DeviceSyncSettings: React.FC = () => {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      <h2 className="text-2xl font-bold mb-6 flex items-center gap-3 text-slate-800">
-        <div className="p-2.5 bg-primary-600/10 text-primary-600 rounded-xl">
+      <h2 className="text-2xl font-bold mb-6 flex items-center gap-3 text-white">
+        <div className="p-2.5 bg-primary-400/20 text-primary-300 rounded-xl shadow-[0_0_10px_rgba(123,172,170,0.3)]">
           <Smartphone className="w-6 h-6" />
         </div>
         同期・ストレージ管理
       </h2>
 
       {/* Sync Settings Toggles */}
-      <div className="p-6 bg-white border border-slate-100 rounded-2xl shadow-sm mb-6">
+      <div className="p-6 bg-white/5 border border-white/10 rounded-2xl shadow-sm mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <h4 className="text-sm font-bold text-slate-700">非アクティブ端末の自動整理</h4>
-            <p className="text-[10px] text-slate-400 font-medium mt-1">
-              24時間以上同期がない古いセッションを自動的に解除します（シークレットモード等の残骸の掃除）。
-            </p>
+            <h4 className="text-sm font-bold text-slate-200">非アクティブ端末の自動整理</h4>
+              <p className="text-[10px] text-slate-400 font-medium mt-1">
+                60日以上同期がない古いセッションを自動的に解除します（シークレットモード等の残骸の掃除）。
+              </p>
           </div>
           <Switch 
             checked={syncSettings?.autoCleanupDevices ?? true}
@@ -163,27 +163,27 @@ export const DeviceSyncSettings: React.FC = () => {
       </div>
 
       {/* Storage Usage Bar */}
-      <div className="p-6 bg-white border border-slate-100 rounded-2xl shadow-sm">
+      <div className="p-6 bg-white/5 border border-white/10 rounded-2xl shadow-sm">
         <div className="flex justify-between items-end mb-3">
           <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">クラウドストレージ使用量</span>
-          <span className={`text-[10px] font-bold ${quotaPercent > 90 ? 'text-red-500 animate-pulse' : 'text-slate-400'}`}>
+          <span className={`text-[10px] font-bold ${quotaPercent > 90 ? 'text-red-400 animate-pulse' : 'text-slate-400'}`}>
             {formatSize(totalUsed)} / {formatSize(MAX_QUOTA)}
             {quotaPercent > 90 && ' (残りわずか!)'}
           </span>
         </div>
-        <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden flex">
+        <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden flex">
           <div 
-            style={{ width: `${highResPercent}%` }} 
-            className={`h-full ${quotaPercent > 90 ? 'bg-red-500' : 'bg-primary-600'}`}
+            style={{ '--progress': `${highResPercent}%`, '--progress-color': quotaPercent > 90 ? '#ef4444' : 'var(--primary-color)' } as React.CSSProperties} 
+            className="h-full progress-bar-fill opacity-80"
           />
           <div 
-            style={{ width: `${thumbnailPercent}%` }} 
-            className="h-full bg-indigo-300"
+            style={{ '--progress': `${thumbnailPercent}%`, '--progress-color': '#a5b4fc' } as React.CSSProperties} 
+            className="h-full progress-bar-fill opacity-60"
           />
         </div>
         <div className="mt-4 flex gap-6 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 bg-primary-600 rounded-full"></span>
+            <span className="w-2 h-2 bg-primary-400 rounded-full shadow-[0_0_5px_rgba(123,172,170,0.5)]"></span>
             高解像度画像 ({formatSize(highResUsed)})
           </div>
           <div className="flex items-center gap-2">
@@ -211,7 +211,7 @@ export const DeviceSyncSettings: React.FC = () => {
                 onClick={handleCleanup}
                 disabled={cleaning}
                 className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all border border-transparent hover:border-red-100 disabled:opacity-50"
-                title="24時間以上動いていない端末を掃除"
+                title="60日以上動いていない端末を掃除"
               >
                 <Trash2 className={`w-3 h-3 ${cleaning ? 'animate-bounce' : ''}`} />
                 古いセッションを掃除
@@ -219,7 +219,7 @@ export const DeviceSyncSettings: React.FC = () => {
             </div>
           </div>
           {devices.length === 0 ? (
-            <p className="text-slate-300 text-center py-10 font-bold text-sm bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+            <p className="text-slate-400 text-center py-10 font-bold text-sm bg-white/5 rounded-2xl border border-dashed border-white/20">
                 同期されているデバイスはありません。
             </p>
           ) : (
@@ -232,14 +232,14 @@ export const DeviceSyncSettings: React.FC = () => {
                   key={device.deviceId} 
                   className={`p-5 rounded-2xl border transition-all ${
                     isRevoked 
-                      ? 'bg-slate-100 border-slate-200 opacity-60' // Revoked style
+                      ? 'bg-white/5 border-white/10 opacity-60' // Revoked style (glass)
                       : device.isActive 
-                        ? 'bg-white border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200' 
-                        : 'bg-slate-50 border-slate-100 grayscale opacity-70' // Disconnected style
-                  } ${isCurrentDevice ? 'ring-2 ring-primary-600/20' : ''}`}
+                        ? 'bg-white/5 border-white/10 shadow-sm hover:shadow-md hover:border-white/20 hover:bg-white/10' 
+                        : 'bg-white/5 border-white/5 grayscale opacity-70' // Disconnected style
+                  } ${isCurrentDevice ? 'ring-1 ring-primary-400/30' : ''}`}
                 >
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                    isRevoked ? 'bg-slate-200 text-slate-400' : 'bg-orange-50 text-orange-500'
+                    isRevoked ? 'bg-white/10 text-slate-500' : 'bg-orange-500/10 text-orange-400'
                   }`}>
                   <Smartphone className="w-5 h-5" />
                 </div>
@@ -254,45 +254,45 @@ export const DeviceSyncSettings: React.FC = () => {
                             value={editName}
                             onChange={(e) => setEditName(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleUpdateName(device.deviceId)}
-                            className="text-sm font-bold text-slate-700 bg-slate-50 border border-primary-600/30 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-primary-600/20 flex-1"
+                            className="text-sm font-bold text-white bg-black/40 border border-primary-500/30 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-primary-500/20 flex-1"
                           />
-                          <button onClick={() => handleUpdateName(device.deviceId)} title="保存" className="p-1 text-primary-600 hover:bg-primary-600/10 rounded-md transition-colors">
+                          <button onClick={() => handleUpdateName(device.deviceId)} title="保存" className="p-1 text-primary-400 hover:bg-primary-500/20 rounded-md transition-colors">
                             <Check className="w-4 h-4" />
                           </button>
-                          <button onClick={() => setEditingId(null)} title="キャンセル" className="p-1 text-slate-300 hover:bg-slate-100 rounded-md transition-colors">
+                          <button onClick={() => setEditingId(null)} title="キャンセル" className="p-1 text-slate-400 hover:bg-white/10 rounded-md transition-colors">
                             <X className="w-4 h-4" />
                           </button>
                         </div>
                       ) : (
                         <h3 className={`font-bold text-base flex items-center gap-2 group/title ${
-                          isRevoked ? 'text-slate-500 line-through decoration-slate-400/50' : 'text-slate-700'
+                          isRevoked ? 'text-slate-500 line-through decoration-slate-400/50' : 'text-slate-200'
                         }`}>
                           {device.deviceName || '不明なデバイス'}
                           {!isRevoked && (
                             <button 
                               onClick={() => startEditing(device)}
                               title="名前を編集"
-                              className="opacity-0 group-hover/title:opacity-100 p-1 text-slate-300 hover:text-primary-600 transition-all"
+                              className="opacity-0 group-hover/title:opacity-100 p-1 text-slate-400 hover:text-primary-400 transition-all"
                             >
                               <Pencil className="w-3 h-3" />
                             </button>
                           )}
                           {isCurrentDevice && (
-                            <span className="text-[10px] bg-primary-600 text-white px-2 py-0.5 rounded-full font-bold shadow-sm">
+                            <span className="text-[10px] bg-primary-500/80 text-white px-2 py-0.5 rounded-full font-bold shadow-sm backdrop-blur-sm">
                               現在使用中
                             </span>
                           )}
                         </h3>
                       )}
-                      <p className="text-[10px] text-slate-300 font-mono mt-1">{device.deviceId}</p>
+                      <p className="text-[10px] text-slate-400 font-mono mt-1">{device.deviceId}</p>
                     </div>
                     <div className="flex items-center gap-2 ml-4">
                       <span className={`px-2.5 py-1 text-[10px] rounded-full font-bold border ${
                         isRevoked 
-                          ? 'bg-slate-200 text-slate-500 border-slate-300' 
+                          ? 'bg-white/5 text-slate-500 border-white/10' 
                           : device.isActive 
-                            ? 'bg-emerald-50 text-emerald-500 border-emerald-100' 
-                            : 'bg-slate-100 text-slate-400 border border-slate-200'
+                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
+                            : 'bg-white/5 text-slate-500 border-white/10'
                       }`}>
                         {isRevoked ? 'REVOKED (履歴)' : device.isActive ? 'ACTIVE' : 'DISCONNECTED'}
                       </span>
@@ -300,7 +300,7 @@ export const DeviceSyncSettings: React.FC = () => {
                         <button 
                           disabled={removingId === device.deviceId}
                           onClick={() => handleDisconnect(device.deviceId)}
-                          className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all disabled:opacity-50"
+                          className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all disabled:opacity-50"
                           title="解除"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -311,13 +311,13 @@ export const DeviceSyncSettings: React.FC = () => {
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-4 mt-5 pt-4 border-t border-slate-50">
+                  <div className="grid grid-cols-2 gap-4 mt-5 pt-4 border-t border-white/10">
                     <div>
-                      <p className="text-[10px] text-slate-300 uppercase font-bold tracking-wider mb-1">最終同期</p>
+                      <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1">最終同期</p>
                       <p className="text-xs font-bold text-slate-500">{formatDate(device.lastSyncTime)}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] text-slate-300 uppercase font-bold tracking-wider mb-1">高画質同期</p>
+                      <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1">高画質同期</p>
                       <p className="text-xs font-bold text-slate-500">{formatDate(device.lastHighResSync)}</p>
                     </div>
                   </div>
@@ -330,20 +330,20 @@ export const DeviceSyncSettings: React.FC = () => {
 
       <button 
         onClick={fetchDevices}
-        className="mt-6 w-full py-4 bg-slate-50 text-slate-600 border border-slate-200 rounded-2xl font-bold hover:bg-white hover:shadow-lg hover:border-slate-300 transition-all active:scale-[0.98] flex items-center justify-center gap-2 group"
+        className="mt-6 w-full py-4 bg-white/5 text-slate-400 border border-white/10 rounded-2xl font-bold hover:bg-white/10 hover:shadow-lg hover:border-white/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 group hover:text-white"
       >
         <RefreshCw className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" />
         同期状態を更新
       </button>
 
-      <div className="mt-8 p-5 bg-blue-50 border border-blue-100 rounded-2xl">
-        <h4 className="text-blue-600 font-bold text-xs mb-2 flex items-center gap-2">
-          <span className="w-5 h-5 bg-blue-200 rounded-full flex items-center justify-center text-[10px]">i</span>
+      <div className="mt-8 p-5 bg-blue-500/10 border border-blue-500/20 rounded-2xl">
+        <h4 className="text-blue-400 font-bold text-xs mb-2 flex items-center gap-2">
+          <span className="w-5 h-5 bg-blue-500/20 rounded-full flex items-center justify-center text-[10px]">i</span>
           マルチデバイス同期について
         </h4>
-        <p className="text-[11px] text-blue-600/70 leading-relaxed font-medium">
-          複数の端末で同時に学習を進めることができます。シークレットモード等でログインを繰り返すとデバイス一覧が増えますが、
-          「古いセッションを掃除」ボタンでいつでも整理可能です。
+        <p className="text-[11px] text-blue-300/80 leading-relaxed font-medium">
+          複数の端末で同時に学習を進めることができます。60日以上ログインしていない古い端末は、
+          「古いセッションを掃除」ボタンで整理可能です。
         </p>
       </div>
     </div>

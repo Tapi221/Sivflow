@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/Components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/Components/ui/card';
 import { ArrowLeft, Save, RefreshCw, CheckCircle, X, Clock, AlertTriangle, Cloud } from 'lucide-react';
 import DataRescuePanel from '@/Components/settings/DataRescuePanel';
-import { localDb } from '@/services/localDB';
+import { getLocalDb } from '../services/localDB';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
 import type { SyncSettings as SyncSettingsType } from '@/types/sync';
@@ -64,7 +64,8 @@ export default function SyncSettings() {
 
   const loadSettings = useCallback(async () => {
     try {
-      const saved = await localDb.syncSettings.get('default');
+      const db = await getLocalDb();
+      const saved = await db.syncSettings.get('default');
       if (saved) {
         setSettings(saved);
       }
@@ -99,7 +100,8 @@ export default function SyncSettings() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await localDb.syncSettings.put(settings);
+      const db = await getLocalDb();
+      await db.syncSettings.put(settings);
       await reloadSyncSettings();
       success('設定を保存しました');
     } catch (error) {

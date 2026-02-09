@@ -9,7 +9,7 @@ import {
 import { Button } from '@/Components/ui/button';
 import { Badge } from '@/Components/ui/badge';
 import { AlertCircle, RefreshCw, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
-import { localDb } from '@/services/localDB';
+import { getLocalDb } from '@/services/localDB';
 import { useAuth } from '@/contexts/AuthContext';
 import type { SyncError } from '@/types/sync';
 
@@ -34,7 +34,8 @@ export function SyncErrorDialog({ open, onClose }: SyncErrorDialogProps) {
 
   const loadErrors = useCallback(async () => {
     try {
-      const allErrors = await localDb.syncErrors.orderBy('occurredAt').reverse().toArray();
+      const db = await getLocalDb();
+      const allErrors = await db.syncErrors.orderBy('occurredAt').reverse().toArray();
       setErrors(allErrors);
     } catch (error) {
       console.error('Failed to load sync errors:', error);
@@ -65,7 +66,8 @@ export function SyncErrorDialog({ open, onClose }: SyncErrorDialogProps) {
   };
 
   const handleClearOne = async (errorId: string) => {
-    await localDb.syncErrors.delete(errorId);
+    const db = await getLocalDb();
+    await db.syncErrors.delete(errorId);
     await loadErrors();
   };
 

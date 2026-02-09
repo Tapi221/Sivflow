@@ -26,7 +26,7 @@ import {
 
 import { TagInput } from '@/Components/ui/tag-input';
 import MediaUploader from '@/Components/card/MediaUploader';
-import MathRenderer from '@/Components/math/MathRender';
+
 import { cn } from '@/lib/utils';
 import { getResistancePhase, normalizeMemoryStability } from '@/utils/reviewUtils';
 import { calculateResistanceScore } from '@/utils/reviewMetrics';
@@ -62,6 +62,7 @@ interface CardEditorProps {
   showCancelButton?: boolean;
   showSaveButton?: boolean;
   hideTitle?: boolean;
+  mode?: 'default' | 'four_choice' | 'pair';
 }
 
 export default function CardEditor({ 
@@ -78,6 +79,7 @@ export default function CardEditor({
   showCancelButton = true,
   showSaveButton = true,
   hideTitle = false,
+  mode = 'default',
 }: CardEditorProps) {
   const { settings } = useUserSettings();
   const [showPreview, setShowPreview] = useState(settings?.defaultPreviewEnabled ?? false);
@@ -163,24 +165,62 @@ export default function CardEditor({
       });
     } else {
         // Initial state for new card
-        setFormData(prev => ({
-            ...prev,
-            folderId: folderId || '',
-            questionBlocks: defaultToTextBlock ? [{
-                id: `question-text-${nanoid()}`,
-                type: 'text',
-                content: '',
-                orderIndex: 0
-            }] : [],
-            answerBlocks: defaultToTextBlock ? [{
-                id: `answer-text-${nanoid()}`,
-                type: 'text',
-                content: '',
-                orderIndex: 0
-            }] : [],
-        }));
+        if (mode === 'pair') {
+            const questionBlocks = Array.from({ length: 2 }).map((_, i) => ({
+                id: `question-text-${nanoid()}`, type: 'text', content: '', orderIndex: i
+            }));
+            const answerBlocks = Array.from({ length: 2 }).map((_, i) => ({
+                id: `answer-text-${nanoid()}`, type: 'text', content: '', orderIndex: i
+            }));
+            
+            setFormData(prev => ({
+                ...prev,
+                folderId: folderId || '',
+                questionBlocks,
+                answerBlocks
+            }));
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                folderId: folderId || '',
+                questionBlocks: defaultToTextBlock ? [{
+                    id: `question-text-${nanoid()}`,
+                    type: 'text',
+                    content: '',
+                    orderIndex: 0
+                }] : [],
+                answerBlocks: defaultToTextBlock ? [{
+                    id: `answer-text-${nanoid()}`,
+                    type: 'text',
+                    content: '',
+                    orderIndex: 0
+                }] : [],
+            }));
+        }
     }
-  }, [card, folderId, draftKey, defaultToTextBlock]);
+  }, [card, folderId, draftKey, defaultToTextBlock, mode]);
+
+  // ペアモード用の追加・削除ハンドラ
+  const handleAddPairTextBlocks = () => {
+    if (mode !== 'pair') return;
+    const qId = `question-text-${nanoid()}`;
+    const aId = `answer-text-${nanoid()}`;
+    
+    setFormData(prev => ({
+      ...prev,
+      questionBlocks: [...prev.questionBlocks, { id: qId, type: 'text', content: '', orderIndex: prev.questionBlocks.length }],
+      answerBlocks: [...prev.answerBlocks, { id: aId, type: 'text', content: '', orderIndex: prev.answerBlocks.length }]
+    }));
+  };
+
+  const handleDeletePair = (index: number) => {
+    if (mode !== 'pair') return;
+    setFormData(prev => {
+      const newQB = prev.questionBlocks.filter((_, i) => i !== index).map((b, i) => ({ ...b, orderIndex: i }));
+      const newAB = prev.answerBlocks.filter((_, i) => i !== index).map((b, i) => ({ ...b, orderIndex: i }));
+      return { ...prev, questionBlocks: newQB, answerBlocks: newAB };
+    });
+  };
 
   // Auto-save logic
   useEffect(() => {
@@ -228,27 +268,29 @@ export default function CardEditor({
     clearDraft();
   };
 
+  // ARIA: avoid passing expressions directly into `aria-pressed`.
+  // Precompute string values to satisfy axe/aria lint rules.
+  const ariaPressedBookmark = formData.isBookmarked ? "true" : "false";
+  const ariaPressedUncertainty = formData.hasUncertainty ? "true" : "false";
+  const ariaPressedPreview = showPreview ? "true" : "false";
+
 
   
   return (
-    <div className="space-y-4 md:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div 
+      className="space-y-4 md:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700"
+      style={{ ['--accent-color' as any]: settings?.accentColor }}
+    >
       {/* 復元通知 */}
       {isRestored && (
         <div 
-          className="mx-4 p-3 rounded-2xl animate-in fade-in slide-in-from-top-2 duration-500 flex items-center justify-center gap-2 border shadow-sm"
-          style={{ 
-            backgroundColor: `${settings?.accentColor}10`,
-            borderColor: `${settings?.accentColor}20`,
-            ['--accent-color' as any]: settings?.accentColor
-          }}
+          className="mx-4 p-3 rounded-2xl animate-in fade-in slide-in-from-top-2 duration-500 flex items-center justify-center gap-2 border shadow-sm bg-[color:var(--accent-color)/0.1] border-[color:var(--accent-color)/0.2]"
         >
           <RefreshCw 
-            className="w-4 h-4 animate-spin-slow" 
-            style={{ color: 'var(--accent-color)' }}
+            className="w-4 h-4 animate-spin-slow text-[color:var(--accent-color)]" 
           />
           <p 
-            className="text-xs font-bold"
-            style={{ color: 'var(--accent-color)' }}
+            className="text-xs font-bold text-[color:var(--accent-color)]"
           >
             編集中のデータを復元しました
           </p>
@@ -264,129 +306,148 @@ export default function CardEditor({
         </div>
       )}
 
-      {/* トップバナー：カード番号、耐性スコア、タイトル、および各種トグル */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 px-4">
-        <div className="flex flex-1 items-start gap-4 md:gap-8">
-            <div className="flex flex-col gap-4 min-w-[max-content]">
-                <div className="flex flex-col">
-                    <span className="text-[10px] font-bold text-slate-300 uppercase tracking-[0.3em] mb-1">Index</span>
-                    <span className="text-3xl md:text-4xl font-extrabold text-slate-800 tracking-tighter italic leading-none">
-                        Q<span className="text-primary-600">{questionNumber}</span>
-                    </span>
-                </div>
-                
-                <div className="flex flex-col">
-                    <span className="text-[10px] font-bold text-slate-300 uppercase tracking-[0.3em] mb-1 text-nowrap">耐性スコア</span>
-                    <div className="flex items-center gap-2">
-                        {card ? (
-                            (() => {
-                                // Calculate Resistance Score
-                                const resistance = calculateResistanceScore(card.interval ?? 0);
-                                const phase = getResistancePhase(resistance);
-                                return (
-                                    <Badge variant="outline" className={cn("rounded-full px-4 py-1 text-[10px] font-extrabold border-none", phase.colorClass)}>
-                                        {resistance}%
-                                    </Badge>
-                                );
-                            })()
-                        ) : (
-                            <Badge variant="outline" className="rounded-full px-4 py-1 text-[10px] font-extrabold bg-primary-600/10 text-primary-600 border-none">
-                                新規作成
-                            </Badge>
-                        )}
-                    </div>
-                </div>
-            </div>
+      {/* トップバナー：1列ヘッダー */}
+      <div className="px-4">
+        <div
+          className={cn(
+            "grid grid-cols-1 gap-3 items-center",
+            // PCは完全に1列
+            "lg:grid-cols-[96px_auto_minmax(0,1fr)_minmax(260px,420px)_auto_auto]"
+          )}
+        >
+          {/* INDEX / Q */}
+          <div className="h-14 flex flex-col justify-center">
+            <span className="text-[10px] font-bold text-slate-300 uppercase tracking-[0.3em] leading-none">
+              INDEX
+            </span>
+            <div className="flex items-end gap-2 leading-none">
+              <span className="text-3xl font-extrabold text-slate-800 tracking-tighter italic">
+                Q{questionNumber}
+              </span>
 
-            <div className="flex flex-col flex-1 min-w-[200px] gap-4">
-                {/* タイトル入力 (条件付き表示) */}
-                {!hideTitle && (
-                  <div className="flex flex-col">
-                      <span className="text-[10px] font-bold text-slate-300 uppercase tracking-[0.3em] mb-1">タイトル</span>
-                      <div className="relative group">
-                          <Input
-                            id="title-header"
-                            ref={titleInputRef}
-                            value={formData.title}
-                            onChange={(e) => handleChange('title', e.target.value)}
-                            placeholder="タイトルを入力（任意）"
-                            className="bg-slate-50 border-none h-10 rounded-xl px-4 text-slate-700 font-bold placeholder:text-slate-200 focus-visible:ring-indigo-500/10 transition-all text-sm"
-                          />
-                      </div>
-                  </div>
+              {!card ? (
+                <span className="text-[10px] font-extrabold rounded-full px-3 py-1 bg-primary-600/10 text-primary-600">
+                  新規
+                </span>
+              ) : null}
+            </div>
+          </div>
+
+          {/* 左側の丸アイコン（ブックマーク / 不確実） */}
+          <div className="h-14 flex items-center gap-3">
+            <button
+              type="button"
+              title="ブックマーク"
+              aria-label="ブックマーク"
+              aria-pressed={ariaPressedBookmark}
+              className={cn(
+                "h-14 w-14 rounded-full bg-slate-50 border border-slate-100/50 flex items-center justify-center transition-all",
+                formData.isBookmarked
+                  ? "text-primary-600 bg-primary-600/10 border-primary-600/20"
+                  : "text-slate-300 hover:text-slate-500 hover:border-slate-200"
+              )}
+              onClick={() => handleChange("isBookmarked", !formData.isBookmarked)}
+            >
+              <Bookmark className={cn("w-5 h-5", formData.isBookmarked && "fill-current")} />
+            </button>
+
+            <button
+              type="button"
+              title="不確実フラグ"
+              aria-label="不確実フラグ"
+              aria-pressed={ariaPressedUncertainty}
+              className={cn(
+                "h-14 w-14 rounded-full bg-slate-50 border border-slate-100/50 flex items-center justify-center transition-all",
+                formData.hasUncertainty
+                  ? "bg-amber-100 text-amber-600 border-amber-200"
+                  : "text-slate-300 hover:text-slate-500 hover:border-slate-200"
+              )}
+              onClick={() => handleChange("hasUncertainty", !formData.hasUncertainty)}
+            >
+              <HelpCircle className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* タイトル */}
+          {!hideTitle ? (
+            <div className="min-w-0">
+              <Label htmlFor="title-header" className="sr-only">
+                タイトル
+              </Label>
+              <div className="h-14 rounded-2xl bg-slate-50 border border-slate-100/50 flex items-center px-4 min-w-0">
+                <Input
+  id="title-header"
+  ref={titleInputRef}
+  value={formData.title}
+  onChange={(e) => handleChange("title", e.target.value)}
+  placeholder="タイトル（任意）"
+  autoComplete="new-password"
+  autoCorrect="off"
+  autoCapitalize="off"
+  spellCheck={false}
+  name="__ignore_chrome_autofill_title"
+  data-form-type="other"
+  className="h-10 w-full bg-transparent border-none px-0 text-slate-700 font-bold placeholder:text-slate-200 focus-visible:ring-indigo-500/10 text-sm"
+/>
+
+              </div>
+            </div>
+          ) : (
+            <div className="hidden lg:block" />
+          )}
+
+          {/* タグ：スクロールバーを出さず、1行で切る */}
+          <div className="min-w-0">
+            <Label className="sr-only">タグ</Label>
+            <div className="h-14 rounded-2xl bg-slate-50 border border-slate-100/50 flex items-center px-4 min-w-0 overflow-hidden">
+              <TagInput
+                tags={formData.tags || []}
+                availableTags={availableTags}
+                rootFolderId={folderId}
+                onChange={(tags) => handleChange("tags", tags)}
+                placeholder="タグ"
+                className={cn(
+                  "bg-transparent border-none h-10 min-h-0 rounded-none px-0 py-0 w-full",
+                  // 重要：autoスクロール禁止。見た目は切る（スクロールバーを出さない）
+                  "overflow-hidden whitespace-nowrap"
                 )}
-
-                <div className="flex flex-col">
-                    <div className="flex items-center gap-2 mb-1">
-                        <Tag className="w-3 h-3 text-slate-300" />
-                        <span className="text-[10px] font-bold text-slate-300 uppercase tracking-[0.3em]">タグ</span>
-                    </div>
-                    <TagInput 
-                        tags={formData.tags || []} 
-                        availableTags={availableTags}
-                        rootFolderId={folderId}
-                        onChange={(tags) => handleChange('tags', tags)} 
-                        className="bg-slate-50 border-none min-h-[40px] rounded-xl px-3 py-1.5 transition-all"
-                        placeholder="タグを追加"
-                    />
-                </div>
+              />
             </div>
+          </div>
 
-            {/* 各種トグル (タイトル右側) */}
-            <div className="flex items-center gap-2 md:gap-4 bg-slate-50 p-1.5 rounded-xl border border-slate-100/50 mt-4 md:mt-0 self-start">
-                <div className="flex items-center gap-2 px-2">
-                    <Switch
-                        id="draft-switch"
-                        checked={formData.isDraft}
-                        onCheckedChange={(checked) => handleChange('isDraft', checked)}
-                    />
-                    <Label htmlFor="draft-switch" className="text-[9px] font-bold text-slate-400 uppercase tracking-widest cursor-pointer hidden sm:block">下書き</Label>
-                </div>
-                
-                <div className="w-[1px] h-4 bg-slate-200"></div>
-
-                <button 
-                    title="ブックマーク"
-                    aria-label="ブックマーク"
-                    className={cn(
-                        "p-1.5 rounded-lg transition-all",
-                        formData.isBookmarked ? "text-primary-600 bg-primary-600/10" : "text-slate-300 hover:text-slate-500 hover:bg-slate-100"
-                    )}
-                     onClick={() => handleChange('isBookmarked', !formData.isBookmarked)}
-                >
-                    <Bookmark className={cn("w-4 h-4", formData.isBookmarked && "fill-current")} />
-                </button>
-                
-                <div className="w-[1px] h-4 bg-slate-200"></div>
-
-                <button 
-                    title="不確実フラグ"
-                    aria-label="不確実フラグ"
-                    className={cn(
-                        "p-1.5 rounded-lg transition-all",
-                        formData.hasUncertainty ? "bg-amber-100 text-amber-600" : "text-slate-300 hover:text-slate-500 hover:bg-slate-100"
-                    )}
-                    onClick={() => handleChange('hasUncertainty', !formData.hasUncertainty)}
-                >
-                    <HelpCircle className="w-4 h-4" />
-                </button>
+          {/* 作成中（下書き）トグル：showPreviewと絶対混ぜない */}
+          <div className="h-14 flex items-center">
+            <div className="h-14 rounded-2xl bg-slate-50 border border-slate-100/50 flex items-center gap-3 px-4">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest select-none">
+                作成中
+              </span>
+              <Switch
+                id="draft-switch"
+                checked={formData.isDraft}
+                onCheckedChange={(checked) => handleChange("isDraft", checked)}
+              />
             </div>
-        </div>
-        
-        <div className="flex items-center gap-4">
-             <div className="flex items-center gap-3 bg-white px-4 md:px-5 py-2 md:py-2.5 rounded-xl md:rounded-2xl border border-slate-50 group hover:border-slate-100 transition-all cursor-pointer select-none" onClick={() => setShowPreview(!showPreview)}>
-                <Label htmlFor="preview-toggle" className="text-[10px] font-bold text-slate-400 uppercase tracking-widest cursor-pointer">プレビュー</Label>
-                <Switch
-                    id="preview-toggle"
-                    checked={showPreview}
-                    onCheckedChange={setShowPreview}
-                />
-            </div>
+          </div>
+
+          {/* PREVIEW ボタン：プレビューの切替だけ */}
+          <button
+            type="button"
+            onClick={() => setShowPreview((v) => !v)}
+            className={cn(
+              "h-14 rounded-2xl px-5 flex items-center gap-2 border transition-all select-none",
+              showPreview
+                ? "bg-primary-600/10 text-primary-700 border-primary-600/20"
+                : "bg-white text-slate-500 border-slate-200 hover:border-slate-300"
+            )}
+            aria-label="プレビュー切り替え"
+          >
+            <Search className="w-5 h-5" />
+            <span className="text-xs font-extrabold tracking-widest">PREVIEW</span>
+          </button>
+
         </div>
       </div>
-      
-
-      
+    
       {/* 問題と解答セクション */}
       <DragDropContext onDragEnd={(result) => {
         if (!result.destination) return;
@@ -421,38 +482,80 @@ export default function CardEditor({
           }));
         }
       }}>
-        <div className="grid lg:grid-cols-2 gap-12 px-2 md:px-4">
-          <BlockEditor 
-            blocks={formData.questionBlocks} 
-            onChange={(blocks) => handleChange('questionBlocks', blocks)}
-            prefix="question"
-            label="問題"
-            color="text-indigo-500"
-            droppableId="question-blocks"
-            accentColor={settings?.accentColor}
-            duplicateToOpposite={settings?.duplicateToOpposite}
-            onCrossDuplicate={(block) => {
-                // Add to Answer side
-                const newBlock = { ...block, id: `answer-${block.type}-${Date.now()}`, orderIndex: formData.answerBlocks.length };
-                handleChange('answerBlocks', [...formData.answerBlocks, newBlock]);
-            }}
-          />
-          <BlockEditor 
-            blocks={formData.answerBlocks} 
-            onChange={(blocks) => handleChange('answerBlocks', blocks)}
-            prefix="answer"
-            label="解答"
-            color="text-emerald-500"
-            droppableId="answer-blocks"
-            accentColor={settings?.accentColor}
-            duplicateToOpposite={settings?.duplicateToOpposite}
-            onCrossDuplicate={(block) => {
-                // Add to Question side
-                const newBlock = { ...block, id: `question-${block.type}-${Date.now()}`, orderIndex: formData.questionBlocks.length };
-                handleChange('questionBlocks', [...formData.questionBlocks, newBlock]);
-            }}
-          />
-        </div>
+        {(() => {
+          const isPairMode = mode === 'pair';
+          
+          // ペアモード用の動的プレースホルダー生成
+          const pairQuestionPlaceholders = isPairMode ? 
+            Object.fromEntries(formData.questionBlocks.map((_, i) => [i, `ペア${i + 1}：用語・単語`])) : undefined;
+          
+          const pairAnswerPlaceholders = isPairMode ? 
+            Object.fromEntries(formData.answerBlocks.map((_, i) => [i, `ペア${i + 1}：意味・説明`])) : undefined;
+
+          return (
+            <>
+              <div className="grid lg:grid-cols-2 gap-12 px-2 md:px-4">
+                <BlockEditor 
+                  blocks={formData.questionBlocks} 
+                  onChange={(blocks) => {
+                    if (isPairMode) return; 
+                    handleChange('questionBlocks', blocks)
+                  }}
+                  prefix="question"
+                  label="問題"
+                  color="text-indigo-500"
+                  droppableId="question-blocks"
+                  accentColor={settings?.accentColor}
+                  duplicateToOpposite={settings?.duplicateToOpposite}
+                  customPlaceholders={pairQuestionPlaceholders}
+                  hideToolbar={isPairMode}
+                  onDelete={isPairMode ? handleDeletePair : undefined}
+                  onCrossDuplicate={(block) => {
+                      if (isPairMode) return;
+                      // Add to Answer side
+                      const newBlock = { ...block, id: `answer-${block.type}-${Date.now()}`, orderIndex: formData.answerBlocks.length };
+                      handleChange('answerBlocks', [...formData.answerBlocks, newBlock]);
+                  }}
+                />
+                <BlockEditor 
+                  blocks={formData.answerBlocks} 
+                  onChange={(blocks) => {
+                    if (isPairMode) return; 
+                    handleChange('answerBlocks', blocks)
+                  }}
+                  prefix="answer"
+                  label="解答"
+                  color="text-emerald-500"
+                  droppableId="answer-blocks"
+                  accentColor={settings?.accentColor}
+                  duplicateToOpposite={settings?.duplicateToOpposite}
+                  customPlaceholders={pairAnswerPlaceholders}
+                  hideToolbar={isPairMode}
+                  onDelete={isPairMode ? handleDeletePair : undefined}
+                  onCrossDuplicate={(block) => {
+                      if (isPairMode) return;
+                      // Add to Question side
+                      const newBlock = { ...block, id: `question-${block.type}-${Date.now()}`, orderIndex: formData.questionBlocks.length };
+                      handleChange('questionBlocks', [...formData.questionBlocks, newBlock]);
+                  }}
+                />
+              </div>
+
+              {isPairMode && (
+                <div className="flex justify-center py-6">
+                  <Button
+                    variant="outline"
+                    onClick={handleAddPairTextBlocks}
+                    className="rounded-full gap-2 border-slate-200 text-slate-500 font-bold px-10 py-6 shadow-sm hover:border-primary-500 hover:text-primary-600 transition-all active:scale-95 bg-white/50 backdrop-blur-sm"
+                  >
+                    <Plus className="w-5 h-5" />
+                    <span>ペアを追加</span>
+                  </Button>
+                </div>
+              )}
+            </>
+          );
+        })()}
       </DragDropContext>
 
       {/* リアルカードプレビューセクション */}
@@ -500,14 +603,9 @@ export default function CardEditor({
                       clearDraft();
                   }} 
                   disabled={isLoading}
-                  className="w-full md:w-auto rounded-full px-8 h-12 md:h-14 font-extrabold flex items-center justify-center gap-3 transition-all active:scale-95 shadow-sm border"
-                  style={{ 
-                    backgroundColor: `${settings?.accentColor}08`, // 8% opacity
-                    borderColor: `${settings?.accentColor}30`,      // 30% opacity
-                    color: settings?.accentColor
-                  }}
+                  className="w-full md:w-auto rounded-full px-8 h-12 md:h-14 font-extrabold flex items-center justify-center gap-3 transition-all active:scale-95 shadow-sm border bg-[color:var(--accent-color)/0.08] border-[color:var(--accent-color)/0.3] text-[color:var(--accent-color)]"
               >
-                  <Plus className="w-5 h-5" style={{ color: settings?.accentColor }} />
+                  <Plus className="w-5 h-5 text-[color:var(--accent-color)]" />
                   <span>続けて作成</span>
               </Button>
               )}

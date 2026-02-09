@@ -4,7 +4,7 @@ import { useCards } from '@/hooks/useCards';
 import { useFolders } from '@/hooks/useFolders';
 import { useQuery } from '@tanstack/react-query';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { localDb } from '@/services/localDB';
+import { getLocalDb } from '../services/localDB';
 import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 import { firestoreDb } from '@/services/firebase';
 import { useAuth } from '@/contexts/AuthContext';
@@ -49,7 +49,7 @@ export default function Dashboard() {
   const { data: studyLogs = [], isLoading: logsLoading } = useQuery({
     queryKey: ['studyLogs', currentUser?.uid],
     queryFn: async () => {
-      if (!currentUser) return [];
+      if (!currentUser || !firestoreDb) return [];
       const q = query(
         collection(firestoreDb, 'studyLogs'),
         where('userId', '==', currentUser.uid),
@@ -68,9 +68,10 @@ export default function Dashboard() {
   const localStudyLogs = useLiveQuery(
     async () => {
       if (!currentUser) return [];
-      return await localDb.table('studyLogs').toArray();
+      const db = await getLocalDb();
+      return await db.table('studyLogs').toArray();
     },
-    [currentUser, localDb.name]
+    [currentUser]
   );
   
   // Filter out deleted cards and hidden folders
@@ -173,9 +174,8 @@ export default function Dashboard() {
     (!c.isDraft && !c.is_draft) && (c.isBookmarked || c.is_bookmarked)
   );
   
-  const draftCards = cards.filter(c => 
-    (c.isDraft || c.is_draft) && 
-    !(c.isDeleted || c.is_deleted)
+  const draftCards = activeCards.filter(c => 
+    (c.isDraft || c.is_draft)
   );
 
   const lastStudiedFolder = useMemo(() => {
@@ -185,7 +185,7 @@ export default function Dashboard() {
     const card = cards.find(c => c.id === cardId);
     if (!card) return null;
     const fId = card.folderId || card.folder_id;
-    return folders.find(f => f.id === fId || f.folderId === fId);
+    return folders.find(f => f.id === fId);
   }, [studyLogs, cards, folders]);
   
   const isLoading = cardsLoading || foldersLoading || logsLoading;
@@ -246,31 +246,53 @@ export default function Dashboard() {
         {/* Priority Section (Today's Review) */}
         <section className="mb-8 md:mb-12">
             <div 
-              className="bg-white rounded-3xl md:rounded-[40px] py-4 px-5 md:p-10 border border-slate-50 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] cursor-pointer hover:shadow-lg transition-all group overflow-hidden relative"
-              onClick={() => navigate(createPageUrl('study'))}
+              className={`
+                rounded-3xl md:rounded-[40px] py-6 px-6 md:p-12 border-t border-white/50 ring-1 ring-slate-900/5 
+                transition-all duration-300 group overflow-hidden relative
+                ${todayCards.length === 0 
+                  ? 'bg-slate-100/50 shadow-[inset_0_2px_4px_0_rgba(0,0,0,0.06)] scale-[0.99] cursor-default' 
+                  : 'bg-[#FAFAFA] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1),0_15px_30px_-5px_rgba(var(--color-primary-600),0.3)] cursor-pointer hover:shadow-[0_25px_50px_-10px_rgba(0,0,0,0.15),0_20px_40px_-5px_rgba(var(--color-primary-600),0.4)] hover:-translate-y-0.5'
+                }
+              `}
+              onClick={() => todayCards.length > 0 && navigate(createPageUrl('study'))}
             >
-                <div className="absolute top-0 right-0 w-48 h-48 md:w-64 md:h-64 bg-primary-50 rounded-full -translate-y-1/2 translate-x-1/2 opacity-20 group-hover:scale-110 transition-transform duration-700"></div>
+                <div className="absolute top-0 right-0 w-48 h-48 md:w-64 md:h-64 bg-primary-100/50 rounded-full -translate-y-1/2 translate-x-1/2 opacity-20 group-hover:scale-110 transition-transform duration-700"></div>
+                
+                {/* Background Pattern (Irregular/Organic) */}
+                <div className="absolute inset-0 opacity-[0.15] pointer-events-none" 
+                     style={{ 
+                       backgroundImage: `
+                         radial-gradient(circle at 15% 50%, rgb(var(--color-primary-600)) 2px, transparent 2.5px),
+                         radial-gradient(circle at 45% 20%, rgb(var(--color-primary-600)) 3px, transparent 3.5px),
+                         radial-gradient(circle at 85% 35%, rgb(var(--color-primary-600)) 2px, transparent 2.5px),
+                         radial-gradient(circle at 75% 85%, rgb(var(--color-primary-600)) 4px, transparent 4.5px),
+                         radial-gradient(circle at 25% 75%, rgb(var(--color-primary-600)) 2px, transparent 2.5px),
+                         radial-gradient(circle at 60% 60%, rgb(var(--color-primary-600)) 1.5px, transparent 2px)
+                       `,
+                       backgroundSize: '160px 160px' // Larger repeat
+                     }} 
+                />
                 
                 <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-8">
-                    <div className="space-y-1 md:space-y-4">
+                    <div className="space-y-2 md:space-y-5">
                         <div className="hidden md:flex items-center gap-2">
-                           <div className="px-2 md:px-3 py-0.5 md:py-1 bg-primary-50 text-primary-600 text-[9px] md:text-[10px] font-bold rounded-full uppercase tracking-wider">Priority Task</div>
-                           {todayCards.length > 0 && <div className="animate-pulse w-1.5 md:w-2 h-1.5 md:h-2 rounded-full bg-primary-600"></div>}
+                           <div className="px-3 md:px-4 py-1 bg-primary-600 text-white text-[10px] md:text-xs font-bold rounded-full uppercase tracking-wider shadow-sm">Priority Task</div>
+                           {todayCards.length > 0 && <div className="animate-pulse w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]"></div>}
                         </div>
-                        <h2 className="text-xl md:text-4xl font-bold text-slate-800">今日の復習</h2>
-                        <p className="text-[10px] md:text-sm text-slate-400 font-medium max-w-sm mt-0 md:mt-2">
-                           記憶が薄れる最適なタイミングです。{todayCards.length}枚が待機中。
-                           <span className="hidden md:block text-[10px] text-slate-300 mt-2 font-bold">※非表示フォルダは除外されています</span>
+                        <h2 className="text-2xl md:text-5xl font-bold text-slate-800 tracking-tight">今日の復習</h2>
+                        <p className="text-xs md:text-base text-slate-500 font-medium max-w-sm mt-1 md:mt-3 leading-relaxed">
+                           記憶が薄れる最適なタイミングです。<br className="hidden md:block"/>現在 {todayCards.length}枚 のカードが待機しています。
+                           <span className="hidden md:block text-[10px] text-slate-400 mt-2 font-bold opacity-70">※非表示フォルダは除外されています</span>
                         </p>
                     </div>
                     
-                    <div className="flex items-center gap-4 md:gap-6">
+                    <div className="flex items-center gap-5 md:gap-8">
                         <div className="flex flex-col items-center">
-                           <span className="text-3xl md:text-6xl font-bold text-primary-600 italic leading-none">{todayCards.length}</span>
-                           <span className="text-[9px] md:text-[10px] font-bold text-slate-300 uppercase mt-1 md:mt-2 tracking-widest">Cards Remaining</span>
+                           <span className="text-4xl md:text-7xl font-bold text-primary-600 italic leading-none tracking-tighter">{todayCards.length}</span>
+                           <span className="text-[9px] md:text-[11px] font-bold text-slate-400 uppercase mt-1 md:mt-2 tracking-[0.2em]">Cards Due</span>
                         </div>
-                        <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-primary-600 flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform">
-                           <ChevronRight className="w-6 h-6 md:w-8 md:h-8" />
+                        <div className="w-14 h-14 md:w-20 md:h-20 rounded-full bg-primary-600 flex items-center justify-center text-white shadow-lg shadow-primary-600/30 group-hover:scale-110 group-hover:bg-primary-500 transition-all duration-300">
+                           <ChevronRight className="w-7 h-7 md:w-10 md:h-10" />
                         </div>
                     </div>
                 </div>
@@ -284,23 +306,23 @@ export default function Dashboard() {
             {/* Weak Points */}
             <div>
                <div 
-                 className="bg-white rounded-[24px] md:rounded-[32px] p-5 md:p-8 border border-slate-50 shadow-sm cursor-pointer hover:shadow-md transition-all group relative overflow-hidden h-[160px] md:h-[200px] flex flex-col justify-between"
+                 className="bg-[#FCFCFC] rounded-[24px] md:rounded-[32px] p-5 md:p-8 border border-slate-200/60 shadow-none cursor-pointer hover:bg-white hover:border-slate-300 transition-all duration-300 group relative overflow-hidden h-[160px] md:h-[200px] flex flex-col justify-between"
                  onClick={() => navigate(createPageUrl('uncertain'))}
                >
-                   <div className="absolute -bottom-6 -right-6 md:-bottom-10 md:-right-10 text-slate-100 group-hover:text-amber-50 group-hover:scale-110 transition-all duration-500">
+                   <div className="absolute -bottom-6 -right-6 md:-bottom-10 md:-right-10 text-slate-100 group-hover:text-amber-50 group-hover:scale-105 transition-all duration-500">
                       <HelpCircle className="w-28 h-28 md:w-48 md:h-48 opacity-50" />
                    </div>
 
-                   <div className="relative z-10 w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-primary-50 flex items-center justify-center text-primary-600 group-hover:scale-110 transition-transform">
+                   <div className="relative z-10 w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-amber-50 flex items-center justify-center text-amber-500 group-hover:scale-105 transition-transform">
                       <HelpCircle className="w-5 h-5 md:w-6 md:h-6" />
                    </div>
                    
                    <div className="relative z-10">
                       <div className="flex items-baseline gap-1 md:gap-2 mb-0.5 md:mb-1">
-                         <span className="text-2xl md:text-3xl font-bold text-slate-700">{uncertainCards.length}</span>
+                         <span className="text-2xl md:text-3xl font-bold text-slate-600 group-hover:text-slate-800 transition-colors">{uncertainCards.length}</span>
                          <span className="text-[10px] md:text-xs font-bold text-slate-400">枚</span>
                       </div>
-                      <p className="text-[10px] md:text-xs text-slate-400 font-bold leading-tight">確認が必要な<br className="md:hidden"/>カード</p>
+                      <p className="text-[10px] md:text-xs text-slate-400 font-bold leading-tight group-hover:text-slate-500 transition-colors">確認が必要な<br className="md:hidden"/>カード</p>
                    </div>
                </div>
             </div>
@@ -308,96 +330,110 @@ export default function Dashboard() {
             {/* Focus Area */}
             <div>
                <div 
-                 className="bg-white rounded-[24px] md:rounded-[32px] p-5 md:p-8 border border-slate-50 shadow-sm cursor-pointer hover:shadow-md transition-all group relative overflow-hidden h-[160px] md:h-[200px] flex flex-col justify-between"
+                 className="bg-[#FCFCFC] rounded-[24px] md:rounded-[32px] p-5 md:p-8 border border-slate-200/60 shadow-none cursor-pointer hover:bg-white hover:border-slate-300 transition-all duration-300 group relative overflow-hidden h-[160px] md:h-[200px] flex flex-col justify-between"
                  onClick={() => navigate(createPageUrl('bookmark'))} 
                >
-                   <div className="absolute -bottom-6 -right-6 md:-bottom-10 md:-right-10 text-slate-100 group-hover:text-teal-50 group-hover:scale-110 transition-all duration-500">
+                   <div className="absolute -bottom-6 -right-6 md:-bottom-10 md:-right-10 text-slate-100 group-hover:text-teal-50 group-hover:scale-105 transition-all duration-500">
                       <Bookmark className="w-28 h-28 md:w-48 md:h-48 opacity-50" />
                    </div>
 
-                   <div className="relative z-10 w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-primary-50 flex items-center justify-center text-primary-600 group-hover:scale-110 transition-transform">
+                   <div className="relative z-10 w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-teal-50 flex items-center justify-center text-teal-600 group-hover:scale-105 transition-transform">
                       <Bookmark className="w-5 h-5 md:w-6 md:h-6" />
                    </div>
                    
                    <div className="relative z-10">
                        <div className="flex items-baseline gap-1 md:gap-2 mb-0.5 md:mb-1">
-                         <span className="text-2xl md:text-3xl font-bold text-slate-700">{bookmarkedCards.length}</span>
+                         <span className="text-2xl md:text-3xl font-bold text-slate-600 group-hover:text-slate-800 transition-colors">{bookmarkedCards.length}</span>
                          <span className="text-[10px] md:text-xs font-bold text-slate-400">枚</span>
                       </div>
-                      <p className="text-[10px] md:text-xs text-slate-400 font-bold leading-tight">ブックマーク<br className="md:hidden"/>したカード</p>
+                      <p className="text-[10px] md:text-xs text-slate-400 font-bold leading-tight group-hover:text-slate-500 transition-colors">ブックマーク<br className="md:hidden"/>したカード</p>
                    </div>
                </div>
             </div>
         </div>
         
-        {/* RESUME Section */}
-        {isLoading ? (
-            <Skeleton className="h-20 w-full rounded-3xl mb-6" />
-        ) : lastStudiedFolder && (
-          <section className="mb-8">
-            <div className="flex items-center gap-2 mb-4">
-              <Clock className="w-3.5 h-3.5 text-primary-600" />
-              <h2 className="text-[10px] font-bold text-slate-300 tracking-[0.2em] uppercase">
-                Resume Learning
-              </h2>
-            </div>
-            <div 
-              className="bg-white rounded-3xl p-5 cursor-pointer hover:shadow-md transition-all shadow-sm border border-slate-50 group"
-              onClick={() => navigate(createPageUrl(`FolderView?id=${lastStudiedFolder.id || lastStudiedFolder.folderId}`))}
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:text-primary-600 transition-colors">
-                  <Clock className="w-4 h-4" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[9px] text-slate-300 font-bold mb-0.5 uppercase tracking-wider">前回の続き</p>
-                  <p className="text-base font-bold text-slate-700 truncate">{lastStudiedFolder.folderName || lastStudiedFolder.folder_name}</p>
-                </div>
-                <ChevronRight className="w-5 h-5 text-slate-200 group-hover:text-primary-600 transition-colors" />
+        {/* RESUME & DRAFTS Section - Side by Side on Desktop */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-6 lg:gap-8 mb-12">
+          {/* RESUME Section */}
+          {isLoading ? (
+              <Skeleton className="h-20 w-full rounded-3xl" />
+          ) : lastStudiedFolder ? (
+            <section>
+              <div className="flex items-center gap-2 mb-4">
+                <Clock className="w-3.5 h-3.5 text-primary-600" />
+                <h2 className="text-[10px] font-bold text-slate-300 tracking-[0.2em] uppercase">
+                  Resume Learning
+                </h2>
               </div>
-            </div>
-          </section>
-        )}
-        
-        {/* DRAFTS Section */}
-        {isLoading ? (
-             <Skeleton className="h-32 w-full rounded-3xl" />
-        ) : draftCards.length > 0 && (
-          <section className="mb-12">
-            <div className="flex items-center gap-2 mb-4">
-              <FileText className="w-3.5 h-3.5 text-primary-600" />
-              <h2 className="text-[10px] font-bold text-slate-300 tracking-[0.2em] uppercase">
-                Drafts in Progress
-              </h2>
-            </div>
-            <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide -mx-2 px-2">
-              {draftCards.slice(0, 10).map(card => {
-                const folder = folders.find(f => f.id === card.folderId || f.id === card.folder_id);
-                const folderName = folder?.folderName || folder?.folder_name || '無所属';
-                const title = card.title || '無題のカード';
-                
-                return (
-                  <div 
-                    key={card.id}
-                    className="flex-shrink-0 w-[180px] bg-white rounded-3xl p-5 cursor-pointer hover:shadow-md transition-all shadow-sm border border-slate-50 group"
-                    onClick={() => navigate(createPageUrl(`CardEdit?id=${card.id}`))}
-                  >
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="w-8 h-8 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300 group-hover:text-primary-600 transition-colors">
-                        <FileText className="w-4 h-4" />
-                      </div>
-                      <span className="text-[8px] font-bold text-slate-200 uppercase tracking-widest">
-                        Draft
-                      </span>
-                    </div>
-                    <h3 className="text-sm font-bold text-slate-700 mb-1 truncate">{title}</h3>
-                    <p className="text-[10px] text-slate-300 font-medium truncate">{folderName}</p>
+              <div 
+                className="bg-[#FCFCFC] rounded-3xl p-5 cursor-pointer hover:bg-white hover:border-slate-300 transition-all duration-300 shadow-none border border-slate-200/60 group h-full"
+                onClick={() => navigate(createPageUrl(`FolderView?id=${lastStudiedFolder.id || lastStudiedFolder.folderId}`))}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 group-hover:text-primary-600 group-hover:bg-primary-50 transition-colors">
+                    <Clock className="w-4 h-4" />
                   </div>
-                );
-              })}
-            </div>
-          </section>
-        )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[9px] text-slate-400 font-bold mb-0.5 uppercase tracking-wider">前回の続き</p>
+                    <p className="text-base font-bold text-slate-600 group-hover:text-slate-800 transition-colors truncate">{lastStudiedFolder.folderName || lastStudiedFolder.folder_name}</p>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-primary-600 transition-colors" />
+                </div>
+              </div>
+            </section>
+          ) : (
+            <div className="hidden lg:block" /> // Empty placeholder on desktop when no last studied folder
+          )}
+          
+          {/* DRAFTS Section */}
+          {isLoading ? (
+               <Skeleton className="h-32 w-full rounded-3xl" />
+          ) : (
+            <section className={!lastStudiedFolder ? "lg:col-span-2" : ""}>
+              <div className="flex items-center gap-2 mb-4">
+                <FileText className="w-3.5 h-3.5 text-primary-600" />
+                <h2 className="text-[10px] font-bold text-slate-300 tracking-[0.2em] uppercase">
+                  Drafts in Progress
+                </h2>
+              </div>
+              
+              {draftCards.length > 0 ? (
+                <div className="relative group/scroll">
+                  <div className="flex gap-4 overflow-x-auto pb-6 pt-2 no-scrollbar mask-gradient-right -mx-4 px-4 scroll-smooth">
+                    {draftCards.slice(0, 15).map(card => {
+                      const folder = folders.find(f => f.id === card.folderId);
+                      const folderName = folder?.folderName || '無所属';
+                      const title = card.title || card.questionText || card.question_text;
+                      
+                      return (
+                        <div 
+                          key={card.id}
+                          className="flex-shrink-0 w-[200px] bg-[#FCFCFC] rounded-3xl p-5 cursor-pointer hover:bg-white hover:border-slate-300 transition-all duration-300 shadow-none border border-slate-200/60 group/card"
+                          onClick={() => navigate(createPageUrl(`CardEdit?id=${card.id}`))}
+                        >
+                          <div className="flex items-start justify-end mb-4">
+                            <span className="text-[8px] font-bold text-slate-300 uppercase tracking-widest">
+                              Draft
+                            </span>
+                          </div>
+                          <h3 className="text-sm font-bold text-slate-600 group-hover/card:text-slate-800 transition-colors mb-1 truncate">{title}</h3>
+                          <p className="text-[10px] text-slate-400 font-medium truncate">{folderName}</p>
+                        </div>
+                      );
+                    })}
+                    {/* スクロール末尾の余白確保 */}
+                    <div className="flex-shrink-0 w-4" />
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-white/50 border border-dashed border-slate-200 rounded-3xl p-8 flex flex-col items-center justify-center text-center">
+                  <FileText className="w-8 h-8 text-slate-200 mb-2" />
+                  <p className="text-xs font-bold text-slate-300 italic">作成中のカードはありません</p>
+                </div>
+              )}
+            </section>
+          )}
+        </div>
       </div>
       
       {/* Dialogs */}

@@ -9,15 +9,17 @@ interface MemoBlockProps {
   onDelete: () => void;
   onDuplicate: () => void;
   dragHandleProps?: any;
+  dragHandleClassName?: string;
   accentColor?: string;
 }
 
-export const MemoBlock = ({ content, onChange, onDelete, onDuplicate, dragHandleProps, accentColor }: MemoBlockProps) => {
+export const MemoBlock = ({ content, onChange, onDelete, onDuplicate, dragHandleProps, dragHandleClassName, accentColor }: MemoBlockProps) => {
   return (
     <BlockWrapper 
       onDelete={onDelete} 
       onDuplicate={onDuplicate} 
       dragHandleProps={dragHandleProps}
+      dragHandleClassName={dragHandleClassName}
       label="Memo"
       icon={StickyNote}
       accentColor={accentColor}
@@ -26,8 +28,8 @@ export const MemoBlock = ({ content, onChange, onDelete, onDuplicate, dragHandle
         value={content}
         onChange={(e) => onChange(e.target.value)}
         placeholder="メモを入力..."
-        minRows={2}
-        className="bg-slate-50 p-6 rounded-[20px] border-none focus-visible:ring-0 text-slate-600 text-sm resize-none"
+        minRows={1}
+        className="bg-slate-50 px-3 py-1 rounded-[16px] border-none focus-visible:ring-0 text-slate-600 text-sm resize-none"
       />
     </BlockWrapper>
   );

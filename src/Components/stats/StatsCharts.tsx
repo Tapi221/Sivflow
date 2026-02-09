@@ -113,59 +113,96 @@ export function StabilityDistributionChart({
       return newBuckets;
   }, [cards, manualData]);
   
-  const yDomainMax = Math.max(...buckets.map(b => b.count)) + 1; // Add padding for labels
+  const yDomainMax = Math.max(...buckets.map(b => b.count)) + 2; // More padding for labels
+
+  // Refined Color Palette (Sophisticated/Muted)
+  // Low Tolerance -> Red-Orange muted
+  // Mid Tolerance -> Yellow-Teal muted
+  // High Tolerance -> Teal-Green muted
+  const getBarColor = (min: number) => {
+    if (min >= 85) return '#5A8684'; // Dark Primary (Stable/Long Term)
+    if (min >= 65) return '#7BACAA'; // Primary (Stable)
+    if (min >= 40) return '#94bab8'; // Light Primary (Learning)
+    if (min >= 20) return '#cbdad9'; // Very Light / Neutral (New)
+    return '#e2e8f0'; // Gray (Need Review)
+  };
 
   return (
-    <Card className={cn("rounded-2xl md:rounded-[24px] border-none shadow-sm p-5 md:p-8 bg-white", className)}>
-        <div className="flex items-center gap-3 mb-6 md:mb-8">
-            <TrendingUp className="w-5 h-5 text-primary-600" />
-            <h2 className="text-xs md:text-sm font-bold text-slate-700">耐性スコア分布</h2>
+    <Card className={cn("rounded-[32px] border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-6 md:p-10 bg-white/80 backdrop-blur-sm", className)}>
+        <div className="flex items-center justify-between mb-8 md:mb-12">
+            <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-2xl bg-primary-100 flex items-center justify-center text-primary-600 shadow-inner">
+                    <TrendingUp className="w-5 h-5" />
+                </div>
+                <div>
+                    <h2 className="text-base md:text-lg font-bold text-slate-800 tracking-tight">耐性スコア分布</h2>
+                    <p className="text-[10px] md:text-xs text-slate-400 font-medium">学習の定着度と忘れにくさを可視化</p>
+                </div>
+            </div>
+            {hasData && (
+                <div className="bg-primary-50 px-4 py-2 rounded-2xl border border-primary-100/50">
+                    <span className="text-[10px] uppercase tracking-wider text-primary-600/70 font-bold block leading-none mb-1">Average</span>
+                    <span className="text-lg md:text-xl font-black text-primary-700 leading-none">{avgPercent}%</span>
+                </div>
+            )}
         </div>
+
       <CardContent className="p-0">
         <style>{`
           .recharts-wrapper, .recharts-surface, .recharts-layer { outline: none !important; }
           *:focus { outline: none !important; }
         `}</style>
-        <div className="w-full outline-none focus:outline-none px-4 md:px-5" style={{ position: 'relative', width: '100%', height: 240, minWidth: 0 }}>
+        <div className="w-full outline-none focus:outline-none" style={{ position: 'relative', width: '100%', height: 260, minWidth: 0 }}>
           <ResponsiveContainer width="100%" height="100%" debounce={50}>
             <BarChart 
                 data={buckets} 
-                margin={{ top: 50, right: -10, left: -10, bottom: 0 }} 
-                barCategoryGap="1%"
+                margin={{ top: 20, right: 0, left: -20, bottom: 0 }} 
+                barCategoryGap="15%"
             >
+              <defs>
+                <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="currentColor" stopOpacity={1} />
+                  <stop offset="100%" stopColor="currentColor" stopOpacity={0.7} />
+                </linearGradient>
+                <filter id="shadow" height="130%">
+                  <feGaussianBlur in="SourceAlpha" stdDeviation="2" />
+                  <feOffset dx="0" dy="2" result="offsetblur" />
+                  <feComponentTransfer>
+                    <feFuncA type="linear" slope="0.1" />
+                  </feComponentTransfer>
+                  <feMerge>
+                    <feMergeNode />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+
               <XAxis 
                 type="number"
                 dataKey="mid" 
                 hide={true}
-                padding={{ left: 0, right: 0 }}
                 domain={[0, 100]}
-                ticks={Array.from({ length: 21 }, (_, i) => i * 5)}
-                interval={0}
-                tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 'bold' }}
-                axisLine={false}
-                tickLine={false}
-                dy={5}
               />
               <YAxis 
-                width={0}
-                hide={false}
-                axisLine={false}
-                tickLine={false}
-                tick={{ fontSize: 10, fill: '#cbd5e1', dx: 5, textAnchor: 'start' }}
+                hide={true}
                 domain={[0, yDomainMax]}
-                allowDecimals={false}
               />
+              
               {enableTooltip && (
                   <Tooltip 
-                    cursor={{ fill: 'transparent' }}
-                    isAnimationActive={false}
+                    cursor={{ fill: '#f1f5f9', opacity: 0.4 }}
+                    isAnimationActive={true}
                     content={({ active, payload }) => {
                       if (active && payload && payload.length) {
                         const data = payload[0].payload;
-                        if (data.count === 0) return null; // 0枚の場合は非表示
+                        if (data.count === 0) return null;
                         return (
-                          <div className="bg-primary-600 text-white text-[10px] md:text-xs rounded-full py-1.5 px-3.5 shadow-xl font-bold border border-white/20 animate-in fade-in duration-200">
-                            {data.range} : {data.count} 枚
+                          <div className="bg-slate-900/90 backdrop-blur-md text-white text-[10px] md:text-xs rounded-2xl py-2 px-4 shadow-2xl font-bold border border-white/10 animate-in zoom-in-95 duration-200">
+                             <div className="flex items-center gap-2 mb-1 opacity-70">
+                                <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: getBarColor(data.min) }} />
+                                <span>{data.range}</span>
+                             </div>
+                             <div className="text-sm">{data.count} <span className="text-[10px] font-normal">Cards</span></div>
                           </div>
                         );
                       }
@@ -173,138 +210,80 @@ export function StabilityDistributionChart({
                     }}
                   />
               )}
-              <defs>
-                <linearGradient id="chartBgGradient" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#FCA5A5" />
-                  <stop offset="18%" stopColor="#FCA5A5" />
-                  <stop offset="22%" stopColor="#FDBA74" />
-                  <stop offset="38%" stopColor="#FDBA74" />
-                  <stop offset="42%" stopColor="#FDE047" />
-                  <stop offset="63%" stopColor="#FDE047" />
-                  <stop offset="67%" stopColor="#99F6E4" />
-                  <stop offset="83%" stopColor="#99F6E4" />
-                  <stop offset="87%" stopColor="#16a34a" />
-                  <stop offset="100%" stopColor="#16a34a" />
-                </linearGradient>
-              </defs>
-              {/* Unified Phase Background Area with Gradient */}
-              <ReferenceArea x1={0} x2={100} fill="url(#chartBgGradient)" fillOpacity={0.15} />
-              
-
 
               <Bar 
                 dataKey="count" 
-                radius={[4, 4, 4, 4]}
+                radius={[6, 6, 0, 0]}
                 activeBar={false}
-                animationDuration={1000}
+                animationDuration={1500}
                 isAnimationActive={true}
-                fillOpacity={barOpacity}
-                label={{ 
-                    position: 'top', 
-                    fontSize: 9, 
-                    fontWeight: 'bold', 
-                    fill: '#64748b',
-                    offset: 3,
-                    formatter: (value: any) => value > 0 ? value : ''
-                }}
               >
-                {buckets.map((entry, index) => {
-                  // Color based on phase ranges (matching the bottom legend)
-                  // 0-20: Red (#FCA5A5)
-                  // 20-40: Orange (#FDBA74)
-                  // 40-65: Yellow (#FDE047)
-                  // 65-85: Teal (#99F6E4)
-                  // 85-100: Green (#16a34a)
-                  const min = entry.min;
-                  let color = '#FCA5A5'; // default
-                  
-                  if (min >= 85) {
-                    color = '#16a34a'; 
-                  } else if (min >= 65) {
-                    color = '#99F6E4'; 
-                  } else if (min >= 40) {
-                    color = '#FDE047'; 
-                  } else if (min >= 20) {
-                    color = '#FDBA74'; 
-                  }
-                  
-                  return (
+                {buckets.map((entry, index) => (
                     <Cell 
                       key={`cell-${index}`} 
-                      fill={color}
-                      fillOpacity={barOpacity}
+                      fill={getBarColor(entry.min)}
+                      style={{ filter: 'url(#shadow)' }}
                     />
-                  );
-                })}
+                ))}
               </Bar>
               
-              {/* Reference Line for Average */}
               {showReferenceLines && hasData && (
                 <ReferenceLine 
                     x={avgPercent} 
-                    stroke="var(--color-primary-600-hex, #689A98)" 
-                    strokeDasharray="3 3"
-                    className="z-10"
+                    stroke="#689A98" 
+                    strokeWidth={2}
+                    strokeDasharray="4 4"
                     label={({ viewBox }) => {
-                        const xPos = viewBox.x; 
-                        
+                        const xPos = viewBox.x;
                         return (
-                           <foreignObject x={xPos - 75} y={0} width={150} height={30} style={{ overflow: 'visible' }}>
-                               <div className="flex justify-center">
-                                    <div className="bg-primary-600 text-white text-[9px] md:text-[10px] font-bold px-2 md:px-3 py-0.5 md:py-1 rounded-full text-center shadow-sm whitespace-nowrap z-50">
-                                        平均耐性スコア: {avgPercent}%
-                                    </div>
+                           <foreignObject x={xPos - 50} y={-10} width={100} height={40} style={{ overflow: 'visible' }}>
+                               <div className="flex flex-col items-center">
+                                    <div className="w-2 h-2 rounded-full bg-primary-600 ring-4 ring-primary-100 mb-1" />
                                </div>
                            </foreignObject>
                         );
                     }}
                 />
               )}
-
-
             </BarChart>
           </ResponsiveContainer>
         </div>
         
-        {/* Phase Visualization Bar */}
-        <div className="mt-0 px-4 md:px-5">
-            <div 
-                className="flex w-full text-[8px] md:text-[9px] font-bold text-white text-center rounded-lg overflow-hidden relative filter drop-shadow-sm h-5 md:h-5"
-                style={{
-                    background: 'linear-gradient(90deg, #FCA5A5 0%, #FCA5A5 18%, #FDBA74 22%, #FDBA74 38%, #FDE047 42%, #FDE047 63%, #99F6E4 67%, #99F6E4 83%, #16a34a 87%, #16a34a 100%)'
-                }}
-            >
+        {/* Phase Visualization Bar - Redesigned */}
+        <div className="mt-8 px-2 md:px-4">
+             <div className="flex justify-between items-center mb-3">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Learn Phase</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Mastery</span>
+             </div>
+             
+            <div className="flex h-3 w-full bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200/50">
                 {[
-                    { width: '20%', label: '要復習', textColor: 'text-slate-700' },
-                    { width: '20%', label: '覚えかけ', textColor: 'text-slate-700' },
-                    { width: '25%', label: '定着途上', textColor: 'text-slate-700' },
-                    { width: '20%', label: '安定', textColor: 'text-teal-900' },
-                    { width: '15%', label: '長期保持', textColor: 'text-white' },
-                ].map((phase) => (
+                    { width: '20%', color: '#f1f5f9' }, // Gray/Neutral
+                    { width: '20%', color: '#cbdad9' }, // Very Light Primary
+                    { width: '25%', color: '#94bab8' }, // Light Primary
+                    { width: '20%', color: '#7BACAA' }, // Primary
+                    { width: '15%', color: '#5A8684' }, // Dark Primary
+                ].map((phase, i) => (
                     <div 
-                        key={phase.label}
-                        style={{ width: phase.width }} 
-                        className={`flex items-center justify-center relative transition-all hover:brightness-110 ${phase.textColor}`}
-                    >
-                        <span className="drop-shadow-sm whitespace-nowrap">{phase.label}</span>
-                    </div>
+                        key={i}
+                        style={{ width: phase.width, backgroundColor: phase.color }} 
+                        className="h-full first:rounded-l-full last:rounded-r-full transition-all hover:brightness-95"
+                    />
                 ))}
             </div>
-             <div className="relative w-full h-4 mt-1">
-                {Array.from({ length: 21 }, (_, i) => {
-                    const val = i * 5;
-                    const interval = isDesktop ? 5 : 10;
-                    if (val % interval !== 0) return null;
-                    return (
-                        <span 
-                            key={val}
-                            className="absolute text-[9px] text-slate-400 font-mono -translate-x-1/2"
-                            style={{ left: `${val}%` }}
-                        >
-                            {val}%
-                        </span>
-                    );
-                })}
+            
+            <div className="flex justify-between mt-4">
+                {[
+                    { label: '要復習', color: 'text-slate-400' },
+                    { label: '覚えかけ', color: 'text-slate-500' },
+                    { label: '定着途上', color: 'text-primary-400' },
+                    { label: '安定維持', color: 'text-primary-600' },
+                    { label: '完全習得', color: 'text-primary-800' },
+                ].map((phase, i) => (
+                    <div key={i} className="flex flex-col items-center">
+                        <span className={`text-[9px] md:text-[11px] font-bold ${phase.color}`}>{phase.label}</span>
+                    </div>
+                ))}
             </div>
         </div>
 

@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { localDb } from '@/services/localDB';
+import { getLocalDb } from '../services/localDB';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/Components/ui/button';
 import { Card } from '@/Components/ui/card';

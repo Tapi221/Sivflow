@@ -93,34 +93,34 @@ export function CodeBlockEditor({ value, onChange, className }: CodeBlockEditorP
   };
 
   return (
-    <div className={cn("rounded-[24px] border border-slate-200 bg-white shadow-sm overflow-hidden flex flex-col", className)}>
+    <div className={cn("rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden flex flex-col", className)}>
       {/* Toolbar */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-slate-100 bg-slate-50 shrink-0">
+      <div className="flex items-center justify-between px-2 py-0.5 border-b border-slate-100 bg-slate-50 shrink-0 h-6">
 
         <div className="flex items-center gap-2">
           <Select value={language} onValueChange={handleLanguageChange}>
-            <SelectTrigger className="w-[140px] h-8 bg-white border-slate-200 text-xs font-medium text-slate-600 focus:ring-0 px-2 shadow-sm">
+            <SelectTrigger className="w-[100px] h-5 bg-transparent border-none text-[9px] font-medium text-slate-500 focus:ring-0 px-0 shadow-none hover:text-slate-700">
               <SelectValue placeholder="Language" />
             </SelectTrigger>
             <SelectContent className="bg-white">
               {SUPPORTED_LANGUAGES.map((lang) => (
-                <SelectItem key={lang.value} value={lang.value} className="text-xs">
+                <SelectItem key={lang.value} value={lang.value} className="text-[10px]">
                   {lang.label}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
           
-          <div className="w-[1px] h-4 bg-slate-200 mx-1" />
+          <div className="w-[1px] h-2.5 bg-slate-200 mx-0.5" />
 
           <Button
             variant="ghost"
             size="icon"
             onClick={handleCopy}
-            className="h-8 w-8 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 rounded-lg transition-colors"
+            className="h-5 w-5 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 rounded transition-colors"
             title="Copy code"
           >
-            {copied ? <CheckIcon className="w-4 h-4" /> : <CopyIcon className="w-4 h-4" />}
+            {copied ? <CheckIcon className="w-3 h-3" /> : <CopyIcon className="w-3 h-3" />}
           </Button>
         </div>
       </div>
@@ -131,19 +131,19 @@ export function CodeBlockEditor({ value, onChange, className }: CodeBlockEditorP
           value={code}
           onValueChange={handleCodeChange}
           highlight={highlightCode}
-          padding={24}
+          padding={4}
           className="font-mono text-sm"
           style={{
             fontFamily: '"Fira Code", "Fira Mono", monospace',
-            fontSize: 14,
+            fontSize: 12,
             backgroundColor: 'transparent',
-            minHeight: '80px',
+            minHeight: '28px',
           }}
           textareaClassName="focus:outline-none"
         />
         {/* Placeholder-like overlay if empty (optional, but editor handles placeholder poorly natively) */}
         {!code && (
-           <div className="absolute top-6 left-6 text-slate-300 font-mono text-sm pointer-events-none">
+           <div className="absolute top-3 left-3 text-slate-300 font-mono text-sm pointer-events-none">
              // Type or paste your code here...
            </div>
         )}

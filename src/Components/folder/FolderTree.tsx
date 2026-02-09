@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronRight, ChevronDown, Folder, Plus, MoreVertical, Pencil, Trash2, BellOff, Bell } from 'lucide-react';
+import { ChevronRight, ChevronDown, Folder, Plus, MoreVertical, Pencil, Trash2, BellOff, Bell, BookOpen, Home, Settings, FileText, Zap, Check, X, Edit } from 'lucide-react';
 import FolderPlusIcon from 'lucide-react/dist/esm/icons/folder-plus';
 import GripVerticalIcon from 'lucide-react/dist/esm/icons/grip-vertical';
 import EyeOffIcon from 'lucide-react/dist/esm/icons/eye-off';
@@ -13,6 +13,33 @@ import {
 } from '@/Components/ui/dropdown-menu';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { cn } from '@/lib/utils';
+
+// Helper to restrict drag movement to vertical axis
+const restrictToVertical = (style) => {
+  if (style?.transform) {
+    let y = '0px';
+    const transform = style.transform;
+    
+    if (transform.includes('translate3d')) {
+       // translate3d(x, y, z)
+       const matches = transform.match(/translate3d\([^,]+,\s*([^,]+),\s*[^)]+\)/);
+       if (matches) y = matches[1];
+       return {
+         ...style,
+         transform: `translate3d(0px, ${y}, 0px)`
+       };
+    } else {
+       // translate(x, y)
+       const matches = transform.match(/translate\([^,]+,\s*([^)]+)\)/);
+       if (matches) y = matches[1];
+       return {
+         ...style,
+         transform: `translate(0px, ${y})`
+       };
+    }
+  }
+  return style;
+};
 
 function FolderItem({ 
   folder, 
@@ -46,7 +73,7 @@ function FolderItem({
     const parentId = f.parentFolderId ?? f.parent_folder_id ?? null;
     // Prevent self-reference recursion (A > A)
     if (f.id === folder.id || (f.folderId && f.folderId === folder.id)) return false;
-    return (parentId === folder.id && (isDeleted === undefined || isDeleted === false));
+    return (parentId === folder.id && (isDeleted === undefined || isDeleted === false) && !f.isHidden);
   })
     .sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
   const hasChildren = childFolders.length > 0;
@@ -54,8 +81,11 @@ function FolderItem({
   const isSelected = selectedFolderId === folder.id;
   const isSilent = folder?.isSilent ?? false;
 
-  // Calculate card count (recursive)
-  const getCardCount = (folderId) => {
+  // Calculate card count (recursive with loop protection)
+  const getCardCount = (folderId, visited = new Set()) => {
+    if (visited.has(folderId)) return 0; // 循環参照を検知
+    visited.add(folderId);
+
     const directCount = cards.filter(c => {
          const cFolderId = c.folderId || c.folder_id;
          const isDeleted = c.isDeleted || c.is_deleted;
@@ -71,7 +101,7 @@ function FolderItem({
     });
     
     const childCount = children.reduce((sum, child) => {
-        return sum + getCardCount(child.id || child.folderId);
+        return sum + getCardCount(child.id || child.folderId, visited);
     }, 0);
     
     return directCount + childCount;
@@ -106,7 +136,11 @@ function FolderItem({
   };
   
   return (
-    <div ref={provided?.innerRef} {...provided?.draggableProps}>
+    <div 
+      ref={provided?.innerRef} 
+      {...provided?.draggableProps}
+      className={cn(level === 0 ? "mb-1" : "mb-0")}
+    >
       <Droppable droppableId={`drop-${folder.id}`} type="folder">
         {(droppableProvided, droppableSnapshot) => (
           <div 
@@ -116,70 +150,142 @@ function FolderItem({
             onDragLeave={handleDragLeave}
           >
             <div 
+              data-selectable-id={`folder:${folder.id}`}
               className={cn(
-                "group flex items-center gap-3 p-3 md:p-4 rounded-[20px] cursor-pointer transition-all select-none mb-2 md:mb-3 border border-slate-100",
-                isSelected ? "bg-primary-50/80 border-primary-200" : "bg-white hover:border-primary-600 hover:shadow-md",
-                snapshot?.isDragging && "shadow-xl bg-white z-50",
-                droppableSnapshot.isDraggingOver && "bg-slate-50 ring-2 ring-slate-100"
+                "group flex items-center gap-1.5 cursor-pointer select-none relative z-10",
+                level === 0 ? "py-0.5 pl-0.5 pr-1.5 md:py-1 md:pl-1 md:pr-2" : "py-0 pl-0.5 pr-1 md:py-0.5 md:pl-1 md:pr-1.5",
+                // 立体感（3D感）を出すためのボーダーと影の追加
+                "bg-white border border-slate-100 border-b-2 border-b-slate-200/80 shadow-sm rounded-xl transition-all duration-300",
+                // ドラッグ中でない場合のみホバー効果を適用
+                !snapshot?.isDragging && "hover:bg-primary-50/30 hover:-translate-y-0.5 hover:shadow-md hover:border-b-primary-200",
+                isSelected ? "ring-2 ring-primary-500 bg-primary-50/60 z-20" : "bg-white",
+                snapshot?.isDragging && "z-50 shadow-xl",
+                droppableSnapshot.isDraggingOver && "ring-2 ring-primary-100 bg-primary-50/30"
               )}
-              style={{ marginLeft: `${level * 24}px` }}
             >
-        {isSelectionMode ? (
-          <Checkbox
-            checked={selectedFolderIds?.includes(folder.id)}
-            onCheckedChange={() => onToggleSelection?.(folder.id)}
-            onClick={(e) => e.stopPropagation()}
-            className="mr-1"
-          />
-        ) : (
-          <span
-            {...provided?.dragHandleProps}
-            className={cn(
-               "relative inline-flex items-center group w-4 h-4 cursor-grab active:cursor-grabbing shrink-0",
-               // モバイルでは編集モード時のみ表示
-               "hidden md:inline-flex",
-               isEditMode && "inline-flex"
-            )}
-          >
-            <GripVerticalIcon className="w-4 h-4 text-primary-600" />
-          </span>
-        )}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            if (hasChildren) onToggle(folder.id);
-          }}
-          className="w-5 h-5 flex items-center justify-center shrink-0"
-        >
-          {hasChildren ? (
-            <span className="relative inline-flex items-center group w-4 h-4">
-              {isExpanded ? <ChevronDown className="w-4 h-4 text-gray-500" /> : <ChevronRight className="w-4 h-4 text-gray-500" />}
-            </span>
+        <div className="flex items-center gap-0 flex-shrink-0 p-0 m-0">
+          {isSelectionMode ? (
+            <Checkbox
+              checked={selectedFolderIds?.includes(folder.id)}
+              onCheckedChange={() => onToggleSelection?.(folder.id)}
+              onClick={(e) => e.stopPropagation()}
+              className="h-3.5 w-3.5 mr-1"
+            />
           ) : (
-            <span className="w-4" />
+            <span
+              {...provided?.dragHandleProps}
+              className={cn(
+                 "relative inline-flex items-center cursor-grab active:cursor-grabbing shrink-0 p-0 m-0 transition-opacity duration-200",
+                 "opacity-0 group-hover:opacity-100 active:opacity-100",
+                 snapshot?.isDragging && "opacity-100",
+                 // モバイルでは編集モード時のみ表示
+                 "hidden md:inline-flex",
+                 isEditMode && "inline-flex"
+              )}
+            >
+              <GripVerticalIcon className="w-3 h-3 text-primary-600" />
+            </span>
           )}
-        </button>
+          {hasChildren && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggle(folder.id);
+              }}
+              className="flex items-center justify-center shrink-0 ml-[-3px] p-0 border-none bg-transparent outline-none"
+            >
+              <span className="relative inline-flex items-center group p-0 m-0">
+                {isExpanded ? <ChevronDown className="w-3 h-3 text-gray-500" /> : <ChevronRight className="w-3 h-3 text-gray-500" />}
+              </span>
+            </button>
+          )}
+        </div>
         
         <div 
-          className="flex-1 flex items-center gap-4 min-w-0"
+          className="flex-1 flex items-center gap-3 min-w-0"
           onClick={() => onSelect(folder.id)}
         >
-          <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-primary-50 flex items-center justify-center text-primary-600 transition-all group-hover:scale-110 flex-shrink-0">
-              <Folder className="w-4 h-4 md:w-5 md:h-5" />
+          <div className="w-6 h-6 md:w-7 md:h-7 liquid-glass-chip bg-primary-50/50 flex items-center justify-center text-primary-600 transition-all group-hover:scale-110 flex-shrink-0">
+              {(() => {
+                const iconName = folder.folderIcon || 'Folder';
+                const IconComponent = {
+                  Folder, BookOpen, Home, Settings, FileText, Zap, ChevronRight: ChevronRight,
+                  Plus, Check, X, Edit, Trash2
+                }[iconName] || Folder;
+                return <IconComponent className="w-3 h-3 md:w-3.5 md:h-3.5" />;
+              })()}
           </div>
-          <div className="flex flex-col min-w-0 flex-1">
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="truncate text-sm md:text-[16px] font-bold text-[#334155] tracking-tight">{folder.folderName || '(名称未設定)'}</span>
+          <div className="flex flex-col min-w-0 flex-1 justify-center">
+            <div className="flex items-center gap-2 min-w-0 flex-wrap">
+              <span className="truncate text-sm md:text-[15px] font-semibold text-liquid-high tracking-tight">{folder.folderName || '(名称未設定)'}</span>
+              
+              <div className="flex items-center gap-1.5 text-primary-700/70 flex-shrink-0">
+                <span className="text-[10px] md:text-[11px] font-bold opacity-80">{cardCount} cards</span>
+                {(() => {
+                  const lastAccess = folder.lastAccessAt ?? folder.last_access_at;
+                  if (!lastAccess) {
+                    return <span className="text-[10px] md:text-[11px] font-medium opacity-60">• 未学習</span>;
+                  }
+                  
+                  // Firestore Timestamp の場合は Date に変換
+                  let accessDate: Date;
+                  if (typeof (lastAccess as any)?.toDate === 'function') {
+                    accessDate = (lastAccess as any).toDate();
+                  } else if (lastAccess instanceof Date) {
+                    accessDate = lastAccess;
+                  } else {
+                    return <span className="text-[10px] md:text-[11px] font-bold opacity-60">• 未学習</span>;
+                  }
+                  
+                  // 無効な日付の場合
+                  if (isNaN(accessDate.getTime())) {
+                    return <span className="text-[10px] md:text-[11px] font-bold opacity-60">• 未学習</span>;
+                  }
+                  
+                  // 現在時刻を取得
+                  const now = new Date();
+                  
+                  // 日付境界（0:00）を基準に日数を計算
+                  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                  const accessStart = new Date(accessDate.getFullYear(), accessDate.getMonth(), accessDate.getDate());
+                  
+                  // ミリ秒単位の差分を日数に変換
+                  const diffMs = todayStart.getTime() - accessStart.getTime();
+                  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                  
+                  // 日数に応じて表示文言を決定
+                  let text = '';
+                  let isToday = false;
+                  
+                  if (diffDays === 0) {
+                    text = '今日';
+                    isToday = true;
+                  } else if (diffDays === 1) {
+                    text = '1日前';
+                  } else if (diffDays > 1) {
+                    text = `${diffDays}日前`;
+                  } else {
+                    text = '今日';
+                    isToday = true;
+                  }
+                  
+                  return (
+                    <span className={`text-[10px] md:text-[11px] font-bold ${isToday ? 'text-primary-600' : 'text-primary-200'}`}>
+                      • {text}
+                    </span>
+                  );
+                })()}
+              </div>
+
               {isSilent && (
-                <BellOff className="w-4 h-4 text-slate-400 shrink-0" />
+                <BellOff className="w-3.5 h-3.5 text-amber-500/60 shrink-0" />
               )}
             </div>
-            <span className="text-[10px] font-bold text-slate-300 mt-0.5">{cardCount} cards</span>
           </div>
         </div>
         
         <div className={cn(
-           "flex items-center gap-1.5 pr-2 flex-shrink-0",
+           "flex items-center gap-1.5 pr-2 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200",
            // モバイルでは編集モード時のみ表示
            "hidden md:flex",
            isEditMode && "flex"
@@ -187,13 +293,13 @@ function FolderItem({
           <Button
             variant="ghost"
             size="icon"
-            className="h-9 w-9 text-primary-600 hover:bg-primary-50"
+            className="h-6 w-6 liquid-glass-chip text-liquid-med hover:text-liquid-high"
             onClick={(e) => {
               e.stopPropagation();
               onCreateCard(folder.id);
             }}
           >
-            <Plus className="w-5 h-5" />
+            <Plus className="w-3.5 h-3.5" />
           </Button>
           
           <DropdownMenu>
@@ -201,10 +307,10 @@ function FolderItem({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 text-primary-600 hover:bg-primary-50"
+                className="h-6 w-6 liquid-glass-chip text-liquid-med hover:text-liquid-high"
                 onClick={(e) => e.stopPropagation()}
               >
-                <MoreVertical className="w-4 h-4" />
+                <MoreVertical className="w-3.5 h-3.5" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="rounded-2xl border-slate-50 shadow-xl p-2">
@@ -250,9 +356,14 @@ function FolderItem({
 </Droppable>
       
       {isExpanded && hasChildren && (
-        <Droppable droppableId={`subfolder-${folder.id}`} type="folder">
-          {(provided) => (
-            <div ref={provided.innerRef} {...provided.droppableProps}>
+        <div className="relative pl-6 md:pl-8 ml-3 md:ml-4 border-l-2 border-slate-100/80 my-2 bg-slate-50/30 rounded-lg">
+            <Droppable droppableId={`subfolder-${folder.id}`} type="folder">
+            {(provided) => (
+                <div 
+                    ref={provided.innerRef} 
+                    {...provided.droppableProps}
+                    className="flex flex-col gap-0.5 pt-1"
+                >
               {childFolders
                 .filter(child => child.id != null)
                 .map((child, index) => (
@@ -284,10 +395,43 @@ function FolderItem({
                     )}
                   </Draggable>
                 ))}
+              
+              {/* 子階層の新規フォルダ作成ボタン */}
+              <button
+                onClick={() => onCreateSubfolder(folder.id)}
+                className={cn(
+                  "group w-full flex items-center gap-1.5 md:gap-2 select-none cursor-pointer",
+                  "py-0 pl-0.5 pr-1 md:py-0.5 md:pl-1 md:pr-1.5",
+                  "bg-slate-50 border border-dashed border-slate-300 shadow-sm rounded-xl transition-all duration-300",
+                  "hover:bg-slate-100 hover:border-slate-400 hover:shadow-md"
+                )}
+              >
+                <span className="relative inline-flex items-center cursor-grab active:cursor-grabbing shrink-0 p-0 m-0 opacity-0">
+                  <GripVerticalIcon className="w-3 h-3 text-transparent" />
+                </span>
+                
+                <div aria-hidden="true" className="w-4 h-4 md:w-5 md:h-5 flex items-center justify-center shrink-0 opacity-0">
+                  <ChevronRight className="w-3 h-3 md:w-3.5 md:h-3.5 text-transparent" />
+                </div>
+                
+                <div className="w-6 h-6 md:w-7 md:h-7 bg-slate-100 flex items-center justify-center text-slate-400 transition-all group-hover:text-slate-600 flex-shrink-0 rounded-lg">
+                  <FolderPlusIcon className="w-3 h-3 md:w-3.5 md:h-3.5" />
+                </div>
+                
+                <div className="flex flex-col min-w-0 flex-1 justify-center">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-[10px] md:text-xs font-bold text-slate-400 group-hover:text-slate-600 truncate transition-colors">
+                      新規フォルダ
+                    </span>
+                  </div>
+                </div>
+              </button>
+              
               {provided.placeholder}
             </div>
           )}
         </Droppable>
+        </div>
       )}
     </div>
   );
@@ -317,7 +461,7 @@ export default function FolderTree({
     // isDeleted フィールドが存在しない場合 or false の場合のみ表示
     const isDeleted = f.isDeleted ?? f.is_deleted;
     const parentId = f.parentFolderId ?? f.parent_folder_id ?? null;
-    return (!parentId && (isDeleted === undefined || isDeleted === false));
+    return (!parentId && (isDeleted === undefined || isDeleted === false) && !f.isHidden);
   })
     .sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
   
@@ -373,6 +517,51 @@ export default function FolderTree({
     };
     if (isDescendant(destParentId, draggableId)) return;
 
+    // 階層制限チェック
+    // 1. 現在の最大階層深度を計算
+    const getDepth = (folderId, visited = new Set()) => {
+      if (!folderId || visited.has(folderId)) return 0;
+      visited.add(folderId);
+      
+      const folder = folders.find(f => (f.id ?? f.folderId) === folderId);
+      if (!folder) return 0;
+      
+      const parentId = folder.parentFolderId ?? folder.parent_folder_id;
+      if (!parentId) return 0;
+      
+      return 1 + getDepth(parentId, visited);
+    };
+    
+    const maxDepth = Math.max(
+      0,
+      ...folders
+        .filter(f => {
+          const isDeleted = f.isDeleted ?? f.is_deleted;
+          return isDeleted === undefined || isDeleted === false;
+        })
+        .map(f => getDepth(f.id ?? f.folderId))
+    );
+    
+    // 2. ドラッグ中のフォルダーの現在の階層レベルを取得
+    const draggedDepth = getDepth(draggableId);
+    
+    // 3. 移動先での階層レベルを計算
+    const destDepth = destParentId ? getDepth(destParentId) + 1 : 0;
+    
+    // 4. 制限チェック
+    // ルートフォルダー（親なし）は他のフォルダーの子にできない
+    if (sourceParentId === null && destParentId !== null) {
+      console.log('ルートフォルダーは他のフォルダーの子にできません');
+      return;
+    }
+    
+    // 現在最大階層にあるフォルダーは、それ以上深い階層に移動できない
+    if (draggedDepth === maxDepth && destDepth > draggedDepth) {
+      console.log('これ以上深い階層には移動できません');
+      return;
+    }
+
+
     // Moving within the same list
     if (source.droppableId === destination.droppableId) {
       const siblings = folders
@@ -419,7 +608,7 @@ export default function FolderTree({
   
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-      <div className="py-2">
+      <div className="py-0">
         
         {rootFolders.length === 0 ? (
           <div className="px-3 py-4 text-sm text-gray-500 text-center">
@@ -432,7 +621,7 @@ export default function FolderTree({
                 ref={provided.innerRef} 
                 {...provided.droppableProps}
                 className={cn(
-                  "min-h-[200px] transition-colors rounded-lg",
+                  "min-h-[200px] transition-colors rounded-lg bg-slate-50/30 p-1 md:p-2",
                   snapshot.isDraggingOver && "bg-primary-50/50 ring-2 ring-primary-200 ring-inset"
                 )}
               >
@@ -465,6 +654,38 @@ export default function FolderTree({
                       )}
                     </Draggable>
                   ))}
+                
+                {/* ルート階層の新規フォルダ作成ボタン */}
+                <button
+                  onClick={() => onCreateFolder(null)}
+                  className={cn(
+                    "group w-full flex items-center gap-1.5 md:gap-2 select-none cursor-pointer",
+                    "py-0.5 pl-0.5 pr-1.5 md:py-1 md:pl-1 md:pr-2",
+                    "bg-slate-50 border border-dashed border-slate-300 shadow-sm rounded-xl transition-all duration-300",
+                    "hover:bg-slate-100 hover:border-slate-400 hover:shadow-md"
+                  )}
+                >
+                  <span className="relative inline-flex items-center cursor-grab active:cursor-grabbing shrink-0 p-0 m-0 opacity-0">
+                    <GripVerticalIcon className="w-3 h-3 text-transparent" />
+                  </span>
+                  
+                  <div aria-hidden="true" className="w-4 h-4 md:w-5 md:h-5 flex items-center justify-center shrink-0 opacity-0">
+                    <ChevronRight className="w-3 h-3 md:w-3.5 md:h-3.5 text-transparent" />
+                  </div>
+                  
+                  <div className="w-6 h-6 md:w-7 md:h-7 bg-slate-100 flex items-center justify-center text-slate-400 transition-all group-hover:text-slate-600 flex-shrink-0 rounded-lg">
+                    <FolderPlusIcon className="w-3 h-3 md:w-3.5 md:h-3.5" />
+                  </div>
+                  
+                  <div className="flex flex-col min-w-0 flex-1 justify-center">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-[10px] md:text-xs font-bold text-slate-400 group-hover:text-slate-600 truncate transition-colors">
+                        新規フォルダ
+                      </span>
+                    </div>
+                  </div>
+                </button>
+                
                 {provided.placeholder}
                 {snapshot.isDraggingOver && rootFolders.length === 0 && (
                   <div className="px-3 py-8 text-sm text-indigo-500 text-center">

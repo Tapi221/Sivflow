@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { localDb } from '@/services/localDB';
+import { getLocalDb } from '@/services/localDB';
 import { snapshotService } from '@/services/SnapshotService';
 import type { AppSnapshot, SnapshotComparison } from '@/types/snapshot';
 import {
@@ -83,20 +83,21 @@ export default function ImportDialog({ open, onOpenChange }: ImportDialogProps) 
     }
 
     // replace: インポートしたデータで上書き
-    setStep('processing');
+      setStep('processing');
 
     try {
       // 全データをクリアして新しいデータをインポート
       // 注意: これは危険な操作なので、事前にバックアップを推奨
-      
+      const db = await getLocalDb();
+
       // カードをインポート
       for (const card of parsedSnapshot.data.cards) {
-        await localDb.table('cards').put(card);
+        await db.table('cards').put(card);
       }
 
       // フォルダをインポート
       for (const folder of parsedSnapshot.data.folders) {
-        await localDb.table('folders').put(folder);
+        await db.table('folders').put(folder);
       }
 
       setStep('complete');

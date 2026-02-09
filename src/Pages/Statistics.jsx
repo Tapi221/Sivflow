@@ -39,7 +39,7 @@ import { normalizeMemoryStability } from '@/utils/reviewUtils';
 import { useCards } from '@/hooks/useCards';
 import { useFolders } from '@/hooks/useFolders';
 import { useUserSettings } from '@/hooks/useUserSettings';
-import { localDb } from '@/services/localDB';
+import { getLocalDb } from '../services/localDB';
 import { cn } from '@/lib/utils';
 
 // --- Constants ---
@@ -97,7 +97,7 @@ const AlgorithmPanel = ({ isOpen, onClose }) => {
                     </div>
                     <h2 className="text-base font-bold text-slate-700">記憶の仕組みについて</h2>
                 </div>
-                <Button variant="ghost" size="sm" onClick={onClose} className="rounded-full bg-slate-50 text-slate-400 hover:bg-slate-100 flex items-center gap-2 h-9 px-4 font-bold text-xs transition-colors">
+                <Button variant="ghost" size="sm" onClick={onClose} className="rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-100 flex items-center gap-2 h-9 px-4 font-bold text-[10px] md:text-xs transition-colors">
                     <ChevronDown className="w-4 h-4 rotate-180" />
                     <span>閉じる</span>
                 </Button>
@@ -105,58 +105,58 @@ const AlgorithmPanel = ({ isOpen, onClose }) => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-8 md:mb-12">
                 {/* Rate */}
-                <div className="space-y-4">
-                    <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
+                <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider">
                         <CheckCircle2 className="w-3 h-3 text-primary-600" />
                         現在の定着状況
                     </div>
-                    <div className="text-sm font-bold text-slate-700 leading-relaxed">
+                    <div className="text-xs md:text-sm font-bold text-slate-600 leading-relaxed">
                         今、テストをしたらどれくらい正解できるかの予測値です。学習が進むにつれてこの数値は上がっていきます。
                     </div>
                 </div>
 
                 {/* Decay */}
-                <div className="space-y-4">
-                    <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
+                <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider">
                         <TrendingDown className="w-3 h-3 text-[#f59e0b]" />
                         忘却のシミュレーション
                     </div>
-                    <div className="text-sm font-bold text-slate-700 leading-relaxed">
+                    <div className="text-xs md:text-sm font-bold text-slate-600 leading-relaxed">
                        人間の脳は時間とともに記憶を忘れていきます。システムはあなたの記憶が薄れるタイミングを計算し、忘れる直前に通知します。
                     </div>
                 </div>
 
                 {/* Interval */}
-                <div className="space-y-4">
-                    <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
+                <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider">
                         <Activity className="w-3 h-3 text-[#8b5cf6]" />
                         最適な復習タイミング
                     </div>
-                    <div className="text-sm font-bold text-slate-700 leading-relaxed">
+                    <div className="text-xs md:text-sm font-bold text-slate-600 leading-relaxed">
                         「正解」するたびに記憶は強固になり、次回の復習までの期間が伸びていきます。最小の努力で最大の記憶効果を狙います。
                     </div>
                 </div>
             </div>
 
             {/* Change in Stability */}
-            <div className="space-y-8">
-                <div className="text-xs font-bold text-slate-400 tracking-tight border-b border-slate-100 pb-2">
+            <div className="space-y-6">
+                <div className="text-[10px] font-bold text-slate-400 tracking-widest uppercase border-b border-slate-100 pb-2">
                     回答によるスケジュールの変化
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                     {[
                         { label: '忘れた', color: '#FF5A65', bg: '#FFF5F6', border: '#FFE4E6', desc: '弱点としてマークし、すぐに再復習します', Icon: FaceIcons.Forgot },
                         { label: 'あいまい', color: '#F9A825', bg: '#FFFBF0', border: '#FFF3D6', desc: '復習間隔を短くして、記憶を補強します', Icon: FaceIcons.Vague },
                         { label: 'OK', color: '#00A3FF', bg: '#F0F9FF', border: '#E0F2FE', desc: '記憶が定着しました。間隔を少し広げます', Icon: FaceIcons.Good },
                         { label: '余裕', color: '#00B67A', bg: '#EEFDF6', border: '#DCFCE7', desc: '完全に詳細まで覚えています。間隔を大幅に広げます', Icon: FaceIcons.Easy },
                     ].map(item => (
-                        <div key={item.label} className="p-4 md:p-6 rounded-2xl md:rounded-[20px] flex md:flex-col items-center gap-3 md:text-center border transition-all hover:shadow-md h-full" style={{ backgroundColor: item.bg, borderColor: item.border }}>
+                        <div key={item.label} className="p-4 md:p-6 rounded-[24px] md:rounded-[28px] flex md:flex-col items-center gap-3 md:text-center border border-transparent hover:border-slate-100 transition-all hover:shadow-md h-full" style={{ backgroundColor: item.bg }}>
                             <div className="flex items-center justify-center mb-0 md:mb-1 shrink-0">
                                 <item.Icon size={24} />
                             </div>
                             <div className="flex flex-col md:items-center">
-                                <div className="text-sm font-extrabold" style={{ color: item.color }}>{item.label}</div>
-                                <div className="text-[10px] md:text-xs text-slate-500 font-medium leading-relaxed mt-0 md:mt-auto">
+                                <div className="text-xs md:text-sm font-extrabold" style={{ color: item.color }}>{item.label}</div>
+                                <div className="text-[9px] md:text-[11px] text-slate-400 font-bold leading-relaxed mt-0.5 md:mt-2">
                                     {item.desc}
                                 </div>
                             </div>
@@ -164,6 +164,7 @@ const AlgorithmPanel = ({ isOpen, onClose }) => {
                     ))}
                 </div>
             </div>
+
         </div>
     );
 };
@@ -217,86 +218,91 @@ export default function Statistics() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-50 to-indigo-50/50 text-slate-800 font-sans selection:bg-indigo-100 selection:text-indigo-900 overflow-x-hidden">
+    <div className="min-h-screen bg-[#F8FAFB] text-slate-800 font-sans selection:bg-indigo-100 selection:text-indigo-900 overflow-x-hidden">
       <div className="max-w-[1400px] mx-auto p-4 md:p-14">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-12">
-            <div>
-                <div className="flex items-center gap-3 mb-2">
-                    <div className="w-7 h-7 flex items-center justify-center text-primary-600">
-                        <BarChart3 className="w-5.5 h-5.5" />
+        {/* Header - Styled to match Folders.jsx */}
+        <Card className="rounded-[32px] border-none shadow-[0_4px_40px_-10px_rgba(0,0,0,0.02)] bg-white overflow-hidden mb-8 md:mb-12">
+          <CardContent className="p-4 md:p-8">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-primary-600 shadow-sm shrink-0">
+                        <BarChart3 className="w-5 h-5 md:w-6 md:h-6" />
                     </div>
-                    <h1 className="text-xl md:text-2xl font-extrabold text-[#334155] tracking-tight">学習統計</h1>
+                    <div>
+                        <h1 className="text-xl md:text-2xl font-bold text-slate-700 tracking-tight">学習統計</h1>
+                        <p className="text-[10px] md:text-xs text-slate-400 font-bold tracking-tight mt-0.5">
+                            記憶の安定度と知識ネットワークの成長を可視化します
+                        </p>
+                    </div>
                 </div>
-                <p className="text-xs md:text-sm text-slate-400 font-bold ml-10 tracking-tight">
-                    記憶の安定度と、知識ネットワークの成長を可視化します。
-                </p>
+
+                <div className="flex flex-wrap items-center gap-3">
+                    <Select value={selectedFolderId} onValueChange={setSelectedFolderId}>
+                        <SelectTrigger className="w-full sm:w-[180px] h-10 bg-white border-slate-100 rounded-xl shadow-sm text-slate-400 font-bold px-4 text-[10px] md:text-xs hover:border-slate-200 transition-all focus:ring-0 focus:ring-offset-0 focus:outline-none">
+                            <SelectValue placeholder="全てのフォルダ" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-2xl border-slate-100 shadow-xl bg-white">
+                            <SelectItem value="all" className="cursor-pointer">
+                                <div className="flex items-center gap-2">
+                                    <Folder className="w-4 h-4 text-slate-400" />
+                                    <span className="font-bold text-slate-700 text-xs">全てのフォルダ</span>
+                                </div>
+                            </SelectItem>
+                            {(() => {
+                                 // Sort folders hierarchically
+                                 const buildHierarchy = (parentId = null, depth = 0) => {
+                                     const children = folders
+                                         .filter(f => (f.parentFolderId === parentId || (parentId === null && !f.parentFolderId && !f.parent_folder_id)))
+                                         .sort((a, b) => (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0));
+                                     
+                                     let result = [];
+                                     children.forEach(child => {
+                                         result.push({ ...child, depth });
+                                         result = [...result, ...buildHierarchy(child.id, depth + 1)];
+                                     });
+                                     return result;
+                                 };
+                                 const sortedFolders = buildHierarchy();
+
+                                 return sortedFolders.map(f => (
+                                     <SelectItem key={f.id} value={f.id} className="cursor-pointer">
+                                         <div className="flex items-center gap-2" style={{ paddingLeft: `${f.depth * 12}px` }}>
+                                             {f.depth > 0 && (
+                                                 <div className="w-px h-4 bg-slate-200 absolute left-0 top-1/2 -translate-y-1/2" style={{ left: `${(f.depth * 12) + 4}px` }}></div>
+                                             )}
+                                             <Folder className={cn(
+                                                 "w-3.5 h-3.5", 
+                                                 f.id === selectedFolderId ? "text-primary-600 fill-primary-600/20" : "text-slate-400"
+                                             )} />
+                                             <span className={cn(
+                                                 "truncate text-xs",
+                                                 f.depth === 0 ? "font-bold text-slate-700" : "text-slate-600"
+                                             )}>
+                                                 {f.folderName}
+                                             </span>
+                                         </div>
+                                     </SelectItem>
+                                 ));
+                            })()}
+                        </SelectContent>
+                    </Select>
+
+                    <Button 
+                        variant="outline"
+                        onClick={() => setIsAlgoPanelOpen(!isAlgoPanelOpen)}
+                        className={cn(
+                            "h-10 rounded-xl px-5 font-bold flex items-center gap-2 transition-all duration-300 text-[10px] md:text-xs",
+                            isAlgoPanelOpen ? "bg-primary-600 text-white border-none" : "bg-white text-slate-400 border-slate-100 shadow-sm hover:border-slate-200"
+                        )}
+                    >
+                        <Calculator className="w-3.5 h-3.5 opacity-60" />
+                        計算ロジック
+                    </Button>
+                </div>
             </div>
+          </CardContent>
+        </Card>
 
-            <div className="flex flex-wrap items-center gap-3 md:gap-4 mt-2 md:mt-0">
-                <Select value={selectedFolderId} onValueChange={setSelectedFolderId}>
-                    <SelectTrigger className="w-full sm:w-[180px] h-10 bg-white border-slate-100 rounded-2xl shadow-sm text-slate-400 font-bold px-4 text-[10px] md:text-xs hover:border-slate-200 transition-all focus:ring-0 focus:ring-offset-0 focus:outline-none">
-                        <SelectValue placeholder="全てのフォルダ" />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-2xl border-slate-100 shadow-xl bg-white">
-                        <SelectItem value="all" className="cursor-pointer">
-                            <div className="flex items-center gap-2">
-                                <Folder className="w-4 h-4 text-slate-400" />
-                                <span className="font-bold text-slate-700">全てのフォルダ</span>
-                            </div>
-                        </SelectItem>
-                        {(() => {
-                             // Sort folders hierarchically
-                             const buildHierarchy = (parentId = null, depth = 0) => {
-                                 const children = folders
-                                     .filter(f => (f.parentFolderId === parentId || (parentId === null && !f.parentFolderId && !f.parent_folder_id)))
-                                     .sort((a, b) => a.createdAt?.seconds - b.createdAt?.seconds); // optional sort
-                                 
-                                 let result = [];
-                                 children.forEach(child => {
-                                     result.push({ ...child, depth });
-                                     result = [...result, ...buildHierarchy(child.id, depth + 1)];
-                                 });
-                                 return result;
-                             };
-                             const sortedFolders = buildHierarchy();
-
-                             return sortedFolders.map(f => (
-                                 <SelectItem key={f.id} value={f.id} className="cursor-pointer">
-                                     <div className="flex items-center gap-2" style={{ paddingLeft: `${f.depth * 12}px` }}>
-                                         {f.depth > 0 && (
-                                             <div className="w-px h-4 bg-slate-200 absolute left-0 top-1/2 -translate-y-1/2" style={{ left: `${(f.depth * 12) + 4}px` }}></div>
-                                         )}
-                                         <Folder className={cn(
-                                             "w-4 h-4", 
-                                             f.id === selectedFolderId ? "text-primary-600 fill-primary-600/20" : "text-slate-400"
-                                         )} />
-                                         <span className={cn(
-                                             "truncate",
-                                             f.depth === 0 ? "font-bold text-slate-700" : "text-slate-600"
-                                         )}>
-                                             {f.folderName}
-                                         </span>
-                                     </div>
-                                 </SelectItem>
-                             ));
-                        })()}
-                    </SelectContent>
-                </Select>
-
-                <Button 
-                    variant="outline"
-                    onClick={() => setIsAlgoPanelOpen(!isAlgoPanelOpen)}
-                    className={cn(
-                        "h-10 rounded-2xl px-5 font-bold flex items-center gap-2 transition-all duration-300 text-[10px] md:text-xs",
-                        isAlgoPanelOpen ? "bg-primary-600 text-white border-none" : "bg-white text-slate-400 border-slate-100 shadow-sm hover:border-slate-200"
-                    )}
-                >
-                    <Calculator className="w-3.5 h-3.5 opacity-60" />
-                    計算ロジック
-                </Button>
-            </div>
-        </div>
 
         {/* Algorithm Panel */}
         <AlgorithmPanel isOpen={isAlgoPanelOpen} onClose={() => setIsAlgoPanelOpen(false)} />

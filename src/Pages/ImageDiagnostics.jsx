@@ -68,6 +68,12 @@ export default function ImageDiagnostics() {
     }
 
     try {
+      if (!firestoreDb) {
+        console.warn('[ImageDiagnostics] firestoreDb not initialized.');
+        setLoading(false);
+        return;
+      }
+      
       // 1. Check User Profiles (Current User Only)
       // Fetch by ID directly to avoid "list" permission issues
       try {
