@@ -1,6 +1,5 @@
 import type { Folder, Card, User, UserSettings, UserStats } from '../types';
 import { firestoreDb } from './firebase';
-import { localDb } from './localDB';
 import { collection, writeBatch, doc, setDoc } from 'firebase/firestore';
 
 /**

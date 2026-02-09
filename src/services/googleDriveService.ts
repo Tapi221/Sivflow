@@ -1,7 +1,7 @@
 import { useGoogleLogin } from '@react-oauth/google';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { firestoreDb } from './firebase';
-import { localDb } from './localDB';
+import { getLocalDb } from './localDB';
 import { useAuth } from '../contexts/AuthContext';
 import { httpsCallable } from 'firebase/functions';
 import { functions } from './firebase';

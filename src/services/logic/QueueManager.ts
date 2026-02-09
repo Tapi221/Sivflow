@@ -1,4 +1,4 @@
-import { IQueueManager, BatchConstraint, SyncTask } from '../interfaces/ISyncService';
+import type { IQueueManager, BatchConstraint, SyncTask } from '../interfaces/ISyncService';
 import { LocalDB } from '../localDB';
 
 /**
@@ -19,11 +19,15 @@ export class QueueManager implements IQueueManager {
   async enqueue(task: SyncTask): Promise<void> {
     const queueItem = {
       id: task.id || `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      idempotencyKey: task.idempotencyKey || `ik_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      targetId: task.targetId || task.payload?.id || 'unknown',
+      operationType: task.operationType || (task.type === 'upload' ? 'update' : 'create'),
       type: task.type,
       entity: task.entity,
       payload: task.payload,
       priority: task.priority,
       createdAt: task.createdAt || Date.now(),
+      updatedAt: Date.now(),
       retryCount: 0,
       status: 'pending' as const
     };
@@ -52,6 +56,9 @@ export class QueueManager implements IQueueManager {
     // 制約に収まる数だけ取得
     return allPending.slice(0, constraint.maxSize).map(item => ({
       id: item.id,
+      idempotencyKey: item.idempotencyKey,
+      targetId: item.targetId,
+      operationType: item.operationType,
       type: item.type,
       entity: item.entity,
       payload: item.payload,

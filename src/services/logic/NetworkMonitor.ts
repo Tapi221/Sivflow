@@ -1,5 +1,5 @@
-import { INetworkMonitor, BatchConstraint } from '../interfaces/ISyncService';
-import { NetworkStatus, SyncContextSource } from '../../types/telemetry';
+import type { INetworkMonitor, BatchConstraint } from '../interfaces/ISyncService';
+import type { NetworkStatus, SyncContextSource } from '../../types/telemetry';
 
 /**
  * NetworkMonitor: ネットワーク状態を監視し、実測値ベースで健全性を判断

@@ -1,6 +1,6 @@
 import { storage } from './firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { LocalDB, initializeDB, getLocalDb } from './localDB';
+import { initializeDB, getLocalDb, type LocalDB } from './localDB';
 import type { UploadedImage } from '@/types';
 import type { BlobUrl, StorageUrl } from '@/types/branded';
 import { createStorageUrl, revokeBlobUrl } from '@/types/branded';
@@ -15,13 +15,11 @@ import { assertImageInvariant } from '@/utils/imageAssertions';
  * - この関数以外から upload / DB update を呼ばせない
  */
 export class ImageSyncOrchestrator {
-  private localDB: LocalDB;
   private userId: string;
 
   constructor(userId: string) {
     this.userId = userId;
     initializeDB(userId);
-    this.localDB = getLocalDb();
   }
 
   /**
@@ -147,7 +145,8 @@ export class ImageSyncOrchestrator {
     imageIndex: number,
     syncedImage: UploadedImage
   ): Promise<void> {
-    const card = await this.localDB.cards.get(cardId);
+    const db = await getLocalDb();
+    const card = await db.cards.get(cardId);
     if (!card) {
       throw new Error(`[ImageSync] Card not found: ${cardId}`);
     }
@@ -155,10 +154,12 @@ export class ImageSyncOrchestrator {
     const images = card[imageField] || [];
     images[imageIndex] = syncedImage;
 
-    await this.localDB.cards.update(cardId, {
+    const updateData: any = {
       [imageField]: images,
       updatedAt: new Date()
-    });
+    };
+
+    await db.cards.update(cardId, updateData);
   }
 
   /**
@@ -171,7 +172,8 @@ export class ImageSyncOrchestrator {
     imageIndex: number,
     error: Error
   ): Promise<void> {
-    const card = await this.localDB.cards.get(cardId);
+    const db = await getLocalDb();
+    const card = await db.cards.get(cardId);
     if (!card) return;
 
     const images = card[imageField] || [];
@@ -185,10 +187,12 @@ export class ImageSyncOrchestrator {
         lastAttempt: new Date()
       };
 
-      await this.localDB.cards.update(cardId, {
+      const updateData: any = {
         [imageField]: images,
         updatedAt: new Date()
-      });
+      };
+
+      await db.cards.update(cardId, updateData);
     }
   }
 
@@ -198,7 +202,8 @@ export class ImageSyncOrchestrator {
   async syncAllPendingImages(onProgress?: (msg: string) => void): Promise<void> {
     onProgress?.('未同期画像を検索中...');
     
-    const cards = await this.localDB.cards.toArray();
+    const db = await getLocalDb();
+    const cards = await db.cards.toArray();
     let totalProcessed = 0;
 
     for (const card of cards) {

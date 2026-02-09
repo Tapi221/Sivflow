@@ -1,7 +1,7 @@
 import { strictValidateBeforeSave } from '@/utils/imageValidation';
 import type { UploadedImage } from '@/types';
 import { firestoreDb } from '@/services/firebase';
-import { localDb } from '@/services/localDB';
+import { getLocalDb } from '@/services/localDB';
 import { doc, setDoc, getDoc, writeBatch } from 'firebase/firestore';
 
 /**
@@ -41,7 +41,8 @@ class ImageDatabaseWriter {
     strictValidateBeforeSave(image);
     
     try {
-      await localDb.images.put(image);
+      const db = await getLocalDb();
+      await db.images.put(image);
       console.log(`[ImageDB] Saved to IndexedDB: ${image.id}`);
     } catch (error) {
       console.error('[ImageDB] Failed to save to IndexedDB', error);
@@ -93,7 +94,8 @@ class ImageDatabaseWriter {
    */
   async getFromIndexedDB(imageId: string): Promise<UploadedImage | null> {
     try {
-      const image = await localDb.images.get(imageId);
+      const db = await getLocalDb();
+      const image = await db.images.get(imageId);
       return image || null;
     } catch (error) {
       console.error('[ImageDB] Failed to get from IndexedDB', error);

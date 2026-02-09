@@ -1,4 +1,4 @@
-import { LocalDB, initializeDB, getLocalDb } from './localDB';
+import { getLocalDb } from './localDB';
 import { StorageStateManager } from './StorageStateManager';
 import { SafeIndexedDBWriter } from './SafeIndexedDBWriter';
 
@@ -38,8 +38,7 @@ export class HistoryCompressionService {
       return;
     }
     
-    initializeDB(userId);
-    const db = getLocalDb();
+    const db = await getLocalDb(userId);
     
     try {
       // 30日以前の raw event を取得

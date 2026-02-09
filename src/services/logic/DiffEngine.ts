@@ -1,4 +1,4 @@
-import { IDiffEngine } from '../interfaces/ISyncService';
+import type { IDiffEngine } from '../interfaces/ISyncService';
 
 /**
  * DiffEngine: データの差分計算とマージを担当する純粋なロジッククラス
@@ -104,5 +104,34 @@ export class DiffEngine implements IDiffEngine {
     // ここでは「データ構造として壊れていないか」を見る
     
     return true;
+  }
+
+  /**
+   * 循環参照の検出
+   * @param targetId チェック対象のフォルダID
+   * @param newParentId 新しい親フォルダID
+   * @param allFolders 全フォルダのリスト
+   * @returns 循環が発生する場合はtrue
+   */
+  detectCycle(targetId: string, newParentId: string | null, allFolders: any[]): boolean {
+    if (!newParentId) return false;
+    if (targetId === newParentId) return true;
+
+    let currentId = newParentId;
+    const visited = new Set<string>();
+    visited.add(targetId);
+
+    while (currentId) {
+      if (visited.has(currentId)) return true; // 循環検知
+      visited.add(currentId);
+
+      const parent = allFolders.find(f => (f.id || f.folderId) === currentId);
+      if (!parent) break;
+
+      currentId = parent.parentFolderId || parent.parent_folder_id || null;
+      if (currentId === targetId) return true;
+    }
+
+    return false;
   }
 }

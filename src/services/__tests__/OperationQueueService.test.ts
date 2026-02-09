@@ -3,7 +3,7 @@ import 'fake-indexeddb/auto';
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { OperationQueueService, operationQueue } from '../operationQueue';
 import type { OperationType, QueuePriority } from '../operationQueue';
-import { db } from '../localDB';
+import { getLocalDb } from '../localDB';
 import type { SyncQueueItem } from '../../types/sync';
 
 // Mock DB
