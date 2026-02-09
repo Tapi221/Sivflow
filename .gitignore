@@ -10,6 +10,8 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+dist_test
+dist_final_check
 *.local
 .env.local
 .env.production
@@ -27,3 +29,18 @@ dist-ssr
 
 # Ignore nested workspace folder to avoid adding a separate repo/worktree
 FlashCard-Master/
+
+# Firebase
+.firebase/
+serviceAccountKey.json
+
+# Build outputs
+build_log*.txt
+build_output.txt
+all_ts_files.txt
+last_part_index.txt
+debug_*.txt
+MANIFEST_FIX_SUMMARY.md
+
+# Service worker
+public/sw.js
