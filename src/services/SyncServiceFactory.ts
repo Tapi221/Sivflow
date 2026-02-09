@@ -6,7 +6,7 @@ import { NetworkMonitor } from './logic/NetworkMonitor';
 import { DiffEngine } from './logic/DiffEngine';
 import { CloudSyncAdapter } from './logic/CloudSyncAdapter';
 import { TelemetryService } from './logic/TelemetryService';
-import { LocalDB } from './localDB';
+import { getLocalDb } from './localDB';
 import type { ISyncService } from './interfaces/ISyncService';
 import type { SyncContextSource } from '../types/telemetry';
 
@@ -25,8 +25,8 @@ export class SyncServiceFactory {
     if (flags.isEnabled('USE_SYNC_V2')) {
       console.log('[SyncServiceFactory] Initializing SyncService V2');
       
-      const { localDb: localDBInstance } = await import('./localDB');
-      const queueManager = new QueueManager(localDBInstance);
+      const db = await getLocalDb(userId);
+      const queueManager = new QueueManager(db);
       const networkMonitor = new NetworkMonitor();
       const diffEngine = new DiffEngine();
       const cloudAdapter = new CloudSyncAdapter(userId);
@@ -34,7 +34,7 @@ export class SyncServiceFactory {
 
       SyncServiceFactory.instance = new SyncServiceV2(
         userId,
-        localDBInstance,
+        db,
         queueManager,
         networkMonitor,
         diffEngine,
@@ -43,7 +43,8 @@ export class SyncServiceFactory {
       );
     } else {
       console.log('[SyncServiceFactory] Initializing Legacy SyncService');
-      SyncServiceFactory.instance = new SyncService(userId);
+      const db = await getLocalDb(userId);
+      SyncServiceFactory.instance = new SyncService(userId, db) as any;
     }
 
     return SyncServiceFactory.instance;

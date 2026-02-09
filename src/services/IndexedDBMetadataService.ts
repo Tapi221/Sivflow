@@ -117,12 +117,33 @@ export class IndexedDBMetadataService {
     // エンティティ数の乖離チェック
     const actualCardCount = await this.db.cards.count();
     const expectedCardCount = meta.expectedEntityCounts.cards;
+    const diff = Math.abs(actualCardCount - expectedCardCount);
     
-    if (Math.abs(actualCardCount - expectedCardCount) > 10) {
-      return { 
-        healthy: false, 
-        reason: `count_mismatch (cards: expected ${expectedCardCount}, got ${actualCardCount})` 
-      };
+    if (diff > 0) {
+      console.warn(`[HealthCheck] Card count mismatch detected. Expected: ${expectedCardCount}, Actual: ${actualCardCount}`);
+      
+      // 許容範囲内ならメタデータを補正して続行 (自己修復)
+      if (diff <= 10) {
+        console.log('[HealthCheck] Mismatch is within tolerance. Auto-correcting metadata...');
+        try {
+            await this.markClean(); // 実数でメタデータを更新
+            return { healthy: true };
+        } catch (e) {
+            console.error('[HealthCheck] Failed to auto-correct metadata', e);
+            // 補正失敗しても、軽微なズレならリビルド強制しない方がUX的に良い場合もあるが、
+            // ここでは安全側に倒してエラーを返す、もしくは warning を出しつつ true を返す設計も可。
+            // 今回は補正失敗＝DB異常として false を返す。
+             return { 
+                healthy: false, 
+                reason: `count_mismatch_autofix_failed (diff: ${diff})` 
+            };
+        }
+      } else {
+         return { 
+            healthy: false, 
+            reason: `count_mismatch (cards: expected ${expectedCardCount}, got ${actualCardCount})` 
+        };
+      }
     }
     
     return { healthy: true };
