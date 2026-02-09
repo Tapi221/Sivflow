@@ -13,11 +13,14 @@ service cloud.firestore {
     // ユーザー
     match /users/{userId} {
       allow read, write: if isAuthenticated() && isOwner(userId);
-    }
-
-    // ユーザーアップロード
-    match /users/{userId}/uploads/{uploadId} {
-      allow read, write: if isAuthenticated() && isOwner(userId);
+      
+      // サブコレクション形式 (SyncServiceV2 用)
+      match /folders/{id} { allow read, write: if isAuthenticated() && isOwner(userId); }
+      match /cards/{id} { allow read, write: if isAuthenticated() && isOwner(userId); }
+      match /cardRelations/{id} { allow read, write: if isAuthenticated() && isOwner(userId); }
+      match /projectMaps/{id} { allow read, write: if isAuthenticated() && isOwner(userId); }
+      match /uploads/{id} { allow read, write: if isAuthenticated() && isOwner(userId); }
+      match /securityLogs/{id} { allow read, write: if isAuthenticated() && isOwner(userId); }
     }
     
     // ユーザー設定

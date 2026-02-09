@@ -4,24 +4,28 @@
 
 [36mvite v7.3.1 [32mbuilding client environment for production...[36m[39m
 transforming...
-[32m笨・[39m 4115 modules transformed.
-笨・[39m Build failed in 16.59s
+[32m笨・[39m 3498 modules transformed.
+笨・[39m Build failed in 7.92s
 error during build:
-src/services/syncService.ts (1:9): "db" is not exported by "src/services/firebase.ts", imported by "src/services/syncService.ts".
-file: C:/FlashcardMaster/src/services/syncService.ts:1:9
+[vite:esbuild] Transform failed with 1 error:
+C:/FlashcardMaster/src/Components/card/blocks/MathRenderer.tsx:65:2: ERROR: Unexpected ")"
+file: C:/FlashcardMaster/src/Components/card/blocks/MathRenderer.tsx:65:2
 
-1: import { db } from './firebase';
-            ^
-2: import { LocalDB } from './localDB';
-3: import type { ICloudProvider } from './cloudProvider';
+Unexpected ")"
+63 |        }}
+64 |      />
+65 |    );
+   |    ^
+66 |  };
+67 |  
 
-    at getRollupError (file:///C:/FlashcardMaster/node_modules/rollup/dist/es/shared/parseAst.js:402:41)
-    at error (file:///C:/FlashcardMaster/node_modules/rollup/dist/es/shared/parseAst.js:398:42)
-    at Module.error (file:///C:/FlashcardMaster/node_modules/rollup/dist/es/shared/node-entry.js:17040:16)
-    at Module.traceVariable (file:///C:/FlashcardMaster/node_modules/rollup/dist/es/shared/node-entry.js:17452:29)
-    at ModuleScope.findVariable (file:///C:/FlashcardMaster/node_modules/rollup/dist/es/shared/node-entry.js:15070:39)
-    at ChildScope.findVariable (file:///C:/FlashcardMaster/node_modules/rollup/dist/es/shared/node-entry.js:5673:38)
-    at ClassBodyScope.findVariable (file:///C:/FlashcardMaster/node_modules/rollup/dist/es/shared/node-entry.js:5673:38)
-    at ChildScope.findVariable (file:///C:/FlashcardMaster/node_modules/rollup/dist/es/shared/node-entry.js:5673:38)
-    at ChildScope.findVariable (file:///C:/FlashcardMaster/node_modules/rollup/dist/es/shared/node-entry.js:5673:38)
-    at FunctionScope.findVariable (file:///C:/FlashcardMaster/node_modules/rollup/dist/es/shared/node-entry.js:5673:38)
+    at failureErrorWithLog (C:\FlashcardMaster\node_modules\esbuild\lib\main.js:1467:15)
+    at C:\FlashcardMaster\node_modules\esbuild\lib\main.js:736:50
+    at responseCallbacks.<computed> (C:\FlashcardMaster\node_modules\esbuild\lib\main.js:603:9)
+    at handleIncomingPacket (C:\FlashcardMaster\node_modules\esbuild\lib\main.js:658:12)
+    at Socket.readFromStdout (C:\FlashcardMaster\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:524:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:191:23)
