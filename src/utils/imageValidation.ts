@@ -1,4 +1,4 @@
-import { UploadedImage } from '@/types';
+import type { UploadedImage } from '@/types';
 import { firestoreDb as db } from '../services/firebase';
 
 /**

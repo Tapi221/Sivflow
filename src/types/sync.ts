@@ -40,7 +40,7 @@ export interface SyncSettings {
   autoSync: boolean;
   intervalMinutes: 5 | 15 | 30 | 60;
   wifiOnly: boolean;
-  autoCleanupDevices: boolean; // 24時間以上非アクティブな端末を自動整理
+  autoCleanupDevices: boolean; // 60日以上非アクティブな端末を自動整理
 }
 
 /**
@@ -52,13 +52,15 @@ export interface SyncQueueItem {
   idempotencyKey: string; // Idempotency Key for Cloud Functions
   
   targetId: string; // Entity ID (Card ID, etc.)
-  entity: 'card' | 'folder';
+  entity: 'card' | 'folder' | 'cardRelation' | 'projectMap';
   operationType: 'create' | 'update' | 'delete'; // Unified operation type
+  type: 'upload' | 'download'; // Added for compatibility with SyncTask
+  
   // Legacy compatibility: action field is deprecated but kept if needed for migration
   action?: 'create' | 'update' | 'delete'; 
 
   payload: any;
-  priority: 'high' | 'normal' | 'background';
+  priority: 'critical' | 'high' | 'medium' | 'low';
   
   createdAt: number;
   updatedAt: number;
@@ -66,6 +68,7 @@ export interface SyncQueueItem {
   status: 'pending' | 'processing' | 'completed' | 'failed';
   retryCount: number;
   nextRetryAt?: number;
+  lastRetryAt?: number; // Added
   lastError?: string;
   processingStartedAt?: number; // Added for orphan detection
 

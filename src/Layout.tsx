@@ -1,8 +1,12 @@
-import React, { useEffect, Suspense, useState } from 'react';
+import React, { useEffect, Suspense, useState, useMemo } from 'react';
 import { Outlet, Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { Button } from '@/Components/ui/button';
 import SettingsDialog from '@/Components/settings/SettingsDialog';
 import { SyncStatusIndicator } from '@/Components/sync/SyncStatusIndicator';
+import { cn } from '@/lib/utils';
+// Added hooks for review count
+import { useCards } from '@/hooks/useCards';
+import { useFolders } from '@/hooks/useFolders';
 
 import {
   DropdownMenu,
@@ -44,7 +48,18 @@ export default function Layout() {
 
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  
+  // サイドバーの状態をlocalStorageで永続化
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
+    const saved = localStorage.getItem('sidebarOpen');
+    return saved !== null ? saved === 'true' : true;
+  });
+  
+  // サイドバーの状態が変更されたらlocalStorageに保存
+  const handleSidebarToggle = (open: boolean) => {
+    setIsSidebarOpen(open);
+    localStorage.setItem('sidebarOpen', String(open));
+  };
   
   const isSettingsOpen = searchParams.get('settings') === 'true';
   const setIsSettingsOpen = (open: boolean) => {
@@ -64,6 +79,58 @@ export default function Layout() {
   
   // Activate auto-repair monitor
   useProfileImageMonitor();
+
+
+  // --- Review Count Logic ---
+  const { cards = [], loading: cardsLoading } = useCards();
+  const { folders = [], loading: foldersLoading } = useFolders();
+
+  const reviewCount = useMemo(() => {
+    if (!cards || !folders || cardsLoading || foldersLoading) return 0;
+
+    // Filter out deleted cards and hidden folders
+    const validFolderIds = new Set(folders.map(f => f.id || f.folderId));
+    const hiddenFolderIds = new Set(folders.filter(f => f.isHidden).map(f => f.id || f.folderId));
+    
+    const activeCards = cards.filter(card => {
+        if (card.isDeleted) return false;
+        const cardFolderId = card.folderId;
+        if (cardFolderId && !validFolderIds.has(cardFolderId)) return false;
+        if (cardFolderId && hiddenFolderIds.has(cardFolderId)) return false;
+        return true;
+    });
+
+    const todayCards = activeCards.filter(card => {
+        if (card.isDraft) return false;
+        if (!card.nextReviewDate) return false;
+        
+        let reviewDate = card.nextReviewDate;
+        if (typeof reviewDate?.toDate === 'function') {
+        reviewDate = reviewDate.toDate();
+        } else if (!(reviewDate instanceof Date)) {
+        reviewDate = new Date(reviewDate);
+        }
+        
+        if (isNaN(reviewDate.getTime())) return false;
+
+        const today = new Date();
+        // Reset time components for accurate date comparison
+        const rDate = new Date(reviewDate.getFullYear(), reviewDate.getMonth(), reviewDate.getDate());
+        const tDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+        const autoCarryOver = settings?.autoCarryOver ?? true;
+
+        if (autoCarryOver) {
+            // Include past due dates
+            return rDate <= tDate;
+        } else {
+            // Only strictly today
+            return rDate.getTime() === tDate.getTime();
+        }
+    });
+
+    return todayCards.length;
+  }, [cards, folders, cardsLoading, foldersLoading, settings?.autoCarryOver]);
   
   // Determine currentPageName from location pathname
   const currentPageName = React.useMemo(() => {
@@ -79,6 +146,22 @@ export default function Layout() {
     // Default capitalize for others which match component names largely
     return path.charAt(0).toUpperCase() + path.slice(1);
   }, [location.pathname]);
+
+  // Sidebar toggle shortcut (Ctrl+B / Cmd+B)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+        const target = e.target as HTMLElement;
+        if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+          return;
+        }
+        e.preventDefault();
+        handleSidebarToggle(!isSidebarOpen);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isSidebarOpen]);
 
   // Handle KaTeX loading
   useEffect(() => {
@@ -114,7 +197,7 @@ export default function Layout() {
   };
 
   const navItems = [
-    { name: 'Dashboard', label: '学習', icon: Home },
+    { name: 'Dashboard', label: '学習', icon: Home, badge: reviewCount > 0 ? reviewCount : null },
     { name: 'Folders', label: 'フォルダ', icon: Folder },
     { name: 'WorldMap', label: 'マップ', icon: MapIcon },
     { name: 'Gallery', label: 'ギャラリー', icon: Globe },
@@ -131,16 +214,13 @@ export default function Layout() {
   );
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-[100dvh] w-full overflow-x-hidden relative">
       <ThemeManager />
 
       {/* Desktop Sync Indicator (Fixed Top Right) */}
-      <div className="hidden md:flex fixed top-4 right-4 z-50">
+      <div className="hidden md:flex fixed top-1 right-2 z-50">
         {!['StudyMode'].includes(currentPageName) && (
-            <SyncStatusIndicator 
-                showText={true} 
-                className="bg-white/80 backdrop-blur-sm border border-slate-200 shadow-sm px-3 py-1.5 rounded-full"
-            />
+            <SyncStatusIndicator />
         )}
       </div>
 
@@ -150,12 +230,16 @@ export default function Layout() {
           <Link to={createPageUrl('Dashboard')} className="flex items-center gap-2 select-none">
             <BookOpen className="w-6 h-6 text-primary-600" />
             <span className="font-bold text-lg text-slate-800">単語カード</span>
+            {reviewCount > 0 && (
+                <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                    {reviewCount > 99 ? '99+' : reviewCount}
+                </span>
+            )}
           </Link>
           
            <div className="flex items-center gap-2">
             {!['StudyMode'].includes(currentPageName) && (
                 <SyncStatusIndicator 
-                    showText={false} // Compact for mobile
                     dropdownAlign="end"
                 />
             )}
@@ -173,92 +257,120 @@ export default function Layout() {
       
       {/* Desktop Toggle Button */}
       <button
-        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className="hidden md:flex fixed top-4 left-4 z-[45] w-12 h-12 bg-white rounded-2xl shadow-[0_2px_10px_-3px_rgba(0,0,0,0.1)] border border-slate-50 items-center justify-center text-slate-400 hover:text-primary-600 hover:border-primary-600/30 hover:scale-105 transition-all active:scale-95"
+        onClick={() => handleSidebarToggle(!isSidebarOpen)}
+        title={isSidebarOpen ? "サイドバーを閉じる" : "サイドバーを開く"}
+        className="hidden md:flex fixed top-1 left-1.5 z-[45] w-9 h-9 bg-white rounded-xl shadow-[0_2px_10px_-2px_rgba(0,0,0,0.1)] border border-slate-100 items-center justify-center text-slate-400 hover:text-primary-600 hover:border-primary-600/30 hover:scale-105 transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] active:scale-95"
       >
-        <Menu className="w-6 h-6" />
+        <Menu className={cn(
+            "w-6 h-6 transition-transform duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]",
+            isSidebarOpen ? "rotate-0" : "rotate-180"
+        )} />
       </button>
       
       {/* Desktop Sidebar */}
       <aside 
-        className={`hidden md:flex fixed left-0 top-0 bottom-0 w-24 bg-white border-r border-slate-50 flex-col z-40 shadow-sm transition-transform duration-300 ease-in-out ${
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={cn(
+          "hidden md:flex fixed left-0 top-0 bottom-0 w-[72px] flex-col z-40 transition-transform duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]",
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full',
+          'bg-white border-r border-slate-50 shadow-sm'
+        )}
       >
-        <div className="h-20 mb-2"></div> {/* Spacer for toggle button */}
+        <div className="h-10 mb-2"></div> {/* Spacer for toggle button */}
         
-        <nav className="flex-1 px-2.5 space-y-4">
+        <nav className="flex-1 px-3 space-y-5">
           <Link
             to={createPageUrl('Dashboard')}
-            className={`flex flex-col items-center justify-center gap-1 p-2 rounded-xl transition-all select-none group ${
+            onClick={() => handleSidebarToggle(false)}
+            className={cn(
+              "flex flex-col items-center justify-center gap-1.5 p-2.5 rounded-2xl transition-all select-none group hover:scale-105 active:scale-95 relative",
               currentPageName === 'Dashboard'
-                ? 'text-primary-600 bg-primary-50' 
+                ? 'text-primary-600 bg-primary-50 shadow-sm ring-1 ring-primary-100'
                 : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
-            }`}
+            )}
           >
-            <BookOpen className="w-5 h-5 md:w-6 md:h-6" />
+            <div className="relative">
+                <BookOpen className="w-5 h-5 md:w-6 md:h-6 transition-transform group-hover:rotate-12" />
+                {reviewCount > 0 && (
+                    <span className="absolute -top-2 -right-3 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center border-2 border-white shadow-sm">
+                        {reviewCount > 99 ? '99+' : reviewCount}
+                    </span>
+                )}
+            </div>
             <span className="text-[10px] md:text-[11px] font-bold">学習</span>
           </Link>
 
           <Link
              to={createPageUrl('Folders')}
-             className={`flex flex-col items-center justify-center gap-1 p-2 rounded-xl transition-all select-none group ${
-              ['Folders', 'FolderView'].includes(currentPageName)
-                ? 'text-primary-600 bg-primary-50' 
-                : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
-             }`}
+             onClick={() => handleSidebarToggle(false)}
+             className={cn(
+               "flex flex-col items-center justify-center gap-1.5 p-2.5 rounded-2xl transition-all select-none group hover:scale-105 active:scale-95",
+               ['Folders', 'FolderView'].includes(currentPageName)
+                 ? 'text-primary-600 bg-primary-50 shadow-sm ring-1 ring-primary-100' 
+                 : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
+             )}
           >
-            <Folder className="w-5 h-5 md:w-6 md:h-6" />
+            <Folder className="w-5 h-5 md:w-6 md:h-6 transition-transform group-hover:-rotate-12" />
             <span className="text-[10px] md:text-[11px] font-bold">フォルダ</span>
           </Link>
 
           <Link
              to={createPageUrl('Gallery')}
-             className={`flex flex-col items-center justify-center gap-1 p-2 rounded-xl transition-all select-none group ${
+             onClick={() => handleSidebarToggle(false)}
+             className={cn(
+               "flex flex-col items-center justify-center gap-1.5 p-2.5 rounded-2xl transition-all select-none group hover:scale-105 active:scale-95",
                currentPageName === 'Gallery'
-                 ? 'text-primary-600 bg-primary-50'
+                 ? 'text-primary-600 bg-primary-50 shadow-sm ring-1 ring-primary-100'
                  : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
-             }`}
+             )}
           >
-            <Globe className="w-5 h-5 md:w-6 md:h-6" />
-            <span className="text-[10px] md:text-[11px] font-bold">ギャラリー</span>
+            <Globe className="w-5 h-5 md:w-6 md:h-6 animate-spin-slow [animation-play-state:paused] group-hover:[animation-play-state:running]" />
+            <span className="text-[10px] md:text-[11px] font-bold whitespace-nowrap">ギャラリー</span>
           </Link>
 
           <Link
              to={createPageUrl('Calendar')}
-             className={`flex flex-col items-center justify-center gap-1 p-2 rounded-xl transition-all select-none group ${
+             onClick={() => handleSidebarToggle(false)}
+             className={cn(
+               "flex flex-col items-center justify-center gap-1.5 p-2.5 rounded-2xl transition-all select-none group hover:scale-105 active:scale-95",
                currentPageName === 'Calendar'
-                 ? 'text-primary-600 bg-primary-50'
+                 ? 'text-primary-600 bg-primary-50 shadow-sm ring-1 ring-primary-100'
                  : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
-             }`}
+             )}
           >
-            <Calendar className="w-5 h-5 md:w-6 md:h-6" />
+            <Calendar className="w-5 h-5 md:w-6 md:h-6 transition-transform group-hover:bounce-slow" />
             <span className="text-[10px] md:text-[11px] font-bold">予定表</span>
           </Link>
 
           <Link
              to={createPageUrl('Statistics')}
-             className={`flex flex-col items-center justify-center gap-1 p-2 rounded-xl transition-all select-none group ${
+             onClick={() => handleSidebarToggle(false)}
+             className={cn(
+               "flex flex-col items-center justify-center gap-1.5 p-2.5 rounded-2xl transition-all select-none group hover:scale-105 active:scale-95",
                currentPageName === 'Statistics'
-                 ? 'text-primary-600 bg-primary-50'
+                 ? 'text-primary-600 bg-primary-50 shadow-sm ring-1 ring-primary-100'
                  : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
-             }`}
+             )}
           >
-            <BarChart3 className="w-5 h-5 md:w-6 md:h-6" />
+            <BarChart3 className="w-5 h-5 md:w-6 md:h-6 transition-transform group-hover:scale-110" />
             <span className="text-[10px] md:text-[11px] font-bold">統計</span>
           </Link>
         </nav>
         
         {/* Sidebar Footer (Sync + User) */}
         <div 
-          className="p-4 border-t border-slate-100 flex flex-col items-center gap-4"
+          className={cn(
+            "p-4 flex flex-col items-center gap-4",
+            ['Folders', 'FolderView'].includes(currentPageName)
+              ? 'border-t border-white/40'
+              : 'border-t border-slate-100'
+          )}
           onMouseEnter={() => setIsUserNameHovered(true)}
           onMouseLeave={() => setIsUserNameHovered(false)}
         >
             {/* User Icon */}
             <button 
               onClick={() => setIsSettingsOpen(true)}
-              style={{ backgroundColor: avatarBg }}
+              style={{ '--avatar-bg': avatarBg, backgroundColor: 'var(--avatar-bg)' } as React.CSSProperties}
               className="w-10 h-10 rounded-full flex items-center justify-center hover:ring-2 hover:ring-primary-600/30 transition-all select-none group overflow-hidden shadow-sm"
             >
               {(settings?.profileImage?.remoteUrl || settings?.profileImage?.localUrl) && !imgError ? (
@@ -272,7 +384,10 @@ export default function Layout() {
                   }}
                 />
               ) : (
-                <span style={{ color: avatarText }} className="text-sm font-bold group-hover:scale-110 transition-transform">
+                <span 
+                  style={{ '--avatar-text': avatarText, color: 'var(--avatar-text)' } as React.CSSProperties} 
+                  className="text-sm font-bold group-hover:scale-110 transition-transform"
+                >
                   {getInitials(settings?.displayName)}
                 </span>
               )}
@@ -288,8 +403,7 @@ export default function Layout() {
                 {/* Absolute Full Text Overlay on Hover */}
                 {isUserNameHovered && (settings?.displayName || 'UserName').length > 5 && (
                     <span 
-                        className="absolute bottom-0 left-1/2 -translate-x-1/2 bg-white px-2 py-1 rounded-md shadow-lg border border-slate-100 text-[10px] text-slate-600 font-bold z-50 whitespace-pre-wrap text-center min-w-[max-content] max-w-[150px]"
-                        style={{ width: 'max-content' }}
+                        className="absolute bottom-0 left-1/2 -translate-x-1/2 bg-white px-2 py-1 rounded-md shadow-lg border border-slate-100 text-[10px] text-slate-600 font-bold z-50 whitespace-pre-wrap text-center min-w-[max-content] max-w-[150px] w-max"
                     >
                         {settings?.displayName || 'UserName'}
                     </span>
@@ -298,7 +412,7 @@ export default function Layout() {
         </div>
       </aside>
 
-      <SettingsDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
+      <SettingsDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen} initialTab="account" />
       
       {/* Mobile Bottom Navigation - Keep simple for now but match style light */}
       {/* Mobile Bottom Navigation */}
@@ -308,13 +422,20 @@ export default function Layout() {
                 <Link 
                     key={item.name}
                     to={createPageUrl(item.name)} 
-                    className={`flex flex-col items-center gap-1 px-3 py-1 select-none transition-colors ${
+                    className={`flex flex-col items-center gap-1 px-3 py-1 select-none transition-colors relative ${
                         currentPageName === item.name
                             ? 'text-primary-600' 
                             : 'text-slate-400'
                     }`}
                 >
-                    <item.icon className="w-5 h-5" />
+                    <div className="relative">
+                        <item.icon className="w-5 h-5" />
+                        {item.badge && item.badge > 0 && (
+                             <span className="absolute -top-1.5 -right-2 bg-red-500 text-white text-[8px] font-bold px-1 rounded-full min-w-[14px] text-center border border-white">
+                                {item.badge > 99 ? '99+' : item.badge}
+                            </span>
+                        )}
+                    </div>
                     <span className="text-[10px] font-bold">{item.label}</span>
                 </Link>
             ))}
@@ -322,9 +443,12 @@ export default function Layout() {
       </nav>
       
       {/* Main Content */}
-      <main className={`pt-14 md:pt-0 pb-24 md:pb-10 transition-all duration-300 ease-in-out ${
-        isSidebarOpen ? 'md:ml-24' : 'md:ml-0'
-      }`}>
+      <main className={cn(
+        "transition-[margin] duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]",
+        // Remove all padding for Folders page (work view)
+        location.pathname.includes('/Folders') ? '' : 'pt-14 md:pt-0 pb-24 md:pb-10',
+        isSidebarOpen ? 'md:ml-[72px]' : 'md:ml-0'
+      )}>
         <SecurityAlertBanner />
         <Suspense fallback={<LoadingFallback />}>
           <Outlet />

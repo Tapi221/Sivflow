@@ -1,5 +1,5 @@
 import type { UploadSource, UploadFallbackReason } from '@/types';
-import type { BlobUrl, Base64DataUrl } from '@/types/branded';
+import type { BlobUrl, StorageUrl, Base64DataUrl } from '@/types/branded';
 import { createBlobUrl, createBase64DataUrl } from '@/types/branded';
 
 /**
@@ -212,7 +212,7 @@ export const normalizeUploadedImage = (
   if (typeof raw === 'string') {
     return {
       id: generateUploadedImageId(),
-      remoteUrl: raw,
+      remoteUrl: raw as StorageUrl,
       status: 'ready' as const,
       localUrl: null,
       contentType: null,
@@ -253,8 +253,8 @@ export const normalizeUploadedImage = (
 
   return {
     id: resolveString(pickFirst(record, ['id'])) ?? generateUploadedImageId(),
-    localUrl: localUrl ?? null,
-    remoteUrl: remoteUrl ?? null,
+    localUrl: (localUrl ?? null) as BlobUrl | null,
+    remoteUrl: (remoteUrl ?? null) as StorageUrl | null,
     status: status ?? (remoteUrl ? 'ready' : 'uploading'),
     contentType: contentType ?? null,
     size: size ?? null,

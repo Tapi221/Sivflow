@@ -15,4 +15,5 @@ export type Folder = BaseEntity & {
   memoText?: string;
   memoImages?: UploadedImage[];
   notePdfs?: UploadedFile[];
+  lastAccessAt?: Date | Timestamp | null; // 最終アクセス日時
 };
