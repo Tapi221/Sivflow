@@ -22,6 +22,11 @@
 - [x] モバイル最適化の実装 <!-- id: 15 -->
 - [x] 動作確認 <!-- id: 16 -->
 
+# 不具合修正：空カードの保存防止
+- [x] 実装計画の作成 (docs/06_Operations/implementation_plan_prevent_empty_card_save.md) <!-- id: 700 -->
+- [x] 修正実装（CardEditor.tsx, useCards.ts） <!-- id: 701 -->
+- [x] 動作確認 <!-- id: 702 -->
+
 # Phase 2: 本番スケール対応実装
 - [x] 実装計画の作成（Rev.3・最終版） <!-- id: 400 -->
 - [x] Task 0: 監視設計・基盤 <!-- id: 401 -->
@@ -59,8 +64,87 @@
 - [x] 原因調査（nanoid インポート漏れ、データの部分的更新による破損、厳格なバリデーション）
 - [x] 修正実装（LocalDB / SyncServiceV2）
 - [x] 文書化（調査報告書・仕様書の更新）
-# 不具合修正：カード表示内容消失問題の解決
-- [x] 原因調査（ブロックエディタ導入に伴う legacy フィールドの同期漏れ） <!-- id: 600 -->
-- [ ] 実装計画の作成 (docs/06_Operations/カード表示内容消失修正計画.md) <!-- id: 601 -->
-- [ ] 修正実装（normalizeCard, denormalizeCardForStorage） <!-- id: 602 -->
-- [ ] 動作確認とデータ復旧の確認 <!-- id: 603 -->
+# 不具合修正：初期化エラー (DatabaseClosedError / cn is not defined / ReferenceError) の解決
+
+- [x] 原因調査（LocalDB 多重インスタンス化・初期化順序の特定） <!-- id: 2200 -->
+- [x] 実装計画の作成 (docs/06_Operations/implementation_plan_fix_initialization_errors.md) <!-- id: 2201 -->
+- [/] 修正実装（LocalDB インポート統一, DataIntegrityService 修正等） <!-- id: 2202 -->
+- [ ] 動作確認（ビルド成功・ReferenceError 消失確認） <!-- id: 2203 -->
+- [ ] 本番環境への反映 (Deploy) <!-- id: 2204 -->
+
+# ブロックUI改善：ボタンのレイアウト最適化
+- [x] 実装計画の作成 (docs/06_Operations/implementation_plan_compact_block_buttons_fix.md) <!-- id: 3000 -->
+- [x] レスポンシブなボタンレイアウトの実装 (BlockEditor.tsx) <!-- id: 3001 -->
+- [x] 動作確認と完了報告 (docs/06_Operations/walkthrough_compact_block_buttons_fix.md) <!-- id: 3002 -->
+
+# ブロックUI改善：余白削減と表示最適化
+- [x] 実装計画の作成 (docs/06_Operations/implementation_plan_reduce_block_padding.md) <!-- id: 800 -->
+- [x] テキスト・数式・メモブロックの余白削減実装 <!-- id: 801 -->
+- [x] サブフォルダ表示の折りたたみ機能実装 (`FolderView.jsx`) <!-- id: 802 -->
+- [x] 本番環境への反映 (Deploy) <!-- id: 803 -->
+
+# ショートカットキー説明の追加
+- [x] 実装計画の作成 (docs/04_Reference/implementation_plan_shortcut_keys_settings.md) <!-- id: 900 -->
+- [x] 設定画面へのショートカットキー説明タブ実装 <!-- id: 901 -->
+- [x] ショートカットキー仕様書の作成 (`docs/04_Reference/shortcut_keys_specification.md`) <!-- id: 902 -->
+- [x] 本番環境への反映 (Deploy) <!-- id: 903 -->
+
+# ブロック並び替え挙動の修正
+- [x] 実装計画の作成 (docs/06_Operations/implementation_plan_block_ordering_fix.md) <!-- id: 1000 -->
+- [x] 並び替え同期ロジックの改善 (BlockOrdering.tsx) <!-- id: 1001 -->
+- [x] 本番環境への反映 (Deploy) <!-- id: 1002 -->
+
+# KaTeXプレビュー表示不具合の修正
+- [x] 実装計画の作成 (docs/06_Operations/implementation_plan_katex_preview_fix.md) <!-- id: 2000 -->
+- [x] 修正実装 (MathRenderer.tsx) <!-- id: 2001 -->
+- [x] 本番環境への反映 (Deploy) <!-- id: 2002 -->
+
+# 不具合修正：KaTeX保存エラー (TypeError) の解決
+- [x] 原因調査（Flashcard.tsx のレンダリングロジック不備） <!-- id: 2100 -->
+- [x] 修正実装（Flashcard.tsx, MathBlock.tsx, useCards.ts） <!-- id: 2101 -->
+- [x] 本番環境への反映 (Deploy) <!-- id: 2102 -->
+
+# カード編集画面のモバイル表示最適化
+- [x] 現状の仕様確認 <!-- id: 100 -->
+    - [x] `src/Components/card/CardEditor.tsx` の確認 <!-- id: 101 -->
+- [x] 実装計画の作成 (docs/06_Operations/implementation_plan_editor_mobile_fix.md) <!-- id: 102 -->
+- [x] モバイル最適化の実装 <!-- id: 103 -->
+- [x] 動作確認 <!-- id: 104 -->
+- [x] 本番環境への反映 (Deploy) <!-- id: 105 -->
+
+# IDE警告の解消およびスタイルのクリーンアップ
+- [x] 実装計画の作成 (docs/06_Operations/implementation_plan_fix_ide_warnings.md) <!-- id: 4000 -->
+- [x] インラインスタイルの移行 (index.css, 各コンポーネント) <!-- id: 4001 -->
+- [x] ID重複の解消 (MediaUploader.tsx, CardEditor.tsx) <!-- id: 4002 -->
+- [x] 動作確認 <!-- id: 4003 -->
+
+# カード閲覧時のテキスト選択防止
+- [x] 実装計画の作成 (docs/06_Operations/implementation_plan_prevent_text_selection_view.md)
+- [x] 修正実装 (Flashcard.tsx)
+- [x] 動作確認 (docs/06_Operations/walkthrough_prevent_text_selection_view.md)
+
+# タグ管理機能の実装
+- [x] 実装計画の作成 (implementation_plan_tag_management_add_feature.md) <!-- id: 6000 -->
+- [x] タグ追加UIの実装 (SettingsDialog.jsx) <!-- id: 6001 -->
+- [x] ビルド確認 <!-- id: 6002 -->
+- [x] 実装完了レポート作成 (walkthrough_tag_management_feature.md) <!-- id: 6003 -->
+
+# PDFドキュメント用テーブル `documents` の追加 (PDFサポート)
+- [x] `src/types/index.ts` の型定義追加 (Document, PdfDocument) <!-- id: 7000 -->
+- [x] `src/services/localDB.ts` のテーブル追加とスキーマ更新 <!-- id: 7001 -->
+- [x] `localDB.ts` の既存バグ・タイポ修正 <!-- id: 7002 -->
+- [x] 動作確認とレポート作成 <!-- id: 7003 -->
+
+# ExplorerItem統一モデルの導入とリファクタリング
+- [x] 実装計画の作成 <!-- id: 7201 -->
+- [x] ExplorerItem/SelectedExplorerItem 型定義の追加 <!-- id: 7202 -->
+- [x] FolderTreeWithCards.tsx のリファクタリング <!-- id: 7203 -->
+- [x] Folders.jsx / TreeViewLayout.tsx の選択状態統合 <!-- id: 7204 -->
+- [x] 動作確認と型チェック <!-- id: 7205 -->
+
+# ExplorerにおけるPDFドキュメントの表示
+- [x] 実装計画の作成 <!-- id: 7100 -->
+- [x] `useDocuments` フックの作成 <!-- id: 7101 -->
+- [x] Explorer/FolderTree への PDF 表示統合 <!-- id: 7102 -->
+- [x] PDFクリック時のオープン処理実装 <!-- id: 7103 -->
+- [x] 動作確認 <!-- id: 7104 -->
