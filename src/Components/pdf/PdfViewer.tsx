@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { pdfjsLib } from '@/lib/pdfjs';
 import { cn } from '@/lib/utils';
+import { clampScale, computeNextScaleFromGesture, computeNextScaleFromWheel, normalizeScale } from './pdfZoomUtils';
 
 export interface PdfViewerHandle {
   scrollToPage: (page: number) => void;
@@ -292,20 +293,14 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(funct
     onScaleChangeRef.current = onScaleChange;
   }, [onScaleChange]);
 
-  const clampScale = useCallback((value: number) => {
-    const lower = Math.min(minScaleRef.current, maxScaleRef.current);
-    const upper = Math.max(minScaleRef.current, maxScaleRef.current);
-    return Math.min(Math.max(value, lower), upper);
-  }, []);
-
   const requestScaleChange = useCallback((nextScale: number, source: 'wheel' | 'gesture') => {
     const handler = onScaleChangeRef.current;
     if (!handler || !Number.isFinite(nextScale)) return;
-    const clamped = Number(clampScale(nextScale).toFixed(3));
+    const clamped = normalizeScale(clampScale(nextScale, minScaleRef.current, maxScaleRef.current));
     if (!Number.isFinite(clamped)) return;
     if (Math.abs(clamped - scaleRef.current) < 0.0005) return;
     handler(clamped, source);
-  }, [clampScale]);
+  }, []);
 
   useEffect(() => {
     const container = scrollContainerEl;
@@ -340,12 +335,15 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(funct
         wheelZoomRafRef.current = null;
         const delta = wheelDeltaRef.current;
         wheelDeltaRef.current = 0;
-        if (!delta) return;
         const direction = Math.sign(delta);
-        if (!direction) return;
-        const step = Math.max(0.001, zoomStepRef.current);
-        const nextScale = direction > 0 ? scaleRef.current - step : scaleRef.current + step;
-        const normalizedNextScale = Number(clampScale(nextScale).toFixed(3));
+        const normalizedNextScale = computeNextScaleFromWheel({
+          currentScale: scaleRef.current,
+          deltaY: delta,
+          zoomStep: zoomStepRef.current,
+          minScale: minScaleRef.current,
+          maxScale: maxScaleRef.current,
+        });
+        if (normalizedNextScale === null) return;
         logZoomInput({
           source: 'wheel',
           deltaY: delta,
@@ -366,8 +364,14 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(funct
       const gestureScale = (event as Event & { scale?: number }).scale;
       if (typeof gestureScale !== 'number' || !Number.isFinite(gestureScale)) return;
       const baseScale = gestureStartScaleRef.current ?? scaleRef.current;
-      const nextScale = baseScale * gestureScale;
-      const normalizedNextScale = Number(clampScale(nextScale).toFixed(3));
+      const normalizedNextScale = computeNextScaleFromGesture({
+        currentScale: scaleRef.current,
+        baseScale,
+        gestureScale,
+        minScale: minScaleRef.current,
+        maxScale: maxScaleRef.current,
+      });
+      if (normalizedNextScale === null) return;
       logZoomInput({
         source: 'gesture',
         deltaY: null,
@@ -405,7 +409,7 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(funct
       wheelDeltaRef.current = 0;
       gestureStartScaleRef.current = null;
     };
-  }, [clampScale, requestScaleChange, scrollContainerEl]);
+  }, [requestScaleChange, scrollContainerEl]);
   const sourceKey = [
     sourceUrl ? `url:${sourceUrl}` : null,
     sourceDataLength > 0 ? `data:${sourceDataLength}` : null,
