@@ -45,3 +45,7 @@ functions/lib/
 
 # Service worker
 public/sw.js
+
+# Local temp artifacts
+.tmp/
+functions/.env*

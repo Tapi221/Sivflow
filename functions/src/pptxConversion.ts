@@ -1,6 +1,7 @@
 import * as functions from "firebase-functions/v1";
 import * as admin from "firebase-admin";
 import { FieldValue } from "firebase-admin/firestore";
+import { GoogleAuth, IdTokenClient } from "google-auth-library";
 import {
   CONVERTER_TOKEN_SECRET_ENV,
   asNonEmptyString,
@@ -12,46 +13,24 @@ if (admin.apps.length === 0) {
   admin.initializeApp();
 }
 
+const ERROR_MESSAGE_LIMIT = 400;
+const DEFAULT_BUCKET = admin.storage().bucket();
+const CONVERTER_REQUEST_TIMEOUT_MS = 15000;
+const ENDPOINT_FALLBACK_ERRORS = new Set([
+  "converter_placeholder_disabled",
+  "converter_token_misconfigured",
+]);
+
 type ConversionStatus = "queued" | "processing" | "ready" | "failed";
 
-type ConversionDocData = {
-  status?: ConversionStatus | string;
-  sourceStoragePath?: string;
-  manifestPath?: string;
-  slideCount?: number;
-  fallbackPdfPath?: string;
-  errorMessage?: string;
-};
-
-type ConversionResult = {
+type ExternalConversionResult = {
   manifestPath: string;
   slideCount: number | null;
   fallbackPdfPath: string | null;
 };
 
-type ManifestSlideLike = {
-  index?: unknown;
-  path?: unknown;
-  url?: unknown;
-  width?: unknown;
-  height?: unknown;
-};
-
-type ManifestLike = {
-  docId?: string;
-  userId?: string;
-  slideCount?: number;
-  slides?: Array<ManifestSlideLike>;
-  fallbackPdfPath?: string;
-};
-
-const ERROR_MESSAGE_LIMIT = 400;
-const DEFAULT_BUCKET = admin.storage().bucket();
-const CONVERTER_REQUEST_TIMEOUT_MS = 15_000;
-const ENDPOINT_FALLBACK_ERRORS = new Set([
-  "converter_placeholder_disabled",
-  "converter_token_misconfigured",
-]);
+const auth = new GoogleAuth();
+const idTokenClientCache = new Map<string, Promise<IdTokenClient>>();
 
 const asFiniteNumber = (value: unknown): number | null => {
   if (typeof value === "number" && Number.isFinite(value)) return value;
@@ -72,15 +51,21 @@ const CONVERTER_ENDPOINT = resolveConverterEndpointFromEnv();
 const toSafeErrorMessage = (error: unknown): string => {
   if (!error) return "unknown_error";
   if (typeof error === "string") return error.slice(0, ERROR_MESSAGE_LIMIT);
-  const maybeName = (error as any)?.name ? `${(error as any).name}: ` : "";
-  const maybeMessage = (error as any)?.message ?? JSON.stringify(error);
+
+  const maybeName = (error as { name?: string } | null)?.name ? `${(error as { name: string }).name}: ` : "";
+  const maybeMessage =
+    (error as { message?: unknown } | null)?.message ?? JSON.stringify(error);
   return `${maybeName}${String(maybeMessage)}`.slice(0, ERROR_MESSAGE_LIMIT);
 };
 
 const isSafeManifestPathValue = (value: string, userId: string, docId: string): boolean =>
   isHttpUrl(value) || isScopedStoragePath(value, userId, docId);
 
-const resolveManifestMetadata = async (manifestPath: string, userId: string, docId: string): Promise<ConversionResult> => {
+const resolveManifestMetadata = async (
+  manifestPath: string,
+  userId: string,
+  docId: string
+): Promise<ExternalConversionResult> => {
   if (!isScopedStoragePath(manifestPath, userId, docId)) {
     throw new Error(`manifest_scope_violation:${manifestPath}`);
   }
@@ -92,9 +77,9 @@ const resolveManifestMetadata = async (manifestPath: string, userId: string, doc
   }
 
   const [contents] = await file.download();
-  let parsed: ManifestLike;
+  let parsed: Record<string, unknown>;
   try {
-    parsed = JSON.parse(contents.toString("utf8")) as ManifestLike;
+    parsed = JSON.parse(contents.toString("utf8")) as Record<string, unknown>;
   } catch {
     throw new Error("manifest_invalid_json");
   }
@@ -115,11 +100,14 @@ const resolveManifestMetadata = async (manifestPath: string, userId: string, doc
       if (!slide || typeof slide !== "object") {
         throw new Error("manifest_slide_invalid_entry");
       }
-      const slidePath = asNonEmptyString(slide.path);
+
+      const slideRecord = slide as Record<string, unknown>;
+      const slidePath = asNonEmptyString(slideRecord.path);
       if (slidePath && !isSafeManifestPathValue(slidePath, userId, docId)) {
         throw new Error("manifest_slide_path_scope_violation");
       }
-      const slideUrl = asNonEmptyString(slide.url);
+
+      const slideUrl = asNonEmptyString(slideRecord.url);
       if (slideUrl && !isSafeManifestPathValue(slideUrl, userId, docId)) {
         throw new Error("manifest_slide_url_scope_violation");
       }
@@ -150,11 +138,20 @@ const getConverterToken = (): string => {
   return token;
 };
 
+const getIdTokenClient = (audience: string): Promise<IdTokenClient> => {
+  const cached = idTokenClientCache.get(audience);
+  if (cached) return cached;
+
+  const created = auth.getIdTokenClient(audience);
+  idTokenClientCache.set(audience, created);
+  return created;
+};
+
 const parseConverterErrorPayload = async (response: Response): Promise<string | null> => {
   const contentType = response.headers.get("content-type") ?? "";
   try {
     if (contentType.includes("application/json")) {
-      const parsed = (await response.json()) as { error?: unknown; message?: unknown };
+      const parsed = (await response.json()) as Record<string, unknown>;
       return asNonEmptyString(parsed.error) ?? asNonEmptyString(parsed.message) ?? null;
     }
     const text = await response.text();
@@ -166,19 +163,12 @@ const parseConverterErrorPayload = async (response: Response): Promise<string | 
 
 const shouldTreatAsEndpointUnavailable = (error: unknown): boolean => {
   const message =
-    typeof error === "string"
-      ? error
-      : asNonEmptyString((error as any)?.message) ?? "";
+    typeof error === "string" ? error : asNonEmptyString((error as { message?: unknown } | null)?.message) ?? "";
+
   if (!message) return false;
+  if (message === "converter_token_not_configured") return true;
 
-  if (message === "converter_token_not_configured") {
-    return true;
-  }
-
-  if (!message.startsWith("converter_http_503")) {
-    return false;
-  }
-
+  if (!message.startsWith("converter_http_503")) return false;
   for (const marker of ENDPOINT_FALLBACK_ERRORS) {
     if (message.includes(`:${marker}`)) return true;
   }
@@ -189,12 +179,22 @@ const requestExternalConversion = async (
   userId: string,
   docId: string,
   sourceStoragePath: string
-): Promise<ConversionResult> => {
+): Promise<ExternalConversionResult> => {
   if (!CONVERTER_ENDPOINT) {
     throw new Error("converter_endpoint_not_configured");
   }
 
   const token = getConverterToken();
+  const idTokenClient = await getIdTokenClient(CONVERTER_ENDPOINT);
+  const idTokenHeaders = await idTokenClient.getRequestHeaders(CONVERTER_ENDPOINT);
+  const authorization = asNonEmptyString(
+    (idTokenHeaders as Record<string, unknown>).Authorization ??
+      (idTokenHeaders as Record<string, unknown>).authorization
+  );
+  if (!authorization) {
+    throw new Error("converter_id_token_missing");
+  }
+
   const controller = new AbortController();
   const timeoutHandle = setTimeout(() => {
     controller.abort();
@@ -206,6 +206,7 @@ const requestExternalConversion = async (
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: authorization,
         "x-pptx-converter-token": token,
       },
       body: JSON.stringify({
@@ -216,10 +217,10 @@ const requestExternalConversion = async (
       signal: controller.signal,
     });
   } catch (error) {
-    if ((error as any)?.name === "AbortError") {
+    if ((error as { name?: string } | null)?.name === "AbortError") {
       throw new Error(`converter_timeout_${CONVERTER_REQUEST_TIMEOUT_MS}ms`);
     }
-    throw error;
+    throw new Error("converter_http_503:network_error");
   } finally {
     clearTimeout(timeoutHandle);
   }
@@ -230,12 +231,7 @@ const requestExternalConversion = async (
     throw new Error(`converter_http_${response.status}${statusDetail}`);
   }
 
-  const payload = (await response.json()) as {
-    manifestPath?: string;
-    slideCount?: number;
-    fallbackPdfPath?: string;
-  };
-
+  const payload = (await response.json()) as Record<string, unknown>;
   const manifestPath = asNonEmptyString(payload.manifestPath);
   if (!manifestPath) {
     throw new Error("converter_response_missing_manifestPath");
@@ -252,13 +248,14 @@ const runConversion = async (
   userId: string,
   docId: string,
   sourceStoragePath: string
-): Promise<ConversionResult> => {
+): Promise<ExternalConversionResult> => {
   const defaultManifestPath = `users/${userId}/documents/${docId}/pptx/manifest.json`;
 
   if (CONVERTER_ENDPOINT) {
     try {
       const external = await requestExternalConversion(userId, docId, sourceStoragePath);
       const fromStorage = await resolveManifestMetadata(external.manifestPath, userId, docId);
+
       return {
         manifestPath: fromStorage.manifestPath,
         slideCount: external.slideCount ?? fromStorage.slideCount,
@@ -268,6 +265,7 @@ const runConversion = async (
       if (!shouldTreatAsEndpointUnavailable(error)) {
         throw error;
       }
+
       console.warn("[PptxConversion] Converter endpoint unavailable, falling back to storage manifest", {
         userId,
         docId,
@@ -283,18 +281,17 @@ const runConversion = async (
 
 export const onPptxConversionQueued = functions
   .runWith({ secrets: [CONVERTER_TOKEN_SECRET_ENV] })
-  .firestore
-  .document("users/{userId}/pptxConversions/{docId}")
-  .onWrite(async (change: functions.Change<functions.firestore.DocumentSnapshot>, context: functions.EventContext) => {
+  .firestore.document("users/{userId}/pptxConversions/{docId}")
+  .onWrite(async (change, context) => {
     const after = change.after;
     if (!after.exists) return;
 
-    const afterData = after.data() as ConversionDocData;
+    const afterData = after.data() as Record<string, unknown>;
     const nextStatus = normalizeStatus(afterData.status);
     if (nextStatus !== "queued") return;
 
-    const userId = String(context.params.userId || "").trim();
-    const docId = String(context.params.docId || "").trim();
+    const userId = String(context.params.userId ?? "").trim();
+    const docId = String(context.params.docId ?? "").trim();
     if (!userId || !docId) {
       console.warn("[PptxConversion] Missing userId/docId in trigger context", context.params);
       return;
@@ -314,7 +311,6 @@ export const onPptxConversionQueued = functions
         },
         { merge: true }
       );
-
       await documentRef.set(
         {
           convertStatus: "failed",
@@ -360,7 +356,8 @@ export const onPptxConversionQueued = functions
     const claimed = await admin.firestore().runTransaction(async (tx) => {
       const snap = await tx.get(conversionRef);
       if (!snap.exists) return false;
-      const currentStatus = normalizeStatus((snap.data() as ConversionDocData)?.status);
+
+      const currentStatus = normalizeStatus((snap.data() as Record<string, unknown> | undefined)?.status);
       if (currentStatus !== "queued") return false;
 
       tx.set(
@@ -452,7 +449,6 @@ export const onPptxConversionQueued = functions
         },
         { merge: true }
       );
-
       await documentRef.set(
         {
           convertStatus: "failed",

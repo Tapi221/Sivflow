@@ -5,74 +5,75 @@ param(
   [string]$Endpoint
 )
 
+Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-if ($Endpoint -notmatch '^https?://') {
-  throw "Endpoint must start with http:// or https://"
+function Test-ValidEndpoint {
+  param([string]$Value)
+  if ($Value -notmatch '^https?://') { return $false }
+  if ($Value -notmatch '/convert/?$') { return $false }
+  return $true
 }
 
-if ($Endpoint -notmatch '/convert/?$') {
-  throw "Endpoint must end with /convert"
-}
+function Set-OrInsertEnvLine {
+  param(
+    [string[]]$Lines,
+    [string]$Key,
+    [string]$Value
+  )
 
-$normalizedEndpoint = $Endpoint.TrimEnd("/")
-if ($normalizedEndpoint -notmatch '/convert$') {
-  $normalizedEndpoint = "$normalizedEndpoint/convert"
-}
-
-$envFile = Join-Path "functions" ".env.$ProjectId"
-$before = @()
-if (Test-Path $envFile) {
-  $before = Get-Content -Path $envFile
-}
-
-$filtered = @()
-foreach ($line in $before) {
-  if ($line -match '^\s*PPTX_CONVERTER_ENDPOINT\s*=') { continue }
-  if ($line -match '^\s*PPTX_CONVERTER_IMPLEMENTATION\s*=') { continue }
-  $filtered += $line
-}
-
-$after = @()
-$after += $filtered
-$startIndex = 0
-while ($startIndex -lt $after.Count -and [string]::IsNullOrWhiteSpace($after[$startIndex])) {
-  $startIndex += 1
-}
-if ($startIndex -gt 0) {
-  if ($startIndex -ge $after.Count) {
-    $after = @()
-  } else {
-    $after = $after[$startIndex..($after.Count - 1)]
+  $pattern = "^\s*$([regex]::Escape($Key))\s*="
+  $updated = @()
+  $found = $false
+  foreach ($line in $Lines) {
+    if ($line -match $pattern) {
+      if (-not $found) {
+        $updated += "$Key=$Value"
+        $found = $true
+      }
+      continue
+    }
+    $updated += $line
   }
+  if (-not $found) {
+    if ($updated.Count -gt 0 -and $updated[$updated.Count - 1] -ne "") {
+      $updated += ""
+    }
+    $updated += "$Key=$Value"
+  }
+  return ,$updated
 }
-if ($after.Count -gt 0 -and -not [string]::IsNullOrWhiteSpace($after[$after.Count - 1])) {
-  $after += ""
-}
-$after += "PPTX_CONVERTER_ENDPOINT=$normalizedEndpoint"
-$after += "PPTX_CONVERTER_IMPLEMENTATION=real"
 
-Set-Content -Path $envFile -Value $after -NoNewline:$false
+if (-not (Test-ValidEndpoint -Value $Endpoint)) {
+  throw "Endpoint は http/https で始まり、末尾が /convert である必要があります: $Endpoint"
+}
+
+$envFile = "functions/.env.$ProjectId"
+$before = if (Test-Path $envFile) { Get-Content $envFile } else { @() }
+
+$after = Set-OrInsertEnvLine -Lines $before -Key "PPTX_CONVERTER_ENDPOINT" -Value $Endpoint
+$after = Set-OrInsertEnvLine -Lines $after -Key "PPTX_CONVERTER_IMPLEMENTATION" -Value "real"
+
+Set-Content -Path $envFile -Value $after -Encoding utf8
 
 Write-Host "Updated: $envFile"
 Write-Host ""
-Write-Host "Before/After diff:"
-
-$tempBefore = [System.IO.Path]::GetTempFileName()
-$tempAfter = [System.IO.Path]::GetTempFileName()
-try {
-  Set-Content -Path $tempBefore -Value $before -NoNewline:$false
-  Set-Content -Path $tempAfter -Value $after -NoNewline:$false
-  & git --no-pager diff --no-index -- $tempBefore $tempAfter
-  if ($LASTEXITCODE -gt 1) {
-    throw "Failed to render diff (git exit code: $LASTEXITCODE)"
-  }
-} finally {
-  Remove-Item -Force -ErrorAction SilentlyContinue $tempBefore
-  Remove-Item -Force -ErrorAction SilentlyContinue $tempAfter
+Write-Host "[before]"
+if ($before.Count -eq 0) {
+  Write-Host "(empty)"
+} else {
+  $before | ForEach-Object { Write-Host $_ }
 }
 
 Write-Host ""
-Write-Host "Effective settings:"
-Write-Host "  PPTX_CONVERTER_ENDPOINT=$normalizedEndpoint"
-Write-Host "  PPTX_CONVERTER_IMPLEMENTATION=real"
+Write-Host "[after]"
+$after | ForEach-Object { Write-Host $_ }
+
+Write-Host ""
+Write-Host "[diff]"
+$diff = Compare-Object -ReferenceObject $before -DifferenceObject $after -PassThru
+if ($null -eq $diff -or $diff.Count -eq 0) {
+  Write-Host "(no changes)"
+} else {
+  $diff | ForEach-Object { Write-Host $_ }
+}

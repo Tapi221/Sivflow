@@ -1,117 +1,148 @@
 param(
   [Parameter(Mandatory = $true)]
   [string]$ProjectId,
+
   [string]$Region = "us-central1",
   [string]$ServiceName = "pptx-converter",
   [string]$Memory = "2Gi",
   [string]$Cpu = "1",
-  [int]$TimeoutSeconds = 120
+  [int]$TimeoutSeconds = 120,
+  [string]$RuntimeServiceAccount = "",
+  [string]$FunctionsServiceAccount = ""
 )
 
+Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-function Invoke-External {
+function Invoke-CheckedCommand {
   param(
-    [Parameter(Mandatory = $true)][string]$Label,
-    [Parameter(Mandatory = $true)][scriptblock]$Command
+    [Parameter(Mandatory = $true)][string]$Executable,
+    [Parameter(Mandatory = $true)][string[]]$Arguments,
+    [Parameter(Mandatory = $true)][string]$Description
   )
-  & $Command
+
+  Write-Host "==> $Description"
+  Write-Host "    $Executable $($Arguments -join ' ')"
+  & $Executable @Arguments
   if ($LASTEXITCODE -ne 0) {
-    throw "$Label failed with exit code $LASTEXITCODE"
+    throw "Command failed ($Description): $Executable $($Arguments -join ' ')"
   }
 }
 
-function Require-Command {
-  param([Parameter(Mandatory = $true)][string]$Name)
-  if (-not (Get-Command $Name -ErrorAction SilentlyContinue)) {
-    throw "Required command not found: $Name"
-  }
+function Test-CommandSuccess {
+  param(
+    [Parameter(Mandatory = $true)][string]$Executable,
+    [Parameter(Mandatory = $true)][string[]]$Arguments
+  )
+
+  & $Executable @Arguments *> $null
+  return $LASTEXITCODE -eq 0
 }
 
-Require-Command -Name "gcloud"
-
-if ($TimeoutSeconds -lt 30 -or $TimeoutSeconds -gt 3600) {
-  throw "TimeoutSeconds must be between 30 and 3600."
+if (-not (Test-Path "services/pptx-converter")) {
+  throw "services/pptx-converter が見つかりません。"
 }
 
-Write-Host "[deploy-pptx-converter] project=$ProjectId region=$Region service=$ServiceName"
-
-Write-Host "[1/5] gcloud project switch"
-Invoke-External -Label "gcloud config set project" -Command {
-  gcloud config set project $ProjectId
+if (-not (Get-Command gcloud -ErrorAction SilentlyContinue)) {
+  throw "gcloud コマンドが見つかりません。Google Cloud SDK をインストールしてください。"
 }
 
-Write-Host "[2/5] checking Secret Manager token"
-$secretExists = $true
-& gcloud secrets describe "PPTX_CONVERTER_TOKEN" --project $ProjectId | Out-Null
-if ($LASTEXITCODE -ne 0) {
-  $secretExists = $false
-}
+Invoke-CheckedCommand -Executable "gcloud" -Arguments @("config", "set", "project", $ProjectId) -Description "Set gcloud project"
 
-if (-not $secretExists) {
-  Write-Host ""
-  Write-Host "Secret 'PPTX_CONVERTER_TOKEN' not found in project '$ProjectId'."
-  Write-Host "Create it manually, then rerun this script:"
-  Write-Host "  gcloud secrets create PPTX_CONVERTER_TOKEN --replication-policy=automatic --project $ProjectId"
-  Write-Host "  echo -n '<your-token>' | gcloud secrets versions add PPTX_CONVERTER_TOKEN --data-file=- --project $ProjectId"
+if (-not (Test-CommandSuccess -Executable "gcloud" -Arguments @("secrets", "describe", "PPTX_CONVERTER_TOKEN", "--project", $ProjectId))) {
+  Write-Error "Secret 'PPTX_CONVERTER_TOKEN' が存在しません。先に作成してください。"
+  Write-Host "例:"
+  Write-Host "  echo -n '<token>' | gcloud secrets create PPTX_CONVERTER_TOKEN --replication-policy=automatic --data-file=- --project $ProjectId"
+  Write-Host "  echo -n '<token>' | gcloud secrets versions add PPTX_CONVERTER_TOKEN --data-file=- --project $ProjectId"
   exit 1
 }
 
-Write-Host "[3/5] deploying Cloud Run service"
-$sourceDir = "services/pptx-converter"
-if (-not (Test-Path $sourceDir)) {
-  throw "Source directory not found: $sourceDir"
+$projectNumber = (& gcloud projects describe $ProjectId --format "value(projectNumber)").Trim()
+if (-not $projectNumber) {
+  throw "Project number を取得できませんでした。"
 }
 
-Invoke-External -Label "gcloud run deploy" -Command {
-  gcloud run deploy $ServiceName `
-    --project $ProjectId `
-    --region $Region `
-    --source $sourceDir `
-    --memory $Memory `
-    --cpu $Cpu `
-    --timeout "$TimeoutSeconds" `
-    --allow-unauthenticated `
-    --set-env-vars "PPTX_MAX_SLIDES=200,PPTX_CONVERSION_DPI=160,PPTX_COMMAND_TIMEOUT_MS=120000,PPTX_STORAGE_BUCKET=$ProjectId.firebasestorage.app" `
-    --set-secrets "PPTX_CONVERTER_TOKEN=PPTX_CONVERTER_TOKEN:latest"
+if (-not $RuntimeServiceAccount) {
+  $RuntimeServiceAccount = "pptx-converter-runtime@$ProjectId.iam.gserviceaccount.com"
 }
 
-Write-Host "[4/5] resolving service URL"
-$baseUrl = (& gcloud run services describe $ServiceName `
+$runtimeSaExists = Test-CommandSuccess -Executable "gcloud" -Arguments @(
+  "iam", "service-accounts", "describe", $RuntimeServiceAccount, "--project", $ProjectId
+)
+
+if (-not $runtimeSaExists) {
+  $expectedDefault = "pptx-converter-runtime@$ProjectId.iam.gserviceaccount.com"
+  if ($RuntimeServiceAccount -ne $expectedDefault) {
+    throw "Runtime service account '$RuntimeServiceAccount' が存在しません。手動で作成するか、-RuntimeServiceAccount を省略してください。"
+  }
+
+  Invoke-CheckedCommand -Executable "gcloud" -Arguments @(
+    "iam", "service-accounts", "create", "pptx-converter-runtime",
+    "--display-name", "PPTX Converter Runtime",
+    "--project", $ProjectId
+  ) -Description "Create dedicated runtime service account"
+}
+
+Invoke-CheckedCommand -Executable "gcloud" -Arguments @(
+  "projects", "add-iam-policy-binding", $ProjectId,
+  "--member", "serviceAccount:$RuntimeServiceAccount",
+  "--role", "roles/storage.objectAdmin"
+) -Description "Grant runtime SA storage.objectAdmin"
+
+$deployArgs = @(
+  "run", "deploy", $ServiceName,
+  "--project", $ProjectId,
+  "--region", $Region,
+  "--source", "services/pptx-converter",
+  "--platform", "managed",
+  "--memory", $Memory,
+  "--cpu", $Cpu,
+  "--timeout", "${TimeoutSeconds}s",
+  "--service-account", $RuntimeServiceAccount,
+  "--set-env-vars", "PPTX_STORAGE_BUCKET=$ProjectId.firebasestorage.app,PPTX_MAX_SLIDES=200,PPTX_CONVERSION_DPI=160,PPTX_COMMAND_TIMEOUT_MS=120000",
+  "--set-secrets", "PPTX_CONVERTER_TOKEN=PPTX_CONVERTER_TOKEN:latest",
+  "--no-allow-unauthenticated",
+  "--quiet"
+)
+Invoke-CheckedCommand -Executable "gcloud" -Arguments $deployArgs -Description "Deploy pptx-converter (IAM required)"
+
+if (-not $FunctionsServiceAccount) {
+  $FunctionsServiceAccount = (& gcloud functions describe onPptxConversionQueued --gen2 --region $Region --project $ProjectId --format "value(serviceConfig.serviceAccountEmail)" 2>$null).Trim()
+  if (-not $FunctionsServiceAccount) {
+    $FunctionsServiceAccount = "$ProjectId@appspot.gserviceaccount.com"
+  }
+}
+
+Invoke-CheckedCommand -Executable "gcloud" -Arguments @(
+  "run", "services", "add-iam-policy-binding", $ServiceName,
+  "--project", $ProjectId,
+  "--region", $Region,
+  "--member", "serviceAccount:$FunctionsServiceAccount",
+  "--role", "roles/run.invoker"
+) -Description "Grant Cloud Run invoker to Functions service account"
+
+& gcloud run services remove-iam-policy-binding $ServiceName `
   --project $ProjectId `
   --region $Region `
-  --format "value(status.url)").Trim()
-if ($LASTEXITCODE -ne 0) {
-  throw "gcloud run services describe failed with exit code $LASTEXITCODE"
-}
+  --member allUsers `
+  --role roles/run.invoker `
+  --quiet *> $null
 
-if ([string]::IsNullOrWhiteSpace($baseUrl)) {
-  throw "Failed to resolve Cloud Run service URL."
+$serviceUrl = (& gcloud run services describe $ServiceName --project $ProjectId --region $Region --format "value(status.url)").Trim()
+if (-not $serviceUrl) {
+  throw "Cloud Run service URL を取得できませんでした。"
 }
-
-$endpoint = "$baseUrl/convert"
+$converterEndpoint = "$serviceUrl/convert"
 
 Write-Host ""
-Write-Host "Cloud Run base URL: $baseUrl"
-Write-Host "Converter endpoint: $endpoint"
+Write-Host "Cloud Run deployed successfully."
+Write-Host "  Base URL:      $serviceUrl"
+Write-Host "  Converter URL: $converterEndpoint"
+Write-Host "  Runtime SA:    $RuntimeServiceAccount"
+Write-Host "  Invoker SA:    $FunctionsServiceAccount"
 Write-Host ""
-Write-Host "[5/5] IAM note (not executed)"
-$serviceAccount = (& gcloud run services describe $ServiceName `
-  --project $ProjectId `
-  --region $Region `
-  --format "value(spec.template.spec.serviceAccountName)").Trim()
-if ($LASTEXITCODE -ne 0) {
-  throw "gcloud run services describe (service account) failed with exit code $LASTEXITCODE"
-}
-
-if ([string]::IsNullOrWhiteSpace($serviceAccount)) {
-  Write-Host "Service account could not be resolved from service describe output."
-} else {
-  Write-Host "Cloud Run service account: $serviceAccount"
-  Write-Host "If converter cannot read/write GCS, grant role manually:"
-  Write-Host "  gcloud projects add-iam-policy-binding $ProjectId --member=""serviceAccount:$serviceAccount"" --role=""roles/storage.objectAdmin"""
-}
-
+Write-Host "権限で詰まった場合の確認コマンド:"
+Write-Host "  gcloud run services describe $ServiceName --project $ProjectId --region $Region --format=""value(spec.template.spec.serviceAccountName)"""
+Write-Host "  gcloud projects add-iam-policy-binding $ProjectId --member=""serviceAccount:<SERVICE_ACCOUNT_EMAIL>"" --role=""roles/storage.objectAdmin"""
 Write-Host ""
-Write-Host "Note: currently deploys with --allow-unauthenticated, but runtime is still protected by x-pptx-converter-token."
-Write-Host "For stricter posture, you can migrate to IAM-authenticated invocation later."
+Write-Host "将来的にIAM認証のみへさらに厳格化する場合は、Functions側ID tokenのみを許可し、tokenヘッダは段階的に廃止できます。"
