@@ -19,8 +19,25 @@ import {
 } from '@/Components/ui/dropdown-menu';
 import type { Card, DocumentItem, ExplorerItem, SelectedExplorerItem } from '@/types';
 
+type FolderTreeNode = {
+  id?: string;
+  folderId?: string;
+  parentFolderId?: string | null;
+  parent_folder_id?: string | null;
+  folderName?: string;
+  folder_name?: string;
+  orderIndex?: number;
+  order_index?: number;
+  isDeleted?: boolean;
+  is_deleted?: boolean;
+  isHidden?: boolean;
+  is_hidden?: boolean;
+  __optimistic?: boolean;
+  [key: string]: unknown;
+};
+
 interface FolderTreeWithCardsProps {
-  folders: any[];
+  folders: FolderTreeNode[];
   cards: Card[];
   documents: DocumentItem[];
   selectedFolderId: string | null;
@@ -50,8 +67,11 @@ const ROOT_FOLDER_ID = '';
 const DEFAULT_NEW_FOLDER_NAME = '新規フォルダ';
 const DEFAULT_NEW_CARD_NAME = '新規カード';
 
-const getFolderId = (folder: any): string => folder?.id ?? folder?.folderId ?? '';
-const getParentFolderId = (folder: any): string | null => folder?.parentFolderId ?? folder?.parent_folder_id ?? null;
+const getFolderId = (folder: FolderTreeNode): string => String(folder?.id ?? folder?.folderId ?? '');
+const getParentFolderId = (folder: FolderTreeNode): string | null => {
+  const parent = folder?.parentFolderId ?? folder?.parent_folder_id ?? null;
+  return parent == null ? null : String(parent);
+};
 const normalizeFolderId = (folderId: string | null | undefined): string => folderId ?? ROOT_FOLDER_ID;
 const isSameFolder = (left: string | null | undefined, right: string | null | undefined) =>
   normalizeFolderId(left) === normalizeFolderId(right);
@@ -63,6 +83,8 @@ const getEntityTime = (value: any): number => {
 };
 const createOptimisticId = (prefix: 'folder' | 'card') =>
   `tmp-${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+const buildStoragePath = (uid: string, docId: string, ext: 'pdf' | 'pptx') =>
+  `users/${uid}/documents/${docId}/source.${ext}`;
 const isTextInputTarget = (target: HTMLElement | null) => {
   if (!target) return false;
   if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return true;
@@ -169,9 +191,8 @@ export function FolderTreeWithCards({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
   const [fileDragFolderId, setFileDragFolderId] = useState<string | null>(null);
-  const [optimisticFolders, setOptimisticFolders] = useState<any[]>([]);
+  const [optimisticFolders, setOptimisticFolders] = useState<FolderTreeNode[]>([]);
   const [optimisticCards, setOptimisticCards] = useState<Card[]>([]);
-  const [pendingReveal, setPendingReveal] = useState<{ id: string; type: 'folder' | 'card'; name: string } | null>(null);
   const [pendingScrollId, setPendingScrollId] = useState<string | null>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
   const rowRefs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -186,12 +207,15 @@ export function FolderTreeWithCards({
   const keyHandlerRef = useRef<(e: KeyboardEvent) => void>(() => {});
 
   const treeFolders = useMemo(() => {
-    const map = new Map<string, any>();
+    const map = new Map<string, FolderTreeNode>();
     for (const folder of folders) {
-      map.set(getFolderId(folder), folder);
+      const folderId = getFolderId(folder);
+      if (!folderId) continue;
+      map.set(folderId, folder);
     }
     for (const folder of optimisticFolders) {
       const id = getFolderId(folder);
+      if (!id) continue;
       if (!map.has(id)) map.set(id, folder);
     }
     return Array.from(map.values());
@@ -235,18 +259,6 @@ export function FolderTreeWithCards({
   }, [editingName]);
 
   useEffect(() => {
-    if (!pendingReveal) return;
-    const exists = pendingReveal.type === 'folder'
-      ? treeFolders.some((folder) => getFolderId(folder) === pendingReveal.id)
-      : treeCards.some((card) => card.id === pendingReveal.id);
-    if (!exists) return;
-
-    // 編集開始はしない。スクロール表示のみ。
-    setPendingScrollId(pendingReveal.id);
-    setPendingReveal(null);
-  }, [pendingReveal, treeFolders, treeCards]);
-
-  useEffect(() => {
     if (!pendingScrollId) return;
     const row = rowRefs.current.get(pendingScrollId);
     if (!row) return;
@@ -278,58 +290,74 @@ export function FolderTreeWithCards({
     });
   }, []);
 
-  const rootFolders = useMemo(() => treeFolders
-    .filter(f => {
-      const parentId = getParentFolderId(f);
-      const isDeleted = f.isDeleted ?? f.is_deleted;
-      const isHidden = f.isHidden ?? f.is_hidden;
-      return !parentId && !isDeleted && !isHidden;
-    })
-    .sort((a, b) => {
-      const orderA = a.orderIndex ?? a.order_index ?? 0;
-      const orderB = b.orderIndex ?? b.order_index ?? 0;
-      return orderA - orderB;
-    }), [treeFolders]);
+  const childFoldersByParentId = useMemo(() => {
+    const map = new Map<string, FolderTreeNode[]>();
+    for (const folder of treeFolders) {
+      const isDeleted = folder.isDeleted ?? folder.is_deleted;
+      const isHidden = folder.isHidden ?? folder.is_hidden;
+      if (isDeleted || isHidden) continue;
 
-  const getChildFolders = useCallback((parentId: string) => {
-    return treeFolders
-      .filter(f => {
-        const parent = getParentFolderId(f);
-        const isDeleted = f.isDeleted ?? f.is_deleted;
-        const isHidden = f.isHidden ?? f.is_hidden;
-        return parent === parentId && !isDeleted && !isHidden;
-      })
-      .sort((a, b) => {
-        const orderA = a.orderIndex ?? a.order_index ?? 0;
-        const orderB = b.orderIndex ?? b.order_index ?? 0;
+      const parentId = normalizeFolderId(getParentFolderId(folder));
+      const siblings = map.get(parentId);
+      if (siblings) siblings.push(folder);
+      else map.set(parentId, [folder]);
+    }
+
+    for (const siblings of map.values()) {
+      siblings.sort((a, b) => {
+        const orderA = (a.orderIndex ?? a.order_index ?? 0) as number;
+        const orderB = (b.orderIndex ?? b.order_index ?? 0) as number;
         return orderA - orderB;
       });
+    }
+    return map;
   }, [treeFolders]);
 
-  /**
-   * ExplorerItem[] を返す
-   */
-  const getFolderItems = useCallback((folderId: string | null): ExplorerItem[] => {
-    const fCards: ExplorerItem[] = treeCards
-      .filter(c => isSameFolder(c.folderId, folderId) && !c.isDeleted)
-      .map(c => ({ type: 'card', data: c }));
+  const rootFolders = useMemo(
+    () => childFoldersByParentId.get(ROOT_FOLDER_ID) ?? [],
+    [childFoldersByParentId]
+  );
 
-    const fDocs: ExplorerItem[] = documents
-      .filter(d => isSameFolder(d.folderId, folderId) && !d.isDeleted)
-      .map(d => ({ type: 'document', data: d }));
+  const getChildFolders = useCallback((parentId: string) => {
+    return childFoldersByParentId.get(parentId) ?? [];
+  }, [childFoldersByParentId]);
 
-    return [...fCards, ...fDocs].sort((a, b) => {
-      const orderA = a.data.orderIndex ?? Number.MAX_SAFE_INTEGER;
-      const orderB = b.data.orderIndex ?? Number.MAX_SAFE_INTEGER;
-      
-      if (orderA !== orderB) return orderA - orderB;
-      
-      // タイブレーク: updatedAt (新しい順)
-      const timeA = getEntityTime(a.data.updatedAt);
-      const timeB = getEntityTime(b.data.updatedAt);
-      return timeB - timeA;
-    });
+  const itemsByFolderId = useMemo(() => {
+    const map = new Map<string, ExplorerItem[]>();
+    const pushItem = (folderId: string | null | undefined, item: ExplorerItem) => {
+      const key = normalizeFolderId(folderId);
+      const list = map.get(key);
+      if (list) list.push(item);
+      else map.set(key, [item]);
+    };
+
+    for (const card of treeCards) {
+      if (card.isDeleted) continue;
+      pushItem(card.folderId, { type: 'card', data: card });
+    }
+    for (const doc of documents) {
+      if (doc.isDeleted) continue;
+      pushItem(doc.folderId, { type: 'document', data: doc });
+    }
+
+    for (const list of map.values()) {
+      list.sort((a, b) => {
+        const orderA = a.data.orderIndex ?? Number.MAX_SAFE_INTEGER;
+        const orderB = b.data.orderIndex ?? Number.MAX_SAFE_INTEGER;
+        if (orderA !== orderB) return orderA - orderB;
+
+        // タイブレーク: updatedAt (新しい順)
+        const timeA = getEntityTime(a.data.updatedAt);
+        const timeB = getEntityTime(b.data.updatedAt);
+        return timeB - timeA;
+      });
+    }
+    return map;
   }, [treeCards, documents]);
+
+  const getFolderItems = useCallback((folderId: string | null): ExplorerItem[] => {
+    return itemsByFolderId.get(normalizeFolderId(folderId)) ?? [];
+  }, [itemsByFolderId]);
 
   const rootItems = useMemo(() => getFolderItems(null), [getFolderItems]);
 
@@ -419,6 +447,7 @@ export function FolderTreeWithCards({
     for (const file of pdfFiles) {
       const now = new Date();
       const docId = createDocumentId();
+      const storagePath = buildStoragePath(currentUser.uid, docId, 'pdf');
       const mimeType = file.type || 'application/pdf';
       const baseDoc: DocumentItem = {
         id: docId,
@@ -438,7 +467,7 @@ export function FolderTreeWithCards({
         localUrl: null,
         localFileId: docId,
         remoteUrl: null,
-        storagePath: null,
+        storagePath,
         downloadUrl: null,
         uploadStatus: 'pending',
       };
@@ -460,17 +489,16 @@ export function FolderTreeWithCards({
       try {
         const result = await uploadFile(
           file,
-          (fileName: string) => `users/${currentUser.uid}/notes/${folderId}/${fileName}`,
+          () => storagePath,
           { type: 'pdf', folderId, docId }
         );
 
-        const storagePath = result.storagePath || null;
         const remoteDownloadUrl = result.metadata?.downloadUrl ?? null;
         await db.updateItem('documents', docId, {
-          storagePath,
+          storagePath: result.storagePath || storagePath,
           remoteUrl: remoteDownloadUrl,
           downloadUrl: remoteDownloadUrl,
-          uploadStatus: remoteDownloadUrl ? 'ready' : 'uploading',
+          uploadStatus: remoteDownloadUrl ? 'ready' : 'queued',
           updatedAt: new Date(),
         });
         if (!remoteDownloadUrl) {
@@ -528,7 +556,7 @@ export function FolderTreeWithCards({
     for (const file of pptxFiles) {
       const now = new Date();
       const docId = createDocumentId();
-      const storagePath = `users/${currentUser.uid}/documents/${docId}/source.pptx`;
+      const storagePath = buildStoragePath(currentUser.uid, docId, 'pptx');
       const mimeType = file.type || PPTX_MIME;
       const baseDoc: DocumentItem = {
         id: docId,
@@ -593,7 +621,7 @@ export function FolderTreeWithCards({
           storagePath: result.storagePath || storagePath,
           remoteUrl: remoteDownloadUrl,
           downloadUrl: remoteDownloadUrl,
-          uploadStatus: remoteDownloadUrl ? 'ready' : 'uploading',
+          uploadStatus: remoteDownloadUrl ? 'ready' : 'queued',
           updatedAt: new Date(),
         });
         if (!remoteDownloadUrl) {
@@ -1077,14 +1105,14 @@ export function FolderTreeWithCards({
     handleArrowNavigation,
   ]);
 
-  const renderFolder = (folder: any, depth: number = 0) => {
+  const renderFolder = (folder: FolderTreeNode, depth: number = 0) => {
     const folderId = getFolderId(folder);
     const folderName = folder.folderName ?? folder.folder_name ?? '(名称未設定)';
     const isExpanded = expandedFolders.has(folderId);
     const isSelected = selectedFolderId === folderId;
     const isEditing = editingId === folderId;
     const childFolders = getChildFolders(folderId);
-    const isOptimisticFolder = Boolean((folder as any).__optimistic);
+    const isOptimisticFolder = Boolean(folder.__optimistic);
     const hasContextMenu = !isOptimisticFolder && (onCreateFolder || onUpdateFolder || onDeleteFolder);
 
     const isPinned = favorites?.some(f => f.type === 'folder' && f.id === folderId);
@@ -1094,6 +1122,9 @@ export function FolderTreeWithCards({
     };
 
     const matchCount = isFiltering ? (matchCountMap.get(folderId) ?? 0) : -1;
+    const hasExpandableContent =
+      childFolders.length > 0 ||
+      (isFiltering ? matchCount > 0 : getFolderItems(folderId).length > 0);
     const isDimmed = isFiltering && matchCount === 0;
     const isFileDraggingOver = fileDragFolderId === folderId;
 
@@ -1102,137 +1133,144 @@ export function FolderTreeWithCards({
         <Droppable droppableId={DnDHelpers.createCardDroppableId(folderId)} isDropDisabled={isExpanded}>
           {(provided, snapshot) => (
             <div
-              ref={(node) => {
-                provided.innerRef(node);
-                setRowRef(folderId, node);
-              }}
+              ref={provided.innerRef}
               {...provided.droppableProps}
-              className={cn(
-                ROW_BASE,
-                isSelected && "bg-primary-50",
-                "hover:bg-slate-100",
-                snapshot.isDraggingOver && "bg-blue-100 ring-1 ring-blue-300",
-                isFileDraggingOver && "bg-blue-50 ring-1 ring-blue-400"
-              )}
-              style={{
-                paddingLeft: `${depth * 16 + 8}px`,
-                height: 32,
-                minHeight: 32,
-                boxSizing: 'border-box',
-              }}
-              onDragEnterCapture={(e) => {
-                if (!isFileDragEvent(e)) return;
-                e.preventDefault();
-                e.stopPropagation();
-                setFileDragFolderId(folderId);
-              }}
-              onDragOverCapture={(e) => {
-                if (!isFileDragEvent(e)) return;
-                e.preventDefault();
-                e.stopPropagation();
-                e.dataTransfer.dropEffect = 'copy';
-                setFileDragFolderId(folderId);
-              }}
-              onDragLeaveCapture={(e) => {
-                if (!isFileDragEvent(e)) return;
-                const nextTarget = e.relatedTarget as Node | null;
-                if (nextTarget && e.currentTarget.contains(nextTarget)) return;
-                setFileDragFolderId((prev) => (prev === folderId ? null : prev));
-              }}
-              onDropCapture={(e) => {
-                if (!isFileDragEvent(e)) return;
-                e.preventDefault();
-                e.stopPropagation();
-                setFileDragFolderId(null);
-                const files = e.dataTransfer?.files ?? null;
-                const pdfFiles = extractPdfFiles(files);
-                const pptxFiles = extractPptxFiles(files);
-                if (pdfFiles.length > 0) void handlePdfDropped(folderId, pdfFiles);
-                if (pptxFiles.length > 0) void handlePptxDropped(folderId, pptxFiles);
-              }}
             >
               <div
-                className="flex-1 flex items-center min-w-0 h-full cursor-pointer"
-                onClick={() => {
-                  if (!isEditing) {
-                    toggleFolder(folderId);
-                    onFolderSelect(folderId);
-                  }
+                ref={(node) => setRowRef(folderId, node)}
+                className={cn(
+                  ROW_BASE,
+                  isSelected && "bg-primary-50",
+                  "hover:bg-slate-100",
+                  snapshot.isDraggingOver && "bg-blue-100 ring-1 ring-blue-300",
+                  isFileDraggingOver && "bg-blue-50 ring-1 ring-blue-400"
+                )}
+                style={{
+                  paddingLeft: `${depth * 16 + 8}px`,
+                  height: 32,
+                  minHeight: 32,
+                  boxSizing: 'border-box',
+                }}
+                onDragEnterCapture={(e) => {
+                  if (!isFileDragEvent(e)) return;
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setFileDragFolderId(folderId);
+                }}
+                onDragOverCapture={(e) => {
+                  if (!isFileDragEvent(e)) return;
+                  e.preventDefault();
+                  e.stopPropagation();
+                  e.dataTransfer.dropEffect = 'copy';
+                  setFileDragFolderId(folderId);
+                }}
+                onDragLeaveCapture={(e) => {
+                  if (!isFileDragEvent(e)) return;
+                  const nextTarget = e.relatedTarget as Node | null;
+                  if (nextTarget && e.currentTarget.contains(nextTarget)) return;
+                  setFileDragFolderId((prev) => (prev === folderId ? null : prev));
+                }}
+                onDropCapture={(e) => {
+                  if (!isFileDragEvent(e)) return;
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setFileDragFolderId(null);
+                  const files = e.dataTransfer?.files ?? null;
+                  const pdfFiles = extractPdfFiles(files);
+                  const pptxFiles = extractPptxFiles(files);
+                  if (pdfFiles.length > 0) void handlePdfDropped(folderId, pdfFiles);
+                  if (pptxFiles.length > 0) void handlePptxDropped(folderId, pptxFiles);
                 }}
               >
-                <div className="w-4 h-4 flex items-center justify-center flex-shrink-0 mr-1">
-                  {(childFolders.length > 0 ||
-                    (isFiltering ? matchCount > 0 : getFolderItems(folderId).length > 0)) ? (
-                    isExpanded ? (
-                      <ChevronDown className="w-4 h-4 text-slate-500" />
-                    ) : (
-                      <ChevronRight className="w-4 h-4 text-slate-500" />
-                    )
-                  ) : null}
+                <div
+                  className="flex-1 flex items-center min-w-0 h-full cursor-pointer"
+                  onClick={() => {
+                    if (!isEditing) onFolderSelect(folderId);
+                  }}
+                  onDoubleClick={() => {
+                    if (!isEditing && hasExpandableContent) toggleFolder(folderId);
+                  }}
+                >
+                  <div
+                    className="w-4 h-4 flex items-center justify-center flex-shrink-0 mr-1"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (!isEditing && hasExpandableContent) toggleFolder(folderId);
+                    }}
+                    onDoubleClick={(e) => e.stopPropagation()}
+                  >
+                    {hasExpandableContent ? (
+                      isExpanded ? (
+                        <ChevronDown className="w-4 h-4 text-slate-500" />
+                      ) : (
+                        <ChevronRight className="w-4 h-4 text-slate-500" />
+                      )
+                    ) : null}
+                  </div>
+
+                  <Folder className={cn("w-4 h-4 flex-shrink-0 mr-1", isPinned ? "text-amber-500 fill-amber-100" : "text-slate-400")} />
+
+                  {isEditing ? (
+                    <input
+                      ref={editInputRef}
+                      aria-label="フォルダ名の編集"
+                      className="text-sm bg-white border border-primary-300 rounded px-1 outline-none ring-1 ring-primary-100 z-10 h-6 w-full leading-5"
+                      value={editingName}
+                      onChange={(e) => {
+                        setEditingName(e.target.value);
+                        editingNameRef.current = e.target.value;
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          e.currentTarget.blur();
+                        }
+                        if (e.key === 'Escape') {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          renameCancelledRef.current = true;
+                          e.currentTarget.blur();
+                        }
+                      }}
+                      onBlur={() => void handleRenameConfirm()}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  ) : (
+                    <div className="flex items-center gap-1 flex-1 overflow-hidden">
+                      <span className={cn("text-sm truncate leading-5", isSelected ? "text-primary-700 font-medium" : "text-slate-700")}>
+                        {folderName}
+                      </span>
+                      {isFiltering && matchCount === 0 && <span className="text-xs text-slate-400">(0)</span>}
+                    </div>
+                  )}
                 </div>
 
-                <Folder className={cn("w-4 h-4 flex-shrink-0 mr-1", isPinned ? "text-amber-500 fill-amber-100" : "text-slate-400")} />
-
-                {isEditing ? (
-                  <input
-                    ref={editInputRef}
-                    aria-label="フォルダ名の編集"
-                    className="text-sm bg-white border border-primary-300 rounded px-1 outline-none ring-1 ring-primary-100 z-10 h-6 w-full leading-5"
-                    value={editingName}
-                    onChange={(e) => {
-                      setEditingName(e.target.value);
-                      editingNameRef.current = e.target.value;
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        e.currentTarget.blur();
-                      }
-                      if (e.key === 'Escape') {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        renameCancelledRef.current = true;
-                        e.currentTarget.blur();
-                      }
-                    }}
-                    onBlur={() => void handleRenameConfirm()}
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                ) : (
-                  <div className="flex items-center gap-1 flex-1 overflow-hidden">
-                    <span className={cn("text-sm truncate leading-5", isSelected ? "text-primary-700 font-medium" : "text-slate-700")}>
-                      {folderName}
-                    </span>
-                    {isFiltering && matchCount === 0 && <span className="text-xs text-slate-400">(0)</span>}
+                {hasContextMenu && !isEditing && (
+                  <div className="absolute right-1 top-0 h-full flex items-center pointer-events-none">
+                    <ContextMenu
+                      type="folder"
+                      onCreateSubfolder={() => void handleCreateFolderAction(folderId)}
+                      onCreateCard={() => void handleCreateCardAction(folderId)}
+                      onRename={() => {
+                        setEditingId(folderId);
+                        setEditingName(folderName);
+                      }}
+                      onDelete={() => handleDelete(folderId, 'folder')}
+                      isPinned={isPinned}
+                      onTogglePin={handleTogglePin}
+                    >
+                      <button
+                        type="button"
+                        aria-label="フォルダメニューを開く"
+                        className="h-6 w-6 p-0 grid place-items-center rounded-md hover:bg-slate-200 text-slate-400 hover:text-slate-600 outline-none pointer-events-auto transition-colors shrink-0"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <MoreVertical className="h-4 w-4" />
+                      </button>
+                    </ContextMenu>
                   </div>
                 )}
               </div>
-
-              {hasContextMenu && !isEditing && (
-                <div className="absolute right-1 top-0 h-full flex items-center pointer-events-none">
-                  <ContextMenu
-                    type="folder"
-                    onCreateSubfolder={() => void handleCreateFolderAction(folderId)}
-                    onCreateCard={() => void handleCreateCardAction(folderId)}
-                    onRename={() => {
-                      setEditingId(folderId);
-                      setEditingName(folderName);
-                    }}
-                    onDelete={() => handleDelete(folderId, 'folder')}
-                    isPinned={isPinned}
-                    onTogglePin={handleTogglePin}
-                  >
-                    <button
-                      type="button"
-                      aria-label="フォルダメニューを開く"
-                      className="h-6 w-6 p-0 grid place-items-center rounded-md hover:bg-slate-200 text-slate-400 hover:text-slate-600 outline-none pointer-events-auto transition-colors shrink-0"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <MoreVertical className="h-4 w-4" />
-                    </button>
-                  </ContextMenu>
-                </div>
-              )}
               {provided.placeholder}
             </div>
           )}
@@ -1341,6 +1379,7 @@ export function FolderTreeWithCards({
     const isSelected = selectedItem?.type === 'card' && selectedItem.id === cardId;
     const isEditing = editingId === cardId;
     const isOptimisticCard = Boolean((card as any).__optimistic);
+    const isDragDisabled = isOptimisticCard || isEditing;
     const hasContextMenu = !isOptimisticCard && (onUpdateCard || onDeleteCard);
 
     const isPinned = favorites?.some(f => f.type === 'card' && f.id === cardId);
@@ -1350,7 +1389,12 @@ export function FolderTreeWithCards({
     };
 
     return (
-      <Draggable key={cardId} draggableId={DnDHelpers.createCardDraggableId(cardId)} index={index}>
+      <Draggable
+        key={cardId}
+        draggableId={DnDHelpers.createCardDraggableId(cardId)}
+        index={index}
+        isDragDisabled={isDragDisabled}
+      >
         {(provided, snapshot) => (
           <div
             ref={(node) => {
@@ -1358,7 +1402,7 @@ export function FolderTreeWithCards({
               setRowRef(cardId, node);
             }}
             {...provided.draggableProps}
-            {...(isEditing ? {} : provided.dragHandleProps)}
+            {...(isDragDisabled ? {} : provided.dragHandleProps)}
             className={cn(
               ROW_BASE,
               isSelected && "bg-primary-50",
