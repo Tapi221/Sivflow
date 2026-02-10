@@ -185,8 +185,10 @@ const requestExternalConversion = async (
   }
 
   const token = getConverterToken();
-  const idTokenClient = await getIdTokenClient(CONVERTER_ENDPOINT);
-  const idTokenHeaders = await idTokenClient.getRequestHeaders(CONVERTER_ENDPOINT);
+  const endpointUrl = new URL(CONVERTER_ENDPOINT);
+  const audience = endpointUrl.origin;
+  const idTokenClient = await getIdTokenClient(audience);
+  const idTokenHeaders = await idTokenClient.getRequestHeaders(audience);
   const authorization = asNonEmptyString(
     (idTokenHeaders as Record<string, unknown>).Authorization ??
       (idTokenHeaders as Record<string, unknown>).authorization

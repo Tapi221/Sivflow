@@ -6,7 +6,8 @@ param(
   [string]$Uid = "e2e-pptx-user",
   [int]$Slides = 3,
   [int]$PollTimeoutSeconds = 120,
-  [int]$PollIntervalSeconds = 4
+  [int]$PollIntervalSeconds = 4,
+  [string]$CredentialsFile = ""
 )
 
 Set-StrictMode -Version Latest
@@ -78,6 +79,36 @@ function Invoke-NodeJson {
   }
 }
 
+function Resolve-GoogleCredentials {
+  param(
+    [string]$CredentialsFileParam
+  )
+
+  $repoDefault = (Resolve-Path ".").Path + "\serviceAccountKey.json"
+
+  if ($CredentialsFileParam) {
+    $resolved = Resolve-Path $CredentialsFileParam -ErrorAction SilentlyContinue
+    if (-not $resolved) {
+      throw "CredentialsFile が見つかりません: $CredentialsFileParam"
+    }
+    return $resolved.Path
+  }
+
+  if ($env:GOOGLE_APPLICATION_CREDENTIALS) {
+    $resolved = Resolve-Path $env:GOOGLE_APPLICATION_CREDENTIALS -ErrorAction SilentlyContinue
+    if ($resolved) {
+      return $resolved.Path
+    }
+    throw "GOOGLE_APPLICATION_CREDENTIALS が指定されていますがファイルが見つかりません: $($env:GOOGLE_APPLICATION_CREDENTIALS)"
+  }
+
+  if (Test-Path $repoDefault) {
+    return $repoDefault
+  }
+
+  return $null
+}
+
 if (-not $Bucket) {
   $Bucket = "$ProjectId.firebasestorage.app"
 }
@@ -92,9 +123,22 @@ if (-not (Get-Command gcloud -ErrorAction SilentlyContinue)) {
   throw "gcloud コマンドが見つかりません。"
 }
 
+$resolvedCreds = Resolve-GoogleCredentials -CredentialsFileParam $CredentialsFile
+if ($resolvedCreds) {
+  $env:GOOGLE_APPLICATION_CREDENTIALS = $resolvedCreds
+  Write-Host "Using GOOGLE_APPLICATION_CREDENTIALS: $resolvedCreds"
+} else {
+  Write-Host "No credentials file provided/found. Falling back to ADC (gcloud auth application-default)."
+}
+
 & gcloud auth application-default print-access-token *> $null
 if ($LASTEXITCODE -ne 0) {
-  throw "ADC が未設定です。'gcloud auth application-default login' を実行してから再試行してください。"
+  throw "Google credentials の解決に失敗しました。-CredentialsFile / GOOGLE_APPLICATION_CREDENTIALS / ./serviceAccountKey.json のいずれかを用意するか、'gcloud auth application-default login' を実行してください。"
+}
+
+& gsutil ls "gs://$Bucket/" *> $null
+if ($LASTEXITCODE -ne 0) {
+  throw "gsutil のプリフライトに失敗しました。Bucket 参照権限を確認してください: gs://$Bucket/"
 }
 
 $envFile = "functions/.env.$ProjectId"
@@ -272,14 +316,21 @@ $manifestRaw = & gsutil cat "gs://$Bucket/$manifestPath"
 if ($LASTEXITCODE -ne 0) {
   throw "Failed to read manifest from gs://$Bucket/$manifestPath"
 }
-$manifestJson = ($manifestRaw -join "`n") | ConvertFrom-Json -Depth 50
-$manifestSlideCount = [int]$manifestJson.slideCount
-$slides = @($manifestJson.slides)
-if ($manifestSlideCount -ne $slides.Count) {
-  throw "Manifest slideCount mismatch. slideCount=$manifestSlideCount slides.length=$($slides.Count)"
+$manifestText = ($manifestRaw -join "`n")
+$manifestJson = $manifestText | ConvertFrom-Json -Depth 50
+$manifestRecord = if ($manifestJson -is [System.Array]) { $manifestJson[0] } else { $manifestJson }
+if ($manifestText -match '"slideCount"\s*:\s*(\d+)') {
+  $slideCountToken = ($Matches[1] | Select-Object -First 1)
+  $manifestSlideCount = [string]$slideCountToken
+} else {
+  throw "manifest.slideCount が読み取れませんでした。"
+}
+$slideEntries = @($manifestRecord.slides)
+if ([string]$manifestSlideCount -ne [string]$slideEntries.Count) {
+  throw "Manifest slideCount mismatch. slideCount=$manifestSlideCount slides.length=$($slideEntries.Count)"
 }
 
-foreach ($slide in $slides) {
+foreach ($slide in $slideEntries) {
   if (-not $slide.path) {
     throw "Manifest contains slide without path."
   }

@@ -7,7 +7,8 @@ param(
   [string]$BrokenEndpoint = "https://127.0.0.1.invalid/convert",
   [int]$Slides = 1,
   [int]$PollTimeoutSeconds = 120,
-  [int]$PollIntervalSeconds = 4
+  [int]$PollIntervalSeconds = 4,
+  [string]$CredentialsFile = ""
 )
 
 Set-StrictMode -Version Latest
@@ -70,6 +71,36 @@ function Invoke-NodeJson {
   }
 }
 
+function Resolve-GoogleCredentials {
+  param(
+    [string]$CredentialsFileParam
+  )
+
+  $repoDefault = (Resolve-Path ".").Path + "\serviceAccountKey.json"
+
+  if ($CredentialsFileParam) {
+    $resolved = Resolve-Path $CredentialsFileParam -ErrorAction SilentlyContinue
+    if (-not $resolved) {
+      throw "CredentialsFile が見つかりません: $CredentialsFileParam"
+    }
+    return $resolved.Path
+  }
+
+  if ($env:GOOGLE_APPLICATION_CREDENTIALS) {
+    $resolved = Resolve-Path $env:GOOGLE_APPLICATION_CREDENTIALS -ErrorAction SilentlyContinue
+    if ($resolved) {
+      return $resolved.Path
+    }
+    throw "GOOGLE_APPLICATION_CREDENTIALS が指定されていますがファイルが見つかりません: $($env:GOOGLE_APPLICATION_CREDENTIALS)"
+  }
+
+  if (Test-Path $repoDefault) {
+    return $repoDefault
+  }
+
+  return $null
+}
+
 if ($BrokenEndpoint -notmatch '^https?://' -or $BrokenEndpoint -notmatch '/convert/?$') {
   throw "BrokenEndpoint must be http/https and end with /convert: $BrokenEndpoint"
 }
@@ -91,9 +122,22 @@ if (-not (Get-Command gcloud -ErrorAction SilentlyContinue)) {
   throw "gcloud コマンドが見つかりません。"
 }
 
+$resolvedCreds = Resolve-GoogleCredentials -CredentialsFileParam $CredentialsFile
+if ($resolvedCreds) {
+  $env:GOOGLE_APPLICATION_CREDENTIALS = $resolvedCreds
+  Write-Host "Using GOOGLE_APPLICATION_CREDENTIALS: $resolvedCreds"
+} else {
+  Write-Host "No credentials file provided/found. Falling back to ADC (gcloud auth application-default)."
+}
+
 & gcloud auth application-default print-access-token *> $null
 if ($LASTEXITCODE -ne 0) {
-  throw "ADC が未設定です。'gcloud auth application-default login' を実行してから再試行してください。"
+  throw "Google credentials の解決に失敗しました。-CredentialsFile / GOOGLE_APPLICATION_CREDENTIALS / ./serviceAccountKey.json のいずれかを用意するか、'gcloud auth application-default login' を実行してください。"
+}
+
+& gsutil ls "gs://$Bucket/" *> $null
+if ($LASTEXITCODE -ne 0) {
+  throw "gsutil のプリフライトに失敗しました。Bucket 参照権限を確認してください: gs://$Bucket/"
 }
 
 $envFile = "functions/.env.$ProjectId"
