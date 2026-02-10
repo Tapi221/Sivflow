@@ -9,7 +9,7 @@
       "source": "functions",
       "codebase": "default",
       "predeploy": [
-        "node ./scripts/predeploy-check.mjs"
+        "node scripts/firebase-predeploy.cjs"
       ],
       "disallowLegacyRuntimeConfig": true,
       "ignore": [
