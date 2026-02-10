@@ -8,6 +8,9 @@
     {
       "source": "functions",
       "codebase": "default",
+      "predeploy": [
+        "node ./scripts/predeploy-check.mjs"
+      ],
       "disallowLegacyRuntimeConfig": true,
       "ignore": [
         "node_modules",

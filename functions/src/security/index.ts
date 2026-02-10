@@ -21,7 +21,7 @@ export const onSecurityLogCreated = functions.firestore
 
     try {
       // 1. 異常検知 (過去ログ集計・ルール判定)
-      const isAbnormal = await detectAbnormalPatterns(userId, logData);
+      await detectAbnormalPatterns(userId, logData);
 
       // 2. リスクスコア計算
       const riskScore = await calculateRiskScore(userId, logData);

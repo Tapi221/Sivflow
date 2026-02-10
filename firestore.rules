@@ -9,6 +9,63 @@ service cloud.firestore {
     function isOwner(userId) {
       return request.auth.uid == userId;
     }
+
+    function legacyImageOwnedByAuthUid(data) {
+      return data != null &&
+        data.userId is string &&
+        data.userId == request.auth.uid;
+    }
+
+    function isPptxConversionOwnedBy(userId, conversionId, data) {
+      return data != null &&
+        data.uid is string &&
+        data.uid == userId &&
+        data.docId is string &&
+        data.docId == conversionId;
+    }
+
+    function isPptxSourcePathForDoc(userId, conversionId, sourcePath) {
+      return sourcePath is string &&
+        sourcePath.matches("^users/" + userId + "/documents/" + conversionId + "/.*$");
+    }
+
+    function canCreatePptxConversion(userId, conversionId) {
+      return isAuthenticated() &&
+        isOwner(userId) &&
+        request.resource.data.keys().hasOnly([
+          "docId",
+          "uid",
+          "sourceStoragePath",
+          "status",
+          "createdAt",
+          "updatedAt",
+          "requestOrigin"
+        ]) &&
+        isPptxConversionOwnedBy(userId, conversionId, request.resource.data) &&
+        request.resource.data.status == "queued" &&
+        isPptxSourcePathForDoc(userId, conversionId, request.resource.data.sourceStoragePath);
+    }
+
+    function canRetryPptxConversion(userId, conversionId) {
+      return isAuthenticated() &&
+        isOwner(userId) &&
+        isPptxConversionOwnedBy(userId, conversionId, resource.data) &&
+        isPptxConversionOwnedBy(userId, conversionId, request.resource.data) &&
+        request.resource.data.status == "queued" &&
+        request.resource.data.sourceStoragePath == resource.data.sourceStoragePath &&
+        request.resource.data.manifestPath == resource.data.manifestPath &&
+        request.resource.data.fallbackPdfPath == resource.data.fallbackPdfPath &&
+        request.resource.data.slideCount == resource.data.slideCount &&
+        request.resource.data.errorMessage == resource.data.errorMessage &&
+        request.resource.data.processingStartedAt == resource.data.processingStartedAt &&
+        request.resource.data.convertedAt == resource.data.convertedAt &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "status",
+          "updatedAt",
+          "createdAt",
+          "requestOrigin"
+        ]);
+    }
     
     // ユーザー
     match /users/{userId} {
@@ -20,7 +77,21 @@ service cloud.firestore {
       match /cardRelations/{id} { allow read, write: if isAuthenticated() && isOwner(userId); }
       match /projectMaps/{id} { allow read, write: if isAuthenticated() && isOwner(userId); }
       match /uploads/{id} { allow read, write: if isAuthenticated() && isOwner(userId); }
+      match /images/{id} { allow read, write: if isAuthenticated() && isOwner(userId); }
+      match /documents/{id} { allow read, write: if isAuthenticated() && isOwner(userId); }
+      match /pptxConversions/{id} {
+        allow read: if isAuthenticated() && isOwner(userId);
+        allow create: if canCreatePptxConversion(userId, id);
+        allow update: if canRetryPptxConversion(userId, id);
+        allow delete: if false;
+      }
       match /securityLogs/{id} { allow read, write: if isAuthenticated() && isOwner(userId); }
+    }
+
+    // 旧グローバル images コレクション互換（移行期間用）
+    match /images/{imageId} {
+      allow read: if isAuthenticated() && legacyImageOwnedByAuthUid(resource.data);
+      allow create, update, delete: if false;
     }
     
     // ユーザー設定
