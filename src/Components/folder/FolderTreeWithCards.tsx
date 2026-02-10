@@ -3,6 +3,7 @@ import { ChevronRight, ChevronDown, Folder, FileText, MoreVertical, Plus } from 
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { cn } from '@/lib/utils';
 import { ContextMenu } from './ContextMenu';
+import DeleteFolderDialog from './DeleteFolderDialog';
 import { DocumentRowMenu } from './DocumentRowMenu';
 import { useFolderDnD, DnDHelpers } from '@/hooks/useFolderDnD';
 import { useReliableFileUpload } from '@/hooks/useReliableFileUpload';
@@ -194,6 +195,8 @@ export function FolderTreeWithCards({
   const [optimisticFolders, setOptimisticFolders] = useState<FolderTreeNode[]>([]);
   const [optimisticCards, setOptimisticCards] = useState<Card[]>([]);
   const [pendingScrollId, setPendingScrollId] = useState<string | null>(null);
+  const [deleteFolderDialogOpen, setDeleteFolderDialogOpen] = useState(false);
+  const [deleteTargetFolderId, setDeleteTargetFolderId] = useState<string | null>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
   const rowRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -321,6 +324,42 @@ export function FolderTreeWithCards({
   const getChildFolders = useCallback((parentId: string) => {
     return childFoldersByParentId.get(parentId) ?? [];
   }, [childFoldersByParentId]);
+
+  const directCardCountByFolderId = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const card of treeCards) {
+      if (card.isDeleted) continue;
+      const folderId = normalizeFolderId(card.folderId);
+      map.set(folderId, (map.get(folderId) ?? 0) + 1);
+    }
+    return map;
+  }, [treeCards]);
+
+  const deleteTargetFolder = useMemo(() => {
+    if (!deleteTargetFolderId) return null;
+    return treeFolders.find((folder) => getFolderId(folder) === deleteTargetFolderId) ?? null;
+  }, [deleteTargetFolderId, treeFolders]);
+
+  const deleteTargetCounts = useMemo(() => {
+    if (!deleteTargetFolderId) return { cardCount: 0, subfolderCount: 0 };
+
+    let cardCount = 0;
+    let subfolderCount = 0;
+    const stack = [deleteTargetFolderId];
+
+    while (stack.length > 0) {
+      const folderId = stack.pop()!;
+      cardCount += directCardCountByFolderId.get(folderId) ?? 0;
+
+      const children = childFoldersByParentId.get(folderId) ?? [];
+      subfolderCount += children.length;
+      for (const child of children) {
+        stack.push(getFolderId(child));
+      }
+    }
+
+    return { cardCount, subfolderCount };
+  }, [deleteTargetFolderId, directCardCountByFolderId, childFoldersByParentId]);
 
   const itemsByFolderId = useMemo(() => {
     const map = new Map<string, ExplorerItem[]>();
@@ -941,15 +980,30 @@ export function FolderTreeWithCards({
       : optimisticCards.some((card) => card.id === id);
     if (isOptimistic) return;
 
-    const confirmMessage = type === 'folder'
-      ? 'このフォルダを削除しますか?'
-      : 'このカードを削除しますか?';
+    if (type === 'folder') {
+      if (!onDeleteFolder) return;
+      setDeleteTargetFolderId(id);
+      setDeleteFolderDialogOpen(true);
+      return;
+    }
 
+    const confirmMessage = 'このカードを削除しますか?';
     if (!confirm(confirmMessage)) return;
 
-    if (type === 'folder') await onDeleteFolder?.(id);
-    else await onDeleteCard?.(id);
+    await onDeleteCard?.(id);
   };
+
+  const handleDeleteFolderDialogOpenChange = useCallback((nextOpen: boolean) => {
+    setDeleteFolderDialogOpen(nextOpen);
+    if (!nextOpen) setDeleteTargetFolderId(null);
+  }, []);
+
+  const handleConfirmDeleteFolder = useCallback(async (folder: { id?: string; folderId?: string }) => {
+    const folderId = String(folder.id ?? folder.folderId ?? '');
+    if (!folderId) throw new Error('フォルダIDの取得に失敗しました');
+    if (!onDeleteFolder) throw new Error('フォルダ削除ハンドラが未設定です');
+    await onDeleteFolder(folderId);
+  }, [onDeleteFolder]);
 
   const handleMoveCard = async (cardId: string) => {
     const targetFolderName = prompt('移動先のフォルダ名を入力してください(完全一致)');
@@ -1542,6 +1596,15 @@ export function FolderTreeWithCards({
             )}
           </div>
         )}
+
+        <DeleteFolderDialog
+          open={deleteFolderDialogOpen}
+          onOpenChange={handleDeleteFolderDialogOpenChange}
+          folder={deleteTargetFolder}
+          cardCount={deleteTargetCounts.cardCount}
+          subfolderCount={deleteTargetCounts.subfolderCount}
+          onConfirm={handleConfirmDeleteFolder}
+        />
       </div>
     </DragDropContext>
   );
