@@ -88,6 +88,14 @@ if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
 if (-not (Get-Command gsutil -ErrorAction SilentlyContinue)) {
   throw "gsutil コマンドが見つかりません。"
 }
+if (-not (Get-Command gcloud -ErrorAction SilentlyContinue)) {
+  throw "gcloud コマンドが見つかりません。"
+}
+
+& gcloud auth application-default print-access-token *> $null
+if ($LASTEXITCODE -ne 0) {
+  throw "ADC が未設定です。'gcloud auth application-default login' を実行してから再試行してください。"
+}
 
 $envFile = "functions/.env.$ProjectId"
 $converterEndpoint = Get-EnvValueFromFile -FilePath $envFile -Key "PPTX_CONVERTER_ENDPOINT"
