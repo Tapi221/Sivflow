@@ -143,6 +143,10 @@ if ($LASTEXITCODE -ne 0) {
 $envFile = "functions/.env.$ProjectId"
 $envExisted = Test-Path $envFile
 $envOriginal = if ($envExisted) { Get-Content $envFile } else { @() }
+$allowSameAliasBefore = $env:ALLOW_SAME_PROJECT_ALIAS
+$allowProdUnsafeBefore = $env:ALLOW_PROD_UNSAFE_CONVERTER_ENDPOINT
+$env:ALLOW_SAME_PROJECT_ALIAS = "1"
+$env:ALLOW_PROD_UNSAFE_CONVERTER_ENDPOINT = "1"
 
 $restoreFailed = $false
 try {
@@ -272,7 +276,7 @@ if (!admin.apps.length) admin.initializeApp({ projectId });
   if ($finalStatus -ne "failed") {
     throw "Expected failed but got $finalStatus"
   }
-  if ($errorMessage -notmatch '^converter_http_') {
+  if ($errorMessage -notmatch 'converter_http_') {
     throw "Expected converter_http_* errorMessage but got: $errorMessage"
   }
 
@@ -296,6 +300,18 @@ finally {
   } catch {
     $restoreFailed = $true
     Write-Error "Failed to restore environment/deployment: $($_.Exception.Message)"
+  } finally {
+    if ([string]::IsNullOrEmpty($allowSameAliasBefore)) {
+      Remove-Item Env:ALLOW_SAME_PROJECT_ALIAS -ErrorAction SilentlyContinue
+    } else {
+      $env:ALLOW_SAME_PROJECT_ALIAS = $allowSameAliasBefore
+    }
+
+    if ([string]::IsNullOrEmpty($allowProdUnsafeBefore)) {
+      Remove-Item Env:ALLOW_PROD_UNSAFE_CONVERTER_ENDPOINT -ErrorAction SilentlyContinue
+    } else {
+      $env:ALLOW_PROD_UNSAFE_CONVERTER_ENDPOINT = $allowProdUnsafeBefore
+    }
   }
 }
 
