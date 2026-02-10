@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "verify:sw": "node scripts/verify-sw.mjs",
+    "build:verify-sw": "npm run build && npm run verify:sw",
     "typecheck": "npm exec tsc -- --noEmit --pretty false",
     "lint": "eslint .",
     "preview": "vite preview",
@@ -72,6 +74,8 @@
     "postcss": "^8.5.6",
     "prism-react-renderer": "^2.4.1",
     "prismjs": "^1.30.0",
+    "pptxgenjs": "^4.0.1",
+    "pdfjs-dist": "^4.10.38",
     "qrcode.react": "^4.2.0",
     "react": "^19.2.0",
     "react-chartjs-2": "^5.3.1",

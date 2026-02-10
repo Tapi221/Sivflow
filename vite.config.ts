@@ -8,18 +8,24 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
       registerType: 'autoUpdate',
-      injectRegister: 'auto',
+      injectRegister: false,
       manifestFilename: 'manifest.webmanifest',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+      injectManifest: {
+        globIgnores: ['**/index.html'],
+      },
       devOptions: {
         enabled: false, // 開発環境ではPWA無効化（manifest生成は行われる）
         type: 'module',
       },
       manifest: {
-        name: 'Flashcard Master',
-        short_name: 'Flashcard',
-        description: 'Advanced flashcard app for serious learners',
+        name: 'manifolmia',
+        short_name: 'manifolmia',
+        description: 'Advanced learning app for serious learners',
         theme_color: '#689A98',
         background_color: '#F8FAFB',
         display: 'standalone',
