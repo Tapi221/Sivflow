@@ -88,11 +88,6 @@ export function RecentPanel({
       onItemSelect({ type: 'card', id: item.id });
     } else if ((item.type as string) === 'pdf') {
       onItemSelect({ type: 'document', id: item.id });
-      
-      const doc = documents.find(d => (d.id || (d as any).documentId) === item.id);
-      if (doc?.downloadUrl) {
-        window.open(doc.downloadUrl, '_blank', 'noopener,noreferrer');
-      }
     }
   };
 

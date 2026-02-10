@@ -1,7 +1,7 @@
 import { storage, firestoreDb as db } from './firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
-import { getLocalDb, type LocalDB } from './localDB';
+import { getLocalDb, type LocalDBLike } from './localDB';
 import type { UploadedImage } from '../types';
 import { createStorageUrl } from '../types/branded';
 
@@ -9,9 +9,9 @@ const MAX_QUOTA = 500 * 1024 * 1024; // 500MB
 const MAX_RETRIES = 5;
 
 export class ImageSyncService {
-  private localDB: LocalDB;
+  private localDB: LocalDBLike;
 
-  constructor(userId: string, localDB: LocalDB) {
+  constructor(userId: string, localDB: LocalDBLike) {
     this.localDB = localDB;
   }
 

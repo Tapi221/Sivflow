@@ -41,6 +41,8 @@ interface BlockEditorProps {
   customPlaceholders?: Record<number, string>;
   hideToolbar?: boolean;
   onDelete?: (index: number) => void;
+  minDeletableIndex?: number;
+  hiddenBlockTypes?: CardBlock['type'][];
 }
 
 export const BlockEditor = ({
@@ -58,12 +60,52 @@ export const BlockEditor = ({
   canAddAudio = true,
   customPlaceholders,
   hideToolbar = false,
-  onDelete
+  onDelete,
+  minDeletableIndex = 0,
+  hiddenBlockTypes = []
 }: BlockEditorProps) => {
   const { settings } = useUserSettings();
   const [activeBlockId, setActiveBlockId] = useState<string | null>(null);
+  const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
   const [pendingUploads, setPendingUploads] = useState<Record<string, File>>({});
   const dragHandleClassName = "js-block-drag-handle";
+
+  const isEditableTarget = (target: EventTarget | null) => {
+    if (!(target instanceof HTMLElement)) return false;
+    return !!target.closest('input, textarea, select, [contenteditable="true"]');
+  };
+
+  const clampDragStyle = (
+    style: React.CSSProperties | undefined,
+    {
+      clampXMin,
+      clampXMax,
+      clampYMin,
+      clampYMax
+    }: {
+      clampXMin?: number;
+      clampXMax?: number;
+      clampYMin?: number;
+      clampYMax?: number;
+    }
+  ) => {
+    if (!style || !style.transform) return style;
+    const match = String(style.transform).match(/translate(?:3d)?\(([-\d.]+)px,\s*([-\d.]+)px/);
+    if (!match) return style;
+    let x = parseFloat(match[1]);
+    let y = parseFloat(match[2]);
+
+    if (clampXMin !== undefined) x = Math.max(x, clampXMin);
+    if (clampXMax !== undefined) x = Math.min(x, clampXMax);
+    if (clampYMin !== undefined) y = Math.max(y, clampYMin);
+    if (clampYMax !== undefined) y = Math.min(y, clampYMax);
+
+    const transform = String(style.transform).includes('3d')
+      ? `translate3d(${x}px, ${y}px, 0px)`
+      : `translate(${x}px, ${y}px)`;
+
+    return { ...style, transform };
+  };
 
   const handleBlockOverflow = (blockId: string, files: File[]) => {
     const index = blocks.findIndex(b => b.id === blockId);
@@ -226,7 +268,10 @@ export const BlockEditor = ({
               const sorted = [...blockSettings].sort((a, b) => a.orderIndex - b.orderIndex);
               const showLabel = settings?.blockButtonShowLabel ?? true;
 
-              return sorted.filter(b => b.isVisible).map((config) => {
+              return sorted
+                .filter(b => b.isVisible)
+                .filter(b => !hiddenBlockTypes.includes(b.type))
+                .map((config) => {
                 const type = config.type;
 
                 const getButtonClass = (specificClasses: string) =>
@@ -345,7 +390,7 @@ export const BlockEditor = ({
       )}
 
       {/* Blocks List */}
-      <Droppable droppableId={droppableId}>
+      <Droppable droppableId={droppableId} direction="vertical" type="card-block">
         {(provided) => (
           <div
             {...provided.droppableProps}
@@ -366,52 +411,90 @@ export const BlockEditor = ({
 
                     // ✅ “触った時だけ”アクティブにする（hoverで反応しない）
                     onPointerDownCapture={() => setActiveBlockId(block.id)}
-                    onFocusCapture={() => setActiveBlockId(block.id)}
+                    onPointerEnter={() => setActiveBlockId(block.id)}
+                    onPointerLeave={() => {
+                      setActiveBlockId(prev => (prev === block.id ? null : prev));
+                    }}
+                    onFocusCapture={(e) => {
+                      setActiveBlockId(block.id);
+                      if (isEditableTarget(e.target)) {
+                        setEditingBlockId(block.id);
+                      }
+                    }}
 
                     // ✅ フォーカスが外へ出たら解除（入力中は維持）
                     onBlurCapture={(e) => {
                       const next = e.relatedTarget as Node | null;
                       if (!next || !e.currentTarget.contains(next)) {
                         setActiveBlockId(prev => (prev === block.id ? null : prev));
+                        setEditingBlockId(prev => (prev === block.id ? null : prev));
                       }
                     }}
 
                     className="relative"
                     data-block-row="true"
                     data-active={(activeBlockId === block.id || snapshot.isDragging) ? "true" : "false"}
+                    style={clampDragStyle(provided.draggableProps.style, {
+                      clampXMin: prefix === 'question' ? 0 : undefined,
+                      clampXMax: prefix === 'answer' ? 0 : undefined,
+                      clampYMin: index === 0 ? 0 : undefined
+                    })}
                   >
                     <div>
                       {block.type === 'text' && (
+                        (() => {
+                          const canDelete = index >= minDeletableIndex;
+                          return (
                         <TextBlock
                           content={block.content || ''}
                           onChange={(val) => handleUpdateBlock(block.id, { content: val })}
-                          onDelete={() => handleDeleteBlock(block.id, index)}
+                          onDelete={() => {
+                            if (canDelete) handleDeleteBlock(block.id, index);
+                          }}
                           onDuplicate={() => handleDuplicateBlock(block.id)}
                           dragHandleProps={provided.dragHandleProps}
                           dragHandleClassName={dragHandleClassName}
                           accentColor={accentColor}
                           autoFocus={autoFocus && index === 0}
                           placeholder={customPlaceholders?.[index]}
+                          isActive={(activeBlockId === block.id || snapshot.isDragging) && editingBlockId !== block.id}
+                          showDelete={canDelete}
                         />
+                          );
+                        })()
                       )}
 
                       {block.type === 'code' && (
+                        (() => {
+                          const canDelete = index >= minDeletableIndex;
+                          return (
                         <CodeBlockItem
                           data={block.code || { language: 'javascript', code: '' }}
                           onChange={(val) => handleUpdateBlock(block.id, { code: val })}
-                          onDelete={() => handleDeleteBlock(block.id, index)}
+                          onDelete={() => {
+                            if (canDelete) handleDeleteBlock(block.id, index);
+                          }}
                           onDuplicate={() => handleDuplicateBlock(block.id)}
                           dragHandleProps={provided.dragHandleProps}
                           dragHandleClassName={dragHandleClassName}
                           accentColor={accentColor}
+                          isActive={(activeBlockId === block.id || snapshot.isDragging) && editingBlockId !== block.id}
+                          showDelete={canDelete}
                         />
+                          );
+                        })()
                       )}
                       {block.type === 'image' && (
+                        (() => {
+                          const canDelete = index >= minDeletableIndex;
+                          return (
                         <MediaBlock
                           type="image"
                           data={block.images || []}
                           onChange={(val) => handleUpdateBlock(block.id, { images: val })}
-                          onDelete={() => handleDeleteBlock(block.id, index)}
+                          onDelete={() => {
+                            if (canDelete) handleDeleteBlock(block.id, index);
+                          }}
                           onDuplicate={() => handleDuplicateBlock(block.id)}
                           dragHandleProps={provided.dragHandleProps}
                           dragHandleClassName={dragHandleClassName}
@@ -419,50 +502,90 @@ export const BlockEditor = ({
                           initialFile={pendingUploads[block.id]}
                           onConsumeInitialFile={() => handleConsumeInitialFile(block.id)}
                           onFilesExcess={(files) => handleBlockOverflow(block.id, files)}
+                          isActive={(activeBlockId === block.id || snapshot.isDragging) && editingBlockId !== block.id}
+                          showDelete={canDelete}
                         />
+                          );
+                        })()
                       )}
                       {block.type === 'audio' && (
+                        (() => {
+                          const canDelete = index >= minDeletableIndex;
+                          return (
                         <MediaBlock
                           type="audio"
                           data={block.audios || []}
                           onChange={(val) => handleUpdateBlock(block.id, { audios: val })}
-                          onDelete={() => handleDeleteBlock(block.id, index)}
+                          onDelete={() => {
+                            if (canDelete) handleDeleteBlock(block.id, index);
+                          }}
                           onDuplicate={() => handleDuplicateBlock(block.id)}
                           dragHandleProps={undefined}
                           accentColor={accentColor}
+                          isActive={(activeBlockId === block.id || snapshot.isDragging) && editingBlockId !== block.id}
+                          showDelete={canDelete}
                         />
+                          );
+                        })()
                       )}
                       {block.type === 'memo' && (
+                        (() => {
+                          const canDelete = index >= minDeletableIndex;
+                          return (
                         <MemoBlock
                           content={block.content || ''}
                           onChange={(val) => handleUpdateBlock(block.id, { content: val })}
-                          onDelete={() => handleDeleteBlock(block.id, index)}
+                          onDelete={() => {
+                            if (canDelete) handleDeleteBlock(block.id, index);
+                          }}
                           onDuplicate={() => handleDuplicateBlock(block.id)}
                           dragHandleProps={provided.dragHandleProps}
                           dragHandleClassName={dragHandleClassName}
                           accentColor={accentColor}
+                          isActive={(activeBlockId === block.id || snapshot.isDragging) && editingBlockId !== block.id}
+                          showDelete={canDelete}
                         />
+                          );
+                        })()
                       )}
                       {block.type === 'reference' && (
+                        (() => {
+                          const canDelete = index >= minDeletableIndex;
+                          return (
                         <ReferenceBlock
                           references={block.references || []}
                           onChange={(val) => handleUpdateBlock(block.id, { references: val })}
-                          onDelete={() => handleDeleteBlock(block.id, index)}
+                          onDelete={() => {
+                            if (canDelete) handleDeleteBlock(block.id, index);
+                          }}
                           onDuplicate={() => handleDuplicateBlock(block.id)}
                           dragHandleProps={undefined}
                           accentColor={accentColor}
+                          isActive={(activeBlockId === block.id || snapshot.isDragging) && editingBlockId !== block.id}
+                          showDelete={canDelete}
                         />
+                          );
+                        })()
                       )}
                       {block.type === 'math' && (
+                        (() => {
+                          const canDelete = index >= minDeletableIndex;
+                          return (
                         <MathBlock
                           data={block.math || { latex: '', displayMode: 'block' }}
                           onChange={(val) => handleUpdateBlock(block.id, { math: val })}
-                          onDelete={() => handleDeleteBlock(block.id, index)}
+                          onDelete={() => {
+                            if (canDelete) handleDeleteBlock(block.id, index);
+                          }}
                           onDuplicate={() => handleDuplicateBlock(block.id)}
                           dragHandleProps={provided.dragHandleProps}
                           dragHandleClassName={dragHandleClassName}
                           accentColor={accentColor}
+                          isActive={(activeBlockId === block.id || snapshot.isDragging) && editingBlockId !== block.id}
+                          showDelete={canDelete}
                         />
+                          );
+                        })()
                       )}
                     </div>
 

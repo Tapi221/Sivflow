@@ -2,9 +2,25 @@ import { normalizeCard, normalizeFolder, extractTextFromBlocks } from '../utils'
 import { denormalizeUploadedImages, normalizeUploadedImages, sanitizeUploadedImages } from '../utils/imageUtils';
 import { getOrCreateDeviceId, getDeviceName } from '../utils/device';
 import { assertImageArrayInvariant } from '../utils/imageAssertions';
+import { deleteDocumentBlob, deleteDocumentBlobsByUser } from './documentFileStore';
+import { removeDocumentBlobUrl } from './documentBlobUrlSessionCache';
+import { InMemoryLocalDB } from './InMemoryLocalDB';
 import Dexie from 'dexie';
 import { nanoid } from 'nanoid';
 import { Timestamp } from 'firebase/firestore';
+import {
+  clearLocalDBResetFailureReason,
+  getLocalDBTelemetrySnapshot,
+  getLocalDBRuntimeStatus,
+  getStoredLocalDBResetFailureReason,
+  markLocalDBGenerationBumped,
+  saveLocalDBResetFailureReason,
+  subscribeLocalDBRuntimeStatus,
+  telemetryOncePerSession,
+  updateLocalDBRuntimeStatus,
+  warnOncePerSession
+} from './localDBRuntimeState';
+import type { LocalDBFallbackReasonCode } from './localDBRuntimeState';
 
 import type {
   Folder,
@@ -23,6 +39,116 @@ import type {
   CardRelation,
   ProjectMap
 } from '../types';
+
+export type LocalDBLike = LocalDB | InMemoryLocalDB;
+export type LocalDBInstance = LocalDBLike;
+
+const LOCALDB_SCHEMA_VERSION_FOR_NAME = 19;
+const LOCALDB_GENERATION_MAX = 3;
+const LOCALDB_RECOVERY_GUIDE_URL = 'https://support.google.com/chrome/answer/2392709';
+const LOCALDB_GENERATION_KEY_PREFIX = 'flashcard.localdb.generation.';
+const LOCALDB_ERROR_MESSAGE_LIMIT = 400;
+const LOCALDB_NAME_PREFIX = 'FlashcardMasterDB_';
+
+const safeStringifyError = (error: unknown): string => {
+  try {
+    if (!error) return 'unknown error';
+    if (typeof error === 'string') return error;
+    const maybeName = (error as any)?.name ? `${(error as any).name}: ` : '';
+    const maybeMessage = (error as any)?.message ?? JSON.stringify(error);
+    return `${maybeName}${String(maybeMessage)}`.slice(0, LOCALDB_ERROR_MESSAGE_LIMIT);
+  } catch {
+    return 'unknown error';
+  }
+};
+
+const safeRevokeBlobUrl = (url: unknown, context: string): void => {
+  if (typeof url !== 'string' || !url.startsWith('blob:')) return;
+  if (typeof URL === 'undefined' || typeof URL.revokeObjectURL !== 'function') return;
+  try {
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.warn(`[LocalDB] Failed to revoke blob URL (${context})`, error);
+  }
+};
+
+const readGenerationFromStorage = (userId: string): number => {
+  if (typeof window === 'undefined') return 0;
+  try {
+    const raw = window.localStorage.getItem(`${LOCALDB_GENERATION_KEY_PREFIX}${userId}`);
+    const parsed = Number(raw ?? '0');
+    if (!Number.isFinite(parsed) || parsed < 0) return 0;
+    return Math.min(Math.floor(parsed), LOCALDB_GENERATION_MAX);
+  } catch {
+    return 0;
+  }
+};
+
+const writeGenerationToStorage = (userId: string, generation: number): void => {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(
+      `${LOCALDB_GENERATION_KEY_PREFIX}${userId}`,
+      String(Math.min(Math.max(0, Math.floor(generation)), LOCALDB_GENERATION_MAX))
+    );
+  } catch {
+    // ignore localStorage write failures
+  }
+};
+
+const makeGenerationDbPrefix = (userId: string): string =>
+  `${LOCALDB_NAME_PREFIX}${userId}_v${LOCALDB_SCHEMA_VERSION_FOR_NAME}_g`;
+
+const extractErrorTexts = (error: any, collector: string[], depth = 0): void => {
+  if (!error || depth > 4) return;
+  const name = typeof error?.name === 'string' ? error.name : '';
+  const message = typeof error?.message === 'string' ? error.message : '';
+  const text = `${name} ${message}`.toLowerCase();
+  if (text.trim()) collector.push(text);
+  extractErrorTexts(error?.inner, collector, depth + 1);
+  extractErrorTexts(error?.cause, collector, depth + 1);
+};
+
+export function isBackingStoreOpenError(error: unknown): boolean {
+  const texts: string[] = [];
+  extractErrorTexts(error, texts);
+  if (texts.length === 0) return false;
+  const merged = texts.join(' | ');
+  const hasUnknownError = merged.includes('unknownerror') || merged.includes('unknown error');
+  const hasBackingStoreToken =
+    merged.includes('opening backing store') ||
+    merged.includes('backing store') ||
+    merged.includes('indexeddb.open');
+  return hasUnknownError && hasBackingStoreToken;
+}
+
+const classifyFallbackReasonCode = (error: unknown): LocalDBFallbackReasonCode => {
+  if (isBackingStoreOpenError(error)) return 'backing_store_open_error';
+
+  const texts: string[] = [];
+  extractErrorTexts(error, texts);
+  const merged = texts.join(' | ');
+
+  if (merged.includes('quotaexceeded') || merged.includes('quota exceeded')) {
+    return 'quota_exceeded';
+  }
+  if (
+    merged.includes('securityerror') ||
+    merged.includes('access denied') ||
+    merged.includes('not allowed') ||
+    merged.includes('disabled')
+  ) {
+    return 'indexeddb_blocked';
+  }
+  if (
+    merged.includes('blocked') ||
+    merged.includes('versionchange') ||
+    merged.includes('upgradeneeded')
+  ) {
+    return 'upgrade_needed_or_blocked';
+  }
+  return 'unknown';
+};
 
 
 const denormalizeCardForStorage = (card: any) => {
@@ -157,8 +283,19 @@ export class LocalDB extends Dexie {
    */
   static async listDatabases(): Promise<IDBDatabaseInfo[]> {
     if (!indexedDB.databases) return [];
-    const dbs = await indexedDB.databases();
-    return dbs;
+    try {
+      const dbs = await indexedDB.databases();
+      return dbs;
+    } catch (error) {
+      if (isBackingStoreOpenError(error)) {
+        warnOncePerSession(
+          'localdb:list-databases-backing-store',
+          `[LocalDB] Failed to list IndexedDB databases due to backing store error. Recovery guide: ${LOCALDB_RECOVERY_GUIDE_URL}`,
+          error
+        );
+      }
+      return [];
+    }
   }
 
   /**
@@ -917,9 +1054,14 @@ export class LocalDB extends Dexie {
     return { folders: folderUpdates.length, cards: cardUpdates.length, canonicalId };
   }
 
-  private static instance: LocalDB | null = null;
+  private static instance: LocalDBInstance | null = null;
   private static currentUserId: string | null = null;
-  private static isInitializing = false;
+  private static openingPromise: Promise<LocalDBInstance> | null = null;
+  private static openingUserId: string | null = null;
+  private static resettingPromise: Promise<void> | null = null;
+  private static persistentOpenDisabled = false;
+  private static fallbackInstances = new Map<string, InMemoryLocalDB>();
+  private static generationBumpedUsers = new Set<string>();
 
   private constructor(userId?: string) {
     // Prevent direct construction from browser code; enforce using LocalDB.getInstance()
@@ -936,7 +1078,7 @@ export class LocalDB extends Dexie {
       }
     }
 
-    super(userId ? `FlashcardMasterDB_${userId}` : 'FlashcardMasterDB_anonymous');
+    super(LocalDB.getDatabaseNameForUser(userId ?? 'anonymous'));
     this.userId = userId;
     this.syncTrigger = null;
 
@@ -1284,6 +1426,60 @@ export class LocalDB extends Dexie {
       });
     });
 
+    // Version 19: documents.localUrl/blobUrl の stale blob URL を正規化
+    this.version(19).stores({
+      folders: 'id, userId, parentFolderId, updatedAt, cloudSyncEnabled, isDeleted, [userId+updatedAt], [userId+isDeleted]',
+      cards: 'id, userId, folderId, updatedAt, nextReviewDate, isDeleted, difficulty, reviewCount, [userId+updatedAt], [userId+isDeleted], [userId+nextReviewDate]',
+      documents: 'id, userId, folderId, updatedAt, isDeleted, [userId+updatedAt], [userId+folderId]',
+      users: 'id, userId, updatedAt',
+      userSettings: 'id, userId, updatedAt, isDeleted, [userId+updatedAt]',
+      userStats: 'id, userId, updatedAt, isDeleted, [userId+updatedAt]',
+      syncMetadata: 'userId, deviceId',
+      levelHistories: 'id, userId, cardId, changedAt',
+      deviceMeta: 'deviceId, userId',
+      syncErrors: 'id, occurredAt, phase, retryable',
+      syncHistory: 'id, finishedAt',
+      syncSettings: 'id',
+      syncQueue: 'id, targetId, status, priority, [status+priority], [targetId+status], idempotencyKey, &migrationKey',
+      conflicts: 'id, entityId',
+      tags: '[rootFolderId+name], rootFolderId, userId, updatedAt',
+      tags_v2: '[userId+name], userId, updatedAt',
+      studyLogs: 'id, userId, cardId, studiedAt',
+      metadata: 'key',
+      images: 'id, userId, status, [userId+status]',
+      cardRelations: 'id, userId, fromCardId, toCardId, updatedAt, [userId+updatedAt]',
+      projectMaps: 'id, userId, folderId, updatedAt, [userId+updatedAt]',
+    }).upgrade(async tx => {
+      const documents = tx.table('documents');
+      await documents.toCollection().modify((d: any) => {
+        if (typeof d.localUrl === 'string' && d.localUrl.startsWith('blob:')) {
+          d.localUrl = null;
+        }
+        if (typeof d.blobUrl === 'string' && d.blobUrl.startsWith('blob:')) {
+          d.blobUrl = null;
+        }
+      });
+    });
+
+  }
+
+  async normalizeDocumentBlobUrlsForSession(): Promise<void> {
+    try {
+      await this.documents.toCollection().modify((d: any) => {
+        if (typeof d.localUrl === 'string' && d.localUrl.startsWith('blob:')) {
+          d.localUrl = null;
+        }
+        if (typeof d.blobUrl === 'string' && d.blobUrl.startsWith('blob:')) {
+          d.blobUrl = null;
+        }
+      });
+    } catch (error) {
+      warnOncePerSession(
+        'localdb:normalize-document-blob-urls-failed',
+        '[LocalDB] Failed to normalize stale document blob URLs.',
+        error
+      );
+    }
   }
 
   async getItem(table: string, id: string): Promise<any> {
@@ -1353,7 +1549,76 @@ export class LocalDB extends Dexie {
     }
   }
 
+  private async canDeleteDocumentBlob(blobId: string, excludeDocumentId: string): Promise<boolean> {
+    if (!blobId) return false;
+    const sharedRef = await this.documents
+      .filter((doc: any) => {
+        if (!doc || doc.id === excludeDocumentId) return false;
+        const refId = doc.localFileId ?? doc.id ?? null;
+        if (!refId || refId !== blobId) return false;
+        const isDeleted = doc.isDeleted ?? doc.is_deleted ?? false;
+        return !isDeleted;
+      })
+      .first();
+    return !sharedRef;
+  }
+
   async updateItem(table: string, id: string, changes: object, skipSync = false): Promise<number> {
+    if (table === 'documents') {
+      const docChanges = changes as any;
+      const hasLocalFileIdChange = Object.prototype.hasOwnProperty.call(docChanges, 'localFileId');
+      const hasBlobUrlChange =
+        Object.prototype.hasOwnProperty.call(docChanges, 'blobUrl') ||
+        Object.prototype.hasOwnProperty.call(docChanges, 'localUrl');
+      try {
+        const existingDoc = await this.documents.get(id);
+        const previousLocalBlobId = existingDoc?.localFileId ?? existingDoc?.id ?? null;
+        const nextLocalBlobId = hasLocalFileIdChange
+          ? docChanges.localFileId ?? null
+          : previousLocalBlobId;
+        const previousBlobUrl = existingDoc?.blobUrl ?? existingDoc?.localUrl ?? null;
+        const nextBlobUrl = hasBlobUrlChange
+          ? docChanges.blobUrl ?? docChanges.localUrl ?? null
+          : previousBlobUrl;
+
+        if (previousBlobUrl && previousBlobUrl !== nextBlobUrl) {
+          safeRevokeBlobUrl(previousBlobUrl, `documents.updateItem:${id}`);
+        } else if (
+          previousBlobUrl &&
+          hasLocalFileIdChange &&
+          previousLocalBlobId &&
+          previousLocalBlobId !== nextLocalBlobId &&
+          !hasBlobUrlChange
+        ) {
+          safeRevokeBlobUrl(previousBlobUrl, `documents.updateItem-replace:${id}`);
+        }
+
+        if (hasBlobUrlChange && !nextBlobUrl && previousLocalBlobId) {
+          removeDocumentBlobUrl(previousLocalBlobId, { userId: this.userId });
+        }
+
+        if (
+          hasLocalFileIdChange &&
+          previousLocalBlobId &&
+          previousLocalBlobId !== nextLocalBlobId &&
+          this.userId
+        ) {
+          const canDelete = await this.canDeleteDocumentBlob(previousLocalBlobId, id);
+          if (canDelete) {
+            await deleteDocumentBlob(previousLocalBlobId, { userId: this.userId });
+            removeDocumentBlobUrl(previousLocalBlobId, { userId: this.userId });
+          } else {
+            console.info('[LocalDB] Skip deleting shared document blob', {
+              documentId: id,
+              localBlobId: previousLocalBlobId,
+            });
+          }
+        }
+      } catch (err) {
+        console.warn('[LocalDB] updateItem documents blob replace cleanup failed', err);
+      }
+    }
+
     const payload = table === 'cards' ? denormalizeCardForStorage(changes) : table === 'folders' ? denormalizeFolderForStorage(changes) : changes;
     console.log(`[LocalDB] updateItem -> table=${table} id=${id} skipSync=${skipSync} changesKeys=${Object.keys(changes).join(',')}`);
     if (table === 'cards') {
@@ -1374,13 +1639,61 @@ export class LocalDB extends Dexie {
   }
 
   async deleteItem(table: string, id: string): Promise<void> {
+    if (table === 'documents') {
+      try {
+        const existingDoc = await this.documents.get(id);
+        safeRevokeBlobUrl(existingDoc?.blobUrl ?? existingDoc?.localUrl ?? null, `documents.deleteItem:${id}`);
+        const localBlobId = existingDoc?.localFileId ?? existingDoc?.id ?? id;
+        if (localBlobId && this.userId) {
+          const canDelete = await this.canDeleteDocumentBlob(localBlobId, id);
+          if (canDelete) {
+            await deleteDocumentBlob(localBlobId, { userId: this.userId });
+            removeDocumentBlobUrl(localBlobId, { userId: this.userId });
+          } else {
+            console.info('[LocalDB] Skip deleting shared document blob', {
+              documentId: id,
+              localBlobId,
+            });
+          }
+        }
+      } catch (err) {
+        console.warn('[LocalDB] deleteItem documents blob cleanup failed', err);
+      }
+    }
     return (this as any).table(table).delete(id);
   }
 
   async softDelete(table: string, id: string): Promise<number> {
     const now = new Date();
     console.log(`[LocalDB] softDelete -> table=${table} id=${id}`);
-    const result = await this.updateItem(table, id, { isDeleted: true, deletedAt: now, updatedAt: now });
+    if (table === 'documents') {
+      try {
+        const existingDoc = await this.documents.get(id);
+        safeRevokeBlobUrl(existingDoc?.blobUrl ?? existingDoc?.localUrl ?? null, `documents.softDelete:${id}`);
+        const localBlobId = existingDoc?.localFileId ?? existingDoc?.id ?? id;
+        if (localBlobId && this.userId) {
+          const canDelete = await this.canDeleteDocumentBlob(localBlobId, id);
+          if (canDelete) {
+            await deleteDocumentBlob(localBlobId, { userId: this.userId });
+            removeDocumentBlobUrl(localBlobId, { userId: this.userId });
+          } else {
+            console.info('[LocalDB] Skip deleting shared document blob', {
+              documentId: id,
+              localBlobId,
+            });
+          }
+        }
+      } catch (err) {
+        console.warn('[LocalDB] softDelete documents blob cleanup failed', err);
+      }
+    }
+
+    const extraChanges =
+      table === 'documents'
+        ? { localFileId: null, localUrl: null, blobUrl: null }
+        : {};
+
+    const result = await this.updateItem(table, id, { isDeleted: true, deletedAt: now, updatedAt: now, ...extraChanges });
     // updateItem 内で enqueueSync が呼ばれるため、ここでは個別には呼ばない
     return result;
   }
@@ -1460,6 +1773,7 @@ export class LocalDB extends Dexie {
       this.conflicts.clear(),
       (this as any).tags.clear(),
       (this as any).table('studyLogs').clear(),
+      this.userId ? deleteDocumentBlobsByUser(this.userId) : Promise.resolve(),
     ]);
   }
 
@@ -1523,6 +1837,9 @@ export class LocalDB extends Dexie {
    * 同期タスクをキューに追加
    */
   private async enqueueSync(tableName: string, type: 'upload' | 'download', payload: any) {
+    // documents.localFileId は端末ローカル専用のため同期対象にしない。
+    if (tableName === 'documents') return;
+
     const syncableTables = ['cards', 'folders', 'cardRelations', 'projectMaps'];
     if (!syncableTables.includes(tableName)) return;
 
@@ -1570,48 +1887,323 @@ export class LocalDB extends Dexie {
     }
   }
 
-  static async getInstance(userId?: string): Promise<LocalDB> {
-    // 初期化中の場合は待機
-    while (LocalDB.isInitializing) {
-      await new Promise(resolve => setTimeout(resolve, 50));
+  private static getGenerationForUser(userId: string): number {
+    return readGenerationFromStorage(userId);
+  }
+
+  private static bumpGenerationForUser(userId: string): number {
+    if (LocalDB.generationBumpedUsers.has(userId)) {
+      return this.getGenerationForUser(userId);
+    }
+    LocalDB.generationBumpedUsers.add(userId);
+    const current = this.getGenerationForUser(userId);
+    const next = Math.min(current + 1, LOCALDB_GENERATION_MAX);
+    if (next !== current) {
+      writeGenerationToStorage(userId, next);
+    }
+    return next;
+  }
+
+  private static async listUserPersistentDbNames(userId: string): Promise<string[]> {
+    const names = new Set<string>();
+    const generationPrefix = makeGenerationDbPrefix(userId);
+
+    for (let generation = 0; generation <= LOCALDB_GENERATION_MAX; generation += 1) {
+      names.add(`${generationPrefix}${generation}`);
     }
 
-    const newUserId = userId || 'anonymous';
-    
-    try {
-      LocalDB.isInitializing = true;
+    names.add(`${LOCALDB_NAME_PREFIX}${userId}`);
 
-      if (LocalDB.instance && LocalDB.currentUserId !== newUserId) {
-        console.log(`[LocalDB] Switching DB from ${LocalDB.currentUserId} to ${newUserId}`);
-        if (LocalDB.instance.isOpen()) {
-          await LocalDB.instance.close();
+    if (typeof indexedDB !== 'undefined' && typeof indexedDB.databases === 'function') {
+      try {
+        const dbs = await indexedDB.databases();
+        for (const db of dbs) {
+          const name = db?.name;
+          if (!name) continue;
+          if (name.startsWith(generationPrefix)) {
+            names.add(name);
+          }
         }
-        LocalDB.instance = null;
-        LocalDB.currentUserId = null;
+      } catch (error) {
+        warnOncePerSession(
+          'localdb:list-user-db-names-failed',
+          `[LocalDB] Failed to enumerate user DB names during reset. Continuing with known generations for user=${userId}.`,
+          error
+        );
       }
-      
-      if (!LocalDB.instance) {
-        console.log(`[LocalDB] Creating new instance for ${newUserId}`);
-        LocalDB.instance = LocalDB.internalCreate(newUserId);
-        LocalDB.currentUserId = newUserId;
-        
-        // 安全なオープン処理
-        if (!LocalDB.instance.isOpen()) {
-          await LocalDB.instance.open();
+    }
+
+    return Array.from(names.values());
+  }
+
+  private static async deleteUserPersistentDatabases(userId: string): Promise<string | null> {
+    const names = await LocalDB.listUserPersistentDbNames(userId);
+    let failureReason: string | null = null;
+
+    for (const name of names) {
+      try {
+        await Dexie.delete(name);
+      } catch (error) {
+        if (!failureReason) {
+          failureReason = `delete failed (${name}): ${safeStringifyError(error)}`;
         }
       }
-      
-      // グローバルデバッグ変数は削除（直接参照は `getLocalDb()` を使用）
-      
+    }
+
+    return failureReason;
+  }
+
+  static getDatabaseNameForUser(userId: string = 'anonymous'): string {
+    const generation = this.getGenerationForUser(userId);
+    return `FlashcardMasterDB_${userId}_v${LOCALDB_SCHEMA_VERSION_FOR_NAME}_g${generation}`;
+  }
+
+  private static getFallbackDatabaseNameForUser(userId: string): string {
+    return `FlashcardMasterDB_mem_${userId}`;
+  }
+
+  private static activateFallback(userId: string, error: unknown): LocalDBInstance {
+    let fallback = LocalDB.fallbackInstances.get(userId);
+    if (!fallback) {
+      fallback = new InMemoryLocalDB(userId, LocalDB.getFallbackDatabaseNameForUser(userId));
+      LocalDB.fallbackInstances.set(userId, fallback);
+    }
+
+    LocalDB.instance = fallback;
+    LocalDB.currentUserId = userId;
+
+    updateLocalDBRuntimeStatus({
+      mode: 'fallback',
+      userId,
+      dbName: fallback.name,
+      fallbackReason: safeStringifyError(error),
+      fallbackReasonCode: classifyFallbackReasonCode(error),
+      resetFailedReason: getStoredLocalDBResetFailureReason(),
+    });
+
+    warnOncePerSession(
+      'localdb:fallback-mode',
+      `[LocalDB] Running in fallback mode (non-persistent). Recovery guide: ${LOCALDB_RECOVERY_GUIDE_URL}`
+    );
+
+    return fallback;
+  }
+
+  private static async openPersistentDbWithRetry(db: LocalDB): Promise<void> {
+    let attempt = 0;
+    const maxAttempts = 2;
+    let lastError: unknown = null;
+
+    while (attempt < maxAttempts) {
+      try {
+        await db.open();
+        return;
+      } catch (error) {
+        lastError = error;
+        const fatalBackingStore = isBackingStoreOpenError(error);
+        if (fatalBackingStore || attempt >= maxAttempts - 1) break;
+        await new Promise((resolve) => setTimeout(resolve, 150 * (attempt + 1)));
+      }
+      attempt += 1;
+    }
+
+    throw lastError;
+  }
+
+  static async getInstance(userId?: string): Promise<LocalDBInstance> {
+    const nextUserId = userId || 'anonymous';
+
+    if (LocalDB.resettingPromise) {
+      await LocalDB.resettingPromise.catch(() => {
+        // reset failure is handled in resetForLogout()
+      });
+    }
+
+    if (LocalDB.instance && LocalDB.currentUserId === nextUserId) {
       return LocalDB.instance;
-    } catch (error) {
-      console.error('[LocalDB] getInstance failed:', error);
-      // エラー時は状態をリセット
+    }
+
+    if (LocalDB.openingPromise && LocalDB.openingUserId === nextUserId) {
+      return await LocalDB.openingPromise;
+    }
+
+    if (LocalDB.openingPromise && LocalDB.openingUserId !== nextUserId) {
+      await LocalDB.openingPromise.catch(() => {
+        // previous open failure is handled below
+      });
+      if (LocalDB.instance && LocalDB.currentUserId === nextUserId) {
+        return LocalDB.instance;
+      }
+    }
+
+    const openPromise = (async (): Promise<LocalDBInstance> => {
+      if (LocalDB.instance && LocalDB.currentUserId !== nextUserId) {
+        try {
+          if (LocalDB.instance.isOpen()) {
+            LocalDB.instance.close();
+          }
+        } catch (closeError) {
+          warnOncePerSession('localdb:switch-close-failed', '[LocalDB] Failed to close previous instance while switching user.', closeError);
+        } finally {
+          LocalDB.instance = null;
+          LocalDB.currentUserId = null;
+        }
+      }
+
+      if (LocalDB.persistentOpenDisabled) {
+        return LocalDB.activateFallback(nextUserId, new Error('Persistent IndexedDB is disabled in this session.'));
+      }
+
+      const persistentDb = LocalDB.internalCreate(nextUserId);
+
+      try {
+        await LocalDB.openPersistentDbWithRetry(persistentDb);
+        if (persistentDb.isOpen()) {
+          await persistentDb.normalizeDocumentBlobUrlsForSession();
+        }
+        LocalDB.instance = persistentDb;
+        LocalDB.currentUserId = nextUserId;
+        LocalDB.persistentOpenDisabled = false;
+
+        updateLocalDBRuntimeStatus({
+          mode: 'persistent',
+          userId: nextUserId,
+          dbName: persistentDb.name,
+          fallbackReason: null,
+          fallbackReasonCode: 'none',
+          resetFailedReason: getStoredLocalDBResetFailureReason(),
+        });
+
+        return persistentDb;
+      } catch (error) {
+        try {
+          if (persistentDb.isOpen()) {
+            persistentDb.close();
+          }
+        } catch {
+          // ignore close failures
+        }
+
+        const isFatal = isBackingStoreOpenError(error);
+        if (isFatal) {
+          LocalDB.bumpGenerationForUser(nextUserId);
+          markLocalDBGenerationBumped();
+          saveLocalDBResetFailureReason(
+            `IndexedDB backing store open failed: ${safeStringifyError(error)}`
+          );
+          warnOncePerSession(
+            'localdb:backing-store-open-error',
+            `[LocalDB] Fatal IndexedDB backing store error detected. Persistent mode disabled for this session. Recovery guide: ${LOCALDB_RECOVERY_GUIDE_URL}`,
+            error
+          );
+        } else {
+          warnOncePerSession(
+            'localdb:open-failed',
+            '[LocalDB] IndexedDB open failed. Falling back to in-memory mode for this session.',
+            error
+          );
+        }
+
+        LocalDB.persistentOpenDisabled = true;
+        return LocalDB.activateFallback(nextUserId, error);
+      }
+    })();
+
+    LocalDB.openingPromise = openPromise;
+    LocalDB.openingUserId = nextUserId;
+
+    try {
+      return await openPromise;
+    } finally {
+      if (LocalDB.openingPromise === openPromise) {
+        LocalDB.openingPromise = null;
+        LocalDB.openingUserId = null;
+      }
+    }
+  }
+
+  static async resetForLogout(userId?: string): Promise<void> {
+    if (LocalDB.resettingPromise) {
+      return LocalDB.resettingPromise;
+    }
+
+    const targetUserId = userId || LocalDB.currentUserId || 'anonymous';
+
+    LocalDB.resettingPromise = (async () => {
+      let resetFailureReason: string | null = null;
+
+      if (LocalDB.openingPromise) {
+        await LocalDB.openingPromise.catch(() => {
+          // best-effort reset continues
+        });
+      }
+
+      const activeInstance = LocalDB.instance;
+
+      if (activeInstance) {
+        try {
+          await activeInstance.clearAllData();
+        } catch (error) {
+          resetFailureReason = `clearAllData failed: ${safeStringifyError(error)}`;
+        }
+
+        try {
+          if (activeInstance.isOpen()) {
+            activeInstance.close();
+          }
+        } catch (error) {
+          if (!resetFailureReason) {
+            resetFailureReason = `close failed: ${safeStringifyError(error)}`;
+          }
+        }
+
+        try {
+          if (activeInstance instanceof LocalDB) {
+            await Dexie.delete(activeInstance.name);
+          } else {
+            await activeInstance.delete();
+          }
+        } catch (error) {
+          if (!resetFailureReason) {
+            resetFailureReason = `delete failed: ${safeStringifyError(error)}`;
+          }
+        }
+      }
+
+      const generationCleanupFailure = await LocalDB.deleteUserPersistentDatabases(targetUserId);
+      if (!resetFailureReason && generationCleanupFailure) {
+        resetFailureReason = generationCleanupFailure;
+      }
+
       LocalDB.instance = null;
       LocalDB.currentUserId = null;
-      throw error;
+      cachedInstance = null;
+      LocalDB.fallbackInstances.delete(targetUserId);
+      LocalDB.persistentOpenDisabled = false;
+
+      if (resetFailureReason) {
+        saveLocalDBResetFailureReason(resetFailureReason);
+        warnOncePerSession(
+          'localdb:logout-reset-failed',
+          `[LocalDB] Logout reset failed (best-effort): ${resetFailureReason}`
+        );
+      } else {
+        saveLocalDBResetFailureReason(null);
+      }
+
+      updateLocalDBRuntimeStatus({
+        mode: 'persistent',
+        userId: null,
+        dbName: null,
+        fallbackReason: null,
+        fallbackReasonCode: 'none',
+      });
+    })();
+
+    try {
+      await LocalDB.resettingPromise;
     } finally {
-      LocalDB.isInitializing = false;
+      LocalDB.resettingPromise = null;
     }
   }
 
@@ -1633,8 +2225,12 @@ export class LocalDB extends Dexie {
       } catch (e) {
         console.error('[LocalDB] Error closing instance during clear:', e);
       } finally {
+        if (LocalDB.instance instanceof InMemoryLocalDB && LocalDB.currentUserId) {
+          LocalDB.fallbackInstances.delete(LocalDB.currentUserId);
+        }
         LocalDB.instance = null;
         LocalDB.currentUserId = null;
+        cachedInstance = null;
       }
     }
   }
@@ -1649,13 +2245,13 @@ export class LocalDB extends Dexie {
   }
 }
 
-let cachedInstance: LocalDB | null = null;
+let cachedInstance: LocalDBInstance | null = null;
 
 /**
  * データベースインスタンスを非同期で取得します。
  * (循環参照を避けるため、トップレベルでの呼び出しを禁止しています)
  */
-export async function getLocalDb(userId?: string): Promise<LocalDB> {
+export async function getLocalDb(userId?: string): Promise<LocalDBLike> {
   if (!cachedInstance || (userId && LocalDB.getInstanceUserId() !== userId)) {
     cachedInstance = await LocalDB.getInstance(userId);
   }
@@ -1665,12 +2261,25 @@ export async function getLocalDb(userId?: string): Promise<LocalDB> {
 /**
  * 下位互換性のための同期取得（非推奨：初期化後にのみ使用可能）
  */
-export function getLocalDbSync(): LocalDB {
+export function getLocalDbSync(): LocalDBLike {
   if (!cachedInstance) {
     throw new Error('[LocalDB] Database accessed before async initialization. Use await getLocalDb() first.');
   }
   return cachedInstance;
 }
+
+export async function resetLocalDBForLogout(userId?: string): Promise<void> {
+  await LocalDB.resetForLogout(userId);
+}
+
+export {
+  clearLocalDBResetFailureReason,
+  getLocalDBTelemetrySnapshot,
+  getLocalDBRuntimeStatus,
+  subscribeLocalDBRuntimeStatus,
+  telemetryOncePerSession,
+  LOCALDB_RECOVERY_GUIDE_URL
+};
 
 if (typeof window !== 'undefined') {
   // Allow overwriting to prevent "Cannot set property... which has only a getter" errors

@@ -1,17 +1,21 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FolderTreeWithCards } from './FolderTreeWithCards';
-import { CardEditorPane } from './CardEditorPane';
+import { RightPane } from './RightPane';
 import { ExplorerTabs } from '../explorer/ExplorerTabs';
 import { FavoritesPanel } from '../explorer/FavoritesPanel';
 import { RecentPanel } from '../explorer/RecentPanel';
 import { InboxPanel } from '../explorer/InboxPanel';
 import { cn } from '@/lib/utils';
 import { useFolders } from '@/hooks/useFolders';
+import { useDocuments } from '@/hooks/useDocuments';
 import { Folder, FileText, Bookmark, Clock, Inbox, Filter } from 'lucide-react';
 import type { Card, DocumentItem, SelectedExplorerItem } from '@/types';
 import { useCards } from '@/hooks/useCards';
 import { useExplorerStore } from '@/hooks/useExplorerStore';
 import { X } from 'lucide-react';
+import { createPageUrl } from '@/utils';
+import { useUserSettings } from '@/hooks/useUserSettings';
 
 interface TreeViewLayoutProps {
   folders: any[];
@@ -19,6 +23,8 @@ interface TreeViewLayoutProps {
   documents: DocumentItem[];
   selectedFolderId: string | null;
   selectedItem: SelectedExplorerItem;
+  selectedCardId: string | null;
+  selectedDocumentId: string | null;
   onFolderSelect: (folderId: string | null) => void;
   onItemSelect: (item: SelectedExplorerItem) => void;
   onCardUpdated: () => void;
@@ -28,18 +34,41 @@ const MIN_SIDEBAR_W = 200;
 const MAX_SIDEBAR_W = 600;
 const DEFAULT_SIDEBAR_W = 320;
 
+const toDate = (value: any): Date | null => {
+  if (value === null || value === undefined) return null;
+  if (typeof value?.toDate === 'function') {
+    const d = value.toDate();
+    return d instanceof Date && !isNaN(d.getTime()) ? d : null;
+  }
+  if (value instanceof Date) return isNaN(value.getTime()) ? null : value;
+  if (typeof value === 'number') {
+    const d = new Date(value);
+    return isNaN(d.getTime()) ? null : d;
+  }
+  if (typeof value === 'string') {
+    const d = new Date(value);
+    return isNaN(d.getTime()) ? null : d;
+  }
+  return null;
+};
+
 function TreeViewLayout({
   folders,
   cards,
   documents,
   selectedFolderId,
   selectedItem,
+  selectedCardId,
+  selectedDocumentId,
   onFolderSelect,
   onItemSelect,
   onCardUpdated,
 }: TreeViewLayoutProps) {
+  const navigate = useNavigate();
+  const { settings } = useUserSettings();
   const { createFolder, updateFolder, deleteFolder } = useFolders();
   const { createCard, updateCard, deleteCard, moveCardToFolder, reorderCards } = useCards();
+  const { updateDocument } = useDocuments();
 
   const {
     explorerTab,
@@ -128,6 +157,79 @@ function TreeViewLayout({
     }
     return path.join(' / ');
   }, [folders]);
+
+  const selectedFolder = useMemo(() => {
+    if (!selectedFolderId) return null;
+    return folders.find(f => (f.id ?? (f as any).folderId) === selectedFolderId) || null;
+  }, [folders, selectedFolderId]);
+
+  const selectedDocument = useMemo(() => {
+    if (!selectedDocumentId) return null;
+    return documents.find(d => (d.id || (d as any).documentId) === selectedDocumentId) || null;
+  }, [documents, selectedDocumentId]);
+
+  const folderCards = useMemo(() => {
+    if (!selectedFolderId) return [];
+    return cards.filter((c) => {
+      const fid = c.folderId ?? (c as any).folder_id;
+      if (fid !== selectedFolderId) return false;
+      const isDeleted = c.isDeleted ?? (c as any).is_deleted;
+      return !isDeleted;
+    });
+  }, [cards, selectedFolderId]);
+
+  const folderStats = useMemo(() => {
+    const autoCarryOver = settings?.autoCarryOver ?? true;
+    const today = new Date();
+    const tDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    let dueCount = 0;
+    let unlearnedCount = 0;
+    let lastReviewedAt: Date | null = null;
+
+    for (const card of folderCards) {
+      const isDraft = card.isDraft ?? (card as any).is_draft;
+      if (!isDraft) {
+        const reviewDate = toDate(card.nextReviewDate ?? (card as any).next_review_date);
+        if (reviewDate) {
+          const rDate = new Date(reviewDate.getFullYear(), reviewDate.getMonth(), reviewDate.getDate());
+          if (autoCarryOver ? rDate <= tDate : rDate.getTime() === tDate.getTime()) {
+            dueCount += 1;
+          }
+        }
+      }
+
+      const reviewCount = card.reviewCount ?? (card as any).review_count ?? 0;
+      if (!isDraft && reviewCount === 0) {
+        unlearnedCount += 1;
+      }
+
+      const lastReview = toDate(card.lastReviewAt ?? (card as any).last_review_at);
+      if (lastReview && (!lastReviewedAt || lastReview > lastReviewedAt)) {
+        lastReviewedAt = lastReview;
+      }
+    }
+
+    return {
+      dueCount,
+      unlearnedCount,
+      lastReviewedAt,
+    };
+  }, [folderCards, settings?.autoCarryOver]);
+
+  const handleStartStudy = useCallback(() => {
+    if (!selectedFolderId) return;
+    navigate(createPageUrl(`StudyMode?folderId=${selectedFolderId}`));
+  }, [navigate, selectedFolderId]);
+
+  const handleCreateCardQuick = useCallback(() => {
+    if (!selectedFolderId) return;
+    navigate(createPageUrl(`CardEdit?folderId=${selectedFolderId}`));
+  }, [navigate, selectedFolderId]);
+
+  const handleBulkCreate = useCallback(() => {
+    if (!selectedFolderId) return;
+    navigate(createPageUrl(`FolderView?id=${selectedFolderId}&openCreationMode=1`));
+  }, [navigate, selectedFolderId]);
 
   const recentFolderIds = useMemo(() => {
     return recent.filter((r) => r.type === 'folder').map((r) => r.id).slice(0, 5);
@@ -337,35 +439,42 @@ function TreeViewLayout({
       case 'explorer':
       default:
         return (
-          <FolderTreeWithCards
-            folders={folders}
-            cards={filteredCards}
-            documents={documents}
-            selectedFolderId={selectedFolderId}
-            selectedItem={selectedItem}
-            onFolderSelect={handleFolderSelectWithRecent}
-            onItemSelect={onItemSelect}
-            onCreateFolder={createFolder}
-            onUpdateFolder={updateFolder}
-            onDeleteFolder={deleteFolder}
-            onCreateCard={createCard}
-            onUpdateCard={updateCard}
-            onDeleteCard={deleteCard}
-            moveCardToFolder={moveCardToFolder}
-            reorderCards={reorderCards}
-            favorites={favorites}
-            onAddFavorite={addFavorite}
-            onRemoveFavorite={removeFavorite}
-            isFiltering={isFiltering}
-          />
+          <div className="hidden md:block">
+            <FolderTreeWithCards
+              folders={folders}
+              cards={filteredCards}
+              documents={documents}
+              selectedFolderId={selectedFolderId}
+              selectedItem={selectedItem}
+              onFolderSelect={handleFolderSelectWithRecent}
+              onItemSelect={onItemSelect}
+              onCreateFolder={createFolder}
+              onUpdateFolder={updateFolder}
+              onDeleteFolder={deleteFolder}
+              onCreateCard={createCard}
+              onUpdateCard={updateCard}
+              onDeleteCard={deleteCard}
+              moveCardToFolder={moveCardToFolder}
+              reorderCards={reorderCards}
+              favorites={favorites}
+              onAddFavorite={addFavorite}
+              onRemoveFavorite={removeFavorite}
+              isFiltering={isFiltering}
+            />
+          </div>
         );
     }
   };
 
+  // NOTE:
+  // 100dvh から固定オフセットを引くのは、Folders ページの上部固定領域
+  // （ヘッダカード + 余白 + モバイル/デスクトップ差分）を差し引いて
+  // 作業ペイン全体を 1 つのビューポートに収めるため。
+  // 将来的には上位レイアウトの `h-screen + flex` へ移行し、この calc 依存を減らす。
   return (
     <div
       className={cn(
-        "flex h-[calc(100dvh-288px)] md:h-[calc(100dvh-152px)] items-stretch border border-slate-200 rounded-xl shadow-sm bg-white overflow-hidden relative",
+        "flex min-h-0 h-[calc(100dvh-288px)] md:h-[calc(100dvh-152px)] items-stretch border border-slate-200 rounded-xl shadow-sm bg-white overflow-hidden relative",
         isResizing && "select-none cursor-col-resize"
       )}
     >
@@ -406,10 +515,21 @@ function TreeViewLayout({
         )}
       </div>
 
-      <div className="flex-1 min-w-0 bg-white flex flex-col overflow-hidden">
-        <CardEditorPane 
-          selectedCardId={selectedItem?.type === 'card' ? selectedItem.id : null} 
-          onCardUpdated={onCardUpdated} 
+      <div className="flex-1 min-h-0 min-w-0 bg-white flex flex-col overflow-hidden">
+        <RightPane
+          selectedCardId={selectedCardId}
+          selectedDocument={selectedDocument}
+          selectedFolderId={selectedFolderId}
+          selectedFolderName={selectedFolder?.folderName ?? (selectedFolder as any)?.folder_name ?? 'フォルダ'}
+          folderCards={folderCards}
+          folderStats={folderStats}
+          onCardUpdated={onCardUpdated}
+          onDocumentUpdated={updateDocument}
+          handlers={{
+            onStartStudy: handleStartStudy,
+            onCreateCard: handleCreateCardQuick,
+            onBulkCreate: handleBulkCreate,
+          }}
         />
       </div>
     </div>

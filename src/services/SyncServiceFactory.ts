@@ -6,7 +6,7 @@ import { NetworkMonitor } from './logic/NetworkMonitor';
 import { DiffEngine } from './logic/DiffEngine';
 import { CloudSyncAdapter } from './logic/CloudSyncAdapter';
 import { TelemetryService } from './logic/TelemetryService';
-import { getLocalDb } from './localDB';
+import { getLocalDb, getLocalDBTelemetrySnapshot, telemetryOncePerSession } from './localDB';
 import type { ISyncService } from './interfaces/ISyncService';
 import type { SyncContextSource } from '../types/telemetry';
 
@@ -31,6 +31,16 @@ export class SyncServiceFactory {
       const diffEngine = new DiffEngine();
       const cloudAdapter = new CloudSyncAdapter(userId);
       const telemetry = new TelemetryService();
+      if (telemetryOncePerSession('localdb_runtime')) {
+        const localDbTelemetry = getLocalDBTelemetrySnapshot();
+        telemetry.recordMetric('localdb_runtime', 1, {
+          localdb_mode: localDbTelemetry.localdb_mode,
+          localdb_reason_code: localDbTelemetry.localdb_reason_code,
+          localdb_fallback_reason: localDbTelemetry.localdb_fallback_reason,
+          localdb_generation_bumped: String(localDbTelemetry.localdb_generation_bumped),
+          localdb_reset_failed: String(localDbTelemetry.localdb_reset_failed),
+        });
+      }
 
       SyncServiceFactory.instance = new SyncServiceV2(
         userId,

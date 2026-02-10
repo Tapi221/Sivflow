@@ -1,15 +1,15 @@
 import type { IQueueManager, BatchConstraint, SyncTask } from '../interfaces/ISyncService';
-import { LocalDB } from '../localDB';
+import type { LocalDBLike } from '../localDB';
 
 /**
  * QueueManager: オフライン時の同期タスクを永続化し、順序保証とリトライ制御を行う
  * LocalDBに依存するが、それ以外の副作用はない
  */
 export class QueueManager implements IQueueManager {
-  private localDB: LocalDB;
+  private localDB: LocalDBLike;
   private readonly MAX_RETRY_COUNT = 3;
 
-  constructor(localDB: LocalDB) {
+  constructor(localDB: LocalDBLike) {
     this.localDB = localDB;
   }
 

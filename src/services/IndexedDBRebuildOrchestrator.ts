@@ -65,7 +65,7 @@ export class IndexedDBRebuildOrchestrator {
       LocalDBClass.clearInstance();
 
       // 4. 物理的に削除 (Dexie.delete)
-      const dbName = `FlashcardMasterDB_${userId}`;
+      const dbName = oldDb?.name || (LocalDBClass as any).getDatabaseNameForUser?.(userId) || `FlashcardMasterDB_${userId}`;
       console.log(`[Rebuild] Deleting database: ${dbName}`);
       await (await import('dexie')).default.delete(dbName);
 

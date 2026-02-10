@@ -1,29 +1,17 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { Card } from '@/Components/ui/card';
-import { Badge } from '@/Components/ui/badge';
 import { Button } from '@/Components/ui/button';
 import { Checkbox } from '@/Components/ui/checkbox';
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
-} from '@/Components/ui/context-menu';
+import { CardShell } from './CardShell';
 import {
   HelpCircle,
   Edit,
   Trash2,
-  Image,
   Volume2,
-  FileText,
-  MoreVertical,
-  Plus,
   Bookmark
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getStabilityPhase, normalizeMemoryStability } from '@/utils/reviewUtils';
-import { useTags } from '@/hooks/useTags';
 
 // CardItem renders a Draggable if enabled, or a simple div otherwise
 function CardItem({ card, index, onView, onEdit, onDelete, onToggleUncertainty, onToggleBookmark, isSelected, onSelect, getTagColor, enableDrag, viewMode = 'grid' }) {
@@ -45,28 +33,88 @@ function CardItem({ card, index, onView, onEdit, onDelete, onToggleUncertainty, 
      : [];
 
   const wrapperClass = (isDragging) => cn(
-    "group relative flex bg-white rounded-3xl shadow-sm border border-slate-200 hover:shadow-md transition-all select-none min-w-0 overflow-hidden w-full text-left",
+    "group w-full min-w-0 text-left transition-all select-none",
     viewMode === 'grid' 
-      ? "flex-col items-stretch p-5 h-[240px]" 
+      ? "border border-slate-200 shadow-sm hover:shadow-md"
       : viewMode === 'gallery'
-        ? "flex-col items-stretch p-5 h-auto mb-4 break-inside-avoid"
+        ? "border border-slate-200 shadow-sm hover:shadow-md"
         : viewMode === 'compact'
-            ? "flex-row items-center p-2 h-14 gap-3 text-sm"
-            : viewMode === 'table'
-                ? "flex-row items-center p-0 h-12 gap-0 text-sm border-0 border-b border-slate-100 rounded-none shadow-none hover:bg-slate-50 transition-colors"
-                : viewMode === 'hero'
-                    ? "flex-col items-stretch p-8 h-auto mb-8 shadow-xl bg-gradient-to-br from-white to-slate-50 border-primary-100"
-                    : viewMode === 'magazine'
-                        ? "flex-col items-stretch p-6 h-auto mb-6 border-l-4 border-l-primary-600 bg-white"
-                        : viewMode === 'sticky'
-                            ? "flex-col items-stretch p-4 h-48 w-48 aspect-square bg-amber-50 border-amber-200 shadow-md hover:rotate-0 hover:scale-105"
-                            : viewMode === 'bullet'
-                                ? "flex-row items-center p-1 h-10 gap-2 text-sm border-0 shadow-none hover:bg-slate-50 rounded-lg group/bullet"
-                                : "flex-row items-center p-3 h-auto gap-4",
+          ? "border border-slate-200 shadow-sm hover:shadow-md"
+          : viewMode === 'table'
+            ? "border-0 border-b border-slate-100 rounded-none shadow-none hover:bg-slate-50 transition-colors"
+            : viewMode === 'hero'
+              ? "shadow-xl bg-gradient-to-br from-white to-slate-50 border-primary-100"
+              : viewMode === 'magazine'
+                ? "border-l-4 border-l-primary-600 bg-white"
+                : viewMode === 'sticky'
+                  ? "bg-amber-50 border-amber-200 shadow-md hover:rotate-0 hover:scale-105 w-48 max-w-none"
+                  : viewMode === 'bullet'
+                    ? "border-0 shadow-none hover:bg-slate-50 rounded-lg group/bullet"
+                    : "border border-slate-200 shadow-sm hover:shadow-md",
     isSelected && "ring-2 ring-primary-600",
     (card.isDraft || card.is_draft) && "border-dashed border-slate-300",
     isDragging && "z-50 shadow-xl rotate-2"
   );
+
+  const contentClass = cn(
+    "flex-1 min-w-0",
+    viewMode === 'grid' 
+      ? "flex flex-col items-stretch p-5 h-[240px]" 
+      : viewMode === 'gallery'
+        ? "flex flex-col items-stretch p-5 h-auto mb-4 break-inside-avoid"
+        : viewMode === 'compact'
+          ? "flex flex-row items-center p-2 h-14 gap-3 text-sm"
+          : viewMode === 'table'
+            ? "flex flex-row items-center p-0 h-12 gap-0 text-sm"
+            : viewMode === 'hero'
+              ? "flex flex-col items-stretch p-8 h-auto mb-8"
+              : viewMode === 'magazine'
+                ? "flex flex-col items-stretch p-6 h-auto mb-6"
+                : viewMode === 'sticky'
+                  ? "flex flex-col items-stretch p-4 h-48 w-48 aspect-square"
+                  : viewMode === 'bullet'
+                    ? "flex flex-row items-center p-1 h-10 gap-2 text-sm"
+                    : "flex flex-row items-center p-3 h-auto gap-4"
+  );
+
+  const showTitleOutside = Boolean(card.title) && (
+    viewMode === 'grid' ||
+    viewMode === 'gallery' ||
+    viewMode === 'hero' ||
+    viewMode === 'magazine'
+  );
+
+  const headlineText = showTitleOutside
+    ? (card.questionText || card.question_text || '質問テキストがありません')
+    : (card.title || card.questionText || card.question_text || '質問テキストがありません');
+
+  const actionItems: React.ReactNode[] = [];
+  if (onEdit) {
+    actionItems.push(
+      <Button
+        key="edit"
+        variant="ghost"
+        size="icon"
+        className="bg-white/90 backdrop-blur shadow-sm hover:bg-slate-100 rounded-full h-8 w-8"
+        onClick={(e) => { e.stopPropagation(); onEdit(card); }}
+      >
+        <Edit className="w-3.5 h-3.5 text-slate-600" />
+      </Button>
+    );
+  }
+  if (onDelete) {
+    actionItems.push(
+      <Button
+        key="delete"
+        variant="ghost"
+        size="icon"
+        className="bg-white/90 backdrop-blur shadow-sm hover:bg-red-50 hover:text-red-500 rounded-full h-8 w-8"
+        onClick={(e) => { e.stopPropagation(); onDelete(card); }}
+      >
+        <Trash2 className="w-3.5 h-3.5" />
+      </Button>
+    );
+  }
 
   const renderCardContent = (ref: any = null, draggableProps: any = {}, dragHandleProps: any = {}, style: any = {}, isDragging: boolean = false) => (
     <div
@@ -75,14 +123,24 @@ function CardItem({ card, index, onView, onEdit, onDelete, onToggleUncertainty, 
       style={{ ...style, ...draggableProps.style }}
       {...draggableProps}
       {...dragHandleProps}
-      className={wrapperClass(isDragging)}
+      className={cn("w-full min-w-0", showTitleOutside && "flex flex-col gap-2")}
       onClick={() => onView(card)}
     >
-      {/* Top Row / Left Col */}
-      <div className={cn(
-          "flex shrink-0 transition-all",
-          (viewMode === 'grid' || viewMode === 'gallery' || viewMode === 'hero' || viewMode === 'magazine' || viewMode === 'sticky') ? "justify-between items-start mb-4 w-full" : "items-center gap-2 w-auto mr-0 mb-0"
-      )}>
+      {showTitleOutside && (
+        <div className="px-1 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+          {card.title}
+        </div>
+      )}
+      <CardShell
+        className={wrapperClass(isDragging)}
+        actions={actionItems}
+      >
+        <div className={contentClass}>
+        {/* Top Row / Left Col */}
+        <div className={cn(
+            "flex shrink-0 transition-all",
+            (viewMode === 'grid' || viewMode === 'gallery' || viewMode === 'hero' || viewMode === 'magazine' || viewMode === 'sticky') ? "justify-between items-start mb-4 w-full" : "items-center gap-2 w-auto mr-0 mb-0"
+        )}>
         <div className="flex items-center gap-2">
             {viewMode === 'bullet' && (
                 <div className="w-1.5 h-1.5 rounded-full bg-slate-400 group-hover/bullet:bg-primary-600 outline outline-offset-2 outline-transparent group-hover/bullet:outline-primary-200" />
@@ -158,11 +216,11 @@ function CardItem({ card, index, onView, onEdit, onDelete, onToggleUncertainty, 
         </div>
       </div>
 
-      <div className={cn(
-          "flex-1 min-w-0",
-          (viewMode === 'list' || viewMode === 'compact' || viewMode === 'timeline' || viewMode === 'table') && "flex items-center gap-4",
-          viewMode === 'table' && "grid grid-cols-[1.5fr_2fr_100px_100px] items-center"
-      )}>
+        <div className={cn(
+            "flex-1 min-w-0",
+            (viewMode === 'list' || viewMode === 'compact' || viewMode === 'timeline' || viewMode === 'table') && "flex items-center gap-4",
+            viewMode === 'table' && "grid grid-cols-[1.5fr_2fr_100px_100px] items-center"
+        )}>
         <div className="min-w-0">
              <h3 className={cn(
                  "font-bold text-slate-800 leading-tight break-anywhere",
@@ -171,9 +229,9 @@ function CardItem({ card, index, onView, onEdit, onDelete, onToggleUncertainty, 
                  (viewMode === 'compact' || viewMode === 'table' || viewMode === 'bullet') ? "text-sm mb-0 truncate" : 
                  "text-base mb-0 truncate"
              )}>
-                {card.title || card.questionText || card.question_text}
+                {headlineText}
              </h3>
-             {(viewMode === 'grid' || viewMode === 'gallery' || viewMode === 'magazine' || viewMode === 'hero') && (
+             {!showTitleOutside && (viewMode === 'grid' || viewMode === 'gallery' || viewMode === 'magazine' || viewMode === 'hero') && (
                  <div className={cn(
                      "text-slate-500 leading-relaxed break-anywhere",
                      viewMode === 'hero' ? "text-xl mb-6 opacity-70" : "text-sm line-clamp-4",
@@ -231,36 +289,8 @@ function CardItem({ card, index, onView, onEdit, onDelete, onToggleUncertainty, 
             </>
         )}
       </div>
-      
-        <div className={cn(
-            "flex gap-1 shrink-0 transition-opacity",
-            (viewMode === 'grid' || viewMode === 'gallery' || viewMode === 'hero' || viewMode === 'magazine' || viewMode === 'sticky') ? "absolute top-4 right-4 opacity-0 group-hover:opacity-100" :
-            viewMode === 'table' ? "opacity-100 h-full items-center px-4 border-l border-slate-100" :
-            "opacity-0 group-hover:opacity-100 static"
-        )}>
-            <Button
-                variant="ghost" 
-                size="icon" 
-                className={cn(
-                    "bg-white/90 backdrop-blur shadow-sm hover:bg-slate-100 rounded-full",
-                    (viewMode === 'table' || viewMode === 'bullet') ? "h-7 w-7" : "h-8 w-8"
-                )}
-                onClick={(e) => { e.stopPropagation(); onEdit(card); }}
-            >
-                <Edit className={cn("text-slate-600", (viewMode === 'table' || viewMode === 'bullet') ? "w-3 h-3" : "w-3.5 h-3.5")} />
-            </Button>
-            <Button
-                variant="ghost"
-                size="icon"
-                className={cn(
-                    "bg-white/90 backdrop-blur shadow-sm hover:bg-red-50 hover:text-red-500 rounded-full",
-                    (viewMode === 'table' || viewMode === 'bullet') ? "h-7 w-7" : "h-8 w-8"
-                )}
-                onClick={(e) => { e.stopPropagation(); onDelete(card); }}
-            >
-                <Trash2 className={cn((viewMode === 'table' || viewMode === 'bullet') ? "w-3 h-3" : "w-3.5 h-3.5")} />
-            </Button>
-        </div>
+      </div>
+    </CardShell>
     </div>
   );
 

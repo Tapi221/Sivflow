@@ -1,5 +1,5 @@
 import { firestoreDb } from './firebase';
-import { getLocalDb, type LocalDB } from './localDB';
+import type { LocalDBLike } from './localDB';
 import type { ICloudProvider } from './cloudProvider';
 import { FirebaseCloudProvider } from './cloudProvider';
 import { ImageSyncService } from './imageSyncService';
@@ -37,7 +37,7 @@ const normalizeFolderForSync = (folder: any) => {
  */
 export class SyncService {
   private userId: string;
-  private localDB: LocalDB;
+  private localDB: LocalDBLike;
   private cloudProvider: ICloudProvider;
   private deviceId: string;
   private imageSyncService: ImageSyncService;
@@ -45,7 +45,7 @@ export class SyncService {
   // Phase 1: Sync Isolation
   public static isSyncing: boolean = false;
 
-  constructor(userId: string, localDB: LocalDB, cloudProvider?: ICloudProvider) {
+  constructor(userId: string, localDB: LocalDBLike, cloudProvider?: ICloudProvider) {
     if (!userId) {
       throw new Error('SyncService requires a user ID.');
     }

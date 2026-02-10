@@ -84,6 +84,7 @@ export default function FolderView() {
   const { currentUser } = useAuth();
   
   const folderId = searchParams.get('id');
+  const openCreationModeParam = searchParams.get('openCreationMode');
 
   useUserSettings();
   const [activeTab, setActiveTab] = useState('cards');
@@ -93,6 +94,7 @@ export default function FolderView() {
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [isCreateCardDialogOpen, setIsCreateCardDialogOpen] = useState(false);
   const [isCreationModeDialogOpen, setIsCreationModeDialogOpen] = useState(false);
+  const [hasOpenedCreationModeFromParam, setHasOpenedCreationModeFromParam] = useState(false);
   
   // Filter state: 'all' | 'crowned' | 'uncrowned'
   const [filterMode] = useState('all');
@@ -128,6 +130,14 @@ export default function FolderView() {
   useEffect(() => {
     setNotePdfs(folder?.notePdfs ?? folder?.note_pdfs ?? []);
   }, [folder]);
+
+  useEffect(() => {
+    if (hasOpenedCreationModeFromParam) return;
+    if (openCreationModeParam === '1') {
+      setIsCreationModeDialogOpen(true);
+      setHasOpenedCreationModeFromParam(true);
+    }
+  }, [openCreationModeParam, hasOpenedCreationModeFromParam]);
 
   const lastAccessUpdatedRef = useRef(null);
   

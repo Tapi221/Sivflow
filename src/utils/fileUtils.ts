@@ -4,7 +4,7 @@ import type { UploadMetadata } from '../types';
 const ALLOWED_EXTENSIONS: Record<string, string[]> = {
   image: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'heif', 'avif', 'svg'],
   audio: ['mp3', 'wav', 'ogg', 'm4a', 'aac', 'webm'],
-  document: ['pdf', 'txt', 'md'],
+  document: ['pdf', 'pptx', 'txt', 'md'],
 };
 
 /**

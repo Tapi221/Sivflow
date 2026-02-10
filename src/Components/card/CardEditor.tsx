@@ -4,9 +4,7 @@ import { Button } from '@/Components/ui/button';
 import { Input } from '@/Components/ui/input';
 import { Label } from '@/Components/ui/label';
 import AutoResizeTextarea from '@/Components/ui/AutoResizeTextarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/card';
 import { Switch } from '@/Components/ui/switch';
-import { Badge } from '@/Components/ui/badge';
 import {
   X,
   HelpCircle,
@@ -63,6 +61,8 @@ interface CardEditorProps {
   showSaveButton?: boolean;
   hideTitle?: boolean;
   mode?: 'default' | 'four_choice' | 'pair';
+  customDraftKey?: string;
+  storageType?: 'local' | 'session' | 'none';
 }
 
 export default function CardEditor({ 
@@ -80,6 +80,8 @@ export default function CardEditor({
   showSaveButton = true,
   hideTitle = false,
   mode = 'default',
+  customDraftKey,
+  storageType = 'local',
 }: CardEditorProps) {
   const { settings } = useUserSettings();
   const [showPreview, setShowPreview] = useState(settings?.defaultPreviewEnabled ?? false);
@@ -126,12 +128,15 @@ export default function CardEditor({
   }, [autoFocus]);
 
   // Draft storage key
-  const draftKey = card ? `card-editor-draft-${card.id}` : `card-editor-draft-new`;
+  const draftKey = customDraftKey ?? (card ? `card-editor-draft-${card.id}` : `card-editor-draft-new`);
+  const storage =
+    storageType === 'session' ? sessionStorage : storageType === 'local' ? localStorage : null;
   const [isRestored, setIsRestored] = useState(false);
 
   useEffect(() => {
     // Attempt to restore draft on mount
-    const savedDraft = localStorage.getItem(draftKey);
+    if (!storage) return;
+    const savedDraft = storage.getItem(draftKey);
     if (savedDraft) {
       try {
         const parsed = JSON.parse(savedDraft);
@@ -198,7 +203,7 @@ export default function CardEditor({
             }));
         }
     }
-  }, [card, folderId, draftKey, defaultToTextBlock, mode]);
+  }, [card, folderId, draftKey, defaultToTextBlock, mode, storage]);
 
   // ペアモード用の追加・削除ハンドラ
   const handleAddPairTextBlocks = () => {
@@ -215,6 +220,7 @@ export default function CardEditor({
 
   const handleDeletePair = (index: number) => {
     if (mode !== 'pair') return;
+    if (index < 2) return;
     setFormData(prev => {
       const newQB = prev.questionBlocks.filter((_, i) => i !== index).map((b, i) => ({ ...b, orderIndex: i }));
       const newAB = prev.answerBlocks.filter((_, i) => i !== index).map((b, i) => ({ ...b, orderIndex: i }));
@@ -224,20 +230,86 @@ export default function CardEditor({
 
   // Auto-save logic
   useEffect(() => {
+    if (!storage) return;
     if (settings?.autoSaveEnabled === false) return;
 
     const timeoutId = setTimeout(() => {
       // Don't save if it's identical to the initial card state (very simplified check)
       // or if everything is empty
-      localStorage.setItem(draftKey, JSON.stringify(formData));
+      storage.setItem(draftKey, JSON.stringify(formData));
     }, 1000);
 
     return () => clearTimeout(timeoutId);
-  }, [formData, draftKey]);
+  }, [formData, draftKey, storage, settings?.autoSaveEnabled]);
+
+  // 追加：ペアモードの左右ブロック数を強制的に揃える（最低2ペア）
+  const normalizePairBlocks = (q: any, a: any) => {
+    const qArr = Array.isArray(q) ? q : [];
+    const aArr = Array.isArray(a) ? a : [];
+    const target = Math.max(qArr.length, aArr.length, 2);
+
+    const cloneEmpty = (tmpl: any) => {
+      const next: any = { ...(tmpl ?? {}) };
+
+      // id は必ず新規にする
+      next.id = typeof nanoid === 'function' ? nanoid() : (crypto as any).randomUUID();
+
+      // よくあるテキストキーを空にする（あなたの実装差異を雑に吸収）
+      if ('text' in next) next.text = '';
+      if ('content' in next) next.content = '';
+      if ('value' in next) next.value = '';
+
+      // type が無い実装でも破綻しないように保険
+      if (!('type' in next)) next.type = 'text';
+
+      return next;
+    };
+
+    const pad = (arr: any[]) => {
+      const out = [...arr];
+      while (out.length < target) out.push(cloneEmpty(out[0]));
+      return out;
+    };
+
+    return {
+      questionBlocks: pad(qArr),
+      answerBlocks: pad(aArr),
+    };
+  };
+
+  // 追加：ペアモード時に、左右のブロック数を自動で揃える
+  useEffect(() => {
+    if (mode !== 'pair') return;
+
+    setFormData((prev: any) => {
+      const normalized = normalizePairBlocks(prev?.questionBlocks, prev?.answerBlocks);
+
+      const same =
+        (prev?.questionBlocks?.length ?? 0) === normalized.questionBlocks.length &&
+        (prev?.answerBlocks?.length ?? 0) === normalized.answerBlocks.length;
+
+      return same
+        ? prev
+        : {
+            ...prev,
+            questionBlocks: normalized.questionBlocks,
+            answerBlocks: normalized.answerBlocks,
+          };
+    });
+  }, [mode]);
 
   const clearDraft = () => {
-    localStorage.removeItem(draftKey);
+    if (!storage) return;
+    storage.removeItem(draftKey);
   };
+
+  useEffect(() => {
+    if (card) return;
+    if (!storage) return;
+    return () => {
+      storage.removeItem(draftKey);
+    };
+  }, [card, draftKey, storage]);
 
   const handleChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -252,6 +324,8 @@ export default function CardEditor({
         if (b.type === 'code') return b.code?.code;
         if (b.type === 'image') return b.images?.length > 0;
         if (b.type === 'audio') return b.audios?.length > 0;
+        if (b.type === 'math') return b.math?.latex?.trim();
+        if (b.type === 'reference') return b.references?.some((r: any) => (r.url?.trim() || r.name?.trim()));
         return false;
       });
     };
@@ -449,12 +523,14 @@ export default function CardEditor({
       </div>
     
       {/* 問題と解答セクション */}
+      <div className="-mt-2 md:-mt-3">
       <DragDropContext onDragEnd={(result) => {
         if (!result.destination) return;
         
         const { source, destination } = result;
         const sourceId = source.droppableId;
         const destId = destination.droppableId;
+        if (source.index === destination.index) return;
         
         const sourceList = sourceId === 'question-blocks' ? [...formData.questionBlocks] : [...formData.answerBlocks];
         const destList = destId === 'question-blocks' ? [...formData.questionBlocks] : [...formData.answerBlocks];
@@ -498,7 +574,6 @@ export default function CardEditor({
                 <BlockEditor 
                   blocks={formData.questionBlocks} 
                   onChange={(blocks) => {
-                    if (isPairMode) return; 
                     handleChange('questionBlocks', blocks)
                   }}
                   prefix="question"
@@ -508,8 +583,10 @@ export default function CardEditor({
                   accentColor={settings?.accentColor}
                   duplicateToOpposite={settings?.duplicateToOpposite}
                   customPlaceholders={pairQuestionPlaceholders}
-                  hideToolbar={isPairMode}
+                  hideToolbar={false}
+                  hiddenBlockTypes={isPairMode ? ['text', 'math', 'code'] : []}
                   onDelete={isPairMode ? handleDeletePair : undefined}
+                  minDeletableIndex={isPairMode ? 2 : 0}
                   onCrossDuplicate={(block) => {
                       if (isPairMode) return;
                       // Add to Answer side
@@ -520,7 +597,6 @@ export default function CardEditor({
                 <BlockEditor 
                   blocks={formData.answerBlocks} 
                   onChange={(blocks) => {
-                    if (isPairMode) return; 
                     handleChange('answerBlocks', blocks)
                   }}
                   prefix="answer"
@@ -530,8 +606,10 @@ export default function CardEditor({
                   accentColor={settings?.accentColor}
                   duplicateToOpposite={settings?.duplicateToOpposite}
                   customPlaceholders={pairAnswerPlaceholders}
-                  hideToolbar={isPairMode}
+                  hideToolbar={false}
+                  hiddenBlockTypes={isPairMode ? ['text', 'math', 'code'] : []}
                   onDelete={isPairMode ? handleDeletePair : undefined}
+                  minDeletableIndex={isPairMode ? 2 : 0}
                   onCrossDuplicate={(block) => {
                       if (isPairMode) return;
                       // Add to Question side
@@ -542,7 +620,7 @@ export default function CardEditor({
               </div>
 
               {isPairMode && (
-                <div className="flex justify-center py-6">
+                <div className="flex justify-center py-1 md:py-2">
                   <Button
                     variant="outline"
                     onClick={handleAddPairTextBlocks}
@@ -557,23 +635,25 @@ export default function CardEditor({
           );
         })()}
       </DragDropContext>
+      </div>
 
       {/* リアルカードプレビューセクション */}
-          {showPreview && (
-        <div className="pt-10 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-           <div className="flex items-center gap-3 px-4">
-              <div className="p-2 rounded-xl bg-primary-600/10">
-                <Search className="w-5 h-5 text-primary-600" />
-              </div>
-              <span className="text-xs font-bold text-primary-600 uppercase tracking-widest">リアルカードプレビュー</span>
-           </div>
-           
-           <div className="bg-slate-50/50 p-4 md:p-8 rounded-3xl md:rounded-[50px] border border-slate-100/50">
+      {showPreview && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-white/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+          onClick={() => setShowPreview(false)}
+        >
+          <div
+            className="w-full max-w-5xl cursor-default"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="bg-slate-50/50 p-3 md:p-6 rounded-3xl md:rounded-[50px] border border-slate-100/50 shadow-2xl">
               <Flashcard 
                 card={formData} 
                 previewMode={true}
               />
-           </div>
+            </div>
+          </div>
         </div>
       )}
       

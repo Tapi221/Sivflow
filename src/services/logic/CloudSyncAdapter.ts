@@ -13,6 +13,28 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
     this.userId = userId;
   }
 
+  private sanitizeForCloud(type: string, data: any): any {
+    if (type !== 'document' || !data || typeof data !== 'object') return data;
+    const next = { ...data };
+    delete next.localFileId;
+    delete next.blobUrl;
+    if (typeof next.localUrl === 'string' && next.localUrl.startsWith('blob:')) {
+      next.localUrl = null;
+    }
+    return next;
+  }
+
+  private sanitizeFromCloud(type: string, data: any): any {
+    if (type !== 'document' || !data || typeof data !== 'object') return data;
+    const next = { ...data };
+    delete next.localFileId;
+    delete next.blobUrl;
+    if (typeof next.localUrl === 'string' && next.localUrl.startsWith('blob:')) {
+      next.localUrl = null;
+    }
+    return next;
+  }
+
   /**
    * 指定時刻以降の差分を取得
    */
@@ -38,7 +60,7 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
         changes.push({
           type: 'card',
           id: doc.id,
-          data: doc.data()
+          data: this.sanitizeFromCloud('card', doc.data())
         });
       });
 
@@ -52,7 +74,7 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
         changes.push({
           type: 'folder',
           id: doc.id,
-          data: doc.data()
+          data: this.sanitizeFromCloud('folder', doc.data())
         });
       });
       
@@ -66,7 +88,7 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
         changes.push({
           type: 'cardRelation',
           id: doc.id,
-          data: doc.data()
+          data: this.sanitizeFromCloud('cardRelation', doc.data())
         });
       });
 
@@ -80,7 +102,7 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
         changes.push({
           type: 'projectMap',
           id: doc.id,
-          data: doc.data()
+          data: this.sanitizeFromCloud('projectMap', doc.data())
         });
       });
 
@@ -114,9 +136,10 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
         const { type, id, data } = change;
         console.log(`   - Adding to batch: ${type}/${id}`);
         const docRef = doc(firestoreDb, `users/${this.userId}/${type}s`, id);
+        const sanitized = this.sanitizeForCloud(type, data);
         
         batch.set(docRef, {
-          ...data,
+          ...sanitized,
           updatedAt: serverTimestamp()
         }, { merge: true });
         

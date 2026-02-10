@@ -18,7 +18,6 @@ interface ColumnNavigatorProps {
   onQuickCreateFolder?: (name: string, parentId: string | null) => Promise<void>;
   onEdit: (folder: Folder) => void;
   onDelete: (folder: Folder) => void;
-  onHide: (folder: Folder) => void;
   onToggleSilent: (folder: Folder) => void;
   onReorder?: (folders: Folder[], parentId: string | null, shouldUpdateUI: boolean) => void;
   isEditMode?: boolean;
@@ -39,7 +38,6 @@ export default function ColumnNavigator({
   onQuickCreateFolder,
   onEdit,
   onDelete,
-  onHide,
   onToggleSilent,
   onReorder,
   isEditMode,
@@ -510,7 +508,6 @@ export default function ColumnNavigator({
                 onQuickCreateFolder={onQuickCreateFolder}
                 onEdit={onEdit}
                 onDelete={onDelete}
-                onHide={onHide}
                 onToggleSilent={onToggleSilent}
                 onSelect={onSelect} // フォルダを開くボタン用
                 onCardClick={onCardSelect}

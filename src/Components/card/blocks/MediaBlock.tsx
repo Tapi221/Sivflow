@@ -15,6 +15,8 @@ interface MediaBlockProps {
   initialFile?: File;
   onConsumeInitialFile?: () => void;
   onFilesExcess?: (files: File[]) => void;
+  isActive?: boolean;
+  showDelete?: boolean;
 }
 
 export const MediaBlock = ({ 
@@ -28,7 +30,9 @@ export const MediaBlock = ({
   accentColor,
   initialFile,
   onConsumeInitialFile,
-  onFilesExcess
+  onFilesExcess,
+  isActive,
+  showDelete
 }: MediaBlockProps) => {
   return (
     <BlockWrapper 
@@ -39,8 +43,10 @@ export const MediaBlock = ({
       label={type === 'image' ? 'Images' : 'Audio'}
       icon={type === 'image' ? ImageIcon : Volume2}
       accentColor={accentColor}
+      isActive={isActive}
       showDuplicate={type !== 'audio'}
       showDragHandle={type !== 'audio'}
+      showDelete={showDelete}
     >
       <MediaUploader
         type={type}

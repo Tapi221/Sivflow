@@ -13,9 +13,11 @@ interface TextBlockProps {
   accentColor?: string;
   autoFocus?: boolean;
   placeholder?: string;
+  isActive?: boolean;
+  showDelete?: boolean;
 }
 
-export const TextBlock = ({ content, onChange, onDelete, onDuplicate, dragHandleProps, dragHandleClassName, accentColor, autoFocus, placeholder }: TextBlockProps) => {
+export const TextBlock = ({ content, onChange, onDelete, onDuplicate, dragHandleProps, dragHandleClassName, accentColor, autoFocus, placeholder, isActive, showDelete }: TextBlockProps) => {
   return (
     <BlockWrapper 
       onDelete={onDelete} 
@@ -25,6 +27,8 @@ export const TextBlock = ({ content, onChange, onDelete, onDuplicate, dragHandle
       label="Text"
       icon={TypeIcon}
       accentColor={accentColor}
+      isActive={isActive}
+      showDelete={showDelete}
     >
       <AutoResizeTextarea
         value={content}

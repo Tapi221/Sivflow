@@ -58,7 +58,7 @@ const DUMMY_BUCKETS = [
 
 const EMPTY_STATE_TEXT = {
     title: "学習を始めると、ここに成長が現れます",
-    description: "単語カードを復習することで、\n記憶の安定度が分布として可視化されます。",
+    description: "manifolmiaを復習することで、\n記憶の安定度が分布として可視化されます。",
     note: "続けるほど、右側（安定・長期保持）に移動していきます。"
 };
 
@@ -184,7 +184,6 @@ export default function Statistics() {
       if (c.isDraft || c.isDeleted) return false;
       const folderId = c.folderId || c.folder_id;
       const folder = folders.find(f => (f.id === folderId || f.folderId === folderId));
-      if (folder?.isHidden || folder?.is_hidden) return false;
       return true;
     });
   }, [allCards, folders]);

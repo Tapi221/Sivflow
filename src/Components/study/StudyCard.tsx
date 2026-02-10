@@ -107,8 +107,12 @@ export default function StudyCard({
            isFlipped={studyPhase === 'answer'}
            onFlip={handleFlip}
            extraHeaderLeft={
-              <Button size="icon" variant="ghost" className="rounded-full w-12 h-12 bg-slate-50 text-primary-600 hover:bg-primary-50 hover:text-primary-700">
-                  <Volume2 className="w-5 h-5" />
+              <Button
+                size="icon"
+                variant="ghost"
+                className="rounded-full w-9 h-9 min-w-0 min-h-0 bg-slate-50 text-primary-600 hover:bg-primary-50 hover:text-primary-700"
+              >
+                  <Volume2 className="w-4 h-4" />
               </Button>
            }
            extraHeaderRight={

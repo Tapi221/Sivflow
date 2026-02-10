@@ -32,6 +32,7 @@ import { AccountLockedScreen } from './Components/security/AccountLockedScreen';
 import { SyncServiceFactory } from './services/SyncServiceFactory';
 // 機能フラグ（Feature Flag）管理
 import { flags } from './features/flags';
+import { DEV_MODE, isLocalHost } from './utils/envGuards';
 
 
 // ===== ページコンポーネントを遅延読み込み（コード分割） =====
@@ -53,6 +54,21 @@ const Gallery = lazy(() => import('./Pages/Gallery'));
 const WorldMap = lazy(() => import('./Pages/WorldMap'));
 const NotImplementedPlaceholder = lazy(() => import('./Pages/NotImplementedPlaceholder'));
 const OneQAMode = lazy(() => import('./Pages/OneQAMode'));
+const PairMode = lazy(() => import('./Pages/PairMode'));
+const FourChoiceMode = lazy(() => import('./Pages/FourChoiceMode'));
+const PdfScrollTest = DEV_MODE
+  ? lazy(() => import('./Pages/PdfScrollTest'))
+  : null;
+
+const isTestBypassEnabled = () => {
+  const hasBypassParam = new URLSearchParams(window.location.search).get('test_bypass') === 'true';
+  if (!hasBypassParam) return false;
+  // Guard 1: development mode 以外（production build 含む）では絶対に有効化しない
+  // NOTE: 一部環境で NODE_ENV=production が常時セットされるため、DEV ではなく MODE を使う。
+  if (!DEV_MODE) return false;
+  // Guard 2: 開発中でも localhost 系ホストのみ許可
+  return isLocalHost(window.location.hostname);
+};
 
 
 // ===== サスペンス用ローディング UI =====
@@ -86,10 +102,8 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }
 
   // 開発環境かどうか
-  const isDev = import.meta.env.DEV;
-  // 開発中のみ ?test_bypass=true が URL に付いていたら認証スキップ
-  const isTestBypass =
-    isDev && new URLSearchParams(window.location.search).get('test_bypass') === 'true';
+  // 開発中、または localhost 上の E2E 実行時のみ認証バイパスを許可
+  const isTestBypass = isTestBypassEnabled();
 
   // ログインしていない & バイパスも無効 → ルート("/") にリダイレクト
   if (!currentUser && !isTestBypass) {
@@ -133,7 +147,7 @@ function LoginPage() {
       <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
         <h1 className="text-3xl font-bold mb-6 text-gray-900">Flash Master</h1>
         <p className="text-gray-600 mb-8">
-          単語カードアプリへようこそ。ログインしてください。
+          manifolmiaへようこそ。ログインしてください。
         </p>
         {/* Google ログインボタン */}
         <button
@@ -236,9 +250,7 @@ function AppContent() {
   }, [currentUser]);
 
   // 開発・テスト用の認証バイパス
-  const isDev = import.meta.env.DEV;
-  const isTestBypass =
-    isDev && new URLSearchParams(window.location.search).get('test_bypass') === 'true';
+  const isTestBypass = isTestBypassEnabled();
 
   // ログインしていない & バイパスもない → ログイン画面に飛ばす
   if (!currentUser && !isTestBypass) {
@@ -250,6 +262,15 @@ function AppContent() {
     return (
       <Suspense fallback={<LoadingFallback />}>
         <SyncSettings />
+      </Suspense>
+    );
+  }
+
+  // test-only page for PDF wheel/trackpad scroll E2E checks
+  if (PdfScrollTest && isTestBypass && window.location.pathname === '/pdf-scroll-test') {
+    return (
+      <Suspense fallback={<LoadingFallback />}>
+        <PdfScrollTest />
       </Suspense>
     );
   }
@@ -353,6 +374,35 @@ function AppContent() {
               </Suspense>
             }
           />
+
+          <Route
+            path="pair-mode"
+            element={
+              <Suspense fallback={<LoadingFallback />}>
+                <PairMode />
+              </Suspense>
+            }
+          />
+
+          <Route
+            path="four-choice-mode"
+            element={
+              <Suspense fallback={<LoadingFallback />}>
+                <FourChoiceMode />
+              </Suspense>
+            }
+          />
+
+          {PdfScrollTest ? (
+            <Route
+              path="pdf-scroll-test"
+              element={
+                <Suspense fallback={<LoadingFallback />}>
+                  <PdfScrollTest />
+                </Suspense>
+              }
+            />
+          ) : null}
         </Route>
 
         {/* どのルートにもマッチしない場合は "/" にリダイレクト */}

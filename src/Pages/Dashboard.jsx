@@ -74,16 +74,14 @@ export default function Dashboard() {
     [currentUser]
   );
   
-  // Filter out deleted cards and hidden folders
+  // Filter out deleted cards
   const validFolderIds = new Set(folders.map(f => f.id || f.folderId));
-  const hiddenFolderIds = new Set(folders.filter(f => f.isHidden || f.is_hidden).map(f => f.id || f.folderId));
   
   const activeCards = cards.filter(card => {
     if (card.isDeleted || card.is_deleted) return false;
     if (foldersLoading) return true;
     const cardFolderId = card.folderId || card.folder_id;
     if (cardFolderId && !validFolderIds.has(cardFolderId)) return false;
-    if (cardFolderId && hiddenFolderIds.has(cardFolderId)) return false;
     return true;
   });
   
@@ -282,7 +280,6 @@ export default function Dashboard() {
                         <h2 className="text-2xl md:text-5xl font-bold text-slate-800 tracking-tight">今日の復習</h2>
                         <p className="text-xs md:text-base text-slate-500 font-medium max-w-sm mt-1 md:mt-3 leading-relaxed">
                            記憶が薄れる最適なタイミングです。<br className="hidden md:block"/>現在 {todayCards.length}枚 のカードが待機しています。
-                           <span className="hidden md:block text-[10px] text-slate-400 mt-2 font-bold opacity-70">※非表示フォルダは除外されています</span>
                         </p>
                     </div>
                     

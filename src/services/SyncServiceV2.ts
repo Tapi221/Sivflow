@@ -6,7 +6,7 @@ import { doc, getDoc, updateDoc, collection, query, getDocs, deleteDoc, Timestam
 import { firestoreDb } from './firebase';
 import { TelemetryService } from './logic/TelemetryService';
 import { SecurityMonitor } from './logic/SecurityMonitor';
-import { LocalDB, getLocalDb } from './localDB';
+import type { LocalDBLike } from './localDB';
 
 /**
  * SyncServiceV2: オーケストレーターとしての同期サービス
@@ -20,14 +20,14 @@ export class SyncServiceV2 implements ISyncService {
   private cloudAdapter: ICloudSyncAdapter;
   private telemetry: TelemetryService;
   private securityMonitor: SecurityMonitor;
-  private localDB: LocalDB;
+  private localDB: LocalDBLike;
   
   private isSyncing = false;
   private fallbackCount = 0;
 
   constructor(
     private userId: string,
-    localDB: LocalDB,
+    localDB: LocalDBLike,
     queueManager: IQueueManager,
     networkMonitor: INetworkMonitor,
     diffEngine: IDiffEngine,
@@ -265,7 +265,16 @@ export class SyncServiceV2 implements ISyncService {
 
     for (const change of changes) {
       const table = `${change.type}s`; // e.g., 'card' -> 'cards'
-      const remoteData = change.data;
+      const remoteData = { ...(change.data ?? {}) };
+
+      // documents.localFileId / blob localUrl は端末ローカル専用のため、受信時に除外する。
+      if (change.type === 'document') {
+        delete (remoteData as any).localFileId;
+        delete (remoteData as any).blobUrl;
+        if (typeof (remoteData as any).localUrl === 'string' && (remoteData as any).localUrl.startsWith('blob:')) {
+          (remoteData as any).localUrl = null;
+        }
+      }
 
       // フォルダの場合、循環参照をチェックして防止
       if (change.type === 'folder') {

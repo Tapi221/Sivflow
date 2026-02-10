@@ -286,3 +286,87 @@ export const calculateRecallProbability = (stability: number, daysSinceReview: n
   const scaledStability = stability * 100;
   return Math.exp(-daysSinceReview / scaledStability);
 };
+
+// ============================================================================
+// Multiple Choice Integration (4択モード統合)
+// ============================================================================
+
+/**
+ * 4択モードでの確信度（正解時のみ取得）
+ */
+export type MultipleChoiceConfidence = 'high' | 'mid' | 'luck';
+
+/**
+ * 4択モードの復習メタデータ
+ */
+export type MultipleChoiceReviewMeta = {
+  /** 選択した答えが正解かどうか */
+  isCorrect: boolean;
+  
+  /** 「分からない」を選択したか（明示的なギブアップ） */
+  isUnknown?: boolean;
+  
+  /** 正解時の確信度（未入力時は自動的に 'mid' 扱い） */
+  confidence?: MultipleChoiceConfidence;
+  
+  /** 選択肢表示後から回答までの時間（ミリ秒） */
+  choiceTimeMs?: number;
+};
+
+/**
+ * 4択結果を SubjectiveScore に変換する
+ * 
+ * 変換ルール:
+ * - isUnknown === true → 0
+ * - isCorrect === false → 0
+ * - isCorrect === true:
+ *   - confidence === 'high' → 3
+ *   - confidence === 'mid' or undefined → 2
+ *   - confidence === 'luck' → 1
+ * 
+ * 反応時間による弱い制限:
+ * - choiceTimeMs > 9000ms → score を最大 1 に制限
+ * - choiceTimeMs > 6000ms → score を最大 2 に制限
+ * 
+ * @param meta 4択モードの復習メタデータ
+ * @returns SubjectiveScore (0..3)
+ */
+export const convertMultipleChoiceToSubjectiveScore = (
+  meta: MultipleChoiceReviewMeta
+): SubjectiveScore => {
+  // 分からないを選択 or 不正解 → 0
+  if (meta.isUnknown === true || meta.isCorrect === false) {
+    return 0;
+  }
+
+  // 正解時: 確信度から base score を決定
+  const confidence = meta.confidence ?? 'mid'; // 未入力時は自動的に 'mid'
+  let score: SubjectiveScore;
+
+  switch (confidence) {
+    case 'high':
+      score = 3;
+      break;
+    case 'mid':
+      score = 2;
+      break;
+    case 'luck':
+      score = 1;
+      break;
+    default:
+      score = 2; // fallback
+  }
+
+  // 反応時間による弱い制限（オプショナル）
+  if (typeof meta.choiceTimeMs === 'number' && meta.choiceTimeMs > 0) {
+    if (meta.choiceTimeMs > 9000) {
+      // 9秒超: 最大 1 に制限（時間かかりすぎ）
+      score = Math.min(score, 1) as SubjectiveScore;
+    } else if (meta.choiceTimeMs > 6000) {
+      // 6秒超: 最大 2 に制限（やや時間かかった）
+      score = Math.min(score, 2) as SubjectiveScore;
+    }
+  }
+
+  return score;
+};

@@ -42,6 +42,10 @@
     --color-primary-700: #5A8684;
     --color-primary-800: #4D7270;
     --color-primary-900: #324A48;
+
+    /* CardShell sizing (global defaults) */
+    --card-base-width: 640px;
+    --card-max-height: min(70vh, 560px);
   }
   
   body {
@@ -162,6 +166,67 @@
   }
   .card:hover {
     @apply shadow-card-hover;
+  }
+
+  /* CardShell: 4:3 base min-height with internal scroll */
+  .card-shell {
+    @apply relative flex flex-col bg-white border border-slate-100 rounded-[32px] shadow-sm overflow-hidden;
+    --card-w: var(--card-base-width);
+    width: var(--card-base-width);
+    max-width: 100%;
+    min-height: calc(var(--card-w) * 3 / 4);
+    max-height: var(--card-max-height);
+  }
+
+  .card-shell-body {
+    @apply flex-1 min-h-0 overflow-y-auto overscroll-contain pt-12;
+  }
+
+  .card-shell-body--bottom {
+    @apply pb-12;
+  }
+
+  .card-shell-viewport {
+    @apply relative w-full overflow-hidden;
+    touch-action: none;
+  }
+
+  .card-shell-panzoom {
+    @apply will-change-transform;
+    transform-origin: 0 0;
+  }
+
+  .card-shell--paper {
+    width: var(--card-base-width);
+    max-width: none;
+  }
+
+  .card-shell-actions {
+    @apply absolute z-20 flex items-center gap-2;
+  }
+
+  .card-shell-actions-top-right {
+    @apply top-3 right-3;
+  }
+
+  .card-shell-actions-top-left {
+    @apply top-3 left-3;
+  }
+
+  .card-shell-actions-bottom-left {
+    @apply bottom-3 left-3;
+  }
+
+  .card-shell-actions-bottom-right {
+    @apply bottom-3 right-3;
+  }
+
+  .card-shell-action {
+    @apply pointer-events-auto;
+  }
+
+  .card-shell-overflow {
+    @apply h-9 w-9 rounded-full bg-white/90 backdrop-blur border border-slate-100 text-slate-500 text-sm font-bold leading-none shadow-sm hover:bg-slate-50;
   }
 
   /* グラデーションカード（主にハイライト用） */
@@ -465,16 +530,20 @@
     margin-left: clamp(8px, 3vw, 24px) !important;
   }
 
-  /* 非表示フォルダセクションの見た目調整（少し縮める） */
-  .hidden-folders-section {
-    opacity: 0.6;
-    transform: scale(0.98);
-  }
-
   /* 一部行の高さ調整 */
   .p-4.rounded-2xl {
     padding-top: 0.5rem !important;
     padding-bottom: 0.5rem !important;
+  }
+
+  /* CardShell: mobile default should follow viewport width */
+  .card-shell {
+    width: 100%;
+  }
+
+  .card-shell.card-shell--paper {
+    width: var(--card-base-width);
+    max-width: none;
   }
 }
 

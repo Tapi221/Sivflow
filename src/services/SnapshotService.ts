@@ -8,7 +8,7 @@
  * - エクスポートは人間に優しく、内部は厳密
  */
 
-import { getLocalDb } from './localDB';
+import { getLocalDb, getLocalDBRuntimeStatus } from './localDB';
 import type { 
   AppSnapshot, 
   SnapshotMetadata, 
@@ -27,6 +27,15 @@ const SNAPSHOTS_KEY = 'flashcard_snapshots';
 const MAX_STORED_SNAPSHOTS = 7; // 最大7世代保持
 
 class SnapshotService {
+  private assertPersistentStorageAvailable(operation: string): void {
+    const status = getLocalDBRuntimeStatus();
+    if (status.mode === 'fallback') {
+      throw new Error(
+        `[Snapshot] ${operation} is unavailable in fallback mode. Local persistent storage is disabled for this session.`
+      );
+    }
+  }
+
   /**
    * 現在の世代カウンターを取得（単調増加）
    */
@@ -49,6 +58,7 @@ class SnapshotService {
    * 現在のデータから完全なスナップショットを作成
    */
   async createSnapshot(userId: string): Promise<AppSnapshot> {
+    this.assertPersistentStorageAvailable('createSnapshot');
     const db = await getLocalDb(userId);
     // 全データを取得（差分ではなく完全コピー）
     const allCards = await db.getAllCards();
@@ -87,6 +97,7 @@ class SnapshotService {
    * ファイル名は人間に優しく、内部データは厳密
    */
   async exportToFile(userId: string, folderName?: string): Promise<void> {
+    this.assertPersistentStorageAvailable('exportToFile');
     const snapshot = await this.createSnapshot(userId);
     
     // ファイル名は補助情報（名前が変わっても壊れない）
@@ -114,6 +125,7 @@ class SnapshotService {
    * 特定フォルダのみをエクスポート
    */
   async exportFolder(userId: string, folderId: string): Promise<void> {
+    this.assertPersistentStorageAvailable('exportFolder');
     const fullSnapshot = await this.createSnapshot(userId);
     
     // 対象フォルダとそのカードのみ抽出
@@ -184,6 +196,7 @@ class SnapshotService {
    * スナップショットを比較（自動マージはしない、UIに判断を委ねる）
    */
   async compareWithLocal(imported: AppSnapshot, userId: string): Promise<SnapshotComparison> {
+    this.assertPersistentStorageAvailable('compareWithLocal');
     const local = await this.createSnapshot(userId);
     
     const localGen = local.metadata.generationCounter;

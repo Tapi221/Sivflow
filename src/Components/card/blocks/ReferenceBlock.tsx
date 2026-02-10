@@ -15,6 +15,8 @@ interface ReferenceBlockProps {
   onDuplicate: () => void;
   dragHandleProps?: any;
   accentColor?: string;
+  isActive?: boolean;
+  showDelete?: boolean;
 }
 
 export const ReferenceBlock = ({ 
@@ -23,7 +25,9 @@ export const ReferenceBlock = ({
   onDelete, 
   onDuplicate, 
   dragHandleProps, 
-  accentColor 
+  accentColor,
+  isActive,
+  showDelete
 }: ReferenceBlockProps) => {
   
   const handleAddLink = () => {
@@ -52,9 +56,11 @@ export const ReferenceBlock = ({
       label="Reference"
       icon={LinkIcon}
       accentColor={accentColor}
+      isActive={isActive}
       className="bg-slate-50/50"
       showDuplicate={false}
       showDragHandle={false}
+      showDelete={showDelete}
     >
       <div className="p-1.5 space-y-1.5">
         {references.map((ref, index) => (

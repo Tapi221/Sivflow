@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ChevronRight, ChevronDown, Folder, Plus, MoreVertical, Pencil, Trash2, BellOff, Bell, BookOpen, Home, Settings, FileText, Zap, Check, X, Edit } from 'lucide-react';
 import FolderPlusIcon from 'lucide-react/dist/esm/icons/folder-plus';
 import GripVerticalIcon from 'lucide-react/dist/esm/icons/grip-vertical';
-import EyeOffIcon from 'lucide-react/dist/esm/icons/eye-off';
 import { Button } from '@/Components/ui/button';
 import { Checkbox } from '@/Components/ui/checkbox';
 import {
@@ -55,7 +54,6 @@ function FolderItem({
   onCreateSubfolder,
   onEdit,
   onDelete,
-  onHide,
   onToggleSilent,
   isSelectionMode,
   selectedFolderIds,
@@ -73,7 +71,7 @@ function FolderItem({
     const parentId = f.parentFolderId ?? f.parent_folder_id ?? null;
     // Prevent self-reference recursion (A > A)
     if (f.id === folder.id || (f.folderId && f.folderId === folder.id)) return false;
-    return (parentId === folder.id && (isDeleted === undefined || isDeleted === false) && !f.isHidden);
+    return (parentId === folder.id && (isDeleted === undefined || isDeleted === false));
   })
     .sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
   const hasChildren = childFolders.length > 0;
@@ -322,10 +320,6 @@ function FolderItem({
                 <Pencil className="w-4 h-4 mr-2" />
                 名前変更
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onHide?.(folder)} className="rounded-xl">
-                <EyeOffIcon className="w-4 h-4 mr-2" />
-                非表示にする
-              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => onToggleSilent(folder)} className="rounded-xl">
                 {isSilent ? (
                   <>
@@ -383,7 +377,6 @@ function FolderItem({
                         onCreateSubfolder={onCreateSubfolder}
                         onEdit={onEdit}
                         onDelete={onDelete}
-                        onHide={onHide}
                         onToggleSilent={onToggleSilent}
                         isSelectionMode={isSelectionMode}
                         selectedFolderIds={selectedFolderIds}
@@ -447,7 +440,6 @@ export default function FolderTree({
   onCreateFolder,
   onEditFolder,
   onDeleteFolder,
-  onHideFolder,
   onToggleSilent,
   isSelectionMode,
   selectedFolderIds,
@@ -461,7 +453,7 @@ export default function FolderTree({
     // isDeleted フィールドが存在しない場合 or false の場合のみ表示
     const isDeleted = f.isDeleted ?? f.is_deleted;
     const parentId = f.parentFolderId ?? f.parent_folder_id ?? null;
-    return (!parentId && (isDeleted === undefined || isDeleted === false) && !f.isHidden);
+    return (!parentId && (isDeleted === undefined || isDeleted === false));
   })
     .sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
   
@@ -643,7 +635,6 @@ export default function FolderTree({
                           onCreateSubfolder={onCreateFolder}
                           onEdit={onEditFolder}
                           onDelete={onDeleteFolder}
-                          onHide={onHideFolder}
                           onToggleSilent={onToggleSilent}
                           isSelectionMode={isSelectionMode}
                           selectedFolderIds={selectedFolderIds}

@@ -42,12 +42,12 @@ export function ContextMenu({
           <>
             {onCreateSubfolder && (
               <DropdownMenuItem onClick={onCreateSubfolder} className="gap-2">
-                <Folder className="w-4 h-4" /> 子フォルダを作成
+                <Folder className="w-4 h-4" /> 新規フォルダ（このフォルダ内）
               </DropdownMenuItem>
             )}
             {onCreateCard && (
               <DropdownMenuItem onClick={onCreateCard} className="gap-2">
-                <Plus className="w-4 h-4 text-blue-500" /> カードを作成
+                <Plus className="w-4 h-4 text-blue-500" /> 新規カード（このフォルダ内）
               </DropdownMenuItem>
             )}
             {(onCreateSubfolder || onCreateCard) && <DropdownMenuSeparator />}

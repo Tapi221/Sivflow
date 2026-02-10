@@ -39,6 +39,7 @@ import { useProfileImageMonitor } from '@/hooks/useProfileImageMonitor';
 
 import { ThemeManager } from '@/Components/common/ThemeManager';
 import { SecurityAlertBanner } from './Components/security/SecurityAlertBanner';
+import { LocalDBStatusBanner } from './Components/security/LocalDBStatusBanner';
 
 // ... (existing imports)
 
@@ -88,15 +89,13 @@ export default function Layout() {
   const reviewCount = useMemo(() => {
     if (!cards || !folders || cardsLoading || foldersLoading) return 0;
 
-    // Filter out deleted cards and hidden folders
+    // Filter out deleted cards
     const validFolderIds = new Set(folders.map(f => f.id || f.folderId));
-    const hiddenFolderIds = new Set(folders.filter(f => f.isHidden).map(f => f.id || f.folderId));
     
     const activeCards = cards.filter(card => {
         if (card.isDeleted) return false;
         const cardFolderId = card.folderId;
         if (cardFolderId && !validFolderIds.has(cardFolderId)) return false;
-        if (cardFolderId && hiddenFolderIds.has(cardFolderId)) return false;
         return true;
     });
 
@@ -229,7 +228,7 @@ export default function Layout() {
         <div className="flex items-center justify-between px-4 h-14">
           <Link to={createPageUrl('Dashboard')} className="flex items-center gap-2 select-none">
             <BookOpen className="w-6 h-6 text-primary-600" />
-            <span className="font-bold text-lg text-slate-800">単語カード</span>
+            <span className="font-bold text-lg text-slate-800">manifolmia</span>
             {reviewCount > 0 && (
                 <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
                     {reviewCount > 99 ? '99+' : reviewCount}
@@ -449,6 +448,7 @@ export default function Layout() {
         location.pathname.includes('/Folders') ? '' : 'pt-14 md:pt-0 pb-24 md:pb-10',
         isSidebarOpen ? 'md:ml-[72px]' : 'md:ml-0'
       )}>
+        <LocalDBStatusBanner />
         <SecurityAlertBanner />
         <Suspense fallback={<LoadingFallback />}>
           <Outlet />

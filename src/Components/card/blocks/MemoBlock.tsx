@@ -11,9 +11,11 @@ interface MemoBlockProps {
   dragHandleProps?: any;
   dragHandleClassName?: string;
   accentColor?: string;
+  isActive?: boolean;
+  showDelete?: boolean;
 }
 
-export const MemoBlock = ({ content, onChange, onDelete, onDuplicate, dragHandleProps, dragHandleClassName, accentColor }: MemoBlockProps) => {
+export const MemoBlock = ({ content, onChange, onDelete, onDuplicate, dragHandleProps, dragHandleClassName, accentColor, isActive, showDelete }: MemoBlockProps) => {
   return (
     <BlockWrapper 
       onDelete={onDelete} 
@@ -23,6 +25,8 @@ export const MemoBlock = ({ content, onChange, onDelete, onDuplicate, dragHandle
       label="Memo"
       icon={StickyNote}
       accentColor={accentColor}
+      isActive={isActive}
+      showDelete={showDelete}
     >
       <AutoResizeTextarea
         value={content}

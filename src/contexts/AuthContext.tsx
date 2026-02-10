@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, useRef, useCallback, type ReactNode } from 'react';
 import { type User as FirebaseUser, onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../services/firebase';
-import { getLocalDb, initializeDB } from '../services/localDB';
+import { getLocalDb, initializeDB, resetLocalDBForLogout } from '../services/localDB';
 import { SyncServiceFactory } from '../services/SyncServiceFactory';
 import type { ISyncService } from '../services/interfaces/ISyncService';
 import type { SyncSettings } from '../types/sync';
@@ -59,6 +59,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [conflictCount, setConflictCount] = useState(0);
   // セキュリティ状態
   const [securityState, setSecurityState] = useState<SecurityState>({ isLocked: false, requires2FA: false, alerts: [] });
+  const lastKnownUserIdRef = useRef<string | null>(null);
 
   const dismissSecurityAlert = useCallback(async (alertId: string) => {
     if (!syncService) return;
@@ -168,6 +169,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setLoading(true);
       if (user) {
+        lastKnownUserIdRef.current = user.uid;
         try {
           // 1. Initialize user-specific DB
           await initializeDB(user.uid);
@@ -252,15 +254,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       } else {
         // User is logged out
         try {
-          // 開発中のデータ消失を防ぐため、ログアウト時のデータ消去を無効化
-          // await localDb.clearAllData();
-          // console.log('[Auth] User logged out. Local data cleared.');
-          
-          // 匿名DBに切り替え (シングルトンパターンにより古いユーザーDBは閉じられる)
+          // ログアウト時のDBリセットは best-effort
+          await resetLocalDBForLogout(lastKnownUserIdRef.current || undefined);
           await initializeDB('anonymous');
         } catch (error) {
-          console.error("[Auth] Failed to reset DB on logout:", error);
+          console.warn('[Auth] Logout DB reset failed (non-fatal):', error);
         }
+        lastKnownUserIdRef.current = null;
         setCurrentUser(null);
         setLoading(false);
         setSyncStatus('idle');

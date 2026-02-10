@@ -1,4 +1,4 @@
-import type { LocalDB } from './localDB';
+import type { LocalDBLike } from './localDB';
 import type { IndexedDBMetadata } from '../types/storage';
 import { CURRENT_SCHEMA_VERSION } from '../types/storage';
 import { SafeIndexedDBWriter } from './SafeIndexedDBWriter';
@@ -12,10 +12,10 @@ import { SafeIndexedDBWriter } from './SafeIndexedDBWriter';
  * - 再構築理由の記録
  */
 export class IndexedDBMetadataService {
-  private db: LocalDB;
+  private db: LocalDBLike;
   private userId: string;
   
-  constructor(db: LocalDB, userId: string) {
+  constructor(db: LocalDBLike, userId: string) {
     this.db = db;
     this.userId = userId;
   }

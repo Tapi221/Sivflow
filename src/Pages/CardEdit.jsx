@@ -224,8 +224,8 @@ export default function CardEdit() {
                           )}
 
                           {/* Controls (Outside Top Left) */}
-                          {!cardId && (
-                            <div className="absolute -top-10 left-0 flex items-center gap-1 z-20">
+                            {!cardId && (
+                              <div className="absolute -top-10 left-0 flex items-center gap-1 z-20 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto transition-opacity">
                               <div className="flex items-center bg-white rounded-full shadow-sm border border-slate-200 overflow-hidden">
                                 <button
                                   onClick={() => handleMoveEditor(index, 'up')}

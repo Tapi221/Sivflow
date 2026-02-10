@@ -1,7 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { getLocalDb } from '@/services/localDB';
+import {
+  getLocalDb,
+  getLocalDBRuntimeStatus,
+  subscribeLocalDBRuntimeStatus,
+} from '@/services/localDB';
 import { snapshotService } from '@/services/SnapshotService';
 import type { AppSnapshot, SnapshotComparison } from '@/types/snapshot';
 import {
@@ -37,6 +41,13 @@ export default function ImportDialog({ open, onOpenChange }: ImportDialogProps) 
   const [comparison, setComparison] = useState<SnapshotComparison | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [importAction, setImportAction] = useState<ImportAction>('keep');
+  const [runtimeStatus, setRuntimeStatus] = useState(getLocalDBRuntimeStatus());
+
+  useEffect(() => {
+    return subscribeLocalDBRuntimeStatus(setRuntimeStatus);
+  }, []);
+
+  const isFallbackMode = runtimeStatus.mode === 'fallback';
 
   const resetState = () => {
     setStep('select');
@@ -48,6 +59,7 @@ export default function ImportDialog({ open, onOpenChange }: ImportDialogProps) 
   };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isFallbackMode) return;
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -70,7 +82,7 @@ export default function ImportDialog({ open, onOpenChange }: ImportDialogProps) 
   };
 
   const handleImport = async () => {
-    if (!parsedSnapshot || !currentUser || importAction === 'cancel') {
+    if (isFallbackMode || !parsedSnapshot || !currentUser || importAction === 'cancel') {
       onOpenChange(false);
       resetState();
       return;
@@ -132,6 +144,12 @@ export default function ImportDialog({ open, onOpenChange }: ImportDialogProps) 
         {/* Step: Select File */}
         {step === 'select' && (
           <div className="py-6">
+            {isFallbackMode && (
+              <div className="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                <AlertTriangle className="mr-1 inline h-4 w-4" />
+                ローカル保存が無効なため、このセッションではインポートできません。
+              </div>
+            )}
             <input
               type="file"
               accept=".json"
@@ -139,11 +157,18 @@ export default function ImportDialog({ open, onOpenChange }: ImportDialogProps) 
               onChange={handleFileSelect}
               ref={fileInputRef}
               className="hidden"
+              disabled={isFallbackMode}
             />
             
             <div 
-              onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-primary-600 hover:bg-gray-50 transition-all"
+              onClick={() => {
+                if (!isFallbackMode) fileInputRef.current?.click();
+              }}
+              className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${
+                isFallbackMode
+                  ? 'cursor-not-allowed border-gray-200 bg-gray-50 opacity-70'
+                  : 'cursor-pointer border-gray-300 hover:border-primary-600 hover:bg-gray-50'
+              }`}
             >
               <FileJson className="w-12 h-12 mx-auto mb-3 text-gray-400" />
               <p className="text-sm font-medium text-gray-700">
@@ -267,6 +292,7 @@ export default function ImportDialog({ open, onOpenChange }: ImportDialogProps) 
               </Button>
               <Button
                 onClick={handleImport}
+                disabled={isFallbackMode}
                 className={importAction === 'replace' ? 'bg-red-600 hover:bg-red-700' : 'bg-primary-600 hover:bg-primary-700'}
               >
                 {importAction === 'replace' ? '上書きインポート' : '閉じる'}

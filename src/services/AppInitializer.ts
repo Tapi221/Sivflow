@@ -1,9 +1,10 @@
-import { getLocalDb } from './localDB';
+import { getLocalDb, getLocalDBRuntimeStatus, LOCALDB_RECOVERY_GUIDE_URL } from './localDB';
 import { IndexedDBMetadataService } from './IndexedDBMetadataService';
 import { IndexedDBRebuildOrchestrator } from './IndexedDBRebuildOrchestrator';
 import { notificationService } from './NotificationService';
 import { contextService } from './ContextService';
 import { getContextualMessage } from '../utils/messageTemplates';
+import { warnOncePerSession } from './localDBRuntimeState';
 
 /**
  * アプリ起動時の初期化処理
@@ -52,6 +53,25 @@ export class AppInitializer {
     );
     
     const db = await getLocalDb();
+    const dbStatus = getLocalDBRuntimeStatus();
+    if (dbStatus.mode === 'fallback') {
+      warnOncePerSession(
+        'app-init:fallback-mode',
+        `[AppInit:${userId}] LocalDB is running in fallback mode. Skipping IndexedDB health/rebuild phases.`
+      );
+
+      notificationService.warning(
+        'ローカル保存が利用できません',
+        `このセッションではメモリ保存で継続します。再読み込みで未同期データが消える可能性があります。Chrome のサイトデータ削除で復旧できます。`,
+        {
+          details: `復旧手順: ${LOCALDB_RECOVERY_GUIDE_URL}`,
+          closeable: true,
+        }
+      );
+
+      this.initialized = true;
+      return;
+    }
     const metaService = new IndexedDBMetadataService(db, userId);
     
     // 🔥 Phase 1: 健全性チェック（前回のセッションの状態を確認）

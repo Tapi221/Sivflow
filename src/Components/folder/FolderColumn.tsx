@@ -24,7 +24,6 @@ interface FolderColumnProps {
   onCreateFolder: (parentId: string | null) => void;
   onEdit: (folder: FolderType) => void;
   onDelete: (folder: FolderType) => void;
-  onHide: (folder: FolderType) => void;
   onToggleSilent: (folder: FolderType) => void;
   onSelect?: (folderId: string) => void; // フォルダを開く（中身を表示）
   onCardClick?: (cardId: string) => void; // カードを選択
@@ -49,7 +48,6 @@ export default function FolderColumn({
   onCreateFolder,
   onEdit,
   onDelete,
-  onHide,
   onToggleSilent,
   onSelect,
   onCardClick,
@@ -350,16 +348,6 @@ export default function FolderColumn({
                                 >
                                   <Pencil className="w-3.5 h-3.5 mr-2" />
                                   名前変更
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    onHide(folder);
-                                  }}
-                                  className="rounded-lg text-xs"
-                                >
-                                  <MoreVertical className="w-3.5 h-3.5 mr-2" />
-                                  非表示にする
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   onClick={(e) => {

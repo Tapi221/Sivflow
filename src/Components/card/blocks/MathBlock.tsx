@@ -15,6 +15,8 @@ interface MathBlockProps {
   dragHandleProps?: any;
   dragHandleClassName?: string;
   accentColor?: string;
+  isActive?: boolean;
+  showDelete?: boolean;
 }
 
 /**
@@ -28,7 +30,9 @@ export const MathBlock: React.FC<MathBlockProps> = ({
   onDuplicate, 
   dragHandleProps,
   dragHandleClassName,
-  accentColor 
+  accentColor,
+  isActive,
+  showDelete
 }) => {
   const [error, setError] = useState<string | null>(null);
 
@@ -54,6 +58,8 @@ export const MathBlock: React.FC<MathBlockProps> = ({
       label="Math"
       icon={SigmaIcon}
       accentColor={accentColor}
+      isActive={isActive}
+      showDelete={showDelete}
     >
       <div className="space-y-1.5 px-2 py-0.5">
         {/* KaTeX入力エリア */}

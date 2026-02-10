@@ -111,6 +111,7 @@ export interface UploadMetadata {
     | 'memo'
     | 'card_audio'
     | 'pdf'
+    | 'pptx'
     | { type: string; [key: string]: any };
 
   status: 'pending' | 'uploading' | 'ready' | 'failed';
@@ -387,17 +388,34 @@ export type Card = BaseEntity & {
   _rescueRaw?: any;
 };
 
-export type DocumentKind = 'pdf'; // 将来 'md' とか増やしたいならここを拡張
+export type DocumentKind = 'pdf' | 'pptx'; // 将来 'md' とか増やしたいならここを拡張
+
+/**
+ * PDFビューアの表示状態
+ * リロード後に復元可能な UI 状態（利便性データ）
+ */
+export interface PdfViewerState {
+  currentPage?: number;
+  scale?: number;
+  fitMode?: 'width' | 'manual';
+}
+
 export interface DocumentItem extends BaseEntity {
 
-  kind: DocumentKind;          // いまは 'pdf' 固定
+  kind: DocumentKind;          // 'pdf' | 'pptx'
   folderId: string;            // カードと同じく所属フォルダを持つ（並列の核）
   orderIndex: number;          // 並び順（カードと同列で扱うなら必須）
 
   title: string;               // UI表示名（ファイル名そのままでも可）
   fileName: string;            // 元ファイル名
-  mimeType: string;            // 'application/pdf'
+  mimeType: string;            // 'application/pdf' | pptx など
   sizeBytes: number;
+
+  // ローカル/リモート参照（Blob/Storage URL）
+  blobUrl?: BlobUrl | null;
+  localUrl?: BlobUrl | null;
+  remoteUrl?: StorageUrl | null;
+  localFileId?: string | null; // IndexedDB 内のローカルファイルキー
 
   // Storage連携（後で埋まる）
   storagePath?: string | null; // 例: users/{uid}/docs/{id}.pdf
@@ -407,6 +425,38 @@ export interface DocumentItem extends BaseEntity {
   // 任意
   tags?: string[];
   pageCount?: number | null;   // 取れるなら（後回しOK）
+
+  // 追加: アップロード状態（未表示だが将来UI用）
+  uploadStatus?: 'pending' | 'uploading' | 'ready' | 'failed';
+
+  // PPTX変換ステータス（新）
+  pptxManifestStatus?: 'none' | 'queued' | 'processing' | 'ready' | 'failed';
+  pptxManifestPath?: string | null;
+  pptxSlideCount?: number | null;
+  pptxLastError?: string | null;
+  pptxConvertRequestedAt?: number | null;
+  pptxConvertedAt?: number | null;
+  pptxSourceSignature?: string | null;
+  pptxRetryCount?: number | null;
+  pptxNextRetryAt?: number | null;
+
+  // 変換ステータス（PPTX などの非PDFドキュメント向け）
+  convertStatus?: 'processing' | 'ready' | 'failed';
+
+  // PPTX変換メタ
+  pptx?: {
+    manifestPath?: string | null;
+    fallbackPdfPath?: string | null;
+    slideCount?: number | null;
+    updatedAt?: Date | Timestamp;
+    error?: string | null;
+    sourceSignature?: string | null;
+    retryCount?: number | null;
+    nextRetryAt?: number | null;
+  };
+
+  // PDFビューア表示状態（利便性データ、リロード後復元用）
+  viewerState?: PdfViewerState | null;
 }
 
 // ✅ localDB.ts の既存 import を壊さないための互換エイリアス

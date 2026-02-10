@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCards } from '@/hooks/useCards';
 import { useFolders } from '@/hooks/useFolders';
 import { useDocuments } from '@/hooks/useDocuments'; // ✅追加
+import { useIsDesktop } from '@/hooks/useIsDesktop';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getLocalDb } from '../services/localDB';
 import { firestoreDb } from '@/services/firebase';
@@ -22,18 +23,32 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/Components/ui/dropdown-menu';
-import { MoreVertical, Settings, Tag, Trash2, Plus, BellOff, Bell, ArrowLeft, ChevronRight, Edit, X } from 'lucide-react';
-import EyeOffIcon from 'lucide-react/dist/esm/icons/eye-off';
+import { MoreVertical, Edit, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { createPageUrl } from '@/utils';
+import { getIsDesktop } from '@/utils/responsive';
 import backgroundImage from '@/assets/background.jpg';
+
+const DESKTOP_FORCED_VIEW_MODE = 'work';
+const DEFAULT_NON_DESKTOP_VIEW_MODE = 'tree';
+// PCは作業表示に一本化したため、表示切替UIは無効化（将来の復活用にコードは残す）
+const ENABLE_VIEW_MODE_SWITCH = false;
+
+const normalizeFolderViewMode = (mode, isDesktop) => {
+  if (isDesktop) return DESKTOP_FORCED_VIEW_MODE;
+  if (mode === DESKTOP_FORCED_VIEW_MODE) return DEFAULT_NON_DESKTOP_VIEW_MODE;
+  return mode || DEFAULT_NON_DESKTOP_VIEW_MODE;
+};
 
 export default function Folders() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const isDesktop = useIsDesktop();
   // 選択状態
   const [selectedFolderId, setSelectedFolderId] = useState(null);
-  const [selectedItem, setSelectedItem] = useState(null); // { type: 'card' | 'document', id: string } | null加
+  const [selectedCardId, setSelectedCardId] = useState(null);
+  const [selectedDocumentId, setSelectedDocumentId] = useState(null);
+  const [selectedItem, setSelectedItem] = useState(null); // { type: 'card' | 'document', id: string } | null
   const [folderDialogOpen, setFolderDialogOpen] = useState(false);
   const [editingFolder, setEditingFolder] = useState(null);
   const [parentFolderId, setParentFolderId] = useState(null);
@@ -42,7 +57,8 @@ export default function Folders() {
   const [isEditMode, setIsEditMode] = useState(false); // モバイル専用の編集モード
   const [viewMode, setViewMode] = useState(() => {
     const saved = localStorage.getItem('folderViewMode');
-    return saved !== null ? saved : 'tree';
+    const initial = saved !== null ? saved : DEFAULT_NON_DESKTOP_VIEW_MODE;
+    return normalizeFolderViewMode(initial, getIsDesktop());
   });
 
   // 範囲選択用の状態
@@ -50,10 +66,19 @@ export default function Folders() {
   const [dragStart, setDragStart] = useState(null);
   const containerRef = useRef(null);
 
+  // PCは常に作業表示に正規化（localStorageの過去値も無効化）
+  useEffect(() => {
+    const normalized = normalizeFolderViewMode(viewMode, isDesktop);
+    if (normalized !== viewMode) {
+      setViewMode(normalized);
+    }
+  }, [isDesktop, viewMode]);
+
   // 表示モードが変更されたらlocalStorageに保存
   useEffect(() => {
-    localStorage.setItem('folderViewMode', viewMode);
-  }, [viewMode]);
+    const normalized = normalizeFolderViewMode(viewMode, isDesktop);
+    localStorage.setItem('folderViewMode', normalized);
+  }, [viewMode, isDesktop]);
 
   // 作業モード時、html要素にno-page-scrollクラスを追加してページ全体のスクロールを無効化
   useEffect(() => {
@@ -68,11 +93,10 @@ export default function Folders() {
     };
   }, [viewMode]);
 
-  const [isHiddenOpen, setIsHiddenOpen] = useState(false);
   const [tagManagerOpen, setTagManagerOpen] = useState(false);
   
-  const { folders = [], loading: foldersLoading, error: foldersError } = useFolders();
-  const { cards = [], loading: cardsLoading, error: cardsError } = useCards();
+  const { folders = [], loading: foldersLoading } = useFolders();
+  const { cards = [], loading: cardsLoading } = useCards();
   const { documents = [] } = useDocuments(); // ✅追加
   const [displayFolders, setDisplayFolders] = useState([]);
   
@@ -94,28 +118,30 @@ export default function Folders() {
   // --- 選択ハンドラ (Workモード用) ---
   const handleSelectFolderInWork = (folderId) => {
     setSelectedFolderId(folderId);
+    setSelectedCardId(null);
+    setSelectedDocumentId(null);
     setSelectedItem(null);
   };
 
   const handleSelectCardInWork = (cardId) => {
     // フォルダは解除せず、アイテムのみ更新
+    setSelectedCardId(cardId);
+    setSelectedDocumentId(null);
     setSelectedItem({ type: 'card', id: cardId });
   };
 
   // ✅追加: ドキュメント選択時の処理
   const handleSelectDocumentInWork = (docId) => {
+    setSelectedDocumentId(docId);
+    setSelectedCardId(null);
     setSelectedItem({ type: 'document', id: docId });
-    
-    // PDFを開く（FolderTreeWithCards 側でも実行しているが、一貫性のため）
-    const doc = documents.find(d => (d.id || d.documentId) === docId);
-    if (doc?.downloadUrl) {
-      window.open(doc.downloadUrl, '_blank', 'noopener,noreferrer');
-    }
   };
 
   const handleSelectItemInWork = (item) => {
     if (!item) {
       setSelectedItem(null);
+      setSelectedCardId(null);
+      setSelectedDocumentId(null);
       return;
     }
     if (item.type === 'card') handleSelectCardInWork(item.id);
@@ -142,42 +168,6 @@ export default function Folders() {
     handleConfirmDelete(folder);
   };
 
-  const handleHideFolder = async (folder) => {
-    const targetFolderId = folder.folderId ?? folder.id;
-    if (!targetFolderId) return;
-
-    const getDescendantIds = (parentId, visited = new Set()) => {
-      if (visited.has(parentId)) return [];
-      visited.add(parentId);
-
-      const children = folders.filter(f => {
-        const parent = f.parentFolderId ?? f.parent_folder_id ?? null;
-        const isDeleted = f.isDeleted ?? f.is_deleted;
-        return parent === parentId && (isDeleted === undefined || isDeleted === false);
-      });
-      let ids = [];
-      children.forEach(child => {
-        const childId = child.folderId ?? child.id;
-        if (childId) {
-          ids.push(childId);
-          ids = [...ids, ...getDescendantIds(childId, visited)];
-        }
-      });
-      return ids;
-    };
-
-    const folderIdsToHide = [targetFolderId, ...getDescendantIds(targetFolderId)];
-
-    for (const id of folderIdsToHide) {
-      await updateFolderMutation.mutateAsync({
-        id,
-        data: {
-          isHidden: true,
-          is_hidden: true
-        }
-      });
-    }
-  };
   
   const handleSaveFolder = async (data, folderId) => {
     if (folderId) {
@@ -358,18 +348,10 @@ export default function Folders() {
 
   const isLoading = foldersLoading || cardsLoading;
   const activeFolders = displayFolders.filter(f => {
-    // isDeleted フィールドが存在しない場合 or false の場合のみ表示
     const isDeleted = f.isDeleted ?? f.is_deleted;
-    const isHidden = f.isHidden ?? f.is_hidden;
-    return (isDeleted === undefined || isDeleted === false) && (isHidden === undefined || isHidden === false);
-  });
-  const hiddenFolders = displayFolders.filter(f => {
-    const isHidden = f.isHidden ?? f.is_hidden;
-    return isHidden === true;
+    return (isDeleted === undefined || isDeleted === false);
   });
 
-  const hasSyncError = foldersError || cardsError;
-  
   return (
     <div className={cn(
       "bg-[#F8FAFB] transition-colors duration-500",
@@ -384,68 +366,38 @@ export default function Folders() {
           "bg-white rounded-2xl shadow-sm border border-slate-100 p-4 md:p-6",
           viewMode !== 'work' && "mb-4"
         )}>
-            <div className="flex items-center justify-end mb-2 md:mb-4">
+            <div className="flex items-center justify-end mb-0">
 
               <div className="flex items-center gap-2">
                 {/* 表示切り替えボタン (Desktop) */}
-                <div className="hidden md:flex items-center bg-slate-50/50 rounded-xl p-1 gap-1 border border-slate-100/50 mr-2">
-                  <Button
-                    variant={viewMode === 'tree' ? 'default' : 'ghost'}
-                    size="sm"
-                    className={`h-8 px-3 rounded-lg text-xs font-bold ${viewMode === 'tree' ? 'bg-primary-600 text-white' : 'text-slate-400 hover:text-slate-600'}`}
-                    onClick={() => setViewMode('tree')}
-                  >
-                    ツリー
-                  </Button>
-                  <Button
-                    variant={viewMode === 'column' ? 'default' : 'ghost'}
-                    size="sm"
-                    className={`h-8 px-3 rounded-lg text-xs font-bold ${viewMode === 'column' ? 'bg-primary-600 text-white' : 'text-slate-400 hover:text-slate-600'}`}
-                    onClick={() => setViewMode('column')}
-                  >
-                    カラム
-                  </Button>
-                  <Button
-                    variant={viewMode === 'work' ? 'default' : 'ghost'}
-                    size="sm"
-                    className={`h-8 px-3 rounded-lg text-xs font-bold ${viewMode === 'work' ? 'bg-primary-600 text-white' : 'text-slate-400 hover:text-slate-600'}`}
-                    onClick={() => setViewMode('work')}
-                  >
-                    作業
-                  </Button>
-                </div>
-
-                {/* Desktop Tools */}
-                <div className="hidden md:flex items-center bg-slate-50/50 rounded-xl p-1 gap-1 border border-slate-100/50">
+                {ENABLE_VIEW_MODE_SWITCH && (
+                  <div className="hidden md:flex items-center bg-slate-50/50 rounded-xl p-1 gap-1 border border-slate-100/50 mr-2">
                     <Button
-                      variant="ghost"
-                      size="icon"
-                      className="w-9 h-9 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
-                      onClick={() => setTagManagerOpen(true)}
+                      variant={viewMode === 'tree' ? 'default' : 'ghost'}
+                      size="sm"
+                      className={`h-8 px-3 rounded-lg text-xs font-bold ${viewMode === 'tree' ? 'bg-primary-600 text-white' : 'text-slate-400 hover:text-slate-600'}`}
+                      onClick={() => setViewMode('tree')}
                     >
-                      <Tag className="w-4.5 h-4.5" />
-                    </Button>
-                    <div className="w-[1px] h-5 bg-slate-200 mx-0.5"></div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="w-9 h-9 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 relative"
-                      onClick={() => navigate(createPageUrl('SyncSettings'))}
-                    >
-                      <Settings className="w-4.5 h-4.5" />
-                      {hasSyncError && (
-                        <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
-                      )}
+                      ツリー
                     </Button>
                     <Button
-                      variant="ghost"
-                      size="icon"
-                      className="w-9 h-9 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
-                      onClick={() => navigate(createPageUrl('Trash'))}
+                      variant={viewMode === 'column' ? 'default' : 'ghost'}
+                      size="sm"
+                      className={`h-8 px-3 rounded-lg text-xs font-bold ${viewMode === 'column' ? 'bg-primary-600 text-white' : 'text-slate-400 hover:text-slate-600'}`}
+                      onClick={() => setViewMode('column')}
                     >
-                      <Trash2 className="w-4.5 h-4.5" />
+                      カラム
                     </Button>
-                </div>
+                    <Button
+                      variant={viewMode === 'work' ? 'default' : 'ghost'}
+                      size="sm"
+                      className={`h-8 px-3 rounded-lg text-xs font-bold ${viewMode === 'work' ? 'bg-primary-600 text-white' : 'text-slate-400 hover:text-slate-600'}`}
+                      onClick={() => setViewMode('work')}
+                    >
+                      作業
+                    </Button>
+                  </div>
+                )}
 
                 {/* Mobile Tools (Overflow Menu) */}
                 <div className="md:hidden flex items-center gap-1">
@@ -457,18 +409,6 @@ export default function Folders() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="p-2 min-w-[160px] liquid-glass rounded-[20px] shadow-2xl border-none">
-                        <DropdownMenuItem onClick={() => setTagManagerOpen(true)} className="rounded-xl py-3">
-                          <Tag className="w-4 h-4 mr-3 text-slate-400" />
-                          <span>タグ管理</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => navigate(createPageUrl('SyncSettings'))} className="rounded-xl py-3">
-                          <Settings className="w-4 h-4 mr-3 text-slate-400" />
-                          <span>同期設定</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => navigate(createPageUrl('Trash'))} className="rounded-xl py-3">
-                          <Trash2 className="w-4 h-4 mr-3 text-slate-400" />
-                          <span>ゴミ箱</span>
-                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => setIsEditMode(true)} className="rounded-xl py-3 text-primary-600">
                           <Edit className="w-4 h-4 mr-3" />
                           <span>編集モード</span>
@@ -512,17 +452,7 @@ export default function Folders() {
                         削除({selectedFolderIds.length})
                       </Button>
                   </div>
-                ) : (
-                  <div className="hidden md:flex items-center gap-2">
-                    <Button
-                        variant="ghost"
-                        className="h-10 px-6 text-slate-500 font-bold text-xs rounded-xl hover:bg-slate-100 border border-slate-200"
-                        onClick={() => setIsSelectionMode(true)}
-                    >
-                        選択
-                    </Button>
-                  </div>
-                )}
+                ) : null}
               </div>
             </div>
             
@@ -552,6 +482,7 @@ export default function Folders() {
             ) : (
               <>
                 {/* PC: 表示モードに応じて切り替え */}
+                {/* PCは作業表示に固定。ツリー/カラムは将来の再利用のため分岐を残す */}
                 <div className="hidden md:block">
                   {viewMode === 'work' ? (
                     <TreeViewLayout
@@ -560,6 +491,8 @@ export default function Folders() {
                       documents={documents}
                       selectedFolderId={selectedFolderId}
                       selectedItem={selectedItem}
+                      selectedCardId={selectedCardId}
+                      selectedDocumentId={selectedDocumentId}
                       onFolderSelect={handleSelectFolderInWork}
                       onItemSelect={handleSelectItemInWork}
                       onCardUpdated={() => {
@@ -586,7 +519,6 @@ export default function Folders() {
                     }}
                     onEdit={handleEditFolder}
                     onDelete={handleDeleteFolder}
-                    onHide={handleHideFolder}
                     onToggleSilent={async (folder) => {
                       const targetFolderId = folder.folderId ?? folder.id;
                       const currentSilent = folder.isSilent ?? folder.is_silent ?? false;
@@ -653,7 +585,6 @@ export default function Folders() {
                       onCreateSubfolder={handleCreateFolder}
                       onEdit={handleEditFolder}
                       onDelete={handleDeleteFolder}
-                      onHide={handleHideFolder}
                       onToggleSilent={async (folder) => {
                         const targetFolderId = folder.folderId ?? folder.id;
                         const currentSilent = folder.isSilent ?? folder.is_silent ?? false;
@@ -724,7 +655,6 @@ export default function Folders() {
                     onCreateSubfolder={handleCreateFolder}
                     onEdit={handleEditFolder}
                     onDelete={handleDeleteFolder}
-                    onHide={handleHideFolder}
                     onToggleSilent={async (folder) => {
                       const targetFolderId = folder.folderId ?? folder.id;
                       const currentSilent = folder.isSilent ?? folder.is_silent ?? false;
@@ -789,53 +719,6 @@ export default function Folders() {
 
 
 
-        {/* Hidden Folders */}
-        <div className="mt-6 mb-20 md:mb-0">
-            <button
-                type="button"
-                onClick={() => setIsHiddenOpen(prev => !prev)}
-                className="w-full h-16 flex items-center justify-between px-8 liquid-glass-header transition-all hover:shadow-md relative z-10 hidden-folders-section"
-            >
-                <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 liquid-glass-chip flex items-center justify-center text-liquid-low">
-                        <EyeOffIcon className="w-4 h-4" />
-                    </div>
-                    <span className="text-[12px] font-bold text-slate-400">
-                        非表示のフォルダ <span className="text-slate-300 ml-1">[{hiddenFolders.length}]</span>
-                    </span>
-                </div>
-                <ChevronRight className={cn("w-4 h-4 text-slate-200 transition-transform", isHiddenOpen && "rotate-90")} />
-            </button>
-          {isHiddenOpen && (
-            <div className="mt-2 p-3 rounded-lg bg-white/70 border border-slate-200/60">
-              {hiddenFolders.length === 0 ? (
-                <div className="text-sm text-gray-500">非表示のフォルダはありません</div>
-              ) : (
-                <ul className="space-y-2">
-                  {hiddenFolders.map(folder => (
-                    <li key={folder.id ?? folder.folderId} className="flex items-center justify-between gap-2 text-sm text-gray-600">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <EyeOffIcon className="w-3.5 h-3.5 text-gray-400" />
-                        <span className="truncate">{folder.folderName || folder.folder_name || '(名称未設定)'}</span>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={async () => {
-                          const id = folder.id ?? folder.folderId;
-                          // Local First & Sync Queued
-                          await updateFolder(id, { isHidden: false });
-                        }}
-                      >
-                        表示する
-                      </Button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          )}
-        </div>
       </div>
         
         {/* Dialogs */}

@@ -1,8 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/Components/ui/button';
-import { Badge } from '@/Components/ui/badge';
-import { Card, CardContent } from '@/Components/ui/card';
-import { ChevronLeft, ChevronRight, HelpCircle, Pencil, RotateCcw, Volume2, Play, Pause, Bookmark, Tag } from 'lucide-react';
+import { CardShell } from './CardShell';
+import { ChevronLeft, ChevronRight, HelpCircle, Pencil, RotateCcw, Bookmark, Tag } from 'lucide-react';
 import { MathRenderer } from './blocks/MathRenderer';
 import { cn } from '@/lib/utils';
 import { CodeRenderer } from './CodeRenderer';
@@ -34,6 +33,7 @@ interface FlashcardProps {
   extraHeaderLeft?: React.ReactNode;
   extraHeaderRight?: React.ReactNode;
   extraFooter?: React.ReactNode;
+  drawMode?: boolean;
 }
 
 function TagBadge({ tag }: { tag: string }) {
@@ -67,31 +67,60 @@ export function Flashcard({
   previewMode,
   extraHeaderLeft,
   extraHeaderRight,
-  extraFooter
+  extraFooter,
+  drawMode
 }: FlashcardProps) {
   // データを正規化してレガシーフィールドとブロックの両方を確実に扱う
   const normalizedCard = React.useMemo(() => normalizeCard(card), [card]);
+  const [isMobile, setIsMobile] = useState(false);
+  const [previewFlipped, setPreviewFlipped] = useState(false);
   
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [isReferencePopupOpen, setIsReferencePopupOpen] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mediaQuery = window.matchMedia('(max-width: 640px)');
+    const update = () => setIsMobile(mediaQuery.matches);
+    update();
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', update);
+      return () => mediaQuery.removeEventListener('change', update);
+    }
+    mediaQuery.addListener(update);
+    return () => mediaQuery.removeListener(update);
+  }, []);
+
+  useEffect(() => {
+    if (!previewMode) return;
+    setPreviewFlipped(false);
+  }, [previewMode, card?.id]);
 
   // 以下、normalizedCard を使用するように変数を再定義
   const cardData = normalizedCard;
 
 
-  // 全てのブロックからリファレンスを抽出
-  const allReferences = React.useMemo(() => {
+  const questionReferences = React.useMemo(() => {
     const refs: ReferenceBlockData[] = [];
-    const qBlocks: CardBlock[] = card?.questionBlocks ?? [];
-    const aBlocks: CardBlock[] = card?.answerBlocks ?? [];
-    
-    [...qBlocks, ...aBlocks].forEach(block => {
+    const qBlocks: CardBlock[] = cardData?.questionBlocks ?? [];
+    qBlocks.forEach(block => {
       if (block.type === 'reference' && block.references) {
         refs.push(...block.references);
       }
     });
-    return refs.filter(r => r.url); // URLがあるもののみ
-  }, [card]);
+    return refs.filter(r => r.url);
+  }, [cardData?.questionBlocks]);
+
+  const answerReferences = React.useMemo(() => {
+    const refs: ReferenceBlockData[] = [];
+    const aBlocks: CardBlock[] = cardData?.answerBlocks ?? [];
+    aBlocks.forEach(block => {
+      if (block.type === 'reference' && block.references) {
+        refs.push(...block.references);
+      }
+    });
+    return refs.filter(r => r.url);
+  }, [cardData?.answerBlocks]);
 
   // 安全なプロパティアクセス（異なる命名規則への対応）
   const isDraft = card?.is_draft ?? card?.isDraft ?? false;
@@ -179,8 +208,14 @@ export function Flashcard({
   const handleFlip = (e?: React.MouseEvent) => {
     if (isImageModalOpen) return;
     if (onFlip) {
-        e?.stopPropagation();
-        onFlip();
+      e?.stopPropagation();
+      onFlip();
+      return;
+    }
+
+    if (previewMode) {
+      e?.stopPropagation();
+      setPreviewFlipped((prev) => !prev);
     }
   };
 
@@ -190,106 +225,143 @@ export function Flashcard({
 
   if (!card) return <div className="text-center py-12 text-gray-500">No Card Data</div>;
 
+  const enableDrawMode = drawMode ?? (previewMode && isMobile);
+
+  const effectiveIsFlipped = isFlipped ?? (previewMode ? previewFlipped : false);
+  const actionsTopLeft: React.ReactNode[] = [];
+  const actionsTopRight: React.ReactNode[] = [];
+  const actionsBottomRight: React.ReactNode[] = [];
+
+  if (extraHeaderLeft) {
+    actionsBottomRight.push(
+      <div key="extra-left" className="flex" onClick={(e) => e.stopPropagation()}>
+        {extraHeaderLeft}
+      </div>
+    );
+  }
+
+  const activeReferences = effectiveIsFlipped ? answerReferences : questionReferences;
+
+  if (activeReferences.length > 0) {
+    actionsBottomRight.push(
+      <button
+        key="references"
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsReferencePopupOpen(true);
+        }}
+        className="flex items-center gap-1 px-2 py-1 h-8 min-h-0 min-w-0 rounded-full bg-primary-600 text-white shadow-[0_2px_0_#1e293b] active:shadow-none active:translate-y-[2px] transition-all hover:bg-primary-500 hover:shadow-[0_2px_0_#1e293b]"
+        title="参考リンクを表示"
+      >
+        <LinkIcon className="w-3 h-3 stroke-[2.25]" />
+        <span className="text-[10px] font-bold">x{activeReferences.length}</span>
+      </button>
+    );
+  }
+
+  if (!previewMode) {
+    if (onToggleUncertainty) {
+      actionsTopLeft.push(
+        <Button
+          key="uncertainty"
+          variant={hasUncertainty ? "default" : "ghost"}
+          size="icon"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleUncertainty(card);
+          }}
+          className={cn(
+            "rounded-full w-9 h-9 md:w-11 md:h-11 transition-colors",
+            hasUncertainty 
+              ? "bg-amber-400 hover:bg-amber-500 text-white shadow-md border-none" 
+              : "bg-slate-50/80 text-slate-400 hover:bg-slate-100 hover:text-slate-600 border border-transparent"
+          )}
+          title="曖昧/要復習"
+        >
+          <HelpCircle className="w-5 h-5 md:w-5 md:h-5 scale-90 md:scale-100" />
+        </Button>
+      );
+    }
+
+    if (onToggleBookmark) {
+      actionsTopLeft.push(
+        <Button
+          key="bookmark"
+          variant={isBookmarked ? "default" : "ghost"}
+          size="icon"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleBookmark(card);
+          }}
+          className={cn(
+            "rounded-full w-9 h-9 md:w-11 md:h-11 transition-colors",
+            isBookmarked 
+              ? "bg-primary-600 hover:bg-primary-700 text-white shadow-md border-none" 
+              : "bg-slate-50/80 text-slate-400 hover:bg-primary-600/10 hover:text-primary-600 border border-transparent"
+          )}
+          title="ブックマーク"
+        >
+          <Bookmark className={cn("w-5 h-5 md:w-5 md:h-5 scale-90 md:scale-100", isBookmarked && "fill-current")} />
+        </Button>
+      );
+    }
+
+    if (onEdit) {
+      actionsTopRight.push(
+        <Button
+          key="edit"
+          variant="ghost"
+          size="icon"
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit(card);
+          }}
+          className="rounded-full w-9 h-9 md:w-11 md:h-11 bg-slate-50/80 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+          title="編集"
+        >
+          <Pencil className="w-5 h-5 md:w-5 md:h-5 scale-90 md:scale-100" />
+        </Button>
+      );
+    }
+  }
+
   return (
     <div className={cn("w-full h-full flex flex-col select-none", className)}>
       {/* カード外ヘッダー（右上要素の移動先） */}
-      <div className="w-full flex justify-end px-2 pb-2 min-h-[40px]">
-        <div className="flex flex-col items-end gap-2">
-             {extraHeaderRight}
-            {isFlipped && !previewMode && (
-                <Button 
-                    variant="ghost" 
-                    className="text-[10px] font-bold tracking-widest text-slate-400 hover:text-slate-600 uppercase flex items-center gap-2 mb-1 bg-slate-50/50 px-3 py-1 rounded-full"
-                    onClick={handleFlip}
-                >
-                    <RotateCcw className="w-3 h-3" />
-                    Back to Question
-                </Button>
-            )}
-            
-            {/* タグ表示 */}
-            {card?.tags && card.tags.length > 0 && (
-                <div className="flex flex-wrap justify-end gap-1.5 animate-in fade-in slide-in-from-right-2 duration-500 delay-150 max-w-[200px] md:max-w-xs">
-                    {card.tags.map((tag: string, i: number) => (
-                         <TagBadge key={i} tag={tag} />
-                    ))}
-                </div>
-            )}
+      {!previewMode && (
+        <div className="w-full flex justify-end px-2 pb-2 min-h-[40px]">
+          <div className="flex flex-col items-end gap-2">
+               {extraHeaderRight}
+              
+              {/* タグ表示 */}
+              {card?.tags && card.tags.length > 0 && (
+                  <div className="flex flex-wrap justify-end gap-1.5 animate-in fade-in slide-in-from-right-2 duration-500 delay-150 max-w-[200px] md:max-w-xs">
+                      {card.tags.map((tag: string, i: number) => (
+                           <TagBadge key={i} tag={tag} />
+                      ))}
+                  </div>
+              )}
+          </div>
         </div>
-      </div>
+      )}
 
-      <Card 
+      <CardShell 
         className={cn(
-          "min-h-[450px] md:min-h-[600px] border-none shadow-[0_4px_30px_-8px_rgba(0,0,0,0.08)] rounded-[32px] md:rounded-[40px] bg-white flex flex-col relative overflow-hidden transition-all duration-300 ring-1 ring-slate-100",
+          "mx-auto border-none shadow-[0_4px_30px_-8px_rgba(0,0,0,0.08)] rounded-[32px] md:rounded-[40px] bg-white overflow-hidden transition-all duration-300 ring-1 ring-slate-100",
           !previewMode && "hover:shadow-[0_8px_40px_-12px_rgba(0,0,0,0.12)]",
           "cursor-pointer"
         )}
         onClick={handleFlip}
+        actionsTopLeft={actionsTopLeft.length > 0 ? actionsTopLeft : undefined}
+        actionsTopRight={actionsTopRight.length > 0 ? actionsTopRight : undefined}
+        actionsBottomRight={actionsBottomRight.length > 0 ? actionsBottomRight : undefined}
+        drawMode={enableDrawMode}
       >
-        <CardContent className="p-1 md:p-2 flex-1 flex flex-col relative">
-          
-          {/* 左上：曖昧・編集・ブックマークボタン */}
-          <div className="absolute top-2 md:top-3 left-2 md:left-3 flex gap-2 md:gap-3 z-10">
-             {extraHeaderLeft}
-             <Button
-                variant={hasUncertainty ? "default" : "ghost"}
-                size="icon"
-                onClick={(e) => {
-                    e.stopPropagation();
-                    if(onToggleUncertainty) onToggleUncertainty(card);
-                }}
-                className={cn(
-                    "rounded-full w-9 h-9 md:w-11 md:h-11 transition-colors",
-                    hasUncertainty 
-                        ? "bg-amber-400 hover:bg-amber-500 text-white shadow-md border-none" 
-                        : "bg-slate-50/80 text-slate-400 hover:bg-slate-100 hover:text-slate-600 border border-transparent"
-                )}
-                title="曖昧/要復習"
-             >
-                <HelpCircle className="w-5 h-5 md:w-5 md:h-5 scale-90 md:scale-100" />
-             </Button>
-
-             <Button
-                variant={isBookmarked ? "default" : "ghost"}
-                size="icon"
-                onClick={(e) => {
-                    e.stopPropagation();
-                    if(onToggleBookmark) onToggleBookmark(card);
-                }}
-                className={cn(
-                    "rounded-full w-9 h-9 md:w-11 md:h-11 transition-colors",
-                    isBookmarked 
-                        ? "bg-primary-600 hover:bg-primary-700 text-white shadow-md border-none" 
-                        : "bg-slate-50/80 text-slate-400 hover:bg-primary-600/10 hover:text-primary-600 border border-transparent"
-                )}
-                title="ブックマーク"
-             >
-                <Bookmark className={cn("w-5 h-5 md:w-5 md:h-5 scale-90 md:scale-100", isBookmarked && "fill-current")} />
-             </Button>
-
-             {!previewMode && onEdit && (
-                 <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onEdit(card);
-                    }}
-                    className="rounded-full w-9 h-9 md:w-11 md:h-11 bg-slate-50/80 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
-                    title="編集"
-                >
-                    <Pencil className="w-5 h-5 md:w-5 md:h-5 scale-90 md:scale-100" />
-                </Button>
-             )}
-          </div>
-          
-
-          {/* 右上：タグ & 表面へ戻る & 追加要素（削除：カード外へ移動） */}
-
+        <div className="relative flex h-full flex-col px-2 md:px-3 pb-3 md:pb-4">
 
           {/* コンテンツエリア - 中央配置 */}
           <div className="flex-1 flex flex-col items-center justify-center text-center max-w-none mx-auto w-full py-8">
-            {isFlipped ? (
+            {effectiveIsFlipped ? (
                 /* 回答表示状態 */
                 <div className="animate-in fade-in zoom-in-95 duration-300 w-full px-2">
                   {cardData.answerBlocks?.length > 0 ? (
@@ -382,9 +454,6 @@ export function Flashcard({
           {/* フッターエリア */}
           <div className="mt-auto pt-4 text-center">
              {extraFooter}
-             {!isFlipped && !previewMode && (
-                 <p className="text-sm text-slate-400 animate-pulse">Click card to reveal answer</p>
-             )}
              {previewMode && (
                 <div className="flex gap-4 justify-center">
                     {/* ボタン削除 */}
@@ -392,30 +461,34 @@ export function Flashcard({
              )}
           </div>
           
-          {/* 参考リンクインジケータ (右下) */}
-          {allReferences.length > 0 && (
-            <div className="absolute bottom-1.5 right-1.5 md:bottom-2 md:right-2 z-10">
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsReferencePopupOpen(true);
-                }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-600 text-white shadow-[0_2px_0_#1e293b] active:shadow-none active:translate-y-[2px] transition-all hover:bg-primary-500 hover:shadow-[0_2px_0_#1e293b]"
-                title="参考リンクを表示"
-              >
-                <LinkIcon className="w-3.5 h-3.5 stroke-[2.5]" />
-                <span className="text-[11px] font-bold">x{allReferences.length}</span>
-              </button>
-            </div>
-          )}
+        </div>
+      </CardShell>
 
-        </CardContent>
-      </Card>
+      {/* カード直下の「Back to Question」 */}
+      {!previewMode && effectiveIsFlipped && (
+        <div className="w-full flex justify-center pt-2">
+          <Button 
+            variant="ghost" 
+            className="text-[10px] font-bold tracking-widest text-slate-400 hover:text-slate-600 uppercase flex items-center gap-2 bg-slate-50/50 px-3 py-1 rounded-full"
+            onClick={handleFlip}
+          >
+            <RotateCcw className="w-3 h-3" />
+            Back to Question
+          </Button>
+        </div>
+      )}
+
+      {/* カード直下のガイダンステキスト */}
+      {!previewMode && !effectiveIsFlipped && (
+        <div className="w-full flex justify-center pt-2">
+          <p className="text-sm text-slate-400 animate-pulse">Click card to reveal answer</p>
+        </div>
+      )}
 
       <ReferencePopup 
         isOpen={isReferencePopupOpen}
         onClose={() => setIsReferencePopupOpen(false)}
-        references={allReferences}
+        references={activeReferences}
       />
 
       {/* ナビゲーション（オプション） */}

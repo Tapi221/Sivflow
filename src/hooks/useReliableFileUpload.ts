@@ -38,7 +38,8 @@ const ALLOWED_MIME_TYPES: Record<string, string[]> = {
   'card_audio': ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/m4a', 'audio/mp4', 'audio/x-m4a'],
   'profile': ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'],
   'memo': ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
-  'pdf': ['application/pdf']
+  'pdf': ['application/pdf'],
+  'pptx': ['application/vnd.openxmlformats-officedocument.presentationml.presentation']
 };
 
 /**
@@ -155,7 +156,15 @@ export const useReliableFileUpload = (): UseReliableFileUploadReturn => {
     try {
         // 1. Generate Safe Path and ID
         const contextType = (context as any)?.type || (typeof context === 'string' ? context : 'card_image');
-        const { safeName, id } = generateSafeStoragePath(file.name, contextType === 'card_audio' ? 'audio' : undefined);
+        const forcedId =
+          typeof context === 'object' && context !== null && typeof (context as any).docId === 'string'
+            ? (context as any).docId.trim()
+            : '';
+        const { safeName, id: generatedId } = generateSafeStoragePath(
+          file.name,
+          contextType === 'card_audio' ? 'audio' : undefined
+        );
+        const id = forcedId || generatedId;
         const storagePath = pathGenerator(safeName);
 
         // 2. Save to ImageDB (Optimistic Local Save)

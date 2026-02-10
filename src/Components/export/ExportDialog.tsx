@@ -1,7 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { getLocalDb } from '@/services/localDB';
+import {
+  getLocalDb,
+  getLocalDBRuntimeStatus,
+  subscribeLocalDBRuntimeStatus,
+} from '@/services/localDB';
 import { snapshotService } from '@/services/SnapshotService';
 import {
   Dialog,
@@ -14,7 +18,7 @@ import {
 import { Button } from '@/Components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/Components/ui/radio-group';
 import { Label } from '@/Components/ui/label';
-import { Folder, Loader2, CheckCircle } from 'lucide-react';
+import { AlertTriangle, Folder, Loader2, CheckCircle } from 'lucide-react';
 import Download from 'lucide-react/dist/esm/icons/download';
 import Database from 'lucide-react/dist/esm/icons/database';
 
@@ -29,6 +33,13 @@ export default function ExportDialog({ open, onOpenChange }: ExportDialogProps) 
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [exportComplete, setExportComplete] = useState(false);
+  const [runtimeStatus, setRuntimeStatus] = useState(getLocalDBRuntimeStatus());
+
+  useEffect(() => {
+    return subscribeLocalDBRuntimeStatus(setRuntimeStatus);
+  }, []);
+
+  const isFallbackMode = runtimeStatus.mode === 'fallback';
 
   // フォルダ一覧を取得
   const folders = useLiveQuery(
@@ -43,7 +54,7 @@ export default function ExportDialog({ open, onOpenChange }: ExportDialogProps) 
   );
 
   const handleExport = async () => {
-    if (!currentUser) return;
+    if (!currentUser || isFallbackMode) return;
     
     setIsExporting(true);
     setExportComplete(false);
@@ -94,10 +105,20 @@ export default function ExportDialog({ open, onOpenChange }: ExportDialogProps) 
         ) : (
           <>
             <div className="py-4">
+              {isFallbackMode && (
+                <div className="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                  <div className="flex items-center gap-2 font-semibold">
+                    <AlertTriangle className="h-4 w-4" />
+                    ローカル保存が無効なため、このセッションではエクスポートできません
+                  </div>
+                </div>
+              )}
+
               <RadioGroup
                 value={exportType}
                 onValueChange={(value) => setExportType(value as 'all' | 'folder')}
                 className="space-y-3"
+                disabled={isFallbackMode}
               >
                 <div className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-gray-50 cursor-pointer">
                   <RadioGroupItem value="all" id="all" />
@@ -136,6 +157,7 @@ export default function ExportDialog({ open, onOpenChange }: ExportDialogProps) 
                     value={selectedFolderId || ''}
                     onChange={(e) => setSelectedFolderId(e.target.value || null)}
                     className="w-full p-2 border rounded-lg text-sm"
+                    disabled={isFallbackMode}
                   >
                     <option value="">選択してください</option>
                     {folders?.map((folder) => (
@@ -164,7 +186,7 @@ export default function ExportDialog({ open, onOpenChange }: ExportDialogProps) 
           {!exportComplete && (
             <Button
               onClick={handleExport}
-              disabled={isExporting || (exportType === 'folder' && !selectedFolderId)}
+              disabled={isFallbackMode || isExporting || (exportType === 'folder' && !selectedFolderId)}
               className="bg-primary-600 hover:bg-primary-700"
             >
               {isExporting ? (

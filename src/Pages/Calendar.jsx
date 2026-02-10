@@ -106,9 +106,7 @@ export default function Calendar() {
         const isDraft = c.is_draft || c.isDraft;
         const folderId = c.folderId || c.folder_id;
         
-        // Hidden check
         const folder = folders.find(f => (f.id === folderId || f.folderId === folderId));
-        const isHidden = folder?.isHidden || folder?.is_hidden;
         
 
         
@@ -120,7 +118,7 @@ export default function Calendar() {
         // Exclude silent cards (Notification OFF)
         if (c.isSilent) return false;
 
-        return !isDraft && dateVal && !isHidden;
+        return !isDraft && dateVal;
     }).forEach(card => {
       const dateValue = card.next_review_date || card.nextReviewDate;
       const dateObj = dateValue?.toDate ? dateValue.toDate() : (dateValue instanceof Date ? dateValue : new Date(dateValue));
