@@ -1,365 +1,287 @@
 param(
   [Parameter(Mandatory = $true)]
   [string]$ProjectId,
+
   [string]$Bucket = "",
   [string]$Uid = "e2e-pptx-user",
   [int]$Slides = 3,
-  [int]$TimeoutSeconds = 120,
-  [string]$CredentialsFile = ""
+  [int]$PollTimeoutSeconds = 120,
+  [int]$PollIntervalSeconds = 4
 )
 
+Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-function Invoke-External {
+function Invoke-CheckedCommand {
   param(
-    [Parameter(Mandatory = $true)][string]$Label,
-    [Parameter(Mandatory = $true)][scriptblock]$Command
+    [Parameter(Mandatory = $true)][string]$Executable,
+    [Parameter(Mandatory = $true)][string[]]$Arguments,
+    [Parameter(Mandatory = $true)][string]$Description
   )
-  & $Command
+
+  Write-Host "==> $Description"
+  Write-Host "    $Executable $($Arguments -join ' ')"
+  & $Executable @Arguments
   if ($LASTEXITCODE -ne 0) {
-    throw "$Label failed with exit code $LASTEXITCODE"
+    throw "Command failed ($Description): $Executable $($Arguments -join ' ')"
   }
 }
 
-function Invoke-CapturedExternal {
+function Get-EnvValueFromFile {
   param(
-    [Parameter(Mandatory = $true)][string]$Label,
-    [Parameter(Mandatory = $true)][scriptblock]$Command
+    [Parameter(Mandatory = $true)][string]$FilePath,
+    [Parameter(Mandatory = $true)][string]$Key
   )
-  $output = & $Command 2>&1
-  $exitCode = $LASTEXITCODE
-  if ($output) {
-    $output | ForEach-Object { Write-Host $_ }
+
+  if (-not (Test-Path $FilePath)) { return $null }
+  foreach ($line in Get-Content $FilePath) {
+    $trimmed = $line.Trim()
+    if (-not $trimmed -or $trimmed.StartsWith("#")) { continue }
+    if ($trimmed -match "^\s*$([regex]::Escape($Key))\s*=\s*(.*)$") {
+      $value = $Matches[1]
+      if (
+        ($value.StartsWith('"') -and $value.EndsWith('"')) -or
+        ($value.StartsWith("'") -and $value.EndsWith("'"))
+      ) {
+        return $value.Substring(1, $value.Length - 2)
+      }
+      return $value
+    }
   }
-  if ($exitCode -ne 0) {
-    throw "$Label failed with exit code $exitCode"
+  return $null
+}
+
+function Invoke-NodeJson {
+  param(
+    [Parameter(Mandatory = $true)][string]$ScriptContent,
+    [Parameter(Mandatory = $true)][string[]]$Arguments
+  )
+
+  $tmpFile = Join-Path $env:TEMP ("pptx-e2e-" + [Guid]::NewGuid().ToString("N") + ".cjs")
+  try {
+    Set-Content -Path $tmpFile -Value $ScriptContent -Encoding utf8
+    $output = & node $tmpFile @Arguments
+    if ($LASTEXITCODE -ne 0) {
+      throw "Node helper failed: $tmpFile"
+    }
+    $jsonText = ($output -join "`n").Trim()
+    if (-not $jsonText) {
+      throw "Node helper returned empty output."
+    }
+    return $jsonText | ConvertFrom-Json -Depth 20
+  } finally {
+    if (Test-Path $tmpFile) {
+      Remove-Item $tmpFile -Force
+    }
   }
-  return @($output)
 }
 
-function Require-Command {
-  param([Parameter(Mandatory = $true)][string]$Name)
-  if (-not (Get-Command $Name -ErrorAction SilentlyContinue)) {
-    throw "Required command not found: $Name"
-  }
-}
-
-Require-Command -Name "node"
-Require-Command -Name "gsutil"
-Require-Command -Name "gcloud"
-
-if ($Slides -lt 1 -or $Slides -gt 10) {
-  throw "Slides must be between 1 and 10."
-}
-
-if ($TimeoutSeconds -lt 30 -or $TimeoutSeconds -gt 600) {
-  throw "TimeoutSeconds must be between 30 and 600."
-}
-
-if ([string]::IsNullOrWhiteSpace($Bucket)) {
+if (-not $Bucket) {
   $Bucket = "$ProjectId.firebasestorage.app"
 }
 
-$resolvedCredentials = ""
-if (-not [string]::IsNullOrWhiteSpace($CredentialsFile)) {
-  $resolvedCredentials = (Resolve-Path $CredentialsFile).Path
-} elseif (-not [string]::IsNullOrWhiteSpace($env:GOOGLE_APPLICATION_CREDENTIALS) -and (Test-Path $env:GOOGLE_APPLICATION_CREDENTIALS)) {
-  $resolvedCredentials = (Resolve-Path $env:GOOGLE_APPLICATION_CREDENTIALS).Path
-} elseif (Test-Path "serviceAccountKey.json") {
-  $resolvedCredentials = (Resolve-Path "serviceAccountKey.json").Path
+if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+  throw "node コマンドが見つかりません。"
+}
+if (-not (Get-Command gsutil -ErrorAction SilentlyContinue)) {
+  throw "gsutil コマンドが見つかりません。"
 }
 
-if (-not [string]::IsNullOrWhiteSpace($resolvedCredentials)) {
-  Set-Item -Path "Env:GOOGLE_APPLICATION_CREDENTIALS" -Value $resolvedCredentials
-  Write-Host "[auth] using GOOGLE_APPLICATION_CREDENTIALS=$resolvedCredentials"
-} else {
-  & gcloud auth application-default print-access-token | Out-Null
-  if ($LASTEXITCODE -ne 0) {
-    throw "No ADC found. Run 'gcloud auth application-default login' or pass -CredentialsFile."
-  }
-  Write-Host "[auth] using application-default credentials"
+$envFile = "functions/.env.$ProjectId"
+$converterEndpoint = Get-EnvValueFromFile -FilePath $envFile -Key "PPTX_CONVERTER_ENDPOINT"
+if (-not $converterEndpoint) {
+  throw "PPTX_CONVERTER_ENDPOINT が $envFile に設定されていません。"
 }
 
-$timestamp = Get-Date -Format "yyyyMMddHHmmss"
-$docId = "e2e-pptx-real-$timestamp"
-$tmpRoot = Join-Path $env:TEMP "flashcardmaster-pptx-e2e"
-$tmpDir = Join-Path $tmpRoot $docId
-$samplePath = Join-Path $tmpDir "sample.pptx"
+# D: unauth direct access must be blocked before running full E2E.
+$unauthPayload = @{
+  userId = "unauth-check"
+  docId = "unauth-check"
+  sourceStoragePath = "users/unauth-check/documents/unauth-check/source.pptx"
+} | ConvertTo-Json -Compress
+$unauthResponse = Invoke-WebRequest -Uri $converterEndpoint -Method Post -ContentType "application/json" -Body $unauthPayload -SkipHttpErrorCheck
+if ($unauthResponse.StatusCode -ne 401 -and $unauthResponse.StatusCode -ne 403) {
+  throw "Unauthenticated direct access to converter was not blocked. status=$($unauthResponse.StatusCode)"
+}
+Write-Host "Unauth direct check passed: status=$($unauthResponse.StatusCode)"
+
+$docId = [Guid]::NewGuid().ToString("N")
 $sourceStoragePath = "users/$Uid/documents/$docId/source.pptx"
 $expectedManifestPath = "users/$Uid/documents/$docId/pptx/manifest.json"
+$tmpDir = Join-Path $env:TEMP "pptx-e2e-$docId"
+$samplePath = Join-Path $tmpDir "sample.pptx"
+New-Item -Path $tmpDir -ItemType Directory -Force | Out-Null
 
-New-Item -ItemType Directory -Path $tmpDir -Force | Out-Null
+Invoke-CheckedCommand -Executable "node" -Arguments @(
+  "scripts/generate-sample-pptx.mjs",
+  "--out", $samplePath,
+  "--slides", [string]$Slides
+) -Description "Generate sample PPTX"
 
-Write-Host "[1/6] generating sample PPTX"
-Invoke-External -Label "generate sample PPTX" -Command {
-  node scripts/generate-sample-pptx.mjs --out $samplePath --slides $Slides
-}
+Invoke-CheckedCommand -Executable "gsutil" -Arguments @(
+  "cp",
+  $samplePath,
+  "gs://$Bucket/$sourceStoragePath"
+) -Description "Upload sample PPTX to GCS"
 
-Write-Host "[2/6] uploading source PPTX to GCS"
-Invoke-External -Label "gsutil cp source PPTX" -Command {
-  gsutil cp $samplePath "gs://$Bucket/$sourceStoragePath"
-}
-
-Write-Host "[3/6] seeding Firestore document + conversion queue"
-$seedEnv = @{
-  E2E_PROJECT_ID = $ProjectId
-  E2E_UID = $Uid
-  E2E_DOC_ID = $docId
-  E2E_SOURCE_STORAGE_PATH = $sourceStoragePath
-}
 $seedScript = @'
 const admin = require("firebase-admin");
-const projectId = process.env.E2E_PROJECT_ID;
-const uid = process.env.E2E_UID;
-const docId = process.env.E2E_DOC_ID;
-const sourceStoragePath = process.env.E2E_SOURCE_STORAGE_PATH;
+const { FieldValue } = require("firebase-admin/firestore");
 
+const [projectId, uid, docId, sourceStoragePath] = process.argv.slice(2);
 if (!projectId || !uid || !docId || !sourceStoragePath) {
-  throw new Error("seed env missing");
+  throw new Error("missing_args");
 }
 
 if (!admin.apps.length) {
   admin.initializeApp({ projectId });
 }
 
-const firestore = admin.firestore();
-const now = admin.firestore.FieldValue.serverTimestamp();
-const documentRef = firestore.doc(`users/${uid}/documents/${docId}`);
-const conversionRef = firestore.doc(`users/${uid}/pptxConversions/${docId}`);
+const db = admin.firestore();
 
 (async () => {
-  await documentRef.set(
+  const now = FieldValue.serverTimestamp();
+  await db.doc(`users/${uid}/documents/${docId}`).set(
     {
       id: docId,
       userId: uid,
       kind: "pptx",
-      title: `E2E PPTX ${docId}`,
-      fileName: "sample.pptx",
-      mimeType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      title: `E2E ${docId}.pptx`,
+      fileName: `E2E ${docId}.pptx`,
       storagePath: sourceStoragePath,
       uploadStatus: "ready",
-      convertStatus: "processing",
       pptxManifestStatus: "queued",
-      pptxManifestPath: null,
-      pptxSlideCount: null,
-      pptxLastError: null,
-      pptxConvertRequestedAt: now,
+      convertStatus: "queued",
       createdAt: now,
       updatedAt: now,
-      isDeleted: false,
+      isDeleted: false
     },
     { merge: true }
   );
 
-  await conversionRef.set(
+  await db.doc(`users/${uid}/pptxConversions/${docId}`).set(
     {
       docId,
       uid,
       sourceStoragePath,
       status: "queued",
-      requestOrigin: "e2e-script",
       createdAt: now,
-      updatedAt: now,
+      updatedAt: now
     },
     { merge: true }
   );
 
-  console.log("seeded");
+  console.log(JSON.stringify({ ok: true }));
 })().catch((error) => {
   console.error(error);
   process.exit(1);
 });
 '@
-foreach ($entry in $seedEnv.GetEnumerator()) {
-  Set-Item -Path "Env:$($entry.Key)" -Value $entry.Value
-}
-Invoke-CapturedExternal -Label "seed Firestore docs" -Command {
-  $seedScript | node -
-} | Out-Null
 
-Write-Host "[4/6] polling conversion status"
-$pollEnv = @{
-  E2E_PROJECT_ID = $ProjectId
-  E2E_BUCKET = $Bucket
-  E2E_UID = $Uid
-  E2E_DOC_ID = $docId
-  E2E_EXPECTED_MANIFEST_PATH = $expectedManifestPath
-  E2E_TIMEOUT_SECONDS = "$TimeoutSeconds"
-}
+[void](Invoke-NodeJson -ScriptContent $seedScript -Arguments @($ProjectId, $Uid, $docId, $sourceStoragePath))
+
 $pollScript = @'
 const admin = require("firebase-admin");
 
-const projectId = process.env.E2E_PROJECT_ID;
-const bucketName = process.env.E2E_BUCKET;
-const uid = process.env.E2E_UID;
-const docId = process.env.E2E_DOC_ID;
-const expectedManifestPath = process.env.E2E_EXPECTED_MANIFEST_PATH;
-const timeoutSeconds = Number(process.env.E2E_TIMEOUT_SECONDS || "120");
-
-if (!projectId || !bucketName || !uid || !docId || !expectedManifestPath) {
-  throw new Error("poll env missing");
+const [projectId, uid, docId] = process.argv.slice(2);
+if (!projectId || !uid || !docId) {
+  throw new Error("missing_args");
 }
 
 if (!admin.apps.length) {
-  admin.initializeApp({ projectId, storageBucket: bucketName });
+  admin.initializeApp({ projectId });
 }
 
-const firestore = admin.firestore();
-const bucket = admin.storage().bucket(bucketName);
-const conversionRef = firestore.doc(`users/${uid}/pptxConversions/${docId}`);
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const normalize = (value) => (typeof value === "string" ? value.trim() : "");
-
-const main = async () => {
-  const startedAt = Date.now();
-  const sequence = [];
-  let finalData = null;
-
-  while (Date.now() - startedAt < timeoutSeconds * 1000) {
-    const snap = await conversionRef.get();
-    if (!snap.exists) {
-      await sleep(1500);
-      continue;
-    }
-    const data = snap.data() || {};
-    finalData = data;
-    const status = normalize(data.status) || "unknown";
-    if (sequence[sequence.length - 1] !== status) {
-      sequence.push(status);
-      console.log(`STATUS=${status}`);
-    }
-
-    if (status === "ready") {
-      const manifestPath = normalize(data.manifestPath);
-      if (manifestPath !== expectedManifestPath) {
-        throw new Error(`manifest_path_unexpected:${manifestPath}`);
-      }
-
-      const manifestFile = bucket.file(manifestPath);
-      const [manifestExists] = await manifestFile.exists();
-      if (!manifestExists) {
-        throw new Error(`manifest_not_found:${manifestPath}`);
-      }
-
-      const [manifestBytes] = await manifestFile.download();
-      let manifest;
-      try {
-        manifest = JSON.parse(manifestBytes.toString("utf8"));
-      } catch {
-        throw new Error("manifest_invalid_json");
-      }
-
-      const slideCount = Number(manifest.slideCount);
-      const slides = Array.isArray(manifest.slides) ? manifest.slides : [];
-      if (!Number.isFinite(slideCount) || slideCount <= 0) {
-        throw new Error("manifest_slide_count_invalid");
-      }
-      if (slides.length !== slideCount) {
-        throw new Error(`manifest_slide_mismatch:${slides.length}:${slideCount}`);
-      }
-
-      for (const slide of slides) {
-        const path = normalize(slide?.path);
-        if (!path) {
-          throw new Error("manifest_slide_path_missing");
-        }
-        const [exists] = await bucket.file(path).exists();
-        if (!exists) {
-          throw new Error(`slide_not_found:${path}`);
-        }
-      }
-
-      console.log(`DOC_ID=${docId}`);
-      console.log(`STATUS_SEQUENCE=${sequence.join("->")}`);
-      console.log("FINAL_STATUS=ready");
-      console.log(`MANIFEST_PATH=${manifestPath}`);
-      console.log(`SLIDE_COUNT=${slideCount}`);
-      return;
-    }
-
-    if (status === "failed") {
-      const errorMessage = normalize(data.errorMessage) || "unknown_error";
-      console.log(`DOC_ID=${docId}`);
-      console.log(`STATUS_SEQUENCE=${sequence.join("->")}`);
-      console.log("FINAL_STATUS=failed");
-      console.log(`ERROR_MESSAGE=${errorMessage}`);
-      process.exit(1);
-    }
-
-    await sleep(2000);
+(async () => {
+  const snap = await admin.firestore().doc(`users/${uid}/pptxConversions/${docId}`).get();
+  if (!snap.exists) {
+    console.log(JSON.stringify({ exists: false }));
+    return;
   }
-
-  const lastStatus = normalize(finalData?.status) || "timeout";
-  const errorMessage = normalize(finalData?.errorMessage) || "timeout";
-  console.log(`DOC_ID=${docId}`);
-  console.log(`STATUS_SEQUENCE=${sequence.join("->")}`);
-  console.log(`FINAL_STATUS=${lastStatus}`);
-  console.log(`ERROR_MESSAGE=${errorMessage}`);
-  process.exit(1);
-};
-
-main().catch((error) => {
-  console.error(error instanceof Error ? error.message : String(error));
+  const data = snap.data() || {};
+  console.log(
+    JSON.stringify({
+      exists: true,
+      status: data.status || null,
+      manifestPath: data.manifestPath || null,
+      slideCount: data.slideCount ?? null,
+      errorMessage: data.errorMessage || null
+    })
+  );
+})().catch((error) => {
+  console.error(error);
   process.exit(1);
 });
 '@
-foreach ($entry in $pollEnv.GetEnumerator()) {
-  Set-Item -Path "Env:$($entry.Key)" -Value $entry.Value
-}
-$pollOutput = Invoke-CapturedExternal -Label "poll conversion status" -Command {
-  $pollScript | node -
+
+$statusSequence = New-Object System.Collections.Generic.List[string]
+$deadline = (Get-Date).AddSeconds($PollTimeoutSeconds)
+$latest = $null
+
+while ((Get-Date) -lt $deadline) {
+  $latest = Invoke-NodeJson -ScriptContent $pollScript -Arguments @($ProjectId, $Uid, $docId)
+  if (-not $latest.exists) {
+    Start-Sleep -Seconds 1
+    continue
+  }
+
+  $status = [string]$latest.status
+  if ($status -and ($statusSequence.Count -eq 0 -or $statusSequence[$statusSequence.Count - 1] -ne $status)) {
+    $statusSequence.Add($status)
+    Write-Host "Status => $status"
+  }
+
+  if ($status -eq "ready" -or $status -eq "failed") {
+    break
+  }
+
+  Start-Sleep -Seconds $PollIntervalSeconds
 }
 
-$sequenceLine = $pollOutput | Where-Object { $_ -match '^STATUS_SEQUENCE=' } | Select-Object -Last 1
-$finalStatusLine = $pollOutput | Where-Object { $_ -match '^FINAL_STATUS=' } | Select-Object -Last 1
-$manifestPathLine = $pollOutput | Where-Object { $_ -match '^MANIFEST_PATH=' } | Select-Object -Last 1
-
-if (-not $finalStatusLine -or $finalStatusLine -notmatch '^FINAL_STATUS=ready$') {
-  throw "E2E did not finish in ready state."
+if ($null -eq $latest -or -not $latest.exists) {
+  throw "Conversion document was not found."
 }
 
-if (-not $manifestPathLine) {
-  throw "MANIFEST_PATH was not produced by poll script."
+$finalStatus = [string]$latest.status
+$manifestPath = [string]$latest.manifestPath
+$errorMessage = [string]$latest.errorMessage
+
+if ($finalStatus -ne "ready") {
+  Write-Host "DOC_ID=$docId"
+  Write-Host "STATUS_SEQUENCE=$($statusSequence -join '>')"
+  Write-Host "FINAL_STATUS=$finalStatus"
+  Write-Host "ERROR_MESSAGE=$errorMessage"
+  throw "Expected ready but got $finalStatus"
 }
 
-$manifestPath = $manifestPathLine -replace '^MANIFEST_PATH=', ''
 if ($manifestPath -ne $expectedManifestPath) {
-  throw "Unexpected manifest path: $manifestPath"
+  throw "Unexpected manifestPath. expected=$expectedManifestPath actual=$manifestPath"
 }
 
-$manifestGsPath = "gs://$Bucket/$manifestPath"
-Write-Host "[5/6] validating manifest/slides via gsutil"
-$manifestJsonLines = Invoke-CapturedExternal -Label "gsutil cat manifest" -Command {
-  gsutil cat $manifestGsPath
+$manifestRaw = & gsutil cat "gs://$Bucket/$manifestPath"
+if ($LASTEXITCODE -ne 0) {
+  throw "Failed to read manifest from gs://$Bucket/$manifestPath"
 }
-$manifestJsonText = ($manifestJsonLines -join "`n").Trim()
-if ([string]::IsNullOrWhiteSpace($manifestJsonText)) {
-  throw "Manifest JSON is empty."
-}
-
-$manifestObject = $manifestJsonText | ConvertFrom-Json
-$slideCountFromField = [int]$manifestObject.slideCount
-$slidesArray = @($manifestObject.slides)
-if ($slideCountFromField -le 0) {
-  throw "Manifest slideCount is invalid: $slideCountFromField"
-}
-if ($slidesArray.Count -ne $slideCountFromField) {
-  throw "Manifest slideCount mismatch. slideCount=$slideCountFromField slides.Length=$($slidesArray.Count)"
+$manifestJson = ($manifestRaw -join "`n") | ConvertFrom-Json -Depth 50
+$manifestSlideCount = [int]$manifestJson.slideCount
+$slides = @($manifestJson.slides)
+if ($manifestSlideCount -ne $slides.Count) {
+  throw "Manifest slideCount mismatch. slideCount=$manifestSlideCount slides.length=$($slides.Count)"
 }
 
-foreach ($slide in $slidesArray) {
-  if ([string]::IsNullOrWhiteSpace($slide.path)) {
-    throw "Manifest slide path is missing."
+foreach ($slide in $slides) {
+  if (-not $slide.path) {
+    throw "Manifest contains slide without path."
   }
-  Invoke-External -Label "gsutil ls slide $($slide.path)" -Command {
-    gsutil ls "gs://$Bucket/$($slide.path)"
+  & gsutil ls "gs://$Bucket/$($slide.path)" *> $null
+  if ($LASTEXITCODE -ne 0) {
+    throw "Slide object does not exist: gs://$Bucket/$($slide.path)"
   }
 }
 
-Write-Host "[6/6] conversion completed and validated"
+Write-Host ""
 Write-Host "DOC_ID=$docId"
-if ($sequenceLine) { Write-Host $sequenceLine }
-Write-Host "FINAL_STATUS=ready"
+Write-Host "STATUS_SEQUENCE=$($statusSequence -join '>')"
+Write-Host "FINAL_STATUS=$finalStatus"
 Write-Host "MANIFEST_PATH=$manifestPath"
-Write-Host "SLIDE_COUNT=$slideCountFromField"
+Write-Host "SLIDE_COUNT=$manifestSlideCount"

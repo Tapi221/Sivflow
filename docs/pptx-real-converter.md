@@ -1,127 +1,141 @@
 # PPTX Real Converter Operations
 
-このドキュメントは `services/pptx-converter` を Cloud Run で運用し、Functions の `onPptxConversionQueued` から real converter 経路を使うための手順です。
+This document describes the production-safe operation for the PPTX real converter pipeline:
 
-## 1. Cloud Run Deploy
+- Firestore trigger: `onPptxConversionQueued`
+- Cloud Run converter: `/convert`
+- Storage output: `users/{uid}/documents/{docId}/pptx/...`
 
-PowerShell:
+## Architecture (IAM-first)
 
-```powershell
-.\scripts\deploy-pptx-converter.ps1 -ProjectId <project-id>
-```
+- Runtime service account (Cloud Run): `pptx-converter-runtime@<project>.iam.gserviceaccount.com`
+  - Required role: `roles/storage.objectAdmin` (minimum practical role for read/write object flow)
+- Invoker service account (Functions): `onPptxConversionQueued` runtime SA
+  - Required role on Cloud Run service: `roles/run.invoker`
+- Converter auth headers:
+  - `Authorization: Bearer <ID_TOKEN>` (audience = Cloud Run URL)
+  - `x-pptx-converter-token: <secret>` (defense-in-depth)
 
-主なデフォルト:
-
-- region: `us-central1`
-- service: `pptx-converter`
-- memory: `2Gi`
-- cpu: `1`
-- timeout: `120s`
-- env:
-  - `PPTX_MAX_SLIDES=200`
-  - `PPTX_CONVERSION_DPI=160`
-  - `PPTX_COMMAND_TIMEOUT_MS=120000`
-- secret:
-  - `PPTX_CONVERTER_TOKEN` (`latest`)
-
-デプロイ成功時に出力される:
-
-- Cloud Run base URL
-- Converter endpoint URL (`<base>/convert`)
-
-## 2. Functions Endpoint Setting
-
-Cloud Run URL を Functions の env に反映:
+## Deploy Cloud Run Converter
 
 ```powershell
-.\scripts\set-pptx-converter-endpoint.ps1 -ProjectId <project-id> -Endpoint https://<cloud-run-host>/convert
+pwsh ./scripts/deploy-pptx-converter.ps1 `
+  -ProjectId <project-id> `
+  -Region us-central1 `
+  -ServiceName pptx-converter
 ```
 
-このスクリプトは以下を強制します:
+The script:
+
+1. Validates `PPTX_CONVERTER_TOKEN` secret exists.
+2. Creates/uses dedicated runtime SA.
+3. Deploys Cloud Run without unauthenticated access.
+4. Grants `roles/run.invoker` to Functions SA.
+5. Prints converter endpoint URL (`.../convert`).
+
+## Configure Functions Endpoint
+
+```powershell
+pwsh ./scripts/set-pptx-converter-endpoint.ps1 `
+  -ProjectId <project-id> `
+  -Endpoint https://<service-hash>-<region>.a.run.app/convert
+```
+
+This updates `functions/.env.<project-id>` with:
 
 - `PPTX_CONVERTER_ENDPOINT=<.../convert>`
 - `PPTX_CONVERTER_IMPLEMENTATION=real`
 
-`functions/.env.<project-id>` の差分を表示します。
-
-## 3. Functions Deploy
+Then deploy Functions:
 
 ```powershell
-firebase use <alias-or-project>
-firebase deploy --only functions
+firebase deploy --only functions --project <project-id>
 ```
 
-`.firebaserc` で `staging` / `prod` が同じ project を向いている場合は `predeploy-check` がブロックします。
+## Predeploy Guard
 
-緊急時 override:
+`firebase.json` runs:
 
-```powershell
-$env:ALLOW_SAME_PROJECT_ALIAS="1"
-firebase deploy --only functions
+```txt
+node ./scripts/predeploy-check.mjs
 ```
 
-本番運用では基本的に override を使わないでください。
+Current checks:
 
-## 4. Real Converter E2E
+- blocks when `staging` and `prod` aliases point to same project (unless override)
+- blocks unsafe prod endpoint (`localhost`, `127.0.0.1`, placeholder `cloudfunctions.net/.../pptxConverterEndpoint`)
+- validates active project resolution for both alias and `--project` flows
 
-```powershell
-.\scripts\e2e-pptx-real.ps1 -ProjectId <project-id>
-```
-
-処理内容:
-
-1. 本物のサンプル PPTX を生成 (`scripts/generate-sample-pptx.mjs`)
-2. `gs://<bucket>/users/<uid>/documents/<docId>/source.pptx` にアップロード
-3. Firestore:
-   - `users/<uid>/documents/<docId>`
-   - `users/<uid>/pptxConversions/<docId> (status=queued)`
-4. `queued -> processing -> ready` をポーリング検証
-5. `manifest.json` と `slides/*.png` の存在検証
-
-成功時の出力:
-
-- `DOC_ID`
-- `STATUS_SEQUENCE`
-- `FINAL_STATUS`
-- `MANIFEST_PATH`
-- `SLIDE_COUNT`
-
-認証:
-
-- 既定で `serviceAccountKey.json` があればそれを使います
-- なければ ADC (`gcloud auth application-default login`) が必要です
-- 明示指定する場合:
-
-```powershell
-.\scripts\e2e-pptx-real.ps1 -ProjectId <project-id> -CredentialsFile <path-to-service-account-json>
-```
-
-A〜D の再現方針:
-
-- A (オンライン正常): `e2e-pptx-real.ps1` で `queued->processing->ready` を確認
-- B (オフライン): ブラウザ DevTools を offline にして UI で conversion が発行されないことを確認
-- C (変換失敗): `PPTX_CONVERTER_ENDPOINT` を意図的に無効 URL に切替えて `failed` を確認
-- D (リロード耐性): A で ready 化した doc を UI で再読み込みし manifest 復元表示を確認
-
-## 5. predeploy-check Overrides
-
-`scripts/predeploy-check.mjs` で使用できる環境変数:
+Overrides (use only with incident ticket):
 
 - `ALLOW_SAME_PROJECT_ALIAS=1`
-- `ALLOW_PLACEHOLDER_IN_PROD=1`
-- `ALLOW_CLOUDFUNCTIONS_PPTX_ENDPOINT_IN_PROD=1`
-- `ALLOW_EMPTY_PPTX_CONVERTER_ENDPOINT_IN_PROD=1`
+- `ALLOW_PROD_UNSAFE_CONVERTER_ENDPOINT=1`
 
-原則:
+## E2E (A-D)
 
-- 通常運用では使わない
-- 使った場合は、理由と期間を必ず記録する
-
-## 6. IAM Note
-
-Cloud Run 実行 SA に GCS 読み書き権限が無い場合、変換は失敗します。  
-`deploy-pptx-converter.ps1` は以下の確認用コマンドを表示します（自動実行しません）。
+## A + D: success path + reload durability precondition
 
 ```powershell
-gcloud projects add-iam-policy-binding <project-id> --member="serviceAccount:<service-account>" --role="roles/storage.objectAdmin"
+pwsh ./scripts/e2e-pptx-real.ps1 -ProjectId <project-id>
 ```
+
+What it verifies:
+
+1. unauth direct call to `/convert` is rejected (`401` or `403`)
+2. sample PPTX upload
+3. `queued -> processing -> ready`
+4. manifest and slides exist in GCS
+5. outputs:
+   - `DOC_ID`
+   - `STATUS_SEQUENCE`
+   - `FINAL_STATUS`
+   - `MANIFEST_PATH`
+   - `SLIDE_COUNT`
+
+## C: failure path
+
+```powershell
+pwsh ./scripts/e2e-pptx-failure.ps1 -ProjectId <project-id>
+```
+
+What it verifies:
+
+1. temporarily points endpoint to unreachable URL
+2. deploys Functions
+3. conversion transitions to `failed`
+4. `errorMessage` is `converter_http_*`
+5. restores env and re-deploys Functions automatically
+
+## B: browser offline behavior
+
+Offline UX is validated from app UI (DevTools Network offline):
+
+1. drop PPTX while offline
+2. no conversion request is emitted
+3. UI remains stable and original file action remains available
+
+## Monitoring and Logs
+
+Check status transitions:
+
+- Firestore: `/users/{uid}/pptxConversions/{docId}`
+  - `status`, `errorMessage`, `manifestPath`, `slideCount`
+
+Check Functions logs:
+
+```powershell
+firebase functions:log --project <project-id> --only onPptxConversionQueued
+```
+
+Check Cloud Run logs:
+
+```powershell
+gcloud run services logs read pptx-converter --project <project-id> --region us-central1 --limit 200
+```
+
+Track minimum SLO signals:
+
+- conversion success rate (`ready / total`)
+- timeout ratio (`converter_timeout_*`)
+- upstream HTTP failure ratio (`converter_http_*`)
+
