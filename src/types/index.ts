@@ -427,7 +427,7 @@ export interface DocumentItem extends BaseEntity {
   pageCount?: number | null;   // 取れるなら（後回しOK）
 
   // 追加: アップロード状態（未表示だが将来UI用）
-  uploadStatus?: 'pending' | 'uploading' | 'ready' | 'failed';
+  uploadStatus?: 'pending' | 'queued' | 'uploading' | 'ready' | 'failed';
 
   // PPTX変換ステータス（新）
   pptxManifestStatus?: 'none' | 'queued' | 'processing' | 'ready' | 'failed';
