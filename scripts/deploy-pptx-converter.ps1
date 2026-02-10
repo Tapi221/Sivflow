@@ -42,6 +42,9 @@ function Test-CommandSuccess {
 if (-not (Test-Path "services/pptx-converter")) {
   throw "services/pptx-converter が見つかりません。"
 }
+if (-not (Test-Path "services/pptx-converter/Dockerfile") -and -not (Test-Path "services/pptx-converter/package.json")) {
+  throw "services/pptx-converter に Dockerfile も package.json もありません。real converter 実装を配置してから実行してください。"
+}
 
 if (-not (Get-Command gcloud -ErrorAction SilentlyContinue)) {
   throw "gcloud コマンドが見つかりません。Google Cloud SDK をインストールしてください。"
