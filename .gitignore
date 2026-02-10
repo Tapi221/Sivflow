@@ -41,6 +41,7 @@ all_ts_files.txt
 last_part_index.txt
 debug_*.txt
 MANIFEST_FIX_SUMMARY.md
+functions/lib/
 
 # Service worker
 public/sw.js
