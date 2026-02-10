@@ -57,7 +57,9 @@ function Invoke-NodeJson {
     [Parameter(Mandatory = $true)][string[]]$Arguments
   )
 
-  $tmpFile = Join-Path $env:TEMP ("pptx-e2e-" + [Guid]::NewGuid().ToString("N") + ".cjs")
+  $repoTmpDir = ".tmp"
+  New-Item -Path $repoTmpDir -ItemType Directory -Force | Out-Null
+  $tmpFile = Join-Path $repoTmpDir ("pptx-e2e-" + [Guid]::NewGuid().ToString("N") + ".cjs")
   try {
     Set-Content -Path $tmpFile -Value $ScriptContent -Encoding utf8
     $output = & node $tmpFile @Arguments
