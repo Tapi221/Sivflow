@@ -46,6 +46,14 @@
     /* CardShell sizing (global defaults) */
     --card-base-width: 640px;
     --card-max-height: min(70vh, 560px);
+
+    /* Sidebar Theme Variables */
+    --sidebar-bg: #F2F4F6;
+    --sidebar-border: #E3E6EA;
+    --sidebar-text: #4B5563;
+    --sidebar-text-muted: #6B7280;
+    --sidebar-active-bg: #E7EBEF;
+    --sidebar-active-accent: #7AA6A1;
   }
   
   body {
@@ -170,16 +178,23 @@
 
   /* CardShell: 4:3 base min-height with internal scroll */
   .card-shell {
-    @apply relative flex flex-col bg-white border border-slate-100 rounded-[32px] shadow-sm overflow-hidden;
+    @apply relative flex flex-col;
     --card-w: var(--card-base-width);
+    --ruled-line-pitch: 24px;
+    --card-line-height: 24px;
     width: var(--card-base-width);
     max-width: 100%;
     min-height: calc(var(--card-w) * 3 / 4);
     max-height: var(--card-max-height);
   }
 
+  .card-shell-frame {
+    @apply relative flex-1 flex flex-col bg-white border border-slate-100 rounded-[32px] shadow-sm overflow-hidden;
+  }
+
   .card-shell-body {
     @apply flex-1 min-h-0 overflow-y-auto overscroll-contain pt-12;
+    line-height: var(--card-line-height);
   }
 
   .card-shell-body--bottom {
