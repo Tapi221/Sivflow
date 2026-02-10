@@ -76,7 +76,7 @@ Overrides (use only with incident ticket):
 ## A + D: success path + reload durability precondition
 
 ```powershell
-pwsh ./scripts/e2e-pptx-real.ps1 -ProjectId <project-id>
+pwsh ./scripts/e2e-pptx-real.ps1 -ProjectId <project-id> -CredentialsFile <path-to-service-account.json>
 ```
 
 What it verifies:
@@ -92,10 +92,17 @@ What it verifies:
    - `MANIFEST_PATH`
    - `SLIDE_COUNT`
 
+Credential resolution order for the E2E scripts:
+
+1. `-CredentialsFile <path>`
+2. `GOOGLE_APPLICATION_CREDENTIALS`
+3. `./serviceAccountKey.json` (repo root auto-detect)
+4. ADC (`gcloud auth application-default login`)
+
 ## C: failure path
 
 ```powershell
-pwsh ./scripts/e2e-pptx-failure.ps1 -ProjectId <project-id>
+pwsh ./scripts/e2e-pptx-failure.ps1 -ProjectId <project-id> -CredentialsFile <path-to-service-account.json>
 ```
 
 What it verifies:
@@ -138,4 +145,3 @@ Track minimum SLO signals:
 - conversion success rate (`ready / total`)
 - timeout ratio (`converter_timeout_*`)
 - upstream HTTP failure ratio (`converter_http_*`)
-
