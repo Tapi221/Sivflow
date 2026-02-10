@@ -311,6 +311,16 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(funct
     const container = scrollContainerEl;
     if (!container) return;
 
+    const logZoomInput = (payload: {
+      source: 'wheel' | 'gesture';
+      deltaY: number | null;
+      direction: number;
+      nextScale: number;
+    }) => {
+      if (!import.meta.env.DEV) return;
+      console.debug('[PdfViewer] zoom input', payload);
+    };
+
     const stopNativeEvent = (event: Event) => {
       if (event.cancelable) {
         event.preventDefault();
@@ -335,7 +345,14 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(funct
         if (!direction) return;
         const step = Math.max(0.001, zoomStepRef.current);
         const nextScale = direction > 0 ? scaleRef.current - step : scaleRef.current + step;
-        requestScaleChange(nextScale, 'wheel');
+        const normalizedNextScale = Number(clampScale(nextScale).toFixed(3));
+        logZoomInput({
+          source: 'wheel',
+          deltaY: delta,
+          direction,
+          nextScale: normalizedNextScale,
+        });
+        requestScaleChange(normalizedNextScale, 'wheel');
       });
     };
 
@@ -349,7 +366,15 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(funct
       const gestureScale = (event as Event & { scale?: number }).scale;
       if (typeof gestureScale !== 'number' || !Number.isFinite(gestureScale)) return;
       const baseScale = gestureStartScaleRef.current ?? scaleRef.current;
-      requestScaleChange(baseScale * gestureScale, 'gesture');
+      const nextScale = baseScale * gestureScale;
+      const normalizedNextScale = Number(clampScale(nextScale).toFixed(3));
+      logZoomInput({
+        source: 'gesture',
+        deltaY: null,
+        direction: Math.sign(normalizedNextScale - scaleRef.current),
+        nextScale: normalizedNextScale,
+      });
+      requestScaleChange(normalizedNextScale, 'gesture');
     };
 
     const handleGestureEnd = (event: Event) => {
@@ -380,7 +405,7 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(funct
       wheelDeltaRef.current = 0;
       gestureStartScaleRef.current = null;
     };
-  }, [requestScaleChange, scrollContainerEl]);
+  }, [clampScale, requestScaleChange, scrollContainerEl]);
   const sourceKey = [
     sourceUrl ? `url:${sourceUrl}` : null,
     sourceDataLength > 0 ? `data:${sourceDataLength}` : null,
