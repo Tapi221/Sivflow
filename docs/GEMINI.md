@@ -148,3 +148,17 @@
 - [x] Explorer/FolderTree への PDF 表示統合 <!-- id: 7102 -->
 - [x] PDFクリック時のオープン処理実装 <!-- id: 7103 -->
 - [x] 動作確認 <!-- id: 7104 -->
+# カード編集画面のレイアウト最適化（1行44px・罫線実装）
+
+- [x] 実装計画の作成 (docs/06_Operations/implementation_plan_card_layout_ruled_lines.md) <!-- id: 1100 -->
+- [x] カードシェルの3層構造（Background/Guide/Content）の実装 <!-- id: 1101 -->
+- [x] 24px間隔の罫線と行高さ（line-height: 24px）の整合実装 <!-- id: 1102 -->
+- [x] 各ブロックの最小高さ（min-height: 44px）の確保 <!-- id: 1103 -->
+- [x] 動作確認と仕様書の更新 <!-- id: 1104 -->
+
+# 音声・リンクマークの配置とサイズ統一
+
+- [x] 実装計画の作成 (docs/06_Operations/implementation_plan_align_audio_link_icons.md) <!-- id: 1201 -->
+- [x] 音声バッジの実装・配置変更 (Flashcard.tsx) <!-- id: 1202 -->
+- [x] StudyCard.tsx の冗長なボタン削除とスタイル調整 <!-- id: 1203 -->
+- [x] 動作確認 <!-- id: 1204 -->
