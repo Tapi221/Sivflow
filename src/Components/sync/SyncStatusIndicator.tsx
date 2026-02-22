@@ -36,25 +36,28 @@ interface SyncStatusIndicatorProps {
   showText?: boolean;
   dropdownAlign?: "center" | "end" | "start";
   dropdownSide?: "top" | "right" | "bottom" | "left";
+  compact?: boolean; // compactモード：アイコンのみ表示
 }
 
 export function SyncStatusIndicator({ 
   className, 
   showText: showTextProp, 
   dropdownAlign = "end", 
-  dropdownSide = "bottom" 
+  dropdownSide = "bottom",
+  compact = false
 }: SyncStatusIndicatorProps) {
-  const { syncStatus, lastSyncTime, triggerSync, queueCount, conflictCount } = useAuth();
+  const { syncStatus, syncNotice, lastSyncTime, triggerSync, queueCount, conflictCount } = useAuth();
   
   // 折りたたみ状態
   const [isExpanded, setIsExpanded] = useState(false);
   
-  // 同期中やエラー時は自動で展開する
+  // 同期中やエラー時は自動で展開する（compactモードでは無効）
   useEffect(() => {
+    if (compact) return; // compact時は自動展開しない
     if (syncStatus === 'syncing' || syncStatus === 'error' || conflictCount > 0) {
       setIsExpanded(true);
     }
-  }, [syncStatus, conflictCount]);
+  }, [syncStatus, conflictCount, compact]);
 
   // ダイアログ状態
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
@@ -62,6 +65,9 @@ export function SyncStatusIndicator({
   const [conflictDialogOpen, setConflictDialogOpen] = useState(false);
 
   const getStatusIcon = () => {
+    if (syncNotice === 'wifi_wait') {
+      return <Cloud className="w-4 h-4 text-amber-500" />;
+    }
     switch (syncStatus) {
       case 'syncing':
         return <RefreshCw className="w-4 h-4 animate-spin text-blue-500" />;
@@ -75,6 +81,9 @@ export function SyncStatusIndicator({
   };
 
   const getStatusText = () => {
+    if (syncNotice === 'wifi_wait') {
+      return 'Wi-Fi待機中';
+    }
     switch (syncStatus) {
       case 'syncing':
         return '同期中...';
@@ -106,6 +115,9 @@ export function SyncStatusIndicator({
   };
 
   const getStatusColor = () => {
+    if (syncNotice === 'wifi_wait') {
+      return 'text-amber-600 dark:text-amber-400';
+    }
     switch (syncStatus) {
       case 'syncing':
         return 'text-blue-600 dark:text-blue-400';
@@ -121,16 +133,18 @@ export function SyncStatusIndicator({
   return (
     <>
     <div className={cn(
-      "flex items-center p-0.5 rounded-full cursor-pointer transition-all duration-300",
+      "flex items-center p-0.5 rounded-full cursor-pointer transition-all duration-300 motion-reduce:transition-none",
       "bg-white/20 backdrop-blur-xl border border-white/30 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)]",
+      compact && "p-0 bg-transparent backdrop-blur-none border-none shadow-none", // compact時はシンプルに
       className
     )}>
       {/* メインのアイコン＆ステータス部分 */}
       <div
-        onClick={() => setIsExpanded(!isExpanded)}
-        title={isExpanded ? "詳細を閉じる" : "詳細を表示（クリック）"}
+        onClick={() => !compact && setIsExpanded(!isExpanded)} // compact時はクリック無効
+        title={compact ? getStatusText() : (isExpanded ? "詳細を閉じる" : "詳細を表示（クリック）")}
         className={cn(
-          'flex items-center gap-2 px-2.5 py-1.5 rounded-full transition-all duration-300',
+          'flex items-center gap-2 px-2.5 py-1.5 rounded-full transition-all duration-300 motion-reduce:transition-none',
+          compact && 'px-1.5 py-1 gap-0', // compact時は小さく
           getStatusColor()
         )}
       >
@@ -142,7 +156,7 @@ export function SyncStatusIndicator({
         </div>
 
         <AnimatePresence mode="wait">
-          {isExpanded && (
+          {isExpanded && !compact && (
             <motion.div
               layout
               initial={{ width: 0, opacity: 0 }}

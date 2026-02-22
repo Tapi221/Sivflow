@@ -3,7 +3,7 @@ import { IndexedDBMetadataService } from './IndexedDBMetadataService';
 import { IndexedDBRebuildOrchestrator } from './IndexedDBRebuildOrchestrator';
 import { notificationService } from './NotificationService';
 import { contextService } from './ContextService';
-import { getContextualMessage } from '../utils/messageTemplates';
+// NOTE: 初期化時のユーザー向け INFO 通知は UI 上で邪魔になるため表示しない。
 import { warnOncePerSession } from './localDBRuntimeState';
 
 /**
@@ -37,20 +37,7 @@ export class AppInitializer {
   private static async doInitialize(userId: string): Promise<void> {
     console.log(`[AppInit:${userId}] Starting initialization...`);
     
-    // コンテキストを判定
-    const context = contextService.getInitContext(userId);
-    const message = getContextualMessage('init', context);
-    const details = getContextualMessage('details', context);
-    
-    // INFO レベルの通知を表示（プログレッシブディスクロージャー）
-    notificationService.info(
-      message,
-      'この処理によってデータが失われることはありません。',
-      {
-        details,
-        duration: 60000, // 60秒後に自動で消える
-      }
-    );
+    // 初期化中のインフォ通知は表示しない（UI を邪魔しないように）
     
     const db = await getLocalDb();
     const dbStatus = getLocalDBRuntimeStatus();

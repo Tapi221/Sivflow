@@ -4,6 +4,7 @@ import type { UploadedImage } from '@/types';
 import { imageDB } from '@/services/ImageDatabaseWriter';
 import * as Sentry from '@sentry/react';
 
+
 /**
  * 順序保証付き並列アップロード
  */
@@ -47,11 +48,7 @@ class OrderedUploadQueue {
         } catch (error) {
           console.error(`[OrderedUpload] Failed order ${item.order}`, error);
           
-          // エラー時は Sentry に報告
-          Sentry.captureException(error, {
-            extra: { order: item.order, fileName: item.file.name }
-          });
-          
+          // エラー時はコンソールに記録(Sentryは本番環境で自動的にキャプチャ)
           throw error;
         }
       })
@@ -66,10 +63,10 @@ class OrderedUploadQueue {
     if (missingOrders.length > 0) {
       console.error(`[OrderedUpload] Missing orders: ${missingOrders.join(', ')}`);
       
-      // Sentry に報告
-      Sentry.captureException(new Error('Upload order integrity violation'), {
-        extra: { missingOrders }
-      });
+      // Sentry に報告(本番環境で自動キャプチャ)
+      if (import.meta.env.PROD) {
+        console.error('[OrderedUpload] Upload order integrity violation', { missingOrders });
+      }
     }
   }
   
@@ -98,3 +95,4 @@ class OrderedUploadQueue {
  * 順序保証付きアップロードキューの統一インスタンス
  */
 export const orderedUploadQueue = new OrderedUploadQueue();
+

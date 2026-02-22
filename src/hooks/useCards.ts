@@ -6,11 +6,25 @@ import { normalizeCard } from '../utils';
 import { normalizeMemoryStability } from '../utils/reviewUtils';
 import { useUserSettings, DEFAULT_SETTINGS } from './useUserSettings';
 import type { Card } from '../types';
+import { normalizeInkDocument } from '@/Components/ink/inkTypes';
 
 // 空カード判定用のヘルパー関数（createCard と updateCard で共通利用）
+function isCardDeleted(
+  card: Partial<Card> & {
+    is_deleted?: boolean;
+    deleted?: boolean;
+    deletedAt?: unknown;
+    deleted_at?: unknown;
+  }
+) {
+  const deletedAt = (card as any).deletedAt ?? (card as any).deleted_at;
+  return Boolean(card.isDeleted ?? card.is_deleted ?? (card as any).deleted ?? deletedAt);
+}
+
 function hasBlocksContent(blocks?: any[]): boolean {
   return blocks?.some(b => {
     if (b.type === 'text' || b.type === 'memo') return b.content?.trim();
+    if (b.type === 'markdown') return b.markdown?.trim();
     if (b.type === 'code') return b.code?.code?.trim();
     if (b.type === 'image') return b.images?.length > 0;
     if (b.type === 'audio') return b.audios?.length > 0;
@@ -21,13 +35,20 @@ function hasBlocksContent(blocks?: any[]): boolean {
 }
 
 function isCardCompletelyEmpty(cardData: Partial<Card>): boolean {
+  const questionInk = normalizeInkDocument(cardData.inkQuestion);
+  const answerInk = normalizeInkDocument(cardData.inkAnswer);
+  const hasInk =
+    (questionInk.strokes?.length ?? 0) > 0 ||
+    (answerInk.strokes?.length ?? 0) > 0;
+
   return (
     !cardData.title?.trim() && 
     !cardData.tags?.length && 
     !hasBlocksContent(cardData.questionBlocks) && 
     !hasBlocksContent(cardData.answerBlocks) &&
     !cardData.questionText?.trim() && // Legacy support
-    !cardData.answerText?.trim()      // Legacy support
+    !cardData.answerText?.trim() &&   // Legacy support
+    !hasInk
   );
 }
 
@@ -67,8 +88,8 @@ export function useCards(folderId?: string) {
     
     let normalized = rawCards.map(normalizeCard);
     
-    // isDeleted が false のもののみ
-    normalized = normalized.filter(c => !c.isDeleted);
+    // 削除済み（legacy is_deleted 含む）を除外
+    normalized = normalized.filter((c) => !isCardDeleted(c as Partial<Card> & { is_deleted?: boolean }));
     
     // folderId でfilter
     if (folderId) {
@@ -93,6 +114,7 @@ export function useCards(folderId?: string) {
     const hasBlocksContent = (blocks?: any[]) => {
       return blocks?.some(b => {
         if (b.type === 'text' || b.type === 'memo') return b.content?.trim();
+        if (b.type === 'markdown') return b.markdown?.trim();
         if (b.type === 'code') return b.code?.code?.trim();
         if (b.type === 'image') return b.images?.length > 0;
         if (b.type === 'audio') return b.audios?.length > 0;
@@ -110,10 +132,14 @@ export function useCards(folderId?: string) {
       !cardData.questionText?.trim() && // Legacy support
       !cardData.answerText?.trim();   // Legacy support
 
+    // 新規作成時はタイトルが空であることを許容する（あとで編集するため）
+    // そのため、作成時のバリデーションはスキップする
+    /*
     if (isCompletelyEmpty) {
       console.error('[useCards] Refusing to create completely empty card');
       throw new Error('カードの内容を入力してください。');
     }
+    */
 
     // Force fetch settings to ensure freshness
     const db = await getLocalDb(currentUser.uid);
@@ -151,6 +177,7 @@ export function useCards(folderId?: string) {
       questionNumber,
       title: cardData.title || '',
       isDraft: cardData.isDraft ?? true,
+      // 新規作成時は必ず isDeleted: false で保存
       isDeleted: false,
       hasUncertainty: cardData.hasUncertainty ?? false,
       isBookmarked: cardData.isBookmarked ?? false,
@@ -171,6 +198,8 @@ export function useCards(folderId?: string) {
       // Ensure blocks are carried over from cardData
       questionBlocks: cardData.questionBlocks || [],
       answerBlocks: cardData.answerBlocks || [],
+      inkQuestion: normalizeInkDocument(cardData.inkQuestion),
+      inkAnswer: normalizeInkDocument(cardData.inkAnswer),
       memoryStability: 0,
       currentLevel: cardData.currentLevel ?? null,
       nextReviewDate,
@@ -203,17 +232,18 @@ export function useCards(folderId?: string) {
     }
     
     const mergedCard = { ...currentCard, ...data };
-    
-    // 更新後に空になる場合は削除
-    if (isCardCompletelyEmpty(mergedCard)) {
-      console.log('[updateCard] Card became empty after update, deleting:', id);
-      await deleteCard(id);
-      return;
+    const patch: Partial<Card> = { ...data };
+
+    // 空カードは自動削除しない。
+    // 新規作成直後/オートセーブ直後に「消える」体験を防ぐため、
+    // 空なら下書き状態を維持する。
+    if (isCardCompletelyEmpty(mergedCard) && patch.isDraft === undefined) {
+      patch.isDraft = true;
     }
     
     // 通常の更新処理
     await db.updateItem('cards', id, {
-      ...data,
+      ...patch,
       updatedAt: new Date(),
     });
   };
@@ -245,7 +275,9 @@ export function useCards(folderId?: string) {
     
     // 移動先フォルダ内の最大 orderIndex を取得
     const allCards = await db.getAllCards();
-    const targetFolderCards = allCards.filter(c => c.folderId === targetFolderId && !c.isDeleted);
+    const targetFolderCards = allCards.filter(
+      (c) => c.folderId === targetFolderId && !isCardDeleted(c as Partial<Card> & { is_deleted?: boolean })
+    );
     const maxOrderIndex = targetFolderCards.reduce((max, c) => Math.max(max, c.orderIndex || 0), 0);
     
     // カードを更新

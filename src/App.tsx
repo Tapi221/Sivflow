@@ -39,7 +39,6 @@ import { DEV_MODE, isLocalHost } from './utils/envGuards';
 // 初回ロードを軽くするために、各ページを lazy で動的 import する
 const Dashboard = lazy(() => import('./Pages/Dashboard'));
 const Calendar = lazy(() => import('./Pages/Calendar'));
-const Statistics = lazy(() => import('./Pages/Statistics'));
 const Folders = lazy(() => import('./Pages/Folders'));
 const FolderView = lazy(() => import('./Pages/FolderView'));
 const CardEdit = lazy(() => import('./Pages/CardEdit'));
@@ -52,6 +51,7 @@ const SyncSettings = lazy(() => import('./Pages/SyncSettings'));
 const ImageDiagnostics = lazy(() => import('./Pages/ImageDiagnostics'));
 const Gallery = lazy(() => import('./Pages/Gallery'));
 const WorldMap = lazy(() => import('./Pages/WorldMap'));
+const TodayStudy = lazy(() => import('./Pages/TodayStudy'));
 const NotImplementedPlaceholder = lazy(() => import('./Pages/NotImplementedPlaceholder'));
 const OneQAMode = lazy(() => import('./Pages/OneQAMode'));
 const PairMode = lazy(() => import('./Pages/PairMode'));
@@ -97,6 +97,8 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { currentUser, loading } = useAuth();
 
   // 認証状態をまだ取得中ならローディング画面を表示
+  // ⚠ AuthProvider は children を常にレンダリングするようになったため、
+  //   ProtectedRoute が loading ガードの唯一の砦となる。
   if (loading) {
     return <LoadingFallback />;
   }
@@ -142,59 +144,87 @@ function LoginPage() {
   };
 
   return (
-    // ログインフォームのレイアウト（画面中央に白いカード）
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-blue-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
-        <h1 className="text-3xl font-bold mb-6 text-gray-900">Flash Master</h1>
-        <p className="text-gray-600 mb-8">
-          manifolmiaへようこそ。ログインしてください。
-        </p>
-        {/* Google ログインボタン */}
-        <button
-          onClick={handleGoogleLogin}
-          disabled={isLoading}
-          className="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-        >
-          {isLoading ? (
-            // ログイン処理中のインジケータ
-            <>
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-              ログイン中...
-            </>
-          ) : (
-            // 通常時のボタン表示（Google のアイコン付き）
-            <>
-              <svg className="w-5 h-5" viewBox="0 0 24 24">
-                <path
-                  fill="currentColor"
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                />
-                <path
-                  fill="currentColor"
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                />
-                <path
-                  fill="currentColor"
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                />
-                <path
-                  fill="currentColor"
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                />
-              </svg>
-              Googleでログイン
-            </>
-          )}
-        </button>
+    <div className="relative min-h-screen overflow-hidden bg-[#F3F7F8]">
+      <div className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-[#9CC8C4]/35 blur-3xl" />
+      <div className="pointer-events-none absolute -right-16 bottom-0 h-80 w-80 rounded-full bg-[#BFD9F5]/35 blur-3xl" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.7),rgba(255,255,255,0.35))]" />
+
+      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-4 py-8">
+        <div className="grid w-full max-w-5xl overflow-hidden rounded-[32px] border border-slate-200/70 bg-white/80 shadow-[0_24px_80px_rgba(15,23,42,0.12)] backdrop-blur-xl md:grid-cols-[1.2fr_0.8fr]">
+          <div className="relative px-7 py-9 md:px-10 md:py-12">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#7BACAA]/25 bg-[#7BACAA]/10 px-3 py-1">
+              <span className="h-2 w-2 rounded-full bg-[#689A98]" />
+              <span className="text-[10px] font-bold tracking-[0.22em] text-[#5A8684]">MANIFOLMIA</span>
+            </div>
+            <h1 className="mt-6 text-3xl font-black leading-tight text-slate-800 md:text-5xl">
+              学習カードを
+              <br />
+              もっと速く、深く。
+            </h1>
+            <p className="mt-4 max-w-xl text-sm leading-relaxed text-slate-600 md:text-base">
+              フォルダ管理・復習・可視化を1つにまとめた学習ワークスペースです。Googleアカウントでそのまま始められます。
+            </p>
+
+            <div className="mt-8 grid gap-3 text-xs text-slate-700 sm:grid-cols-2">
+              <div className="rounded-2xl border border-slate-200/70 bg-white/75 px-4 py-3">復習キューと自動下書きに対応</div>
+              <div className="rounded-2xl border border-slate-200/70 bg-white/75 px-4 py-3">カード編集はPC/モバイル最適化済み</div>
+              <div className="rounded-2xl border border-slate-200/70 bg-white/75 px-4 py-3">ローカル保存 + クラウド同期</div>
+              <div className="rounded-2xl border border-slate-200/70 bg-white/75 px-4 py-3">フォルダ/タグで横断検索</div>
+            </div>
+          </div>
+
+          <div className="flex items-center bg-[linear-gradient(160deg,rgba(104,154,152,0.06),rgba(104,154,152,0.14))] px-6 py-9 md:px-8">
+            <div className="w-full rounded-[28px] border border-slate-200/70 bg-white p-6 shadow-[0_8px_30px_rgba(15,23,42,0.08)] md:p-7">
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">Sign In</p>
+              <h2 className="mt-2 text-2xl font-extrabold text-slate-800">ログイン</h2>
+              <p className="mt-2 text-sm text-slate-500">続行するにはGoogleアカウントで認証してください。</p>
+
+              <button
+                onClick={handleGoogleLogin}
+                disabled={isLoading}
+                className="mt-6 flex h-12 w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isLoading ? (
+                  <>
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-600" />
+                    ログイン中...
+                  </>
+                ) : (
+                  <>
+                    <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+                      <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.2-.9 2.2-1.9 2.9l3.1 2.4c1.8-1.7 2.9-4.2 2.9-7.2 0-.7-.1-1.4-.2-2H12z" />
+                      <path fill="#34A853" d="M12 22c2.6 0 4.8-.9 6.4-2.4l-3.1-2.4c-.9.6-2 .9-3.3.9-2.5 0-4.6-1.7-5.4-3.9l-3.3 2.5C5 19.9 8.2 22 12 22z" />
+                      <path fill="#FBBC05" d="M6.6 14.2c-.2-.6-.3-1.3-.3-2s.1-1.4.3-2L3.3 7.7C2.5 9.2 2 10.6 2 12.2s.5 3 1.3 4.5l3.3-2.5z" />
+                      <path fill="#4285F4" d="M12 6.2c1.4 0 2.7.5 3.6 1.4l2.7-2.7C16.7 3.4 14.5 2.4 12 2.4c-3.8 0-7 2.1-8.7 5.3l3.3 2.5c.8-2.3 2.9-4 5.4-4z" />
+                    </svg>
+                    Googleでログイン
+                  </>
+                )}
+              </button>
+
+              <p className="mt-4 text-center text-[11px] leading-relaxed text-slate-400">
+                ログインすると、保存済みカードと設定を端末間で同期できます。
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
 
 
+/**
+ * "/" は常に Dashboard へ。
+ * リロード時の画面復帰はブラウザURLに任せる。
+ */
+function DefaultRedirect() {
+  return <Navigate to="/Dashboard" replace />;
+}
+
 // ===== アプリ本体のルーティング・起動処理をまとめたコンポーネント =====
 function AppContent() {
-  const { currentUser } = useAuth();
+  const { currentUser, loading } = useAuth();
   const [currentPageName, setCurrentPageName] = useState('Dashboard');
 
   // 差分同期の進捗（文字列など）を取得
@@ -252,6 +282,12 @@ function AppContent() {
   // 開発・テスト用の認証バイパス
   const isTestBypass = isTestBypassEnabled();
 
+  // 認証状態がまだ解決していない場合はローディング画面を表示
+  // ⚠ BrowserRouter を破棄せずにローディング表示することでルーティング状態を保護
+  if (loading) {
+    return <LoadingFallback />;
+  }
+
   // ログインしていない & バイパスもない → ログイン画面に飛ばす
   if (!currentUser && !isTestBypass) {
     return <LoginPage />;
@@ -285,8 +321,8 @@ function AppContent() {
       <Routes>
         {/* ルートパス "/" のレイアウト（ProtectedRoute でログインを強制） */}
         <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-          {/* "/" にアクセスされたら "/Dashboard" にリダイレクト */}
-          <Route index element={<Navigate to="/Dashboard" replace />} />
+          {/* "/" にアクセスされたら "/Dashboard" にリダイレクト（初回のみ） */}
+          <Route index element={<DefaultRedirect />} />
 
           {/* ダッシュボード */}
           <Route
@@ -316,7 +352,16 @@ function AppContent() {
           <Route path="uncertain" element={<UncertainMode />} />
           <Route path="bookmark" element={<BookmarkMode />} />
           <Route path="calendar" element={<Calendar />} />
-          <Route path="statistics" element={<Statistics />} />
+
+          {/* 今日の学習ページ */}
+          <Route
+            path="today-study"
+            element={
+              <Suspense fallback={<LoadingFallback />}>
+                <TodayStudy />
+              </Suspense>
+            }
+          />
 
           {/* ギャラリーなど、重そうなページは Suspense でラップ */}
           <Route
@@ -405,8 +450,8 @@ function AppContent() {
           ) : null}
         </Route>
 
-        {/* どのルートにもマッチしない場合は "/" にリダイレクト */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* どのルートにもマッチしない場合はダッシュボードにリダイレクト */}
+        <Route path="*" element={<Navigate to="/Dashboard" replace />} />
       </Routes>
 
       {/* 同期中であれば、右下に小さなステータスバナーを表示 */}

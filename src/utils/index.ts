@@ -1,18 +1,32 @@
 import { normalizeUploadedImages } from './imageUtils';
 import { normalizeMemoryStability } from './reviewUtils';
+import { normalizeInkDocument } from '@/Components/ink/inkTypes';
 
 // ページ名から URL パスを作成
 // クエリパラメータ付きの場合も対応（例: 'CardEdit?folderId=xxx'）
 export const createPageUrl = (pageName: string): string => {
   const mapping: { [key: string]: string } = {
-    'Dashboard': '/',
+    'Dashboard': '/Dashboard',
+    'dashboard': '/Dashboard',
     'Folders': '/folders',
+    'folders': '/folders',
     'FolderView': '/FolderView',
     'CardEdit': '/CardEdit',
     'CardView': '/CardView',
     'StudyMode': '/study',
+    'study': '/study',
     'UncertainMode': '/uncertain',
+    'uncertain': '/uncertain',
+    'BookmarkMode': '/bookmark',
+    'bookmark': '/bookmark',
     'Calendar': '/calendar',
+    'calendar': '/calendar',
+    'Gallery': '/gallery',
+    'gallery': '/gallery',
+    'WorldMap': '/WorldMap',
+    'OneQAMode': '/one-qa-mode',
+    'PairMode': '/pair-mode',
+    'FourChoiceMode': '/four-choice-mode',
     'Statistics': '/statistics',
     'Trash': '/trash'
   };
@@ -29,22 +43,76 @@ export const createPageUrl = (pageName: string): string => {
   return queryString ? `/${baseName}?${queryString}` : `/${baseName.toLowerCase()}`;
 };
 
+const makeFallbackId = () => {
+  // crypto.randomUUID が使える環境ならそれ、無理なら雑に一意っぽいやつ
+  try {
+    // eslint-disable-next-line no-undef
+    if (typeof crypto !== 'undefined' && typeof (crypto as any).randomUUID === 'function') {
+      return (crypto as any).randomUUID();
+    }
+  } catch {}
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+};
+
 const normalizeDate = (value: any) => {
   if (value === null || value === undefined) return null;
+
   // Firestore Timestamp
-  if (typeof value?.toDate === 'function') return value.toDate();
+  if (typeof value?.toDate === 'function') {
+    const d = value.toDate();
+    return d instanceof Date && !isNaN(d.getTime()) ? d : null;
+  }
+
   // Already a Date
   if (value instanceof Date) return isNaN(value.getTime()) ? null : value;
+
+  // Firestore-like plain object timestamp
+  if (typeof value === 'object') {
+    const seconds =
+      typeof value.seconds === 'number'
+        ? value.seconds
+        : typeof value._seconds === 'number'
+          ? value._seconds
+          : null;
+    const nanoseconds =
+      typeof value.nanoseconds === 'number'
+        ? value.nanoseconds
+        : typeof value._nanoseconds === 'number'
+          ? value._nanoseconds
+          : 0;
+
+    if (seconds !== null) {
+      const ms = seconds * 1000 + Math.floor(nanoseconds / 1e6);
+      const d = new Date(ms);
+      return isNaN(d.getTime()) ? null : d;
+    }
+  }
+
   // Numeric epoch milliseconds/seconds
   if (typeof value === 'number') {
-    const d = new Date(value);
+    // 10桁前後は "秒" の可能性が高い → ms に補正
+    const ms = value < 1e12 ? value * 1000 : value;
+    const d = new Date(ms);
     return isNaN(d.getTime()) ? null : d;
   }
-  // ISO/date string
+
+  // ISO/date string（数値文字列も吸収）
   if (typeof value === 'string') {
-    const d = new Date(value);
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+
+    // "1700000000" / "1700000000000" みたいな数値文字列
+    if (/^\d{10,13}$/.test(trimmed)) {
+      const n = Number(trimmed);
+      const ms = n < 1e12 ? n * 1000 : n;
+      const d = new Date(ms);
+      return isNaN(d.getTime()) ? null : d;
+    }
+
+    const d = new Date(trimmed);
     return isNaN(d.getTime()) ? null : d;
   }
+
   // Fallback: unknown type → null（無効な時間値回避）
   return null;
 };
@@ -54,6 +122,7 @@ export const extractTextFromBlocks = (blocks: any[]): string => {
   // 最初に見つかった非空のテキスト系コンテンツを返す
   for (const block of blocks) {
     if (block.type === 'text' && block.content) return block.content.trim();
+    if (block.type === 'markdown' && block.markdown) return block.markdown.trim();
     if (block.type === 'memo' && block.content) return block.content.trim();
     if (block.type === 'code' && block.code?.code) return block.code.code.split('\n')[0].trim();
   }
@@ -61,9 +130,10 @@ export const extractTextFromBlocks = (blocks: any[]): string => {
 };
 
 export const normalizeCard = (raw: any) => {
-  const id = raw?.id ?? raw?.cardId ?? raw?.card_id;
+  // ★ 変更: id が無い raw が来た時に undefined をばら撒かない
+  const id = raw?.id ?? raw?.cardId ?? raw?.card_id ?? makeFallbackId();
 
-  const normalized = {
+  const normalized: any = {
     id,
     userId: raw?.userId ?? raw?.user_id ?? '',
     deviceId: raw?.deviceId ?? raw?.device_id ?? '',
@@ -77,10 +147,12 @@ export const normalizeCard = (raw: any) => {
     isCompleted: raw?.isCompleted ?? raw?.is_completed ?? false,
     isSilent: raw?.isSilent ?? raw?.is_silent ?? false,
     isDeleted: raw?.isDeleted ?? raw?.is_deleted ?? false,
+
     // deletedAt: isDeleted=true なのに deletedAt がない場合は updatedAt で補完
     deletedAt: (() => {
       const rawDeletedAt = raw?.deletedAt ?? raw?.deleted_at;
       if (rawDeletedAt) return normalizeDate(rawDeletedAt);
+
       // isDeleted=true だが deletedAt がない → updatedAt で推定補完
       const isDeleted = raw?.isDeleted ?? raw?.is_deleted ?? false;
       if (isDeleted) {
@@ -88,8 +160,9 @@ export const normalizeCard = (raw: any) => {
       }
       return null;
     })(),
-    questionText: raw?.questionText ?? raw?.question_text ?? 
-                  raw?.front ?? raw?.question ?? raw?.q ?? 
+
+    questionText: raw?.questionText ?? raw?.question_text ??
+                  raw?.front ?? raw?.question ?? raw?.q ??
                   raw?.fields?.Front ?? raw?.fields?.Question ?? '',
     questionImages: normalizeUploadedImages(raw?.questionImages ?? raw?.question_images ?? []),
     questionAudios: raw?.questionAudios ?? raw?.question_audios ?? [],
@@ -97,7 +170,8 @@ export const normalizeCard = (raw: any) => {
     questionTextHighlighted: raw?.questionTextHighlighted ?? '',
     questionMemo: raw?.questionMemo ?? raw?.question_memo ?? '',
     questionMarked: raw?.questionMarked ?? raw?.question_marked ?? '',
-    answerText: raw?.answerText ?? raw?.answer_text ?? 
+
+    answerText: raw?.answerText ?? raw?.answer_text ??
                 raw?.back ?? raw?.answer ?? raw?.a ??
                 raw?.fields?.Back ?? raw?.fields?.Answer ?? '',
     answerImages: normalizeUploadedImages(raw?.answerImages ?? raw?.answer_images ?? []),
@@ -106,23 +180,30 @@ export const normalizeCard = (raw: any) => {
     answerTextHighlighted: raw?.answerTextHighlighted ?? '',
     answerMemo: raw?.answerMemo ?? raw?.answer_memo ?? '',
     answerMarked: raw?.answerMarked ?? raw?.answer_marked ?? '',
+
     memoryStability: normalizeMemoryStability(
       raw?.memoryStability ?? raw?.memory_stability,
       raw?.currentLevel ?? raw?.current_level ?? raw?.level
     ),
     currentLevel: raw?.currentLevel ?? raw?.current_level ?? raw?.level,
+
     nextReviewDate: normalizeDate(raw?.nextReviewDate ?? raw?.next_review_date),
     lastReviewAt: normalizeDate(raw?.lastReviewAt ?? raw?.last_review_at),
+
     lastSubjectiveScore: raw?.lastSubjectiveScore ?? raw?.last_subjective_score,
     recoveryRemaining: raw?.recoveryRemaining ?? raw?.recovery_remaining,
     lastReviewDelayDays: raw?.lastReviewDelayDays ?? raw?.last_review_delay_days,
+
     createdAt: normalizeDate(raw?.createdAt ?? raw?.created_at) ?? new Date(),
     updatedAt: normalizeDate(raw?.updatedAt ?? raw?.updated_at) ?? new Date(),
+
     responseTimeMs: raw?.responseTimeMs ?? raw?.response_time_ms,
     uncertaintyMarkedDate: normalizeDate(raw?.uncertaintyMarkedDate ?? raw?.uncertainty_marked_date),
     completedDate: normalizeDate(raw?.completedDate ?? raw?.completed_date),
+
     tags: raw?.tags ?? [],
     reviewCount: raw?.reviewCount ?? raw?.review_count ?? 0,
+
     questionBlocks: (raw?.questionBlocks ?? raw?.question_blocks ?? []).filter((b: any) => {
       if (b.type === 'math' && !b.math?.latex?.trim()) return false;
       return true;
@@ -131,12 +212,21 @@ export const normalizeCard = (raw: any) => {
       if (b.type === 'math' && !b.math?.latex?.trim()) return false;
       return true;
     }),
+    inkQuestion: (() => {
+      const doc = normalizeInkDocument(raw?.inkQuestion ?? raw?.ink_question ?? null);
+      return doc.strokes.length > 0 ? doc : null;
+    })(),
+    inkAnswer: (() => {
+      const doc = normalizeInkDocument(raw?.inkAnswer ?? raw?.ink_answer ?? null);
+      return doc.strokes.length > 0 ? doc : null;
+    })(),
+
     _rescueRaw: raw?._rescueRaw ?? undefined,
   };
 
   // ブロックが空で、レガシーフィールドにデータがある場合に自動変換を行う
   if (normalized.questionBlocks.length === 0) {
-    const blocks = [];
+    const blocks: any[] = [];
     let idx = 0;
     if (normalized.questionText) blocks.push({ id: `q-text-${id}`, type: 'text', content: normalized.questionText, orderIndex: idx++ });
     if (normalized.questionCode) blocks.push({ id: `q-code-${id}`, type: 'code', code: normalized.questionCode, orderIndex: idx++ });
@@ -147,7 +237,7 @@ export const normalizeCard = (raw: any) => {
   }
 
   if (normalized.answerBlocks.length === 0) {
-    const blocks = [];
+    const blocks: any[] = [];
     let idx = 0;
     if (normalized.answerText) blocks.push({ id: `a-text-${id}`, type: 'text', content: normalized.answerText, orderIndex: idx++ });
     if (normalized.answerCode) blocks.push({ id: `a-code-${id}`, type: 'code', code: normalized.answerCode, orderIndex: idx++ });
@@ -173,9 +263,9 @@ export const normalizeCard = (raw: any) => {
  * snake_case / camelCase の差異を吸収し、削除状態を一貫して処理する
  */
 export const normalizeFolder = (raw: any) => {
-  const id = raw?.id ?? raw?.folderId ?? raw?.folder_id;
+  const id = raw?.id ?? raw?.folderId ?? raw?.folder_id ?? makeFallbackId();
   const isDeleted = raw?.isDeleted ?? raw?.is_deleted ?? false;
-  
+
   // deletedAt: isDeleted=true なのに deletedAt がない場合は updatedAt で補完
   const rawDeletedAt = raw?.deletedAt ?? raw?.deleted_at;
   let deletedAt: Date | null = null;
@@ -207,5 +297,4 @@ export const normalizeFolder = (raw: any) => {
     createdAt: normalizeDate(raw?.createdAt ?? raw?.created_at) ?? new Date(),
     updatedAt: normalizeDate(raw?.updatedAt ?? raw?.updated_at) ?? new Date(),
   };
-
 };

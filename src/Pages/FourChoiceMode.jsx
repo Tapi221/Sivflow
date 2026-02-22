@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import CardEditor from '@/Components/card/CardEditor';
 import { useCards } from '@/hooks/useCards';
@@ -20,6 +20,24 @@ export default function FourChoiceMode() {
   const { settings } = useUserSettings();
   const { success: toastSuccess, error: toastError, info: toastInfo } = useToast();
   const bottomRef = useRef(null);
+  const isUnloadingRef = useRef(false);
+
+  useEffect(() => {
+    const markUnloading = () => {
+      isUnloadingRef.current = true;
+    };
+    window.addEventListener('pagehide', markUnloading);
+    window.addEventListener('beforeunload', markUnloading);
+    return () => {
+      window.removeEventListener('pagehide', markUnloading);
+      window.removeEventListener('beforeunload', markUnloading);
+    };
+  }, []);
+
+  const safeNavigate = useCallback((to) => {
+    if (isUnloadingRef.current) return;
+    navigate(to);
+  }, [navigate]);
 
   // エディタのリストを管理。各エディタは一意のID、保存状態、オートフォーカスフラグを持つ。
   const [editors, setEditors] = useState(() => {
@@ -31,10 +49,7 @@ export default function FourChoiceMode() {
         console.error('Failed to parse saved editors:', e);
       }
     }
-    return [
-      { id: nanoid(), initialData: null, isSaved: false, autoFocus: true },
-      { id: nanoid(), initialData: null, isSaved: false, autoFocus: false }
-    ];
+    return [{ id: nanoid(), initialData: null, isSaved: false, autoFocus: true }];
   });
 
   const [savingIds, setSavingIds] = useState(new Set());
@@ -90,17 +105,17 @@ export default function FourChoiceMode() {
 
       setEditors(prev => prev.map(e => e.id === editorId ? { ...e, isSaved: true, autoFocus: false } : e ));
 
-      if (continueCreating) {
+      if (continueCreating === true) {
         toastSuccess(`カードを追加しました (Q${questionNum})`);
 
         setEditors(prev => [
           ...prev.map(p => ({ ...p, autoFocus: false })),
           { id: nanoid(), initialData: null, isSaved: false, autoFocus: true }
         ]);
-      } else {
+      } else if (continueCreating === false) {
         toastSuccess('カードを作成しました');
         clearPersistence();
-        navigate(`/FolderView?id=${folderId}`);
+        safeNavigate(`/FolderView?id=${folderId}`);
       }
     } catch (error) {
       console.error('Failed to save card after retries:', error);
@@ -116,7 +131,7 @@ export default function FourChoiceMode() {
 
   const handleCancel = () => {
     clearPersistence();
-    navigate(`/FolderView?id=${folderId}`);
+    safeNavigate(`/FolderView?id=${folderId}`);
   };
 
   const handleDelete = (editorId) => {

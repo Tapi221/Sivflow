@@ -28,19 +28,19 @@ export const InfoToast: React.FC<InfoToastProps> = ({ notification, onDismiss })
   }, [notification, onDismiss]);
 
   return (
-    <div className="bg-white dark:bg-slate-800 shadow-lg rounded-lg p-4 max-w-sm border border-slate-200 dark:border-slate-700 animate-slide-in-right">
+    <div className="bg-white shadow-lg rounded-2xl p-4 max-w-sm border border-slate-200/60 ring-1 ring-slate-100 animate-slide-in-right">
       <div className="flex items-start gap-3">
         {/* アイコン */}
         <div className="flex-shrink-0">
-          <Info className="w-5 h-5 text-blue-500" />
+          <Info className="w-5 h-5 text-primary-500" />
         </div>
 
         {/* コンテンツ */}
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
+          <p className="text-sm font-bold text-slate-700">
             {notification.title}
           </p>
-          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+          <p className="mt-1 text-xs text-slate-500">
             {notification.message}
           </p>
         </div>
@@ -48,9 +48,9 @@ export const InfoToast: React.FC<InfoToastProps> = ({ notification, onDismiss })
 
       {/* プログレスバー（自動で消える場合） */}
       {notification.autoClose && notification.duration && (
-        <div className="mt-3 h-1 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+        <div className="mt-3 h-1 bg-slate-100 rounded-full overflow-hidden">
           <div
-            className="h-full bg-blue-500 transition-all ease-linear"
+            className="h-full bg-primary-500 rounded-full transition-all ease-linear"
             style={{
               width: '100%',
               animation: `shrink ${notification.duration}ms linear`,

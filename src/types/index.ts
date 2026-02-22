@@ -1,7 +1,9 @@
 import { Timestamp } from 'firebase/firestore';
 
 import type { BlobUrl, StorageUrl } from './branded';
+import './ide-shims.d'; // Ensure IDE picks up shim types
 import type { CodeBlockData } from './code-block';
+import type { InkDocument } from '@/Components/ink/inkTypes';
 
 /**
  * 同期可能なエンティティの共通ベース。
@@ -199,6 +201,9 @@ export interface UserSettings extends BaseEntity {
   autoSaveEnabled?: boolean;
   duplicateToOpposite?: boolean;
 
+  // カード編集画面の高さ設定（端末間で同期）
+  cardEditorHeightPx?: number | null;
+
   editorBlockSettings?: BlockConfig[];
   blockButtonShowLabel?: boolean;
 }
@@ -280,7 +285,7 @@ export type ReferenceBlockData = {
  */
 export interface BlockConfig {
   id: string; // type と同一
-  type: 'text' | 'code' | 'image' | 'audio' | 'reference' | 'math';
+  type: 'text' | 'code' | 'image' | 'audio' | 'reference' | 'math' | 'markdown';
 
   label: string; // 表示名
   isVisible: boolean;
@@ -301,9 +306,10 @@ export type MathBlockData = {
  */
 export type CardBlock = {
   id: string;
-  type: 'text' | 'code' | 'image' | 'audio' | 'memo' | 'reference' | 'math';
+  type: 'text' | 'code' | 'image' | 'audio' | 'memo' | 'reference' | 'math' | 'markdown';
 
   orderIndex: number;
+  rowOffset?: number;
 
   // payload（typeに応じて使う）
   content?: string;
@@ -312,6 +318,7 @@ export type CardBlock = {
   audios?: Array<{ url: string; filename: string; order: number }>;
   references?: ReferenceBlockData[];
   math?: MathBlockData;
+  markdown?: string; // Markdown文字列
 };
 
 /**
@@ -350,6 +357,8 @@ export type Card = BaseEntity & {
   // ブロック方式（新方式）
   questionBlocks?: CardBlock[];
   answerBlocks?: CardBlock[];
+  inkQuestion?: InkDocument | null;
+  inkAnswer?: InkDocument | null;
 
   // 学習状態/スケジューリング
   memoryStability: number;
@@ -372,13 +381,10 @@ export type Card = BaseEntity & {
   lastReviewDelayDays?: number;
   currentLevel?: number;
   responseTimeMs?: number;
-
-  /**
-   * 復習回数（レビュー実行で+1）
-   * - 既存カード互換のため optional
-   */
+  /** 復習回数（レビュー実行で+1） - 既存カード互換のため optional */
   reviewCount?: number;
-
+  /** 互換用 ID */
+  cardId?: string;
 
   // イベント時刻
   uncertaintyMarkedDate?: Date | Timestamp;
@@ -428,6 +434,7 @@ export interface DocumentItem extends BaseEntity {
 
   // 追加: アップロード状態（未表示だが将来UI用）
   uploadStatus?: 'pending' | 'queued' | 'uploading' | 'ready' | 'failed';
+  documentId?: string;
 
   // PPTX変換ステータス（新）
   pptxManifestStatus?: 'none' | 'queued' | 'processing' | 'ready' | 'failed';
@@ -544,3 +551,4 @@ export interface ProjectMap extends BaseEntity {
 export * from './sync';
 export * from './code-block';
 export * from './media';
+export type { BlobUrl, StorageUrl } from './branded';

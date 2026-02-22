@@ -7,7 +7,7 @@ import type { UserSettings } from '../types';
 export const DEFAULT_SETTINGS: Partial<UserSettings> = {
   displayName: 'UserName',
   profileImage: null,
-  theme: 'system',
+  theme: 'light',
   language: 'ja',
   weekStartDay: 'monday',
   notificationsEnabled: false,
@@ -22,13 +22,14 @@ export const DEFAULT_SETTINGS: Partial<UserSettings> = {
   autoDraftEnabled: true,
   autoSaveEnabled: true,
   accentColor: '#689A98', // Default system accent color
+  cardEditorHeightPx: null, // カードの高さ設定（nullの場合はデフォルトの4:3比率）
   editorBlockSettings: [
     { id: 'text', type: 'text', label: 'テキスト', isVisible: true, orderIndex: 0 },
     { id: 'code', type: 'code', label: 'コード', isVisible: true, orderIndex: 1 },
     { id: 'image', type: 'image', label: '画像', isVisible: true, orderIndex: 2 },
     { id: 'audio', type: 'audio', label: '音声', isVisible: true, orderIndex: 3 },
-    { id: 'reference', type: 'reference', label: 'リンク', isVisible: true, orderIndex: 4 },
-    { id: 'math', type: 'math', label: '数式', isVisible: true, orderIndex: 5 },
+    { id: 'math', type: 'math', label: '数式', isVisible: true, orderIndex: 4 },
+    { id: 'markdown', type: 'markdown', label: 'Markdown', isVisible: true, orderIndex: 5 },
   ],
 };
 
@@ -38,8 +39,10 @@ export function useUserSettings() {
   const settings = useLiveQuery(
     async () => {
        if (!currentUser) return DEFAULT_SETTINGS;
-       const db = await getLocalDb();
-       const userSettings = await db.userSettings.get(currentUser.uid);
+       const db = await getLocalDb(currentUser.uid);
+       const userSettings =
+         (await db.userSettings.get(currentUser.uid)) ||
+         (await db.userSettings.where('userId').equals(currentUser.uid).first());
        return { ...DEFAULT_SETTINGS, ...(userSettings || {}) };
     },
     [currentUser],
@@ -52,8 +55,10 @@ export function useUserSettings() {
   const updateSettings = useCallback(async (newSettings: Partial<UserSettings>) => {
       if (!currentUser) return;
       
-      const db = await getLocalDb();
-      const current = await db.userSettings.get(currentUser.uid);
+      const db = await getLocalDb(currentUser.uid);
+      const current =
+        (await db.userSettings.get(currentUser.uid)) ||
+        (await db.userSettings.where('userId').equals(currentUser.uid).first());
       const updated = {
           ...current,
           ...newSettings,
@@ -64,7 +69,7 @@ export function useUserSettings() {
           } : (current?.profileImage || null),
           userId: currentUser.uid,
           updatedAt: new Date(),
-          id: current?.id || currentUser.uid 
+          id: currentUser.uid
       };
       
       // 安全策：ロジックに関わる値が実際に変更された場合のみ更新（パフォーマンスのための浅い比較）

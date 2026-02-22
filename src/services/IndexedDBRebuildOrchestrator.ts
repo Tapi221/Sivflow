@@ -1,4 +1,5 @@
 import { getLocalDb } from './localDB';
+import { Dexie } from 'dexie';
 import { CloudSyncAdapter } from './logic/CloudSyncAdapter';
 
 /**
@@ -67,7 +68,7 @@ export class IndexedDBRebuildOrchestrator {
       // 4. 物理的に削除 (Dexie.delete)
       const dbName = oldDb?.name || (LocalDBClass as any).getDatabaseNameForUser?.(userId) || `FlashcardMasterDB_${userId}`;
       console.log(`[Rebuild] Deleting database: ${dbName}`);
-      await (await import('dexie')).default.delete(dbName);
+      await Dexie.delete(dbName);
 
       // 5. 新しいインスタンスを作成
       console.log('[Rebuild] Creating new DB instance...');

@@ -61,7 +61,7 @@ export function useAllDescendantCards(rootFolderId?: string) {
     const filtered = rawCards
       .map(normalizeCard)
       .filter(c => {
-        const isDel = c.isDeleted;
+        const isDel = c.isDeleted ?? (c as any).is_deleted;
         // c.folderId が targetFolderIds に含まれているか
         return !isDel && targetFolderIds.includes(c.folderId);
       });

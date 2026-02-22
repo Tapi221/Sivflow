@@ -13,6 +13,7 @@ interface AuthContextType {
   currentUser: FirebaseUser | null;
   loading: boolean;
   syncStatus: 'idle' | 'syncing' | 'success' | 'error';
+  syncNotice: 'none' | 'wifi_wait';
   lastSyncTime: Date | null;
   triggerSync: () => Promise<void>;
   // 高度化機能
@@ -28,6 +29,7 @@ const AuthContext = createContext<AuthContextType>({
   currentUser: null,
   loading: true,
   syncStatus: 'idle',
+  syncNotice: 'none',
   lastSyncTime: null,
   triggerSync: async () => {},
   // 高度化機能
@@ -51,6 +53,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'success' | 'error'>('idle');
+  const [syncNotice, setSyncNotice] = useState<'none' | 'wifi_wait'>('none');
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
   const [syncService, setSyncService] = useState<ISyncService | null>(null);
   
@@ -130,12 +133,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     setSyncStatus('syncing');
+    setSyncNotice('none');
     try {
       // 旧 UI 互換のため、戻り値がある synchronize() を使用
       const result = await syncService.synchronize();
       const db = await getLocalDb();
       const currentLastSync = await db.getLastSyncTime(currentUser.uid);
       setLastSyncTime(currentLastSync);
+
+      // WiFi限定モード等で「同期スキップ」の場合はエラー扱いしない
+      const skippedByPolicy = result.errors.some((message) =>
+        message.includes('WiFi限定モードのためスキップ')
+      );
+      if (skippedByPolicy) {
+        setSyncStatus(currentLastSync ? 'success' : 'idle');
+        setSyncNotice('wifi_wait');
+        await updateCounts();
+        console.log('[Auth] Sync skipped by policy:', result);
+        return;
+      }
+      setSyncNotice('none');
       
       // 競合がある場合は'error'状態（ユーザーの注意を引くため）
       if (result.conflicts > 0) {
@@ -152,6 +169,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       console.log('[Auth] Sync completed:', result);
     } catch (error) {
       console.error('[Auth] Sync failed:', error);
+      setSyncNotice('none');
       setSyncStatus('error');
     }
     // No finally needed here because all paths set status, but for safety against future changes:
@@ -166,8 +184,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [triggerSyncInternal]);
 
   useEffect(() => {
+    let isInitialCall = true;
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setLoading(true);
+      // ⚠ 初回以外は setLoading(true) を呼ばない。
+      // 以前は毎回 setLoading(true) を呼んでいたため、BrowserRouter が
+      // 破棄→再構築され、ルーティング状態が失われていた。
+      // 初回のみ loading=true を維持し（初期値が true）、
+      // 2回目以降（トークンリフレッシュ等）は loading を変えずに
+      // バックグラウンドで処理する。
+      if (isInitialCall) {
+        isInitialCall = false;
+        // loading は初期値 true のまま — 明示的に setLoading(true) する必要なし
+      }
+      // NOTE: 初回以外は loading を true にしない（UI フリーズ防止）
       if (user) {
         lastKnownUserIdRef.current = user.uid;
         try {
@@ -203,12 +232,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
           // 6. Decide sync strategy
           setSyncStatus('syncing');
+          setSyncNotice('none');
           try {
+            let skippedByPolicy = false;
             if (lastSync) {
               // Existing device, perform delta sync
               console.log('[Auth] Existing user detected. Performing delta sync.');
               // Note: synchronize() does not throw, it returns a result object.
               const result = await service.synchronize();
+              skippedByPolicy = result.errors.some((message) =>
+                message.includes('WiFi限定モードのためスキップ')
+              );
+              if (skippedByPolicy) {
+                console.log('[Auth] Initial sync skipped by policy:', result);
+                setSyncNotice('wifi_wait');
+              }
               // Status update handled below based on lastSyncTime presence
             } else {
               // New device or first login, perform full sync
@@ -225,6 +263,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
             // 初回同期未実行の場合は 'idle'、実行済みの場合は 'success'
             // Explicitly set success if we have a timestamp, ensuring we exit 'syncing'
             setSyncStatus(currentLastSync ? 'success' : 'idle');
+            if (!skippedByPolicy) {
+              setSyncNotice('none');
+            }
             
             // 7. カウントを更新
             const { pending: queue } = await service.getQueueStatus();
@@ -242,10 +283,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
             const existingLastSync = await db.getLastSyncTime(user.uid);
             // Strict logic: If we have a previous sync time, it's an error. If not, it's idle.
             setSyncStatus(existingLastSync ? 'error' : 'idle');
+            setSyncNotice('none');
           }
         } catch (error) {
            // Outer catch for instantiation errors, handled same as sync failure
             console.error("[Auth] Fatal setup error:", error);
+            setSyncNotice('none');
             setSyncStatus('error');
         } finally {
             setCurrentUser(user);
@@ -253,17 +296,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
       } else {
         // User is logged out
+        const previousUserId = lastKnownUserIdRef.current || undefined;
         try {
           // ログアウト時のDBリセットは best-effort
-          await resetLocalDBForLogout(lastKnownUserIdRef.current || undefined);
+          await resetLocalDBForLogout(previousUserId);
           await initializeDB('anonymous');
         } catch (error) {
           console.warn('[Auth] Logout DB reset failed (non-fatal):', error);
         }
+        SyncServiceFactory.resetInstance(previousUserId);
         lastKnownUserIdRef.current = null;
         setCurrentUser(null);
         setLoading(false);
         setSyncStatus('idle');
+        setSyncNotice('none');
         setLastSyncTime(null);
         setSyncService(null);
         setQueueCount(0);
@@ -338,6 +384,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     currentUser,
     loading,
     syncStatus,
+    syncNotice,
     lastSyncTime,
     triggerSync,
     // 高度化機能
@@ -352,6 +399,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Debug logging
   console.log({
     syncStatus,
+    syncNotice,
     lastSyncTime,
     lastSyncError: null, // access not straightforward here, assuming handled by syncService internally
     totalSyncCount: 0, // transient, actual count in syncService. getSyncStats needed to verify
@@ -359,5 +407,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     conflictCount
   });
 
-  return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
+  // ⚠ 以前は {!loading && children} で children を条件レンダリングしていたが、
+  // これにより BrowserRouter が loading 遷移のたびに破棄→再構築され、
+  // React Router のルーティング状態が失われてリダイレクトが発生していた。
+  // loading 状態のハンドリングは ProtectedRoute / AppContent に委譲する。
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

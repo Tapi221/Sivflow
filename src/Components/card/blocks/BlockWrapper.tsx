@@ -19,6 +19,14 @@ interface BlockWrapperProps {
   showDelete?: boolean;
   showDuplicate?: boolean;
   showDragHandle?: boolean;
+  dragEnabled?: boolean;
+  canMoveUp?: boolean;
+  canMoveDown?: boolean;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
+  onMoveDragStart?: () => void;
+  onMoveDragEnd?: () => void;
+  contentClassName?: string;
 }
 
 export const BlockWrapper = ({ 
@@ -34,32 +42,128 @@ export const BlockWrapper = ({
   isActive,
   showDelete = true,
   showDuplicate = true,
-  showDragHandle = true
+  showDragHandle = true,
+  dragEnabled = true,
+  canMoveUp = false,
+  canMoveDown = false,
+  onMoveUp,
+  onMoveDown,
+  onMoveDragStart,
+  onMoveDragEnd,
+  contentClassName
 }: BlockWrapperProps) => {
+  const stepDragRef = React.useRef<{
+    pointerId: number;
+    startY: number;
+    appliedSteps: number;
+  } | null>(null);
+
+  const applyStepMoves = (deltaSteps: number) => {
+    if (deltaSteps > 0) {
+      for (let i = 0; i < deltaSteps; i += 1) {
+        onMoveDown?.();
+      }
+      return;
+    }
+
+    if (deltaSteps < 0) {
+      for (let i = 0; i < Math.abs(deltaSteps); i += 1) {
+        onMoveUp?.();
+      }
+    }
+  };
+
+  const startStepDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!onMoveUp && !onMoveDown) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const pointerId = event.pointerId;
+    onMoveDragStart?.();
+    stepDragRef.current = {
+      pointerId,
+      startY: event.clientY,
+      appliedSteps: 0,
+    };
+
+    const target = event.currentTarget;
+    target.setPointerCapture(pointerId);
+
+    const onPointerMove = (moveEvent: PointerEvent) => {
+      if (!stepDragRef.current || moveEvent.pointerId !== stepDragRef.current.pointerId) return;
+
+      const deltaY = moveEvent.clientY - stepDragRef.current.startY;
+      const nextSteps = Math.round(deltaY / 24);
+      const diff = nextSteps - stepDragRef.current.appliedSteps;
+
+      if (diff !== 0) {
+        applyStepMoves(diff);
+        stepDragRef.current.appliedSteps = nextSteps;
+      }
+    };
+
+    const onPointerEnd = (endEvent: PointerEvent) => {
+      if (!stepDragRef.current || endEvent.pointerId !== stepDragRef.current.pointerId) return;
+      const appliedSteps = stepDragRef.current.appliedSteps;
+      stepDragRef.current = null;
+
+      if (appliedSteps === 0) {
+        if (endEvent.shiftKey) {
+          onMoveUp?.();
+        } else {
+          onMoveDown?.();
+        }
+      }
+
+      onMoveDragEnd?.();
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerEnd);
+      window.removeEventListener('pointercancel', onPointerEnd);
+    };
+
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerEnd);
+    window.addEventListener('pointercancel', onPointerEnd);
+  };
+
   return (
     <div 
       className={cn(
-        "relative bg-white border-2 border-slate-100/80 rounded-[32px] p-1.5 transition-all duration-300 hover:border-primary-200 hover:shadow-sm",
+        "relative overflow-visible bg-white border border-slate-200/80 rounded-xl py-0 px-1.5 transition-all duration-300 hover:border-primary-200 hover:shadow-sm",
+        isActive && "z-40",
         className
       )}
       style={{
-        borderColor: accentColor ? `${accentColor}40` : undefined, // 25% opacity for subtle look
+        borderColor: accentColor ? `${accentColor}40` : undefined,
       }}
     >
       {/* 操作メニュー (ホバー時に表示、またはモバイル時はタップで表示) */}
       <div
         data-active={isActive ? "true" : "false"}
-        className="absolute right-2 top-1 md:right-3 md:top-1 flex flex-row items-center gap-1 opacity-0 pointer-events-none
+        className="absolute -right-1 top-1/2 -translate-y-1/2 flex flex-col items-center gap-0 -space-y-px opacity-0 pointer-events-none
         data-[active=true]:opacity-100 data-[active=true]:pointer-events-auto
-        transition-opacity duration-150 z-10"
+        transition-opacity duration-150 z-[80]"
       >
         {showDragHandle && (
           <div 
             {...dragHandleProps}
+            onPointerDown={startStepDrag}
+            onKeyDown={(event) => {
+              if (event.key !== 'Enter' && event.key !== ' ') return;
+              event.preventDefault();
+              if (event.shiftKey) {
+                if (canMoveUp) onMoveUp?.();
+                return;
+              }
+              if (canMoveDown) onMoveDown?.();
+            }}
             className={cn(
-              "w-5 h-5 min-w-0 min-h-0 p-0 bg-white border border-slate-100 rounded-full text-slate-400 hover:text-primary-600 hover:border-primary-100 cursor-grab active:cursor-grabbing shadow-sm flex items-center justify-center flex-none",
+              "w-5 h-5 min-w-0 min-h-0 p-0 bg-white border border-slate-100 rounded-full text-slate-400 hover:text-primary-600 hover:border-primary-100 shadow-sm flex items-center justify-center flex-none transition-colors",
+              "cursor-grab active:cursor-grabbing active:bg-primary-50 active:border-primary-200",
               dragHandleClassName
             )}
+            title="クリック: 1行下へ / Shift+クリック: 1行上へ"
           >
             <GripIcon className="w-2.5 h-2.5" />
           </div>
@@ -85,7 +189,7 @@ export const BlockWrapper = ({
       </div>
 
 
-      <div className="relative pr-12 md:pr-14">
+      <div className={cn("relative px-1", contentClassName)}>
         {children}
       </div>
     </div>

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import CardEditor from '@/Components/card/CardEditor';
 import { useCards } from '@/hooks/useCards';
@@ -20,6 +20,24 @@ export default function OneQAMode() {
   const { createCard } = useCards(folderId || undefined);
   const { settings } = useUserSettings();
   const bottomRef = useRef(null);
+  const isUnloadingRef = useRef(false);
+
+  useEffect(() => {
+    const markUnloading = () => {
+      isUnloadingRef.current = true;
+    };
+    window.addEventListener('pagehide', markUnloading);
+    window.addEventListener('beforeunload', markUnloading);
+    return () => {
+      window.removeEventListener('pagehide', markUnloading);
+      window.removeEventListener('beforeunload', markUnloading);
+    };
+  }, []);
+
+  const safeNavigate = useCallback((to) => {
+    if (isUnloadingRef.current) return;
+    navigate(to);
+  }, [navigate]);
 
   // Manage list of editors. Each editor has a unique ID, optional initialData, save status, and autofocus flag.
   const [editors, setEditors] = useState(() => {
@@ -31,10 +49,7 @@ export default function OneQAMode() {
         console.error('Failed to parse saved editors:', e);
       }
     }
-    return [
-      { id: nanoid(), initialData: null, isSaved: false, autoFocus: true },
-      { id: nanoid(), initialData: null, isSaved: false, autoFocus: false }
-    ];
+    return [{ id: nanoid(), initialData: null, isSaved: false, autoFocus: true }];
   });
 
   const [savingIds, setSavingIds] = useState(new Set());
@@ -93,7 +108,7 @@ export default function OneQAMode() {
       // Mark this editor as saved
       setEditors(prev => prev.map(e => e.id === editorId ? { ...e, isSaved: true, autoFocus: false } : e ));
 
-      if (continueCreating) {
+      if (continueCreating === true) {
         toast.success(`カードを追加しました (Q${questionNum})`);
 
         // Add a new editor at the end and set it to autoFocus. Keep existing editors editable.
@@ -101,10 +116,10 @@ export default function OneQAMode() {
           ...prev.map(p => ({ ...p, autoFocus: false })),
           { id: nanoid(), initialData: null, isSaved: false, autoFocus: true }
         ]);
-      } else {
+      } else if (continueCreating === false) {
         toast.success('カードを作成しました');
         clearPersistence();
-        navigate(`/FolderView?id=${folderId}`);
+        safeNavigate(`/FolderView?id=${folderId}`);
       }
     } catch (error) {
       console.error('Failed to save card after retries:', error);
@@ -121,7 +136,7 @@ export default function OneQAMode() {
   const handleCancel = () => {
     // If we have unsaved changes, maybe warn? For now simple navigation.
     clearPersistence();
-    navigate(`/FolderView?id=${folderId}`);
+    safeNavigate(`/FolderView?id=${folderId}`);
   };
 
   const handleDelete = (editorId) => {

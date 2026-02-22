@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { 
   User, 
-  Moon, 
   Tag, 
   Volume2, 
   Database, 
@@ -17,12 +16,11 @@ import {
   RefreshCw,
   Calendar,
   ChevronRight,
-  Sun,
-  Monitor,
-  Keyboard
+  Keyboard,
+  Cloud
 } from 'lucide-react';
 import { getLocalDb } from '@/services/localDB';
-import { Dialog, DialogContent, DialogTitle } from '@/Components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/Components/ui/dialog';
 import { Button } from '@/Components/ui/button';
 import { Switch } from '@/Components/ui/switch';
 import { Input } from '@/Components/ui/input';
@@ -70,7 +68,6 @@ const sidebarItems = [
   { id: 'voice', label: '音声設定', icon: Volume2 },
   { id: 'shortcut', label: 'ショートカット', icon: Keyboard },
   { id: 'sync', label: '同期設定', icon: RefreshCw },
-  { id: 'theme', label: 'テーマ', icon: Moon },
   { id: 'data', label: 'データ', icon: Database },
 ];
 
@@ -127,6 +124,24 @@ const voiceOptions = [
     { id: 'zephyr', label: 'Zephyr' },
 ];
 
+const ACCENT_COLORS = [
+  { id: '#689A98', label: 'Teal', gradient: 'linear-gradient(135deg, #689A98 0%, #90B8B6 100%)' },
+  { id: '#3B82F6', label: 'Blue', gradient: 'linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%)' },
+  { id: '#10B981', label: 'Green', gradient: 'linear-gradient(135deg, #10B981 0%, #34D399 100%)' },
+  { id: '#F59E0B', label: 'Amber', gradient: 'linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%)' },
+  { id: '#EF4444', label: 'Red', gradient: 'linear-gradient(135deg, #EF4444 0%, #F87171 100%)' },
+  { id: '#8B5CF6', label: 'Violet', gradient: 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)' },
+];
+
+const FALLBACK_ACCENT_COLORS = [
+  { id: '#689A98', label: 'Teal', gradient: 'linear-gradient(135deg, #689A98 0%, #90B8B6 100%)' },
+  { id: '#3B82F6', label: 'Blue', gradient: 'linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%)' },
+  { id: '#10B981', label: 'Green', gradient: 'linear-gradient(135deg, #10B981 0%, #34D399 100%)' },
+  { id: '#F59E0B', label: 'Amber', gradient: 'linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%)' },
+  { id: '#EF4444', label: 'Red', gradient: 'linear-gradient(135deg, #EF4444 0%, #F87171 100%)' },
+  { id: '#8B5CF6', label: 'Violet', gradient: 'linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)' },
+];
+
 export default function SettingsDialog({ open, onOpenChange, initialTab }) {
   const [activeTab, setActiveTab] = useState('account');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -134,7 +149,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
   // タブの初期化と同期
   useEffect(() => {
     if (open && initialTab) {
-      setActiveTab(initialTab);
+      setActiveTab(initialTab === 'theme' ? 'account' : initialTab);
     }
   }, [open, initialTab]);
 
@@ -291,6 +306,10 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
   };
 
   const { settings: syncPrefs, updateSettings: updateSyncPrefs } = useSyncSettings();
+  const accentColorsForRender =
+    typeof ACCENT_COLORS !== 'undefined' && Array.isArray(ACCENT_COLORS) && ACCENT_COLORS.length > 0
+      ? ACCENT_COLORS
+      : FALLBACK_ACCENT_COLORS;
 
   const handleReviewStartDayChange = async (checked) => {
     // 1. Update setting
@@ -298,6 +317,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
 
     // 2. Retroactively update TODAY's new cards (0 reviews)
     try {
+        const localDb = await getLocalDb(currentUser?.uid);
         const todayStart = new Date();
         todayStart.setHours(0, 0, 0, 0);
 
@@ -793,20 +813,27 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                     </div>
                 </div>
 
-                <div className="space-y-4">
-                    <div className="bg-white border border-slate-200 p-4 md:p-6 rounded-xl flex items-center justify-between gap-4 shadow-sm">
+                <div className="space-y-3">
+                    <div className="bg-white border border-slate-100 p-4 rounded-xl flex items-center justify-between gap-4 shadow-sm hover:border-slate-200/60 transition-colors">
                         <div>
-                            <div className="font-bold text-slate-700 text-sm">自動音声再生 (問題)</div>
-                            <div className="text-xs text-slate-500 mt-1">カードが表示された瞬間に問いかけを読み上げます</div>
+                            <div className="font-bold text-slate-700 text-sm tracking-tight">自動音声再生 (問題)</div>
+                            <div className="text-[11px] text-slate-400 mt-0.5">カードが表示された瞬間に問いかけを読み上げます</div>
                         </div>
-                        <Switch />
+                        <Switch
+                            checked={settings?.autoVoiceQuestion ?? false}
+                            onCheckedChange={(checked) => updateSettings({ autoVoiceQuestion: checked })}
+                        />
                     </div>
-                    <div className="bg-white border border-slate-200 p-4 md:p-6 rounded-xl flex items-center justify-between gap-4 shadow-sm">
+
+                    <div className="bg-white border border-slate-100 p-4 rounded-xl flex items-center justify-between gap-4 shadow-sm hover:border-slate-200/60 transition-colors">
                         <div>
-                            <div className="font-bold text-slate-700 text-sm">自動音声再生 (解答)</div>
-                            <div className="text-xs text-slate-500 mt-1">答えを表示した瞬間に解説を読み上げます</div>
+                            <div className="font-bold text-slate-700 text-sm tracking-tight">自動音声再生 (解答)</div>
+                            <div className="text-[11px] text-slate-400 mt-0.5">答えを表示した瞬間に解説を読み上げます</div>
                         </div>
-                        <Switch />
+                        <Switch
+                            checked={settings?.autoVoiceAnswer ?? false}
+                            onCheckedChange={(checked) => updateSettings({ autoVoiceAnswer: checked })}
+                        />
                     </div>
                 </div>
 
@@ -842,17 +869,15 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                     </div>
                 </div>
 
-                <div className="bg-white border border-slate-200 p-6 rounded-xl space-y-6 shadow-sm">
-                    <div>
-
-
-                         <div className="flex items-center justify-between pt-4 border-t border-slate-100 mt-4">
+                <div className="bg-white border border-slate-100 p-5 rounded-2xl space-y-5 shadow-sm">
+                    <div className="space-y-4">
+                         <div className="flex items-center justify-between pt-1">
                             <div>
-                                <div className="font-bold text-slate-700 text-sm">カード編集時のプレビュー初期値</div>
-                                <div className="text-xs text-slate-500">編集画面を開いた時のプレビューのデフォルト状態を設定します</div>
+                                <div className="font-bold text-slate-700 text-[13px] tracking-tight">カード編集時のプレビュー初期値</div>
+                                <div className="text-[11px] text-slate-400 mt-0.5">編集画面を開いた時のプレビューのデフォルト状態</div>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <span className={cn("text-[10px] font-bold", (settings?.defaultPreviewEnabled ?? false) ? 'text-primary-600' : 'text-slate-400')}>
+                            <div className="flex items-center gap-3">
+                                <span className={cn("text-[10px] font-bold tracking-tighter", (settings?.defaultPreviewEnabled ?? false) ? 'text-primary-600' : 'text-slate-400')}>
                                     {(settings?.defaultPreviewEnabled ?? false) ? 'ON' : 'OFF'}
                                 </span>
                                 <Switch 
@@ -862,13 +887,13 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                             </div>
                         </div>
 
-                        <div className="flex items-center justify-between pt-4 border-t border-slate-100 mt-4">
+                        <div className="flex items-center justify-between pt-4 border-t border-slate-50">
                             <div>
-                                <div className="font-bold text-slate-700 text-sm">オートセーブ（自動下書き）</div>
-                                <div className="text-xs text-slate-500">編集中の内容を一時的に保存し、リロード時に復元します</div>
+                                <div className="font-bold text-slate-700 text-[13px] tracking-tight">オートセーブ（自動下書き）</div>
+                                <div className="text-[11px] text-slate-400 mt-0.5">編集中の内容を一時的に保存し、復元します</div>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <span className={cn("text-[10px] font-bold", (settings?.autoSaveEnabled ?? true) ? 'text-primary-600' : 'text-slate-400')}>
+                            <div className="flex items-center gap-3">
+                                <span className={cn("text-[10px] font-bold tracking-tighter", (settings?.autoSaveEnabled ?? true) ? 'text-primary-600' : 'text-slate-400')}>
                                     {(settings?.autoSaveEnabled ?? true) ? 'ON' : 'OFF'}
                                 </span>
                                 <Switch 
@@ -878,13 +903,13 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                             </div>
                         </div>
 
-                        <div className="flex items-center justify-between pt-4 border-t border-slate-100 mt-4">
+                        <div className="flex items-center justify-between pt-4 border-t border-slate-50">
                             <div>
-                                <div className="font-bold text-slate-700 text-sm">ブロック複製を反対側に追加</div>
-                                <div className="text-xs text-slate-500">ブロックを複製した際、反対側のセクション（問題⇔解答）に追加します</div>
+                                <div className="font-bold text-slate-700 text-[13px] tracking-tight">ブロック複製を反対側に追加</div>
+                                <div className="text-[11px] text-slate-400 mt-0.5">複製した際、反対側のセクション（問題⇔解答）に追加</div>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <span className={cn("text-[10px] font-bold", (settings?.duplicateToOpposite ?? false) ? 'text-primary-600' : 'text-slate-400')}>
+                            <div className="flex items-center gap-3">
+                                <span className={cn("text-[10px] font-bold tracking-tighter", (settings?.duplicateToOpposite ?? false) ? 'text-primary-600' : 'text-slate-400')}>
                                     {(settings?.duplicateToOpposite ?? false) ? 'ON' : 'OFF'}
                                 </span>
                                 <Switch 
@@ -1029,49 +1054,17 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
               <div className="flex items-center gap-3">
                 <div className="w-1.5 h-6 bg-primary-500 rounded-full shadow-sm" />
                 <div className="space-y-1">
-                  <h2 className="text-xl font-bold text-slate-800 tracking-wide">テーマ設定</h2>
-                  <p className="text-sm text-slate-500">アプリの表示設定を管理します</p>
+                  <h2 className="text-xl font-bold text-slate-800 tracking-wide">表示設定</h2>
+                  <p className="text-sm text-slate-500">ライトモード固定です</p>
                 </div>
               </div>
 
               <div className="space-y-6">
-                {/* Theme Mode */}
-                <div className="space-y-4">
-                  <div className="text-sm font-bold text-slate-600">外観モード</div>
-                  <div className="grid grid-cols-2 gap-4">
-                    {[
-                      { value: 'light', label: 'ライト', icon: Sun },
-                      // Dark mode option removed
-                      { value: 'system', label: 'システム', icon: Monitor },
-                    ].map((mode) => (
-                      <div
-                        key={mode.value}
-                        onClick={() => updateSettings({ theme: mode.value })}
-                        className={cn(
-                          "p-4 rounded-xl border-2 cursor-pointer transition-all flex flex-col items-center gap-2",
-                          settings?.theme === mode.value
-                            ? "border-primary-400 bg-primary-50 text-primary-700 shadow-sm"
-                            : "border-slate-100 bg-white text-slate-500 hover:border-slate-300 hover:bg-slate-50"
-                        )}
-                      >
-                        <mode.icon className={cn(
-                          "w-6 h-6",
-                          settings?.theme === mode.value ? "text-primary-600" : "text-slate-400"
-                        )} />
-                        <span className={cn(
-                          "font-bold text-sm",
-                          settings?.theme === mode.value ? "text-primary-800" : "text-slate-500"
-                        )}>{mode.label}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
                 {/* Accent Color Settings */}
-                 <div className="pt-6 border-t border-slate-200 space-y-4">
+                 <div className="space-y-4">
                     <div className="text-sm font-bold text-slate-600">アクセントカラー</div>
                     <div className="grid grid-cols-4 sm:grid-cols-6 gap-3">
-                        {ACCENT_COLORS.map((color) => (
+                        {accentColorsForRender.map((color) => (
                             <button
                                 key={color.id}
                                 onClick={() => updateSettings({ accentColor: color.id })}
@@ -1289,8 +1282,8 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                 <div className="flex items-center gap-3">
                     <div className="w-1.5 h-6 bg-primary-400 rounded-full shadow-[0_0_10px_rgba(123,172,170,0.5)]" />
                     <div className="space-y-1">
-                        <h2 className="text-xl font-bold text-white tracking-wide">ショートカット</h2>
-                        <p className="text-sm text-slate-400">アプリ内で利用可能なキーボードショートカット一覧です</p>
+                        <h2 className="text-xl font-bold text-slate-800 tracking-wide">ショートカット</h2>
+                        <p className="text-sm text-slate-500">アプリ内で利用可能なキーボードショートカット一覧です</p>
                     </div>
                 </div>
 
@@ -1349,16 +1342,16 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                     },
                   ].map((section) => (
                     <div key={section.title} className="space-y-3">
-                      <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest px-1">{section.title}</h3>
-                      <div className="glass-card rounded-2xl overflow-hidden border border-white/10">
+                      <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">{section.title}</h3>
+                      <div className="rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-sm">
                         <table className="w-full text-left text-sm">
-                          <tbody className="divide-y divide-white/10">
+                          <tbody className="divide-y divide-slate-100">
                             {section.shortcuts.map((s, i) => (
-                              <tr key={i} className="hover:bg-white/5 transition-colors">
-                                <td className="px-4 py-3 font-mono text-primary-300 font-bold w-1/3">
-                                  <span className="bg-white/10 px-2 py-1 rounded-md border border-white/20 shadow-sm text-xs drop-shadow-sm inline-block min-w-[30px] text-center">{s.key}</span>
+                              <tr key={i} className="hover:bg-slate-50 transition-colors">
+                                <td className="px-4 py-3 font-mono text-primary-700 font-bold w-1/3">
+                                  <span className="bg-primary-50 px-2 py-1 rounded-md border border-primary-100 text-xs inline-block min-w-[30px] text-center">{s.key}</span>
                                 </td>
-                                <td className="px-4 py-3 text-slate-300 font-medium">{s.desc}</td>
+                                <td className="px-4 py-3 text-slate-700 font-medium">{s.desc}</td>
                               </tr>
                             ))}
                           </tbody>
@@ -1374,7 +1367,10 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-[950px] w-[95%] md:w-full h-[85vh] md:h-[80vh] max-h-[800px] p-0 gap-0 border-slate-200 shadow-2xl flex flex-col overflow-hidden data-[state=open]:duration-300 bg-[#F8FAFB] ring-0 outline-none">
+        <DialogContent className="w-full max-w-none h-[100dvh] md:max-w-[950px] md:w-full md:h-[80vh] md:max-h-[800px] p-0 gap-0 border-0 md:border border-slate-200 shadow-none md:shadow-2xl flex flex-col overflow-hidden data-[state=open]:duration-300 bg-[#F8FAFB] ring-0 outline-none rounded-none md:rounded-2xl">
+          <DialogDescription className="sr-only">
+            アカウント、学習、同期、データ管理などの設定を行うダイアログです。
+          </DialogDescription>
           <div className="flex flex-1 h-full overflow-hidden">
             {/* Sidebar */}
             <div className={`
@@ -1398,9 +1394,12 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                 {sidebarItems.map((item) => (
                   <button
                     key={item.id}
-                    onClick={() => setActiveTab(item.id)}
+                    onClick={() => {
+                      setActiveTab(item.id);
+                      setIsMobileMenuOpen(false);
+                    }}
                     className={cn(
-                      "flex items-center gap-2 md:gap-3 px-3 py-2 md:px-4 md:py-3 rounded-xl transition-all text-xs md:text-sm font-bold text-left whitespace-nowrap snap-start relative group active:scale-95",
+                      "flex items-center gap-2 md:gap-3 px-3 py-3 md:px-4 md:py-3 rounded-xl transition-all text-sm md:text-sm font-bold text-left whitespace-nowrap snap-start relative group active:scale-95 min-h-11",
                       activeTab === item.id
                         ? "bg-white text-slate-800 shadow-sm border border-slate-200"
                         : "text-slate-500 hover:bg-slate-100 hover:text-slate-700"
@@ -1444,16 +1443,21 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
             {/* Content Content - Reverted from glass-content */}
             <div className="flex-1 overflow-y-auto relative bg-transparent">
                 {/* Mobile Header */}
-                <div className="md:hidden sticky top-0 z-20 flex items-center justify-between p-4 bg-[#F8FAFB]/90 border-b border-slate-200 backdrop-blur-md">
+                <div className="md:hidden sticky top-0 z-20 flex items-center justify-between p-3 bg-[#F8FAFB]/95 border-b border-slate-200 backdrop-blur-md">
                     <div className="flex items-center gap-2">
                         <DialogTitle className="text-lg font-bold text-slate-800">設定</DialogTitle>
                     </div>
-                    <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-slate-600">
-                        {isMobileMenuOpen ? <X /> : <Layers />}
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-slate-600 h-10 w-10">
+                          {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Layers className="w-5 h-5" />}
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="text-slate-600 h-10 w-10">
+                          <X className="w-5 h-5" />
+                      </Button>
+                    </div>
                 </div>
 
-              <div className="p-4 md:p-8 lg:p-10 pb-20 max-w-4xl mx-auto space-y-8">
+              <div className="p-4 md:p-8 lg:p-10 pb-[max(5rem,env(safe-area-inset-bottom))] max-w-4xl mx-auto space-y-8">
                  {renderContent()}
               </div>
             </div>

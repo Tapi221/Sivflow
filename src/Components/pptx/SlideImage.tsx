@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ref, getDownloadURL } from 'firebase/storage';
+import { ref, getDownloadURL } from 'firebase/storage'; // IDE Check: firebase/storage
 import { storage } from '@/services/firebase';
 import { cn } from '@/lib/utils';
 

@@ -6,6 +6,7 @@ import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { cn } from '@/lib/utils';
 import { Tag as TagIcon, X } from 'lucide-react';
 import { DragDropContext } from '@hello-pangea/dnd';
+import { TagBadge } from '@/Components/tag/TagBadge';
 
 interface ColumnNavigatorProps {
   folders: Folder[];
@@ -58,7 +59,7 @@ export default function ColumnNavigator({
   const [historyIndex, setHistoryIndex] = useState<number>(0);
 
   // タグ関連の状態
-  const { tags } = useTags();
+  const { tags, getTagColor } = useTags();
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   // ユニークなタグ名のリストを取得(rootFolderIdに依存しない全タグの一覧を表示)
@@ -454,18 +455,15 @@ export default function ColumnNavigator({
           {uniqueTagNames.map(tagName => {
             const isSelected = selectedTags.includes(tagName);
             return (
-              <button
+              <TagBadge
                 key={tagName}
+                label={tagName}
+                size="sm"
+                colorClass={getTagColor(tagName)}
+                selected={isSelected}
+                className={cn("max-w-[220px]", !isSelected && "opacity-85 hover:opacity-100")}
                 onClick={() => toggleTag(tagName)}
-                className={cn(
-                  "px-2.5 py-1 rounded-full text-[11px] font-medium transition-all duration-200 border",
-                  isSelected
-                    ? "bg-primary-500 text-white border-primary-600 shadow-sm"
-                    : "bg-white text-slate-600 border-slate-200 hover:border-primary-300 hover:bg-slate-50"
-                )}
-              >
-                {tagName}
-              </button>
+              />
             );
           })}
           {selectedTags.length > 0 && (

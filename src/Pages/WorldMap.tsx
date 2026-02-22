@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useState, useRef } from 'react';
+// @ts-ignore
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAllDescendantCards } from '../hooks/useAllDescendantCards';
 import { useProjectMap } from '../hooks/useProjectMap';
 import { useGraphSimulation, type GraphNode, type GraphLink } from '../hooks/useGraphSimulation';
 import { useCardRelations } from '../hooks/useCardRelations';
-import { Button } from '../Components/ui/button';
+import { Button } from '@/Components/ui/button';
 import { HandTray } from '../Components/map/HandTray';
 import { CardPopup } from '../Components/card/CardPopup';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../Components/ui/dropdown-menu';

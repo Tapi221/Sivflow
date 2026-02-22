@@ -1,6 +1,7 @@
 import React from 'react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/Components/ui/dropdown-menu';
-import { ArrowRight, ExternalLink, Pencil, Trash2, Bookmark } from 'lucide-react';
+import { ArrowRight, ExternalLink, Pencil, Trash2 } from 'lucide-react';
+import Pin from 'lucide-react/dist/esm/icons/pin';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
 import { getLocalDb } from '@/services/localDB';
@@ -19,6 +20,8 @@ interface DocumentRowMenuProps {
 
 const getFolderId = (f: any) => f?.id ?? f?.folderId ?? null;
 const getFolderName = (f: any) => f?.folderName ?? f?.folder_name ?? '';
+const isSoftDeleted = (item?: { isDeleted?: boolean; is_deleted?: boolean } | null) =>
+  Boolean(item?.isDeleted ?? item?.is_deleted);
 
 export function DocumentRowMenu({
   doc,
@@ -36,12 +39,12 @@ export function DocumentRowMenu({
   const getNextOrderIndex = (folderId: string) => {
     let maxOrder = -1;
     for (const card of cards) {
-      if (card.folderId !== folderId || card.isDeleted) continue;
+      if (card.folderId !== folderId || isSoftDeleted(card as any)) continue;
       const order = card.orderIndex ?? -1;
       if (order > maxOrder) maxOrder = order;
     }
     for (const d of documents) {
-      if (d.folderId !== folderId || d.isDeleted || d.id === doc.id) continue;
+      if (d.folderId !== folderId || isSoftDeleted(d as any) || d.id === doc.id) continue;
       const order = d.orderIndex ?? -1;
       if (order > maxOrder) maxOrder = order;
     }
@@ -182,7 +185,7 @@ export function DocumentRowMenu({
       <DropdownMenuContent align="start" className="w-48">
         {onTogglePin && (
           <DropdownMenuItem onClick={onTogglePin} className="gap-2">
-            <Bookmark className={`w-4 h-4 ${isPinned ? 'fill-amber-400 text-amber-500' : ''}`} />
+            <Pin className={`w-4 h-4 ${isPinned ? 'text-amber-500' : ''}`} />
             {isPinned ? 'お気に入りから削除' : 'お気に入りに追加'}
           </DropdownMenuItem>
         )}

@@ -12,7 +12,7 @@ import { Skeleton } from '@/Components/ui/skeleton';
 import {
   Flame,
   HelpCircle,
-  Bookmark,
+  Star,
   Clock,
   FileText,
   Sparkles,
@@ -24,6 +24,7 @@ import {
   Zap
 } from 'lucide-react';
 import { createPageUrl } from '@/utils';
+import { FaceIcons } from '@/Components/ui/FaceIcons';
 
 import ExportDialog from '@/Components/export/ExportDialog';
 import ImportDialog from '@/Components/export/ImportDialog';
@@ -53,7 +54,7 @@ export default function Dashboard() {
       const q = query(
         collection(firestoreDb, 'studyLogs'),
         where('userId', '==', currentUser.uid),
-        orderBy('studiedAt', 'desc')
+        orderBy('createdAt', 'desc')
       );
       const snapshot = await getDocs(q);
       return snapshot.docs.map(doc => ({
@@ -68,7 +69,7 @@ export default function Dashboard() {
   const localStudyLogs = useLiveQuery(
     async () => {
       if (!currentUser) return [];
-      const db = await getLocalDb();
+      const db = await getLocalDb(currentUser.uid);
       return await db.table('studyLogs').toArray();
     },
     [currentUser]
@@ -120,20 +121,27 @@ export default function Dashboard() {
   });
 
   // Streak calculation
+  const mergedStudyLogs = useMemo(() => {
+    const combined = [...studyLogs];
+    if (localStudyLogs) combined.push(...localStudyLogs);
+    return combined;
+  }, [studyLogs, localStudyLogs]);
+
+  const getLogDate = (log) => {
+    const raw = log?.studiedAt ?? log?.createdAt;
+    const date = raw?.toDate?.() || new Date(raw);
+    return date instanceof Date && !Number.isNaN(date.getTime()) ? date : null;
+  };
+
   const streak = useMemo(() => {
-    // Combine logs (unique by folderId+cardId+studiedAt string)
-    const combinedLogs = [...studyLogs];
-    if (localStudyLogs) {
-        // Simple merge
-        combinedLogs.push(...localStudyLogs);
-    }
+    if (mergedStudyLogs.length === 0) return 0;
 
-    if (combinedLogs.length === 0) return 0;
-
-    const dates = new Set(combinedLogs.map(log => {
-      const dateVal = log.studiedAt?.toDate?.() || new Date(log.studiedAt);
-      return dateVal.toDateString();
-    }));
+    const dates = new Set(
+      mergedStudyLogs
+        .map(getLogDate)
+        .filter(Boolean)
+        .map((d) => d.toDateString())
+    );
     
     // Check if we studied today
     const today = new Date();
@@ -157,7 +165,23 @@ export default function Dashboard() {
     
     return count;
     // @ts-ignore
-  }, [studyLogs, localStudyLogs, todayCards.length]);
+  }, [mergedStudyLogs, todayCards.length]);
+
+  const todayRatingCounts = useMemo(() => {
+    const today = new Date();
+    const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const end = new Date(start);
+    end.setDate(end.getDate() + 1);
+
+    const counts = { 0: 0, 1: 0, 2: 0, 3: 0 };
+    for (const log of mergedStudyLogs) {
+      const dt = getLogDate(log);
+      if (!dt || dt < start || dt >= end) continue;
+      const score = Number(log?.subjectiveScore ?? log?.subjective_score);
+      if (score >= 0 && score <= 3) counts[score] += 1;
+    }
+    return counts;
+  }, [mergedStudyLogs]);
 
   const uncertainCards = activeCards.filter(c => 
     (c.hasUncertainty || c.has_uncertainty) && !c.isDraft && !c.is_draft
@@ -187,17 +211,31 @@ export default function Dashboard() {
   }, [studyLogs, cards, folders]);
   
   const isLoading = cardsLoading || foldersLoading || logsLoading;
+  const dueCount = todayCards.length;
+  const isNoDueCards = dueCount === 0;
+  const priorityDescriptionLine1 = isNoDueCards
+    ? '今日の復習はありません。'
+    : '忘れる前に復習しましょう。';
+  const priorityDescriptionLine2 = isNoDueCards
+    ? 'カードを追加するか、学習を進めましょう。'
+    : null;
 
   return (
-    <div className="min-h-screen bg-[#F5F7FA] text-slate-800 font-sans selection:bg-teal-100 selection:text-teal-900">
-      <div className="max-w-[1100px] mx-auto p-4 md:p-12">
+    <div className="min-h-screen bg-[#F5F7FA] text-slate-800 font-sans selection:bg-teal-100 selection:text-teal-900 relative overflow-hidden">
+      {/* Background Ruled Lines */}
+      <div 
+        className="absolute inset-0 opacity-100 pointer-events-none z-0" 
+        style={{ 
+          backgroundImage: 'repeating-linear-gradient(to bottom, rgba(0,0,0,0.03) 0px, rgba(0,0,0,0.03) 1px, transparent 1px, transparent 24px)',
+          backgroundSize: '100% 24px'
+        }}
+      />
+      <div className="max-w-[1100px] mx-auto p-4 md:p-12 relative z-10">
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
            <div className="flex-1">
               <div className="flex items-center gap-2 md:gap-3 mb-1 md:mb-2">
-                <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl md:rounded-2xl bg-white border border-slate-100 flex items-center justify-center text-primary-600 shadow-sm shrink-0">
-                  <Sparkles className="w-4 h-4 md:w-5 md:h-5" />
-                </div>
+                {/* Icon removed as requested */}
                 <h1 className="text-xl md:text-2xl font-bold text-slate-700 leading-tight">
                   こんにちは、{settings?.displayName || '学習者'}さん
                 </h1>
@@ -256,36 +294,27 @@ export default function Dashboard() {
             >
                 <div className="absolute top-0 right-0 w-48 h-48 md:w-64 md:h-64 bg-primary-100/50 rounded-full -translate-y-1/2 translate-x-1/2 opacity-20 group-hover:scale-110 transition-transform duration-700"></div>
                 
-                {/* Background Pattern (Irregular/Organic) */}
-                <div className="absolute inset-0 opacity-[0.15] pointer-events-none" 
-                     style={{ 
-                       backgroundImage: `
-                         radial-gradient(circle at 15% 50%, rgb(var(--color-primary-600)) 2px, transparent 2.5px),
-                         radial-gradient(circle at 45% 20%, rgb(var(--color-primary-600)) 3px, transparent 3.5px),
-                         radial-gradient(circle at 85% 35%, rgb(var(--color-primary-600)) 2px, transparent 2.5px),
-                         radial-gradient(circle at 75% 85%, rgb(var(--color-primary-600)) 4px, transparent 4.5px),
-                         radial-gradient(circle at 25% 75%, rgb(var(--color-primary-600)) 2px, transparent 2.5px),
-                         radial-gradient(circle at 60% 60%, rgb(var(--color-primary-600)) 1.5px, transparent 2px)
-                       `,
-                       backgroundSize: '160px 160px' // Larger repeat
-                     }} 
-                />
-                
                 <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-8">
                     <div className="space-y-2 md:space-y-5">
                         <div className="hidden md:flex items-center gap-2">
-                           <div className="px-3 md:px-4 py-1 bg-primary-600 text-white text-[10px] md:text-xs font-bold rounded-full uppercase tracking-wider shadow-sm">Priority Task</div>
+                           <div className="px-3 md:px-4 py-1 bg-primary-600 text-white text-[10px] md:text-xs font-bold rounded-full uppercase tracking-wider shadow-sm">優先タスク</div>
                            {todayCards.length > 0 && <div className="animate-pulse w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]"></div>}
                         </div>
                         <h2 className="text-2xl md:text-5xl font-bold text-slate-800 tracking-tight">今日の復習</h2>
                         <p className="text-xs md:text-base text-slate-500 font-medium max-w-sm mt-1 md:mt-3 leading-relaxed">
-                           記憶が薄れる最適なタイミングです。<br className="hidden md:block"/>現在 {todayCards.length}枚 のカードが待機しています。
+                           {priorityDescriptionLine1}
+                           {priorityDescriptionLine2 && (
+                             <>
+                               <br className="hidden md:block" />
+                               {priorityDescriptionLine2}
+                             </>
+                           )}
                         </p>
                     </div>
                     
                     <div className="flex items-center gap-5 md:gap-8">
                         <div className="flex flex-col items-center">
-                           <span className="text-4xl md:text-7xl font-bold text-primary-600 italic leading-none tracking-tighter">{todayCards.length}</span>
+                           <span className="text-4xl md:text-7xl font-bold text-primary-600 italic leading-none tracking-tighter">{dueCount}</span>
                            <span className="text-[9px] md:text-[11px] font-bold text-slate-400 uppercase mt-1 md:mt-2 tracking-[0.2em]">Cards Due</span>
                         </div>
                         <div className="w-14 h-14 md:w-20 md:h-20 rounded-full bg-primary-600 flex items-center justify-center text-white shadow-lg shadow-primary-600/30 group-hover:scale-110 group-hover:bg-primary-500 transition-all duration-300">
@@ -294,6 +323,32 @@ export default function Dashboard() {
                     </div>
                 </div>
             </div>
+        </section>
+
+        {/* Today's Rating Tiles */}
+        <section className="mb-12">
+          <div className="flex items-center gap-2 mb-4">
+            <CheckCheck className="w-3.5 h-3.5 text-primary-600" />
+            <h2 className="text-[10px] font-bold text-slate-300 tracking-[0.2em] uppercase">
+              Today's Ratings
+            </h2>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+            {[
+              { score: 0, label: '忘れた', Icon: FaceIcons.Forgot },
+              { score: 1, label: 'あいまい', Icon: FaceIcons.Vague },
+              { score: 2, label: '覚えた', Icon: FaceIcons.Good },
+              { score: 3, label: '余裕', Icon: FaceIcons.Easy },
+            ].map(({ score, label, Icon }) => (
+              <div key={score} className="bg-[#FCFCFC] rounded-2xl border border-slate-200/60 p-4 flex items-center gap-3">
+                <Icon size={28} />
+                <div>
+                  <div className="text-lg font-bold text-slate-700 leading-none">{todayRatingCounts[score]}</div>
+                  <div className="text-[10px] text-slate-400 font-bold mt-1">{label}</div>
+                </div>
+              </div>
+            ))}
+          </div>
         </section>
 
         {/* WEAK POINTS & FOCUS AREA */}
@@ -331,11 +386,11 @@ export default function Dashboard() {
                  onClick={() => navigate(createPageUrl('bookmark'))} 
                >
                    <div className="absolute -bottom-6 -right-6 md:-bottom-10 md:-right-10 text-slate-100 group-hover:text-teal-50 group-hover:scale-105 transition-all duration-500">
-                      <Bookmark className="w-28 h-28 md:w-48 md:h-48 opacity-50" />
+                      <Star className="w-28 h-28 md:w-48 md:h-48 opacity-50" />
                    </div>
 
                    <div className="relative z-10 w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-teal-50 flex items-center justify-center text-teal-600 group-hover:scale-105 transition-transform">
-                      <Bookmark className="w-5 h-5 md:w-6 md:h-6" />
+                      <Star className="w-5 h-5 md:w-6 md:h-6" />
                    </div>
                    
                    <div className="relative z-10">

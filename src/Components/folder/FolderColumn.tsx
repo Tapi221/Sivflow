@@ -407,7 +407,7 @@ export default function FolderColumn({
                   className="group flex items-center gap-2.5 px-2.5 py-1 rounded-lg cursor-pointer transition-all duration-200 text-slate-700 hover:bg-slate-100"
                 >
                   <div className="p-1 rounded-md flex-shrink-0 bg-slate-200 text-slate-500">
-                    <FileText className="w-3.5 h-3.5" />
+                    <BookOpen className="w-3.5 h-3.5" />
                   </div>
                   <div className="flex flex-col min-w-0">
                     <span className="text-[12px] font-semibold truncate">

@@ -14,10 +14,15 @@ import { useReliableFileUpload } from '@/hooks/useReliableFileUpload';
 
 function ImageItem({ item, index, onRemove, onDownload, onRetry }) {
   const [showFullscreen, setShowFullscreen] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
   const displayUrl = item.remoteUrl ?? item.localUrl ?? '';
   const isFailed = item.status === 'failed';
   // Use optimistic UI: "uploading" is now a background state, not a blocking one.
   // We show a small badge instead of blocking the image.
+
+  useEffect(() => {
+    setLoadFailed(false);
+  }, [displayUrl]);
   
   return (
     <>
@@ -26,24 +31,21 @@ function ImageItem({ item, index, onRemove, onDownload, onRetry }) {
           <div
             ref={provided.innerRef}
             {...provided.draggableProps}
-            className="relative group border rounded-lg overflow-hidden bg-gray-50"
+            {...provided.dragHandleProps}
+            className="relative group border rounded-lg overflow-hidden bg-gray-50 w-full"
           >
-            <div
-              {...provided.dragHandleProps}
-              className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 rounded p-1"
-            >
-              <Menu className="w-4 h-4 text-gray-500" />
-            </div>
-            
-            {displayUrl ? (
+            {displayUrl && !loadFailed ? (
               <img
                 src={displayUrl}
                 alt={`Image ${index + 1}`}
-                className="w-full h-24 object-contain cursor-pointer bg-white"
+                className="w-full h-auto cursor-pointer bg-white"
                 onClick={() => setShowFullscreen(true)}
+                onError={() => setLoadFailed(true)}
               />
             ) : (
-              <div className="w-full h-24 bg-white" />
+              <div className="w-full h-48 bg-white flex items-center justify-center text-slate-400 text-xs">
+                画像を表示できません
+              </div>
             )}
 
             {/* Optimistic Status Badges & Progress */}
@@ -71,15 +73,6 @@ function ImageItem({ item, index, onRemove, onDownload, onRetry }) {
             </div>
             
             <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <Button
-                variant="secondary"
-                size="icon"
-                className="h-7 w-7 bg-white/80"
-                onClick={() => onDownload(displayUrl)}
-                disabled={!displayUrl}
-              >
-                <ChevronDown className="w-3 h-3" />
-              </Button>
               {isFailed && (
                 <Button
                   variant="secondary"
@@ -90,14 +83,6 @@ function ImageItem({ item, index, onRemove, onDownload, onRetry }) {
                   <RotateCcw className="w-3 h-3" />
                 </Button>
               )}
-              <Button
-                variant="secondary"
-                size="icon"
-                className="h-7 w-7 bg-white/80 hover:bg-red-100"
-                onClick={() => onRemove(index)}
-              >
-                <X className="w-3 h-3" />
-              </Button>
             </div>
           </div>
         )}
@@ -180,6 +165,7 @@ interface MediaUploaderProps {
   initialFile?: File;
   onConsumeInitialFile?: () => void;
   onFilesExcess?: (files: File[]) => void;
+  autoOpenPicker?: boolean;
 }
 
 export default function MediaUploader({ 
@@ -189,7 +175,8 @@ export default function MediaUploader({
   maxFiles = 10,
   initialFile,
   onConsumeInitialFile,
-  onFilesExcess
+  onFilesExcess,
+  autoOpenPicker = false,
 }: MediaUploaderProps) {
   const { currentUser } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
@@ -198,6 +185,7 @@ export default function MediaUploader({
   const latestItemsRef = useRef(urls);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const autoOpenedRef = useRef(false);
 
   const uniqueId = useId();
   const inputId = `file-${type}-${uniqueId}`;
@@ -215,6 +203,23 @@ export default function MediaUploader({
   useEffect(() => {
     latestItemsRef.current = urls;
   }, [urls]);
+
+  useEffect(() => {
+    if (!autoOpenPicker) {
+      autoOpenedRef.current = false;
+      return;
+    }
+    if (autoOpenedRef.current) return;
+
+    const trigger = () => {
+      if (!fileInputRef.current) return;
+      autoOpenedRef.current = true;
+      fileInputRef.current.click();
+    };
+
+    const rafId = window.requestAnimationFrame(trigger);
+    return () => window.cancelAnimationFrame(rafId);
+  }, [autoOpenPicker, urls.length, type]);
   
   const accept = type === 'image'
     ? 'image/png,image/jpeg,image/jpg,image/heic,image/heif'
@@ -325,7 +330,7 @@ export default function MediaUploader({
 
       console.log('[MediaUploader] Images prepared:', prepared.length);
       const newImages = [...(urls as UploadedImage[]), ...prepared.map((item) => item.image)];
-      latestItemsRef.current = newImages; // 最新の状態を保存
+      latestItemsRef.current = newImages as any; // 最新の状態を保存
       onChange(newImages);
 
       // Process uploads
@@ -484,6 +489,10 @@ export default function MediaUploader({
   
   // Handle paste for images and audio
   const handlePaste = useCallback(async (e) => {
+    const target = e.target as HTMLElement | null;
+    const isEditableTarget = !!target?.closest('input, textarea, select, [contenteditable="true"]');
+    if (isEditableTarget) return;
+
     // Only handle paste if mouse is hovering over this uploader instance
     if (!containerRef.current?.matches(':hover')) return;
     
@@ -620,7 +629,7 @@ export default function MediaUploader({
                 {...provided.droppableProps}
                 className={cn(
                   type === 'image' 
-                    ? "grid grid-cols-2 sm:grid-cols-3 gap-2" 
+                    ? "grid grid-cols-1 gap-2" 
                     : "space-y-2"
                 )}
               >

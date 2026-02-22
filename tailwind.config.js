@@ -4,7 +4,7 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
-  // darkMode: 'class',
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
@@ -57,7 +57,7 @@ export default {
           'Roboto',
           'sans-serif',
         ],
-      },
+            },
       backgroundImage: {
         'gradient-primary': 'linear-gradient(135deg, #689A98 0%, #90B8B6 100%)',
         'gradient-secondary': 'linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%)',

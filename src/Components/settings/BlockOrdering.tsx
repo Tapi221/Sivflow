@@ -7,7 +7,6 @@ import GripVertical from 'lucide-react/dist/esm/icons/grip-vertical';
 import TypeIcon from 'lucide-react/dist/esm/icons/type';
 import CodeIcon from 'lucide-react/dist/esm/icons/code';
 import ImageIcon from 'lucide-react/dist/esm/icons/image';
-import LinkIcon from 'lucide-react/dist/esm/icons/link';
 import SigmaIcon from 'lucide-react/dist/esm/icons/sigma';
 import { cn } from '@/lib/utils';
 import type { BlockConfig } from '@/types';
@@ -19,9 +18,14 @@ const ICONS = {
   code: CodeIcon,
   image: ImageIcon,
   audio: Volume2,
-  reference: LinkIcon,
   math: SigmaIcon
 };
+
+const sanitizeBlockSettings = (items: BlockConfig[]) =>
+  items
+    .filter((item) => item.type !== 'reference')
+    .sort((a, b) => a.orderIndex - b.orderIndex)
+    .map((item, index) => ({ ...item, orderIndex: index }));
 
 export const BlockOrdering = () => {
   const { settings, updateSettings } = useUserSettings();
@@ -43,8 +47,7 @@ export const BlockOrdering = () => {
     if (isDraggingRef.current) return;
 
     if (settings?.editorBlockSettings) {
-      // Sort by orderIndex to ensure correct display order
-      const sorted = [...settings.editorBlockSettings].sort((a, b) => a.orderIndex - b.orderIndex);
+      const sorted = sanitizeBlockSettings([...settings.editorBlockSettings]);
       
       // 文字列表現で比較し、実際に変更がある場合のみステートを更新する（チラツキ防止）
       setBlocks(prev => {
@@ -57,10 +60,10 @@ export const BlockOrdering = () => {
             { id: 'code', type: 'code', label: 'コード', isVisible: true, orderIndex: 1 },
             { id: 'image', type: 'image', label: '画像', isVisible: true, orderIndex: 2 },
             { id: 'audio', type: 'audio', label: '音声', isVisible: true, orderIndex: 3 },
-            { id: 'reference', type: 'reference', label: 'リンク', isVisible: true, orderIndex: 4 },
-            { id: 'math', type: 'math', label: '数式', isVisible: true, orderIndex: 5 },
+            { id: 'math', type: 'math', label: '数式', isVisible: true, orderIndex: 4 },
+            { id: 'markdown', type: 'markdown', label: 'Markdown', isVisible: true, orderIndex: 5 },
         ];
-        setBlocks(defaults);
+        setBlocks(sanitizeBlockSettings(defaults));
     }
   }, [settings?.editorBlockSettings]);
 

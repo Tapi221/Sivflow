@@ -20,6 +20,7 @@ interface RightPaneProps {
   onDocumentUpdated?: (documentId: string, updates: Partial<DocumentItem>) => Promise<void>;
   handlers: {
     onStartStudy: () => void;
+    onViewCards: () => void;
     onCreateCard: () => void;
     onBulkCreate: () => void;
   };
@@ -45,7 +46,7 @@ export function RightPane({
         doc={selectedDocument}
         onDocumentUpdate={
           onDocumentUpdated
-            ? (updates) => onDocumentUpdated(selectedDocument.id, updates)
+            ? (updates) => onDocumentUpdated(selectedDocument.id, updates as Partial<DocumentItem>)
             : undefined
         }
       />

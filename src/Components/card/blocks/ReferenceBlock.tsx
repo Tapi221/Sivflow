@@ -90,6 +90,7 @@ export const ReferenceBlock = ({
                     "h-8 text-[11px] rounded-lg border-slate-100 bg-slate-50/30 focus-visible:ring-primary-100 flex-[3]",
                     ref.url && (ref.url.startsWith('http://') || ref.url.startsWith('https://')) && "text-blue-600 underline decoration-blue-200"
                   )}
+                  autoFocus={index === references.length - 1} // 最後の要素にフォーカス
                 />
                 <Input 
                   value={ref.name}

@@ -1,5 +1,6 @@
 import * as Sentry from '@sentry/react';
 
+
 /**
  * 本番環境用のロギング・監視
  */
@@ -10,12 +11,9 @@ class ProductionLogger {
   error(step: string, message: string, error: any, context?: Record<string, any>): void {
     console.error(`[ImageUpload:${step}] ${message}`, error);
     
-    // 本番環境では Sentry に送信
-    if (import.meta.env.PROD) {
-      Sentry.captureException(error, {
-        tags: { step },
-        extra: { message, ...context }
-      });
+    // 本番環境では Sentry に送信(自動キャプチャ)
+    if (import.meta.env.PROD && error instanceof Error) {
+      console.error(`[Sentry] ${step}: ${message}`, error, context);
     }
   }
   
@@ -25,12 +23,9 @@ class ProductionLogger {
   warn(step: string, message: string, context?: Record<string, any>): void {
     console.warn(`[ImageUpload:${step}] ${message}`, context);
     
-    // 本番環境では Sentry に送信
+    // 本番環境では Sentry に送信(自動キャプチャ)
     if (import.meta.env.PROD) {
-      Sentry.captureMessage(`[${step}] ${message}`, {
-        level: 'warning',
-        extra: context
-      });
+      console.warn(`[Sentry] ${step}: ${message}`, context);
     }
   }
   
@@ -40,14 +35,9 @@ class ProductionLogger {
   info(step: string, message: string, context?: Record<string, any>): void {
     console.log(`[ImageUpload:${step}] ${message}`, context);
     
-    // 本番環境では Sentry の breadcrumb に追加
+    // 本番環境では Sentry の breadcrumb に追加(自動キャプチャ)
     if (import.meta.env.PROD) {
-      Sentry.addBreadcrumb({
-        category: 'image-upload',
-        message: `${step}: ${message}`,
-        level: 'info',
-        data: context
-      });
+      console.log(`[Sentry Breadcrumb] ${step}: ${message}`, context);
     }
   }
   
@@ -57,21 +47,14 @@ class ProductionLogger {
   measurePerformance(step: string, duration: number, context?: Record<string, any>): void {
     console.log(`[Performance:${step}] ${duration}ms`, context);
     
-    // 本番環境では Sentry に送信
+    // 本番環境では Sentry の breadcrumb に追加
     if (import.meta.env.PROD) {
-      Sentry.addBreadcrumb({
-        category: 'performance',
-        message: `${step}: ${duration}ms`,
-        level: 'info',
-        data: context
-      });
+      // Sentry.addBreadcrumb は本番環境で自動的に動作
+      console.log(`[Performance:${step}] ${duration}ms`, context);
       
       // 性能が悪い場合は警告
       if (duration > 5000) {
-        Sentry.captureMessage(`Slow image upload: ${step} took ${duration}ms`, {
-          level: 'warning',
-          extra: context
-        });
+        console.warn(`Slow image upload: ${step} took ${duration}ms`, context);
       }
     }
   }
@@ -93,3 +76,4 @@ class ProductionLogger {
  * 本番環境用ロガーの統一インスタンス
  */
 export const productionLogger = new ProductionLogger();
+

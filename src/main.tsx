@@ -3,9 +3,11 @@ import { createRoot } from 'react-dom/client'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import './index.css'
+import './styles/code-theme.css'
+import './styles/options.css'
 import 'katex/dist/katex.min.css'
-import App from './App.tsx'
-import { ErrorBoundary } from './Components/common/ErrorBoundary.tsx'
+import App from './App'
+import { ErrorBoundary } from './Components/common/ErrorBoundary'
 import { startTabPresence } from '@/utils/tabPresence'
 
 // Manifest検証（デバッグ用・開発環境のみ）

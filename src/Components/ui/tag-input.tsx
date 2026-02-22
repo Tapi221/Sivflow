@@ -1,19 +1,15 @@
 // @ts-nocheck
 import * as React from "react"
-import { Check, Plus, X, ChevronsUpDown, Tag as TagIcon, Palette, MoreVertical } from "lucide-react"
+import { Check, Plus, Tag as TagIcon, Palette } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { Badge } from "@/Components/ui/badge"
-import { Button } from "@/Components/ui/button"
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
 import {
   Command,
-  CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
-  CommandSeparator,
 } from "@/Components/ui/command"
 import {
   Popover,
@@ -21,6 +17,7 @@ import {
   PopoverTrigger,
 } from "@/Components/ui/popover"
 import { useTags } from "@/hooks/useTags"
+import { TagBadge } from "@/Components/tag/TagBadge"
 
 interface TagInputProps {
   tags: string[]
@@ -90,7 +87,7 @@ export function TagInput({
     <Popover open={open} onOpenChange={setOpen}>
       <div
         className={cn(
-          "w-full flex flex-col min-h-[48px] py-1.5 px-3 bg-slate-50 border border-transparent hover:border-slate-200 rounded-xl transition-all cursor-text",
+          "w-full flex flex-col min-h-0 py-0 px-0 bg-transparent border-none rounded-none transition-all cursor-text",
           className
         )}
         onClick={() => setOpen(true)}
@@ -115,29 +112,17 @@ export function TagInput({
                                                 {...provided.dragHandleProps}
                                                 style={{ ...provided.draggableProps.style }}
                                              >
-                                                <Badge 
-                                                    variant="secondary" 
+                                                <TagBadge
+                                                    label={tag}
+                                                    size="xs"
+                                                    colorClass={colorClass}
                                                     className={cn(
-                                                        "pl-1.5 pr-1 py-0.5 flex items-center gap-1 border-none shadow-sm select-none transition-all font-bold text-[10px]", 
-                                                        colorClass,
-                                                        snapshot.isDragging && "scale-105 shadow-md z-50"
+                                                      "select-none",
+                                                      snapshot.isDragging && "scale-105 shadow-md z-50"
                                                     )}
-                                                    onClick={(e) => {
-                                                        e.stopPropagation()
-                                                    }}
-                                                >
-                                                    {tag}
-                                                    <div
-                                                        className="ml-1 rounded-full hover:bg-black/5 p-0.5 cursor-pointer"
-                                                        onClick={(e) => {
-                                                            e.preventDefault()
-                                                            e.stopPropagation()
-                                                            handleUnselect(tag)
-                                                        }}
-                                                    >
-                                                        <X className="h-3 w-3" />
-                                                    </div>
-                                                </Badge>
+                                                    onRemove={() => handleUnselect(tag)}
+                                                    removeAriaLabel={`${tag}を削除`}
+                                                />
                                              </div>
                                          )}
                                      </Draggable>
@@ -151,7 +136,7 @@ export function TagInput({
              
              <PopoverTrigger asChild>
                  <button 
-                    className="flex items-center gap-1 h-7 px-2 text-slate-300 hover:text-slate-500 transition-colors"
+                    className="flex items-center gap-1 h-7 px-0 text-slate-300 hover:text-slate-400 transition-colors"
                     onClick={() => setOpen(true)}
                  >
                      {tags.length === 0 && <span className="text-[10px] font-bold uppercase tracking-wider">{placeholder}</span>}
@@ -194,19 +179,22 @@ export function TagInput({
                   </div>
                   
                   <div className="px-1">
-                      <div className="text-[10px] text-slate-400 mb-2 font-bold uppercase tracking-widest flex items-center gap-1.5">
-                          <Palette className="w-3 h-3" /> カラーを選択
+                      <div className="text-xs text-slate-600 mb-2 font-bold uppercase tracking-widest flex items-center gap-1.5">
+                          <Palette className="w-3.5 h-3.5" /> カラーを選択
                       </div>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-2.5 rounded-xl border border-slate-200 bg-slate-50/70 p-2">
                           {availableColors.map((color) => (
                               <button
                                   key={color}
                                   title={`${color.split(' ')[0]}を選択`}
                                   aria-label={`${color.split(' ')[0]}を選択`}
                                   className={cn(
-                                      "w-6 h-6 rounded-full border border-slate-100 transition-all",
+                                      "w-8 h-8 rounded-full border-2 ring-1 ring-slate-300/70 shadow-sm transition-all",
                                       color.split(' ')[0],
-                                      (selectedColor === color || (!selectedColor && color === availableColors[0])) ? "ring-2 ring-offset-2 ring-primary-500 scale-110" : "hover:scale-110"
+                                      color.split(' ')[2],
+                                      (selectedColor === color || (!selectedColor && color === availableColors[0]))
+                                        ? "ring-2 ring-offset-2 ring-primary-600 scale-110 shadow-md"
+                                        : "hover:scale-105 hover:ring-slate-400"
                                   )}
                                   onClick={(e) => {
                                       e.stopPropagation();
@@ -240,15 +228,12 @@ export function TagInput({
                           isSelected ? "bg-primary-50/30 border-primary-100/50" : "hover:bg-slate-50"
                         )}
                       >
-                        <Badge 
-                          variant="secondary" 
-                          className={cn(
-                            "px-2 py-0.5 border-none shadow-sm font-bold text-[10px]", 
-                            colorClass
-                          )}
-                        >
-                          {tag}
-                        </Badge>
+                        <TagBadge
+                          label={tag}
+                          size="xs"
+                          colorClass={colorClass}
+                          className="max-w-[220px]"
+                        />
                         {isSelected && <Check className="w-3.5 h-3.5 text-primary-600" />}
                       </CommandItem>
                    );

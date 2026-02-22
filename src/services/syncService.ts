@@ -430,9 +430,9 @@ export class SyncService {
           }
         } else if (item.action === 'delete') {
           if (item.entity === 'card') {
-            await this.cloudProvider.deleteCard(item.payload.id);
+            await this.cloudProvider.deleteCard(item.payload.id, this.userId);
           } else {
-            await this.cloudProvider.deleteFolder(item.payload.id);
+            await this.cloudProvider.deleteFolder(item.payload.id, this.userId);
           }
         }
         
@@ -636,9 +636,9 @@ export class SyncService {
     // Firestore から削除を試行
     try {
       if (entityType === 'card') {
-        await this.cloudProvider.deleteCard(id);
+        await this.cloudProvider.deleteCard(id, this.userId);
       } else {
-        await this.cloudProvider.deleteFolder(id);
+        await this.cloudProvider.deleteFolder(id, this.userId);
       }
       console.log(`[Sync] Purged ${entityType} ${id} from Firestore`);
     } catch (error: any) {

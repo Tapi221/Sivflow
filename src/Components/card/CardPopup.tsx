@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Flashcard } from './Flashcard';
 import { Button } from '../ui/button';
 import { X } from 'lucide-react';
+import { useUserSettings } from '@/hooks/useUserSettings';
 
 interface CardPopupProps {
   card: any;
@@ -18,6 +19,7 @@ export function CardPopup({
     onToggleUncertainty, 
     onToggleBookmark 
 }: CardPopupProps) {
+  const { settings } = useUserSettings();
   const [isFlipped, setIsFlipped] = useState(false);
 
   return (
@@ -44,6 +46,7 @@ export function CardPopup({
           onToggleUncertainty={onToggleUncertainty}
           onToggleBookmark={onToggleBookmark}
           className="h-auto min-h-[500px]"
+          editorSharedHeightPx={settings?.cardEditorHeightPx ?? null}
         />
       </div>
     </div>

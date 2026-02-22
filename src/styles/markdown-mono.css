@@ -1,0 +1,118 @@
+/* Markdown block: allow selection + use same serif font as TextBlock */
+.markdownBlockRoot {
+  -webkit-user-select: text !important;
+  user-select: text !important;
+  font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif !important;
+  font-size: 16px !important;
+  line-height: 24px !important;
+  font-variant-numeric: lining-nums proportional-nums !important;
+  font-feature-settings: "lnum" 1 !important;
+}
+
+.markdownBlockEditor {
+  font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif !important;
+  font-size: 16px !important;
+  line-height: 24px !important;
+  font-variant-numeric: lining-nums proportional-nums !important;
+  font-feature-settings: "lnum" 1 !important;
+}
+
+.markdownBlockPreview {
+  font-size: 16px !important;
+  line-height: 24px !important;
+  font-variant-numeric: lining-nums proportional-nums !important;
+  font-feature-settings: "lnum" 1 !important;
+}
+
+.markdownBlockRoot :is(
+  h1, h2, h3, h4, h5, h6,
+  p, span, div,
+  ul, ol, li,
+  blockquote,
+  table, thead, tbody, tfoot, tr, th, td,
+  pre, code, kbd, samp,
+  em, strong,
+  hr
+) {
+  -webkit-user-select: text !important;
+  user-select: text !important;
+  font-family: inherit !important;
+}
+
+.markdownBlockEditor textarea,
+.markdownBlockEditor [contenteditable="true"],
+.markdownBlockRoot textarea,
+.markdownBlockRoot [contenteditable="true"] {
+  -webkit-user-select: text !important;
+  user-select: text !important;
+  font-family: inherit !important;
+  font-size: 16px !important;
+  line-height: 24px !important;
+}
+
+.markdownBlockPreview textarea,
+.markdownBlockPreview [contenteditable="true"] {
+  -webkit-user-select: text !important;
+  user-select: text !important;
+  font-family: inherit !important;
+  font-size: 16px !important;
+  line-height: 24px !important;
+}
+
+.markdownBlockRoot pre,
+.markdownBlockRoot code,
+.markdownBlockRoot kbd,
+.markdownBlockRoot samp,
+.markdownBlockPreview pre,
+.markdownBlockPreview code {
+  -webkit-user-select: text !important;
+  user-select: text !important;
+  font-family: inherit !important;
+}
+
+/* Markdown preview: fixed-height paper rhythm (24px grid) */
+.markdownBlockPreviewFrame {
+  --md-lines: 6;
+  height: auto;
+  min-height: calc(var(--ruled-line-pitch, 24px) * 2);
+  background: transparent !important;
+  overflow: visible !important;
+}
+
+.markdownBlockPreviewContent {
+  height: auto;
+  overflow: visible;
+}
+
+.markdownBlockSurface {
+  background: transparent !important;
+}
+
+.markdownBlockRoot .markdown-block-view,
+.markdownBlockSurface .markdown-block-view {
+  line-height: var(--card-line-height, 24px);
+}
+
+/* 罫線グリッドに合わせるため、要素間隔は24pxに統一 */
+.markdownBlockRoot .markdown-block-view > * + *,
+.markdownBlockSurface .markdown-block-view > * + * {
+  margin-top: var(--card-line-height, 24px) !important;
+}
+
+.markdownBlockRoot .markdown-block-view :is(
+  p, ul, ol, li,
+  h1, h2, h3, h4, h5, h6,
+  blockquote, pre, table, hr
+),
+.markdownBlockSurface .markdown-block-view :is(
+  p, ul, ol, li,
+  h1, h2, h3, h4, h5, h6,
+  blockquote, pre, table, hr
+) {
+  margin-bottom: 0 !important;
+}
+
+.markdownBlockRoot .markdown-block-view :is(ul, ol),
+.markdownBlockSurface .markdown-block-view :is(ul, ol) {
+  padding-left: 24px !important;
+}

@@ -1,50 +1,20 @@
 {
   "compilerOptions": {
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "target": "ES2022",
-    "useDefineForClassFields": true,
-    "lib": ["ES2022", "DOM", "DOM.Iterable", "WebWorker"],
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
-    "types": ["vite/client"],
-    "skipLibCheck": true,
-    "allowJs": true,
-    "checkJs": false,
-    "declaration": false,
-    "sourceMap": false,
-
-    /* Bundler mode */
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
-    "moduleDetection": "force",
-    "noEmit": true,
+    "moduleResolution": "Bundler",
     "jsx": "react-jsx",
-    
-    /* Path mapping */
+
+    "noEmit": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
-    },
-
-    /* Linting */
-    "strict": false,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "erasableSyntaxOnly": false,
-    "noFallthroughCasesInSwitch": false,
-    "noUncheckedSideEffectImports": false,
-    "skipLibCheck": true
+    }
   },
-  "include": ["src"],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "build",
-    ".next",
-    ".turbo",
-    ".firebase",
-    "coverage",
-    "tmp",
-    "functions"
-  ]
+  "include": ["src"]
 }

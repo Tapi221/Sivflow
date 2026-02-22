@@ -61,7 +61,7 @@ export class OperationQueueService {
     priority: QueuePriority = 'medium'
   ): Promise<void> {
     const db = await getLocalDb();
-    await db.transaction('rw', [db.syncQueue], async () => {
+    await db.transaction('rw', ['syncQueue'], async () => {
         // 1. Find existing Pending item
         // Items in 'processing' status are EXCLUDED from compression to preserve execution integrity.
         // We use the composite index [targetId+status] implicitly via where clause.
@@ -194,7 +194,7 @@ export class OperationQueueService {
     // Process items in parallel (limited by the fact we just fetched limited batch)
     await Promise.all(candidates.map(async (item) => {
         // 3-a. Transactional Lock (CAS)
-        const lockedItem = await db.transaction('rw', [db.syncQueue], async () => {
+        const lockedItem = await db.transaction<SyncQueueItem | null | undefined>('rw', ['syncQueue'], async () => {
              const current = await db.syncQueue.get(item.id);
              if (!current || current.status !== 'pending') return null;
              
@@ -341,7 +341,7 @@ export class OperationQueueService {
           if (staleItems.length > 0) {
               console.warn(`[Queue] Found ${staleItems.length} stale processing items. Recovering...`);
               
-              await db.transaction('rw', [db.syncQueue], async () => {
+              await db.transaction('rw', ['syncQueue'], async () => {
                   for (const item of staleItems) {
                        await db.syncQueue.update(item.id, {
                            status: 'pending',

@@ -142,7 +142,7 @@ const generateUploadedImageId = (): string => {
 export const createUploadedImage = (file: File) => {
   return {
     id: generateUploadedImageId(),
-    localUrl: URL.createObjectURL(file),
+    localUrl: createBlobUrl(URL.createObjectURL(file)),
     remoteUrl: null,
     status: 'uploading' as const,
     contentType: file.type || null,

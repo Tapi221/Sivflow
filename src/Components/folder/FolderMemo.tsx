@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Button } from '@/Components/ui/button';
-import { StickyNote, Image as ImageIcon, X, Upload, Loader2, RotateCcw, Plus, Edit2, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
+import { StickyNote, Image as ImageIcon, X, Upload, Loader2, RotateCcw, Plus, Edit, Trash2, ChevronRight, ChevronLeft } from 'lucide-react';
 import AutoResizeTextarea from '@/Components/ui/AutoResizeTextarea';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -456,7 +456,7 @@ export default function FolderMemo({ folder, onUpdate }: any) {
                             </span>
                             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <Button variant="ghost" size="icon" onClick={() => setEditingId(memo.id)} className="h-8 w-8 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-50">
-                                    <Edit2 className="w-3.5 h-3.5" />
+                                    <Edit className="w-3.5 h-3.5" />
                                 </Button>
                                 <Button variant="ghost" size="icon" onClick={() => handleDeleteMemo(memo.id)} className="h-8 w-8 rounded-full text-slate-400 hover:text-red-500 hover:bg-red-50">
                                     <Trash2 className="w-3.5 h-3.5" />

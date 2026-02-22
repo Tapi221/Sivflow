@@ -2,7 +2,7 @@
  * InboxPanel - 未分類カード一覧表示コンポーネント
  */
 import React, { useMemo, useState, useRef, useEffect } from 'react';
-import { FileText, Folder, ArrowRight, ChevronRight, ChevronDown } from 'lucide-react';
+import { BookOpen, Folder, ArrowRight, ChevronRight, ChevronDown } from 'lucide-react';
 
 interface InboxPanelProps {
   cards: any[];
@@ -119,7 +119,7 @@ export function InboxPanel({
                 className="flex-1 flex items-center gap-2 min-w-0 cursor-pointer"
                 onClick={() => onCardSelect(cardId)}
               >
-                <FileText className="w-4 h-4 shrink-0 text-slate-400" />
+                <BookOpen className="w-4 h-4 shrink-0 text-slate-400" />
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-medium text-slate-700 truncate">
                     {card.title || '無題のカード'}

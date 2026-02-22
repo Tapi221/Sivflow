@@ -10,6 +10,22 @@
       (function() {
         // ロード時の緑色フラッシュを防ぐため、localStorageから即座に色を反映
         const color = localStorage.getItem('flashcard-accent-color') || '#689A98';
+        const root = document.documentElement;
+
+        const toRgb = (hex) => {
+          const match = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex || '');
+          if (!match) return '104 154 152';
+          const r = parseInt(match[1], 16);
+          const g = parseInt(match[2], 16);
+          const b = parseInt(match[3], 16);
+          return `${r} ${g} ${b}`;
+        };
+
+        // Tailwindのprimary系ユーティリティが初回描画から正しい色を使えるようにする
+        root.style.setProperty('--color-primary-600-hex', color);
+        root.style.setProperty('--color-primary-600', toRgb(color));
+        root.style.setProperty('--accent-color', color);
+
         const meta = document.createElement('meta');
         meta.name = 'theme-color';
         meta.content = color;

@@ -52,6 +52,25 @@ const toDate = (value?: Date | Timestamp | null): Date | null => {
   if (!value) return null;
   if (value instanceof Date) return value;
   if (typeof (value as any)?.toDate === 'function') return (value as any).toDate();
+  if (typeof value === 'object') {
+    const seconds =
+      typeof (value as any)?.seconds === 'number'
+        ? (value as any).seconds
+        : typeof (value as any)?._seconds === 'number'
+          ? (value as any)._seconds
+          : null;
+    const nanoseconds =
+      typeof (value as any)?.nanoseconds === 'number'
+        ? (value as any).nanoseconds
+        : typeof (value as any)?._nanoseconds === 'number'
+          ? (value as any)._nanoseconds
+          : 0;
+    if (seconds !== null) {
+      const ms = seconds * 1000 + Math.floor(nanoseconds / 1e6);
+      const d = new Date(ms);
+      return Number.isNaN(d.getTime()) ? null : d;
+    }
+  }
   const parsed = new Date(value as any);
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 };

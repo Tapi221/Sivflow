@@ -32,7 +32,7 @@ import { Button } from '@/Components/ui/button';
 import { cn } from '@/lib/utils';
 import { PdfViewer } from './PdfViewer';
 import type { PdfViewerHandle } from './PdfViewer';
-import { ChevronLeft, ChevronRight, Minus, Plus, ExternalLink } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Minus, Plus, ExternalLink } from 'lucide-react'; // IDE Check: Icons
 import { getDocumentBlob } from '@/services/documentFileStore';
 import {
   cacheDocumentBlobUrl,
@@ -50,11 +50,11 @@ interface PdfPaneDoc {
   name?: string;
   title?: string;
   remoteUrl?: string | null;
-  blobUrl?: string | null;
-  localUrl?: string | null;
+  blobUrl?: import('@/types').BlobUrl | null;
+  localUrl?: import('@/types').BlobUrl | null;
   localFileId?: string | null;
   downloadUrl?: string | null;
-  uploadStatus?: 'pending' | 'uploading' | 'ready' | 'failed' | null;
+  uploadStatus?: 'pending' | 'queued' | 'uploading' | 'ready' | 'failed' | null;
   updatedAt?: unknown;
   viewerState?: PdfViewerState | null; // 復元用
 }

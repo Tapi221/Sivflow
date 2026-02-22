@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import type { Notification } from '../../types/notification';
 import { notificationService } from '../../services/NotificationService';
 import { InfoToast } from './InfoToast';
-import { firestoreDb as db } from '../../services/firebase';
 import { WarningDialog } from './WarningDialog';
 import { ErrorDialog } from './ErrorDialog';
 
@@ -18,13 +17,22 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   useEffect(() => {
     // 通知サービスを購読
     const unsubscribe = notificationService.subscribe((notification) => {
-      if (!notification.id) {
+      const isDismissEvent = !notification.level;
+
+      if (isDismissEvent) {
         // 削除通知
-        setNotifications(prev => prev.filter(n => n.id !== (notification as any).id));
-      } else {
-        // 追加通知
-        setNotifications(prev => [...prev, notification]);
+        setNotifications(prev => prev.filter(n => n.id !== notification.id));
+        return;
       }
+
+      // 追加通知（同一IDは置き換え）
+      setNotifications(prev => {
+        const exists = prev.some(n => n.id === notification.id);
+        if (exists) {
+          return prev.map(n => (n.id === notification.id ? notification : n));
+        }
+        return [...prev, notification];
+      });
     });
 
     return unsubscribe;

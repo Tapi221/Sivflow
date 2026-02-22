@@ -9,7 +9,7 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType>({
-  theme: 'system',
+  theme: 'light',
   setTheme: () => {},
   isDark: false,
 });
@@ -23,38 +23,34 @@ interface ThemeProviderProps {
 }
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(() => {
-    const saved = localStorage.getItem('theme') as Theme;
-    return saved || 'system';
-  });
+  const [theme, setThemeState] = useState<Theme>('light');
   const [isDark, setIsDark] = useState(false);
+
+  const setTheme = (nextTheme: Theme) => {
+    // ダークモード廃止: ライトのみ許可
+    setThemeState('light');
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('theme', 'light');
+    }
+  };
 
   useEffect(() => {
     const updateTheme = () => {
-      let dark = false;
-      
-      if (theme === 'system') {
-        dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      } else {
-        dark = theme === 'dark';
-      }
+      const dark = false;
       
       setIsDark(dark);
-      
-      if (dark) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
+
+      const root = document.documentElement;
+      const body = document.body;
+
+      root.classList.toggle('dark', dark);
+      body?.classList.toggle('dark', dark);
+      root.setAttribute('data-theme', dark ? 'dark' : 'light');
+      root.style.colorScheme = dark ? 'dark' : 'light';
     };
 
     updateTheme();
-    localStorage.setItem('theme', theme);
-
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    mediaQuery.addEventListener('change', updateTheme);
-
-    return () => mediaQuery.removeEventListener('change', updateTheme);
+    localStorage.setItem('theme', 'light');
   }, [theme]);
 
   return (

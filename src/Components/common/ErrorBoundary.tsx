@@ -188,7 +188,7 @@ export class ErrorBoundary extends Component<Props, State> {
               <div className="space-y-3">
                 <Button 
                   onClick={this.handleReset}
-                  className="w-full bg-primary-600 hover:bg-primary-700 text-white rounded-xl h-12 font-bold shadow-md"
+                  className="w-full bg-primary-600 hover:bg-primary-700 text-white rounded-xl h-12 font-bold shadow-md transition-all active:scale-[0.98]"
                 >
                   <RefreshCw className="w-4 h-4 mr-2" />
                   アプリを再読み込み

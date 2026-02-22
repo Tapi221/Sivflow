@@ -9,6 +9,8 @@
  */
 
 import { getLocalDb, getLocalDBRuntimeStatus } from './localDB';
+import { firestoreDb } from './firebase';
+import { collection, addDoc, query, where, orderBy, limit, getDocs, deleteDoc } from 'firebase/firestore';
 import type { 
   AppSnapshot, 
   SnapshotMetadata, 
@@ -246,9 +248,6 @@ class SnapshotService {
    * 🔥 設計変更: Snapshot は「正」である → クラウドに保存
    */
   async saveToFirestore(snapshot: AppSnapshot): Promise<void> {
-    const { firestoreDb } = await import('./firebase');
-    const { collection, addDoc, query, where, orderBy, limit, getDocs, deleteDoc } = await import('firebase/firestore');
-    
     const userId = snapshot.metadata.userId;
     if (!userId) {
       throw new Error('userId is required for saving snapshot');
@@ -283,9 +282,6 @@ class SnapshotService {
    * Firestore から保存済みスナップショット一覧を取得
    */
   async getStoredSnapshots(userId: string): Promise<AppSnapshot[]> {
-    const { firestoreDb } = await import('./firebase');
-    const { collection, query, orderBy, getDocs } = await import('firebase/firestore');
-    
     const snapshotsRef = collection(firestoreDb, `users/${userId}/snapshots`);
     const q = query(snapshotsRef, orderBy('metadata.createdAt', 'desc'));
     

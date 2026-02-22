@@ -2,7 +2,9 @@
  * ExplorerTabs - Explorerタブ切替UIコンポーネント
  */
 import React from 'react';
-import { Bookmark, Folder, Clock, FileText } from 'lucide-react';
+import { Folder, Clock, Trash2 } from 'lucide-react';
+import Pin from 'lucide-react/dist/esm/icons/pin';
+import FolderPlus from 'lucide-react/dist/esm/icons/folder-plus';
 import { cn } from '@/lib/utils';
 import type { ExplorerTab } from '@/hooks/useExplorerStore';
 import { TagFilterPopover } from './TagFilterPopover';
@@ -11,19 +13,32 @@ interface ExplorerTabsProps {
   activeTab: ExplorerTab;
   onTabChange: (tab: ExplorerTab) => void;
   allTags: string[];
+  onCreateRootFolder?: () => void | Promise<void>;
+  showExplorerActions?: boolean;
 }
 
 // タブ定義
 const TABS: { id: ExplorerTab; label: string; icon: React.ElementType }[] = [
-  { id: 'favorites', label: 'お気に入り', icon: Bookmark },
+  { id: 'favorites', label: 'お気に入り', icon: Pin },
   { id: 'explorer', label: 'エクスプローラー', icon: Folder },
   { id: 'recent', label: '最近', icon: Clock },
-  { id: 'inbox', label: '受信箱', icon: FileText },
+  { id: 'trash', label: 'ごみ箱', icon: Trash2 },
 ];
 
-export function ExplorerTabs({ activeTab, onTabChange, allTags }: ExplorerTabsProps) {
+export function ExplorerTabs({
+  activeTab,
+  onTabChange,
+  allTags,
+  onCreateRootFolder,
+  showExplorerActions = false,
+}: ExplorerTabsProps) {
+  const shouldShowExplorerActions = showExplorerActions && activeTab === 'explorer';
+
   return (
-    <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50/50 px-1 pr-2">
+    <div className={cn(
+      "flex items-center justify-between border-b border-slate-200 bg-slate-50/50 pr-2 h-9",
+      "pl-2 md:pl-1" // サイドバー内ではハンバーガーボタンは非表示のためパディング不要
+    )}>
       <div className="flex items-center flex-1 overflow-x-auto no-scrollbar">
         {TABS.map(tab => {
           const Icon = tab.icon;
@@ -34,7 +49,7 @@ export function ExplorerTabs({ activeTab, onTabChange, allTags }: ExplorerTabsPr
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
               className={cn(
-                "flex items-center gap-1 px-2 py-1.5 text-xs font-medium transition-colors relative whitespace-nowrap",
+                "flex items-center justify-center px-2 py-1 text-xs font-medium transition-colors relative whitespace-nowrap",
                 "hover:text-primary-600",
                 isActive 
                   ? "text-primary-600" 
@@ -42,8 +57,9 @@ export function ExplorerTabs({ activeTab, onTabChange, allTags }: ExplorerTabsPr
               )}
               title={tab.label}
             >
-              <Icon className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline truncate max-w-[60px]">{tab.label}</span>
+              <Icon className="w-4 h-4" />
+              {/* スクリーンリーダー用にラベルは保持し、視覚的に隠す */}
+              <span className="sr-only">{tab.label}</span>
               {/* アクティブインジケーター */}
               {isActive && (
                 <div className="absolute bottom-0 left-1 right-1 h-0.5 bg-primary-500 rounded-full" />
@@ -53,12 +69,27 @@ export function ExplorerTabs({ activeTab, onTabChange, allTags }: ExplorerTabsPr
         })}
       </div>
       
-      {/* フィルタボタン (ExplorerとInboxのみ表示) */}
-      {(activeTab === 'explorer' || activeTab === 'inbox') && (
-        <div className="flex-shrink-0 ml-1 border-l border-slate-200 pl-1">
+      {/* フィルタボタン (Explorerのみ表示) */}
+      <div
+        className={cn(
+          "flex items-center gap-1 flex-shrink-0 overflow-hidden transition-all duration-200 ease-out",
+          shouldShowExplorerActions
+            ? "ml-1 pl-1 border-l border-slate-200 opacity-100 translate-x-0 max-w-[120px]"
+            : "ml-0 pl-0 border-l-0 opacity-0 translate-x-1 max-w-0 pointer-events-none"
+        )}
+        aria-hidden={!shouldShowExplorerActions}
+      >
+          <button
+            type="button"
+            onClick={() => {
+              void onCreateRootFolder?.();
+            }}
+            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-slate-500 transition-colors hover:bg-slate-100 hover:text-primary-600"
+          >
+            <FolderPlus className="w-4 h-4" />
+          </button>
           <TagFilterPopover allTags={allTags} />
-        </div>
-      )}
+      </div>
     </div>
   );
 }

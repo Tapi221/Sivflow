@@ -1,0 +1,157 @@
+:root {
+  --code-bg: #fbf7f2;
+  --code-fg: #2f2a36;
+  --code-border: rgba(47, 42, 54, 0.12);
+
+  --tok-keyword: #8b5fbf;
+  --tok-type: #5fa8a3;
+  --tok-func: #c06c84;
+  --tok-string: #4e9a6a;
+  --tok-number: #d08a3c;
+  --tok-comment: rgba(47, 42, 54, 0.55);
+  --tok-plain: var(--code-fg);
+
+  /* backwards-compatible aliases used in existing components */
+  --code-token-text: var(--tok-plain);
+  --code-token-comment: var(--tok-comment);
+  --code-token-punctuation: var(--tok-plain);
+  --code-token-keyword: var(--tok-keyword);
+  --code-token-type: var(--tok-type);
+  --code-token-function: var(--tok-func);
+  --code-token-string: var(--tok-string);
+  --code-token-number: var(--tok-number);
+  --code-token-operator: var(--tok-plain);
+}
+
+html.dark {
+  --code-bg: #1f1c25;
+  --code-fg: #f0ebf7;
+  --code-border: rgba(240, 235, 247, 0.2);
+
+  --tok-keyword: #d0b2f1;
+  --tok-type: #9ad6d2;
+  --tok-func: #e7a5b8;
+  --tok-string: #9dd1ad;
+  --tok-number: #e2b37a;
+  --tok-comment: rgba(240, 235, 247, 0.62);
+  --tok-plain: var(--code-fg);
+}
+
+.codeBlock.codeBlockRoot {
+  background: var(--code-bg) !important;
+  color: var(--code-fg) !important;
+  border: 1px solid var(--code-border) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 1px 2px rgba(47, 42, 54, 0.06) !important;
+  overflow: hidden;
+}
+
+.codeBlock.codeBlockRoot::before {
+  display: none !important;
+}
+
+.codeBlock .codeBlockLang {
+  background: rgba(255, 255, 255, 0.72) !important;
+  border: 1px solid var(--code-border) !important;
+  color: rgba(47, 42, 54, 0.7) !important;
+}
+
+.codeBlock .codeBlockPre,
+.codeBlock .code-block-pre,
+.codeBlock pre {
+  margin: 0 !important;
+  padding: 12px 14px !important;
+  line-height: 1.6 !important;
+  font-size: 13px !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  color: var(--code-fg) !important;
+  white-space: pre !important;
+  overflow: auto !important;
+}
+
+.codeBlock .code-block-pre--tools {
+  padding-top: 26px !important;
+}
+
+.codeBlock code {
+  margin: 0 !important;
+  padding: 0 !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+  font-size: 0.92em !important;
+  line-height: 1.6 !important;
+  font-variant-ligatures: none !important;
+}
+
+.codeBlock pre > code > div,
+.codeBlock .line,
+.codeBlock .token-line {
+  margin-block: 0 !important;
+  padding-block: 0 !important;
+  line-height: inherit !important;
+}
+
+.codeBlock .token {
+  color: var(--tok-plain) !important;
+}
+
+.codeBlock .token.comment,
+.codeBlock .token.prolog,
+.codeBlock .token.doctype,
+.codeBlock .token.cdata {
+  color: var(--tok-comment) !important;
+}
+
+.codeBlock .token.keyword,
+.codeBlock .token.atrule {
+  color: var(--tok-keyword) !important;
+}
+
+.codeBlock .token.class-name,
+.codeBlock .token.builtin,
+.codeBlock .token.property,
+.codeBlock .token.tag,
+.codeBlock .token.attr-name {
+  color: var(--tok-type) !important;
+}
+
+.codeBlock .token.function {
+  color: var(--tok-func) !important;
+}
+
+.codeBlock .token.string,
+.codeBlock .token.char,
+.codeBlock .token.inserted,
+.codeBlock .token.attr-value {
+  color: var(--tok-string) !important;
+}
+
+.codeBlock .token.number,
+.codeBlock .token.boolean,
+.codeBlock .token.constant,
+.codeBlock .token.symbol,
+.codeBlock .token.deleted {
+  color: var(--tok-number) !important;
+}
+
+.codeBlock .token.operator,
+.codeBlock .token.entity,
+.codeBlock .token.url,
+.codeBlock .token.punctuation {
+  color: var(--tok-plain) !important;
+}
+
+@media (max-width: 768px) {
+  .codeBlock .codeBlockPre,
+  .codeBlock .code-block-pre,
+  .codeBlock pre {
+    font-size: 12px !important;
+    line-height: 1.5 !important;
+  }
+
+  .codeBlock code {
+    font-size: 0.9em !important;
+    line-height: 1.5 !important;
+  }
+}

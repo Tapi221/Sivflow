@@ -1,8 +1,10 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { Settings, Search, Check, Tag } from 'lucide-react';
+import { Filter, Search, Check, Tag } from 'lucide-react';
 import { useExplorerStore } from '@/hooks/useExplorerStore';
+import { useTags } from '@/hooks/useTags';
 import { cn } from '@/lib/utils';
 import { Popover, PopoverContent, PopoverTrigger } from '@/Components/ui/popover';
+import { TagBadge } from '@/Components/tag/TagBadge';
 
 interface TagFilterPopoverProps {
   allTags: string[]; // 全タグ一覧（呼び出し元から渡す）
@@ -10,6 +12,7 @@ interface TagFilterPopoverProps {
 }
 
 export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) {
+  const { getTagColor } = useTags();
   const {
     tagFilter,
     tagMatchMode,
@@ -49,17 +52,16 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
       <PopoverTrigger asChild>
         <button
           className={cn(
-            "p-1.5 rounded-md transition-colors relative",
-            isFilterActive
-              ? "bg-primary-100 text-primary-600 hover:bg-primary-200"
-              : "text-slate-400 hover:bg-slate-100 hover:text-slate-600",
+            "flex items-center justify-center px-2 py-1 text-xs font-medium transition-colors relative whitespace-nowrap",
+            "hover:text-primary-600",
+            isFilterActive ? "text-primary-600" : "text-slate-500",
             className
           )}
           title="タグで絞り込み"
         >
-          <Settings className="w-4 h-4" />
+          <Filter className="w-4 h-4" />
           {isFilterActive && (
-            <span className="absolute top-1 right-1 w-2 h-2 bg-primary-500 rounded-full border border-white" />
+            <div className="absolute bottom-0 left-1 right-1 h-0.5 bg-primary-500 rounded-full" />
           )}
         </button>
       </PopoverTrigger>
@@ -79,11 +81,11 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
           {/* Header & Search */}
           <div className="p-3 border-b border-slate-200/70">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-semibold text-slate-800">タグで絞り込み</span>
+              <span className="text-xs font-semibold text-slate-800">タグで絞り込み</span>
               {isFilterActive && (
                 <button
                   onClick={clearTagFilter}
-                  className="text-xs px-2 py-1 rounded-md border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition-colors"
+                  className="text-[11px] px-2 py-0.5 rounded-md border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition-colors"
                 >
                   すべてクリア
                 </button>
@@ -96,7 +98,7 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
                 ref={inputRef}
                 type="text"
                 className={cn(
-                  "w-full pl-8 pr-2 py-1.5 text-sm rounded",
+                  "w-full pl-8 pr-2 py-1.5 text-xs rounded",
                   "border border-slate-200 bg-white/90",
                   "focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-400/60 focus:border-primary-300",
                   "placeholder:text-slate-400",
@@ -110,13 +112,13 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
           </div>
 
           {/* Match Mode Toggle */}
-          <div className="px-3 py-2 border-b border-slate-200/70 flex items-center gap-2 text-xs bg-white/70">
+          <div className="px-3 py-2 border-b border-slate-200/70 flex items-center gap-2 text-[11px] bg-white/70">
             <span className="text-slate-500">条件:</span>
             <div className="flex bg-white rounded border border-slate-200 p-0.5 shadow-sm">
               <button
                 onClick={() => setTagMatchMode('any')}
                 className={cn(
-                  "px-2 py-0.5 rounded transition-colors",
+                  "px-2 py-0.5 rounded transition-colors text-[11px]",
                   tagMatchMode === 'any'
                     ? "bg-primary-100 text-primary-800 font-medium"
                     : "text-slate-600 hover:text-slate-800 hover:bg-slate-50"
@@ -127,7 +129,7 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
               <button
                 onClick={() => setTagMatchMode('all')}
                 className={cn(
-                  "px-2 py-0.5 rounded transition-colors",
+                  "px-2 py-0.5 rounded transition-colors text-[11px]",
                   tagMatchMode === 'all'
                     ? "bg-primary-100 text-primary-800 font-medium"
                     : "text-slate-600 hover:text-slate-800 hover:bg-slate-50"
@@ -154,9 +156,9 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
                       key={tag}
                       onClick={() => toggleTag(tag)}
                       className={cn(
-                        "w-full flex items-center px-2 py-1.5 text-sm rounded transition-colors text-left group",
+                        "w-full flex items-center px-2 py-1 text-xs rounded transition-colors text-left group",
                         isSelected
-                          ? "bg-primary-50 text-primary-800"
+                          ? "bg-slate-100 text-slate-800"
                           : "hover:bg-slate-100 text-slate-800"
                       )}
                     >
@@ -170,7 +172,14 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
                       >
                         {isSelected && <Check className="w-3 h-3" />}
                       </div>
-                      <span className="truncate flex-1">{tag}</span>
+                      <div className="min-w-0 flex-1">
+                        <TagBadge
+                          label={tag}
+                          size="xs"
+                          colorClass={getTagColor(tag)}
+                          className="max-w-full"
+                        />
+                      </div>
                     </button>
                   );
                 })}

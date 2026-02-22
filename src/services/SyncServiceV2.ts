@@ -264,8 +264,22 @@ export class SyncServiceV2 implements ISyncService {
     const allFolders = await this.localDB.folders.toArray();
 
     for (const change of changes) {
-      const table = `${change.type}s`; // e.g., 'card' -> 'cards'
+      const tableByType: Record<string, string> = {
+        card: 'cards',
+        folder: 'folders',
+        cardRelation: 'cardRelations',
+        projectMap: 'projectMaps',
+        userSetting: 'userSettings',
+      };
+      const table = tableByType[change.type] ?? `${change.type}s`; // e.g., 'card' -> 'cards'
       const remoteData = { ...(change.data ?? {}) };
+      if (!remoteData.id && change.id) {
+        remoteData.id = change.id;
+      }
+      if (change.type === 'userSetting') {
+        remoteData.id = this.userId;
+        remoteData.userId = this.userId;
+      }
 
       // documents.localFileId / blob localUrl は端末ローカル専用のため、受信時に除外する。
       if (change.type === 'document') {

@@ -15,6 +15,15 @@ interface CardShellProps extends React.HTMLAttributes<HTMLDivElement> {
   actionsBottomRight?: React.ReactNode;
   children: React.ReactNode;
   drawMode?: boolean;
+  resizable?: boolean;
+  resizeStepPx?: number;
+  resizeStorageKey?: string;
+  heightPx?: number | null;
+  onHeightChange?: (heightPx: number) => void;
+  onMinHeightChange?: (heightPx: number) => void;
+  showResizeHandle?: boolean;
+  bodyOverflowY?: 'auto' | 'visible' | 'hidden';
+  lockHeight?: boolean;
 }
 
 export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
@@ -28,6 +37,15 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
     className,
     style,
     drawMode = false,
+    resizable = false,
+    resizeStepPx = 24,
+    resizeStorageKey,
+    heightPx,
+    onHeightChange,
+    onMinHeightChange,
+    showResizeHandle = true,
+    bodyOverflowY,
+    lockHeight = false,
     ...props
   }, ref) => {
     const shellRef = React.useRef<HTMLDivElement | null>(null);
@@ -54,6 +72,71 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
     } | null>(null);
 
     const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+    const [customHeightPx, setCustomHeightPx] = React.useState<number | null>(null);
+    const resizeRef = React.useRef<{
+      pointerId: number;
+      startY: number;
+      baseHeight: number;
+    } | null>(null);
+
+    const computeMinHeight = React.useCallback(() => {
+      const element = shellRef.current;
+      const resizeHandleReservePx = resizable && !drawMode && showResizeHandle ? 20 : 0;
+      // 罫線グリッド上での見切れ防止マージン
+      const safetyReservePx = 8;
+      const contentBaseMin = resizeStepPx * 2 + resizeHandleReservePx + safetyReservePx;
+      // 最小高さを 48px (step * 2) 基準にしつつ、ハンドル分も確保
+      if (!element) return contentBaseMin;
+
+      // 幅ベースの4:3高さを最低限として維持し、コンパクト化しすぎる崩れを防ぐ
+      const widthBasedMin = Math.ceil(((element.clientWidth || element.offsetWidth || 0) * 3 / 4) / resizeStepPx) * resizeStepPx;
+      const baseMin = Math.max(contentBaseMin, widthBasedMin || 0);
+
+      const body = element.querySelector('.card-shell-body') as HTMLElement | null;
+      if (!body) return baseMin;
+
+      const blockRows = Array.from(body.querySelectorAll('[data-block-row="true"]')) as HTMLElement[];
+      if (blockRows.length > 0) {
+        const bodyRect = body.getBoundingClientRect();
+        let maxBottom = bodyRect.top;
+
+        for (const row of blockRows) {
+          const rowRect = row.getBoundingClientRect();
+          if (rowRect.bottom > maxBottom) {
+            maxBottom = rowRect.bottom;
+          }
+        }
+
+        // data-block-row の実座標ベースで必要高さを算出する（scrollHeightは自己参照ループの原因になるため使わない）
+        const contentHeight = Math.max(0, maxBottom - bodyRect.top);
+        const requiredHeight = contentHeight + resizeHandleReservePx + safetyReservePx;
+        const snappedContentHeight = Math.ceil(requiredHeight / resizeStepPx) * resizeStepPx;
+        // コンテンツがある場合でも最小限の高さを確保しつつ、見切れない高さを返す
+        return Math.max(baseMin, snappedContentHeight || baseMin);
+      }
+
+      return baseMin;
+    }, [drawMode, resizable, resizeStepPx, showResizeHandle]);
+
+    const computeMaxHeight = React.useCallback(() => {
+      if (resizable) return Number.POSITIVE_INFINITY;
+      if (typeof window === 'undefined') return 900;
+      return Math.max(Math.floor(window.innerHeight * 0.9), 420);
+    }, [resizable]);
+
+    const clampHeight = React.useCallback((height: number) => {
+      return clamp(height, computeMinHeight(), computeMaxHeight());
+    }, [computeMaxHeight, computeMinHeight]);
+
+    const isControlledResize = typeof onHeightChange === 'function';
+    const resolvedHeightPx = heightPx ?? customHeightPx;
+    const commitHeight = React.useCallback((nextHeight: number) => {
+      if (isControlledResize && onHeightChange) {
+        onHeightChange(nextHeight);
+        return;
+      }
+      setCustomHeightPx(nextHeight);
+    }, [isControlledResize, onHeightChange]);
 
     const isInteractiveTarget = (target: EventTarget | null) => {
       const element = target as HTMLElement | null;
@@ -72,6 +155,15 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
         if (!width) return;
 
         element.style.setProperty('--card-w', `${width}px`);
+
+        setCustomHeightPx((prev) => {
+          if (prev == null) return prev;
+          return clampHeight(prev);
+        });
+
+        if (onMinHeightChange) {
+          onMinHeightChange(computeMinHeight());
+        }
       };
 
       updateWidth();
@@ -79,7 +171,93 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
       observer.observe(element);
 
       return () => observer.disconnect();
-    }, []);
+    }, [clampHeight, computeMinHeight, onMinHeightChange]);
+
+    React.useEffect(() => {
+      if (!resizable || !resizeStorageKey || typeof window === 'undefined') return;
+
+      const raw = window.localStorage.getItem(resizeStorageKey);
+      if (!raw) return;
+
+      const parsed = Number(raw);
+      if (!Number.isFinite(parsed)) return;
+      setCustomHeightPx(clampHeight(parsed));
+    }, [clampHeight, resizeStorageKey, resizable]);
+
+    React.useEffect(() => {
+      if (!resizable || !resizeStorageKey || customHeightPx == null || typeof window === 'undefined') return;
+      window.localStorage.setItem(resizeStorageKey, String(customHeightPx));
+    }, [customHeightPx, resizeStorageKey, resizable]);
+
+    React.useEffect(() => {
+      if (!onMinHeightChange || typeof ResizeObserver === 'undefined') return;
+
+      const element = shellRef.current;
+      if (!element) return;
+
+      const body = element.querySelector('.card-shell-body') as HTMLElement | null;
+      if (!body) return;
+
+      let rafId: number | null = null;
+      const scheduleNotify = () => {
+        if (rafId != null || typeof window === 'undefined') return;
+        rafId = window.requestAnimationFrame(() => {
+          rafId = null;
+          onMinHeightChange(computeMinHeight());
+        });
+      };
+
+      const rowElements = new Set<HTMLElement>();
+      const rowObserver = new ResizeObserver(() => scheduleNotify());
+
+      const syncRowObservers = () => {
+        const nextRows = new Set(
+          Array.from(body.querySelectorAll('[data-block-row="true"]')) as HTMLElement[]
+        );
+
+        rowElements.forEach((row) => {
+          if (!nextRows.has(row)) {
+            rowObserver.unobserve(row);
+            rowElements.delete(row);
+          }
+        });
+
+        nextRows.forEach((row) => {
+          if (!rowElements.has(row)) {
+            rowObserver.observe(row);
+            rowElements.add(row);
+          }
+        });
+      };
+
+      scheduleNotify();
+      const bodyObserver = new ResizeObserver(() => scheduleNotify());
+      bodyObserver.observe(body);
+      syncRowObservers();
+
+      const mutationObserver = new MutationObserver(() => {
+        syncRowObservers();
+        scheduleNotify();
+      });
+
+      mutationObserver.observe(body, {
+        childList: true,
+        subtree: true,
+        characterData: true,
+      });
+
+      body.addEventListener('input', scheduleNotify, true);
+
+      return () => {
+        body.removeEventListener('input', scheduleNotify, true);
+        mutationObserver.disconnect();
+        bodyObserver.disconnect();
+        rowObserver.disconnect();
+        if (rafId != null && typeof window !== 'undefined') {
+          window.cancelAnimationFrame(rafId);
+        }
+      };
+    }, [computeMinHeight, onMinHeightChange]);
 
     React.useEffect(() => {
       if (!drawMode) {
@@ -103,6 +281,9 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
     const overflowTopRight = topRightItems.slice(2);
     const bottomLeftItems = React.Children.toArray(actionsBottomLeft).filter(Boolean);
     const bottomRightItems = React.Children.toArray(actionsBottomRight).filter(Boolean);
+
+    // card-shell--editor-unified-scroll クラスがあるかチェック
+    const isEditorMode = className && typeof className === 'string' && className.includes('card-shell--editor-unified-scroll');
 
     const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
       if (!drawMode) return;
@@ -207,8 +388,22 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
     const shell = (
       <div
         ref={setRefs}
-        className={cn('card-shell', drawMode && 'card-shell--paper', className)}
-        style={style}
+        className={cn('card-shell', drawMode && 'card-shell--paper', resizable && !drawMode && 'card-shell--resizable', className)}
+        style={
+          resolvedHeightPx != null
+            ? ({
+                ...(style ?? {}),
+                ['--card-resize-height' as any]: `${resolvedHeightPx}px`,
+                minHeight: `${resolvedHeightPx}px`,
+                ...(lockHeight
+                  ? {
+                      height: `${resolvedHeightPx}px`,
+                      maxHeight: `${resolvedHeightPx}px`,
+                    }
+                  : {}),
+              } as React.CSSProperties)
+            : style
+        }
         {...props}
       >
         {topLeftItems.length > 0 && (
@@ -271,11 +466,66 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
         <div
           className={cn(
             'card-shell-body',
-            (bottomLeftItems.length > 0 || bottomRightItems.length > 0) && 'card-shell-body--bottom'
+            (bottomLeftItems.length > 0 || bottomRightItems.length > 0) && 'card-shell-body--bottom',
+            isEditorMode && 'card-shell-body--no-scroll'
           )}
+
+        style={
+          bodyOverflowY
+            ? { overflowY: bodyOverflowY, overflowX: 'clip' }
+            : (isEditorMode ? { overflowY: 'hidden', overflowX: 'clip' } : { overflowX: 'clip' })
+        }
+
         >
           {children}
         </div>
+        {resizable && !drawMode && showResizeHandle && (
+          <button
+            type="button"
+            aria-label="カードの高さを変更"
+            className="card-shell-resize-handle"
+            onPointerDown={(event) => {
+              const element = shellRef.current;
+              if (!element) return;
+
+              event.preventDefault();
+              event.stopPropagation();
+
+              const pointerId = event.pointerId;
+              resizeRef.current = {
+                pointerId,
+                startY: event.clientY,
+                baseHeight: resolvedHeightPx ?? element.offsetHeight,
+              };
+
+              const target = event.currentTarget;
+              target.setPointerCapture(pointerId);
+
+              const onMove = (moveEvent: PointerEvent) => {
+                if (!resizeRef.current || moveEvent.pointerId !== resizeRef.current.pointerId) return;
+
+                const deltaY = moveEvent.clientY - resizeRef.current.startY;
+                const snappedDelta = Math.round(deltaY / resizeStepPx) * resizeStepPx;
+                const nextHeight = clampHeight(resizeRef.current.baseHeight + snappedDelta);
+                commitHeight(nextHeight);
+              };
+
+              const onEnd = (endEvent: PointerEvent) => {
+                if (!resizeRef.current || endEvent.pointerId !== resizeRef.current.pointerId) return;
+                resizeRef.current = null;
+                window.removeEventListener('pointermove', onMove);
+                window.removeEventListener('pointerup', onEnd);
+                window.removeEventListener('pointercancel', onEnd);
+              };
+
+              window.addEventListener('pointermove', onMove);
+              window.addEventListener('pointerup', onEnd);
+              window.addEventListener('pointercancel', onEnd);
+            }}
+          >
+            <span className="card-shell-resize-knob" />
+          </button>
+        )}
       </div>
     );
 

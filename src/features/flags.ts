@@ -7,12 +7,14 @@ export interface FeatureFlags {
   USE_SYNC_V2: boolean;
   ENABLE_ADVANCED_TELEMETRY: boolean;
   ENABLE_BACKGROUND_SYNC: boolean;
+  postReviewPractice: boolean;
 }
 
 const DEFAULT_FLAGS: FeatureFlags = {
   USE_SYNC_V2: true, // Phase 2ロールアウト開始
   ENABLE_ADVANCED_TELEMETRY: true,
   ENABLE_BACKGROUND_SYNC: true, // バックグラウンド同期を有効化
+  postReviewPractice: true,
 };
 
 export class FeatureFlagManager {

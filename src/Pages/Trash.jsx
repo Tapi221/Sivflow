@@ -45,7 +45,8 @@ export default function Trash() {
     async () => {
       if (!currentUser) return [];
       try {
-        const folders = await localDb.getAllFolders();
+        const db = await getLocalDb(currentUser.uid);
+        const folders = await db.getAllFolders();
         // normalizeFolder で正規化（isDeleted, deletedAt を一貫して処理）
         return folders.map(normalizeFolder);
       } catch (err) {
@@ -53,7 +54,7 @@ export default function Trash() {
         return [];
       }
     },
-    [currentUser, localDb.name],
+    [currentUser?.uid],
     []
   );
   
@@ -61,7 +62,8 @@ export default function Trash() {
     async () => {
       if (!currentUser) return [];
       try {
-        const cards = await localDb.getAllCards();
+        const db = await getLocalDb(currentUser.uid);
+        const cards = await db.getAllCards();
         // normalizeCard で正規化（isDeleted, deletedAt を一貫して処理）
         return cards.map(normalizeCard);
       } catch (err) {
@@ -69,7 +71,7 @@ export default function Trash() {
         return [];
       }
     },
-    [currentUser, localDb.name],
+    [currentUser?.uid],
     []
   );
   
@@ -177,9 +179,11 @@ export default function Trash() {
   };
   
   const handleRestore = async () => {
+    if (!currentUser) return;
     setIsProcessing(true);
     
     try {
+      const db = await getLocalDb(currentUser.uid);
       // まず、選択されたカードの親フォルダを特定
       const parentFolderIds = new Set();
       for (const cardId of selectedIds.cards) {
@@ -201,7 +205,7 @@ export default function Trash() {
       // 選択されたフォルダを復元（localDB.restore → Firestore）
       for (const id of selectedIds.folders) {
         // IndexedDB を先に更新（ローカルファースト）
-        await localDb.restore('folders', id);
+        await db.restore('folders', id);
         
         // Firestore も更新
         const folderRef = doc(firestoreDb, ...folderDocPathSegments(currentUser.uid, id));
@@ -215,7 +219,7 @@ export default function Trash() {
       // 選択されたカードを復元（localDB.restore → Firestore）
       for (const id of selectedIds.cards) {
         // IndexedDB を先に更新（ローカルファースト）
-        await localDb.restore('cards', id);
+        await db.restore('cards', id);
         
         // Firestore も更新
         const cardRef = doc(firestoreDb, ...cardDocPathSegments(currentUser.uid, id));
@@ -239,7 +243,9 @@ export default function Trash() {
   // フォルダとその親フォルダを再帰的に復元
   const restoreFolderWithParents = async (folderId) => {
     try {
-      const rawFolder = await localDb.getItem('folders', folderId);
+      if (!currentUser) return;
+      const db = await getLocalDb(currentUser.uid);
+      const rawFolder = await db.getItem('folders', folderId);
       if (!rawFolder) {
         console.error('Folder not found:', folderId);
         return;
@@ -251,7 +257,7 @@ export default function Trash() {
       
       // 親フォルダが存在し、削除されている場合は先に復元
       if (folder.parentFolderId) {
-        const rawParentFolder = await localDb.getItem('folders', folder.parentFolderId);
+        const rawParentFolder = await db.getItem('folders', folder.parentFolderId);
         if (rawParentFolder) {
           const parentFolder = normalizeFolder(rawParentFolder);
           if (parentFolder.isDeleted) {
@@ -262,7 +268,7 @@ export default function Trash() {
       }
       
       // 自身を復元（IndexedDB → Firestore）ローカルファースト
-      await localDb.restore('folders', folderId);
+      await db.restore('folders', folderId);
       
       // Firestore も更新
       const folderRef = doc(firestoreDb, ...folderDocPathSegments(currentUser.uid, folderId));
@@ -282,13 +288,15 @@ export default function Trash() {
   // 完全削除 - TRASHED → PURGED
   // IndexedDB と Firestore 両方から物理削除
   const handlePermanentDelete = async () => {
+    if (!currentUser) return;
     setIsProcessing(true);
     
     try {
+      const db = await getLocalDb(currentUser.uid);
       // フォルダを完全削除
       for (const id of selectedIds.folders) {
         // IndexedDB から削除（ローカルファースト）
-        await localDb.purge('folders', id);
+        await db.purge('folders', id);
         
         // Firestore からも削除
         try {
@@ -304,7 +312,7 @@ export default function Trash() {
       // カードを完全削除
       for (const id of selectedIds.cards) {
         // IndexedDB から削除（ローカルファースト）
-        await localDb.purge('cards', id);
+        await db.purge('cards', id);
         
         // Firestore からも削除
         try {
@@ -336,7 +344,7 @@ export default function Trash() {
   };
   
   return (
-    <div className="min-h-screen bg-[#F8FAFB] text-slate-800 font-sans selection:bg-indigo-100 selection:text-indigo-900 overflow-x-hidden">
+    <div className="min-h-screen bg-[#F8FAFB] text-slate-800 font-serif selection:bg-indigo-100 selection:text-indigo-900 overflow-x-hidden">
       <div className="max-w-[1400px] mx-auto p-6 md:p-14">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-12">
@@ -528,9 +536,10 @@ export default function Trash() {
                               // フォルダ内のカードも自動復元（カード自体が isDeleted=true の場合のみ）
                               // 親フォルダ削除により不可視になっていたカードは状態変更不要
                               console.log('Restoring cards:', folderCards.length);
+                              const db = await getLocalDb(currentUser.uid);
                               for (const card of folderCards) {
                                 if (card.isDeleted) {
-                                  await localDb.restore('cards', card.id);
+                                  await db.restore('cards', card.id);
                                   // Firestore も更新
                                   try {
                                     const cardRef = doc(firestoreDb, ...cardDocPathSegments(currentUser.uid, card.id));
@@ -649,9 +658,10 @@ export default function Trash() {
                           onClick={async () => {
                             setIsProcessing(true);
                             try {
+                              const db = await getLocalDb(currentUser.uid);
                               // カードを復元（localDB.restore → Firestore）
                               for (const card of folderCards) {
-                                await localDb.restore('cards', card.id);
+                                await db.restore('cards', card.id);
                                 // Firestore も更新
                                 try {
                                   const cardRef = doc(firestoreDb, ...cardDocPathSegments(currentUser.uid, card.id));

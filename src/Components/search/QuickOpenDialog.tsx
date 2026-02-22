@@ -17,7 +17,7 @@ import { highlightMatches } from '@/utils/highlightText';
 
 // アイコン
 import SearchIcon from 'lucide-react/dist/esm/icons/search';
-import FileTextIcon from 'lucide-react/dist/esm/icons/file-text';
+import StickyNoteIcon from 'lucide-react/dist/esm/icons/sticky-note';
 import FolderIcon from 'lucide-react/dist/esm/icons/folder';
 import TagIcon from 'lucide-react/dist/esm/icons/tag';
 
@@ -140,7 +140,7 @@ export function QuickOpenDialog(_props: QuickOpenDialogProps) {
   const getIcon = (type: QuickOpenItem['type']) => {
     switch (type) {
       case 'card':
-        return <FileTextIcon className="w-4 h-4 text-blue-500" />;
+        return <StickyNoteIcon className="w-4 h-4 text-blue-500" />;
       case 'folder':
         return <FolderIcon className="w-4 h-4 text-amber-500" />;
       case 'tag':

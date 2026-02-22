@@ -1,29 +1,29 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Droppable, Draggable } from '@hello-pangea/dnd';
-import {
-  Plus,
-  Volume2,
-  StickyNote,
-  HelpCircle,
-  Sparkles
-} from 'lucide-react';
-import TypeIcon from 'lucide-react/dist/esm/icons/type';
-import CodeIcon from 'lucide-react/dist/esm/icons/code';
-import ImageIcon from 'lucide-react/dist/esm/icons/image';
-import LinkIcon from 'lucide-react/dist/esm/icons/link';
-import SigmaIcon from 'lucide-react/dist/esm/icons/sigma';
+import { Plus } from 'lucide-react';
 
-import { Button } from '@/Components/ui/button';
-import { nanoid } from 'nanoid';
+import { BlockToolbar } from './BlockToolbar';
 import { TextBlock } from './blocks/TextBlock';
 import { CodeBlockItem } from './blocks/CodeBlockItem';
 import { MediaBlock } from './blocks/MediaBlock';
 import { MemoBlock } from './blocks/MemoBlock';
 import { ReferenceBlock } from './blocks/ReferenceBlock';
 import { MathBlock } from './blocks/MathBlock';
-import type { CardBlock, BlockConfig } from '@/types';
+import { MarkdownBlock } from './blocks/MarkdownBlock';
+
+import type { CardBlock } from '@/types';
 import { cn } from '@/lib/utils';
 import { useUserSettings } from '@/hooks/useUserSettings';
+
+const uid = () =>
+  (typeof crypto !== 'undefined' && 'randomUUID' in crypto)
+    ? crypto.randomUUID()
+    : Math.random().toString(36).slice(2);
+
+export interface BlockEditorHandle {
+  addBlock: (type: CardBlock['type']) => void;
+}
 
 interface BlockEditorProps {
   blocks: CardBlock[];
@@ -40,12 +40,20 @@ interface BlockEditorProps {
   canAddAudio?: boolean;
   customPlaceholders?: Record<number, string>;
   hideToolbar?: boolean;
+
+  emptyAddDefaultType?: CardBlock['type'];
+
   onDelete?: (index: number) => void;
   minDeletableIndex?: number;
   hiddenBlockTypes?: CardBlock['type'][];
+
+  toolbarMountRef?: React.RefObject<HTMLDivElement | null>;
 }
 
-export const BlockEditor = ({
+type DndStyle = React.CSSProperties & { transform?: string };
+const ROW_STEP_PX = 24;
+
+export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>(({
   blocks = [],
   onChange,
   prefix,
@@ -62,13 +70,26 @@ export const BlockEditor = ({
   hideToolbar = false,
   onDelete,
   minDeletableIndex = 0,
-  hiddenBlockTypes = []
-}: BlockEditorProps) => {
+  hiddenBlockTypes = [],
+  toolbarMountRef
+}, ref) => {
   const { settings } = useUserSettings();
   const [activeBlockId, setActiveBlockId] = useState<string | null>(null);
   const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
   const [pendingUploads, setPendingUploads] = useState<Record<string, File>>({});
+  const blocksRef = React.useRef<CardBlock[]>(blocks);
+  const moveSessionRef = React.useRef<{ blockId: string; originOffset: number } | null>(null);
   const dragHandleClassName = "js-block-drag-handle";
+
+  React.useEffect(() => {
+    blocksRef.current = blocks;
+  }, [blocks]);
+
+  React.useImperativeHandle(ref, () => ({
+    addBlock: (type: CardBlock['type']) => {
+      handleAddBlock(type);
+    }
+  }));
 
   const isEditableTarget = (target: EventTarget | null) => {
     if (!(target instanceof HTMLElement)) return false;
@@ -89,9 +110,12 @@ export const BlockEditor = ({
       clampYMax?: number;
     }
   ) => {
-    if (!style || !style.transform) return style;
-    const match = String(style.transform).match(/translate(?:3d)?\(([-\d.]+)px,\s*([-\d.]+)px/);
+    const s = style as DndStyle | undefined;
+    if (!s || !s.transform) return style;
+
+    const match = String(s.transform).match(/translate(?:3d)?\(([-\d.]+)px,\s*([-\d.]+)px/);
     if (!match) return style;
+
     let x = parseFloat(match[1]);
     let y = parseFloat(match[2]);
 
@@ -100,7 +124,7 @@ export const BlockEditor = ({
     if (clampYMin !== undefined) y = Math.max(y, clampYMin);
     if (clampYMax !== undefined) y = Math.min(y, clampYMax);
 
-    const transform = String(style.transform).includes('3d')
+    const transform = String(s.transform).includes('3d')
       ? `translate3d(${x}px, ${y}px, 0px)`
       : `translate(${x}px, ${y}px)`;
 
@@ -116,7 +140,7 @@ export const BlockEditor = ({
     let currentIndex = index + 1;
 
     files.forEach(file => {
-      const newBlockId = `${prefix}-image-${nanoid()}`;
+      const newBlockId = `${prefix}-image-${uid()}`;
       const newBlock: CardBlock = {
         id: newBlockId,
         type: 'image',
@@ -152,8 +176,18 @@ export const BlockEditor = ({
       }
     }
 
+    const tailRowOffset = (() => {
+      for (let i = blocks.length - 1; i >= 0; i -= 1) {
+        const b = blocks[i];
+        if (b.type === 'text' || b.type === 'code') {
+          return Math.round(Number(b.rowOffset ?? 0));
+        }
+      }
+      return 0;
+    })();
+
     const newBlock: CardBlock = {
-      id: `${prefix}-${type}-${nanoid()}`,
+      id: `${prefix}-${type}-${uid()}`,
       type,
       content: '',
       images: [],
@@ -161,34 +195,11 @@ export const BlockEditor = ({
       code: type === 'code' ? { language: 'javascript', code: '' } : undefined,
       references: type === 'reference' ? [{ url: '', name: '' }] : undefined,
       math: type === 'math' ? { latex: '', displayMode: 'block' } : undefined,
+      markdown: type === 'markdown' ? '' : undefined,
+      rowOffset: (type === 'text' || type === 'code') ? tailRowOffset : undefined,
       orderIndex: blocks.length
     };
-
-    let insertIndex = blocks.length;
-
-    if (type === 'audio') {
-      const referenceIndex = blocks.findIndex(b => b.type === 'reference');
-      if (referenceIndex !== -1) {
-        insertIndex = referenceIndex;
-      }
-    } else if (type === 'reference') {
-      insertIndex = blocks.length;
-    } else {
-      const audioIndex = blocks.findIndex(b => b.type === 'audio');
-      if (audioIndex !== -1) {
-        insertIndex = audioIndex;
-      } else {
-        const referenceIndex = blocks.findIndex(b => b.type === 'reference');
-        if (referenceIndex !== -1) {
-          insertIndex = referenceIndex;
-        }
-      }
-    }
-
-    const newBlocks = [...blocks];
-    newBlocks.splice(insertIndex, 0, newBlock);
-
-    onChange(newBlocks.map((b, i) => ({ ...b, orderIndex: i })));
+    onChange([...blocks, newBlock].map((b, i) => ({ ...b, orderIndex: i })));
   };
 
   const handleUpdateBlock = (id: string, updates: Partial<CardBlock>) => {
@@ -230,7 +241,7 @@ export const BlockEditor = ({
 
     const duplicate: CardBlock = {
       ...original,
-      id: `${prefix}-${original.type}-${nanoid()}`,
+      id: `${prefix}-${original.type}-${uid()}`,
       orderIndex: index + 1
     };
 
@@ -241,364 +252,346 @@ export const BlockEditor = ({
     onChange(reindexed);
   };
 
-  const Icon = prefix === 'question' ? HelpCircle : Sparkles;
+  const handleMoveBlock = (index: number, direction: 'up' | 'down') => {
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= blocks.length) return;
+
+    const next = [...blocks];
+    const [moved] = next.splice(index, 1);
+    next.splice(targetIndex, 0, moved);
+    onChange(next.map((item, orderIndex) => ({ ...item, orderIndex })));
+  };
+
+  const getRowOffset = (block: CardBlock) => {
+    return Math.round(Number(block.rowOffset ?? 0));
+  };
+
+  const getRowOffsetBoundsWithinCard = (blockId: string, currentOffset: number) => {
+    if (typeof document === 'undefined') {
+      return { min: Number.NEGATIVE_INFINITY, max: Number.POSITIVE_INFINITY };
+    }
+
+    const rowEl = document.querySelector(`[data-block-id="${blockId}"]`) as HTMLElement | null;
+    if (!rowEl) return { min: Number.NEGATIVE_INFINITY, max: Number.POSITIVE_INFINITY };
+
+    const bodyEl = rowEl.closest('.card-shell-body') as HTMLElement | null;
+    if (!bodyEl) return { min: Number.NEGATIVE_INFINITY, max: Number.POSITIVE_INFINITY };
+
+    const rowRect = rowEl.getBoundingClientRect();
+    const bodyRect = bodyEl.getBoundingClientRect();
+    const upRows = Math.floor((rowRect.top - bodyRect.top) / ROW_STEP_PX);
+    const downRows = Math.floor((bodyRect.bottom - rowRect.bottom) / ROW_STEP_PX);
+
+    return {
+      min: currentOffset - Math.max(0, upRows),
+      max: currentOffset + Math.max(0, downRows),
+    };
+  };
+
+  const handleShiftBlockRow = (blockId: string, direction: 'up' | 'down') => {
+    const delta = direction === 'up' ? -1 : 1;
+    const sourceBlocks = blocksRef.current;
+    const currentBlock = sourceBlocks.find((block) => block.id === blockId);
+    if (!currentBlock || (currentBlock.type !== 'text' && currentBlock.type !== 'code')) return;
+
+    const currentOffset = getRowOffset(currentBlock);
+    const nextOffsetRaw = currentOffset + delta;
+    const bounds = getRowOffsetBoundsWithinCard(blockId, currentOffset);
+    const nextOffset = Math.min(Math.max(nextOffsetRaw, bounds.min), bounds.max);
+    if (nextOffset === currentOffset) return;
+
+    const nextBlocks = sourceBlocks.map((block) => {
+        if (block.id === blockId) {
+          return {
+            ...block,
+            rowOffset: nextOffset,
+          };
+        }
+        return {
+          ...block,
+          rowOffset: block.rowOffset,
+        };
+      });
+
+    blocksRef.current = nextBlocks;
+    onChange(nextBlocks);
+  };
+
+  const handleMoveDragStart = (blockId: string) => {
+    const sourceBlocks = blocksRef.current;
+    const currentBlock = sourceBlocks.find((block) => block.id === blockId);
+    if (!currentBlock) return;
+    moveSessionRef.current = {
+      blockId,
+      originOffset: getRowOffset(currentBlock),
+    };
+  };
+
+  const handleMoveDragEnd = (blockId: string) => {
+    const session = moveSessionRef.current;
+    moveSessionRef.current = null;
+    if (!session || session.blockId !== blockId) return;
+
+    const sourceBlocks = blocksRef.current;
+    const movedBlock = sourceBlocks.find((block) => block.id === blockId);
+    if (!movedBlock || (movedBlock.type !== 'text' && movedBlock.type !== 'code')) return;
+
+    const movedEl = document.querySelector(`[data-block-id="${blockId}"]`) as HTMLElement | null;
+    if (!movedEl) return;
+
+    const movedRect = movedEl.getBoundingClientRect();
+    const candidates = Array.from(document.querySelectorAll('[data-block-row="true"]')) as HTMLElement[];
+
+    const hasCollision = candidates.some((el) => {
+      if (el === movedEl) return false;
+      const rect = el.getBoundingClientRect();
+
+      const horizontalOverlap = movedRect.left < rect.right && movedRect.right > rect.left;
+      const verticalOverlap = movedRect.top < rect.bottom && movedRect.bottom > rect.top;
+
+      return horizontalOverlap && verticalOverlap;
+    });
+
+    if (!hasCollision) return;
+
+    const revertedBlocks = sourceBlocks.map((block) =>
+      block.id === blockId
+        ? { ...block, rowOffset: session.originOffset }
+        : block
+    );
+
+    blocksRef.current = revertedBlocks;
+    onChange(revertedBlocks);
+  };
+
+  const toolbarNode = hideToolbar ? null : (
+    <BlockToolbar
+      label={label}
+      onAddBlock={handleAddBlock}
+      settings={settings}
+      canAddLink={canAddLink}
+      canAddAudio={canAddAudio}
+      hiddenBlockTypes={hiddenBlockTypes}
+    />
+  );
+
+  const toolbarMount = toolbarMountRef?.current ?? null;
 
   return (
     <div className={cn("space-y-1.5 md:space-y-2", prefix === 'question' ? 'js-question-editor' : 'js-answer-editor')}>
-      {/* Header & Add Block Toolbar */}
-      {!hideToolbar && (
-        <div className="flex flex-row items-center justify-between gap-3 px-2">
-          <div className="flex items-center gap-2">
-            <span className="text-[9px] md:text-[10px] font-bold text-slate-300 uppercase tracking-widest block">
-              {label}
-            </span>
-          </div>
+      {toolbarNode && toolbarMount ? createPortal(toolbarNode, toolbarMount) : toolbarNode}
 
-          <div className="flex flex-nowrap items-center gap-1.5 md:gap-2 bg-slate-100/50 p-1.5 md:p-2 rounded-2xl md:rounded-full shadow-inner backdrop-blur-sm max-w-full w-fit overflow-x-auto no-scrollbar select-none">
-            {(() => {
-              const blockSettings = settings?.editorBlockSettings || [
-                { id: 'text', type: 'text', label: 'テキスト', isVisible: true, orderIndex: 0 },
-                { id: 'code', type: 'code', label: 'コード', isVisible: true, orderIndex: 1 },
-                { id: 'image', type: 'image', label: '画像', isVisible: true, orderIndex: 2 },
-                { id: 'audio', type: 'audio', label: '音声', isVisible: true, orderIndex: 3 },
-                { id: 'reference', type: 'reference', label: 'リンク', isVisible: true, orderIndex: 4 },
-                { id: 'math', type: 'math', label: '数式', isVisible: true, orderIndex: 5 },
-              ];
-
-              const sorted = [...blockSettings].sort((a, b) => a.orderIndex - b.orderIndex);
-              const showLabel = settings?.blockButtonShowLabel ?? true;
-
-              return sorted
-                .filter(b => b.isVisible)
-                .filter(b => !hiddenBlockTypes.includes(b.type))
-                .map((config) => {
-                const type = config.type;
-
-                const getButtonClass = (specificClasses: string) =>
-                  cn(
-                    "flex items-center justify-center gap-1.5 md:gap-2 rounded-full font-bold transition-all duration-300 active:scale-95 text-[10px] md:text-[11px] flex-shrink-0 h-7 md:h-8 backdrop-blur-md border border-white/40",
-                    specificClasses,
-                    showLabel
-                      ? "w-7 md:w-auto lg:w-7 xl:w-auto px-0 md:px-3 lg:px-0 xl:px-3"
-                      : "w-7 md:w-8 px-0"
-                  );
-
-                const labelClass = showLabel ? "uppercase tracking-wider hidden md:inline lg:hidden xl:inline" : "hidden";
-
-                switch (type) {
-                  case 'text':
-                    return (
-                      <Button
-                        key="add-text"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleAddBlock('text')}
-                        className={getButtonClass("text-slate-500 hover:text-primary-600 bg-gradient-to-br from-blue-50/80 to-white/80 shadow-sm hover:shadow-lg hover:shadow-primary-500/20 hover:-translate-y-0.5")}
-                      >
-                        <TypeIcon className="w-3.5 h-3.5 md:w-4 h-4" />
-                        <span className={labelClass}>{config.label}</span>
-                      </Button>
-                    );
-                  case 'code':
-                    return (
-                      <Button
-                        key="add-code"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleAddBlock('code')}
-                        className={getButtonClass("text-slate-500 hover:text-indigo-600 bg-gradient-to-br from-indigo-50/80 to-white/80 shadow-sm hover:shadow-lg hover:shadow-indigo-500/20 hover:-translate-y-0.5")}
-                      >
-                        <CodeIcon className="w-3.5 h-3.5 md:w-4 h-4" />
-                        <span className={labelClass}>{config.label}</span>
-                      </Button>
-                    );
-                  case 'image':
-                    return (
-                      <Button
-                        key="add-image"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleAddBlock('image')}
-                        className={getButtonClass("text-slate-500 hover:text-emerald-600 bg-gradient-to-br from-emerald-50/80 to-white/80 shadow-sm hover:shadow-lg hover:shadow-emerald-500/20 hover:-translate-y-0.5")}
-                      >
-                        <ImageIcon className="w-3.5 h-3.5 md:w-4 h-4" />
-                        <span className={labelClass}>{config.label}</span>
-                      </Button>
-                    );
-                  case 'audio':
-                    const isAudioHere = blocks.some(b => b.type === 'audio');
-                    return (
-                      <Button
-                        key="add-audio"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleAddBlock('audio')}
-                        disabled={!canAddAudio && !isAudioHere}
-                        className={cn(
-                          getButtonClass(""),
-                          isAudioHere
-                            ? "text-amber-600 bg-gradient-to-br from-amber-100/90 to-white/90 shadow-md shadow-amber-500/20"
-                            : "text-slate-500 hover:text-amber-600 bg-gradient-to-br from-amber-50/80 to-white/80 shadow-sm hover:shadow-lg hover:shadow-amber-500/20 hover:-translate-y-0.5",
-                          (!canAddAudio && !isAudioHere) && "opacity-40 cursor-not-allowed grayscale shadow-none"
-                        )}
-                      >
-                        <Volume2 className="w-3.5 h-3.5 md:w-4 h-4" />
-                        <span className={labelClass}>{config.label}</span>
-                      </Button>
-                    );
-                  case 'reference':
-                    const isLinkHere = blocks.some(b => b.type === 'reference');
-                    return (
-                      <Button
-                        key="add-reference"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleAddBlock('reference')}
-                        disabled={!canAddLink && !isLinkHere}
-                        className={cn(
-                          getButtonClass(""),
-                          isLinkHere
-                            ? "text-cyan-600 bg-gradient-to-br from-cyan-100/90 to-white/90 shadow-md shadow-cyan-500/20"
-                            : "text-slate-500 hover:text-cyan-600 bg-gradient-to-br from-cyan-50/80 to-white/80 shadow-sm hover:shadow-lg hover:shadow-cyan-500/20 hover:-translate-y-0.5",
-                          (!canAddLink && !isLinkHere) && "opacity-40 cursor-not-allowed grayscale shadow-none"
-                        )}
-                      >
-                        <LinkIcon className="w-3.5 h-3.5 md:w-4 h-4" />
-                        <span className={labelClass}>{config.label}</span>
-                      </Button>
-                    );
-                  case 'math':
-                    return (
-                      <Button
-                        key="add-math"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleAddBlock('math')}
-                        className={getButtonClass("text-slate-500 hover:text-purple-600 bg-gradient-to-br from-purple-50/80 to-white/80 shadow-sm hover:shadow-lg hover:shadow-purple-500/20 hover:-translate-y-0.5")}
-                      >
-                        <SigmaIcon className="w-3.5 h-3.5 md:w-4 h-4" />
-                        <span className={labelClass}>{config.label}</span>
-                      </Button>
-                    );
-                  default:
-                    return null;
-                }
-              });
-            })()}
-          </div>
-        </div>
-      )}
-
-      {/* Blocks List */}
       <Droppable droppableId={droppableId} direction="vertical" type="card-block">
         {(provided) => (
-          <div
-            {...provided.droppableProps}
-            ref={provided.innerRef}
-            className="space-y-3"
-          >
+          <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-0 pr-3 overflow-x-clip overflow-y-visible">
             {blocks.map((block, index) => (
               <Draggable
                 key={block.id}
                 draggableId={block.id}
                 index={index}
-                isDragDisabled={block.type === 'reference' || block.type === 'audio'}
+                isDragDisabled={
+                  block.type === 'reference' ||
+                  block.type === 'audio' ||
+                  block.type === 'text' ||
+                  block.type === 'code'
+                }
               >
                 {(provided, snapshot) => (
+                  (() => {
+                    const isLinePositionable = block.type === 'text' || block.type === 'code';
+                    const rowOffsetPx = isLinePositionable ? getRowOffset(block) * ROW_STEP_PX : 0;
+                    const dragStyle = clampDragStyle(provided.draggableProps.style, {
+                      // ブロック並び替えは縦方向のみ。X軸を固定して「掴んだ瞬間に横へ逃げる」挙動を防ぐ
+                      clampXMin: 0,
+                      clampXMax: 0,
+                      clampYMin: index === 0 ? 0 : undefined
+                    }) as React.CSSProperties | undefined;
+                    const baseTransform = dragStyle?.transform ? String(dragStyle.transform) : '';
+                    const offsetTransform = rowOffsetPx !== 0 ? `translateY(${rowOffsetPx}px)` : '';
+                    const mergedTransform = [baseTransform, offsetTransform].filter(Boolean).join(' ').trim();
+
+                    const mergedStyle: React.CSSProperties | undefined = dragStyle
+                      ? { ...dragStyle, transform: mergedTransform || dragStyle.transform }
+                      : (mergedTransform ? { transform: mergedTransform } : undefined);
+
+                    return (
                   <div
                     ref={provided.innerRef}
                     {...provided.draggableProps}
-
-                    // ✅ “触った時だけ”アクティブにする（hoverで反応しない）
+                    data-block-id={block.id}
                     onPointerDownCapture={() => setActiveBlockId(block.id)}
                     onPointerEnter={() => setActiveBlockId(block.id)}
-                    onPointerLeave={() => {
-                      setActiveBlockId(prev => (prev === block.id ? null : prev));
-                    }}
+                    onPointerLeave={() => setActiveBlockId((prev) => (prev === block.id ? null : prev))}
                     onFocusCapture={(e) => {
                       setActiveBlockId(block.id);
-                      if (isEditableTarget(e.target)) {
-                        setEditingBlockId(block.id);
-                      }
+                      if (isEditableTarget(e.target)) setEditingBlockId(block.id);
                     }}
-
-                    // ✅ フォーカスが外へ出たら解除（入力中は維持）
                     onBlurCapture={(e) => {
                       const next = e.relatedTarget as Node | null;
                       if (!next || !e.currentTarget.contains(next)) {
-                        setActiveBlockId(prev => (prev === block.id ? null : prev));
-                        setEditingBlockId(prev => (prev === block.id ? null : prev));
+                        setActiveBlockId((prev) => (prev === block.id ? null : prev));
+                        setEditingBlockId((prev) => (prev === block.id ? null : prev));
                       }
                     }}
-
                     className="relative"
                     data-block-row="true"
                     data-active={(activeBlockId === block.id || snapshot.isDragging) ? "true" : "false"}
-                    style={clampDragStyle(provided.draggableProps.style, {
-                      clampXMin: prefix === 'question' ? 0 : undefined,
-                      clampXMax: prefix === 'answer' ? 0 : undefined,
-                      clampYMin: index === 0 ? 0 : undefined
-                    })}
+                    style={mergedStyle}
                   >
-                    <div>
-                      {block.type === 'text' && (
-                        (() => {
-                          const canDelete = index >= minDeletableIndex;
-                          return (
-                        <TextBlock
-                          content={block.content || ''}
-                          onChange={(val) => handleUpdateBlock(block.id, { content: val })}
-                          onDelete={() => {
-                            if (canDelete) handleDeleteBlock(block.id, index);
-                          }}
-                          onDuplicate={() => handleDuplicateBlock(block.id)}
-                          dragHandleProps={provided.dragHandleProps}
-                          dragHandleClassName={dragHandleClassName}
-                          accentColor={accentColor}
-                          autoFocus={autoFocus && index === 0}
-                          placeholder={customPlaceholders?.[index]}
-                          isActive={(activeBlockId === block.id || snapshot.isDragging) && editingBlockId !== block.id}
-                          showDelete={canDelete}
-                        />
-                          );
-                        })()
-                      )}
+                    {block.type === 'text' && (
+                      <TextBlock
+                        content={block.content || ''}
+                        onChange={(content) => handleUpdateBlock(block.id, { content })}
+                        onDelete={() => handleDeleteBlock(block.id, index)}
+                        onDuplicate={() => handleDuplicateBlock(block.id)}
+                        onMoveUp={() => handleShiftBlockRow(block.id, 'up')}
+                        onMoveDown={() => handleShiftBlockRow(block.id, 'down')}
+                        onMoveDragStart={() => handleMoveDragStart(block.id)}
+                        onMoveDragEnd={() => handleMoveDragEnd(block.id)}
+                        canMoveUp={true}
+                        canMoveDown={true}
+                        dragHandleProps={undefined}
+                        dragEnabled={true}
+                        dragHandleClassName={dragHandleClassName}
+                        accentColor={accentColor}
+                        isActive={activeBlockId === block.id || snapshot.isDragging}
+                        placeholder={customPlaceholders?.[index] || "文章を入力..."}
+                        autoFocus={autoFocus && index === blocks.length - 1}
+                      />
+                    )}
 
-                      {block.type === 'code' && (
-                        (() => {
-                          const canDelete = index >= minDeletableIndex;
-                          return (
-                        <CodeBlockItem
-                          data={block.code || { language: 'javascript', code: '' }}
-                          onChange={(val) => handleUpdateBlock(block.id, { code: val })}
-                          onDelete={() => {
-                            if (canDelete) handleDeleteBlock(block.id, index);
-                          }}
-                          onDuplicate={() => handleDuplicateBlock(block.id)}
-                          dragHandleProps={provided.dragHandleProps}
-                          dragHandleClassName={dragHandleClassName}
-                          accentColor={accentColor}
-                          isActive={(activeBlockId === block.id || snapshot.isDragging) && editingBlockId !== block.id}
-                          showDelete={canDelete}
-                        />
-                          );
-                        })()
-                      )}
-                      {block.type === 'image' && (
-                        (() => {
-                          const canDelete = index >= minDeletableIndex;
-                          return (
-                        <MediaBlock
-                          type="image"
-                          data={block.images || []}
-                          onChange={(val) => handleUpdateBlock(block.id, { images: val })}
-                          onDelete={() => {
-                            if (canDelete) handleDeleteBlock(block.id, index);
-                          }}
-                          onDuplicate={() => handleDuplicateBlock(block.id)}
-                          dragHandleProps={provided.dragHandleProps}
-                          dragHandleClassName={dragHandleClassName}
-                          accentColor={accentColor}
-                          initialFile={pendingUploads[block.id]}
-                          onConsumeInitialFile={() => handleConsumeInitialFile(block.id)}
-                          onFilesExcess={(files) => handleBlockOverflow(block.id, files)}
-                          isActive={(activeBlockId === block.id || snapshot.isDragging) && editingBlockId !== block.id}
-                          showDelete={canDelete}
-                        />
-                          );
-                        })()
-                      )}
-                      {block.type === 'audio' && (
-                        (() => {
-                          const canDelete = index >= minDeletableIndex;
-                          return (
-                        <MediaBlock
-                          type="audio"
-                          data={block.audios || []}
-                          onChange={(val) => handleUpdateBlock(block.id, { audios: val })}
-                          onDelete={() => {
-                            if (canDelete) handleDeleteBlock(block.id, index);
-                          }}
-                          onDuplicate={() => handleDuplicateBlock(block.id)}
-                          dragHandleProps={undefined}
-                          accentColor={accentColor}
-                          isActive={(activeBlockId === block.id || snapshot.isDragging) && editingBlockId !== block.id}
-                          showDelete={canDelete}
-                        />
-                          );
-                        })()
-                      )}
-                      {block.type === 'memo' && (
-                        (() => {
-                          const canDelete = index >= minDeletableIndex;
-                          return (
-                        <MemoBlock
-                          content={block.content || ''}
-                          onChange={(val) => handleUpdateBlock(block.id, { content: val })}
-                          onDelete={() => {
-                            if (canDelete) handleDeleteBlock(block.id, index);
-                          }}
-                          onDuplicate={() => handleDuplicateBlock(block.id)}
-                          dragHandleProps={provided.dragHandleProps}
-                          dragHandleClassName={dragHandleClassName}
-                          accentColor={accentColor}
-                          isActive={(activeBlockId === block.id || snapshot.isDragging) && editingBlockId !== block.id}
-                          showDelete={canDelete}
-                        />
-                          );
-                        })()
-                      )}
-                      {block.type === 'reference' && (
-                        (() => {
-                          const canDelete = index >= minDeletableIndex;
-                          return (
-                        <ReferenceBlock
-                          references={block.references || []}
-                          onChange={(val) => handleUpdateBlock(block.id, { references: val })}
-                          onDelete={() => {
-                            if (canDelete) handleDeleteBlock(block.id, index);
-                          }}
-                          onDuplicate={() => handleDuplicateBlock(block.id)}
-                          dragHandleProps={undefined}
-                          accentColor={accentColor}
-                          isActive={(activeBlockId === block.id || snapshot.isDragging) && editingBlockId !== block.id}
-                          showDelete={canDelete}
-                        />
-                          );
-                        })()
-                      )}
-                      {block.type === 'math' && (
-                        (() => {
-                          const canDelete = index >= minDeletableIndex;
-                          return (
-                        <MathBlock
-                          data={block.math || { latex: '', displayMode: 'block' }}
-                          onChange={(val) => handleUpdateBlock(block.id, { math: val })}
-                          onDelete={() => {
-                            if (canDelete) handleDeleteBlock(block.id, index);
-                          }}
-                          onDuplicate={() => handleDuplicateBlock(block.id)}
-                          dragHandleProps={provided.dragHandleProps}
-                          dragHandleClassName={dragHandleClassName}
-                          accentColor={accentColor}
-                          isActive={(activeBlockId === block.id || snapshot.isDragging) && editingBlockId !== block.id}
-                          showDelete={canDelete}
-                        />
-                          );
-                        })()
-                      )}
-                    </div>
+                    {block.type === 'code' && (
+                      <CodeBlockItem
+                        data={block.code || { language: 'javascript', code: '' }}
+                        onChange={(data) => handleUpdateBlock(block.id, { code: data })}
+                        onDelete={() => handleDeleteBlock(block.id, index)}
+                        onDuplicate={() => handleDuplicateBlock(block.id)}
+                        onMoveUp={() => handleShiftBlockRow(block.id, 'up')}
+                        onMoveDown={() => handleShiftBlockRow(block.id, 'down')}
+                        onMoveDragStart={() => handleMoveDragStart(block.id)}
+                        onMoveDragEnd={() => handleMoveDragEnd(block.id)}
+                        canMoveUp={true}
+                        canMoveDown={true}
+                        dragHandleProps={undefined}
+                        dragEnabled={true}
+                        dragHandleClassName={dragHandleClassName}
+                        accentColor={accentColor}
+                        isActive={activeBlockId === block.id || snapshot.isDragging}
+                      />
+                    )}
 
+                    {block.type === 'image' && (
+                      <MediaBlock
+                        type="image"
+                        data={block.images || []}
+                        onChange={(data) => handleUpdateBlock(block.id, { images: data })}
+                        onDelete={() => handleDeleteBlock(block.id, index)}
+                        onDuplicate={() => handleDuplicateBlock(block.id)}
+                        dragHandleProps={provided.dragHandleProps}
+                        dragHandleClassName={dragHandleClassName}
+                        accentColor={accentColor}
+                        isActive={activeBlockId === block.id || snapshot.isDragging}
+                        initialFile={pendingUploads[block.id]}
+                        onConsumeInitialFile={() => handleConsumeInitialFile(block.id)}
+                        onFilesExcess={(files) => handleBlockOverflow(block.id, files)}
+                      />
+                    )}
+
+                    {block.type === 'audio' && (
+                      <MediaBlock
+                        type="audio"
+                        data={block.audios || []}
+                        onChange={(data) => handleUpdateBlock(block.id, { audios: data })}
+                        onDelete={() => handleDeleteBlock(block.id, index)}
+                        onDuplicate={() => handleDuplicateBlock(block.id)}
+                        isActive={activeBlockId === block.id || snapshot.isDragging}
+                        accentColor={accentColor}
+                      />
+                    )}
+
+                    {block.type === 'memo' && (
+                      <MemoBlock
+                        content={block.content || ''}
+                        onChange={(content) => handleUpdateBlock(block.id, { content })}
+                        onDelete={() => handleDeleteBlock(block.id, index)}
+                        onDuplicate={() => handleDuplicateBlock(block.id)}
+                        dragHandleProps={provided.dragHandleProps}
+                        dragHandleClassName={dragHandleClassName}
+                        accentColor={accentColor}
+                        isActive={activeBlockId === block.id || snapshot.isDragging}
+                      />
+                    )}
+
+                    {block.type === 'reference' && (
+                      <ReferenceBlock
+                        references={block.references || []}
+                        onChange={(references) => handleUpdateBlock(block.id, { references })}
+                        onDelete={() => handleDeleteBlock(block.id, index)}
+                        onDuplicate={() => handleDuplicateBlock(block.id)}
+                        dragHandleProps={provided.dragHandleProps}
+                        accentColor={accentColor}
+                        isActive={activeBlockId === block.id || snapshot.isDragging}
+                      />
+                    )}
+
+                    {block.type === 'math' && (
+                      <MathBlock
+                        data={block.math || { latex: '', displayMode: 'block' }}
+                        onChange={(data) => handleUpdateBlock(block.id, { math: data })}
+                        onDelete={() => handleDeleteBlock(block.id, index)}
+                        onDuplicate={() => handleDuplicateBlock(block.id)}
+                        dragHandleProps={provided.dragHandleProps}
+                        dragHandleClassName={dragHandleClassName}
+                        accentColor={accentColor}
+                        isActive={activeBlockId === block.id || snapshot.isDragging}
+                      />
+                    )}
+
+                    {block.type === 'markdown' && (
+                      <MarkdownBlock
+                        markdown={block.markdown || ''}
+                        onChange={(md) => handleUpdateBlock(block.id, { markdown: md })}
+                        onDelete={() => handleDeleteBlock(block.id, index)}
+                        onDuplicate={() => handleDuplicateBlock(block.id)}
+                        dragHandleProps={provided.dragHandleProps}
+                        dragHandleClassName={dragHandleClassName}
+                        accentColor={accentColor}
+                        isActive={activeBlockId === block.id || snapshot.isDragging}
+                        onReplaceWithBlocks={(parsed) => {
+                          const newBlocks = parsed.map((p, pi) => {
+                            const newId = `${prefix}-${p.type}-${uid()}`;
+                            if (p.type === 'code') {
+                              return {
+                                id: newId, type: 'code' as const,
+                                code: p.code, content: '', images: [], audios: [],
+                                orderIndex: 0,
+                              };
+                            }
+                            return {
+                              id: newId, type: 'markdown' as const,
+                              markdown: p.markdown, content: '', images: [], audios: [],
+                              orderIndex: 0,
+                            };
+                          });
+                          const updated = [...blocks];
+                          updated.splice(index, 1, ...newBlocks);
+                          onChange(updated.map((b, i) => ({ ...b, orderIndex: i })));
+                        }}
+                      />
+                    )}
                   </div>
+                    );
+                  })()
                 )}
               </Draggable>
             ))}
+
             {provided.placeholder}
 
             {blocks.length === 0 && (
-              <div className="text-center py-12 border-2 border-dashed border-slate-100 rounded-[40px] bg-slate-50/30">
-                <Plus className="w-8 h-8 text-slate-200 mx-auto mb-2" />
-                <p className="text-xs font-bold text-slate-300 uppercase tracking-widest">
+              <div className="flex min-h-[112px] flex-col items-center justify-center rounded-[40px] border-2 border-dashed border-slate-100 bg-slate-50/30 px-4 py-4 text-center">
+                <Plus className="h-8 w-8 text-slate-200" />
+                <p className="m-0 mt-2 text-xs font-bold leading-tight text-slate-300 tracking-widest">
                   ブロックを追加してください
                 </p>
               </div>
@@ -608,4 +601,6 @@ export const BlockEditor = ({
       </Droppable>
     </div>
   );
-};
+});
+
+BlockEditor.displayName = 'BlockEditor';

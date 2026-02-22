@@ -33,7 +33,7 @@ export function useDocuments(folderId?: string) {
   const documents = useMemo(() => {
     if (!rawDocuments) return [];
 
-    let filtered = rawDocuments.filter(d => !d.isDeleted);
+    let filtered = rawDocuments.filter(d => !(d.isDeleted ?? (d as any).is_deleted));
 
     if (folderId) {
       filtered = filtered.filter(d => d.folderId === folderId);

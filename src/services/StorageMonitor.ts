@@ -40,9 +40,9 @@ class StorageMonitor {
     this.checkAndNotify();
 
     // 定期的にチェック
-    this.intervalId = setInterval(() => {
+    this.intervalId = window.setInterval(() => {
       this.checkAndNotify();
-    }, intervalMs);
+    }, intervalMs) as unknown as number;
   }
 
   /**

@@ -123,6 +123,12 @@
 - [x] 修正実装 (Flashcard.tsx)
 - [x] 動作確認 (docs/06_Operations/walkthrough_prevent_text_selection_view.md)
 
+# テキスト・コードブロックの縦幅最適化
+
+- [x] 実装計画の作成 (docs/06_Operations/implementation_plan_compact_blocks.md) <!-- id: 8000 -->
+- [x] テキスト・コードブロックのパディングおよび最小高さの削減 <!-- id: 8001 -->
+- [x] 動作確認と完了レポート作成 (walkthrough.md) <!-- id: 8002 -->
+
 # タグ管理機能の実装
 - [x] 実装計画の作成 (implementation_plan_tag_management_add_feature.md) <!-- id: 6000 -->
 - [x] タグ追加UIの実装 (SettingsDialog.jsx) <!-- id: 6001 -->

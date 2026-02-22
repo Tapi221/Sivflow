@@ -72,6 +72,7 @@ export const MathBlock: React.FC<MathBlockProps> = ({
             onChange={(e) => handleLatexChange(e.target.value)}
             placeholder="例: x = \frac{-b \pm \sqrt{b^2-4ac}}{2a}"
             minRows={1}
+            allowInternalScroll={false}
             className={cn(
               "font-mono text-base text-slate-700 placeholder:text-slate-300",
               "border border-slate-100 rounded-xl px-3 py-2 transition-all duration-300",

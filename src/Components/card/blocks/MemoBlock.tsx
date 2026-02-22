@@ -33,6 +33,7 @@ export const MemoBlock = ({ content, onChange, onDelete, onDuplicate, dragHandle
         onChange={(e) => onChange(e.target.value)}
         placeholder="メモを入力..."
         minRows={1}
+        allowInternalScroll={false}
         className="bg-slate-50 px-3 py-1 rounded-[16px] border-none focus-visible:ring-0 text-slate-600 text-sm resize-none"
       />
     </BlockWrapper>

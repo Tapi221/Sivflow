@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useCards } from '@/hooks/useCards';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,6 +13,28 @@ import { nanoid } from 'nanoid';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
+const CARD_EDIT_RELOAD_GUARD_KEY = 'card-edit:reload-guard-url';
+const CARD_EDIT_EDITORS_KEY = 'card-edit-editors';
+const CARD_EDIT_FOLDER_ID_KEY = 'card-edit:folder-id';
+
+const normalizeEditors = (rawEditors) => {
+  if (!Array.isArray(rawEditors)) return [];
+
+  const usedIds = new Set();
+
+  return rawEditors.map((editor, index) => {
+    const candidateId = typeof editor?.id === 'string' ? editor.id.trim() : '';
+    const uniqueId = candidateId && !usedIds.has(candidateId) ? candidateId : nanoid();
+    usedIds.add(uniqueId);
+
+    return {
+      id: uniqueId,
+      isSaved: !!editor?.isSaved,
+      autoFocus: !!editor?.autoFocus && index === rawEditors.length - 1,
+    };
+  });
+};
+
 export default function CardEdit() {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
@@ -22,16 +44,99 @@ export default function CardEdit() {
   const folderId = searchParams.get('folderId');
   const mode = searchParams.get('mode') || 'default';
   const hideTitle = searchParams.get('hideTitle') === 'true';
+  const returnTo = searchParams.get('returnTo');
+  const shouldReturnToCardView = returnTo === 'card-view';
+  const shouldReturnToCalendar = returnTo === 'calendar';
+  
+  // 🔍 デバッグ：コンポーネントマウント時のURL確認
+  useEffect(() => {
+    console.log('[CardEdit] Component mounted/updated', {
+      cardId,
+      folderId,
+      pathname: window.location.pathname,
+      search: window.location.search,
+    });
+  }, [cardId, folderId]);
   
   const [isLoading, setIsLoading] = useState(false);
   const [savingIds, setSavingIds] = useState(new Set());
+  const isUnloadingRef = useRef(false);
+  
+  // リロードガードを同期的に初期化（useEffectより前に実行される）
+  const suppressAutoNavigateAfterReloadRef = useRef((() => {
+    if (typeof window === 'undefined') return false;
+    const currentUrl = `${window.location.pathname}${window.location.search}`;
+    const guardedUrl = sessionStorage.getItem(CARD_EDIT_RELOAD_GUARD_KEY);
+    return guardedUrl === currentUrl;
+  })());
+
+  useEffect(() => {
+    if (!suppressAutoNavigateAfterReloadRef.current) {
+      sessionStorage.removeItem(CARD_EDIT_RELOAD_GUARD_KEY);
+      return;
+    }
+
+    // リロード直後の場合、3秒後にガードを解除
+    const timerId = window.setTimeout(() => {
+      suppressAutoNavigateAfterReloadRef.current = false;
+      sessionStorage.removeItem(CARD_EDIT_RELOAD_GUARD_KEY);
+    }, 3000);
+
+    return () => {
+      window.clearTimeout(timerId);
+    };
+  }, []);
+
+  useEffect(() => {
+    const currentUrl = `${window.location.pathname}${window.location.search}`;
+
+    const markUnloading = () => {
+      isUnloadingRef.current = true;
+      sessionStorage.setItem(CARD_EDIT_RELOAD_GUARD_KEY, currentUrl);
+    };
+
+    window.addEventListener('pagehide', markUnloading);
+    window.addEventListener('beforeunload', markUnloading);
+
+    return () => {
+      window.removeEventListener('pagehide', markUnloading);
+      window.removeEventListener('beforeunload', markUnloading);
+    };
+  }, []);
+
+  const safeNavigate = useCallback((to) => {
+    if (isUnloadingRef.current) {
+      console.log('[CardEdit] safeNavigate: blocked (unloading)', to);
+      return;
+    }
+    console.log('[CardEdit] safeNavigate: executing', to);
+    navigate(to);
+  }, [navigate]);
   
   // useCardsフックから必要な関数とデータを取得
   const { cards: allCards = [], loading: cardsLoading, createCard, updateCard, deleteCard } = useCards();
   
   const card = allCards.find(c => c.id === cardId);
   
-  const targetFolderId = folderId || card?.folderId;
+  // targetFolderId の決定（優先順位：URL > card.folderId > sessionStorage）
+  const targetFolderId = useMemo(() => {
+    if (folderId) {
+      // URLにfolderIdがあれば最優先
+      console.log('[CardEdit] targetFolderId: from URL', folderId);
+      sessionStorage.setItem(CARD_EDIT_FOLDER_ID_KEY, folderId);
+      return folderId;
+    }
+    if (card?.folderId) {
+      // カードデータからfolderIdを取得
+      console.log('[CardEdit] targetFolderId: from card', card.folderId);
+      sessionStorage.setItem(CARD_EDIT_FOLDER_ID_KEY, card.folderId);
+      return card.folderId;
+    }
+    // リロード直後などでまだ取得できない場合、sessionStorageから復元
+    const savedFolderId = sessionStorage.getItem(CARD_EDIT_FOLDER_ID_KEY);
+    console.log('[CardEdit] targetFolderId: from sessionStorage or undefined', savedFolderId || undefined);
+    return savedFolderId || undefined;
+  }, [folderId, card?.folderId]);
   
   const { cards: folderCards = [] } = useCards(targetFolderId);
   
@@ -39,15 +144,50 @@ export default function CardEdit() {
     return [...folderCards].sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
   }, [folderCards]);
   
+  // リロード時にエディタIDを維持するため sessionStorage で永続化（PairMode/FourChoiceMode と同じパターン）
   const [editors, setEditors] = useState(() => {
     if (cardId) {
       return [{ id: cardId, isSaved: false, autoFocus: true }];
     }
-    return [
-      { id: nanoid(), isSaved: false, autoFocus: true },
-      { id: nanoid(), isSaved: false, autoFocus: false }
-    ];
+    // 新規作成時: sessionStorage から復元を試みる
+    const saved = sessionStorage.getItem(CARD_EDIT_EDITORS_KEY);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        const normalized = normalizeEditors(parsed);
+        if (normalized.length > 0) {
+          // autoFocus を無効化して復元（リロード後に余計なフォーカスを避ける）
+          return normalized.map(e => ({ ...e, autoFocus: false }));
+        }
+      } catch (e) {
+        console.error('Failed to parse saved editors:', e);
+      }
+    }
+    return [{ id: nanoid(), isSaved: false, autoFocus: true }];
   });
+
+  useEffect(() => {
+    if (cardId) return;
+
+    setEditors((prev) => {
+      const normalized = normalizeEditors(prev);
+      const hasChanged = normalized.some((editor, index) => editor.id !== prev[index]?.id);
+      return hasChanged ? normalized : prev;
+    });
+  }, [cardId]);
+
+  // 永続化: 新規作成時のみエディタリストを sessionStorage に同期
+  useEffect(() => {
+    if (!cardId) {
+      sessionStorage.setItem(CARD_EDIT_EDITORS_KEY, JSON.stringify(editors));
+    }
+  }, [editors, cardId]);
+
+  // ページ離脱時に永続化データをクリア（リロードではない通常の画面遷移時）
+  const clearEditorPersistence = useCallback(() => {
+    sessionStorage.removeItem(CARD_EDIT_EDITORS_KEY);
+    sessionStorage.removeItem(CARD_EDIT_FOLDER_ID_KEY);
+  }, []);
 
   const questionNumberOffset = useMemo(() => {
     if (cardId) {
@@ -66,7 +206,10 @@ export default function CardEdit() {
     return Array.from(tags).sort();
   }, [allCards]);
   
-  const handleSave = async (editorId, formData, continueCreating = false) => {
+  const handleSave = async (editorId, formData, continueCreating, saveContext) => {
+    const isPageHidden = typeof document !== 'undefined' && document.visibilityState === 'hidden';
+    const isBackgroundSave = continueCreating === undefined;
+
     if (savingIds.has(editorId)) return;
     setSavingIds(prev => new Set(prev).add(editorId));
     
@@ -76,8 +219,20 @@ export default function CardEdit() {
           ...formData,
           updatedAt: new Date()
         });
-        toast.success('カードを更新しました');
-        navigate(`/FolderView?id=${targetFolderId}`);
+        if (!isBackgroundSave) {
+          toast.success('カードを更新しました');
+        }
+        // リロードガード中、またはfolderIdが未確定の場合はナビゲートしない
+        if (continueCreating === false && saveContext === 'manual-save' && targetFolderId && !isPageHidden && !suppressAutoNavigateAfterReloadRef.current) {
+          clearEditorPersistence();
+          if (shouldReturnToCalendar) {
+            safeNavigate(createPageUrl('Calendar'));
+          } else if (shouldReturnToCardView) {
+            safeNavigate(`/CardView?folderId=${targetFolderId}&cardId=${cardId}`);
+          } else {
+            safeNavigate(`/FolderView?id=${targetFolderId}`);
+          }
+        }
       } else {
         if (currentUser) {
           const finalFolderId = targetFolderId || formData.folderId || '';
@@ -98,15 +253,23 @@ export default function CardEdit() {
           // Mark as saved
           setEditors(prev => prev.map(e => e.id === editorId ? { ...e, isSaved: true, autoFocus: false } : e));
 
-          if (continueCreating) {
+          if (continueCreating === true) {
             toast.success('カードを追加しました');
             setEditors(prev => [
               ...prev.map(p => ({ ...p, autoFocus: false })),
               { id: nanoid(), isSaved: false, autoFocus: true }
             ]);
-          } else {
+          } else if (continueCreating === false && saveContext === 'manual-save' && targetFolderId && !isPageHidden && !suppressAutoNavigateAfterReloadRef.current) {
+            // リロードガード中、またはfolderIdが未確定の場合はナビゲートしない
             toast.success('カードを作成しました');
-            navigate(`/FolderView?id=${targetFolderId}`);
+            clearEditorPersistence();
+            if (shouldReturnToCalendar) {
+              safeNavigate(createPageUrl('Calendar'));
+            } else if (shouldReturnToCardView) {
+              safeNavigate(`/CardView?folderId=${targetFolderId}`);
+            } else {
+              safeNavigate(`/FolderView?id=${targetFolderId}`);
+            }
           }
         }
       }
@@ -125,7 +288,7 @@ export default function CardEdit() {
   const handleDeleteEditor = (editorId) => {
     if (cardId) {
       // 既存カードの編集時はエディタ削除＝ナビゲーションバック
-      handleCancel();
+      handleCancel('user');
       return;
     }
     if (editors.length <= 1) {
@@ -156,17 +319,44 @@ export default function CardEdit() {
     setEditors(items);
   };
   
-  const handleCancel = () => {
-    if (targetFolderId) {
-      navigate(`/FolderView?id=${targetFolderId}`);
-    } else {
-      navigate('/Folders');
+  const handleCancel = (reason) => {
+    if (isUnloadingRef.current) return;
+
+    if (reason !== 'user') {
+      console.log('[CardEdit] Cancel ignored: non-user trigger', reason);
+      return;
     }
+    
+    // リロードガード中は何もしない（リロード直後のautosave等による誤動作防止）
+    if (suppressAutoNavigateAfterReloadRef.current) {
+      console.log('[CardEdit] Cancel ignored: reload guard active');
+      return;
+    }
+    
+    clearEditorPersistence();
+    
+    // folderIdが未確定の場合は待機（カードロード中）
+    if (!targetFolderId) {
+      console.log('[CardEdit] Cancel ignored: folderId not yet determined');
+      return;
+    }
+    
+    if (shouldReturnToCalendar) {
+      safeNavigate(createPageUrl('Calendar'));
+      return;
+    }
+
+    if (shouldReturnToCardView) {
+      safeNavigate(`/CardView?folderId=${targetFolderId}${cardId ? `&cardId=${cardId}` : ''}`);
+      return;
+    }
+
+    safeNavigate(`/FolderView?id=${targetFolderId}`);
   };
   
   if (cardId && cardsLoading) {
     return (
-      <div className="min-h-screen bg-[#F5F7F8] text-slate-800 font-sans p-6 md:p-14">
+      <div className="min-h-screen bg-[#F5F7F8] text-slate-800 font-serif p-6 md:p-14">
         <div className="max-w-[1400px] mx-auto space-y-4">
           <Skeleton className="h-10 w-48" />
           <Skeleton className="h-[600px] w-full" />
@@ -176,20 +366,20 @@ export default function CardEdit() {
   }
   
   return (
-    <div className="min-h-screen bg-[#F5F7F8] text-slate-800 font-sans">
-      <div className="max-w-[1400px] mx-auto p-2 md:pt-8 md:pb-10 md:px-4">
+    <div className="min-h-screen bg-[#F5F7F8] text-slate-800 font-serif">
+      <div className="max-w-[1400px] mx-auto px-0 pb-0 md:pt-8 md:pb-0 md:px-4">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-4">
+        <div
+          className="flex items-center mb-1 px-4 md:px-0"
+          style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.5rem)' }}
+        >
           <Button
             variant="ghost"
             size="icon"
-            onClick={handleCancel}
+            onClick={() => handleCancel('user')}
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <h1 className="text-2xl font-bold text-gray-900">
-            {cardId ? 'カード編集' : '新規カード作成'}
-          </h1>
         </div>
         
         {/* Editor Area */}
@@ -225,7 +415,7 @@ export default function CardEdit() {
 
                           {/* Controls (Outside Top Left) */}
                             {!cardId && (
-                              <div className="absolute -top-10 left-0 flex items-center gap-1 z-20 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto transition-opacity">
+                              <div className="hidden md:flex absolute top-2 left-2 md:top-3 md:left-3 items-center gap-1 z-20 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto transition-opacity">
                               <div className="flex items-center bg-white rounded-full shadow-sm border border-slate-200 overflow-hidden">
                                 <button
                                   onClick={() => handleMoveEditor(index, 'up')}
@@ -266,16 +456,45 @@ export default function CardEdit() {
                           )}
 
                           <div className={cn(
-                            "relative bg-white rounded-[32px] border border-slate-200/60 shadow-sm p-2 md:p-6",
+                            "relative bg-white rounded-none border-0 shadow-none p-0 md:rounded-[32px] md:border md:border-slate-200/60 md:shadow-sm md:p-6",
                             snapshot.isDragging ? 'shadow-2xl ring-2 ring-primary-500/20 scale-[1.02]' : ''
                           )}>
+                            {!cardId && (
+                              <div className="md:hidden px-3 pt-3 pb-1 flex flex-wrap items-center gap-2">
+                                <button
+                                  onClick={() => handleMoveEditor(index, 'up')}
+                                  disabled={index === 0}
+                                  className="h-10 min-w-10 px-2 rounded-xl border border-slate-200 bg-white text-slate-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                  title="上へ移動"
+                                >
+                                  <ChevronUp className="w-4 h-4 mx-auto" />
+                                </button>
+                                <button
+                                  onClick={() => handleMoveEditor(index, 'down')}
+                                  disabled={index === editors.length - 1}
+                                  className="h-10 min-w-10 px-2 rounded-xl border border-slate-200 bg-white text-slate-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                  title="下へ移動"
+                                >
+                                  <ChevronDown className="w-4 h-4 mx-auto" />
+                                </button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleDeleteEditor(editor.id)}
+                                  className="h-10 w-10 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-red-500 hover:bg-red-50 transition-colors"
+                                  title="このカードを削除"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            )}
                             <CardEditor
                               card={card}
                               folderId={targetFolderId}
                               questionNumber={questionNumberOffset + index + 1}
                               autoFocus={!!editor.autoFocus}
-                              onSave={(data, cont) => handleSave(editor.id, data, cont)}
-                              onCancel={handleCancel}
+                              onSave={(data, cont, context) => handleSave(editor.id, data, cont, context)}
+                              onCancel={(reason) => handleCancel(reason)}
                               isLoading={savingIds.has(editor.id)}
                               showContinueButton={!cardId && index === editors.length - 1}
                               showSaveButton={index === editors.length - 1}
@@ -283,13 +502,13 @@ export default function CardEdit() {
                               availableTags={availableTags}
                               customDraftKey={cardId ? undefined : `cardedit_draft_${editor.id}`}
                               storageType={cardId ? 'local' : 'session'}
-                              onDelete={() => handleDeleteEditor(editor.id)}
+                              onDelete={!cardId ? () => handleDeleteEditor(editor.id) : undefined}
                               mode={mode}
                             />
                             
                             {/* Saved Overlay */}
                             {editor.isSaved && (
-                              <div className="absolute -top-3 right-4 z-10 pointer-events-none animate-in fade-in zoom-in duration-500">
+                              <div className="absolute top-2 right-3 md:-top-3 md:right-4 z-10 pointer-events-none animate-in fade-in zoom-in duration-500">
                                 <div className="flex items-center gap-2 px-3 py-1 md:px-4 md:py-1.5 rounded-full text-[9px] md:text-[10px] font-black shadow-sm border backdrop-blur-md bg-white/95 text-primary-600 border-primary-100">
                                   <div className="w-1.5 h-1.5 rounded-full bg-primary-600 animate-pulse" />
                                   保存済み

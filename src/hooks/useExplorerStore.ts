@@ -8,7 +8,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 // 型定義
-export type ExplorerTab = 'favorites' | 'explorer' | 'recent' | 'inbox';
+export type ExplorerTab = 'favorites' | 'explorer' | 'recent' | 'trash' | 'inbox';
 
 export interface FavoriteItem {
   type: 'folder' | 'card';

@@ -6,16 +6,13 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/Components/ui/select"
+} from '@/Components/ui/select';
 import type { CodeBlockData } from '@/types/code-block';
 import { Check as CheckIcon } from 'lucide-react';
-import CodeIcon from 'lucide-react/dist/esm/icons/code';
-import EyeIcon from 'lucide-react/dist/esm/icons/eye';
-import EyeOffIcon from 'lucide-react/dist/esm/icons/eye-off';
-import CopyIcon from 'lucide-react/dist/esm/icons/copy';
 import { cn } from '@/lib/utils';
 import Editor from 'react-simple-code-editor';
 import Prism from 'prismjs';
+
 import 'prismjs/components/prism-clike';
 import 'prismjs/components/prism-javascript';
 import 'prismjs/components/prism-typescript';
@@ -27,14 +24,13 @@ import 'prismjs/components/prism-csharp';
 import 'prismjs/components/prism-go';
 import 'prismjs/components/prism-rust';
 import 'prismjs/components/prism-sql';
-import 'prismjs/components/prism-markup'; // HTML
+import 'prismjs/components/prism-markup';
 import 'prismjs/components/prism-css';
 import 'prismjs/components/prism-json';
 import 'prismjs/components/prism-bash';
 import 'prismjs/components/prism-markdown';
 
-// Manually import a light theme CSS or defined styles
-import 'prismjs/themes/prism.css'; // Default light theme
+import 'prismjs/themes/prism.css';
 
 interface CodeBlockEditorProps {
   value?: CodeBlockData;
@@ -61,91 +57,105 @@ const SUPPORTED_LANGUAGES = [
 ];
 
 export function CodeBlockEditor({ value, onChange, className }: CodeBlockEditorProps) {
-  const [copied, setCopied] = React.useState(false);
-  
-  // Default state
-  const code = value?.code || '';
-  const language = value?.language || 'javascript';
+  const editorHostRef = React.useRef<HTMLDivElement | null>(null);
+
+
+  const code = value?.code ?? '';
+  const language = value?.language ?? 'javascript';
 
   const handleCodeChange = (newCode: string) => {
-    onChange({
-      language,
-      code: newCode
-    });
+    onChange({ language, code: newCode });
   };
 
   const handleLanguageChange = (newLang: string) => {
-    onChange({
-      language: newLang,
-      code
-    });
+    onChange({ language: newLang, code });
   };
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+
+
+  const highlightCode = (src: string) => {
+    const grammar = (Prism.languages as any)[language] || Prism.languages.javascript;
+    return Prism.highlight(src, grammar, language);
   };
 
-  const highlightCode = (code: string) => {
-    const grammer = Prism.languages[language] || Prism.languages.javascript;
-    return Prism.highlight(code, grammer, language);
-  };
+  React.useEffect(() => {
+    const textarea = editorHostRef.current?.querySelector('textarea');
+    if (!textarea) return;
+    textarea.setAttribute('wrap', 'off');
+  }, [language]);
 
   return (
-    <div className={cn("rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden flex flex-col", className)}>
-      {/* Toolbar */}
-      <div className="flex items-center justify-between px-2 py-0.5 border-b border-slate-100 bg-slate-50 shrink-0 h-6">
-
-        <div className="flex items-center gap-2">
+    <div
+      ref={editorHostRef}
+      className={cn(
+        'codeBlockRoot relative group overflow-hidden max-w-full',
+        className
+      )}
+    >
+      <div
+        className={cn(
+          "relative cursor-text overflow-hidden leading-[24px] max-w-full w-full",
+          "code-editor-surface"
+        )}
+      >
+        <div
+          className="
+            absolute top-0.5 right-0.5 z-20 flex items-center gap-0.5
+            opacity-90 group-hover:opacity-100 group-focus-within:opacity-100
+            transition-opacity pointer-events-auto
+          "
+        >
           <Select value={language} onValueChange={handleLanguageChange}>
-            <SelectTrigger className="w-[100px] h-5 bg-transparent border-none text-[9px] font-medium text-slate-500 focus:ring-0 px-0 shadow-none hover:text-slate-700">
+            <SelectTrigger
+              className="
+                codeBlockLang
+                h-5 w-[72px] min-w-0 min-h-0
+                rounded-full px-2
+                bg-white/75
+                border border-slate-200/70
+                text-[10px] font-bold text-slate-500
+                tracking-[0.12em] uppercase
+                hover:text-slate-700
+                focus:ring-0
+              "
+            >
               <SelectValue placeholder="Language" />
             </SelectTrigger>
+
             <SelectContent className="bg-white">
               {SUPPORTED_LANGUAGES.map((lang) => (
-                <SelectItem key={lang.value} value={lang.value} className="text-[10px]">
+                <SelectItem key={lang.value} value={lang.value} className="text-[8px]">
                   {lang.label}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          
-          <div className="w-[1px] h-2.5 bg-slate-200 mx-0.5" />
 
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleCopy}
-            className="h-5 w-5 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 rounded transition-colors"
-            title="Copy code"
-          >
-            {copied ? <CheckIcon className="w-3 h-3" /> : <CopyIcon className="w-3 h-3" />}
-          </Button>
+
         </div>
-      </div>
 
-      {/* WYSIWYG Editor Area */}
-      <div className="relative bg-white cursor-text overflow-hidden group">
         <Editor
           value={code}
           onValueChange={handleCodeChange}
           highlight={highlightCode}
-          padding={4}
-          className="font-mono text-sm"
+          padding={0}
+          className="code-editor-no-scroll codeBlockPre font-mono leading-[24px] [&>pre]:m-0 [&>textarea]:m-0"
           style={{
             fontFamily: '"Fira Code", "Fira Mono", monospace',
-            fontSize: 12,
+            fontSize: 13,
+            lineHeight: '24px',
             backgroundColor: 'transparent',
-            minHeight: '28px',
+            minHeight: '24px',
+            margin: 0,
+            overflow: 'visible',
           }}
-          textareaClassName="focus:outline-none"
+          textareaClassName="focus:outline-none leading-[24px] m-0 p-0"
         />
-        {/* Placeholder-like overlay if empty (optional, but editor handles placeholder poorly natively) */}
+
         {!code && (
-           <div className="absolute top-3 left-3 text-slate-300 font-mono text-sm pointer-events-none">
-             // Type or paste your code here...
-           </div>
+          <div className="absolute top-0 left-0 text-slate-300 font-mono text-[13px] leading-[24px] pointer-events-none">
+            // Type or paste your code here...
+          </div>
         )}
       </div>
     </div>

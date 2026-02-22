@@ -57,7 +57,7 @@ export default function PdfScrollTest() {
   const [currentPage, setCurrentPage] = useState(1);
   const pdfData = useMemo(() => createE2EPdfData(14), []);
   const pdfBlobUrl = useMemo(
-    () => URL.createObjectURL(new Blob([pdfData], { type: 'application/pdf' })),
+    () => URL.createObjectURL(new Blob([pdfData as any], { type: 'application/pdf' })),
     [pdfData]
   );
 

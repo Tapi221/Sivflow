@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useUserSettings } from '@/hooks/useUserSettings';
+import { useTheme } from '@/contexts/ThemeContext';
 
 // Helper to convert hex to RGB object
 const hexToRgb = (hex: string) => {
@@ -44,7 +45,12 @@ const generatePalette = (baseHex: string) => {
 
 export function ThemeManager() {
   const { settings } = useUserSettings();
+  const { setTheme } = useTheme();
   const accentColor = settings?.accentColor || '#689A98'; // Default fallback
+
+  useEffect(() => {
+    setTheme('light');
+  }, [setTheme]);
 
   useEffect(() => {
     const root = document.documentElement;

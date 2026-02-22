@@ -15,12 +15,15 @@ import type { SyncContextSource } from '../types/telemetry';
  * Feature Flagに基づいて、適切なSyncServiceのインスタンスを生成・返却する
  */
 export class SyncServiceFactory {
-  private static instance: ISyncService | null = null;
+  private static instances = new Map<string, ISyncService>();
 
-  public static async getInstance(userId: string): Promise<any> {
-    if (SyncServiceFactory.instance) {
-      return SyncServiceFactory.instance;
+  public static async getInstance(userId: string): Promise<ISyncService> {
+    const existing = SyncServiceFactory.instances.get(userId);
+    if (existing) {
+      return existing;
     }
+
+    let instance: ISyncService;
 
     if (flags.isEnabled('USE_SYNC_V2')) {
       console.log('[SyncServiceFactory] Initializing SyncService V2');
@@ -42,7 +45,7 @@ export class SyncServiceFactory {
         });
       }
 
-      SyncServiceFactory.instance = new SyncServiceV2(
+      instance = new SyncServiceV2(
         userId,
         db,
         queueManager,
@@ -54,9 +57,18 @@ export class SyncServiceFactory {
     } else {
       console.log('[SyncServiceFactory] Initializing Legacy SyncService');
       const db = await getLocalDb(userId);
-      SyncServiceFactory.instance = new SyncService(userId, db) as any;
+      instance = new SyncService(userId, db);
     }
 
-    return SyncServiceFactory.instance;
+    SyncServiceFactory.instances.set(userId, instance);
+    return instance;
+  }
+
+  public static resetInstance(userId?: string): void {
+    if (userId) {
+      SyncServiceFactory.instances.delete(userId);
+      return;
+    }
+    SyncServiceFactory.instances.clear();
   }
 }

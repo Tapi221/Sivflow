@@ -58,6 +58,11 @@ function extractBlockTexts(blocks: any[]): { field: MatchField; text: string }[]
           results.push({ field: 'question', text: block.content });
         }
         break;
+      case 'markdown':
+        if (block.markdown?.trim()) {
+          results.push({ field: 'question', text: block.markdown });
+        }
+        break;
       case 'code':
         if (block.code?.code?.trim()) {
           results.push({ field: 'code', text: block.code.code });

@@ -8,7 +8,7 @@ import { Badge } from '@/Components/ui/badge';
 import { Skeleton } from '@/Components/ui/skeleton';
 import { 
   ArrowLeft, 
-  Bookmark,
+  Star,
   Check, 
   Folder 
 } from 'lucide-react';
@@ -108,7 +108,7 @@ export default function BookmarkMode() {
   const isLoading = cardsLoading || foldersLoading;
   
   return (
-    <div className="min-h-screen bg-[#F8FAFB] text-slate-800 font-sans selection:bg-teal-100 selection:text-teal-900 overflow-x-hidden">
+    <div className="min-h-screen bg-[#F8FAFB] text-slate-800 font-serif selection:bg-teal-100 selection:text-teal-900 overflow-x-hidden">
       <div className="max-w-[1400px] mx-auto p-6 md:p-14">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
@@ -122,7 +122,7 @@ export default function BookmarkMode() {
           </Button>
           <div className="flex items-center gap-3">
              <div className="w-10 h-10 rounded-full bg-primary-50 flex items-center justify-center text-primary-600">
-                <Bookmark className="w-6 h-6" />
+                <Star className="w-6 h-6" />
              </div>
              <div>
                 <h1 className="text-2xl font-extrabold text-[#334155] tracking-tight">ブックマークモード</h1>

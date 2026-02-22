@@ -2,7 +2,8 @@
  * FavoritesPanel - ピン留め一覧表示コンポーネント
  */
 import React, { useMemo } from 'react';
-import { Folder, FileText, Bookmark, X } from 'lucide-react';
+import { Folder, BookOpen, X } from 'lucide-react';
+import Star from 'lucide-react/dist/esm/icons/star';
 import { cn } from '@/lib/utils';
 import type { FavoriteItem } from '@/hooks/useExplorerStore';
 import type { Card, DocumentItem, SelectedExplorerItem } from '@/types';
@@ -62,7 +63,7 @@ export function FavoritesPanel({
       return {
         name: card?.title || '無題のカード',
         path: cardFolder ? (cardFolder.folderName || cardFolder.folder_name) : '',
-        icon: FileText,
+        icon: BookOpen,
       };
     }
   };
@@ -80,7 +81,7 @@ export function FavoritesPanel({
   if (validFavorites.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full py-12 text-slate-400">
-        <Bookmark className="w-10 h-10 mb-3 opacity-30" />
+        <Star className="w-10 h-10 mb-3 opacity-30" />
         <p className="text-sm font-medium">お気に入りがありません</p>
         <p className="text-xs mt-1">フォルダやカードを右クリックして追加</p>
       </div>
@@ -96,12 +97,12 @@ export function FavoritesPanel({
         return (
           <div
             key={`${item.type}:${item.id}`}
-            className="group flex items-center gap-2 px-3 py-1.5 hover:bg-slate-100 cursor-pointer transition-colors"
+            className="group flex items-center gap-2 px-3 py-1.5 hover:bg-primary-50/50 cursor-pointer transition-colors"
             onClick={() => handleClick(item)}
           >
             <Icon className={cn(
               "w-4 h-4 shrink-0",
-              item.type === 'folder' ? "text-amber-500" : "text-slate-400"
+              item.type === 'folder' ? "text-[#E8A858]" : "text-slate-400"
             )} />
             <div className="flex-1 min-w-0">
               <div className="text-sm font-medium text-slate-700 truncate">

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { ShieldAlert } from 'lucide-react';
+import { Shield } from 'lucide-react'; // IDE Check: Shield icon
 // CSSはApp.tsx等でグローバル定義するか、インラインでシンプルに実装
 
 export const AccountLockedScreen: React.FC = () => {
@@ -31,7 +31,7 @@ export const AccountLockedScreen: React.FC = () => {
         borderRadius: '50%',
         marginBottom: '2rem'
       }}>
-        <ShieldAlert size={64} color="#fff" />
+        <Shield size={64} color="#fff" />
       </div>
       
       <h1 style={{ marginBottom: '1rem', fontSize: '2rem' }}>Account Locked</h1>

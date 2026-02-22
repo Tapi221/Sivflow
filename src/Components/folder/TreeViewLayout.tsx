@@ -1,21 +1,22 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { FolderTreeWithCards } from './FolderTreeWithCards';
 import { RightPane } from './RightPane';
 import { ExplorerTabs } from '../explorer/ExplorerTabs';
 import { FavoritesPanel } from '../explorer/FavoritesPanel';
 import { RecentPanel } from '../explorer/RecentPanel';
-import { InboxPanel } from '../explorer/InboxPanel';
 import { cn } from '@/lib/utils';
 import { useFolders } from '@/hooks/useFolders';
 import { useDocuments } from '@/hooks/useDocuments';
-import { Folder, FileText, Bookmark, Clock, Inbox, Filter } from 'lucide-react';
+import { createPageUrl } from '@/utils';
+import { useUserSettings } from '@/hooks/useUserSettings';
+import { useTags } from '@/hooks/useTags';
+import { TagBadge } from '@/Components/tag/TagBadge';
 import type { Card, DocumentItem, SelectedExplorerItem } from '@/types';
 import { useCards } from '@/hooks/useCards';
 import { useExplorerStore } from '@/hooks/useExplorerStore';
-import { X } from 'lucide-react';
-import { createPageUrl } from '@/utils';
-import { useUserSettings } from '@/hooks/useUserSettings';
+
 
 interface TreeViewLayoutProps {
   folders: any[];
@@ -69,6 +70,7 @@ function TreeViewLayout({
   const { createFolder, updateFolder, deleteFolder } = useFolders();
   const { createCard, updateCard, deleteCard, moveCardToFolder, reorderCards } = useCards();
   const { updateDocument } = useDocuments();
+  const { getTagColor } = useTags();
 
   const {
     explorerTab,
@@ -85,6 +87,12 @@ function TreeViewLayout({
     tagMatchMode,
   } = useExplorerStore();
 
+  useEffect(() => {
+    if (explorerTab === 'inbox') {
+      setExplorerTab('explorer');
+    }
+  }, [explorerTab, setExplorerTab]);
+
   const [sidebarWidth, setSidebarWidth] = useState(() => {
     if (typeof window === 'undefined') return DEFAULT_SIDEBAR_W;
     const saved = localStorage.getItem('ui.sidebarWidth');
@@ -96,9 +104,16 @@ function TreeViewLayout({
     const saved = localStorage.getItem('ui.sidebarOpen');
     return saved !== null ? saved === 'true' : true;
   });
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  );
 
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
+  const contentScrollRef = useRef<HTMLDivElement>(null);
+
+  // モバイルでのスクロールに応じたExplorerTabsの縮小 (廃止: 常に表示)
+  // const isTabsCompact = useHeaderCompact(32, 8, contentScrollRef);
 
   const resizingRef = useRef(false);
   const startXRef = useRef(0);
@@ -110,6 +125,7 @@ function TreeViewLayout({
 
   const applyWidthDom = useCallback(
     (w: number) => {
+      if (isMobile) return;
       pendingWRef.current = clamp(w);
 
       if (rafIdRef.current != null) return;
@@ -117,33 +133,49 @@ function TreeViewLayout({
         rafIdRef.current = null;
         const el = sidebarRef.current;
         if (!el) return;
+        // モバイルでない場合のみ幅を適用したいが、JSでは判定が難しいのでCSSに任せるのが理想だが
+        // ここでは applyWidthDom が desktop でしか呼ばれない前提（リサイズハンドルがないため）で動く。
         el.style.width = isSidebarOpen ? `${pendingWRef.current}px` : '0px';
       });
     },
-    [isSidebarOpen]
+    [isMobile, isSidebarOpen]
   );
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 768);
+    onResize();
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   useEffect(() => {
     const el = sidebarRef.current;
     if (!el) return;
-    el.style.width = isSidebarOpen ? `${sidebarWidth}px` : '0px';
+    if (!isMobile) {
+      el.style.width = isSidebarOpen ? `${sidebarWidth}px` : '0px';
+    } else {
+      // モバイル時は常に画面幅優先。desktop時のinline widthを完全に破棄する。
+      el.style.width = '';
+    }
     pendingWRef.current = sidebarWidth;
-  }, [sidebarWidth, isSidebarOpen]);
+  }, [isMobile, sidebarWidth, isSidebarOpen]);
+
+  const showMobileDetail = isMobile && Boolean(selectedFolderId || selectedCardId || selectedDocumentId);
 
   const handleCardSelectWithRecent = (cardId: string) => {
     onItemSelect({ type: 'card', id: cardId });
-    addRecent({ type: 'card', id: cardId, ts: Date.now() });
+    addRecent({ type: 'card', id: cardId });
   };
 
   const handleDocumentSelectWithRecent = (docId: string) => {
     onItemSelect({ type: 'document', id: docId });
-    addRecent({ type: 'pdf' as any, id: docId, ts: Date.now() });
+    addRecent({ type: 'pdf' as any, id: docId });
   };
 
   const handleFolderSelectWithRecent = (folderId: string | null) => {
     onFolderSelect(folderId);
     if (folderId) {
-      addRecent({ type: 'folder', id: folderId, ts: Date.now() });
+      addRecent({ type: 'folder', id: folderId });
     }
   };
 
@@ -221,19 +253,27 @@ function TreeViewLayout({
     navigate(createPageUrl(`StudyMode?folderId=${selectedFolderId}`));
   }, [navigate, selectedFolderId]);
 
-  const handleCreateCardQuick = useCallback(() => {
+  const handleViewCards = useCallback(() => {
     if (!selectedFolderId) return;
-    navigate(createPageUrl(`CardEdit?folderId=${selectedFolderId}`));
+    navigate(createPageUrl(`CardView?folderId=${selectedFolderId}`));
   }, [navigate, selectedFolderId]);
+
+  const handleCreateCardQuick = useCallback(async () => {
+    if (!selectedFolderId) return;
+    try {
+      const createdCard = await createCard({ folderId: selectedFolderId, title: '' });
+      const createdCardId = createdCard?.id ?? createdCard?.cardId ?? null;
+      if (!createdCardId) return;
+      handleCardSelectWithRecent(createdCardId);
+    } catch (error) {
+      console.error('[TreeViewLayout] Failed to create card from dashboard action:', error);
+    }
+  }, [createCard, handleCardSelectWithRecent, selectedFolderId]);
 
   const handleBulkCreate = useCallback(() => {
     if (!selectedFolderId) return;
-    navigate(createPageUrl(`FolderView?id=${selectedFolderId}&openCreationMode=1`));
+    navigate(createPageUrl(`CardEdit?folderId=${selectedFolderId}&mode=continuous`));
   }, [navigate, selectedFolderId]);
-
-  const recentFolderIds = useMemo(() => {
-    return recent.filter((r) => r.type === 'folder').map((r) => r.id).slice(0, 5);
-  }, [recent]);
 
   const allTags = useMemo(() => {
     const tags = new Set<string>();
@@ -241,7 +281,15 @@ function TreeViewLayout({
     return Array.from(tags).sort();
   }, [cards]);
 
-  const isFilterTargetTab = explorerTab === 'explorer' || explorerTab === 'inbox';
+  const handleCreateRootFolder = useCallback(async () => {
+    try {
+      await createFolder('新規フォルダ');
+    } catch (error) {
+      console.error('[TreeViewLayout] Failed to create root folder from tabs:', error);
+    }
+  }, [createFolder]);
+
+  const isFilterTargetTab = explorerTab === 'explorer';
   const isFilterActive = isFilterTargetTab && tagFilter.length > 0;
 
   const { filteredCards, isFiltering } = useMemo(() => {
@@ -289,28 +337,18 @@ function TreeViewLayout({
           </button>
         </div>
 
-        {/* ここが“デカすぎ問題”の修正ポイント */}
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-1.5">
           {tagFilter.map((tag) => (
-            <span
+            <TagBadge
               key={tag}
-              className={cn(
-                "inline-flex items-center max-w-full",
-                "px-1.5 py-0.5 rounded-full text-[11px] leading-4",
-                "bg-primary-100 text-primary-700 border border-primary-200"
-              )}
-              title={`#${tag}`}
-            >
-              <span className="truncate max-w-[140px]">#{tag}</span>
-              <button
-                type="button"
-                aria-label={`${tag}を削除`}
-                onClick={() => toggleTag(tag)}
-                className="ml-1 grid place-items-center rounded-full text-primary-600 hover:text-primary-800 hover:bg-primary-200/60 w-4 h-4 transition-colors"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </span>
+              label={tag}
+              size="sm"
+              colorClass={getTagColor(tag)}
+              className="max-w-[180px]"
+              title={tag}
+              onRemove={() => toggleTag(tag)}
+              removeAriaLabel={`${tag}を削除`}
+            />
           ))}
         </div>
 
@@ -421,25 +459,26 @@ function TreeViewLayout({
             cards={cards}
             documents={documents}
             onFolderSelect={handleFolderSelectWithRecent}
-            onCardSelect={handleCardSelectWithRecent}
-            onDocumentSelect={handleDocumentSelectWithRecent}
+            onItemSelect={onItemSelect}
             onClearRecent={clearRecent}
           />
         );
-      case 'inbox':
+      case 'trash':
         return (
-          <InboxPanel
-            cards={filteredCards}
-            folders={folders}
-            onCardSelect={handleCardSelectWithRecent}
-            onMoveCard={moveCardToFolder}
-            recentFolderIds={recentFolderIds}
-          />
+          <div className="p-4">
+            <button
+              type="button"
+              onClick={() => navigate(createPageUrl('Trash'))}
+              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              ごみ箱を開く
+            </button>
+          </div>
         );
       case 'explorer':
       default:
         return (
-          <div className="hidden md:block">
+          <div className="block">
             <FolderTreeWithCards
               folders={folders}
               cards={filteredCards}
@@ -466,37 +505,65 @@ function TreeViewLayout({
     }
   };
 
-  // NOTE:
-  // 100dvh から固定オフセットを引くのは、Folders ページの上部固定領域
-  // （ヘッダカード + 余白 + モバイル/デスクトップ差分）を差し引いて
-  // 作業ペイン全体を 1 つのビューポートに収めるため。
-  // 将来的には上位レイアウトの `h-screen + flex` へ移行し、この calc 依存を減らす。
   return (
     <div
       className={cn(
-        "flex min-h-0 h-[calc(100dvh-288px)] md:h-[calc(100dvh-152px)] items-stretch border border-slate-200 rounded-xl shadow-sm bg-white overflow-hidden relative",
+        "flex min-h-0 h-[100dvh] md:h-full items-stretch border-0 md:border-r md:border-slate-200 bg-transparent md:bg-white overflow-hidden relative",
         isResizing && "select-none cursor-col-resize"
       )}
     >
       <div
         ref={sidebarRef}
         className={cn(
-          "shrink-0 flex flex-col bg-white border-r border-slate-200 relative group/sidebar select-none overflow-hidden will-change-[width]",
+          "shrink-0 flex-col bg-[#F8FAFB] md:bg-[#F8FAFB] border-r-0 md:border-r border-sidebar-border relative group/sidebar select-none overflow-hidden will-change-[width] font-serif",
+          showMobileDetail ? "hidden md:flex" : "flex",
+          "md:ring-1 md:ring-black/5 md:shadow-[inset_0_1px_0_rgba(255,255,255,0.75),inset_-1px_0_0_rgba(255,255,255,0.5),10px_0_24px_-20px_rgba(15,23,42,0.35)]",
           isResizing ? "transition-none" : "transition-all duration-300 ease-in-out",
-          !isSidebarOpen && "w-0 border-r-0 overflow-hidden"
+          "w-[100dvw] max-w-[100dvw] md:w-auto md:max-w-none",
+          !isSidebarOpen && "md:w-0 md:border-r-0 md:overflow-hidden"
         )}
-        style={{ width: isSidebarOpen ? `${sidebarWidth}px` : '0px' }}
       >
-        <ExplorerTabs activeTab={explorerTab} onTabChange={setExplorerTab} allTags={allTags} />
+        <div className={cn(
+            "flex flex-col h-full w-full font-serif",
+             "bg-[#F8FAFB] md:bg-[#F8FAFB]"
+        )}>
+            {/* ExplorerTabs: 常にSticky表示 */}
+            <div 
+              className={cn(
+                "sticky top-0 z-10 bg-[#F8FAFB] md:bg-[#F8FAFB]",
+                "transition-all duration-200 ease-out",
+                "motion-reduce:transition-none",
+                // "md:relative" // デスクトップでもStickyで良いが、元々 relative だったなら戻しても良い。
+                // 今回はモバイルでの Sticky 化が主眼。
+                // 元のコードでは md:relative だったのでそれは維持しつつ、
+                // モバイルでの hidden/max-h-0 を削除する。
+                "md:relative"
+              )}
+            >
+              <ExplorerTabs
+                activeTab={explorerTab}
+                onTabChange={setExplorerTab}
+                allTags={allTags}
+                onCreateRootFolder={handleCreateRootFolder}
+                showExplorerActions={explorerTab === 'explorer'}
+              />
+            </div>
 
-        {renderFilterChips()}
+            {renderFilterChips()}
 
-        <div className="flex-1 overflow-y-auto outline-none min-w-[200px]">{renderTabContent()}</div>
+            <div 
+              ref={contentScrollRef}
+              className="flex-1 overflow-y-auto outline-none min-w-0"
+            >
+              {renderTabContent()}
+            </div>
+        </div>
 
+        {/* リサイズハンドル: デスクトップのみ表示 */}
         {isSidebarOpen && (
           <div
             className={cn(
-              "absolute top-0 right-0 w-1.5 h-full cursor-col-resize z-50 hover:bg-primary-600/10 transition-colors",
+              "hidden md:block absolute top-0 right-0 w-1.5 h-full cursor-col-resize z-50 hover:bg-primary-600/10 transition-colors",
               isResizing && "bg-primary-600/20"
             )}
             onPointerDown={startResizing}
@@ -515,7 +582,27 @@ function TreeViewLayout({
         )}
       </div>
 
-      <div className="flex-1 min-h-0 min-w-0 bg-white flex flex-col overflow-hidden">
+      {/* 右ペイン: モバイルでは非表示 */}
+      <div className={cn(
+        "flex-1 min-h-0 min-w-0 bg-white flex-col overflow-hidden",
+        showMobileDetail ? "flex" : "hidden md:flex"
+      )}>
+        {isMobile && showMobileDetail && (
+          <div className="shrink-0 flex items-center gap-2 px-3 py-2 border-b border-slate-100 bg-white">
+            <button
+              type="button"
+              onClick={() => {
+                onItemSelect(null);
+                onFolderSelect(null);
+              }}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50"
+              aria-label="一覧に戻る"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </button>
+            <span className="text-sm font-semibold text-slate-700">フォルダ</span>
+          </div>
+        )}
         <RightPane
           selectedCardId={selectedCardId}
           selectedDocument={selectedDocument}
@@ -527,6 +614,7 @@ function TreeViewLayout({
           onDocumentUpdated={updateDocument}
           handlers={{
             onStartStudy: handleStartStudy,
+            onViewCards: handleViewCards,
             onCreateCard: handleCreateCardQuick,
             onBulkCreate: handleBulkCreate,
           }}

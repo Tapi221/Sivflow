@@ -134,20 +134,26 @@ export default function CardEditor({
   const [isRestored, setIsRestored] = useState(false);
 
   useEffect(() => {
-    // Attempt to restore draft on mount
-    if (!storage) return;
-    const savedDraft = storage.getItem(draftKey);
-    if (savedDraft) {
-      try {
-        const parsed = JSON.parse(savedDraft);
-        setFormData(prev => ({ ...prev, ...parsed }));
-        setIsRestored(true);
-        // Clear restoration message after 5 seconds
-        setTimeout(() => setIsRestored(false), 5000);
-      } catch (e) {
-        console.error('Failed to parse draft:', e);
+    // ドラフト復元を試みる（storage が使用可能な場合のみ）
+    if (storage) {
+      const savedDraft = storage.getItem(draftKey);
+      if (savedDraft) {
+        try {
+          const parsed = JSON.parse(savedDraft);
+          setFormData(prev => ({ ...prev, ...parsed }));
+          setIsRestored(true);
+          // 5秒後に復元メッセージを消す
+          setTimeout(() => setIsRestored(false), 5000);
+          return; // ドラフト復元成功時はカードデータで上書きしない
+        } catch (e) {
+          console.error('Failed to parse draft:', e);
+        }
       }
-    } else if (card) {
+    }
+
+    // ドラフトがない場合、または storage が null (storageType="none") の場合
+    if (card) {
+      // 既存カードのデータを反映
       setFormData({
         title: card.title || '',
         folderId: card.folderId || folderId || '',
@@ -169,39 +175,38 @@ export default function CardEditor({
         isBookmarked: card.isBookmarked ?? card.is_bookmarked ?? false,
       });
     } else {
-        // Initial state for new card
-        if (mode === 'pair') {
-            const questionBlocks = Array.from({ length: 2 }).map((_, i) => ({
-                id: `question-text-${nanoid()}`, type: 'text', content: '', orderIndex: i
-            }));
-            const answerBlocks = Array.from({ length: 2 }).map((_, i) => ({
-                id: `answer-text-${nanoid()}`, type: 'text', content: '', orderIndex: i
-            }));
-            
-            setFormData(prev => ({
-                ...prev,
-                folderId: folderId || '',
-                questionBlocks,
-                answerBlocks
-            }));
-        } else {
-            setFormData(prev => ({
-                ...prev,
-                folderId: folderId || '',
-                questionBlocks: defaultToTextBlock ? [{
-                    id: `question-text-${nanoid()}`,
-                    type: 'text',
-                    content: '',
-                    orderIndex: 0
-                }] : [],
-                answerBlocks: defaultToTextBlock ? [{
-                    id: `answer-text-${nanoid()}`,
-                    type: 'text',
-                    content: '',
-                    orderIndex: 0
-                }] : [],
-            }));
-        }
+      // 新規カードの初期状態を設定
+      if (mode === 'pair') {
+        const questionBlocks = Array.from({ length: 2 }).map((_, i) => ({
+          id: `question-text-${nanoid()}`, type: 'text', content: '', orderIndex: i
+        }));
+        const answerBlocks = Array.from({ length: 2 }).map((_, i) => ({
+          id: `answer-text-${nanoid()}`, type: 'text', content: '', orderIndex: i
+        }));
+        setFormData(prev => ({
+          ...prev,
+          folderId: folderId || '',
+          questionBlocks,
+          answerBlocks
+        }));
+      } else {
+        setFormData(prev => ({
+          ...prev,
+          folderId: folderId || '',
+          questionBlocks: defaultToTextBlock ? [{
+            id: `question-text-${nanoid()}`,
+            type: 'text',
+            content: '',
+            orderIndex: 0
+          }] : [],
+          answerBlocks: defaultToTextBlock ? [{
+            id: `answer-text-${nanoid()}`,
+            type: 'text',
+            content: '',
+            orderIndex: 0
+          }] : [],
+        }));
+      }
     }
   }, [card, folderId, draftKey, defaultToTextBlock, mode, storage]);
 

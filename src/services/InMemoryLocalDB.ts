@@ -437,6 +437,7 @@ const ENTITY_MAP: Record<string, SyncQueueItem['entity']> = {
 
 export class InMemoryLocalDB {
   public readonly name: string;
+  public version: number = 0; // Add version as well just in case
   public readonly isInMemoryFallback = true;
   public userId?: string;
 
@@ -522,12 +523,15 @@ export class InMemoryLocalDB {
   }
 
   async delete(): Promise<void> {
-    await Promise.all(this.tables.map((table) => table.clear()));
+    // Simulate DB deletion (clearing in-memory state)
+    this.version = 0;
+    this.tables.forEach(t => t.clear());
     this.opened = false;
+    return Promise.resolve();
   }
 
-  async transaction(_mode: string, _tables: any[], callback: () => Promise<any>): Promise<any> {
-    return callback();
+  async transaction<T>(mode: string, tables: string | string[], scope: () => Promise<T> | T): Promise<T> {
+    return await scope();
   }
 
   async getItem(tableName: string, id: string): Promise<any> {

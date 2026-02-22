@@ -5,7 +5,7 @@ import { assertImageArrayInvariant } from '../utils/imageAssertions';
 import { deleteDocumentBlob, deleteDocumentBlobsByUser } from './documentFileStore';
 import { removeDocumentBlobUrl } from './documentBlobUrlSessionCache';
 import { InMemoryLocalDB } from './InMemoryLocalDB';
-import Dexie from 'dexie';
+import { Dexie, type PromiseExtended } from 'dexie';
 import { nanoid } from 'nanoid';
 import { Timestamp } from 'firebase/firestore';
 import {
@@ -277,6 +277,14 @@ export class LocalDB extends Dexie {
 
   // Public userId for global access
   public userId?: string;
+
+  /**
+   * Explicitly implement transaction to satisfy LocalDBLike interface and inconsistent Dexie types.
+   */
+  transaction<U>(mode: string, ...args: any[]): PromiseExtended<U> {
+    // Cast to any to avoid Dexie type mismatch issues in strict environments
+    return (super.transaction as any)(mode, ...args);
+  }
 
   /**
    * ブラウザ内の全データベースを列挙します
@@ -901,7 +909,11 @@ export class LocalDB extends Dexie {
         // カードを既に持っているフォルダを優先
         const folderCardCounts = recoveredFolders.map(f => ({
             folder: f,
-            count: allCards.filter(c => ((c as any).folderId || (c as any).folder_id) === f.id).length
+            count: allCards.filter(c => {
+              const cardFolderId = (c as any).folderId || (c as any).folder_id;
+              const cardIsDeleted = Boolean((c as any).isDeleted ?? (c as any).is_deleted ?? (c as any).deleted);
+              return cardFolderId === f.id && !cardIsDeleted;
+            }).length
         }));
         
         const folderWithCards = folderCardCounts.sort((a, b) => b.count - a.count)[0];
@@ -952,7 +964,7 @@ export class LocalDB extends Dexie {
       }
       let changed = false;
 
-      // ID/ユーザー/削除フラグの強制 (以前の aggressive rescue ロジック)
+      // ID/ユーザー/削除フラグの整合性補正
       if (!update.id) {
           update.id = update.cardId || update.card_id || crypto.randomUUID();
           changed = true;
@@ -961,8 +973,9 @@ export class LocalDB extends Dexie {
         update.userId = currentUserId;
         changed = true;
       }
-      if (update.isDeleted !== false) {
-        update.isDeleted = false;
+      const isActuallyDeleted = Boolean(update.isDeleted ?? update.is_deleted ?? update.deleted);
+      if (update.isDeleted !== isActuallyDeleted) {
+        update.isDeleted = isActuallyDeleted;
         changed = true;
       }
       if (update.is_deleted !== undefined) { delete update.is_deleted; changed = true; }
@@ -992,42 +1005,44 @@ export class LocalDB extends Dexie {
         // but this log helps diagnose "unmeasured" stats issues.
       }
 
-      // Content Hydration (コンテンツの中身を復元)
-      // UIが参照する questionText / answerText が空の場合、rawデータから復元を試みる
-      // Note: normalizeCard と同じロジックを適用
-      // Dexie上のデータが「正規化後(中身空)」の状態でも、もし raw fields が残っていればここで抽出して復活させる
-      if (!update.questionText || update.questionText === '') {
-          const extractedQ = 
-              update.questionText ?? update.question_text ?? 
-              update.front ?? update.question ?? update.q ?? 
-              update.fields?.Front ?? update.fields?.Question ??
-              update._rescueRaw?.fields?.Front ??
-              update._rescueRaw?.question ??
-              '';
-          
-          if (extractedQ) {
-              console.log(`[Hydration] Recovered question for card ${update.id}: ${extractedQ.substring(0, 20)}...`);
-              update.questionText = extractedQ;
-              changed = true;
-          }
-      }
-      if (!update.answerText || update.answerText === '') {
-          const extractedA = 
-              update.answerText ?? update.answer_text ?? 
-              update.back ?? update.answer ?? update.a ?? 
-              update.fields?.Back ?? update.fields?.Answer ??
-              update._rescueRaw?.fields?.Back ??
-              update._rescueRaw?.answer ??
-              '';
-              
-          if (extractedA) {
-              update.answerText = extractedA;
-              changed = true;
-          }
+      if (!isActuallyDeleted) {
+        // Content Hydration (コンテンツの中身を復元)
+        // UIが参照する questionText / answerText が空の場合、rawデータから復元を試みる
+        // Note: normalizeCard と同じロジックを適用
+        // Dexie上のデータが「正規化後(中身空)」の状態でも、もし raw fields が残っていればここで抽出して復活させる
+        if (!update.questionText || update.questionText === '') {
+            const extractedQ = 
+                update.questionText ?? update.question_text ?? 
+                update.front ?? update.question ?? update.q ?? 
+                update.fields?.Front ?? update.fields?.Question ??
+                update._rescueRaw?.fields?.Front ??
+                update._rescueRaw?.question ??
+                '';
+            
+            if (extractedQ) {
+                console.log(`[Hydration] Recovered question for card ${update.id}: ${extractedQ.substring(0, 20)}...`);
+                update.questionText = extractedQ;
+                changed = true;
+            }
+        }
+        if (!update.answerText || update.answerText === '') {
+            const extractedA = 
+                update.answerText ?? update.answer_text ?? 
+                update.back ?? update.answer ?? update.a ?? 
+                update.fields?.Back ?? update.fields?.Answer ??
+                update._rescueRaw?.fields?.Back ??
+                update._rescueRaw?.answer ??
+                '';
+                
+            if (extractedA) {
+                update.answerText = extractedA;
+                changed = true;
+            }
+        }
       }
 
       // 正規フォルダ ID に結びつける
-      if (canonicalId && update.folderId !== canonicalId) {
+      if (canonicalId && !isActuallyDeleted && update.folderId !== canonicalId) {
           update.folderId = canonicalId;
           changed = true;
       }
@@ -1518,10 +1533,25 @@ export class LocalDB extends Dexie {
     try {
       const id = await (this as any).table(table).add(payload);
       // Immediately verify the saved record is readable from THIS instance.
+      // Sometimes IndexedDB visibility can lag in edge cases; retry a few times before failing.
       try {
-        const saved = await (this as any).table(table).get(payload.id || id);
+        const maxVerifyAttempts = 4;
+        let saved: any = null;
+        for (let attempt = 1; attempt <= maxVerifyAttempts; attempt++) {
+          try {
+            saved = await (this as any).table(table).get(payload.id || id);
+          } catch (e) {
+            saved = null;
+          }
+
+          if (saved) break;
+
+          // small backoff between attempts
+          await new Promise((res) => setTimeout(res, 35 * attempt));
+        }
+
         if (!saved) {
-          console.error('[LocalDB] addItem verification failed: write succeeded but read returned null', { table, id: payload.id || id, instanceName: this.name });
+          console.error('[LocalDB] addItem verification failed after retries: write succeeded but read returned null', { table, id: payload.id || id, instanceName: this.name });
           throw new Error('DB instance mismatch: write succeeded but read failed');
         }
       } catch (verifyErr) {
@@ -1840,14 +1870,15 @@ export class LocalDB extends Dexie {
     // documents.localFileId は端末ローカル専用のため同期対象にしない。
     if (tableName === 'documents') return;
 
-    const syncableTables = ['cards', 'folders', 'cardRelations', 'projectMaps'];
+    const syncableTables = ['cards', 'folders', 'cardRelations', 'projectMaps', 'userSettings'];
     if (!syncableTables.includes(tableName)) return;
 
     const entityNameMap: Record<string, string> = {
       cards: 'card',
       folders: 'folder',
       cardRelations: 'cardRelation',
-      projectMaps: 'projectMap'
+      projectMaps: 'projectMap',
+      userSettings: 'userSetting'
     };
 
     // 既に同じIDのタスクが pending で存在する場合は上書きを検討すべきだが、
@@ -2364,3 +2395,4 @@ if (typeof window !== 'undefined') {
     rawDB: async () => await getLocalDb()
   };
 }
+

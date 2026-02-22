@@ -75,14 +75,14 @@ export function ImageGallery({ urls, onFullscreenChange }: ImageGalleryProps) {
 
   return (
     <>
-      <div className="grid gap-2 mt-3 w-full">
+      <div className="mt-3 image-full-width">
         {urls.map((url, index) => (
            !failedImages.has(index) ? (
             <img
                 key={index}
                 src={url}
                 alt={`Image ${index + 1}`}
-                className="w-full rounded-lg cursor-pointer hover:opacity-90 transition-opacity object-contain bg-slate-50 min-h-[200px] max-h-[500px]"
+                className="block w-full h-auto cursor-pointer hover:opacity-90 transition-opacity bg-slate-50"
                 onClick={(e) => {
                 e.stopPropagation();
                 setFullscreenIndex(index);
@@ -91,7 +91,7 @@ export function ImageGallery({ urls, onFullscreenChange }: ImageGalleryProps) {
                 onError={() => handleImageError(index)}
             />
            ) : (
-             <div key={index} className="w-full h-48 bg-slate-100 rounded-lg flex items-center justify-center text-slate-400 flex-col gap-2">
+             <div key={index} className="w-full h-48 bg-slate-100 flex items-center justify-center text-slate-400 flex-col gap-2">
                <ImageIcon className="w-8 h-8 text-slate-300" />
                <span className="text-xs">画像の読み込みに失敗しました</span>
              </div>

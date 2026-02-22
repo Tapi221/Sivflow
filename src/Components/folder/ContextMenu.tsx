@@ -1,5 +1,6 @@
-import React from 'react';
-import { Plus, Pencil, Trash2, Folder, ArrowRight, Bookmark } from 'lucide-react';
+import { Plus, Pencil, Trash2, Folder, ArrowRight } from 'lucide-react';
+import Pin from 'lucide-react/dist/esm/icons/pin';
+// Note: If IDE still reports Star as missing, we verify that npm run typecheck passes.
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,12 +43,12 @@ export function ContextMenu({
           <>
             {onCreateSubfolder && (
               <DropdownMenuItem onClick={onCreateSubfolder} className="gap-2">
-                <Folder className="w-4 h-4" /> 新規フォルダ（このフォルダ内）
+                <Folder className="w-4 h-4" /> 新規フォルダ
               </DropdownMenuItem>
             )}
             {onCreateCard && (
               <DropdownMenuItem onClick={onCreateCard} className="gap-2">
-                <Plus className="w-4 h-4 text-blue-500" /> 新規カード（このフォルダ内）
+                <Plus className="w-4 h-4 text-blue-500" /> 新規カード
               </DropdownMenuItem>
             )}
             {(onCreateSubfolder || onCreateCard) && <DropdownMenuSeparator />}
@@ -57,8 +58,8 @@ export function ContextMenu({
         {/* ピン留め / ピン解除 */}
         {onTogglePin && (
           <DropdownMenuItem onClick={onTogglePin} className="gap-2">
-            <Bookmark className={`w-4 h-4 ${isPinned ? 'fill-amber-400 text-amber-500' : ''}`} />
-            {isPinned ? 'お気に入りから削除' : 'お気に入りに追加'}
+            <Pin className={`w-4 h-4 ${isPinned ? 'text-amber-500' : ''}`} />
+            {isPinned ? 'ピン留め解除' : 'ピン留め'}
           </DropdownMenuItem>
         )}
         

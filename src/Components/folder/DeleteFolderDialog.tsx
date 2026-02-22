@@ -11,6 +11,15 @@ import {
 } from '@/Components/ui/alert-dialog';
 import { AlertTriangle } from 'lucide-react';
 
+interface DeleteFolderDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  folder: any; // Using any for now as folder type might be complex or imported from elsewhere. Ideally should use Folder type.
+  cardCount: number;
+  subfolderCount: number;
+  onConfirm: (folder: any) => Promise<void>;
+}
+
 export default function DeleteFolderDialog({ 
   open, 
   onOpenChange, 
@@ -18,8 +27,9 @@ export default function DeleteFolderDialog({
   cardCount,
   subfolderCount,
   onConfirm 
-}) {
+}: DeleteFolderDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const actionButtonRef = React.useRef<HTMLButtonElement | null>(null);
   
   const handleConfirm = async () => {
     setIsLoading(true);
@@ -30,7 +40,13 @@ export default function DeleteFolderDialog({
   
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="w-[95vw] sm:w-full sm:max-w-md rounded-2xl md:rounded-xl p-5 md:p-6 gap-6 shadow-xl border-none">
+      <AlertDialogContent
+        className="w-[95vw] sm:w-full sm:max-w-md rounded-2xl md:rounded-xl p-5 md:p-6 gap-6 shadow-xl border-none"
+        onOpenAutoFocus={(event) => {
+          event.preventDefault();
+          actionButtonRef.current?.focus();
+        }}
+      >
         <AlertDialogHeader className="space-y-4">
           <AlertDialogTitle className="flex items-center gap-3 text-xl font-bold text-slate-800">
             <div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center shrink-0">
@@ -79,6 +95,8 @@ export default function DeleteFolderDialog({
             キャンセル
           </AlertDialogCancel>
           <AlertDialogAction
+            ref={actionButtonRef}
+            autoFocus
             onClick={handleConfirm}
             disabled={isLoading}
             className="flex-1 rounded-xl h-11 font-bold bg-[#E11D48] hover:bg-[#BE123C] text-white shadow-soft transition-all border-none"

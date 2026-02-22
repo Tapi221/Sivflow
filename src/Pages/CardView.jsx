@@ -1,10 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCards } from '@/hooks/useCards';
-import { useCardRelations } from '@/hooks/useCardRelations';
 import { Button } from '@/Components/ui/button';
 import { Skeleton } from '@/Components/ui/skeleton';
-import { ArrowLeft, BookOpen, Info, ShieldCheck, Tag } from 'lucide-react';
+import { ArrowLeft, BookOpen, ShieldCheck, Tag } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 import CardViewer from '@/Components/card/CardViewer';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/Components/ui/tooltip';
@@ -12,7 +11,6 @@ import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/Comp
 import { normalizeMemoryStability, getResistancePhase } from '@/utils/reviewUtils';
 import { calculateResistanceScore } from '@/utils/reviewMetrics';
 import { LocalMap } from '@/Components/map/LocalMap';
-import { HandTray } from '@/Components/map/HandTray';
 
 export default function CardView() {
   const navigate = useNavigate();
@@ -55,34 +53,8 @@ export default function CardView() {
   const resistance = calculateResistanceScore(currentCard?.interval ?? 0);
   const resistancePhase = getResistancePhase(resistance);
 
-  // --- Map Integration ---
-  const { relations, deleteRelation } = useCardRelations(currentCard?.id); // For deleting relations
-  // useCardRelations automatically filters by whatever ID is passed? 
-  // No, useCardRelations(relatedCardId) filters by that ID.
-  // We need to import useCardRelations. It's not imported yet in CardView? 
-  // Wait, I imported LocalMap but not the hook. I need to add import.
-  // But wait, LocalMap uses useCardRelations internally.
-  // CardView needs it too to DELETE relation.
-
-  const handleCardReturnToTray = async (droppedCardId) => {
-      if (!currentCard || !relations) return;
-
-      // Find relation
-      const relation = relations.find(r => 
-          (r.fromCardId === currentCard.id && r.toCardId === droppedCardId) ||
-          (r.fromCardId === droppedCardId && r.toCardId === currentCard.id)
-      );
-
-      if (relation) {
-          if (confirm('関係を削除しますか？')) {
-               await deleteRelation(relation.id);
-          }
-      }
-  };
-  // ---------------------------
-
   const handleEdit = (card) => {
-    navigate(createPageUrl(`CardEdit?id=${card.id}&folderId=${folderId}`));
+    navigate(createPageUrl(`CardEdit?id=${card.id}&folderId=${folderId}&returnTo=card-view`));
   };
   
   const handleToggleUncertainty = async (card) => {
@@ -104,7 +76,7 @@ export default function CardView() {
   }
   
   return (
-    <div className="min-h-screen bg-[#F5F7F8] text-slate-800 font-sans">
+    <div className="min-h-screen bg-[#F5F7F8] text-slate-800 font-serif">
       <div className="max-w-[1600px] mx-auto p-2 md:pt-8 md:pb-8 md:px-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-4 px-2">
@@ -119,7 +91,7 @@ export default function CardView() {
              </Button>
              <div>
                 <div className="text-[10px] font-bold tracking-[0.2em] text-slate-400 uppercase mb-0.5">Knowledge Review</div>
-                <h1 className="text-xl font-bold text-slate-700 font-mono">
+                <h1 className="text-xl font-bold text-slate-700">
                   {currentCard?.title || 'Untitled Card'}
                 </h1>
              </div>
@@ -152,18 +124,6 @@ export default function CardView() {
                     onToggleUncertainty={handleToggleUncertainty}
                     onToggleBookmark={handleToggleBookmark}
                 />
-                 {/* 手元トレイ統合 */}
-                 <div className="mt-8">
-                    <div className="text-[10px] font-bold tracking-[0.2em] text-slate-300 uppercase mb-4 px-2">
-                        Hand Tray (Nearby Cards)
-                    </div>
-                    <HandTray 
-                        folderId={folderId} 
-                        className="bg-white/50 backdrop-blur-sm border border-white/50 shadow-sm"
-                        onCardDragStart={(card) => console.log('Drag start:', card.id)}
-                        onCardDrop={handleCardReturnToTray}
-                    />
-                 </div>
             </div>
             
              {/* Sidebar */}
@@ -183,20 +143,20 @@ export default function CardView() {
                                 </div>
                                 
                                 <div className="flex items-baseline gap-1 mb-2">
-                                    <span className={`text-5xl font-bold italic transition-colors duration-500 ${resistancePhase.colorClass.split(" ")[1]}`}>
+                                    <span className="text-5xl font-bold italic text-primary-600 transition-colors duration-500">
                                         {resistance}
                                     </span>
                                 </div>
                                 
                                 <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden mb-2">
                                     <div 
-                                        className={`h-full rounded-full transition-all duration-700 ${resistancePhase.calendarClass}`} 
+                                        className="h-full rounded-full bg-primary-600 transition-all duration-700" 
                                         style={{ width: `${resistance}%` }}
                                     ></div>
                                 </div>
                                 
                                 <div className="flex justify-between items-center">
-                                     <div className={`text-xs font-bold px-2 py-0.5 rounded-md ${resistancePhase.colorClass}`}>
+                                     <div className="text-xs font-bold px-2 py-0.5 rounded-md bg-primary-50 text-primary-700 border border-primary-100">
                                          {resistancePhase.label}
                                      </div>
                                      <div className="text-xs text-slate-400 font-medium">

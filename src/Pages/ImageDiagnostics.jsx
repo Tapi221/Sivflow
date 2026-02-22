@@ -150,7 +150,7 @@ export default function ImageDiagnostics() {
   }, [currentUser]);
 
   return (
-    <div className="min-h-screen bg-slate-50 p-8 font-sans">
+    <div className="min-h-screen bg-slate-50 p-8 font-serif">
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">

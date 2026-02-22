@@ -122,6 +122,9 @@ function getCardPreviewText(card: Card): string {
     if (block.type === 'text' && block.content) {
       return block.content.slice(0, 50);
     }
+    if (block.type === 'markdown' && block.markdown) {
+      return block.markdown.slice(0, 50);
+    }
   }
   // 古い形式のフォールバック
   if (card.questionText) {

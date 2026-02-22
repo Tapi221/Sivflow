@@ -1,0 +1,82 @@
+import {
+  cloneInkDocument,
+  createEmptyInkDocument,
+  normalizeInkDocument,
+  type InkDocument,
+  type InkSide,
+} from './inkTypes';
+
+const INK_STORAGE_PREFIX = 'ink:';
+
+const getStorage = (): Storage | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    return window.localStorage;
+  } catch {
+    return null;
+  }
+};
+
+export const getInkStorageKey = (cardId: string, side: InkSide): string =>
+  `${INK_STORAGE_PREFIX}${cardId}:${side}`;
+
+export const loadInkFromStorage = (
+  cardId: string | null | undefined,
+  side: InkSide,
+  fallback?: InkDocument | null
+): InkDocument => {
+  const normalizedFallback = normalizeInkDocument(fallback ?? createEmptyInkDocument());
+  if (!cardId) return normalizedFallback;
+
+  const storage = getStorage();
+  if (!storage) return normalizedFallback;
+
+  try {
+    const raw = storage.getItem(getInkStorageKey(cardId, side));
+    if (!raw) return normalizedFallback;
+    const parsed = JSON.parse(raw);
+    return normalizeInkDocument(parsed);
+  } catch {
+    return normalizedFallback;
+  }
+};
+
+export const saveInkToStorage = (
+  cardId: string | null | undefined,
+  side: InkSide,
+  document: InkDocument
+): void => {
+  if (!cardId) return;
+  const storage = getStorage();
+  if (!storage) return;
+
+  try {
+    storage.setItem(
+      getInkStorageKey(cardId, side),
+      JSON.stringify(normalizeInkDocument(document))
+    );
+  } catch {
+    // Ignore storage quota errors to avoid blocking input.
+  }
+};
+
+export const clearInkFromStorage = (cardId: string | null | undefined, side: InkSide): void => {
+  if (!cardId) return;
+  const storage = getStorage();
+  if (!storage) return;
+
+  try {
+    storage.removeItem(getInkStorageKey(cardId, side));
+  } catch {
+    // ignore
+  }
+};
+
+export const resolveInkDocument = (
+  cardId: string | null | undefined,
+  side: InkSide,
+  fallback?: InkDocument | null
+): InkDocument => {
+  const loaded = loadInkFromStorage(cardId, side, fallback);
+  return cloneInkDocument(loaded);
+};

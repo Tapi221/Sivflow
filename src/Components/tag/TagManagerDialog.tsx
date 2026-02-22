@@ -56,19 +56,21 @@ export default function TagManagerDialog({ open, onOpenChange }: TagManagerDialo
                             </div>
                             
                             {/* Color Palette */}
-                            <div className="flex items-center gap-1.5 opacity-40 group-hover:opacity-100 transition-opacity">
+                            <div className="flex items-center gap-1.5 opacity-90 group-hover:opacity-100 transition-opacity">
                                 {DEFAULT_COLORS.slice(0, 8).map(color => (
                                     <button
                                         key={color}
                                         onClick={() => handleColorChange(tag.name, color)}
                                         className={cn(
-                                            "w-6 h-6 rounded-full border transition-all hover:scale-110",
+                                            "w-7 h-7 rounded-full border-2 ring-1 ring-slate-300/70 shadow-sm transition-all hover:scale-105",
                                             color.split(' ')[0], // bg class
                                             color.split(' ')[2], // border class
-                                            tag.color === color ? "ring-2 ring-offset-2 ring-slate-300 scale-110 opacity-100" : "opacity-30 hover:opacity-100"
+                                            tag.color === color
+                                              ? "ring-2 ring-offset-2 ring-primary-600 scale-110 opacity-100 shadow-md"
+                                              : "opacity-80 hover:opacity-100"
                                         )}
                                     >
-                                        {tag.color === color && <Check className="w-3 h-3 mx-auto text-slate-600/50" />}
+                                        {tag.color === color && <Check className="w-3 h-3 mx-auto text-slate-700/70" />}
                                     </button>
                                 ))}
                             </div>

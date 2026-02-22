@@ -4,8 +4,6 @@ import React, {
   useEffect 
 } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getLocalDb } from '../services/localDB';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCards } from '@/hooks/useCards';
 import { useFolders } from '@/hooks/useFolders';
 import { useUserSettings } from '@/hooks/useUserSettings';
@@ -48,9 +46,52 @@ const RESISTANCE_LEGEND = [
   { label: "長期保持 (Solid)", min: 85, max: 100, color: "bg-emerald-400" },
 ];
 
+const toDate = (value) => {
+  if (!value) return null;
+  if (typeof value?.toDate === 'function') {
+    const d = value.toDate();
+    return d instanceof Date && !isNaN(d.getTime()) ? d : null;
+  }
+  if (value instanceof Date) return isNaN(value.getTime()) ? null : value;
+  if (typeof value === 'object') {
+    const seconds =
+      typeof value.seconds === 'number'
+        ? value.seconds
+        : typeof value._seconds === 'number'
+          ? value._seconds
+          : null;
+    const nanoseconds =
+      typeof value.nanoseconds === 'number'
+        ? value.nanoseconds
+        : typeof value._nanoseconds === 'number'
+          ? value._nanoseconds
+          : 0;
+    if (seconds !== null) {
+      const d = new Date(seconds * 1000 + Math.floor(nanoseconds / 1e6));
+      return isNaN(d.getTime()) ? null : d;
+    }
+  }
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? null : d;
+};
+
+const getCalendarCardTitle = (card) => {
+  const rawTitle = card?.title;
+  if (typeof rawTitle === 'string' && rawTitle.trim().length > 0) {
+    return rawTitle.trim();
+  }
+
+  const questionText = String(card?.questionText ?? card?.question_text ?? '');
+  const textOnly = questionText.replace(/<[^>]*>/g, '').trim();
+  if (textOnly.length > 0) {
+    return textOnly.length > 50 ? `${textOnly.substring(0, 50)}...` : textOnly;
+  }
+
+  return '無題のカード';
+};
+
 export default function Calendar() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   
   const [currentDate, setCurrentDate] = useState(new Date());
   
@@ -89,39 +130,49 @@ export default function Calendar() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedDate, currentDate]);
 
-  const updateCardMutation = useMutation({
-    mutationFn: ({ id, data }) => localDb.updateItem('cards', id, data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['cards'] }),
-  });
-  
   const { cards = [], loading: cardsLoading } = useCards();
   const { folders = [], loading: foldersLoading } = useFolders();
   const { settings } = useUserSettings();
+
+  const folderMap = useMemo(() => {
+    const map = new Map();
+    folders.forEach((folder) => {
+      const id = folder?.id ?? folder?.folderId;
+      if (id) map.set(String(id), folder);
+    });
+    return map;
+  }, [folders]);
   
   // Get cards grouped by date
   const cardsByDate = useMemo(() => {
     const grouped = {};
     cards.filter(c => {
+        const isDeleted = Boolean(
+          c.isDeleted ??
+          c.is_deleted ??
+          c.deleted ??
+          c.deletedAt ??
+          c.deleted_at
+        );
+        const isDraft = Boolean(c.isDraft ?? c.is_draft);
         const dateVal = c.next_review_date || c.nextReviewDate;
-        const isDraft = c.is_draft || c.isDraft;
-        const folderId = c.folderId || c.folder_id;
-        
-        const folder = folders.find(f => (f.id === folderId || f.folderId === folderId));
-        
+        const isSilent = Boolean(c.is_silent ?? c.isSilent);
+        const rawFolderId = c.folderId || c.folder_id;
+        const folderId = rawFolderId ? String(rawFolderId) : null;
 
-        
+        // 学習バッジと一致させるため、下書き/サイレント/削除済みは除外する。
+        if (isDeleted || isDraft || isSilent || !dateVal) return false;
 
-
-        // If folderId exists but folder is not found in the loaded list, it's likely a deleted folder.
-        if (folderId && !folder) return false;
-
-        // Exclude silent cards (Notification OFF)
-        if (c.isSilent) return false;
-
-        return !isDraft && dateVal;
+        // フォルダ一覧のロード完了後は、存在しない folderId を除外する。
+        // これにより「不明なフォルダ」グループが予定表に出ないようにする。
+        if (!folderId) return true;
+        if (foldersLoading) return true;
+        const folder = folderMap.get(folderId);
+        if (!folder) return false;
+        return !(folder.isDeleted ?? folder.is_deleted);
     }).forEach(card => {
       const dateValue = card.next_review_date || card.nextReviewDate;
-      const dateObj = dateValue?.toDate ? dateValue.toDate() : (dateValue instanceof Date ? dateValue : new Date(dateValue));
+      const dateObj = toDate(dateValue);
 
       if (!dateObj || isNaN(dateObj.getTime())) return;
 
@@ -139,17 +190,19 @@ export default function Calendar() {
       // If overdue and autoCarryOver is used, treat as Today
       if (autoCarryOver && checkDate < todayDate) {
           dateKey = todayStr;
-          // Mark as overdue for UI styling if not already
-          card.is_overdue = true; 
       }
 
       if (!grouped[dateKey]) {
         grouped[dateKey] = [];
       }
-      grouped[dateKey].push(card);
+      grouped[dateKey].push(
+        autoCarryOver && checkDate < todayDate
+          ? { ...card, is_overdue: true }
+          : card
+      );
     });
     return grouped;
-  }, [cards, settings]);
+  }, [cards, folderMap, foldersLoading, settings?.autoCarryOver]);
   
   // Get cards for selected date
   const selectedDateCards = useMemo(() => {
@@ -162,7 +215,8 @@ export default function Calendar() {
   const groupedPlannedUnits = useMemo(() => {
     const counts = {}; 
     selectedDateCards.forEach(card => {
-        const fid = card.folderId || card.folder_id;
+        const fidRaw = card.folderId || card.folder_id;
+        const fid = fidRaw ? String(fidRaw) : null;
         const key = fid || 'uncategorized';
         counts[key] = (counts[key] || 0) + 1;
     });
@@ -171,14 +225,14 @@ export default function Calendar() {
         if (folderId === 'uncategorized') {
              return { folderName: '未分類', count, folderId: 'uncategorized' };
         }
-        const folder = folders.find(f => f.id === folderId);
+        const folder = folderMap.get(String(folderId));
         return {
             folderName: folder?.folderName || folder?.folder_name || '不明なフォルダ',
             count,
             folderId
         };
     }).sort((a, b) => b.count - a.count);
-  }, [selectedDateCards, folders]);
+  }, [selectedDateCards, folderMap]);
 
   const renderCalendarGrid = () => {
     const weekStartDay = settings?.weekStartDay === 'sunday' ? 0 : 1; // 0=Sun, 1=Mon
@@ -281,7 +335,7 @@ export default function Calendar() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F7FA] text-slate-800 font-sans selection:bg-indigo-100 selection:text-indigo-900 p-4 md:p-8 flex flex-col">
+    <div className="min-h-screen bg-[#F5F7FA] text-slate-800 font-serif selection:bg-indigo-100 selection:text-indigo-900 p-4 md:p-8 flex flex-col">
         {/* Top Header */}
         <div className="flex flex-col sm:flex-row items-center sm:items-center justify-start mb-2 md:mb-6 w-full max-w-[1400px] mx-auto gap-4">
             <div className="flex items-center gap-4 w-full md:w-auto">
@@ -334,11 +388,6 @@ export default function Calendar() {
 
                 {/* Planned Units List */}
                 <div className="flex-1 overflow-y-auto pr-2 mb-8 -mr-2">
-                     <div className="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-4 flex items-center gap-2">
-                         <div className="w-3 h-3 text-primary-600"><StackIcon /></div>
-                         Planned Units
-                     </div>
-                     
                      <div className="space-y-3">
                         {selectedDateCards.length === 0 ? (
                             <div className="text-center py-10 text-slate-300 text-xs font-bold">
@@ -370,7 +419,7 @@ export default function Calendar() {
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <Badge variant="secondary" className="bg-white hover:bg-white text-slate-500 border border-slate-100 shadow-sm">
-                                                    {group.count}枚
+                                                    {group.count}
                                                 </Badge>
                                                 <div className={cn("text-slate-300 transition-transform duration-300", isExpanded && "rotate-180")}>
                                                     <ChevronDownIcon />
@@ -394,10 +443,16 @@ export default function Calendar() {
                                                         <div 
                                                             key={card.id} 
                                                             className="p-3 rounded-xl hover:bg-slate-50 flex items-start justify-between cursor-pointer group/card transition-colors"
-                                                            onClick={() => navigate(createPageUrl(`CardEdit?id=${card.id}`))}
+                                                            onClick={() => {
+                                                                const cardFolderId = card.folderId || card.folder_id;
+                                                                const query = cardFolderId
+                                                                  ? `CardEdit?id=${card.id}&folderId=${cardFolderId}&returnTo=calendar`
+                                                                  : `CardEdit?id=${card.id}&returnTo=calendar`;
+                                                                navigate(createPageUrl(query));
+                                                            }}
                                                         >
                                                             <div className="text-xs font-bold text-slate-600 line-clamp-1 group-hover/card:text-primary-600 transition-colors">
-                                                                {card.title || 'Untitled Card'}
+                                                                {getCalendarCardTitle(card)}
                                                             </div>
                                                             <div className={cn(
                                                                 "w-1.5 h-1.5 rounded-full mt-1 flex-shrink-0",
@@ -461,13 +516,6 @@ export default function Calendar() {
     </div>
   );
 }
-
-// Icon helper
-const StackIcon = () => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-    </svg>
-);
 
 const FolderIcon = () => (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
