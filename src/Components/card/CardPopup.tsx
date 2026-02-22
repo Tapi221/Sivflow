@@ -39,15 +39,20 @@ export function CardPopup({
           <X className="w-6 h-6" />
         </Button>
         <Flashcard
-          card={card}
-          isFlipped={isFlipped}
-          onFlip={() => setIsFlipped(!isFlipped)}
-          onEdit={onEdit}
-          onToggleUncertainty={onToggleUncertainty}
-          onToggleBookmark={onToggleBookmark}
-          className="h-auto min-h-[500px]"
-          editorSharedHeightPx={settings?.cardEditorHeightPx ?? null}
-        />
+  card={card}
+  isFlipped={isFlipped}
+  onFlip={() => setIsFlipped(!isFlipped)}
+  onEdit={(c) => {
+    // 編集へ行くなら、閲覧モーダルは邪魔なので閉じる
+    onEdit?.(c);
+    onClose();
+  }}
+  onToggleUncertainty={onToggleUncertainty}
+  onToggleBookmark={onToggleBookmark}
+  className="h-auto min-h-[500px]"
+  editorSharedHeightPx={settings?.cardEditorHeightPx ?? null}
+/>
+
       </div>
     </div>
   );

@@ -1,7 +1,21 @@
-import React, { useState } from 'react';
-import { FileText } from 'lucide-react';
-import { Flashcard } from '@/Components/card/Flashcard';
-import { useCards } from '@/hooks/useCards';
+import React, { useEffect, useMemo, useState } from "react";
+import { FileText } from "lucide-react";
+import { DragDropContext } from "@hello-pangea/dnd";
+
+import { Flashcard } from "@/Components/card/Flashcard";
+import { BlockEditor } from "@/Components/card/BlockEditor";
+import { PaperCardScaleFrame } from "@/Components/card/PaperCardScaleFrame";
+import { CardShell } from "@/Components/card/CardShell";
+import { CardSurface } from "@/Components/card/CardSurface";
+
+import { Button } from "@/Components/ui/button";
+import { useCards } from "@/hooks/useCards";
+import { useUserSettings } from "@/hooks/useUserSettings";
+
+import type { CardBlock } from "@/types";
+
+type DndLocation = { droppableId: string; index: number };
+type DndResult = { source: DndLocation; destination?: DndLocation | null };
 
 interface CardEditorPaneProps {
   selectedCardId: string | null;
@@ -9,17 +23,49 @@ interface CardEditorPaneProps {
 }
 
 export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPaneProps) {
+  const { settings } = useUserSettings();
   const { cards, updateCard } = useCards();
-  // カードの問題/解答のフリップ状態を管理
+
+  const selectedCard = useMemo(() => {
+    if (!selectedCardId) return null;
+    return cards.find((c: any) => c.id === selectedCardId) ?? null;
+  }, [cards, selectedCardId]);
+
+  // 閲覧状態
   const [isFlipped, setIsFlipped] = useState(false);
 
-  // 選択されたカードを取得
-  const selectedCard = selectedCardId
-    ? cards.find(c => c.id === selectedCardId)
-    : null;
+  // 編集状態（右ペイン内）
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  // カード未選択時のプレースホルダー
-  if (!selectedCardId || !selectedCard) {
+  // 編集用ドラフト（右ペイン内で完結）
+  const [draft, setDraft] = useState<{
+    title: string;
+    tags: string[];
+    questionBlocks: CardBlock[];
+    answerBlocks: CardBlock[];
+  } | null>(null);
+
+  // カード切替時にドラフトを再ロード
+  useEffect(() => {
+    setIsFlipped(false);
+    setIsEditing(false);
+
+    if (!selectedCard) {
+      setDraft(null);
+      return;
+    }
+
+    setDraft({
+      title: selectedCard.title ?? "",
+      tags: selectedCard.tags ?? [],
+      questionBlocks: (selectedCard.questionBlocks ?? []) as CardBlock[],
+      answerBlocks: (selectedCard.answerBlocks ?? []) as CardBlock[],
+    });
+  }, [selectedCardId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // 未選択時
+  if (!selectedCardId || !selectedCard || !draft) {
     return (
       <div className="flex items-center justify-center h-full min-h-[400px] text-slate-400">
         <div className="text-center">
@@ -31,37 +77,219 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
     );
   }
 
-  // ブックマークのトグルハンドラー
+  // 閲覧側のトグル
   const handleToggleBookmark = async (card: any) => {
     try {
       await updateCard(card.id, { isBookmarked: !card.isBookmarked });
-      if (onCardUpdated) onCardUpdated();
+      onCardUpdated?.();
     } catch (error) {
-      console.error('ブックマークの更新に失敗しました:', error);
+      console.error("ブックマークの更新に失敗しました:", error);
     }
   };
 
-  // 不確証マークのトグルハンドラー
   const handleToggleUncertainty = async (card: any) => {
     try {
       await updateCard(card.id, { hasUncertainty: !card.hasUncertainty });
-      if (onCardUpdated) onCardUpdated();
+      onCardUpdated?.();
     } catch (error) {
-      console.error('不確証マークの更新に失敗しました:', error);
+      console.error("不確証マークの更新に失敗しました:", error);
     }
+  };
+
+  const resetDraftFromCard = () => {
+    setDraft({
+      title: selectedCard.title ?? "",
+      tags: selectedCard.tags ?? [],
+      questionBlocks: (selectedCard.questionBlocks ?? []) as CardBlock[],
+      answerBlocks: (selectedCard.answerBlocks ?? []) as CardBlock[],
+    });
+  };
+
+  const handleSave = async () => {
+    try {
+      setIsSaving(true);
+      await updateCard(selectedCard.id, {
+        title: draft.title,
+        tags: draft.tags,
+        questionBlocks: draft.questionBlocks,
+        answerBlocks: draft.answerBlocks,
+      });
+      onCardUpdated?.();
+      setIsEditing(false);
+    } catch (e) {
+      console.error("カード更新に失敗しました:", e);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const onDragEnd = (result: DndResult) => {
+    if (!result.destination) return;
+
+    const { source, destination } = result;
+
+    if (source.droppableId === destination.droppableId && source.index === destination.index) return;
+
+    const getList = (id: string) => {
+      if (id === "question-blocks") return [...draft.questionBlocks];
+      return [...draft.answerBlocks];
+    };
+
+    // same list
+    if (source.droppableId === destination.droppableId) {
+      const list = getList(source.droppableId);
+      const [moved] = list.splice(source.index, 1);
+      list.splice(destination.index, 0, moved);
+
+      const re = list.map((b: any, i: number) => ({ ...b, orderIndex: i }));
+
+      setDraft((prev) => {
+        if (!prev) return prev;
+        return source.droppableId === "question-blocks"
+          ? { ...prev, questionBlocks: re as CardBlock[] }
+          : { ...prev, answerBlocks: re as CardBlock[] };
+      });
+      return;
+    }
+
+    // cross list
+    const sourceList = getList(source.droppableId);
+    const destList = getList(destination.droppableId);
+
+    const [moved] = sourceList.splice(source.index, 1);
+    destList.splice(destination.index, 0, moved);
+
+    const reS = sourceList.map((b: any, i: number) => ({ ...b, orderIndex: i }));
+    const reD = destList.map((b: any, i: number) => ({ ...b, orderIndex: i }));
+
+    setDraft((prev) => {
+      if (!prev) return prev;
+
+      const next: any = { ...prev };
+
+      if (source.droppableId === "question-blocks") next.questionBlocks = reS;
+      else next.answerBlocks = reS;
+
+      if (destination.droppableId === "question-blocks") next.questionBlocks = reD;
+      else next.answerBlocks = reD;
+
+      return next;
+    });
   };
 
   return (
     <div className="h-full overflow-y-auto p-4">
-      <Flashcard
-        card={selectedCard}
-        isFlipped={isFlipped}
-        onFlip={() => setIsFlipped(prev => !prev)}
-        onToggleBookmark={handleToggleBookmark}
-        onToggleUncertainty={handleToggleUncertainty}
-        showNavigation={false}
-        showTags={true}
-      />
+      {isEditing ? (
+        <div className="space-y-4">
+          {/* 右ペイン用の最小ヘッダ（保存/キャンセルだけ） */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="text-xs font-bold text-slate-400">編集（右ペイン）</div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                className="h-9 rounded-full px-4"
+                onClick={() => {
+                  resetDraftFromCard();
+                  setIsEditing(false);
+                }}
+                disabled={isSaving}
+              >
+                キャンセル
+              </Button>
+
+              <Button
+                type="button"
+                className="h-9 rounded-full px-6"
+                onClick={handleSave}
+                disabled={isSaving}
+              >
+                保存
+              </Button>
+            </div>
+          </div>
+
+          {/* ★紙カード2枚並び編集 */}
+          <DragDropContext onDragEnd={onDragEnd}>
+            <div className="grid lg:grid-cols-2 gap-10">
+              {/* 問題 */}
+              <PaperCardScaleFrame baseWidth={520}>
+                <CardShell
+                  className={cn(
+                    "mx-auto border-none rounded-[32px] md:rounded-[40px] overflow-hidden shadow-2xl",
+                    "bg-white"
+                  )}
+                  resizable={false}
+                  showResizeHandle={false}
+                  bodyOverflowY="auto"
+                >
+                  <CardSurface ruled={true} ruledRowPx={24}>
+                    <BlockEditor
+                      blocks={draft.questionBlocks}
+                      onChange={(blocks) =>
+                        setDraft((prev) => (prev ? { ...prev, questionBlocks: blocks as any } : prev))
+                      }
+                      prefix="question"
+                      label="問題"
+                      color="text-indigo-500"
+                      droppableId="question-blocks"
+                      accentColor={settings?.accentColor}
+                      duplicateToOpposite={settings?.duplicateToOpposite}
+                    />
+                  </CardSurface>
+                </CardShell>
+              </PaperCardScaleFrame>
+
+              {/* 解答 */}
+              <PaperCardScaleFrame baseWidth={520}>
+                <CardShell
+                  className={cn(
+                    "mx-auto border-none rounded-[32px] md:rounded-[40px] overflow-hidden shadow-2xl",
+                    "bg-white"
+                  )}
+                  resizable={false}
+                  showResizeHandle={false}
+                  bodyOverflowY="auto"
+                >
+                  <CardSurface ruled={true} ruledRowPx={24}>
+                    <BlockEditor
+                      blocks={draft.answerBlocks}
+                      onChange={(blocks) =>
+                        setDraft((prev) => (prev ? { ...prev, answerBlocks: blocks as any } : prev))
+                      }
+                      prefix="answer"
+                      label="解答"
+                      color="text-emerald-500"
+                      droppableId="answer-blocks"
+                      accentColor={settings?.accentColor}
+                      duplicateToOpposite={settings?.duplicateToOpposite}
+                    />
+                  </CardSurface>
+                </CardShell>
+              </PaperCardScaleFrame>
+            </div>
+          </DragDropContext>
+        </div>
+      ) : (
+        <Flashcard
+          card={selectedCard}
+          isFlipped={isFlipped}
+          onFlip={() => setIsFlipped((p) => !p)}
+          onToggleBookmark={handleToggleBookmark}
+          onToggleUncertainty={handleToggleUncertainty}
+          showNavigation={false}
+          showTags={true}
+          onEdit={() => {
+            setIsFlipped(false);
+            setIsEditing(true);
+          }}
+        />
+      )}
     </div>
   );
+}
+
+function cn(...classes: Array<string | undefined | false | null>) {
+  return classes.filter(Boolean).join(" ");
 }
