@@ -84,15 +84,10 @@ export default function CardEditor({
   storageType = 'local',
 }: CardEditorProps) {
   const { settings } = useUserSettings();
-  const [showPreview, setShowPreview] = useState(settings?.defaultPreviewEnabled ?? false);
+  const [showPreview, setShowPreview] = useState(false);
 
-  // 設定が変更され、まだ手動で切り替えていない場合にプレビュー状態を同期
-  // または、初期状態のまま維持することも可能。通常は「デフォルト」の初期値で十分。
-  useEffect(() => {
-    if (settings && settings.defaultPreviewEnabled !== undefined) {
-      setShowPreview(settings.defaultPreviewEnabled);
-    }
-  }, [settings?.defaultPreviewEnabled]);
+
+
   const [formData, setFormData] = useState({
     title: '',
     folderId: folderId || '',
@@ -133,82 +128,121 @@ export default function CardEditor({
     storageType === 'session' ? sessionStorage : storageType === 'local' ? localStorage : null;
   const [isRestored, setIsRestored] = useState(false);
 
+  const [initialized, setInitialized] = useState(false);
+
+const hasAnyContent = (data: any) => {
+  const blocksHave = (blocks: any[]) =>
+    Array.isArray(blocks) &&
+    blocks.some((b: any) => {
+      if (!b) return false;
+      if (b.type === 'text' || b.type === 'memo') return !!(b.content ?? '').trim();
+      if (b.type === 'code') return !!b.code?.code;
+      if (b.type === 'image') return (b.images?.length ?? 0) > 0;
+      if (b.type === 'audio') return (b.audios?.length ?? 0) > 0;
+      if (b.type === 'math') return !!(b.math?.latex ?? '').trim();
+      if (b.type === 'reference')
+        return (b.references ?? []).some(
+          (r: any) => (r?.url ?? '').trim() || (r?.name ?? '').trim()
+        );
+      return false;
+    });
+
+  return (
+    !!(data?.title ?? '').trim() ||
+    !!(data?.questionText ?? '').trim() ||
+    !!(data?.answerText ?? '').trim() ||
+    blocksHave(data?.questionBlocks) ||
+    blocksHave(data?.answerBlocks)
+  );
+};
+
+
   useEffect(() => {
-    // ドラフト復元を試みる（storage が使用可能な場合のみ）
-    if (storage) {
-      const savedDraft = storage.getItem(draftKey);
-      if (savedDraft) {
-        try {
-          const parsed = JSON.parse(savedDraft);
+  // ドラフト復元を試みる（storage が使用可能な場合のみ）
+  if (storage) {
+    const savedDraft = storage.getItem(draftKey);
+    if (savedDraft) {
+      try {
+        const parsed = JSON.parse(savedDraft);
+
+        // ★空ドラフトが本体データを隠す事故を防ぐ
+        if (!hasAnyContent(parsed)) {
+          storage.removeItem(draftKey);
+        } else {
           setFormData(prev => ({ ...prev, ...parsed }));
           setIsRestored(true);
-          // 5秒後に復元メッセージを消す
           setTimeout(() => setIsRestored(false), 5000);
-          return; // ドラフト復元成功時はカードデータで上書きしない
-        } catch (e) {
-          console.error('Failed to parse draft:', e);
-        }
-      }
-    }
 
-    // ドラフトがない場合、または storage が null (storageType="none") の場合
-    if (card) {
-      // 既存カードのデータを反映
-      setFormData({
-        title: card.title || '',
-        folderId: card.folderId || folderId || '',
-        isDraft: card.isDraft || false,
-        hasUncertainty: card.hasUncertainty || false,
-        questionText: card.questionText || '',
-        questionImages: card.questionImages || [],
-        questionAudios: card.questionAudios || [],
-        questionCode: card.questionCode || card.question_code || null,
-        questionMemo: card.questionMemo || '',
-        questionBlocks: card.questionBlocks || [],
-        answerText: card.answerText || '',
-        answerImages: card.answerImages || [],
-        answerAudios: card.answerAudios || [],
-        answerCode: card.answerCode || card.answer_code || null,
-        answerMemo: card.answerMemo || '',
-        answerBlocks: card.answerBlocks || [],
-        tags: card.tags || [],
-        isBookmarked: card.isBookmarked ?? card.is_bookmarked ?? false,
-      });
-    } else {
-      // 新規カードの初期状態を設定
-      if (mode === 'pair') {
-        const questionBlocks = Array.from({ length: 2 }).map((_, i) => ({
-          id: `question-text-${nanoid()}`, type: 'text', content: '', orderIndex: i
-        }));
-        const answerBlocks = Array.from({ length: 2 }).map((_, i) => ({
-          id: `answer-text-${nanoid()}`, type: 'text', content: '', orderIndex: i
-        }));
-        setFormData(prev => ({
-          ...prev,
-          folderId: folderId || '',
-          questionBlocks,
-          answerBlocks
-        }));
-      } else {
-        setFormData(prev => ({
-          ...prev,
-          folderId: folderId || '',
-          questionBlocks: defaultToTextBlock ? [{
-            id: `question-text-${nanoid()}`,
-            type: 'text',
-            content: '',
-            orderIndex: 0
-          }] : [],
-          answerBlocks: defaultToTextBlock ? [{
-            id: `answer-text-${nanoid()}`,
-            type: 'text',
-            content: '',
-            orderIndex: 0
-          }] : [],
-        }));
+          // ★初期化完了扱いにして、後続のオートセーブ暴発を抑える
+          setInitialized(true);
+          return; // ドラフト復元成功時はカードデータで上書きしない
+        }
+      } catch (e) {
+        console.error('Failed to parse draft:', e);
       }
     }
-  }, [card, folderId, draftKey, defaultToTextBlock, mode, storage]);
+  }
+
+  // ドラフトがない場合、または storage が null (storageType="none") の場合
+  if (card) {
+    setFormData({
+      title: card.title || '',
+      folderId: card.folderId || folderId || '',
+      isDraft: card.isDraft || false,
+      hasUncertainty: card.hasUncertainty || false,
+      questionText: card.questionText || '',
+      questionImages: card.questionImages || [],
+      questionAudios: card.questionAudios || [],
+      questionCode: card.questionCode || card.question_code || null,
+      questionMemo: card.questionMemo || '',
+      questionBlocks: card.questionBlocks || [],
+      answerText: card.answerText || '',
+      answerImages: card.answerImages || [],
+      answerAudios: card.answerAudios || [],
+      answerCode: card.answerCode || card.answer_code || null,
+      answerMemo: card.answerMemo || '',
+      answerBlocks: card.answerBlocks || [],
+      tags: card.tags || [],
+      isBookmarked: card.isBookmarked ?? card.is_bookmarked ?? false,
+    });
+  } else {
+    if (mode === 'pair') {
+      const questionBlocks = Array.from({ length: 2 }).map((_, i) => ({
+        id: `question-text-${nanoid()}`, type: 'text', content: '', orderIndex: i
+      }));
+      const answerBlocks = Array.from({ length: 2 }).map((_, i) => ({
+        id: `answer-text-${nanoid()}`, type: 'text', content: '', orderIndex: i
+      }));
+      setFormData(prev => ({
+        ...prev,
+        folderId: folderId || '',
+        questionBlocks,
+        answerBlocks
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        folderId: folderId || '',
+        questionBlocks: defaultToTextBlock ? [{
+          id: `question-text-${nanoid()}`,
+          type: 'text',
+          content: '',
+          orderIndex: 0
+        }] : [],
+        answerBlocks: defaultToTextBlock ? [{
+          id: `answer-text-${nanoid()}`,
+          type: 'text',
+          content: '',
+          orderIndex: 0
+        }] : [],
+      }));
+    }
+  }
+
+  // ★初期化完了
+  setInitialized(true);
+}, [card, folderId, draftKey, defaultToTextBlock, mode, storage]);
+
 
   // ペアモード用の追加・削除ハンドラ
   const handleAddPairTextBlocks = () => {
@@ -235,17 +269,23 @@ export default function CardEditor({
 
   // Auto-save logic
   useEffect(() => {
-    if (!storage) return;
-    if (settings?.autoSaveEnabled === false) return;
+  if (!storage) return;
+  if (settings?.autoSaveEnabled === false) return;
+  if (!initialized) return;
 
-    const timeoutId = setTimeout(() => {
-      // Don't save if it's identical to the initial card state (very simplified check)
-      // or if everything is empty
-      storage.setItem(draftKey, JSON.stringify(formData));
-    }, 1000);
+  // ★空の状態は保存しない（空ドラフトが勝って“消えた”に見える事故を防ぐ）
+  if (!hasAnyContent(formData)) {
+    storage.removeItem(draftKey);
+    return;
+  }
 
-    return () => clearTimeout(timeoutId);
-  }, [formData, draftKey, storage, settings?.autoSaveEnabled]);
+  const timeoutId = setTimeout(() => {
+    storage.setItem(draftKey, JSON.stringify(formData));
+  }, 1000);
+
+  return () => clearTimeout(timeoutId);
+}, [formData, draftKey, storage, settings?.autoSaveEnabled, initialized]);
+
 
   // 追加：ペアモードの左右ブロック数を強制的に揃える（最低2ペア）
   const normalizePairBlocks = (q: any, a: any) => {
