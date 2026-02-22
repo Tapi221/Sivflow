@@ -88,7 +88,7 @@ export function CodeBlockEditor({ value, onChange, className }: CodeBlockEditorP
     <div
       ref={editorHostRef}
       className={cn(
-        'codeBlockRoot relative group overflow-hidden max-w-full',
+        'codeBlockRoot relative group overflow-hidden max-w-full rounded-xl border border-zinc-200/50 bg-zinc-50/70 shadow-sm',
         className
       )}
     >
@@ -100,22 +100,22 @@ export function CodeBlockEditor({ value, onChange, className }: CodeBlockEditorP
       >
         <div
           className="
-            absolute top-1.5 left-3 z-20 flex items-center gap-0.5
-            opacity-90 group-hover:opacity-100 group-focus-within:opacity-100
+            absolute top-2.5 left-3 z-30 flex items-center gap-0.5
+            opacity-40 group-hover:opacity-100 group-focus-within:opacity-100
             transition-opacity pointer-events-auto
           "
         >
           <Select value={language} onValueChange={handleLanguageChange}>
             <SelectTrigger
               className="
-                codeBlockLang
-                h-6 w-[84px] min-w-0 min-h-0
-                rounded-full px-1.5
-                bg-transparent border-none shadow-none
-                text-[11px] font-bold text-slate-500/80
+                h-5 w-auto min-w-0 min-h-0
+                rounded-md px-1.5 py-0
+                bg-zinc-900/5 border-none shadow-none
+                text-[10px] font-bold text-zinc-500
                 tracking-wider uppercase
-                hover:text-slate-700 hover:bg-white/40
+                hover:text-zinc-700 hover:bg-zinc-900/10
                 focus:ring-0
+                gap-1
               "
             >
               <SelectValue placeholder="Language" />
@@ -123,7 +123,7 @@ export function CodeBlockEditor({ value, onChange, className }: CodeBlockEditorP
 
             <SelectContent className="bg-white">
               {SUPPORTED_LANGUAGES.map((lang) => (
-                <SelectItem key={lang.value} value={lang.value} className="text-[10px]">
+                <SelectItem key={lang.value} value={lang.value} className="text-xs">
                   {lang.label}
                 </SelectItem>
               ))}
@@ -135,7 +135,7 @@ export function CodeBlockEditor({ value, onChange, className }: CodeBlockEditorP
           value={code}
           onValueChange={handleCodeChange}
           highlight={highlightCode}
-          padding="28px 16px 12px 16px"
+          padding="24px 16px 10px 16px"
           className={cn(
             "code-editor-no-scroll codeBlockPre font-mono",
             // Prism.css 等の不要なマージン/背景をリセット
@@ -144,7 +144,7 @@ export function CodeBlockEditor({ value, onChange, className }: CodeBlockEditorP
           )}
           style={{
             fontFamily: '"Fira Code", "Fira Mono", ui-monospace, monospace',
-            fontSize: 14,
+            fontSize: 13.5,
             lineHeight: '20px',
             backgroundColor: 'transparent',
             minHeight: '20px',
@@ -155,7 +155,7 @@ export function CodeBlockEditor({ value, onChange, className }: CodeBlockEditorP
         />
 
         {!code && (
-          <div className="absolute top-0 left-0 text-slate-300 font-mono text-[14px] items-center leading-[20px] pointer-events-none p-[28px_16px_12px_16px] z-0">
+          <div className="absolute top-0 left-0 text-slate-300 font-mono text-[13.5px] items-center leading-[20px] pointer-events-none p-[24px_16px_10px_16px] z-0">
             // Type or paste your code here...
           </div>
         )}

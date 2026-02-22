@@ -370,15 +370,15 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
 
           {/* ★紙カード2枚並び編集 */}
           <DragDropContext onDragEnd={onDragEnd}>
-            <div className="grid lg:grid-cols-2 gap-10">
+            <div className="grid lg:grid-cols-2 gap-6 max-w-7xl mx-auto">
               {/* 問題 */}
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 w-full">
                 {/* ツールバーのマウント先（カードの外側に表示） */}
                 <div ref={toolbarMountRefQ} />
-                <PaperCardScaleFrame baseWidth={520}>
+                <PaperCardScaleFrame baseWidth={480}>
                   <CardShell
                     className={cn(
-                      "mx-auto border-none rounded-[32px] md:rounded-[40px] overflow-hidden shadow-2xl",
+                      "mx-auto border-none rounded-[32px] md:rounded-[40px] overflow-hidden shadow-xl",
                       "bg-white"
                     )}
                     resizable={true}
@@ -417,13 +417,13 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
               </div>
 
               {/* 解答 */}
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 w-full">
                 {/* ツールバーのマウント先（カードの外側に表示） */}
                 <div ref={toolbarMountRefA} />
-                <PaperCardScaleFrame baseWidth={520}>
+                <PaperCardScaleFrame baseWidth={480}>
                   <CardShell
                     className={cn(
-                      "mx-auto border-none rounded-[32px] md:rounded-[40px] overflow-hidden shadow-2xl",
+                      "mx-auto border-none rounded-[32px] md:rounded-[40px] overflow-hidden shadow-xl",
                       "bg-white"
                     )}
                     resizable={true}

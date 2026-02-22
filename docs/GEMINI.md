@@ -176,3 +176,9 @@
 - [x] 実装計画の作成 (docs/06_Operations/implementation_plan_remove_drag_handle_hover.md)
 - [x] ホバー・アクティブ時の視覚効果削除の実装 (BlockWrapper.tsx)
 - [x] 動作確認
+
+# コードブロックのデザイン刷新とカード表示切れの修正
+- [x] 実装計画の作成 (docs/06_Operations/implementation_plan_refine_code_ui.md)
+- [x] Claude風デザインの適用 (index.css, CodeRenderer.tsx, CodeBlockEditor.tsx)
+- [x] カード編集画面の見切れ修正 (CardEditorPane.tsx)
+- [x] 動作確認
