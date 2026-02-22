@@ -159,8 +159,8 @@ export const BlockWrapper = ({
               if (canMoveDown) onMoveDown?.();
             }}
             className={cn(
-              "w-5 h-5 min-w-0 min-h-0 p-0 bg-white border border-slate-100 rounded-full text-slate-400 hover:text-primary-600 hover:border-primary-100 shadow-sm flex items-center justify-center flex-none transition-colors",
-              "cursor-grab active:cursor-grabbing active:bg-primary-50 active:border-primary-200",
+              "w-5 h-5 min-w-0 min-h-0 p-0 bg-white border border-slate-100 rounded-full text-slate-400 shadow-sm flex items-center justify-center flex-none transition-colors",
+              "cursor-grab active:cursor-grabbing",
               dragHandleClassName
             )}
             title="クリック: 1行下へ / Shift+クリック: 1行上へ"

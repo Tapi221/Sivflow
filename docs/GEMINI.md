@@ -162,9 +162,17 @@
 - [x] 各ブロックの最小高さ（min-height: 44px）の確保 <!-- id: 1103 -->
 - [x] 動作確認と仕様書の更新 <!-- id: 1104 -->
 
-# 音声・リンクマークの配置とサイズ統一
+# 不具合修正：カード編集画面の空表示問題の解決
+- [x] 実装計画の作成 (docs/06_Operations/implementation_plan_fix_empty_card_edit.md) <!-- id: 5000 -->
+- [x] レースコンディションの修正 (CardEditorPane.tsx) <!-- id: 5001 -->
+- [x] 動作確認 <!-- id: 5002 -->
 
-- [x] 実装計画の作成 (docs/06_Operations/implementation_plan_align_audio_link_icons.md) <!-- id: 1201 -->
-- [x] 音声バッジの実装・配置変更 (Flashcard.tsx) <!-- id: 1202 -->
-- [x] StudyCard.tsx の冗長なボタン削除とスタイル調整 <!-- id: 1203 -->
-- [x] 動作確認 <!-- id: 1204 -->
+# 不具合修正：コードブロックの選択・カーソル位置ズレの解消
+- [x] 実装計画の作成 (docs/06_Operations/implementation_plan_fix_code_block_drift.md) <!-- id: 5100 -->
+- [x] 描画メトリクス（フォント・パディング）の統一 <!-- id: 5101 -->
+- [x] 動作確認 <!-- id: 5102 -->
+
+# ブロックUI改善：ドラッグハンドルのホバー効果削除
+- [x] 実装計画の作成 (docs/06_Operations/implementation_plan_remove_drag_handle_hover.md)
+- [x] ホバー・アクティブ時の視覚効果削除の実装 (BlockWrapper.tsx)
+- [x] 動作確認

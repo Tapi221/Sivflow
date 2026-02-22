@@ -85,30 +85,53 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
     });
   };
 
-  // カード切替時にドラフトを再ロード
+  // カード切替時またはロード完了時にドラフトをロード
   useEffect(() => {
-    setIsFlipped(false);
-    setIsEditing(false);
+    // IDが完全に切り替わった場合（null/別のカード/新規）は、編集状態と反転状態をリセット
+    // ※依存配列に selectedCardId だけを入れて「切り替わり」だけを検知する手法もあるが、
+    // ここではデータのロード完了を待つ必要がある。
+    
+    // データがまだロードされていない場合は何もしない（ロード完了後に再度呼ばれる）
+    if (!isNew && selectedCardId && !selectedCard) {
+      return;
+    }
 
-    // ★新規モードなら、カードが無くても編集を開始できる
+    // 以前の selectedCardId を保持して、本当に切り替わった時だけ編集を閉じる設計も可能だが、
+    // 現状は selectedCardId が依存配列にあるため、切り替わり時にここが走る。
+    
+    // 編集中に外部（Syncなど）の cards 一覧が更新された際、勝手に draft を上書きしないためのガード
+    if (isEditing && draft && selectedCard && selectedCardId === selectedCard.id) {
+      return; 
+    }
+
+    setIsFlipped(false);
+    
+    // IDが null になった場合は編集を解除
+    if (!selectedCardId) {
+      setIsEditing(false);
+      setDraft(null);
+      return;
+    }
+
+    // 新規モード
     if (isNew) {
       initNewDraft();
       setIsEditing(true);
       return;
     }
 
-    if (!selectedCard) {
+    // ロードされたデータをドラフトに反映
+    if (selectedCard) {
+      setDraft({
+        title: selectedCard.title ?? "",
+        tags: selectedCard.tags ?? [],
+        questionBlocks: (selectedCard.questionBlocks ?? []) as CardBlock[],
+        answerBlocks: (selectedCard.answerBlocks ?? []) as CardBlock[],
+      });
+    } else {
       setDraft(null);
-      return;
     }
-
-    setDraft({
-      title: selectedCard.title ?? "",
-      tags: selectedCard.tags ?? [],
-      questionBlocks: (selectedCard.questionBlocks ?? []) as CardBlock[],
-      answerBlocks: (selectedCard.answerBlocks ?? []) as CardBlock[],
-    });
-  }, [selectedCardId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selectedCardId, selectedCard, isNew]); 
 
   // 閲覧側のトグル（既存カードのみ）
   const handleToggleBookmark = async (card: any) => {

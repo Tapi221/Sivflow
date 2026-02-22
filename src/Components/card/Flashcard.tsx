@@ -598,7 +598,7 @@ export function Flashcard({
         >
           <CardSurface
             ruled={true}
-            ruledOffsetPx={0}
+            ruledOffsetPx={24}
             overlay={
               <>
                 <InkLayer
@@ -631,7 +631,7 @@ export function Flashcard({
             {/* コンテンツエリア - 編集画面に揃えて上寄せ */}
             <div
               className={cn(
-                "paperCardTypography flex-1 flex flex-col max-w-full mx-auto w-full pb-8 overflow-x-clip overflow-y-visible pt-0"
+                "paperCardTypography flex-1 flex flex-col max-w-full mx-auto w-full pb-8 overflow-x-clip overflow-y-visible pt-6"
               )}
             >
               {effectiveIsFlipped ? (

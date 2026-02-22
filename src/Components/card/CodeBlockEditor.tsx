@@ -135,27 +135,27 @@ export function CodeBlockEditor({ value, onChange, className }: CodeBlockEditorP
           value={code}
           onValueChange={handleCodeChange}
           highlight={highlightCode}
-          padding={0}
+          padding="28px 16px 12px 16px"
           className={cn(
-            "code-editor-no-scroll codeBlockPre font-mono leading-[20px]",
-            // Prism.css 等の干渉を徹底的に排除するリセット
-            "[&>pre]:!m-0 [&>pre]:!p-[28px_16px_12px_16px] [&>pre]:!bg-transparent [&>pre]:!border-none",
-            "[&>textarea]:!m-0 [&>textarea]:!p-[28px_16px_12px_16px] [&>textarea]:border-none [&>textarea]:shadow-none"
+            "code-editor-no-scroll codeBlockPre font-mono",
+            // Prism.css 等の不要なマージン/背景をリセット
+            "[&>pre]:!m-0 [&>pre]:!bg-transparent [&>pre]:!border-none",
+            "[&>textarea]:!m-0 [&>textarea]:!border-none [&>textarea]:!ring-0 [&>textarea]:!outline-none"
           )}
           style={{
-            fontFamily: '"Fira Code", "Fira Mono", monospace',
-            fontSize: 13.5,
+            fontFamily: '"Fira Code", "Fira Mono", ui-monospace, monospace',
+            fontSize: 14,
             lineHeight: '20px',
             backgroundColor: 'transparent',
             minHeight: '20px',
             margin: 0,
             overflow: 'visible',
           }}
-          textareaClassName="focus:outline-none leading-[20px] m-0 p-0 !border-none !ring-0"
+          textareaClassName="leading-[20px] m-0"
         />
 
         {!code && (
-          <div className="absolute top-0 left-0 text-slate-300 font-mono text-[13.5px] leading-[20px] pointer-events-none p-[28px_16px_12px_16px] z-0">
+          <div className="absolute top-0 left-0 text-slate-300 font-mono text-[14px] items-center leading-[20px] pointer-events-none p-[28px_16px_12px_16px] z-0">
             // Type or paste your code here...
           </div>
         )}

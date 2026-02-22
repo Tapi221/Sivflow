@@ -74,7 +74,7 @@
 .markdownBlockPreviewFrame {
   --md-lines: 6;
   height: auto;
-  min-height: calc(var(--ruled-line-pitch, 24px) * 2);
+  min-height: calc(var(--ruled-line-pitch, 24px) * 1);
   background: transparent !important;
   overflow: visible !important;
 }
