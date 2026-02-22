@@ -1272,8 +1272,8 @@
 .code-editor-no-scroll textarea,
 .code-editor-no-scroll pre {
   font-family: "Fira Code", "Fira Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
-  font-size: 13px !important;
-  line-height: 24px !important;
+  font-size: 14px !important;
+  line-height: 20px !important;
   letter-spacing: normal !important;
   font-variant-ligatures: none !important;
   tab-size: 2 !important;
@@ -1286,12 +1286,12 @@
 
 .code-editor-no-scroll textarea {
   overflow-y: hidden !important;
-  overflow-x: auto !important;
+  overflow-x: hidden !important;
 }
 
 .code-editor-no-scroll pre {
   overflow-y: hidden !important;
-  overflow-x: auto !important;
+  overflow-x: hidden !important;
 }
 
 .code-editor-no-scroll .npm__react-simple-code-editor__textarea,

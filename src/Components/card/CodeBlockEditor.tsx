@@ -100,7 +100,7 @@ export function CodeBlockEditor({ value, onChange, className }: CodeBlockEditorP
       >
         <div
           className="
-            absolute top-0.5 right-0.5 z-20 flex items-center gap-0.5
+            absolute top-2.5 right-2.5 z-20 flex items-center gap-0.5
             opacity-90 group-hover:opacity-100 group-focus-within:opacity-100
             transition-opacity pointer-events-auto
           "
@@ -109,7 +109,7 @@ export function CodeBlockEditor({ value, onChange, className }: CodeBlockEditorP
             <SelectTrigger
               className="
                 codeBlockLang
-                h-5 w-[72px] min-w-0 min-h-0
+                h-6 w-[80px] min-w-0 min-h-0
                 rounded-full px-2
                 bg-white/75
                 border border-slate-200/70
@@ -124,7 +124,7 @@ export function CodeBlockEditor({ value, onChange, className }: CodeBlockEditorP
 
             <SelectContent className="bg-white">
               {SUPPORTED_LANGUAGES.map((lang) => (
-                <SelectItem key={lang.value} value={lang.value} className="text-[8px]">
+                <SelectItem key={lang.value} value={lang.value} className="text-[10px]">
                   {lang.label}
                 </SelectItem>
               ))}
@@ -140,25 +140,25 @@ export function CodeBlockEditor({ value, onChange, className }: CodeBlockEditorP
           highlight={highlightCode}
           padding={0}
           className={cn(
-            "code-editor-no-scroll codeBlockPre font-mono leading-[24px]",
+            "code-editor-no-scroll codeBlockPre font-mono leading-[20px]",
             // Prism.css 等の干渉を徹底的に排除するリセット
-            "[&>pre]:!m-0 [&>pre]:!p-0 [&>pre]:!bg-transparent [&>pre]:!border-none",
-            "[&>textarea]:!m-0 [&>textarea]:!p-0 [&>textarea]:border-none [&>textarea]:shadow-none"
+            "[&>pre]:!m-0 [&>pre]:!p-[12px_16px] [&>pre]:!bg-transparent [&>pre]:!border-none",
+            "[&>textarea]:!m-0 [&>textarea]:!p-[12px_16px] [&>textarea]:border-none [&>textarea]:shadow-none"
           )}
           style={{
             fontFamily: '"Fira Code", "Fira Mono", monospace',
-            fontSize: 13,
-            lineHeight: '24px',
+            fontSize: 14,
+            lineHeight: '20px',
             backgroundColor: 'transparent',
-            minHeight: '24px',
+            minHeight: '20px',
             margin: 0,
             overflow: 'visible',
           }}
-          textareaClassName="focus:outline-none leading-[24px] m-0 p-0 !border-none !ring-0"
+          textareaClassName="focus:outline-none leading-[20px] m-0 p-0 !border-none !ring-0"
         />
 
         {!code && (
-          <div className="absolute top-0 left-0 text-slate-300 font-mono text-[13px] leading-[24px] pointer-events-none">
+          <div className="absolute top-0 left-0 text-slate-300 font-mono text-[14px] leading-[20px] pointer-events-none p-[12px_16px] z-0">
             // Type or paste your code here...
           </div>
         )}

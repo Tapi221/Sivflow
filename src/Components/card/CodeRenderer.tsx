@@ -87,12 +87,13 @@ export function CodeRenderer({ code, language, className }: CodeRendererProps) {
     <div
       className={cn(
         "code-block codeBlock codeBlockRoot relative group overflow-hidden flex flex-col max-w-full",
+        "rounded-xl border border-slate-200/70 bg-amber-50/35",
         className
       )}
     >
-      {/* Top-right label */}
-      <div className="absolute top-[10px] right-[10px] z-20 flex items-center opacity-85 group-hover:opacity-100 transition-opacity pointer-events-auto">
-        <span className="codeBlockLang">
+      {/* Top-right label: 控えめで絶対配置 */}
+      <div className="absolute top-2.5 right-2.5 z-20 transition-opacity opacity-70 group-hover:opacity-100 pointer-events-none">
+        <span className="grid h-6 min-w-6 px-1.5 place-items-center rounded-full border border-slate-200/60 bg-white/90 text-[10px] font-bold text-slate-500/80 uppercase tracking-wider shadow-sm">
           {languageLabel}
         </span>
       </div>
@@ -109,8 +110,7 @@ export function CodeRenderer({ code, language, className }: CodeRendererProps) {
               className={cn(
                 preClassName,
                 "codeBlockPre code-block-pre code-block-pre--flat code-block-pre--tools codeBlock",
-                // 横スクロールはコードでは許可するのが普通
-                "overflow-x-auto"
+                "overflow-x-auto text-[14px] leading-5 px-4 py-3"
               )}
               style={{ ...style }}
             >
