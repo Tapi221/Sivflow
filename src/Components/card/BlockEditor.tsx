@@ -378,7 +378,13 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
   const toolbarMount = toolbarMountRef?.current ?? null;
 
   return (
-    <div className={cn("space-y-1.5 md:space-y-2", prefix === 'question' ? 'js-question-editor' : 'js-answer-editor')}>
+  <div
+    className={cn(
+      "pt-4 md:pt-6 space-y-1.5 md:space-y-2",
+      prefix === 'question' ? 'js-question-editor' : 'js-answer-editor'
+    )}
+  >
+
       {toolbarNode && toolbarMount ? createPortal(toolbarNode, toolbarMount) : toolbarNode}
 
       <Droppable droppableId={droppableId} direction="vertical" type="card-block">

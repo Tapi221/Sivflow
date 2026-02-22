@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { FileText } from "lucide-react";
+import { FileText, Plus } from "lucide-react";
 import { DragDropContext } from "@hello-pangea/dnd";
 
 import { Flashcard } from "@/Components/card/Flashcard";
@@ -24,12 +24,20 @@ interface CardEditorPaneProps {
 
 export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPaneProps) {
   const { settings } = useUserSettings();
-  const { cards, updateCard } = useCards();
+
+  // ★重要：createCard が無い場合はここだけあなたの実装名に合わせて変更
+  const { cards, updateCard, createCard } = useCards() as any;
+
+  const isNew =
+    selectedCardId === "new" ||
+    selectedCardId === "__new__" ||
+    selectedCardId === "NEW" ||
+    selectedCardId === "create";
 
   const selectedCard = useMemo(() => {
-    if (!selectedCardId) return null;
+    if (!selectedCardId || isNew) return null;
     return cards.find((c: any) => c.id === selectedCardId) ?? null;
-  }, [cards, selectedCardId]);
+  }, [cards, selectedCardId, isNew]);
 
   // 閲覧状態
   const [isFlipped, setIsFlipped] = useState(false);
@@ -46,10 +54,26 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
     answerBlocks: CardBlock[];
   } | null>(null);
 
+  const initNewDraft = () => {
+    setDraft({
+      title: "",
+      tags: [],
+      questionBlocks: [],
+      answerBlocks: [],
+    });
+  };
+
   // カード切替時にドラフトを再ロード
   useEffect(() => {
     setIsFlipped(false);
     setIsEditing(false);
+
+    // ★新規モードなら、カードが無くても編集を開始できる
+    if (isNew) {
+      initNewDraft();
+      setIsEditing(true);
+      return;
+    }
 
     if (!selectedCard) {
       setDraft(null);
@@ -64,20 +88,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
     });
   }, [selectedCardId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // 未選択時
-  if (!selectedCardId || !selectedCard || !draft) {
-    return (
-      <div className="flex items-center justify-center h-full min-h-[400px] text-slate-400">
-        <div className="text-center">
-          <FileText className="w-12 h-12 mx-auto mb-4 opacity-30" />
-          <p className="text-sm font-bold">左のツリーからカードを選択してください</p>
-          <p className="text-xs mt-2 opacity-70">カードをクリックすると閲覧できます</p>
-        </div>
-      </div>
-    );
-  }
-
-  // 閲覧側のトグル
+  // 閲覧側のトグル（既存カードのみ）
   const handleToggleBookmark = async (card: any) => {
     try {
       await updateCard(card.id, { isBookmarked: !card.isBookmarked });
@@ -97,6 +108,12 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
   };
 
   const resetDraftFromCard = () => {
+    if (isNew) {
+      initNewDraft();
+      return;
+    }
+    if (!selectedCard) return;
+
     setDraft({
       title: selectedCard.title ?? "",
       tags: selectedCard.tags ?? [],
@@ -106,24 +123,49 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
   };
 
   const handleSave = async () => {
+    if (!draft) return;
+
     try {
       setIsSaving(true);
-      await updateCard(selectedCard.id, {
+
+      const payload = {
         title: draft.title,
         tags: draft.tags,
         questionBlocks: draft.questionBlocks,
         answerBlocks: draft.answerBlocks,
-      });
+      };
+
+      if (isNew) {
+        if (typeof createCard !== "function") {
+          console.error(
+            "[CardEditorPane] createCard が useCards にありません。useCards の作成関数名に合わせて置き換えてください。"
+          );
+          return;
+        }
+
+        await createCard(payload);
+        onCardUpdated?.();
+
+        // 新規作成後は編集を閉じてプレースホルダに戻す（親が新IDを選択してくれるのが理想）
+        setIsEditing(false);
+        initNewDraft();
+        return;
+      }
+
+      if (!selectedCard) return;
+
+      await updateCard(selectedCard.id, payload);
       onCardUpdated?.();
       setIsEditing(false);
     } catch (e) {
-      console.error("カード更新に失敗しました:", e);
+      console.error("カード保存に失敗しました:", e);
     } finally {
       setIsSaving(false);
     }
   };
 
   const onDragEnd = (result: DndResult) => {
+    if (!draft) return;
     if (!result.destination) return;
 
     const { source, destination } = result;
@@ -177,13 +219,47 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
     });
   };
 
+  // 未選択時（新規作成もここからできるようにする）
+  if ((!selectedCardId || !selectedCard) && !isNew && !isEditing) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-[400px] text-slate-400">
+        <div className="text-center">
+          <FileText className="w-12 h-12 mx-auto mb-4 opacity-30" />
+          <p className="text-sm font-bold">左のツリーからカードを選択してください</p>
+          <p className="text-xs mt-2 opacity-70">カードをクリックすると閲覧できます</p>
+
+          <div className="mt-6">
+            <Button
+              type="button"
+              className="h-10 rounded-full px-5"
+              onClick={() => {
+                initNewDraft();
+                setIsEditing(true);
+              }}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              新規カードを作成
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // draft が無いのに編集に入った場合の保険
+  if (!draft) {
+    initNewDraft();
+  }
+
   return (
     <div className="h-full overflow-y-auto p-4">
       {isEditing ? (
         <div className="space-y-4">
           {/* 右ペイン用の最小ヘッダ（保存/キャンセルだけ） */}
           <div className="flex items-center justify-between gap-2">
-            <div className="text-xs font-bold text-slate-400">編集（右ペイン）</div>
+            <div className="text-xs font-bold text-slate-400">
+              {isNew ? "新規カード作成（右ペイン）" : "編集（右ペイン）"}
+            </div>
 
             <div className="flex items-center gap-2">
               <Button
@@ -226,9 +302,11 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
                 >
                   <CardSurface ruled={true} ruledRowPx={24}>
                     <BlockEditor
-                      blocks={draft.questionBlocks}
+                      blocks={draft?.questionBlocks ?? []}
                       onChange={(blocks) =>
-                        setDraft((prev) => (prev ? { ...prev, questionBlocks: blocks as any } : prev))
+                        setDraft((prev) =>
+                          prev ? { ...prev, questionBlocks: blocks as any } : prev
+                        )
                       }
                       prefix="question"
                       label="問題"
@@ -254,9 +332,11 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
                 >
                   <CardSurface ruled={true} ruledRowPx={24}>
                     <BlockEditor
-                      blocks={draft.answerBlocks}
+                      blocks={draft?.answerBlocks ?? []}
                       onChange={(blocks) =>
-                        setDraft((prev) => (prev ? { ...prev, answerBlocks: blocks as any } : prev))
+                        setDraft((prev) =>
+                          prev ? { ...prev, answerBlocks: blocks as any } : prev
+                        )
                       }
                       prefix="answer"
                       label="解答"
