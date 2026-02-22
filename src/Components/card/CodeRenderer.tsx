@@ -91,9 +91,9 @@ export function CodeRenderer({ code, language, className }: CodeRendererProps) {
         className
       )}
     >
-      {/* Top-right label: 控えめで絶対配置 */}
-      <div className="absolute top-2.5 right-2.5 z-20 transition-opacity opacity-70 group-hover:opacity-100 pointer-events-none">
-        <span className="grid h-6 min-w-6 px-1.5 place-items-center rounded-full border border-slate-200/60 bg-white/90 text-[10px] font-bold text-slate-500/80 uppercase tracking-wider shadow-sm">
+      {/* 言語ラベル: 左上に控えめに配置 (Claude風) */}
+      <div className="absolute top-1.5 left-3 z-20 pointer-events-none transition-opacity opacity-50 group-hover:opacity-100">
+        <span className="text-[11px] font-bold text-slate-500/80 uppercase tracking-wider">
           {languageLabel}
         </span>
       </div>
@@ -110,7 +110,7 @@ export function CodeRenderer({ code, language, className }: CodeRendererProps) {
               className={cn(
                 preClassName,
                 "codeBlockPre code-block-pre code-block-pre--flat code-block-pre--tools codeBlock",
-                "overflow-x-auto text-[14px] leading-5 px-4 py-3"
+                "overflow-x-auto text-[13.5px] leading-5 px-4 pt-7 pb-3"
               )}
               style={{ ...style }}
             >
