@@ -182,3 +182,8 @@
 - [x] Claude風デザインの適用 (index.css, CodeRenderer.tsx, CodeBlockEditor.tsx)
 - [x] カード編集画面の見切れ修正 (CardEditorPane.tsx)
 - [x] 動作確認
+
+# カード全体の罫線表示の改善
+- [x] 実装計画の作成 (docs/06_Operations/implementation_plan_ruled_lines_everywhere.md)
+- [x] カード全体の罫線表示の実装 (index.css)
+- [x] 動作確認
