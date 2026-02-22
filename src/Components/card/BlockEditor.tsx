@@ -81,29 +81,35 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
   const moveSessionRef = React.useRef<{ blockId: string; originOffset: number } | null>(null);
   const dragHandleClassName = "js-block-drag-handle";
 
-  // コンテナのスケール計測用
+  // コンテナのスケールと座標計測用
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [currentScale, setCurrentScale] = useState(1);
+  const [measurement, setMeasurement] = useState({ scale: 1, top: 0, left: 0 });
 
   React.useEffect(() => {
     if (!containerRef.current) return;
-    const updateScale = () => {
+    const updateMeasurement = () => {
       const el = containerRef.current;
       if (!el) return;
-      // PaperCardScaleFrame によるスケールを計測
-      // getBoundingClientRect().width はスケール後の幅、offsetWidth は元の幅
+      
       const rect = el.getBoundingClientRect();
       const scale = rect.width / el.offsetWidth;
-      if (scale > 0) setCurrentScale(scale);
+      
+      setMeasurement({
+        scale: scale > 0 ? scale : 1,
+        top: rect.top,
+        left: rect.left
+      });
     };
 
-    updateScale();
-    const obs = new ResizeObserver(updateScale);
+    updateMeasurement();
+    const obs = new ResizeObserver(updateMeasurement);
     obs.observe(containerRef.current);
-    window.addEventListener('resize', updateScale);
+    window.addEventListener('resize', updateMeasurement);
+    window.addEventListener('scroll', updateMeasurement, true); // スクロール時も座標が変わるので追従
     return () => {
       obs.disconnect();
-      window.removeEventListener('resize', updateScale);
+      window.removeEventListener('resize', updateMeasurement);
+      window.removeEventListener('scroll', updateMeasurement, true);
     };
   }, []);
 
@@ -129,36 +135,54 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
       clampXMax,
       clampYMin,
       clampYMax,
-      scale = 1
+      scale = 1,
+      containerTop = 0,
+      containerLeft = 0
     }: {
       clampXMin?: number;
       clampXMax?: number;
       clampYMin?: number;
       clampYMax?: number;
       scale?: number;
+      containerTop?: number;
+      containerLeft?: number;
     }
   ) => {
-    const s = style as DndStyle | undefined;
-    if (!s || !s.transform) return style;
+    const s = style as DndStyle | any;
+    if (!s) return style;
 
-    const match = String(s.transform).match(/translate(?:3d)?\(([-\d.]+)px,\s*([-\d.]+)px/);
-    if (!match) return style;
+    const result: any = { ...style };
 
-    // dnd から渡される translate は「画面（非スケール）上の移動量」
-    // スケールされたコンテナ内では、これを scale で割ることでマウスに追従するようになる
-    let x = parseFloat(match[1]) / scale;
-    let y = parseFloat(match[2]) / scale;
+    // transform 補正 (translate)
+    if (s.transform) {
+      const match = String(s.transform).match(/translate(?:3d)?\(([-\d.]+)px,\s*([-\d.]+)px/);
+      if (match) {
+        let x = parseFloat(match[1]) / scale;
+        let y = parseFloat(match[2]) / scale;
 
-    if (clampXMin !== undefined) x = Math.max(x, clampXMin);
-    if (clampXMax !== undefined) x = Math.min(x, clampXMax);
-    if (clampYMin !== undefined) y = Math.max(y, clampYMin);
-    if (clampYMax !== undefined) y = Math.min(y, clampYMax);
+        if (clampXMin !== undefined) x = Math.max(x, clampXMin);
+        if (clampXMax !== undefined) x = Math.min(x, clampXMax);
+        if (clampYMin !== undefined) y = Math.max(y, clampYMin);
+        if (clampYMax !== undefined) y = Math.min(y, clampYMax);
 
-    const transform = String(s.transform).includes('3d')
-      ? `translate3d(${x}px, ${y}px, 0px)`
-      : `translate(${x}px, ${y}px)`;
+        result.transform = String(s.transform).includes('3d')
+          ? `translate3d(${x}px, ${y}px, 0px)`
+          : `translate(${x}px, ${y}px)`;
+      }
+    }
 
-    return { ...style, transform };
+    // top / left 補正 (dnd が付与する fixed 座標)
+    // 親に transform があると fixed 要素の基準が親になり、かつスケールもかかっているため補正が必要
+    if (s.top !== undefined) {
+      const rawTop = typeof s.top === 'number' ? s.top : parseFloat(String(s.top));
+      result.top = (rawTop - containerTop) / scale;
+    }
+    if (s.left !== undefined) {
+      const rawLeft = typeof s.left === 'number' ? s.left : parseFloat(String(s.left));
+      result.left = (rawLeft - containerLeft) / scale;
+    }
+
+    return result as React.CSSProperties;
   };
 
   const handleBlockOverflow = (blockId: string, files: File[]) => {
@@ -438,10 +462,13 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
                     const isLinePositionable = block.type === 'text' || block.type === 'code';
                     const rowOffsetPx = isLinePositionable ? getRowOffset(block) * ROW_STEP_PX : 0;
                     const dragStyle = clampDragStyle(provided.draggableProps.style, {
-                      // X軸方向の固定は一旦解除し、スケール補正後の挙動を確認する。
-                      // 必要なら clampXMin: 0, clampXMax: 0 を戻すが、スケールがある場合はこれ自体がズレの元になる
+                      // 掴んだ瞬間に横へ逃げるのを防ぐため、X軸を 0 に固定
+                      clampXMin: 0,
+                      clampXMax: 0,
                       clampYMin: index === 0 ? 0 : undefined,
-                      scale: currentScale
+                      scale: measurement.scale,
+                      containerTop: measurement.top,
+                      containerLeft: measurement.left,
                     }) as React.CSSProperties | undefined;
                     const baseTransform = dragStyle?.transform ? String(dragStyle.transform) : '';
                     const offsetTransform = rowOffsetPx !== 0 ? `translateY(${rowOffsetPx}px)` : '';

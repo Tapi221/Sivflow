@@ -25,7 +25,7 @@ interface CardEditorPaneProps {
 }
 
 export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPaneProps) {
-  const { settings } = useUserSettings();
+  const { settings, updateSettings } = useUserSettings();
 
   // ★重要：createCard が無い場合はここだけあなたの実装名に合わせて変更
   const { cards, updateCard, createCard } = useCards() as any;
@@ -50,6 +50,19 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
 
   // 裏表共通のカード高さ（null = CardShell 内部自動計算）
   const [cardHeightPx, setCardHeightPx] = useState<number | null>(null);
+
+  // Settings からの高さを同期
+  useEffect(() => {
+    if (settings?.cardEditorHeightPx != null) {
+      setCardHeightPx(settings.cardEditorHeightPx);
+    } else if (typeof window !== 'undefined') {
+      const raw = window.localStorage.getItem('card-editor.resize:shared-height');
+      const parsed = Number(raw);
+      if (Number.isFinite(parsed) && parsed > 0) {
+        setCardHeightPx(parsed);
+      }
+    }
+  }, [settings?.cardEditorHeightPx]);
 
   // ツールバーの外部マウント先（問題・解答 各カードの上）
   const toolbarMountRefQ = useRef<HTMLDivElement | null>(null);
@@ -349,7 +362,13 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
                     showResizeHandle={true}
                     bodyOverflowY="auto"
                     heightPx={cardHeightPx ?? undefined}
-                    onHeightChange={setCardHeightPx}
+                    onHeightChange={(newHeight) => {
+                      setCardHeightPx(newHeight);
+                      updateSettings({ cardEditorHeightPx: newHeight });
+                      if (typeof window !== 'undefined') {
+                        window.localStorage.setItem('card-editor.resize:shared-height', String(newHeight));
+                      }
+                    }}
                     actionsTopLeft={editorActionsTopLeft}
                   >
                     {/* ruledOffsetPx=24 は BlockEditor の pt-6（24px）に合わせた罫線開始位置 */}
@@ -388,7 +407,13 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
                     showResizeHandle={true}
                     bodyOverflowY="auto"
                     heightPx={cardHeightPx ?? undefined}
-                    onHeightChange={setCardHeightPx}
+                    onHeightChange={(newHeight) => {
+                      setCardHeightPx(newHeight);
+                      updateSettings({ cardEditorHeightPx: newHeight });
+                      if (typeof window !== 'undefined') {
+                        window.localStorage.setItem('card-editor.resize:shared-height', String(newHeight));
+                      }
+                    }}
                     actionsTopLeft={editorActionsTopLeft}
                   >
                     {/* ruledOffsetPx=24 は BlockEditor の pt-6（24px）に合わせた罫線開始位置 */}
@@ -428,6 +453,8 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
             setIsFlipped(false);
             setIsEditing(true);
           }}
+          editorSharedHeightPx={cardHeightPx}
+          lockCardHeight={true}
         />
       )}
     </div>
