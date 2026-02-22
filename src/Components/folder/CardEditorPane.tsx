@@ -1,5 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { FileText, Plus } from "lucide-react";
+import Star from "lucide-react/dist/esm/icons/star";
+import CircleHelp from "lucide-react/dist/esm/icons/circle-help";
 import { DragDropContext } from "@hello-pangea/dnd";
 
 import { Flashcard } from "@/Components/card/Flashcard";
@@ -45,6 +47,13 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
   // 編集状態（右ペイン内）
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+
+  // 裏表共通のカード高さ（null = CardShell 内部自動計算）
+  const [cardHeightPx, setCardHeightPx] = useState<number | null>(null);
+
+  // ツールバーの外部マウント先（問題・解答 各カードの上）
+  const toolbarMountRefQ = useRef<HTMLDivElement | null>(null);
+  const toolbarMountRefA = useRef<HTMLDivElement | null>(null);
 
   // 編集用ドラフト（右ペイン内で完結）
   const [draft, setDraft] = useState<{
@@ -106,6 +115,47 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
       console.error("不確証マークの更新に失敗しました:", error);
     }
   };
+
+  // 編集画面用の actionsTopLeft（星・はてなボタン）
+  // CardShell の card-shell-body pt-12 と同じ高さの領域に表示され、閲覧画面と同じ位置になる
+  const editorActionsTopLeft = selectedCard ? (
+    <div className="flex items-center gap-1">
+      {/* 不確証(はてな)マーク */}
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          handleToggleUncertainty(selectedCard);
+        }}
+        className={cn(
+          "rounded-full w-6 h-6 min-w-0 min-h-0 transition-colors flex items-center justify-center",
+          (selectedCard.hasUncertainty ?? false)
+            ? "bg-amber-100 text-amber-600 hover:bg-amber-200 border-none"
+            : "bg-slate-50/80 text-slate-400 hover:bg-slate-100 hover:text-slate-600 border border-transparent"
+        )}
+        title="曘昧/要復習"
+      >
+        <CircleHelp className="w-3 h-3" />
+      </button>
+      {/* ブックマーク(星)マーク */}
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          handleToggleBookmark(selectedCard);
+        }}
+        className={cn(
+          "rounded-full w-6 h-6 min-w-0 min-h-0 transition-colors flex items-center justify-center",
+          (selectedCard.isBookmarked ?? false)
+            ? "bg-indigo-100 text-indigo-600 hover:bg-indigo-200 border-none"
+            : "bg-slate-50/80 text-slate-400 hover:bg-primary-600/10 hover:text-primary-600 border border-transparent"
+        )}
+        title="ブックマーク"
+      >
+        <Star className={cn("w-3 h-3", (selectedCard.isBookmarked ?? false) && "fill-current")} />
+      </button>
+    </div>
+  ) : undefined;
 
   const resetDraftFromCard = () => {
     if (isNew) {
@@ -290,64 +340,82 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
           <DragDropContext onDragEnd={onDragEnd}>
             <div className="grid lg:grid-cols-2 gap-10">
               {/* 問題 */}
-              <PaperCardScaleFrame baseWidth={520}>
-                <CardShell
-                  className={cn(
-                    "mx-auto border-none rounded-[32px] md:rounded-[40px] overflow-hidden shadow-2xl",
-                    "bg-white"
-                  )}
-                  resizable={false}
-                  showResizeHandle={false}
-                  bodyOverflowY="auto"
-                >
-                  <CardSurface ruled={true} ruledRowPx={24}>
-                    <BlockEditor
-                      blocks={draft?.questionBlocks ?? []}
-                      onChange={(blocks) =>
-                        setDraft((prev) =>
-                          prev ? { ...prev, questionBlocks: blocks as any } : prev
-                        )
-                      }
-                      prefix="question"
-                      label="問題"
-                      color="text-indigo-500"
-                      droppableId="question-blocks"
-                      accentColor={settings?.accentColor}
-                      duplicateToOpposite={settings?.duplicateToOpposite}
-                    />
-                  </CardSurface>
-                </CardShell>
-              </PaperCardScaleFrame>
+              <div className="flex flex-col gap-2">
+                {/* ツールバーのマウント先（カードの外側に表示） */}
+                <div ref={toolbarMountRefQ} />
+                <PaperCardScaleFrame baseWidth={520}>
+                  <CardShell
+                    className={cn(
+                      "mx-auto border-none rounded-[32px] md:rounded-[40px] overflow-hidden shadow-2xl",
+                      "bg-white"
+                    )}
+                    resizable={true}
+                    showResizeHandle={true}
+                    bodyOverflowY="auto"
+                    heightPx={cardHeightPx ?? undefined}
+                    onHeightChange={setCardHeightPx}
+                    actionsTopLeft={editorActionsTopLeft}
+                  >
+                    {/* ruledOffsetPx=24 は BlockEditor の pt-6（24px）に合わせた罫線開始位置 */}
+                    <CardSurface ruled={true} ruledRowPx={24} ruledOffsetPx={24}>
+                      <BlockEditor
+                        blocks={draft?.questionBlocks ?? []}
+                        onChange={(blocks) =>
+                          setDraft((prev) =>
+                            prev ? { ...prev, questionBlocks: blocks as any } : prev
+                          )
+                        }
+                        prefix="question"
+                        label="問題"
+                        color="text-indigo-500"
+                        droppableId="question-blocks"
+                        accentColor={settings?.accentColor}
+                        duplicateToOpposite={settings?.duplicateToOpposite}
+                        toolbarMountRef={toolbarMountRefQ}
+                      />
+                    </CardSurface>
+                  </CardShell>
+                </PaperCardScaleFrame>
+              </div>
 
               {/* 解答 */}
-              <PaperCardScaleFrame baseWidth={520}>
-                <CardShell
-                  className={cn(
-                    "mx-auto border-none rounded-[32px] md:rounded-[40px] overflow-hidden shadow-2xl",
-                    "bg-white"
-                  )}
-                  resizable={false}
-                  showResizeHandle={false}
-                  bodyOverflowY="auto"
-                >
-                  <CardSurface ruled={true} ruledRowPx={24}>
-                    <BlockEditor
-                      blocks={draft?.answerBlocks ?? []}
-                      onChange={(blocks) =>
-                        setDraft((prev) =>
-                          prev ? { ...prev, answerBlocks: blocks as any } : prev
-                        )
-                      }
-                      prefix="answer"
-                      label="解答"
-                      color="text-emerald-500"
-                      droppableId="answer-blocks"
-                      accentColor={settings?.accentColor}
-                      duplicateToOpposite={settings?.duplicateToOpposite}
-                    />
-                  </CardSurface>
-                </CardShell>
-              </PaperCardScaleFrame>
+              <div className="flex flex-col gap-2">
+                {/* ツールバーのマウント先（カードの外側に表示） */}
+                <div ref={toolbarMountRefA} />
+                <PaperCardScaleFrame baseWidth={520}>
+                  <CardShell
+                    className={cn(
+                      "mx-auto border-none rounded-[32px] md:rounded-[40px] overflow-hidden shadow-2xl",
+                      "bg-white"
+                    )}
+                    resizable={true}
+                    showResizeHandle={true}
+                    bodyOverflowY="auto"
+                    heightPx={cardHeightPx ?? undefined}
+                    onHeightChange={setCardHeightPx}
+                    actionsTopLeft={editorActionsTopLeft}
+                  >
+                    {/* ruledOffsetPx=24 は BlockEditor の pt-6（24px）に合わせた罫線開始位置 */}
+                    <CardSurface ruled={true} ruledRowPx={24} ruledOffsetPx={24}>
+                      <BlockEditor
+                        blocks={draft?.answerBlocks ?? []}
+                        onChange={(blocks) =>
+                          setDraft((prev) =>
+                            prev ? { ...prev, answerBlocks: blocks as any } : prev
+                          )
+                        }
+                        prefix="answer"
+                        label="解答"
+                        color="text-emerald-500"
+                        droppableId="answer-blocks"
+                        accentColor={settings?.accentColor}
+                        duplicateToOpposite={settings?.duplicateToOpposite}
+                        toolbarMountRef={toolbarMountRefA}
+                      />
+                    </CardSurface>
+                  </CardShell>
+                </PaperCardScaleFrame>
+              </div>
             </div>
           </DragDropContext>
         </div>

@@ -597,7 +597,8 @@ export function Flashcard({
           drawMode={enableDrawMode}
         >
           <CardSurface
-            ruled={false}
+            ruled={true}
+            ruledOffsetPx={0}
             overlay={
               <>
                 <InkLayer

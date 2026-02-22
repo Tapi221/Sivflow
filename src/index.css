@@ -409,18 +409,6 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
     line-height: var(--card-line-height);
-    background-image: repeating-linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 0.03),
-      rgba(0, 0, 0, 0.03) 1px,
-      transparent 1px,
-      transparent var(--ruled-line-pitch)
-    );
-    background-size: 100% var(--ruled-line-pitch);
-    background-position: 0 var(--ruled-line-pitch);
-    background-attachment: local;
-    background-origin: content-box;
-    background-clip: content-box;
   }
 
   .card-shell-body::-webkit-scrollbar {

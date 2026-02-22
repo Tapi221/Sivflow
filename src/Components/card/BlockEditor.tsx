@@ -380,7 +380,7 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
   return (
   <div
     className={cn(
-      "pt-4 md:pt-6 space-y-1.5 md:space-y-2",
+      "pt-6 space-y-1.5 md:space-y-2",
       prefix === 'question' ? 'js-question-editor' : 'js-answer-editor'
     )}
   >
