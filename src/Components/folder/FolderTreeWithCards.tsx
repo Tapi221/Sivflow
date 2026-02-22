@@ -894,6 +894,8 @@ export function FolderTreeWithCards({
 
       if (createdCardId) {
         setNewlyCreatedCardId(createdCardId);
+        // 新規作成後に右ペインを表示（エディタを開く）するように連動させる
+        onItemSelect({ type: 'card', id: createdCardId });
       }
 
       const finalName =
@@ -907,8 +909,7 @@ export function FolderTreeWithCards({
       if (!createdCardId) {
         throw new Error('カードIDの取得に失敗しました');
       }
-      // 新規作成後に右ペインを強制遷移させない。
-      // 現在の選択（例: フォルダダッシュボード表示）を維持し、サイドバー上に新規カードのみ追加する。
+
       if (editingIdRef.current === tempId) {
         closeRename();
       }

@@ -139,7 +139,12 @@ export function CodeBlockEditor({ value, onChange, className }: CodeBlockEditorP
           onValueChange={handleCodeChange}
           highlight={highlightCode}
           padding={0}
-          className="code-editor-no-scroll codeBlockPre font-mono leading-[24px] [&>pre]:m-0 [&>textarea]:m-0"
+          className={cn(
+            "code-editor-no-scroll codeBlockPre font-mono leading-[24px]",
+            // Prism.css 等の干渉を徹底的に排除するリセット
+            "[&>pre]:!m-0 [&>pre]:!p-0 [&>pre]:!bg-transparent [&>pre]:!border-none",
+            "[&>textarea]:!m-0 [&>textarea]:!p-0 [&>textarea]:border-none [&>textarea]:shadow-none"
+          )}
           style={{
             fontFamily: '"Fira Code", "Fira Mono", monospace',
             fontSize: 13,
@@ -149,7 +154,7 @@ export function CodeBlockEditor({ value, onChange, className }: CodeBlockEditorP
             margin: 0,
             overflow: 'visible',
           }}
-          textareaClassName="focus:outline-none leading-[24px] m-0 p-0"
+          textareaClassName="focus:outline-none leading-[24px] m-0 p-0 !border-none !ring-0"
         />
 
         {!code && (
