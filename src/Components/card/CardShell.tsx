@@ -88,8 +88,10 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
       // 最小高さを 48px (step * 2) 基準にしつつ、ハンドル分も確保
       if (!element) return contentBaseMin;
 
-      // 幅ベースの4:3高さを最低限として維持し、コンパクト化しすぎる崩れを防ぐ
-      const widthBasedMin = Math.ceil(((element.clientWidth || element.offsetWidth || 0) * 3 / 4) / resizeStepPx) * resizeStepPx;
+      // 幅ベースの最小高さ制限（デフォルトは 4:3 = 75%）
+      // resizable 時は制限を大幅に緩和（1/8 = 12.5%）してコンパクトにできるようにする
+      const widthRatio = resizable ? (1 / 8) : (3 / 4);
+      const widthBasedMin = Math.ceil(((element.clientWidth || element.offsetWidth || 0) * widthRatio) / resizeStepPx) * resizeStepPx;
       const baseMin = Math.max(contentBaseMin, widthBasedMin || 0);
 
       const body = element.querySelector('.card-shell-body') as HTMLElement | null;

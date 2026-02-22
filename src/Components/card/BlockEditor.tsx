@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Droppable, Draggable } from '@hello-pangea/dnd';
 import { Plus } from 'lucide-react';
@@ -81,6 +81,32 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
   const moveSessionRef = React.useRef<{ blockId: string; originOffset: number } | null>(null);
   const dragHandleClassName = "js-block-drag-handle";
 
+  // コンテナのスケール計測用
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [currentScale, setCurrentScale] = useState(1);
+
+  React.useEffect(() => {
+    if (!containerRef.current) return;
+    const updateScale = () => {
+      const el = containerRef.current;
+      if (!el) return;
+      // PaperCardScaleFrame によるスケールを計測
+      // getBoundingClientRect().width はスケール後の幅、offsetWidth は元の幅
+      const rect = el.getBoundingClientRect();
+      const scale = rect.width / el.offsetWidth;
+      if (scale > 0) setCurrentScale(scale);
+    };
+
+    updateScale();
+    const obs = new ResizeObserver(updateScale);
+    obs.observe(containerRef.current);
+    window.addEventListener('resize', updateScale);
+    return () => {
+      obs.disconnect();
+      window.removeEventListener('resize', updateScale);
+    };
+  }, []);
+
   React.useEffect(() => {
     blocksRef.current = blocks;
   }, [blocks]);
@@ -102,12 +128,14 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
       clampXMin,
       clampXMax,
       clampYMin,
-      clampYMax
+      clampYMax,
+      scale = 1
     }: {
       clampXMin?: number;
       clampXMax?: number;
       clampYMin?: number;
       clampYMax?: number;
+      scale?: number;
     }
   ) => {
     const s = style as DndStyle | undefined;
@@ -116,8 +144,10 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
     const match = String(s.transform).match(/translate(?:3d)?\(([-\d.]+)px,\s*([-\d.]+)px/);
     if (!match) return style;
 
-    let x = parseFloat(match[1]);
-    let y = parseFloat(match[2]);
+    // dnd から渡される translate は「画面（非スケール）上の移動量」
+    // スケールされたコンテナ内では、これを scale で割ることでマウスに追従するようになる
+    let x = parseFloat(match[1]) / scale;
+    let y = parseFloat(match[2]) / scale;
 
     if (clampXMin !== undefined) x = Math.max(x, clampXMin);
     if (clampXMax !== undefined) x = Math.min(x, clampXMax);
@@ -379,6 +409,7 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
 
   return (
   <div
+    ref={containerRef}
     className={cn(
       "pt-6 space-y-1.5 md:space-y-2",
       prefix === 'question' ? 'js-question-editor' : 'js-answer-editor'
@@ -407,10 +438,10 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
                     const isLinePositionable = block.type === 'text' || block.type === 'code';
                     const rowOffsetPx = isLinePositionable ? getRowOffset(block) * ROW_STEP_PX : 0;
                     const dragStyle = clampDragStyle(provided.draggableProps.style, {
-                      // ブロック並び替えは縦方向のみ。X軸を固定して「掴んだ瞬間に横へ逃げる」挙動を防ぐ
-                      clampXMin: 0,
-                      clampXMax: 0,
-                      clampYMin: index === 0 ? 0 : undefined
+                      // X軸方向の固定は一旦解除し、スケール補正後の挙動を確認する。
+                      // 必要なら clampXMin: 0, clampXMax: 0 を戻すが、スケールがある場合はこれ自体がズレの元になる
+                      clampYMin: index === 0 ? 0 : undefined,
+                      scale: currentScale
                     }) as React.CSSProperties | undefined;
                     const baseTransform = dragStyle?.transform ? String(dragStyle.transform) : '';
                     const offsetTransform = rowOffsetPx !== 0 ? `translateY(${rowOffsetPx}px)` : '';

@@ -306,11 +306,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
       {isEditing ? (
         <div className="space-y-4">
           {/* 右ペイン用の最小ヘッダ（保存/キャンセルだけ） */}
-          <div className="flex items-center justify-between gap-2">
-            <div className="text-xs font-bold text-slate-400">
-              {isNew ? "新規カード作成（右ペイン）" : "編集（右ペイン）"}
-            </div>
-
+          <div className="flex items-center justify-end gap-2">
             <div className="flex items-center gap-2">
               <Button
                 type="button"
