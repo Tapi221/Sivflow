@@ -7,7 +7,6 @@ import { BlockToolbar } from './BlockToolbar';
 import { TextBlock } from './blocks/TextBlock';
 import { CodeBlockItem } from './blocks/CodeBlockItem';
 import { MediaBlock } from './blocks/MediaBlock';
-import { MemoBlock } from './blocks/MemoBlock';
 import { ReferenceBlock } from './blocks/ReferenceBlock';
 import { MathBlock } from './blocks/MathBlock';
 import { MarkdownBlock } from './blocks/MarkdownBlock';
@@ -57,7 +56,6 @@ const isRowPositionableType = (type: CardBlock['type']) =>
   type === 'text' ||
   type === 'code' ||
   type === 'image' ||
-  type === 'memo' ||
   type === 'math' ||
   type === 'markdown';
 
@@ -618,25 +616,6 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
                             isActive={activeBlockId === block.id || snapshot.isDragging}
                             accentColor={accentColor}
                             // ★ audio は 1行移動しない（いらん）
-                          />
-                        )}
-
-                        {block.type === 'memo' && (
-                          <MemoBlock
-                            content={block.content || ''}
-                            onChange={(content) => handleUpdateBlock(block.id, { content })}
-                            onDelete={() => handleDeleteBlock(block.id, index)}
-                            onDuplicate={() => handleDuplicateBlock(block.id)}
-                            dragHandleProps={undefined}
-                            dragHandleClassName={dragHandleClassName}
-                            accentColor={accentColor}
-                            isActive={activeBlockId === block.id || snapshot.isDragging}
-                            onMoveUp={() => handleShiftBlockRow(block.id, 'up')}
-                            onMoveDown={() => handleShiftBlockRow(block.id, 'down')}
-                            onMoveDragStart={() => handleMoveDragStart(block.id)}
-                            onMoveDragEnd={() => handleMoveDragEnd(block.id)}
-                            canMoveUp={canMoveUp}
-                            canMoveDown={canMoveDown}
                           />
                         )}
 
