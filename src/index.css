@@ -693,12 +693,15 @@
   /* 罫線背景ユーティリティ */
 .bg-ruled {
   --ruled-line-pitch: var(--card-line-height, 24px);
+  --ruled-line-thickness: 1px;
+  --ruled-line-color: rgba(0, 0, 0, 0.03);
+
   background-image: repeating-linear-gradient(
     to bottom,
-    rgba(0, 0, 0, 0.03),
-    rgba(0, 0, 0, 0.03) 1px,
-    transparent 1px,
-    transparent var(--ruled-line-pitch)
+    transparent 0,
+    transparent calc(var(--ruled-line-pitch) - var(--ruled-line-thickness)),
+    var(--ruled-line-color) calc(var(--ruled-line-pitch) - var(--ruled-line-thickness)),
+    var(--ruled-line-color) var(--ruled-line-pitch)
   );
   background-size: 100% var(--ruled-line-pitch);
 }
@@ -873,6 +876,11 @@
 /* Stack block borders as a single line by overlapping adjacent rows by 1px */
 [data-block-row="true"] + [data-block-row="true"] {
   margin-top: 0;
+}
+
+/* 紙カード上では 1px オーバーラップを無効化（罫線グリッドとの衝突を防ぐ） */
+.card-shell--paper [data-block-row="true"] + [data-block-row="true"] {
+  margin-top: 0 !important;
 }
 
 /* Review page mobile optimization */
@@ -1193,6 +1201,16 @@
 
   /* ✅ ガイド線などを絶対出さない */
   background-image: none !important;
+}
+
+/* CodeBlockEditor を 24pxグリッドに寄せる（紙罫線と合わせる） */
+.code-grid-24 :where(pre, code, textarea, div) {
+  line-height: 24px;
+}
+
+/* ヘッダーや言語ラベルがある場合に備えて、極端な上下paddingを避ける */
+.code-grid-24 :where(pre) {
+  margin: 0;
 }
 
 /* CodeRenderer(表示)専用: 内側カード化をやめる */

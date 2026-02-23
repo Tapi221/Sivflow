@@ -27,6 +27,7 @@ interface TextBlockProps {
 export const TextBlock = ({ content, onChange, onDelete, onDuplicate, dragHandleProps, dragEnabled = true, dragHandleClassName, accentColor, autoFocus, placeholder, isActive, showDelete, canMoveUp, canMoveDown, onMoveUp, onMoveDown, onMoveDragStart, onMoveDragEnd }: TextBlockProps) => {
   return (
     <BlockWrapper 
+      variant="paper"
       onDelete={onDelete} 
       onDuplicate={onDuplicate} 
       dragHandleProps={dragHandleProps}

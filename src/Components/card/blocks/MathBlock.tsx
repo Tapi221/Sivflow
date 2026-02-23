@@ -80,6 +80,7 @@ export const MathBlock: React.FC<MathBlockProps> = ({
 
   return (
     <BlockWrapper
+      variant="paper"
       onDelete={onDelete}
       onDuplicate={onDuplicate}
       dragHandleProps={dragHandleProps}

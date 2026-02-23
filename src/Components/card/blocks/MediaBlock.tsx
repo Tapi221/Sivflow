@@ -54,6 +54,7 @@ export const MediaBlock = ({
 
   return (
     <BlockWrapper
+      variant="paper"
       onDelete={onDelete}
       onDuplicate={onDuplicate}
       dragHandleProps={dragHandleProps}
