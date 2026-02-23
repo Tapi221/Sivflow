@@ -9,6 +9,18 @@ import {
 import AutoResizeTextarea from '@/Components/ui/AutoResizeTextarea';
 import { cn } from '@/lib/utils';
 
+type CSSCustomProperties = React.CSSProperties & Record<`--${string}`, string>;
+
+const EDITOR_LINE_HEIGHT = 24;
+const EDITOR_MIN_ROWS = 10;
+const EDITOR_MAX_HEIGHT = 520;
+
+const isHexColor = (color: string) => /^#[0-9a-fA-F]{3,8}$/.test(color);
+
+/**
+ * accentColor は hex カラーコード推奨（例: "#3b82f6"）。
+ * それ以外の形式はデフォルト色にフォールバックします。
+ */
 interface MarkdownEditorDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -28,6 +40,11 @@ export const MarkdownEditorDialog: React.FC<MarkdownEditorDialogProps> = ({
   accentColor,
   error,
 }) => {
+  const ringColor =
+    accentColor && isHexColor(accentColor)
+      ? `${accentColor}40`
+      : 'var(--primary-color-alpha-40)';
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[min(92vw,780px)] max-w-[780px] p-0 overflow-hidden">
@@ -47,10 +64,10 @@ export const MarkdownEditorDialog: React.FC<MarkdownEditorDialogProps> = ({
             onPasteCapture={onPasteCapture}
             placeholder="Markdownを入力..."
             aria-label="Markdown入力"
-            minRows={10}
-            lineHeight={24}
+            minRows={EDITOR_MIN_ROWS}
+            lineHeight={EDITOR_LINE_HEIGHT}
             allowInternalScroll={true}
-            maxHeight={520}
+            maxHeight={EDITOR_MAX_HEIGHT}
             autoFocus
             textareaClassName="font-serif"
             className={cn(
@@ -59,15 +76,13 @@ export const MarkdownEditorDialog: React.FC<MarkdownEditorDialogProps> = ({
               'focus-visible:ring-2 focus-visible:ring-offset-0 bg-white focus:border-slate-300',
               'shadow-inner focus:shadow-sm resize-none whitespace-pre-wrap'
             )}
-            style={{
-              '--tw-ring-color': accentColor
-                ? `${accentColor}40`
-                : 'var(--primary-color-alpha-40)',
-            } as React.CSSProperties}
+            style={
+              { '--tw-ring-color': ringColor } as CSSCustomProperties
+            }
           />
 
           {error && (
-            <p className="text-[10px] text-red-600 mt-1 font-medium">
+            <p className="text-[10px] text-red-600 mt-1 font-medium" role="alert">
               ⚠️ {error}
             </p>
           )}

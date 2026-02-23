@@ -59,18 +59,31 @@ npm run dev
 ```
 
 ## 🏗 プロジェクト構造概要
-
 ```
-src/
-├── Components/          # Feature-based Component Structure
-│   ├── ui/             # Generic UI (Button, Input) - No logic
-│   ├── card/           # Card domain (Editor, Block, etc.)
-│   ├── folder/         # Folder domain (Tree, View, Dialog)
-│   ├── explorer/       # Sidebar Explorer (Tabs, Recent, Favorites)
-│   ├── tag/            # Tag management & Filtering
-│   ├── stats/          # Statistics & Graphs
-│   └── settings/       # App Settings
-├── Pages/              # Route handling & Data wiring
-├── services/           # External boundaries (Firebase, Storage, Algo)
-└── hooks/              # Business Logic (useCards, useFolders, useExplorerStore)
+.
+├── src/                        # Web app source (React + TS)
+│   ├── Components/             # Feature-based components
+│   │   ├── card/               # Card domain (Editor, Block, etc.)
+│   │   │   └── blocks/         # Block implementations (e.g. MathBlock.tsx)
+│   │   ├── ui/
+│   │   └── ...
+│   ├── hooks/
+│   ├── __tests__/
+│   ├── assets/
+│   ├── App.tsx
+│   └── main.tsx
+├── functions/                  # Firebase Functions (node/ts)
+│   ├── src/
+│   └── lib/
+├── public/                     # Static/public files
+│   └── manifest.webmanifest
+├── docs/                       # ドキュメント（仕様・設計・運用）
+├── scripts/                    # 各種スクリプト・マイグレーション
+├── services/                   # 外部サービス / マイクロサービス
+├── tests/                      # e2e / integration テスト
+├── test-results/               # テスト結果出力
+├── package.json
+├── tsconfig.json
+├── vite.config.ts
+└── README.md
 ```
