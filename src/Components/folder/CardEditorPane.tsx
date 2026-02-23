@@ -6,7 +6,7 @@ import { DragDropContext } from "@hello-pangea/dnd";
 
 import { Flashcard } from "@/Components/card/Flashcard";
 import { BlockEditor } from "@/Components/card/BlockEditor";
-import { PaperCardScaleFrame } from "@/Components/card/PaperCardScaleFrame";
+import { ScaleToFitFrame } from "@/Components/card/ScaleToFitFrame";
 import { CardShell } from "@/Components/card/CardShell";
 import { CardSurface } from "@/Components/card/CardSurface";
 
@@ -375,7 +375,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
               <div className="flex flex-col gap-2 w-full">
                 {/* ツールバーのマウント先（カードの外側に表示） */}
                 <div ref={toolbarMountRefQ} />
-                <PaperCardScaleFrame baseWidth={480}>
+                <ScaleToFitFrame baseWidth={480}>
                   <CardShell
                     className={cn(
                       "mx-auto border-none rounded-[32px] md:rounded-[40px] overflow-hidden shadow-xl",
@@ -414,14 +414,14 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
                       />
                     </CardSurface>
                   </CardShell>
-                </PaperCardScaleFrame>
+                </ScaleToFitFrame>
               </div>
 
               {/* 解答 */}
               <div className="flex flex-col gap-2 w-full">
                 {/* ツールバーのマウント先（カードの外側に表示） */}
                 <div ref={toolbarMountRefA} />
-                <PaperCardScaleFrame baseWidth={480}>
+                <ScaleToFitFrame baseWidth={480}>
                   <CardShell
                     className={cn(
                       "mx-auto border-none rounded-[32px] md:rounded-[40px] overflow-hidden shadow-xl",
@@ -459,7 +459,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
                       />
                     </CardSurface>
                   </CardShell>
-                </PaperCardScaleFrame>
+                </ScaleToFitFrame>
               </div>
             </div>
           </DragDropContext>

@@ -18,7 +18,7 @@ import { ReferencePopup } from './ReferencePopup';
 import type { CardBlock, ReferenceBlockData } from '@/types';
 import { normalizeCard } from '@/utils';
 import { CardSurface } from "./CardSurface";
-import { PaperCardScaleFrame } from './PaperCardScaleFrame';
+import { ScaleToFitFrame } from './ScaleToFitFrame';
 import { TagBadge } from '@/Components/tag/TagBadge';
 import { InkLayer, InkToolbar, type InkHistoryState, type InkLayerHandle } from '@/Components/ink/InkLayer';
 import { resolveInkDocument } from '@/Components/ink/inkStorage';
@@ -586,7 +586,7 @@ export function Flashcard({
         </div>
       )}
 
-      <PaperCardScaleFrame baseWidth={480}>
+      <ScaleToFitFrame baseWidth={480}>
         <CardShell
           className={cn(
             "mx-auto border-none rounded-[32px] md:rounded-[40px] overflow-hidden transition-all duration-300",
@@ -671,7 +671,7 @@ export function Flashcard({
             </div>
           </CardSurface>
         </CardShell>
-      </PaperCardScaleFrame>
+      </ScaleToFitFrame>
 
       {/* カード直下の「Back to Question」 */}
       {!previewMode && effectiveIsFlipped && (
