@@ -219,9 +219,9 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
             setIsEditorOpen(true);
           }}
         >
-          <div className="markdownBlockPreviewContent px-3">
-            {previewNode}
-          </div>
+          <div className="markdownBlockPreviewContent px-3 pt-[2px] pb-[2px]">
+    {previewNode}
+  </div>
         </div>
         <MarkdownEditorDialog
           open={isEditorOpen}
