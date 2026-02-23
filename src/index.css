@@ -877,8 +877,10 @@
 
 /* Review page mobile optimization */
 [data-page="review"] {
+  height: 100dvh;
   min-height: 100vh;
   min-height: 100dvh;
+  overflow: hidden;
 }
 
 @media (max-width: 768px) {
@@ -939,11 +941,11 @@
   }
 
   [data-page="review"] .reviewCardViewport {
-    flex: 1 1 auto;
-    min-height: 0;
-    max-height: calc(100vh - var(--review-top) - var(--review-bottom));
-    max-height: calc(100dvh - var(--review-top) - var(--review-bottom));
-  }
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: calc(100vh - var(--review-top, 0px) - var(--review-bottom, 0px));
+  max-height: calc(100dvh - var(--review-top, 0px) - var(--review-bottom, 0px));
+}
 
   [data-page="review"] .reviewRatingBar {
     position: sticky;

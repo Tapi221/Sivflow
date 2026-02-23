@@ -62,6 +62,25 @@ export default function StudyMode() {
     return new URLSearchParams(location.search).get('previewStampRally') === '1';
   }, [isDev, location.search]);
 
+  useEffect(() => {
+    // StudyMode は集中フローなので「ページスクロール」を殺す。
+    // 大規模アプリ想定で ref-counting（他画面と競合しても剥がしすぎない）。
+    const root = document.documentElement;
+    const prev = Number(root.dataset.noPageScrollCount || '0');
+    const next = prev + 1;
+    root.dataset.noPageScrollCount = String(next);
+    root.classList.add('no-page-scroll');
+    return () => {
+      const current = Number(root.dataset.noPageScrollCount || '1') - 1;
+      if (current <= 0) {
+        delete root.dataset.noPageScrollCount;
+        root.classList.remove('no-page-scroll');
+      } else {
+        root.dataset.noPageScrollCount = String(current);
+      }
+    };
+  }, []);
+
   const { cards: allCards = [], loading: isLoading, updateCard } = useCards(folderId);
   const { folders = [], loading: foldersLoading } = useFolders();
   const { updateFolder } = useFolders();
@@ -196,7 +215,7 @@ export default function StudyMode() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#F5F7F8] p-4 md:p-8">
+      <div className="h-[100dvh] overflow-hidden bg-[#F5F7F8] p-4 md:p-8">
         <div className="max-w-[1400px] mx-auto space-y-4">
           <Skeleton className="h-10 w-48" />
           <Skeleton className="h-[600px] w-full" />
@@ -239,11 +258,12 @@ export default function StudyMode() {
   return (
     <div
       data-page="review"
-      className={`reviewPage bg-[#F5F7F8] text-slate-800 font-serif ${isCompletionView ? 'h-[100dvh] overflow-hidden' : 'min-h-screen'}`}
+      className="reviewPage bg-[#F5F7F8] text-slate-800 font-serif h-[100dvh] overflow-hidden flex flex-col"
+      style={{ '--card-max-height': '100%' }}
     >
-      <div className={`reviewShell max-w-[1600px] mx-auto p-3 ${isCompletionView ? 'md:py-4 md:px-8 h-full flex flex-col' : 'md:p-8'}`}>
+      <div className="reviewShell max-w-[1600px] mx-auto w-full p-3 md:py-4 md:px-8 h-full flex flex-col min-h-0">
         {!isCompletionView && (
-          <div className={`reviewHeader flex items-center justify-between px-2 ${isCompletionView ? 'mb-3 md:mb-4' : 'mb-4 md:mb-6'}`}>
+          <div className={`reviewHeader shrink-0 flex items-center justify-between px-2 ${isCompletionView ? 'mb-3 md:mb-4' : 'mb-4 md:mb-6'}`}>
             <div className="flex items-center gap-3 md:gap-4">
               <button
                 type="button"
@@ -277,18 +297,26 @@ export default function StudyMode() {
           </div>
         )}
 
-        <div className={`reviewProgress w-full h-1.5 bg-slate-200 rounded-full overflow-hidden ${isCompletionView ? 'mb-4 md:mb-5' : 'mb-6 md:mb-8'}`}>
+        <div className={`reviewProgress shrink-0 w-full h-1.5 bg-slate-200 rounded-full overflow-hidden ${isCompletionView ? 'mb-4 md:mb-5' : 'mb-6 md:mb-8'}`}>
           <div className="h-full bg-primary-600 transition-all duration-500 ease-out" style={{ width: `${Math.max(0, Math.min(100, progressPercent || 0))}%` }} />
         </div>
 
         {previewStampRally && (
-          <div className="mb-6 rounded-2xl border border-slate-200 bg-white/95 p-4">
+          <div className="shrink-0 mb-6 rounded-2xl border border-slate-200 bg-white/95 p-4">
             <div className="mb-2 text-[11px] font-semibold tracking-wide text-slate-500">DEV: StampRally Preview</div>
             <StampRally currentStreak={effectiveStreak} />
           </div>
         )}
 
-        <div className={isCompletionView ? 'flex-1 min-h-0 overflow-hidden' : ''}>
+        <div
+          className={[
+            'flex-1 min-h-0',
+            // 画面全体が長くなる系（空/サマリー）はここでスクロールさせる
+            (studyCards.length === 0 || studyComplete || (isPracticeMode && practiceState?.phase === 'summary'))
+              ? 'overflow-y-auto overscroll-contain'
+              : 'overflow-hidden',
+          ].join(' ')}
+        >
           {studyCards.length === 0 ? (
             <StudyEmpty folderId={folderId} navigate={navigate} handleBack={handleBack} />
           ) : isPracticeMode ? (
