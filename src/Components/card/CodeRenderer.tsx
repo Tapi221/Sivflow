@@ -92,7 +92,7 @@ export function CodeRenderer({ code, language, className }: CodeRendererProps) {
       )}
     >
       {/* 言語ラベル: 左上に控えめに配置 (Claude風チップ) */}
-      <div className="absolute top-2.5 left-3 z-20 pointer-events-none transition-opacity opacity-40 group-hover:opacity-100 flex items-center">
+      <div className="absolute top-2.5 left-[10px] z-20 pointer-events-none transition-opacity opacity-40 group-hover:opacity-100 flex items-center">
         <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider font-sans bg-zinc-900/5 px-1.5 py-0.5 rounded-md leading-none">
           {languageLabel}
         </span>
@@ -110,7 +110,7 @@ export function CodeRenderer({ code, language, className }: CodeRendererProps) {
               className={cn(
                 preClassName,
                 "codeBlockPre code-block-pre code-block-pre--flat code-block-pre--tools codeBlock",
-                "overflow-x-auto text-[13.5px] leading-5 px-4 pt-6 pb-2.5"
+                "overflow-x-auto text-[13.5px] leading-5 px-[10px] pt-6 pb-2.5"
               )}
               style={{ ...style }}
             >

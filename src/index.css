@@ -1018,7 +1018,7 @@
 
 .codeBlockPre {
   margin: 0 !important;
-  padding: 12px 16px !important;
+  padding: 12px 10px !important;
   font-size: 14px !important;
   line-height: 24px !important;
   background-image: none !important;
@@ -1170,7 +1170,7 @@
   border-radius: 16px;
   box-shadow: 0 1px 0 rgba(15, 23, 42, 0.03), 0 6px 16px rgba(15, 23, 42, 0.06);
 
-  padding: 0 16px;
+  padding: 0 10px;
   margin: 0;
 
   font-family: "Fira Code", "Fira Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -1200,7 +1200,7 @@
   border-radius: 12px !important;
   box-shadow: none !important;
   margin: 0 !important;
-  padding: 0 16px !important;
+  padding: 0 10px !important;
 }
 
 /* 右上ツールが被らないように上だけ余白を増やす */
@@ -1214,7 +1214,7 @@
   border: 1px solid var(--code-border);
   border-radius: 12px;
   box-shadow: none;
-  padding: 0 16px;
+  padding: 0 10px;
 }
 
 
@@ -1274,7 +1274,7 @@
   font-family: "Fira Code", "Fira Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
   font-size: 14px !important;
   line-height: 20px !important;
-  padding: 24px 16px 10px 16px !important;
+  padding: 24px 10px 10px 10px !important;
   letter-spacing: normal !important;
   tab-size: 2 !important;
   white-space: pre !important;

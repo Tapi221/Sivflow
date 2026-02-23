@@ -100,7 +100,7 @@ export function CodeBlockEditor({ value, onChange, className }: CodeBlockEditorP
       >
         <div
           className="
-            absolute top-2.5 left-3 z-30 flex items-center gap-0.5
+            absolute top-2.5 left-[10px] z-30 flex items-center gap-0.5
             opacity-40 group-hover:opacity-100 group-focus-within:opacity-100
             transition-opacity pointer-events-auto
           "
@@ -135,7 +135,7 @@ export function CodeBlockEditor({ value, onChange, className }: CodeBlockEditorP
           value={code}
           onValueChange={handleCodeChange}
           highlight={highlightCode}
-          padding="24px 16px 10px 16px"
+          padding="24px 10px 10px 10px"
           className={cn(
             "code-editor-no-scroll codeBlockPre font-mono",
             // Prism.css 等の不要なマージン/背景をリセット
@@ -155,7 +155,7 @@ export function CodeBlockEditor({ value, onChange, className }: CodeBlockEditorP
         />
 
         {!code && (
-          <div className="absolute top-0 left-0 text-slate-300 font-mono text-[13.5px] items-center leading-[20px] pointer-events-none p-[24px_16px_10px_16px] z-0">
+          <div className="absolute top-0 left-0 text-slate-300 font-mono text-[13.5px] items-center leading-[20px] pointer-events-none p-[24px_10px_10px_10px] z-0">
             // Type or paste your code here...
           </div>
         )}

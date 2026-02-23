@@ -7,6 +7,7 @@ import {
 import TypeIcon from 'lucide-react/dist/esm/icons/type';
 import CodeIcon from 'lucide-react/dist/esm/icons/code';
 import ImageIcon from 'lucide-react/dist/esm/icons/image';
+import LinkIcon from 'lucide-react/dist/esm/icons/link';
 import SigmaIcon from 'lucide-react/dist/esm/icons/sigma';
 import NotebookPenIcon from 'lucide-react/dist/esm/icons/notebook-pen';
 import { cn } from '@/lib/utils';
@@ -43,6 +44,7 @@ const ALLOWED_TYPES: readonly CardBlock['type'][] = [
   'code',
   'image',
   'audio',
+  'reference',
   'markdown',
   'math',
   'memo',
@@ -76,6 +78,7 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
           { type: 'code', label: 'コード', icon: 'Code', isVisible: true, color: 'indigo' },
           { type: 'image', label: '画像', icon: 'Image', isVisible: true, color: 'emerald' },
           { type: 'audio', label: '音声', icon: 'Volume2', isVisible: true, color: 'amber' },
+          { type: 'reference', label: 'リンク', icon: 'Link', isVisible: true, color: 'cyan' },
           { type: 'markdown', label: 'Markdown', icon: 'NotebookPen', isVisible: true, color: 'rose' },
           { type: 'math', label: '数式', icon: 'Sigma', isVisible: true, color: 'purple' },
           { type: 'memo', label: 'メモ', icon: 'StickyNote', isVisible: true, color: 'slate' }
@@ -87,6 +90,7 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
       switch (iconName) {
         case 'Type': return TypeIcon;
         case 'Image': return ImageIcon;
+        case 'Link': return LinkIcon;
         case 'Sigma': return SigmaIcon;
         case 'Code': return CodeIcon;
         case 'StickyNote': return StickyNote;
@@ -101,6 +105,7 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
       case 'code': return CodeIcon;
       case 'image': return ImageIcon;
       case 'audio': return Volume2;
+      case 'reference': return LinkIcon;
       case 'markdown': return NotebookPenIcon;
       case 'math': return SigmaIcon;
       case 'memo': return StickyNote;
@@ -110,6 +115,7 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
 
   const isTypeHidden = (type: CardBlock['type']) => {
     if (hiddenBlockTypes.includes(type)) return true;
+    if (type === 'reference' && !canAddLink) return true;
     if (type === 'audio' && !canAddAudio) return true;
     return false;
   };
@@ -126,6 +132,7 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
     indigo: 'hover:shadow-indigo-500/30 hover:text-indigo-600',
     emerald: 'hover:shadow-emerald-500/30 hover:text-emerald-600',
     amber: 'hover:shadow-amber-500/30 hover:text-amber-600',
+    cyan: 'hover:shadow-cyan-500/30 hover:text-cyan-600',
     rose: 'hover:shadow-rose-500/30 hover:text-rose-600',
     purple: 'hover:shadow-purple-500/30 hover:text-purple-600',
     slate: 'hover:shadow-slate-500/20 hover:text-slate-600',
