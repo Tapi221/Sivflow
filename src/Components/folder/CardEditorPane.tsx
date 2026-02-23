@@ -379,7 +379,8 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
                   <CardShell
                     className={cn(
                       "mx-auto border-none rounded-[32px] md:rounded-[40px] overflow-hidden shadow-xl",
-                      "bg-white"
+                      "premium-paper-depth",
+                      "card-shell--paper"
                     )}
                     resizable={true}
                     showResizeHandle={true}
