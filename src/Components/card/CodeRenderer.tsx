@@ -1,3 +1,5 @@
+// src/Components/card/CodeRenderer.tsx
+
 import { useMemo, useState, useCallback } from "react";
 import { Highlight } from "prism-react-renderer";
 import { cn } from "@/lib/utils";
@@ -29,22 +31,22 @@ const LANGUAGE_ALIASES: Record<string, string> = {
 };
 
 const LANGUAGE_LABELS: Record<string, string> = {
-  javascript: "JavaScript",
-  typescript: "TypeScript",
+  javascript: "JS",
+  typescript: "TS",
   jsx: "JSX",
   tsx: "TSX",
   json: "JSON",
-  bash: "Shell",
+  bash: "SH",
   css: "CSS",
   html: "HTML",
-  markdown: "Markdown",
-  python: "Python",
-  java: "Java",
+  markdown: "MD",
+  python: "PY",
+  java: "JAVA",
   c: "C",
   cpp: "C++",
   csharp: "C#",
-  go: "Go",
-  rust: "Rust",
+  go: "GO",
+  rust: "RS",
   sql: "SQL",
   yaml: "YAML",
   clike: "Text",
@@ -73,7 +75,6 @@ export function CodeRenderer({ code, language, className }: CodeRendererProps) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // clipboard API が使えない環境のフォールバック
       const el = document.createElement("textarea");
       el.value = normalizedCode;
       document.body.appendChild(el);
@@ -88,70 +89,62 @@ export function CodeRenderer({ code, language, className }: CodeRendererProps) {
   return (
     <div
       className={cn(
-        "relative group flex flex-col max-w-full overflow-hidden",
-        "rounded-xl border border-slate-200 bg-white shadow-sm",
+        "code-block codeBlock codeBlockRoot relative group overflow-hidden flex flex-col max-w-full",
         className
       )}
     >
-      {/* ── ヘッダーバー ── */}
-      <div className="flex items-center justify-between px-3.5 py-2 border-b border-slate-100 bg-slate-50/80">
-        {/* 言語ラベル */}
-        <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest select-none font-sans">
+      {/* 言語ラベル: 左上に控えめに配置 */}
+      <div className="absolute top-2.5 left-[10px] z-20 pointer-events-none transition-opacity opacity-40 group-hover:opacity-100 flex items-center">
+        <span className="codeBlockLang">
           {languageLabel}
         </span>
-
-        {/* コピーボタン */}
-        <button
-          onClick={handleCopy}
-          className={cn(
-            "flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium transition-all duration-150",
-            "text-slate-400 hover:text-slate-600 hover:bg-slate-200/60",
-            "focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300",
-            copied && "text-emerald-600 hover:text-emerald-600 hover:bg-emerald-50"
-          )}
-          aria-label="コードをコピー"
-        >
-          {copied ? (
-            <>
-              <CheckIcon size={12} strokeWidth={2.5} />
-              <span>Copied</span>
-            </>
-          ) : (
-            <>
-              <CopyIcon size={12} strokeWidth={2} />
-              <span>Copy</span>
-            </>
-          )}
-        </button>
       </div>
 
-      {/* ── コード本体 ── */}
-      <Highlight theme={codeTheme} code={normalizedCode} language={validLanguage}>
-        {({ className: preClassName, style, tokens, getLineProps, getTokenProps }: any) => (
-          <pre
-            className={cn(
-              preClassName,
-              "m-0 overflow-x-auto",
-              "px-4 py-3.5",
-              "text-[13px] leading-[1.65] font-mono",
-              "bg-white"
-            )}
-            style={style}
-          >
-            <code className="font-[inherit]">
-              {tokens.map((line: any[], i: number) => (
-                <div key={i} {...getLineProps({ line })} className="min-h-[1em]">
-                  {line.map((token: any, key: number) => (
-                    <span key={key} {...getTokenProps({ token })} />
-                  ))}
-                </div>
-              ))}
-            </code>
-          </pre>
+      {/* コピーボタン: 右上 */}
+      <button
+        onClick={handleCopy}
+        className={cn(
+          "absolute top-2 right-2 z-20",
+          "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium",
+          "opacity-0 group-hover:opacity-100 transition-opacity duration-150",
+          "text-zinc-400 hover:text-zinc-600 hover:bg-zinc-900/5",
+          "focus:outline-none",
+          copied && "opacity-100 text-emerald-600 hover:text-emerald-600"
         )}
-      </Highlight>
+        aria-label="コードをコピー"
+      >
+        {copied ? (
+          <CheckIcon size={11} strokeWidth={2.5} />
+        ) : (
+          <CopyIcon size={11} strokeWidth={2} />
+        )}
+        <span>{copied ? "Copied" : "Copy"}</span>
+      </button>
+
+      <div className="relative flex-1">
+        <Highlight theme={codeTheme} code={normalizedCode} language={validLanguage}>
+          {({ className: preClassName, style, tokens, getLineProps, getTokenProps }: any) => (
+            <pre
+              className={cn(
+                preClassName,
+                "codeBlockPre code-block-pre code-block-pre--flat code-block-pre--tools codeBlock",
+                "overflow-x-auto text-[13.5px] leading-5 px-[10px] pt-6 pb-2.5"
+              )}
+              style={{ ...style }}
+            >
+              <code>
+                {tokens.map((line: any[], i: number) => (
+                  <div key={i} {...getLineProps({ line })}>
+                    {line.map((token: any, key: number) => (
+                      <span key={key} {...getTokenProps({ token })} />
+                    ))}
+                  </div>
+                ))}
+              </code>
+            </pre>
+          )}
+        </Highlight>
+      </div>
     </div>
   );
 }
-
-
