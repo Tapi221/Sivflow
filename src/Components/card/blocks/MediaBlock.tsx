@@ -17,27 +17,45 @@ interface MediaBlockProps {
   onFilesExcess?: (files: File[]) => void;
   isActive?: boolean;
   showDelete?: boolean;
+
+  // ---- 1行移動（rowOffset）用：BlockEditor から渡す ----
+  canMoveUp?: boolean;
+  canMoveDown?: boolean;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
+  onMoveDragStart?: () => void;
+  onMoveDragEnd?: () => void;
 }
 
-export const MediaBlock = ({ 
-  type, 
-  data, 
-  onChange, 
-  onDelete, 
-  onDuplicate, 
-  dragHandleProps, 
+export const MediaBlock = ({
+  type,
+  data,
+  onChange,
+  onDelete,
+  onDuplicate,
+  dragHandleProps,
   dragHandleClassName,
   accentColor,
   initialFile,
   onConsumeInitialFile,
   onFilesExcess,
   isActive,
-  showDelete
+  showDelete,
+
+  // move props
+  canMoveUp,
+  canMoveDown,
+  onMoveUp,
+  onMoveDown,
+  onMoveDragStart,
+  onMoveDragEnd,
 }: MediaBlockProps) => {
+  const enableRowMove = type !== 'audio'; // audio は “いらん” 扱いで移動させない
+
   return (
-    <BlockWrapper 
-      onDelete={onDelete} 
-      onDuplicate={onDuplicate} 
+    <BlockWrapper
+      onDelete={onDelete}
+      onDuplicate={onDuplicate}
       dragHandleProps={dragHandleProps}
       dragHandleClassName={dragHandleClassName}
       label={type === 'image' ? 'Images' : 'Audio'}
@@ -47,6 +65,13 @@ export const MediaBlock = ({
       showDuplicate={type !== 'audio'}
       showDragHandle={type !== 'audio'}
       showDelete={showDelete}
+      // 1行移動（imageのみ有効）
+      canMoveUp={enableRowMove ? canMoveUp : false}
+      canMoveDown={enableRowMove ? canMoveDown : false}
+      onMoveUp={enableRowMove ? onMoveUp : undefined}
+      onMoveDown={enableRowMove ? onMoveDown : undefined}
+      onMoveDragStart={enableRowMove ? onMoveDragStart : undefined}
+      onMoveDragEnd={enableRowMove ? onMoveDragEnd : undefined}
     >
       <MediaUploader
         type={type}

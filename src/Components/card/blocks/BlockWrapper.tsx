@@ -1,5 +1,4 @@
 import React from 'react';
-import { Button } from '@/Components/ui/button';
 import { cn } from '@/lib/utils';
 import GripIcon from 'lucide-react/dist/esm/icons/grip-vertical';
 import TrashIcon from 'lucide-react/dist/esm/icons/trash-2';
@@ -20,14 +19,19 @@ interface BlockWrapperProps {
   showDuplicate?: boolean;
   showDragHandle?: boolean;
   dragEnabled?: boolean;
+
+  // 1行移動（rowOffset）用
   canMoveUp?: boolean;
   canMoveDown?: boolean;
   onMoveUp?: () => void;
   onMoveDown?: () => void;
   onMoveDragStart?: () => void;
   onMoveDragEnd?: () => void;
+
   contentClassName?: string;
 }
+
+const STEP_PX = 24;
 
 export const BlockWrapper = ({
   children,
@@ -60,8 +64,7 @@ export const BlockWrapper = ({
 
   /**
    * deltaSteps 分だけ移動を試みて、実際に適用できたステップ数を返す。
-   * ここで canMoveUp / canMoveDown を必ず尊重することで、
-   * 一番上（上に動けない）を越えるのを防ぐ。
+   * canMoveUp / canMoveDown を尊重して境界で止める。
    */
   const applyStepMoves = (deltaSteps: number) => {
     if (deltaSteps === 0) return 0;
@@ -77,16 +80,17 @@ export const BlockWrapper = ({
       return applied;
     }
 
-    // deltaSteps < 0
     for (let i = 0; i < Math.abs(deltaSteps); i += 1) {
       if (!canMoveUp) break;
       onMoveUp?.();
       applied -= 1;
     }
+
     return applied;
   };
 
   const startStepDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragEnabled) return;
     if (!onMoveUp && !onMoveDown) return;
 
     event.preventDefault();
@@ -94,6 +98,7 @@ export const BlockWrapper = ({
 
     const pointerId = event.pointerId;
     onMoveDragStart?.();
+
     stepDragRef.current = {
       pointerId,
       startY: event.clientY,
@@ -107,18 +112,19 @@ export const BlockWrapper = ({
       if (!stepDragRef.current || moveEvent.pointerId !== stepDragRef.current.pointerId) return;
 
       const deltaY = moveEvent.clientY - stepDragRef.current.startY;
-      const nextSteps = Math.round(deltaY / 24);
+      const nextSteps = Math.round(deltaY / STEP_PX);
       const diff = nextSteps - stepDragRef.current.appliedSteps;
 
       if (diff !== 0) {
-        // 実際に動けた分だけ appliedSteps を進める（ここ超重要）
         const actuallyApplied = applyStepMoves(diff);
+        // ここが肝：実際に動けた分だけ進める（境界でズレない）
         stepDragRef.current.appliedSteps += actuallyApplied;
       }
     };
 
     const onPointerEnd = (endEvent: PointerEvent) => {
       if (!stepDragRef.current || endEvent.pointerId !== stepDragRef.current.pointerId) return;
+
       const appliedSteps = stepDragRef.current.appliedSteps;
       stepDragRef.current = null;
 
@@ -132,6 +138,7 @@ export const BlockWrapper = ({
       }
 
       onMoveDragEnd?.();
+
       window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('pointerup', onPointerEnd);
       window.removeEventListener('pointercancel', onPointerEnd);
@@ -153,7 +160,7 @@ export const BlockWrapper = ({
         borderColor: accentColor ? `${accentColor}40` : undefined,
       }}
     >
-      {/* 操作メニュー (ホバー時に表示、またはモバイル時はタップで表示) */}
+      {/* 操作メニュー (アクティブ時に表示) */}
       <div
         data-active={isActive ? 'true' : 'false'}
         className="absolute -right-1 top-1/2 -translate-y-1/2 flex flex-col items-center gap-0 -space-y-px opacity-0 pointer-events-none
@@ -190,6 +197,7 @@ export const BlockWrapper = ({
             onClick={onDuplicate}
             className="w-5 h-5 min-w-0 min-h-0 p-0 bg-white border border-slate-100 rounded-full text-slate-400 hover:text-indigo-600 hover:border-indigo-100 shadow-sm flex items-center justify-center flex-none"
             title="複製"
+            type="button"
           >
             <CopyIcon className="w-2.5 h-2.5" />
           </button>
@@ -200,6 +208,7 @@ export const BlockWrapper = ({
             onClick={onDelete}
             className="w-5 h-5 min-w-0 min-h-0 p-0 bg-white border border-slate-100 rounded-full text-slate-400 hover:text-red-600 hover:border-red-100 shadow-sm flex items-center justify-center flex-none"
             title="削除"
+            type="button"
           >
             <TrashIcon className="w-2.5 h-2.5" />
           </button>

@@ -15,6 +15,15 @@ interface MarkdownBlockProps {
   accentColor?: string;
   isActive?: boolean;
   showDelete?: boolean;
+
+  // ---- 1行移動（rowOffset）用 ----
+  canMoveUp?: boolean;
+  canMoveDown?: boolean;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
+  onMoveDragStart?: () => void;
+  onMoveDragEnd?: () => void;
+
   /** ブロック列を差し替えるコールバック（ペースト分離用） */
   onReplaceWithBlocks?: (
     blocks: Array<
@@ -38,6 +47,15 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
   accentColor,
   isActive,
   showDelete,
+
+  // move props
+  canMoveUp,
+  canMoveDown,
+  onMoveUp,
+  onMoveDown,
+  onMoveDragStart,
+  onMoveDragEnd,
+
   onReplaceWithBlocks,
 }) => {
   const PREVIEW_LINES = 6;
@@ -58,7 +76,6 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
     setError(null);
     onChange(value);
   };
-
 
   /**
    * ペースト処理：
@@ -176,6 +193,13 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
       accentColor={accentColor}
       isActive={isActive}
       showDelete={showDelete}
+      // 1行移動
+      canMoveUp={canMoveUp}
+      canMoveDown={canMoveDown}
+      onMoveUp={onMoveUp}
+      onMoveDown={onMoveDown}
+      onMoveDragStart={onMoveDragStart}
+      onMoveDragEnd={onMoveDragEnd}
     >
       <div className="markdownBlockRoot px-0 py-0">
         <div
@@ -184,7 +208,7 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
             'cursor-text'
           )}
           data-testid="markdown-preview"
-          style={{ ['--md-lines' as any]: PREVIEW_LINES } as React.CSSProperties}
+          style={{ ['--md-lines' as any]: 6 } as React.CSSProperties}
           tabIndex={0}
           role="button"
           aria-label="Markdownを編集"

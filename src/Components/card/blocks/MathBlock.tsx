@@ -17,22 +17,38 @@ interface MathBlockProps {
   accentColor?: string;
   isActive?: boolean;
   showDelete?: boolean;
+
+  // ---- 1行移動（rowOffset）用 ----
+  canMoveUp?: boolean;
+  canMoveDown?: boolean;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
+  onMoveDragStart?: () => void;
+  onMoveDragEnd?: () => void;
 }
 
 /**
  * 数式ブロックコンポーネント
  * KaTeX入力、リアルタイムプレビュー、エラーハンドリングを提供
  */
-export const MathBlock: React.FC<MathBlockProps> = ({ 
-  data, 
-  onChange, 
-  onDelete, 
-  onDuplicate, 
+export const MathBlock: React.FC<MathBlockProps> = ({
+  data,
+  onChange,
+  onDelete,
+  onDuplicate,
   dragHandleProps,
   dragHandleClassName,
   accentColor,
   isActive,
-  showDelete
+  showDelete,
+
+  // move props
+  canMoveUp,
+  canMoveDown,
+  onMoveUp,
+  onMoveDown,
+  onMoveDragStart,
+  onMoveDragEnd,
 }) => {
   const [error, setError] = useState<string | null>(null);
 
@@ -50,9 +66,9 @@ export const MathBlock: React.FC<MathBlockProps> = ({
   };
 
   return (
-    <BlockWrapper 
-      onDelete={onDelete} 
-      onDuplicate={onDuplicate} 
+    <BlockWrapper
+      onDelete={onDelete}
+      onDuplicate={onDuplicate}
       dragHandleProps={dragHandleProps}
       dragHandleClassName={dragHandleClassName}
       label="Math"
@@ -60,6 +76,13 @@ export const MathBlock: React.FC<MathBlockProps> = ({
       accentColor={accentColor}
       isActive={isActive}
       showDelete={showDelete}
+      // 1行移動
+      canMoveUp={canMoveUp}
+      canMoveDown={canMoveDown}
+      onMoveUp={onMoveUp}
+      onMoveDown={onMoveDown}
+      onMoveDragStart={onMoveDragStart}
+      onMoveDragEnd={onMoveDragEnd}
     >
       <div className="space-y-1.5 px-2 py-0.5">
         {/* KaTeX入力エリア */}
@@ -74,10 +97,10 @@ export const MathBlock: React.FC<MathBlockProps> = ({
             minRows={1}
             allowInternalScroll={false}
             className={cn(
-              "font-mono text-base text-slate-700 placeholder:text-slate-300",
-              "border border-slate-100 rounded-xl px-3 py-2 transition-all duration-300",
-              "focus-visible:ring-2 focus-visible:ring-offset-0 bg-slate-50/50 focus:bg-white focus:border-slate-200/50",
-              "shadow-inner focus:shadow-sm resize-none leading-relaxed w-full"
+              'font-mono text-base text-slate-700 placeholder:text-slate-300',
+              'border border-slate-100 rounded-xl px-3 py-2 transition-all duration-300',
+              'focus-visible:ring-2 focus-visible:ring-offset-0 bg-slate-50/50 focus:bg-white focus:border-slate-200/50',
+              'shadow-inner focus:shadow-sm resize-none leading-relaxed w-full'
             )}
             style={{
               '--tw-ring-color': accentColor ? `${accentColor}40` : 'var(--primary-color-alpha-40)',
@@ -85,7 +108,7 @@ export const MathBlock: React.FC<MathBlockProps> = ({
           />
           {error && (
             <p className="text-[10px] text-red-600 mt-1 font-medium">
-              ⚠️ {error}
+              {error}
             </p>
           )}
         </div>
@@ -93,8 +116,8 @@ export const MathBlock: React.FC<MathBlockProps> = ({
         {/* プレビューエリア */}
         {(data?.latex || '').trim() && (
           <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 min-h-[50px] overflow-hidden">
-            <MathRenderer 
-              latex={data.latex} 
+            <MathRenderer
+              latex={data.latex}
               displayMode={data.displayMode || 'block'}
               className="text-slate-800"
             />

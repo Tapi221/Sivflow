@@ -13,13 +13,39 @@ interface MemoBlockProps {
   accentColor?: string;
   isActive?: boolean;
   showDelete?: boolean;
+
+  // ---- 1行移動（rowOffset）用 ----
+  canMoveUp?: boolean;
+  canMoveDown?: boolean;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
+  onMoveDragStart?: () => void;
+  onMoveDragEnd?: () => void;
 }
 
-export const MemoBlock = ({ content, onChange, onDelete, onDuplicate, dragHandleProps, dragHandleClassName, accentColor, isActive, showDelete }: MemoBlockProps) => {
+export const MemoBlock = ({
+  content,
+  onChange,
+  onDelete,
+  onDuplicate,
+  dragHandleProps,
+  dragHandleClassName,
+  accentColor,
+  isActive,
+  showDelete,
+
+  // move props
+  canMoveUp,
+  canMoveDown,
+  onMoveUp,
+  onMoveDown,
+  onMoveDragStart,
+  onMoveDragEnd,
+}: MemoBlockProps) => {
   return (
-    <BlockWrapper 
-      onDelete={onDelete} 
-      onDuplicate={onDuplicate} 
+    <BlockWrapper
+      onDelete={onDelete}
+      onDuplicate={onDuplicate}
       dragHandleProps={dragHandleProps}
       dragHandleClassName={dragHandleClassName}
       label="Memo"
@@ -27,6 +53,13 @@ export const MemoBlock = ({ content, onChange, onDelete, onDuplicate, dragHandle
       accentColor={accentColor}
       isActive={isActive}
       showDelete={showDelete}
+      // 1行移動
+      canMoveUp={canMoveUp}
+      canMoveDown={canMoveDown}
+      onMoveUp={onMoveUp}
+      onMoveDown={onMoveDown}
+      onMoveDragStart={onMoveDragStart}
+      onMoveDragEnd={onMoveDragEnd}
     >
       <AutoResizeTextarea
         value={content}
