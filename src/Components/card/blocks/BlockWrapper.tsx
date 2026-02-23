@@ -29,10 +29,10 @@ interface BlockWrapperProps {
   contentClassName?: string;
 }
 
-export const BlockWrapper = ({ 
-  children, 
-  onDelete, 
-  onDuplicate, 
+export const BlockWrapper = ({
+  children,
+  onDelete,
+  onDuplicate,
   dragHandleProps,
   dragHandleClassName,
   className,
@@ -50,7 +50,7 @@ export const BlockWrapper = ({
   onMoveDown,
   onMoveDragStart,
   onMoveDragEnd,
-  contentClassName
+  contentClassName,
 }: BlockWrapperProps) => {
   const stepDragRef = React.useRef<{
     pointerId: number;
@@ -58,19 +58,32 @@ export const BlockWrapper = ({
     appliedSteps: number;
   } | null>(null);
 
+  /**
+   * deltaSteps 分だけ移動を試みて、実際に適用できたステップ数を返す。
+   * ここで canMoveUp / canMoveDown を必ず尊重することで、
+   * 一番上（上に動けない）を越えるのを防ぐ。
+   */
   const applyStepMoves = (deltaSteps: number) => {
+    if (deltaSteps === 0) return 0;
+
+    let applied = 0;
+
     if (deltaSteps > 0) {
       for (let i = 0; i < deltaSteps; i += 1) {
+        if (!canMoveDown) break;
         onMoveDown?.();
+        applied += 1;
       }
-      return;
+      return applied;
     }
 
-    if (deltaSteps < 0) {
-      for (let i = 0; i < Math.abs(deltaSteps); i += 1) {
-        onMoveUp?.();
-      }
+    // deltaSteps < 0
+    for (let i = 0; i < Math.abs(deltaSteps); i += 1) {
+      if (!canMoveUp) break;
+      onMoveUp?.();
+      applied -= 1;
     }
+    return applied;
   };
 
   const startStepDrag = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -98,8 +111,9 @@ export const BlockWrapper = ({
       const diff = nextSteps - stepDragRef.current.appliedSteps;
 
       if (diff !== 0) {
-        applyStepMoves(diff);
-        stepDragRef.current.appliedSteps = nextSteps;
+        // 実際に動けた分だけ appliedSteps を進める（ここ超重要）
+        const actuallyApplied = applyStepMoves(diff);
+        stepDragRef.current.appliedSteps += actuallyApplied;
       }
     };
 
@@ -108,11 +122,12 @@ export const BlockWrapper = ({
       const appliedSteps = stepDragRef.current.appliedSteps;
       stepDragRef.current = null;
 
+      // まったくドラッグされなかった場合はクリック扱いで 1 ステップだけ動かす
       if (appliedSteps === 0) {
         if (endEvent.shiftKey) {
-          onMoveUp?.();
+          if (canMoveUp) onMoveUp?.();
         } else {
-          onMoveDown?.();
+          if (canMoveDown) onMoveDown?.();
         }
       }
 
@@ -128,10 +143,10 @@ export const BlockWrapper = ({
   };
 
   return (
-    <div 
+    <div
       className={cn(
-        "relative overflow-visible bg-white border border-slate-200/80 rounded-xl py-0 px-1.5",
-        isActive && "z-40",
+        'relative overflow-visible bg-white border border-slate-200/80 rounded-xl py-0 px-1.5',
+        isActive && 'z-40',
         className
       )}
       style={{
@@ -140,18 +155,19 @@ export const BlockWrapper = ({
     >
       {/* 操作メニュー (ホバー時に表示、またはモバイル時はタップで表示) */}
       <div
-        data-active={isActive ? "true" : "false"}
+        data-active={isActive ? 'true' : 'false'}
         className="absolute -right-1 top-1/2 -translate-y-1/2 flex flex-col items-center gap-0 -space-y-px opacity-0 pointer-events-none
         data-[active=true]:opacity-100 data-[active=true]:pointer-events-auto
         transition-opacity duration-150 z-[80]"
       >
         {showDragHandle && (
-          <div 
+          <div
             {...dragHandleProps}
             onPointerDown={startStepDrag}
             onKeyDown={(event) => {
               if (event.key !== 'Enter' && event.key !== ' ') return;
               event.preventDefault();
+
               if (event.shiftKey) {
                 if (canMoveUp) onMoveUp?.();
                 return;
@@ -159,8 +175,8 @@ export const BlockWrapper = ({
               if (canMoveDown) onMoveDown?.();
             }}
             className={cn(
-              "w-5 h-5 min-w-0 min-h-0 p-0 bg-white border border-slate-100 rounded-full text-slate-400 shadow-sm flex items-center justify-center flex-none transition-colors",
-              "cursor-grab active:cursor-grabbing",
+              'w-5 h-5 min-w-0 min-h-0 p-0 bg-white border border-slate-100 rounded-full text-slate-400 shadow-sm flex items-center justify-center flex-none transition-colors',
+              'cursor-grab active:cursor-grabbing',
               dragHandleClassName
             )}
             title="クリック: 1行下へ / Shift+クリック: 1行上へ"
@@ -168,8 +184,9 @@ export const BlockWrapper = ({
             <GripIcon className="w-2.5 h-2.5" />
           </div>
         )}
+
         {showDuplicate && (
-          <button 
+          <button
             onClick={onDuplicate}
             className="w-5 h-5 min-w-0 min-h-0 p-0 bg-white border border-slate-100 rounded-full text-slate-400 hover:text-indigo-600 hover:border-indigo-100 shadow-sm flex items-center justify-center flex-none"
             title="複製"
@@ -177,8 +194,9 @@ export const BlockWrapper = ({
             <CopyIcon className="w-2.5 h-2.5" />
           </button>
         )}
+
         {showDelete && (
-          <button 
+          <button
             onClick={onDelete}
             className="w-5 h-5 min-w-0 min-h-0 p-0 bg-white border border-slate-100 rounded-full text-slate-400 hover:text-red-600 hover:border-red-100 shadow-sm flex items-center justify-center flex-none"
             title="削除"
@@ -188,12 +206,7 @@ export const BlockWrapper = ({
         )}
       </div>
 
-
-      <div className={cn("relative px-1", contentClassName)}>
-        {children}
-      </div>
+      <div className={cn('relative px-1', contentClassName)}>{children}</div>
     </div>
   );
 };
-
-
