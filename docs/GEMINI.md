@@ -187,3 +187,8 @@
 - [x] 実装計画の作成 (docs/06_Operations/implementation_plan_ruled_lines_everywhere.md)
 - [x] カード全体の罫線表示の実装 (index.css)
 - [x] 動作確認
+
+# ブロック全体のホバー効果の削除（並び替え時を含む）
+- [x] 実装計画の作成 (docs/06_Operations/implementation_plan_remove_block_hover.md)
+- [x] BlockWrapper および各ブロックのホバースタイル削除 (BlockWrapper.tsx等)
+- [x] 動作確認

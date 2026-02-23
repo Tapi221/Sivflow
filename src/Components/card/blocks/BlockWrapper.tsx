@@ -130,7 +130,7 @@ export const BlockWrapper = ({
   return (
     <div 
       className={cn(
-        "relative overflow-visible bg-white border border-slate-200/80 rounded-xl py-0 px-1.5 transition-all duration-300 hover:border-primary-200 hover:shadow-sm",
+        "relative overflow-visible bg-white border border-slate-200/80 rounded-xl py-0 px-1.5",
         isActive && "z-40",
         className
       )}
