@@ -1,9 +1,14 @@
-import React from 'react';
+// src/Components/card/CodeBlockEditor.tsx
+
+import React, { useMemo } from 'react';
 import { Button } from '@/Components/ui/button';
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
+  SelectSeparator,
   SelectTrigger,
   SelectValue,
 } from '@/Components/ui/select';
@@ -32,11 +37,10 @@ import 'prismjs/components/prism-markdown';
 
 import 'prismjs/themes/prism.css';
 
-interface CodeBlockEditorProps {
-  value?: CodeBlockData;
-  onChange: (value: CodeBlockData) => void;
-  className?: string;
-}
+// ─── 定数 ────────────────────────────────────────────────
+
+const STORAGE_KEY = 'codeblock_recent_langs';
+const MAX_RECENT = 3; // 先頭に表示する最近使った言語の最大数
 
 const SUPPORTED_LANGUAGES = [
   { value: 'javascript', label: 'JavaScript' },
@@ -56,9 +60,47 @@ const SUPPORTED_LANGUAGES = [
   { value: 'markdown', label: 'Markdown' },
 ];
 
+// ─── localStorage ユーティリティ ────────────────────────
+
+/** 最近使った言語リストを取得 */
+function getRecentLangs(): string[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * 使った言語を先頭に追加して保存する。
+ * リストは最大 MAX_RECENT 件に絞る。
+ */
+function pushRecentLang(lang: string): void {
+  try {
+    const prev = getRecentLangs().filter((l) => l !== lang); // 重複を除去
+    const next = [lang, ...prev].slice(0, MAX_RECENT);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  } catch {
+    // localStorage が使えない環境(プライベートブラウジング等)では無視
+  }
+}
+
+// ─── コンポーネント ──────────────────────────────────────
+
+interface CodeBlockEditorProps {
+  value?: CodeBlockData;
+  onChange: (value: CodeBlockData) => void;
+  className?: string;
+}
+
 export function CodeBlockEditor({ value, onChange, className }: CodeBlockEditorProps) {
   const editorHostRef = React.useRef<HTMLDivElement | null>(null);
 
+  // 最近使った言語リストを state で管理（セレクトを開いたタイミングで最新を反映）
+  const [recentLangs, setRecentLangs] = React.useState<string[]>(() => getRecentLangs());
 
   const code = value?.code ?? '';
   const language = value?.language ?? 'javascript';
@@ -69,9 +111,10 @@ export function CodeBlockEditor({ value, onChange, className }: CodeBlockEditorP
 
   const handleLanguageChange = (newLang: string) => {
     onChange({ language: newLang, code });
+    // 選択と同時に履歴を更新
+    pushRecentLang(newLang);
+    setRecentLangs(getRecentLangs());
   };
-
-
 
   const highlightCode = (src: string) => {
     const grammar = (Prism.languages as any)[language] || Prism.languages.javascript;
@@ -83,6 +126,19 @@ export function CodeBlockEditor({ value, onChange, className }: CodeBlockEditorP
     if (!textarea) return;
     textarea.setAttribute('wrap', 'off');
   }, [language]);
+
+  // 「最近使った言語」に対応する label オブジェクトを導出
+  const recentLangItems = useMemo(() => {
+    return recentLangs
+      .map((val) => SUPPORTED_LANGUAGES.find((l) => l.value === val))
+      .filter((l): l is { value: string; label: string } => l !== undefined);
+  }, [recentLangs]);
+
+  // 全言語リストから「最近使った言語」を除いたもの（重複表示を防ぐ）
+  const remainingLangItems = useMemo(() => {
+    const recentSet = new Set(recentLangs);
+    return SUPPORTED_LANGUAGES.filter((l) => !recentSet.has(l.value));
+  }, [recentLangs]);
 
   return (
     <div
@@ -98,6 +154,7 @@ export function CodeBlockEditor({ value, onChange, className }: CodeBlockEditorP
           "code-editor-surface"
         )}
       >
+        {/* ── 言語セレクタ ── */}
         <div
           className="
             absolute top-2.5 left-[10px] z-30 flex items-center gap-0.5
@@ -122,43 +179,55 @@ export function CodeBlockEditor({ value, onChange, className }: CodeBlockEditorP
             </SelectTrigger>
 
             <SelectContent className="bg-white">
-              {SUPPORTED_LANGUAGES.map((lang) => (
-                <SelectItem key={lang.value} value={lang.value} className="text-xs">
-                  {lang.label}
-                </SelectItem>
-              ))}
+              {/* 最近使った言語セクション（1件以上あるときだけ表示） */}
+              {recentLangItems.length > 0 && (
+                <>
+                  <SelectGroup>
+                    <SelectLabel className="text-[10px] text-slate-400 uppercase tracking-widest px-2 py-1">
+                      最近使った言語
+                    </SelectLabel>
+                    {recentLangItems.map((lang) => (
+                      <SelectItem key={`recent-${lang.value}`} value={lang.value} className="text-xs">
+                        {lang.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                  <SelectSeparator />
+                </>
+              )}
+
+              {/* 残りの全言語 */}
+              <SelectGroup>
+                {recentLangItems.length > 0 && (
+                  <SelectLabel className="text-[10px] text-slate-400 uppercase tracking-widest px-2 py-1">
+                    すべての言語
+                  </SelectLabel>
+                )}
+                {remainingLangItems.map((lang) => (
+                  <SelectItem key={lang.value} value={lang.value} className="text-xs">
+                    {lang.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
             </SelectContent>
           </Select>
         </div>
 
+        {/* ── コードエディタ本体（既存のまま） ── */}
         <Editor
           value={code}
           onValueChange={handleCodeChange}
           highlight={highlightCode}
-          padding="24px 10px 10px 10px"
-          className={cn(
-            "code-editor-no-scroll codeBlockPre font-mono",
-            // Prism.css 等の不要なマージン/背景をリセット
-            "[&>pre]:!m-0 [&>pre]:!bg-transparent [&>pre]:!border-none",
-            "[&>textarea]:!m-0 [&>textarea]:!border-none [&>textarea]:!ring-0 [&>textarea]:!outline-none"
-          )}
+          padding={{ top: 28, bottom: 10, left: 10, right: 10 }}
           style={{
-            fontFamily: '"Fira Code", "Fira Mono", ui-monospace, monospace',
-            fontSize: 13.5,
-            lineHeight: '20px',
-            backgroundColor: 'transparent',
-            minHeight: '20px',
-            margin: 0,
-            overflow: 'visible',
+            fontFamily: '"Fira Code", "Fira Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+            fontSize: 13,
+            lineHeight: '24px',
+            minHeight: 56,
           }}
-          textareaClassName="leading-[20px] m-0"
+          className="code-editor-no-scroll w-full"
+          textareaClassName="focus:outline-none"
         />
-
-        {!code && (
-          <div className="absolute top-0 left-0 text-slate-300 font-mono text-[13.5px] items-center leading-[20px] pointer-events-none p-[24px_10px_10px_10px] z-0">
-            // Type or paste your code here...
-          </div>
-        )}
       </div>
     </div>
   );
