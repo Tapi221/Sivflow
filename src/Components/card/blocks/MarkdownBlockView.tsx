@@ -120,7 +120,7 @@ export const MarkdownBlockView: React.FC<MarkdownBlockViewProps> = ({
 
       return (
         <code
-          className="rounded px-1 py-0 font-mono text-[0.9em] leading-[24px] align-baseline bg-red-50 text-red-600 border border-red-100"
+          className="rounded px-1 py-0 font-mono text-[0.9em] leading-none align-baseline bg-red-50 text-red-600 ring-1 ring-inset ring-red-100"
           {...props}
         >
           {children}

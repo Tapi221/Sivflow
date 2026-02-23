@@ -383,7 +383,11 @@ export function Flashcard({
       >
         {lines.map((line, lineIndex) => {
           return (
-            <div key={`line-${lineIndex}`} className="whitespace-pre-wrap break-all leading-[24px]">
+            <div
+  key={`line-${lineIndex}`}
+  className="whitespace-pre-wrap break-words leading-[24px]"
+  style={{ overflowWrap: 'anywhere' }}
+>
               {line === '' ? '\u00A0' : line}
             </div>
           );
@@ -393,24 +397,33 @@ export function Flashcard({
   };
 
   const renderBlocks = (blocks: CardBlock[] | undefined) => {
-    if (!blocks || blocks.length === 0) return null;
+  if (!blocks || blocks.length === 0) return null;
 
-    const getRowOffset = (block: CardBlock) => Math.round(Number(block.rowOffset ?? 0));
-    const ROW_STEP_PX = 24;
+  // rowOffset の安全化（文字列/NaN 対策 + クランプ）
+  const getRowOffset = (block: CardBlock) => {
+    const n = Number((block as any).rowOffset ?? 0);
+    if (!Number.isFinite(n)) return 0;
+    return Math.max(-999, Math.min(999, Math.round(n)));
+  };
 
-    return (
-      <div className="space-y-0 w-full max-w-full">
-        {blocks.map((block) => {
-          const isLinePositionable = block.type === 'text' || block.type === 'code';
-          const rowOffsetPx = isLinePositionable ? getRowOffset(block) * ROW_STEP_PX : 0;
-          const offsetTransform = rowOffsetPx !== 0 ? `translateY(${rowOffsetPx}px)` : '';
+  const ROW_STEP_PX = 24;
 
-          return (
-          <div 
-            key={block.id} 
+  return (
+    <div className="space-y-0 w-full max-w-full">
+      {blocks.map((block) => {
+        const isLinePositionable = block.type === 'text' || block.type === 'code';
+        const rowOffsetPx = isLinePositionable ? getRowOffset(block) * ROW_STEP_PX : 0;
+
+        // ✅ transform はやめる：見た目だけ動いてレイアウトがズレる
+        // ✅ marginTop で実寸を動かす
+        const offsetStyle = rowOffsetPx ? { marginTop: rowOffsetPx } : undefined;
+
+        return (
+          <div
+            key={block.id}
             className="w-full min-w-0 max-w-full"
             data-block-row="true"
-            style={offsetTransform ? { transform: offsetTransform } : undefined}
+            style={offsetStyle}
           >
             {block.type === 'text' && (block.content ?? '').trim() !== '' && (
               <div className="w-full max-w-full overflow-hidden">
@@ -462,11 +475,11 @@ export function Flashcard({
               </div>
             )}
           </div>
-          );
-        })}
-      </div>
-    );
-  };
+        );
+      })}
+    </div>
+  );
+};
 
   // レガシー描画（blocksが空のときのフォールバック）
   const renderLegacy = (side: 'question' | 'answer') => {

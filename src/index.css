@@ -691,16 +691,16 @@
   }
 
   /* 罫線背景ユーティリティ */
-  .bg-ruled {
-    background-image: repeating-linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 0.03),
-      rgba(0, 0, 0, 0.03) 1px,
-      transparent 1px,
-      transparent 24px
-    );
-    background-size: 100% 24px;
-  }
+.bg-ruled {
+  --ruled-line-pitch: var(--card-line-height, 24px);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.03),
+    rgba(0, 0, 0, 0.03) 1px,
+    transparent 1px,
+    transparent var(--ruled-line-pitch)
+  );
+  background-size: 100% var(--ruled-line-pitch);
 }
 
   /* ===== Sidebar utility mappings (ensure class names used in components map to CSS variables) ===== */
@@ -872,7 +872,7 @@
 
 /* Stack block borders as a single line by overlapping adjacent rows by 1px */
 [data-block-row="true"] + [data-block-row="true"] {
-  margin-top: -1px;
+  margin-top: 0;
 }
 
 /* Review page mobile optimization */
@@ -1364,4 +1364,5 @@
 /* 数字のテキスト */
 .calendar-day-selected .calendar-date-text {
   text-shadow: none;
+}
 }

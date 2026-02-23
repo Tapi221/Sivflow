@@ -56,6 +56,11 @@ export const BlockWrapper = ({
   onMoveDragEnd,
   contentClassName,
 }: BlockWrapperProps) => {
+  // border はレイアウトを膨らませるので、アクティブ強調は box-shadow（inset）で描画する。
+  // ※ className 側で `border-transparent` を指定しても、ここで borderColor を上書きしない。
+  const activeOutline =
+    isActive && accentColor ? `inset 0 0 0 2px ${accentColor}40` : undefined;
+
   const stepDragRef = React.useRef<{
     pointerId: number;
     startY: number;
@@ -156,9 +161,7 @@ export const BlockWrapper = ({
         isActive && 'z-40',
         className
       )}
-      style={{
-        borderColor: accentColor ? `${accentColor}40` : undefined,
-      }}
+      style={activeOutline ? { boxShadow: activeOutline } : undefined}
     >
       {/* 操作メニュー (アクティブ時に表示) */}
       <div
