@@ -117,6 +117,29 @@ const normalizeDate = (value: any) => {
   return null;
 };
 
+const normalizeReviewLogs = (rawLogs: any): Array<{ reviewedAt: string; rating: 1 | 2 | 3 | 4; resistanceScore: number }> => {
+  if (!Array.isArray(rawLogs)) return [];
+
+  const normalized = rawLogs
+    .map((log) => {
+      const reviewed = normalizeDate(log?.reviewedAt ?? log?.reviewed_at);
+      const ratingNum = Number(log?.rating);
+      const scoreNum = Number(log?.resistanceScore ?? log?.resistance_score);
+      if (!reviewed || !Number.isFinite(ratingNum) || !Number.isFinite(scoreNum)) return null;
+      if (ratingNum < 1 || ratingNum > 4) return null;
+
+      return {
+        reviewedAt: reviewed.toISOString(),
+        rating: ratingNum as 1 | 2 | 3 | 4,
+        resistanceScore: Math.max(0, Math.min(100, scoreNum)),
+      };
+    })
+    .filter((v): v is { reviewedAt: string; rating: 1 | 2 | 3 | 4; resistanceScore: number } => Boolean(v));
+
+  normalized.sort((a, b) => new Date(a.reviewedAt).getTime() - new Date(b.reviewedAt).getTime());
+  return normalized;
+};
+
 export const extractTextFromBlocks = (blocks: any[]): string => {
   if (!blocks || !Array.isArray(blocks)) return '';
   // 最初に見つかった非空のテキスト系コンテンツを返す
@@ -202,6 +225,7 @@ export const normalizeCard = (raw: any) => {
 
     tags: raw?.tags ?? [],
     reviewCount: raw?.reviewCount ?? raw?.review_count ?? 0,
+    reviewLogs: normalizeReviewLogs(raw?.reviewLogs ?? raw?.review_logs ?? []),
 
     questionBlocks: (raw?.questionBlocks ?? raw?.question_blocks ?? []).filter((b: any) => {
       if (b.type === 'math' && !b.math?.latex?.trim()) return false;

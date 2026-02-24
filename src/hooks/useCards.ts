@@ -168,6 +168,12 @@ export function useCards(folderId?: string) {
       return d;
     })();
 
+    const normalizedReviewLogs = Array.isArray(cardData.reviewLogs)
+      ? [...cardData.reviewLogs].sort(
+          (a, b) => new Date(a.reviewedAt).getTime() - new Date(b.reviewedAt).getTime()
+        )
+      : [];
+
     const newCard: Card = {
       id,
       userId: currentUser.uid,
@@ -205,6 +211,8 @@ export function useCards(folderId?: string) {
       nextReviewDate,
       createdAt: now,
       updatedAt: now,
+      tags: cardData.tags || [],
+      reviewLogs: normalizedReviewLogs,
     };
 
     try {
@@ -233,6 +241,11 @@ export function useCards(folderId?: string) {
     
     const mergedCard = { ...currentCard, ...data };
     const patch: Partial<Card> = { ...data };
+    if (Array.isArray(patch.reviewLogs)) {
+      patch.reviewLogs = [...patch.reviewLogs].sort(
+        (a, b) => new Date(a.reviewedAt).getTime() - new Date(b.reviewedAt).getTime()
+      );
+    }
 
     // 空カードは自動削除しない。
     // 新規作成直後/オートセーブ直後に「消える」体験を防ぐため、

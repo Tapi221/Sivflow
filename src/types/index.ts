@@ -50,6 +50,12 @@ export interface ProfileImage {
  */
 export type SubjectiveScoreValue = 0 | 1 | 2 | 3;
 
+export type ReviewLog = {
+  reviewedAt: string; // ISO
+  rating: 1 | 2 | 3 | 4;
+  resistanceScore: number;
+};
+
 /**
  * アップロードされた画像の型定義
  *
@@ -402,6 +408,7 @@ export type Card = BaseEntity & {
   responseTimeMs?: number;
   /** 復習回数（レビュー実行で+1） - 既存カード互換のため optional */
   reviewCount?: number;
+  reviewLogs?: ReviewLog[];
   /** 互換用 ID */
   cardId?: string;
 
