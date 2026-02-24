@@ -12,7 +12,6 @@ type Props = {
   onToggleBookmark: (card: any) => void;
   showHard: boolean;
   showEasy: boolean;
-  currentResistance: number;
 };
 
 export function StudyReview({
@@ -24,7 +23,6 @@ export function StudyReview({
   onToggleBookmark,
   showHard,
   showEasy,
-  currentResistance,
 }: Props) {
   return (
     <div className="reviewMain grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8">
@@ -42,16 +40,6 @@ export function StudyReview({
       </div>
 
       <div className="hidden lg:block space-y-6">
-        <div className="bg-white rounded-3xl p-6 md:p-8 shadow-[0_2px_20px_-4px_rgba(0,0,0,0.05)]">
-          <div className="text-[10px] font-bold tracking-[0.2em] text-slate-300 uppercase mb-3 md:mb-4">耐性スコア</div>
-          <div className="flex items-baseline gap-1 mb-3 md:mb-4">
-            <span className="text-4xl md:text-5xl font-bold text-slate-800 italic">{currentResistance}</span>
-          </div>
-          <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-            <div className="h-full bg-primary-600 rounded-full" style={{ width: `${currentResistance}%` }}></div>
-          </div>
-        </div>
-
         <div className="bg-white rounded-3xl p-6 md:p-8 shadow-[0_2px_20px_-4px_rgba(0,0,0,0.05)] min-h-[250px] md:min-h-[300px]">
           <div className="flex items-center justify-between mb-6">
             <div className="text-[10px] font-bold tracking-[0.2em] text-slate-300 uppercase flex items-center gap-2">

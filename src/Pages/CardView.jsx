@@ -3,13 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useCards } from '@/hooks/useCards';
 import { Button } from '@/Components/ui/button';
 import { Skeleton } from '@/Components/ui/skeleton';
-import { ArrowLeft, ShieldCheck, Tag } from 'lucide-react';
+import { ArrowLeft, Tag } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 import CardViewer from '@/Components/card/CardViewer';
-import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/Components/ui/tooltip';
-
-import { normalizeMemoryStability, getResistancePhase } from '@/utils/reviewUtils';
-import { calculateResistanceScore } from '@/utils/reviewMetrics';
 
 export default function CardView() {
   const navigate = useNavigate();
@@ -39,19 +35,6 @@ export default function CardView() {
   
   const currentCard = sortedCards[currentIndex];
   
-  // --- Metrics Calculation ---
-  const normalizedStability = currentCard 
-    ? normalizeMemoryStability(currentCard.memoryStability, currentCard.currentLevel ?? currentCard.level)
-    : 0;
-  
-  // Interval extraction (estimated from nextReviewDate or next_review_date vs lastReviewDate etc.)
-  // Ideally card should have 'interval' field. If not, use diff between Now and NextReview
-  const intervalDays =  currentCard?.interval ?? 1;
-
-  // Retention is internal-only now.
-  const resistance = calculateResistanceScore(currentCard?.interval ?? 0);
-  const resistancePhase = getResistancePhase(resistance);
-
   const handleEdit = (card) => {
     navigate(createPageUrl(`CardEdit?id=${card.id}&folderId=${folderId}&returnTo=card-view`));
   };
@@ -118,52 +101,8 @@ export default function CardView() {
                 />
             </div>
             
-             {/* Sidebar */}
+            {/* Sidebar */}
             <div className="space-y-6 hidden lg:block">
-                
-                 {/* 1. Resistance Score (Primary Metric) */}
-                <div className="bg-white rounded-3xl p-8 shadow-[0_2px_20px_-4px_rgba(0,0,0,0.05)] border border-slate-50">
-                    <TooltipProvider>
-                       <Tooltip>
-                          <TooltipTrigger asChild>
-                             <div className="cursor-default">
-                                <div className="flex items-center justify-between mb-2">
-                                    <div className="text-[10px] font-bold tracking-[0.2em] text-slate-300 uppercase flex items-center gap-2">
-                                        <ShieldCheck className="w-3 h-3" />
-                                        耐性スコア (Resistance)
-                                    </div>
-                                </div>
-                                
-                                <div className="flex items-baseline gap-1 mb-2">
-                                    <span className="text-5xl font-bold italic text-primary-600 transition-colors duration-500">
-                                        {resistance}
-                                    </span>
-                                </div>
-                                
-                                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden mb-2">
-                                    <div 
-                                        className="h-full rounded-full bg-primary-600 transition-all duration-700" 
-                                        style={{ width: `${resistance}%` }}
-                                    ></div>
-                                </div>
-                                
-                                <div className="flex justify-between items-center">
-                                     <div className="text-xs font-bold px-2 py-0.5 rounded-md bg-primary-50 text-primary-700 border border-primary-100">
-                                         {resistancePhase.label}
-                                     </div>
-                                     <div className="text-xs text-slate-400 font-medium">
-                                        Interval: {intervalDays} days
-                                     </div>
-                                </div>
-                             </div>
-                          </TooltipTrigger>
-                          <TooltipContent side="top">
-                             <p className="font-bold text-xs">{intervalDays} 日間の間隔に耐えています</p>
-                          </TooltipContent>
-                       </Tooltip>
-                    </TooltipProvider>
-                </div>
-
                 {/* Tags Sidebar Section */}
                 {currentCard?.tags && currentCard.tags.length > 0 && (
                   <div className="bg-white rounded-3xl p-8 shadow-[0_2px_20px_-4px_rgba(0,0,0,0.05)]">

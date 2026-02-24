@@ -12,7 +12,6 @@ import { Skeleton } from '@/Components/ui/skeleton';
 import { ArrowLeft } from 'lucide-react';
 import { FaceIcons } from '@/Components/ui/FaceIcons';
 import { createPageUrl } from '@/utils';
-import { calculateResistanceScore } from '@/utils/reviewMetrics';
 import { getDebugStreak } from '@/utils/debugStreak';
 import { sanitizeStreak } from '@/utils/streak';
 import { flags } from '@/features/flags';
@@ -229,7 +228,6 @@ export default function StudyMode() {
     : null;
   const practiceCurrentCard = practiceCurrentCardId ? cardById.get(practiceCurrentCardId) : null;
   const currentCard = isPracticeMode ? practiceCurrentCard : studyCards[currentIndex];
-  const currentResistance = currentCard ? calculateResistanceScore(currentCard.interval || 0) : 0;
 
   const progressPercent = (() => {
     if (studyCards.length === 0) return 0;
@@ -361,7 +359,6 @@ export default function StudyMode() {
               onToggleBookmark={handleToggleBookmark}
               showHard={settings?.showReviewHard ?? true}
               showEasy={settings?.showReviewEasy ?? true}
-              currentResistance={currentResistance}
             />
           )}
         </div>
