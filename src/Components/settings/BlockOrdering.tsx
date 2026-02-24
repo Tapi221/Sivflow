@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
 import { Switch } from '@/Components/ui/switch';
-import { Volume2 } from 'lucide-react';
 import GripVertical from 'lucide-react/dist/esm/icons/grip-vertical';
 import TypeIcon from 'lucide-react/dist/esm/icons/type';
 import CodeIcon from 'lucide-react/dist/esm/icons/code';
@@ -17,13 +16,12 @@ const ICONS = {
   text: TypeIcon,
   code: CodeIcon,
   image: ImageIcon,
-  audio: Volume2,
   math: SigmaIcon
 };
 
 const sanitizeBlockSettings = (items: BlockConfig[]) =>
   items
-    .filter((item) => item.type !== 'reference')
+    .filter((item) => item.type !== 'reference' && item.type !== 'audio')
     .sort((a, b) => a.orderIndex - b.orderIndex)
     .map((item, index) => ({ ...item, orderIndex: index }));
 
@@ -59,9 +57,8 @@ export const BlockOrdering = () => {
             { id: 'text', type: 'text', label: 'テキスト', isVisible: true, orderIndex: 0 },
             { id: 'code', type: 'code', label: 'コード', isVisible: true, orderIndex: 1 },
             { id: 'image', type: 'image', label: '画像', isVisible: true, orderIndex: 2 },
-            { id: 'audio', type: 'audio', label: '音声', isVisible: true, orderIndex: 3 },
-            { id: 'math', type: 'math', label: '数式', isVisible: true, orderIndex: 4 },
-            { id: 'markdown', type: 'markdown', label: 'Markdown', isVisible: true, orderIndex: 5 },
+            { id: 'math', type: 'math', label: '数式', isVisible: true, orderIndex: 3 },
+            { id: 'markdown', type: 'markdown', label: 'Markdown', isVisible: true, orderIndex: 4 },
         ];
         setBlocks(sanitizeBlockSettings(defaults));
     }

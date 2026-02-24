@@ -1,14 +1,12 @@
 import React from 'react';
 import {
   Plus,
-  Volume2,
   StickyNote
 } from 'lucide-react';
 // lucide-react のアイコンを個別インポート（named export が無いアイコンは dist から直接取得）
 import TypeIcon from 'lucide-react/dist/esm/icons/type';
 import CodeIcon from 'lucide-react/dist/esm/icons/code';
 import ImageIcon from 'lucide-react/dist/esm/icons/image';
-import LinkIcon from 'lucide-react/dist/esm/icons/link';
 import SigmaIcon from 'lucide-react/dist/esm/icons/sigma';
 import NotebookPenIcon from 'lucide-react/dist/esm/icons/notebook-pen';
 import { cn } from '@/lib/utils'; // clsx + tailwind-merge のユーティリティ
@@ -26,8 +24,6 @@ interface BlockToolbarProps {
   label: string;                              // ツールバー左端に表示するラベル（例: "表面" / "裏面"）
   onAddBlock: (type: CardBlock['type']) => void; // ブロック追加時に呼ばれるコールバック
   settings?: any;                             // ユーザー設定（ブロックの表示順・可視状態など）
-  canAddLink?: boolean;                       // リンクブロックの追加を許可するか
-  canAddAudio?: boolean;                      // 音声ブロックの追加を許可するか
   hiddenBlockTypes?: CardBlock['type'][];     // 強制的に非表示にするブロック種別リスト
   className?: string;
 }
@@ -44,15 +40,13 @@ type BlockConfig = {
 
 // このツールバーが扱える型の許可リスト（settings に未知の type が混入しても無視する）
 const ALLOWED_TYPES: readonly CardBlock['type'][] = [
-  'text', 'code', 'image', 'audio', 'reference', 'markdown', 'math',
+  'text', 'code', 'image', 'markdown', 'math',
 ] as const;
 
 export const BlockToolbar: React.FC<BlockToolbarProps> = ({
   label,
   onAddBlock,
   settings,
-  canAddLink = true,
-  canAddAudio = true,
   hiddenBlockTypes = [],
   className
 }) => {
@@ -77,8 +71,6 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
           { type: 'text',      label: 'テキスト',  icon: 'Type',        isVisible: true, color: 'primary'  },
           { type: 'code',      label: 'コード',    icon: 'Code',        isVisible: true, color: 'indigo'   },
           { type: 'image',     label: '画像',      icon: 'Image',       isVisible: true, color: 'emerald'  },
-          { type: 'audio',     label: '音声',      icon: 'Volume2',     isVisible: true, color: 'amber'    },
-          { type: 'reference', label: 'リンク',    icon: 'Link',        isVisible: true, color: 'cyan'     },
           { type: 'markdown',  label: 'Markdown',  icon: 'NotebookPen', isVisible: true, color: 'rose'     },
           { type: 'math',      label: '数式',      icon: 'Sigma',       isVisible: true, color: 'purple'   },
         ];
@@ -90,10 +82,8 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
       switch (iconName) {
         case 'Type':       return TypeIcon;
         case 'Image':      return ImageIcon;
-        case 'Link':       return LinkIcon;
         case 'Sigma':      return SigmaIcon;
         case 'Code':       return CodeIcon;
-        case 'Volume2':    return Volume2;
         case 'NotebookPen':return NotebookPenIcon;
       }
     }
@@ -102,8 +92,6 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
       case 'text':      return TypeIcon;
       case 'code':      return CodeIcon;
       case 'image':     return ImageIcon;
-      case 'audio':     return Volume2;
-      case 'reference': return LinkIcon;
       case 'markdown':  return NotebookPenIcon;
       case 'math':      return SigmaIcon;
       default:          return Plus; // 想定外の type には「＋」アイコンを表示
@@ -114,8 +102,6 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
   // hiddenBlockTypes に含まれる / Prop で禁止されている場合は true を返す
   const isTypeHidden = (type: CardBlock['type']) => {
     if (hiddenBlockTypes.includes(type)) return true;
-    if (type === 'reference' && !canAddLink)  return true; // リンク追加不可
-    if (type === 'audio'     && !canAddAudio) return true; // 音声追加不可
     return false;
   };
 
@@ -134,7 +120,6 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
     primary: 'hover:shadow-primary-500/20 hover:text-primary-600',
     indigo:  'hover:shadow-indigo-500/30 hover:text-indigo-600',
     emerald: 'hover:shadow-emerald-500/30 hover:text-emerald-600',
-    amber:   'hover:shadow-amber-500/30 hover:text-amber-600',
     cyan:    'hover:shadow-cyan-500/30 hover:text-cyan-600',
     rose:    'hover:shadow-rose-500/30 hover:text-rose-600',
     purple:  'hover:shadow-purple-500/30 hover:text-purple-600',

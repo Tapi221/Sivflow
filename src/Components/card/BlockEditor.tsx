@@ -35,8 +35,6 @@ interface BlockEditorProps {
   duplicateToOpposite?: boolean;
   onCrossDuplicate?: (block: CardBlock) => void;
   autoFocus?: boolean;
-  canAddLink?: boolean;
-  canAddAudio?: boolean;
   customPlaceholders?: Record<number, string>;
   hideToolbar?: boolean;
 
@@ -70,8 +68,6 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
   duplicateToOpposite = false,
   onCrossDuplicate,
   autoFocus = false,
-  canAddLink = true,
-  canAddAudio = true,
   customPlaceholders,
   hideToolbar = false,
   onDelete,
@@ -315,15 +311,6 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
 
     const original = blocks[index];
 
-    if (original.type === 'reference' && !canAddLink) {
-      alert('リンクブロックはこのセクションに既に存在します。');
-      return;
-    }
-    if (original.type === 'audio' && !canAddAudio) {
-      alert('音声ブロックはこのセクションに既に存在します。');
-      return;
-    }
-
     if (duplicateToOpposite && onCrossDuplicate) {
       onCrossDuplicate(original);
       return;
@@ -433,8 +420,6 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
       label={label}
       onAddBlock={handleAddBlock}
       settings={settings}
-      canAddLink={canAddLink}
-      canAddAudio={canAddAudio}
       hiddenBlockTypes={hiddenBlockTypes}
     />
   );

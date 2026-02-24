@@ -372,12 +372,14 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
   };
 
   const setReferenceItems = (side: "question" | "answer", refs: ReferenceBlockData[]) => {
-    const sanitized = (refs ?? []).filter((r) => (r?.url ?? "").trim() || (r?.name ?? "").trim());
-    if (sanitized.length === 0) {
+    const nextRefs = refs ?? [];
+    if (nextRefs.length === 0) {
       removeBlockByTypeIfExists(side, "reference");
       return;
     }
-    upsertSingleBlock(side, "reference", { references: sanitized });
+    // ポップアップ編集中は空行（未入力リンク）も保持する。
+    // これを即時除去すると「リンクを設定」を押しても何も起きないように見えるため。
+    upsertSingleBlock(side, "reference", { references: nextRefs });
   };
 
   const getBadgeCount = (side: "question" | "answer", kind: "image" | "audio" | "reference") => {
@@ -394,7 +396,12 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
     }
     return blocks
       .filter((b) => b.type === "reference")
-      .reduce((sum, b) => sum + (b.references?.length ?? 0), 0);
+      .reduce(
+        (sum, b) =>
+          sum +
+          (b.references?.filter((r) => (r?.url ?? "").trim() || (r?.name ?? "").trim()).length ?? 0),
+        0
+      );
   };
 
   const renderMediaDialogButtons = (side: "question" | "answer") => {
@@ -402,6 +409,12 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
     const audioCount = getBadgeCount(side, "audio");
     const linkCount = getBadgeCount(side, "reference");
     const base = "flex items-center gap-1 rounded-full px-2 py-1 h-8 min-h-0 min-w-0 text-[10px] font-bold";
+    const openLinkDialog = () => {
+      if (getReferenceItems(side).length === 0) {
+        setReferenceItems(side, [{ url: "", name: "" }]);
+      }
+      setLinkDialogSide(side);
+    };
 
     return (
       <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
@@ -429,8 +442,8 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
         </button>
         <button
           type="button"
-          className={cn(base, "bg-cyan-500 text-white hover:bg-cyan-400")}
-          onClick={() => setLinkDialogSide(side)}
+          className={cn(base, "bg-slate-50 text-slate-500 hover:bg-slate-100")}
+          onClick={openLinkDialog}
           title="リンクを追加"
           aria-label="リンクを追加"
         >
@@ -818,26 +831,62 @@ function LinkEditor({
   return (
     <div className="space-y-2">
       {refs.map((ref, index) => (
-        <div key={index} className="grid grid-cols-[1fr_180px_auto] gap-2">
-          <Input
-            value={ref.url ?? ""}
-            onChange={(e) => update(index, { url: e.target.value })}
-            placeholder="URL (https://...)"
-            className="h-9"
-          />
-          <Input
-            value={ref.name ?? ""}
-            onChange={(e) => update(index, { name: e.target.value })}
-            placeholder="表示名"
-            className="h-9"
-          />
-          <Button type="button" variant="ghost" className="h-9 px-3" onClick={() => remove(index)}>
-            削除
-          </Button>
+        <div key={index} className="relative bg-white p-2 rounded-xl border border-slate-100 shadow-sm group/link">
+          <button
+            type="button"
+            onClick={() => remove(index)}
+            title="リンクを削除"
+            className="absolute -top-1 -right-1 p-1 bg-white border border-slate-200 rounded-full text-slate-400 hover:text-red-500 hover:border-red-200 opacity-0 group-hover/link:opacity-100 transition-opacity z-20 shadow-sm"
+          >
+            <span className="sr-only">削除</span>
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M18 6 6 18" />
+              <path d="m6 6 12 12" />
+            </svg>
+          </button>
+
+          <div className="flex items-center gap-2">
+            <div className="bg-slate-50 p-1.5 rounded-lg text-slate-400">
+              <LinkIcon className="w-3.5 h-3.5" />
+            </div>
+            <div className="flex-1 flex gap-2">
+              <Input
+                value={ref.url ?? ""}
+                onChange={(e) => update(index, { url: e.target.value })}
+                placeholder="URL (https://...)"
+                autoComplete="off"
+                spellCheck={false}
+                data-lpignore="true"
+                data-1p-ignore
+                className="h-8 text-[11px] rounded-lg border-slate-100 bg-slate-50/30 focus-visible:ring-primary-100 flex-[3]"
+                autoFocus={index === refs.length - 1}
+              />
+              <Input
+                value={ref.name ?? ""}
+                onChange={(e) => update(index, { name: e.target.value })}
+                placeholder="表示名"
+                autoComplete="off"
+                spellCheck={false}
+                data-lpignore="true"
+                data-1p-ignore
+                className="h-8 text-[11px] rounded-lg border-slate-100 bg-slate-50/30 focus-visible:ring-primary-100 flex-[2]"
+              />
+            </div>
+          </div>
         </div>
       ))}
-      <Button type="button" variant="outline" className="h-9" onClick={add}>
-        リンクを追加
+
+      <Button
+        type="button"
+        variant="outline"
+        onClick={add}
+        className={cn(
+          "w-full h-8 border-dashed border-2 text-slate-400 hover:text-primary-600 hover:border-primary-200 hover:bg-primary-50/30 rounded-xl font-bold flex items-center justify-center gap-2 text-[11px] transition-all",
+          refs.length > 0 ? "mt-1.5 border-slate-100 bg-slate-50/10" : "border-slate-200"
+        )}
+      >
+        <Plus className="w-3 h-3" />
+        <span>{refs.length > 0 ? "リンクを追加" : "リンクを設定"}</span>
       </Button>
     </div>
   );

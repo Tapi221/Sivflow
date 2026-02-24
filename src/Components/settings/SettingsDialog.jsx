@@ -1316,7 +1316,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                       shortcuts: [
                         { key: 'Tab', desc: '入力項目の移動 (タイトル → 問題 → 解答)' },
                         { key: 'Shift + Tab', desc: '前の入力項目へ移動' },
-                        { key: 'Ctrl + V', desc: '画像または音声を貼り付け（該当ブロックへのホバー時）' },
+                        { key: 'Ctrl + V', desc: '画像を貼り付け（画像ブロックへのホバー時）' },
                       ]
                     },
                     {
