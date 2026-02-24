@@ -64,6 +64,7 @@ import { validateUsername, truncateUsername, countUnicodeCharacters } from '@/ut
 const sidebarItems = [
   { id: 'account', label: 'アカウント', icon: User },
   { id: 'study', label: '学習設定', icon: BookOpen },
+  { id: 'theme', label: 'テーマカラー', icon: Layers },
   { id: 'tags', label: 'タグ管理', icon: Tag },
   { id: 'voice', label: '音声設定', icon: Volume2 },
   { id: 'shortcut', label: 'ショートカット', icon: Keyboard },
@@ -149,7 +150,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
   // タブの初期化と同期
   useEffect(() => {
     if (open && initialTab) {
-      setActiveTab(initialTab === 'theme' ? 'account' : initialTab);
+      setActiveTab(initialTab);
     }
   }, [open, initialTab]);
 

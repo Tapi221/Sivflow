@@ -545,7 +545,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
               onToggleBookmark={handleToggleBookmark}
               onToggleUncertainty={handleToggleUncertainty}
               showNavigation={false}
-              showTags={true}
+              showTags={false}
               onEdit={() => {
                 setIsFlipped(false);
                 setIsEditing(true);
