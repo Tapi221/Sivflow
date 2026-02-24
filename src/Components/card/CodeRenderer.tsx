@@ -89,7 +89,11 @@ export function CodeRenderer({ code, language, className }: CodeRendererProps) {
   // コピーボタン（右上アクション）
   const copyButton = (
     <button
-      onClick={handleCopy}
+      onPointerDown={(e) => e.stopPropagation()}
+      onClick={(e) => {
+        e.stopPropagation();
+        handleCopy();
+      }}
       className={cn(
         "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium",
         "opacity-0 group-hover:opacity-100 transition-opacity duration-150",
