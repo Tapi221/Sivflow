@@ -82,6 +82,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
   const [draft, setDraft] = useState<{
     title: string;
     tags: string[];
+    isDraft: boolean;
     questionBlocks: CardBlock[];
     answerBlocks: CardBlock[];
   } | null>(null);
@@ -90,6 +91,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
     setDraft({
       title: "",
       tags: [],
+      isDraft: true,
       questionBlocks: [],
       answerBlocks: [],
     });
@@ -135,6 +137,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
       setDraft({
         title: selectedCard.title ?? "",
         tags: selectedCard.tags ?? [],
+        isDraft: selectedCard.isDraft ?? true,
         questionBlocks: (selectedCard.questionBlocks ?? []) as CardBlock[],
         answerBlocks: (selectedCard.answerBlocks ?? []) as CardBlock[],
       });
@@ -213,6 +216,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
     setDraft({
       title: selectedCard.title ?? "",
       tags: selectedCard.tags ?? [],
+      isDraft: selectedCard.isDraft ?? true,
       questionBlocks: (selectedCard.questionBlocks ?? []) as CardBlock[],
       answerBlocks: (selectedCard.answerBlocks ?? []) as CardBlock[],
     });
@@ -227,6 +231,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
       const payload = {
         title: draft.title,
         tags: draft.tags,
+        isDraft: draft.isDraft,
         questionBlocks: draft.questionBlocks,
         answerBlocks: draft.answerBlocks,
       };
@@ -267,6 +272,26 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
     }
     if (!selectedCard) return;
     await updateCard(selectedCard.id, { tags: nextTags });
+    onCardUpdated?.();
+  };
+
+  const handleToggleDraft = async (nextIsDraft: boolean) => {
+    if (isEditing) {
+      setDraft((prev) => (prev ? { ...prev, isDraft: nextIsDraft } : prev));
+      return;
+    }
+    if (!selectedCard) return;
+    await updateCard(selectedCard.id, { isDraft: nextIsDraft });
+    onCardUpdated?.();
+  };
+
+  const handleUpdateTitle = async (nextTitle: string) => {
+    if (isEditing) {
+      setDraft((prev) => (prev ? { ...prev, title: nextTitle } : prev));
+      return;
+    }
+    if (!selectedCard) return;
+    await updateCard(selectedCard.id, { title: nextTitle });
     onCardUpdated?.();
   };
 
@@ -328,7 +353,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
   const panelCard = useMemo(() => {
     if (selectedCard) {
       if (!isEditing || !draft) return selectedCard;
-      return { ...selectedCard, tags: draft.tags };
+      return { ...selectedCard, title: draft.title, tags: draft.tags, isDraft: draft.isDraft };
     }
     if (!draft) return null;
     const now = new Date();
@@ -341,6 +366,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
       questionNumber: "",
       title: draft.title,
       tags: draft.tags,
+      isDraft: draft.isDraft,
       isDraft: true,
       isDeleted: false,
       hasUncertainty: false,
@@ -415,7 +441,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
         >
           {isMetaOpen ? <PanelRightClose className="h-4 w-4" /> : <PanelRightOpen className="h-4 w-4" />}
         </Button>
-        <div className="min-w-0 flex-1 overflow-hidden p-4">
+        <div className={cn("min-w-0 flex-1 p-4", isEditing ? "overflow-y-auto" : "overflow-hidden")}>
           {isEditing ? (
             <div className="space-y-4">
           {/* 右ペイン用の最小ヘッダ（保存/キャンセルだけ） */}
@@ -563,6 +589,8 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
             card={panelCard}
             reviewLogs={panelCard?.reviewLogs ?? []}
             onUpdateTags={handleUpdateTags}
+            onToggleDraft={handleToggleDraft}
+            onUpdateTitle={handleUpdateTitle}
           />
         )}
       </div>

@@ -1,8 +1,9 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 import { RatingCountTiles } from "@/Components/study/RatingCountTiles";
 import { TagBadge } from "@/Components/tag/TagBadge";
+import { Switch } from "@/Components/ui/switch";
 import { useTags } from "@/hooks/useTags";
 import type { Card, ReviewLog } from "@/types";
 
@@ -12,6 +13,8 @@ type CardMetaPanelProps = {
   card: Card | null;
   reviewLogs?: ReviewLog[];
   onUpdateTags: (nextTags: string[]) => void;
+  onToggleDraft: (isDraft: boolean) => void;
+  onUpdateTitle: (nextTitle: string) => void;
 };
 
 const META_DATE_FORMATTER = new Intl.DateTimeFormat("ja-JP", {
@@ -50,10 +53,21 @@ function aggregateDailyLast(logs: ReviewLog[]) {
     .map(([day, log]) => ({ day, resistanceScore: log.resistanceScore }));
 }
 
-export function CardMetaPanel({ card, reviewLogs = [], onUpdateTags }: CardMetaPanelProps) {
+export function CardMetaPanel({
+  card,
+  reviewLogs = [],
+  onUpdateTags,
+  onToggleDraft,
+  onUpdateTitle,
+}: CardMetaPanelProps) {
   const [newTag, setNewTag] = useState("");
   const [period, setPeriod] = useState<Period>("30d");
+  const [titleInput, setTitleInput] = useState(card?.title ?? "");
   const { addTag, getTagColor } = useTags();
+
+  useEffect(() => {
+    setTitleInput(card?.title ?? "");
+  }, [card?.id, card?.title]);
 
   const safeLogs = useMemo(
     () =>
@@ -121,6 +135,13 @@ export function CardMetaPanel({ card, reviewLogs = [], onUpdateTags }: CardMetaP
     onUpdateTags(tags.filter((t) => t !== tag));
   };
 
+  const commitTitle = () => {
+    const next = titleInput.trim();
+    const current = (card?.title ?? "").trim();
+    if (next === current) return;
+    onUpdateTitle(next);
+  };
+
   return (
     <aside className="h-full w-80 shrink-0 border-l border-slate-200 bg-white">
       <div className="h-full overflow-y-auto p-4">
@@ -128,6 +149,26 @@ export function CardMetaPanel({ card, reviewLogs = [], onUpdateTags }: CardMetaP
           <section>
             <h3 className="text-xs font-semibold tracking-wide text-slate-500 uppercase">基本情報</h3>
             <div className="mt-3 space-y-2 text-sm text-slate-700">
+              <div>
+                <p className="mb-1 text-xs font-medium text-slate-600">タイトル</p>
+                <input
+                  value={titleInput}
+                  onChange={(e) => setTitleInput(e.target.value)}
+                  onBlur={commitTitle}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      commitTitle();
+                    }
+                  }}
+                  className="h-9 w-full rounded-md border border-slate-300 px-2 text-sm outline-none focus:border-slate-500"
+                  placeholder="タイトル"
+                />
+              </div>
+              <div className="flex items-center justify-between rounded border border-slate-200 bg-slate-50 px-2 py-1.5">
+                <span className="text-xs font-medium text-slate-600">下書き</span>
+                <Switch checked={Boolean(card?.isDraft)} onCheckedChange={onToggleDraft} />
+              </div>
               <p>作成日: {formatDateLabel(card?.createdAt)}</p>
               <p>更新日: {formatDateLabel(card?.updatedAt)}</p>
               <p>最終復習日: {latestReview ? formatDateLabel(latestReview.reviewedAt) : "未復習"}</p>
@@ -135,7 +176,7 @@ export function CardMetaPanel({ card, reviewLogs = [], onUpdateTags }: CardMetaP
           </section>
 
           <section>
-            <h3 className="text-xs font-semibold tracking-wide text-slate-500 uppercase">復習（4択評価）</h3>
+            <h3 className="text-xs font-semibold tracking-wide text-slate-500 uppercase">復習</h3>
             <p className="mt-3 text-sm text-slate-700">復習回数: {safeLogs.length}</p>
             <div className="mt-3 space-y-2">
               {recent10.length === 0 ? (

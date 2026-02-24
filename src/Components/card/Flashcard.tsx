@@ -539,33 +539,35 @@ export function Flashcard({
         </div>
       )}
 
-      <ScaleToFitFrame
-        baseWidth={480}
-        fitHeight
-        centerContent
-        allowUpscale
-        maxScale={1.9}
-      >
-        <CardShell
-          className={cn(
-            "mx-auto border-none rounded-[32px] md:rounded-[40px] transition-all duration-300",
-            "premium-paper-depth",
-            !previewMode && "premium-paper-depth--hover cursor-pointer",
-            "card-shell--paper"
-          )}
-          ref={shellRef}
-          onClick={handleFlip}
-          resizable={false}
-          resizeStepPx={undefined}
-          showResizeHandle={false}
-          heightPx={sharedPreviewHeightPx}
-          lockHeight={lockCardHeight}
-          bodyOverflowY="auto"
-          actionsTopLeft={actionsTopLeft.length > 0 ? actionsTopLeft : undefined}
-          actionsTopRight={actionsTopRight.length > 0 ? actionsTopRight : undefined}
-          actionsBottomRight={actionsBottomRight.length > 0 ? actionsBottomRight : undefined}
-          drawMode={enableDrawMode}
+      <div className="relative">
+        <div className="card-ambient-shadow" aria-hidden="true" />
+        <ScaleToFitFrame
+          baseWidth={480}
+          fitHeight
+          centerContent
+          allowUpscale
+          maxScale={1.9}
         >
+          <CardShell
+            className={cn(
+              "mx-auto border-none rounded-[32px] md:rounded-[40px] transition-all duration-300",
+              "premium-paper-depth",
+              !previewMode && "premium-paper-depth--hover cursor-pointer",
+              "card-shell--paper"
+            )}
+            ref={shellRef}
+            onClick={handleFlip}
+            resizable={false}
+            resizeStepPx={undefined}
+            showResizeHandle={false}
+            heightPx={sharedPreviewHeightPx}
+            lockHeight={lockCardHeight}
+            bodyOverflowY="auto"
+            actionsTopLeft={actionsTopLeft.length > 0 ? actionsTopLeft : undefined}
+            actionsTopRight={actionsTopRight.length > 0 ? actionsTopRight : undefined}
+            actionsBottomRight={actionsBottomRight.length > 0 ? actionsBottomRight : undefined}
+            drawMode={enableDrawMode}
+          >
           <CardSurface
             ruled={true}
             ruledOffsetPx={24}
@@ -626,8 +628,9 @@ export function Flashcard({
               )}
             </div>
           </CardSurface>
-        </CardShell>
-      </ScaleToFitFrame>
+          </CardShell>
+        </ScaleToFitFrame>
+      </div>
 
       <ReferencePopup
         isOpen={isReferencePopupOpen}
