@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
+import { useTags } from "@/hooks/useTags";
 import type { Card, ReviewLog } from "@/types";
 
 type Period = "7d" | "30d" | "all";
@@ -50,6 +51,7 @@ function aggregateDailyLast(logs: ReviewLog[]) {
 export function CardMetaPanel({ card, reviewLogs = [], onUpdateTags }: CardMetaPanelProps) {
   const [newTag, setNewTag] = useState("");
   const [period, setPeriod] = useState<Period>("30d");
+  const { addTag, getTagColor } = useTags();
 
   const safeLogs = useMemo(
     () =>
@@ -79,13 +81,14 @@ export function CardMetaPanel({ card, reviewLogs = [], onUpdateTags }: CardMetaP
 
   const tags = card?.tags ?? [];
 
-  const addTag = () => {
+  const handleAddTag = async () => {
     const trimmed = newTag.trim();
     if (!trimmed) return;
     if (tags.includes(trimmed)) {
       setNewTag("");
       return;
     }
+    await addTag(trimmed);
     onUpdateTags([...tags, trimmed]);
     setNewTag("");
   };
@@ -171,7 +174,10 @@ export function CardMetaPanel({ card, reviewLogs = [], onUpdateTags }: CardMetaP
                 <p className="text-sm text-slate-500">タグなし</p>
               ) : (
                 tags.map((tag) => (
-                  <span key={tag} className="inline-flex items-center gap-1 rounded-full border border-slate-300 px-2 py-1 text-xs">
+                  <span
+                    key={tag}
+                    className={`inline-flex items-center gap-1 rounded-full border px-2 py-1 text-xs ${getTagColor(tag)}`}
+                  >
                     {tag}
                     <button type="button" className="text-slate-500 hover:text-slate-800" onClick={() => removeTag(tag)}>
                       x
@@ -187,13 +193,13 @@ export function CardMetaPanel({ card, reviewLogs = [], onUpdateTags }: CardMetaP
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
-                    addTag();
+                    handleAddTag();
                   }
                 }}
                 className="h-9 flex-1 rounded-md border border-slate-300 px-2 text-sm outline-none focus:border-slate-500"
                 placeholder="タグを追加"
               />
-              <button type="button" className="h-9 rounded-md bg-slate-900 px-3 text-sm text-white" onClick={addTag}>
+              <button type="button" className="h-9 rounded-md bg-slate-900 px-3 text-sm text-white" onClick={handleAddTag}>
                 追加
               </button>
             </div>

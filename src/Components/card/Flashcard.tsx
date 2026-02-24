@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/Components/ui/button';
 import { CardShell } from './CardShell';
-import { ChevronLeft, ChevronRight, Pencil, RotateCcw, Image as ImageIcon, X, Volume2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Pencil, Image as ImageIcon, X, Volume2 } from 'lucide-react';
 import Star from 'lucide-react/dist/esm/icons/star';
 import CircleHelp from 'lucide-react/dist/esm/icons/circle-help';
 import LinkIcon from 'lucide-react/dist/esm/icons/link';
@@ -652,27 +652,6 @@ export function Flashcard({
           </CardSurface>
         </CardShell>
       </ScaleToFitFrame>
-
-      {/* カード直下の「Back to Question」 */}
-      {!previewMode && effectiveIsFlipped && (
-        <div className="w-full flex justify-center pt-2">
-          <Button
-            variant="ghost"
-            className="text-[10px] font-bold tracking-widest text-slate-400 hover:text-slate-600 uppercase flex items-center gap-2 bg-slate-50/50 px-3 py-1 rounded-full"
-            onClick={handleFlip}
-          >
-            <RotateCcw className="w-3 h-3" />
-            Back to Question
-          </Button>
-        </div>
-      )}
-
-      {/* カード直下のガイダンステキスト */}
-      {!previewMode && !effectiveIsFlipped && (
-        <div className="w-full flex justify-center pt-2">
-          <p className="text-sm text-slate-400 animate-pulse">Click card to reveal answer</p>
-        </div>
-      )}
 
       <ReferencePopup
         isOpen={isReferencePopupOpen}
