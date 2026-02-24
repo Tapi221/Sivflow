@@ -410,7 +410,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
           {isMetaOpen ? "メタを閉じる" : "メタを開く"}
         </Button>
       </div>
-      <div className="flex h-[calc(100%-3rem)] overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+      <div className="flex h-[calc(100%-3rem)] overflow-hidden">
         <div className="min-w-0 flex-1 overflow-y-auto p-4">
           {isEditing ? (
             <div className="space-y-4">
@@ -551,7 +551,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
                 setIsEditing(true);
               }}
               editorSharedHeightPx={cardHeightPx}
-              lockCardHeight={true}
+              lockCardHeight={false}
             />
           )}
         </div>
