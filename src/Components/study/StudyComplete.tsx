@@ -1,9 +1,9 @@
 import React from 'react';
 import { Button } from '@/Components/ui/button';
 import { Card, CardContent } from '@/Components/ui/card';
-import { SUBJECTIVE_LABELS } from '@/utils/reviewUtils';
 import { createPageUrl } from '@/utils';
 import { StampRally } from '@/Components/study/StampRally';
+import { RatingCountTiles } from '@/Components/study/RatingCountTiles';
 
 type Tile = { rating: string; score: number; Icon: any };
 
@@ -92,24 +92,12 @@ export function StudyComplete({
             <p className={`text-sm text-[#94a3b8] ${compact ? 'mb-5 md:mb-6' : 'mb-8'}`}>全てのカードを学習しました</p>
 
             <div className={`grid grid-cols-2 md:grid-cols-4 max-w-2xl mx-auto ${compact ? 'gap-2 md:gap-2.5 mb-6' : 'gap-2 md:gap-3 mb-8'}`}>
-              {ratingTiles.map(({ rating, score }) => {
+              {ratingTiles.map(({ rating }) => {
                 const count = ratingCounts[rating] ?? 0;
                 const canPractice = isPracticeFeatureEnabled && count > 0;
                 const design = faceDesign[rating as keyof typeof faceDesign];
 
-                if (!isPracticeFeatureEnabled) {
-                  return (
-                    <div key={rating} className={`bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center transform transition-all hover:scale-105 ${compact ? 'p-2.5 md:p-3' : 'p-3'}`}>
-                      <div className={`mb-1 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-transform group-hover:scale-110 ${design.iconWrap}`}>
-                        <svg width="18" height="18" className="md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                          {design.svg}
-                        </svg>
-                      </div>
-                      <span className="text-lg font-bold text-[#1e293b]">{results[score] ?? 0}</span>
-                      <span className={`text-[9px] text-[#94a3b8] font-medium uppercase tracking-wider ${design.labelHover}`}>{SUBJECTIVE_LABELS[score]}</span>
-                    </div>
-                  );
-                }
+                if (!isPracticeFeatureEnabled) return null;
 
                 return (
                   <button
@@ -130,6 +118,18 @@ export function StudyComplete({
                 );
               })}
             </div>
+            {!isPracticeFeatureEnabled && (
+              <RatingCountTiles
+                compact={compact}
+                className={compact ? 'max-w-2xl mx-auto mb-6' : 'max-w-2xl mx-auto mb-8'}
+                counts={{
+                  forgot: results[0] ?? 0,
+                  vague: results[1] ?? 0,
+                  remembered: results[2] ?? 0,
+                  easy: results[3] ?? 0,
+                }}
+              />
+            )}
 
             {isPracticeFeatureEnabled && (
               <p className={`text-xs text-slate-400 ${compact ? 'mb-5 md:mb-6' : 'mb-8'}`}>※追い復習は追加練習です（復習予定は変更されません）</p>

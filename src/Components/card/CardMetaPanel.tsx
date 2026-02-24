@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
+import { RatingCountTiles } from "@/Components/study/RatingCountTiles";
 import { useTags } from "@/hooks/useTags";
 import type { Card, ReviewLog } from "@/types";
 
@@ -65,8 +66,13 @@ export function CardMetaPanel({ card, reviewLogs = [], onUpdateTags }: CardMetaP
   const recent10 = safeLogs.slice(-10).reverse();
 
   const distribution20 = useMemo(() => {
-    const base = { 1: 0, 2: 0, 3: 0, 4: 0 };
-    for (const log of safeLogs.slice(-20)) base[log.rating] += 1;
+    const base = { forgot: 0, vague: 0, remembered: 0, easy: 0 };
+    for (const log of safeLogs.slice(-20)) {
+      if (log.rating === 1) base.forgot += 1;
+      else if (log.rating === 2) base.vague += 1;
+      else if (log.rating === 3) base.remembered += 1;
+      else if (log.rating === 4) base.easy += 1;
+    }
     return base;
   }, [safeLogs]);
 
@@ -142,14 +148,7 @@ export function CardMetaPanel({ card, reviewLogs = [], onUpdateTags }: CardMetaP
                 ))
               )}
             </div>
-            <div className="mt-3 grid grid-cols-4 gap-2 text-center text-xs text-slate-700">
-              {[1, 2, 3, 4].map((r) => (
-                <div key={r} className="rounded border border-slate-200 py-1">
-                  <p className="text-[10px] text-slate-500">R{r}</p>
-                  <p className="font-semibold">{distribution20[r as 1 | 2 | 3 | 4]}</p>
-                </div>
-              ))}
-            </div>
+            <RatingCountTiles counts={distribution20} compact className="mt-3" />
           </section>
 
           <section>
