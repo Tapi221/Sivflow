@@ -53,7 +53,6 @@ function extractBlockTexts(blocks: any[]): { field: MatchField; text: string }[]
   for (const block of blocks || []) {
     switch (block.type) {
       case 'text':
-      case 'memo':
         if (block.content?.trim()) {
           results.push({ field: 'question', text: block.content });
         }

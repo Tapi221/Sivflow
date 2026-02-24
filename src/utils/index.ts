@@ -123,7 +123,6 @@ export const extractTextFromBlocks = (blocks: any[]): string => {
   for (const block of blocks) {
     if (block.type === 'text' && block.content) return block.content.trim();
     if (block.type === 'markdown' && block.markdown) return block.markdown.trim();
-    if (block.type === 'memo' && block.content) return block.content.trim();
     if (block.type === 'code' && block.code?.code) return block.code.code.split('\n')[0].trim();
   }
   return '';
@@ -232,7 +231,6 @@ export const normalizeCard = (raw: any) => {
     if (normalized.questionCode) blocks.push({ id: `q-code-${id}`, type: 'code', code: normalized.questionCode, orderIndex: idx++ });
     if (normalized.questionImages.length > 0) blocks.push({ id: `q-img-${id}`, type: 'image', images: normalized.questionImages, orderIndex: idx++ });
     if (normalized.questionAudios.length > 0) blocks.push({ id: `q-audio-${id}`, type: 'audio', audios: normalized.questionAudios, orderIndex: idx++ });
-    if (normalized.questionMemo) blocks.push({ id: `q-memo-${id}`, type: 'memo', content: normalized.questionMemo, orderIndex: idx++ });
     normalized.questionBlocks = blocks;
   }
 
@@ -243,7 +241,6 @@ export const normalizeCard = (raw: any) => {
     if (normalized.answerCode) blocks.push({ id: `a-code-${id}`, type: 'code', code: normalized.answerCode, orderIndex: idx++ });
     if (normalized.answerImages.length > 0) blocks.push({ id: `a-img-${id}`, type: 'image', images: normalized.answerImages, orderIndex: idx++ });
     if (normalized.answerAudios.length > 0) blocks.push({ id: `a-audio-${id}`, type: 'audio', audios: normalized.answerAudios, orderIndex: idx++ });
-    if (normalized.answerMemo) blocks.push({ id: `a-memo-${id}`, type: 'memo', content: normalized.answerMemo, orderIndex: idx++ });
     normalized.answerBlocks = blocks;
   }
 

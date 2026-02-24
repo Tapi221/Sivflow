@@ -9,7 +9,6 @@ import {
   X,
   HelpCircle,
   Image as ImageIcon,
-  StickyNote,
   Save,
   Plus,
   ArrowRight,
@@ -97,13 +96,11 @@ export default function CardEditor({
     questionImages: [],
     questionAudios: [],
     questionCode: null,
-    questionMemo: '',
     questionBlocks: [], // 追加
     answerText: '',
     answerImages: [],
     answerAudios: [],
     answerCode: null,
-    answerMemo: '',
     answerBlocks: [], // 追加
     tags: [],
     isBookmarked: false,
@@ -135,7 +132,7 @@ const hasAnyContent = (data: any) => {
     Array.isArray(blocks) &&
     blocks.some((b: any) => {
       if (!b) return false;
-      if (b.type === 'text' || b.type === 'memo') return !!(b.content ?? '').trim();
+      if (b.type === 'text') return !!(b.content ?? '').trim();
       if (b.type === 'code') return !!b.code?.code;
       if (b.type === 'image') return (b.images?.length ?? 0) > 0;
       if (b.type === 'audio') return (b.audios?.length ?? 0) > 0;
@@ -194,13 +191,11 @@ const hasAnyContent = (data: any) => {
       questionImages: card.questionImages || [],
       questionAudios: card.questionAudios || [],
       questionCode: card.questionCode || card.question_code || null,
-      questionMemo: card.questionMemo || '',
       questionBlocks: card.questionBlocks || [],
       answerText: card.answerText || '',
       answerImages: card.answerImages || [],
       answerAudios: card.answerAudios || [],
       answerCode: card.answerCode || card.answer_code || null,
-      answerMemo: card.answerMemo || '',
       answerBlocks: card.answerBlocks || [],
       tags: card.tags || [],
       isBookmarked: card.isBookmarked ?? card.is_bookmarked ?? false,
@@ -365,7 +360,7 @@ const hasAnyContent = (data: any) => {
     
     const hasBlocks = (blocks: any[]) => {
       return blocks.some(b => {
-        if (b.type === 'text' || b.type === 'memo') return b.content?.trim();
+        if (b.type === 'text') return b.content?.trim();
         if (b.type === 'code') return b.code?.code;
         if (b.type === 'image') return b.images?.length > 0;
         if (b.type === 'audio') return b.audios?.length > 0;

@@ -23,7 +23,7 @@ function isCardDeleted(
 
 function hasBlocksContent(blocks?: any[]): boolean {
   return blocks?.some(b => {
-    if (b.type === 'text' || b.type === 'memo') return b.content?.trim();
+    if (b.type === 'text') return b.content?.trim();
     if (b.type === 'markdown') return b.markdown?.trim();
     if (b.type === 'code') return b.code?.code?.trim();
     if (b.type === 'image') return b.images?.length > 0;
@@ -113,7 +113,7 @@ export function useCards(folderId?: string) {
     // Validation: カードが完全に空（タイトルもコンテンツもタグもない）場合は保存を拒否
     const hasBlocksContent = (blocks?: any[]) => {
       return blocks?.some(b => {
-        if (b.type === 'text' || b.type === 'memo') return b.content?.trim();
+        if (b.type === 'text') return b.content?.trim();
         if (b.type === 'markdown') return b.markdown?.trim();
         if (b.type === 'code') return b.code?.code?.trim();
         if (b.type === 'image') return b.images?.length > 0;

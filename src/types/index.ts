@@ -325,7 +325,7 @@ export type MathBlockData = {
  */
 export type CardBlock = {
   id: string;
-  type: 'text' | 'code' | 'image' | 'audio' | 'memo' | 'reference' | 'math' | 'markdown';
+  type: 'text' | 'code' | 'image' | 'audio' | 'reference' | 'math' | 'markdown';
 
   orderIndex: number;
   rowOffset?: number;

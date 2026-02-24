@@ -166,12 +166,10 @@ export function Flashcard({
   const questionText = cardData?.question_text ?? cardData?.questionText ?? '';
   const questionImages = cardData?.question_images ?? cardData?.questionImages ?? [];
   const questionAudios = cardData?.question_audios ?? cardData?.questionAudios ?? [];
-  const questionMemo = cardData?.question_memo ?? cardData?.questionMemo ?? '';
 
   const answerText = cardData?.answer_text ?? cardData?.answerText ?? '';
   const answerImages = cardData?.answer_images ?? cardData?.answerImages ?? [];
   const answerAudios = cardData?.answer_audios ?? cardData?.answerAudios ?? [];
-  const answerMemo = cardData?.answer_memo ?? cardData?.answerMemo ?? '';
 
   const questionCode = cardData?.questionCode || cardData?.question_code || null;
   const answerCode = cardData?.answerCode || cardData?.answer_code || null;
@@ -450,13 +448,6 @@ export function Flashcard({
                 </div>
               )}
 
-              {block.type === 'memo' && (block.content ?? '').trim() !== '' && (
-                <div className="p-4 bg-slate-50 rounded-2xl text-sm text-slate-600 text-left whitespace-pre-wrap break-all border border-slate-100/50">
-                  <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Memo</div>
-                  {block.content}
-                </div>
-              )}
-
               {block.type === 'math' && (block.math?.latex ?? '').trim() !== '' && (
                 <div className="py-2 flex justify-center">
                   <MathRenderer
@@ -486,14 +477,12 @@ export function Flashcard({
     const text = side === 'question' ? questionText : answerText;
     const images = side === 'question' ? questionImageUrls : answerImageUrls;
     const audios = side === 'question' ? (questionAudios ?? []) : (answerAudios ?? []);
-    const memo = side === 'question' ? questionMemo : answerMemo;
     const code = side === 'question' ? questionCode : answerCode;
 
     const hasAny =
       (text ?? '').trim() !== '' ||
       (images?.length ?? 0) > 0 ||
       (audios?.length ?? 0) > 0 ||
-      (memo ?? '').trim() !== '' ||
       (code?.code ?? '').trim() !== '';
 
     if (!hasAny) return null;
@@ -520,12 +509,6 @@ export function Flashcard({
           </div>
         )}
 
-        {(memo ?? '').trim() !== '' && (
-          <div className="p-4 bg-slate-50 rounded-2xl text-sm text-slate-600 text-left whitespace-pre-wrap break-all border border-slate-100/50">
-            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Memo</div>
-            {memo}
-          </div>
-        )}
       </div>
     );
   };
