@@ -1,4 +1,4 @@
-import React, { useEffect, Suspense, useState, useMemo, useRef, useCallback } from 'react';
+import React, { useEffect, Suspense, useState } from 'react';
 import { Outlet, Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { Button } from '@/Components/ui/button';
 import SettingsDialog from '@/Components/settings/SettingsDialog';
@@ -9,30 +9,20 @@ import { useCards } from '@/hooks/useCards';
 import { useFolders } from '@/hooks/useFolders';
 
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/Components/ui/dropdown-menu';
-import { 
-  Home, 
   Folder, 
   BookOpen, 
   Calendar, 
-  Trash2,
-  HelpCircle,
   Menu,
-  User,
   Settings
 } from 'lucide-react';
-import Globe from 'lucide-react/dist/esm/icons/globe';
 import ImagesIcon from 'lucide-react/dist/esm/icons/images';
 import { useAuth } from '@/contexts/AuthContext';
-import { auth } from '@/services/firebase';
-import { signOut } from 'firebase/auth';
 import { createPageUrl } from '@/utils';
 import { useUserSettings } from '@/hooks/useUserSettings';
+import { useSettingsQueryParam } from '@/hooks/useSettingsQueryParam';
+import { useSidebarOverlay } from '@/hooks/useSidebarOverlay';
+import { useReviewCount } from '@/hooks/useReviewCount';
+import { useKatexLoader } from '@/hooks/useKatexLoader';
 import { getAvatarColors, getInitials } from '@/utils/avatarUtils';
 
 import { useHeaderCompact } from '@/hooks/useHeaderCompact';
@@ -42,41 +32,6 @@ import { SecurityAlertBanner } from './Components/security/SecurityAlertBanner';
 import { LocalDBStatusBanner } from './Components/security/LocalDBStatusBanner';
 
 // ... (existing imports)
-
-const toDate = (value: any): Date | null => {
-  if (!value) return null;
-  if (typeof value?.toDate === 'function') {
-    const d = value.toDate();
-    return d instanceof Date && !isNaN(d.getTime()) ? d : null;
-  }
-  if (value instanceof Date) return isNaN(value.getTime()) ? null : value;
-  if (typeof value === 'object') {
-    const seconds =
-      typeof value.seconds === 'number'
-        ? value.seconds
-        : typeof value._seconds === 'number'
-          ? value._seconds
-          : null;
-    const nanoseconds =
-      typeof value.nanoseconds === 'number'
-        ? value.nanoseconds
-        : typeof value._nanoseconds === 'number'
-          ? value._nanoseconds
-          : 0;
-    if (seconds !== null) {
-      const d = new Date(seconds * 1000 + Math.floor(nanoseconds / 1e6));
-      return isNaN(d.getTime()) ? null : d;
-    }
-  }
-  const d = new Date(value);
-  return isNaN(d.getTime()) ? null : d;
-};
-
-const isCardDeleted = (card: any) =>
-  Boolean(card?.isDeleted ?? card?.is_deleted ?? card?.deleted ?? card?.deletedAt ?? card?.deleted_at);
-
-const isCardDraft = (card: any) => Boolean(card?.isDraft ?? card?.is_draft);
-const isCardSilent = (card: any) => Boolean(card?.isSilent ?? card?.is_silent);
 
 export default function Layout() {
   // ... (existing logic)
@@ -101,51 +56,14 @@ export default function Layout() {
     }
   }, [isFoldersRoute, location.pathname]);
   
-  // サイドバーの状態をlocalStorageで永続化
-  const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
-    const saved = localStorage.getItem('sidebarOpen');
-    return saved !== null ? saved === 'true' : true;
-  });
-  
-  // サイドバーの状態が変更されたらlocalStorageに保存
-  const handleSidebarToggle = (open: boolean) => {
-    setIsSidebarOpen(open);
-    localStorage.setItem('sidebarOpen', String(open));
-  };
-  const closeSidebar = useCallback(() => {
-    setIsSidebarOpen(false);
-    localStorage.setItem('sidebarOpen', 'false');
-  }, []);
-  
-  const isSettingsOpen = searchParams.get('settings') === 'true';
-  const setIsSettingsOpen = (open: boolean) => {
-    if (open && typeof document !== 'undefined') {
-      const activeElement = document.activeElement;
-      if (activeElement instanceof HTMLElement) {
-        activeElement.blur();
-      }
-    }
-    const newParams = new URLSearchParams(searchParams);
-    if (open) {
-        newParams.set('settings', 'true');
-    } else {
-        newParams.delete('settings');
-    }
-    setSearchParams(newParams, { replace: true });
-  };
+  const { isSettingsOpen, setIsSettingsOpen } = useSettingsQueryParam(searchParams, setSearchParams);
   const [imgError, setImgError] = useState(false);
   const { currentUser } = useAuth();
   const { settings } = useUserSettings();
-  const sidebarToggleButtonRef = useRef<HTMLButtonElement | null>(null);
-  const sidebarPanelRef = useRef<HTMLElement | null>(null);
-  const firstSidebarNavLinkRef = useRef<HTMLAnchorElement | null>(null);
-  const wasSidebarOpenRef = useRef(isSidebarOpen);
-  const previousPathnameRef = useRef(location.pathname);
-  const previousBodyOverflowRef = useRef('');
-  const previousHtmlOverflowRef = useRef('');
 
   // Reset imgError when remoteUrl changes
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setImgError(false);
   }, [settings?.profileImage?.remoteUrl]);
 
@@ -158,7 +76,7 @@ export default function Layout() {
         console.warn('[Layout] blob remoteUrl detected on render:', remoteUrl);
       }
     }
-  }, [settings?.profileImage?.remoteUrl, settings?.profileImage?.updatedAt]);
+  }, [settings?.profileImage, settings?.profileImage?.remoteUrl, settings?.profileImage?.updatedAt]);
 
   // ヘッダー縮小状態の管理（モバイルのみ）
   const isHeaderCompact = useHeaderCompact(32, 8);
@@ -166,44 +84,13 @@ export default function Layout() {
   // --- Review Count Logic ---
   const { cards = [], loading: cardsLoading } = useCards();
   const { folders = [], loading: foldersLoading } = useFolders();
-  const folderMap = useMemo(() => {
-    const map = new Map<string, any>();
-    folders.forEach((folder: any) => {
-      const id = folder?.id ?? folder?.folderId;
-      if (id) map.set(String(id), folder);
-    });
-    return map;
-  }, [folders]);
-
-  const reviewCount = useMemo(() => {
-    if (!cards || cardsLoading || foldersLoading) return 0;
-
-    const autoCarryOver = settings?.autoCarryOver ?? true;
-    const today = new Date();
-    const tDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-
-    return cards.filter((card: any) => {
-      if (isCardDeleted(card) || isCardDraft(card) || isCardSilent(card)) return false;
-
-      const dateValue = card?.next_review_date ?? card?.nextReviewDate;
-      const reviewDate = toDate(dateValue);
-      if (!reviewDate) return false;
-
-      const folderId = card?.folderId ?? card?.folder_id;
-      if (folderId !== null && folderId !== undefined && folderId !== '') {
-        const normalizedFolderId = String(folderId);
-        const folder = folderMap.get(normalizedFolderId);
-        if (!folder) return false;
-        if (folder?.isDeleted ?? folder?.is_deleted) return false;
-      }
-
-      const rDate = new Date(reviewDate.getFullYear(), reviewDate.getMonth(), reviewDate.getDate());
-      if (autoCarryOver) {
-        return rDate <= tDate;
-      }
-      return rDate.getTime() === tDate.getTime();
-    }).length;
-  }, [cards, cardsLoading, folderMap, foldersLoading, settings?.autoCarryOver]);
+  const { reviewCount } = useReviewCount({
+    settings,
+    cards,
+    cardsLoading,
+    folders,
+    foldersLoading,
+  });
   
   // Determine currentPageName from location pathname
   const currentPageName = React.useMemo(() => {
@@ -218,6 +105,24 @@ export default function Layout() {
     return path.charAt(0).toUpperCase() + path.slice(1);
   }, [location.pathname]);
 
+  useKatexLoader();
+
+  const isStudyModePage = currentPageName === 'StudyMode';
+  const isCardEditPage = currentPageName === 'CardEdit';
+  const canUseSidebarNav = !isStudyModePage && !isCardEditPage;
+  const canUseSidebarNavUi = canUseSidebarNav && !isSettingsOpen;
+  const {
+    isSidebarOpen,
+    handleSidebarToggle,
+    closeSidebar,
+    sidebarToggleButtonRef,
+    sidebarPanelRef,
+    firstSidebarNavLinkRef,
+  } = useSidebarOverlay({
+    canUseSidebarNavUi,
+    locationPathname: location.pathname,
+    isSettingsOpen,
+  });
   // Sidebar toggle shortcut (Ctrl+B / Cmd+B)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -232,122 +137,12 @@ export default function Layout() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isSidebarOpen]);
-
-  // Handle KaTeX loading
-  useEffect(() => {
-    if ((window as any).katex) return;
-    
-    // Load KaTeX CSS
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css';
-    document.head.appendChild(link);
-    
-    // Load KaTeX JS
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js';
-    script.async = true;
-    document.head.appendChild(script);
-    
-    script.onload = () => {
-      const autoRender = document.createElement('script');
-      autoRender.src = 'https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js';
-      autoRender.async = true;
-      document.head.appendChild(autoRender);
-    };
-  }, []);
-
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      navigate('/login');
-    } catch (error) {
-      console.error('ログアウトエラー:', error);
-    }
-  };
-
-  const navItems = [
-    { name: 'Dashboard', label: '学習', icon: Home, badge: reviewCount > 0 ? reviewCount : null },
-    { name: 'Folders', label: 'フォルダ', icon: Folder },
-    { name: 'Gallery', label: 'ギャラリー', icon: Globe },
-    { name: 'Calendar', label: '予定表', icon: Calendar },
-  ];
-  
-  const isStudyModePage = currentPageName === 'StudyMode';
-  const isCardEditPage = currentPageName === 'CardEdit';
-  const canUseSidebarNav = !isStudyModePage && !isCardEditPage;
-  const canUseSidebarNavUi = canUseSidebarNav && !isSettingsOpen;
+  }, [handleSidebarToggle, isSidebarOpen]);
   const showMobileHeader = currentPageName === 'Dashboard';
   const overlayNavItemBaseClass =
     "group relative w-full h-12 rounded-xl px-3 flex items-center justify-start gap-3 text-left select-none text-slate-600 transition-all duration-200 hover:bg-slate-100/80 hover:text-slate-800";
   const overlayNavItemActiveClass =
     "bg-gradient-to-r from-primary-50/90 to-sky-50/90 text-slate-900 font-semibold shadow-[inset_0_0_0_1px_rgba(59,130,246,0.2)]";
-
-  useEffect(() => {
-    if (!canUseSidebarNavUi) return;
-    if (typeof document === 'undefined') return;
-
-    const body = document.body;
-    const html = document.documentElement;
-
-    if (isSidebarOpen) {
-      previousBodyOverflowRef.current = body.style.overflow;
-      previousHtmlOverflowRef.current = html.style.overflow;
-      body.style.overflow = 'hidden';
-      html.style.overflow = 'hidden';
-
-      requestAnimationFrame(() => {
-        if (firstSidebarNavLinkRef.current) {
-          firstSidebarNavLinkRef.current.focus();
-          return;
-        }
-        sidebarPanelRef.current?.focus();
-      });
-    } else {
-      body.style.overflow = previousBodyOverflowRef.current;
-      html.style.overflow = previousHtmlOverflowRef.current;
-
-      if (wasSidebarOpenRef.current) {
-        sidebarToggleButtonRef.current?.focus();
-      }
-    }
-
-    wasSidebarOpenRef.current = isSidebarOpen;
-
-    return () => {
-      body.style.overflow = previousBodyOverflowRef.current;
-      html.style.overflow = previousHtmlOverflowRef.current;
-    };
-  }, [canUseSidebarNavUi, isSidebarOpen]);
-
-  useEffect(() => {
-    if (!canUseSidebarNavUi || !isSidebarOpen) return;
-
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape') return;
-      e.preventDefault();
-      closeSidebar();
-    };
-
-    window.addEventListener('keydown', handleEscape);
-    return () => window.removeEventListener('keydown', handleEscape);
-  }, [canUseSidebarNavUi, closeSidebar, isSidebarOpen]);
-
-  useEffect(() => {
-    if (!isSettingsOpen) return;
-    closeSidebar();
-  }, [closeSidebar, isSettingsOpen]);
-
-  useEffect(() => {
-    const previousPathname = previousPathnameRef.current;
-    previousPathnameRef.current = location.pathname;
-    if (previousPathname === location.pathname) return;
-    const timerId = window.setTimeout(() => {
-      closeSidebar();
-    }, 0);
-    return () => window.clearTimeout(timerId);
-  }, [closeSidebar, location.pathname]);
 
   // Helper for dynamic colors
   const { bg: avatarBg, text: avatarText } = React.useMemo(() => 

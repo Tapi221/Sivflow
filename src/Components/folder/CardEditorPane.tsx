@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FileText, PanelRightClose, PanelRightOpen, Plus } from "lucide-react";
 import Star from "lucide-react/dist/esm/icons/star";
 import CircleHelp from "lucide-react/dist/esm/icons/circle-help";
@@ -20,6 +20,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/Components/u
 import { Input } from "@/Components/ui/input";
 import { useCards } from "@/hooks/useCards";
 import { useUserSettings } from "@/hooks/useUserSettings";
+import { useToast } from "@/contexts/ToastContext";
 
 import type { CardBlock, ReferenceBlockData } from "@/types";
 
@@ -29,10 +30,12 @@ type DndResult = { source: DndLocation; destination?: DndLocation | null };
 interface CardEditorPaneProps {
   selectedCardId: string | null;
   onCardUpdated?: () => void;
+  onSelectCardId?: (cardId: string) => void;
 }
 
-export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPaneProps) {
+export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }: CardEditorPaneProps) {
   const { settings, updateSettings } = useUserSettings();
+  const { success: toastSuccess, error: toastError } = useToast();
 
   // ★重要：createCard が無い場合はここだけあなたの実装名に合わせて変更
   const { cards, updateCard, createCard } = useCards() as any;
@@ -96,7 +99,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
     answerBlocks: CardBlock[];
   } | null>(null);
 
-  const initNewDraft = () => {
+  const initNewDraft = useCallback(() => {
     setDraft({
       title: "",
       tags: [],
@@ -104,7 +107,13 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
       questionBlocks: [],
       answerBlocks: [],
     });
-  };
+  }, []);
+
+  useEffect(() => {
+    if (isEditing && !draft) {
+      initNewDraft();
+    }
+  }, [isEditing, draft]);
 
   // カード切替時またはロード完了時にドラフトをロード
   useEffect(() => {
@@ -250,15 +259,22 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
           console.error(
             "[CardEditorPane] createCard が useCards にありません。useCards の作成関数名に合わせて置き換えてください。"
           );
+          toastError?.("カードの作成関数が見つかりません");
           return;
         }
 
-        await createCard(payload);
+        const created = await createCard(payload);
+        const newId =
+          (typeof created === "object" && created !== null && "id" in created && (created as any).id) ||
+          (typeof created === "string" ? created : null);
         onCardUpdated?.();
+        toastSuccess?.("カードを作成しました");
+        if (newId && typeof onSelectCardId === "function") {
+          onSelectCardId(newId);
+        }
 
-        // 新規作成後は編集を閉じてプレースホルダに戻す（親が新IDを選択してくれるのが理想）
+        // 新規作成後は編集を閉じる（親が新ID選択できる場合は onSelectCardId で追従）
         setIsEditing(false);
-        initNewDraft();
         return;
       }
 
@@ -266,9 +282,11 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
 
       await updateCard(selectedCard.id, payload);
       onCardUpdated?.();
+      toastSuccess?.("カードを更新しました");
       setIsEditing(false);
     } catch (e) {
       console.error("カード保存に失敗しました:", e);
+      toastError?.("カード保存に失敗しました");
     } finally {
       setIsSaving(false);
     }
@@ -322,6 +340,10 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
     type: CardBlock["type"],
     payload: Partial<CardBlock>
   ) => {
+    const uniqueId =
+      typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const blocks = getSideBlocks(side);
     const index = blocks.findIndex((block) => block.type === type);
     if (index >= 0) {
@@ -331,7 +353,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
       return;
     }
     const nextBlock: CardBlock = {
-      id: `${side}-${type}-${Date.now()}`,
+      id: `${side}-${type}-${uniqueId}`,
       type,
       orderIndex: blocks.length,
       content: "",
@@ -526,7 +548,6 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
       title: draft.title,
       tags: draft.tags,
       isDraft: draft.isDraft,
-      isDraft: true,
       isDeleted: false,
       hasUncertainty: false,
       isBookmarked: false,
@@ -575,9 +596,9 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
     );
   }
 
-  // draft が無いのに編集に入った場合の保険
-  if (!draft) {
-    initNewDraft();
+  // 編集開始直後に draft が未初期化の1フレームを安全に吸収
+  if (isEditing && !draft) {
+    return <div className="h-full p-4 text-slate-400">Loading...</div>;
   }
 
   return (

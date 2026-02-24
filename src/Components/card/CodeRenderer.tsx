@@ -1,5 +1,6 @@
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useRef, useEffect } from "react";
 import { Highlight } from "prism-react-renderer";
+import type { RenderProps } from "prism-react-renderer";
 import { cn } from "@/lib/utils";
 import { codeTheme } from "@/theme/codeTheme";
 import CheckIcon from "lucide-react/dist/esm/icons/check";
@@ -53,6 +54,7 @@ const LANGUAGE_LABELS: Record<string, string> = {
 
 export function CodeRenderer({ code, language, className }: CodeRendererProps) {
   const [copied, setCopied] = useState(false);
+  const copiedTimerRef = useRef<number | null>(null);
 
   const normalizedCode = useMemo(() => {
     return (code ?? "").replace(/\s+$/, "");
@@ -68,23 +70,45 @@ export function CodeRenderer({ code, language, className }: CodeRendererProps) {
     return LANGUAGE_LABELS[validLanguage] ?? validLanguage;
   }, [validLanguage]);
 
+  useEffect(() => {
+    return () => {
+      if (copiedTimerRef.current !== null) {
+        window.clearTimeout(copiedTimerRef.current);
+        copiedTimerRef.current = null;
+      }
+    };
+  }, []);
+
+  const showCopiedForAWhile = useCallback(() => {
+    setCopied(true);
+    if (copiedTimerRef.current !== null) {
+      window.clearTimeout(copiedTimerRef.current);
+    }
+    copiedTimerRef.current = window.setTimeout(() => {
+      setCopied(false);
+      copiedTimerRef.current = null;
+    }, 2000);
+  }, []);
+
   const handleCopy = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(normalizedCode);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      showCopiedForAWhile();
     } catch {
       // clipboard API が使えない環境のフォールバック
       const el = document.createElement("textarea");
       el.value = normalizedCode;
       document.body.appendChild(el);
       el.select();
-      document.execCommand("copy");
+      const copiedByFallback = document.execCommand("copy");
       document.body.removeChild(el);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      if (copiedByFallback) {
+        showCopiedForAWhile();
+      } else {
+        console.warn("Copy fallback failed");
+      }
     }
-  }, [normalizedCode]);
+  }, [normalizedCode, showCopiedForAWhile]);
 
   // コピーボタン（右上アクション）
   const copyButton = (
@@ -96,7 +120,7 @@ export function CodeRenderer({ code, language, className }: CodeRendererProps) {
       }}
       className={cn(
         "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium",
-        "opacity-0 group-hover:opacity-100 transition-opacity duration-150",
+        "opacity-100 supports-[hover:hover]:opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity duration-150",
         "text-zinc-400 hover:text-zinc-600 hover:bg-zinc-900/5",
         "focus:outline-none",
         copied && "opacity-100 text-emerald-600 hover:text-emerald-600"
@@ -119,25 +143,41 @@ export function CodeRenderer({ code, language, className }: CodeRendererProps) {
         right={copyButton}
       >
         <Highlight theme={codeTheme} code={normalizedCode} language={validLanguage}>
-          {({ className: preClassName, style, tokens, getLineProps, getTokenProps }: any) => (
-            <pre
-              className={cn(
-                preClassName,
-                "codeBlockPre overflow-x-auto"
-              )}
-              style={{ ...style }}
-            >
-              <code>
-                {tokens.map((line: any[], i: number) => (
-                  <div key={i} {...getLineProps({ line })}>
-                    {line.map((token: any, key: number) => (
-                      <span key={key} {...getTokenProps({ token })} />
-                    ))}
-                  </div>
-                ))}
-              </code>
-            </pre>
-          )}
+          {({
+            className: preClassName,
+            style,
+            tokens,
+            getLineProps,
+            getTokenProps,
+          }: RenderProps) => {
+            const lastLine = tokens[tokens.length - 1];
+            const lastLineIsTrailingEmpty =
+              Array.isArray(lastLine) &&
+              lastLine.every((token) => token.content.trim() === "");
+            const visibleTokens = lastLineIsTrailingEmpty
+              ? tokens.slice(0, -1)
+              : tokens;
+
+            return (
+              <pre
+                className={cn(
+                  preClassName,
+                  "codeBlockPre overflow-x-auto"
+                )}
+                style={{ ...style }}
+              >
+                <code>
+                  {visibleTokens.map((line, i) => (
+                    <div key={i} {...getLineProps({ line })}>
+                      {line.map((token, key) => (
+                        <span key={key} {...getTokenProps({ token })} />
+                      ))}
+                    </div>
+                  ))}
+                </code>
+              </pre>
+            );
+          }}
         </Highlight>
       </CodeBlockFrame>
     </div>

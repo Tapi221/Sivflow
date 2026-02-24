@@ -41,7 +41,6 @@ export interface ReviewLog {
 
 /** ユーザー設定 */
 export interface UserSettings {
-  theme: 'light' | 'dark' | 'system';
   dailyGoal: number;
   notificationsEnabled: boolean;
 }

@@ -8,7 +8,6 @@ import { sanitizeProfileImage } from '@/utils/profileImageSanitizer';
 export const DEFAULT_SETTINGS: Partial<UserSettings> = {
   displayName: 'UserName',
   profileImage: null,
-  theme: 'light',
   language: 'ja',
   weekStartDay: 'monday',
   notificationsEnabled: false,

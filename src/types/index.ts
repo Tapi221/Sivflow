@@ -188,7 +188,6 @@ export interface UserSettings extends BaseEntity {
   // ロケール/テーマ
   weekStartDay: 'sunday' | 'monday';
   language: 'ja' | 'en' | 'zh';
-  theme: 'light' | 'dark' | 'system';
   accentColor: string;
   levelColors: { [level: number]: string };
 

@@ -22,13 +22,75 @@ import { InkLayer, InkToolbar, type InkHistoryState, type InkLayerHandle } from 
 import { resolveInkDocument } from '@/Components/ink/inkStorage';
 import type { InkDocument, InkEditTool } from '@/Components/ink/inkTypes';
 
+type FlashcardMediaLike =
+  | string
+  | {
+      remoteUrl?: string | null;
+      localUrl?: string | null;
+      url?: string | null;
+    };
+
+type FlashcardCardLike = {
+  id?: string;
+  cardId?: string;
+  has_uncertainty?: boolean;
+  hasUncertainty?: boolean;
+  is_bookmarked?: boolean;
+  isBookmarked?: boolean;
+  question_text?: string;
+  questionText?: string;
+  answer_text?: string;
+  answerText?: string;
+  question_images?: FlashcardMediaLike[];
+  questionImages?: FlashcardMediaLike[];
+  answer_images?: FlashcardMediaLike[];
+  answerImages?: FlashcardMediaLike[];
+  question_audios?: FlashcardMediaLike[];
+  questionAudios?: FlashcardMediaLike[];
+  answer_audios?: FlashcardMediaLike[];
+  answerAudios?: FlashcardMediaLike[];
+  questionCode?: { code?: string; language?: string } | null;
+  question_code?: { code?: string; language?: string } | null;
+  answerCode?: { code?: string; language?: string } | null;
+  answer_code?: { code?: string; language?: string } | null;
+  questionBlocks?: CardBlock[];
+  answerBlocks?: CardBlock[];
+  inkQuestion?: InkDocument | null;
+  inkAnswer?: InkDocument | null;
+  [key: string]: unknown;
+};
+
+const renderMultilineText = (text: string) => {
+  const normalized = String(text ?? '').replace(/\r\n/g, '\n');
+  const lines = normalized.split('\n');
+
+  return (
+    <div
+      className="w-full min-h-[24px] px-1.5 py-0 text-center text-base font-medium text-slate-700 font-serif"
+      style={{ lineHeight: '24px' }}
+    >
+      {lines.map((line, lineIndex) => {
+        return (
+          <div
+            key={`line-${lineIndex}`}
+            className="whitespace-pre-wrap break-words leading-[24px]"
+            style={{ overflowWrap: 'anywhere' }}
+          >
+            {line === '' ? '\u00A0' : line}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
 interface FlashcardProps {
-  card: any;
+  card: FlashcardCardLike | null | undefined;
   isFlipped?: boolean;
   onFlip?: () => void;
-  onEdit?: (card: any) => void;
-  onToggleUncertainty?: (card: any) => void;
-  onToggleBookmark?: (card: any) => void;
+  onEdit?: (card: FlashcardCardLike) => void;
+  onToggleUncertainty?: (card: FlashcardCardLike) => void;
+  onToggleBookmark?: (card: FlashcardCardLike) => void;
   className?: string;
   showNavigation?: boolean;
   onNext?: () => void;
@@ -107,7 +169,9 @@ export function Flashcard({
   useEffect(() => {
     if (!inkEditingEnabled) {
       setPreviewInkTool(null);
+      return;
     }
+    setPreviewInkTool((prev) => prev ?? 'pen');
   }, [inkEditingEnabled]);
 
   // エディタから直接渡された高さがあれば優先して使用
@@ -192,17 +256,17 @@ export function Flashcard({
 
   const handleFlip = (e?: React.MouseEvent) => {
     if (isImageModalOpen) return;
-    if (previewMode && inkEditingEnabled) return;
-
-    if (onFlip) {
-      e?.stopPropagation();
-      onFlip();
-      return;
-    }
+    if (previewMode && inkEditingEnabled && previewInkTool) return;
 
     if (previewMode) {
       e?.stopPropagation();
       setPreviewFlipped((prev) => !prev);
+      return;
+    }
+
+    if (onFlip) {
+      e?.stopPropagation();
+      onFlip();
     }
   };
 
@@ -362,31 +426,6 @@ export function Flashcard({
     );
   }
 
-  // blocks描画（空は何も出さない。白紙維持）
-  const renderMultilineText = (text: string) => {
-    const normalized = String(text ?? '').replace(/\r\n/g, '\n');
-    const lines = normalized.split('\n');
-
-    return (
-      <div
-        className="w-full min-h-[24px] px-1.5 py-0 text-center text-base font-medium text-slate-700 font-serif"
-        style={{ lineHeight: '24px' }}
-      >
-        {lines.map((line, lineIndex) => {
-          return (
-            <div
-              key={`line-${lineIndex}`}
-              className="whitespace-pre-wrap break-words leading-[24px]"
-              style={{ overflowWrap: 'anywhere' }}
-            >
-              {line === '' ? '\u00A0' : line}
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
-
   const renderBlocks = (blocks: CardBlock[] | undefined) => {
     if (!blocks || blocks.length === 0) return null;
 
@@ -414,6 +453,7 @@ export function Flashcard({
               key={block.id}
               className="w-full min-w-0 max-w-full"
               data-block-row="true"
+              data-row-offset-applied={rowOffsetPx ? 'true' : undefined}
               style={offsetStyle}
             >
               {block.type === 'text' && (block.content ?? '').trim() !== '' && (
@@ -573,7 +613,7 @@ export function Flashcard({
                   ref={previewInkRef}
                   cardId={cardIdForInk}
                   side={activeInkSide}
-                  editable={Boolean(previewMode && inkEditingEnabled && previewInkTool)}
+                  editable={Boolean(previewMode && inkEditingEnabled)}
                   tool={previewInkTool ?? 'pen'}
                   document={activeInkDocument}
                   onDocumentChange={(next) => onInkDocumentChange?.(activeInkSide, next)}

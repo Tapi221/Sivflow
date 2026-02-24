@@ -206,4 +206,9 @@
   .card-shell-overflow {
     @apply h-9 w-9 rounded-full bg-white/90 backdrop-blur border border-slate-100 text-slate-500 text-sm font-bold leading-none shadow-sm hover:bg-slate-50;
   }
+
+  /* rowOffset 付き行は独立した整形コンテキストにして、隣接要素のマージン干渉を防ぐ */
+  .card-shell [data-block-row="true"][data-row-offset-applied="true"] {
+    display: flow-root;
+  }
 }

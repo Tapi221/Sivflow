@@ -29,10 +29,15 @@ export function CardSurface({
   ruledOffsetPx = 0,
 }: CardSurfaceProps) {
   return (
-    <div className={cn("relative flex min-h-0 flex-1 flex-col px-2 md:px-3 pb-3 md:pb-4", className)}>
+    <div
+      className={cn(
+        "relative flex min-h-0 flex-1 flex-col px-2 pb-3 md:px-3 md:pb-4",
+        className
+      )}
+    >
       {ruled && (
         <div
-          className="absolute inset-0 bg-repeat-y pointer-events-none z-0"
+          className="pointer-events-none absolute inset-0 z-0 bg-repeat-y"
           style={{
             opacity: ruledOpacity,
             // 罫線パターン（ruledRowPx ピッチ）
@@ -51,8 +56,15 @@ export function CardSurface({
       )}
 
       {/* ここから先はコンテンツ */}
-      <div className="relative z-10 flex min-h-0 flex-1 flex-col">{children}</div>
-      {overlay ? <div className="absolute inset-0 z-20 pointer-events-none">{overlay}</div> : null}
+      <div className="relative z-10 flex min-h-0 flex-1 flex-col">
+        {children}
+      </div>
+
+      {overlay ? (
+        <div className="pointer-events-none absolute inset-0 z-20">
+          {overlay}
+        </div>
+      ) : null}
     </div>
   );
 }
