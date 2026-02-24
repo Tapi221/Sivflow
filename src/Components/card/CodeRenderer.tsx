@@ -50,7 +50,7 @@ const LANGUAGE_LABELS: Record<string, string> = {
   rust: "RS",
   sql: "SQL",
   yaml: "YAML",
-  clike: "TEXT",
+  clike: "Text",
 };
 
 export function CodeRenderer({ code, language, className }: CodeRendererProps) {
@@ -67,7 +67,7 @@ export function CodeRenderer({ code, language, className }: CodeRendererProps) {
   }, [language]);
 
   const languageLabel = useMemo(() => {
-    return LANGUAGE_LABELS[validLanguage] ?? validLanguage.toUpperCase();
+    return LANGUAGE_LABELS[validLanguage] ?? validLanguage;
   }, [validLanguage]);
 
   const handleCopy = useCallback(async () => {
@@ -87,6 +87,7 @@ export function CodeRenderer({ code, language, className }: CodeRendererProps) {
     }
   }, [normalizedCode]);
 
+  // コピーボタン（右上アクション）
   const copyButton = (
     <button
       onClick={handleCopy}
@@ -109,22 +110,33 @@ export function CodeRenderer({ code, language, className }: CodeRendererProps) {
   );
 
   return (
-    <CodeBlockFrame languageLabel={languageLabel} right={copyButton} className={className}>
-      <Highlight theme={codeTheme} code={normalizedCode} language={validLanguage}>
-        {({ className: preClassName, style, tokens, getLineProps, getTokenProps }: any) => (
-          <pre className={cn(preClassName, "codeBlockPre")} style={style}>
-            <code>
-              {tokens.map((line: any[], i: number) => (
-                <div key={i} {...getLineProps({ line })}>
-                  {line.map((token: any, key: number) => (
-                    <span key={key} {...getTokenProps({ token })} />
-                  ))}
-                </div>
-              ))}
-            </code>
-          </pre>
-        )}
-      </Highlight>
-    </CodeBlockFrame>
+    <div className={className}>
+      <CodeBlockFrame
+        languageLabel={languageLabel}
+        right={copyButton}
+      >
+        <Highlight theme={codeTheme} code={normalizedCode} language={validLanguage}>
+          {({ className: preClassName, style, tokens, getLineProps, getTokenProps }: any) => (
+            <pre
+              className={cn(
+                preClassName,
+                "codeBlockPre overflow-x-auto"
+              )}
+              style={{ ...style }}
+            >
+              <code>
+                {tokens.map((line: any[], i: number) => (
+                  <div key={i} {...getLineProps({ line })}>
+                    {line.map((token: any, key: number) => (
+                      <span key={key} {...getTokenProps({ token })} />
+                    ))}
+                  </div>
+                ))}
+              </code>
+            </pre>
+          )}
+        </Highlight>
+      </CodeBlockFrame>
+    </div>
   );
 }
