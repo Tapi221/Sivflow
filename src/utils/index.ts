@@ -23,7 +23,6 @@ export const createPageUrl = (pageName: string): string => {
     'calendar': '/calendar',
     'Gallery': '/gallery',
     'gallery': '/gallery',
-    'WorldMap': '/WorldMap',
     'OneQAMode': '/one-qa-mode',
     'PairMode': '/pair-mode',
     'FourChoiceMode': '/four-choice-mode',

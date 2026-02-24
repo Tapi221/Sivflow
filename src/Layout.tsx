@@ -27,7 +27,6 @@ import {
   Settings
 } from 'lucide-react';
 import Globe from 'lucide-react/dist/esm/icons/globe';
-import MapIcon from 'lucide-react/dist/esm/icons/map';
 import ImagesIcon from 'lucide-react/dist/esm/icons/images';
 import { useAuth } from '@/contexts/AuthContext';
 import { auth } from '@/services/firebase';
@@ -271,7 +270,6 @@ export default function Layout() {
   const navItems = [
     { name: 'Dashboard', label: '学習', icon: Home, badge: reviewCount > 0 ? reviewCount : null },
     { name: 'Folders', label: 'フォルダ', icon: Folder },
-    { name: 'WorldMap', label: 'マップ', icon: MapIcon },
     { name: 'Gallery', label: 'ギャラリー', icon: Globe },
     { name: 'Calendar', label: '予定表', icon: Calendar },
   ];

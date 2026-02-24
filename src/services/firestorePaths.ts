@@ -50,26 +50,6 @@ export const cardDocPathSegments = (userId: string, cardId: string): string[] =>
 };
 
 /**
- * ユーザーのカードリレーションコレクションパスを生成（セグメント配列）
- * @param userId - ユーザーID
- * @returns ["users", userId, "cardRelations"]
- */
-export const cardRelationsPathSegments = (userId: string): string[] => {
-  if (!userId) throw new Error('userId is required for cardRelationsPath');
-  return ['users', userId, 'cardRelations'];
-};
-
-/**
- * ユーザーのプロジェクトマップコレクションパスを生成（セグメント配列）
- * @param userId - ユーザーID
- * @returns ["users", userId, "projectMaps"]
- */
-export const projectMapsPathSegments = (userId: string): string[] => {
-  if (!userId) throw new Error('userId is required for projectMapsPath');
-  return ['users', userId, 'projectMaps'];
-};
-
-/**
  * ユーザーのアップロードファイルコレクションパスを生成（セグメント配列）
  * @param userId - ユーザーID
  * @returns ["users", userId, "uploads"]

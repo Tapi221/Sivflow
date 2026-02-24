@@ -267,8 +267,6 @@ export class SyncServiceV2 implements ISyncService {
       const tableByType: Record<string, string> = {
         card: 'cards',
         folder: 'folders',
-        cardRelation: 'cardRelations',
-        projectMap: 'projectMaps',
         userSetting: 'userSettings',
       };
       const table = tableByType[change.type] ?? `${change.type}s`; // e.g., 'card' -> 'cards'
@@ -369,7 +367,7 @@ export class SyncServiceV2 implements ISyncService {
 
       // 2. ローカルDBをトランザクション内で更新
       // 主なエンティティをリセットしてクラウドデータで埋める
-      const tables = ['folders', 'cards', 'cardRelations', 'projectMaps'];
+      const tables = ['folders', 'cards'];
       
       await this.localDB.transaction('rw', tables, async () => {
         // すべてのデータを一旦削除（ソフトデリートではなく物理削除して再構築）

@@ -50,7 +50,6 @@ const BookmarkMode = lazy(() => import('./Pages/BookmarkMode'));
 const SyncSettings = lazy(() => import('./Pages/SyncSettings'));
 const ImageDiagnostics = lazy(() => import('./Pages/ImageDiagnostics'));
 const Gallery = lazy(() => import('./Pages/Gallery'));
-const WorldMap = lazy(() => import('./Pages/WorldMap'));
 const TodayStudy = lazy(() => import('./Pages/TodayStudy'));
 const NotImplementedPlaceholder = lazy(() => import('./Pages/NotImplementedPlaceholder'));
 const OneQAMode = lazy(() => import('./Pages/OneQAMode'));
@@ -389,15 +388,6 @@ function AppContent() {
             element={
               <Suspense fallback={<LoadingFallback />}>
                 <ImageDiagnostics />
-              </Suspense>
-            }
-          />
-
-          <Route
-            path="WorldMap"
-            element={
-              <Suspense fallback={<LoadingFallback />}>
-                <WorldMap />
               </Suspense>
             }
           />

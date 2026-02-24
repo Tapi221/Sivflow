@@ -550,29 +550,6 @@ export type Folder = BaseEntity & {
   notePdfs?: UploadedFile[];
 };
 
-export interface CardRelation extends BaseEntity {
-  fromCardId: string;
-  toCardId: string;
-
-  type: 'premise' | 'derivative' | 'related';
-  lineType: 'straight' | 'wave' | 'zigzag' | 'double';
-
-  reasonTag?: string;
-}
-
-export interface MapNodePosition {
-  cardId: string;
-  x: number;
-  y: number;
-  pinned: boolean;
-}
-
-export interface ProjectMap extends BaseEntity {
-  folderId: string;
-  name: string;
-  nodes: MapNodePosition[];
-}
-
 // まとめて再エクスポート（外からこの index 的ファイルだけ import すれば済むようにしてる）
 export * from './sync';
 export * from './code-block';

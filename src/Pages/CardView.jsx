@@ -10,7 +10,6 @@ import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/Comp
 
 import { normalizeMemoryStability, getResistancePhase } from '@/utils/reviewUtils';
 import { calculateResistanceScore } from '@/utils/reviewMetrics';
-import { LocalMap } from '@/Components/map/LocalMap';
 
 export default function CardView() {
   const navigate = useNavigate();
@@ -170,37 +169,6 @@ export default function CardView() {
                           </TooltipContent>
                        </Tooltip>
                     </TooltipProvider>
-                </div>
-
-                {/* Active Links / Local Map */}
-                <div className="bg-white rounded-3xl p-8 shadow-[0_2px_20px_-4px_rgba(0,0,0,0.05)] min-h-[360px] flex flex-col">
-                    <div className="flex items-center justify-between mb-6">
-                            <div className="text-[10px] font-bold tracking-[0.2em] text-slate-300 uppercase flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-                            Active Links
-                            </div>
-                            <Button variant="ghost" size="sm" className="h-8 bg-slate-50 text-slate-500 text-xs rounded-full px-3 hover:bg-slate-100">
-                            マップ拡大
-                            </Button>
-                    </div>
-
-                    {/* Local Map Visualization */}
-                    <div className="flex-1 flex items-center justify-center rounded-2xl overflow-hidden bg-slate-50/50">
-                        {currentCard ? (
-                             <LocalMap 
-                                centerCardId={currentCard.id} 
-                                width={320} 
-                                height={240}
-                                onNodeClick={(id) => {
-                                    // Navigate to clicked card
-                                    const index = sortedCards.findIndex(c => c.id === id);
-                                    if (index !== -1) setCurrentIndex(index);
-                                }}
-                             />
-                        ) : (
-                            <div className="text-xs text-slate-400">Select a card</div>
-                        )}
-                    </div>
                 </div>
 
                 {/* Tags Sidebar Section */}

@@ -52,7 +52,7 @@ export interface SyncQueueItem {
   idempotencyKey: string; // Idempotency Key for Cloud Functions
   
   targetId: string; // Entity ID (Card ID, etc.)
-  entity: 'card' | 'folder' | 'cardRelation' | 'projectMap';
+  entity: 'card' | 'folder';
   operationType: 'create' | 'update' | 'delete'; // Unified operation type
   type: 'upload' | 'download'; // Added for compatibility with SyncTask
   

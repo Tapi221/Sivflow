@@ -55,8 +55,6 @@ function cloudUpdatedAt(): any {
 const COLLECTION_BY_TYPE: Record<string, string> = {
   card: 'cards',
   folder: 'folders',
-  cardRelation: 'cardRelations',
-  projectMap: 'projectMaps',
   userSetting: 'userSettings',
 };
 
@@ -114,36 +112,6 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
         console.log(`[CloudSyncAdapter] Remote folders found: ${snap.size}`);
         snap.forEach((d) => {
           changes.push({ type: 'folder', id: d.id, data: this.sanitizeFromCloud('folder', d.data()) });
-        });
-      }
-
-      // cardRelations
-      {
-        const ref = collection(firestoreDb, `users/${this.userId}/cardRelations`);
-        const qy = query(ref, where('updatedAt', '>', sinceTimestamp));
-        const snap = await getDocs(qy);
-        console.log(`[CloudSyncAdapter] Remote relations found: ${snap.size}`);
-        snap.forEach((d) => {
-          changes.push({
-            type: 'cardRelation',
-            id: d.id,
-            data: this.sanitizeFromCloud('cardRelation', d.data()),
-          });
-        });
-      }
-
-      // projectMaps
-      {
-        const ref = collection(firestoreDb, `users/${this.userId}/projectMaps`);
-        const qy = query(ref, where('updatedAt', '>', sinceTimestamp));
-        const snap = await getDocs(qy);
-        console.log(`[CloudSyncAdapter] Remote maps found: ${snap.size}`);
-        snap.forEach((d) => {
-          changes.push({
-            type: 'projectMap',
-            id: d.id,
-            data: this.sanitizeFromCloud('projectMap', d.data()),
-          });
         });
       }
 
@@ -256,35 +224,6 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
         if (!snap.empty) {
           results.push({ type: 'folder', id, data: this.sanitizeFromCloud('folder', snap.docs[0].data()) });
           continue;
-        }
-      }
-
-      // cardRelation
-      {
-        const snap = await getDocs(
-          query(collection(firestoreDb, `users/${this.userId}/cardRelations`), where('id', '==', id))
-        );
-        if (!snap.empty) {
-          results.push({
-            type: 'cardRelation',
-            id,
-            data: this.sanitizeFromCloud('cardRelation', snap.docs[0].data()),
-          });
-          continue;
-        }
-      }
-
-      // projectMap
-      {
-        const snap = await getDocs(
-          query(collection(firestoreDb, `users/${this.userId}/projectMaps`), where('id', '==', id))
-        );
-        if (!snap.empty) {
-          results.push({
-            type: 'projectMap',
-            id,
-            data: this.sanitizeFromCloud('projectMap', snap.docs[0].data()),
-          });
         }
       }
 
