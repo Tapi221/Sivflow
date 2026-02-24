@@ -12,14 +12,12 @@ import { MarkdownBlockView } from './blocks/MarkdownBlockView';
 import { cn } from '@/lib/utils';
 import { CodeRenderer } from './CodeRenderer';
 import { AudioPlayer, ImageGallery } from './CardMedia';
-import { useTags } from '@/hooks/useTags';
 import { useUserSettings } from '@/hooks/useUserSettings';
 import { ReferencePopup } from './ReferencePopup';
 import type { CardBlock, ReferenceBlockData } from '@/types';
 import { normalizeCard } from '@/utils';
 import { CardSurface } from "./CardSurface";
 import { ScaleToFitFrame } from './ScaleToFitFrame';
-import { TagBadge } from '@/Components/tag/TagBadge';
 import { InkLayer, InkToolbar, type InkHistoryState, type InkLayerHandle } from '@/Components/ink/InkLayer';
 import { resolveInkDocument } from '@/Components/ink/inkStorage';
 import type { InkDocument, InkEditTool } from '@/Components/ink/inkTypes';
@@ -31,7 +29,6 @@ interface FlashcardProps {
   onEdit?: (card: any) => void;
   onToggleUncertainty?: (card: any) => void;
   onToggleBookmark?: (card: any) => void;
-  onTagClick?: (tag: string) => void;
   className?: string;
   showNavigation?: boolean;
   onNext?: () => void;
@@ -50,7 +47,6 @@ interface FlashcardProps {
   /** エディタから渡される共有高さ（プレビューで優先利用） */
   editorSharedHeightPx?: number | null;
   lockCardHeight?: boolean;
-  showTags?: boolean;
 }
 
 export function Flashcard({
@@ -60,7 +56,6 @@ export function Flashcard({
   onEdit,
   onToggleUncertainty,
   onToggleBookmark,
-  onTagClick,
   className,
   showNavigation,
   onNext,
@@ -78,10 +73,8 @@ export function Flashcard({
   onInkDocumentChange,
   editorSharedHeightPx,
   lockCardHeight = false,
-  showTags = true,
 }: FlashcardProps) {
   const { settings } = useUserSettings();
-  const { getTagColor } = useTags();
   // ✅ ここが重要：プレビューは CardEditor の formData をそのまま使う
   // normalizeCard が blocks を潰す実装だと「…しか出ない」になる
   const cardData = React.useMemo(() => {
@@ -542,29 +535,6 @@ export function Flashcard({
           <div className="flex flex-col items-end gap-2">
             {extraHeaderRight}
 
-            {/* タグ表示 */}
-            {showTags && cardData?.tags && Array.isArray(cardData.tags) && cardData.tags.length > 0 && (
-              <div className="flex flex-wrap justify-end gap-1.5 animate-in fade-in slide-in-from-right-2 duration-500 delay-150 max-w-[200px] md:max-w-xs">
-                {cardData.tags.map((tag: string, i: number) => (
-                  <button
-                    key={`${tag}-${i}`}
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onTagClick?.(tag);
-                    }}
-                    className="outline-none"
-                  >
-                    <TagBadge
-                      label={tag}
-                      size="md"
-                      colorClass={getTagColor(tag)}
-                      className="max-w-full"
-                    />
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
         </div>
       )}

@@ -71,7 +71,6 @@ export default function CardViewer({
            onEdit={onEdit}
            onToggleUncertainty={onToggleUncertainty}
            onToggleBookmark={onToggleBookmark}
-           showTags={false}
            onPrev={handlePrev}
            onNext={handleNext}
            hasNext={currentIndex < cards.length - 1}

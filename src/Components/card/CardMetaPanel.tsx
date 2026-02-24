@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 import { RatingCountTiles } from "@/Components/study/RatingCountTiles";
+import { TagBadge } from "@/Components/tag/TagBadge";
 import { useTags } from "@/hooks/useTags";
 import type { Card, ReviewLog } from "@/types";
 
@@ -201,15 +202,14 @@ export function CardMetaPanel({ card, reviewLogs = [], onUpdateTags }: CardMetaP
                 <p className="text-sm text-slate-500">タグなし</p>
               ) : (
                 tags.map((tag) => (
-                  <span
+                  <TagBadge
                     key={tag}
-                    className={`inline-flex items-center gap-1 rounded-full border px-2 py-1 text-xs ${getTagColor(tag)}`}
-                  >
-                    {tag}
-                    <button type="button" className="text-slate-500 hover:text-slate-800" onClick={() => removeTag(tag)}>
-                      x
-                    </button>
-                  </span>
+                    label={tag}
+                    size="sm"
+                    colorClass={getTagColor(tag)}
+                    onRemove={() => removeTag(tag)}
+                    className="max-w-full"
+                  />
                 ))
               )}
             </div>
