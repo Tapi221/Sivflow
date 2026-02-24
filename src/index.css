@@ -206,20 +206,18 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    /* スクロールバーつまみの色：アクセントカラー（動的） */
-    background: var(--color-primary-600-hex, #689A98);
+    background: #cbd5e1;
     border-radius: 10px;
     transition: background 0.3s ease;
   }
   ::-webkit-scrollbar-thumb:hover {
-    /* ホバー時に少し濃い色に */
-    background: var(--color-primary-700, #5A8684);
+    background: #94a3b8;
   }
 
   /* Firefox 用のスタイル */
   * {
     scrollbar-width: thin;
-    scrollbar-color: var(--color-primary-600-hex, #689A98) transparent;
+    scrollbar-color: #cbd5e1 transparent;
   }
 
   /* ===== テキスト選択時のハイライト色 ===== */

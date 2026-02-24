@@ -24,7 +24,7 @@ import {
   Zap
 } from 'lucide-react';
 import { createPageUrl } from '@/utils';
-import { FaceIcons } from '@/Components/ui/FaceIcons';
+import { RatingCountTiles } from '@/Components/study/RatingCountTiles';
 
 import ExportDialog from '@/Components/export/ExportDialog';
 import ImportDialog from '@/Components/export/ImportDialog';
@@ -333,22 +333,15 @@ export default function Dashboard() {
               Today's Ratings
             </h2>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-            {[
-              { score: 0, label: '忘れた', Icon: FaceIcons.Forgot },
-              { score: 1, label: 'あいまい', Icon: FaceIcons.Vague },
-              { score: 2, label: '覚えた', Icon: FaceIcons.Good },
-              { score: 3, label: '余裕', Icon: FaceIcons.Easy },
-            ].map(({ score, label, Icon }) => (
-              <div key={score} className="bg-[#FCFCFC] rounded-2xl border border-slate-200/60 p-4 flex items-center gap-3">
-                <Icon size={28} />
-                <div>
-                  <div className="text-lg font-bold text-slate-700 leading-none">{todayRatingCounts[score]}</div>
-                  <div className="text-[10px] text-slate-400 font-bold mt-1">{label}</div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <RatingCountTiles
+            className="md:gap-4"
+            counts={{
+              forgot: todayRatingCounts[0] ?? 0,
+              vague: todayRatingCounts[1] ?? 0,
+              remembered: todayRatingCounts[2] ?? 0,
+              easy: todayRatingCounts[3] ?? 0,
+            }}
+          />
         </section>
 
         {/* WEAK POINTS & FOCUS AREA */}
