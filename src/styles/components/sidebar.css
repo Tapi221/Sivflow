@@ -1,0 +1,24 @@
+@layer components {
+  .glass-sidebar {
+    position: relative;
+    background: rgba(255, 255, 255, 0.1);
+    -webkit-backdrop-filter: blur(16px) saturate(115%);
+    backdrop-filter: blur(16px) saturate(115%);
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    transition: all 0.3s ease;
+  }
+
+  .sidebar-item-active {
+    background: var(--sidebar-active-bg);
+    color: var(--sidebar-text);
+    border-left: 3px solid var(--sidebar-active-accent);
+  }
+
+  .sidebar-item:hover {
+    background: rgba(231, 235, 239, 0.6);
+  }
+
+  .sidebar-sub-item {
+    padding-left: 20px;
+  }
+}

@@ -1,0 +1,129 @@
+@layer utilities {
+  .animate-slide-in-right {
+    animation: slideInRight 0.3s ease-out;
+  }
+
+  .animate-slide-in-up {
+    animation: slideInUp 0.4s ease-out;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .animate-bounce-soft {
+    animation: bounceSoft 0.5s ease-out;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.2s ease-out;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, var(--color-primary-600-hex, #689A98) 0%, #86B4B2 100%);
+  }
+
+  .hover-lift {
+    @apply transition-transform duration-300 hover:-translate-y-1;
+  }
+
+  .focus-ring {
+    @apply focus:outline-none focus:ring-4 focus:ring-primary-200;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .mask-gradient-right {
+    -webkit-mask-image: linear-gradient(to right, black 90%, transparent 100%);
+    mask-image: linear-gradient(to right, black 90%, transparent 100%);
+  }
+
+  .break-anywhere {
+    overflow-wrap: anywhere;
+    word-break: break-all;
+  }
+
+  .bg-ruled {
+    --ruled-line-pitch: var(--card-line-height, 24px);
+    background-image: repeating-linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.03),
+      rgba(0, 0, 0, 0.03) 1px,
+      transparent 1px,
+      transparent var(--ruled-line-pitch)
+    );
+    background-size: 100% var(--ruled-line-pitch);
+  }
+
+  .bg-sidebar {
+    background-color: var(--sidebar-bg) !important;
+  }
+
+  .border-sidebar-border {
+    border-color: var(--sidebar-border) !important;
+  }
+
+  .text-sidebar-foreground {
+    color: var(--sidebar-text) !important;
+  }
+
+  .text-sidebar-muted {
+    color: var(--sidebar-text-muted) !important;
+  }
+
+  .bg-sidebar-accent {
+    background-color: var(--sidebar-active-bg) !important;
+  }
+
+  .text-sidebar-accent-foreground {
+    color: var(--sidebar-active-accent) !important;
+  }
+
+  .ring-sidebar-ring {
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0) !important;
+  }
+
+  .shadow-card-hover {
+    box-shadow: 0 6px 30px rgba(15, 23, 42, 0.1);
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

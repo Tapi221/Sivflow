@@ -1,0 +1,104 @@
+@layer components {
+  .card-gradient {
+    @apply rounded-2xl p-5 text-white shadow-soft;
+    background: var(--color-primary-600-hex, #689A98);
+  }
+
+  .card-outline {
+    @apply bg-background-subtle/80 backdrop-blur-sm border-2 border-primary-100 rounded-2xl p-5;
+  }
+
+  .stat-card {
+    @apply bg-background-light rounded-2xl p-4 shadow-card border border-neutral-100 transition-all duration-300;
+    @apply hover:shadow-card-hover hover:-translate-y-1;
+  }
+
+  .input {
+    @apply w-full px-4 py-3 bg-background-light border-2 border-neutral-200 rounded-xl transition-all duration-300;
+    @apply focus:border-primary focus:ring-4 focus:ring-primary-100 focus:outline-none;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
+  }
+
+  .badge-primary,
+  .badge-success {
+    @apply bg-primary-100 text-primary-600;
+  }
+
+  .badge-warning {
+    @apply bg-neutral-100 text-neutral-600;
+  }
+
+  .level-badge {
+    @apply px-2.5 py-1 rounded-lg text-xs font-bold text-white shadow-sm;
+  }
+
+  .progress-bar {
+    @apply h-2 bg-gray-200 rounded-full overflow-hidden;
+  }
+
+  .progress-bar-fill {
+    @apply h-full rounded-full transition-[width] duration-300 ease-out;
+    width: var(--progress, 0%);
+    background: var(--progress-color, linear-gradient(135deg, var(--color-primary-600-hex, #689A98) 0%, #86B4B2 100%));
+  }
+
+  .nav-link {
+    @apply flex flex-col items-center gap-1 px-4 py-2 text-neutral-500 transition-colors duration-300;
+    @apply hover:text-primary;
+  }
+
+  .nav-link.active {
+    @apply text-primary;
+  }
+
+  .fab {
+    @apply fixed bottom-24 right-6 w-14 h-14 rounded-full shadow-glow flex items-center justify-center text-white text-2xl transition-all duration-300;
+    background: linear-gradient(135deg, var(--color-primary-600-hex, #689A98) 0%, #86B4B2 100%);
+  }
+
+  .fab:hover {
+    @apply transform scale-110;
+  }
+
+  .tag {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-md;
+  }
+
+  .dropdown-menu {
+    @apply absolute z-50 mt-2 bg-background-light border border-neutral-100 rounded-xl shadow-lg overflow-hidden;
+  }
+
+  .dropdown-item {
+    @apply w-full px-4 py-2.5 text-left text-sm text-gray-700 transition-colors;
+    @apply hover:bg-primary-50 hover:text-primary;
+  }
+
+  .tooltip {
+    @apply absolute z-50 px-3 py-2 text-sm text-white bg-gray-900 rounded-lg shadow-lg;
+  }
+
+  .modal-overlay {
+    @apply fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4;
+  }
+
+  .modal-content {
+    @apply bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden;
+  }
+
+  .emoji-icon {
+    @apply text-2xl filter drop-shadow-sm;
+  }
+
+  .restore-notification {
+    background-color: var(--accent-bg, transparent);
+    border-color: var(--accent-border, transparent);
+  }
+
+  .restore-notification-icon,
+  .restore-notification-text {
+    color: var(--accent-main, var(--primary-color));
+  }
+}

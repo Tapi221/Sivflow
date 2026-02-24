@@ -1,0 +1,38 @@
+@layer base {
+  html {
+    --color-primary-50: #f5f5f5;
+    --color-primary-100: #e6f0ef;
+    --color-primary-200: #cfe0df;
+    --color-primary-300: #b8d0cf;
+    --color-primary-400: #90b8b6;
+    --color-primary-500: #7bacaa;
+    --color-primary-600: 104 154 152;
+    --color-primary-700: #5a8684;
+    --color-primary-800: #4d7270;
+    --color-primary-900: #324a48;
+
+    --card-base-width: 480px;
+    --card-max-height: min(70vh, 560px);
+
+    --sidebar-bg: #f8fafb;
+    --sidebar-border: #e3e6ea;
+    --sidebar-text: #4b5563;
+    --sidebar-text-muted: #6b7280;
+    --sidebar-active-bg: #e7ebef;
+    --sidebar-active-accent: #7aa6a1;
+
+    --code-bg: #f7f8f9;
+    --code-fg: #24292f;
+    --code-border: rgba(0, 0, 0, 0.06);
+
+    --code-token-text: #24292f;
+    --code-token-comment: #8b949e;
+    --code-token-punctuation: #4b5563;
+    --code-token-keyword: #5a3da0;
+    --code-token-type: #2f6f9f;
+    --code-token-function: #2b5f88;
+    --code-token-string: #2f6b3c;
+    --code-token-number: #a35f1a;
+    --code-token-operator: #374151;
+  }
+}

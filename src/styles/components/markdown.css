@@ -1,0 +1,22 @@
+@layer components {
+  .markdown-block-view {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  .mathBlockRoot {
+    position: relative;
+  }
+
+  .katex-display-wrapper {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .katex-display-wrapper .katex-display {
+    margin: 0 !important;
+    text-align: center;
+  }
+}
