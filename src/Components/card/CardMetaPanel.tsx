@@ -30,27 +30,52 @@ const DAY_FORMATTER = new Intl.DateTimeFormat("ja-JP", {
   day: "2-digit",
 });
 
+function toValidDate(value: unknown): Date | null {
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : value;
+  }
+  if (typeof value === "string") {
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+  return null;
+}
+
+function toDayKeyAndTs(date: Date) {
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  const day = date.getDate();
+  const dayDate = new Date(year, month, day);
+  const dayKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+  return { dayKey, dayTs: dayDate.getTime() };
+}
+
 function formatDateLabel(value: unknown) {
-  if (!value) return "未設定";
-  const date = value instanceof Date ? value : new Date(String(value));
-  if (Number.isNaN(date.getTime())) return "未設定";
+  const date = toValidDate(value);
+  if (!date) return "未設定";
   return META_DATE_FORMATTER.format(date);
 }
 
 function aggregateDailyLast(logs: ReviewLog[]) {
-  const byDay = new Map<string, ReviewLog>();
+  const byDay = new Map<
+    string,
+    { dayKey: string; dayTs: number; reviewedAtTs: number; resistanceScore: number }
+  >();
 
   for (const log of logs) {
-    const day = String(log.reviewedAt).slice(0, 10);
-    const current = byDay.get(day);
-    if (!current || new Date(log.reviewedAt).getTime() >= new Date(current.reviewedAt).getTime()) {
-      byDay.set(day, log);
+    const reviewedAt = toValidDate(log.reviewedAt);
+    if (!reviewedAt) continue;
+    const reviewedAtTs = reviewedAt.getTime();
+    const { dayKey, dayTs } = toDayKeyAndTs(reviewedAt);
+    const current = byDay.get(dayKey);
+    if (!current || reviewedAtTs >= current.reviewedAtTs) {
+      byDay.set(dayKey, { dayKey, dayTs, reviewedAtTs, resistanceScore: log.resistanceScore });
     }
   }
 
-  return [...byDay.entries()]
-    .sort((a, b) => a[0].localeCompare(b[0]))
-    .map(([day, log]) => ({ day, resistanceScore: log.resistanceScore }));
+  return [...byDay.values()]
+    .sort((a, b) => a.dayTs - b.dayTs)
+    .map(({ dayKey, dayTs, resistanceScore }) => ({ dayKey, dayTs, resistanceScore }));
 }
 
 export function CardMetaPanel({
@@ -63,6 +88,7 @@ export function CardMetaPanel({
   const [newTag, setNewTag] = useState("");
   const [period, setPeriod] = useState<Period>("30d");
   const [titleInput, setTitleInput] = useState(card?.title ?? "");
+  const [isAdding, setIsAdding] = useState(false);
   const { addTag, getTagColor } = useTags();
 
   useEffect(() => {
@@ -70,10 +96,11 @@ export function CardMetaPanel({
   }, [card?.id, card?.title]);
 
   const safeLogs = useMemo(
-    () =>
-      [...reviewLogs].sort(
-        (a, b) => new Date(a.reviewedAt).getTime() - new Date(b.reviewedAt).getTime()
-      ),
+    () => [...reviewLogs].sort((a, b) => {
+      const aTs = toValidDate(a.reviewedAt)?.getTime() ?? Number.NEGATIVE_INFINITY;
+      const bTs = toValidDate(b.reviewedAt)?.getTime() ?? Number.NEGATIVE_INFINITY;
+      return aTs - bTs;
+    }),
     [reviewLogs]
   );
 
@@ -97,38 +124,39 @@ export function CardMetaPanel({
     const days = period === "7d" ? 7 : 30;
     const threshold = new Date();
     threshold.setDate(threshold.getDate() - days);
-    return daily.filter((d) => new Date(`${d.day}T00:00:00`).getTime() >= threshold.getTime());
+    const thresholdTs = threshold.getTime();
+    return daily.filter((d) => d.dayTs >= thresholdTs);
   }, [safeLogs, period]);
 
-  const yTicks = useMemo(() => {
-    if (chartData.length === 0) return [0, 1];
-    const values = chartData.map((d) => d.resistanceScore);
-    const min = Math.floor(Math.min(...values));
-    const max = Math.ceil(Math.max(...values));
-    const ticks: number[] = [];
-    for (let v = min; v <= max; v += 1) ticks.push(v);
-    return ticks.length > 0 ? ticks : [0, 1];
-  }, [chartData]);
-
   const xTicks = useMemo(() => {
-    if (chartData.length <= 1) return chartData.map((d) => d.day);
+    if (chartData.length <= 1) return chartData.map((d) => d.dayTs);
     return chartData
       .filter((_, idx) => idx % 5 === 0 || idx === chartData.length - 1)
-      .map((d) => d.day);
+      .map((d) => d.dayTs);
   }, [chartData]);
 
   const tags = card?.tags ?? [];
 
   const handleAddTag = async () => {
+    if (isAdding) return;
     const trimmed = newTag.trim();
     if (!trimmed) return;
     if (tags.includes(trimmed)) {
       setNewTag("");
       return;
     }
-    await addTag(trimmed);
-    onUpdateTags([...tags, trimmed]);
-    setNewTag("");
+    setIsAdding(true);
+    try {
+      await addTag(trimmed);
+      if (tags.includes(trimmed)) {
+        setNewTag("");
+        return;
+      }
+      onUpdateTags([...tags, trimmed]);
+      setNewTag("");
+    } finally {
+      setIsAdding(false);
+    }
   };
 
   const removeTag = (tag: string) => {
@@ -155,6 +183,7 @@ export function CardMetaPanel({
                   value={titleInput}
                   onChange={(e) => setTitleInput(e.target.value)}
                   onBlur={commitTitle}
+                  disabled={!card}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       e.preventDefault();
@@ -167,7 +196,7 @@ export function CardMetaPanel({
               </div>
               <div className="flex items-center justify-between rounded border border-slate-200 bg-slate-50 px-2 py-1.5">
                 <span className="text-xs font-medium text-slate-600">下書き</span>
-                <Switch checked={Boolean(card?.isDraft)} onCheckedChange={onToggleDraft} />
+                <Switch checked={Boolean(card?.isDraft)} onCheckedChange={onToggleDraft} disabled={!card} />
               </div>
               <p>作成日: {formatDateLabel(card?.createdAt)}</p>
               <p>更新日: {formatDateLabel(card?.updatedAt)}</p>
@@ -216,19 +245,32 @@ export function CardMetaPanel({
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData}>
                     <XAxis
-                      dataKey="day"
+                      dataKey="dayTs"
                       ticks={xTicks}
-                      tickFormatter={(v) => DAY_FORMATTER.format(new Date(`${v}T00:00:00`))}
+                      tickFormatter={(v) => {
+                        const date = new Date(Number(v));
+                        return Number.isNaN(date.getTime()) ? "" : DAY_FORMATTER.format(date);
+                      }}
                       tick={{ fontSize: 10 }}
                     />
                     <YAxis
-                      ticks={yTicks}
-                      domain={[yTicks[0], yTicks[yTicks.length - 1]]}
+                      domain={["dataMin", "dataMax"]}
+                      tickCount={6}
                       allowDecimals={false}
                       width={36}
                       tick={{ fontSize: 10 }}
                     />
-                    <Tooltip formatter={(value) => [`${value}`, "Score"]} labelFormatter={(label) => String(label)} />
+                    <Tooltip
+                      formatter={(value) => [`${value}`, "Score"]}
+                      labelFormatter={(label, payload) => {
+                        const dayKey = payload?.[0]?.payload?.dayKey;
+                        if (typeof dayKey === "string" && dayKey.length > 0) return dayKey;
+                        const date = new Date(Number(label));
+                        if (Number.isNaN(date.getTime())) return "";
+                        const { dayKey: fallbackDayKey } = toDayKeyAndTs(date);
+                        return fallbackDayKey;
+                      }}
+                    />
                     <Line type="monotone" dataKey="resistanceScore" stroke="#0f172a" strokeWidth={2} dot={false} />
                   </LineChart>
                 </ResponsiveContainer>
@@ -258,6 +300,7 @@ export function CardMetaPanel({
               <input
                 value={newTag}
                 onChange={(e) => setNewTag(e.target.value)}
+                disabled={isAdding || !card}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
@@ -267,7 +310,12 @@ export function CardMetaPanel({
                 className="h-9 flex-1 rounded-md border border-slate-300 px-2 text-sm outline-none focus:border-slate-500"
                 placeholder="タグを追加"
               />
-              <button type="button" className="h-9 rounded-md bg-slate-900 px-3 text-sm text-white" onClick={handleAddTag}>
+              <button
+                type="button"
+                className="h-9 rounded-md bg-slate-900 px-3 text-sm text-white disabled:opacity-60"
+                onClick={handleAddTag}
+                disabled={isAdding || !card}
+              >
                 追加
               </button>
             </div>
