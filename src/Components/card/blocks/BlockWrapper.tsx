@@ -20,13 +20,6 @@ interface BlockWrapperProps {
   showDragHandle?: boolean;
   dragEnabled?: boolean;
 
-  /**
-   * ブロック外枠の表示スタイル
-   * - default: 通常（borderあり）
-   * - paper: 罫線背景に合わせる（borderなし、薄いbox-shadowで輪郭だけ出す）
-   */
-  variant?: 'default' | 'paper';
-
   // 1行移動（rowOffset）用
   canMoveUp?: boolean;
   canMoveDown?: boolean;
@@ -55,9 +48,6 @@ export const BlockWrapper = ({
   showDuplicate = true,
   showDragHandle = true,
   dragEnabled = true,
-
-  variant = 'default',
-
   canMoveUp = false,
   canMoveDown = false,
   onMoveUp,
@@ -66,18 +56,10 @@ export const BlockWrapper = ({
   onMoveDragEnd,
   contentClassName,
 }: BlockWrapperProps) => {
-  // paper は「追加した瞬間に枠が見えない」問題が起きるので、薄い輪郭だけ常時出す（box-shadowで）
-  const paperBaseOutline =
-    variant === 'paper' ? 'inset 0 0 0 1px rgba(15, 23, 42, 0.10)' : undefined;
-
-  // アクティブ強調も box-shadow（inset）で描画（borderでレイアウトを膨らませない）
+  // border はレイアウトを膨らませるので、アクティブ強調は box-shadow（inset）で描画する。
+  // ※ className 側で `border-transparent` を指定しても、ここで borderColor を上書きしない。
   const activeOutline =
     isActive && accentColor ? `inset 0 0 0 2px ${accentColor}40` : undefined;
-
-  const composedShadow =
-    paperBaseOutline && activeOutline
-      ? `${paperBaseOutline}, ${activeOutline}`
-      : paperBaseOutline ?? activeOutline;
 
   const stepDragRef = React.useRef<{
     pointerId: number;
@@ -140,6 +122,7 @@ export const BlockWrapper = ({
 
       if (diff !== 0) {
         const actuallyApplied = applyStepMoves(diff);
+        // ここが肝：実際に動けた分だけ進める（境界でズレない）
         stepDragRef.current.appliedSteps += actuallyApplied;
       }
     };
@@ -174,13 +157,11 @@ export const BlockWrapper = ({
   return (
     <div
       className={cn(
-        // paper では border を消す（罫線と喧嘩する＆二重線でズレて見える）
-        'relative overflow-visible bg-white rounded-xl py-0 px-1.5',
-        variant !== 'paper' && 'border border-slate-200/80',
+        'relative overflow-visible bg-white border border-slate-200/80 rounded-xl py-0 px-1.5',
         isActive && 'z-40',
         className
       )}
-      style={composedShadow ? { boxShadow: composedShadow } : undefined}
+      style={activeOutline ? { boxShadow: activeOutline } : undefined}
     >
       {/* 操作メニュー (アクティブ時に表示) */}
       <div

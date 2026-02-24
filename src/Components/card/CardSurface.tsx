@@ -28,30 +28,20 @@ export function CardSurface({
   ruledRowPx = 24,
   ruledOffsetPx = 0,
 }: CardSurfaceProps) {
-  // 罫線を「行の下」に描画する（最後の1pxだけ線）
-  // これにより文字を横切りにくく、視覚的ズレが減る。
-  const lineColor = "rgba(0, 0, 0, 0.04)";
-  const lineThicknessPx = 1;
-
   return (
-    <div
-      className={cn(
-        "relative flex min-h-0 flex-1 flex-col px-2 md:px-3 pb-3 md:pb-4",
-        className
-      )}
-    >
+    <div className={cn("relative flex min-h-0 flex-1 flex-col px-2 md:px-3 pb-3 md:pb-4", className)}>
       {ruled && (
         <div
           className="absolute inset-0 bg-repeat-y pointer-events-none z-0"
           style={{
             opacity: ruledOpacity,
-            // 罫線パターン（ruledRowPx ピッチ）: 行の下に 1px 線
+            // 罫線パターン（ruledRowPx ピッチ）
             backgroundImage: `repeating-linear-gradient(
               to bottom,
-              transparent 0,
-              transparent calc(${ruledRowPx}px - ${lineThicknessPx}px),
-              ${lineColor} calc(${ruledRowPx}px - ${lineThicknessPx}px),
-              ${lineColor} ${ruledRowPx}px
+              rgba(0, 0, 0, 0.04),
+              rgba(0, 0, 0, 0.04) 1px,
+              transparent 1px,
+              transparent ${ruledRowPx}px
             )`,
             backgroundSize: `100% ${ruledRowPx}px`,
             // コンテンツのtop paddingと罫線の開始位置を一致させる

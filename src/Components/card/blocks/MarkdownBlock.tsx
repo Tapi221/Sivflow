@@ -183,12 +183,11 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
 
   return (
     <BlockWrapper
-      variant="paper"
       onDelete={onDelete}
       onDuplicate={onDuplicate}
       dragHandleProps={dragHandleProps}
       dragHandleClassName={dragHandleClassName}
-      className="bg-transparent border-0 py-0"
+      className="bg-transparent border-transparent py-0"
       label="Markdown"
       icon={NotebookPenIcon}
       accentColor={accentColor}

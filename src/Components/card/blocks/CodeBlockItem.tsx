@@ -23,37 +23,18 @@ interface CodeBlockItemProps {
   onMoveDragEnd?: () => void;
 }
 
-export const CodeBlockItem = ({
-  data,
-  onChange,
-  onDelete,
-  onDuplicate,
-  dragHandleProps,
-  dragEnabled = true,
-  dragHandleClassName,
-  accentColor,
-  isActive,
-  showDelete,
-  canMoveUp,
-  canMoveDown,
-  onMoveUp,
-  onMoveDown,
-  onMoveDragStart,
-  onMoveDragEnd,
-}: CodeBlockItemProps) => {
+export const CodeBlockItem = ({ data, onChange, onDelete, onDuplicate, dragHandleProps, dragEnabled = true, dragHandleClassName, accentColor, isActive, showDelete, canMoveUp, canMoveDown, onMoveUp, onMoveDown, onMoveDragStart, onMoveDragEnd }: CodeBlockItemProps) => {
   return (
-    <BlockWrapper
-      variant="paper"
-      onDelete={onDelete}
-      onDuplicate={onDuplicate}
+    <BlockWrapper 
+      onDelete={onDelete} 
+      onDuplicate={onDuplicate} 
       dragHandleProps={dragHandleProps}
       dragEnabled={dragEnabled}
       dragHandleClassName={dragHandleClassName}
-      // paper では BlockWrapper が border を消すので、ここで border-transparent を連打しない
-      className="bg-transparent shadow-none px-0"
+      className="bg-transparent border-transparent hover:border-transparent shadow-none px-0"
       label="Code"
       icon={CodeIcon}
-      accentColor={accentColor}
+      accentColor={undefined}
       isActive={isActive}
       showDelete={showDelete}
       canMoveUp={!!canMoveUp}
@@ -64,10 +45,11 @@ export const CodeBlockItem = ({
       onMoveDragEnd={onMoveDragEnd}
       contentClassName="relative px-0"
     >
-      {/* 24pxグリッドに寄せるためのフック用クラス（CSSでline-heightを固定する） */}
-      <div className="code-grid-24">
-        <CodeBlockEditor value={data} onChange={onChange} className="border-none shadow-none" />
-      </div>
+      <CodeBlockEditor 
+        value={data}
+        onChange={onChange}
+        className="border-none shadow-none"
+      />
     </BlockWrapper>
   );
 };

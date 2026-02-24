@@ -50,7 +50,6 @@ export const ReferenceBlock = ({
 
   return (
     <BlockWrapper 
-      variant="paper"
       onDelete={onDelete} 
       onDuplicate={onDuplicate} 
       dragHandleProps={dragHandleProps}
