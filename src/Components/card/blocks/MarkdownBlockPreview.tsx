@@ -167,9 +167,10 @@ export const MarkdownBlockView: React.FC<MarkdownBlockViewProps> = ({
       pre: ({ children }) => {
         const firstChild = React.Children.toArray(children)[0];
         if (!React.isValidElement(firstChild)) {
+          const raw = extractText(children).replace(/\r\n/g, '\n').replace(/(?:\n)+$/, '');
           return (
-            <div className="code-block codeBlock my-2">
-              <pre className="m-0 overflow-x-auto">{children}</pre>
+            <div className="my-2">
+              <CodeRenderer code={raw} language="clike" />
             </div>
           );
         }
@@ -183,7 +184,7 @@ export const MarkdownBlockView: React.FC<MarkdownBlockViewProps> = ({
           .replace(/(?:\n)+$/, '');
 
         return (
-          <div className="m-0 code-block codeBlock">
+          <div className="m-0">
             <CodeRenderer code={rawCode} language={language} />
           </div>
         );

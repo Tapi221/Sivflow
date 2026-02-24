@@ -148,53 +148,7 @@
 
 /* ===== components レイヤー: ボタンやカードなど再利用用クラス ===== */
 @layer components {
-  /* プライマリボタン - グラデーション */
-  .btn-primary {
-    /* padding, 文字色, 角丸, 影, トランジションなどを Tailwind で適用 */
-    @apply px-5 py-2.5 text-white font-medium rounded-xl shadow-soft transition-all duration-300;
-    /* 背景はカスタムの線形グラデーション */
-    background: linear-gradient(135deg, #7BACAA 0%, #90B8B6 100%);
-  }
-  .btn-primary:hover {
-    /* ホバー時は影を強くし、少し浮かせる */
-    @apply shadow-glow transform -translate-y-0.5;
-    /* ホバー中は単色寄りの背景にする */
-    background: var(--color-primary-600-hex, #689A98);
-  }
-  
-  .btn-primary:active {
-    /* クリック時は元の位置に戻す */
-    @apply transform translate-y-0;
-  }
-  
-  .btn-primary:disabled {
-    /* 無効化時は薄く・クリック不可・影なし */
-    @apply opacity-50 cursor-not-allowed transform-none shadow-none;
-  }
-
-  /* セカンダリボタン（ニュートラルカラー） */
-  .btn-secondary {
-    @apply px-5 py-2.5 bg-neutral text-white font-medium rounded-xl border-2 border-neutral shadow-sm transition-all duration-300;
-    @apply hover:border-primary-400 hover:text-primary hover:shadow-soft;
-  }
-
-  /* アクセントボタン（単色） */
-  .btn-accent {
-    @apply px-5 py-2.5 text-white font-medium rounded-xl shadow-soft transition-all duration-300;
-    background: var(--color-primary-600-hex, #689A98);
-  }
-  .btn-accent:hover {
-    @apply shadow-glow transform -translate-y-0.5;
-    background: var(--color-primary-600-hex, #689A98);
-  }
-
-  /* 共通カード - ソフトシャドウ */
-  .card {
-    @apply bg-background-light border border-neutral-100 rounded-2xl p-5 shadow-card transition-all duration-300;
-  }
-  .card:hover {
-    @apply shadow-card-hover;
-  }
+  /* UI統一: button/card は `Components/ui/*` を正系統とし、旧 `.btn-*` / `.card` は未使用のため削除 */
 
   /* CardShell: 4:3 base min-height with internal scroll */
   .card-shell {
@@ -857,7 +811,6 @@ img {
 }
 
 .codeBlockPre .token,
-.code-block .token,
 .code-editor-no-scroll .token {
   color: var(--code-token-text) !important;
 }
@@ -866,10 +819,6 @@ img {
 .codeBlockPre .token.prolog,
 .codeBlockPre .token.doctype,
 .codeBlockPre .token.cdata,
-.code-block .token.comment,
-.code-block .token.prolog,
-.code-block .token.doctype,
-.code-block .token.cdata,
 .code-editor-no-scroll .token.comment,
 .code-editor-no-scroll .token.prolog,
 .code-editor-no-scroll .token.doctype,
@@ -878,15 +827,12 @@ img {
 }
 
 .codeBlockPre .token.punctuation,
-.code-block .token.punctuation,
 .code-editor-no-scroll .token.punctuation {
   color: var(--code-token-punctuation) !important;
 }
 
 .codeBlockPre .token.keyword,
 .codeBlockPre .token.atrule,
-.code-block .token.keyword,
-.code-block .token.atrule,
 .code-editor-no-scroll .token.keyword,
 .code-editor-no-scroll .token.atrule {
   color: var(--code-token-keyword) !important;
@@ -894,15 +840,12 @@ img {
 
 .codeBlockPre .token.class-name,
 .codeBlockPre .token.builtin,
-.code-block .token.class-name,
-.code-block .token.builtin,
 .code-editor-no-scroll .token.class-name,
 .code-editor-no-scroll .token.builtin {
   color: var(--code-token-type) !important;
 }
 
 .codeBlockPre .token.function,
-.code-block .token.function,
 .code-editor-no-scroll .token.function {
   color: var(--code-token-function) !important;
 }
@@ -910,9 +853,6 @@ img {
 .codeBlockPre .token.string,
 .codeBlockPre .token.char,
 .codeBlockPre .token.inserted,
-.code-block .token.string,
-.code-block .token.char,
-.code-block .token.inserted,
 .code-editor-no-scroll .token.string,
 .code-editor-no-scroll .token.char,
 .code-editor-no-scroll .token.inserted {
@@ -923,10 +863,6 @@ img {
 .codeBlockPre .token.boolean,
 .codeBlockPre .token.constant,
 .codeBlockPre .token.symbol,
-.code-block .token.number,
-.code-block .token.boolean,
-.code-block .token.constant,
-.code-block .token.symbol,
 .code-editor-no-scroll .token.number,
 .code-editor-no-scroll .token.boolean,
 .code-editor-no-scroll .token.constant,
@@ -937,9 +873,6 @@ img {
 .codeBlockPre .token.operator,
 .codeBlockPre .token.entity,
 .codeBlockPre .token.url,
-.code-block .token.operator,
-.code-block .token.entity,
-.code-block .token.url,
 .code-editor-no-scroll .token.operator,
 .code-editor-no-scroll .token.entity,
 .code-editor-no-scroll .token.url {
@@ -947,31 +880,26 @@ img {
 }
 
 .codeBlockPre .token.property,
-.code-block .token.property,
 .code-editor-no-scroll .token.property {
   color: var(--code-token-type) !important;
 }
 
 .codeBlockPre .token.tag,
-.code-block .token.tag,
 .code-editor-no-scroll .token.tag {
   color: var(--code-token-type) !important;
 }
 
 .codeBlockPre .token.attr-name,
-.code-block .token.attr-name,
 .code-editor-no-scroll .token.attr-name {
   color: var(--code-token-type) !important;
 }
 
 .codeBlockPre .token.attr-value,
-.code-block .token.attr-value,
 .code-editor-no-scroll .token.attr-value {
   color: var(--code-token-string) !important;
 }
 
 .codeBlockPre .token.deleted,
-.code-block .token.deleted,
 .code-editor-no-scroll .token.deleted {
   color: var(--code-token-number) !important;
 }
@@ -1005,71 +933,15 @@ img {
   background-image: none !important;
 }
 
-/* CodeRenderer(表示)専用: 内側カード化をやめる */
-.code-block-pre--flat {
-  background: var(--code-bg) !important;
-  border: 1px solid var(--code-border) !important;
-  border-radius: 12px !important;
-  box-shadow: none !important;
-  margin: 0 !important;
-  padding: 0 10px !important;
-}
-
 /* 右上ツールが被らないように上だけ余白を増やす */
 .code-block-pre--tools {
   padding-top: 24px !important;
 }
 
-/* Editor surface: match preview colors without interfering with editor text metrics */
-.code-editor-surface {
-  background: var(--code-bg);
-  border: 1px solid var(--code-border);
-  border-radius: 12px;
-  box-shadow: none;
-  padding: 0 10px;
-}
-
+/* コードブロック統一: `.code-editor-surface` は未使用のため削除済み（予約名） */
 
 .code-block-pre code {
   user-select: text;
-}
-
-/* Code display density tuning (preview/render only) */
-.code-block pre,
-.code-block code {
-  font-size: 13px !important;
-  line-height: 1.5 !important;
-  font-variant-ligatures: none;
-  margin: 0 !important;
-}
-
-.code-block pre {
-  padding: 12px !important;
-  white-space: pre !important;
-}
-
-.code-block .code-block-pre--tools {
-  padding-top: 16px !important;
-}
-
-.code-block pre > code > div,
-.code-block .line,
-.code-block .token-line {
-  padding-block: 0 !important;
-  margin-block: 0 !important;
-  line-height: inherit !important;
-}
-
-.code-block pre span {
-  line-height: inherit !important;
-}
-
-@media (max-width: 768px) {
-  .code-block pre,
-  .code-block code {
-    font-size: 12px !important;
-    line-height: 1.5 !important;
-  }
 }
 
 /* CodeBlockEditor(編集)専用: 縦スクロールを禁止して高さ拡張に任せる */

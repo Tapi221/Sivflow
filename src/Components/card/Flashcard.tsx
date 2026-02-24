@@ -8,7 +8,7 @@ import LinkIcon from 'lucide-react/dist/esm/icons/link';
 
 import { Dialog, DialogContent } from '@/Components/ui/dialog';
 import { MathRenderer } from './blocks/MathRenderer';
-import { MarkdownBlockView } from './blocks/MarkdownBlockView';
+import { MarkdownBlockView } from './blocks/MarkdownBlockPreview';
 import { cn } from '@/lib/utils';
 import { CodeRenderer } from './CodeRenderer';
 import { AudioPlayer, ImageGallery } from './CardMedia';
@@ -543,8 +543,6 @@ export function Flashcard({
         <div className="card-ambient-shadow" aria-hidden="true" />
         <ScaleToFitFrame
           baseWidth={480}
-          fitHeight
-          centerContent
         >
           <CardShell
             className={cn(
