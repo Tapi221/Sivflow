@@ -319,7 +319,7 @@ export function Flashcard({
           onToggleUncertainty(cardData);
         }}
         className={cn(
-          "rounded-full w-6 h-6 min-w-0 min-h-0 transition-colors flex items-center justify-center",
+          "rounded-full w-8 h-8 min-w-0 min-h-0 transition-colors flex items-center justify-center",
           hasUncertainty
             ? "bg-amber-100 text-amber-600 hover:bg-amber-200 border-none"
             : "bg-slate-50/80 text-slate-400 hover:bg-slate-100 hover:text-slate-600 border border-transparent"
@@ -341,7 +341,7 @@ export function Flashcard({
           onToggleBookmark(cardData);
         }}
         className={cn(
-          "rounded-full w-6 h-6 min-w-0 min-h-0 transition-colors flex items-center justify-center",
+          "rounded-full w-8 h-8 min-w-0 min-h-0 transition-colors flex items-center justify-center",
           isBookmarked
             ? "bg-indigo-100 text-indigo-600 hover:bg-indigo-200 border-none"
             : "bg-slate-50/80 text-slate-400 hover:bg-primary-600/10 hover:text-primary-600 border border-transparent"
@@ -384,10 +384,10 @@ export function Flashcard({
         {lines.map((line, lineIndex) => {
           return (
             <div
-  key={`line-${lineIndex}`}
-  className="whitespace-pre-wrap break-words leading-[24px]"
-  style={{ overflowWrap: 'anywhere' }}
->
+              key={`line-${lineIndex}`}
+              className="whitespace-pre-wrap break-words leading-[24px]"
+              style={{ overflowWrap: 'anywhere' }}
+            >
               {line === '' ? '\u00A0' : line}
             </div>
           );
@@ -397,89 +397,89 @@ export function Flashcard({
   };
 
   const renderBlocks = (blocks: CardBlock[] | undefined) => {
-  if (!blocks || blocks.length === 0) return null;
+    if (!blocks || blocks.length === 0) return null;
 
-  // rowOffset の安全化（文字列/NaN 対策 + クランプ）
-  const getRowOffset = (block: CardBlock) => {
-    const n = Number((block as any).rowOffset ?? 0);
-    if (!Number.isFinite(n)) return 0;
-    return Math.max(-999, Math.min(999, Math.round(n)));
-  };
+    // rowOffset の安全化（文字列/NaN 対策 + クランプ）
+    const getRowOffset = (block: CardBlock) => {
+      const n = Number((block as any).rowOffset ?? 0);
+      if (!Number.isFinite(n)) return 0;
+      return Math.max(-999, Math.min(999, Math.round(n)));
+    };
 
-  const ROW_STEP_PX = 24;
+    const ROW_STEP_PX = 24;
 
-  return (
-    <div className="space-y-0 w-full max-w-full">
-      {blocks.map((block) => {
-        const isLinePositionable = block.type === 'text' || block.type === 'code';
-        const rowOffsetPx = isLinePositionable ? getRowOffset(block) * ROW_STEP_PX : 0;
+    return (
+      <div className="space-y-0 w-full max-w-full">
+        {blocks.map((block) => {
+          const isLinePositionable = block.type === 'text' || block.type === 'code';
+          const rowOffsetPx = isLinePositionable ? getRowOffset(block) * ROW_STEP_PX : 0;
 
-        // ✅ transform はやめる：見た目だけ動いてレイアウトがズレる
-        // ✅ marginTop で実寸を動かす
-        const offsetStyle = rowOffsetPx ? { marginTop: rowOffsetPx } : undefined;
+          // ✅ transform はやめる：見た目だけ動いてレイアウトがズレる
+          // ✅ marginTop で実寸を動かす
+          const offsetStyle = rowOffsetPx ? { marginTop: rowOffsetPx } : undefined;
 
-        return (
-          <div
-            key={block.id}
-            className="w-full min-w-0 max-w-full"
-            data-block-row="true"
-            style={offsetStyle}
-          >
-            {block.type === 'text' && (block.content ?? '').trim() !== '' && (
-              <div className="w-full max-w-full overflow-hidden">
-                {renderMultilineText(String(block.content ?? ''))}
-              </div>
-            )}
-
-            {block.type === 'code' && (block.code?.code ?? '').trim() !== '' && (
-              <div className="w-full max-w-full overflow-hidden">
-                <CodeRenderer code={block.code!.code} language={block.code!.language} />
-              </div>
-            )}
-
-            {block.type === 'image' && (block.images?.length ?? 0) > 0 && (
-              <ImageGallery
-                urls={(block.images ?? []).map((img: any) => img.remoteUrl || img.localUrl || img.url || img)}
-                onFullscreenChange={handleGalleryFullscreenChange}
-              />
-            )}
-
-            {block.type === 'audio' && (block.audios?.length ?? 0) > 0 && (
-              <div className="flex justify-center">
-                <AudioPlayer urls={(block.audios ?? []).map((a: any) => a.remoteUrl || a.localUrl || a.url || a)} />
-              </div>
-            )}
-
-            {block.type === 'memo' && (block.content ?? '').trim() !== '' && (
-              <div className="p-4 bg-slate-50 rounded-2xl text-sm text-slate-600 text-left whitespace-pre-wrap break-all border border-slate-100/50">
-                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Memo</div>
-                {block.content}
-              </div>
-            )}
-
-            {block.type === 'math' && (block.math?.latex ?? '').trim() !== '' && (
-              <div className="py-2 flex justify-center">
-                <MathRenderer
-                  latex={block.math!.latex || ''}
-                  displayMode={block.math!.displayMode || 'block'}
-                  className="text-slate-800"
-                />
-              </div>
-            )}
-
-            {block.type === 'markdown' && (block.markdown ?? '').trim() !== '' && (
-              <div className="markdownBlockSurface w-full max-w-full bg-transparent overflow-visible">
-                <div className="w-full max-w-full px-1.5 py-0">
-                  <MarkdownBlockView md={block.markdown!} className="markdownBlockCardView" />
+          return (
+            <div
+              key={block.id}
+              className="w-full min-w-0 max-w-full"
+              data-block-row="true"
+              style={offsetStyle}
+            >
+              {block.type === 'text' && (block.content ?? '').trim() !== '' && (
+                <div className="w-full max-w-full overflow-hidden">
+                  {renderMultilineText(String(block.content ?? ''))}
                 </div>
-              </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
-};
+              )}
+
+              {block.type === 'code' && (block.code?.code ?? '').trim() !== '' && (
+                <div className="w-full max-w-full overflow-hidden">
+                  <CodeRenderer code={block.code!.code} language={block.code!.language} />
+                </div>
+              )}
+
+              {block.type === 'image' && (block.images?.length ?? 0) > 0 && (
+                <ImageGallery
+                  urls={(block.images ?? []).map((img: any) => img.remoteUrl || img.localUrl || img.url || img)}
+                  onFullscreenChange={handleGalleryFullscreenChange}
+                />
+              )}
+
+              {block.type === 'audio' && (block.audios?.length ?? 0) > 0 && (
+                <div className="flex justify-center">
+                  <AudioPlayer urls={(block.audios ?? []).map((a: any) => a.remoteUrl || a.localUrl || a.url || a)} />
+                </div>
+              )}
+
+              {block.type === 'memo' && (block.content ?? '').trim() !== '' && (
+                <div className="p-4 bg-slate-50 rounded-2xl text-sm text-slate-600 text-left whitespace-pre-wrap break-all border border-slate-100/50">
+                  <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Memo</div>
+                  {block.content}
+                </div>
+              )}
+
+              {block.type === 'math' && (block.math?.latex ?? '').trim() !== '' && (
+                <div className="py-2 flex justify-center">
+                  <MathRenderer
+                    latex={block.math!.latex || ''}
+                    displayMode={block.math!.displayMode || 'block'}
+                    className="text-slate-800"
+                  />
+                </div>
+              )}
+
+              {block.type === 'markdown' && (block.markdown ?? '').trim() !== '' && (
+                <div className="markdownBlockSurface w-full max-w-full bg-transparent overflow-visible">
+                  <div className="w-full max-w-full px-1.5 py-0">
+                    <MarkdownBlockView md={block.markdown!} className="markdownBlockCardView" />
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
 
   // レガシー描画（blocksが空のときのフォールバック）
   const renderLegacy = (side: 'question' | 'answer') => {
@@ -589,18 +589,16 @@ export function Flashcard({
       <ScaleToFitFrame baseWidth={480}>
         <CardShell
           className={cn(
-            "mx-auto border-none rounded-[32px] md:rounded-[40px] overflow-hidden transition-all duration-300",
+            "mx-auto border-none rounded-[32px] md:rounded-[40px] transition-all duration-300",
             "premium-paper-depth",
             !previewMode && "premium-paper-depth--hover cursor-pointer",
             "card-shell--paper"
           )}
           ref={shellRef}
           onClick={handleFlip}
-          // プレビュー時はリサイズ不可にする（変な横線を防ぐ）
           resizable={false}
           resizeStepPx={undefined}
           showResizeHandle={false}
-          // プレビュー時は編集で設定された高さを反映する
           heightPx={sharedPreviewHeightPx}
           lockHeight={lockCardHeight}
           bodyOverflowY="auto"
@@ -662,7 +660,6 @@ export function Flashcard({
             <div className="mt-auto pt-4 text-center">
               {extraFooter}
 
-              {/* ここは必要なら後で描画UI（draw tools）を入れる枠 */}
               {previewMode && (
                 <div className="flex gap-4 justify-center">
                   {/* intentionally empty */}
@@ -714,18 +711,18 @@ export function Flashcard({
             <div className="mt-8 space-y-4">
               {activeImages.map((url, index) => (
                 <div key={index} className="w-full">
-                  <img 
-                    src={url} 
-                    alt={`Image ${index + 1}`} 
+                  <img
+                    src={url}
+                    alt={`Image ${index + 1}`}
                     className="w-full h-auto rounded-lg border border-slate-100 shadow-sm"
                   />
                 </div>
               ))}
             </div>
             {activeImages.length === 0 && (
-               <div className="flex items-center justify-center py-20 text-slate-400">
-                 画像がありません
-               </div>
+              <div className="flex items-center justify-center py-20 text-slate-400">
+                画像がありません
+              </div>
             )}
           </div>
         </DialogContent>
@@ -733,30 +730,30 @@ export function Flashcard({
 
       <Dialog open={isAudioPopupOpen} onOpenChange={setIsAudioPopupOpen}>
         <DialogContent className="sm:max-w-md w-full bg-white border-none shadow-2xl p-6 rounded-2xl">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-slate-700 flex items-center gap-2">
-                <Volume2 className="w-5 h-5 text-amber-500" />
-                音声再生
-              </h3>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="rounded-full hover:bg-slate-100 text-slate-400"
-                onClick={() => setIsAudioPopupOpen(false)}
-              >
-                <X className="w-5 h-5" />
-              </Button>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-bold text-slate-700 flex items-center gap-2">
+              <Volume2 className="w-5 h-5 text-amber-500" />
+              音声再生
+            </h3>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full hover:bg-slate-100 text-slate-400"
+              onClick={() => setIsAudioPopupOpen(false)}
+            >
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
+
+          <div className="py-2">
+            <AudioPlayer urls={activeAudioUrls} />
+          </div>
+
+          {activeAudioUrls.length === 0 && (
+            <div className="text-center py-8 text-slate-400 text-sm">
+              音声がありません
             </div>
-            
-            <div className="py-2">
-              <AudioPlayer urls={activeAudioUrls} />
-            </div>
-            
-            {activeAudioUrls.length === 0 && (
-               <div className="text-center py-8 text-slate-400 text-sm">
-                 音声がありません
-               </div>
-            )}
+          )}
         </DialogContent>
       </Dialog>
 

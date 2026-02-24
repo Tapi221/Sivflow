@@ -82,14 +82,10 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
     const computeMinHeight = React.useCallback(() => {
       const element = shellRef.current;
       const resizeHandleReservePx = resizable && !drawMode && showResizeHandle ? 20 : 0;
-      // 罫線グリッド上での見切れ防止マージン
       const safetyReservePx = 8;
       const contentBaseMin = resizeStepPx * 2 + resizeHandleReservePx + safetyReservePx;
-      // 最小高さを 48px (step * 2) 基準にしつつ、ハンドル分も確保
       if (!element) return contentBaseMin;
 
-      // 幅ベースの最小高さ制限（デフォルトは 4:3 = 75%）
-      // resizable 時は制限を大幅に緩和（1/8 = 12.5%）してコンパクトにできるようにする
       const widthRatio = resizable ? (1 / 8) : (3 / 4);
       const widthBasedMin = Math.ceil(((element.clientWidth || element.offsetWidth || 0) * widthRatio) / resizeStepPx) * resizeStepPx;
       const baseMin = Math.max(contentBaseMin, widthBasedMin || 0);
@@ -109,11 +105,9 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
           }
         }
 
-        // data-block-row の実座標ベースで必要高さを算出する（scrollHeightは自己参照ループの原因になるため使わない）
         const contentHeight = Math.max(0, maxBottom - bodyRect.top);
         const requiredHeight = contentHeight + resizeHandleReservePx + safetyReservePx;
         const snappedContentHeight = Math.ceil(requiredHeight / resizeStepPx) * resizeStepPx;
-        // コンテンツがある場合でも最小限の高さを確保しつつ、見切れない高さを返す
         return Math.max(baseMin, snappedContentHeight || baseMin);
       }
 
@@ -284,7 +278,6 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
     const bottomLeftItems = React.Children.toArray(actionsBottomLeft).filter(Boolean);
     const bottomRightItems = React.Children.toArray(actionsBottomRight).filter(Boolean);
 
-    // card-shell--editor-unified-scroll クラスがあるかチェック
     const isEditorMode = className && typeof className === 'string' && className.includes('card-shell--editor-unified-scroll');
 
     const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -407,6 +400,12 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
             : style
         }
         {...props}
+        onClick={(e) => {
+          // ★ card-shell-actions 内のボタン等からのバブリングは無視する
+          // overflow:hidden によるクリッピングで stopPropagation が効かない場合の保険
+          if ((e.target as HTMLElement).closest('.card-shell-actions')) return;
+          props.onClick?.(e);
+        }}
       >
         {topLeftItems.length > 0 && (
           <div className="card-shell-actions card-shell-actions-top-left">
@@ -471,13 +470,11 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
             (bottomLeftItems.length > 0 || bottomRightItems.length > 0) && 'card-shell-body--bottom',
             isEditorMode && 'card-shell-body--no-scroll'
           )}
-
-        style={
-          bodyOverflowY
-            ? { overflowY: bodyOverflowY, overflowX: 'clip' }
-            : (isEditorMode ? { overflowY: 'hidden', overflowX: 'clip' } : { overflowX: 'clip' })
-        }
-
+          style={
+            bodyOverflowY
+              ? { overflowY: bodyOverflowY, overflowX: 'clip' }
+              : (isEditorMode ? { overflowY: 'hidden', overflowX: 'clip' } : { overflowX: 'clip' })
+          }
         >
           {children}
         </div>

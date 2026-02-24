@@ -82,7 +82,7 @@ export class ImageSyncService {
     console.log('[ImageSync] Starting image sync check...');
     onProgress?.('画像同期の準備中...');
     const cards = await this.localDB.cards.toArray();
-    let totalItems = 0;
+    const totalItems = 0;
     
     for (const card of cards) {
       const updatedQuestionImages = await this.processImageArray(userId, card.id, 'cards', 'questionImages', card.questionImages, onProgress);

@@ -46,7 +46,7 @@ export const createPageUrl = (pageName: string): string => {
 const makeFallbackId = () => {
   // crypto.randomUUID が使える環境ならそれ、無理なら雑に一意っぽいやつ
   try {
-    // eslint-disable-next-line no-undef
+     
     if (typeof crypto !== 'undefined' && typeof (crypto as any).randomUUID === 'function') {
       return (crypto as any).randomUUID();
     }

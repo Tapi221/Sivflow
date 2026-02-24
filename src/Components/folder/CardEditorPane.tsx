@@ -424,7 +424,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
                 <ScaleToFitFrame baseWidth={480}>
                   <CardShell
                     className={cn(
-                      "mx-auto border-none rounded-[32px] md:rounded-[40px] overflow-hidden shadow-xl",
+                      "mx-auto border-none rounded-[32px] md:rounded-[40px] shadow-xl",
                       "bg-white"
                     )}
                     resizable={true}

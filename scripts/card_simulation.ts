@@ -5,7 +5,7 @@ function simulateCardScenario(card: Card, scenario: Array<'success'|'fail'|'dela
   let S = card.memoryStability ?? 35;
   let state = card.state ?? 'PRE-LEARN';
   let I = 1; // 初期間隔
-  let now = new Date();
+  const now = new Date();
   let nextReviewDate = card.nextReviewDate ?? new Date(now.getTime() + I * 24 * 60 * 60 * 1000);
   const λ = 0.15; // 忘却率
   const β = 0.5; // 失敗時減衰

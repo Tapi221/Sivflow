@@ -33,6 +33,18 @@ export type UploadFallbackReason = 'timeout' | 'network_error' | 'permission_err
 export type CardState = 'PRE-LEARN' | 'STABLE' | 'DECAYING' | 'FAILED' | 'RELEARN';
 
 /**
+ * プロフィール画像スキーマ（Settings保存用）
+ * 
+ * ⚠️ 仕様:
+ * - remoteUrl のみを保存（blob: URL は禁止）
+ * - updatedAt は UNIX タイムスタンプ（ミリ秒）
+ */
+export interface ProfileImage {
+  remoteUrl: string | null;        // Firebase Storage downloadURL
+  updatedAt: number;                // UNIX タイムスタンプ
+}
+
+/**
  * 主観評価スコア（復習UIの4段階）
  * reviewUtils の SubjectiveScore と同じ意味だが、型定義レイヤーに依存を持ち込まないためここで定義する。
  */
@@ -45,12 +57,15 @@ export type SubjectiveScoreValue = 0 | 1 | 2 | 3;
  * 1. localUrl は Blob URL のみ（data: 禁止）
  * 2. remoteUrl は Storage URL のみ（https: のみ）
  * 3. Base64 は保存しない
+ *
+ * ⚠️ プロフィール画像用: localUrl を settings に保存してはいけません
+ * settings には remoteUrl のみを保存してください（blob: URL は永続化防止）
  */
 export interface UploadedImage {
   id: string;
 
   // URL（型で縛って事故を減らす）
-  localUrl?: BlobUrl | null; // 一時プレビュー用（Blob URL のみ）
+  localUrl?: BlobUrl | null; // 一時プレビュー用（Blob URL のみ）。settings に保存しない！
   remoteUrl?: StorageUrl | null; // 永続参照（Storage URL のみ）
   thumbnailUrl?: StorageUrl | null; // サムネイルURL（Storage）
 
@@ -81,6 +96,10 @@ export interface UploadedImage {
   // 信頼性リファクタ用
   source?: UploadSource;
   fallbackReason?: UploadFallbackReason;
+
+  // プロフィール画像用メタデータ
+  /** 最後に更新された時刻（settings保存時の参考用） */
+  updatedAt?: Date | Timestamp | null;
 }
 
 export interface UploadedFile {
@@ -159,7 +178,7 @@ export interface User {
 export interface UserSettings extends BaseEntity {
   // 表示/プロフィール
   displayName?: string;
-  profileImage?: UploadedImage | null;
+  profileImage?: ProfileImage | null;
 
   // ロケール/テーマ
   weekStartDay: 'sunday' | 'monday';

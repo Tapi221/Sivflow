@@ -432,8 +432,10 @@
   }
 
   .card-shell-actions {
-    @apply absolute z-20 flex items-center gap-2;
-  }
+  @apply absolute z-20 flex items-center gap-2;
+  /* ScaleToFitFrame の transform:scale 下でも overflow:hidden に潰されないよう */
+  overflow: visible !important;
+}
 
   .card-shell-actions-top-right {
     @apply top-3 right-3;

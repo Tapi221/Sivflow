@@ -35,9 +35,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useFolders } from '@/hooks/useFolders';
 import { cn } from '@/lib/utils';
 import { signOut } from 'firebase/auth';
-import { auth, storage } from '@/services/firebase';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { auth } from '@/services/firebase';
 import { useNavigate } from 'react-router-dom';
+import { uploadProfileImage } from '@/services/imageUploadService';
 import { useReliableFileUpload } from '@/hooks/useReliableFileUpload';
 import { Slider } from '@/Components/ui/slider';
 import { useUserSettings } from '@/hooks/useUserSettings';
@@ -155,6 +155,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
 
   const [selectedFolderId, setSelectedFolderId] = useState('all');
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [imgError, setImgError] = useState(false);
   const [editingName, setEditingName] = useState(false);
   const [tempDisplayName, setTempDisplayName] = useState('');
   const [nameError, setNameError] = useState('');
@@ -173,6 +174,18 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
       setSelectedRootFolderId(rootFolders[0].id);
     }
   }, [rootFolders, selectedRootFolderId]);
+
+  // Reset imgError when profileImage remoteUrl changes
+  useEffect(() => {
+    setImgError(false);
+  }, [settings?.profileImage?.remoteUrl]);
+
+  // Debug: Log profileImage changes (検証用)
+  useEffect(() => {
+    if (import.meta.env.DEV) {
+      console.log('[Settings] loaded profileImage', settings?.profileImage);
+    }
+  }, [settings?.profileImage?.remoteUrl, settings?.profileImage?.updatedAt]);
 
   // Hoist hooks
   const { tags: allTags = [], updateTagColor, deleteTag, addTag } = useTags();
@@ -201,84 +214,80 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
     }
   };
 
-  const { uploadFile, uploadProgress, uploadStatus, error: uploadError, reset } = useReliableFileUpload();
-
-  // Helper storage path generator
-  const getStoragePath = (uid) => (fileName) => `profile-images/${uid}/${fileName}`;
-
+  /**
+   * プロフィール画像アップロード処理
+   *
+   * 新仕様:
+   * - Firebase Storage の downloadURL のみを settings に保存
+   * - スキーマ: { remoteUrl: string | null; updatedAt: number }
+   */
   const handleImageUpload = async (event) => {
-    const file = event.target.files?.[0];
+    // Prevent multiple concurrent uploads
+    if (uploadingImage) return;
+
+    // Avoid React event pooling issues - preserve input element reference
+    const inputEl = event.currentTarget;
+    const file = inputEl.files?.[0];
     if (!file) return;
 
-    console.log('画像アップロード開始:', file.name, file.type, file.size);
-    
+    if (import.meta.env.DEV) {
+      console.log('[ProfileImage] Upload started:', file.name, file.type, file.size);
+    }
+    setUploadingImage(true);
+
     try {
       let processedFile = file;
-      
-      // Convert HEIC to JPEG if needed
-      if (isHeicFile(file)) {
-        console.log('HEIC形式を検出、JPEG に変換中...');
-        processedFile = await convertHeicToJpeg(file);
-        console.log('JPEG変換完了');
-      }
 
-      // Create uploaded image object with uploading status
-      // createUploadedImage handles URL.createObjectURL internally
-      const uploadedImage = createUploadedImage(processedFile);
-      
-      // Update settings with uploading status - THIS SHOWS THE IMAGE IMMEDIATELY
-      await updateSettings({ profileImage: uploadedImage });
-      console.log('設定を更新（アップロード中）');
-      console.log('📤 Profile image status:', uploadedImage.status, 'localUrl:', uploadedImage.localUrl?.substring(0, 50));
+      // HEIC形式を JPEG に変換
+      if (isHeicFile(file)) {
+        if (import.meta.env.DEV) {
+          console.log('[ProfileImage] Converting HEIC to JPEG...');
+        }
+        processedFile = await convertHeicToJpeg(file);
+        if (import.meta.env.DEV) {
+          console.log('[ProfileImage] Conversion complete');
+        }
+      }
 
       if (!currentUser?.uid) {
         throw new Error('ユーザーIDが見つかりません');
       }
 
-      try {
-         // Use the shared hook for reliable upload (runs in background)
-         const result = await uploadFile(
-             processedFile, 
-             getStoragePath(currentUser.uid),
-             { type: 'profile' }
-         );
-         
-         // Ensure icon is visible for at least 1 second
-         await new Promise(resolve => setTimeout(resolve, 1000));
-         
-         const finalImage = {
-            ...uploadedImage,
-            remoteUrl: result.url || null,
-            status: 'ready',
-            storagePath: result.storagePath || null,
-            contentType: processedFile.type || null,
-            size: processedFile.size || null,
-            source: result.source || null,
-            fallbackReason: result.fallbackReason || null
-         };
+      // Firebase Storage にアップロード
+      if (import.meta.env.DEV) {
+        console.log('[ProfileImage] Uploading to Firebase Storage...');
+      }
+      const downloadUrl = await uploadProfileImage({
+        uid: currentUser.uid,
+        file: processedFile,
+      });
 
-         await updateSettings({ profileImage: finalImage });
-         console.log('プロフィール画像の設定完了');
-         console.log('✅ Upload complete. Status:', finalImage.status, 'source:', finalImage.source);
-      } catch (uploadError) {
-         console.error('Upload failed via hook:', uploadError);
-         throw uploadError;
+      if (import.meta.env.DEV) {
+        console.log('[ProfileImage] ✅ Upload successful');
       }
+
+      // settings に保存: シンプルなスキーマ
+      const profileImageData = {
+        remoteUrl: downloadUrl,
+        updatedAt: Date.now(),
+      };
+      await updateSettings({
+        profileImage: profileImageData,
+      });
+      if (import.meta.env.DEV) {
+        console.log('[Settings] saved profileImage', profileImageData);
+        console.log('[ProfileImage] Settings saved successfully');
+      }
+
     } catch (error) {
-      console.error('画像処理・全体エラー:', error);
-      console.error('エラー詳細:', error.message, error.code);
-      
-      try {
-        const failedImage = createFailedUploadedImage(file);
-        await updateSettings({ profileImage: failedImage });
-      } catch (e) {
-         console.error('Failed to set failed status', e);
-      }
-    }
-    // Removed: finally block with setUploadingImage(false)
-    // Reset file input
-    if (event.target) {
-      event.target.value = '';
+      console.error('[ProfileImage] ❌ Upload failed:', error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('[ProfileImage] Error:', errorMessage);
+
+    } finally {
+      setUploadingImage(false);
+      // ファイル入力をリセット（event pooling対策）
+      inputEl.value = '';
     }
   };
 
@@ -293,7 +302,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
       setNameError(result.message);
       return;
     }
-    
+
     await updateSettings({ displayName: tempDisplayName.trim() });
     setEditingName(false);
     setNameError('');
@@ -361,10 +370,9 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
   const renderContent = () => {
     switch (activeTab) {
       case 'account':
-        const profileImageUrl = settings?.profileImage?.remoteUrl || settings?.profileImage?.localUrl;
+        const profileImageUrl = settings?.profileImage?.remoteUrl ?? '/default-avatar.png';
         const displayName = settings?.displayName || 'UserName';
-        
-        console.log('🎨 Rendering profile. Image status:', settings?.profileImage?.status, 'source:', settings?.profileImage?.source);
+        const hasValidImage = !!settings?.profileImage?.remoteUrl && !imgError;
         
         const { bg: avatarBg, text: avatarText } = getAvatarColors(settings?.displayName);
 
@@ -381,22 +389,17 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
               <div className="flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-6">
                 <div className="relative group">
                   <div 
-                    style={{ backgroundColor: avatarBg }}
+                    style={{ backgroundColor: hasValidImage ? 'transparent' : avatarBg }}
                     className="w-24 h-24 rounded-full flex items-center justify-center text-3xl font-bold overflow-hidden border-4 border-white shadow-lg relative ring-2 ring-slate-100"
                   >
-                    {profileImageUrl && settings?.profileImage?.status !== 'failed' ? (
+                    {hasValidImage ? (
                       <img 
                         src={profileImageUrl} 
                         alt="Profile" 
                         className="w-full h-full object-cover"
                         onError={(e) => {
-                             console.error('[Settings] Profile image load failed.', e);
-                             e.currentTarget.style.display = 'none'; // Immediate hide
-                             if (settings?.profileImage) {
-                                 updateSettings({ 
-                                     profileImage: { ...settings.profileImage, status: 'failed' } 
-                                 });
-                             }
+                          console.error('[Settings] Profile image load failed:', e.currentTarget.src);
+                          setImgError(true);
                         }}
                       />
                     ) : (
@@ -404,20 +407,16 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                          {getInitials(displayName)}
                        </span>
                      )}
-                    
-                    {/* Status Badge */}
-
-                    {settings?.profileImage?.source === 'local_fallback' && (
-                        <div className="absolute bottom-0 right-0 p-1 bg-amber-100 backdrop-blur-sm border border-amber-200 rounded-full shadow-md z-10" title="Saved locally (Cloud unavailable)">
-                             <Database className="w-4 h-4 text-amber-500" />
-                        </div>
-                    )}
                   </div>
                   
-                  {/* Upload overlay - Non-blocking */}
+                  {/* Upload overlay */}
                   <button
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={() => {
+                      if (uploadingImage) return;
+                      fileInputRef.current?.click();
+                    }}
                     className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/20 flex items-center justify-center transition-all cursor-pointer"
+                    disabled={uploadingImage}
                   >
                      <Camera className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-md" />
                   </button>
@@ -436,33 +435,19 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                     onClick={() => fileInputRef.current?.click()}
                     variant="outline"
                     className="rounded-xl border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300 font-bold text-sm shadow-sm"
-                    disabled={uploadStatus === 'uploading'}
+                    disabled={uploadingImage}
                   >
                     <Camera className="w-4 h-4 mr-2" />
-                    画像を変更
+                    {uploadingImage ? 'アップロード中...' : '画像を変更'}
                   </Button>
                   
-                  {/* Upload Progress Bar */}
-                  {(uploadStatus === 'uploading' || uploadStatus === 'failed') && (
-                      <UploadProgress 
-                          fileName="プロフィール画像"
-                          progress={uploadProgress}
-                          status={uploadStatus}
-                          error={uploadError}
-                          onRetry={() => {
-                              reset();
-                              fileInputRef.current?.click();
-                          }}
-                      />
+                  {/* Upload Status */}
+                  {uploadingImage && (
+                      <div className="text-xs text-slate-500">アップロード中...</div>
                   )}
 
                   <p className="text-xs text-slate-500">
                     JPG、PNG、HEIC形式に対応しています (最大10MB)
-                    {settings?.profileImage?.source === 'local_fallback' && (
-                        <span className="block text-amber-500 mt-1 font-bold">
-                            オフライン保存（クラウド同期待機中）
-                        </span>
-                    )}
                   </p>
                 </div>
               </div>

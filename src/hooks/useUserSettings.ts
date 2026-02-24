@@ -62,11 +62,6 @@ export function useUserSettings() {
       const updated = {
           ...current,
           ...newSettings,
-          // profileImage のネストされたマージ（フィールド消失を防ぐための最小限のアプローチ）
-          profileImage: newSettings.profileImage ? {
-              ...(current?.profileImage || {}),
-              ...newSettings.profileImage
-          } : (current?.profileImage || null),
           userId: currentUser.uid,
           updatedAt: new Date(),
           id: currentUser.uid

@@ -965,7 +965,7 @@ export class SyncService {
   async synchronize(onProgress?: (msg: string) => void): Promise<SyncResult> {
     const startedAt = Date.now();
     let uploaded = 0;
-    let downloaded = 0;
+    const downloaded = 0;
     let conflictCount = 0;
     const errors: string[] = [];
 

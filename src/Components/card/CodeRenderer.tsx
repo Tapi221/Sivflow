@@ -91,21 +91,14 @@ export function CodeRenderer({ code, language, className }: CodeRendererProps) {
     <button
       onClick={handleCopy}
       className={cn(
-<<<<<<< HEAD
         "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium",
         "opacity-0 group-hover:opacity-100 transition-opacity duration-150",
         "text-zinc-400 hover:text-zinc-600 hover:bg-zinc-900/5",
         "focus:outline-none",
         copied && "opacity-100 text-emerald-600 hover:text-emerald-600"
-=======
-        "relative group flex flex-col max-w-full overflow-hidden",
-        "rounded-xl border border-slate-200 bg-white shadow-sm",
-        className
->>>>>>> parent of 7484c86 (202602231950コードブロックダサかったのでもとに戻す)
       )}
       aria-label="コードをコピー"
     >
-<<<<<<< HEAD
       {copied ? (
         <CheckIcon size={11} strokeWidth={2.5} />
       ) : (
@@ -143,67 +136,6 @@ export function CodeRenderer({ code, language, className }: CodeRendererProps) {
           )}
         </Highlight>
       </CodeBlockFrame>
-=======
-      {/* ── ヘッダーバー ── */}
-      <div className="flex items-center justify-between px-3.5 py-2 border-b border-slate-100 bg-slate-50/80">
-        {/* 言語ラベル */}
-        <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest select-none font-sans">
-          {languageLabel}
-        </span>
-
-        {/* コピーボタン */}
-        <button
-          onClick={handleCopy}
-          className={cn(
-            "flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium transition-all duration-150",
-            "text-slate-400 hover:text-slate-600 hover:bg-slate-200/60",
-            "focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300",
-            copied && "text-emerald-600 hover:text-emerald-600 hover:bg-emerald-50"
-          )}
-          aria-label="コードをコピー"
-        >
-          {copied ? (
-            <>
-              <CheckIcon size={12} strokeWidth={2.5} />
-              <span>Copied</span>
-            </>
-          ) : (
-            <>
-              <CopyIcon size={12} strokeWidth={2} />
-              <span>Copy</span>
-            </>
-          )}
-        </button>
-      </div>
-
-      {/* ── コード本体 ── */}
-      <Highlight theme={codeTheme} code={normalizedCode} language={validLanguage}>
-        {({ className: preClassName, style, tokens, getLineProps, getTokenProps }: any) => (
-          <pre
-            className={cn(
-              preClassName,
-              "m-0 overflow-x-auto",
-              "px-4 py-3.5",
-              "text-[13px] leading-[1.65] font-mono",
-              "bg-white"
-            )}
-            style={style}
-          >
-            <code className="font-[inherit]">
-              {tokens.map((line: any[], i: number) => (
-                <div key={i} {...getLineProps({ line })} className="min-h-[1em]">
-                  {line.map((token: any, key: number) => (
-                    <span key={key} {...getTokenProps({ token })} />
-                  ))}
-                </div>
-              ))}
-            </code>
-          </pre>
-        )}
-      </Highlight>
->>>>>>> parent of 7484c86 (202602231950コードブロックダサかったのでもとに戻す)
     </div>
   );
 }
-
-

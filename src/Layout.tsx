@@ -35,7 +35,7 @@ import { signOut } from 'firebase/auth';
 import { createPageUrl } from '@/utils';
 import { useUserSettings } from '@/hooks/useUserSettings';
 import { getAvatarColors, getInitials } from '@/utils/avatarUtils';
-import { useProfileImageMonitor } from '@/hooks/useProfileImageMonitor';
+
 import { useHeaderCompact } from '@/hooks/useHeaderCompact';
 
 import { ThemeManager } from '@/Components/common/ThemeManager';
@@ -145,8 +145,17 @@ export default function Layout() {
   const previousBodyOverflowRef = useRef('');
   const previousHtmlOverflowRef = useRef('');
 
-  // Activate auto-repair monitor
-  useProfileImageMonitor();
+  // Reset imgError when remoteUrl changes
+  useEffect(() => {
+    setImgError(false);
+  }, [settings?.profileImage?.remoteUrl]);
+
+  // Debug: Log profileImage changes (検証用)
+  useEffect(() => {
+    if (import.meta.env.DEV) {
+      console.log('[Settings] loaded profileImage', settings?.profileImage);
+    }
+  }, [settings?.profileImage?.remoteUrl, settings?.profileImage?.updatedAt]);
 
   // ヘッダー縮小状態の管理（モバイルのみ）
   const isHeaderCompact = useHeaderCompact(32, 8);
@@ -182,7 +191,7 @@ export default function Layout() {
         const normalizedFolderId = String(folderId);
         const folder = folderMap.get(normalizedFolderId);
         if (!folder) return false;
-        if (Boolean(folder?.isDeleted ?? folder?.is_deleted)) return false;
+        if (folder?.isDeleted ?? folder?.is_deleted) return false;
       }
 
       const rDate = new Date(reviewDate.getFullYear(), reviewDate.getMonth(), reviewDate.getDate());
@@ -494,9 +503,9 @@ export default function Layout() {
               style={{ '--avatar-bg': avatarBg, backgroundColor: 'var(--avatar-bg)' } as React.CSSProperties}
               className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 overflow-hidden shadow-sm"
             >
-              {(settings?.profileImage?.remoteUrl || settings?.profileImage?.localUrl) && !imgError ? (
+              {settings?.profileImage?.remoteUrl && !imgError ? (
                 <img
-                  src={settings.profileImage.remoteUrl || settings.profileImage.localUrl}
+                  src={settings.profileImage.remoteUrl}
                   alt="Profile"
                   className="w-full h-full object-cover"
                   onError={(e) => {

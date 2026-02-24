@@ -244,7 +244,7 @@ export default function MediaUploader({
 
     const isImage = type === 'image';
     const currentCount = urls.length;
-    let limit = Math.max(0, maxFiles - currentCount);
+    const limit = Math.max(0, maxFiles - currentCount);
     
     // Convert to array
     const allFiles = Array.from(files);
