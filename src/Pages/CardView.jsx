@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCards } from '@/hooks/useCards';
 import { Button } from '@/Components/ui/button';
 import { Skeleton } from '@/Components/ui/skeleton';
-import { ArrowLeft, BookOpen, ShieldCheck, Tag } from 'lucide-react';
+import { ArrowLeft, ShieldCheck, Tag } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 import CardViewer from '@/Components/card/CardViewer';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/Components/ui/tooltip';
@@ -96,13 +96,6 @@ export default function CardView() {
              </div>
           </div>
           
-          <Button
-            onClick={() => navigate(createPageUrl(`StudyMode?folderId=${folderId}`))}
-            className="bg-primary-600 hover:bg-primary-700 text-white rounded-xl px-6"
-          >
-            <BookOpen className="w-4 h-4 mr-2" />
-            学習モード
-          </Button>
         </div>
         
         {/* Viewer */}
