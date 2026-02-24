@@ -1,10 +1,10 @@
 import React from 'react';
-import { Image as ImageIcon, Volume2 } from 'lucide-react';
+import { Image as ImageIcon } from 'lucide-react';
 import { BlockWrapper } from './BlockWrapper';
 import MediaUploader from '../MediaUploader';
 
 interface MediaBlockProps {
-  type: 'image' | 'audio';
+  type: 'image';
   data: any[];
   onChange: (data: any[]) => void;
   onDelete: () => void;
@@ -50,34 +50,31 @@ export const MediaBlock = ({
   onMoveDragStart,
   onMoveDragEnd,
 }: MediaBlockProps) => {
-  const enableRowMove = type !== 'audio'; // audio は “いらん” 扱いで移動させない
-
   return (
     <BlockWrapper
       onDelete={onDelete}
       onDuplicate={onDuplicate}
       dragHandleProps={dragHandleProps}
       dragHandleClassName={dragHandleClassName}
-      label={type === 'image' ? 'Images' : 'Audio'}
-      icon={type === 'image' ? ImageIcon : Volume2}
+      label="Images"
+      icon={ImageIcon}
       accentColor={accentColor}
       isActive={isActive}
-      showDuplicate={type !== 'audio'}
-      showDragHandle={type !== 'audio'}
+      showDuplicate
+      showDragHandle
       showDelete={showDelete}
-      // 1行移動（imageのみ有効）
-      canMoveUp={enableRowMove ? canMoveUp : false}
-      canMoveDown={enableRowMove ? canMoveDown : false}
-      onMoveUp={enableRowMove ? onMoveUp : undefined}
-      onMoveDown={enableRowMove ? onMoveDown : undefined}
-      onMoveDragStart={enableRowMove ? onMoveDragStart : undefined}
-      onMoveDragEnd={enableRowMove ? onMoveDragEnd : undefined}
+      canMoveUp={canMoveUp}
+      canMoveDown={canMoveDown}
+      onMoveUp={onMoveUp}
+      onMoveDown={onMoveDown}
+      onMoveDragStart={onMoveDragStart}
+      onMoveDragEnd={onMoveDragEnd}
     >
       <MediaUploader
         type={type}
         urls={data}
         onChange={onChange}
-        maxFiles={1} // Always 1 for both image and audio
+        maxFiles={1}
         initialFile={initialFile}
         onConsumeInitialFile={onConsumeInitialFile}
         onFilesExcess={onFilesExcess}
