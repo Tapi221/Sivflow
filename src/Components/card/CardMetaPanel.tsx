@@ -79,6 +79,23 @@ export function CardMetaPanel({ card, reviewLogs = [], onUpdateTags }: CardMetaP
     return daily.filter((d) => new Date(`${d.day}T00:00:00`).getTime() >= threshold.getTime());
   }, [safeLogs, period]);
 
+  const yTicks = useMemo(() => {
+    if (chartData.length === 0) return [0, 1];
+    const values = chartData.map((d) => d.resistanceScore);
+    const min = Math.floor(Math.min(...values));
+    const max = Math.ceil(Math.max(...values));
+    const ticks: number[] = [];
+    for (let v = min; v <= max; v += 1) ticks.push(v);
+    return ticks.length > 0 ? ticks : [0, 1];
+  }, [chartData]);
+
+  const xTicks = useMemo(() => {
+    if (chartData.length <= 1) return chartData.map((d) => d.day);
+    return chartData
+      .filter((_, idx) => idx % 5 === 0 || idx === chartData.length - 1)
+      .map((d) => d.day);
+  }, [chartData]);
+
   const tags = card?.tags ?? [];
 
   const handleAddTag = async () => {
@@ -157,8 +174,19 @@ export function CardMetaPanel({ card, reviewLogs = [], onUpdateTags }: CardMetaP
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData}>
-                    <XAxis dataKey="day" tickFormatter={(v) => DAY_FORMATTER.format(new Date(`${v}T00:00:00`))} tick={{ fontSize: 10 }} />
-                    <YAxis domain={[0, 100]} width={28} tick={{ fontSize: 10 }} />
+                    <XAxis
+                      dataKey="day"
+                      ticks={xTicks}
+                      tickFormatter={(v) => DAY_FORMATTER.format(new Date(`${v}T00:00:00`))}
+                      tick={{ fontSize: 10 }}
+                    />
+                    <YAxis
+                      ticks={yTicks}
+                      domain={[yTicks[0], yTicks[yTicks.length - 1]]}
+                      allowDecimals={false}
+                      width={36}
+                      tick={{ fontSize: 10 }}
+                    />
                     <Tooltip formatter={(value) => [`${value}`, "Score"]} labelFormatter={(label) => String(label)} />
                     <Line type="monotone" dataKey="resistanceScore" stroke="#0f172a" strokeWidth={2} dot={false} />
                   </LineChart>
