@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { FileText, Plus } from "lucide-react";
+import { FileText, PanelRightClose, PanelRightOpen, Plus } from "lucide-react";
 import Star from "lucide-react/dist/esm/icons/star";
 import CircleHelp from "lucide-react/dist/esm/icons/circle-help";
 import { DragDropContext } from "@hello-pangea/dnd";
@@ -9,6 +9,7 @@ import { BlockEditor } from "@/Components/card/BlockEditor";
 import { ScaleToFitFrame } from "@/Components/card/ScaleToFitFrame";
 import { CardShell } from "@/Components/card/CardShell";
 import { CardSurface } from "@/Components/card/CardSurface";
+import { CardMetaPanel } from "@/Components/card/CardMetaPanel";
 
 import { Button } from "@/Components/ui/button";
 import { useCards } from "@/hooks/useCards";
@@ -50,6 +51,15 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
 
   // 裏表共通のカード高さ（null = CardShell 内部自動計算）
   const [cardHeightPx, setCardHeightPx] = useState<number | null>(null);
+  const [isMetaOpen, setIsMetaOpen] = useState<boolean>(() => {
+    if (typeof window === "undefined") return true;
+    return window.localStorage.getItem("card-editor.meta-panel-open") !== "false";
+  });
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem("card-editor.meta-panel-open", String(isMetaOpen));
+  }, [isMetaOpen]);
 
   // Settings からの高さを同期
   useEffect(() => {
@@ -250,6 +260,16 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
     }
   };
 
+  const handleUpdateTags = async (nextTags: string[]) => {
+    if (isEditing) {
+      setDraft((prev) => (prev ? { ...prev, tags: nextTags } : prev));
+      return;
+    }
+    if (!selectedCard) return;
+    await updateCard(selectedCard.id, { tags: nextTags });
+    onCardUpdated?.();
+  };
+
   const onDragEnd = (result: DndResult) => {
     if (!draft) return;
     if (!result.destination) return;
@@ -305,6 +325,46 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
     });
   };
 
+  const panelCard = useMemo(() => {
+    if (selectedCard) {
+      if (!isEditing || !draft) return selectedCard;
+      return { ...selectedCard, tags: draft.tags };
+    }
+    if (!draft) return null;
+    const now = new Date();
+    return {
+      id: "__draft__",
+      userId: "",
+      deviceId: "web",
+      folderId: "",
+      orderIndex: 0,
+      questionNumber: "",
+      title: draft.title,
+      tags: draft.tags,
+      isDraft: true,
+      isDeleted: false,
+      hasUncertainty: false,
+      isBookmarked: false,
+      isCompleted: false,
+      isSilent: false,
+      questionText: "",
+      questionImages: [],
+      questionAudios: [],
+      questionMemo: "",
+      questionMarked: "",
+      answerText: "",
+      answerImages: [],
+      answerAudios: [],
+      answerMemo: "",
+      answerMarked: "",
+      memoryStability: 0,
+      nextReviewDate: now,
+      createdAt: now,
+      updatedAt: now,
+      reviewLogs: [],
+    } as any;
+  }, [selectedCard, isEditing, draft]);
+
   // 未選択時（新規作成もここからできるようにする）
   if ((!selectedCardId || !selectedCard) && !isNew && !isEditing) {
     return (
@@ -338,9 +398,22 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
   }
 
   return (
-    <div className="h-full overflow-y-auto p-4">
-      {isEditing ? (
-        <div className="space-y-4">
+    <div className="h-full p-4">
+      <div className="mb-3 flex items-center justify-end">
+        <Button
+          type="button"
+          variant="ghost"
+          className="h-9 rounded-full px-3"
+          onClick={() => setIsMetaOpen((prev) => !prev)}
+        >
+          {isMetaOpen ? <PanelRightClose className="mr-2 h-4 w-4" /> : <PanelRightOpen className="mr-2 h-4 w-4" />}
+          {isMetaOpen ? "メタを閉じる" : "メタを開く"}
+        </Button>
+      </div>
+      <div className="flex h-[calc(100%-3rem)] overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+        <div className="min-w-0 flex-1 overflow-y-auto p-4">
+          {isEditing ? (
+            <div className="space-y-4">
           {/* 右ペイン用の最小ヘッダ（保存/キャンセルだけ） */}
           <div className="flex items-center justify-end gap-2">
             <div className="flex items-center gap-2">
@@ -369,8 +442,8 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
           </div>
 
           {/* ★紙カード2枚並び編集 */}
-          <DragDropContext onDragEnd={onDragEnd}>
-            <div className="grid lg:grid-cols-2 gap-6 max-w-7xl mx-auto">
+              <DragDropContext onDragEnd={onDragEnd}>
+                <div className="grid lg:grid-cols-2 gap-6 max-w-7xl mx-auto">
               {/* 問題 */}
               <div className="flex flex-col gap-2 w-full">
                 {/* ツールバーのマウント先（カードの外側に表示） */}
@@ -461,26 +534,35 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
                   </CardShell>
                 </ScaleToFitFrame>
               </div>
+                </div>
+              </DragDropContext>
             </div>
-          </DragDropContext>
+          ) : (
+            <Flashcard
+              card={selectedCard}
+              isFlipped={isFlipped}
+              onFlip={() => setIsFlipped((p) => !p)}
+              onToggleBookmark={handleToggleBookmark}
+              onToggleUncertainty={handleToggleUncertainty}
+              showNavigation={false}
+              showTags={true}
+              onEdit={() => {
+                setIsFlipped(false);
+                setIsEditing(true);
+              }}
+              editorSharedHeightPx={cardHeightPx}
+              lockCardHeight={true}
+            />
+          )}
         </div>
-      ) : (
-        <Flashcard
-          card={selectedCard}
-          isFlipped={isFlipped}
-          onFlip={() => setIsFlipped((p) => !p)}
-          onToggleBookmark={handleToggleBookmark}
-          onToggleUncertainty={handleToggleUncertainty}
-          showNavigation={false}
-          showTags={true}
-          onEdit={() => {
-            setIsFlipped(false);
-            setIsEditing(true);
-          }}
-          editorSharedHeightPx={cardHeightPx}
-          lockCardHeight={true}
-        />
-      )}
+        {isMetaOpen && (
+          <CardMetaPanel
+            card={panelCard}
+            reviewLogs={panelCard?.reviewLogs ?? []}
+            onUpdateTags={handleUpdateTags}
+          />
+        )}
+      </div>
     </div>
   );
 }
