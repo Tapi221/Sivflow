@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSwipeable } from 'react-swipeable';
 import { Button } from '@/Components/ui/button';
 import { Badge } from '@/Components/ui/badge';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/Components/ui/tooltip";
 import { Volume2 } from 'lucide-react';
 import { Flashcard } from '../card/Flashcard';
 import { useUserSettings } from '@/hooks/useUserSettings';
@@ -147,7 +146,6 @@ export default function StudyCard({
   );
 
   const renderReviewButtons = () => (
-    <TooltipProvider delayDuration={0}>
       <div className="reviewRatingBar flex items-center justify-center gap-2 md:gap-3 animate-in fade-in slide-in-from-bottom-4 duration-300">
           {/* 0: 忘れた (赤) */}
           <button
@@ -169,77 +167,55 @@ export default function StudyCard({
 
           {/* 1: あいまい (黄) */}
           {showHard && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                      className="w-16 h-20 md:w-20 md:h-24 rounded-2xl bg-white border border-slate-100 shadow-sm hover:border-amber-100 hover:bg-[#FFFBF0] flex flex-col items-center justify-center gap-1 md:gap-2 transition-all hover:-translate-y-1 active:scale-95 group"
-                      onClick={(e) => { e.stopPropagation(); handleResult(1); }}
-                  >
-                      <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-amber-50 flex items-center justify-center text-[#F9A825] group-hover:scale-110 transition-transform">
-                          <svg width="18" height="18" className="md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                              <line x1="8" y1="15" x2="16" y2="15" />
-                              <line x1="9" y1="9" x2="9.01" y2="9" />
-                              <line x1="15" y1="9" x2="15.01" y2="9" />
-                          </svg>
-                      </div>
-                      <span className="text-[10px] md:text-xs font-bold text-slate-600 group-hover:text-[#F9A825]">あいまい</span>
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="max-w-[200px] text-center bg-slate-800 text-white border-slate-700">
-                  <p>覚えかけのカード。</p>
-                </TooltipContent>
-              </Tooltip>
-          )}
-
-          {/* 2: 覚えた (青) */}
-          <Tooltip>
-            <TooltipTrigger asChild>
               <button
-                  className={`w-16 h-20 md:w-20 md:h-24 rounded-2xl bg-white border shadow-sm flex flex-col items-center justify-center gap-1 md:gap-2 transition-all hover:-translate-y-1 active:scale-95 group ${
-                    swipeDir === 'Left' ? 'border-blue-500 bg-blue-50 scale-105' : 'border-slate-100'
-                  }`}
-                  onClick={(e) => { e.stopPropagation(); handleResult(2); }}
+                  className="w-16 h-20 md:w-20 md:h-24 rounded-2xl bg-white border border-slate-100 shadow-sm hover:border-amber-100 hover:bg-[#FFFBF0] flex flex-col items-center justify-center gap-1 md:gap-2 transition-all hover:-translate-y-1 active:scale-95 group"
+                  onClick={(e) => { e.stopPropagation(); handleResult(1); }}
               >
-                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-blue-50 flex items-center justify-center text-[#00A3FF] group-hover:scale-110 transition-transform">
+                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-amber-50 flex items-center justify-center text-[#F9A825] group-hover:scale-110 transition-transform">
                       <svg width="18" height="18" className="md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+                          <line x1="8" y1="15" x2="16" y2="15" />
                           <line x1="9" y1="9" x2="9.01" y2="9" />
                           <line x1="15" y1="9" x2="15.01" y2="9" />
                       </svg>
                   </div>
-                  <span className="text-[10px] md:text-xs font-bold text-slate-600 group-hover:text-[#00A3FF]">覚えた</span>
+                  <span className="text-[10px] md:text-xs font-bold text-slate-600 group-hover:text-[#F9A825]">あいまい</span>
               </button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="max-w-[200px] text-center bg-slate-800 text-white border-slate-700">
-              <p>（左スワイプ）正解したカード。</p>
-            </TooltipContent>
-          </Tooltip>
+          )}
+
+          {/* 2: 覚えた (青) */}
+          <button
+              className={`w-16 h-20 md:w-20 md:h-24 rounded-2xl bg-white border shadow-sm flex flex-col items-center justify-center gap-1 md:gap-2 transition-all hover:-translate-y-1 active:scale-95 group ${
+                swipeDir === 'Left' ? 'border-blue-500 bg-blue-50 scale-105' : 'border-slate-100'
+              }`}
+              onClick={(e) => { e.stopPropagation(); handleResult(2); }}
+          >
+              <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-blue-50 flex items-center justify-center text-[#00A3FF] group-hover:scale-110 transition-transform">
+                  <svg width="18" height="18" className="md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+                      <line x1="9" y1="9" x2="9.01" y2="9" />
+                      <line x1="15" y1="9" x2="15.01" y2="9" />
+                  </svg>
+              </div>
+              <span className="text-[10px] md:text-xs font-bold text-slate-600 group-hover:text-[#00A3FF]">覚えた</span>
+          </button>
 
           {/* 3: 余裕 (緑) */}
           {showEasy && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                      className="w-16 h-20 md:w-20 md:h-24 rounded-2xl bg-white border border-slate-100 shadow-sm hover:border-emerald-100 hover:bg-[#EEFDF6] flex flex-col items-center justify-center gap-1 md:gap-2 transition-all hover:-translate-y-1 active:scale-95 group"
-                      onClick={(e) => { e.stopPropagation(); handleResult(3); }}
-                  >
-                      <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-emerald-50 flex items-center justify-center text-[#00B67A] group-hover:scale-110 transition-transform">
-                          <svg width="18" height="18" className="md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M8 13s1.5 3 4 3 4-3 4-3" />
-                              <line x1="9" y1="9" x2="9.01" y2="9" />
-                              <line x1="15" y1="9" x2="15.01" y2="9" />
-                          </svg>
-                      </div>
-                      <span className="text-[10px] md:text-xs font-bold text-slate-600 group-hover:text-[#00B67A]">余裕</span>
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="max-w-[200px] text-center bg-slate-800 text-white border-slate-700">
-                  <p>簡単なカード。</p>
-                </TooltipContent>
-              </Tooltip>
+              <button
+                  className="w-16 h-20 md:w-20 md:h-24 rounded-2xl bg-white border border-slate-100 shadow-sm hover:border-emerald-100 hover:bg-[#EEFDF6] flex flex-col items-center justify-center gap-1 md:gap-2 transition-all hover:-translate-y-1 active:scale-95 group"
+                  onClick={(e) => { e.stopPropagation(); handleResult(3); }}
+              >
+                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-emerald-50 flex items-center justify-center text-[#00B67A] group-hover:scale-110 transition-transform">
+                      <svg width="18" height="18" className="md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M8 13s1.5 3 4 3 4-3 4-3" />
+                          <line x1="9" y1="9" x2="9.01" y2="9" />
+                          <line x1="15" y1="9" x2="15.01" y2="9" />
+                      </svg>
+                  </div>
+                  <span className="text-[10px] md:text-xs font-bold text-slate-600 group-hover:text-[#00B67A]">余裕</span>
+              </button>
           )}
       </div>
-    </TooltipProvider>
   );
   
   if (!card) {
