@@ -607,7 +607,7 @@ export function Flashcard({
                   className={cn(previewMode && inkEditingEnabled ? '' : 'pointer-events-none')}
                 />
                 {previewMode && inkEditingEnabled && (
-                  <div className="absolute bottom-2 left-2 z-30">
+                  <div className="absolute bottom-2 left-2 z-30 pointer-events-auto">
                     <InkToolbar
                       tool={previewInkTool}
                       canUndo={previewInkHistory.canUndo}
