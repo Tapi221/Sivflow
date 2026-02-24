@@ -116,17 +116,17 @@ export function SyncStatusIndicator({
 
   const getStatusColor = () => {
     if (syncNotice === 'wifi_wait') {
-      return 'text-amber-600 dark:text-amber-400';
+      return 'text-amber-600';
     }
     switch (syncStatus) {
       case 'syncing':
-        return 'text-blue-600 dark:text-blue-400';
+        return 'text-blue-600';
       case 'success':
         return 'text-primary-600';
       case 'error':
-        return 'text-red-600 dark:text-red-400';
+        return 'text-red-600';
       default:
-        return 'text-gray-600 dark:text-gray-400';
+        return 'text-gray-600';
     }
   };
 
@@ -172,7 +172,7 @@ export function SyncStatusIndicator({
               {/* オフライン表示 */}
               {!navigator.onLine && (
                 <div 
-                  className="flex items-center gap-1 px-1 text-orange-600 dark:text-orange-400"
+                  className="flex items-center gap-1 px-1 text-orange-600"
                   title="オフライン状態です"
                 >
                   <CloudOff className="w-3.5 h-3.5" />

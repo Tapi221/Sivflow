@@ -147,17 +147,17 @@ export function SyncHistoryDialog({ open, onClose }: SyncHistoryDialogProps) {
               {histories.map((history, index) => (
                 <div
                   key={history.id}
-                  className={`border-l-4 ${getTimelineColor(history.result)} pl-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors`}
+                  className={`border-l-4 ${getTimelineColor(history.result)} pl-4 py-3 hover:bg-gray-50 transition-colors`}
                 >
                   <div className="flex items-center justify-between gap-2 flex-wrap">
                     <div className="flex items-center gap-2">
                       {getResultBadge(history.result)}
-                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                      <span className="text-sm text-gray-600">
                         {formatDate(history.startedAt)}
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-4 text-sm text-gray-700 dark:text-gray-300">
+                    <div className="flex items-center gap-4 text-sm text-gray-700">
                       {/* アップロード件数 */}
                       <div className="flex items-center gap-1" title="アップロード">
                         <ChevronUp className="w-4 h-4 text-blue-500" />

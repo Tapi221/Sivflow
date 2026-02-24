@@ -155,7 +155,7 @@ export default function SyncSettings() {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-medium">自動同期</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-sm text-gray-600">
                     定期的にクラウドと同期します
                   </p>
                 </div>
@@ -208,7 +208,7 @@ export default function SyncSettings() {
                   <label htmlFor="wifiOnly" className="font-medium cursor-pointer">
                     WiFi接続時のみ同期
                   </label>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-sm text-gray-600">
                     モバイルデータ通信量を節約できます
                   </p>
                 </div>
@@ -248,8 +248,8 @@ export default function SyncSettings() {
                   ) : effectiveConflictCount > 0 ? (
                     /* Prioritize Conflict Display */
                     <div className="relative">
-                      <div className="w-16 h-16 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
-                        <AlertTriangle className="w-8 h-8 text-yellow-600 dark:text-yellow-400" />
+                      <div className="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center">
+                        <AlertTriangle className="w-8 h-8 text-yellow-600" />
                       </div>
                     </div>
                   ) : effectiveSyncStatus === 'success' ? (
@@ -263,12 +263,12 @@ export default function SyncSettings() {
                     </div>
                   ) : effectiveSyncStatus === 'error' ? (
                     <div className="relative">
-                      <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-                        <X className="w-8 h-8 text-red-600 dark:text-red-400" />
+                      <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center">
+                        <X className="w-8 h-8 text-red-600" />
                       </div>
                     </div>
                   ) : (
-                    <div className="w-16 h-16 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center">
+                    <div className="w-16 h-16 rounded-full bg-slate-200 flex items-center justify-center">
                       <Cloud className="w-8 h-8 text-slate-400" />
                     </div>
                   )}
@@ -283,7 +283,7 @@ export default function SyncSettings() {
                 </div>
 
                 {/* Reassurance Message */}
-                <p className="text-base text-slate-600 dark:text-slate-300 mb-6 max-w-md mx-auto leading-relaxed">
+                <p className="text-base text-slate-600 mb-6 max-w-md mx-auto leading-relaxed">
                   {effectiveSyncStatus === 'syncing' ? 
                     'データをクラウドに保存しています。そのままお待ちください。' :
                    effectiveConflictCount > 0 ?

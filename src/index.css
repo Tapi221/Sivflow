@@ -76,33 +76,6 @@
     --code-token-operator: #374151;  /* operator */
   }
 
-  html.dark {
-    color-scheme: dark;
-
-    /* Sidebar Theme Variables (Dark) */
-    --sidebar-bg: #0F172A;
-    --sidebar-border: #1E293B;
-    --sidebar-text: #E2E8F0;
-    --sidebar-text-muted: #94A3B8;
-    --sidebar-active-bg: #1E293B;
-    --sidebar-active-accent: #7AA6A1;
-
-    /* Shared code theme (dark): keep structure compatible */
-    --code-bg: #111827;
-    --code-fg: #e5e7eb;
-    --code-border: rgba(226, 232, 240, 0.18);
-
-    --code-token-text: #e5e7eb;
-    --code-token-comment: #94a3b8;
-    --code-token-punctuation: #cbd5e1;
-    --code-token-keyword: #c4b5fd;
-    --code-token-type: #93c5fd;
-    --code-token-function: #7dd3fc;
-    --code-token-string: #86efac;
-    --code-token-number: #fbbf24;
-    --code-token-operator: #d1d5db;
-  }
-  
   body {
     /* Tailwind の bg-background-light クラスを適用（@apply） */
     @apply bg-background-light select-none;
@@ -116,69 +89,6 @@
     /* モバイルブラウザのツールバー表示による高さ変化に対応 */
     height: 100dvh;
     position: relative;
-  }
-
-  html.dark body {
-    background-color: #020617;
-    color: #E2E8F0;
-  }
-
-  /* Global fallback overrides so dark mode visibly reacts even on legacy light-only classes */
-  html.dark .bg-white {
-    background-color: #0F172A !important;
-  }
-  html.dark .bg-white\/90 {
-    background-color: rgba(15, 23, 42, 0.9) !important;
-  }
-  html.dark .bg-white\/80 {
-    background-color: rgba(15, 23, 42, 0.8) !important;
-  }
-  html.dark .bg-white\/70 {
-    background-color: rgba(15, 23, 42, 0.7) !important;
-  }
-  html.dark .bg-white\/60 {
-    background-color: rgba(15, 23, 42, 0.6) !important;
-  }
-  html.dark .bg-white\/50 {
-    background-color: rgba(15, 23, 42, 0.5) !important;
-  }
-  html.dark .bg-slate-50 {
-    background-color: #0B1220 !important;
-  }
-  html.dark .bg-slate-100 {
-    background-color: #1E293B !important;
-  }
-
-  html.dark .border-slate-50,
-  html.dark .border-slate-100,
-  html.dark .border-slate-200,
-  html.dark .border-slate-300 {
-    border-color: #334155 !important;
-  }
-
-  html.dark .text-slate-900 {
-    color: #F8FAFC !important;
-  }
-  html.dark .text-slate-800 {
-    color: #E2E8F0 !important;
-  }
-  html.dark .text-slate-700 {
-    color: #CBD5E1 !important;
-  }
-  html.dark .text-slate-600,
-  html.dark .text-slate-500 {
-    color: #94A3B8 !important;
-  }
-  html.dark .text-slate-400 {
-    color: #64748B !important;
-  }
-
-  /* Tailwind arbitrary color classes used in this project */
-  html.dark [class*="bg-[#F8FAFB]"] {
-    background-color: #0B1220 !important;
-  }
-  html.dark [class*="bg-[#F3F7F8]"] {
-    background-color: #020617 !important;
   }
 
   /* 入力フォーカス時のズーム防止とジャンプ防止 */
@@ -521,7 +431,7 @@
 
   /* プログレスバー */
   .progress-bar {
-    @apply h-2 bg-gray-200 rounded-full overflow-hidden dark:bg-gray-700;
+    @apply h-2 bg-gray-200 rounded-full overflow-hidden
   }
   .progress-bar-fill {
     @apply h-full rounded-full transition-all duration-500;
@@ -549,7 +459,7 @@
   /* タグ用スタイル */
   .tag {
     @apply inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-md;
-    @apply dark:bg-gray-700 dark:text-gray-300;
+    @apply
   }
 
   /* ドロップダウンメニュー本体とアイテム */
@@ -559,13 +469,13 @@
   .dropdown-item {
     @apply w-full px-4 py-2.5 text-left text-sm text-gray-700 transition-colors;
     @apply hover:bg-primary-50 hover:text-primary;
-    @apply dark:text-gray-200 dark:hover:bg-gray-700;
+    @apply
   }
 
   /* ツールチップ */
   .tooltip {
     @apply absolute z-50 px-3 py-2 text-sm text-white bg-gray-900 rounded-lg shadow-lg;
-    @apply dark:bg-gray-700;
+    @apply
   }
 
   /* モーダルのオーバーレイ＆コンテンツ */
@@ -574,7 +484,7 @@
   }
   .modal-content {
     @apply bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden;
-    @apply dark:bg-gray-800;
+    @apply
   }
 
   /* 絵文字アイコンのスタイル */
@@ -636,7 +546,7 @@
 
   /* フォーカスリングの共通クラス */
   .focus-ring {
-    @apply focus:outline-none focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-800;
+    @apply focus:outline-none focus:ring-4 focus:ring-primary-200
   }
   
   /* スクロールバーを非表示にするユーティリティ */

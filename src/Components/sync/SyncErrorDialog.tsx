@@ -144,7 +144,7 @@ export function SyncErrorDialog({ open, onClose }: SyncErrorDialogProps) {
               {errors.map((error) => (
                 <div
                   key={error.id}
-                  className="border rounded-lg p-4 bg-white dark:bg-gray-800"
+                  className="border rounded-lg p-4 bg-white"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -191,7 +191,7 @@ export function SyncErrorDialog({ open, onClose }: SyncErrorDialogProps) {
                     </div>
                   </div>
 
-                  <p className="text-sm font-medium mt-2 text-gray-800 dark:text-gray-200">
+                  <p className="text-sm font-medium mt-2 text-gray-800">
                     {error.message}
                   </p>
 
@@ -209,7 +209,7 @@ export function SyncErrorDialog({ open, onClose }: SyncErrorDialogProps) {
                         スタックトレース
                       </button>
                       {expandedId === error.id && (
-                        <pre className="mt-2 p-3 bg-gray-100 dark:bg-gray-900 rounded text-xs overflow-x-auto max-h-40 overflow-y-auto">
+                        <pre className="mt-2 p-3 bg-gray-100 rounded text-xs overflow-x-auto max-h-40 overflow-y-auto">
                           {error.stack}
                         </pre>
                       )}

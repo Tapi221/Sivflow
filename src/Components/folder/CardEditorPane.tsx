@@ -2,6 +2,9 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { FileText, PanelRightClose, PanelRightOpen, Plus } from "lucide-react";
 import Star from "lucide-react/dist/esm/icons/star";
 import CircleHelp from "lucide-react/dist/esm/icons/circle-help";
+import ImageIcon from "lucide-react/dist/esm/icons/image";
+import Volume2Icon from "lucide-react/dist/esm/icons/volume-2";
+import LinkIcon from "lucide-react/dist/esm/icons/link";
 import { DragDropContext } from "@hello-pangea/dnd";
 
 import { Flashcard } from "@/Components/card/Flashcard";
@@ -10,12 +13,15 @@ import { ScaleToFitFrame } from "@/Components/card/ScaleToFitFrame";
 import { CardShell } from "@/Components/card/CardShell";
 import { CardSurface } from "@/Components/card/CardSurface";
 import { CardMetaPanel } from "@/Components/card/CardMetaPanel";
+import MediaUploader from "@/Components/card/MediaUploader";
 
 import { Button } from "@/Components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/Components/ui/dialog";
+import { Input } from "@/Components/ui/input";
 import { useCards } from "@/hooks/useCards";
 import { useUserSettings } from "@/hooks/useUserSettings";
 
-import type { CardBlock } from "@/types";
+import type { CardBlock, ReferenceBlockData } from "@/types";
 
 type DndLocation = { droppableId: string; index: number };
 type DndResult = { source: DndLocation; destination?: DndLocation | null };
@@ -48,6 +54,9 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
   // 編集状態（右ペイン内）
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [imageDialogSide, setImageDialogSide] = useState<"question" | "answer" | null>(null);
+  const [audioDialogSide, setAudioDialogSide] = useState<"question" | "answer" | null>(null);
+  const [linkDialogSide, setLinkDialogSide] = useState<"question" | "answer" | null>(null);
 
   // 裏表共通のカード高さ（null = CardShell 内部自動計算）
   const [cardHeightPx, setCardHeightPx] = useState<number | null>(null);
@@ -295,6 +304,143 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
     onCardUpdated?.();
   };
 
+  const getSideBlocks = (side: "question" | "answer") =>
+    side === "question" ? (draft?.questionBlocks ?? []) : (draft?.answerBlocks ?? []);
+
+  const setSideBlocks = (side: "question" | "answer", nextBlocks: CardBlock[]) => {
+    setDraft((prev) => {
+      if (!prev) return prev;
+      const reindexed = nextBlocks.map((block, index) => ({ ...block, orderIndex: index }));
+      return side === "question"
+        ? { ...prev, questionBlocks: reindexed }
+        : { ...prev, answerBlocks: reindexed };
+    });
+  };
+
+  const upsertSingleBlock = (
+    side: "question" | "answer",
+    type: CardBlock["type"],
+    payload: Partial<CardBlock>
+  ) => {
+    const blocks = getSideBlocks(side);
+    const index = blocks.findIndex((block) => block.type === type);
+    if (index >= 0) {
+      const next = [...blocks];
+      next[index] = { ...next[index], ...payload };
+      setSideBlocks(side, next);
+      return;
+    }
+    const nextBlock: CardBlock = {
+      id: `${side}-${type}-${Date.now()}`,
+      type,
+      orderIndex: blocks.length,
+      content: "",
+      ...payload,
+    } as CardBlock;
+    setSideBlocks(side, [...blocks, nextBlock]);
+  };
+
+  const removeBlockByTypeIfExists = (side: "question" | "answer", type: CardBlock["type"]) => {
+    const blocks = getSideBlocks(side);
+    setSideBlocks(
+      side,
+      blocks.filter((block) => block.type !== type)
+    );
+  };
+
+  const getMediaItems = (side: "question" | "answer", type: "image" | "audio") => {
+    const block = getSideBlocks(side).find((b) => b.type === type);
+    if (type === "image") return (block?.images ?? []) as any[];
+    return (block?.audios ?? []) as any[];
+  };
+
+  const getReferenceItems = (side: "question" | "answer"): ReferenceBlockData[] => {
+    const block = getSideBlocks(side).find((b) => b.type === "reference");
+    return (block?.references ?? []) as ReferenceBlockData[];
+  };
+
+  const setMediaItems = (side: "question" | "answer", type: "image" | "audio", items: any[]) => {
+    if (!items || items.length === 0) {
+      removeBlockByTypeIfExists(side, type);
+      return;
+    }
+    if (type === "image") {
+      upsertSingleBlock(side, "image", { images: items });
+      return;
+    }
+    upsertSingleBlock(side, "audio", { audios: items });
+  };
+
+  const setReferenceItems = (side: "question" | "answer", refs: ReferenceBlockData[]) => {
+    const sanitized = (refs ?? []).filter((r) => (r?.url ?? "").trim() || (r?.name ?? "").trim());
+    if (sanitized.length === 0) {
+      removeBlockByTypeIfExists(side, "reference");
+      return;
+    }
+    upsertSingleBlock(side, "reference", { references: sanitized });
+  };
+
+  const getBadgeCount = (side: "question" | "answer", kind: "image" | "audio" | "reference") => {
+    const blocks = getSideBlocks(side);
+    if (kind === "image") {
+      return blocks
+        .filter((b) => b.type === "image")
+        .reduce((sum, b) => sum + (b.images?.length ?? 0), 0);
+    }
+    if (kind === "audio") {
+      return blocks
+        .filter((b) => b.type === "audio")
+        .reduce((sum, b) => sum + (b.audios?.length ?? 0), 0);
+    }
+    return blocks
+      .filter((b) => b.type === "reference")
+      .reduce((sum, b) => sum + (b.references?.length ?? 0), 0);
+  };
+
+  const renderMediaDialogButtons = (side: "question" | "answer") => {
+    const imageCount = getBadgeCount(side, "image");
+    const audioCount = getBadgeCount(side, "audio");
+    const linkCount = getBadgeCount(side, "reference");
+    const base = "flex items-center gap-1 rounded-full px-2 py-1 h-8 min-h-0 min-w-0 text-[10px] font-bold";
+
+    return (
+      <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+        <button
+          type="button"
+          className={cn(base, "bg-slate-50 text-slate-500 hover:bg-slate-100")}
+          onClick={() => setImageDialogSide(side)}
+          title="画像を追加"
+          aria-label="画像を追加"
+        >
+          <ImageIcon className="w-3 h-3" />
+          <Plus className="w-3 h-3" />
+          {imageCount > 0 ? <span>x{imageCount}</span> : null}
+        </button>
+        <button
+          type="button"
+          className={cn(base, "bg-slate-50 text-slate-500 hover:bg-slate-100")}
+          onClick={() => setAudioDialogSide(side)}
+          title="音声を追加"
+          aria-label="音声を追加"
+        >
+          <Volume2Icon className="w-3 h-3" />
+          <Plus className="w-3 h-3" />
+          {audioCount > 0 ? <span>x{audioCount}</span> : null}
+        </button>
+        <button
+          type="button"
+          className={cn(base, "bg-cyan-500 text-white hover:bg-cyan-400")}
+          onClick={() => setLinkDialogSide(side)}
+          title="リンクを追加"
+          aria-label="リンクを追加"
+        >
+          <LinkIcon className="w-3 h-3" />
+          {linkCount > 0 ? <span>x{linkCount}</span> : <Plus className="w-3 h-3" />}
+        </button>
+      </div>
+    );
+  };
+
   const onDragEnd = (result: DndResult) => {
     if (!draft) return;
     if (!result.destination) return;
@@ -497,6 +643,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
                       }
                     }}
                     actionsTopLeft={editorActionsTopLeft}
+                    actionsTopRight={renderMediaDialogButtons("question")}
                   >
                     {/* ruledOffsetPx=24 は BlockEditor の pt-6（24px）に合わせた罫線開始位置 */}
                     <CardSurface ruled={true} ruledRowPx={24} ruledOffsetPx={24}>
@@ -542,6 +689,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
                       }
                     }}
                     actionsTopLeft={editorActionsTopLeft}
+                    actionsTopRight={renderMediaDialogButtons("answer")}
                   >
                     {/* ruledOffsetPx=24 は BlockEditor の pt-6（24px）に合わせた罫線開始位置 */}
                     <CardSurface ruled={true} ruledRowPx={24} ruledOffsetPx={24}>
@@ -594,10 +742,103 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
           />
         )}
       </div>
+
+      <Dialog open={Boolean(imageDialogSide)} onOpenChange={(open) => !open && setImageDialogSide(null)}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>画像を追加</DialogTitle>
+          </DialogHeader>
+          {imageDialogSide && (
+            <MediaUploader
+              type="image"
+              urls={getMediaItems(imageDialogSide, "image")}
+              onChange={(next) => setMediaItems(imageDialogSide, "image", next as any[])}
+              maxFiles={10}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={Boolean(audioDialogSide)} onOpenChange={(open) => !open && setAudioDialogSide(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>音声を追加</DialogTitle>
+          </DialogHeader>
+          {audioDialogSide && (
+            <MediaUploader
+              type="audio"
+              urls={getMediaItems(audioDialogSide, "audio")}
+              onChange={(next) => setMediaItems(audioDialogSide, "audio", next as any[])}
+              maxFiles={10}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={Boolean(linkDialogSide)} onOpenChange={(open) => !open && setLinkDialogSide(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>リンクを追加</DialogTitle>
+          </DialogHeader>
+          {linkDialogSide && (
+            <LinkEditor
+              items={getReferenceItems(linkDialogSide)}
+              onChange={(next) => setReferenceItems(linkDialogSide, next)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
 
 function cn(...classes: Array<string | undefined | false | null>) {
   return classes.filter(Boolean).join(" ");
+}
+
+function LinkEditor({
+  items,
+  onChange,
+}: {
+  items: ReferenceBlockData[];
+  onChange: (items: ReferenceBlockData[]) => void;
+}) {
+  const refs = items ?? [];
+
+  const add = () => onChange([...refs, { url: "", name: "" }]);
+  const update = (index: number, patch: Partial<ReferenceBlockData>) => {
+    const next = [...refs];
+    next[index] = { ...next[index], ...patch };
+    onChange(next);
+  };
+  const remove = (index: number) => {
+    onChange(refs.filter((_, i) => i !== index));
+  };
+
+  return (
+    <div className="space-y-2">
+      {refs.map((ref, index) => (
+        <div key={index} className="grid grid-cols-[1fr_180px_auto] gap-2">
+          <Input
+            value={ref.url ?? ""}
+            onChange={(e) => update(index, { url: e.target.value })}
+            placeholder="URL (https://...)"
+            className="h-9"
+          />
+          <Input
+            value={ref.name ?? ""}
+            onChange={(e) => update(index, { name: e.target.value })}
+            placeholder="表示名"
+            className="h-9"
+          />
+          <Button type="button" variant="ghost" className="h-9 px-3" onClick={() => remove(index)}>
+            削除
+          </Button>
+        </div>
+      ))}
+      <Button type="button" variant="outline" className="h-9" onClick={add}>
+        リンクを追加
+      </Button>
+    </div>
+  );
 }

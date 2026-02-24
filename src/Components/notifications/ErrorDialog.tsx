@@ -20,14 +20,14 @@ export const ErrorDialog: React.FC<ErrorDialogProps> = ({ notification, onDismis
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
-      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-md w-full">
+      <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
         {/* ヘッダー */}
-        <div className="flex items-start gap-3 p-6 border-b border-slate-200 dark:border-slate-700">
+        <div className="flex items-start gap-3 p-6 border-b border-slate-200">
           <div className="flex-shrink-0">
             <AlertCircle className="w-6 h-6 text-red-500" />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+            <h3 className="text-lg font-semibold text-slate-900">
               {notification.title}
             </h3>
           </div>
@@ -35,7 +35,7 @@ export const ErrorDialog: React.FC<ErrorDialogProps> = ({ notification, onDismis
 
         {/* コンテンツ */}
         <div className="p-6">
-          <p className="text-sm text-slate-600 dark:text-slate-400 whitespace-pre-line">
+          <p className="text-sm text-slate-600 whitespace-pre-line">
             {notification.message}
           </p>
 
@@ -44,13 +44,13 @@ export const ErrorDialog: React.FC<ErrorDialogProps> = ({ notification, onDismis
             <div className="mt-4">
               <button
                 onClick={() => setShowDetails(!showDetails)}
-                className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
+                className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900"
               >
                 <ChevronDown className={`w-4 h-4 transition-transform ${showDetails ? 'rotate-180' : ''}`} />
                 詳細を見る
               </button>
               {showDetails && (
-                <div className="mt-2 p-3 bg-slate-50 dark:bg-slate-900 rounded text-xs text-slate-600 dark:text-slate-400 whitespace-pre-line font-mono">
+                <div className="mt-2 p-3 bg-slate-50 rounded text-xs text-slate-600 whitespace-pre-line font-mono">
                   {notification.details}
                 </div>
               )}
@@ -59,7 +59,7 @@ export const ErrorDialog: React.FC<ErrorDialogProps> = ({ notification, onDismis
         </div>
 
         {/* アクション（必須） */}
-        <div className="flex gap-3 p-6 border-t border-slate-200 dark:border-slate-700">
+        <div className="flex gap-3 p-6 border-t border-slate-200">
           {notification.actions?.map((action, index) => (
             <button
               key={index}
@@ -70,7 +70,7 @@ export const ErrorDialog: React.FC<ErrorDialogProps> = ({ notification, onDismis
               className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${
                 action.primary
                   ? 'bg-red-500 text-white hover:bg-red-600'
-                  : 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-600'
+                  : 'bg-slate-100 text-slate-900 hover:bg-slate-200'
               }`}
             >
               {action.label}

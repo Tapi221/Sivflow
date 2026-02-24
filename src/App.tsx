@@ -4,8 +4,6 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Suspense, lazy, useState, useEffect } from 'react';
 // 認証状態をアプリ全体に配るコンテキスト
 import { AuthProvider } from './contexts/AuthContext';
-// テーマ（ライト/ダークなど）を配るコンテキスト
-import { ThemeProvider } from './contexts/ThemeContext';
 // トースト（画面右上などに出る通知）を配るコンテキスト
 import { ToastProvider } from './contexts/ToastContext';
 // 通知用の Provider（多分リアルタイム通知など）
@@ -474,19 +472,17 @@ function App() {
   return (
     // 各種コンテキストでアプリ全体をラップし、どの子コンポーネントからも利用できるようにする
     <AuthProvider>
-      <ThemeProvider>
-        <ToastProvider>
-          <NotificationProvider>
-            {/* ブラウザの URL に応じて画面を切り替えるための Router */}
-            <BrowserRouter>
-              {/* lazy で遅延読み込みしたページのローディング中に表示する UI の定義 */}
-              <Suspense fallback={<LoadingFallback />}>
-                <AppContent />
-              </Suspense>
-            </BrowserRouter>
-          </NotificationProvider>
-        </ToastProvider>
-      </ThemeProvider>
+      <ToastProvider>
+        <NotificationProvider>
+          {/* ブラウザの URL に応じて画面を切り替えるための Router */}
+          <BrowserRouter>
+            {/* lazy で遅延読み込みしたページのローディング中に表示する UI の定義 */}
+            <Suspense fallback={<LoadingFallback />}>
+              <AppContent />
+            </Suspense>
+          </BrowserRouter>
+        </NotificationProvider>
+      </ToastProvider>
     </AuthProvider>
   );
 }

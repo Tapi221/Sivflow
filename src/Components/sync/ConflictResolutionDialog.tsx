@@ -216,13 +216,13 @@ export function ConflictResolutionDialog({
 
         <div className="flex-1 overflow-y-auto space-y-4">
           {/* エンティティ情報 */}
-          <Card className="bg-gray-50 dark:bg-gray-800">
+          <Card className="bg-gray-50">
             <CardContent className="pt-4">
               <div className="flex items-center gap-2 text-sm">
                 <Badge>
                   {currentConflict.entityType === 'card' ? 'カード' : 'フォルダ'}
                 </Badge>
-                <span className="text-gray-600 dark:text-gray-400">
+                <span className="text-gray-600">
                   ID: {currentConflict.entityId}
                 </span>
               </div>
@@ -239,7 +239,7 @@ export function ConflictResolutionDialog({
               <CardContent className="pt-4">
                 <div className="flex items-center gap-2 mb-3">
                   <Merge className="w-4 h-4 text-green-500" />
-                  <h3 className="font-medium text-green-700 dark:text-green-400">
+                  <h3 className="font-medium text-green-700">
                     自動マージ済み
                   </h3>
                 </div>
@@ -255,12 +255,12 @@ export function ConflictResolutionDialog({
                     .map(([key, value]) => (
                       <div
                         key={key}
-                        className="bg-green-50 dark:bg-green-900/20 p-2 rounded"
+                        className="bg-green-50 p-2 rounded"
                       >
                         <span className="text-gray-500 text-xs">
                           {getFieldLabel(key)}
                         </span>
-                        <p className="text-gray-800 dark:text-gray-200 truncate">
+                        <p className="text-gray-800 truncate">
                           {truncateValue(formatValue(value), 50)}
                         </p>
                       </div>
@@ -278,7 +278,7 @@ export function ConflictResolutionDialog({
             </div>
 
             {Object.entries(currentConflict.conflicts).map(([key, value]) => (
-              <Card key={key} className="border-yellow-300 dark:border-yellow-700">
+              <Card key={key} className="border-yellow-300">
                 <CardContent className="pt-4">
                   <h4 className="font-medium mb-3">{getFieldLabel(key)}</h4>
 
@@ -297,8 +297,8 @@ export function ConflictResolutionDialog({
                       <div
                         className={`border rounded-lg p-4 cursor-pointer transition-colors ${
                           (fieldSelections[key] || 'local') === 'local'
-                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                            : 'border-gray-200 dark:border-gray-700'
+                            ? 'border-blue-500 bg-blue-50'
+                            : 'border-gray-200'
                         }`}
                         onClick={() =>
                           setFieldSelections({ ...fieldSelections, [key]: 'local' })
@@ -314,7 +314,7 @@ export function ConflictResolutionDialog({
                             ローカル
                           </Label>
                         </div>
-                        <div className="text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 p-2 rounded max-h-32 overflow-y-auto">
+                        <div className="text-sm text-gray-700 bg-white p-2 rounded max-h-32 overflow-y-auto">
                           <pre className="whitespace-pre-wrap break-words">
                             {truncateValue(formatValue(value.local))}
                           </pre>
@@ -325,8 +325,8 @@ export function ConflictResolutionDialog({
                       <div
                         className={`border rounded-lg p-4 cursor-pointer transition-colors ${
                           fieldSelections[key] === 'remote'
-                            ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
-                            : 'border-gray-200 dark:border-gray-700'
+                            ? 'border-green-500 bg-green-50'
+                            : 'border-gray-200'
                         }`}
                         onClick={() =>
                           setFieldSelections({ ...fieldSelections, [key]: 'remote' })
@@ -342,7 +342,7 @@ export function ConflictResolutionDialog({
                             クラウド
                           </Label>
                         </div>
-                        <div className="text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 p-2 rounded max-h-32 overflow-y-auto">
+                        <div className="text-sm text-gray-700 bg-white p-2 rounded max-h-32 overflow-y-auto">
                           <pre className="whitespace-pre-wrap break-words">
                             {truncateValue(formatValue(value.remote))}
                           </pre>

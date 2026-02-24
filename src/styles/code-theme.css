@@ -21,17 +21,3 @@
   --code-token-number: var(--tok-number);
   --code-token-operator: var(--tok-plain);
 }
-
-html.dark {
-  --code-bg: #1f1c25;
-  --code-fg: #f0ebf7;
-  --code-border: rgba(240, 235, 247, 0.2);
-
-  --tok-keyword: #d0b2f1;
-  --tok-type: #9ad6d2;
-  --tok-func: #e7a5b8;
-  --tok-string: #9dd1ad;
-  --tok-number: #e2b37a;
-  --tok-comment: rgba(240, 235, 247, 0.62);
-  --tok-plain: var(--code-fg);
-}
