@@ -310,8 +310,6 @@ export const normalizeFolder = (raw: any) => {
     deletedAt,
     isHidden: raw?.isHidden ?? raw?.is_hidden ?? false,
     isSilent: raw?.isSilent ?? raw?.is_silent ?? false,
-    memoText: raw?.memoText ?? raw?.memo_text ?? '',
-    memoImages: normalizeUploadedImages(raw?.memoImages ?? raw?.memo_images ?? []),
     notePdfs: raw?.notePdfs ?? raw?.note_pdfs ?? [],
     lastAccessAt: normalizeDate(raw?.lastAccessAt ?? raw?.last_access_at),
     createdAt: normalizeDate(raw?.createdAt ?? raw?.created_at) ?? new Date(),

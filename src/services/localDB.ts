@@ -196,19 +196,7 @@ const denormalizeCardForStorage = (card: any) => {
 
 const denormalizeFolderForStorage = (folder: any) => {
   if (!folder) return folder;
-  const result = { ...folder };
-
-  if (folder.memoImages !== undefined || folder.memo_images !== undefined) {
-    const memoImages = normalizeUploadedImages(folder.memoImages ?? folder.memo_images ?? []);
-    try {
-      assertImageArrayInvariant(memoImages as any);
-    } catch (e) {
-      console.warn('[LocalDB] memoImages validation failed, but proceeding with sanitization:', e);
-    }
-    result.memoImages = denormalizeUploadedImages(memoImages, { case: 'camel', stripUndefined: true }) as any;
-  }
-
-  return result;
+  return { ...folder };
 };
 
 const normalizeFolderWithSilent = (raw: any) => {

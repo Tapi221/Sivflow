@@ -1,5 +1,5 @@
 import { firestoreDb } from './firebase';
-import { collection, doc, setDoc, deleteDoc, query, where, getDocs, Timestamp } from 'firebase/firestore';
+import { collection, doc, setDoc, query, where, getDocs, Timestamp } from 'firebase/firestore';
 import type { Folder, Card } from '../types';
 import { denormalizeUploadedImages, normalizeUploadedImages } from '../utils/imageUtils';
 import { foldersPathSegments, folderDocPathSegments, cardsPathSegments, cardDocPathSegments } from './firestorePaths';
@@ -11,14 +11,6 @@ const denormalizeCardForCloud = (card: Card) => {
     ...card,
     questionImages: denormalizeUploadedImages(questionImages, { case: 'camel', stripUndefined: true }),
     answerImages: denormalizeUploadedImages(answerImages, { case: 'camel', stripUndefined: true }),
-  };
-};
-
-const denormalizeFolderForCloud = (folder: Folder) => {
-  const memoImages = normalizeUploadedImages((folder as any).memoImages ?? (folder as any).memo_images ?? []);
-  return {
-    ...folder,
-    memoImages: denormalizeUploadedImages(memoImages, { case: 'camel', stripUndefined: true }),
   };
 };
 
@@ -45,7 +37,7 @@ export class FirebaseCloudProvider implements ICloudProvider {
     if (!folder.userId) throw new Error('userId is required for upsertFolder');
     const docRef = doc(firestoreDb, ...folderDocPathSegments(folder.userId, folder.id));
     const data = {
-      ...denormalizeFolderForCloud(folder),
+      ...folder,
       updatedAt: Timestamp.now()
     };
     await setDoc(docRef, data, { merge: true });

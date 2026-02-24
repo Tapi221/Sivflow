@@ -511,14 +511,6 @@ export type SelectedExplorerItem =
   | { type: 'document'; id: string }
   | null;
 
-export interface FolderMemoItem {
-  id: string;
-  content: string; // テキスト
-  images: UploadedImage[]; // 添付画像
-  createdAt: number;
-  updatedAt: number;
-}
-
 /**
  * フォルダ（同期対象）
  */
@@ -540,11 +532,6 @@ export type Folder = BaseEntity & {
   cloudSyncEnabled: boolean;
   isSilent?: boolean;
   isHidden?: boolean;
-
-  // メモ（旧/新）
-  memoText?: string; // deprecated
-  memoImages?: UploadedImage[]; // deprecated
-  memos?: FolderMemoItem[]; // 複数メモ
 
   // PDFノート
   notePdfs?: UploadedFile[];

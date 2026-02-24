@@ -82,7 +82,6 @@ export class ImageSyncService {
     console.log('[ImageSync] Starting image sync check...');
     onProgress?.('画像同期の準備中...');
     const cards = await this.localDB.cards.toArray();
-    const totalItems = 0;
     
     for (const card of cards) {
       const updatedQuestionImages = await this.processImageArray(userId, card.id, 'cards', 'questionImages', card.questionImages, onProgress);
@@ -92,18 +91,6 @@ export class ImageSyncService {
         await this.localDB.cards.update(card.id, {
           questionImages: updatedQuestionImages || card.questionImages,
           answerImages: updatedAnswerImages || card.answerImages,
-          updatedAt: new Date()
-        });
-      }
-    }
-
-    const folders = await this.localDB.folders.toArray();
-    for (const folder of folders) {
-      if (!folder.memoImages) continue;
-      const updatedMemoImages = await this.processImageArray(userId, folder.id, 'folders', 'memoImages', folder.memoImages);
-      if (updatedMemoImages) {
-        await this.localDB.folders.update(folder.id, {
-          memoImages: updatedMemoImages,
           updatedAt: new Date()
         });
       }

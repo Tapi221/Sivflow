@@ -475,7 +475,7 @@ export class SyncService {
         const mergedImages: any = {};
         let imageMergedDescription = '';
         
-        ['questionImages', 'answerImages', 'memoImages'].forEach(field => {
+        ['questionImages', 'answerImages'].forEach(field => {
             if (local[field] && remote[field]) {
                 const combined = [...local[field], ...remote[field]];
                 const unique = Array.from(new Map(combined.map(img => [img.id, img])).values());
