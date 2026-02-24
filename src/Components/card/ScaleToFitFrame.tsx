@@ -7,6 +7,10 @@ export interface ScaleToFitFrameProps {
   baseWidth?: number;
   scaleMultiplier?: number;
   disableScale?: boolean;
+  fitHeight?: boolean;
+  centerContent?: boolean;
+  allowUpscale?: boolean;
+  maxScale?: number;
 }
 
 export function ScaleToFitFrame({
@@ -15,6 +19,10 @@ export function ScaleToFitFrame({
   baseWidth = 480,
   scaleMultiplier = 1,
   disableScale = false,
+  fitHeight = false,
+  centerContent = false,
+  allowUpscale = false,
+  maxScale = 1.6,
 }: ScaleToFitFrameProps) {
   const frameRef = React.useRef<HTMLDivElement | null>(null);
   const contentRef = React.useRef<HTMLDivElement | null>(null);
@@ -52,8 +60,14 @@ export function ScaleToFitFrame({
       if (!availableWidth) return;
 
       const safeBase = Math.max(1, baseWidth);
-      const fitScale = Math.min(1, availableWidth / safeBase);
-      const nextScale = Math.max(0.1, Math.min(1, fitScale * scaleMultiplier));
+      const fitByWidth = availableWidth / safeBase;
+      const fitByHeight =
+        fitHeight && contentHeight && frame.clientHeight
+          ? frame.clientHeight / Math.max(1, contentHeight)
+          : Number.POSITIVE_INFINITY;
+      const fitScale = Math.min(fitByWidth, fitByHeight);
+      const upperBound = allowUpscale ? Math.max(1, maxScale) : 1;
+      const nextScale = Math.max(0.1, Math.min(upperBound, fitScale * scaleMultiplier));
 
       setScale((prev) => (Math.abs(prev - nextScale) < 0.0001 ? prev : nextScale));
     };
@@ -64,7 +78,7 @@ export function ScaleToFitFrame({
     observer.observe(frame);
 
     return () => observer.disconnect();
-  }, [baseWidth, scaleMultiplier, disableScale, schedule]);
+  }, [baseWidth, scaleMultiplier, disableScale, fitHeight, contentHeight, allowUpscale, maxScale, schedule]);
 
   React.useEffect(() => {
     if (typeof ResizeObserver === 'undefined') return;
@@ -73,7 +87,7 @@ export function ScaleToFitFrame({
     const content = contentRef.current;
 
     const updateHeight = () => {
-      const h = content.getBoundingClientRect().height;
+      const h = content.offsetHeight;
       const next = Math.max(0, Math.ceil(h));
       setContentHeight((prev) => (prev === next ? prev : next));
     };
@@ -92,15 +106,19 @@ export function ScaleToFitFrame({
   return (
     <div
       ref={frameRef}
-      className={cn('w-full overflow-x-hidden', className)}
-      style={scaledHeight != null ? { height: `${scaledHeight}px` } : undefined}
+      className={cn('w-full overflow-x-hidden', fitHeight && 'h-full', className)}
+      style={!fitHeight && scaledHeight != null ? { height: `${scaledHeight}px` } : undefined}
     >
       <div
-        className="mx-auto"
+        className={cn('mx-auto', fitHeight && centerContent && 'h-full flex items-center justify-center')}
         style={{
           width: disableScale ? '100%' : `${Math.max(1, baseWidth)}px`,
           transform: disableScale ? 'none' : `scale(${scale})`,
-          transformOrigin: disableScale ? 'initial' : 'top center',
+          transformOrigin: disableScale
+            ? 'initial'
+            : fitHeight && centerContent
+              ? 'center center'
+              : 'top center',
           willChange: disableScale ? undefined : 'transform',
         }}
       >

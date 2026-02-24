@@ -399,19 +399,23 @@ export function CardEditorPane({ selectedCardId, onCardUpdated }: CardEditorPane
 
   return (
     <div className="h-full p-4">
-      <div className="mb-3 flex items-center justify-end">
+      <div className="relative flex h-full overflow-hidden">
         <Button
           type="button"
-          variant="ghost"
-          className="h-9 rounded-full px-3"
+          variant="outline"
+          size="icon"
+          className="absolute top-3 z-20 h-8 w-8 rounded-full bg-white/90 shadow-sm"
+          style={{
+            right: isMetaOpen ? "20rem" : "0",
+            transform: "translateX(50%)",
+          }}
           onClick={() => setIsMetaOpen((prev) => !prev)}
+          title={isMetaOpen ? "close meta panel" : "open meta panel"}
+          aria-label={isMetaOpen ? "close meta panel" : "open meta panel"}
         >
-          {isMetaOpen ? <PanelRightClose className="mr-2 h-4 w-4" /> : <PanelRightOpen className="mr-2 h-4 w-4" />}
-          {isMetaOpen ? "メタを閉じる" : "メタを開く"}
+          {isMetaOpen ? <PanelRightClose className="h-4 w-4" /> : <PanelRightOpen className="h-4 w-4" />}
         </Button>
-      </div>
-      <div className="flex h-[calc(100%-3rem)] overflow-hidden">
-        <div className="min-w-0 flex-1 overflow-y-auto p-4">
+        <div className="min-w-0 flex-1 overflow-hidden p-4">
           {isEditing ? (
             <div className="space-y-4">
           {/* 右ペイン用の最小ヘッダ（保存/キャンセルだけ） */}

@@ -539,7 +539,13 @@ export function Flashcard({
         </div>
       )}
 
-      <ScaleToFitFrame baseWidth={480}>
+      <ScaleToFitFrame
+        baseWidth={480}
+        fitHeight
+        centerContent
+        allowUpscale
+        maxScale={1.9}
+      >
         <CardShell
           className={cn(
             "mx-auto border-none rounded-[32px] md:rounded-[40px] transition-all duration-300",
