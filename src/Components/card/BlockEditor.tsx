@@ -7,7 +7,6 @@ import { BlockToolbar } from './BlockToolbar';
 import { TextBlock } from './blocks/TextBlock';
 import { CodeBlockItem } from './blocks/CodeBlockItem';
 import { MediaBlock } from './blocks/MediaBlock';
-import { ReferenceBlock } from './blocks/ReferenceBlock';
 import { MathBlock } from './blocks/MathBlock';
 import { MarkdownBlock } from './blocks/MarkdownBlock';
 
@@ -253,14 +252,8 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
   };
 
   const handleAddBlock = (type: CardBlock['type']) => {
-    // reference/audio は単体だけ
-    if (type === 'reference' || type === 'audio') {
-      const existingIndex = blocks.findIndex(b => b.type === type);
-      if (existingIndex !== -1) {
-        handleDeleteBlock(blocks[existingIndex].id, existingIndex);
-        return;
-      }
-    }
+    // reference/audio は右上ポップアップ専用。本文ブロック追加経路では扱わない。
+    if (type === 'reference' || type === 'audio') return;
 
     const tailRowOffset = (() => {
       for (let i = blocks.length - 1; i >= 0; i -= 1) {
@@ -277,10 +270,9 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
       images: [],
       audios: [],
       code: type === 'code' ? { language: 'javascript', code: '' } : undefined,
-      references: type === 'reference' ? [{ url: '', name: '' }] : undefined,
       math: type === 'math' ? { latex: '', displayMode: 'block' } : undefined,
       markdown: type === 'markdown' ? '' : undefined,
-      // 1行移動対象だけ rowOffset を持つ（audio/reference は “いらん”）
+      // 1行移動対象だけ rowOffset を持つ
       rowOffset: isRowPositionableType(type) ? tailRowOffset : undefined,
       orderIndex: blocks.length
     };
@@ -345,7 +337,7 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
     const currentBlock = sourceBlocks.find((block) => block.id === blockId);
     if (!currentBlock) return;
 
-    // audio/reference は対象外
+    // 非ライン配置タイプは対象外
     if (!isRowPositionableType(currentBlock.type)) return;
 
     const currentOffset = getRowOffset(currentBlock);
@@ -425,6 +417,7 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
   );
 
   const toolbarMount = toolbarMountRef?.current ?? null;
+  const visibleBlocks = blocks.filter((block) => block.type !== 'reference' && block.type !== 'audio');
 
   return (
     <div
@@ -439,23 +432,18 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
       <Droppable droppableId={droppableId} direction="vertical" type="card-block">
         {(provided) => (
           <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-0 pr-3 overflow-x-clip overflow-y-visible">
-            {blocks.map((block, index) => (
+            {visibleBlocks.map((block, index) => (
               <Draggable
                 key={block.id}
                 draggableId={block.id}
                 index={index}
-                isDragDisabled={
-                  block.type === 'reference' ||
-                  block.type === 'audio' ||
-                  block.type === 'text' ||
-                  block.type === 'code'
-                }
+                isDragDisabled={block.type === 'text' || block.type === 'code'}
               >
                 {(provided, snapshot) => (
                   (() => {
                     const rowMovable = isRowPositionableType(block.type);
 
-                    // ★ rowOffset は rowMovable のみ適用（audio/reference は対象外）
+                    // rowOffset は rowMovable のみ適用
                     const rowOffsetPx = rowMovable ? getRowOffset(block) * ROW_STEP_PX : 0;
 
                     const currentOffset = rowMovable ? getRowOffset(block) : 0;
@@ -481,11 +469,7 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
                       ? { ...dragStyle, transform: mergedTransform || dragStyle.transform }
                       : (mergedTransform ? { transform: mergedTransform } : undefined);
 
-                    const isDndDisabled =
-                      block.type === 'reference' ||
-                      block.type === 'audio' ||
-                      block.type === 'text' ||
-                      block.type === 'code';
+                    const isDndDisabled = block.type === 'text' || block.type === 'code';
 
                     return (
                       <div
@@ -544,7 +528,7 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
                             accentColor={accentColor}
                             isActive={activeBlockId === block.id || snapshot.isDragging}
                             placeholder={customPlaceholders?.[index] || "文章を入力..."}
-                            autoFocus={autoFocus && index === blocks.length - 1}
+                            autoFocus={autoFocus && index === visibleBlocks.length - 1}
                           />
                         )}
 
@@ -588,32 +572,6 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
                             onMoveDragEnd={() => handleMoveDragEnd(block.id)}
                             canMoveUp={canMoveUp}
                             canMoveDown={canMoveDown}
-                          />
-                        )}
-
-                        {block.type === 'audio' && (
-                          <MediaBlock
-                            type="audio"
-                            data={block.audios || []}
-                            onChange={(data) => handleUpdateBlock(block.id, { audios: data })}
-                            onDelete={() => handleDeleteBlock(block.id, index)}
-                            onDuplicate={() => handleDuplicateBlock(block.id)}
-                            isActive={activeBlockId === block.id || snapshot.isDragging}
-                            accentColor={accentColor}
-                            // ★ audio は 1行移動しない（いらん）
-                          />
-                        )}
-
-                        {block.type === 'reference' && (
-                          <ReferenceBlock
-                            references={block.references || []}
-                            onChange={(references) => handleUpdateBlock(block.id, { references })}
-                            onDelete={() => handleDeleteBlock(block.id, index)}
-                            onDuplicate={() => handleDuplicateBlock(block.id)}
-                            dragHandleProps={provided.dragHandleProps}
-                            accentColor={accentColor}
-                            isActive={activeBlockId === block.id || snapshot.isDragging}
-                            // ★ reference は 1行移動しない（いらん）
                           />
                         )}
 
@@ -688,7 +646,7 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
 
             {provided.placeholder}
 
-            {blocks.length === 0 && (
+            {visibleBlocks.length === 0 && (
               <div className="flex min-h-[112px] flex-col items-center justify-center rounded-[40px] border-2 border-dashed border-slate-100 bg-slate-50/30 px-4 py-4 text-center">
                 <Plus className="h-8 w-8 text-slate-200" />
                 <p className="m-0 mt-2 text-xs font-bold leading-tight text-slate-300 tracking-widest">

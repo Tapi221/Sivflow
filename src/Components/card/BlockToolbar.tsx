@@ -1,7 +1,6 @@
 import React from 'react';
 import {
-  Plus,
-  StickyNote
+  Plus
 } from 'lucide-react';
 // lucide-react のアイコンを個別インポート（named export が無いアイコンは dist から直接取得）
 import TypeIcon from 'lucide-react/dist/esm/icons/type';

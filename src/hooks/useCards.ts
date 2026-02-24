@@ -193,13 +193,11 @@ export function useCards(folderId?: string) {
       questionImages: cardData.questionImages || [],
       questionAudios: cardData.questionAudios || [],
       questionCode: cardData.questionCode || null,
-      questionMemo: cardData.questionMemo || '',
       questionMarked: cardData.questionMarked || '',
       answerText: cardData.answerText || '',
       answerImages: cardData.answerImages || [],
       answerAudios: cardData.answerAudios || [],
       answerCode: cardData.answerCode || null,
-      answerMemo: cardData.answerMemo || '',
       answerMarked: cardData.answerMarked || '',
       // Ensure blocks are carried over from cardData
       questionBlocks: cardData.questionBlocks || [],

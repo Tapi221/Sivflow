@@ -135,7 +135,6 @@ export interface UploadMetadata {
   context:
     | 'card_image'
     | 'profile'
-    | 'memo'
     | 'card_audio'
     | 'pdf'
     | 'pptx'
@@ -366,14 +365,12 @@ export type Card = BaseEntity & {
 
   // 本文（旧方式）
   questionText: string;
-  questionMemo: string;
   questionMarked: string;
   questionImages: UploadedImage[];
   questionAudios: Array<{ url: string; filename: string; order: number }>;
   questionCode?: CodeBlockData | null;
 
   answerText: string;
-  answerMemo: string;
   answerMarked: string;
   answerImages: UploadedImage[];
   answerAudios: Array<{ url: string; filename: string; order: number }>;

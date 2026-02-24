@@ -42,10 +42,6 @@
       },
       "description": "\u554f\u984c\u97f3\u58f0URL\u914d\u5217"
     },
-    "question_memo": {
-      "type": "string",
-      "description": "\u554f\u984c\u30e1\u30e2"
-    },
     "answer_text": {
       "type": "string",
       "description": "\u56de\u7b54\u30c6\u30ad\u30b9\u30c8\uff08LaTeX\u5bfe\u5fdc\uff09"
@@ -63,10 +59,6 @@
         "type": "string"
       },
       "description": "\u56de\u7b54\u97f3\u58f0URL\u914d\u5217"
-    },
-    "answer_memo": {
-      "type": "string",
-      "description": "\u56de\u7b54\u30e1\u30e2"
     },
     "level": {
       "type": "number",

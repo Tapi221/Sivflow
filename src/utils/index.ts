@@ -189,7 +189,6 @@ export const normalizeCard = (raw: any) => {
     questionAudios: raw?.questionAudios ?? raw?.question_audios ?? [],
     questionCode: raw?.questionCode ?? raw?.question_code ?? null,
     questionTextHighlighted: raw?.questionTextHighlighted ?? '',
-    questionMemo: raw?.questionMemo ?? raw?.question_memo ?? '',
     questionMarked: raw?.questionMarked ?? raw?.question_marked ?? '',
 
     answerText: raw?.answerText ?? raw?.answer_text ??
@@ -199,7 +198,6 @@ export const normalizeCard = (raw: any) => {
     answerAudios: raw?.answerAudios ?? raw?.answer_audios ?? [],
     answerCode: raw?.answerCode ?? raw?.answer_code ?? null,
     answerTextHighlighted: raw?.answerTextHighlighted ?? '',
-    answerMemo: raw?.answerMemo ?? raw?.answer_memo ?? '',
     answerMarked: raw?.answerMarked ?? raw?.answer_marked ?? '',
 
     memoryStability: normalizeMemoryStability(

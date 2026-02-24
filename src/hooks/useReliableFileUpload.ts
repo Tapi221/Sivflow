@@ -37,7 +37,6 @@ const ALLOWED_MIME_TYPES: Record<string, string[]> = {
   'card_image': ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/heic', 'image/heif', 'image/avif'],
   'card_audio': ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/m4a', 'audio/mp4', 'audio/x-m4a'],
   'profile': ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'],
-  'memo': ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
   'pdf': ['application/pdf'],
   'pptx': ['application/vnd.openxmlformats-officedocument.presentationml.presentation']
 };

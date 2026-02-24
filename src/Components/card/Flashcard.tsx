@@ -545,8 +545,6 @@ export function Flashcard({
           baseWidth={480}
           fitHeight
           centerContent
-          allowUpscale
-          maxScale={1.9}
         >
           <CardShell
             className={cn(
