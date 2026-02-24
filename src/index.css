@@ -282,6 +282,34 @@
     word-wrap: break-word;
   }
 
+  .card-shell-resize-handle {
+    @apply absolute left-0 right-0 bottom-0 flex items-center justify-center;
+    height: 20px;
+    border: 0;
+    background: transparent;
+    cursor: ns-resize;
+    z-index: 30;
+    touch-action: none;
+  }
+
+  .card-shell-resize-handle:focus-visible {
+    outline: none;
+  }
+
+  .card-shell-resize-knob {
+    width: 64px;
+    height: 4px;
+    border-radius: 9999px;
+    background: rgba(100, 116, 139, 0.45);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.15);
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .card-shell-resize-handle:hover .card-shell-resize-knob {
+    background: rgba(71, 85, 105, 0.6);
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.18);
+  }
+
   .card-shell-body--bottom {
     @apply pb-12;
   }
