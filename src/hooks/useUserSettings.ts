@@ -1,8 +1,9 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { getLocalDb } from '../services/localDB';
 import { useAuth } from '../contexts/AuthContext';
 import type { UserSettings } from '../types';
+import { sanitizeProfileImage } from '@/utils/profileImageSanitizer';
 
 export const DEFAULT_SETTINGS: Partial<UserSettings> = {
   displayName: 'UserName',
@@ -35,6 +36,11 @@ export const DEFAULT_SETTINGS: Partial<UserSettings> = {
 
 export function useUserSettings() {
   const { currentUser } = useAuth();
+  const repairedBlobRef = useRef(false);
+
+  useEffect(() => {
+    repairedBlobRef.current = false;
+  }, [currentUser?.uid]);
   
   const settings = useLiveQuery(
     async () => {
@@ -43,7 +49,12 @@ export function useUserSettings() {
        const userSettings =
          (await db.userSettings.get(currentUser.uid)) ||
          (await db.userSettings.where('userId').equals(currentUser.uid).first());
-       return { ...DEFAULT_SETTINGS, ...(userSettings || {}) };
+       const merged = { ...DEFAULT_SETTINGS, ...(userSettings || {}) };
+       const sanitizedProfile = sanitizeProfileImage(merged.profileImage);
+       return {
+         ...merged,
+         profileImage: sanitizedProfile.profileImage,
+       };
     },
     [currentUser],
     { 
@@ -51,6 +62,43 @@ export function useUserSettings() {
       accentColor: typeof window !== 'undefined' ? (localStorage.getItem('flashcard-accent-color') || DEFAULT_SETTINGS.accentColor) : DEFAULT_SETTINGS.accentColor 
     }
   );
+
+  useEffect(() => {
+    if (!currentUser || !settings) return;
+    if (repairedBlobRef.current) return;
+    const sanitizedProfile = sanitizeProfileImage(settings.profileImage);
+    if (!sanitizedProfile.wasBlobRemoteUrl) return;
+
+    repairedBlobRef.current = true;
+    if (import.meta.env.DEV) {
+      console.warn('[Settings] blob remoteUrl detected during hydrate; repairing profileImage');
+    }
+
+    if (typeof window === 'undefined') return;
+    const timerId = window.setTimeout(async () => {
+      const db = await getLocalDb(currentUser.uid);
+      const current =
+        (await db.userSettings.get(currentUser.uid)) ||
+        (await db.userSettings.where('userId').equals(currentUser.uid).first());
+      const currentSanitized = sanitizeProfileImage(current?.profileImage);
+      if (!currentSanitized.wasBlobRemoteUrl) return;
+
+      await db.userSettings.put({
+        ...current,
+        userId: currentUser.uid,
+        id: currentUser.uid,
+        updatedAt: new Date(),
+        profileImage: currentSanitized.profileImage,
+      });
+
+      if (import.meta.env.DEV) {
+        const repaired = await db.userSettings.get(currentUser.uid);
+        console.log('[Settings][RepairCheck] profileImage after repair:', repaired?.profileImage ?? null);
+      }
+    }, 0);
+
+    return () => window.clearTimeout(timerId);
+  }, [currentUser, settings]);
   
   const updateSettings = useCallback(async (newSettings: Partial<UserSettings>) => {
       if (!currentUser) return;
@@ -59,9 +107,21 @@ export function useUserSettings() {
       const current =
         (await db.userSettings.get(currentUser.uid)) ||
         (await db.userSettings.where('userId').equals(currentUser.uid).first());
+      const hasProfileImageUpdate = Object.prototype.hasOwnProperty.call(newSettings, 'profileImage');
+      let sanitizedProfile = current?.profileImage ?? null;
+
+      if (hasProfileImageUpdate) {
+        const profileSanitizeResult = sanitizeProfileImage(newSettings.profileImage);
+        sanitizedProfile = profileSanitizeResult.profileImage;
+        if (import.meta.env.DEV && profileSanitizeResult.wasBlobRemoteUrl) {
+          console.warn('[Settings] blocked blob remoteUrl on save; forcing profileImage.remoteUrl=null');
+        }
+      }
+
       const updated = {
           ...current,
           ...newSettings,
+          profileImage: sanitizedProfile,
           userId: currentUser.uid,
           updatedAt: new Date(),
           id: currentUser.uid
@@ -70,7 +130,7 @@ export function useUserSettings() {
       // 安全策：ロジックに関わる値が実際に変更された場合のみ更新（パフォーマンスのための浅い比較）
       if (JSON.stringify(current) === JSON.stringify(updated)) return;
       
-      await db.upsert('userSettings', updated);
+      await db.userSettings.put(updated as UserSettings);
   }, [currentUser]);
 
   return {

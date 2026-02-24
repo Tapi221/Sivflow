@@ -154,6 +154,10 @@ export default function Layout() {
   useEffect(() => {
     if (import.meta.env.DEV) {
       console.log('[Settings] loaded profileImage', settings?.profileImage);
+      const remoteUrl = settings?.profileImage?.remoteUrl;
+      if (typeof remoteUrl === 'string' && remoteUrl.startsWith('blob:')) {
+        console.warn('[Layout] blob remoteUrl detected on render:', remoteUrl);
+      }
     }
   }, [settings?.profileImage?.remoteUrl, settings?.profileImage?.updatedAt]);
 
@@ -352,6 +356,9 @@ export default function Layout() {
     getAvatarColors(settings?.displayName), 
     [settings?.displayName]
   );
+  const profileRemoteUrl = settings?.profileImage?.remoteUrl ?? null;
+  const profileImageIsBlob = typeof profileRemoteUrl === 'string' && profileRemoteUrl.startsWith('blob:');
+  const hasValidProfileImage = !!profileRemoteUrl && !profileImageIsBlob && !imgError;
 
   return (
     <div className="min-h-[100dvh] w-full overflow-x-hidden relative">
@@ -503,9 +510,9 @@ export default function Layout() {
               style={{ '--avatar-bg': avatarBg, backgroundColor: 'var(--avatar-bg)' } as React.CSSProperties}
               className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 overflow-hidden shadow-sm"
             >
-              {settings?.profileImage?.remoteUrl && !imgError ? (
+              {hasValidProfileImage ? (
                 <img
-                  src={settings.profileImage.remoteUrl}
+                  src={profileRemoteUrl}
                   alt="Profile"
                   className="w-full h-full object-cover"
                   onError={(e) => {

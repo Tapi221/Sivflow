@@ -184,6 +184,10 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
   useEffect(() => {
     if (import.meta.env.DEV) {
       console.log('[Settings] loaded profileImage', settings?.profileImage);
+      const remoteUrl = settings?.profileImage?.remoteUrl;
+      if (typeof remoteUrl === 'string' && remoteUrl.startsWith('blob:')) {
+        console.warn('[Settings] blob remoteUrl detected on render:', remoteUrl);
+      }
     }
   }, [settings?.profileImage?.remoteUrl, settings?.profileImage?.updatedAt]);
 
@@ -370,9 +374,11 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
   const renderContent = () => {
     switch (activeTab) {
       case 'account':
-        const profileImageUrl = settings?.profileImage?.remoteUrl ?? '/default-avatar.png';
+        const remoteUrl = settings?.profileImage?.remoteUrl;
+        const isBlob = typeof remoteUrl === 'string' && remoteUrl.startsWith('blob:');
+        const profileImageUrl = !isBlob && remoteUrl ? remoteUrl : '/default-avatar.png';
         const displayName = settings?.displayName || 'UserName';
-        const hasValidImage = !!settings?.profileImage?.remoteUrl && !imgError;
+        const hasValidImage = !!remoteUrl && !isBlob && !imgError;
         
         const { bg: avatarBg, text: avatarText } = getAvatarColors(settings?.displayName);
 

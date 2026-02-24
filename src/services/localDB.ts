@@ -1,5 +1,6 @@
 import { normalizeCard, normalizeFolder, extractTextFromBlocks } from '../utils';
 import { denormalizeUploadedImages, normalizeUploadedImages, sanitizeUploadedImages } from '../utils/imageUtils';
+import { sanitizeProfileImage } from '@/utils/profileImageSanitizer';
 import { getOrCreateDeviceId, getDeviceName } from '../utils/device';
 import { assertImageArrayInvariant } from '../utils/imageAssertions';
 import { deleteDocumentBlob, deleteDocumentBlobsByUser } from './documentFileStore';
@@ -222,9 +223,7 @@ const normalizeFolderWithSilent = (raw: any) => {
 
 const denormalizeUserSettingsForStorage = (settings: any) => {
   if (!settings) return settings;
-  const profileImage = settings.profileImage
-    ? sanitizeUploadedImages([settings.profileImage])[0]
-    : null;
+  const profileImage = sanitizeProfileImage(settings.profileImage).profileImage;
     
   // If sanitized image corresponds to a logic where localUrl is removed, 
   // and no remoteUrl exists, it effectively becomes an empty/invalid image record 

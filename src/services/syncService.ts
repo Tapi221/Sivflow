@@ -8,7 +8,7 @@ import { collection, getDocs, query, where, writeBatch, Timestamp, doc, getDoc, 
 import type { Folder, Card, User, UserSettings, UserStats } from '../types';
 import type { SyncError, SyncHistory, SyncSettings, SyncConflict, SyncQueueItem, DiffResult, SyncResult } from '../types/sync';
 import { DEFAULT_SYNC_SETTINGS } from '../types/sync';
-import { sanitizeUploadedImages } from '../utils/imageUtils';
+import { sanitizeProfileImage } from '@/utils/profileImageSanitizer';
 
 type SyncableCollection = 'users' | 'userSettings' | 'folders' | 'cards' | 'userStats';
 
@@ -714,8 +714,7 @@ export class SyncService {
     for (const item of remoteItems) {
         // PULL SIDE SANITIZATION: DB保存前に汚染データ（Blob URL）を除去
         if (table === 'userSettings' && item.profileImage) {
-             const sanitized = sanitizeUploadedImages([item.profileImage]);
-             item.profileImage = sanitized[0] || null;
+             item.profileImage = sanitizeProfileImage(item.profileImage).profileImage;
         }
 
         const localItem = await this.localDB.getItem(table, item.id);
@@ -869,14 +868,7 @@ export class SyncService {
 
                 // userSettingsの画像サニタイズ (Blob URLを除去)
                 if (item.collection === 'userSettings' && payload.profileImage) {
-                    const sanitized = sanitizeUploadedImages([payload.profileImage]);
-                    payload.profileImage = sanitized[0] || null;
-                }
-
-                // userSettingsの画像サニタイズ (Blob URLを除去)
-                if (item.collection === 'userSettings' && payload.profileImage) {
-                    const sanitized = sanitizeUploadedImages([payload.profileImage]);
-                    payload.profileImage = sanitized[0] || null;
+                    payload.profileImage = sanitizeProfileImage(payload.profileImage).profileImage;
                 }
                 
                 // updatedAtをTimestampに変換
