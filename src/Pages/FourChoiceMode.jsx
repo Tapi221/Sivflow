@@ -115,7 +115,7 @@ export default function FourChoiceMode() {
       } else if (continueCreating === false) {
         toastSuccess('カードを作成しました');
         clearPersistence();
-        safeNavigate(`/FolderView?id=${folderId}`);
+        safeNavigate(`/Folders?folderId=${folderId}`);
       }
     } catch (error) {
       console.error('Failed to save card after retries:', error);
@@ -131,7 +131,7 @@ export default function FourChoiceMode() {
 
   const handleCancel = () => {
     clearPersistence();
-    safeNavigate(`/FolderView?id=${folderId}`);
+    safeNavigate(`/Folders?folderId=${folderId}`);
   };
 
   const handleDelete = (editorId) => {

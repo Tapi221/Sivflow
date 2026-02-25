@@ -66,7 +66,7 @@ export default function CardView() {
              <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => navigate(createPageUrl(`FolderView?id=${folderId}`))}
+                onClick={() => navigate(createPageUrl(`Folders?folderId=${folderId}`))}
                 className="w-10 h-10 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors"
              >
                 <ArrowLeft className="w-5 h-5" />

@@ -88,10 +88,6 @@ export default function UncertainMode() {
   };
   
   const handleViewCard = (card) => {
-    // If viewing, maybe use CardView page or just Edit?
-    // Existing code used CardEdit. Folder screen uses CardView for view and CardEdit for edit.
-    // I'll stick to CardEdit for consistency with previous implementation or Switch to CardView?
-    // "Folder screen" uses `onView` -> navigate CardView. `onEdit` -> navigate CardEdit.
     navigate(createPageUrl(`CardView?folderId=${card.folder_id || card.folderId}&cardId=${card.id}`));
   };
 

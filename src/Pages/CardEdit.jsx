@@ -230,7 +230,7 @@ export default function CardEdit() {
           } else if (shouldReturnToCardView) {
             safeNavigate(`/CardView?folderId=${targetFolderId}&cardId=${cardId}`);
           } else {
-            safeNavigate(`/FolderView?id=${targetFolderId}`);
+            safeNavigate(`/Folders?folderId=${targetFolderId}`);
           }
         }
       } else {
@@ -268,7 +268,7 @@ export default function CardEdit() {
             } else if (shouldReturnToCardView) {
               safeNavigate(`/CardView?folderId=${targetFolderId}`);
             } else {
-              safeNavigate(`/FolderView?id=${targetFolderId}`);
+              safeNavigate(`/Folders?folderId=${targetFolderId}`);
             }
           }
         }
@@ -351,7 +351,7 @@ export default function CardEdit() {
       return;
     }
 
-    safeNavigate(`/FolderView?id=${targetFolderId}`);
+    safeNavigate(`/Folders?folderId=${targetFolderId}`);
   };
   
   if (cardId && cardsLoading) {

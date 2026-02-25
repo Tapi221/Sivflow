@@ -38,7 +38,6 @@ import { DEV_MODE, isLocalHost } from './utils/envGuards';
 const Dashboard = lazy(() => import('./Pages/Dashboard'));
 const Calendar = lazy(() => import('./Pages/Calendar'));
 const Folders = lazy(() => import('./Pages/Folders'));
-const FolderView = lazy(() => import('./Pages/FolderView'));
 const CardEdit = lazy(() => import('./Pages/CardEdit'));
 const CardView = lazy(() => import('./Pages/CardView'));
 const StudyMode = lazy(() => import('./Pages/StudyMode'));
@@ -342,7 +341,6 @@ function AppContent() {
           />
 
           {/* 以降はページごとのルート */}
-          <Route path="FolderView" element={<FolderView />} />
           <Route path="CardEdit" element={<CardEdit />} />
           <Route path="CardView" element={<CardView />} />
           <Route path="study" element={<StudyMode />} />

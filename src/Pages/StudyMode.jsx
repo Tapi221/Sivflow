@@ -206,7 +206,7 @@ export default function StudyMode() {
       return;
     }
     if (folderId) {
-      navigate(createPageUrl(`FolderView?id=${folderId}`));
+      navigate(createPageUrl(`Folders?folderId=${folderId}`));
     } else {
       navigate(createPageUrl('Dashboard'));
     }

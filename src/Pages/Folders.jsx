@@ -171,7 +171,7 @@ export default function Folders() {
     // TreeViewLayout側でモバイル時にRightPaneがないので、
     // ユーザーは「開けない」ことになる。
     // (実装計画には詳細がなかったが、今回はフォルダ一覧の統一が主眼)
-    // 既存のFolderViewでもPDFは表示されるはず。ここでのクリックは「スルー」でもよい？
+    // 既存のFolders画面でもPDFは表示されるはず。ここでのクリックは「スルー」でもよい？
     // いったんPCと同じ処理にする。
     setSelectedDocumentId(docId);
     setSelectedCardId(null);

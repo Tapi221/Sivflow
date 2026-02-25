@@ -119,7 +119,7 @@ export default function OneQAMode() {
       } else if (continueCreating === false) {
         toast.success('カードを作成しました');
         clearPersistence();
-        safeNavigate(`/FolderView?id=${folderId}`);
+        safeNavigate(`/Folders?folderId=${folderId}`);
       }
     } catch (error) {
       console.error('Failed to save card after retries:', error);
@@ -136,7 +136,7 @@ export default function OneQAMode() {
   const handleCancel = () => {
     // If we have unsaved changes, maybe warn? For now simple navigation.
     clearPersistence();
-    safeNavigate(`/FolderView?id=${folderId}`);
+    safeNavigate(`/Folders?folderId=${folderId}`);
   };
 
   const handleDelete = (editorId) => {

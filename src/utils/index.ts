@@ -10,7 +10,6 @@ export const createPageUrl = (pageName: string): string => {
     'dashboard': '/Dashboard',
     'Folders': '/folders',
     'folders': '/folders',
-    'FolderView': '/FolderView',
     'CardEdit': '/CardEdit',
     'CardView': '/CardView',
     'StudyMode': '/study',

@@ -412,7 +412,7 @@ export default function Dashboard() {
               </div>
               <div 
                 className="bg-[#FCFCFC] rounded-3xl p-5 cursor-pointer hover:bg-white hover:border-slate-300 transition-all duration-300 shadow-none border border-slate-200/60 group h-full"
-                onClick={() => navigate(createPageUrl(`FolderView?id=${lastStudiedFolder.id || lastStudiedFolder.folderId}`))}
+                onClick={() => navigate(createPageUrl(`Folders?folderId=${lastStudiedFolder.id || lastStudiedFolder.folderId}`))}
               >
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 group-hover:text-primary-600 group-hover:bg-primary-50 transition-colors">

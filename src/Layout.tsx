@@ -364,7 +364,7 @@ export default function Layout() {
              onClick={closeSidebar}
              className={cn(
                overlayNavItemBaseClass,
-               ['Folders', 'FolderView'].includes(currentPageName)
+               ['Folders'].includes(currentPageName)
                  ? overlayNavItemActiveClass
                  : ''
              )}
