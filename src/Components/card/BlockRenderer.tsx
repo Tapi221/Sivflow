@@ -4,6 +4,7 @@ import { CodeRenderer } from './CodeRenderer';
 import { AudioPlayer, ImageGallery } from './CardMedia';
 import { MathRenderer } from './blocks/MathRenderer';
 import { MarkdownBlockView } from './blocks/MarkdownBlockPreview';
+import { TEXT_BLOCK_CONTENT_CLASS } from './blocks/textBlockStyles';
 import { CARD_ROW_PX } from './constants';
 
 interface BlockRendererProps {
@@ -19,7 +20,7 @@ const ROW_STEP_PX = CARD_ROW_PX;
  * - pre-wrap で改行/空行を保持
  * - 末尾改行で最後の空行が消えるケースを補正
  */
-const renderMultilineText = (text: string, lineHeightPx: number) => {
+const renderMultilineText = (text: string) => {
   const raw = String(text ?? '');
   const normalized = raw.replace(/\r\n/g, '\n');
 
@@ -32,8 +33,7 @@ const renderMultilineText = (text: string, lineHeightPx: number) => {
   return (
     <div className="w-full max-w-full overflow-hidden">
       <div
-        className="w-full px-1.5 py-0 text-center text-base font-medium text-slate-700 font-sans whitespace-pre-wrap break-words"
-        style={{ lineHeight: `${lineHeightPx}px`, overflowWrap: 'anywhere' }}
+        className={`${TEXT_BLOCK_CONTENT_CLASS} whitespace-pre-wrap`}
       >
         {displayText}
       </div>
@@ -92,7 +92,7 @@ export function BlockRenderer({ blocks, onGalleryFullscreenChange }: BlockRender
           >
             {block.type === 'text' && (block.content ?? '').trim() !== '' && (
               <div className="w-full max-w-full overflow-hidden">
-                {renderMultilineText(String(block.content ?? ''), ROW_STEP_PX)}
+                {renderMultilineText(String(block.content ?? ''))}
               </div>
             )}
 

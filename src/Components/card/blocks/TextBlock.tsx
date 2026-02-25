@@ -2,6 +2,7 @@ import React from 'react';
 import AutoResizeTextarea from '@/Components/ui/AutoResizeTextarea';
 import TypeIcon from 'lucide-react/dist/esm/icons/type';
 import { BlockWrapper } from './BlockWrapper';
+import { TEXT_BLOCK_CONTENT_CLASS, TEXT_BLOCK_LINE_HEIGHT_PX } from './textBlockStyles';
 
 interface TextBlockProps {
   content: string;
@@ -50,10 +51,10 @@ export const TextBlock = ({ content, onChange, onDelete, onDuplicate, dragHandle
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder || "テキストを入力..."}
         minRows={1}
-        lineHeight={24}
+        lineHeight={TEXT_BLOCK_LINE_HEIGHT_PX}
         allowInternalScroll={false}
         autoFocus={autoFocus}
-        className="font-serif text-base font-medium text-slate-700 leading-[24px] break-all text-center placeholder:text-slate-300 border-none p-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent resize-none w-full"
+        className={`${TEXT_BLOCK_CONTENT_CLASS} placeholder:text-slate-300 focus-visible:ring-0 focus-visible:ring-offset-0`}
       />
     </BlockWrapper>
   );

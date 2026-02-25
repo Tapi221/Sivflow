@@ -18,6 +18,7 @@ import { Input } from "@/Components/ui/input";
 import { useCards } from "@/hooks/useCards";
 import { useUserSettings } from "@/hooks/useUserSettings";
 import { useToast } from "@/contexts/ToastContext";
+import { cn } from "@/lib/utils";
 
 import type { CardBlock, ReferenceBlockData } from "@/types";
 
@@ -38,6 +39,45 @@ interface CardEditorPaneProps {
   onSelectCardId?: (cardId: string) => void;
 }
 
+const NEW_SENTINEL = "__new__" as const;
+
+function normalizeSelectedCardId(raw: string | null): string | null {
+  if (!raw) return null;
+  if (raw === NEW_SENTINEL) return NEW_SENTINEL;
+  if (raw === "new" || raw === "NEW" || raw === "create") return NEW_SENTINEL;
+  return raw;
+}
+
+function makeNewDraft(): EditorDraft {
+  return {
+    title: "",
+    tags: [],
+    isDraft: true,
+    questionBlocks: [],
+    answerBlocks: [],
+  };
+}
+
+function sanitizeReferences(refs: ReferenceBlockData[]): ReferenceBlockData[] {
+  return (refs ?? [])
+    .map((r) => ({
+      url: (r?.url ?? "").trim(),
+      name: (r?.name ?? "").trim(),
+    }))
+    .filter((r) => r.url.length > 0 || r.name.length > 0);
+}
+
+function normalizeOrderIndex(blocks: CardBlock[]): CardBlock[] {
+  return (blocks ?? []).map((b, i) => ({ ...b, orderIndex: i }));
+}
+
+function normalizeCrossSideId(blockId: unknown, nextSide: "question" | "answer"): string | null {
+  if (typeof blockId !== "string") return null;
+  if (blockId.startsWith("question-")) return blockId.replace(/^question-/, `${nextSide}-`);
+  if (blockId.startsWith("answer-")) return blockId.replace(/^answer-/, `${nextSide}-`);
+  return null;
+}
+
 export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }: CardEditorPaneProps) {
   const { settings, updateSettings } = useUserSettings();
   const { success: toastSuccess, error: toastError } = useToast();
@@ -45,16 +85,23 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
   // ★重要：createCard が無い場合はここだけあなたの実装名に合わせて変更
   const { cards, updateCard, createCard } = useCards() as any;
 
-  const isNew =
-    selectedCardId === "new" ||
-    selectedCardId === "__new__" ||
-    selectedCardId === "NEW" ||
-    selectedCardId === "create";
+  // 親が selectedCardId を渡さないケース（未選択状態から新規作成）を救うための fallback
+  const [localSelectedCardId, setLocalSelectedCardId] = useState<string | null>(null);
+  useEffect(() => {
+    if (selectedCardId != null) setLocalSelectedCardId(null);
+  }, [selectedCardId]);
+
+  const effectiveSelectedCardId = selectedCardId ?? localSelectedCardId;
+  const normalizedSelectedCardId = useMemo(
+    () => normalizeSelectedCardId(effectiveSelectedCardId),
+    [effectiveSelectedCardId]
+  );
+  const isNew = normalizedSelectedCardId === NEW_SENTINEL;
 
   const selectedCard = useMemo(() => {
-    if (!selectedCardId || isNew) return null;
-    return cards.find((c: any) => c.id === selectedCardId) ?? null;
-  }, [cards, selectedCardId, isNew]);
+    if (!normalizedSelectedCardId || isNew) return null;
+    return cards.find((c: any) => c.id === normalizedSelectedCardId) ?? null;
+  }, [cards, normalizedSelectedCardId, isNew]);
 
   // 閲覧状態
   const [isFlipped, setIsFlipped] = useState(false);
@@ -65,11 +112,14 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
   const [imageDialogSide, setImageDialogSide] = useState<"question" | "answer" | null>(null);
   const [audioDialogSide, setAudioDialogSide] = useState<"question" | "answer" | null>(null);
   const [linkDialogSide, setLinkDialogSide] = useState<"question" | "answer" | null>(null);
-  // 差分1: 編集中の対象IDを固定して、cards更新時のdraft上書きを防ぐ
+
+  // 編集中の対象IDを固定して、cards更新時のdraft上書きを防ぐ
   const editingCardIdRef = useRef<string | null>(null);
-  const wasEditingRef = useRef(false);
-  // 差分2: 高さ保存のI/Oはdebounceで間引く
+  const hydratedFromIdRef = useRef<string | null>(null);
+
+  // 高さ保存のI/Oはdebounceで間引く + unmount で flush
   const heightPersistTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastHeightRef = useRef<number | null>(null);
 
   // 裏表共通のカード高さ（null = CardShell 内部自動計算）
   const [cardHeightPx, setCardHeightPx] = useState<number | null>(null);
@@ -87,21 +137,20 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
   useEffect(() => {
     if (settings?.cardEditorHeightPx != null) {
       setCardHeightPx(settings.cardEditorHeightPx);
-    } else if (typeof window !== 'undefined') {
-      const raw = window.localStorage.getItem('card-editor.resize:shared-height');
-      const parsed = Number(raw);
-      if (Number.isFinite(parsed) && parsed > 0) {
-        setCardHeightPx(parsed);
-      }
+      return;
     }
+    if (typeof window === "undefined") return;
+    const raw = window.localStorage.getItem("card-editor.resize:shared-height");
+    const parsed = Number(raw);
+    if (Number.isFinite(parsed) && parsed > 0) setCardHeightPx(parsed);
   }, [settings?.cardEditorHeightPx]);
 
   const persistHeight = useCallback(
     (newHeight: number) => {
       setCardHeightPx(newHeight);
-      if (heightPersistTimerRef.current) {
-        clearTimeout(heightPersistTimerRef.current);
-      }
+      lastHeightRef.current = newHeight;
+
+      if (heightPersistTimerRef.current) clearTimeout(heightPersistTimerRef.current);
       heightPersistTimerRef.current = setTimeout(() => {
         updateSettings({ cardEditorHeightPx: newHeight });
         if (typeof window !== "undefined") {
@@ -116,9 +165,18 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
     return () => {
       if (heightPersistTimerRef.current) {
         clearTimeout(heightPersistTimerRef.current);
+        heightPersistTimerRef.current = null;
+      }
+      // 最後のドラッグ値を落とさない
+      const h = lastHeightRef.current;
+      if (h != null && Number.isFinite(h) && h > 0) {
+        updateSettings({ cardEditorHeightPx: h });
+        if (typeof window !== "undefined") {
+          window.localStorage.setItem("card-editor.resize:shared-height", String(h));
+        }
       }
     };
-  }, []);
+  }, [updateSettings]);
 
   // ツールバーの外部マウント先（問題・解答 各カードの上）
   const toolbarMountRefQ = useRef<HTMLDivElement | null>(null);
@@ -127,101 +185,75 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
   // 編集用ドラフト（右ペイン内で完結）
   const [draft, setDraft] = useState<EditorDraft | null>(null);
 
-  const initNewDraft = useCallback(() => {
-    setDraft({
-      title: "",
-      tags: [],
-      isDraft: true,
-      questionBlocks: [],
-      answerBlocks: [],
-    });
+  const buildDraftFromCard = useCallback((card: any): EditorDraft => {
+    return {
+      title: card?.title ?? "",
+      tags: card?.tags ?? [],
+      isDraft: card?.isDraft ?? true,
+      questionBlocks: (card?.questionBlocks ?? []) as CardBlock[],
+      answerBlocks: (card?.answerBlocks ?? []) as CardBlock[],
+    };
   }, []);
 
+  // 選択IDが変わった時だけ、最低限の状態遷移をする（※依存に isEditing を入れない）
   useEffect(() => {
-    if (isEditing && !isNew && !draft) {
-      initNewDraft();
-    }
-  }, [isEditing, isNew, draft, initNewDraft]);
-
-  useEffect(() => {
-    if (isEditing && !wasEditingRef.current) {
-      editingCardIdRef.current = isNew ? "__new__" : selectedCardId;
-    } else if (!isEditing) {
-      editingCardIdRef.current = null;
-    }
-    wasEditingRef.current = isEditing;
-  }, [isEditing, isNew, selectedCardId]);
-
-  // カード切替時またはロード完了時にドラフトをロード
-  useEffect(() => {
-    // IDが完全に切り替わった場合（null/別のカード/新規）は、編集状態と反転状態をリセット
-    // ※依存配列に selectedCardId だけを入れて「切り替わり」だけを検知する手法もあるが、
-    // ここではデータのロード完了を待つ必要がある。
-    
-    // 最優先: IDが null なら必ず編集解除
-    if (!selectedCardId) {
+    if (!normalizedSelectedCardId) {
       setIsFlipped(false);
       setIsEditing(false);
       setDraft(null);
       editingCardIdRef.current = null;
-      return;
-    }
-
-    // データがまだロードされていない場合は何もしない（ロード完了後に再度呼ばれる）
-    if (!isNew && !selectedCard) {
-      return;
-    }
-
-    // 以前の selectedCardId を保持して、本当に切り替わった時だけ編集を閉じる設計も可能だが、
-    // 現状は selectedCardId が依存配列にあるため、切り替わり時にここが走る。
-
-    const currentEditorTargetId = isNew ? "__new__" : selectedCardId;
-    // 差分3: 同じ編集中IDならcards更新でもdraftを保持
-    if (isEditing && draft && editingCardIdRef.current === currentEditorTargetId) {
+      hydratedFromIdRef.current = null;
       return;
     }
 
     setIsFlipped(false);
 
-    // 新規モード
-    if (isNew) {
-      if (!draft) {
-        initNewDraft();
-      }
+    // 新規モードに入った瞬間だけ編集を開始（キャンセルで isEditing=false にできる）
+    if (normalizedSelectedCardId === NEW_SENTINEL) {
       setIsEditing(true);
+      setDraft((prev) => prev ?? makeNewDraft());
+      editingCardIdRef.current = NEW_SENTINEL;
+      hydratedFromIdRef.current = NEW_SENTINEL;
       return;
     }
 
-    // ロードされたデータをドラフトに反映
-    if (selectedCard) {
-      const nextDraft: EditorDraft = {
-        title: selectedCard.title ?? "",
-        tags: selectedCard.tags ?? [],
-        isDraft: selectedCard.isDraft ?? true,
-        questionBlocks: (selectedCard.questionBlocks ?? []) as CardBlock[],
-        answerBlocks: (selectedCard.answerBlocks ?? []) as CardBlock[],
-      };
-      // 同値のドラフトで setState を抑止して更新ループを防ぐ。
-      setDraft((prev) => {
-        if (
-          prev &&
-          prev.title === nextDraft.title &&
-          prev.isDraft === nextDraft.isDraft &&
-          prev.tags.length === nextDraft.tags.length &&
-          prev.questionBlocks.length === nextDraft.questionBlocks.length &&
-          prev.answerBlocks.length === nextDraft.answerBlocks.length &&
-          prev.tags.every((tag, i) => tag === nextDraft.tags[i]) &&
-          prev.questionBlocks.every((block, i) => block.id === nextDraft.questionBlocks[i]?.id) &&
-          prev.answerBlocks.every((block, i) => block.id === nextDraft.answerBlocks[i]?.id)
-        ) {
-          return prev;
-        }
-        return nextDraft;
-      });
+    // 別カードを選んだら編集は閉じる（事故防止）
+    setIsEditing(false);
+    setDraft(null);
+    editingCardIdRef.current = null;
+    hydratedFromIdRef.current = null;
+  }, [normalizedSelectedCardId]);
+
+  // isEditing の開始/終了で target を固定
+  useEffect(() => {
+    if (isEditing) {
+      editingCardIdRef.current = isNew ? NEW_SENTINEL : normalizedSelectedCardId;
     } else {
+      editingCardIdRef.current = null;
+      hydratedFromIdRef.current = null;
       setDraft(null);
     }
-  }, [selectedCardId, selectedCard, isNew, isEditing, draft, initNewDraft]);
+  }, [isEditing, isNew, normalizedSelectedCardId]);
+
+  // 編集開始時にだけドラフトを hydrate（cards更新で上書きしない）
+  useEffect(() => {
+    if (!isEditing) return;
+
+    const targetId = isNew ? NEW_SENTINEL : normalizedSelectedCardId;
+    if (!targetId) return;
+
+    if (isNew) {
+      setDraft((prev) => prev ?? makeNewDraft());
+      hydratedFromIdRef.current = NEW_SENTINEL;
+      return;
+    }
+
+    if (!selectedCard) return;
+    if (hydratedFromIdRef.current === selectedCard.id) return;
+
+    setDraft(buildDraftFromCard(selectedCard));
+    hydratedFromIdRef.current = selectedCard.id;
+  }, [isEditing, isNew, normalizedSelectedCardId, selectedCard, buildDraftFromCard]);
 
   // 閲覧側のトグル（既存カードのみ）
   const handleToggleBookmark = async (card: any) => {
@@ -243,7 +275,6 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
   };
 
   // 編集画面用の actionsTopLeft（星・はてなボタン）
-  // CardShell の card-shell-body pt-12 と同じ高さの領域に表示され、閲覧画面と同じ位置になる
   const editorActionsTopLeft = selectedCard ? (
     <CardCornerActions
       onHelp={() => handleToggleUncertainty(selectedCard)}
@@ -253,21 +284,31 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
     />
   ) : undefined;
 
-  const resetDraftFromCard = () => {
-    if (isNew) {
-      initNewDraft();
-      return;
-    }
-    if (!selectedCard) return;
+  const handleStartNew = useCallback(() => {
+    setDraft(makeNewDraft());
+    setIsEditing(true);
 
-    setDraft({
-      title: selectedCard.title ?? "",
-      tags: selectedCard.tags ?? [],
-      isDraft: selectedCard.isDraft ?? true,
-      questionBlocks: (selectedCard.questionBlocks ?? []) as CardBlock[],
-      answerBlocks: (selectedCard.answerBlocks ?? []) as CardBlock[],
-    });
-  };
+    if (typeof onSelectCardId === "function") {
+      onSelectCardId(NEW_SENTINEL);
+    } else {
+      setLocalSelectedCardId(NEW_SENTINEL);
+    }
+  }, [onSelectCardId]);
+
+  const handleCancel = useCallback(() => {
+    setIsSaving(false);
+    setImageDialogSide(null);
+    setAudioDialogSide(null);
+    setLinkDialogSide(null);
+
+    setDraft(null);
+    setIsEditing(false);
+
+    if (!selectedCardId && localSelectedCardId === NEW_SENTINEL) {
+      // 親が未管理の場合は空状態へ戻す
+      setLocalSelectedCardId(null);
+    }
+  }, [selectedCardId, localSelectedCardId]);
 
   const handleSave = async () => {
     if (!draft) return;
@@ -275,12 +316,26 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
     try {
       setIsSaving(true);
 
+      const sanitizeBlocksForSave = (blocks: CardBlock[]): CardBlock[] => {
+        const next: CardBlock[] = [];
+        for (const b of blocks ?? []) {
+          if (b?.type === "reference") {
+            const cleaned = sanitizeReferences((b as any)?.references ?? []);
+            if (cleaned.length === 0) continue;
+            next.push({ ...(b as any), references: cleaned } as any);
+            continue;
+          }
+          next.push(b);
+        }
+        return normalizeOrderIndex(next);
+      };
+
       const payload = {
         title: draft.title,
         tags: draft.tags,
         isDraft: draft.isDraft,
-        questionBlocks: draft.questionBlocks,
-        answerBlocks: draft.answerBlocks,
+        questionBlocks: sanitizeBlocksForSave(draft.questionBlocks),
+        answerBlocks: sanitizeBlocksForSave(draft.answerBlocks),
       };
 
       if (isNew) {
@@ -293,16 +348,19 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
         }
 
         const created = await createCard(payload);
+
         const newId =
           (typeof created === "object" && created !== null && "id" in created && (created as any).id) ||
           (typeof created === "string" ? created : null);
+
         onCardUpdated?.();
         toastSuccess?.("カードを作成しました");
-        if (newId && typeof onSelectCardId === "function") {
-          onSelectCardId(newId);
+
+        if (newId) {
+          if (typeof onSelectCardId === "function") onSelectCardId(newId);
+          else setLocalSelectedCardId(newId);
         }
 
-        // 新規作成後は編集を閉じる（親が新ID選択できる場合は onSelectCardId で追従）
         setIsEditing(false);
         return;
       }
@@ -357,30 +415,27 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
   const setSideBlocks = (side: "question" | "answer", nextBlocks: CardBlock[]) => {
     setDraft((prev) => {
       if (!prev) return prev;
-      const reindexed = nextBlocks.map((block, index) => ({ ...block, orderIndex: index }));
-      return side === "question"
-        ? { ...prev, questionBlocks: reindexed }
-        : { ...prev, answerBlocks: reindexed };
+      const reindexed = normalizeOrderIndex(nextBlocks);
+      return side === "question" ? { ...prev, questionBlocks: reindexed } : { ...prev, answerBlocks: reindexed };
     });
   };
 
-  const upsertSingleBlock = (
-    side: "question" | "answer",
-    type: CardBlock["type"],
-    payload: Partial<CardBlock>
-  ) => {
+  const upsertSingleBlock = (side: "question" | "answer", type: CardBlock["type"], payload: Partial<CardBlock>) => {
     const uniqueId =
-      typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
-        ? crypto.randomUUID()
+      typeof crypto !== "undefined" && typeof (crypto as any).randomUUID === "function"
+        ? (crypto as any).randomUUID()
         : `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
     const blocks = getSideBlocks(side);
     const index = blocks.findIndex((block) => block.type === type);
+
     if (index >= 0) {
       const next = [...blocks];
       next[index] = { ...next[index], ...payload };
       setSideBlocks(side, next);
       return;
     }
+
     const nextBlock: CardBlock = {
       id: `${side}-${type}-${uniqueId}`,
       type,
@@ -388,6 +443,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
       content: "",
       ...payload,
     } as CardBlock;
+
     setSideBlocks(side, [...blocks, nextBlock]);
   };
 
@@ -428,39 +484,31 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
       removeBlockByTypeIfExists(side, "reference");
       return;
     }
-    // ポップアップ編集中は空行（未入力リンク）も保持する。
-    // これを即時除去すると「リンクを設定」を押しても何も起きないように見えるため。
+    // ポップアップ編集中は空行も保持（保存時に正規化して落とす）
     upsertSingleBlock(side, "reference", { references: nextRefs });
   };
 
   const getBadgeCount = (side: "question" | "answer", kind: "image" | "audio" | "reference") => {
     const blocks = getSideBlocks(side);
     if (kind === "image") {
-      return blocks
-        .filter((b) => b.type === "image")
-        .reduce((sum, b) => sum + (b.images?.length ?? 0), 0);
+      return blocks.filter((b) => b.type === "image").reduce((sum, b) => sum + (b.images?.length ?? 0), 0);
     }
     if (kind === "audio") {
-      return blocks
-        .filter((b) => b.type === "audio")
-        .reduce((sum, b) => sum + (b.audios?.length ?? 0), 0);
+      return blocks.filter((b) => b.type === "audio").reduce((sum, b) => sum + (b.audios?.length ?? 0), 0);
     }
     return blocks
       .filter((b) => b.type === "reference")
-      .reduce(
-        (sum, b) =>
-          sum +
-          (b.references?.filter((r) => (r?.url ?? "").trim() || (r?.name ?? "").trim()).length ?? 0),
-        0
-      );
+      .reduce((sum, b) => sum + (sanitizeReferences((b as any)?.references ?? []).length ?? 0), 0);
   };
 
   const renderMediaDialogButtons = (side: "question" | "answer") => {
     const imageCount = getBadgeCount(side, "image");
     const audioCount = getBadgeCount(side, "audio");
     const linkCount = getBadgeCount(side, "reference");
+
     const base =
       "inline-flex shrink-0 items-center justify-center gap-1 rounded-full h-7 min-h-0 min-w-0 px-2 text-[10px] font-bold leading-none whitespace-nowrap";
+
     const openLinkDialog = () => {
       if (getReferenceItems(side).length === 0) {
         setReferenceItems(side, [{ url: "", name: "" }]);
@@ -481,6 +529,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
           <Plus className="w-3 h-3 shrink-0" />
           {imageCount > 0 ? <span>x{imageCount}</span> : null}
         </button>
+
         <button
           type="button"
           className={cn(base, "bg-slate-50 text-slate-500 hover:bg-slate-100")}
@@ -492,6 +541,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
           <Plus className="w-3 h-3 shrink-0" />
           {audioCount > 0 ? <span>x{audioCount}</span> : null}
         </button>
+
         <button
           type="button"
           className={cn(base, "bg-slate-50 text-slate-500 hover:bg-slate-100")}
@@ -511,44 +561,43 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
     if (!result.destination) return;
 
     const { source, destination } = result;
-
     if (source.droppableId === destination.droppableId && source.index === destination.index) return;
 
-    const getList = (id: string) => {
+    const listFor = (id: string) => {
       if (id === "question-blocks") return [...draft.questionBlocks];
       return [...draft.answerBlocks];
     };
 
     // same list
     if (source.droppableId === destination.droppableId) {
-      const list = getList(source.droppableId);
+      const list = listFor(source.droppableId);
       const [moved] = list.splice(source.index, 1);
       list.splice(destination.index, 0, moved);
 
-      const re = list.map((b: any, i: number) => ({ ...b, orderIndex: i }));
-
+      const re = normalizeOrderIndex(list as CardBlock[]);
       setDraft((prev) => {
         if (!prev) return prev;
-        return source.droppableId === "question-blocks"
-          ? { ...prev, questionBlocks: re as CardBlock[] }
-          : { ...prev, answerBlocks: re as CardBlock[] };
+        return source.droppableId === "question-blocks" ? { ...prev, questionBlocks: re } : { ...prev, answerBlocks: re };
       });
       return;
     }
 
-    // cross list
-    const sourceList = getList(source.droppableId);
-    const destList = getList(destination.droppableId);
+    // cross list（id の side プレフィックスも整合させる）
+    const sourceList = listFor(source.droppableId);
+    const destList = listFor(destination.droppableId);
 
-    const [moved] = sourceList.splice(source.index, 1);
+    const [rawMoved] = sourceList.splice(source.index, 1);
+    const nextSide: "question" | "answer" = destination.droppableId === "question-blocks" ? "question" : "answer";
+    const maybeNewId = normalizeCrossSideId((rawMoved as any)?.id, nextSide);
+    const moved = maybeNewId ? { ...(rawMoved as any), id: maybeNewId } : rawMoved;
+
     destList.splice(destination.index, 0, moved);
 
-    const reS = sourceList.map((b: any, i: number) => ({ ...b, orderIndex: i }));
-    const reD = destList.map((b: any, i: number) => ({ ...b, orderIndex: i }));
+    const reS = normalizeOrderIndex(sourceList as CardBlock[]);
+    const reD = normalizeOrderIndex(destList as CardBlock[]);
 
     setDraft((prev) => {
       if (!prev) return prev;
-
       const next: any = { ...prev };
 
       if (source.droppableId === "question-blocks") next.questionBlocks = reS;
@@ -567,6 +616,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
       return { ...selectedCard, title: draft.title, tags: draft.tags, isDraft: draft.isDraft };
     }
     if (!draft) return null;
+
     const now = new Date();
     return {
       id: "__draft__",
@@ -599,8 +649,10 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
     } as any;
   }, [selectedCard, isEditing, draft]);
 
-  // 未選択時（新規作成もここからできるようにする）
-  if ((!selectedCardId || !selectedCard) && !isNew && !isEditing) {
+  // --- 表示分岐（チラつき防止） ---
+
+  // 未選択
+  if (!normalizedSelectedCardId && !isEditing) {
     return (
       <div className="flex items-center justify-center h-full min-h-[400px] text-slate-400">
         <div className="text-center">
@@ -609,14 +661,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
           <p className="text-xs mt-2 opacity-70">カードをクリックすると閲覧できます</p>
 
           <div className="mt-6">
-            <Button
-              type="button"
-              className="h-10 rounded-full px-5"
-              onClick={() => {
-                initNewDraft();
-                setIsEditing(true);
-              }}
-            >
+            <Button type="button" className="h-10 rounded-full px-5" onClick={handleStartNew}>
               <Plus className="w-4 h-4 mr-2" />
               新規カードを作成
             </Button>
@@ -624,6 +669,32 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
         </div>
       </div>
     );
+  }
+
+  // 新規IDはあるが編集してない（キャンセル直後など）
+  if (isNew && !isEditing) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-[400px] text-slate-400">
+        <div className="text-center">
+          <p className="text-sm font-bold">新規カードを作成します</p>
+          <p className="text-xs mt-2 opacity-70">「作成開始」を押して編集を始めてください</p>
+          <div className="mt-6 flex items-center justify-center gap-2">
+            <Button type="button" className="h-10 rounded-full px-5" onClick={() => setIsEditing(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              作成開始
+            </Button>
+            <Button type="button" variant="ghost" className="h-10 rounded-full px-5" onClick={handleCancel}>
+              戻る
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 既存カード選択済みだがロード中
+  if (!isNew && normalizedSelectedCardId && !selectedCard && !isEditing) {
+    return <div className="h-full p-4 text-slate-400">Loading...</div>;
   }
 
   // 編集開始直後に draft が未初期化の1フレームを安全に吸収
@@ -649,121 +720,102 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
         >
           {isMetaOpen ? <PanelRightClose className="h-4 w-4" /> : <PanelRightOpen className="h-4 w-4" />}
         </Button>
+
         <div className={cn("min-w-0 flex-1 p-4", isEditing ? "overflow-y-auto" : "overflow-hidden")}>
           {isEditing ? (
             <div className="space-y-4">
-          {/* 右ペイン用の最小ヘッダ（保存/キャンセルだけ） */}
-          <div className="flex items-center justify-end gap-2">
-            <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                variant="ghost"
-                className="h-9 rounded-full px-4"
-                onClick={() => {
-                  resetDraftFromCard();
-                  setIsEditing(false);
-                }}
-                disabled={isSaving}
-              >
-                キャンセル
-              </Button>
+              {/* 右ペイン用の最小ヘッダ（保存/キャンセルだけ） */}
+              <div className="flex items-center justify-end gap-2">
+                <div className="flex items-center gap-2">
+                  <Button type="button" variant="ghost" className="h-9 rounded-full px-4" onClick={handleCancel} disabled={isSaving}>
+                    キャンセル
+                  </Button>
 
-              <Button
-                type="button"
-                className="h-9 rounded-full px-6"
-                onClick={handleSave}
-                disabled={isSaving}
-              >
-                保存
-              </Button>
-            </div>
-          </div>
+                  <Button type="button" className="h-9 rounded-full px-6" onClick={handleSave} disabled={isSaving}>
+                    保存
+                  </Button>
+                </div>
+              </div>
 
-          {/* ★紙カード2枚並び編集 */}
+              {/* ★紙カード2枚並び編集 */}
               <DragDropContext onDragEnd={onDragEnd}>
                 <div className="grid lg:grid-cols-2 gap-6 max-w-7xl mx-auto">
-              {/* 問題 */}
-              <div className="flex flex-col gap-2 w-full">
-                {/* ツールバーのマウント先（カードの外側に表示） */}
-                <div ref={toolbarMountRefQ} />
-                <CardFrame
-                  className={cn(
-                    "overflow-hidden shadow-xl",
-                    "premium-paper-depth",
-                    "card-shell--paper"
-                  )}
-                  resizable={true}
-                  showResizeHandle={true}
-                  bodyOverflowY="auto"
-                  heightPx={cardHeightPx ?? undefined}
-                  onHeightChange={(newHeight) => persistHeight(newHeight)}
-                  actionsTopLeft={editorActionsTopLeft}
-                  actionsTopRight={renderMediaDialogButtons("question")}
-                >
-                  <BlockEditor
-                    blocks={draft?.questionBlocks ?? []}
-                    onChange={(blocks) => setSideBlocks("question", blocks as CardBlock[])}
-                    prefix="question"
-                    label="問題"
-                    color="text-indigo-500"
-                    droppableId="question-blocks"
-                    accentColor={settings?.accentColor}
-                    duplicateToOpposite={settings?.duplicateToOpposite}
-                    toolbarMountRef={toolbarMountRefQ}
-                  />
-                </CardFrame>
-              </div>
+                  {/* 問題 */}
+                  <div className="flex flex-col gap-2 w-full">
+                    <div ref={toolbarMountRefQ} />
+                    <CardFrame
+                      className={cn("overflow-hidden shadow-xl", "premium-paper-depth", "card-shell--paper")}
+                      resizable={true}
+                      showResizeHandle={true}
+                      bodyOverflowY="auto"
+                      heightPx={cardHeightPx ?? undefined}
+                      onHeightChange={(newHeight) => persistHeight(newHeight)}
+                      actionsTopLeft={editorActionsTopLeft}
+                      actionsTopRight={renderMediaDialogButtons("question")}
+                    >
+                      <BlockEditor
+                        blocks={draft?.questionBlocks ?? []}
+                        onChange={(blocks) => setSideBlocks("question", blocks as CardBlock[])}
+                        prefix="question"
+                        label="問題"
+                        color="text-indigo-500"
+                        droppableId="question-blocks"
+                        accentColor={settings?.accentColor}
+                        duplicateToOpposite={settings?.duplicateToOpposite}
+                        toolbarMountRef={toolbarMountRefQ}
+                      />
+                    </CardFrame>
+                  </div>
 
-              {/* 解答 */}
-              <div className="flex flex-col gap-2 w-full">
-                {/* ツールバーのマウント先（カードの外側に表示） */}
-                <div ref={toolbarMountRefA} />
-                <CardFrame
-                  className={cn(
-                    "shadow-xl",
-                    "bg-white"
-                  )}
-                  resizable={true}
-                  showResizeHandle={true}
-                  bodyOverflowY="auto"
-                  heightPx={cardHeightPx ?? undefined}
-                  onHeightChange={(newHeight) => persistHeight(newHeight)}
-                  actionsTopLeft={editorActionsTopLeft}
-                  actionsTopRight={renderMediaDialogButtons("answer")}
-                >
-                  <BlockEditor
-                    blocks={draft?.answerBlocks ?? []}
-                    onChange={(blocks) => setSideBlocks("answer", blocks as CardBlock[])}
-                    prefix="answer"
-                    label="解答"
-                    color="text-emerald-500"
-                    droppableId="answer-blocks"
-                    accentColor={settings?.accentColor}
-                    duplicateToOpposite={settings?.duplicateToOpposite}
-                    toolbarMountRef={toolbarMountRefA}
-                  />
-                </CardFrame>
-              </div>
+                  {/* 解答 */}
+                  <div className="flex flex-col gap-2 w-full">
+                    <div ref={toolbarMountRefA} />
+                    <CardFrame
+                      className={cn("shadow-xl", "bg-white")}
+                      resizable={true}
+                      showResizeHandle={true}
+                      bodyOverflowY="auto"
+                      heightPx={cardHeightPx ?? undefined}
+                      onHeightChange={(newHeight) => persistHeight(newHeight)}
+                      actionsTopLeft={editorActionsTopLeft}
+                      actionsTopRight={renderMediaDialogButtons("answer")}
+                    >
+                      <BlockEditor
+                        blocks={draft?.answerBlocks ?? []}
+                        onChange={(blocks) => setSideBlocks("answer", blocks as CardBlock[])}
+                        prefix="answer"
+                        label="解答"
+                        color="text-emerald-500"
+                        droppableId="answer-blocks"
+                        accentColor={settings?.accentColor}
+                        duplicateToOpposite={settings?.duplicateToOpposite}
+                        toolbarMountRef={toolbarMountRefA}
+                      />
+                    </CardFrame>
+                  </div>
                 </div>
               </DragDropContext>
             </div>
           ) : (
-            <Flashcard
-              card={selectedCard}
-              isFlipped={isFlipped}
-              onFlip={() => setIsFlipped((p) => !p)}
-              onToggleBookmark={handleToggleBookmark}
-              onToggleUncertainty={handleToggleUncertainty}
-              showNavigation={false}
-              onEdit={() => {
-                setIsFlipped(false);
-                setIsEditing(true);
-              }}
-              editorSharedHeightPx={cardHeightPx}
-              lockCardHeight={false}
-            />
+            selectedCard && (
+              <Flashcard
+                card={selectedCard}
+                isFlipped={isFlipped}
+                onFlip={() => setIsFlipped((p) => !p)}
+                onToggleBookmark={handleToggleBookmark}
+                onToggleUncertainty={handleToggleUncertainty}
+                showNavigation={false}
+                onEdit={() => {
+                  setIsFlipped(false);
+                  setIsEditing(true);
+                }}
+                editorSharedHeightPx={cardHeightPx}
+                lockCardHeight={false}
+              />
+            )
           )}
         </div>
+
         {isMetaOpen && (
           <CardMetaPanel
             card={panelCard}
@@ -813,19 +865,12 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
             <DialogTitle>リンクを追加</DialogTitle>
           </DialogHeader>
           {linkDialogSide && (
-            <LinkEditor
-              items={getReferenceItems(linkDialogSide)}
-              onChange={(next) => setReferenceItems(linkDialogSide, next)}
-            />
+            <LinkEditor items={getReferenceItems(linkDialogSide)} onChange={(next) => setReferenceItems(linkDialogSide, next)} />
           )}
         </DialogContent>
       </Dialog>
     </div>
   );
-}
-
-function cn(...classes: Array<string | undefined | false | null>) {
-  return classes.filter(Boolean).join(" ");
 }
 
 function LinkEditor({
