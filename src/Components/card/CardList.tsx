@@ -177,18 +177,16 @@ function CardItem({ card, index, onView, onEdit, onDelete, onToggleUncertainty, 
             
             {hasUncertainty && (
                  <div className={cn(
-                     "rounded-full bg-amber-100 flex items-center justify-center",
-                     (viewMode === 'table' || viewMode === 'bullet') ? "w-5 h-5" : "w-8 h-8"
+                     "rounded-full bg-amber-100 text-amber-600 border border-amber-200 flex items-center justify-center w-14 h-14"
                  )}>
-                    <HelpCircle className={cn("text-amber-600", (viewMode === 'table' || viewMode === 'bullet') ? "w-3 h-3" : "w-4 h-4")} />
+                    <HelpCircle className="w-5 h-5" />
                  </div>
              )}
               {card.isBookmarked && (
                   <div className={cn(
-                      "rounded-full bg-primary-600/10 flex items-center justify-center",
-                      (viewMode === 'table' || viewMode === 'bullet') ? "w-5 h-5" : "w-8 h-8"
+                      "rounded-full text-primary-600 bg-primary-600/10 border border-primary-600/20 flex items-center justify-center w-14 h-14"
                   )}>
-                     <Star className={cn("text-primary-600 fill-current", (viewMode === 'table' || viewMode === 'bullet') ? "w-3 h-3" : "w-4 h-4")} />
+                     <Star className="w-5 h-5 fill-current" />
                   </div>
               )}
 

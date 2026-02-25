@@ -1,7 +1,6 @@
 // src/Components/card/CodeBlockEditor.tsx
 
-import React, { useMemo } from 'react';
-import { Button } from '@/Components/ui/button';
+import { useCallback, useLayoutEffect, useMemo, useState, useRef } from 'react';
 import {
   Select,
   SelectContent,
@@ -13,8 +12,6 @@ import {
   SelectValue,
 } from '@/Components/ui/select';
 import type { CodeBlockData } from '@/types/code-block';
-import { Check as CheckIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import Editor from 'react-simple-code-editor';
 import Prism from 'prismjs';
 import { CodeBlockFrame } from './blocks/CodeBlockFrame';
@@ -54,22 +51,41 @@ const SUPPORTED_LANGUAGES = [
   { value: 'go', label: 'Go' },
   { value: 'rust', label: 'Rust' },
   { value: 'sql', label: 'SQL' },
-  { value: 'html', label: 'HTML' },
+  { value: 'markup', label: 'HTML' },
   { value: 'css', label: 'CSS' },
   { value: 'json', label: 'JSON' },
   { value: 'bash', label: 'Bash' },
   { value: 'markdown', label: 'Markdown' },
 ];
+const SUPPORTED_LANGUAGE_SET = new Set(SUPPORTED_LANGUAGES.map((l) => l.value));
+
+function normalizeLanguage(lang: string): string {
+  if (lang === 'html') return 'markup';
+  return lang;
+}
+
+function canUseLocalStorage(): boolean {
+  try {
+    return typeof window !== 'undefined' && 'localStorage' in window && !!window.localStorage;
+  } catch {
+    return false;
+  }
+}
 
 // ─── localStorage ユーティリティ ────────────────────────
 
 /** 最近使った言語リストを取得 */
 function getRecentLangs(): string[] {
+  if (!canUseLocalStorage()) return [];
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter((v): v is string => typeof v === 'string')
+      .map(normalizeLanguage)
+      .filter((v) => SUPPORTED_LANGUAGE_SET.has(v));
   } catch {
     return [];
   }
@@ -80,10 +96,12 @@ function getRecentLangs(): string[] {
  * リストは最大 MAX_RECENT 件に絞る。
  */
 function pushRecentLang(lang: string): void {
+  if (!canUseLocalStorage()) return;
   try {
-    const prev = getRecentLangs().filter((l) => l !== lang); // 重複を除去
-    const next = [lang, ...prev].slice(0, MAX_RECENT);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    const normalized = normalizeLanguage(lang);
+    const prev = getRecentLangs().filter((l) => l !== normalized); // 重複を除去
+    const next = [normalized, ...prev].slice(0, MAX_RECENT);
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
   } catch {
     // localStorage が使えない環境(プライベートブラウジング等)では無視
   }
@@ -98,35 +116,40 @@ interface CodeBlockEditorProps {
 }
 
 export function CodeBlockEditor({ value, onChange, className }: CodeBlockEditorProps) {
-  const editorHostRef = React.useRef<HTMLDivElement | null>(null);
+  const editorHostRef = useRef<HTMLDivElement | null>(null);
 
   // 最近使った言語リストを state で管理（セレクトを開いたタイミングで最新を反映）
-  const [recentLangs, setRecentLangs] = React.useState<string[]>(() => getRecentLangs());
+  const [recentLangs, setRecentLangs] = useState<string[]>(() => getRecentLangs());
 
   const code = value?.code ?? '';
-  const language = value?.language ?? 'javascript';
+  const normalizedLanguage = normalizeLanguage(value?.language ?? 'javascript');
+  const grammar = useMemo(
+    () => Prism.languages[normalizedLanguage] ?? Prism.languages.javascript,
+    [normalizedLanguage]
+  );
 
-  const handleCodeChange = (newCode: string) => {
-    onChange({ language, code: newCode });
-  };
+  const handleCodeChange = useCallback((newCode: string) => {
+    onChange({ language: normalizedLanguage, code: newCode });
+  }, [onChange, normalizedLanguage]);
 
-  const handleLanguageChange = (newLang: string) => {
-    onChange({ language: newLang, code });
+  const handleLanguageChange = useCallback((newLang: string) => {
+    const nextLanguage = normalizeLanguage(newLang);
+    onChange({ language: nextLanguage, code });
     // 選択と同時に履歴を更新
-    pushRecentLang(newLang);
+    pushRecentLang(nextLanguage);
     setRecentLangs(getRecentLangs());
-  };
+  }, [onChange, code]);
 
-  const highlightCode = (src: string) => {
-    const grammar = (Prism.languages as any)[language] || Prism.languages.javascript;
-    return Prism.highlight(src, grammar, language);
-  };
+  const highlightCode = useCallback((src: string) => {
+    // Prism.highlight の language 引数は常に正規化済みキーを使う。
+    return Prism.highlight(src, grammar, normalizedLanguage);
+  }, [grammar, normalizedLanguage]);
 
-  React.useEffect(() => {
+  useLayoutEffect(() => {
     const textarea = editorHostRef.current?.querySelector('textarea');
     if (!textarea) return;
     textarea.setAttribute('wrap', 'off');
-  }, [language]);
+  }, [normalizedLanguage]);
 
   // 「最近使った言語」に対応する label オブジェクトを導出
   const recentLangItems = useMemo(() => {
@@ -143,7 +166,13 @@ export function CodeBlockEditor({ value, onChange, className }: CodeBlockEditorP
 
   // 言語セレクタ（右上アクション）
   const languageSelector = (
-    <Select value={language} onValueChange={handleLanguageChange}>
+    <Select
+      value={normalizedLanguage}
+      onValueChange={handleLanguageChange}
+      onOpenChange={(open) => {
+        if (open) setRecentLangs(getRecentLangs());
+      }}
+    >
       <SelectTrigger
         className="
           h-5 w-auto min-w-0 min-h-0

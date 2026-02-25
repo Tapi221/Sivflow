@@ -3,47 +3,24 @@ import { nanoid } from 'nanoid';
 import { Button } from '@/Components/ui/button';
 import { Input } from '@/Components/ui/input';
 import { Label } from '@/Components/ui/label';
-import AutoResizeTextarea from '@/Components/ui/AutoResizeTextarea';
 import { Switch } from '@/Components/ui/switch';
 import {
   X,
   HelpCircle,
-  Image as ImageIcon,
   Save,
   Plus,
-  ArrowRight,
-  Sparkles,
   Search,
-  CheckCircle,
-  Volume2,
-  Tag,
   Bookmark,
   RefreshCw
 } from 'lucide-react';
 
 import { TagInput } from '@/Components/ui/tag-input';
-import MediaUploader from '@/Components/card/MediaUploader';
 
 import { cn } from '@/lib/utils';
-import { getResistancePhase, normalizeMemoryStability } from '@/utils/reviewUtils';
-import { calculateResistanceScore } from '@/utils/reviewMetrics';
-import { CodeBlockEditor } from './CodeBlockEditor';
 import { Flashcard } from './Flashcard';
 import { BlockEditor } from './BlockEditor'; 
 import { DragDropContext } from '@hello-pangea/dnd';
 import { useUserSettings } from '@/hooks/useUserSettings';
-
-interface SectionHeaderProps {
-  icon: React.ElementType;
-  label: string;
-  color: string;
-}
-
-const SectionHeader = ({ label }: { label: string }) => (
-  <div className="flex items-center gap-3 mb-2 md:mb-6">
-    <span className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">{label}</span>
-  </div>
-);
 
 interface CardEditorProps {
   card?: any;
@@ -386,7 +363,6 @@ const hasAnyContent = (data: any) => {
   // Precompute string values to satisfy axe/aria lint rules.
   const ariaPressedBookmark = formData.isBookmarked ? "true" : "false";
   const ariaPressedUncertainty = formData.hasUncertainty ? "true" : "false";
-  const ariaPressedPreview = showPreview ? "true" : "false";
 
 
   

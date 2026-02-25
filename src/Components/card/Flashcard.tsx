@@ -369,19 +369,24 @@ export function Flashcard({
       <button
         key="uncertainty"
         type="button"
+        aria-label="不確実フラグ"
+        aria-pressed={hasUncertainty ? 'true' : 'false'}
+        onPointerDown={(e) => {
+          e.stopPropagation();
+        }}
         onClick={(e) => {
           e.stopPropagation();
           onToggleUncertainty(cardData);
         }}
         className={cn(
-          "rounded-full w-8 h-8 min-w-0 min-h-0 transition-colors flex items-center justify-center",
+          "rounded-full w-14 h-14 min-w-0 min-h-0 transition-all flex items-center justify-center",
           hasUncertainty
-            ? "bg-amber-100 text-amber-600 hover:bg-amber-200 border-none"
-            : "bg-slate-50/80 text-slate-400 hover:bg-slate-100 hover:text-slate-600 border border-transparent"
+            ? "bg-amber-100 text-amber-600 border border-amber-200"
+            : "bg-slate-50 text-slate-300 border border-slate-100/50 hover:text-slate-500 hover:border-slate-200"
         )}
         title="曖昧/要復習"
       >
-        <CircleHelp className={cn("w-3 h-3", hasUncertainty && "fill-current/20")} />
+        <CircleHelp className={cn("w-5 h-5", hasUncertainty && "fill-current/20")} />
       </button>
     );
   }
@@ -391,19 +396,24 @@ export function Flashcard({
       <button
         key="bookmark"
         type="button"
+        aria-label="ブックマーク"
+        aria-pressed={isBookmarked ? 'true' : 'false'}
+        onPointerDown={(e) => {
+          e.stopPropagation();
+        }}
         onClick={(e) => {
           e.stopPropagation();
           onToggleBookmark(cardData);
         }}
         className={cn(
-          "rounded-full w-8 h-8 min-w-0 min-h-0 transition-colors flex items-center justify-center",
+          "rounded-full w-14 h-14 min-w-0 min-h-0 transition-all flex items-center justify-center",
           isBookmarked
-            ? "bg-indigo-100 text-indigo-600 hover:bg-indigo-200 border-none"
-            : "bg-slate-50/80 text-slate-400 hover:bg-primary-600/10 hover:text-primary-600 border border-transparent"
+            ? "text-primary-600 bg-primary-600/10 border border-primary-600/20"
+            : "bg-slate-50 text-slate-300 border border-slate-100/50 hover:text-slate-500 hover:border-slate-200"
         )}
         title="ブックマーク"
       >
-        <Star className={cn("w-3 h-3", isBookmarked && "fill-current")} />
+        <Star className={cn("w-5 h-5", isBookmarked && "fill-current")} />
       </button>
     );
   }
