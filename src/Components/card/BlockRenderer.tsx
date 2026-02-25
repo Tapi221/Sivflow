@@ -71,7 +71,7 @@ export function BlockRenderer({ blocks, onGalleryFullscreenChange }: BlockRender
             )}
 
             {block.type === 'code' && (block.code?.code ?? '').trim() !== '' && (
-              <div className="w-full max-w-full overflow-hidden">
+              <div className="w-full max-w-full overflow-visible">
                 <CodeRenderer code={block.code!.code} language={block.code!.language} />
               </div>
             )}

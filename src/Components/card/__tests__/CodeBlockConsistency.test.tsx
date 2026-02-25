@@ -5,6 +5,7 @@ import { cleanup, render } from '@testing-library/react';
 import { BlockRenderer } from '../BlockRenderer';
 import { CodeBlockEditor } from '../CodeBlockEditor';
 import { MarkdownBlockView } from '../blocks/MarkdownBlockPreview';
+import { CodeBlockItem } from '../blocks/CodeBlockItem';
 import type { CardBlock } from '@/types';
 
 afterEach(() => {
@@ -78,5 +79,58 @@ describe('Code block consistency', () => {
     expect(view.container.querySelector('.codeBlockLang')?.textContent).toBe('JS');
     expect(preview.container.querySelector('.codeBlockLang')?.textContent).toBe('JS');
     expect(edit.container.querySelector('.codeBlockLang')).toBeNull();
+  });
+
+  it('editor contract keeps width-expanding host (no w-full) for horizontal scroll parity', () => {
+    const { container } = render(
+      <CodeBlockEditor
+        value={{ language: 'javascript', code: LONG_LINE }}
+        onChange={() => {}}
+      />
+    );
+
+    const editorHost = container.querySelector('.code-editor-no-scroll');
+    const textarea = container.querySelector('.npm__react-simple-code-editor__textarea');
+    expect(editorHost).toBeTruthy();
+    expect(textarea).toBeTruthy();
+    expect(editorHost?.className ?? '').not.toContain('w-full');
+    expect(textarea?.className ?? '').toContain('code-no-wrap');
+  });
+
+  it('code block item keeps outer wrapper spacing neutralized', () => {
+    const { container } = render(
+      <CodeBlockItem
+        data={{ language: 'javascript', code: 'const z = 1;' }}
+        onChange={() => {}}
+        onDelete={() => {}}
+        onDuplicate={() => {}}
+      />
+    );
+
+    const wrapper = container.firstElementChild as HTMLElement | null;
+    expect(wrapper).toBeTruthy();
+    expect(wrapper?.className ?? '').toContain('px-0');
+    expect(wrapper?.className ?? '').toContain('border-0');
+  });
+
+  it('viewer code block is not clipped by block wrapper overflow', () => {
+    const { container } = render(
+      <BlockRenderer
+        blocks={[
+          {
+            id: 'code-overflow-1',
+            type: 'code',
+            orderIndex: 0,
+            code: { language: 'javascript', code: LONG_LINE },
+          } as CardBlock,
+        ]}
+      />
+    );
+
+    const root = container.querySelector('.codeBlockRoot');
+    const outer = root?.closest('.overflow-visible') as HTMLElement | null;
+    expect(root).toBeTruthy();
+    expect(outer).toBeTruthy();
+    expect(outer?.className ?? '').toContain('overflow-visible');
   });
 });

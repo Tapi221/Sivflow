@@ -179,11 +179,10 @@ export function CodeBlockContent(props: CodeBlockContentProps) {
           highlight={highlightCode}
           padding={0}
           style={{ minHeight: 56 }}
-          className="code-editor-no-scroll code-no-wrap w-full"
+          className="code-editor-no-scroll code-no-wrap"
           textareaClassName="code-no-wrap focus:outline-none"
         />
       </CodeBlockFrame>
     </div>
   );
 }
-
