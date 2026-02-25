@@ -4,6 +4,8 @@ import { Button } from '@/Components/ui/button';
 import { Badge } from '@/Components/ui/badge';
 import { Volume2 } from 'lucide-react';
 import { Flashcard } from '../card/Flashcard';
+import { MobileScalableCard } from '../card/MobileScalableCard';
+import { CANONICAL_CARD_WIDTH, CARD_SAFE_PADDING_PX } from '../card/constants';
 import { useUserSettings } from '@/hooks/useUserSettings';
 
 export default function StudyCard({ 
@@ -233,45 +235,46 @@ export default function StudyCard({
           swipeDir === 'Left' ? 'opacity-50 -translate-x-4 border-blue-400' : 
           swipeDir === 'Right' ? 'opacity-50 translate-x-4 border-red-400' : ''
         }`} {...handlers}>
-          <Flashcard 
-            card={card}
-            isFlipped={studyPhase === 'answer'}
-            onFlip={handleFlip}
-            editorSharedHeightPx={settings?.cardEditorHeightPx ?? null}
-            lockCardHeight
-            extraHeaderLeft={
-              <Button
-                size="icon"
-                variant="ghost"
-                className="rounded-full w-8 h-8 md:w-9 md:h-9 min-w-0 min-h-0 bg-slate-50 text-primary-600 hover:bg-primary-50 hover:text-primary-700"
-              >
-                <Volume2 className="w-4 h-4 md:w-5 h-5" />
-              </Button>
-            }
-            extraHeaderRight={
-              <div className="flex flex-col items-end pointer-events-none mb-2">
-                {(card.reviewCount !== undefined && card.reviewCount >= 0) && (
-                  <Badge variant="outline" className="text-[10px] text-slate-400 border-slate-200 bg-slate-50/50 backdrop-blur-sm whitespace-nowrap tabular-nums font-bold">
-                    {card.reviewCount + 1}回目の復習
-                  </Badge>
-                )}
-                {nextReviewLabel && (
-                  <Badge variant="outline" className="mt-1 text-[10px] text-slate-500 border-slate-200 bg-white/70 backdrop-blur-sm whitespace-nowrap font-semibold">
-                    次回学習日 {nextReviewLabel}
-                  </Badge>
-                )}
-              </div>
-            }
-            extraFooter={
-              studyPhase === 'timing' && (
-                <div className="text-center">
-                  <p className="text-sm text-slate-400 animate-pulse">カードをクリックまたはスワイプして解答を表示</p>
+          <MobileScalableCard cardDesignWidth={CANONICAL_CARD_WIDTH} safePadding={CARD_SAFE_PADDING_PX}>
+            <Flashcard 
+              card={card}
+              isFlipped={studyPhase === 'answer'}
+              onFlip={handleFlip}
+              editorSharedHeightPx={settings?.cardEditorHeightPx ?? null}
+              extraHeaderLeft={
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="rounded-full w-8 h-8 md:w-9 md:h-9 min-w-0 min-h-0 bg-slate-50 text-primary-600 hover:bg-primary-50 hover:text-primary-700"
+                >
+                  <Volume2 className="w-4 h-4 md:w-5 h-5" />
+                </Button>
+              }
+              extraHeaderRight={
+                <div className="flex flex-col items-end pointer-events-none mb-2">
+                  {(card.reviewCount !== undefined && card.reviewCount >= 0) && (
+                    <Badge variant="outline" className="text-[10px] text-slate-400 border-slate-200 bg-slate-50/50 backdrop-blur-sm whitespace-nowrap tabular-nums font-bold">
+                      {card.reviewCount + 1}回目の復習
+                    </Badge>
+                  )}
+                  {nextReviewLabel && (
+                    <Badge variant="outline" className="mt-1 text-[10px] text-slate-500 border-slate-200 bg-white/70 backdrop-blur-sm whitespace-nowrap font-semibold">
+                      次回学習日 {nextReviewLabel}
+                    </Badge>
+                  )}
                 </div>
-              )
-            }
-            onToggleUncertainty={onToggleUncertainty}
-            onToggleBookmark={onToggleBookmark}
-          />
+              }
+              extraFooter={
+                studyPhase === 'timing' && (
+                  <div className="text-center">
+                    <p className="text-sm text-slate-400 animate-pulse">カードをクリックまたはスワイプして解答を表示</p>
+                  </div>
+                )
+              }
+              onToggleUncertainty={onToggleUncertainty}
+              onToggleBookmark={onToggleBookmark}
+            />
+          </MobileScalableCard>
         </div>
       </div>
 

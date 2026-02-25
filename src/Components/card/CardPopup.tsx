@@ -3,6 +3,8 @@ import { Flashcard } from './Flashcard';
 import { Button } from '../ui/button';
 import { X } from 'lucide-react';
 import { useUserSettings } from '@/hooks/useUserSettings';
+import { MobileScalableCard } from './MobileScalableCard';
+import { CANONICAL_CARD_WIDTH, CARD_SAFE_PADDING_PX } from './constants';
 
 interface CardPopupProps {
   card: any;
@@ -38,20 +40,21 @@ export function CardPopup({
         >
           <X className="w-6 h-6" />
         </Button>
-        <Flashcard
-  card={card}
-  isFlipped={isFlipped}
-  onFlip={() => setIsFlipped(!isFlipped)}
-  onEdit={(c) => {
-    // 編集へ行くなら、閲覧モーダルは邪魔なので閉じる
-    onEdit?.(c);
-    onClose();
-  }}
-  onToggleUncertainty={onToggleUncertainty}
-  onToggleBookmark={onToggleBookmark}
-  className="h-auto min-h-[500px]"
-  editorSharedHeightPx={settings?.cardEditorHeightPx ?? null}
-/>
+        <MobileScalableCard cardDesignWidth={CANONICAL_CARD_WIDTH} safePadding={CARD_SAFE_PADDING_PX}>
+          <Flashcard
+            card={card}
+            isFlipped={isFlipped}
+            onFlip={() => setIsFlipped(!isFlipped)}
+            onEdit={(c) => {
+              // 編集へ行くなら、閲覧モーダルは邪魔なので閉じる
+              onEdit?.(c);
+              onClose();
+            }}
+            onToggleUncertainty={onToggleUncertainty}
+            onToggleBookmark={onToggleBookmark}
+            editorSharedHeightPx={settings?.cardEditorHeightPx ?? null}
+          />
+        </MobileScalableCard>
 
       </div>
     </div>

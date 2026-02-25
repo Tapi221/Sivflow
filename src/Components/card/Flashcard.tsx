@@ -5,7 +5,7 @@ import LinkIcon from 'lucide-react/dist/esm/icons/link';
 
 import { Dialog, DialogContent } from '@/Components/ui/dialog';
 import { cn } from '@/lib/utils';
-import { AudioPlayer, ImageGallery } from './CardMedia';
+import { AudioPlayer } from './CardMedia';
 import { useUserSettings } from '@/hooks/useUserSettings';
 import { ReferencePopup } from './ReferencePopup';
 import type { CardBlock, ReferenceBlockData } from '@/types';
@@ -14,8 +14,9 @@ import { resolveInkDocument } from '@/Components/ink/inkStorage';
 import type { InkDocument, InkEditTool } from '@/Components/ink/inkTypes';
 import { CardFrame } from './frame/CardFrame';
 import { CardCornerActions } from './frame/CardCornerActions';
-import { BlockRenderer } from './BlockRenderer';
-import { CARD_TOP_PADDING_PX } from './constants';
+import { SharedCardContent } from './SharedCardContent';
+import { CANONICAL_CARD_WIDTH } from './constants';
+import { normalizeExtraRows } from '@/domain/card/extraRows';
 
 type FlashcardMediaLike =
   | string
@@ -50,6 +51,10 @@ type FlashcardCardLike = {
   answer_code?: { code?: string; language?: string } | null;
   questionBlocks?: CardBlock[];
   answerBlocks?: CardBlock[];
+  questionExtraRows?: number;
+  question_extra_rows?: number;
+  answerExtraRows?: number;
+  answer_extra_rows?: number;
   inkQuestion?: InkDocument | null;
   inkAnswer?: InkDocument | null;
   [key: string]: unknown;
@@ -198,6 +203,8 @@ export function Flashcard({
 
   const questionCode = cardData?.questionCode || cardData?.question_code || null;
   const answerCode = cardData?.answerCode || cardData?.answer_code || null;
+  const questionExtraRows = normalizeExtraRows(cardData?.questionExtraRows ?? cardData?.question_extra_rows ?? 0);
+  const answerExtraRows = normalizeExtraRows(cardData?.answerExtraRows ?? cardData?.answer_extra_rows ?? 0);
   const cardIdForInk = cardData?.id ?? cardData?.cardId ?? null;
 
   const questionInkDocument = React.useMemo(
@@ -261,7 +268,6 @@ export function Flashcard({
 
   const actionsTopLeft: React.ReactNode[] = [];
   const actionsTopRight: React.ReactNode[] = [];
-  const actionsBottomRight: React.ReactNode[] = [];
   const mediaActionNodes: React.ReactNode[] = [];
 
   // extraHeaderLeft は名前通り TopLeft 側へ
@@ -380,87 +386,130 @@ export function Flashcard({
     );
   }
 
-  // レガシー描画（blocksが空のときのフォールバック）
-  const renderLegacy = (side: 'question' | 'answer') => {
-    const text = side === 'question' ? questionText : answerText;
-    const images = side === 'question' ? questionImageUrls : answerImageUrls;
-    const audios = side === 'question' ? (questionAudios ?? []) : (answerAudios ?? []);
-    const code = side === 'question' ? questionCode : answerCode;
+  const resolveSideBlocks = React.useCallback(
+    (side: 'question' | 'answer'): CardBlock[] => {
+      const sideBlocks =
+        side === 'question'
+          ? (cardData?.questionBlocks ?? [])
+          : (cardData?.answerBlocks ?? []);
+      if (sideBlocks.length > 0) return sideBlocks;
 
-    const hasAny =
-      (text ?? '').trim() !== '' ||
-      (images?.length ?? 0) > 0 ||
-      (audios?.length ?? 0) > 0 ||
-      (code?.code ?? '').trim() !== '';
+      const text = side === 'question' ? questionText : answerText;
+      const images = side === 'question' ? questionImageUrls : answerImageUrls;
+      const audios = side === 'question' ? questionAudios : answerAudios;
+      const code = side === 'question' ? questionCode : answerCode;
 
-    if (!hasAny) return null;
+      const fallbackBlocks: CardBlock[] = [];
+      let orderIndex = 0;
 
-    return (
-      <div className="space-y-0 w-full max-w-full">
-        {(text ?? '').trim() !== '' && (
-          <BlockRenderer
-            blocks={[
-              { id: `${side}-legacy-text`, type: 'text', orderIndex: 0, content: String(text) } as CardBlock,
-            ]}
-          />
-        )}
+      if ((text ?? '').trim() !== '') {
+        fallbackBlocks.push({
+          id: `${side}-legacy-text`,
+          type: 'text',
+          orderIndex: orderIndex++,
+          content: String(text),
+        } as CardBlock);
+      }
 
-        {(code?.code ?? '').trim() !== '' && (
-          <BlockRenderer
-            blocks={[{ id: `${side}-legacy-code`, type: 'code', orderIndex: 0, code } as CardBlock]}
-          />
-        )}
+      if ((code?.code ?? '').trim() !== '') {
+        fallbackBlocks.push({
+          id: `${side}-legacy-code`,
+          type: 'code',
+          orderIndex: orderIndex++,
+          code,
+        } as CardBlock);
+      }
 
-        {(images?.length ?? 0) > 0 && (
-          <ImageGallery urls={images} onFullscreenChange={handleGalleryFullscreenChange} />
-        )}
+      if ((images?.length ?? 0) > 0) {
+        fallbackBlocks.push({
+          id: `${side}-legacy-image`,
+          type: 'image',
+          orderIndex: orderIndex++,
+          images: images as any,
+        } as CardBlock);
+      }
 
-        {(audios?.length ?? 0) > 0 && (
-          <div className="flex justify-center">
-            <AudioPlayer urls={(audios as FlashcardMediaLike[]).map(toMediaUrl).filter((u): u is string => Boolean(u))} />
-          </div>
-        )}
-      </div>
-    );
-  };
+      if ((audios?.length ?? 0) > 0) {
+        fallbackBlocks.push({
+          id: `${side}-legacy-audio`,
+          type: 'audio',
+          orderIndex,
+          audios: audios as any,
+        } as CardBlock);
+      }
 
-  const renderSide = (side: 'question' | 'answer') => {
-    const blocks = side === 'question' ? (cardData?.questionBlocks ?? []) : (cardData?.answerBlocks ?? []);
-    if (blocks.length > 0) {
-      return <BlockRenderer blocks={blocks} onGalleryFullscreenChange={handleGalleryFullscreenChange} />;
-    }
-    return renderLegacy(side);
-  };
+      return fallbackBlocks;
+    },
+    [
+      answerAudios,
+      answerCode,
+      answerImageUrls,
+      answerText,
+      cardData?.answerBlocks,
+      cardData?.questionBlocks,
+      questionAudios,
+      questionCode,
+      questionImageUrls,
+      questionText,
+    ]
+  );
 
   // overlay を安定化（Inkが余計に再マウント/再描画されにくい）
   const overlayNode = React.useMemo(() => {
-    if (!cardIdForInk) return null;
+    const hasHeaderOverlay = Boolean(extraHeaderRight && !previewMode);
+    const hasFooterOverlay = Boolean(extraFooter);
+    const hasInkOverlay = Boolean(cardIdForInk);
+    if (!hasHeaderOverlay && !hasFooterOverlay && !hasInkOverlay) return null;
 
     return (
       <>
-        <InkLayer
-          ref={previewInkRef}
-          cardId={cardIdForInk}
-          side={activeInkSide}
-          editable={Boolean(previewMode && inkEditingEnabled)}
-          tool={previewInkTool ?? 'pen'}
-          document={activeInkDocument}
-          onDocumentChange={(next) => onInkDocumentChange?.(activeInkSide, next)}
-          onHistoryChange={setPreviewInkHistory}
-          className={cn(previewMode && inkEditingEnabled ? '' : 'pointer-events-none')}
-        />
-        {previewMode && inkEditingEnabled && (
-          <div className="absolute bottom-2 left-2 z-30 pointer-events-auto">
-            <InkToolbar
-              tool={previewInkTool}
-              canUndo={previewInkHistory.canUndo}
-              canRedo={previewInkHistory.canRedo}
-              onToolChange={setPreviewInkTool}
-              onUndo={() => previewInkRef.current?.undo()}
-              onRedo={() => previewInkRef.current?.redo()}
-              onClear={() => previewInkRef.current?.clear()}
-            />
+        {hasHeaderOverlay && (
+          <div className="absolute right-2 top-2 z-30 pointer-events-none">
+            <div
+              className="pointer-events-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {extraHeaderRight}
+            </div>
           </div>
+        )}
+        {hasFooterOverlay && (
+          <div className="absolute inset-x-0 bottom-2 z-30 pointer-events-none">
+            <div
+              className="flex justify-center pointer-events-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {extraFooter}
+            </div>
+          </div>
+        )}
+        {hasInkOverlay && (
+          <>
+            <InkLayer
+              ref={previewInkRef}
+              cardId={cardIdForInk}
+              side={activeInkSide}
+              editable={Boolean(previewMode && inkEditingEnabled)}
+              tool={previewInkTool ?? 'pen'}
+              document={activeInkDocument}
+              onDocumentChange={(next) => onInkDocumentChange?.(activeInkSide, next)}
+              onHistoryChange={setPreviewInkHistory}
+              className={cn(previewMode && inkEditingEnabled ? '' : 'pointer-events-none')}
+            />
+            {previewMode && inkEditingEnabled && (
+              <div className="absolute bottom-2 left-2 z-30 pointer-events-auto">
+                <InkToolbar
+                  tool={previewInkTool}
+                  canUndo={previewInkHistory.canUndo}
+                  canRedo={previewInkHistory.canRedo}
+                  onToolChange={setPreviewInkTool}
+                  onUndo={() => previewInkRef.current?.undo()}
+                  onRedo={() => previewInkRef.current?.redo()}
+                  onClear={() => previewInkRef.current?.clear()}
+                />
+              </div>
+            )}
+          </>
         )}
       </>
     );
@@ -468,60 +517,50 @@ export function Flashcard({
     cardIdForInk,
     activeInkSide,
     activeInkDocument,
-    previewMode,
     inkEditingEnabled,
     previewInkTool,
     previewInkHistory.canUndo,
     previewInkHistory.canRedo,
+    extraFooter,
+    extraHeaderRight,
+    previewMode,
     onInkDocumentChange,
   ]);
 
+  const fixedHeightPx =
+    lockCardHeight && sharedPreviewHeightPx != null
+      ? sharedPreviewHeightPx
+      : undefined;
+  const bodyOverflowY = fixedHeightPx != null ? 'auto' : 'visible';
+  const activeSide: 'question' | 'answer' = effectiveIsFlipped ? 'answer' : 'question';
+  const activeBlocks = resolveSideBlocks(activeSide);
+  const activeExtraRows = activeSide === 'answer' ? answerExtraRows : questionExtraRows;
+
   return (
     <div className={cn('w-full h-full flex flex-col select-none', className)}>
-      {/* カード外ヘッダー（右上要素の移動先） */}
-      {!previewMode && (
-        <div className="w-full flex justify-end px-2 pb-2 min-h-[40px]">
-          <div className="flex flex-col items-end gap-2">{extraHeaderRight}</div>
-        </div>
-      )}
-
       <div className="relative">
         <CardFrame
+          baseWidth={CANONICAL_CARD_WIDTH}
           className={cn('premium-paper-depth', !previewMode && 'cursor-pointer', 'card-shell--paper')}
           onClick={handleFlip}
           resizable={false}
           resizeStepPx={undefined}
           showResizeHandle={false}
-          heightPx={sharedPreviewHeightPx}
-          lockHeight={lockCardHeight}
-          bodyOverflowY="hidden"
+          heightPx={fixedHeightPx}
+          lockHeight={Boolean(fixedHeightPx != null && lockCardHeight)}
+          bodyOverflowY={bodyOverflowY}
           actionsTopLeft={actionsTopLeft.length > 0 ? actionsTopLeft : undefined}
           actionsTopRight={actionsTopRight.length > 0 ? actionsTopRight : undefined}
-          actionsBottomRight={actionsBottomRight.length > 0 ? actionsBottomRight : undefined}
           drawMode={enableDrawMode}
           overlay={overlayNode}
         >
-          {/* コンテンツエリア - 編集画面に揃えて上寄せ */}
-          <div
-            className={cn('paperCardTypography flex-1 flex flex-col max-w-full mx-auto w-full pb-8 overflow-x-clip overflow-y-visible')}
-            style={{ paddingTop: CARD_TOP_PADDING_PX }}
-          >
-            {effectiveIsFlipped ? (
-              <div className="animate-in fade-in zoom-in-95 duration-300 w-full max-w-full">{renderSide('answer')}</div>
-            ) : (
-              <div className="animate-in fade-in zoom-in-95 duration-300 w-full max-w-full">{renderSide('question')}</div>
-            )}
-          </div>
-
-          {/* フッター */}
-          <div className="mt-auto pt-4 text-center">
-            {extraFooter}
-
-            {previewMode && (
-              <div className="flex gap-4 justify-center">
-                {/* intentionally empty */}
-              </div>
-            )}
+          <div className="animate-in fade-in zoom-in-95 duration-300 w-full max-w-full flex min-h-0 flex-1">
+            <SharedCardContent
+              mode="view"
+              blocks={activeBlocks}
+              extraRows={activeExtraRows}
+              onGalleryFullscreenChange={handleGalleryFullscreenChange}
+            />
           </div>
         </CardFrame>
       </div>

@@ -14,6 +14,12 @@ interface BlockRendererProps {
 }
 
 const ROW_STEP_PX = CARD_ROW_PX;
+const isRowPositionableType = (type: CardBlock['type']) =>
+  type === 'text' ||
+  type === 'code' ||
+  type === 'image' ||
+  type === 'math' ||
+  type === 'markdown';
 
 export function BlockRenderer({ blocks, onGalleryFullscreenChange }: BlockRendererProps) {
   const getRowOffset = useCallback((block: CardBlock) => {
@@ -49,7 +55,7 @@ export function BlockRenderer({ blocks, onGalleryFullscreenChange }: BlockRender
   return (
     <div className="w-full max-w-full space-y-0">
       {renderableBlocks.map((block) => {
-        const isLinePositionable = block.type === 'text' || block.type === 'code';
+        const isLinePositionable = isRowPositionableType(block.type);
         const rowOffsetPx = isLinePositionable ? getRowOffset(block) * ROW_STEP_PX : 0;
 
         // marginTop を使う前提で、margin-collapsing を確実に潰すため flow-root を入れる

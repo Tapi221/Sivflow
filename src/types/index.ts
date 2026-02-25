@@ -378,6 +378,8 @@ export type Card = BaseEntity & {
   // ブロック方式（新方式）
   questionBlocks?: CardBlock[];
   answerBlocks?: CardBlock[];
+  questionExtraRows?: number;
+  answerExtraRows?: number;
   inkQuestion?: InkDocument | null;
   inkAnswer?: InkDocument | null;
 

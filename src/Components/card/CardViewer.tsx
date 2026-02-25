@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { Flashcard } from './Flashcard';
-import { MobileScalableCard } from './MobileScalableCard';
 import { useUserSettings } from '@/hooks/useUserSettings';
+import { CANONICAL_CARD_WIDTH, CARD_SAFE_PADDING_PX } from './constants';
+import { MobileScalableCard } from './MobileScalableCard';
 
 // アプリに合わせてちゃんとした型に置き換えてね（最低限の例）
 export type Card = {
@@ -120,8 +121,8 @@ export default function CardViewer({
   }
 
   return (
-    <div className="max-w-[520px] mx-auto w-full">
-      <MobileScalableCard cardDesignWidth={480} safePadding={24}>
+    <div className="mx-auto w-full" style={{ maxWidth: `${CANONICAL_CARD_WIDTH + 40}px` }}>
+      <MobileScalableCard cardDesignWidth={CANONICAL_CARD_WIDTH} safePadding={CARD_SAFE_PADDING_PX}>
         <Flashcard
           card={card}
           isFlipped={isFlipped}

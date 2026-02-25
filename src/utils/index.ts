@@ -1,6 +1,7 @@
 import { normalizeUploadedImages } from './imageUtils';
 import { normalizeMemoryStability } from './reviewUtils';
 import { normalizeInkDocument } from '@/Components/ink/inkTypes';
+import { normalizeExtraRows } from '@/domain/card/extraRows';
 
 // ページ名から URL パスを作成
 // クエリパラメータ付きの場合も対応（例: 'CardEdit?folderId=xxx'）
@@ -231,6 +232,8 @@ export const normalizeCard = (raw: any) => {
       if (b.type === 'math' && !b.math?.latex?.trim()) return false;
       return true;
     }),
+    questionExtraRows: normalizeExtraRows(raw?.questionExtraRows ?? raw?.question_extra_rows ?? 0),
+    answerExtraRows: normalizeExtraRows(raw?.answerExtraRows ?? raw?.answer_extra_rows ?? 0),
     inkQuestion: (() => {
       const doc = normalizeInkDocument(raw?.inkQuestion ?? raw?.ink_question ?? null);
       return doc.strokes.length > 0 ? doc : null;

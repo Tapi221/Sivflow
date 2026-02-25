@@ -6,11 +6,13 @@ import LinkIcon from "lucide-react/dist/esm/icons/link";
 import { DragDropContext } from "@hello-pangea/dnd";
 
 import { Flashcard } from "@/Components/card/Flashcard";
-import { BlockEditor } from "@/Components/card/BlockEditor";
 import { CardMetaPanel } from "@/Components/card/CardMetaPanel";
 import MediaUploader from "@/Components/card/MediaUploader";
 import { CardFrame } from "@/Components/card/frame/CardFrame";
 import { CardCornerActions } from "@/Components/card/frame/CardCornerActions";
+import { SharedCardContent } from "@/Components/card/SharedCardContent";
+import { CANONICAL_CARD_WIDTH } from "@/Components/card/constants";
+import { normalizeExtraRows } from "@/domain/card/extraRows";
 
 import { Button } from "@/Components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/Components/ui/dialog";
@@ -31,6 +33,8 @@ type EditorDraft = {
   isDraft: boolean;
   questionBlocks: CardBlock[];
   answerBlocks: CardBlock[];
+  questionExtraRows: number;
+  answerExtraRows: number;
 };
 
 interface CardEditorPaneProps {
@@ -55,6 +59,8 @@ function makeNewDraft(): EditorDraft {
     isDraft: true,
     questionBlocks: [],
     answerBlocks: [],
+    questionExtraRows: 0,
+    answerExtraRows: 0,
   };
 }
 
@@ -79,7 +85,7 @@ function normalizeCrossSideId(blockId: unknown, nextSide: "question" | "answer")
 }
 
 export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }: CardEditorPaneProps) {
-  const { settings, updateSettings } = useUserSettings();
+  const { settings } = useUserSettings();
   const { success: toastSuccess, error: toastError } = useToast();
 
   // ★重要：createCard が無い場合はここだけあなたの実装名に合わせて変更
@@ -117,12 +123,6 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
   const editingCardIdRef = useRef<string | null>(null);
   const hydratedFromIdRef = useRef<string | null>(null);
 
-  // 高さ保存のI/Oはdebounceで間引く + unmount で flush
-  const heightPersistTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const lastHeightRef = useRef<number | null>(null);
-
-  // 裏表共通のカード高さ（null = CardShell 内部自動計算）
-  const [cardHeightPx, setCardHeightPx] = useState<number | null>(null);
   const [isMetaOpen, setIsMetaOpen] = useState<boolean>(() => {
     if (typeof window === "undefined") return true;
     return window.localStorage.getItem("card-editor.meta-panel-open") !== "false";
@@ -132,51 +132,6 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
     if (typeof window === "undefined") return;
     window.localStorage.setItem("card-editor.meta-panel-open", String(isMetaOpen));
   }, [isMetaOpen]);
-
-  // Settings からの高さを同期
-  useEffect(() => {
-    if (settings?.cardEditorHeightPx != null) {
-      setCardHeightPx(settings.cardEditorHeightPx);
-      return;
-    }
-    if (typeof window === "undefined") return;
-    const raw = window.localStorage.getItem("card-editor.resize:shared-height");
-    const parsed = Number(raw);
-    if (Number.isFinite(parsed) && parsed > 0) setCardHeightPx(parsed);
-  }, [settings?.cardEditorHeightPx]);
-
-  const persistHeight = useCallback(
-    (newHeight: number) => {
-      setCardHeightPx(newHeight);
-      lastHeightRef.current = newHeight;
-
-      if (heightPersistTimerRef.current) clearTimeout(heightPersistTimerRef.current);
-      heightPersistTimerRef.current = setTimeout(() => {
-        updateSettings({ cardEditorHeightPx: newHeight });
-        if (typeof window !== "undefined") {
-          window.localStorage.setItem("card-editor.resize:shared-height", String(newHeight));
-        }
-      }, 150);
-    },
-    [updateSettings]
-  );
-
-  useEffect(() => {
-    return () => {
-      if (heightPersistTimerRef.current) {
-        clearTimeout(heightPersistTimerRef.current);
-        heightPersistTimerRef.current = null;
-      }
-      // 最後のドラッグ値を落とさない
-      const h = lastHeightRef.current;
-      if (h != null && Number.isFinite(h) && h > 0) {
-        updateSettings({ cardEditorHeightPx: h });
-        if (typeof window !== "undefined") {
-          window.localStorage.setItem("card-editor.resize:shared-height", String(h));
-        }
-      }
-    };
-  }, [updateSettings]);
 
   // ツールバーの外部マウント先（問題・解答 各カードの上）
   const toolbarMountRefQ = useRef<HTMLDivElement | null>(null);
@@ -192,6 +147,8 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
       isDraft: card?.isDraft ?? true,
       questionBlocks: (card?.questionBlocks ?? []) as CardBlock[],
       answerBlocks: (card?.answerBlocks ?? []) as CardBlock[],
+      questionExtraRows: normalizeExtraRows(card?.questionExtraRows ?? card?.question_extra_rows ?? 0),
+      answerExtraRows: normalizeExtraRows(card?.answerExtraRows ?? card?.answer_extra_rows ?? 0),
     };
   }, []);
 
@@ -336,6 +293,8 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
         isDraft: draft.isDraft,
         questionBlocks: sanitizeBlocksForSave(draft.questionBlocks),
         answerBlocks: sanitizeBlocksForSave(draft.answerBlocks),
+        questionExtraRows: normalizeExtraRows(draft.questionExtraRows),
+        answerExtraRows: normalizeExtraRows(draft.answerExtraRows),
       };
 
       if (isNew) {
@@ -412,12 +371,31 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
   const getSideBlocks = (side: "question" | "answer") =>
     side === "question" ? (draft?.questionBlocks ?? []) : (draft?.answerBlocks ?? []);
 
+  const getSideExtraRows = (side: "question" | "answer") =>
+    normalizeExtraRows(
+      side === "question" ? draft?.questionExtraRows : draft?.answerExtraRows
+    );
+
   const setSideBlocks = (side: "question" | "answer", nextBlocks: CardBlock[]) => {
     setDraft((prev) => {
       if (!prev) return prev;
       const reindexed = normalizeOrderIndex(nextBlocks);
       return side === "question" ? { ...prev, questionBlocks: reindexed } : { ...prev, answerBlocks: reindexed };
     });
+  };
+
+  const setSideExtraRows = (side: "question" | "answer", nextExtraRows: number) => {
+    const safeNext = normalizeExtraRows(nextExtraRows);
+    setDraft((prev) => {
+      if (!prev) return prev;
+      return side === "question"
+        ? { ...prev, questionExtraRows: safeNext }
+        : { ...prev, answerExtraRows: safeNext };
+    });
+  };
+
+  const adjustSideExtraRows = (side: "question" | "answer", delta: number) => {
+    setSideExtraRows(side, getSideExtraRows(side) + delta);
   };
 
   const upsertSingleBlock = (side: "question" | "answer", type: CardBlock["type"], payload: Partial<CardBlock>) => {
@@ -556,6 +534,49 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
     );
   };
 
+  const renderEditorOverlay = (
+    side: "question" | "answer",
+    toolbarMountRef: React.RefObject<HTMLDivElement | null>
+  ) => {
+    const extraRows = getSideExtraRows(side);
+    return (
+      <>
+        <div className="absolute inset-x-0 top-2 z-30 flex justify-center pointer-events-none">
+          <div ref={toolbarMountRef} className="pointer-events-auto" />
+        </div>
+
+        <div className="absolute bottom-2 right-2 z-30 pointer-events-none">
+          <div
+            className="pointer-events-auto inline-flex items-center gap-1 rounded-full bg-white/90 border border-slate-200 px-1 py-1 shadow-sm"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="h-6 w-6 rounded-full text-slate-500 hover:bg-slate-100"
+              onClick={() => adjustSideExtraRows(side, -1)}
+              aria-label={`${side} 余白行を減らす`}
+              title="余白を1行減らす"
+            >
+              -
+            </button>
+            <span className="text-[10px] font-bold text-slate-500 tabular-nums min-w-[56px] text-center">
+              +{extraRows} rows
+            </span>
+            <button
+              type="button"
+              className="h-6 w-6 rounded-full text-slate-500 hover:bg-slate-100"
+              onClick={() => adjustSideExtraRows(side, 1)}
+              aria-label={`${side} 余白行を増やす`}
+              title="余白を1行増やす"
+            >
+              +
+            </button>
+          </div>
+        </div>
+      </>
+    );
+  };
+
   const onDragEnd = (result: DndResult) => {
     if (!draft) return;
     if (!result.destination) return;
@@ -613,7 +634,14 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
   const panelCard = useMemo(() => {
     if (selectedCard) {
       if (!isEditing || !draft) return selectedCard;
-      return { ...selectedCard, title: draft.title, tags: draft.tags, isDraft: draft.isDraft };
+      return {
+        ...selectedCard,
+        title: draft.title,
+        tags: draft.tags,
+        isDraft: draft.isDraft,
+        questionExtraRows: draft.questionExtraRows,
+        answerExtraRows: draft.answerExtraRows,
+      };
     }
     if (!draft) return null;
 
@@ -646,6 +674,8 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
       createdAt: now,
       updatedAt: now,
       reviewLogs: [],
+      questionExtraRows: draft.questionExtraRows,
+      answerExtraRows: draft.answerExtraRows,
     } as any;
   }, [selectedCard, isEditing, draft]);
 
@@ -742,20 +772,21 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
                 <div className="grid lg:grid-cols-2 gap-6 max-w-7xl mx-auto">
                   {/* 問題 */}
                   <div className="flex flex-col gap-2 w-full">
-                    <div ref={toolbarMountRefQ} />
                     <CardFrame
+                      baseWidth={CANONICAL_CARD_WIDTH}
                       className={cn("premium-paper-depth", "card-shell--paper")}
-                      resizable={true}
-                      showResizeHandle={true}
-                      bodyOverflowY="auto"
-                      heightPx={cardHeightPx ?? undefined}
-                      onHeightChange={(newHeight) => persistHeight(newHeight)}
+                      resizable={false}
+                      showResizeHandle={false}
+                      bodyOverflowY="visible"
                       actionsTopLeft={editorActionsTopLeft}
                       actionsTopRight={renderMediaDialogButtons("question")}
+                      overlay={renderEditorOverlay("question", toolbarMountRefQ)}
                     >
-                      <BlockEditor
+                      <SharedCardContent
+                        mode="edit"
                         blocks={draft?.questionBlocks ?? []}
-                        onChange={(blocks) => setSideBlocks("question", blocks as CardBlock[])}
+                        onChange={(blocks) => setSideBlocks("question", blocks)}
+                        extraRows={draft?.questionExtraRows ?? 0}
                         prefix="question"
                         label="問題"
                         color="text-indigo-500"
@@ -769,20 +800,21 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
 
                   {/* 解答 */}
                   <div className="flex flex-col gap-2 w-full">
-                    <div ref={toolbarMountRefA} />
                     <CardFrame
+                      baseWidth={CANONICAL_CARD_WIDTH}
                       className={cn("premium-paper-depth", "card-shell--paper")}
-                      resizable={true}
-                      showResizeHandle={true}
-                      bodyOverflowY="auto"
-                      heightPx={cardHeightPx ?? undefined}
-                      onHeightChange={(newHeight) => persistHeight(newHeight)}
+                      resizable={false}
+                      showResizeHandle={false}
+                      bodyOverflowY="visible"
                       actionsTopLeft={editorActionsTopLeft}
                       actionsTopRight={renderMediaDialogButtons("answer")}
+                      overlay={renderEditorOverlay("answer", toolbarMountRefA)}
                     >
-                      <BlockEditor
+                      <SharedCardContent
+                        mode="edit"
                         blocks={draft?.answerBlocks ?? []}
-                        onChange={(blocks) => setSideBlocks("answer", blocks as CardBlock[])}
+                        onChange={(blocks) => setSideBlocks("answer", blocks)}
+                        extraRows={draft?.answerExtraRows ?? 0}
                         prefix="answer"
                         label="解答"
                         color="text-emerald-500"
@@ -809,8 +841,6 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
                   setIsFlipped(false);
                   setIsEditing(true);
                 }}
-                editorSharedHeightPx={cardHeightPx}
-                lockCardHeight={false}
               />
             )
           )}

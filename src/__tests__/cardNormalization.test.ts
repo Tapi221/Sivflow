@@ -55,4 +55,17 @@ describe('normalizeCard', () => {
     expect(normalized.answerBlocks).toHaveLength(1);
     expect(normalized.answerBlocks[0].content).toBe('Legacy Answer');
   });
+
+  it('should normalize per-side extra rows', () => {
+    const rawCard = {
+      id: 'rows-card',
+      question_extra_rows: '3',
+      answerExtraRows: 2,
+    };
+
+    const normalized = normalizeCard(rawCard);
+
+    expect(normalized.questionExtraRows).toBe(3);
+    expect(normalized.answerExtraRows).toBe(2);
+  });
 });

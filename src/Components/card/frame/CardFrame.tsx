@@ -36,6 +36,7 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
       ruledOffsetPx = CARD_TOP_PADDING_PX,
       ruledOpacity = 1,
       overlay,
+      style,
       ...shellProps
     },
     ref
@@ -49,6 +50,10 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
               'mx-auto border-none rounded-[32px] md:rounded-[40px]',
               className
             )}
+            style={{
+              ...(style as React.CSSProperties | undefined),
+              ['--card-base-width' as any]: `${Math.max(1, baseWidth)}px`,
+            }}
             {...shellProps}
           >
             <CardSurface

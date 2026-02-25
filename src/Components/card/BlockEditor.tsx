@@ -52,6 +52,7 @@ interface BlockEditorProps {
   hiddenBlockTypes?: CardBlock['type'][];
 
   toolbarMountRef?: React.RefObject<HTMLDivElement | null>;
+  topPaddingPx?: number;
 }
 
 type DndStyle = React.CSSProperties & { transform?: string };
@@ -114,6 +115,7 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
       minDeletableIndex = 0,
       hiddenBlockTypes = [],
       toolbarMountRef,
+      topPaddingPx = CARD_TOP_PADDING_PX,
     },
     ref
   ) => {
@@ -507,7 +509,7 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
           'space-y-1.5 md:space-y-2',
           prefix === 'question' ? 'js-question-editor' : 'js-answer-editor'
         )}
-        style={{ paddingTop: CARD_TOP_PADDING_PX }}
+        style={{ paddingTop: topPaddingPx }}
       >
         {toolbarNode && toolbarMount ? createPortal(toolbarNode, toolbarMount) : toolbarNode}
 

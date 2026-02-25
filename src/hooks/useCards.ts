@@ -7,6 +7,7 @@ import { normalizeMemoryStability } from '../utils/reviewUtils';
 import { useUserSettings, DEFAULT_SETTINGS } from './useUserSettings';
 import type { Card } from '../types';
 import { normalizeInkDocument } from '@/Components/ink/inkTypes';
+import { normalizeExtraRows } from '@/domain/card/extraRows';
 
 // 空カード判定用のヘルパー関数（createCard と updateCard で共通利用）
 function isCardDeleted(
@@ -197,6 +198,8 @@ export function useCards(folderId?: string) {
       // Ensure blocks are carried over from cardData
       questionBlocks: cardData.questionBlocks || [],
       answerBlocks: cardData.answerBlocks || [],
+      questionExtraRows: normalizeExtraRows(cardData.questionExtraRows ?? 0),
+      answerExtraRows: normalizeExtraRows(cardData.answerExtraRows ?? 0),
       inkQuestion: normalizeInkDocument(cardData.inkQuestion),
       inkAnswer: normalizeInkDocument(cardData.inkAnswer),
       memoryStability: 0,

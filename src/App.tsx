@@ -58,6 +58,9 @@ const PdfScrollTest = DEV_MODE
 const CodeBlockVisualTest = DEV_MODE
   ? lazy(() => import('./Pages/CodeBlockVisualTest'))
   : null;
+const CardLayoutConsistencyTest = DEV_MODE
+  ? lazy(() => import('./Pages/CardLayoutConsistencyTest'))
+  : null;
 
 const isTestBypassEnabled = () => {
   const hasBypassParam = new URLSearchParams(window.location.search).get('test_bypass') === 'true';
@@ -452,6 +455,17 @@ function AppContent() {
               element={
                 <Suspense fallback={<LoadingFallback />}>
                   <CodeBlockVisualTest />
+                </Suspense>
+              }
+            />
+          ) : null}
+
+          {CardLayoutConsistencyTest ? (
+            <Route
+              path="card-layout-test"
+              element={
+                <Suspense fallback={<LoadingFallback />}>
+                  <CardLayoutConsistencyTest />
                 </Suspense>
               }
             />
