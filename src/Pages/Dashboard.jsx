@@ -29,12 +29,6 @@ import { RatingCountTiles } from '@/Components/study/RatingCountTiles';
 import ExportDialog from '@/Components/export/ExportDialog';
 import ImportDialog from '@/Components/export/ImportDialog';
 import { useUserSettings } from '@/hooks/useUserSettings';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/Components/ui/tooltip";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -245,23 +239,18 @@ export default function Dashboard() {
            
            {/* Desktop Streak Display (Hidden on Mobile) */}
            <div className="hidden md:flex items-center gap-4 bg-white px-4 md:px-6 py-2 md:py-3 rounded-2xl md:rounded-3xl border border-slate-50 shadow-sm transition-all hover:shadow-md h-fit">
-              <TooltipProvider>
-                <Tooltip delayDuration={0}>
-                  <TooltipTrigger asChild>
-                    <div className="flex flex-col items-center cursor-default">
-                       <div className="text-[8px] md:text-[9px] font-bold text-slate-300 uppercase tracking-widest mb-0.5 md:mb-1">Streak</div>
-                       <div className="flex items-center gap-1.5">
-                          <Flame className="w-4 h-4 md:w-5 md:h-5 text-orange-400 fill-orange-400" />
-                          <span className="text-lg md:text-xl font-bold text-slate-700">{streak}</span>
-                          <span className="text-[10px] font-bold text-slate-400 mt-1">days</span>
-                       </div>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent className="bg-white text-slate-600 border border-slate-100 shadow-2xl font-bold py-3 px-4 rounded-xl">
-                    <p className="text-xs">1枚でも復習するとストリークが増えます</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <div
+                className="flex flex-col items-center cursor-default"
+                aria-label="1枚でも復習するとストリークが増えます"
+                title="1枚でも復習するとストリークが増えます"
+              >
+                 <div className="text-[8px] md:text-[9px] font-bold text-slate-300 uppercase tracking-widest mb-0.5 md:mb-1">Streak</div>
+                 <div className="flex items-center gap-1.5">
+                    <Flame className="w-4 h-4 md:w-5 md:h-5 text-orange-400 fill-orange-400" />
+                    <span className="text-lg md:text-xl font-bold text-slate-700">{streak}</span>
+                    <span className="text-[10px] font-bold text-slate-400 mt-1">days</span>
+                 </div>
+              </div>
            </div>
         </div>
 

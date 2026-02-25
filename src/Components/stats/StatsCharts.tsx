@@ -5,7 +5,6 @@ import {
   Bar, 
   XAxis, 
   YAxis, 
-  Tooltip, 
   ResponsiveContainer,
   PieChart,
   Pie,
@@ -27,7 +26,6 @@ export function StabilityDistributionChart({
 
     data: manualData = null,
     barOpacity = 1,
-    enableTooltip = true,
     showReferenceLines = true,
     compact = false,
     tiny = false,
@@ -210,29 +208,6 @@ export function StabilityDistributionChart({
                   tickFormatter={(v) => v === 0 ? '' : String(v)}
                 />
                 
-                {enableTooltip && (
-                    <Tooltip 
-                      cursor={{ fill: '#f1f5f9', opacity: 0.4 }}
-                      isAnimationActive={true}
-                      content={({ active, payload }) => {
-                        if (active && payload && payload.length) {
-                          const data = payload[0].payload;
-                          if (data.count === 0) return null;
-                          return (
-                            <div className="bg-slate-900/90 backdrop-blur-md text-white text-[10px] md:text-xs rounded-2xl py-2 px-4 shadow-2xl font-bold border border-white/10 animate-in zoom-in-95 duration-200">
-                               <div className="flex items-center gap-2 mb-1 opacity-70">
-                                  <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: getBarColor(data.min) }} />
-                                  <span>{data.range}</span>
-                               </div>
-                               <div className="text-sm">{data.count} <span className="text-[10px] font-normal">Cards</span></div>
-                            </div>
-                          );
-                        }
-                        return null;
-                      }}
-                    />
-                )}
-
                 <Bar 
                   dataKey="count" 
                   radius={[8, 8, 0, 0]}

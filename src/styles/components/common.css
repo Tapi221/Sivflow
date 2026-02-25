@@ -76,10 +76,6 @@
     @apply hover:bg-primary-50 hover:text-primary;
   }
 
-  .tooltip {
-    @apply absolute z-50 px-3 py-2 text-sm text-white bg-gray-900 rounded-lg shadow-lg;
-  }
-
   .modal-overlay {
     @apply fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4;
   }

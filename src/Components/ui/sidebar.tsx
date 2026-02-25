@@ -10,12 +10,6 @@ import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { Skeleton } from "@/Components/ui/skeleton"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -105,24 +99,22 @@ const SidebarProvider = React.forwardRef((
 
   return (
     (<SidebarContext.Provider value={contextValue}>
-      <TooltipProvider delayDuration={0}>
-        <div
-          style={
-            {
-              "--sidebar-width": SIDEBAR_WIDTH,
-              "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
-              ...style
-            }
+      <div
+        style={
+          {
+            "--sidebar-width": SIDEBAR_WIDTH,
+            "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
+            ...style
           }
-          className={cn(
-            "group/sidebar-wrapper flex min-h-svh w-full has-[[data-variant=inset]]:bg-sidebar",
-            className
-          )}
-          ref={ref}
-          {...props}>
-          {children}
-        </div>
-      </TooltipProvider>
+        }
+        className={cn(
+          "group/sidebar-wrapper flex min-h-svh w-full has-[[data-variant=inset]]:bg-sidebar",
+          className
+        )}
+        ref={ref}
+        {...props}>
+        {children}
+      </div>
     </SidebarContext.Provider>)
   );
 })
@@ -454,7 +446,19 @@ const SidebarMenuButton = React.forwardRef((
   ref
 ) => {
   const Comp = asChild ? Slot : "button"
-  const { isMobile, state } = useSidebar()
+  let tooltipTitle
+  if (typeof tooltip === "string") {
+    tooltipTitle = tooltip
+  } else if (tooltip && typeof tooltip === "object" && typeof tooltip.children === "string") {
+    tooltipTitle = tooltip.children
+  }
+
+  const fallbackA11yProps = tooltipTitle
+    ? {
+      title: tooltipTitle,
+      "aria-label": props["aria-label"] ?? tooltipTitle,
+    }
+    : {}
 
   const button = (
     <Comp
@@ -463,29 +467,11 @@ const SidebarMenuButton = React.forwardRef((
       data-size={size}
       data-active={isActive}
       className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
+      {...fallbackA11yProps}
       {...props} />
   )
 
-  if (!tooltip) {
-    return button
-  }
-
-  if (typeof tooltip === "string") {
-    tooltip = {
-      children: tooltip,
-    }
-  }
-
-  return (
-    (<Tooltip>
-      <TooltipTrigger asChild>{button}</TooltipTrigger>
-      <TooltipContent
-        side="right"
-        align="center"
-        hidden={state !== "collapsed" || isMobile}
-        {...tooltip} />
-    </Tooltip>)
-  );
+  return button
 })
 SidebarMenuButton.displayName = "SidebarMenuButton"
 

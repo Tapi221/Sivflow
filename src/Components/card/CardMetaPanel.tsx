@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Line, LineChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 
 import { RatingCountTiles } from "@/Components/study/RatingCountTiles";
 import { TagBadge } from "@/Components/tag/TagBadge";
@@ -259,17 +259,6 @@ export function CardMetaPanel({
                       allowDecimals={false}
                       width={36}
                       tick={{ fontSize: 10 }}
-                    />
-                    <Tooltip
-                      formatter={(value) => [`${value}`, "Score"]}
-                      labelFormatter={(label, payload) => {
-                        const dayKey = payload?.[0]?.payload?.dayKey;
-                        if (typeof dayKey === "string" && dayKey.length > 0) return dayKey;
-                        const date = new Date(Number(label));
-                        if (Number.isNaN(date.getTime())) return "";
-                        const { dayKey: fallbackDayKey } = toDayKeyAndTs(date);
-                        return fallbackDayKey;
-                      }}
                     />
                     <Line type="monotone" dataKey="resistanceScore" stroke="#0f172a" strokeWidth={2} dot={false} />
                   </LineChart>
