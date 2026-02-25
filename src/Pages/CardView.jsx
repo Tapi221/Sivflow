@@ -6,6 +6,7 @@ import { Skeleton } from '@/Components/ui/skeleton';
 import { ArrowLeft, Tag } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 import CardViewer from '@/Components/card/CardViewer';
+import { useCardEntity } from '@/hooks/useCardEntity';
 
 export default function CardView() {
   const navigate = useNavigate();
@@ -34,6 +35,12 @@ export default function CardView() {
   }, [targetCardId, sortedCards]);
   
   const currentCard = sortedCards[currentIndex];
+  const { effectiveCard } = useCardEntity(currentCard?.id);
+  const visibleCard = effectiveCard ?? currentCard;
+  const effectiveCards = useMemo(() => {
+    if (!effectiveCard) return sortedCards;
+    return sortedCards.map((card) => (card.id === effectiveCard.id ? effectiveCard : card));
+  }, [sortedCards, effectiveCard]);
   
   const handleEdit = (card) => {
     navigate(createPageUrl(`CardEdit?id=${card.id}&folderId=${folderId}&returnTo=card-view`));
@@ -74,7 +81,7 @@ export default function CardView() {
              <div>
                 <div className="text-[10px] font-bold tracking-[0.2em] text-slate-400 uppercase mb-0.5">Knowledge Review</div>
                 <h1 className="text-xl font-bold text-slate-700">
-                  {currentCard?.title || 'Untitled Card'}
+                  {visibleCard?.title || 'Untitled Card'}
                 </h1>
              </div>
           </div>
@@ -92,7 +99,7 @@ export default function CardView() {
             {/* Main Viewer Area */}
             <div>
                  <CardViewer
-                    cards={sortedCards}
+                    cards={effectiveCards}
                     currentIndex={currentIndex}
                     onIndexChange={setCurrentIndex}
                     onEdit={handleEdit}
@@ -104,15 +111,15 @@ export default function CardView() {
             {/* Sidebar */}
             <div className="space-y-6 hidden lg:block">
                 {/* Tags Sidebar Section */}
-                {currentCard?.tags && currentCard.tags.length > 0 && (
+                {visibleCard?.tags && visibleCard.tags.length > 0 && (
                   <div className="bg-white rounded-3xl p-8 shadow-[0_2px_20px_-4px_rgba(0,0,0,0.05)]">
                       <div className="text-[10px] font-bold tracking-[0.2em] text-slate-300 uppercase mb-4 flex items-center gap-2">
                         <Tag className="w-3 h-3" />
                         Tags
                       </div>
                       <div className="flex flex-wrap gap-2">
-                        {currentCard.tags.map((tag, i) => (
-                          <span key={i} className="px-3 py-1.5 bg-slate-50 text-slate-600 rounded-lg text-xs font-bold border border-slate-100">
+                        {visibleCard.tags.map((tag) => (
+                          <span key={tag} className="px-3 py-1.5 bg-slate-50 text-slate-600 rounded-lg text-xs font-bold border border-slate-100">
                             {tag}
                           </span>
                         ))}

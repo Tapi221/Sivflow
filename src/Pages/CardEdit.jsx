@@ -12,6 +12,7 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { nanoid } from 'nanoid';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useCardEntity } from '@/hooks/useCardEntity';
 
 const CARD_EDIT_RELOAD_GUARD_KEY = 'card-edit:reload-guard-url';
 const CARD_EDIT_EDITORS_KEY = 'card-edit-editors';
@@ -115,8 +116,7 @@ export default function CardEdit() {
   
   // useCardsフックから必要な関数とデータを取得
   const { cards: allCards = [], loading: cardsLoading, createCard, updateCard, deleteCard } = useCards();
-  
-  const card = allCards.find(c => c.id === cardId);
+  const { effectiveCard: card, flushDraft, hasDirtyDraft } = useCardEntity(cardId);
   
   // targetFolderId の決定（優先順位：URL > card.folderId > sessionStorage）
   const targetFolderId = useMemo(() => {
@@ -224,6 +224,7 @@ export default function CardEdit() {
         }
         // リロードガード中、またはfolderIdが未確定の場合はナビゲートしない
         if (continueCreating === false && saveContext === 'manual-save' && targetFolderId && !isPageHidden && !suppressAutoNavigateAfterReloadRef.current) {
+          await flushDraft();
           clearEditorPersistence();
           if (shouldReturnToCalendar) {
             safeNavigate(createPageUrl('Calendar'));
@@ -288,7 +289,7 @@ export default function CardEdit() {
   const handleDeleteEditor = (editorId) => {
     if (cardId) {
       // 既存カードの編集時はエディタ削除＝ナビゲーションバック
-      handleCancel('user');
+      void handleCancel('user');
       return;
     }
     if (editors.length <= 1) {
@@ -319,7 +320,7 @@ export default function CardEdit() {
     setEditors(items);
   };
   
-  const handleCancel = (reason) => {
+  const handleCancel = async (reason) => {
     if (isUnloadingRef.current) return;
 
     if (reason !== 'user') {
@@ -333,13 +334,23 @@ export default function CardEdit() {
       return;
     }
     
-    clearEditorPersistence();
-    
     // folderIdが未確定の場合は待機（カードロード中）
     if (!targetFolderId) {
       console.log('[CardEdit] Cancel ignored: folderId not yet determined');
       return;
     }
+
+    try {
+      if (hasDirtyDraft) {
+        await flushDraft();
+      }
+    } catch (error) {
+      console.error('[CardEdit] flushDraft failed', error);
+      toast.error('保存に失敗したため遷移を中止しました。');
+      return;
+    }
+
+    clearEditorPersistence();
     
     if (shouldReturnToCalendar) {
       safeNavigate(createPageUrl('Calendar'));
@@ -376,7 +387,7 @@ export default function CardEdit() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => handleCancel('user')}
+            onClick={() => void handleCancel('user')}
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
@@ -494,7 +505,7 @@ export default function CardEdit() {
                               questionNumber={questionNumberOffset + index + 1}
                               autoFocus={!!editor.autoFocus}
                               onSave={(data, cont, context) => handleSave(editor.id, data, cont, context)}
-                              onCancel={(reason) => handleCancel(reason)}
+                              onCancel={(reason) => void handleCancel(reason)}
                               isLoading={savingIds.has(editor.id)}
                               showContinueButton={!cardId && index === editors.length - 1}
                               showSaveButton={index === editors.length - 1}

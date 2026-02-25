@@ -21,6 +21,7 @@ import { Flashcard } from './Flashcard';
 import { BlockEditor } from './BlockEditor'; 
 import { DragDropContext } from '@hello-pangea/dnd';
 import { useUserSettings } from '@/hooks/useUserSettings';
+import { getCardDraftKey } from '@/hooks/useCardEntity';
 
 interface CardEditorProps {
   card?: any;
@@ -97,7 +98,7 @@ export default function CardEditor({
   }, [autoFocus]);
 
   // Draft storage key
-  const draftKey = customDraftKey ?? (card ? `card-editor-draft-${card.id}` : `card-editor-draft-new`);
+  const draftKey = customDraftKey ?? (card ? getCardDraftKey(card.id) : `card-editor-draft-new`);
   const storage =
     storageType === 'session' ? sessionStorage : storageType === 'local' ? localStorage : null;
   const [isRestored, setIsRestored] = useState(false);
@@ -240,6 +241,8 @@ const hasAnyContent = (data: any) => {
   };
 
   // Auto-save logic
+  const draftSaveTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => {
   if (!storage) return;
   if (settings?.autoSaveEnabled === false) return;
@@ -251,11 +254,17 @@ const hasAnyContent = (data: any) => {
     return;
   }
 
-  const timeoutId = setTimeout(() => {
+  if (draftSaveTimerRef.current) clearTimeout(draftSaveTimerRef.current);
+  draftSaveTimerRef.current = setTimeout(() => {
     storage.setItem(draftKey, JSON.stringify(formData));
   }, 1000);
 
-  return () => clearTimeout(timeoutId);
+  return () => {
+    if (draftSaveTimerRef.current) {
+      clearTimeout(draftSaveTimerRef.current);
+      draftSaveTimerRef.current = null;
+    }
+  };
 }, [formData, draftKey, storage, settings?.autoSaveEnabled, initialized]);
 
 
@@ -317,7 +326,24 @@ const hasAnyContent = (data: any) => {
 
   const clearDraft = () => {
     if (!storage) return;
+    if (draftSaveTimerRef.current) {
+      clearTimeout(draftSaveTimerRef.current);
+      draftSaveTimerRef.current = null;
+    }
     storage.removeItem(draftKey);
+  };
+
+  const flushDraft = () => {
+    if (!storage || !initialized) return;
+    if (draftSaveTimerRef.current) {
+      clearTimeout(draftSaveTimerRef.current);
+      draftSaveTimerRef.current = null;
+    }
+    if (hasAnyContent(formData)) {
+      storage.setItem(draftKey, JSON.stringify(formData));
+    } else {
+      storage.removeItem(draftKey);
+    }
   };
 
   useEffect(() => {
@@ -334,6 +360,7 @@ const hasAnyContent = (data: any) => {
   
   const handleSubmit = async () => {
     console.log('[CardEditor] Current formData:', formData);
+    flushDraft();
     
     const hasBlocks = (blocks: any[]) => {
       return blocks.some(b => {
@@ -680,7 +707,7 @@ const hasAnyContent = (data: any) => {
             <Button 
                 variant="ghost" 
                 onClick={() => {
-                    clearDraft();
+                    flushDraft();
                     onCancel();
                 }} 
                 disabled={isLoading}

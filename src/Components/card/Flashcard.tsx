@@ -9,7 +9,6 @@ import { AudioPlayer, ImageGallery } from './CardMedia';
 import { useUserSettings } from '@/hooks/useUserSettings';
 import { ReferencePopup } from './ReferencePopup';
 import type { CardBlock, ReferenceBlockData } from '@/types';
-import { normalizeCard } from '@/utils';
 import { InkLayer, InkToolbar, type InkHistoryState, type InkLayerHandle } from '@/Components/ink/InkLayer';
 import { resolveInkDocument } from '@/Components/ink/inkStorage';
 import type { InkDocument, InkEditTool } from '@/Components/ink/inkTypes';
@@ -109,12 +108,8 @@ export function Flashcard({
   lockCardHeight = false,
 }: FlashcardProps) {
   const { settings } = useUserSettings();
-  // ✅ ここが重要：プレビューは CardEditor の formData をそのまま使う
-  // normalizeCard が blocks を潰す実装だと「…しか出ない」になる
-  const cardData = React.useMemo(() => {
-    if (!card) return card;
-    return previewMode ? card : normalizeCard(card);
-  }, [card, previewMode]);
+
+  const cardData = card;
 
   const [previewFlipped, setPreviewFlipped] = useState(false);
 
@@ -122,6 +117,7 @@ export function Flashcard({
   const [isReferencePopupOpen, setIsReferencePopupOpen] = useState(false);
   const [isImagePopupOpen, setIsImagePopupOpen] = useState(false);
   const [isAudioPopupOpen, setIsAudioPopupOpen] = useState(false);
+
   const previewInkRef = useRef<InkLayerHandle | null>(null);
   const [previewInkTool, setPreviewInkTool] = useState<InkEditTool | null>(null);
   const [previewInkHistory, setPreviewInkHistory] = useState<InkHistoryState>({
@@ -132,7 +128,6 @@ export function Flashcard({
 
   // プレビュー時にエディタの共有リサイズ高さを反映するための state
   const [sharedPreviewHeightPx, setSharedPreviewHeightPx] = useState<number | null>(null);
-  const shellRef = React.useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!previewMode) return;
@@ -168,25 +163,25 @@ export function Flashcard({
         setSharedPreviewHeightPx(parsed);
       }
     }
-  }, [card?.id, editorSharedHeightPx, settings?.cardEditorHeightPx]);
+  }, [editorSharedHeightPx, settings?.cardEditorHeightPx]);
 
   // 参考リンク抽出
   const questionReferences = React.useMemo(() => {
     const refs: ReferenceBlockData[] = [];
     const qBlocks: CardBlock[] = cardData?.questionBlocks ?? [];
-    qBlocks.forEach(block => {
+    qBlocks.forEach((block) => {
       if (block.type === 'reference' && block.references) refs.push(...block.references);
     });
-    return refs.filter(r => r.url);
+    return refs.filter((r) => r.url);
   }, [cardData?.questionBlocks]);
 
   const answerReferences = React.useMemo(() => {
     const refs: ReferenceBlockData[] = [];
     const aBlocks: CardBlock[] = cardData?.answerBlocks ?? [];
-    aBlocks.forEach(block => {
+    aBlocks.forEach((block) => {
       if (block.type === 'reference' && block.references) refs.push(...block.references);
     });
-    return refs.filter(r => r.url);
+    return refs.filter((r) => r.url);
   }, [cardData?.answerBlocks]);
 
   // 安全なプロパティアクセス（異なる命名規則への対応）
@@ -223,25 +218,9 @@ export function Flashcard({
     .map((image: any) => image?.remoteUrl ?? image?.localUrl ?? image?.url ?? image)
     .filter(Boolean);
 
-  const handleGalleryFullscreenChange = (isFullscreen: boolean) => {
+  const handleGalleryFullscreenChange = React.useCallback((isFullscreen: boolean) => {
     setIsImageModalOpen(isFullscreen);
-  };
-
-  const handleFlip = (e?: React.MouseEvent) => {
-    if (isImageModalOpen) return;
-    if (previewMode && inkEditingEnabled && previewInkTool) return;
-
-    if (previewMode) {
-      e?.stopPropagation();
-      setPreviewFlipped((prev) => !prev);
-      return;
-    }
-
-    if (onFlip) {
-      e?.stopPropagation();
-      onFlip();
-    }
-  };
+  }, []);
 
   if (!cardData) {
     return <div className="text-center py-12 text-gray-500">No Card Data</div>;
@@ -255,14 +234,40 @@ export function Flashcard({
   const activeInkSide = effectiveIsFlipped ? 'answer' : 'question';
   const activeInkDocument = effectiveIsFlipped ? answerInkDocument : questionInkDocument;
 
+  // Flip阻害条件を集約（増えてもここだけ直せば良い）
+  const isModalBlockingFlip =
+    isImageModalOpen || isImagePopupOpen || isAudioPopupOpen || isReferencePopupOpen;
+
+  const isInkEditingActive = Boolean(previewMode && inkEditingEnabled && previewInkTool);
+
+  const handleFlip = React.useCallback(
+    (e?: React.MouseEvent) => {
+      if (isModalBlockingFlip) return;
+      if (isInkEditingActive) return;
+
+      if (previewMode) {
+        e?.stopPropagation();
+        setPreviewFlipped((prev) => !prev);
+        return;
+      }
+
+      if (onFlip) {
+        e?.stopPropagation();
+        onFlip();
+      }
+    },
+    [isModalBlockingFlip, isInkEditingActive, previewMode, onFlip]
+  );
+
   const actionsTopLeft: React.ReactNode[] = [];
   const actionsTopRight: React.ReactNode[] = [];
   const actionsBottomRight: React.ReactNode[] = [];
   const mediaActionNodes: React.ReactNode[] = [];
 
+  // extraHeaderLeft は名前通り TopLeft 側へ
   if (extraHeaderLeft) {
-    actionsBottomRight.push(
-      <div key="extra-left" className="flex" onClick={(e) => e.stopPropagation()}>
+    actionsTopLeft.push(
+      <div key="extra-header-left" className="flex" onClick={(e) => e.stopPropagation()}>
         {extraHeaderLeft}
       </div>
     );
@@ -292,7 +297,15 @@ export function Flashcard({
   const activeAudios = effectiveIsFlipped ? answerAudios : questionAudios;
 
   // データ構造の正規化（urlプロパティを持つオブジェクトか、文字列か）
-  const activeAudioUrls = activeAudios.map((a: any) => a.remoteUrl || a.localUrl || a.url || a).filter(Boolean);
+  const toMediaUrl = React.useCallback((m: FlashcardMediaLike): string | null => {
+    if (typeof m === 'string') return m;
+    return m.remoteUrl ?? m.localUrl ?? m.url ?? null;
+  }, []);
+
+  const activeAudioUrls = React.useMemo(
+    () => (activeAudios ?? []).map(toMediaUrl).filter((u): u is string => Boolean(u)),
+    [activeAudios, toMediaUrl]
+  );
 
   if (activeAudioUrls.length > 0) {
     mediaActionNodes.push(
@@ -384,9 +397,19 @@ export function Flashcard({
 
     return (
       <div className="space-y-0 w-full max-w-full">
-        {(text ?? '').trim() !== '' && <BlockRenderer blocks={[{ id: `${side}-legacy-text`, type: 'text', orderIndex: 0, content: String(text) } as CardBlock]} />}
+        {(text ?? '').trim() !== '' && (
+          <BlockRenderer
+            blocks={[
+              { id: `${side}-legacy-text`, type: 'text', orderIndex: 0, content: String(text) } as CardBlock,
+            ]}
+          />
+        )}
 
-        {(code?.code ?? '').trim() !== '' && <BlockRenderer blocks={[{ id: `${side}-legacy-code`, type: 'code', orderIndex: 0, code } as CardBlock]} />}
+        {(code?.code ?? '').trim() !== '' && (
+          <BlockRenderer
+            blocks={[{ id: `${side}-legacy-code`, type: 'code', orderIndex: 0, code } as CardBlock]}
+          />
+        )}
 
         {(images?.length ?? 0) > 0 && (
           <ImageGallery urls={images} onFullscreenChange={handleGalleryFullscreenChange} />
@@ -394,10 +417,9 @@ export function Flashcard({
 
         {(audios?.length ?? 0) > 0 && (
           <div className="flex justify-center">
-            <AudioPlayer urls={audios.map((a: any) => a.remoteUrl || a.localUrl || a.url || a)} />
+            <AudioPlayer urls={(audios as FlashcardMediaLike[]).map(toMediaUrl).filter((u): u is string => Boolean(u))} />
           </div>
         )}
-
       </div>
     );
   };
@@ -405,36 +427,67 @@ export function Flashcard({
   const renderSide = (side: 'question' | 'answer') => {
     const blocks = side === 'question' ? (cardData?.questionBlocks ?? []) : (cardData?.answerBlocks ?? []);
     if (blocks.length > 0) {
-      return (
-        <BlockRenderer
-          blocks={blocks}
-          onGalleryFullscreenChange={handleGalleryFullscreenChange}
-        />
-      );
+      return <BlockRenderer blocks={blocks} onGalleryFullscreenChange={handleGalleryFullscreenChange} />;
     }
     return renderLegacy(side);
   };
 
+  // overlay を安定化（Inkが余計に再マウント/再描画されにくい）
+  const overlayNode = React.useMemo(() => {
+    if (!cardIdForInk) return null;
+
+    return (
+      <>
+        <InkLayer
+          ref={previewInkRef}
+          cardId={cardIdForInk}
+          side={activeInkSide}
+          editable={Boolean(previewMode && inkEditingEnabled)}
+          tool={previewInkTool ?? 'pen'}
+          document={activeInkDocument}
+          onDocumentChange={(next) => onInkDocumentChange?.(activeInkSide, next)}
+          onHistoryChange={setPreviewInkHistory}
+          className={cn(previewMode && inkEditingEnabled ? '' : 'pointer-events-none')}
+        />
+        {previewMode && inkEditingEnabled && (
+          <div className="absolute bottom-2 left-2 z-30 pointer-events-auto">
+            <InkToolbar
+              tool={previewInkTool}
+              canUndo={previewInkHistory.canUndo}
+              canRedo={previewInkHistory.canRedo}
+              onToolChange={setPreviewInkTool}
+              onUndo={() => previewInkRef.current?.undo()}
+              onRedo={() => previewInkRef.current?.redo()}
+              onClear={() => previewInkRef.current?.clear()}
+            />
+          </div>
+        )}
+      </>
+    );
+  }, [
+    cardIdForInk,
+    activeInkSide,
+    activeInkDocument,
+    previewMode,
+    inkEditingEnabled,
+    previewInkTool,
+    previewInkHistory.canUndo,
+    previewInkHistory.canRedo,
+    onInkDocumentChange,
+  ]);
+
   return (
-    <div className={cn("w-full h-full flex flex-col select-none", className)}>
+    <div className={cn('w-full h-full flex flex-col select-none', className)}>
       {/* カード外ヘッダー（右上要素の移動先） */}
       {!previewMode && (
         <div className="w-full flex justify-end px-2 pb-2 min-h-[40px]">
-          <div className="flex flex-col items-end gap-2">
-            {extraHeaderRight}
-
-          </div>
+          <div className="flex flex-col items-end gap-2">{extraHeaderRight}</div>
         </div>
       )}
 
       <div className="relative">
         <CardFrame
-          className={cn(
-            'premium-paper-depth',
-            !previewMode && 'cursor-pointer',
-            'card-shell--paper'
-          )}
-          shellRef={shellRef}
+          className={cn('premium-paper-depth', !previewMode && 'cursor-pointer', 'card-shell--paper')}
           onClick={handleFlip}
           resizable={false}
           resizeStepPx={undefined}
@@ -446,63 +499,30 @@ export function Flashcard({
           actionsTopRight={actionsTopRight.length > 0 ? actionsTopRight : undefined}
           actionsBottomRight={actionsBottomRight.length > 0 ? actionsBottomRight : undefined}
           drawMode={enableDrawMode}
-          overlay={
-              <>
-                <InkLayer
-                  ref={previewInkRef}
-                  cardId={cardIdForInk}
-                  side={activeInkSide}
-                  editable={Boolean(previewMode && inkEditingEnabled)}
-                  tool={previewInkTool ?? 'pen'}
-                  document={activeInkDocument}
-                  onDocumentChange={(next) => onInkDocumentChange?.(activeInkSide, next)}
-                  onHistoryChange={setPreviewInkHistory}
-                  className={cn(previewMode && inkEditingEnabled ? '' : 'pointer-events-none')}
-                />
-                {previewMode && inkEditingEnabled && (
-                  <div className="absolute bottom-2 left-2 z-30 pointer-events-auto">
-                    <InkToolbar
-                      tool={previewInkTool}
-                      canUndo={previewInkHistory.canUndo}
-                      canRedo={previewInkHistory.canRedo}
-                      onToolChange={setPreviewInkTool}
-                      onUndo={() => previewInkRef.current?.undo()}
-                      onRedo={() => previewInkRef.current?.redo()}
-                      onClear={() => previewInkRef.current?.clear()}
-                    />
-                  </div>
-                )}
-              </>
-            }
+          overlay={overlayNode}
         >
-            {/* コンテンツエリア - 編集画面に揃えて上寄せ */}
-            <div
-              className={cn(
-                "paperCardTypography flex-1 flex flex-col max-w-full mx-auto w-full pb-8 overflow-x-clip overflow-y-visible"
-              )}
-              style={{ paddingTop: CARD_TOP_PADDING_PX }}
-            >
-              {effectiveIsFlipped ? (
-                <div className="animate-in fade-in zoom-in-95 duration-300 w-full max-w-full">
-                  {renderSide('answer')}
-                </div>
-              ) : (
-                <div className="animate-in fade-in zoom-in-95 duration-300 w-full max-w-full">
-                  {renderSide('question')}
-                </div>
-              )}
-            </div>
+          {/* コンテンツエリア - 編集画面に揃えて上寄せ */}
+          <div
+            className={cn('paperCardTypography flex-1 flex flex-col max-w-full mx-auto w-full pb-8 overflow-x-clip overflow-y-visible')}
+            style={{ paddingTop: CARD_TOP_PADDING_PX }}
+          >
+            {effectiveIsFlipped ? (
+              <div className="animate-in fade-in zoom-in-95 duration-300 w-full max-w-full">{renderSide('answer')}</div>
+            ) : (
+              <div className="animate-in fade-in zoom-in-95 duration-300 w-full max-w-full">{renderSide('question')}</div>
+            )}
+          </div>
 
-            {/* フッター */}
-            <div className="mt-auto pt-4 text-center">
-              {extraFooter}
+          {/* フッター */}
+          <div className="mt-auto pt-4 text-center">
+            {extraFooter}
 
-              {previewMode && (
-                <div className="flex gap-4 justify-center">
-                  {/* intentionally empty */}
-                </div>
-              )}
-            </div>
+            {previewMode && (
+              <div className="flex gap-4 justify-center">
+                {/* intentionally empty */}
+              </div>
+            )}
+          </div>
         </CardFrame>
       </div>
 
@@ -525,7 +545,7 @@ export function Flashcard({
             </Button>
             <div className="mt-8 space-y-4">
               {activeImages.map((url, index) => (
-                <div key={index} className="w-full">
+                <div key={`${url}-${index}`} className="w-full">
                   <img
                     src={url}
                     alt={`Image ${index + 1}`}
@@ -534,11 +554,7 @@ export function Flashcard({
                 </div>
               ))}
             </div>
-            {activeImages.length === 0 && (
-              <div className="flex items-center justify-center py-20 text-slate-400">
-                画像がありません
-              </div>
-            )}
+            {activeImages.length === 0 && <div className="flex items-center justify-center py-20 text-slate-400">画像がありません</div>}
           </div>
         </DialogContent>
       </Dialog>
@@ -564,11 +580,7 @@ export function Flashcard({
             <AudioPlayer urls={activeAudioUrls} />
           </div>
 
-          {activeAudioUrls.length === 0 && (
-            <div className="text-center py-8 text-slate-400 text-sm">
-              音声がありません
-            </div>
-          )}
+          {activeAudioUrls.length === 0 && <div className="text-center py-8 text-slate-400 text-sm">音声がありません</div>}
         </DialogContent>
       </Dialog>
 

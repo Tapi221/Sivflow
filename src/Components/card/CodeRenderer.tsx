@@ -28,9 +28,12 @@ const LANGUAGE_ALIASES: Record<string, string> = {
   "cs": "csharp",
   "shell": "bash",
   "sh": "bash",
+  "text": "clike",
+  "txt": "clike",
+  "plain": "clike",
 };
 
-const LANGUAGE_LABELS: Record<string, string> = {
+const LANGUAGE_FULL_LABELS: Record<string, string> = {
   javascript: "JavaScript",
   typescript: "TypeScript",
   jsx: "JSX",
@@ -49,7 +52,29 @@ const LANGUAGE_LABELS: Record<string, string> = {
   rust: "Rust",
   sql: "SQL",
   yaml: "YAML",
-  clike: "Text",
+  clike: "Plain text",
+};
+
+const LANGUAGE_SHORT_LABELS: Record<string, string> = {
+  javascript: "JS",
+  typescript: "TS",
+  jsx: "JSX",
+  tsx: "TSX",
+  json: "JSON",
+  bash: "SH",
+  css: "CSS",
+  html: "HTML",
+  markdown: "MD",
+  python: "PY",
+  java: "JAVA",
+  c: "C",
+  cpp: "C++",
+  csharp: "C#",
+  go: "GO",
+  rust: "RS",
+  sql: "SQL",
+  yaml: "YML",
+  clike: "TXT",
 };
 
 export function CodeRenderer({ code, language, className }: CodeRendererProps) {
@@ -66,8 +91,12 @@ export function CodeRenderer({ code, language, className }: CodeRendererProps) {
     return SUPPORTED_LANGS.has(normalized) ? normalized : "clike";
   }, [language]);
 
-  const languageLabel = useMemo(() => {
-    return LANGUAGE_LABELS[validLanguage] ?? validLanguage;
+  const languageFullLabel = useMemo(() => {
+    return LANGUAGE_FULL_LABELS[validLanguage] ?? validLanguage;
+  }, [validLanguage]);
+
+  const languageShortLabel = useMemo(() => {
+    return LANGUAGE_SHORT_LABELS[validLanguage] ?? validLanguage.toUpperCase();
   }, [validLanguage]);
 
   useEffect(() => {
@@ -95,22 +124,17 @@ export function CodeRenderer({ code, language, className }: CodeRendererProps) {
       await navigator.clipboard.writeText(normalizedCode);
       showCopiedForAWhile();
     } catch {
-      // clipboard API が使えない環境のフォールバック
       const el = document.createElement("textarea");
       el.value = normalizedCode;
       document.body.appendChild(el);
       el.select();
       const copiedByFallback = document.execCommand("copy");
       document.body.removeChild(el);
-      if (copiedByFallback) {
-        showCopiedForAWhile();
-      } else {
-        console.warn("Copy fallback failed");
-      }
+      if (copiedByFallback) showCopiedForAWhile();
+      else console.warn("Copy fallback failed");
     }
   }, [normalizedCode, showCopiedForAWhile]);
 
-  // コピーボタン（右上アクション）
   const copyButton = (
     <button
       onPointerDown={(e) => e.stopPropagation()}
@@ -139,7 +163,8 @@ export function CodeRenderer({ code, language, className }: CodeRendererProps) {
   return (
     <div className={className}>
       <CodeBlockFrame
-        languageLabel={languageLabel}
+        languageLabel={languageShortLabel}
+        languageTitle={languageFullLabel}   // ← CodeBlockFrame 側で title に使う
         right={copyButton}
       >
         <Highlight theme={codeTheme} code={normalizedCode} language={validLanguage}>

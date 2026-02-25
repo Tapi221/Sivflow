@@ -30,7 +30,7 @@
 
   .codeBlockPre {
     margin: 0;
-    padding: 20px 10px 10px 10px;
+    padding: 20px 10px 0 10px;
     font-size: 14px;
     line-height: 20px;
     font-family: "Fira Code", "Fira Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -48,6 +48,11 @@
 
   .codeBlockPre--tools {
     padding-top: var(--code-tools-reserve);
+  }
+
+  .codeBlockPre > code {
+    display: block;
+    padding-bottom: 10px;
   }
 
   .codeBlockLang {
