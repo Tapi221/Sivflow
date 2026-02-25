@@ -1,4 +1,5 @@
 import type { ITelemetryService, LogLevel, LogContext, SyncLogEntry } from '../../types/telemetry';
+import { sanitizeForLog } from '@/utils/logSanitizer';
 
 /**
  * TelemetryService: 構造化ログとメトリクスを収集するサービス
@@ -16,7 +17,7 @@ export class TelemetryService implements ITelemetryService {
       timestamp: new Date().toISOString(),
       level,
       message,
-      context: context || {},
+      context: sanitizeForLog(context || {}),
       error
     };
 
@@ -24,7 +25,7 @@ export class TelemetryService implements ITelemetryService {
 
     // コンソールにも出力（開発時）
     const logMethod = level === 'error' ? console.error : level === 'warn' ? console.warn : console.log;
-    logMethod(`[${level.toUpperCase()}] ${message}`, context, error);
+    logMethod(`[${level.toUpperCase()}] ${message}`, sanitizeForLog(context), sanitizeForLog(error));
 
     // ログの保持数制限（メモリリーク防止）
     if (this.logs.length > 1000) {

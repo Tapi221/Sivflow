@@ -22,6 +22,8 @@ import {
   warnOncePerSession
 } from './localDBRuntimeState';
 import type { LocalDBFallbackReasonCode } from './localDBRuntimeState';
+import type { IntegrityIssue, IntegrityRepairResult } from './dataIntegrityTypes';
+import { sanitizeForLog } from '@/utils/logSanitizer';
 
 import type {
   Folder,
@@ -827,233 +829,230 @@ export class LocalDB extends Dexie {
    * 既存のレコードを走査し、不足している必須プロパティ（userId, name, isDeleted等）を補完します。
    * これはデータの論理的不整合を解消し、UIの表示条件を満たすようにするための修復処理です。
    */
-  async repairDataIntegrity(currentUserId: string, onProgress?: (msg: string) => void): Promise<{ folders: number, cards: number, canonicalId: string | null }> {
-    console.log(`[Repair] Starting data integrity repair for user: ${currentUserId}`);
+  async repairDataIntegrity(currentUserId: string, onProgress?: (msg: string) => void): Promise<IntegrityRepairResult> {
+    const issues: IntegrityIssue[] = [];
+    const normalizedTimestamp = (value: unknown): Date | null => {
+      if (value == null || value === '') return null;
+      if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value;
+      if (typeof value === 'string' || typeof value === 'number') {
+        const parsed = new Date(value);
+        return Number.isNaN(parsed.getTime()) ? null : parsed;
+      }
+      if (typeof value === 'object' && typeof (value as any).toDate === 'function') {
+        try {
+          const dt = (value as any).toDate();
+          return dt instanceof Date && !Number.isNaN(dt.getTime()) ? dt : null;
+        } catch {
+          return null;
+        }
+      }
+      return null;
+    };
+    const extractSideText = (blocks: any[], side: 'question' | 'answer'): string | null => {
+      const b = blocks.find((block) => {
+        const role = String(block?.side ?? block?.role ?? '').toLowerCase();
+        const type = String(block?.type ?? '').toLowerCase();
+        return role === side || type === side || type === `${side}_text`;
+      });
+      const text = b?.text;
+      return typeof text === 'string' && text.trim() ? text.trim() : null;
+    };
+
+    console.log('[Repair] Starting data integrity repair');
     onProgress?.('整合性修復を開始...');
 
-    // 1. Folders
     const allFolders = await this.folders.toArray();
     const allCards = await this.cards.toArray();
+    const rescueFolderId = 'RESCUE_ORPHANS_FOLDER';
 
-    // 1. 基本的な整合性補修 (以前のロジックを維持しつつ整理)
-    const fixedFolders = allFolders.map(f => {
-      const update = { ...f } as any;
+    let foldersUpdated = 0;
+    let cardsUpdated = 0;
+    const folderIds = new Set(allFolders.map((f: any) => String(f?.id ?? f?.folderId ?? '')).filter(Boolean));
+
+    const folderUpdates = allFolders.map((folder) => {
+      const update = { ...folder } as any;
       let changed = false;
-
-      // ID保証
       if (!update.id) {
-          update.id = update.folderId || crypto.randomUUID();
-          changed = true;
+        update.id = update.folderId || crypto.randomUUID();
+        changed = true;
       }
       if (!update.folderId) {
-          update.folderId = update.id;
-          changed = true;
+        update.folderId = update.id;
+        changed = true;
       }
-
-      // ユーザーID補完
       if (!update.userId) {
         update.userId = currentUserId;
         changed = true;
       }
-
-      // 名前補完
-      const currentName = update.folderName || update.name || update.folder_name;
-      if (!currentName || currentName === '') {
+      if (update.parentFolderId === undefined) {
+        update.parentFolderId = null;
+        changed = true;
+      }
+      const name = update.folderName || update.name || update.folder_name;
+      if (!name) {
         update.folderName = 'Recovered Folder';
         changed = true;
       } else if (!update.folderName) {
-        update.folderName = currentName;
+        update.folderName = name;
         changed = true;
       }
-
-      // 削除フラグ補正
-      const isActuallyDeleted = update.isDeleted ?? update.is_deleted ?? update.deleted;
-      if (isActuallyDeleted === undefined) {
-        update.isDeleted = false;
-        changed = true;
-      } else if (update.isDeleted === undefined) {
-        update.isDeleted = isActuallyDeleted;
-        changed = true;
+      if (changed) {
+        foldersUpdated += 1;
+        return update;
       }
-
-      // 階層整合性
-      if (update.parentFolderId === undefined) {
-          update.parentFolderId = null;
-          changed = true;
-      }
-
-      return update;
-    });
-
-    // 2. 正規フォルダの選定 (Normalization フェーズ)
-    onProgress?.('復旧データの集約中...');
-    const recoveredFolders = fixedFolders.filter(f => 
-        f.folderName === 'Recovered Folder' && !f.isDeleted && f.userId === currentUserId
-    );
-
-    let canonicalFolder = null;
-    if (recoveredFolders.length > 0) {
-        // カードを既に持っているフォルダを優先
-        const folderCardCounts = recoveredFolders.map(f => ({
-            folder: f,
-            count: allCards.filter(c => {
-              const cardFolderId = (c as any).folderId || (c as any).folder_id;
-              const cardIsDeleted = Boolean((c as any).isDeleted ?? (c as any).is_deleted ?? (c as any).deleted);
-              return cardFolderId === f.id && !cardIsDeleted;
-            }).length
-        }));
-        
-        const folderWithCards = folderCardCounts.sort((a, b) => b.count - a.count)[0];
-        if (folderWithCards.count > 0) {
-            canonicalFolder = folderWithCards.folder;
-        } else {
-            // なければ最古のフォルダ
-            canonicalFolder = recoveredFolders.sort((a, b) => {
-                const dateA = new Date(a.createdAt || a.created_at || 0).getTime();
-                const dateB = new Date(b.createdAt || b.created_at || 0).getTime();
-                return dateA - dateB;
-            })[0];
-        }
-    }
-
-    const canonicalId = canonicalFolder?.id || null;
-
-    // 3. 全フォルダ更新 (重複の論理削除)
-    const folderUpdates = fixedFolders.map(f => {
-        const isRecovered = f.folderName === 'Recovered Folder' && !f.isDeleted;
-        if (isRecovered && canonicalId && f.id !== canonicalId) {
-            return {
-                ...f,
-                isDeleted: true,
-                deletedReason: "recovery-deduplicated",
-                updatedAt: new Date()
-            };
-        }
-        // fixedFolders作成時にchangedフラグを管理しなくなったので、とりあえず全部戻してDexieの差分検知に任せるか、
-        // 厳密にやるなら以前のchangedフラグ方式で行く。ここではシンプルに。
-        return f;
-    });
-
+      return null;
+    }).filter(Boolean);
     if (folderUpdates.length > 0) {
-        await this.folders.bulkPut(folderUpdates);
-        console.log(`[Normalization] Processed ${folderUpdates.length} folders. Canonical: ${canonicalId}`);
+      await this.folders.bulkPut(folderUpdates as any[]);
     }
 
-    // 4. カードの集約
-    onProgress?.('全カードを正規フォルダへ移動中...');
-    let firstCardKeys: string[] = [];
+    if (!folderIds.has(rescueFolderId)) {
+      await this.folders.put({
+        id: rescueFolderId,
+        folderId: rescueFolderId,
+        folderName: 'Recovered Folder',
+        userId: currentUserId,
+        parentFolderId: null,
+        isDeleted: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as any);
+      folderIds.add(rescueFolderId);
+      foldersUpdated += 1;
+    }
 
-    const cardUpdates = allCards.map((c, index) => {
-      const update = { ...c } as any;
-      if (index === 0) {
-        firstCardKeys = Object.keys(update);
-        console.log('[Recovery-Raw]', update.id, firstCardKeys);
-      }
+    onProgress?.('カード不整合を修復中...');
+    const cardUpdates = allCards.map((card) => {
+      const update = { ...card } as any;
+      const entityId = String(update.id ?? update.cardId ?? 'unknown');
       let changed = false;
 
-      // ID/ユーザー/削除フラグの整合性補正
       if (!update.id) {
-          update.id = update.cardId || update.card_id || crypto.randomUUID();
-          changed = true;
+        update.id = update.cardId || update.card_id || crypto.randomUUID();
+        changed = true;
       }
       if (update.userId !== currentUserId) {
         update.userId = currentUserId;
         changed = true;
       }
-      const isActuallyDeleted = Boolean(update.isDeleted ?? update.is_deleted ?? update.deleted);
-      if (update.isDeleted !== isActuallyDeleted) {
-        update.isDeleted = isActuallyDeleted;
+
+      const hasDeletedAt = update.deletedAt != null;
+      const isDeleted = Boolean(update.isDeleted ?? update.is_deleted ?? update.deleted);
+      if (hasDeletedAt !== isDeleted) {
+        update.isDeleted = hasDeletedAt;
         changed = true;
+        issues.push({
+          code: 'DELETED_FLAG_MISMATCH',
+          entityType: 'card',
+          entityId,
+          severity: 'warning',
+          fixed: true,
+          details: { hasDeletedAt, isDeletedBefore: isDeleted, isDeletedAfter: hasDeletedAt },
+        });
       }
       if (update.is_deleted !== undefined) { delete update.is_deleted; changed = true; }
       if (update.deleted !== undefined) { delete update.deleted; changed = true; }
 
-      // [DEBUG] Raw Data Inspection for the first card
-      // This allows verification of where the text data is actually living.
-      if (index === 0) { // Only log for the first one to avoid spam
-          console.log("[Hydration-Raw-Sample] Keys:", Object.keys(update));
-          console.log("[Hydration-Raw-Sample] Full:", JSON.stringify({
-              id: update.id,
-              currentQ: update.questionText,
-              currentA: update.answerText,
-              raw: update, 
-              _rescueRaw: update._rescueRaw
-          }, null, 2));
-      }
-
-      // [SAFETY CHECK] Migration Integirty Canary
-      // Check for cards with lastReviewAt but no reviewCount
-      const hasLastReview = !!(update.lastReviewAt || update.last_review_at);
-      const reviewCount = update.reviewCount ?? update.review_count ?? 0;
-      
-      if (hasLastReview && reviewCount === 0) {
-        console.warn(`[Data Integrity Warning] Card ${update.id} has lastReviewAt but reviewCount is 0. This may cause statistics to be inaccurate.`, { hasLastReview, reviewCount });
-        // NOTE: We do not auto-fix here to avoid destructive changes without user consent, 
-        // but this log helps diagnose "unmeasured" stats issues.
-      }
-
-      if (!isActuallyDeleted) {
-        // Content Hydration (コンテンツの中身を復元)
-        // UIが参照する questionText / answerText が空の場合、rawデータから復元を試みる
-        // Note: normalizeCard と同じロジックを適用
-        // Dexie上のデータが「正規化後(中身空)」の状態でも、もし raw fields が残っていればここで抽出して復活させる
-        if (!update.questionText || update.questionText === '') {
-            const extractedQ = 
-                update.questionText ?? update.question_text ?? 
-                update.front ?? update.question ?? update.q ?? 
-                update.fields?.Front ?? update.fields?.Question ??
-                update._rescueRaw?.fields?.Front ??
-                update._rescueRaw?.question ??
-                '';
-            
-            if (extractedQ) {
-                console.log(`[Hydration] Recovered question for card ${update.id}: ${extractedQ.substring(0, 20)}...`);
-                update.questionText = extractedQ;
-                changed = true;
-            }
-        }
-        if (!update.answerText || update.answerText === '') {
-            const extractedA = 
-                update.answerText ?? update.answer_text ?? 
-                update.back ?? update.answer ?? update.a ?? 
-                update.fields?.Back ?? update.fields?.Answer ??
-                update._rescueRaw?.fields?.Back ??
-                update._rescueRaw?.answer ??
-                '';
-                
-            if (extractedA) {
-                update.answerText = extractedA;
-                changed = true;
-            }
-        }
-      }
-
-      // 正規フォルダ ID に結びつける
-      if (canonicalId && !isActuallyDeleted && update.folderId !== canonicalId) {
-          update.folderId = canonicalId;
+      const timestampFields = ['createdAt', 'updatedAt', 'deletedAt', 'nextReviewDate', 'lastReviewAt'];
+      for (const key of timestampFields) {
+        const raw = update[key];
+        if (raw == null) continue;
+        const normalized = normalizedTimestamp(raw);
+        if (!normalized) continue;
+        if (!(raw instanceof Date)) {
+          update[key] = normalized;
           changed = true;
+          issues.push({
+            code: 'TIMESTAMP_TYPE_MIXED',
+            entityType: 'card',
+            entityId,
+            severity: 'info',
+            fixed: true,
+            details: { field: key, originalType: typeof raw },
+          });
+        }
       }
 
-      // タイムスタンプ補完
+      const missingFolder = update.folderId === undefined || update.folderId === null || String(update.folderId).trim() === '';
+      if (!update.isDeleted && missingFolder) {
+        update.folderId = rescueFolderId;
+        changed = true;
+        issues.push({
+          code: 'MISSING_FOLDER',
+          entityType: 'card',
+          entityId,
+          severity: 'error',
+          fixed: true,
+          details: { assignedFolderId: rescueFolderId },
+        });
+      }
+
+      const blocks = Array.isArray(update.blocks) ? update.blocks.map((b: any) => ({ ...b })) : [];
+      if (blocks.length > 0) {
+        let blockChanged = false;
+        blocks.forEach((block: any, index: number) => {
+          if (typeof block.orderIndex !== 'number') {
+            block.orderIndex = index;
+            blockChanged = true;
+          }
+        });
+        if (blockChanged) {
+          update.blocks = blocks;
+          changed = true;
+          issues.push({
+            code: 'BLOCK_ORDER_INDEX_MISSING',
+            entityType: 'card',
+            entityId,
+            severity: 'warning',
+            fixed: true,
+            details: { blockCount: blocks.length },
+          });
+        }
+
+        const qBlockText = extractSideText(blocks, 'question');
+        const aBlockText = extractSideText(blocks, 'answer');
+        const qText = typeof update.questionText === 'string' ? update.questionText.trim() : '';
+        const aText = typeof update.answerText === 'string' ? update.answerText.trim() : '';
+        const hasQMismatch = Boolean(qBlockText && qText && qBlockText !== qText);
+        const hasAMismatch = Boolean(aBlockText && aText && aBlockText !== aText);
+        if (hasQMismatch || hasAMismatch) {
+          if (qBlockText) update.questionText = qBlockText;
+          if (aBlockText) update.answerText = aBlockText;
+          changed = true;
+          issues.push({
+            code: 'TEXT_BLOCK_MISMATCH',
+            entityType: 'card',
+            entityId,
+            severity: 'warning',
+            fixed: true,
+            details: { hasQuestionMismatch: hasQMismatch, hasAnswerMismatch: hasAMismatch },
+          });
+        }
+      }
+
       if (!update.createdAt) {
-          update.createdAt = update.created_at || new Date();
-          changed = true;
+        update.createdAt = new Date();
+        changed = true;
       }
       if (!update.updatedAt) {
-          update.updatedAt = update.updated_at || update.createdAt || new Date();
-          changed = true;
+        update.updatedAt = update.createdAt || new Date();
+        changed = true;
       }
 
-      return changed ? update : null;
-    }).filter(x => x !== null);
+      if (changed) {
+        cardsUpdated += 1;
+        return update;
+      }
+      return null;
+    }).filter(Boolean);
 
     if (cardUpdates.length > 0) {
-      await this.cards.bulkPut(cardUpdates);
-      console.log(`[Normalization] Consolidated ${cardUpdates.length} cards into: ${canonicalId}`);
+      await this.cards.bulkPut(cardUpdates as any[]);
     }
 
     onProgress?.('復旧データの正規化完了');
-    return { folders: folderUpdates.length, cards: cardUpdates.length, canonicalId };
+    console.log('[Repair] Completed', sanitizeForLog({ foldersUpdated, cardsUpdated, issueCount: issues.length }));
+    return { folders: foldersUpdated, cards: cardsUpdated, canonicalId: null, issues };
   }
 
   private static instance: LocalDBInstance | null = null;

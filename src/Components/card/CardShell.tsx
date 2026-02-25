@@ -78,6 +78,8 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
       startY: number;
       baseHeight: number;
     } | null>(null);
+    const resizeRafRef = React.useRef<number | null>(null);
+    const resizePendingHeightRef = React.useRef<number | null>(null);
 
     const computeMinHeight = React.useCallback(() => {
       const element = shellRef.current;
@@ -403,71 +405,52 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
         onClick={(e) => {
           // ★ card-shell-actions 内のボタン等からのバブリングは無視する
           // overflow:hidden によるクリッピングで stopPropagation が効かない場合の保険
-          if ((e.target as HTMLElement).closest('.card-shell-actions')) return;
+          if ((e.target as HTMLElement).closest('.card-shell-header, .card-shell-footer, .card-shell-action, .card-shell-overflow')) return;
           props.onClick?.(e);
         }}
       >
-        {topLeftItems.length > 0 && (
-          <div className="card-shell-actions card-shell-actions-top-left">
-            {topLeftItems.map((action, index) => (
-              <div key={`top-left-${index}`} className="card-shell-action">
-                {action}
-              </div>
-            ))}
-          </div>
-        )}
-        {topRightItems.length > 0 && (
-          <div className="card-shell-actions card-shell-actions-top-right">
-            {primaryTopRight.map((action, index) => (
-              <div key={`action-${index}`} className="card-shell-action">
-                {action}
-              </div>
-            ))}
-            {overflowTopRight.length > 0 && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    type="button"
-                    className="card-shell-overflow"
-                    onClick={(event) => event.stopPropagation()}
-                    aria-label="More actions"
-                  >
-                    ...
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" sideOffset={6}>
-                  {overflowTopRight.map((action, index) => (
-                    <DropdownMenuItem key={`overflow-${index}`} asChild>
-                      {React.isValidElement(action) ? action : <span>{action}</span>}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-          </div>
-        )}
-        {bottomLeftItems.length > 0 && (
-          <div className="card-shell-actions card-shell-actions-bottom-left">
-            {bottomLeftItems.map((action, index) => (
-              <div key={`bottom-action-${index}`} className="card-shell-action">
-                {action}
-              </div>
-            ))}
-          </div>
-        )}
-        {bottomRightItems.length > 0 && (
-          <div className="card-shell-actions card-shell-actions-bottom-right">
-            {bottomRightItems.map((action, index) => (
-              <div key={`bottom-right-${index}`} className="card-shell-action">
-                {action}
-              </div>
-            ))}
+        {(topLeftItems.length > 0 || topRightItems.length > 0) && (
+          <div className="card-shell-header">
+            <div className="card-shell-header-side">
+              {topLeftItems.map((action, index) => (
+                <div key={`top-left-${index}`} className="card-shell-action">
+                  {action}
+                </div>
+              ))}
+            </div>
+            <div className="card-shell-header-side card-shell-header-side-right">
+              {primaryTopRight.map((action, index) => (
+                <div key={`action-${index}`} className="card-shell-action">
+                  {action}
+                </div>
+              ))}
+              {overflowTopRight.length > 0 && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      className="card-shell-overflow"
+                      onClick={(event) => event.stopPropagation()}
+                      aria-label="More actions"
+                    >
+                      ...
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" sideOffset={6}>
+                    {overflowTopRight.map((action, index) => (
+                      <DropdownMenuItem key={`overflow-${index}`} asChild>
+                        {React.isValidElement(action) ? action : <span>{action}</span>}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </div>
           </div>
         )}
         <div
           className={cn(
             'card-shell-body',
-            (bottomLeftItems.length > 0 || bottomRightItems.length > 0) && 'card-shell-body--bottom',
             isEditorMode && 'card-shell-body--no-scroll'
           )}
           style={
@@ -478,6 +461,24 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
         >
           {children}
         </div>
+        {(bottomLeftItems.length > 0 || bottomRightItems.length > 0) && (
+          <div className="card-shell-footer">
+            <div className="card-shell-footer-side">
+              {bottomLeftItems.map((action, index) => (
+                <div key={`bottom-action-${index}`} className="card-shell-action">
+                  {action}
+                </div>
+              ))}
+            </div>
+            <div className="card-shell-footer-side card-shell-footer-side-right">
+              {bottomRightItems.map((action, index) => (
+                <div key={`bottom-right-${index}`} className="card-shell-action">
+                  {action}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         {resizable && !drawMode && showResizeHandle && (
           <button
             type="button"
@@ -502,16 +503,39 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
 
               const onMove = (moveEvent: PointerEvent) => {
                 if (!resizeRef.current || moveEvent.pointerId !== resizeRef.current.pointerId) return;
+                moveEvent.preventDefault();
 
                 const deltaY = moveEvent.clientY - resizeRef.current.startY;
                 const snappedDelta = Math.round(deltaY / resizeStepPx) * resizeStepPx;
-                const nextHeight = clampHeight(resizeRef.current.baseHeight + snappedDelta);
-                commitHeight(nextHeight);
+                const nextHeightRaw = resizeRef.current.baseHeight + snappedDelta;
+                const nextHeight = isControlledResize
+                  ? Math.max(resizeStepPx, nextHeightRaw)
+                  : clampHeight(nextHeightRaw);
+
+                resizePendingHeightRef.current = nextHeight;
+                if (resizeRafRef.current != null) return;
+
+                resizeRafRef.current = window.requestAnimationFrame(() => {
+                  resizeRafRef.current = null;
+                  const pendingHeight = resizePendingHeightRef.current;
+                  resizePendingHeightRef.current = null;
+                  if (pendingHeight == null) return;
+                  commitHeight(pendingHeight);
+                });
               };
 
               const onEnd = (endEvent: PointerEvent) => {
                 if (!resizeRef.current || endEvent.pointerId !== resizeRef.current.pointerId) return;
                 resizeRef.current = null;
+                if (resizeRafRef.current != null) {
+                  window.cancelAnimationFrame(resizeRafRef.current);
+                  resizeRafRef.current = null;
+                }
+                const pendingHeight = resizePendingHeightRef.current;
+                resizePendingHeightRef.current = null;
+                if (pendingHeight != null) {
+                  commitHeight(pendingHeight);
+                }
                 window.removeEventListener('pointermove', onMove);
                 window.removeEventListener('pointerup', onEnd);
                 window.removeEventListener('pointercancel', onEnd);

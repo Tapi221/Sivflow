@@ -378,7 +378,10 @@ export type Card = BaseEntity & {
   // ブロック方式（新方式）
   questionBlocks?: CardBlock[];
   answerBlocks?: CardBlock[];
+  layoutRows?: number;
+  /** @deprecated Read-only legacy field. Use layoutRows. */
   questionExtraRows?: number;
+  /** @deprecated Read-only legacy field. Use layoutRows. */
   answerExtraRows?: number;
   inkQuestion?: InkDocument | null;
   inkAnswer?: InkDocument | null;

@@ -22,6 +22,7 @@ import { DashboardSkeleton } from './Components/skeletons/DashboardSkeleton';
 import { autoBackupService } from './services/AutoBackupService';
 // データ整合性チェックのサービス
 import { dataIntegrityService } from './services/DataIntegrityService';
+import { sanitizeForLog } from '@/utils/logSanitizer';
 // 同期の進捗などを扱うカスタムフック
 import { useSync } from './hooks/useSync';
 // アカウントロック時に表示する画面
@@ -252,10 +253,14 @@ function AppContent() {
         // 3. データ整合性チェック（DB 健全性チェック）
         const report = await dataIntegrityService.checkIntegrity();
         if (!report.isHealthy) {
+          const issueSummary = report.issues.reduce<Record<string, number>>((acc, issue) => {
+            acc[issue.code] = (acc[issue.code] || 0) + 1;
+            return acc;
+          }, {});
           console.error(
             '[Critical] Data integrity issues found:',
             report.issues.length,
-            report.issues,
+            sanitizeForLog(issueSummary),
           );
         } else {
           console.log(
@@ -274,7 +279,7 @@ function AppContent() {
           await syncService.performStartupSync();
         }
       } catch (error) {
-        console.error('[Critical] Startup tasks failed:', error);
+        console.error('[Critical] Startup tasks failed:', sanitizeForLog(error));
       }
     };
 

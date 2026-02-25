@@ -1,178 +1,187 @@
-/**
- * DataIntegrityService
- * 
- * 設計原則：
- * - 起動時にデータ整合性をチェック
- * - 問題を検出のみ（自動修復は限定的）
- * - 修復より隔離を優先
- */
-
 import { getLocalDb } from './localDB';
 import { normalizeCard, normalizeFolder } from '@/utils';
+import type { IntegrityIssue, IntegrityReport } from './dataIntegrityTypes';
+import { sanitizeForLog } from '@/utils/logSanitizer';
 
-export interface IntegrityIssue {
-  type: 'orphaned_card' | 'invalid_folder_ref' | 'missing_required_field' | 'invalid_value';
-  severity: 'warning' | 'error';
-  itemType: 'card' | 'folder';
-  itemId: string;
-  description: string;
-  suggestion: string;
-}
+const TIMESTAMP_KEYS = ['createdAt', 'updatedAt', 'deletedAt', 'nextReviewDate', 'lastReviewAt'] as const;
 
-export interface IntegrityReport {
-  checkedAt: string;
-  totalCards: number;
-  totalFolders: number;
-  issues: IntegrityIssue[];
-  isHealthy: boolean;
-}
+const isMissingFolderId = (folderId: unknown): boolean =>
+  folderId === null || folderId === undefined || String(folderId).trim() === '';
+
+const readDeletedState = (entity: any): boolean => Boolean(entity?.isDeleted ?? entity?.is_deleted ?? entity?.deleted);
+
+const normalizeTimestampValue = (value: unknown): Date | null => {
+  if (value == null || value === '') return null;
+  if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value;
+  if (typeof value === 'string' || typeof value === 'number') {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+  if (typeof value === 'object' && typeof (value as any).toDate === 'function') {
+    try {
+      const dt = (value as any).toDate();
+      return dt instanceof Date && !Number.isNaN(dt.getTime()) ? dt : null;
+    } catch {
+      return null;
+    }
+  }
+  return null;
+};
+
+const extractSideBlockText = (blocks: any[], side: 'question' | 'answer'): string | null => {
+  const target = blocks.find((block) => {
+    const role = String(block?.side ?? block?.role ?? '').toLowerCase();
+    const type = String(block?.type ?? '').toLowerCase();
+    return role === side || type === side || type === `${side}_text`;
+  });
+  if (!target) return null;
+  const txt = target?.text;
+  return typeof txt === 'string' && txt.trim() ? txt.trim() : null;
+};
 
 class DataIntegrityService {
-  /**
-   * 完全な整合性チェックを実行
-   */
   async checkIntegrity(): Promise<IntegrityReport> {
     const issues: IntegrityIssue[] = [];
-    
+
     try {
       const db = await getLocalDb();
       const allCards = await db.getAllCards();
       const allFolders = await db.getAllFolders();
-      
+
       const cards = allCards.map(normalizeCard);
       const folders = allFolders.map(normalizeFolder);
-      
-      const folderIds = new Set(folders.map(f => f.id));
-      const nonDeletedFolderIds = new Set(
-        folders.filter(f => !f.isDeleted).map(f => f.id)
-      );
+      const folderIds = new Set(folders.map((f) => f.id));
 
-      // 1. カードの整合性チェック
-      for (const card of cards) {
-        // 削除済みカードはスキップ
-        if (card.isDeleted) continue;
-
-        // フォルダIDのチェック
-        // null または '' は「未分類（トップレベル）」として完全に許容する
-        const currentFid = card.folderId;
-        const isUnclassified = currentFid === null || currentFid === '' || currentFid === undefined;
-        
-        if (currentFid === undefined) {
+      for (const card of cards as any[]) {
+        const deletedAtExists = card.deletedAt != null;
+        const isDeleted = readDeletedState(card);
+        if (deletedAtExists !== isDeleted) {
           issues.push({
-            type: 'missing_required_field',
-            severity: 'error',
-            itemType: 'card',
-            itemId: card.id,
-            description: 'カードにフォルダIDプロパティがありません',
-            suggestion: '整合性修復を実行してください'
-          });
-          continue;
-        }
-
-        // フォルダが存在しないカード（孤立カード）
-        // 未分類でない場合、かつフォルダリストに存在しない場合はエラー
-        if (!isUnclassified && !folderIds.has(currentFid)) {
-          issues.push({
-            type: 'orphaned_card',
-            severity: 'error',
-            itemType: 'card',
-            itemId: card.id,
-            description: `カードが参照するフォルダ ${currentFid} が存在しません`,
-            suggestion: '整合性修復を実行して未分類に移動してください'
-          });
-          continue;
-        }
-
-        // フォルダは存在するが削除済み
-        if (!nonDeletedFolderIds.has(card.folderId)) {
-          issues.push({
-            type: 'invalid_folder_ref',
+            code: 'DELETED_FLAG_MISMATCH',
+            entityType: 'card',
+            entityId: String(card.id ?? 'unknown'),
             severity: 'warning',
-            itemType: 'card',
-            itemId: card.id,
-            description: 'カードが参照するフォルダは削除済みです',
-            suggestion: 'フォルダを復元するか、カードを削除してください'
+            fixed: false,
+            details: { hasDeletedAt: deletedAtExists, isDeleted },
           });
         }
 
-        // 必須フィールドのチェック
-        if (!card.questionText && (!card.questionImages || card.questionImages.length === 0)) {
-          issues.push({
-            type: 'missing_required_field',
-            severity: 'warning',
-            itemType: 'card',
-            itemId: card.id,
-            description: 'カードに問題文がありません',
-            suggestion: 'カードを編集して問題文を追加してください'
-          });
-        }
-      }
-
-      // 2. フォルダの整合性チェック
-      for (const folder of folders) {
-        if (folder.isDeleted) continue;
-
-        // 親フォルダが削除済みの場合
-        if (folder.parentFolderId && !nonDeletedFolderIds.has(folder.parentFolderId)) {
-          if (!folderIds.has(folder.parentFolderId)) {
+        for (const key of TIMESTAMP_KEYS) {
+          const raw = card[key];
+          if (raw == null) continue;
+          const normalized = normalizeTimestampValue(raw);
+          if (!normalized || !(raw instanceof Date)) {
             issues.push({
-              type: 'orphaned_card',
-              severity: 'warning',
-              itemType: 'folder',
-              itemId: folder.id,
-              description: `フォルダが参照する親フォルダ ${folder.parentFolderId} が存在しません`,
-              suggestion: 'フォルダ構造を確認してください'
+              code: 'TIMESTAMP_TYPE_MIXED',
+              entityType: 'card',
+              entityId: String(card.id ?? 'unknown'),
+              severity: normalized ? 'info' : 'warning',
+              fixed: false,
+              details: { field: key, originalType: typeof raw },
             });
           }
         }
 
-        // フォルダ名がない
+        if (!isDeleted && isMissingFolderId(card.folderId)) {
+          issues.push({
+            code: 'MISSING_FOLDER',
+            entityType: 'card',
+            entityId: String(card.id ?? 'unknown'),
+            severity: 'error',
+            fixed: false,
+            details: { folderId: card.folderId ?? null },
+          });
+        }
+
+        if (!isDeleted && !isMissingFolderId(card.folderId) && !folderIds.has(String(card.folderId))) {
+          issues.push({
+            code: 'INVALID_FOLDER_REF',
+            entityType: 'card',
+            entityId: String(card.id ?? 'unknown'),
+            severity: 'error',
+            fixed: false,
+            details: { folderId: String(card.folderId) },
+          });
+        }
+
+        const blocks = Array.isArray(card.blocks) ? card.blocks : [];
+        if (blocks.some((b) => typeof b?.orderIndex !== 'number')) {
+          issues.push({
+            code: 'BLOCK_ORDER_INDEX_MISSING',
+            entityType: 'card',
+            entityId: String(card.id ?? 'unknown'),
+            severity: 'warning',
+            fixed: false,
+            details: { blockCount: blocks.length },
+          });
+        }
+
+        const qBlockText = extractSideBlockText(blocks, 'question');
+        const aBlockText = extractSideBlockText(blocks, 'answer');
+        const qText = typeof card.questionText === 'string' ? card.questionText.trim() : '';
+        const aText = typeof card.answerText === 'string' ? card.answerText.trim() : '';
+
+        if ((qBlockText && qText && qBlockText !== qText) || (aBlockText && aText && aBlockText !== aText)) {
+          issues.push({
+            code: 'TEXT_BLOCK_MISMATCH',
+            entityType: 'card',
+            entityId: String(card.id ?? 'unknown'),
+            severity: 'warning',
+            fixed: false,
+            details: {
+              hasQuestionMismatch: Boolean(qBlockText && qText && qBlockText !== qText),
+              hasAnswerMismatch: Boolean(aBlockText && aText && aBlockText !== aText),
+            },
+          });
+        }
+      }
+
+      for (const folder of folders as any[]) {
         if (!folder.folderName && !(folder as any).folder_name) {
           issues.push({
-            type: 'missing_required_field',
+            code: 'MISSING_REQUIRED_FIELD',
+            entityType: 'folder',
+            entityId: String(folder.id ?? 'unknown'),
             severity: 'warning',
-            itemType: 'folder',
-            itemId: folder.id,
-            description: 'フォルダに名前がありません',
-            suggestion: 'フォルダ名を設定してください'
+            fixed: false,
+            details: { field: 'folderName' },
           });
         }
       }
 
       return {
         checkedAt: new Date().toISOString(),
-        totalCards: cards.filter(c => !c.isDeleted).length,
-        totalFolders: folders.filter(f => !f.isDeleted).length,
+        totalCards: cards.filter((c) => !c.isDeleted).length,
+        totalFolders: folders.filter((f) => !f.isDeleted).length,
         issues,
-        isHealthy: issues.filter(i => i.severity === 'error').length === 0
+        isHealthy: issues.filter((i) => i.severity === 'error').length === 0,
       };
     } catch (error) {
-      console.error('Integrity check failed:', error);
+      console.error('[Integrity] check failed', sanitizeForLog(error));
       return {
         checkedAt: new Date().toISOString(),
         totalCards: 0,
         totalFolders: 0,
-        issues: [{
-          type: 'invalid_value',
-          severity: 'error',
-          itemType: 'card',
-          itemId: 'system',
-          description: `整合性チェックに失敗しました: ${error}`,
-          suggestion: 'アプリを再起動してください'
-        }],
-        isHealthy: false
+        issues: [
+          {
+            code: 'SYSTEM_CHECK_FAILED',
+            entityType: 'system',
+            entityId: 'system',
+            severity: 'error',
+            fixed: false,
+            details: { error: String(error) },
+          },
+        ],
+        isHealthy: false,
       };
     }
   }
 
-  /**
-   * 孤立カードをゴミ箱に移動（隔離）
-   */
   async quarantineOrphanedCards(): Promise<number> {
     const report = await this.checkIntegrity();
     const orphanedCardIds = report.issues
-      .filter(i => i.type === 'orphaned_card' && i.itemType === 'card')
-      .map(i => i.itemId);
+      .filter((i) => i.code === 'INVALID_FOLDER_REF' && i.entityType === 'card')
+      .map((i) => i.entityId);
 
     let count = 0;
     const db = await getLocalDb();
@@ -181,7 +190,7 @@ class DataIntegrityService {
         await db.softDelete('cards', cardId);
         count++;
       } catch (e) {
-        console.error(`Failed to quarantine card ${cardId}:`, e);
+        console.error('[Integrity] quarantine failed', sanitizeForLog({ cardId, error: e }));
       }
     }
 

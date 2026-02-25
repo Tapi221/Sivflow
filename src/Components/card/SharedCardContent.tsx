@@ -3,12 +3,10 @@ import type { CardBlock } from '@/types';
 import { cn } from '@/lib/utils';
 import { BlockRenderer } from './BlockRenderer';
 import { BlockEditor } from './BlockEditor';
-import { CARD_ROW_PX, CARD_TOP_PADDING_PX } from './constants';
-import { normalizeExtraRows } from '@/domain/card/extraRows';
+import { CARD_TOP_PADDING_PX } from './constants';
 
 type SharedCardContentBaseProps = {
   blocks: CardBlock[];
-  extraRows?: number;
   className?: string;
 };
 
@@ -39,9 +37,6 @@ type SharedCardContentEditProps = SharedCardContentBaseProps & {
 export type SharedCardContentProps = SharedCardContentViewProps | SharedCardContentEditProps;
 
 export function SharedCardContent(props: SharedCardContentProps) {
-  const safeExtraRows = normalizeExtraRows(props.extraRows);
-  const extraSpaceHeightPx = safeExtraRows * CARD_ROW_PX;
-
   return (
     <div
       className={cn(
@@ -76,13 +71,6 @@ export function SharedCardContent(props: SharedCardContentProps) {
           onGalleryFullscreenChange={props.onGalleryFullscreenChange}
         />
       )}
-
-      <div
-        className="w-full shrink-0"
-        aria-hidden="true"
-        data-card-extra-space="true"
-        style={extraSpaceHeightPx > 0 ? { height: `${extraSpaceHeightPx}px` } : undefined}
-      />
     </div>
   );
 }

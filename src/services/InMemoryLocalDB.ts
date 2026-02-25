@@ -729,7 +729,7 @@ export class InMemoryLocalDB {
   async repairDataIntegrity(
     _currentUserId: string,
     _onProgress?: (msg: string) => void
-  ): Promise<{ folders: number; cards: number; canonicalId: string | null }> {
-    return { folders: 0, cards: 0, canonicalId: null };
+  ): Promise<{ folders: number; cards: number; canonicalId: string | null; issues: any[] }> {
+    return { folders: 0, cards: 0, canonicalId: null, issues: [] };
   }
 }

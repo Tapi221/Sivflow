@@ -22,6 +22,7 @@ export interface CardFrameProps
   ruledOffsetPx?: number;
   ruledOpacity?: number;
   overlay?: React.ReactNode;
+  footerLeft?: React.ReactNode;
 }
 
 export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
@@ -36,6 +37,7 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
       ruledOffsetPx = CARD_TOP_PADDING_PX,
       ruledOpacity = 1,
       overlay,
+      footerLeft,
       style,
       ...shellProps
     },
@@ -54,6 +56,7 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
               ...(style as React.CSSProperties | undefined),
               ['--card-base-width' as any]: `${Math.max(1, baseWidth)}px`,
             }}
+            actionsBottomLeft={footerLeft}
             {...shellProps}
           >
             <CardSurface

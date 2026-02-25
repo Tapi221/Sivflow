@@ -1,7 +1,7 @@
 import { normalizeUploadedImages } from './imageUtils';
 import { normalizeMemoryStability } from './reviewUtils';
 import { normalizeInkDocument } from '@/Components/ink/inkTypes';
-import { normalizeExtraRows } from '@/domain/card/extraRows';
+import { DEFAULT_LAYOUT_ROWS, normalizeExtraRows, normalizeLayoutRows } from '@/domain/card/extraRows';
 
 // ページ名から URL パスを作成
 // クエリパラメータ付きの場合も対応（例: 'CardEdit?folderId=xxx'）
@@ -154,6 +154,10 @@ export const normalizeCard = (raw: any) => {
   // ★ 変更: id が無い raw が来た時に undefined をばら撒かない
   const id = raw?.id ?? raw?.cardId ?? raw?.card_id ?? makeFallbackId();
 
+  const legacyQuestionExtraRows = normalizeExtraRows(raw?.questionExtraRows ?? raw?.question_extra_rows ?? 0);
+  const legacyAnswerExtraRows = normalizeExtraRows(raw?.answerExtraRows ?? raw?.answer_extra_rows ?? 0);
+  const migratedLayoutRows = DEFAULT_LAYOUT_ROWS + Math.max(legacyQuestionExtraRows, legacyAnswerExtraRows);
+
   const normalized: any = {
     id,
     userId: raw?.userId ?? raw?.user_id ?? '',
@@ -232,8 +236,10 @@ export const normalizeCard = (raw: any) => {
       if (b.type === 'math' && !b.math?.latex?.trim()) return false;
       return true;
     }),
-    questionExtraRows: normalizeExtraRows(raw?.questionExtraRows ?? raw?.question_extra_rows ?? 0),
-    answerExtraRows: normalizeExtraRows(raw?.answerExtraRows ?? raw?.answer_extra_rows ?? 0),
+    layoutRows: normalizeLayoutRows(raw?.layoutRows ?? raw?.layout_rows ?? migratedLayoutRows),
+    // Legacy互換の読み取り専用。高さロジックは layoutRows のみを参照する。
+    questionExtraRows: legacyQuestionExtraRows,
+    answerExtraRows: legacyAnswerExtraRows,
     inkQuestion: (() => {
       const doc = normalizeInkDocument(raw?.inkQuestion ?? raw?.ink_question ?? null);
       return doc.strokes.length > 0 ? doc : null;

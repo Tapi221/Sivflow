@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { normalizeCard } from '../utils';
+import { DEFAULT_LAYOUT_ROWS, MAX_LAYOUT_ROWS } from '@/domain/card/extraRows';
 
 describe('normalizeCard', () => {
   it('should filter out empty math blocks from questionBlocks and answerBlocks', () => {
@@ -56,16 +57,37 @@ describe('normalizeCard', () => {
     expect(normalized.answerBlocks[0].content).toBe('Legacy Answer');
   });
 
-  it('should normalize per-side extra rows', () => {
+  it('should normalize layout rows', () => {
     const rawCard = {
       id: 'rows-card',
+      layout_rows: '20',
       question_extra_rows: '3',
       answerExtraRows: 2,
     };
 
     const normalized = normalizeCard(rawCard);
 
-    expect(normalized.questionExtraRows).toBe(3);
-    expect(normalized.answerExtraRows).toBe(2);
+    expect(normalized.layoutRows).toBe(20);
+  });
+
+  it('migrates legacy per-side extra rows to layoutRows using larger side', () => {
+    const rawCard = {
+      id: 'legacy-rows-card',
+      question_extra_rows: '3',
+      answer_extra_rows: 10,
+    };
+
+    const normalized = normalizeCard(rawCard);
+    expect(normalized.layoutRows).toBe(DEFAULT_LAYOUT_ROWS + 10);
+  });
+
+  it('clamps layoutRows with compatibility max bound', () => {
+    const rawCard = {
+      id: 'clamp-rows-card',
+      layoutRows: MAX_LAYOUT_ROWS + 100,
+    };
+
+    const normalized = normalizeCard(rawCard);
+    expect(normalized.layoutRows).toBe(MAX_LAYOUT_ROWS);
   });
 });

@@ -9,6 +9,7 @@ import type { Folder, Card, User, UserSettings, UserStats } from '../types';
 import type { SyncError, SyncHistory, SyncSettings, SyncConflict, SyncQueueItem, DiffResult, SyncResult } from '../types/sync';
 import { DEFAULT_SYNC_SETTINGS } from '../types/sync';
 import { sanitizeProfileImage } from '@/utils/profileImageSanitizer';
+import { sanitizeForLog } from '@/utils/logSanitizer';
 
 type SyncableCollection = 'users' | 'userSettings' | 'folders' | 'cards' | 'userStats';
 
@@ -678,7 +679,7 @@ export class SyncService {
    */
   async pullChanges(onProgress?: (msg: string) => void): Promise<boolean> {
     const lastSyncTime = await this.localDB.getLastSyncTime(this.userId);
-    console.log(`[Sync] Pulling changes since: ${lastSyncTime?.toISOString()}`);
+    console.log(`[Sync][Pull] Starting. since=${lastSyncTime?.toISOString() ?? 'epoch'}`);
 
     try {
       // 各コレクションから安全にデータを取得
@@ -700,10 +701,10 @@ export class SyncService {
 
       // 最終同期時刻を更新
       await this.localDB.updateLastSyncTime(this.userId, new Date());
-      console.log('[Sync] Pull completed successfully.');
+      console.log('[Sync][Pull] Completed successfully.');
       return true;
     } catch (error: any) {
-      console.error('[Sync] Error pulling changes from Firestore:', error);
+      console.error('[Sync][Pull] Failed:', sanitizeForLog(error));
       await this.recordError(error.message, 'download', error.stack);
       return false;
     }
@@ -807,7 +808,7 @@ export class SyncService {
     // synchronize()から渡されたsince（pull前の時刻）を使用、なければDB値
     const lastSync = since || dbLastSync || new Date(0);
     
-    console.log(`[Sync] Pushing local changes since: ${lastSync.toISOString()}`);
+    console.log(`[Sync][Push] Starting. since=${lastSync.toISOString()}`);
     
     // 各テーブルからダーティなアイテムを取得
     const dirtyFolders = await this.localDB.getDirtyItems('folders', this.userId, lastSync);
@@ -818,7 +819,12 @@ export class SyncService {
     try {
         const totalDirty = dirtyFolders.length + dirtyCards.length + dirtyUserSettings.length + dirtyUserStats.length;
         if (totalDirty === 0) {
-            console.log('[Sync] No local changes to push.');
+            console.log('[Sync][Push] Skipped: no local dirty records.', sanitizeForLog({
+              folders: dirtyFolders.length,
+              cards: dirtyCards.length,
+              userSettings: dirtyUserSettings.length,
+              userStats: dirtyUserStats.length,
+            }));
             return true;
         }
 
@@ -830,6 +836,8 @@ export class SyncService {
             ...dirtyUserStats.map(s => ({ collection: 'userStats', data: s }))
         ];
 
+        let pushedCount = 0;
+        let skippedCount = 0;
         for (let i = 0; i < allItems.length; i += 500) {
             const chunk = allItems.slice(i, i + 500);
             const batch = writeBatch(firestoreDb);
@@ -846,7 +854,11 @@ export class SyncService {
                 try {
                   serverSnap = await getDoc(docRef);
                 } catch (e) {
-                  console.warn(`[Sync] Failed to check server state for ${item.data.id}, skipping push.`);
+                  skippedCount += 1;
+                  console.warn('[Sync][Push] Skipped item: failed to check server state.', sanitizeForLog({
+                    collection: item.collection,
+                    entityId: item.data.id,
+                  }));
                   continue; 
                 }
                 
@@ -855,7 +867,13 @@ export class SyncService {
                     const serverUpdated = serverData.updatedAt?.toDate?.() || new Date(0);
                     // lastSync (Pull前の時刻) より後にサーバーが更新されていたら競合
                     if (serverUpdated > lastSync) {
-                        console.warn(`[Sync] Conflict detected for ${item.collection}/${item.data.id}. Server version (${serverUpdated.toISOString()}) is newer than baseline (${lastSync.toISOString()}). Skipping push.`);
+                        skippedCount += 1;
+                        console.warn('[Sync][Push] Skipped item: conflict (server newer than baseline).', sanitizeForLog({
+                          collection: item.collection,
+                          entityId: item.data.id,
+                          serverUpdated: serverUpdated.toISOString(),
+                          baseline: lastSync.toISOString(),
+                        }));
                         // ここで Push をスキップし、次の Pull で解決されるのを待つ
                         // または、明示的に競合リストに入れる？
                         // 現状はスキップ安全策をとる
@@ -885,13 +903,14 @@ export class SyncService {
             
             if (operationCount > 0) {
               await batch.commit();
+              pushedCount += operationCount;
             }
         }
 
-        console.log(`[Sync] Push completed successfully (${totalDirty} items processed).`);
+        console.log(`[Sync][Push] Completed. dirty=${totalDirty}, pushed=${pushedCount}, skipped=${skippedCount}`);
         return true;
     } catch (error: any) {
-        console.error('[Sync] Error pushing changes to Firestore:', error);
+        console.error('[Sync][Push] Failed:', sanitizeForLog(error));
         await this.recordError(error.message, 'upload', error.stack);
         return false;
     }
@@ -988,7 +1007,9 @@ export class SyncService {
       }
 
       // キュー処理優先（オフライン中に溜まった変更をまず適用）
+      console.log('[Sync][PushQueue] Processing queued operations before pull/push.');
       const queueResult = await this.processQueue();
+      console.log('[Sync][PushQueue] Result', sanitizeForLog(queueResult));
       if (queueResult.failed > 0) {
         errors.push(`キュー処理失敗: ${queueResult.failed}件`);
       }
@@ -1019,7 +1040,9 @@ export class SyncService {
       }
 
       // プッシュ（ローカル → サーバー）
-      if (pullSuccess) {
+      if (pullSuccess && typeof navigator !== 'undefined' && !navigator.onLine) {
+        console.warn('[Sync][Push] Skipped after pull: browser is offline.');
+      } else if (pullSuccess) {
         onProgress?.('ローカルの変更を送信中...');
         let pushSuccess = false;
         try {
@@ -1037,6 +1060,8 @@ export class SyncService {
         if (!pushSuccess) {
           errors.push('プッシュ失敗');
         }
+      } else {
+        console.warn('[Sync][Push] Skipped because pull did not succeed.');
       }
 
       // 競合チェック

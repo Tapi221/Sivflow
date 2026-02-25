@@ -17,19 +17,16 @@
   }
 
   .card-shell--resizable {
-    padding-bottom: 20px;
+    --card-resize-handle-reserve: 22px;
+    padding-bottom: 0;
     min-height: var(--card-resize-height, 144px);
     max-height: none;
     height: var(--card-resize-height, 144px);
   }
 
-  .card-shell--resizable .card-shell-frame {
-    overflow-x: clip !important;
-  }
-
   .card-shell--resizable .card-shell-body {
     flex: 1 0 auto;
-    overflow-y: visible;
+    padding-bottom: var(--card-resize-handle-reserve);
     overflow-x: clip !important;
   }
 
@@ -59,10 +56,6 @@
     display: none !important;
   }
 
-  .card-shell-frame {
-    @apply relative w-full h-full;
-  }
-
   .card-shell-body {
     @apply relative flex-1 min-h-0;
     overflow-y: auto;
@@ -84,7 +77,7 @@
 
   .card-shell-resize-handle {
     @apply absolute left-0 right-0 bottom-0 flex items-center justify-center;
-    height: 20px;
+    height: 18px;
     border: 0;
     background: transparent;
     cursor: ns-resize;
@@ -97,21 +90,21 @@
   }
 
   .card-shell-resize-knob {
-    width: 64px;
-    height: 4px;
+    width: 72px;
+    height: 6px;
     border-radius: 9999px;
-    background: rgba(100, 116, 139, 0.45);
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.15);
+    background: rgba(148, 163, 184, 0.72);
+    box-shadow: 0 1px 1px rgba(15, 23, 42, 0.12);
     transition: background-color 0.2s ease, box-shadow 0.2s ease;
   }
 
   .card-shell-resize-handle:hover .card-shell-resize-knob {
-    background: rgba(71, 85, 105, 0.6);
+    background: rgba(100, 116, 139, 0.82);
     box-shadow: 0 2px 4px rgba(15, 23, 42, 0.18);
   }
 
-  .card-shell-body--bottom {
-    @apply pb-12;
+  .card-shell-resize-handle:active .card-shell-resize-knob {
+    background: rgba(71, 85, 105, 0.88);
   }
 
   .image-full-width {
@@ -184,25 +177,28 @@
     z-index: 0;
   }
 
-  .card-shell-actions {
-    @apply absolute z-20 flex items-center gap-2;
-    overflow: visible !important;
+  .card-shell-header,
+  .card-shell-footer {
+    @apply flex items-center justify-between gap-2 px-3;
+    min-height: 2.5rem;
   }
 
-  .card-shell-actions-top-right {
-    @apply top-3 right-3;
+  .card-shell-header {
+    @apply pt-3;
   }
 
-  .card-shell-actions-top-left {
-    @apply top-3 left-3;
+  .card-shell-footer {
+    @apply pb-3;
   }
 
-  .card-shell-actions-bottom-left {
-    @apply bottom-3 left-3;
+  .card-shell-header-side,
+  .card-shell-footer-side {
+    @apply flex items-center gap-2 min-w-0;
   }
 
-  .card-shell-actions-bottom-right {
-    @apply bottom-3 right-3;
+  .card-shell-header-side-right,
+  .card-shell-footer-side-right {
+    @apply justify-end;
   }
 
   .card-shell-action {

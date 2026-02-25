@@ -19,27 +19,23 @@ describe('SharedCardContent', () => {
     { id: 'b-1', type: 'text', orderIndex: 0, content: 'hello' },
   ];
 
-  it('renders view mode with shared root and card extra space', () => {
+  it('renders view mode with shared root', () => {
     const { container } = render(
-      <SharedCardContent mode="view" blocks={blocks} extraRows={3} />
+      <SharedCardContent mode="view" blocks={blocks} />
     );
 
     const root = container.querySelector('.card-content-root');
-    const extra = container.querySelector('[data-card-extra-space="true"]') as HTMLElement | null;
 
     expect(root).toBeTruthy();
     expect(screen.getByTestId('mock-block-renderer')).toBeTruthy();
-    expect(extra).toBeTruthy();
-    expect(extra?.style.height).toBe('72px');
   });
 
-  it('renders edit mode with the same shared root and card extra space', () => {
+  it('renders edit mode with the same shared root', () => {
     const { container } = render(
       <DragDropContext onDragEnd={() => {}}>
         <SharedCardContent
           mode="edit"
           blocks={blocks}
-          extraRows={2}
           onChange={() => {}}
           prefix="question"
           label="問題"
@@ -50,11 +46,8 @@ describe('SharedCardContent', () => {
     );
 
     const root = container.querySelector('.card-content-root');
-    const extra = container.querySelector('[data-card-extra-space="true"]') as HTMLElement | null;
 
     expect(root).toBeTruthy();
     expect(screen.getByTestId('mock-block-editor')).toBeTruthy();
-    expect(extra).toBeTruthy();
-    expect(extra?.style.height).toBe('48px');
   });
 });

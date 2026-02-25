@@ -65,7 +65,6 @@ export default function CardLayoutConsistencyTest() {
                   mode="edit"
                   blocks={editBlocks}
                   onChange={setEditBlocks}
-                  extraRows={2}
                   prefix="question"
                   label="問題"
                   color="text-indigo-500"

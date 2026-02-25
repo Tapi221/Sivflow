@@ -6,7 +6,6 @@ import LinkIcon from 'lucide-react/dist/esm/icons/link';
 import { Dialog, DialogContent } from '@/Components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { AudioPlayer } from './CardMedia';
-import { useUserSettings } from '@/hooks/useUserSettings';
 import { ReferencePopup } from './ReferencePopup';
 import type { CardBlock, ReferenceBlockData } from '@/types';
 import { InkLayer, InkToolbar, type InkHistoryState, type InkLayerHandle } from '@/Components/ink/InkLayer';
@@ -15,8 +14,8 @@ import type { InkDocument, InkEditTool } from '@/Components/ink/inkTypes';
 import { CardFrame } from './frame/CardFrame';
 import { CardCornerActions } from './frame/CardCornerActions';
 import { SharedCardContent } from './SharedCardContent';
-import { CANONICAL_CARD_WIDTH } from './constants';
-import { normalizeExtraRows } from '@/domain/card/extraRows';
+import { CANONICAL_CARD_WIDTH, CARD_ROW_PX } from './constants';
+import { DEFAULT_LAYOUT_ROWS, normalizeExtraRows, normalizeLayoutRows } from '@/domain/card/extraRows';
 
 type FlashcardMediaLike =
   | string
@@ -51,9 +50,15 @@ type FlashcardCardLike = {
   answer_code?: { code?: string; language?: string } | null;
   questionBlocks?: CardBlock[];
   answerBlocks?: CardBlock[];
+  layoutRows?: number;
+  layout_rows?: number;
+  /** @deprecated Read-only legacy field. Use layoutRows/layout_rows. */
   questionExtraRows?: number;
+  /** @deprecated Read-only legacy field. Use layoutRows/layout_rows. */
   question_extra_rows?: number;
+  /** @deprecated Read-only legacy field. Use layoutRows/layout_rows. */
   answerExtraRows?: number;
+  /** @deprecated Read-only legacy field. Use layoutRows/layout_rows. */
   answer_extra_rows?: number;
   inkQuestion?: InkDocument | null;
   inkAnswer?: InkDocument | null;
@@ -82,9 +87,6 @@ interface FlashcardProps {
   drawMode?: boolean;
   inkEditingEnabled?: boolean;
   onInkDocumentChange?: (side: 'question' | 'answer', nextDocument: InkDocument) => void;
-  /** エディタから渡される共有高さ（プレビューで優先利用） */
-  editorSharedHeightPx?: number | null;
-  lockCardHeight?: boolean;
 }
 
 export function Flashcard({
@@ -109,11 +111,7 @@ export function Flashcard({
   drawMode,
   inkEditingEnabled = false,
   onInkDocumentChange,
-  editorSharedHeightPx,
-  lockCardHeight = false,
 }: FlashcardProps) {
-  const { settings } = useUserSettings();
-
   const cardData = card;
 
   const [previewFlipped, setPreviewFlipped] = useState(false);
@@ -131,8 +129,6 @@ export function Flashcard({
     strokeCount: 0,
   });
 
-  // プレビュー時にエディタの共有リサイズ高さを反映するための state
-  const [sharedPreviewHeightPx, setSharedPreviewHeightPx] = useState<number | null>(null);
 
   useEffect(() => {
     if (!previewMode) return;
@@ -146,29 +142,6 @@ export function Flashcard({
     }
     setPreviewInkTool((prev) => prev ?? 'pen');
   }, [inkEditingEnabled]);
-
-  // エディタから直接渡された高さがあれば優先して使用
-  // プレビューモード以外でも適用する
-  useEffect(() => {
-    if (editorSharedHeightPx != null) {
-      setSharedPreviewHeightPx(editorSharedHeightPx);
-      return;
-    }
-
-    // editorSharedHeightPx がない場合は userSettings / localStorage から復元
-    if (settings?.cardEditorHeightPx != null) {
-      setSharedPreviewHeightPx(settings.cardEditorHeightPx);
-      return;
-    }
-
-    if (typeof window !== 'undefined') {
-      const raw = window.localStorage.getItem('card-editor.resize:shared-height');
-      const parsed = Number(raw);
-      if (Number.isFinite(parsed) && parsed > 0) {
-        setSharedPreviewHeightPx(parsed);
-      }
-    }
-  }, [editorSharedHeightPx, settings?.cardEditorHeightPx]);
 
   // 参考リンク抽出
   const questionReferences = React.useMemo(() => {
@@ -203,8 +176,13 @@ export function Flashcard({
 
   const questionCode = cardData?.questionCode || cardData?.question_code || null;
   const answerCode = cardData?.answerCode || cardData?.answer_code || null;
-  const questionExtraRows = normalizeExtraRows(cardData?.questionExtraRows ?? cardData?.question_extra_rows ?? 0);
-  const answerExtraRows = normalizeExtraRows(cardData?.answerExtraRows ?? cardData?.answer_extra_rows ?? 0);
+  const legacyQuestionExtraRows = normalizeExtraRows(cardData?.questionExtraRows ?? cardData?.question_extra_rows ?? 0);
+  const legacyAnswerExtraRows = normalizeExtraRows(cardData?.answerExtraRows ?? cardData?.answer_extra_rows ?? 0);
+  const layoutRows = normalizeLayoutRows(
+    cardData?.layoutRows ??
+      cardData?.layout_rows ??
+      (DEFAULT_LAYOUT_ROWS + Math.max(legacyQuestionExtraRows, legacyAnswerExtraRows))
+  );
   const cardIdForInk = cardData?.id ?? cardData?.cardId ?? null;
 
   const questionInkDocument = React.useMemo(
@@ -527,14 +505,10 @@ export function Flashcard({
     onInkDocumentChange,
   ]);
 
-  const fixedHeightPx =
-    lockCardHeight && sharedPreviewHeightPx != null
-      ? sharedPreviewHeightPx
-      : undefined;
-  const bodyOverflowY = fixedHeightPx != null ? 'auto' : 'visible';
+  const fixedHeightPx = layoutRows * CARD_ROW_PX;
+  const bodyOverflowY = 'auto';
   const activeSide: 'question' | 'answer' = effectiveIsFlipped ? 'answer' : 'question';
   const activeBlocks = resolveSideBlocks(activeSide);
-  const activeExtraRows = activeSide === 'answer' ? answerExtraRows : questionExtraRows;
 
   return (
     <div className={cn('w-full h-full flex flex-col select-none', className)}>
@@ -547,7 +521,7 @@ export function Flashcard({
           resizeStepPx={undefined}
           showResizeHandle={false}
           heightPx={fixedHeightPx}
-          lockHeight={Boolean(fixedHeightPx != null && lockCardHeight)}
+          lockHeight
           bodyOverflowY={bodyOverflowY}
           actionsTopLeft={actionsTopLeft.length > 0 ? actionsTopLeft : undefined}
           actionsTopRight={actionsTopRight.length > 0 ? actionsTopRight : undefined}
@@ -558,7 +532,6 @@ export function Flashcard({
             <SharedCardContent
               mode="view"
               blocks={activeBlocks}
-              extraRows={activeExtraRows}
               onGalleryFullscreenChange={handleGalleryFullscreenChange}
             />
           </div>
