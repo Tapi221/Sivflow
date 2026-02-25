@@ -24,6 +24,14 @@ import type { CardBlock, ReferenceBlockData } from "@/types";
 type DndLocation = { droppableId: string; index: number };
 type DndResult = { source: DndLocation; destination?: DndLocation | null };
 
+type EditorDraft = {
+  title: string;
+  tags: string[];
+  isDraft: boolean;
+  questionBlocks: CardBlock[];
+  answerBlocks: CardBlock[];
+};
+
 interface CardEditorPaneProps {
   selectedCardId: string | null;
   onCardUpdated?: () => void;
@@ -117,13 +125,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
   const toolbarMountRefA = useRef<HTMLDivElement | null>(null);
 
   // 編集用ドラフト（右ペイン内で完結）
-  const [draft, setDraft] = useState<{
-    title: string;
-    tags: string[];
-    isDraft: boolean;
-    questionBlocks: CardBlock[];
-    answerBlocks: CardBlock[];
-  } | null>(null);
+  const [draft, setDraft] = useState<EditorDraft | null>(null);
 
   const initNewDraft = useCallback(() => {
     setDraft({
@@ -192,12 +194,29 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
 
     // ロードされたデータをドラフトに反映
     if (selectedCard) {
-      setDraft({
+      const nextDraft: EditorDraft = {
         title: selectedCard.title ?? "",
         tags: selectedCard.tags ?? [],
         isDraft: selectedCard.isDraft ?? true,
         questionBlocks: (selectedCard.questionBlocks ?? []) as CardBlock[],
         answerBlocks: (selectedCard.answerBlocks ?? []) as CardBlock[],
+      };
+      // 同値のドラフトで setState を抑止して更新ループを防ぐ。
+      setDraft((prev) => {
+        if (
+          prev &&
+          prev.title === nextDraft.title &&
+          prev.isDraft === nextDraft.isDraft &&
+          prev.tags.length === nextDraft.tags.length &&
+          prev.questionBlocks.length === nextDraft.questionBlocks.length &&
+          prev.answerBlocks.length === nextDraft.answerBlocks.length &&
+          prev.tags.every((tag, i) => tag === nextDraft.tags[i]) &&
+          prev.questionBlocks.every((block, i) => block.id === nextDraft.questionBlocks[i]?.id) &&
+          prev.answerBlocks.every((block, i) => block.id === nextDraft.answerBlocks[i]?.id)
+        ) {
+          return prev;
+        }
+        return nextDraft;
       });
     } else {
       setDraft(null);

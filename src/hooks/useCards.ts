@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { getLocalDb } from '../services/localDB';
 import { useAuth } from '../contexts/AuthContext';
@@ -54,7 +54,7 @@ function isCardCompletelyEmpty(cardData: Partial<Card>): boolean {
 
 export function useCards(folderId?: string) {
   const { currentUser } = useAuth();
-  const [error, setError] = useState<string | null>(null);
+  const [error] = useState<string | null>(null);
   
   // Use settings to determine init schedule
   const { settings } = useUserSettings();
@@ -65,18 +65,15 @@ export function useCards(folderId?: string) {
       try {
         if (!currentUser) return [];
         const db = await getLocalDb(currentUser.uid);
-        console.log(`[Diagnostic] useCards: Fetching from DB ${db.name}`);
         const all = await db.getAllCards(); 
-        console.log(`[Diagnostic] useCards: TOTAL CARDS IN DEXIE (Normalized) = ${all.length}`);
         return all;
       } catch (err: any) {
         console.error(`[useCards] Error: ${err.message}`);
-        setError(err.message);
         return [];
       }
     },
 
-    [currentUser] // localDb.name is removed as dependency because it's now internal to liveQuery
+    [currentUser?.uid] // localDb.name is removed as dependency because it's now internal to liveQuery
   );
 
   // ... (rest of the hook code, I'll use multi_replace for accuracy if needed, but let's try one big block or smaller chunks)
@@ -107,8 +104,6 @@ export function useCards(folderId?: string) {
 
   const createCard = async (cardData: Partial<Card>) => {
     if (!currentUser) throw new Error('認証が必要です');
-
-    console.log('[createCard] START', { folderId: cardData.folderId, title: cardData.title });
 
     // Validation: カードが完全に空（タイトルもコンテンツもタグもない）場合は保存を拒否
     const hasBlocksContent = (blocks?: any[]) => {
@@ -214,10 +209,8 @@ export function useCards(folderId?: string) {
     };
 
     try {
-      console.log('[createCard] BEFORE_LOCALDB_ADD', { table: 'cards', cardId: newCard.id });
       const db = await getLocalDb(currentUser.uid);
       await db.addItem('cards', newCard);
-      console.log('[createCard] AFTER_LOCALDB_ADD', { table: 'cards', cardId: newCard.id, status: 'success' });
       return newCard;
     } catch (err) {
       console.error('[createCard] ERROR during LocalDB add', { table: 'cards', cardId: newCard.id, error: err });

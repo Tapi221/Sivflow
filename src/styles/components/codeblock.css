@@ -3,8 +3,9 @@
     position: relative;
     border-radius: 16px;
     border: 1px solid var(--code-border);
-    background: var(--code-bg) !important;
+    background: var(--code-bg);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+    overflow: hidden; /* ::before の角丸はみ出し防止 */
   }
 
   .codeBlockRoot::before {
@@ -19,20 +20,29 @@
     pointer-events: none;
   }
 
+  /* ===== Preview (pre) ===== */
+
   .codeBlockPre {
-    margin: 0 !important;
-    padding: 24px 10px 10px 10px !important;
-    font-size: 14px !important;
-    line-height: 20px !important;
-    font-family: "Fira Code", "Fira Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
-    tab-size: 2 !important;
-    font-variant-ligatures: none !important;
-    background: transparent !important;
-    background-image: none !important;
-    color: var(--code-fg) !important;
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-    white-space: pre !important;
+    margin: 0;
+    padding: 24px 10px 10px 10px;
+    font-size: 14px;
+    line-height: 20px;
+    font-family: "Fira Code", "Fira Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    tab-size: 2;
+    font-variant-ligatures: none;
+    background: transparent;
+    background-image: none;
+    color: var(--code-fg);
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: pre;
+    word-break: normal;
+    overflow-wrap: normal;
+  }
+
+  /* ツールバーがある版は上余白を増やす（24pxのままだと意味がないので増やす） */
+  .codeBlockPre--tools {
+    padding-top: 44px;
   }
 
   .codeBlockLang {
@@ -46,14 +56,23 @@
     text-transform: uppercase;
     padding: 2px 8px;
     border-radius: 9999px;
+
+    /* fallback -> color-mix */
+    background: rgba(255, 255, 255, 0.12);
     background: color-mix(in srgb, var(--code-bg) 88%, white 12%);
+
     border: 1px solid var(--code-border);
+
+    /* fallback -> color-mix */
+    color: #6b7280;
     color: color-mix(in srgb, var(--code-fg) 82%, #6b7280 18%);
   }
 
+  /* ===== Prism token colors ===== */
+
   .codeBlockPre .token,
   .code-editor-no-scroll .token {
-    color: var(--code-token-text) !important;
+    color: var(--code-token-text);
   }
 
   .codeBlockPre .token.comment,
@@ -64,31 +83,31 @@
   .code-editor-no-scroll .token.prolog,
   .code-editor-no-scroll .token.doctype,
   .code-editor-no-scroll .token.cdata {
-    color: var(--code-token-comment) !important;
+    color: var(--code-token-comment);
   }
 
   .codeBlockPre .token.punctuation,
   .code-editor-no-scroll .token.punctuation {
-    color: var(--code-token-punctuation) !important;
+    color: var(--code-token-punctuation);
   }
 
   .codeBlockPre .token.keyword,
   .codeBlockPre .token.atrule,
   .code-editor-no-scroll .token.keyword,
   .code-editor-no-scroll .token.atrule {
-    color: var(--code-token-keyword) !important;
+    color: var(--code-token-keyword);
   }
 
   .codeBlockPre .token.class-name,
   .codeBlockPre .token.builtin,
   .code-editor-no-scroll .token.class-name,
   .code-editor-no-scroll .token.builtin {
-    color: var(--code-token-type) !important;
+    color: var(--code-token-type);
   }
 
   .codeBlockPre .token.function,
   .code-editor-no-scroll .token.function {
-    color: var(--code-token-function) !important;
+    color: var(--code-token-function);
   }
 
   .codeBlockPre .token.string,
@@ -97,7 +116,7 @@
   .code-editor-no-scroll .token.string,
   .code-editor-no-scroll .token.char,
   .code-editor-no-scroll .token.inserted {
-    color: var(--code-token-string) !important;
+    color: var(--code-token-string);
   }
 
   .codeBlockPre .token.number,
@@ -108,7 +127,7 @@
   .code-editor-no-scroll .token.boolean,
   .code-editor-no-scroll .token.constant,
   .code-editor-no-scroll .token.symbol {
-    color: var(--code-token-number) !important;
+    color: var(--code-token-number);
   }
 
   .codeBlockPre .token.operator,
@@ -117,7 +136,7 @@
   .code-editor-no-scroll .token.operator,
   .code-editor-no-scroll .token.entity,
   .code-editor-no-scroll .token.url {
-    color: var(--code-token-operator) !important;
+    color: var(--code-token-operator);
   }
 
   .codeBlockPre .token.property,
@@ -126,57 +145,68 @@
   .code-editor-no-scroll .token.tag,
   .codeBlockPre .token.attr-name,
   .code-editor-no-scroll .token.attr-name {
-    color: var(--code-token-type) !important;
+    color: var(--code-token-type);
   }
 
   .codeBlockPre .token.attr-value,
   .code-editor-no-scroll .token.attr-value {
-    color: var(--code-token-string) !important;
+    color: var(--code-token-string);
   }
 
   .codeBlockPre .token.deleted,
   .code-editor-no-scroll .token.deleted {
-    color: var(--code-token-number) !important;
+    color: var(--code-token-number);
   }
 
+  /* ===== Editor (react-simple-code-editor) =====
+     ここでスクロール責務を握って、内側は基本 overflow を増やしすぎない
+  */
+
   .code-editor-no-scroll {
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
     max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior: contain;
   }
 
   .code-editor-no-scroll textarea,
   .code-editor-no-scroll pre {
-    font-family: "Fira Code", "Fira Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
-    font-size: 14px !important;
-    line-height: 20px !important;
-    padding: 24px 10px 10px 10px !important;
-    letter-spacing: normal !important;
-    tab-size: 2 !important;
-    white-space: pre !important;
-    word-break: normal !important;
-    overflow-wrap: normal !important;
-    margin: 0 !important;
-    text-align: left !important;
-    font-variant-ligatures: none !important;
+    font-family: "Fira Code", "Fira Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 14px;
+    line-height: 20px;
+    padding: 24px 10px 10px 10px;
+    letter-spacing: normal;
+    tab-size: 2;
+    white-space: pre;
+    word-break: normal;
+    overflow-wrap: normal;
+    margin: 0;
+    text-align: left;
+    font-variant-ligatures: none;
+  }
+
+  /* ツールバーがある場合の余白（エディタ側も合わせる） */
+  .code-editor-no-scroll--tools textarea,
+  .code-editor-no-scroll--tools pre {
+    padding-top: 44px;
   }
 
   .code-editor-no-scroll textarea {
-    overflow-y: hidden !important;
-    overflow-x: hidden !important;
-    border: none !important;
-    outline: none !important;
-    box-shadow: none !important;
-    resize: none !important;
-    background: transparent !important;
-    color: transparent !important;
-    caret-color: #334155 !important;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    resize: none;
+    background: transparent;
+
+    /* 入力文字は pre 側で描画するので透明にする */
+    color: transparent;
+
+    /* テーマ対応: 変数で渡す。無ければ code-fg */
+    caret-color: var(--code-caret, var(--code-fg));
   }
 
   .code-editor-no-scroll pre {
-    overflow-y: hidden !important;
-    overflow-x: hidden !important;
-    background: transparent !important;
-    pointer-events: none !important;
+    background: transparent;
+    pointer-events: none;
   }
 }

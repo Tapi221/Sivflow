@@ -162,11 +162,11 @@ export function CodeRenderer({ code, language, className }: CodeRendererProps) {
               <pre
                 className={cn(
                   preClassName,
-                  "codeBlockPre overflow-x-auto"
+                  "codeBlockPre overflow-x-auto whitespace-pre break-normal overscroll-contain"
                 )}
                 style={{ ...style }}
               >
-                <code>
+                <code className="whitespace-pre break-normal">
                   {visibleTokens.map((line, i) => (
                     <div key={i} {...getLineProps({ line })}>
                       {line.map((token, key) => (

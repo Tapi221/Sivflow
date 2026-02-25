@@ -13,16 +13,9 @@ export function useFolders() {
     async () => {
       if (!currentUser) return [];
       const db = await getLocalDb();
-      console.log(`[Diagnostic] useFolders: Fetching from DB ${db.name}`);
       const rawFolders = await db.folders.toArray();
 
-      console.log(`[Diagnostic] useFolders: TOTAL RAW RECORDS IN DEXIE = ${rawFolders.length}`);
-      rawFolders.forEach((f, i) => {
-          console.log(`[Dexie-Folder-${i}] ID=${f.id}, Name=${(f as any).folderName}, Deleted=${(f as any).isDeleted}/${(f as any).is_deleted}, User=${f.userId}`);
-      });
-
       const filtered = rawFolders.filter(f => !((f as any).isDeleted ?? (f as any).is_deleted));
-      console.log(`[Diagnostic] useFolders: Post-filter count = ${filtered.length}`);
 
       return filtered.map(normalizeFolder);
     },
@@ -38,8 +31,6 @@ export function useFolders() {
     if (!currentUser) throw new Error('認証が必要です');
 
     const db = await getLocalDb();
-    console.log('[Diagnostic] createFolder START. localDb instance type:', db?.constructor?.name);
-    console.log('[createFolder] START', { folderName: name, parentId, dbName: db?.name });
 
     // orderIndexの設定
     const currentFolders = folders || []; 
@@ -73,17 +64,7 @@ export function useFolders() {
         updatedAt: now.toDate()
     };
     try {
-      console.log('[createFolder] BEFORE_LOCALDB_ADD', { table: 'folders', folderId, dbName: db?.name });
       await db.addItem('folders', localData as any);
-      console.log('[createFolder] AFTER_LOCALDB_ADD', { table: 'folders', folderId, status: 'success', dbName: db?.name });
-
-      // Diagnostic: immediately read back the saved folder to verify it exists in the current DB instance
-      try {
-        const saved = await db.getItem('folders', folderId);
-        console.log('[createFolder] VERIFY_SAVED_ITEM', { folderId, saved, dbName: db?.name });
-      } catch (readErr) {
-        console.error('[createFolder] VERIFY_SAVED_ITEM ERROR', { folderId, error: readErr });
-      }
       return folderId;
     } catch (err) {
       console.error('[createFolder] ERROR during LocalDB add', { table: 'folders', folderId, error: err });

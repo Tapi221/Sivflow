@@ -12,7 +12,7 @@ type CodeBlockFrameProps = {
  * - 外枠: codeBlockRoot
  * - 言語ラベル左上配置: codeBlockLang
  * - アクション領域右上配置: right prop
- * - 内容領域: children（code-block-pre code-block-pre--tools）
+ * - 内容領域: children（codeBlockPre codeBlockPre--tools）
  */
 export const CodeBlockFrame: React.FC<CodeBlockFrameProps> = ({
   languageLabel,
@@ -32,7 +32,7 @@ export const CodeBlockFrame: React.FC<CodeBlockFrameProps> = ({
       {right && <div className="absolute right-2.5 top-2.5 z-20">{right}</div>}
 
       {/* コンテンツ領域 */}
-      <div className="code-block-pre code-block-pre--tools relative">
+      <div className="codeBlockPre codeBlockPre--tools relative">
         {children}
       </div>
     </div>
