@@ -2,6 +2,8 @@ import React from 'react';
 import AutoResizeTextarea from '@/Components/ui/AutoResizeTextarea';
 import { TEXT_BLOCK_CONTENT_CLASS, TEXT_BLOCK_LINE_HEIGHT_PX } from './textBlockStyles';
 
+const TEXT_BASELINE_NUDGE_PX = 2;
+
 type TextBlockContentProps =
   | {
       mode: 'view';
@@ -23,7 +25,12 @@ export function TextBlockContent(props: TextBlockContentProps) {
 
     return (
       <div className="w-full max-w-full overflow-hidden">
-        <div className={`${TEXT_BLOCK_CONTENT_CLASS} whitespace-pre-wrap`}>{displayText}</div>
+        <div
+          className={`${TEXT_BLOCK_CONTENT_CLASS} whitespace-pre-wrap`}
+          style={{ transform: `translateY(${TEXT_BASELINE_NUDGE_PX}px)` }}
+        >
+          {displayText}
+        </div>
       </div>
     );
   }
@@ -38,7 +45,7 @@ export function TextBlockContent(props: TextBlockContentProps) {
       allowInternalScroll={false}
       autoFocus={props.autoFocus}
       className={`${TEXT_BLOCK_CONTENT_CLASS} placeholder:text-slate-300 focus-visible:ring-0 focus-visible:ring-offset-0`}
+      style={{ transform: `translateY(${TEXT_BASELINE_NUDGE_PX}px)` }}
     />
   );
 }
-

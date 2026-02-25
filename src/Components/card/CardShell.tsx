@@ -22,7 +22,6 @@ interface CardShellProps extends React.HTMLAttributes<HTMLDivElement> {
   onHeightChange?: (heightPx: number) => void;
   onMinHeightChange?: (heightPx: number) => void;
   showResizeHandle?: boolean;
-  bodyOverflowY?: 'auto' | 'visible' | 'hidden';
   lockHeight?: boolean;
 }
 
@@ -44,7 +43,6 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
     onHeightChange,
     onMinHeightChange,
     showResizeHandle = true,
-    bodyOverflowY,
     lockHeight = false,
     ...props
   }, ref) => {
@@ -63,12 +61,6 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
       center: { x: number; y: number };
       startScale: number;
       startTranslate: { x: number; y: number };
-    } | null>(null);
-    const scrollRef = React.useRef<{
-      pointerId: number;
-      startY: number;
-      startScrollTop: number;
-      element: HTMLElement;
     } | null>(null);
 
     const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
@@ -280,31 +272,19 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
     const bottomLeftItems = React.Children.toArray(actionsBottomLeft).filter(Boolean);
     const bottomRightItems = React.Children.toArray(actionsBottomRight).filter(Boolean);
 
-    const isEditorMode = className && typeof className === 'string' && className.includes('card-shell--editor-unified-scroll');
-
     const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
       if (!drawMode) return;
       if (isInteractiveTarget(event.target)) return;
 
       pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
 
-      const scrollElement = (event.target as HTMLElement | null)?.closest('.card-shell-body') as HTMLElement | null;
-      if (scrollElement) {
-        scrollRef.current = {
-          pointerId: event.pointerId,
-          startY: event.clientY,
-          startScrollTop: scrollElement.scrollTop,
-          element: scrollElement,
-        };
-      } else {
-        panRef.current = {
-          pointerId: event.pointerId,
-          startX: event.clientX,
-          startY: event.clientY,
-          originX: panZoom.x,
-          originY: panZoom.y,
-        };
-      }
+      panRef.current = {
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        originX: panZoom.x,
+        originY: panZoom.y,
+      };
 
       if (pointersRef.current.size === 2) {
         const points = Array.from(pointersRef.current.values());
@@ -314,7 +294,7 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
           y: (points[0].y + points[1].y) / 2,
         };
         panRef.current = null;
-        scrollRef.current = null;
+
         pinchRef.current = {
           distance,
           center,
@@ -355,13 +335,6 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
         return;
       }
 
-      if (scrollRef.current?.pointerId === event.pointerId) {
-        event.preventDefault();
-        const deltaY = event.clientY - scrollRef.current.startY;
-        scrollRef.current.element.scrollTop = scrollRef.current.startScrollTop - deltaY;
-        return;
-      }
-
       if (panRef.current?.pointerId === event.pointerId) {
         event.preventDefault();
         const deltaX = event.clientX - panRef.current.startX;
@@ -378,8 +351,12 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
       if (!drawMode) return;
       pointersRef.current.delete(event.pointerId);
       if (panRef.current?.pointerId === event.pointerId) panRef.current = null;
-      if (scrollRef.current?.pointerId === event.pointerId) scrollRef.current = null;
       if (pointersRef.current.size < 2) pinchRef.current = null;
+    };
+
+    const enforcedShellOverflowStyle: React.CSSProperties = {
+      overflowY: 'visible',
+      overflowX: 'visible',
     };
 
     const shell = (
@@ -390,6 +367,7 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
           resolvedHeightPx != null
             ? ({
                 ...(style ?? {}),
+                ...enforcedShellOverflowStyle,
                 ['--card-resize-height' as any]: `${resolvedHeightPx}px`,
                 minHeight: `${resolvedHeightPx}px`,
                 ...(lockHeight
@@ -399,7 +377,10 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
                     }
                   : {}),
               } as React.CSSProperties)
-            : style
+            : ({
+                ...(style ?? {}),
+                ...enforcedShellOverflowStyle,
+              } as React.CSSProperties)
         }
         {...props}
         onClick={(e) => {
@@ -449,15 +430,8 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
           </div>
         )}
         <div
-          className={cn(
-            'card-shell-body',
-            isEditorMode && 'card-shell-body--no-scroll'
-          )}
-          style={
-            bodyOverflowY
-              ? { overflowY: bodyOverflowY, overflowX: 'clip' }
-              : (isEditorMode ? { overflowY: 'hidden', overflowX: 'clip' } : { overflowX: 'clip' })
-          }
+          className="card-shell-body"
+          style={{ overflowY: 'hidden', overflowX: 'visible' }}
         >
           {children}
         </div>

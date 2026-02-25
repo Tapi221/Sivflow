@@ -333,6 +333,7 @@ export type CardBlock = {
 
   orderIndex: number;
   rowOffset?: number;
+  offsetRows?: number;
 
   // payload（typeに応じて使う）
   content?: string;

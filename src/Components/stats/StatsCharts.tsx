@@ -140,7 +140,7 @@ export function StabilityDistributionChart({
 
   return (
     <Card className={cn(
-        "rounded-[32px] border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white/80 backdrop-blur-sm", 
+        "rounded-[32px] border-none shadow-[0_8px_30px_rgb(0,0,0,0.05)] bg-white/80 backdrop-blur-sm", 
         tiny ? "p-3 rounded-xl" : isTight ? "p-4 md:p-5 rounded-2xl" : "p-6 md:p-10",
         className
     )}>

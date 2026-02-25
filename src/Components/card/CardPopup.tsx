@@ -29,7 +29,7 @@ export function CardPopup({
          onClick={onClose}
     >
       <div 
-        className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200"
+        className="relative w-full max-w-2xl max-h-[90vh] animate-in zoom-in-95 duration-200"
         onClick={e => e.stopPropagation()}
       >
         <Button 

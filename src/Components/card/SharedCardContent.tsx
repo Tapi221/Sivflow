@@ -3,7 +3,7 @@ import type { CardBlock } from '@/types';
 import { cn } from '@/lib/utils';
 import { BlockRenderer } from './BlockRenderer';
 import { BlockEditor } from './BlockEditor';
-import { CARD_TOP_PADDING_PX } from './constants';
+import { CARD_CONTENT_TOP_PX } from './constants';
 
 type SharedCardContentBaseProps = {
   blocks: CardBlock[];
@@ -43,7 +43,7 @@ export function SharedCardContent(props: SharedCardContentProps) {
         'card-content-root flex min-h-0 flex-1 flex-col w-full max-w-full overflow-x-hidden overflow-y-visible',
         props.className
       )}
-      style={{ paddingTop: `var(--card-content-padding-top, ${CARD_TOP_PADDING_PX}px)` }}
+      style={{ paddingTop: `var(--card-content-padding-top, ${CARD_CONTENT_TOP_PX}px)` }}
     >
       {props.mode === 'edit' ? (
         <BlockEditor
@@ -63,7 +63,6 @@ export function SharedCardContent(props: SharedCardContentProps) {
           minDeletableIndex={props.minDeletableIndex}
           hiddenBlockTypes={props.hiddenBlockTypes}
           toolbarMountRef={props.toolbarMountRef}
-          topPaddingPx={0}
         />
       ) : (
         <BlockRenderer

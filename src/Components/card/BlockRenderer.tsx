@@ -6,6 +6,12 @@ import { ImageBlockContent } from './blocks/ImageBlockContent';
 import { MathBlockContent } from './blocks/MathBlockContent';
 import { MarkdownBlockContent } from './blocks/MarkdownBlockContent';
 import { TextBlockContent } from './blocks/TextBlockContent';
+import {
+  getNormalizedCodeOffsetRows,
+  getRowOffsetPx,
+  getRowOffsetStyle,
+  isRowPositionableType,
+} from './rowOffset';
 import { CARD_ROW_PX } from './constants';
 
 interface BlockRendererProps {
@@ -13,21 +19,7 @@ interface BlockRendererProps {
   onGalleryFullscreenChange?: (isFullscreen: boolean) => void;
 }
 
-const ROW_STEP_PX = CARD_ROW_PX;
-const isRowPositionableType = (type: CardBlock['type']) =>
-  type === 'text' ||
-  type === 'code' ||
-  type === 'image' ||
-  type === 'math' ||
-  type === 'markdown';
-
 export function BlockRenderer({ blocks, onGalleryFullscreenChange }: BlockRendererProps) {
-  const getRowOffset = useCallback((block: CardBlock) => {
-    const n = Number(block.rowOffset ?? 0);
-    if (!Number.isFinite(n)) return 0;
-    return Math.max(-999, Math.min(999, Math.round(n)));
-  }, []);
-
   const toMediaUrl = useCallback((item: unknown) => {
     if (typeof item === 'string') return item;
     if (!item || typeof item !== 'object') return null;
@@ -55,12 +47,12 @@ export function BlockRenderer({ blocks, onGalleryFullscreenChange }: BlockRender
   return (
     <div className="w-full max-w-full space-y-0">
       {renderableBlocks.map((block) => {
-        const isLinePositionable = isRowPositionableType(block.type);
-        const rowOffsetPx = isLinePositionable ? getRowOffset(block) * ROW_STEP_PX : 0;
-
-        // marginTop を使う前提で、margin-collapsing を確実に潰すため flow-root を入れる
-        // (親子/兄弟マージン相殺で突然ズレる事故を防ぐ)
-        const offsetStyle = rowOffsetPx ? { marginTop: rowOffsetPx } : undefined;
+        const isCodeBlock = block.type === 'code';
+        const isLinePositionable = isRowPositionableType(block.type) && !isCodeBlock;
+        const rowOffsetPx = isLinePositionable ? getRowOffsetPx(block) : 0;
+        const offsetStyle = isLinePositionable ? getRowOffsetStyle(block) : undefined;
+        const codeOffsetRows = isCodeBlock ? getNormalizedCodeOffsetRows(block) : 0;
+        const codeOffsetPx = codeOffsetRows * CARD_ROW_PX;
 
         return (
           <div
@@ -78,6 +70,13 @@ export function BlockRenderer({ blocks, onGalleryFullscreenChange }: BlockRender
 
             {block.type === 'code' && (block.code?.code ?? '').trim() !== '' && (
               <div className="w-full max-w-full overflow-visible">
+                {codeOffsetPx > 0 && (
+                  <div
+                    aria-hidden
+                    className="pointer-events-none"
+                    style={{ height: `${codeOffsetPx}px` }}
+                  />
+                )}
                 <CodeRenderer code={block.code!.code} language={block.code!.language} />
               </div>
             )}

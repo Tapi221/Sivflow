@@ -90,4 +90,20 @@ describe('normalizeCard', () => {
     const normalized = normalizeCard(rawCard);
     expect(normalized.layoutRows).toBe(MAX_LAYOUT_ROWS);
   });
+
+  it('migrates code block rowOffset to offsetRows with non-negative clamp', () => {
+    const rawCard = {
+      id: 'offset-migrate-card',
+      questionBlocks: [
+        { id: 'q-code-1', type: 'code', rowOffset: 3, code: { language: 'javascript', code: 'const a = 1;' } },
+        { id: 'q-code-2', type: 'code', rowOffset: -2, code: { language: 'javascript', code: 'const b = 2;' } },
+      ],
+    };
+
+    const normalized = normalizeCard(rawCard);
+    expect(normalized.questionBlocks[0].offsetRows).toBe(3);
+    expect(normalized.questionBlocks[0].rowOffset).toBeUndefined();
+    expect(normalized.questionBlocks[1].offsetRows).toBe(0);
+    expect(normalized.questionBlocks[1].rowOffset).toBeUndefined();
+  });
 });

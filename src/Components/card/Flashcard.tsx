@@ -14,7 +14,8 @@ import type { InkDocument, InkEditTool } from '@/Components/ink/inkTypes';
 import { CardFrame } from './frame/CardFrame';
 import { CardCornerActions } from './frame/CardCornerActions';
 import { SharedCardContent } from './SharedCardContent';
-import { CANONICAL_CARD_WIDTH, CARD_ROW_PX } from './constants';
+import { CANONICAL_CARD_WIDTH, layoutRowsToCardHeightPx } from './constants';
+import { sortBlocksByOrderIndex } from './blockOrdering';
 import { DEFAULT_LAYOUT_ROWS, normalizeExtraRows, normalizeLayoutRows } from '@/domain/card/extraRows';
 
 type FlashcardMediaLike =
@@ -370,7 +371,9 @@ export function Flashcard({
         side === 'question'
           ? (cardData?.questionBlocks ?? [])
           : (cardData?.answerBlocks ?? []);
-      if (sideBlocks.length > 0) return sideBlocks;
+      if (sideBlocks.length > 0) {
+        return sortBlocksByOrderIndex(sideBlocks);
+      }
 
       const text = side === 'question' ? questionText : answerText;
       const images = side === 'question' ? questionImageUrls : answerImageUrls;
@@ -505,13 +508,12 @@ export function Flashcard({
     onInkDocumentChange,
   ]);
 
-  const fixedHeightPx = layoutRows * CARD_ROW_PX;
-  const bodyOverflowY = 'auto';
+  const fixedHeightPx = layoutRowsToCardHeightPx(layoutRows);
   const activeSide: 'question' | 'answer' = effectiveIsFlipped ? 'answer' : 'question';
   const activeBlocks = resolveSideBlocks(activeSide);
 
   return (
-    <div className={cn('w-full h-full flex flex-col select-none', className)}>
+    <div className={cn('w-full flex flex-col select-none overflow-visible', className)}>
       <div className="relative">
         <CardFrame
           baseWidth={CANONICAL_CARD_WIDTH}
@@ -522,7 +524,6 @@ export function Flashcard({
           showResizeHandle={false}
           heightPx={fixedHeightPx}
           lockHeight
-          bodyOverflowY={bodyOverflowY}
           actionsTopLeft={actionsTopLeft.length > 0 ? actionsTopLeft : undefined}
           actionsTopRight={actionsTopRight.length > 0 ? actionsTopRight : undefined}
           drawMode={enableDrawMode}

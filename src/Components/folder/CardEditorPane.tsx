@@ -11,7 +11,13 @@ import MediaUploader from "@/Components/card/MediaUploader";
 import { CardFrame } from "@/Components/card/frame/CardFrame";
 import { CardCornerActions } from "@/Components/card/frame/CardCornerActions";
 import { SharedCardContent } from "@/Components/card/SharedCardContent";
-import { CANONICAL_CARD_WIDTH, CARD_ROW_PX } from "@/Components/card/constants";
+import { sortBlocksByOrderIndex } from "@/Components/card/blockOrdering";
+import {
+  CANONICAL_CARD_WIDTH,
+  CARD_ROW_PX,
+  cardHeightPxToLayoutRows,
+  layoutRowsToCardHeightPx,
+} from "@/Components/card/constants";
 import {
   DEFAULT_LAYOUT_ROWS,
   normalizeExtraRows,
@@ -153,8 +159,8 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
       title: card?.title ?? "",
       tags: card?.tags ?? [],
       isDraft: card?.isDraft ?? true,
-      questionBlocks: (card?.questionBlocks ?? []) as CardBlock[],
-      answerBlocks: (card?.answerBlocks ?? []) as CardBlock[],
+      questionBlocks: sortBlocksByOrderIndex((card?.questionBlocks ?? []) as CardBlock[]),
+      answerBlocks: sortBlocksByOrderIndex((card?.answerBlocks ?? []) as CardBlock[]),
       layoutRows: normalizeLayoutRows(card?.layoutRows ?? card?.layout_rows ?? migratedRows),
     };
   }, []);
@@ -392,7 +398,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
 
   const scheduleLayoutRowsFromHeight = useCallback(
     (nextHeightPx: number) => {
-      const nextRows = normalizeLayoutRows(Math.round(nextHeightPx / CARD_ROW_PX));
+      const nextRows = normalizeLayoutRows(cardHeightPxToLayoutRows(nextHeightPx));
       pendingRowsRef.current = nextRows;
 
       if (rowsRafRef.current != null) return;
@@ -745,20 +751,21 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
               <DragDropContext onDragEnd={onDragEnd}>
                 <div className="grid lg:grid-cols-2 gap-6 max-w-7xl mx-auto">
                   {/* 問題 */}
-                  <div className="flex flex-col gap-2 w-full">
+                  <div className="flex flex-col gap-2 w-full min-h-0">
+                    <div className="shrink-0 flex justify-center">
+                      <div ref={toolbarMountRefQ} />
+                    </div>
                     <CardFrame
                       baseWidth={CANONICAL_CARD_WIDTH}
                       className={cn("premium-paper-depth", "card-shell--paper")}
                       resizable
                       showResizeHandle
                       resizeStepPx={CARD_ROW_PX}
-                      heightPx={normalizeLayoutRows(draft?.layoutRows) * CARD_ROW_PX}
+                      heightPx={layoutRowsToCardHeightPx(normalizeLayoutRows(draft?.layoutRows))}
                       lockHeight
                       onHeightChange={scheduleLayoutRowsFromHeight}
-                      bodyOverflowY="auto"
                       actionsTopLeft={editorActionsTopLeft}
                       actionsTopRight={renderMediaDialogButtons("question")}
-                      footerLeft={<div ref={toolbarMountRefQ} />}
                     >
                       <SharedCardContent
                         mode="edit"
@@ -776,20 +783,21 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
                   </div>
 
                   {/* 解答 */}
-                  <div className="flex flex-col gap-2 w-full">
+                  <div className="flex flex-col gap-2 w-full min-h-0">
+                    <div className="shrink-0 flex justify-center">
+                      <div ref={toolbarMountRefA} />
+                    </div>
                     <CardFrame
                       baseWidth={CANONICAL_CARD_WIDTH}
                       className={cn("premium-paper-depth", "card-shell--paper")}
                       resizable
                       showResizeHandle
                       resizeStepPx={CARD_ROW_PX}
-                      heightPx={normalizeLayoutRows(draft?.layoutRows) * CARD_ROW_PX}
+                      heightPx={layoutRowsToCardHeightPx(normalizeLayoutRows(draft?.layoutRows))}
                       lockHeight
                       onHeightChange={scheduleLayoutRowsFromHeight}
-                      bodyOverflowY="auto"
                       actionsTopLeft={editorActionsTopLeft}
                       actionsTopRight={renderMediaDialogButtons("answer")}
-                      footerLeft={<div ref={toolbarMountRefA} />}
                     >
                       <SharedCardContent
                         mode="edit"

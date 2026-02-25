@@ -59,7 +59,6 @@ export default function CardLayoutConsistencyTest() {
                 className="premium-paper-depth card-shell--paper"
                 resizable={false}
                 showResizeHandle={false}
-                bodyOverflowY="visible"
               >
                 <SharedCardContent
                   mode="edit"

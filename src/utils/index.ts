@@ -157,6 +157,21 @@ export const normalizeCard = (raw: any) => {
   const legacyQuestionExtraRows = normalizeExtraRows(raw?.questionExtraRows ?? raw?.question_extra_rows ?? 0);
   const legacyAnswerExtraRows = normalizeExtraRows(raw?.answerExtraRows ?? raw?.answer_extra_rows ?? 0);
   const migratedLayoutRows = DEFAULT_LAYOUT_ROWS + Math.max(legacyQuestionExtraRows, legacyAnswerExtraRows);
+  const normalizeBlockOffsets = (block: any) => {
+    if (!block || typeof block !== 'object') return block;
+    if (block.type !== 'code') return block;
+
+    const fallbackRows = Number(block.offsetRows ?? block.rowOffset ?? 0);
+    const normalizedOffsetRows = Number.isFinite(fallbackRows)
+      ? Math.max(0, Math.round(fallbackRows))
+      : 0;
+
+    return {
+      ...block,
+      offsetRows: normalizedOffsetRows,
+      rowOffset: undefined,
+    };
+  };
 
   const normalized: any = {
     id,
@@ -228,14 +243,18 @@ export const normalizeCard = (raw: any) => {
     reviewCount: raw?.reviewCount ?? raw?.review_count ?? 0,
     reviewLogs: normalizeReviewLogs(raw?.reviewLogs ?? raw?.review_logs ?? []),
 
-    questionBlocks: (raw?.questionBlocks ?? raw?.question_blocks ?? []).filter((b: any) => {
-      if (b.type === 'math' && !b.math?.latex?.trim()) return false;
-      return true;
-    }),
-    answerBlocks: (raw?.answerBlocks ?? raw?.answer_blocks ?? []).filter((b: any) => {
-      if (b.type === 'math' && !b.math?.latex?.trim()) return false;
-      return true;
-    }),
+    questionBlocks: (raw?.questionBlocks ?? raw?.question_blocks ?? [])
+      .map(normalizeBlockOffsets)
+      .filter((b: any) => {
+        if (b.type === 'math' && !b.math?.latex?.trim()) return false;
+        return true;
+      }),
+    answerBlocks: (raw?.answerBlocks ?? raw?.answer_blocks ?? [])
+      .map(normalizeBlockOffsets)
+      .filter((b: any) => {
+        if (b.type === 'math' && !b.math?.latex?.trim()) return false;
+        return true;
+      }),
     layoutRows: normalizeLayoutRows(raw?.layoutRows ?? raw?.layout_rows ?? migratedLayoutRows),
     // Legacy互換の読み取り専用。高さロジックは layoutRows のみを参照する。
     questionExtraRows: legacyQuestionExtraRows,

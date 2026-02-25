@@ -7,7 +7,6 @@ import { normalizeMemoryStability } from '../utils/reviewUtils';
 import { useUserSettings, DEFAULT_SETTINGS } from './useUserSettings';
 import type { Card } from '../types';
 import { normalizeInkDocument } from '@/Components/ink/inkTypes';
-import { normalizeExtraRows } from '@/domain/card/extraRows';
 
 // 空カード判定用のヘルパー関数（createCard と updateCard で共通利用）
 function isCardDeleted(
@@ -198,8 +197,6 @@ export function useCards(folderId?: string) {
       // Ensure blocks are carried over from cardData
       questionBlocks: cardData.questionBlocks || [],
       answerBlocks: cardData.answerBlocks || [],
-      questionExtraRows: normalizeExtraRows(cardData.questionExtraRows ?? 0),
-      answerExtraRows: normalizeExtraRows(cardData.answerExtraRows ?? 0),
       inkQuestion: normalizeInkDocument(cardData.inkQuestion),
       inkAnswer: normalizeInkDocument(cardData.inkAnswer),
       memoryStability: 0,
@@ -235,6 +232,11 @@ export function useCards(folderId?: string) {
     
     const mergedCard = { ...currentCard, ...data };
     const patch: Partial<Card> = { ...data };
+    // Legacy rows fields are read-only migration inputs. Never persist them again.
+    delete (patch as any).questionExtraRows;
+    delete (patch as any).answerExtraRows;
+    delete (patch as any).question_extra_rows;
+    delete (patch as any).answer_extra_rows;
     if (Array.isArray(patch.reviewLogs)) {
       patch.reviewLogs = [...patch.reviewLogs].sort(
         (a, b) => new Date(a.reviewedAt).getTime() - new Date(b.reviewedAt).getTime()

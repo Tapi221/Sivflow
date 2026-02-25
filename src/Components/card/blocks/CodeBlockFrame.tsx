@@ -1,4 +1,6 @@
 import React from 'react';
+import { CARD_ROW_PX } from '@/Components/card/constants';
+import { RowSnap } from '@/Components/card/RowSnap';
 
 type CodeBlockFrameProps = {
   variant?: 'viewer' | 'editor';
@@ -31,7 +33,13 @@ export const CodeBlockFrame: React.FC<CodeBlockFrameProps> = ({
   const showLangLabel = !!languageLabel && !headerLeft; // 左側ヘッダがあると被るので抑止
 
   return (
-    <div className={`codeBlockRoot codeBlockRoot--${variant} relative group overflow-hidden`}>
+    <RowSnap rowPx={CARD_ROW_PX}>
+      {({ snapPaddingBottomPx, snapRef }) => (
+        <div
+          ref={snapRef as React.Ref<HTMLDivElement>}
+          className={`codeBlockRoot codeBlockRoot--${variant} relative group overflow-hidden`}
+          style={{ ['--code-snap-pad-b' as any]: `${snapPaddingBottomPx}px` }}
+        >
       {showLangLabel && (
         <div
           className="absolute z-20"
@@ -71,6 +79,8 @@ export const CodeBlockFrame: React.FC<CodeBlockFrameProps> = ({
       <div className="codeBlockBody codeBlockBody--withHeader relative">
         {children}
       </div>
-    </div>
+        </div>
+      )}
+    </RowSnap>
   );
 };

@@ -20,7 +20,13 @@ import { MarkdownBlock } from './blocks/MarkdownBlock';
 import type { CardBlock } from '@/types';
 import { cn } from '@/lib/utils';
 import { useUserSettings } from '@/hooks/useUserSettings';
-import { CARD_ROW_PX, CARD_TOP_PADDING_PX } from './constants';
+import { CARD_ROW_PX } from './constants';
+import { sortBlocksByOrderIndex } from './blockOrdering';
+import {
+  getNormalizedCodeOffsetRows,
+  getNormalizedRowOffset,
+  isRowPositionableType,
+} from './rowOffset';
 
 const uid = () =>
   typeof crypto !== 'undefined' && 'randomUUID' in crypto
@@ -52,18 +58,10 @@ interface BlockEditorProps {
   hiddenBlockTypes?: CardBlock['type'][];
 
   toolbarMountRef?: React.RefObject<HTMLDivElement | null>;
-  topPaddingPx?: number;
 }
 
 type DndStyle = React.CSSProperties & { transform?: string };
 const ROW_STEP_PX = CARD_ROW_PX;
-
-const isRowPositionableType = (type: CardBlock['type']) =>
-  type === 'text' ||
-  type === 'code' ||
-  type === 'image' ||
-  type === 'math' ||
-  type === 'markdown';
 
 const isEditableTarget = (target: EventTarget | null) => {
   if (!(target instanceof HTMLElement)) return false;
@@ -115,20 +113,23 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
       minDeletableIndex = 0,
       hiddenBlockTypes = [],
       toolbarMountRef,
-      topPaddingPx = CARD_TOP_PADDING_PX,
     },
     ref
   ) => {
     const { settings } = useUserSettings();
 
     // reference/audio は本文ブロックじゃない扱い（ここでは編集しない）
-    const nonBodyBlocks = useMemo(
-      () => blocks.filter((b) => b.type === 'reference' || b.type === 'audio'),
+    const orderedBlocks = useMemo(
+      () => sortBlocksByOrderIndex(blocks),
       [blocks]
     );
+    const nonBodyBlocks = useMemo(
+      () => orderedBlocks.filter((b) => b.type === 'reference' || b.type === 'audio'),
+      [orderedBlocks]
+    );
     const bodyBlocks = useMemo(
-      () => blocks.filter((b) => b.type !== 'reference' && b.type !== 'audio'),
-      [blocks]
+      () => orderedBlocks.filter((b) => b.type !== 'reference' && b.type !== 'audio'),
+      [orderedBlocks]
     );
 
     // このエディタが責任を持つのは bodyBlocks のみ。emit 時に nonBody を末尾へ保持する。
@@ -167,7 +168,7 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
     // 1行移動ドラッグ用セッション（候補要素もキャッシュ）
     const moveSessionRef = useRef<{
       blockId: string;
-      originOffset: number;
+      originOffsetRows: number;
       candidates: HTMLElement[];
     } | null>(null);
 
@@ -284,7 +285,10 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
       return result as React.CSSProperties;
     };
 
-    const getRowOffset = (block: CardBlock) => Math.round(Number(block.rowOffset ?? 0));
+    const getBlockOffsetRows = (block: CardBlock) => {
+      if (block.type === 'code') return getNormalizedCodeOffsetRows(block);
+      return getNormalizedRowOffset(block);
+    };
 
     const getRowOffsetBoundsWithinCard = (blockId: string, currentOffset: number) => {
       if (typeof document === 'undefined') {
@@ -294,13 +298,19 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
       const rowEl = rowElMapRef.current.get(blockId) ?? null;
       if (!rowEl) return { min: Number.NEGATIVE_INFINITY, max: Number.POSITIVE_INFINITY };
 
-      const bodyEl = rowEl.closest('.card-shell-body') as HTMLElement | null;
-      if (!bodyEl) return { min: Number.NEGATIVE_INFINITY, max: Number.POSITIVE_INFINITY };
+      const surfaceEl = rowEl.closest('[data-card-surface="true"]') as HTMLElement | null;
+      if (!surfaceEl) return { min: Number.NEGATIVE_INFINITY, max: Number.POSITIVE_INFINITY };
 
       const rowRect = rowEl.getBoundingClientRect();
-      const bodyRect = bodyEl.getBoundingClientRect();
-      const upRows = Math.floor((rowRect.top - bodyRect.top) / ROW_STEP_PX);
-      const downRows = Math.floor((bodyRect.bottom - rowRect.bottom) / ROW_STEP_PX);
+      const surfaceRect = surfaceEl.getBoundingClientRect();
+      const surfaceStyle = window.getComputedStyle(surfaceEl);
+      const ruledTopOffsetPx = Math.max(0, Number.parseFloat(surfaceStyle.getPropertyValue('--ruled-offset-px')) || 0);
+      const ruledBottomOffsetPx = Math.max(0, Number.parseFloat(surfaceStyle.getPropertyValue('--ruled-bottom-offset-px')) || 0);
+
+      const topLineY = surfaceRect.top + ruledTopOffsetPx;
+      const bottomLineY = surfaceRect.bottom - ruledBottomOffsetPx;
+      const upRows = Math.floor((rowRect.top - topLineY) / ROW_STEP_PX);
+      const downRows = Math.floor((bottomLineY - rowRect.bottom) / ROW_STEP_PX);
 
       return {
         min: currentOffset - Math.max(0, upRows),
@@ -313,7 +323,7 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
       const index = source.findIndex((b) => b.id === blockId);
       if (index === -1) return;
 
-      const baseOffset = getRowOffset(source[index]);
+      const baseOffset = getBlockOffsetRows(source[index]);
 
       const newPendingUploads = { ...pendingUploads };
       const newBlocks = [...source];
@@ -358,6 +368,9 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
       const tailRowOffset = (() => {
         for (let i = source.length - 1; i >= 0; i -= 1) {
           const b = source[i];
+          if (b.type === 'code' && b.offsetRows !== undefined) {
+            return getNormalizedCodeOffsetRows(b);
+          }
           if (b.rowOffset !== undefined) return Math.round(Number(b.rowOffset ?? 0));
         }
         return 0;
@@ -372,7 +385,8 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
         code: type === 'code' ? { language: 'javascript', code: '' } : undefined,
         math: type === 'math' ? { latex: '', displayMode: 'block' } : undefined,
         markdown: type === 'markdown' ? '' : undefined,
-        rowOffset: isRowPositionableType(type) ? tailRowOffset : undefined,
+        rowOffset: isRowPositionableType(type) && type !== 'code' ? tailRowOffset : undefined,
+        offsetRows: type === 'code' ? Math.max(0, tailRowOffset) : undefined,
         orderIndex: 0,
       };
 
@@ -431,13 +445,20 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
       if (!currentBlock) return;
       if (!isRowPositionableType(currentBlock.type)) return;
 
-      const currentOffset = getRowOffset(currentBlock);
-      const bounds = getRowOffsetBoundsWithinCard(blockId, currentOffset);
-      const nextOffsetRaw = currentOffset + delta;
-      const nextOffset = Math.min(Math.max(nextOffsetRaw, bounds.min), bounds.max);
-      if (nextOffset === currentOffset) return;
+      const currentOffsetRows = getBlockOffsetRows(currentBlock);
+      const bounds = getRowOffsetBoundsWithinCard(blockId, currentOffsetRows);
+      const nextOffsetRowsRaw = currentOffsetRows + delta;
+      const boundedMin = currentBlock.type === 'code' ? Math.max(0, bounds.min) : bounds.min;
+      const nextOffsetRows = Math.min(Math.max(nextOffsetRowsRaw, boundedMin), bounds.max);
+      if (nextOffsetRows === currentOffsetRows) return;
 
-      const next = source.map((b) => (b.id === blockId ? { ...b, rowOffset: nextOffset } : b));
+      const next = source.map((b) => {
+        if (b.id !== blockId) return b;
+        if (b.type === 'code') {
+          return { ...b, offsetRows: nextOffsetRows, rowOffset: undefined };
+        }
+        return { ...b, rowOffset: nextOffsetRows };
+      });
       blocksRef.current = next;
       emitChange(next);
     };
@@ -453,7 +474,7 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
 
       moveSessionRef.current = {
         blockId,
-        originOffset: getRowOffset(currentBlock),
+        originOffsetRows: getBlockOffsetRows(currentBlock),
         candidates,
       };
     };
@@ -484,9 +505,13 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
 
       if (!hasCollision) return;
 
-      const reverted = source.map((b) =>
-        b.id === blockId ? { ...b, rowOffset: session.originOffset } : b
-      );
+      const reverted = source.map((b) => {
+        if (b.id !== blockId) return b;
+        if (b.type === 'code') {
+          return { ...b, offsetRows: session.originOffsetRows, rowOffset: undefined };
+        }
+        return { ...b, rowOffset: session.originOffsetRows };
+      });
       blocksRef.current = reverted;
       emitChange(reverted);
     };
@@ -501,17 +526,19 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
     );
 
     const toolbarMount = toolbarMountRef?.current ?? null;
+    const inlineToolbar = toolbarNode && !toolbarMount ? (
+      <div className="mb-2">{toolbarNode}</div>
+    ) : null;
 
     return (
       <div
         ref={containerRef}
         className={cn(
-          'space-y-1.5 md:space-y-2',
+          'space-y-0',
           prefix === 'question' ? 'js-question-editor' : 'js-answer-editor'
         )}
-        style={{ paddingTop: topPaddingPx }}
       >
-        {toolbarNode && toolbarMount ? createPortal(toolbarNode, toolbarMount) : toolbarNode}
+        {toolbarNode && toolbarMount ? createPortal(toolbarNode, toolbarMount) : inlineToolbar}
 
         <Droppable droppableId={droppableId} direction="vertical" type="card-block">
           {(provided) => (
@@ -530,14 +557,18 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
                 >
                   {(provided, snapshot) => {
                     const rowMovable = isRowPositionableType(block.type);
+                    const isCodeBlock = block.type === 'code';
 
-                    const rowOffsetPx = rowMovable ? getRowOffset(block) * ROW_STEP_PX : 0;
+                    const rowOffsetRows = rowMovable ? getBlockOffsetRows(block) : 0;
+                    const rowOffsetPx = rowMovable && !isCodeBlock ? rowOffsetRows * ROW_STEP_PX : 0;
+                    const codeOffsetPx = isCodeBlock ? rowOffsetRows * ROW_STEP_PX : 0;
 
-                    const currentOffset = rowMovable ? getRowOffset(block) : 0;
+                    const currentOffset = rowMovable ? rowOffsetRows : 0;
                     const bounds = rowMovable
                       ? getRowOffsetBoundsWithinCard(block.id, currentOffset)
                       : { min: 0, max: 0 };
-                    const canMoveUp = rowMovable ? currentOffset > bounds.min : false;
+                    const effectiveMin = isCodeBlock ? Math.max(0, bounds.min) : bounds.min;
+                    const canMoveUp = rowMovable ? currentOffset > effectiveMin : false;
                     const canMoveDown = rowMovable ? currentOffset < bounds.max : false;
 
                     const dragStyle = clampDragStyle(provided.draggableProps.style, {
@@ -590,6 +621,7 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
                         }}
                         className="relative"
                         data-block-row="true"
+                        data-row-offset-applied={rowOffsetPx ? 'true' : undefined}
                         data-active={activeBlockId === block.id || snapshot.isDragging ? 'true' : 'false'}
                         style={mergedStyle}
                       >
@@ -631,23 +663,32 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
                         )}
 
                         {block.type === 'code' && (
-                          <CodeBlockItem
-                            data={block.code || { language: 'javascript', code: '' }}
-                            onChange={(data) => handleUpdateBlock(block.id, { code: data })}
-                            onDelete={() => handleDeleteBlock(block.id, index)}
-                            onDuplicate={() => handleDuplicateBlock(block.id)}
-                            onMoveUp={() => handleShiftBlockRow(block.id, 'up')}
-                            onMoveDown={() => handleShiftBlockRow(block.id, 'down')}
-                            onMoveDragStart={() => handleMoveDragStart(block.id)}
-                            onMoveDragEnd={() => handleMoveDragEnd(block.id)}
-                            canMoveUp={canMoveUp}
-                            canMoveDown={canMoveDown}
-                            dragHandleProps={undefined}
-                            dragEnabled={true}
-                            dragHandleClassName="js-block-drag-handle"
-                            accentColor={accentColor}
-                            isActive={activeBlockId === block.id || snapshot.isDragging}
-                          />
+                          <div className="w-full max-w-full overflow-visible">
+                            {codeOffsetPx > 0 && (
+                              <div
+                                aria-hidden
+                                className="pointer-events-none"
+                                style={{ height: `${codeOffsetPx}px` }}
+                              />
+                            )}
+                            <CodeBlockItem
+                              data={block.code || { language: 'javascript', code: '' }}
+                              onChange={(data) => handleUpdateBlock(block.id, { code: data })}
+                              onDelete={() => handleDeleteBlock(block.id, index)}
+                              onDuplicate={() => handleDuplicateBlock(block.id)}
+                              onMoveUp={() => handleShiftBlockRow(block.id, 'up')}
+                              onMoveDown={() => handleShiftBlockRow(block.id, 'down')}
+                              onMoveDragStart={() => handleMoveDragStart(block.id)}
+                              onMoveDragEnd={() => handleMoveDragEnd(block.id)}
+                              canMoveUp={canMoveUp}
+                              canMoveDown={canMoveDown}
+                              dragHandleProps={undefined}
+                              dragEnabled={true}
+                              dragHandleClassName="js-block-drag-handle"
+                              accentColor={accentColor}
+                              isActive={activeBlockId === block.id || snapshot.isDragging}
+                            />
+                          </div>
                         )}
 
                         {block.type === 'image' && (
@@ -708,7 +749,7 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
                             canMoveUp={canMoveUp}
                             canMoveDown={canMoveDown}
                             onReplaceWithBlocks={(parsed) => {
-                              const baseOffset = getRowOffset(block);
+                              const baseOffset = getBlockOffsetRows(block);
 
                               const newBlocks = parsed.map((p) => {
                                 const newId = `${prefix}-${p.type}-${uid()}`;
@@ -721,7 +762,8 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
                                     content: '',
                                     images: [],
                                     audios: [],
-                                    rowOffset: baseOffset,
+                                    offsetRows: Math.max(0, baseOffset),
+                                    rowOffset: undefined,
                                     orderIndex: 0,
                                   };
                                 }

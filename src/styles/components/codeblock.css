@@ -9,9 +9,13 @@
     --code-padding-top: 20px;
     --code-padding-inline: 10px;
     --code-padding-bottom: 10px;
+    --code-root-base-pad-b: var(--code-padding-bottom);
     --code-font-size: 14px;
     --code-line-height: 20px;
     --code-font-family: "Fira Code", "Fira Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    --code-scrollbar-track: rgba(148, 163, 184, 0.1);
+    --code-scrollbar-thumb: rgba(100, 116, 139, 0.2);
+    --code-scrollbar-thumb-hover: rgba(100, 116, 139, 0.3);
   }
 
   .codeBlockRoot {
@@ -21,6 +25,7 @@
     background: var(--code-bg);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
     overflow: hidden; /* ::before の角丸はみ出し防止 */
+    padding-bottom: calc(var(--code-root-base-pad-b) + var(--code-snap-pad-b, 0px));
   }
 
   .codeBlockRoot::before {
@@ -43,6 +48,29 @@
     overscroll-behavior: contain;
     white-space: pre;
     scrollbar-gutter: stable;
+    scrollbar-color: var(--code-scrollbar-thumb) var(--code-scrollbar-track);
+    scrollbar-width: thin;
+  }
+
+  .codeBlockBody::-webkit-scrollbar {
+    height: 10px;
+  }
+
+  .codeBlockBody::-webkit-scrollbar-track {
+    background: var(--code-scrollbar-track);
+    border-radius: 9999px;
+  }
+
+  .codeBlockBody::-webkit-scrollbar-thumb {
+    background: var(--code-scrollbar-thumb);
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  .codeBlockBody::-webkit-scrollbar-thumb:hover {
+    background: var(--code-scrollbar-thumb-hover);
+    background-clip: padding-box;
   }
 
   .codeBlockBody--withHeader {
