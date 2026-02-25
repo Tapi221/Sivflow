@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback } from 'react';
+import { useMemo, useCallback } from 'react';
 import type { CardBlock } from '@/types';
 import { CodeRenderer } from './CodeRenderer';
 import { AudioPlayer, ImageGallery } from './CardMedia';

@@ -744,7 +744,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
                   <div className="flex flex-col gap-2 w-full">
                     <div ref={toolbarMountRefQ} />
                     <CardFrame
-                      className={cn("overflow-hidden shadow-xl", "premium-paper-depth", "card-shell--paper")}
+                      className={cn("premium-paper-depth", "card-shell--paper")}
                       resizable={true}
                       showResizeHandle={true}
                       bodyOverflowY="auto"
@@ -771,7 +771,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
                   <div className="flex flex-col gap-2 w-full">
                     <div ref={toolbarMountRefA} />
                     <CardFrame
-                      className={cn("shadow-xl", "bg-white")}
+                      className={cn("premium-paper-depth", "card-shell--paper")}
                       resizable={true}
                       showResizeHandle={true}
                       bodyOverflowY="auto"

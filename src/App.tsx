@@ -71,7 +71,7 @@ const isTestBypassEnabled = () => {
 function LoadingFallback() {
   return (
     // 画面全体を覆うローディング画面（Tailwind で中央寄せ＆背景など指定）
-    <div className="min-h-screen flex items-center justify-center bg-[#F8FAFB] animate-in fade-in duration-500">
+    <div className="h-[100dvh] flex items-center justify-center bg-[#F8FAFB] animate-in fade-in duration-500">
       <div className="text-center">
         {/* 二重の丸いボーダーでローディングスピナーを作っている */}
         <div className="relative w-16 h-16 mx-auto mb-6">
@@ -140,12 +140,12 @@ function LoginPage() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#F3F7F8]">
+    <div className="relative h-[100dvh] overflow-hidden bg-[#F3F7F8]">
       <div className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-[#9CC8C4]/35 blur-3xl" />
       <div className="pointer-events-none absolute -right-16 bottom-0 h-80 w-80 rounded-full bg-[#BFD9F5]/35 blur-3xl" />
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.7),rgba(255,255,255,0.35))]" />
 
-      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-4 py-8">
+      <div className="relative z-10 mx-auto flex h-full w-full max-w-6xl items-center justify-center px-4 py-8">
         <div className="grid w-full max-w-5xl overflow-hidden rounded-[32px] border border-slate-200/70 bg-white/80 shadow-[0_24px_80px_rgba(15,23,42,0.12)] backdrop-blur-xl md:grid-cols-[1.2fr_0.8fr]">
           <div className="relative px-7 py-9 md:px-10 md:py-12">
             <div className="inline-flex items-center gap-2 rounded-full border border-[#7BACAA]/25 bg-[#7BACAA]/10 px-3 py-1">

@@ -164,7 +164,7 @@ export function CodeBlockEditor({ value, onChange, className }: CodeBlockEditorP
     return SUPPORTED_LANGUAGES.filter((l) => !recentSet.has(l.value));
   }, [recentLangs]);
 
-  // 言語セレクタ（右上アクション）
+  // 言語セレクタ（左上アクション）
   const languageSelector = (
     <Select
       value={normalizedLanguage}
@@ -229,20 +229,20 @@ export function CodeBlockEditor({ value, onChange, className }: CodeBlockEditorP
       className={className}
     >
       <CodeBlockFrame
-        right={languageSelector}
+        left={languageSelector}
       >
         <Editor
           value={code}
           onValueChange={handleCodeChange}
           highlight={highlightCode}
-          padding={{ top: 28, bottom: 10, left: 10, right: 10 }}
+          padding={0}
           style={{
             fontFamily: '"Fira Code", "Fira Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
             fontSize: 14,
             lineHeight: '20px',
             minHeight: 56,
           }}
-          className="code-editor-no-scroll w-full"
+          className="code-editor-no-scroll code-editor-no-scroll--tools w-full"
           textareaClassName="focus:outline-none"
         />
       </CodeBlockFrame>

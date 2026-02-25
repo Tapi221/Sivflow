@@ -37,9 +37,10 @@ export function CardSurface({
     >
       {ruled && (
         <div
-          className="pointer-events-none absolute inset-0 z-0 bg-repeat-y"
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-0 bg-repeat-y"
           style={{
             opacity: ruledOpacity,
+            top: `${Math.max(0, ruledOffsetPx)}px`,
             // 罫線パターン（ruledRowPx ピッチ）
             backgroundImage: `repeating-linear-gradient(
               to bottom,
@@ -49,8 +50,6 @@ export function CardSurface({
               transparent ${ruledRowPx}px
             )`,
             backgroundSize: `100% ${ruledRowPx}px`,
-            // コンテンツのtop paddingと罫線の開始位置を一致させる
-            backgroundPosition: `0 ${ruledOffsetPx}px`,
           }}
         />
       )}

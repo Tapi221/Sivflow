@@ -154,7 +154,7 @@ export default function Layout() {
   const hasValidProfileImage = !!profileRemoteUrl && !profileImageIsBlob && !imgError;
 
   return (
-    <div className="min-h-[100dvh] w-full overflow-x-hidden relative">
+    <div className="relative flex h-[100dvh] w-full flex-col overflow-hidden">
       <ThemeManager />
 
       {/* Desktop Sync Indicator (Fixed Top Right) */}
@@ -422,20 +422,27 @@ export default function Layout() {
 
       {/* Main Content */}
       <main className={cn(
-        "transition-[margin] duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]",
-        // Remove all padding for Folders page (work view)
-        isFoldersRoute || isCardEditRoute || isStudyModePage
-          ? ''
-          : showMobileHeader
-            ? 'pt-14 md:pt-0 pb-10'
-            : 'pb-10',
-        'md:ml-0'
+        "md:ml-0 flex min-h-0 flex-1 flex-col transition-[margin] duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]"
       )}>
         <LocalDBStatusBanner />
         <SecurityAlertBanner />
-        <Suspense fallback={<LoadingFallback />}>
-          <Outlet />
-        </Suspense>
+        <div
+          className={cn(
+            "flex-1 min-h-0",
+            isFoldersRoute || isCardEditRoute || isStudyModePage
+              ? "overflow-hidden"
+              : "overflow-y-auto",
+            isFoldersRoute || isCardEditRoute || isStudyModePage
+              ? ""
+              : showMobileHeader
+                ? "pt-14 md:pt-0 pb-10"
+                : "pb-10"
+          )}
+        >
+          <Suspense fallback={<LoadingFallback />}>
+            <Outlet />
+          </Suspense>
+        </div>
       </main>
     </div>
   );

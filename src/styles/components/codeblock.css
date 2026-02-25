@@ -1,4 +1,10 @@
 @layer components {
+  :root {
+    --code-tools-top: 6px;
+    --code-tools-inset: 10px;
+    --code-tools-reserve: 28px;
+  }
+
   .codeBlockRoot {
     position: relative;
     border-radius: 16px;
@@ -24,7 +30,7 @@
 
   .codeBlockPre {
     margin: 0;
-    padding: 24px 10px 10px 10px;
+    padding: 20px 10px 10px 10px;
     font-size: 14px;
     line-height: 20px;
     font-family: "Fira Code", "Fira Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -40,9 +46,8 @@
     overflow-wrap: normal;
   }
 
-  /* ツールバーがある版は上余白を増やす（24pxのままだと意味がないので増やす） */
   .codeBlockPre--tools {
-    padding-top: 44px;
+    padding-top: var(--code-tools-reserve);
   }
 
   .codeBlockLang {
@@ -174,7 +179,7 @@
     font-family: "Fira Code", "Fira Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-size: 14px;
     line-height: 20px;
-    padding: 24px 10px 10px 10px;
+    padding: 20px 10px 10px 10px;
     letter-spacing: normal;
     tab-size: 2;
     white-space: pre;
@@ -185,10 +190,9 @@
     font-variant-ligatures: none;
   }
 
-  /* ツールバーがある場合の余白（エディタ側も合わせる） */
   .code-editor-no-scroll--tools textarea,
   .code-editor-no-scroll--tools pre {
-    padding-top: 44px;
+    padding-top: var(--code-tools-reserve);
   }
 
   .code-editor-no-scroll textarea {

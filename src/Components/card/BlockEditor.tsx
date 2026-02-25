@@ -20,7 +20,7 @@ import { MarkdownBlock } from './blocks/MarkdownBlock';
 import type { CardBlock } from '@/types';
 import { cn } from '@/lib/utils';
 import { useUserSettings } from '@/hooks/useUserSettings';
-import { CARD_ROW_PX } from './constants';
+import { CARD_ROW_PX, CARD_TOP_PADDING_PX } from './constants';
 
 const uid = () =>
   typeof crypto !== 'undefined' && 'randomUUID' in crypto
@@ -504,9 +504,10 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
       <div
         ref={containerRef}
         className={cn(
-          'pt-6 space-y-1.5 md:space-y-2',
+          'space-y-1.5 md:space-y-2',
           prefix === 'question' ? 'js-question-editor' : 'js-answer-editor'
         )}
+        style={{ paddingTop: CARD_TOP_PADDING_PX }}
       >
         {toolbarNode && toolbarMount ? createPortal(toolbarNode, toolbarMount) : toolbarNode}
 

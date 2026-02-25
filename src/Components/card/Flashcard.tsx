@@ -16,6 +16,7 @@ import type { InkDocument, InkEditTool } from '@/Components/ink/inkTypes';
 import { CardFrame } from './frame/CardFrame';
 import { CardCornerActions } from './frame/CardCornerActions';
 import { BlockRenderer } from './BlockRenderer';
+import { CARD_TOP_PADDING_PX } from './constants';
 
 type FlashcardMediaLike =
   | string
@@ -427,12 +428,10 @@ export function Flashcard({
       )}
 
       <div className="relative">
-        <div className="card-ambient-shadow" aria-hidden="true" />
         <CardFrame
           className={cn(
-            'transition-all duration-300',
             'premium-paper-depth',
-            !previewMode && 'premium-paper-depth--hover cursor-pointer',
+            !previewMode && 'cursor-pointer',
             'card-shell--paper'
           )}
           shellRef={shellRef}
@@ -442,7 +441,7 @@ export function Flashcard({
           showResizeHandle={false}
           heightPx={sharedPreviewHeightPx}
           lockHeight={lockCardHeight}
-          bodyOverflowY="auto"
+          bodyOverflowY="hidden"
           actionsTopLeft={actionsTopLeft.length > 0 ? actionsTopLeft : undefined}
           actionsTopRight={actionsTopRight.length > 0 ? actionsTopRight : undefined}
           actionsBottomRight={actionsBottomRight.length > 0 ? actionsBottomRight : undefined}
@@ -479,8 +478,9 @@ export function Flashcard({
             {/* コンテンツエリア - 編集画面に揃えて上寄せ */}
             <div
               className={cn(
-                "paperCardTypography flex-1 flex flex-col max-w-full mx-auto w-full pb-8 overflow-x-clip overflow-y-visible pt-6"
+                "paperCardTypography flex-1 flex flex-col max-w-full mx-auto w-full pb-8 overflow-x-clip overflow-y-visible"
               )}
+              style={{ paddingTop: CARD_TOP_PADDING_PX }}
             >
               {effectiveIsFlipped ? (
                 <div className="animate-in fade-in zoom-in-95 duration-300 w-full max-w-full">

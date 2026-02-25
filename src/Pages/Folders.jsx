@@ -195,7 +195,7 @@ export default function Folders() {
     <div
       className={cn(
         "bg-[#F8FAFB] transition-colors duration-500 relative",
-        isDesktop ? "h-screen overflow-hidden" : "min-h-[100dvh] overflow-x-hidden overflow-y-auto"
+        isDesktop ? "h-full overflow-hidden" : "h-full overflow-x-hidden overflow-y-auto"
       )}
     >
       {/* Background Ruled Lines */}
@@ -206,7 +206,7 @@ export default function Folders() {
           backgroundSize: '100% 24px'
         }}
       />
-      <div className={cn("w-full mx-auto", isDesktop ? "h-full" : "min-h-[100dvh]")}>
+      <div className="w-full mx-auto h-full">
             {isLoading ? (
               <div className="space-y-3 p-4">
                 {[...Array(3)].map((_, i) => (

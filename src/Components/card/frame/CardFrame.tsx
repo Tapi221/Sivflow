@@ -33,25 +33,29 @@ export function CardFrame({
   ...shellProps
 }: CardFrameProps) {
   return (
-    <ScaleToFitFrame baseWidth={baseWidth}>
-      <CardShell
-        ref={shellRef}
-        className={cn(
-          'mx-auto border-none rounded-[32px] md:rounded-[40px]',
-          className
-        )}
-        {...shellProps}
-      >
-        <CardSurface
-          ruled={ruled}
-          ruledRowPx={ruledRowPx}
-          ruledOffsetPx={ruledOffsetPx}
-          ruledOpacity={ruledOpacity}
-          overlay={overlay}
-        >
-          {children}
-        </CardSurface>
-      </CardShell>
+    <ScaleToFitFrame baseWidth={baseWidth} contentPaddingPx={12}>
+      <div className="mx-auto overflow-visible rounded-[32px] md:rounded-[40px]">
+        <div className="overflow-hidden rounded-[32px] md:rounded-[40px]">
+          <CardShell
+            ref={shellRef}
+            className={cn(
+              'mx-auto border-none rounded-[32px] md:rounded-[40px]',
+              className
+            )}
+            {...shellProps}
+          >
+            <CardSurface
+              ruled={ruled}
+              ruledRowPx={ruledRowPx}
+              ruledOffsetPx={ruledOffsetPx}
+              ruledOpacity={ruledOpacity}
+              overlay={overlay}
+            >
+              {children}
+            </CardSurface>
+          </CardShell>
+        </div>
+      </div>
     </ScaleToFitFrame>
   );
 }

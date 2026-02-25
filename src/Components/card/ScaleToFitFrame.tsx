@@ -11,6 +11,7 @@ export interface ScaleToFitFrameProps {
   centerContent?: boolean;
   allowUpscale?: boolean;
   maxScale?: number;
+  contentPaddingPx?: number;
 }
 
 export function ScaleToFitFrame({
@@ -23,6 +24,7 @@ export function ScaleToFitFrame({
   centerContent = false,
   allowUpscale = false,
   maxScale = 1.6,
+  contentPaddingPx = 0,
 }: ScaleToFitFrameProps) {
   const frameRef = React.useRef<HTMLDivElement | null>(null);
   const contentRef = React.useRef<HTMLDivElement | null>(null);
@@ -102,11 +104,12 @@ export function ScaleToFitFrame({
 
   const scaledHeight =
     contentHeight != null ? Math.ceil(contentHeight * (disableScale ? 1 : scale)) : null;
+  const safePaddingPx = Math.max(0, contentPaddingPx);
 
   return (
     <div
       ref={frameRef}
-      className={cn('w-full overflow-x-hidden', fitHeight && 'h-full', className)}
+      className={cn('w-full min-h-0 overflow-visible', fitHeight && 'h-full', className)}
       style={!fitHeight && scaledHeight != null ? { height: `${scaledHeight}px` } : undefined}
     >
       <div
@@ -122,7 +125,7 @@ export function ScaleToFitFrame({
           willChange: disableScale ? undefined : 'transform',
         }}
       >
-        <div ref={contentRef} className="flow-root">
+        <div ref={contentRef} className="flow-root" style={{ padding: safePaddingPx }}>
           {children}
         </div>
       </div>

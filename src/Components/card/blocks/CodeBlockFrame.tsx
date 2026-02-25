@@ -2,6 +2,7 @@ import React from 'react';
 
 type CodeBlockFrameProps = {
   languageLabel?: string;
+  left?: React.ReactNode; // 編集なら言語Select等
   right?: React.ReactNode; // 編集なら言語Select、閲覧ならCopyボタン等
   children: React.ReactNode;
 };
@@ -16,22 +17,39 @@ type CodeBlockFrameProps = {
  */
 export const CodeBlockFrame: React.FC<CodeBlockFrameProps> = ({
   languageLabel,
+  left,
   right,
   children,
 }) => {
   return (
     <div className="codeBlockRoot relative group overflow-hidden">
-      {/* 左上：言語ラベル */}
       {languageLabel && (
-        <div className="absolute left-[10px] top-2.5 z-20 pointer-events-none">
+        <div
+          className="absolute z-20 pointer-events-none"
+          style={{ left: 'var(--code-tools-inset)', top: 'var(--code-tools-top)' }}
+        >
           <span className="codeBlockLang">{languageLabel}</span>
         </div>
       )}
 
-      {/* 右上：アクション（コピーボタン、言語セレクタなど） */}
-      {right && <div className="absolute right-2.5 top-2.5 z-20">{right}</div>}
+      {left && (
+        <div
+          className="absolute z-20"
+          style={{ left: 'var(--code-tools-inset)', top: 'var(--code-tools-top)' }}
+        >
+          {left}
+        </div>
+      )}
 
-      {/* コンテンツ領域 */}
+      {right && (
+        <div
+          className="absolute z-20"
+          style={{ right: 'var(--code-tools-inset)', top: 'var(--code-tools-top)' }}
+        >
+          {right}
+        </div>
+      )}
+
       <div className="codeBlockPre codeBlockPre--tools relative">
         {children}
       </div>
