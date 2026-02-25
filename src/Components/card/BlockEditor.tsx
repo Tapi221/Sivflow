@@ -13,6 +13,7 @@ import { MarkdownBlock } from './blocks/MarkdownBlock';
 import type { CardBlock } from '@/types';
 import { cn } from '@/lib/utils';
 import { useUserSettings } from '@/hooks/useUserSettings';
+import { CARD_ROW_PX } from './constants';
 
 const uid = () =>
   (typeof crypto !== 'undefined' && 'randomUUID' in crypto)
@@ -47,7 +48,7 @@ interface BlockEditorProps {
 }
 
 type DndStyle = React.CSSProperties & { transform?: string };
-const ROW_STEP_PX = 24;
+const ROW_STEP_PX = CARD_ROW_PX;
 
 const isRowPositionableType = (type: CardBlock['type']) =>
   type === 'text' ||

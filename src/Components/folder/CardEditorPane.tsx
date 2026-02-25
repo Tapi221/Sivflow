@@ -1,7 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FileText, PanelRightClose, PanelRightOpen, Plus } from "lucide-react";
-import Star from "lucide-react/dist/esm/icons/star";
-import CircleHelp from "lucide-react/dist/esm/icons/circle-help";
 import ImageIcon from "lucide-react/dist/esm/icons/image";
 import Volume2Icon from "lucide-react/dist/esm/icons/volume-2";
 import LinkIcon from "lucide-react/dist/esm/icons/link";
@@ -9,11 +7,10 @@ import { DragDropContext } from "@hello-pangea/dnd";
 
 import { Flashcard } from "@/Components/card/Flashcard";
 import { BlockEditor } from "@/Components/card/BlockEditor";
-import { ScaleToFitFrame } from "@/Components/card/ScaleToFitFrame";
-import { CardShell } from "@/Components/card/CardShell";
-import { CardSurface } from "@/Components/card/CardSurface";
 import { CardMetaPanel } from "@/Components/card/CardMetaPanel";
 import MediaUploader from "@/Components/card/MediaUploader";
+import { CardFrame } from "@/Components/card/frame/CardFrame";
+import { CardCornerActions } from "@/Components/card/frame/CardCornerActions";
 
 import { Button } from "@/Components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/Components/ui/dialog";
@@ -60,6 +57,11 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
   const [imageDialogSide, setImageDialogSide] = useState<"question" | "answer" | null>(null);
   const [audioDialogSide, setAudioDialogSide] = useState<"question" | "answer" | null>(null);
   const [linkDialogSide, setLinkDialogSide] = useState<"question" | "answer" | null>(null);
+  // 差分1: 編集中の対象IDを固定して、cards更新時のdraft上書きを防ぐ
+  const editingCardIdRef = useRef<string | null>(null);
+  const wasEditingRef = useRef(false);
+  // 差分2: 高さ保存のI/Oはdebounceで間引く
+  const heightPersistTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // 裏表共通のカード高さ（null = CardShell 内部自動計算）
   const [cardHeightPx, setCardHeightPx] = useState<number | null>(null);
@@ -86,6 +88,30 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
     }
   }, [settings?.cardEditorHeightPx]);
 
+  const persistHeight = useCallback(
+    (newHeight: number) => {
+      setCardHeightPx(newHeight);
+      if (heightPersistTimerRef.current) {
+        clearTimeout(heightPersistTimerRef.current);
+      }
+      heightPersistTimerRef.current = setTimeout(() => {
+        updateSettings({ cardEditorHeightPx: newHeight });
+        if (typeof window !== "undefined") {
+          window.localStorage.setItem("card-editor.resize:shared-height", String(newHeight));
+        }
+      }, 150);
+    },
+    [updateSettings]
+  );
+
+  useEffect(() => {
+    return () => {
+      if (heightPersistTimerRef.current) {
+        clearTimeout(heightPersistTimerRef.current);
+      }
+    };
+  }, []);
+
   // ツールバーの外部マウント先（問題・解答 各カードの上）
   const toolbarMountRefQ = useRef<HTMLDivElement | null>(null);
   const toolbarMountRefA = useRef<HTMLDivElement | null>(null);
@@ -110,10 +136,19 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
   }, []);
 
   useEffect(() => {
-    if (isEditing && !draft) {
+    if (isEditing && !isNew && !draft) {
       initNewDraft();
     }
-  }, [isEditing, draft]);
+  }, [isEditing, isNew, draft, initNewDraft]);
+
+  useEffect(() => {
+    if (isEditing && !wasEditingRef.current) {
+      editingCardIdRef.current = isNew ? "__new__" : selectedCardId;
+    } else if (!isEditing) {
+      editingCardIdRef.current = null;
+    }
+    wasEditingRef.current = isEditing;
+  }, [isEditing, isNew, selectedCardId]);
 
   // カード切替時またはロード完了時にドラフトをロード
   useEffect(() => {
@@ -121,31 +156,36 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
     // ※依存配列に selectedCardId だけを入れて「切り替わり」だけを検知する手法もあるが、
     // ここではデータのロード完了を待つ必要がある。
     
+    // 最優先: IDが null なら必ず編集解除
+    if (!selectedCardId) {
+      setIsFlipped(false);
+      setIsEditing(false);
+      setDraft(null);
+      editingCardIdRef.current = null;
+      return;
+    }
+
     // データがまだロードされていない場合は何もしない（ロード完了後に再度呼ばれる）
-    if (!isNew && selectedCardId && !selectedCard) {
+    if (!isNew && !selectedCard) {
       return;
     }
 
     // 以前の selectedCardId を保持して、本当に切り替わった時だけ編集を閉じる設計も可能だが、
     // 現状は selectedCardId が依存配列にあるため、切り替わり時にここが走る。
-    
-    // 編集中に外部（Syncなど）の cards 一覧が更新された際、勝手に draft を上書きしないためのガード
-    if (isEditing && draft && selectedCard && selectedCardId === selectedCard.id) {
-      return; 
-    }
 
-    setIsFlipped(false);
-    
-    // IDが null になった場合は編集を解除
-    if (!selectedCardId) {
-      setIsEditing(false);
-      setDraft(null);
+    const currentEditorTargetId = isNew ? "__new__" : selectedCardId;
+    // 差分3: 同じ編集中IDならcards更新でもdraftを保持
+    if (isEditing && draft && editingCardIdRef.current === currentEditorTargetId) {
       return;
     }
 
+    setIsFlipped(false);
+
     // 新規モード
     if (isNew) {
-      initNewDraft();
+      if (!draft) {
+        initNewDraft();
+      }
       setIsEditing(true);
       return;
     }
@@ -162,7 +202,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
     } else {
       setDraft(null);
     }
-  }, [selectedCardId, selectedCard, isNew]); 
+  }, [selectedCardId, selectedCard, isNew, isEditing, draft, initNewDraft]);
 
   // 閲覧側のトグル（既存カードのみ）
   const handleToggleBookmark = async (card: any) => {
@@ -186,42 +226,12 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
   // 編集画面用の actionsTopLeft（星・はてなボタン）
   // CardShell の card-shell-body pt-12 と同じ高さの領域に表示され、閲覧画面と同じ位置になる
   const editorActionsTopLeft = selectedCard ? (
-    <div className="flex items-center gap-1">
-      {/* 不確証(はてな)マーク */}
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          handleToggleUncertainty(selectedCard);
-        }}
-        className={cn(
-          "rounded-full w-6 h-6 min-w-0 min-h-0 transition-colors flex items-center justify-center",
-          (selectedCard.hasUncertainty ?? false)
-            ? "bg-amber-100 text-amber-600 hover:bg-amber-200 border-none"
-            : "bg-slate-50/80 text-slate-400 hover:bg-slate-100 hover:text-slate-600 border border-transparent"
-        )}
-        title="曘昧/要復習"
-      >
-        <CircleHelp className="w-3 h-3" />
-      </button>
-      {/* ブックマーク(星)マーク */}
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          handleToggleBookmark(selectedCard);
-        }}
-        className={cn(
-          "rounded-full w-6 h-6 min-w-0 min-h-0 transition-colors flex items-center justify-center",
-          (selectedCard.isBookmarked ?? false)
-            ? "bg-indigo-100 text-indigo-600 hover:bg-indigo-200 border-none"
-            : "bg-slate-50/80 text-slate-400 hover:bg-primary-600/10 hover:text-primary-600 border border-transparent"
-        )}
-        title="ブックマーク"
-      >
-        <Star className={cn("w-3 h-3", (selectedCard.isBookmarked ?? false) && "fill-current")} />
-      </button>
-    </div>
+    <CardCornerActions
+      onHelp={() => handleToggleUncertainty(selectedCard)}
+      onStar={() => handleToggleBookmark(selectedCard)}
+      helpActive={selectedCard.hasUncertainty ?? false}
+      starActive={selectedCard.isBookmarked ?? false}
+    />
   ) : undefined;
 
   const resetDraftFromCard = () => {
@@ -430,7 +440,8 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
     const imageCount = getBadgeCount(side, "image");
     const audioCount = getBadgeCount(side, "audio");
     const linkCount = getBadgeCount(side, "reference");
-    const base = "flex items-center gap-1 rounded-full px-2 py-1 h-8 min-h-0 min-w-0 text-[10px] font-bold";
+    const base =
+      "inline-flex shrink-0 items-center justify-center gap-1 rounded-full h-7 min-h-0 min-w-0 px-2 text-[10px] font-bold leading-none whitespace-nowrap";
     const openLinkDialog = () => {
       if (getReferenceItems(side).length === 0) {
         setReferenceItems(side, [{ url: "", name: "" }]);
@@ -439,7 +450,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
     };
 
     return (
-      <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+      <div className="flex flex-nowrap items-center gap-1.5 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
         <button
           type="button"
           className={cn(base, "bg-slate-50 text-slate-500 hover:bg-slate-100")}
@@ -447,8 +458,8 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
           title="画像を追加"
           aria-label="画像を追加"
         >
-          <ImageIcon className="w-3 h-3" />
-          <Plus className="w-3 h-3" />
+          <ImageIcon className="w-3 h-3 shrink-0" />
+          <Plus className="w-3 h-3 shrink-0" />
           {imageCount > 0 ? <span>x{imageCount}</span> : null}
         </button>
         <button
@@ -458,8 +469,8 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
           title="音声を追加"
           aria-label="音声を追加"
         >
-          <Volume2Icon className="w-3 h-3" />
-          <Plus className="w-3 h-3" />
+          <Volume2Icon className="w-3 h-3 shrink-0" />
+          <Plus className="w-3 h-3 shrink-0" />
           {audioCount > 0 ? <span>x{audioCount}</span> : null}
         </button>
         <button
@@ -469,8 +480,8 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
           title="リンクを追加"
           aria-label="リンクを追加"
         >
-          <LinkIcon className="w-3 h-3" />
-          {linkCount > 0 ? <span>x{linkCount}</span> : <Plus className="w-3 h-3" />}
+          <LinkIcon className="w-3 h-3 shrink-0" />
+          {linkCount > 0 ? <span>x{linkCount}</span> : <Plus className="w-3 h-3 shrink-0" />}
         </button>
       </div>
     );
@@ -656,93 +667,63 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
               <div className="flex flex-col gap-2 w-full">
                 {/* ツールバーのマウント先（カードの外側に表示） */}
                 <div ref={toolbarMountRefQ} />
-                <ScaleToFitFrame baseWidth={480}>
-                  <CardShell
-                    className={cn(
-                      "mx-auto border-none rounded-[32px] md:rounded-[40px] overflow-hidden shadow-xl",
-                      "premium-paper-depth",
-                      "card-shell--paper"
-                    )}
-                    resizable={true}
-                    showResizeHandle={true}
-                    bodyOverflowY="auto"
-                    heightPx={cardHeightPx ?? undefined}
-                    onHeightChange={(newHeight) => {
-                      setCardHeightPx(newHeight);
-                      updateSettings({ cardEditorHeightPx: newHeight });
-                      if (typeof window !== 'undefined') {
-                        window.localStorage.setItem('card-editor.resize:shared-height', String(newHeight));
-                      }
-                    }}
-                    actionsTopLeft={editorActionsTopLeft}
-                    actionsTopRight={renderMediaDialogButtons("question")}
-                  >
-                    {/* ruledOffsetPx=24 は BlockEditor の pt-6（24px）に合わせた罫線開始位置 */}
-                    <CardSurface ruled={true} ruledRowPx={24} ruledOffsetPx={24}>
-                      <BlockEditor
-                        blocks={draft?.questionBlocks ?? []}
-                        onChange={(blocks) =>
-                          setDraft((prev) =>
-                            prev ? { ...prev, questionBlocks: blocks as any } : prev
-                          )
-                        }
-                        prefix="question"
-                        label="問題"
-                        color="text-indigo-500"
-                        droppableId="question-blocks"
-                        accentColor={settings?.accentColor}
-                        duplicateToOpposite={settings?.duplicateToOpposite}
-                        toolbarMountRef={toolbarMountRefQ}
-                      />
-                    </CardSurface>
-                  </CardShell>
-                </ScaleToFitFrame>
+                <CardFrame
+                  className={cn(
+                    "overflow-hidden shadow-xl",
+                    "premium-paper-depth",
+                    "card-shell--paper"
+                  )}
+                  resizable={true}
+                  showResizeHandle={true}
+                  bodyOverflowY="auto"
+                  heightPx={cardHeightPx ?? undefined}
+                  onHeightChange={(newHeight) => persistHeight(newHeight)}
+                  actionsTopLeft={editorActionsTopLeft}
+                  actionsTopRight={renderMediaDialogButtons("question")}
+                >
+                  <BlockEditor
+                    blocks={draft?.questionBlocks ?? []}
+                    onChange={(blocks) => setSideBlocks("question", blocks as CardBlock[])}
+                    prefix="question"
+                    label="問題"
+                    color="text-indigo-500"
+                    droppableId="question-blocks"
+                    accentColor={settings?.accentColor}
+                    duplicateToOpposite={settings?.duplicateToOpposite}
+                    toolbarMountRef={toolbarMountRefQ}
+                  />
+                </CardFrame>
               </div>
 
               {/* 解答 */}
               <div className="flex flex-col gap-2 w-full">
                 {/* ツールバーのマウント先（カードの外側に表示） */}
                 <div ref={toolbarMountRefA} />
-                <ScaleToFitFrame baseWidth={480}>
-                  <CardShell
-                    className={cn(
-                      "mx-auto border-none rounded-[32px] md:rounded-[40px] shadow-xl",
-                      "bg-white"
-                    )}
-                    resizable={true}
-                    showResizeHandle={true}
-                    bodyOverflowY="auto"
-                    heightPx={cardHeightPx ?? undefined}
-                    onHeightChange={(newHeight) => {
-                      setCardHeightPx(newHeight);
-                      updateSettings({ cardEditorHeightPx: newHeight });
-                      if (typeof window !== 'undefined') {
-                        window.localStorage.setItem('card-editor.resize:shared-height', String(newHeight));
-                      }
-                    }}
-                    actionsTopLeft={editorActionsTopLeft}
-                    actionsTopRight={renderMediaDialogButtons("answer")}
-                  >
-                    {/* ruledOffsetPx=24 は BlockEditor の pt-6（24px）に合わせた罫線開始位置 */}
-                    <CardSurface ruled={true} ruledRowPx={24} ruledOffsetPx={24}>
-                      <BlockEditor
-                        blocks={draft?.answerBlocks ?? []}
-                        onChange={(blocks) =>
-                          setDraft((prev) =>
-                            prev ? { ...prev, answerBlocks: blocks as any } : prev
-                          )
-                        }
-                        prefix="answer"
-                        label="解答"
-                        color="text-emerald-500"
-                        droppableId="answer-blocks"
-                        accentColor={settings?.accentColor}
-                        duplicateToOpposite={settings?.duplicateToOpposite}
-                        toolbarMountRef={toolbarMountRefA}
-                      />
-                    </CardSurface>
-                  </CardShell>
-                </ScaleToFitFrame>
+                <CardFrame
+                  className={cn(
+                    "shadow-xl",
+                    "bg-white"
+                  )}
+                  resizable={true}
+                  showResizeHandle={true}
+                  bodyOverflowY="auto"
+                  heightPx={cardHeightPx ?? undefined}
+                  onHeightChange={(newHeight) => persistHeight(newHeight)}
+                  actionsTopLeft={editorActionsTopLeft}
+                  actionsTopRight={renderMediaDialogButtons("answer")}
+                >
+                  <BlockEditor
+                    blocks={draft?.answerBlocks ?? []}
+                    onChange={(blocks) => setSideBlocks("answer", blocks as CardBlock[])}
+                    prefix="answer"
+                    label="解答"
+                    color="text-emerald-500"
+                    droppableId="answer-blocks"
+                    accentColor={settings?.accentColor}
+                    duplicateToOpposite={settings?.duplicateToOpposite}
+                    toolbarMountRef={toolbarMountRefA}
+                  />
+                </CardFrame>
               </div>
                 </div>
               </DragDropContext>

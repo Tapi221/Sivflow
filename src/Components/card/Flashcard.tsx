@@ -1,26 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/Components/ui/button';
-import { CardShell } from './CardShell';
 import { ChevronLeft, ChevronRight, Pencil, Image as ImageIcon, X, Volume2 } from 'lucide-react';
-import Star from 'lucide-react/dist/esm/icons/star';
-import CircleHelp from 'lucide-react/dist/esm/icons/circle-help';
 import LinkIcon from 'lucide-react/dist/esm/icons/link';
 
 import { Dialog, DialogContent } from '@/Components/ui/dialog';
-import { MathRenderer } from './blocks/MathRenderer';
-import { MarkdownBlockView } from './blocks/MarkdownBlockPreview';
 import { cn } from '@/lib/utils';
-import { CodeRenderer } from './CodeRenderer';
 import { AudioPlayer, ImageGallery } from './CardMedia';
 import { useUserSettings } from '@/hooks/useUserSettings';
 import { ReferencePopup } from './ReferencePopup';
 import type { CardBlock, ReferenceBlockData } from '@/types';
 import { normalizeCard } from '@/utils';
-import { CardSurface } from "./CardSurface";
-import { ScaleToFitFrame } from './ScaleToFitFrame';
 import { InkLayer, InkToolbar, type InkHistoryState, type InkLayerHandle } from '@/Components/ink/InkLayer';
 import { resolveInkDocument } from '@/Components/ink/inkStorage';
 import type { InkDocument, InkEditTool } from '@/Components/ink/inkTypes';
+import { CardFrame } from './frame/CardFrame';
+import { CardCornerActions } from './frame/CardCornerActions';
+import { BlockRenderer } from './BlockRenderer';
 
 type FlashcardMediaLike =
   | string
@@ -58,30 +53,6 @@ type FlashcardCardLike = {
   inkQuestion?: InkDocument | null;
   inkAnswer?: InkDocument | null;
   [key: string]: unknown;
-};
-
-const renderMultilineText = (text: string) => {
-  const normalized = String(text ?? '').replace(/\r\n/g, '\n');
-  const lines = normalized.split('\n');
-
-  return (
-    <div
-      className="w-full min-h-[24px] px-1.5 py-0 text-center text-base font-medium text-slate-700 font-serif"
-      style={{ lineHeight: '24px' }}
-    >
-      {lines.map((line, lineIndex) => {
-        return (
-          <div
-            key={`line-${lineIndex}`}
-            className="whitespace-pre-wrap break-words leading-[24px]"
-            style={{ overflowWrap: 'anywhere' }}
-          >
-            {line === '' ? '\u00A0' : line}
-          </div>
-        );
-      })}
-    </div>
-  );
 };
 
 interface FlashcardProps {
@@ -160,6 +131,7 @@ export function Flashcard({
 
   // プレビュー時にエディタの共有リサイズ高さを反映するための state
   const [sharedPreviewHeightPx, setSharedPreviewHeightPx] = useState<number | null>(null);
+  const shellRef = React.useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!previewMode) return;
@@ -364,57 +336,15 @@ export function Flashcard({
   }
 
   // アクション表示（編集(onEdit)以外はプレビューでも表示）
-  if (onToggleUncertainty) {
+  if (onToggleUncertainty || onToggleBookmark) {
     actionsTopLeft.push(
-      <button
-        key="uncertainty"
-        type="button"
-        aria-label="不確実フラグ"
-        aria-pressed={hasUncertainty ? 'true' : 'false'}
-        onPointerDown={(e) => {
-          e.stopPropagation();
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
-          onToggleUncertainty(cardData);
-        }}
-        className={cn(
-          "rounded-full w-14 h-14 min-w-0 min-h-0 transition-all flex items-center justify-center",
-          hasUncertainty
-            ? "bg-amber-100 text-amber-600 border border-amber-200"
-            : "bg-slate-50 text-slate-300 border border-slate-100/50 hover:text-slate-500 hover:border-slate-200"
-        )}
-        title="曖昧/要復習"
-      >
-        <CircleHelp className={cn("w-5 h-5", hasUncertainty && "fill-current/20")} />
-      </button>
-    );
-  }
-
-  if (onToggleBookmark) {
-    actionsTopLeft.push(
-      <button
-        key="bookmark"
-        type="button"
-        aria-label="ブックマーク"
-        aria-pressed={isBookmarked ? 'true' : 'false'}
-        onPointerDown={(e) => {
-          e.stopPropagation();
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
-          onToggleBookmark(cardData);
-        }}
-        className={cn(
-          "rounded-full w-14 h-14 min-w-0 min-h-0 transition-all flex items-center justify-center",
-          isBookmarked
-            ? "text-primary-600 bg-primary-600/10 border border-primary-600/20"
-            : "bg-slate-50 text-slate-300 border border-slate-100/50 hover:text-slate-500 hover:border-slate-200"
-        )}
-        title="ブックマーク"
-      >
-        <Star className={cn("w-5 h-5", isBookmarked && "fill-current")} />
-      </button>
+      <CardCornerActions
+        key="corner-actions"
+        onHelp={onToggleUncertainty ? () => onToggleUncertainty(cardData) : undefined}
+        onStar={onToggleBookmark ? () => onToggleBookmark(cardData) : undefined}
+        helpActive={hasUncertainty}
+        starActive={isBookmarked}
+      />
     );
   }
 
@@ -436,85 +366,6 @@ export function Flashcard({
     );
   }
 
-  const renderBlocks = (blocks: CardBlock[] | undefined) => {
-    if (!blocks || blocks.length === 0) return null;
-
-    // rowOffset の安全化（文字列/NaN 対策 + クランプ）
-    const getRowOffset = (block: CardBlock) => {
-      const n = Number((block as any).rowOffset ?? 0);
-      if (!Number.isFinite(n)) return 0;
-      return Math.max(-999, Math.min(999, Math.round(n)));
-    };
-
-    const ROW_STEP_PX = 24;
-
-    return (
-      <div className="space-y-0 w-full max-w-full">
-        {blocks.map((block) => {
-          const isLinePositionable = block.type === 'text' || block.type === 'code';
-          const rowOffsetPx = isLinePositionable ? getRowOffset(block) * ROW_STEP_PX : 0;
-
-          // ✅ transform はやめる：見た目だけ動いてレイアウトがズレる
-          // ✅ marginTop で実寸を動かす
-          const offsetStyle = rowOffsetPx ? { marginTop: rowOffsetPx } : undefined;
-
-          return (
-            <div
-              key={block.id}
-              className="w-full min-w-0 max-w-full"
-              data-block-row="true"
-              data-row-offset-applied={rowOffsetPx ? 'true' : undefined}
-              style={offsetStyle}
-            >
-              {block.type === 'text' && (block.content ?? '').trim() !== '' && (
-                <div className="w-full max-w-full overflow-hidden">
-                  {renderMultilineText(String(block.content ?? ''))}
-                </div>
-              )}
-
-              {block.type === 'code' && (block.code?.code ?? '').trim() !== '' && (
-                <div className="w-full max-w-full overflow-hidden">
-                  <CodeRenderer code={block.code!.code} language={block.code!.language} />
-                </div>
-              )}
-
-              {block.type === 'image' && (block.images?.length ?? 0) > 0 && (
-                <ImageGallery
-                  urls={(block.images ?? []).map((img: any) => img.remoteUrl || img.localUrl || img.url || img)}
-                  onFullscreenChange={handleGalleryFullscreenChange}
-                />
-              )}
-
-              {block.type === 'audio' && (block.audios?.length ?? 0) > 0 && (
-                <div className="flex justify-center">
-                  <AudioPlayer urls={(block.audios ?? []).map((a: any) => a.remoteUrl || a.localUrl || a.url || a)} />
-                </div>
-              )}
-
-              {block.type === 'math' && (block.math?.latex ?? '').trim() !== '' && (
-                <div className="py-2 flex justify-center">
-                  <MathRenderer
-                    latex={block.math!.latex || ''}
-                    displayMode={block.math!.displayMode || 'block'}
-                    className="text-slate-800"
-                  />
-                </div>
-              )}
-
-              {block.type === 'markdown' && (block.markdown ?? '').trim() !== '' && (
-                <div className="markdownBlockSurface w-full max-w-full bg-transparent overflow-visible">
-                  <div className="w-full max-w-full px-1.5 py-0">
-                    <MarkdownBlockView md={block.markdown!} className="markdownBlockCardView" />
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
-
   // レガシー描画（blocksが空のときのフォールバック）
   const renderLegacy = (side: 'question' | 'answer') => {
     const text = side === 'question' ? questionText : answerText;
@@ -532,15 +383,9 @@ export function Flashcard({
 
     return (
       <div className="space-y-0 w-full max-w-full">
-        {(text ?? '').trim() !== '' && (
-          renderMultilineText(String(text))
-        )}
+        {(text ?? '').trim() !== '' && <BlockRenderer blocks={[{ id: `${side}-legacy-text`, type: 'text', orderIndex: 0, content: String(text) } as CardBlock]} />}
 
-        {(code?.code ?? '').trim() !== '' && (
-          <div className="w-full max-w-full overflow-hidden">
-            <CodeRenderer code={code.code} language={code.language} />
-          </div>
-        )}
+        {(code?.code ?? '').trim() !== '' && <BlockRenderer blocks={[{ id: `${side}-legacy-code`, type: 'code', orderIndex: 0, code } as CardBlock]} />}
 
         {(images?.length ?? 0) > 0 && (
           <ImageGallery urls={images} onFullscreenChange={handleGalleryFullscreenChange} />
@@ -558,24 +403,16 @@ export function Flashcard({
 
   const renderSide = (side: 'question' | 'answer') => {
     const blocks = side === 'question' ? (cardData?.questionBlocks ?? []) : (cardData?.answerBlocks ?? []);
-    const blocksNode = renderBlocks(blocks);
-    if (blocksNode) return blocksNode;
+    if (blocks.length > 0) {
+      return (
+        <BlockRenderer
+          blocks={blocks}
+          onGalleryFullscreenChange={handleGalleryFullscreenChange}
+        />
+      );
+    }
     return renderLegacy(side);
   };
-
-  const shellRef = React.useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (!previewMode) return;
-    if (!shellRef.current) return;
-    try {
-      const shell = shellRef.current;
-      const body = shell.querySelector('.card-shell-body') as HTMLElement | null;
-      console.debug('[Flashcard] shell width', shell.clientWidth, 'body width', body?.clientWidth);
-    } catch (e) {
-      // ignore
-    }
-  }, [previewMode, sharedPreviewHeightPx, card?.id]);
 
   return (
     <div className={cn("w-full h-full flex flex-col select-none", className)}>
@@ -591,33 +428,26 @@ export function Flashcard({
 
       <div className="relative">
         <div className="card-ambient-shadow" aria-hidden="true" />
-        <ScaleToFitFrame
-          baseWidth={480}
-        >
-          <CardShell
-            className={cn(
-              "mx-auto border-none rounded-[32px] md:rounded-[40px] transition-all duration-300",
-              "premium-paper-depth",
-              !previewMode && "premium-paper-depth--hover cursor-pointer",
-              "card-shell--paper"
-            )}
-            ref={shellRef}
-            onClick={handleFlip}
-            resizable={false}
-            resizeStepPx={undefined}
-            showResizeHandle={false}
-            heightPx={sharedPreviewHeightPx}
-            lockHeight={lockCardHeight}
-            bodyOverflowY="auto"
-            actionsTopLeft={actionsTopLeft.length > 0 ? actionsTopLeft : undefined}
-            actionsTopRight={actionsTopRight.length > 0 ? actionsTopRight : undefined}
-            actionsBottomRight={actionsBottomRight.length > 0 ? actionsBottomRight : undefined}
-            drawMode={enableDrawMode}
-          >
-          <CardSurface
-            ruled={true}
-            ruledOffsetPx={24}
-            overlay={
+        <CardFrame
+          className={cn(
+            'transition-all duration-300',
+            'premium-paper-depth',
+            !previewMode && 'premium-paper-depth--hover cursor-pointer',
+            'card-shell--paper'
+          )}
+          shellRef={shellRef}
+          onClick={handleFlip}
+          resizable={false}
+          resizeStepPx={undefined}
+          showResizeHandle={false}
+          heightPx={sharedPreviewHeightPx}
+          lockHeight={lockCardHeight}
+          bodyOverflowY="auto"
+          actionsTopLeft={actionsTopLeft.length > 0 ? actionsTopLeft : undefined}
+          actionsTopRight={actionsTopRight.length > 0 ? actionsTopRight : undefined}
+          actionsBottomRight={actionsBottomRight.length > 0 ? actionsBottomRight : undefined}
+          drawMode={enableDrawMode}
+          overlay={
               <>
                 <InkLayer
                   ref={previewInkRef}
@@ -645,7 +475,7 @@ export function Flashcard({
                 )}
               </>
             }
-          >
+        >
             {/* コンテンツエリア - 編集画面に揃えて上寄せ */}
             <div
               className={cn(
@@ -673,9 +503,7 @@ export function Flashcard({
                 </div>
               )}
             </div>
-          </CardSurface>
-          </CardShell>
-        </ScaleToFitFrame>
+        </CardFrame>
       </div>
 
       <ReferencePopup

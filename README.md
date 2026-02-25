@@ -60,6 +60,10 @@ npm run dev
 
 ## 🏗 プロジェクト構造概要
 ```
+
+## UI統一ルール（カード）
+* `CardFrame` 以外で `rounded-*` / `shadow-*` / `ring-*` / `max-w-*` をカード見た目目的で追加しない。
+* ブロック枠の見た目は `BlockWrapper` / `BlockRenderer` に集約し、他画面で個別実装しない。
 .
 ├── src/                        # Web app source (React + TS)
 │   ├── Components/             # Feature-based components
