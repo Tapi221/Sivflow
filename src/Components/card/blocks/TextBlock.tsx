@@ -1,8 +1,7 @@
 import React from 'react';
-import AutoResizeTextarea from '@/Components/ui/AutoResizeTextarea';
 import TypeIcon from 'lucide-react/dist/esm/icons/type';
 import { BlockWrapper } from './BlockWrapper';
-import { TEXT_BLOCK_CONTENT_CLASS, TEXT_BLOCK_LINE_HEIGHT_PX } from './textBlockStyles';
+import { TextBlockContent } from './TextBlockContent';
 
 interface TextBlockProps {
   content: string;
@@ -33,7 +32,8 @@ export const TextBlock = ({ content, onChange, onDelete, onDuplicate, dragHandle
       dragHandleProps={dragHandleProps}
       dragEnabled={dragEnabled}
       dragHandleClassName={dragHandleClassName}
-      className="bg-transparent border-slate-100/80 py-0"
+      className="bg-transparent border-0 px-0 py-0"
+      contentClassName="px-0"
       label="Text"
       icon={TypeIcon}
       accentColor={accentColor}
@@ -46,15 +46,12 @@ export const TextBlock = ({ content, onChange, onDelete, onDuplicate, dragHandle
       onMoveDragStart={onMoveDragStart}
       onMoveDragEnd={onMoveDragEnd}
     >
-      <AutoResizeTextarea
-        value={content}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder || "テキストを入力..."}
-        minRows={1}
-        lineHeight={TEXT_BLOCK_LINE_HEIGHT_PX}
-        allowInternalScroll={false}
+      <TextBlockContent
+        mode="edit"
+        content={content}
+        onChange={onChange}
+        placeholder={placeholder}
         autoFocus={autoFocus}
-        className={`${TEXT_BLOCK_CONTENT_CLASS} placeholder:text-slate-300 focus-visible:ring-0 focus-visible:ring-offset-0`}
       />
     </BlockWrapper>
   );

@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react';
 
 import SigmaIcon from 'lucide-react/dist/esm/icons/sigma';
 import { BlockWrapper } from './BlockWrapper';
-import { MathRenderer } from './MathRenderer';
+import { MathBlockContent } from './MathBlockContent';
 import { MathEditorDialog } from './MathEditorDialog';
 import { cn } from '@/lib/utils';
 import type { MathBlockData } from '@/types';
@@ -109,19 +109,12 @@ export const MathBlock: React.FC<MathBlockProps> = ({
             setIsEditorOpen(true);
           }}
         >
-          {latex.trim() ? (
-            <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 min-h-[50px] overflow-x-auto overflow-y-hidden">
-              <MathRenderer
-                latex={latex}
-                displayMode={data.displayMode ?? 'block'}
-                className="text-slate-800"
-              />
-            </div>
-          ) : (
-            <div className="text-[12px] text-slate-400 px-1 py-2">
-              数式を入力...
-            </div>
-          )}
+          <MathBlockContent
+            latex={latex}
+            displayMode={data.displayMode ?? 'block'}
+            showPlaceholder
+            placeholder="数式を入力..."
+          />
         </div>
 
         <div className="px-1">

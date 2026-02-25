@@ -28,14 +28,16 @@ describe('Code block consistency', () => {
       />
     );
 
+    const body = container.querySelector('.codeBlockBody');
     const pre = container.querySelector('pre');
     const code = container.querySelector('pre code');
+    expect(body).toBeTruthy();
     expect(pre).toBeTruthy();
     expect(code).toBeTruthy();
-    expect(pre?.className ?? '').toContain('overflow-x-auto');
-    expect(pre?.className ?? '').toContain('whitespace-pre');
-    expect(pre?.className ?? '').toContain('break-normal');
-    expect(code?.className ?? '').toContain('whitespace-pre');
+    expect(body?.className ?? '').toContain('codeBlockBody');
+    expect(pre?.className ?? '').toContain('codeBlockPre');
+    expect(pre?.className ?? '').toContain('code-no-wrap');
+    expect(code?.className ?? '').toContain('code-no-wrap');
     expect(code?.textContent ?? '').toContain(LONG_LINE);
   });
 
@@ -69,12 +71,12 @@ describe('Code block consistency', () => {
     expect(viewRoot).toBeTruthy();
     expect(previewRoot).toBeTruthy();
 
-    expect(edit.container.querySelector('.codeBlockPre.codeBlockPre--tools')).toBeTruthy();
-    expect(view.container.querySelector('.codeBlockPre.codeBlockPre--tools')).toBeTruthy();
-    expect(preview.container.querySelector('.codeBlockPre.codeBlockPre--tools')).toBeTruthy();
+    expect(edit.container.querySelector('.codeBlockBody.codeBlockBody--withHeader')).toBeTruthy();
+    expect(view.container.querySelector('.codeBlockBody.codeBlockBody--withHeader')).toBeTruthy();
+    expect(preview.container.querySelector('.codeBlockBody.codeBlockBody--withHeader')).toBeTruthy();
 
-    expect(view.container.querySelector('.codeBlockLang')?.textContent).toBe('JavaScript');
-    expect(preview.container.querySelector('.codeBlockLang')?.textContent).toBe('JavaScript');
+    expect(view.container.querySelector('.codeBlockLang')?.textContent).toBe('JS');
+    expect(preview.container.querySelector('.codeBlockLang')?.textContent).toBe('JS');
     expect(edit.container.querySelector('.codeBlockLang')).toBeNull();
   });
 });

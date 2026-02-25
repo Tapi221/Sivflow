@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from '@/Components/ui/dialog';
 import AutoResizeTextarea from '@/Components/ui/AutoResizeTextarea';
-import { MathRenderer } from './MathRenderer';
+import { MathBlockContent } from './MathBlockContent';
 import { cn } from '@/lib/utils';
 import type { MathBlockData } from '@/types';
 
@@ -77,13 +77,7 @@ export const MathEditorDialog: React.FC<MathEditorDialogProps> = ({
           />
 
           {latex.trim() && (
-            <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 min-h-[50px] overflow-x-auto overflow-y-hidden">
-              <MathRenderer
-                latex={latex}
-                displayMode={data.displayMode ?? 'block'}
-                className="text-slate-800"
-              />
-            </div>
+            <MathBlockContent latex={latex} displayMode={data.displayMode ?? 'block'} />
           )}
 
           {error && (

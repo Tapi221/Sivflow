@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import NotebookPenIcon from 'lucide-react/dist/esm/icons/notebook-pen';
 import { BlockWrapper } from './BlockWrapper';
-import { MarkdownBlockPreview } from './MarkdownBlockPreview';
+import { MarkdownBlockContent } from './MarkdownBlockContent';
 import { MarkdownEditorDialog } from './MarkdownEditorDialog';
 import { cn } from '@/lib/utils';
 
@@ -173,7 +173,7 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
 
   const previewNode = useMemo(
     () => (
-      <MarkdownBlockPreview
+      <MarkdownBlockContent
         markdown={markdown}
         className="font-serif text-base font-medium leading-[24px]"
       />

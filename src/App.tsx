@@ -55,6 +55,9 @@ const FourChoiceMode = lazy(() => import('./Pages/FourChoiceMode'));
 const PdfScrollTest = DEV_MODE
   ? lazy(() => import('./Pages/PdfScrollTest'))
   : null;
+const CodeBlockVisualTest = DEV_MODE
+  ? lazy(() => import('./Pages/CodeBlockVisualTest'))
+  : null;
 
 const isTestBypassEnabled = () => {
   const hasBypassParam = new URLSearchParams(window.location.search).get('test_bypass') === 'true';
@@ -307,6 +310,14 @@ function AppContent() {
     );
   }
 
+  if (CodeBlockVisualTest && isTestBypass && window.location.pathname === '/codeblock-visual-test') {
+    return (
+      <Suspense fallback={<LoadingFallback />}>
+        <CodeBlockVisualTest />
+      </Suspense>
+    );
+  }
+
   // 通常時のアプリ本体
   return (
     <>
@@ -430,6 +441,17 @@ function AppContent() {
               element={
                 <Suspense fallback={<LoadingFallback />}>
                   <PdfScrollTest />
+                </Suspense>
+              }
+            />
+          ) : null}
+
+          {CodeBlockVisualTest ? (
+            <Route
+              path="codeblock-visual-test"
+              element={
+                <Suspense fallback={<LoadingFallback />}>
+                  <CodeBlockVisualTest />
                 </Suspense>
               }
             />

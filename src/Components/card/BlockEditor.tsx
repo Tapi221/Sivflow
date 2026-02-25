@@ -516,7 +516,7 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
             <div
               {...provided.droppableProps}
               ref={provided.innerRef}
-              className="space-y-0 pr-3 overflow-x-clip overflow-y-visible"
+              className="space-y-0 overflow-x-visible overflow-y-visible"
             >
               {bodyBlocks.map((block, index) => (
                 <Draggable
@@ -650,7 +650,6 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
 
                         {block.type === 'image' && (
                           <MediaBlock
-                            type="image"
                             data={block.images || []}
                             onChange={(data) => handleUpdateBlock(block.id, { images: data })}
                             onDelete={() => handleDeleteBlock(block.id, index)}

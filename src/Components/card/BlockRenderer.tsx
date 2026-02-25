@@ -1,10 +1,11 @@
 import { useMemo, useCallback } from 'react';
 import type { CardBlock } from '@/types';
 import { CodeRenderer } from './CodeRenderer';
-import { AudioPlayer, ImageGallery } from './CardMedia';
-import { MathRenderer } from './blocks/MathRenderer';
-import { MarkdownBlockView } from './blocks/MarkdownBlockPreview';
-import { TEXT_BLOCK_CONTENT_CLASS } from './blocks/textBlockStyles';
+import { AudioPlayer } from './CardMedia';
+import { ImageBlockContent } from './blocks/ImageBlockContent';
+import { MathBlockContent } from './blocks/MathBlockContent';
+import { MarkdownBlockContent } from './blocks/MarkdownBlockContent';
+import { TextBlockContent } from './blocks/TextBlockContent';
 import { CARD_ROW_PX } from './constants';
 
 interface BlockRendererProps {
@@ -13,33 +14,6 @@ interface BlockRendererProps {
 }
 
 const ROW_STEP_PX = CARD_ROW_PX;
-
-/**
- * 罫線スナップ前提のテキスト描画。
- * - 1要素にまとめて layout を安定化
- * - pre-wrap で改行/空行を保持
- * - 末尾改行で最後の空行が消えるケースを補正
- */
-const renderMultilineText = (text: string) => {
-  const raw = String(text ?? '');
-  const normalized = raw.replace(/\r\n/g, '\n');
-
-  // 空文字は高さが潰れやすいので NBSP を入れて最低1行を保証
-  let displayText = normalized.length === 0 ? '\u00A0' : normalized;
-
-  // 末尾が改行のとき、最後の空行が高さとして出ないケースがあるので補正
-  if (displayText.endsWith('\n')) displayText += '\u00A0';
-
-  return (
-    <div className="w-full max-w-full overflow-hidden">
-      <div
-        className={`${TEXT_BLOCK_CONTENT_CLASS} whitespace-pre-wrap`}
-      >
-        {displayText}
-      </div>
-    </div>
-  );
-};
 
 export function BlockRenderer({ blocks, onGalleryFullscreenChange }: BlockRendererProps) {
   const getRowOffset = useCallback((block: CardBlock) => {
@@ -92,7 +66,7 @@ export function BlockRenderer({ blocks, onGalleryFullscreenChange }: BlockRender
           >
             {block.type === 'text' && (block.content ?? '').trim() !== '' && (
               <div className="w-full max-w-full overflow-hidden">
-                {renderMultilineText(String(block.content ?? ''))}
+                <TextBlockContent mode="view" content={String(block.content ?? '')} />
               </div>
             )}
 
@@ -103,7 +77,8 @@ export function BlockRenderer({ blocks, onGalleryFullscreenChange }: BlockRender
             )}
 
             {block.type === 'image' && (block.images?.length ?? 0) > 0 && (
-              <ImageGallery
+              <ImageBlockContent
+                mode="view"
                 urls={(block.images ?? []).map(toMediaUrl).filter((u): u is string => Boolean(u))}
                 onFullscreenChange={onGalleryFullscreenChange}
               />
@@ -119,10 +94,9 @@ export function BlockRenderer({ blocks, onGalleryFullscreenChange }: BlockRender
 
             {block.type === 'math' && (block.math?.latex ?? '').trim() !== '' && (
               <div className="py-2 flex justify-center">
-                <MathRenderer
+                <MathBlockContent
                   latex={block.math!.latex || ''}
                   displayMode={block.math!.displayMode || 'block'}
-                  className="text-slate-800"
                 />
               </div>
             )}
@@ -130,7 +104,7 @@ export function BlockRenderer({ blocks, onGalleryFullscreenChange }: BlockRender
             {block.type === 'markdown' && (block.markdown ?? '').trim() !== '' && (
               <div className="markdownBlockSurface w-full max-w-full bg-transparent overflow-visible">
                 <div className="w-full max-w-full px-1.5 py-0">
-                  <MarkdownBlockView md={block.markdown!} className="markdownBlockCardView" />
+                  <MarkdownBlockContent markdown={block.markdown!} className="markdownBlockCardView" />
                 </div>
               </div>
             )}

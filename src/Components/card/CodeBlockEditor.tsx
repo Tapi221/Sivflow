@@ -1,6 +1,4 @@
-// src/Components/card/CodeBlockEditor.tsx
-
-import { useCallback, useLayoutEffect, useMemo, useState, useRef } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   Select,
   SelectContent,
@@ -12,33 +10,11 @@ import {
   SelectValue,
 } from '@/Components/ui/select';
 import type { CodeBlockData } from '@/types/code-block';
-import Editor from 'react-simple-code-editor';
-import Prism from 'prismjs';
-import { CodeBlockFrame } from './blocks/CodeBlockFrame';
-
-import 'prismjs/components/prism-clike';
-import 'prismjs/components/prism-javascript';
-import 'prismjs/components/prism-typescript';
-import 'prismjs/components/prism-python';
-import 'prismjs/components/prism-java';
-import 'prismjs/components/prism-c';
-import 'prismjs/components/prism-cpp';
-import 'prismjs/components/prism-csharp';
-import 'prismjs/components/prism-go';
-import 'prismjs/components/prism-rust';
-import 'prismjs/components/prism-sql';
-import 'prismjs/components/prism-markup';
-import 'prismjs/components/prism-css';
-import 'prismjs/components/prism-json';
-import 'prismjs/components/prism-bash';
-import 'prismjs/components/prism-markdown';
-
-import 'prismjs/themes/prism.css';
-
-// ─── 定数 ────────────────────────────────────────────────
+import { CodeBlockContent } from './blocks/CodeBlockContent';
+import { normalizeEditorLanguage } from './blocks/codeBlockLanguage';
 
 const STORAGE_KEY = 'codeblock_recent_langs';
-const MAX_RECENT = 3; // 先頭に表示する最近使った言語の最大数
+const MAX_RECENT = 3;
 
 const SUPPORTED_LANGUAGES = [
   { value: 'javascript', label: 'JavaScript' },
@@ -59,11 +35,6 @@ const SUPPORTED_LANGUAGES = [
 ];
 const SUPPORTED_LANGUAGE_SET = new Set(SUPPORTED_LANGUAGES.map((l) => l.value));
 
-function normalizeLanguage(lang: string): string {
-  if (lang === 'html') return 'markup';
-  return lang;
-}
-
 function canUseLocalStorage(): boolean {
   try {
     return typeof window !== 'undefined' && 'localStorage' in window && !!window.localStorage;
@@ -72,9 +43,6 @@ function canUseLocalStorage(): boolean {
   }
 }
 
-// ─── localStorage ユーティリティ ────────────────────────
-
-/** 最近使った言語リストを取得 */
 function getRecentLangs(): string[] {
   if (!canUseLocalStorage()) return [];
   try {
@@ -84,30 +52,24 @@ function getRecentLangs(): string[] {
     if (!Array.isArray(parsed)) return [];
     return parsed
       .filter((v): v is string => typeof v === 'string')
-      .map(normalizeLanguage)
+      .map(normalizeEditorLanguage)
       .filter((v) => SUPPORTED_LANGUAGE_SET.has(v));
   } catch {
     return [];
   }
 }
 
-/**
- * 使った言語を先頭に追加して保存する。
- * リストは最大 MAX_RECENT 件に絞る。
- */
 function pushRecentLang(lang: string): void {
   if (!canUseLocalStorage()) return;
   try {
-    const normalized = normalizeLanguage(lang);
-    const prev = getRecentLangs().filter((l) => l !== normalized); // 重複を除去
+    const normalized = normalizeEditorLanguage(lang);
+    const prev = getRecentLangs().filter((l) => l !== normalized);
     const next = [normalized, ...prev].slice(0, MAX_RECENT);
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
   } catch {
-    // localStorage が使えない環境(プライベートブラウジング等)では無視
+    // noop
   }
 }
-
-// ─── コンポーネント ──────────────────────────────────────
 
 interface CodeBlockEditorProps {
   value?: CodeBlockData;
@@ -116,55 +78,32 @@ interface CodeBlockEditorProps {
 }
 
 export function CodeBlockEditor({ value, onChange, className }: CodeBlockEditorProps) {
-  const editorHostRef = useRef<HTMLDivElement | null>(null);
-
-  // 最近使った言語リストを state で管理（セレクトを開いたタイミングで最新を反映）
   const [recentLangs, setRecentLangs] = useState<string[]>(() => getRecentLangs());
 
   const code = value?.code ?? '';
-  const normalizedLanguage = normalizeLanguage(value?.language ?? 'javascript');
-  const grammar = useMemo(
-    () => Prism.languages[normalizedLanguage] ?? Prism.languages.javascript,
-    [normalizedLanguage]
+  const normalizedLanguage = normalizeEditorLanguage(value?.language ?? 'javascript');
+
+  const handleLanguageChange = useCallback(
+    (newLang: string) => {
+      const nextLanguage = normalizeEditorLanguage(newLang);
+      onChange({ language: nextLanguage, code });
+      pushRecentLang(nextLanguage);
+      setRecentLangs(getRecentLangs());
+    },
+    [onChange, code]
   );
 
-  const handleCodeChange = useCallback((newCode: string) => {
-    onChange({ language: normalizedLanguage, code: newCode });
-  }, [onChange, normalizedLanguage]);
-
-  const handleLanguageChange = useCallback((newLang: string) => {
-    const nextLanguage = normalizeLanguage(newLang);
-    onChange({ language: nextLanguage, code });
-    // 選択と同時に履歴を更新
-    pushRecentLang(nextLanguage);
-    setRecentLangs(getRecentLangs());
-  }, [onChange, code]);
-
-  const highlightCode = useCallback((src: string) => {
-    // Prism.highlight の language 引数は常に正規化済みキーを使う。
-    return Prism.highlight(src, grammar, normalizedLanguage);
-  }, [grammar, normalizedLanguage]);
-
-  useLayoutEffect(() => {
-    const textarea = editorHostRef.current?.querySelector('textarea');
-    if (!textarea) return;
-    textarea.setAttribute('wrap', 'off');
-  }, [normalizedLanguage]);
-
-  // 「最近使った言語」に対応する label オブジェクトを導出
   const recentLangItems = useMemo(() => {
     return recentLangs
       .map((val) => SUPPORTED_LANGUAGES.find((l) => l.value === val))
       .filter((l): l is { value: string; label: string } => l !== undefined);
   }, [recentLangs]);
 
-  // 全言語リストから「最近使った言語」を除いたもの（重複表示を防ぐ）
   const remainingLangItems = useMemo(() => {
     const recentSet = new Set(recentLangs);
     return SUPPORTED_LANGUAGES.filter((l) => !recentSet.has(l.value));
   }, [recentLangs]);
 
-  // 言語セレクタ（左上アクション）
   const languageSelector = (
     <Select
       value={normalizedLanguage}
@@ -189,7 +128,6 @@ export function CodeBlockEditor({ value, onChange, className }: CodeBlockEditorP
       </SelectTrigger>
 
       <SelectContent className="bg-white">
-        {/* 最近使った言語セクション（1件以上あるときだけ表示） */}
         {recentLangItems.length > 0 && (
           <>
             <SelectGroup>
@@ -206,7 +144,6 @@ export function CodeBlockEditor({ value, onChange, className }: CodeBlockEditorP
           </>
         )}
 
-        {/* 残りの全言語 */}
         <SelectGroup>
           {recentLangItems.length > 0 && (
             <SelectLabel className="text-[10px] text-slate-400 uppercase tracking-widest px-2 py-1">
@@ -224,28 +161,14 @@ export function CodeBlockEditor({ value, onChange, className }: CodeBlockEditorP
   );
 
   return (
-    <div
-      ref={editorHostRef}
+    <CodeBlockContent
+      mode="editor"
+      code={code}
+      language={normalizedLanguage}
+      onCodeChange={(nextCode) => onChange({ language: normalizedLanguage, code: nextCode })}
+      headerLeft={languageSelector}
       className={className}
-    >
-      <CodeBlockFrame
-        left={languageSelector}
-      >
-        <Editor
-          value={code}
-          onValueChange={handleCodeChange}
-          highlight={highlightCode}
-          padding={0}
-          style={{
-            fontFamily: '"Fira Code", "Fira Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-            fontSize: 14,
-            lineHeight: '20px',
-            minHeight: 56,
-          }}
-          className="code-editor-no-scroll code-editor-no-scroll--tools w-full"
-          textareaClassName="focus:outline-none"
-        />
-      </CodeBlockFrame>
-    </div>
+    />
   );
 }
+

@@ -1,14 +1,23 @@
 @layer components {
   :root {
-    --code-tools-top: 6px;
-    --code-tools-inset: 10px;
-    --code-tools-reserve: 28px;
+    --code-frame-radius: 16px;
+    --code-frame-border-width: 1px;
+    --code-frame-accent-width: 2px;
+    --code-header-inset-y: 6px;
+    --code-header-inset-x: 10px;
+    --code-header-reserve: 28px;
+    --code-padding-top: 20px;
+    --code-padding-inline: 10px;
+    --code-padding-bottom: 10px;
+    --code-font-size: 14px;
+    --code-line-height: 20px;
+    --code-font-family: "Fira Code", "Fira Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   }
 
   .codeBlockRoot {
     position: relative;
-    border-radius: 16px;
-    border: 1px solid var(--code-border);
+    border-radius: var(--code-frame-radius);
+    border: var(--code-frame-border-width) solid var(--code-border);
     background: var(--code-bg);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
     overflow: hidden; /* ::before の角丸はみ出し防止 */
@@ -20,39 +29,51 @@
     left: 0;
     top: 0;
     bottom: 0;
-    width: 2px;
+    width: var(--code-frame-accent-width);
     background: rgba(var(--color-primary-600), 0.35);
-    border-radius: 16px 0 0 16px;
+    border-radius: var(--code-frame-radius) 0 0 var(--code-frame-radius);
     pointer-events: none;
   }
 
-  /* ===== Preview (pre) ===== */
+  /* ===== Common Body/Code ===== */
+
+  .codeBlockBody {
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior: contain;
+    white-space: pre;
+    scrollbar-gutter: stable;
+  }
+
+  .codeBlockBody--withHeader {
+    padding-top: var(--code-header-reserve);
+  }
 
   .codeBlockPre {
     margin: 0;
-    padding: 20px 10px 0 10px;
-    font-size: 14px;
-    line-height: 20px;
-    font-family: "Fira Code", "Fira Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    padding: var(--code-padding-top) var(--code-padding-inline) 0 var(--code-padding-inline);
+    font-size: var(--code-font-size);
+    line-height: var(--code-line-height);
+    font-family: var(--code-font-family);
     tab-size: 2;
     font-variant-ligatures: none;
     background: transparent;
     background-image: none;
     color: var(--code-fg);
-    overflow-x: auto;
-    overflow-y: hidden;
+    overflow: visible;
     white-space: pre;
     word-break: normal;
     overflow-wrap: normal;
   }
 
-  .codeBlockPre--tools {
-    padding-top: var(--code-tools-reserve);
-  }
-
   .codeBlockPre > code {
     display: block;
-    padding-bottom: 10px;
+    padding-bottom: var(--code-padding-bottom);
+    white-space: pre;
+  }
+
+  .codeBlockPre > code > div {
+    white-space: pre;
   }
 
   .codeBlockLang {
@@ -173,31 +194,48 @@
   */
 
   .code-editor-no-scroll {
-    max-width: 100%;
-    overflow-x: auto;
-    overflow-y: hidden;
-    overscroll-behavior: contain;
+    width: max-content;
+    min-width: 100%;
   }
 
   .code-editor-no-scroll textarea,
   .code-editor-no-scroll pre {
-    font-family: "Fira Code", "Fira Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    font-size: 14px;
-    line-height: 20px;
-    padding: 20px 10px 10px 10px;
+    font-family: var(--code-font-family);
+    font-size: var(--code-font-size);
+    line-height: var(--code-line-height);
+    padding: var(--code-padding-top) var(--code-padding-inline) var(--code-padding-bottom) var(--code-padding-inline);
     letter-spacing: normal;
     tab-size: 2;
-    white-space: pre;
-    word-break: normal;
-    overflow-wrap: normal;
+    white-space: pre !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
     margin: 0;
     text-align: left;
     font-variant-ligatures: none;
   }
 
-  .code-editor-no-scroll--tools textarea,
-  .code-editor-no-scroll--tools pre {
-    padding-top: var(--code-tools-reserve);
+  .code-editor-no-scroll pre {
+    display: inline-block !important;
+    min-width: 100%;
+  }
+
+  /* react-simple-code-editor の既定 pre-wrap を打ち消して、常に横スクロールを正とする */
+  .code-editor-no-scroll .npm__react-simple-code-editor__textarea {
+    white-space: pre !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+  }
+
+  /* generic safeguard: code block content should never soft-wrap */
+  .code-no-wrap {
+    white-space: pre !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+  }
+
+  .codeBlockBody,
+  .codeBlockBody * {
+    font-family: var(--code-font-family);
   }
 
   .code-editor-no-scroll textarea {

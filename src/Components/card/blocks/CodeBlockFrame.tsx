@@ -1,13 +1,14 @@
 import React from 'react';
 
 type CodeBlockFrameProps = {
+  variant?: 'viewer' | 'editor';
   /** Notion風: 表示は短縮(例: JS/TS/PY) */
   languageLabel?: string;
   /** hover / a11y 用のフル名(例: JavaScript/TypeScript) */
   languageTitle?: string;
 
-  left?: React.ReactNode; // 編集なら言語Select等
-  right?: React.ReactNode; // 編集なら言語Select、閲覧ならCopyボタン等
+  headerLeft?: React.ReactNode;
+  headerRight?: React.ReactNode;
   children: React.ReactNode;
 };
 
@@ -16,24 +17,25 @@ type CodeBlockFrameProps = {
  *
  * - 外枠: codeBlockRoot
  * - 言語ラベル左上配置: codeBlockLang
- * - アクション領域右上配置: right prop
- * - 内容領域: children（codeBlockPre codeBlockPre--tools）
+ * - ヘッダ: headerLeft / headerRight
+ * - 内容領域: codeBlockBody（横スクロール責務を一元化）
  */
 export const CodeBlockFrame: React.FC<CodeBlockFrameProps> = ({
+  variant = 'viewer',
   languageLabel,
   languageTitle,
-  left,
-  right,
+  headerLeft,
+  headerRight,
   children,
 }) => {
-  const showLangLabel = !!languageLabel && !left; // left(Select) があると被るので抑止
+  const showLangLabel = !!languageLabel && !headerLeft; // 左側ヘッダがあると被るので抑止
 
   return (
-    <div className="codeBlockRoot relative group overflow-hidden">
+    <div className={`codeBlockRoot codeBlockRoot--${variant} relative group overflow-hidden`}>
       {showLangLabel && (
         <div
           className="absolute z-20"
-          style={{ left: 'var(--code-tools-inset)', top: 'var(--code-tools-top)' }}
+          style={{ left: 'var(--code-header-inset-x)', top: 'var(--code-header-inset-y)' }}
           // ラベルクリックで親のカード選択やD&Dに干渉しにくくする
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => e.stopPropagation()}
@@ -44,29 +46,29 @@ export const CodeBlockFrame: React.FC<CodeBlockFrameProps> = ({
         </div>
       )}
 
-      {left && (
+      {headerLeft && (
         <div
           className="absolute z-20"
-          style={{ left: 'var(--code-tools-inset)', top: 'var(--code-tools-top)' }}
+          style={{ left: 'var(--code-header-inset-x)', top: 'var(--code-header-inset-y)' }}
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => e.stopPropagation()}
         >
-          {left}
+          {headerLeft}
         </div>
       )}
 
-      {right && (
+      {headerRight && (
         <div
           className="absolute z-20"
-          style={{ right: 'var(--code-tools-inset)', top: 'var(--code-tools-top)' }}
+          style={{ right: 'var(--code-header-inset-x)', top: 'var(--code-header-inset-y)' }}
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => e.stopPropagation()}
         >
-          {right}
+          {headerRight}
         </div>
       )}
 
-      <div className="codeBlockPre codeBlockPre--tools relative">
+      <div className="codeBlockBody codeBlockBody--withHeader relative">
         {children}
       </div>
     </div>

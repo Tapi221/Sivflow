@@ -1,10 +1,9 @@
 import React from 'react';
 import { Image as ImageIcon } from 'lucide-react';
 import { BlockWrapper } from './BlockWrapper';
-import MediaUploader from '../MediaUploader';
+import { ImageBlockContent } from './ImageBlockContent';
 
 interface MediaBlockProps {
-  type: 'image';
   data: any[];
   onChange: (data: any[]) => void;
   onDelete: () => void;
@@ -28,7 +27,6 @@ interface MediaBlockProps {
 }
 
 export const MediaBlock = ({
-  type,
   data,
   onChange,
   onDelete,
@@ -70,11 +68,10 @@ export const MediaBlock = ({
       onMoveDragStart={onMoveDragStart}
       onMoveDragEnd={onMoveDragEnd}
     >
-      <MediaUploader
-        type={type}
+      <ImageBlockContent
+        mode="edit"
         urls={data}
         onChange={onChange}
-        maxFiles={1}
         initialFile={initialFile}
         onConsumeInitialFile={onConsumeInitialFile}
         onFilesExcess={onFilesExcess}

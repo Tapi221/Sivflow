@@ -12,7 +12,8 @@
     "preflight": "npm run typecheck && npm run build && npx vitest run tests/unit/pdfZoomUtils.test.ts tests/functions/pptxConverterGuards.test.ts",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest"
+    "test": "vitest",
+    "test:e2e:codeblock": "playwright test tests/e2e/codeblock_visual.spec.ts"
   },
   "dependencies": {
     "@google-cloud/notebooks": "^4.2.1",
