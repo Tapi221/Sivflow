@@ -2,9 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { Line, LineChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 
 import { RatingCountTiles } from "@/Components/study/RatingCountTiles";
-import { TagBadge } from "@/Components/tag/TagBadge";
+import TagManagerDialog from "@/Components/tag/TagManagerDialog";
+import { Button } from "@/Components/ui/button";
 import { Switch } from "@/Components/ui/switch";
-import { useTags } from "@/hooks/useTags";
+import { TagInput } from "@/Components/ui/tag-input";
 import type { Card, ReviewLog } from "@/types";
 import { NUMERIC_TYPO, UI_TYPO } from "@/styles/typography";
 
@@ -95,11 +96,9 @@ export function CardMetaPanel({
   onToggleDraft,
   onUpdateTitle,
 }: CardMetaPanelProps) {
-  const [newTag, setNewTag] = useState("");
   const [period, setPeriod] = useState<Period>("30d");
   const [titleInput, setTitleInput] = useState(card?.title ?? "");
-  const [isAdding, setIsAdding] = useState(false);
-  const { addTag, getTagColor } = useTags();
+  const [tagManagerOpen, setTagManagerOpen] = useState(false);
 
   useEffect(() => {
     setTitleInput(card?.title ?? "");
@@ -149,32 +148,6 @@ export function CardMetaPanel({
 
   const tags = card?.tags ?? [];
 
-  const handleAddTag = async () => {
-    if (isAdding) return;
-    const trimmed = newTag.trim();
-    if (!trimmed) return;
-    if (tags.includes(trimmed)) {
-      setNewTag("");
-      return;
-    }
-    setIsAdding(true);
-    try {
-      await addTag(trimmed);
-      if (tags.includes(trimmed)) {
-        setNewTag("");
-        return;
-      }
-      onUpdateTags([...tags, trimmed]);
-      setNewTag("");
-    } finally {
-      setIsAdding(false);
-    }
-  };
-
-  const removeTag = (tag: string) => {
-    onUpdateTags(tags.filter((t) => t !== tag));
-  };
-
   const commitTitle = () => {
     const next = titleInput.trim();
     const current = (card?.title ?? "").trim();
@@ -206,6 +179,25 @@ export function CardMetaPanel({
                   placeholder="タイトル"
                 />
               </div>
+              <section>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-semibold tracking-wide text-slate-500 uppercase">タグ管理</h3>
+                  <Button type="button" variant="outline" size="sm" className="h-7 px-2 text-xs" onClick={() => setTagManagerOpen(true)}>
+                    色を変更
+                  </Button>
+                </div>
+                <div className="mt-3 rounded-md border border-slate-200 bg-slate-50 px-2 py-2">
+                  <TagInput
+                    tags={tags}
+                    onChange={(nextTags) => {
+                      if (!card) return;
+                      onUpdateTags(nextTags);
+                    }}
+                    placeholder="タグを選択・追加"
+                    className={`bg-transparent ${!card ? "pointer-events-none opacity-60" : ""}`}
+                  />
+                </div>
+              </section>
               <div className="flex items-center justify-between rounded border border-slate-200 bg-slate-50 px-2 py-1.5">
                 <span className="text-xs font-medium text-slate-600">下書き</span>
                 <Switch checked={Boolean(card?.isDraft)} onCheckedChange={onToggleDraft} disabled={!card} />
@@ -280,50 +272,9 @@ export function CardMetaPanel({
             </div>
           </section>
 
-          <section>
-            <h3 className="text-xs font-semibold tracking-wide text-slate-500 uppercase">タグ管理</h3>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {tags.length === 0 ? (
-                <p className="text-sm text-slate-500">タグなし</p>
-              ) : (
-                tags.map((tag) => (
-                  <TagBadge
-                    key={tag}
-                    label={tag}
-                    size="sm"
-                    colorClass={getTagColor(tag)}
-                    onRemove={() => removeTag(tag)}
-                    className="max-w-full"
-                  />
-                ))
-              )}
-            </div>
-            <div className="mt-3 flex items-center gap-2">
-              <input
-                value={newTag}
-                onChange={(e) => setNewTag(e.target.value)}
-                disabled={isAdding || !card}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    handleAddTag();
-                  }
-                }}
-                className="h-9 flex-1 rounded-md border border-slate-300 px-2 text-sm outline-none focus:border-slate-500"
-                placeholder="タグを追加"
-              />
-              <button
-                type="button"
-                className="h-9 rounded-md bg-slate-900 px-3 text-sm text-white disabled:opacity-60"
-                onClick={handleAddTag}
-                disabled={isAdding || !card}
-              >
-                追加
-              </button>
-            </div>
-          </section>
         </div>
       </div>
+      <TagManagerDialog open={tagManagerOpen} onOpenChange={setTagManagerOpen} />
     </aside>
   );
 }
