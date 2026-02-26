@@ -106,4 +106,20 @@ describe('normalizeCard', () => {
     expect(normalized.questionBlocks[1].offsetRows).toBe(0);
     expect(normalized.questionBlocks[1].rowOffset).toBeUndefined();
   });
+
+  it('migrates math block rowOffset to offsetRows with non-negative clamp', () => {
+    const rawCard = {
+      id: 'math-offset-migrate-card',
+      answerBlocks: [
+        { id: 'a-math-1', type: 'math', rowOffset: 3, math: { latex: 'x^2', displayMode: 'block' } },
+        { id: 'a-math-2', type: 'math', rowOffset: -2, math: { latex: 'x+1', displayMode: 'block' } },
+      ],
+    };
+
+    const normalized = normalizeCard(rawCard);
+    expect(normalized.answerBlocks[0].offsetRows).toBe(3);
+    expect(normalized.answerBlocks[0].rowOffset).toBeUndefined();
+    expect(normalized.answerBlocks[1].offsetRows).toBe(0);
+    expect(normalized.answerBlocks[1].rowOffset).toBeUndefined();
+  });
 });

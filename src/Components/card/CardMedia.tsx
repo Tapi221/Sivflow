@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { Button } from '@/Components/ui/button';
-import { Play, Pause, Volume2, ChevronLeft, ChevronRight, Image as ImageIcon } from 'lucide-react';
+import { Play, Pause, Volume2, Image as ImageIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ImageFrame } from './blocks/ImageFrame';
 
 interface AudioPlayerProps {
   urls: string[];
@@ -59,36 +60,78 @@ export function AudioPlayer({ urls }: AudioPlayerProps) {
 
 interface ImageGalleryProps {
   urls: string[];
+  items?: Array<
+    string | {
+      remoteUrl?: string | null;
+      localUrl?: string | null;
+      url?: string | null;
+      scale?: number | null;
+      x?: number | null;
+      naturalW?: number | null;
+      naturalH?: number | null;
+    }
+  >;
   onFullscreenChange?: (isFullscreen: boolean) => void;
 }
 
-export function ImageGallery({ urls, onFullscreenChange }: ImageGalleryProps) {
-  const [fullscreenIndex, setFullscreenIndex] = useState<number | null>(null);
+export function ImageGallery({ urls, items }: ImageGalleryProps) {
   const [failedImages, setFailedImages] = useState(new Set());
+  const [naturalSizeMap, setNaturalSizeMap] = useState<Record<number, { w: number; h: number }>>({});
+  const resolvedItems = React.useMemo(
+    () =>
+      (items && items.length > 0 ? items : urls).map((entry) => {
+        if (typeof entry === 'string') {
+          return { url: entry, scale: 1, x: 0, naturalW: null, naturalH: null };
+        }
+        return {
+          url: entry.remoteUrl ?? entry.localUrl ?? entry.url ?? '',
+          scale: entry.scale ?? 1,
+          x: entry.x ?? 0,
+          naturalW: entry.naturalW ?? null,
+          naturalH: entry.naturalH ?? null,
+        };
+      }),
+    [items, urls]
+  );
+  const urlKey = React.useMemo(
+    () => resolvedItems.map((item) => item.url).join('\u001f'),
+    [resolvedItems]
+  );
+
+  React.useEffect(() => {
+    setNaturalSizeMap({});
+  }, [urlKey]);
 
   const handleImageError = (index: number) => {
     setFailedImages(prev => new Set(prev).add(index));
-    console.error(`Image load failed at index ${index}:`, urls[index]);
+    console.error(`Image load failed at index ${index}:`, resolvedItems[index]?.url);
   };
 
-  if (!urls || urls.length === 0) return null;
+  if (!resolvedItems || resolvedItems.length === 0) return null;
 
   return (
     <>
-      <div className="mt-3 image-full-width">
-        {urls.map((url, index) => (
+      <div className="w-full">
+        {resolvedItems.map((item, index) => (
            !failedImages.has(index) ? (
-            <img
-                key={index}
-                src={url}
-                alt={`Image ${index + 1}`}
-                className="block w-full h-auto cursor-pointer hover:opacity-90 transition-opacity bg-slate-50"
-                onClick={(e) => {
-                e.stopPropagation();
-                setFullscreenIndex(index);
-                onFullscreenChange?.(true);
-                }}
-                onError={() => handleImageError(index)}
+            <ImageFrame
+              key={index}
+              src={item.url}
+              alt={`Image ${index + 1}`}
+              scale={item.scale}
+              x={item.x}
+              naturalW={item.naturalW ?? naturalSizeMap[index]?.w ?? null}
+              naturalH={item.naturalH ?? naturalSizeMap[index]?.h ?? null}
+              className="bg-transparent"
+              imgClassName="cursor-pointer"
+              onNaturalSize={({ naturalW, naturalH }) => {
+                setNaturalSizeMap((prev) => {
+                  const current = prev[index];
+                  if (current?.w === naturalW && current?.h === naturalH) return prev;
+                  return { ...prev, [index]: { w: naturalW, h: naturalH } };
+                });
+              }}
+              onError={() => handleImageError(index)}
             />
            ) : (
              <div key={index} className="w-full h-48 bg-slate-100 flex items-center justify-center text-slate-400 flex-col gap-2">
@@ -98,50 +141,6 @@ export function ImageGallery({ urls, onFullscreenChange }: ImageGalleryProps) {
            )
         ))}
       </div>
-
-      {fullscreenIndex !== null && (
-        <div
-          className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4"
-          onClick={(e) => {
-            e.stopPropagation(); 
-            setFullscreenIndex(null);
-            onFullscreenChange?.(false);
-          }}
-        >
-           <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-4 left-4 text-white hover:bg-white/20"
-            onClick={(e) => {
-              e.stopPropagation();
-              setFullscreenIndex(Math.max(0, fullscreenIndex - 1));
-            }}
-            disabled={fullscreenIndex === 0}
-          >
-            <ChevronLeft className="w-6 h-6" />
-          </Button>
-
-          <img
-            src={urls[fullscreenIndex]}
-            alt="Fullscreen"
-            className="max-w-full max-h-full object-contain"
-            onClick={(e) => e.stopPropagation()}
-          />
-
-           <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-4 right-4 text-white hover:bg-white/20"
-            onClick={(e) => {
-              e.stopPropagation();
-              setFullscreenIndex(Math.min(urls.length - 1, fullscreenIndex + 1));
-            }}
-            disabled={fullscreenIndex === urls.length - 1}
-          >
-            <ChevronRight className="w-6 h-6" />
-          </Button>
-        </div>
-      )}
     </>
   );
 }

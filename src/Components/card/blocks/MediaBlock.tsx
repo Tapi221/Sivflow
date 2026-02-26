@@ -52,6 +52,8 @@ export const MediaBlock = ({
     <BlockWrapper
       onDelete={onDelete}
       onDuplicate={onDuplicate}
+      className="px-0 border-transparent"
+      contentClassName="px-0"
       dragHandleProps={dragHandleProps}
       dragHandleClassName={dragHandleClassName}
       label="Images"
@@ -68,14 +70,17 @@ export const MediaBlock = ({
       onMoveDragStart={onMoveDragStart}
       onMoveDragEnd={onMoveDragEnd}
     >
-      <ImageBlockContent
-        mode="edit"
-        urls={data}
-        onChange={onChange}
-        initialFile={initialFile}
-        onConsumeInitialFile={onConsumeInitialFile}
-        onFilesExcess={onFilesExcess}
-      />
+      <div className="relative rounded-[11px] overflow-hidden">
+        <ImageBlockContent
+          mode="edit"
+          urls={data}
+          onChange={onChange}
+          initialFile={initialFile}
+          onConsumeInitialFile={onConsumeInitialFile}
+          onFilesExcess={onFilesExcess}
+        />
+        <div className="pointer-events-none absolute inset-0 z-20 rounded-[11px] border border-slate-200/80" />
+      </div>
     </BlockWrapper>
   );
 };

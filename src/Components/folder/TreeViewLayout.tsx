@@ -16,6 +16,8 @@ import { TagBadge } from '@/Components/tag/TagBadge';
 import type { Card, DocumentItem, SelectedExplorerItem } from '@/types';
 import { useCards } from '@/hooks/useCards';
 import { useExplorerStore } from '@/hooks/useExplorerStore';
+import CreateCardSelectionDialog from '@/Components/card/CreateCardSelectionDialog';
+import CreationModeDialog from '@/Components/card/CreationModeDialog';
 
 
 interface TreeViewLayoutProps {
@@ -109,6 +111,8 @@ function TreeViewLayout({
   );
 
   const [isResizing, setIsResizing] = useState(false);
+  const [isCreateSelectionOpen, setIsCreateSelectionOpen] = useState(false);
+  const [isModeSelectionOpen, setIsModeSelectionOpen] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const contentScrollRef = useRef<HTMLDivElement>(null);
 
@@ -258,22 +262,46 @@ function TreeViewLayout({
     navigate(createPageUrl(`CardView?folderId=${selectedFolderId}`));
   }, [navigate, selectedFolderId]);
 
-  const handleCreateCardQuick = useCallback(async () => {
+  const handleOpenCreateCard = useCallback(() => {
     if (!selectedFolderId) return;
-    try {
-      const createdCard = await createCard({ folderId: selectedFolderId, title: '' });
-      const createdCardId = createdCard?.id ?? createdCard?.cardId ?? null;
-      if (!createdCardId) return;
-      handleCardSelectWithRecent(createdCardId);
-    } catch (error) {
-      console.error('[TreeViewLayout] Failed to create card from dashboard action:', error);
-    }
-  }, [createCard, handleCardSelectWithRecent, selectedFolderId]);
+    setIsCreateSelectionOpen(true);
+  }, [selectedFolderId]);
 
-  const handleBulkCreate = useCallback(() => {
-    if (!selectedFolderId) return;
-    navigate(createPageUrl(`CardEdit?folderId=${selectedFolderId}&mode=continuous`));
-  }, [navigate, selectedFolderId]);
+  const handleSelectCreateMode = useCallback(
+    (mode: 'single' | 'continuous') => {
+      if (!selectedFolderId) return;
+      setIsCreateSelectionOpen(false);
+      if (mode === 'single') {
+        navigate(createPageUrl(`CardEdit?folderId=${selectedFolderId}`));
+        return;
+      }
+      setIsModeSelectionOpen(true);
+    },
+    [navigate, selectedFolderId]
+  );
+
+  const handleSelectDetailedMode = useCallback(
+    (mode: string, options?: { hideTitle?: boolean }) => {
+      if (!selectedFolderId) return;
+      setIsModeSelectionOpen(false);
+
+      if (mode === 'qa') {
+        const hideTitle = options?.hideTitle ? '&hideTitle=true' : '';
+        navigate(createPageUrl(`one-qa-mode?folderId=${selectedFolderId}${hideTitle}`));
+        return;
+      }
+      if (mode === 'pair') {
+        navigate(createPageUrl(`pair-mode?folderId=${selectedFolderId}`));
+        return;
+      }
+      if (mode === 'choice') {
+        navigate(createPageUrl(`four-choice-mode?folderId=${selectedFolderId}`));
+        return;
+      }
+      navigate(createPageUrl(`create-mode/placeholder?folderId=${selectedFolderId}`));
+    },
+    [navigate, selectedFolderId]
+  );
 
   const allTags = useMemo(() => {
     const tags = new Set<string>();
@@ -615,11 +643,26 @@ function TreeViewLayout({
           handlers={{
             onStartStudy: handleStartStudy,
             onViewCards: handleViewCards,
-            onCreateCard: handleCreateCardQuick,
-            onBulkCreate: handleBulkCreate,
+            onCreateCard: handleOpenCreateCard,
           }}
         />
       </div>
+
+      <CreateCardSelectionDialog
+        open={isCreateSelectionOpen}
+        onOpenChange={setIsCreateSelectionOpen}
+        onSelectMode={handleSelectCreateMode}
+      />
+
+      <CreationModeDialog
+        open={isModeSelectionOpen}
+        onOpenChange={setIsModeSelectionOpen}
+        onSelectMode={handleSelectDetailedMode}
+        onBack={() => {
+          setIsModeSelectionOpen(false);
+          setIsCreateSelectionOpen(true);
+        }}
+      />
     </div>
   );
 }

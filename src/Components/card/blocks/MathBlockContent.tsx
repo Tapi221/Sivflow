@@ -1,6 +1,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { MathRenderer } from './MathRenderer';
+import { MathBlockFrame } from './MathBlockFrame';
 
 interface MathBlockContentProps {
   latex: string;
@@ -26,14 +27,13 @@ export const MathBlockContent: React.FC<MathBlockContentProps> = ({
   if (!hasLatex) return null;
 
   return (
-    <div
+    <MathBlockFrame
       className={cn(
-        'bg-slate-50 border border-slate-200 rounded-lg p-3 min-h-[50px] overflow-x-auto overflow-y-hidden',
+        'bg-slate-50 border border-slate-200 rounded-lg p-3 min-h-[50px] overflow-x-auto overflow-y-hidden flex justify-center',
         className
       )}
     >
       <MathRenderer latex={latex} displayMode={displayMode} className="text-slate-800" />
-    </div>
+    </MathBlockFrame>
   );
 };
-

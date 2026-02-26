@@ -20,7 +20,6 @@ type FolderDashboardHandlers = {
   onStartStudy: () => void;
   onViewCards: () => void;
   onCreateCard: () => void;
-  onBulkCreate: () => void;
 };
 
 interface FolderDashboardProps {
@@ -253,10 +252,7 @@ export function FolderDashboard({
             閲覧
           </Button>
           <Button type="button" size="sm" variant="secondary" onClick={handlers.onCreateCard} className="h-8 px-4 text-xs">
-            新規カード
-          </Button>
-          <Button type="button" size="sm" variant="ghost" onClick={handlers.onBulkCreate} className="h-8 px-3 text-xs">
-            一括作成
+            カード作成
           </Button>
         </div>
 

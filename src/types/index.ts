@@ -93,6 +93,10 @@ export interface UploadedImage {
   retryCount?: number;
   error?: string;
   uploadOrder?: number; // 順序保証用
+  scale?: number | null;
+  x?: number | null;
+  naturalW?: number | null;
+  naturalH?: number | null;
 
   // 互換/移行中フィールド
   /** @deprecated Use status instead */

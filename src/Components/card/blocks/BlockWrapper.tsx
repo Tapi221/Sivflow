@@ -130,17 +130,7 @@ export const BlockWrapper = ({
     const onPointerEnd = (endEvent: PointerEvent) => {
       if (!stepDragRef.current || endEvent.pointerId !== stepDragRef.current.pointerId) return;
 
-      const appliedSteps = stepDragRef.current.appliedSteps;
       stepDragRef.current = null;
-
-      // まったくドラッグされなかった場合はクリック扱いで 1 ステップだけ動かす
-      if (appliedSteps === 0) {
-        if (endEvent.shiftKey) {
-          if (canMoveUp) onMoveUp?.();
-        } else {
-          if (canMoveDown) onMoveDown?.();
-        }
-      }
 
       onMoveDragEnd?.();
 
@@ -157,7 +147,7 @@ export const BlockWrapper = ({
   return (
     <div
       className={cn(
-        'relative overflow-visible bg-white border border-slate-200/80 rounded-xl py-0 px-1.5',
+        'group relative overflow-visible bg-transparent border border-slate-200/80 rounded-xl py-0 px-1.5',
         isActive && 'z-40',
         className
       )}
@@ -167,6 +157,8 @@ export const BlockWrapper = ({
       <div
         data-active={isActive ? 'true' : 'false'}
         className="absolute -right-1 top-1/2 -translate-y-1/2 flex flex-col items-center gap-0 -space-y-px opacity-0 pointer-events-none
+        group-hover:opacity-100 group-hover:pointer-events-auto
+        group-focus-within:opacity-100 group-focus-within:pointer-events-auto
         data-[active=true]:opacity-100 data-[active=true]:pointer-events-auto
         transition-opacity duration-150 z-[80]"
       >
@@ -174,22 +166,12 @@ export const BlockWrapper = ({
           <div
             {...dragHandleProps}
             onPointerDown={startStepDrag}
-            onKeyDown={(event) => {
-              if (event.key !== 'Enter' && event.key !== ' ') return;
-              event.preventDefault();
-
-              if (event.shiftKey) {
-                if (canMoveUp) onMoveUp?.();
-                return;
-              }
-              if (canMoveDown) onMoveDown?.();
-            }}
             className={cn(
               'w-5 h-5 min-w-0 min-h-0 p-0 bg-white border border-slate-100 rounded-full text-slate-400 shadow-sm flex items-center justify-center flex-none transition-colors',
               'cursor-grab active:cursor-grabbing',
               dragHandleClassName
             )}
-            title="クリック: 1行下へ / Shift+クリック: 1行上へ"
+            title="ドラッグで1行ずつ移動"
           >
             <GripIcon className="w-2.5 h-2.5" />
           </div>

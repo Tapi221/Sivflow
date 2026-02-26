@@ -4,8 +4,9 @@ import { CARD_ROW_PX } from './constants';
 
 const ROW_OFFSET_MIN = -999;
 const ROW_OFFSET_MAX = 999;
-const CODE_OFFSET_ROWS_MIN = 0;
-const CODE_OFFSET_ROWS_MAX = 999;
+const GRID_OFFSET_ROWS_MIN = 0;
+const GRID_OFFSET_ROWS_MAX = 999;
+export const GRID_OFFSET_TYPES = new Set<CardBlock['type']>(['code', 'math']);
 
 export const isRowPositionableType = (type: CardBlock['type']) =>
   type === 'text' ||
@@ -20,11 +21,13 @@ export const getNormalizedRowOffset = (block: CardBlock): number => {
   return Math.max(ROW_OFFSET_MIN, Math.min(ROW_OFFSET_MAX, Math.round(n)));
 };
 
-export const getNormalizedCodeOffsetRows = (block: CardBlock): number => {
-  if (block.type !== 'code') return 0;
+export const isGridOffsetType = (type: CardBlock['type']) => GRID_OFFSET_TYPES.has(type);
+
+export const getNormalizedGridOffsetRows = (block: CardBlock): number => {
+  if (!isGridOffsetType(block.type)) return 0;
   const n = Number(block.offsetRows ?? block.rowOffset ?? 0);
   if (!Number.isFinite(n)) return 0;
-  return Math.max(CODE_OFFSET_ROWS_MIN, Math.min(CODE_OFFSET_ROWS_MAX, Math.round(n)));
+  return Math.max(GRID_OFFSET_ROWS_MIN, Math.min(GRID_OFFSET_ROWS_MAX, Math.round(n)));
 };
 
 export const getRowOffsetPx = (block: CardBlock): number => {

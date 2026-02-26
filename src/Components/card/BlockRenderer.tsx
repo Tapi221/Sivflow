@@ -7,9 +7,10 @@ import { MathBlockContent } from './blocks/MathBlockContent';
 import { MarkdownBlockContent } from './blocks/MarkdownBlockContent';
 import { TextBlockContent } from './blocks/TextBlockContent';
 import {
-  getNormalizedCodeOffsetRows,
+  getNormalizedGridOffsetRows,
   getRowOffsetPx,
   getRowOffsetStyle,
+  isGridOffsetType,
   isRowPositionableType,
 } from './rowOffset';
 import { CARD_ROW_PX } from './constants';
@@ -47,12 +48,12 @@ export function BlockRenderer({ blocks, onGalleryFullscreenChange }: BlockRender
   return (
     <div className="w-full max-w-full space-y-0">
       {renderableBlocks.map((block) => {
-        const isCodeBlock = block.type === 'code';
-        const isLinePositionable = isRowPositionableType(block.type) && !isCodeBlock;
+        const isGridOffsetBlock = isGridOffsetType(block.type);
+        const isLinePositionable = isRowPositionableType(block.type) && !isGridOffsetBlock;
         const rowOffsetPx = isLinePositionable ? getRowOffsetPx(block) : 0;
         const offsetStyle = isLinePositionable ? getRowOffsetStyle(block) : undefined;
-        const codeOffsetRows = isCodeBlock ? getNormalizedCodeOffsetRows(block) : 0;
-        const codeOffsetPx = codeOffsetRows * CARD_ROW_PX;
+        const gridOffsetRows = isGridOffsetBlock ? getNormalizedGridOffsetRows(block) : 0;
+        const gridOffsetPx = gridOffsetRows * CARD_ROW_PX;
 
         return (
           <div
@@ -70,11 +71,11 @@ export function BlockRenderer({ blocks, onGalleryFullscreenChange }: BlockRender
 
             {block.type === 'code' && (block.code?.code ?? '').trim() !== '' && (
               <div className="w-full max-w-full overflow-visible">
-                {codeOffsetPx > 0 && (
+                {gridOffsetPx > 0 && (
                   <div
                     aria-hidden
                     className="pointer-events-none"
-                    style={{ height: `${codeOffsetPx}px` }}
+                    style={{ height: `${gridOffsetPx}px` }}
                   />
                 )}
                 <CodeRenderer code={block.code!.code} language={block.code!.language} />
@@ -85,6 +86,7 @@ export function BlockRenderer({ blocks, onGalleryFullscreenChange }: BlockRender
               <ImageBlockContent
                 mode="view"
                 urls={(block.images ?? []).map(toMediaUrl).filter((u): u is string => Boolean(u))}
+                items={(block.images ?? []) as any[]}
                 onFullscreenChange={onGalleryFullscreenChange}
               />
             )}
@@ -98,7 +100,14 @@ export function BlockRenderer({ blocks, onGalleryFullscreenChange }: BlockRender
             )}
 
             {block.type === 'math' && (block.math?.latex ?? '').trim() !== '' && (
-              <div className="py-2 flex justify-center">
+              <div className="w-full max-w-full overflow-visible">
+                {gridOffsetPx > 0 && (
+                  <div
+                    aria-hidden
+                    className="pointer-events-none"
+                    style={{ height: `${gridOffsetPx}px` }}
+                  />
+                )}
                 <MathBlockContent
                   latex={block.math!.latex || ''}
                   displayMode={block.math!.displayMode || 'block'}

@@ -1,113 +1,118 @@
 import React, { useCallback, useState, useEffect, useRef, useId } from 'react';
 import { Button } from '@/Components/ui/button';
-import { Upload, X, Menu, ChevronDown, Play, Pause, Loader2, RotateCcw, Cloud, Check } from 'lucide-react';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { storage } from '@/services/firebase';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { Slider } from '@/Components/ui/slider';
+import { Upload, X, Play, Pause, RotateCcw, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import type { UploadedImage } from '@/types';
-import { createUploadedImage, createFailedUploadedImage, isHeicFile, convertHeicToJpeg, compressAndConvertToBase64 } from '@/utils/imageUtils';
+import { createUploadedImage, createFailedUploadedImage, isHeicFile, convertHeicToJpeg } from '@/utils/imageUtils';
 import type { UploadedImageStatus } from '@/types';
-import type { BlobUrl, StorageUrl } from '@/types/branded';
+import type { StorageUrl } from '@/types/branded';
 import { useReliableFileUpload } from '@/hooks/useReliableFileUpload';
+import { ImageFrame } from './blocks/ImageFrame';
 
-function ImageItem({ item, index, onRemove, onDownload, onRetry }) {
-  const [showFullscreen, setShowFullscreen] = useState(false);
+const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
+
+function ImageItem({ item, index, onRetry, onUpdate }) {
   const [loadFailed, setLoadFailed] = useState(false);
   const displayUrl = item.remoteUrl ?? item.localUrl ?? '';
   const isFailed = item.status === 'failed';
-  // Use optimistic UI: "uploading" is now a background state, not a blocking one.
-  // We show a small badge instead of blocking the image.
-
+  const safeScale = clamp(Number(item.scale ?? 1), 0.2, 1);
   useEffect(() => {
     setLoadFailed(false);
   }, [displayUrl]);
   
   return (
     <>
-      <Draggable draggableId={`draggable-img-${item.id || index}-${index}`} index={index}>
-        {(provided) => (
+      <div className="relative group rounded-lg overflow-hidden w-full">
+        {displayUrl && !loadFailed ? (
+          <ImageFrame
+            src={displayUrl}
+            alt={`Image ${index + 1}`}
+            className="bg-transparent"
+            imgClassName="cursor-pointer"
+            scale={item.scale ?? 1}
+            x={item.x ?? 0}
+            naturalW={item.naturalW ?? null}
+            naturalH={item.naturalH ?? null}
+            editable
+            onError={() => setLoadFailed(true)}
+            onNaturalSize={({ naturalW, naturalH }) => {
+              if ((item.naturalW ?? 0) === naturalW && (item.naturalH ?? 0) === naturalH) return;
+              onUpdate(index, { naturalW, naturalH });
+            }}
+            onTransformChange={({ scale, x }) => {
+              onUpdate(index, { scale, x });
+            }}
+          />
+        ) : (
+          <div className="w-full h-48 bg-white flex items-center justify-center text-slate-400 text-xs">
+            画像を表示できません
+          </div>
+        )}
+        {displayUrl && !loadFailed && (
           <div
-            ref={provided.innerRef}
-            {...provided.draggableProps}
-            {...provided.dragHandleProps}
-            className="relative group border rounded-lg overflow-hidden bg-gray-50 w-full"
+            className="pointer-events-none absolute inset-x-3 bottom-2 z-30 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 supports-[hover:none]:opacity-100 transition-opacity"
           >
-            {displayUrl && !loadFailed ? (
-              <img
-                src={displayUrl}
-                alt={`Image ${index + 1}`}
-                className="w-full h-auto cursor-pointer bg-white"
-                onClick={() => setShowFullscreen(true)}
-                onError={() => setLoadFailed(true)}
+            <div
+              className="pointer-events-auto ml-auto w-full max-w-[300px] rounded-lg border border-slate-200/70 bg-white/75 px-2 py-1 shadow-sm backdrop-blur"
+              onPointerDown={(event) => event.stopPropagation()}
+            >
+              <Slider
+                min={20}
+                max={100}
+                step={1}
+                value={[Math.round(safeScale * 100)]}
+                onValueChange={(values) => {
+                  const nextScaleRaw = clamp((values[0] ?? 100) / 100, 0.2, 1);
+                  const nextScale = nextScaleRaw >= 0.98 ? 1 : nextScaleRaw;
+                  const baseX = nextScale >= 0.999 ? 0 : clamp(Number(item.x ?? 0), -1, 1);
+                  onUpdate(index, { scale: nextScale, x: baseX });
+                }}
+                className="w-full scale-[0.92]"
+                aria-label="画像サイズ"
               />
-            ) : (
-              <div className="w-full h-48 bg-white flex items-center justify-center text-slate-400 text-xs">
-                画像を表示できません
-              </div>
-            )}
-
-            {/* Optimistic Status Badges & Progress */}
-            <div className="absolute inset-x-2 bottom-2 z-20">
-                 {item.status === 'uploading' && item.progress !== undefined && item.progress < 100 && (
-                     <div className="bg-white/90 rounded-full h-1 overflow-hidden shadow-sm">
-                        <div 
-                          className="h-full progress-bar-fill" 
-                          style={{ '--progress': `${item.progress}%`, '--progress-color': 'var(--primary-color)' } as React.CSSProperties} 
-                        />
-                     </div>
-                 )}
-            </div>
-
-            <div className="absolute bottom-1 right-1 flex gap-1 z-20">
-                {item.source === 'cloud' && (
-                    <div className="p-0.5 bg-green-500 rounded-full shadow-sm" title="Synced to cloud">
-                        <Check className="w-3 h-3 text-white" />
-                    </div>
-                )}
-                {item.source === 'local_fallback' && (
-                    <div className="p-1.5 bg-amber-500 rounded-full shadow-sm" title={`Saved locally (${item.fallbackReason ?? 'offline'})`}>
-                    </div>
-                )}
-            </div>
-            
-            <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              {isFailed && (
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  className="h-7 w-7 bg-white/80"
-                  onClick={() => onRetry(index)}
-                >
-                  <RotateCcw className="w-3 h-3" />
-                </Button>
-              )}
             </div>
           </div>
         )}
-      </Draggable>
-      
-      {showFullscreen && displayUrl && (
-        <div 
-          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
-          onClick={() => setShowFullscreen(false)}
-        >
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-4 right-4 text-white hover:bg-white/20"
-            onClick={() => setShowFullscreen(false)}
-          >
-            <X className="w-6 h-6" />
-          </Button>
-          <img
-            src={displayUrl}
-            alt="Fullscreen"
-            className="max-w-full max-h-full object-contain"
-          />
+
+        {/* Optimistic Status Badges & Progress */}
+        <div className="absolute inset-x-2 bottom-2 z-20">
+             {item.status === 'uploading' && item.progress !== undefined && item.progress < 100 && (
+                 <div className="bg-white/90 rounded-full h-1 overflow-hidden shadow-sm">
+                    <div
+                      className="h-full progress-bar-fill"
+                      style={{ '--progress': `${item.progress}%`, '--progress-color': 'var(--primary-color)' } as React.CSSProperties}
+                    />
+                 </div>
+             )}
         </div>
-      )}
+
+        <div className="absolute bottom-1 right-1 flex gap-1 z-20">
+            {item.source === 'cloud' && (
+                <div className="p-0.5 bg-green-500 rounded-full shadow-sm" title="Synced to cloud">
+                    <Check className="w-3 h-3 text-white" />
+                </div>
+            )}
+            {item.source === 'local_fallback' && (
+                <div className="p-1.5 bg-amber-500 rounded-full shadow-sm" title={`Saved locally (${item.fallbackReason ?? 'offline'})`}>
+                </div>
+            )}
+        </div>
+
+        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          {isFailed && (
+            <Button
+              variant="secondary"
+              size="icon"
+              className="h-7 w-7 bg-white/80"
+              onClick={() => onRetry(index)}
+            >
+              <RotateCcw className="w-3 h-3" />
+            </Button>
+          )}
+        </div>
+      </div>
     </>
   );
 }
@@ -233,7 +238,6 @@ export default function MediaUploader({
   const getStoragePath = (uid: string) => (fileName: string) => `users/${uid}/uploads/${fileName}`;
   
   const handleUpload = async (files: FileList | File[]) => {
-    console.log('[MediaUploader] handleUpload called with', files);
     if (!files || files.length === 0) return;
 
     // 認証チェック
@@ -258,18 +262,11 @@ export default function MediaUploader({
         onFilesExcess(filesExcess);
     }
     
-    // Even if limit is 0 (full), we might have just consumed the initialFile which calls this function.
-    // However, if we are full and handleUpload is called, limit is 0.
-    // BUT, initialFile logic calls handleUpload([file]). At that point, the block is likely empty (newly created).
-    // So 'limit' should be correct (1-0=1).
-    
     if (filesToUpload.length === 0) {
         return;
     }
 
     const filesArray = filesToUpload;
-
-    console.log('[MediaUploader] Processing files:', filesArray.length, 'isImage:', isImage);
 
     if (!isImage) {
       setIsUploading(true);
@@ -312,7 +309,6 @@ export default function MediaUploader({
 
     // Image Upload Logic using Hook
     try {
-      console.log('[MediaUploader] Preparing images...');
       const prepared = await Promise.all(
         filesArray.map(async (file) => {
           if (isHeicFile(file)) {
@@ -328,20 +324,17 @@ export default function MediaUploader({
         })
       );
 
-      console.log('[MediaUploader] Images prepared:', prepared.length);
       const newImages = [...(urls as UploadedImage[]), ...prepared.map((item) => item.image)];
-      latestItemsRef.current = newImages as any; // 最新の状態を保存
+      latestItemsRef.current = newImages;
       onChange(newImages);
 
       // Process uploads
-      console.log('[MediaUploader] Starting uploads...');
       await Promise.all(
         prepared.map(async (preparedItem) => {
           if (!preparedItem.file) return;
           const image = preparedItem.image;
           
           try {
-            console.log('[MediaUploader] Uploading image:', image.id);
             const result = await uploadFile(
               preparedItem.file, 
               getStoragePath(currentUser.uid), 
@@ -355,8 +348,6 @@ export default function MediaUploader({
                onChange(updated);
             }
           );
-          
-          console.log('[MediaUploader] Upload complete for image:', image.id, result);
           
           // Ensure cloud sync icon is visible for at least 1 second and force 100%
           const currentMid = latestItemsRef.current as UploadedImage[] || [];
@@ -384,7 +375,6 @@ export default function MediaUploader({
           });
           latestItemsRef.current = updated; // 最新の状態を保存
           onChange(updated);
-          console.log('[MediaUploader] State updated after upload complete:', updated.length);
         } catch (error: any) {
           console.error('[MediaUploader] Image upload error for:', image.id, error);
           const current = (latestItemsRef.current as UploadedImage[]) || [];
@@ -537,19 +527,12 @@ export default function MediaUploader({
     const newUrls = (urls as string[]).filter((_, i) => i !== index);
     onChange(newUrls);
   };
-  
-  const handleReorder = (result) => {
-    if (!result.destination) return;
 
-    const list = Array.from(urls as any[]);
-    const [removed] = list.splice(result.source.index, 1);
-    list.splice(result.destination.index, 0, removed);
-    
-    onChange(list);
-  };
-  
-  const handleDownload = (url: string) => {
-    window.open(url, '_blank');
+  const handleUpdateImage = (index: number, patch: Partial<UploadedImage>) => {
+    const current = (latestItemsRef.current as UploadedImage[]) || [];
+    const next = current.map((image, i) => (i === index ? { ...image, ...patch } : image));
+    latestItemsRef.current = next;
+    onChange(next);
   };
   
   return (
@@ -574,6 +557,7 @@ export default function MediaUploader({
           }}
         >
           <input
+            hidden
             id={inputId}
             type="file"
             accept={accept}
@@ -609,6 +593,7 @@ export default function MediaUploader({
       */}
       {urls.length > 0 && (
         <input
+          hidden
           id={`${inputId}-hidden`}
           type="file"
           accept={accept}
@@ -620,75 +605,58 @@ export default function MediaUploader({
         />
       )}
       
-      {urls.length > 0 && (
-        <DragDropContext onDragEnd={handleReorder}>
-          <Droppable droppableId={`media-${type}`} direction={type === 'image' ? 'horizontal' : 'vertical'}>
-            {(provided) => (
-              <div
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-                className={cn(
-                  type === 'image' 
-                    ? "grid grid-cols-1 gap-2" 
-                    : "space-y-2"
-                )}
-              >
-                {urls.map((item, index) => (
-                  type === 'image' ? (
-                    <ImageItem
-                      key={`img-${(item as UploadedImage).id ?? index}-${index}`}
-                      item={item as UploadedImage}
-                      index={index}
-                      onRemove={handleRemove}
-                      onDownload={handleDownload}
-                      onRetry={handleRetry}
-                    />
-                  ) : (
-                    <AudioItem
-                      key={`audio-${index}`}
-                      url={item as string}
-                      index={index}
-                      onRemove={handleRemove}
-                    />
-                  )
-                ))}
-                
-                {/* 
-                    追加ボタンを表示するタイル: 
-                    画像リストまたは音声リストの末尾に配置される。
-                */}
-                {urls.length < maxFiles && (
-                  type === 'image' ? (
-                    <div
-                      className="flex flex-col items-center justify-center h-24 border-2 border-dashed border-slate-200 rounded-lg cursor-pointer hover:border-slate-300 hover:bg-slate-50 transition-all text-slate-400"
-                      onClick={() => {
-                        setRetryIndex(null);
-                        fileInputRef.current?.click();
-                      }}
-                    >
-                      <Upload className="w-5 h-5 mb-1" />
-                      <span className="text-[10px] font-bold uppercase tracking-tighter">追加</span>
-                    </div>
-                  ) : (
-                    <Button
-                      variant="outline"
-                      className="w-full flex items-center justify-center gap-2 border-dashed text-slate-500 py-2.5 h-auto"
-                      onClick={() => {
-                        setRetryIndex(null);
-                        fileInputRef.current?.click();
-                      }}
-                    >
-                      <Upload className="w-4 h-4" />
-                      <span className="text-xs uppercase font-bold">音声を追加</span>
-                    </Button>
-                  )
-                )}
+      {urls.length > 0 && type === 'image' && (
+        <div className="grid grid-cols-1 gap-2">
+          {urls.map((item, index) => (
+            <ImageItem
+              key={`img-${(item as UploadedImage).id ?? index}-${index}`}
+              item={item as UploadedImage}
+              index={index}
+              onRetry={handleRetry}
+              onUpdate={handleUpdateImage}
+            />
+          ))}
 
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-        </DragDropContext>
+          {urls.length < maxFiles && (
+            <div
+              className="flex flex-col items-center justify-center h-24 border-2 border-dashed border-slate-200 rounded-lg cursor-pointer hover:border-slate-300 hover:bg-slate-50 transition-all text-slate-400"
+              onClick={() => {
+                setRetryIndex(null);
+                fileInputRef.current?.click();
+              }}
+            >
+              <Upload className="w-5 h-5 mb-1" />
+              <span className="text-[10px] font-bold uppercase tracking-tighter">追加</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {urls.length > 0 && type === 'audio' && (
+        <div className="space-y-2">
+          {urls.map((item, index) => (
+            <AudioItem
+              key={`audio-${index}`}
+              url={item as string}
+              index={index}
+              onRemove={handleRemove}
+            />
+          ))}
+          
+          {urls.length < maxFiles && (
+            <Button
+              variant="outline"
+              className="w-full flex items-center justify-center gap-2 border-dashed text-slate-500 py-2.5 h-auto"
+              onClick={() => {
+                setRetryIndex(null);
+                fileInputRef.current?.click();
+              }}
+            >
+              <Upload className="w-4 h-4" />
+              <span className="text-xs uppercase font-bold">音声を追加</span>
+            </Button>
+          )}
+        </div>
       )}
     </div>
   );

@@ -6,6 +6,7 @@ type ImageBlockContentProps =
   | {
       mode: 'view';
       urls: string[];
+      items?: any[];
       onFullscreenChange?: (isFullscreen: boolean) => void;
     }
   | {
@@ -20,7 +21,7 @@ type ImageBlockContentProps =
 
 export function ImageBlockContent(props: ImageBlockContentProps) {
   if (props.mode === 'view') {
-    return <ImageGallery urls={props.urls} onFullscreenChange={props.onFullscreenChange} />;
+    return <ImageGallery urls={props.urls} items={props.items} onFullscreenChange={props.onFullscreenChange} />;
   }
 
   return (
@@ -35,4 +36,3 @@ export function ImageBlockContent(props: ImageBlockContentProps) {
     />
   );
 }
-

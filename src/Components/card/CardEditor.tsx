@@ -578,11 +578,13 @@ const hasAnyContent = (data: any) => {
         const sourceList = sourceId === 'question-blocks' ? [...formData.questionBlocks] : [...formData.answerBlocks];
         const destList = destId === 'question-blocks' ? [...formData.questionBlocks] : [...formData.answerBlocks];
         
-        const [movedItem] = sourceList.splice(source.index, 1);
+        const [movedItemRaw] = sourceList.splice(source.index, 1);
+        if (!movedItemRaw) return;
+        const movedItem = { ...movedItemRaw };
         
-        // IDを更新して移動先を識別可能にする (任意)
+        // 跨ぎ移動時は新しいIDを発行して衝突を防ぐ
         if (sourceId !== destId) {
-          movedItem.id = movedItem.id.replace(sourceId.split('-')[0], destId.split('-')[0]);
+          movedItem.id = `${destId.split('-')[0]}-${movedItem.type}-${nanoid()}`;
         }
 
         if (sourceId === destId) {

@@ -148,6 +148,10 @@ export const createUploadedImage = (file: File) => {
     contentType: file.type || null,
     size: Number.isFinite(file.size) ? file.size : null,
     storagePath: null,
+    scale: 1,
+    x: 0,
+    naturalW: null,
+    naturalH: null,
   };
 };
 
@@ -160,6 +164,10 @@ export const createFailedUploadedImage = (file: File) => {
     contentType: file.type || null,
     size: Number.isFinite(file.size) ? file.size : null,
     storagePath: null,
+    scale: 1,
+    x: 0,
+    naturalW: null,
+    naturalH: null,
   };
 };
 
@@ -195,6 +203,8 @@ const resolveNumber = (value: unknown): number | undefined => {
   }
   return undefined;
 };
+
+const clampNumber = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
 
 const pickFirst = (obj: Record<string, unknown>, keys: string[]): unknown => {
   for (const key of keys) {
@@ -240,6 +250,10 @@ export const normalizeUploadedImage = (
   const contentType = resolveString(pickFirst(record, ['contentType', 'content_type', 'mimeType', 'mime_type']));
   const size = resolveNumber(pickFirst(record, ['size', 'sizeBytes', 'size_bytes']));
   const storagePath = resolveString(pickFirst(record, ['storagePath', 'storage_path', 'path']));
+  const scale = resolveNumber(pickFirst(record, ['scale']));
+  const x = resolveNumber(pickFirst(record, ['x']));
+  const naturalW = resolveNumber(pickFirst(record, ['naturalW', 'natural_w']));
+  const naturalH = resolveNumber(pickFirst(record, ['naturalH', 'natural_h']));
 
   const source = resolveString(pickFirst(record, ['source'])) as UploadSource | undefined;
   const fallbackReason = resolveString(pickFirst(record, ['fallbackReason', 'fallback_reason'])) as UploadFallbackReason | undefined;
@@ -251,6 +265,9 @@ export const normalizeUploadedImage = (
     return null;
   }
 
+  const normalizedScale = clampNumber(scale ?? 1, 0.2, 1);
+  const normalizedX = normalizedScale >= 0.999 ? 0 : clampNumber(x ?? 0, -1, 1);
+
   return {
     id: resolveString(pickFirst(record, ['id'])) ?? generateUploadedImageId(),
     localUrl: (localUrl ?? null) as BlobUrl | null,
@@ -261,6 +278,10 @@ export const normalizeUploadedImage = (
     storagePath: storagePath ?? null,
     source: source ?? (remoteUrl && !localUrl ? 'cloud' : null),
     fallbackReason: fallbackReason ?? null,
+    scale: normalizedScale,
+    x: normalizedX,
+    naturalW: naturalW ?? null,
+    naturalH: naturalH ?? null,
   };
 };
 

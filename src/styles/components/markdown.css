@@ -4,10 +4,6 @@
     overflow-wrap: anywhere;
   }
 
-  .mathBlockRoot {
-    position: relative;
-  }
-
   .katex-display-wrapper {
     display: block;
     width: 100%;

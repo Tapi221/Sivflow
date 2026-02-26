@@ -22,7 +22,6 @@ interface RightPaneProps {
     onStartStudy: () => void;
     onViewCards: () => void;
     onCreateCard: () => void;
-    onBulkCreate: () => void;
   };
 }
 

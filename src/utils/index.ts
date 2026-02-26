@@ -2,6 +2,7 @@ import { normalizeUploadedImages } from './imageUtils';
 import { normalizeMemoryStability } from './reviewUtils';
 import { normalizeInkDocument } from '@/Components/ink/inkTypes';
 import { DEFAULT_LAYOUT_ROWS, normalizeExtraRows, normalizeLayoutRows } from '@/domain/card/extraRows';
+import { isGridOffsetType } from '@/Components/card/rowOffset';
 
 // ページ名から URL パスを作成
 // クエリパラメータ付きの場合も対応（例: 'CardEdit?folderId=xxx'）
@@ -159,7 +160,7 @@ export const normalizeCard = (raw: any) => {
   const migratedLayoutRows = DEFAULT_LAYOUT_ROWS + Math.max(legacyQuestionExtraRows, legacyAnswerExtraRows);
   const normalizeBlockOffsets = (block: any) => {
     if (!block || typeof block !== 'object') return block;
-    if (block.type !== 'code') return block;
+    if (!isGridOffsetType(block.type)) return block;
 
     const fallbackRows = Number(block.offsetRows ?? block.rowOffset ?? 0);
     const normalizedOffsetRows = Number.isFinite(fallbackRows)
