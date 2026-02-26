@@ -70,6 +70,50 @@ const restoreCaret = (textarea: HTMLTextAreaElement, pos: number) => {
   });
 };
 
+/** plain が「コードっぽい」かざっくり判定（現実運用向けに雑で良い） */
+const isProbablyCode = (t: string) => {
+  const s = (t ?? '').trim();
+  if (!s) return false;
+
+  if (/```|~~~/.test(s)) return true; // 既にフェンス
+  if (/^\s*<\w+[\s>]/m.test(s)) return true; // <body ...> など
+  if (/\b(className|function|const|let|var|import|export|return)\b/.test(s)) return true;
+  if (/[{}();]|=>/.test(s)) return true;
+
+  return false;
+};
+
+const looksLikeHtmlBlockCandidate = (t: string) => /^\s*<\w+[\s>]/.test(t ?? '');
+
+const detectLang = (plain: string, html: string) => {
+  const m = html?.match(/language-([a-z0-9_+-]+)/i);
+  if (m?.[1]) return m[1];
+
+  if (/\bclassName=/.test(plain) || /^\s*</m.test(plain)) return 'tsx';
+  if (/\binterface\b|\btype\b|\bimplements\b/.test(plain)) return 'ts';
+  return 'text';
+};
+
+const wrapFence = (code: string, lang: string) => {
+  const c = (code ?? '').replace(/\r\n/g, '\n').replace(/\n+$/, '');
+  return `\n\`\`\`${lang}\n${c}\n\`\`\`\n`;
+};
+
+const extractPreTextFromHtml = (html: string) => {
+  if (typeof document === 'undefined') return '';
+  try {
+    const div = document.createElement('div');
+    div.innerHTML = html;
+
+    const pre = div.querySelector('pre');
+    if (pre?.textContent) return pre.textContent;
+
+    return div.textContent || div.innerText || '';
+  } catch {
+    return '';
+  }
+};
+
 /**
  * Markdownブロック（編集用）
  * textarea入力 + リアルタイムプレビュー
@@ -145,30 +189,78 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
   };
 
   /**
-   * ペースト処理：
-   * 1. text/html があれば sanitize → turndown でMarkdown化
-   * 2. text/plain しかなければそのまま
-   * 3. コードフェンスがあれば分離してコールバック
+   * ペースト処理（安定運用版）：
+   * - ChatGPT等のリッチHTMLがあっても、plainがコードっぽいなら plain を優先
+   * - 先頭が <tag...> の場合は Markdown の HTMLブロック化を避けるため fenced code に包む
+   * - HTML→MD 変換結果が過剰エスケープっぽい時は plain にフォールバック
    */
   const handlePaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
     const clipboardData = e.clipboardData;
     const html = clipboardData.getData('text/html');
     const plain = clipboardData.getData('text/plain');
-    const textarea = e.currentTarget;
-    const selectionStart = textarea.selectionStart ?? 0;
-    const selectionEnd = textarea.selectionEnd ?? 0;
 
-    // HTML がある場合 → sanitize → Markdown 変換
+    const textarea = e.currentTarget;
+
+    // selection の逆転や範囲外を保険で正規化
+    const baseLen = markdown.length;
+    const a = Math.min(textarea.selectionStart ?? 0, baseLen);
+    const b = Math.min(textarea.selectionEnd ?? 0, baseLen);
+    const selectionStart = Math.min(a, b);
+    const selectionEnd = Math.max(a, b);
+
+    // 1) plain がコードっぽいなら、HTMLがあっても plain を優先（ここが本丸）
+    if (plain && isProbablyCode(plain)) {
+      e.preventDefault();
+
+      const lang = detectLang(plain, html);
+
+      // 先頭が <tag...> だと Markdown が HTML ブロック扱いするのでフェンスで包む
+      const insertText =
+        looksLikeHtmlBlockCandidate(plain) && !/```|~~~/.test(plain)
+          ? wrapFence(plain, lang)
+          : plain;
+
+      applyInsert(textarea, insertText, selectionStart, selectionEnd, {
+        attemptSplitFences: true,
+      });
+      return;
+    }
+
+    // 2) HTML がある場合：基本は sanitize→Markdown 化。ただし <pre> 系はテキスト抽出優先
     if (html && html.trim()) {
       e.preventDefault();
+
+      // <pre> があるなら converter を通すより素直に抜く方が事故らない
+      if (/<pre[\s>]/i.test(html)) {
+        const preText = plain || extractPreTextFromHtml(html);
+        const lang = detectLang(preText, html);
+        const fenced = wrapFence(preText, lang);
+
+        applyInsert(textarea, fenced, selectionStart, selectionEnd, {
+          attemptSplitFences: true,
+        });
+        return;
+      }
+
       try {
         const { sanitizeAndConvertToMarkdown } = await import('@/utils/markdownPaste');
         const mdRaw = await sanitizeAndConvertToMarkdown(html);
 
-        // 変換結果が空っぽなら plain にフォールバック（plain が無ければ HTML をテキスト化）
+        // converter が過剰エスケープしてるときは plain に逃がす
+        const overEscaped =
+          /className=\\"/.test(mdRaw) ||
+          /\\_/.test(mdRaw) ||
+          /\\</.test(mdRaw);
+
         const fallbackText = plain || htmlToPlainText(html);
-        const insertText =
-          mdRaw && mdRaw.trim().length > 0 ? mdRaw : fallbackText;
+        let insertText = mdRaw && mdRaw.trim().length > 0 ? mdRaw : fallbackText;
+
+        if (plain && overEscaped) insertText = fallbackText;
+
+        // 先頭が <tag...> なら HTML ブロック化を避けるためフェンス化
+        if (looksLikeHtmlBlockCandidate(insertText) && !/```|~~~/.test(insertText)) {
+          insertText = wrapFence(insertText, detectLang(insertText, html));
+        }
 
         applyInsert(textarea, insertText, selectionStart, selectionEnd, {
           attemptSplitFences: true,
@@ -176,14 +268,19 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
       } catch {
         // フォールバック: plain を優先。無ければ HTML をテキスト化して挿入
         const fallbackText = plain || htmlToPlainText(html);
-        applyInsert(textarea, fallbackText, selectionStart, selectionEnd, {
+        const insertText =
+          looksLikeHtmlBlockCandidate(fallbackText) && !/```|~~~/.test(fallbackText)
+            ? wrapFence(fallbackText, detectLang(fallbackText, html))
+            : fallbackText;
+
+        applyInsert(textarea, insertText, selectionStart, selectionEnd, {
           attemptSplitFences: true,
         });
       }
       return;
     }
 
-    // text/plain のみ → コードフェンスチェック（``` / ~~~）
+    // 3) text/plain のみ → コードフェンスチェック（``` / ~~~）
     if (plain && /```|~~~/.test(plain) && onReplaceWithBlocks) {
       e.preventDefault();
       applyInsert(textarea, plain, selectionStart, selectionEnd, {
