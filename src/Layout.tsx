@@ -42,6 +42,9 @@ export default function Layout() {
   const [searchParams, setSearchParams] = useSearchParams();
   const isFoldersRoute = /^\/folders(?:\/|$)/i.test(location.pathname);
   const isCardEditRoute = /^\/cardedit(?:\/|$)/i.test(location.pathname);
+  const hasFoldersDetailQuery = Boolean(
+    searchParams.get('folderId') || searchParams.get('cardId') || searchParams.get('docId')
+  );
 
   // ページ遷移時にスクロール位置をリセット
   useEffect(() => {
@@ -112,6 +115,7 @@ export default function Layout() {
   const isCardEditPage = currentPageName === 'CardEdit';
   const canUseSidebarNav = !isStudyModePage && !isCardEditPage;
   const canUseSidebarNavUi = canUseSidebarNav && !isSettingsOpen;
+  const shouldHideGlobalSidebarToggle = isFoldersRoute && hasFoldersDetailQuery;
   const {
     isSidebarOpen,
     handleSidebarToggle,
@@ -247,7 +251,7 @@ export default function Layout() {
       )}
       
       {/* Global Toggle Button (Desktop + Mobile) */}
-      {canUseSidebarNavUi && !isSidebarOpen && (
+      {canUseSidebarNavUi && !isSidebarOpen && !shouldHideGlobalSidebarToggle && (
       <button
         ref={sidebarToggleButtonRef}
         onClick={() => handleSidebarToggle(!isSidebarOpen)}

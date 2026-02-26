@@ -89,17 +89,21 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
 
       const blockRows = Array.from(body.querySelectorAll('[data-block-row="true"]')) as HTMLElement[];
       if (blockRows.length > 0) {
-        const bodyRect = body.getBoundingClientRect();
-        let maxBottom = bodyRect.top;
-
+        // NOTE:
+        // getBoundingClientRect() is affected by parent transforms (ScaleToFitFrame).
+        // Using offset metrics keeps min-height calculation in layout space and
+        // prevents underestimation when scaled down.
+        let maxBottom = 0;
         for (const row of blockRows) {
-          const rowRect = row.getBoundingClientRect();
-          if (rowRect.bottom > maxBottom) {
-            maxBottom = rowRect.bottom;
+          const style = window.getComputedStyle(row);
+          const marginBottom = Number.parseFloat(style.marginBottom || '0') || 0;
+          const rowBottom = row.offsetTop + row.offsetHeight + marginBottom;
+          if (rowBottom > maxBottom) {
+            maxBottom = rowBottom;
           }
         }
 
-        const contentHeight = Math.max(0, maxBottom - bodyRect.top);
+        const contentHeight = Math.max(0, maxBottom);
         const requiredHeight = contentHeight + resizeHandleReservePx + safetyReservePx;
         const snappedContentHeight = Math.ceil(requiredHeight / resizeStepPx) * resizeStepPx;
         return Math.max(baseMin, snappedContentHeight || baseMin);
