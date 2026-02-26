@@ -159,19 +159,19 @@ export function SyncHistoryDialog({ open, onClose }: SyncHistoryDialogProps) {
 
                     <div className="flex items-center gap-4 text-sm text-gray-700">
                       {/* アップロード件数 */}
-                      <div className="flex items-center gap-1" title="アップロード">
+                      <div className="flex items-center gap-1">
                         <ChevronUp className="w-4 h-4 text-blue-500" />
                         <span>{history.uploaded}件</span>
                       </div>
 
                       {/* ダウンロード件数 */}
-                      <div className="flex items-center gap-1" title="ダウンロード">
+                      <div className="flex items-center gap-1">
                         <ChevronDown className="w-4 h-4 text-green-500" />
                         <span>{history.downloaded}件</span>
                       </div>
 
                       {/* 所要時間 */}
-                      <div className="flex items-center gap-1 text-gray-500" title="所要時間">
+                      <div className="flex items-center gap-1 text-gray-500">
                         <Clock className="w-4 h-4" />
                         <span>{formatDuration(history.startedAt, history.finishedAt)}</span>
                       </div>

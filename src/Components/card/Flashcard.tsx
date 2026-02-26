@@ -16,7 +16,12 @@ import { CardCornerActions } from './frame/CardCornerActions';
 import { SharedCardContent } from './SharedCardContent';
 import { CANONICAL_CARD_WIDTH, layoutRowsToCardHeightPx } from './constants';
 import { sortBlocksByOrderIndex } from './blockOrdering';
-import { DEFAULT_LAYOUT_ROWS, normalizeExtraRows, normalizeLayoutRows } from '@/domain/card/extraRows';
+import {
+  DEFAULT_LAYOUT_ROWS,
+  LEGACY_BASE_LAYOUT_ROWS,
+  normalizeExtraRows,
+  normalizeLayoutRows,
+} from '@/domain/card/extraRows';
 
 type FlashcardMediaLike =
   | string
@@ -182,7 +187,7 @@ export function Flashcard({
   const layoutRows = normalizeLayoutRows(
     cardData?.layoutRows ??
       cardData?.layout_rows ??
-      (DEFAULT_LAYOUT_ROWS + Math.max(legacyQuestionExtraRows, legacyAnswerExtraRows))
+      (LEGACY_BASE_LAYOUT_ROWS + Math.max(legacyQuestionExtraRows, legacyAnswerExtraRows))
   );
   const cardIdForInk = cardData?.id ?? cardData?.cardId ?? null;
 
@@ -270,7 +275,6 @@ export function Flashcard({
           setIsImagePopupOpen(true);
         }}
         className="flex items-center gap-1 px-2 py-1 h-8 min-h-0 min-w-0 rounded-full bg-indigo-500 text-white shadow-[0_2px_0_#4338ca] active:shadow-none active:translate-y-[2px] transition-all hover:bg-indigo-400 hover:shadow-[0_2px_0_#4338ca]"
-        title="画像を表示"
       >
         <ImageIcon className="w-3 h-3 stroke-[2.25]" />
         <span className="text-[10px] font-bold">x{activeImages.length}</span>
@@ -301,7 +305,6 @@ export function Flashcard({
           setIsAudioPopupOpen(true);
         }}
         className="flex items-center gap-1 px-2 py-1 h-8 min-h-0 min-w-0 rounded-full transition-all bg-amber-500 text-white shadow-[0_2px_0_#b45309] active:shadow-none active:translate-y-[2px] hover:bg-amber-400 hover:shadow-[0_2px_0_#b45309]"
-        title={`音声 (x${activeAudioUrls.length})`}
       >
         <Volume2 className="w-3 h-3 stroke-[2.25]" />
         <span className="text-[10px] font-bold">x{activeAudioUrls.length}</span>
@@ -318,7 +321,6 @@ export function Flashcard({
           setIsReferencePopupOpen(true);
         }}
         className="flex items-center gap-1 px-2 py-1 h-8 min-h-0 min-w-0 rounded-full transition-all bg-cyan-500 text-white shadow-[0_2px_0_#0e7490] active:shadow-none active:translate-y-[2px] hover:bg-cyan-400"
-        title={`参考リンク (x${activeReferences.length})`}
       >
         <LinkIcon className="w-3 h-3 stroke-[2.25]" />
         <span className="text-[10px] font-bold">x{activeReferences.length}</span>
@@ -358,7 +360,6 @@ export function Flashcard({
           onEdit(cardData);
         }}
         className="rounded-full w-8 h-8 md:w-9 h-9 bg-slate-50/80 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
-        title="編集"
       >
         <Pencil className="w-4 h-4 md:w-5 h-5" />
       </Button>

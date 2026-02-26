@@ -54,7 +54,6 @@ export function CardCornerActions({
               ? 'bg-amber-100 text-amber-600 hover:bg-amber-200'
               : 'bg-slate-50/80 text-slate-400 hover:bg-slate-100 hover:text-slate-600'
           )}
-          title="曖昧/要復習"
         >
           <CircleHelp size={12} className={cn(helpActive && 'opacity-90')} />
         </button>
@@ -80,7 +79,6 @@ export function CardCornerActions({
               ? 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200'
               : 'bg-slate-50/80 text-slate-400 hover:bg-primary-600/10 hover:text-primary-600'
           )}
-          title="ブックマーク"
         >
           <Star size={12} className={cn(starActive && 'fill-current')} />
         </button>

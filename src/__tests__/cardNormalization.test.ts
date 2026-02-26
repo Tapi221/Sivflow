@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { normalizeCard } from '../utils';
-import { DEFAULT_LAYOUT_ROWS, MAX_LAYOUT_ROWS } from '@/domain/card/extraRows';
+import { LEGACY_BASE_LAYOUT_ROWS, MAX_LAYOUT_ROWS } from '@/domain/card/extraRows';
 
 describe('normalizeCard', () => {
   it('should filter out empty math blocks from questionBlocks and answerBlocks', () => {
@@ -78,7 +78,7 @@ describe('normalizeCard', () => {
     };
 
     const normalized = normalizeCard(rawCard);
-    expect(normalized.layoutRows).toBe(DEFAULT_LAYOUT_ROWS + 10);
+    expect(normalized.layoutRows).toBe(LEGACY_BASE_LAYOUT_ROWS + 10);
   });
 
   it('clamps layoutRows with compatibility max bound', () => {

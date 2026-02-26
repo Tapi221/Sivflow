@@ -202,7 +202,7 @@ export function FolderDashboard({
   const cardClass = 'rounded-xl border border-slate-200 p-4 bg-white shadow-none';
 
   return (
-    <div className="relative h-full overflow-y-auto font-serif">
+    <div className="relative h-full overflow-y-auto">
       <div
         className="pointer-events-none absolute inset-0"
         style={{

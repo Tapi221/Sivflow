@@ -256,7 +256,7 @@ export default function StudyMode() {
   return (
     <div
       data-page="review"
-      className="reviewPage bg-[#F5F7F8] text-slate-800 font-serif h-[100dvh] overflow-hidden flex flex-col"
+      className="reviewPage bg-[#F5F7F8] text-slate-800 h-[100dvh] overflow-hidden flex flex-col"
       style={{ '--card-max-height': '100%' }}
     >
       <div className="reviewShell max-w-[1600px] mx-auto w-full p-3 md:py-4 md:px-8 h-full flex flex-col min-h-0">
@@ -275,7 +275,7 @@ export default function StudyMode() {
                 <div className="reviewMeta text-[9px] md:text-[10px] font-bold tracking-[0.2em] text-slate-400 uppercase mb-0.5 truncate">
                   {isPracticeMode ? `追い復習 ROUND ${practiceState.roundNumber}` : 'Knowledge Review'}
                 </div>
-                <h1 className="reviewTitle text-lg md:text-xl font-bold text-slate-700 font-mono truncate">
+                <h1 className="reviewTitle text-lg md:text-xl font-bold text-slate-700 font-serif truncate">
                   {(() => {
                     const t = currentCard?.title || '';
                     const q = currentCard?.questionText || '';

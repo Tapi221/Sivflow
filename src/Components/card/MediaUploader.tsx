@@ -4,23 +4,46 @@ import { Slider } from '@/Components/ui/slider';
 import { Upload, X, Play, Pause, RotateCcw, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
-import type { UploadedImage } from '@/types';
+import type { UploadedImage, AssetRecord } from '@/types';
 import { createUploadedImage, createFailedUploadedImage, isHeicFile, convertHeicToJpeg } from '@/utils/imageUtils';
 import type { UploadedImageStatus } from '@/types';
 import type { StorageUrl } from '@/types/branded';
 import { useReliableFileUpload } from '@/hooks/useReliableFileUpload';
 import { ImageFrame } from './blocks/ImageFrame';
+import { putImageBlob, deleteImageBlob } from '@/services/imageFileStore';
+import { getOrCreateImageBlobUrl, removeImageBlobUrl } from '@/services/imageBlobUrlSessionCache';
+import { getLocalDb } from '@/services/localDB';
 
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
 
 function ImageItem({ item, index, onRetry, onUpdate }) {
   const [loadFailed, setLoadFailed] = useState(false);
-  const displayUrl = item.remoteUrl ?? item.localUrl ?? '';
+  const { currentUser } = useAuth();
+  const [resolvedLocalUrl, setResolvedLocalUrl] = useState<string | null>(null);
+  const displayUrl = item.remoteUrl ?? item.localUrl ?? resolvedLocalUrl ?? '';
   const isFailed = item.status === 'failed';
   const safeScale = clamp(Number(item.scale ?? 1), 0.2, 1);
   useEffect(() => {
     setLoadFailed(false);
   }, [displayUrl]);
+  useEffect(() => {
+    const localFileId = item?.localFileId;
+    if (!localFileId) {
+      setResolvedLocalUrl(null);
+      return;
+    }
+    if (item?.remoteUrl || item?.localUrl) return;
+    let cancelled = false;
+    const run = async () => {
+      const url = await getOrCreateImageBlobUrl(localFileId, { userId: currentUser?.uid });
+      if (cancelled) return;
+      setResolvedLocalUrl(url);
+    };
+    void run();
+    return () => {
+      cancelled = true;
+    };
+  }, [currentUser?.uid, item?.localFileId, item?.localUrl, item?.remoteUrl]);
   
   return (
     <>
@@ -90,12 +113,12 @@ function ImageItem({ item, index, onRetry, onUpdate }) {
 
         <div className="absolute bottom-1 right-1 flex gap-1 z-20">
             {item.source === 'cloud' && (
-                <div className="p-0.5 bg-green-500 rounded-full shadow-sm" title="Synced to cloud">
+                <div className="p-0.5 bg-green-500 rounded-full shadow-sm">
                     <Check className="w-3 h-3 text-white" />
                 </div>
             )}
             {item.source === 'local_fallback' && (
-                <div className="p-1.5 bg-amber-500 rounded-full shadow-sm" title={`Saved locally (${item.fallbackReason ?? 'offline'})`}>
+                <div className="p-1.5 bg-amber-500 rounded-full shadow-sm">
                 </div>
             )}
         </div>
@@ -236,6 +259,45 @@ export default function MediaUploader({
 
   // Helper to generate storage path
   const getStoragePath = (uid: string) => (fileName: string) => `users/${uid}/uploads/${fileName}`;
+  const buildAssetRemoteKey = useCallback((uid: string, assetId: string) => `users/${uid}/assets/${assetId}`, []);
+  const upsertAssetRecord = useCallback(
+    async (asset: AssetRecord) => {
+      const db = await getLocalDb(currentUser?.uid);
+      await db.images.put(asset as any);
+    },
+    [currentUser?.uid]
+  );
+  const enqueueAssetUpload = useCallback(
+    async (payload: { assetId: string; localBlobId: string; remoteKey: string; mime: string; size: number }) => {
+      const db = await getLocalDb(currentUser?.uid);
+      const now = Date.now();
+      const existing = await db.syncQueue
+        .where('targetId')
+        .equals(payload.assetId)
+        .filter((item: any) => item.entity === 'asset' && item.status === 'pending')
+        .first();
+      if (existing) return;
+      await db.syncQueue.add({
+        id: crypto.randomUUID(),
+        idempotencyKey: crypto.randomUUID(),
+        targetId: payload.assetId,
+        entity: 'asset',
+        operationType: 'update',
+        type: 'upload',
+        action: 'update',
+        payload,
+        priority: 'high',
+        createdAt: now,
+        updatedAt: now,
+        status: 'pending',
+        retryCount: 0,
+      } as any);
+      if (import.meta.env.DEV) {
+        console.info('[Asset] Enqueued upload', payload);
+      }
+    },
+    [currentUser?.uid]
+  );
   
   const handleUpload = async (files: FileList | File[]) => {
     if (!files || files.length === 0) return;
@@ -314,13 +376,85 @@ export default function MediaUploader({
           if (isHeicFile(file)) {
             try {
               const converted = await convertHeicToJpeg(file);
-              return { file: converted, image: createUploadedImage(converted) };
+              const image = createUploadedImage(converted);
+              const assetId = image.assetId ?? image.id;
+              const blobRecord = await putImageBlob(converted, { userId: currentUser.uid, assetId });
+              const previewUrl = await getOrCreateImageBlobUrl(blobRecord.localBlobId, { userId: currentUser.uid });
+              const remoteKey = buildAssetRemoteKey(currentUser.uid, assetId);
+              await upsertAssetRecord({
+                id: assetId,
+                userId: currentUser.uid,
+                mime: blobRecord.mime,
+                size: blobRecord.size,
+                localBlobId: blobRecord.localBlobId,
+                localStatus: 'present',
+                remoteKey,
+                remoteStatus: 'none',
+                createdAt: new Date(),
+                updatedAt: new Date(),
+              });
+              if (import.meta.env.DEV) {
+                console.info('[MediaUploader] image asset created', { assetId, localBlobId: blobRecord.localBlobId });
+              }
+              await enqueueAssetUpload({
+                assetId,
+                localBlobId: blobRecord.localBlobId,
+                remoteKey,
+                mime: blobRecord.mime,
+                size: blobRecord.size,
+              });
+              return {
+                file: converted,
+                image: {
+                  ...image,
+                  assetId,
+                  localFileId: blobRecord.localBlobId,
+                  storagePath: remoteKey,
+                  localUrl: (previewUrl ?? image.localUrl) as any,
+                },
+              };
             } catch (error) {
               console.warn('HEIC conversion failed', error);
               return { file: null, image: createFailedUploadedImage(file) };
             }
           }
-          return { file, image: createUploadedImage(file) };
+          const image = createUploadedImage(file);
+          const assetId = image.assetId ?? image.id;
+          const blobRecord = await putImageBlob(file, { userId: currentUser.uid, assetId });
+          const previewUrl = await getOrCreateImageBlobUrl(blobRecord.localBlobId, { userId: currentUser.uid });
+          const remoteKey = buildAssetRemoteKey(currentUser.uid, assetId);
+          await upsertAssetRecord({
+            id: assetId,
+            userId: currentUser.uid,
+            mime: blobRecord.mime,
+            size: blobRecord.size,
+            localBlobId: blobRecord.localBlobId,
+            localStatus: 'present',
+            remoteKey,
+            remoteStatus: 'none',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          });
+          if (import.meta.env.DEV) {
+            console.info('[MediaUploader] image asset created', { assetId, localBlobId: blobRecord.localBlobId });
+          }
+          await enqueueAssetUpload({
+            assetId,
+            localBlobId: blobRecord.localBlobId,
+            remoteKey,
+            mime: blobRecord.mime,
+            size: blobRecord.size,
+          });
+          return {
+            file,
+            image: {
+              ...image,
+              assetId,
+              localFileId: blobRecord.localBlobId,
+              storagePath: remoteKey,
+              localUrl: (previewUrl ?? image.localUrl) as any,
+            },
+          };
         })
       );
 
@@ -337,8 +471,8 @@ export default function MediaUploader({
           try {
             const result = await uploadFile(
               preparedItem.file, 
-              getStoragePath(currentUser.uid), 
-              { type: 'card_image' },
+              () => buildAssetRemoteKey(currentUser.uid, image.assetId ?? image.id),
+              { type: 'card_image', docId: image.assetId ?? image.id },
               (progress) => {
                // Update progress state
                const current = latestItemsRef.current as UploadedImage[] || [];
@@ -361,16 +495,18 @@ export default function MediaUploader({
           const current = (latestItemsRef.current as UploadedImage[]) || [];
           const updated = current.map(item => {
             if (item.id !== image.id) return item;
-            if (item.localUrl) URL.revokeObjectURL(item.localUrl);
+            const safeRemoteUrl = typeof result.url === 'string' && result.url.startsWith('http') ? result.url : null;
             return {
               ...item,
-              localUrl: null,
-              remoteUrl: (result.url || null) as StorageUrl | null,
+              assetId: item.assetId ?? item.id,
+              localFileId: item.localFileId ?? item.assetId ?? item.id,
+              localUrl: item.localUrl ?? null,
+              remoteUrl: (safeRemoteUrl || null) as StorageUrl | null,
               storagePath: result.storagePath || null,
-              status: 'ready' as UploadedImageStatus,
+              status: safeRemoteUrl ? ('ready' as UploadedImageStatus) : ('uploading' as UploadedImageStatus),
               source: result.source || null,
               fallbackReason: result.fallbackReason || null,
-            progress: 100 // completed
+              progress: 100 // completed
             };
           });
           latestItemsRef.current = updated; // 最新の状態を保存
@@ -412,26 +548,61 @@ export default function MediaUploader({
 
     try {
       const targetFile = isHeicFile(file) ? await convertHeicToJpeg(file) : file;
-      const newImage = createUploadedImage(targetFile) as UploadedImage;
+      const created = createUploadedImage(targetFile) as UploadedImage;
+      const assetId = created.assetId ?? created.id;
+      const remoteKey = buildAssetRemoteKey(currentUser.uid, assetId);
+      const blobRecord = await putImageBlob(targetFile, { userId: currentUser.uid, assetId });
+      const previewUrl = await getOrCreateImageBlobUrl(blobRecord.localBlobId, { userId: currentUser.uid });
+      await upsertAssetRecord({
+        id: assetId,
+        userId: currentUser.uid,
+        mime: blobRecord.mime,
+        size: blobRecord.size,
+        localBlobId: blobRecord.localBlobId,
+        localStatus: 'present',
+        remoteKey,
+        remoteStatus: 'none',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+      if (import.meta.env.DEV) {
+        console.info('[MediaUploader] image asset created', { assetId, localBlobId: blobRecord.localBlobId });
+      }
+      await enqueueAssetUpload({
+        assetId,
+        localBlobId: blobRecord.localBlobId,
+        remoteKey,
+        mime: blobRecord.mime,
+        size: blobRecord.size,
+      });
+      const newImage = {
+        ...created,
+        assetId,
+        localFileId: blobRecord.localBlobId,
+        storagePath: remoteKey,
+        localUrl: (previewUrl ?? created.localUrl) as any,
+      };
       const replaced = current.map((item, i) => (i === index ? newImage : item));
       onChange(replaced);
 
       const result = await uploadFile(
         targetFile, 
-        getStoragePath(currentUser.uid),
-        { type: 'card_image' }
+        () => remoteKey,
+        { type: 'card_image', docId: assetId }
       );
       
       const after = (latestItemsRef.current as UploadedImage[]) || [];
       const updated = after.map(item => {
         if (item.id !== newImage.id) return item;
-        if (item.localUrl) URL.revokeObjectURL(item.localUrl);
+        const safeRemoteUrl = typeof result.url === 'string' && result.url.startsWith('http') ? result.url : null;
         return {
           ...item,
-          localUrl: null,
-          remoteUrl: (result.url || null) as StorageUrl | null,
+          assetId: item.assetId ?? item.id,
+          localFileId: item.localFileId ?? item.assetId ?? item.id,
+          localUrl: item.localUrl ?? null,
+          remoteUrl: (safeRemoteUrl || null) as StorageUrl | null,
           storagePath: result.storagePath || null,
-          status: 'ready' as UploadedImageStatus,
+          status: safeRemoteUrl ? ('ready' as UploadedImageStatus) : ('uploading' as UploadedImageStatus),
           source: result.source || null,
           fallbackReason: result.fallbackReason || null
         };
@@ -516,8 +687,9 @@ export default function MediaUploader({
     if (type === 'image') {
       const items = urls as UploadedImage[];
       const removed = items[index];
-      if (removed?.localUrl) {
-        URL.revokeObjectURL(removed.localUrl);
+      if (removed?.localFileId) {
+        removeImageBlobUrl(removed.localFileId, { userId: currentUser?.uid });
+        void deleteImageBlob(removed.localFileId, { userId: currentUser?.uid });
       }
       const next = items.filter((_, i) => i !== index);
       onChange(next);

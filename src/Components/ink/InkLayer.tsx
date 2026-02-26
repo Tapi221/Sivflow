@@ -636,7 +636,6 @@ export const InkToolbar = React.memo(function InkToolbar({
         variant={tool === 'pen' ? 'default' : 'ghost'}
         className="h-7 w-7"
         onClick={() => onToolChange(tool === 'pen' ? null : 'pen')}
-        title="ペン"
       >
         <PenLine className="h-3.5 w-3.5" />
       </Button>
@@ -646,7 +645,6 @@ export const InkToolbar = React.memo(function InkToolbar({
         variant={tool === 'eraser' ? 'default' : 'ghost'}
         className="h-7 w-7"
         onClick={() => onToolChange(tool === 'eraser' ? null : 'eraser')}
-        title="消しゴム"
       >
         <Eraser className="h-3.5 w-3.5" />
       </Button>
@@ -657,7 +655,6 @@ export const InkToolbar = React.memo(function InkToolbar({
         className="h-7 w-7"
         onClick={onUndo}
         disabled={!canUndo}
-        title="Undo"
       >
         <Undo2 className="h-3.5 w-3.5" />
       </Button>
@@ -668,7 +665,6 @@ export const InkToolbar = React.memo(function InkToolbar({
         className="h-7 w-7"
         onClick={onRedo}
         disabled={!canRedo}
-        title="Redo"
       >
         <Redo2 className="h-3.5 w-3.5" />
       </Button>
@@ -679,7 +675,6 @@ export const InkToolbar = React.memo(function InkToolbar({
         className="h-7 w-7 text-rose-500 hover:text-rose-600"
         onClick={onClear}
         disabled={!canUndo}
-        title="クリア"
       >
         <Trash2 className="h-3.5 w-3.5" />
       </Button>

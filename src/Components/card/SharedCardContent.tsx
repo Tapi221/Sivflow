@@ -1,6 +1,7 @@
 import React from 'react';
 import type { CardBlock } from '@/types';
 import { cn } from '@/lib/utils';
+import { CONTENT_TYPO } from '@/styles/typography';
 import { BlockRenderer } from './BlockRenderer';
 import { BlockEditor } from './BlockEditor';
 import { CARD_CONTENT_TOP_PX } from './constants';
@@ -41,6 +42,7 @@ export function SharedCardContent(props: SharedCardContentProps) {
     <div
       className={cn(
         'card-content-root flex min-h-0 flex-1 flex-col w-full max-w-full overflow-x-hidden overflow-y-visible',
+        CONTENT_TYPO,
         props.className
       )}
       style={{ paddingTop: `var(--card-content-padding-top, ${CARD_CONTENT_TOP_PX}px)` }}

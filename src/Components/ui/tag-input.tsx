@@ -186,7 +186,6 @@ export function TagInput({
                           {availableColors.map((color) => (
                               <button
                                   key={color}
-                                  title={`${color.split(' ')[0]}を選択`}
                                   aria-label={`${color.split(' ')[0]}を選択`}
                                   className={cn(
                                       "w-8 h-8 rounded-full border-2 ring-1 ring-slate-300/70 shadow-sm transition-all",

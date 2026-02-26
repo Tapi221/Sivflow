@@ -4,7 +4,7 @@ import { CodeRenderer } from './CodeRenderer';
 import { AudioPlayer } from './CardMedia';
 import { ImageBlockContent } from './blocks/ImageBlockContent';
 import { MathBlockContent } from './blocks/MathBlockContent';
-import { MarkdownBlockContent } from './blocks/MarkdownBlockContent';
+import { MarkdownBlockView } from './blocks/MarkdownBlockPreview';
 import { TextBlockContent } from './blocks/TextBlockContent';
 import {
   getNormalizedGridOffsetRows,
@@ -116,11 +116,7 @@ export function BlockRenderer({ blocks, onGalleryFullscreenChange }: BlockRender
             )}
 
             {block.type === 'markdown' && (block.markdown ?? '').trim() !== '' && (
-              <div className="markdownBlockSurface w-full max-w-full bg-transparent overflow-visible">
-                <div className="w-full max-w-full px-1.5 py-0">
-                  <MarkdownBlockContent markdown={block.markdown!} className="markdownBlockCardView" />
-                </div>
-              </div>
+              <MarkdownBlockView md={block.markdown!} className="markdownBlockCardView" />
             )}
           </div>
         );

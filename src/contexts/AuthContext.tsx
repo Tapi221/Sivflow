@@ -208,7 +208,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
           // - 異常検知 → 即破棄 → 再構築
           // - UI 描画前に完了を保証
           const { AppInitializer } = await import('../services/AppInitializer');
-          await AppInitializer.initialize(user.uid);
+          const initResult = await AppInitializer.initialize(user.uid);
+          if (initResult?.degraded) {
+            console.warn('[Auth] startup_degraded=true', {
+              userId: user.uid,
+              reason: initResult.reason,
+              skippedFailures: initResult.skippedFailures ?? 0,
+            });
+          }
 
           // 3. 同期サービス初期化 (非同期)
           const service = await SyncServiceFactory.getInstance(user.uid);

@@ -109,7 +109,6 @@ export function RecentPanel({
         <button
           onClick={onClearRecent}
           className="text-xs text-slate-400 hover:text-red-500 flex items-center gap-1 transition-colors"
-          title="履歴をクリア"
         >
           <Trash2 className="w-3 h-3" />
           <span>クリア</span>

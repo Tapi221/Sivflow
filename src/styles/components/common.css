@@ -1,4 +1,8 @@
 @layer components {
+  .card-editor-right-pane-font {
+    --font-serif: "Yu Mincho", "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Noto Serif JP", "MS PMincho", serif;
+  }
+
   .card-gradient {
     @apply rounded-2xl p-5 text-white shadow-soft;
     background: var(--color-primary-600-hex, #689A98);

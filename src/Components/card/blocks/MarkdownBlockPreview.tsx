@@ -1,4 +1,5 @@
 import React from 'react';
+import { cn } from '@/lib/utils';
 import { MarkdownBlockContent } from './MarkdownBlockContent';
 
 interface MarkdownBlockViewProps {
@@ -13,17 +14,35 @@ export type MarkdownBlockPreviewProps = {
   className?: string;
 };
 
+interface MarkdownBlockDisplayProps extends MarkdownBlockPreviewProps {
+  contentClassName?: string;
+}
+
+export const MarkdownBlockDisplay: React.FC<MarkdownBlockDisplayProps> = ({
+  markdown,
+  align,
+  className,
+  contentClassName,
+}) => {
+  return (
+    <div className="markdownBlockSurface w-full max-w-full bg-transparent overflow-visible">
+      <div className={cn('w-full max-w-full px-1.5 py-0', contentClassName)}>
+        <MarkdownBlockContent markdown={markdown} align={align} className={className} />
+      </div>
+    </div>
+  );
+};
+
 export const MarkdownBlockPreview: React.FC<MarkdownBlockPreviewProps> = ({
   markdown,
   ...rest
 }) => {
-  return <MarkdownBlockContent markdown={markdown} {...rest} />;
+  return <MarkdownBlockDisplay markdown={markdown} {...rest} />;
 };
 
 export const MarkdownBlockView: React.FC<MarkdownBlockViewProps> = ({
   md,
   ...rest
 }) => {
-  return <MarkdownBlockContent markdown={md} {...rest} />;
+  return <MarkdownBlockDisplay markdown={md} {...rest} />;
 };
-

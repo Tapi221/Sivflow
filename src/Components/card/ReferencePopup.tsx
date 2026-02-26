@@ -54,7 +54,7 @@ export const ReferencePopup = ({ isOpen, onClose, references }: ReferencePopupPr
                       <ExternalLink className="w-4 h-4 text-slate-300 group-hover:text-primary-400 shrink-0 mt-0.5" />
                     </div>
                     <div className="mt-1 flex items-center gap-2">
-                      <span className="text-[10px] text-slate-400 truncate font-mono">
+                      <span className="text-[10px] text-slate-400 truncate font-serif">
                         {(() => {
                           try {
                             return new URL(ref.url).hostname;

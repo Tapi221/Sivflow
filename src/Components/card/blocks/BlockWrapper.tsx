@@ -56,10 +56,14 @@ export const BlockWrapper = ({
   onMoveDragEnd,
   contentClassName,
 }: BlockWrapperProps) => {
+  const [isEditingWithin, setIsEditingWithin] = React.useState(false);
+
   // border はレイアウトを膨らませるので、アクティブ強調は box-shadow（inset）で描画する。
   // ※ className 側で `border-transparent` を指定しても、ここで borderColor を上書きしない。
+  const isOutlineVisible = Boolean(isActive || isEditingWithin);
+  const outlineColor = accentColor ? `${accentColor}40` : 'rgba(59, 130, 246, 0.35)';
   const activeOutline =
-    isActive && accentColor ? `inset 0 0 0 2px ${accentColor}40` : undefined;
+    isOutlineVisible ? `inset 0 0 0 2px ${outlineColor}` : undefined;
 
   const stepDragRef = React.useRef<{
     pointerId: number;
@@ -146,9 +150,18 @@ export const BlockWrapper = ({
 
   return (
     <div
+      onFocusCapture={() => {
+        setIsEditingWithin(true);
+      }}
+      onBlurCapture={(event) => {
+        const nextFocused = event.relatedTarget as Node | null;
+        if (!nextFocused || !event.currentTarget.contains(nextFocused)) {
+          setIsEditingWithin(false);
+        }
+      }}
       className={cn(
         'group relative overflow-visible bg-transparent border border-slate-200/80 rounded-xl py-0 px-1.5',
-        isActive && 'z-40',
+        isOutlineVisible && 'z-40',
         className
       )}
       style={activeOutline ? { boxShadow: activeOutline } : undefined}
@@ -171,7 +184,6 @@ export const BlockWrapper = ({
               'cursor-grab active:cursor-grabbing',
               dragHandleClassName
             )}
-            title="ドラッグで1行ずつ移動"
           >
             <GripIcon className="w-2.5 h-2.5" />
           </div>
@@ -181,7 +193,6 @@ export const BlockWrapper = ({
           <button
             onClick={onDuplicate}
             className="w-5 h-5 min-w-0 min-h-0 p-0 bg-white border border-slate-100 rounded-full text-slate-400 hover:text-indigo-600 hover:border-indigo-100 shadow-sm flex items-center justify-center flex-none"
-            title="複製"
             type="button"
           >
             <CopyIcon className="w-2.5 h-2.5" />
@@ -192,7 +203,6 @@ export const BlockWrapper = ({
           <button
             onClick={onDelete}
             className="w-5 h-5 min-w-0 min-h-0 p-0 bg-white border border-slate-100 rounded-full text-slate-400 hover:text-red-600 hover:border-red-100 shadow-sm flex items-center justify-center flex-none"
-            title="削除"
             type="button"
           >
             <TrashIcon className="w-2.5 h-2.5" />

@@ -362,24 +362,9 @@ const hasAnyContent = (data: any) => {
     console.log('[CardEditor] Current formData:', formData);
     flushDraft();
     
-    const hasBlocks = (blocks: any[]) => {
-      return blocks.some(b => {
-        if (b.type === 'text') return b.content?.trim();
-        if (b.type === 'code') return b.code?.code;
-        if (b.type === 'image') return b.images?.length > 0;
-        if (b.type === 'audio') return b.audios?.length > 0;
-        if (b.type === 'math') return b.math?.latex?.trim();
-        if (b.type === 'reference') return b.references?.some((r: any) => (r.url?.trim() || r.name?.trim()));
-        return false;
-      });
-    };
-
-    const hasQuestionContent = hasBlocks(formData.questionBlocks);
-    const hasAnswerContent = hasBlocks(formData.answerBlocks);
-    
     const dataToSave = {
       ...formData,
-      isDraft: settings?.autoDraftEnabled !== false && (!hasQuestionContent || !hasAnswerContent) ? true : formData.isDraft
+      isDraft: formData.isDraft,
     };
     
     await onSave(dataToSave);
@@ -454,7 +439,6 @@ const hasAnyContent = (data: any) => {
           <div className="h-14 flex items-center gap-3">
             <button
               type="button"
-              title="ブックマーク"
               aria-label="ブックマーク"
               aria-pressed={ariaPressedBookmark}
               className={cn(
@@ -470,7 +454,6 @@ const hasAnyContent = (data: any) => {
 
             <button
               type="button"
-              title="不確実フラグ"
               aria-label="不確実フラグ"
               aria-pressed={ariaPressedUncertainty}
               className={cn(

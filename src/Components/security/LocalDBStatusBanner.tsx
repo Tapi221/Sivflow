@@ -49,7 +49,6 @@ export function LocalDBStatusBanner() {
             onClick={clearLocalDBResetFailureReason}
             className="rounded p-1 text-amber-800 hover:bg-amber-200/70"
             aria-label="通知を閉じる"
-            title="通知を閉じる"
           >
             <X size={16} />
           </button>

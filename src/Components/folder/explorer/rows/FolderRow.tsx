@@ -33,6 +33,8 @@ interface FolderRowProps {
   rowBaseClassName: string;
   isDragging: boolean;
   hasUpdateOrDelete: boolean;
+  menuOpen: boolean;
+  onMenuOpenChange: (open: boolean) => void;
   // 追加属性
   setRowRef: (id: string, node: HTMLElement | null) => void;
   isDimmed: boolean;
@@ -72,6 +74,8 @@ export const FolderRow: React.FC<FolderRowProps> = ({
   rowBaseClassName,
   isDragging,
   hasUpdateOrDelete,
+  menuOpen,
+  onMenuOpenChange,
   setRowRef,
   isDimmed,
   isFileDraggingOver,
@@ -190,6 +194,8 @@ export const FolderRow: React.FC<FolderRowProps> = ({
 
                   {hasContextMenu && (
                   <ContextMenu
+                    open={menuOpen}
+                    onOpenChange={onMenuOpenChange}
                     type="folder"
                     onCreateSubfolder={() => void handleCreateFolderAction(folderId)}
                     onCreateCard={() => void handleCreateCardAction(folderId)}

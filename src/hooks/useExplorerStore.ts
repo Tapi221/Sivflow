@@ -1,17 +1,17 @@
 /**
  * useExplorerStore - Explorer状態管理フック
  * 
- * Favorites, Recent, タブ状態をlocalStorageで永続化
+ * Pinned, Recent, タブ状態をlocalStorageで永続化
  */
 import { useState, useEffect, useCallback } from 'react';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 // 型定義
-export type ExplorerTab = 'favorites' | 'explorer' | 'recent' | 'trash' | 'inbox';
+export type ExplorerTab = 'pinned' | 'explorer' | 'recent' | 'inbox';
 
-export interface FavoriteItem {
-  type: 'folder' | 'card';
+export interface PinnedItem {
+  type: 'folder' | 'card' | 'document';
   id: string;
 }
 
@@ -27,12 +27,12 @@ export interface ExplorerState {
   explorerTab: ExplorerTab;
   setExplorerTab: (tab: ExplorerTab) => void;
 
-  // Favorites
-  favorites: FavoriteItem[];
-  addFavorite: (item: FavoriteItem) => void;
-  removeFavorite: (item: FavoriteItem) => void;
-  reorderFavorites: (newFavorites: FavoriteItem[]) => void;
-  isFavorite: (type: 'folder' | 'card', id: string) => boolean;
+  // Pinned
+  pinnedItems: PinnedItem[];
+  pinItem: (item: PinnedItem) => void;
+  unpinItem: (item: PinnedItem) => void;
+  reorderPinnedItems: (newPinnedItems: PinnedItem[]) => void;
+  isPinned: (type: 'folder' | 'card' | 'document', id: string) => boolean;
 
   // Recent
   recent: RecentItem[];
@@ -42,14 +42,21 @@ export interface ExplorerState {
   // Tag Filter State
   tagFilter: string[];
   tagMatchMode: 'any' | 'all';
+  uncertaintyFilter: 'any' | 'on' | 'off';
+  bookmarkedFilter: 'any' | 'on' | 'off';
+  draftFilter: 'any' | 'on' | 'off';
   setTagFilter: (tags: string[]) => void;
   toggleTag: (tag: string) => void;
   clearTagFilter: () => void;
+  clearAllFilters: () => void;
   setTagMatchMode: (mode: 'any' | 'all') => void;
+  setUncertaintyFilter: (mode: 'any' | 'on' | 'off') => void;
+  setBookmarkedFilter: (mode: 'any' | 'on' | 'off') => void;
+  setDraftFilter: (mode: 'any' | 'on' | 'off') => void;
 }
 
 // 定数
-const MAX_FAVORITES = 20;
+const MAX_PINNED_ITEMS = 20;
 const MAX_RECENT = 30;
 
 /**
@@ -63,21 +70,21 @@ export const useExplorerStore = create<ExplorerState>()(
       explorerTab: 'explorer',
       setExplorerTab: (tab) => set({ explorerTab: tab }),
 
-      // Favorites
-      favorites: [],
-      addFavorite: (item) => set((state) => {
-        const exists = state.favorites.some(f => f.type === item.type && f.id === item.id);
+      // Pinned
+      pinnedItems: [],
+      pinItem: (item) => set((state) => {
+        const exists = state.pinnedItems.some(p => p.type === item.type && p.id === item.id);
         if (exists) return state;
         // 先頭に追加、最大数制限
-        return { favorites: [item, ...state.favorites].slice(0, MAX_FAVORITES) };
+        return { pinnedItems: [item, ...state.pinnedItems].slice(0, MAX_PINNED_ITEMS) };
       }),
-      removeFavorite: (item) => set((state) => ({
-        favorites: state.favorites.filter(f => !(f.type === item.type && f.id === item.id))
+      unpinItem: (item) => set((state) => ({
+        pinnedItems: state.pinnedItems.filter(p => !(p.type === item.type && p.id === item.id))
       })),
-      reorderFavorites: (newFavorites) => set({ favorites: newFavorites }),
-      isFavorite: (type, id) => {
+      reorderPinnedItems: (newPinnedItems) => set({ pinnedItems: newPinnedItems }),
+      isPinned: (type, id) => {
         // state helper
-        return false; // Not used directly, hook consumers check state.favorites
+        return false; // Not used directly, hook consumers check state.pinnedItems
       },
 
       // Recent
@@ -95,6 +102,9 @@ export const useExplorerStore = create<ExplorerState>()(
       // Tag Filter
       tagFilter: [],
       tagMatchMode: 'any',
+      uncertaintyFilter: 'any',
+      bookmarkedFilter: 'any',
+      draftFilter: 'any',
       setTagFilter: (tags) => set({ tagFilter: tags }),
       toggleTag: (tag) => set((state) => {
         const exists = state.tagFilter.includes(tag);
@@ -104,17 +114,46 @@ export const useExplorerStore = create<ExplorerState>()(
         return { tagFilter: newFilter };
       }),
       clearTagFilter: () => set({ tagFilter: [] }),
+      clearAllFilters: () =>
+        set({
+          tagFilter: [],
+          tagMatchMode: 'any',
+          uncertaintyFilter: 'any',
+          bookmarkedFilter: 'any',
+          draftFilter: 'any',
+        }),
       setTagMatchMode: (mode) => set({ tagMatchMode: mode }),
+      setUncertaintyFilter: (mode) => set({ uncertaintyFilter: mode }),
+      setBookmarkedFilter: (mode) => set({ bookmarkedFilter: mode }),
+      setDraftFilter: (mode) => set({ draftFilter: mode }),
     }),
     {
       name: 'explorer-storage',
       partialize: (state) => ({
         explorerTab: state.explorerTab,
-        favorites: state.favorites,
+        pinnedItems: state.pinnedItems,
         recent: state.recent,
         tagFilter: state.tagFilter,
         tagMatchMode: state.tagMatchMode,
+        uncertaintyFilter: state.uncertaintyFilter,
+        bookmarkedFilter: state.bookmarkedFilter,
+        draftFilter: state.draftFilter,
       }),
+      migrate: (persistedState: any) => {
+        if (!persistedState || typeof persistedState !== 'object') return persistedState;
+        const next = { ...persistedState };
+
+        if (next.explorerTab === 'favorites') {
+          next.explorerTab = 'pinned';
+        }
+
+        if (!Array.isArray(next.pinnedItems) && Array.isArray(next.favorites)) {
+          next.pinnedItems = next.favorites;
+        }
+        delete next.favorites;
+
+        return next;
+      },
     }
   )
 );

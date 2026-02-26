@@ -132,7 +132,6 @@ export function InboxPanel({
                 <button
                   onClick={() => setMovingCardId(isOpen ? null : cardId)}
                   className="opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-200 rounded transition-all flex items-center gap-1 text-xs text-slate-500"
-                  title="フォルダへ移動"
                   disabled={isMoving}
                 >
                   <ArrowRight className="w-3.5 h-3.5" />

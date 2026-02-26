@@ -4,7 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import { FolderTreeWithCards } from './FolderTreeWithCards';
 import { RightPane } from './RightPane';
 import { ExplorerTabs } from '../explorer/ExplorerTabs';
-import { FavoritesPanel } from '../explorer/FavoritesPanel';
+import { PinnedPanel } from '../explorer/PinnedPanel';
 import { RecentPanel } from '../explorer/RecentPanel';
 import { cn } from '@/lib/utils';
 import { useFolders } from '@/hooks/useFolders';
@@ -77,16 +77,19 @@ function TreeViewLayout({
   const {
     explorerTab,
     setExplorerTab,
-    favorites,
-    addFavorite,
-    removeFavorite,
+    pinnedItems,
+    pinItem,
+    unpinItem,
     recent,
     addRecent,
     clearRecent,
     tagFilter,
     toggleTag,
-    clearTagFilter,
+    clearAllFilters,
     tagMatchMode,
+    uncertaintyFilter,
+    bookmarkedFilter,
+    draftFilter,
   } = useExplorerStore();
 
   useEffect(() => {
@@ -164,7 +167,7 @@ function TreeViewLayout({
     pendingWRef.current = sidebarWidth;
   }, [isMobile, sidebarWidth, isSidebarOpen]);
 
-  const showMobileDetail = isMobile && Boolean(selectedFolderId || selectedCardId || selectedDocumentId);
+  const showMobileDetail = isMobile && Boolean(selectedFolderId || selectedCardId || selectedDocumentId || selectedItem);
 
   const handleCardSelectWithRecent = (cardId: string) => {
     onItemSelect({ type: 'card', id: cardId });
@@ -318,21 +321,57 @@ function TreeViewLayout({
   }, [createFolder]);
 
   const isFilterTargetTab = explorerTab === 'explorer';
-  const isFilterActive = isFilterTargetTab && tagFilter.length > 0;
+  const isFilterActive =
+    isFilterTargetTab &&
+    (tagFilter.length > 0 ||
+      uncertaintyFilter !== 'any' ||
+      bookmarkedFilter !== 'any' ||
+      draftFilter !== 'any');
 
   const { filteredCards, isFiltering } = useMemo(() => {
-    const active = tagFilter.length > 0 && isFilterTargetTab;
+    const active =
+      isFilterTargetTab &&
+      (tagFilter.length > 0 ||
+        uncertaintyFilter !== 'any' ||
+        bookmarkedFilter !== 'any' ||
+        draftFilter !== 'any');
     if (!active) return { filteredCards: cards, isFiltering: false };
 
     const filtered = cards.filter((card) => {
-      if (!card.tags || card.tags.length === 0) return false;
-      const cardTags = new Set(card.tags);
-      if (tagMatchMode === 'any') return tagFilter.some((t) => cardTags.has(t));
-      return tagFilter.every((t) => cardTags.has(t));
+      if (tagFilter.length > 0) {
+        if (!card.tags || card.tags.length === 0) return false;
+        const cardTags = new Set(card.tags);
+        const tagMatched =
+          tagMatchMode === 'any'
+            ? tagFilter.some((t) => cardTags.has(t))
+            : tagFilter.every((t) => cardTags.has(t));
+        if (!tagMatched) return false;
+      }
+
+      const hasUncertainty = Boolean(card.hasUncertainty ?? (card as any).has_uncertainty);
+      const isBookmarked = Boolean(card.isBookmarked ?? (card as any).is_bookmarked);
+      const isDraft = Boolean(card.isDraft ?? (card as any).is_draft);
+
+      if (uncertaintyFilter === 'on' && !hasUncertainty) return false;
+      if (uncertaintyFilter === 'off' && hasUncertainty) return false;
+      if (bookmarkedFilter === 'on' && !isBookmarked) return false;
+      if (bookmarkedFilter === 'off' && isBookmarked) return false;
+      if (draftFilter === 'on' && !isDraft) return false;
+      if (draftFilter === 'off' && isDraft) return false;
+
+      return true;
     });
 
     return { filteredCards: filtered, isFiltering: true };
-  }, [cards, tagFilter, tagMatchMode, isFilterTargetTab]);
+  }, [
+    cards,
+    tagFilter,
+    tagMatchMode,
+    isFilterTargetTab,
+    uncertaintyFilter,
+    bookmarkedFilter,
+    draftFilter,
+  ]);
 
   const matchModeLabel = useMemo(() => {
     return tagMatchMode === 'any' ? 'どれか一致（OR）' : '全部一致（AND）';
@@ -358,7 +397,7 @@ function TreeViewLayout({
 
           <button
             type="button"
-            onClick={clearTagFilter}
+            onClick={clearAllFilters}
             className="shrink-0 text-[11px] px-2 py-1 rounded-md border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition-colors"
           >
             クリア
@@ -373,11 +412,31 @@ function TreeViewLayout({
               size="sm"
               colorClass={getTagColor(tag)}
               className="max-w-[180px]"
-              title={tag}
               onRemove={() => toggleTag(tag)}
               removeAriaLabel={`${tag}を削除`}
             />
           ))}
+          {uncertaintyFilter !== 'any' && (
+            <TagBadge
+              label={`はてな: ${uncertaintyFilter === 'on' ? 'あり' : 'なし'}`}
+              size="sm"
+              colorClass="bg-slate-100 text-slate-700 border-slate-200"
+            />
+          )}
+          {bookmarkedFilter !== 'any' && (
+            <TagBadge
+              label={`星: ${bookmarkedFilter === 'on' ? 'あり' : 'なし'}`}
+              size="sm"
+              colorClass="bg-slate-100 text-slate-700 border-slate-200"
+            />
+          )}
+          {draftFilter !== 'any' && (
+            <TagBadge
+              label={`下書き: ${draftFilter === 'on' ? 'あり' : 'なし'}`}
+              size="sm"
+              colorClass="bg-slate-100 text-slate-700 border-slate-200"
+            />
+          )}
         </div>
 
         <div className="mt-1 text-[11px] text-slate-400 leading-4">
@@ -466,16 +525,16 @@ function TreeViewLayout({
 
   const renderTabContent = () => {
     switch (explorerTab) {
-      case 'favorites':
+      case 'pinned':
         return (
-          <FavoritesPanel
-            favorites={favorites}
+          <PinnedPanel
+            pinnedItems={pinnedItems}
             folders={folders}
             cards={cards}
             documents={documents}
             onFolderSelect={handleFolderSelectWithRecent}
             onItemSelect={onItemSelect}
-            onRemoveFavorite={removeFavorite}
+            onUnpinItem={unpinItem}
             getFolderPath={getFolderPath}
           />
         );
@@ -490,18 +549,6 @@ function TreeViewLayout({
             onItemSelect={onItemSelect}
             onClearRecent={clearRecent}
           />
-        );
-      case 'trash':
-        return (
-          <div className="p-4">
-            <button
-              type="button"
-              onClick={() => navigate(createPageUrl('Trash'))}
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-slate-50"
-            >
-              ごみ箱を開く
-            </button>
-          </div>
         );
       case 'explorer':
       default:
@@ -523,9 +570,9 @@ function TreeViewLayout({
               onDeleteCard={deleteCard}
               moveCardToFolder={moveCardToFolder}
               reorderCards={reorderCards}
-              favorites={favorites}
-              onAddFavorite={addFavorite}
-              onRemoveFavorite={removeFavorite}
+              pinnedItems={pinnedItems}
+              onPinItem={pinItem}
+              onUnpinItem={unpinItem}
               isFiltering={isFiltering}
             />
           </div>
@@ -543,7 +590,7 @@ function TreeViewLayout({
       <div
         ref={sidebarRef}
         className={cn(
-          "shrink-0 flex-col bg-[#F8FAFB] md:bg-[#F8FAFB] border-r-0 md:border-r border-sidebar-border relative group/sidebar select-none overflow-hidden will-change-[width] font-serif",
+          "shrink-0 flex-col bg-[#F8FAFB] md:bg-[#F8FAFB] border-r-0 md:border-r border-sidebar-border relative group/sidebar select-none overflow-hidden will-change-[width]",
           showMobileDetail ? "hidden md:flex" : "flex",
           "md:ring-1 md:ring-black/5 md:shadow-[inset_0_1px_0_rgba(255,255,255,0.75),inset_-1px_0_0_rgba(255,255,255,0.5),10px_0_24px_-20px_rgba(15,23,42,0.35)]",
           isResizing ? "transition-none" : "transition-all duration-300 ease-in-out",
@@ -552,7 +599,7 @@ function TreeViewLayout({
         )}
       >
         <div className={cn(
-            "flex flex-col h-full w-full font-serif",
+            "flex flex-col h-full w-full",
              "bg-[#F8FAFB] md:bg-[#F8FAFB]"
         )}>
             {/* ExplorerTabs: 常にSticky表示 */}
@@ -632,6 +679,7 @@ function TreeViewLayout({
           </div>
         )}
         <RightPane
+          selectedItem={selectedItem}
           selectedCardId={selectedCardId}
           selectedDocument={selectedDocument}
           selectedFolderId={selectedFolderId}
@@ -668,3 +716,4 @@ function TreeViewLayout({
 }
 
 export default TreeViewLayout;
+

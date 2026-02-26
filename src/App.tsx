@@ -43,8 +43,6 @@ const CardEdit = lazy(() => import('./Pages/CardEdit'));
 const CardView = lazy(() => import('./Pages/CardView'));
 const StudyMode = lazy(() => import('./Pages/StudyMode'));
 const Trash = lazy(() => import('./Pages/Trash'));
-const UncertainMode = lazy(() => import('./Pages/UncertainMode'));
-const BookmarkMode = lazy(() => import('./Pages/BookmarkMode'));
 const SyncSettings = lazy(() => import('./Pages/SyncSettings'));
 const ImageDiagnostics = lazy(() => import('./Pages/ImageDiagnostics'));
 const Gallery = lazy(() => import('./Pages/Gallery'));
@@ -363,8 +361,6 @@ function AppContent() {
           <Route path="CardEdit" element={<CardEdit />} />
           <Route path="CardView" element={<CardView />} />
           <Route path="study" element={<StudyMode />} />
-          <Route path="uncertain" element={<UncertainMode />} />
-          <Route path="bookmark" element={<BookmarkMode />} />
           <Route path="calendar" element={<Calendar />} />
 
           {/* 今日の学習ページ */}

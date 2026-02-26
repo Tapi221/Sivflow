@@ -482,9 +482,7 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
                 const deltaY = moveEvent.clientY - resizeRef.current.startY;
                 const snappedDelta = Math.round(deltaY / resizeStepPx) * resizeStepPx;
                 const nextHeightRaw = resizeRef.current.baseHeight + snappedDelta;
-                const nextHeight = isControlledResize
-                  ? Math.max(resizeStepPx, nextHeightRaw)
-                  : clampHeight(nextHeightRaw);
+                const nextHeight = clampHeight(nextHeightRaw);
 
                 resizePendingHeightRef.current = nextHeight;
                 if (resizeRafRef.current != null) return;

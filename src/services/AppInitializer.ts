@@ -17,7 +17,7 @@ import { warnOncePerSession } from './localDBRuntimeState';
  */
 export class AppInitializer {
   private static initialized = false;
-  private static initPromise: Promise<void> | null = null;
+  private static initPromise: Promise<{ degraded: boolean; reason?: string; skippedFailures?: number }> | null = null;
   private static notificationId: string | null = null;
   
   /**
@@ -25,17 +25,20 @@ export class AppInitializer {
    * 
    * @param userId ユーザーID
    */
-  static async initialize(userId: string): Promise<void> {
+  static async initialize(userId: string): Promise<{ degraded: boolean; reason?: string; skippedFailures?: number }> {
     // 二重実行防止
-    if (this.initialized) return;
+    if (this.initialized) return { degraded: false };
     if (this.initPromise) return this.initPromise;
     
     this.initPromise = this.doInitialize(userId);
-    await this.initPromise;
+    return await this.initPromise;
   }
   
-  private static async doInitialize(userId: string): Promise<void> {
+  private static async doInitialize(userId: string): Promise<{ degraded: boolean; reason?: string; skippedFailures?: number }> {
     console.log(`[AppInit:${userId}] Starting initialization...`);
+    let degraded = false;
+    let degradedReason: string | undefined;
+    let skippedFailures = 0;
     
     // 初期化中のインフォ通知は表示しない（UI を邪魔しないように）
     
@@ -57,7 +60,7 @@ export class AppInitializer {
       );
 
       this.initialized = true;
-      return;
+      return { degraded: false };
     }
     const metaService = new IndexedDBMetadataService(db, userId);
     
@@ -98,7 +101,18 @@ export class AppInitializer {
         throw new Error('Rebuild loop detected');
       }
       
-      await this.rebuild(userId, reason);
+      const rebuildResult = await this.rebuild(userId, reason);
+      if (rebuildResult.degraded) {
+        degraded = true;
+        degradedReason = 'rebuild_partial_failures';
+        skippedFailures = rebuildResult.failures.length;
+        notificationService.warning(
+          '一部データをスキップして起動しました',
+          '破損データを除外して継続しています。必要に応じて同期を実行してください。',
+          { closeable: true }
+        );
+        console.warn('[AppInit] startup_degraded=true', { userId, reason: degradedReason, skippedFailures });
+      }
       console.log(`[AppInit:${userId}] Phase2: Rebuild complete ✓`);
     } else {
       console.log(`[AppInit:${userId}] Phase1: Health check OK ✓`);
@@ -129,6 +143,7 @@ export class AppInitializer {
     
     this.initialized = true;
     console.log(`[AppInit:${userId}] ✅ Initialization complete (all phases)`);
+    return { degraded, reason: degradedReason, skippedFailures };
     
     // 初期化完了の通知は自動で消える（INFO レベル）
   }
@@ -136,7 +151,10 @@ export class AppInitializer {
   /**
    * IndexedDB を再構築
    */
-  private static async rebuild(userId: string, reason?: string): Promise<void> {
+  private static async rebuild(
+    userId: string,
+    reason?: string
+  ): Promise<{ degraded: boolean; failures: Array<{ type: string; id: string; error: string }> }> {
     console.log(`[AppInit:${userId}] Rebuilding IndexedDB...`);
     
     const db = await getLocalDb(userId);
@@ -151,9 +169,9 @@ export class AppInitializer {
     // 🔥 重要: 削除後に新しいインスタンスを取得
     await getLocalDb(userId);
     
+    let rebuildResult: Awaited<ReturnType<typeof IndexedDBRebuildOrchestrator.rebuild>>;
     try {
-      // 再構築
-      await IndexedDBRebuildOrchestrator.rebuild(userId, reason);
+      rebuildResult = await IndexedDBRebuildOrchestrator.rebuild(userId, reason);
     } catch (error: any) {
       console.error(`[AppInit:${userId}] Rebuild FAILED:`, error.message || error);
       throw error; // 上位で捕捉されることを期待
@@ -163,7 +181,15 @@ export class AppInitializer {
     // 新しい DB インスタンスを作成（削除後のため）
     const newDb = await getLocalDb(userId);
     metaService = new IndexedDBMetadataService(newDb, userId);
+    await metaService.recomputeMetadataFor('post_rebuild');
     await metaService.markClean();
+    if (rebuildResult.degraded) {
+      console.warn(`[AppInit:${userId}] Rebuild completed with partial failures`, {
+        count: rebuildResult.failures.length,
+        failures: rebuildResult.failures.slice(0, 20),
+      });
+    }
+    return { degraded: rebuildResult.degraded, failures: rebuildResult.failures };
   }
   
   /**

@@ -1,11 +1,17 @@
 import React from 'react';
-import type { Card, DocumentItem } from '@/types';
+import type { Card, DocumentItem, SelectedExplorerItem } from '@/types';
 import { CardPane } from './CardPane';
 import { FolderDashboard } from './FolderDashboard';
 import { PdfPane } from '@/Components/pdf/PdfPane';
 import { PowerPointPane } from '@/Components/pptx/PowerPointPane';
+import Dashboard from '@/Pages/Dashboard';
+import Gallery from '@/Pages/Gallery';
+import Calendar from '@/Pages/Calendar';
+import SyncSettings from '@/Pages/SyncSettings';
+import Trash from '@/Pages/Trash';
 
 interface RightPaneProps {
+  selectedItem: SelectedExplorerItem;
   selectedCardId: string | null;
   selectedDocument: DocumentItem | null;
   selectedFolderId: string | null;
@@ -26,6 +32,7 @@ interface RightPaneProps {
 }
 
 export function RightPane({
+  selectedItem,
   selectedCardId,
   selectedDocument,
   selectedFolderId,
@@ -36,6 +43,22 @@ export function RightPane({
   onDocumentUpdated,
   handlers,
 }: RightPaneProps) {
+  if (selectedItem?.type === 'today-study') {
+    return <Dashboard />;
+  }
+  if (selectedItem?.type === 'gallery') {
+    return <Gallery />;
+  }
+  if (selectedItem?.type === 'calendar') {
+    return <Calendar />;
+  }
+  if (selectedItem?.type === 'settings') {
+    return <SyncSettings />;
+  }
+  if (selectedItem?.type === 'trash') {
+    return <Trash />;
+  }
+
   if (selectedDocument) {
     if (selectedDocument.kind === 'pptx') {
       return <PowerPointPane doc={selectedDocument} />;

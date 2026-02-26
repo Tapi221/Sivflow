@@ -4,6 +4,7 @@ import { Button } from '@/Components/ui/button';
 import SettingsDialog from '@/Components/settings/SettingsDialog';
 import { SyncStatusIndicator } from '@/Components/sync/SyncStatusIndicator';
 import { cn } from '@/lib/utils';
+import { UI_TYPO } from '@/styles/typography';
 // Added hooks for review count
 import { useCards } from '@/hooks/useCards';
 import { useFolders } from '@/hooks/useFolders';
@@ -154,7 +155,7 @@ export default function Layout() {
   const hasValidProfileImage = !!profileRemoteUrl && !profileImageIsBlob && !imgError;
 
   return (
-    <div className="relative flex h-[100dvh] w-full flex-col overflow-hidden">
+    <div className={cn("relative flex h-[100dvh] w-full flex-col overflow-hidden", UI_TYPO)}>
       <ThemeManager />
 
       {/* Desktop Sync Indicator (Fixed Top Right) */}
@@ -253,7 +254,6 @@ export default function Layout() {
         aria-label={isSidebarOpen ? 'サイドバーを閉じる' : 'サイドバーを開く'}
         aria-expanded={isSidebarOpen}
         aria-controls="app-sidebar-overlay"
-        title={isSidebarOpen ? "サイドバーを閉じる" : "サイドバーを開く"}
         className="flex fixed top-1 left-1.5 z-[65] w-6 h-6 bg-white rounded-md shadow-[0_2px_8px_-2px_rgba(0,0,0,0.1)] border border-slate-100 items-center justify-center text-slate-400 hover:text-primary-600 hover:border-primary-600/30 hover:scale-105 transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] active:scale-95"
       >
         <Menu className={cn(

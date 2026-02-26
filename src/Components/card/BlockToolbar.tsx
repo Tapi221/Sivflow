@@ -152,7 +152,6 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
                 "active:scale-95 transition-all"
               )}
               aria-label={`${label} にブロックを追加`}
-              title="ブロックを追加"
             >
               <Plus className="w-3 h-3" />
               <span className="leading-none">追加</span>
@@ -218,7 +217,6 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
                   "active:scale-95 shadow-[0_1px_4px_rgba(0,0,0,0.06)] hover:shadow-md border border-transparent",
                   colorMap[config.color || 'primary'] // カラーテーマを適用
                 )}
-                title={`${config.label}を追加`}
                 aria-label={`${config.label}を追加`}
               >
                 <Icon className="w-3 h-3" />

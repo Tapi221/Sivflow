@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { useCards } from '@/hooks/useCards';
 import { useFolders } from '@/hooks/useFolders';
 import { useDocuments } from '@/hooks/useDocuments';
@@ -9,10 +9,8 @@ import { useToast } from '@/contexts/ToastContext';
 import { Skeleton } from '@/Components/ui/skeleton';
 import TreeViewLayout from '@/Components/folder/TreeViewLayout';
 import { cn } from '@/lib/utils';
-import { createPageUrl } from '@/utils';
 
 export default function Folders() {
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const queryString = searchParams.toString();
   const queryClient = useQueryClient();
@@ -146,14 +144,7 @@ export default function Folders() {
   };
 
   const handleSelectCardInWork = (cardId) => {
-    // デスクトップ: プレビュー表示
-    // モバイル: 編集画面に遷移（右ペインに相当）
-    if (!isDesktop) {
-        // モバイルでは編集画面（CardEdit）に遷移
-        navigate(createPageUrl(`CardEdit?id=${cardId}`));
-        return;
-    }
-    // デスクトップでは右ペインにカードを表示
+    // PC/モバイル共通で右ペインの編集UIを表示する
     setSelectedCardId(cardId);
     setSelectedDocumentId(null);
     setSelectedItem({ type: 'card', id: cardId });
@@ -185,8 +176,48 @@ export default function Folders() {
       setSelectedDocumentId(null);
       return;
     }
-    if (item.type === 'card') handleSelectCardInWork(item.id);
-    else if (item.type === 'document') handleSelectDocumentInWork(item.id);
+    if (item.type === 'card') {
+      handleSelectCardInWork(item.id);
+      return;
+    }
+    if (item.type === 'document') {
+      handleSelectDocumentInWork(item.id);
+      return;
+    }
+    if (item.type === 'today-study') {
+      setSelectedItem({ type: 'today-study' });
+      setSelectedCardId(null);
+      setSelectedDocumentId(null);
+      setSelectedFolderId(null);
+      return;
+    }
+    if (item.type === 'gallery') {
+      setSelectedItem({ type: 'gallery' });
+      setSelectedCardId(null);
+      setSelectedDocumentId(null);
+      setSelectedFolderId(null);
+      return;
+    }
+    if (item.type === 'calendar') {
+      setSelectedItem({ type: 'calendar' });
+      setSelectedCardId(null);
+      setSelectedDocumentId(null);
+      setSelectedFolderId(null);
+      return;
+    }
+    if (item.type === 'settings') {
+      setSelectedItem({ type: 'settings' });
+      setSelectedCardId(null);
+      setSelectedDocumentId(null);
+      setSelectedFolderId(null);
+      return;
+    }
+    if (item.type === 'trash') {
+      setSelectedItem({ type: 'trash' });
+      setSelectedCardId(null);
+      setSelectedDocumentId(null);
+      setSelectedFolderId(null);
+    }
   };
   
   const isLoading = foldersLoading || cardsLoading;

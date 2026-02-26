@@ -4,6 +4,7 @@ import { sanitizeProfileImage } from '@/utils/profileImageSanitizer';
 import { getOrCreateDeviceId, getDeviceName } from '../utils/device';
 import { assertImageArrayInvariant } from '../utils/imageAssertions';
 import { deleteDocumentBlob, deleteDocumentBlobsByUser } from './documentFileStore';
+import { deleteImageBlobsByUser } from './imageFileStore';
 import { removeDocumentBlobUrl } from './documentBlobUrlSessionCache';
 import { InMemoryLocalDB } from './InMemoryLocalDB';
 import { Dexie, type PromiseExtended } from 'dexie';
@@ -24,6 +25,7 @@ import {
 import type { LocalDBFallbackReasonCode } from './localDBRuntimeState';
 import type { IntegrityIssue, IntegrityRepairResult } from './dataIntegrityTypes';
 import { sanitizeForLog } from '@/utils/logSanitizer';
+import { findBlobUrlFixesDeep } from '@/utils/blobUrlSanitizer';
 
 import type {
   Folder,
@@ -39,6 +41,7 @@ import type {
   SyncQueueItem,
   SyncConflict,
   UploadedImage,
+  AssetRecord,
   CardRelation,
   ProjectMap
 } from '../types';
@@ -170,6 +173,42 @@ const denormalizeCardForStorage = (card: any) => {
     result.answerText = extractTextFromBlocks(card.answerBlocks);
   }
 
+  const sanitizeBlockImages = (blocks: any[] | undefined) => {
+    if (!Array.isArray(blocks)) return blocks;
+    return blocks.map((block) => {
+      if (!block || typeof block !== 'object') return block;
+      if (!Array.isArray((block as any).images)) return block;
+      const sanitizedImages = (block as any).images.map((img: any) => {
+        if (!img || typeof img !== 'object') return img;
+        const assetId = img.assetId ?? img.id ?? null;
+        const remoteUrl =
+          typeof img.remoteUrl === 'string' && img.remoteUrl.startsWith('http')
+            ? img.remoteUrl
+            : null;
+        return {
+          id: img.id ?? assetId,
+          assetId,
+          remoteUrl,
+          storagePath: img.storagePath ?? null,
+          status: img.status ?? (remoteUrl ? 'ready' : 'uploading'),
+          error: img.error ?? undefined,
+          scale: img.scale ?? 1,
+          x: img.x ?? 0,
+          naturalW: img.naturalW ?? null,
+          naturalH: img.naturalH ?? null,
+        };
+      });
+      return { ...block, images: sanitizedImages };
+    });
+  };
+
+  if (Array.isArray(card.questionBlocks)) {
+    result.questionBlocks = sanitizeBlockImages(card.questionBlocks);
+  }
+  if (Array.isArray(card.answerBlocks)) {
+    result.answerBlocks = sanitizeBlockImages(card.answerBlocks);
+  }
+
   // 画像フィールドの変換（既存ロジック）
   if (card.questionImages !== undefined || card.question_images !== undefined) {
     const questionImages = normalizeUploadedImages(card.questionImages ?? card.question_images ?? []);
@@ -194,6 +233,97 @@ const denormalizeCardForStorage = (card: any) => {
   }
 
   return result;
+};
+
+const hasBlobUrlDeep = (value: unknown): boolean => {
+  return findBlobUrlFixesDeep(value).length > 0;
+};
+
+class InvalidImageUrlError extends Error {
+  entityType?: string;
+  entityId?: string;
+  path?: string;
+
+  constructor(params: { entityType?: string; entityId?: string; path?: string; message?: string }) {
+    const details = [
+      params.message ?? '画像の保存形式が不正です。blob: URL は保存できません。',
+      params.entityType ? `entityType=${params.entityType}` : null,
+      params.entityId ? `id=${params.entityId}` : null,
+      params.path ? `path=${params.path}` : null,
+    ]
+      .filter(Boolean)
+      .join(' ');
+    super(details);
+    this.name = 'InvalidImageUrlError';
+    this.entityType = params.entityType;
+    this.entityId = params.entityId;
+    this.path = params.path;
+  }
+}
+
+const assertNoBlobUrlInCardPayload = (
+  cardLike: unknown,
+  context?: { entityType?: string; entityId?: string }
+) => {
+  if (!cardLike || typeof cardLike !== 'object') return;
+  const fixes = findBlobUrlFixesDeep(cardLike);
+  if (fixes.length === 0) return;
+
+  telemetryOncePerSession('cards:blob-url-persist-blocked');
+  const firstFix = fixes[0];
+  throw new InvalidImageUrlError({
+    message: '画像の保存形式が不正です。blob: URL は保存できません。',
+    entityType: context?.entityType ?? 'card',
+    entityId:
+      context?.entityId ??
+      ((cardLike as any)?.id ? String((cardLike as any).id) : undefined),
+    path: firstFix.path || '<root>',
+  });
+};
+
+const scrubBlobUrlsDeep = (value: unknown): unknown => {
+  if (typeof value === 'string') {
+    return value.startsWith('blob:') ? null : value;
+  }
+  if (Array.isArray(value)) {
+    return value.map((entry) => scrubBlobUrlsDeep(entry));
+  }
+  if (value && typeof value === 'object') {
+    const result: Record<string, unknown> = {};
+    for (const [key, nested] of Object.entries(value as Record<string, unknown>)) {
+      result[key] = scrubBlobUrlsDeep(nested);
+    }
+    return result;
+  }
+  return value;
+};
+
+const setNestedPath = (target: Record<string, unknown>, path: string, value: unknown): void => {
+  const keys = path.split('.');
+  let cursor: Record<string, unknown> = target;
+  for (let i = 0; i < keys.length - 1; i += 1) {
+    const key = keys[i];
+    const current = cursor[key];
+    if (!current || typeof current !== 'object' || Array.isArray(current)) {
+      cursor[key] = {};
+    }
+    cursor = cursor[key] as Record<string, unknown>;
+  }
+  cursor[keys[keys.length - 1]] = value;
+};
+
+const buildCardCandidateFromMods = (obj: unknown, mods: unknown): unknown => {
+  if (!obj || typeof obj !== 'object') return mods;
+  if (!mods || typeof mods !== 'object') return obj;
+  const candidate = { ...(obj as Record<string, unknown>) };
+  for (const [key, value] of Object.entries(mods as Record<string, unknown>)) {
+    if (key.includes('.')) {
+      setNestedPath(candidate, key, value);
+    } else {
+      candidate[key] = value;
+    }
+  }
+  return candidate;
 };
 
 const denormalizeFolderForStorage = (folder: any) => {
@@ -254,7 +384,7 @@ export class LocalDB extends Dexie {
 
   // ブラウザストレージ設計準拠テーブル
   metadata!: Dexie.Table<any, string>; // IndexedDB 健全性管理用
-  images!: Dexie.Table<UploadedImage, string>; // 画像・音声のメタデータ管理用
+  images!: Dexie.Table<AssetRecord | UploadedImage, string>; // 画像資産メタデータ
 
   // Phase 3: Map Feature
   cardRelations!: Dexie.Table<CardRelation, string>;
@@ -461,13 +591,16 @@ export class LocalDB extends Dexie {
       if (cards.length > 0) {
         const newCards = cards.map(c => {
           const id = c.id || c.cardId || c.card_id || crypto.randomUUID();
-          return {
+          const payload = denormalizeCardForStorage({
             ...c,
             id,
             userId: currentUserId,
             updatedAt: rescueTime,
             _rescueOrigin: sourceDbName
-          };
+          });
+          if (!hasBlobUrlDeep(payload)) return payload;
+          telemetryOncePerSession('cards:blob-url-scrubbed-on-import');
+          return scrubBlobUrlsDeep(payload) as any;
         });
         await this.cards.bulkPut(newCards);
       }
@@ -781,7 +914,13 @@ export class LocalDB extends Dexie {
     onProgress?.(`保存中 (${folders.length + cards.length}件)...`);
 
     if (folders.length > 0) await this.folders.bulkPut(folders);
-    if (cards.length > 0) await this.cards.bulkPut(cards);
+    if (cards.length > 0) {
+      const sanitizedCards = cards.map((card) => {
+        const payload = denormalizeCardForStorage(card);
+        return hasBlobUrlDeep(payload) ? (scrubBlobUrlsDeep(payload) as any) : payload;
+      });
+      await this.cards.bulkPut(sanitizedCards);
+    }
 
     // Verification Log
     const dbFolders = await this.folders.toArray();
@@ -856,6 +995,119 @@ export class LocalDB extends Dexie {
       });
       const text = b?.text;
       return typeof text === 'string' && text.trim() ? text.trim() : null;
+    };
+    const pushBlobRepairIssue = (entityId: string, side: 'question' | 'answer', details: Record<string, unknown>) => {
+      issues.push({
+        code: 'MISSING_REQUIRED_FIELD',
+        entityType: 'card',
+        entityId,
+        severity: 'warning',
+        fixed: true,
+        details: {
+          side,
+          ...details,
+        },
+      });
+    };
+    const getAnyBlocks = (cardRecord: any, side: 'question' | 'answer') => {
+      if (side === 'question') return cardRecord.questionBlocks ?? cardRecord.question_blocks ?? [];
+      return cardRecord.answerBlocks ?? cardRecord.answer_blocks ?? [];
+    };
+    const resolveImageUrls = (img: any) => {
+      const localUrl = typeof img?.localUrl === 'string'
+        ? img.localUrl
+        : typeof img?.local_url === 'string'
+          ? img.local_url
+          : null;
+      const remoteUrl = typeof img?.remoteUrl === 'string'
+        ? img.remoteUrl
+        : typeof img?.remote_url === 'string'
+          ? img.remote_url
+          : typeof img?.url === 'string'
+            ? img.url
+            : null;
+      return { localUrl, remoteUrl };
+    };
+    const makeMissingLocalImage = (img: any, remoteUrl: string | null) => {
+      const hasRemote = typeof remoteUrl === 'string' && remoteUrl.trim().length > 0;
+      return {
+        ...img,
+        localUrl: null,
+        local_url: null,
+        status: hasRemote ? (img?.status ?? 'ready') : 'failed',
+        error: hasRemote ? img?.error : '画像が端末内に存在しません。再添付してください。',
+      };
+    };
+    const repairBlockImages = (blocks: any[], entityId: string, side: 'question' | 'answer') => {
+      if (!Array.isArray(blocks) || blocks.length === 0) return { blocks, changed: false };
+      let changed = false;
+      const repairedBlocks = blocks.map((block: any) => {
+        if (!block || typeof block !== 'object') return block;
+        let nextBlock = block;
+        let blockChanged = false;
+
+        if (Array.isArray(block.images)) {
+          const repairedImages = block.images.map((img: any) => {
+            if (!img || typeof img !== 'object') return img;
+            const { localUrl, remoteUrl } = resolveImageUrls(img);
+            if (!localUrl?.startsWith('blob:')) return img;
+            blockChanged = true;
+            pushBlobRepairIssue(entityId, side, {
+              blockId: block.id ?? null,
+              imageId: img.id ?? null,
+              reason: 'removed_persisted_blob_url',
+            });
+            return makeMissingLocalImage(img, remoteUrl);
+          });
+          if (blockChanged) {
+            nextBlock = { ...nextBlock, images: repairedImages };
+          }
+        }
+
+        const blockStringFields = ['src', 'url', 'localUrl', 'local_url'] as const;
+        for (const key of blockStringFields) {
+          const value = (nextBlock as any)?.[key];
+          if (typeof value !== 'string' || !value.startsWith('blob:')) continue;
+          blockChanged = true;
+          pushBlobRepairIssue(entityId, side, {
+            blockId: block.id ?? null,
+            reason: 'removed_persisted_blob_url_block_field',
+            field: key,
+          });
+          (nextBlock as any)[key] = null;
+          (nextBlock as any).status = 'failed';
+          (nextBlock as any).error = '画像が端末内に存在しません。再添付してください。';
+        }
+
+        if (!blockChanged) return block;
+        changed = true;
+        return nextBlock;
+      });
+      return { blocks: repairedBlocks, changed };
+    };
+    const repairLegacyImages = (imagesRaw: unknown, entityId: string, side: 'question' | 'answer') => {
+      const normalized = normalizeUploadedImages(imagesRaw ?? []);
+      if (normalized.length === 0) return { cleaned: normalized, changed: false };
+
+      let changed = false;
+      const cleaned = normalized.map((img: any) => {
+        const localUrl = typeof img?.localUrl === 'string' ? img.localUrl : null;
+        if (!localUrl?.startsWith('blob:')) return img;
+        changed = true;
+        pushBlobRepairIssue(entityId, side, {
+          imageId: img.id ?? null,
+          reason: 'removed_persisted_blob_url_legacy_array',
+        });
+        const hasRemote = typeof img?.remoteUrl === 'string' && img.remoteUrl.trim().length > 0;
+        return {
+          ...img,
+          localUrl: null,
+          status: hasRemote ? (img.status ?? 'ready') : 'failed',
+          error: hasRemote ? img.error : '画像が端末内に存在しません。再添付してください。',
+        };
+      });
+
+      return { cleaned, changed };
     };
 
     console.log('[Repair] Starting data integrity repair');
@@ -1027,6 +1279,54 @@ export class LocalDB extends Dexie {
             fixed: true,
             details: { hasQuestionMismatch: hasQMismatch, hasAnswerMismatch: hasAMismatch },
           });
+        }
+      }
+
+      const questionBlocksRaw = getAnyBlocks(update, 'question');
+      const answerBlocksRaw = getAnyBlocks(update, 'answer');
+
+      const questionBlockRepair = repairBlockImages(questionBlocksRaw, entityId, 'question');
+      if (questionBlockRepair.changed) {
+        update.questionBlocks = questionBlockRepair.blocks;
+        if (update.question_blocks !== undefined) delete update.question_blocks;
+        changed = true;
+      }
+      const answerBlockRepair = repairBlockImages(answerBlocksRaw, entityId, 'answer');
+      if (answerBlockRepair.changed) {
+        update.answerBlocks = answerBlockRepair.blocks;
+        if (update.answer_blocks !== undefined) delete update.answer_blocks;
+        changed = true;
+      }
+
+      if (update.questionImages !== undefined || update.question_images !== undefined) {
+        const repairedQuestionImages = repairLegacyImages(
+          update.questionImages ?? update.question_images,
+          entityId,
+          'question'
+        );
+        if (repairedQuestionImages.changed) {
+          update.questionImages = denormalizeUploadedImages(repairedQuestionImages.cleaned, {
+            case: 'camel',
+            stripUndefined: true,
+          }) as any;
+          if (update.question_images !== undefined) delete update.question_images;
+          changed = true;
+        }
+      }
+
+      if (update.answerImages !== undefined || update.answer_images !== undefined) {
+        const repairedAnswerImages = repairLegacyImages(
+          update.answerImages ?? update.answer_images,
+          entityId,
+          'answer'
+        );
+        if (repairedAnswerImages.changed) {
+          update.answerImages = denormalizeUploadedImages(repairedAnswerImages.cleaned, {
+            case: 'camel',
+            stripUndefined: true,
+          }) as any;
+          if (update.answer_images !== undefined) delete update.answer_images;
+          changed = true;
         }
       }
 
@@ -1462,6 +1762,15 @@ export class LocalDB extends Dexie {
       });
     });
 
+    const cardsTable = this.table('cards');
+    cardsTable.hook('creating', (_primaryKey, obj) => {
+      assertNoBlobUrlInCardPayload(obj, { entityType: 'card', entityId: (obj as any)?.id });
+    });
+    cardsTable.hook('updating', (mods, _primaryKey, obj) => {
+      const candidate = buildCardCandidateFromMods(obj, mods);
+      assertNoBlobUrlInCardPayload(candidate, { entityType: 'card', entityId: (obj as any)?.id });
+    });
+
   }
 
   async normalizeDocumentBlobUrlsForSession(): Promise<void> {
@@ -1498,7 +1807,13 @@ export class LocalDB extends Dexie {
   }
 
   async addItem(table: string, item: any, skipSync = false): Promise<string> {
+    if (table === 'cards') {
+      assertNoBlobUrlInCardPayload(item, { entityType: table, entityId: item?.id });
+    }
     const payload = table === 'cards' ? denormalizeCardForStorage(item) : table === 'folders' ? denormalizeFolderForStorage(item) : item;
+    if (table === 'cards') {
+      assertNoBlobUrlInCardPayload(payload, { entityType: table, entityId: payload?.id ?? item?.id });
+    }
     const safePreview = (() => {
       try {
         const s = JSON.stringify(payload);
@@ -1635,7 +1950,13 @@ export class LocalDB extends Dexie {
       }
     }
 
+    if (table === 'cards') {
+      assertNoBlobUrlInCardPayload(changes, { entityType: table, entityId: id });
+    }
     const payload = table === 'cards' ? denormalizeCardForStorage(changes) : table === 'folders' ? denormalizeFolderForStorage(changes) : changes;
+    if (table === 'cards') {
+      assertNoBlobUrlInCardPayload(payload, { entityType: table, entityId: id });
+    }
     console.log(`[LocalDB] updateItem -> table=${table} id=${id} skipSync=${skipSync} changesKeys=${Object.keys(changes).join(',')}`);
     if (table === 'cards') {
       const c = payload as any;
@@ -1725,6 +2046,11 @@ export class LocalDB extends Dexie {
   async bulkUpsert(table: string, items: any[], skipSync = false): Promise<void> {
     if (items.length === 0) return;
     const payload = table === 'cards' ? items.map(denormalizeCardForStorage) : table === 'folders' ? items.map(denormalizeFolderForStorage) : items;
+    if (table === 'cards') {
+      for (const entry of payload) {
+        assertNoBlobUrlInCardPayload(entry, { entityType: table, entityId: (entry as any)?.id });
+      }
+    }
     await (this as any).table(table).bulkPut(payload);
     if (!skipSync) {
         for (const item of payload) {
@@ -1790,6 +2116,7 @@ export class LocalDB extends Dexie {
       (this as any).tags.clear(),
       (this as any).table('studyLogs').clear(),
       this.userId ? deleteDocumentBlobsByUser(this.userId) : Promise.resolve(),
+      this.userId ? deleteImageBlobsByUser(this.userId) : Promise.resolve(),
     ]);
   }
 
@@ -1833,7 +2160,13 @@ export class LocalDB extends Dexie {
 
   async upsert(tableName: string, data: any, skipSync = false): Promise<void> {
     const table = (this as any).table(tableName);
+    if (tableName === 'cards') {
+      assertNoBlobUrlInCardPayload(data, { entityType: tableName, entityId: data?.id });
+    }
     const payload = tableName === 'cards' ? denormalizeCardForStorage(data) : tableName === 'folders' ? denormalizeFolderForStorage(data) : data;
+    if (tableName === 'cards') {
+      assertNoBlobUrlInCardPayload(payload, { entityType: tableName, entityId: payload?.id ?? data?.id });
+    }
     await table.put(payload);
     if (!skipSync) await this.enqueueSync(tableName, 'upload', payload);
   }

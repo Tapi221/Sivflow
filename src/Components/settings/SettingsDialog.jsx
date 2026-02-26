@@ -466,7 +466,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                 <span>ユーザー名</span>
                 {editingName && (
                   <span className={cn(
-                    "text-[10px] font-mono font-bold",
+                    "text-[10px] font-serif font-bold",
                     countUnicodeCharacters(tempDisplayName.trim()) > 20 ? "text-red-500" : "text-slate-400"
                   )}>
                     {countUnicodeCharacters(tempDisplayName.trim())} / 20
@@ -1102,7 +1102,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                             <div className="font-bold text-slate-200">
                                 {syncStatus === 'syncing' ? '同期中...' : (syncStatus === 'error' ? '同期エラー' : '同期ステータス')}
                             </div>
-                            <div className="text-xs text-slate-400 font-mono mt-1">
+                            <div className="text-xs text-slate-400 font-serif mt-1">
                                 最終同期: {!lastSyncTime ? '未同期' : new Date(lastSyncTime).toLocaleString('ja-JP')}
                             </div>
                         </div>
@@ -1340,7 +1340,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                           <tbody className="divide-y divide-slate-100">
                             {section.shortcuts.map((s, i) => (
                               <tr key={i} className="hover:bg-slate-50 transition-colors">
-                                <td className="px-4 py-3 font-mono text-primary-700 font-bold w-1/3">
+                                <td className="px-4 py-3 font-serif text-primary-700 font-bold w-1/3">
                                   <span className="bg-primary-50 px-2 py-1 rounded-md border border-primary-100 text-xs inline-block min-w-[30px] text-center">{s.key}</span>
                                 </td>
                                 <td className="px-4 py-3 text-slate-700 font-medium">{s.desc}</td>

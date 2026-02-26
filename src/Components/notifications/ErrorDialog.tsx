@@ -50,7 +50,7 @@ export const ErrorDialog: React.FC<ErrorDialogProps> = ({ notification, onDismis
                 詳細を見る
               </button>
               {showDetails && (
-                <div className="mt-2 p-3 bg-slate-50 rounded text-xs text-slate-600 whitespace-pre-line font-mono">
+                <div className="mt-2 p-3 bg-slate-50 rounded text-xs text-slate-600 whitespace-pre-line font-serif">
                   {notification.details}
                 </div>
               )}

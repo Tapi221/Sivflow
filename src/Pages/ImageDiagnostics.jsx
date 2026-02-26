@@ -150,7 +150,7 @@ export default function ImageDiagnostics() {
   }, [currentUser]);
 
   return (
-    <div className="min-h-screen bg-slate-50 p-8 font-serif">
+    <div className="min-h-screen bg-slate-50 p-8">
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
@@ -224,7 +224,7 @@ export default function ImageDiagnostics() {
                                     <td className="px-4 py-3 text-slate-600">{r.type}</td>
                                     <td className="px-4 py-3">
                                         <div className="font-medium text-slate-700">{r.label}</div>
-                                        <div className="text-xs text-slate-400 font-mono">{r.id}</div>
+                                        <div className="text-xs text-slate-400 font-serif">{r.id}</div>
                                     </td>
                                     <td className="px-4 py-3 max-w-xs break-all">
                                         <div className="text-xs text-slate-500">{r.url}</div>

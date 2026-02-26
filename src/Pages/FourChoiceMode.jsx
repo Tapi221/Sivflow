@@ -219,7 +219,6 @@ export default function FourChoiceMode() {
                                     onClick={() => handleMove(index, 'up')}
                                     disabled={index === 0}
                                     className="p-1.5 hover:bg-slate-50 text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors border-r border-slate-100"
-                                    title="上へ移動"
                                 >
                                     <ChevronUp className="w-4 h-4" />
                                 </button>
@@ -227,7 +226,6 @@ export default function FourChoiceMode() {
                                     onClick={() => handleMove(index, 'down')}
                                     disabled={index === editors.length - 1}
                                     className="p-1.5 hover:bg-slate-50 text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                                    title="下へ移動"
                                 >
                                     <ChevronDown className="w-4 h-4" />
                                 </button>
@@ -236,7 +234,6 @@ export default function FourChoiceMode() {
                             <div
                               {...provided.dragHandleProps}
                               className="p-1.5 cursor-grab active:cursor-grabbing rounded-full bg-white shadow-sm border border-slate-200 text-slate-400 hover:text-slate-600 transition-colors hidden md:flex"
-                              title="ドラッグして並べ替え"
                             >
                               <GripVertical className="w-4 h-4" />
                             </div>
@@ -246,7 +243,6 @@ export default function FourChoiceMode() {
                                 size="icon"
                                 onClick={() => handleDelete(editor.id)}
                                 className="w-8 h-8 rounded-full bg-white shadow-sm border border-slate-200 text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all"
-                                title="このカードを削除"
                             >
                                 <Trash2 className="w-4 h-4" />
                             </Button>

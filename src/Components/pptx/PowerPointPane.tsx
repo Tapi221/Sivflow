@@ -1210,7 +1210,7 @@ export function PowerPointPane({ doc, className }: PowerPointPaneProps) {
           </Button>
 
           {canOpenSource && (
-            <Button variant="ghost" size="sm" onClick={handleOpenSource} className="ml-1" title="原本を開く">
+            <Button variant="ghost" size="sm" onClick={handleOpenSource} className="ml-1">
               <ExternalLink className="w-4 h-4" />
             </Button>
           )}

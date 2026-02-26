@@ -54,7 +54,7 @@ export class OperationQueueService {
    * If a pending operation exists for the same target, it attempts to compress them.
    */
   async enqueueChange(
-    entity: 'card' | 'folder',
+    entity: 'card' | 'folder' | 'asset',
     targetId: string, 
     operationType: OperationType, 
     data: any, 
@@ -116,7 +116,7 @@ export class OperationQueueService {
 
   // Helper to add new item
   private async addItem(
-      entity: 'card' | 'folder', 
+      entity: 'card' | 'folder' | 'asset', 
       targetId: string, 
       op: OperationType, 
       data: any, 

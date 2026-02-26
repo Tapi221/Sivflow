@@ -14,12 +14,14 @@ import { SharedCardContent } from "@/Components/card/SharedCardContent";
 import { sortBlocksByOrderIndex } from "@/Components/card/blockOrdering";
 import {
   CANONICAL_CARD_WIDTH,
+  CARD_HEIGHT_PHASE_PX,
   CARD_ROW_PX,
   cardHeightPxToLayoutRows,
   layoutRowsToCardHeightPx,
 } from "@/Components/card/constants";
 import {
   DEFAULT_LAYOUT_ROWS,
+  LEGACY_BASE_LAYOUT_ROWS,
   normalizeExtraRows,
   normalizeLayoutRows,
 } from "@/domain/card/extraRows";
@@ -46,6 +48,9 @@ type EditorDraft = {
   layoutRows: number;
 };
 
+// CardShell.computeMinHeight() の safetyReservePx(8) と二重加算にならないよう補正する。
+const CARD_SHELL_MIN_HEIGHT_SLACK_PX = 8;
+
 interface CardEditorPaneProps {
   selectedCardId: string | null;
   onCardUpdated?: () => void;
@@ -65,10 +70,10 @@ function makeNewDraft(): EditorDraft {
   return {
     title: "",
     tags: [],
-    isDraft: true,
+    isDraft: false,
     questionBlocks: [],
     answerBlocks: [],
-    layoutRows: 18,
+    layoutRows: DEFAULT_LAYOUT_ROWS,
   };
 }
 
@@ -90,6 +95,27 @@ function normalizeCrossSideId(blockId: unknown, nextSide: "question" | "answer")
   if (blockId.startsWith("question-")) return blockId.replace(/^question-/, `${nextSide}-`);
   if (blockId.startsWith("answer-")) return blockId.replace(/^answer-/, `${nextSide}-`);
   return null;
+}
+
+function isBlockEmpty(block: CardBlock): boolean {
+  if (block.type === "reference" || block.type === "audio") return true;
+  if (block.type === "text") return !String(block.content ?? "").trim();
+  if (block.type === "markdown") return !String(block.markdown ?? "").trim();
+  if (block.type === "code") return !String(block.code?.code ?? "").trim();
+  if (block.type === "math") return !String(block.math?.latex ?? "").trim();
+  if (block.type === "image") return (block.images?.length ?? 0) === 0;
+  return true;
+}
+
+function shouldAutoOpenEditorForCard(card: any): boolean {
+  if (!card) return false;
+  if (String(card?.title ?? "").trim().length > 0) return false;
+  if ((card?.tags ?? []).length > 0) return false;
+  const questionBlocks = (card?.questionBlocks ?? []) as CardBlock[];
+  const answerBlocks = (card?.answerBlocks ?? []) as CardBlock[];
+  const hasQuestionContent = questionBlocks.some((b) => !isBlockEmpty(b));
+  const hasAnswerContent = answerBlocks.some((b) => !isBlockEmpty(b));
+  return !hasQuestionContent && !hasAnswerContent;
 }
 
 export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }: CardEditorPaneProps) {
@@ -149,21 +175,48 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
   const [draft, setDraft] = useState<EditorDraft | null>(null);
   const rowsRafRef = useRef<number | null>(null);
   const pendingRowsRef = useRef<number | null>(null);
+  const minHeightPxBySideRef = useRef<{ question: number; answer: number }>({
+    question: layoutRowsToCardHeightPx(DEFAULT_LAYOUT_ROWS),
+    answer: layoutRowsToCardHeightPx(DEFAULT_LAYOUT_ROWS),
+  });
+
+  const rowsFromMinHeightPx = useCallback((minHeightPx: number): number => {
+    const safeHeight = Number.isFinite(minHeightPx) ? minHeightPx : 0;
+    const adjustedHeight = Math.max(0, safeHeight - CARD_SHELL_MIN_HEIGHT_SLACK_PX);
+    const rawRows = Math.ceil((adjustedHeight - CARD_HEIGHT_PHASE_PX) / CARD_ROW_PX);
+    return normalizeLayoutRows(rawRows);
+  }, []);
+
+  const getRequiredMinRows = useCallback((): number => {
+    const requiredHeightPx = Math.max(
+      minHeightPxBySideRef.current.question,
+      minHeightPxBySideRef.current.answer
+    );
+    return rowsFromMinHeightPx(requiredHeightPx);
+  }, [rowsFromMinHeightPx]);
 
   const buildDraftFromCard = useCallback((card: any): EditorDraft => {
     const legacyQuestionRows = normalizeExtraRows(card?.questionExtraRows ?? card?.question_extra_rows ?? 0);
     const legacyAnswerRows = normalizeExtraRows(card?.answerExtraRows ?? card?.answer_extra_rows ?? 0);
-    const migratedRows = DEFAULT_LAYOUT_ROWS + Math.max(legacyQuestionRows, legacyAnswerRows);
+    const migratedRows = LEGACY_BASE_LAYOUT_ROWS + Math.max(legacyQuestionRows, legacyAnswerRows);
 
     return {
       title: card?.title ?? "",
       tags: card?.tags ?? [],
-      isDraft: card?.isDraft ?? true,
+      isDraft: card?.isDraft ?? false,
       questionBlocks: sortBlocksByOrderIndex((card?.questionBlocks ?? []) as CardBlock[]),
       answerBlocks: sortBlocksByOrderIndex((card?.answerBlocks ?? []) as CardBlock[]),
       layoutRows: normalizeLayoutRows(card?.layoutRows ?? card?.layout_rows ?? migratedRows),
     };
   }, []);
+
+  useEffect(() => {
+    const baseHeight = layoutRowsToCardHeightPx(DEFAULT_LAYOUT_ROWS);
+    minHeightPxBySideRef.current = {
+      question: baseHeight,
+      answer: baseHeight,
+    };
+  }, [normalizedSelectedCardId, isEditing]);
 
   // 選択IDが変わった時だけ、最低限の状態遷移をする（※依存に isEditing を入れない）
   useEffect(() => {
@@ -187,12 +240,14 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
       return;
     }
 
-    // 別カードを選んだら編集は閉じる（事故防止）
-    setIsEditing(false);
+    // 新規作成直後の空カードは自動で編集モードを開く。
+    // それ以外の既存カードは閲覧モードに戻す。
+    const autoOpenEditor = shouldAutoOpenEditorForCard(selectedCard);
+    setIsEditing(autoOpenEditor);
     setDraft(null);
     editingCardIdRef.current = null;
     hydratedFromIdRef.current = null;
-  }, [normalizedSelectedCardId]);
+  }, [normalizedSelectedCardId, selectedCard]);
 
   // isEditing の開始/終了で target を固定
   useEffect(() => {
@@ -344,7 +399,8 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
       setIsEditing(false);
     } catch (e) {
       console.error("カード保存に失敗しました:", e);
-      toastError?.("カード保存に失敗しました");
+      const message = e instanceof Error ? e.message : "カード保存に失敗しました";
+      toastError?.(message);
     } finally {
       setIsSaving(false);
     }
@@ -391,14 +447,15 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
     });
   };
 
-  const setLayoutRows = (nextRows: number) => {
+  const setLayoutRows = useCallback((nextRows: number) => {
     const safeRows = normalizeLayoutRows(nextRows);
     setDraft((prev) => (prev ? { ...prev, layoutRows: safeRows } : prev));
-  };
+  }, []);
 
   const scheduleLayoutRowsFromHeight = useCallback(
     (nextHeightPx: number) => {
-      const nextRows = normalizeLayoutRows(cardHeightPxToLayoutRows(nextHeightPx));
+      const requestedRows = normalizeLayoutRows(cardHeightPxToLayoutRows(nextHeightPx));
+      const nextRows = Math.max(requestedRows, getRequiredMinRows());
       pendingRowsRef.current = nextRows;
 
       if (rowsRafRef.current != null) return;
@@ -410,7 +467,31 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
         setLayoutRows(pending);
       });
     },
-    [setLayoutRows]
+    [getRequiredMinRows, setLayoutRows]
+  );
+
+  const handleSideMinHeightChange = useCallback(
+    (side: "question" | "answer", minHeightPx: number) => {
+      minHeightPxBySideRef.current[side] = Math.max(0, minHeightPx);
+      const requiredRows = getRequiredMinRows();
+
+      setDraft((prev) => {
+        if (!prev) return prev;
+        if (prev.layoutRows >= requiredRows) return prev;
+        return { ...prev, layoutRows: requiredRows };
+      });
+    },
+    [getRequiredMinRows]
+  );
+
+  const handleQuestionMinHeightChange = useCallback(
+    (minHeightPx: number) => handleSideMinHeightChange("question", minHeightPx),
+    [handleSideMinHeightChange]
+  );
+
+  const handleAnswerMinHeightChange = useCallback(
+    (minHeightPx: number) => handleSideMinHeightChange("answer", minHeightPx),
+    [handleSideMinHeightChange]
   );
 
   useEffect(() => {
@@ -524,7 +605,6 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
           type="button"
           className={cn(base, "bg-slate-50 text-slate-500 hover:bg-slate-100")}
           onClick={() => setImageDialogSide(side)}
-          title="画像を追加"
           aria-label="画像を追加"
         >
           <ImageIcon className="w-3 h-3 shrink-0" />
@@ -536,7 +616,6 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
           type="button"
           className={cn(base, "bg-slate-50 text-slate-500 hover:bg-slate-100")}
           onClick={() => setAudioDialogSide(side)}
-          title="音声を追加"
           aria-label="音声を追加"
         >
           <Volume2Icon className="w-3 h-3 shrink-0" />
@@ -548,7 +627,6 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
           type="button"
           className={cn(base, "bg-slate-50 text-slate-500 hover:bg-slate-100")}
           onClick={openLinkDialog}
-          title="リンクを追加"
           aria-label="リンクを追加"
         >
           <LinkIcon className="w-3 h-3 shrink-0" />
@@ -713,7 +791,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
   }
 
   return (
-    <div className="h-full p-4">
+    <div className="h-full p-4 card-editor-right-pane-font">
       <div className="relative flex h-full overflow-hidden">
         <Button
           type="button"
@@ -725,7 +803,6 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
             transform: "translateX(50%)",
           }}
           onClick={() => setIsMetaOpen((prev) => !prev)}
-          title={isMetaOpen ? "close meta panel" : "open meta panel"}
           aria-label={isMetaOpen ? "close meta panel" : "open meta panel"}
         >
           {isMetaOpen ? <PanelRightClose className="h-4 w-4" /> : <PanelRightOpen className="h-4 w-4" />}
@@ -764,6 +841,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
                       heightPx={layoutRowsToCardHeightPx(normalizeLayoutRows(draft?.layoutRows))}
                       lockHeight
                       onHeightChange={scheduleLayoutRowsFromHeight}
+                      onMinHeightChange={handleQuestionMinHeightChange}
                       actionsTopLeft={editorActionsTopLeft}
                       actionsTopRight={renderMediaDialogButtons("question")}
                     >
@@ -796,6 +874,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
                       heightPx={layoutRowsToCardHeightPx(normalizeLayoutRows(draft?.layoutRows))}
                       lockHeight
                       onHeightChange={scheduleLayoutRowsFromHeight}
+                      onMinHeightChange={handleAnswerMinHeightChange}
                       actionsTopLeft={editorActionsTopLeft}
                       actionsTopRight={renderMediaDialogButtons("answer")}
                     >
@@ -917,7 +996,6 @@ function LinkEditor({
           <button
             type="button"
             onClick={() => remove(index)}
-            title="リンクを削除"
             className="absolute -top-1 -right-1 p-1 bg-white border border-slate-200 rounded-full text-slate-400 hover:text-red-500 hover:border-red-200 opacity-0 group-hover/link:opacity-100 transition-opacity z-20 shadow-sm"
           >
             <span className="sr-only">削除</span>

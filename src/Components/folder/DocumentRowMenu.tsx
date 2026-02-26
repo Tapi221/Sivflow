@@ -12,6 +12,8 @@ interface DocumentRowMenuProps {
   folders: any[];
   cards: Card[];
   documents: DocumentItem[];
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   onUpdateFolder?: (folderId: string, data: any) => Promise<void>;
   isPinned?: boolean;
   onTogglePin?: () => void;
@@ -28,6 +30,8 @@ export function DocumentRowMenu({
   folders,
   cards,
   documents,
+  open,
+  onOpenChange,
   onUpdateFolder,
   isPinned,
   onTogglePin,
@@ -178,7 +182,7 @@ export function DocumentRowMenu({
   };
 
   return (
-    <DropdownMenu>
+    <DropdownMenu open={open} onOpenChange={onOpenChange}>
       <DropdownMenuTrigger asChild>
         {children}
       </DropdownMenuTrigger>
@@ -186,7 +190,7 @@ export function DocumentRowMenu({
         {onTogglePin && (
           <DropdownMenuItem onClick={onTogglePin} className="gap-2">
             <Pin className={`w-4 h-4 ${isPinned ? 'text-amber-500' : ''}`} />
-            {isPinned ? 'お気に入りから削除' : 'お気に入りに追加'}
+            {isPinned ? 'ピン留めを外す' : 'ピン留めに追加'}
           </DropdownMenuItem>
         )}
         <DropdownMenuItem onClick={handleRename} className="gap-2">

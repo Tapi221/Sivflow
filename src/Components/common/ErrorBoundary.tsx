@@ -179,7 +179,7 @@ export class ErrorBoundary extends Component<Props, State> {
               </p>
               
               <div className="bg-slate-50 p-4 rounded-2xl mb-8 overflow-auto max-h-32">
-                <pre className="text-[10px] text-slate-500 font-mono">
+                <pre className="text-[10px] text-slate-500 font-serif">
                   {this.state.error?.message || 'Unknown error'}
                   {this.state.error?.stack && `\n\n${this.state.error.stack}`}
                 </pre>

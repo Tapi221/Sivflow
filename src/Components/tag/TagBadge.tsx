@@ -11,7 +11,6 @@ interface TagBadgeProps {
   selected?: boolean;
   className?: string;
   textClassName?: string;
-  title?: string;
   onClick?: () => void;
   onRemove?: () => void;
   removeAriaLabel?: string;
@@ -30,7 +29,6 @@ export function TagBadge({
   selected = false,
   className,
   textClassName,
-  title,
   onClick,
   onRemove,
   removeAriaLabel,
@@ -65,16 +63,15 @@ export function TagBadge({
 
   if (onClick) {
     return (
-      <button type="button" className={rootClassName} onClick={onClick} title={title}>
+      <button type="button" className={rootClassName} onClick={onClick}>
         {content}
       </button>
     );
   }
 
   return (
-    <span className={rootClassName} title={title}>
+    <span className={rootClassName}>
       {content}
     </span>
   );
 }
-

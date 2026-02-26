@@ -140,8 +140,11 @@ const generateUploadedImageId = (): string => {
 };
 
 export const createUploadedImage = (file: File) => {
+  const id = generateUploadedImageId();
   return {
-    id: generateUploadedImageId(),
+    id,
+    assetId: id,
+    localFileId: id,
     localUrl: createBlobUrl(URL.createObjectURL(file)),
     remoteUrl: null,
     status: 'uploading' as const,
@@ -156,8 +159,11 @@ export const createUploadedImage = (file: File) => {
 };
 
 export const createFailedUploadedImage = (file: File) => {
+  const id = generateUploadedImageId();
   return {
-    id: generateUploadedImageId(),
+    id,
+    assetId: id,
+    localFileId: id,
     localUrl: null,
     remoteUrl: null,
     status: 'failed' as const,
@@ -250,6 +256,8 @@ export const normalizeUploadedImage = (
   const contentType = resolveString(pickFirst(record, ['contentType', 'content_type', 'mimeType', 'mime_type']));
   const size = resolveNumber(pickFirst(record, ['size', 'sizeBytes', 'size_bytes']));
   const storagePath = resolveString(pickFirst(record, ['storagePath', 'storage_path', 'path']));
+  const localFileId = resolveString(pickFirst(record, ['localFileId', 'local_file_id']));
+  const assetId = resolveString(pickFirst(record, ['assetId', 'asset_id'])) ?? resolveString(pickFirst(record, ['id']));
   const scale = resolveNumber(pickFirst(record, ['scale']));
   const x = resolveNumber(pickFirst(record, ['x']));
   const naturalW = resolveNumber(pickFirst(record, ['naturalW', 'natural_w']));
@@ -258,7 +266,7 @@ export const normalizeUploadedImage = (
   const source = resolveString(pickFirst(record, ['source'])) as UploadSource | undefined;
   const fallbackReason = resolveString(pickFirst(record, ['fallbackReason', 'fallback_reason'])) as UploadFallbackReason | undefined;
 
-  if (!remoteUrl && !localUrl) {
+  if (!remoteUrl && !localUrl && !localFileId && !assetId) {
     if (options.onInvalid === 'throw') {
       throw new Error('UploadedImage missing url');
     }
@@ -270,8 +278,10 @@ export const normalizeUploadedImage = (
 
   return {
     id: resolveString(pickFirst(record, ['id'])) ?? generateUploadedImageId(),
+    assetId: assetId ?? null,
     localUrl: (localUrl ?? null) as BlobUrl | null,
     remoteUrl: (remoteUrl ?? null) as StorageUrl | null,
+    localFileId: localFileId ?? null,
     status: status ?? (remoteUrl ? 'ready' : 'uploading'),
     contentType: contentType ?? null,
     size: size ?? null,
@@ -299,6 +309,8 @@ export const normalizeUploadedImages = (
 export const denormalizeUploadedImage = (
   image: {
     id: string;
+    assetId?: string | null;
+    localFileId?: string | null;
     localUrl?: string | null;
     remoteUrl?: string | null;
     status: 'uploading' | 'ready' | 'failed';
@@ -311,7 +323,8 @@ export const denormalizeUploadedImage = (
   const output: Record<string, unknown> = options.case === 'snake'
     ? {
         id: image.id,
-        url: image.remoteUrl ?? image.localUrl ?? null,
+        asset_id: image.assetId ?? image.id,
+        url: image.remoteUrl ?? null,
         content_type: image.contentType ?? null,
         size: image.size ?? null,
         storage_path: image.storagePath ?? null,
@@ -319,7 +332,8 @@ export const denormalizeUploadedImage = (
       }
     : {
         id: image.id,
-        url: image.remoteUrl ?? image.localUrl ?? null,
+        assetId: image.assetId ?? image.id,
+        url: image.remoteUrl ?? null,
         contentType: image.contentType ?? null,
         size: image.size ?? null,
         storagePath: image.storagePath ?? null,
@@ -340,6 +354,8 @@ export const denormalizeUploadedImage = (
 export const denormalizeUploadedImages = (
   images: Array<{
     id: string;
+    assetId?: string | null;
+    localFileId?: string | null;
     localUrl?: string | null;
     remoteUrl?: string | null;
     status: 'uploading' | 'ready' | 'failed';

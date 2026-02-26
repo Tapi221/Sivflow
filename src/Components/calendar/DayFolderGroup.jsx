@@ -47,7 +47,6 @@ export default function DayFolderGroup({
             <div 
               key={folderId}
               className="flex items-center gap-1 text-[10px] text-slate-600 truncate px-1 py-0.5 rounded hover:bg-slate-100"
-              title={`${folderName}: ${count}枚`}
             >
               <div className="w-1.5 h-1.5 rounded-full bg-primary-600" />
               <div className="truncate flex-1 font-medium">{folderName}</div>

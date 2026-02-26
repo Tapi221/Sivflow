@@ -19,6 +19,32 @@ export class IndexedDBMetadataService {
     this.db = db;
     this.userId = userId;
   }
+
+  private async recomputeMetadata(reason: string): Promise<void> {
+    const cardCount = await this.db.cards.count();
+    const folderCount = await this.db.folders.count();
+    const eventCount = await this.db.levelHistories.count();
+    const current = await this.db.metadata.get('main');
+    const next: IndexedDBMetadata = {
+      key: 'main',
+      schemaVersion: CURRENT_SCHEMA_VERSION,
+      lastFullSyncAt: current?.lastFullSyncAt ?? new Date(),
+      expectedEntityCounts: {
+        cards: cardCount,
+        folders: folderCount,
+        events: eventCount,
+      },
+      storageState: current?.storageState ?? 'CLEAN',
+      rebuildCount: current?.rebuildCount ?? 0,
+      rebuildReason: current?.rebuildReason,
+    };
+    await SafeIndexedDBWriter.write(this.userId, () => this.db.metadata.put(next), 'recomputeMetadata');
+    console.log('[HealthCheck] healthcheck_metadata_recomputed', { userId: this.userId, reason, counts: next.expectedEntityCounts });
+  }
+
+  async recomputeMetadataFor(reason: string): Promise<void> {
+    await this.recomputeMetadata(reason);
+  }
   
   /**
    * メタデータを更新（再構築 + 同期完了後のみ呼ぶ）
@@ -121,6 +147,19 @@ export class IndexedDBMetadataService {
     
     if (diff > 0) {
       console.warn(`[HealthCheck] Card count mismatch detected. Expected: ${expectedCardCount}, Actual: ${actualCardCount}`);
+
+      if (expectedCardCount === 0 && actualCardCount > 0) {
+        try {
+          await this.recomputeMetadata('expected_zero_actual_positive');
+          return { healthy: true };
+        } catch (e) {
+          console.error('[HealthCheck] metadata recompute failed for expected=0 mismatch', e);
+          return {
+            healthy: false,
+            reason: `metadata_recompute_failed (cards: expected ${expectedCardCount}, got ${actualCardCount})`,
+          };
+        }
+      }
       
       // 許容範囲内ならメタデータを補正して続行 (自己修復)
       if (diff <= 10) {

@@ -19,6 +19,8 @@ interface DocumentRowProps {
   rowBaseClassName: string;
   setRowRef: (id: string, node: HTMLElement | null) => void;
   isDragging: boolean;
+  menuOpen: boolean;
+  onMenuOpenChange: (open: boolean) => void;
 }
 
 export const DocumentRow: React.FC<DocumentRowProps> = ({
@@ -35,6 +37,8 @@ export const DocumentRow: React.FC<DocumentRowProps> = ({
   rowBaseClassName,
   setRowRef,
   isDragging,
+  menuOpen,
+  onMenuOpenChange,
 }) => {
   const docId = doc.id;
   const title = doc.title || '無題のドキュメント';
@@ -78,6 +82,8 @@ export const DocumentRow: React.FC<DocumentRowProps> = ({
           folders={treeFolders}
           cards={treeCards}
           documents={documents}
+          open={menuOpen}
+          onOpenChange={onMenuOpenChange}
           onUpdateFolder={onUpdateFolder}
           isPinned={isPinned}
           onTogglePin={handleTogglePin}

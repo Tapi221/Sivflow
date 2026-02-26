@@ -12,6 +12,8 @@ import {
 interface ContextMenuProps {
   type: 'folder' | 'card';
   children: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   onCreateSubfolder?: () => void;
   onCreateCard?: () => void;
   onRename?: () => void;
@@ -25,6 +27,8 @@ interface ContextMenuProps {
 export function ContextMenu({
   type,
   children,
+  open,
+  onOpenChange,
   onCreateSubfolder,
   onCreateCard,
   onRename,
@@ -34,7 +38,7 @@ export function ContextMenu({
   onTogglePin,
 }: ContextMenuProps) {
   return (
-    <DropdownMenu>
+    <DropdownMenu open={open} onOpenChange={onOpenChange}>
       <DropdownMenuTrigger asChild>
         {children}
       </DropdownMenuTrigger>

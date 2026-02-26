@@ -53,7 +53,7 @@ export const MathRenderer: React.FC<MathRendererProps> = React.memo(({
     return (
       <div 
         className={cn(
-          "px-3 py-2 rounded border border-red-200 bg-red-50 text-red-600 font-mono text-sm break-all",
+          "px-3 py-2 rounded border border-red-200 bg-red-50 text-red-600 font-serif text-sm break-all",
           displayMode === 'block' ? "w-full my-2" : "inline-block mx-1",
           className
         )}

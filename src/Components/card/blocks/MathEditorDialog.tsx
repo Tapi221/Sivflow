@@ -64,9 +64,9 @@ export const MathEditorDialog: React.FC<MathEditorDialogProps> = ({
             allowInternalScroll={true}
             maxHeight={EDITOR_MAX_HEIGHT}
             autoFocus
-            textareaClassName="font-mono"
+            textareaClassName="font-serif"
             className={cn(
-              'w-full font-mono text-base leading-relaxed text-slate-700 placeholder:text-slate-300',
+              'w-full font-serif text-base leading-relaxed text-slate-700 placeholder:text-slate-300',
               'border border-slate-200 rounded-xl px-3 py-2 transition-all duration-300',
               'focus-visible:ring-2 focus-visible:ring-offset-0 bg-white focus:border-slate-300',
               'shadow-inner focus:shadow-sm resize-none whitespace-pre-wrap'

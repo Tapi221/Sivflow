@@ -138,7 +138,7 @@ export default function TodayStudy() {
   const reviewCount = todayCards.length;
 
   return (
-    <div className="min-h-screen bg-[#F5F7FA] font-serif">
+    <div className="min-h-screen bg-[#F5F7FA]">
       
       {/* ヘッダーエリア */}
       <div className="bg-white border-b border-slate-100 px-5 pt-8 pb-6">

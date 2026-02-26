@@ -32,6 +32,31 @@ export type UploadFallbackReason = 'timeout' | 'network_error' | 'permission_err
 
 export type CardState = 'PRE-LEARN' | 'STABLE' | 'DECAYING' | 'FAILED' | 'RELEARN';
 
+export type AssetRemoteStatus = 'none' | 'uploading' | 'ready' | 'failed';
+export type AssetLocalStatus = 'present' | 'missing';
+
+export interface AssetRecord {
+  id: string; // assetId
+  userId: string;
+  mime: string;
+  size: number;
+  createdAt: Date | Timestamp;
+  updatedAt: Date | Timestamp;
+  localBlobId: string | null;
+  localStatus: AssetLocalStatus;
+  remoteKey?: string | null;
+  remoteStatus: AssetRemoteStatus;
+  remoteUrlCache?: string | null;
+  retryCount?: number;
+  width?: number | null;
+  height?: number | null;
+  sha256?: string | null;
+}
+
+export interface CardImageRef {
+  assetId: string;
+}
+
 /**
  * プロフィール画像スキーマ（Settings保存用）
  * 
@@ -69,6 +94,7 @@ export type ReviewLog = {
  */
 export interface UploadedImage {
   id: string;
+  assetId?: string | null;
 
   // URL（型で縛って事故を減らす）
   localUrl?: BlobUrl | null; // 一時プレビュー用（Blob URL のみ）。settings に保存しない！
@@ -78,6 +104,7 @@ export interface UploadedImage {
   // Storage 側の識別情報
   remoteId?: string | null; // Storage上のパスやID
   storagePath?: string | null;
+  localFileId?: string | null; // IndexedDB blob store key
 
   // 状態
   status: UploadedImageStatus;
@@ -515,6 +542,11 @@ export type ExplorerItem =
 export type SelectedExplorerItem = 
   | { type: 'card'; id: string }
   | { type: 'document'; id: string }
+  | { type: 'today-study' }
+  | { type: 'gallery' }
+  | { type: 'calendar' }
+  | { type: 'settings' }
+  | { type: 'trash' }
   | null;
 
 /**

@@ -37,7 +37,7 @@ export const UploadProgress = ({
           )}
           <span className="font-medium text-slate-700 truncate">{fileName}</span>
         </div>
-        <span className="text-xs text-slate-400 font-mono shrink-0">
+        <span className="text-xs text-slate-400 font-serif shrink-0">
           {Math.round(progress)}%
         </span>
       </div>

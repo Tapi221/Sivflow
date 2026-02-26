@@ -6,6 +6,7 @@ import { TagBadge } from "@/Components/tag/TagBadge";
 import { Switch } from "@/Components/ui/switch";
 import { useTags } from "@/hooks/useTags";
 import type { Card, ReviewLog } from "@/types";
+import { NUMERIC_TYPO, UI_TYPO } from "@/styles/typography";
 
 type Period = "7d" | "30d" | "all";
 
@@ -33,6 +34,15 @@ const DAY_FORMATTER = new Intl.DateTimeFormat("ja-JP", {
 function toValidDate(value: unknown): Date | null {
   if (value instanceof Date) {
     return Number.isNaN(value.getTime()) ? null : value;
+  }
+  if (
+    typeof value === "object" &&
+    value !== null &&
+    "toDate" in value &&
+    typeof (value as { toDate?: unknown }).toDate === "function"
+  ) {
+    const date = (value as { toDate: () => Date }).toDate();
+    return Number.isNaN(date.getTime()) ? null : date;
   }
   if (typeof value === "string") {
     const date = new Date(value);
@@ -106,6 +116,8 @@ export function CardMetaPanel({
 
   const latestReview = safeLogs.at(-1);
   const recent10 = safeLogs.slice(-10).reverse();
+  const completedReviewCount = Math.max(card?.reviewCount ?? 0, safeLogs.length);
+  const nextReviewAttempt = completedReviewCount + 1;
 
   const distribution20 = useMemo(() => {
     const base = { forgot: 0, vague: 0, remembered: 0, easy: 0 };
@@ -171,7 +183,7 @@ export function CardMetaPanel({
   };
 
   return (
-    <aside className="h-full w-80 shrink-0 border-l border-slate-200 bg-white">
+    <aside className={`h-full w-80 shrink-0 border-l border-slate-200 bg-white ${UI_TYPO} ${NUMERIC_TYPO}`}>
       <div className="h-full overflow-y-auto p-4">
         <div className="space-y-6">
           <section>
@@ -201,6 +213,7 @@ export function CardMetaPanel({
               <p>作成日: {formatDateLabel(card?.createdAt)}</p>
               <p>更新日: {formatDateLabel(card?.updatedAt)}</p>
               <p>最終復習日: {latestReview ? formatDateLabel(latestReview.reviewedAt) : "未復習"}</p>
+              <p>次回復習日 ({nextReviewAttempt}回目): {formatDateLabel(card?.nextReviewDate)}</p>
             </div>
           </section>
 

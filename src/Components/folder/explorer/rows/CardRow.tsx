@@ -31,6 +31,8 @@ interface CardRowProps {
   isDragging: boolean;
   hasUpdateOrDelete: boolean;
   isNewlyCreated?: boolean;
+  menuOpen: boolean;
+  onMenuOpenChange: (open: boolean) => void;
 }
 
 export const CardRow: React.FC<CardRowProps> = ({
@@ -56,6 +58,8 @@ export const CardRow: React.FC<CardRowProps> = ({
   isDragging,
   hasUpdateOrDelete,
   isNewlyCreated,
+  menuOpen,
+  onMenuOpenChange,
 }) => {
   const cardId = card.id;
   
@@ -177,6 +181,8 @@ export const CardRow: React.FC<CardRowProps> = ({
             {hasContextMenu && !isEditing && (
               <div className="absolute right-1 top-0 h-full flex items-center pointer-events-none">
                 <ContextMenu
+                  open={menuOpen}
+                  onOpenChange={onMenuOpenChange}
                   type="card"
                   onRename={() => {
                     setEditingId(cardId);

@@ -153,7 +153,6 @@ export default function ImportDialog({ open, onOpenChange }: ImportDialogProps) 
             <input
               type="file"
               accept=".json"
-              title="インポートするJSONファイルを選択"
               onChange={handleFileSelect}
               ref={fileInputRef}
               className="hidden"

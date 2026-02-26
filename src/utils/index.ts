@@ -1,7 +1,11 @@
 import { normalizeUploadedImages } from './imageUtils';
 import { normalizeMemoryStability } from './reviewUtils';
 import { normalizeInkDocument } from '@/Components/ink/inkTypes';
-import { DEFAULT_LAYOUT_ROWS, normalizeExtraRows, normalizeLayoutRows } from '@/domain/card/extraRows';
+import {
+  LEGACY_BASE_LAYOUT_ROWS,
+  normalizeExtraRows,
+  normalizeLayoutRows,
+} from '@/domain/card/extraRows';
 import { isGridOffsetType } from '@/Components/card/rowOffset';
 
 // ページ名から URL パスを作成
@@ -157,7 +161,8 @@ export const normalizeCard = (raw: any) => {
 
   const legacyQuestionExtraRows = normalizeExtraRows(raw?.questionExtraRows ?? raw?.question_extra_rows ?? 0);
   const legacyAnswerExtraRows = normalizeExtraRows(raw?.answerExtraRows ?? raw?.answer_extra_rows ?? 0);
-  const migratedLayoutRows = DEFAULT_LAYOUT_ROWS + Math.max(legacyQuestionExtraRows, legacyAnswerExtraRows);
+  const migratedLayoutRows =
+    LEGACY_BASE_LAYOUT_ROWS + Math.max(legacyQuestionExtraRows, legacyAnswerExtraRows);
   const normalizeBlockOffsets = (block: any) => {
     if (!block || typeof block !== 'object') return block;
     if (!isGridOffsetType(block.type)) return block;

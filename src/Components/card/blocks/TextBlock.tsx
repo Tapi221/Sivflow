@@ -2,6 +2,7 @@ import React from 'react';
 import TypeIcon from 'lucide-react/dist/esm/icons/type';
 import { BlockWrapper } from './BlockWrapper';
 import { TextBlockContent } from './TextBlockContent';
+import { cn } from '@/lib/utils';
 
 interface TextBlockProps {
   content: string;
@@ -25,6 +26,8 @@ interface TextBlockProps {
 }
 
 export const TextBlock = ({ content, onChange, onDelete, onDuplicate, dragHandleProps, dragEnabled = true, dragHandleClassName, accentColor, autoFocus, placeholder, isActive, showDelete, canMoveUp, canMoveDown, onMoveUp, onMoveDown, onMoveDragStart, onMoveDragEnd }: TextBlockProps) => {
+  const isContentEmpty = content.replace(/[\u200B-\u200D\uFEFF]/g, '').trim().length === 0;
+
   return (
     <BlockWrapper 
       onDelete={onDelete} 
@@ -32,7 +35,7 @@ export const TextBlock = ({ content, onChange, onDelete, onDuplicate, dragHandle
       dragHandleProps={dragHandleProps}
       dragEnabled={dragEnabled}
       dragHandleClassName={dragHandleClassName}
-      className="bg-transparent border-0 px-0 py-0"
+      className={cn('bg-transparent px-0 py-0', !isContentEmpty && 'border-0')}
       contentClassName="px-0"
       label="Text"
       icon={TypeIcon}

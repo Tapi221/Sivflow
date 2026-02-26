@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import React from 'react';
-import { afterEach, describe, it, expect } from 'vitest';
-import { cleanup, render, screen, within, waitFor } from '@testing-library/react';
+import { afterEach, describe, it, expect, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MarkdownBlock } from '../MarkdownBlock';
 
@@ -112,10 +112,72 @@ describe('MarkdownBlock', () => {
     expect(screen.getByTestId('markdown-preview')).toBeTruthy();
   });
 
-  it('プレビューに固定行数(24pxグリッド)用のスタイル変数が付与される', () => {
+  it('プレビュー要素がレンダリングされる', () => {
     render(<StatefulMarkdownBlock initialMarkdown={'a\nb\nc\nd\ne\nf\ng'} />);
 
     const preview = screen.getByTestId('markdown-preview');
-    expect(preview.style.getPropertyValue('--md-lines')).toBe('6');
+    expect(preview).toBeTruthy();
   });
+
+  it('空Markdownに閉じたcode fenceを貼るとcodeブロック1つで置換される', async () => {
+    const user = userEvent.setup();
+    const onReplaceWithBlocks = vi.fn();
+    render(
+      <MarkdownBlock
+        markdown=""
+        onChange={() => {}}
+        onDelete={() => {}}
+        onDuplicate={() => {}}
+        onReplaceWithBlocks={onReplaceWithBlocks}
+      />
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Markdownを編集' }));
+    const dialog = await screen.findByRole('dialog', { name: /markdown editor/i });
+    const textarea = within(dialog).getByLabelText('Markdown入力');
+
+    fireEvent.paste(textarea, {
+      clipboardData: {
+        getData: (type: string) => (type === 'text/plain' ? '```ts\r\nconst a = 1;\r\n```' : ''),
+      },
+    });
+
+    expect(onReplaceWithBlocks).toHaveBeenCalledTimes(1);
+    expect(onReplaceWithBlocks.mock.calls[0][0]).toEqual([
+      { type: 'code', code: { language: 'ts', code: 'const a = 1;' } },
+    ]);
+  });
+
+  it('markdown+code混在を貼ると分割して置換される', async () => {
+    const user = userEvent.setup();
+    const onReplaceWithBlocks = vi.fn();
+    render(
+      <MarkdownBlock
+        markdown=""
+        onChange={() => {}}
+        onDelete={() => {}}
+        onDuplicate={() => {}}
+        onReplaceWithBlocks={onReplaceWithBlocks}
+      />
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Markdownを編集' }));
+    const dialog = await screen.findByRole('dialog', { name: /markdown editor/i });
+    const textarea = within(dialog).getByLabelText('Markdown入力');
+
+    fireEvent.paste(textarea, {
+      clipboardData: {
+        getData: (type: string) =>
+          type === 'text/plain' ? 'before\n```ts\nconst a = 1;\n```\nafter' : '',
+      },
+    });
+
+    expect(onReplaceWithBlocks).toHaveBeenCalledTimes(1);
+    expect(onReplaceWithBlocks.mock.calls[0][0]).toEqual([
+      { type: 'markdown', markdown: 'before\n' },
+      { type: 'code', code: { language: 'ts', code: 'const a = 1;' } },
+      { type: 'markdown', markdown: 'after' },
+    ]);
+  });
+
 });

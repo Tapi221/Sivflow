@@ -1,9 +1,14 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import NotebookPenIcon from 'lucide-react/dist/esm/icons/notebook-pen';
 import { BlockWrapper } from './BlockWrapper';
-import { MarkdownBlockContent } from './MarkdownBlockContent';
+import { MarkdownBlockView } from './MarkdownBlockPreview';
 import { MarkdownEditorDialog } from './MarkdownEditorDialog';
+import { TEXT_BLOCK_CONTENT_CLASS } from './textBlockStyles';
 import { cn } from '@/lib/utils';
+
+type EditorBlock =
+  | { type: 'markdown'; markdown: string }
+  | { type: 'code'; code: { language: string; code: string } };
 
 interface MarkdownBlockProps {
   markdown: string;
@@ -25,13 +30,45 @@ interface MarkdownBlockProps {
   onMoveDragEnd?: () => void;
 
   /** ブロック列を差し替えるコールバック（ペースト分離用） */
-  onReplaceWithBlocks?: (
-    blocks: Array<
-      | { type: 'markdown'; markdown: string }
-      | { type: 'code'; code: { language: string; code: string } }
-    >
-  ) => void;
+  onReplaceWithBlocks?: (blocks: EditorBlock[]) => void;
 }
+
+const MAX_LENGTH = 50000;
+
+const normalizeMarkdownForEditor = (input: string) =>
+  String(input ?? '')
+    .replace(/\r\n/g, '\n')
+    .replace(/\n{3,}$/g, '\n\n');
+
+const validateBlocksLength = (blocks: EditorBlock[]) => {
+  for (const b of blocks) {
+    const len = b.type === 'markdown' ? b.markdown.length : b.code.code.length;
+    if (len > MAX_LENGTH) return false;
+  }
+  return true;
+};
+
+const htmlToPlainText = (html: string) => {
+  if (typeof document === 'undefined') return '';
+  try {
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    return div.textContent || div.innerText || '';
+  } catch {
+    return '';
+  }
+};
+
+const restoreCaret = (textarea: HTMLTextAreaElement, pos: number) => {
+  requestAnimationFrame(() => {
+    try {
+      textarea.focus();
+      textarea.setSelectionRange(pos, pos);
+    } catch (error) {
+      void error;
+    }
+  });
+};
 
 /**
  * Markdownブロック（編集用）
@@ -58,23 +95,53 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
 
   onReplaceWithBlocks,
 }) => {
-  const PREVIEW_LINES = 6;
   const [error, setError] = useState<string | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
-
-  const normalizeMarkdownForEditor = (input: string) =>
-    String(input ?? '')
-      .replace(/\r\n/g, '\n')
-      .replace(/\n{3,}$/g, '\n\n');
+  const isMarkdownEmpty = markdown.trim().length === 0;
 
   const handleChange = (value: string) => {
-    const MAX_LENGTH = 50000;
     if (value.length > MAX_LENGTH) {
       setError('Markdown文字列が長すぎます（最大50,000文字）');
       return;
     }
     setError(null);
     onChange(value);
+  };
+
+  const applyInsert = (
+    textarea: HTMLTextAreaElement,
+    insertText: string,
+    selectionStart: number,
+    selectionEnd: number,
+    { attemptSplitFences }: { attemptSplitFences: boolean }
+  ) => {
+    const normalized = normalizeMarkdownForEditor(insertText);
+    const merged = markdown.slice(0, selectionStart) + normalized + markdown.slice(selectionEnd);
+
+    // 全体が長すぎる場合は通常挿入でも弾く
+    if (merged.length > MAX_LENGTH) {
+      setError('貼り付け内容が長すぎます（最大50,000文字）');
+      return;
+    }
+
+    if (attemptSplitFences && onReplaceWithBlocks) {
+      const blocks = parseAndSplitFences(merged);
+      const hasCode = blocks.some((b) => b.type === 'code');
+      if (hasCode) {
+        if (!validateBlocksLength(blocks)) {
+          setError('貼り付け内容が長すぎます（各ブロック最大50,000文字）');
+          return;
+        }
+        setError(null);
+        onReplaceWithBlocks(blocks);
+        return;
+      }
+    }
+
+    // 分離不要なら通常挿入（state更新 + カーソル復元）
+    handleChange(merged);
+    const nextCaret = selectionStart + normalized.length;
+    restoreCaret(textarea, nextCaret);
   };
 
   /**
@@ -96,74 +163,31 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
       e.preventDefault();
       try {
         const { sanitizeAndConvertToMarkdown } = await import('@/utils/markdownPaste');
-        const mdRaw = sanitizeAndConvertToMarkdown(html);
-        const md = normalizeMarkdownForEditor(
-          mdRaw && mdRaw.trim().length > 0 ? mdRaw : plain
-        );
+        const mdRaw = await sanitizeAndConvertToMarkdown(html);
 
-        // 既存内容 + ペーストを合わせてフェンス分離（必要なら）
-        const existingBefore = markdown.slice(0, selectionStart);
-        const existingAfter = markdown.slice(selectionEnd);
-        const merged = existingBefore + md + existingAfter;
+        // 変換結果が空っぽなら plain にフォールバック（plain が無ければ HTML をテキスト化）
+        const fallbackText = plain || htmlToPlainText(html);
+        const insertText =
+          mdRaw && mdRaw.trim().length > 0 ? mdRaw : fallbackText;
 
-        if (onReplaceWithBlocks) {
-          const blocks = parseAndSplitFences(merged);
-          if (blocks.length > 1) {
-            onReplaceWithBlocks(blocks);
-            return;
-          }
-        }
-
-        // 分離不要なら通常挿入（state更新 + カーソル復元）
-        handleChange(merged);
-        const nextCaret = selectionStart + md.length;
-        requestAnimationFrame(() => {
-          try {
-            textarea.focus();
-            textarea.setSelectionRange(nextCaret, nextCaret);
-          } catch (error) {
-            void error;
-          }
+        applyInsert(textarea, insertText, selectionStart, selectionEnd, {
+          attemptSplitFences: true,
         });
       } catch {
-        // フォールバック: plaintext で挿入
-        const fallback = normalizeMarkdownForEditor(plain || html);
-        const merged = markdown.slice(0, selectionStart) + fallback + markdown.slice(selectionEnd);
-        handleChange(merged);
-        const nextCaret = selectionStart + fallback.length;
-        requestAnimationFrame(() => {
-          try {
-            textarea.focus();
-            textarea.setSelectionRange(nextCaret, nextCaret);
-          } catch (error) {
-            void error;
-          }
+        // フォールバック: plain を優先。無ければ HTML をテキスト化して挿入
+        const fallbackText = plain || htmlToPlainText(html);
+        applyInsert(textarea, fallbackText, selectionStart, selectionEnd, {
+          attemptSplitFences: true,
         });
       }
       return;
     }
 
-    // text/plain のみ → コードフェンスチェック
-    if (plain && plain.includes('```') && onReplaceWithBlocks) {
+    // text/plain のみ → コードフェンスチェック（``` / ~~~）
+    if (plain && /```|~~~/.test(plain) && onReplaceWithBlocks) {
       e.preventDefault();
-      const existingBefore = markdown.slice(0, selectionStart);
-      const existingAfter = markdown.slice(selectionEnd);
-      const merged = existingBefore + normalizeMarkdownForEditor(plain) + existingAfter;
-      const blocks = parseAndSplitFences(merged);
-      if (blocks.length > 1) {
-        onReplaceWithBlocks(blocks);
-        return;
-      }
-      // 分離不要なら通常挿入（state更新 + カーソル復元）
-      handleChange(merged);
-      const nextCaret = selectionStart + plain.length;
-      requestAnimationFrame(() => {
-        try {
-          textarea.focus();
-          textarea.setSelectionRange(nextCaret, nextCaret);
-        } catch (error) {
-          void error;
-        }
+      applyInsert(textarea, plain, selectionStart, selectionEnd, {
+        attemptSplitFences: true,
       });
       return;
     }
@@ -171,23 +195,14 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
     // それ以外 → ブラウザのデフォルト動作に委ねる
   };
 
-  const previewNode = useMemo(
-    () => (
-      <MarkdownBlockContent
-        markdown={markdown}
-        className="font-serif text-base font-medium leading-[24px]"
-      />
-    ),
-    [markdown]
-  );
-
   return (
     <BlockWrapper
       onDelete={onDelete}
       onDuplicate={onDuplicate}
       dragHandleProps={dragHandleProps}
       dragHandleClassName={dragHandleClassName}
-      className="bg-transparent border-transparent py-0"
+      className={cn('bg-transparent px-0 py-0', !isMarkdownEmpty && 'border-0')}
+      contentClassName="px-0"
       label="Markdown"
       icon={NotebookPenIcon}
       accentColor={accentColor}
@@ -201,14 +216,13 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
       onMoveDragStart={onMoveDragStart}
       onMoveDragEnd={onMoveDragEnd}
     >
-      <div className="markdownBlockRoot px-0 py-0">
+      <div className="px-0 py-0">
         <div
           className={cn(
-            'markdownBlockPreviewFrame markdownBlockPreview bg-transparent border-0 rounded-lg p-0 overflow-visible',
-            'cursor-text'
+            'markdownBlockPreview bg-transparent border-0 rounded-lg overflow-visible cursor-text',
+            'p-0'
           )}
           data-testid="markdown-preview"
-          style={{ ['--md-lines' as any]: 6 } as React.CSSProperties}
           tabIndex={0}
           role="button"
           aria-label="Markdownを編集"
@@ -219,10 +233,20 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
             setIsEditorOpen(true);
           }}
         >
-          <div className="markdownBlockPreviewContent px-3 pt-[2px] pb-[2px]">
-    {previewNode}
-  </div>
+          {isMarkdownEmpty ? (
+            <div
+              className={cn(TEXT_BLOCK_CONTENT_CLASS, 'min-h-[24px] text-slate-300')}
+              style={{ transform: 'translateY(2px)' }}
+            >
+              Markdownを入力...
+            </div>
+          ) : (
+            <div style={{ transform: 'translateY(2px)' }}>
+              <MarkdownBlockView md={markdown} className="markdownBlockCardView" />
+            </div>
+          )}
         </div>
+
         <MarkdownEditorDialog
           open={isEditorOpen}
           onOpenChange={setIsEditorOpen}
@@ -238,96 +262,109 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
 };
 
 /**
- * Markdown文字列をコードフェンス(```)で分割し、
+ * Markdown文字列をコードフェンスで分割し、
  * markdown / code ブロックの配列を返す。
  *
  * 重要:
  * - Markdownのインデント（ネストリスト等）を壊さないため、pushする本文は trim() しない
  * - 空判定だけ trim() を使う
  * - 改行は \n / \r\n 両方を扱う
+ * - インデント付きフェンス（リスト内の ```）に対応（CommonMark: 先頭0〜3スペース）
+ * - ``` と ~~~ の両対応
+ * - unclosed fence は分割しない（1つの markdown ブロックとして返す）
  */
-function parseAndSplitFences(
-  md: string
-): Array<
-  | { type: 'markdown'; markdown: string }
-  | { type: 'code'; code: { language: string; code: string } }
-> {
-  const normalizeChunk = (text: string) =>
-    text
-      .replace(/\r\n/g, '\n')
-      .replace(/^\n+/, '')
-      .replace(/\n{3,}$/g, '\n\n');
+function parseAndSplitFences(md: string): EditorBlock[] {
+  const normalizedMd = md.replace(/\r\n/g, '\n');
+  const lines = normalizedMd.split('\n');
 
-  // fence line pattern: ``` + language(optional) の行
-  const fenceRegex = /^```([a-zA-Z0-9_-]*)\s*$/gm;
-
-  const result: Array<
-    | { type: 'markdown'; markdown: string }
-    | { type: 'code'; code: { language: string; code: string } }
-  > = [];
-
-  let lastIndex = 0;
-  let match: RegExpExecArray | null;
+  const out: EditorBlock[] = [];
+  let markdownBuf: string[] = [];
 
   let insideFence = false;
-  let fenceLang = '';
-  let fenceStart = 0;
+  let fenceIndent = '';
+  let markerChar: '`' | '~' | null = null;
+  let markerLen = 0;
+  let lang = '';
+  let codeBuf: string[] = [];
 
-  fenceRegex.lastIndex = 0;
+  const openRe = /^( {0,3})(`{3,}|~{3,})([^\n]*)$/;
 
-  while ((match = fenceRegex.exec(md)) !== null) {
-    const fenceLineStart = match.index;
-    const fenceLineText = match[0];
-    const fenceLineEnd = fenceLineStart + fenceLineText.length;
+  const flushMarkdown = () => {
+    const text = markdownBuf.join('\n').replace(/\n{3,}$/g, '\n\n');
+    if (text.trim().length > 0) {
+      out.push({ type: 'markdown', markdown: text });
+    }
+    markdownBuf = [];
+  };
 
-    // fence行末の改行（\n または \r\n）を含めて次の開始位置を決める
-    let nextIndex = fenceLineEnd;
-    if (md[nextIndex] === '\r' && md[nextIndex + 1] === '\n') nextIndex += 2;
-    else if (md[nextIndex] === '\n') nextIndex += 1;
-
+  for (const line of lines) {
     if (!insideFence) {
-      // フェンス開始前の markdown
-      const textBefore = normalizeChunk(md.slice(lastIndex, fenceLineStart));
-      if (textBefore.trim().length > 0) {
-        result.push({ type: 'markdown', markdown: textBefore });
+      const m = line.match(openRe);
+      if (!m) {
+        markdownBuf.push(line);
+        continue;
       }
 
-      insideFence = true;
-      fenceLang = match[1] || '';
-      fenceStart = nextIndex; // フェンス行の次からコード開始
-    } else {
-      // フェンス終了 → コード取り出し
-      const codeContent = md.slice(fenceStart, fenceLineStart);
-      // 末尾の空行をすべて落とす（内容末尾のインデントは保持）
-      const code = codeContent.replace(/(?:\r?\n)+$/, '');
+      const indent = m[1] ?? '';
+      const marker = m[2] ?? '';
+      const infoRaw = (m[3] ?? '').trim();
+      const ch = marker[0] as '`' | '~';
 
-      result.push({
+      // CommonMark: backtick fence の info string に backtick は不可
+      if (ch === '`' && infoRaw.includes('`')) {
+        markdownBuf.push(line);
+        continue;
+      }
+
+      flushMarkdown();
+      insideFence = true;
+      fenceIndent = indent;
+      markerChar = ch;
+      markerLen = marker.length;
+      lang = infoRaw.split(/\s+/)[0] ?? '';
+      codeBuf = [];
+      continue;
+    }
+
+    // closing fence: up to 3 spaces + same marker repeated >= opening length + trailing spaces only
+    const closeRe = new RegExp(`^ {0,3}${markerChar}{${markerLen},}[ \\t]*$`);
+    if (markerChar && closeRe.test(line)) {
+      const raw = codeBuf.join('\n');
+      const dedented =
+        fenceIndent.length > 0
+          ? raw
+              .split('\n')
+              .map((l) => (l.startsWith(fenceIndent) ? l.slice(fenceIndent.length) : l))
+              .join('\n')
+          : raw;
+
+      out.push({
         type: 'code',
-        code: { language: fenceLang || 'text', code },
+        code: { language: lang || 'text', code: dedented.replace(/\n+$/, '') },
       });
 
       insideFence = false;
-      fenceLang = '';
-      lastIndex = nextIndex;
+      fenceIndent = '';
+      markerChar = null;
+      markerLen = 0;
+      lang = '';
+      codeBuf = [];
+      continue;
     }
+
+    codeBuf.push(line);
   }
 
-  // 残り
-  const remaining = normalizeChunk(md.slice(lastIndex));
-  if (remaining.trim().length > 0) {
-    if (insideFence) {
-      // 閉じられていないフェンス → そのまま markdown として戻す
-      const reconstructed =
-        '```' + fenceLang + '\n' + normalizeChunk(md.slice(fenceStart));
-      result.push({ type: 'markdown', markdown: reconstructed });
-    } else {
-      result.push({ type: 'markdown', markdown: remaining });
-    }
+  // unclosed fence は分割しない
+  if (insideFence) {
+    return [{ type: 'markdown', markdown: normalizedMd }];
   }
 
-  if (result.length === 0) {
-    result.push({ type: 'markdown', markdown: '' });
+  flushMarkdown();
+
+  if (out.length === 0) {
+    out.push({ type: 'markdown', markdown: '' });
   }
 
-  return result;
+  return out;
 }

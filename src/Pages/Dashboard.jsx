@@ -11,8 +11,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Skeleton } from '@/Components/ui/skeleton';
 import {
   Flame,
-  HelpCircle,
-  Star,
   Clock,
   FileText,
   Sparkles,
@@ -177,19 +175,6 @@ export default function Dashboard() {
     return counts;
   }, [mergedStudyLogs]);
 
-  const uncertainCards = activeCards.filter(c => 
-    (c.hasUncertainty || c.has_uncertainty) && !c.isDraft && !c.is_draft
-  );
-  
-  const focusCards = activeCards.filter(c => 
-    !c.isDraft && !c.is_draft && 
-    (c.isSilent === false || (c.tags && c.tags.includes('focus')))
-  );
-  
-  const bookmarkedCards = activeCards.filter(c => 
-    (!c.isDraft && !c.is_draft) && (c.isBookmarked || c.is_bookmarked)
-  );
-  
   const draftCards = activeCards.filter(c => 
     (c.isDraft || c.is_draft)
   );
@@ -215,7 +200,7 @@ export default function Dashboard() {
     : null;
 
   return (
-    <div className="min-h-screen bg-[#F5F7FA] text-slate-800 font-sans selection:bg-teal-100 selection:text-teal-900 relative overflow-hidden">
+    <div className="min-h-screen bg-[#F5F7FA] text-slate-800 selection:bg-teal-100 selection:text-teal-900 relative overflow-hidden">
       {/* Background Ruled Lines */}
       <div 
         className="absolute inset-0 opacity-100 pointer-events-none z-0" 
@@ -242,7 +227,6 @@ export default function Dashboard() {
               <div
                 className="flex flex-col items-center cursor-default"
                 aria-label="1枚でも復習するとストリークが増えます"
-                title="1枚でも復習するとストリークが増えます"
               >
                  <div className="text-[8px] md:text-[9px] font-bold text-slate-300 uppercase tracking-widest mb-0.5 md:mb-1">Streak</div>
                  <div className="flex items-center gap-1.5">
@@ -333,59 +317,6 @@ export default function Dashboard() {
           />
         </section>
 
-        {/* WEAK POINTS & FOCUS AREA */}
-        {/* WEAK POINTS & FOCUS AREA */}
-        {/* WEAK POINTS & FOCUS AREA */}
-        <div className="grid grid-cols-2 gap-4 md:gap-8 mb-12">
-            {/* Weak Points */}
-            <div>
-               <div 
-                 className="bg-[#FCFCFC] rounded-[24px] md:rounded-[32px] p-5 md:p-8 border border-slate-200/60 shadow-none cursor-pointer hover:bg-white hover:border-slate-300 transition-all duration-300 group relative overflow-hidden h-[160px] md:h-[200px] flex flex-col justify-between"
-                 onClick={() => navigate(createPageUrl('uncertain'))}
-               >
-                   <div className="absolute -bottom-6 -right-6 md:-bottom-10 md:-right-10 text-slate-100 group-hover:text-amber-50 group-hover:scale-105 transition-all duration-500">
-                      <HelpCircle className="w-28 h-28 md:w-48 md:h-48 opacity-50" />
-                   </div>
-
-                   <div className="relative z-10 w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-amber-50 flex items-center justify-center text-amber-500 group-hover:scale-105 transition-transform">
-                      <HelpCircle className="w-5 h-5 md:w-6 md:h-6" />
-                   </div>
-                   
-                   <div className="relative z-10">
-                      <div className="flex items-baseline gap-1 md:gap-2 mb-0.5 md:mb-1">
-                         <span className="text-2xl md:text-3xl font-bold text-slate-600 group-hover:text-slate-800 transition-colors">{uncertainCards.length}</span>
-                         <span className="text-[10px] md:text-xs font-bold text-slate-400">枚</span>
-                      </div>
-                      <p className="text-[10px] md:text-xs text-slate-400 font-bold leading-tight group-hover:text-slate-500 transition-colors">確認が必要な<br className="md:hidden"/>カード</p>
-                   </div>
-               </div>
-            </div>
-
-            {/* Focus Area */}
-            <div>
-               <div 
-                 className="bg-[#FCFCFC] rounded-[24px] md:rounded-[32px] p-5 md:p-8 border border-slate-200/60 shadow-none cursor-pointer hover:bg-white hover:border-slate-300 transition-all duration-300 group relative overflow-hidden h-[160px] md:h-[200px] flex flex-col justify-between"
-                 onClick={() => navigate(createPageUrl('bookmark'))} 
-               >
-                   <div className="absolute -bottom-6 -right-6 md:-bottom-10 md:-right-10 text-slate-100 group-hover:text-teal-50 group-hover:scale-105 transition-all duration-500">
-                      <Star className="w-28 h-28 md:w-48 md:h-48 opacity-50" />
-                   </div>
-
-                   <div className="relative z-10 w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-teal-50 flex items-center justify-center text-teal-600 group-hover:scale-105 transition-transform">
-                      <Star className="w-5 h-5 md:w-6 md:h-6" />
-                   </div>
-                   
-                   <div className="relative z-10">
-                       <div className="flex items-baseline gap-1 md:gap-2 mb-0.5 md:mb-1">
-                         <span className="text-2xl md:text-3xl font-bold text-slate-600 group-hover:text-slate-800 transition-colors">{bookmarkedCards.length}</span>
-                         <span className="text-[10px] md:text-xs font-bold text-slate-400">枚</span>
-                      </div>
-                      <p className="text-[10px] md:text-xs text-slate-400 font-bold leading-tight group-hover:text-slate-500 transition-colors">ブックマーク<br className="md:hidden"/>したカード</p>
-                   </div>
-               </div>
-            </div>
-        </div>
-        
         {/* RESUME & DRAFTS Section - Side by Side on Desktop */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-6 lg:gap-8 mb-12">
           {/* RESUME Section */}

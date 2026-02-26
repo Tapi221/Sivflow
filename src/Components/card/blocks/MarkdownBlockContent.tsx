@@ -137,7 +137,7 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
   return (
     <div
       className={cn(
-        'markdown-block-view markdownBlockPreview max-w-none font-serif text-[16px] font-medium leading-[24px] [font-variant-numeric:lining-nums_proportional-nums] [font-feature-settings:"lnum"_1]',
+        'markdown-block-view markdownBlockPreview max-w-none font-serif text-[16px] font-medium leading-[24px] [font-variant-numeric:lining-nums_tabular-nums] [font-feature-settings:"lnum"_1]',
         alignClass,
         className
       )}
@@ -148,4 +148,3 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
     </div>
   );
 };
-

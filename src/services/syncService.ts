@@ -5,11 +5,14 @@ import { FirebaseCloudProvider } from './cloudProvider';
 import { ImageSyncService } from './imageSyncService';
 import { getOrCreateDeviceId, getDeviceName } from '../utils/device';
 import { collection, getDocs, query, where, writeBatch, Timestamp, doc, getDoc, setDoc, limit, orderBy } from 'firebase/firestore';
+import { ref as storageRef, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import type { Folder, Card, User, UserSettings, UserStats } from '../types';
 import type { SyncError, SyncHistory, SyncSettings, SyncConflict, SyncQueueItem, DiffResult, SyncResult } from '../types/sync';
 import { DEFAULT_SYNC_SETTINGS } from '../types/sync';
 import { sanitizeProfileImage } from '@/utils/profileImageSanitizer';
 import { sanitizeForLog } from '@/utils/logSanitizer';
+import { storage } from './firebase';
+import { getImageBlob } from './imageFileStore';
 
 type SyncableCollection = 'users' | 'userSettings' | 'folders' | 'cards' | 'userStats';
 
@@ -350,7 +353,7 @@ export class SyncService {
    * オフライン時またはpush失敗時に使用
    */
   async enqueueChange(
-    entity: 'card' | 'folder',
+    entity: 'card' | 'folder' | 'asset',
     action: 'create' | 'update' | 'delete',
     payload: any
   ): Promise<void> {
@@ -424,13 +427,69 @@ export class SyncService {
         }
 
         if (item.action === 'create' || item.action === 'update') {
-          if (item.entity === 'card') {
+          if (item.entity === 'asset') {
+            const payload = item.payload ?? {};
+            const assetId = payload.assetId ?? item.targetId ?? item.payload?.id;
+            const localBlobId = payload.localBlobId ?? assetId;
+            const remoteKey = payload.remoteKey ?? `users/${this.userId}/assets/${assetId}`;
+            if (!assetId || !localBlobId) {
+              throw new Error('Asset queue payload is missing assetId/localBlobId');
+            }
+            const blob = await getImageBlob(localBlobId, { userId: this.userId });
+            if (!blob) {
+              await this.localDB.images.put({
+                id: assetId,
+                userId: this.userId,
+                mime: payload.mime ?? 'application/octet-stream',
+                size: payload.size ?? 0,
+                localBlobId,
+                localStatus: 'missing',
+                remoteKey,
+                remoteStatus: 'failed',
+                updatedAt: new Date(),
+                createdAt: new Date(),
+              } as any);
+              throw new Error(`Asset blob missing: ${assetId}`);
+            }
+            const task = uploadBytesResumable(storageRef(storage, remoteKey), blob, {
+              contentType: blob.type || payload.mime || 'application/octet-stream',
+            });
+            await new Promise<void>((resolve, reject) => {
+              task.on('state_changed', undefined, reject, () => resolve());
+            });
+            const remoteUrl = await getDownloadURL(task.snapshot.ref);
+            const existingAsset = await this.localDB.images.get(assetId);
+            await this.localDB.images.put({
+              ...(existingAsset as any ?? {}),
+              id: assetId,
+              userId: this.userId,
+              mime: blob.type || payload.mime || (existingAsset as any)?.mime || 'application/octet-stream',
+              size: blob.size || payload.size || (existingAsset as any)?.size || 0,
+              localBlobId,
+              localStatus: 'present',
+              remoteKey,
+              remoteStatus: 'ready',
+              remoteUrlCache: remoteUrl,
+              retryCount: 0,
+              updatedAt: new Date(),
+              createdAt: (existingAsset as any)?.createdAt ?? new Date(),
+            } as any);
+            if (import.meta.env.DEV) {
+              console.info('[AssetSync] syncQueue upload success', { assetId, remoteKey });
+            }
+          } else if (item.entity === 'card') {
             await this.cloudProvider.upsertCard(item.payload);
           } else {
             await this.cloudProvider.upsertFolder(item.payload);
           }
         } else if (item.action === 'delete') {
-          if (item.entity === 'card') {
+          if (item.entity === 'asset') {
+            // 画像資産のdeleteは現状ローカルメタ更新のみ（Storage削除は将来対応）
+            await this.localDB.images.update(item.payload.id ?? item.targetId, {
+              remoteStatus: 'none',
+              updatedAt: new Date(),
+            } as any);
+          } else if (item.entity === 'card') {
             await this.cloudProvider.deleteCard(item.payload.id, this.userId);
           } else {
             await this.cloudProvider.deleteFolder(item.payload.id, this.userId);

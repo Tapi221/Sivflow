@@ -9,7 +9,7 @@ export interface SyncTask {
   operationType?: 'create' | 'update' | 'delete'; // Added for compatibility
   
   type: 'upload' | 'download';
-  entity: 'card' | 'folder' | 'userSetting';
+  entity: 'card' | 'folder' | 'userSetting' | 'asset';
   payload: any;
   priority: 'critical' | 'high' | 'medium' | 'low';
   createdAt: number;

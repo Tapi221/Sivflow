@@ -2,7 +2,7 @@
  * ExplorerTabs - Explorerタブ切替UIコンポーネント
  */
 import React from 'react';
-import { Folder, Clock, Trash2 } from 'lucide-react';
+import { Folder, Clock } from 'lucide-react';
 import Pin from 'lucide-react/dist/esm/icons/pin';
 import FolderPlus from 'lucide-react/dist/esm/icons/folder-plus';
 import { cn } from '@/lib/utils';
@@ -19,10 +19,9 @@ interface ExplorerTabsProps {
 
 // タブ定義
 const TABS: { id: ExplorerTab; label: string; icon: React.ElementType }[] = [
-  { id: 'favorites', label: 'お気に入り', icon: Pin },
+  { id: 'pinned', label: 'ピン留め', icon: Pin },
   { id: 'explorer', label: 'エクスプローラー', icon: Folder },
   { id: 'recent', label: '最近', icon: Clock },
-  { id: 'trash', label: 'ごみ箱', icon: Trash2 },
 ];
 
 export function ExplorerTabs({
@@ -37,7 +36,8 @@ export function ExplorerTabs({
   return (
     <div className={cn(
       "flex items-center justify-between border-b border-slate-200 bg-slate-50/50 pr-2 h-9",
-      "pl-2 md:pl-1" // サイドバー内ではハンバーガーボタンは非表示のためパディング不要
+      // 左上の固定ハンバーガーボタンと重ならないよう、全画面幅で左余白を確保する。
+      "pl-10"
     )}>
       <div className="flex items-center flex-1 overflow-x-auto no-scrollbar">
         {TABS.map(tab => {
@@ -48,6 +48,7 @@ export function ExplorerTabs({
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
+              title={tab.label}
               className={cn(
                 "flex items-center justify-center px-2 py-1 text-xs font-medium transition-colors relative whitespace-nowrap",
                 "hover:text-primary-600",
@@ -55,7 +56,6 @@ export function ExplorerTabs({
                   ? "text-primary-600" 
                   : "text-slate-500"
               )}
-              title={tab.label}
             >
               <Icon className="w-4 h-4" />
               {/* スクリーンリーダー用にラベルは保持し、視覚的に隠す */}

@@ -172,7 +172,7 @@ export const StorageManager = () => {
                                     {getFileIcon(file.mimeType)}
                                 </div>
                                 <div className="min-w-0">
-                                    <div className="font-bold text-sm text-slate-700 truncate max-w-[150px] md:max-w-[200px]" title={file.originalFilename}>
+                                    <div className="font-bold text-sm text-slate-700 truncate max-w-[150px] md:max-w-[200px]">
                                         {file.originalFilename}
                                     </div>
                                     <div className="flex items-center gap-2 text-[10px] text-slate-400">

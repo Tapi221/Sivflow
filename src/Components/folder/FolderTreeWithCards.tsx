@@ -55,9 +55,9 @@ interface FolderTreeWithCardsProps {
   onDeleteCard?: (cardId: string) => Promise<void>;
   moveCardToFolder?: (cardId: string, targetFolderId: string) => Promise<void>;
   reorderCards?: (folderId: string, cardIds: string[]) => Promise<void>;
-  favorites?: Array<{ type: 'folder' | 'card' | 'document'; id: string }>;
-  onAddFavorite?: (item: { type: 'folder' | 'card' | 'document'; id: string }) => void;
-  onRemoveFavorite?: (item: { type: 'folder' | 'card' | 'document'; id: string }) => void;
+  pinnedItems?: Array<{ type: 'folder' | 'card' | 'document'; id: string }>;
+  onPinItem?: (item: { type: 'folder' | 'card' | 'document'; id: string }) => void;
+  onUnpinItem?: (item: { type: 'folder' | 'card' | 'document'; id: string }) => void;
   isFiltering?: boolean;
 
   /** サイドバー外側のclass（任意） */
@@ -80,9 +80,9 @@ export function FolderTreeWithCards({
   onDeleteCard,
   moveCardToFolder,
   reorderCards,
-  favorites,
-  onAddFavorite,
-  onRemoveFavorite,
+  pinnedItems,
+  onPinItem,
+  onUnpinItem,
   isFiltering = false,
   className,
 }: FolderTreeWithCardsProps) {
@@ -213,6 +213,7 @@ export function FolderTreeWithCards({
   }, [selectedItem, treeCards, treeFolders]);
 
   const [newlyCreatedCardId, setNewlyCreatedCardId] = useState<string | null>(null);
+  const [openRowMenuId, setOpenRowMenuId] = useState<string | null>(null);
 
   // 別のカードを選択したら新規フラグを解除（ただし、新規作成直後の自動選択による遷移は除く）
   useEffect(() => {
@@ -1255,10 +1256,10 @@ export function FolderTreeWithCards({
     const isEditing = editingId === folderId;
     const childFolders = getChildFolders(folderId);
 
-    const isPinned = favorites?.some((f) => f.type === 'folder' && f.id === folderId);
+    const isPinned = pinnedItems?.some((f) => f.type === 'folder' && f.id === folderId);
     const handleTogglePin = () => {
-      if (isPinned) onRemoveFavorite?.({ type: 'folder', id: folderId });
-      else onAddFavorite?.({ type: 'folder', id: folderId });
+      if (isPinned) onUnpinItem?.({ type: 'folder', id: folderId });
+      else onPinItem?.({ type: 'folder', id: folderId });
     };
 
     const matchCount = isFiltering ? matchCountMap.get(folderId) ?? 0 : -1;
@@ -1296,6 +1297,10 @@ export function FolderTreeWithCards({
         rowBaseClassName={ROW_BASE}
         isDragging={isDragging}
         hasUpdateOrDelete={Boolean(onUpdateFolder || onDeleteFolder)}
+        menuOpen={openRowMenuId === `folder:${folderId}`}
+        onMenuOpenChange={(open) =>
+          setOpenRowMenuId(open ? `folder:${folderId}` : (prev) => (prev === `folder:${folderId}` ? null : prev))
+        }
         setRowRef={setRowRef}
         isDimmed={isDimmed}
         isFileDraggingOver={isFileDraggingOver}
@@ -1376,10 +1381,10 @@ export function FolderTreeWithCards({
   const renderDocument = (doc: DocumentItem, depth: number, _index: number) => {
     const docId = doc.id;
     const isSelected = selectedItem?.type === 'document' && selectedItem.id === docId;
-    const isPinned = favorites?.some((f) => f.type === 'document' && f.id === docId);
+    const isPinned = pinnedItems?.some((f) => f.type === 'document' && f.id === docId);
     const handleTogglePin = () => {
-      if (isPinned) onRemoveFavorite?.({ type: 'document', id: docId });
-      else onAddFavorite?.({ type: 'document', id: docId });
+      if (isPinned) onUnpinItem?.({ type: 'document', id: docId });
+      else onPinItem?.({ type: 'document', id: docId });
     };
 
     return (
@@ -1398,6 +1403,10 @@ export function FolderTreeWithCards({
         rowBaseClassName={ROW_BASE}
         setRowRef={setRowRef}
         isDragging={isDragging}
+        menuOpen={openRowMenuId === `document:${docId}`}
+        onMenuOpenChange={(open) =>
+          setOpenRowMenuId(open ? `document:${docId}` : (prev) => (prev === `document:${docId}` ? null : prev))
+        }
       />
     );
   };
@@ -1406,11 +1415,11 @@ export function FolderTreeWithCards({
     const cardId = card.id;
     const isSelected = selectedItem?.type === 'card' && selectedItem.id === cardId;
     const isEditing = editingId === cardId;
-    const isPinned = favorites?.some((f) => f.type === 'card' && f.id === cardId);
+    const isPinned = pinnedItems?.some((f) => f.type === 'card' && f.id === cardId);
 
     const handleTogglePin = () => {
-      if (isPinned) onRemoveFavorite?.({ type: 'card', id: cardId });
-      else onAddFavorite?.({ type: 'card', id: cardId });
+      if (isPinned) onUnpinItem?.({ type: 'card', id: cardId });
+      else onPinItem?.({ type: 'card', id: cardId });
     };
 
     return (
@@ -1439,6 +1448,10 @@ export function FolderTreeWithCards({
         isDragging={isDragging}
         hasUpdateOrDelete={Boolean(onUpdateCard || onDeleteCard)}
         isNewlyCreated={cardId === newlyCreatedCardId}
+        menuOpen={openRowMenuId === `card:${cardId}`}
+        onMenuOpenChange={(open) =>
+          setOpenRowMenuId(open ? `card:${cardId}` : (prev) => (prev === `card:${cardId}` ? null : prev))
+        }
       />
     );
   };
@@ -1519,3 +1532,4 @@ export function FolderTreeWithCards({
     </DragDropContext>
   );
 }
+

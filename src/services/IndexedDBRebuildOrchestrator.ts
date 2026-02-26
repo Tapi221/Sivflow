@@ -1,6 +1,8 @@
 import { getLocalDb } from './localDB';
 import { Dexie } from 'dexie';
 import { CloudSyncAdapter } from './logic/CloudSyncAdapter';
+import { sanitizeForLog } from '@/utils/logSanitizer';
+import { sanitizeBlobUrlsDeep, type BlobUrlFix } from '@/utils/blobUrlSanitizer';
 
 /**
  * IndexedDB 再構築オーケストレーター
@@ -11,6 +13,14 @@ import { CloudSyncAdapter } from './logic/CloudSyncAdapter';
  */
 export class IndexedDBRebuildOrchestrator {
   private static isRebuilding = false;
+
+  static isSupportedType(type: string): boolean {
+    return type === 'card' || type === 'folder' || type === 'cardRelation' || type === 'projectMap';
+  }
+
+  private static tableFromType(type: string): string {
+    return `${type}s`;
+  }
 
   /**
    * IndexedDB を再構築
@@ -23,10 +33,15 @@ export class IndexedDBRebuildOrchestrator {
     userId: string,
     reason?: string,
     onProgress?: (msg: string) => void
-  ): Promise<void> {
+  ): Promise<{
+    success: boolean;
+    degraded: boolean;
+    failures: Array<{ type: string; id: string; error: string; fixes?: BlobUrlFix[] }>;
+    insertedCount: number;
+  }> {
     if (this.isRebuilding) {
       console.warn('[Rebuild] Rebuild already in progress. Skipping.');
-      return;
+      return { success: true, degraded: false, failures: [], insertedCount: 0 };
     }
 
     if (!userId) {
@@ -49,7 +64,7 @@ export class IndexedDBRebuildOrchestrator {
       if (changes.length === 0) {
         console.log(`[Rebuild:${userId}] No data found in cloud. Skipping destructive rebuild.`);
         onProgress?.('クラウドにデータはありませんでした。');
-        return;
+        return { success: true, degraded: false, failures: [], insertedCount: 0 };
       }
 
       onProgress?.('データベースを再構築中...');
@@ -77,20 +92,47 @@ export class IndexedDBRebuildOrchestrator {
       onProgress?.(`${changes.length} 件のデータを復元中...`);
       
       // 6. 新しいDBにデータを流し込む
-      await newDb.transaction('rw', 
-        [newDb.folders, newDb.cards, newDb.users, newDb.userSettings, newDb.userStats, newDb.syncMetadata, newDb.levelHistories, newDb.deviceMeta, (newDb as any).tags, (newDb as any).cardRelations, (newDb as any).projectMaps], 
+      const failures: Array<{ type: string; id: string; error: string; fixes?: BlobUrlFix[] }> = [];
+      let insertedCount = 0;
+      await newDb.transaction('rw',
+        [newDb.folders, newDb.cards, newDb.users, newDb.userSettings, newDb.userStats, newDb.syncMetadata, newDb.levelHistories, newDb.deviceMeta, (newDb as any).tags, (newDb as any).cardRelations, (newDb as any).projectMaps],
         async () => {
           console.log(`[Rebuild] Inserting ${changes.length} items to fresh DB...`);
-          // 取得したデータを保存
           for (const change of changes) {
-            const table = `${change.type}s`;
-            if (table === 'cards' || table === 'folders' || table === 'cardRelations' || table === 'projectMaps') {
-              // トランザクション内なので await 可能
-              await newDb.upsert(table as any, change.data, true);
+            if (!this.isSupportedType(change.type)) continue;
+            const table = this.tableFromType(change.type);
+            const sanitizeResult = sanitizeBlobUrlsDeep(change.data);
+            if (sanitizeResult.changed) {
+              console.warn('[Rebuild] sanitize_blob_url', sanitizeForLog({
+                type: change.type,
+                id: change.id,
+                fixes: sanitizeResult.fixes,
+              }));
+            }
+
+            try {
+              await newDb.upsert(table as any, sanitizeResult.value, true);
+              insertedCount += 1;
+            } catch (error) {
+              const itemFailure = {
+                type: change.type,
+                id: change.id ?? sanitizeResult.value?.id ?? 'unknown',
+                error: error instanceof Error ? error.message : String(error),
+                fixes: sanitizeResult.changed ? sanitizeResult.fixes : undefined,
+              };
+              failures.push(itemFailure);
+              console.error('[Rebuild] rebuild_item_failed', sanitizeForLog(itemFailure));
+              continue;
             }
           }
         }
       );
+      if (failures.length > 0) {
+        console.error('[Rebuild] rebuild_partial_failures', sanitizeForLog({
+          count: failures.length,
+          failures: failures.slice(0, 20),
+        }));
+      }
       
       // 7. メタデータサービスでCLEANマークをつける（オプションだが推奨）
       // 循環参照回避のためダイナミックインポート
@@ -102,8 +144,14 @@ export class IndexedDBRebuildOrchestrator {
         console.warn('[Rebuild] Failed to mark clean state', e);
       }
 
-      console.log(`[Rebuild:${userId}] Rebuild complete with ${changes.length} items.`);
+      console.log(`[Rebuild:${userId}] Rebuild complete with ${insertedCount}/${changes.length} items.`);
       onProgress?.('再構築が完了しました');
+      return {
+        success: true,
+        degraded: failures.length > 0,
+        failures,
+        insertedCount,
+      };
       
     } catch (error) {
       console.error(`[Rebuild:${userId}] Rebuild failed:`, error);

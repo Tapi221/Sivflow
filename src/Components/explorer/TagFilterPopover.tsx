@@ -16,9 +16,15 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
   const {
     tagFilter,
     tagMatchMode,
+    uncertaintyFilter,
+    bookmarkedFilter,
+    draftFilter,
     toggleTag,
-    clearTagFilter,
+    clearAllFilters,
     setTagMatchMode,
+    setUncertaintyFilter,
+    setBookmarkedFilter,
+    setDraftFilter,
   } = useExplorerStore();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -45,7 +51,11 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
   }, [allTags, searchQuery]);
 
   // フィルタ有効状態
-  const isFilterActive = tagFilter.length > 0;
+  const isFilterActive =
+    tagFilter.length > 0 ||
+    uncertaintyFilter !== 'any' ||
+    bookmarkedFilter !== 'any' ||
+    draftFilter !== 'any';
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -57,7 +67,6 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
             isFilterActive ? "text-primary-600" : "text-slate-500",
             className
           )}
-          title="タグで絞り込み"
         >
           <Filter className="w-4 h-4" />
           {isFilterActive && (
@@ -84,7 +93,7 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
               <span className="text-xs font-semibold text-slate-800">タグで絞り込み</span>
               {isFilterActive && (
                 <button
-                  onClick={clearTagFilter}
+                  onClick={clearAllFilters}
                   className="text-[11px] px-2 py-0.5 rounded-md border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition-colors"
                 >
                   すべてクリア
@@ -138,6 +147,65 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
                 すべて (AND)
               </button>
             </div>
+          </div>
+
+          <div className="px-3 py-2 border-b border-slate-200/70 bg-white/70 space-y-2">
+            {[
+              {
+                label: 'はてな',
+                value: uncertaintyFilter,
+                onChange: setUncertaintyFilter,
+              },
+              {
+                label: '星',
+                value: bookmarkedFilter,
+                onChange: setBookmarkedFilter,
+              },
+              {
+                label: '下書き',
+                value: draftFilter,
+                onChange: setDraftFilter,
+              },
+            ].map((item) => (
+              <div key={item.label} className="flex items-center justify-between gap-2 text-[11px]">
+                <span className="text-slate-600">{item.label}:</span>
+                <div className="flex bg-white rounded border border-slate-200 p-0.5 shadow-sm">
+                  <button
+                    onClick={() => item.onChange('any')}
+                    className={cn(
+                      'px-2 py-0.5 rounded transition-colors',
+                      item.value === 'any'
+                        ? 'bg-primary-100 text-primary-800 font-medium'
+                        : 'text-slate-600 hover:text-slate-800 hover:bg-slate-50'
+                    )}
+                  >
+                    指定なし
+                  </button>
+                  <button
+                    onClick={() => item.onChange('on')}
+                    className={cn(
+                      'px-2 py-0.5 rounded transition-colors',
+                      item.value === 'on'
+                        ? 'bg-primary-100 text-primary-800 font-medium'
+                        : 'text-slate-600 hover:text-slate-800 hover:bg-slate-50'
+                    )}
+                  >
+                    あり
+                  </button>
+                  <button
+                    onClick={() => item.onChange('off')}
+                    className={cn(
+                      'px-2 py-0.5 rounded transition-colors',
+                      item.value === 'off'
+                        ? 'bg-primary-100 text-primary-800 font-medium'
+                        : 'text-slate-600 hover:text-slate-800 hover:bg-slate-50'
+                    )}
+                  >
+                    なし
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
 
           {/* Tag List */}

@@ -609,7 +609,6 @@ export function PdfPane({ doc, className, viewerOptions, onDocumentUpdate }: Pdf
             onClick={handleOpenNewTab}
             disabled={!effectiveRemoteUrl && !localBlobUrl}
             className="ml-1"
-            title="新しいタブで開く"
           >
             <ExternalLink className="w-4 h-4" />
           </Button>

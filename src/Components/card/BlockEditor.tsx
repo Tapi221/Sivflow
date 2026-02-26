@@ -8,7 +8,6 @@ import React, {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { Droppable, Draggable } from '@hello-pangea/dnd';
-import { Plus } from 'lucide-react';
 
 import { BlockToolbar } from './BlockToolbar';
 import { TextBlock } from './blocks/TextBlock';
@@ -52,8 +51,6 @@ interface BlockEditorProps {
   customPlaceholders?: Record<number, string>;
   hideToolbar?: boolean;
 
-  emptyAddDefaultType?: CardBlock['type'];
-
   onDelete?: (index: number) => void;
   minDeletableIndex?: number;
   hiddenBlockTypes?: CardBlock['type'][];
@@ -66,7 +63,7 @@ const ROW_STEP_PX = CARD_ROW_PX;
 
 const isEditableTarget = (target: EventTarget | null) => {
   if (!(target instanceof HTMLElement)) return false;
-  return !!target.closest('input, textarea, select, [contenteditable="true"]');
+  return !!target.closest('input, textarea, select, [contenteditable]');
 };
 
     // resize を rAF で間引く
@@ -110,6 +107,7 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
       customPlaceholders,
       hideToolbar = false,
       onDelete,
+      minDeletableIndex = 0,
       hiddenBlockTypes = [],
       toolbarMountRef,
     },
@@ -126,24 +124,34 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
       () => orderedBlocks.filter((b) => b.type === 'reference' || b.type === 'audio'),
       [orderedBlocks]
     );
+    const nonBodyBlocksRef = useRef<CardBlock[]>(nonBodyBlocks);
+    useEffect(() => {
+      nonBodyBlocksRef.current = nonBodyBlocks;
+    }, [nonBodyBlocks]);
     const bodyBlocks = useMemo(
       () => orderedBlocks.filter((b) => b.type !== 'reference' && b.type !== 'audio'),
       [orderedBlocks]
     );
 
+    const reindexBlocks = useCallback(
+      (arr: CardBlock[]) => arr.map((b, i) => ({ ...b, orderIndex: i })),
+      []
+    );
+
     // このエディタが責任を持つのは bodyBlocks のみ。emit 時に nonBody を末尾へ保持する。
     const emitChange = useCallback(
-      (nextBodyBlocks: CardBlock[]) => {
-        const normalized = [...nextBodyBlocks, ...nonBodyBlocks].map((b, i) => ({
-          ...b,
-          orderIndex: i,
-        }));
-        onChange(normalized);
+      (nextBodyBlocks: CardBlock[], opts?: { reindex?: boolean }) => {
+        const merged = [...nextBodyBlocks, ...nonBodyBlocksRef.current];
+        onChange(opts?.reindex ? reindexBlocks(merged) : merged);
       },
-      [nonBodyBlocks, onChange]
+      [onChange, reindexBlocks]
     );
 
     const [pendingUploads, setPendingUploads] = useState<Record<string, File>>({});
+    const pendingUploadsRef = useRef<Record<string, File>>({});
+    useEffect(() => {
+      pendingUploadsRef.current = pendingUploads;
+    }, [pendingUploads]);
 
     // stale 回避用のスナップショット（唯一の真実は props と emitChange）
     const blocksRef = useRef<CardBlock[]>(bodyBlocks);
@@ -230,37 +238,81 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
         clampYMin,
         clampYMax,
         scale = 1,
+        extraTranslateY = 0,
       }: {
         clampXMin?: number;
         clampXMax?: number;
         clampYMin?: number;
         clampYMax?: number;
         scale?: number;
+        extraTranslateY?: number;
       }
     ) => {
+      if (!style) {
+        return extraTranslateY
+          ? ({ transform: `translateY(${extraTranslateY}px)` } as React.CSSProperties)
+          : style;
+      }
+
       const s = style as DndStyle | any;
-      if (!s) return style;
 
       const result: any = { ...style };
 
       // transform 補正 (translate)
       if (s.transform) {
-        const match = String(s.transform).match(
-          /translate(?:3d)?\(([-\d.]+)px,\s*([-\d.]+)px/
-        );
-        if (match) {
-          let x = parseFloat(match[1]) / scale;
-          let y = parseFloat(match[2]) / scale;
+        const transform = String(s.transform);
+        try {
+          if (typeof DOMMatrixReadOnly !== 'undefined' && typeof DOMMatrix !== 'undefined') {
+            const ro = new DOMMatrixReadOnly(transform);
+            let x = ro.m41 / scale;
+            let y = ro.m42 / scale;
 
-          if (clampXMin !== undefined) x = Math.max(x, clampXMin);
-          if (clampXMax !== undefined) x = Math.min(x, clampXMax);
-          if (clampYMin !== undefined) y = Math.max(y, clampYMin);
-          if (clampYMax !== undefined) y = Math.min(y, clampYMax);
+            if (clampXMin !== undefined) x = Math.max(x, clampXMin);
+            if (clampXMax !== undefined) x = Math.min(x, clampXMax);
+            if (clampYMin !== undefined) y = Math.max(y, clampYMin);
+            if (clampYMax !== undefined) y = Math.min(y, clampYMax);
+            y += extraTranslateY;
 
-          result.transform = String(s.transform).includes('3d')
-            ? `translate3d(${x}px, ${y}px, 0px)`
-            : `translate(${x}px, ${y}px)`;
+            const m = new DOMMatrix(transform);
+            m.m41 = x;
+            m.m42 = y;
+            result.transform = m.toString();
+          } else {
+            const match = transform.match(
+              /translate(?:3d)?\(([-\d.]+)px,\s*([-\d.]+)px(?:,\s*([-\d.]+)px)?\)/
+            );
+            if (!match) {
+              if (extraTranslateY) {
+                const base = transform === 'none' ? '' : `${transform} `;
+                result.transform = `${base}translateY(${extraTranslateY}px)`.trim();
+              }
+              return result as React.CSSProperties;
+            }
+
+            let x = parseFloat(match[1]) / scale;
+            let y = parseFloat(match[2]) / scale;
+
+            if (clampXMin !== undefined) x = Math.max(x, clampXMin);
+            if (clampXMax !== undefined) x = Math.min(x, clampXMax);
+            if (clampYMin !== undefined) y = Math.max(y, clampYMin);
+            if (clampYMax !== undefined) y = Math.min(y, clampYMax);
+            y += extraTranslateY;
+
+            const is3d = /translate3d\(/.test(transform);
+            const z = match[3] ?? '0';
+            result.transform = transform.replace(
+              /translate(?:3d)?\(([-\d.]+)px,\s*([-\d.]+)px(?:,\s*([-\d.]+)px)?\)/,
+              is3d ? `translate3d(${x}px, ${y}px, ${z}px)` : `translate(${x}px, ${y}px)`
+            );
+          }
+        } catch {
+          if (extraTranslateY) {
+            const base = transform === 'none' ? '' : `${transform} `;
+            result.transform = `${base}translateY(${extraTranslateY}px)`.trim();
+          }
         }
+      } else if (extraTranslateY) {
+        result.transform = `translateY(${extraTranslateY}px)`;
       }
 
       return result as React.CSSProperties;
@@ -291,14 +343,20 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
       const surfaceStyle = window.getComputedStyle(surfaceEl);
       const ruledTopOffsetPx = Math.max(0, Number.parseFloat(surfaceStyle.getPropertyValue('--ruled-offset-px')) || 0);
       const ruledBottomOffsetPx = Math.max(0, Number.parseFloat(surfaceStyle.getPropertyValue('--ruled-bottom-offset-px')) || 0);
+      const rawSurfaceScaleY =
+        surfaceEl.offsetHeight > 0 ? surfaceRect.height / surfaceEl.offsetHeight : 1;
+      const surfaceScaleY =
+        Number.isFinite(rawSurfaceScaleY) && rawSurfaceScaleY > 0 ? rawSurfaceScaleY : 1;
+      const stepPx = ROW_STEP_PX * surfaceScaleY;
+      const epsilon = stepPx * 0.01;
 
-      const topLineY = surfaceRect.top + ruledTopOffsetPx;
-      const bottomLineY = surfaceRect.bottom - ruledBottomOffsetPx;
+      const topLineY = surfaceRect.top + ruledTopOffsetPx * surfaceScaleY;
+      const bottomLineY = surfaceRect.bottom - ruledBottomOffsetPx * surfaceScaleY;
       const minAnchorTopY = useContentTopForMin
-        ? rowRect.top + currentOffset * ROW_STEP_PX
+        ? rowRect.top + currentOffset * stepPx
         : rowRect.top;
-      const upRows = Math.floor((minAnchorTopY - topLineY) / ROW_STEP_PX);
-      const downRows = Math.floor((bottomLineY - rowRect.bottom) / ROW_STEP_PX);
+      const upRows = Math.floor((minAnchorTopY - topLineY + epsilon) / stepPx);
+      const downRows = Math.floor((bottomLineY - rowRect.bottom + epsilon) / stepPx);
 
       return {
         min: currentOffset - Math.max(0, upRows),
@@ -334,21 +392,21 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
         insertIndex++;
       }
 
-      setPendingUploads((prev) => {
-        const next = { ...prev };
-        for (const entry of pendingEntries) {
-          next[entry.id] = entry.file;
-        }
-        return next;
-      });
+      const nextPending = { ...pendingUploadsRef.current };
+      for (const entry of pendingEntries) {
+        nextPending[entry.id] = entry.file;
+      }
+      pendingUploadsRef.current = nextPending;
+      setPendingUploads(nextPending);
       blocksRef.current = newBlocks;
-      emitChange(newBlocks);
+      emitChange(newBlocks, { reindex: true });
     };
 
     const handleConsumeInitialFile = (blockId: string) => {
       setPendingUploads((prev) => {
         const next = { ...prev };
         delete next[blockId];
+        pendingUploadsRef.current = next;
         return next;
       });
     };
@@ -362,10 +420,17 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
       const tailRowOffset = (() => {
         for (let i = source.length - 1; i >= 0; i -= 1) {
           const b = source[i];
-          if (isGridOffsetType(b.type) && b.offsetRows !== undefined) {
-            return getNormalizedGridOffsetRows(b);
-          }
+          if (!isRowPositionableType(b.type) || isGridOffsetType(b.type)) continue;
           if (b.rowOffset !== undefined) return Math.round(Number(b.rowOffset ?? 0));
+        }
+        return 0;
+      })();
+
+      const tailGridOffsetRows = (() => {
+        for (let i = source.length - 1; i >= 0; i -= 1) {
+          const b = source[i];
+          if (!isGridOffsetType(b.type)) continue;
+          return getNormalizedGridOffsetRows(b);
         }
         return 0;
       })();
@@ -380,13 +445,13 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
         math: type === 'math' ? { latex: '', displayMode: 'block' } : undefined,
         markdown: type === 'markdown' ? '' : undefined,
         rowOffset: isRowPositionableType(type) && !isGridOffsetType(type) ? tailRowOffset : undefined,
-        offsetRows: isGridOffsetType(type) ? Math.max(0, tailRowOffset) : undefined,
+        offsetRows: isGridOffsetType(type) ? Math.max(0, tailGridOffsetRows) : undefined,
         orderIndex: 0,
       };
 
       const next = [...source, newBlock];
       blocksRef.current = next;
-      emitChange(next);
+      emitChange(next, { reindex: true });
     };
 
     const handleUpdateBlock = (id: string, updates: Partial<CardBlock>) => {
@@ -397,6 +462,7 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
     };
 
     const handleDeleteBlock = (id: string, index?: number) => {
+      if (index != null && index < minDeletableIndex) return;
       if (onDelete && index !== undefined) {
         onDelete(index);
         return;
@@ -405,7 +471,7 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
       const source = blocksRef.current;
       const next = source.filter((b) => b.id !== id);
       blocksRef.current = next;
-      emitChange(next);
+      emitChange(next, { reindex: true });
     };
 
     const handleDuplicateBlock = (id: string) => {
@@ -429,7 +495,7 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
       const next = [...source];
       next.splice(index + 1, 0, duplicate);
       blocksRef.current = next;
-      emitChange(next);
+      emitChange(next, { reindex: true });
     };
 
     const handleShiftBlockRow = (blockId: string, direction: 'up' | 'down') => {
@@ -560,29 +626,17 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
                     const rowOffsetPx = rowMovable && !isGridOffsetBlock ? rowOffsetRows * ROW_STEP_PX : 0;
                     const gridOffsetPx = isGridOffsetBlock ? rowOffsetRows * ROW_STEP_PX : 0;
 
-                    const currentOffset = rowMovable ? rowOffsetRows : 0;
                     const canMoveUp = rowMovable;
                     const canMoveDown = rowMovable;
 
                     const dragStyle = clampDragStyle(provided.draggableProps.style, {
                       clampXMin: 0,
                       clampXMax: 0,
-                      clampYMin: index === 0 ? 0 : undefined,
+                      // finalY = dndY + rowOffsetPx >= 0
+                      clampYMin: index === 0 ? -rowOffsetPx : undefined,
                       scale: measurement.scale,
+                      extraTranslateY: rowOffsetPx,
                     }) as React.CSSProperties | undefined;
-
-                    const baseTransform = dragStyle?.transform ? String(dragStyle.transform) : '';
-                    const offsetTransform = rowOffsetPx !== 0 ? `translateY(${rowOffsetPx}px)` : '';
-                    const mergedTransform = [baseTransform, offsetTransform]
-                      .filter(Boolean)
-                      .join(' ')
-                      .trim();
-
-                    const mergedStyle: React.CSSProperties | undefined = dragStyle
-                      ? { ...dragStyle, transform: mergedTransform || dragStyle.transform }
-                      : mergedTransform
-                      ? { transform: mergedTransform }
-                      : undefined;
 
                     const isDndDisabled = false;
 
@@ -598,7 +652,7 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
                         data-block-row="true"
                         data-row-offset-applied={rowOffsetPx ? 'true' : undefined}
                         data-active={snapshot.isDragging ? 'true' : 'false'}
-                        style={mergedStyle}
+                        style={dragStyle}
                       >
                         {/* DnD 並び替え用の“掴み帯”（BlockWrapperのグリップは1行移動専用） */}
                         {!isDndDisabled && (
@@ -676,7 +730,7 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
                             dragHandleClassName="js-block-drag-handle"
                             accentColor={accentColor}
                             isActive={snapshot.isDragging}
-                            initialFile={pendingUploads[block.id]}
+                            initialFile={pendingUploads[block.id] ?? pendingUploadsRef.current[block.id]}
                             onConsumeInitialFile={() => handleConsumeInitialFile(block.id)}
                             onFilesExcess={(files) => handleBlockOverflow(block.id, files)}
                             onMoveUp={() => handleShiftBlockRow(block.id, 'up')}
@@ -769,7 +823,7 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
                               updated.splice(index, 1, ...newBlocks);
 
                               blocksRef.current = updated;
-                              emitChange(updated);
+                              emitChange(updated, { reindex: true });
                             }}
                           />
                         )}
@@ -780,15 +834,6 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
               ))}
 
               {provided.placeholder}
-
-              {bodyBlocks.length === 0 && (
-                <div className="flex min-h-[112px] flex-col items-center justify-center rounded-[40px] border-2 border-dashed border-slate-100 bg-slate-50/30 px-4 py-4 text-center">
-                  <Plus className="h-8 w-8 text-slate-200" />
-                  <p className="m-0 mt-2 text-xs font-bold leading-tight text-slate-300 tracking-widest">
-                    ブロックを追加してください
-                  </p>
-                </div>
-              )}
             </div>
           )}
         </Droppable>

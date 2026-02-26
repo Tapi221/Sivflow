@@ -1,4 +1,4 @@
-import type { ITelemetryService, LogLevel, LogContext, SyncLogEntry } from '../../types/telemetry';
+import type { ITelemetryService, LogLevel, LogContext, SyncLogEntry, TelemetryEventName } from '../../types/telemetry';
 import { sanitizeForLog } from '@/utils/logSanitizer';
 
 /**
@@ -28,6 +28,30 @@ export class TelemetryService implements ITelemetryService {
     logMethod(`[${level.toUpperCase()}] ${message}`, sanitizeForLog(context), sanitizeForLog(error));
 
     // ログの保持数制限（メモリリーク防止）
+    if (this.logs.length > 1000) {
+      this.logs.shift();
+    }
+  }
+
+  logEvent(
+    eventName: TelemetryEventName,
+    level: LogLevel,
+    message: string,
+    context?: LogContext,
+    error?: Error
+  ): void {
+    const entry: SyncLogEntry = {
+      timestamp: new Date().toISOString(),
+      level,
+      eventName,
+      message,
+      context: sanitizeForLog(context || {}),
+      error,
+    };
+
+    this.logs.push(entry);
+    const logMethod = level === 'error' ? console.error : level === 'warn' ? console.warn : console.log;
+    logMethod(`[${level.toUpperCase()}] ${eventName}: ${message}`, sanitizeForLog(context), sanitizeForLog(error));
     if (this.logs.length > 1000) {
       this.logs.shift();
     }

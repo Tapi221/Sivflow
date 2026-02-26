@@ -335,7 +335,7 @@ export default function Calendar() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F7FA] text-slate-800 font-serif selection:bg-indigo-100 selection:text-indigo-900 p-4 md:p-8 flex flex-col">
+    <div className="min-h-screen bg-[#F5F7FA] text-slate-800 selection:bg-indigo-100 selection:text-indigo-900 p-4 md:p-8 flex flex-col">
         {/* Top Header */}
         <div className="flex flex-col sm:flex-row items-center sm:items-center justify-start mb-2 md:mb-6 w-full max-w-[1400px] mx-auto gap-4">
             <div className="flex items-center gap-4 w-full md:w-auto">

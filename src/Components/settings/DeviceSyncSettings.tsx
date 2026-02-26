@@ -284,7 +284,7 @@ export const DeviceSyncSettings: React.FC = () => {
                           )}
                         </h3>
                       )}
-                      <p className="text-[10px] text-slate-400 font-mono mt-1">{device.deviceId}</p>
+                      <p className="text-[10px] text-slate-400 font-serif mt-1">{device.deviceId}</p>
                     </div>
                     <div className="flex items-center gap-2 ml-4">
                       <span className={`px-2.5 py-1 text-[10px] rounded-full font-bold border ${

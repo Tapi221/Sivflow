@@ -78,6 +78,7 @@ export const MathBlock: React.FC<MathBlockProps> = ({
     <BlockWrapper
       onDelete={onDelete}
       onDuplicate={onDuplicate}
+      className={cn(latex.trim().length > 0 && 'border-transparent')}
       dragHandleProps={dragHandleProps}
       dragHandleClassName={dragHandleClassName}
       label="Math"

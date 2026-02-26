@@ -247,7 +247,6 @@ const SidebarRail = React.forwardRef(({ className, ...props }, ref) => {
       aria-label="Toggle Sidebar"
       tabIndex={-1}
       onClick={toggleSidebar}
-      title="Toggle Sidebar"
       className={cn(
         "absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] hover:after:bg-sidebar-border group-data-[side=left]:-right-4 group-data-[side=right]:left-0 sm:flex",
         "[[data-side=left]_&]:cursor-w-resize [[data-side=right]_&]:cursor-e-resize",
@@ -439,26 +438,12 @@ const SidebarMenuButton = React.forwardRef((
     isActive = false,
     variant = "default",
     size = "default",
-    tooltip,
     className,
     ...props
   },
   ref
 ) => {
   const Comp = asChild ? Slot : "button"
-  let tooltipTitle
-  if (typeof tooltip === "string") {
-    tooltipTitle = tooltip
-  } else if (tooltip && typeof tooltip === "object" && typeof tooltip.children === "string") {
-    tooltipTitle = tooltip.children
-  }
-
-  const fallbackA11yProps = tooltipTitle
-    ? {
-      title: tooltipTitle,
-      "aria-label": props["aria-label"] ?? tooltipTitle,
-    }
-    : {}
 
   const button = (
     <Comp
@@ -467,7 +452,6 @@ const SidebarMenuButton = React.forwardRef((
       data-size={size}
       data-active={isActive}
       className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
-      {...fallbackA11yProps}
       {...props} />
   )
 

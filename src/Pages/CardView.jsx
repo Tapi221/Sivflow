@@ -65,7 +65,7 @@ export default function CardView() {
   }
   
   return (
-    <div className="min-h-screen bg-[#F5F7F8] text-slate-800 font-serif">
+    <div className="min-h-screen bg-[#F5F7F8] text-slate-800">
       <div className="max-w-[1600px] mx-auto p-2 md:pt-8 md:pb-8 md:px-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-4 px-2">

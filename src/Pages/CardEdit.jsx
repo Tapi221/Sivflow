@@ -367,7 +367,7 @@ export default function CardEdit() {
   
   if (cardId && cardsLoading) {
     return (
-      <div className="min-h-screen bg-[#F5F7F8] text-slate-800 font-serif p-6 md:p-14">
+      <div className="min-h-screen bg-[#F5F7F8] text-slate-800 p-6 md:p-14">
         <div className="max-w-[1400px] mx-auto space-y-4">
           <Skeleton className="h-10 w-48" />
           <Skeleton className="h-[600px] w-full" />
@@ -377,7 +377,7 @@ export default function CardEdit() {
   }
   
   return (
-    <div className="min-h-screen bg-[#F5F7F8] text-slate-800 font-serif">
+    <div className="min-h-screen bg-[#F5F7F8] text-slate-800">
       <div className="max-w-[1400px] mx-auto px-0 pb-0 md:pt-8 md:pb-0 md:px-4">
         {/* Header */}
         <div
@@ -432,7 +432,6 @@ export default function CardEdit() {
                                   onClick={() => handleMoveEditor(index, 'up')}
                                   disabled={index === 0}
                                   className="p-1.5 hover:bg-slate-50 text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors border-r border-slate-100"
-                                  title="上へ移動"
                                 >
                                   <ChevronUp className="w-4 h-4" />
                                 </button>
@@ -440,7 +439,6 @@ export default function CardEdit() {
                                   onClick={() => handleMoveEditor(index, 'down')}
                                   disabled={index === editors.length - 1}
                                   className="p-1.5 hover:bg-slate-50 text-slate-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                                  title="下へ移動"
                                 >
                                   <ChevronDown className="w-4 h-4" />
                                 </button>
@@ -449,7 +447,6 @@ export default function CardEdit() {
                               <div
                                 {...provided.dragHandleProps}
                                 className="p-1.5 cursor-grab active:cursor-grabbing rounded-full bg-white shadow-sm border border-slate-200 text-slate-400 hover:text-slate-600 transition-colors hidden md:flex"
-                                title="ドラッグして並べ替え"
                               >
                                 <GripVertical className="w-4 h-4" />
                               </div>
@@ -459,7 +456,6 @@ export default function CardEdit() {
                                 size="icon"
                                 onClick={() => handleDeleteEditor(editor.id)}
                                 className="w-8 h-8 rounded-full bg-white shadow-sm border border-slate-200 text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all"
-                                title="このカードを削除"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </Button>
@@ -476,7 +472,6 @@ export default function CardEdit() {
                                   onClick={() => handleMoveEditor(index, 'up')}
                                   disabled={index === 0}
                                   className="h-10 min-w-10 px-2 rounded-xl border border-slate-200 bg-white text-slate-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                                  title="上へ移動"
                                 >
                                   <ChevronUp className="w-4 h-4 mx-auto" />
                                 </button>
@@ -484,7 +479,6 @@ export default function CardEdit() {
                                   onClick={() => handleMoveEditor(index, 'down')}
                                   disabled={index === editors.length - 1}
                                   className="h-10 min-w-10 px-2 rounded-xl border border-slate-200 bg-white text-slate-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                                  title="下へ移動"
                                 >
                                   <ChevronDown className="w-4 h-4 mx-auto" />
                                 </button>
@@ -493,7 +487,6 @@ export default function CardEdit() {
                                   size="icon"
                                   onClick={() => handleDeleteEditor(editor.id)}
                                   className="h-10 w-10 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-red-500 hover:bg-red-50 transition-colors"
-                                  title="このカードを削除"
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </Button>

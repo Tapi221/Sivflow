@@ -2,6 +2,7 @@ import React from 'react';
 import { Image as ImageIcon } from 'lucide-react';
 import { BlockWrapper } from './BlockWrapper';
 import { ImageBlockContent } from './ImageBlockContent';
+import { cn } from '@/lib/utils';
 
 interface MediaBlockProps {
   data: any[];
@@ -48,11 +49,13 @@ export const MediaBlock = ({
   onMoveDragStart,
   onMoveDragEnd,
 }: MediaBlockProps) => {
+  const isMediaEmpty = data.length === 0 && !initialFile;
+
   return (
     <BlockWrapper
       onDelete={onDelete}
       onDuplicate={onDuplicate}
-      className="px-0 border-transparent"
+      className={cn('px-0', !isMediaEmpty && 'border-transparent')}
       contentClassName="px-0"
       dragHandleProps={dragHandleProps}
       dragHandleClassName={dragHandleClassName}

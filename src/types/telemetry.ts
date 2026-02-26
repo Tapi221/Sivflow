@@ -3,6 +3,11 @@ export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 export type SyncContextSource = 'user_initiated' | 'background' | 'periodic' | 'force_resync' | 'system';
 
 export type NetworkStatus = 'excellent' | 'good' | 'poor' | 'offline';
+export type TelemetryEventName =
+  | 'startup_degraded'
+  | 'sanitize_blob_url_from_cloud'
+  | 'rebuild_item_failed'
+  | 'rebuild_partial_failures';
 
 export interface LogContext {
   userId?: string;
@@ -32,6 +37,7 @@ export interface SyncLogEntry {
   timestamp: string;
   level: LogLevel;
   message: string;
+  eventName?: TelemetryEventName;
   context: LogContext;
   error?: Error;
   metrics?: SystemMetrics | UserMetrics;
@@ -43,6 +49,7 @@ export interface SyncLogEntry {
 
 export interface ITelemetryService {
   log(level: LogLevel, message: string, context?: LogContext, error?: Error): void;
+  logEvent(eventName: TelemetryEventName, level: LogLevel, message: string, context?: LogContext, error?: Error): void;
   recordMetric(name: string, value: number, tags?: Record<string, string>): void;
   startTransaction(name: string): { end: (status: 'success' | 'failure') => void };
 }

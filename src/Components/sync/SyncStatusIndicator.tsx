@@ -140,8 +140,7 @@ export function SyncStatusIndicator({
     )}>
       {/* メインのアイコン＆ステータス部分 */}
       <div
-        onClick={() => !compact && setIsExpanded(!isExpanded)} // compact時はクリック無効
-        title={compact ? getStatusText() : (isExpanded ? "詳細を閉じる" : "詳細を表示（クリック）")}
+        onClick={() => !compact && setIsExpanded(!isExpanded)}
         className={cn(
           'flex items-center gap-2 px-2.5 py-1.5 rounded-full transition-all duration-300 motion-reduce:transition-none',
           compact && 'px-1.5 py-1 gap-0', // compact時は小さく
@@ -173,7 +172,6 @@ export function SyncStatusIndicator({
               {!navigator.onLine && (
                 <div 
                   className="flex items-center gap-1 px-1 text-orange-600"
-                  title="オフライン状態です"
                 >
                   <CloudOff className="w-3.5 h-3.5" />
                 </div>
@@ -195,7 +193,6 @@ export function SyncStatusIndicator({
                         e.stopPropagation();
                         setConflictDialogOpen(true);
                       }}
-                      title={`${conflictCount}件の競合があります`}
                     >
                       <AlertTriangle className="w-2.5 h-2.5 mr-0.5" />
                       {conflictCount}
@@ -215,7 +212,6 @@ export function SyncStatusIndicator({
                   onClick={triggerSync}
                   disabled={syncStatus === 'syncing' || !navigator.onLine}
                   className="h-7 w-7 text-slate-500 hover:text-primary-600 hover:bg-white/30 rounded-full transition-colors"
-                  title="今すぐ同期"
                 >
                   <RefreshCw
                     className={cn(

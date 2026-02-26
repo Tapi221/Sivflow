@@ -153,7 +153,6 @@ export default function ExportDialog({ open, onOpenChange }: ExportDialogProps) 
                     エクスポートするフォルダを選択:
                   </Label>
                   <select
-                    title="エクスポート対象フォルダを選択"
                     value={selectedFolderId || ''}
                     onChange={(e) => setSelectedFolderId(e.target.value || null)}
                     className="w-full p-2 border rounded-lg text-sm"

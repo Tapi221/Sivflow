@@ -7,6 +7,7 @@ import { normalizeMemoryStability } from '../utils/reviewUtils';
 import { useUserSettings, DEFAULT_SETTINGS } from './useUserSettings';
 import type { Card } from '../types';
 import { normalizeInkDocument } from '@/Components/ink/inkTypes';
+import { DEFAULT_LAYOUT_ROWS, normalizeLayoutRows } from '@/domain/card/extraRows';
 
 // 空カード判定用のヘルパー関数（createCard と updateCard で共通利用）
 function isCardDeleted(
@@ -32,24 +33,6 @@ function hasBlocksContent(blocks?: any[]): boolean {
     if (b.type === 'reference') return b.references?.some((r: any) => r.url?.trim());
     return false;
   }) || false;
-}
-
-function isCardCompletelyEmpty(cardData: Partial<Card>): boolean {
-  const questionInk = normalizeInkDocument(cardData.inkQuestion);
-  const answerInk = normalizeInkDocument(cardData.inkAnswer);
-  const hasInk =
-    (questionInk.strokes?.length ?? 0) > 0 ||
-    (answerInk.strokes?.length ?? 0) > 0;
-
-  return (
-    !cardData.title?.trim() && 
-    !cardData.tags?.length && 
-    !hasBlocksContent(cardData.questionBlocks) && 
-    !hasBlocksContent(cardData.answerBlocks) &&
-    !cardData.questionText?.trim() && // Legacy support
-    !cardData.answerText?.trim() &&   // Legacy support
-    !hasInk
-  );
 }
 
 export function useCards(folderId?: string) {
@@ -177,7 +160,7 @@ export function useCards(folderId?: string) {
       orderIndex,
       questionNumber,
       title: cardData.title || '',
-      isDraft: cardData.isDraft ?? true,
+      isDraft: cardData.isDraft ?? false,
       // 新規作成時は必ず isDeleted: false で保存
       isDeleted: false,
       hasUncertainty: cardData.hasUncertainty ?? false,
@@ -197,6 +180,9 @@ export function useCards(folderId?: string) {
       // Ensure blocks are carried over from cardData
       questionBlocks: cardData.questionBlocks || [],
       answerBlocks: cardData.answerBlocks || [],
+      layoutRows: normalizeLayoutRows(
+        (cardData as any).layoutRows ?? (cardData as any).layout_rows ?? DEFAULT_LAYOUT_ROWS
+      ),
       inkQuestion: normalizeInkDocument(cardData.inkQuestion),
       inkAnswer: normalizeInkDocument(cardData.inkAnswer),
       memoryStability: 0,
@@ -243,13 +229,6 @@ export function useCards(folderId?: string) {
       );
     }
 
-    // 空カードは自動削除しない。
-    // 新規作成直後/オートセーブ直後に「消える」体験を防ぐため、
-    // 空なら下書き状態を維持する。
-    if (isCardCompletelyEmpty(mergedCard) && patch.isDraft === undefined) {
-      patch.isDraft = true;
-    }
-    
     // 通常の更新処理
     await db.updateItem('cards', id, {
       ...patch,

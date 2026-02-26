@@ -218,7 +218,7 @@ export default function DataRescuePanel() {
                                             <span className="font-bold text-slate-200 text-sm">
                                                 Backup Data
                                             </span>
-                                            <span className="text-[10px] bg-white/10 text-slate-400 px-1.5 py-0.5 rounded font-mono border border-white/10">
+                                            <span className="text-[10px] bg-white/10 text-slate-400 px-1.5 py-0.5 rounded font-serif border border-white/10">
                                                 {d.name?.slice(-8)}
                                             </span>
                                         </div>
@@ -335,7 +335,7 @@ export default function DataRescuePanel() {
             
             {/* Logs Area */}
             {logs.length > 0 && (
-                <div className="p-3 bg-black/40 rounded-lg border border-white/10 font-mono text-[9px] text-emerald-400 max-h-40 overflow-y-auto custom-scrollbar">
+                <div className="p-3 bg-black/40 rounded-lg border border-white/10 font-serif text-[9px] text-emerald-400 max-h-40 overflow-y-auto custom-scrollbar">
                     {logs.map((log, i) => (
                         <div key={i}>{log}</div>
                     ))}

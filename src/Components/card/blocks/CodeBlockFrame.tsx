@@ -44,7 +44,6 @@ export const CodeBlockFrame: React.FC<CodeBlockFrameProps> = ({
           // ラベルクリックで親のカード選択やD&Dに干渉しにくくする
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => e.stopPropagation()}
-          title={languageTitle ?? languageLabel}
           aria-label={`Language: ${languageTitle ?? languageLabel}`}
         >
           <span className="codeBlockLang">{languageLabel}</span>

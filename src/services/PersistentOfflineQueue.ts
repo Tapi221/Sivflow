@@ -2,6 +2,7 @@ import { strictValidateBeforeSave } from '@/utils/imageValidation';
 import type { UploadedImage } from '@/types';
 import { getLocalDb, isBackingStoreOpenError } from '@/services/localDB';
 import { warnOncePerSession } from '@/services/localDBRuntimeState';
+import { auth } from '@/services/firebase';
 
 interface QueueItem {
   id: string;
@@ -220,6 +221,7 @@ class PersistentOfflineQueue {
 
           // ドキュメント（PDF/PPTX）の場合は documents テーブルも更新（remoteUrl反映）
           const isDocumentItem = this.isDocumentQueueItem(item);
+          const isAssetLikeImageItem = !isDocumentItem && item.fileType.startsWith('image/');
           if (isDocumentItem) {
             const localDb = await getLocalDb();
             const existingDoc = await localDb.documents.get(updatedImage.id);
@@ -242,6 +244,43 @@ class PersistentOfflineQueue {
               });
             }
           }
+
+          if (isAssetLikeImageItem) {
+            const localDb = await getLocalDb();
+            const existingAsset = await localDb.images.get(updatedImage.id);
+            const now = new Date();
+            await localDb.images.put({
+              ...(existingAsset as any ?? {}),
+              id: updatedImage.id,
+              userId: auth.currentUser?.uid ?? (existingAsset as any)?.userId ?? '',
+              mime: item.fileType || (existingAsset as any)?.mime || 'application/octet-stream',
+              size: item.fileData.byteLength ?? (existingAsset as any)?.size ?? 0,
+              localBlobId: (existingAsset as any)?.localBlobId ?? updatedImage.localFileId ?? updatedImage.id,
+              localStatus: (existingAsset as any)?.localStatus ?? 'present',
+              remoteKey: updatedImage.storagePath ?? (existingAsset as any)?.remoteKey ?? null,
+              remoteStatus: 'ready',
+              remoteUrlCache: updatedImage.remoteUrl ?? (existingAsset as any)?.remoteUrlCache ?? null,
+              updatedAt: now,
+              createdAt: (existingAsset as any)?.createdAt ?? now,
+              retryCount: 0,
+            } as any);
+
+            const pendingAssetSyncItems = await localDb.syncQueue
+              .where('targetId')
+              .equals(updatedImage.id)
+              .filter((q: any) => q.entity === 'asset')
+              .toArray();
+            if (pendingAssetSyncItems.length > 0) {
+              await localDb.syncQueue.bulkDelete(pendingAssetSyncItems.map((q: any) => q.id));
+            }
+
+            if (import.meta.env.DEV) {
+              console.info('[AssetSync] upload success', {
+                assetId: updatedImage.id,
+                remoteKey: updatedImage.storagePath ?? null,
+              });
+            }
+          }
           
           // キューから削除
           await this.dequeue(item.id);
@@ -257,6 +296,7 @@ class PersistentOfflineQueue {
           if ((item.retryCount ?? 0) + 1 >= 3) {
             console.error(`[PersistentQueue] Max retries reached: ${item.fileName}`);
             const isDocumentItem = this.isDocumentQueueItem(item);
+            const isAssetLikeImageItem = !isDocumentItem && item.fileType.startsWith('image/');
             if (isDocumentItem) {
               try {
                 const localDb = await getLocalDb();
@@ -287,6 +327,32 @@ class PersistentOfflineQueue {
                 }
               } catch (docErr) {
                 console.warn('[PersistentQueue] Failed to mark document upload as failed', docErr);
+              }
+            }
+            if (isAssetLikeImageItem) {
+              try {
+                const localDb = await getLocalDb();
+                const existingAsset = await localDb.images.get(item.id);
+                const now = new Date();
+                await localDb.images.put({
+                  ...(existingAsset as any ?? {}),
+                  id: item.id,
+                  userId: auth.currentUser?.uid ?? (existingAsset as any)?.userId ?? '',
+                  mime: item.fileType || (existingAsset as any)?.mime || 'application/octet-stream',
+                  size: item.fileData.byteLength ?? (existingAsset as any)?.size ?? 0,
+                  localBlobId: (existingAsset as any)?.localBlobId ?? item.id,
+                  localStatus: (existingAsset as any)?.localStatus ?? 'present',
+                  remoteKey: (existingAsset as any)?.remoteKey ?? null,
+                  remoteStatus: 'failed',
+                  updatedAt: now,
+                  createdAt: (existingAsset as any)?.createdAt ?? now,
+                  retryCount: (existingAsset as any)?.retryCount ? (existingAsset as any).retryCount + 1 : 1,
+                } as any);
+                if (import.meta.env.DEV) {
+                  console.warn('[AssetSync] upload failed', { assetId: item.id });
+                }
+              } catch (assetErr) {
+                console.warn('[PersistentQueue] Failed to update asset status', assetErr);
               }
             }
             await this.dequeue(item.id);

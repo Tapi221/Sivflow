@@ -11,6 +11,8 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 import * as Firestore from 'firebase/firestore';
+import { sanitizeBlobUrlsDeep } from '@/utils/blobUrlSanitizer';
+import { sanitizeForLog } from '@/utils/logSanitizer';
 
 /**
  * undefined は Firestore に投げた瞬間に爆発するので、深い階層まで除去する。
@@ -78,7 +80,16 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
 
   private sanitizeFromCloud(type: string, data: any): any {
     if (!data) return data;
-    return deepStripUndefined(data);
+    const stripped = deepStripUndefined(data);
+    const sanitized = sanitizeBlobUrlsDeep(stripped);
+    if (sanitized.changed) {
+      console.warn('[CloudSyncAdapter] sanitize_blob_url_from_cloud', sanitizeForLog({
+        type,
+        id: data?.id,
+        fixes: sanitized.fixes,
+      }));
+    }
+    return sanitized.value;
   }
 
   async pullDiff(since: number): Promise<{ changes: any[]; serverTime: number }> {
