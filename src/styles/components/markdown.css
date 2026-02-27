@@ -4,6 +4,28 @@
     overflow-wrap: anywhere;
   }
 
+  .blockSurface {
+    position: relative;
+    background: var(--card-surface, #ffffff);
+  }
+
+  .blockSurfaceContent {
+    position: relative;
+    z-index: 10;
+  }
+
+  .blockSurface--bleedX {
+    margin-left: calc(var(--card-padding-x, 12px) * -1);
+    margin-right: calc(var(--card-padding-x, 12px) * -1);
+    padding-left: var(--card-padding-x, 12px);
+    padding-right: var(--card-padding-x, 12px);
+  }
+
+  /* Ensure quote blocks never show nested ruled layers */
+  .blockquoteNoRuled .blockSurface > .pointer-events-none.absolute.z-0 {
+    display: none;
+  }
+
   .katex-display-wrapper {
     display: block;
     width: 100%;

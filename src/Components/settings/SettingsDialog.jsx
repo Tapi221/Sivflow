@@ -193,7 +193,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
   }, [settings?.profileImage?.remoteUrl, settings?.profileImage?.updatedAt]);
 
   // Hoist hooks
-  const { tags: allTags = [], updateTagColor, deleteTag, addTag } = useTags();
+  const { tags: allTags = [], updateTagColor, deleteTag, addTag, getTagUsageCount } = useTags();
   const [tagSearchTerm, setTagSearchTerm] = useState('');
   
   // タグ追加用の状態管理
@@ -778,10 +778,14 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    onClick={() => {
-                                        if (confirm(`タグ「${tag.name}」を削除しますか？`)) {
-                                            deleteTag(tag.name, selectedRootFolderId);
-                                        }
+                                    onClick={async () => {
+                                        const usageCount = await getTagUsageCount(tag.name);
+                                        const ok = confirm(
+                                          `タグ「${tag.name}」を削除しますか？\n\n` +
+                                          `この操作で ${usageCount} 件のカードからタグが削除されます。`
+                                        );
+                                        if (!ok) return;
+                                        await deleteTag(tag.name);
                                     }}
                                     className="text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
                                 >

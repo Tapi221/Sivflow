@@ -36,13 +36,14 @@ export default function Folders() {
     }
   }, [selectedFolderId]);
 
-  const [selectedCardId, setSelectedCardId] = useState(() => queryCardId || null);
-  const [selectedDocumentId, setSelectedDocumentId] = useState(() => queryDocId || null);
   const [selectedItem, setSelectedItem] = useState(() => {
     if (queryCardId) return { type: 'card', id: queryCardId };
     if (queryDocId) return { type: 'document', id: queryDocId };
     return null;
   }); // { type: 'card' | 'document', id: string } | null
+
+  const selectedCardId = selectedItem?.type === 'card' ? selectedItem.id : null;
+  const selectedDocumentId = selectedItem?.type === 'document' ? selectedItem.id : null;
 
   useEffect(() => {
     const next = new URLSearchParams(queryString);
@@ -52,11 +53,11 @@ export default function Folders() {
       next.delete('folderId');
     }
 
-    if (selectedCardId) {
-      next.set('cardId', selectedCardId);
+    if (selectedItem?.type === 'card') {
+      next.set('cardId', selectedItem.id);
       next.delete('docId');
-    } else if (selectedDocumentId) {
-      next.set('docId', selectedDocumentId);
+    } else if (selectedItem?.type === 'document') {
+      next.set('docId', selectedItem.id);
       next.delete('cardId');
     } else {
       next.delete('cardId');
@@ -73,7 +74,7 @@ export default function Folders() {
     if (pendingUrlSyncRef.current === current) {
       pendingUrlSyncRef.current = null;
     }
-  }, [selectedFolderId, selectedCardId, selectedDocumentId, queryString, setSearchParams]);
+  }, [selectedFolderId, selectedItem, queryString, setSearchParams]);
 
   useEffect(() => {
     const pendingTarget = pendingUrlSyncRef.current;
@@ -88,18 +89,18 @@ export default function Folders() {
       setSelectedFolderId(queryFolderId || null);
     }
 
-    if (queryCardId && queryCardId !== selectedCardId) {
-      setSelectedCardId(queryCardId);
-      setSelectedDocumentId(null);
+    if (queryCardId && (selectedItem?.type !== 'card' || selectedItem.id !== queryCardId)) {
       setSelectedItem({ type: 'card', id: queryCardId });
       return;
     }
 
-    if (queryDocId && queryDocId !== selectedDocumentId) {
-      setSelectedDocumentId(queryDocId);
-      setSelectedCardId(null);
+    if (queryDocId && (selectedItem?.type !== 'document' || selectedItem.id !== queryDocId)) {
       setSelectedItem({ type: 'document', id: queryDocId });
       return;
+    }
+
+    if (!queryCardId && !queryDocId && (selectedItem?.type === 'card' || selectedItem?.type === 'document')) {
+      setSelectedItem(null);
     }
   }, [
     queryString,
@@ -107,8 +108,7 @@ export default function Folders() {
     queryCardId,
     queryDocId,
     selectedFolderId,
-    selectedCardId,
-    selectedDocumentId,
+    selectedItem,
   ]);
   
   const { folders = [], loading: foldersLoading } = useFolders();
@@ -138,15 +138,11 @@ export default function Folders() {
     // モバイル/デスクトップともに選択状態を直接更新する。
     // URL同期は useEffect 側で一元管理する。
     setSelectedFolderId(folderId);
-    setSelectedCardId(null);
-    setSelectedDocumentId(null);
     setSelectedItem(null);
   };
 
   const handleSelectCardInWork = (cardId) => {
     // PC/モバイル共通で右ペインの編集UIを表示する
-    setSelectedCardId(cardId);
-    setSelectedDocumentId(null);
     setSelectedItem({ type: 'card', id: cardId });
   };
 
@@ -164,16 +160,12 @@ export default function Folders() {
     // (実装計画には詳細がなかったが、今回はフォルダ一覧の統一が主眼)
     // 既存のFolders画面でもPDFは表示されるはず。ここでのクリックは「スルー」でもよい？
     // いったんPCと同じ処理にする。
-    setSelectedDocumentId(docId);
-    setSelectedCardId(null);
     setSelectedItem({ type: 'document', id: docId });
   };
 
   const handleSelectItemInWork = (item) => {
     if (!item) {
       setSelectedItem(null);
-      setSelectedCardId(null);
-      setSelectedDocumentId(null);
       return;
     }
     if (item.type === 'card') {
@@ -186,36 +178,26 @@ export default function Folders() {
     }
     if (item.type === 'today-study') {
       setSelectedItem({ type: 'today-study' });
-      setSelectedCardId(null);
-      setSelectedDocumentId(null);
       setSelectedFolderId(null);
       return;
     }
     if (item.type === 'gallery') {
       setSelectedItem({ type: 'gallery' });
-      setSelectedCardId(null);
-      setSelectedDocumentId(null);
       setSelectedFolderId(null);
       return;
     }
     if (item.type === 'calendar') {
       setSelectedItem({ type: 'calendar' });
-      setSelectedCardId(null);
-      setSelectedDocumentId(null);
       setSelectedFolderId(null);
       return;
     }
     if (item.type === 'settings') {
       setSelectedItem({ type: 'settings' });
-      setSelectedCardId(null);
-      setSelectedDocumentId(null);
       setSelectedFolderId(null);
       return;
     }
     if (item.type === 'trash') {
       setSelectedItem({ type: 'trash' });
-      setSelectedCardId(null);
-      setSelectedDocumentId(null);
       setSelectedFolderId(null);
     }
   };

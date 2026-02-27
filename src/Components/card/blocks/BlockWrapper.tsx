@@ -57,13 +57,16 @@ export const BlockWrapper = ({
   contentClassName,
 }: BlockWrapperProps) => {
   const [isEditingWithin, setIsEditingWithin] = React.useState(false);
+  const isEditableFocusTarget = (target: EventTarget | null) => {
+    if (!(target instanceof HTMLElement)) return false;
+    return Boolean(target.closest('input, textarea, [contenteditable="true"], [contenteditable=""]'));
+  };
 
-  // border はレイアウトを膨らませるので、アクティブ強調は box-shadow（inset）で描画する。
-  // ※ className 側で `border-transparent` を指定しても、ここで borderColor を上書きしない。
+  // 実ボーダーは高さを+2pxして24pxグリッドを崩すため、常に inset box-shadow で描画する。
   const isOutlineVisible = Boolean(isActive || isEditingWithin);
   const outlineColor = accentColor ? `${accentColor}40` : 'rgba(59, 130, 246, 0.35)';
-  const activeOutline =
-    isOutlineVisible ? `inset 0 0 0 2px ${outlineColor}` : undefined;
+  const baseOutline = `inset 0 0 0 var(--card-ruled-line-px, 1px) var(--card-ruled-color, rgba(0,0,0,0.05))`;
+  const activeOutline = `inset 0 0 0 var(--card-ruled-line-px, 1px) ${outlineColor}`;
 
   const stepDragRef = React.useRef<{
     pointerId: number;
@@ -71,10 +74,6 @@ export const BlockWrapper = ({
     appliedSteps: number;
   } | null>(null);
 
-  /**
-   * deltaSteps 分だけ移動を試みて、実際に適用できたステップ数を返す。
-   * canMoveUp / canMoveDown を尊重して境界で止める。
-   */
   const applyStepMoves = (deltaSteps: number) => {
     if (deltaSteps === 0) return 0;
 
@@ -101,6 +100,7 @@ export const BlockWrapper = ({
   const startStepDrag = (event: React.PointerEvent<HTMLDivElement>) => {
     if (!dragEnabled) return;
     if (!onMoveUp && !onMoveDown) return;
+    if (!canMoveUp && !canMoveDown) return;
 
     event.preventDefault();
     event.stopPropagation();
@@ -126,7 +126,6 @@ export const BlockWrapper = ({
 
       if (diff !== 0) {
         const actuallyApplied = applyStepMoves(diff);
-        // ここが肝：実際に動けた分だけ進める（境界でズレない）
         stepDragRef.current.appliedSteps += actuallyApplied;
       }
     };
@@ -150,21 +149,26 @@ export const BlockWrapper = ({
 
   return (
     <div
-      onFocusCapture={() => {
-        setIsEditingWithin(true);
+      onFocusCapture={(event) => {
+        setIsEditingWithin(isEditableFocusTarget(event.target));
       }}
       onBlurCapture={(event) => {
         const nextFocused = event.relatedTarget as Node | null;
         if (!nextFocused || !event.currentTarget.contains(nextFocused)) {
           setIsEditingWithin(false);
+          return;
         }
+        setIsEditingWithin(isEditableFocusTarget(nextFocused));
       }}
       className={cn(
-        'group relative overflow-visible bg-transparent border border-slate-200/80 rounded-xl py-0 px-1.5',
+        'group relative overflow-visible bg-transparent py-0 px-1.5',
         isOutlineVisible && 'z-40',
         className
       )}
-      style={activeOutline ? { boxShadow: activeOutline } : undefined}
+      style={{
+        boxShadow: isOutlineVisible ? activeOutline : baseOutline,
+        borderRadius: 'var(--block-frame-radius, 12px)',
+      }}
     >
       {/* 操作メニュー (アクティブ時に表示) */}
       <div

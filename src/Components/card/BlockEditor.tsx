@@ -616,7 +616,7 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
                   key={block.id}
                   draggableId={`${droppableId}:${block.id}`}
                   index={index}
-                  isDragDisabled={false}
+                  isDragDisabled={true}
                 >
                   {(provided, snapshot) => {
                     const rowMovable = isRowPositionableType(block.type);
@@ -638,7 +638,7 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
                       extraTranslateY: rowOffsetPx,
                     }) as React.CSSProperties | undefined;
 
-                    const isDndDisabled = false;
+                    const isDndDisabled = true;
 
                     return (
                       <div

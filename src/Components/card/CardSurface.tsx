@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import { cn } from "@/lib/utils";
+import { RuledLayer } from "./RuledLayer";
 
 type CSSVars = React.CSSProperties & Record<`--${string}`, string>;
 
@@ -45,6 +46,10 @@ export function CardSurface({
       "--card-row-px": `${rowPx}px`,
       "--card-font-size": "16px",
       "--card-line-height": `${rowPx}px`,
+      "--card-ruled-color": "rgba(0,0,0,0.05)",
+      "--card-ruled-line-px": "1px",
+      "--card-ruled-opacity": String(clamp01(ruledOpacity)),
+      "--card-surface": "hsl(var(--background))",
       "--card-padding-x": "12px",
       "--card-padding-bottom": "16px",
       "--ruled-offset-px": `${topPx}px`,
@@ -52,7 +57,7 @@ export function CardSurface({
       "--card-content-padding-top": `${topPx}px`,
     };
     return { ...vars, ...(style ?? {}) } as CSSVars;
-  }, [rowPx, topPx, bottomPx, style]);
+  }, [rowPx, topPx, bottomPx, ruledOpacity, style]);
 
   return (
     <div
@@ -60,33 +65,20 @@ export function CardSurface({
       className={cn("relative flex min-h-0 flex-1 flex-col", className)}
       style={{
         ...surfaceStyle,
+        background: "var(--card-surface)",
         paddingLeft: "var(--card-padding-x)",
         paddingRight: "var(--card-padding-x)",
         paddingBottom: "var(--card-padding-bottom)",
       }}
     >
       {ruled && (
-        <div
-          className="pointer-events-none absolute inset-x-0 z-0"
-          style={{
-            top: "var(--ruled-offset-px)",
-            bottom: "var(--ruled-bottom-offset-px)",
-            opacity: clamp01(ruledOpacity),
-            // 上端は繰り返し罫線に任せ、下端のみ固定線を追加して 44px を厳密に合わせる
-            backgroundImage: `
-              linear-gradient(to bottom, rgba(0,0,0,0.05), rgba(0,0,0,0.05)),
-              repeating-linear-gradient(
-                to bottom,
-                rgba(0,0,0,0.05),
-                rgba(0,0,0,0.05) 1px,
-                transparent 1px,
-                transparent var(--card-row-px)
-              )
-            `,
-            backgroundSize: "100% 1px, 100% var(--card-row-px)",
-            backgroundPosition: "0 100%, 0 0",
-            backgroundRepeat: "no-repeat, repeat-y",
-          }}
+        <RuledLayer
+          kind="repeat+bottom"
+          ruledOpacity={clamp01(ruledOpacity)}
+          ruledRowPx={rowPx}
+          ruledInsetX="var(--card-padding-x)"
+          ruledOffsetPx={topPx}
+          ruledBottomOffsetPx={bottomPx}
         />
       )}
 

@@ -3,6 +3,7 @@ import CodeIcon from 'lucide-react/dist/esm/icons/code';
 import { BlockWrapper } from './BlockWrapper';
 import { CodeBlockEditor } from '../CodeBlockEditor';
 import type { CodeBlockData } from '@/types/code-block';
+import { cn } from '@/lib/utils';
 
 interface CodeBlockItemProps {
   data: CodeBlockData;
@@ -24,6 +25,8 @@ interface CodeBlockItemProps {
 }
 
 export const CodeBlockItem = ({ data, onChange, onDelete, onDuplicate, dragHandleProps, dragEnabled = true, dragHandleClassName, accentColor, isActive, showDelete, canMoveUp, canMoveDown, onMoveUp, onMoveDown, onMoveDragStart, onMoveDragEnd }: CodeBlockItemProps) => {
+  const isCodeEmpty = (data?.code ?? '').trim().length === 0;
+
   return (
     <BlockWrapper 
       onDelete={onDelete} 
@@ -31,10 +34,10 @@ export const CodeBlockItem = ({ data, onChange, onDelete, onDuplicate, dragHandl
       dragHandleProps={dragHandleProps}
       dragEnabled={dragEnabled}
       dragHandleClassName={dragHandleClassName}
-      className="bg-transparent border-0 hover:border-0 shadow-none px-0 rounded-none"
+      className={cn('bg-transparent px-0 py-0', !isCodeEmpty && 'border-0')}
       label="Code"
       icon={CodeIcon}
-      accentColor={undefined}
+      accentColor={accentColor}
       isActive={isActive}
       showDelete={showDelete}
       canMoveUp={!!canMoveUp}

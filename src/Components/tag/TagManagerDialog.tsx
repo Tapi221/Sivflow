@@ -1,9 +1,19 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/Components/ui/dialog';
 import { Button } from '@/Components/ui/button';
-import { Tag as TagIcon, Check } from 'lucide-react';
+import { Tag as TagIcon, Check, Trash2 } from 'lucide-react';
 import { useTags, DEFAULT_COLORS } from '@/hooks/useTags';
 import { cn } from '@/lib/utils';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/Components/ui/alert-dialog';
 
 interface TagManagerDialogProps {
   open: boolean;
@@ -11,7 +21,10 @@ interface TagManagerDialogProps {
 }
 
 export default function TagManagerDialog({ open, onOpenChange }: TagManagerDialogProps) {
-  const { tags: allTags, updateTagColor } = useTags();
+  const { tags: allTags, updateTagColor, deleteTag, getTagUsageCount } = useTags();
+  const [pendingDeleteTag, setPendingDeleteTag] = useState<string | null>(null);
+  const [pendingUsageCount, setPendingUsageCount] = useState<number>(0);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // 全タグをアルファベット順にソート
   const sortedTags = useMemo(() => {
@@ -20,6 +33,24 @@ export default function TagManagerDialog({ open, onOpenChange }: TagManagerDialo
 
   const handleColorChange = async (tagName: string, newColor: string) => {
       await updateTagColor(tagName, newColor);
+  };
+
+  const openDeleteDialog = async (tagName: string) => {
+    const usageCount = await getTagUsageCount(tagName);
+    setPendingUsageCount(usageCount);
+    setPendingDeleteTag(tagName);
+  };
+
+  const handleDeleteConfirmed = async () => {
+    if (!pendingDeleteTag) return;
+    try {
+      setIsDeleting(true);
+      await deleteTag(pendingDeleteTag);
+    } finally {
+      setIsDeleting(false);
+      setPendingDeleteTag(null);
+      setPendingUsageCount(0);
+    }
   };
 
   return (
@@ -57,7 +88,7 @@ export default function TagManagerDialog({ open, onOpenChange }: TagManagerDialo
                             
                             {/* Color Palette */}
                             <div className="flex items-center gap-1.5 opacity-90 group-hover:opacity-100 transition-opacity">
-                                {DEFAULT_COLORS.slice(0, 8).map(color => (
+                                {DEFAULT_COLORS.map(color => (
                                     <button
                                         key={color}
                                         onClick={() => handleColorChange(tag.name, color)}
@@ -73,6 +104,14 @@ export default function TagManagerDialog({ open, onOpenChange }: TagManagerDialo
                                         {tag.color === color && <Check className="w-3 h-3 mx-auto text-slate-700/70" />}
                                     </button>
                                 ))}
+                                <button
+                                  type="button"
+                                  onClick={() => void openDeleteDialog(tag.name)}
+                                  className="ml-1 inline-flex h-7 w-7 items-center justify-center rounded-full border border-slate-200 text-slate-400 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-500"
+                                  aria-label={`${tag.name} を削除`}
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
                             </div>
                         </div>
                     ))}
@@ -85,6 +124,36 @@ export default function TagManagerDialog({ open, onOpenChange }: TagManagerDialo
                  閉じる
              </Button>
          </div>
+
+         <AlertDialog open={Boolean(pendingDeleteTag)} onOpenChange={(open) => {
+           if (!open) {
+             setPendingDeleteTag(null);
+             setPendingUsageCount(0);
+           }
+         }}>
+           <AlertDialogContent className="max-w-md">
+             <AlertDialogHeader>
+               <AlertDialogTitle className="text-red-600">タグを削除しますか？</AlertDialogTitle>
+               <AlertDialogDescription>
+                 「{pendingDeleteTag ?? ''}」を削除すると、
+                 {pendingUsageCount} 件のカードからこのタグが削除されます。
+               </AlertDialogDescription>
+             </AlertDialogHeader>
+             <AlertDialogFooter>
+               <AlertDialogCancel disabled={isDeleting}>キャンセル</AlertDialogCancel>
+               <AlertDialogAction
+                 onClick={(e) => {
+                   e.preventDefault();
+                   void handleDeleteConfirmed();
+                 }}
+                 disabled={isDeleting}
+                 className="bg-red-600 hover:bg-red-500"
+               >
+                 {isDeleting ? '削除中...' : '削除する'}
+               </AlertDialogAction>
+             </AlertDialogFooter>
+           </AlertDialogContent>
+         </AlertDialog>
          
       </DialogContent>
     </Dialog>

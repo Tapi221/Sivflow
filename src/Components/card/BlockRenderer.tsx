@@ -116,7 +116,7 @@ export function BlockRenderer({ blocks, onGalleryFullscreenChange }: BlockRender
             )}
 
             {block.type === 'markdown' && (block.markdown ?? '').trim() !== '' && (
-              <MarkdownBlockView md={block.markdown!} className="markdownBlockCardView" />
+              <MarkdownBlockView md={block.markdown!} className="markdownBlockCardView" bleedX={false} />
             )}
           </div>
         );

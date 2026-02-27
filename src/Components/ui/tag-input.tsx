@@ -21,11 +21,10 @@ import { TagBadge } from "@/Components/tag/TagBadge"
 
 interface TagInputProps {
   tags: string[]
-  availableTags?: string[] 
-  rootFolderId?: string
   onChange: (tags: string[]) => void
   placeholder?: string
   className?: string
+  quietHover?: boolean
 }
 
 export function TagInput({ 
@@ -33,13 +32,13 @@ export function TagInput({
   onChange, 
   placeholder = "タグを選択...", 
   className,
-  rootFolderId
+  quietHover = false,
 }: TagInputProps) {
   const [open, setOpen] = React.useState(false)
   const [inputValue, setInputValue] = React.useState("")
   const [selectedColor, setSelectedColor] = React.useState<string | null>(null)
   
-  const { tags: allTags, availableColors, addTag, getTagColor } = useTags(rootFolderId);
+  const { tags: allTags, availableColors, addTag, getTagColor } = useTags();
 
   const handleUnselect = (tagToRemove: string) => {
     onChange(tags.filter((tag) => tag !== tagToRemove))
@@ -56,9 +55,7 @@ export function TagInput({
   const handleCreateTag = async () => {
     const trimmed = inputValue.trim()
     if (trimmed && !tags.includes(trimmed)) {
-      if (rootFolderId) {
-          await addTag(trimmed, selectedColor || availableColors[0], rootFolderId);
-      }
+      await addTag(trimmed, selectedColor || availableColors[0]);
       onChange([...tags, trimmed])
       setInputValue("")
       setSelectedColor(null)
@@ -87,7 +84,8 @@ export function TagInput({
     <Popover open={open} onOpenChange={setOpen}>
       <div
         className={cn(
-          "w-full flex flex-col min-h-0 py-0 px-0 bg-transparent border-none rounded-none transition-all cursor-text",
+          "w-full flex flex-col min-h-0 py-0 px-0 bg-transparent border-none rounded-none cursor-text",
+          !quietHover && "transition-all",
           className
         )}
         onClick={() => setOpen(true)}
@@ -102,7 +100,7 @@ export function TagInput({
                             className="flex flex-wrap gap-1.5"
                          >
                              {tags.map((tag, index) => {
-                                 const colorClass = getTagColor(tag, rootFolderId);
+                                 const colorClass = getTagColor(tag);
                                  return (
                                      <Draggable key={tag} draggableId={tag} index={index}>
                                          {(provided, snapshot) => (
@@ -118,6 +116,7 @@ export function TagInput({
                                                     colorClass={colorClass}
                                                     className={cn(
                                                       "select-none",
+                                                      quietHover && "transition-none shadow-none [&_button]:hover:bg-transparent [&_button]:hover:text-slate-500",
                                                       snapshot.isDragging && "scale-105 shadow-md z-50"
                                                     )}
                                                     onRemove={() => handleUnselect(tag)}
@@ -136,7 +135,10 @@ export function TagInput({
              
              <PopoverTrigger asChild>
                  <button 
-                    className="flex items-center gap-1 h-7 px-0 text-slate-300 hover:text-slate-400 transition-colors"
+                    className={cn(
+                      "flex items-center gap-1 h-7 px-0 text-slate-300",
+                      quietHover ? "" : "hover:text-slate-400 transition-colors"
+                    )}
                     onClick={() => setOpen(true)}
                  >
                      {tags.length === 0 && <span className="text-[10px] font-bold uppercase tracking-wider">{placeholder}</span>}
@@ -215,7 +217,7 @@ export function TagInput({
               )}
               <div className="grid grid-cols-1 gap-1 p-1">
                 {filteredTags.map((tag) => {
-                   const colorClass = getTagColor(tag, rootFolderId);
+                   const colorClass = getTagColor(tag);
                    const isSelected = tags.includes(tag);
                    return (
                       <CommandItem

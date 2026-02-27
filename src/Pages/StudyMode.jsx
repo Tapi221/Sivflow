@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useCallback } from 'react';
+import React, { useMemo, useEffect, useCallback, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useUserSettings } from '@/hooks/useUserSettings';
 import { useCards } from '@/hooks/useCards';
@@ -88,13 +88,47 @@ export default function StudyMode() {
   const isAdvancedTelemetryEnabled = flags.isEnabled('ENABLE_ADVANCED_TELEMETRY');
   const telemetry = useMemo(() => new TelemetryService(), []);
 
-  const { studyCards, cardById } = useStudyCards({
+  const { studyCards: dueStudyCards } = useStudyCards({
     folderId,
     allCards,
     folders,
     foldersLoading,
     settings,
   });
+  const [sessionSeedCards, setSessionSeedCards] = useState([]);
+
+  useEffect(() => {
+    setSessionSeedCards([]);
+  }, [folderId]);
+
+  useEffect(() => {
+    if (sessionSeedCards.length > 0) return;
+    if (dueStudyCards.length === 0) return;
+    setSessionSeedCards(dueStudyCards);
+  }, [dueStudyCards, sessionSeedCards.length]);
+
+  const allCardsById = useMemo(() => {
+    const map = new Map();
+    for (const card of allCards) {
+      if (card?.id) map.set(card.id, card);
+    }
+    return map;
+  }, [allCards]);
+
+  const studyCards = useMemo(() => {
+    if (sessionSeedCards.length === 0) return dueStudyCards;
+    return sessionSeedCards
+      .map((seedCard) => allCardsById.get(seedCard.id) ?? seedCard)
+      .filter(Boolean);
+  }, [allCardsById, dueStudyCards, sessionSeedCards]);
+
+  const studyCardById = useMemo(() => {
+    const map = new Map();
+    for (const card of studyCards) {
+      if (card?.id) map.set(card.id, card);
+    }
+    return map;
+  }, [studyCards]);
 
   const createStudyLogMutation = useMutation({
     mutationFn: (data) => {
@@ -226,7 +260,7 @@ export default function StudyMode() {
   const practiceCurrentCardId = isPracticeMode && practiceState?.phase === 'cards'
     ? practiceState.roundQueue[0]
     : null;
-  const practiceCurrentCard = practiceCurrentCardId ? cardById.get(practiceCurrentCardId) : null;
+  const practiceCurrentCard = practiceCurrentCardId ? studyCardById.get(practiceCurrentCardId) : null;
   const currentCard = isPracticeMode ? practiceCurrentCard : studyCards[currentIndex];
 
   const progressPercent = (() => {

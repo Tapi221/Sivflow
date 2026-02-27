@@ -7,6 +7,7 @@ type RowSnapProps = {
 };
 
 const EPSILON = 0.5;
+const SNAP_TOLERANCE_PX = 1;
 
 export function RowSnap({ rowPx, children, afterGapRows = 0 }: RowSnapProps) {
   const targetRef = React.useRef<HTMLElement | null>(null);
@@ -29,10 +30,13 @@ export function RowSnap({ rowPx, children, afterGapRows = 0 }: RowSnapProps) {
       const node = targetRef.current;
       if (!node) return;
 
-      const measuredPxRaw = node.getBoundingClientRect().height - paddingRef.current;
+      const measuredPxRaw = node.offsetHeight - paddingRef.current;
       const measuredPx = Math.max(0, measuredPxRaw);
-      const snapPx = Math.ceil(measuredPx / safeRowPx) * safeRowPx;
-      const nextExtra = Math.max(0, snapPx - measuredPx) + gapPx;
+      const remainder = measuredPx % safeRowPx;
+      const isAlreadySnapped =
+        remainder <= SNAP_TOLERANCE_PX || safeRowPx - remainder <= SNAP_TOLERANCE_PX;
+      const snapPadding = isAlreadySnapped ? 0 : safeRowPx - remainder;
+      const nextExtra = Math.max(0, Math.round(snapPadding + gapPx));
 
       setSnapPaddingBottomPx((prev) =>
         Math.abs(prev - nextExtra) < EPSILON ? prev : nextExtra

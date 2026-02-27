@@ -6,23 +6,11 @@
   user-select: text !important;
 }
 
-.markdownBlockPreview.markdown-block-view {
-  line-height: var(--card-line-height, 24px);
-}
-
-/* 罫線グリッドに合わせるため、要素間隔は24pxに統一 */
-.markdownBlockPreview.markdown-block-view > * + * {
-  margin-top: var(--card-line-height, 24px);
-}
-
 .markdownBlockPreview.markdown-block-view :is(
   p, ul, ol, li,
   h1, h2, h3, h4, h5, h6,
   blockquote, pre, table, hr
 ) {
+  margin-top: 0;
   margin-bottom: 0;
-}
-
-.markdownBlockPreview.markdown-block-view :is(ul, ol) {
-  padding-left: 24px;
 }

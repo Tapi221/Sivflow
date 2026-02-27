@@ -1,5 +1,6 @@
 @layer components {
   :root {
+    --block-frame-radius: 12px;
     --code-frame-radius: 16px;
     --code-frame-border-width: 1px;
     --code-frame-accent-width: 2px;
@@ -19,6 +20,7 @@
   }
 
   .codeBlockRoot {
+    --code-frame-radius: var(--block-frame-radius, 12px);
     position: relative;
     border-radius: var(--code-frame-radius);
     border: var(--code-frame-border-width) solid var(--code-border);
@@ -26,6 +28,11 @@
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
     overflow: hidden; /* ::before の角丸はみ出し防止 */
     padding-bottom: calc(var(--code-root-base-pad-b) + var(--snap-pad-b, 0px));
+  }
+
+  .codeBlockOuter {
+    padding-top: 8px;
+    padding-bottom: 8px;
   }
 
   .codeBlockRoot::before {

@@ -475,14 +475,11 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
           {isMarkdownEmpty ? (
             <div
               className={cn(TEXT_BLOCK_CONTENT_CLASS, 'min-h-[24px] text-slate-300')}
-              style={{ transform: 'translateY(2px)' }}
             >
               Markdownを入力...
             </div>
           ) : (
-            <div style={{ transform: 'translateY(2px)' }}>
-              <MarkdownBlockView md={markdown} className="markdownBlockCardView" />
-            </div>
+            <MarkdownBlockView md={markdown} className="markdownBlockCardView" bleedX={false} />
           )}
         </div>
 

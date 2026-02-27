@@ -82,7 +82,10 @@ export const MediaBlock = ({
           onConsumeInitialFile={onConsumeInitialFile}
           onFilesExcess={onFilesExcess}
         />
-        <div className="pointer-events-none absolute inset-0 z-20 rounded-[11px] border border-slate-200/80" />
+        <div
+          className="pointer-events-none absolute inset-0 z-20 rounded-[11px] border border-slate-200/80"
+          style={{ borderWidth: 'var(--card-ruled-line-px, 1px)' }}
+        />
       </div>
     </BlockWrapper>
   );

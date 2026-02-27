@@ -163,7 +163,6 @@ export function CardMetaPanel({
             <h3 className="text-xs font-semibold tracking-wide text-slate-500 uppercase">基本情報</h3>
             <div className="mt-3 space-y-2 text-sm text-slate-700">
               <div>
-                <p className="mb-1 text-xs font-medium text-slate-600">タイトル</p>
                 <input
                   value={titleInput}
                   onChange={(e) => setTitleInput(e.target.value)}
@@ -194,6 +193,7 @@ export function CardMetaPanel({
                       onUpdateTags(nextTags);
                     }}
                     placeholder="タグを選択・追加"
+                    quietHover
                     className={`bg-transparent ${!card ? "pointer-events-none opacity-60" : ""}`}
                   />
                 </div>
@@ -224,7 +224,7 @@ export function CardMetaPanel({
                 ))
               )}
             </div>
-            <RatingCountTiles counts={distribution20} compact className="mt-3" />
+            <RatingCountTiles counts={distribution20} compact disableHover className="mt-3" />
           </section>
 
           <section>

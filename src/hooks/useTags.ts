@@ -33,7 +33,7 @@ export const DEFAULT_COLORS = [
 /**
  * useTags: ユーザー単位で共通管理されるタグを操作するホック
  */
-export function useTags(_rootFolderId?: string) {
+export function useTags() {
   const { currentUser } = useAuth();
 
   const tags = useLiveQuery(
@@ -47,6 +47,16 @@ export function useTags(_rootFolderId?: string) {
     []
   );
 
+  const getTagUsageCount = async (name: string): Promise<number> => {
+    if (!currentUser) return 0;
+    const db = await getLocalDb();
+    const cards = await db.cards.where('userId').equals(currentUser.uid).toArray();
+    return cards.reduce((count, card: any) => {
+      const tags = Array.isArray(card?.tags) ? card.tags : [];
+      return tags.includes(name) ? count + 1 : count;
+    }, 0);
+  };
+
   const getTagColor = (tagName: string) => {
     const tag = tags?.find(t => t.name === tagName);
     return tag?.color || DEFAULT_COLORS[0];
@@ -55,7 +65,7 @@ export function useTags(_rootFolderId?: string) {
   /**
    * タグを追加または取得。既に存在すれば色は変更等を行わず、存在しなければ新規作成。
    */
-  const addTag = async (name: string, color: string = DEFAULT_COLORS[0], _targetRootFolderId?: string) => {
+  const addTag = async (name: string, color: string = DEFAULT_COLORS[0]) => {
     if (!currentUser) return;
     
     const db = await getLocalDb();
@@ -77,16 +87,27 @@ export function useTags(_rootFolderId?: string) {
     });
   };
 
-  const updateTagColor = async (name: string, color: string, _targetRootFolderId?: string) => {
+  const updateTagColor = async (name: string, color: string) => {
       if (!currentUser) return;
       const db = await getLocalDb();
       await db.tags_v2.update([currentUser.uid, name], { color, updatedAt: new Date() });
   };
 
-  const deleteTag = async (name: string, _targetRootFolderId?: string) => {
+  const deleteTag = async (name: string) => {
       if (!currentUser) return;
       const db = await getLocalDb();
-      await db.tags_v2.delete([currentUser.uid, name]);
+      let removedFromCards = 0;
+      await db.transaction('rw', db.tags_v2, db.cards, async () => {
+        await db.tags_v2.delete([currentUser.uid, name]);
+        await db.cards.where('userId').equals(currentUser.uid).modify((card: any) => {
+          const tags = Array.isArray(card?.tags) ? card.tags : [];
+          if (!tags.includes(name)) return;
+          card.tags = tags.filter((t: unknown) => t !== name);
+          card.updatedAt = new Date();
+          removedFromCards += 1;
+        });
+      });
+      return removedFromCards;
   };
 
   return {
@@ -95,6 +116,7 @@ export function useTags(_rootFolderId?: string) {
     getTagColor,
     addTag,
     updateTagColor,
-    deleteTag
+    deleteTag,
+    getTagUsageCount,
   };
 }

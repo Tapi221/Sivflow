@@ -31,7 +31,6 @@ interface CardEditorProps {
   onCancel: () => void;
   isLoading: boolean;
   showContinueButton?: boolean;
-  availableTags?: string[];
   defaultToTextBlock?: boolean;
   autoFocus?: boolean;
   showCancelButton?: boolean;
@@ -50,7 +49,6 @@ export default function CardEditor({
   onCancel,
   isLoading,
   showContinueButton = false,
-  availableTags = [],
   defaultToTextBlock = false,
   autoFocus = false,
   showCancelButton = true,
@@ -502,8 +500,6 @@ const hasAnyContent = (data: any) => {
             <div className="h-14 rounded-2xl bg-slate-50 border border-slate-100/50 flex items-center px-4 min-w-0 overflow-hidden">
               <TagInput
                 tags={formData.tags || []}
-                availableTags={availableTags}
-                rootFolderId={folderId}
                 onChange={(tags) => handleChange("tags", tags)}
                 placeholder="タグ"
                 className={cn(

@@ -33,48 +33,50 @@ export const CodeBlockFrame: React.FC<CodeBlockFrameProps> = ({
   const showLangLabel = !!languageLabel && !headerLeft; // 左側ヘッダがあると被るので抑止
 
   return (
-    <RowSnappedRoot
-      rowPx={CARD_ROW_PX}
-      className={`codeBlockRoot codeBlockRoot--${variant} relative group overflow-hidden`}
-    >
-      {showLangLabel && (
-        <div
-          className="absolute z-20"
-          style={{ left: 'var(--code-header-inset-x)', top: 'var(--code-header-inset-y)' }}
-          // ラベルクリックで親のカード選択やD&Dに干渉しにくくする
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={(e) => e.stopPropagation()}
-          aria-label={`Language: ${languageTitle ?? languageLabel}`}
-        >
-          <span className="codeBlockLang">{languageLabel}</span>
-        </div>
-      )}
+    <div className="codeBlockOuter">
+      <RowSnappedRoot
+        rowPx={CARD_ROW_PX}
+        className={`codeBlockRoot codeBlockRoot--${variant} relative group overflow-hidden`}
+      >
+        {showLangLabel && (
+          <div
+            className="absolute z-20"
+            style={{ left: 'var(--code-header-inset-x)', top: 'var(--code-header-inset-y)' }}
+            // ラベルクリックで親のカード選択やD&Dに干渉しにくくする
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
+            aria-label={`Language: ${languageTitle ?? languageLabel}`}
+          >
+            <span className="codeBlockLang">{languageLabel}</span>
+          </div>
+        )}
 
-      {headerLeft && (
-        <div
-          className="absolute z-20"
-          style={{ left: 'var(--code-header-inset-x)', top: 'var(--code-header-inset-y)' }}
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {headerLeft}
-        </div>
-      )}
+        {headerLeft && (
+          <div
+            className="absolute z-20"
+            style={{ left: 'var(--code-header-inset-x)', top: 'var(--code-header-inset-y)' }}
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {headerLeft}
+          </div>
+        )}
 
-      {headerRight && (
-        <div
-          className="absolute z-20"
-          style={{ right: 'var(--code-header-inset-x)', top: 'var(--code-header-inset-y)' }}
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {headerRight}
-        </div>
-      )}
+        {headerRight && (
+          <div
+            className="absolute z-20"
+            style={{ right: 'var(--code-header-inset-x)', top: 'var(--code-header-inset-y)' }}
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {headerRight}
+          </div>
+        )}
 
-      <div className="codeBlockBody codeBlockBody--withHeader relative">
-        {children}
-      </div>
-    </RowSnappedRoot>
+        <div className="codeBlockBody codeBlockBody--withHeader relative">
+          {children}
+        </div>
+      </RowSnappedRoot>
+    </div>
   );
 };
