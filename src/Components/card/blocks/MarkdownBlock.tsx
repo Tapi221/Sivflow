@@ -116,30 +116,70 @@ const isFenceStart = (text: string) => {
 };
 
 /**
+ * insertText の先頭から「フォーカス判定に使うべき位置」までの offset を返す。
+ * - 先頭の空行はスキップ
+ * - 最初の非空行が CommonMark 的に有効な fence なら、その fence marker(```/~~~) の位置を返す
+ * - fence でなければ最初の非空行の行頭を返す
+ *
+ * これにより、insertText 側にもともと付いている "\n" や空行があってもズレない。
+ */
+const computeFocusOffsetInInsertText = (insertText: string) => {
+  const normalized = normalizeMarkdownForEditor(insertText).replace(/\r\n/g, '\n');
+  const lines = normalized.split('\n');
+
+  let offset = 0;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i] ?? '';
+    const isLast = i === lines.length - 1;
+
+    if (line.trim().length === 0) {
+      // 空行はスキップ（offset は「その行 + 改行1文字」進む）
+      offset += line.length + (isLast ? 0 : 1);
+      continue;
+    }
+
+    const m = line.match(/^( {0,3})(`{3,}|~{3,})/);
+    if (m) {
+      // marker の位置（行頭 + 0〜3スペースぶん）
+      return offset + (m[1]?.length ?? 0);
+    }
+
+    // fence でない通常行：その行頭を返す
+    return offset;
+  }
+
+  return 0;
+};
+
+/**
  * フェンスを行境界に寄せる（行途中に貼ると壊れやすい対策）
  * - fence が先頭に来るなら、必要に応じて前後に改行を補う
- * - 先頭に足した改行分は focusDelta として返す（フォーカス判定ズレ防止）
+ * - focusOffset は「実際の fence/先頭非空行」に寄せた offset を返す（貼り付け側に元空行があってもズレない）
  */
 const normalizeFenceBoundaries = (
   insertText: string,
   ctx: { atLineStart: boolean; atLineEnd: boolean }
-): { text: string; focusDelta: number } => {
-  if (!isFenceStart(insertText)) return { text: insertText, focusDelta: 0 };
+): { text: string; focusOffset: number } => {
+  // fence開始と判定できるものだけ境界補正を走らせる（誤爆防止）
+  if (!isFenceStart(insertText)) {
+    return { text: insertText, focusOffset: 0 };
+  }
 
   let out = insertText;
-  let focusDelta = 0;
 
   // 行途中にフェンスを入れると壊れやすいので、前に改行を足す
-  // ※ここで足した分だけ selectionStart からフォーカス座標を進める必要がある
   if (!ctx.atLineStart && !/^\r?\n/.test(out)) {
     out = `\n${out}`;
-    focusDelta += 1;
   }
 
   // 後続テキストと結合して壊れるのを避ける（フェンス末尾に改行が無いペースト対策）
   if (!ctx.atLineEnd && !/\r?\n$/.test(out)) out = `${out}\n`;
 
-  return { text: out, focusDelta };
+  // ✅ 「自分が足した \n」も「元からの空行」も含め、実際の fence 開始（or 最初の非空行）へ寄せる
+  const focusOffset = computeFocusOffsetInInsertText(out);
+
+  return { text: out, focusOffset };
 };
 
 const wrapFence = (code: string, lang: string) => {
@@ -244,9 +284,8 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
         }
         setError(null);
 
-        // ✅ normalizeFenceBoundaries が先頭に \n を足した場合は focusPos を進める
+        // ✅ insertText 先頭ではなく「実際の fence/先頭非空行」に寄せた座標で判定する
         const pos = focusPos ?? selectionStart;
-
         const relativeIndex = pickBlockIndexByPos(ranges, pos);
         onReplaceWithBlocks(blocks, { relativeIndex });
         return;
@@ -305,7 +344,7 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
 
       applyInsert(textarea, insertText, selectionStart, selectionEnd, {
         attemptSplitFences: true,
-        focusPos: selectionStart + normalizedFence.focusDelta,
+        focusPos: selectionStart + normalizedFence.focusOffset,
       });
       return;
     }
@@ -327,7 +366,7 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
 
         applyInsert(textarea, insertText, selectionStart, selectionEnd, {
           attemptSplitFences: true,
-          focusPos: selectionStart + normalizedFence.focusDelta,
+          focusPos: selectionStart + normalizedFence.focusOffset,
         });
         return;
       }
@@ -355,7 +394,7 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
 
         applyInsert(textarea, insertText, selectionStart, selectionEnd, {
           attemptSplitFences: true,
-          focusPos: selectionStart + normalizedFence.focusDelta,
+          focusPos: selectionStart + normalizedFence.focusOffset,
         });
       } catch {
         // フォールバック: plain を優先。無ければ HTML をテキスト化して挿入
@@ -370,7 +409,7 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
 
         applyInsert(textarea, insertText, selectionStart, selectionEnd, {
           attemptSplitFences: true,
-          focusPos: selectionStart + normalizedFence.focusDelta,
+          focusPos: selectionStart + normalizedFence.focusOffset,
         });
       }
       return;
@@ -387,12 +426,12 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
 
       applyInsert(textarea, insertText, selectionStart, selectionEnd, {
         attemptSplitFences: true,
-        focusPos: selectionStart + normalizedFence.focusDelta,
+        focusPos: selectionStart + normalizedFence.focusOffset,
       });
       return;
     }
 
-    // それ以外 → ブラウザのデフォルト動作に委ねる
+    // それ以外 → ブラウザのデフォールト動作に委ねる
   };
 
   return (

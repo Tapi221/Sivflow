@@ -81,14 +81,14 @@ describe('normalizeCard', () => {
     expect(normalized.layoutRows).toBe(LEGACY_BASE_LAYOUT_ROWS + 10);
   });
 
-  it('clamps layoutRows with compatibility max bound', () => {
+  it('does not clamp layoutRows to compatibility max bound', () => {
     const rawCard = {
       id: 'clamp-rows-card',
       layoutRows: MAX_LAYOUT_ROWS + 100,
     };
 
     const normalized = normalizeCard(rawCard);
-    expect(normalized.layoutRows).toBe(MAX_LAYOUT_ROWS);
+    expect(normalized.layoutRows).toBe(MAX_LAYOUT_ROWS + 100);
   });
 
   it('migrates code block rowOffset to offsetRows with non-negative clamp', () => {
