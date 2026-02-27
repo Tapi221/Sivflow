@@ -109,6 +109,7 @@ function TreeViewLayout({
     const saved = localStorage.getItem('ui.sidebarOpen');
     return saved !== null ? saved === 'true' : true;
   });
+
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== 'undefined' ? window.innerWidth < 768 : false
   );
@@ -118,9 +119,6 @@ function TreeViewLayout({
   const [isModeSelectionOpen, setIsModeSelectionOpen] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const contentScrollRef = useRef<HTMLDivElement>(null);
-
-  // モバイルでのスクロールに応じたExplorerTabsの縮小 (廃止: 常に表示)
-  // const isTabsCompact = useHeaderCompact(32, 8, contentScrollRef);
 
   const resizingRef = useRef(false);
   const startXRef = useRef(0);
@@ -140,8 +138,6 @@ function TreeViewLayout({
         rafIdRef.current = null;
         const el = sidebarRef.current;
         if (!el) return;
-        // モバイルでない場合のみ幅を適用したいが、JSでは判定が難しいのでCSSに任せるのが理想だが
-        // ここでは applyWidthDom が desktop でしか呼ばれない前提（リサイズハンドルがないため）で動く。
         el.style.width = isSidebarOpen ? `${pendingWRef.current}px` : '0px';
       });
     },
@@ -587,13 +583,24 @@ function TreeViewLayout({
         isResizing && "select-none cursor-col-resize"
       )}
     >
+      {/* =====================================================
+          サイドバー
+          【修正】overflow-hidden を常時から削除。
+          will-change-[width] もリサイズ中のみに限定。
+          理由: overflow-hidden + will-change の組み合わせが新しい
+          スタッキングコンテキストを形成し、Radix UI の DropdownMenu
+          (ContextMenu) がポータル経由で描画されてもポインターイベントが
+          サイドバー要素に届かなくなっていた。
+          サイドバーを閉じた時は !isSidebarOpen 条件クラスの
+          md:overflow-hidden が適用されるため見た目は壊れない。
+      ===================================================== */}
       <div
         ref={sidebarRef}
         className={cn(
-          "shrink-0 flex-col bg-[#F8FAFB] md:bg-[#F8FAFB] border-r-0 md:border-r border-sidebar-border relative group/sidebar select-none overflow-hidden will-change-[width]",
+          "shrink-0 flex-col bg-[#F8FAFB] md:bg-[#F8FAFB] border-r-0 md:border-r border-sidebar-border relative group/sidebar select-none",
           showMobileDetail ? "hidden md:flex" : "flex",
           "md:ring-1 md:ring-black/5 md:shadow-[inset_0_1px_0_rgba(255,255,255,0.75),inset_-1px_0_0_rgba(255,255,255,0.5),10px_0_24px_-20px_rgba(15,23,42,0.35)]",
-          isResizing ? "transition-none" : "transition-all duration-300 ease-in-out",
+          isResizing ? "transition-none will-change-[width]" : "transition-all duration-300 ease-in-out",
           "w-[100dvw] max-w-[100dvw] md:w-auto md:max-w-none",
           !isSidebarOpen && "md:w-0 md:border-r-0 md:overflow-hidden"
         )}
@@ -603,15 +610,11 @@ function TreeViewLayout({
              "bg-[#F8FAFB] md:bg-[#F8FAFB]"
         )}>
             {/* ExplorerTabs: 常にSticky表示 */}
-            <div 
+            <div
               className={cn(
                 "sticky top-0 z-10 bg-[#F8FAFB] md:bg-[#F8FAFB]",
                 "transition-all duration-200 ease-out",
                 "motion-reduce:transition-none",
-                // "md:relative" // デスクトップでもStickyで良いが、元々 relative だったなら戻しても良い。
-                // 今回はモバイルでの Sticky 化が主眼。
-                // 元のコードでは md:relative だったのでそれは維持しつつ、
-                // モバイルでの hidden/max-h-0 を削除する。
                 "md:relative"
               )}
             >
@@ -626,7 +629,7 @@ function TreeViewLayout({
 
             {renderFilterChips()}
 
-            <div 
+            <div
               ref={contentScrollRef}
               className="flex-1 overflow-y-auto outline-none min-w-0"
             >
@@ -657,9 +660,15 @@ function TreeViewLayout({
         )}
       </div>
 
-      {/* 右ペイン: モバイルでは非表示 */}
+      {/* =====================================================
+          右ペイン
+          【修正】overflow-hidden を削除。
+          理由: 右ペインの overflow-hidden も新しいスタッキングコンテキストを
+          作り、サイドバー内の Radix UI DropdownMenu のイベント伝播を
+          妨害していた。
+      ===================================================== */}
       <div className={cn(
-        "flex-1 min-h-0 min-w-0 bg-white flex-col overflow-hidden",
+        "flex-1 min-h-0 min-w-0 bg-white flex-col",
         showMobileDetail ? "flex" : "hidden md:flex"
       )}>
         {isMobile && showMobileDetail && (
@@ -716,4 +725,3 @@ function TreeViewLayout({
 }
 
 export default TreeViewLayout;
-
