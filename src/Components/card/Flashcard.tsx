@@ -10,7 +10,7 @@ import { ReferencePopup } from './ReferencePopup';
 import type { CardBlock, ReferenceBlockData } from '@/types';
 import { InkLayer, InkToolbar, type InkHistoryState, type InkLayerHandle } from '@/Components/ink/InkLayer';
 import { resolveInkDocument } from '@/Components/ink/inkStorage';
-import type { InkDocument, InkEditTool } from '@/Components/ink/inkTypes';
+import { INK_DOCUMENT_VERSION, type InkDocument, type InkEditTool } from '@/Components/ink/inkTypes';
 import { CardFrame } from './frame/CardFrame';
 import { CardCornerActions } from './frame/CardCornerActions';
 import { SharedCardContent } from './SharedCardContent';
@@ -22,6 +22,7 @@ import {
   normalizeExtraRows,
   normalizeLayoutRows,
 } from '@/domain/card/extraRows';
+import { useCards } from '@/hooks/useCards';
 
 type FlashcardMediaLike =
   | string
@@ -119,6 +120,7 @@ export function Flashcard({
   onInkDocumentChange,
 }: FlashcardProps) {
   const cardData = card;
+  const { updateCard } = useCards();
 
   const [previewFlipped, setPreviewFlipped] = useState(false);
 
@@ -128,18 +130,29 @@ export function Flashcard({
   const [isAudioPopupOpen, setIsAudioPopupOpen] = useState(false);
 
   const previewInkRef = useRef<InkLayerHandle | null>(null);
+  const contentRef = useRef<HTMLDivElement | null>(null);
   const [previewInkTool, setPreviewInkTool] = useState<InkEditTool | null>(null);
   const [previewInkHistory, setPreviewInkHistory] = useState<InkHistoryState>({
     canUndo: false,
     canRedo: false,
     strokeCount: 0,
   });
+  const [layoutStable, setLayoutStable] = useState(false);
 
+  // ✅ side も含めて保持（debounce中のflipでも保存先を間違えない）
+  const pendingInkRef = useRef<{ side: 'question' | 'answer'; doc: InkDocument } | null>(null);
+  const inkSaveTimerRef = useRef<number | null>(null);
+
+  // ---- 先に派生値を確定（TDZ回避） ----
+  const cardIdForInk = cardData?.id ?? cardData?.cardId ?? null;
+  const enableDrawMode = drawMode ?? false;
+  const effectiveIsFlipped = isFlipped ?? (previewMode ? previewFlipped : false);
+  const activeInkSide: 'question' | 'answer' = effectiveIsFlipped ? 'answer' : 'question';
 
   useEffect(() => {
     if (!previewMode) return;
     setPreviewFlipped(false);
-  }, [previewMode, card?.id]);
+  }, [previewMode, cardData?.id]);
 
   useEffect(() => {
     if (!inkEditingEnabled) {
@@ -149,12 +162,97 @@ export function Flashcard({
     setPreviewInkTool((prev) => prev ?? 'pen');
   }, [inkEditingEnabled]);
 
+  useEffect(() => {
+    if (!previewMode || !inkEditingEnabled) {
+      setLayoutStable(false);
+      return;
+    }
+
+    let cancelled = false;
+    let settleTimer: number | null = null;
+    let resizeObserver: ResizeObserver | null = null;
+
+    const scheduleStable = () => {
+      if (cancelled) return;
+      if (settleTimer != null) {
+        window.clearTimeout(settleTimer);
+      }
+      settleTimer = window.setTimeout(() => {
+        if (!cancelled) {
+          setLayoutStable(true);
+        }
+      }, 250);
+    };
+
+    const init = async () => {
+      setLayoutStable(false);
+
+      const fontsReady = (document as any).fonts?.ready;
+      if (fontsReady && typeof fontsReady.then === 'function') {
+        try {
+          await fontsReady;
+        } catch {
+          // ignore
+        }
+      }
+      if (cancelled) return;
+
+      const root = contentRef.current;
+      if (!root) {
+        scheduleStable();
+        return;
+      }
+
+      const images = Array.from(root.querySelectorAll('img'));
+      const imageWaiters = images
+        .filter((img) => !img.complete)
+        .map(
+          (img) =>
+            new Promise<void>((resolve) => {
+              const done = () => {
+                img.removeEventListener('load', done);
+                img.removeEventListener('error', done);
+                resolve();
+              };
+              img.addEventListener('load', done, { once: true });
+              img.addEventListener('error', done, { once: true });
+            })
+        );
+
+      if (imageWaiters.length > 0) {
+        await Promise.allSettled(imageWaiters);
+      }
+      if (cancelled) return;
+
+      scheduleStable();
+
+      if (typeof ResizeObserver !== 'undefined') {
+        resizeObserver = new ResizeObserver(() => {
+          setLayoutStable(false);
+          scheduleStable();
+        });
+        resizeObserver.observe(root);
+      }
+    };
+
+    void init();
+    return () => {
+      cancelled = true;
+      if (settleTimer != null) {
+        window.clearTimeout(settleTimer);
+      }
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
+    };
+  }, [cardData?.id, effectiveIsFlipped, inkEditingEnabled, previewMode]);
+
   // 参考リンク抽出
   const questionReferences = React.useMemo(() => {
     const refs: ReferenceBlockData[] = [];
     const qBlocks: CardBlock[] = cardData?.questionBlocks ?? [];
     qBlocks.forEach((block) => {
-      if (block.type === 'reference' && block.references) refs.push(...block.references);
+      if (block.type === 'reference' && (block as any).references) refs.push(...((block as any).references as ReferenceBlockData[]));
     });
     return refs.filter((r) => r.url);
   }, [cardData?.questionBlocks]);
@@ -163,7 +261,7 @@ export function Flashcard({
     const refs: ReferenceBlockData[] = [];
     const aBlocks: CardBlock[] = cardData?.answerBlocks ?? [];
     aBlocks.forEach((block) => {
-      if (block.type === 'reference' && block.references) refs.push(...block.references);
+      if (block.type === 'reference' && (block as any).references) refs.push(...((block as any).references as ReferenceBlockData[]));
     });
     return refs.filter((r) => r.url);
   }, [cardData?.answerBlocks]);
@@ -182,14 +280,18 @@ export function Flashcard({
 
   const questionCode = cardData?.questionCode || cardData?.question_code || null;
   const answerCode = cardData?.answerCode || cardData?.answer_code || null;
+
   const legacyQuestionExtraRows = normalizeExtraRows(cardData?.questionExtraRows ?? cardData?.question_extra_rows ?? 0);
   const legacyAnswerExtraRows = normalizeExtraRows(cardData?.answerExtraRows ?? cardData?.answer_extra_rows ?? 0);
-  const layoutRows = normalizeLayoutRows(
+
+  // ✅ B案（raw/safe分離 + finiteガード）
+  const rawLayoutRows =
     cardData?.layoutRows ??
-      cardData?.layout_rows ??
-      (LEGACY_BASE_LAYOUT_ROWS + Math.max(legacyQuestionExtraRows, legacyAnswerExtraRows))
-  );
-  const cardIdForInk = cardData?.id ?? cardData?.cardId ?? null;
+    cardData?.layout_rows ??
+    (LEGACY_BASE_LAYOUT_ROWS + Math.max(legacyQuestionExtraRows, legacyAnswerExtraRows));
+
+  const safeLayoutRows = Number.isFinite(rawLayoutRows) ? rawLayoutRows : DEFAULT_LAYOUT_ROWS;
+  const layoutRows = normalizeLayoutRows(safeLayoutRows);
 
   const questionInkDocument = React.useMemo(
     () => resolveInkDocument(cardIdForInk, 'question', cardData?.inkQuestion ?? null),
@@ -217,12 +319,7 @@ export function Flashcard({
     return <div className="text-center py-12 text-gray-500">No Card Data</div>;
   }
 
-  // Preview should prioritize native scroll behavior over pan/zoom gestures.
-  const enableDrawMode = drawMode ?? false;
-
-  const effectiveIsFlipped = isFlipped ?? (previewMode ? previewFlipped : false);
   const activeReferences = effectiveIsFlipped ? answerReferences : questionReferences;
-  const activeInkSide = effectiveIsFlipped ? 'answer' : 'question';
   const activeInkDocument = effectiveIsFlipped ? answerInkDocument : questionInkDocument;
 
   // Flip阻害条件を集約（増えてもここだけ直せば良い）
@@ -230,6 +327,58 @@ export function Flashcard({
     isImageModalOpen || isImagePopupOpen || isAudioPopupOpen || isReferencePopupOpen;
 
   const isInkEditingActive = Boolean(previewMode && inkEditingEnabled && previewInkTool);
+
+  // ✅ stable になってからマウント（書けない/ズレないを優先）
+  const shouldMountInkLayer = Boolean(previewMode && inkEditingEnabled && cardIdForInk && layoutStable);
+
+  const flushPendingInk = React.useCallback(() => {
+    if (!cardIdForInk) return;
+
+    const pending = pendingInkRef.current;
+    if (!pending) return;
+
+    pendingInkRef.current = null;
+
+    updateCard(
+      cardIdForInk,
+      pending.side === 'question' ? { inkQuestion: pending.doc } : { inkAnswer: pending.doc }
+    ).catch((error) => {
+      console.error('[Flashcard] Failed to persist ink document', error);
+    });
+  }, [cardIdForInk, updateCard]);
+
+  const handleInkDocumentChange = React.useCallback(
+    (side: 'question' | 'answer', nextDocument: InkDocument) => {
+      const next: InkDocument = {
+        ...nextDocument,
+        version: nextDocument.version ?? INK_DOCUMENT_VERSION,
+        updatedAt: Date.now(),
+      };
+
+      onInkDocumentChange?.(side, next);
+
+      // ✅ side も一緒に保持
+      pendingInkRef.current = { side, doc: next };
+
+      if (inkSaveTimerRef.current != null) {
+        window.clearTimeout(inkSaveTimerRef.current);
+      }
+      inkSaveTimerRef.current = window.setTimeout(() => {
+        flushPendingInk();
+        inkSaveTimerRef.current = null;
+      }, 300);
+    },
+    [flushPendingInk, onInkDocumentChange]
+  );
+
+  useEffect(() => {
+    return () => {
+      if (inkSaveTimerRef.current != null) {
+        window.clearTimeout(inkSaveTimerRef.current);
+      }
+      flushPendingInk();
+    };
+  }, [flushPendingInk]);
 
   const handleFlip = React.useCallback(
     (e?: React.MouseEvent) => {
@@ -440,7 +589,7 @@ export function Flashcard({
   const overlayNode = React.useMemo(() => {
     const hasHeaderOverlay = Boolean(extraHeaderRight && !previewMode);
     const hasFooterOverlay = Boolean(extraFooter);
-    const hasInkOverlay = Boolean(cardIdForInk);
+    const hasInkOverlay = Boolean(previewMode && inkEditingEnabled && cardIdForInk);
     if (!hasHeaderOverlay && !hasFooterOverlay && !hasInkOverlay) return null;
 
     return (
@@ -467,18 +616,27 @@ export function Flashcard({
         )}
         {hasInkOverlay && (
           <>
-            <InkLayer
-              ref={previewInkRef}
-              cardId={cardIdForInk}
-              side={activeInkSide}
-              editable={Boolean(previewMode && inkEditingEnabled)}
-              tool={previewInkTool ?? 'pen'}
-              document={activeInkDocument}
-              onDocumentChange={(next) => onInkDocumentChange?.(activeInkSide, next)}
-              onHistoryChange={setPreviewInkHistory}
-              className={cn(previewMode && inkEditingEnabled ? '' : 'pointer-events-none')}
-            />
-            {previewMode && inkEditingEnabled && (
+            {shouldMountInkLayer && (
+              <InkLayer
+                ref={previewInkRef}
+                cardId={cardIdForInk}
+                side={activeInkSide}
+                editable={Boolean(previewMode && inkEditingEnabled && layoutStable)}
+                tool={previewInkTool ?? 'pen'}
+                value={activeInkDocument}
+                onChange={(next) => handleInkDocumentChange(activeInkSide, next)}
+                onHistoryChange={setPreviewInkHistory}
+              />
+            )}
+
+            {previewMode && inkEditingEnabled && !layoutStable && (
+              <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/25 text-slate-600 text-xs font-semibold">
+                レイアウト準備中...
+              </div>
+            )}
+
+            {/* ✅ stable 前は ref が null なので出さない */}
+            {previewMode && inkEditingEnabled && layoutStable && (
               <div className="absolute bottom-2 left-2 z-30 pointer-events-auto">
                 <InkToolbar
                   tool={previewInkTool}
@@ -497,16 +655,18 @@ export function Flashcard({
     );
   }, [
     cardIdForInk,
+    handleInkDocumentChange,
     activeInkSide,
     activeInkDocument,
     inkEditingEnabled,
+    layoutStable,
     previewInkTool,
     previewInkHistory.canUndo,
     previewInkHistory.canRedo,
     extraFooter,
     extraHeaderRight,
     previewMode,
-    onInkDocumentChange,
+    shouldMountInkLayer,
   ]);
 
   const fixedHeightPx = layoutRowsToCardHeightPx(layoutRows);
@@ -530,7 +690,7 @@ export function Flashcard({
           drawMode={enableDrawMode}
           overlay={overlayNode}
         >
-          <div className="animate-in fade-in zoom-in-95 duration-300 w-full max-w-full flex min-h-0 flex-1">
+          <div ref={contentRef} className="animate-in fade-in zoom-in-95 duration-300 w-full max-w-full flex min-h-0 flex-1">
             <SharedCardContent
               mode="view"
               blocks={activeBlocks}

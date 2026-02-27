@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { Eraser, PenLine, Redo2, Trash2, Undo2 } from 'lucide-react';
 
 import {
+  INK_DOCUMENT_VERSION,
   INK_PAPER_H,
   INK_PAPER_W,
   cloneInkDocument,
@@ -15,7 +16,7 @@ import {
   type InkSide,
   type InkStroke,
 } from './inkTypes';
-import { loadInkFromStorage, saveInkToStorage } from './inkStorage';
+import { saveInkToStorage } from './inkStorage';
 import {
   clientPointToPaperPoint,
   paperPointToCanvasPoint,
@@ -49,7 +50,8 @@ const copyStrokes = (strokes: InkStroke[]): InkStroke[] =>
   }));
 
 const buildDocumentFromStrokes = (strokes: InkStroke[]): InkDocument => ({
-  version: 1,
+  version: INK_DOCUMENT_VERSION,
+  updatedAt: Date.now(),
   strokes: copyStrokes(strokes),
 });
 
@@ -86,11 +88,16 @@ interface InkLayerProps {
   side: InkSide;
   editable: boolean;
   tool: InkEditTool;
+  value?: InkDocument | null;
+  onChange?: (next: InkDocument) => void;
+  /** @deprecated use value */
   document?: InkDocument | null;
+  /** @deprecated use onChange */
   className?: string;
   paperWidth?: number;
   paperHeight?: number;
   eraserRadius?: number;
+  /** @deprecated use onChange */
   onDocumentChange?: (next: InkDocument) => void;
   onHistoryChange?: (state: InkHistoryState) => void;
 }
@@ -102,6 +109,8 @@ export const InkLayer = React.memo(
       side,
       editable,
       tool,
+      value,
+      onChange,
       document,
       className,
       paperWidth = INK_PAPER_W,
@@ -241,9 +250,10 @@ export const InkLayer = React.memo(
       if (cardId) {
         saveInkToStorage(cardId, side, nextDocument);
       }
+      onChange?.(cloneInkDocument(nextDocument));
       onDocumentChange?.(cloneInkDocument(nextDocument));
       emitHistory();
-    }, [cardId, emitHistory, onDocumentChange, side]);
+    }, [cardId, emitHistory, onChange, onDocumentChange, side]);
 
     const stopDrawingRaf = React.useCallback(() => {
       if (drawRafRef.current != null) {
@@ -393,10 +403,8 @@ export const InkLayer = React.memo(
     );
 
     const initializeDocument = React.useCallback(() => {
-      const normalizedDocument = normalizeInkDocument(document ?? createEmptyInkDocument());
-      const initialDocument = cardId
-        ? loadInkFromStorage(cardId, side, normalizedDocument)
-        : normalizedDocument;
+      const incoming = value ?? document ?? createEmptyInkDocument();
+      const initialDocument = normalizeInkDocument(incoming);
 
       const signature = toDocSignature(initialDocument);
       if (signature === appliedSignatureRef.current) return;
@@ -411,7 +419,7 @@ export const InkLayer = React.memo(
       redrawBaseCanvas();
       clearLiveCanvas();
       emitHistory();
-    }, [cardId, clearLiveCanvas, document, emitHistory, redrawBaseCanvas, side]);
+    }, [clearLiveCanvas, document, emitHistory, redrawBaseCanvas, value]);
 
     const syncCanvasSize = React.useCallback(() => {
       const rect = readContainerRect();

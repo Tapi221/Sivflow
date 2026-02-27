@@ -75,8 +75,18 @@ export const clearInkFromStorage = (cardId: string | null | undefined, side: Ink
 export const resolveInkDocument = (
   cardId: string | null | undefined,
   side: InkSide,
-  fallback?: InkDocument | null
+  cardDocument?: InkDocument | null
 ): InkDocument => {
-  const loaded = loadInkFromStorage(cardId, side, fallback);
-  return cloneInkDocument(loaded);
+  const normalizedCardDocument = normalizeInkDocument(cardDocument ?? createEmptyInkDocument());
+  const storageDocument = loadInkFromStorage(cardId, side, null);
+
+  let resolved = normalizedCardDocument;
+  if (storageDocument) {
+    resolved =
+      storageDocument.updatedAt > normalizedCardDocument.updatedAt
+        ? storageDocument
+        : normalizedCardDocument;
+  }
+
+  return cloneInkDocument(resolved);
 };

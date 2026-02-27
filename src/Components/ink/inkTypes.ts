@@ -1,6 +1,6 @@
 import type { Card } from '@/types';
 
-export const INK_DOCUMENT_VERSION = 1;
+export const INK_DOCUMENT_VERSION = 2;
 export const INK_PAPER_W = 1000;
 export const INK_PAPER_H = 1414;
 
@@ -27,6 +27,7 @@ export type InkStroke = {
 
 export type InkDocument = {
   version: number;
+  updatedAt: number;
   strokes: InkStroke[];
   deletedStrokeIds?: string[];
 };
@@ -41,6 +42,7 @@ const clamp = (value: number, min: number, max: number) =>
 
 export const createEmptyInkDocument = (): InkDocument => ({
   version: INK_DOCUMENT_VERSION,
+  updatedAt: 0,
   strokes: [],
 });
 
@@ -96,6 +98,7 @@ export const normalizeInkDocument = (value: unknown): InkDocument => {
 
   return {
     version: isFiniteNumber(maybe.version) ? maybe.version : INK_DOCUMENT_VERSION,
+    updatedAt: isFiniteNumber(maybe.updatedAt) ? maybe.updatedAt : 0,
     strokes,
     ...(deletedStrokeIds && deletedStrokeIds.length > 0 ? { deletedStrokeIds } : {}),
   };
@@ -103,6 +106,7 @@ export const normalizeInkDocument = (value: unknown): InkDocument => {
 
 export const cloneInkDocument = (doc: InkDocument): InkDocument => ({
   version: doc.version,
+  updatedAt: doc.updatedAt,
   deletedStrokeIds: doc.deletedStrokeIds ? [...doc.deletedStrokeIds] : undefined,
   strokes: doc.strokes.map((stroke) => ({
     ...stroke,
