@@ -49,3 +49,12 @@ public/sw.js
 # Local temp artifacts
 .tmp/
 functions/.env*
+tmp/
+dist/
+node_modules/
+test-results/
+.firebase/
+*.log
+debug_*.txt
+serviceAccountKey.json
+serviceAccountKey.json
