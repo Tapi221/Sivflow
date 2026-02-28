@@ -58,3 +58,4 @@ test-results/
 debug_*.txt
 serviceAccountKey.json
 serviceAccountKey.json
+secrets/
