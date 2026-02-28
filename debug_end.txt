@@ -1,9 +1,0 @@
-
-             {/* Mobile Close Button (Overlay) - Optional but helpful if standard X is hard to reach */}
-            {renderContent()}
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}

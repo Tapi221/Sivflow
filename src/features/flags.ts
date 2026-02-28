@@ -4,12 +4,16 @@ export type FeatureFlags = {
   newEditor: boolean;
   enableMarkdownImages: boolean;
   experimentalPasteSplit: boolean;
+
+  // ✅ SyncV2 切り替え用（SyncServiceFactory が USE_SYNC_V2 を参照するため）
+  useSyncV2: boolean;
 };
 
 const DEFAULT_FLAGS: FeatureFlags = {
   newEditor: false,
   enableMarkdownImages: false,
   experimentalPasteSplit: false,
+  useSyncV2: false,
 };
 
 class FeatureFlagService {
@@ -31,11 +35,15 @@ class FeatureFlagService {
       const raw = localStorage.getItem('FEATURE_FLAGS');
       if (!raw) return;
 
-      const parsed = JSON.parse(raw);
+      const parsed: unknown = JSON.parse(raw);
+      if (parsed == null || typeof parsed !== 'object') return;
 
-      for (const key of Object.keys(parsed) as (keyof FeatureFlags)[]) {
-        if (key in this.flags && typeof parsed[key] === 'boolean') {
-          this.flags[key] = parsed[key];
+      const obj = parsed as Record<string, unknown>;
+
+      for (const key of Object.keys(obj) as (keyof FeatureFlags)[]) {
+        const value = obj[key as unknown as string];
+        if (key in this.flags && typeof value === 'boolean') {
+          this.flags[key] = value;
         }
       }
     } catch (err) {
@@ -56,9 +64,11 @@ class FeatureFlagService {
 
     if (import.meta.env.DEV && typeof window !== 'undefined') {
       try {
-        const current = JSON.parse(
-          localStorage.getItem('FEATURE_FLAGS') || '{}'
-        );
+        const raw = localStorage.getItem('FEATURE_FLAGS') || '{}';
+        const parsed: unknown = JSON.parse(raw);
+        const current: Record<string, unknown> =
+          parsed != null && typeof parsed === 'object' ? (parsed as Record<string, unknown>) : {};
+
         current[flag] = value;
         localStorage.setItem('FEATURE_FLAGS', JSON.stringify(current));
       } catch (err) {
@@ -84,3 +94,20 @@ class FeatureFlagService {
 }
 
 export const featureFlags = new FeatureFlagService();
+
+/**
+ * ✅ 互換レイヤー
+ * 既存コードの flags.isEnabled('USE_SYNC_V2') を壊さないためのアダプタ。
+ * 早めに featureFlags.getFlag('useSyncV2') へ移行して、最終的に削除する。
+ */
+export type LegacyFlagName = 'USE_SYNC_V2';
+
+const legacyToKey: Record<LegacyFlagName, keyof FeatureFlags> = {
+  USE_SYNC_V2: 'useSyncV2',
+};
+
+export const flags = {
+  isEnabled(name: LegacyFlagName): boolean {
+    return featureFlags.getFlag(legacyToKey[name]);
+  },
+};
