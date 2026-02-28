@@ -21,6 +21,7 @@ export class BackupService {
    * ローカルDBのすべてのデータをFirestoreにバックアップします。
    * @returns バックアップが成功したかどうか、およびバックアップしたアイテム数
    */
+
   async backupAllData(
     folders: Folder[],
     cards: Card[],
@@ -28,52 +29,94 @@ export class BackupService {
     userStats: UserStats
   ): Promise<{ success: boolean; itemCount: number; error?: string }> {
     try {
-      const batch = writeBatch(firestoreDb);
+      if (!firestoreDb) {
+        throw new Error('Firestore is not initialized.');
+      }
+
+      // Firestore batch 制限対策
+      // - 500 ops / 10MiB を超えると commit が死ぬので、余裕を持ってチャンクする
+      const MAX_OPS = 450;
+      const MAX_BYTES = Math.floor(7.5 * 1024 * 1024);
+      const encoder = new TextEncoder();
+
+      const estimateBytes = (value: unknown): number => {
+        try {
+          return encoder.encode(JSON.stringify(value)).length;
+        } catch {
+          return 1024 * 1024;
+        }
+      };
+
+      let batch = writeBatch(firestoreDb);
+      let ops = 0;
+      let bytes = 0;
       let itemCount = 0;
+
+      const commit = async (): Promise<void> => {
+        if (ops === 0) return;
+        await batch.commit();
+        batch = writeBatch(firestoreDb);
+        ops = 0;
+        bytes = 0;
+      };
+
+      const addSet = async (ref: any, data: any): Promise<void> => {
+        const payloadBytes = estimateBytes(data) + 512;
+        const wouldExceed = ops > 0 && (ops + 1 > MAX_OPS || bytes + payloadBytes > MAX_BYTES);
+        if (wouldExceed) {
+          await commit();
+        }
+        batch.set(ref, data);
+        ops += 1;
+        bytes += payloadBytes;
+        itemCount += 1;
+      };
+
+      const now = new Date();
 
       // フォルダをバックアップ（cloud_sync_enabledの状態に関わらずバックアップ）
       for (const folder of folders) {
         const folderRef = doc(firestoreDb, `users/${this.userId}/folders/${folder.id}`);
-        batch.set(folderRef, {
+        await addSet(folderRef, {
           ...folder,
           // バックアップ時のメタデータを追加
-          backupAt: new Date(),
+          backupAt: now,
           source: 'manual_backup',
         });
-        itemCount++;
       }
 
       // カードをバックアップ
       for (const card of cards) {
         const cardRef = doc(firestoreDb, `users/${this.userId}/cards/${card.id}`);
-        batch.set(cardRef, {
+        await addSet(cardRef, {
           ...card,
-          backupAt: new Date(),
+          backupAt: now,
           source: 'manual_backup',
         });
-        itemCount++;
       }
 
       // ユーザー設定をバックアップ
-      const userSettingsRef = doc(firestoreDb, `users/${this.userId}/userSettings/settings`);
-      batch.set(userSettingsRef, {
-        ...userSettings,
-        backupAt: new Date(),
-        source: 'manual_backup',
-      });
-      itemCount++;
+      {
+        const userSettingsRef = doc(firestoreDb, `users/${this.userId}/userSettings/settings`);
+        await addSet(userSettingsRef, {
+          ...userSettings,
+          backupAt: now,
+          source: 'manual_backup',
+        });
+      }
 
       // ユーザー統計をバックアップ
-      const userStatsRef = doc(firestoreDb, `users/${this.userId}/userStats/stats`);
-      batch.set(userStatsRef, {
-        ...userStats,
-        backupAt: new Date(),
-        source: 'manual_backup',
-      });
-      itemCount++;
+      {
+        const userStatsRef = doc(firestoreDb, `users/${this.userId}/userStats/stats`);
+        await addSet(userStatsRef, {
+          ...userStats,
+          backupAt: now,
+          source: 'manual_backup',
+        });
+      }
 
-      // バッチ処理を実行
-      await batch.commit();
+      // 残りを commit
+      await commit();
 
       console.log(`[Backup] Successfully backed up ${itemCount} items.`);
       return {

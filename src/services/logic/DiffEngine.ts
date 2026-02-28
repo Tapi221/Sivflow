@@ -44,7 +44,6 @@ const toMillis = (value: unknown): number => {
   return 0;
 };
 
-
 /**
  * DiffEngine: データの差分計算とマージを担当する純粋なロジッククラス
  * 状態を持たず、副作用もない
