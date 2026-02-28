@@ -4,6 +4,8 @@ import {
   collection,
   query,
   where,
+  orderBy,
+  limit,
   getDocs,
   writeBatch,
   doc,
@@ -27,9 +29,7 @@ function deepStripUndefined(input: any): any {
   if (input instanceof Date) return input;
 
   if (Array.isArray(input)) {
-    return input
-      .map(deepStripUndefined)
-      .filter((v) => v !== undefined);
+    return input.map(deepStripUndefined).filter((v) => v !== undefined);
   }
 
   if (typeof input === 'object') {
@@ -60,6 +60,60 @@ const COLLECTION_BY_TYPE: Record<string, string> = {
   userSetting: 'userSettings',
 };
 
+/**
+ * Firestore writeBatch は「1リクエストあたり 10MiB」制限がある。
+ * 大きい変更が混ざると commit が普通に死ぬので、サイズでチャンクして複数回 commit する。
+ * （余裕を見て 7.5MiB 目安）
+ */
+const MAX_BATCH_BYTES = Math.floor(7.5 * 1024 * 1024);
+/**
+ * Firestore batch の最大書き込み数は 500。余裕を見て 450。
+ */
+const MAX_BATCH_OPS = 450;
+/**
+ * pullDiff のページサイズ（無限 getDocs で死なないように）
+ */
+const PAGE_SIZE = 500;
+
+const _encoder = new TextEncoder();
+
+/** JSON stringify の byte 数で概算（正確じゃないが爆死回避には十分） */
+function estimateBytes(value: unknown): number {
+  try {
+    return _encoder.encode(JSON.stringify(value)).length;
+  } catch {
+    // stringify 不能 = だいたい危険なので大きめに見積もる
+    return 1024 * 1024;
+  }
+}
+
+function chunkChangesBySize(changes: any[]): any[][] {
+  const chunks: any[][] = [];
+  let current: any[] = [];
+  let bytes = 0;
+
+  for (const ch of changes) {
+    // data だけじゃなく type/id も少し上乗せ
+    const docBytes = estimateBytes(ch?.data ?? {});
+    const extra = docBytes + 512;
+
+    const wouldExceedBytes = current.length > 0 && bytes + extra > MAX_BATCH_BYTES;
+    const wouldExceedOps = current.length > 0 && current.length + 1 > MAX_BATCH_OPS;
+
+    if (wouldExceedBytes || wouldExceedOps) {
+      chunks.push(current);
+      current = [];
+      bytes = 0;
+    }
+
+    current.push(ch);
+    bytes += extra;
+  }
+
+  if (current.length > 0) chunks.push(current);
+  return chunks;
+}
+
 export class CloudSyncAdapter implements ICloudSyncAdapter {
   private userId: string;
 
@@ -83,11 +137,14 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
     const stripped = deepStripUndefined(data);
     const sanitized = sanitizeBlobUrlsDeep(stripped);
     if (sanitized.changed) {
-      console.warn('[CloudSyncAdapter] sanitize_blob_url_from_cloud', sanitizeForLog({
-        type,
-        id: data?.id,
-        fixes: sanitized.fixes,
-      }));
+      console.warn(
+        '[CloudSyncAdapter] sanitize_blob_url_from_cloud',
+        sanitizeForLog({
+          type,
+          id: data?.id,
+          fixes: sanitized.fixes,
+        })
+      );
     }
     return sanitized.value;
   }
@@ -103,27 +160,70 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
 
     try {
       const sinceTimestamp = Timestamp.fromMillis(since);
+      const startAfterFn = (Firestore as any).startAfter as undefined | ((snapshot: any) => any);
 
       // cards
       {
         const ref = collection(firestoreDb, `users/${this.userId}/cards`);
-        const qy = query(ref, where('updatedAt', '>', sinceTimestamp));
-        const snap = await getDocs(qy);
-        console.log(`[CloudSyncAdapter] Remote cards found: ${snap.size}`);
-        snap.forEach((d) => {
-          changes.push({ type: 'card', id: d.id, data: this.sanitizeFromCloud('card', d.data()) });
-        });
+
+        let lastDoc: any = null;
+        let total = 0;
+
+        while (true) {
+          const constraints: any[] = [
+            where('updatedAt', '>', sinceTimestamp),
+            orderBy('updatedAt', 'asc'),
+            limit(PAGE_SIZE),
+          ];
+
+          // typings に startAfter が無い環境でも動くよう any 経由で呼ぶ
+          if (startAfterFn && lastDoc) constraints.splice(2, 0, startAfterFn(lastDoc));
+
+          const qy = query(ref, ...constraints);
+          const snap = await getDocs(qy);
+          total += snap.size;
+
+          snap.forEach((d) => {
+            changes.push({ type: 'card', id: d.id, data: this.sanitizeFromCloud('card', d.data()) });
+          });
+
+          // startAfter が無い環境では1ページで止める（現状より悪化させない）
+          if (!startAfterFn || snap.empty || snap.size < PAGE_SIZE) break;
+          lastDoc = snap.docs[snap.docs.length - 1] ?? null;
+        }
+
+        console.log(`[CloudSyncAdapter] Remote cards found: ${total}`);
       }
 
       // folders
       {
         const ref = collection(firestoreDb, `users/${this.userId}/folders`);
-        const qy = query(ref, where('updatedAt', '>', sinceTimestamp));
-        const snap = await getDocs(qy);
-        console.log(`[CloudSyncAdapter] Remote folders found: ${snap.size}`);
-        snap.forEach((d) => {
-          changes.push({ type: 'folder', id: d.id, data: this.sanitizeFromCloud('folder', d.data()) });
-        });
+
+        let lastDoc: any = null;
+        let total = 0;
+
+        while (true) {
+          const constraints: any[] = [
+            where('updatedAt', '>', sinceTimestamp),
+            orderBy('updatedAt', 'asc'),
+            limit(PAGE_SIZE),
+          ];
+
+          if (startAfterFn && lastDoc) constraints.splice(2, 0, startAfterFn(lastDoc));
+
+          const qy = query(ref, ...constraints);
+          const snap = await getDocs(qy);
+          total += snap.size;
+
+          snap.forEach((d) => {
+            changes.push({ type: 'folder', id: d.id, data: this.sanitizeFromCloud('folder', d.data()) });
+          });
+
+          if (!startAfterFn || snap.empty || snap.size < PAGE_SIZE) break;
+          lastDoc = snap.docs[snap.docs.length - 1] ?? null;
+        }
+
+        console.log(`[CloudSyncAdapter] Remote folders found: ${total}`);
       }
 
       // userSettings (top-level document)
@@ -132,9 +232,10 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
         const snap = await getDoc(settingsRef);
         if (snap.exists()) {
           const data: any = this.sanitizeFromCloud('userSetting', snap.data());
-          const updatedAt = data?.updatedAt?.toMillis?.()
-            ?? data?.updatedAt?.getTime?.()
-            ?? (data?.updatedAt instanceof Date ? data.updatedAt.getTime() : 0);
+          const updatedAt =
+            data?.updatedAt?.toMillis?.() ??
+            data?.updatedAt?.getTime?.() ??
+            (data?.updatedAt instanceof Date ? data.updatedAt.getTime() : 0);
           if (!since || updatedAt > since) {
             changes.push({ type: 'userSetting', id: snap.id, data });
           }
@@ -149,9 +250,7 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
     }
   }
 
-  async pushBatch(
-    changes: any[]
-  ): Promise<{ successIds: string[]; failedIds: string[]; error?: any }> {
+  async pushBatch(changes: any[]): Promise<{ successIds: string[]; failedIds: string[]; error?: any }> {
     console.log(`📤 [CloudSyncAdapter] pushBatch START. Count: ${changes.length}`);
     const successIds: string[] = [];
     const failedIds: string[] = [];
@@ -166,39 +265,59 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
         };
       }
 
-      const batch = writeBatch(firestoreDb);
+      const chunks = chunkChangesBySize(changes);
+      let firstError: any = undefined;
 
-      for (const change of changes) {
-        const { type, id, data } = change;
-        const col = COLLECTION_BY_TYPE[type] ?? `${type}s`; // 保険
-        console.log(`   - Adding to batch: ${col}/${id}`);
-        const docRef =
-          type === 'userSetting'
-            ? doc(firestoreDb, 'userSettings', id || this.userId)
-            : doc(firestoreDb, `users/${this.userId}/${col}`, id);
-        const sanitized = this.sanitizeForCloud(type, data);
+      for (const chunk of chunks) {
+        const batch = writeBatch(firestoreDb);
+        const chunkIds: string[] = [];
 
-        // sanitized が null とか来たら普通に事故るので最低限の防御
-        if (!sanitized || typeof sanitized !== 'object') {
-          throw new Error(`Invalid payload for ${type}/${id}: expected object`);
+        for (const change of chunk) {
+          const { type, id, data } = change;
+          const col = COLLECTION_BY_TYPE[type] ?? `${type}s`; // 保険
+          console.log(`   - Adding to batch: ${col}/${id}`);
+
+          const docRef =
+            type === 'userSetting'
+              ? doc(firestoreDb, 'userSettings', id || this.userId)
+              : doc(firestoreDb, `users/${this.userId}/${col}`, id);
+
+          const sanitized = this.sanitizeForCloud(type, data);
+
+          // sanitized が null とか来たら普通に事故るので最低限の防御
+          if (!sanitized || typeof sanitized !== 'object') {
+            throw new Error(`Invalid payload for ${type}/${id}: expected object`);
+          }
+
+          batch.set(
+            docRef,
+            {
+              ...sanitized,
+              updatedAt: cloudUpdatedAt(),
+            },
+            { merge: true }
+          );
+
+          chunkIds.push(id);
         }
 
-        batch.set(
-          docRef,
-          {
-            ...sanitized,
-            updatedAt: cloudUpdatedAt(),
-          },
-          { merge: true }
-        );
-
-        successIds.push(id);
+        try {
+          console.log(`   - Committing batch... (ops=${chunkIds.length})`);
+          await batch.commit();
+          successIds.push(...chunkIds);
+        } catch (error) {
+          console.error('❌ [CloudSyncAdapter] pushBatch chunk commit ERROR:', error);
+          failedIds.push(...chunkIds);
+          if (!firstError) firstError = error;
+          // 次のチャンクへ（成功分は残す）
+        }
       }
 
-      console.log('   - Committing batch...');
-      await batch.commit();
-      console.log('📤 [CloudSyncAdapter] pushBatch SUCCESS');
+      if (failedIds.length > 0) {
+        return { successIds, failedIds, error: firstError };
+      }
 
+      console.log('📤 [CloudSyncAdapter] pushBatch SUCCESS');
       return { successIds, failedIds };
     } catch (error) {
       console.error('❌ [CloudSyncAdapter] pushBatch ERROR:', error);
@@ -218,9 +337,7 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
 
       // card
       {
-        const snap = await getDocs(
-          query(collection(firestoreDb, `users/${this.userId}/cards`), where('id', '==', id))
-        );
+        const snap = await getDocs(query(collection(firestoreDb, `users/${this.userId}/cards`), where('id', '==', id)));
         if (!snap.empty) {
           results.push({ type: 'card', id, data: this.sanitizeFromCloud('card', snap.docs[0].data()) });
           continue;

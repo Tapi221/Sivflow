@@ -379,22 +379,23 @@ export class SyncServiceV2 implements ISyncService {
         for (const change of diff.changes) {
           const tableName = `${change.type}s`;
           if (tables.includes(tableName)) {
-            await (this.localDB as any)[tableName].put(change.data);
+            const data = { ...(change.data ?? {}) };
+            // Dexie put は key が無いと insert できずに死ぬので補正
+            if (!data.id && change.id) data.id = change.id;
+            await (this.localDB as any)[tableName].put(data);
           }
         }
       });
 
-      // 3. 同期メタデータを更新 (最後の同期時刻をクラウドの最新に合わせる)
-      // 次回の差分同期はここから始まる
-      if (diff.serverTime) {
-          await this.localDB.upsert('syncMetadata', {
-              id: 'lastSync',
-              timestamp: diff.serverTime,
-              updatedAt: new Date().getTime() // タイムスタンプとして数値で保存
-          }, true);
-      }
-      
-      this.telemetry.log('info', 'Full resync completed successfully');
+      // 3. 同期時刻を更新 (次回の差分同期はここから始まる)
+// ✅ syncMetadata を直に触ると起点がズレて差分同期が壊れやすいので、既存ルートに統一する
+if (diff.serverTime) {
+  await this.localDB.updateLastSyncTime(this.userId, new Date(diff.serverTime));
+} else {
+  await this.localDB.updateLastSyncTime(this.userId, new Date());
+}
+
+this.telemetry.log('info', 'Full resync completed successfully');
     } catch (error) {
       this.telemetry.log('error', 'Full resync failed', {}, error as Error);
       throw error;

@@ -1,5 +1,50 @@
 import type { IDiffEngine } from '../interfaces/ISyncService';
 
+type TimestampLike = {
+  toMillis?: () => number;
+  seconds?: number;
+  nanoseconds?: number;
+};
+
+/**
+ * Firestore Timestamp / Date / number(ms or sec) / string(ISO) が混ざっても
+ * 時刻比較が壊れないように number(ms) に正規化する。
+ */
+const toMillis = (value: unknown): number => {
+  if (value == null) return 0;
+
+  if (typeof value === 'number') {
+    if (!Number.isFinite(value)) return 0;
+    // epoch seconds が混ざっても耐える（ms は 1e12 台、sec は 1e9 台）
+    return value < 100_000_000_000 ? Math.floor(value * 1000) : Math.floor(value);
+  }
+
+  if (value instanceof Date) {
+    const t = value.getTime();
+    return Number.isFinite(t) ? t : 0;
+  }
+
+  if (typeof value === 'string') {
+    const t = Date.parse(value);
+    return Number.isFinite(t) ? t : 0;
+  }
+
+  if (typeof value === 'object') {
+    const ts = value as TimestampLike;
+    if (typeof ts.toMillis === 'function') {
+      const t = ts.toMillis();
+      return Number.isFinite(t) ? t : 0;
+    }
+    if (typeof ts.seconds === 'number') {
+      const nanos = typeof ts.nanoseconds === 'number' ? ts.nanoseconds : 0;
+      return Math.floor(ts.seconds * 1000 + nanos / 1_000_000);
+    }
+  }
+
+  return 0;
+};
+
+
 /**
  * DiffEngine: データの差分計算とマージを担当する純粋なロジッククラス
  * 状態を持たず、副作用もない
@@ -60,8 +105,8 @@ export class DiffEngine implements IDiffEngine {
     // 更新日時の比較 (Time based conflict detection)
     // サーバーのupdatedAtとローカルのupdatedAtを比較
     // もしローカルが最後にsyncした時刻よりも、サーバーの更新日時が新しいなら、サーバー側で誰かが更新している
-    const serverHasUpdates = remote.updatedAt > (local.lastSyncedAt || 0);
-    const localHasUpdates = local.localUpdatedAt > (local.lastSyncedAt || 0);
+    const serverHasUpdates = toMillis(remote.updatedAt) > toMillis(local.lastSyncedAt || 0);
+    const localHasUpdates = toMillis(local.localUpdatedAt) > toMillis(local.lastSyncedAt || 0);
     
     if (serverHasUpdates && localHasUpdates) {
       conflict = true;
@@ -82,7 +127,7 @@ export class DiffEngine implements IDiffEngine {
     }
     
     // メタデータの調整
-    if (remote.updatedAt > merged.updatedAt) {
+    if (toMillis(remote.updatedAt) > toMillis(merged.updatedAt)) {
       merged.updatedAt = remote.updatedAt;
     }
     
