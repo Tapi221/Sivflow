@@ -1,161 +1,176 @@
-/**
- * AutoBackupService
- * 
- * 設計原則：
- * - 1日1回自動バックアップ
- * - 最大7世代保持（世代ローテーション）
- * - 容量制限で自然消滅
- */
+// src/services/AutoBackupService.ts
 
-import { snapshotService } from './SnapshotService';
-import type { AppSnapshot } from '@/types/snapshot';
+const BACKUP_STORAGE_KEY = 'app:autoBackups';
+const LAST_BACKUP_KEY = 'app:lastBackupAt';
+const MAX_BACKUPS = 5;
 
-const BACKUP_STORAGE_KEY = 'flashcard_auto_backups';
-const LAST_BACKUP_KEY = 'flashcard_last_backup_date';
-const MAX_BACKUPS = 7;
-const MIN_BACKUP_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24時間
-
-export interface BackupMetadata {
+export interface AutoBackup {
   id: string;
+  userId: string;
   createdAt: string;
-  generationCounter: number;
-  cardCount: number;
-  folderCount: number;
-  sizeBytes: number;
+  payload: unknown;
 }
 
 class AutoBackupService {
   /**
-   * 自動バックアップが必要かチェック
+   * localStorage / sessionStorage が
+   * 「存在するかつ実際に使えるか」を安全に判定する。
+   *
+   * Safari private mode 等では
+   * 存在するが setItem で例外を投げることがある。
    */
-  shouldBackup(): boolean {
-    const lastBackup = localStorage.getItem(LAST_BACKUP_KEY);
-    if (!lastBackup) return true;
-    
-    const lastBackupTime = new Date(lastBackup).getTime();
-    const now = Date.now();
-    
-    return (now - lastBackupTime) >= MIN_BACKUP_INTERVAL_MS;
+  private storageAvailable(
+    type: 'localStorage' | 'sessionStorage'
+  ): boolean {
+    if (typeof window === 'undefined') return false;
+
+    try {
+      const storage = window[type];
+      const testKey = '__storage_test__';
+
+      storage.setItem(testKey, testKey);
+      storage.removeItem(testKey);
+      return true;
+    } catch (e) {
+      if (e instanceof DOMException) {
+        // 容量超過 or private mode など
+        return (
+          e.name === 'QuotaExceededError' ||
+          e.name === 'NS_ERROR_DOM_QUOTA_REACHED'
+        );
+      }
+      return false;
+    }
   }
 
   /**
-   * 自動バックアップを実行
+   * バックアップ実行
    */
   async performAutoBackup(userId: string): Promise<boolean> {
-    if (!this.shouldBackup()) {
-      console.log('AutoBackup: Skipped (last backup is recent)');
-      return false;
-    }
+    if (!userId) return false;
 
     try {
-      console.log('AutoBackup: Starting...');
-      const snapshot = await snapshotService.createSnapshot(userId);
-      
-      // 既存バックアップを取得
-      const backups = this.getStoredBackups();
-      
-      // 新しいバックアップを追加
-      const backupData = {
+      const snapshot = await this.buildSnapshot(userId);
+
+      const existing = this.loadBackups();
+      const next: AutoBackup[] = [
         snapshot,
-        metadata: {
-          id: `backup_${Date.now()}`,
-          createdAt: new Date().toISOString(),
-          generationCounter: snapshot.metadata.generationCounter,
-          cardCount: snapshot.data.cards.length,
-          folderCount: snapshot.data.folders.length,
-          sizeBytes: 0 // 後で計算
+        ...existing,
+      ].slice(0, MAX_BACKUPS);
+
+      // ---- localStorage 保存（縮退付き） ----
+      if (this.storageAvailable('localStorage')) {
+        try {
+          localStorage.setItem(
+            BACKUP_STORAGE_KEY,
+            JSON.stringify(next)
+          );
+        } catch (e) {
+          if (e instanceof DOMException && e.name === 'QuotaExceededError') {
+            console.warn(
+              '[AutoBackup] QuotaExceededError. Keeping latest only.'
+            );
+
+            try {
+              localStorage.setItem(
+                BACKUP_STORAGE_KEY,
+                JSON.stringify(next.slice(0, 1))
+              );
+            } catch (e2) {
+              console.error(
+                '[AutoBackup] Failed to persist even 1 backup. Clearing key.',
+                e2
+              );
+              try {
+                localStorage.removeItem(BACKUP_STORAGE_KEY);
+              } catch {
+                /* noop */
+              }
+            }
+          } else {
+            throw e;
+          }
         }
-      };
-      
-      const json = JSON.stringify(backupData);
-      backupData.metadata.sizeBytes = new Blob([json]).size;
-      
-      backups.unshift(backupData);
-      
-      // 古いバックアップを削除（世代ローテーション）
-      while (backups.length > MAX_BACKUPS) {
-        backups.pop();
+
+        try {
+          localStorage.setItem(
+            LAST_BACKUP_KEY,
+            new Date().toISOString()
+          );
+        } catch {
+          // lastBackupAt は致命的でないため握りつぶす
+        }
+      } else {
+        console.warn(
+          '[AutoBackup] localStorage unavailable. Skipping local backup.'
+        );
       }
-      
-      // 保存
-      localStorage.setItem(BACKUP_STORAGE_KEY, JSON.stringify(backups));
-      localStorage.setItem(LAST_BACKUP_KEY, new Date().toISOString());
-      
-      console.log('AutoBackup: Completed successfully');
+
       return true;
-    } catch (error) {
-      console.error('AutoBackup: Failed', error);
+    } catch (err) {
+      console.error('[AutoBackup] Failed:', err);
       return false;
     }
   }
 
   /**
-   * 保存済みバックアップ一覧を取得
+   * バックアップ一覧ロード
    */
-  getStoredBackups(): Array<{ snapshot: AppSnapshot; metadata: BackupMetadata }> {
+  private loadBackups(): AutoBackup[] {
+    if (!this.storageAvailable('localStorage')) return [];
+
     try {
-      const stored = localStorage.getItem(BACKUP_STORAGE_KEY);
-      return stored ? JSON.parse(stored) : [];
+      const raw = localStorage.getItem(BACKUP_STORAGE_KEY);
+      if (!raw) return [];
+
+      const parsed = JSON.parse(raw);
+
+      if (!Array.isArray(parsed)) return [];
+
+      return parsed;
     } catch {
       return [];
     }
   }
 
   /**
-   * バックアップメタデータ一覧を取得
+   * 実際のバックアップデータ生成
+   * 実プロジェクト側のデータ収集ロジックに差し替えること。
    */
-  getBackupList(): BackupMetadata[] {
-    return this.getStoredBackups().map(b => b.metadata);
+  private async buildSnapshot(userId: string): Promise<AutoBackup> {
+    const payload = await this.collectUserData(userId);
+
+    return {
+      id: crypto.randomUUID(),
+      userId,
+      createdAt: new Date().toISOString(),
+      payload,
+    };
   }
 
   /**
-   * 特定のバックアップを取得
+   * 実データ収集（ここは実装依存）
    */
-  getBackup(backupId: string): { snapshot: AppSnapshot; metadata: BackupMetadata } | null {
-    const backups = this.getStoredBackups();
-    return backups.find(b => b.metadata.id === backupId) || null;
+  private async collectUserData(userId: string): Promise<unknown> {
+    // TODO: IndexedDB / Firestore / etc からデータ収集
+    return {
+      userId,
+      timestamp: Date.now(),
+    };
   }
 
   /**
-   * バックアップからスナップショットをエクスポート
+   * 最終バックアップ日時取得
    */
-  exportBackup(backupId: string): void {
-    const backup = this.getBackup(backupId);
-    if (!backup) {
-      throw new Error('Backup not found');
+  getLastBackupAt(): string | null {
+    if (!this.storageAvailable('localStorage')) return null;
+
+    try {
+      return localStorage.getItem(LAST_BACKUP_KEY);
+    } catch {
+      return null;
     }
-
-    const date = new Date(backup.metadata.createdAt).toISOString().split('T')[0];
-    const filename = `flashcard_backup_${date}_gen${backup.metadata.generationCounter}.json`;
-    
-    const json = JSON.stringify(backup.snapshot, null, 2);
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
-
-  /**
-   * バックアップを削除
-   */
-  deleteBackup(backupId: string): void {
-    const backups = this.getStoredBackups().filter(b => b.metadata.id !== backupId);
-    localStorage.setItem(BACKUP_STORAGE_KEY, JSON.stringify(backups));
-  }
-
-  /**
-   * 全バックアップを削除
-   */
-  clearAllBackups(): void {
-    localStorage.removeItem(BACKUP_STORAGE_KEY);
-    localStorage.removeItem(LAST_BACKUP_KEY);
   }
 }
 
 export const autoBackupService = new AutoBackupService();
-export default autoBackupService;

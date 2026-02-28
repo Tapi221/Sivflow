@@ -1,77 +1,86 @@
-/**
- * Feature Flags Management
- * 段階的ロールアウトやA/Bテストのためのフラグ管理
- */
+// src/features/flags.ts
 
-export interface FeatureFlags {
-  USE_SYNC_V2: boolean;
-  ENABLE_ADVANCED_TELEMETRY: boolean;
-  ENABLE_BACKGROUND_SYNC: boolean;
-  postReviewPractice: boolean;
-}
-
-const DEFAULT_FLAGS: FeatureFlags = {
-  USE_SYNC_V2: true, // Phase 2ロールアウト開始
-  ENABLE_ADVANCED_TELEMETRY: true,
-  ENABLE_BACKGROUND_SYNC: true, // バックグラウンド同期を有効化
-  postReviewPractice: true,
+export type FeatureFlags = {
+  newEditor: boolean;
+  enableMarkdownImages: boolean;
+  experimentalPasteSplit: boolean;
 };
 
-export class FeatureFlagManager {
-  private static instance: FeatureFlagManager;
-  private flags: FeatureFlags;
+const DEFAULT_FLAGS: FeatureFlags = {
+  newEditor: false,
+  enableMarkdownImages: false,
+  experimentalPasteSplit: false,
+};
 
-  private constructor() {
-    this.flags = { ...DEFAULT_FLAGS };
+class FeatureFlagService {
+  private flags: FeatureFlags = { ...DEFAULT_FLAGS };
+
+  constructor() {
     this.loadOverrides();
   }
 
-  public static getInstance(): FeatureFlagManager {
-    if (!FeatureFlagManager.instance) {
-      FeatureFlagManager.instance = new FeatureFlagManager();
+  /**
+   * 開発環境のみ localStorage から override を読み込む
+   * 本番では完全に無視（安全優先）
+   */
+  private loadOverrides() {
+    if (typeof window === 'undefined') return;
+    if (!import.meta.env.DEV) return;
+
+    try {
+      const raw = localStorage.getItem('FEATURE_FLAGS');
+      if (!raw) return;
+
+      const parsed = JSON.parse(raw);
+
+      for (const key of Object.keys(parsed) as (keyof FeatureFlags)[]) {
+        if (key in this.flags && typeof parsed[key] === 'boolean') {
+          this.flags[key] = parsed[key];
+        }
+      }
+    } catch (err) {
+      console.warn('[FeatureFlags] Failed to load overrides:', err);
     }
-    return FeatureFlagManager.instance;
   }
 
-  /**
-   * フラグの値を取得
-   */
-  public isEnabled(flag: keyof FeatureFlags): boolean {
+  public getFlag(flag: keyof FeatureFlags): boolean {
     return this.flags[flag];
   }
 
   /**
-   * ローカルストレージからのオーバーライドを読み込む
-   * (開発者用ツールや特定ユーザーへの配信で使用)
+   * 開発環境のみ localStorage に保存
+   * 本番ではメモリ上のみ変更
    */
-  private loadOverrides() {
-    if (typeof window === 'undefined') return;
+  public setFlag(flag: keyof FeatureFlags, value: boolean) {
+    this.flags[flag] = value;
 
-    try {
-      const overrides = localStorage.getItem('FEATURE_FLAGS');
-      if (overrides) {
-        const parsed = JSON.parse(overrides);
-        this.flags = { ...this.flags, ...parsed };
-        console.log('[FeatureFlags] Loaded overrides:', parsed);
+    if (import.meta.env.DEV && typeof window !== 'undefined') {
+      try {
+        const current = JSON.parse(
+          localStorage.getItem('FEATURE_FLAGS') || '{}'
+        );
+        current[flag] = value;
+        localStorage.setItem('FEATURE_FLAGS', JSON.stringify(current));
+      } catch (err) {
+        console.warn('[FeatureFlags] Failed to persist override:', err);
       }
-    } catch (e) {
-      console.error('[FeatureFlags] Failed to load overrides', e);
     }
   }
 
   /**
-   * フラグを動的に設定 (ロールアウト率に基づく判定などに使用)
+   * 本番では常に DEFAULT を使う
    */
-  public setFlag(flag: keyof FeatureFlags, value: boolean) {
-    this.flags[flag] = value;
-    
-    // 永続化も更新
-    if (typeof window !== 'undefined') {
-        const current = JSON.parse(localStorage.getItem('FEATURE_FLAGS') || '{}');
-        current[flag] = value;
-        localStorage.setItem('FEATURE_FLAGS', JSON.stringify(current));
+  public resetToDefaults() {
+    this.flags = { ...DEFAULT_FLAGS };
+
+    if (import.meta.env.DEV && typeof window !== 'undefined') {
+      localStorage.removeItem('FEATURE_FLAGS');
     }
+  }
+
+  public getAll(): FeatureFlags {
+    return { ...this.flags };
   }
 }
 
-export const flags = FeatureFlagManager.getInstance();
+export const featureFlags = new FeatureFlagService();
