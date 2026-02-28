@@ -115,7 +115,15 @@ export function CardMetaPanel({
 
   const latestReview = safeLogs.at(-1);
   const recent10 = safeLogs.slice(-10).reverse();
-  const completedReviewCount = Math.max(card?.reviewCount ?? 0, safeLogs.length);
+
+  // reviewCount は snake_case で入ってくるケースがあるので両対応しておく（UI側は事故らないのが正義）
+  const rawReviewCount = (card?.reviewCount ?? (card as any)?.review_count ?? 0) as unknown;
+  const normalizedReviewCount = Number.isFinite(Number(rawReviewCount))
+    ? Math.max(0, Math.trunc(Number(rawReviewCount)))
+    : 0;
+
+  // SSOT は card.reviewCount（互換あり）。ログはあってもなくても表示が壊れないよう max を取る。
+  const completedReviewCount = Math.max(normalizedReviewCount, safeLogs.length);
   const nextReviewAttempt = completedReviewCount + 1;
 
   const distribution20 = useMemo(() => {
@@ -202,16 +210,16 @@ export function CardMetaPanel({
                 <span className="text-xs font-medium text-slate-600">下書き</span>
                 <Switch checked={Boolean(card?.isDraft)} onCheckedChange={onToggleDraft} disabled={!card} />
               </div>
-              <p>作成日: {formatDateLabel(card?.createdAt)}</p>
-              <p>更新日: {formatDateLabel(card?.updatedAt)}</p>
-              <p>最終復習日: {latestReview ? formatDateLabel(latestReview.reviewedAt) : "未復習"}</p>
-              <p>次回復習日 ({nextReviewAttempt}回目): {formatDateLabel(card?.nextReviewDate)}</p>
+              <p>作成日: {formatDateLabel(card?.createdAt ?? (card as any)?.created_at)}</p>
+              <p>更新日: {formatDateLabel(card?.updatedAt ?? (card as any)?.updated_at)}</p>
+              <p>最終復習日: {latestReview ? formatDateLabel(latestReview.reviewedAt) : formatDateLabel(card?.lastReviewAt ?? (card as any)?.last_review_at)}</p>
+              <p>次回復習日 ({nextReviewAttempt}回目): {formatDateLabel(card?.nextReviewDate ?? (card as any)?.next_review_date)}</p>
             </div>
           </section>
 
           <section>
             <h3 className="text-xs font-semibold tracking-wide text-slate-500 uppercase">復習</h3>
-            <p className="mt-3 text-sm text-slate-700">復習回数: {safeLogs.length}</p>
+            <p className="mt-3 text-sm text-slate-700">復習回数: {completedReviewCount}</p>
             <div className="mt-3 space-y-2">
               {recent10.length === 0 ? (
                 <p className="text-sm text-slate-500">未復習</p>

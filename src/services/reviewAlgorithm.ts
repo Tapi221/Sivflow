@@ -231,15 +231,16 @@ export const computeNextReview = ({
   now = new Date(),
   delayBonusEnabled = false
 }: ReviewAlgorithmInput & { delayBonusEnabled?: boolean }): ReviewAlgorithmResult => {
+  const c: any = card as any;
   // Get current stability (with legacy conversion)
-  const legacyLevel = card.currentLevel ?? card.level ?? null;
-  const currentStability = getInitialStability(card.memoryStability ?? null, legacyLevel);
+  const legacyLevel = (card.currentLevel ?? c.current_level ?? card.level ?? c.level ?? null) as any;
+  const currentStability = getInitialStability((card.memoryStability ?? c.memory_stability ?? null) as any, legacyLevel);
 
   // ✅ Get current difficulty
-  const currentDifficulty = getInitialDifficulty(card.difficulty ?? null, currentStability);
+  const currentDifficulty = getInitialDifficulty((card.difficulty ?? c.difficulty ?? null) as any, currentStability);
 
   // Calculate delay (days overdue)
-  const plannedDate = toDate(card.nextReviewDate ?? null);
+  const plannedDate = toDate((card.nextReviewDate ?? c.next_review_date ?? null) as any);
   const diff = plannedDate ? diffDays(now, plannedDate) : 0;
   const delayDays = Math.max(0, diff);
 
@@ -271,7 +272,7 @@ export const computeNextReview = ({
   nextReviewDate.setHours(0, 0, 0, 0);
 
   // Increment review count
-  const currentReviewCount = card.reviewCount ?? 0;
+  const currentReviewCount = (card.reviewCount ?? c.review_count ?? 0) as any;
   const reviewCount = currentReviewCount + 1;
 
   return {

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FileText, PanelRightClose, PanelRightOpen, Plus } from "lucide-react";
+import { FileText, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import ImageIcon from "lucide-react/dist/esm/icons/image";
 import Volume2Icon from "lucide-react/dist/esm/icons/volume-2";
 import LinkIcon from "lucide-react/dist/esm/icons/link";
@@ -156,6 +156,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
   // 編集中の対象IDを固定して、cards更新時のdraft上書きを防ぐ
   const editingCardIdRef = useRef<string | null>(null);
   const hydratedFromIdRef = useRef<string | null>(null);
+  const autoOpenCheckedIdRef = useRef<string | null>(null);
 
   const [isMetaOpen, setIsMetaOpen] = useState<boolean>(() => {
     if (typeof window === "undefined") return true;
@@ -226,6 +227,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
       setDraft(null);
       editingCardIdRef.current = null;
       hydratedFromIdRef.current = null;
+      autoOpenCheckedIdRef.current = null;
       return;
     }
 
@@ -237,17 +239,34 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
       setDraft((prev) => prev ?? makeNewDraft());
       editingCardIdRef.current = NEW_SENTINEL;
       hydratedFromIdRef.current = NEW_SENTINEL;
+      autoOpenCheckedIdRef.current = NEW_SENTINEL;
       return;
     }
 
-    // 新規作成直後の空カードは自動で編集モードを開く。
-    // それ以外の既存カードは閲覧モードに戻す。
-    const autoOpenEditor = shouldAutoOpenEditorForCard(selectedCard);
-    setIsEditing(autoOpenEditor);
+    // 既存カードは一旦閲覧モードへ。
+    // ★/はてな等の updateCard による参照更新で draft を飛ばさないよう、
+    // 「空カード判定による自動編集オープン」は別Effectで “選択直後だけ” 実施する。
+    setIsEditing(false);
     setDraft(null);
     editingCardIdRef.current = null;
     hydratedFromIdRef.current = null;
-  }, [normalizedSelectedCardId, selectedCard]);
+    autoOpenCheckedIdRef.current = null;
+  }, [normalizedSelectedCardId]);
+
+  // 新規作成直後の空カードは自動で編集モードを開く（選択直後に1回だけ）
+  useEffect(() => {
+    if (!normalizedSelectedCardId) return;
+    if (normalizedSelectedCardId === NEW_SENTINEL) return;
+    if (!selectedCard) return;
+    if (isEditing) return;
+
+    if (autoOpenCheckedIdRef.current === normalizedSelectedCardId) return;
+    autoOpenCheckedIdRef.current = normalizedSelectedCardId;
+
+    if (shouldAutoOpenEditorForCard(selectedCard)) {
+      setIsEditing(true);
+    }
+  }, [normalizedSelectedCardId, selectedCard, isEditing]);
 
   // isEditing の開始/終了で target を固定
   useEffect(() => {
@@ -805,7 +824,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
           onClick={() => setIsMetaOpen((prev) => !prev)}
           aria-label={isMetaOpen ? "close meta panel" : "open meta panel"}
         >
-          {isMetaOpen ? <PanelRightClose className="h-4 w-4" /> : <PanelRightOpen className="h-4 w-4" />}
+          {isMetaOpen ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </Button>
 
         <div className={cn("min-w-0 flex-1 p-4", isEditing ? "overflow-y-auto" : "overflow-hidden")}>
