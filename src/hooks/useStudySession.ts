@@ -5,6 +5,7 @@ import { normalizeMemoryStability } from '@/utils/reviewUtils';
 import { getDebugStreak } from '@/utils/debugStreak';
 import { sanitizeStreak } from '@/utils/streak';
 import { getLocalDb } from '@/services/localDB';
+import { useTodayStudyStore } from '@/stores/useTodayStudyStore';
 
 const SCORE_TO_RATING: Record<number, 'forgot' | 'vague' | 'remembered' | 'easy'> = {
   0: 'forgot',
@@ -128,6 +129,14 @@ export function useStudySession({
         },
       ];
     });
+
+    // 当日集計ストアを即時更新（ダッシュボードへの即時反映用）
+    const ratingKey = SCORE_TO_RATING[subjectiveScore] ?? 'forgot';
+    const todayStore = useTodayStudyStore.getState();
+    todayStore.addRating(ratingKey);
+    if (subjectiveScore === 0 || subjectiveScore === 1) {
+      todayStore.markForExtra(card.id);
+    }
 
     setResults((prev) => ({
       ...prev,

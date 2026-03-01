@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useTodayStudyStore } from '@/stores/useTodayStudyStore';
 
 type PracticeState = {
   sourceSessionId: string;
@@ -62,6 +63,10 @@ export function usePracticeMode({
   }, [finalRatingByCardId, isPracticeFeatureEnabled, logPracticeEvent, sourceSessionId]);
 
   const handlePracticeAnswer = useCallback((answer: 'ok' | 'anxious') => {
+    // setPracticeState の setter は同期的に呼ばれるため、
+    // ここで消化したカード ID を捕捉して store 側へ反映する
+    let doneCardId: string | null = null;
+
     setPracticeState((prev) => {
       if (!prev || prev.phase !== 'cards') return prev;
       const [currentCardId, ...nextRoundQueue] = prev.roundQueue;
@@ -70,6 +75,8 @@ export function usePracticeMode({
       const nextRemaining = answer === 'anxious' ? [...prev.remaining, currentCardId] : prev.remaining;
       const nextDoneCount = answer === 'ok' ? prev.doneCount + 1 : prev.doneCount;
       const isRoundEnded = nextRoundQueue.length === 0;
+
+      if (answer === 'ok') doneCardId = currentCardId;
 
       logPracticeEvent('practice_answer', {
         rating: prev.filterRating,
@@ -85,6 +92,11 @@ export function usePracticeMode({
         phase: isRoundEnded ? 'summary' : 'cards',
       };
     });
+
+    // 追い復習キューから消化済みカードを除外（ダッシュボード即時反映）
+    if (doneCardId) {
+      useTodayStudyStore.getState().markExtraDone(doneCardId);
+    }
   }, [logPracticeEvent]);
 
   const handlePracticeContinueRound = useCallback(() => {

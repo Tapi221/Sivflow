@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCards } from '@/hooks/useCards';
 import { useFolders } from '@/hooks/useFolders';
@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 import { RatingCountTiles } from '@/Components/study/RatingCountTiles';
+import { useTodayStudyStore } from '@/stores/useTodayStudyStore';
 
 import ExportDialog from '@/Components/export/ExportDialog';
 import ImportDialog from '@/Components/export/ImportDialog';
@@ -33,6 +34,30 @@ export default function Dashboard() {
   const { currentUser } = useAuth();
   const { settings } = useUserSettings();
   
+  // 当日学習ストア（評価集計 & 追い復習キュー）
+  const { ratings, extraQueue } = useTodayStudyStore();
+
+  // マウント時 / userId 変更時: 日付・userId の齟齬をリセット
+  useEffect(() => {
+    const uid = currentUser?.uid ?? 'anon';
+    useTodayStudyStore.getState().hydrate(uid);
+  }, [currentUser?.uid]);
+
+  // フォーカス復帰・タブ切り替え・別タブ変更でリセット確認
+  useEffect(() => {
+    const uid = () => currentUser?.uid ?? 'anon';
+    const sync = () => useTodayStudyStore.getState().resetIfNewDay(uid());
+    const onVisible = () => { if (!document.hidden) sync(); };
+    window.addEventListener('focus', sync);
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('storage', sync);
+    return () => {
+      window.removeEventListener('focus', sync);
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('storage', sync);
+    };
+  }, [currentUser?.uid]);
+
   const { cards = [], loading: cardsLoading } = useCards();
   const { folders = [], loading: foldersLoading } = useFolders();
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
@@ -199,6 +224,12 @@ export default function Dashboard() {
     ? 'カードを追加するか、学習を進めましょう。'
     : null;
 
+  // ストアから当日集計と追い復習残数を取得
+  const todayTotalRated = ratings.forgot + ratings.vague + ratings.remembered + ratings.easy;
+  // due > 0: まだ未完了 / todayTotalRated === 0: 今日まだ1枚もやっていない → どちらも表示
+  const showTodayReview = dueCount > 0 || todayTotalRated === 0;
+  const extraRemaining = extraQueue.length;
+
   return (
     <div className="min-h-screen bg-[#F5F7FA] text-slate-800 selection:bg-teal-100 selection:text-teal-900 relative overflow-hidden">
       {/* Background Ruled Lines */}
@@ -252,8 +283,8 @@ export default function Dashboard() {
             </div>
         </div>
 
-        {/* Priority Section (Today's Review) */}
-        <section className="mb-8 md:mb-12">
+        {/* Priority Section (Today's Review) — 完了済みの日は非表示 */}
+        {showTodayReview && <section className="mb-8 md:mb-12">
             <div 
               className={`
                 rounded-3xl md:rounded-[40px] py-6 px-6 md:p-12 border-t border-white/50 ring-1 ring-slate-900/5 
@@ -296,7 +327,36 @@ export default function Dashboard() {
                     </div>
                 </div>
             </div>
-        </section>
+        </section>}
+
+        {/* 追い復習セクション — 未消化カードがある場合のみ表示 */}
+        {extraRemaining > 0 && (
+          <section className="mb-8 md:mb-12">
+            <div className="flex items-center gap-2 mb-4">
+              <Zap className="w-3.5 h-3.5 text-amber-500" />
+              <h2 className="text-[10px] font-bold text-slate-300 tracking-[0.2em] uppercase">
+                追い復習
+              </h2>
+            </div>
+            <div
+              className="bg-amber-50/60 rounded-3xl py-5 px-6 md:py-7 md:px-10 border border-amber-100/80 cursor-pointer hover:bg-amber-50 transition-all duration-300 group"
+              onClick={() => navigate(createPageUrl('study'))}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-bold text-amber-500 uppercase tracking-[0.15em] mb-1">忘れた・あいまいのカード</p>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-4xl md:text-5xl font-bold text-amber-700 italic leading-none tracking-tighter">{extraRemaining}</span>
+                    <span className="text-sm font-medium text-amber-500">枚残り</span>
+                  </div>
+                </div>
+                <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-amber-400 flex items-center justify-center text-white shadow-md shadow-amber-400/30 group-hover:scale-110 group-hover:bg-amber-500 transition-all duration-300">
+                  <ChevronRight className="w-6 h-6 md:w-7 md:h-7" />
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Today's Rating Tiles */}
         <section className="mb-12">
@@ -309,10 +369,10 @@ export default function Dashboard() {
           <RatingCountTiles
             className="md:gap-4"
             counts={{
-              forgot: todayRatingCounts[0] ?? 0,
-              vague: todayRatingCounts[1] ?? 0,
-              remembered: todayRatingCounts[2] ?? 0,
-              easy: todayRatingCounts[3] ?? 0,
+              forgot: ratings.forgot,
+              vague: ratings.vague,
+              remembered: ratings.remembered,
+              easy: ratings.easy,
             }}
           />
         </section>
