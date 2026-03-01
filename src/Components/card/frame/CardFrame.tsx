@@ -1,14 +1,14 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { ScaleToFitFrame } from '@/Components/card/ScaleToFitFrame';
-import { CardShell } from '@/Components/card/CardShell';
-import { CardSurface } from '@/Components/card/CardSurface';
+import { ScaleToFitFrame } from '@/components/card/ScaleToFitFrame';
+import { CardShell } from '@/components/card/CardShell';
+import { CardSurface } from '@/components/card/CardSurface';
 import {
   CARD_BASE_WIDTH,
   CARD_RULED_OFFSET_BOTTOM_PX,
   CARD_ROW_PX,
   CARD_RULED_OFFSET_TOP_PX,
-} from '@/Components/card/constants';
+} from '@/components/card/constants';
 
 // CardShell の props 型をそのまま流用するための別名
 type CardShellProps = React.ComponentProps<typeof CardShell>;

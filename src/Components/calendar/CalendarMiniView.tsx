@@ -16,7 +16,7 @@ import {
 } from 'date-fns';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Button } from '@/Components/ui/button';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/types';
 
 interface CalendarMiniViewProps {

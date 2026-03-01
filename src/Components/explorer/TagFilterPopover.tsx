@@ -3,8 +3,8 @@ import { Filter, Search, Check, Tag } from 'lucide-react';
 import { useExplorerStore } from '@/hooks/useExplorerStore';
 import { useTags } from '@/hooks/useTags';
 import { cn } from '@/lib/utils';
-import { Popover, PopoverContent, PopoverTrigger } from '@/Components/ui/popover';
-import { TagBadge } from '@/Components/tag/TagBadge';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { TagBadge } from '@/components/tag/TagBadge';
 
 interface TagFilterPopoverProps {
   allTags: string[]; // 全タグ一覧（呼び出し元から渡す）

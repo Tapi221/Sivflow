@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import Dexie from 'dexie';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { Button } from '@/Components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/Components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LocalDB, initializeDB, getLocalDb } from '@/services/localDB';
 import { useAuth } from '@/contexts/AuthContext';
 import { Clock, RefreshCw, AlertTriangle, CheckCircle, Loader2, Folder, FileText, ChevronDown, ChevronRight } from 'lucide-react';
 import { useToast } from '@/contexts/ToastContext';
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/Components/ui/collapsible';
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
 
 export default function DataRescuePanel() {
   const { currentUser } = useAuth();

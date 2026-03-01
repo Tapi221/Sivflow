@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
-import { Switch } from '@/Components/ui/switch';
+import { Switch } from '@/components/ui/switch';
 import GripVertical from 'lucide-react/dist/esm/icons/grip-vertical';
 import TypeIcon from 'lucide-react/dist/esm/icons/type';
 import CodeIcon from 'lucide-react/dist/esm/icons/code';

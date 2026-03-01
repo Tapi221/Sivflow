@@ -1,13 +1,13 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import CardEditor from '@/Components/card/CardEditor';
+import CardEditor from '@/components/card/CardEditor';
 import { useCards } from '@/hooks/useCards';
 import { useUserSettings } from '@/hooks/useUserSettings';
 import { toast } from 'sonner';
 import { nanoid } from 'nanoid';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { GripVertical, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
-import { Button } from '@/Components/ui/button';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 const ONE_QA_EDITORS_KEY = 'one-qa-mode-editors';

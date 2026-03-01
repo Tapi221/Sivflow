@@ -6,7 +6,7 @@ import { normalizeCard } from '../utils';
 import { normalizeMemoryStability } from '../utils/reviewUtils';
 import { useUserSettings, DEFAULT_SETTINGS } from './useUserSettings';
 import type { Card } from '../types';
-import { normalizeInkDocument } from '@/Components/ink/inkTypes';
+import { normalizeInkDocument } from '@/components/ink/inkTypes';
 import { DEFAULT_LAYOUT_ROWS, normalizeLayoutRows } from '@/domain/card/extraRows';
 
 // 空カード判定用のヘルパー関数（createCard と updateCard で共通利用）

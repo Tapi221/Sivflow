@@ -5,8 +5,8 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/Components/ui/dialog';
-import AutoResizeTextarea from '@/Components/ui/AutoResizeTextarea';
+} from '@/components/ui/dialog';
+import AutoResizeTextarea from '@/components/ui/AutoResizeTextarea';
 import { MathBlockContent } from './MathBlockContent';
 import { cn } from '@/lib/utils';
 import type { MathBlockData } from '@/types';

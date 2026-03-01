@@ -8,7 +8,7 @@ import { getLocalDb } from '../services/localDB';
 import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 import { firestoreDb } from '@/services/firebase';
 import { useAuth } from '@/contexts/AuthContext';
-import { Skeleton } from '@/Components/ui/skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Flame,
   Clock,
@@ -22,11 +22,11 @@ import {
   Zap
 } from 'lucide-react';
 import { createPageUrl } from '@/utils';
-import { RatingCountTiles } from '@/Components/study/RatingCountTiles';
+import { RatingCountTiles } from '@/components/study/RatingCountTiles';
 import { useTodayStudyStore } from '@/stores/useTodayStudyStore';
 
-import ExportDialog from '@/Components/export/ExportDialog';
-import ImportDialog from '@/Components/export/ImportDialog';
+import ExportDialog from '@/components/export/ExportDialog';
+import ImportDialog from '@/components/export/ImportDialog';
 import { useUserSettings } from '@/hooks/useUserSettings';
 
 export default function Dashboard() {

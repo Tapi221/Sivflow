@@ -4,7 +4,7 @@ import {
   computeNextScaleFromGesture,
   computeNextScaleFromWheel,
   normalizeScale,
-} from '@/Components/pdf/pdfZoomUtils';
+} from '@/components/pdf/pdfZoomUtils';
 
 describe('pdfZoomUtils', () => {
   describe('normalizeScale', () => {

@@ -20,17 +20,17 @@ import {
   Cloud
 } from 'lucide-react';
 import { getLocalDb } from '@/services/localDB';
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/Components/ui/dialog';
-import { Button } from '@/Components/ui/button';
-import { Switch } from '@/Components/ui/switch';
-import { Input } from '@/Components/ui/input';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Input } from '@/components/ui/input';
 import { 
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/Components/ui/select';
+} from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFolders } from '@/hooks/useFolders';
 import { cn } from '@/lib/utils';
@@ -39,10 +39,10 @@ import { auth } from '@/services/firebase';
 import { useNavigate } from 'react-router-dom';
 import { uploadProfileImage } from '@/services/imageUploadService';
 import { useReliableFileUpload } from '@/hooks/useReliableFileUpload';
-import { Slider } from '@/Components/ui/slider';
+import { Slider } from '@/components/ui/slider';
 import { useUserSettings } from '@/hooks/useUserSettings';
 import { BookOpen } from 'lucide-react';
-import { FaceIcons } from '@/Components/ui/FaceIcons';
+import { FaceIcons } from '@/components/ui/FaceIcons';
 import { StorageManager } from './StorageManager';
 import { 
   createUploadedImage, 
@@ -51,13 +51,13 @@ import {
   convertHeicToJpeg, 
   compressAndConvertToBase64 
 } from '@/utils/imageUtils';
-import { UploadProgress } from '@/Components/ui/UploadProgress';
+import { UploadProgress } from '@/components/ui/UploadProgress';
 import { getAvatarColors, getInitials } from '@/utils/avatarUtils';
 import { useTags, DEFAULT_COLORS } from '@/hooks/useTags';
-import { Popover, PopoverContent, PopoverTrigger } from '@/Components/ui/popover';
-import DataRescuePanel from '@/Components/settings/DataRescuePanel';
-import { DeviceSyncSettings } from '@/Components/settings/DeviceSyncSettings';
-import { BlockOrdering } from '@/Components/settings/BlockOrdering';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import DataRescuePanel from '@/components/settings/DataRescuePanel';
+import { DeviceSyncSettings } from '@/components/settings/DeviceSyncSettings';
+import { BlockOrdering } from '@/components/settings/BlockOrdering';
 import { useSyncSettings } from '@/hooks/useSyncSettings';
 import { validateUsername, truncateUsername, countUnicodeCharacters } from '@/utils/userValidation';
 

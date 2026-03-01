@@ -1,7 +1,7 @@
 import React from 'react';
-import { Button } from '@/Components/ui/button';
-import { Card, CardContent } from '@/Components/ui/card';
-import StudyCard from '@/Components/study/StudyCard';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import StudyCard from '@/components/study/StudyCard';
 
 type Props = {
   practiceState: any;

@@ -1,9 +1,9 @@
 import React from 'react';
-import { Button } from '@/Components/ui/button';
-import { Card, CardContent } from '@/Components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { createPageUrl } from '@/utils';
-import { StampRally } from '@/Components/study/StampRally';
-import { RatingCountTiles } from '@/Components/study/RatingCountTiles';
+import { StampRally } from '@/components/study/StampRally';
+import { RatingCountTiles } from '@/components/study/RatingCountTiles';
 
 type Tile = { rating: string; score: number; Icon: any };
 

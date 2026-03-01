@@ -1,18 +1,18 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Switch } from '@/Components/ui/switch';
+import { Switch } from '@/components/ui/switch';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/Components/ui/select';
-import { Checkbox } from '@/Components/ui/checkbox';
-import { Button } from '@/Components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/Components/ui/tabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/Components/ui/card';
+} from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Save, RefreshCw, CheckCircle, X, Clock, AlertTriangle, Cloud } from 'lucide-react';
-import DataRescuePanel from '@/Components/settings/DataRescuePanel';
+import DataRescuePanel from '@/components/settings/DataRescuePanel';
 import { getLocalDb } from '../services/localDB';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';

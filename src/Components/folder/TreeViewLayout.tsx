@@ -12,12 +12,12 @@ import { useDocuments } from '@/hooks/useDocuments';
 import { createPageUrl } from '@/utils';
 import { useUserSettings } from '@/hooks/useUserSettings';
 import { useTags } from '@/hooks/useTags';
-import { TagBadge } from '@/Components/tag/TagBadge';
+import { TagBadge } from '@/components/tag/TagBadge';
 import type { Card, DocumentItem, SelectedExplorerItem } from '@/types';
 import { useCards } from '@/hooks/useCards';
 import { useExplorerStore } from '@/hooks/useExplorerStore';
-import CreateCardSelectionDialog from '@/Components/card/CreateCardSelectionDialog';
-import CreationModeDialog from '@/Components/card/CreationModeDialog';
+import CreateCardSelectionDialog from '@/components/card/CreateCardSelectionDialog';
+import CreationModeDialog from '@/components/card/CreationModeDialog';
 
 
 interface TreeViewLayoutProps {

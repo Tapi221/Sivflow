@@ -8,7 +8,7 @@ import {
   SelectSeparator,
   SelectTrigger,
   SelectValue,
-} from '@/Components/ui/select';
+} from '@/components/ui/select';
 import type { CodeBlockData } from '@/types/code-block';
 import { CodeBlockContent } from './blocks/CodeBlockContent';
 import { normalizeEditorLanguage } from './blocks/codeBlockLanguage';

@@ -5,20 +5,20 @@ import Volume2Icon from "lucide-react/dist/esm/icons/volume-2";
 import LinkIcon from "lucide-react/dist/esm/icons/link";
 import { DragDropContext } from "@hello-pangea/dnd";
 
-import { Flashcard } from "@/Components/card/Flashcard";
-import { CardMetaPanel } from "@/Components/card/CardMetaPanel";
-import MediaUploader from "@/Components/card/MediaUploader";
-import { CardFrame } from "@/Components/card/frame/CardFrame";
-import { CardCornerActions } from "@/Components/card/frame/CardCornerActions";
-import { SharedCardContent } from "@/Components/card/SharedCardContent";
-import { sortBlocksByOrderIndex } from "@/Components/card/blockOrdering";
+import { Flashcard } from "@/components/card/Flashcard";
+import { CardMetaPanel } from "@/components/card/CardMetaPanel";
+import MediaUploader from "@/components/card/MediaUploader";
+import { CardFrame } from "@/components/card/frame/CardFrame";
+import { CardCornerActions } from "@/components/card/frame/CardCornerActions";
+import { SharedCardContent } from "@/components/card/SharedCardContent";
+import { sortBlocksByOrderIndex } from "@/components/card/blockOrdering";
 import {
   CANONICAL_CARD_WIDTH,
   CARD_HEIGHT_PHASE_PX,
   CARD_ROW_PX,
   cardHeightPxToLayoutRows,
   layoutRowsToCardHeightPx,
-} from "@/Components/card/constants";
+} from "@/components/card/constants";
 import {
   DEFAULT_LAYOUT_ROWS,
   LEGACY_BASE_LAYOUT_ROWS,
@@ -26,9 +26,9 @@ import {
   normalizeLayoutRows,
 } from "@/domain/card/extraRows";
 
-import { Button } from "@/Components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/Components/ui/dialog";
-import { Input } from "@/Components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { useCards } from "@/hooks/useCards";
 import { useUserSettings } from "@/hooks/useUserSettings";
 import { useToast } from "@/contexts/ToastContext";

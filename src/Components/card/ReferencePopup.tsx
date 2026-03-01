@@ -5,7 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/Components/ui/dialog";
+} from "@/components/ui/dialog";
 import type { ReferenceBlockData } from '@/types';
 import Globe from 'lucide-react/dist/esm/icons/globe';
 import ExternalLink from 'lucide-react/dist/esm/icons/external-link';

@@ -3,7 +3,7 @@ import React from 'react';
 import { afterEach, describe, it, expect, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MarkdownBlock } from '@/Components/card/blocks/MarkdownBlock';
+import { MarkdownBlock } from '@/components/card/blocks/MarkdownBlock';
 
 afterEach(() => {
   cleanup();

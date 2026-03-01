@@ -1,6 +1,6 @@
 import React from 'react';
-import { CARD_ROW_PX } from '@/Components/card/constants';
-import { RowSnappedRoot } from '@/Components/card/RowSnappedRoot';
+import { CARD_ROW_PX } from '@/components/card/constants';
+import { RowSnappedRoot } from '@/components/card/RowSnappedRoot';
 
 type CodeBlockFrameProps = {
   variant?: 'viewer' | 'editor';

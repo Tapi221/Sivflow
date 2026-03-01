@@ -6,8 +6,8 @@ import { useDocuments } from '@/hooks/useDocuments';
 import { useIsDesktop } from '@/hooks/useIsDesktop';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/contexts/ToastContext';
-import { Skeleton } from '@/Components/ui/skeleton';
-import TreeViewLayout from '@/Components/folder/TreeViewLayout';
+import { Skeleton } from '@/components/ui/skeleton';
+import TreeViewLayout from '@/components/folder/TreeViewLayout';
 import { cn } from '@/lib/utils';
 
 export default function Folders() {
@@ -78,7 +78,7 @@ export default function Folders() {
 
   useEffect(() => {
     const pendingTarget = pendingUrlSyncRef.current;
-    if (pendingTarget) {
+    if (pendingTarget !== null) {
       // state から URL へ反映中は、古い query で state を巻き戻さない
       if (queryString !== pendingTarget) return;
       pendingUrlSyncRef.current = null;

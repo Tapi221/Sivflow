@@ -21,7 +21,7 @@ vi.mock('../ReferencePopup', () => ({
   ReferencePopup: () => null,
 }));
 
-vi.mock('@/Components/ui/dialog', () => ({
+vi.mock('@/components/ui/dialog', () => ({
   Dialog: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   DialogContent: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));

@@ -8,24 +8,24 @@ import { addDoc, collection } from 'firebase/firestore';
 import { getLocalDb } from '../services/localDB';
 import { firestoreDb } from '@/services/firebase';
 import { useAuth } from '@/contexts/AuthContext';
-import { Skeleton } from '@/Components/ui/skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft } from 'lucide-react';
-import { FaceIcons } from '@/Components/ui/FaceIcons';
+import { FaceIcons } from '@/components/ui/FaceIcons';
 import { createPageUrl } from '@/utils';
 import { getDebugStreak } from '@/utils/debugStreak';
 import { sanitizeStreak } from '@/utils/streak';
 import { flags } from '@/features/flags';
 import { TelemetryService } from '@/services/logic/TelemetryService';
 import confetti from 'canvas-confetti';
-import { StampRally } from '@/Components/study/StampRally';
+import { StampRally } from '@/components/study/StampRally';
 import { useStudyCards } from '@/hooks/useStudyCards';
 import { useStudySession } from '@/hooks/useStudySession';
 import { usePracticeMode } from '@/hooks/usePracticeMode';
-import { StudyEmpty } from '@/Components/study/StudyEmpty';
-import { StudyReview } from '@/Components/study/StudyReview';
-import { StudyComplete } from '@/Components/study/StudyComplete';
-import { PracticeCards } from '@/Components/study/PracticeCards';
-import { PracticeSummary } from '@/Components/study/PracticeSummary';
+import { StudyEmpty } from '@/components/study/StudyEmpty';
+import { StudyReview } from '@/components/study/StudyReview';
+import { StudyComplete } from '@/components/study/StudyComplete';
+import { PracticeCards } from '@/components/study/PracticeCards';
+import { PracticeSummary } from '@/components/study/PracticeSummary';
 
 const RATING_LABELS = {
   forgot: '忘れた',

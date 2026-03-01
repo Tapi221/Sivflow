@@ -5,10 +5,10 @@
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Dialog, DialogContent } from '@/Components/ui/dialog';
-import { Input } from '@/Components/ui/input';
-import { Button } from '@/Components/ui/button';
-import { Badge } from '@/Components/ui/badge';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useCards } from '@/hooks/useCards';
 import { useFolders } from '@/hooks/useFolders';

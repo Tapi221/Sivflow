@@ -1,13 +1,13 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import CardEditor from '@/Components/card/CardEditor';
+import CardEditor from '@/components/card/CardEditor';
 import { useCards } from '@/hooks/useCards';
 import { useUserSettings } from '@/hooks/useUserSettings';
 import { useToast } from '@/contexts/ToastContext';
 import { nanoid } from 'nanoid';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { GripVertical, Trash2, ArrowLeft, ChevronUp, ChevronDown } from 'lucide-react';
-import { Button } from '@/Components/ui/button';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 const FOUR_CHOICE_EDITORS_KEY = 'four-choice-mode-editors';

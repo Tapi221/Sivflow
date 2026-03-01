@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from '@/Components/ui/button';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Eraser, PenLine, Redo2, Trash2, Undo2 } from 'lucide-react';
 

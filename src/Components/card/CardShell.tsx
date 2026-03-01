@@ -5,7 +5,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/Components/ui/dropdown-menu';
+} from '@/components/ui/dropdown-menu';
 
 interface CardShellProps extends React.HTMLAttributes<HTMLDivElement> {
   actions?: React.ReactNode;

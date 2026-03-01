@@ -3,8 +3,8 @@ import { firestoreDb } from '@/services/firebase';
 import { collection, getDocs, limit, query, where, doc, getDoc } from 'firebase/firestore';
 import { cardsPathSegments } from '@/services/firestorePaths';
 import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/Components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, CheckCircle, XCircle, AlertTriangle, RefreshCw } from 'lucide-react';
 
 export default function ImageDiagnostics() {

@@ -1,11 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCards } from '@/hooks/useCards';
-import { Button } from '@/Components/ui/button';
-import { Skeleton } from '@/Components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, Tag } from 'lucide-react';
 import { createPageUrl } from '@/utils';
-import CardViewer from '@/Components/card/CardViewer';
+import CardViewer from '@/components/card/CardViewer';
 import { useCardEntity } from '@/hooks/useCardEntity';
 
 export default function CardView() {

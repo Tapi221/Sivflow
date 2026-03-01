@@ -10,14 +10,14 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/Components/ui/command"
+} from "@/components/ui/command"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/Components/ui/popover"
+} from "@/components/ui/popover"
 import { useTags } from "@/hooks/useTags"
-import { TagBadge } from "@/Components/tag/TagBadge"
+import { TagBadge } from "@/components/tag/TagBadge"
 
 interface TagInputProps {
   tags: string[]

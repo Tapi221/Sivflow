@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { nanoid } from 'nanoid';
-import { Button } from '@/Components/ui/button';
-import { Input } from '@/Components/ui/input';
-import { Label } from '@/Components/ui/label';
-import { Switch } from '@/Components/ui/switch';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import {
   X,
   HelpCircle,
@@ -14,7 +14,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 
-import { TagInput } from '@/Components/ui/tag-input';
+import { TagInput } from '@/components/ui/tag-input';
 
 import { cn } from '@/lib/utils';
 import { Flashcard } from './Flashcard';

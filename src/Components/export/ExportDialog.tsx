@@ -14,10 +14,10 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from '@/Components/ui/dialog';
-import { Button } from '@/Components/ui/button';
-import { RadioGroup, RadioGroupItem } from '@/Components/ui/radio-group';
-import { Label } from '@/Components/ui/label';
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 import { AlertTriangle, Folder, Loader2, CheckCircle } from 'lucide-react';
 import Download from 'lucide-react/dist/esm/icons/download';
 import Database from 'lucide-react/dist/esm/icons/database';

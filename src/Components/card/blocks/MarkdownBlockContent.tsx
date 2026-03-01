@@ -4,7 +4,7 @@ import remarkGfm from 'remark-gfm';
 import remarkBreaks from 'remark-breaks';
 import { cn } from '@/lib/utils';
 import { CodeRenderer } from '../CodeRenderer';
-import { BlockSurface } from '@/Components/card/BlockSurface';
+import { BlockSurface } from '@/components/card/BlockSurface';
 
 const TYPE = {
   body: { fontSize: 16, lineHeight: 24 },

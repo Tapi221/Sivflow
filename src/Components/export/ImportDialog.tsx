@@ -15,10 +15,10 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from '@/Components/ui/dialog';
-import { Button } from '@/Components/ui/button';
-import { RadioGroup, RadioGroupItem } from '@/Components/ui/radio-group';
-import { Label } from '@/Components/ui/label';
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 import { CheckCircle, Loader2, ArrowRight, AlertTriangle } from 'lucide-react';
 import Upload from 'lucide-react/dist/esm/icons/upload';
 import FileJson from 'lucide-react/dist/esm/icons/file-json';

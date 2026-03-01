@@ -3,15 +3,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import { firestoreDb, storage } from '@/services/firebase';
 import { collection, query, orderBy, onSnapshot, deleteDoc, doc, Timestamp } from 'firebase/firestore';
 import { ref, deleteObject } from 'firebase/storage';
-import { Button } from '@/Components/ui/button';
-import { ScrollArea } from '@/Components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { formatBytes } from '@/utils/fileUtils';
 import { Trash2, FileText, Image, AlertCircle, Loader2 } from 'lucide-react';
 import FileAudio from 'lucide-react/dist/esm/icons/file-audio';
 import Database from 'lucide-react/dist/esm/icons/database';
-import { Alert, AlertDescription, AlertTitle } from '@/Components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import type { UploadMetadata } from '@/types';
-import { Separator } from '@/Components/ui/separator';
+import { Separator } from '@/components/ui/separator';
 
 export const StorageManager = () => {
   const { currentUser } = useAuth();

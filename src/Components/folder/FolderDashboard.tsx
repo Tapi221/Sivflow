@@ -1,8 +1,8 @@
 import React, { useMemo, useRef, useState, useEffect, useCallback } from 'react';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Cell } from 'recharts';
-import { Button } from '@/Components/ui/button';
-import { CardHeader } from '@/Components/ui/CardHeader';
-import { EmptyState } from '@/Components/ui/EmptyState';
+import { Button } from '@/components/ui/button';
+import { CardHeader } from '@/components/ui/CardHeader';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { extractTextFromBlocks } from '@/utils';
 import { formatLastAccess } from '@/utils/dateUtils';
 import { calculateResistanceScore } from '@/utils/reviewMetrics';

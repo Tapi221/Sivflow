@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Button } from '@/Components/ui/button';
+import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, Pencil, Image as ImageIcon, X, Volume2 } from 'lucide-react';
 import LinkIcon from 'lucide-react/dist/esm/icons/link';
 
-import { Dialog, DialogContent } from '@/Components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { AudioPlayer } from './CardMedia';
 import { ReferencePopup } from './ReferencePopup';
 import type { CardBlock, ReferenceBlockData } from '@/types';
-import { InkLayer, InkToolbar, type InkHistoryState, type InkLayerHandle } from '@/Components/ink/InkLayer';
-import { resolveInkDocument } from '@/Components/ink/inkStorage';
-import { INK_DOCUMENT_VERSION, type InkDocument, type InkEditTool } from '@/Components/ink/inkTypes';
+import { InkLayer, InkToolbar, type InkHistoryState, type InkLayerHandle } from '@/components/ink/InkLayer';
+import { resolveInkDocument } from '@/components/ink/inkStorage';
+import { INK_DOCUMENT_VERSION, type InkDocument, type InkEditTool } from '@/components/ink/inkTypes';
 import { CardFrame } from './frame/CardFrame';
 import { CardCornerActions } from './frame/CardCornerActions';
 import { SharedCardContent } from './SharedCardContent';

@@ -1,6 +1,6 @@
 import React from 'react';
 import Globe from 'lucide-react/dist/esm/icons/globe';
-import { Card, CardContent } from '@/Components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 
 export default function Gallery() {
   return (

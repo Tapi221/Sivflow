@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ComponentProps } from 'react';
 import { useSwipeable, type SwipeEventData } from 'react-swipeable';
-import { Button } from '@/Components/ui/button';
-import { Badge } from '@/Components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Volume2 } from 'lucide-react';
 import { Flashcard } from '../card/Flashcard';
 import { MobileScalableCard } from '../card/MobileScalableCard';

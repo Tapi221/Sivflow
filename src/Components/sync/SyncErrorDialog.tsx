@@ -5,9 +5,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from '@/Components/ui/dialog';
-import { Button } from '@/Components/ui/button';
-import { Badge } from '@/Components/ui/badge';
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { AlertCircle, RefreshCw, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import { getLocalDb } from '@/services/localDB';
 import { useAuth } from '@/contexts/AuthContext';

@@ -1,6 +1,6 @@
 import React, { useCallback, useState, useEffect, useRef, useId } from 'react';
-import { Button } from '@/Components/ui/button';
-import { Slider } from '@/Components/ui/slider';
+import { Button } from '@/components/ui/button';
+import { Slider } from '@/components/ui/slider';
 import { Upload, X, Play, Pause, RotateCcw, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';

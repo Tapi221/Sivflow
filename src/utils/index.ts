@@ -1,12 +1,12 @@
 import { normalizeUploadedImages } from './imageUtils';
 import { normalizeMemoryStability } from './reviewUtils';
-import { normalizeInkDocument } from '@/Components/ink/inkTypes';
+import { normalizeInkDocument } from '@/components/ink/inkTypes';
 import {
   LEGACY_BASE_LAYOUT_ROWS,
   normalizeExtraRows,
   normalizeLayoutRows,
 } from '@/domain/card/extraRows';
-import { isGridOffsetType } from '@/Components/card/rowOffset';
+import { isGridOffsetType } from '@/components/card/rowOffset';
 
 // ページ名から URL パスを作成
 // クエリパラメータ付きの場合も対応（例: 'CardEdit?folderId=xxx'）

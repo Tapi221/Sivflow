@@ -2,11 +2,11 @@ import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useCards } from '@/hooks/useCards';
 import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/Components/ui/button';
-import { Skeleton } from '@/Components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, GripVertical, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
 import { createPageUrl } from '@/utils';
-import CardEditor from '@/Components/card/CardEditor';
+import CardEditor from '@/components/card/CardEditor';
 import { addDays } from 'date-fns';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { nanoid } from 'nanoid';

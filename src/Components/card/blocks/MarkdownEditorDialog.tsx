@@ -5,8 +5,8 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/Components/ui/dialog';
-import AutoResizeTextarea from '@/Components/ui/AutoResizeTextarea';
+} from '@/components/ui/dialog';
+import AutoResizeTextarea from '@/components/ui/AutoResizeTextarea';
 import { cn } from '@/lib/utils';
 
 type CSSCustomProperties = React.CSSProperties & Record<`--${string}`, string>;

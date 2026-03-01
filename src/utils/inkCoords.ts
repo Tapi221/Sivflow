@@ -1,4 +1,4 @@
-import { INK_PAPER_H, INK_PAPER_W, type InkPoint } from '@/Components/ink/inkTypes';
+import { INK_PAPER_H, INK_PAPER_W, type InkPoint } from '@/components/ink/inkTypes';
 
 export type RectLike = {
   left: number;

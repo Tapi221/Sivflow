@@ -5,8 +5,8 @@
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Dialog, DialogContent } from '@/Components/ui/dialog';
-import { Input } from '@/Components/ui/input';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { useCards } from '@/hooks/useCards';
 import { useFolders } from '@/hooks/useFolders';

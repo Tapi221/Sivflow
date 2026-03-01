@@ -1,9 +1,9 @@
-declare module '@/Components/ui/button' {
+declare module '@/components/ui/button' {
   export const Button: any;
   export const buttonVariants: any;
 }
 
-declare module '@/Components/ui/card' {
+declare module '@/components/ui/card' {
   export const Card: any;
   export const CardContent: any;
   export const CardHeader: any;
@@ -12,7 +12,7 @@ declare module '@/Components/ui/card' {
   export const CardFooter: any;
 }
 
-declare module '@/Components/ui/dropdown-menu' {
+declare module '@/components/ui/dropdown-menu' {
   export const DropdownMenu: any;
   export const DropdownMenuTrigger: any;
   export const DropdownMenuContent: any;
@@ -30,7 +30,7 @@ declare module '@/Components/ui/dropdown-menu' {
   export const DropdownMenuRadioGroup: any;
 }
 
-declare module '@/Components/ui/AutoResizeTextarea' {
+declare module '@/components/ui/AutoResizeTextarea' {
   export default any;
 }
 
@@ -104,4 +104,4 @@ declare module 'lucide-react' {
 }
 
 declare module '@/components/*';
-declare module '@/Components/*';
+declare module '@/components/*';

@@ -5,8 +5,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from '@/Components/ui/dialog';
-import { Badge } from '@/Components/ui/badge';
+} from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
 import { Clock, ArrowUpDown, CheckCircle2 as CheckCircle, AlertTriangle, AlertCircle as XCircle, ChevronUp, ChevronDown } from 'lucide-react';
 import { getLocalDb } from '@/services/localDB';
 import type { SyncHistory } from '@/types/sync';

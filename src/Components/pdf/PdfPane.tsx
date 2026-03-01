@@ -28,7 +28,7 @@
  * 5. StrictMode → 二重保存なし
  */
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { Button } from '@/Components/ui/button';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { PdfViewer } from './PdfViewer';
 import type { PdfViewerHandle } from './PdfViewer';

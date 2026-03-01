@@ -7,9 +7,9 @@ import { useNavigate } from 'react-router-dom';
 import { useCards } from '@/hooks/useCards';
 import { useFolders } from '@/hooks/useFolders';
 import { useUserSettings } from '@/hooks/useUserSettings';
-import { Button } from '@/Components/ui/button';
-import { Card } from '@/Components/ui/card';
-import { Badge } from '@/Components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { 
   ChevronLeft,
   ChevronRight,
@@ -482,7 +482,7 @@ export default function Calendar() {
                             navigate(createPageUrl('StudyMode'));
                         }
                     }}
-                    disabled={selectedDateCards.length === 0}
+                    disabled={selectedDateCards.length === 0 || !isToday(selectedDate)}
                 >
                     START LEARNING
                 </Button>

@@ -1,5 +1,5 @@
 import React from 'react';
-import AutoResizeTextarea from '@/Components/ui/AutoResizeTextarea';
+import AutoResizeTextarea from '@/components/ui/AutoResizeTextarea';
 import { TEXT_BLOCK_CONTENT_CLASS, TEXT_BLOCK_LINE_HEIGHT_PX } from './textBlockStyles';
 
 const TEXT_BASELINE_NUDGE_PX = 2;

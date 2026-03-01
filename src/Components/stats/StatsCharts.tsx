@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   BarChart, 
   Bar, 
@@ -17,7 +17,7 @@ import { normalizeMemoryStability, getStabilityPhase } from '@/utils/reviewUtils
 import { calculateAverageStability, isReviewed } from '@/utils/statistics';
 import { calculateResistanceScore } from '@/utils/reviewMetrics';
 import { cn } from '@/lib/utils';
-import { Button } from '@/Components/ui/button';
+import { Button } from '@/components/ui/button';
 // ... (omitted lines)
 
 export function StabilityDistributionChart({ 

@@ -1,5 +1,5 @@
 import React from 'react';
-import StudyCard from '@/Components/study/StudyCard';
+import StudyCard from '@/components/study/StudyCard';
 import type { Card } from '@/types';
 
 type Props = {

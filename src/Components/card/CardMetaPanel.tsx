@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { Line, LineChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 
-import { RatingCountTiles } from "@/Components/study/RatingCountTiles";
-import TagManagerDialog from "@/Components/tag/TagManagerDialog";
-import { Button } from "@/Components/ui/button";
-import { Switch } from "@/Components/ui/switch";
-import { TagInput } from "@/Components/ui/tag-input";
+import { RatingCountTiles } from "@/components/study/RatingCountTiles";
+import TagManagerDialog from "@/components/tag/TagManagerDialog";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { TagInput } from "@/components/ui/tag-input";
 import type { Card, ReviewLog } from "@/types";
 import { NUMERIC_TYPO, UI_TYPO } from "@/styles/typography";
 

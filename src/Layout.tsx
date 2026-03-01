@@ -1,8 +1,8 @@
 import React, { useEffect, Suspense, useState } from 'react';
 import { Outlet, Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
-import { Button } from '@/Components/ui/button';
-import SettingsDialog from '@/Components/settings/SettingsDialog';
-import { SyncStatusIndicator } from '@/Components/sync/SyncStatusIndicator';
+import { Button } from '@/components/ui/button';
+import SettingsDialog from '@/components/settings/SettingsDialog';
+import { SyncStatusIndicator } from '@/components/sync/SyncStatusIndicator';
 import { cn } from '@/lib/utils';
 import { UI_TYPO } from '@/styles/typography';
 // Added hooks for review count
@@ -28,7 +28,7 @@ import { getAvatarColors, getInitials } from '@/utils/avatarUtils';
 
 import { useHeaderCompact } from '@/hooks/useHeaderCompact';
 
-import { ThemeManager } from '@/Components/common/ThemeManager';
+import { ThemeManager } from '@/components/common/ThemeManager';
 import { SecurityAlertBanner } from './Components/security/SecurityAlertBanner';
 import { LocalDBStatusBanner } from './Components/security/LocalDBStatusBanner';
 

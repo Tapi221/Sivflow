@@ -1,7 +1,7 @@
 import { CheckCircle2, X, Loader2, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Button } from '@/Components/ui/button';
-import { Progress } from '@/Components/ui/progress';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 
 export interface UploadProgressProps {
   fileName: string;

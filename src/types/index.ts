@@ -3,7 +3,7 @@ import { Timestamp } from 'firebase/firestore';
 import type { BlobUrl, StorageUrl } from './branded';
 import './ide-shims.d'; // Ensure IDE picks up shim types
 import type { CodeBlockData } from './code-block';
-import type { InkDocument } from '@/Components/ink/inkTypes';
+import type { InkDocument } from '@/components/ink/inkTypes';
 
 /**
  * 同期可能なエンティティの共通ベース。

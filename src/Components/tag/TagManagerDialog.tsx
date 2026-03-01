@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { Dialog, DialogContent, DialogTitle } from '@/Components/ui/dialog';
-import { Button } from '@/Components/ui/button';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { Tag as TagIcon, Check, Trash2 } from 'lucide-react';
 import { useTags, DEFAULT_COLORS } from '@/hooks/useTags';
 import { cn } from '@/lib/utils';
@@ -13,7 +13,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/Components/ui/alert-dialog';
+} from '@/components/ui/alert-dialog';
 
 interface TagManagerDialogProps {
   open: boolean;
