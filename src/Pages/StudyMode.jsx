@@ -15,7 +15,7 @@ import { createPageUrl } from '@/utils';
 import { getDebugStreak } from '@/utils/debugStreak';
 import { sanitizeStreak } from '@/utils/streak';
 import { flags } from '@/features/flags';
-import { TelemetryService } from '@/services/sync/logic/TelemetryService';
+import { TelemetryService } from '@/services/logic/TelemetryService';
 import confetti from 'canvas-confetti';
 import { StampRally } from '@/Components/study/StampRally';
 import { useStudyCards } from '@/hooks/useStudyCards';
@@ -400,4 +400,3 @@ export default function StudyMode() {
     </div>
   );
 }
-

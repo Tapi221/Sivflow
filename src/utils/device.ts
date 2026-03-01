@@ -1,0 +1,39 @@
+export function getOrCreateDeviceId(): string {
+  if (typeof window === 'undefined') return 'server';
+  let deviceId = localStorage.getItem('deviceId');
+  if (!deviceId) {
+    deviceId = `device_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    localStorage.setItem('deviceId', deviceId);
+  }
+  return deviceId;
+}
+
+export function getDeviceName(): string {
+  if (typeof window === 'undefined') return 'Server';
+  const ua = navigator.userAgent;
+  
+  // OS Detection
+  let os = 'Web Browser';
+  if (/Android/i.test(ua)) os = 'Android';
+  else if (/iPhone|iPad|iPod/i.test(ua)) os = 'iOS';
+  else if (/Windows/i.test(ua)) os = 'Windows PC';
+  else if (/Macintosh/i.test(ua)) os = 'Mac';
+  else if (/Linux/i.test(ua)) os = 'Linux PC';
+
+  // Browser/App Detection
+  let client = '';
+  // PWA standalone mode check
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone;
+  
+  if (isStandalone) {
+    client = 'App';
+  } else {
+    if (/Edg\//i.test(ua)) client = 'Edge';
+    else if (/Chrome/i.test(ua)) client = 'Chrome';
+    else if (/Safari/i.test(ua)) client = 'Safari';
+    else if (/Firefox/i.test(ua)) client = 'Firefox';
+    if (!client) client = 'Browser';
+  }
+
+  return `${client} (${os})`;
+}

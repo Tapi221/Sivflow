@@ -19,7 +19,6 @@
     "test:e2e:codeblock": "playwright test tests/e2e/codeblock_visual.spec.ts",
     "test:e2e:card-layout": "playwright test tests/e2e/card_layout_consistency.spec.ts"
   },
-
   "dependencies": {
     "@google-cloud/notebooks": "^4.2.1",
     "@hello-pangea/dnd": "^18.0.1",

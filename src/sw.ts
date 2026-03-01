@@ -1,17 +1,78 @@
-/// <reference lib="webworker" />
+/// <reference lib="WebWorker" />
 
-declare let self: ServiceWorkerGlobalScope;
+import { clientsClaim } from 'workbox-core'
+import {
+  cleanupOutdatedCaches,
+  precacheAndRoute,
+  matchPrecache,
+} from 'workbox-precaching'
+import { registerRoute, setCatchHandler } from 'workbox-routing'
+import { CacheFirst, NetworkFirst } from 'workbox-strategies'
+import { CacheableResponsePlugin } from 'workbox-cacheable-response'
+import { ExpirationPlugin } from 'workbox-expiration'
 
-self.addEventListener("install", (event) => {
-  // Workbox InjectManifest marker: keep this in emitted JS
-  const manifest = (self as any).__WB_MANIFEST;
-  event.waitUntil(Promise.resolve(manifest));
-  self.skipWaiting();
-});
+declare let self: ServiceWorkerGlobalScope
 
-self.addEventListener("activate", (event) => {
-  event.waitUntil(self.clients.claim());
-});
+declare global {
+  interface ServiceWorkerGlobalScope {
+    __WB_MANIFEST: Array<{ url: string; revision?: string | null }>
+  }
+}
 
-// （任意）sw が空扱いされないように最低限の fetch フック
-self.addEventListener("fetch", () => {});
+const cacheVersion =
+  (import.meta as any).env?.VITE_BUILD_VERSION ||
+  (import.meta as any).env?.GITHUB_SHA ||
+  'dev'
+
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting()
+})
+
+clientsClaim()
+cleanupOutdatedCaches()
+precacheAndRoute(self.__WB_MANIFEST)
+
+registerRoute(
+  ({ request }) => request.mode === 'navigate',
+  new NetworkFirst({
+    cacheName: `html-navigation-cache-${cacheVersion}`,
+    networkTimeoutSeconds: 3,
+    plugins: [
+      new CacheableResponsePlugin({ statuses: [200] }),
+      new ExpirationPlugin({
+        maxEntries: 50,
+        maxAgeSeconds: 24 * 60 * 60,
+      }),
+    ],
+  }),
+)
+
+registerRoute(
+  ({ request }) =>
+    request.destination === 'script' ||
+    request.destination === 'style' ||
+    request.destination === 'worker',
+  new CacheFirst({
+    cacheName: `static-assets-cache-${cacheVersion}`,
+    plugins: [
+      new CacheableResponsePlugin({ statuses: [200] }),
+      new ExpirationPlugin({
+        maxEntries: 200,
+        maxAgeSeconds: 30 * 24 * 60 * 60,
+      }),
+    ],
+  }),
+)
+
+setCatchHandler(async ({ event }) => {
+  if (event.request.mode === 'navigate') {
+    const response =
+      (await matchPrecache('/offline.html')) ??
+      (await matchPrecache('offline.html'))
+    return response ?? Response.error()
+  }
+
+  return Response.error()
+})
+
+export {}
