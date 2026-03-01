@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "verify:sw": "node scripts/verify-sw.mjs",
+    "verify:sw": "node scripts/verify/verify-sw.mjs",
     "build:verify-sw": "npm run build && npm run verify:sw",
     "typecheck": "npm exec tsc -- --noEmit --pretty false",
     "preflight": "npm run typecheck && npm run build && npx vitest run tests/unit/pdfZoomUtils.test.ts tests/functions/pptxConverterGuards.test.ts",

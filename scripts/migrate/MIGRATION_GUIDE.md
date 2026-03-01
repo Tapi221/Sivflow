@@ -44,10 +44,10 @@ npm install --save-dev firebase-admin tsx
 
 ```powershell
 # 基本的な確認
-npx tsx scripts/migrateFirestoreToSubcollections.ts --dry-run
+npx tsx scripts/migrate/migrateFirestoreToSubcollections.ts --dry-run
 
 # 詳細ログ付き（スキップ理由や差分も表示）
-npx tsx scripts/migrateFirestoreToSubcollections.ts --dry-run --verbose
+npx tsx scripts/migrate/migrateFirestoreToSubcollections.ts --dry-run --verbose
 ```
 
 **確認項目**:
@@ -77,10 +77,10 @@ gcloud firestore export gs://[YOUR-BUCKET-NAME]/firestore-backup-$(Get-Date -For
 
 ```powershell
 # 本番実行（10秒後に開始）
-npx tsx scripts/migrateFirestoreToSubcollections.ts
+npx tsx scripts/migrate/migrateFirestoreToSubcollections.ts
 
 # 詳細ログ付きで実行
-npx tsx scripts/migrateFirestoreToSubcollections.ts --verbose
+npx tsx scripts/migrate/migrateFirestoreToSubcollections.ts --verbose
 ```
 
 実行中は以下のような出力が表示されます:

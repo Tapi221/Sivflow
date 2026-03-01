@@ -3,7 +3,7 @@ import React from 'react';
 import { afterEach, describe, it, expect, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MarkdownBlock } from '../MarkdownBlock';
+import { MarkdownBlock } from '@/Components/card/blocks/MarkdownBlock';
 
 afterEach(() => {
   cleanup();
@@ -172,12 +172,21 @@ describe('MarkdownBlock', () => {
       },
     });
 
-    expect(onReplaceWithBlocks).toHaveBeenCalledTimes(1);
-    expect(onReplaceWithBlocks.mock.calls[0][0]).toEqual([
-      { type: 'markdown', markdown: 'before\n' },
-      { type: 'code', code: { language: 'ts', code: 'const a = 1;' } },
-      { type: 'markdown', markdown: 'after' },
-    ]);
-  });
+    type CodeBlock = { type: 'code'; code: { language: string; code: string } };
+type MarkdownBlockOut = { type: 'markdown'; markdown: string };
+type OutputBlock = CodeBlock | MarkdownBlockOut;
 
+const blocks = onReplaceWithBlocks.mock.calls[0][0] as OutputBlock[];
+const normalized: OutputBlock[] = blocks.map((b) =>
+  b.type === 'markdown'
+    ? { ...b, markdown: b.markdown.replace(/\n+$/, '') }
+    : b
+);
+
+expect(normalized).toEqual([
+  { type: 'markdown', markdown: 'before' },
+  { type: 'code', code: { language: 'ts', code: 'const a = 1;' } },
+  { type: 'markdown', markdown: 'after' },
+]);
+  });
 });

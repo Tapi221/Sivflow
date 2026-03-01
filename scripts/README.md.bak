@@ -27,17 +27,17 @@
 
 - `migrateBase64.ts`
   - 目的: 画像/音声の Base64 形式からの移行処理。メディアの正規化を行う。
-  - 実行: `npx ts-node scripts/migrate/migrateBase64.ts`
+  - 実行: `npx ts-node scripts/migrateBase64.ts`
   - リスク: 大きなファイルを扱う可能性があるためメモリに注意。分割実行を検討してください。
 
 - `verify_migration.js`
   - 目的: マイグレーションの整合性チェック。Node で実行する簡易スクリプト。
-  - 実行: `node scripts/verify/verify_migration.js`
+  - 実行: `node scripts/verify_migration.js`
   - リスク: 検証ツールですが、オプションで修正を行う場合は注意。
 
 - `verify_security_signal.ts`
   - 目的: セキュリティシグナルの検証・モック送信ツール。
-  - 実行: `npx ts-node scripts/verify/verify_security_signal.ts`
+  - 実行: `npx ts-node scripts/verify_security_signal.ts`
   - リスク: テスト用のセキュリティログを生成するため、本番環境ではテストアカウントを利用してください。
 
 ---

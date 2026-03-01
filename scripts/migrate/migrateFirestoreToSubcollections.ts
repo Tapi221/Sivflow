@@ -8,7 +8,7 @@
  *   /cards/{id} → /users/{userId}/cards/{id}
  * 
  * 実行方法:
- *   npx tsx scripts/migrateFirestoreToSubcollections.ts [--dry-run] [--verbose]
+ *   npx tsx scripts/migrate/migrateFirestoreToSubcollections.ts [--dry-run] [--verbose]
  * 
  * オプション:
  *   --dry-run: 実際の書き込みを行わず、移行対象のみ表示
@@ -36,7 +36,7 @@ const isVerbose = args.includes('--verbose');
 if (isHelp) {
   console.log(`
 Usage:
-  npx tsx scripts/migrateFirestoreToSubcollections.ts [options]
+  npx tsx scripts/migrate/migrateFirestoreToSubcollections.ts [options]
 
 Options:
   --dry-run     書き込みを行わず、移行対象のみ表示
