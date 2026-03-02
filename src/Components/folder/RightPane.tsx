@@ -4,11 +4,11 @@ import { CardPane } from './CardPane';
 import { FolderDashboard } from './FolderDashboard';
 import { PdfPane } from '@/components/pdf/PdfPane';
 import { PowerPointPane } from '@/components/pptx/PowerPointPane';
-import Dashboard from '@/Pages/Dashboard';
-import Gallery from '@/Pages/Gallery';
-import Calendar from '@/Pages/Calendar';
-import SyncSettings from '@/Pages/SyncSettings';
-import Trash from '@/Pages/Trash';
+import Dashboard from '@/pages/Dashboard';
+import Gallery from '@/pages/Gallery';
+import Calendar from '@/pages/Calendar';
+import SyncSettings from '@/pages/SyncSettings';
+import Trash from '@/pages/Trash';
 
 interface RightPaneProps {
   selectedItem: SelectedExplorerItem;
