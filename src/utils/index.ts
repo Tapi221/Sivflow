@@ -8,41 +8,73 @@ import {
 } from '@/domain/card/extraRows';
 import { isGridOffsetType } from '@/components/card/rowOffset';
 
+type UnknownRecord = Record<string, unknown>;
+
+const asRecord = (v: unknown): UnknownRecord | null => {
+  return v !== null && typeof v === 'object' ? (v as UnknownRecord) : null;
+};
+
+const pick = (...vals: unknown[]): unknown => {
+  for (const v of vals) if (v !== undefined && v !== null) return v;
+  return undefined;
+};
+
+const toStringOr = (v: unknown, fallback = ''): string => {
+  return typeof v === 'string' ? v : fallback;
+};
+
+const toBoolOr = (v: unknown, fallback = false): boolean => {
+  return typeof v === 'boolean' ? v : fallback;
+};
+
+const toFiniteNumber = (v: unknown, fallback: number): number => {
+  if (typeof v === 'number' && Number.isFinite(v)) return v;
+  if (typeof v === 'string') {
+    const n = Number(v);
+    if (Number.isFinite(n)) return n;
+  }
+  return fallback;
+};
+
+const toArrayOr = (v: unknown, fallback: unknown[] = []): unknown[] => {
+  return Array.isArray(v) ? v : fallback;
+};
+
 // ページ名から URL パスを作成
 // クエリパラメータ付きの場合も対応（例: 'CardEdit?folderId=xxx'）
 export const createPageUrl = (pageName: string): string => {
-  const mapping: { [key: string]: string } = {
-    'Dashboard': '/Dashboard',
-    'dashboard': '/Dashboard',
-    'Folders': '/folders',
-    'folders': '/folders',
-    'CardEdit': '/CardEdit',
-    'CardView': '/CardView',
-    'StudyMode': '/study',
-    'study': '/study',
-    'UncertainMode': '/uncertain',
-    'uncertain': '/uncertain',
-    'BookmarkMode': '/bookmark',
-    'bookmark': '/bookmark',
-    'Calendar': '/calendar',
-    'calendar': '/calendar',
-    'Gallery': '/gallery',
-    'gallery': '/gallery',
-    'OneQAMode': '/one-qa-mode',
-    'PairMode': '/pair-mode',
-    'FourChoiceMode': '/four-choice-mode',
-    'Statistics': '/statistics',
-    'Trash': '/trash'
+  const mapping: Record<string, string> = {
+    Dashboard: '/Dashboard',
+    dashboard: '/Dashboard',
+    Folders: '/folders',
+    folders: '/folders',
+    CardEdit: '/CardEdit',
+    CardView: '/CardView',
+    StudyMode: '/study',
+    study: '/study',
+    UncertainMode: '/uncertain',
+    uncertain: '/uncertain',
+    BookmarkMode: '/bookmark',
+    bookmark: '/bookmark',
+    Calendar: '/calendar',
+    calendar: '/calendar',
+    Gallery: '/gallery',
+    gallery: '/gallery',
+    OneQAMode: '/one-qa-mode',
+    PairMode: '/pair-mode',
+    FourChoiceMode: '/four-choice-mode',
+    Statistics: '/statistics',
+    Trash: '/trash',
   };
-  
+
   // クエリパラメータを分離
   const [baseName, queryString] = pageName.split('?');
   const basePath = mapping[baseName];
-  
+
   if (basePath) {
     return queryString ? `${basePath}?${queryString}` : basePath;
   }
-  
+
   // マッピングにない場合はそのままパスとして返す（クエリパラメータも保持）
   return queryString ? `/${baseName}?${queryString}` : `/${baseName.toLowerCase()}`;
 };
@@ -50,20 +82,23 @@ export const createPageUrl = (pageName: string): string => {
 const makeFallbackId = () => {
   // crypto.randomUUID が使える環境ならそれ、無理なら雑に一意っぽいやつ
   try {
-     
-    if (typeof crypto !== 'undefined' && typeof (crypto as any).randomUUID === 'function') {
-      return (crypto as any).randomUUID();
-    }
-  } catch {}
+    const c = globalThis.crypto as unknown;
+    const rec = asRecord(c);
+    const fn = rec ? rec.randomUUID : undefined;
+    if (typeof fn === 'function') return (fn as () => string)();
+  } catch {
+    // ignore: randomUUID not available
+  }
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 };
 
-const normalizeDate = (value: any) => {
+const normalizeDate = (value: unknown): Date | null => {
   if (value === null || value === undefined) return null;
 
   // Firestore Timestamp
-  if (typeof value?.toDate === 'function') {
-    const d = value.toDate();
+  const rec = asRecord(value);
+  if (rec && typeof rec.toDate === 'function') {
+    const d = (rec.toDate as () => unknown)();
     return d instanceof Date && !isNaN(d.getTime()) ? d : null;
   }
 
@@ -71,18 +106,18 @@ const normalizeDate = (value: any) => {
   if (value instanceof Date) return isNaN(value.getTime()) ? null : value;
 
   // Firestore-like plain object timestamp
-  if (typeof value === 'object') {
+  if (rec) {
     const seconds =
-      typeof value.seconds === 'number'
-        ? value.seconds
-        : typeof value._seconds === 'number'
-          ? value._seconds
+      typeof rec.seconds === 'number'
+        ? rec.seconds
+        : typeof rec._seconds === 'number'
+          ? rec._seconds
           : null;
     const nanoseconds =
-      typeof value.nanoseconds === 'number'
-        ? value.nanoseconds
-        : typeof value._nanoseconds === 'number'
-          ? value._nanoseconds
+      typeof rec.nanoseconds === 'number'
+        ? rec.nanoseconds
+        : typeof rec._nanoseconds === 'number'
+          ? rec._nanoseconds
           : 0;
 
     if (seconds !== null) {
@@ -121,54 +156,141 @@ const normalizeDate = (value: any) => {
   return null;
 };
 
-const normalizeReviewLogs = (rawLogs: any): Array<{ reviewedAt: string; rating: 1 | 2 | 3 | 4; resistanceScore: number }> => {
+type NormalizedReviewLog = {
+  reviewedAt: string;
+  rating: 1 | 2 | 3 | 4;
+  resistanceScore: number;
+};
+
+const normalizeReviewLogs = (rawLogs: unknown): NormalizedReviewLog[] => {
   if (!Array.isArray(rawLogs)) return [];
 
+  const pickNumber = (v: unknown): number | null => {
+    if (typeof v === 'number') return Number.isFinite(v) ? v : null;
+    if (typeof v === 'string') {
+      const n = Number(v);
+      return Number.isFinite(n) ? n : null;
+    }
+    return null;
+  };
+
+  const clampRating = (n: number): 1 | 2 | 3 | 4 | null => {
+    const r = Math.round(n);
+    if (r < 1 || r > 4) return null;
+    return r as 1 | 2 | 3 | 4;
+  };
+
   const normalized = rawLogs
-    .map((log) => {
-      const reviewed = normalizeDate(log?.reviewedAt ?? log?.reviewed_at);
-      const ratingNum = Number(log?.rating);
-      const scoreRaw = Number(log?.resistanceScore ?? log?.resistance_score);
-      const scoreNum = Number.isFinite(scoreRaw) ? scoreRaw : 0;
-      if (!reviewed || !Number.isFinite(ratingNum)) return null;
-      if (ratingNum < 1 || ratingNum > 4) return null;
+    .map((item) => {
+      const log = asRecord(item);
+      if (!log) return null;
+
+      const reviewed = normalizeDate(pick(log.reviewedAt, log.reviewed_at));
+
+      // ✅ rating が無いログを捨てない（subjectiveScore 系も拾う）
+      const ratingRaw =
+        pickNumber(pick(log.rating, log.ratingNum, log.rating_num)) ??
+        pickNumber(pick(log.subjectiveScore, log.subjective_score)) ??
+        pickNumber(pick(log.lastSubjectiveScore, log.last_subjective_score));
+
+      const scoreRaw = pickNumber(
+        pick(log.resistanceScore, log.resistance_score, log.endurance, log.endurance_score)
+      );
+      const scoreNum = scoreRaw ?? 0;
+
+      if (!reviewed || ratingRaw === null) return null;
+
+      const rating = clampRating(ratingRaw);
+      if (!rating) return null;
 
       return {
         reviewedAt: reviewed.toISOString(),
-        rating: ratingNum as 1 | 2 | 3 | 4,
+        rating,
         resistanceScore: Math.max(0, Math.min(100, scoreNum)),
-      };
+      } satisfies NormalizedReviewLog;
     })
-    .filter((v): v is { reviewedAt: string; rating: 1 | 2 | 3 | 4; resistanceScore: number } => Boolean(v));
+    .filter((v): v is NormalizedReviewLog => v !== null);
 
-  normalized.sort((a, b) => new Date(a.reviewedAt).getTime() - new Date(b.reviewedAt).getTime());
+  normalized.sort(
+    (a, b) => new Date(a.reviewedAt).getTime() - new Date(b.reviewedAt).getTime()
+  );
   return normalized;
 };
 
-export const extractTextFromBlocks = (blocks: any[]): string => {
-  if (!blocks || !Array.isArray(blocks)) return '';
+export const extractTextFromBlocks = (blocks: unknown[]): string => {
+  if (!Array.isArray(blocks)) return '';
   // 最初に見つかった非空のテキスト系コンテンツを返す
-  for (const block of blocks) {
-    if (block.type === 'text' && block.content) return block.content.trim();
-    if (block.type === 'markdown' && block.markdown) return block.markdown.trim();
-    if (block.type === 'code' && block.code?.code) return block.code.code.split('\n')[0].trim();
+  for (const b of blocks) {
+    const block = asRecord(b);
+    if (!block) continue;
+
+    if (block.type === 'text' && typeof block.content === 'string' && block.content.trim()) {
+      return block.content.trim();
+    }
+    if (block.type === 'markdown' && typeof block.markdown === 'string' && block.markdown.trim()) {
+      return block.markdown.trim();
+    }
+    if (block.type === 'code') {
+      const codeObj = asRecord(block.code);
+      const code = codeObj ? codeObj.code : undefined;
+      if (typeof code === 'string' && code.trim()) return code.split('\n')[0].trim();
+    }
   }
   return '';
 };
 
-export const normalizeCard = (raw: any) => {
-  // ★ 変更: id が無い raw が来た時に undefined をばら撒かない
-  const id = raw?.id ?? raw?.cardId ?? raw?.card_id ?? makeFallbackId();
+type GridBlockType = Parameters<typeof isGridOffsetType>[0];
 
-  const legacyQuestionExtraRows = normalizeExtraRows(raw?.questionExtraRows ?? raw?.question_extra_rows ?? 0);
-  const legacyAnswerExtraRows = normalizeExtraRows(raw?.answerExtraRows ?? raw?.answer_extra_rows ?? 0);
+const isGridBlockType = (v: unknown): v is GridBlockType => {
+  return (
+    v === 'text' ||
+    v === 'markdown' ||
+    v === 'code' ||
+    v === 'image' ||
+    v === 'audio' ||
+    v === 'reference' ||
+    v === 'math'
+  );
+};
+
+export const normalizeCard = (raw: unknown) => {
+  const r = asRecord(raw) ?? {};
+
+  // ★ 変更: id が無い raw が来た時に undefined をばら撒かない
+  const id = toStringOr(pick(r.id, r.cardId, r.card_id), '') || makeFallbackId();
+
+  const legacyQuestionExtraRows = normalizeExtraRows(
+    toFiniteNumber(pick(r.questionExtraRows, r.question_extra_rows), 0)
+  );
+  const legacyAnswerExtraRows = normalizeExtraRows(
+    toFiniteNumber(pick(r.answerExtraRows, r.answer_extra_rows), 0)
+  );
   const migratedLayoutRows =
     LEGACY_BASE_LAYOUT_ROWS + Math.max(legacyQuestionExtraRows, legacyAnswerExtraRows);
-  const normalizeBlockOffsets = (block: any) => {
-    if (!block || typeof block !== 'object') return block;
-    if (!isGridOffsetType(block.type)) return block;
 
-    const fallbackRows = Number(block.offsetRows ?? block.rowOffset ?? 0);
+  // ✅ TS2345 対策：currentLevel を number に正規化してから使う
+  const rawLevel = pick(r.currentLevel, r.current_level, r.level);
+  const levelNum = toFiniteNumber(rawLevel, 0);
+
+  const rawMs = pick(r.memoryStability, r.memory_stability);
+  const msNum =
+    typeof rawMs === 'number'
+      ? rawMs
+      : typeof rawMs === 'string'
+        ? Number(rawMs)
+        : undefined;
+  const msNumFinite =
+    typeof msNum === 'number' && Number.isFinite(msNum) ? msNum : undefined;
+
+  const normalizeBlockOffsets = (blockRaw: unknown) => {
+    const block = asRecord(blockRaw);
+    if (!block) return blockRaw;
+
+    const type = block.type;
+    if (!isGridBlockType(type)) return blockRaw;
+    if (!isGridOffsetType(type)) return blockRaw;
+
+    const fallbackRows = toFiniteNumber(pick(block.offsetRows, block.rowOffset), 0);
     const normalizedOffsetRows = Number.isFinite(fallbackRows)
       ? Math.max(0, Math.round(fallbackRows))
       : 0;
@@ -180,130 +302,182 @@ export const normalizeCard = (raw: any) => {
     };
   };
 
-  const normalized: any = {
+  const normalized: UnknownRecord = {
     id,
-    userId: raw?.userId ?? raw?.user_id ?? '',
-    deviceId: raw?.deviceId ?? raw?.device_id ?? '',
-    folderId: raw?.folderId ?? raw?.folder_id ?? '',
-    orderIndex: raw?.orderIndex ?? raw?.order_index ?? 0,
-    questionNumber: raw?.questionNumber ?? raw?.question_number ?? '',
-    title: raw?.title ?? '',
-    isDraft: raw?.isDraft ?? raw?.is_draft ?? false,
-    hasUncertainty: raw?.hasUncertainty ?? raw?.has_uncertainty ?? false,
-    isBookmarked: raw?.isBookmarked ?? raw?.is_bookmarked ?? false,
-    isCompleted: raw?.isCompleted ?? raw?.is_completed ?? false,
-    isSilent: raw?.isSilent ?? raw?.is_silent ?? false,
-    isDeleted: raw?.isDeleted ?? raw?.is_deleted ?? false,
+    userId: toStringOr(pick(r.userId, r.user_id), ''),
+    deviceId: toStringOr(pick(r.deviceId, r.device_id), ''),
+    folderId: toStringOr(pick(r.folderId, r.folder_id), ''),
+    orderIndex: toFiniteNumber(pick(r.orderIndex, r.order_index), 0),
+    questionNumber: toStringOr(pick(r.questionNumber, r.question_number), ''),
+    title: toStringOr(r.title, ''),
+    isDraft: toBoolOr(pick(r.isDraft, r.is_draft), false),
+    hasUncertainty: toBoolOr(pick(r.hasUncertainty, r.has_uncertainty), false),
+    isBookmarked: toBoolOr(pick(r.isBookmarked, r.is_bookmarked), false),
+    isCompleted: toBoolOr(pick(r.isCompleted, r.is_completed), false),
+    isSilent: toBoolOr(pick(r.isSilent, r.is_silent), false),
+    isDeleted: toBoolOr(pick(r.isDeleted, r.is_deleted), false),
 
     // deletedAt: isDeleted=true なのに deletedAt がない場合は updatedAt で補完
     deletedAt: (() => {
-      const rawDeletedAt = raw?.deletedAt ?? raw?.deleted_at;
+      const rawDeletedAt = pick(r.deletedAt, r.deleted_at);
       if (rawDeletedAt) return normalizeDate(rawDeletedAt);
 
-      // isDeleted=true だが deletedAt がない → updatedAt で推定補完
-      const isDeleted = raw?.isDeleted ?? raw?.is_deleted ?? false;
+      const isDeleted = toBoolOr(pick(r.isDeleted, r.is_deleted), false);
       if (isDeleted) {
-        return normalizeDate(raw?.updatedAt ?? raw?.updated_at ?? raw?.createdAt ?? raw?.created_at) ?? new Date(0);
+        return (
+          normalizeDate(pick(r.updatedAt, r.updated_at, r.createdAt, r.created_at)) ??
+          new Date(0)
+        );
       }
       return null;
     })(),
 
-    questionText: raw?.questionText ?? raw?.question_text ??
-                  raw?.front ?? raw?.question ?? raw?.q ??
-                  raw?.fields?.Front ?? raw?.fields?.Question ?? '',
-    questionImages: normalizeUploadedImages(raw?.questionImages ?? raw?.question_images ?? []),
-    questionAudios: raw?.questionAudios ?? raw?.question_audios ?? [],
-    questionCode: raw?.questionCode ?? raw?.question_code ?? null,
-    questionTextHighlighted: raw?.questionTextHighlighted ?? '',
-    questionMarked: raw?.questionMarked ?? raw?.question_marked ?? '',
-
-    answerText: raw?.answerText ?? raw?.answer_text ??
-                raw?.back ?? raw?.answer ?? raw?.a ??
-                raw?.fields?.Back ?? raw?.fields?.Answer ?? '',
-    answerImages: normalizeUploadedImages(raw?.answerImages ?? raw?.answer_images ?? []),
-    answerAudios: raw?.answerAudios ?? raw?.answer_audios ?? [],
-    answerCode: raw?.answerCode ?? raw?.answer_code ?? null,
-    answerTextHighlighted: raw?.answerTextHighlighted ?? '',
-    answerMarked: raw?.answerMarked ?? raw?.answer_marked ?? '',
-
-    memoryStability: normalizeMemoryStability(
-      raw?.memoryStability ?? raw?.memory_stability,
-      raw?.currentLevel ?? raw?.current_level ?? raw?.level
+    questionText: toStringOr(
+      pick(
+        r.questionText,
+        r.question_text,
+        r.front,
+        r.question,
+        r.q,
+        asRecord(r.fields)?.Front,
+        asRecord(r.fields)?.Question
+      ),
+      ''
     ),
-    currentLevel: raw?.currentLevel ?? raw?.current_level ?? raw?.level,
+    questionImages: normalizeUploadedImages(toArrayOr(pick(r.questionImages, r.question_images), [])),
+    questionAudios: toArrayOr(pick(r.questionAudios, r.question_audios), []),
+    questionCode: pick(r.questionCode, r.question_code, null),
+    questionTextHighlighted: toStringOr(r.questionTextHighlighted, ''),
+    questionMarked: toStringOr(pick(r.questionMarked, r.question_marked), ''),
 
-    nextReviewDate: normalizeDate(raw?.nextReviewDate ?? raw?.next_review_date),
-    lastReviewAt: normalizeDate(raw?.lastReviewAt ?? raw?.last_review_at),
+    answerText: toStringOr(
+      pick(
+        r.answerText,
+        r.answer_text,
+        r.back,
+        r.answer,
+        r.a,
+        asRecord(r.fields)?.Back,
+        asRecord(r.fields)?.Answer
+      ),
+      ''
+    ),
+    answerImages: normalizeUploadedImages(toArrayOr(pick(r.answerImages, r.answer_images), [])),
+    answerAudios: toArrayOr(pick(r.answerAudios, r.answer_audios), []),
+    answerCode: pick(r.answerCode, r.answer_code, null),
+    answerTextHighlighted: toStringOr(r.answerTextHighlighted, ''),
+    answerMarked: toStringOr(pick(r.answerMarked, r.answer_marked), ''),
 
-    lastSubjectiveScore: raw?.lastSubjectiveScore ?? raw?.last_subjective_score,
-    recoveryRemaining: raw?.recoveryRemaining ?? raw?.recovery_remaining,
-    lastReviewDelayDays: raw?.lastReviewDelayDays ?? raw?.last_review_delay_days,
+    // ✅ ここが修正点：levelNum を渡す
+    memoryStability: normalizeMemoryStability(msNumFinite, levelNum),
+    currentLevel: levelNum,
 
-    createdAt: normalizeDate(raw?.createdAt ?? raw?.created_at) ?? new Date(),
-    updatedAt: normalizeDate(raw?.updatedAt ?? raw?.updated_at) ?? new Date(),
+    nextReviewDate: normalizeDate(pick(r.nextReviewDate, r.next_review_date)),
+    lastReviewAt: normalizeDate(pick(r.lastReviewAt, r.last_review_at)),
 
-    responseTimeMs: raw?.responseTimeMs ?? raw?.response_time_ms,
-    uncertaintyMarkedDate: normalizeDate(raw?.uncertaintyMarkedDate ?? raw?.uncertainty_marked_date),
-    completedDate: normalizeDate(raw?.completedDate ?? raw?.completed_date),
+    lastSubjectiveScore: pick(r.lastSubjectiveScore, r.last_subjective_score),
+    recoveryRemaining: pick(r.recoveryRemaining, r.recovery_remaining),
+    lastReviewDelayDays: pick(r.lastReviewDelayDays, r.last_review_delay_days),
 
-    tags: raw?.tags ?? [],
-    reviewCount: raw?.reviewCount ?? raw?.review_count ?? 0,
-    reviewLogs: normalizeReviewLogs(raw?.reviewLogs ?? raw?.review_logs ?? []),
+    createdAt: normalizeDate(pick(r.createdAt, r.created_at)) ?? new Date(),
+    updatedAt: normalizeDate(pick(r.updatedAt, r.updated_at)) ?? new Date(),
 
-    questionBlocks: (raw?.questionBlocks ?? raw?.question_blocks ?? [])
+    responseTimeMs: pick(r.responseTimeMs, r.response_time_ms),
+    uncertaintyMarkedDate: normalizeDate(pick(r.uncertaintyMarkedDate, r.uncertainty_marked_date)),
+    completedDate: normalizeDate(pick(r.completedDate, r.completed_date)),
+
+    tags: toArrayOr(r.tags, []),
+    reviewCount: toFiniteNumber(pick(r.reviewCount, r.review_count), 0),
+    reviewLogs: normalizeReviewLogs(pick(r.reviewLogs, r.review_logs, [])),
+
+    questionBlocks: toArrayOr(pick(r.questionBlocks, r.question_blocks), [])
       .map(normalizeBlockOffsets)
-      .filter((b: any) => {
-        if (b.type === 'math' && !b.math?.latex?.trim()) return false;
+      .filter((b) => {
+        const br = asRecord(b);
+        if (!br) return false;
+
+        if (br.type === 'math') {
+          const math = asRecord(br.math);
+          const latex = math ? toStringOr(math.latex, '') : '';
+          if (!latex.trim()) return false;
+        }
         return true;
       }),
-    answerBlocks: (raw?.answerBlocks ?? raw?.answer_blocks ?? [])
+
+    answerBlocks: toArrayOr(pick(r.answerBlocks, r.answer_blocks), [])
       .map(normalizeBlockOffsets)
-      .filter((b: any) => {
-        if (b.type === 'math' && !b.math?.latex?.trim()) return false;
+      .filter((b) => {
+        const br = asRecord(b);
+        if (!br) return false;
+
+        if (br.type === 'math') {
+          const math = asRecord(br.math);
+          const latex = math ? toStringOr(math.latex, '') : '';
+          if (!latex.trim()) return false;
+        }
         return true;
       }),
-    layoutRows: normalizeLayoutRows(raw?.layoutRows ?? raw?.layout_rows ?? migratedLayoutRows),
+
+    layoutRows: normalizeLayoutRows(
+      toFiniteNumber(pick(r.layoutRows, r.layout_rows), migratedLayoutRows)
+    ),
+
     // Legacy互換の読み取り専用。高さロジックは layoutRows のみを参照する。
     questionExtraRows: legacyQuestionExtraRows,
     answerExtraRows: legacyAnswerExtraRows,
+
     inkQuestion: (() => {
-      const doc = normalizeInkDocument(raw?.inkQuestion ?? raw?.ink_question ?? null);
+      const doc = normalizeInkDocument(pick(r.inkQuestion, r.ink_question, null));
       return doc.strokes.length > 0 ? doc : null;
     })(),
     inkAnswer: (() => {
-      const doc = normalizeInkDocument(raw?.inkAnswer ?? raw?.ink_answer ?? null);
+      const doc = normalizeInkDocument(pick(r.inkAnswer, r.ink_answer, null));
       return doc.strokes.length > 0 ? doc : null;
     })(),
 
-    _rescueRaw: raw?._rescueRaw ?? undefined,
+    _rescueRaw: pick(r._rescueRaw, undefined),
   };
 
   // ブロックが空で、レガシーフィールドにデータがある場合に自動変換を行う
-  if (normalized.questionBlocks.length === 0) {
-    const blocks: any[] = [];
+  if (Array.isArray(normalized.questionBlocks) && normalized.questionBlocks.length === 0) {
+    const blocks: UnknownRecord[] = [];
     let idx = 0;
-    if (normalized.questionText) blocks.push({ id: `q-text-${id}`, type: 'text', content: normalized.questionText, orderIndex: idx++ });
-    if (normalized.questionCode) blocks.push({ id: `q-code-${id}`, type: 'code', code: normalized.questionCode, orderIndex: idx++ });
-    if (normalized.questionImages.length > 0) blocks.push({ id: `q-img-${id}`, type: 'image', images: normalized.questionImages, orderIndex: idx++ });
-    if (normalized.questionAudios.length > 0) blocks.push({ id: `q-audio-${id}`, type: 'audio', audios: normalized.questionAudios, orderIndex: idx++ });
+
+    const qText = normalized.questionText;
+    const qCode = normalized.questionCode;
+    const qImgs = normalized.questionImages;
+    const qAudios = normalized.questionAudios;
+
+    if (typeof qText === 'string' && qText) blocks.push({ id: `q-text-${id}`, type: 'text', content: qText, orderIndex: idx++ });
+    if (qCode) blocks.push({ id: `q-code-${id}`, type: 'code', code: qCode, orderIndex: idx++ });
+    if (Array.isArray(qImgs) && qImgs.length > 0) blocks.push({ id: `q-img-${id}`, type: 'image', images: qImgs, orderIndex: idx++ });
+    if (Array.isArray(qAudios) && qAudios.length > 0) blocks.push({ id: `q-audio-${id}`, type: 'audio', audios: qAudios, orderIndex: idx++ });
+
     normalized.questionBlocks = blocks;
   }
 
-  if (normalized.answerBlocks.length === 0) {
-    const blocks: any[] = [];
+  if (Array.isArray(normalized.answerBlocks) && normalized.answerBlocks.length === 0) {
+    const blocks: UnknownRecord[] = [];
     let idx = 0;
-    if (normalized.answerText) blocks.push({ id: `a-text-${id}`, type: 'text', content: normalized.answerText, orderIndex: idx++ });
-    if (normalized.answerCode) blocks.push({ id: `a-code-${id}`, type: 'code', code: normalized.answerCode, orderIndex: idx++ });
-    if (normalized.answerImages.length > 0) blocks.push({ id: `a-img-${id}`, type: 'image', images: normalized.answerImages, orderIndex: idx++ });
-    if (normalized.answerAudios.length > 0) blocks.push({ id: `a-audio-${id}`, type: 'audio', audios: normalized.answerAudios, orderIndex: idx++ });
+
+    const aText = normalized.answerText;
+    const aCode = normalized.answerCode;
+    const aImgs = normalized.answerImages;
+    const aAudios = normalized.answerAudios;
+
+    if (typeof aText === 'string' && aText) blocks.push({ id: `a-text-${id}`, type: 'text', content: aText, orderIndex: idx++ });
+    if (aCode) blocks.push({ id: `a-code-${id}`, type: 'code', code: aCode, orderIndex: idx++ });
+    if (Array.isArray(aImgs) && aImgs.length > 0) blocks.push({ id: `a-img-${id}`, type: 'image', images: aImgs, orderIndex: idx++ });
+    if (Array.isArray(aAudios) && aAudios.length > 0) blocks.push({ id: `a-audio-${id}`, type: 'audio', audios: aAudios, orderIndex: idx++ });
+
     normalized.answerBlocks = blocks;
   }
 
   // 逆にブロックはあるがレガシーフィールドが空の場合（ブロックエディタでの保存後など）
-  if (!normalized.questionText && normalized.questionBlocks.length > 0) {
+  if (!normalized.questionText && Array.isArray(normalized.questionBlocks) && normalized.questionBlocks.length > 0) {
     normalized.questionText = extractTextFromBlocks(normalized.questionBlocks);
   }
-  if (!normalized.answerText && normalized.answerBlocks.length > 0) {
+  if (!normalized.answerText && Array.isArray(normalized.answerBlocks) && normalized.answerBlocks.length > 0) {
     normalized.answerText = extractTextFromBlocks(normalized.answerBlocks);
   }
 
@@ -314,37 +488,40 @@ export const normalizeCard = (raw: any) => {
  * フォルダデータを正規化する関数
  * snake_case / camelCase の差異を吸収し、削除状態を一貫して処理する
  */
-export const normalizeFolder = (raw: any) => {
-  const id = raw?.id ?? raw?.folderId ?? raw?.folder_id ?? makeFallbackId();
-  const isDeleted = raw?.isDeleted ?? raw?.is_deleted ?? false;
+export const normalizeFolder = (raw: unknown) => {
+  const r = asRecord(raw) ?? {};
+  const id = toStringOr(pick(r.id, r.folderId, r.folder_id), '') || makeFallbackId();
+
+  const isDeleted = toBoolOr(pick(r.isDeleted, r.is_deleted), false);
 
   // deletedAt: isDeleted=true なのに deletedAt がない場合は updatedAt で補完
-  const rawDeletedAt = raw?.deletedAt ?? raw?.deleted_at;
+  const rawDeletedAt = pick(r.deletedAt, r.deleted_at);
   let deletedAt: Date | null = null;
   if (rawDeletedAt) {
     deletedAt = normalizeDate(rawDeletedAt);
   } else if (isDeleted) {
     // isDeleted=true だが deletedAt がない → updatedAt で推定補完
-    deletedAt = normalizeDate(raw?.updatedAt ?? raw?.updated_at ?? raw?.createdAt ?? raw?.created_at) ?? new Date(0);
+    deletedAt =
+      normalizeDate(pick(r.updatedAt, r.updated_at, r.createdAt, r.created_at)) ?? new Date(0);
   }
 
   return {
     id,
     folderId: id,
-    userId: raw?.userId ?? raw?.user_id ?? '',
-    deviceId: raw?.deviceId ?? raw?.device_id ?? '',
-    parentFolderId: raw?.parentFolderId ?? raw?.parent_folder_id ?? null,
-    folderName: raw?.folderName ?? raw?.folder_name ?? '',
-    folderColor: raw?.folderColor ?? raw?.folder_color ?? null,
-    orderIndex: raw?.orderIndex ?? raw?.order_index ?? 0,
-    cloudSyncEnabled: raw?.cloudSyncEnabled ?? raw?.cloud_sync_enabled ?? true,
+    userId: toStringOr(pick(r.userId, r.user_id), ''),
+    deviceId: toStringOr(pick(r.deviceId, r.device_id), ''),
+    parentFolderId: pick(r.parentFolderId, r.parent_folder_id, null) as string | null,
+    folderName: toStringOr(pick(r.folderName, r.folder_name), ''),
+    folderColor: pick(r.folderColor, r.folder_color, null),
+    orderIndex: toFiniteNumber(pick(r.orderIndex, r.order_index), 0),
+    cloudSyncEnabled: toBoolOr(pick(r.cloudSyncEnabled, r.cloud_sync_enabled), true),
     isDeleted,
     deletedAt,
-    isHidden: raw?.isHidden ?? raw?.is_hidden ?? false,
-    isSilent: raw?.isSilent ?? raw?.is_silent ?? false,
-    notePdfs: raw?.notePdfs ?? raw?.note_pdfs ?? [],
-    lastAccessAt: normalizeDate(raw?.lastAccessAt ?? raw?.last_access_at),
-    createdAt: normalizeDate(raw?.createdAt ?? raw?.created_at) ?? new Date(),
-    updatedAt: normalizeDate(raw?.updatedAt ?? raw?.updated_at) ?? new Date(),
+    isHidden: toBoolOr(pick(r.isHidden, r.is_hidden), false),
+    isSilent: toBoolOr(pick(r.isSilent, r.is_silent), false),
+    notePdfs: toArrayOr(pick(r.notePdfs, r.note_pdfs), []),
+    lastAccessAt: normalizeDate(pick(r.lastAccessAt, r.last_access_at)),
+    createdAt: normalizeDate(pick(r.createdAt, r.created_at)) ?? new Date(),
+    updatedAt: normalizeDate(pick(r.updatedAt, r.updated_at)) ?? new Date(),
   };
 };
