@@ -28,10 +28,6 @@ const META_DATE_FORMATTER = new Intl.DateTimeFormat("ja-JP", {
   minute: "2-digit",
 });
 
-const DAY_FORMATTER = new Intl.DateTimeFormat("ja-JP", {
-  month: "2-digit",
-  day: "2-digit",
-});
 
 function toValidDate(value: unknown): Date | null {
   if (value instanceof Date) {
@@ -53,14 +49,6 @@ function toValidDate(value: unknown): Date | null {
   return null;
 }
 
-function toDayKeyAndTs(date: Date) {
-  const year = date.getFullYear();
-  const month = date.getMonth();
-  const day = date.getDate();
-  const dayDate = new Date(year, month, day);
-  const dayKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-  return { dayKey, dayTs: dayDate.getTime() };
-}
 
 function formatDateLabel(value: unknown) {
   const date = toValidDate(value);
@@ -68,27 +56,6 @@ function formatDateLabel(value: unknown) {
   return META_DATE_FORMATTER.format(date);
 }
 
-function aggregateDailyLast(logs: ReviewLog[]) {
-  const byDay = new Map<
-    string,
-    { dayKey: string; dayTs: number; reviewedAtTs: number; resistanceScore: number }
-  >();
-
-  for (const log of logs) {
-    const reviewedAt = toValidDate(log.reviewedAt);
-    if (!reviewedAt) continue;
-    const reviewedAtTs = reviewedAt.getTime();
-    const { dayKey, dayTs } = toDayKeyAndTs(reviewedAt);
-    const current = byDay.get(dayKey);
-    if (!current || reviewedAtTs >= current.reviewedAtTs) {
-      byDay.set(dayKey, { dayKey, dayTs, reviewedAtTs, resistanceScore: log.resistanceScore });
-    }
-  }
-
-  return [...byDay.values()]
-    .sort((a, b) => a.dayTs - b.dayTs)
-    .map(({ dayKey, dayTs, resistanceScore }) => ({ dayKey, dayTs, resistanceScore }));
-}
 
 export function CardMetaPanel({
   card,
@@ -151,20 +118,19 @@ export function CardMetaPanel({
   }, [safeLogs]);
 
   const chartData = useMemo(() => {
-    const daily = aggregateDailyLast(safeLogs);
-    if (period === "all") return daily;
-    const days = period === "7d" ? 7 : 30;
-    const threshold = new Date();
-    threshold.setDate(threshold.getDate() - days);
-    const thresholdTs = threshold.getTime();
-    return daily.filter((d) => d.dayTs >= thresholdTs);
+    const all = safeLogs
+      .filter((log) => log.resistanceScore != null)
+      .map((log, idx) => ({ reviewIndex: idx + 1, resistanceScore: log.resistanceScore }));
+    if (period === "all") return all;
+    const count = period === "7d" ? 7 : 30;
+    return all.slice(-count);
   }, [safeLogs, period]);
 
   const xTicks = useMemo(() => {
-    if (chartData.length <= 1) return chartData.map((d) => d.dayTs);
+    if (chartData.length <= 1) return chartData.map((d) => d.reviewIndex);
     return chartData
       .filter((_, idx) => idx % 5 === 0 || idx === chartData.length - 1)
-      .map((d) => d.dayTs);
+      .map((d) => d.reviewIndex);
   }, [chartData]);
 
   const tags = card?.tags ?? [];
@@ -265,7 +231,7 @@ export function CardMetaPanel({
                     className={`rounded px-2 py-1 ${period === p ? "bg-slate-900 text-white" : "text-slate-600"}`}
                     onClick={() => setPeriod(p)}
                   >
-                    {p === "all" ? "全期間" : p}
+                    {p === "all" ? "全期間" : p === "7d" ? "直近7" : "直近30"}
                   </button>
                 ))}
               </div>
@@ -277,16 +243,13 @@ export function CardMetaPanel({
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData}>
                     <XAxis
-                      dataKey="dayTs"
+                      dataKey="reviewIndex"
                       ticks={xTicks}
-                      tickFormatter={(v) => {
-                        const date = new Date(Number(v));
-                        return Number.isNaN(date.getTime()) ? "" : DAY_FORMATTER.format(date);
-                      }}
                       tick={{ fontSize: 10 }}
+                      label={{ value: "復習回数", position: "insideBottomRight", offset: -4, fontSize: 10 }}
                     />
                     <YAxis
-                      domain={["dataMin", "dataMax"]}
+                      domain={[0, 100]}
                       tickCount={6}
                       allowDecimals={false}
                       width={36}

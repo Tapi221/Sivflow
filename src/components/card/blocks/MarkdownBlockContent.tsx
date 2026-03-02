@@ -48,7 +48,7 @@ const extractTextDeep = (node: React.ReactNode): string => {
 
 // ✅ 制御文字は一律拒否（安全）
 // ✅ 空白は「リンク種別ごと」に扱いを変える（tel/mailto は救済）
-const hasControlChars = (s: string) => /[\u0000-\u001F\u007F]/.test(s);
+const hasControlChars = (s: string) => /\p{Cc}/u.test(s);
 const hasWhitespace = (s: string) => /\s/.test(s);
 
 // mailto の ? 以降を “なるべく壊れにくく” 再構築
@@ -220,7 +220,12 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
   const components = useMemo<Components>(
     () => ({
       h1: ({ children }) => (
-        <BlockSurface ruled ruledRowPx={TYPE.h1.lineHeight} bleedX={bleedX} padBottomRows={1}>
+        <BlockSurface
+          ruled
+          ruledRowPx={TYPE.h1.lineHeight}
+          bleedX={bleedX}
+          padBottomRows={1}
+        >
           <h1
             className="m-0 font-serif font-medium"
             style={{
@@ -233,7 +238,12 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
         </BlockSurface>
       ),
       h2: ({ children }) => (
-        <BlockSurface ruled ruledRowPx={TYPE.h2.lineHeight} bleedX={bleedX} padBottomRows={1}>
+        <BlockSurface
+          ruled
+          ruledRowPx={TYPE.h2.lineHeight}
+          bleedX={bleedX}
+          padBottomRows={1}
+        >
           <h2
             className="m-0 font-serif font-medium"
             style={{
@@ -246,7 +256,12 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
         </BlockSurface>
       ),
       h3: ({ children }) => (
-        <BlockSurface ruled ruledRowPx={TYPE.h3.lineHeight} bleedX={bleedX} padBottomRows={1}>
+        <BlockSurface
+          ruled
+          ruledRowPx={TYPE.h3.lineHeight}
+          bleedX={bleedX}
+          padBottomRows={1}
+        >
           <h3
             className="m-0 font-serif font-medium"
             style={{
@@ -276,7 +291,8 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
       del: ({ children }) => <del className="line-through">{children}</del>,
       hr: () => <HrRenderer />,
 
-      a: ({ node: _node, href, children, ...props }) => {
+      // ✅ node を受け取らない（unused-vars 回避）
+      a: ({ href, children, ...props }) => {
         const safeHref = sanitizeLinkHref(typeof href === 'string' ? href : undefined);
         if (!safeHref) return <span className="break-words">{children}</span>;
 
@@ -296,7 +312,8 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
         );
       },
 
-      img: ({ node: _node, src = '', alt = '', title }) => {
+      // ✅ node を受け取らない（unused-vars 回避）
+      img: ({ src = '', alt = '', title }) => {
         if (!ALLOW_MARKDOWN_IMAGES) {
           return (
             <span className="text-slate-500">
@@ -358,11 +375,10 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
           {children}
         </th>
       ),
-      td: ({ children }) => (
-        <td className="border border-slate-200 px-2 py-1 align-top">{children}</td>
-      ),
+      td: ({ children }) => <td className="border border-slate-200 px-2 py-1 align-top">{children}</td>,
 
-      code: ({ node: _node, className: codeClassName, children }) => {
+      // ✅ node を受け取らない（unused-vars 回避）
+      code: ({ className: codeClassName, children }) => {
         const classStr = typeof codeClassName === 'string' ? codeClassName : '';
         const isBlockCode = classStr.includes('language-');
 
@@ -394,7 +410,9 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
         const classStr = typeof childProps.className === 'string' ? childProps.className : '';
         const langMatch = /language-([^\s]+)/.exec(classStr);
         const language = langMatch?.[1] ?? 'clike';
-        const rawCode = extractTextDeep(childProps.children).replace(/\r\n/g, '\n').replace(/(?:\n)+$/, '');
+        const rawCode = extractTextDeep(childProps.children)
+          .replace(/\r\n/g, '\n')
+          .replace(/(?:\n)+$/, '');
 
         return <MarkdownFencedCodeBlock code={rawCode} language={language} bleedX={bleedX} />;
       },
