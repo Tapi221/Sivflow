@@ -51,7 +51,7 @@ export function CardSurface({
       "--card-ruled-opacity": String(clamp01(ruledOpacity)),
       "--card-surface": "hsl(var(--background))",
       "--card-padding-x": "12px",
-      "--card-padding-bottom": "16px",
+      "--card-padding-bottom": `${Math.max(16, bottomPx)}px`,
       "--ruled-offset-px": `${topPx}px`,
       "--ruled-bottom-offset-px": `${bottomPx}px`,
       "--card-content-padding-top": `${topPx}px`,

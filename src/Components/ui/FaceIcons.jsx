@@ -1,8 +1,7 @@
 import React from 'react';
 
-// Simple face icons matching the uploaded reference image style
 export const FaceIcons = {
-  // Score 0: Forgot - Sad face (red)
+  // Score 0: 忘れた - Sad face (red)
   Forgot: ({ className, size = 48 }) => (
     <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className={className}>
       <circle cx="24" cy="24" r="22" fill="#FFE5E5" stroke="#FF5A65" strokeWidth="2"/>
@@ -12,7 +11,7 @@ export const FaceIcons = {
     </svg>
   ),
   
-  // Score 1: Vague - Neutral face (yellow)
+  // Score 1: あいまい - Neutral face (yellow)
   Vague: ({ className, size = 48 }) => (
     <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className={className}>
       <circle cx="24" cy="24" r="22" fill="#FFF9E5" stroke="#FFC107" strokeWidth="2"/>
@@ -22,7 +21,7 @@ export const FaceIcons = {
     </svg>
   ),
   
-  // Score 2: Good - Slight smile (blue)
+  // Score 2: 覚えた - Slight smile (blue)
   Good: ({ className, size = 48 }) => (
     <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className={className}>
       <circle cx="24" cy="24" r="22" fill="#E3F2FD" stroke="#42A5F5" strokeWidth="2"/>
@@ -32,7 +31,7 @@ export const FaceIcons = {
     </svg>
   ),
   
-  // Score 3: Easy - Happy face (green)
+  // Score 3: 余裕 - Happy face (green)
   Easy: ({ className, size = 48 }) => (
     <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className={className}>
       <circle cx="24" cy="24" r="22" fill="#E8F5E9" stroke="#4CAF50" strokeWidth="2"/>

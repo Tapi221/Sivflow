@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { createPageUrl } from '@/utils';
-import { CardEditorPane } from '@/Components/folder/CardEditorPane';
+import { CardEditorPane } from '@/components/folder/CardEditorPane';
 
 const CARD_EDIT_FOLDER_ID_KEY = 'card-edit:folder-id';
 
@@ -16,6 +16,7 @@ export default function CardEdit() {
   const returnTo = searchParams.get('returnTo');
   const shouldReturnToCalendar = returnTo === 'calendar';
   const shouldReturnToCardView = returnTo === 'card-view';
+  const shouldReturnToStudy = returnTo === 'study';
 
   // folderId の永続化（リロード時復元用）
   const targetFolderId = (() => {
@@ -49,6 +50,8 @@ export default function CardEdit() {
       safeNavigate(createPageUrl('Calendar'));
     } else if (shouldReturnToCardView) {
       safeNavigate(`/CardView?folderId=${targetFolderId}${cardId ? `&cardId=${cardId}` : ''}`);
+    } else if (shouldReturnToStudy) {
+      safeNavigate(`/study?folderId=${targetFolderId}`);
     } else {
       safeNavigate(`/Folders?folderId=${targetFolderId}`);
     }

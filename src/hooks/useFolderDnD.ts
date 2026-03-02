@@ -4,7 +4,6 @@
  * DragDropContext のonDragEndハンドラを提供
  */
 import { useCallback } from 'react';
-import type { DropResult } from '@hello-pangea/dnd';
 
 interface UseFolderDnDProps {
   cards: any[];
@@ -46,7 +45,11 @@ export function useFolderDnD({
   reorderCards,
 }: UseFolderDnDProps) {
   
-  const onDragEnd = useCallback(async (result: DropResult) => {
+  const onDragEnd = useCallback(async (result: {
+    source: { droppableId: string; index: number };
+    destination: { droppableId: string; index: number } | null;
+    draggableId: string;
+  }) => {
     const { source, destination, draggableId } = result;
     
     // ドロップ先がない場合は何もしない

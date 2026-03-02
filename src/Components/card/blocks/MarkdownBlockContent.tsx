@@ -426,7 +426,7 @@ function ParagraphRenderer({
   bodyStyle: React.CSSProperties;
 }) {
   return (
-    <p className="m-0" style={bodyStyle}>
+    <p className="m-0" style={{ ...bodyStyle, whiteSpace: 'pre-wrap' }}>
       {children}
     </p>
   );

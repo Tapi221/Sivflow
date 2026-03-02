@@ -128,8 +128,9 @@ const normalizeReviewLogs = (rawLogs: any): Array<{ reviewedAt: string; rating: 
     .map((log) => {
       const reviewed = normalizeDate(log?.reviewedAt ?? log?.reviewed_at);
       const ratingNum = Number(log?.rating);
-      const scoreNum = Number(log?.resistanceScore ?? log?.resistance_score);
-      if (!reviewed || !Number.isFinite(ratingNum) || !Number.isFinite(scoreNum)) return null;
+      const scoreRaw = Number(log?.resistanceScore ?? log?.resistance_score);
+      const scoreNum = Number.isFinite(scoreRaw) ? scoreRaw : 0;
+      if (!reviewed || !Number.isFinite(ratingNum)) return null;
       if (ratingNum < 1 || ratingNum > 4) return null;
 
       return {

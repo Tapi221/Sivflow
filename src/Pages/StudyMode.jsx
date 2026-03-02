@@ -48,6 +48,7 @@ export default function StudyMode() {
   const { settings } = useUserSettings();
 
   const folderId = useMemo(() => new URLSearchParams(location.search).get('folderId'), [location.search]);
+  const SESSION_KEY = folderId ? `manifolmia_session_${folderId}` : null;
 
   const isDev = useMemo(() => {
     if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.DEV) return true;
@@ -104,8 +105,31 @@ export default function StudyMode() {
   useEffect(() => {
     if (sessionSeedCards.length > 0) return;
     if (dueStudyCards.length === 0) return;
+
+    if (SESSION_KEY) {
+      try {
+        const raw = localStorage.getItem(SESSION_KEY);
+        if (raw) {
+          const data = JSON.parse(raw);
+          const isRecent = Date.now() - data.savedAt < 24 * 60 * 60 * 1000;
+          if (isRecent && Array.isArray(data.cardIds)) {
+            const dueById = new Map(dueStudyCards.map(c => [c.id, c]));
+            const remaining = data.cardIds.map(id => dueById.get(id)).filter(Boolean);
+            // 一部のカードが既にレビュー済み（残りが元より少ない）場合のみ復元
+            if (remaining.length > 0 && remaining.length < data.cardIds.length) {
+              setSessionSeedCards(remaining);
+              return;
+            }
+          }
+          localStorage.removeItem(SESSION_KEY);
+        }
+      } catch {
+        if (SESSION_KEY) localStorage.removeItem(SESSION_KEY);
+      }
+    }
+
     setSessionSeedCards(dueStudyCards);
-  }, [dueStudyCards, sessionSeedCards.length]);
+  }, [dueStudyCards, sessionSeedCards.length, SESSION_KEY]);
 
   const allCardsById = useMemo(() => {
     const map = new Map();
@@ -160,6 +184,21 @@ export default function StudyMode() {
     createStudyLogMutation,
     createLevelHistoryMutation,
   });
+
+  // カードを1枚以上レビューしたら進捗を保存（currentIndex が進むたびに更新）
+  // 復元時は cardIds のうち dueStudyCards に残っているものだけを使う（自動的に続きになる）
+  useEffect(() => {
+    if (!SESSION_KEY || sessionSeedCards.length === 0 || studyComplete || currentIndex === 0) return;
+    localStorage.setItem(SESSION_KEY, JSON.stringify({
+      cardIds: sessionSeedCards.map(c => c.id),
+      savedAt: Date.now(),
+    }));
+  }, [currentIndex, SESSION_KEY, sessionSeedCards, studyComplete]);
+
+  // セッション完了時にクリア
+  useEffect(() => {
+    if (studyComplete && SESSION_KEY) localStorage.removeItem(SESSION_KEY);
+  }, [studyComplete, SESSION_KEY]);
 
   const debugStreak = getDebugStreak();
   const effectiveStreak = debugStreak ?? sanitizeStreak(results?.streak);
@@ -390,6 +429,7 @@ export default function StudyMode() {
               onResult={handleResult}
               onToggleUncertainty={handleToggleUncertainty}
               onToggleBookmark={handleToggleBookmark}
+              onEdit={(card) => navigate(`/CardEdit?id=${card.id}&folderId=${folderId}&returnTo=study`)}
               showHard={settings?.showReviewHard ?? true}
               showEasy={settings?.showReviewEasy ?? true}
             />

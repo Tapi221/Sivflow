@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { TagInput } from "@/components/ui/tag-input";
 import type { Card, ReviewLog } from "@/types";
 import { NUMERIC_TYPO, UI_TYPO } from "@/styles/typography";
+import { calculateResistanceScore } from "@/utils/reviewMetrics";
 
 type Period = "7d" | "30d" | "all";
 
@@ -115,6 +116,18 @@ export function CardMetaPanel({
 
   const latestReview = safeLogs.at(-1);
   const recent10 = safeLogs.slice(-10).reverse();
+
+  const currentResistanceScore = useMemo(() => {
+    if (!card) return null;
+    if (latestReview?.resistanceScore != null && latestReview.resistanceScore > 0) {
+      return latestReview.resistanceScore;
+    }
+    const next = toValidDate(card.nextReviewDate ?? (card as any).next_review_date);
+    const last = toValidDate(card.lastReviewAt ?? (card as any).last_review_at);
+    if (!next || !last) return null;
+    const intervalDays = Math.max(0, (next.getTime() - last.getTime()) / (1000 * 60 * 60 * 24));
+    return calculateResistanceScore(intervalDays);
+  }, [card, latestReview]);
 
   // reviewCount は snake_case で入ってくるケースがあるので両対応しておく（UI側は事故らないのが正義）
   const rawReviewCount = (card?.reviewCount ?? (card as any)?.review_count ?? 0) as unknown;
@@ -236,6 +249,12 @@ export function CardMetaPanel({
           </section>
 
           <section>
+            {currentResistanceScore !== null && (
+              <div className="mb-3 flex items-center justify-between rounded border border-slate-200 bg-slate-50 px-3 py-2">
+                <span className="text-xs font-medium text-slate-600">現在の耐性スコア</span>
+                <span className="text-sm font-semibold tabular-nums text-slate-900">{currentResistanceScore}%</span>
+              </div>
+            )}
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-semibold tracking-wide text-slate-500 uppercase">耐性スコア推移</h3>
               <div className="flex rounded-md border border-slate-200 p-0.5 text-xs">

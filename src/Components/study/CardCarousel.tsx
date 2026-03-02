@@ -12,6 +12,7 @@ type CardCarouselProps = {
   onResult: StudyCardProps['onResult'];
   onToggleUncertainty?: (card: Card) => void;
   onToggleBookmark?: (card: Card) => void;
+  onEdit?: (card: Card) => void;
   showHard?: boolean;
   showEasy?: boolean;
 };
@@ -22,6 +23,7 @@ export function CardCarousel({
   onResult,
   onToggleUncertainty,
   onToggleBookmark,
+  onEdit,
   showHard = true,
   showEasy = true,
 }: CardCarouselProps) {
@@ -35,6 +37,7 @@ export function CardCarousel({
           onResult={onResult}
           onToggleUncertainty={onToggleUncertainty}
           onToggleBookmark={onToggleBookmark}
+          onEdit={onEdit}
           showHard={showHard}
           showEasy={showEasy}
         />

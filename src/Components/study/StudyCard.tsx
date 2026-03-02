@@ -19,6 +19,7 @@ type BaseProps = {
 
   onToggleUncertainty?: (card: Card) => void;
   onToggleBookmark?: (card: Card) => void;
+  onEdit?: (card: Card) => void;
 
   showHard?: boolean;
   showEasy?: boolean;
@@ -92,6 +93,7 @@ function StudyCardInner({
   onResult,
   onToggleUncertainty,
   onToggleBookmark,
+  onEdit,
   mode = 'review',
   showHard = true,
   showEasy = true,
@@ -342,6 +344,7 @@ function StudyCardInner({
 
   const handleToggleUncertainty = onToggleUncertainty ? () => onToggleUncertainty(card) : undefined;
   const handleToggleBookmark = onToggleBookmark ? () => onToggleBookmark(card) : undefined;
+  const handleEdit = onEdit ? () => onEdit(card) : undefined;
 
   const reviewCount = (card as unknown as { reviewCount?: unknown }).reviewCount;
   const showReviewCount = typeof reviewCount === 'number' && reviewCount >= 0;
@@ -387,6 +390,7 @@ function StudyCardInner({
               }
               onToggleUncertainty={handleToggleUncertainty}
               onToggleBookmark={handleToggleBookmark}
+              onEdit={handleEdit}
             />
         </div>
       </div>

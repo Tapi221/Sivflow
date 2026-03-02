@@ -11,6 +11,7 @@ type Props = {
   onResult: (subjectiveScore: number, responseTime: number) => void;
   onToggleUncertainty: (card: Card) => void;
   onToggleBookmark: (card: Card) => void;
+  onEdit?: (card: Card) => void;
   showHard: boolean;
   showEasy: boolean;
 };
@@ -21,6 +22,7 @@ export function StudyReview({
   onResult,
   onToggleUncertainty,
   onToggleBookmark,
+  onEdit,
   showHard,
   showEasy,
 }: Props) {
@@ -50,6 +52,7 @@ export function StudyReview({
               onResult={onResult}
               onToggleUncertainty={onToggleUncertainty}
               onToggleBookmark={onToggleBookmark}
+              onEdit={onEdit}
               showHard={showHard}
               showEasy={showEasy}
             />
@@ -68,6 +71,7 @@ export function StudyReview({
         onResult={onResult}
         onToggleUncertainty={onToggleUncertainty}
         onToggleBookmark={onToggleBookmark}
+        onEdit={onEdit}
         showHard={showHard}
         showEasy={showEasy}
       />

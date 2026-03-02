@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { Timestamp } from 'firebase/firestore';
 import { computeNextReview } from '@/services/reviewAlgorithm';
 import { normalizeMemoryStability } from '@/utils/reviewUtils';
+import { calculateResistanceScore } from '@/utils/reviewMetrics';
 import { getDebugStreak } from '@/utils/debugStreak';
 import { sanitizeStreak } from '@/utils/streak';
 import { getLocalDb } from '@/services/localDB';
@@ -75,8 +76,14 @@ export function useStudySession({
     });
 
     if (updateCard) {
+      const newLog = {
+        reviewedAt: new Date().toISOString(),
+        rating: (subjectiveScore + 1) as 1 | 2 | 3 | 4,
+        resistanceScore: calculateResistanceScore(reviewUpdate.intervalDays),
+      };
       await updateCard(card.id, {
         ...reviewUpdate,
+        reviewLogs: [...(card.reviewLogs ?? []), newLog],
         updatedAt: new Date(),
       });
     }

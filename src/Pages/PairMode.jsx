@@ -2,7 +2,7 @@ import React, { useCallback, useRef, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import { CardEditorPane } from '@/Components/folder/CardEditorPane';
+import { CardEditorPane } from '@/components/folder/CardEditorPane';
 
 export default function PairMode() {
   const [searchParams] = useSearchParams();
