@@ -1,11 +1,8 @@
 import { useEffect, useRef, useState, type ComponentProps } from 'react';
-import { useSwipeable, type SwipeEventData } from 'react-swipeable';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Volume2 } from 'lucide-react';
 import { Flashcard } from '../card/Flashcard';
-import { MobileScalableCard } from '../card/MobileScalableCard';
-import { CANONICAL_CARD_WIDTH, CARD_SAFE_PADDING_PX } from '../card/constants';
 import type { Card } from '@/types';
 
 type FlashcardCardLike = ComponentProps<typeof Flashcard>['card'];
@@ -25,6 +22,13 @@ type BaseProps = {
 
   showHard?: boolean;
   showEasy?: boolean;
+
+  /**
+   * 縦ページャから flip を外部トリガーするための整数カウンタ。
+   * この値がインクリメントされると handleFlip() が呼ばれる。
+   * card 変化で StudyCard が remount されるためリセット不要。
+   */
+  flipTrigger?: number;
 };
 
 type ReviewProps = BaseProps & {
@@ -91,12 +95,12 @@ function StudyCardInner({
   mode = 'review',
   showHard = true,
   showEasy = true,
+  flipTrigger,
 }: InnerProps) {
   const isPracticeMode = mode === 'practice';
 
   const [studyPhase, setStudyPhase] = useState<StudyPhase>('timing');
   const [elapsedTime, setElapsedTime] = useState(0);
-  const [swipeDir, setSwipeDir] = useState<SwipeEventData['dir'] | null>(null);
 
   const startTimeRef = useRef<number>(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -149,37 +153,20 @@ function StudyCardInner({
     // answer -> timing: イベント内でリセット（effect 内 setState を避ける）
     setStudyPhase('timing');
     setElapsedTime(0);
-    setSwipeDir(null);
     startTiming();
   };
 
-  const handlers = useSwipeable({
-    onSwipedLeft: () => {
-      if (studyPhase === 'answer') {
-        emitResult(isPracticeMode ? 'ok' : 2);
-      }
-    },
-    onSwipedRight: () => {
-      if (studyPhase === 'answer') {
-        emitResult(isPracticeMode ? 'anxious' : 0);
-      }
-    },
-    onSwiping: (e: SwipeEventData) => {
-      if (studyPhase === 'answer') {
-        setSwipeDir(e.dir);
-      }
-    },
-    onSwiped: () => setSwipeDir(null),
-    preventScrollOnSwipe: true,
-    trackMouse: true,
-  });
+  // 縦ページャから Space/Enter でカードをめくるための外部トリガー
+  useEffect(() => {
+    if (!flipTrigger) return;
+    handleFlip();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flipTrigger]);
 
   const renderPracticeButtons = () => (
     <div className="reviewRatingBar flex items-center justify-center gap-3 animate-in fade-in slide-in-from-bottom-4 duration-300">
       <button
-        className={`w-24 h-20 md:w-28 md:h-24 rounded-2xl bg-white border shadow-sm flex flex-col items-center justify-center gap-2 transition-all hover:-translate-y-1 active:scale-95 group ${
-          swipeDir === 'Right' ? 'border-red-500 bg-red-50 scale-105' : 'border-slate-100'
-        }`}
+        className="w-24 h-20 md:w-28 md:h-24 rounded-2xl bg-white border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-2 transition-all hover:-translate-y-1 active:scale-95 group"
         onClick={(e) => {
           e.stopPropagation();
           emitResult('anxious');
@@ -206,9 +193,7 @@ function StudyCardInner({
       </button>
 
       <button
-        className={`w-24 h-20 md:w-28 md:h-24 rounded-2xl bg-white border shadow-sm flex flex-col items-center justify-center gap-2 transition-all hover:-translate-y-1 active:scale-95 group ${
-          swipeDir === 'Left' ? 'border-blue-500 bg-blue-50 scale-105' : 'border-slate-100'
-        }`}
+        className="w-24 h-20 md:w-28 md:h-24 rounded-2xl bg-white border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-2 transition-all hover:-translate-y-1 active:scale-95 group"
         onClick={(e) => {
           e.stopPropagation();
           emitResult('ok');
@@ -239,9 +224,7 @@ function StudyCardInner({
   const renderReviewButtons = () => (
     <div className="reviewRatingBar flex items-center justify-center gap-2 md:gap-3 animate-in fade-in slide-in-from-bottom-4 duration-300">
       <button
-        className={`w-16 h-20 md:w-20 md:h-24 rounded-2xl bg-white border shadow-sm flex flex-col items-center justify-center gap-1 md:gap-2 transition-all hover:-translate-y-1 active:scale-95 group ${
-          swipeDir === 'Right' ? 'border-red-500 bg-red-50 scale-105' : 'border-slate-100'
-        }`}
+        className="w-16 h-20 md:w-20 md:h-24 rounded-2xl bg-white border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-1 md:gap-2 transition-all hover:-translate-y-1 active:scale-95 group"
         onClick={(e) => {
           e.stopPropagation();
           emitResult(0);
@@ -298,9 +281,7 @@ function StudyCardInner({
       )}
 
       <button
-        className={`w-16 h-20 md:w-20 md:h-24 rounded-2xl bg-white border shadow-sm flex flex-col items-center justify-center gap-1 md:gap-2 transition-all hover:-translate-y-1 active:scale-95 group ${
-          swipeDir === 'Left' ? 'border-blue-500 bg-blue-50 scale-105' : 'border-slate-100'
-        }`}
+        className="w-16 h-20 md:w-20 md:h-24 rounded-2xl bg-white border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-1 md:gap-2 transition-all hover:-translate-y-1 active:scale-95 group"
         onClick={(e) => {
           e.stopPropagation();
           emitResult(2);
@@ -368,17 +349,7 @@ function StudyCardInner({
   return (
     <div className="reviewStudyCard flex flex-col gap-6 w-full mx-auto max-w-[520px]">
       <div className="reviewCardViewport">
-        <div
-          className={`transition-all duration-200 ${
-            swipeDir === 'Left'
-              ? 'opacity-50 -translate-x-4 border-blue-400'
-              : swipeDir === 'Right'
-                ? 'opacity-50 translate-x-4 border-red-400'
-                : ''
-          }`}
-          {...handlers}
-        >
-          <MobileScalableCard cardDesignWidth={CANONICAL_CARD_WIDTH} safePadding={CARD_SAFE_PADDING_PX}>
+        <div>
             <Flashcard
               card={flashcardCard}
               isFlipped={studyPhase === 'answer'}
@@ -417,7 +388,6 @@ function StudyCardInner({
               onToggleUncertainty={handleToggleUncertainty}
               onToggleBookmark={handleToggleBookmark}
             />
-          </MobileScalableCard>
         </div>
       </div>
 

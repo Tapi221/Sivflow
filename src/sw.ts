@@ -11,21 +11,30 @@ import { CacheFirst, NetworkFirst } from 'workbox-strategies'
 import { CacheableResponsePlugin } from 'workbox-cacheable-response'
 import { ExpirationPlugin } from 'workbox-expiration'
 
+import type { PrecacheEntry } from 'workbox-precaching'
+
 declare let self: ServiceWorkerGlobalScope
 
 declare global {
   interface ServiceWorkerGlobalScope {
-    __WB_MANIFEST: Array<{ url: string; revision?: string | null }>
+    // Workbox が定義している型に合わせる（TS2717潰し）
+    __WB_MANIFEST: Array<string | PrecacheEntry>
   }
 }
 
-const cacheVersion =
-  (import.meta as any).env?.VITE_BUILD_VERSION ||
-  (import.meta as any).env?.GITHUB_SHA ||
-  'dev'
+// Vite の import.meta.env を any なしで読む（ESLint no-explicit-any潰し）
+type ViteEnv = {
+  VITE_BUILD_VERSION?: string
+  GITHUB_SHA?: string
+}
+
+const env = (import.meta as ImportMeta & { env?: ViteEnv }).env
+const cacheVersion = env?.VITE_BUILD_VERSION ?? env?.GITHUB_SHA ?? 'dev'
 
 self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting()
+  if (event.data && (event.data as { type?: string }).type === 'SKIP_WAITING') {
+    self.skipWaiting()
+  }
 })
 
 clientsClaim()
@@ -64,14 +73,15 @@ registerRoute(
   }),
 )
 
-setCatchHandler(async ({ event }) => {
-  if (event.request.mode === 'navigate') {
+// setCatchHandler の event は型が広くて request が無い扱いになることがあるので、
+// Workbox のコールバック引数にある request を使う（TS2339潰し）
+setCatchHandler(async ({ request }) => {
+  if (request.mode === 'navigate') {
     const response =
       (await matchPrecache('/offline.html')) ??
       (await matchPrecache('offline.html'))
     return response ?? Response.error()
   }
-
   return Response.error()
 })
 

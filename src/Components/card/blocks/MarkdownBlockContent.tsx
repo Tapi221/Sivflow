@@ -333,7 +333,7 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
           padRightRows={0}
         >
           <blockquote
-            className="m-0 border-l-4 border-slate-300 text-slate-600 italic"
+            className="m-0 border-l-4 border-slate-300 italic"
             style={{ ...bodyStyle, paddingLeft: 'var(--card-row-px)' }}
           >
             {children}
@@ -354,12 +354,12 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
       tbody: ({ children }) => <tbody>{children}</tbody>,
       tr: ({ children }) => <tr className="border-b border-slate-200">{children}</tr>,
       th: ({ children }) => (
-        <th className="border border-slate-200 px-2 py-1 text-left font-semibold text-slate-700 whitespace-nowrap">
+        <th className="border border-slate-200 px-2 py-1 text-left font-semibold whitespace-nowrap">
           {children}
         </th>
       ),
       td: ({ children }) => (
-        <td className="border border-slate-200 px-2 py-1 text-slate-700 align-top">{children}</td>
+        <td className="border border-slate-200 px-2 py-1 align-top">{children}</td>
       ),
 
       code: ({ node: _node, className: codeClassName, children }) => {
@@ -405,7 +405,8 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
   return (
     <div
       className={cn(
-        'markdown-block-view markdownBlockPreview max-w-none font-serif text-[16px] font-medium leading-[24px] [font-variant-numeric:lining-nums_tabular-nums] [font-feature-settings:"lnum"_1]',
+        'markdown-block-view markdownBlockPreview max-w-none font-serif text-[16px] font-medium leading-[24px] text-[#222222] [font-variant-numeric:lining-nums_tabular-nums] [font-feature-settings:"lnum"_1]',
+        '[&_p+p]:mt-[24px]',
         alignClass,
         className
       )}

@@ -33,7 +33,7 @@ export const MathBlockContent: React.FC<MathBlockContentProps> = ({
         className
       )}
     >
-      <MathRenderer latex={latex} displayMode={displayMode} className="text-slate-800" />
+      <MathRenderer latex={latex} displayMode={displayMode} className="text-[#222222]" />
     </MathBlockFrame>
   );
 };

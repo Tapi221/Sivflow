@@ -678,6 +678,7 @@ export function Flashcard({
       <div className="relative">
         <CardFrame
           baseWidth={CANONICAL_CARD_WIDTH}
+          contentPaddingPx={0}
           className={cn('premium-paper-depth', !previewMode && 'cursor-pointer', 'card-shell--paper')}
           onClick={handleFlip}
           resizable={false}

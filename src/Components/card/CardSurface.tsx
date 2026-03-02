@@ -68,7 +68,6 @@ export function CardSurface({
         background: "var(--card-surface)",
         paddingLeft: "var(--card-padding-x)",
         paddingRight: "var(--card-padding-x)",
-        paddingBottom: "var(--card-padding-bottom)",
       }}
     >
       {ruled && (
@@ -82,7 +81,7 @@ export function CardSurface({
         />
       )}
 
-      <div className="relative z-10 flex min-h-0 flex-1 flex-col">
+      <div className="relative z-10 flex min-h-0 flex-1 flex-col" style={{ paddingBottom: "var(--card-padding-bottom)" }}>
         {children}
       </div>
 

@@ -385,9 +385,8 @@ export default function StudyMode() {
             />
           ) : (
             <StudyReview
-              currentCard={currentCard}
-              currentIndex={currentIndex}
-              totalCards={studyCards.length}
+              cards={studyCards}
+              sessionCurrentIndex={currentIndex}
               onResult={handleResult}
               onToggleUncertainty={handleToggleUncertainty}
               onToggleBookmark={handleToggleBookmark}

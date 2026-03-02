@@ -53,6 +53,8 @@ const CARD_SHELL_MIN_HEIGHT_SLACK_PX = 8;
 
 interface CardEditorPaneProps {
   selectedCardId: string | null;
+  folderId?: string;
+  autoEdit?: boolean;
   onCardUpdated?: () => void;
   onSelectCardId?: (cardId: string) => void;
 }
@@ -118,7 +120,7 @@ function shouldAutoOpenEditorForCard(card: any): boolean {
   return !hasQuestionContent && !hasAnswerContent;
 }
 
-export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }: CardEditorPaneProps) {
+export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdated, onSelectCardId }: CardEditorPaneProps) {
   const { settings } = useUserSettings();
   const { success: toastSuccess, error: toastError } = useToast();
 
@@ -243,10 +245,10 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
       return;
     }
 
-    // 既存カードは一旦閲覧モードへ。
+    // 既存カードは一旦閲覧モードへ（autoEdit=true なら即編集モードへ）。
     // ★/はてな等の updateCard による参照更新で draft を飛ばさないよう、
     // 「空カード判定による自動編集オープン」は別Effectで “選択直後だけ” 実施する。
-    setIsEditing(false);
+    setIsEditing(!!autoEdit);
     setDraft(null);
     editingCardIdRef.current = null;
     hydratedFromIdRef.current = null;
@@ -392,7 +394,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
           return;
         }
 
-        const created = await createCard(payload);
+        const created = await createCard({ ...payload, folderId: folderId ?? '' });
 
         const newId =
           (typeof created === "object" && created !== null && "id" in created && (created as any).id) ||
@@ -810,7 +812,7 @@ export function CardEditorPane({ selectedCardId, onCardUpdated, onSelectCardId }
   }
 
   return (
-    <div className="h-full p-4 card-editor-right-pane-font">
+    <div className="h-full pl-4 py-4 card-editor-right-pane-font">
       <div className="relative flex h-full overflow-hidden">
         <Button
           type="button"
