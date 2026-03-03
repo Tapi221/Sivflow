@@ -1,5 +1,6 @@
 import { getLocalDb, getLocalDbSync } from './LocalDB';
 import { auditAndRepairTags } from '@/hooks/useTags';
+import { auth } from '@/services/firebase';
 
 type WindowWithLocalDbDevtools = Window & {
   dbDebug?: () => Promise<void>;
@@ -15,6 +16,15 @@ type WindowWithLocalDbDevtools = Window & {
     };
   };
 };
+
+const REPAIR_TAGS_ALLOWLIST = (
+  import.meta.env.VITE_REPAIR_TAGS_ALLOWLIST ??
+  import.meta.env.VITE_REPAIR_TAGS_ALLOWED_UIDS ??
+  ''
+)
+  .split(',')
+  .map((uid) => uid.trim())
+  .filter(Boolean);
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -36,8 +46,23 @@ const toDateOrNow = (value: unknown): Date => {
 };
 
 const getAuthUid = (w: WindowWithLocalDbDevtools): string | undefined => {
-  const uid = w.auth?.currentUser?.uid;
-  return typeof uid === 'string' ? uid : undefined;
+  const firebaseUid = auth.currentUser?.uid;
+  if (typeof firebaseUid === 'string' && firebaseUid.length > 0) {
+    return firebaseUid;
+  }
+
+  const windowUid = w.auth?.currentUser?.uid;
+  return typeof windowUid === 'string' ? windowUid : undefined;
+};
+
+const assertRepairTagsAllowed = (userId: string): void => {
+  if (REPAIR_TAGS_ALLOWLIST.length === 0) {
+    throw new Error('repairTags: forbidden');
+  }
+
+  if (!REPAIR_TAGS_ALLOWLIST.includes(userId)) {
+    throw new Error('repairTags: forbidden');
+  }
 };
 
 export function installLocalDbDevtools(): void {
@@ -48,8 +73,11 @@ export function installLocalDbDevtools(): void {
   w.repairTags = async (userId?: string) => {
     const resolvedUserId = userId ?? getAuthUid(w);
     if (!resolvedUserId) {
-      throw new Error('repairTags: userId が必要です');
+      throw new Error('repairTags: userId is required');
     }
+
+    assertRepairTagsAllowed(resolvedUserId);
+
     const result = await auditAndRepairTags(resolvedUserId);
     console.log('[repairTags] result', result);
     return result;

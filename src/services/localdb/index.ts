@@ -18,7 +18,5 @@ export {
   telemetryOncePerSession,
 } from '../localDBRuntimeState';
 
-// devtools の副作用起動（開発環境のみ）
-if (import.meta.env.DEV) {
-  import('./devtools').then(m => m.installLocalDbDevtools());
-}
+// 本番でも読み込む。実際の機能露出は devtools 側の UID allowlist で制限する。
+import('./devtools').then(m => m.installLocalDbDevtools());

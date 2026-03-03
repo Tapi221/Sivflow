@@ -37,6 +37,7 @@ self.addEventListener('message', (event) => {
   }
 })
 
+self.skipWaiting()
 clientsClaim()
 cleanupOutdatedCaches()
 precacheAndRoute(self.__WB_MANIFEST)

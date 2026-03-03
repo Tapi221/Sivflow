@@ -1,3 +1,10 @@
+// DEV時だけ devtools を有効化（index.ts を経由しない構成でも確実に動く）
+if (import.meta.env.DEV && typeof window !== 'undefined') {
+  import('./devtools')
+    .then((m) => m.installLocalDbDevtools?.())
+    .catch(() => {});
+}
+
 import { Dexie } from 'dexie';
 import { nanoid } from 'nanoid';
 import type {

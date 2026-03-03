@@ -1,3 +1,4 @@
+import '@/services/localdb';
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -129,6 +130,13 @@ window.addEventListener('vite:preloadError' as any, () => {
 
 // Service Workerの登録（本番環境のみ）
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  // Production verification:
+  // - DevTools Console: `typeof window.repairTags`
+  // - DevTools Console: `await window.repairTags()` or `await window.repairTags('<uid>')`
+  // - Application > Service Workers に `waiting` が残る場合:
+  //   1. この起動処理が `SKIP_WAITING` を送る
+  //   2. 反映されない場合は `registration.waiting?.postMessage({ type: 'SKIP_WAITING' })`
+  //   3. その後 `controllerchange` により一度だけ reload される
   const applyWaitingWorker = (registration: ServiceWorkerRegistration) => {
     const waiting = registration.waiting
     if (!waiting) return
