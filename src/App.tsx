@@ -43,7 +43,6 @@ const CardEdit = lazy(() => import('./Pages/CardEdit'));
 const CardView = lazy(() => import('./Pages/CardView'));
 const StudyMode = lazy(() => import('./Pages/StudyMode'));
 const Trash = lazy(() => import('./Pages/Trash'));
-const SyncSettings = lazy(() => import('./Pages/SyncSettings'));
 const ImageDiagnostics = lazy(() => import('./Pages/ImageDiagnostics'));
 const Gallery = lazy(() => import('./Pages/Gallery'));
 const TodayStudy = lazy(() => import('./Pages/TodayStudy'));
@@ -298,15 +297,6 @@ function AppContent() {
     return <LoginPage />;
   }
 
-  // バイパス中かつ URL が /sync-settings のときは、同期設定ページだけ単体表示（テスト用）
-  if (isTestBypass && window.location.pathname === '/sync-settings') {
-    return (
-      <Suspense fallback={<LoadingFallback />}>
-        <SyncSettings />
-      </Suspense>
-    );
-  }
-
   // test-only page for PDF wheel/trackpad scroll E2E checks
   if (PdfScrollTest && isTestBypass && window.location.pathname === '/pdf-scroll-test') {
     return (
@@ -384,15 +374,6 @@ function AppContent() {
           />
 
           <Route path="trash" element={<Trash />} />
-
-          <Route
-            path="sync-settings"
-            element={
-              <Suspense fallback={<LoadingFallback />}>
-                <SyncSettings />
-              </Suspense>
-            }
-          />
 
           <Route
             path="diagnostics"

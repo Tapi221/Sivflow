@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -18,7 +17,6 @@ import {
   Check,
   AlertCircle,
   History,
-  Settings,
   AlertTriangle,
   MoreVertical,
 } from 'lucide-react';
@@ -242,13 +240,6 @@ export function SyncStatusIndicator({
                         競合解決 ({conflictCount}件)
                       </DropdownMenuItem>
                     )}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link to="/sync-settings">
-                        <Settings className="w-4 h-4 mr-2" />
-                        同期設定
-                      </Link>
-                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
