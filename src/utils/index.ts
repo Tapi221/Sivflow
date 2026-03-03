@@ -387,6 +387,7 @@ export const normalizeCard = (raw: unknown) => {
     completedDate: normalizeDate(pick(r.completedDate, r.completed_date)),
 
     tags: toArrayOr(r.tags, []),
+    ...(Array.isArray(r.tagIds) ? { tagIds: r.tagIds.filter((x: unknown): x is string => typeof x === 'string') } : {}),
     reviewCount: toFiniteNumber(pick(r.reviewCount, r.review_count), 0),
     reviewLogs: normalizeReviewLogs(pick(r.reviewLogs, r.review_logs, [])),
 

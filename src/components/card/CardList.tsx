@@ -27,12 +27,20 @@ function CardItem({
     (card.questionAudios?.length > 0 || card.question_audios?.length > 0) ||
     (card.answerAudios?.length > 0 || card.answer_audios?.length > 0);
 
-  const userTags = Array.isArray(card.tags)
-    ? card.tags.map((tag: string) => ({
-        label: tag,
-        color: getTagColor ? getTagColor(tag) : 'bg-slate-100 text-slate-600 border-slate-200',
-      }))
-    : [];
+  const tagIdList: string[] = Array.isArray(card.tagIds) ? card.tagIds : [];
+  const userTags = tagIdList.length > 0
+    ? tagIdList
+        .map((id: string) => ({
+          label: getTagNameById ? (getTagNameById(id) ?? '') : id,
+          color: getTagColor ? getTagColor(id) : 'bg-slate-100 text-slate-600 border-slate-200',
+        }))
+        .filter(t => t.label)
+    : Array.isArray(card.tags)
+      ? card.tags.map((tag: string) => ({
+          label: tag,
+          color: getTagColor ? getTagColor(tag) : 'bg-slate-100 text-slate-600 border-slate-200',
+        }))
+      : [];
 
   const showTitleOutside = Boolean(card.title);
   const headlineText = showTitleOutside

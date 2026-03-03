@@ -29,8 +29,8 @@ import { getAvatarColors, getInitials } from '@/utils/avatarUtils';
 import { useHeaderCompact } from '@/hooks/useHeaderCompact';
 
 import { ThemeManager } from '@/components/common/ThemeManager';
-import { SecurityAlertBanner } from './Components/security/SecurityAlertBanner';
-import { LocalDBStatusBanner } from './Components/security/LocalDBStatusBanner';
+import { SecurityAlertBanner } from './components/security/SecurityAlertBanner';
+import { LocalDBStatusBanner } from './components/security/LocalDBStatusBanner';
 
 // ... (existing imports)
 

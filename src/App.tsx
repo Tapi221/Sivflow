@@ -7,7 +7,7 @@ import { AuthProvider } from './contexts/AuthContext';
 // トースト（画面右上などに出る通知）を配るコンテキスト
 import { ToastProvider } from './contexts/ToastContext';
 // 通知用の Provider（多分リアルタイム通知など）
-import { NotificationProvider } from './Components/notifications/NotificationProvider';
+import { NotificationProvider } from './components/notifications/NotificationProvider';
 // 認証状態を取得するためのカスタムフック
 import { useAuth } from './contexts/AuthContext';
 // 画面の共通レイアウトコンポーネント（ヘッダーやサイドバーなど）
@@ -17,7 +17,7 @@ import { signOut } from 'firebase/auth';
 // 初期化済みの Firebase Auth インスタンス
 import { auth } from './services/firebase';
 // ダッシュボード用のローディングスケルトン
-import { DashboardSkeleton } from './Components/skeletons/DashboardSkeleton';
+import { DashboardSkeleton } from './components/skeletons/DashboardSkeleton';
 // 自動バックアップ関連のサービス
 import { autoBackupService } from './services/AutoBackupService';
 // データ整合性チェックのサービス
@@ -26,7 +26,7 @@ import { sanitizeForLog } from '@/utils/logSanitizer';
 // 同期の進捗などを扱うカスタムフック
 import { useSync } from './hooks/useSync';
 // アカウントロック時に表示する画面
-import { AccountLockedScreen } from './Components/security/AccountLockedScreen';
+import { AccountLockedScreen } from './components/security/AccountLockedScreen';
 // 同期サービスを生成するファクトリ
 import { SyncServiceFactory } from './services/SyncServiceFactory';
 // 機能フラグ（Feature Flag）管理

@@ -87,6 +87,7 @@ export function buildFullTextIndex(
   tags: Tag[],
   folderPathMap: Map<string, string>
 ): FullTextIndex {
+  const tagById = new Map<string, string>(tags.map(t => [t.id, t.name]));
   const items: FullTextItem[] = [];
   
   // カード
@@ -127,7 +128,14 @@ export function buildFullTextIndex(
       path,
       searchableTexts,
       data: card,
-      tags: card.tags,
+      tags: (() => {
+        const ids: string[] = Array.isArray(card.tagIds) ? (card.tagIds as string[]) : [];
+        if (ids.length > 0) {
+          const names = ids.map(id => tagById.get(id) ?? '').filter(n => n);
+          if (names.length > 0) return names;
+        }
+        return Array.isArray(card.tags) ? (card.tags as string[]) : [];
+      })(),
     });
   }
   

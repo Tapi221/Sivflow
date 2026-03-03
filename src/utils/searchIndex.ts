@@ -8,6 +8,7 @@ import type { Folder } from '../types';
 
 // タグの型定義（useTags.tsと同じ）
 export interface Tag {
+  id?: string;
   name: string;
   color: string;
   userId: string;

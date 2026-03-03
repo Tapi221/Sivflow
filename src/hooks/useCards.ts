@@ -191,6 +191,7 @@ export function useCards(folderId?: string) {
       createdAt: now,
       updatedAt: now,
       tags: cardData.tags || [],
+      ...(Array.isArray(cardData.tagIds) ? { tagIds: cardData.tagIds } : {}),
       reviewLogs: normalizedReviewLogs,
     };
 

@@ -11,7 +11,7 @@ import { useFolders } from '@/hooks/useFolders';
 import { useDocuments } from '@/hooks/useDocuments';
 import { createPageUrl } from '@/utils';
 import { useUserSettings } from '@/hooks/useUserSettings';
-import { useTags } from '@/hooks/useTags';
+import { useTags, resolveCardTagNames } from '@/hooks/useTags';
 import { TagBadge } from '@/components/tag/TagBadge';
 import type { Card, DocumentItem, SelectedExplorerItem } from '@/types';
 import { useCards } from '@/hooks/useCards';
@@ -72,7 +72,7 @@ function TreeViewLayout({
   const { createFolder, updateFolder, deleteFolder } = useFolders();
   const { createCard, updateCard, deleteCard, moveCardToFolder, reorderCards } = useCards();
   const { updateDocument } = useDocuments();
-  const { getTagColor } = useTags();
+  const { getTagColor, tagById } = useTags();
 
   const {
     explorerTab,
@@ -303,10 +303,12 @@ function TreeViewLayout({
   );
 
   const allTags = useMemo(() => {
-    const tags = new Set<string>();
-    cards.forEach((c) => c.tags?.forEach((t: string) => tags.add(t)));
-    return Array.from(tags).sort();
-  }, [cards]);
+    const tagNames = new Set<string>();
+    cards.forEach((c) => {
+      resolveCardTagNames(c.tagIds, c.tags, tagById).forEach(t => tagNames.add(t));
+    });
+    return Array.from(tagNames).sort();
+  }, [cards, tagById]);
 
   const handleCreateRootFolder = useCallback(async () => {
     try {
@@ -335,12 +337,13 @@ function TreeViewLayout({
 
     const filtered = cards.filter((card) => {
       if (tagFilter.length > 0) {
-        if (!card.tags || card.tags.length === 0) return false;
-        const cardTags = new Set(card.tags);
+        const resolvedNames = resolveCardTagNames(card.tagIds, card.tags, tagById);
+        if (resolvedNames.length === 0) return false;
+        const cardTagSet = new Set(resolvedNames);
         const tagMatched =
           tagMatchMode === 'any'
-            ? tagFilter.some((t) => cardTags.has(t))
-            : tagFilter.every((t) => cardTags.has(t));
+            ? tagFilter.some((t) => cardTagSet.has(t))
+            : tagFilter.every((t) => cardTagSet.has(t));
         if (!tagMatched) return false;
       }
 
@@ -367,6 +370,7 @@ function TreeViewLayout({
     uncertaintyFilter,
     bookmarkedFilter,
     draftFilter,
+    tagById,
   ]);
 
   const matchModeLabel = useMemo(() => {

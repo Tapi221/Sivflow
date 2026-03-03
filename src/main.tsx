@@ -6,7 +6,7 @@ import './styles/code-theme.css'
 import './styles/options.css'
 import 'katex/dist/katex.min.css'
 import App from './App'
-import { ErrorBoundary } from './Components/common/ErrorBoundary'
+import { ErrorBoundary } from './components/common/ErrorBoundary'
 import { startTabPresence } from '@/utils/tabPresence'
 
 // Manifest検証（デバッグ用・開発環境のみ）

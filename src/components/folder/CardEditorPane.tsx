@@ -32,6 +32,7 @@ import { Input } from "@/components/ui/input";
 import { useCards } from "@/hooks/useCards";
 import { useUserSettings } from "@/hooks/useUserSettings";
 import { useToast } from "@/contexts/ToastContext";
+import { useTags, resolveCardTagNames } from "@/hooks/useTags";
 import { cn } from "@/lib/utils";
 
 import type { CardBlock, ReferenceBlockData } from "@/types";
@@ -112,7 +113,7 @@ function isBlockEmpty(block: CardBlock): boolean {
 function shouldAutoOpenEditorForCard(card: unknown): boolean {
   if (!card) return false;
   if (String(card?.title ?? "").trim().length > 0) return false;
-  if ((card?.tags ?? []).length > 0) return false;
+  if ((card?.tagIds ?? card?.tags ?? []).length > 0) return false;
   const questionBlocks = (card?.questionBlocks ?? []) as CardBlock[];
   const answerBlocks = (card?.answerBlocks ?? []) as CardBlock[];
   const hasQuestionContent = questionBlocks.some((b) => !isBlockEmpty(b));
@@ -123,6 +124,7 @@ function shouldAutoOpenEditorForCard(card: unknown): boolean {
 export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdated, onSelectCardId }: CardEditorPaneProps) {
   const { settings } = useUserSettings();
   const { success: toastSuccess, error: toastError } = useToast();
+  const { tagById, addTag } = useTags();
 
   // ★重要：createCard が無い場合はここだけあなたの実装名に合わせて変更
   const { cards, updateCard, createCard } = useCards() as any;
@@ -205,13 +207,14 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
 
     return {
       title: card?.title ?? "",
-      tags: card?.tags ?? [],
+      // tagIds 優先、fallback: card.tags（移行期間互換）
+      tags: resolveCardTagNames(card?.tagIds, card?.tags, tagById),
       isDraft: card?.isDraft ?? false,
       questionBlocks: sortBlocksByOrderIndex((card?.questionBlocks ?? []) as CardBlock[]),
       answerBlocks: sortBlocksByOrderIndex((card?.answerBlocks ?? []) as CardBlock[]),
       layoutRows: normalizeLayoutRows(card?.layoutRows ?? card?.layout_rows ?? migratedRows),
     };
-  }, []);
+  }, [tagById]);
 
   useEffect(() => {
     const baseHeight = layoutRowsToCardHeightPx(DEFAULT_LAYOUT_ROWS);
@@ -376,9 +379,13 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
         return normalizeOrderIndex(next);
       };
 
+      // draft.tags はタグ名の配列。tags_v3 に登録しIDを収集して tagIds で保存。
+      const resolvedTags = await Promise.all(draft.tags.map(name => addTag(name)));
+      const tagIds = resolvedTags.map(t => t.id);
+
       const payload = {
         title: draft.title,
-        tags: draft.tags,
+        tagIds,
         isDraft: draft.isDraft,
         questionBlocks: sanitizeBlocksForSave(draft.questionBlocks),
         answerBlocks: sanitizeBlocksForSave(draft.answerBlocks),
@@ -433,7 +440,9 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
       return;
     }
     if (!selectedCard) return;
-    await updateCard(selectedCard.id, { tags: nextTags });
+    // 名前 → ID変換してtagIdsのみ更新
+    const resolved = await Promise.all(nextTags.map(name => addTag(name)));
+    await updateCard(selectedCard.id, { tagIds: resolved.map(t => t.id) });
     onCardUpdated?.();
   };
 

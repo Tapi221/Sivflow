@@ -525,4 +525,34 @@ export const defineSchema = (db: LocalDB): void => {
 
     console.log(`[Migration v20] tags_v3: ${toAdd.length} added, cards patched: ${cardPatches.length}`);
   });
+
+  // Version 21: cards.tagIds に multiEntry index を追加（usage count 高速化）
+  db.version(21).stores({
+    folders: 'id, userId, parentFolderId, updatedAt, cloudSyncEnabled, isDeleted, [userId+updatedAt], [userId+isDeleted]',
+    cards: 'id, userId, folderId, updatedAt, nextReviewDate, isDeleted, difficulty, reviewCount, [userId+updatedAt], [userId+isDeleted], [userId+nextReviewDate], *tagIds',
+    documents: 'id, userId, folderId, updatedAt, isDeleted, [userId+updatedAt], [userId+folderId]',
+    users: 'id, userId, updatedAt',
+    userSettings: 'id, userId, updatedAt, isDeleted, [userId+updatedAt]',
+    userStats: 'id, userId, updatedAt, isDeleted, [userId+updatedAt]',
+    syncMetadata: 'userId, deviceId',
+    levelHistories: 'id, userId, cardId, changedAt',
+    deviceMeta: 'deviceId, userId',
+    syncErrors: 'id, occurredAt, phase, retryable',
+    syncHistory: 'id, finishedAt',
+    syncSettings: 'id',
+    syncQueue: 'id, targetId, status, priority, [status+priority], [targetId+status], idempotencyKey, &migrationKey',
+    conflicts: 'id, entityId',
+    tags: '[rootFolderId+name], rootFolderId, userId, updatedAt',
+    tags_v2: '[userId+name], userId, updatedAt',
+    tags_v3: 'id, userId, [userId+nameLower], updatedAt',
+    studyLogs: 'id, userId, cardId, studiedAt',
+  }).upgrade(async tx => {
+    const cards = tx.table('cards');
+    await cards.toCollection().modify((raw: unknown) => {
+      const card = raw as { tagIds?: unknown };
+      if (card.tagIds === undefined) {
+        card.tagIds = [];
+      }
+    });
+  });
 };

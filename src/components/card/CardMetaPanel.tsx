@@ -9,6 +9,7 @@ import { TagInput } from "@/components/ui/tag-input";
 import type { Card, ReviewLog } from "@/types";
 import { NUMERIC_TYPO, UI_TYPO } from "@/styles/typography";
 import { calculateResistanceScore } from "@/utils/reviewMetrics";
+import { useTags, resolveCardTagNames } from "@/hooks/useTags";
 
 type Period = "7d" | "30d" | "all";
 
@@ -67,6 +68,7 @@ export function CardMetaPanel({
   const [period, setPeriod] = useState<Period>("30d");
   const [titleInput, setTitleInput] = useState(card?.title ?? "");
   const [tagManagerOpen, setTagManagerOpen] = useState(false);
+  const { tagById } = useTags();
 
   useEffect(() => {
     setTitleInput(card?.title ?? "");
@@ -133,7 +135,8 @@ export function CardMetaPanel({
       .map((d) => d.reviewIndex);
   }, [chartData]);
 
-  const tags = card?.tags ?? [];
+  // tagIds 優先、fallback: card.tags（移行期間互換）
+  const tags = resolveCardTagNames(card?.tagIds, card?.tags, tagById);
 
   const commitTitle = () => {
     const next = titleInput.trim();

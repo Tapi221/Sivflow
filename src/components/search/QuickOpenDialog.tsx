@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { useCards } from '@/hooks/useCards';
 import { useFolders } from '@/hooks/useFolders';
-import { useTags } from '@/hooks/useTags';
+import { useTags, resolveCardTagNames } from '@/hooks/useTags';
 import { useCommandPalette } from '@/hooks/useCommandPalette';
 import { buildQuickOpenIndex, searchQuickOpen, type QuickOpenItem } from '@/utils/searchIndex';
 import { highlightMatches } from '@/utils/highlightText';
@@ -37,18 +37,18 @@ export function QuickOpenDialog(_props: QuickOpenDialogProps) {
   // データ取得
   const { cards } = useCards();
   const { folders } = useFolders();
-  const { tags } = useTags();
+  const { tags, tagById } = useTags();
   
-  // タグごとのカード数を計算
+  // タグごとのカード数を計算（tagIds 優先、fallback: card.tags）
   const cardTagCounts = useMemo(() => {
     const counts = new Map<string, number>();
     for (const card of cards || []) {
-      for (const tag of card.tags || []) {
-        counts.set(tag, (counts.get(tag) || 0) + 1);
+      for (const name of resolveCardTagNames(card.tagIds, card.tags, tagById)) {
+        counts.set(name, (counts.get(name) || 0) + 1);
       }
     }
     return counts;
-  }, [cards]);
+  }, [cards, tagById]);
   
   // インデックス構築
   const index = useMemo(() => {

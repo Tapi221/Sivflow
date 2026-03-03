@@ -4,7 +4,8 @@
       "Bash(npx vitest run tests/unit/pdfZoomUtils.test.ts)",
       "Bash(node -e \"const r = require\\(''react''\\); console.log\\(''act:'', typeof r.act, Object.keys\\(r\\).filter\\(k => k.includes\\(''act''\\)\\)\\)\")",
       "Bash(npx tsc --noEmit --pretty false)",
-      "Bash(npx tsc --noEmit)"
+      "Bash(npx tsc --noEmit)",
+      "Bash(python3 -c \":*)"
     ]
   }
 }

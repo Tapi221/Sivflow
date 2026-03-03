@@ -11,6 +11,7 @@ export type Tag = TagV3Record;
 
 // cards テーブルの型がここでは分からないので、必要最小限だけ扱う
 type CardTagFields = {
+  userId?: string;
   tags?: unknown;
   tagIds?: unknown;
   updatedAt?: Date;
@@ -44,6 +45,23 @@ const asStringArray = (v: unknown): string[] => {
   if (!Array.isArray(v)) return [];
   return v.filter((x): x is string => typeof x === 'string');
 };
+
+/**
+ * tagIds → タグ名に解決。tagIds が空なら legacy card.tags にフォールバック。
+ * pure utility: フックの外でも呼べる。
+ */
+export function resolveCardTagNames(
+  tagIds: unknown,
+  legacyTags: unknown,
+  tagById: ReadonlyMap<string, Pick<TagV3Record, 'name'>>,
+): string[] {
+  const ids = asStringArray(tagIds);
+  if (ids.length > 0) {
+    const names = ids.map(id => tagById.get(id)?.name ?? '').filter(n => n);
+    if (names.length > 0) return names;
+  }
+  return asStringArray(legacyTags);
+}
 
 /**
  * useTags: ユーザー単位で共通管理されるタグを操作するフック
@@ -103,8 +121,35 @@ export function useTags() {
 
     // nameOrId が id なら直接、そうでなければ名前解決
     const tagId = tagById.has(nameOrId) ? nameOrId : (getTagIdByName(nameOrId) ?? null);
-    const tagName = nameOrId;
+    const tagName = tagId ? (tagById.get(tagId)?.name ?? nameOrId) : nameOrId;
+    let indexedCount = 0;
 
+    if (tagId) {
+      // multiEntry index (*tagIds) を使った高速カウント（userId でフィルタ）
+      try {
+        indexedCount = await (db.cards as unknown as { where: (idx: string) => { equals: (v: string) => { and: (fn: (c: unknown) => boolean) => { count: () => Promise<number> } } } })
+          .where('tagIds')
+          .equals(tagId)
+          .and((c: unknown) => (c as CardTagFields).userId === currentUser.uid)
+          .count();
+      } catch {
+        indexedCount = -1;
+      }
+    }
+
+    if (indexedCount >= 0) {
+      let legacyOnlyCount = 0;
+      await db.cards.where('userId').equals(currentUser.uid).each((raw: unknown) => {
+        const card = raw as CardTagFields;
+        const idTags = asStringArray(card.tagIds);
+        if (idTags.length > 0) return;
+        const nameTags = asStringArray(card.tags);
+        if (nameTags.includes(tagName)) legacyOnlyCount += 1;
+      });
+      return indexedCount + legacyOnlyCount;
+    }
+
+    // フォールバック: 全件走査（legacy card.tags も考慮）
     let count = 0;
     await db.cards.where('userId').equals(currentUser.uid).each((raw: unknown) => {
       const card = raw as CardTagFields;
@@ -164,6 +209,83 @@ export function useTags() {
     };
     await db.tags_v3.add(newTag);
     return newTag;
+  };
+
+  /**
+   * タグ名変更。nameLower が既存の別タグと重複する場合はエラーを返す（マージは行わない）。
+   * カード更新は不要（tagIds参照のため）。
+   */
+  const renameTag = async (
+    tagId: string,
+    newName: string,
+  ): Promise<void | { error: string }> => {
+    if (!currentUser) return { error: 'ログイン状態を確認してください。' };
+    const tag = tagById.get(tagId);
+    if (!tag) return { error: '対象のタグが見つかりません。' };
+
+    const trimmedName = newName.trim();
+    if (!trimmedName) return { error: 'タグ名を入力してください。' };
+    const newNameLower = trimmedName.toLowerCase();
+    const db = await getLocalDb();
+
+    if (newNameLower !== tag.nameLower) {
+      const existing = await db.tags_v3
+        .where('[userId+nameLower]')
+        .equals([currentUser.uid, newNameLower])
+        .first();
+      if (existing && existing.id !== tagId) return { error: `「${trimmedName}」はすでに存在します。` };
+    }
+
+    await db.tags_v3.update(tagId, { name: trimmedName, nameLower: newNameLower, updatedAt: new Date() });
+  };
+
+  /**
+   * タグマージ: fromTagId を intoTagId に統合。
+   * cards.tagIds を走査し fromTagId → intoTagId に置換（modify で全件ロード回避）。
+   * fromTagId を tags_v3 から削除。重複 tagIds は Set で排除。
+   */
+  const mergeTags = async (
+    fromTagId: string,
+    intoTagId: string,
+  ): Promise<{ updatedCards: number } | { error: string }> => {
+    if (!currentUser) return { error: 'ログイン状態を確認してください。' };
+    if (fromTagId === intoTagId) return { error: '統合元と統合先が同じです。' };
+    const db = await getLocalDb();
+    const fromTag = tagById.get(fromTagId);
+    const intoTag = tagById.get(intoTagId);
+    if (!fromTag || !intoTag) return { error: '統合対象のタグが見つかりません。' };
+
+    let updatedCards = 0;
+    const cardsToUpdate: Array<{ id: string; tagIds: string[] }> = [];
+
+    await db.transaction('rw', db.tags_v3, db.cards, async () => {
+      await db.cards.where('userId').equals(currentUser.uid).each((raw: unknown) => {
+        const card = raw as { id?: string; tagIds?: unknown };
+        if (typeof card.id !== 'string') return;
+        const ids = asStringArray(card.tagIds);
+        if (!ids.includes(fromTagId)) return;
+        cardsToUpdate.push({
+          id: card.id,
+          tagIds: Array.from(new Set(ids.map(id => (id === fromTagId ? intoTagId : id)))),
+        });
+      });
+
+      const now = new Date();
+      const CHUNK = 100;
+      for (let i = 0; i < cardsToUpdate.length; i += CHUNK) {
+        const chunk = cardsToUpdate.slice(i, i + CHUNK);
+        await db.cards.bulkUpdate(
+          chunk.map(card => ({
+            key: card.id,
+            changes: { tagIds: card.tagIds, updatedAt: now },
+          }))
+        );
+      }
+      updatedCards = cardsToUpdate.length;
+      await db.tags_v3.delete(fromTagId);
+    });
+
+    return { updatedCards };
   };
 
   const updateTagColor = async (nameOrId: string, color: string): Promise<void> => {
@@ -331,9 +453,12 @@ export function useTags() {
 
   return {
     tags,
+    tagById,
     availableColors: DEFAULT_COLORS,
     getTagColor,
     addTag,
+    renameTag,
+    mergeTags,
     updateTagColor,
     deleteTag,
     getTagUsageCount,
