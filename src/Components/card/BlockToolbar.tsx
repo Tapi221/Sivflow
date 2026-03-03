@@ -22,7 +22,7 @@ import {
 interface BlockToolbarProps {
   label: string;                              // ツールバー左端に表示するラベル（例: "表面" / "裏面"）
   onAddBlock: (type: CardBlock['type']) => void; // ブロック追加時に呼ばれるコールバック
-  settings?: any;                             // ユーザー設定（ブロックの表示順・可視状態など）
+  settings?: unknown;                             // ユーザー設定（ブロックの表示順・可視状態など）
   hiddenBlockTypes?: CardBlock['type'][];     // 強制的に非表示にするブロック種別リスト
   className?: string;
 }
@@ -56,7 +56,7 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
   const blockSettings: BlockConfig[] =
     (settings?.editorBlockSettings && settings.editorBlockSettings.length > 0)
       ? settings.editorBlockSettings
-          .map((x: any) => ({
+          .map((x: unknown) => ({
             type: x.type as CardBlock['type'],
             label: x.label ?? String(x.type),
             icon: x.icon,

@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { getLocalDb, getLocalDbSync } from './LocalDB';
 
 type WindowWithLocalDbDevtools = Window & {
@@ -154,4 +153,3 @@ export function installLocalDbDevtools(): void {
     rawDB: async () => getLocalDb(),
   };
 }
-/* eslint-enable no-console */

@@ -22,7 +22,7 @@ export const storage = getStorage(app);
 export const functions = getFunctions(app, 'asia-northeast1');
 
 // Firestore の初期化
-let _firestoreDb: any = null;
+let _firestoreDb: unknown = null;
 
 try {
   // まずは推奨される方法でキャッシュ設定付き初期化を試行
@@ -30,13 +30,13 @@ try {
     localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
   });
   console.log('[Firebase] Firestore initialized with persistent cache');
-} catch (e: any) {
+} catch (e: unknown) {
   console.warn('[Firebase] initializeFirestore failed, falling back to getFirestore:', e.message);
   // すでに初期化されている場合などは getFirestore で既存インスタンスを取得
   try {
     _firestoreDb = getFirestore(app);
     console.log('[Firebase] Fallback to getFirestore() successful');
-  } catch (fallbackErr: any) {
+  } catch (fallbackErr: unknown) {
     console.error('[Firebase] All Firestore initialization attempts failed:', fallbackErr);
   }
 }

@@ -16,7 +16,7 @@ export interface LogContext {
   syncContext?: SyncContextSource;
   batteryLevel?: number;
   isBackground?: boolean;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // System SLIs (Technical Health)
@@ -74,7 +74,7 @@ export interface SecurityMetadata {
   userAgent?: string;
   path?: string;      // アクセスしようとしたリソース
   reason?: string;    // エラー詳細
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface SecurityLog {
@@ -91,5 +91,5 @@ export interface SecurityLog {
   description: string; // ログ詳細（日本語可）
   metadata?: SecurityMetadata;
   
-  occurredAt: any; // Timestamp or Date
+  occurredAt: unknown; // Timestamp or Date
 }

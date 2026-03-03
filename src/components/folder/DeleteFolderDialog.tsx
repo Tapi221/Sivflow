@@ -14,10 +14,10 @@ import { AlertTriangle } from 'lucide-react';
 interface DeleteFolderDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  folder: any; // Using any for now as folder type might be complex or imported from elsewhere. Ideally should use Folder type.
+  folder: unknown; // Using any for now as folder type might be complex or imported from elsewhere. Ideally should use Folder type.
   cardCount: number;
   subfolderCount: number;
-  onConfirm: (folder: any) => Promise<void>;
+  onConfirm: (folder: unknown) => Promise<void>;
 }
 
 export default function DeleteFolderDialog({ 

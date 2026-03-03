@@ -154,7 +154,7 @@ export class ImageSyncOrchestrator {
     const images = card[imageField] || [];
     images[imageIndex] = syncedImage;
 
-    const updateData: any = {
+    const updateData: unknown = {
       [imageField]: images,
       updatedAt: new Date()
     };
@@ -187,7 +187,7 @@ export class ImageSyncOrchestrator {
         lastAttempt: new Date()
       };
 
-      const updateData: any = {
+      const updateData: unknown = {
         [imageField]: images,
         updatedAt: new Date()
       };

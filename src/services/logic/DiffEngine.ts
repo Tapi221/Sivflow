@@ -56,10 +56,10 @@ export class DiffEngine implements IDiffEngine {
    * @param remote リモートのデータ
    * @returns 差分オブジェクト（変更がない場合はnull）
    */
-  calculateDiff(local: any, remote: any): any | null {
+  calculateDiff(local: unknown, remote: unknown): unknown | null {
     if (!local || !remote) return null;
     
-    const diff: any = {};
+    const diff: unknown = {};
     let hasChanges = false;
     
     // オブジェクトのキーを走査
@@ -89,8 +89,8 @@ export class DiffEngine implements IDiffEngine {
    * client_wins: クライアントの値を優先
    * Manualはここでは扱わず、呼び出し元で処理することを想定
    */
-  merge(local: any, remote: any, strategy: 'server_wins' | 'client_wins' | 'manual' = 'server_wins'): {
-    merged: any;
+  merge(local: unknown, remote: unknown, strategy: 'server_wins' | 'client_wins' | 'manual' = 'server_wins'): {
+    merged: unknown;
     conflict: boolean;
   } {
     // データがない場合の処理
@@ -137,7 +137,7 @@ export class DiffEngine implements IDiffEngine {
    * 整合性チェック
    * 単純なフィールド一致率や必須フィールドの存在確認
    */
-  validateConsistency(local: any, remote: any): boolean {
+  validateConsistency(local: unknown, remote: unknown): boolean {
     if (!local || !remote) return false;
     
     // IDの一致確認
@@ -157,7 +157,7 @@ export class DiffEngine implements IDiffEngine {
    * @param allFolders 全フォルダのリスト
    * @returns 循環が発生する場合はtrue
    */
-  detectCycle(targetId: string, newParentId: string | null, allFolders: any[]): boolean {
+  detectCycle(targetId: string, newParentId: string | null, allFolders: unknown[]): boolean {
     if (!newParentId) return false;
     if (targetId === newParentId) return true;
 

@@ -60,7 +60,7 @@ export class BackupService {
         bytes = 0;
       };
 
-      const addSet = async (ref: any, data: any): Promise<void> => {
+      const addSet = async (ref: unknown, data: unknown): Promise<void> => {
         const payloadBytes = estimateBytes(data) + 512;
         const wouldExceed = ops > 0 && (ops + 1 > MAX_OPS || bytes + payloadBytes > MAX_BYTES);
         if (wouldExceed) {

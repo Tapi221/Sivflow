@@ -142,7 +142,7 @@ export const useReliableFileUpload = (): UseReliableFileUploadReturn => {
     
     try {
         validateFile(file, context);
-    } catch (validationError: any) {
+    } catch (validationError: unknown) {
         setError(validationError.message);
         setUploadStatus('failed');
         throw validationError;
@@ -218,7 +218,7 @@ export const useReliableFileUpload = (): UseReliableFileUploadReturn => {
             }
         };
 
-    } catch (error: any) {
+    } catch (error: unknown) {
        console.error('[ReliableUpload] Error:', error);
        setError(error.message);
        setUploadStatus('failed');

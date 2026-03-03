@@ -146,7 +146,7 @@ export function ConflictResolutionDialog({
     }
   };
 
-  const formatValue = (value: any): string => {
+  const formatValue = (value: unknown): string => {
     if (value === null || value === undefined) {
       return '(空)';
     }

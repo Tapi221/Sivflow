@@ -8,7 +8,7 @@ export interface FolderStats {
   lastReviewedAt: Date | null;
 }
 
-const toDate = (value: any): Date | null => {
+const toDate = (value: unknown): Date | null => {
   if (value === null || value === undefined) return null;
   if (typeof value?.toDate === 'function') {
     const d = value.toDate();

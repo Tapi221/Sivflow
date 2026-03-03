@@ -13,7 +13,7 @@ export default function DataRescuePanel() {
   const { currentUser } = useAuth();
   const { success, error } = useToast();
   
-  const [databases, setDatabases] = useState<(IDBDatabaseInfo & { counts?: any, tableDetails?: any, isCurrent?: boolean })[]>([]);
+  const [databases, setDatabases] = useState<(IDBDatabaseInfo & { counts?: unknown, tableDetails?: unknown, isCurrent?: boolean })[]>([]);
   const [loading, setLoading] = useState(false);
   const [importing, setImporting] = useState<string | null>(null);
   const [progressMsg, setProgressMsg] = useState<string>('');
@@ -39,7 +39,7 @@ export default function DataRescuePanel() {
         const db = await getLocalDb();
         const currentDbName = db.name;
         
-        const enriched: any[] = [];
+        const enriched: unknown[] = [];
         console.log(`[Rescue] Scanning ${dbs.length} databases...`);
 
         for (let i = 0; i < dbs.length; i++) {
@@ -64,7 +64,7 @@ export default function DataRescuePanel() {
                     new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 3000))
                 ]);
 
-                const tableDetails: any = {};
+                const tableDetails: unknown = {};
                 for (const table of tempDb.tables) {
                     try {
                         const count = await table.count();
@@ -72,11 +72,11 @@ export default function DataRescuePanel() {
                     } catch (e) {}
                 }
 
-                const counts: any = {
+                const counts: unknown = {
                     folders: tableDetails['folders'] || tableDetails['folder'] || tableDetails['folder_list'] || 0,
                     cards: tableDetails['cards'] || tableDetails['card'] || tableDetails['flashcards'] || tableDetails['flash_cards'] || 0,
                     logs: tableDetails['studyLogs'] || tableDetails['study_logs'] || tableDetails['learning_history'] || tableDetails['history'] || 0,
-                    total: Object.values(tableDetails).reduce((a: any, b: any) => a + b, 0)
+                    total: Object.values(tableDetails).reduce((a: unknown, b: unknown) => a + b, 0)
                 };
 
                 tempDb.close();
@@ -90,7 +90,7 @@ export default function DataRescuePanel() {
                         isCurrent: d.name === currentDbName 
                     });
                 }
-            } catch (e: any) {
+            } catch (e: unknown) {
                 console.warn(`[Rescue] Skipping ${d.name} due to scan error/timeout:`, e.message);
             }
         }
@@ -105,7 +105,7 @@ export default function DataRescuePanel() {
 
         setDatabases(enriched);
         setScanResult(`スキャン完了 (${enriched.length}個のバックアップが見つかりました)`);
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error('Failed to list databases', e);
       setScanResult(`スキャン失敗: ${e.message}`);
     } finally {
@@ -140,7 +140,7 @@ export default function DataRescuePanel() {
       
       success(`復元が完了しました。反映には【再読み込み】が必要です。`);
       setTimeout(() => window.location.reload(), 1500);
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error(e);
       addLog(`エラー: ${e.message}`);
       error(`復元失敗: ${e.message}`);
@@ -288,7 +288,7 @@ export default function DataRescuePanel() {
                                 const result = await userDb.repairDataIntegrity(currentUser.uid, setProgressMsg);
                                 success(`修復完了: ${result.folders}個のフォルダ、${result.cards}件のカードを整理しました。`);
                                 window.location.reload();
-                            } catch (err: any) {
+                            } catch (err: unknown) {
                                 error(`エラー: ${err.message}`);
                             } finally {
                                 setLoading(false);
@@ -323,7 +323,7 @@ export default function DataRescuePanel() {
                             try {
                                 await LocalDB.fullOriginForensicAudit((msg) => console.log(msg));
                                 alert("完了しました。F12コンソールを確認してください。");
-                            } catch (err: any) {
+                            } catch (err: unknown) {
                                 alert(err.message);
                             }
                         }}
@@ -348,7 +348,7 @@ export default function DataRescuePanel() {
   );
 }
 
-function HistoryIcon(props: any) {
+function HistoryIcon(props: unknown) {
     return (
       <svg
         {...props}

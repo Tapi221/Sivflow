@@ -84,6 +84,6 @@ test.describe('Sync UI Verification', () => {
  */
 declare global {
     interface Window {
-        forceSyncUI: (status: any, conflict: any) => void;
+        forceSyncUI: (status: unknown, conflict: unknown) => void;
     }
 }

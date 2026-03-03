@@ -12,7 +12,7 @@ type Params = {
 
 export function useStudyCards({ folderId, allCards, folders, foldersLoading, settings }: Params) {
   const studyCards = useMemo(() => {
-    const toDate = (value: any): Date | null => {
+    const toDate = (value: unknown): Date | null => {
       if (!value) return null;
       if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value;
       if (typeof value?.toDate === 'function') {

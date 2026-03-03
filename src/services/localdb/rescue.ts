@@ -1,29 +1,32 @@
 import { Dexie } from 'dexie';
 import type { LocalDB } from './LocalDB';
+import type { Card } from '../../types';
 import { denormalizeCardForStorage } from './transforms';
 import { hasBlobUrlDeep, scrubBlobUrlsDeep } from './blobUrl';
 import { telemetryOncePerSession } from '../localDBRuntimeState';
 import { getOrCreateDeviceId, getDeviceName } from '../../utils/device';
 
+type LocalDBWithTags = LocalDB & { tags: { bulkPut(items: unknown[]): Promise<unknown> } };
+
 // ─── Firestore document flattening (private helpers) ───────────────────────
 
-function parseFields(fields: any): any {
-  const result: any = {};
+function parseFields(fields: unknown): unknown {
+  const result: unknown = {};
   for (const [key, field] of Object.entries(fields)) {
-    const f = field as any;
+    const f = field as Record<string, unknown>;
     if (f.stringValue !== undefined) result[key] = f.stringValue;
     else if (f.booleanValue !== undefined) result[key] = f.booleanValue;
     else if (f.integerValue !== undefined) result[key] = Number(f.integerValue);
     else if (f.doubleValue !== undefined) result[key] = Number(f.doubleValue);
     else if (f.timestampValue !== undefined) {
-        result[key] = f.timestampValue instanceof Date ? f.timestampValue : new Date(f.timestampValue);
+        result[key] = f.timestampValue instanceof Date ? f.timestampValue : new Date(f.timestampValue as string | number);
     }
     else if (f.mapValue !== undefined) result[key] = flattenFirestoreDocument({ value: f });
   }
   return result;
 }
 
-function flattenFirestoreDocument(data: any): any {
+function flattenFirestoreDocument(data: unknown): unknown {
   if (!data) return null;
   if (data.value?.mapValue?.fields) return parseFields(data.value.mapValue.fields);
   if (data.fields) return parseFields(data.fields);
@@ -35,8 +38,8 @@ function flattenFirestoreDocument(data: any): any {
 
 async function finalizeRawImport(
   db: LocalDB,
-  folders: any[],
-  cards: any[],
+  folders: unknown[],
+  cards: unknown[],
   userId: string,
   onProgress?: (m: string) => void
 ): Promise<{ folders: number; cards: number; firstCardKeys: string[] }> {
@@ -45,10 +48,10 @@ async function finalizeRawImport(
 
   if (folders.length > 0) await db.folders.bulkPut(folders);
   if (cards.length > 0) {
-    const sanitizedCards = cards.map((card) => {
+    const sanitizedCards = (cards.map((card) => {
       const payload = denormalizeCardForStorage(card);
-      return hasBlobUrlDeep(payload) ? (scrubBlobUrlsDeep(payload) as any) : payload;
-    });
+      return hasBlobUrlDeep(payload) ? scrubBlobUrlsDeep(payload) : payload;
+    })) as Card[];
     await db.cards.bulkPut(sanitizedCards);
   }
 
@@ -84,9 +87,8 @@ export async function extractFromFirestoreSDK(
   let nativeDb: IDBDatabase | null = null;
 
   return new Promise((resolve, reject) => {
-    const rescueTime = new Date();
-    const recoveredFolders: any[] = [];
-    const recoveredCards: any[] = [];
+    const recoveredFolders: unknown[] = [];
+    const recoveredCards: unknown[] = [];
 
     // Native Open without version (doesn't trigger upgrade/block)
     const request = indexedDB.open(sourceDbName);
@@ -113,7 +115,7 @@ export async function extractFromFirestoreSDK(
          const targetTable = tableNames.find(n => n.startsWith('remoteDocuments'));
          if (!targetTable) {
            onProgress?.('対象テーブルが見つかりません (Native)');
-           try { nativeDb?.close(); } catch {}
+           try { nativeDb?.close(); } catch { /* ignore close errors */ }
            return resolve({ cards: 0, folders: 0, firstCardKeys: [] });
          }
 
@@ -124,12 +126,9 @@ export async function extractFromFirestoreSDK(
          const store = transaction.objectStore(activeTable);
          const cursorRequest = store.openCursor();
 
-         let totalProcessed = 0;
-
-         cursorRequest.onsuccess = (e: any) => {
-           const cursor = e.target.result;
+         cursorRequest.onsuccess = (e: Event) => {
+           const cursor = (e.target as IDBRequest<IDBCursorWithValue | null>).result;
            if (cursor) {
-             totalProcessed++;
              const record = cursor.value;
 
              // Safety Block (V25 - Orphan Recovery)
@@ -169,7 +168,7 @@ export async function extractFromFirestoreSDK(
                    data = { createdAt: new Date() };
                  }
 
-                 const item: any = { ...data };
+                 const item: unknown = { ...data };
                  item.id = id;
                  item.userId = currentUserId;
                  item.isDeleted = false;
@@ -223,17 +222,17 @@ export async function extractFromFirestoreSDK(
              finalizeRawImport(db, recoveredFolders, recoveredCards, currentUserId, onProgress)
                .then(resolve)
                .catch(reject)
-               .finally(() => { try { nativeDb?.close(); } catch {} });
+               .finally(() => { try { nativeDb?.close(); } catch { /* ignore close errors */ } });
            }
          };
 
          cursorRequest.onerror = () => {
-             try { nativeDb?.close(); } catch {}
+             try { nativeDb?.close(); } catch { /* ignore close errors */ }
              reject(new Error('Cursor error'));
          };
 
        } catch (err) {
-         try { nativeDb?.close(); } catch {}
+         try { nativeDb?.close(); } catch { /* ignore close errors */ }
          reject(err);
        }
      };
@@ -286,7 +285,7 @@ export async function importFromDatabase(
     const safeRead = async (tableName: string) => {
         try {
             return await sourceDb.table(tableName).toArray();
-        } catch (e) {
+        } catch {
             console.warn(`[Rescue] Table ${tableName} not found in source DB.`);
             return [];
         }
@@ -329,7 +328,7 @@ export async function importFromDatabase(
 
     // Cards
     if (cards.length > 0) {
-      const newCards = cards.map(c => {
+      const newCards = (cards.map(c => {
         const id = c.id || c.cardId || c.card_id || crypto.randomUUID();
         const payload = denormalizeCardForStorage({
           ...c,
@@ -340,14 +339,14 @@ export async function importFromDatabase(
         });
         if (!hasBlobUrlDeep(payload)) return payload;
         telemetryOncePerSession('cards:blob-url-scrubbed-on-import');
-        return scrubBlobUrlsDeep(payload) as any;
-      });
+        return scrubBlobUrlsDeep(payload);
+      })) as Card[];
       await db.cards.bulkPut(newCards);
     }
 
     // Documents (PDF)
     if (documents.length > 0) {
-      const newDocs = documents.map((d: any) => {
+      const newDocs = documents.map((d: unknown) => {
         const id = d.id || d.documentId || d.docId || crypto.randomUUID();
         return {
           ...d,
@@ -392,7 +391,7 @@ export async function importFromDatabase(
             userId: currentUserId,
             _rescueOrigin: sourceDbName
         }));
-        await (db as any).table('studyLogs').bulkPut(newLogs);
+        await db.table('studyLogs').bulkPut(newLogs);
     }
 
     // Tags
@@ -402,7 +401,7 @@ export async function importFromDatabase(
             userId: currentUserId,
             updatedAt: rescueTime
         }));
-        await (db as any).tags.bulkPut(newTags);
+        await (db as LocalDBWithTags).tags.bulkPut(newTags);
     }
 
     // User Settings

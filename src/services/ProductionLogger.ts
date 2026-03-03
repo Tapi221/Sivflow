@@ -8,7 +8,7 @@ class ProductionLogger {
   /**
    * エラーログ（Sentry に送信）
    */
-  error(step: string, message: string, error: any, context?: Record<string, any>): void {
+  error(step: string, message: string, error: unknown, context?: Record<string, any>): void {
     console.error(`[ImageUpload:${step}] ${message}`, error);
     
     // 本番環境では Sentry に送信(自動キャプチャ)

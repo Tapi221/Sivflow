@@ -109,7 +109,7 @@ function isBlockEmpty(block: CardBlock): boolean {
   return true;
 }
 
-function shouldAutoOpenEditorForCard(card: any): boolean {
+function shouldAutoOpenEditorForCard(card: unknown): boolean {
   if (!card) return false;
   if (String(card?.title ?? "").trim().length > 0) return false;
   if ((card?.tags ?? []).length > 0) return false;
@@ -142,7 +142,7 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
 
   const selectedCard = useMemo(() => {
     if (!normalizedSelectedCardId || isNew) return null;
-    return cards.find((c: any) => c.id === normalizedSelectedCardId) ?? null;
+    return cards.find((c: unknown) => c.id === normalizedSelectedCardId) ?? null;
   }, [cards, normalizedSelectedCardId, isNew]);
 
   // 閲覧状態
@@ -198,7 +198,7 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
     return rowsFromMinHeightPx(requiredHeightPx);
   }, [rowsFromMinHeightPx]);
 
-  const buildDraftFromCard = useCallback((card: any): EditorDraft => {
+  const buildDraftFromCard = useCallback((card: unknown): EditorDraft => {
     const legacyQuestionRows = normalizeExtraRows(card?.questionExtraRows ?? card?.question_extra_rows ?? 0);
     const legacyAnswerRows = normalizeExtraRows(card?.answerExtraRows ?? card?.answer_extra_rows ?? 0);
     const migratedRows = LEGACY_BASE_LAYOUT_ROWS + Math.max(legacyQuestionRows, legacyAnswerRows);
@@ -302,7 +302,7 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
   }, [isEditing, isNew, normalizedSelectedCardId, selectedCard, buildDraftFromCard]);
 
   // 閲覧側のトグル（既存カードのみ）
-  const handleToggleBookmark = async (card: any) => {
+  const handleToggleBookmark = async (card: unknown) => {
     try {
       await updateCard(card.id, { isBookmarked: !card.isBookmarked });
       onCardUpdated?.();
@@ -311,7 +311,7 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
     }
   };
 
-  const handleToggleUncertainty = async (card: any) => {
+  const handleToggleUncertainty = async (card: unknown) => {
     try {
       await updateCard(card.id, { hasUncertainty: !card.hasUncertainty });
       onCardUpdated?.();
@@ -570,7 +570,7 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
     return (block?.references ?? []) as ReferenceBlockData[];
   };
 
-  const setMediaItems = (side: "question" | "answer", type: "image" | "audio", items: any[]) => {
+  const setMediaItems = (side: "question" | "answer", type: "image" | "audio", items: unknown[]) => {
     if (!items || items.length === 0) {
       removeBlockByTypeIfExists(side, type);
       return;
@@ -700,7 +700,7 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
 
     setDraft((prev) => {
       if (!prev) return prev;
-      const next: any = { ...prev };
+      const next: unknown = { ...prev };
 
       if (source.droppableId === "question-blocks") next.questionBlocks = reS;
       else next.answerBlocks = reS;

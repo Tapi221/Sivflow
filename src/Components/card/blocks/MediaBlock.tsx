@@ -5,11 +5,11 @@ import { ImageBlockContent } from './ImageBlockContent';
 import { cn } from '@/lib/utils';
 
 interface MediaBlockProps {
-  data: any[];
-  onChange: (data: any[]) => void;
+  data: unknown[];
+  onChange: (data: unknown[]) => void;
   onDelete: () => void;
   onDuplicate: () => void;
-  dragHandleProps?: any;
+  dragHandleProps?: unknown;
   dragHandleClassName?: string;
   accentColor?: string;
   initialFile?: File;

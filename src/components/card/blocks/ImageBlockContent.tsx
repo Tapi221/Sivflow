@@ -6,13 +6,13 @@ type ImageBlockContentProps =
   | {
       mode: 'view';
       urls: string[];
-      items?: any[];
+      items?: unknown[];
       onFullscreenChange?: (isFullscreen: boolean) => void;
     }
   | {
       mode: 'edit';
-      urls: any[];
-      onChange: (data: any[]) => void;
+      urls: unknown[];
+      onChange: (data: unknown[]) => void;
       initialFile?: File;
       onConsumeInitialFile?: () => void;
       onFilesExcess?: (files: File[]) => void;

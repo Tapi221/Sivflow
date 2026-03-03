@@ -44,7 +44,7 @@ const DETECTION_RULES: DetectionRule[] = [
 export interface SecurityState {
   isLocked: boolean;
   requires2FA: boolean;
-  alerts: any[];
+  alerts: unknown[];
 }
 
 /**

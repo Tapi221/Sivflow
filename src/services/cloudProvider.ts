@@ -65,19 +65,19 @@ export class FirebaseCloudProvider implements ICloudProvider {
     // 型定義が欠けていても死なないように namespace 経由で参照（存在すればページング）
     const orderByFn = (Firestore as any).orderBy as undefined | ((field: string, dir?: 'asc' | 'desc') => any);
     const limitFn = (Firestore as any).limit as undefined | ((n: number) => any);
-    const startAfterFn = (Firestore as any).startAfter as undefined | ((snapshot: any) => any);
+    const startAfterFn = (Firestore as any).startAfter as undefined | ((snapshot: unknown) => any);
 
     const PAGE_SIZE = 500;
     const canOrder = typeof orderByFn === 'function';
     const canLimit = typeof limitFn === 'function';
     const canPage = canOrder && canLimit && typeof startAfterFn === 'function';
 
-    const fetchPagedDocs = async (colRef: any): Promise<any[]> => {
-      const out: any[] = [];
-      let lastDoc: any = null;
+    const fetchPagedDocs = async (colRef: unknown): Promise<any[]> => {
+      const out: unknown[] = [];
+      let lastDoc: unknown = null;
 
       while (true) {
-        const constraints: any[] = [where('updatedAt', '>', sinceTimestamp)];
+        const constraints: unknown[] = [where('updatedAt', '>', sinceTimestamp)];
         if (canOrder) constraints.push(orderByFn('updatedAt', 'asc'));
         if (canPage && lastDoc) constraints.push(startAfterFn(lastDoc));
         if (canLimit) constraints.push(limitFn(PAGE_SIZE));
@@ -98,12 +98,12 @@ export class FirebaseCloudProvider implements ICloudProvider {
     // フォルダの取得
     const foldersCol = collection(firestoreDb, ...foldersPathSegments(userId));
     const folderDocs = await fetchPagedDocs(foldersCol);
-    const folders = folderDocs.map((d: any) => ({ id: d.id, ...(d.data()) } as any as Folder));
+    const folders = folderDocs.map((d: unknown) => ({ id: d.id, ...(d.data()) } as any as Folder));
 
     // カードの取得（フォルダに関わらずユーザー単位で取得）
     const cardsCol = collection(firestoreDb, ...cardsPathSegments(userId));
     const cardDocs = await fetchPagedDocs(cardsCol);
-    const cards = cardDocs.map((d: any) => ({ id: d.id, ...(d.data()) } as any as Card));
+    const cards = cardDocs.map((d: unknown) => ({ id: d.id, ...(d.data()) } as any as Card));
 
     return { folders, cards };
   }

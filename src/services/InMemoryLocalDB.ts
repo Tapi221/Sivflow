@@ -6,7 +6,7 @@ import type { Card, Folder, SyncQueueItem } from '../types';
 type KeyPath = string | string[];
 type Predicate<T> = (value: T) => boolean;
 
-const toTimestamp = (value: any): number => {
+const toTimestamp = (value: unknown): number => {
   if (value instanceof Date) return value.getTime();
   if (value && typeof value?.toDate === 'function') {
     const date = value.toDate();
@@ -20,7 +20,7 @@ const toTimestamp = (value: any): number => {
   return 0;
 };
 
-const normalizeComparable = (value: any): any => {
+const normalizeComparable = (value: unknown): unknown => {
   if (value instanceof Date || (value && typeof value?.toDate === 'function')) {
     return toTimestamp(value);
   }
@@ -28,7 +28,7 @@ const normalizeComparable = (value: any): any => {
   return value;
 };
 
-const compareValues = (left: any, right: any): number => {
+const compareValues = (left: unknown, right: unknown): number => {
   const a = normalizeComparable(left);
   const b = normalizeComparable(right);
 
@@ -51,7 +51,7 @@ const compareValues = (left: any, right: any): number => {
   return 0;
 };
 
-const isEqual = (left: any, right: any): boolean => compareValues(left, right) === 0;
+const isEqual = (left: unknown, right: unknown): boolean => compareValues(left, right) === 0;
 
 const parseIndexKeys = (index: string): string[] => {
   if (index.startsWith('[') && index.endsWith(']')) {
@@ -60,7 +60,7 @@ const parseIndexKeys = (index: string): string[] => {
   return [index];
 };
 
-const serializeKey = (key: any): string => {
+const serializeKey = (key: unknown): string => {
   if (Array.isArray(key)) return JSON.stringify(key);
   if (typeof key === 'object' && key !== null) return JSON.stringify(key);
   return String(key);
@@ -95,13 +95,13 @@ class InMemoryCollection<T extends Record<string, any>> {
     );
   }
 
-  private getIndexedValue(item: T): any {
+  private getIndexedValue(item: T): unknown {
     if (!this.indexKeys || this.indexKeys.length === 0) return undefined;
     if (this.indexKeys.length === 1) return item[this.indexKeys[0]];
     return this.indexKeys.map((key) => item[key]);
   }
 
-  private withIndexPredicate(predicate: (indexValue: any) => boolean): InMemoryCollection<T> {
+  private withIndexPredicate(predicate: (indexValue: unknown) => boolean): InMemoryCollection<T> {
     return this.clone({
       predicates: [
         ...this.predicates,
@@ -135,29 +135,29 @@ class InMemoryCollection<T extends Record<string, any>> {
     return entries;
   }
 
-  equals(value: any): InMemoryCollection<T> {
+  equals(value: unknown): InMemoryCollection<T> {
     return this.withIndexPredicate((indexedValue) => isEqual(indexedValue, value));
   }
 
-  above(value: any): InMemoryCollection<T> {
+  above(value: unknown): InMemoryCollection<T> {
     return this.withIndexPredicate((indexedValue) => compareValues(indexedValue, value) > 0);
   }
 
-  aboveOrEqual(value: any): InMemoryCollection<T> {
+  aboveOrEqual(value: unknown): InMemoryCollection<T> {
     return this.withIndexPredicate((indexedValue) => compareValues(indexedValue, value) >= 0);
   }
 
-  below(value: any): InMemoryCollection<T> {
+  below(value: unknown): InMemoryCollection<T> {
     return this.withIndexPredicate((indexedValue) => compareValues(indexedValue, value) < 0);
   }
 
-  belowOrEqual(value: any): InMemoryCollection<T> {
+  belowOrEqual(value: unknown): InMemoryCollection<T> {
     return this.withIndexPredicate((indexedValue) => compareValues(indexedValue, value) <= 0);
   }
 
   between(
-    lowerValue: any,
-    upperValue: any,
+    lowerValue: unknown,
+    upperValue: unknown,
     includeLower = true,
     includeUpper = true
   ): InMemoryCollection<T> {
@@ -179,7 +179,7 @@ class InMemoryCollection<T extends Record<string, any>> {
     });
   }
 
-  anyOf(values: any[]): InMemoryCollection<T> {
+  anyOf(values: unknown[]): InMemoryCollection<T> {
     return this.withIndexPredicate((indexedValue) => values.some((value) => isEqual(indexedValue, value)));
   }
 
@@ -280,14 +280,14 @@ class InMemoryTable<T extends Record<string, any>> {
     private readonly keyPath: KeyPath = 'id'
   ) {}
 
-  private deriveKeyFromRecord(record: T): any {
+  private deriveKeyFromRecord(record: T): unknown {
     if (Array.isArray(this.keyPath)) {
       return this.keyPath.map((path) => record[path]);
     }
     return record[this.keyPath];
   }
 
-  private ensureRecordKey(record: T): any {
+  private ensureRecordKey(record: T): unknown {
     let key = this.deriveKeyFromRecord(record);
     if (Array.isArray(this.keyPath)) {
       return key;
@@ -306,7 +306,7 @@ class InMemoryTable<T extends Record<string, any>> {
     return serializeKey(key);
   }
 
-  private serializeInputKey(key: any): string {
+  private serializeInputKey(key: unknown): string {
     return serializeKey(key);
   }
 
@@ -357,12 +357,12 @@ class InMemoryTable<T extends Record<string, any>> {
     throw new Error('[InMemoryLocalDB] Unsupported Dexie API: Table.bulkGet()');
   }
 
-  async get(key: any): Promise<T | undefined> {
+  async get(key: unknown): Promise<T | undefined> {
     const found = this.rows.get(this.serializeInputKey(key));
     return found ? ensureObject(found) : undefined;
   }
 
-  async update(key: any, changes: Partial<T>): Promise<number> {
+  async update(key: unknown, changes: Partial<T>): Promise<number> {
     const serialized = this.serializeInputKey(key);
     const current = this.rows.get(serialized);
     if (!current) return 0;
@@ -371,11 +371,11 @@ class InMemoryTable<T extends Record<string, any>> {
     return 1;
   }
 
-  async delete(key: any): Promise<void> {
+  async delete(key: unknown): Promise<void> {
     this.rows.delete(this.serializeInputKey(key));
   }
 
-  async bulkDelete(keys: any[]): Promise<void> {
+  async bulkDelete(keys: unknown[]): Promise<void> {
     keys.forEach((key) => this.rows.delete(this.serializeInputKey(key)));
   }
 
@@ -416,7 +416,7 @@ class InMemoryTable<T extends Record<string, any>> {
   }
 }
 
-const normalizeFolderWithSilent = (raw: any) => {
+const normalizeFolderWithSilent = (raw: unknown) => {
   if (!raw) return raw;
   const hasSilent = raw?.silent !== undefined;
   const hasIsSilent = raw?.isSilent !== undefined || raw?.is_silent !== undefined;
@@ -548,7 +548,7 @@ export class InMemoryLocalDB {
     return items;
   }
 
-  private async enqueueSync(tableName: string, payload: any): Promise<void> {
+  private async enqueueSync(tableName: string, payload: unknown): Promise<void> {
     if (!SYNCABLE_TABLES.has(tableName)) return;
     const now = Date.now();
     const task: SyncQueueItem = {
@@ -572,7 +572,7 @@ export class InMemoryLocalDB {
     }
   }
 
-  async addItem(tableName: string, item: any, skipSync = false): Promise<string> {
+  async addItem(tableName: string, item: unknown, skipSync = false): Promise<string> {
     const payload = ensureObject(item);
     const id = await this.table(tableName).add(payload);
     if (!skipSync) await this.enqueueSync(tableName, payload);
@@ -604,7 +604,7 @@ export class InMemoryLocalDB {
     await this.deleteItem(tableName, id);
   }
 
-  async bulkUpsert(tableName: string, items: any[], skipSync = false): Promise<void> {
+  async bulkUpsert(tableName: string, items: unknown[], skipSync = false): Promise<void> {
     if (!Array.isArray(items) || items.length === 0) return;
     await this.table(tableName).bulkPut(items as any[]);
     if (!skipSync) {
@@ -664,7 +664,7 @@ export class InMemoryLocalDB {
     await this.syncHistory.where('finishedAt').below(now - THIRTY_DAYS).delete();
     const all = await this.syncHistory.orderBy('finishedAt').toArray();
     if (all.length > 100) {
-      const toDelete = all.slice(0, all.length - 100).map((item: any) => item.id);
+      const toDelete = all.slice(0, all.length - 100).map((item: unknown) => item.id);
       await this.syncHistory.bulkDelete(toDelete);
     }
   }
@@ -675,21 +675,21 @@ export class InMemoryLocalDB {
     const oldErrors = await this.syncErrors
       .where('occurredAt')
       .below(now - SEVEN_DAYS)
-      .and((item: any) => !item.retryable)
+      .and((item: unknown) => !item.retryable)
       .toArray();
-    await this.syncErrors.bulkDelete(oldErrors.map((item: any) => item.id));
+    await this.syncErrors.bulkDelete(oldErrors.map((item: unknown) => item.id));
   }
 
   async getDeviceMeta(userId: string): Promise<any | undefined> {
     return this.deviceMeta.where('userId').equals(userId).first();
   }
 
-  async upsertDeviceMeta(meta: any): Promise<void> {
+  async upsertDeviceMeta(meta: unknown): Promise<void> {
     await this.deviceMeta.put(meta);
   }
 
   async getSyncEnabledFolders(userId: string): Promise<any[]> {
-    return this.folders.where('userId').equals(userId).and((folder: any) => folder.cloudSyncEnabled === true).toArray();
+    return this.folders.where('userId').equals(userId).and((folder: unknown) => folder.cloudSyncEnabled === true).toArray();
   }
 
   async getUpdatedCards(folderId: string, lastSyncTime: Date): Promise<any[]> {
@@ -697,11 +697,11 @@ export class InMemoryLocalDB {
     return this.cards
       .where('folderId')
       .equals(folderId)
-      .and((card: any) => toTimestamp(card.updatedAt) > threshold)
+      .and((card: unknown) => toTimestamp(card.updatedAt) > threshold)
       .toArray();
   }
 
-  async upsert(tableName: string, data: any, skipSync = false): Promise<void> {
+  async upsert(tableName: string, data: unknown, skipSync = false): Promise<void> {
     await this.table(tableName).put(data);
     if (!skipSync) await this.enqueueSync(tableName, data);
   }
@@ -729,7 +729,7 @@ export class InMemoryLocalDB {
   async repairDataIntegrity(
     _currentUserId: string,
     _onProgress?: (msg: string) => void
-  ): Promise<{ folders: number; cards: number; canonicalId: string | null; issues: any[] }> {
+  ): Promise<{ folders: number; cards: number; canonicalId: string | null; issues: unknown[] }> {
     return { folders: 0, cards: 0, canonicalId: null, issues: [] };
   }
 }

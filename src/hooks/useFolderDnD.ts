@@ -6,7 +6,7 @@
 import { useCallback } from 'react';
 
 interface UseFolderDnDProps {
-  cards: any[];
+  cards: unknown[];
   moveCardToFolder: (cardId: string, targetFolderId: string) => Promise<void>;
   reorderCards: (folderId: string, cardIds: string[]) => Promise<void>;
 }

@@ -47,7 +47,7 @@ export interface FullTextIndex {
 /**
  * ブロックからテキストを抽出
  */
-function extractBlockTexts(blocks: any[]): { field: MatchField; text: string }[] {
+function extractBlockTexts(blocks: unknown[]): { field: MatchField; text: string }[] {
   const results: { field: MatchField; text: string }[] = [];
   
   for (const block of blocks || []) {

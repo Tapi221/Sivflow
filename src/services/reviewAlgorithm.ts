@@ -231,7 +231,7 @@ export const computeNextReview = ({
   now = new Date(),
   delayBonusEnabled = false
 }: ReviewAlgorithmInput & { delayBonusEnabled?: boolean }): ReviewAlgorithmResult => {
-  const c: any = card as any;
+  const c: unknown = card as any;
   // Get current stability (with legacy conversion)
   const legacyLevel = (card.currentLevel ?? c.current_level ?? card.level ?? c.level ?? null) as any;
   const currentStability = getInitialStability((card.memoryStability ?? c.memory_stability ?? null) as any, legacyLevel);

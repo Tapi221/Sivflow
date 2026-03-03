@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-const toDate = (value: any): Date | null => {
+const toDate = (value: unknown): Date | null => {
   if (!value) return null;
   if (typeof value?.toDate === 'function') {
     const d = value.toDate();
@@ -29,17 +29,17 @@ const toDate = (value: any): Date | null => {
   return isNaN(d.getTime()) ? null : d;
 };
 
-const isCardDeleted = (card: any) =>
+const isCardDeleted = (card: unknown) =>
   Boolean(card?.isDeleted ?? card?.is_deleted ?? card?.deleted ?? card?.deletedAt ?? card?.deleted_at);
 
-const isCardDraft = (card: any) => Boolean(card?.isDraft ?? card?.is_draft);
-const isCardSilent = (card: any) => Boolean(card?.isSilent ?? card?.is_silent);
+const isCardDraft = (card: unknown) => Boolean(card?.isDraft ?? card?.is_draft);
+const isCardSilent = (card: unknown) => Boolean(card?.isSilent ?? card?.is_silent);
 
 type UseReviewCountParams = {
-  settings: any;
-  cards: any[];
+  settings: unknown;
+  cards: unknown[];
   cardsLoading: boolean;
-  folders: any[];
+  folders: unknown[];
   foldersLoading: boolean;
 };
 
@@ -52,7 +52,7 @@ export function useReviewCount({
 }: UseReviewCountParams) {
   const folderMap = useMemo(() => {
     const map = new Map<string, any>();
-    folders.forEach((folder: any) => {
+    folders.forEach((folder: unknown) => {
       const id = folder?.id ?? folder?.folderId;
       if (id) map.set(String(id), folder);
     });
@@ -66,7 +66,7 @@ export function useReviewCount({
     const today = new Date();
     const tDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
-    return cards.filter((card: any) => {
+    return cards.filter((card: unknown) => {
       if (isCardDeleted(card) || isCardDraft(card) || isCardSilent(card)) return false;
 
       const dateValue = card?.next_review_date ?? card?.nextReviewDate;

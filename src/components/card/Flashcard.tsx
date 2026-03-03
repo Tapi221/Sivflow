@@ -304,11 +304,11 @@ export function Flashcard({
   );
 
   const questionImageUrls = (questionImages ?? [])
-    .map((image: any) => image?.remoteUrl ?? image?.localUrl ?? image?.url ?? image)
+    .map((image: unknown) => image?.remoteUrl ?? image?.localUrl ?? image?.url ?? image)
     .filter(Boolean);
 
   const answerImageUrls = (answerImages ?? [])
-    .map((image: any) => image?.remoteUrl ?? image?.localUrl ?? image?.url ?? image)
+    .map((image: unknown) => image?.remoteUrl ?? image?.localUrl ?? image?.url ?? image)
     .filter(Boolean);
 
   const handleGalleryFullscreenChange = React.useCallback((isFullscreen: boolean) => {

@@ -10,7 +10,7 @@ interface CodeBlockItemProps {
   onChange: (data: CodeBlockData) => void;
   onDelete: () => void;
   onDuplicate: () => void;
-  dragHandleProps?: any;
+  dragHandleProps?: unknown;
   dragEnabled?: boolean;
   dragHandleClassName?: string;
   accentColor?: string;

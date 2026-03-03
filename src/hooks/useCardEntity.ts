@@ -6,11 +6,11 @@ const DRAFT_KEY_PREFIX = 'card-editor-draft-';
 
 const makeDraftKey = (cardId: string) => `${DRAFT_KEY_PREFIX}${cardId}`;
 
-const withStableBlockIds = (raw: any) => {
+const withStableBlockIds = (raw: unknown) => {
   if (!raw) return raw;
 
-  const assignIds = (blocks: any[], side: 'q' | 'a') =>
-    (Array.isArray(blocks) ? blocks : []).map((block: any, index: number) => {
+  const assignIds = (blocks: unknown[], side: 'q' | 'a') =>
+    (Array.isArray(blocks) ? blocks : []).map((block: unknown, index: number) => {
       if (typeof block?.id === 'string' && block.id.trim()) return block;
       return {
         ...block,

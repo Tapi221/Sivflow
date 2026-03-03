@@ -5,8 +5,8 @@ import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { BookOpen, Folder, ArrowRight, ChevronRight, ChevronDown } from 'lucide-react';
 
 interface InboxPanelProps {
-  cards: any[];
-  folders: any[];
+  cards: unknown[];
+  folders: unknown[];
   onCardSelect: (cardId: string) => void;
   onMoveCard: (cardId: string, targetFolderId: string) => Promise<void>;
   recentFolderIds?: string[]; // 最近使ったフォルダID
@@ -38,7 +38,7 @@ export function InboxPanel({
     
     // 重複を除去
     const seen = new Set<string>();
-    const options: any[] = [];
+    const options: unknown[] = [];
     
     for (const f of recentFolders) {
       const id = f.id || f.folderId;

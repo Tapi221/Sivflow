@@ -21,7 +21,7 @@ import CreationModeDialog from '@/components/card/CreationModeDialog';
 
 
 interface TreeViewLayoutProps {
-  folders: any[];
+  folders: unknown[];
   cards: Card[];
   documents: DocumentItem[];
   selectedFolderId: string | null;
@@ -37,7 +37,7 @@ const MIN_SIDEBAR_W = 200;
 const MAX_SIDEBAR_W = 600;
 const DEFAULT_SIDEBAR_W = 320;
 
-const toDate = (value: any): Date | null => {
+const toDate = (value: unknown): Date | null => {
   if (value === null || value === undefined) return null;
   if (typeof value?.toDate === 'function') {
     const d = value.toDate();

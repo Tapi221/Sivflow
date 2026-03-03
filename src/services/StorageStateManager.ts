@@ -78,7 +78,7 @@ export class StorageStateManager {
   /**
    * ストレージイベントをログ記録
    */
-  private static logStorageEvent(userId: string, event: string, data: any): void {
+  private static logStorageEvent(userId: string, event: string, data: unknown): void {
     // 運用ログ記録
     const logEntry = {
       timestamp: new Date().toISOString(),

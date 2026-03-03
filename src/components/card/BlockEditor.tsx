@@ -256,7 +256,7 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
 
       const s = style as DndStyle | any;
 
-      const result: any = { ...style };
+      const result: unknown = { ...style };
 
       // transform 補正 (translate)
       if (s.transform) {

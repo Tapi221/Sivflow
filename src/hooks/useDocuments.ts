@@ -20,7 +20,7 @@ export function useDocuments(folderId?: string) {
         // documentsテーブルから全件取得
         const all = await db.documents.toArray();
         return all;
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(`[useDocuments] Error: ${err.message}`);
         setError(err.message);
         return [];
@@ -61,7 +61,7 @@ export function useDocuments(folderId?: string) {
           updatedAt: now,
           deviceId: currentUser.uid, // 簡略版（実装に応じて調整）
         });
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(`[useDocuments] Update error: ${err.message}`, { documentId, updates });
         throw err;
       }

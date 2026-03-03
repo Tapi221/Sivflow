@@ -178,7 +178,7 @@ export class ImageSyncService {
       throw new Error('Storage quota exceeded (Max 500MB)');
     }
 
-    let lastError: any = null;
+    let lastError: unknown = null;
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
       try {
         // Update state to inProgress

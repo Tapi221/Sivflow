@@ -77,7 +77,7 @@ class SnapshotService {
     const folders = allFolders.map(normalizeFolder);
 
     // 学習ログは現時点では空（将来拡張用）
-    const reviews: any[] = [];
+    const reviews: unknown[] = [];
 
     // 設定も現時点では空（将来拡張用）
     const settings = null;

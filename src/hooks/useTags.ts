@@ -123,7 +123,7 @@ export function useTags() {
 
     const tagId = getTagIdByName(name);
 
-    return cards.reduce((count, card: any) => {
+    return cards.reduce((count, card: unknown) => {
       const nameTags = Array.isArray(card?.tags) ? card.tags : [];
       const idTags = Array.isArray(card?.tagIds) ? card.tagIds : [];
       const hitByName = nameTags.includes(name);
@@ -187,7 +187,7 @@ export function useTags() {
     await db.transaction('rw', db.tags_v2, db.cards, async () => {
       await db.tags_v2.delete([currentUser.uid, name]);
 
-      await db.cards.where('userId').equals(currentUser.uid).modify((card: any) => {
+      await db.cards.where('userId').equals(currentUser.uid).modify((card: unknown) => {
         const nameTags = Array.isArray(card?.tags) ? card.tags : [];
         const idTags = Array.isArray(card?.tagIds) ? card.tagIds : [];
 

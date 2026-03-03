@@ -131,7 +131,7 @@ export function ImageGallery({ urls, items }: ImageGalleryProps) {
   React.useEffect(() => {
     const source = (items && items.length > 0 ? items : urls) as Array<any>;
     const candidates = source.filter((entry) => typeof entry === 'object' && Boolean(entry));
-    const hasUsableLegacyUrl = (entry: any) => {
+    const hasUsableLegacyUrl = (entry: unknown) => {
       const values = [entry?.remoteUrl, entry?.localUrl, entry?.url];
       return values.some((v) => typeof v === 'string' && !v.startsWith('blob:') && v.trim().length > 0);
     };

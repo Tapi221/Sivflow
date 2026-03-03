@@ -76,7 +76,7 @@ export default function ImportDialog({ open, onOpenChange }: ImportDialogProps) 
       }
 
       setStep('preview');
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message || 'ファイルの読み込みに失敗しました');
     }
   };
@@ -119,7 +119,7 @@ export default function ImportDialog({ open, onOpenChange }: ImportDialogProps) 
         resetState();
         window.location.reload(); // データを反映するためにリロード
       }, 2000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message || 'インポートに失敗しました');
       setStep('preview');
     }

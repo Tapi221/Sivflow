@@ -246,7 +246,8 @@ export const defineSchema = (db: LocalDB): void => {
     const oldTags = await tx.table('tags').toArray();
     if (oldTags.length === 0) return;
 
-    const consolidatedMap = new Map<string, any>();
+    type TagRecord = { name: string; color: string; userId: string; rootFolderId: string; updatedAt: Date; [key: string]: unknown };
+    const consolidatedMap = new Map<string, TagRecord>();
     oldTags.forEach(tag => {
         const key = `${tag.userId}_${tag.name}`;
         const existing = consolidatedMap.get(key);
@@ -288,7 +289,7 @@ export const defineSchema = (db: LocalDB): void => {
     // 既存カードに difficulty / reviewCount が無い場合は補完する（破壊的変更なし）
     const cards = tx.table('cards');
 
-    await cards.toCollection().modify((c: any) => {
+    await cards.toCollection().modify((c: unknown) => {
       if (typeof c.difficulty !== 'number' || !Number.isFinite(c.difficulty)) {
         c.difficulty = 0.35; // 初期値（安全寄り）
       } else {
@@ -327,7 +328,7 @@ export const defineSchema = (db: LocalDB): void => {
     projectMaps: 'id, userId, folderId, updatedAt, [userId+updatedAt]',
   }).upgrade(async tx => {
     const cards = tx.table('cards');
-    await cards.toCollection().modify((c: any) => {
+    await cards.toCollection().modify((c: unknown) => {
       if (typeof c.difficulty !== 'number' || !Number.isFinite(c.difficulty)) c.difficulty = 0.35;
       c.difficulty = Math.max(0, Math.min(1, c.difficulty));
       if (typeof c.reviewCount !== 'number' || !Number.isFinite(c.reviewCount)) {
@@ -361,7 +362,7 @@ export const defineSchema = (db: LocalDB): void => {
     projectMaps: 'id, userId, folderId, updatedAt, [userId+updatedAt]',
   }).upgrade(async tx => {
     const documents = tx.table('documents');
-    await documents.toCollection().modify((d: any) => {
+    await documents.toCollection().modify((d: unknown) => {
       if (typeof d.localUrl === 'string' && d.localUrl.startsWith('blob:')) {
         d.localUrl = null;
       }

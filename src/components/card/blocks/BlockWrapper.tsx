@@ -8,7 +8,7 @@ interface BlockWrapperProps {
   children: React.ReactNode;
   onDelete: () => void;
   onDuplicate: () => void;
-  dragHandleProps?: any;
+  dragHandleProps?: unknown;
   dragHandleClassName?: string;
   className?: string;
   label?: string;

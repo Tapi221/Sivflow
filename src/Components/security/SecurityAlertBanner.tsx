@@ -28,7 +28,7 @@ export const SecurityAlertBanner: React.FC = () => {
       )}
 
       {/* 個別のセキュリティアラート */}
-      {securityState.alerts.map((alert: any) => (
+      {securityState.alerts.map((alert: unknown) => (
         <div key={alert.id} style={{
           backgroundColor: '#fff7ed', // orange-50
           borderBottom: '1px solid #fdba74', // orange-300

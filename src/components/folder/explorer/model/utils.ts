@@ -35,7 +35,7 @@ export const normalizeFolderId = (folderId: string | null | undefined): string =
 export const isSameFolder = (left: string | null | undefined, right: string | null | undefined) =>
   normalizeFolderId(left) === normalizeFolderId(right);
 
-export const getEntityTime = (value: any): number => {
+export const getEntityTime = (value: unknown): number => {
   if (!value) return 0;
   if (value instanceof Date) return value.getTime();
   if (typeof value?.toDate === 'function') return value.toDate()?.getTime?.() ?? 0;

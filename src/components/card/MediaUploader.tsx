@@ -274,7 +274,7 @@ export default function MediaUploader({
       const existing = await db.syncQueue
         .where('targetId')
         .equals(payload.assetId)
-        .filter((item: any) => item.entity === 'asset' && item.status === 'pending')
+        .filter((item: unknown) => item.entity === 'asset' && item.status === 'pending')
         .first();
       if (existing) return;
       await db.syncQueue.add({
@@ -344,7 +344,7 @@ export default function MediaUploader({
         const results = await Promise.allSettled(filesToUpload.map(uploadAudioWrapper));
         const uploadedUrls = results
           .filter(result => result.status === 'fulfilled')
-          .map((result: any) => result.value.url);
+          .map((result: unknown) => result.value.url);
 
         if (uploadedUrls.length > 0) {
           if (maxFiles === 1) {
@@ -360,7 +360,7 @@ export default function MediaUploader({
            console.error('Audio upload failures:', failures);
            alert(`${failures.length}件のファイルのアップロードに失敗しました。`);
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('[MediaUploader] Audio upload error:', error);
         alert(`ファイルのアップロードに失敗しました: ${error.message}`);
       } finally {
@@ -511,7 +511,7 @@ export default function MediaUploader({
           });
           latestItemsRef.current = updated; // 最新の状態を保存
           onChange(updated);
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.error('[MediaUploader] Image upload error for:', image.id, error);
           const current = (latestItemsRef.current as UploadedImage[]) || [];
           const updated = current.map(item =>
@@ -522,7 +522,7 @@ export default function MediaUploader({
         }
       })
     );
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[MediaUploader] Image preparation/upload error:', error);
       alert(`画像のアップロードに失敗しました: ${error.message}`);
     }
@@ -608,7 +608,7 @@ export default function MediaUploader({
         };
       });
       onChange(updated);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.warn('Retry failed', error);
       // Fallback failed or hook threw
       const failedImage = createFailedUploadedImage(file) as UploadedImage;

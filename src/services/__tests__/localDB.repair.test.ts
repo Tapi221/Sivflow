@@ -3,7 +3,7 @@ import 'fake-indexeddb/auto';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { getLocalDb, LocalDB } from '../localDB';
 
-const rawPutCard = async (dbName: string, card: any): Promise<void> => {
+const rawPutCard = async (dbName: string, card: unknown): Promise<void> => {
   await new Promise<void>((resolve, reject) => {
     const openReq = indexedDB.open(dbName);
     openReq.onerror = () => reject(openReq.error ?? new Error('Failed to open IndexedDB'));

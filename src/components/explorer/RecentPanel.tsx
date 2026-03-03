@@ -9,7 +9,7 @@ import type { Card, DocumentItem, SelectedExplorerItem } from '@/types';
 
 interface RecentPanelProps {
   recent: RecentItem[];
-  folders: any[];
+  folders: unknown[];
   cards: Card[];
   documents?: DocumentItem[]; // ✅追加
   onFolderSelect: (folderId: string) => void;

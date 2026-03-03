@@ -132,7 +132,7 @@ function LoginPage() {
       // ポップアップで Google 認証
       await signInWithPopup(auth, provider);
       // 成功すると AuthProvider 側の onAuthStateChanged が発火して画面遷移する想定
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('ログインエラー:', error);
       if (error.code === 'auth/popup-closed-by-user') {
         // ユーザーがポップアップを閉じた場合は無視

@@ -4,12 +4,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import StudyCard from '@/components/study/StudyCard';
 
 type Props = {
-  practiceState: any;
-  practiceCurrentCard: any;
+  practiceState: unknown;
+  practiceCurrentCard: unknown;
   counterCurrent: number;
   counterTotal: number;
   handlePracticeAnswer: (answer: 'ok' | 'anxious') => void;
-  handleToggleUncertainty: (card: any) => void;
+  handleToggleUncertainty: (card: unknown) => void;
   handlePracticeExit: (reason?: string) => void;
   ratingLabels: Record<string, string>;
 };

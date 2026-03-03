@@ -10,7 +10,7 @@ import type { Card, DocumentItem, SelectedExplorerItem } from '@/types';
 
 interface PinnedPanelProps {
   pinnedItems: PinnedItem[];
-  folders: any[];
+  folders: unknown[];
   cards: Card[];
   documents?: DocumentItem[];
   onFolderSelect: (folderId: string) => void;

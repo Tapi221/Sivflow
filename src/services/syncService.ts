@@ -16,7 +16,7 @@ import { getImageBlob } from './imageFileStore';
 
 type SyncableCollection = 'users' | 'userSettings' | 'folders' | 'cards' | 'userStats';
 
-const normalizeFolderForSync = (folder: any) => {
+const normalizeFolderForSync = (folder: unknown) => {
   if (!folder) return folder;
   const isSilent = folder.isSilent ?? folder.is_silent ?? folder.silent;
   const normalized = { ...folder };
@@ -355,7 +355,7 @@ export class SyncService {
   async enqueueChange(
     entity: 'card' | 'folder' | 'asset',
     action: 'create' | 'update' | 'delete',
-    payload: any
+    payload: unknown
   ): Promise<void> {
     // キューの上限（1000件）を確認
     const count = await this.localDB.syncQueue.count();
@@ -365,7 +365,7 @@ export class SyncService {
       await this.localDB.syncQueue.bulkDelete(oldest.map(i => i.id));
     }
 
-    const queueItem: any = {
+    const queueItem: unknown = {
       id: crypto.randomUUID(),
       entity,
       action,
@@ -500,7 +500,7 @@ export class SyncService {
         await this.localDB.syncQueue.delete(item.id);
         processed++;
         console.log(`[Sync] Processed queue item: ${item.action} ${item.entity} ${item.payload.id}`);
-      } catch (error: any) {
+      } catch (error: unknown) {
         // 失敗したらエラー記録してキュー保持
         await this.recordError(
           `Queue processing failed: ${error.message}`,
@@ -522,7 +522,7 @@ export class SyncService {
   /**
    * クラウドのデータとローカルのデータをマージする（Field-level Merging）
    */
-  private mergeEntity(local: any, remote: any, entityType: 'card' | 'folder'): any {
+  private mergeEntity(local: unknown, remote: unknown, entityType: 'card' | 'folder'): unknown {
     if (!local) return remote;
     if (!remote) return local;
 
@@ -532,7 +532,7 @@ export class SyncService {
     // 基本的には「最新の更新日時」を持つ方を優先
     if (remoteUpdated > localUpdated) {
         // 画像フィールドの特別なマージ
-        const mergedImages: any = {};
+        const mergedImages: unknown = {};
         let imageMergedDescription = '';
         
         ['questionImages', 'answerImages'].forEach(field => {
@@ -561,7 +561,7 @@ export class SyncService {
                 : '別の端末でも編集が行われていました。最新の内容を優先しましたが、競合がある可能性があります。';
             
             // 手動解決用に詳細を conflicts テーブルに保存
-            const conflictDetails: any = isCard ? {
+            const conflictDetails: unknown = isCard ? {
                 question: { local: local.question, remote: remote.question },
                 answer: { local: local.answer, remote: remote.answer }
             } : {
@@ -589,10 +589,10 @@ export class SyncService {
    * 2-way差分検出とフィールド単位自動マージ
    * base=local（ユーザーが最後に見た状態）
    */
-  private diffFields(local: any, remote: any): DiffResult {
+  private diffFields(local: unknown, remote: unknown): DiffResult {
     const base = local; // 2-way merge
     const autoMerged = { ...base };
-    const conflicts: Record<string, { local: any; remote: any }> = {};
+    const conflicts: Record<string, { local: unknown; remote: unknown }> = {};
 
     // 共通フィールドを比較
     const allKeys = new Set([...Object.keys(local), ...Object.keys(remote)]);
@@ -634,8 +634,8 @@ export class SyncService {
   private async saveConflict(
     entityId: string,
     entityType: 'card' | 'folder',
-    autoMerged: any,
-    conflicts: Record<string, { local: any; remote: any }>
+    autoMerged: unknown,
+    conflicts: Record<string, { local: unknown; remote: unknown }>
   ): Promise<void> {
     const conflict: SyncConflict = {
       id: crypto.randomUUID(),
@@ -659,7 +659,7 @@ export class SyncService {
   /**
    * 競合を解決
    */
-  async resolveConflict(conflictId: string, resolvedData: any): Promise<void> {
+  async resolveConflict(conflictId: string, resolvedData: unknown): Promise<void> {
     const conflict = await this.localDB.conflicts.get(conflictId);
     if (!conflict) {
       throw new Error(`Conflict ${conflictId} not found`);
@@ -701,7 +701,7 @@ export class SyncService {
         await this.cloudProvider.deleteFolder(id, this.userId);
       }
       console.log(`[Sync] Purged ${entityType} ${id} from Firestore`);
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Firestore 削除失敗時はキューに追加
       console.warn(`[Sync] Failed to purge ${entityType} ${id} from Firestore, queueing for later:`, error.message);
       await this.enqueueChange(entityType, 'delete', { id });
@@ -762,14 +762,14 @@ export class SyncService {
       await this.localDB.updateLastSyncTime(this.userId, new Date());
       console.log('[Sync][Pull] Completed successfully.');
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[Sync][Pull] Failed:', sanitizeForLog(error));
       await this.recordError(error.message, 'download', error.stack);
       return false;
     }
   }
 
-  private async mergeAndUpsert(table: string, remoteItems: any[]): Promise<void> {
+  private async mergeAndUpsert(table: string, remoteItems: unknown[]): Promise<void> {
     const entityType = table === 'cards' ? 'card' : 'folder';
     for (const item of remoteItems) {
         // PULL SIDE SANITIZATION: DB保存前に汚染データ（Blob URL）を除去
@@ -808,7 +808,7 @@ export class SyncService {
 
       const snapshot = await getDocs(q);
       return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as T));
-    } catch (error: any) {
+    } catch (error: unknown) {
       // 権限不足の場合はログに出力して空配列を返す
       if (error?.code === 'permission-denied') {
         console.warn(`[Sync] Permission denied for collection "${collectionName}". Skipping...`);
@@ -846,7 +846,7 @@ export class SyncService {
         return [{ id: snapshot.id, ...snapshot.data() } as UserStats];
       }
       return [];
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error?.code === 'permission-denied') {
         console.warn('[Sync] Permission denied for userStats. Skipping...');
         return [];
@@ -968,7 +968,7 @@ export class SyncService {
 
         console.log(`[Sync][Push] Completed. dirty=${totalDirty}, pushed=${pushedCount}, skipped=${skippedCount}`);
         return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('[Sync][Push] Failed:', sanitizeForLog(error));
         await this.recordError(error.message, 'upload', error.stack);
         return false;
@@ -1016,7 +1016,7 @@ export class SyncService {
       // 成功時に全エラーをクリア（以前のエラー状態をリセット）
       await this.clearAllErrors();
       await this.recordHistory(startedAt, 'success', 0, 0);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[Sync] Error during full sync:', error);
       await this.recordError(error.message, 'download', error.stack);
       await this.recordHistory(startedAt, 'failed', 0, 0);
@@ -1083,7 +1083,7 @@ export class SyncService {
       let pullSuccess = false;
       try {
         pullSuccess = await this.pullChanges(onProgress);
-      } catch (pullError: any) {
+      } catch (pullError: unknown) {
         console.warn('[Sync] Pull failed with fatal error. Checking for self-healing fallback...', pullError.message);
         // 【正常遷移: Delta Sync 失敗 → Full Sync】
         // 差分同期が論理的に修復不能なエラー（409衝突や構造不整合など）の場合、フル同期を試みる
@@ -1106,7 +1106,7 @@ export class SyncService {
         let pushSuccess = false;
         try {
           pushSuccess = await this.pushChanges(previousSyncTime || undefined);
-        } catch (pushError: any) {
+        } catch (pushError: unknown) {
           console.warn('[Sync] Push failed with fatal error. Checking for fallback...', pushError.message);
           // プッシュ失敗時も特定の条件下ではフル同期による整合性確保を試みる
           if (pushError.message?.includes('conflict')) {
@@ -1141,7 +1141,7 @@ export class SyncService {
         const existingDoc = await getDoc(deviceMetaDoc);
         const existingData = existingDoc.exists() ? existingDoc.data() : null;
         
-        const metadata: any = {
+        const metadata: unknown = {
           userId: this.userId,
           deviceId: this.deviceId,
           lastSyncTime: Timestamp.now(),
@@ -1179,7 +1179,7 @@ export class SyncService {
         errors 
       };
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[Sync] Synchronization failed:', error);
       await this.recordError(error.message, 'merge', error.stack);
       await this.recordHistory(startedAt, 'failed', uploaded, downloaded);

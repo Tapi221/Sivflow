@@ -47,7 +47,7 @@ export interface MediaAsset {
 /**
  * UploadedImage から MediaAsset への変換
  */
-export const imageToMediaAsset = (image: any): MediaAsset => {
+export const imageToMediaAsset = (image: unknown): MediaAsset => {
   return {
     id: image.id,
     kind: 'image',
@@ -73,7 +73,7 @@ export const imageToMediaAsset = (image: any): MediaAsset => {
 /**
  * MediaAsset から UploadedImage への変換（後方互換性）
  */
-export const mediaAssetToImage = (asset: MediaAsset): any => {
+export const mediaAssetToImage = (asset: MediaAsset): unknown => {
   if (asset.kind !== 'image') {
     throw new Error('MediaAsset is not an image');
   }

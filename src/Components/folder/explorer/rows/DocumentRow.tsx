@@ -10,10 +10,10 @@ interface DocumentRowProps {
   isSelected: boolean;
   onSelect: (item: { type: 'document'; id: string }) => void;
   // 以下、ContextMenu 用のプロップス
-  treeFolders: any[];
-  treeCards: any[];
-  documents: any[];
-  onUpdateFolder?: (folderId: string, data: any) => Promise<void>;
+  treeFolders: unknown[];
+  treeCards: unknown[];
+  documents: unknown[];
+  onUpdateFolder?: (folderId: string, data: unknown) => Promise<void>;
   isPinned: boolean;
   handleTogglePin: () => void;
   rowBaseClassName: string;

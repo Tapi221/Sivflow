@@ -25,7 +25,7 @@ interface CalendarMiniViewProps {
   accentColor?: string;
 }
 
-const toDate = (value: any): Date | null => {
+const toDate = (value: unknown): Date | null => {
   if (!value) return null;
   if (typeof value?.toDate === 'function') {
     const d = value.toDate();

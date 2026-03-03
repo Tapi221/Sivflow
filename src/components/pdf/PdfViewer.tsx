@@ -63,7 +63,7 @@ interface PdfViewerProps {
 }
 
 interface PdfPageProps {
-  pdf: any;
+  pdf: unknown;
   pageNumber: number;
   scale: number;
   opaqueCanvas: boolean;
@@ -112,7 +112,7 @@ function PdfPage({
     let cancelled = false;
     pdf
       .getPage(pageNumber)
-      .then((page: any) => {
+      .then((page: unknown) => {
         if (cancelled) return;
         const viewport = page.getViewport({ scale: 1 });
         const nextSize = { width: viewport.width, height: viewport.height };
@@ -158,7 +158,7 @@ function PdfPage({
   useEffect(() => {
     if (!pdf || !shouldRender || scale <= 0) return;
     let cancelled = false;
-    let renderTask: any | null = null;
+    let renderTask: unknown | null = null;
 
     (async () => {
       try {
@@ -186,7 +186,7 @@ function PdfPage({
           setRendered(true);
           setError(null);
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         if (cancelled) return;
         const msg = String(err?.message ?? '');
         if (msg.includes('cancelled') || msg.includes('Rendering cancelled')) return;
@@ -488,7 +488,7 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(funct
 
   useEffect(() => {
   let cancelled = false;
-  let loadingTask: any | null = null;
+  let loadingTask: unknown | null = null;
 
   // 既存 doc の破棄
   if (docRef.current?.destroy) {
@@ -538,7 +538,7 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(funct
   });
 
   const buildGetDocumentParams = async () => {
-    const params: any = {
+    const params: unknown = {
       enableXfa,
       useSystemFonts,
       cMapUrl,
@@ -591,7 +591,7 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(funct
       pageRefs.current = new Array(pdf.numPages || 0).fill(null);
       visibilityRatiosRef.current = {};
       setError(null);
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (cancelled) return;
 
       const msg = String(err?.message ?? err ?? '');

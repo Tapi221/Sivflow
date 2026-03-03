@@ -39,7 +39,7 @@ describe('IndexedDBRebuildOrchestrator', () => {
 
   it('continues rebuild with degraded success when one item fails', async () => {
     const oldDb = { close: vi.fn(), name: 'FlashcardMasterDB_user-1' };
-    const upsert = vi.fn(async (_table: string, data: any) => {
+    const upsert = vi.fn(async (_table: string, data: unknown) => {
       if (data?.id === 'bad-card') {
         throw new Error('bad payload');
       }
@@ -57,7 +57,7 @@ describe('IndexedDBRebuildOrchestrator', () => {
       cardRelations: {},
       projectMaps: {},
       upsert,
-      transaction: vi.fn(async (_mode: string, _tables: any[], fn: () => Promise<void>) => {
+      transaction: vi.fn(async (_mode: string, _tables: unknown[], fn: () => Promise<void>) => {
         await fn();
       }),
     };

@@ -34,7 +34,7 @@ describe('useReliableFileUpload', () => {
 
     try {
       await result.current.uploadFile(largeFile, pathGen);
-    } catch (e: any) {
+    } catch (e: unknown) {
       expect(e.message).toContain('ファイルサイズが大きすぎます');
     }
 
@@ -50,7 +50,7 @@ describe('useReliableFileUpload', () => {
 
     try {
       await result.current.uploadFile(textFile, pathGen, { type: 'card_image' });
-    } catch (e: any) {
+    } catch (e: unknown) {
       expect(e.message).toContain('サポートされていないファイル形式です');
     }
 

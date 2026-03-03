@@ -57,7 +57,7 @@ export class OperationQueueService {
     entity: 'card' | 'folder' | 'asset',
     targetId: string, 
     operationType: OperationType, 
-    data: any, 
+    data: unknown, 
     priority: QueuePriority = 'medium'
   ): Promise<void> {
     const db = await getLocalDb();
@@ -119,7 +119,7 @@ export class OperationQueueService {
       entity: 'card' | 'folder' | 'asset', 
       targetId: string, 
       op: OperationType, 
-      data: any, 
+      data: unknown, 
       priority: QueuePriority
   ) {
       const newItem: SyncQueueItem = {
@@ -234,7 +234,7 @@ export class OperationQueueService {
   /**
    * Failure Handling with Backoff & DLQ
    */
-  private async handleFailure(item: SyncQueueItem, error: any): Promise<void> {
+  private async handleFailure(item: SyncQueueItem, error: unknown): Promise<void> {
       const newRetryCount = (item.retryCount || 0) + 1;
 
       if (newRetryCount > this.MAX_RETRIES) {
@@ -266,7 +266,7 @@ export class OperationQueueService {
    * In Phase 1, we just delete from queue and log error.
    * Future: Move to dedicated DLQ table.
    */
-  private async moveToDLQ(item: SyncQueueItem, error: any): Promise<void> {
+  private async moveToDLQ(item: SyncQueueItem, error: unknown): Promise<void> {
       console.error(`[Queue] Item ${item.id} moved to DLQ after ${this.MAX_RETRIES} retries.`, error, item);
       
       // In a real implementation: localDb.dlq.add({ ...item, error: ... })

@@ -64,7 +64,7 @@ export class SyncServiceV2 implements ISyncService {
         conflicts: 0,
         errors: []
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: false,
         uploaded: 0,
@@ -174,7 +174,7 @@ export class SyncServiceV2 implements ISyncService {
             await this.applyRemoteChanges(changes);
           }
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         this.telemetry.log('error', 'Task failed', { taskId: task.id }, error as Error);
         
         // 【正常遷移: Delta Sync 失敗 → Full Sync】
@@ -259,7 +259,7 @@ export class SyncServiceV2 implements ISyncService {
   /**
    * リモートの変更をローカルDBに適用
    */
-  private async applyRemoteChanges(changes: any[]): Promise<void> {
+  private async applyRemoteChanges(changes: unknown[]): Promise<void> {
     // フォルダの循環参照チェック用に全フォルダを一度取得
     const allFolders = await this.localDB.folders.toArray();
 
@@ -456,7 +456,7 @@ this.telemetry.log('info', 'Full resync completed successfully');
           throw new Error('DEVICE_REVOKED: This device has been removed from the account.');
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // ネットワークやパーミッション起因のエラーもACCESS_DENIED扱いすべきか検討が必要だが、
       // ここでは明示的なRevokeエラーのみを扱う。
       if (error.message?.includes('DEVICE_REVOKED')) {
@@ -548,7 +548,7 @@ this.telemetry.log('info', 'Full resync completed successfully');
   /**
    * キュー処理実行 (Syncを呼び出す)
    */
-  async processQueue(): Promise<{ processed: number; errors: any[] }> {
+  async processQueue(): Promise<{ processed: number; errors: unknown[] }> {
     await this.sync('background');
     return { processed: 0, errors: [] };
   }
@@ -556,7 +556,7 @@ this.telemetry.log('info', 'Full resync completed successfully');
   /**
    * セキュリティ状態の監視開始 for AuthContext
    */
-  monitorSecurity(callback: (state: { isLocked: boolean; requires2FA: boolean; alerts: any[] }) => void): () => void {
+  monitorSecurity(callback: (state: { isLocked: boolean; requires2FA: boolean; alerts: unknown[] }) => void): () => void {
     this.securityMonitor.startMonitoring(callback);
     return () => this.securityMonitor.stopMonitoring();
   }

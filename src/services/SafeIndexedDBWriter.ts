@@ -33,7 +33,7 @@ export class SafeIndexedDBWriter {
     
     try {
       return await operation();
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.name === 'QuotaExceededError') {
         // 状態遷移
         StorageStateManager.setReadOnly(userId, context);

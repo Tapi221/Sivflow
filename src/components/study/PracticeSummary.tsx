@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
 type Props = {
-  practiceState: any;
+  practiceState: unknown;
   handlePracticeContinueRound: () => void;
   handlePracticeExit: (reason?: string) => void;
   ratingLabels: Record<string, string>;

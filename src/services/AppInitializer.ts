@@ -172,7 +172,7 @@ export class AppInitializer {
     let rebuildResult: Awaited<ReturnType<typeof IndexedDBRebuildOrchestrator.rebuild>>;
     try {
       rebuildResult = await IndexedDBRebuildOrchestrator.rebuild(userId, reason);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(`[AppInit:${userId}] Rebuild FAILED:`, error.message || error);
       throw error; // 上位で捕捉されることを期待
     }

@@ -48,10 +48,10 @@ interface FolderTreeWithCardsProps {
   onFolderSelect: (folderId: string | null) => void;
   onItemSelect: (item: SelectedExplorerItem) => void;
   onCreateFolder?: (name: string, parentId?: string) => Promise<string>;
-  onUpdateFolder?: (folderId: string, data: any) => Promise<void>;
+  onUpdateFolder?: (folderId: string, data: unknown) => Promise<void>;
   onDeleteFolder?: (folderId: string) => Promise<void>;
-  onCreateCard?: (data: any) => Promise<any>;
-  onUpdateCard?: (cardId: string, data: any) => Promise<void>;
+  onCreateCard?: (data: unknown) => Promise<any>;
+  onUpdateCard?: (cardId: string, data: unknown) => Promise<void>;
   onDeleteCard?: (cardId: string) => Promise<void>;
   moveCardToFolder?: (cardId: string, targetFolderId: string) => Promise<void>;
   reorderCards?: (folderId: string, cardIds: string[]) => Promise<void>;
@@ -554,7 +554,7 @@ export function FolderTreeWithCards({
           await saveDocumentBlob(docId, file, { userId: currentUser.uid });
           await db.documents.put(baseDoc as any);
           nextOrderIndex += 1;
-        } catch (localErr: any) {
+        } catch (localErr: unknown) {
           console.error('[FolderTreeWithCards] Failed to prepare local PDF source', {
             error: localErr,
             docId,
@@ -585,7 +585,7 @@ export function FolderTreeWithCards({
               blobUrl: (latestDoc as any)?.blobUrl ?? latestDoc?.localUrl ?? null,
             });
           }
-        } catch (err: any) {
+        } catch (err: unknown) {
           console.error('[FolderTreeWithCards] PDF upload failed', err);
           try {
             await db.updateItem('documents', docId, {
@@ -676,7 +676,7 @@ export function FolderTreeWithCards({
           await saveDocumentBlob(docId, file, { userId: currentUser.uid });
           await db.documents.put(baseDoc as any);
           nextOrderIndex += 1;
-        } catch (localErr: any) {
+        } catch (localErr: unknown) {
           console.error('[FolderTreeWithCards] Failed to prepare local PPTX source', {
             error: localErr,
             docId,
@@ -708,7 +708,7 @@ export function FolderTreeWithCards({
               blobUrl: (latestDoc as any)?.blobUrl ?? latestDoc?.localUrl ?? null,
             });
           }
-        } catch (err: any) {
+        } catch (err: unknown) {
           console.error('[FolderTreeWithCards] PPTX upload failed', err);
           try {
             const failedAt = new Date();
@@ -852,7 +852,7 @@ export function FolderTreeWithCards({
       }
       // スクロール表示のみ（編集開始はしない）
       setPendingScrollId(createdFolderId);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setOptimisticFolders((prev) => prev.filter((folder) => getFolderId(folder) !== tempId));
       optimisticFolderNameRef.current.delete(tempId);
       setPendingScrollId((prev) => (prev === tempId ? null : prev));
@@ -920,7 +920,7 @@ export function FolderTreeWithCards({
       }
       // スクロール表示のみ（編集開始はしない）
       setPendingScrollId(createdCardId);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setOptimisticCards((prev) => prev.filter((card) => card.id !== tempId));
       optimisticCardNameRef.current.delete(tempId);
       setPendingScrollId((prev) => (prev === tempId ? null : prev));
@@ -1032,7 +1032,7 @@ export function FolderTreeWithCards({
       }
       // 成功時だけ閉じる
       closeRename();
-    } catch (err: any) {
+    } catch (err: unknown) {
       // 失敗時はエラー表示のみで、editingId は維持して再編集可能にする
       toastError?.(err?.message || '名前の変更に失敗しました');
     } finally {

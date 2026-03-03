@@ -139,7 +139,7 @@ export const useExplorerStore = create<ExplorerState>()(
         bookmarkedFilter: state.bookmarkedFilter,
         draftFilter: state.draftFilter,
       }),
-      migrate: (persistedState: any) => {
+      migrate: (persistedState: unknown) => {
         if (!persistedState || typeof persistedState !== 'object') return persistedState;
         const next = { ...persistedState };
 

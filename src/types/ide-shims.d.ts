@@ -7,24 +7,24 @@
 declare module '@hello-pangea/dnd' {
     export * from '@hello-pangea/dnd';
     // Fallback if @hello-pangea/dnd types aren't perfect match or available
-    export const Draggable: any;
-    export const Droppable: any;
-    export const DragDropContext: any;
-    export const DroppableProvided: any;
-    export const DraggableProvided: any;
-    export const DraggableStateSnapshot: any;
-    export const DroppableStateSnapshot: any;
-    export const DropResult: any;
+    export const Draggable: unknown;
+    export const Droppable: unknown;
+    export const DragDropContext: unknown;
+    export const DroppableProvided: unknown;
+    export const DraggableProvided: unknown;
+    export const DraggableStateSnapshot: unknown;
+    export const DroppableStateSnapshot: unknown;
+    export const DropResult: unknown;
 }
 
 // Fix for: "Module 'firebase/storage' ... not found"
 declare module 'firebase/storage' {
-    export function getStorage(app?: any, bucketUrl?: string): any;
-    export function ref(storage: any, url?: string): any; // url or path
-    export function getDownloadURL(ref: any): Promise<string>;
-    export function uploadBytes(ref: any, data: Blob | Uint8Array | ArrayBuffer, metadata?: any): Promise<any>;
-    export function uploadBytesResumable(ref: any, data: Blob | Uint8Array | ArrayBuffer, metadata?: any): any;
-    export function deleteObject(ref: any): Promise<void>;
+    export function getStorage(app?: unknown, bucketUrl?: string): unknown;
+    export function ref(storage: unknown, url?: string): unknown; // url or path
+    export function getDownloadURL(ref: unknown): Promise<string>;
+    export function uploadBytes(ref: unknown, data: Blob | Uint8Array | ArrayBuffer, metadata?: unknown): Promise<any>;
+    export function uploadBytesResumable(ref: unknown, data: Blob | Uint8Array | ArrayBuffer, metadata?: unknown): unknown;
+    export function deleteObject(ref: unknown): Promise<void>;
 }
 
 // Fix for: "Module 'firebase/firestore' ... not found"
@@ -42,7 +42,7 @@ declare module 'firebase/firestore' {
         toJSON(): { seconds: number; nanoseconds: number };
     }
     // Add other firestore exports if needed, but Timestamp is the main one used in types/index.ts
-    export function getFirestore(app?: any): any;
+    export function getFirestore(app?: unknown): unknown;
     // ... add more as discovered missing
 }
 

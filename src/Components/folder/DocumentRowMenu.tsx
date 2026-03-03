@@ -9,19 +9,19 @@ import type { Card, DocumentItem } from '@/types';
 
 interface DocumentRowMenuProps {
   doc: DocumentItem;
-  folders: any[];
+  folders: unknown[];
   cards: Card[];
   documents: DocumentItem[];
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  onUpdateFolder?: (folderId: string, data: any) => Promise<void>;
+  onUpdateFolder?: (folderId: string, data: unknown) => Promise<void>;
   isPinned?: boolean;
   onTogglePin?: () => void;
   children: React.ReactNode;
 }
 
-const getFolderId = (f: any) => f?.id ?? f?.folderId ?? null;
-const getFolderName = (f: any) => f?.folderName ?? f?.folder_name ?? '';
+const getFolderId = (f: unknown) => f?.id ?? f?.folderId ?? null;
+const getFolderName = (f: unknown) => f?.folderName ?? f?.folder_name ?? '';
 const isSoftDeleted = (item?: { isDeleted?: boolean; is_deleted?: boolean } | null) =>
   Boolean(item?.isDeleted ?? item?.is_deleted);
 
@@ -74,7 +74,7 @@ export function DocumentRowMenu({
     const folder = folders.find(f => getFolderId(f) === folderId);
     if (!folder) return;
     const existing = folder?.notePdfs ?? folder?.note_pdfs ?? [];
-    const next = existing.map((p: any) => (p.id === doc.id ? { ...p, name } : p));
+    const next = existing.map((p: unknown) => (p.id === doc.id ? { ...p, name } : p));
     await onUpdateFolder(folderId, { notePdfs: next, note_pdfs: next });
   };
 
@@ -83,7 +83,7 @@ export function DocumentRowMenu({
     const folder = folders.find(f => getFolderId(f) === folderId);
     if (!folder) return;
     const existing = folder?.notePdfs ?? folder?.note_pdfs ?? [];
-    const next = existing.filter((p: any) => p.id !== doc.id);
+    const next = existing.filter((p: unknown) => p.id !== doc.id);
     if (next.length === existing.length) return;
     await onUpdateFolder(folderId, { notePdfs: next, note_pdfs: next });
   };
@@ -112,7 +112,7 @@ export function DocumentRowMenu({
       await db.updateItem('documents', doc.id, { title: nextName.trim(), updatedAt: new Date() });
       await updateNotePdfName(doc.folderId, nextName.trim());
       toastSuccess?.('ドキュメント名を更新しました');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('[DocumentRowMenu] rename failed', err);
       toastError(err?.message || 'ドキュメント名の変更に失敗しました');
     }
@@ -149,7 +149,7 @@ export function DocumentRowMenu({
       await removeNotePdfFromFolder(doc.folderId);
       await addNotePdfToFolder(targetFolderId, name);
       toastSuccess?.('ドキュメントを移動しました');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('[DocumentRowMenu] move failed', err);
       toastError(err?.message || 'ドキュメントの移動に失敗しました');
     }
@@ -166,7 +166,7 @@ export function DocumentRowMenu({
       const db = await getLocalDb(currentUser.uid);
       await db.softDelete('documents', doc.id);
       await removeNotePdfFromFolder(doc.folderId);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('[DocumentRowMenu] delete failed', err);
       toastError(err?.message || 'ドキュメントの削除に失敗しました');
     }

@@ -169,7 +169,7 @@ export interface UploadMetadata {
     | 'card_audio'
     | 'pdf'
     | 'pptx'
-    | { type: string; [key: string]: any };
+    | { type: string; [key: string]: unknown };
 
   status: 'pending' | 'uploading' | 'ready' | 'failed';
 
@@ -450,7 +450,7 @@ export type Card = BaseEntity & {
   completedDate?: Date | Timestamp;
 
   // Recovery data persistence（退避用）
-  _rescueRaw?: any;
+  _rescueRaw?: unknown;
 };
 
 export type DocumentKind = 'pdf' | 'pptx'; // 将来 'md' とか増やしたいならここを拡張

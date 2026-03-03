@@ -12,7 +12,7 @@ import type { UploadMetadata } from '@/types';
 export const cleanupFailedUploads = async (userId: string) => {
   const result = {
     deleted: 0,
-    errors: [] as { id: string; error: any }[]
+    errors: [] as { id: string; error: unknown }[]
   };
 
   try {
@@ -53,7 +53,7 @@ export const cleanupFailedUploads = async (userId: string) => {
           const fileRef = ref(storage, data.storagePath);
           try {
             await deleteObject(fileRef);
-          } catch (e: any) {
+          } catch (e: unknown) {
             // ファイルが既に存在しない場合は無視してメタデータ削除に進む
             if (e.code !== 'storage/object-not-found') {
               throw e;

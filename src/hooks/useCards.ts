@@ -22,7 +22,7 @@ function isCardDeleted(
   return Boolean(card.isDeleted ?? card.is_deleted ?? (card as any).deleted ?? deletedAt);
 }
 
-function hasBlocksContent(blocks?: any[]): boolean {
+function hasBlocksContent(blocks?: unknown[]): boolean {
   return blocks?.some(b => {
     if (b.type === 'text') return b.content?.trim();
     if (b.type === 'markdown') return b.markdown?.trim();
@@ -30,7 +30,7 @@ function hasBlocksContent(blocks?: any[]): boolean {
     if (b.type === 'image') return b.images?.length > 0;
     if (b.type === 'audio') return b.audios?.length > 0;
     if (b.type === 'math') return b.math?.latex?.trim();
-    if (b.type === 'reference') return b.references?.some((r: any) => r.url?.trim());
+    if (b.type === 'reference') return b.references?.some((r: unknown) => r.url?.trim());
     return false;
   }) || false;
 }
@@ -50,7 +50,7 @@ export function useCards(folderId?: string) {
         const db = await getLocalDb(currentUser.uid);
         const all = await db.getAllCards(); 
         return all;
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(`[useCards] Error: ${err.message}`);
         return [];
       }
@@ -89,7 +89,7 @@ export function useCards(folderId?: string) {
     if (!currentUser) throw new Error('認証が必要です');
 
     // Validation: カードが完全に空（タイトルもコンテンツもタグもない）場合は保存を拒否
-    const hasBlocksContent = (blocks?: any[]) => {
+    const hasBlocksContent = (blocks?: unknown[]) => {
       return blocks?.some(b => {
         if (b.type === 'text') return b.content?.trim();
         if (b.type === 'markdown') return b.markdown?.trim();
@@ -97,7 +97,7 @@ export function useCards(folderId?: string) {
         if (b.type === 'image') return b.images?.length > 0;
         if (b.type === 'audio') return b.audios?.length > 0;
         if (b.type === 'math') return b.math?.latex?.trim();
-        if (b.type === 'reference') return b.references?.some((r: any) => r.url?.trim());
+        if (b.type === 'reference') return b.references?.some((r: unknown) => r.url?.trim());
         return false;
       }) || false;
     };

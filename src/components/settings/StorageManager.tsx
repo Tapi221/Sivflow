@@ -62,7 +62,7 @@ export const StorageManager = () => {
           if (result.errors.length > 0) {
             console.warn('Cleanup errors:', result.errors);
           }
-      } catch (e: any) {
+      } catch (e: unknown) {
           console.error("Cleanup failed", e);
           setError(e.message);
       } finally {
@@ -80,7 +80,7 @@ export const StorageManager = () => {
         try {
             const storageRef = ref(storage, file.storagePath);
             await deleteObject(storageRef);
-        } catch (e: any) {
+        } catch (e: unknown) {
             if (e.code !== 'storage/object-not-found') {
                 console.warn("Storage delete failed", e);
                 // Continue to delete metadata record even if storage fails (orphan cleanup)

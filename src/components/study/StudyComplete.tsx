@@ -5,7 +5,7 @@ import { createPageUrl } from '@/utils';
 import { StampRally } from '@/components/study/StampRally';
 import { RatingCountTiles } from '@/components/study/RatingCountTiles';
 
-type Tile = { rating: string; score: number; Icon: any };
+type Tile = { rating: string; score: number; Icon: unknown };
 
 type Props = {
   stampRallyStreak: number;

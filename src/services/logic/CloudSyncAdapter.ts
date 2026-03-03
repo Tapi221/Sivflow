@@ -21,7 +21,7 @@ import { sanitizeForLog } from '@/utils/logSanitizer';
  * ※ 配列内の undefined も消す（Firestore 的にアウト）
  * ※ Date / Timestamp はそのまま
  */
-function deepStripUndefined(input: any): any {
+function deepStripUndefined(input: unknown): unknown {
   if (input === undefined) return undefined;
   if (input === null) return null;
 
@@ -33,7 +33,7 @@ function deepStripUndefined(input: any): any {
   }
 
   if (typeof input === 'object') {
-    const out: any = {};
+    const out: unknown = {};
     for (const [k, v] of Object.entries(input)) {
       const cleaned = deepStripUndefined(v);
       if (cleaned !== undefined) out[k] = cleaned;
@@ -48,7 +48,7 @@ function deepStripUndefined(input: any): any {
  * serverTimestamp が使える環境なら使う。無理ならクライアント時刻で妥協。
  * （大規模運用なら最終的には serverTimestamp に統一したいが、まず死なないのが最優先）
  */
-function cloudUpdatedAt(): any {
+function cloudUpdatedAt(): unknown {
   const fn = (Firestore as any).serverTimestamp;
   if (typeof fn === 'function') return fn();
   return Timestamp.now();
@@ -87,9 +87,9 @@ function estimateBytes(value: unknown): number {
   }
 }
 
-function chunkChangesBySize(changes: any[]): any[][] {
-  const chunks: any[][] = [];
-  let current: any[] = [];
+function chunkChangesBySize(changes: unknown[]): unknown[][] {
+  const chunks: unknown[][] = [];
+  let current: unknown[] = [];
   let bytes = 0;
 
   for (const ch of changes) {
@@ -121,7 +121,7 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
     this.userId = userId;
   }
 
-  private sanitizeForCloud(type: string, data: any): any {
+  private sanitizeForCloud(type: string, data: unknown): unknown {
     if (!data) return data;
 
     // ✅ 全エンティティ共通: undefined を深く除去
@@ -132,7 +132,7 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
     return cleaned;
   }
 
-  private sanitizeFromCloud(type: string, data: any): any {
+  private sanitizeFromCloud(type: string, data: unknown): unknown {
     if (!data) return data;
     const stripped = deepStripUndefined(data);
     const sanitized = sanitizeBlobUrlsDeep(stripped);
@@ -149,9 +149,9 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
     return sanitized.value;
   }
 
-  async pullDiff(since: number): Promise<{ changes: any[]; serverTime: number }> {
+  async pullDiff(since: number): Promise<{ changes: unknown[]; serverTime: number }> {
     console.log('🔄 [CloudSyncAdapter] pullDiff START', { since, userId: this.userId });
-    const changes: any[] = [];
+    const changes: unknown[] = [];
 
     if (!firestoreDb) {
       console.warn('⚠️ [CloudSyncAdapter] firestoreDb is not initialized. Skipping pullDiff.');
@@ -160,17 +160,17 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
 
     try {
       const sinceTimestamp = Timestamp.fromMillis(since);
-      const startAfterFn = (Firestore as any).startAfter as undefined | ((snapshot: any) => any);
+      const startAfterFn = (Firestore as any).startAfter as undefined | ((snapshot: unknown) => any);
 
       // cards
       {
         const ref = collection(firestoreDb, `users/${this.userId}/cards`);
 
-        let lastDoc: any = null;
+        let lastDoc: unknown = null;
         let total = 0;
 
         while (true) {
-          const constraints: any[] = [
+          const constraints: unknown[] = [
             where('updatedAt', '>', sinceTimestamp),
             orderBy('updatedAt', 'asc'),
             limit(PAGE_SIZE),
@@ -199,11 +199,11 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
       {
         const ref = collection(firestoreDb, `users/${this.userId}/folders`);
 
-        let lastDoc: any = null;
+        let lastDoc: unknown = null;
         let total = 0;
 
         while (true) {
-          const constraints: any[] = [
+          const constraints: unknown[] = [
             where('updatedAt', '>', sinceTimestamp),
             orderBy('updatedAt', 'asc'),
             limit(PAGE_SIZE),
@@ -231,7 +231,7 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
         const settingsRef = doc(firestoreDb, 'userSettings', this.userId);
         const snap = await getDoc(settingsRef);
         if (snap.exists()) {
-          const data: any = this.sanitizeFromCloud('userSetting', snap.data());
+          const data: unknown = this.sanitizeFromCloud('userSetting', snap.data());
           const updatedAt =
             data?.updatedAt?.toMillis?.() ??
             data?.updatedAt?.getTime?.() ??
@@ -250,7 +250,7 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
     }
   }
 
-  async pushBatch(changes: any[]): Promise<{ successIds: string[]; failedIds: string[]; error?: any }> {
+  async pushBatch(changes: unknown[]): Promise<{ successIds: string[]; failedIds: string[]; error?: unknown }> {
     console.log(`📤 [CloudSyncAdapter] pushBatch START. Count: ${changes.length}`);
     const successIds: string[] = [];
     const failedIds: string[] = [];
@@ -266,7 +266,7 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
       }
 
       const chunks = chunkChangesBySize(changes);
-      let firstError: any = undefined;
+      let firstError: unknown = undefined;
 
       for (const chunk of chunks) {
         const batch = writeBatch(firestoreDb);
@@ -330,7 +330,7 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
   }
 
   async pullFull(entityIds: string[]): Promise<any[]> {
-    const results: any[] = [];
+    const results: unknown[] = [];
 
     for (const id of entityIds) {
       if (!firestoreDb) throw new Error('Firebase Firestore is not initialized.');

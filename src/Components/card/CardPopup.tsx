@@ -7,11 +7,11 @@ import { MobileScalableCard } from './MobileScalableCard';
 import { CANONICAL_CARD_WIDTH, CARD_SAFE_PADDING_PX } from './constants';
 
 interface CardPopupProps {
-  card: any;
+  card: unknown;
   onClose: () => void;
-  onEdit?: (card: any) => void;
-  onToggleUncertainty?: (card: any) => void;
-  onToggleBookmark?: (card: any) => void;
+  onEdit?: (card: unknown) => void;
+  onToggleUncertainty?: (card: unknown) => void;
+  onToggleBookmark?: (card: unknown) => void;
 }
 
 export function CardPopup({ 

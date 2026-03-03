@@ -15,7 +15,7 @@ export interface SyncError {
   stack?: string;
   retryCount: number;
   retryable: boolean;
-  metadata?: any;
+  metadata?: unknown;
 }
 
 /**
@@ -59,7 +59,7 @@ export interface SyncQueueItem {
   // Legacy compatibility: action field is deprecated but kept if needed for migration
   action?: 'create' | 'update' | 'delete'; 
 
-  payload: any;
+  payload: unknown;
   priority: 'critical' | 'high' | 'medium' | 'low';
   
   createdAt: number;
@@ -85,8 +85,8 @@ export interface SyncConflict {
   id: string;
   entityId: string;
   entityType: 'card' | 'folder';
-  autoMerged: any;
-  conflicts: Record<string, { local: any; remote: any }>;
+  autoMerged: unknown;
+  conflicts: Record<string, { local: unknown; remote: unknown }>;
   detectedAt: number;
 }
 
@@ -95,8 +95,8 @@ export interface SyncConflict {
  * 2-way merge（base=local）の結果を表現
  */
 export interface DiffResult {
-  autoMerged: any;
-  conflicts: Record<string, { local: any; remote: any }>;
+  autoMerged: unknown;
+  conflicts: Record<string, { local: unknown; remote: unknown }>;
 }
 
 /**

@@ -16,12 +16,12 @@ const SCORE_TO_RATING: Record<number, 'forgot' | 'vague' | 'remembered' | 'easy'
 };
 
 type Params = {
-  studyCards: any[];
-  updateCard?: ((id: string, patch: any) => Promise<any>) | null;
-  currentUser: any;
-  settings: any;
-  createStudyLogMutation: any;
-  createLevelHistoryMutation: any;
+  studyCards: unknown[];
+  updateCard?: ((id: string, patch: unknown) => Promise<any>) | null;
+  currentUser: unknown;
+  settings: unknown;
+  createStudyLogMutation: unknown;
+  createLevelHistoryMutation: unknown;
 };
 
 const createSessionId = () => {

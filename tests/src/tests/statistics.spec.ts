@@ -7,7 +7,7 @@ type MockCard = {
   reviewCount?: number;
   memoryStability?: number;
   lastReviewAt?: Date;
-  [key: string]: any;
+  [key: string]: unknown;
 };
 
 console.log('Running Statistics Logic Tests...');
@@ -20,7 +20,7 @@ const test = (name: string, fn: () => void) => {
     fn();
     console.log(`✅ [PASS] ${name}`);
     passed++;
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error(`❌ [FAIL] ${name}`);
     console.error(e.message);
     failed++;

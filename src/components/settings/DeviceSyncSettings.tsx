@@ -115,7 +115,7 @@ export const DeviceSyncSettings: React.FC = () => {
     fetchStats();
   }, [currentUser]);
 
-  const formatDate = (date: any) => {
+  const formatDate = (date: unknown) => {
     if (!date) return '未同期';
     const d = date instanceof Timestamp ? date.toDate() : new Date(date);
     return format(d, 'yyyy/MM/dd HH:mm', { locale: ja });

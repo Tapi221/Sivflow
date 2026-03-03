@@ -81,7 +81,7 @@ export class HistoryCompressionService {
   /**
    * イベントを日単位に圧縮
    */
-  private compressByDay(events: any[], userId: string): CompressedHistory[] {
+  private compressByDay(events: unknown[], userId: string): CompressedHistory[] {
     // 日ごとにグループ化
     const byDay = new Map<string, any[]>();
     

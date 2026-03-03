@@ -17,7 +17,7 @@ function CardItem({
   getTagColor,
   enableDrag,
   index,
-}: any) {
+}: unknown) {
   const stability = normalizeMemoryStability(
     card.memoryStability ?? card.memory_stability,
     card.currentLevel ?? card.current_level ?? card.level
@@ -68,10 +68,10 @@ function CardItem({
   }
 
   const renderCardContent = (
-    ref: any = null,
-    draggableProps: any = {},
-    dragHandleProps: any = {},
-    style: any = {},
+    ref: unknown = null,
+    draggableProps: unknown = {},
+    dragHandleProps: unknown = {},
+    style: unknown = {},
     isDragging: boolean = false
   ) => (
     <div
@@ -123,7 +123,7 @@ function CardItem({
                 </div>
               )}
 
-              {userTags.map((t: any, i: number) => (
+              {userTags.map((t: unknown, i: number) => (
                 <span key={i} className={cn('px-2 py-1 rounded-full font-bold border text-[10px]', t.color)}>
                   {t.label}
                 </span>
@@ -198,7 +198,7 @@ export default function CardList({
   onDragEnd,
   enableDrag = false,
   viewMode = 'grid',
-}: any) {
+}: unknown) {
   void onToggleUncertainty;
   void onToggleBookmark;
   void viewMode;
@@ -212,7 +212,7 @@ export default function CardList({
             ref={provided.innerRef}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           >
-            {cards.map((card: any, index: number) => (
+            {cards.map((card: unknown, index: number) => (
               <CardItem
                 key={card.id}
                 card={card}

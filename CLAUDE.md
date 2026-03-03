@@ -1,35 +1,40 @@
-# Claude Code Operational Rules
+# Claude Code 運用ルール
 
-## 1. Token Efficiency (MANDATORY)
-- Never read entire files unless explicitly instructed.
-- Always search first (rg or equivalent) before opening files.
-- When opening a file, read a maximum of 40 lines unless otherwise specified.
-- Do not perform exploratory reading across multiple files.
-- Do not repeat or summarize investigation steps.
+## 1. トークン効率（必須）
+- 明示的に指示されない限り、ファイル全体を読まない。
+- ファイルを開く前に必ず検索（`rg` など同等手段）を行う。
+- ファイルを開く場合、特に指定がなければ最大 40 行まで読む。
+- 複数ファイルにまたがる探索的な読み方をしない。
+- 調査手順の説明や要約を繰り返さない。
 
-## 2. Investigation Scope
-- Only read files directly related to the symbol or function mentioned.
-- Do not inspect unrelated components.
-- Avoid reading build artifacts, dist, docs, public, or node_modules.
+## 2. 調査範囲
+- 言及されたシンボル／関数に直接関係するファイルだけを読む。
+- 無関係なコンポーネントは調べない。
+- ビルド生成物や `dist` / `docs` / `public` / `node_modules` は読まない。
 
-## 3. Response Format
-- Provide:
-  1) Root cause
-  2) Exact lines involved
-  3) Minimal patch (copy-paste ready)
-- No narration of investigation process.
+## 3. 回答フォーマット
+以下を必ず提示する：
+1) 根本原因  
+2) 関係する正確な行（該当箇所）  
+3) 最小限のパッチ（コピペ可能）
 
-## 4. Large File Policy
-If a file exceeds 500 lines:
-- Ask for a specific symbol or function name before reading.
-- Never scan the entire file.
+- 調査プロセスのナレーションは書かない。
 
-## 5. Refactoring
-- Prefer minimal diff.
-- Avoid architectural rewrites unless explicitly requested.
+## 4. 大きなファイルの扱い
+ファイルが 500 行を超える場合：
+- 読む前に、対象のシンボル名または関数名を確認する。
+- ファイル全体のスキャンはしない。
 
-## 6. Safety
-- Never modify configuration or environment files unless explicitly asked.
-- Never auto-generate large new files.
+## 5. リファクタリング方針
+- 差分は最小を優先する。
+- 明示的に求められない限り、アーキテクチャの作り直しはしない。
 
-Failure to follow these rules is considered incorrect behavior.
+## 6. 安全性
+- 明示的に頼まれない限り、設定ファイルや環境ファイルは変更しない。
+- 大きな新規ファイルを自動生成しない。
+
+これらのルールに従わない場合は、誤った振る舞いとみなす。
+
+## 禁止事項
+- `as any` の使用禁止
+- 500 行を超えるファイルの作成禁止

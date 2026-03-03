@@ -52,7 +52,7 @@ class PersistentOfflineQueue {
     return 'DOC';
   }
 
-  private isDocumentUploadReady(doc: any): boolean {
+  private isDocumentUploadReady(doc: unknown): boolean {
     if (!doc) return false;
     if (doc.uploadStatus === 'ready') return true;
     if (typeof doc.remoteUrl === 'string' && doc.remoteUrl.trim().length > 0) return true;
@@ -268,10 +268,10 @@ class PersistentOfflineQueue {
             const pendingAssetSyncItems = await localDb.syncQueue
               .where('targetId')
               .equals(updatedImage.id)
-              .filter((q: any) => q.entity === 'asset')
+              .filter((q: unknown) => q.entity === 'asset')
               .toArray();
             if (pendingAssetSyncItems.length > 0) {
-              await localDb.syncQueue.bulkDelete(pendingAssetSyncItems.map((q: any) => q.id));
+              await localDb.syncQueue.bulkDelete(pendingAssetSyncItems.map((q: unknown) => q.id));
             }
 
             if (import.meta.env.DEV) {

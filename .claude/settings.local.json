@@ -7,7 +7,8 @@
       "Bash(node node_modules/vite/bin/vite.js build)",
       "Bash(git -C c:/Manifolmia stash list)",
       "Bash(grep -n \"CardView\\\\|handleViewCards\" /c/Manifolmia/src/Components/folder/*.tsx)",
-      "Bash(grep -r \"export.*\" c:/Manifolmia/src/Components/card/*.tsx c:/Manifolmia/src/Components/card/*.jsx)"
+      "Bash(grep -r \"export.*\" c:/Manifolmia/src/Components/card/*.tsx c:/Manifolmia/src/Components/card/*.jsx)",
+      "Bash(npx tsc --noEmit --skipLibCheck)"
     ]
   }
 }

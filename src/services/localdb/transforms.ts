@@ -1,9 +1,10 @@
-import { normalizeCard, normalizeFolder, extractTextFromBlocks } from '../../utils';
+import { normalizeFolder, extractTextFromBlocks } from '../../utils';
 import { denormalizeUploadedImages, normalizeUploadedImages, sanitizeUploadedImages } from '../../utils/imageUtils';
 import { sanitizeProfileImage } from '@/utils/profileImageSanitizer';
 import { assertImageArrayInvariant } from '../../utils/imageAssertions';
+import type { UploadedImage } from '@/types';
 
-export const denormalizeCardForStorage = (card: any) => {
+export const denormalizeCardForStorage = (card: unknown) => {
   if (!card) return card;
   const result = { ...card };
 
@@ -17,12 +18,13 @@ export const denormalizeCardForStorage = (card: any) => {
     result.answerText = extractTextFromBlocks(card.answerBlocks);
   }
 
-  const sanitizeBlockImages = (blocks: any[] | undefined) => {
+  const sanitizeBlockImages = (blocks: unknown[] | undefined) => {
     if (!Array.isArray(blocks)) return blocks;
     return blocks.map((block) => {
       if (!block || typeof block !== 'object') return block;
-      if (!Array.isArray((block as any).images)) return block;
-      const sanitizedImages = (block as any).images.map((img: any) => {
+      const blockRecord = block as Record<string, unknown>;
+      if (!Array.isArray(blockRecord.images)) return block;
+      const sanitizedImages = (blockRecord.images as unknown[]).map((img: unknown) => {
         if (!img || typeof img !== 'object') return img;
         const assetId = img.assetId ?? img.id ?? null;
         const remoteUrl =
@@ -57,34 +59,34 @@ export const denormalizeCardForStorage = (card: any) => {
   if (card.questionImages !== undefined || card.question_images !== undefined) {
     const questionImages = normalizeUploadedImages(card.questionImages ?? card.question_images ?? []);
     try {
-      assertImageArrayInvariant(questionImages as any);
+      assertImageArrayInvariant(questionImages as UploadedImage[]);
     } catch (e) {
       console.warn('[LocalDB] questionImages validation failed, but proceeding with sanitization:', e);
     }
     const cleanQuestionImages = sanitizeUploadedImages(questionImages);
-    result.questionImages = denormalizeUploadedImages(cleanQuestionImages, { case: 'camel', stripUndefined: true }) as any;
+    result.questionImages = denormalizeUploadedImages(cleanQuestionImages, { case: 'camel', stripUndefined: true });
   }
 
   if (card.answerImages !== undefined || card.answer_images !== undefined) {
     const answerImages = normalizeUploadedImages(card.answerImages ?? card.answer_images ?? []);
     try {
-      assertImageArrayInvariant(answerImages as any);
+      assertImageArrayInvariant(answerImages as UploadedImage[]);
     } catch (e) {
       console.warn('[LocalDB] answerImages validation failed, but proceeding with sanitization:', e);
     }
     const cleanAnswerImages = sanitizeUploadedImages(answerImages);
-    result.answerImages = denormalizeUploadedImages(cleanAnswerImages, { case: 'camel', stripUndefined: true }) as any;
+    result.answerImages = denormalizeUploadedImages(cleanAnswerImages, { case: 'camel', stripUndefined: true });
   }
 
   return result;
 };
 
-export const denormalizeFolderForStorage = (folder: any) => {
+export const denormalizeFolderForStorage = (folder: unknown) => {
   if (!folder) return folder;
   return { ...folder };
 };
 
-export const normalizeFolderWithSilent = (raw: any) => {
+export const normalizeFolderWithSilent = (raw: unknown) => {
   if (!raw) return raw;
   const hasSilent = raw?.silent !== undefined;
   const hasIsSilent = raw?.isSilent !== undefined || raw?.is_silent !== undefined;
@@ -94,7 +96,7 @@ export const normalizeFolderWithSilent = (raw: any) => {
   return normalizeFolder(normalizedInput);
 };
 
-export const denormalizeUserSettingsForStorage = (settings: any) => {
+export const denormalizeUserSettingsForStorage = (settings: unknown) => {
   if (!settings) return settings;
   const profileImage = sanitizeProfileImage(settings.profileImage).profileImage;
 

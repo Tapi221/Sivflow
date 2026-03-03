@@ -8,7 +8,7 @@ const TIMESTAMP_KEYS = ['createdAt', 'updatedAt', 'deletedAt', 'nextReviewDate',
 const isMissingFolderId = (folderId: unknown): boolean =>
   folderId === null || folderId === undefined || String(folderId).trim() === '';
 
-const readDeletedState = (entity: any): boolean => Boolean(entity?.isDeleted ?? entity?.is_deleted ?? entity?.deleted);
+const readDeletedState = (entity: unknown): boolean => Boolean(entity?.isDeleted ?? entity?.is_deleted ?? entity?.deleted);
 
 const normalizeTimestampValue = (value: unknown): Date | null => {
   if (value == null || value === '') return null;
@@ -28,7 +28,7 @@ const normalizeTimestampValue = (value: unknown): Date | null => {
   return null;
 };
 
-const extractSideBlockText = (blocks: any[], side: 'question' | 'answer'): string | null => {
+const extractSideBlockText = (blocks: unknown[], side: 'question' | 'answer'): string | null => {
   const target = blocks.find((block) => {
     const role = String(block?.side ?? block?.role ?? '').toLowerCase();
     const type = String(block?.type ?? '').toLowerCase();

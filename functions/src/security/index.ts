@@ -64,7 +64,7 @@ const DETECTION_RULES: DetectionRule[] = [
   { type: 'SYNC_CONFLICT_EXCESS', riskScore: 3, timeWindowMs: 5 * 60 * 1000, countThreshold: 10 },
 ];
 
-async function detectAbnormalPatterns(userId: string, logData: any): Promise<boolean> {
+async function detectAbnormalPatterns(userId: string, logData: unknown): Promise<boolean> {
   const db = admin.firestore();
   const now = Date.now();
   let isAbnormal = false;
@@ -98,7 +98,7 @@ async function detectAbnormalPatterns(userId: string, logData: any): Promise<boo
   return isAbnormal;
 }
 
-async function calculateRiskScore(userId: string, logData: any): Promise<number> {
+async function calculateRiskScore(userId: string, logData: unknown): Promise<number> {
   const db = admin.firestore();
   const statusRef = db.doc(`users/${userId}/security/status`);
   
