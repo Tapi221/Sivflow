@@ -6,6 +6,7 @@ import { CardShell } from './CardShell';
 import { HelpCircle, Edit, Trash2, Volume2, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { normalizeMemoryStability } from '@/utils/reviewUtils';
+import { resolveCardTagNames } from '@/hooks/useTags';
 
 function CardItem({
   card,
@@ -15,6 +16,7 @@ function CardItem({
   isSelected,
   onSelect,
   getTagColor,
+  getTagNameById,
   enableDrag,
   index,
 }: unknown) {
@@ -27,20 +29,18 @@ function CardItem({
     (card.questionAudios?.length > 0 || card.question_audios?.length > 0) ||
     (card.answerAudios?.length > 0 || card.answer_audios?.length > 0);
 
-  const tagIdList: string[] = Array.isArray(card.tagIds) ? card.tagIds : [];
-  const userTags = tagIdList.length > 0
-    ? tagIdList
-        .map((id: string) => ({
-          label: getTagNameById ? (getTagNameById(id) ?? '') : id,
-          color: getTagColor ? getTagColor(id) : 'bg-slate-100 text-slate-600 border-slate-200',
-        }))
-        .filter(t => t.label)
-    : Array.isArray(card.tags)
-      ? card.tags.map((tag: string) => ({
-          label: tag,
-          color: getTagColor ? getTagColor(tag) : 'bg-slate-100 text-slate-600 border-slate-200',
-        }))
-      : [];
+  const tagNameMap = new Map<string, { name: string }>();
+  if (typeof getTagNameById === 'function' && Array.isArray(card.tagIds)) {
+    for (const id of card.tagIds) {
+      if (typeof id !== 'string') continue;
+      const name = getTagNameById(id);
+      if (name) tagNameMap.set(id, { name });
+    }
+  }
+  const userTags = resolveCardTagNames(card.tagIds, card.tags, tagNameMap).map((tagName: string) => ({
+    label: tagName,
+    color: getTagColor ? getTagColor(tagName) : 'bg-slate-100 text-slate-600 border-slate-200',
+  }));
 
   const showTitleOutside = Boolean(card.title);
   const headlineText = showTitleOutside
@@ -203,6 +203,7 @@ export default function CardList({
   selectedIds = [],
   onSelect,
   getTagColor,
+  getTagNameById,
   onDragEnd,
   enableDrag = false,
   viewMode = 'grid',
@@ -233,6 +234,7 @@ export default function CardList({
                 isSelected={selectedIds.includes(card.id)}
                 onSelect={onSelect}
                 getTagColor={getTagColor}
+                getTagNameById={getTagNameById}
                 enableDrag={enableDrag}
               />
             ))}

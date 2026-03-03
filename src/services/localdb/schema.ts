@@ -546,6 +546,10 @@ export const defineSchema = (db: LocalDB): void => {
     tags_v2: '[userId+name], userId, updatedAt',
     tags_v3: 'id, userId, [userId+nameLower], updatedAt',
     studyLogs: 'id, userId, cardId, studiedAt',
+    metadata: 'key',
+    images: 'id, userId, status, [userId+status]',
+    cardRelations: 'id, userId, fromCardId, toCardId, updatedAt, [userId+updatedAt]',
+    projectMaps: 'id, userId, folderId, updatedAt, [userId+updatedAt]',
   }).upgrade(async tx => {
     const cards = tx.table('cards');
     await cards.toCollection().modify((raw: unknown) => {

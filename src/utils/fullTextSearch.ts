@@ -6,6 +6,7 @@
 import type { Card } from '../types';
 import type { Folder } from '../types';
 import type { Tag, QuickOpenItemType } from './searchIndex';
+import { resolveCardTagNames } from '@/hooks/useTags';
 
 // 検索フィールドの種類
 export type MatchField = 'title' | 'question' | 'answer' | 'code' | 'math' | 'name' | 'path';
@@ -87,7 +88,7 @@ export function buildFullTextIndex(
   tags: Tag[],
   folderPathMap: Map<string, string>
 ): FullTextIndex {
-  const tagById = new Map<string, string>(tags.map(t => [t.id, t.name]));
+  const tagById = new Map<string, { name: string }>(tags.map(t => [t.id, { name: t.name }]));
   const items: FullTextItem[] = [];
   
   // カード
@@ -128,14 +129,7 @@ export function buildFullTextIndex(
       path,
       searchableTexts,
       data: card,
-      tags: (() => {
-        const ids: string[] = Array.isArray(card.tagIds) ? (card.tagIds as string[]) : [];
-        if (ids.length > 0) {
-          const names = ids.map(id => tagById.get(id) ?? '').filter(n => n);
-          if (names.length > 0) return names;
-        }
-        return Array.isArray(card.tags) ? (card.tags as string[]) : [];
-      })(),
+      tags: resolveCardTagNames(card.tagIds, card.tags, tagById),
     });
   }
   

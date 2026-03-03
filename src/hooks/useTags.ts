@@ -46,6 +46,12 @@ const asStringArray = (v: unknown): string[] => {
   return v.filter((x): x is string => typeof x === 'string');
 };
 
+type TagRepairSummary = {
+  removedOrphanTagRefs: number;
+  dedupedTagRefs: number;
+  duplicateNameLowerPairs: Array<{ userId: string; nameLower: string; tagIds: string[] }>;
+};
+
 /**
  * tagIds → タグ名に解決。tagIds が空なら legacy card.tags にフォールバック。
  * pure utility: フックの外でも呼べる。
@@ -61,6 +67,68 @@ export function resolveCardTagNames(
     if (names.length > 0) return names;
   }
   return asStringArray(legacyTags);
+}
+
+export async function auditAndRepairTags(userId: string): Promise<TagRepairSummary> {
+  const db = await getLocalDb(userId);
+  const tagIdsByNameLower = new Map<string, string[]>();
+  const knownTagIds = new Set<string>();
+  let removedOrphanTagRefs = 0;
+  let dedupedTagRefs = 0;
+
+  await db.transaction('rw', db.tags_v3, db.cards, async () => {
+    await db.tags_v3.where('userId').equals(userId).each((raw: unknown) => {
+      const tag = raw as { id?: unknown; userId?: unknown; nameLower?: unknown };
+      if (typeof tag.id !== 'string' || typeof tag.userId !== 'string' || typeof tag.nameLower !== 'string') return;
+      knownTagIds.add(tag.id);
+      const key = `${tag.userId}__${tag.nameLower}`;
+      const existing = tagIdsByNameLower.get(key);
+      if (existing) existing.push(tag.id);
+      else tagIdsByNameLower.set(key, [tag.id]);
+    });
+
+    await db.cards.where('userId').equals(userId).modify((raw: unknown) => {
+      const card = raw as Record<string, unknown> & CardTagFields;
+      const currentTagIds = asStringArray(card.tagIds);
+      if (currentTagIds.length === 0) return;
+
+      const seen = new Set<string>();
+      const nextTagIds: string[] = [];
+      let changed = false;
+
+      for (const tagId of currentTagIds) {
+        if (!knownTagIds.has(tagId)) {
+          removedOrphanTagRefs += 1;
+          changed = true;
+          continue;
+        }
+        if (seen.has(tagId)) {
+          dedupedTagRefs += 1;
+          changed = true;
+          continue;
+        }
+        seen.add(tagId);
+        nextTagIds.push(tagId);
+      }
+
+      if (!changed) return;
+      card.tagIds = nextTagIds;
+      card.updatedAt = new Date();
+    });
+  });
+
+  const duplicateNameLowerPairs: Array<{ userId: string; nameLower: string; tagIds: string[] }> = [];
+  for (const [key, tagIds] of tagIdsByNameLower.entries()) {
+    if (tagIds.length < 2) continue;
+    const separatorIndex = key.indexOf('__');
+    duplicateNameLowerPairs.push({
+      userId: key.slice(0, separatorIndex),
+      nameLower: key.slice(separatorIndex + 2),
+      tagIds,
+    });
+  }
+
+  return { removedOrphanTagRefs, dedupedTagRefs, duplicateNameLowerPairs };
 }
 
 /**
@@ -256,32 +324,16 @@ export function useTags() {
     if (!fromTag || !intoTag) return { error: '統合対象のタグが見つかりません。' };
 
     let updatedCards = 0;
-    const cardsToUpdate: Array<{ id: string; tagIds: string[] }> = [];
 
     await db.transaction('rw', db.tags_v3, db.cards, async () => {
-      await db.cards.where('userId').equals(currentUser.uid).each((raw: unknown) => {
-        const card = raw as { id?: string; tagIds?: unknown };
-        if (typeof card.id !== 'string') return;
+      await db.cards.where('userId').equals(currentUser.uid).modify((raw: unknown) => {
+        const card = raw as Record<string, unknown> & CardTagFields;
         const ids = asStringArray(card.tagIds);
         if (!ids.includes(fromTagId)) return;
-        cardsToUpdate.push({
-          id: card.id,
-          tagIds: Array.from(new Set(ids.map(id => (id === fromTagId ? intoTagId : id)))),
-        });
+        card.tagIds = Array.from(new Set(ids.map(id => (id === fromTagId ? intoTagId : id))));
+        card.updatedAt = new Date();
+        updatedCards += 1;
       });
-
-      const now = new Date();
-      const CHUNK = 100;
-      for (let i = 0; i < cardsToUpdate.length; i += CHUNK) {
-        const chunk = cardsToUpdate.slice(i, i + CHUNK);
-        await db.cards.bulkUpdate(
-          chunk.map(card => ({
-            key: card.id,
-            changes: { tagIds: card.tagIds, updatedAt: now },
-          }))
-        );
-      }
-      updatedCards = cardsToUpdate.length;
       await db.tags_v3.delete(fromTagId);
     });
 
@@ -457,6 +509,7 @@ export function useTags() {
     availableColors: DEFAULT_COLORS,
     getTagColor,
     addTag,
+    auditAndRepairTags,
     renameTag,
     mergeTags,
     updateTagColor,

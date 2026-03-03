@@ -1,7 +1,9 @@
 import { getLocalDb, getLocalDbSync } from './LocalDB';
+import { auditAndRepairTags } from '@/hooks/useTags';
 
 type WindowWithLocalDbDevtools = Window & {
   dbDebug?: () => Promise<void>;
+  repairTags?: (userId?: string) => Promise<unknown>;
   __dbHelpers?: {
     addDebugFolder: (data: unknown) => Promise<unknown>;
     dump: () => Promise<void>;
@@ -42,6 +44,16 @@ export function installLocalDbDevtools(): void {
   if (typeof window === 'undefined') return;
 
   const w = window as WindowWithLocalDbDevtools;
+
+  w.repairTags = async (userId?: string) => {
+    const resolvedUserId = userId ?? getAuthUid(w);
+    if (!resolvedUserId) {
+      throw new Error('repairTags: userId が必要です');
+    }
+    const result = await auditAndRepairTags(resolvedUserId);
+    console.log('[repairTags] result', result);
+    return result;
+  };
 
   // Allow overwriting to prevent "Cannot set property... which has only a getter" errors
   try {
