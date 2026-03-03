@@ -19,13 +19,15 @@ export type EnqueueSync = (
   payload: unknown
 ) => Promise<void>;
 
-/** Dexie を直接 import しない最小インターフェース */
+/** Dexie を直接 import しない最小インターフェース。
+ *  add/put/bulkPut の戻り値は Dexie の PromiseExtended<IndexableType> と合わせるため
+ *  PromiseLike<unknown> にしてある（実運用上は常に string が返る）。 */
 export interface TableLike<T extends Record<string, unknown>> {
-  add(item: T): Promise<string>;
+  add(item: T): PromiseLike<unknown>;
   get(id: string): Promise<T | undefined>;
   update(id: string, changes: Partial<T>): Promise<number>;
-  put(item: T): Promise<string>;
-  bulkPut(items: ReadonlyArray<T>): Promise<void>;
+  put(item: T): PromiseLike<unknown>;
+  bulkPut(items: ReadonlyArray<T>): PromiseLike<unknown>;
   delete(id: string): Promise<void>;
 }
 
@@ -201,7 +203,7 @@ export async function addItem(
         ? db.table<FolderStorageRow>(table)
         : db.table<AnyRow>(table);
 
-    const returnedId = await tableApi.add(payload);
+    const returnedId = String(await tableApi.add(payload));
     const resolvedId = getId(payload) ?? returnedId;
 
     // 書き込み後の読み取り検証

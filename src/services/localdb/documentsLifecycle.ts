@@ -23,7 +23,7 @@ type DocumentsTable = {
   filter(fn: (doc: DocumentRecord) => boolean): { first(): Promise<DocumentRecord | undefined> };
 };
 
-type DocDbCtx = { documents: DocumentsTable; userId?: string };
+export type DocDbCtx = { documents: DocumentsTable; userId?: string };
 
 export async function canDeleteDocumentBlob(
   documents: DocumentsTable,

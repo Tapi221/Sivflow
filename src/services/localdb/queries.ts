@@ -1,36 +1,44 @@
 import { normalizeCard } from '../../utils';
 import { normalizeFolderWithSilent } from './transforms';
-import { Dexie } from 'dexie';
+import { Dexie, type Table } from 'dexie';
 import { Timestamp } from 'firebase/firestore';
 import { getOrCreateDeviceId, getDeviceName } from '../../utils/device';
 import { warnOncePerSession } from '../localDBRuntimeState';
 
-export async function getItem(db: unknown, table: string, id: string): Promise<unknown> {
+/** queries.ts が必要とする LocalDB プロパティの最小インターフェース */
+type QueryDb = Dexie & {
+  readonly cards: Table;
+  readonly folders: Table;
+  readonly documents: Table;
+  readonly syncMetadata: Table;
+};
+
+export async function getItem(db: QueryDb, table: string, id: string): Promise<unknown> {
   const item = await db.table(table).get(id);
   if (table === 'cards') return item ? normalizeCard(item) : item;
   if (table === 'folders') return item ? normalizeFolderWithSilent(item) : item;
   return item;
 }
 
-export async function getAllItems(db: unknown, table: string): Promise<unknown[]> {
+export async function getAllItems(db: QueryDb, table: string): Promise<unknown[]> {
   const items = await db.table(table).toArray();
   if (table === 'cards') return items.map(normalizeCard);
   if (table === 'folders') return items.map(normalizeFolderWithSilent);
   return items;
 }
 
-export async function getAllCards(db: unknown): Promise<unknown[]> {
+export async function getAllCards(db: QueryDb): Promise<unknown[]> {
   // Return raw objects to preserve _rescueRaw and other fields for integrity repair
   return await db.cards.toArray();
 }
 
-export async function getAllFolders(db: unknown): Promise<unknown[]> {
+export async function getAllFolders(db: QueryDb): Promise<unknown[]> {
   const folders = await db.folders.toArray();
   return folders.map(normalizeFolderWithSilent);
 }
 
 export async function getDirtyItems(
-  db: unknown,
+  db: QueryDb,
   table: string,
   userId: string,
   lastSyncTime: Date
@@ -42,7 +50,7 @@ export async function getDirtyItems(
 }
 
 export async function getUpdatedCards(
-  db: unknown,
+  db: QueryDb,
   folderId: string,
   lastSyncTime: Date
 ): Promise<unknown[]> {
@@ -55,13 +63,13 @@ export async function getUpdatedCards(
   }).toArray();
 }
 
-export async function getLastSyncTime(db: unknown, userId: string): Promise<Date | null> {
+export async function getLastSyncTime(db: QueryDb, userId: string): Promise<Date | null> {
   const meta = await db.syncMetadata.get(userId);
   if (!meta || !meta.lastSyncTime) return null;
   return meta.lastSyncTime instanceof Timestamp ? meta.lastSyncTime.toDate() : meta.lastSyncTime;
 }
 
-export async function updateLastSyncTime(db: unknown, userId: string, syncTime: Date): Promise<void> {
+export async function updateLastSyncTime(db: QueryDb, userId: string, syncTime: Date): Promise<void> {
   await db.syncMetadata.put({
     userId: userId,
     deviceId: getOrCreateDeviceId(),
@@ -72,7 +80,7 @@ export async function updateLastSyncTime(db: unknown, userId: string, syncTime: 
   });
 }
 
-export async function normalizeDocumentBlobUrlsForSession(db: unknown): Promise<void> {
+export async function normalizeDocumentBlobUrlsForSession(db: QueryDb): Promise<void> {
   try {
     await db.documents.toCollection().modify((d: unknown) => {
       if (typeof d.localUrl === 'string' && d.localUrl.startsWith('blob:')) {
