@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Line, LineChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 
 import { RatingCountTiles } from "@/components/study/RatingCountTiles";
-import TagManagerDialog from "@/components/tag/TagManagerDialog";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { TagInput } from "@/components/ui/tag-input";
@@ -67,7 +67,7 @@ export function CardMetaPanel({
 }: CardMetaPanelProps) {
   const [period, setPeriod] = useState<Period>("30d");
   const [titleInput, setTitleInput] = useState(card?.title ?? "");
-  const [tagManagerOpen, setTagManagerOpen] = useState(false);
+  const [, setSearchParams] = useSearchParams();
   const { tagById } = useTags();
 
   useEffect(() => {
@@ -145,6 +145,15 @@ export function CardMetaPanel({
     onUpdateTitle(next);
   };
 
+  const openTagSettings = () => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set("settings", "true");
+      next.set("settingsTab", "tags");
+      return next;
+    }, { replace: true });
+  };
+
   return (
     <aside className={`h-full w-80 shrink-0 border-l border-slate-200 bg-white ${UI_TYPO} ${NUMERIC_TYPO}`}>
       <div className="h-full overflow-y-auto p-4">
@@ -171,8 +180,8 @@ export function CardMetaPanel({
               <section>
                 <div className="flex items-center justify-between">
                   <h3 className="text-xs font-semibold tracking-wide text-slate-500 uppercase">タグ管理</h3>
-                  <Button type="button" variant="outline" size="sm" className="h-7 px-2 text-xs" onClick={() => setTagManagerOpen(true)}>
-                    色を変更
+                  <Button type="button" variant="outline" size="sm" className="h-7 px-2 text-xs" onClick={openTagSettings}>
+                    設定で管理
                   </Button>
                 </div>
                 <div className="mt-3 rounded-md border border-slate-200 bg-slate-50 px-2 py-2">
@@ -267,7 +276,6 @@ export function CardMetaPanel({
 
         </div>
       </div>
-      <TagManagerDialog open={tagManagerOpen} onOpenChange={setTagManagerOpen} />
     </aside>
   );
 }

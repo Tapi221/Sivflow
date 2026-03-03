@@ -60,7 +60,7 @@ export default function Layout() {
     }
   }, [isFoldersRoute, location.pathname]);
   
-  const { isSettingsOpen, setIsSettingsOpen } = useSettingsQueryParam(searchParams, setSearchParams);
+  const { isSettingsOpen, settingsTab, setIsSettingsOpen } = useSettingsQueryParam(searchParams, setSearchParams);
   const [imgError, setImgError] = useState(false);
   const { currentUser } = useAuth();
   const { settings } = useUserSettings();
@@ -420,7 +420,7 @@ export default function Layout() {
       </aside>
       )}
 
-      <SettingsDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen} initialTab="account" />
+      <SettingsDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen} initialTab={settingsTab ?? 'account'} />
 
 
 

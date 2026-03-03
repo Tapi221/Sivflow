@@ -260,6 +260,22 @@ export interface UserSettings extends BaseEntity {
 
   editorBlockSettings?: BlockConfig[];
   blockButtonShowLabel?: boolean;
+  explorerViews?: Array<{
+    id: string;
+    name: string;
+    kind: 'folder' | 'tagCategory' | 'tagTree';
+    options?: {
+      categoryMode?: 'user-defined' | 'none';
+      scopeMode?: 'all' | 'selectedRoots' | 'selectedTags' | 'prefix';
+      includedTagIds?: string[];
+      rootTagIds?: string[];
+      tagNamePrefix?: string;
+      hideZeroUsage?: boolean;
+      ungroupedLabel?: string;
+    };
+  }>;
+  selectedExplorerViewId?: string;
+  tagCategoryDisplayNames?: Record<string, string>;
 }
 
 /**

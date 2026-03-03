@@ -11,8 +11,6 @@ import {
   Layers,
   Camera,
   Loader2,
-  Search,
-  Trash2,
   RefreshCw,
   Calendar,
   ChevronRight,
@@ -53,13 +51,12 @@ import {
 } from '@/utils/imageUtils';
 import { UploadProgress } from '@/components/ui/UploadProgress';
 import { getAvatarColors, getInitials } from '@/utils/avatarUtils';
-import { useTags, DEFAULT_COLORS } from '@/hooks/useTags';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import DataRescuePanel from '@/components/settings/DataRescuePanel';
 import { DeviceSyncSettings } from '@/components/settings/DeviceSyncSettings';
 import { BlockOrdering } from '@/components/settings/BlockOrdering';
 import { useSyncSettings } from '@/hooks/useSyncSettings';
 import { validateUsername, truncateUsername, countUnicodeCharacters } from '@/utils/userValidation';
+import { TagManagerPanel } from '@/components/tag/TagManagerPanel';
 
 const sidebarItems = [
   { id: 'account', label: 'アカウント', icon: User },
@@ -70,51 +67,6 @@ const sidebarItems = [
   { id: 'shortcut', label: 'ショートカット', icon: Keyboard },
   { id: 'sync', label: '同期設定', icon: RefreshCw },
   { id: 'data', label: 'データ', icon: Database },
-];
-
-const mockTags = [
-  {
-    folder: '線形代数',
-    tags: [
-      { name: '重要', colors: ['#FFE4E6', '#FEE2E2', '#FEF3C7', '#DBEAFE', '#F3E8FF', '#F3F4F6'] }, // Red, Orange, Yellow, Blue, Purple, Gray (faded)
-    ]
-  },
-  {
-    folder: '基礎',
-    tags: [
-        { name: '基礎', colors: ['#FFE4E6', '#FEE2E2', '#FEF3C7', '#DBEAFE', '#F3E8FF', '#F3F4F6'] }
-    ]
-  },
-  {
-      folder: '試験に出る',
-      tags: [
-          { name: '試験に出る', colors: ['#FFE4E6', '#FEE2E2', '#FEF3C7', '#DBEAFE', '#F3E8FF', '#F3F4F6'] }
-      ]
-  },
-  {
-      folder: '計算',
-      tags: [
-          { name: '計算', colors: ['#FFE4E6', '#FEE2E2', '#FEF3C7', '#DBEAFE', '#F3E8FF', '#F3F4F6'] }
-      ]
-  },
-  {
-      folder: '公式',
-      tags: [
-          { name: '公式', colors: ['#FFE4E6', '#FEE2E2', '#FEF3C7', '#DBEAFE', '#F3E8FF', '#F3F4F6'] }
-      ]
-  },
-    {
-      folder: '暗記',
-      tags: [
-          { name: '暗記', colors: ['#FFE4E6', '#FEE2E2', '#FEF3C7', '#DBEAFE', '#F3E8FF', '#F3F4F6'] }
-      ]
-  },
-  {
-    folder: '微積分',
-    tags: [
-      { name: '応用', colors: ['#FFE4E6', '#FEE2E2', '#FEF3C7', '#DBEAFE', '#F3E8FF', '#F3F4F6'] },
-    ]
-  }
 ];
 
 const voiceOptions = [
@@ -154,27 +106,16 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
     }
   }, [open, initialTab]);
 
-  const [selectedFolderId, setSelectedFolderId] = useState('all');
   const [uploadingImage, setUploadingImage] = useState(false);
   const [imgError, setImgError] = useState(false);
   const [editingName, setEditingName] = useState(false);
   const [tempDisplayName, setTempDisplayName] = useState('');
   const [nameError, setNameError] = useState('');
-  const [selectedRootFolderId, setSelectedRootFolderId] = useState('');
   const fileInputRef = useRef(null);
   const { currentUser, syncStatus, lastSyncTime, triggerSync } = useAuth();
   const navigate = useNavigate();
   const { folders = [], updateFolder } = useFolders();
   const { settings, updateSettings } = useUserSettings();
-
-  const rootFolders = folders.filter(f => !f.parentFolderId && !f.parent_folder_id);
-
-  // Initialize selectedRootFolderId when folders are ready
-  useEffect(() => {
-    if (rootFolders.length > 0 && !selectedRootFolderId) {
-      setSelectedRootFolderId(rootFolders[0].id);
-    }
-  }, [rootFolders, selectedRootFolderId]);
 
   // Reset imgError when profileImage remoteUrl changes
   useEffect(() => {
@@ -191,24 +132,6 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
       }
     }
   }, [settings?.profileImage?.remoteUrl, settings?.profileImage?.updatedAt]);
-
-  // Hoist hooks
-  const { tags: allTags = [], updateTagColor, deleteTag, addTag, getTagUsageCount } = useTags();
-  const [tagSearchTerm, setTagSearchTerm] = useState('');
-  
-  // タグ追加用の状態管理
-  const [isAddingTag, setIsAddingTag] = useState(false);
-  const [newTagName, setNewTagName] = useState('');
-  const [newTagColor, setNewTagColor] = useState(DEFAULT_COLORS[0]);
-  const [tagError, setTagError] = useState('');
-
-
-  const filteredTags = selectedFolderId === 'all' 
-    ? mockTags 
-    : mockTags.filter(group => {
-        const folder = folders.find(f => f.id === selectedFolderId);
-        return folder ? group.folder === (folder.folderName || folder.folder_name) : false;
-    });
 
   const handleLogout = async () => {
     try {
@@ -547,255 +470,16 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
         );
 
       case 'tags':
-        // Hooks moved to top level for stability
-        
-        // Filter tags by selected root folder
-        const currentFolderTags = (allTags || []).filter(t => t.rootFolderId === selectedRootFolderId);
-        const filteredRealTags = currentFolderTags.filter(t => t?.name?.toLowerCase().includes(tagSearchTerm.toLowerCase()));
-
-        // タグ追加ハンドラー
-        const handleAddTag = async () => {
-          const trimmedName = newTagName.trim();
-          
-          // バリデーション
-          if (!trimmedName) {
-            setTagError('タグ名を入力してください');
-            return;
-          }
-          
-          if (trimmedName.length > 20) {
-            setTagError('タグ名は20文字以内で入力してください');
-            return;
-          }
-          
-          // 重複チェック
-          const isDuplicate = currentFolderTags.some(t => t.name === trimmedName);
-          if (isDuplicate) {
-            setTagError('このタグは既に存在します');
-            return;
-          }
-          
-          try {
-            await addTag(trimmedName, newTagColor, selectedRootFolderId);
-            // リセット
-            setNewTagName('');
-            setNewTagColor(DEFAULT_COLORS[0]);
-            setIsAddingTag(false);
-            setTagError('');
-          } catch (error) {
-            console.error('タグ追加エラー:', error);
-            setTagError('タグの追加に失敗しました');
-          }
-        };
-
         return (
           <div className="space-y-6 animate-in fade-in duration-300">
-              <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 md:gap-0">
-                <div className="flex items-center gap-3">
-                  <div className="w-1.5 h-6 bg-primary-500 rounded-full shadow-sm" />
-                  <div>
-                    <h2 className="text-xl font-bold text-slate-800 tracking-wide">タグ管理</h2>
-                    <p className="text-[10px] text-slate-500 font-medium mt-1">※ここで設定したタグは、選択したフォルダとその配下のすべてのフォルダで使用できます</p>
-                  </div>
-                </div>
-                <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 md:gap-4">
-                    {/* Root Folder Selector */}
-                    <Select value={selectedRootFolderId} onValueChange={setSelectedRootFolderId}>
-                        <SelectTrigger className="w-full md:w-[180px] bg-white border-slate-200 rounded-xl font-bold text-sm text-slate-700 shadow-sm">
-                            <SelectValue placeholder="フォルダを選択" />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-xl border-slate-200 shadow-xl bg-white text-slate-700 max-h-[300px]">
-                            {rootFolders.map(f => (
-                                <SelectItem key={f.id} value={f.id} className="cursor-pointer font-bold focus:bg-slate-100 focus:text-slate-900">
-                                    {f.folderName}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                        <Input 
-                            className="pl-9 w-full md:w-[200px] bg-white border-slate-200 rounded-xl text-slate-800 placeholder:text-slate-400 focus:border-primary-500 focus:ring-primary-100 shadow-sm" 
-                            placeholder="タグを検索..." 
-                            value={tagSearchTerm}
-                            onChange={(e) => setTagSearchTerm(e.target.value)}
-                        />
-                    </div>
-                    
-                    {/* 新規タグ追加ボタン */}
-                    <Button
-                        onClick={() => {
-                          setIsAddingTag(!isAddingTag);
-                          if (!isAddingTag) {
-                            setNewTagName('');
-                            setNewTagColor(DEFAULT_COLORS[0]);
-                            setTagError('');
-                          }
-                        }}
-                        className="bg-primary-600 hover:bg-primary-500 text-white rounded-xl font-bold shadow-md shadow-primary-200 whitespace-nowrap"
-                        size="sm"
-                    >
-                        <Tag className="w-4 h-4 mr-2" />
-                        新規タグ
-                    </Button>
-                </div>
+            <div className="flex items-center gap-3">
+              <div className="h-6 w-1.5 rounded-full bg-primary-500 shadow-sm" />
+              <div>
+                <h2 className="text-xl font-bold tracking-wide text-slate-800">タグ管理</h2>
+                <p className="mt-1 text-xs text-slate-500">タグの色、カテゴリ、リネーム、マージ、削除をここで一元管理します。</p>
               </div>
-            
-            {/* タグ追加フォーム */}
-            {isAddingTag && (
-                <div className="bg-gradient-to-br from-primary-50 to-blue-50 border-2 border-primary-200 rounded-xl p-4 space-y-4 animate-in slide-in-from-top-2 duration-300">
-                    <div className="flex items-center gap-2 mb-2">
-                        <Tag className="w-4 h-4 text-primary-600" />
-                        <span className="font-bold text-sm text-primary-800">新しいタグを追加</span>
-                    </div>
-                    
-                    <div className="space-y-3">
-                        {/* タグ名入力 */}
-                        <div>
-                            <label className="text-xs font-bold text-slate-600 mb-1.5 block">タグ名</label>
-                            <Input
-                                value={newTagName}
-                                onChange={(e) => {
-                                    setNewTagName(e.target.value);
-                                    if (tagError) setTagError('');
-                                }}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter' && newTagName.trim()) handleAddTag();
-                                    if (e.key === 'Escape') {
-                                        setIsAddingTag(false);
-                                        setTagError('');
-                                    }
-                                }}
-                                placeholder="例: 重要、基礎、試験に出る"
-                                className={cn(
-                                    "bg-white border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:border-primary-500 focus:ring-primary-100",
-                                    tagError && "border-red-500 focus-visible:ring-red-100"
-                                )}
-                                autoFocus
-                            />
-                            {tagError && (
-                                <p className="text-[11px] font-bold text-red-500 mt-1.5 animate-in fade-in slide-in-from-top-1 duration-200">
-                                    {tagError}
-                                </p>
-                            )}
-                        </div>
-                        
-                        {/* カラーピッカー */}
-                        <div>
-                            <label className="text-xs font-bold text-slate-600 mb-1.5 block">カラー</label>
-                            <div className="flex flex-wrap gap-2">
-                                {DEFAULT_COLORS.map((color) => (
-                                    <button
-                                        key={color}
-                                        type="button"
-                                        className={cn(
-                                            "w-8 h-8 rounded-full border-2 transition-all",
-                                            (color || '').split(' ')[0],
-                                            newTagColor === color 
-                                                ? "ring-2 ring-offset-2 ring-primary-500 scale-110 border-white" 
-                                                : "border-slate-200 hover:scale-110 hover:border-slate-300"
-                                        )}
-                                        onClick={() => setNewTagColor(color)}
-                                    />
-                                ))}
-                            </div>
-                        </div>
-                        
-                        {/* アクションボタン */}
-                        <div className="flex gap-2 pt-2">
-                            <Button
-                                onClick={handleAddTag}
-                                disabled={!newTagName.trim()}
-                                className="flex-1 bg-primary-600 hover:bg-primary-500 disabled:opacity-50 disabled:bg-primary-600/50 text-white rounded-xl font-bold shadow-md shadow-primary-200"
-                            >
-                                <Check className="w-4 h-4 mr-2" />
-                                追加
-                            </Button>
-                            <Button
-                                onClick={() => {
-                                    setIsAddingTag(false);
-                                    setNewTagName('');
-                                    setNewTagColor(DEFAULT_COLORS[0]);
-                                    setTagError('');
-                                }}
-                                variant="outline"
-                                className="rounded-xl border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-700 font-bold"
-                            >
-                                <X className="w-4 h-4 mr-2" />
-                                キャンセル
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            )}
-            
-            <div className="space-y-4 h-[400px] overflow-y-auto pr-2 custom-scrollbar pb-20">
-                {filteredRealTags.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-                        <Tag className="w-12 h-12 mb-4 opacity-30" />
-                        <p className="font-bold">
-                            {tagSearchTerm ? '一致するタグがありません' : 'このフォルダにはタグがありません'}
-                        </p>
-                        <p className="text-sm mt-2">上の「新規タグ」ボタンからタグを追加できます</p>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 gap-3">
-                        {filteredRealTags.map((tag) => (
-                            <div key={tag.name} className="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between group hover:border-primary-200 hover:shadow-sm transition-all">
-                                <div className="flex items-center gap-3">
-                                    {/* Color Indicator / Picker */}
-                                    <Popover>
-                                        <PopoverTrigger asChild>
-                                            <button 
-                                                className={cn(
-                                                    "w-8 h-8 rounded-full border border-slate-100 shadow-sm transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-400",
-                                                    (tag.color || '').split(' ')[0] // bg class
-                                                )}
-                                            />
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-64 p-3 rounded-xl bg-white border-slate-200 shadow-xl">
-                                            <div className="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">カラーを選択</div>
-                                            <div className="flex flex-wrap gap-2">
-                                                {DEFAULT_COLORS.map((color) => (
-                                                    <button
-                                                        key={color}
-                                                        className={cn(
-                                                            "w-8 h-8 rounded-full border border-slate-100 transition-all",
-                                                            (color || '').split(' ')[0],
-                                                            tag.color === color ? "ring-2 ring-offset-2 ring-slate-400 scale-110" : "hover:scale-110"
-                                                        )}
-                                                        onClick={() => updateTagColor(tag.name, color, selectedRootFolderId)}
-                                                    />
-                                                ))}
-                                            </div>
-                                        </PopoverContent>
-                                    </Popover>
-                                    
-                                    <span className="font-bold text-slate-700 text-sm">{tag.name}</span>
-                                </div>
-
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={async () => {
-                                        const usageCount = await getTagUsageCount(tag.name);
-                                        const ok = confirm(
-                                          `タグ「${tag.name}」を削除しますか？\n\n` +
-                                          `この操作で ${usageCount} 件のカードからタグが削除されます。`
-                                        );
-                                        if (!ok) return;
-                                        await deleteTag(tag.name);
-                                    }}
-                                    className="text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </Button>
-                            </div>
-                        ))}
-                    </div>
-                )}
             </div>
+            <TagManagerPanel />
           </div>
         );
       case 'voice':
@@ -1437,7 +1121,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
             </div>
 
             {/* Content Content - Reverted from glass-content */}
-            <div className="flex-1 overflow-y-auto relative bg-transparent">
+            <div className="relative flex-1 overflow-x-hidden overflow-y-auto bg-transparent">
                 {/* Mobile Header */}
                 <div className="md:hidden sticky top-0 z-20 flex items-center justify-between p-3 bg-[#F8FAFB]/95 border-b border-slate-200 backdrop-blur-md">
                     <div className="flex items-center gap-2">
@@ -1453,7 +1137,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                     </div>
                 </div>
 
-              <div className="p-4 md:p-8 lg:p-10 pb-[max(5rem,env(safe-area-inset-bottom))] max-w-4xl mx-auto space-y-8">
+              <div className="mx-auto max-w-4xl space-y-8 p-4 pb-[max(5rem,env(safe-area-inset-bottom))] md:p-8 lg:p-10">
                  {renderContent()}
               </div>
             </div>

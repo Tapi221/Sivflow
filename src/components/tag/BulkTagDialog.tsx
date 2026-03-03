@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useTags } from '@/hooks/useTags';
+import { TagBadge } from '@/components/tag/TagBadge';
 
 interface BulkTagDialogProps {
   open: boolean;
@@ -70,14 +71,18 @@ export default function BulkTagDialog({
                   type="button"
                   onClick={() => setSelectedTagId(tag.id === selectedTagId ? null : tag.id)}
                   className={cn(
-                    'px-3 py-1.5 rounded-full text-sm font-semibold border transition-all',
-                    tag.color,
+                    'rounded-full transition-all',
                     selectedTagId === tag.id
                       ? 'ring-2 ring-offset-1 ring-primary-500 scale-105'
                       : 'opacity-70 hover:opacity-100'
                   )}
                 >
-                  {tag.name}
+                  <TagBadge
+                    label={tag.name}
+                    size="md"
+                    colorClass={tag.color}
+                    className="pointer-events-none"
+                  />
                 </button>
               ))}
             </div>

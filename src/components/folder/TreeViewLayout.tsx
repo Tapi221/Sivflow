@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Settings2 } from 'lucide-react';
 import { FolderTreeWithCards } from './FolderTreeWithCards';
 import { RightPane } from './RightPane';
 import { ExplorerTabs } from '../explorer/ExplorerTabs';
@@ -13,15 +13,19 @@ import { createPageUrl } from '@/utils';
 import { useUserSettings } from '@/hooks/useUserSettings';
 import { useTags, resolveCardTagNames } from '@/hooks/useTags';
 import { TagBadge } from '@/components/tag/TagBadge';
-import type { Card, DocumentItem, SelectedExplorerItem } from '@/types';
+import type { Card, DocumentItem, Folder, SelectedExplorerItem } from '@/types';
 import { useCards } from '@/hooks/useCards';
 import { useExplorerStore } from '@/hooks/useExplorerStore';
 import CreateCardSelectionDialog from '@/components/card/CreateCardSelectionDialog';
 import CreationModeDialog from '@/components/card/CreationModeDialog';
-
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ViewManagerDialog } from './ViewManagerDialog';
+import { VirtualTreeView } from './VirtualTreeView';
+import { buildVirtualTree, type ViewDef, type ViewKind } from './viewTypes';
 
 interface TreeViewLayoutProps {
-  folders: unknown[];
+  folders: Folder[];
   cards: Card[];
   documents: DocumentItem[];
   selectedFolderId: string | null;
@@ -33,9 +37,28 @@ interface TreeViewLayoutProps {
   onCardUpdated: () => void;
 }
 
+type LegacyCardFields = {
+  folder_id?: string;
+  is_deleted?: boolean;
+  is_draft?: boolean;
+  next_review_date?: unknown;
+  review_count?: number;
+  last_review_at?: unknown;
+  has_uncertainty?: boolean;
+  is_bookmarked?: boolean;
+};
+
+type CardLike = Card & LegacyCardFields;
+
 const MIN_SIDEBAR_W = 200;
 const MAX_SIDEBAR_W = 600;
 const DEFAULT_SIDEBAR_W = 320;
+const DEFAULT_FOLDER_VIEW: ViewDef = { id: 'folder-default', name: 'フォルダ', kind: 'folder' };
+
+const createViewId = () =>
+  (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+    ? crypto.randomUUID()
+    : `view-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`);
 
 const toDate = (value: unknown): Date | null => {
   if (value === null || value === undefined) return null;
@@ -68,11 +91,11 @@ function TreeViewLayout({
   onCardUpdated,
 }: TreeViewLayoutProps) {
   const navigate = useNavigate();
-  const { settings } = useUserSettings();
+  const { settings, updateSettings } = useUserSettings();
   const { createFolder, updateFolder, deleteFolder } = useFolders();
   const { createCard, updateCard, deleteCard, moveCardToFolder, reorderCards } = useCards();
   const { updateDocument } = useDocuments();
-  const { getTagColor, tagById } = useTags();
+  const { getTagColor, getCategoryName, listCategoryIdsInUse, tagById, tags } = useTags();
 
   const {
     explorerTab,
@@ -117,6 +140,7 @@ function TreeViewLayout({
   const [isResizing, setIsResizing] = useState(false);
   const [isCreateSelectionOpen, setIsCreateSelectionOpen] = useState(false);
   const [isModeSelectionOpen, setIsModeSelectionOpen] = useState(false);
+  const [isViewManagerOpen, setIsViewManagerOpen] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const contentScrollRef = useRef<HTMLDivElement>(null);
 
@@ -172,7 +196,7 @@ function TreeViewLayout({
 
   const handleDocumentSelectWithRecent = (docId: string) => {
     onItemSelect({ type: 'document', id: docId });
-    addRecent({ type: 'pdf' as any, id: docId });
+    addRecent({ type: 'document', id: docId });
   };
 
   const handleFolderSelectWithRecent = (folderId: string | null) => {
@@ -185,30 +209,30 @@ function TreeViewLayout({
   const getFolderPath = useCallback((folderId: string | null): string => {
     if (!folderId) return '';
     const path: string[] = [];
-    let currentFolder = folders.find(f => f.id === folderId);
+    let currentFolder = folders.find((folder) => folder.id === folderId);
     while (currentFolder) {
-      path.unshift(currentFolder.name);
-      currentFolder = folders.find(f => f.id === currentFolder.parentId);
+      path.unshift(currentFolder.folderName);
+      currentFolder = folders.find((folder) => folder.id === currentFolder?.parentFolderId);
     }
     return path.join(' / ');
   }, [folders]);
 
   const selectedFolder = useMemo(() => {
     if (!selectedFolderId) return null;
-    return folders.find(f => (f.id ?? (f as any).folderId) === selectedFolderId) || null;
+    return folders.find((folder) => folder.id === selectedFolderId) ?? null;
   }, [folders, selectedFolderId]);
 
   const selectedDocument = useMemo(() => {
     if (!selectedDocumentId) return null;
-    return documents.find(d => (d.id || (d as any).documentId) === selectedDocumentId) || null;
+    return documents.find((document) => (document.id || document.documentId) === selectedDocumentId) ?? null;
   }, [documents, selectedDocumentId]);
 
   const folderCards = useMemo(() => {
     if (!selectedFolderId) return [];
-    return cards.filter((c) => {
-      const fid = c.folderId ?? (c as any).folder_id;
+    return cards.filter((card): card is CardLike => {
+      const fid = card.folderId ?? card.folder_id;
       if (fid !== selectedFolderId) return false;
-      const isDeleted = c.isDeleted ?? (c as any).is_deleted;
+      const isDeleted = card.isDeleted ?? card.is_deleted;
       return !isDeleted;
     });
   }, [cards, selectedFolderId]);
@@ -222,9 +246,9 @@ function TreeViewLayout({
     let lastReviewedAt: Date | null = null;
 
     for (const card of folderCards) {
-      const isDraft = card.isDraft ?? (card as any).is_draft;
+      const isDraft = card.isDraft ?? card.is_draft;
       if (!isDraft) {
-        const reviewDate = toDate(card.nextReviewDate ?? (card as any).next_review_date);
+        const reviewDate = toDate(card.nextReviewDate ?? card.next_review_date);
         if (reviewDate) {
           const rDate = new Date(reviewDate.getFullYear(), reviewDate.getMonth(), reviewDate.getDate());
           if (autoCarryOver ? rDate <= tDate : rDate.getTime() === tDate.getTime()) {
@@ -233,12 +257,12 @@ function TreeViewLayout({
         }
       }
 
-      const reviewCount = card.reviewCount ?? (card as any).review_count ?? 0;
+      const reviewCount = card.reviewCount ?? card.review_count ?? 0;
       if (!isDraft && reviewCount === 0) {
         unlearnedCount += 1;
       }
 
-      const lastReview = toDate(card.lastReviewAt ?? (card as any).last_review_at);
+      const lastReview = toDate(card.lastReviewAt ?? card.last_review_at);
       if (lastReview && (!lastReviewedAt || lastReview > lastReviewedAt)) {
         lastReviewedAt = lastReview;
       }
@@ -310,6 +334,33 @@ function TreeViewLayout({
     return Array.from(tagNames).sort();
   }, [cards, tagById]);
 
+  const viewDefs = useMemo(() => {
+    const storedViews = Array.isArray(settings?.explorerViews) ? settings.explorerViews : [];
+    const folderView = storedViews.find((view) => view.kind === 'folder') ?? DEFAULT_FOLDER_VIEW;
+    return [folderView, ...storedViews.filter((view) => view.kind !== 'folder')];
+  }, [settings?.explorerViews]);
+
+  const selectedViewId = useMemo(() => {
+    const savedViewId = settings?.selectedExplorerViewId;
+    if (savedViewId && viewDefs.some((view) => view.id === savedViewId)) return savedViewId;
+    return viewDefs[0]?.id ?? DEFAULT_FOLDER_VIEW.id;
+  }, [settings?.selectedExplorerViewId, viewDefs]);
+
+  const selectedView = useMemo(
+    () => viewDefs.find((view) => view.id === selectedViewId) ?? DEFAULT_FOLDER_VIEW,
+    [selectedViewId, viewDefs]
+  );
+
+  const categoryIdsInUse = useMemo(() => listCategoryIdsInUse(), [listCategoryIdsInUse]);
+
+  const categoryNameById = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const categoryId of categoryIdsInUse) {
+      map.set(categoryId, getCategoryName(categoryId));
+    }
+    return map;
+  }, [categoryIdsInUse, getCategoryName]);
+
   const handleCreateRootFolder = useCallback(async () => {
     try {
       await createFolder('新規フォルダ');
@@ -347,9 +398,9 @@ function TreeViewLayout({
         if (!tagMatched) return false;
       }
 
-      const hasUncertainty = Boolean(card.hasUncertainty ?? (card as any).has_uncertainty);
-      const isBookmarked = Boolean(card.isBookmarked ?? (card as any).is_bookmarked);
-      const isDraft = Boolean(card.isDraft ?? (card as any).is_draft);
+      const hasUncertainty = Boolean(card.hasUncertainty ?? card.has_uncertainty);
+      const isBookmarked = Boolean(card.isBookmarked ?? card.is_bookmarked);
+      const isDraft = Boolean(card.isDraft ?? card.is_draft);
 
       if (uncertaintyFilter === 'on' && !hasUncertainty) return false;
       if (uncertaintyFilter === 'off' && hasUncertainty) return false;
@@ -372,6 +423,91 @@ function TreeViewLayout({
     draftFilter,
     tagById,
   ]);
+
+  const virtualTreeNodes = useMemo(() => {
+    if (selectedView.kind === 'folder') return [];
+    return buildVirtualTree(selectedView, filteredCards, tags, categoryNameById);
+  }, [selectedView, filteredCards, tags, categoryNameById]);
+
+  const persistSettings = useCallback(async (patch: Partial<typeof settings>) => {
+    await updateSettings(patch);
+  }, [updateSettings]);
+
+  const handleViewChange = useCallback(async (viewId: string) => {
+    await persistSettings({ selectedExplorerViewId: viewId });
+    const nextView = viewDefs.find((view) => view.id === viewId);
+    if (nextView && nextView.kind !== 'folder') {
+      onFolderSelect(null);
+    }
+  }, [onFolderSelect, persistSettings, viewDefs]);
+
+  const handleAddView = useCallback(async (kind: ViewKind) => {
+    if (kind === 'folder') return;
+    const nextView: ViewDef = {
+      id: createViewId(),
+      name: kind === 'tagCategory' ? '新しいタグビュー' : '新しいタグツリー',
+      kind,
+      options: kind === 'tagCategory'
+        ? { categoryMode: 'user-defined', ungroupedLabel: '未分類' }
+        : { scopeMode: 'all', hideZeroUsage: true, ungroupedLabel: '未分類' },
+    };
+    await persistSettings({
+      explorerViews: [...viewDefs, nextView],
+      selectedExplorerViewId: nextView.id,
+    });
+  }, [persistSettings, viewDefs]);
+
+  const handleRenameView = useCallback(async (viewId: string, name: string) => {
+    await persistSettings({
+      explorerViews: viewDefs.map((view) => (view.id === viewId ? { ...view, name } : view)),
+    });
+  }, [persistSettings, viewDefs]);
+
+  const handleDeleteView = useCallback(async (viewId: string) => {
+    const nextViews = viewDefs.filter((view) => view.id !== viewId);
+    await persistSettings({
+      explorerViews: nextViews,
+      selectedExplorerViewId: selectedViewId === viewId ? DEFAULT_FOLDER_VIEW.id : selectedViewId,
+    });
+  }, [persistSettings, selectedViewId, viewDefs]);
+
+  const handleUpdateCategoryName = useCallback(async (categoryId: string, displayName: string) => {
+    await updateSettings({
+      tagCategoryDisplayNames: {
+        ...(settings?.tagCategoryDisplayNames ?? {}),
+        [categoryId]: displayName,
+      },
+    });
+  }, [settings?.tagCategoryDisplayNames, updateSettings]);
+
+  const handleUpdateUngroupedLabel = useCallback(async (viewId: string, label: string) => {
+    await persistSettings({
+      explorerViews: viewDefs.map((view) => (
+        view.id === viewId
+          ? {
+              ...view,
+              options: {
+                ...view.options,
+                ungroupedLabel: label,
+              },
+            }
+          : view
+      )),
+    });
+  }, [persistSettings, viewDefs]);
+
+  const handleUpdateViewOptions = useCallback(async (viewId: string, options: NonNullable<ViewDef['options']>) => {
+    await persistSettings({
+      explorerViews: viewDefs.map((view) => (
+        view.id === viewId
+          ? {
+              ...view,
+              options,
+            }
+          : view
+      )),
+    });
+  }, [persistSettings, viewDefs]);
 
   const matchModeLabel = useMemo(() => {
     return tagMatchMode === 'any' ? 'どれか一致（OR）' : '全部一致（AND）';
@@ -554,27 +690,36 @@ function TreeViewLayout({
       default:
         return (
           <div className="block">
-            <FolderTreeWithCards
-              folders={folders}
-              cards={filteredCards}
-              documents={documents}
-              selectedFolderId={selectedFolderId}
-              selectedItem={selectedItem}
-              onFolderSelect={handleFolderSelectWithRecent}
-              onItemSelect={onItemSelect}
-              onCreateFolder={createFolder}
-              onUpdateFolder={updateFolder}
-              onDeleteFolder={deleteFolder}
-              onCreateCard={createCard}
-              onUpdateCard={updateCard}
-              onDeleteCard={deleteCard}
-              moveCardToFolder={moveCardToFolder}
-              reorderCards={reorderCards}
-              pinnedItems={pinnedItems}
-              onPinItem={pinItem}
-              onUnpinItem={unpinItem}
-              isFiltering={isFiltering}
-            />
+            {selectedView.kind === 'folder' ? (
+              <FolderTreeWithCards
+                folders={folders}
+                cards={filteredCards}
+                documents={documents}
+                selectedFolderId={selectedFolderId}
+                selectedItem={selectedItem}
+                onFolderSelect={handleFolderSelectWithRecent}
+                onItemSelect={onItemSelect}
+                onCreateFolder={createFolder}
+                onUpdateFolder={updateFolder}
+                onDeleteFolder={deleteFolder}
+                onCreateCard={createCard}
+                onUpdateCard={updateCard}
+                onDeleteCard={deleteCard}
+                moveCardToFolder={moveCardToFolder}
+                reorderCards={reorderCards}
+                pinnedItems={pinnedItems}
+                onPinItem={pinItem}
+                onUnpinItem={unpinItem}
+                isFiltering={isFiltering}
+              />
+            ) : (
+              <VirtualTreeView
+                nodes={virtualTreeNodes}
+                cards={filteredCards}
+                selectedItem={selectedItem}
+                onItemSelect={onItemSelect}
+              />
+            )}
           </div>
         );
     }
@@ -629,6 +774,33 @@ function TreeViewLayout({
                 onCreateRootFolder={handleCreateRootFolder}
                 showExplorerActions={explorerTab === 'explorer'}
               />
+              {explorerTab === 'explorer' && (
+                <div className="border-b border-slate-100 px-2 pb-2">
+                  <div className="flex items-center gap-2">
+                    <Select value={selectedViewId} onValueChange={(value) => void handleViewChange(value)}>
+                      <SelectTrigger className="h-9 bg-white">
+                        <SelectValue placeholder="ビューを選択" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {viewDefs.map((view) => (
+                          <SelectItem key={view.id} value={view.id}>
+                            {view.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setIsViewManagerOpen(true)}
+                      aria-label="ビュー管理"
+                    >
+                      <Settings2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {renderFilterChips()}
@@ -696,7 +868,7 @@ function TreeViewLayout({
           selectedCardId={selectedCardId}
           selectedDocument={selectedDocument}
           selectedFolderId={selectedFolderId}
-          selectedFolderName={selectedFolder?.folderName ?? (selectedFolder as any)?.folder_name ?? 'フォルダ'}
+          selectedFolderName={selectedFolder?.folderName ?? 'フォルダ'}
           folderCards={folderCards}
           folderStats={folderStats}
           onCardUpdated={onCardUpdated}
@@ -723,6 +895,19 @@ function TreeViewLayout({
           setIsModeSelectionOpen(false);
           setIsCreateSelectionOpen(true);
         }}
+      />
+      <ViewManagerDialog
+        open={isViewManagerOpen}
+        onOpenChange={setIsViewManagerOpen}
+        views={viewDefs}
+        tags={tags}
+        categoryNameEntries={Array.from(categoryNameById.entries())}
+        onAddView={handleAddView}
+        onRenameView={handleRenameView}
+        onDeleteView={handleDeleteView}
+        onUpdateCategoryName={handleUpdateCategoryName}
+        onUpdateUngroupedLabel={handleUpdateUngroupedLabel}
+        onUpdateViewOptions={handleUpdateViewOptions}
       />
     </div>
   );

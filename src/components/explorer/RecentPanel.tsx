@@ -5,11 +5,11 @@ import React, { useMemo } from 'react';
 import { Folder, FileText, BookOpen, Clock, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { RecentItem } from '@/hooks/useExplorerStore';
-import type { Card, DocumentItem, SelectedExplorerItem } from '@/types';
+import type { Card, DocumentItem, Folder, SelectedExplorerItem } from '@/types';
 
 interface RecentPanelProps {
   recent: RecentItem[];
-  folders: unknown[];
+  folders: Folder[];
   cards: Card[];
   documents?: DocumentItem[]; // ✅追加
   onFolderSelect: (folderId: string) => void;
@@ -49,10 +49,10 @@ export function RecentPanel({
         return folders.some(f => (f.id || f.folderId) === rec.id);
       }
       if (rec.type === 'card') {
-        return cards.some(c => c.id === rec.id || (c as any).cardId === rec.id);
+        return cards.some(c => c.id === rec.id || c.cardId === rec.id);
       }
-      if ((rec.type as string) === 'pdf' || rec.type === 'document') {
-        return documents.some(d => d.id === rec.id || (d as any).documentId === rec.id);
+      if (rec.type === 'document') {
+        return documents.some(d => d.id === rec.id || d.documentId === rec.id);
       }
       return false;
     });
@@ -63,17 +63,17 @@ export function RecentPanel({
     if (item.type === 'folder') {
       const folder = folders.find(f => (f.id || f.folderId) === item.id);
       return {
-        name: folder?.folderName || folder?.folder_name || '不明なフォルダ',
+        name: folder?.folderName || '不明なフォルダ',
         icon: Folder,
       };
     } else if (item.type === 'card') {
-      const card = cards.find(c => c.id === item.id || (c as any).cardId === item.id);
+      const card = cards.find(c => c.id === item.id || c.cardId === item.id);
       return {
         name: card?.title || '無題のカード',
         icon: BookOpen,
       };
     } else {
-      const doc = documents.find(d => d.id === item.id || (d as any).documentId === item.id);
+      const doc = documents.find(d => d.id === item.id || d.documentId === item.id);
       return {
         name: doc?.title || '無題のドキュメント',
         icon: FileText,
@@ -86,7 +86,7 @@ export function RecentPanel({
       onFolderSelect(item.id);
     } else if (item.type === 'card') {
       onItemSelect({ type: 'card', id: item.id });
-    } else if ((item.type as string) === 'pdf' || item.type === 'document') {
+    } else if (item.type === 'document') {
       onItemSelect({ type: 'document', id: item.id });
     }
   };
@@ -129,7 +129,7 @@ export function RecentPanel({
             >
               <Icon className={cn(
                 "w-4 h-4 shrink-0",
-                item.type === 'folder' ? "text-[#E8A858]" : (item.type as string) === 'pdf' ? "text-rose-500" : "text-slate-400"
+                item.type === 'folder' ? "text-[#E8A858]" : item.type === 'document' ? "text-rose-500" : "text-slate-400"
               )} />
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-medium text-slate-700 truncate">

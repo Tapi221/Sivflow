@@ -47,7 +47,7 @@ export type TagV3Record = {
   color: string;
   userId: string;
   updatedAt: Date;
-  categoryId?: 'subject' | 'exam' | 'difficulty' | 'type';
+  categoryId?: string;
   parentId?: string;
 };
 

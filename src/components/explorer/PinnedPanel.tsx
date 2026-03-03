@@ -6,11 +6,17 @@ import { Folder, BookOpen, FileText, ChevronRight, ChevronDown, X } from 'lucide
 import Pin from 'lucide-react/dist/esm/icons/pin';
 import { cn } from '@/lib/utils';
 import type { PinnedItem } from '@/hooks/useExplorerStore';
-import type { Card, DocumentItem, SelectedExplorerItem } from '@/types';
+import type { Card, DocumentItem, Folder, SelectedExplorerItem } from '@/types';
+
+type LegacyCardFields = {
+  folder_id?: string;
+};
+
+type CardLike = Card & LegacyCardFields;
 
 interface PinnedPanelProps {
   pinnedItems: PinnedItem[];
-  folders: unknown[];
+  folders: Folder[];
   cards: Card[];
   documents?: DocumentItem[];
   onFolderSelect: (folderId: string) => void;
@@ -49,9 +55,9 @@ export function PinnedPanel({
   }, [pinnedItems, folders, cards, documents]);
 
   const folderById = useMemo(() => {
-    const map = new Map<string, any>();
+    const map = new Map<string, Folder>();
     folders.forEach((folder) => {
-      const id = String(folder.id || folder.folderId || '');
+      const id = String(folder.id || folder.folderId);
       if (!id) return;
       map.set(id, folder);
     });
@@ -61,9 +67,9 @@ export function PinnedPanel({
   const folderChildrenMap = useMemo(() => {
     const map = new Map<string, string[]>();
     folders.forEach((folder) => {
-      const id = String(folder.id || folder.folderId || '');
+      const id = String(folder.id || folder.folderId);
       if (!id) return;
-      const parentId = String(folder.parentId || folder.parentFolderId || '');
+      const parentId = String(folder.parentFolderId || '');
       const key = parentId || '__root__';
       const list = map.get(key) ?? [];
       list.push(id);
@@ -73,8 +79,8 @@ export function PinnedPanel({
       ids.sort((a, b) => {
         const fa = folderById.get(a);
         const fb = folderById.get(b);
-        const oa = Number(fa?.orderIndex ?? fa?.order_index ?? 0);
-        const ob = Number(fb?.orderIndex ?? fb?.order_index ?? 0);
+        const oa = Number(fa?.orderIndex ?? 0);
+        const ob = Number(fb?.orderIndex ?? 0);
         return oa - ob;
       });
     }
@@ -84,17 +90,17 @@ export function PinnedPanel({
   const itemsByFolderId = useMemo(() => {
     const map = new Map<string, Array<{ type: 'card' | 'document'; id: string; orderIndex: number }>>();
     cards.forEach((card) => {
-      const folderId = String(card.folderId || (card as any).folder_id || '');
+      const folderId = String((card as CardLike).folderId || (card as CardLike).folder_id || '');
       if (!folderId) return;
       const list = map.get(folderId) ?? [];
-      list.push({ type: 'card', id: card.id, orderIndex: Number(card.orderIndex ?? (card as any).order_index ?? 0) });
+      list.push({ type: 'card', id: card.id, orderIndex: Number(card.orderIndex ?? 0) });
       map.set(folderId, list);
     });
     documents.forEach((doc) => {
-      const folderId = String(doc.folderId || (doc as any).folder_id || '');
+      const folderId = String(doc.folderId || '');
       if (!folderId) return;
       const list = map.get(folderId) ?? [];
-      list.push({ type: 'document', id: doc.id, orderIndex: Number(doc.orderIndex ?? (doc as any).order_index ?? 0) });
+      list.push({ type: 'document', id: doc.id, orderIndex: Number(doc.orderIndex ?? 0) });
       map.set(folderId, list);
     });
     for (const list of map.values()) {
@@ -114,7 +120,7 @@ export function PinnedPanel({
     const isDescendantOfPinned = (folderId: string): boolean => {
       let current = folderById.get(folderId);
       while (current) {
-        const parentId = String(current.parentId || current.parentFolderId || '');
+        const parentId = String(current.parentFolderId || '');
         if (!parentId) return false;
         if (pinnedFolderIdSet.has(parentId)) return true;
         current = folderById.get(parentId);
@@ -131,7 +137,7 @@ export function PinnedPanel({
     if (item.type === 'folder') {
       const folder = folders.find(f => (f.id || f.folderId) === item.id);
       return {
-        name: folder?.folderName || folder?.folder_name || '不明なフォルダ',
+        name: folder?.folderName || '不明なフォルダ',
         path: getFolderPath ? getFolderPath(item.id) : '',
         icon: Folder,
       };
@@ -142,7 +148,7 @@ export function PinnedPanel({
         : null;
       return {
         name: card?.title || '無題のカード',
-        path: cardFolder ? (cardFolder.folderName || cardFolder.folder_name) : '',
+        path: cardFolder?.folderName ?? '',
         icon: BookOpen,
       };
     } else if (item.type === 'document') {
@@ -152,7 +158,7 @@ export function PinnedPanel({
         : null;
       return {
         name: doc?.title || doc?.fileName || '無題のドキュメント',
-        path: docFolder ? (docFolder.folderName || docFolder.folder_name) : '',
+        path: docFolder?.folderName ?? '',
         icon: FileText,
       };
     }
@@ -181,7 +187,7 @@ export function PinnedPanel({
   const renderSubtree = (folderId: string, depth: number) => {
     const folder = folderById.get(folderId);
     if (!folder) return null;
-    const folderName = folder.folderName || folder.folder_name || '無題のフォルダ';
+    const folderName = folder.folderName || '無題のフォルダ';
     const childFolderIds = folderChildrenMap.get(folderId) ?? [];
     const folderItems = itemsByFolderId.get(folderId) ?? [];
     const hasChildren = childFolderIds.length > 0 || folderItems.length > 0;

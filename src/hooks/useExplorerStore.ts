@@ -16,7 +16,7 @@ export interface PinnedItem {
 }
 
 export interface RecentItem {
-  type: 'folder' | 'card';
+  type: 'folder' | 'card' | 'document';
   id: string;
   ts: number; // タイムスタンプ
 }

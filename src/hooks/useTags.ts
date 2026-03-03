@@ -3,8 +3,10 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { getLocalDb } from '../services/localDB';
 import { useAuth } from '../contexts/AuthContext';
 import type { TagV3Record } from '../services/localdb/types';
+import type { Card } from '../types';
+import { useUserSettings } from './useUserSettings';
 
-export type TagCategory = 'subject' | 'exam' | 'difficulty' | 'type';
+export type TagCategory = string;
 
 /** useTags が外部に公開する Tag 型（TagV3Record と同じ形、nullable なし） */
 export type Tag = TagV3Record;
@@ -41,10 +43,14 @@ const genId = (): string => {
   return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
 };
 
+const genCategoryId = (): string => `cat_${genId()}`;
+
 const asStringArray = (v: unknown): string[] => {
   if (!Array.isArray(v)) return [];
   return v.filter((x): x is string => typeof x === 'string');
 };
+
+const getCardTagIds = (card: Pick<CardTagFields, 'tagIds'>): string[] => asStringArray(card.tagIds);
 
 type TagRepairSummary = {
   removedOrphanTagRefs: number;
@@ -140,6 +146,7 @@ export async function auditAndRepairTags(userId: string): Promise<TagRepairSumma
  */
 export function useTags() {
   const { currentUser } = useAuth();
+  const { settings, updateSettings } = useUserSettings();
 
   const tags = useLiveQuery(
     async () => {
@@ -169,6 +176,38 @@ export function useTags() {
     return map;
   }, [tags]);
 
+  const getTagChildrenMap = (): Map<string | null, Tag[]> => {
+    const childrenMap = new Map<string | null, Tag[]>();
+    for (const tag of tags) {
+      const parentId = typeof tag.parentId === 'string' && tagById.has(tag.parentId)
+        ? tag.parentId
+        : null;
+      const siblings = childrenMap.get(parentId) ?? [];
+      siblings.push(tag);
+      childrenMap.set(parentId, siblings);
+    }
+    return childrenMap;
+  };
+
+  const categoryNameMap = useMemo(
+    () => settings?.tagCategoryDisplayNames ?? {},
+    [settings?.tagCategoryDisplayNames]
+  );
+
+  const categoryIdsInUse = useMemo(() => {
+    const ids = new Set<string>();
+    for (const tag of tags) {
+      if (typeof tag.categoryId === 'string' && tag.categoryId.trim()) {
+        ids.add(tag.categoryId);
+      }
+    }
+    return Array.from(ids).sort((left, right) => {
+      const leftName = (categoryNameMap[left] ?? left).trim();
+      const rightName = (categoryNameMap[right] ?? right).trim();
+      return leftName.localeCompare(rightName, 'ja');
+    });
+  }, [categoryNameMap, tags]);
+
   /** name または nameLower で色を返す（UI互換） */
   const getTagColor = (tagNameOrId: string) => {
     const byName = tagByName.get(tagNameOrId) ?? tagByNameLower.get(tagNameOrId.toLowerCase()) ?? tagById.get(tagNameOrId);
@@ -183,6 +222,74 @@ export function useTags() {
     return tagById.get(tagId)?.name ?? null;
   };
 
+  const getCategoryName = (categoryId: string): string => {
+    const displayName = categoryNameMap[categoryId];
+    return typeof displayName === 'string' && displayName.trim() ? displayName : categoryId;
+  };
+
+  const setCategoryName = async (categoryId: string, name: string): Promise<void> => {
+    if (!currentUser) return;
+    await updateSettings({
+      tagCategoryDisplayNames: {
+        ...categoryNameMap,
+        [categoryId]: name,
+      },
+    });
+  };
+
+  const ensureCategory = async (displayName?: string): Promise<string> => {
+    if (!currentUser) throw new Error('not authenticated');
+    const categoryId = genCategoryId();
+    const resolvedName = displayName?.trim() || '新しいカテゴリ';
+    await setCategoryName(categoryId, resolvedName);
+    return categoryId;
+  };
+
+  const setTagCategory = async (tagId: string, categoryId: string | null): Promise<void> => {
+    if (!currentUser) return;
+    const db = await getLocalDb();
+    const nextCategoryId = typeof categoryId === 'string' && categoryId.trim() ? categoryId : undefined;
+    await db.transaction('rw', db.tags_v3, async () => {
+      await db.tags_v3.update(tagId, {
+        categoryId: nextCategoryId,
+        updatedAt: new Date(),
+      });
+    });
+  };
+
+  const setTagParent = async (
+    tagId: string,
+    parentId: string | null,
+  ): Promise<void | { error: string }> => {
+    if (!currentUser) return { error: 'ログイン状態を確認してください。' };
+    const tag = tagById.get(tagId);
+    if (!tag) return { error: '対象のタグが見つかりません。' };
+
+    const normalizedParentId = typeof parentId === 'string' && parentId.trim() ? parentId : undefined;
+    if (normalizedParentId === tagId) {
+      return { error: '自分自身を親にはできません。' };
+    }
+    if (normalizedParentId && !tagById.has(normalizedParentId)) {
+      return { error: '親タグが見つかりません。' };
+    }
+
+    let currentParentId = normalizedParentId;
+    while (currentParentId) {
+      if (currentParentId === tagId) {
+        return { error: '循環は禁止です。' };
+      }
+      currentParentId = tagById.get(currentParentId)?.parentId;
+    }
+
+    const db = await getLocalDb();
+    await db.tags_v3.update(tagId, {
+      parentId: normalizedParentId,
+      updatedAt: new Date(),
+    });
+  };
+
+  const listCategoryIdsInUse = (): string[] => categoryIdsInUse;
+
   const getTagUsageCount = async (nameOrId: string): Promise<number> => {
     if (!currentUser) return 0;
     const db = await getLocalDb();
@@ -195,10 +302,10 @@ export function useTags() {
     if (tagId) {
       // multiEntry index (*tagIds) を使った高速カウント（userId でフィルタ）
       try {
-        indexedCount = await (db.cards as unknown as { where: (idx: string) => { equals: (v: string) => { and: (fn: (c: unknown) => boolean) => { count: () => Promise<number> } } } })
+        indexedCount = await db.cards
           .where('tagIds')
           .equals(tagId)
-          .and((c: unknown) => (c as CardTagFields).userId === currentUser.uid)
+          .and((card) => card.userId === currentUser.uid)
           .count();
       } catch {
         indexedCount = -1;
@@ -334,6 +441,14 @@ export function useTags() {
         card.updatedAt = new Date();
         updatedCards += 1;
       });
+      await db.tags_v3
+        .where('[userId+parentId]')
+        .equals([currentUser.uid, fromTagId])
+        .modify((raw: unknown) => {
+          const childTag = raw as { parentId?: string; updatedAt?: Date };
+          childTag.parentId = intoTagId;
+          childTag.updatedAt = new Date();
+        });
       await db.tags_v3.delete(fromTagId);
     });
 
@@ -364,6 +479,14 @@ export function useTags() {
     let removedFromCards = 0;
 
     await db.transaction('rw', db.tags_v3, db.cards, async () => {
+      await db.tags_v3
+        .where('[userId+parentId]')
+        .equals([currentUser.uid, tagId])
+        .modify((raw: unknown) => {
+          const childTag = raw as { parentId?: string; updatedAt?: Date };
+          childTag.parentId = undefined;
+          childTag.updatedAt = new Date();
+        });
       await db.tags_v3.delete(tagId);
 
       await db.cards.where('userId').equals(currentUser.uid).modify((raw: unknown) => {
@@ -431,7 +554,7 @@ export function useTags() {
             chunk.map(async (cardId) => {
               const card = await db.cards.get(cardId);
               if (!card) return;
-              const existing = asStringArray((card as unknown as { tagIds?: unknown }).tagIds);
+              const existing = getCardTagIds(card);
               if (existing.includes(tagId)) return;
               await db.cards.update(cardId, {
                 tagIds: [...existing, tagId],
@@ -488,7 +611,7 @@ export function useTags() {
             chunk.map(async (cardId) => {
               const card = await db.cards.get(cardId);
               if (!card) return;
-              const existing = asStringArray((card as unknown as { tagIds?: unknown }).tagIds);
+              const existing = getCardTagIds(card);
               if (!existing.includes(tagId)) return;
               await db.cards.update(cardId, {
                 tagIds: existing.filter(id => id !== tagId),
@@ -508,6 +631,13 @@ export function useTags() {
     tagById,
     availableColors: DEFAULT_COLORS,
     getTagColor,
+    getCategoryName,
+    setCategoryName,
+    ensureCategory,
+    setTagCategory,
+    setTagParent,
+    listCategoryIdsInUse,
+    getTagChildrenMap,
     addTag,
     auditAndRepairTags,
     renameTag,
