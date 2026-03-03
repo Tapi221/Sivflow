@@ -7,7 +7,6 @@ import { PowerPointPane } from '@/components/pptx/PowerPointPane';
 import Dashboard from '@/pages/Dashboard';
 import Gallery from '@/pages/Gallery';
 import Calendar from '@/pages/Calendar';
-import SyncSettings from '@/pages/SyncSettings';
 import Trash from '@/pages/Trash';
 
 interface RightPaneProps {
@@ -53,7 +52,7 @@ export function RightPane({
     return <Calendar />;
   }
   if (selectedItem?.type === 'settings') {
-    return <SyncSettings />;
+    return <Dashboard />;
   }
   if (selectedItem?.type === 'trash') {
     return <Trash />;

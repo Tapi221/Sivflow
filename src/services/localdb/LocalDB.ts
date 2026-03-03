@@ -48,6 +48,7 @@ export type {
   ProjectMap,
   TagLegacyRecord,
   TagV2Record,
+  TagV3Record,
   LocalDBLike,
   LocalDBInstance,
 } from './types';
@@ -115,6 +116,7 @@ export class LocalDB extends Dexie {
   projectMaps!: Dexie.Table<Record<string, unknown>, string>;
   tags!: Dexie.Table<Record<string, unknown>, [string, string]>;
   tags_v2!: Dexie.Table<Record<string, unknown>, [string, string]>;
+  tags_v3!: Dexie.Table<import('./types').TagV3Record, string>;
 
   public userId?: string;
 

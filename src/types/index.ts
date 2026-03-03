@@ -388,6 +388,8 @@ export type Card = BaseEntity & {
   // 表示/管理
   title?: string;
   tags?: string[];
+  /** ID参照タグ（tags_v3 の Tag.id を保持）。tags より優先。 */
+  tagIds?: string[];
   isDraft: boolean;
   hasUncertainty: boolean;
   isBookmarked?: boolean;

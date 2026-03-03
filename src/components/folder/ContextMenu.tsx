@@ -1,4 +1,4 @@
-import { Plus, Pencil, Trash2, Folder, ArrowRight } from 'lucide-react';
+import { Plus, Pencil, Trash2, Folder, ArrowRight, Tag } from 'lucide-react';
 import Pin from 'lucide-react/dist/esm/icons/pin';
 // Note: If IDE still reports Star as missing, we verify that npm run typecheck passes.
 import {
@@ -19,6 +19,7 @@ interface ContextMenuProps {
   onRename?: () => void;
   onDelete?: () => void;
   onMove?: () => void;
+  onBulkTag?: () => void;
   // ピン留め機能
   isPinned?: boolean;
   onTogglePin?: () => void;
@@ -34,6 +35,7 @@ export function ContextMenu({
   onRename,
   onDelete,
   onMove,
+  onBulkTag,
   isPinned,
   onTogglePin,
 }: ContextMenuProps) {
@@ -76,6 +78,12 @@ export function ContextMenu({
         {type === 'card' && onMove && (
           <DropdownMenuItem onClick={onMove} className="gap-2">
             <ArrowRight className="w-4 h-4" /> 移動
+          </DropdownMenuItem>
+        )}
+
+        {type === 'folder' && onBulkTag && (
+          <DropdownMenuItem onClick={onBulkTag} className="gap-2">
+            <Tag className="w-4 h-4 text-violet-500" /> タグを一括付与
           </DropdownMenuItem>
         )}
         

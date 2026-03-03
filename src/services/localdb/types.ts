@@ -39,5 +39,17 @@ export type TagV2Record = TagLegacyRecord & {
   parentId?: string;
 };
 
+/** tags_v3 のレコード型（id が主体） */
+export type TagV3Record = {
+  id: string;
+  name: string;
+  nameLower: string;
+  color: string;
+  userId: string;
+  updatedAt: Date;
+  categoryId?: 'subject' | 'exam' | 'difficulty' | 'type';
+  parentId?: string;
+};
+
 export type LocalDBLike = LocalDB | InMemoryLocalDB;
 export type LocalDBInstance = LocalDBLike;

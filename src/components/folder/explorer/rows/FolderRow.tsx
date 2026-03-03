@@ -44,6 +44,7 @@ interface FolderRowProps {
   onDragLeaveCapture: (e: React.DragEvent) => void;
   onDropCapture: (e: React.DragEvent) => void;
   hasExpandableContent: boolean;
+  onBulkTag?: () => void;
   // 子要素
   children?: React.ReactNode;
 }
@@ -84,6 +85,7 @@ export const FolderRow: React.FC<FolderRowProps> = ({
   onDragLeaveCapture,
   onDropCapture,
   hasExpandableContent,
+  onBulkTag,
   children,
 }) => {
   const folderId = folder.id || (folder as any).folderId;
@@ -204,6 +206,7 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                       setEditingName(folderName);
                     }}
                     onDelete={() => handleDelete(folderId, 'folder')}
+                    onBulkTag={onBulkTag}
                     isPinned={isPinned}
                     onTogglePin={handleTogglePin}
                   >

@@ -2,24 +2,12 @@ import { useMemo } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { getLocalDb } from '../services/localDB';
 import { useAuth } from '../contexts/AuthContext';
+import type { TagV3Record } from '../services/localdb/types';
 
 export type TagCategory = 'subject' | 'exam' | 'difficulty' | 'type';
 
-export interface Tag {
-  // DBには未付与があり得るので optional（読み込み時に補完して実質必須にする）
-  id?: string;
-  name: string;
-  color: string;
-  userId: string;
-  updatedAt: Date;
-  rootFolderId?: string; // Legacy/Compat
-
-  // 未来拡張（今は触らない）
-  categoryId?: TagCategory;
-  parentId?: string;
-}
-
-type TagWithId = Tag & { id: string };
+/** useTags が外部に公開する Tag 型（TagV3Record と同じ形、nullable なし） */
+export type Tag = TagV3Record;
 
 // cards テーブルの型がここでは分からないので、必要最小限だけ扱う
 type CardTagFields = {
@@ -60,151 +48,149 @@ const asStringArray = (v: unknown): string[] => {
 /**
  * useTags: ユーザー単位で共通管理されるタグを操作するフック
  *
- * ✅ 互換:
- * - tags_v2 のPKが [userId+name] のまま
- * - card.tags(string[]) と card.tagIds(string[]) 両対応
- * - tags_v2 の既存データに id が無ければ補完して update
+ * ✅ tags_v3 (id 主体) を読み書きする。
+ * ✅ 互換: card.tags(string[]) と card.tagIds(string[]) 両対応
+ * ✅ tags_v2 が存在する環境でも migration 後は tags_v3 を使う
  */
 export function useTags() {
   const { currentUser } = useAuth();
 
   const tags = useLiveQuery(
     async () => {
-      if (!currentUser) return [] as TagWithId[];
-
+      if (!currentUser) return [] as Tag[];
       const db = await getLocalDb();
-      const list = (await db.tags_v2
-        .where('userId')
-        .equals(currentUser.uid)
-        .toArray()) as Tag[];
-
-      const missing = list.filter(t => !t?.id);
-
-      if (missing.length) {
-        await db.transaction('rw', db.tags_v2, async () => {
-          for (const t of missing) {
-            // tags_v2 のPKが [userId, name] 前提で update
-            await db.tags_v2.update([currentUser.uid, t.name], {
-              id: genId(),
-              updatedAt: new Date(),
-            });
-          }
-        });
-
-        const fixed = (await db.tags_v2
-          .where('userId')
-          .equals(currentUser.uid)
-          .toArray()) as Tag[];
-
-        // id を強制（まだ無いなら最後の安全策で付与）
-        return fixed.map(t => ({ ...t, id: t.id ?? genId() })) as TagWithId[];
-      }
-
-      return list.map(t => ({ ...t, id: t.id ?? genId() })) as TagWithId[];
+      return db.tags_v3.where('userId').equals(currentUser.uid).toArray();
     },
     [currentUser],
-    []
+    [] as Tag[]
   );
 
   const tagByName = useMemo(() => {
-    const map = new Map<string, TagWithId>();
-    for (const t of tags || []) map.set(t.name, t);
+    const map = new Map<string, Tag>();
+    for (const t of tags) map.set(t.name, t);
+    return map;
+  }, [tags]);
+
+  const tagByNameLower = useMemo(() => {
+    const map = new Map<string, Tag>();
+    for (const t of tags) map.set(t.nameLower, t);
     return map;
   }, [tags]);
 
   const tagById = useMemo(() => {
-    const map = new Map<string, TagWithId>();
-    for (const t of tags || []) map.set(t.id, t);
+    const map = new Map<string, Tag>();
+    for (const t of tags) map.set(t.id, t);
     return map;
   }, [tags]);
 
-  const getTagColor = (tagName: string) => {
-    const t = tagByName.get(tagName);
-    return t?.color || DEFAULT_COLORS[0];
+  /** name または nameLower で色を返す（UI互換） */
+  const getTagColor = (tagNameOrId: string) => {
+    const byName = tagByName.get(tagNameOrId) ?? tagByNameLower.get(tagNameOrId.toLowerCase()) ?? tagById.get(tagNameOrId);
+    return byName?.color || DEFAULT_COLORS[0];
   };
 
-  const getTagIdByName = (tagName: string) => {
-    return tagByName.get(tagName)?.id ?? null;
+  const getTagIdByName = (tagName: string): string | null => {
+    return (tagByName.get(tagName) ?? tagByNameLower.get(tagName.toLowerCase()))?.id ?? null;
   };
 
-  const getTagNameById = (tagId: string) => {
+  const getTagNameById = (tagId: string): string | null => {
     return tagById.get(tagId)?.name ?? null;
   };
 
-  const getTagUsageCount = async (name: string): Promise<number> => {
+  const getTagUsageCount = async (nameOrId: string): Promise<number> => {
     if (!currentUser) return 0;
-
     const db = await getLocalDb();
-    const cards = await db.cards.where('userId').equals(currentUser.uid).toArray();
 
-    const tagId = getTagIdByName(name);
+    // nameOrId が id なら直接、そうでなければ名前解決
+    const tagId = tagById.has(nameOrId) ? nameOrId : (getTagIdByName(nameOrId) ?? null);
+    const tagName = nameOrId;
 
-    return cards.reduce((count: number, c: unknown) => {
-      const card = c as CardTagFields;
+    let count = 0;
+    await db.cards.where('userId').equals(currentUser.uid).each((raw: unknown) => {
+      const card = raw as CardTagFields;
       const nameTags = asStringArray(card.tags);
       const idTags = asStringArray(card.tagIds);
-
-      const hitByName = nameTags.includes(name);
+      const hitByName = nameTags.includes(tagName);
       const hitById = tagId ? idTags.includes(tagId) : false;
-
-      return hitByName || hitById ? count + 1 : count;
-    }, 0);
+      if (hitByName || hitById) count += 1;
+    });
+    return count;
   };
 
   /**
    * タグを追加または取得。
-   * 既に存在すれば id の不足だけ補完（余計な破壊をしない）
+   * nameLower が既存なら color だけ更新（重複作成しない）
    */
-  const addTag = async (name: string, color: string = DEFAULT_COLORS[0]) => {
-    if (!currentUser) return;
-
+  const addTag = async (
+    name: string,
+    color: string = DEFAULT_COLORS[0],
+    categoryId?: TagCategory,
+    parentId?: string,
+  ): Promise<Tag> => {
     const db = await getLocalDb();
-    const existing = (await db.tags_v2.get([currentUser.uid, name])) as Tag | undefined;
+    if (!currentUser) throw new Error('not authenticated');
+
+    const nameLower = name.toLowerCase();
+
+    // 既存チェック（idempotent）
+    const existing = await db.tags_v3
+      .where('[userId+nameLower]')
+      .equals([currentUser.uid, nameLower])
+      .first();
 
     if (existing) {
+      // color/categoryId に差分があれば更新
       const patch: Partial<Tag> = {};
-      if (!existing.id) patch.id = genId();
       if (existing.color !== color) patch.color = color;
-
-      if (Object.keys(patch).length) {
+      if (categoryId && existing.categoryId !== categoryId) patch.categoryId = categoryId;
+      if (parentId && existing.parentId !== parentId) patch.parentId = parentId;
+      if (Object.keys(patch).length > 0) {
         patch.updatedAt = new Date();
-        await db.tags_v2.update([currentUser.uid, name], patch);
+        await db.tags_v3.update(existing.id, patch);
+        return { ...existing, ...patch };
       }
-      return;
+      return existing;
     }
 
-    await db.tags_v2.add({
+    const newTag: Tag = {
       id: genId(),
       name,
+      nameLower,
       color,
       userId: currentUser.uid,
-      rootFolderId: 'GLOBAL',
       updatedAt: new Date(),
-    } as Tag);
+      ...(categoryId ? { categoryId } : {}),
+      ...(parentId ? { parentId } : {}),
+    };
+    await db.tags_v3.add(newTag);
+    return newTag;
   };
 
-  const updateTagColor = async (name: string, color: string) => {
+  const updateTagColor = async (nameOrId: string, color: string): Promise<void> => {
     if (!currentUser) return;
     const db = await getLocalDb();
-    await db.tags_v2.update([currentUser.uid, name], { color, updatedAt: new Date() });
+    const tag = tagById.get(nameOrId) ?? tagByName.get(nameOrId) ?? tagByNameLower.get(nameOrId.toLowerCase());
+    if (!tag) return;
+    await db.tags_v3.update(tag.id, { color, updatedAt: new Date() });
   };
 
   /**
-   * タグ削除: tags_v2 から削除し、カードからも除去
-   * - 旧: card.tags(string[])
-   * - 新: card.tagIds(string[])
-   * 両方から消す
+   * タグ削除: tags_v3 から削除し、カードからも除去
+   * - card.tags(string[]) からも除去（互換）
+   * - card.tagIds(string[]) からも除去
    */
-  const deleteTag = async (name: string) => {
+  const deleteTag = async (nameOrId: string): Promise<number> => {
     if (!currentUser) return 0;
 
-    const tagId = getTagIdByName(name);
-    const db = await getLocalDb();
+    const tag = tagById.get(nameOrId) ?? tagByName.get(nameOrId) ?? tagByNameLower.get(nameOrId.toLowerCase());
+    if (!tag) return 0;
 
+    const { id: tagId, name: tagName } = tag;
+    const db = await getLocalDb();
     let removedFromCards = 0;
 
-    await db.transaction('rw', db.tags_v2, db.cards, async () => {
-      await db.tags_v2.delete([currentUser.uid, name]);
+    await db.transaction('rw', db.tags_v3, db.cards, async () => {
+      await db.tags_v3.delete(tagId);
 
       await db.cards.where('userId').equals(currentUser.uid).modify((raw: unknown) => {
         const card = raw as Record<string, unknown> & CardTagFields;
@@ -212,13 +198,13 @@ export function useTags() {
         const nameTags = asStringArray(card.tags);
         const idTags = asStringArray(card.tagIds);
 
-        const hadName = nameTags.includes(name);
-        const hadId = tagId ? idTags.includes(tagId) : false;
+        const hadName = nameTags.includes(tagName);
+        const hadId = idTags.includes(tagId);
 
         if (!hadName && !hadId) return;
 
-        if (hadName) card.tags = nameTags.filter(t => t !== name);
-        if (hadId && tagId) card.tagIds = idTags.filter(id => id !== tagId);
+        if (hadName) card.tags = nameTags.filter(t => t !== tagName);
+        if (hadId) card.tagIds = idTags.filter(id => id !== tagId);
 
         card.updatedAt = new Date();
         removedFromCards += 1;
@@ -228,16 +214,133 @@ export function useTags() {
     return removedFromCards;
   };
 
+  /**
+   * フォルダ配下カードに一括タグ付与。
+   * @returns 実際に変更したカード枚数
+   */
+  const addTagToCardsInFolder = async (
+    folderId: string,
+    tagId: string,
+    includeSubfolders: boolean,
+  ): Promise<number> => {
+    if (!currentUser) return 0;
+    const db = await getLocalDb();
+
+    // 対象 folderId 収集
+    const targetFolderIds = new Set<string>([folderId]);
+    if (includeSubfolders) {
+      const allFolders = await db.folders.where('userId').equals(currentUser.uid).toArray();
+      const collectChildren = (parentId: string) => {
+        for (const f of allFolders) {
+          if ((f as { parentFolderId?: string }).parentFolderId === parentId) {
+            targetFolderIds.add(f.id);
+            collectChildren(f.id);
+          }
+        }
+      };
+      collectChildren(folderId);
+    }
+
+    const CHUNK = 100;
+    let modified = 0;
+
+    for (const tid of targetFolderIds) {
+      const ids = await db.cards
+        .where('[userId+folderId]' as Parameters<typeof db.cards.where>[0])
+        .equals([currentUser.uid, tid] as Parameters<typeof db.cards.where.equals>[0])
+        .primaryKeys() as string[];
+
+      for (let i = 0; i < ids.length; i += CHUNK) {
+        const chunk = ids.slice(i, i + CHUNK);
+        await db.transaction('rw', db.cards, async () => {
+          await Promise.all(
+            chunk.map(async (cardId) => {
+              const card = await db.cards.get(cardId);
+              if (!card) return;
+              const existing = asStringArray((card as unknown as { tagIds?: unknown }).tagIds);
+              if (existing.includes(tagId)) return;
+              await db.cards.update(cardId, {
+                tagIds: [...existing, tagId],
+                updatedAt: new Date(),
+              });
+              modified += 1;
+            })
+          );
+        });
+      }
+    }
+    return modified;
+  };
+
+  /**
+   * フォルダ配下カードから一括タグ除去。
+   * @returns 実際に変更したカード枚数
+   */
+  const removeTagFromCardsInFolder = async (
+    folderId: string,
+    tagId: string,
+    includeSubfolders: boolean,
+  ): Promise<number> => {
+    if (!currentUser) return 0;
+    const db = await getLocalDb();
+
+    const targetFolderIds = new Set<string>([folderId]);
+    if (includeSubfolders) {
+      const allFolders = await db.folders.where('userId').equals(currentUser.uid).toArray();
+      const collectChildren = (parentId: string) => {
+        for (const f of allFolders) {
+          if ((f as { parentFolderId?: string }).parentFolderId === parentId) {
+            targetFolderIds.add(f.id);
+            collectChildren(f.id);
+          }
+        }
+      };
+      collectChildren(folderId);
+    }
+
+    const CHUNK = 100;
+    let modified = 0;
+
+    for (const tid of targetFolderIds) {
+      const ids = await db.cards
+        .where('[userId+folderId]' as Parameters<typeof db.cards.where>[0])
+        .equals([currentUser.uid, tid] as Parameters<typeof db.cards.where.equals>[0])
+        .primaryKeys() as string[];
+
+      for (let i = 0; i < ids.length; i += CHUNK) {
+        const chunk = ids.slice(i, i + CHUNK);
+        await db.transaction('rw', db.cards, async () => {
+          await Promise.all(
+            chunk.map(async (cardId) => {
+              const card = await db.cards.get(cardId);
+              if (!card) return;
+              const existing = asStringArray((card as unknown as { tagIds?: unknown }).tagIds);
+              if (!existing.includes(tagId)) return;
+              await db.cards.update(cardId, {
+                tagIds: existing.filter(id => id !== tagId),
+                updatedAt: new Date(),
+              });
+              modified += 1;
+            })
+          );
+        });
+      }
+    }
+    return modified;
+  };
+
   return {
-    tags: tags || [],
+    tags,
     availableColors: DEFAULT_COLORS,
     getTagColor,
     addTag,
     updateTagColor,
     deleteTag,
     getTagUsageCount,
+    addTagToCardsInFolder,
+    removeTagFromCardsInFolder,
 
-    // 移行/将来用
+    // 移行/互換用
     getTagIdByName,
     getTagNameById,
   };

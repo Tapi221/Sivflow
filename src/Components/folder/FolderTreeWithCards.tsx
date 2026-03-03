@@ -35,6 +35,7 @@ import {
 import { DocumentRow } from './explorer/rows/DocumentRow';
 import { CardRow } from './explorer/rows/CardRow';
 import { FolderRow } from './explorer/rows/FolderRow';
+import BulkTagDialog from '@/components/tag/BulkTagDialog';
 
 const isSoftDeleted = (entity?: { isDeleted?: boolean; is_deleted?: boolean } | null) =>
   Boolean(entity?.isDeleted ?? entity?.is_deleted);
@@ -230,6 +231,7 @@ export function FolderTreeWithCards({
   const [pendingScrollId, setPendingScrollId] = useState<string | null>(null);
   const [deleteFolderDialogOpen, setDeleteFolderDialogOpen] = useState(false);
   const [deleteTargetFolderId, setDeleteTargetFolderId] = useState<string | null>(null);
+  const [bulkTagFolderId, setBulkTagFolderId] = useState<string | null>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
   const rowRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const treeRootRef = useRef<HTMLDivElement | null>(null);
@@ -1301,6 +1303,7 @@ export function FolderTreeWithCards({
         onMenuOpenChange={(open) =>
           setOpenRowMenuId(open ? `folder:${folderId}` : (prev) => (prev === `folder:${folderId}` ? null : prev))
         }
+        onBulkTag={() => setBulkTagFolderId(folderId)}
         setRowRef={setRowRef}
         isDimmed={isDimmed}
         isFileDraggingOver={isFileDraggingOver}
@@ -1528,6 +1531,14 @@ export function FolderTreeWithCards({
           subfolderCount={deleteTargetCounts.subfolderCount}
           onConfirm={handleConfirmDeleteFolder}
         />
+
+        {bulkTagFolderId && (
+          <BulkTagDialog
+            open={Boolean(bulkTagFolderId)}
+            onOpenChange={(open) => { if (!open) setBulkTagFolderId(null); }}
+            folderId={bulkTagFolderId}
+          />
+        )}
       </div>
     </DragDropContext>
   );

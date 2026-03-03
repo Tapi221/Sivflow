@@ -461,6 +461,7 @@ export class InMemoryLocalDB {
   projectMaps!: InMemoryTable<any>;
   tags!: InMemoryTable<any>;
   tags_v2!: InMemoryTable<any>;
+  tags_v3!: InMemoryTable<any>;
 
   tables: InMemoryTable<any>[] = [];
   private readonly tableMap = new Map<string, InMemoryTable<any>>();
@@ -491,6 +492,7 @@ export class InMemoryLocalDB {
     this.projectMaps = this.registerTable('projectMaps', 'id');
     this.tags = this.registerTable('tags', ['rootFolderId', 'name']);
     this.tags_v2 = this.registerTable('tags_v2', ['userId', 'name']);
+    this.tags_v3 = this.registerTable('tags_v3', 'id');
     this.registerTable('studyLogs', 'id');
   }
 
@@ -530,7 +532,10 @@ export class InMemoryLocalDB {
     return Promise.resolve();
   }
 
-  async transaction<T>(mode: string, tables: string | string[], scope: () => Promise<T> | T): Promise<T> {
+  async transaction<T>(mode: string, ...args: unknown[]): Promise<T> {
+    // InMemoryLocalDB はロックなしで即時実行。
+    // Dexie 互換の可変引数スタイル (mode, table1, table2, ..., scope) に対応。
+    const scope = args[args.length - 1] as () => Promise<T> | T;
     return await scope();
   }
 
