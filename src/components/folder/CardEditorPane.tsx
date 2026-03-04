@@ -647,7 +647,7 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
 
   return (
     <div className="h-full px-4 py-4 card-editor-right-pane-font">
-      <div className={cn("relative flex h-full gap-4", isEditing ? "overflow-hidden" : "overflow-y-auto overflow-x-hidden")}>
+      <div className="relative flex h-full gap-4 overflow-hidden">
         <Button
           type="button"
           variant="outline"
@@ -663,7 +663,7 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
           {isMetaOpen ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </Button>
 
-        <div className={cn("min-w-0 flex-1 p-4", isEditing ? "overflow-y-auto" : "overflow-visible")}>
+        <div className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-4">
           {isEditing ? (
             <div className="space-y-4">
               {/* 右ペイン用の最小ヘッダ（保存/キャンセルだけ） */}
@@ -681,7 +681,7 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
 
               {/* ★紙カード2枚並び編集 */}
               <DragDropContext onDragEnd={onDragEnd}>
-                <div className="grid lg:grid-cols-2 gap-6 max-w-7xl mx-auto">
+                <div className="mx-auto grid w-fit max-w-full grid-cols-1 gap-6 lg:grid-cols-2">
                   {/* 問題 */}
                   <div className="flex flex-col gap-2 w-full min-h-0">
                     <div className="shrink-0 flex justify-center">
