@@ -22,7 +22,7 @@ import {
   Zap
 } from 'lucide-react';
 import { createPageUrl } from '@/utils';
-import { RatingCountTiles } from '@/components/study/RatingCountTiles';
+import { RatingCountTiles } from '@/features/study/RatingCountTiles';
 import { useTodayStudyStore } from '@/stores/useTodayStudyStore';
 
 import ExportDialog from '@/components/export/ExportDialog';

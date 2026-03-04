@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { CardCarousel } from '@/components/study/CardCarousel';
-import { VerticalCardPager } from '@/components/review/VerticalCardPager';
+import { CardCarousel } from '@/features/study/CardCarousel';
+import { VerticalCardPager } from '@/features/review/VerticalCardPager';
 import { useIsDesktop } from '@/hooks/useIsDesktop';
-import StudyCard from '@/components/study/StudyCard';
+import StudyCard from '@/features/study/StudyCard';
 import type { Card } from '@/types';
 
 type Props = {

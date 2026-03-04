@@ -46,7 +46,7 @@ export function BlockRenderer({ blocks, onGalleryFullscreenChange }: BlockRender
   if (!renderableBlocks || renderableBlocks.length === 0) return null;
 
   return (
-    <div className="w-full max-w-full space-y-0">
+    <div className="w-full max-w-full">
       {renderableBlocks.map((block) => {
         const isGridOffsetBlock = isGridOffsetType(block.type);
         const isLinePositionable = isRowPositionableType(block.type) && !isGridOffsetBlock;

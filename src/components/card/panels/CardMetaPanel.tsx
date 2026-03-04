@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Line, LineChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 
-import { RatingCountTiles } from "@/components/study/RatingCountTiles";
+import { RatingCountTiles } from "@/features/study/RatingCountTiles";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { TagInput } from "@/components/ui/tag-input";

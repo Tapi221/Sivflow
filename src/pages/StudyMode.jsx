@@ -17,15 +17,15 @@ import { sanitizeStreak } from '@/utils/streak';
 import { flags } from '@/features/flags';
 import { TelemetryService } from '@/services/logic/TelemetryService';
 import confetti from 'canvas-confetti';
-import { StampRally } from '@/components/study/StampRally';
+import { StampRally } from '@/features/study/StampRally';
 import { useStudyCards } from '@/hooks/useStudyCards';
 import { useStudySession } from '@/hooks/useStudySession';
 import { usePracticeMode } from '@/hooks/usePracticeMode';
-import { StudyEmpty } from '@/components/study/StudyEmpty';
-import { StudyReview } from '@/components/study/StudyReview';
-import { StudyComplete } from '@/components/study/StudyComplete';
-import { PracticeCards } from '@/components/study/PracticeCards';
-import { PracticeSummary } from '@/components/study/PracticeSummary';
+import { StudyEmpty } from '@/features/study/StudyEmpty';
+import { StudyReview } from '@/features/study/StudyReview';
+import { StudyComplete } from '@/features/study/StudyComplete';
+import { PracticeCards } from '@/features/study/PracticeCards';
+import { PracticeSummary } from '@/features/study/PracticeSummary';
 
 const RATING_LABELS = {
   forgot: '忘れた',

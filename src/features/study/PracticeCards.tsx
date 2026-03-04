@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import StudyCard from '@/components/study/StudyCard';
+import StudyCard from '@/features/study/StudyCard';
 
 type Props = {
   practiceState: unknown;

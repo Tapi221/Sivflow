@@ -1,5 +1,5 @@
 import type { ComponentProps } from 'react';
-import { CardCarousel3D } from '@/components/review/CardCarousel3D';
+import { CardCarousel3D } from '@/features/review/CardCarousel3D';
 import StudyCard from './StudyCard';
 import type { Card } from '@/types';
 
