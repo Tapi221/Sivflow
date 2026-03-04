@@ -1,5 +1,5 @@
 import React from 'react';
-import { CARD_ROW_PX } from '@/components/card/constants';
+import { CARD_ROW_PX } from '@/components/card/common/constants';
 import { RowSnappedRoot } from '@/components/card/frame/RowSnappedRoot';
 
 type CodeBlockFrameProps = {

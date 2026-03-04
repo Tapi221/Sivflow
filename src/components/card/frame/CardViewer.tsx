@@ -2,8 +2,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { Flashcard } from './Flashcard';
 import { useUserSettings } from '@/hooks/useUserSettings';
-import { CANONICAL_CARD_WIDTH, CARD_SAFE_PADDING_PX } from './constants';
-import { MobileScalableCard } from './frame/MobileScalableCard';
+import { CANONICAL_CARD_WIDTH, CARD_SAFE_PADDING_PX } from '../common/constants';
+import { MobileScalableCard } from './MobileScalableCard';
 
 // アプリに合わせてちゃんとした型に置き換えてね（最低限の例）
 export type Card = {

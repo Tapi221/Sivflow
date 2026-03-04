@@ -2,8 +2,8 @@
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { Flashcard } from '../Flashcard';
-import { CARD_ROW_PX } from '../constants';
+import { Flashcard } from '../frame/Flashcard';
+import { CARD_ROW_PX } from '../common/constants';
 
 vi.mock('../frame/CardFrame', () => ({
   CardFrame: ({ children, heightPx }: { children: React.ReactNode; heightPx?: number }) => (
@@ -13,7 +13,7 @@ vi.mock('../frame/CardFrame', () => ({
   ),
 }));
 
-vi.mock('../SharedCardContent', () => ({
+vi.mock('../common/SharedCardContent', () => ({
   SharedCardContent: () => <div data-testid="mock-shared-content" />,
 }));
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { ScaleToFitFrame } from '@/components/card/ScaleToFitFrame';
+import { ScaleToFitFrame } from '@/components/card/frame/ScaleToFitFrame';
 import { CardShell } from '@/components/card/frame/CardShell';
 import { CardSurface } from '@/components/card/frame/CardSurface';
 import {
@@ -8,7 +8,7 @@ import {
   CARD_RULED_OFFSET_BOTTOM_PX,
   CARD_ROW_PX,
   CARD_RULED_OFFSET_TOP_PX,
-} from '@/components/card/constants';
+} from '@/components/card/common/constants';
 
 // CardShell の props 型をそのまま流用するための別名
 type CardShellProps = React.ComponentProps<typeof CardShell>;

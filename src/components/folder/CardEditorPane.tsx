@@ -5,12 +5,12 @@ import Volume2Icon from "lucide-react/dist/esm/icons/volume-2";
 import LinkIcon from "lucide-react/dist/esm/icons/link";
 import { DragDropContext } from "@hello-pangea/dnd";
 
-import { Flashcard } from "@/components/card/Flashcard";
+import { Flashcard } from "@/components/card/frame/Flashcard";
 import { CardMetaPanel } from "@/components/card/panels/CardMetaPanel";
 import MediaUploader from "@/components/card/media/MediaUploader";
 import { CardFrame } from "@/components/card/frame/CardFrame";
 import { CardCornerActions } from "@/components/card/frame/CardCornerActions";
-import { SharedCardContent } from "@/components/card/SharedCardContent";
+import { SharedCardContent } from "@/components/card/common/SharedCardContent";
 import { sortBlocksByOrderIndex } from "@/components/card/blocks/blockOrdering";
 import {
   CANONICAL_CARD_WIDTH,
@@ -19,7 +19,7 @@ import {
   minCardHeightPxToLayoutRows,
   CARD_HEIGHT_PHASE_PX,
   CARD_ROW_PX,
-} from "@/components/card/constants";
+} from "@/components/card/common/constants";
 import {
   DEFAULT_LAYOUT_ROWS,
   LEGACY_BASE_LAYOUT_ROWS,

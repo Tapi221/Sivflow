@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 import type { CardBlock } from '@/types';
-import { CARD_ROW_PX } from '../constants';
+import { CARD_ROW_PX } from '../common/constants';
 
 const ROW_OFFSET_MIN = -999;
 const ROW_OFFSET_MAX = 999;

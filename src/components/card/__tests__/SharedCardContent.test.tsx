@@ -3,7 +3,7 @@ import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { DragDropContext } from '@hello-pangea/dnd';
-import { SharedCardContent } from '../SharedCardContent';
+import { SharedCardContent } from '../common/SharedCardContent';
 import type { CardBlock } from '@/types';
 
 vi.mock('../blocks/BlockRenderer', () => ({

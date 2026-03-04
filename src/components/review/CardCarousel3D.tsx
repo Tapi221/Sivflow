@@ -11,9 +11,9 @@
  */
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Flashcard } from '@/components/card/Flashcard';
+import { Flashcard } from '@/components/card/frame/Flashcard';
 import { MobileScalableCard } from '@/components/card/frame/MobileScalableCard';
-import { CANONICAL_CARD_WIDTH, CARD_SAFE_PADDING_PX } from '@/components/card/constants';
+import { CANONICAL_CARD_WIDTH, CARD_SAFE_PADDING_PX } from '@/components/card/common/constants';
 import type { Card } from '@/types';
 
 // ── レイアウト定数 (ここを変えれば見た目を調整できる) ──────────────────

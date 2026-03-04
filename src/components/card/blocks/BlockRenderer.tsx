@@ -13,7 +13,7 @@ import {
   isGridOffsetType,
   isRowPositionableType,
 } from '../frame/rowOffset';
-import { CARD_ROW_PX } from '../constants';
+import { CARD_ROW_PX } from '../common/constants';
 
 interface BlockRendererProps {
   blocks?: CardBlock[];

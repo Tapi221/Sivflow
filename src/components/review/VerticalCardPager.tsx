@@ -11,7 +11,7 @@
 
 import { useRef } from 'react';
 import { useVerticalCardPager } from '@/hooks/useVerticalCardPager';
-import { CANONICAL_CARD_WIDTH } from '@/components/card/constants';
+import { CANONICAL_CARD_WIDTH } from '@/components/card/common/constants';
 
 // ── レイアウト定数 ──────────────────────────────────────────────────────────
 const DEFAULT_CARD_WIDTH = CANONICAL_CARD_WIDTH;   // カード列の固定幅 (px) = カード設計幅と一致させて青枠を正確に合わせる

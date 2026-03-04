@@ -1,5 +1,5 @@
-import { ScaleToFitFrame } from '../ScaleToFitFrame';
-import type { ScaleToFitFrameProps } from '../ScaleToFitFrame';
+import { ScaleToFitFrame } from './ScaleToFitFrame';
+import type { ScaleToFitFrameProps } from './ScaleToFitFrame';
 
 export { ScaleToFitFrame };
 export type { ScaleToFitFrameProps };

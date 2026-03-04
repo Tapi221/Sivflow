@@ -9,7 +9,7 @@ import { ExplorerFilterSummary } from './ExplorerFilterSummary';
 import { TagFilterPopover } from '@/components/explorer/TagFilterPopover';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogContent, DialogOverlay, DialogPortal } from '@/components/ui/dialog';
-import { Flashcard } from '@/components/card/Flashcard';
+import { Flashcard } from '@/components/card/frame/Flashcard';
 
 interface DirectoryDiagramPaneProps {
   folders: Folder[];

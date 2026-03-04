@@ -5,17 +5,17 @@ import LinkIcon from 'lucide-react/dist/esm/icons/link';
 
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
-import { AudioPlayer } from './media/CardMedia';
-import { ReferencePopup } from './overlays/ReferencePopup';
+import { AudioPlayer } from '../media/CardMedia';
+import { ReferencePopup } from '../overlays/ReferencePopup';
 import type { CardBlock, ReferenceBlockData } from '@/types';
 import { InkLayer, InkToolbar, type InkHistoryState, type InkLayerHandle } from '@/components/ink/InkLayer';
 import { resolveInkDocument } from '@/components/ink/inkStorage';
 import { INK_DOCUMENT_VERSION, type InkDocument, type InkEditTool } from '@/components/ink/inkTypes';
-import { CardFrame } from './frame/CardFrame';
-import { CardCornerActions } from './frame/CardCornerActions';
-import { SharedCardContent } from './SharedCardContent';
-import { CANONICAL_CARD_WIDTH, layoutRowsToCardHeightPx } from './constants';
-import { sortBlocksByOrderIndex } from './blocks/blockOrdering';
+import { CardFrame } from './CardFrame';
+import { CardCornerActions } from './CardCornerActions';
+import { SharedCardContent } from '../common/SharedCardContent';
+import { CANONICAL_CARD_WIDTH, layoutRowsToCardHeightPx } from '../common/constants';
+import { sortBlocksByOrderIndex } from '../blocks/blockOrdering';
 import {
   DEFAULT_LAYOUT_ROWS,
   LEGACY_BASE_LAYOUT_ROWS,

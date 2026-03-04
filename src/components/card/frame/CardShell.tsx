@@ -4,7 +4,7 @@ import {
   cardHeightPxToLayoutRows,
   layoutRowsToCardHeightPx,
   snapMinCardHeightPx,
-} from '@/components/card/constants';
+} from '@/components/card/common/constants';
 import {
   DropdownMenu,
   DropdownMenuContent,

@@ -7,6 +7,12 @@ export * from './frame/ruledStyles';
 export * from './frame/rowOffset';
 export * from './frame/PaperCardScaleFrame';
 export * from './frame/MobileScalableCard';
+export * from './frame/ScaleToFitFrame';
+export * from './frame/CardViewer';
+export * from './frame/Flashcard';
+
+export * from './common/SharedCardContent';
+export * from './common/constants';
 
 export * from './blocks/BlockEditor';
 export * from './blocks/BlockRenderer';
