@@ -44,7 +44,7 @@ export function RuledLayer({
 
   return (
     <div
-      className={cn('pointer-events-none absolute z-0', className)}
+      className={cn('ruledLayer pointer-events-none absolute z-0', className)}
       style={layerStyle}
     />
   );

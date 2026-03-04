@@ -341,6 +341,7 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
 
       blockquote: ({ children }) => (
         <BlockSurface
+          className="blockquoteNoRuled"
           ruled={false}
           bleedX={false}
           background="var(--card-surface)"
@@ -351,7 +352,7 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
           padRightRows={0}
         >
           <blockquote
-            className="m-0 border-l-4 border-slate-300 italic"
+            className="markdownBlockquote m-0 border-l-4 border-slate-300 text-left italic"
             style={{ ...bodyStyle, paddingLeft: 'var(--card-row-px)' }}
           >
             {children}

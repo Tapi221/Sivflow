@@ -22,8 +22,62 @@
   }
 
   /* Ensure quote blocks never show nested ruled layers */
-  .blockquoteNoRuled .blockSurface > .pointer-events-none.absolute.z-0 {
+  .blockSurface.blockquoteNoRuled .ruledLayer,
+  .markdownBlockCardView blockquote .ruledLayer {
     display: none;
+  }
+
+  .markdownBlockCardView blockquote {
+    margin: 0;
+    padding: 0.75rem 1rem;
+    position: relative;
+    z-index: 2;
+    isolation: isolate;
+    background-color: var(--card-surface, #ffffff);
+    border-left: 4px solid rgba(148, 163, 184, 0.7);
+    border-radius: 10px;
+    display: flow-root;
+    box-sizing: border-box;
+  }
+
+  .markdownBlockCardView blockquote > :not(.blockSurface),
+  .markdownBlockCardView blockquote > .blockSurface > .blockSurfaceContent {
+    position: relative;
+    z-index: 1;
+  }
+
+  .markdownBlockCardView blockquote :is(p, ul, ol, pre, table) {
+    margin: 0;
+  }
+
+  .markdownBlockCardView blockquote li {
+    margin: 0;
+  }
+
+  .markdownBlockCardView blockquote > :where(* + *) {
+    margin-top: 0.5rem;
+  }
+
+  .markdownBlockCardView blockquote :is(ul, ol) {
+    padding-left: 1.25rem;
+  }
+
+  .markdownBlockCardView blockquote pre,
+  .markdownBlockCardView blockquote table,
+  .markdownBlockCardView blockquote .overflow-x-auto {
+    background-color: var(--card-surface, #ffffff);
+  }
+
+  .markdownBlockCardView blockquote blockquote {
+    margin-top: 0.75rem;
+    background-color: var(--card-surface, #ffffff);
+    border-left-color: rgba(100, 116, 139, 0.55);
+    border-radius: 8px;
+    box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.25);
+  }
+
+  .markdownBlockCardView blockquote blockquote > :where(* + *) {
+    margin-top: 0.5rem;
   }
 
   .katex-display-wrapper {
