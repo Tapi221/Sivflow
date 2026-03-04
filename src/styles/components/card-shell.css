@@ -1,15 +1,24 @@
 @layer components {
   .card-shell {
     @apply relative flex flex-col;
+
     --card-w: var(--card-base-width);
+
+    /* 1行のピッチ = 罫線ピッチ */
     --card-row-px: 24px;
     --ruled-line-pitch: var(--card-row-px);
+
     --card-font-size: 16px;
     --card-line-height: var(--card-row-px);
+
     --card-padding-x: 12px;
     --card-padding-bottom: 16px;
-    --card-content-padding-top: 44px;
-    --ruled-offset-px: var(--card-content-padding-top);
+
+    /* ★統一：ヘッダー高 = カード上端→最初の罫線 = 44px */
+    --card-header-h: 44px;
+    --card-content-padding-top: var(--card-header-h);
+    --ruled-offset-px: var(--card-header-h);
+
     width: var(--card-base-width);
     max-width: 100%;
     min-height: calc(var(--card-w) * 3 / 4);
@@ -154,15 +163,18 @@
   .card-shell-header,
   .card-shell-footer {
     @apply flex items-center justify-between gap-2 px-3;
-    height: 52px;
-    min-height: 52px;
-    max-height: 52px;
   }
 
+  /* ★ここが一番重要：ヘッダーを44pxに固定して、余計なpaddingでズラさない */
   .card-shell-header {
     @apply absolute left-0 right-0 top-0;
     z-index: 30;
-    padding-top: 2px;
+
+    height: var(--card-header-h);
+    min-height: var(--card-header-h);
+    max-height: var(--card-header-h);
+
+    padding-top: 0;
     padding-bottom: 0;
   }
 
