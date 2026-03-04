@@ -40,7 +40,7 @@
 
   .card-shell--resizable .card-shell-body {
     flex: 1 0 auto;
-    overflow-x: visible !important;
+    /* スクロール不可が要件なので、ここで overflow を再開しない */
   }
 
   .card-shell-body {
@@ -50,21 +50,20 @@
     padding-top: var(--card-header-h);
     padding-bottom: var(--card-footer-h);
 
-    overflow-y: clip;
-    overflow-x: visible;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-
-  .card-shell-body::-webkit-scrollbar {
-    display: none;
+    /* ★根本対応：カード内スクロールを不可能にする */
+    overflow: hidden;
+    overscroll-behavior: none;
   }
 
   .card-shell-body > * {
     min-height: 0;
     flex: 1 0 auto;
     max-width: 100%;
-    overflow-x: visible;
+
+    /* 親が overflow:hidden なので、子の overflow 指定は実質意味を持たないが
+       “はみ出し前提”のUIがあるならここで増殖させない方が安全 */
+    overflow: hidden;
+
     word-wrap: break-word;
   }
 
