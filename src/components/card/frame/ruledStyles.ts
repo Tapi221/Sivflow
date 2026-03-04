@@ -13,15 +13,16 @@ const REPEAT_WITHOUT_LAST_ROW_SIZE = '100% calc(100% - var(--card-row-px))';
 const BOTTOM_LINE_LAYER = 'linear-gradient(var(--card-ruled-color), var(--card-ruled-color))';
 const BOTTOM_LINE_POSITION = '0 calc(100% - var(--card-ruled-line-px))';
 const BOTTOM_LINE_SIZE = '100% var(--card-ruled-line-px)';
+const withRuledPhase = (y: string) => `0 calc(${y} + var(--card-ruled-phase-px, 0px))`;
 
 function buildRepeatLayerStyle(
-  backgroundPosition: string,
+  backgroundPositionY: string,
   backgroundRepeat: CSSProperties['backgroundRepeat']
 ): Pick<CSSProperties, 'backgroundImage' | 'backgroundSize' | 'backgroundPosition' | 'backgroundRepeat'> {
   return {
     backgroundImage: REPEATING_LAYER,
     backgroundSize: '100% var(--card-row-px)',
-    backgroundPosition,
+    backgroundPosition: withRuledPhase(backgroundPositionY),
     backgroundRepeat,
   };
 }
@@ -31,7 +32,7 @@ export function getRuledStyle(kind: RuledStyleKind): Pick<
   'backgroundImage' | 'backgroundSize' | 'backgroundPosition' | 'backgroundRepeat'
 > {
   if (kind === 'repeat-only') {
-    return buildRepeatLayerStyle('0 0', 'repeat-y');
+    return buildRepeatLayerStyle('0px', 'repeat-y');
   }
 
   if (kind === 'bottom-only') {
@@ -49,7 +50,7 @@ export function getRuledStyle(kind: RuledStyleKind): Pick<
       ${REPEATING_LAYER}
     `,
     backgroundSize: `${BOTTOM_LINE_SIZE}, ${REPEAT_WITHOUT_LAST_ROW_SIZE}`,
-    backgroundPosition: `${BOTTOM_LINE_POSITION}, 0 0`,
+    backgroundPosition: `${BOTTOM_LINE_POSITION}, ${withRuledPhase('0px')}`,
     backgroundRepeat: 'no-repeat, no-repeat',
   };
 }

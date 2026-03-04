@@ -680,6 +680,7 @@ export function Flashcard({
   const fixedHeightPx = layoutRowsToCardHeightPx(layoutRows);
   const activeSide: 'question' | 'answer' = effectiveIsFlipped ? 'answer' : 'question';
   const activeBlocks = resolveSideBlocks(activeSide);
+  const ruledPhasePx = activeBlocks.some((block) => block.type === 'markdown') ? 12 : 0;
 
   return (
     <div className={cn('w-full flex flex-col select-none overflow-visible', className)}>
@@ -700,6 +701,7 @@ export function Flashcard({
           actionsTopLeft={actionsTopLeft.length > 0 ? actionsTopLeft : undefined}
           actionsTopRight={actionsTopRight.length > 0 ? actionsTopRight : undefined}
           drawMode={enableDrawMode}
+          ruledPhasePx={ruledPhasePx}
           overlay={overlayNode}
         >
           <div ref={contentRef} className="animate-in fade-in zoom-in-95 duration-300 w-full max-w-full flex min-h-0 flex-1">

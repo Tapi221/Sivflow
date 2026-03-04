@@ -22,6 +22,8 @@ type CardSurfaceProps = {
   ruledOffsetPx?: number;
   /** カード下端から最後の罫線までのオフセット(px) */
   ruledBottomOffsetPx?: number;
+  /** 罫線の位相オフセット(px)。未指定時は従来どおり 0。 */
+  ruledPhasePx?: number;
 };
 
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
@@ -36,6 +38,7 @@ export function CardSurface({
   ruledRowPx = 24,
   ruledOffsetPx = 0,
   ruledBottomOffsetPx = 0,
+  ruledPhasePx = 0,
 }: CardSurfaceProps) {
   const rowPx = Math.max(8, ruledRowPx);
   const topPx = Math.max(0, ruledOffsetPx);
@@ -75,6 +78,7 @@ export function CardSurface({
           kind="repeat+bottom"
           ruledOpacity={clamp01(ruledOpacity)}
           ruledRowPx={rowPx}
+          ruledPhasePx={ruledPhasePx}
           ruledInsetX="var(--card-padding-x)"
           ruledOffsetPx={topPx}
           ruledBottomOffsetPx={bottomPx}

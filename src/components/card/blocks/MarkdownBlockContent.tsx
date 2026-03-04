@@ -5,7 +5,7 @@ import remarkBreaks from 'remark-breaks';
 import { cn } from '@/lib/utils';
 import { CodeRenderer } from './CodeRenderer';
 import { BlockSurface } from '@/components/card/blocks/BlockSurface';
-import { TEXT_BLOCK_CONTENT_CLASS } from './textBlockStyles';
+import { BLOCK_BODY_TEXT_COLOR_CLASS, TEXT_BLOCK_CONTENT_CLASS } from './textBlockStyles';
 
 const TYPE = {
   body: { fontSize: 16, lineHeight: 24 },
@@ -425,7 +425,7 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
   return (
     <div
       className={cn(
-        'markdown-block-view markdownBlockPreview max-w-none font-serif text-[16px] font-medium leading-[24px] text-[#222222] [font-variant-numeric:lining-nums_tabular-nums] [font-feature-settings:"lnum"_1]',
+        `markdown-block-view markdownBlockPreview max-w-none font-serif text-[16px] font-medium leading-[24px] ${BLOCK_BODY_TEXT_COLOR_CLASS} [font-variant-numeric:lining-nums_tabular-nums] [font-feature-settings:"lnum"_1]`,
         '[&_p+p]:mt-[24px]',
         alignClass,
         className

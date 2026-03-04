@@ -4,6 +4,14 @@
     overflow-wrap: anywhere;
   }
 
+  .markdownBlockCardView {
+    --markdown-text-color: currentColor;
+    --task-checkbox-border-color: var(--markdown-text-color);
+    --task-checkbox-fill-color: var(--markdown-text-color);
+    --task-checkbox-check-color: var(--card-surface, #ffffff);
+    --task-checkbox-offset-y: 1px;
+  }
+
   .blockSurface {
     position: relative;
     background: var(--card-surface, #ffffff);
@@ -33,6 +41,7 @@
     position: relative;
     z-index: 2;
     isolation: isolate;
+    text-align: left;
     background-color: var(--card-surface, #ffffff);
     border-left: 4px solid rgba(148, 163, 184, 0.7);
     border-radius: 10px;
@@ -40,10 +49,113 @@
     box-sizing: border-box;
   }
 
+  .markdownBlockCardView blockquote :is(p, li, pre, table) {
+    text-align: left;
+  }
+
   .markdownBlockCardView blockquote > :not(.blockSurface),
   .markdownBlockCardView blockquote > .blockSurface > .blockSurfaceContent {
     position: relative;
     z-index: 1;
+  }
+
+  .markdownBlockCardView ul {
+    margin: 0;
+    padding-left: calc(var(--card-row-px, 24px) * 1.25);
+    list-style-position: outside;
+  }
+
+  /* Remove list indent only for task-list containers so wrapped lines align naturally. */
+  .markdownBlockCardView ul.contains-task-list,
+  .markdownBlockCardView ul:has(> li.task-list-item),
+  .markdownBlockCardView ul:has(> li:has(> input[type='checkbox'])) {
+    padding-left: 0;
+  }
+
+  .markdownBlockCardView ol {
+    margin: 0;
+    padding-left: calc(var(--card-row-px, 24px) * 1.4);
+    list-style-position: outside;
+  }
+
+  .markdownBlockCardView li {
+    margin: 0;
+    padding: 0;
+  }
+
+  .markdownBlockCardView li > :is(ul, ol) {
+    margin-top: 0;
+  }
+
+  .markdownBlockCardView li + li {
+    margin-top: 0;
+  }
+
+  .markdownBlockCardView ::marker {
+    color: var(--markdown-text-color);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .markdownBlockCardView li.task-list-item,
+  .markdownBlockCardView li:has(> input[type='checkbox']) {
+    list-style: none;
+    padding-left: 0;
+    display: grid;
+    grid-template-columns: 16px 1fr;
+    column-gap: 0.45rem;
+    align-items: start;
+    line-height: var(--card-row-px, 24px);
+    min-height: var(--card-row-px, 24px);
+  }
+
+  .markdownBlockCardView li.task-list-item::marker,
+  .markdownBlockCardView li:has(> input[type='checkbox'])::marker {
+    content: '';
+  }
+
+  .markdownBlockCardView li.task-list-item > input[type='checkbox'],
+  .markdownBlockCardView li:has(> input[type='checkbox']) > input[type='checkbox'] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    border: 1px solid var(--task-checkbox-border-color);
+    border-radius: 3px;
+    background-color: var(--card-surface, #ffffff);
+    transform: translateY(var(--task-checkbox-offset-y));
+    align-self: start;
+    position: relative;
+  }
+
+  .markdownBlockCardView li.task-list-item > :not(input[type='checkbox']),
+  .markdownBlockCardView li:has(> input[type='checkbox']) > :not(input[type='checkbox']) {
+    grid-column: 2;
+  }
+
+  .markdownBlockCardView li.task-list-item > :is(ul, ol),
+  .markdownBlockCardView li:has(> input[type='checkbox']) > :is(ul, ol) {
+    grid-column: 2;
+    margin-top: 0;
+  }
+
+  .markdownBlockCardView li.task-list-item > input[type='checkbox']:checked,
+  .markdownBlockCardView li:has(> input[type='checkbox']) > input[type='checkbox']:checked {
+    background-color: var(--task-checkbox-fill-color);
+    border-color: var(--task-checkbox-fill-color);
+  }
+
+  .markdownBlockCardView li.task-list-item > input[type='checkbox']:checked::after,
+  .markdownBlockCardView li:has(> input[type='checkbox']) > input[type='checkbox']:checked::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 1px;
+    width: 4px;
+    height: 8px;
+    border-right: 2px solid var(--task-checkbox-check-color);
+    border-bottom: 2px solid var(--task-checkbox-check-color);
+    transform: rotate(45deg);
   }
 
   .markdownBlockCardView blockquote :is(p, ul, ol, pre, table) {
@@ -56,10 +168,6 @@
 
   .markdownBlockCardView blockquote > :where(* + *) {
     margin-top: 0.5rem;
-  }
-
-  .markdownBlockCardView blockquote :is(ul, ol) {
-    padding-left: 1.25rem;
   }
 
   .markdownBlockCardView blockquote pre,

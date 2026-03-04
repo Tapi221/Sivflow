@@ -58,6 +58,8 @@ export interface CardFrameProps
   ruledOpacity?: number;
   /** カード下端から最後の罫線までのオフセット(px) */
   ruledBottomOffsetPx?: number;
+  /** 罫線の位相オフセット(px)。未指定時は 0。 */
+  ruledPhasePx?: number;
 
   /** カード表面に重ねる overlay（例: インク層、選択ハイライト、UIレイヤなど） */
   overlay?: React.ReactNode;
@@ -89,6 +91,7 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
       ruledRowPx = CARD_ROW_PX,
       ruledOffsetPx = CARD_RULED_OFFSET_TOP_PX,
       ruledBottomOffsetPx = CARD_RULED_OFFSET_BOTTOM_PX,
+      ruledPhasePx = 0,
       ruledOpacity = 1,
 
       // 表面に重ねるUIレイヤ（例: インク、選択状態、ガイド）
@@ -153,6 +156,7 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
               ruledRowPx={ruledRowPx}
               ruledOffsetPx={ruledOffsetPx}
               ruledBottomOffsetPx={ruledBottomOffsetPx}
+              ruledPhasePx={ruledPhasePx}
               ruledOpacity={ruledOpacity}
               overlay={overlay}
             >

@@ -1,7 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FileText, ChevronLeft, ChevronRight, Plus } from "lucide-react";
-import ImageIcon from "lucide-react/dist/esm/icons/image";
-import Volume2Icon from "lucide-react/dist/esm/icons/volume-2";
 import LinkIcon from "lucide-react/dist/esm/icons/link";
 import { DragDropContext } from "@hello-pangea/dnd";
 
@@ -30,6 +28,16 @@ import {
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import {
+  makeNewDraft,
+  normalizeOrderIndex,
+  normalizeSelectedCardId,
+  sanitizeReferences,
+  shouldAutoOpenEditorForCard,
+  type EditorDraft,
+} from "@/components/card/editor/cardEditorUtils";
+import { useCardBlocksDnd } from "@/components/card/editor/useCardBlocksDnd";
+import { useCardMediaDialogs } from "@/components/card/editor/useCardMediaDialogs";
 import { useCards } from "@/hooks/useCards";
 import { useUserSettings } from "@/hooks/useUserSettings";
 import { useToast } from "@/contexts/ToastContext";
@@ -37,20 +45,6 @@ import { useTags, resolveCardTagNames } from "@/hooks/useTags";
 import { cn } from "@/lib/utils";
 
 import type { CardBlock, ReferenceBlockData, UploadedImage } from "@/types";
-
-type DndLocation = { droppableId: string; index: number };
-type DndResult = { source: DndLocation; destination?: DndLocation | null };
-
-type EditorDraft = {
-  title: string;
-  tags: string[];
-  isDraft: boolean;
-  questionImages: UploadedImage[];
-  answerImages: UploadedImage[];
-  questionBlocks: CardBlock[];
-  answerBlocks: CardBlock[];
-  layoutRows: number;
-};
 
 interface CardEditorPaneProps {
   selectedCardId: string | null;
@@ -61,67 +55,6 @@ interface CardEditorPaneProps {
 }
 
 const NEW_SENTINEL = "__new__" as const;
-
-function normalizeSelectedCardId(raw: string | null): string | null {
-  if (!raw) return null;
-  if (raw === NEW_SENTINEL) return NEW_SENTINEL;
-  if (raw === "new" || raw === "NEW" || raw === "create") return NEW_SENTINEL;
-  return raw;
-}
-
-function makeNewDraft(): EditorDraft {
-  return {
-    title: "",
-    tags: [],
-    isDraft: false,
-    questionImages: [],
-    answerImages: [],
-    questionBlocks: [],
-    answerBlocks: [],
-    layoutRows: DEFAULT_LAYOUT_ROWS,
-  };
-}
-
-function sanitizeReferences(refs: ReferenceBlockData[]): ReferenceBlockData[] {
-  return (refs ?? [])
-    .map((r) => ({
-      url: (r?.url ?? "").trim(),
-      name: (r?.name ?? "").trim(),
-    }))
-    .filter((r) => r.url.length > 0 || r.name.length > 0);
-}
-
-function normalizeOrderIndex(blocks: CardBlock[]): CardBlock[] {
-  return (blocks ?? []).map((b, i) => ({ ...b, orderIndex: i }));
-}
-
-function normalizeCrossSideId(blockId: unknown, nextSide: "question" | "answer"): string | null {
-  if (typeof blockId !== "string") return null;
-  if (blockId.startsWith("question-")) return blockId.replace(/^question-/, `${nextSide}-`);
-  if (blockId.startsWith("answer-")) return blockId.replace(/^answer-/, `${nextSide}-`);
-  return null;
-}
-
-function isBlockEmpty(block: CardBlock): boolean {
-  if (block.type === "reference" || block.type === "audio") return true;
-  if (block.type === "text") return !String(block.content ?? "").trim();
-  if (block.type === "markdown") return !String(block.markdown ?? "").trim();
-  if (block.type === "code") return !String(block.code?.code ?? "").trim();
-  if (block.type === "math") return !String(block.math?.latex ?? "").trim();
-  if (block.type === "image") return (block.images?.length ?? 0) === 0;
-  return true;
-}
-
-function shouldAutoOpenEditorForCard(card: unknown): boolean {
-  if (!card) return false;
-  if (String(card?.title ?? "").trim().length > 0) return false;
-  if ((card?.tagIds ?? card?.tags ?? []).length > 0) return false;
-  const questionBlocks = (card?.questionBlocks ?? []) as CardBlock[];
-  const answerBlocks = (card?.answerBlocks ?? []) as CardBlock[];
-  const hasQuestionContent = questionBlocks.some((b) => !isBlockEmpty(b));
-  const hasAnswerContent = answerBlocks.some((b) => !isBlockEmpty(b));
-  return !hasQuestionContent && !hasAnswerContent;
-}
 
 export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdated, onSelectCardId }: CardEditorPaneProps) {
   const { settings } = useUserSettings();
@@ -155,9 +88,6 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
   // 編集状態（右ペイン内）
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [imageDialogSide, setImageDialogSide] = useState<"question" | "answer" | null>(null);
-  const [audioDialogSide, setAudioDialogSide] = useState<"question" | "answer" | null>(null);
-  const [linkDialogSide, setLinkDialogSide] = useState<"question" | "answer" | null>(null);
 
   // 編集中の対象IDを固定して、cards更新時のdraft上書きを防ぐ
   const editingCardIdRef = useRef<string | null>(null);
@@ -588,165 +518,33 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
     );
   };
 
-  // --- 画像ダイアログ（questionImages / answerImages フィールドを直接操作） ---
-  const getDialogImages = (side: "question" | "answer"): UploadedImage[] =>
-    (side === "question" ? draft?.questionImages : draft?.answerImages) ?? [];
-
-  const setDialogImages = (side: "question" | "answer", images: UploadedImage[]) => {
-    setDraft((prev) => {
-      if (!prev) return prev;
-      return side === "question" ? { ...prev, questionImages: images } : { ...prev, answerImages: images };
-    });
-  };
-
-  // --- 音声ダイアログ（audio ブロックを操作） ---
-  const getDialogAudios = (side: "question" | "answer") => {
-    const block = getSideBlocks(side).find((b) => b.type === "audio");
-    return (block?.audios ?? []) as unknown as (string | UploadedImage)[];
-  };
-
-  const setDialogAudios = (side: "question" | "answer", items: unknown[]) => {
-    if (!items || items.length === 0) {
-      removeBlockByTypeIfExists(side, "audio");
-      return;
-    }
-    upsertSingleBlock(side, "audio", { audios: items });
-  };
-
-  // --- リンクダイアログ（reference ブロックを操作） ---
-  const getReferenceItems = (side: "question" | "answer"): ReferenceBlockData[] => {
-    const block = getSideBlocks(side).find((b) => b.type === "reference");
-    return (block?.references ?? []) as ReferenceBlockData[];
-  };
-
-  const setReferenceItems = (side: "question" | "answer", refs: ReferenceBlockData[]) => {
-    const nextRefs = refs ?? [];
-    if (nextRefs.length === 0) {
-      removeBlockByTypeIfExists(side, "reference");
-      return;
-    }
-    // ポップアップ編集中は空行も保持（保存時に正規化して落とす）
-    upsertSingleBlock(side, "reference", { references: nextRefs });
-  };
-
-  const getImageCount = (side: "question" | "answer") =>
-    getDialogImages(side).length;
-
-  const getAudioCount = (side: "question" | "answer") =>
-    getSideBlocks(side).filter((b) => b.type === "audio").reduce((sum, b) => sum + (b.audios?.length ?? 0), 0);
-
-  const getLinkCount = (side: "question" | "answer") =>
-    getSideBlocks(side)
-      .filter((b) => b.type === "reference")
-      .reduce((sum, b) => sum + (sanitizeReferences((b as any)?.references ?? []).length ?? 0), 0);
-
-  const renderMediaDialogButtons = (side: "question" | "answer") => {
-    const imageCount = getImageCount(side);
-    const audioCount = getAudioCount(side);
-    const linkCount = getLinkCount(side);
-
-    const base =
-      "inline-flex shrink-0 items-center justify-center gap-1 rounded-full h-7 min-h-0 min-w-0 px-2 text-[10px] font-bold leading-none whitespace-nowrap";
-
-    const openLinkDialog = () => {
-      if (getReferenceItems(side).length === 0) {
-        setReferenceItems(side, [{ url: "", name: "" }]);
-      }
-      setLinkDialogSide(side);
-    };
-
-    return (
-      <div className="flex flex-nowrap items-center gap-1.5 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-        <button
-          type="button"
-          className={cn(base, "bg-slate-50 text-slate-500 hover:bg-slate-100")}
-          onClick={() => setImageDialogSide(side)}
-          aria-label="画像を追加"
-        >
-          <ImageIcon className="w-3 h-3 shrink-0" />
-          <Plus className="w-3 h-3 shrink-0" />
-          {imageCount > 0 ? <span>x{imageCount}</span> : null}
-        </button>
-
-        <button
-          type="button"
-          className={cn(base, "bg-slate-50 text-slate-500 hover:bg-slate-100")}
-          onClick={() => setAudioDialogSide(side)}
-          aria-label="音声を追加"
-        >
-          <Volume2Icon className="w-3 h-3 shrink-0" />
-          <Plus className="w-3 h-3 shrink-0" />
-          {audioCount > 0 ? <span>x{audioCount}</span> : null}
-        </button>
-
-        <button
-          type="button"
-          className={cn(base, "bg-slate-50 text-slate-500 hover:bg-slate-100")}
-          onClick={openLinkDialog}
-          aria-label="リンクを追加"
-        >
-          <LinkIcon className="w-3 h-3 shrink-0" />
-          {linkCount > 0 ? <span>x{linkCount}</span> : <Plus className="w-3 h-3 shrink-0" />}
-        </button>
-      </div>
-    );
-  };
-
-
-  const onDragEnd = (result: DndResult) => {
-    if (!draft) return;
-    if (!result.destination) return;
-    allowAutoMinHeightSyncRef.current = true;
-
-    const { source, destination } = result;
-    if (source.droppableId === destination.droppableId && source.index === destination.index) return;
-
-    const listFor = (id: string) => {
-      if (id === "question-blocks") return [...draft.questionBlocks];
-      return [...draft.answerBlocks];
-    };
-
-    // same list
-    if (source.droppableId === destination.droppableId) {
-      const list = listFor(source.droppableId);
-      const [moved] = list.splice(source.index, 1);
-      list.splice(destination.index, 0, moved);
-
-      const re = normalizeOrderIndex(list as CardBlock[]);
-      setDraft((prev) => {
-        if (!prev) return prev;
-        return source.droppableId === "question-blocks" ? { ...prev, questionBlocks: re } : { ...prev, answerBlocks: re };
-      });
-      return;
-    }
-
-    // cross list（id の side プレフィックスも整合させる）
-    const sourceList = listFor(source.droppableId);
-    const destList = listFor(destination.droppableId);
-
-    const [rawMoved] = sourceList.splice(source.index, 1);
-    const nextSide: "question" | "answer" = destination.droppableId === "question-blocks" ? "question" : "answer";
-    const maybeNewId = normalizeCrossSideId((rawMoved as any)?.id, nextSide);
-    const moved = maybeNewId ? { ...(rawMoved as any), id: maybeNewId } : rawMoved;
-
-    destList.splice(destination.index, 0, moved);
-
-    const reS = normalizeOrderIndex(sourceList as CardBlock[]);
-    const reD = normalizeOrderIndex(destList as CardBlock[]);
-
-    setDraft((prev) => {
-      if (!prev) return prev;
-      const next: EditorDraft = { ...prev };
-
-      if (source.droppableId === "question-blocks") next.questionBlocks = reS;
-      else next.answerBlocks = reS;
-
-      if (destination.droppableId === "question-blocks") next.questionBlocks = reD;
-      else next.answerBlocks = reD;
-
-      return next;
-    });
-  };
+  const { onDragEnd } = useCardBlocksDnd({
+    draft,
+    setDraft,
+    allowAutoMinHeightSyncRef,
+  });
+  const {
+    imageDialogSide,
+    setImageDialogSide,
+    audioDialogSide,
+    setAudioDialogSide,
+    linkDialogSide,
+    setLinkDialogSide,
+    renderMediaDialogButtons,
+    getDialogImages,
+    setDialogImages,
+    getDialogAudios,
+    setDialogAudios,
+    getReferenceItems,
+    setReferenceItems,
+  } = useCardMediaDialogs({
+    draft,
+    setDraft,
+    getSideBlocks,
+    setSideBlocks,
+    removeBlockByTypeIfExists,
+    upsertSingleBlock,
+  });
 
   const panelCard = useMemo(() => {
     if (selectedCard) {
@@ -848,15 +646,15 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
   }
 
   return (
-    <div className="h-full pl-4 py-4 card-editor-right-pane-font">
-      <div className="relative flex h-full overflow-hidden">
+    <div className="h-full px-4 py-4 card-editor-right-pane-font">
+      <div className={cn("relative flex h-full gap-4", isEditing ? "overflow-hidden" : "overflow-y-auto overflow-x-hidden")}>
         <Button
           type="button"
           variant="outline"
           size="icon"
           className="absolute top-3 z-20 h-8 w-8 rounded-full bg-white/90 shadow-sm"
           style={{
-            right: isMetaOpen ? "20rem" : "0",
+            right: isMetaOpen ? "calc(20rem + 1rem)" : "0",
             transform: "translateX(50%)",
           }}
           onClick={() => setIsMetaOpen((prev) => !prev)}
@@ -865,7 +663,7 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
           {isMetaOpen ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </Button>
 
-        <div className={cn("min-w-0 flex-1 p-4", isEditing ? "overflow-y-auto" : "overflow-hidden")}>
+        <div className={cn("min-w-0 flex-1 p-4", isEditing ? "overflow-y-auto" : "overflow-visible")}>
           {isEditing ? (
             <div className="space-y-4">
               {/* 右ペイン用の最小ヘッダ（保存/キャンセルだけ） */}

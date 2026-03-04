@@ -9,6 +9,7 @@ type RuledLayerProps = {
   kind?: RuledStyleKind;
   ruledOpacity?: number | string;
   ruledRowPx?: number;
+  ruledPhasePx?: number;
   ruledInsetX?: number | string;
   ruledOffsetPx?: number;
   ruledBottomOffsetPx?: number;
@@ -21,6 +22,7 @@ export function RuledLayer({
   kind = 'repeat+bottom',
   ruledOpacity,
   ruledRowPx = 24,
+  ruledPhasePx = 0,
   ruledInsetX = 0,
   ruledOffsetPx = 0,
   ruledBottomOffsetPx = 0,
@@ -31,6 +33,7 @@ export function RuledLayer({
 
   const layerStyle: CSSVars = {
     '--card-row-px': `${rowPx}px`,
+    '--card-ruled-phase-px': `${ruledPhasePx}px`,
     left: typeof ruledInsetX === 'number' ? `${ruledInsetX}px` : String(ruledInsetX),
     right: typeof ruledInsetX === 'number' ? `${ruledInsetX}px` : String(ruledInsetX),
     top: `${topPx}px`,

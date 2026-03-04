@@ -2,6 +2,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { MathRenderer } from './MathRenderer';
 import { MathBlockFrame } from './MathBlockFrame';
+import { BLOCK_BODY_TEXT_COLOR_CLASS } from './textBlockStyles';
 
 interface MathBlockContentProps {
   latex: string;
@@ -33,7 +34,7 @@ export const MathBlockContent: React.FC<MathBlockContentProps> = ({
         className
       )}
     >
-      <MathRenderer latex={latex} displayMode={displayMode} className="text-[#222222]" />
+      <MathRenderer latex={latex} displayMode={displayMode} className={BLOCK_BODY_TEXT_COLOR_CLASS} />
     </MathBlockFrame>
   );
 };
