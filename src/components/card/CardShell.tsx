@@ -16,8 +16,6 @@ interface CardShellProps extends React.HTMLAttributes<HTMLDivElement> {
   actions?: React.ReactNode;
   actionsTopLeft?: React.ReactNode;
   actionsTopRight?: React.ReactNode;
-  actionsBottomLeft?: React.ReactNode;
-  actionsBottomRight?: React.ReactNode;
   children: React.ReactNode;
   drawMode?: boolean;
   resizable?: boolean;
@@ -37,8 +35,6 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
     actions,
     actionsTopLeft,
     actionsTopRight,
-    actionsBottomLeft,
-    actionsBottomRight,
     children,
     className,
     style,
@@ -307,8 +303,7 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
     const topRightItems = React.Children.toArray(actionsTopRight ?? actions).filter(Boolean);
     const primaryTopRight = topRightItems.slice(0, 2);
     const overflowTopRight = topRightItems.slice(2);
-    const bottomLeftItems = React.Children.toArray(actionsBottomLeft).filter(Boolean);
-    const bottomRightItems = React.Children.toArray(actionsBottomRight).filter(Boolean);
+
 
     const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
       if (!drawMode) return;
@@ -473,24 +468,7 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
         >
           {children}
         </div>
-        {(bottomLeftItems.length > 0 || bottomRightItems.length > 0) && (
-          <div className="card-shell-footer">
-            <div className="card-shell-footer-side">
-              {bottomLeftItems.map((action, index) => (
-                <div key={`bottom-action-${index}`} className="card-shell-action">
-                  {action}
-                </div>
-              ))}
-            </div>
-            <div className="card-shell-footer-side card-shell-footer-side-right">
-              {bottomRightItems.map((action, index) => (
-                <div key={`bottom-right-${index}`} className="card-shell-action">
-                  {action}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        
         {resizable && !drawMode && showResizeHandle && (
           <button
             type="button"
