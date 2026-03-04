@@ -1,14 +1,13 @@
 /**
  * useExplorerStore - Explorer状態管理フック
- * 
+ *
  * Pinned, Recent, タブ状態をlocalStorageで永続化
  */
-import { useState, useEffect, useCallback } from 'react';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 // 型定義
-export type ExplorerTab = 'pinned' | 'explorer' | 'recent' | 'inbox';
+export type ExplorerTab = 'pinned' | 'explorer' | 'views' | 'recent' | 'inbox';
 
 export interface PinnedItem {
   type: 'folder' | 'card' | 'document';
@@ -72,7 +71,7 @@ const MAX_RECENT = 30;
  */
 export const useExplorerStore = create<ExplorerState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       // タブ初期値
       activeTab: 'explorer',
       explorerTab: 'explorer',
@@ -90,7 +89,7 @@ export const useExplorerStore = create<ExplorerState>()(
         pinnedItems: state.pinnedItems.filter(p => !(p.type === item.type && p.id === item.id))
       })),
       reorderPinnedItems: (newPinnedItems) => set({ pinnedItems: newPinnedItems }),
-      isPinned: (type, id) => {
+      isPinned: (_type, _id) => {
         // state helper
         return false; // Not used directly, hook consumers check state.pinnedItems
       },

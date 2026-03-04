@@ -425,8 +425,7 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
   return (
     <div
       className={cn(
-        `markdown-block-view markdownBlockPreview max-w-none font-serif text-[16px] font-medium leading-[24px] ${BLOCK_BODY_TEXT_COLOR_CLASS} [font-variant-numeric:lining-nums_tabular-nums] [font-feature-settings:"lnum"_1]`,
-        '[&_p+p]:mt-[24px]',
+        `markdown-block-view markdownBlockPreview markdownBlockCardView max-w-none font-serif text-[16px] font-medium leading-[24px] ${BLOCK_BODY_TEXT_COLOR_CLASS} [font-variant-numeric:lining-nums_tabular-nums] [font-feature-settings:"lnum"_1]`,
         alignClass,
         className
       )}

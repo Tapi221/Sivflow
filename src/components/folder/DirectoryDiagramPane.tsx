@@ -319,6 +319,9 @@ export function DirectoryDiagramPane({ folders, cards, documents }: DirectoryDia
         .map(buildNode)
         .filter((child): child is TreeNode => child !== null);
       const itemChildren = itemMap.get(id) ?? [];
+      if (isFilterActive && folderChildren.length === 0 && itemChildren.length === 0) {
+        return null;
+      }
       return {
         id,
         kind: 'folder',
@@ -334,7 +337,7 @@ export function DirectoryDiagramPane({ folders, cards, documents }: DirectoryDia
     return (childFolderMap.get(ROOT_KEY) ?? [])
       .map(buildNode)
       .filter((node): node is TreeNode => node !== null);
-  }, [filteredDocuments, filteredCards, folders, tagById]);
+  }, [filteredDocuments, filteredCards, folders, isFilterActive, tagById]);
 
   const previewCard = useMemo(
     () => (previewCardId ? cards.find((card) => card.id === previewCardId) ?? null : null),

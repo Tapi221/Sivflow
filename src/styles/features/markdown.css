@@ -10,6 +10,15 @@
     --task-checkbox-fill-color: var(--markdown-text-color);
     --task-checkbox-check-color: var(--card-surface, #ffffff);
     --task-checkbox-offset-y: 1px;
+    --markdown-blank-line-height: 24px;
+  }
+
+  .markdownBlockCardView > :where(* + *) {
+    margin-top: var(--markdown-blank-line-height);
+  }
+
+  .markdownBlockCardView :is(li, blockquote) > :where(* + *) {
+    margin-top: var(--markdown-blank-line-height);
   }
 
   .blockSurface {
@@ -167,7 +176,7 @@
   }
 
   .markdownBlockCardView blockquote > :where(* + *) {
-    margin-top: 0.5rem;
+    margin-top: var(--markdown-blank-line-height);
   }
 
   .markdownBlockCardView blockquote pre,
@@ -185,7 +194,7 @@
   }
 
   .markdownBlockCardView blockquote blockquote > :where(* + *) {
-    margin-top: 0.5rem;
+    margin-top: var(--markdown-blank-line-height);
   }
 
   .katex-display-wrapper {

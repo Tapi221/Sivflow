@@ -5,6 +5,7 @@ import React from 'react';
 import { Folder, Clock } from 'lucide-react';
 import Pin from 'lucide-react/dist/esm/icons/pin';
 import FolderPlus from 'lucide-react/dist/esm/icons/folder-plus';
+import PanelsTopLeft from 'lucide-react/dist/esm/icons/panels-top-left';
 import { cn } from '@/lib/utils';
 import type { ExplorerTab } from '@/hooks/useExplorerStore';
 import { TagFilterPopover } from './TagFilterPopover';
@@ -21,6 +22,7 @@ interface ExplorerTabsProps {
 const TABS: { id: ExplorerTab; label: string; icon: React.ElementType }[] = [
   { id: 'pinned', label: 'ピン留め', icon: Pin },
   { id: 'explorer', label: 'エクスプローラー', icon: Folder },
+  { id: 'views', label: 'ビュー', icon: PanelsTopLeft },
   { id: 'recent', label: '最近', icon: Clock },
 ];
 

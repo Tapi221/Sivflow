@@ -161,7 +161,7 @@ export function ViewManagerDialog(props: ViewManagerDialogProps) {
             </div>
 
             <div className="space-y-3">
-              {views.map((view) => (
+              {customViews.map((view) => (
                 <div key={view.id} className="rounded-lg border border-slate-200 p-3">
                   <div className="flex items-center gap-2">
                     <Input
@@ -175,7 +175,7 @@ export function ViewManagerDialog(props: ViewManagerDialogProps) {
                       }}
                     />
                     <div className="min-w-24 text-xs text-slate-500">{view.kind}</div>
-                    <Button type="button" variant="outline" disabled={view.kind === 'folder'} onClick={() => onDeleteView(view.id)}>
+                    <Button type="button" variant="outline" onClick={() => onDeleteView(view.id)}>
                       削除
                     </Button>
                   </div>

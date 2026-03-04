@@ -3,6 +3,8 @@ import { BookOpen, ChevronDown, ChevronRight, FolderTree } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Card, SelectedExplorerItem } from '@/types';
 import type { TreeNode } from './viewTypes';
+import { ExplorerRow } from './explorer/rows/ExplorerRow';
+import { ExplorerRowContent } from './explorer/rows/ExplorerRowContent';
 
 interface VirtualTreeViewProps {
   nodes: TreeNode[];
@@ -65,37 +67,49 @@ export function VirtualTreeView({ nodes, cards, selectedItem, onItemSelect }: Vi
       if (!card) return null;
       const isSelected = selectedItem?.type === 'card' && selectedItem.id === node.cardId;
       return (
-        <button
+        <ExplorerRow
           key={node.id}
-          type="button"
-          className={cn(
-            'flex h-8 w-full items-center rounded-md pr-2 text-left transition-colors hover:bg-slate-100',
-            isSelected && 'bg-primary-100/80'
-          )}
-          style={{ paddingLeft: `${depth * 12 + 16}px` }}
+          depth={depth + 1}
+          className={cn('pr-2 hover:bg-slate-100 cursor-pointer', isSelected && 'bg-primary-100/80')}
           onClick={() => onItemSelect({ type: 'card', id: node.cardId })}
         >
-          <BookOpen className={cn('mr-2 h-4 w-4 shrink-0 text-slate-400', isSelected && 'text-primary-600')} />
-          <span className={cn('truncate text-sm text-slate-600', isSelected && 'font-medium text-primary-700')}>
-            {getCardTitle(card)}
-          </span>
-        </button>
+          <div className="flex h-full min-w-0 flex-1 items-center pr-1">
+            <BookOpen className={cn('mr-1 h-4 w-4 shrink-0 text-slate-400', isSelected && 'text-primary-600')} />
+            <ExplorerRowContent
+              title={getCardTitle(card)}
+              titleClassName={cn(
+                'lining-nums tabular-nums',
+                isSelected ? 'font-medium text-primary-700' : 'text-slate-600'
+              )}
+            />
+          </div>
+        </ExplorerRow>
       );
     }
 
     const isExpanded = expandedGroupIds.has(node.id);
     return (
       <div key={node.id}>
-        <button
-          type="button"
-          className="flex h-8 w-full items-center rounded-md pr-2 text-left transition-colors hover:bg-slate-100"
-          style={{ paddingLeft: `${depth * 12 + 4}px` }}
+        <ExplorerRow
+          depth={depth}
+          className="pr-2 hover:bg-slate-100 cursor-pointer"
           onClick={() => toggleGroup(node.id)}
         >
-          {isExpanded ? <ChevronDown className="mr-1 h-4 w-4 text-slate-400" /> : <ChevronRight className="mr-1 h-4 w-4 text-slate-400" />}
-          <FolderTree className="mr-2 h-4 w-4 text-slate-400" />
-          <span className="truncate text-sm font-medium text-slate-700">{node.label}</span>
-        </button>
+          <div className="flex h-full min-w-0 flex-1 items-center pr-1">
+            <div className="mr-1 flex h-4 w-4 flex-shrink-0 items-center justify-center">
+              {isExpanded ? (
+                <ChevronDown className="h-4 w-4 text-slate-500" />
+              ) : (
+                <ChevronRight className="h-4 w-4 text-slate-500" />
+              )}
+            </div>
+            <FolderTree className="mr-1 h-4 w-4 flex-shrink-0 text-slate-400" />
+            <ExplorerRowContent
+              title={node.label}
+              titleClassName="font-medium text-slate-700 lining-nums tabular-nums"
+            />
+          </div>
+        </ExplorerRow>
         {isExpanded ? <div>{node.children.map((child) => renderNode(child, depth + 1))}</div> : null}
       </div>
     );

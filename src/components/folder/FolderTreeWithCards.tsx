@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import { Folder } from 'lucide-react';
+import { Folder, SearchX } from 'lucide-react';
 // DnD types and components
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 import { cn } from '@/lib/utils';
@@ -62,6 +62,7 @@ interface FolderTreeWithCardsProps {
   onPinItem?: (item: { type: 'folder' | 'card' | 'document'; id: string }) => void;
   onUnpinItem?: (item: { type: 'folder' | 'card' | 'document'; id: string }) => void;
   isFiltering?: boolean;
+  createFolderRequestToken?: number;
 
   /** サイドバー外側のclass（任意） */
   className?: string;
@@ -87,6 +88,7 @@ export function FolderTreeWithCards({
   onPinItem,
   onUnpinItem,
   isFiltering = false,
+  createFolderRequestToken = 0,
   className,
 }: FolderTreeWithCardsProps) {
   // フォルダ・カード共通の行スタイル（高さ・padding・背景の描画範囲を完全統一）
@@ -453,6 +455,16 @@ export function FolderTreeWithCards({
   );
 
   const rootItems = useMemo(() => getFolderItems(null), [getFolderItems]);
+
+  const hasFilterMatches = useMemo(() => {
+    if (!isFiltering) return true;
+    if (rootItems.length > 0) return true;
+
+    return rootFolders.some((folder) => {
+      const folderId = getFolderId(folder);
+      return (matchCountMap.get(folderId) ?? 0) > 0;
+    });
+  }, [isFiltering, rootItems, rootFolders, matchCountMap]);
 
   const selectedFolderName = useMemo(() => {
     if (!selectedFolderId) return 'ルート';
@@ -866,6 +878,11 @@ export function FolderTreeWithCards({
       toastError?.(err?.message || 'フォルダの作成に失敗しました');
     }
   };
+
+  useEffect(() => {
+    if (createFolderRequestToken <= 0) return;
+    void handleCreateFolderAction(null);
+  }, [createFolderRequestToken]);
 
   const handleCreateCardAction = async (targetFolderId: string | null) => {
     if (!onCreateCard) return;
@@ -1485,6 +1502,14 @@ export function FolderTreeWithCards({
           <div className="text-center py-8 text-slate-400">
             <Folder className="w-8 h-8 mx-auto mb-2 opacity-30" />
             <p className="text-xs">フォルダとカードがありません</p>
+          </div>
+        ) : isFiltering && !hasFilterMatches ? (
+          <div className="flex min-h-full items-start justify-center px-4 py-10">
+            <div className="text-center text-slate-500">
+              <SearchX className="mx-auto mb-3 h-8 w-8 text-slate-300" />
+              <p className="text-sm font-medium text-slate-600">一致する項目がありません</p>
+              <p className="mt-1 text-xs text-slate-400">条件を変えるか、絞り込みをクリアしてください。</p>
+            </div>
           </div>
         ) : (
           <div>

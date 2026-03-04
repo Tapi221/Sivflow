@@ -28,7 +28,9 @@ export function MobileScalableCard({
   className
 }: MobileScalableCardProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
+  const [contentHeight, setContentHeight] = useState<number | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
 
   // スケール計算と適用
@@ -69,6 +71,23 @@ export function MobileScalableCard({
       }
     };
   }, [cardDesignWidth, safePadding]);
+
+  useEffect(() => {
+    const content = contentRef.current;
+    if (!content || typeof ResizeObserver === 'undefined') return;
+
+    const updateHeight = () => {
+      const nextHeight = Math.max(0, Math.ceil(content.offsetHeight));
+      setContentHeight((prev) => (prev === nextHeight ? prev : nextHeight));
+    };
+
+    updateHeight();
+
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(content);
+
+    return () => observer.disconnect();
+  }, []);
 
   // 編集モード制御（将来の拡張用）
   useEffect(() => {
@@ -136,20 +155,30 @@ export function MobileScalableCard({
       <div
         ref={containerRef}
         className={cn(
-          "w-full mx-auto transition-transform duration-300 ease-out",
+          "w-full mx-auto transition-[height] duration-300 ease-out",
           isEditMode && enableEditMode && "fixed inset-0 z-50 flex items-center justify-center p-4",
           className
         )}
         style={{
-          transform: isEditMode && enableEditMode ? 'scale(1)' : `scale(${scale})`,
-          transformOrigin: 'top center',
-          // 縮小時の高さ調整（縮小した分だけ占有高さを減らす）
-          ...(scale < 1 && !isEditMode ? {
-            marginBottom: `calc((1 - ${scale}) * -100%)`
-          } : {})
+          height:
+            !isEditMode && contentHeight != null
+              ? `${Math.ceil(contentHeight * scale)}px`
+              : undefined
         }}
       >
-        {children}
+        <div
+          style={{
+            width: `${Math.max(1, cardDesignWidth)}px`,
+            margin: '0 auto',
+            transform: isEditMode && enableEditMode ? 'scale(1)' : `scale(${scale})`,
+            transformOrigin: 'top center',
+            willChange: 'transform',
+          }}
+        >
+          <div ref={contentRef}>
+            {children}
+          </div>
+        </div>
       </div>
     </>
   );

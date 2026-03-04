@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Settings2 } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { FolderTreeWithCards } from './FolderTreeWithCards';
 import { RightPane } from './RightPane';
 import { ExplorerTabs } from '../explorer/ExplorerTabs';
@@ -17,10 +17,8 @@ import { useCards } from '@/hooks/useCards';
 import { useExplorerStore } from '@/hooks/useExplorerStore';
 import CreateCardSelectionDialog from '@/components/card/overlays/CreateCardSelectionDialog';
 import CreationModeDialog from '@/components/card/overlays/CreationModeDialog';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ViewManagerDialog } from './ViewManagerDialog';
-import { VirtualTreeView } from './VirtualTreeView';
+import { ViewsPanel } from './ViewsPanel';
 import { buildVirtualTree, type ViewDef, type ViewKind } from './viewTypes';
 import { ExplorerFilterSummary } from './ExplorerFilterSummary';
 
@@ -108,7 +106,6 @@ function TreeViewLayout({
     addRecent,
     clearRecent,
     tagFilter,
-    toggleTag,
     tagMatchMode,
     uncertaintyFilter,
     bookmarkedFilter,
@@ -142,6 +139,7 @@ function TreeViewLayout({
   const [isCreateSelectionOpen, setIsCreateSelectionOpen] = useState(false);
   const [isModeSelectionOpen, setIsModeSelectionOpen] = useState(false);
   const [isViewManagerOpen, setIsViewManagerOpen] = useState(false);
+  const [createFolderRequestToken, setCreateFolderRequestToken] = useState(0);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const contentScrollRef = useRef<HTMLDivElement>(null);
 
@@ -189,16 +187,6 @@ function TreeViewLayout({
   }, [isMobile, sidebarWidth, isSidebarOpen]);
 
   const showMobileDetail = isMobile && Boolean(selectedFolderId || selectedCardId || selectedDocumentId || selectedItem);
-
-  const handleCardSelectWithRecent = (cardId: string) => {
-    onItemSelect({ type: 'card', id: cardId });
-    addRecent({ type: 'card', id: cardId });
-  };
-
-  const handleDocumentSelectWithRecent = (docId: string) => {
-    onItemSelect({ type: 'document', id: docId });
-    addRecent({ type: 'document', id: docId });
-  };
 
   const handleFolderSelectWithRecent = (folderId: string | null) => {
     onFolderSelect(folderId);
@@ -352,7 +340,7 @@ function TreeViewLayout({
     const validStoredViews = storedViews.filter((view): view is ViewDef => ACTIVE_VIEW_KINDS.includes(view.kind as ViewKind));
     const folderView = validStoredViews.find((view) => view.kind === 'folder') ?? DEFAULT_FOLDER_VIEW;
     return [folderView, ...validStoredViews.filter((view) => view.kind !== 'folder')];
-  }, [settings?.explorerViews]);
+  }, [settings]);
 
   const selectedViewId = useMemo(() => {
     const savedViewId = settings?.selectedExplorerViewId;
@@ -365,6 +353,16 @@ function TreeViewLayout({
     [selectedViewId, viewDefs]
   );
 
+  const customViews = useMemo(
+    () => viewDefs.filter((view) => view.kind !== 'folder'),
+    [viewDefs]
+  );
+
+  const activeCustomView = useMemo(() => {
+    if (selectedView.kind !== 'folder') return selectedView;
+    return customViews[0] ?? null;
+  }, [customViews, selectedView]);
+
   const categoryIdsInUse = useMemo(() => listCategoryIdsInUse(), [listCategoryIdsInUse]);
 
   const categoryNameById = useMemo(() => {
@@ -376,12 +374,8 @@ function TreeViewLayout({
   }, [categoryIdsInUse, getCategoryName]);
 
   const handleCreateRootFolder = useCallback(async () => {
-    try {
-      await createFolder('新規フォルダ');
-    } catch (error) {
-      console.error('[TreeViewLayout] Failed to create root folder from tabs:', error);
-    }
-  }, [createFolder]);
+    setCreateFolderRequestToken((prev) => prev + 1);
+  }, []);
 
   const isFilterTargetTab = explorerTab === 'explorer';
   const isFilterActive =
@@ -455,9 +449,9 @@ function TreeViewLayout({
   ]);
 
   const virtualTreeNodes = useMemo(() => {
-    if (selectedView.kind === 'folder') return [];
-    return buildVirtualTree(selectedView, filteredCards, tags, categoryNameById);
-  }, [selectedView, filteredCards, tags, categoryNameById]);
+    if (!activeCustomView) return [];
+    return buildVirtualTree(activeCustomView, filteredCards, tags, categoryNameById);
+  }, [activeCustomView, filteredCards, tags, categoryNameById]);
 
   const persistSettings = useCallback(async (patch: Partial<typeof settings>) => {
     await updateSettings(patch);
@@ -641,40 +635,45 @@ function TreeViewLayout({
             onClearRecent={clearRecent}
           />
         );
+      case 'views':
+        return (
+          <ViewsPanel
+            views={customViews}
+            selectedViewId={activeCustomView?.id ?? null}
+            nodes={virtualTreeNodes}
+            cards={filteredCards}
+            selectedItem={selectedItem}
+            onSelectView={handleViewChange}
+            onItemSelect={onItemSelect}
+            onOpenManager={() => setIsViewManagerOpen(true)}
+          />
+        );
       case 'explorer':
       default:
         return (
           <div className="block">
-            {selectedView.kind === 'folder' ? (
-              <FolderTreeWithCards
-                folders={folders}
-                cards={filteredCards}
-                documents={filteredDocuments}
-                selectedFolderId={selectedFolderId}
-                selectedItem={selectedItem}
-                onFolderSelect={handleFolderSelectWithRecent}
-                onItemSelect={onItemSelect}
-                onCreateFolder={createFolder}
-                onUpdateFolder={updateFolder}
-                onDeleteFolder={deleteFolder}
-                onCreateCard={createCard}
-                onUpdateCard={updateCard}
-                onDeleteCard={deleteCard}
-                moveCardToFolder={moveCardToFolder}
-                reorderCards={reorderCards}
-                pinnedItems={pinnedItems}
-                onPinItem={pinItem}
-                onUnpinItem={unpinItem}
-                isFiltering={isFiltering}
-              />
-            ) : (
-              <VirtualTreeView
-                nodes={virtualTreeNodes}
-                cards={filteredCards}
-                selectedItem={selectedItem}
-                onItemSelect={onItemSelect}
-              />
-            )}
+            <FolderTreeWithCards
+              folders={folders}
+              cards={filteredCards}
+              documents={filteredDocuments}
+              selectedFolderId={selectedFolderId}
+              selectedItem={selectedItem}
+              onFolderSelect={handleFolderSelectWithRecent}
+              onItemSelect={onItemSelect}
+              onCreateFolder={createFolder}
+              onUpdateFolder={updateFolder}
+              onDeleteFolder={deleteFolder}
+              onCreateCard={createCard}
+              onUpdateCard={updateCard}
+              onDeleteCard={deleteCard}
+              moveCardToFolder={moveCardToFolder}
+              reorderCards={reorderCards}
+              pinnedItems={pinnedItems}
+              onPinItem={pinItem}
+              onUnpinItem={unpinItem}
+              isFiltering={isFiltering}
+              createFolderRequestToken={createFolderRequestToken}
+            />
           </div>
         );
     }
@@ -729,33 +728,6 @@ function TreeViewLayout({
                 onCreateRootFolder={handleCreateRootFolder}
                 showExplorerActions={explorerTab === 'explorer'}
               />
-              {explorerTab === 'explorer' && (
-                <div className="border-b border-slate-100 px-2 pb-2">
-                  <div className="flex items-center gap-2">
-                    <Select value={selectedViewId} onValueChange={(value) => void handleViewChange(value)}>
-                      <SelectTrigger className="h-9 bg-white">
-                        <SelectValue placeholder="ビューを選択" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {viewDefs.map((view) => (
-                          <SelectItem key={view.id} value={view.id}>
-                            {view.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      onClick={() => setIsViewManagerOpen(true)}
-                      aria-label="ビュー管理"
-                    >
-                      <Settings2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              )}
             </div>
 
             <ExplorerFilterSummary
