@@ -11,6 +11,7 @@ const REPEATING_LAYER = `repeating-linear-gradient(
 )`;
 const BOTTOM_ONLY_POSITION =
   '0 calc(100% - var(--card-row-px) + var(--card-ruled-line-px))';
+const REPEAT_WITHOUT_LAST_ROW_SIZE = '100% calc(100% - var(--card-row-px))';
 
 function buildRepeatLayerStyle(
   backgroundPosition: string,
@@ -41,8 +42,8 @@ export function getRuledStyle(kind: RuledStyleKind): Pick<
       ${REPEATING_LAYER},
       ${REPEATING_LAYER}
     `,
-    backgroundSize: '100% var(--card-row-px), 100% var(--card-row-px)',
+    backgroundSize: `100% var(--card-row-px), ${REPEAT_WITHOUT_LAST_ROW_SIZE}`,
     backgroundPosition: `${BOTTOM_ONLY_POSITION}, 0 0`,
-    backgroundRepeat: 'no-repeat, repeat-y',
+    backgroundRepeat: 'no-repeat, no-repeat',
   };
 }
