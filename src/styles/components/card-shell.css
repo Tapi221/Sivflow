@@ -132,7 +132,7 @@
   }
 
   .premium-paper-depth--hover:hover {
-    transform: translateY(-1px) scale(1.006);
+    transform: translateY(-1px) scale(1.01);
     box-shadow:
       0 0 3px rgba(15, 23, 42, 0.05),
       0 0 30px rgba(15, 23, 42, 0.1),
