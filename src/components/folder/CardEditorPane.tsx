@@ -36,7 +36,7 @@ import { useToast } from "@/contexts/ToastContext";
 import { useTags, resolveCardTagNames } from "@/hooks/useTags";
 import { cn } from "@/lib/utils";
 
-import type { CardBlock, ReferenceBlockData } from "@/types";
+import type { CardBlock, ReferenceBlockData, UploadedImage } from "@/types";
 
 type DndLocation = { droppableId: string; index: number };
 type DndResult = { source: DndLocation; destination?: DndLocation | null };
@@ -45,6 +45,8 @@ type EditorDraft = {
   title: string;
   tags: string[];
   isDraft: boolean;
+  questionImages: UploadedImage[];
+  answerImages: UploadedImage[];
   questionBlocks: CardBlock[];
   answerBlocks: CardBlock[];
   layoutRows: number;
@@ -72,6 +74,8 @@ function makeNewDraft(): EditorDraft {
     title: "",
     tags: [],
     isDraft: false,
+    questionImages: [],
+    answerImages: [],
     questionBlocks: [],
     answerBlocks: [],
     layoutRows: DEFAULT_LAYOUT_ROWS,
@@ -209,6 +213,8 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
       // tagIds 優先、fallback: card.tags（移行期間互換）
       tags: resolveCardTagNames(card?.tagIds, card?.tags, tagById),
       isDraft: card?.isDraft ?? false,
+      questionImages: ((card as any)?.questionImages ?? []) as UploadedImage[],
+      answerImages: ((card as any)?.answerImages ?? []) as UploadedImage[],
       questionBlocks: sortBlocksByOrderIndex((card?.questionBlocks ?? []) as CardBlock[]),
       answerBlocks: sortBlocksByOrderIndex((card?.answerBlocks ?? []) as CardBlock[]),
       layoutRows: normalizeLayoutRows(card?.layoutRows ?? card?.layout_rows ?? migratedRows),
@@ -391,6 +397,8 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
         title: draft.title,
         tagIds,
         isDraft: draft.isDraft,
+        questionImages: draft.questionImages,
+        answerImages: draft.answerImages,
         questionBlocks: sanitizeBlocksForSave(draft.questionBlocks),
         answerBlocks: sanitizeBlocksForSave(draft.answerBlocks),
         layoutRows: normalizeLayoutRows(draft.layoutRows),
@@ -580,27 +588,35 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
     );
   };
 
-  const getMediaItems = (side: "question" | "answer", type: "image" | "audio") => {
-    const block = getSideBlocks(side).find((b) => b.type === type);
-    if (type === "image") return (block?.images ?? []) as any[];
-    return (block?.audios ?? []) as any[];
+  // --- 画像ダイアログ（questionImages / answerImages フィールドを直接操作） ---
+  const getDialogImages = (side: "question" | "answer"): UploadedImage[] =>
+    (side === "question" ? draft?.questionImages : draft?.answerImages) ?? [];
+
+  const setDialogImages = (side: "question" | "answer", images: UploadedImage[]) => {
+    setDraft((prev) => {
+      if (!prev) return prev;
+      return side === "question" ? { ...prev, questionImages: images } : { ...prev, answerImages: images };
+    });
   };
 
-  const getReferenceItems = (side: "question" | "answer"): ReferenceBlockData[] => {
-    const block = getSideBlocks(side).find((b) => b.type === "reference");
-    return (block?.references ?? []) as ReferenceBlockData[];
+  // --- 音声ダイアログ（audio ブロックを操作） ---
+  const getDialogAudios = (side: "question" | "answer") => {
+    const block = getSideBlocks(side).find((b) => b.type === "audio");
+    return (block?.audios ?? []) as unknown as (string | UploadedImage)[];
   };
 
-  const setMediaItems = (side: "question" | "answer", type: "image" | "audio", items: unknown[]) => {
+  const setDialogAudios = (side: "question" | "answer", items: unknown[]) => {
     if (!items || items.length === 0) {
-      removeBlockByTypeIfExists(side, type);
-      return;
-    }
-    if (type === "image") {
-      upsertSingleBlock(side, "image", { images: items });
+      removeBlockByTypeIfExists(side, "audio");
       return;
     }
     upsertSingleBlock(side, "audio", { audios: items });
+  };
+
+  // --- リンクダイアログ（reference ブロックを操作） ---
+  const getReferenceItems = (side: "question" | "answer"): ReferenceBlockData[] => {
+    const block = getSideBlocks(side).find((b) => b.type === "reference");
+    return (block?.references ?? []) as ReferenceBlockData[];
   };
 
   const setReferenceItems = (side: "question" | "answer", refs: ReferenceBlockData[]) => {
@@ -613,23 +629,21 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
     upsertSingleBlock(side, "reference", { references: nextRefs });
   };
 
-  const getBadgeCount = (side: "question" | "answer", kind: "image" | "audio" | "reference") => {
-    const blocks = getSideBlocks(side);
-    if (kind === "image") {
-      return blocks.filter((b) => b.type === "image").reduce((sum, b) => sum + (b.images?.length ?? 0), 0);
-    }
-    if (kind === "audio") {
-      return blocks.filter((b) => b.type === "audio").reduce((sum, b) => sum + (b.audios?.length ?? 0), 0);
-    }
-    return blocks
+  const getImageCount = (side: "question" | "answer") =>
+    getDialogImages(side).length;
+
+  const getAudioCount = (side: "question" | "answer") =>
+    getSideBlocks(side).filter((b) => b.type === "audio").reduce((sum, b) => sum + (b.audios?.length ?? 0), 0);
+
+  const getLinkCount = (side: "question" | "answer") =>
+    getSideBlocks(side)
       .filter((b) => b.type === "reference")
       .reduce((sum, b) => sum + (sanitizeReferences((b as any)?.references ?? []).length ?? 0), 0);
-  };
 
   const renderMediaDialogButtons = (side: "question" | "answer") => {
-    const imageCount = getBadgeCount(side, "image");
-    const audioCount = getBadgeCount(side, "audio");
-    const linkCount = getBadgeCount(side, "reference");
+    const imageCount = getImageCount(side);
+    const audioCount = getAudioCount(side);
+    const linkCount = getLinkCount(side);
 
     const base =
       "inline-flex shrink-0 items-center justify-center gap-1 rounded-full h-7 min-h-0 min-w-0 px-2 text-[10px] font-bold leading-none whitespace-nowrap";
@@ -722,7 +736,7 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
 
     setDraft((prev) => {
       if (!prev) return prev;
-      const next: unknown = { ...prev };
+      const next: EditorDraft = { ...prev };
 
       if (source.droppableId === "question-blocks") next.questionBlocks = reS;
       else next.answerBlocks = reS;
@@ -979,16 +993,16 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
         )}
       </div>
 
-      <Dialog open={Boolean(imageDialogSide)} onOpenChange={(open) => !open && setImageDialogSide(null)}>
-        <DialogContent className="max-w-3xl">
+      <Dialog modal={false} open={Boolean(imageDialogSide)} onOpenChange={(open) => !open && setImageDialogSide(null)}>
+        <DialogContent nonModal className="max-w-3xl">
           <DialogHeader>
             <DialogTitle>画像を追加</DialogTitle>
           </DialogHeader>
           {imageDialogSide && (
             <MediaUploader
               type="image"
-              urls={getMediaItems(imageDialogSide, "image")}
-              onChange={(next) => setMediaItems(imageDialogSide, "image", next as any[])}
+              urls={getDialogImages(imageDialogSide)}
+              onChange={(next) => setDialogImages(imageDialogSide, next as UploadedImage[])}
               maxFiles={10}
             />
           )}
@@ -1003,8 +1017,8 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
           {audioDialogSide && (
             <MediaUploader
               type="audio"
-              urls={getMediaItems(audioDialogSide, "audio")}
-              onChange={(next) => setMediaItems(audioDialogSide, "audio", next as any[])}
+              urls={getDialogAudios(audioDialogSide)}
+              onChange={(next) => setDialogAudios(audioDialogSide, next as unknown[])}
               maxFiles={10}
             />
           )}

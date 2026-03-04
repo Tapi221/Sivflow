@@ -30,10 +30,10 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, children, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & { nonModal?: boolean }
+>(({ className, children, nonModal, ...props }, ref) => (
   <DialogPortal>
-    <DialogOverlay />
+    {!nonModal && <DialogOverlay />}
     <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
       <DialogPrimitive.Content
         ref={ref}
