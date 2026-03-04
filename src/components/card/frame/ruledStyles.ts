@@ -9,9 +9,10 @@ const REPEATING_LAYER = `repeating-linear-gradient(
   transparent var(--card-ruled-line-px),
   transparent var(--card-row-px)
 )`;
-const BOTTOM_ONLY_POSITION =
-  '0 calc(100% - var(--card-row-px) + var(--card-ruled-line-px))';
 const REPEAT_WITHOUT_LAST_ROW_SIZE = '100% calc(100% - var(--card-row-px))';
+const BOTTOM_LINE_LAYER = 'linear-gradient(var(--card-ruled-color), var(--card-ruled-color))';
+const BOTTOM_LINE_POSITION = '0 calc(100% - var(--card-ruled-line-px))';
+const BOTTOM_LINE_SIZE = '100% var(--card-ruled-line-px)';
 
 function buildRepeatLayerStyle(
   backgroundPosition: string,
@@ -34,16 +35,21 @@ export function getRuledStyle(kind: RuledStyleKind): Pick<
   }
 
   if (kind === 'bottom-only') {
-    return buildRepeatLayerStyle(BOTTOM_ONLY_POSITION, 'no-repeat');
+    return {
+      backgroundImage: BOTTOM_LINE_LAYER,
+      backgroundSize: BOTTOM_LINE_SIZE,
+      backgroundPosition: BOTTOM_LINE_POSITION,
+      backgroundRepeat: 'no-repeat',
+    };
   }
 
   return {
     backgroundImage: `
-      ${REPEATING_LAYER},
+      ${BOTTOM_LINE_LAYER},
       ${REPEATING_LAYER}
     `,
-    backgroundSize: `100% var(--card-row-px), ${REPEAT_WITHOUT_LAST_ROW_SIZE}`,
-    backgroundPosition: `${BOTTOM_ONLY_POSITION}, 0 0`,
+    backgroundSize: `${BOTTOM_LINE_SIZE}, ${REPEAT_WITHOUT_LAST_ROW_SIZE}`,
+    backgroundPosition: `${BOTTOM_LINE_POSITION}, 0 0`,
     backgroundRepeat: 'no-repeat, no-repeat',
   };
 }
