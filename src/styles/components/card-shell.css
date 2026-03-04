@@ -14,15 +14,21 @@
     --card-padding-x: 12px;
     --card-padding-bottom: 16px;
 
-    /* ★統一：ヘッダー高 = カード上端→最初の罫線 = 44px */
+    /* 仕様固定：ヘッダー44 / 本文24(1行) / フッター44 */
     --card-header-h: 44px;
-    --card-content-padding-top: var(--card-header-h);
+    --card-footer-h: 44px;
+
+    /* 罫線開始位置（カード上端→最初の罫線）= 44px */
     --ruled-offset-px: var(--card-header-h);
 
     width: var(--card-base-width);
     max-width: 100%;
-    min-height: calc(var(--card-w) * 3 / 4);
     max-height: var(--card-max-height);
+
+    /* 最小高さ = 44 + 24 + 44 = 112px */
+    min-height: calc(
+      var(--card-header-h) + var(--card-row-px) + var(--card-footer-h)
+    );
   }
 
   .card-shell--resizable {
@@ -39,6 +45,11 @@
 
   .card-shell-body {
     @apply relative flex flex-col flex-1 min-h-0;
+
+    /* ヘッダー/フッターが absolute で被るので本文領域を確保 */
+    padding-top: var(--card-header-h);
+    padding-bottom: var(--card-footer-h);
+
     overflow-y: clip;
     overflow-x: visible;
     scrollbar-width: none;
@@ -132,7 +143,7 @@
   }
 
   .premium-paper-depth--hover:hover {
-    transform: translateY(-1px) scale(1.01);
+    transform: translateY(-1px) scale(1.006);
     box-shadow:
       0 0 3px rgba(15, 23, 42, 0.05),
       0 0 30px rgba(15, 23, 42, 0.1),
@@ -165,7 +176,7 @@
     @apply flex items-center justify-between gap-2 px-3;
   }
 
-  /* ★ここが一番重要：ヘッダーを44pxに固定して、余計なpaddingでズラさない */
+  /* ヘッダー：44px固定、absoluteで上に貼る */
   .card-shell-header {
     @apply absolute left-0 right-0 top-0;
     z-index: 30;
@@ -178,9 +189,14 @@
     padding-bottom: 0;
   }
 
+  /* フッター：44px固定 */
   .card-shell-footer {
+    height: var(--card-footer-h);
+    min-height: var(--card-footer-h);
+    max-height: var(--card-footer-h);
+
     padding-top: 0;
-    padding-bottom: 12px;
+    padding-bottom: 0;
   }
 
   .card-shell-header-side,
