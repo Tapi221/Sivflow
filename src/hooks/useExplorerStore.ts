@@ -45,6 +45,12 @@ export interface ExplorerState {
   uncertaintyFilter: 'any' | 'on' | 'off';
   bookmarkedFilter: 'any' | 'on' | 'off';
   draftFilter: 'any' | 'on' | 'off';
+  contentTypeFilter: ('card' | 'pdf' | 'pptx')[];
+  directoryBadgeVisibility: {
+    uncertainty: boolean;
+    bookmarked: boolean;
+    tags: boolean;
+  };
   setTagFilter: (tags: string[]) => void;
   toggleTag: (tag: string) => void;
   clearTagFilter: () => void;
@@ -53,6 +59,8 @@ export interface ExplorerState {
   setUncertaintyFilter: (mode: 'any' | 'on' | 'off') => void;
   setBookmarkedFilter: (mode: 'any' | 'on' | 'off') => void;
   setDraftFilter: (mode: 'any' | 'on' | 'off') => void;
+  toggleContentType: (kind: 'card' | 'pdf' | 'pptx') => void;
+  toggleDirectoryBadgeVisibility: (key: 'uncertainty' | 'bookmarked' | 'tags') => void;
 }
 
 // 定数
@@ -105,6 +113,12 @@ export const useExplorerStore = create<ExplorerState>()(
       uncertaintyFilter: 'any',
       bookmarkedFilter: 'any',
       draftFilter: 'any',
+      contentTypeFilter: ['card', 'pdf', 'pptx'],
+      directoryBadgeVisibility: {
+        uncertainty: true,
+        bookmarked: true,
+        tags: true,
+      },
       setTagFilter: (tags) => set({ tagFilter: tags }),
       toggleTag: (tag) => set((state) => {
         const exists = state.tagFilter.includes(tag);
@@ -121,11 +135,27 @@ export const useExplorerStore = create<ExplorerState>()(
           uncertaintyFilter: 'any',
           bookmarkedFilter: 'any',
           draftFilter: 'any',
+          contentTypeFilter: ['card', 'pdf', 'pptx'],
         }),
       setTagMatchMode: (mode) => set({ tagMatchMode: mode }),
       setUncertaintyFilter: (mode) => set({ uncertaintyFilter: mode }),
       setBookmarkedFilter: (mode) => set({ bookmarkedFilter: mode }),
       setDraftFilter: (mode) => set({ draftFilter: mode }),
+      toggleContentType: (kind) => set((state) => {
+        const exists = state.contentTypeFilter.includes(kind);
+        if (exists) {
+          const next = state.contentTypeFilter.filter((value) => value !== kind);
+          return { contentTypeFilter: next.length > 0 ? next : [kind] };
+        }
+        return { contentTypeFilter: [...state.contentTypeFilter, kind] };
+      }),
+      toggleDirectoryBadgeVisibility: (key) =>
+        set((state) => ({
+          directoryBadgeVisibility: {
+            ...state.directoryBadgeVisibility,
+            [key]: !state.directoryBadgeVisibility[key],
+          },
+        })),
     }),
     {
       name: 'explorer-storage',
@@ -138,6 +168,8 @@ export const useExplorerStore = create<ExplorerState>()(
         uncertaintyFilter: state.uncertaintyFilter,
         bookmarkedFilter: state.bookmarkedFilter,
         draftFilter: state.draftFilter,
+        contentTypeFilter: state.contentTypeFilter,
+        directoryBadgeVisibility: state.directoryBadgeVisibility,
       }),
       migrate: (persistedState: unknown) => {
         if (!persistedState || typeof persistedState !== 'object') return persistedState;

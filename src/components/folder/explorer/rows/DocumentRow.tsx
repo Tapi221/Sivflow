@@ -3,6 +3,7 @@ import { FileText, MoreVertical } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DocumentRowMenu } from '../../DocumentRowMenu';
 import type { Card, DocumentItem, FolderTreeNode } from '../model/utils';
+import { getExplorerRowStyle } from './shared';
 
 interface DocumentRowProps {
   doc: DocumentItem;
@@ -53,12 +54,7 @@ export const DocumentRow: React.FC<DocumentRowProps> = ({
         "pr-9",
         "cursor-pointer"
       )}
-      style={{
-        paddingLeft: `${depth * 12 + 4}px`,
-        height: 32,
-        minHeight: 32,
-        boxSizing: 'border-box',
-      }}
+      style={getExplorerRowStyle(depth)}
       onClick={() => onSelect({ type: 'document', id: docId })}
     >
       <div className="flex-1 flex items-center min-w-0 h-full pr-1">

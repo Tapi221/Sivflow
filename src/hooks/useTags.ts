@@ -45,6 +45,16 @@ const genId = (): string => {
 
 const genCategoryId = (): string => `cat_${genId()}`;
 
+const MAX_PATH_DEPTH = 12;
+
+/** "/" 区切りのパス文字列をセグメント配列に変換する純関数 */
+export const parseTagPath = (pathStr: string): string[] | { error: string } => {
+  const segments = pathStr.split('/').map((s) => s.trim()).filter((s) => s.length > 0);
+  if (segments.length === 0) return { error: 'パスを入力してください。' };
+  if (segments.length > MAX_PATH_DEPTH) return { error: `パスの深さは最大 ${MAX_PATH_DEPTH} です。` };
+  return segments;
+};
+
 const asStringArray = (v: unknown): string[] => {
   if (!Array.isArray(v)) return [];
   return v.filter((x): x is string => typeof x === 'string');
@@ -387,6 +397,144 @@ export function useTags() {
   };
 
   /**
+   * パス文字列で指定された階層を辿り、必要な中間タグを自動生成して末端 tagId を返す。
+   * 同じ親の下に同名タグが存在する場合は再利用（重複作成しない）。
+   */
+  const ensurePathExists = async (
+    fullPath: string,
+  ): Promise<{ leafTagId: string } | { error: string }> => {
+    if (!currentUser) return { error: 'ログイン状態を確認してください。' };
+    const parsed = parseTagPath(fullPath);
+    if ('error' in parsed) return parsed;
+
+    const db = await getLocalDb();
+    let parentId: string | undefined = undefined;
+    let lastTagId = '';
+
+    for (const segment of parsed) {
+      const nameLower = segment.toLowerCase();
+      const candidates = await db.tags_v3
+        .where('[userId+nameLower]')
+        .equals([currentUser.uid, nameLower])
+        .toArray();
+
+      const existing = candidates.find((t) =>
+        parentId === undefined ? !t.parentId : t.parentId === parentId,
+      );
+
+      if (existing) {
+        lastTagId = existing.id;
+        parentId = existing.id;
+      } else {
+        const newTag: Tag = {
+          id: genId(),
+          name: segment,
+          nameLower,
+          color: DEFAULT_COLORS[0],
+          userId: currentUser.uid,
+          updatedAt: new Date(),
+          ...(parentId ? { parentId } : {}),
+        };
+        await db.tags_v3.add(newTag);
+        lastTagId = newTag.id;
+        parentId = newTag.id;
+      }
+    }
+
+    if (!lastTagId) return { error: 'パスが解決できませんでした。' };
+    return { leafTagId: lastTagId };
+  };
+
+  /**
+   * 選択中タグを parentPath で指定した親の下に移動する。
+   * parentPath が空ならルートに戻す。中間タグは自動生成。
+   * 循環チェックはローカルマップ（tagById + 新規生成分）で行う。
+   */
+  const moveSelectedTagToPath = async (
+    tagId: string,
+    parentPath: string,
+  ): Promise<void | { error: string }> => {
+    if (!currentUser) return { error: 'ログイン状態を確認してください。' };
+    const trimmed = parentPath.trim();
+
+    if (!trimmed) {
+      return setTagParent(tagId, null);
+    }
+
+    const parsed = parseTagPath(trimmed);
+    if ('error' in parsed) return parsed;
+
+    const db = await getLocalDb();
+    // tagById は live query 由来なので新規作成分を手動で追跡する
+    const localMap = new Map<string, Pick<Tag, 'parentId'>>(tagById);
+    let parentId: string | undefined = undefined;
+
+    for (const segment of parsed) {
+      const nameLower = segment.toLowerCase();
+      const candidates = await db.tags_v3
+        .where('[userId+nameLower]')
+        .equals([currentUser.uid, nameLower])
+        .toArray();
+
+      const existing = candidates.find((t) =>
+        parentId === undefined ? !t.parentId : t.parentId === parentId,
+      );
+
+      if (existing) {
+        localMap.set(existing.id, existing);
+        parentId = existing.id;
+      } else {
+        const newTag: Tag = {
+          id: genId(),
+          name: segment,
+          nameLower,
+          color: DEFAULT_COLORS[0],
+          userId: currentUser.uid,
+          updatedAt: new Date(),
+          ...(parentId ? { parentId } : {}),
+        };
+        await db.tags_v3.add(newTag);
+        localMap.set(newTag.id, newTag);
+        parentId = newTag.id;
+      }
+    }
+
+    const finalParentId = parentId;
+    if (!finalParentId) return { error: '親パスが解決できませんでした。' };
+    if (finalParentId === tagId) return { error: '自分自身を親にはできません。' };
+
+    // 循環チェック（localMap を使って ancestor chain を辿る）
+    const visited = new Set<string>();
+    let cur: string | undefined = finalParentId;
+    while (cur) {
+      if (visited.has(cur)) break;
+      if (cur === tagId) return { error: '循環は禁止です。' };
+      visited.add(cur);
+      cur = localMap.get(cur)?.parentId;
+    }
+
+    await db.tags_v3.update(tagId, { parentId: finalParentId, updatedAt: new Date() });
+  };
+
+  /**
+   * tagId のルートから葉までのパス文字列を返す（例: "JavaScript/DOM/innerHTML"）。
+   * 循環混入時は visited で打ち切り。
+   */
+  const getTagPathString = (tagId: string): string => {
+    const segments: string[] = [];
+    const visited = new Set<string>();
+    let currentId: string | undefined = tagId;
+    while (currentId && !visited.has(currentId)) {
+      visited.add(currentId);
+      const tag = tagById.get(currentId);
+      if (!tag) break;
+      segments.unshift(tag.name);
+      currentId = tag.parentId;
+    }
+    return segments.join('/');
+  };
+
+  /**
    * タグ名変更。nameLower が既存の別タグと重複する場合はエラーを返す（マージは行わない）。
    * カード更新は不要（tagIds参照のため）。
    */
@@ -647,6 +795,11 @@ export function useTags() {
     getTagUsageCount,
     addTagToCardsInFolder,
     removeTagFromCardsInFolder,
+
+    // パス操作
+    ensurePathExists,
+    moveSelectedTagToPath,
+    getTagPathString,
 
     // 移行/互換用
     getTagIdByName,

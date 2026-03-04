@@ -214,7 +214,9 @@ export const BlockWrapper = ({
         )}
       </div>
 
-      <div className={cn('relative px-1', contentClassName)}>{children}</div>
+      <div data-block-measure-root="true" className={cn('relative px-1', contentClassName)}>
+        {children}
+      </div>
     </div>
   );
 };

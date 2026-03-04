@@ -20,6 +20,16 @@ interface ViewManagerDialogProps {
   onUpdateViewOptions: (viewId: string, options: NonNullable<ViewDef['options']>) => void;
 }
 
+const TAG_TREE_SCOPE_OPTIONS: Array<{
+  value: NonNullable<ViewDef['options']>['scopeMode'];
+  label: string;
+}> = [
+  { value: 'all', label: '全て' },
+  { value: 'selectedRoots', label: 'ルートタグで絞る' },
+  { value: 'selectedTags', label: 'タグ選択' },
+  { value: 'prefix', label: 'パスで絞る（先頭一致）' },
+];
+
 export function ViewManagerDialog(props: ViewManagerDialogProps) {
   const {
     open,
@@ -110,12 +120,26 @@ export function ViewManagerDialog(props: ViewManagerDialogProps) {
     return sortedTags.filter((tag) => tag.nameLower.includes(keyword));
   };
 
+  const getScopeHelperText = (scopeMode: NonNullable<ViewDef['options']>['scopeMode']) => {
+    switch (scopeMode) {
+      case 'selectedRoots':
+        return '選んだルートタグと、その配下のタグだけを表示します。';
+      case 'selectedTags':
+        return 'チェックしたタグだけを表示対象にします。';
+      case 'prefix':
+        return 'タグ階層のパスを `/` 区切りで入力すると、その文字列で始まるパスだけを表示します。';
+      case 'all':
+      default:
+        return '全てのタグを表示します。';
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>ビュー管理</DialogTitle>
-          <DialogDescription>ビュー名と tagTree の表示範囲を編集します。</DialogDescription>
+          <DialogDescription>ビュー名と、ビュー種別ごとの表示設定を編集します。</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
@@ -174,7 +198,12 @@ export function ViewManagerDialog(props: ViewManagerDialogProps) {
                   {view.kind === 'tagTree' ? (
                     <div className="mt-3 space-y-3">
                       <div className="space-y-2">
-                        <Label htmlFor={`scope-${view.id}`}>範囲</Label>
+                        <div className="space-y-1">
+                          <Label htmlFor={`scope-${view.id}`}>表示範囲（タグツリーのみ）</Label>
+                          <p className="text-xs text-slate-500">
+                            基本の絞り込みと、詳細なパス指定をここで設定します。
+                          </p>
+                        </div>
                         <select
                           id={`scope-${view.id}`}
                           value={view.options?.scopeMode ?? 'all'}
@@ -184,11 +213,15 @@ export function ViewManagerDialog(props: ViewManagerDialogProps) {
                           }}
                           className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm"
                         >
-                          <option value="all">全て</option>
-                          <option value="selectedRoots">ルートタグで絞る</option>
-                          <option value="selectedTags">タグ選択</option>
-                          <option value="prefix">プレフィックス</option>
+                          {TAG_TREE_SCOPE_OPTIONS.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
                         </select>
+                        <p className="text-xs text-slate-500">
+                          {getScopeHelperText(view.options?.scopeMode ?? 'all')}
+                        </p>
                       </div>
 
                       {(view.options?.scopeMode ?? 'all') === 'selectedRoots' ? (
@@ -277,13 +310,18 @@ export function ViewManagerDialog(props: ViewManagerDialogProps) {
 
                       {(view.options?.scopeMode ?? 'all') === 'prefix' ? (
                         <div className="space-y-2">
-                          <Label htmlFor={`prefix-${view.id}`}>プレフィックス</Label>
+                          <Label htmlFor={`prefix-${view.id}`}>パス</Label>
                           <Input
                             id={`prefix-${view.id}`}
-                            placeholder="javascript/"
+                            placeholder="例: JavaScript/DOM"
                             value={view.options?.tagNamePrefix ?? ''}
                             onChange={(event) => updateTagTreeOptions(view, { tagNamePrefix: event.target.value })}
                           />
+                          <div className="space-y-1 text-xs text-slate-500">
+                            <p>タグ階層のパスと同じ形式です（`/` 区切り）。</p>
+                            <p>例）`JavaScript/` と入力すると `JavaScript/...` 配下だけ表示します。</p>
+                            <p>空欄なら全て表示します。</p>
+                          </div>
                         </div>
                       ) : null}
 
@@ -295,6 +333,10 @@ export function ViewManagerDialog(props: ViewManagerDialogProps) {
                         />
                         <span>0件タグを隠す</span>
                       </label>
+                    </div>
+                  ) : view.kind === 'tagCategory' ? (
+                    <div className="mt-3 rounded-md border border-dashed border-slate-200 px-3 py-2 text-xs text-slate-500">
+                      このビュー種別には範囲設定はありません。
                     </div>
                   ) : null}
                 </div>

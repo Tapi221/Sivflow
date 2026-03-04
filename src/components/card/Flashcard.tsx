@@ -94,6 +94,10 @@ interface FlashcardProps {
   drawMode?: boolean;
   inkEditingEnabled?: boolean;
   onInkDocumentChange?: (side: 'question' | 'answer', nextDocument: InkDocument) => void;
+  allowUpscale?: boolean;
+  maxScale?: number;
+  scaleMultiplier?: number;
+  contentPaddingPx?: number;
 }
 
 export function Flashcard({
@@ -118,6 +122,10 @@ export function Flashcard({
   drawMode,
   inkEditingEnabled = false,
   onInkDocumentChange,
+  allowUpscale = false,
+  maxScale = 1.6,
+  scaleMultiplier = 1,
+  contentPaddingPx,
 }: FlashcardProps) {
   const cardData = card;
   const { updateCard } = useCards();
@@ -678,7 +686,10 @@ export function Flashcard({
       <div className="relative">
         <CardFrame
           baseWidth={CANONICAL_CARD_WIDTH}
-          contentPaddingPx={0}
+          contentPaddingPx={contentPaddingPx ?? 0}
+          allowUpscale={allowUpscale}
+          maxScale={maxScale}
+          scaleMultiplier={scaleMultiplier}
           className={cn('premium-paper-depth', !previewMode && 'cursor-pointer', 'card-shell--paper')}
           onClick={handleFlip}
           resizable={false}

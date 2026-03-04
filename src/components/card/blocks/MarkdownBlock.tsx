@@ -51,6 +51,9 @@ const normalizeMarkdownForEditor = (input: string) =>
     .replace(/\r\n/g, '\n')
     .replace(/\n{3,}$/g, '\n\n');
 
+const normalizeMarkdownBlockValue = (input: string) =>
+  normalizeMarkdownForEditor(input).replace(/\n+$/g, '');
+
 const validateBlocksLength = (blocks: EditorBlock[]) => {
   for (const b of blocks) {
     const len = b.type === 'markdown' ? b.markdown.length : b.code.code.length;
@@ -244,15 +247,18 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
 }) => {
   const [error, setError] = useState<string | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
-  const isMarkdownEmpty = markdown.trim().length === 0;
+  const normalizedMarkdown = normalizeMarkdownBlockValue(markdown);
+  const isMarkdownEmpty = normalizedMarkdown.trim().length === 0;
 
   const handleChange = (value: string) => {
-    if (value.length > MAX_LENGTH) {
+    const normalizedValue = normalizeMarkdownBlockValue(value);
+
+    if (normalizedValue.length > MAX_LENGTH) {
       setError('Markdown文字列が長すぎます（最大50,000文字）');
       return;
     }
     setError(null);
-    onChange(value);
+    onChange(normalizedValue);
   };
 
   const applyInsert = (
@@ -479,14 +485,14 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
               Markdownを入力...
             </div>
           ) : (
-            <MarkdownBlockView md={markdown} className="markdownBlockCardView" bleedX={false} />
+            <MarkdownBlockView md={normalizedMarkdown} className="markdownBlockCardView" bleedX={false} />
           )}
         </div>
 
         <MarkdownEditorDialog
           open={isEditorOpen}
           onOpenChange={setIsEditorOpen}
-          value={markdown}
+          value={normalizedMarkdown}
           onChange={handleChange}
           onPasteCapture={handlePaste}
           accentColor={accentColor}

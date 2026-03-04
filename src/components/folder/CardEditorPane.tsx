@@ -14,10 +14,11 @@ import { SharedCardContent } from "@/components/card/SharedCardContent";
 import { sortBlocksByOrderIndex } from "@/components/card/blockOrdering";
 import {
   CANONICAL_CARD_WIDTH,
-  CARD_HEIGHT_PHASE_PX,
-  CARD_ROW_PX,
   cardHeightPxToLayoutRows,
   layoutRowsToCardHeightPx,
+  minCardHeightPxToLayoutRows,
+  CARD_HEIGHT_PHASE_PX,
+  CARD_ROW_PX,
 } from "@/components/card/constants";
 import {
   DEFAULT_LAYOUT_ROWS,
@@ -48,9 +49,6 @@ type EditorDraft = {
   answerBlocks: CardBlock[];
   layoutRows: number;
 };
-
-// CardShell.computeMinHeight() の safetyReservePx(8) と二重加算にならないよう補正する。
-const CARD_SHELL_MIN_HEIGHT_SLACK_PX = 8;
 
 interface CardEditorPaneProps {
   selectedCardId: string | null;
@@ -180,6 +178,9 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
   const [draft, setDraft] = useState<EditorDraft | null>(null);
   const rowsRafRef = useRef<number | null>(null);
   const pendingRowsRef = useRef<number | null>(null);
+  const layoutRowsRef = useRef<number>(DEFAULT_LAYOUT_ROWS);
+  const allowAutoMinHeightSyncRef = useRef(false);
+  const manualResizeInProgressRef = useRef(false);
   const minHeightPxBySideRef = useRef<{ question: number; answer: number }>({
     question: layoutRowsToCardHeightPx(DEFAULT_LAYOUT_ROWS),
     answer: layoutRowsToCardHeightPx(DEFAULT_LAYOUT_ROWS),
@@ -187,9 +188,7 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
 
   const rowsFromMinHeightPx = useCallback((minHeightPx: number): number => {
     const safeHeight = Number.isFinite(minHeightPx) ? minHeightPx : 0;
-    const adjustedHeight = Math.max(0, safeHeight - CARD_SHELL_MIN_HEIGHT_SLACK_PX);
-    const rawRows = Math.ceil((adjustedHeight - CARD_HEIGHT_PHASE_PX) / CARD_ROW_PX);
-    return normalizeLayoutRows(rawRows);
+    return normalizeLayoutRows(minCardHeightPxToLayoutRows(Math.max(0, safeHeight)));
   }, []);
 
   const getRequiredMinRows = useCallback((): number => {
@@ -217,7 +216,12 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
   }, [tagById]);
 
   useEffect(() => {
+    layoutRowsRef.current = normalizeLayoutRows(draft?.layoutRows);
+  }, [draft?.layoutRows]);
+
+  useEffect(() => {
     const baseHeight = layoutRowsToCardHeightPx(DEFAULT_LAYOUT_ROWS);
+    allowAutoMinHeightSyncRef.current = false;
     minHeightPxBySideRef.current = {
       question: baseHeight,
       answer: baseHeight,
@@ -470,6 +474,7 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
     side === "question" ? (draft?.questionBlocks ?? []) : (draft?.answerBlocks ?? []);
 
   const setSideBlocks = (side: "question" | "answer", nextBlocks: CardBlock[]) => {
+    allowAutoMinHeightSyncRef.current = true;
     setDraft((prev) => {
       if (!prev) return prev;
       const reindexed = normalizeOrderIndex(nextBlocks);
@@ -484,7 +489,12 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
 
   const scheduleLayoutRowsFromHeight = useCallback(
     (nextHeightPx: number) => {
-      const requestedRows = normalizeLayoutRows(cardHeightPxToLayoutRows(nextHeightPx));
+      const currentRows = layoutRowsRef.current;
+      const currentHeightPx = layoutRowsToCardHeightPx(currentRows);
+      const rawRows = (nextHeightPx - CARD_HEIGHT_PHASE_PX) / CARD_ROW_PX;
+      const requestedRows = normalizeLayoutRows(
+        nextHeightPx < currentHeightPx ? Math.floor(rawRows) : cardHeightPxToLayoutRows(nextHeightPx)
+      );
       const nextRows = Math.max(requestedRows, getRequiredMinRows());
       pendingRowsRef.current = nextRows;
 
@@ -503,6 +513,8 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
   const handleSideMinHeightChange = useCallback(
     (side: "question" | "answer", minHeightPx: number) => {
       minHeightPxBySideRef.current[side] = Math.max(0, minHeightPx);
+      if (manualResizeInProgressRef.current) return;
+      if (!allowAutoMinHeightSyncRef.current) return;
       const requiredRows = getRequiredMinRows();
 
       setDraft((prev) => {
@@ -670,6 +682,7 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
   const onDragEnd = (result: DndResult) => {
     if (!draft) return;
     if (!result.destination) return;
+    allowAutoMinHeightSyncRef.current = true;
 
     const { source, destination } = result;
     if (source.droppableId === destination.droppableId && source.index === destination.index) return;
@@ -872,6 +885,12 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
                       lockHeight
                       onHeightChange={scheduleLayoutRowsFromHeight}
                       onMinHeightChange={handleQuestionMinHeightChange}
+                      onResizeStart={() => {
+                        manualResizeInProgressRef.current = true;
+                      }}
+                      onResizeEnd={() => {
+                        manualResizeInProgressRef.current = false;
+                      }}
                       actionsTopLeft={editorActionsTopLeft}
                       actionsTopRight={renderMediaDialogButtons("question")}
                     >
@@ -905,6 +924,12 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
                       lockHeight
                       onHeightChange={scheduleLayoutRowsFromHeight}
                       onMinHeightChange={handleAnswerMinHeightChange}
+                      onResizeStart={() => {
+                        manualResizeInProgressRef.current = true;
+                      }}
+                      onResizeEnd={() => {
+                        manualResizeInProgressRef.current = false;
+                      }}
                       actionsTopLeft={editorActionsTopLeft}
                       actionsTopRight={renderMediaDialogButtons("answer")}
                     >

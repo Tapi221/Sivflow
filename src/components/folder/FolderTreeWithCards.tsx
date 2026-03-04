@@ -35,7 +35,9 @@ import {
 import { DocumentRow } from './explorer/rows/DocumentRow';
 import { CardRow } from './explorer/rows/CardRow';
 import { FolderRow } from './explorer/rows/FolderRow';
+import { EXPLORER_ROW_BASE_CLASS_NAME } from './explorer/rows/shared';
 import BulkTagDialog from '@/components/tag/BulkTagDialog';
+import { useTags } from '@/hooks/useTags';
 
 const isSoftDeleted = (entity?: { isDeleted?: boolean; is_deleted?: boolean } | null) =>
   Boolean(entity?.isDeleted ?? entity?.is_deleted);
@@ -89,10 +91,10 @@ export function FolderTreeWithCards({
 }: FolderTreeWithCardsProps) {
   // フォルダ・カード共通の行スタイル（高さ・padding・背景の描画範囲を完全統一）
   // overflow-hidden を入れて「選択背景が行の縦幅を超えて見える」問題を確実に切る
-  const ROW_BASE =
-    'group flex items-center h-8 min-h-0 box-border pr-2 py-0 relative w-full text-left rounded-md overflow-hidden transition-colors';
+  const ROW_BASE = EXPLORER_ROW_BASE_CLASS_NAME;
 
   const { currentUser } = useAuth();
+  const { getTagColor } = useTags();
   const { uploadFile } = useReliableFileUpload();
   const { error: toastError } = useToast();
 
@@ -1252,7 +1254,6 @@ export function FolderTreeWithCards({
 
   const renderFolder = (folder: FolderTreeNode, depth: number = 0) => {
     const folderId = getFolderId(folder);
-    const folderName = folder.folderName ?? folder.folder_name ?? '(名称未設定)';
     const isExpanded = expandedFolders.has(folderId);
     const isSelected = selectedFolderId === folderId;
     const isEditing = editingId === folderId;
@@ -1269,7 +1270,6 @@ export function FolderTreeWithCards({
       childFolders.length > 0 || (isFiltering ? matchCount > 0 : getFolderItems(folderId).length > 0);
     const isDimmed = isFiltering && matchCount === 0;
     const isFileDraggingOver = fileDragFolderId === folderId;
-
     return (
       <FolderRow
         key={folderId}
@@ -1307,6 +1307,7 @@ export function FolderTreeWithCards({
         setRowRef={setRowRef}
         isDimmed={isDimmed}
         isFileDraggingOver={isFileDraggingOver}
+        getTagColor={getTagColor}
         onDragEnterCapture={(e) => {
           if (!isFileDragEvent(e)) return;
           e.preventDefault();

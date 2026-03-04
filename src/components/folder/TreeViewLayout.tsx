@@ -12,7 +12,6 @@ import { useDocuments } from '@/hooks/useDocuments';
 import { createPageUrl } from '@/utils';
 import { useUserSettings } from '@/hooks/useUserSettings';
 import { useTags, resolveCardTagNames } from '@/hooks/useTags';
-import { TagBadge } from '@/components/tag/TagBadge';
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from '@/types';
 import { useCards } from '@/hooks/useCards';
 import { useExplorerStore } from '@/hooks/useExplorerStore';
@@ -23,6 +22,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ViewManagerDialog } from './ViewManagerDialog';
 import { VirtualTreeView } from './VirtualTreeView';
 import { buildVirtualTree, type ViewDef, type ViewKind } from './viewTypes';
+import { ExplorerFilterSummary } from './ExplorerFilterSummary';
 
 interface TreeViewLayoutProps {
   folders: Folder[];
@@ -54,6 +54,7 @@ const MIN_SIDEBAR_W = 200;
 const MAX_SIDEBAR_W = 600;
 const DEFAULT_SIDEBAR_W = 320;
 const DEFAULT_FOLDER_VIEW: ViewDef = { id: 'folder-default', name: 'フォルダ', kind: 'folder' };
+const ACTIVE_VIEW_KINDS: ViewKind[] = ['folder', 'tagCategory', 'tagTree'];
 
 const createViewId = () =>
   (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
@@ -108,11 +109,11 @@ function TreeViewLayout({
     clearRecent,
     tagFilter,
     toggleTag,
-    clearAllFilters,
     tagMatchMode,
     uncertaintyFilter,
     bookmarkedFilter,
     draftFilter,
+    contentTypeFilter,
   } = useExplorerStore();
 
   useEffect(() => {
@@ -227,6 +228,18 @@ function TreeViewLayout({
     return documents.find((document) => (document.id || document.documentId) === selectedDocumentId) ?? null;
   }, [documents, selectedDocumentId]);
 
+  const mobileDetailTitle = useMemo(() => {
+    if (selectedItem?.type === 'directory') return 'ディレクトリ';
+    if (selectedItem?.type === 'today-study') return '今日の学習';
+    if (selectedItem?.type === 'gallery') return 'ギャラリー';
+    if (selectedItem?.type === 'calendar') return '予定表';
+    if (selectedItem?.type === 'settings') return '設定';
+    if (selectedItem?.type === 'trash') return 'ごみ箱';
+    if (selectedItem?.type === 'card') return 'カード';
+    if (selectedItem?.type === 'document') return 'ドキュメント';
+    return selectedFolder?.folderName ?? 'フォルダ';
+  }, [selectedItem, selectedFolder]);
+
   const folderCards = useMemo(() => {
     if (!selectedFolderId) return [];
     return cards.filter((card): card is CardLike => {
@@ -336,8 +349,9 @@ function TreeViewLayout({
 
   const viewDefs = useMemo(() => {
     const storedViews = Array.isArray(settings?.explorerViews) ? settings.explorerViews : [];
-    const folderView = storedViews.find((view) => view.kind === 'folder') ?? DEFAULT_FOLDER_VIEW;
-    return [folderView, ...storedViews.filter((view) => view.kind !== 'folder')];
+    const validStoredViews = storedViews.filter((view): view is ViewDef => ACTIVE_VIEW_KINDS.includes(view.kind as ViewKind));
+    const folderView = validStoredViews.find((view) => view.kind === 'folder') ?? DEFAULT_FOLDER_VIEW;
+    return [folderView, ...validStoredViews.filter((view) => view.kind !== 'folder')];
   }, [settings?.explorerViews]);
 
   const selectedViewId = useMemo(() => {
@@ -375,18 +389,25 @@ function TreeViewLayout({
     (tagFilter.length > 0 ||
       uncertaintyFilter !== 'any' ||
       bookmarkedFilter !== 'any' ||
-      draftFilter !== 'any');
+      draftFilter !== 'any' ||
+      contentTypeFilter.length < 3);
 
-  const { filteredCards, isFiltering } = useMemo(() => {
+  const { filteredCards, filteredDocuments, isFiltering } = useMemo(() => {
     const active =
       isFilterTargetTab &&
       (tagFilter.length > 0 ||
         uncertaintyFilter !== 'any' ||
         bookmarkedFilter !== 'any' ||
-        draftFilter !== 'any');
-    if (!active) return { filteredCards: cards, isFiltering: false };
+        draftFilter !== 'any' ||
+        contentTypeFilter.length < 3);
+    if (!active) return { filteredCards: cards, filteredDocuments: documents, isFiltering: false };
+
+    const allowCards = contentTypeFilter.includes('card');
+    const allowPdf = contentTypeFilter.includes('pdf');
+    const allowPptx = contentTypeFilter.includes('pptx');
 
     const filtered = cards.filter((card) => {
+      if (!allowCards) return false;
       if (tagFilter.length > 0) {
         const resolvedNames = resolveCardTagNames(card.tagIds, card.tags, tagById);
         if (resolvedNames.length === 0) return false;
@@ -412,15 +433,24 @@ function TreeViewLayout({
       return true;
     });
 
-    return { filteredCards: filtered, isFiltering: true };
+    const nextDocuments = documents.filter((document) => {
+      if (document.isDeleted) return false;
+      if (document.kind === 'pdf') return allowPdf;
+      if (document.kind === 'pptx') return allowPptx;
+      return false;
+    });
+
+    return { filteredCards: filtered, filteredDocuments: nextDocuments, isFiltering: true };
   }, [
     cards,
+    documents,
     tagFilter,
     tagMatchMode,
     isFilterTargetTab,
     uncertaintyFilter,
     bookmarkedFilter,
     draftFilter,
+    contentTypeFilter,
     tagById,
   ]);
 
@@ -508,81 +538,6 @@ function TreeViewLayout({
       )),
     });
   }, [persistSettings, viewDefs]);
-
-  const matchModeLabel = useMemo(() => {
-    return tagMatchMode === 'any' ? 'どれか一致（OR）' : '全部一致（AND）';
-  }, [tagMatchMode]);
-
-  const renderFilterChips = () => {
-    if (!isFilterActive) return null;
-
-    const resultCount = filteredCards.length;
-
-    return (
-      <div className="px-2 py-2 bg-slate-50/60 border-b border-slate-100">
-        <div className="flex items-center justify-between gap-2 mb-2">
-          <div className="min-w-0 flex items-center gap-2">
-            <span className="text-xs font-medium text-slate-600 shrink-0">絞り込み中</span>
-            <span className="text-[11px] text-slate-500 truncate">
-              {matchModeLabel}
-              <span className="mx-1 text-slate-300">•</span>
-              結果 {resultCount} 件
-            </span>
-            {resultCount === 0 && <span className="text-[11px] text-rose-500/90 shrink-0">一致なし</span>}
-          </div>
-
-          <button
-            type="button"
-            onClick={clearAllFilters}
-            className="shrink-0 text-[11px] px-2 py-1 rounded-md border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition-colors"
-          >
-            クリア
-          </button>
-        </div>
-
-        <div className="flex flex-wrap gap-1.5">
-          {tagFilter.map((tag) => (
-            <TagBadge
-              key={tag}
-              label={tag}
-              size="sm"
-              colorClass={getTagColor(tag)}
-              className="max-w-[180px]"
-              onRemove={() => toggleTag(tag)}
-              removeAriaLabel={`${tag}を削除`}
-            />
-          ))}
-          {uncertaintyFilter !== 'any' && (
-            <TagBadge
-              label={`はてな: ${uncertaintyFilter === 'on' ? 'あり' : 'なし'}`}
-              size="sm"
-              colorClass="bg-slate-100 text-slate-700 border-slate-200"
-            />
-          )}
-          {bookmarkedFilter !== 'any' && (
-            <TagBadge
-              label={`星: ${bookmarkedFilter === 'on' ? 'あり' : 'なし'}`}
-              size="sm"
-              colorClass="bg-slate-100 text-slate-700 border-slate-200"
-            />
-          )}
-          {draftFilter !== 'any' && (
-            <TagBadge
-              label={`下書き: ${draftFilter === 'on' ? 'あり' : 'なし'}`}
-              size="sm"
-              colorClass="bg-slate-100 text-slate-700 border-slate-200"
-            />
-          )}
-        </div>
-
-        <div className="mt-1 text-[11px] text-slate-400 leading-4">
-          {tagMatchMode === 'any'
-            ? '選んだタグのどれかが付いているカードを表示します。'
-            : '選んだタグがすべて付いているカードだけ表示します。'}
-        </div>
-      </div>
-    );
-  };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -694,7 +649,7 @@ function TreeViewLayout({
               <FolderTreeWithCards
                 folders={folders}
                 cards={filteredCards}
-                documents={documents}
+                documents={filteredDocuments}
                 selectedFolderId={selectedFolderId}
                 selectedItem={selectedItem}
                 onFolderSelect={handleFolderSelectWithRecent}
@@ -803,7 +758,11 @@ function TreeViewLayout({
               )}
             </div>
 
-            {renderFilterChips()}
+            <ExplorerFilterSummary
+              getTagColor={getTagColor}
+              isFilterActive={isFilterActive}
+              resultCount={filteredCards.length + filteredDocuments.length}
+            />
 
             <div
               ref={contentScrollRef}
@@ -860,7 +819,7 @@ function TreeViewLayout({
             >
               <ArrowLeft className="w-4 h-4" />
             </button>
-            <span className="text-sm font-semibold text-slate-700">フォルダ</span>
+            <span className="text-sm font-semibold text-slate-700">{mobileDetailTitle}</span>
           </div>
         )}
         <RightPane
@@ -869,6 +828,9 @@ function TreeViewLayout({
           selectedDocument={selectedDocument}
           selectedFolderId={selectedFolderId}
           selectedFolderName={selectedFolder?.folderName ?? 'フォルダ'}
+          folders={folders}
+          cards={cards}
+          documents={documents}
           folderCards={folderCards}
           folderStats={folderStats}
           onCardUpdated={onCardUpdated}

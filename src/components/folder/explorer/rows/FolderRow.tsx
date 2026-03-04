@@ -5,6 +5,8 @@ import { cn } from '@/lib/utils';
 import { ContextMenu } from '../../ContextMenu';
 import { DnDHelpers } from '@/hooks/useFolderDnD';
 import type { FolderTreeNode } from '../model/utils';
+import { ExplorerRow } from './ExplorerRow';
+import { ExplorerRowContent } from './ExplorerRowContent';
 
 interface FolderRowProps {
   folder: FolderTreeNode;
@@ -109,8 +111,9 @@ export const FolderRow: React.FC<FolderRowProps> = ({
               snapshot.isDraggingOver && "bg-blue-50/50 ring-1 ring-blue-200/50 rounded-sm"
             )}
           >
-            <div
-              ref={(node) => setRowRef(folderId, node)}
+            <ExplorerRow
+              rowRef={(node) => setRowRef(folderId, node)}
+              depth={depth}
               className={cn(
                 rowBaseClassName,
                 !isDragging && "hover:bg-slate-100",
@@ -119,7 +122,6 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                 isFileDraggingOver && "bg-blue-50 ring-1 ring-blue-400",
                 "group pr-8"
               )}
-              style={{ paddingLeft: `${depth * 12 + 4}px`, height: 32, minHeight: 32, boxSizing: 'border-box' }}
               onClick={onSelect}
               onDragEnterCapture={onDragEnterCapture}
               onDragOverCapture={onDragOverCapture}
@@ -171,11 +173,13 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                     onClick={(e) => e.stopPropagation()}
                   />
                 ) : (
-                  <div className="flex items-center gap-1 flex-1 overflow-hidden pointer-events-none">
-                    <span className={cn("text-sm truncate leading-5 lining-nums tabular-nums", isSelected ? "text-primary-700 font-medium" : "text-slate-700")}>
-                      {folderName}
-                    </span>
-                    {isFiltering && matchCount === 0 && <span className="text-xs text-slate-400">(0)</span>}
+                  <div className="flex-1 overflow-hidden pointer-events-none">
+                    <ExplorerRowContent
+                      left={null}
+                      title={folderName}
+                      titleClassName={cn("lining-nums tabular-nums", isSelected ? "text-primary-700 font-medium" : "text-slate-700")}
+                      right={isFiltering && matchCount === 0 ? <span className="text-xs text-slate-400">(0)</span> : null}
+                    />
                   </div>
                 )}
               </div>
@@ -222,7 +226,7 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                   )}
                 </div>
               )}
-            </div>
+            </ExplorerRow>
 
             <div className="h-0 overflow-hidden">
               {provided.placeholder}

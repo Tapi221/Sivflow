@@ -30,9 +30,9 @@ export const UploadProgress = ({
         <div className="flex items-center gap-2 truncate flex-1 mr-4">
           {showIcon && (
             <div className="shrink-0">
-               {status === 'uploading' && <FileText className="w-4 h-4 text-slate-400" />}
-               {status === 'completed' && <CheckCircle2 className="w-4 h-4 text-primary-600" />}
-               {status === 'failed' && <X className="w-4 h-4 text-red-500" />}
+              {status === 'uploading' && <FileText className="w-4 h-4 text-slate-400" />}
+              {status === 'completed' && <CheckCircle2 className="w-4 h-4 text-primary-600" />}
+              {status === 'failed' && <X className="w-4 h-4 text-red-500" />}
             </div>
           )}
           <span className="font-medium text-slate-700 truncate">{fileName}</span>
@@ -55,33 +55,33 @@ export const UploadProgress = ({
           Actually, we can use [&>div]:bg-red-500 utility class on the root if convenient.
       */}
       <div className={cn("h-1.5 w-full bg-slate-100 rounded-full overflow-hidden mt-2", status === 'failed' ? "bg-red-100" : "")}>
-         <div 
+          <div 
             className={cn("h-full transition-all duration-300", 
-                 status === 'failed' ? "bg-red-500" : status === 'completed' ? "bg-primary-600" : "bg-slate-900"
+                  status === 'failed' ? "bg-red-500" : status === 'completed' ? "bg-primary-600" : "bg-slate-900"
             )} 
             style={{ width: `${progress}%` }}
-         />
+          />
       </div>
 
       {status === 'uploading' && (
         <div className="flex items-center gap-2 text-xs text-slate-400">
-           <Loader2 className="w-3 h-3 animate-spin" />
-           <span>アップロード中...</span>
+            <Loader2 className="w-3 h-3 animate-spin" />
+            <span>アップロード中...</span>
         </div>
       )}
 
       {status === 'completed' && (
         <div className="flex items-center gap-2 text-xs text-primary-600 font-medium">
-           <CheckCircle2 className="w-3 h-3" />
-           <span>完了しました</span>
+            <CheckCircle2 className="w-3 h-3" />
+            <span>完了しました</span>
         </div>
       )}
 
       {status === 'failed' && (
         <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-xs text-red-500 font-medium">
-               <X className="w-3 h-3" />
-               <span>{error || 'アップロードに失敗しました'}</span>
+                <X className="w-3 h-3" />
+                <span>{error || 'アップロードに失敗しました'}</span>
             </div>
             {onRetry && (
                 <Button 

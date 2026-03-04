@@ -12,12 +12,8 @@ import { NotificationProvider } from './components/notifications/NotificationPro
 import { useAuth } from './contexts/AuthContext';
 // 画面の共通レイアウトコンポーネント（ヘッダーやサイドバーなど）
 import Layout from './Layout';
-// Firebase 認証の signOut 関数
-import { signOut } from 'firebase/auth';
 // 初期化済みの Firebase Auth インスタンス
 import { auth } from './services/firebase';
-// ダッシュボード用のローディングスケルトン
-import { DashboardSkeleton } from './components/skeletons/DashboardSkeleton';
 // 自動バックアップ関連のサービス
 import { autoBackupService } from './services/AutoBackupService';
 // データ整合性チェックのサービス
@@ -36,7 +32,6 @@ import { DEV_MODE, isLocalHost } from './utils/envGuards';
 
 // ===== ページコンポーネントを遅延読み込み（コード分割） =====
 // 初回ロードを軽くするために、各ページを lazy で動的 import する
-const Dashboard = lazy(() => import('./Pages/Dashboard'));
 const Calendar = lazy(() => import('./Pages/Calendar'));
 const Folders = lazy(() => import('./Pages/Folders'));
 const CardEdit = lazy(() => import('./Pages/CardEdit'));
@@ -215,18 +210,16 @@ function LoginPage() {
 
 
 /**
- * "/" は常に Dashboard へ。
+ * "/" は常に folders へ。
  * リロード時の画面復帰はブラウザURLに任せる。
  */
 function DefaultRedirect() {
-  return <Navigate to="/Dashboard" replace />;
+  return <Navigate to="/folders" replace />;
 }
 
 // ===== アプリ本体のルーティング・起動処理をまとめたコンポーネント =====
 function AppContent() {
   const { currentUser, loading } = useAuth();
-  const [currentPageName, setCurrentPageName] = useState('Dashboard');
-
   // 差分同期の進捗（文字列など）を取得
   const { syncProgress } = useSync();
 
@@ -324,18 +317,8 @@ function AppContent() {
       <Routes>
         {/* ルートパス "/" のレイアウト（ProtectedRoute でログインを強制） */}
         <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-          {/* "/" にアクセスされたら "/Dashboard" にリダイレクト（初回のみ） */}
+          {/* "/" にアクセスされたら "/folders" にリダイレクト */}
           <Route index element={<DefaultRedirect />} />
-
-          {/* ダッシュボード */}
-          <Route
-            path="Dashboard"
-            element={
-              <Suspense fallback={<DashboardSkeleton />}>
-                <Dashboard />
-              </Suspense>
-            }
-          />
 
           {/* フォルダ一覧 */}
           <Route
@@ -454,8 +437,8 @@ function AppContent() {
           ) : null}
         </Route>
 
-        {/* どのルートにもマッチしない場合はダッシュボードにリダイレクト */}
-        <Route path="*" element={<Navigate to="/Dashboard" replace />} />
+        {/* どのルートにもマッチしない場合はフォルダ画面にリダイレクト */}
+        <Route path="*" element={<Navigate to="/folders" replace />} />
       </Routes>
 
       {/* 同期中であれば、右下に小さなステータスバナーを表示 */}

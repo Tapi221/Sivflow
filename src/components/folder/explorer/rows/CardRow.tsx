@@ -6,6 +6,7 @@ import { ContextMenu } from '../../ContextMenu';
 import { lockToVerticalTransform } from '../dnd/lockToVertical';
 import { DnDHelpers } from '@/hooks/useFolderDnD';
 import type { Card, SelectedExplorerItem } from '@/types';
+import { getExplorerRowStyle } from './shared';
 
 interface CardRowProps {
   card: Card;
@@ -109,10 +110,7 @@ export const CardRow: React.FC<CardRowProps> = ({
             )}
             style={{
               ...lockedStyle,
-              paddingLeft: `${depth * 12 + 4}px`,
-              height: 32,
-              minHeight: 32,
-              boxSizing: 'border-box',
+              ...getExplorerRowStyle(depth),
               pointerEvents: snapshot.isDragging ? "none" : "auto", 
             }}
             onClick={() => {

@@ -19,12 +19,14 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
     uncertaintyFilter,
     bookmarkedFilter,
     draftFilter,
+    contentTypeFilter,
     toggleTag,
     clearAllFilters,
     setTagMatchMode,
     setUncertaintyFilter,
     setBookmarkedFilter,
     setDraftFilter,
+    toggleContentType,
   } = useExplorerStore();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -55,7 +57,8 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
     tagFilter.length > 0 ||
     uncertaintyFilter !== 'any' ||
     bookmarkedFilter !== 'any' ||
-    draftFilter !== 'any';
+    draftFilter !== 'any' ||
+    contentTypeFilter.length < 3;
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -150,6 +153,29 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
           </div>
 
           <div className="px-3 py-2 border-b border-slate-200/70 bg-white/70 space-y-2">
+            <div className="flex items-center justify-between gap-2 text-[11px]">
+              <span className="text-slate-600">表示:</span>
+              <div className="flex bg-white rounded border border-slate-200 p-0.5 shadow-sm">
+                {[
+                  { label: 'カード', value: 'card' as const },
+                  { label: 'PDF', value: 'pdf' as const },
+                  { label: 'PPTX', value: 'pptx' as const },
+                ].map((item) => (
+                  <button
+                    key={item.value}
+                    onClick={() => toggleContentType(item.value)}
+                    className={cn(
+                      'px-2 py-0.5 rounded transition-colors',
+                      contentTypeFilter.includes(item.value)
+                        ? 'bg-primary-100 text-primary-800 font-medium'
+                        : 'text-slate-600 hover:text-slate-800 hover:bg-slate-50'
+                    )}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </div>
             {[
               {
                 label: 'はてな',

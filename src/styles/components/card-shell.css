@@ -50,7 +50,7 @@
 
   .card-shell-resize-handle {
     @apply absolute left-0 right-0 flex items-center justify-center;
-    bottom: -9px;
+    bottom: 2px;
     height: 18px;
     border: 0;
     background: transparent;

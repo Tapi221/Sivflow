@@ -9,10 +9,12 @@ import { useToast } from '@/contexts/ToastContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import TreeViewLayout from '@/components/folder/TreeViewLayout';
 import { cn } from '@/lib/utils';
+import { useSettingsQueryParam } from '@/hooks/useSettingsQueryParam';
 
 export default function Folders() {
   const [searchParams, setSearchParams] = useSearchParams();
   const queryString = searchParams.toString();
+  const { setIsSettingsOpen } = useSettingsQueryParam(searchParams, setSearchParams);
   const queryClient = useQueryClient();
   const isDesktop = useIsDesktop();
   const queryFolderId = searchParams.get('folderId');
@@ -181,6 +183,11 @@ export default function Folders() {
       setSelectedFolderId(null);
       return;
     }
+    if (item.type === 'directory') {
+      setSelectedItem({ type: 'directory' });
+      setSelectedFolderId(null);
+      return;
+    }
     if (item.type === 'gallery') {
       setSelectedItem({ type: 'gallery' });
       setSelectedFolderId(null);
@@ -192,8 +199,7 @@ export default function Folders() {
       return;
     }
     if (item.type === 'settings') {
-      setSelectedItem({ type: 'settings' });
-      setSelectedFolderId(null);
+      setIsSettingsOpen(true);
       return;
     }
     if (item.type === 'trash') {

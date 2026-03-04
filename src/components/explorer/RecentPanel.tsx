@@ -4,6 +4,8 @@
 import React, { useMemo } from 'react';
 import { Folder, FileText, BookOpen, Clock, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ExplorerRow } from '@/components/folder/explorer/rows/ExplorerRow';
+import { ExplorerRowContent } from '@/components/folder/explorer/rows/ExplorerRowContent';
 import type { RecentItem } from '@/hooks/useExplorerStore';
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from '@/types';
 
@@ -122,24 +124,23 @@ export function RecentPanel({
           const Icon = info.icon;
           
           return (
-            <div
+            <ExplorerRow
               key={`${item.type}:${item.id}:${item.ts}`}
-              className="flex items-center gap-2 px-3 py-1.5 hover:bg-primary-50/50 cursor-pointer transition-colors"
+              depth={1}
+              className="cursor-pointer hover:bg-slate-100"
               onClick={() => handleClick(item)}
             >
-              <Icon className={cn(
-                "w-4 h-4 shrink-0",
-                item.type === 'folder' ? "text-[#E8A858]" : item.type === 'document' ? "text-rose-500" : "text-slate-400"
-              )} />
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium text-slate-700 truncate">
-                  {info.name}
-                </div>
-              </div>
-              <span className="text-[10px] text-slate-400 shrink-0">
-                {getRelativeTime(item.ts)}
-              </span>
-            </div>
+              <ExplorerRowContent
+                left={
+                  <Icon className={cn(
+                    "w-4 h-4 shrink-0 mr-2",
+                    item.type === 'folder' ? "text-[#E8A858]" : item.type === 'document' ? "text-rose-500" : "text-slate-400"
+                  )} />
+                }
+                title={info.name}
+                right={<span className="text-[10px] text-slate-400 shrink-0">{getRelativeTime(item.ts)}</span>}
+              />
+            </ExplorerRow>
           );
         })}
       </div>

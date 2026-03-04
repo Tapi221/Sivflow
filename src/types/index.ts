@@ -561,6 +561,7 @@ export type SelectedExplorerItem =
   | { type: 'card'; id: string }
   | { type: 'document'; id: string }
   | { type: 'today-study' }
+  | { type: 'directory' }
   | { type: 'gallery' }
   | { type: 'calendar' }
   | { type: 'settings' }

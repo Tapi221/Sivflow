@@ -5,6 +5,8 @@ import React, { useMemo, useState } from 'react';
 import { Folder, BookOpen, FileText, ChevronRight, ChevronDown, X } from 'lucide-react';
 import Pin from 'lucide-react/dist/esm/icons/pin';
 import { cn } from '@/lib/utils';
+import { ExplorerRow } from '@/components/folder/explorer/rows/ExplorerRow';
+import { ExplorerRowContent } from '@/components/folder/explorer/rows/ExplorerRowContent';
 import type { PinnedItem } from '@/hooks/useExplorerStore';
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from '@/types';
 
@@ -196,41 +198,45 @@ export function PinnedPanel({
 
     return (
       <div key={`folder-subtree:${folderId}`}>
-        <div
-          className="group flex items-center gap-2 px-3 py-1.5 hover:bg-primary-50/50 cursor-pointer transition-colors"
-          style={{ paddingLeft: `${12 + depth * 12}px` }}
+        <ExplorerRow
+          depth={depth + 1}
+          className="cursor-pointer hover:bg-slate-100"
           onClick={() => onFolderSelect(folderId)}
         >
-          {hasChildren ? (
-            <button
-              type="button"
-              className="w-4 h-4 flex items-center justify-center text-slate-500"
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleFolder(folderId);
-              }}
-            >
-              {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-            </button>
-          ) : (
-            <span className="w-4 h-4 shrink-0" />
-          )}
-          <Folder className="w-4 h-4 shrink-0 text-[#E8A858]" />
-          <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium text-slate-700 truncate">{folderName}</div>
-          </div>
-          {showUnpin ? (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onUnpinItem({ type: 'folder', id: folderId });
-              }}
-              className="opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-200 rounded transition-all"
-            >
-              <X className="w-3 h-3 text-slate-400" />
-            </button>
-          ) : null}
-        </div>
+          <ExplorerRowContent
+            left={
+              <>
+                {hasChildren ? (
+                  <button
+                    type="button"
+                    className="w-4 h-4 mr-1 flex items-center justify-center text-slate-500"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleFolder(folderId);
+                    }}
+                  >
+                    {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                  </button>
+                ) : (
+                  <span className="w-4 h-4 mr-1 shrink-0" />
+                )}
+                <Folder className="w-4 h-4 mr-2 shrink-0 text-[#E8A858]" />
+              </>
+            }
+            title={folderName}
+            right={showUnpin ? (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onUnpinItem({ type: 'folder', id: folderId });
+                }}
+                className="opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-200 rounded transition-all"
+              >
+                <X className="w-3 h-3 text-slate-400" />
+              </button>
+            ) : null}
+          />
+        </ExplorerRow>
 
         {isExpanded ? (
           <>
@@ -240,45 +246,44 @@ export function PinnedPanel({
                 const card = cards.find((c) => c.id === entry.id);
                 const isPinned = validPinnedItems.some((item) => item.type === 'card' && item.id === entry.id);
                 return (
-                  <div
+                  <ExplorerRow
                     key={`card-in-folder:${entry.id}`}
-                    className="group flex items-center gap-2 px-3 py-1.5 hover:bg-primary-50/50 cursor-pointer transition-colors"
-                    style={{ paddingLeft: `${12 + (depth + 1) * 12}px` }}
+                    depth={depth + 2}
+                    className="cursor-pointer hover:bg-slate-100"
                     onClick={() => onItemSelect({ type: 'card', id: entry.id })}
                   >
-                    <BookOpen className="w-4 h-4 shrink-0 text-slate-400" />
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium text-slate-700 truncate">{card?.title || '無題のカード'}</div>
-                    </div>
-                    {isPinned ? (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onUnpinItem({ type: 'card', id: entry.id });
-                        }}
-                        className="opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-200 rounded transition-all"
-                      >
-                        <X className="w-3 h-3 text-slate-400" />
-                      </button>
-                    ) : null}
-                  </div>
+                    <ExplorerRowContent
+                      left={<BookOpen className="w-4 h-4 mr-2 shrink-0 text-slate-400" />}
+                      title={card?.title || '無題のカード'}
+                      right={isPinned ? (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onUnpinItem({ type: 'card', id: entry.id });
+                          }}
+                          className="opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-200 rounded transition-all"
+                        >
+                          <X className="w-3 h-3 text-slate-400" />
+                        </button>
+                      ) : null}
+                    />
+                  </ExplorerRow>
                 );
               }
 
               const doc = documents.find((d) => d.id === entry.id);
               const isPinned = validPinnedItems.some((item) => item.type === 'document' && item.id === entry.id);
               return (
-                <div
-                  key={`doc-in-folder:${entry.id}`}
-                  className="group flex items-center gap-2 px-3 py-1.5 hover:bg-primary-50/50 cursor-pointer transition-colors"
-                  style={{ paddingLeft: `${12 + (depth + 1) * 12}px` }}
-                  onClick={() => onItemSelect({ type: 'document', id: entry.id })}
-                >
-                  <FileText className="w-4 h-4 shrink-0 text-slate-400" />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-slate-700 truncate">{doc?.title || doc?.fileName || '無題のドキュメント'}</div>
-                  </div>
-                  {isPinned ? (
+              <ExplorerRow
+                key={`doc-in-folder:${entry.id}`}
+                depth={depth + 2}
+                className="cursor-pointer hover:bg-slate-100"
+                onClick={() => onItemSelect({ type: 'document', id: entry.id })}
+              >
+                <ExplorerRowContent
+                  left={<FileText className="w-4 h-4 mr-2 shrink-0 text-slate-400" />}
+                  title={doc?.title || doc?.fileName || '無題のドキュメント'}
+                  right={isPinned ? (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -289,9 +294,10 @@ export function PinnedPanel({
                       <X className="w-3 h-3 text-slate-400" />
                     </button>
                   ) : null}
-                </div>
-              );
-            })}
+                />
+              </ExplorerRow>
+            );
+          })}
           </>
         ) : null}
       </div>
@@ -300,51 +306,66 @@ export function PinnedPanel({
 
   return (
     <div className="py-1">
-      <div
-        className="group flex items-center gap-2 px-3 py-1.5 hover:bg-primary-50/50 cursor-pointer transition-colors"
+      <ExplorerRow
+        depth={1}
+        className="cursor-pointer hover:bg-slate-100"
         onClick={() => onItemSelect({ type: 'today-study' })}
       >
-        <Pin className="w-4 h-4 shrink-0 text-primary-600 fill-primary-100" strokeWidth={2.2} />
-        <div className="flex-1 min-w-0">
-          <div className="text-sm font-medium text-slate-700 truncate">今日の学習</div>
-        </div>
-      </div>
-      <div
-        className="group flex items-center gap-2 px-3 py-1.5 hover:bg-primary-50/50 cursor-pointer transition-colors"
+        <ExplorerRowContent
+          left={<Pin className="w-4 h-4 mr-2 shrink-0 text-primary-600 fill-primary-100" strokeWidth={2.2} />}
+          title="今日の学習"
+        />
+      </ExplorerRow>
+      <ExplorerRow
+        depth={1}
+        className="cursor-pointer hover:bg-slate-100"
+        onClick={() => onItemSelect({ type: 'directory' })}
+      >
+        <ExplorerRowContent
+          left={<Pin className="w-4 h-4 mr-2 shrink-0 text-primary-600 fill-primary-100" strokeWidth={2.2} />}
+          title="ディレクトリ"
+        />
+      </ExplorerRow>
+      <ExplorerRow
+        depth={1}
+        className="cursor-pointer hover:bg-slate-100"
         onClick={() => onItemSelect({ type: 'gallery' })}
       >
-        <Pin className="w-4 h-4 shrink-0 text-primary-600 fill-primary-100" strokeWidth={2.2} />
-        <div className="flex-1 min-w-0">
-          <div className="text-sm font-medium text-slate-700 truncate">ギャラリー</div>
-        </div>
-      </div>
-      <div
-        className="group flex items-center gap-2 px-3 py-1.5 hover:bg-primary-50/50 cursor-pointer transition-colors"
+        <ExplorerRowContent
+          left={<Pin className="w-4 h-4 mr-2 shrink-0 text-primary-600 fill-primary-100" strokeWidth={2.2} />}
+          title="ギャラリー"
+        />
+      </ExplorerRow>
+      <ExplorerRow
+        depth={1}
+        className="cursor-pointer hover:bg-slate-100"
         onClick={() => onItemSelect({ type: 'calendar' })}
       >
-        <Pin className="w-4 h-4 shrink-0 text-primary-600 fill-primary-100" strokeWidth={2.2} />
-        <div className="flex-1 min-w-0">
-          <div className="text-sm font-medium text-slate-700 truncate">予定表</div>
-        </div>
-      </div>
-      <div
-        className="group flex items-center gap-2 px-3 py-1.5 hover:bg-primary-50/50 cursor-pointer transition-colors"
+        <ExplorerRowContent
+          left={<Pin className="w-4 h-4 mr-2 shrink-0 text-primary-600 fill-primary-100" strokeWidth={2.2} />}
+          title="予定表"
+        />
+      </ExplorerRow>
+      <ExplorerRow
+        depth={1}
+        className="cursor-pointer hover:bg-slate-100"
         onClick={() => onItemSelect({ type: 'settings' })}
       >
-        <Pin className="w-4 h-4 shrink-0 text-primary-600 fill-primary-100" strokeWidth={2.2} />
-        <div className="flex-1 min-w-0">
-          <div className="text-sm font-medium text-slate-700 truncate">設定</div>
-        </div>
-      </div>
-      <div
-        className="group flex items-center gap-2 px-3 py-1.5 hover:bg-primary-50/50 cursor-pointer transition-colors"
+        <ExplorerRowContent
+          left={<Pin className="w-4 h-4 mr-2 shrink-0 text-primary-600 fill-primary-100" strokeWidth={2.2} />}
+          title="設定"
+        />
+      </ExplorerRow>
+      <ExplorerRow
+        depth={1}
+        className="cursor-pointer hover:bg-slate-100"
         onClick={() => onItemSelect({ type: 'trash' })}
       >
-        <Pin className="w-4 h-4 shrink-0 text-primary-600 fill-primary-100" strokeWidth={2.2} />
-        <div className="flex-1 min-w-0">
-          <div className="text-sm font-medium text-slate-700 truncate">ごみ箱</div>
-        </div>
-      </div>
+        <ExplorerRowContent
+          left={<Pin className="w-4 h-4 mr-2 shrink-0 text-primary-600 fill-primary-100" strokeWidth={2.2} />}
+          title="ごみ箱"
+        />
+      </ExplorerRow>
 
       {validPinnedItems.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-full py-12 text-slate-400">
@@ -361,36 +382,34 @@ export function PinnedPanel({
         const Icon = info.icon;
         
         return (
-          <div
+          <ExplorerRow
             key={`${item.type}:${item.id}`}
-            className="group flex items-center gap-2 px-3 py-1.5 hover:bg-primary-50/50 cursor-pointer transition-colors"
+            depth={1}
+            className="cursor-pointer hover:bg-slate-100"
             onClick={() => handleClick(item)}
           >
-            <Icon className={cn(
-              "w-4 h-4 shrink-0",
-              item.type === 'folder' ? "text-[#E8A858]" : "text-slate-400"
-            )} />
-            <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium text-slate-700 truncate">
-                {info.name}
-              </div>
-              {info.path && (
-                <div className="text-[10px] text-slate-400 truncate">
-                  {info.path}
-                </div>
-              )}
-            </div>
-            {/* 削除ボタン */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onUnpinItem(item);
-              }}
-              className="opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-200 rounded transition-all"
-            >
-              <X className="w-3 h-3 text-slate-400" />
-            </button>
-          </div>
+            <ExplorerRowContent
+              left={
+                <Icon className={cn(
+                  "w-4 h-4 mr-2 shrink-0",
+                  item.type === 'folder' ? "text-[#E8A858]" : "text-slate-400"
+                )} />
+              }
+              title={info.name}
+              subtitle={info.path}
+              right={
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onUnpinItem(item);
+                  }}
+                  className="opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-200 rounded transition-all"
+                >
+                  <X className="w-3 h-3 text-slate-400" />
+                </button>
+              }
+            />
+          </ExplorerRow>
         );
       })}
     </div>

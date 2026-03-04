@@ -80,3 +80,15 @@ export function layoutRowsToCardHeightPx(rows: number): number {
 export function cardHeightPxToLayoutRows(heightPx: number): number {
   return Math.round((heightPx - CARD_HEIGHT_PHASE_PX) / CARD_ROW_PX);
 }
+
+/**
+ * 「この高さ以上が必要」という最小必要高さ(px)を rows へ変換。
+ * 編集画面の min-height 判定では round ではなく ceil を使う。
+ */
+export function minCardHeightPxToLayoutRows(heightPx: number): number {
+  return Math.ceil((heightPx - CARD_HEIGHT_PHASE_PX) / CARD_ROW_PX);
+}
+
+export function snapMinCardHeightPx(heightPx: number): number {
+  return layoutRowsToCardHeightPx(minCardHeightPxToLayoutRows(heightPx));
+}

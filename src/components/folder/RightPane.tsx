@@ -1,7 +1,8 @@
 import React from 'react';
-import type { Card, DocumentItem, SelectedExplorerItem } from '@/types';
+import type { Card, DocumentItem, Folder, SelectedExplorerItem } from '@/types';
 import { CardPane } from './CardPane';
 import { FolderDashboard } from './FolderDashboard';
+import { DirectoryDiagramPane } from './DirectoryDiagramPane';
 import { PdfPane } from '@/components/pdf/PdfPane';
 import { PowerPointPane } from '@/components/pptx/PowerPointPane';
 import Dashboard from '@/pages/Dashboard';
@@ -15,6 +16,9 @@ interface RightPaneProps {
   selectedDocument: DocumentItem | null;
   selectedFolderId: string | null;
   selectedFolderName: string;
+  folders: Folder[];
+  cards: Card[];
+  documents: DocumentItem[];
   folderCards: Card[];
   folderStats: {
     dueCount: number;
@@ -36,6 +40,9 @@ export function RightPane({
   selectedDocument,
   selectedFolderId,
   selectedFolderName,
+  folders,
+  cards,
+  documents,
   folderCards,
   folderStats,
   onCardUpdated,
@@ -47,6 +54,9 @@ export function RightPane({
   }
   if (selectedItem?.type === 'gallery') {
     return <Gallery />;
+  }
+  if (selectedItem?.type === 'directory') {
+    return <DirectoryDiagramPane folders={folders} cards={cards} documents={documents} />;
   }
   if (selectedItem?.type === 'calendar') {
     return <Calendar />;

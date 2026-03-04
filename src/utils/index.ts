@@ -44,8 +44,8 @@ const toArrayOr = (v: unknown, fallback: unknown[] = []): unknown[] => {
 // クエリパラメータ付きの場合も対応（例: 'CardEdit?folderId=xxx'）
 export const createPageUrl = (pageName: string): string => {
   const mapping: Record<string, string> = {
-    Dashboard: '/Dashboard',
-    dashboard: '/Dashboard',
+    Dashboard: '/folders',
+    dashboard: '/folders',
     Folders: '/folders',
     folders: '/folders',
     CardEdit: '/CardEdit',

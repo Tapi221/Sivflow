@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/popover"
 import { useTags } from "@/hooks/useTags"
 import { TagBadge } from "@/components/tag/TagBadge"
+import { TagChip } from "@/components/tag/TagChip"
 
 interface TagInputProps {
   tags: string[]
@@ -109,17 +110,16 @@ export function TagInput({
                                                 {...provided.dragHandleProps}
                                                 style={{ ...provided.draggableProps.style }}
                                              >
-                                                <TagBadge
-                                                    label={tag}
-                                                    size="xs"
-                                                    colorClass={colorClass}
-                                                    className={cn(
-                                                      "select-none",
-                                                      quietHover && "transition-none shadow-none [&_button]:hover:bg-transparent [&_button]:hover:text-slate-500",
-                                                      snapshot.isDragging && "scale-105 shadow-md z-50"
-                                                    )}
-                                                    onRemove={() => handleUnselect(tag)}
-                                                    removeAriaLabel={`${tag}を削除`}
+                                                <TagChip
+                                                  label={tag}
+                                                  colorClass={colorClass}
+                                                  badgeClassName={cn(
+                                                    "select-none",
+                                                    quietHover && "transition-none shadow-none [&_button]:hover:bg-transparent [&_button]:hover:text-slate-500",
+                                                    snapshot.isDragging && "scale-105 shadow-md z-50"
+                                                  )}
+                                                  onRemove={() => handleUnselect(tag)}
+                                                  removeAriaLabel={`${tag}を削除`}
                                                 />
                                              </div>
                                          )}

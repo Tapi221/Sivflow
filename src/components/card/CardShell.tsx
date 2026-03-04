@@ -1,6 +1,11 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import {
+  cardHeightPxToLayoutRows,
+  layoutRowsToCardHeightPx,
+  snapMinCardHeightPx,
+} from '@/components/card/constants';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -21,6 +26,8 @@ interface CardShellProps extends React.HTMLAttributes<HTMLDivElement> {
   heightPx?: number | null;
   onHeightChange?: (heightPx: number) => void;
   onMinHeightChange?: (heightPx: number) => void;
+  onResizeStart?: () => void;
+  onResizeEnd?: () => void;
   showResizeHandle?: boolean;
   lockHeight?: boolean;
 }
@@ -42,6 +49,8 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
     heightPx,
     onHeightChange,
     onMinHeightChange,
+    onResizeStart,
+    onResizeEnd,
     showResizeHandle = true,
     lockHeight = false,
     ...props
@@ -69,15 +78,14 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
       pointerId: number;
       startY: number;
       baseHeight: number;
+      baseRows: number;
     } | null>(null);
     const resizeRafRef = React.useRef<number | null>(null);
     const resizePendingHeightRef = React.useRef<number | null>(null);
 
     const computeMinHeight = React.useCallback(() => {
       const element = shellRef.current;
-      const resizeHandleReservePx = resizable && !drawMode && showResizeHandle ? 20 : 0;
-      const safetyReservePx = 8;
-      const contentBaseMin = resizeStepPx * 2 + resizeHandleReservePx + safetyReservePx;
+      const contentBaseMin = resizeStepPx * 2;
       if (!element) return contentBaseMin;
 
       const widthRatio = resizable ? (1 / 8) : (3 / 4);
@@ -89,28 +97,52 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
 
       const blockRows = Array.from(body.querySelectorAll('[data-block-row="true"]')) as HTMLElement[];
       if (blockRows.length > 0) {
+        const surface = body.querySelector('[data-card-surface="true"]') as HTMLElement | null;
+        const surfaceStyle = surface ? window.getComputedStyle(surface) : null;
+        const ruledBottomOffsetPx = Math.max(
+          0,
+          Number.parseFloat(surfaceStyle?.getPropertyValue('--ruled-bottom-offset-px') || '0') || 0
+        );
         // NOTE:
         // getBoundingClientRect() is affected by parent transforms (ScaleToFitFrame).
         // Using offset metrics keeps min-height calculation in layout space and
         // prevents underestimation when scaled down.
+        const bodyRect = body.getBoundingClientRect();
+        const bodyScaleY =
+          body.offsetHeight > 0 ? bodyRect.height / body.offsetHeight : 1;
+        const safeBodyScaleY =
+          Number.isFinite(bodyScaleY) && bodyScaleY > 0 ? bodyScaleY : 1;
         let maxBottom = 0;
         for (const row of blockRows) {
+          const measureTarget =
+            (row.querySelector('[data-block-measure-root="true"]') as HTMLElement | null) ?? row;
           const style = window.getComputedStyle(row);
           const marginBottom = Number.parseFloat(style.marginBottom || '0') || 0;
-          const rowBottom = row.offsetTop + row.offsetHeight + marginBottom;
+          const targetOffsetTop = measureTarget === row ? 0 : measureTarget.offsetTop;
+          const layoutBottom =
+            row.offsetTop +
+            targetOffsetTop +
+            Math.max(measureTarget.offsetHeight, measureTarget.scrollHeight) +
+            marginBottom;
+          const targetRect = measureTarget.getBoundingClientRect();
+          const visualBottom = ((targetRect.bottom - bodyRect.top) / safeBodyScaleY) + marginBottom;
+          const rowBottom = Math.max(layoutBottom, visualBottom);
           if (rowBottom > maxBottom) {
             maxBottom = rowBottom;
           }
         }
 
         const contentHeight = Math.max(0, maxBottom);
-        const requiredHeight = contentHeight + resizeHandleReservePx + safetyReservePx;
-        const snappedContentHeight = Math.ceil(requiredHeight / resizeStepPx) * resizeStepPx;
+        const requiredHeight = contentHeight + ruledBottomOffsetPx;
+        // Subtract sub-pixel tolerance: getBoundingClientRect() can return fractional
+        // CSS pixels (esp. on high-DPI screens), causing requiredHeight to land just
+        // above a grid boundary and snapMinCardHeightPx (Math.ceil) to add an extra row.
+        const snappedContentHeight = snapMinCardHeightPx(requiredHeight - 0.9);
         return Math.max(baseMin, snappedContentHeight || baseMin);
       }
 
       return baseMin;
-    }, [drawMode, resizable, resizeStepPx, showResizeHandle]);
+    }, [resizable, resizeStepPx]);
 
     const computeMaxHeight = React.useCallback(() => {
       if (resizable) return Number.POSITIVE_INFINITY;
@@ -152,10 +184,11 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
 
         setCustomHeightPx((prev) => {
           if (prev == null) return prev;
+          if (resizeRef.current) return prev;
           return clampHeight(prev);
         });
 
-        if (onMinHeightChange) {
+        if (onMinHeightChange && !resizeRef.current) {
           onMinHeightChange(computeMinHeight());
         }
       };
@@ -197,6 +230,7 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
         if (rafId != null || typeof window === 'undefined') return;
         rafId = window.requestAnimationFrame(() => {
           rafId = null;
+          if (resizeRef.current) return;
           onMinHeightChange(computeMinHeight());
         });
       };
@@ -470,10 +504,12 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
               event.stopPropagation();
 
               const pointerId = event.pointerId;
+              onResizeStart?.();
               resizeRef.current = {
                 pointerId,
                 startY: event.clientY,
                 baseHeight: resolvedHeightPx ?? element.offsetHeight,
+                baseRows: cardHeightPxToLayoutRows(resolvedHeightPx ?? element.offsetHeight),
               };
 
               const target = event.currentTarget;
@@ -484,8 +520,12 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
                 moveEvent.preventDefault();
 
                 const deltaY = moveEvent.clientY - resizeRef.current.startY;
-                const snappedDelta = Math.round(deltaY / resizeStepPx) * resizeStepPx;
-                const nextHeightRaw = resizeRef.current.baseHeight + snappedDelta;
+                const snappedSteps =
+                  deltaY >= 0
+                    ? Math.max(0, Math.floor((deltaY + resizeStepPx * 0.75) / resizeStepPx))
+                    : Math.min(0, Math.ceil((deltaY - resizeStepPx * 0.25) / resizeStepPx));
+                const nextRowsRaw = resizeRef.current.baseRows + snappedSteps;
+                const nextHeightRaw = layoutRowsToCardHeightPx(nextRowsRaw);
                 const nextHeight = clampHeight(nextHeightRaw);
 
                 resizePendingHeightRef.current = nextHeight;
@@ -511,6 +551,13 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
                 resizePendingHeightRef.current = null;
                 if (pendingHeight != null) {
                   commitHeight(pendingHeight);
+                }
+                if (typeof window !== 'undefined') {
+                  window.requestAnimationFrame(() => {
+                    onResizeEnd?.();
+                  });
+                } else {
+                  onResizeEnd?.();
                 }
                 window.removeEventListener('pointermove', onMove);
                 window.removeEventListener('pointerup', onEnd);

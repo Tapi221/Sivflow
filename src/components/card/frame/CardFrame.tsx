@@ -33,6 +33,15 @@ export interface CardFrameProps
   /** 画面端からの余白など、スケール計算に使う padding(px) */
   contentPaddingPx?: number;
 
+  /** 基準幅より大きく拡大して表示してよいか */
+  allowUpscale?: boolean;
+
+  /** 拡大時の最大スケール */
+  maxScale?: number;
+
+  /** 追加のスケール倍率 */
+  scaleMultiplier?: number;
+
   /** CardShell に渡す追加クラス（標準クラスに合成される） */
   className?: string;
 
@@ -68,6 +77,9 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
 
       // 画面側の余白。小さいと画面端ギリギリまでカードが来て事故りやすい
       contentPaddingPx = 12,
+      allowUpscale = false,
+      maxScale = 1.6,
+      scaleMultiplier = 1,
 
       // 追加のクラス（標準の見た目に合成）
       className,
@@ -97,7 +109,13 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
        * - baseWidth を基準にスケール計算する
        * - contentPaddingPx は「カード周囲の安全余白」としてスケール計算に使う
        */
-      <ScaleToFitFrame baseWidth={baseWidth} contentPaddingPx={contentPaddingPx}>
+      <ScaleToFitFrame
+        baseWidth={baseWidth}
+        contentPaddingPx={contentPaddingPx}
+        allowUpscale={allowUpscale}
+        maxScale={maxScale}
+        scaleMultiplier={scaleMultiplier}
+      >
         {/* スケール後のカードを中央寄せしたいので mx-auto ラッパー */}
         <div className="mx-auto">
           {/**

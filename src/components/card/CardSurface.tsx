@@ -51,7 +51,7 @@ export function CardSurface({
       "--card-ruled-opacity": String(clamp01(ruledOpacity)),
       "--card-surface": "hsl(var(--background))",
       "--card-padding-x": "12px",
-      "--card-padding-bottom": `${Math.max(16, bottomPx)}px`,
+      "--card-padding-bottom": `${bottomPx}px`,
       "--ruled-offset-px": `${topPx}px`,
       "--ruled-bottom-offset-px": `${bottomPx}px`,
       "--card-content-padding-top": `${topPx}px`,
@@ -81,7 +81,10 @@ export function CardSurface({
         />
       )}
 
-      <div className="relative z-10 flex min-h-0 flex-1 flex-col" style={{ paddingBottom: "var(--card-padding-bottom)" }}>
+      <div
+        className="relative z-10 flex min-h-0 flex-1 flex-col"
+        style={{ paddingBottom: "var(--card-padding-bottom)" }}
+      >
         {children}
       </div>
 

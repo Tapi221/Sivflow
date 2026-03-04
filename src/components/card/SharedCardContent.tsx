@@ -38,10 +38,15 @@ type SharedCardContentEditProps = SharedCardContentBaseProps & {
 export type SharedCardContentProps = SharedCardContentViewProps | SharedCardContentEditProps;
 
 export function SharedCardContent(props: SharedCardContentProps) {
+  const rootClassName =
+    props.mode === 'edit'
+      ? 'card-content-root flex min-h-0 flex-col w-full max-w-full overflow-x-hidden overflow-y-visible'
+      : 'card-content-root flex min-h-0 flex-1 flex-col w-full max-w-full overflow-x-hidden overflow-y-visible';
+
   return (
     <div
       className={cn(
-        'card-content-root flex min-h-0 flex-1 flex-col w-full max-w-full overflow-x-hidden overflow-y-visible',
+        rootClassName,
         CONTENT_TYPO,
         props.className
       )}

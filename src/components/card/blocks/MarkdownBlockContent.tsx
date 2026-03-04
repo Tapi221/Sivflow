@@ -5,6 +5,7 @@ import remarkBreaks from 'remark-breaks';
 import { cn } from '@/lib/utils';
 import { CodeRenderer } from '../CodeRenderer';
 import { BlockSurface } from '@/components/card/BlockSurface';
+import { TEXT_BLOCK_CONTENT_CLASS } from './textBlockStyles';
 
 const TYPE = {
   body: { fontSize: 16, lineHeight: 24 },
@@ -444,7 +445,10 @@ function ParagraphRenderer({
   bodyStyle: React.CSSProperties;
 }) {
   return (
-    <p className="m-0" style={{ ...bodyStyle, whiteSpace: 'pre-wrap' }}>
+    <p
+      className={cn(TEXT_BLOCK_CONTENT_CLASS, 'm-0 border-none bg-transparent p-0 whitespace-pre-wrap')}
+      style={bodyStyle}
+    >
       {children}
     </p>
   );
