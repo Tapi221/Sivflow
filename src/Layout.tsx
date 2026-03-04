@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import SettingsDialog from '@/components/settings/SettingsDialog';
 import { SyncStatusIndicator } from '@/components/sync/SyncStatusIndicator';
 import { cn } from '@/lib/utils';
-import { UI_TYPO } from '@/styles/typography';
+import { UI_TYPO } from '@/styles/tokens/typography';
 // Added hooks for review count
 import { useCards } from '@/hooks/useCards';
 import { useFolders } from '@/hooks/useFolders';

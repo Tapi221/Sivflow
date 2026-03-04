@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { TagInput } from "@/components/ui/tag-input";
 import type { Card, ReviewLog } from "@/types";
-import { NUMERIC_TYPO, UI_TYPO } from "@/styles/typography";
+import { NUMERIC_TYPO, UI_TYPO } from "@/styles/tokens/typography";
 import { calculateResistanceScore } from "@/utils/reviewMetrics";
 import { useTags, resolveCardTagNames } from "@/hooks/useTags";
 

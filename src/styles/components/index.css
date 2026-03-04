@@ -1,6 +1,6 @@
 @import "./card-shell.css";
-@import "./codeblock.css";
-@import "./mathblock.css";
-@import "./calendar.css";
+@import "../features/codeblock.css";
+@import "../features/mathblock.css";
+@import "../features/calendar.css";
 @import "./common.css";
-@import "./markdown.css";
+@import "../features/markdown.css";
