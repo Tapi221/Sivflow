@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Play, Pause, Volume2, Image as ImageIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { ImageFrame } from './blocks/ImageFrame';
+import { ImageFrame } from '../blocks/ImageFrame';
 import { useAuth } from '@/contexts/AuthContext';
 import { getOrCreateImageBlobUrl } from '@/services/imageBlobUrlSessionCache';
 import { getLocalDb } from '@/services/localDB';

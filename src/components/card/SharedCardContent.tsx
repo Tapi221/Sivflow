@@ -2,8 +2,8 @@ import React from 'react';
 import type { CardBlock } from '@/types';
 import { cn } from '@/lib/utils';
 import { CONTENT_TYPO } from '@/styles/typography';
-import { BlockRenderer } from './BlockRenderer';
-import { BlockEditor } from './BlockEditor';
+import { BlockRenderer } from './blocks/BlockRenderer';
+import { BlockEditor } from './blocks/BlockEditor';
 import { CARD_CONTENT_TOP_PX } from './constants';
 
 type SharedCardContentBaseProps = {

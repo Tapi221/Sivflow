@@ -2,8 +2,8 @@
 import React from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { cleanup, render } from '@testing-library/react';
-import { BlockRenderer } from '../BlockRenderer';
-import { CodeBlockEditor } from '../CodeBlockEditor';
+import { BlockRenderer } from '../blocks/BlockRenderer';
+import { CodeBlockEditor } from '../blocks/CodeBlockEditor';
 import { MarkdownBlockView } from '../blocks/MarkdownBlockPreview';
 import { CodeBlockItem } from '../blocks/CodeBlockItem';
 import type { CardBlock } from '@/types';

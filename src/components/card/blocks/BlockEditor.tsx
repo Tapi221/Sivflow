@@ -10,23 +10,23 @@ import { createPortal } from 'react-dom';
 import { Droppable, Draggable } from '@hello-pangea/dnd';
 
 import { BlockToolbar } from './BlockToolbar';
-import { TextBlock } from './blocks/TextBlock';
-import { CodeBlockItem } from './blocks/CodeBlockItem';
-import { MediaBlock } from './blocks/MediaBlock';
-import { MathBlock } from './blocks/MathBlock';
-import { MarkdownBlock } from './blocks/MarkdownBlock';
+import { TextBlock } from './TextBlock';
+import { CodeBlockItem } from './CodeBlockItem';
+import { MediaBlock } from './MediaBlock';
+import { MathBlock } from './MathBlock';
+import { MarkdownBlock } from './MarkdownBlock';
 
 import type { CardBlock } from '@/types';
 import { cn } from '@/lib/utils';
 import { useUserSettings } from '@/hooks/useUserSettings';
-import { CARD_ROW_PX } from './constants';
+import { CARD_ROW_PX } from '../constants';
 import { sortBlocksByOrderIndex } from './blockOrdering';
 import {
   getNormalizedGridOffsetRows,
   getNormalizedRowOffset,
   isGridOffsetType,
   isRowPositionableType,
-} from './rowOffset';
+} from '../frame/rowOffset';
 
 const uid = () =>
   typeof crypto !== 'undefined' && 'randomUUID' in crypto

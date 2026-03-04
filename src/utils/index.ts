@@ -6,7 +6,7 @@ import {
   normalizeExtraRows,
   normalizeLayoutRows,
 } from '@/domain/card/extraRows';
-import { isGridOffsetType } from '@/components/card/rowOffset';
+import { isGridOffsetType } from '@/components/card/frame/rowOffset';
 
 type UnknownRecord = Record<string, unknown>;
 

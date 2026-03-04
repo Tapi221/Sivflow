@@ -7,7 +7,7 @@ import { ArrowLeft } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 import { CardCarousel3D } from '@/components/review/CardCarousel3D';
 import { VerticalCardPager } from '@/components/review/VerticalCardPager';
-import { MobileScalableCard } from '@/components/card/MobileScalableCard';
+import { MobileScalableCard } from '@/components/card/frame/MobileScalableCard';
 import { Flashcard } from '@/components/card/Flashcard';
 import { CANONICAL_CARD_WIDTH, CARD_SAFE_PADDING_PX } from '@/components/card/constants';
 import { useCardEntity } from '@/hooks/useCardEntity';

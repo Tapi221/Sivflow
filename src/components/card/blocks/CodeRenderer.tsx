@@ -1,4 +1,4 @@
-import { CodeBlockContent } from './blocks/CodeBlockContent';
+import { CodeBlockContent } from './CodeBlockContent';
 
 interface CodeRendererProps {
   code: string;

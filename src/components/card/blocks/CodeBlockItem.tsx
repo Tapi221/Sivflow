@@ -1,7 +1,7 @@
 import React from 'react';
 import CodeIcon from 'lucide-react/dist/esm/icons/code';
 import { BlockWrapper } from './BlockWrapper';
-import { CodeBlockEditor } from '../CodeBlockEditor';
+import { CodeBlockEditor } from './CodeBlockEditor';
 import type { CodeBlockData } from '@/types/code-block';
 import { cn } from '@/lib/utils';
 

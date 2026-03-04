@@ -3,8 +3,8 @@ import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkBreaks from 'remark-breaks';
 import { cn } from '@/lib/utils';
-import { CodeRenderer } from '../CodeRenderer';
-import { BlockSurface } from '@/components/card/BlockSurface';
+import { CodeRenderer } from './CodeRenderer';
+import { BlockSurface } from '@/components/card/blocks/BlockSurface';
 import { TEXT_BLOCK_CONTENT_CLASS } from './textBlockStyles';
 
 const TYPE = {

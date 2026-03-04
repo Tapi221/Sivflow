@@ -12,7 +12,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Flashcard } from '@/components/card/Flashcard';
-import { MobileScalableCard } from '@/components/card/MobileScalableCard';
+import { MobileScalableCard } from '@/components/card/frame/MobileScalableCard';
 import { CANONICAL_CARD_WIDTH, CARD_SAFE_PADDING_PX } from '@/components/card/constants';
 import type { Card } from '@/types';
 

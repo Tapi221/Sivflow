@@ -6,12 +6,12 @@ import LinkIcon from "lucide-react/dist/esm/icons/link";
 import { DragDropContext } from "@hello-pangea/dnd";
 
 import { Flashcard } from "@/components/card/Flashcard";
-import { CardMetaPanel } from "@/components/card/CardMetaPanel";
-import MediaUploader from "@/components/card/MediaUploader";
+import { CardMetaPanel } from "@/components/card/panels/CardMetaPanel";
+import MediaUploader from "@/components/card/media/MediaUploader";
 import { CardFrame } from "@/components/card/frame/CardFrame";
 import { CardCornerActions } from "@/components/card/frame/CardCornerActions";
 import { SharedCardContent } from "@/components/card/SharedCardContent";
-import { sortBlocksByOrderIndex } from "@/components/card/blockOrdering";
+import { sortBlocksByOrderIndex } from "@/components/card/blocks/blockOrdering";
 import {
   CANONICAL_CARD_WIDTH,
   cardHeightPxToLayoutRows,

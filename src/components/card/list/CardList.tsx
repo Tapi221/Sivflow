@@ -2,7 +2,7 @@ import React from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { CardShell } from './CardShell';
+import { CardShell } from '../frame/CardShell';
 import { HelpCircle, Edit, Trash2, Volume2, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { normalizeMemoryStability } from '@/utils/reviewUtils';

@@ -17,7 +17,7 @@ vi.mock('../SharedCardContent', () => ({
   SharedCardContent: () => <div data-testid="mock-shared-content" />,
 }));
 
-vi.mock('../ReferencePopup', () => ({
+vi.mock('../overlays/ReferencePopup', () => ({
   ReferencePopup: () => null,
 }));
 

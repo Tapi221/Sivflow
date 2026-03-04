@@ -4,7 +4,7 @@ import { Flashcard } from '@/components/card/Flashcard';
 import { CardFrame } from '@/components/card/frame/CardFrame';
 import { SharedCardContent } from '@/components/card/SharedCardContent';
 import { CANONICAL_CARD_WIDTH, CARD_SAFE_PADDING_PX } from '@/components/card/constants';
-import { MobileScalableCard } from '@/components/card/MobileScalableCard';
+import { MobileScalableCard } from '@/components/card/frame/MobileScalableCard';
 import type { CardBlock } from '@/types';
 
 const FIXTURE_BLOCKS: CardBlock[] = [

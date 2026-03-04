@@ -10,8 +10,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import type { CodeBlockData } from '@/types/code-block';
-import { CodeBlockContent } from './blocks/CodeBlockContent';
-import { normalizeEditorLanguage } from './blocks/codeBlockLanguage';
+import { CodeBlockContent } from './CodeBlockContent';
+import { normalizeEditorLanguage } from './codeBlockLanguage';
 
 const STORAGE_KEY = 'codeblock_recent_langs';
 const MAX_RECENT = 3;

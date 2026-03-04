@@ -9,7 +9,7 @@ import { createUploadedImage, createFailedUploadedImage, isHeicFile, convertHeic
 import type { UploadedImageStatus } from '@/types';
 import type { StorageUrl } from '@/types/branded';
 import { useReliableFileUpload } from '@/hooks/useReliableFileUpload';
-import { ImageFrame } from './blocks/ImageFrame';
+import { ImageFrame } from '../blocks/ImageFrame';
 import { putImageBlob, deleteImageBlob } from '@/services/imageFileStore';
 import { getOrCreateImageBlobUrl, removeImageBlobUrl } from '@/services/imageBlobUrlSessionCache';
 import { getLocalDb } from '@/services/localDB';

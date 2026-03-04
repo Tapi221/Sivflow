@@ -1,8 +1,8 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { ScaleToFitFrame } from '@/components/card/ScaleToFitFrame';
-import { CardShell } from '@/components/card/CardShell';
-import { CardSurface } from '@/components/card/CardSurface';
+import { CardShell } from '@/components/card/frame/CardShell';
+import { CardSurface } from '@/components/card/frame/CardSurface';
 import {
   CARD_BASE_WIDTH,
   CARD_RULED_OFFSET_BOTTOM_PX,

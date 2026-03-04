@@ -40,7 +40,6 @@
 
   .card-shell--resizable .card-shell-body {
     flex: 1 0 auto;
-    /* スクロール不可が要件なので、ここで overflow を再開しない */
   }
 
   .card-shell-body {
@@ -50,21 +49,53 @@
     padding-top: var(--card-header-h);
     padding-bottom: var(--card-footer-h);
 
-    /* ★根本対応：カード内スクロールを不可能にする */
-    overflow: hidden;
-    overscroll-behavior: none;
+    /* 通常時：スクロールバーは出さない前提（ただしノート編集は別で完全禁止） */
+    overflow-y: clip;
+    overflow-x: visible;
   }
 
   .card-shell-body > * {
     min-height: 0;
     flex: 1 0 auto;
     max-width: 100%;
-
-    /* 親が overflow:hidden なので、子の overflow 指定は実質意味を持たないが
-       “はみ出し前提”のUIがあるならここで増殖させない方が安全 */
-    overflow: hidden;
-
+    overflow-x: visible;
     word-wrap: break-word;
+  }
+
+  /* =========================
+     編集＝ノートモード
+     - max-height撤去（伸びる）
+     - カード内スクロール完全禁止
+     - resizable固定heightを無効化
+     ========================= */
+  .card-shell--note {
+    max-height: none;
+    height: auto;
+  }
+
+  .card-shell--note.card-shell--resizable {
+    height: auto;
+    max-height: none;
+  }
+
+  .card-shell--note .card-shell-body {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  .card-shell--note .card-shell-body > * {
+    overflow: hidden;
+  }
+
+  /* ProseMirror / TipTap */
+  .card-shell--note .ProseMirror {
+    overflow: hidden !important;
+  }
+
+  /* textarea系 */
+  .card-shell--note textarea {
+    overflow: hidden !important;
+    resize: none;
   }
 
   .card-shell-resize-handle {
@@ -188,7 +219,7 @@
     padding-bottom: 0;
   }
 
-  /* フッター：44px固定 */
+  /* フッター：44px固定（見た目領域） */
   .card-shell-footer {
     height: var(--card-footer-h);
     min-height: var(--card-footer-h);

@@ -1,6 +1,6 @@
 import React from 'react';
-import MediaUploader from '../MediaUploader';
-import { ImageGallery } from '../CardMedia';
+import MediaUploader from '../media/MediaUploader';
+import { ImageGallery } from '../media/CardMedia';
 
 type ImageBlockContentProps =
   | {

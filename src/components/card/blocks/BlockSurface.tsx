@@ -1,6 +1,6 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { RuledLayer } from './RuledLayer';
+import { RuledLayer } from '../frame/RuledLayer';
 
 type CSSVarStyle = React.CSSProperties & Partial<Record<`--${string}`, string | number>>;
 

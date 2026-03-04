@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Flashcard } from './Flashcard';
-import { Button } from '../ui/button';
+import { Flashcard } from '../Flashcard';
+import { Button } from '../../ui/button';
 import { X } from 'lucide-react';
 import { useUserSettings } from '@/hooks/useUserSettings';
-import { MobileScalableCard } from './MobileScalableCard';
-import { CANONICAL_CARD_WIDTH, CARD_SAFE_PADDING_PX } from './constants';
+import { MobileScalableCard } from '../frame/MobileScalableCard';
+import { CANONICAL_CARD_WIDTH, CARD_SAFE_PADDING_PX } from '../constants';
 
 interface CardPopupProps {
   card: unknown;

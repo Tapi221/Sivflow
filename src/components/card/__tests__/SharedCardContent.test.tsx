@@ -6,11 +6,11 @@ import { DragDropContext } from '@hello-pangea/dnd';
 import { SharedCardContent } from '../SharedCardContent';
 import type { CardBlock } from '@/types';
 
-vi.mock('../BlockRenderer', () => ({
+vi.mock('../blocks/BlockRenderer', () => ({
   BlockRenderer: () => <div data-testid="mock-block-renderer" />,
 }));
 
-vi.mock('../BlockEditor', () => ({
+vi.mock('../blocks/BlockEditor', () => ({
   BlockEditor: () => <div data-testid="mock-block-editor" />,
 }));
 

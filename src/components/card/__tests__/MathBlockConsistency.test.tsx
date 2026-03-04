@@ -2,7 +2,7 @@
 import React from 'react';
 import { describe, expect, it } from 'vitest';
 import { render } from '@testing-library/react';
-import { BlockRenderer } from '../BlockRenderer';
+import { BlockRenderer } from '../blocks/BlockRenderer';
 import { MathBlockContent } from '../blocks/MathBlockContent';
 import type { CardBlock } from '@/types';
 
