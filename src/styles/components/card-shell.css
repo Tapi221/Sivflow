@@ -30,7 +30,7 @@
 
   .card-shell-body {
     @apply relative flex flex-col flex-1 min-h-0;
-    overflow-y: hidden;
+    overflow-y: clip;
     overflow-x: visible;
     scrollbar-width: none;
     -ms-overflow-style: none;

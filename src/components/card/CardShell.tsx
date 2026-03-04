@@ -469,7 +469,7 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
         )}
         <div
           className="card-shell-body"
-          style={{ overflowY: 'hidden', overflowX: 'visible' }}
+          style={{ overflowY: 'clip', overflowX: 'visible' }}
         >
           {children}
         </div>
