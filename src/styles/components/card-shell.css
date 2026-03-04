@@ -45,9 +45,10 @@
   .card-shell-body {
     @apply relative flex flex-col flex-1 min-h-0;
 
-    /* ヘッダー/フッターが absolute で被るので本文領域を確保 */
-    padding-top: var(--card-header-h);
-    padding-bottom: var(--card-footer-h);
+    /* 上下44pxの余白は CardSurface 側で管理する。
+       ここで重ねると「端から最初/最後の罫線まで44px」が 88px に崩れる。 */
+    padding-top: 0;
+    padding-bottom: 0;
 
     /* 通常時：スクロールバーは出さない前提（ただしノート編集は別で完全禁止） */
     overflow-y: clip;
