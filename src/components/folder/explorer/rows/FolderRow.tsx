@@ -143,14 +143,14 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                       <ChevronDown
                         className={cn(
                           "sidebar-icon w-4 h-4 text-[#6E6E80] group-hover:text-[#202123]",
-                          isSelected && "text-foreground"
+                          isSelected && "text-primary-700"
                         )}
                       />
                     ) : (
                       <ChevronRight
                         className={cn(
                           "sidebar-icon w-4 h-4 text-[#6E6E80] group-hover:text-[#202123]",
-                          isSelected && "text-foreground"
+                          isSelected && "text-primary-700"
                         )}
                       />
                     )
@@ -160,7 +160,7 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                 <FolderGlyph
                   className={cn(
                     "sidebar-icon w-4 h-4 flex-shrink-0 mr-1 text-[#6E6E80] group-hover:text-[#202123]",
-                    isSelected && "text-foreground"
+                    isSelected && "text-primary-700"
                   )}
                 />
 

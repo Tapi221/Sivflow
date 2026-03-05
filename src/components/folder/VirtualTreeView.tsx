@@ -75,7 +75,7 @@ export function VirtualTreeView({ nodes, cards, selectedItem, onItemSelect }: Vi
           onClick={() => onItemSelect({ type: 'card', id: node.cardId })}
         >
           <div className="flex h-full min-w-0 flex-1 items-center pr-1">
-            <BookOpen className={cn('sidebar-icon mr-1 h-4 w-4 shrink-0 text-[#6E6E80]', isSelected && 'text-primary-600')} />
+            <BookOpen className={cn('sidebar-icon mr-1 h-4 w-4 shrink-0 text-[#6E6E80]', isSelected && 'text-primary-700')} />
             <ExplorerRowContent
               title={getCardTitle(card)}
               titleClassName={cn(

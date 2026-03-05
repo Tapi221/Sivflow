@@ -60,7 +60,7 @@ export const DocumentRow: React.FC<DocumentRowProps> = ({
         <FileText
           className={cn(
             "sidebar-icon w-4 h-4 mr-2 shrink-0 text-[#6E6E80] group-hover:text-[#202123]",
-            isSelected && "text-foreground"
+            isSelected && "text-primary-700"
           )}
         />
         <span className={cn(

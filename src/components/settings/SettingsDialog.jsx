@@ -556,7 +556,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                                 <div className="text-[11px] text-slate-400 mt-0.5">編集画面を開いた時のプレビューのデフォルト状態</div>
                             </div>
                             <div className="flex items-center gap-3">
-                                <span className={cn("text-[10px] font-bold tracking-tighter", (settings?.defaultPreviewEnabled ?? false) ? 'text-primary-600' : 'text-slate-400')}>
+                                <span className={cn("text-[10px] font-bold tracking-tighter", (settings?.defaultPreviewEnabled ?? false) ? 'text-primary-700' : 'text-slate-400')}>
                                     {(settings?.defaultPreviewEnabled ?? false) ? 'ON' : 'OFF'}
                                 </span>
                                 <Switch 
@@ -572,7 +572,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                                 <div className="text-[11px] text-slate-400 mt-0.5">編集中の内容を一時的に保存し、復元します</div>
                             </div>
                             <div className="flex items-center gap-3">
-                                <span className={cn("text-[10px] font-bold tracking-tighter", (settings?.autoSaveEnabled ?? true) ? 'text-primary-600' : 'text-slate-400')}>
+                                <span className={cn("text-[10px] font-bold tracking-tighter", (settings?.autoSaveEnabled ?? true) ? 'text-primary-700' : 'text-slate-400')}>
                                     {(settings?.autoSaveEnabled ?? true) ? 'ON' : 'OFF'}
                                 </span>
                                 <Switch 
@@ -588,7 +588,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                                 <div className="text-[11px] text-slate-400 mt-0.5">複製した際、反対側のセクション（問題⇔解答）に追加</div>
                             </div>
                             <div className="flex items-center gap-3">
-                                <span className={cn("text-[10px] font-bold tracking-tighter", (settings?.duplicateToOpposite ?? false) ? 'text-primary-600' : 'text-slate-400')}>
+                                <span className={cn("text-[10px] font-bold tracking-tighter", (settings?.duplicateToOpposite ?? false) ? 'text-primary-700' : 'text-slate-400')}>
                                     {(settings?.duplicateToOpposite ?? false) ? 'ON' : 'OFF'}
                                 </span>
                                 <Switch 
@@ -740,12 +740,12 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                                 <div className="text-xs text-slate-500">作成したカードの初回の復習をいつから始めるか設定します</div>
                             </div>
                             <div className="flex items-center gap-2">
-                                <span className={cn("text-[10px] font-bold", !(settings?.reviewStartNextDay ?? true) ? 'text-primary-600' : 'text-slate-400')}>当日</span>
+                                <span className={cn("text-[10px] font-bold", !(settings?.reviewStartNextDay ?? true) ? 'text-primary-700' : 'text-slate-400')}>当日</span>
                                 <Switch 
                                     checked={settings?.reviewStartNextDay ?? true}
                                     onCheckedChange={handleReviewStartDayChange}
                                 />
-                                <span className={cn("text-[10px] font-bold", (settings?.reviewStartNextDay ?? true) ? 'text-primary-600' : 'text-slate-400')}>翌日</span>
+                                <span className={cn("text-[10px] font-bold", (settings?.reviewStartNextDay ?? true) ? 'text-primary-700' : 'text-slate-400')}>翌日</span>
                             </div>
                         </div>
                     </div>
@@ -1109,7 +1109,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                         : "text-slate-500 hover:bg-slate-100 hover:text-slate-700"
                     )}
                   >
-                    <item.icon className={cn("w-4 h-4 md:w-5 md:h-5", activeTab === item.id ? "text-primary-600" : "text-slate-400 group-hover:text-primary-500")} strokeWidth={2.5} />
+                    <item.icon className={cn("w-4 h-4 md:w-5 md:h-5", activeTab === item.id ? "text-primary-700" : "text-slate-400 group-hover:text-primary-500")} strokeWidth={2.5} />
                     <span className="block">{item.label}</span>
                     {activeTab === item.id && (
                         <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary-600 rounded-r-full shadow-sm" />

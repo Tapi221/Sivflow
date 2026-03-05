@@ -296,8 +296,8 @@ export default function Calendar() {
                             {/* Date Number */}
                             <span className={cn(
                                 "text-sm font-bold mb-1 md:mb-1 transition-colors calendar-date-text",
-                                isSelected ? "text-primary-600" : "text-slate-400 group-hover:text-slate-600",
-                                isTodayDate && !isSelected && "text-primary-600"
+                                isSelected ? "text-primary-700" : "text-slate-400 group-hover:text-slate-600",
+                                isTodayDate && !isSelected && "text-primary-700"
                             )}>
                                 {format(dayItem, 'd')}
                             </span>

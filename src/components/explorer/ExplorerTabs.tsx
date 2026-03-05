@@ -50,9 +50,9 @@ export function ExplorerTabs({
               title={tab.label}
               className={cn(
                 "flex items-center justify-center px-2 py-1 text-xs font-medium transition-colors relative whitespace-nowrap",
-                "hover:text-primary-600",
+                "hover:text-primary-700",
                 isActive 
-                  ? "text-primary-600" 
+                  ? "text-primary-700" 
                   : "text-[#6E6E80]"
               )}
             >
@@ -83,7 +83,7 @@ export function ExplorerTabs({
             onClick={() => {
               void onCreateRootFolder?.();
             }}
-            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-[#6E6E80] transition-colors hover:bg-slate-100 hover:text-primary-600"
+            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-[#6E6E80] transition-colors hover:bg-slate-100 hover:text-primary-700"
           >
             <FolderPlus className="w-4 h-4" />
           </button>

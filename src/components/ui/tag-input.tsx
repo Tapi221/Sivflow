@@ -234,7 +234,7 @@ export function TagInput({
                           colorClass={colorClass}
                           className="max-w-[220px]"
                         />
-                        {isSelected && <Check className="w-3.5 h-3.5 text-primary-600" />}
+                        {isSelected && <Check className="w-3.5 h-3.5 text-primary-700" />}
                       </CommandItem>
                    );
                 })}

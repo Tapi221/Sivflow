@@ -66,8 +66,8 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
         <button
           className={cn(
             "flex items-center justify-center px-2 py-1 text-xs font-medium transition-colors relative whitespace-nowrap",
-            "hover:text-primary-600",
-            isFilterActive ? "text-primary-600" : "text-slate-500",
+            "hover:text-primary-700",
+            isFilterActive ? "text-primary-700" : "text-slate-500",
             className
           )}
         >
