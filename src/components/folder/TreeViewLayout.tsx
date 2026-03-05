@@ -681,7 +681,7 @@ function TreeViewLayout({
   return (
     <div
       className={cn(
-        "relative flex h-full min-h-0 items-stretch overflow-hidden border-0 bg-transparent md:border-r md:border-slate-200 md:bg-white",
+        "relative flex h-full min-h-0 items-stretch overflow-hidden border-0 bg-transparent md:border-r md:border-slate-200 md:bg-[var(--sidebar-bg)]",
         isResizing && "select-none cursor-col-resize"
       )}
     >

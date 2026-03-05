@@ -158,7 +158,7 @@ export function CardMetaPanel({
 
   return (
     <aside
-      className={`meta-panel h-full w-80 shrink-0 border-l border-[var(--sidebar-border)] bg-[var(--sidebar-bg)] font-serif text-[var(--sidebar-text)] ${UI_TYPO} ${NUMERIC_TYPO}`}
+      className={`meta-panel h-full w-80 shrink-0 bg-[var(--sidebar-bg)] font-serif text-[var(--sidebar-text)] ${UI_TYPO} ${NUMERIC_TYPO}`}
       style={
         {
           "--meta-row-px": "24px",
