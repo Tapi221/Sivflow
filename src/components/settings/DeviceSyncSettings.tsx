@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { firestoreDb } from "../../services/firebase";
 import { collection, query, getDocs, Timestamp } from "firebase/firestore";
 import { useAuth } from "../../contexts/AuthContext";
@@ -26,7 +26,7 @@ export const DeviceSyncSettings: React.FC = () => {
   const { settings: syncSettings, updateSettings: updateSyncSettings } =
     useSyncSettings();
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     if (!currentUser) return;
     initializeDB(currentUser.uid);
     const db = await getLocalDb();
@@ -34,9 +34,9 @@ export const DeviceSyncSettings: React.FC = () => {
       (await db.userStats.get("current")) ||
       (await db.userStats.toCollection().first());
     setStats(s || null);
-  };
+  }, [currentUser]);
 
-  const fetchDevices = async () => {
+  const fetchDevices = useCallback(async () => {
     if (!currentUser) return;
     setLoading(true);
     try {
@@ -63,7 +63,7 @@ export const DeviceSyncSettings: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUser]);
 
   const handleDisconnect = async (deviceId: string) => {
     if (!currentUser) return;
@@ -131,7 +131,7 @@ export const DeviceSyncSettings: React.FC = () => {
   useEffect(() => {
     fetchDevices();
     fetchStats();
-  }, [currentUser]);
+  }, [fetchDevices, fetchStats]);
 
   const formatDate = (date: unknown) => {
     if (!date) return "未同期";

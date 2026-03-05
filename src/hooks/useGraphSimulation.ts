@@ -77,7 +77,7 @@ export function useGraphSimulation({
     return () => {
       sim.stop();
     };
-  }, []); // Run once on mount? Or when nodes/links change?
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- Run once on mount; updates are handled below.
 
   // Handle updates to nodes/links efficiently
   useEffect(() => {

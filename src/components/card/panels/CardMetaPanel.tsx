@@ -72,8 +72,9 @@ export function CardMetaPanel({
     "h-[var(--meta-row-px)] min-h-[var(--meta-row-px)] flex items-center";
   const [period, setPeriod] = useState<Period>("30d");
   const [titleInput, setTitleInput] = useState(card?.title ?? "");
+  const draftFlag = Boolean(card?.isDraft ?? (card as unknown)?.is_draft);
   const [draftChecked, setDraftChecked] = useState(
-    Boolean(card?.isDraft ?? (card as unknown)?.is_draft),
+    draftFlag,
   );
   const [, setSearchParams] = useSearchParams();
   const { tagById } = useTags();
@@ -83,10 +84,8 @@ export function CardMetaPanel({
   }, [card?.id, card?.title]);
 
   useEffect(() => {
-    queueMicrotask(() =>
-      setDraftChecked(Boolean(card?.isDraft ?? (card as unknown)?.is_draft)),
-    );
-  }, [card?.id, card?.isDraft, (card as unknown)?.is_draft]);
+    queueMicrotask(() => setDraftChecked(draftFlag));
+  }, [card?.id, draftFlag]);
 
   const safeLogs = useMemo(
     () =>

@@ -137,14 +137,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
         syncIntervalRef.current = setInterval(async () => {
           if (navigator.onLine && syncStatus !== "syncing") {
             console.log("[Auth] Running background sync...");
-            await triggerSyncInternal("background"); // Pass 'background' for background sync
+            await service.synchronize();
+            await updateCounts();
           }
         }, intervalMs);
       }
     } catch (error) {
       console.error("[Auth] Failed to reload sync settings:", error);
     }
-  }, [currentUser, syncStatus]); // Added currentUser to dependencies
+  }, [currentUser, syncStatus, updateCounts]); // Added currentUser to dependencies
 
   /**
    * 内部同期トリガー（循環参照を避けるため分離）

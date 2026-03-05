@@ -323,12 +323,17 @@ export function Flashcard({
   const questionText = cardData?.question_text ?? cardData?.questionText ?? "";
   const questionImages =
     cardData?.question_images ?? cardData?.questionImages ?? [];
-  const questionAudios =
-    cardData?.question_audios ?? cardData?.questionAudios ?? [];
+  const questionAudios = React.useMemo(
+    () => cardData?.question_audios ?? cardData?.questionAudios ?? [],
+    [cardData?.question_audios, cardData?.questionAudios],
+  );
 
   const answerText = cardData?.answer_text ?? cardData?.answerText ?? "";
   const answerImages = cardData?.answer_images ?? cardData?.answerImages ?? [];
-  const answerAudios = cardData?.answer_audios ?? cardData?.answerAudios ?? [];
+  const answerAudios = React.useMemo(
+    () => cardData?.answer_audios ?? cardData?.answerAudios ?? [],
+    [cardData?.answer_audios, cardData?.answerAudios],
+  );
 
   const questionCode =
     cardData?.questionCode || cardData?.question_code || null;

@@ -427,7 +427,7 @@ export function PdfPane({
       url: source.url ?? null,
       updatedAt: getUpdatedAtKey(doc.updatedAt),
     }),
-    [doc.id, doc.updatedAt, localBlobId, localBlobUrl, remoteUrl, source.url],
+    [doc.updatedAt, localBlobId, localBlobUrl, remoteUrl, source.url],
   );
 
   const sourceUnavailable = !source.url;

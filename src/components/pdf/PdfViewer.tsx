@@ -116,7 +116,7 @@ function PdfPage({
   useEffect(() => {
     if (!baseSize) return;
     queueMicrotask(() => setPageSize(baseSize));
-  }, [baseSize?.width, baseSize?.height]);
+  }, [baseSize, baseSize?.width, baseSize?.height]);
 
   useEffect(() => {
     if (!pdf || pageSize) return;
@@ -720,6 +720,7 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       sourceMetaBlobUrl,
       sourceMetaLocalFileId,
       sourceMetaRemoteUrl,
+      sourceMetaUpdatedAt,
     ]);
 
     useEffect(() => {

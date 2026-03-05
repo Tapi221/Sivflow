@@ -246,7 +246,7 @@ export default function MediaUploader({
       // Notify parent that the file has been consumed so it can be cleared from state
       onConsumeInitialFile();
     }
-  }, [initialFile]);
+  }, [handleUpload, initialFile, onConsumeInitialFile]);
 
   useEffect(() => {
     latestItemsRef.current = urls;
@@ -334,6 +334,7 @@ export default function MediaUploader({
     [currentUser?.uid],
   );
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- upload handler intentionally recreated with current mutable editor state.
   const handleUpload = async (files: FileList | File[]) => {
     if (!files || files.length === 0) return;
 
@@ -736,7 +737,7 @@ export default function MediaUploader({
       setDragOver(false);
       handleUpload(e.dataTransfer.files);
     },
-    [urls],
+    [handleUpload],
   );
 
   const handleDragOver = (e) => {
@@ -780,7 +781,7 @@ export default function MediaUploader({
         await handleUpload(files);
       }
     },
-    [urls, type, maxFiles, onFilesExcess],
+    [handleUpload, type],
   );
 
   useEffect(() => {

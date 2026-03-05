@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps -- large legacy explorer handlers intentionally stabilized to avoid interaction regressions. */
 import React, {
   useState,
   useRef,
