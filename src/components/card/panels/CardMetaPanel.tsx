@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Line, LineChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 
@@ -6,8 +6,9 @@ import { RatingCountTiles } from "@/features/study/RatingCountTiles";
 import { SurfaceButton } from "@/components/ui/surface-button";
 import { Switch } from "@/components/ui/switch";
 import { TagInput } from "@/components/ui/tag-input";
+import { EmptyMetaPanel } from "@/components/card/panels/EmptyMetaPanel";
+import { MetaPanelLeadSection } from "@/components/card/panels/MetaPanelShell";
 import type { Card, ReviewLog } from "@/types";
-import { NUMERIC_TYPO, UI_TYPO } from "@/styles/tokens/typography";
 import { calculateResistanceScore } from "@/utils/reviewMetrics";
 import { useTags, resolveCardTagNames } from "@/hooks/useTags";
 
@@ -19,6 +20,7 @@ type CardMetaPanelProps = {
   onUpdateTags: (nextTags: string[]) => void;
   onToggleDraft: (isDraft: boolean) => void;
   onUpdateTitle: (nextTitle: string) => void;
+  mode?: "full" | "calendar";
 };
 
 const META_DATE_FORMATTER = new Intl.DateTimeFormat("ja-JP", {
@@ -64,7 +66,9 @@ export function CardMetaPanel({
   onUpdateTags,
   onToggleDraft,
   onUpdateTitle,
+  mode = "full",
 }: CardMetaPanelProps) {
+  const isCalendarMode = mode === "calendar";
   const infoRowClass = "h-[var(--meta-row-px)] leading-[var(--meta-row-px)] text-[length:var(--meta-font-size)] text-[var(--sidebar-text)]";
   const actionRowClass = "h-[var(--meta-row-px)] min-h-[var(--meta-row-px)] flex items-center";
   const [period, setPeriod] = useState<Period>("30d");
@@ -161,93 +165,87 @@ export function CardMetaPanel({
   };
 
   return (
-    <aside
-      className={`meta-panel h-full w-80 shrink-0 rounded-l-xl border border-[#d7d9de] bg-sidebar font-serif text-sm text-[var(--sidebar-text)] surface-panel-convex ${UI_TYPO} ${NUMERIC_TYPO}`}
-      style={
-        {
-          "--meta-row-px": "var(--app-row-px)",
-          "--meta-font-size": "0.875rem",
-          "--meta-action-min-h": "var(--meta-row-px)",
-          backgroundColor: "var(--sidebar-bg)",
-        } as CSSProperties
-      }
-    >
-      <div className="h-full overflow-y-auto bg-sidebar p-2">
-        <div className="space-y-6">
-          <section>
-            <div className="mt-2 space-y-2 text-[length:var(--meta-font-size)] text-[var(--sidebar-text)]">
-              <div className={actionRowClass}>
-                <input
-                  value={titleInput}
-                  onChange={(e) => setTitleInput(e.target.value)}
-                  onBlur={commitTitle}
-                  disabled={!card}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      commitTitle();
-                    }
-                  }}
-                  className="h-[var(--meta-row-px)] w-full rounded-md border border-[var(--surface-border)] bg-white px-2 text-[length:var(--surface-placeholder-font-size)] leading-[var(--meta-row-px)] text-[#6e6466] surface-concave outline-none placeholder:text-[var(--surface-placeholder-text)] focus:border-[#cfcfcf] focus:bg-white"
-                  placeholder="タイトル"
-                />
-              </div>
-              <div className={`${actionRowClass} justify-start gap-2`}>
-                <Switch
-                  checked={draftChecked}
-                  onCheckedChange={(next) => {
-                    setDraftChecked(next);
-                    if (!card) return;
-                    void Promise.resolve(onToggleDraft(next)).catch(() => {
-                      setDraftChecked(Boolean(card?.isDraft ?? (card as any)?.is_draft));
-                    });
-                  }}
-                  disabled={!card}
-                />
-                <span className="text-[length:var(--meta-font-size)] font-medium leading-[var(--meta-row-px)] text-[var(--sidebar-text-muted)]">下書き</span>
-              </div>
-              <section>
-                <div className={`${actionRowClass} justify-between`}>
-                  <h3 className="h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] font-semibold tracking-wide text-[var(--sidebar-text-muted)] uppercase">タグ管理</h3>
-                  <SurfaceButton
-                    type="button"
-                    surface="convex"
-                    size="xs"
-                    className="h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)]"
-                    onClick={openTagSettings}
-                  >
-                    設定で管理
-                  </SurfaceButton>
+    <EmptyMetaPanel>
+          <MetaPanelLeadSection>
+              {!isCalendarMode && (
+                <>
+                  <div className={actionRowClass}>
+                    <input
+                      value={titleInput}
+                      onChange={(e) => setTitleInput(e.target.value)}
+                      onBlur={commitTitle}
+                      disabled={!card}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          commitTitle();
+                        }
+                      }}
+                      className="h-[var(--meta-row-px)] w-full rounded-md border border-[var(--surface-border)] bg-white px-2 text-[length:var(--surface-placeholder-font-size)] leading-[var(--meta-row-px)] text-[#6e6466] surface-concave outline-none placeholder:text-[var(--surface-placeholder-text)] focus:border-[#cfcfcf] focus:bg-white"
+                      placeholder="タイトル"
+                    />
+                  </div>
+                  <div className={`${actionRowClass} justify-start gap-2`}>
+                    <Switch
+                      checked={draftChecked}
+                      onCheckedChange={(next) => {
+                        setDraftChecked(next);
+                        if (!card) return;
+                        void Promise.resolve(onToggleDraft(next)).catch(() => {
+                          setDraftChecked(Boolean(card?.isDraft ?? (card as any)?.is_draft));
+                        });
+                      }}
+                      disabled={!card}
+                    />
+                    <span className="text-[length:var(--meta-font-size)] font-medium leading-[var(--meta-row-px)] text-[var(--sidebar-text-muted)]">下書き</span>
+                  </div>
+                  <section>
+                    <div className={`${actionRowClass} justify-between`}>
+                      <h3 className="h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] font-semibold tracking-wide text-[var(--sidebar-text-muted)] uppercase">タグ管理</h3>
+                      <SurfaceButton
+                        type="button"
+                        surface="convex"
+                        size="xs"
+                        className="h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)]"
+                        onClick={openTagSettings}
+                      >
+                        設定で管理
+                      </SurfaceButton>
+                    </div>
+                    <div className="mt-2 rounded-md border border-[var(--surface-border)] bg-white px-2 py-1 surface-concave">
+                      <TagInput
+                        tags={tags}
+                        onChange={(nextTags) => {
+                          if (!card) return;
+                          onUpdateTags(nextTags);
+                        }}
+                        placeholder="タグを選択・追加"
+                        quietHover
+                        className={`bg-transparent ${!card ? "pointer-events-none opacity-60" : ""}`}
+                      />
+                    </div>
+                  </section>
+                </>
+              )}
+              {!isCalendarMode && (
+                <div className="space-y-0">
+                  <p className={infoRowClass}>作成日: {formatDateLabel(card?.createdAt ?? (card as any)?.created_at)}</p>
+                  <p className={infoRowClass}>更新日: {formatDateLabel(card?.updatedAt ?? (card as any)?.updated_at)}</p>
+                  <p className={infoRowClass}>最終復習日: {latestReview ? formatDateLabel(latestReview.reviewedAt) : formatDateLabel(card?.lastReviewAt ?? (card as any)?.last_review_at)}</p>
+                  <p className={infoRowClass}>次回復習日 ({nextReviewAttempt}回目): {formatDateLabel(card?.nextReviewDate ?? (card as any)?.next_review_date)}</p>
                 </div>
-                <div className="mt-2 rounded-md border border-[var(--surface-border)] bg-white px-2 py-1 surface-concave">
-                  <TagInput
-                    tags={tags}
-                    onChange={(nextTags) => {
-                      if (!card) return;
-                      onUpdateTags(nextTags);
-                    }}
-                    placeholder="タグを選択・追加"
-                    quietHover
-                    className={`bg-transparent ${!card ? "pointer-events-none opacity-60" : ""}`}
-                  />
-                </div>
-              </section>
-              <div className="space-y-0">
-                <p className={infoRowClass}>作成日: {formatDateLabel(card?.createdAt ?? (card as any)?.created_at)}</p>
-                <p className={infoRowClass}>更新日: {formatDateLabel(card?.updatedAt ?? (card as any)?.updated_at)}</p>
-                <p className={infoRowClass}>最終復習日: {latestReview ? formatDateLabel(latestReview.reviewedAt) : formatDateLabel(card?.lastReviewAt ?? (card as any)?.last_review_at)}</p>
-                <p className={infoRowClass}>次回復習日 ({nextReviewAttempt}回目): {formatDateLabel(card?.nextReviewDate ?? (card as any)?.next_review_date)}</p>
+              )}
+          </MetaPanelLeadSection>
+
+          {!isCalendarMode && (
+            <section>
+              <div className="mt-3 space-y-2">
               </div>
-            </div>
-          </section>
+              <RatingCountTiles counts={distribution20} compact disableHover singleRow surface="concave" className="mt-3" />
+            </section>
+          )}
 
-          <section>
-            <div className="mt-3 space-y-2">
-            </div>
-            <RatingCountTiles counts={distribution20} compact disableHover singleRow surface="concave" className="mt-3" />
-          </section>
-
-          <section>
+          {!isCalendarMode && <section>
             {currentResistanceScore !== null && (
               <div className="mb-3 flex min-h-[var(--meta-action-min-h)] items-center justify-between rounded border border-[var(--sidebar-border)] bg-[var(--sidebar-active-bg)] px-2">
                 <span className="text-[length:var(--meta-font-size)] font-medium leading-[var(--meta-row-px)] text-[var(--sidebar-text-muted)]">現在の耐性スコア</span>
@@ -294,11 +292,8 @@ export function CardMetaPanel({
                 </ResponsiveContainer>
               )}
             </div>
-          </section>
-
-        </div>
-      </div>
-    </aside>
+          </section>}
+    </EmptyMetaPanel>
   );
 }
 

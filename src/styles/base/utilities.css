@@ -93,7 +93,7 @@
     box-shadow: var(--surface-shadow-concave);
   }
 
-  
+  /* 凸(パネル) */
   .surface-panel-convex {
     box-shadow:
       0 10px 24px rgba(15, 23, 42, 0.12),
@@ -101,7 +101,8 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.95),
       inset 0 -1px 0 rgba(148, 163, 184, 0.25);
   }
-
+  
+  /* 凸(ダイアログ) */
   .surface-dialog-convex {
     border: 1px solid #d7d9de;
     background: rgba(243, 245, 248, 0.95);
