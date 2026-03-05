@@ -132,7 +132,7 @@ export const FolderRow: React.FC<FolderRowProps> = ({
             >
               <div className="flex-1 flex items-center min-w-0 h-full pr-1 cursor-pointer">
                 <div
-                  className="sidebar-action w-4 h-4 flex items-center justify-center flex-shrink-0 mr-1"
+                  className="sidebar-action w-4 h-4 flex items-center justify-center flex-shrink-0 mr-0"
                   onClick={(e) => {
                     e.stopPropagation();
                     onToggle();
@@ -159,7 +159,7 @@ export const FolderRow: React.FC<FolderRowProps> = ({
 
                 <FolderGlyph
                   className={cn(
-                    "sidebar-icon w-4 h-4 flex-shrink-0 mr-1 text-[#6E6E80] group-hover:text-[#202123]",
+                    "sidebar-icon w-4 h-4 flex-shrink-0 mr-0 text-[#6E6E80] group-hover:text-[#202123]",
                     isSelected && "text-primary-700"
                   )}
                 />

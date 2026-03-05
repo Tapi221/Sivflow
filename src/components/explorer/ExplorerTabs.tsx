@@ -49,7 +49,7 @@ export function ExplorerTabs({
               onClick={() => onTabChange(tab.id)}
               title={tab.label}
               className={cn(
-                "flex items-center justify-center px-0 py-1 text-xs font-medium transition-colors relative whitespace-nowrap",
+                "flex items-center justify-center px-2 py-1 text-xs font-medium transition-colors relative whitespace-nowrap",
                 "hover:text-primary-700",
                 isActive 
                   ? "text-primary-700" 

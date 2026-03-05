@@ -97,14 +97,14 @@ export function VirtualTreeView({ nodes, cards, selectedItem, onItemSelect }: Vi
           onClick={() => toggleGroup(node.id)}
         >
           <div className="flex h-full min-w-0 flex-1 items-center pr-1">
-            <div className="mr-1 flex h-4 w-4 flex-shrink-0 items-center justify-center">
+            <div className="mr-0 flex h-4 w-4 flex-shrink-0 items-center justify-center">
               {isExpanded ? (
                 <ChevronDown className="sidebar-icon h-4 w-4 text-[#6E6E80]" />
               ) : (
                 <ChevronRight className="sidebar-icon h-4 w-4 text-[#6E6E80]" />
               )}
             </div>
-            <FolderTree className="sidebar-icon mr-1 h-4 w-4 flex-shrink-0 text-[#6E6E80]" />
+            <FolderTree className="sidebar-icon mr-0 h-4 w-4 flex-shrink-0 text-[#6E6E80]" />
             <ExplorerRowContent
               title={node.label}
               titleClassName="font-medium text-[#202123] lining-nums tabular-nums"

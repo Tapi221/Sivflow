@@ -156,8 +156,8 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
   }
 
   return (
-    <div className={cn("h-full bg-sidebar pb-4 pt-0 card-editor-right-pane-font", isMetaOpen ? "pl-4 pr-0" : "px-4")}>
-      <div className={cn("relative flex h-full overflow-hidden", isMetaOpen ? "gap-0" : "gap-4")}>
+    <div className="h-full bg-sidebar pb-4 pt-0 card-editor-right-pane-font px-4">
+      <div className="relative flex h-full overflow-hidden">
         <Button
           type="button"
           variant="ghost"
@@ -173,7 +173,7 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
           {isMetaOpen ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </Button>
 
-        <div className={cn("min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-4", isMetaOpen && "pr-0")}>
+        <div className={cn("min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-4", isMetaOpen && "pr-[20.5rem]")}>
           {isEditing ? (
             <div className="space-y-4">
               <div className="flex items-center justify-end gap-2">
@@ -286,13 +286,15 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
         </div>
 
         {isMetaOpen && (
-          <CardMetaPanel
-            card={panelCard}
-            reviewLogs={panelCard?.reviewLogs ?? []}
-            onUpdateTags={handleUpdateTags}
-            onToggleDraft={handleToggleDraft}
-            onUpdateTitle={handleUpdateTitle}
-          />
+          <div className="absolute right-0 top-0 h-full z-10">
+            <CardMetaPanel
+              card={panelCard}
+              reviewLogs={panelCard?.reviewLogs ?? []}
+              onUpdateTags={handleUpdateTags}
+              onToggleDraft={handleToggleDraft}
+              onUpdateTitle={handleUpdateTitle}
+            />
+          </div>
         )}
       </div>
 
