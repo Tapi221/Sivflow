@@ -609,7 +609,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                             {/* 0: 忘れた (Forgot) - Always shown */}
                             <div className="flex items-start gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
                                 <div className="mt-1 opacity-80">
-                                    <div className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center text-[#FF5A65]">
+                                    <div className="w-8 h-8 rounded-full bg-red-50 face-badge-convex flex items-center justify-center text-[#FF5A65]">
                                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                         <circle cx="12" cy="12" r="10" stroke="none" />
                                         <path d="M16 16s-1.5-2-4-2-4 2-4 2" />
@@ -631,7 +631,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                             {/* 1: あいまい (Vague/Hard) - Toggleable */}
                             <div className="flex items-start gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
                                 <div className="mt-1 opacity-80">
-                                    <div className="w-8 h-8 rounded-full bg-amber-50 flex items-center justify-center text-[#F9A825]">
+                                    <div className="w-8 h-8 rounded-full bg-amber-50 face-badge-convex flex items-center justify-center text-[#F9A825]">
                                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                         <line x1="8" y1="15" x2="16" y2="15" />
                                         <line x1="9" y1="9" x2="9.01" y2="9" />
@@ -656,7 +656,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                             {/* 2: 覚えた (Good) - Always shown */}
                             <div className="flex items-start gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
                                 <div className="mt-1 opacity-80">
-                                    <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-[#00A3FF]">
+                                    <div className="w-8 h-8 rounded-full bg-blue-50 face-badge-convex flex items-center justify-center text-[#00A3FF]">
                                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                         <path d="M8 14s1.5 2 4 2 4-2 4-2" />
                                         <line x1="9" y1="9" x2="9.01" y2="9" />
@@ -677,7 +677,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                             {/* 3: 余裕 (Easy) - Toggleable */}
                             <div className="flex items-start gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
                                 <div className="mt-1 opacity-80">
-                                    <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-[#00B67A]">
+                                    <div className="w-8 h-8 rounded-full bg-emerald-50 face-badge-convex flex items-center justify-center text-[#00B67A]">
                                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                         <path d="M8 13s1.5 3 4 3 4-3 4-3" />
                                         <line x1="9" y1="9" x2="9.01" y2="9" />
@@ -1071,7 +1071,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="w-full max-w-none h-[100dvh] md:max-w-[950px] md:w-full md:h-[80vh] md:max-h-[800px] p-0 gap-0 border-0 md:border border-slate-200 shadow-none md:shadow-2xl flex flex-col overflow-hidden data-[state=open]:duration-300 bg-[#F8FAFB] ring-0 outline-none rounded-none md:rounded-2xl">
+        <DialogContent className="w-full max-w-none h-[100dvh] md:max-w-[950px] md:w-full md:h-[80vh] md:max-h-[800px] p-0 gap-0 border-0 shadow-none surface-dialog-convex-md flex flex-col overflow-hidden data-[state=open]:duration-300 bg-[#F8FAFB] ring-0 outline-none rounded-none md:rounded-2xl">
           <DialogDescription className="sr-only">
             アカウント、学習、同期、データ管理などの設定を行うダイアログです。
           </DialogDescription>

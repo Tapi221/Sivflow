@@ -91,7 +91,11 @@ export const DocumentRow: React.FC<DocumentRowProps> = ({
           <button
             type="button"
             aria-label="ドキュメントメニューを開く"
-            className="sidebar-action h-6 w-6 p-0 grid place-items-center rounded-md hover:bg-slate-200 text-[#6E6E80] hover:text-[#202123] outline-none pointer-events-auto transition-colors shrink-0"
+            className={cn(
+              "sidebar-action h-6 w-6 p-0 grid place-items-center rounded-md hover:bg-slate-200 text-[#6E6E80] hover:text-[#202123] outline-none pointer-events-auto transition-all shrink-0",
+              "opacity-0 group-hover:opacity-100",
+              (isSelected || menuOpen) && "opacity-100"
+            )}
             onClick={(e) => e.stopPropagation()}
             onPointerDown={(e) => e.stopPropagation()}
           >

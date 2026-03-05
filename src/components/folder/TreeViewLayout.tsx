@@ -681,7 +681,7 @@ function TreeViewLayout({
   return (
     <div
       className={cn(
-        "relative flex h-full min-h-0 items-stretch overflow-hidden border-0 bg-transparent md:border-r md:border-sidebar-border md:bg-sidebar",
+        "relative flex h-full min-h-0 items-stretch overflow-hidden border-0 bg-transparent",
         isResizing && "select-none cursor-col-resize"
       )}
     >
@@ -698,14 +698,17 @@ function TreeViewLayout({
       ===================================================== */}
       <div
         ref={sidebarRef}
-        style={{ backgroundColor: "var(--sidebar-bg)" }}
+        style={{
+          background: "linear-gradient(180deg, #fafbfd 0%, #eef2f6 100%)",
+          boxShadow:
+            "inset 0 1px 0 rgba(255,255,255,0.98), inset 0 -1px 0 rgba(148,163,184,0.34), inset -1px 0 0 rgba(148,163,184,0.28), 0 1px 2px rgba(15,23,42,0.08)",
+        }}
         className={cn(
-          "shrink-0 flex-col bg-sidebar md:bg-sidebar border-r-0 md:border-r border-sidebar-border relative group/sidebar select-none",
+          "shrink-0 flex-col border border-[#d7d9de] rounded-r-xl relative group/sidebar select-none",
           showMobileDetail ? "hidden md:flex" : "flex",
-          "md:shadow-none",
           isResizing ? "transition-none will-change-[width]" : "transition-all duration-300 ease-in-out",
           "w-[100dvw] max-w-[100dvw] md:w-auto md:max-w-none",
-          !isSidebarOpen && "md:w-0 md:border-r-0 md:overflow-hidden"
+          !isSidebarOpen && "md:w-0 md:border-0 md:overflow-hidden md:shadow-none"
         )}
       >
         <div className="flex flex-col h-full min-h-0 w-full overflow-hidden">
@@ -738,6 +741,19 @@ function TreeViewLayout({
               {renderTabContent()}
             </div>
         </div>
+
+        {/* 子要素の背景に潰されないよう、最前面に凸オーバーレイを重ねる */}
+        <div
+          aria-hidden
+          className={cn(
+            "pointer-events-none absolute inset-0 z-20",
+            "rounded-r-xl"
+          )}
+          style={{
+            boxShadow:
+              "inset 1px 1px 0 rgba(255,255,255,0.94), inset -1px -1px 0 rgba(148,163,184,0.42), inset 0 0 0 1px rgba(203,213,225,0.55)",
+          }}
+        />
 
         {/* リサイズハンドル: デスクトップのみ表示 */}
         {isSidebarOpen && (

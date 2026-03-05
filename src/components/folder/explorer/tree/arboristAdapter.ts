@@ -67,9 +67,16 @@ export const buildExplorerTreeData = ({
     };
   };
 
-  const buildFolderNode = (folder: FolderTreeNode): ExplorerTreeNode => {
+  const buildFolderNode = (folder: FolderTreeNode): ExplorerTreeNode | null => {
     const folderId = getFolderId(folder);
-    const childFolderNodes = getChildFolders(folderId).map(buildFolderNode);
+    const matchCount = isFiltering ? (matchCountMap.get(folderId) ?? 0) : -1;
+
+    // フィルタ時は一致のないフォルダをツリーから除外し、結果表示との視覚的整合を保つ
+    if (isFiltering && matchCount === 0) return null;
+
+    const childFolderNodes = getChildFolders(folderId)
+      .map(buildFolderNode)
+      .filter((node): node is ExplorerTreeNode => node !== null);
     const itemNodes = getFolderItems(folderId).map(buildItemNode);
 
     return {
@@ -78,13 +85,16 @@ export const buildExplorerTreeData = ({
       name: folder.folderName || folder.folder_name || '無題のフォルダ',
       kind: 'folder',
       folder,
-      isDimmed: isFiltering ? (matchCountMap.get(folderId) ?? 0) === 0 : false,
-      matchCount: isFiltering ? (matchCountMap.get(folderId) ?? 0) : -1,
+      isDimmed: false,
+      matchCount,
       children: [...childFolderNodes, ...itemNodes],
     };
   };
 
-  return [...rootFolders.map(buildFolderNode), ...rootItems.map(buildItemNode)];
+  return [
+    ...rootFolders.map(buildFolderNode).filter((node): node is ExplorerTreeNode => node !== null),
+    ...rootItems.map(buildItemNode),
+  ];
 };
 
 export const toSelectedTreeId = (

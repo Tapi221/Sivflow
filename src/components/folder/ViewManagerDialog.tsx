@@ -255,7 +255,7 @@ function ViewManagerDialogBody(props: ViewManagerDialogBodyProps) {
                         {(view.options?.rootTagIds?.length ?? 0) > 0 ? (
                           <div className="flex flex-wrap gap-2 rounded-md border border-emerald-200 bg-emerald-50/60 p-2">
                             {(view.options?.rootTagIds ?? []).map((rootTagId) => (
-                              <span key={rootTagId} className="rounded-full border border-emerald-200 bg-white px-2 py-1 text-xs text-emerald-700">
+                              <span key={rootTagId} className="rounded-full border border-emerald-200 bg-white px-2 py-1 text-xs text-emerald-700 surface-convex">
                                 {tagById.get(rootTagId)?.name ?? rootTagId}
                               </span>
                             ))}

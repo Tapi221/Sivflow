@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { Line, LineChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 
 import { RatingCountTiles } from "@/features/study/RatingCountTiles";
-import { Button } from "@/components/ui/button";
+import { SurfaceButton } from "@/components/ui/surface-button";
 import { Switch } from "@/components/ui/switch";
 import { TagInput } from "@/components/ui/tag-input";
 import type { Card, ReviewLog } from "@/types";
@@ -91,7 +91,6 @@ export function CardMetaPanel({
   );
 
   const latestReview = safeLogs.at(-1);
-  const recent10 = safeLogs.slice(-10).reverse();
 
   const currentResistanceScore = useMemo(() => {
     if (!card) return null;
@@ -163,7 +162,7 @@ export function CardMetaPanel({
 
   return (
     <aside
-      className={`meta-panel h-full w-80 shrink-0 border-l border-[#d9d9d9] bg-sidebar font-serif text-sm text-[var(--sidebar-text)] ${UI_TYPO} ${NUMERIC_TYPO}`}
+      className={`meta-panel h-full w-80 shrink-0 rounded-l-xl border border-[#d7d9de] bg-sidebar font-serif text-sm text-[var(--sidebar-text)] surface-panel-convex ${UI_TYPO} ${NUMERIC_TYPO}`}
       style={
         {
           "--meta-row-px": "var(--app-row-px)",
@@ -189,7 +188,7 @@ export function CardMetaPanel({
                       commitTitle();
                     }
                   }}
-                  className="h-[var(--meta-row-px)] w-full rounded-md border border-[#d9d9d9] bg-white px-2 text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] text-[#6e6466] shadow-[inset_0_1px_2px_rgba(86,72,74,0.16)] outline-none placeholder:text-[#978d90] focus:border-[#cfcfcf] focus:bg-white"
+                  className="h-[var(--meta-row-px)] w-full rounded-md border border-[var(--surface-border)] bg-white px-2 text-[length:var(--surface-placeholder-font-size)] leading-[var(--meta-row-px)] text-[#6e6466] surface-concave outline-none placeholder:text-[var(--surface-placeholder-text)] focus:border-[#cfcfcf] focus:bg-white"
                   placeholder="タイトル"
                 />
               </div>
@@ -210,17 +209,17 @@ export function CardMetaPanel({
               <section>
                 <div className={`${actionRowClass} justify-between`}>
                   <h3 className="h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] font-semibold tracking-wide text-[var(--sidebar-text-muted)] uppercase">タグ管理</h3>
-                  <Button
+                  <SurfaceButton
                     type="button"
-                    variant="outline"
-                    size="sm"
-                    className="h-[var(--meta-row-px)] px-2 text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] border-[#d9d9d9] bg-white text-[#6e6466] shadow-[0_1px_0_rgba(255,255,255,0.95)_inset,0_-1px_0_rgba(86,72,74,0.10)_inset,0_1px_2px_rgba(86,72,74,0.16)] hover:bg-white"
+                    surface="convex"
+                    size="xs"
+                    className="h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)]"
                     onClick={openTagSettings}
                   >
                     設定で管理
-                  </Button>
+                  </SurfaceButton>
                 </div>
-                <div className="mt-2 rounded-md border border-[var(--sidebar-border)] bg-[var(--sidebar-active-bg)] px-2 py-1">
+                <div className="mt-2 rounded-md border border-[var(--surface-border)] bg-white px-2 py-1 surface-concave">
                   <TagInput
                     tags={tags}
                     onChange={(nextTags) => {
@@ -244,21 +243,8 @@ export function CardMetaPanel({
 
           <section>
             <div className="mt-3 space-y-2">
-              {recent10.length === 0 ? (
-                null
-              ) : (
-                recent10.map((log, idx) => (
-                  <div
-                    key={`${log.reviewedAt}-${idx}`}
-                    className="flex h-[var(--meta-row-px)] items-center justify-between text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] text-[var(--sidebar-text)]"
-                  >
-                    <span>{formatDateLabel(log.reviewedAt)}</span>
-                    <span className="rounded bg-[var(--sidebar-active-bg)] px-2 leading-[var(--meta-row-px)]">R{log.rating}</span>
-                  </div>
-                ))
-              )}
             </div>
-            <RatingCountTiles counts={distribution20} compact disableHover singleRow className="mt-3" />
+            <RatingCountTiles counts={distribution20} compact disableHover singleRow surface="concave" className="mt-3" />
           </section>
 
           <section>
@@ -270,16 +256,17 @@ export function CardMetaPanel({
             )}
             <div className="flex min-h-[var(--meta-action-min-h)] items-center justify-between">
               <h3 className="h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] font-semibold tracking-wide text-[var(--sidebar-text-muted)] uppercase">耐性スコア推移</h3>
-              <div className="flex rounded-md border border-[var(--sidebar-border)] p-0.5 text-[length:var(--meta-font-size)]">
+              <div className="flex bg-white rounded border border-[var(--surface-border)] p-0.5 shadow-sm text-[length:var(--meta-font-size)]">
                 {(["7d", "30d", "all"] as const).map((p) => (
-                  <button
+                  <SurfaceButton
                     key={p}
-                    type="button"
-                    className={`min-h-[var(--meta-action-min-h)] rounded px-2 leading-[var(--meta-row-px)] ${period === p ? "bg-[var(--sidebar-text)] text-white" : "text-[var(--sidebar-text-muted)]"}`}
+                    surface={period === p ? "convexActive" : "concave"}
+                    size="xs"
+                    className="h-[var(--meta-row-px)] leading-[var(--meta-row-px)]"
                     onClick={() => setPeriod(p)}
                   >
                     {p === "all" ? "全期間" : p === "7d" ? "直近7" : "直近30"}
-                  </button>
+                  </SurfaceButton>
                 ))}
               </div>
             </div>
@@ -314,3 +301,5 @@ export function CardMetaPanel({
     </aside>
   );
 }
+
+

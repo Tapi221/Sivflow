@@ -135,18 +135,18 @@ export function TagInput({
              <PopoverTrigger asChild>
                  <button 
                     className={cn(
-                      "flex items-center gap-1 h-7 px-0 text-slate-300",
+                      "flex items-center gap-1 h-7 px-0 text-[var(--surface-placeholder-text)]",
                       quietHover ? "" : "hover:text-slate-400 transition-colors"
                     )}
                     onClick={() => setOpen(true)}
                  >
-                     {tags.length === 0 && <span className="text-[10px] font-bold uppercase tracking-wider">{placeholder}</span>}
+                     {tags.length === 0 && <span className="text-[length:var(--surface-placeholder-font-size)] font-normal normal-case tracking-normal text-[var(--surface-placeholder-text)]">{placeholder}</span>}
                      {tags.length > 0 && <Plus className="w-3.5 h-3.5" />}
                  </button>
              </PopoverTrigger>
         </div>
       </div>
-      <PopoverContent className="w-[320px] p-0 rounded-2xl shadow-2xl border-none overflow-hidden" align="start">
+      <PopoverContent className="w-[320px] p-0 rounded-xl surface-dialog-convex overflow-hidden" align="start">
         <Command 
           className="bg-white"
           onKeyDown={(e) => {
@@ -165,7 +165,7 @@ export function TagInput({
               placeholder="タグを検索・作成..." 
               value={inputValue}
               onValueChange={setInputValue}
-              className="h-9 rounded-lg border border-[#d9d9d9] bg-white text-[#202123] shadow-[inset_0_1px_2px_rgba(86,72,74,0.16)] placeholder:text-[#978d90] focus:ring-0 focus:border-[#cfcfcf] focus:bg-white"
+              className="h-6 rounded-lg border border-[var(--surface-border)] bg-white text-[#202123] surface-concave placeholder:text-[var(--surface-placeholder-text)] focus:ring-0 focus:border-[#cfcfcf] focus:bg-white"
             />
           </div>
           <CommandList className="max-h-[350px]">
@@ -207,11 +207,11 @@ export function TagInput({
                </div>
             )}
 
-            <CommandGroup heading={<span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest px-2">既存のタグ</span>}>
+            <CommandGroup heading={<span className="text-[10px] font-bold text-[var(--surface-placeholder-text)] uppercase tracking-widest px-2">既存のタグ</span>}>
               {filteredTags.length === 0 && !inputValue && (
                 <div className="py-6 text-center">
-                  <TagIcon className="w-8 h-8 text-slate-100 mx-auto mb-2" />
-                  <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">タグがありません</p>
+                  <TagIcon className="w-8 h-8 text-[var(--surface-placeholder-text)] opacity-35 mx-auto mb-2" />
+                  <p className="text-[10px] font-bold text-[var(--surface-placeholder-text)] uppercase tracking-widest">タグがありません</p>
                 </div>
               )}
               <div className="grid grid-cols-1 gap-1 p-1">
@@ -246,3 +246,4 @@ export function TagInput({
     </Popover>
   )
 }
+

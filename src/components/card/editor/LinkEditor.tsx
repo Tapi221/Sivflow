@@ -53,7 +53,7 @@ export function LinkEditor({ items, onChange }: LinkEditorProps) {
                 spellCheck={false}
                 data-lpignore="true"
                 data-1p-ignore
-                className="h-8 flex-[3] rounded-lg border border-[#d9d9d9] bg-white text-[11px] text-[#202123] shadow-[inset_0_1px_2px_rgba(86,72,74,0.16)] placeholder:text-[#978d90] focus-visible:ring-0 focus-visible:border-[#cfcfcf] focus-visible:bg-white"
+                className="h-8 flex-[3] rounded-lg border border-[var(--surface-border)] bg-white text-[11px] text-[#202123] surface-concave placeholder:text-[var(--surface-placeholder-text)] focus-visible:ring-0 focus-visible:border-[#cfcfcf] focus-visible:bg-white"
                 autoFocus={index === refs.length - 1}
               />
               <Input
@@ -64,7 +64,7 @@ export function LinkEditor({ items, onChange }: LinkEditorProps) {
                 spellCheck={false}
                 data-lpignore="true"
                 data-1p-ignore
-                className="h-8 flex-[2] rounded-lg border border-[#d9d9d9] bg-white text-[11px] text-[#202123] shadow-[inset_0_1px_2px_rgba(86,72,74,0.16)] placeholder:text-[#978d90] focus-visible:ring-0 focus-visible:border-[#cfcfcf] focus-visible:bg-white"
+                className="h-8 flex-[2] rounded-lg border border-[var(--surface-border)] bg-white text-[11px] text-[#202123] surface-concave placeholder:text-[var(--surface-placeholder-text)] focus-visible:ring-0 focus-visible:border-[#cfcfcf] focus-visible:bg-white"
               />
             </div>
           </div>
@@ -86,4 +86,5 @@ export function LinkEditor({ items, onChange }: LinkEditorProps) {
     </div>
   );
 }
+
 

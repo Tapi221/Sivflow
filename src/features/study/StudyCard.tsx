@@ -168,13 +168,13 @@ function StudyCardInner({
   const renderPracticeButtons = () => (
     <div className="reviewRatingBar flex items-center justify-center gap-3 animate-in fade-in slide-in-from-bottom-4 duration-300">
       <button
-        className="w-24 h-20 md:w-28 md:h-24 rounded-2xl bg-white border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-2 transition-all hover:-translate-y-1 active:scale-95 group"
+        className="w-24 h-20 md:w-28 md:h-24 rounded-2xl bg-white border border-[var(--surface-border)] surface-convex flex flex-col items-center justify-center gap-2 transition-all hover:-translate-y-1 active:scale-95 group"
         onClick={(e) => {
           e.stopPropagation();
           emitResult('anxious');
         }}
       >
-        <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-red-50 flex items-center justify-center text-[#FF5A65] group-hover:scale-110 transition-transform">
+        <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-red-50 face-badge-convex flex items-center justify-center text-[#FF5A65] group-hover:scale-110 transition-transform">
           <svg
             width="18"
             height="18"
@@ -195,13 +195,13 @@ function StudyCardInner({
       </button>
 
       <button
-        className="w-24 h-20 md:w-28 md:h-24 rounded-2xl bg-white border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-2 transition-all hover:-translate-y-1 active:scale-95 group"
+        className="w-24 h-20 md:w-28 md:h-24 rounded-2xl bg-white border border-[var(--surface-border)] surface-convex flex flex-col items-center justify-center gap-2 transition-all hover:-translate-y-1 active:scale-95 group"
         onClick={(e) => {
           e.stopPropagation();
           emitResult('ok');
         }}
       >
-        <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-blue-50 flex items-center justify-center text-[#00A3FF] group-hover:scale-110 transition-transform">
+        <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-blue-50 face-badge-convex flex items-center justify-center text-[#00A3FF] group-hover:scale-110 transition-transform">
           <svg
             width="18"
             height="18"
@@ -226,13 +226,13 @@ function StudyCardInner({
   const renderReviewButtons = () => (
     <div className="reviewRatingBar flex items-center justify-center gap-2 md:gap-3 animate-in fade-in slide-in-from-bottom-4 duration-300">
       <button
-        className="w-16 h-20 md:w-20 md:h-24 rounded-2xl bg-white border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-1 md:gap-2 transition-all hover:-translate-y-1 active:scale-95 group"
+        className="w-16 h-20 md:w-20 md:h-24 rounded-2xl bg-white border border-[var(--surface-border)] surface-convex flex flex-col items-center justify-center gap-1 md:gap-2 transition-all hover:-translate-y-1 active:scale-95 group"
         onClick={(e) => {
           e.stopPropagation();
           emitResult(0);
         }}
       >
-        <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-red-50 flex items-center justify-center text-[#FF5A65] group-hover:scale-110 transition-transform">
+        <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-red-50 face-badge-convex flex items-center justify-center text-[#FF5A65] group-hover:scale-110 transition-transform">
           <svg
             width="18"
             height="18"
@@ -255,13 +255,13 @@ function StudyCardInner({
 
       {showHard && (
         <button
-          className="w-16 h-20 md:w-20 md:h-24 rounded-2xl bg-white border border-slate-100 shadow-sm hover:border-amber-100 hover:bg-[#FFFBF0] flex flex-col items-center justify-center gap-1 md:gap-2 transition-all hover:-translate-y-1 active:scale-95 group"
+          className="w-16 h-20 md:w-20 md:h-24 rounded-2xl bg-white border border-[var(--surface-border)] surface-convex hover:bg-[#FFFBF0] flex flex-col items-center justify-center gap-1 md:gap-2 transition-all hover:-translate-y-1 active:scale-95 group"
           onClick={(e) => {
             e.stopPropagation();
             emitResult(1);
           }}
         >
-          <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-amber-50 flex items-center justify-center text-[#F9A825] group-hover:scale-110 transition-transform">
+          <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-amber-50 face-badge-convex flex items-center justify-center text-[#F9A825] group-hover:scale-110 transition-transform">
             <svg
               width="18"
               height="18"
@@ -283,13 +283,13 @@ function StudyCardInner({
       )}
 
       <button
-        className="w-16 h-20 md:w-20 md:h-24 rounded-2xl bg-white border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-1 md:gap-2 transition-all hover:-translate-y-1 active:scale-95 group"
+        className="w-16 h-20 md:w-20 md:h-24 rounded-2xl bg-white border border-[var(--surface-border)] surface-convex flex flex-col items-center justify-center gap-1 md:gap-2 transition-all hover:-translate-y-1 active:scale-95 group"
         onClick={(e) => {
           e.stopPropagation();
           emitResult(2);
         }}
       >
-        <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-blue-50 flex items-center justify-center text-[#00A3FF] group-hover:scale-110 transition-transform">
+        <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-blue-50 face-badge-convex flex items-center justify-center text-[#00A3FF] group-hover:scale-110 transition-transform">
           <svg
             width="18"
             height="18"
@@ -311,13 +311,13 @@ function StudyCardInner({
 
       {showEasy && (
         <button
-          className="w-16 h-20 md:w-20 md:h-24 rounded-2xl bg-white border border-slate-100 shadow-sm hover:border-emerald-100 hover:bg-[#EEFDF6] flex flex-col items-center justify-center gap-1 md:gap-2 transition-all hover:-translate-y-1 active:scale-95 group"
+          className="w-16 h-20 md:w-20 md:h-24 rounded-2xl bg-white border border-[var(--surface-border)] surface-convex hover:bg-[#EEFDF6] flex flex-col items-center justify-center gap-1 md:gap-2 transition-all hover:-translate-y-1 active:scale-95 group"
           onClick={(e) => {
             e.stopPropagation();
             emitResult(3);
           }}
         >
-          <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-emerald-50 flex items-center justify-center text-[#00B67A] group-hover:scale-110 transition-transform">
+          <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-emerald-50 face-badge-convex flex items-center justify-center text-[#00B67A] group-hover:scale-110 transition-transform">
             <svg
               width="18"
               height="18"
@@ -399,3 +399,4 @@ function StudyCardInner({
     </div>
   );
 }
+

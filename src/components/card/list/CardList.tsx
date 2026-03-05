@@ -132,7 +132,7 @@ function CardItem({
               )}
 
               {userTags.map((t: unknown, i: number) => (
-                <span key={i} className={cn('px-2 py-1 rounded-full font-bold border text-[10px]', t.color)}>
+                <span key={i} className={cn('px-2 py-1 rounded-full font-bold border text-[10px] surface-convex', t.color)}>
                   {t.label}
                 </span>
               ))}

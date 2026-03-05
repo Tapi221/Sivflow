@@ -9,11 +9,12 @@ type Props = {
   disableHover?: boolean;
   singleColumn?: boolean;
   singleRow?: boolean;
+  surface?: 'convex' | 'concave';
 };
 
 const FACE_DESIGN: Record<RatingKey, { iconWrap: string; labelHover: string; label: string; svg: React.ReactNode }> = {
   forgot: {
-    iconWrap: 'bg-red-50 text-[#FF5A65]',
+    iconWrap: 'bg-red-50 text-[#FF5A65] face-badge-convex',
     labelHover: 'group-hover:text-[#FF5A65]',
     label: '忘れた',
     svg: (
@@ -26,7 +27,7 @@ const FACE_DESIGN: Record<RatingKey, { iconWrap: string; labelHover: string; lab
     ),
   },
   vague: {
-    iconWrap: 'bg-amber-50 text-[#F9A825]',
+    iconWrap: 'bg-amber-50 text-[#F9A825] face-badge-convex',
     labelHover: 'group-hover:text-[#F9A825]',
     label: 'あいまい',
     svg: (
@@ -38,7 +39,7 @@ const FACE_DESIGN: Record<RatingKey, { iconWrap: string; labelHover: string; lab
     ),
   },
   remembered: {
-    iconWrap: 'bg-blue-50 text-[#00A3FF]',
+    iconWrap: 'bg-blue-50 text-[#00A3FF] face-badge-convex',
     labelHover: 'group-hover:text-[#00A3FF]',
     label: '覚えた',
     svg: (
@@ -50,7 +51,7 @@ const FACE_DESIGN: Record<RatingKey, { iconWrap: string; labelHover: string; lab
     ),
   },
   easy: {
-    iconWrap: 'bg-emerald-50 text-[#00B67A]',
+    iconWrap: 'bg-emerald-50 text-[#00B67A] face-badge-convex',
     labelHover: 'group-hover:text-[#00B67A]',
     label: '余裕',
     svg: (
@@ -72,7 +73,9 @@ export function RatingCountTiles({
   disableHover = false,
   singleColumn = false,
   singleRow = false,
+  surface = 'convex',
 }: Props) {
+  const surfaceClass = surface === 'concave' ? 'surface-concave' : 'surface-convex';
   const gridClass = singleRow
     ? 'grid grid-cols-4 gap-2'
     : singleColumn
@@ -86,7 +89,7 @@ export function RatingCountTiles({
         return (
           <div
             key={key}
-            className={`group bg-white rounded-2xl border border-slate-200 shadow-sm ${disableHover ? '' : 'transform transition-all hover:scale-105'} ${singleColumn ? 'flex items-center justify-between gap-2 p-2.5' : `flex flex-col items-center ${compact ? 'p-2.5' : 'p-3'}`}`}
+            className={`group bg-white rounded-2xl border border-[var(--surface-border)] ${surfaceClass} ${disableHover ? '' : 'transform transition-all hover:scale-105'} ${singleColumn ? 'flex items-center justify-between gap-2 p-2.5' : `flex flex-col items-center ${compact ? 'p-2.5' : 'p-3'}`}`}
           >
             <div className={`${singleColumn ? '' : 'mb-1'} w-8 h-8 rounded-full flex items-center justify-center ${disableHover ? '' : 'transition-transform group-hover:scale-110'} ${design.iconWrap}`}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -110,3 +113,4 @@ export function RatingCountTiles({
     </div>
   );
 }
+

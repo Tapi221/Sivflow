@@ -32,7 +32,7 @@ export function StudyComplete({
 }: Props) {
   const faceDesign = {
     forgot: {
-      iconWrap: 'bg-red-50 text-[#FF5A65]',
+      iconWrap: 'bg-red-50 text-[#FF5A65] face-badge-convex',
       labelHover: 'group-hover:text-[#FF5A65]',
       svg: (
         <>
@@ -44,7 +44,7 @@ export function StudyComplete({
       ),
     },
     vague: {
-      iconWrap: 'bg-amber-50 text-[#F9A825]',
+      iconWrap: 'bg-amber-50 text-[#F9A825] face-badge-convex',
       labelHover: 'group-hover:text-[#F9A825]',
       svg: (
         <>
@@ -55,7 +55,7 @@ export function StudyComplete({
       ),
     },
     remembered: {
-      iconWrap: 'bg-blue-50 text-[#00A3FF]',
+      iconWrap: 'bg-blue-50 text-[#00A3FF] face-badge-convex',
       labelHover: 'group-hover:text-[#00A3FF]',
       svg: (
         <>
@@ -66,7 +66,7 @@ export function StudyComplete({
       ),
     },
     easy: {
-      iconWrap: 'bg-emerald-50 text-[#00B67A]',
+      iconWrap: 'bg-emerald-50 text-[#00B67A] face-badge-convex',
       labelHover: 'group-hover:text-[#00B67A]',
       svg: (
         <>
@@ -105,7 +105,7 @@ export function StudyComplete({
                     type="button"
                     onClick={() => handleStartPractice(rating)}
                     disabled={!canPractice}
-                    className={`bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center transform transition-all ${compact ? 'p-2.5 md:p-3' : 'p-3'} ${canPractice ? 'hover:scale-105' : 'opacity-50 cursor-not-allowed'}`}
+                    className={`bg-white rounded-2xl border border-[var(--surface-border)] surface-concave flex flex-col items-center transform transition-all ${compact ? 'p-2.5 md:p-3' : 'p-3'} ${canPractice ? 'hover:scale-105' : 'opacity-50 cursor-not-allowed'}`}
                   >
                     <div className={`mb-1 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-transform group-hover:scale-110 ${design.iconWrap}`}>
                       <svg width="18" height="18" className="md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -122,6 +122,7 @@ export function StudyComplete({
               <RatingCountTiles
                 compact={compact}
                 className={compact ? 'max-w-2xl mx-auto mb-6' : 'max-w-2xl mx-auto mb-8'}
+                surface="concave"
                 counts={{
                   forgot: results[0] ?? 0,
                   vague: results[1] ?? 0,
@@ -150,3 +151,4 @@ export function StudyComplete({
     </div>
   );
 }
+

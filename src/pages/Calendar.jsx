@@ -347,19 +347,19 @@ export default function Calendar() {
                         setCurrentDate(now);
                         setSelectedDate(now);
                     }}
-                    className="h-10 rounded-full border-slate-200 text-slate-500 font-bold px-4 hover:border-primary-600 hover:text-primary-600 bg-white shadow-sm"
+                    className="h-10 rounded-full border border-[var(--surface-border)] text-slate-500 font-bold px-4 hover:border-primary-600 hover:text-primary-600 bg-white face-badge-convex"
                 >
                     Today
                 </Button>
 
-                <div className="flex items-center bg-white rounded-full p-1 shadow-sm border border-slate-100 h-10 w-full sm:w-auto justify-between">
-                    <Button variant="ghost" size="icon" onClick={() => setCurrentDate(addMonths(currentDate, -1))} className="h-8 w-8 rounded-full text-slate-400 hover:text-primary-600 shrink-0">
+                <div className="flex items-center bg-white rounded-full p-1 border border-[var(--surface-border)] face-badge-convex h-10 w-full sm:w-auto justify-between">
+                    <Button variant="ghost" size="icon" onClick={() => setCurrentDate(addMonths(currentDate, -1))} className="h-8 w-8 rounded-full text-slate-400 hover:text-primary-600 bg-white border border-[var(--surface-border)] face-badge-convex hover:bg-white shrink-0">
                         <ChevronLeft className="w-4 h-4" />
                     </Button>
                     <span className="flex-1 sm:w-32 text-center text-[11px] sm:text-xs font-extrabold text-[#334155] tracking-wider uppercase">
                         {format(currentDate, 'MMMM yyyy')}
                     </span>
-                    <Button variant="ghost" size="icon" onClick={() => setCurrentDate(addMonths(currentDate, 1))} className="h-8 w-8 rounded-full text-slate-400 hover:text-primary-600 shrink-0">
+                    <Button variant="ghost" size="icon" onClick={() => setCurrentDate(addMonths(currentDate, 1))} className="h-8 w-8 rounded-full text-slate-400 hover:text-primary-600 bg-white border border-[var(--surface-border)] face-badge-convex hover:bg-white shrink-0">
                         <ChevronRight className="w-4 h-4" />
                     </Button>
                 </div>
@@ -375,7 +375,7 @@ export default function Calendar() {
             </Card>
 
             {/* Right: Sidebar */}
-            <Card className="rounded-[32px] md:rounded-[40px] border-none shadow-sm bg-white p-6 md:p-8 min-h-[400px] md:min-h-[600px] flex flex-col relative md:sticky md:top-8">
+            <Card className="rounded-[32px] md:rounded-[40px] border border-[#d7d9de] surface-panel-convex bg-white p-6 md:p-8 min-h-[400px] md:min-h-[600px] flex flex-col relative md:sticky md:top-8">
                 {/* Header */}
                 <div className="mb-6 md:mb-10">
                     <p className="text-[10px] font-bold text-primary-600 tracking-[0.2em] uppercase mb-2">Focus Detail</p>

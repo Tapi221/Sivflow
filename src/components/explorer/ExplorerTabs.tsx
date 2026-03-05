@@ -34,7 +34,9 @@ export function ExplorerTabs({
 
   return (
     <div className={cn(
-      "flex items-center justify-between border-b border-sidebar-border bg-sidebar pr-2 h-9",
+      "flex items-center justify-between pr-2 h-9",
+      "border border-[#d7d9de] rounded-md",
+      "surface-panel-convex",
       // 左上の固定ハンバーガーボタンと重ならないよう、全画面幅で左余白を確保する。
       "pl-10"
     )} style={{ backgroundColor: "var(--sidebar-bg)" }}>

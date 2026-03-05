@@ -53,7 +53,7 @@ export function TagBadge({
   );
 
   const rootClassName = cn(
-    'inline-flex max-w-full items-center rounded-full border font-bold shadow-sm transition-all',
+    'inline-flex max-w-full items-center rounded-full border font-bold surface-convex transition-all',
     sizeClassMap[size],
     colorClass,
     selected && 'ring-2 ring-primary-500/40 scale-[1.02]',

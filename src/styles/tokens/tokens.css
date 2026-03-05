@@ -22,6 +22,14 @@
     --sidebar-text-muted: #6e6e80;
     --sidebar-active-bg: #e7ebef;
     --sidebar-active-accent: #7aa6a1;
+    --surface-border: #d9d9d9;
+    --surface-placeholder-text: #978d90;
+    --surface-placeholder-font-size: 0.875rem;
+    --surface-shadow-concave: inset 0 1px 2px rgba(86, 72, 74, 0.16);
+    --surface-shadow-convex:
+      0 1px 0 rgba(255, 255, 255, 0.9) inset,
+      0 -1px 0 rgba(86, 72, 74, 0.08) inset,
+      0 1px 2px rgba(86, 72, 74, 0.16);
 
     --code-bg: #f7f8f9;
     --code-fg: #24292f;
