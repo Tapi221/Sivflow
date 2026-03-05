@@ -7,6 +7,7 @@
 ---
 
 ## 実行に共通する前提
+
 - Node と npm がインストールされていること
 - TypeScript スクリプトは `ts-node` で実行可能（`npx ts-node <path>`）
 - 重要データはスナップショット（`SnapshotService` によるエクスポート）でバックアップする
@@ -57,5 +58,6 @@ npx ts-node scripts/card_simulation.ts # 読み取り専用の確認
 ---
 
 ## 追加作業提案
+
 - 各スクリプトに `--dry-run` と `--yes` フラグを追加して安全性を高める。
 - スクリプト実行前に自動で `SnapshotService.createSnapshot()` を呼ぶラッパーを作成することを推奨します。

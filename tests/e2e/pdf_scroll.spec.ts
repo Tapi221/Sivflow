@@ -1,15 +1,15 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from "@playwright/test";
 
-test.describe('PDF Scroll Container', () => {
-  test('wheel scroll updates scrollTop', async ({ page }) => {
+test.describe("PDF Scroll Container", () => {
+  test("wheel scroll updates scrollTop", async ({ page }) => {
     test.setTimeout(120000);
-    const baseUrl = process.env.E2E_BASE_URL ?? 'http://localhost:5173';
+    const baseUrl = process.env.E2E_BASE_URL ?? "http://localhost:5173";
 
     await page.goto(`${baseUrl}/pdf-scroll-test?test_bypass=true`, {
-      waitUntil: 'domcontentloaded',
+      waitUntil: "domcontentloaded",
     });
 
-    const scrollContainer = page.getByTestId('pdf-scroll-container');
+    const scrollContainer = page.getByTestId("pdf-scroll-container");
     await expect(scrollContainer).toBeVisible();
 
     const initialDiagnostics = await page.evaluate(() => {
@@ -25,8 +25,9 @@ test.describe('PDF Scroll Container', () => {
 
     await expect
       .poll(
-        async () => scrollContainer.evaluate((el) => el.scrollHeight - el.clientHeight),
-        { timeout: 30000 }
+        async () =>
+          scrollContainer.evaluate((el) => el.scrollHeight - el.clientHeight),
+        { timeout: 30000 },
       )
       .toBeGreaterThan(400);
 
@@ -40,9 +41,11 @@ test.describe('PDF Scroll Container', () => {
                 maxScrollTop: number;
               } | null;
             };
-            return debugWindow.__getPdfScrollDiagnostics?.()?.isScrollable ?? false;
+            return (
+              debugWindow.__getPdfScrollDiagnostics?.()?.isScrollable ?? false
+            );
           }),
-        { timeout: 10000 }
+        { timeout: 10000 },
       )
       .toBeTruthy();
 
@@ -55,7 +58,9 @@ test.describe('PDF Scroll Container', () => {
     }
 
     await expect
-      .poll(async () => scrollContainer.evaluate((el) => el.scrollTop), { timeout: 5000 })
+      .poll(async () => scrollContainer.evaluate((el) => el.scrollTop), {
+        timeout: 5000,
+      })
       .toBeGreaterThan(startTop + 120);
   });
 });

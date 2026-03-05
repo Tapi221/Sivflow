@@ -3,13 +3,20 @@
  * カード本文（問題/解答/コード/数式）をテキスト化して検索
  */
 
-import type { Card } from '../types';
-import type { Folder } from '../types';
-import type { Tag, QuickOpenItemType } from './searchIndex';
-import { resolveCardTagNames } from '@/hooks/useTags';
+import type { Card } from "../types";
+import type { Folder } from "../types";
+import type { Tag, QuickOpenItemType } from "./searchIndex";
+import { resolveCardTagNames } from "@/hooks/useTags";
 
 // 検索フィールドの種類
-export type MatchField = 'title' | 'question' | 'answer' | 'code' | 'math' | 'name' | 'path';
+export type MatchField =
+  | "title"
+  | "question"
+  | "answer"
+  | "code"
+  | "math"
+  | "name"
+  | "path";
 
 // 全文検索結果
 export interface FullTextResult {
@@ -18,7 +25,7 @@ export interface FullTextResult {
   name: string;
   path: string;
   matchField: MatchField;
-  snippet: string;         // ヒット箇所のスニペット
+  snippet: string; // ヒット箇所のスニペット
   matchPositions: number[]; // マッチ位置（ハイライト用）
   score: number;
   data: Card | Folder | Tag;
@@ -26,8 +33,8 @@ export interface FullTextResult {
 
 // 検索フィルタ
 export interface SearchFilters {
-  types?: QuickOpenItemType[];  // 検索対象の種別
-  tagFilter?: string;           // 特定タグを持つカードのみ
+  types?: QuickOpenItemType[]; // 検索対象の種別
+  tagFilter?: string; // 特定タグを持つカードのみ
 }
 
 // インデックスアイテム
@@ -48,34 +55,36 @@ export interface FullTextIndex {
 /**
  * ブロックからテキストを抽出
  */
-function extractBlockTexts(blocks: unknown[]): { field: MatchField; text: string }[] {
+function extractBlockTexts(
+  blocks: unknown[],
+): { field: MatchField; text: string }[] {
   const results: { field: MatchField; text: string }[] = [];
-  
+
   for (const block of blocks || []) {
     switch (block.type) {
-      case 'text':
+      case "text":
         if (block.content?.trim()) {
-          results.push({ field: 'question', text: block.content });
+          results.push({ field: "question", text: block.content });
         }
         break;
-      case 'markdown':
+      case "markdown":
         if (block.markdown?.trim()) {
-          results.push({ field: 'question', text: block.markdown });
+          results.push({ field: "question", text: block.markdown });
         }
         break;
-      case 'code':
+      case "code":
         if (block.code?.code?.trim()) {
-          results.push({ field: 'code', text: block.code.code });
+          results.push({ field: "code", text: block.code.code });
         }
         break;
-      case 'math':
+      case "math":
         if (block.math?.latex?.trim()) {
-          results.push({ field: 'math', text: block.math.latex });
+          results.push({ field: "math", text: block.math.latex });
         }
         break;
     }
   }
-  
+
   return results;
 }
 
@@ -86,81 +95,83 @@ export function buildFullTextIndex(
   cards: Card[],
   folders: Folder[],
   tags: Tag[],
-  folderPathMap: Map<string, string>
+  folderPathMap: Map<string, string>,
 ): FullTextIndex {
-  const tagById = new Map<string, { name: string }>(tags.map(t => [t.id, { name: t.name }]));
+  const tagById = new Map<string, { name: string }>(
+    tags.map((t) => [t.id, { name: t.name }]),
+  );
   const items: FullTextItem[] = [];
-  
+
   // カード
   for (const card of cards) {
     const searchableTexts: { field: MatchField; text: string }[] = [];
-    
+
     // タイトル
     if (card.title?.trim()) {
-      searchableTexts.push({ field: 'title', text: card.title });
+      searchableTexts.push({ field: "title", text: card.title });
     }
-    
+
     // 問題ブロック
     const questionTexts = extractBlockTexts(card.questionBlocks || []);
     for (const qt of questionTexts) {
-      searchableTexts.push({ ...qt, field: 'question' });
+      searchableTexts.push({ ...qt, field: "question" });
     }
-    
+
     // 解答ブロック
     const answerTexts = extractBlockTexts(card.answerBlocks || []);
     for (const at of answerTexts) {
-      searchableTexts.push({ ...at, field: 'answer' });
+      searchableTexts.push({ ...at, field: "answer" });
     }
-    
+
     // 旧形式のテキスト
     if (card.questionText?.trim()) {
-      searchableTexts.push({ field: 'question', text: card.questionText });
+      searchableTexts.push({ field: "question", text: card.questionText });
     }
     if (card.answerText?.trim()) {
-      searchableTexts.push({ field: 'answer', text: card.answerText });
+      searchableTexts.push({ field: "answer", text: card.answerText });
     }
-    
-    const path = folderPathMap.get(card.folderId || '') || '';
-    
+
+    const path = folderPathMap.get(card.folderId || "") || "";
+
     items.push({
-      type: 'card',
+      type: "card",
       id: card.id,
-      name: card.title || '無題のカード',
+      name: card.title || "無題のカード",
       path,
       searchableTexts,
       data: card,
       tags: resolveCardTagNames(card.tagIds, card.tags, tagById),
     });
   }
-  
+
   // フォルダ
   for (const folder of folders) {
     const path = folderPathMap.get(folder.id) || folder.folderName;
     items.push({
-      type: 'folder',
+      type: "folder",
       id: folder.id,
       name: folder.folderName,
       path,
       searchableTexts: [
-        { field: 'name', text: folder.folderName },
-        { field: 'path', text: path },
+        { field: "name", text: folder.folderName },
+        { field: "path", text: path },
       ],
       data: folder,
     });
   }
-  
+
   // タグ
   for (const tag of tags) {
     items.push({
-      type: 'tag',
+      type: "tag",
       id: tag.name,
       name: tag.name,
-      path: '',
-      searchableTexts: [{ field: 'name', text: tag.name }],
+      path: "",
+      searchableTexts: [{ field: "name", text: tag.name }],
       data: tag,
     });
   }
-  
+
   return { items };
 }
 
@@ -170,27 +181,27 @@ export function buildFullTextIndex(
 function generateSnippet(
   text: string,
   query: string,
-  contextLength: number = 40
+  contextLength: number = 40,
 ): { snippet: string; positions: number[] } {
   const lowerText = text.toLowerCase();
   const lowerQuery = query.toLowerCase();
-  
+
   const index = lowerText.indexOf(lowerQuery);
   if (index === -1) {
-    return { snippet: text.slice(0, contextLength * 2) + '...', positions: [] };
+    return { snippet: text.slice(0, contextLength * 2) + "...", positions: [] };
   }
-  
+
   const start = Math.max(0, index - contextLength);
   const end = Math.min(text.length, index + query.length + contextLength);
-  
-  let snippet = '';
-  if (start > 0) snippet += '...';
+
+  let snippet = "";
+  if (start > 0) snippet += "...";
   snippet += text.slice(start, end);
-  if (end < text.length) snippet += '...';
-  
+  if (end < text.length) snippet += "...";
+
   // スニペット内でのマッチ位置を計算
   const adjustedIndex = index - start + (start > 0 ? 3 : 0);
-  
+
   return {
     snippet,
     positions: [adjustedIndex],
@@ -204,17 +215,17 @@ export function searchFullText(
   query: string,
   index: FullTextIndex,
   filters: SearchFilters = {},
-  maxResults: number = 50
+  maxResults: number = 50,
 ): FullTextResult[] {
   if (!query.trim()) {
     return [];
   }
-  
+
   const lowerQuery = query.toLowerCase();
-  const terms = lowerQuery.split(/\s+/).filter(t => t.length > 0);
-  
+  const terms = lowerQuery.split(/\s+/).filter((t) => t.length > 0);
+
   const results: FullTextResult[] = [];
-  
+
   for (const item of index.items) {
     // 種別フィルタ
     if (filters.types && filters.types.length > 0) {
@@ -222,22 +233,22 @@ export function searchFullText(
         continue;
       }
     }
-    
+
     // タグフィルタ（カードのみ）
-    if (filters.tagFilter && item.type === 'card') {
+    if (filters.tagFilter && item.type === "card") {
       if (!item.tags?.includes(filters.tagFilter)) {
         continue;
       }
     }
-    
+
     // 各検索可能テキストで検索
     for (const { field, text } of item.searchableTexts) {
       const lowerText = text.toLowerCase();
-      
+
       // 全てのタームが含まれているかチェック
       let allTermsMatch = true;
       let score = 0;
-      
+
       for (const term of terms) {
         if (lowerText.includes(term)) {
           // 前方一致なら高スコア
@@ -251,10 +262,10 @@ export function searchFullText(
           break;
         }
       }
-      
+
       if (allTermsMatch) {
         const { snippet, positions } = generateSnippet(text, query);
-        
+
         results.push({
           type: item.type,
           id: item.id,
@@ -266,15 +277,15 @@ export function searchFullText(
           score,
           data: item.data,
         });
-        
+
         // 同じアイテムで複数フィールドがヒットしても1つだけ返す
         break;
       }
     }
   }
-  
+
   // スコア降順でソート
   results.sort((a, b) => b.score - a.score);
-  
+
   return results.slice(0, maxResults);
 }

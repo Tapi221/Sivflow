@@ -1,36 +1,36 @@
 // @vitest-environment jsdom
-import React from 'react';
-import { describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import { DragDropContext } from '@hello-pangea/dnd';
-import { SharedCardContent } from '../common/SharedCardContent';
-import type { CardBlock } from '@/types';
+import React from "react";
+import { describe, expect, it, vi } from "vitest";
+import { render, screen } from "@testing-library/react";
+import { DragDropContext } from "@hello-pangea/dnd";
+import { SharedCardContent } from "../common/SharedCardContent";
+import type { CardBlock } from "@/types";
 
-vi.mock('../blocks/BlockRenderer', () => ({
+vi.mock("../blocks/BlockRenderer", () => ({
   BlockRenderer: () => <div data-testid="mock-block-renderer" />,
 }));
 
-vi.mock('../blocks/BlockEditor', () => ({
+vi.mock("../blocks/BlockEditor", () => ({
   BlockEditor: () => <div data-testid="mock-block-editor" />,
 }));
 
-describe('SharedCardContent', () => {
+describe("SharedCardContent", () => {
   const blocks: CardBlock[] = [
-    { id: 'b-1', type: 'text', orderIndex: 0, content: 'hello' },
+    { id: "b-1", type: "text", orderIndex: 0, content: "hello" },
   ];
 
-  it('renders view mode with shared root', () => {
+  it("renders view mode with shared root", () => {
     const { container } = render(
-      <SharedCardContent mode="view" blocks={blocks} />
+      <SharedCardContent mode="view" blocks={blocks} />,
     );
 
-    const root = container.querySelector('.card-content-root');
+    const root = container.querySelector(".card-content-root");
 
     expect(root).toBeTruthy();
-    expect(screen.getByTestId('mock-block-renderer')).toBeTruthy();
+    expect(screen.getByTestId("mock-block-renderer")).toBeTruthy();
   });
 
-  it('renders edit mode with the same shared root', () => {
+  it("renders edit mode with the same shared root", () => {
     const { container } = render(
       <DragDropContext onDragEnd={() => {}}>
         <SharedCardContent
@@ -42,12 +42,12 @@ describe('SharedCardContent', () => {
           color="text-indigo-500"
           droppableId="question-blocks"
         />
-      </DragDropContext>
+      </DragDropContext>,
     );
 
-    const root = container.querySelector('.card-content-root');
+    const root = container.querySelector(".card-content-root");
 
     expect(root).toBeTruthy();
-    expect(screen.getByTestId('mock-block-editor')).toBeTruthy();
+    expect(screen.getByTestId("mock-block-editor")).toBeTruthy();
   });
 });

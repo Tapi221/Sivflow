@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { getDesktopMediaQuery, getIsDesktop } from '@/utils/responsive';
+import { useEffect, useState } from "react";
+import { getDesktopMediaQuery, getIsDesktop } from "@/utils/responsive";
 
 export function useIsDesktop() {
   const [isDesktop, setIsDesktop] = useState(getIsDesktop);
@@ -15,14 +15,14 @@ export function useIsDesktop() {
     handleChange();
 
     if (mediaQuery.addEventListener) {
-      mediaQuery.addEventListener('change', handleChange);
+      mediaQuery.addEventListener("change", handleChange);
     } else {
       mediaQuery.addListener(handleChange);
     }
 
     return () => {
       if (mediaQuery.removeEventListener) {
-        mediaQuery.removeEventListener('change', handleChange);
+        mediaQuery.removeEventListener("change", handleChange);
       } else {
         mediaQuery.removeListener(handleChange);
       }

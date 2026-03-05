@@ -1,15 +1,24 @@
-import React, { useMemo, useState } from 'react';
-import { HelpCircle, Settings2, Star, Tag as TagIcon } from '@/ui/icons';
-import type { Card, DocumentItem, Folder } from '@/types';
-import { TagBadge } from '@/components/tag/TagBadge';
-import { resolveCardTagNames, useTags } from '@/hooks/useTags';
-import { cn } from '@/lib/utils';
-import { useExplorerStore } from '@/hooks/useExplorerStore';
-import { ExplorerFilterSummary } from './ExplorerFilterSummary';
-import { TagFilterPopover } from '@/components/explorer/TagFilterPopover';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Dialog, DialogContent, DialogOverlay, DialogPortal } from '@/components/ui/dialog';
-import { Flashcard } from '@/components/card/frame/Flashcard';
+import React, { useMemo, useState } from "react";
+import { HelpCircle, Settings2, Star, Tag as TagIcon } from "@/ui/icons";
+import type { Card, DocumentItem, Folder } from "@/types";
+import { TagBadge } from "@/components/tag/TagBadge";
+import { resolveCardTagNames, useTags } from "@/hooks/useTags";
+import { cn } from "@/lib/utils";
+import { useExplorerStore } from "@/hooks/useExplorerStore";
+import { ExplorerFilterSummary } from "./ExplorerFilterSummary";
+import { TagFilterPopover } from "@/components/explorer/TagFilterPopover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Dialog,
+  DialogContent,
+  DialogOverlay,
+  DialogPortal,
+} from "@/components/ui/dialog";
+import { Flashcard } from "@/components/card/frame/Flashcard";
 
 interface DirectoryDiagramPaneProps {
   folders: Folder[];
@@ -19,7 +28,7 @@ interface DirectoryDiagramPaneProps {
 
 type TreeNode = {
   id: string;
-  kind: 'folder' | 'card' | 'pdf' | 'pptx';
+  kind: "folder" | "card" | "pdf" | "pptx";
   name: string;
   sourceCardId?: string;
   tags: string[];
@@ -29,16 +38,19 @@ type TreeNode = {
   children: TreeNode[];
 };
 
-const ROOT_KEY = '__root__';
+const ROOT_KEY = "__root__";
 
 const getCardLabel = (card: Card): string => {
-  if (typeof card.title === 'string' && card.title.trim()) {
+  if (typeof card.title === "string" && card.title.trim()) {
     return card.title.trim();
   }
 
-  const source = typeof card.questionText === 'string' ? card.questionText : '';
-  const plain = source.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
-  if (!plain) return '無題のカード';
+  const source = typeof card.questionText === "string" ? card.questionText : "";
+  const plain = source
+    .replace(/<[^>]*>/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!plain) return "無題のカード";
   return plain.length > 10 ? `${plain.slice(0, 10)}...` : plain;
 };
 
@@ -61,14 +73,16 @@ function DirectoryTreeNode({
   };
   onCardClick: (cardId: string) => void;
 }) {
-  const isFolderNode = node.kind === 'folder';
-  const isCardNode = node.kind === 'card' && typeof node.sourceCardId === 'string';
+  const isFolderNode = node.kind === "folder";
+  const isCardNode =
+    node.kind === "card" && typeof node.sourceCardId === "string";
   const labelClassName = cn(
-    'relative z-10 inline-flex min-h-7 items-center gap-2 font-serif text-base font-medium leading-[24px] text-[#222222]',
+    "relative z-10 inline-flex min-h-7 items-center gap-2 font-serif text-base font-medium leading-[24px] text-[#222222]",
     isFolderNode
-      ? 'min-h-0 border-b border-slate-400 px-0 pb-[1px] pt-0 leading-[20px]'
-      : 'rounded-md bg-white px-1.5 py-0',
-    isCardNode && 'cursor-pointer transition-colors duration-150 hover:bg-slate-100 focus-visible:bg-slate-100'
+      ? "min-h-0 border-b border-slate-400 px-0 pb-[1px] pt-0 leading-[20px]"
+      : "rounded-md bg-white px-1.5 py-0",
+    isCardNode &&
+      "cursor-pointer transition-colors duration-150 hover:bg-slate-100 focus-visible:bg-slate-100",
   );
   const labelContent = (
     <>
@@ -83,14 +97,14 @@ function DirectoryTreeNode({
           ) : null}
           {badgeVisibility.tags
             ? node.tags.map((tag) => (
-              <TagBadge
-                key={`${node.id}:${tag}`}
-                label={tag}
-                size="xs"
-                colorClass={getTagColor(tag)}
-                className="shrink-0 align-middle"
-              />
-            ))
+                <TagBadge
+                  key={`${node.id}:${tag}`}
+                  label={tag}
+                  size="xs"
+                  colorClass={getTagColor(tag)}
+                  className="shrink-0 align-middle"
+                />
+              ))
             : null}
         </div>
       ) : null}
@@ -105,28 +119,28 @@ function DirectoryTreeNode({
           style={{
             top: 0,
             bottom: 0,
-            borderLeftWidth: '1px',
+            borderLeftWidth: "1px",
           }}
         />
       ) : null}
-      <div className={cn('relative min-h-7', hasParent ? 'pl-3' : 'pl-0')}>
+      <div className={cn("relative min-h-7", hasParent ? "pl-3" : "pl-0")}>
         {hasParent ? (
           <>
             {isLast ? (
               <div
                 className="absolute left-0 top-0 border-slate-300"
                 style={{
-                  height: '50%',
-                  borderLeftWidth: '1px',
+                  height: "50%",
+                  borderLeftWidth: "1px",
                 }}
               />
             ) : null}
             <div
               className="absolute left-0 top-1/2 border-slate-300"
               style={{
-                width: '0.75rem',
-                borderTopWidth: '1px',
-                transform: 'translateY(-0.5px)',
+                width: "0.75rem",
+                borderTopWidth: "1px",
+                transform: "translateY(-0.5px)",
               }}
             />
           </>
@@ -137,16 +151,14 @@ function DirectoryTreeNode({
             onClick={() => onCardClick(node.sourceCardId!)}
             className={cn(
               labelClassName,
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/60'
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/60",
             )}
             aria-label={`${node.name} をプレビュー`}
           >
             {labelContent}
           </button>
         ) : (
-          <div className={labelClassName}>
-            {labelContent}
-          </div>
+          <div className={labelClassName}>{labelContent}</div>
         )}
       </div>
       {node.children.length > 0 ? (
@@ -168,7 +180,11 @@ function DirectoryTreeNode({
   );
 }
 
-export function DirectoryDiagramPane({ folders, cards, documents }: DirectoryDiagramPaneProps) {
+export function DirectoryDiagramPane({
+  folders,
+  cards,
+  documents,
+}: DirectoryDiagramPaneProps) {
   const { tagById, getTagColor } = useTags();
   const [previewCardId, setPreviewCardId] = useState<string | null>(null);
   const {
@@ -184,56 +200,65 @@ export function DirectoryDiagramPane({ folders, cards, documents }: DirectoryDia
 
   const isFilterActive =
     tagFilter.length > 0 ||
-    uncertaintyFilter !== 'any' ||
-    bookmarkedFilter !== 'any' ||
-    draftFilter !== 'any' ||
+    uncertaintyFilter !== "any" ||
+    bookmarkedFilter !== "any" ||
+    draftFilter !== "any" ||
     contentTypeFilter.length < 3;
 
   const allTags = useMemo(() => {
     const tagNames = new Set<string>();
     cards.forEach((card) => {
-      resolveCardTagNames(card.tagIds, card.tags, tagById).forEach((tag) => tagNames.add(tag));
+      resolveCardTagNames(card.tagIds, card.tags, tagById).forEach((tag) =>
+        tagNames.add(tag),
+      );
     });
-    return Array.from(tagNames).sort((a, b) => a.localeCompare(b, 'ja'));
+    return Array.from(tagNames).sort((a, b) => a.localeCompare(b, "ja"));
   }, [cards, tagById]);
 
   const { filteredCards, filteredDocuments } = useMemo(() => {
-    if (!isFilterActive) return { filteredCards: cards, filteredDocuments: documents };
+    if (!isFilterActive)
+      return { filteredCards: cards, filteredDocuments: documents };
 
-    const allowCards = contentTypeFilter.includes('card');
-    const allowPdf = contentTypeFilter.includes('pdf');
-    const allowPptx = contentTypeFilter.includes('pptx');
+    const allowCards = contentTypeFilter.includes("card");
+    const allowPdf = contentTypeFilter.includes("pdf");
+    const allowPptx = contentTypeFilter.includes("pptx");
 
     const nextCards = cards.filter((card) => {
       if (!allowCards) return false;
       if (tagFilter.length > 0) {
-        const resolvedNames = resolveCardTagNames(card.tagIds, card.tags, tagById);
+        const resolvedNames = resolveCardTagNames(
+          card.tagIds,
+          card.tags,
+          tagById,
+        );
         if (resolvedNames.length === 0) return false;
         const cardTagSet = new Set(resolvedNames);
         const tagMatched =
-          tagMatchMode === 'any'
+          tagMatchMode === "any"
             ? tagFilter.some((tag) => cardTagSet.has(tag))
             : tagFilter.every((tag) => cardTagSet.has(tag));
         if (!tagMatched) return false;
       }
 
-      const hasUncertainty = Boolean(card.hasUncertainty ?? card.has_uncertainty);
+      const hasUncertainty = Boolean(
+        card.hasUncertainty ?? card.has_uncertainty,
+      );
       const isBookmarked = Boolean(card.isBookmarked ?? card.is_bookmarked);
       const isDraft = Boolean(card.isDraft ?? card.is_draft);
 
-      if (uncertaintyFilter === 'on' && !hasUncertainty) return false;
-      if (uncertaintyFilter === 'off' && hasUncertainty) return false;
-      if (bookmarkedFilter === 'on' && !isBookmarked) return false;
-      if (bookmarkedFilter === 'off' && isBookmarked) return false;
-      if (draftFilter === 'on' && !isDraft) return false;
-      if (draftFilter === 'off' && isDraft) return false;
+      if (uncertaintyFilter === "on" && !hasUncertainty) return false;
+      if (uncertaintyFilter === "off" && hasUncertainty) return false;
+      if (bookmarkedFilter === "on" && !isBookmarked) return false;
+      if (bookmarkedFilter === "off" && isBookmarked) return false;
+      if (draftFilter === "on" && !isDraft) return false;
+      if (draftFilter === "off" && isDraft) return false;
 
       return true;
     });
     const nextDocuments = documents.filter((document) => {
       if (document.isDeleted) return false;
-      if (document.kind === 'pdf') return allowPdf;
-      if (document.kind === 'pptx') return allowPptx;
+      if (document.kind === "pdf") return allowPdf;
+      if (document.kind === "pptx") return allowPptx;
       return false;
     });
     return { filteredCards: nextCards, filteredDocuments: nextDocuments };
@@ -251,12 +276,14 @@ export function DirectoryDiagramPane({ folders, cards, documents }: DirectoryDia
   ]);
 
   const rootNodes = useMemo(() => {
-    const visibleFolders = folders.filter((folder) => !folder.isDeleted && !folder.isHidden);
+    const visibleFolders = folders.filter(
+      (folder) => !folder.isDeleted && !folder.isHidden,
+    );
     const childFolderMap = new Map<string, Folder[]>();
     const itemMap = new Map<string, TreeNode[]>();
 
     for (const folder of visibleFolders) {
-      const folderId = String(folder.id || folder.folderId || '');
+      const folderId = String(folder.id || folder.folderId || "");
       if (!folderId) continue;
       const parentId = String(folder.parentFolderId || ROOT_KEY);
       const siblings = childFolderMap.get(parentId) ?? [];
@@ -266,13 +293,13 @@ export function DirectoryDiagramPane({ folders, cards, documents }: DirectoryDia
 
     for (const card of filteredCards) {
       if (card.isDeleted) continue;
-      const folderId = String(card.folderId || '');
+      const folderId = String(card.folderId || "");
       if (!folderId) continue;
       const items = itemMap.get(folderId) ?? [];
       const cardTags = resolveCardTagNames(card.tagIds, card.tags, tagById);
       items.push({
         id: `card:${card.id}`,
-        kind: 'card',
+        kind: "card",
         name: getCardLabel(card),
         sourceCardId: card.id,
         tags: cardTags,
@@ -285,13 +312,14 @@ export function DirectoryDiagramPane({ folders, cards, documents }: DirectoryDia
     }
 
     for (const document of filteredDocuments) {
-      const folderId = String(document.folderId || '');
+      const folderId = String(document.folderId || "");
       if (!folderId) continue;
       const items = itemMap.get(folderId) ?? [];
       items.push({
         id: `${document.kind}:${document.id}`,
         kind: document.kind,
-        name: document.title?.trim() || document.fileName || '無題のドキュメント',
+        name:
+          document.title?.trim() || document.fileName || "無題のドキュメント",
         tags: [],
         hasUncertainty: false,
         isBookmarked: false,
@@ -305,27 +333,31 @@ export function DirectoryDiagramPane({ folders, cards, documents }: DirectoryDia
       siblings.sort((a, b) => {
         const orderDiff = Number(a.orderIndex ?? 0) - Number(b.orderIndex ?? 0);
         if (orderDiff !== 0) return orderDiff;
-        return (a.folderName || '').localeCompare(b.folderName || '', 'ja');
+        return (a.folderName || "").localeCompare(b.folderName || "", "ja");
       });
     }
 
     for (const items of itemMap.values()) {
-      items.sort((a, b) => a.name.localeCompare(b.name, 'ja'));
+      items.sort((a, b) => a.name.localeCompare(b.name, "ja"));
     }
 
     const buildNode = (folder: Folder): TreeNode | null => {
-      const id = String(folder.id || folder.folderId || '');
+      const id = String(folder.id || folder.folderId || "");
       const folderChildren = (childFolderMap.get(id) ?? [])
         .map(buildNode)
         .filter((child): child is TreeNode => child !== null);
       const itemChildren = itemMap.get(id) ?? [];
-      if (isFilterActive && folderChildren.length === 0 && itemChildren.length === 0) {
+      if (
+        isFilterActive &&
+        folderChildren.length === 0 &&
+        itemChildren.length === 0
+      ) {
         return null;
       }
       return {
         id,
-        kind: 'folder',
-        name: folder.folderName || '無題のフォルダ',
+        kind: "folder",
+        name: folder.folderName || "無題のフォルダ",
         tags: [],
         hasUncertainty: false,
         isBookmarked: false,
@@ -340,8 +372,11 @@ export function DirectoryDiagramPane({ folders, cards, documents }: DirectoryDia
   }, [filteredDocuments, filteredCards, folders, isFilterActive, tagById]);
 
   const previewCard = useMemo(
-    () => (previewCardId ? cards.find((card) => card.id === previewCardId) ?? null : null),
-    [cards, previewCardId]
+    () =>
+      previewCardId
+        ? (cards.find((card) => card.id === previewCardId) ?? null)
+        : null,
+    [cards, previewCardId],
   );
 
   return (
@@ -349,7 +384,9 @@ export function DirectoryDiagramPane({ folders, cards, documents }: DirectoryDia
       <div className="border-b border-slate-200 px-5 py-4">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-sm font-semibold text-slate-800">ディレクトリ</h2>
+            <h2 className="text-sm font-semibold text-slate-800">
+              ディレクトリ
+            </h2>
           </div>
           <div className="flex items-center gap-2">
             <Popover>
@@ -365,9 +402,17 @@ export function DirectoryDiagramPane({ folders, cards, documents }: DirectoryDia
               <PopoverContent align="end" className="w-52 p-2">
                 <div className="space-y-1">
                   {[
-                    { key: 'uncertainty' as const, label: 'はてなマーク', icon: HelpCircle },
-                    { key: 'bookmarked' as const, label: '星マーク', icon: Star },
-                    { key: 'tags' as const, label: 'タグ', icon: TagIcon },
+                    {
+                      key: "uncertainty" as const,
+                      label: "はてなマーク",
+                      icon: HelpCircle,
+                    },
+                    {
+                      key: "bookmarked" as const,
+                      label: "星マーク",
+                      icon: Star,
+                    },
+                    { key: "tags" as const, label: "タグ", icon: TagIcon },
                   ].map((item) => {
                     const Icon = item.icon;
                     const checked = directoryBadgeVisibility[item.key];
@@ -377,14 +422,28 @@ export function DirectoryDiagramPane({ folders, cards, documents }: DirectoryDia
                         type="button"
                         onClick={() => toggleDirectoryBadgeVisibility(item.key)}
                         className={cn(
-                          'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors',
-                          checked ? 'bg-slate-100 text-slate-900' : 'text-slate-600 hover:bg-slate-50'
+                          "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors",
+                          checked
+                            ? "bg-slate-100 text-slate-900"
+                            : "text-slate-600 hover:bg-slate-50",
                         )}
                       >
-                        <Icon className={cn('h-4 w-4 shrink-0', item.key === 'bookmarked' && checked && 'fill-current text-amber-500')} />
+                        <Icon
+                          className={cn(
+                            "h-4 w-4 shrink-0",
+                            item.key === "bookmarked" &&
+                              checked &&
+                              "fill-current text-amber-500",
+                          )}
+                        />
                         <span className="flex-1 text-left">{item.label}</span>
-                        <span className={cn('text-xs', checked ? 'text-primary-700' : 'text-slate-400')}>
-                          {checked ? '表示' : '非表示'}
+                        <span
+                          className={cn(
+                            "text-xs",
+                            checked ? "text-primary-700" : "text-slate-400",
+                          )}
+                        >
+                          {checked ? "表示" : "非表示"}
                         </span>
                       </button>
                     );
@@ -392,7 +451,10 @@ export function DirectoryDiagramPane({ folders, cards, documents }: DirectoryDia
                 </div>
               </PopoverContent>
             </Popover>
-            <TagFilterPopover allTags={allTags} className="shrink-0 rounded-md border border-slate-200 bg-white hover:bg-slate-50" />
+            <TagFilterPopover
+              allTags={allTags}
+              className="shrink-0 rounded-md border border-slate-200 bg-white hover:bg-slate-50"
+            />
           </div>
         </div>
       </div>
@@ -426,7 +488,10 @@ export function DirectoryDiagramPane({ folders, cards, documents }: DirectoryDia
         )}
       </div>
 
-      <Dialog open={Boolean(previewCard)} onOpenChange={(open) => !open && setPreviewCardId(null)}>
+      <Dialog
+        open={Boolean(previewCard)}
+        onOpenChange={(open) => !open && setPreviewCardId(null)}
+      >
         <DialogPortal>
           <DialogOverlay className="bg-transparent" />
           <DialogContent className="w-screen max-w-none border-none bg-transparent p-0 shadow-none [&>button]:hidden">
@@ -435,7 +500,10 @@ export function DirectoryDiagramPane({ folders, cards, documents }: DirectoryDia
               onClick={() => setPreviewCardId(null)}
             >
               {previewCard ? (
-                <div className="mx-auto w-fit" onClick={(event) => event.stopPropagation()}>
+                <div
+                  className="mx-auto w-fit"
+                  onClick={(event) => event.stopPropagation()}
+                >
                   <Flashcard
                     card={previewCard}
                     previewMode

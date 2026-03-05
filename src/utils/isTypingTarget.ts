@@ -11,11 +11,11 @@ export function isTypingTarget(target: EventTarget | null): boolean {
   if (!target || !(target instanceof HTMLElement)) return false;
 
   const tag = target.tagName;
-  if (tag === 'INPUT' || tag === 'TEXTAREA') return true;
+  if (tag === "INPUT" || tag === "TEXTAREA") return true;
   if (target.isContentEditable) return true;
 
-  const role = target.getAttribute('role');
-  if (role === 'textbox' || role === 'combobox') return true;
+  const role = target.getAttribute("role");
+  if (role === "textbox" || role === "combobox") return true;
 
   if (target.closest('[data-prevent-hotkeys="true"]')) return true;
 

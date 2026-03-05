@@ -1,12 +1,12 @@
-import React from 'react';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { CardShell } from '../frame/CardShell';
-import { HelpCircle, Edit, Trash2, Volume2, Star } from '@/ui/icons';
-import { cn } from '@/lib/utils';
-import { normalizeMemoryStability } from '@/utils/reviewUtils';
-import { resolveCardTagNames } from '@/hooks/useTags';
+import React from "react";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { CardShell } from "../frame/CardShell";
+import { HelpCircle, Edit, Trash2, Volume2, Star } from "@/ui/icons";
+import { cn } from "@/lib/utils";
+import { normalizeMemoryStability } from "@/utils/reviewUtils";
+import { resolveCardTagNames } from "@/hooks/useTags";
 
 function CardItem({
   card,
@@ -22,30 +22,39 @@ function CardItem({
 }: unknown) {
   const stability = normalizeMemoryStability(
     card.memoryStability ?? card.memory_stability,
-    card.currentLevel ?? card.current_level ?? card.level
+    card.currentLevel ?? card.current_level ?? card.level,
   );
   const hasUncertainty = card.hasUncertainty || card.has_uncertainty;
   const hasAudio =
-    (card.questionAudios?.length > 0 || card.question_audios?.length > 0) ||
-    (card.answerAudios?.length > 0 || card.answer_audios?.length > 0);
+    card.questionAudios?.length > 0 ||
+    card.question_audios?.length > 0 ||
+    card.answerAudios?.length > 0 ||
+    card.answer_audios?.length > 0;
 
   const tagNameMap = new Map<string, { name: string }>();
-  if (typeof getTagNameById === 'function' && Array.isArray(card.tagIds)) {
+  if (typeof getTagNameById === "function" && Array.isArray(card.tagIds)) {
     for (const id of card.tagIds) {
-      if (typeof id !== 'string') continue;
+      if (typeof id !== "string") continue;
       const name = getTagNameById(id);
       if (name) tagNameMap.set(id, { name });
     }
   }
-  const userTags = resolveCardTagNames(card.tagIds, card.tags, tagNameMap).map((tagName: string) => ({
-    label: tagName,
-    color: getTagColor ? getTagColor(tagName) : 'bg-slate-100 text-slate-600 border-slate-200',
-  }));
+  const userTags = resolveCardTagNames(card.tagIds, card.tags, tagNameMap).map(
+    (tagName: string) => ({
+      label: tagName,
+      color: getTagColor
+        ? getTagColor(tagName)
+        : "bg-slate-100 text-slate-600 border-slate-200",
+    }),
+  );
 
   const showTitleOutside = Boolean(card.title);
   const headlineText = showTitleOutside
-    ? (card.questionText || card.question_text || '質問テキストがありません')
-    : (card.title || card.questionText || card.question_text || '質問テキストがありません');
+    ? card.questionText || card.question_text || "質問テキストがありません"
+    : card.title ||
+      card.questionText ||
+      card.question_text ||
+      "質問テキストがありません";
 
   const actionItems: React.ReactNode[] = [];
   if (onEdit) {
@@ -55,10 +64,13 @@ function CardItem({
         variant="ghost"
         size="icon"
         className="bg-white/90 backdrop-blur shadow-sm hover:bg-slate-100 rounded-full h-8 w-8"
-        onClick={(e) => { e.stopPropagation(); onEdit(card); }}
+        onClick={(e) => {
+          e.stopPropagation();
+          onEdit(card);
+        }}
       >
         <Edit className="w-3.5 h-3.5 text-slate-600" />
-      </Button>
+      </Button>,
     );
   }
   if (onDelete) {
@@ -68,10 +80,13 @@ function CardItem({
         variant="ghost"
         size="icon"
         className="bg-white/90 backdrop-blur shadow-sm hover:bg-red-50 hover:text-red-500 rounded-full h-8 w-8"
-        onClick={(e) => { e.stopPropagation(); onDelete(card); }}
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete(card);
+        }}
       >
         <Trash2 className="w-3.5 h-3.5" />
-      </Button>
+      </Button>,
     );
   }
 
@@ -80,14 +95,17 @@ function CardItem({
     draggableProps: unknown = {},
     dragHandleProps: unknown = {},
     style: unknown = {},
-    isDragging: boolean = false
+    isDragging: boolean = false,
   ) => (
     <div
       ref={ref}
       style={{ ...style, ...draggableProps.style }}
       {...draggableProps}
       {...dragHandleProps}
-      className={cn('w-full min-w-0', showTitleOutside && 'flex flex-col gap-2')}
+      className={cn(
+        "w-full min-w-0",
+        showTitleOutside && "flex flex-col gap-2",
+      )}
       onClick={() => onView(card)}
     >
       {showTitleOutside && (
@@ -97,10 +115,10 @@ function CardItem({
       )}
       <CardShell
         className={cn(
-          'group w-full min-w-0 text-left transition-all select-none border border-slate-200 shadow-sm hover:shadow-md',
-          isSelected && 'ring-2 ring-primary-600',
-          (card.isDraft || card.is_draft) && 'border-dashed border-slate-300',
-          isDragging && 'z-50 shadow-xl rotate-2'
+          "group w-full min-w-0 text-left transition-all select-none border border-slate-200 shadow-sm hover:shadow-md",
+          isSelected && "ring-2 ring-primary-600",
+          (card.isDraft || card.is_draft) && "border-dashed border-slate-300",
+          isDragging && "z-50 shadow-xl rotate-2",
         )}
         actions={actionItems}
       >
@@ -108,7 +126,12 @@ function CardItem({
           <div className="flex shrink-0 transition-all justify-between items-start mb-4 w-full">
             <div className="flex items-center gap-2">
               <div
-                className={cn('transition-all duration-200', isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100')}
+                className={cn(
+                  "transition-all duration-200",
+                  isSelected
+                    ? "opacity-100"
+                    : "opacity-0 group-hover:opacity-100",
+                )}
                 onClick={(e) => e.stopPropagation()}
               >
                 <Checkbox
@@ -118,7 +141,9 @@ function CardItem({
                 />
               </div>
 
-              <span className="font-bold text-primary-600 text-lg">{Math.round(stability)}%</span>
+              <span className="font-bold text-primary-600 text-lg">
+                {Math.round(stability)}%
+              </span>
 
               {hasUncertainty && (
                 <div className="rounded-full bg-amber-100 text-amber-600 border border-amber-200 flex items-center justify-center w-14 h-14">
@@ -132,7 +157,13 @@ function CardItem({
               )}
 
               {userTags.map((t: unknown, i: number) => (
-                <span key={i} className={cn('px-2 py-1 rounded-full font-bold border text-[10px] surface-convex', t.color)}>
+                <span
+                  key={i}
+                  className={cn(
+                    "px-2 py-1 rounded-full font-bold border text-[10px] surface-convex",
+                    t.color,
+                  )}
+                >
                   {t.label}
                 </span>
               ))}
@@ -163,7 +194,9 @@ function CardItem({
             {(card.answerText || card.answer_text) && (
               <div className="text-sm text-slate-500 leading-relaxed break-anywhere">
                 <div className="opacity-50 mt-2 pt-2 border-t border-slate-100">
-                  <span className="font-bold text-slate-400 block text-xs mb-1">ANSWER</span>
+                  <span className="font-bold text-slate-400 block text-xs mb-1">
+                    ANSWER
+                  </span>
                   <div>{card.answerText || card.answer_text}</div>
                 </div>
               </div>
@@ -186,7 +219,7 @@ function CardItem({
           provided.draggableProps,
           provided.dragHandleProps,
           {},
-          snapshot.isDragging
+          snapshot.isDragging,
         )
       }
     </Draggable>
@@ -206,7 +239,7 @@ export default function CardList({
   getTagNameById,
   onDragEnd,
   enableDrag = false,
-  viewMode = 'grid',
+  viewMode = "grid",
 }: unknown) {
   void onToggleUncertainty;
   void onToggleBookmark;

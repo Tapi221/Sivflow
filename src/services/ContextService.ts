@@ -1,6 +1,6 @@
 /**
  * コンテキストサービス
- * 
+ *
  * ユーザーの状況に応じて適切なメッセージを提供する
  * 同じ処理でも「意味」を変える
  */
@@ -8,7 +8,7 @@ class ContextService {
   /**
    * 初期化コンテキストを取得
    */
-  getInitContext(userId: string): 'first_time' | 'normal' | 'recovery' {
+  getInitContext(userId: string): "first_time" | "normal" | "recovery" {
     // LocalStorage から前回の起動情報を取得
     const lastInitKey = `last_init_${userId}`;
     const lastInit = localStorage.getItem(lastInitKey);
@@ -16,7 +16,7 @@ class ContextService {
     if (!lastInit) {
       // 初回起動
       localStorage.setItem(lastInitKey, Date.now().toString());
-      return 'first_time';
+      return "first_time";
     }
 
     // エラーフラグをチェック
@@ -26,25 +26,25 @@ class ContextService {
     if (errorFlag) {
       // エラー後の復旧
       localStorage.removeItem(errorFlagKey);
-      return 'recovery';
+      return "recovery";
     }
 
     // 通常起動
     localStorage.setItem(lastInitKey, Date.now().toString());
-    return 'normal';
+    return "normal";
   }
 
   /**
    * 同期コンテキストを取得
    */
-  getSyncContext(userId: string): 'initial' | 'update' | 'offline_recovery' {
+  getSyncContext(userId: string): "initial" | "update" | "offline_recovery" {
     // 前回の同期時刻を取得
     const lastSyncKey = `last_sync_${userId}`;
     const lastSync = localStorage.getItem(lastSyncKey);
 
     if (!lastSync) {
       // 初回同期
-      return 'initial';
+      return "initial";
     }
 
     // オフライン期間をチェック
@@ -54,11 +54,11 @@ class ContextService {
 
     // 1時間以上オフラインだった場合
     if (offlineDuration > 60 * 60 * 1000) {
-      return 'offline_recovery';
+      return "offline_recovery";
     }
 
     // 通常の更新
-    return 'update';
+    return "update";
   }
 
   /**
@@ -66,7 +66,7 @@ class ContextService {
    */
   setErrorFlag(userId: string): void {
     const errorFlagKey = `error_flag_${userId}`;
-    localStorage.setItem(errorFlagKey, 'true');
+    localStorage.setItem(errorFlagKey, "true");
   }
 
   /**

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { DragDropContext } from "@hello-pangea/dnd";
-import { ChevronLeft, ChevronRight } from '@/ui/icons';
+import { ChevronLeft, ChevronRight } from "@/ui/icons";
 
 import {
   CardEditorLoadingState,
@@ -8,7 +8,11 @@ import {
   NewCardIdleState,
 } from "@/components/card/editor/CardEditorPaneStates";
 import { SharedCardContent } from "@/components/card/common/SharedCardContent";
-import { CARD_ROW_PX, CANONICAL_CARD_WIDTH, layoutRowsToCardHeightPx } from "@/components/card/common/constants";
+import {
+  CARD_ROW_PX,
+  CANONICAL_CARD_WIDTH,
+  layoutRowsToCardHeightPx,
+} from "@/components/card/common/constants";
 import { useCardEditorContentController } from "@/components/card/editor/useCardEditorContentController";
 import { LinkEditor } from "@/components/card/editor/LinkEditor";
 import { useCardEditorSession } from "@/components/card/editor/useCardEditorSession";
@@ -18,14 +22,22 @@ import { CardFrame } from "@/components/card/frame/CardFrame";
 import { Flashcard } from "@/components/card/frame/Flashcard";
 import MediaUploader from "@/components/card/media/MediaUploader";
 import { CardMetaPanel } from "@/components/card/panels/CardMetaPanel";
-import { DEFAULT_LAYOUT_ROWS, normalizeLayoutRows } from "@/domain/card/extraRows";
+import {
+  DEFAULT_LAYOUT_ROWS,
+  normalizeLayoutRows,
+} from "@/domain/card/extraRows";
 import { useToast } from "@/contexts/ToastContext";
 import { useCards } from "@/hooks/useCards";
 import { useTags } from "@/hooks/useTags";
 import { useUserSettings } from "@/hooks/useUserSettings";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import type { UploadedImage } from "@/types";
 
 interface CardEditorPaneProps {
@@ -36,7 +48,13 @@ interface CardEditorPaneProps {
   onSelectCardId?: (cardId: string) => void;
 }
 
-export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdated, onSelectCardId }: CardEditorPaneProps) {
+export function CardEditorPane({
+  selectedCardId,
+  folderId,
+  autoEdit,
+  onCardUpdated,
+  onSelectCardId,
+}: CardEditorPaneProps) {
   const { settings } = useUserSettings();
   const { success: toastSuccess, error: toastError } = useToast();
   const { tagById, addTag } = useTags();
@@ -44,12 +62,17 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
 
   const [isMetaOpen, setIsMetaOpen] = useState<boolean>(() => {
     if (typeof window === "undefined") return true;
-    return window.localStorage.getItem("card-editor.meta-panel-open") !== "false";
+    return (
+      window.localStorage.getItem("card-editor.meta-panel-open") !== "false"
+    );
   });
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    window.localStorage.setItem("card-editor.meta-panel-open", String(isMetaOpen));
+    window.localStorage.setItem(
+      "card-editor.meta-panel-open",
+      String(isMetaOpen),
+    );
   }, [isMetaOpen]);
 
   const toolbarMountRefQ = useRef<HTMLDivElement | null>(null);
@@ -144,7 +167,12 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
   }
 
   if (isNew && !isEditing) {
-    return <NewCardIdleState onStartEditing={() => setIsEditing(true)} onCancel={handleCancel} />;
+    return (
+      <NewCardIdleState
+        onStartEditing={() => setIsEditing(true)}
+        onCancel={handleCancel}
+      />
+    );
   }
 
   if (!isNew && normalizedSelectedCardId && !selectedCard && !isEditing) {
@@ -170,7 +198,11 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
           onClick={() => setIsMetaOpen((prev) => !prev)}
           aria-label={isMetaOpen ? "close meta panel" : "open meta panel"}
         >
-          {isMetaOpen ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          {isMetaOpen ? (
+            <ChevronRight className="h-4 w-4" />
+          ) : (
+            <ChevronLeft className="h-4 w-4" />
+          )}
         </Button>
 
         <div
@@ -184,10 +216,21 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
             <div className="flex flex-col items-center gap-4">
               <div className="flex w-full items-center justify-end gap-2">
                 <div className="flex items-center gap-2">
-                  <Button type="button" variant="ghost" className="h-9 rounded-full px-4" onClick={handleCancel} disabled={isSaving}>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="h-9 rounded-full px-4"
+                    onClick={handleCancel}
+                    disabled={isSaving}
+                  >
                     キャンセル
                   </Button>
-                  <Button type="button" className="h-9 rounded-full px-6" onClick={handleSave} disabled={isSaving}>
+                  <Button
+                    type="button"
+                    className="h-9 rounded-full px-6"
+                    onClick={handleSave}
+                    disabled={isSaving}
+                  >
                     保存
                   </Button>
                 </div>
@@ -205,7 +248,9 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
                       resizable
                       showResizeHandle
                       resizeStepPx={CARD_ROW_PX}
-                      heightPx={layoutRowsToCardHeightPx(normalizeLayoutRows(draft?.layoutRows))}
+                      heightPx={layoutRowsToCardHeightPx(
+                        normalizeLayoutRows(draft?.layoutRows),
+                      )}
                       lockHeight
                       onHeightChange={scheduleLayoutRowsFromHeight}
                       onMinHeightChange={handleQuestionMinHeightChange}
@@ -243,7 +288,9 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
                       resizable
                       showResizeHandle
                       resizeStepPx={CARD_ROW_PX}
-                      heightPx={layoutRowsToCardHeightPx(normalizeLayoutRows(draft?.layoutRows))}
+                      heightPx={layoutRowsToCardHeightPx(
+                        normalizeLayoutRows(draft?.layoutRows),
+                      )}
                       lockHeight
                       onHeightChange={scheduleLayoutRowsFromHeight}
                       onMinHeightChange={handleAnswerMinHeightChange}
@@ -302,7 +349,11 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
         )}
       </div>
 
-      <Dialog modal={false} open={Boolean(imageDialogSide)} onOpenChange={(open) => !open && setImageDialogSide(null)}>
+      <Dialog
+        modal={false}
+        open={Boolean(imageDialogSide)}
+        onOpenChange={(open) => !open && setImageDialogSide(null)}
+      >
         <DialogContent nonModal className="max-w-3xl">
           <DialogHeader>
             <DialogTitle>画像を追加</DialogTitle>
@@ -311,14 +362,19 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
             <MediaUploader
               type="image"
               urls={getDialogImages(imageDialogSide)}
-              onChange={(next) => setDialogImages(imageDialogSide, next as UploadedImage[])}
+              onChange={(next) =>
+                setDialogImages(imageDialogSide, next as UploadedImage[])
+              }
               maxFiles={10}
             />
           )}
         </DialogContent>
       </Dialog>
 
-      <Dialog open={Boolean(audioDialogSide)} onOpenChange={(open) => !open && setAudioDialogSide(null)}>
+      <Dialog
+        open={Boolean(audioDialogSide)}
+        onOpenChange={(open) => !open && setAudioDialogSide(null)}
+      >
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>音声を追加</DialogTitle>
@@ -327,20 +383,28 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
             <MediaUploader
               type="audio"
               urls={getDialogAudios(audioDialogSide)}
-              onChange={(next) => setDialogAudios(audioDialogSide, next as unknown[])}
+              onChange={(next) =>
+                setDialogAudios(audioDialogSide, next as unknown[])
+              }
               maxFiles={10}
             />
           )}
         </DialogContent>
       </Dialog>
 
-      <Dialog open={Boolean(linkDialogSide)} onOpenChange={(open) => !open && setLinkDialogSide(null)}>
+      <Dialog
+        open={Boolean(linkDialogSide)}
+        onOpenChange={(open) => !open && setLinkDialogSide(null)}
+      >
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>リンクを追加</DialogTitle>
           </DialogHeader>
           {linkDialogSide && (
-            <LinkEditor items={getReferenceItems(linkDialogSide)} onChange={(next) => setReferenceItems(linkDialogSide, next)} />
+            <LinkEditor
+              items={getReferenceItems(linkDialogSide)}
+              onChange={(next) => setReferenceItems(linkDialogSide, next)}
+            />
           )}
         </DialogContent>
       </Dialog>

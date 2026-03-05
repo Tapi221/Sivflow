@@ -1,5 +1,5 @@
-import { deleteDocumentBlobsByUser } from '../documentFileStore';
-import { deleteImageBlobsByUser } from '../imageFileStore';
+import { deleteDocumentBlobsByUser } from "../documentFileStore";
+import { deleteImageBlobsByUser } from "../imageFileStore";
 
 type Clearable = { clear(): Promise<void> };
 type DBWithLegacyTables = {
@@ -26,7 +26,7 @@ export async function clearAllData(db: unknown): Promise<void> {
     db.syncQueue.clear(),
     db.conflicts.clear(),
     dbExt.tags.clear(),
-    dbExt.table('studyLogs').clear(),
+    dbExt.table("studyLogs").clear(),
     db.userId ? deleteDocumentBlobsByUser(db.userId) : Promise.resolve(),
     db.userId ? deleteImageBlobsByUser(db.userId) : Promise.resolve(),
   ]);
@@ -35,8 +35,11 @@ export async function clearAllData(db: unknown): Promise<void> {
 export async function cleanupSyncHistory(db: unknown): Promise<void> {
   const now = Date.now();
   const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
-  await db.syncHistory.where('finishedAt').below(now - THIRTY_DAYS).delete();
-  const all = await db.syncHistory.orderBy('finishedAt').toArray();
+  await db.syncHistory
+    .where("finishedAt")
+    .below(now - THIRTY_DAYS)
+    .delete();
+  const all = await db.syncHistory.orderBy("finishedAt").toArray();
   if (all.length > 100) {
     const toDelete = all.slice(0, all.length - 100);
     await db.syncHistory.bulkDelete(toDelete.map((h: unknown) => h.id));
@@ -46,18 +49,35 @@ export async function cleanupSyncHistory(db: unknown): Promise<void> {
 export async function cleanupSyncErrors(db: unknown): Promise<void> {
   const now = Date.now();
   const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
-  const oldErrors = await db.syncErrors.where('occurredAt').below(now - SEVEN_DAYS).and((e: unknown) => !e.retryable).toArray();
+  const oldErrors = await db.syncErrors
+    .where("occurredAt")
+    .below(now - SEVEN_DAYS)
+    .and((e: unknown) => !e.retryable)
+    .toArray();
   await db.syncErrors.bulkDelete(oldErrors.map((e: unknown) => e.id));
 }
 
-export async function getDeviceMeta(db: unknown, userId: string): Promise<Record<string, unknown> | undefined> {
-  return db.deviceMeta.where('userId').equals(userId).first();
+export async function getDeviceMeta(
+  db: unknown,
+  userId: string,
+): Promise<Record<string, unknown> | undefined> {
+  return db.deviceMeta.where("userId").equals(userId).first();
 }
 
-export async function upsertDeviceMeta(db: unknown, meta: unknown): Promise<void> {
+export async function upsertDeviceMeta(
+  db: unknown,
+  meta: unknown,
+): Promise<void> {
   await db.deviceMeta.put(meta);
 }
 
-export async function getSyncEnabledFolders(db: unknown, userId: string): Promise<Record<string, unknown>[]> {
-  return db.folders.where('userId').equals(userId).and((f: unknown) => f.cloudSyncEnabled === true).toArray();
+export async function getSyncEnabledFolders(
+  db: unknown,
+  userId: string,
+): Promise<Record<string, unknown>[]> {
+  return db.folders
+    .where("userId")
+    .equals(userId)
+    .and((f: unknown) => f.cloudSyncEnabled === true)
+    .toArray();
 }

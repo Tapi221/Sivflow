@@ -1,51 +1,73 @@
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import React, { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, MessageSquare, List, Layers, ArrowUpDown, ChevronRight, FileText, FileX, Copy } from '@/ui/icons';
+import {
+  ArrowLeft,
+  MessageSquare,
+  List,
+  Layers,
+  ArrowUpDown,
+  ChevronRight,
+  FileText,
+  FileX,
+  Copy,
+} from "@/ui/icons";
 
 /**
  * 作成モードを選択するダイアログ
  */
-export default function CreationModeDialog({ open, onOpenChange, onSelectMode, onBack }) {
+export default function CreationModeDialog({
+  open,
+  onOpenChange,
+  onSelectMode,
+  onBack,
+}) {
   const [selectedMainMode, setSelectedMainMode] = useState(null);
 
   const modes = [
     {
-      id: 'qa',
-      title: '一問一答',
-      description: 'シンプルに表面と裏面を入力します',
+      id: "qa",
+      title: "一問一答",
+      description: "シンプルに表面と裏面を入力します",
       icon: <MessageSquare className="w-5 h-5 text-blue-500" />,
-      color: 'bg-blue-50',
-      hasOptions: true
+      color: "bg-blue-50",
+      hasOptions: true,
     },
     {
-      id: 'choice',
-      title: '4択問題',
-      description: '正解と不正解の選択肢を作成します',
+      id: "choice",
+      title: "4択問題",
+      description: "正解と不正解の選択肢を作成します",
       icon: <List className="w-5 h-5 text-green-500" />,
-      color: 'bg-green-50'
+      color: "bg-green-50",
     },
     {
-      id: 'multi',
-      title: '多答問題',
-      description: '複数の正解がある問題を作成します',
+      id: "multi",
+      title: "多答問題",
+      description: "複数の正解がある問題を作成します",
       icon: <Layers className="w-5 h-5 text-purple-500" />,
-      color: 'bg-purple-50'
+      color: "bg-purple-50",
     },
     {
-      id: 'sort',
-      title: '並び替え',
-      description: '正しい順序に並べ替える問題を作成します',
+      id: "sort",
+      title: "並び替え",
+      description: "正しい順序に並べ替える問題を作成します",
       icon: <ArrowUpDown className="w-5 h-5 text-orange-500" />,
-      color: 'bg-orange-50'
+      color: "bg-orange-50",
     },
     {
-      id: 'pair',
-      title: 'ペアモード',
-      description: '問題と解答のセットを一括で作成します',
+      id: "pair",
+      title: "ペアモード",
+      description: "問題と解答のセットを一括で作成します",
       icon: <Copy className="w-5 h-5 text-indigo-500" />,
-      color: 'bg-indigo-50'
-    }
+      color: "bg-indigo-50",
+    },
   ];
 
   const handleBack = () => {
@@ -77,16 +99,16 @@ export default function CreationModeDialog({ open, onOpenChange, onSelectMode, o
           </Button>
           <div>
             <DialogTitle className="text-xl font-bold text-slate-800">
-              {selectedMainMode === 'qa' ? '一問一答の設定' : '作成モード選択'}
+              {selectedMainMode === "qa" ? "一問一答の設定" : "作成モード選択"}
             </DialogTitle>
             <DialogDescription className="text-sm text-slate-500 font-medium">
-              {selectedMainMode === 'qa' 
-                ? 'タイトルの有無を選択してください' 
-                : '作成したいカードの形式を選んでください'}
+              {selectedMainMode === "qa"
+                ? "タイトルの有無を選択してください"
+                : "作成したいカードの形式を選んでください"}
             </DialogDescription>
           </div>
         </DialogHeader>
-        
+
         {!selectedMainMode ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
             {modes.map((mode) => (
@@ -101,13 +123,17 @@ export default function CreationModeDialog({ open, onOpenChange, onSelectMode, o
                 }}
                 className="flex items-center p-4 rounded-2xl border border-slate-100 bg-[#F8FAFB] hover:border-primary-200 hover:bg-white hover:shadow-md transition-all text-left group"
               >
-                <div className={`w-11 h-11 rounded-xl ${mode.color} flex items-center justify-center mr-4 shrink-0 transition-transform group-hover:scale-110 shadow-sm`}>
+                <div
+                  className={`w-11 h-11 rounded-xl ${mode.color} flex items-center justify-center mr-4 shrink-0 transition-transform group-hover:scale-110 shadow-sm`}
+                >
                   {mode.icon}
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-bold text-base text-slate-800 mb-0.5 group-hover:text-primary-600 transition-colors flex items-center justify-between">
                     {mode.title}
-                    {mode.hasOptions && <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-primary-400 group-hover:translate-x-0.5 transition-all" />}
+                    {mode.hasOptions && (
+                      <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-primary-400 group-hover:translate-x-0.5 transition-all" />
+                    )}
                   </h3>
                   <p className="text-xs text-slate-500 leading-relaxed font-medium">
                     {mode.description}
@@ -119,14 +145,16 @@ export default function CreationModeDialog({ open, onOpenChange, onSelectMode, o
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
             <button
-              onClick={() => onSelectMode('qa', { hideTitle: false })}
+              onClick={() => onSelectMode("qa", { hideTitle: false })}
               className="group flex flex-col sm:flex-row items-center sm:items-start p-5 rounded-2xl border border-slate-100 bg-[#F8FAFB] hover:border-blue-200 hover:bg-white hover:shadow-md transition-all text-left gap-4"
             >
               <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-sm">
                 <FileText className="w-6 h-6 text-blue-600" />
               </div>
               <div className="text-center sm:text-left">
-                <h3 className="font-bold text-slate-800 mb-1 group-hover:text-blue-600 transition-colors">タイトルあり</h3>
+                <h3 className="font-bold text-slate-800 mb-1 group-hover:text-blue-600 transition-colors">
+                  タイトルあり
+                </h3>
                 <p className="text-xs text-slate-500 font-medium leading-relaxed">
                   各カードに固有のタイトルを付けます。内容が把握しやすくなります。
                 </p>
@@ -134,14 +162,16 @@ export default function CreationModeDialog({ open, onOpenChange, onSelectMode, o
             </button>
 
             <button
-              onClick={() => onSelectMode('qa', { hideTitle: true })}
+              onClick={() => onSelectMode("qa", { hideTitle: true })}
               className="group flex flex-col sm:flex-row items-center sm:items-start p-5 rounded-2xl border border-slate-100 bg-[#F8FAFB] hover:border-indigo-200 hover:bg-white hover:shadow-md transition-all text-left gap-4"
             >
               <div className="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-sm">
                 <FileX className="w-6 h-6 text-indigo-600" />
               </div>
               <div className="text-center sm:text-left">
-                <h3 className="font-bold text-slate-800 mb-1 group-hover:text-indigo-600 transition-colors">タイトルなし</h3>
+                <h3 className="font-bold text-slate-800 mb-1 group-hover:text-indigo-600 transition-colors">
+                  タイトルなし
+                </h3>
                 <p className="text-xs text-slate-500 font-medium leading-relaxed">
                   タイトルを省略して効率的に作成します。暗記を優先したい時に。
                 </p>

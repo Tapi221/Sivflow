@@ -1,44 +1,46 @@
-import React from 'react';
-import {
-  Plus
-} from '@/ui/icons';
-import { Type } from '@/ui/icons';
-import { Code } from '@/ui/icons';
-import { ImageIcon } from '@/ui/icons';
-import { StratisFormulaIcon } from '@/ui/icons';
-import { StratisMarkdownIcon } from '@/ui/icons';
-import { cn } from '@/lib/utils'; // clsx + tailwind-merge のユーティリティ
-import type { CardBlock } from '@/types';
+import React from "react";
+import { Plus } from "@/ui/icons";
+import { Type } from "@/ui/icons";
+import { Code } from "@/ui/icons";
+import { ImageIcon } from "@/ui/icons";
+import { StratisFormulaIcon } from "@/ui/icons";
+import { StratisMarkdownIcon } from "@/ui/icons";
+import { cn } from "@/lib/utils"; // clsx + tailwind-merge のユーティリティ
+import type { CardBlock } from "@/types";
 
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 
 // ---- Props 定義 ----
 interface BlockToolbarProps {
-  label: string;                              // ツールバー左端に表示するラベル（例: "表面" / "裏面"）
-  onAddBlock: (type: CardBlock['type']) => void; // ブロック追加時に呼ばれるコールバック
-  settings?: unknown;                             // ユーザー設定（ブロックの表示順・可視状態など）
-  hiddenBlockTypes?: CardBlock['type'][];     // 強制的に非表示にするブロック種別リスト
+  label: string; // ツールバー左端に表示するラベル（例: "表面" / "裏面"）
+  onAddBlock: (type: CardBlock["type"]) => void; // ブロック追加時に呼ばれるコールバック
+  settings?: unknown; // ユーザー設定（ブロックの表示順・可視状態など）
+  hiddenBlockTypes?: CardBlock["type"][]; // 強制的に非表示にするブロック種別リスト
   className?: string;
 }
 
 // ブロック設定の内部型（設定オブジェクト1件分）
 type BlockConfig = {
-  type: CardBlock['type'];
+  type: CardBlock["type"];
   label: string;
-  icon?: string;       // アイコン名（文字列）
+  icon?: string; // アイコン名（文字列）
   isVisible?: boolean; // 表示するか（UserSettings 由来）
-  enabled?: boolean;   // 有効か（isVisible の別名的なフラグ）
-  color?: string;      // ホバー時のカラーテーマキー
+  enabled?: boolean; // 有効か（isVisible の別名的なフラグ）
+  color?: string; // ホバー時のカラーテーマキー
 };
 
 // このツールバーが扱える型の許可リスト（settings に未知の type が混入しても無視する）
-const ALLOWED_TYPES: readonly CardBlock['type'][] = [
-  'text', 'code', 'image', 'markdown', 'math',
+const ALLOWED_TYPES: readonly CardBlock["type"][] = [
+  "text",
+  "code",
+  "image",
+  "markdown",
+  "math",
 ] as const;
 
 export const BlockToolbar: React.FC<BlockToolbarProps> = ({
@@ -46,17 +48,16 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
   onAddBlock,
   settings,
   hiddenBlockTypes = [],
-  className
+  className,
 }) => {
-
   // ---- ブロック設定を解決する ----
   // settings.editorBlockSettings があればそれを使い、なければハードコードされたデフォルトを使う
   // filter で ALLOWED_TYPES に含まれない type を弾いてセキュリティ的な安全を確保
   const blockSettings: BlockConfig[] =
-    (settings?.editorBlockSettings && settings.editorBlockSettings.length > 0)
+    settings?.editorBlockSettings && settings.editorBlockSettings.length > 0
       ? settings.editorBlockSettings
           .map((x: unknown) => ({
-            type: x.type as CardBlock['type'],
+            type: x.type as CardBlock["type"],
             label: x.label ?? String(x.type),
             icon: x.icon,
             isVisible: x.isVisible,
@@ -66,39 +67,80 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
           .filter((x: BlockConfig) => ALLOWED_TYPES.includes(x.type))
       : [
           // ↓ デフォルト設定（設定が無い場合のフォールバック）
-          { type: 'text',      label: 'テキスト',  icon: 'Type',        isVisible: true, color: 'primary'  },
-          { type: 'code',      label: 'コード',    icon: 'Code',        isVisible: true, color: 'indigo'   },
-          { type: 'image',     label: '画像',      icon: 'Image',       isVisible: true, color: 'emerald'  },
-          { type: 'markdown',  label: 'Markdown',  icon: 'NotebookPen', isVisible: true, color: 'rose'     },
-          { type: 'math',      label: '数式',      icon: 'Sigma',       isVisible: true, color: 'purple'   },
+          {
+            type: "text",
+            label: "テキスト",
+            icon: "Type",
+            isVisible: true,
+            color: "primary",
+          },
+          {
+            type: "code",
+            label: "コード",
+            icon: "Code",
+            isVisible: true,
+            color: "indigo",
+          },
+          {
+            type: "image",
+            label: "画像",
+            icon: "Image",
+            isVisible: true,
+            color: "emerald",
+          },
+          {
+            type: "markdown",
+            label: "Markdown",
+            icon: "NotebookPen",
+            isVisible: true,
+            color: "rose",
+          },
+          {
+            type: "math",
+            label: "数式",
+            icon: "Sigma",
+            isVisible: true,
+            color: "purple",
+          },
         ];
 
   // ---- アイコン名の文字列 → React コンポーネントへの変換 ----
   // iconName が指定されていればそちらを優先し、なければ type から推測する
-  const getIcon = (iconName: string | undefined, type: CardBlock['type']) => {
+  const getIcon = (iconName: string | undefined, type: CardBlock["type"]) => {
     if (iconName) {
       switch (iconName) {
-        case 'Type':       return Type;
-        case 'Image':      return ImageIcon;
-        case 'Sigma':      return StratisFormulaIcon;
-        case 'Code':       return Code;
-        case 'NotebookPen':return StratisMarkdownIcon;
+        case "Type":
+          return Type;
+        case "Image":
+          return ImageIcon;
+        case "Sigma":
+          return StratisFormulaIcon;
+        case "Code":
+          return Code;
+        case "NotebookPen":
+          return StratisMarkdownIcon;
       }
     }
     // iconName が未定義 or 未知の値だった場合のフォールバック
     switch (type) {
-      case 'text':      return Type;
-      case 'code':      return Code;
-      case 'image':     return ImageIcon;
-      case 'markdown':  return StratisMarkdownIcon;
-      case 'math':      return StratisFormulaIcon;
-      default:          return Plus; // 想定外の type には「＋」アイコンを表示
+      case "text":
+        return Type;
+      case "code":
+        return Code;
+      case "image":
+        return ImageIcon;
+      case "markdown":
+        return StratisMarkdownIcon;
+      case "math":
+        return StratisFormulaIcon;
+      default:
+        return Plus; // 想定外の type には「＋」アイコンを表示
     }
   };
 
   // ---- 特定 type を非表示にすべきか判定 ----
   // hiddenBlockTypes に含まれる / Prop で禁止されている場合は true を返す
-  const isTypeHidden = (type: CardBlock['type']) => {
+  const isTypeHidden = (type: CardBlock["type"]) => {
     if (hiddenBlockTypes.includes(type)) return true;
     return false;
   };
@@ -107,7 +149,7 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
   // isVisible / enabled のどちらも未設定なら表示する（true がデフォルト）
   const visibleConfigs = blockSettings.filter((config) => {
     const isVisible = config.isVisible ?? config.enabled ?? true;
-    if (!isVisible)          return false;
+    if (!isVisible) return false;
     if (isTypeHidden(config.type)) return false;
     return true;
   });
@@ -115,18 +157,17 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
   // ---- カラーテーマキー → Tailwind クラス の対応表 ----
   // Tailwind は動的クラス名を認識できないため、ここで完全なクラス文字列を列挙する必要がある
   const colorMap: Record<string, string> = {
-    primary: 'hover:shadow-primary-500/20 hover:text-primary-600',
-    indigo:  'hover:shadow-indigo-500/30 hover:text-indigo-600',
-    emerald: 'hover:shadow-emerald-500/30 hover:text-emerald-600',
-    cyan:    'hover:shadow-cyan-500/30 hover:text-cyan-600',
-    rose:    'hover:shadow-rose-500/30 hover:text-rose-600',
-    purple:  'hover:shadow-purple-500/30 hover:text-purple-600',
-    slate:   'hover:shadow-slate-500/20 hover:text-slate-600',
+    primary: "hover:shadow-primary-500/20 hover:text-primary-600",
+    indigo: "hover:shadow-indigo-500/30 hover:text-indigo-600",
+    emerald: "hover:shadow-emerald-500/30 hover:text-emerald-600",
+    cyan: "hover:shadow-cyan-500/30 hover:text-cyan-600",
+    rose: "hover:shadow-rose-500/30 hover:text-rose-600",
+    purple: "hover:shadow-purple-500/30 hover:text-purple-600",
+    slate: "hover:shadow-slate-500/20 hover:text-slate-600",
   };
 
   return (
     <div className={cn("mb-1.5 md:mb-2", className)}>
-
       {/* =====================================================
           モバイル (<md): 「追加」ボタン1つ → ドロップダウンで種別選択
           画面が狭いため、全ボタンを並べず DropdownMenu に集約する
@@ -148,7 +189,7 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
                 "h-6 px-2.5 rounded-full bg-white text-slate-600 font-bold text-[10px]",
                 "inline-flex items-center gap-1",
                 "shadow-[0_1px_4px_rgba(0,0,0,0.06)] border border-slate-200/60",
-                "active:scale-95 transition-all"
+                "active:scale-95 transition-all",
               )}
               aria-label={`${label} にブロックを追加`}
             >
@@ -164,7 +205,9 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
           >
             {visibleConfigs.length === 0 ? (
               // 表示できるブロックが0件の場合のフォールバックメッセージ
-              <div className="px-2 py-2 text-xs text-slate-400">追加できるブロックがありません</div>
+              <div className="px-2 py-2 text-xs text-slate-400">
+                追加できるブロックがありません
+              </div>
             ) : (
               visibleConfigs.map((config) => {
                 const Icon = getIcon(config.icon, config.type);
@@ -174,14 +217,16 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
                     onClick={() => onAddBlock(config.type)} // 選択時にブロック追加を親に通知
                     className={cn(
                       "rounded-xl flex items-center gap-2 py-2",
-                      "text-slate-600 focus:text-slate-800"
+                      "text-slate-600 focus:text-slate-800",
                     )}
                   >
                     {/* アイコン */}
                     <span className="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-slate-50 border border-slate-200/60">
                       <Icon className="w-4 h-4" />
                     </span>
-                    <span className="text-[12px] font-bold">{config.label}</span>
+                    <span className="text-[12px] font-bold">
+                      {config.label}
+                    </span>
                   </DropdownMenuItem>
                 );
               })
@@ -214,19 +259,19 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
                 className={cn(
                   "group flex items-center gap-1.5 px-2.5 h-7 rounded-full bg-white text-slate-500 transition-all shrink-0",
                   "active:scale-95 shadow-[0_1px_4px_rgba(0,0,0,0.06)] hover:shadow-md border border-transparent",
-                  colorMap[config.color || 'primary'] // カラーテーマを適用
+                  colorMap[config.color || "primary"], // カラーテーマを適用
                 )}
                 aria-label={`${config.label}を追加`}
               >
                 <Icon className="w-3 h-3" />
-                <span className="text-[9px] font-bold leading-none">{config.label}</span>
+                <span className="text-[9px] font-bold leading-none">
+                  {config.label}
+                </span>
               </button>
             );
           })}
         </div>
       </div>
-
     </div>
   );
 };
-

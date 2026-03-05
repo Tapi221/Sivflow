@@ -1,4 +1,4 @@
-import { Skeleton } from "@/components/ui/skeleton"
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function DashboardSkeleton() {
   return (
@@ -19,7 +19,10 @@ export function DashboardSkeleton() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[...Array(3)].map((_, i) => (
-          <div key={i} className="p-6 rounded-xl border bg-card text-card-foreground shadow-sm space-y-2">
+          <div
+            key={i}
+            className="p-6 rounded-xl border bg-card text-card-foreground shadow-sm space-y-2"
+          >
             <Skeleton className="h-4 w-[100px]" />
             <Skeleton className="h-8 w-[60px]" />
             <Skeleton className="h-2 w-[140px]" />
@@ -33,5 +36,5 @@ export function DashboardSkeleton() {
         <Skeleton className="h-[300px] rounded-xl" />
       </div>
     </div>
-  )
+  );
 }

@@ -1,16 +1,16 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   AlertTriangle,
   Check,
@@ -19,9 +19,9 @@ import {
   Cloud,
   HardDrive,
   Merge,
-} from '@/ui/icons';
-import { useAuth } from '@/contexts/AuthContext';
-import type { SyncConflict } from '@/types/sync';
+} from "@/ui/icons";
+import { useAuth } from "@/contexts/AuthContext";
+import type { SyncConflict } from "@/types/sync";
 
 interface ConflictResolutionDialogProps {
   open: boolean;
@@ -43,7 +43,7 @@ export function ConflictResolutionDialog({
   const [conflicts, setConflicts] = useState<SyncConflict[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [fieldSelections, setFieldSelections] = useState<
-    Record<string, 'local' | 'remote'>
+    Record<string, "local" | "remote">
   >({});
   const [resolving, setResolving] = useState(false);
 
@@ -55,7 +55,7 @@ export function ConflictResolutionDialog({
       setCurrentIndex(0);
       setFieldSelections({});
     } catch (error) {
-      console.error('Failed to load conflicts:', error);
+      console.error("Failed to load conflicts:", error);
     }
   }, [syncService]);
 
@@ -78,7 +78,7 @@ export function ConflictResolutionDialog({
           Object.entries(currentConflict.conflicts).map(([key, value]) => [
             key,
             value.local,
-          ])
+          ]),
         ),
         updatedAt: new Date(),
       };
@@ -101,7 +101,7 @@ export function ConflictResolutionDialog({
           Object.entries(currentConflict.conflicts).map(([key, value]) => [
             key,
             value.remote,
-          ])
+          ]),
         ),
         updatedAt: new Date(),
       };
@@ -122,9 +122,9 @@ export function ConflictResolutionDialog({
         ...currentConflict.autoMerged,
         ...Object.fromEntries(
           Object.entries(currentConflict.conflicts).map(([key, value]) => {
-            const selection = fieldSelections[key] || 'local';
+            const selection = fieldSelections[key] || "local";
             return [key, value[selection]];
-          })
+          }),
         ),
         updatedAt: new Date(),
       };
@@ -148,9 +148,9 @@ export function ConflictResolutionDialog({
 
   const formatValue = (value: unknown): string => {
     if (value === null || value === undefined) {
-      return '(空)';
+      return "(空)";
     }
-    if (typeof value === 'object') {
+    if (typeof value === "object") {
       return JSON.stringify(value, null, 2);
     }
     return String(value);
@@ -158,23 +158,23 @@ export function ConflictResolutionDialog({
 
   const truncateValue = (value: string, maxLength: number = 200): string => {
     if (value.length <= maxLength) return value;
-    return value.substring(0, maxLength) + '...';
+    return value.substring(0, maxLength) + "...";
   };
 
   const getFieldLabel = (key: string): string => {
     const labels: Record<string, string> = {
-      questionText: '問題文',
-      answerText: '解答',
-      title: 'タイトル',
-      name: '名前',
-      description: '説明',
-      level: 'レベル',
-      nextReviewDate: '次回復習日',
-      hasUncertainty: '不確実フラグ',
-      isCompleted: '完了フラグ',
-      isSilent: 'サイレントフラグ',
-      orderIndex: '順序',
-      questionNumber: '問題番号',
+      questionText: "問題文",
+      answerText: "解答",
+      title: "タイトル",
+      name: "名前",
+      description: "説明",
+      level: "レベル",
+      nextReviewDate: "次回復習日",
+      hasUncertainty: "不確実フラグ",
+      isCompleted: "完了フラグ",
+      isSilent: "サイレントフラグ",
+      orderIndex: "順序",
+      questionNumber: "問題番号",
     };
     return labels[key] || key;
   };
@@ -220,7 +220,9 @@ export function ConflictResolutionDialog({
             <CardContent className="pt-4">
               <div className="flex items-center gap-2 text-sm">
                 <Badge>
-                  {currentConflict.entityType === 'card' ? 'カード' : 'フォルダ'}
+                  {currentConflict.entityType === "card"
+                    ? "カード"
+                    : "フォルダ"}
                 </Badge>
                 <span className="text-gray-600">
                   ID: {currentConflict.entityId}
@@ -233,30 +235,31 @@ export function ConflictResolutionDialog({
           {Object.keys(currentConflict.autoMerged).filter(
             (key) =>
               !(key in currentConflict.conflicts) &&
-              !['id', 'userId', 'deviceId', 'createdAt', 'updatedAt'].includes(key)
+              !["id", "userId", "deviceId", "createdAt", "updatedAt"].includes(
+                key,
+              ),
           ).length > 0 && (
             <Card>
               <CardContent className="pt-4">
                 <div className="flex items-center gap-2 mb-3">
                   <Merge className="w-4 h-4 text-green-500" />
-                  <h3 className="font-medium text-green-700">
-                    自動マージ済み
-                  </h3>
+                  <h3 className="font-medium text-green-700">自動マージ済み</h3>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   {Object.entries(currentConflict.autoMerged)
                     .filter(
                       ([key]) =>
                         !(key in currentConflict.conflicts) &&
-                        !['id', 'userId', 'deviceId', 'createdAt', 'updatedAt'].includes(
-                          key
-                        )
+                        ![
+                          "id",
+                          "userId",
+                          "deviceId",
+                          "createdAt",
+                          "updatedAt",
+                        ].includes(key),
                     )
                     .map(([key, value]) => (
-                      <div
-                        key={key}
-                        className="bg-green-50 p-2 rounded"
-                      >
+                      <div key={key} className="bg-green-50 p-2 rounded">
                         <span className="text-gray-500 text-xs">
                           {getFieldLabel(key)}
                         </span>
@@ -283,11 +286,11 @@ export function ConflictResolutionDialog({
                   <h4 className="font-medium mb-3">{getFieldLabel(key)}</h4>
 
                   <RadioGroup
-                    value={fieldSelections[key] || 'local'}
+                    value={fieldSelections[key] || "local"}
                     onValueChange={(val) =>
                       setFieldSelections({
                         ...fieldSelections,
-                        [key]: val as 'local' | 'remote',
+                        [key]: val as "local" | "remote",
                       })
                     }
                     className="space-y-3"
@@ -296,12 +299,15 @@ export function ConflictResolutionDialog({
                       {/* ローカル */}
                       <div
                         className={`border rounded-lg p-4 cursor-pointer transition-colors ${
-                          (fieldSelections[key] || 'local') === 'local'
-                            ? 'border-blue-500 bg-blue-50'
-                            : 'border-gray-200'
+                          (fieldSelections[key] || "local") === "local"
+                            ? "border-blue-500 bg-blue-50"
+                            : "border-gray-200"
                         }`}
                         onClick={() =>
-                          setFieldSelections({ ...fieldSelections, [key]: 'local' })
+                          setFieldSelections({
+                            ...fieldSelections,
+                            [key]: "local",
+                          })
                         }
                       >
                         <div className="flex items-center space-x-2 mb-2">
@@ -324,12 +330,15 @@ export function ConflictResolutionDialog({
                       {/* リモート */}
                       <div
                         className={`border rounded-lg p-4 cursor-pointer transition-colors ${
-                          fieldSelections[key] === 'remote'
-                            ? 'border-green-500 bg-green-50'
-                            : 'border-gray-200'
+                          fieldSelections[key] === "remote"
+                            ? "border-green-500 bg-green-50"
+                            : "border-gray-200"
                         }`}
                         onClick={() =>
-                          setFieldSelections({ ...fieldSelections, [key]: 'remote' })
+                          setFieldSelections({
+                            ...fieldSelections,
+                            [key]: "remote",
+                          })
                         }
                       >
                         <div className="flex items-center space-x-2 mb-2">

@@ -68,7 +68,10 @@ const loadFirebaseRc = () => {
 
   try {
     const parsed = JSON.parse(fs.readFileSync(firebasercPath, "utf8"));
-    const projects = parsed.projects && typeof parsed.projects === "object" ? parsed.projects : {};
+    const projects =
+      parsed.projects && typeof parsed.projects === "object"
+        ? parsed.projects
+        : {};
     return projects;
   } catch (error) {
     fail(`Failed to parse .firebaserc: ${String(error)}`);
@@ -120,10 +123,14 @@ const resolveActiveProjectRaw = () => {
 
 const activeProjectRaw = resolveActiveProjectRaw();
 const activeProjectId = resolveProjectId(activeProjectRaw);
-const activeAlias = resolveAliasFromValue(activeProjectRaw) ?? resolveAliasFromValue(activeProjectId);
+const activeAlias =
+  resolveAliasFromValue(activeProjectRaw) ??
+  resolveAliasFromValue(activeProjectId);
 
 if (!activeProjectId) {
-  fail("Cannot resolve active Firebase project. Use --project or firebase use.");
+  fail(
+    "Cannot resolve active Firebase project. Use --project or firebase use.",
+  );
 }
 
 const stagingProjectId = resolveProjectId("staging");
@@ -136,7 +143,7 @@ if (
   !ALLOW_SAME_PROJECT_ALIAS
 ) {
   fail(
-    "staging and prod aliases resolve to the same project. Set ALLOW_SAME_PROJECT_ALIAS=1 only for emergency."
+    "staging and prod aliases resolve to the same project. Set ALLOW_SAME_PROJECT_ALIAS=1 only for emergency.",
   );
 }
 
@@ -156,7 +163,9 @@ envCandidates.push(path.join(functionsDir, ".env"));
 const findConverterEndpoint = () => {
   for (const candidate of envCandidates) {
     const envMap = parseDotEnvFile(candidate);
-    const endpoint = envMap.get("PPTX_CONVERTER_ENDPOINT") ?? envMap.get("PPTX_CONVERSION_ENDPOINT");
+    const endpoint =
+      envMap.get("PPTX_CONVERTER_ENDPOINT") ??
+      envMap.get("PPTX_CONVERSION_ENDPOINT");
     if (endpoint) {
       return { endpoint, filePath: candidate };
     }
@@ -178,21 +187,30 @@ if (isProdDeploy) {
     normalized.includes("127.0.0.1") ||
     normalized.includes("0.0.0.0");
   const isPlaceholderCloudFunction =
-    normalized.includes("cloudfunctions.net") && normalized.includes("pptxconverterendpoint");
+    normalized.includes("cloudfunctions.net") &&
+    normalized.includes("pptxconverterendpoint");
 
-  if ((isLocal || isPlaceholderCloudFunction) && !ALLOW_PROD_UNSAFE_CONVERTER_ENDPOINT) {
+  if (
+    (isLocal || isPlaceholderCloudFunction) &&
+    !ALLOW_PROD_UNSAFE_CONVERTER_ENDPOINT
+  ) {
     const reasons = [];
     if (isLocal) reasons.push("local endpoint");
-    if (isPlaceholderCloudFunction) reasons.push("placeholder cloudfunctions endpoint");
+    if (isPlaceholderCloudFunction)
+      reasons.push("placeholder cloudfunctions endpoint");
     fail(
-      `Unsafe prod PPTX_CONVERTER_ENDPOINT (${reasons.join(", ")}): ${endpoint}. Set ALLOW_PROD_UNSAFE_CONVERTER_ENDPOINT=1 only for emergency.`
+      `Unsafe prod PPTX_CONVERTER_ENDPOINT (${reasons.join(", ")}): ${endpoint}. Set ALLOW_PROD_UNSAFE_CONVERTER_ENDPOINT=1 only for emergency.`,
     );
   }
 }
 
-info(`Active project: ${activeProjectId}${activeAlias ? ` (alias: ${activeAlias})` : ""}`);
+info(
+  `Active project: ${activeProjectId}${activeAlias ? ` (alias: ${activeAlias})` : ""}`,
+);
 if (endpointSource) {
-  info(`PPTX_CONVERTER_ENDPOINT loaded from ${path.relative(cwd, endpointSource.filePath)}`);
+  info(
+    `PPTX_CONVERTER_ENDPOINT loaded from ${path.relative(cwd, endpointSource.filePath)}`,
+  );
 } else {
   info("PPTX_CONVERTER_ENDPOINT is not configured in functions/.env*");
 }

@@ -1,26 +1,28 @@
 const SENSITIVE_KEYS = new Set([
-  'text',
-  'content',
-  'questionText',
-  'answerText',
-  'question',
-  'answer',
-  'memo',
-  'note',
-  'description',
-  'front',
-  'back',
-  'fields',
-  '_rescueRaw',
+  "text",
+  "content",
+  "questionText",
+  "answerText",
+  "question",
+  "answer",
+  "memo",
+  "note",
+  "description",
+  "front",
+  "back",
+  "fields",
+  "_rescueRaw",
 ]);
 
-const REDACTED = '[REDACTED]';
+const REDACTED = "[REDACTED]";
 
 function sanitizeValue(value: unknown, depth: number): unknown {
-  if (depth > 4) return '[TRUNCATED]';
-  if (typeof value === 'string') return value.length > 120 ? `${value.slice(0, 120)}...` : value;
-  if (Array.isArray(value)) return value.map((item) => sanitizeValue(item, depth + 1));
-  if (!value || typeof value !== 'object') return value;
+  if (depth > 4) return "[TRUNCATED]";
+  if (typeof value === "string")
+    return value.length > 120 ? `${value.slice(0, 120)}...` : value;
+  if (Array.isArray(value))
+    return value.map((item) => sanitizeValue(item, depth + 1));
+  if (!value || typeof value !== "object") return value;
 
   const out: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(value as Record<string, unknown>)) {

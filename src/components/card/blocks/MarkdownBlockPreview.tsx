@@ -1,17 +1,17 @@
-import React from 'react';
-import { cn } from '@/lib/utils';
-import { MarkdownBlockContent } from './MarkdownBlockContent';
+import React from "react";
+import { cn } from "@/lib/utils";
+import { MarkdownBlockContent } from "./MarkdownBlockContent";
 
 interface MarkdownBlockViewProps {
   md: string;
-  align?: 'left' | 'center';
+  align?: "left" | "center";
   className?: string;
   bleedX?: boolean;
 }
 
 export type MarkdownBlockPreviewProps = {
   markdown: string;
-  align?: 'left' | 'center';
+  align?: "left" | "center";
   className?: string;
   bleedX?: boolean;
 };
@@ -29,8 +29,13 @@ export const MarkdownBlockDisplay: React.FC<MarkdownBlockDisplayProps> = ({
 }) => {
   return (
     <div className="markdownBlockSurface w-full max-w-full bg-transparent overflow-visible">
-      <div className={cn('w-full max-w-full px-0 py-0', contentClassName)}>
-        <MarkdownBlockContent markdown={markdown} align={align} className={className} bleedX={bleedX} />
+      <div className={cn("w-full max-w-full px-0 py-0", contentClassName)}>
+        <MarkdownBlockContent
+          markdown={markdown}
+          align={align}
+          className={className}
+          bleedX={bleedX}
+        />
       </div>
     </div>
   );

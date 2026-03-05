@@ -1,11 +1,17 @@
-import React from 'react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { ArrowRight, ExternalLink, Pencil, Trash2 } from '@/ui/icons';
-import { Pin } from '@/ui/icons';
-import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/contexts/ToastContext';
-import { getLocalDb } from '@/services/localDB';
-import type { Card, DocumentItem } from '@/types';
+import React from "react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ArrowRight, ExternalLink, Pencil, Trash2 } from "@/ui/icons";
+import { Pin } from "@/ui/icons";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/contexts/ToastContext";
+import { getLocalDb } from "@/services/localDB";
+import type { Card, DocumentItem } from "@/types";
 
 interface DocumentRowMenuProps {
   doc: DocumentItem;
@@ -21,9 +27,10 @@ interface DocumentRowMenuProps {
 }
 
 const getFolderId = (f: unknown) => f?.id ?? f?.folderId ?? null;
-const getFolderName = (f: unknown) => f?.folderName ?? f?.folder_name ?? '';
-const isSoftDeleted = (item?: { isDeleted?: boolean; is_deleted?: boolean } | null) =>
-  Boolean(item?.isDeleted ?? item?.is_deleted);
+const getFolderName = (f: unknown) => f?.folderName ?? f?.folder_name ?? "";
+const isSoftDeleted = (
+  item?: { isDeleted?: boolean; is_deleted?: boolean } | null,
+) => Boolean(item?.isDeleted ?? item?.is_deleted);
 
 export function DocumentRowMenu({
   doc,
@@ -48,7 +55,8 @@ export function DocumentRowMenu({
       if (order > maxOrder) maxOrder = order;
     }
     for (const d of documents) {
-      if (d.folderId !== folderId || isSoftDeleted(d as any) || d.id === doc.id) continue;
+      if (d.folderId !== folderId || isSoftDeleted(d as any) || d.id === doc.id)
+        continue;
       const order = d.orderIndex ?? -1;
       if (order > maxOrder) maxOrder = order;
     }
@@ -57,7 +65,7 @@ export function DocumentRowMenu({
 
   const getDocDisplayName = () => {
     const legacyName = (doc as any)?.name as string | undefined;
-    return doc.title || doc.fileName || legacyName || '無題のドキュメント';
+    return doc.title || doc.fileName || legacyName || "無題のドキュメント";
   };
 
   const buildNotePdfMeta = (name: string) => ({
@@ -65,22 +73,24 @@ export function DocumentRowMenu({
     name,
     remoteUrl: doc.remoteUrl ?? doc.localUrl ?? doc.downloadUrl ?? null,
     storagePath: doc.storagePath ?? null,
-    contentType: doc.mimeType ?? 'application/pdf',
+    contentType: doc.mimeType ?? "application/pdf",
     size: doc.sizeBytes ?? 0,
   });
 
   const updateNotePdfName = async (folderId: string, name: string) => {
     if (!onUpdateFolder) return;
-    const folder = folders.find(f => getFolderId(f) === folderId);
+    const folder = folders.find((f) => getFolderId(f) === folderId);
     if (!folder) return;
     const existing = folder?.notePdfs ?? folder?.note_pdfs ?? [];
-    const next = existing.map((p: unknown) => (p.id === doc.id ? { ...p, name } : p));
+    const next = existing.map((p: unknown) =>
+      p.id === doc.id ? { ...p, name } : p,
+    );
     await onUpdateFolder(folderId, { notePdfs: next, note_pdfs: next });
   };
 
   const removeNotePdfFromFolder = async (folderId: string) => {
     if (!onUpdateFolder) return;
-    const folder = folders.find(f => getFolderId(f) === folderId);
+    const folder = folders.find((f) => getFolderId(f) === folderId);
     if (!folder) return;
     const existing = folder?.notePdfs ?? folder?.note_pdfs ?? [];
     const next = existing.filter((p: unknown) => p.id !== doc.id);
@@ -90,7 +100,7 @@ export function DocumentRowMenu({
 
   const addNotePdfToFolder = async (folderId: string, name: string) => {
     if (!onUpdateFolder) return;
-    const folder = folders.find(f => getFolderId(f) === folderId);
+    const folder = folders.find((f) => getFolderId(f) === folderId);
     if (!folder) return;
     const existing = folder?.notePdfs ?? folder?.note_pdfs ?? [];
     const next = [...existing, buildNotePdfMeta(name)];
@@ -99,32 +109,43 @@ export function DocumentRowMenu({
 
   const handleRename = async () => {
     const currentName = getDocDisplayName();
-    const nextName = prompt('新しいドキュメント名を入力してください', currentName);
-    if (!nextName || !nextName.trim() || nextName.trim() === currentName) return;
+    const nextName = prompt(
+      "新しいドキュメント名を入力してください",
+      currentName,
+    );
+    if (!nextName || !nextName.trim() || nextName.trim() === currentName)
+      return;
 
     if (!currentUser) {
-      toastError('認証が必要です');
+      toastError("認証が必要です");
       return;
     }
 
     try {
       const db = await getLocalDb(currentUser.uid);
-      await db.updateItem('documents', doc.id, { title: nextName.trim(), updatedAt: new Date() });
+      await db.updateItem("documents", doc.id, {
+        title: nextName.trim(),
+        updatedAt: new Date(),
+      });
       await updateNotePdfName(doc.folderId, nextName.trim());
-      toastSuccess?.('ドキュメント名を更新しました');
+      toastSuccess?.("ドキュメント名を更新しました");
     } catch (err: unknown) {
-      console.error('[DocumentRowMenu] rename failed', err);
-      toastError(err?.message || 'ドキュメント名の変更に失敗しました');
+      console.error("[DocumentRowMenu] rename failed", err);
+      toastError(err?.message || "ドキュメント名の変更に失敗しました");
     }
   };
 
   const handleMove = async () => {
-    const targetFolderName = prompt('移動先のフォルダ名を入力してください(完全一致)');
+    const targetFolderName = prompt(
+      "移動先のフォルダ名を入力してください(完全一致)",
+    );
     if (!targetFolderName) return;
 
-    const targetFolder = folders.find(f => getFolderName(f) === targetFolderName);
+    const targetFolder = folders.find(
+      (f) => getFolderName(f) === targetFolderName,
+    );
     if (!targetFolder) {
-      alert('フォルダが見つかりませんでした。');
+      alert("フォルダが見つかりませんでした。");
       return;
     }
 
@@ -132,14 +153,14 @@ export function DocumentRowMenu({
     if (!targetFolderId || targetFolderId === doc.folderId) return;
 
     if (!currentUser) {
-      toastError('認証が必要です');
+      toastError("認証が必要です");
       return;
     }
 
     try {
       const db = await getLocalDb(currentUser.uid);
       const nextOrderIndex = getNextOrderIndex(targetFolderId);
-      await db.updateItem('documents', doc.id, {
+      await db.updateItem("documents", doc.id, {
         folderId: targetFolderId,
         orderIndex: nextOrderIndex,
         updatedAt: new Date(),
@@ -148,49 +169,47 @@ export function DocumentRowMenu({
       const name = getDocDisplayName();
       await removeNotePdfFromFolder(doc.folderId);
       await addNotePdfToFolder(targetFolderId, name);
-      toastSuccess?.('ドキュメントを移動しました');
+      toastSuccess?.("ドキュメントを移動しました");
     } catch (err: unknown) {
-      console.error('[DocumentRowMenu] move failed', err);
-      toastError(err?.message || 'ドキュメントの移動に失敗しました');
+      console.error("[DocumentRowMenu] move failed", err);
+      toastError(err?.message || "ドキュメントの移動に失敗しました");
     }
   };
 
   const handleDelete = async () => {
-    if (!confirm('このドキュメントを削除しますか?')) return;
+    if (!confirm("このドキュメントを削除しますか?")) return;
     if (!currentUser) {
-      toastError('認証が必要です');
+      toastError("認証が必要です");
       return;
     }
 
     try {
       const db = await getLocalDb(currentUser.uid);
-      await db.softDelete('documents', doc.id);
+      await db.softDelete("documents", doc.id);
       await removeNotePdfFromFolder(doc.folderId);
     } catch (err: unknown) {
-      console.error('[DocumentRowMenu] delete failed', err);
-      toastError(err?.message || 'ドキュメントの削除に失敗しました');
+      console.error("[DocumentRowMenu] delete failed", err);
+      toastError(err?.message || "ドキュメントの削除に失敗しました");
     }
   };
 
   const handleOpenNewTab = () => {
     const url = doc.remoteUrl ?? doc.localUrl ?? doc.downloadUrl;
     if (url) {
-      window.open(url, '_blank', 'noopener,noreferrer');
+      window.open(url, "_blank", "noopener,noreferrer");
     } else {
-      toastError('PDFのURLが見つかりません');
+      toastError("PDFのURLが見つかりません");
     }
   };
 
   return (
     <DropdownMenu open={open} onOpenChange={onOpenChange}>
-      <DropdownMenuTrigger asChild>
-        {children}
-      </DropdownMenuTrigger>
+      <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-48">
         {onTogglePin && (
           <DropdownMenuItem onClick={onTogglePin} className="gap-2">
-            <Pin className={`w-4 h-4 ${isPinned ? 'text-amber-500' : ''}`} />
-            {isPinned ? 'ピン留めを外す' : 'ピン留めに追加'}
+            <Pin className={`w-4 h-4 ${isPinned ? "text-amber-500" : ""}`} />
+            {isPinned ? "ピン留めを外す" : "ピン留めに追加"}
           </DropdownMenuItem>
         )}
         <DropdownMenuItem onClick={handleRename} className="gap-2">

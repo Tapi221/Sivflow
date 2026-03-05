@@ -1,13 +1,28 @@
-import { forwardRef } from 'react';
-import type { SVGProps } from 'react';
+import { forwardRef } from "react";
+import type { SVGProps } from "react";
 
 export type StratisArrowRefresh03IconProps = SVGProps<SVGSVGElement>;
 
-export const StratisArrowRefresh03Icon = forwardRef<SVGSVGElement, StratisArrowRefresh03IconProps>(function StratisArrowRefresh03Icon(
-  { className, ...props },
-  ref
-) {
+export const StratisArrowRefresh03Icon = forwardRef<
+  SVGSVGElement,
+  StratisArrowRefresh03IconProps
+>(function StratisArrowRefresh03Icon({ className, ...props }, ref) {
   return (
-    <svg ref={ref} {...props} fill="none" viewBox="0 0 24 24" className={['block', className].filter(Boolean).join(' ')} xmlns="http://www.w3.org/2000/svg"><path d="M16 19.3688C18.3912 17.9836 20 15.3947 20 12.4295C20 9.06753 17.9318 6.18926 15 5.00086M15 16.9357V20.9412H19M8 5.57241C5.60879 6.95755 4 9.54647 4 12.5117C4 15.8736 6.06817 18.7519 9 19.9403M9 8.00549L9 4L5 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+    <svg
+      ref={ref}
+      {...props}
+      fill="none"
+      viewBox="0 0 24 24"
+      className={["block", className].filter(Boolean).join(" ")}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M16 19.3688C18.3912 17.9836 20 15.3947 20 12.4295C20 9.06753 17.9318 6.18926 15 5.00086M15 16.9357V20.9412H19M8 5.57241C5.60879 6.95755 4 9.54647 4 12.5117C4 15.8736 6.06817 18.7519 9 19.9403M9 8.00549L9 4L5 4"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 });

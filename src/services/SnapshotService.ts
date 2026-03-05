@@ -8,8 +8,8 @@
  * - エクスポートは人間に優しく、内部は厳密
  */
 
-import { getLocalDb, getLocalDBRuntimeStatus } from './localDB';
-import { firestoreDb } from './firebase';
+import { getLocalDb, getLocalDBRuntimeStatus } from "./localDB";
+import { firestoreDb } from "./firebase";
 import {
   collection,
   addDoc,
@@ -19,22 +19,27 @@ import {
   limit,
   getDocs,
   deleteDoc,
-} from 'firebase/firestore';
-import type { AppSnapshot, SnapshotMetadata, SnapshotData, SnapshotComparison } from '@/types/snapshot';
-import { CURRENT_SCHEMA_VERSION, APP_VERSION } from '@/types/snapshot';
-import { normalizeCard, normalizeFolder } from '@/utils';
+} from "firebase/firestore";
+import type {
+  AppSnapshot,
+  SnapshotMetadata,
+  SnapshotData,
+  SnapshotComparison,
+} from "@/types/snapshot";
+import { CURRENT_SCHEMA_VERSION, APP_VERSION } from "@/types/snapshot";
+import { normalizeCard, normalizeFolder } from "@/utils";
 
 /** ローカルストレージのキー */
-const GENERATION_COUNTER_KEY = 'flashcard_generation_counter';
-const SNAPSHOTS_KEY = 'flashcard_snapshots';
+const GENERATION_COUNTER_KEY = "flashcard_generation_counter";
+const SNAPSHOTS_KEY = "flashcard_snapshots";
 const MAX_STORED_SNAPSHOTS = 7; // 最大7世代保持
 
 class SnapshotService {
   private assertPersistentStorageAvailable(operation: string): void {
     const status = getLocalDBRuntimeStatus();
-    if (status.mode === 'fallback') {
+    if (status.mode === "fallback") {
       throw new Error(
-        `[Snapshot] ${operation} is unavailable in fallback mode. Local persistent storage is disabled for this session.`
+        `[Snapshot] ${operation} is unavailable in fallback mode. Local persistent storage is disabled for this session.`,
       );
     }
   }
@@ -63,9 +68,9 @@ class SnapshotService {
    */
   async createSnapshot(
     userId: string,
-    options: { bumpGenerationCounter?: boolean } = {}
+    options: { bumpGenerationCounter?: boolean } = {},
   ): Promise<AppSnapshot> {
-    this.assertPersistentStorageAvailable('createSnapshot');
+    this.assertPersistentStorageAvailable("createSnapshot");
     const db = await getLocalDb(userId);
 
     // 全データを取得（差分ではなく完全コピー）
@@ -86,7 +91,9 @@ class SnapshotService {
 
     const metadata: SnapshotMetadata = {
       schemaVersion: CURRENT_SCHEMA_VERSION,
-      generationCounter: bump ? this.incrementGenerationCounter() : this.getGenerationCounter(),
+      generationCounter: bump
+        ? this.incrementGenerationCounter()
+        : this.getGenerationCounter(),
       createdAt: new Date().toISOString(),
       appVersion: APP_VERSION,
       userId,
@@ -107,22 +114,22 @@ class SnapshotService {
    * ファイル名は人間に優しく、内部データは厳密
    */
   async exportToFile(userId: string, folderName?: string): Promise<void> {
-    this.assertPersistentStorageAvailable('exportToFile');
+    this.assertPersistentStorageAvailable("exportToFile");
     const snapshot = await this.createSnapshot(userId);
 
     // ファイル名は補助情報（名前が変わっても壊れない）
-    const date = new Date().toISOString().split('T')[0];
+    const date = new Date().toISOString().split("T")[0];
     const gen = snapshot.metadata.generationCounter;
-    const folderPart = folderName ? `_${folderName}` : '';
+    const folderPart = folderName ? `_${folderName}` : "";
     const filename = `flashcard${folderPart}_${date}_gen${gen}.json`;
 
     // JSON出力（圧縮なし、可読性優先）
     const json = JSON.stringify(snapshot, null, 2);
 
     // ダウンロード
-    const blob = new Blob([json], { type: 'application/json' });
+    const blob = new Blob([json], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = filename;
     document.body.appendChild(a);
@@ -135,16 +142,18 @@ class SnapshotService {
    * 特定フォルダのみをエクスポート
    */
   async exportFolder(userId: string, folderId: string): Promise<void> {
-    this.assertPersistentStorageAvailable('exportFolder');
+    this.assertPersistentStorageAvailable("exportFolder");
     const fullSnapshot = await this.createSnapshot(userId);
 
     // 対象フォルダとそのカードのみ抽出
     const folder = fullSnapshot.data.folders.find((f) => f.id === folderId);
     if (!folder) {
-      throw new Error('Folder not found');
+      throw new Error("Folder not found");
     }
 
-    const cards = fullSnapshot.data.cards.filter((c) => c.folderId === folderId);
+    const cards = fullSnapshot.data.cards.filter(
+      (c) => c.folderId === folderId,
+    );
 
     // 部分スナップショット
     const partialSnapshot: AppSnapshot = {
@@ -157,15 +166,16 @@ class SnapshotService {
       },
     };
 
-    const folderName = (folder as any).folderName || (folder as any).folder_name || 'unknown';
-    const date = new Date().toISOString().split('T')[0];
+    const folderName =
+      (folder as any).folderName || (folder as any).folder_name || "unknown";
+    const date = new Date().toISOString().split("T")[0];
     const gen = partialSnapshot.metadata.generationCounter;
     const filename = `flashcard_${folderName}_${date}_gen${gen}.json`;
 
     const json = JSON.stringify(partialSnapshot, null, 2);
-    const blob = new Blob([json], { type: 'application/json' });
+    const blob = new Blob([json], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = filename;
     document.body.appendChild(a);
@@ -183,20 +193,22 @@ class SnapshotService {
 
     // 必須フィールドの検証
     if (!parsed.metadata || !parsed.data) {
-      throw new Error('Invalid snapshot format: missing metadata or data');
+      throw new Error("Invalid snapshot format: missing metadata or data");
     }
 
-    if (typeof parsed.metadata.schemaVersion !== 'number') {
-      throw new Error('Invalid snapshot format: missing schemaVersion');
+    if (typeof parsed.metadata.schemaVersion !== "number") {
+      throw new Error("Invalid snapshot format: missing schemaVersion");
     }
 
-    if (typeof parsed.metadata.generationCounter !== 'number') {
-      throw new Error('Invalid snapshot format: missing generationCounter');
+    if (typeof parsed.metadata.generationCounter !== "number") {
+      throw new Error("Invalid snapshot format: missing generationCounter");
     }
 
     // スキーマバージョンチェック
     if (parsed.metadata.schemaVersion > CURRENT_SCHEMA_VERSION) {
-      throw new Error(`Unsupported schema version: ${parsed.metadata.schemaVersion}`);
+      throw new Error(
+        `Unsupported schema version: ${parsed.metadata.schemaVersion}`,
+      );
     }
 
     return parsed as AppSnapshot;
@@ -205,23 +217,28 @@ class SnapshotService {
   /**
    * スナップショットを比較（自動マージはしない、UIに判断を委ねる）
    */
-  async compareWithLocal(imported: AppSnapshot, userId: string): Promise<SnapshotComparison> {
-    this.assertPersistentStorageAvailable('compareWithLocal');
+  async compareWithLocal(
+    imported: AppSnapshot,
+    userId: string,
+  ): Promise<SnapshotComparison> {
+    this.assertPersistentStorageAvailable("compareWithLocal");
 
     // Compareは読み取り操作なので世代カウンターを進めない
-    const local = await this.createSnapshot(userId, { bumpGenerationCounter: false });
+    const local = await this.createSnapshot(userId, {
+      bumpGenerationCounter: false,
+    });
 
     const localGen = local.metadata.generationCounter;
     const importedGen = imported.metadata.generationCounter;
 
     // 正本判定は generationCounter のみ
-    let newerSnapshot: 'local' | 'imported' | 'same';
+    let newerSnapshot: "local" | "imported" | "same";
     if (localGen > importedGen) {
-      newerSnapshot = 'local';
+      newerSnapshot = "local";
     } else if (importedGen > localGen) {
-      newerSnapshot = 'imported';
+      newerSnapshot = "imported";
     } else {
-      newerSnapshot = 'same';
+      newerSnapshot = "same";
     }
 
     // 差分計算（情報提供用、マージには使わない）
@@ -231,12 +248,20 @@ class SnapshotService {
     const localFolderIds = new Set(local.data.folders.map((f) => f.id));
     const importedFolderIds = new Set(imported.data.folders.map((f) => f.id));
 
-    const cardsAdded = [...importedCardIds].filter((id) => !localCardIds.has(id)).length;
-    const cardsRemoved = [...localCardIds].filter((id) => !importedCardIds.has(id)).length;
+    const cardsAdded = [...importedCardIds].filter(
+      (id) => !localCardIds.has(id),
+    ).length;
+    const cardsRemoved = [...localCardIds].filter(
+      (id) => !importedCardIds.has(id),
+    ).length;
     const cardsModified = 0; // 詳細比較は省略
 
-    const foldersAdded = [...importedFolderIds].filter((id) => !localFolderIds.has(id)).length;
-    const foldersRemoved = [...localFolderIds].filter((id) => !importedFolderIds.has(id)).length;
+    const foldersAdded = [...importedFolderIds].filter(
+      (id) => !localFolderIds.has(id),
+    ).length;
+    const foldersRemoved = [...localFolderIds].filter(
+      (id) => !importedFolderIds.has(id),
+    ).length;
 
     return {
       newerSnapshot,
@@ -260,7 +285,7 @@ class SnapshotService {
   async saveToFirestore(snapshot: AppSnapshot): Promise<void> {
     const userId = snapshot.metadata.userId;
     if (!userId) {
-      throw new Error('userId is required for saving snapshot');
+      throw new Error("userId is required for saving snapshot");
     }
 
     // Firestore に保存
@@ -273,8 +298,8 @@ class SnapshotService {
     // 古いスナップショットを削除（最大7世代保持）
     const q = query(
       snapshotsRef,
-      orderBy('metadata.createdAt', 'desc'),
-      limit(100) // 安全のため多めに取得
+      orderBy("metadata.createdAt", "desc"),
+      limit(100), // 安全のため多めに取得
     );
 
     const querySnapshot = await getDocs(q);
@@ -293,7 +318,7 @@ class SnapshotService {
    */
   async getStoredSnapshots(userId: string): Promise<AppSnapshot[]> {
     const snapshotsRef = collection(firestoreDb, `users/${userId}/snapshots`);
-    const q = query(snapshotsRef, orderBy('metadata.createdAt', 'desc'));
+    const q = query(snapshotsRef, orderBy("metadata.createdAt", "desc"));
 
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map((doc) => {
@@ -322,11 +347,13 @@ class SnapshotService {
     const localSnapshots = this.getStoredSnapshotsFromLocalStorage();
 
     if (localSnapshots.length === 0) {
-      console.log('[Snapshot] No local snapshots to migrate');
+      console.log("[Snapshot] No local snapshots to migrate");
       return;
     }
 
-    console.log(`[Snapshot] Migrating ${localSnapshots.length} snapshots to Firestore...`);
+    console.log(
+      `[Snapshot] Migrating ${localSnapshots.length} snapshots to Firestore...`,
+    );
 
     for (const snapshot of localSnapshots) {
       // userId を追加
@@ -336,7 +363,7 @@ class SnapshotService {
 
     // 移行完了後、LocalStorage から削除
     localStorage.removeItem(SNAPSHOTS_KEY);
-    console.log('[Snapshot] Migration complete, LocalStorage cleared');
+    console.log("[Snapshot] Migration complete, LocalStorage cleared");
   }
 }
 

@@ -1,27 +1,29 @@
-import { useCallback, useMemo } from 'react';
-import { useCards } from '@/hooks/useCards';
-import { normalizeCard } from '@/utils';
+import { useCallback, useMemo } from "react";
+import { useCards } from "@/hooks/useCards";
+import { normalizeCard } from "@/utils";
 
-const DRAFT_KEY_PREFIX = 'card-editor-draft-';
+const DRAFT_KEY_PREFIX = "card-editor-draft-";
 
 const makeDraftKey = (cardId: string) => `${DRAFT_KEY_PREFIX}${cardId}`;
 
 const withStableBlockIds = (raw: unknown) => {
   if (!raw) return raw;
 
-  const assignIds = (blocks: unknown[], side: 'q' | 'a') =>
-    (Array.isArray(blocks) ? blocks : []).map((block: unknown, index: number) => {
-      if (typeof block?.id === 'string' && block.id.trim()) return block;
-      return {
-        ...block,
-        id: `${side}-${raw.id ?? raw.cardId ?? 'card'}-${index}-${Date.now()}`,
-      };
-    });
+  const assignIds = (blocks: unknown[], side: "q" | "a") =>
+    (Array.isArray(blocks) ? blocks : []).map(
+      (block: unknown, index: number) => {
+        if (typeof block?.id === "string" && block.id.trim()) return block;
+        return {
+          ...block,
+          id: `${side}-${raw.id ?? raw.cardId ?? "card"}-${index}-${Date.now()}`,
+        };
+      },
+    );
 
   return {
     ...raw,
-    questionBlocks: assignIds(raw.questionBlocks ?? raw.question_blocks, 'q'),
-    answerBlocks: assignIds(raw.answerBlocks ?? raw.answer_blocks, 'a'),
+    questionBlocks: assignIds(raw.questionBlocks ?? raw.question_blocks, "q"),
+    answerBlocks: assignIds(raw.answerBlocks ?? raw.answer_blocks, "a"),
   };
 };
 
@@ -30,7 +32,7 @@ export function getCardDraftKey(cardId: string) {
 }
 
 export function readCardDraft(cardId: string) {
-  if (typeof window === 'undefined') return null;
+  if (typeof window === "undefined") return null;
   const key = makeDraftKey(cardId);
   const raw = window.localStorage.getItem(key);
   if (!raw) return null;
@@ -59,7 +61,9 @@ export function useCardEntity(cardId?: string | null) {
     if (!cardId) return null;
     const draft = readCardDraft(cardId);
     if (!draft) return null;
-    return normalizeCard(withStableBlockIds({ ...(serverCard ?? {}), ...draft, id: cardId }));
+    return normalizeCard(
+      withStableBlockIds({ ...(serverCard ?? {}), ...draft, id: cardId }),
+    );
   }, [cardId, serverCard]);
 
   const effectiveCard = useMemo(() => {

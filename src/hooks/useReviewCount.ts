@@ -1,23 +1,23 @@
-import { useMemo } from 'react';
+import { useMemo } from "react";
 
 const toDate = (value: unknown): Date | null => {
   if (!value) return null;
-  if (typeof value?.toDate === 'function') {
+  if (typeof value?.toDate === "function") {
     const d = value.toDate();
     return d instanceof Date && !isNaN(d.getTime()) ? d : null;
   }
   if (value instanceof Date) return isNaN(value.getTime()) ? null : value;
-  if (typeof value === 'object') {
+  if (typeof value === "object") {
     const seconds =
-      typeof value.seconds === 'number'
+      typeof value.seconds === "number"
         ? value.seconds
-        : typeof value._seconds === 'number'
+        : typeof value._seconds === "number"
           ? value._seconds
           : null;
     const nanoseconds =
-      typeof value.nanoseconds === 'number'
+      typeof value.nanoseconds === "number"
         ? value.nanoseconds
-        : typeof value._nanoseconds === 'number'
+        : typeof value._nanoseconds === "number"
           ? value._nanoseconds
           : 0;
     if (seconds !== null) {
@@ -30,10 +30,17 @@ const toDate = (value: unknown): Date | null => {
 };
 
 const isCardDeleted = (card: unknown) =>
-  Boolean(card?.isDeleted ?? card?.is_deleted ?? card?.deleted ?? card?.deletedAt ?? card?.deleted_at);
+  Boolean(
+    card?.isDeleted ??
+    card?.is_deleted ??
+    card?.deleted ??
+    card?.deletedAt ??
+    card?.deleted_at,
+  );
 
 const isCardDraft = (card: unknown) => Boolean(card?.isDraft ?? card?.is_draft);
-const isCardSilent = (card: unknown) => Boolean(card?.isSilent ?? card?.is_silent);
+const isCardSilent = (card: unknown) =>
+  Boolean(card?.isSilent ?? card?.is_silent);
 
 type UseReviewCountParams = {
   settings: unknown;
@@ -64,24 +71,33 @@ export function useReviewCount({
 
     const autoCarryOver = settings?.autoCarryOver ?? true;
     const today = new Date();
-    const tDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const tDate = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+    );
 
     return cards.filter((card: unknown) => {
-      if (isCardDeleted(card) || isCardDraft(card) || isCardSilent(card)) return false;
+      if (isCardDeleted(card) || isCardDraft(card) || isCardSilent(card))
+        return false;
 
       const dateValue = card?.next_review_date ?? card?.nextReviewDate;
       const reviewDate = toDate(dateValue);
       if (!reviewDate) return false;
 
       const folderId = card?.folderId ?? card?.folder_id;
-      if (folderId !== null && folderId !== undefined && folderId !== '') {
+      if (folderId !== null && folderId !== undefined && folderId !== "") {
         const normalizedFolderId = String(folderId);
         const folder = folderMap.get(normalizedFolderId);
         if (!folder) return false;
         if (folder?.isDeleted ?? folder?.is_deleted) return false;
       }
 
-      const rDate = new Date(reviewDate.getFullYear(), reviewDate.getMonth(), reviewDate.getDate());
+      const rDate = new Date(
+        reviewDate.getFullYear(),
+        reviewDate.getMonth(),
+        reviewDate.getDate(),
+      );
       if (autoCarryOver) {
         return rDate <= tDate;
       }

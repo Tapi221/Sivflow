@@ -1,9 +1,9 @@
-import React from 'react';
-import { CARD_ROW_PX } from '@/components/card/common/constants';
-import { RowSnappedRoot } from '@/components/card/frame/RowSnappedRoot';
+import React from "react";
+import { CARD_ROW_PX } from "@/components/card/common/constants";
+import { RowSnappedRoot } from "@/components/card/frame/RowSnappedRoot";
 
 type CodeBlockFrameProps = {
-  variant?: 'viewer' | 'editor';
+  variant?: "viewer" | "editor";
   /** Notion風: 表示は短縮(例: JS/TS/PY) */
   languageLabel?: string;
   /** hover / a11y 用のフル名(例: JavaScript/TypeScript) */
@@ -23,7 +23,7 @@ type CodeBlockFrameProps = {
  * - 内容領域: codeBlockBody（横スクロール責務を一元化）
  */
 export const CodeBlockFrame: React.FC<CodeBlockFrameProps> = ({
-  variant = 'viewer',
+  variant = "viewer",
   languageLabel,
   languageTitle,
   headerLeft,
@@ -41,7 +41,10 @@ export const CodeBlockFrame: React.FC<CodeBlockFrameProps> = ({
         {showLangLabel && (
           <div
             className="absolute z-20"
-            style={{ left: 'var(--code-header-inset-x)', top: 'var(--code-header-inset-y)' }}
+            style={{
+              left: "var(--code-header-inset-x)",
+              top: "var(--code-header-inset-y)",
+            }}
             // ラベルクリックで親のカード選択やD&Dに干渉しにくくする
             onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
@@ -54,7 +57,10 @@ export const CodeBlockFrame: React.FC<CodeBlockFrameProps> = ({
         {headerLeft && (
           <div
             className="absolute z-20"
-            style={{ left: 'var(--code-header-inset-x)', top: 'var(--code-header-inset-y)' }}
+            style={{
+              left: "var(--code-header-inset-x)",
+              top: "var(--code-header-inset-y)",
+            }}
             onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
           >
@@ -65,7 +71,10 @@ export const CodeBlockFrame: React.FC<CodeBlockFrameProps> = ({
         {headerRight && (
           <div
             className="absolute z-20"
-            style={{ right: 'var(--code-header-inset-x)', top: 'var(--code-header-inset-y)' }}
+            style={{
+              right: "var(--code-header-inset-x)",
+              top: "var(--code-header-inset-y)",
+            }}
             onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
           >

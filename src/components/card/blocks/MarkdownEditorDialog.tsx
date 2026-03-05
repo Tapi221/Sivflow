@@ -1,13 +1,13 @@
-import React from 'react';
+import React from "react";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import AutoResizeTextarea from '@/components/ui/AutoResizeTextarea';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/dialog";
+import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
+import { cn } from "@/lib/utils";
 
 type CSSCustomProperties = React.CSSProperties & Record<`--${string}`, string>;
 
@@ -43,7 +43,7 @@ export const MarkdownEditorDialog: React.FC<MarkdownEditorDialogProps> = ({
   const ringColor =
     accentColor && isHexColor(accentColor)
       ? `${accentColor}40`
-      : 'var(--primary-color-alpha-40)';
+      : "var(--primary-color-alpha-40)";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -71,18 +71,19 @@ export const MarkdownEditorDialog: React.FC<MarkdownEditorDialogProps> = ({
             autoFocus
             textareaClassName="font-serif"
             className={cn(
-              'w-full font-serif text-base font-medium leading-[24px] text-slate-700 placeholder:text-slate-300',
-              'border border-slate-200 rounded-xl px-3 py-2 transition-all duration-300',
-              'focus-visible:ring-2 focus-visible:ring-offset-0 bg-white focus:border-slate-300',
-              'shadow-inner focus:shadow-sm resize-none whitespace-pre-wrap'
+              "w-full font-serif text-base font-medium leading-[24px] text-slate-700 placeholder:text-slate-300",
+              "border border-slate-200 rounded-xl px-3 py-2 transition-all duration-300",
+              "focus-visible:ring-2 focus-visible:ring-offset-0 bg-white focus:border-slate-300",
+              "shadow-inner focus:shadow-sm resize-none whitespace-pre-wrap",
             )}
-            style={
-              { '--tw-ring-color': ringColor } as CSSCustomProperties
-            }
+            style={{ "--tw-ring-color": ringColor } as CSSCustomProperties}
           />
 
           {error && (
-            <p className="text-[10px] text-red-600 mt-1 font-medium" role="alert">
+            <p
+              className="text-[10px] text-red-600 mt-1 font-medium"
+              role="alert"
+            >
               ⚠️ {error}
             </p>
           )}

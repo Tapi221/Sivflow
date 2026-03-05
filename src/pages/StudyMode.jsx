@@ -1,43 +1,43 @@
-import React, { useMemo, useEffect, useCallback, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useUserSettings } from '@/hooks/useUserSettings';
-import { useCards } from '@/hooks/useCards';
-import { useFolders } from '@/hooks/useFolders';
-import { useMutation } from '@tanstack/react-query';
-import { addDoc, collection } from 'firebase/firestore';
-import { getLocalDb } from '../services/localDB';
-import { firestoreDb } from '@/services/firebase';
-import { useAuth } from '@/contexts/AuthContext';
-import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft } from '@/ui/icons';
-import { createPageUrl } from '@/utils';
-import { getDebugStreak } from '@/utils/debugStreak';
-import { sanitizeStreak } from '@/utils/streak';
-import { flags } from '@/features/flags';
-import { TelemetryService } from '@/services/logic/TelemetryService';
-import confetti from 'canvas-confetti';
-import { StampRally } from '@/features/study/StampRally';
-import { useStudyCards } from '@/hooks/useStudyCards';
-import { useStudySession } from '@/hooks/useStudySession';
-import { usePracticeMode } from '@/hooks/usePracticeMode';
-import { StudyEmpty } from '@/features/study/StudyEmpty';
-import { StudyReview } from '@/features/study/StudyReview';
-import { StudyComplete } from '@/features/study/StudyComplete';
-import { PracticeCards } from '@/features/study/PracticeCards';
-import { PracticeSummary } from '@/features/study/PracticeSummary';
+import React, { useMemo, useEffect, useCallback, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useUserSettings } from "@/hooks/useUserSettings";
+import { useCards } from "@/hooks/useCards";
+import { useFolders } from "@/hooks/useFolders";
+import { useMutation } from "@tanstack/react-query";
+import { addDoc, collection } from "firebase/firestore";
+import { getLocalDb } from "../services/localDB";
+import { firestoreDb } from "@/services/firebase";
+import { useAuth } from "@/contexts/AuthContext";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ArrowLeft } from "@/ui/icons";
+import { createPageUrl } from "@/utils";
+import { getDebugStreak } from "@/utils/debugStreak";
+import { sanitizeStreak } from "@/utils/streak";
+import { flags } from "@/features/flags";
+import { TelemetryService } from "@/services/logic/TelemetryService";
+import confetti from "canvas-confetti";
+import { StampRally } from "@/features/study/StampRally";
+import { useStudyCards } from "@/hooks/useStudyCards";
+import { useStudySession } from "@/hooks/useStudySession";
+import { usePracticeMode } from "@/hooks/usePracticeMode";
+import { StudyEmpty } from "@/features/study/StudyEmpty";
+import { StudyReview } from "@/features/study/StudyReview";
+import { StudyComplete } from "@/features/study/StudyComplete";
+import { PracticeCards } from "@/features/study/PracticeCards";
+import { PracticeSummary } from "@/features/study/PracticeSummary";
 
 const RATING_LABELS = {
-  forgot: '忘れた',
-  vague: 'あいまい',
-  remembered: '覚えた',
-  easy: '余裕',
+  forgot: "忘れた",
+  vague: "あいまい",
+  remembered: "覚えた",
+  easy: "余裕",
 };
 
 const RATING_TILES = [
-  { rating: 'forgot', score: 0, Icon: null },
-  { rating: 'vague', score: 1, Icon: null },
-  { rating: 'remembered', score: 2, Icon: null },
-  { rating: 'easy', score: 3, Icon: null },
+  { rating: "forgot", score: 0, Icon: null },
+  { rating: "vague", score: 1, Icon: null },
+  { rating: "remembered", score: 2, Icon: null },
+  { rating: "easy", score: 3, Icon: null },
 ];
 
 export default function StudyMode() {
@@ -46,46 +46,67 @@ export default function StudyMode() {
   const { currentUser } = useAuth();
   const { settings } = useUserSettings();
 
-  const folderId = useMemo(() => new URLSearchParams(location.search).get('folderId'), [location.search]);
+  const folderId = useMemo(
+    () => new URLSearchParams(location.search).get("folderId"),
+    [location.search],
+  );
   const SESSION_KEY = folderId ? `manifolmia_session_${folderId}` : null;
 
   const isDev = useMemo(() => {
-    if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.DEV) return true;
-    if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV !== 'production') return true;
+    if (
+      typeof import.meta !== "undefined" &&
+      import.meta.env &&
+      import.meta.env.DEV
+    )
+      return true;
+    if (
+      typeof process !== "undefined" &&
+      process.env &&
+      process.env.NODE_ENV !== "production"
+    )
+      return true;
     return false;
   }, []);
 
   const previewStampRally = useMemo(() => {
     if (!isDev) return false;
-    if (typeof window === 'undefined') return false;
-    return new URLSearchParams(location.search).get('previewStampRally') === '1';
+    if (typeof window === "undefined") return false;
+    return (
+      new URLSearchParams(location.search).get("previewStampRally") === "1"
+    );
   }, [isDev, location.search]);
 
   useEffect(() => {
     // StudyMode は集中フローなので「ページスクロール」を殺す。
     // 大規模アプリ想定で ref-counting（他画面と競合しても剥がしすぎない）。
     const root = document.documentElement;
-    const prev = Number(root.dataset.noPageScrollCount || '0');
+    const prev = Number(root.dataset.noPageScrollCount || "0");
     const next = prev + 1;
     root.dataset.noPageScrollCount = String(next);
-    root.classList.add('no-page-scroll');
+    root.classList.add("no-page-scroll");
     return () => {
-      const current = Number(root.dataset.noPageScrollCount || '1') - 1;
+      const current = Number(root.dataset.noPageScrollCount || "1") - 1;
       if (current <= 0) {
         delete root.dataset.noPageScrollCount;
-        root.classList.remove('no-page-scroll');
+        root.classList.remove("no-page-scroll");
       } else {
         root.dataset.noPageScrollCount = String(current);
       }
     };
   }, []);
 
-  const { cards: allCards = [], loading: isLoading, updateCard } = useCards(folderId);
+  const {
+    cards: allCards = [],
+    loading: isLoading,
+    updateCard,
+  } = useCards(folderId);
   const { folders = [], loading: foldersLoading } = useFolders();
   const { updateFolder } = useFolders();
 
-  const isPracticeFeatureEnabled = flags.isEnabled('postReviewPractice');
-  const isAdvancedTelemetryEnabled = flags.isEnabled('ENABLE_ADVANCED_TELEMETRY');
+  const isPracticeFeatureEnabled = flags.isEnabled("postReviewPractice");
+  const isAdvancedTelemetryEnabled = flags.isEnabled(
+    "ENABLE_ADVANCED_TELEMETRY",
+  );
   const telemetry = useMemo(() => new TelemetryService(), []);
 
   const { studyCards: dueStudyCards } = useStudyCards({
@@ -112,10 +133,15 @@ export default function StudyMode() {
           const data = JSON.parse(raw);
           const isRecent = Date.now() - data.savedAt < 24 * 60 * 60 * 1000;
           if (isRecent && Array.isArray(data.cardIds)) {
-            const dueById = new Map(dueStudyCards.map(c => [c.id, c]));
-            const remaining = data.cardIds.map(id => dueById.get(id)).filter(Boolean);
+            const dueById = new Map(dueStudyCards.map((c) => [c.id, c]));
+            const remaining = data.cardIds
+              .map((id) => dueById.get(id))
+              .filter(Boolean);
             // 一部のカードが既にレビュー済み（残りが元より少ない）場合のみ復元
-            if (remaining.length > 0 && remaining.length < data.cardIds.length) {
+            if (
+              remaining.length > 0 &&
+              remaining.length < data.cardIds.length
+            ) {
               setSessionSeedCards(remaining);
               return;
             }
@@ -156,14 +182,14 @@ export default function StudyMode() {
   const createStudyLogMutation = useMutation({
     mutationFn: (data) => {
       if (!firestoreDb) return Promise.resolve(null);
-      return addDoc(collection(firestoreDb, 'studyLogs'), data);
+      return addDoc(collection(firestoreDb, "studyLogs"), data);
     },
   });
 
   const createLevelHistoryMutation = useMutation({
     mutationFn: async (data) => {
       const localDb = await getLocalDb(currentUser?.uid);
-      return localDb.addItem('levelHistories', data);
+      return localDb.addItem("levelHistories", data);
     },
   });
 
@@ -187,11 +213,20 @@ export default function StudyMode() {
   // カードを1枚以上レビューしたら進捗を保存（currentIndex が進むたびに更新）
   // 復元時は cardIds のうち dueStudyCards に残っているものだけを使う（自動的に続きになる）
   useEffect(() => {
-    if (!SESSION_KEY || sessionSeedCards.length === 0 || studyComplete || currentIndex === 0) return;
-    localStorage.setItem(SESSION_KEY, JSON.stringify({
-      cardIds: sessionSeedCards.map(c => c.id),
-      savedAt: Date.now(),
-    }));
+    if (
+      !SESSION_KEY ||
+      sessionSeedCards.length === 0 ||
+      studyComplete ||
+      currentIndex === 0
+    )
+      return;
+    localStorage.setItem(
+      SESSION_KEY,
+      JSON.stringify({
+        cardIds: sessionSeedCards.map((c) => c.id),
+        savedAt: Date.now(),
+      }),
+    );
   }, [currentIndex, SESSION_KEY, sessionSeedCards, studyComplete]);
 
   // セッション完了時にクリア
@@ -201,9 +236,10 @@ export default function StudyMode() {
 
   const debugStreak = getDebugStreak();
   const effectiveStreak = debugStreak ?? sanitizeStreak(results?.streak);
-  const stampRallyStreak = studyComplete && debugStreak === null
-    ? Math.max(1, effectiveStreak)
-    : effectiveStreak;
+  const stampRallyStreak =
+    studyComplete && debugStreak === null
+      ? Math.max(1, effectiveStreak)
+      : effectiveStreak;
 
   const finalRatingByCardId = useMemo(() => {
     const finalByCardId = new Map();
@@ -216,20 +252,24 @@ export default function StudyMode() {
   const ratingCounts = useMemo(() => {
     const counts = { forgot: 0, vague: 0, remembered: 0, easy: 0 };
     for (const rating of finalRatingByCardId.values()) {
-      if (Object.prototype.hasOwnProperty.call(counts, rating)) counts[rating] += 1;
+      if (Object.prototype.hasOwnProperty.call(counts, rating))
+        counts[rating] += 1;
     }
     return counts;
   }, [finalRatingByCardId]);
 
-  const logPracticeEvent = useCallback((eventName, context = {}) => {
-    if (!isAdvancedTelemetryEnabled) return;
-    telemetry.log('info', eventName, {
-      event: eventName,
-      userId: currentUser?.uid,
-      sourceSessionId,
-      ...context,
-    });
-  }, [currentUser?.uid, isAdvancedTelemetryEnabled, sourceSessionId, telemetry]);
+  const logPracticeEvent = useCallback(
+    (eventName, context = {}) => {
+      if (!isAdvancedTelemetryEnabled) return;
+      telemetry.log("info", eventName, {
+        event: eventName,
+        userId: currentUser?.uid,
+        sourceSessionId,
+        ...context,
+      });
+    },
+    [currentUser?.uid, isAdvancedTelemetryEnabled, sourceSessionId, telemetry],
+  );
 
   const {
     practiceState,
@@ -274,13 +314,13 @@ export default function StudyMode() {
 
   const handleBack = () => {
     if (practiceState) {
-      handlePracticeExit('back_button');
+      handlePracticeExit("back_button");
       return;
     }
     if (folderId) {
       navigate(createPageUrl(`Folders?folderId=${folderId}`));
     } else {
-      navigate(createPageUrl('Dashboard'));
+      navigate(createPageUrl("Dashboard"));
     }
   };
 
@@ -295,16 +335,23 @@ export default function StudyMode() {
     );
   }
 
-  const practiceCurrentCardId = isPracticeMode && practiceState?.phase === 'cards'
-    ? practiceState.roundQueue[0]
+  const practiceCurrentCardId =
+    isPracticeMode && practiceState?.phase === "cards"
+      ? practiceState.roundQueue[0]
+      : null;
+  const practiceCurrentCard = practiceCurrentCardId
+    ? studyCardById.get(practiceCurrentCardId)
     : null;
-  const practiceCurrentCard = practiceCurrentCardId ? studyCardById.get(practiceCurrentCardId) : null;
-  const currentCard = isPracticeMode ? practiceCurrentCard : studyCards[currentIndex];
+  const currentCard = isPracticeMode
+    ? practiceCurrentCard
+    : studyCards[currentIndex];
 
   const progressPercent = (() => {
     if (studyCards.length === 0) return 0;
     if (isPracticeMode && practiceState) {
-      const done = (practiceState.roundTotal ?? 0) - (practiceState.roundQueue?.length ?? 0);
+      const done =
+        (practiceState.roundTotal ?? 0) -
+        (practiceState.roundQueue?.length ?? 0);
       return (done / (practiceState.roundTotal || 1)) * 100;
     }
     if (studyComplete) return 100;
@@ -312,28 +359,35 @@ export default function StudyMode() {
   })();
 
   const showCounter = isPracticeMode
-    ? practiceState?.phase === 'cards' && (practiceState?.roundTotal ?? 0) > 0
+    ? practiceState?.phase === "cards" && (practiceState?.roundTotal ?? 0) > 0
     : !studyComplete && studyCards.length > 0;
 
   const counterCurrent = isPracticeMode
     ? Math.min(
-      practiceState?.roundTotal ?? 0,
-      (practiceState?.roundTotal ?? 0) - (practiceState?.roundQueue?.length ?? 0) + 1
-    )
+        practiceState?.roundTotal ?? 0,
+        (practiceState?.roundTotal ?? 0) -
+          (practiceState?.roundQueue?.length ?? 0) +
+          1,
+      )
     : currentIndex + 1;
 
-  const counterTotal = isPracticeMode ? (practiceState?.roundTotal ?? 0) : studyCards.length;
-  const isCompletionView = !isPracticeMode && studyComplete && studyCards.length > 0;
+  const counterTotal = isPracticeMode
+    ? (practiceState?.roundTotal ?? 0)
+    : studyCards.length;
+  const isCompletionView =
+    !isPracticeMode && studyComplete && studyCards.length > 0;
 
   return (
     <div
       data-page="review"
       className="reviewPage bg-[#F5F7F8] text-slate-800 h-[100dvh] overflow-hidden flex flex-col"
-      style={{ '--card-max-height': '100%' }}
+      style={{ "--card-max-height": "100%" }}
     >
       <div className="reviewShell max-w-[1600px] mx-auto w-full p-3 md:py-4 md:px-8 h-full flex flex-col min-h-0">
         {!isCompletionView && (
-          <div className={`reviewHeader shrink-0 flex items-center justify-between px-2 ${isCompletionView ? 'mb-3 md:mb-4' : 'mb-4 md:mb-6'}`}>
+          <div
+            className={`reviewHeader shrink-0 flex items-center justify-between px-2 ${isCompletionView ? "mb-3 md:mb-4" : "mb-4 md:mb-6"}`}
+          >
             <div className="flex items-center gap-3 md:gap-4">
               <button
                 type="button"
@@ -345,14 +399,16 @@ export default function StudyMode() {
               </button>
               <div className="min-w-0">
                 <div className="reviewMeta text-[9px] md:text-[10px] font-bold tracking-[0.2em] text-slate-400 uppercase mb-0.5 truncate">
-                  {isPracticeMode ? `追い復習 ROUND ${practiceState.roundNumber}` : 'Knowledge Review'}
+                  {isPracticeMode
+                    ? `追い復習 ROUND ${practiceState.roundNumber}`
+                    : "Knowledge Review"}
                 </div>
                 <h1 className="reviewTitle text-lg md:text-xl font-bold text-slate-700 font-serif truncate">
                   {(() => {
-                    const t = currentCard?.title || '';
-                    const q = currentCard?.questionText || '';
+                    const t = currentCard?.title || "";
+                    const q = currentCard?.questionText || "";
                     if (t && q && t.trim() === q.trim()) return t;
-                    return t || 'Untitled Card';
+                    return t || "Untitled Card";
                   })()}
                 </h1>
               </div>
@@ -360,37 +416,56 @@ export default function StudyMode() {
 
             {showCounter && (
               <div className="flex items-end gap-1 text-slate-400 shrink-0">
-                <span className="text-2xl md:text-3xl font-bold text-slate-700 italic">{counterCurrent}</span>
-                <span className="text-sm md:text-lg font-medium mb-1">/ {counterTotal}</span>
+                <span className="text-2xl md:text-3xl font-bold text-slate-700 italic">
+                  {counterCurrent}
+                </span>
+                <span className="text-sm md:text-lg font-medium mb-1">
+                  / {counterTotal}
+                </span>
               </div>
             )}
           </div>
         )}
 
-        <div className={`reviewProgress shrink-0 w-full h-1.5 bg-slate-200 rounded-full overflow-hidden ${isCompletionView ? 'mb-4 md:mb-5' : 'mb-6 md:mb-8'}`}>
-          <div className="h-full bg-primary-600 transition-all duration-500 ease-out" style={{ width: `${Math.max(0, Math.min(100, progressPercent || 0))}%` }} />
+        <div
+          className={`reviewProgress shrink-0 w-full h-1.5 bg-slate-200 rounded-full overflow-hidden ${isCompletionView ? "mb-4 md:mb-5" : "mb-6 md:mb-8"}`}
+        >
+          <div
+            className="h-full bg-primary-600 transition-all duration-500 ease-out"
+            style={{
+              width: `${Math.max(0, Math.min(100, progressPercent || 0))}%`,
+            }}
+          />
         </div>
 
         {previewStampRally && (
           <div className="shrink-0 mb-6 rounded-2xl border border-slate-200 bg-white/95 p-4">
-            <div className="mb-2 text-[11px] font-semibold tracking-wide text-slate-500">DEV: StampRally Preview</div>
+            <div className="mb-2 text-[11px] font-semibold tracking-wide text-slate-500">
+              DEV: StampRally Preview
+            </div>
             <StampRally currentStreak={effectiveStreak} />
           </div>
         )}
 
         <div
           className={[
-            'flex-1 min-h-0',
+            "flex-1 min-h-0",
             // 画面全体が長くなる系（空/サマリー）はここでスクロールさせる
-            (studyCards.length === 0 || studyComplete || (isPracticeMode && practiceState?.phase === 'summary'))
-              ? 'overflow-y-auto overscroll-contain'
-              : 'overflow-hidden',
-          ].join(' ')}
+            studyCards.length === 0 ||
+            studyComplete ||
+            (isPracticeMode && practiceState?.phase === "summary")
+              ? "overflow-y-auto overscroll-contain"
+              : "overflow-hidden",
+          ].join(" ")}
         >
           {studyCards.length === 0 ? (
-            <StudyEmpty folderId={folderId} navigate={navigate} handleBack={handleBack} />
+            <StudyEmpty
+              folderId={folderId}
+              navigate={navigate}
+              handleBack={handleBack}
+            />
           ) : isPracticeMode ? (
-            practiceState.phase === 'summary' ? (
+            practiceState.phase === "summary" ? (
               <PracticeSummary
                 practiceState={practiceState}
                 handlePracticeContinueRound={handlePracticeContinueRound}
@@ -428,7 +503,11 @@ export default function StudyMode() {
               onResult={handleResult}
               onToggleUncertainty={handleToggleUncertainty}
               onToggleBookmark={handleToggleBookmark}
-              onEdit={(card) => navigate(`/CardEdit?id=${card.id}&folderId=${folderId}&returnTo=study`)}
+              onEdit={(card) =>
+                navigate(
+                  `/CardEdit?id=${card.id}&folderId=${folderId}&returnTo=study`,
+                )
+              }
               showHard={settings?.showReviewHard ?? true}
               showEasy={settings?.showReviewEasy ?? true}
             />

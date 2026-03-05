@@ -25,24 +25,24 @@ const surfaceButtonVariants = cva(
       surface: "convex",
       size: "sm",
     },
-  }
+  },
 );
 
 export interface SurfaceButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+  extends
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof surfaceButtonVariants> {}
 
-export const SurfaceButton = React.forwardRef<HTMLButtonElement, SurfaceButtonProps>(
-  ({ className, surface, size, type, ...props }, ref) => (
-    <button
-      ref={ref}
-      type={type ?? "button"}
-      className={cn(surfaceButtonVariants({ surface, size }), className)}
-      {...props}
-    />
-  )
-);
+export const SurfaceButton = React.forwardRef<
+  HTMLButtonElement,
+  SurfaceButtonProps
+>(({ className, surface, size, type, ...props }, ref) => (
+  <button
+    ref={ref}
+    type={type ?? "button"}
+    className={cn(surfaceButtonVariants({ surface, size }), className)}
+    {...props}
+  />
+));
 
 SurfaceButton.displayName = "SurfaceButton";
-
-

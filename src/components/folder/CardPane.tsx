@@ -1,5 +1,5 @@
-import React from 'react';
-import { CardEditorPane } from './CardEditorPane';
+import React from "react";
+import { CardEditorPane } from "./CardEditorPane";
 
 interface CardPaneProps {
   selectedCardId: string | null;
@@ -7,6 +7,10 @@ interface CardPaneProps {
 }
 
 export function CardPane({ selectedCardId, onCardUpdated }: CardPaneProps) {
-  return <CardEditorPane selectedCardId={selectedCardId} onCardUpdated={onCardUpdated} />;
+  return (
+    <CardEditorPane
+      selectedCardId={selectedCardId}
+      onCardUpdated={onCardUpdated}
+    />
+  );
 }
-

@@ -1,8 +1,8 @@
-import React from 'react';
-import { X } from '@/ui/icons';
-import { cn } from '@/lib/utils';
+import React from "react";
+import { X } from "@/ui/icons";
+import { cn } from "@/lib/utils";
 
-type TagBadgeSize = 'xs' | 'sm' | 'md';
+type TagBadgeSize = "xs" | "sm" | "md";
 
 interface TagBadgeProps {
   label: string;
@@ -17,15 +17,15 @@ interface TagBadgeProps {
 }
 
 const sizeClassMap: Record<TagBadgeSize, string> = {
-  xs: 'text-[10px] px-2 py-0.5 gap-1 leading-4',
-  sm: 'text-[11px] px-2.5 py-1 gap-1.5 leading-4',
-  md: 'text-xs px-3 py-1.5 gap-1.5 leading-5',
+  xs: "text-[10px] px-2 py-0.5 gap-1 leading-4",
+  sm: "text-[11px] px-2.5 py-1 gap-1.5 leading-4",
+  md: "text-xs px-3 py-1.5 gap-1.5 leading-5",
 };
 
 export function TagBadge({
   label,
-  colorClass = 'bg-slate-100 text-slate-600 border-slate-200',
-  size = 'sm',
+  colorClass = "bg-slate-100 text-slate-600 border-slate-200",
+  size = "sm",
   selected = false,
   className,
   textClassName,
@@ -35,7 +35,7 @@ export function TagBadge({
 }: TagBadgeProps) {
   const content = (
     <>
-      <span className={cn('truncate', textClassName)}>{label}</span>
+      <span className={cn("truncate", textClassName)}>{label}</span>
       {onRemove && (
         <button
           type="button"
@@ -53,12 +53,13 @@ export function TagBadge({
   );
 
   const rootClassName = cn(
-    'inline-flex max-w-full items-center rounded-full border font-bold surface-convex transition-all',
+    "inline-flex max-w-full items-center rounded-full border font-bold surface-convex transition-all",
     sizeClassMap[size],
     colorClass,
-    selected && 'ring-2 ring-primary-500/40 scale-[1.02]',
-    onClick && 'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/50',
-    className
+    selected && "ring-2 ring-primary-500/40 scale-[1.02]",
+    onClick &&
+      "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/50",
+    className,
   );
 
   if (onClick) {
@@ -69,9 +70,5 @@ export function TagBadge({
     );
   }
 
-  return (
-    <span className={rootClassName}>
-      {content}
-    </span>
-  );
+  return <span className={rootClassName}>{content}</span>;
 }

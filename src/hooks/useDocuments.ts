@@ -1,8 +1,8 @@
-import { useState, useMemo, useCallback } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { getLocalDb } from '../services/localDB';
-import { useAuth } from '../contexts/AuthContext';
-import type { Document, DocumentItem } from '../types';
+import { useState, useMemo, useCallback } from "react";
+import { useLiveQuery } from "dexie-react-hooks";
+import { getLocalDb } from "../services/localDB";
+import { useAuth } from "../contexts/AuthContext";
+import type { Document, DocumentItem } from "../types";
 
 /**
  * PDFドキュメントを取得・管理するためのフック
@@ -12,31 +12,30 @@ export function useDocuments(folderId?: string) {
   const [error, setError] = useState<string | null>(null);
 
   // useLiveQueryでドキュメントを取得
-  const rawDocuments = useLiveQuery(
-    async () => {
-      try {
-        if (!currentUser) return [];
-        const db = await getLocalDb(currentUser.uid);
-        // documentsテーブルから全件取得
-        const all = await db.documents.toArray();
-        return all;
-      } catch (err: unknown) {
-        console.error(`[useDocuments] Error: ${err.message}`);
-        setError(err.message);
-        return [];
-      }
-    },
-    [currentUser]
-  );
+  const rawDocuments = useLiveQuery(async () => {
+    try {
+      if (!currentUser) return [];
+      const db = await getLocalDb(currentUser.uid);
+      // documentsテーブルから全件取得
+      const all = await db.documents.toArray();
+      return all;
+    } catch (err: unknown) {
+      console.error(`[useDocuments] Error: ${err.message}`);
+      setError(err.message);
+      return [];
+    }
+  }, [currentUser]);
 
   // フィルタリングとソート
   const documents = useMemo(() => {
     if (!rawDocuments) return [];
 
-    let filtered = rawDocuments.filter(d => !(d.isDeleted ?? (d as any).is_deleted));
+    let filtered = rawDocuments.filter(
+      (d) => !(d.isDeleted ?? (d as any).is_deleted),
+    );
 
     if (folderId) {
-      filtered = filtered.filter(d => d.folderId === folderId);
+      filtered = filtered.filter((d) => d.folderId === folderId);
     }
 
     // orderIndexでソート
@@ -49,8 +48,11 @@ export function useDocuments(folderId?: string) {
   // ✅ スパース更新（必要なフィールドのみ更新）
   // viewerState など表示状態の更新時に、他のフィールドを上書きしない
   const updateDocument = useCallback(
-    async (documentId: string, updates: Partial<DocumentItem>): Promise<void> => {
-      if (!currentUser) throw new Error('User not authenticated');
+    async (
+      documentId: string,
+      updates: Partial<DocumentItem>,
+    ): Promise<void> => {
+      if (!currentUser) throw new Error("User not authenticated");
       try {
         const db = await getLocalDb(currentUser.uid);
         const now = new Date();
@@ -62,11 +64,14 @@ export function useDocuments(folderId?: string) {
           deviceId: currentUser.uid, // 簡略版（実装に応じて調整）
         });
       } catch (err: unknown) {
-        console.error(`[useDocuments] Update error: ${err.message}`, { documentId, updates });
+        console.error(`[useDocuments] Update error: ${err.message}`, {
+          documentId,
+          updates,
+        });
         throw err;
       }
     },
-    [currentUser]
+    [currentUser],
   );
 
   return {

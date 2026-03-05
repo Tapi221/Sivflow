@@ -19,7 +19,8 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:e2e:codeblock": "playwright test tests/e2e/codeblock_visual.spec.ts",
-    "test:e2e:card-layout": "playwright test tests/e2e/card_layout_consistency.spec.ts"
+    "test:e2e:card-layout": "playwright test tests/e2e/card_layout_consistency.spec.ts",
+    "format": "prettier . --write"
   },
   "dependencies": {
     "@flaticon/flaticon-uicons": "^3.3.1",

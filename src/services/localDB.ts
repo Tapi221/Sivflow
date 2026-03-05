@@ -1,2 +1,2 @@
 // Facade: all implementation has moved to ./localdb/
-export * from './localdb/index';
+export * from "./localdb/index";

@@ -21,7 +21,11 @@
 
   .text-gradient {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, var(--color-primary-600-hex, #689A98) 0%, #86B4B2 100%);
+    background-image: linear-gradient(
+      135deg,
+      var(--color-primary-600-hex, #689a98) 0%,
+      #86b4b2 100%
+    );
   }
 
   .hover-lift {
@@ -50,7 +54,6 @@
     overflow-wrap: anywhere;
     word-break: break-all;
   }
-
 
   .bg-sidebar {
     background-color: var(--sidebar-bg) !important;
@@ -101,7 +104,7 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.95),
       inset 0 -1px 0 rgba(148, 163, 184, 0.25);
   }
-  
+
   /* 凸(ダイアログ) */
   .surface-dialog-convex {
     border: 1px solid #d7d9de;

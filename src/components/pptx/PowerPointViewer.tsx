@@ -1,7 +1,13 @@
-import React, { useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { cn } from '@/lib/utils';
-import { SlideImage } from './SlideImage';
-import type { SlideData } from './SlideImage';
+import React, {
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
+import { cn } from "@/lib/utils";
+import { SlideImage } from "./SlideImage";
+import type { SlideData } from "./SlideImage";
 
 export interface PowerPointViewerHandle {
   scrollToSlide: (index: number) => void;
@@ -15,9 +21,18 @@ interface PowerPointViewerProps {
   pageGap?: number;
 }
 
-export const PowerPointViewer = React.forwardRef<PowerPointViewerHandle, PowerPointViewerProps>(function PowerPointViewer(
-  { slides, scale, onSlideChange, className, pageGap = 16 }: PowerPointViewerProps,
-  ref
+export const PowerPointViewer = React.forwardRef<
+  PowerPointViewerHandle,
+  PowerPointViewerProps
+>(function PowerPointViewer(
+  {
+    slides,
+    scale,
+    onSlideChange,
+    className,
+    pageGap = 16,
+  }: PowerPointViewerProps,
+  ref,
 ) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollRootEl, setScrollRootEl] = useState<HTMLDivElement | null>(null);
@@ -69,21 +84,29 @@ export const PowerPointViewer = React.forwardRef<PowerPointViewerHandle, PowerPo
     scheduleSlideUpdate();
   }, [wrapWidth, scale, scheduleSlideUpdate]);
 
-  useImperativeHandle(ref, () => ({
-    scrollToSlide: (index: number) => {
-      const container = scrollRef.current;
-      if (!container) return;
-      const clamped = Math.min(Math.max(index, 1), slides.length || 1);
-      const target = slideRefs.current[clamped - 1];
-      if (!target) return;
-      container.scrollTo({ top: target.offsetTop, behavior: 'smooth' });
-    },
-  }), [slides.length]);
+  useImperativeHandle(
+    ref,
+    () => ({
+      scrollToSlide: (index: number) => {
+        const container = scrollRef.current;
+        if (!container) return;
+        const clamped = Math.min(Math.max(index, 1), slides.length || 1);
+        const target = slideRefs.current[clamped - 1];
+        if (!target) return;
+        container.scrollTo({ top: target.offsetTop, behavior: "smooth" });
+      },
+    }),
+    [slides.length],
+  );
 
   const paddingAllowance = 32;
   const chromeAllowance = 12;
-  const availableWidth = Math.max(1, wrapWidth - paddingAllowance - chromeAllowance);
-  const renderWidth = Math.min(1800, Math.max(240, Math.floor(availableWidth))) * scale;
+  const availableWidth = Math.max(
+    1,
+    wrapWidth - paddingAllowance - chromeAllowance,
+  );
+  const renderWidth =
+    Math.min(1800, Math.max(240, Math.floor(availableWidth))) * scale;
 
   return (
     <div
@@ -91,7 +114,7 @@ export const PowerPointViewer = React.forwardRef<PowerPointViewerHandle, PowerPo
         scrollRef.current = el;
         setScrollRootEl((prev) => (prev === el ? prev : el));
       }}
-      className={cn('h-full w-full overflow-auto bg-slate-50', className)}
+      className={cn("h-full w-full overflow-auto bg-slate-50", className)}
     >
       <div className="p-4">
         <div ref={wrapRef} className="w-full min-w-0">

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -8,8 +8,8 @@ import {
   AlertDialogFooter,
   AlertDialogCancel,
   AlertDialogAction,
-} from '@/components/ui/alert-dialog';
-import { AlertTriangle } from '@/ui/icons';
+} from "@/components/ui/alert-dialog";
+import { AlertTriangle } from "@/ui/icons";
 
 interface DeleteFolderDialogProps {
   open: boolean;
@@ -20,24 +20,24 @@ interface DeleteFolderDialogProps {
   onConfirm: (folder: unknown) => Promise<void>;
 }
 
-export default function DeleteFolderDialog({ 
-  open, 
-  onOpenChange, 
+export default function DeleteFolderDialog({
+  open,
+  onOpenChange,
   folder,
   cardCount,
   subfolderCount,
-  onConfirm 
+  onConfirm,
 }: DeleteFolderDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
   const actionButtonRef = React.useRef<HTMLButtonElement | null>(null);
-  
+
   const handleConfirm = async () => {
     setIsLoading(true);
     await onConfirm(folder);
     setIsLoading(false);
     onOpenChange(false);
   };
-  
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent
@@ -56,10 +56,13 @@ export default function DeleteFolderDialog({
           </AlertDialogTitle>
           <div className="space-y-5">
             <AlertDialogDescription className="text-slate-600 font-medium leading-relaxed">
-              <span className="font-bold text-slate-900 bg-slate-100 px-1.5 py-0.5 rounded">「{folder?.folderName || folder?.folder_name || '(名称未設定)'}」</span>
+              <span className="font-bold text-slate-900 bg-slate-100 px-1.5 py-0.5 rounded">
+                「{folder?.folderName || folder?.folder_name || "(名称未設定)"}
+                」
+              </span>
               をごみ箱に移動します。
             </AlertDialogDescription>
-            
+
             {(cardCount > 0 || subfolderCount > 0) && (
               <div className="bg-[#FFFBF0] border border-amber-100 rounded-2xl p-4 text-amber-900 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
                 <p className="font-bold text-sm mb-2 flex items-center gap-2">
@@ -69,18 +72,20 @@ export default function DeleteFolderDialog({
                 <ul className="space-y-1 ml-3.5">
                   {subfolderCount > 0 && (
                     <li className="text-xs font-bold flex items-center gap-2 text-amber-800/80">
-                      サブフォルダ: <span className="text-amber-600">{subfolderCount}件</span>
+                      サブフォルダ:{" "}
+                      <span className="text-amber-600">{subfolderCount}件</span>
                     </li>
                   )}
                   {cardCount > 0 && (
                     <li className="text-xs font-bold flex items-center gap-2 text-amber-800/80">
-                      カード: <span className="text-amber-600">{cardCount}件</span>
+                      カード:{" "}
+                      <span className="text-amber-600">{cardCount}件</span>
                     </li>
                   )}
                 </ul>
               </div>
             )}
-            
+
             <p className="text-[11px] font-bold text-slate-400 flex items-center gap-1.5 px-1">
               <span className="w-1 h-1 rounded-full bg-slate-300" />
               ごみ箱からいつでも復元できます
@@ -88,7 +93,7 @@ export default function DeleteFolderDialog({
           </div>
         </AlertDialogHeader>
         <AlertDialogFooter className="flex flex-row gap-3 mt-2">
-          <AlertDialogCancel 
+          <AlertDialogCancel
             disabled={isLoading}
             className="flex-1 rounded-xl h-11 font-bold text-slate-500 border-slate-200 hover:bg-slate-50 hover:text-slate-600 transition-all border-2"
           >
@@ -106,7 +111,9 @@ export default function DeleteFolderDialog({
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 削除中...
               </div>
-            ) : '削除する'}
+            ) : (
+              "削除する"
+            )}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

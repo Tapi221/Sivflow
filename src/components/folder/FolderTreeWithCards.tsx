@@ -1,17 +1,28 @@
-import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import { FileText, Folder as FolderIcon, SearchX } from '@/ui/icons';
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useMemo,
+  useCallback,
+} from "react";
+import { FileText, Folder as FolderIcon, SearchX } from "@/ui/icons";
 // DnD types and components
-import { DragDropContext } from '@hello-pangea/dnd';
-import { cn } from '@/lib/utils';
-import type { Card, DocumentItem, ExplorerItem, SelectedExplorerItem } from '@/types';
-import DeleteFolderDialog from './DeleteFolderDialog';
-import { useFolderDnD } from '@/hooks/useFolderDnD';
-import { useReliableFileUpload } from '@/hooks/useReliableFileUpload';
-import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/contexts/ToastContext';
-import { getLocalDb } from '@/services/localDB';
-import { saveDocumentBlob } from '@/services/documentFileStore';
-import { getOrCreateDeviceId } from '@/utils/device';
+import { DragDropContext } from "@hello-pangea/dnd";
+import { cn } from "@/lib/utils";
+import type {
+  Card,
+  DocumentItem,
+  ExplorerItem,
+  SelectedExplorerItem,
+} from "@/types";
+import DeleteFolderDialog from "./DeleteFolderDialog";
+import { useFolderDnD } from "@/hooks/useFolderDnD";
+import { useReliableFileUpload } from "@/hooks/useReliableFileUpload";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/contexts/ToastContext";
+import { getLocalDb } from "@/services/localDB";
+import { saveDocumentBlob } from "@/services/documentFileStore";
+import { getOrCreateDeviceId } from "@/utils/device";
 import {
   type FolderTreeNode,
   ROOT_FOLDER_ID,
@@ -31,21 +42,22 @@ import {
   extractPdfFiles,
   extractPptxFiles,
   PPTX_MIME,
-} from './explorer/model/utils';
-import { FolderRow } from './explorer/rows/FolderRow';
-import { EXPLORER_ROW_BASE_CLASS_NAME } from './explorer/rows/shared';
-import BulkTagDialog from '@/components/tag/BulkTagDialog';
-import { FolderTreeArborist } from '@/components/sidebar/FolderTreeArborist';
+} from "./explorer/model/utils";
+import { FolderRow } from "./explorer/rows/FolderRow";
+import { EXPLORER_ROW_BASE_CLASS_NAME } from "./explorer/rows/shared";
+import BulkTagDialog from "@/components/tag/BulkTagDialog";
+import { FolderTreeArborist } from "@/components/sidebar/FolderTreeArborist";
 import {
   buildExplorerTreeData,
   parseSelectedTreeId,
   toExpandedTreeIds,
   toSelectedTreeId,
   type ExplorerTreeNode,
-} from './explorer/tree/arboristAdapter';
+} from "./explorer/tree/arboristAdapter";
 
-const isSoftDeleted = (entity?: { isDeleted?: boolean; is_deleted?: boolean } | null) =>
-  Boolean(entity?.isDeleted ?? entity?.is_deleted);
+const isSoftDeleted = (
+  entity?: { isDeleted?: boolean; is_deleted?: boolean } | null,
+) => Boolean(entity?.isDeleted ?? entity?.is_deleted);
 
 interface FolderTreeWithCardsProps {
   folders: FolderTreeNode[];
@@ -62,11 +74,20 @@ interface FolderTreeWithCardsProps {
   onUpdateCard?: (cardId: string, data: unknown) => Promise<void>;
   onDeleteCard?: (cardId: string) => Promise<void>;
   moveCardToFolder?: (cardId: string, targetFolderId: string) => Promise<void>;
-  moveDocumentToFolder?: (documentId: string, targetFolderId: string) => Promise<void>;
+  moveDocumentToFolder?: (
+    documentId: string,
+    targetFolderId: string,
+  ) => Promise<void>;
   reorderCards?: (folderId: string, cardIds: string[]) => Promise<void>;
-  pinnedItems?: Array<{ type: 'folder' | 'card' | 'document'; id: string }>;
-  onPinItem?: (item: { type: 'folder' | 'card' | 'document'; id: string }) => void;
-  onUnpinItem?: (item: { type: 'folder' | 'card' | 'document'; id: string }) => void;
+  pinnedItems?: Array<{ type: "folder" | "card" | "document"; id: string }>;
+  onPinItem?: (item: {
+    type: "folder" | "card" | "document";
+    id: string;
+  }) => void;
+  onUnpinItem?: (item: {
+    type: "folder" | "card" | "document";
+    id: string;
+  }) => void;
   isFiltering?: boolean;
   createFolderRequestToken?: number;
 
@@ -108,18 +129,23 @@ export function FolderTreeWithCards({
 
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(() => {
     try {
-      const saved = localStorage.getItem('folder_expandedFolders');
+      const saved = localStorage.getItem("folder_expandedFolders");
       return saved ? new Set(JSON.parse(saved)) : new Set();
     } catch (e) {
       return new Set();
     }
   });
 
-  const [optimisticFolders, setOptimisticFolders] = useState<FolderTreeNode[]>([]);
+  const [optimisticFolders, setOptimisticFolders] = useState<FolderTreeNode[]>(
+    [],
+  );
   const [optimisticCards, setOptimisticCards] = useState<Card[]>([]);
 
   useEffect(() => {
-    localStorage.setItem('folder_expandedFolders', JSON.stringify(Array.from(expandedFolders)));
+    localStorage.setItem(
+      "folder_expandedFolders",
+      JSON.stringify(Array.from(expandedFolders)),
+    );
   }, [expandedFolders]);
 
   const treeFolders = useMemo(() => {
@@ -186,7 +212,7 @@ export function FolderTreeWithCards({
 
   // カードが選択されたときも、そのカードが属するフォルダを自動展開
   useEffect(() => {
-    if (!selectedItem || selectedItem.type !== 'card') return;
+    if (!selectedItem || selectedItem.type !== "card") return;
 
     const card = treeCards.find((c) => c.id === selectedItem.id);
     if (!card || !card.folderId) return;
@@ -223,12 +249,18 @@ export function FolderTreeWithCards({
     });
   }, [selectedItem, treeCards, treeFolders]);
 
-  const [newlyCreatedCardId, setNewlyCreatedCardId] = useState<string | null>(null);
+  const [newlyCreatedCardId, setNewlyCreatedCardId] = useState<string | null>(
+    null,
+  );
   const [openRowMenuId, setOpenRowMenuId] = useState<string | null>(null);
 
   // 別のカードを選択したら新規フラグを解除（ただし、新規作成直後の自動選択による遷移は除く）
   useEffect(() => {
-    if (selectedItem?.type === 'card' && selectedItem.id && newlyCreatedCardId) {
+    if (
+      selectedItem?.type === "card" &&
+      selectedItem.id &&
+      newlyCreatedCardId
+    ) {
       if (selectedItem.id !== newlyCreatedCardId) {
         setNewlyCreatedCardId(null);
       }
@@ -236,11 +268,13 @@ export function FolderTreeWithCards({
   }, [selectedItem, newlyCreatedCardId]);
 
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editingName, setEditingName] = useState('');
+  const [editingName, setEditingName] = useState("");
   const [fileDragFolderId, setFileDragFolderId] = useState<string | null>(null);
   const [pendingScrollId, setPendingScrollId] = useState<string | null>(null);
   const [deleteFolderDialogOpen, setDeleteFolderDialogOpen] = useState(false);
-  const [deleteTargetFolderId, setDeleteTargetFolderId] = useState<string | null>(null);
+  const [deleteTargetFolderId, setDeleteTargetFolderId] = useState<
+    string | null
+  >(null);
   const [bulkTagFolderId, setBulkTagFolderId] = useState<string | null>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
   const rowRefs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -248,7 +282,7 @@ export function FolderTreeWithCards({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadTargetFolderIdRef = useRef<string | null>(null);
   const editingIdRef = useRef<string | null>(null);
-  const editingNameRef = useRef('');
+  const editingNameRef = useRef("");
   const optimisticFolderNameRef = useRef<Map<string, string>>(new Map());
   const optimisticCardNameRef = useRef<Map<string, string>>(new Map());
   const renameCancelledRef = useRef(false);
@@ -257,7 +291,7 @@ export function FolderTreeWithCards({
 
   const cardsForDnD = useMemo(
     () => treeCards.filter((card) => !(card as any).__optimistic),
-    [treeCards]
+    [treeCards],
   );
 
   const { onDragEnd } = useFolderDnD({
@@ -294,7 +328,7 @@ export function FolderTreeWithCards({
     const row = rowRefs.current.get(pendingScrollId);
     if (!row) return;
     const rafId = window.requestAnimationFrame(() => {
-      row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      row.scrollIntoView({ block: "nearest", behavior: "smooth" });
       setPendingScrollId(null);
     });
     return () => window.cancelAnimationFrame(rafId);
@@ -307,8 +341,8 @@ export function FolderTreeWithCards({
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => keyHandlerRef.current(e);
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
   }, []);
 
   const toggleFolder = useCallback((folderId: string) => {
@@ -344,12 +378,12 @@ export function FolderTreeWithCards({
 
   const rootFolders = useMemo(
     () => childFoldersByParentId.get(ROOT_FOLDER_ID) ?? [],
-    [childFoldersByParentId]
+    [childFoldersByParentId],
   );
 
   const getChildFolders = useCallback(
     (parentId: string) => childFoldersByParentId.get(parentId) ?? [],
-    [childFoldersByParentId]
+    [childFoldersByParentId],
   );
 
   const visibleFolderIdSet = useMemo(() => {
@@ -369,7 +403,7 @@ export function FolderTreeWithCards({
       if (normalized === ROOT_FOLDER_ID) return ROOT_FOLDER_ID;
       return visibleFolderIdSet.has(normalized) ? normalized : ROOT_FOLDER_ID;
     },
-    [visibleFolderIdSet]
+    [visibleFolderIdSet],
   );
 
   // カード/ドキュメントは「実在するフォルダに紐づくもののみ表示」する。
@@ -379,15 +413,18 @@ export function FolderTreeWithCards({
       if (normalized === ROOT_FOLDER_ID) return false;
       return visibleFolderIdSet.has(normalized);
     },
-    [visibleFolderIdSet]
+    [visibleFolderIdSet],
   );
 
   const directCardCountByFolderId = useMemo(() => {
     const map = new Map<string, number>();
     for (const card of treeCards) {
       if (isSoftDeleted(card as any)) continue;
-      if (!hasValidFolderBinding(card.folderId ?? (card as any).folder_id)) continue;
-      const folderId = resolveTreeFolderId(card.folderId ?? (card as any).folder_id);
+      if (!hasValidFolderBinding(card.folderId ?? (card as any).folder_id))
+        continue;
+      const folderId = resolveTreeFolderId(
+        card.folderId ?? (card as any).folder_id,
+      );
       map.set(folderId, (map.get(folderId) ?? 0) + 1);
     }
     return map;
@@ -395,7 +432,11 @@ export function FolderTreeWithCards({
 
   const deleteTargetFolder = useMemo(() => {
     if (!deleteTargetFolderId) return null;
-    return treeFolders.find((folder) => getFolderId(folder) === deleteTargetFolderId) ?? null;
+    return (
+      treeFolders.find(
+        (folder) => getFolderId(folder) === deleteTargetFolderId,
+      ) ?? null
+    );
   }, [deleteTargetFolderId, treeFolders]);
 
   const deleteTargetCounts = useMemo(() => {
@@ -421,7 +462,10 @@ export function FolderTreeWithCards({
 
   const itemsByFolderId = useMemo(() => {
     const map = new Map<string, ExplorerItem[]>();
-    const pushItem = (folderId: string | null | undefined, item: ExplorerItem) => {
+    const pushItem = (
+      folderId: string | null | undefined,
+      item: ExplorerItem,
+    ) => {
       const key = normalizeFolderId(folderId);
       const list = map.get(key);
       if (list) list.push(item);
@@ -430,13 +474,21 @@ export function FolderTreeWithCards({
 
     for (const card of treeCards) {
       if (isSoftDeleted(card as any)) continue;
-      if (!hasValidFolderBinding(card.folderId ?? (card as any).folder_id)) continue;
-      pushItem(resolveTreeFolderId(card.folderId ?? (card as any).folder_id), { type: 'card', data: card });
+      if (!hasValidFolderBinding(card.folderId ?? (card as any).folder_id))
+        continue;
+      pushItem(resolveTreeFolderId(card.folderId ?? (card as any).folder_id), {
+        type: "card",
+        data: card,
+      });
     }
     for (const doc of documents) {
       if (isSoftDeleted(doc as any)) continue;
-      if (!hasValidFolderBinding(doc.folderId ?? (doc as any).folder_id)) continue;
-      pushItem(resolveTreeFolderId(doc.folderId ?? (doc as any).folder_id), { type: 'document', data: doc });
+      if (!hasValidFolderBinding(doc.folderId ?? (doc as any).folder_id))
+        continue;
+      pushItem(resolveTreeFolderId(doc.folderId ?? (doc as any).folder_id), {
+        type: "document",
+        data: doc,
+      });
     }
 
     for (const list of map.values()) {
@@ -457,7 +509,7 @@ export function FolderTreeWithCards({
   const getFolderItems = useCallback(
     (folderId: string | null): ExplorerItem[] =>
       itemsByFolderId.get(normalizeFolderId(folderId)) ?? [],
-    [itemsByFolderId]
+    [itemsByFolderId],
   );
 
   // Memoize match counts for filtering to avoid expensive recursive recalculation
@@ -471,7 +523,7 @@ export function FolderTreeWithCards({
       const children = getChildFolders(folderId);
       const childCount = children.reduce(
         (acc, child) => acc + calcMatchCount(getFolderId(child)),
-        0
+        0,
       );
       const total = directCount + childCount;
       map.set(folderId, total);
@@ -508,30 +560,34 @@ export function FolderTreeWithCards({
     }) => {
       // parentId が null のときは root（ROOT_FOLDER_ID = ''）
       const newFolderRawId =
-        parentId !== null ? (parseSelectedTreeId(parentId)?.id ?? ROOT_FOLDER_ID) : ROOT_FOLDER_ID;
+        parentId !== null
+          ? (parseSelectedTreeId(parentId)?.id ?? ROOT_FOLDER_ID)
+          : ROOT_FOLDER_ID;
 
       for (const dragId of dragIds) {
         const parsed = parseSelectedTreeId(dragId);
         if (!parsed) continue;
 
-        if (parsed.type === 'folder') {
-          await onUpdateFolder?.(parsed.id, { parentFolderId: newFolderRawId || null });
-        } else if (parsed.type === 'card') {
+        if (parsed.type === "folder") {
+          await onUpdateFolder?.(parsed.id, {
+            parentFolderId: newFolderRawId || null,
+          });
+        } else if (parsed.type === "card") {
           await moveCardToFolder?.(parsed.id, newFolderRawId);
-        } else if (parsed.type === 'document') {
+        } else if (parsed.type === "document") {
           await moveDocumentToFolder?.(parsed.id, newFolderRawId);
         }
       }
     },
-    [onUpdateFolder, moveCardToFolder, moveDocumentToFolder]
+    [onUpdateFolder, moveCardToFolder, moveDocumentToFolder],
   );
 
   const arboristDisableDrag = useCallback(
-    (node: import('react-arborist').NodeApi<ExplorerTreeNode>) => {
+    (node: import("react-arborist").NodeApi<ExplorerTreeNode>) => {
       // データのないノード（virtual root など）はドラッグ不可
       return !node.data?.kind;
     },
-    []
+    [],
   );
 
   const arboristDisableDrop = useCallback(
@@ -539,19 +595,20 @@ export function FolderTreeWithCards({
       parentNode,
       dragNodes,
     }: {
-      parentNode: import('react-arborist').NodeApi<ExplorerTreeNode>;
-      dragNodes: import('react-arborist').NodeApi<ExplorerTreeNode>[];
+      parentNode: import("react-arborist").NodeApi<ExplorerTreeNode>;
+      dragNodes: import("react-arborist").NodeApi<ExplorerTreeNode>[];
       index: number;
     }) => {
       const parentKind = parentNode?.data?.kind;
 
       // カード・ドキュメントへのドロップは禁止
-      if (parentKind === 'card' || parentKind === 'document') return true;
+      if (parentKind === "card" || parentKind === "document") return true;
 
       // フォルダを自分の子孫へ移動しようとしている場合は禁止
       for (const dragNode of dragNodes) {
-        if (dragNode.data?.kind !== 'folder') continue;
-        let check: import('react-arborist').NodeApi<ExplorerTreeNode> | null = parentNode;
+        if (dragNode.data?.kind !== "folder") continue;
+        let check: import("react-arborist").NodeApi<ExplorerTreeNode> | null =
+          parentNode;
         while (check) {
           if (check.id === dragNode.id) return true;
           check = check.parent;
@@ -560,7 +617,7 @@ export function FolderTreeWithCards({
 
       return false;
     },
-    []
+    [],
   );
 
   const explorerTreeData = useMemo<ExplorerTreeNode[]>(
@@ -574,7 +631,14 @@ export function FolderTreeWithCards({
         matchCountMap,
         getFolderId,
       }),
-    [getChildFolders, getFolderItems, isFiltering, matchCountMap, rootFolders, rootItems]
+    [
+      getChildFolders,
+      getFolderItems,
+      isFiltering,
+      matchCountMap,
+      rootFolders,
+      rootItems,
+    ],
   );
 
   const selectedTreeId = useMemo(() => {
@@ -585,11 +649,12 @@ export function FolderTreeWithCards({
     (id: string) => {
       const parsed = parseSelectedTreeId(id);
       if (!parsed) return;
-      if (parsed.type === 'folder') onFolderSelect(parsed.id);
-      if (parsed.type === 'card') onItemSelect({ type: 'card', id: parsed.id });
-      if (parsed.type === 'document') onItemSelect({ type: 'document', id: parsed.id });
+      if (parsed.type === "folder") onFolderSelect(parsed.id);
+      if (parsed.type === "card") onItemSelect({ type: "card", id: parsed.id });
+      if (parsed.type === "document")
+        onItemSelect({ type: "document", id: parsed.id });
     },
-    [onFolderSelect, onItemSelect]
+    [onFolderSelect, onItemSelect],
   );
 
   const getNextOrderIndex = useCallback(
@@ -598,34 +663,38 @@ export function FolderTreeWithCards({
       let maxOrder = -1;
       for (const card of treeCards) {
         if (isSoftDeleted(card as any)) continue;
-        const cardFolderId = resolveTreeFolderId(card.folderId ?? (card as any).folder_id);
+        const cardFolderId = resolveTreeFolderId(
+          card.folderId ?? (card as any).folder_id,
+        );
         if (!isSameFolder(cardFolderId, targetFolderId)) continue;
         const order = card.orderIndex ?? -1;
         if (order > maxOrder) maxOrder = order;
       }
       for (const doc of documents) {
         if (isSoftDeleted(doc as any)) continue;
-        const docFolderId = resolveTreeFolderId(doc.folderId ?? (doc as any).folder_id);
+        const docFolderId = resolveTreeFolderId(
+          doc.folderId ?? (doc as any).folder_id,
+        );
         if (!isSameFolder(docFolderId, targetFolderId)) continue;
         const order = doc.orderIndex ?? -1;
         if (order > maxOrder) maxOrder = order;
       }
       return maxOrder + 1;
     },
-    [treeCards, documents, resolveTreeFolderId]
+    [treeCards, documents, resolveTreeFolderId],
   );
 
   const handlePdfDropped = useCallback(
     async (folderId: string, files: File[]) => {
       if (!files.length) return;
       if (!currentUser) {
-        toastError?.('PDFの追加にはログインが必要です');
+        toastError?.("PDFの追加にはログインが必要です");
         return;
       }
 
       const pdfFiles = files.filter((file) => {
-        const name = file.name?.toLowerCase() ?? '';
-        return file.type === 'application/pdf' || name.endsWith('.pdf');
+        const name = file.name?.toLowerCase() ?? "";
+        return file.type === "application/pdf" || name.endsWith(".pdf");
       });
 
       if (pdfFiles.length === 0) return;
@@ -636,8 +705,8 @@ export function FolderTreeWithCards({
       for (const file of pdfFiles) {
         const now = new Date();
         const docId = createDocumentId();
-        const storagePath = buildStoragePath(currentUser.uid, docId, 'pdf');
-        const mimeType = file.type || 'application/pdf';
+        const storagePath = buildStoragePath(currentUser.uid, docId, "pdf");
+        const mimeType = file.type || "application/pdf";
         const baseDoc: DocumentItem = {
           id: docId,
           userId: currentUser.uid,
@@ -645,7 +714,7 @@ export function FolderTreeWithCards({
           createdAt: now,
           updatedAt: now,
           isDeleted: false,
-          kind: 'pdf',
+          kind: "pdf",
           folderId,
           orderIndex: nextOrderIndex,
           title: file.name,
@@ -658,7 +727,7 @@ export function FolderTreeWithCards({
           remoteUrl: null,
           storagePath,
           downloadUrl: null,
-          uploadStatus: 'pending',
+          uploadStatus: "pending",
         };
 
         try {
@@ -666,53 +735,71 @@ export function FolderTreeWithCards({
           await db.documents.put(baseDoc as any);
           nextOrderIndex += 1;
         } catch (localErr: unknown) {
-          console.error('[FolderTreeWithCards] Failed to prepare local PDF source', {
-            error: localErr,
-            docId,
-            fileName: file.name,
-          });
-          toastError?.(localErr?.message || 'PDFのローカル保存に失敗しました');
+          console.error(
+            "[FolderTreeWithCards] Failed to prepare local PDF source",
+            {
+              error: localErr,
+              docId,
+              fileName: file.name,
+            },
+          );
+          toastError?.(localErr?.message || "PDFのローカル保存に失敗しました");
           continue;
         }
 
         try {
-          const result = await uploadFile(file, () => storagePath, { type: 'pdf', folderId, docId });
+          const result = await uploadFile(file, () => storagePath, {
+            type: "pdf",
+            folderId,
+            docId,
+          });
 
           const remoteDownloadUrl = result.metadata?.downloadUrl ?? null;
-          await db.updateItem('documents', docId, {
+          await db.updateItem("documents", docId, {
             storagePath: result.storagePath || storagePath,
             remoteUrl: remoteDownloadUrl,
             downloadUrl: remoteDownloadUrl,
-            uploadStatus: remoteDownloadUrl ? 'ready' : 'queued',
+            uploadStatus: remoteDownloadUrl ? "ready" : "queued",
             updatedAt: new Date(),
           });
           if (!remoteDownloadUrl) {
             const latestDoc = await db.documents.get(docId);
-            console.info('[FolderTreeWithCards] PDF upload queued in local-only mode', {
-              docId,
-              uploadSource: result.source,
-              uploadStatus: latestDoc?.uploadStatus ?? null,
-              localFileId: latestDoc?.localFileId ?? null,
-              blobUrl: (latestDoc as any)?.blobUrl ?? latestDoc?.localUrl ?? null,
-            });
+            console.info(
+              "[FolderTreeWithCards] PDF upload queued in local-only mode",
+              {
+                docId,
+                uploadSource: result.source,
+                uploadStatus: latestDoc?.uploadStatus ?? null,
+                localFileId: latestDoc?.localFileId ?? null,
+                blobUrl:
+                  (latestDoc as any)?.blobUrl ?? latestDoc?.localUrl ?? null,
+              },
+            );
           }
         } catch (err: unknown) {
-          console.error('[FolderTreeWithCards] PDF upload failed', err);
+          console.error("[FolderTreeWithCards] PDF upload failed", err);
           try {
-            await db.updateItem('documents', docId, {
-              uploadStatus: 'failed',
+            await db.updateItem("documents", docId, {
+              uploadStatus: "failed",
               updatedAt: new Date(),
             });
             const failedDoc = await db.documents.get(docId);
-            console.error('[FolderTreeWithCards] PDF upload failed but local source kept', {
-              docId,
-              localFileId: failedDoc?.localFileId ?? null,
-              blobUrl: (failedDoc as any)?.blobUrl ?? failedDoc?.localUrl ?? null,
-            });
+            console.error(
+              "[FolderTreeWithCards] PDF upload failed but local source kept",
+              {
+                docId,
+                localFileId: failedDoc?.localFileId ?? null,
+                blobUrl:
+                  (failedDoc as any)?.blobUrl ?? failedDoc?.localUrl ?? null,
+              },
+            );
           } catch (markErr) {
-            console.error('[FolderTreeWithCards] Failed to mark PDF upload failure', markErr);
+            console.error(
+              "[FolderTreeWithCards] Failed to mark PDF upload failure",
+              markErr,
+            );
           }
-          toastError?.(err?.message || 'PDFの追加に失敗しました');
+          toastError?.(err?.message || "PDFの追加に失敗しました");
         }
       }
 
@@ -720,20 +807,20 @@ export function FolderTreeWithCards({
         setExpandedFolders((prev) => new Set(prev).add(folderId));
       }
     },
-    [currentUser, getNextOrderIndex, toastError, uploadFile]
+    [currentUser, getNextOrderIndex, toastError, uploadFile],
   );
 
   const handlePptxDropped = useCallback(
     async (folderId: string, files: File[]) => {
       if (!files.length) return;
       if (!currentUser) {
-        toastError?.('PPTXの追加にはログインが必要です');
+        toastError?.("PPTXの追加にはログインが必要です");
         return;
       }
 
       const pptxFiles = files.filter((file) => {
-        const name = file.name?.toLowerCase() ?? '';
-        return file.type === PPTX_MIME || name.endsWith('.pptx');
+        const name = file.name?.toLowerCase() ?? "";
+        return file.type === PPTX_MIME || name.endsWith(".pptx");
       });
 
       if (pptxFiles.length === 0) return;
@@ -744,7 +831,7 @@ export function FolderTreeWithCards({
       for (const file of pptxFiles) {
         const now = new Date();
         const docId = createDocumentId();
-        const storagePath = buildStoragePath(currentUser.uid, docId, 'pptx');
+        const storagePath = buildStoragePath(currentUser.uid, docId, "pptx");
         const mimeType = file.type || PPTX_MIME;
         const baseDoc: DocumentItem = {
           id: docId,
@@ -753,9 +840,9 @@ export function FolderTreeWithCards({
           createdAt: now,
           updatedAt: now,
           isDeleted: false,
-          kind: 'pptx',
-          convertStatus: 'processing',
-          pptxManifestStatus: 'none',
+          kind: "pptx",
+          convertStatus: "processing",
+          pptxManifestStatus: "none",
           pptxManifestPath: null,
           pptxSlideCount: null,
           pptxLastError: null,
@@ -780,7 +867,7 @@ export function FolderTreeWithCards({
           remoteUrl: null,
           storagePath,
           downloadUrl: null,
-          uploadStatus: 'pending',
+          uploadStatus: "pending",
         };
 
         try {
@@ -788,69 +875,87 @@ export function FolderTreeWithCards({
           await db.documents.put(baseDoc as any);
           nextOrderIndex += 1;
         } catch (localErr: unknown) {
-          console.error('[FolderTreeWithCards] Failed to prepare local PPTX source', {
-            error: localErr,
-            docId,
-            fileName: file.name,
-          });
-          toastError?.(localErr?.message || 'PPTXのローカル保存に失敗しました');
+          console.error(
+            "[FolderTreeWithCards] Failed to prepare local PPTX source",
+            {
+              error: localErr,
+              docId,
+              fileName: file.name,
+            },
+          );
+          toastError?.(localErr?.message || "PPTXのローカル保存に失敗しました");
           continue;
         }
 
         try {
-          const result = await uploadFile(file, () => storagePath, { type: 'pptx', folderId, docId });
+          const result = await uploadFile(file, () => storagePath, {
+            type: "pptx",
+            folderId,
+            docId,
+          });
 
           const remoteDownloadUrl = result.metadata?.downloadUrl ?? null;
-          await db.updateItem('documents', docId, {
+          await db.updateItem("documents", docId, {
             storagePath: result.storagePath || storagePath,
             remoteUrl: remoteDownloadUrl,
             downloadUrl: remoteDownloadUrl,
-            uploadStatus: remoteDownloadUrl ? 'ready' : 'queued',
+            uploadStatus: remoteDownloadUrl ? "ready" : "queued",
             updatedAt: new Date(),
           });
 
           if (!remoteDownloadUrl) {
             const latestDoc = await db.documents.get(docId);
-            console.info('[FolderTreeWithCards] PPTX upload queued in local-only mode', {
-              docId,
-              uploadSource: result.source,
-              uploadStatus: latestDoc?.uploadStatus ?? null,
-              localFileId: latestDoc?.localFileId ?? null,
-              blobUrl: (latestDoc as any)?.blobUrl ?? latestDoc?.localUrl ?? null,
-            });
+            console.info(
+              "[FolderTreeWithCards] PPTX upload queued in local-only mode",
+              {
+                docId,
+                uploadSource: result.source,
+                uploadStatus: latestDoc?.uploadStatus ?? null,
+                localFileId: latestDoc?.localFileId ?? null,
+                blobUrl:
+                  (latestDoc as any)?.blobUrl ?? latestDoc?.localUrl ?? null,
+              },
+            );
           }
         } catch (err: unknown) {
-          console.error('[FolderTreeWithCards] PPTX upload failed', err);
+          console.error("[FolderTreeWithCards] PPTX upload failed", err);
           try {
             const failedAt = new Date();
-            await db.updateItem('documents', docId, {
-              uploadStatus: 'failed',
-              convertStatus: 'failed',
-              pptxManifestStatus: 'failed',
-              pptxLastError: err?.message || 'upload_failed',
+            await db.updateItem("documents", docId, {
+              uploadStatus: "failed",
+              convertStatus: "failed",
+              pptxManifestStatus: "failed",
+              pptxLastError: err?.message || "upload_failed",
               pptx: {
                 ...(baseDoc.pptx ?? {}),
-                error: err?.message || 'upload_failed',
+                error: err?.message || "upload_failed",
                 updatedAt: failedAt,
               },
               updatedAt: failedAt,
             });
             const failedDoc = await db.documents.get(docId);
-            console.error('[FolderTreeWithCards] PPTX upload failed but local source kept', {
-              docId,
-              localFileId: failedDoc?.localFileId ?? null,
-              blobUrl: (failedDoc as any)?.blobUrl ?? failedDoc?.localUrl ?? null,
-            });
+            console.error(
+              "[FolderTreeWithCards] PPTX upload failed but local source kept",
+              {
+                docId,
+                localFileId: failedDoc?.localFileId ?? null,
+                blobUrl:
+                  (failedDoc as any)?.blobUrl ?? failedDoc?.localUrl ?? null,
+              },
+            );
           } catch (markErr) {
-            console.error('[FolderTreeWithCards] Failed to mark PPTX upload failure', markErr);
+            console.error(
+              "[FolderTreeWithCards] Failed to mark PPTX upload failure",
+              markErr,
+            );
           }
-          toastError?.(err?.message || 'PPTXの追加に失敗しました');
+          toastError?.(err?.message || "PPTXの追加に失敗しました");
         }
       }
 
       setExpandedFolders((prev) => new Set(prev).add(folderId));
     },
-    [currentUser, getNextOrderIndex, toastError, uploadFile]
+    [currentUser, getNextOrderIndex, toastError, uploadFile],
   );
 
   const getUniqueFolderName = useCallback(
@@ -861,8 +966,10 @@ export function FolderTreeWithCards({
       });
       const names = new Set(
         siblings
-          .map((folder) => String(folder.folderName ?? folder.folder_name ?? '').trim())
-          .filter(Boolean)
+          .map((folder) =>
+            String(folder.folderName ?? folder.folder_name ?? "").trim(),
+          )
+          .filter(Boolean),
       );
       if (!names.has(DEFAULT_NEW_FOLDER_NAME)) return DEFAULT_NEW_FOLDER_NAME;
 
@@ -872,7 +979,7 @@ export function FolderTreeWithCards({
       }
       return `${DEFAULT_NEW_FOLDER_NAME} (${next})`;
     },
-    [treeFolders]
+    [treeFolders],
   );
 
   const getUniqueCardName = useCallback(
@@ -882,11 +989,13 @@ export function FolderTreeWithCards({
         treeCards
           .filter((card) => {
             if (isSoftDeleted(card as any)) return false;
-            const cardFolderId = resolveTreeFolderId(card.folderId ?? (card as any).folder_id);
+            const cardFolderId = resolveTreeFolderId(
+              card.folderId ?? (card as any).folder_id,
+            );
             return isSameFolder(cardFolderId, targetFolderId);
           })
-          .map((card) => String(card.title ?? '').trim())
-          .filter(Boolean)
+          .map((card) => String(card.title ?? "").trim())
+          .filter(Boolean),
       );
       if (!names.has(DEFAULT_NEW_CARD_NAME)) return DEFAULT_NEW_CARD_NAME;
 
@@ -896,13 +1005,13 @@ export function FolderTreeWithCards({
       }
       return `${DEFAULT_NEW_CARD_NAME} (${next})`;
     },
-    [treeCards, resolveTreeFolderId]
+    [treeCards, resolveTreeFolderId],
   );
 
   const handleCreateFolderAction = async (parentId: string | null) => {
     if (!onCreateFolder) return;
     const name = getUniqueFolderName(parentId);
-    const tempId = createOptimisticId('folder');
+    const tempId = createOptimisticId("folder");
     optimisticFolderNameRef.current.set(tempId, name);
     const siblingCount = treeFolders.filter((folder) => {
       if (isSoftDeleted(folder)) return false;
@@ -936,14 +1045,16 @@ export function FolderTreeWithCards({
     try {
       const createdFolderId = await onCreateFolder(name, parentId ?? undefined);
       if (!createdFolderId) {
-        throw new Error('フォルダIDの取得に失敗しました');
+        throw new Error("フォルダIDの取得に失敗しました");
       }
       const finalName =
         (editingIdRef.current === tempId
           ? editingNameRef.current.trim()
           : optimisticFolderNameRef.current.get(tempId)) || name;
 
-      setOptimisticFolders((prev) => prev.filter((folder) => getFolderId(folder) !== tempId));
+      setOptimisticFolders((prev) =>
+        prev.filter((folder) => getFolderId(folder) !== tempId),
+      );
       if (parentId) {
         setExpandedFolders((prev) => new Set(prev).add(parentId));
       }
@@ -964,13 +1075,15 @@ export function FolderTreeWithCards({
       // スクロール表示のみ（編集開始はしない）
       setPendingScrollId(createdFolderId);
     } catch (err: unknown) {
-      setOptimisticFolders((prev) => prev.filter((folder) => getFolderId(folder) !== tempId));
+      setOptimisticFolders((prev) =>
+        prev.filter((folder) => getFolderId(folder) !== tempId),
+      );
       optimisticFolderNameRef.current.delete(tempId);
       setPendingScrollId((prev) => (prev === tempId ? null : prev));
       if (editingIdRef.current === tempId) {
         closeRename();
       }
-      toastError?.(err?.message || 'フォルダの作成に失敗しました');
+      toastError?.(err?.message || "フォルダの作成に失敗しました");
     }
   };
 
@@ -983,8 +1096,8 @@ export function FolderTreeWithCards({
     if (!onCreateCard) return;
 
     const normalizedFolderId = normalizeFolderId(targetFolderId);
-    const title = ''; // 空文字で作成
-    const tempId = createOptimisticId('card');
+    const title = ""; // 空文字で作成
+    const tempId = createOptimisticId("card");
     optimisticCardNameRef.current.set(tempId, title);
     const now = new Date();
 
@@ -1006,13 +1119,17 @@ export function FolderTreeWithCards({
     setPendingScrollId(tempId);
 
     try {
-      const createdCard = await onCreateCard({ folderId: normalizedFolderId, title, blocks: [] });
+      const createdCard = await onCreateCard({
+        folderId: normalizedFolderId,
+        title,
+        blocks: [],
+      });
       const createdCardId = createdCard?.id ?? createdCard?.cardId ?? null;
 
       if (createdCardId) {
         setNewlyCreatedCardId(createdCardId);
         // 新規作成後に右ペインを表示（エディタを開く）するように連動させる
-        onItemSelect({ type: 'card', id: createdCardId });
+        onItemSelect({ type: "card", id: createdCardId });
       }
 
       const finalName =
@@ -1024,7 +1141,7 @@ export function FolderTreeWithCards({
       optimisticCardNameRef.current.delete(tempId);
 
       if (!createdCardId) {
-        throw new Error('カードIDの取得に失敗しました');
+        throw new Error("カードIDの取得に失敗しました");
       }
 
       if (editingIdRef.current === tempId) {
@@ -1043,24 +1160,26 @@ export function FolderTreeWithCards({
       if (editingIdRef.current === tempId) {
         closeRename();
       }
-      toastError?.(err?.message || 'カードの作成に失敗しました');
+      toastError?.(err?.message || "カードの作成に失敗しました");
     }
   };
 
   const handleToolbarAddFile = useCallback(() => {
     const targetFolderId = selectedFolderId;
     if (!targetFolderId) {
-      toastError?.('ファイル追加先のフォルダを選択してください');
+      toastError?.("ファイル追加先のフォルダを選択してください");
       return;
     }
     uploadTargetFolderIdRef.current = targetFolderId;
     fileInputRef.current?.click();
   }, [selectedFolderId, toastError]);
 
-  const handleToolbarFileInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleToolbarFileInputChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const targetFolderId = uploadTargetFolderIdRef.current;
     const files = event.target.files;
-    event.target.value = '';
+    event.target.value = "";
 
     if (!targetFolderId || !files) return;
 
@@ -1071,15 +1190,15 @@ export function FolderTreeWithCards({
     if (pptxFiles.length > 0) void handlePptxDropped(targetFolderId, pptxFiles);
 
     if (pdfFiles.length === 0 && pptxFiles.length === 0) {
-      toastError?.('PDFまたはPPTXファイルを選択してください');
+      toastError?.("PDFまたはPPTXファイルを選択してください");
     }
   };
 
   const closeRename = useCallback(() => {
     setEditingId(null);
-    setEditingName('');
+    setEditingName("");
     editingIdRef.current = null;
-    editingNameRef.current = '';
+    editingNameRef.current = "";
     renameCancelledRef.current = false;
   }, []);
 
@@ -1109,16 +1228,18 @@ export function FolderTreeWithCards({
       }
 
       // tmp- ID（optimistic）の場合は、ローカル更新のみ（サーバー更新しない）
-      if (id.startsWith('tmp-')) {
-        const isOptimisticFolder = optimisticFolders.some((folder) => getFolderId(folder) === id);
+      if (id.startsWith("tmp-")) {
+        const isOptimisticFolder = optimisticFolders.some(
+          (folder) => getFolderId(folder) === id,
+        );
         if (isOptimisticFolder) {
           optimisticFolderNameRef.current.set(id, nextName);
           setOptimisticFolders((prev) =>
             prev.map((folder) =>
               getFolderId(folder) === id
                 ? { ...folder, folderName: nextName, folder_name: nextName }
-                : folder
-            )
+                : folder,
+            ),
           );
           closeRename();
           return;
@@ -1128,7 +1249,9 @@ export function FolderTreeWithCards({
         if (isOptimisticCard) {
           optimisticCardNameRef.current.set(id, nextName);
           setOptimisticCards((prev) =>
-            prev.map((card) => (card.id === id ? ({ ...card, title: nextName } as Card) : card))
+            prev.map((card) =>
+              card.id === id ? ({ ...card, title: nextName } as Card) : card,
+            ),
           );
           closeRename();
           return;
@@ -1150,63 +1273,73 @@ export function FolderTreeWithCards({
       closeRename();
     } catch (err: unknown) {
       // 失敗時はエラー表示のみで、editingId は維持して再編集可能にする
-      toastError?.(err?.message || '名前の変更に失敗しました');
+      toastError?.(err?.message || "名前の変更に失敗しました");
     } finally {
       inFlightRef.current = false;
     }
   };
 
-  const handleDelete = async (id: string, type: 'folder' | 'card') => {
+  const handleDelete = async (id: string, type: "folder" | "card") => {
     const isOptimistic =
-      type === 'folder'
+      type === "folder"
         ? optimisticFolders.some((folder) => getFolderId(folder) === id)
         : optimisticCards.some((card) => card.id === id);
     if (isOptimistic) return;
 
-    if (type === 'folder') {
+    if (type === "folder") {
       if (!onDeleteFolder) return;
       setDeleteTargetFolderId(id);
       setDeleteFolderDialogOpen(true);
       return;
     }
 
-    const confirmMessage = 'このカードを削除しますか?';
+    const confirmMessage = "このカードを削除しますか?";
     if (!confirm(confirmMessage)) return;
 
     await onDeleteCard?.(id);
   };
 
-  const handleDeleteFolderDialogOpenChange = useCallback((nextOpen: boolean) => {
-    setDeleteFolderDialogOpen(nextOpen);
-    if (!nextOpen) setDeleteTargetFolderId(null);
-  }, []);
+  const handleDeleteFolderDialogOpenChange = useCallback(
+    (nextOpen: boolean) => {
+      setDeleteFolderDialogOpen(nextOpen);
+      if (!nextOpen) setDeleteTargetFolderId(null);
+    },
+    [],
+  );
 
   const handleConfirmDeleteFolder = useCallback(
     async (folder: { id?: string; folderId?: string }) => {
-      const folderId = String(folder.id ?? folder.folderId ?? '');
-      if (!folderId) throw new Error('フォルダIDの取得に失敗しました');
-      if (!onDeleteFolder) throw new Error('フォルダ削除ハンドラが未設定です');
+      const folderId = String(folder.id ?? folder.folderId ?? "");
+      if (!folderId) throw new Error("フォルダIDの取得に失敗しました");
+      if (!onDeleteFolder) throw new Error("フォルダ削除ハンドラが未設定です");
       await onDeleteFolder(folderId);
     },
-    [onDeleteFolder]
+    [onDeleteFolder],
   );
 
   const handleArrowNavigation = (key: string, currentId: string) => {
-    const flatList: Array<{ id: string; type: 'folder' | 'card' | 'document'; parentId: string | null }> =
-      [];
+    const flatList: Array<{
+      id: string;
+      type: "folder" | "card" | "document";
+      parentId: string | null;
+    }> = [];
 
     const addFolderAndChildren = (folderId: string | null) => {
-      const folderList = folderId === null ? rootFolders : getChildFolders(folderId);
+      const folderList =
+        folderId === null ? rootFolders : getChildFolders(folderId);
 
       folderList.forEach((folder) => {
         const id = getFolderId(folder);
-        flatList.push({ id, type: 'folder', parentId: folderId });
+        flatList.push({ id, type: "folder", parentId: folderId });
 
         if (expandedFolders.has(id)) {
           addFolderAndChildren(id);
           getFolderItems(id).forEach((item) => {
             flatList.push({
-              id: item.data.id || (item.data as any).cardId || (item.data as any).documentId,
+              id:
+                item.data.id ||
+                (item.data as any).cardId ||
+                (item.data as any).documentId,
               type: item.type as any,
               parentId: id,
             });
@@ -1221,7 +1354,10 @@ export function FolderTreeWithCards({
     // Then append root-level items (cards/documents that live at root)
     getFolderItems(null).forEach((item) => {
       flatList.push({
-        id: item.data.id || (item.data as any).cardId || (item.data as any).documentId,
+        id:
+          item.data.id ||
+          (item.data as any).cardId ||
+          (item.data as any).documentId,
         type: item.type as any,
         parentId: null,
       });
@@ -1232,15 +1368,15 @@ export function FolderTreeWithCards({
 
     const currentItem = flatList[currentIndex];
 
-    if (key === 'ArrowUp' && currentIndex > 0) {
+    if (key === "ArrowUp" && currentIndex > 0) {
       const prevItem = flatList[currentIndex - 1];
-      if (prevItem.type === 'folder') onFolderSelect(prevItem.id);
+      if (prevItem.type === "folder") onFolderSelect(prevItem.id);
       else onItemSelect({ type: prevItem.type, id: prevItem.id });
-    } else if (key === 'ArrowDown' && currentIndex < flatList.length - 1) {
+    } else if (key === "ArrowDown" && currentIndex < flatList.length - 1) {
       const nextItem = flatList[currentIndex + 1];
-      if (nextItem.type === 'folder') onFolderSelect(nextItem.id);
+      if (nextItem.type === "folder") onFolderSelect(nextItem.id);
       else onItemSelect({ type: nextItem.type, id: nextItem.id });
-    } else if (key === 'ArrowRight' && currentItem.type === 'folder') {
+    } else if (key === "ArrowRight" && currentItem.type === "folder") {
       if (!expandedFolders.has(currentId)) {
         toggleFolder(currentId);
       } else {
@@ -1249,7 +1385,7 @@ export function FolderTreeWithCards({
         if (children.length > 0) onFolderSelect(getFolderId(children[0]));
         else if (folderItems.length > 0) {
           onItemSelect({
-            type: folderItems[0].type === 'card' ? 'card' : 'document',
+            type: folderItems[0].type === "card" ? "card" : "document",
             id:
               folderItems[0].data.id ||
               (folderItems[0].data as any).cardId ||
@@ -1257,8 +1393,8 @@ export function FolderTreeWithCards({
           });
         }
       }
-    } else if (key === 'ArrowLeft') {
-      if (currentItem.type === 'folder' && expandedFolders.has(currentId)) {
+    } else if (key === "ArrowLeft") {
+      if (currentItem.type === "folder" && expandedFolders.has(currentId)) {
         toggleFolder(currentId);
       } else if (currentItem.parentId) {
         onFolderSelect(currentItem.parentId);
@@ -1274,20 +1410,30 @@ export function FolderTreeWithCards({
       const treeRoot = treeRootRef.current;
       if (!treeRoot) return;
       const activeEl = document.activeElement as HTMLElement | null;
-      const isTreeFocused = treeRoot.contains(target) || (activeEl ? treeRoot.contains(activeEl) : false);
+      const isTreeFocused =
+        treeRoot.contains(target) ||
+        (activeEl ? treeRoot.contains(activeEl) : false);
       if (!isTreeFocused) return;
       if (isTextInputTarget(target)) return;
       if (hasOpenModalDialog()) return;
 
       // 新規フォルダ
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'n') {
+      if (
+        (e.ctrlKey || e.metaKey) &&
+        e.shiftKey &&
+        e.key.toLowerCase() === "n"
+      ) {
         e.preventDefault();
         void handleCreateFolderAction(selectedFolderId ?? null);
         return;
       }
 
       // ファイル追加（未使用回避も兼ねる）
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'o') {
+      if (
+        (e.ctrlKey || e.metaKey) &&
+        e.shiftKey &&
+        e.key.toLowerCase() === "o"
+      ) {
         e.preventDefault();
         handleToolbarAddFile();
         return;
@@ -1296,33 +1442,35 @@ export function FolderTreeWithCards({
       const currentId = selectedItem?.id || selectedFolderId;
       if (!currentId) return;
 
-      const isCard = selectedItem?.type === 'card';
-      const isDoc = selectedItem?.type === 'document';
+      const isCard = selectedItem?.type === "card";
+      const isDoc = selectedItem?.type === "document";
 
-      if (e.key === 'F2') {
+      if (e.key === "F2") {
         e.preventDefault();
         if (!selectedFolderId || isCard || isDoc) return;
 
-        const folder = treeFolders.find((f) => getFolderId(f) === selectedFolderId);
-        const name = folder?.folderName || folder?.folder_name || '';
+        const folder = treeFolders.find(
+          (f) => getFolderId(f) === selectedFolderId,
+        );
+        const name = folder?.folderName || folder?.folder_name || "";
         setEditingId(currentId);
         setEditingName(name);
       }
 
-      if (e.key === 'Delete' || e.key === 'Backspace') {
+      if (e.key === "Delete" || e.key === "Backspace") {
         e.preventDefault();
-        if (isCard) void handleDelete(currentId, 'card');
+        if (isCard) void handleDelete(currentId, "card");
         else if (isDoc) {
           /* ドキュメント削除は未実装 */
-        } else void handleDelete(currentId, 'folder');
+        } else void handleDelete(currentId, "folder");
       }
 
-      if (e.key === 'Enter' && isCard) {
+      if (e.key === "Enter" && isCard) {
         e.preventDefault();
-        onItemSelect({ type: 'card', id: currentId });
+        onItemSelect({ type: "card", id: currentId });
       }
 
-      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+      if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
         e.preventDefault();
         handleArrowNavigation(e.key, currentId);
       }
@@ -1358,9 +1506,12 @@ export function FolderTreeWithCards({
     }) => {
       const treeNode = node.data;
 
-      if (treeNode.kind === 'folder' && treeNode.folder) {
+      if (treeNode.kind === "folder" && treeNode.folder) {
         const folderId = treeNode.rawId;
-        const isPinned = pinnedItems?.some((item) => item.type === 'folder' && item.id === folderId) ?? false;
+        const isPinned =
+          pinnedItems?.some(
+            (item) => item.type === "folder" && item.id === folderId,
+          ) ?? false;
 
         return (
           <div style={style}>
@@ -1386,8 +1537,8 @@ export function FolderTreeWithCards({
               renameCancelledRef={renameCancelledRef}
               isPinned={isPinned}
               handleTogglePin={() => {
-                if (isPinned) onUnpinItem?.({ type: 'folder', id: folderId });
-                else onPinItem?.({ type: 'folder', id: folderId });
+                if (isPinned) onUnpinItem?.({ type: "folder", id: folderId });
+                else onPinItem?.({ type: "folder", id: folderId });
               }}
               isFiltering={Boolean(isFiltering)}
               matchCount={treeNode.matchCount ?? -1}
@@ -1396,7 +1547,11 @@ export function FolderTreeWithCards({
               hasUpdateOrDelete={Boolean(onUpdateFolder || onDeleteFolder)}
               menuOpen={openRowMenuId === `folder:${folderId}`}
               onMenuOpenChange={(open) =>
-                setOpenRowMenuId(open ? `folder:${folderId}` : (prev) => (prev === `folder:${folderId}` ? null : prev))
+                setOpenRowMenuId(
+                  open
+                    ? `folder:${folderId}`
+                    : (prev) => (prev === `folder:${folderId}` ? null : prev),
+                )
               }
               onBulkTag={() => setBulkTagFolderId(folderId)}
               setRowRef={setRowRef}
@@ -1412,14 +1567,16 @@ export function FolderTreeWithCards({
                 if (!isFileDragEvent(e)) return;
                 e.preventDefault();
                 e.stopPropagation();
-                e.dataTransfer.dropEffect = 'copy';
+                e.dataTransfer.dropEffect = "copy";
                 setFileDragFolderId(folderId);
               }}
               onDragLeaveCapture={(e) => {
                 if (!isFileDragEvent(e)) return;
                 const nextTarget = e.relatedTarget as Node | null;
                 if (nextTarget && e.currentTarget.contains(nextTarget)) return;
-                setFileDragFolderId((prev) => (prev === folderId ? null : prev));
+                setFileDragFolderId((prev) =>
+                  prev === folderId ? null : prev,
+                );
               }}
               onDropCapture={(e) => {
                 if (!isFileDragEvent(e)) return;
@@ -1429,8 +1586,10 @@ export function FolderTreeWithCards({
                 const files = e.dataTransfer?.files ?? null;
                 const pdfFiles = extractPdfFiles(files);
                 const pptxFiles = extractPptxFiles(files);
-                if (pdfFiles.length > 0) void handlePdfDropped(folderId, pdfFiles);
-                if (pptxFiles.length > 0) void handlePptxDropped(folderId, pptxFiles);
+                if (pdfFiles.length > 0)
+                  void handlePdfDropped(folderId, pdfFiles);
+                if (pptxFiles.length > 0)
+                  void handlePptxDropped(folderId, pptxFiles);
               }}
               hasExpandableContent={Boolean(treeNode.children?.length)}
             />
@@ -1439,7 +1598,7 @@ export function FolderTreeWithCards({
       }
 
       const iconClassName =
-        treeNode.kind === 'document' ? 'text-rose-500' : 'text-[#6E6E80]';
+        treeNode.kind === "document" ? "text-rose-500" : "text-[#6E6E80]";
 
       return (
         <div style={style}>
@@ -1447,25 +1606,27 @@ export function FolderTreeWithCards({
             ref={(el) => setRowRef(treeNode.rawId, el)}
             className={cn(
               ROW_BASE,
-              'flex h-6 min-h-6 items-center pr-2 pl-0 leading-6 select-none',
-              'hover:bg-muted/60',
-              isSelected && 'bg-muted'
+              "flex h-6 min-h-6 items-center pr-2 pl-0 leading-6 select-none",
+              "hover:bg-muted/60",
+              isSelected && "bg-muted",
             )}
-            style={{ paddingLeft: '4px' }}
+            style={{ paddingLeft: "4px" }}
             onClick={() => {
-              if (treeNode.kind === 'card') onItemSelect({ type: 'card', id: treeNode.rawId });
-              if (treeNode.kind === 'document') onItemSelect({ type: 'document', id: treeNode.rawId });
+              if (treeNode.kind === "card")
+                onItemSelect({ type: "card", id: treeNode.rawId });
+              if (treeNode.kind === "document")
+                onItemSelect({ type: "document", id: treeNode.rawId });
             }}
           >
             <span className="mr-1 size-4 shrink-0" />
             <FileText
-              className={cn('mr-2 h-4 w-4 shrink-0', iconClassName)}
-              style={{ transform: 'translateY(-1px)' }}
+              className={cn("mr-2 h-4 w-4 shrink-0", iconClassName)}
+              style={{ transform: "translateY(-1px)" }}
             />
             <span
               className={cn(
-                'truncate text-sm',
-                isSelected ? 'font-medium text-primary-700' : 'text-[#202123]'
+                "truncate text-sm",
+                isSelected ? "font-medium text-primary-700" : "text-[#202123]",
               )}
             >
               {treeNode.name}
@@ -1501,7 +1662,7 @@ export function FolderTreeWithCards({
       setEditingId,
       setEditingName,
       onUpdateFolder,
-    ]
+    ],
   );
 
   const hasRootContent = explorerTreeData.length > 0;
@@ -1511,10 +1672,7 @@ export function FolderTreeWithCards({
       {/* ✅ サイドバー境界線: 右端 1px + ほんのり背景差 */}
       <div
         ref={treeRootRef}
-        className={cn(
-          'h-full w-full border-r border-black/5',
-          className
-        )}
+        className={cn("h-full w-full border-r border-black/5", className)}
       >
         <input
           ref={fileInputRef}
@@ -1534,8 +1692,12 @@ export function FolderTreeWithCards({
           <div className="flex min-h-full items-start justify-center px-4 py-10">
             <div className="text-center text-slate-500">
               <SearchX className="mx-auto mb-3 h-8 w-8 text-slate-300" />
-              <p className="text-sm font-medium text-slate-600">一致する項目がありません</p>
-              <p className="mt-1 text-xs text-slate-400">条件を変えるか、絞り込みをクリアしてください。</p>
+              <p className="text-sm font-medium text-slate-600">
+                一致する項目がありません
+              </p>
+              <p className="mt-1 text-xs text-slate-400">
+                条件を変えるか、絞り込みをクリアしてください。
+              </p>
             </div>
           </div>
         ) : (
@@ -1546,8 +1708,8 @@ export function FolderTreeWithCards({
               expandedIds={toExpandedTreeIds(expandedFolders)}
               onSelect={handleTreeSelect}
               onToggleExpand={(id, nextOpen) => {
-                if (!id.startsWith('folder:')) return;
-                const folderId = id.slice('folder:'.length);
+                if (!id.startsWith("folder:")) return;
+                const folderId = id.slice("folder:".length);
                 setExpandedFolders((prev) => {
                   const next = new Set(prev);
                   if (nextOpen) next.add(folderId);
@@ -1575,7 +1737,9 @@ export function FolderTreeWithCards({
         {bulkTagFolderId && (
           <BulkTagDialog
             open={Boolean(bulkTagFolderId)}
-            onOpenChange={(open) => { if (!open) setBulkTagFolderId(null); }}
+            onOpenChange={(open) => {
+              if (!open) setBulkTagFolderId(null);
+            }}
             folderId={bulkTagFolderId}
           />
         )}
@@ -1583,6 +1747,3 @@ export function FolderTreeWithCards({
     </DragDropContext>
   );
 }
-
-
-

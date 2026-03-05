@@ -1,11 +1,13 @@
 @layer components {
   .card-editor-right-pane-font {
-    --font-serif: "Yu Mincho", "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Noto Serif JP", "MS PMincho", serif;
+    --font-serif:
+      "Yu Mincho", "Hiragino Mincho ProN", "Hiragino Mincho Pro",
+      "Noto Serif JP", "MS PMincho", serif;
   }
 
   .card-gradient {
     @apply rounded-2xl p-5 text-white shadow-soft;
-    background: var(--color-primary-600-hex, #689A98);
+    background: var(--color-primary-600-hex, #689a98);
   }
 
   .card-outline {
@@ -46,7 +48,14 @@
   .progress-bar-fill {
     @apply h-full rounded-full transition-[width] duration-300 ease-out;
     width: var(--progress, 0%);
-    background: var(--progress-color, linear-gradient(135deg, var(--color-primary-600-hex, #689A98) 0%, #86B4B2 100%));
+    background: var(
+      --progress-color,
+      linear-gradient(
+        135deg,
+        var(--color-primary-600-hex, #689a98) 0%,
+        #86b4b2 100%
+      )
+    );
   }
 
   .nav-link {
@@ -60,7 +69,11 @@
 
   .fab {
     @apply fixed bottom-24 right-6 w-14 h-14 rounded-full shadow-glow flex items-center justify-center text-white text-2xl transition-all duration-300;
-    background: linear-gradient(135deg, var(--color-primary-600-hex, #689A98) 0%, #86B4B2 100%);
+    background: linear-gradient(
+      135deg,
+      var(--color-primary-600-hex, #689a98) 0%,
+      #86b4b2 100%
+    );
   }
 
   .fab:hover {

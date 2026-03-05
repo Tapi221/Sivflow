@@ -1,18 +1,18 @@
-export type IntegrityIssueSeverity = 'info' | 'warning' | 'error';
+export type IntegrityIssueSeverity = "info" | "warning" | "error";
 
 export type IntegrityIssueCode =
-  | 'DELETED_FLAG_MISMATCH'
-  | 'TIMESTAMP_TYPE_MIXED'
-  | 'MISSING_FOLDER'
-  | 'BLOCK_ORDER_INDEX_MISSING'
-  | 'TEXT_BLOCK_MISMATCH'
-  | 'MISSING_REQUIRED_FIELD'
-  | 'INVALID_FOLDER_REF'
-  | 'SYSTEM_CHECK_FAILED';
+  | "DELETED_FLAG_MISMATCH"
+  | "TIMESTAMP_TYPE_MIXED"
+  | "MISSING_FOLDER"
+  | "BLOCK_ORDER_INDEX_MISSING"
+  | "TEXT_BLOCK_MISMATCH"
+  | "MISSING_REQUIRED_FIELD"
+  | "INVALID_FOLDER_REF"
+  | "SYSTEM_CHECK_FAILED";
 
 export interface IntegrityIssue {
   code: IntegrityIssueCode;
-  entityType: 'card' | 'folder' | 'system';
+  entityType: "card" | "folder" | "system";
   entityId: string;
   severity: IntegrityIssueSeverity;
   fixed: boolean;

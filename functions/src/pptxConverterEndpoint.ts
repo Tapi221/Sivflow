@@ -38,7 +38,8 @@ type ManifestPayload = {
 const PNG_1PX_BASE64 =
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aOioAAAAASUVORK5CYII=";
 
-const normalizePrefix = (value: string): string => (value.endsWith("/") ? value : `${value}/`);
+const normalizePrefix = (value: string): string =>
+  value.endsWith("/") ? value : `${value}/`;
 
 const hasUnsafePathFragments = (value: string): boolean =>
   value.includes("..") || value.includes("\\") || value.includes("//");
@@ -68,10 +69,13 @@ const requirePlaceholderEnabled = (res: functions.Response): boolean => {
 const extractProvidedToken = (req: functions.https.Request): string | null =>
   asNonEmptyString(req.header("x-pptx-converter-token"));
 
-const requireToken = (req: functions.https.Request, res: functions.Response): boolean => {
+const requireToken = (
+  req: functions.https.Request,
+  res: functions.Response,
+): boolean => {
   const validation = validateConverterToken(
     process.env[CONVERTER_TOKEN_SECRET_ENV],
-    extractProvidedToken(req)
+    extractProvidedToken(req),
   );
 
   if (validation === "misconfigured") {
@@ -119,7 +123,9 @@ export const pptxConverterEndpoint = functions
     }
 
     const bucket = admin.storage().bucket();
-    const destinationPrefix = normalizePrefix(`users/${userId}/documents/${docId}/pptx/`);
+    const destinationPrefix = normalizePrefix(
+      `users/${userId}/documents/${docId}/pptx/`,
+    );
 
     try {
       const sourceFile = bucket.file(sourceStoragePath);

@@ -1,5 +1,5 @@
-import type { SyncContextSource, NetworkStatus } from '../../types/telemetry';
-import type { SyncResult } from '../../types/sync';
+import type { SyncContextSource, NetworkStatus } from "../../types/telemetry";
+import type { SyncResult } from "../../types/sync";
 
 /**
  * JSONっぽい値を表現したい時用（ログ/永続化/ネットワーク境界で便利）
@@ -9,12 +9,12 @@ export type JsonValue = JsonPrimitive | JsonObject | JsonArray;
 export type JsonObject = { [key: string]: JsonValue };
 export type JsonArray = JsonValue[];
 
-export type SyncTaskType = 'upload' | 'download';
-export type SyncEntity = 'card' | 'folder' | 'userSetting' | 'asset';
-export type SyncPriority = 'critical' | 'high' | 'medium' | 'low';
-export type SyncOperationType = 'create' | 'update' | 'delete';
+export type SyncTaskType = "upload" | "download";
+export type SyncEntity = "card" | "folder" | "userSetting" | "asset";
+export type SyncPriority = "critical" | "high" | "medium" | "low";
+export type SyncOperationType = "create" | "update" | "delete";
 
-export type MergeStrategy = 'server_wins' | 'client_wins' | 'manual';
+export type MergeStrategy = "server_wins" | "client_wins" | "manual";
 
 /**
  * Domain Entities
@@ -101,7 +101,9 @@ export type SyncChange = Record<string, unknown>;
 
 // 4. Cloud Sync Adapter Interface
 export interface ICloudSyncAdapter {
-  pullDiff(since: number): Promise<{ changes: SyncChange[]; serverTime: number }>;
+  pullDiff(
+    since: number,
+  ): Promise<{ changes: SyncChange[]; serverTime: number }>;
 
   pushBatch(
     changes: SyncChange[],

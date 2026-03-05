@@ -1,8 +1,8 @@
-import React from 'react';
-import { Trophy } from '@/ui/icons';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { createPageUrl } from '@/utils';
+import React from "react";
+import { Trophy } from "@/ui/icons";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { createPageUrl } from "@/utils";
 
 type Props = {
   folderId: string | null;
@@ -17,14 +17,20 @@ export function StudyEmpty({ folderId, navigate, handleBack }: Props) {
         <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-primary-100 bg-primary-50/70">
           <Trophy className="w-7 h-7 text-primary-600" />
         </div>
-        <h2 className="text-xl font-semibold mb-2 text-slate-800">学習するカードがありません</h2>
+        <h2 className="text-xl font-semibold mb-2 text-slate-800">
+          学習するカードがありません
+        </h2>
         <p className="text-sm text-slate-500 mb-8">
-          {folderId ? 'このフォルダにカードを追加してください' : '今日復習するカードはありません'}
+          {folderId
+            ? "このフォルダにカードを追加してください"
+            : "今日復習するカードはありません"}
         </p>
         <div className="flex flex-wrap justify-center gap-3">
           {folderId && (
             <Button
-              onClick={() => navigate(createPageUrl(`CardEdit?folderId=${folderId}`))}
+              onClick={() =>
+                navigate(createPageUrl(`CardEdit?folderId=${folderId}`))
+              }
               className="bg-primary-600 hover:bg-primary-700 text-white rounded-xl px-6 h-11"
             >
               カードを追加
@@ -32,10 +38,12 @@ export function StudyEmpty({ folderId, navigate, handleBack }: Props) {
           )}
           <Button
             onClick={handleBack}
-            variant={folderId ? 'outline' : 'default'}
-            className={folderId
-              ? 'rounded-xl px-6 h-11 border-slate-200 hover:bg-slate-50 text-slate-700'
-              : 'bg-primary-600 hover:bg-primary-700 text-white rounded-xl px-6 h-11'}
+            variant={folderId ? "outline" : "default"}
+            className={
+              folderId
+                ? "rounded-xl px-6 h-11 border-slate-200 hover:bg-slate-50 text-slate-700"
+                : "bg-primary-600 hover:bg-primary-700 text-white rounded-xl px-6 h-11"
+            }
           >
             戻る
           </Button>

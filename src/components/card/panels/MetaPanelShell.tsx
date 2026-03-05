@@ -21,7 +21,7 @@ export function MetaPanelShell({
     <aside
       className={cn(
         `meta-panel h-full w-80 shrink-0 rounded-l-xl border border-[#d7d9de] bg-sidebar font-serif text-sm text-[var(--sidebar-text)] surface-panel-convex ${UI_TYPO} ${NUMERIC_TYPO}`,
-        className
+        className,
       )}
       style={
         {
@@ -33,7 +33,9 @@ export function MetaPanelShell({
         } as CSSProperties
       }
     >
-      <div className={cn("h-full overflow-y-auto bg-sidebar p-2", bodyClassName)}>
+      <div
+        className={cn("h-full overflow-y-auto bg-sidebar p-2", bodyClassName)}
+      >
         <div className={cn("space-y-6", contentClassName)}>{children}</div>
       </div>
     </aside>
@@ -45,10 +47,15 @@ type MetaPanelLeadSectionProps = {
   className?: string;
 };
 
-export function MetaPanelLeadSection({ children, className }: MetaPanelLeadSectionProps) {
+export function MetaPanelLeadSection({
+  children,
+  className,
+}: MetaPanelLeadSectionProps) {
   return (
     <section className={className}>
-      <div className="mt-2 space-y-2 text-[length:var(--meta-font-size)] text-[var(--sidebar-text)]">{children}</div>
+      <div className="mt-2 space-y-2 text-[length:var(--meta-font-size)] text-[var(--sidebar-text)]">
+        {children}
+      </div>
     </section>
   );
 }

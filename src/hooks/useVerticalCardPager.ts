@@ -8,8 +8,8 @@
  * - feedback loop 防止: IO が起因の activeIndex 変化ではスクロールしない
  */
 
-import { useCallback, useEffect, useRef } from 'react';
-import { isTypingTarget } from '@/utils/isTypingTarget';
+import { useCallback, useEffect, useRef } from "react";
+import { isTypingTarget } from "@/utils/isTypingTarget";
 
 export type UseVerticalCardPagerOptions = {
   /** カード総数 */
@@ -48,17 +48,24 @@ export function useVerticalCardPager({
   const pendingScrollRef = useRef(false);
   // activeIndex の最新値を ref でも保持（stale closure 回避）
   const activeIndexRef = useRef(activeIndex);
-  useEffect(() => { activeIndexRef.current = activeIndex; }, [activeIndex]);
+  useEffect(() => {
+    activeIndexRef.current = activeIndex;
+  }, [activeIndex]);
 
   // ── scrollToIndex ──────────────────────────────────────────────────────
-  const scrollToIndex = useCallback((idx: number, behavior: ScrollBehavior = 'smooth') => {
-    const el = itemRefs.current[idx];
-    if (!el) return;
-    pendingScrollRef.current = true;
-    el.scrollIntoView({ behavior, block: 'center' });
-    // スクロールアニメーション完了後にフラグを解除（smooth は ~600ms 想定）
-    setTimeout(() => { pendingScrollRef.current = false; }, 700);
-  }, []);
+  const scrollToIndex = useCallback(
+    (idx: number, behavior: ScrollBehavior = "smooth") => {
+      const el = itemRefs.current[idx];
+      if (!el) return;
+      pendingScrollRef.current = true;
+      el.scrollIntoView({ behavior, block: "center" });
+      // スクロールアニメーション完了後にフラグを解除（smooth は ~600ms 想定）
+      setTimeout(() => {
+        pendingScrollRef.current = false;
+      }, 700);
+    },
+    [],
+  );
 
   // ── goNext / goPrev ──────────────────────────────────────────────────
   const goNext = useCallback(() => {
@@ -82,14 +89,14 @@ export function useVerticalCardPager({
       ioTriggeredRef.current = false;
       return;
     }
-    scrollToIndex(activeIndex, 'smooth');
+    scrollToIndex(activeIndex, "smooth");
   }, [activeIndex]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── 初回マウント: activeIndex の位置に即時スクロール ─────────────────
   useEffect(() => {
     // rAF で DOM がレンダリングされた後に実行
     const id = requestAnimationFrame(() => {
-      scrollToIndex(activeIndex, 'instant');
+      scrollToIndex(activeIndex, "instant");
     });
     return () => cancelAnimationFrame(id);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -139,7 +146,7 @@ export function useVerticalCardPager({
       {
         root: container,
         // コンテナの上下 25% を除いた中央 50% 帯でのみ検出
-        rootMargin: '-25% 0px -25% 0px',
+        rootMargin: "-25% 0px -25% 0px",
         threshold: 0,
       },
     );
@@ -159,19 +166,19 @@ export function useVerticalCardPager({
       if (e.ctrlKey || e.metaKey) return;
 
       switch (e.key) {
-        case ' ':
+        case " ":
           if (e.shiftKey) return; // Shift+Space は素通し
           e.preventDefault();
           onFlip?.();
           break;
-        case 'Enter':
+        case "Enter":
           onFlip?.();
           break;
-        case 'ArrowDown':
+        case "ArrowDown":
           e.preventDefault();
           goNext();
           break;
-        case 'ArrowUp':
+        case "ArrowUp":
           e.preventDefault();
           goPrev();
           break;
@@ -180,8 +187,8 @@ export function useVerticalCardPager({
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [onFlip, goNext, goPrev]);
 
   return { itemRefs, scrollToIndex, goNext, goPrev };

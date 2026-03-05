@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo } from "react";
 
 type StudyCard = Record<string, any>;
 
@@ -10,26 +10,33 @@ type Params = {
   settings: Record<string, any> | null | undefined;
 };
 
-export function useStudyCards({ folderId, allCards, folders, foldersLoading, settings }: Params) {
+export function useStudyCards({
+  folderId,
+  allCards,
+  folders,
+  foldersLoading,
+  settings,
+}: Params) {
   const studyCards = useMemo(() => {
     const toDate = (value: unknown): Date | null => {
       if (!value) return null;
-      if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value;
-      if (typeof value?.toDate === 'function') {
+      if (value instanceof Date)
+        return Number.isNaN(value.getTime()) ? null : value;
+      if (typeof value?.toDate === "function") {
         const d = value.toDate();
         return d instanceof Date && !Number.isNaN(d.getTime()) ? d : null;
       }
-      if (typeof value === 'object') {
+      if (typeof value === "object") {
         const seconds =
-          typeof value.seconds === 'number'
+          typeof value.seconds === "number"
             ? value.seconds
-            : typeof value._seconds === 'number'
+            : typeof value._seconds === "number"
               ? value._seconds
               : null;
         const nanoseconds =
-          typeof value.nanoseconds === 'number'
+          typeof value.nanoseconds === "number"
             ? value.nanoseconds
-            : typeof value._nanoseconds === 'number'
+            : typeof value._nanoseconds === "number"
               ? value._nanoseconds
               : 0;
         if (seconds !== null) {
@@ -41,14 +48,16 @@ export function useStudyCards({ folderId, allCards, folders, foldersLoading, set
       return Number.isNaN(d.getTime()) ? null : d;
     };
 
-    let cards = (allCards ?? []).filter((c) => !c?.isDraft && !c?.isDeleted && !c?.is_deleted);
+    let cards = (allCards ?? []).filter(
+      (c) => !c?.isDraft && !c?.isDeleted && !c?.is_deleted,
+    );
 
     if (!foldersLoading) {
       const activeFolderIds = new Set(
         (folders ?? [])
           .filter((f) => !f?.isDeleted && !f?.is_deleted)
           .map((f) => f.id ?? f.folderId)
-          .filter(Boolean)
+          .filter(Boolean),
       );
       cards = cards.filter((c) => {
         const fid = c?.folderId ?? c?.folder_id;
@@ -60,15 +69,25 @@ export function useStudyCards({ folderId, allCards, folders, foldersLoading, set
       cards = cards.filter((c) => (c?.folderId ?? c?.folder_id) === folderId);
     } else {
       const today = new Date();
-      const tDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const tDate = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
+      );
       const autoCarryOver = settings?.autoCarryOver ?? true;
       cards = cards.filter((c) => {
         const reviewDateRaw = c?.nextReviewDate ?? c?.next_review_date;
         if (!reviewDateRaw) return false;
         const reviewDate = toDate(reviewDateRaw);
         if (!reviewDate) return false;
-        const rDate = new Date(reviewDate.getFullYear(), reviewDate.getMonth(), reviewDate.getDate());
-        return autoCarryOver ? rDate <= tDate : rDate.getTime() === tDate.getTime();
+        const rDate = new Date(
+          reviewDate.getFullYear(),
+          reviewDate.getMonth(),
+          reviewDate.getDate(),
+        );
+        return autoCarryOver
+          ? rDate <= tDate
+          : rDate.getTime() === tDate.getTime();
       });
     }
 

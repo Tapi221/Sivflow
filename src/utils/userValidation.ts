@@ -14,7 +14,8 @@ export const USERNAME_VALIDATION = {
   MAX_LENGTH: 20,
   // 許可される文字: 日本語（ひらがな、カタカナ、漢字）、英数字、スペース、ハイフン、アンダースコア
   // Unicodeプロパティを使用して日本語を判定
-  ALLOWED_CHARS_REGEX: /^[a-zA-Z0-9\s\-_ \u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF\u3400-\u4DBF]+$/,
+  ALLOWED_CHARS_REGEX:
+    /^[a-zA-Z0-9\s\-_ \u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF\u3400-\u4DBF]+$/,
 };
 
 /**
@@ -37,7 +38,7 @@ export function validateUsername(username: string): ValidationResult {
   if (trimmedName.length === 0) {
     return {
       isValid: false,
-      message: 'ユーザーネームを入力してください。（空白のみは不可）',
+      message: "ユーザーネームを入力してください。（空白のみは不可）",
     };
   }
 
@@ -65,23 +66,24 @@ export function validateUsername(username: string): ValidationResult {
   if (!USERNAME_VALIDATION.ALLOWED_CHARS_REGEX.test(trimmedName)) {
     return {
       isValid: false,
-      message: 'ユーザーネームに使用できない文字が含まれています。（日本語、英数字、スペース、ハイフン、アンダースコアが使用可能です）',
+      message:
+        "ユーザーネームに使用できない文字が含まれています。（日本語、英数字、スペース、ハイフン、アンダースコアが使用可能です）",
     };
   }
 
-  return { isValid: true, message: '' };
+  return { isValid: true, message: "" };
 }
 
 /**
  * 表示用に文字列を省略する（Unicode単位）
  */
 export function truncateUsername(name: string, maxLength: number = 20): string {
-  if (!name) return '';
-  
+  if (!name) return "";
+
   const chars = Array.from(name);
   if (chars.length <= maxLength) {
     return name;
   }
-  
-  return chars.slice(0, maxLength).join('') + '...';
+
+  return chars.slice(0, maxLength).join("") + "...";
 }

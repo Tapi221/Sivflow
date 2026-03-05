@@ -1,28 +1,29 @@
-import { findBlobUrlFixesDeep } from '@/utils/blobUrlSanitizer';
-import { telemetryOncePerSession } from '../localDBRuntimeState';
+import { findBlobUrlFixesDeep } from "@/utils/blobUrlSanitizer";
+import { telemetryOncePerSession } from "../localDBRuntimeState";
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
+  typeof value === "object" && value !== null && !Array.isArray(value);
 
 const toIdString = (value: unknown): string | undefined => {
-  if (typeof value === 'string' || typeof value === 'number') return String(value);
+  if (typeof value === "string" || typeof value === "number")
+    return String(value);
   return undefined;
 };
 
 const getIdFromUnknownEntity = (entity: unknown): string | undefined => {
   if (!isRecord(entity)) return undefined;
-  if (!('id' in entity)) return undefined;
+  if (!("id" in entity)) return undefined;
   return toIdString(entity.id);
 };
 
 export const safeRevokeBlobUrl = (url: unknown, context: string): void => {
-  if (typeof url !== 'string' || !url.startsWith('blob:')) return;
-  if (typeof URL === 'undefined' || typeof URL.revokeObjectURL !== 'function') return;
+  if (typeof url !== "string" || !url.startsWith("blob:")) return;
+  if (typeof URL === "undefined" || typeof URL.revokeObjectURL !== "function")
+    return;
 
   try {
     URL.revokeObjectURL(url);
   } catch (error) {
-
     console.warn(`[LocalDB] Failed to revoke blob URL (${context})`, error);
   }
 };
@@ -45,18 +46,19 @@ export class InvalidImageUrlError extends Error {
 
   constructor(params: InvalidImageUrlErrorParams) {
     const parts: Array<string | null> = [
-      params.message ?? '画像の保存形式が不正です。blob: URL は保存できません。',
+      params.message ??
+        "画像の保存形式が不正です。blob: URL は保存できません。",
       params.entityType ? `entityType=${params.entityType}` : null,
       params.entityId ? `id=${params.entityId}` : null,
       params.path ? `path=${params.path}` : null,
     ];
 
     const details = parts
-      .filter((v): v is string => typeof v === 'string' && v.length > 0)
-      .join(' ');
+      .filter((v): v is string => typeof v === "string" && v.length > 0)
+      .join(" ");
 
     super(details);
-    this.name = 'InvalidImageUrlError';
+    this.name = "InvalidImageUrlError";
     this.entityType = params.entityType;
     this.entityId = params.entityId;
     this.path = params.path;
@@ -65,30 +67,32 @@ export class InvalidImageUrlError extends Error {
 
 export const assertNoBlobUrlInCardPayload = (
   cardLike: unknown,
-  context?: { entityType?: string; entityId?: string }
+  context?: { entityType?: string; entityId?: string },
 ): void => {
   if (!isRecord(cardLike)) return;
 
   const fixes = findBlobUrlFixesDeep(cardLike);
   if (fixes.length === 0) return;
 
-  telemetryOncePerSession('cards:blob-url-persist-blocked');
+  telemetryOncePerSession("cards:blob-url-persist-blocked");
 
   const firstFix = fixes[0];
   const fixPath =
-    typeof firstFix.path === 'string' && firstFix.path.length > 0 ? firstFix.path : '<root>';
+    typeof firstFix.path === "string" && firstFix.path.length > 0
+      ? firstFix.path
+      : "<root>";
 
   throw new InvalidImageUrlError({
-    message: '画像の保存形式が不正です。blob: URL は保存できません。',
-    entityType: context?.entityType ?? 'card',
+    message: "画像の保存形式が不正です。blob: URL は保存できません。",
+    entityType: context?.entityType ?? "card",
     entityId: context?.entityId ?? getIdFromUnknownEntity(cardLike),
     path: fixPath,
   });
 };
 
 export const scrubBlobUrlsDeep = (value: unknown): unknown => {
-  if (typeof value === 'string') {
-    return value.startsWith('blob:') ? null : value;
+  if (typeof value === "string") {
+    return value.startsWith("blob:") ? null : value;
   }
 
   if (Array.isArray(value)) {
@@ -109,9 +113,9 @@ export const scrubBlobUrlsDeep = (value: unknown): unknown => {
 export const setNestedPath = (
   target: Record<string, unknown>,
   path: string,
-  value: unknown
+  value: unknown,
 ): void => {
-  const keys = path.split('.').filter((k) => k.length > 0);
+  const keys = path.split(".").filter((k) => k.length > 0);
   if (keys.length === 0) return;
 
   let cursor: Record<string, unknown> = target;
@@ -130,14 +134,17 @@ export const setNestedPath = (
   cursor[keys[keys.length - 1]] = value;
 };
 
-export const buildCardCandidateFromMods = (obj: unknown, mods: unknown): unknown => {
+export const buildCardCandidateFromMods = (
+  obj: unknown,
+  mods: unknown,
+): unknown => {
   if (!isRecord(obj)) return mods;
   if (!isRecord(mods)) return obj;
 
   const candidate: Record<string, unknown> = { ...obj };
 
   for (const [key, value] of Object.entries(mods)) {
-    if (key.includes('.')) {
+    if (key.includes(".")) {
       setNestedPath(candidate, key, value);
     } else {
       candidate[key] = value;

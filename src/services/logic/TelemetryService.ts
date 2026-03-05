@@ -3,9 +3,9 @@ import type {
   LogLevel,
   LogContext,
   SyncLogEntry,
-  TelemetryEventName
-} from '../../types/telemetry';
-import { sanitizeForLog } from '@/utils/logSanitizer';
+  TelemetryEventName,
+} from "../../types/telemetry";
+import { sanitizeForLog } from "@/utils/logSanitizer";
 
 /**
  * TelemetryService: 構造化ログとメトリクスを収集するサービス
@@ -18,13 +18,18 @@ export class TelemetryService implements ITelemetryService {
   /**
    * 構造化ログを記録
    */
-  log(level: LogLevel, message: string, context?: LogContext, error?: Error): void {
+  log(
+    level: LogLevel,
+    message: string,
+    context?: LogContext,
+    error?: Error,
+  ): void {
     const entry: SyncLogEntry = {
       timestamp: new Date().toISOString(),
       level,
       message,
       context: sanitizeForLog(context || {}),
-      error
+      error,
     };
 
     this.logs.push(entry);
@@ -32,16 +37,16 @@ export class TelemetryService implements ITelemetryService {
     // コンソール出力は開発環境のみ
     if (import.meta.env.DEV) {
       const logMethod =
-        level === 'error'
+        level === "error"
           ? console.error
-          : level === 'warn'
-          ? console.warn
-          : console.log;
+          : level === "warn"
+            ? console.warn
+            : console.log;
 
       logMethod(
         `[${level.toUpperCase()}] ${message}`,
         sanitizeForLog(context),
-        sanitizeForLog(error)
+        sanitizeForLog(error),
       );
     }
 
@@ -56,7 +61,7 @@ export class TelemetryService implements ITelemetryService {
     level: LogLevel,
     message: string,
     context?: LogContext,
-    error?: Error
+    error?: Error,
   ): void {
     const entry: SyncLogEntry = {
       timestamp: new Date().toISOString(),
@@ -64,23 +69,23 @@ export class TelemetryService implements ITelemetryService {
       eventName,
       message,
       context: sanitizeForLog(context || {}),
-      error
+      error,
     };
 
     this.logs.push(entry);
 
     if (import.meta.env.DEV) {
       const logMethod =
-        level === 'error'
+        level === "error"
           ? console.error
-          : level === 'warn'
-          ? console.warn
-          : console.log;
+          : level === "warn"
+            ? console.warn
+            : console.log;
 
       logMethod(
         `[${level.toUpperCase()}] ${eventName}: ${message}`,
         sanitizeForLog(context),
-        sanitizeForLog(error)
+        sanitizeForLog(error),
       );
     }
 
@@ -92,7 +97,11 @@ export class TelemetryService implements ITelemetryService {
   /**
    * メトリクスを記録
    */
-  recordMetric(name: string, value: number, tags?: Record<string, string>): void {
+  recordMetric(
+    name: string,
+    value: number,
+    tags?: Record<string, string>,
+  ): void {
     const key = tags ? `${name}_${JSON.stringify(tags)}` : name;
 
     if (!this.metrics.has(key)) {
@@ -111,26 +120,29 @@ export class TelemetryService implements ITelemetryService {
   /**
    * トランザクション計測（durationを自動記録）
    */
-  startTransaction(name: string): { end: (status: 'success' | 'failure') => void } {
+  startTransaction(name: string): {
+    end: (status: "success" | "failure") => void;
+  } {
     const startTime = performance.now();
 
     return {
-      end: (status: 'success' | 'failure') => {
+      end: (status: "success" | "failure") => {
         const duration = performance.now() - startTime;
         this.recordMetric(`transaction_duration_${name}`, duration, { status });
-        this.log('info', `Transaction ${name} completed`, { duration, status });
-      }
+        this.log("info", `Transaction ${name} completed`, { duration, status });
+      },
     };
   }
 
   /**
    * 集計データの取得（ダッシュボード用）
    */
-  getMetricsSummary(): Record<string, { avg: number; p95: number; count: number }> {
-    const summary: Record<
-      string,
-      { avg: number; p95: number; count: number }
-    > = {};
+  getMetricsSummary(): Record<
+    string,
+    { avg: number; p95: number; count: number }
+  > {
+    const summary: Record<string, { avg: number; p95: number; count: number }> =
+      {};
 
     this.metrics.forEach((values, key) => {
       const sorted = [...values].sort((a, b) => a - b);
@@ -148,8 +160,6 @@ export class TelemetryService implements ITelemetryService {
    * 直近のエラーログを取得
    */
   getRecentErrors(limit: number = 10): SyncLogEntry[] {
-    return this.logs
-      .filter((log) => log.level === 'error')
-      .slice(-limit);
+    return this.logs.filter((log) => log.level === "error").slice(-limit);
   }
 }

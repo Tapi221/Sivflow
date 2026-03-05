@@ -1,70 +1,74 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { getPageRuledBg } from '@/components/card/frame/ruledStyles';
-import { useSearchParams } from 'react-router-dom';
-import { useCards } from '@/hooks/useCards';
-import { useFolders } from '@/hooks/useFolders';
-import { useDocuments } from '@/hooks/useDocuments';
-import { useIsDesktop } from '@/hooks/useIsDesktop';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useToast } from '@/contexts/ToastContext';
-import { Skeleton } from '@/components/ui/skeleton';
-import TreeViewLayout from '@/components/folder/TreeViewLayout';
-import { cn } from '@/lib/utils';
-import { useSettingsQueryParam } from '@/hooks/useSettingsQueryParam';
+import React, { useState, useEffect, useRef } from "react";
+import { getPageRuledBg } from "@/components/card/frame/ruledStyles";
+import { useSearchParams } from "react-router-dom";
+import { useCards } from "@/hooks/useCards";
+import { useFolders } from "@/hooks/useFolders";
+import { useDocuments } from "@/hooks/useDocuments";
+import { useIsDesktop } from "@/hooks/useIsDesktop";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/contexts/ToastContext";
+import { Skeleton } from "@/components/ui/skeleton";
+import TreeViewLayout from "@/components/folder/TreeViewLayout";
+import { cn } from "@/lib/utils";
+import { useSettingsQueryParam } from "@/hooks/useSettingsQueryParam";
 
 export default function Folders() {
   const [searchParams, setSearchParams] = useSearchParams();
   const queryString = searchParams.toString();
-  const { setIsSettingsOpen } = useSettingsQueryParam(searchParams, setSearchParams);
+  const { setIsSettingsOpen } = useSettingsQueryParam(
+    searchParams,
+    setSearchParams,
+  );
   const queryClient = useQueryClient();
   const isDesktop = useIsDesktop();
-  const queryFolderId = searchParams.get('folderId');
-  const queryCardId = searchParams.get('cardId');
-  const queryDocId = searchParams.get('docId');
-  
+  const queryFolderId = searchParams.get("folderId");
+  const queryCardId = searchParams.get("cardId");
+  const queryDocId = searchParams.get("docId");
+
   const pendingUrlSyncRef = useRef(null);
 
   // 選択状態
   const [selectedFolderId, setSelectedFolderId] = useState(() => {
     if (queryFolderId) return queryFolderId;
-    return localStorage.getItem('folder_selectedFolderId_work') || null;
+    return localStorage.getItem("folder_selectedFolderId_work") || null;
   });
-  
+
   // 選択状態の永続化
   useEffect(() => {
     if (selectedFolderId) {
-      localStorage.setItem('folder_selectedFolderId_work', selectedFolderId);
+      localStorage.setItem("folder_selectedFolderId_work", selectedFolderId);
     } else {
-      localStorage.removeItem('folder_selectedFolderId_work');
+      localStorage.removeItem("folder_selectedFolderId_work");
     }
   }, [selectedFolderId]);
 
   const [selectedItem, setSelectedItem] = useState(() => {
-    if (queryCardId) return { type: 'card', id: queryCardId };
-    if (queryDocId) return { type: 'document', id: queryDocId };
+    if (queryCardId) return { type: "card", id: queryCardId };
+    if (queryDocId) return { type: "document", id: queryDocId };
     return null;
   }); // { type: 'card' | 'document', id: string } | null
 
-  const selectedCardId = selectedItem?.type === 'card' ? selectedItem.id : null;
-  const selectedDocumentId = selectedItem?.type === 'document' ? selectedItem.id : null;
+  const selectedCardId = selectedItem?.type === "card" ? selectedItem.id : null;
+  const selectedDocumentId =
+    selectedItem?.type === "document" ? selectedItem.id : null;
 
   useEffect(() => {
     const next = new URLSearchParams(queryString);
     if (selectedFolderId) {
-      next.set('folderId', selectedFolderId);
+      next.set("folderId", selectedFolderId);
     } else {
-      next.delete('folderId');
+      next.delete("folderId");
     }
 
-    if (selectedItem?.type === 'card') {
-      next.set('cardId', selectedItem.id);
-      next.delete('docId');
-    } else if (selectedItem?.type === 'document') {
-      next.set('docId', selectedItem.id);
-      next.delete('cardId');
+    if (selectedItem?.type === "card") {
+      next.set("cardId", selectedItem.id);
+      next.delete("docId");
+    } else if (selectedItem?.type === "document") {
+      next.set("docId", selectedItem.id);
+      next.delete("cardId");
     } else {
-      next.delete('cardId');
-      next.delete('docId');
+      next.delete("cardId");
+      next.delete("docId");
     }
 
     const current = queryString;
@@ -92,17 +96,27 @@ export default function Folders() {
       setSelectedFolderId(queryFolderId || null);
     }
 
-    if (queryCardId && (selectedItem?.type !== 'card' || selectedItem.id !== queryCardId)) {
-      setSelectedItem({ type: 'card', id: queryCardId });
+    if (
+      queryCardId &&
+      (selectedItem?.type !== "card" || selectedItem.id !== queryCardId)
+    ) {
+      setSelectedItem({ type: "card", id: queryCardId });
       return;
     }
 
-    if (queryDocId && (selectedItem?.type !== 'document' || selectedItem.id !== queryDocId)) {
-      setSelectedItem({ type: 'document', id: queryDocId });
+    if (
+      queryDocId &&
+      (selectedItem?.type !== "document" || selectedItem.id !== queryDocId)
+    ) {
+      setSelectedItem({ type: "document", id: queryDocId });
       return;
     }
 
-    if (!queryCardId && !queryDocId && (selectedItem?.type === 'card' || selectedItem?.type === 'document')) {
+    if (
+      !queryCardId &&
+      !queryDocId &&
+      (selectedItem?.type === "card" || selectedItem?.type === "document")
+    ) {
       setSelectedItem(null);
     }
   }, [
@@ -113,12 +127,12 @@ export default function Folders() {
     selectedFolderId,
     selectedItem,
   ]);
-  
+
   const { folders = [], loading: foldersLoading } = useFolders();
   const { cards = [], loading: cardsLoading } = useCards();
   const { documents = [] } = useDocuments();
   const { updateFolder } = useFolders();
-  
+
   const updateFolderMutation = useMutation({
     mutationFn: ({ id, data }) => updateFolder(id, data),
   });
@@ -127,12 +141,12 @@ export default function Folders() {
   useEffect(() => {
     window.scrollTo(0, 0);
     if (isDesktop) {
-      document.documentElement.classList.add('no-page-scroll');
+      document.documentElement.classList.add("no-page-scroll");
     } else {
-      document.documentElement.classList.remove('no-page-scroll');
+      document.documentElement.classList.remove("no-page-scroll");
     }
     return () => {
-      document.documentElement.classList.remove('no-page-scroll');
+      document.documentElement.classList.remove("no-page-scroll");
     };
   }, [isDesktop]);
 
@@ -146,7 +160,7 @@ export default function Folders() {
 
   const handleSelectCardInWork = (cardId) => {
     // PC/モバイル共通で右ペインの編集UIを表示する
-    setSelectedItem({ type: 'card', id: cardId });
+    setSelectedItem({ type: "card", id: cardId });
   };
 
   const handleSelectDocumentInWork = (docId) => {
@@ -163,7 +177,7 @@ export default function Folders() {
     // (実装計画には詳細がなかったが、今回はフォルダ一覧の統一が主眼)
     // 既存のFolders画面でもPDFは表示されるはず。ここでのクリックは「スルー」でもよい？
     // いったんPCと同じ処理にする。
-    setSelectedItem({ type: 'document', id: docId });
+    setSelectedItem({ type: "document", id: docId });
   };
 
   const handleSelectItemInWork = (item) => {
@@ -171,83 +185,85 @@ export default function Folders() {
       setSelectedItem(null);
       return;
     }
-    if (item.type === 'card') {
+    if (item.type === "card") {
       handleSelectCardInWork(item.id);
       return;
     }
-    if (item.type === 'document') {
+    if (item.type === "document") {
       handleSelectDocumentInWork(item.id);
       return;
     }
-    if (item.type === 'today-study') {
-      setSelectedItem({ type: 'today-study' });
+    if (item.type === "today-study") {
+      setSelectedItem({ type: "today-study" });
       setSelectedFolderId(null);
       return;
     }
-    if (item.type === 'directory') {
-      setSelectedItem({ type: 'directory' });
+    if (item.type === "directory") {
+      setSelectedItem({ type: "directory" });
       setSelectedFolderId(null);
       return;
     }
-    if (item.type === 'gallery') {
-      setSelectedItem({ type: 'gallery' });
+    if (item.type === "gallery") {
+      setSelectedItem({ type: "gallery" });
       setSelectedFolderId(null);
       return;
     }
-    if (item.type === 'calendar') {
-      setSelectedItem({ type: 'calendar' });
+    if (item.type === "calendar") {
+      setSelectedItem({ type: "calendar" });
       setSelectedFolderId(null);
       return;
     }
-    if (item.type === 'settings') {
+    if (item.type === "settings") {
       setIsSettingsOpen(true);
       return;
     }
-    if (item.type === 'trash') {
-      setSelectedItem({ type: 'trash' });
+    if (item.type === "trash") {
+      setSelectedItem({ type: "trash" });
       setSelectedFolderId(null);
     }
   };
-  
+
   const isLoading = foldersLoading || cardsLoading;
 
   return (
     <div
       className={cn(
         "bg-[#F8FAFB] transition-colors duration-500 relative",
-        isDesktop ? "h-full overflow-hidden" : "h-full overflow-x-hidden overflow-y-auto"
+        isDesktop
+          ? "h-full overflow-hidden"
+          : "h-full overflow-x-hidden overflow-y-auto",
       )}
     >
       {/* Background Ruled Lines */}
-      <div 
-        className="absolute inset-0 opacity-100 pointer-events-none z-0" 
-        style={{ 
-          ...getPageRuledBg()
+      <div
+        className="absolute inset-0 opacity-100 pointer-events-none z-0"
+        style={{
+          ...getPageRuledBg(),
         }}
       />
       <div className="w-full mx-auto h-full">
-            {isLoading ? (
-              <div className="space-y-3 p-4">
-                {[...Array(3)].map((_, i) => (
-                  <Skeleton key={i} className="h-16 w-full rounded-2xl" />
-                ))}
-              </div>
-            ) : (
-                <TreeViewLayout
-                  folders={folders}
-                  cards={cards}
-                  documents={documents}
-                  selectedFolderId={selectedFolderId}
-                  selectedItem={selectedItem}
-                  selectedCardId={selectedCardId}
-                  selectedDocumentId={selectedDocumentId}
-                  onFolderSelect={handleSelectFolderInWork}
-                  onItemSelect={handleSelectItemInWork}
-                  onCardUpdated={() => {
-                    // カード更新後の処理
-                  }}
-                />
-            )}
+        {isLoading ? (
+          <div className="space-y-3 p-4">
+            {[...Array(3)].map((_, i) => (
+              <Skeleton key={i} className="h-16 w-full rounded-2xl" />
+            ))}
+          </div>
+        ) : (
+          <TreeViewLayout
+            folders={folders}
+            cards={cards}
+            documents={documents}
+            selectedFolderId={selectedFolderId}
+            selectedItem={selectedItem}
+            selectedCardId={selectedCardId}
+            selectedDocumentId={selectedDocumentId}
+            onFolderSelect={handleSelectFolderInWork}
+            onItemSelect={handleSelectItemInWork}
+            onCardUpdated={() => {
+              // カード更新後の処理
+            }}
+          />
+        )}
       </div>
     </div>
   );

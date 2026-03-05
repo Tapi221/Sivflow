@@ -1,5 +1,5 @@
-import { Plus } from '@/ui/icons';
-import { Link } from '@/ui/icons';
+import { Plus } from "@/ui/icons";
+import { Link } from "@/ui/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -27,14 +27,24 @@ export function LinkEditor({ items, onChange }: LinkEditorProps) {
   return (
     <div className="space-y-2">
       {refs.map((ref, index) => (
-        <div key={index} className="relative rounded-xl border border-slate-100 bg-white p-2 shadow-sm group/link">
+        <div
+          key={index}
+          className="relative rounded-xl border border-slate-100 bg-white p-2 shadow-sm group/link"
+        >
           <button
             type="button"
             onClick={() => remove(index)}
             className="absolute -top-1 -right-1 z-20 rounded-full border border-slate-200 bg-white p-1 text-slate-400 opacity-0 shadow-sm transition-opacity group-hover/link:opacity-100 hover:border-red-200 hover:text-red-500"
           >
             <span className="sr-only">削除</span>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-2.5 w-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-2.5 w-2.5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <path d="M18 6 6 18" />
               <path d="m6 6 12 12" />
             </svg>
@@ -77,7 +87,9 @@ export function LinkEditor({ items, onChange }: LinkEditorProps) {
         onClick={add}
         className={cn(
           "flex h-8 w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed text-[11px] font-bold text-slate-400 transition-all hover:border-primary-200 hover:bg-primary-50/30 hover:text-primary-600",
-          refs.length > 0 ? "mt-1.5 border-slate-100 bg-slate-50/10" : "border-slate-200"
+          refs.length > 0
+            ? "mt-1.5 border-slate-100 bg-slate-50/10"
+            : "border-slate-200",
         )}
       >
         <Plus className="h-3 w-3" />
@@ -86,5 +98,3 @@ export function LinkEditor({ items, onChange }: LinkEditorProps) {
     </div>
   );
 }
-
-

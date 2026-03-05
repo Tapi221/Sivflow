@@ -1,8 +1,8 @@
-import React from 'react';
-import { Image as ImageIcon } from '@/ui/icons';
-import { BlockWrapper } from './BlockWrapper';
-import { ImageBlockContent } from './ImageBlockContent';
-import { cn } from '@/lib/utils';
+import React from "react";
+import { Image as ImageIcon } from "@/ui/icons";
+import { BlockWrapper } from "./BlockWrapper";
+import { ImageBlockContent } from "./ImageBlockContent";
+import { cn } from "@/lib/utils";
 
 interface MediaBlockProps {
   data: unknown[];
@@ -55,7 +55,7 @@ export const MediaBlock = ({
     <BlockWrapper
       onDelete={onDelete}
       onDuplicate={onDuplicate}
-      className={cn('px-0', !isMediaEmpty && 'border-transparent')}
+      className={cn("px-0", !isMediaEmpty && "border-transparent")}
       contentClassName="px-0"
       dragHandleProps={dragHandleProps}
       dragHandleClassName={dragHandleClassName}
@@ -84,7 +84,7 @@ export const MediaBlock = ({
         />
         <div
           className="pointer-events-none absolute inset-0 z-20 rounded-[11px] border border-slate-200/80"
-          style={{ borderWidth: 'var(--card-ruled-line-px, 1px)' }}
+          style={{ borderWidth: "var(--card-ruled-line-px, 1px)" }}
         />
       </div>
     </BlockWrapper>

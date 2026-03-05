@@ -1,24 +1,28 @@
-import { Dexie } from 'dexie';
-import { InMemoryLocalDB } from '../InMemoryLocalDB';
+import { Dexie } from "dexie";
+import { InMemoryLocalDB } from "../InMemoryLocalDB";
 // NOTE: createLocalDBInternal import creates a circular dependency with LocalDB.ts.
 // This is safe in ESM because both modules only use each other inside function bodies,
 // never at module initialization time.
-import { createLocalDBInternal } from './LocalDB';
-import type { LocalDB } from './LocalDB';
-import { isBackingStoreOpenError, safeStringifyError, classifyFallbackReasonCode } from './errors';
+import { createLocalDBInternal } from "./LocalDB";
+import type { LocalDB } from "./LocalDB";
+import {
+  isBackingStoreOpenError,
+  safeStringifyError,
+  classifyFallbackReasonCode,
+} from "./errors";
 import {
   getFallbackDatabaseNameForUser,
   bumpGenerationForUser as _bumpGenerationForUser,
   deleteUserPersistentDatabases,
-} from './generation';
+} from "./generation";
 import {
   getStoredLocalDBResetFailureReason,
   markLocalDBGenerationBumped,
   saveLocalDBResetFailureReason,
   updateLocalDBRuntimeStatus,
   warnOncePerSession,
-} from '../localDBRuntimeState';
-import type { LocalDBInstance, LocalDBLike } from './types';
+} from "../localDBRuntimeState";
+import type { LocalDBInstance, LocalDBLike } from "./types";
 
 // --- シングルトン状態 ---
 let instance: LocalDBInstance | null = null;
@@ -35,7 +39,10 @@ let cachedInstance: LocalDBInstance | null = null;
 function activateFallback(userId: string, error: unknown): LocalDBInstance {
   let fallback = fallbackInstances.get(userId);
   if (!fallback) {
-    fallback = new InMemoryLocalDB(userId, getFallbackDatabaseNameForUser(userId));
+    fallback = new InMemoryLocalDB(
+      userId,
+      getFallbackDatabaseNameForUser(userId),
+    );
     fallbackInstances.set(userId, fallback);
   }
 
@@ -43,7 +50,7 @@ function activateFallback(userId: string, error: unknown): LocalDBInstance {
   currentUserId = userId;
 
   updateLocalDBRuntimeStatus({
-    mode: 'fallback',
+    mode: "fallback",
     userId,
     dbName: fallback.name,
     fallbackReason: safeStringifyError(error),
@@ -52,8 +59,8 @@ function activateFallback(userId: string, error: unknown): LocalDBInstance {
   });
 
   warnOncePerSession(
-    'localdb:fallback-mode',
-    `[LocalDB] Running in fallback mode (non-persistent). Recovery guide: https://support.google.com/chrome/answer/2392709`
+    "localdb:fallback-mode",
+    `[LocalDB] Running in fallback mode (non-persistent). Recovery guide: https://support.google.com/chrome/answer/2392709`,
   );
 
   return fallback;
@@ -87,7 +94,7 @@ export function getInstanceUserId(): string | null {
 }
 
 export async function getInstance(userId?: string): Promise<LocalDBInstance> {
-  const nextUserId = userId || 'anonymous';
+  const nextUserId = userId || "anonymous";
 
   if (resettingPromise) {
     await resettingPromise.catch(() => {
@@ -119,7 +126,11 @@ export async function getInstance(userId?: string): Promise<LocalDBInstance> {
           instance.close();
         }
       } catch (closeError) {
-        warnOncePerSession('localdb:switch-close-failed', '[LocalDB] Failed to close previous instance while switching user.', closeError);
+        warnOncePerSession(
+          "localdb:switch-close-failed",
+          "[LocalDB] Failed to close previous instance while switching user.",
+          closeError,
+        );
       } finally {
         instance = null;
         currentUserId = null;
@@ -127,7 +138,10 @@ export async function getInstance(userId?: string): Promise<LocalDBInstance> {
     }
 
     if (persistentOpenDisabled) {
-      return activateFallback(nextUserId, new Error('Persistent IndexedDB is disabled in this session.'));
+      return activateFallback(
+        nextUserId,
+        new Error("Persistent IndexedDB is disabled in this session."),
+      );
     }
 
     const persistentDb = createLocalDBInternal(nextUserId);
@@ -142,11 +156,11 @@ export async function getInstance(userId?: string): Promise<LocalDBInstance> {
       persistentOpenDisabled = false;
 
       updateLocalDBRuntimeStatus({
-        mode: 'persistent',
+        mode: "persistent",
         userId: nextUserId,
         dbName: persistentDb.name,
         fallbackReason: null,
-        fallbackReasonCode: 'none',
+        fallbackReasonCode: "none",
         resetFailedReason: getStoredLocalDBResetFailureReason(),
       });
 
@@ -165,18 +179,18 @@ export async function getInstance(userId?: string): Promise<LocalDBInstance> {
         _bumpGenerationForUser(nextUserId);
         markLocalDBGenerationBumped();
         saveLocalDBResetFailureReason(
-          `IndexedDB backing store open failed: ${safeStringifyError(error)}`
+          `IndexedDB backing store open failed: ${safeStringifyError(error)}`,
         );
         warnOncePerSession(
-          'localdb:backing-store-open-error',
+          "localdb:backing-store-open-error",
           `[LocalDB] Fatal IndexedDB backing store error detected. Persistent mode disabled for this session. Recovery guide: https://support.google.com/chrome/answer/2392709`,
-          error
+          error,
         );
       } else {
         warnOncePerSession(
-          'localdb:open-failed',
-          '[LocalDB] IndexedDB open failed. Falling back to in-memory mode for this session.',
-          error
+          "localdb:open-failed",
+          "[LocalDB] IndexedDB open failed. Falling back to in-memory mode for this session.",
+          error,
         );
       }
 
@@ -203,7 +217,7 @@ export async function resetForLogout(userId?: string): Promise<void> {
     return resettingPromise;
   }
 
-  const targetUserId = userId || currentUserId || 'anonymous';
+  const targetUserId = userId || currentUserId || "anonymous";
 
   resettingPromise = (async () => {
     let resetFailureReason: string | null = null;
@@ -246,7 +260,8 @@ export async function resetForLogout(userId?: string): Promise<void> {
       }
     }
 
-    const generationCleanupFailure = await deleteUserPersistentDatabases(targetUserId);
+    const generationCleanupFailure =
+      await deleteUserPersistentDatabases(targetUserId);
     if (!resetFailureReason && generationCleanupFailure) {
       resetFailureReason = generationCleanupFailure;
     }
@@ -260,19 +275,19 @@ export async function resetForLogout(userId?: string): Promise<void> {
     if (resetFailureReason) {
       saveLocalDBResetFailureReason(resetFailureReason);
       warnOncePerSession(
-        'localdb:logout-reset-failed',
-        `[LocalDB] Logout reset failed (best-effort): ${resetFailureReason}`
+        "localdb:logout-reset-failed",
+        `[LocalDB] Logout reset failed (best-effort): ${resetFailureReason}`,
       );
     } else {
       saveLocalDBResetFailureReason(null);
     }
 
     updateLocalDBRuntimeStatus({
-      mode: 'persistent',
+      mode: "persistent",
       userId: null,
       dbName: null,
       fallbackReason: null,
-      fallbackReasonCode: 'none',
+      fallbackReasonCode: "none",
     });
   })();
 
@@ -289,9 +304,11 @@ export function clearInstance(): void {
       if (instance.isOpen()) {
         instance.close();
       }
-      console.log(`[LocalDB] Instance for ${currentUserId} cleared via clearInstance()`);
+      console.log(
+        `[LocalDB] Instance for ${currentUserId} cleared via clearInstance()`,
+      );
     } catch (e) {
-      console.error('[LocalDB] Error closing instance during clear:', e);
+      console.error("[LocalDB] Error closing instance during clear:", e);
     } finally {
       if (instance instanceof InMemoryLocalDB && currentUserId) {
         fallbackInstances.delete(currentUserId);
@@ -312,7 +329,9 @@ export async function getLocalDb(userId?: string): Promise<LocalDBLike> {
 
 export function getLocalDbSync(): LocalDBLike {
   if (!cachedInstance) {
-    throw new Error('[LocalDB] Database accessed before async initialization. Use await getLocalDb() first.');
+    throw new Error(
+      "[LocalDB] Database accessed before async initialization. Use await getLocalDb() first.",
+    );
   }
   return cachedInstance;
 }

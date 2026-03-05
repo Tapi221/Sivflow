@@ -13,7 +13,9 @@
     --code-root-base-pad-b: 8px;
     --code-font-size: 14px;
     --code-line-height: 20px;
-    --code-font-family: "Fira Code", "Fira Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    --code-font-family:
+      "Fira Code", "Fira Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
+      Consolas, monospace;
   }
 
   .codeBlockRoot {
@@ -68,7 +70,8 @@
 
   .codeBlockPre {
     margin: 0;
-    padding: var(--code-padding-top) var(--code-padding-inline) 0 var(--code-padding-inline);
+    padding: var(--code-padding-top) var(--code-padding-inline) 0
+      var(--code-padding-inline);
     font-size: var(--code-font-size);
     line-height: var(--code-line-height);
     font-family: var(--code-font-family);
@@ -227,7 +230,8 @@
     font-family: inherit !important;
     font-size: inherit !important;
     line-height: inherit !important;
-    padding: var(--code-padding-top) var(--code-padding-inline) var(--code-padding-bottom) var(--code-padding-inline) !important;
+    padding: var(--code-padding-top) var(--code-padding-inline)
+      var(--code-padding-bottom) var(--code-padding-inline) !important;
     letter-spacing: normal !important;
     tab-size: inherit !important;
     white-space: pre !important;

@@ -1,5 +1,5 @@
-import React from 'react';
-import { RowSnap } from './RowSnap';
+import React from "react";
+import { RowSnap } from "./RowSnap";
 
 type RowSnappedRootProps = {
   rowPx: number;
@@ -8,7 +8,12 @@ type RowSnappedRootProps = {
   children: React.ReactNode;
 };
 
-export function RowSnappedRoot({ rowPx, className, style, children }: RowSnappedRootProps) {
+export function RowSnappedRoot({
+  rowPx,
+  className,
+  style,
+  children,
+}: RowSnappedRootProps) {
   return (
     <RowSnap rowPx={rowPx}>
       {({ snapPaddingBottomPx, snapRef }) => (
@@ -17,7 +22,7 @@ export function RowSnappedRoot({ rowPx, className, style, children }: RowSnapped
           className={className}
           style={{
             ...(style ?? {}),
-            ['--snap-pad-b' as any]: `${snapPaddingBottomPx}px`,
+            ["--snap-pad-b" as any]: `${snapPaddingBottomPx}px`,
           }}
         >
           {children}
@@ -26,4 +31,3 @@ export function RowSnappedRoot({ rowPx, className, style, children }: RowSnapped
     </RowSnap>
   );
 }
-

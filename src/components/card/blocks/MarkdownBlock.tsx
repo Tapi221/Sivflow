@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import { NotebookPen } from '@/ui/icons';
-import { BlockWrapper } from './BlockWrapper';
-import { MarkdownBlockView } from './MarkdownBlockPreview';
-import { MarkdownEditorDialog } from './MarkdownEditorDialog';
-import { TEXT_BLOCK_CONTENT_CLASS } from './textBlockStyles';
-import { cn } from '@/lib/utils';
+import React, { useState } from "react";
+import { NotebookPen } from "@/ui/icons";
+import { BlockWrapper } from "./BlockWrapper";
+import { MarkdownBlockView } from "./MarkdownBlockPreview";
+import { MarkdownEditorDialog } from "./MarkdownEditorDialog";
+import { TEXT_BLOCK_CONTENT_CLASS } from "./textBlockStyles";
+import { cn } from "@/lib/utils";
 
 type EditorBlock =
-  | { type: 'markdown'; markdown: string }
-  | { type: 'code'; code: { language: string; code: string } };
+  | { type: "markdown"; markdown: string }
+  | { type: "code"; code: { language: string; code: string } };
 
 type ReplaceFocus = {
   /**
@@ -47,29 +47,29 @@ interface MarkdownBlockProps {
 const MAX_LENGTH = 50000;
 
 const normalizeMarkdownForEditor = (input: string) =>
-  String(input ?? '')
-    .replace(/\r\n/g, '\n')
-    .replace(/\n{3,}$/g, '\n\n');
+  String(input ?? "")
+    .replace(/\r\n/g, "\n")
+    .replace(/\n{3,}$/g, "\n\n");
 
 const normalizeMarkdownBlockValue = (input: string) =>
-  normalizeMarkdownForEditor(input).replace(/\n+$/g, '');
+  normalizeMarkdownForEditor(input).replace(/\n+$/g, "");
 
 const validateBlocksLength = (blocks: EditorBlock[]) => {
   for (const b of blocks) {
-    const len = b.type === 'markdown' ? b.markdown.length : b.code.code.length;
+    const len = b.type === "markdown" ? b.markdown.length : b.code.code.length;
     if (len > MAX_LENGTH) return false;
   }
   return true;
 };
 
 const htmlToPlainText = (html: string) => {
-  if (typeof document === 'undefined') return '';
+  if (typeof document === "undefined") return "";
   try {
-    const div = document.createElement('div');
+    const div = document.createElement("div");
     div.innerHTML = html;
-    return div.textContent || div.innerText || '';
+    return div.textContent || div.innerText || "";
   } catch {
-    return '';
+    return "";
   }
 };
 
@@ -86,32 +86,34 @@ const restoreCaret = (textarea: HTMLTextAreaElement, pos: number) => {
 
 /** plain が「コードっぽい」かざっくり判定（現実運用向けに雑で良い） */
 const isProbablyCode = (t: string) => {
-  const s = (t ?? '').trim();
+  const s = (t ?? "").trim();
   if (!s) return false;
 
   if (/```|~~~/.test(s)) return true; // 既にフェンス
   if (/^\s*<\w+[\s>]/m.test(s)) return true; // <body ...> など
-  if (/\b(className|function|const|let|var|import|export|return)\b/.test(s)) return true;
+  if (/\b(className|function|const|let|var|import|export|return)\b/.test(s))
+    return true;
   if (/[{}();]|=>/.test(s)) return true;
 
   return false;
 };
 
-const looksLikeHtmlBlockCandidate = (t: string) => /^\s*<\w+[\s>]/.test(t ?? '');
+const looksLikeHtmlBlockCandidate = (t: string) =>
+  /^\s*<\w+[\s>]/.test(t ?? "");
 
 const detectLang = (plain: string, html: string) => {
   const m = html?.match(/language-([a-z0-9_+-]+)/i);
   if (m?.[1]) return m[1];
 
-  if (/\bclassName=/.test(plain) || /^\s*</m.test(plain)) return 'tsx';
-  if (/\binterface\b|\btype\b|\bimplements\b/.test(plain)) return 'ts';
-  return 'text';
+  if (/\bclassName=/.test(plain) || /^\s*</m.test(plain)) return "tsx";
+  if (/\binterface\b|\btype\b|\bimplements\b/.test(plain)) return "ts";
+  return "text";
 };
 
 // CommonMark寄せ: 先頭の空行だけスキップし、最初の非空行が 0〜3スペース + fence なら true
 const isFenceStart = (text: string) => {
-  const normalized = normalizeMarkdownForEditor(text).replace(/\r\n/g, '\n');
-  const lines = normalized.split('\n');
+  const normalized = normalizeMarkdownForEditor(text).replace(/\r\n/g, "\n");
+  const lines = normalized.split("\n");
   let i = 0;
   while (i < lines.length && lines[i].trim().length === 0) i++;
   if (i >= lines.length) return false;
@@ -127,13 +129,16 @@ const isFenceStart = (text: string) => {
  * これにより、insertText 側にもともと付いている "\n" や空行があってもズレない。
  */
 const computeFocusOffsetInInsertText = (insertText: string) => {
-  const normalized = normalizeMarkdownForEditor(insertText).replace(/\r\n/g, '\n');
-  const lines = normalized.split('\n');
+  const normalized = normalizeMarkdownForEditor(insertText).replace(
+    /\r\n/g,
+    "\n",
+  );
+  const lines = normalized.split("\n");
 
   let offset = 0;
 
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i] ?? '';
+    const line = lines[i] ?? "";
     const isLast = i === lines.length - 1;
 
     if (line.trim().length === 0) {
@@ -162,7 +167,7 @@ const computeFocusOffsetInInsertText = (insertText: string) => {
  */
 const normalizeFenceBoundaries = (
   insertText: string,
-  ctx: { atLineStart: boolean; atLineEnd: boolean }
+  ctx: { atLineStart: boolean; atLineEnd: boolean },
 ): { text: string; focusOffset: number } => {
   // fence開始と判定できるものだけ境界補正を走らせる（誤爆防止）
   if (!isFenceStart(insertText)) {
@@ -186,29 +191,29 @@ const normalizeFenceBoundaries = (
 };
 
 const wrapFence = (code: string, lang: string) => {
-  const c = (code ?? '').replace(/\r\n/g, '\n').replace(/\n+$/, '');
+  const c = (code ?? "").replace(/\r\n/g, "\n").replace(/\n+$/, "");
   // 閉じフェンス後に必ず改行（後ろと結合して壊れるのを防ぐ）
   return `\`\`\`${lang}\n${c}\n\`\`\`\n`;
 };
 
 const extractPreTextFromHtml = (html: string) => {
-  if (typeof document === 'undefined') return '';
+  if (typeof document === "undefined") return "";
   try {
-    const div = document.createElement('div');
+    const div = document.createElement("div");
     div.innerHTML = html;
 
-    const pre = div.querySelector('pre');
-    const code = pre?.querySelector('code');
+    const pre = div.querySelector("pre");
+    const code = pre?.querySelector("code");
     if (code?.textContent) return code.textContent;
     if (pre?.textContent) return pre.textContent;
 
-    return div.textContent || div.innerText || '';
+    return div.textContent || div.innerText || "";
   } catch {
-    return '';
+    return "";
   }
 };
 
-type BlockRange = { start: number; end: number; type: EditorBlock['type'] };
+type BlockRange = { start: number; end: number; type: EditorBlock["type"] };
 
 const pickBlockIndexByPos = (ranges: BlockRange[], pos: number) => {
   // end 排他: start <= pos < end
@@ -254,7 +259,7 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
     const normalizedValue = normalizeMarkdownBlockValue(value);
 
     if (normalizedValue.length > MAX_LENGTH) {
-      setError('Markdown文字列が長すぎます（最大50,000文字）');
+      setError("Markdown文字列が長すぎます（最大50,000文字）");
       return;
     }
     setError(null);
@@ -273,19 +278,22 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
       attemptSplitFences: boolean;
       /** 分割時のフォーカス判定に使う merged 上の座標（未指定なら selectionStart） */
       focusPos?: number;
-    }
+    },
   ) => {
     const normalized = normalizeMarkdownForEditor(insertText);
-    const merged = markdown.slice(0, selectionStart) + normalized + markdown.slice(selectionEnd);
+    const merged =
+      markdown.slice(0, selectionStart) +
+      normalized +
+      markdown.slice(selectionEnd);
 
     // 分割できるなら「最終保存される各ブロック」単位で長さチェックして置き換え
     if (attemptSplitFences && onReplaceWithBlocks) {
       const { blocks, ranges } = parseAndSplitFencesWithRanges(merged);
-      const hasCode = blocks.some((b) => b.type === 'code');
+      const hasCode = blocks.some((b) => b.type === "code");
 
       if (hasCode) {
         if (!validateBlocksLength(blocks)) {
-          setError('貼り付け内容が長すぎます（各ブロック最大50,000文字）');
+          setError("貼り付け内容が長すぎます（各ブロック最大50,000文字）");
           return;
         }
         setError(null);
@@ -300,7 +308,7 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
 
     // 分割しないなら「このブロックに保存される最終文字列(merged)」でチェック
     if (merged.length > MAX_LENGTH) {
-      setError('貼り付け内容が長すぎます（1ブロック最大50,000文字）');
+      setError("貼り付け内容が長すぎます（1ブロック最大50,000文字）");
       return;
     }
 
@@ -318,8 +326,8 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
    */
   const handlePaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
     const clipboardData = e.clipboardData;
-    const html = clipboardData.getData('text/html');
-    const plain = clipboardData.getData('text/plain');
+    const html = clipboardData.getData("text/html");
+    const plain = clipboardData.getData("text/plain");
 
     const textarea = e.currentTarget;
 
@@ -330,10 +338,15 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
     const selectionStart = Math.min(a, b);
     const selectionEnd = Math.max(a, b);
 
-    const prevChar = selectionStart > 0 ? markdown[selectionStart - 1] : '';
-    const nextChar = selectionEnd < markdown.length ? markdown[selectionEnd] : '';
-    const atLineStart = selectionStart === 0 || prevChar === '\n' || prevChar === '\r';
-    const atLineEnd = selectionEnd === markdown.length || nextChar === '\n' || nextChar === '\r';
+    const prevChar = selectionStart > 0 ? markdown[selectionStart - 1] : "";
+    const nextChar =
+      selectionEnd < markdown.length ? markdown[selectionEnd] : "";
+    const atLineStart =
+      selectionStart === 0 || prevChar === "\n" || prevChar === "\r";
+    const atLineEnd =
+      selectionEnd === markdown.length ||
+      nextChar === "\n" ||
+      nextChar === "\r";
 
     // 1) plain がコードっぽいなら、HTMLがあっても plain を優先（ここが本丸）
     if (plain && isProbablyCode(plain)) {
@@ -343,9 +356,14 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
 
       // 先頭が <tag...> だと Markdown が HTML ブロック扱いするのでフェンスで包む
       let insertText =
-        looksLikeHtmlBlockCandidate(plain) && !/```|~~~/.test(plain) ? wrapFence(plain, lang) : plain;
+        looksLikeHtmlBlockCandidate(plain) && !/```|~~~/.test(plain)
+          ? wrapFence(plain, lang)
+          : plain;
 
-      const normalizedFence = normalizeFenceBoundaries(insertText, { atLineStart, atLineEnd });
+      const normalizedFence = normalizeFenceBoundaries(insertText, {
+        atLineStart,
+        atLineEnd,
+      });
       insertText = normalizedFence.text;
 
       applyInsert(textarea, insertText, selectionStart, selectionEnd, {
@@ -365,9 +383,14 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
         const preText = normalizeMarkdownForEditor(raw);
 
         const lang = detectLang(preText, html);
-        let insertText = isFenceStart(preText) ? preText : wrapFence(preText, lang);
+        let insertText = isFenceStart(preText)
+          ? preText
+          : wrapFence(preText, lang);
 
-        const normalizedFence = normalizeFenceBoundaries(insertText, { atLineStart, atLineEnd });
+        const normalizedFence = normalizeFenceBoundaries(insertText, {
+          atLineStart,
+          atLineEnd,
+        });
         insertText = normalizedFence.text;
 
         applyInsert(textarea, insertText, selectionStart, selectionEnd, {
@@ -378,7 +401,8 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
       }
 
       try {
-        const { sanitizeAndConvertToMarkdown } = await import('@/utils/markdownPaste');
+        const { sanitizeAndConvertToMarkdown } =
+          await import("@/utils/markdownPaste");
         const mdRaw = await sanitizeAndConvertToMarkdown(html);
 
         // converter が過剰エスケープしてるときは plain に逃がす
@@ -386,16 +410,23 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
           /className=\\"/.test(mdRaw) || /\\_/.test(mdRaw) || /\\</.test(mdRaw);
 
         const fallbackText = plain || htmlToPlainText(html);
-        let insertText = mdRaw && mdRaw.trim().length > 0 ? mdRaw : fallbackText;
+        let insertText =
+          mdRaw && mdRaw.trim().length > 0 ? mdRaw : fallbackText;
 
         if (plain && overEscaped) insertText = fallbackText;
 
         // 先頭が <tag...> なら HTML ブロック化を避けるためフェンス化
-        if (looksLikeHtmlBlockCandidate(insertText) && !/```|~~~/.test(insertText)) {
+        if (
+          looksLikeHtmlBlockCandidate(insertText) &&
+          !/```|~~~/.test(insertText)
+        ) {
           insertText = wrapFence(insertText, detectLang(insertText, html));
         }
 
-        const normalizedFence = normalizeFenceBoundaries(insertText, { atLineStart, atLineEnd });
+        const normalizedFence = normalizeFenceBoundaries(insertText, {
+          atLineStart,
+          atLineEnd,
+        });
         insertText = normalizedFence.text;
 
         applyInsert(textarea, insertText, selectionStart, selectionEnd, {
@@ -406,11 +437,15 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
         // フォールバック: plain を優先。無ければ HTML をテキスト化して挿入
         const fallbackText = plain || htmlToPlainText(html);
         let insertText =
-          looksLikeHtmlBlockCandidate(fallbackText) && !/```|~~~/.test(fallbackText)
+          looksLikeHtmlBlockCandidate(fallbackText) &&
+          !/```|~~~/.test(fallbackText)
             ? wrapFence(fallbackText, detectLang(fallbackText, html))
             : fallbackText;
 
-        const normalizedFence = normalizeFenceBoundaries(insertText, { atLineStart, atLineEnd });
+        const normalizedFence = normalizeFenceBoundaries(insertText, {
+          atLineStart,
+          atLineEnd,
+        });
         insertText = normalizedFence.text;
 
         applyInsert(textarea, insertText, selectionStart, selectionEnd, {
@@ -427,7 +462,10 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
 
       let insertText = plain;
 
-      const normalizedFence = normalizeFenceBoundaries(insertText, { atLineStart, atLineEnd });
+      const normalizedFence = normalizeFenceBoundaries(insertText, {
+        atLineStart,
+        atLineEnd,
+      });
       insertText = normalizedFence.text;
 
       applyInsert(textarea, insertText, selectionStart, selectionEnd, {
@@ -446,7 +484,7 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
       onDuplicate={onDuplicate}
       dragHandleProps={dragHandleProps}
       dragHandleClassName={dragHandleClassName}
-      className={cn('bg-transparent px-0 py-0', !isMarkdownEmpty && 'border-0')}
+      className={cn("bg-transparent px-0 py-0", !isMarkdownEmpty && "border-0")}
       contentClassName="px-0"
       label="Markdown"
       icon={NotebookPen}
@@ -464,8 +502,8 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
       <div className="px-0 py-0">
         <div
           className={cn(
-            'markdownBlockPreview bg-transparent border-0 rounded-lg overflow-visible cursor-text',
-            'p-0'
+            "markdownBlockPreview bg-transparent border-0 rounded-lg overflow-visible cursor-text",
+            "p-0",
           )}
           data-testid="markdown-preview"
           tabIndex={0}
@@ -473,19 +511,26 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
           aria-label="Markdownを編集"
           onClick={() => setIsEditorOpen(true)}
           onKeyDown={(event) => {
-            if (event.key !== 'Enter' && event.key !== ' ') return;
+            if (event.key !== "Enter" && event.key !== " ") return;
             event.preventDefault();
             setIsEditorOpen(true);
           }}
         >
           {isMarkdownEmpty ? (
             <div
-              className={cn(TEXT_BLOCK_CONTENT_CLASS, 'min-h-[24px] text-slate-300')}
+              className={cn(
+                TEXT_BLOCK_CONTENT_CLASS,
+                "min-h-[24px] text-slate-300",
+              )}
             >
               Markdownを入力...
             </div>
           ) : (
-            <MarkdownBlockView md={normalizedMarkdown} className="markdownBlockCardView" bleedX={false} />
+            <MarkdownBlockView
+              md={normalizedMarkdown}
+              className="markdownBlockCardView"
+              bleedX={false}
+            />
           )}
         </div>
 
@@ -523,9 +568,12 @@ function parseAndSplitFences(md: string): EditorBlock[] {
  * 範囲の判定は end 排他（start <= pos < end）で、
  * “境界ちょうど” は次（後ろ）ブロックに属する。
  */
-function parseAndSplitFencesWithRanges(md: string): { blocks: EditorBlock[]; ranges: BlockRange[] } {
-  const normalizedMd = md.replace(/\r\n/g, '\n');
-  const lines = normalizedMd.split('\n');
+function parseAndSplitFencesWithRanges(md: string): {
+  blocks: EditorBlock[];
+  ranges: BlockRange[];
+} {
+  const normalizedMd = md.replace(/\r\n/g, "\n");
+  const lines = normalizedMd.split("\n");
 
   const blocks: EditorBlock[] = [];
   const ranges: BlockRange[] = [];
@@ -534,10 +582,10 @@ function parseAndSplitFencesWithRanges(md: string): { blocks: EditorBlock[]; ran
   let markdownStart: number | null = null;
 
   let insideFence = false;
-  let fenceIndent = '';
-  let markerChar: '`' | '~' | null = null;
+  let fenceIndent = "";
+  let markerChar: "`" | "~" | null = null;
   let markerLen = 0;
-  let lang = '';
+  let lang = "";
   let codeBuf: string[] = [];
 
   let fenceStart: number | null = null;
@@ -548,11 +596,11 @@ function parseAndSplitFencesWithRanges(md: string): { blocks: EditorBlock[]; ran
     if (markdownStart === null) return;
 
     // 旧版と同じ：末尾の過剰改行は \n\n に整える
-    const text = markdownBuf.join('\n').replace(/\n{3,}$/g, '\n\n');
+    const text = markdownBuf.join("\n").replace(/\n{3,}$/g, "\n\n");
 
     if (text.trim().length > 0) {
-      blocks.push({ type: 'markdown', markdown: text });
-      ranges.push({ start: markdownStart, end, type: 'markdown' });
+      blocks.push({ type: "markdown", markdown: text });
+      ranges.push({ start: markdownStart, end, type: "markdown" });
     }
     markdownBuf = [];
     markdownStart = null;
@@ -575,13 +623,13 @@ function parseAndSplitFencesWithRanges(md: string): { blocks: EditorBlock[]; ran
         continue;
       }
 
-      const indent = m[1] ?? '';
-      const marker = m[2] ?? '';
-      const infoRaw = (m[3] ?? '').trim();
-      const ch = marker[0] as '`' | '~';
+      const indent = m[1] ?? "";
+      const marker = m[2] ?? "";
+      const infoRaw = (m[3] ?? "").trim();
+      const ch = marker[0] as "`" | "~";
 
       // CommonMark: backtick fence の info string に backtick は不可
-      if (ch === '`' && infoRaw.includes('`')) {
+      if (ch === "`" && infoRaw.includes("`")) {
         if (markdownStart === null) markdownStart = lineStart;
         markdownBuf.push(line);
         pos = lineEndWithNewline;
@@ -595,7 +643,7 @@ function parseAndSplitFencesWithRanges(md: string): { blocks: EditorBlock[]; ran
       fenceIndent = indent;
       markerChar = ch;
       markerLen = marker.length;
-      lang = infoRaw.split(/\s+/)[0] ?? '';
+      lang = infoRaw.split(/\s+/)[0] ?? "";
       codeBuf = [];
       fenceStart = lineStart;
 
@@ -606,30 +654,32 @@ function parseAndSplitFencesWithRanges(md: string): { blocks: EditorBlock[]; ran
     // closing fence: up to 3 spaces + same marker repeated >= opening length + trailing spaces only
     const closeRe = new RegExp(`^ {0,3}${markerChar}{${markerLen},}[ \\t]*$`);
     if (markerChar && closeRe.test(line)) {
-      const raw = codeBuf.join('\n');
+      const raw = codeBuf.join("\n");
       const dedented =
         fenceIndent.length > 0
           ? raw
-              .split('\n')
-              .map((l) => (l.startsWith(fenceIndent) ? l.slice(fenceIndent.length) : l))
-              .join('\n')
+              .split("\n")
+              .map((l) =>
+                l.startsWith(fenceIndent) ? l.slice(fenceIndent.length) : l,
+              )
+              .join("\n")
           : raw;
 
       blocks.push({
-        type: 'code',
-        code: { language: lang || 'text', code: dedented.replace(/\n+$/, '') },
+        type: "code",
+        code: { language: lang || "text", code: dedented.replace(/\n+$/, "") },
       });
 
       const start = fenceStart ?? lineStart;
       const end = lineEndWithNewline; // 閉じフェンス行まで含める
-      ranges.push({ start, end, type: 'code' });
+      ranges.push({ start, end, type: "code" });
 
       // reset
       insideFence = false;
-      fenceIndent = '';
+      fenceIndent = "";
       markerChar = null;
       markerLen = 0;
-      lang = '';
+      lang = "";
       codeBuf = [];
       fenceStart = null;
 
@@ -644,18 +694,17 @@ function parseAndSplitFencesWithRanges(md: string): { blocks: EditorBlock[]; ran
   // unclosed fence は分割しない
   if (insideFence) {
     return {
-      blocks: [{ type: 'markdown', markdown: normalizedMd }],
-      ranges: [{ start: 0, end: normalizedMd.length, type: 'markdown' }],
+      blocks: [{ type: "markdown", markdown: normalizedMd }],
+      ranges: [{ start: 0, end: normalizedMd.length, type: "markdown" }],
     };
   }
 
   flushMarkdown(normalizedMd.length);
 
   if (blocks.length === 0) {
-    blocks.push({ type: 'markdown', markdown: '' });
-    ranges.push({ start: 0, end: normalizedMd.length, type: 'markdown' });
+    blocks.push({ type: "markdown", markdown: "" });
+    ranges.push({ start: 0, end: normalizedMd.length, type: "markdown" });
   }
 
   return { blocks, ranges };
 }
-

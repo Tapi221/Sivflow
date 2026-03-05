@@ -1,13 +1,16 @@
-import { forwardRef } from 'react';
-import type { SVGProps } from 'react';
-import { STRATIS_INNER_STROKE_PATH_PROPS, StratisFrameIcon } from './StratisFrameIcon';
+import { forwardRef } from "react";
+import type { SVGProps } from "react";
+import {
+  STRATIS_INNER_STROKE_PATH_PROPS,
+  StratisFrameIcon,
+} from "./StratisFrameIcon";
 
 export type StratisFormulaIconProps = SVGProps<SVGSVGElement>;
 
-export const StratisFormulaIcon = forwardRef<SVGSVGElement, StratisFormulaIconProps>(function StratisFormulaIcon(
-  { className, ...props },
-  ref
-) {
+export const StratisFormulaIcon = forwardRef<
+  SVGSVGElement,
+  StratisFormulaIconProps
+>(function StratisFormulaIcon({ className, ...props }, ref) {
   return (
     <StratisFrameIcon ref={ref} {...props} className={className}>
       <path

@@ -1,8 +1,8 @@
-import React from 'react';
-import { Type } from '@/ui/icons';
-import { BlockWrapper } from './BlockWrapper';
-import { TextBlockContent } from './TextBlockContent';
-import { cn } from '@/lib/utils';
+import React from "react";
+import { Type } from "@/ui/icons";
+import { BlockWrapper } from "./BlockWrapper";
+import { TextBlockContent } from "./TextBlockContent";
+import { cn } from "@/lib/utils";
 
 interface TextBlockProps {
   content: string;
@@ -25,17 +25,37 @@ interface TextBlockProps {
   onMoveDragEnd?: () => void;
 }
 
-export const TextBlock = ({ content, onChange, onDelete, onDuplicate, dragHandleProps, dragEnabled = true, dragHandleClassName, accentColor, autoFocus, placeholder, isActive, showDelete, canMoveUp, canMoveDown, onMoveUp, onMoveDown, onMoveDragStart, onMoveDragEnd }: TextBlockProps) => {
-  const isContentEmpty = content.replace(/[\u200B-\u200D\uFEFF]/g, '').trim().length === 0;
+export const TextBlock = ({
+  content,
+  onChange,
+  onDelete,
+  onDuplicate,
+  dragHandleProps,
+  dragEnabled = true,
+  dragHandleClassName,
+  accentColor,
+  autoFocus,
+  placeholder,
+  isActive,
+  showDelete,
+  canMoveUp,
+  canMoveDown,
+  onMoveUp,
+  onMoveDown,
+  onMoveDragStart,
+  onMoveDragEnd,
+}: TextBlockProps) => {
+  const isContentEmpty =
+    content.replace(/[\u200B-\u200D\uFEFF]/g, "").trim().length === 0;
 
   return (
-    <BlockWrapper 
-      onDelete={onDelete} 
-      onDuplicate={onDuplicate} 
+    <BlockWrapper
+      onDelete={onDelete}
+      onDuplicate={onDuplicate}
       dragHandleProps={dragHandleProps}
       dragEnabled={dragEnabled}
       dragHandleClassName={dragHandleClassName}
-      className={cn('bg-transparent px-0 py-0', !isContentEmpty && 'border-0')}
+      className={cn("bg-transparent px-0 py-0", !isContentEmpty && "border-0")}
       contentClassName="px-0"
       label="Text"
       icon={Type}
@@ -59,4 +79,3 @@ export const TextBlock = ({ content, onChange, onDelete, onDuplicate, dragHandle
     </BlockWrapper>
   );
 };
-

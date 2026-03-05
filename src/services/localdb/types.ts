@@ -1,5 +1,5 @@
-import type { LocalDB } from './LocalDB';
-import type { InMemoryLocalDB } from '../InMemoryLocalDB';
+import type { LocalDB } from "./LocalDB";
+import type { InMemoryLocalDB } from "../InMemoryLocalDB";
 
 // Map機能は削除済みだが、旧DB互換（読み取り/救出）とDexie型のために最小定義だけ残す
 export type CardRelation = {

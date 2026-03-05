@@ -5,42 +5,42 @@ import React, {
   useMemo,
   useRef,
   useState,
-} from 'react';
-import { createPortal } from 'react-dom';
-import { Droppable, Draggable } from '@hello-pangea/dnd';
+} from "react";
+import { createPortal } from "react-dom";
+import { Droppable, Draggable } from "@hello-pangea/dnd";
 
-import { BlockToolbar } from './BlockToolbar';
-import { TextBlock } from './TextBlock';
-import { CodeBlockItem } from './CodeBlockItem';
-import { MediaBlock } from './MediaBlock';
-import { MathBlock } from './MathBlock';
-import { MarkdownBlock } from './MarkdownBlock';
+import { BlockToolbar } from "./BlockToolbar";
+import { TextBlock } from "./TextBlock";
+import { CodeBlockItem } from "./CodeBlockItem";
+import { MediaBlock } from "./MediaBlock";
+import { MathBlock } from "./MathBlock";
+import { MarkdownBlock } from "./MarkdownBlock";
 
-import type { CardBlock } from '@/types';
-import { cn } from '@/lib/utils';
-import { useUserSettings } from '@/hooks/useUserSettings';
-import { CARD_ROW_PX } from '../common/constants';
-import { sortBlocksByOrderIndex } from './blockOrdering';
+import type { CardBlock } from "@/types";
+import { cn } from "@/lib/utils";
+import { useUserSettings } from "@/hooks/useUserSettings";
+import { CARD_ROW_PX } from "../common/constants";
+import { sortBlocksByOrderIndex } from "./blockOrdering";
 import {
   getNormalizedGridOffsetRows,
   getNormalizedRowOffset,
   isGridOffsetType,
   isRowPositionableType,
-} from '../frame/rowOffset';
+} from "../frame/rowOffset";
 
 const uid = () =>
-  typeof crypto !== 'undefined' && 'randomUUID' in crypto
+  typeof crypto !== "undefined" && "randomUUID" in crypto
     ? crypto.randomUUID()
     : Math.random().toString(36).slice(2);
 
 export interface BlockEditorHandle {
-  addBlock: (type: CardBlock['type']) => void;
+  addBlock: (type: CardBlock["type"]) => void;
 }
 
 interface BlockEditorProps {
   blocks: CardBlock[];
   onChange: (blocks: CardBlock[]) => void;
-  prefix: 'question' | 'answer';
+  prefix: "question" | "answer";
   label: string;
   color: string;
   droppableId: string;
@@ -53,7 +53,7 @@ interface BlockEditorProps {
 
   onDelete?: (index: number) => void;
   minDeletableIndex?: number;
-  hiddenBlockTypes?: CardBlock['type'][];
+  hiddenBlockTypes?: CardBlock["type"][];
 
   toolbarMountRef?: React.RefObject<HTMLDivElement | null>;
 }
@@ -63,10 +63,10 @@ const ROW_STEP_PX = CARD_ROW_PX;
 
 const isEditableTarget = (target: EventTarget | null) => {
   if (!(target instanceof HTMLElement)) return false;
-  return !!target.closest('input, textarea, select, [contenteditable]');
+  return !!target.closest("input, textarea, select, [contenteditable]");
 };
 
-    // resize を rAF で間引く
+// resize を rAF で間引く
 const useRafThrottledCallback = (fn: () => void) => {
   const rafIdRef = useRef<number | null>(null);
   const fnRef = useRef(fn);
@@ -92,7 +92,10 @@ const useRafThrottledCallback = (fn: () => void) => {
   return schedule;
 };
 
-export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>(
+export const BlockEditor = React.forwardRef<
+  BlockEditorHandle,
+  BlockEditorProps
+>(
   (
     {
       blocks = [],
@@ -111,31 +114,37 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
       hiddenBlockTypes = [],
       toolbarMountRef,
     },
-    ref
+    ref,
   ) => {
     const { settings } = useUserSettings();
 
     // reference/audio は本文ブロックじゃない扱い（ここでは編集しない）
     const orderedBlocks = useMemo(
       () => sortBlocksByOrderIndex(blocks),
-      [blocks]
+      [blocks],
     );
     const nonBodyBlocks = useMemo(
-      () => orderedBlocks.filter((b) => b.type === 'reference' || b.type === 'audio'),
-      [orderedBlocks]
+      () =>
+        orderedBlocks.filter(
+          (b) => b.type === "reference" || b.type === "audio",
+        ),
+      [orderedBlocks],
     );
     const nonBodyBlocksRef = useRef<CardBlock[]>(nonBodyBlocks);
     useEffect(() => {
       nonBodyBlocksRef.current = nonBodyBlocks;
     }, [nonBodyBlocks]);
     const bodyBlocks = useMemo(
-      () => orderedBlocks.filter((b) => b.type !== 'reference' && b.type !== 'audio'),
-      [orderedBlocks]
+      () =>
+        orderedBlocks.filter(
+          (b) => b.type !== "reference" && b.type !== "audio",
+        ),
+      [orderedBlocks],
     );
 
     const reindexBlocks = useCallback(
       (arr: CardBlock[]) => arr.map((b, i) => ({ ...b, orderIndex: i })),
-      []
+      [],
     );
 
     // このエディタが責任を持つのは bodyBlocks のみ。emit 時に nonBody を末尾へ保持する。
@@ -144,10 +153,12 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
         const merged = [...nextBodyBlocks, ...nonBodyBlocksRef.current];
         onChange(opts?.reindex ? reindexBlocks(merged) : merged);
       },
-      [onChange, reindexBlocks]
+      [onChange, reindexBlocks],
     );
 
-    const [pendingUploads, setPendingUploads] = useState<Record<string, File>>({});
+    const [pendingUploads, setPendingUploads] = useState<Record<string, File>>(
+      {},
+    );
     const pendingUploadsRef = useRef<Record<string, File>>({});
     useEffect(() => {
       pendingUploadsRef.current = pendingUploads;
@@ -161,14 +172,17 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
 
     // row DOM 参照（querySelector地獄を回避）
     const rowElMapRef = useRef<Map<string, HTMLElement>>(new Map());
-    const registerRowEl = useCallback((blockId: string, el: HTMLElement | null) => {
-      const map = rowElMapRef.current;
-      if (!el) {
-        map.delete(blockId);
-        return;
-      }
-      map.set(blockId, el);
-    }, []);
+    const registerRowEl = useCallback(
+      (blockId: string, el: HTMLElement | null) => {
+        const map = rowElMapRef.current;
+        if (!el) {
+          map.delete(blockId);
+          return;
+        }
+        map.set(blockId, el);
+      },
+      [],
+    );
 
     // 1行移動ドラッグ用セッション（候補要素もキャッシュ）
     const moveSessionRef = useRef<{
@@ -190,7 +204,8 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
       if (offsetW <= 0) return;
 
       const rawScale = rect.width / offsetW;
-      const safeScale = Number.isFinite(rawScale) && rawScale > 0 ? rawScale : 1;
+      const safeScale =
+        Number.isFinite(rawScale) && rawScale > 0 ? rawScale : 1;
       const scale = Math.round(safeScale * 1000) / 1000;
 
       const nextMeasurement = {
@@ -201,7 +216,7 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
       setMeasurement((prev) =>
         Math.abs(prev.scale - nextMeasurement.scale) < 0.001
           ? prev
-          : nextMeasurement
+          : nextMeasurement,
       );
     }, []);
 
@@ -216,16 +231,16 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
       const obs = new ResizeObserver(() => scheduleMeasurement());
       obs.observe(el);
 
-      window.addEventListener('resize', scheduleMeasurement, { passive: true });
+      window.addEventListener("resize", scheduleMeasurement, { passive: true });
 
       return () => {
         obs.disconnect();
-        window.removeEventListener('resize', scheduleMeasurement);
+        window.removeEventListener("resize", scheduleMeasurement);
       };
     }, [scheduleMeasurement, updateMeasurement]);
 
     useImperativeHandle(ref, () => ({
-      addBlock: (type: CardBlock['type']) => {
+      addBlock: (type: CardBlock["type"]) => {
         handleAddBlock(type);
       },
     }));
@@ -246,11 +261,13 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
         clampYMax?: number;
         scale?: number;
         extraTranslateY?: number;
-      }
+      },
     ) => {
       if (!style) {
         return extraTranslateY
-          ? ({ transform: `translateY(${extraTranslateY}px)` } as React.CSSProperties)
+          ? ({
+              transform: `translateY(${extraTranslateY}px)`,
+            } as React.CSSProperties)
           : style;
       }
 
@@ -262,7 +279,10 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
       if (s.transform) {
         const transform = String(s.transform);
         try {
-          if (typeof DOMMatrixReadOnly !== 'undefined' && typeof DOMMatrix !== 'undefined') {
+          if (
+            typeof DOMMatrixReadOnly !== "undefined" &&
+            typeof DOMMatrix !== "undefined"
+          ) {
             const ro = new DOMMatrixReadOnly(transform);
             let x = ro.m41 / scale;
             let y = ro.m42 / scale;
@@ -279,12 +299,13 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
             result.transform = m.toString();
           } else {
             const match = transform.match(
-              /translate(?:3d)?\(([-\d.]+)px,\s*([-\d.]+)px(?:,\s*([-\d.]+)px)?\)/
+              /translate(?:3d)?\(([-\d.]+)px,\s*([-\d.]+)px(?:,\s*([-\d.]+)px)?\)/,
             );
             if (!match) {
               if (extraTranslateY) {
-                const base = transform === 'none' ? '' : `${transform} `;
-                result.transform = `${base}translateY(${extraTranslateY}px)`.trim();
+                const base = transform === "none" ? "" : `${transform} `;
+                result.transform =
+                  `${base}translateY(${extraTranslateY}px)`.trim();
               }
               return result as React.CSSProperties;
             }
@@ -299,15 +320,17 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
             y += extraTranslateY;
 
             const is3d = /translate3d\(/.test(transform);
-            const z = match[3] ?? '0';
+            const z = match[3] ?? "0";
             result.transform = transform.replace(
               /translate(?:3d)?\(([-\d.]+)px,\s*([-\d.]+)px(?:,\s*([-\d.]+)px)?\)/,
-              is3d ? `translate3d(${x}px, ${y}px, ${z}px)` : `translate(${x}px, ${y}px)`
+              is3d
+                ? `translate3d(${x}px, ${y}px, ${z}px)`
+                : `translate(${x}px, ${y}px)`,
             );
           }
         } catch {
           if (extraTranslateY) {
-            const base = transform === 'none' ? '' : `${transform} `;
+            const base = transform === "none" ? "" : `${transform} `;
             result.transform = `${base}translateY(${extraTranslateY}px)`.trim();
           }
         }
@@ -319,44 +342,65 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
     };
 
     const getBlockOffsetRows = (block: CardBlock) => {
-      if (isGridOffsetType(block.type)) return getNormalizedGridOffsetRows(block);
+      if (isGridOffsetType(block.type))
+        return getNormalizedGridOffsetRows(block);
       return getNormalizedRowOffset(block);
     };
 
     const getRowOffsetBoundsWithinCard = (
       blockId: string,
       currentOffset: number,
-      useContentTopForMin = false
+      useContentTopForMin = false,
     ) => {
-      if (typeof document === 'undefined') {
+      if (typeof document === "undefined") {
         return { min: Number.NEGATIVE_INFINITY, max: Number.POSITIVE_INFINITY };
       }
 
       const rowEl = rowElMapRef.current.get(blockId) ?? null;
-      if (!rowEl) return { min: Number.NEGATIVE_INFINITY, max: Number.POSITIVE_INFINITY };
+      if (!rowEl)
+        return { min: Number.NEGATIVE_INFINITY, max: Number.POSITIVE_INFINITY };
 
-      const surfaceEl = rowEl.closest('[data-card-surface="true"]') as HTMLElement | null;
-      if (!surfaceEl) return { min: Number.NEGATIVE_INFINITY, max: Number.POSITIVE_INFINITY };
+      const surfaceEl = rowEl.closest(
+        '[data-card-surface="true"]',
+      ) as HTMLElement | null;
+      if (!surfaceEl)
+        return { min: Number.NEGATIVE_INFINITY, max: Number.POSITIVE_INFINITY };
 
       const rowRect = rowEl.getBoundingClientRect();
       const surfaceRect = surfaceEl.getBoundingClientRect();
       const surfaceStyle = window.getComputedStyle(surfaceEl);
-      const ruledTopOffsetPx = Math.max(0, Number.parseFloat(surfaceStyle.getPropertyValue('--ruled-offset-px')) || 0);
-      const ruledBottomOffsetPx = Math.max(0, Number.parseFloat(surfaceStyle.getPropertyValue('--ruled-bottom-offset-px')) || 0);
+      const ruledTopOffsetPx = Math.max(
+        0,
+        Number.parseFloat(surfaceStyle.getPropertyValue("--ruled-offset-px")) ||
+          0,
+      );
+      const ruledBottomOffsetPx = Math.max(
+        0,
+        Number.parseFloat(
+          surfaceStyle.getPropertyValue("--ruled-bottom-offset-px"),
+        ) || 0,
+      );
       const rawSurfaceScaleY =
-        surfaceEl.offsetHeight > 0 ? surfaceRect.height / surfaceEl.offsetHeight : 1;
+        surfaceEl.offsetHeight > 0
+          ? surfaceRect.height / surfaceEl.offsetHeight
+          : 1;
       const surfaceScaleY =
-        Number.isFinite(rawSurfaceScaleY) && rawSurfaceScaleY > 0 ? rawSurfaceScaleY : 1;
+        Number.isFinite(rawSurfaceScaleY) && rawSurfaceScaleY > 0
+          ? rawSurfaceScaleY
+          : 1;
       const stepPx = ROW_STEP_PX * surfaceScaleY;
       const epsilon = stepPx * 0.01;
 
       const topLineY = surfaceRect.top + ruledTopOffsetPx * surfaceScaleY;
-      const bottomLineY = surfaceRect.bottom - ruledBottomOffsetPx * surfaceScaleY;
+      const bottomLineY =
+        surfaceRect.bottom - ruledBottomOffsetPx * surfaceScaleY;
       const minAnchorTopY = useContentTopForMin
         ? rowRect.top + currentOffset * stepPx
         : rowRect.top;
       const upRows = Math.floor((minAnchorTopY - topLineY + epsilon) / stepPx);
-      const downRows = Math.floor((bottomLineY - rowRect.bottom + epsilon) / stepPx);
+      const downRows = Math.floor(
+        (bottomLineY - rowRect.bottom + epsilon) / stepPx,
+      );
 
       return {
         min: currentOffset - Math.max(0, upRows),
@@ -379,10 +423,10 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
         const newBlockId = `${prefix}-image-${uid()}`;
         const newBlock: CardBlock = {
           id: newBlockId,
-          type: 'image',
+          type: "image",
           images: [],
           audios: [],
-          content: '',
+          content: "",
           rowOffset: baseOffset,
           orderIndex: 0,
         };
@@ -411,17 +455,19 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
       });
     };
 
-    const handleAddBlock = (type: CardBlock['type']) => {
+    const handleAddBlock = (type: CardBlock["type"]) => {
       // reference/audio は右上ポップアップ専用。本文ブロック追加経路では扱わない。
-      if (type === 'reference' || type === 'audio') return;
+      if (type === "reference" || type === "audio") return;
 
       const source = blocksRef.current;
 
       const tailRowOffset = (() => {
         for (let i = source.length - 1; i >= 0; i -= 1) {
           const b = source[i];
-          if (!isRowPositionableType(b.type) || isGridOffsetType(b.type)) continue;
-          if (b.rowOffset !== undefined) return Math.round(Number(b.rowOffset ?? 0));
+          if (!isRowPositionableType(b.type) || isGridOffsetType(b.type))
+            continue;
+          if (b.rowOffset !== undefined)
+            return Math.round(Number(b.rowOffset ?? 0));
         }
         return 0;
       })();
@@ -438,14 +484,20 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
       const newBlock: CardBlock = {
         id: `${prefix}-${type}-${uid()}`,
         type,
-        content: '',
+        content: "",
         images: [],
         audios: [],
-        code: type === 'code' ? { language: 'javascript', code: '' } : undefined,
-        math: type === 'math' ? { latex: '', displayMode: 'block' } : undefined,
-        markdown: type === 'markdown' ? '' : undefined,
-        rowOffset: isRowPositionableType(type) && !isGridOffsetType(type) ? tailRowOffset : undefined,
-        offsetRows: isGridOffsetType(type) ? Math.max(0, tailGridOffsetRows) : undefined,
+        code:
+          type === "code" ? { language: "javascript", code: "" } : undefined,
+        math: type === "math" ? { latex: "", displayMode: "block" } : undefined,
+        markdown: type === "markdown" ? "" : undefined,
+        rowOffset:
+          isRowPositionableType(type) && !isGridOffsetType(type)
+            ? tailRowOffset
+            : undefined,
+        offsetRows: isGridOffsetType(type)
+          ? Math.max(0, tailGridOffsetRows)
+          : undefined,
         orderIndex: 0,
       };
 
@@ -498,8 +550,8 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
       emitChange(next, { reindex: true });
     };
 
-    const handleShiftBlockRow = (blockId: string, direction: 'up' | 'down') => {
-      const delta = direction === 'up' ? -1 : 1;
+    const handleShiftBlockRow = (blockId: string, direction: "up" | "down") => {
+      const delta = direction === "up" ? -1 : 1;
       const source = blocksRef.current;
       const currentBlock = source.find((b) => b.id === blockId);
       if (!currentBlock) return;
@@ -509,11 +561,16 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
       const bounds = getRowOffsetBoundsWithinCard(
         blockId,
         currentOffsetRows,
-        isGridOffsetType(currentBlock.type)
+        isGridOffsetType(currentBlock.type),
       );
       const nextOffsetRowsRaw = currentOffsetRows + delta;
-      const boundedMin = isGridOffsetType(currentBlock.type) ? Math.max(0, bounds.min) : bounds.min;
-      const nextOffsetRows = Math.min(Math.max(nextOffsetRowsRaw, boundedMin), bounds.max);
+      const boundedMin = isGridOffsetType(currentBlock.type)
+        ? Math.max(0, bounds.min)
+        : bounds.min;
+      const nextOffsetRows = Math.min(
+        Math.max(nextOffsetRowsRaw, boundedMin),
+        bounds.max,
+      );
       if (nextOffsetRows === currentOffsetRows) return;
 
       const next = source.map((b) => {
@@ -562,8 +619,10 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
       const hasCollision = candidates.some((el) => {
         if (el === movedEl) return false;
         const rect = el.getBoundingClientRect();
-        const horizontalOverlap = movedRect.left < rect.right && movedRect.right > rect.left;
-        const verticalOverlap = movedRect.top < rect.bottom && movedRect.bottom > rect.top;
+        const horizontalOverlap =
+          movedRect.left < rect.right && movedRect.right > rect.left;
+        const verticalOverlap =
+          movedRect.top < rect.bottom && movedRect.bottom > rect.top;
         return horizontalOverlap && verticalOverlap;
       });
 
@@ -572,7 +631,11 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
       const reverted = source.map((b) => {
         if (b.id !== blockId) return b;
         if (isGridOffsetType(b.type)) {
-          return { ...b, offsetRows: session.originOffsetRows, rowOffset: undefined };
+          return {
+            ...b,
+            offsetRows: session.originOffsetRows,
+            rowOffset: undefined,
+          };
         }
         return { ...b, rowOffset: session.originOffsetRows };
       });
@@ -590,21 +653,28 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
     );
 
     const toolbarMount = toolbarMountRef?.current ?? null;
-    const inlineToolbar = toolbarNode && !toolbarMount ? (
-      <div className="mb-2">{toolbarNode}</div>
-    ) : null;
+    const inlineToolbar =
+      toolbarNode && !toolbarMount ? (
+        <div className="mb-2">{toolbarNode}</div>
+      ) : null;
 
     return (
       <div
         ref={containerRef}
         className={cn(
-          'space-y-0',
-          prefix === 'question' ? 'js-question-editor' : 'js-answer-editor'
+          "space-y-0",
+          prefix === "question" ? "js-question-editor" : "js-answer-editor",
         )}
       >
-        {toolbarNode && toolbarMount ? createPortal(toolbarNode, toolbarMount) : inlineToolbar}
+        {toolbarNode && toolbarMount
+          ? createPortal(toolbarNode, toolbarMount)
+          : inlineToolbar}
 
-        <Droppable droppableId={droppableId} direction="vertical" type="card-block">
+        <Droppable
+          droppableId={droppableId}
+          direction="vertical"
+          type="card-block"
+        >
           {(provided) => (
             <div
               {...provided.droppableProps}
@@ -622,21 +692,31 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
                     const rowMovable = isRowPositionableType(block.type);
                     const isGridOffsetBlock = isGridOffsetType(block.type);
 
-                    const rowOffsetRows = rowMovable ? getBlockOffsetRows(block) : 0;
-                    const rowOffsetPx = rowMovable && !isGridOffsetBlock ? rowOffsetRows * ROW_STEP_PX : 0;
-                    const gridOffsetPx = isGridOffsetBlock ? rowOffsetRows * ROW_STEP_PX : 0;
+                    const rowOffsetRows = rowMovable
+                      ? getBlockOffsetRows(block)
+                      : 0;
+                    const rowOffsetPx =
+                      rowMovable && !isGridOffsetBlock
+                        ? rowOffsetRows * ROW_STEP_PX
+                        : 0;
+                    const gridOffsetPx = isGridOffsetBlock
+                      ? rowOffsetRows * ROW_STEP_PX
+                      : 0;
 
                     const canMoveUp = rowMovable;
                     const canMoveDown = rowMovable;
 
-                    const dragStyle = clampDragStyle(provided.draggableProps.style, {
-                      clampXMin: 0,
-                      clampXMax: 0,
-                      // finalY = dndY + rowOffsetPx >= 0
-                      clampYMin: index === 0 ? -rowOffsetPx : undefined,
-                      scale: measurement.scale,
-                      extraTranslateY: rowOffsetPx,
-                    }) as React.CSSProperties | undefined;
+                    const dragStyle = clampDragStyle(
+                      provided.draggableProps.style,
+                      {
+                        clampXMin: 0,
+                        clampXMax: 0,
+                        // finalY = dndY + rowOffsetPx >= 0
+                        clampYMin: index === 0 ? -rowOffsetPx : undefined,
+                        scale: measurement.scale,
+                        extraTranslateY: rowOffsetPx,
+                      },
+                    ) as React.CSSProperties | undefined;
 
                     const isDndDisabled = true;
 
@@ -650,8 +730,10 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
                         data-block-id={block.id}
                         className="relative"
                         data-block-row="true"
-                        data-row-offset-applied={rowOffsetPx ? 'true' : undefined}
-                        data-active={snapshot.isDragging ? 'true' : 'false'}
+                        data-row-offset-applied={
+                          rowOffsetPx ? "true" : undefined
+                        }
+                        data-active={snapshot.isDragging ? "true" : "false"}
                         style={dragStyle}
                       >
                         {/* DnD 並び替え用の“掴み帯”（BlockWrapperのグリップは1行移動専用） */}
@@ -661,23 +743,31 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
                             className="absolute left-0 top-0 bottom-0 w-2 cursor-grab active:cursor-grabbing"
                             aria-label="Drag to reorder"
                             onMouseDownCapture={(e) => {
-                              if (isEditableTarget(e.target)) e.stopPropagation();
+                              if (isEditableTarget(e.target))
+                                e.stopPropagation();
                             }}
                             onTouchStartCapture={(e) => {
-                              if (isEditableTarget(e.target)) e.stopPropagation();
+                              if (isEditableTarget(e.target))
+                                e.stopPropagation();
                             }}
                           />
                         )}
 
-                        {block.type === 'text' && (
+                        {block.type === "text" && (
                           <TextBlock
-                            content={block.content || ''}
-                            onChange={(content) => handleUpdateBlock(block.id, { content })}
+                            content={block.content || ""}
+                            onChange={(content) =>
+                              handleUpdateBlock(block.id, { content })
+                            }
                             onDelete={() => handleDeleteBlock(block.id, index)}
                             onDuplicate={() => handleDuplicateBlock(block.id)}
-                            onMoveUp={() => handleShiftBlockRow(block.id, 'up')}
-                            onMoveDown={() => handleShiftBlockRow(block.id, 'down')}
-                            onMoveDragStart={() => handleMoveDragStart(block.id)}
+                            onMoveUp={() => handleShiftBlockRow(block.id, "up")}
+                            onMoveDown={() =>
+                              handleShiftBlockRow(block.id, "down")
+                            }
+                            onMoveDragStart={() =>
+                              handleMoveDragStart(block.id)
+                            }
                             onMoveDragEnd={() => handleMoveDragEnd(block.id)}
                             canMoveUp={canMoveUp}
                             canMoveDown={canMoveDown}
@@ -686,12 +776,16 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
                             dragHandleClassName="js-block-drag-handle"
                             accentColor={accentColor}
                             isActive={snapshot.isDragging}
-                            placeholder={customPlaceholders?.[index] || '文章を入力...'}
-                            autoFocus={autoFocus && index === bodyBlocks.length - 1}
+                            placeholder={
+                              customPlaceholders?.[index] || "文章を入力..."
+                            }
+                            autoFocus={
+                              autoFocus && index === bodyBlocks.length - 1
+                            }
                           />
                         )}
 
-                        {block.type === 'code' && (
+                        {block.type === "code" && (
                           <div className="w-full max-w-full overflow-visible">
                             {gridOffsetPx > 0 && (
                               <div
@@ -701,13 +795,28 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
                               />
                             )}
                             <CodeBlockItem
-                              data={block.code || { language: 'javascript', code: '' }}
-                              onChange={(data) => handleUpdateBlock(block.id, { code: data })}
-                              onDelete={() => handleDeleteBlock(block.id, index)}
+                              data={
+                                block.code || {
+                                  language: "javascript",
+                                  code: "",
+                                }
+                              }
+                              onChange={(data) =>
+                                handleUpdateBlock(block.id, { code: data })
+                              }
+                              onDelete={() =>
+                                handleDeleteBlock(block.id, index)
+                              }
                               onDuplicate={() => handleDuplicateBlock(block.id)}
-                              onMoveUp={() => handleShiftBlockRow(block.id, 'up')}
-                              onMoveDown={() => handleShiftBlockRow(block.id, 'down')}
-                              onMoveDragStart={() => handleMoveDragStart(block.id)}
+                              onMoveUp={() =>
+                                handleShiftBlockRow(block.id, "up")
+                              }
+                              onMoveDown={() =>
+                                handleShiftBlockRow(block.id, "down")
+                              }
+                              onMoveDragStart={() =>
+                                handleMoveDragStart(block.id)
+                              }
                               onMoveDragEnd={() => handleMoveDragEnd(block.id)}
                               canMoveUp={canMoveUp}
                               canMoveDown={canMoveDown}
@@ -720,29 +829,42 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
                           </div>
                         )}
 
-                        {block.type === 'image' && (
+                        {block.type === "image" && (
                           <MediaBlock
                             data={block.images || []}
-                            onChange={(data) => handleUpdateBlock(block.id, { images: data })}
+                            onChange={(data) =>
+                              handleUpdateBlock(block.id, { images: data })
+                            }
                             onDelete={() => handleDeleteBlock(block.id, index)}
                             onDuplicate={() => handleDuplicateBlock(block.id)}
                             dragHandleProps={undefined}
                             dragHandleClassName="js-block-drag-handle"
                             accentColor={accentColor}
                             isActive={snapshot.isDragging}
-                            initialFile={pendingUploads[block.id] ?? pendingUploadsRef.current[block.id]}
-                            onConsumeInitialFile={() => handleConsumeInitialFile(block.id)}
-                            onFilesExcess={(files) => handleBlockOverflow(block.id, files)}
-                            onMoveUp={() => handleShiftBlockRow(block.id, 'up')}
-                            onMoveDown={() => handleShiftBlockRow(block.id, 'down')}
-                            onMoveDragStart={() => handleMoveDragStart(block.id)}
+                            initialFile={
+                              pendingUploads[block.id] ??
+                              pendingUploadsRef.current[block.id]
+                            }
+                            onConsumeInitialFile={() =>
+                              handleConsumeInitialFile(block.id)
+                            }
+                            onFilesExcess={(files) =>
+                              handleBlockOverflow(block.id, files)
+                            }
+                            onMoveUp={() => handleShiftBlockRow(block.id, "up")}
+                            onMoveDown={() =>
+                              handleShiftBlockRow(block.id, "down")
+                            }
+                            onMoveDragStart={() =>
+                              handleMoveDragStart(block.id)
+                            }
                             onMoveDragEnd={() => handleMoveDragEnd(block.id)}
                             canMoveUp={canMoveUp}
                             canMoveDown={canMoveDown}
                           />
                         )}
 
-                        {block.type === 'math' && (
+                        {block.type === "math" && (
                           <div className="w-full max-w-full overflow-visible">
                             {gridOffsetPx > 0 && (
                               <div
@@ -752,17 +874,32 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
                               />
                             )}
                             <MathBlock
-                              data={block.math || { latex: '', displayMode: 'block' }}
-                              onChange={(data) => handleUpdateBlock(block.id, { math: data })}
-                              onDelete={() => handleDeleteBlock(block.id, index)}
+                              data={
+                                block.math || {
+                                  latex: "",
+                                  displayMode: "block",
+                                }
+                              }
+                              onChange={(data) =>
+                                handleUpdateBlock(block.id, { math: data })
+                              }
+                              onDelete={() =>
+                                handleDeleteBlock(block.id, index)
+                              }
                               onDuplicate={() => handleDuplicateBlock(block.id)}
                               dragHandleProps={undefined}
                               dragHandleClassName="js-block-drag-handle"
                               accentColor={accentColor}
                               isActive={snapshot.isDragging}
-                              onMoveUp={() => handleShiftBlockRow(block.id, 'up')}
-                              onMoveDown={() => handleShiftBlockRow(block.id, 'down')}
-                              onMoveDragStart={() => handleMoveDragStart(block.id)}
+                              onMoveUp={() =>
+                                handleShiftBlockRow(block.id, "up")
+                              }
+                              onMoveDown={() =>
+                                handleShiftBlockRow(block.id, "down")
+                              }
+                              onMoveDragStart={() =>
+                                handleMoveDragStart(block.id)
+                              }
                               onMoveDragEnd={() => handleMoveDragEnd(block.id)}
                               canMoveUp={canMoveUp}
                               canMoveDown={canMoveDown}
@@ -770,19 +907,25 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
                           </div>
                         )}
 
-                        {block.type === 'markdown' && (
+                        {block.type === "markdown" && (
                           <MarkdownBlock
-                            markdown={block.markdown || ''}
-                            onChange={(md) => handleUpdateBlock(block.id, { markdown: md })}
+                            markdown={block.markdown || ""}
+                            onChange={(md) =>
+                              handleUpdateBlock(block.id, { markdown: md })
+                            }
                             onDelete={() => handleDeleteBlock(block.id, index)}
                             onDuplicate={() => handleDuplicateBlock(block.id)}
                             dragHandleProps={undefined}
                             dragHandleClassName="js-block-drag-handle"
                             accentColor={accentColor}
                             isActive={snapshot.isDragging}
-                            onMoveUp={() => handleShiftBlockRow(block.id, 'up')}
-                            onMoveDown={() => handleShiftBlockRow(block.id, 'down')}
-                            onMoveDragStart={() => handleMoveDragStart(block.id)}
+                            onMoveUp={() => handleShiftBlockRow(block.id, "up")}
+                            onMoveDown={() =>
+                              handleShiftBlockRow(block.id, "down")
+                            }
+                            onMoveDragStart={() =>
+                              handleMoveDragStart(block.id)
+                            }
                             onMoveDragEnd={() => handleMoveDragEnd(block.id)}
                             canMoveUp={canMoveUp}
                             canMoveDown={canMoveDown}
@@ -796,8 +939,10 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
                                   return {
                                     id: newId,
                                     type: p.type,
-                                    ...(p.type === 'code' ? { code: p.code } : {}),
-                                    content: '',
+                                    ...(p.type === "code"
+                                      ? { code: p.code }
+                                      : {}),
+                                    content: "",
                                     images: [],
                                     audios: [],
                                     offsetRows: Math.max(0, baseOffset),
@@ -808,9 +953,9 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
 
                                 return {
                                   id: newId,
-                                  type: 'markdown' as const,
+                                  type: "markdown" as const,
                                   markdown: p.markdown,
-                                  content: '',
+                                  content: "",
                                   images: [],
                                   audios: [],
                                   rowOffset: baseOffset,
@@ -839,7 +984,7 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
         </Droppable>
       </div>
     );
-  }
+  },
 );
 
-BlockEditor.displayName = 'BlockEditor';
+BlockEditor.displayName = "BlockEditor";

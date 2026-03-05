@@ -35,7 +35,9 @@ export function makeNewDraft(): EditorDraft {
   };
 }
 
-export function sanitizeReferences(refs: ReferenceBlockData[]): ReferenceBlockData[] {
+export function sanitizeReferences(
+  refs: ReferenceBlockData[],
+): ReferenceBlockData[] {
   return (refs ?? [])
     .map((r) => ({
       url: (r?.url ?? "").trim(),
@@ -48,10 +50,15 @@ export function normalizeOrderIndex(blocks: CardBlock[]): CardBlock[] {
   return (blocks ?? []).map((b, i) => ({ ...b, orderIndex: i }));
 }
 
-export function normalizeCrossSideId(blockId: unknown, nextSide: "question" | "answer"): string | null {
+export function normalizeCrossSideId(
+  blockId: unknown,
+  nextSide: "question" | "answer",
+): string | null {
   if (typeof blockId !== "string") return null;
-  if (blockId.startsWith("question-")) return blockId.replace(/^question-/, `${nextSide}-`);
-  if (blockId.startsWith("answer-")) return blockId.replace(/^answer-/, `${nextSide}-`);
+  if (blockId.startsWith("question-"))
+    return blockId.replace(/^question-/, `${nextSide}-`);
+  if (blockId.startsWith("answer-"))
+    return blockId.replace(/^answer-/, `${nextSide}-`);
   return null;
 }
 

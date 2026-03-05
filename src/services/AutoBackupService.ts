@@ -1,7 +1,7 @@
 // src/services/AutoBackupService.ts
 
-const BACKUP_STORAGE_KEY = 'app:autoBackups';
-const LAST_BACKUP_KEY = 'app:lastBackupAt';
+const BACKUP_STORAGE_KEY = "app:autoBackups";
+const LAST_BACKUP_KEY = "app:lastBackupAt";
 const MAX_BACKUPS = 5;
 
 export interface AutoBackup {
@@ -19,14 +19,12 @@ class AutoBackupService {
    * Safari private mode 等では
    * 存在するが setItem で例外を投げることがある。
    */
-  private storageAvailable(
-    type: 'localStorage' | 'sessionStorage'
-  ): boolean {
-    if (typeof window === 'undefined') return false;
+  private storageAvailable(type: "localStorage" | "sessionStorage"): boolean {
+    if (typeof window === "undefined") return false;
 
     try {
       const storage = window[type];
-      const testKey = '__storage_test__';
+      const testKey = "__storage_test__";
 
       storage.setItem(testKey, testKey);
       storage.removeItem(testKey);
@@ -35,8 +33,8 @@ class AutoBackupService {
       if (e instanceof DOMException) {
         // 容量超過 or private mode など
         return (
-          e.name === 'QuotaExceededError' ||
-          e.name === 'NS_ERROR_DOM_QUOTA_REACHED'
+          e.name === "QuotaExceededError" ||
+          e.name === "NS_ERROR_DOM_QUOTA_REACHED"
         );
       }
       return false;
@@ -53,33 +51,27 @@ class AutoBackupService {
       const snapshot = await this.buildSnapshot(userId);
 
       const existing = this.loadBackups();
-      const next: AutoBackup[] = [
-        snapshot,
-        ...existing,
-      ].slice(0, MAX_BACKUPS);
+      const next: AutoBackup[] = [snapshot, ...existing].slice(0, MAX_BACKUPS);
 
       // ---- localStorage 保存（縮退付き） ----
-      if (this.storageAvailable('localStorage')) {
+      if (this.storageAvailable("localStorage")) {
         try {
-          localStorage.setItem(
-            BACKUP_STORAGE_KEY,
-            JSON.stringify(next)
-          );
+          localStorage.setItem(BACKUP_STORAGE_KEY, JSON.stringify(next));
         } catch (e) {
-          if (e instanceof DOMException && e.name === 'QuotaExceededError') {
+          if (e instanceof DOMException && e.name === "QuotaExceededError") {
             console.warn(
-              '[AutoBackup] QuotaExceededError. Keeping latest only.'
+              "[AutoBackup] QuotaExceededError. Keeping latest only.",
             );
 
             try {
               localStorage.setItem(
                 BACKUP_STORAGE_KEY,
-                JSON.stringify(next.slice(0, 1))
+                JSON.stringify(next.slice(0, 1)),
               );
             } catch (e2) {
               console.error(
-                '[AutoBackup] Failed to persist even 1 backup. Clearing key.',
-                e2
+                "[AutoBackup] Failed to persist even 1 backup. Clearing key.",
+                e2,
               );
               try {
                 localStorage.removeItem(BACKUP_STORAGE_KEY);
@@ -93,22 +85,19 @@ class AutoBackupService {
         }
 
         try {
-          localStorage.setItem(
-            LAST_BACKUP_KEY,
-            new Date().toISOString()
-          );
+          localStorage.setItem(LAST_BACKUP_KEY, new Date().toISOString());
         } catch {
           // lastBackupAt は致命的でないため握りつぶす
         }
       } else {
         console.warn(
-          '[AutoBackup] localStorage unavailable. Skipping local backup.'
+          "[AutoBackup] localStorage unavailable. Skipping local backup.",
         );
       }
 
       return true;
     } catch (err) {
-      console.error('[AutoBackup] Failed:', err);
+      console.error("[AutoBackup] Failed:", err);
       return false;
     }
   }
@@ -117,7 +106,7 @@ class AutoBackupService {
    * バックアップ一覧ロード
    */
   private loadBackups(): AutoBackup[] {
-    if (!this.storageAvailable('localStorage')) return [];
+    if (!this.storageAvailable("localStorage")) return [];
 
     try {
       const raw = localStorage.getItem(BACKUP_STORAGE_KEY);
@@ -163,7 +152,7 @@ class AutoBackupService {
    * 最終バックアップ日時取得
    */
   getLastBackupAt(): string | null {
-    if (!this.storageAvailable('localStorage')) return null;
+    if (!this.storageAvailable("localStorage")) return null;
 
     try {
       return localStorage.getItem(LAST_BACKUP_KEY);

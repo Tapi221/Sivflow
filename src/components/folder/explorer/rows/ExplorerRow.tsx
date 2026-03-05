@@ -1,6 +1,6 @@
-import React from 'react';
-import { cn } from '@/lib/utils';
-import { EXPLORER_ROW_BASE_CLASS_NAME, getExplorerRowStyle } from './shared';
+import React from "react";
+import { cn } from "@/lib/utils";
+import { EXPLORER_ROW_BASE_CLASS_NAME, getExplorerRowStyle } from "./shared";
 
 interface ExplorerRowProps extends React.HTMLAttributes<HTMLDivElement> {
   depth: number;
@@ -22,7 +22,7 @@ export const ExplorerRow: React.FC<ExplorerRowProps> = ({
   <div
     ref={rowRef}
     className={cn(EXPLORER_ROW_BASE_CLASS_NAME, className)}
-    data-selected={selected ? 'true' : undefined}
+    data-selected={selected ? "true" : undefined}
     style={{ ...getExplorerRowStyle(depth), ...style }}
     {...props}
   >

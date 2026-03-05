@@ -1,8 +1,8 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { useSpring, animated } from 'react-spring';
-import { Star } from '@/ui/icons';
-import { sanitizeStreak } from '@/utils/streak';
+import React from "react";
+import { motion } from "framer-motion";
+import { useSpring, animated } from "react-spring";
+import { Star } from "@/ui/icons";
+import { sanitizeStreak } from "@/utils/streak";
 
 export const StampRally = ({ currentStreak = 1, compact = false }) => {
   const DOT_SIZE_PX = 12; // w-3 h-3
@@ -26,16 +26,28 @@ export const StampRally = ({ currentStreak = 1, compact = false }) => {
   const { number } = useSpring({
     from: { number: Math.max(0, safeStreak - 1) },
     to: { number: safeStreak },
-    config: { duration: 180 }
+    config: { duration: 180 },
   });
 
   return (
-    <div className={`w-full max-w-4xl mx-auto bg-white/50 border border-white shadow-sm backdrop-blur-sm ${compact ? 'p-3 md:p-4 rounded-[28px] md:rounded-[36px]' : 'p-4 md:p-8 rounded-[32px] md:rounded-[48px]'}`}>
-      <div className={`text-center ${compact ? 'mb-4' : 'mb-7'}`}>
-        <h3 className={`font-bold text-slate-400 tracking-[0.3em] uppercase mb-2 ${compact ? 'text-[11px]' : 'text-sm'}`}>週間連続達成日数</h3>
-        <div className={`flex items-center justify-center gap-2 font-black text-slate-700 italic ${compact ? 'text-3xl md:text-4xl' : 'text-4xl md:text-6xl'}`}>
+    <div
+      className={`w-full max-w-4xl mx-auto bg-white/50 border border-white shadow-sm backdrop-blur-sm ${compact ? "p-3 md:p-4 rounded-[28px] md:rounded-[36px]" : "p-4 md:p-8 rounded-[32px] md:rounded-[48px]"}`}
+    >
+      <div className={`text-center ${compact ? "mb-4" : "mb-7"}`}>
+        <h3
+          className={`font-bold text-slate-400 tracking-[0.3em] uppercase mb-2 ${compact ? "text-[11px]" : "text-sm"}`}
+        >
+          週間連続達成日数
+        </h3>
+        <div
+          className={`flex items-center justify-center gap-2 font-black text-slate-700 italic ${compact ? "text-3xl md:text-4xl" : "text-4xl md:text-6xl"}`}
+        >
           <animated.span>{number.to((n) => Math.floor(n))}</animated.span>
-          <span className={`text-primary-600 not-italic ${compact ? 'text-xl md:text-2xl' : 'text-2xl md:text-3xl'}`}>日</span>
+          <span
+            className={`text-primary-600 not-italic ${compact ? "text-xl md:text-2xl" : "text-2xl md:text-3xl"}`}
+          >
+            日
+          </span>
         </div>
         <p className="mt-2 text-xs text-slate-400">{stampedCount} / 7</p>
       </div>
@@ -69,7 +81,11 @@ export const StampRally = ({ currentStreak = 1, compact = false }) => {
                     key={day.dayNum}
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: [0, 1, 1], scale: [0.95, 1.05, 1] }}
-                    transition={{ duration: 0.2, times: [0, 0.6, 1], ease: 'easeOut' }}
+                    transition={{
+                      duration: 0.2,
+                      times: [0, 0.6, 1],
+                      ease: "easeOut",
+                    }}
                     className="w-3.5 h-3.5 flex items-center justify-center"
                   >
                     <Star className="w-4 h-4 text-primary-600 fill-primary-600" />
@@ -87,8 +103,8 @@ export const StampRally = ({ currentStreak = 1, compact = false }) => {
               }
 
               const baseDotClass = day.isStamped
-                ? 'bg-primary-600 border-primary-600'
-                : 'bg-white border-slate-300 opacity-40';
+                ? "bg-primary-600 border-primary-600"
+                : "bg-white border-slate-300 opacity-40";
 
               return (
                 <div
@@ -105,7 +121,7 @@ export const StampRally = ({ currentStreak = 1, compact = false }) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
-        className={`text-center text-slate-500 font-medium ${compact ? 'mt-4 text-sm' : 'mt-8'}`}
+        className={`text-center text-slate-500 font-medium ${compact ? "mt-4 text-sm" : "mt-8"}`}
       >
         {`${safeStreak}日連続達成！`}
       </motion.div>

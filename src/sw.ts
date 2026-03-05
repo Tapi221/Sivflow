@@ -1,49 +1,49 @@
 /// <reference lib="WebWorker" />
 
-import { clientsClaim } from 'workbox-core'
+import { clientsClaim } from "workbox-core";
 import {
   cleanupOutdatedCaches,
   precacheAndRoute,
   matchPrecache,
-} from 'workbox-precaching'
-import { registerRoute, setCatchHandler } from 'workbox-routing'
-import { CacheFirst, NetworkFirst } from 'workbox-strategies'
-import { CacheableResponsePlugin } from 'workbox-cacheable-response'
-import { ExpirationPlugin } from 'workbox-expiration'
+} from "workbox-precaching";
+import { registerRoute, setCatchHandler } from "workbox-routing";
+import { CacheFirst, NetworkFirst } from "workbox-strategies";
+import { CacheableResponsePlugin } from "workbox-cacheable-response";
+import { ExpirationPlugin } from "workbox-expiration";
 
-import type { PrecacheEntry } from 'workbox-precaching'
+import type { PrecacheEntry } from "workbox-precaching";
 
-declare let self: ServiceWorkerGlobalScope
+declare let self: ServiceWorkerGlobalScope;
 
 declare global {
   interface ServiceWorkerGlobalScope {
     // Workbox が定義している型に合わせる（TS2717潰し）
-    __WB_MANIFEST: Array<string | PrecacheEntry>
+    __WB_MANIFEST: Array<string | PrecacheEntry>;
   }
 }
 
 // Vite の import.meta.env を any なしで読む（ESLint no-explicit-any潰し）
 type ViteEnv = {
-  VITE_BUILD_VERSION?: string
-  GITHUB_SHA?: string
-}
+  VITE_BUILD_VERSION?: string;
+  GITHUB_SHA?: string;
+};
 
-const env = (import.meta as ImportMeta & { env?: ViteEnv }).env
-const cacheVersion = env?.VITE_BUILD_VERSION ?? env?.GITHUB_SHA ?? 'dev'
+const env = (import.meta as ImportMeta & { env?: ViteEnv }).env;
+const cacheVersion = env?.VITE_BUILD_VERSION ?? env?.GITHUB_SHA ?? "dev";
 
-self.addEventListener('message', (event) => {
-  if (event.data && (event.data as { type?: string }).type === 'SKIP_WAITING') {
-    self.skipWaiting()
+self.addEventListener("message", (event) => {
+  if (event.data && (event.data as { type?: string }).type === "SKIP_WAITING") {
+    self.skipWaiting();
   }
-})
+});
 
-self.skipWaiting()
-clientsClaim()
-cleanupOutdatedCaches()
-precacheAndRoute(self.__WB_MANIFEST)
+self.skipWaiting();
+clientsClaim();
+cleanupOutdatedCaches();
+precacheAndRoute(self.__WB_MANIFEST);
 
 registerRoute(
-  ({ request }) => request.mode === 'navigate',
+  ({ request }) => request.mode === "navigate",
   new NetworkFirst({
     cacheName: `html-navigation-cache-${cacheVersion}`,
     networkTimeoutSeconds: 3,
@@ -55,13 +55,13 @@ registerRoute(
       }),
     ],
   }),
-)
+);
 
 registerRoute(
   ({ request }) =>
-    request.destination === 'script' ||
-    request.destination === 'style' ||
-    request.destination === 'worker',
+    request.destination === "script" ||
+    request.destination === "style" ||
+    request.destination === "worker",
   new CacheFirst({
     cacheName: `static-assets-cache-${cacheVersion}`,
     plugins: [
@@ -72,18 +72,18 @@ registerRoute(
       }),
     ],
   }),
-)
+);
 
 // setCatchHandler の event は型が広くて request が無い扱いになることがあるので、
 // Workbox のコールバック引数にある request を使う（TS2339潰し）
 setCatchHandler(async ({ request }) => {
-  if (request.mode === 'navigate') {
+  if (request.mode === "navigate") {
     const response =
-      (await matchPrecache('/offline.html')) ??
-      (await matchPrecache('offline.html'))
-    return response ?? Response.error()
+      (await matchPrecache("/offline.html")) ??
+      (await matchPrecache("offline.html"));
+    return response ?? Response.error();
   }
-  return Response.error()
-})
+  return Response.error();
+});
 
-export {}
+export {};

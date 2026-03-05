@@ -1,4 +1,4 @@
-import { getImageBlob } from './imageFileStore';
+import { getImageBlob } from "./imageFileStore";
 
 type BlobScopeOptions = {
   userId?: string | null;
@@ -20,12 +20,16 @@ const makeScopedId = (id: string, options?: BlobScopeOptions): string => {
 };
 
 const revokeBlobUrl = (url: string): void => {
-  if (!url.startsWith('blob:')) return;
-  if (typeof URL === 'undefined' || typeof URL.revokeObjectURL !== 'function') return;
+  if (!url.startsWith("blob:")) return;
+  if (typeof URL === "undefined" || typeof URL.revokeObjectURL !== "function")
+    return;
   try {
     URL.revokeObjectURL(url);
   } catch (error) {
-    console.warn('[imageBlobUrlSessionCache] revokeObjectURL failed', { url, error });
+    console.warn("[imageBlobUrlSessionCache] revokeObjectURL failed", {
+      url,
+      error,
+    });
   }
 };
 
@@ -56,7 +60,7 @@ const evictIfNeeded = (): void => {
 
 export const getCachedImageBlobUrl = (
   id: string | null | undefined,
-  options?: BlobScopeOptions
+  options?: BlobScopeOptions,
 ): string | null => {
   if (!id) return null;
   const key = makeScopedId(id, options);
@@ -66,8 +70,12 @@ export const getCachedImageBlobUrl = (
   return entry.url;
 };
 
-export const cacheImageBlobUrl = (id: string, url: string, options?: BlobScopeOptions): void => {
-  if (!id || !url || !url.startsWith('blob:')) return;
+export const cacheImageBlobUrl = (
+  id: string,
+  url: string,
+  options?: BlobScopeOptions,
+): void => {
+  if (!id || !url || !url.startsWith("blob:")) return;
   const key = makeScopedId(id, options);
   const now = Date.now();
   const existing = cache.get(key);
@@ -92,7 +100,7 @@ export const cacheImageBlobUrl = (id: string, url: string, options?: BlobScopeOp
 export const getOrCreateImageBlobUrl = async (
   id: string | null | undefined,
   blobOrOptions?: Blob | BlobScopeOptions,
-  options?: BlobScopeOptions
+  options?: BlobScopeOptions,
 ): Promise<string | null> => {
   if (!id) return null;
   const scopeOptions =
@@ -109,7 +117,10 @@ export const getOrCreateImageBlobUrl = async (
   return url;
 };
 
-export const removeImageBlobUrl = (id: string | null | undefined, options?: BlobScopeOptions): void => {
+export const removeImageBlobUrl = (
+  id: string | null | undefined,
+  options?: BlobScopeOptions,
+): void => {
   if (!id) return;
   const key = makeScopedId(id, options);
   const entry = cache.get(key);
@@ -117,7 +128,7 @@ export const removeImageBlobUrl = (id: string | null | undefined, options?: Blob
   cleanupStaleUrls(entry);
   if (entry.pinCount > 0) {
     entry.staleUrls.push(entry.url);
-    entry.url = '';
+    entry.url = "";
     return;
   }
   revokeBlobUrl(entry.url);

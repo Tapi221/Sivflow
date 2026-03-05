@@ -1,7 +1,7 @@
-import type { ComponentProps } from 'react';
-import { CardCarousel3D } from '@/features/review/CardCarousel3D';
-import StudyCard from './StudyCard';
-import type { Card } from '@/types';
+import type { ComponentProps } from "react";
+import { CardCarousel3D } from "@/features/review/CardCarousel3D";
+import StudyCard from "./StudyCard";
+import type { Card } from "@/types";
 
 type StudyCardProps = ComponentProps<typeof StudyCard>;
 
@@ -9,7 +9,7 @@ type CardCarouselProps = {
   cards: Card[];
   /** Study session's authoritative index — syncs carousel when a rating is submitted */
   sessionCurrentIndex: number;
-  onResult: StudyCardProps['onResult'];
+  onResult: StudyCardProps["onResult"];
   onToggleUncertainty?: (card: Card) => void;
   onToggleBookmark?: (card: Card) => void;
   onEdit?: (card: Card) => void;

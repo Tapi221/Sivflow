@@ -1,13 +1,13 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { PdfViewer } from '@/components/pdf/PdfViewer';
-import type { PdfViewerHandle } from '@/components/pdf/PdfViewer';
-import { DEV_MODE, isLocalHost } from '@/utils/envGuards';
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { PdfViewer } from "@/components/pdf/PdfViewer";
+import type { PdfViewerHandle } from "@/components/pdf/PdfViewer";
+import { DEV_MODE, isLocalHost } from "@/utils/envGuards";
 
 const createE2EPdfData = (pageCount = 14): Uint8Array => {
   const objects = new Map<number, string>();
-  objects.set(1, '<< /Type /Catalog /Pages 2 0 R >>');
-  objects.set(100, '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>');
+  objects.set(1, "<< /Type /Catalog /Pages 2 0 R >>");
+  objects.set(100, "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>");
 
   const kids: string[] = [];
   let nextId = 3;
@@ -17,21 +17,33 @@ const createE2EPdfData = (pageCount = 14): Uint8Array => {
     const contentId = nextId++;
     kids.push(`${pageId} 0 R`);
 
-    const stream = ['BT', '/F1 24 Tf', '72 720 Td', `(PDF E2E Scroll Page ${page}) Tj`, 'ET'].join('\n');
+    const stream = [
+      "BT",
+      "/F1 24 Tf",
+      "72 720 Td",
+      `(PDF E2E Scroll Page ${page}) Tj`,
+      "ET",
+    ].join("\n");
     objects.set(
       pageId,
-      `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 100 0 R >> >> /Contents ${contentId} 0 R >>`
+      `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 100 0 R >> >> /Contents ${contentId} 0 R >>`,
     );
-    objects.set(contentId, `<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`);
+    objects.set(
+      contentId,
+      `<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`,
+    );
   }
 
-  objects.set(2, `<< /Type /Pages /Kids [${kids.join(' ')}] /Count ${pageCount} >>`);
+  objects.set(
+    2,
+    `<< /Type /Pages /Kids [${kids.join(" ")}] /Count ${pageCount} >>`,
+  );
 
   const ids = Array.from(objects.keys()).sort((a, b) => a - b);
   const maxId = ids[ids.length - 1];
   const offsets: Array<number | null> = new Array(maxId + 1).fill(null);
 
-  let out = '%PDF-1.4\n';
+  let out = "%PDF-1.4\n";
   for (const id of ids) {
     offsets[id] = out.length;
     out += `${id} 0 obj\n${objects.get(id)}\nendobj\n`;
@@ -39,10 +51,13 @@ const createE2EPdfData = (pageCount = 14): Uint8Array => {
 
   const xrefStart = out.length;
   out += `xref\n0 ${maxId + 1}\n`;
-  out += '0000000000 65535 f \n';
+  out += "0000000000 65535 f \n";
   for (let id = 1; id <= maxId; id += 1) {
     const off = offsets[id];
-    out += typeof off === 'number' ? `${String(off).padStart(10, '0')} 00000 n \n` : '0000000000 00000 f \n';
+    out +=
+      typeof off === "number"
+        ? `${String(off).padStart(10, "0")} 00000 n \n`
+        : "0000000000 00000 f \n";
   }
 
   out += `trailer\n<< /Size ${maxId + 1} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF\n`;
@@ -57,8 +72,11 @@ export default function PdfScrollTest() {
   const [currentPage, setCurrentPage] = useState(1);
   const pdfData = useMemo(() => createE2EPdfData(14), []);
   const pdfBlobUrl = useMemo(
-    () => URL.createObjectURL(new Blob([pdfData as any], { type: 'application/pdf' })),
-    [pdfData]
+    () =>
+      URL.createObjectURL(
+        new Blob([pdfData as any], { type: "application/pdf" }),
+      ),
+    [pdfData],
   );
 
   useEffect(() => {
@@ -72,10 +90,14 @@ export default function PdfScrollTest() {
     if (!isLocalHost(window.location.hostname)) return;
     const debugWindow = window as Window & {
       __logPdfScrollDiagnostics?: () => void;
-      __getPdfScrollDiagnostics?: () => ReturnType<PdfViewerHandle['getScrollDiagnostics']>;
+      __getPdfScrollDiagnostics?: () => ReturnType<
+        PdfViewerHandle["getScrollDiagnostics"]
+      >;
     };
-    debugWindow.__logPdfScrollDiagnostics = () => viewerRef.current?.logScrollDiagnostics();
-    debugWindow.__getPdfScrollDiagnostics = () => viewerRef.current?.getScrollDiagnostics() ?? null;
+    debugWindow.__logPdfScrollDiagnostics = () =>
+      viewerRef.current?.logScrollDiagnostics();
+    debugWindow.__getPdfScrollDiagnostics = () =>
+      viewerRef.current?.getScrollDiagnostics() ?? null;
 
     return () => {
       delete debugWindow.__logPdfScrollDiagnostics;
@@ -88,9 +110,15 @@ export default function PdfScrollTest() {
       <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white">
         <div className="flex items-center justify-between border-b border-slate-200 px-3 py-2">
           <div className="text-sm text-slate-700">
-            PDF scroll test: {numPages > 0 ? `${currentPage} / ${numPages}` : 'loading'}
+            PDF scroll test:{" "}
+            {numPages > 0 ? `${currentPage} / ${numPages}` : "loading"}
           </div>
-          <Button type="button" variant="outline" size="sm" onClick={() => viewerRef.current?.logScrollDiagnostics()}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => viewerRef.current?.logScrollDiagnostics()}
+          >
             Log Scroll Diagnostics
           </Button>
         </div>

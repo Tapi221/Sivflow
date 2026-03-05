@@ -1,14 +1,14 @@
-import React from 'react';
-import { cn } from '@/lib/utils';
-import { ScaleToFitFrame } from '@/components/card/frame/ScaleToFitFrame';
-import { CardShell } from '@/components/card/frame/CardShell';
-import { CardSurface } from '@/components/card/frame/CardSurface';
+import React from "react";
+import { cn } from "@/lib/utils";
+import { ScaleToFitFrame } from "@/components/card/frame/ScaleToFitFrame";
+import { CardShell } from "@/components/card/frame/CardShell";
+import { CardSurface } from "@/components/card/frame/CardSurface";
 import {
   CARD_BASE_WIDTH,
   CARD_RULED_OFFSET_BOTTOM_PX,
   CARD_ROW_PX,
   CARD_RULED_OFFSET_TOP_PX,
-} from '@/components/card/common/constants';
+} from "@/components/card/common/constants";
 
 // CardShell の props 型をそのまま流用するための別名
 type CardShellProps = React.ComponentProps<typeof CardShell>;
@@ -23,7 +23,7 @@ export interface CardFrameProps
   // children は CardFrame 側で明示管理し、
   // className は CardFrame が標準スタイルを持つので上書き合成のため別定義、
   // ref は forwardRef で受けるので除外する
-  extends Omit<CardShellProps, 'children' | 'className' | 'ref'> {
+  extends Omit<CardShellProps, "children" | "className" | "ref"> {
   /** カード内部に表示する内容 */
   children: React.ReactNode;
 
@@ -103,7 +103,7 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
       // CardShell に渡すそれ以外の props（onClick 等）
       ...shellProps
     },
-    ref
+    ref,
   ) => {
     return (
       /**
@@ -130,8 +130,8 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
             ref={ref}
             className={cn(
               // 標準スタイル: 中央寄せ、ボーダー無し、角丸をデバイス幅で変える
-              'mx-auto border-none rounded-[32px] md:rounded-[40px]',
-              className
+              "mx-auto border-none rounded-[32px] md:rounded-[40px]",
+              className,
             )}
             style={{
               // 外から渡された style を尊重しつつ
@@ -142,7 +142,7 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
                * - カード内の別コンポーネント（例えば横幅計算やレイアウト）で参照するための共有値
                * - baseWidth が 0/負にならないよう最低 1px に丸める
                */
-              ['--card-base-width' as any]: `${Math.max(1, baseWidth)}px`,
+              ["--card-base-width" as any]: `${Math.max(1, baseWidth)}px`,
             }}
             {...shellProps}
           >
@@ -167,7 +167,7 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
         </div>
       </ScaleToFitFrame>
     );
-  }
+  },
 );
 
-CardFrame.displayName = 'CardFrame';
+CardFrame.displayName = "CardFrame";

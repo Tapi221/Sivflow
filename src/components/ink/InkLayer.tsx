@@ -1,7 +1,7 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { Eraser, PenLine, Redo2, Trash2, Undo2 } from '@/ui/icons';
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { Eraser, PenLine, Redo2, Trash2, Undo2 } from "@/ui/icons";
 
 import {
   INK_DOCUMENT_VERSION,
@@ -15,23 +15,26 @@ import {
   type InkPoint,
   type InkSide,
   type InkStroke,
-} from './inkTypes';
-import { saveInkToStorage } from './inkStorage';
+} from "./inkTypes";
+import { saveInkToStorage } from "./inkStorage";
 import {
   clientPointToPaperPoint,
   paperPointToCanvasPoint,
   squaredDistance,
   type RectLike,
-} from '@/utils/inkCoords';
+} from "@/utils/inkCoords";
 
-const TOOL_STYLE: Record<Exclude<InkEditTool, 'eraser'>, { color: string; width: number; opacity: number }> = {
+const TOOL_STYLE: Record<
+  Exclude<InkEditTool, "eraser">,
+  { color: string; width: number; opacity: number }
+> = {
   pen: {
-    color: '#1f2937',
+    color: "#1f2937",
     width: 3,
     opacity: 1,
   },
   highlighter: {
-    color: '#f59e0b',
+    color: "#f59e0b",
     width: 12,
     opacity: 0.35,
   },
@@ -119,7 +122,7 @@ export const InkLayer = React.memo(
       onDocumentChange,
       onHistoryChange,
     },
-    ref
+    ref,
   ) {
     const containerRef = React.useRef<HTMLDivElement | null>(null);
     const baseCanvasRef = React.useRef<HTMLCanvasElement | null>(null);
@@ -134,7 +137,7 @@ export const InkLayer = React.memo(
     const pendingErasePointRef = React.useRef<InkPoint | null>(null);
     const drawRafRef = React.useRef<number | null>(null);
     const eraseRafRef = React.useRef<number | null>(null);
-    const appliedSignatureRef = React.useRef<string>('');
+    const appliedSignatureRef = React.useRef<string>("");
 
     const readContainerRect = React.useCallback((): RectLike | null => {
       const rect = containerRef.current?.getBoundingClientRect();
@@ -147,13 +150,16 @@ export const InkLayer = React.memo(
       };
     }, []);
 
-    const clearCanvas = React.useCallback((canvas: HTMLCanvasElement | null) => {
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-    }, []);
+    const clearCanvas = React.useCallback(
+      (canvas: HTMLCanvasElement | null) => {
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      },
+      [],
+    );
 
     const drawStroke = React.useCallback(
       (ctx: CanvasRenderingContext2D, stroke: InkStroke) => {
@@ -167,28 +173,44 @@ export const InkLayer = React.memo(
         ctx.strokeStyle = stroke.color;
         ctx.fillStyle = stroke.color;
         ctx.globalAlpha = stroke.opacity;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
         ctx.lineWidth = Math.max(1, stroke.width * scale);
 
-        const first = paperPointToCanvasPoint(stroke.points[0], ctx.canvas.width, ctx.canvas.height, {
-          paperWidth,
-          paperHeight,
-        });
+        const first = paperPointToCanvasPoint(
+          stroke.points[0],
+          ctx.canvas.width,
+          ctx.canvas.height,
+          {
+            paperWidth,
+            paperHeight,
+          },
+        );
 
         if (stroke.points.length === 1) {
           ctx.beginPath();
-          ctx.arc(first.x, first.y, Math.max(1, ctx.lineWidth / 2), 0, Math.PI * 2);
+          ctx.arc(
+            first.x,
+            first.y,
+            Math.max(1, ctx.lineWidth / 2),
+            0,
+            Math.PI * 2,
+          );
           ctx.fill();
           ctx.restore();
           return;
         }
 
         if (stroke.points.length === 2) {
-          const second = paperPointToCanvasPoint(stroke.points[1], ctx.canvas.width, ctx.canvas.height, {
-            paperWidth,
-            paperHeight,
-          });
+          const second = paperPointToCanvasPoint(
+            stroke.points[1],
+            ctx.canvas.width,
+            ctx.canvas.height,
+            {
+              paperWidth,
+              paperHeight,
+            },
+          );
           ctx.beginPath();
           ctx.moveTo(first.x, first.y);
           ctx.lineTo(second.x, second.y);
@@ -201,14 +223,24 @@ export const InkLayer = React.memo(
         ctx.beginPath();
         ctx.moveTo(first.x, first.y);
         for (let i = 1; i < stroke.points.length - 1; i += 1) {
-          const current = paperPointToCanvasPoint(stroke.points[i], ctx.canvas.width, ctx.canvas.height, {
-            paperWidth,
-            paperHeight,
-          });
-          const next = paperPointToCanvasPoint(stroke.points[i + 1], ctx.canvas.width, ctx.canvas.height, {
-            paperWidth,
-            paperHeight,
-          });
+          const current = paperPointToCanvasPoint(
+            stroke.points[i],
+            ctx.canvas.width,
+            ctx.canvas.height,
+            {
+              paperWidth,
+              paperHeight,
+            },
+          );
+          const next = paperPointToCanvasPoint(
+            stroke.points[i + 1],
+            ctx.canvas.width,
+            ctx.canvas.height,
+            {
+              paperWidth,
+              paperHeight,
+            },
+          );
           const midX = (current.x + next.x) / 2;
           const midY = (current.y + next.y) / 2;
           ctx.quadraticCurveTo(current.x, current.y, midX, midY);
@@ -217,19 +249,19 @@ export const InkLayer = React.memo(
           stroke.points[stroke.points.length - 1],
           ctx.canvas.width,
           ctx.canvas.height,
-          { paperWidth, paperHeight }
+          { paperWidth, paperHeight },
         );
         ctx.lineTo(last.x, last.y);
         ctx.stroke();
         ctx.restore();
       },
-      [paperHeight, paperWidth]
+      [paperHeight, paperWidth],
     );
 
     const redrawBaseCanvas = React.useCallback(() => {
       const canvas = baseCanvasRef.current;
       if (!canvas) return;
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext("2d");
       if (!ctx) return;
 
       ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -276,7 +308,7 @@ export const InkLayer = React.memo(
       drawRafRef.current = requestAnimationFrame(() => {
         drawRafRef.current = null;
 
-        const liveCtx = liveCanvasRef.current?.getContext('2d');
+        const liveCtx = liveCanvasRef.current?.getContext("2d");
         const activeStroke = activeStrokeRef.current;
 
         if (!liveCtx || !activeStroke) {
@@ -301,7 +333,10 @@ export const InkLayer = React.memo(
 
         const radiusSquared = eraserRadius * eraserRadius;
         const nextStrokes = strokesRef.current.filter(
-          (stroke) => !stroke.points.some((candidate) => squaredDistance(candidate, point) <= radiusSquared)
+          (stroke) =>
+            !stroke.points.some(
+              (candidate) => squaredDistance(candidate, point) <= radiusSquared,
+            ),
         );
 
         if (nextStrokes.length === strokesRef.current.length) return;
@@ -313,7 +348,7 @@ export const InkLayer = React.memo(
         clearLiveCanvas();
         emitDocumentChange();
       },
-      [clearLiveCanvas, emitDocumentChange, eraserRadius, redrawBaseCanvas]
+      [clearLiveCanvas, emitDocumentChange, eraserRadius, redrawBaseCanvas],
     );
 
     const scheduleEraseFlush = React.useCallback(() => {
@@ -342,7 +377,7 @@ export const InkLayer = React.memo(
       strokesRef.current = [...strokesRef.current, activeStroke];
       redoStackRef.current = [];
 
-      const baseCtx = baseCanvasRef.current?.getContext('2d');
+      const baseCtx = baseCanvasRef.current?.getContext("2d");
       if (baseCtx) {
         drawStroke(baseCtx, activeStroke);
       } else {
@@ -399,7 +434,7 @@ export const InkLayer = React.memo(
         redo,
         clear,
       }),
-      [clear, redo, undo]
+      [clear, redo, undo],
     );
 
     const initializeDocument = React.useCallback(() => {
@@ -443,7 +478,7 @@ export const InkLayer = React.memo(
       clearLiveCanvas();
 
       const activeStroke = activeStrokeRef.current;
-      const liveCtx = liveCanvasRef.current?.getContext('2d');
+      const liveCtx = liveCanvasRef.current?.getContext("2d");
       if (activeStroke && liveCtx) {
         drawStroke(liveCtx, activeStroke);
       }
@@ -456,7 +491,7 @@ export const InkLayer = React.memo(
     React.useEffect(() => {
       syncCanvasSize();
       const target = containerRef.current;
-      if (!target || typeof ResizeObserver === 'undefined') return;
+      if (!target || typeof ResizeObserver === "undefined") return;
 
       const observer = new ResizeObserver(() => {
         syncCanvasSize();
@@ -472,7 +507,12 @@ export const InkLayer = React.memo(
     }, [stopDrawingRaf]);
 
     const clientToPaperPoint = React.useCallback(
-      (clientX: number, clientY: number, pressure?: number, now?: number): InkPoint | null => {
+      (
+        clientX: number,
+        clientY: number,
+        pressure?: number,
+        now?: number,
+      ): InkPoint | null => {
         const rect = readContainerRect();
         if (!rect) return null;
 
@@ -483,15 +523,25 @@ export const InkLayer = React.memo(
           paperHeight,
         });
       },
-      [paperHeight, paperWidth, readContainerRect]
+      [paperHeight, paperWidth, readContainerRect],
     );
 
     const handlePointerDown = React.useCallback(
       (event: React.PointerEvent<HTMLDivElement>) => {
         if (!editable) return;
-        if (event.button !== 0 && event.pointerType !== 'touch' && event.pointerType !== 'pen') return;
+        if (
+          event.button !== 0 &&
+          event.pointerType !== "touch" &&
+          event.pointerType !== "pen"
+        )
+          return;
 
-        const point = clientToPaperPoint(event.clientX, event.clientY, event.pressure, Date.now());
+        const point = clientToPaperPoint(
+          event.clientX,
+          event.clientY,
+          event.pressure,
+          Date.now(),
+        );
         if (!point) return;
 
         event.preventDefault();
@@ -499,16 +549,17 @@ export const InkLayer = React.memo(
 
         activePointerIdRef.current = event.pointerId;
 
-        if (tool === 'eraser') {
+        if (tool === "eraser") {
           pendingErasePointRef.current = point;
           scheduleEraseFlush();
           return;
         }
 
-        const style = TOOL_STYLE[tool === 'highlighter' ? 'highlighter' : 'pen'];
+        const style =
+          TOOL_STYLE[tool === "highlighter" ? "highlighter" : "pen"];
         activeStrokeRef.current = {
           id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-          tool: tool === 'highlighter' ? 'highlighter' : 'pen',
+          tool: tool === "highlighter" ? "highlighter" : "pen",
           color: style.color,
           width: style.width,
           opacity: style.opacity,
@@ -516,12 +567,12 @@ export const InkLayer = React.memo(
           createdAt: Date.now(),
         };
 
-        const liveCtx = liveCanvasRef.current?.getContext('2d');
+        const liveCtx = liveCanvasRef.current?.getContext("2d");
         if (!liveCtx || !activeStrokeRef.current) return;
 
         drawStroke(liveCtx, activeStrokeRef.current);
       },
-      [clientToPaperPoint, drawStroke, editable, scheduleEraseFlush, tool]
+      [clientToPaperPoint, drawStroke, editable, scheduleEraseFlush, tool],
     );
 
     const handlePointerMove = React.useCallback(
@@ -531,8 +582,13 @@ export const InkLayer = React.memo(
 
         event.preventDefault();
 
-        if (tool === 'eraser') {
-          const point = clientToPaperPoint(event.clientX, event.clientY, event.pressure, Date.now());
+        if (tool === "eraser") {
+          const point = clientToPaperPoint(
+            event.clientX,
+            event.clientY,
+            event.pressure,
+            Date.now(),
+          );
           if (!point) return;
           pendingErasePointRef.current = point;
           scheduleEraseFlush();
@@ -543,20 +599,28 @@ export const InkLayer = React.memo(
 
         const nativeEvent = event.nativeEvent;
         const coalesced =
-          typeof nativeEvent.getCoalescedEvents === 'function'
+          typeof nativeEvent.getCoalescedEvents === "function"
             ? nativeEvent.getCoalescedEvents()
             : [nativeEvent];
 
         const nextPoints: InkPoint[] = [];
         for (const sample of coalesced) {
-          const next = clientToPaperPoint(sample.clientX, sample.clientY, sample.pressure, Date.now());
+          const next = clientToPaperPoint(
+            sample.clientX,
+            sample.clientY,
+            sample.pressure,
+            Date.now(),
+          );
           if (!next) continue;
           nextPoints.push(next);
         }
         if (nextPoints.length === 0) return;
 
         // 微小移動点を間引いてノイズ低減（筆跡はcoalescedで十分滑らか）
-        let lastPoint = activeStrokeRef.current.points[activeStrokeRef.current.points.length - 1];
+        let lastPoint =
+          activeStrokeRef.current.points[
+            activeStrokeRef.current.points.length - 1
+          ];
         const minDistSq = 0.35 * 0.35;
         for (const next of nextPoints) {
           if (!lastPoint || squaredDistance(lastPoint, next) >= minDistSq) {
@@ -566,7 +630,13 @@ export const InkLayer = React.memo(
         }
         scheduleDrawFlush();
       },
-      [clientToPaperPoint, editable, scheduleDrawFlush, scheduleEraseFlush, tool]
+      [
+        clientToPaperPoint,
+        editable,
+        scheduleDrawFlush,
+        scheduleEraseFlush,
+        tool,
+      ],
     );
 
     const finalizePointer = React.useCallback(
@@ -580,34 +650,46 @@ export const InkLayer = React.memo(
           event.currentTarget.releasePointerCapture(event.pointerId);
         }
 
-        if (tool !== 'eraser') {
+        if (tool !== "eraser") {
           commitActiveStroke();
         }
 
         activePointerIdRef.current = null;
         pendingErasePointRef.current = null;
       },
-      [commitActiveStroke, stopDrawingRaf, tool]
+      [commitActiveStroke, stopDrawingRaf, tool],
     );
 
     return (
       <div
         ref={containerRef}
-        className={cn('absolute inset-0', editable ? 'pointer-events-auto' : 'pointer-events-none', className)}
-        style={{ touchAction: editable ? 'none' : 'auto' }}
+        className={cn(
+          "absolute inset-0",
+          editable ? "pointer-events-auto" : "pointer-events-none",
+          className,
+        )}
+        style={{ touchAction: editable ? "none" : "auto" }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={finalizePointer}
         onPointerCancel={finalizePointer}
       >
-        <canvas ref={baseCanvasRef} className="absolute inset-0 h-full w-full" aria-hidden="true" />
-        <canvas ref={liveCanvasRef} className="absolute inset-0 h-full w-full" aria-hidden="true" />
+        <canvas
+          ref={baseCanvasRef}
+          className="absolute inset-0 h-full w-full"
+          aria-hidden="true"
+        />
+        <canvas
+          ref={liveCanvasRef}
+          className="absolute inset-0 h-full w-full"
+          aria-hidden="true"
+        />
       </div>
     );
-  })
+  }),
 );
 
-InkLayer.displayName = 'InkLayer';
+InkLayer.displayName = "InkLayer";
 
 interface InkToolbarProps {
   tool: InkEditTool | null;
@@ -633,26 +715,26 @@ export const InkToolbar = React.memo(function InkToolbar({
   return (
     <div
       className={cn(
-        'pointer-events-auto inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white/90 p-1 shadow-sm backdrop-blur',
-        className
+        "pointer-events-auto inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white/90 p-1 shadow-sm backdrop-blur",
+        className,
       )}
       data-card-no-pan="true"
     >
       <Button
         type="button"
         size="icon"
-        variant={tool === 'pen' ? 'default' : 'ghost'}
+        variant={tool === "pen" ? "default" : "ghost"}
         className="h-7 w-7"
-        onClick={() => onToolChange(tool === 'pen' ? null : 'pen')}
+        onClick={() => onToolChange(tool === "pen" ? null : "pen")}
       >
         <PenLine className="h-3.5 w-3.5" />
       </Button>
       <Button
         type="button"
         size="icon"
-        variant={tool === 'eraser' ? 'default' : 'ghost'}
+        variant={tool === "eraser" ? "default" : "ghost"}
         className="h-7 w-7"
-        onClick={() => onToolChange(tool === 'eraser' ? null : 'eraser')}
+        onClick={() => onToolChange(tool === "eraser" ? null : "eraser")}
       >
         <Eraser className="h-3.5 w-3.5" />
       </Button>
@@ -690,6 +772,6 @@ export const InkToolbar = React.memo(function InkToolbar({
   );
 });
 
-InkToolbar.displayName = 'InkToolbar';
+InkToolbar.displayName = "InkToolbar";
 
 export const EMPTY_INK_HISTORY: InkHistoryState = HISTORY_EMPTY;

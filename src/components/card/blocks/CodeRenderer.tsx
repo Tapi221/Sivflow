@@ -1,4 +1,4 @@
-import { CodeBlockContent } from './CodeBlockContent';
+import { CodeBlockContent } from "./CodeBlockContent";
 
 interface CodeRendererProps {
   code: string;
@@ -7,6 +7,12 @@ interface CodeRendererProps {
 }
 
 export function CodeRenderer({ code, language, className }: CodeRendererProps) {
-  return <CodeBlockContent mode="viewer" code={code} language={language} className={className} />;
+  return (
+    <CodeBlockContent
+      mode="viewer"
+      code={code}
+      language={language}
+      className={className}
+    />
+  );
 }
-

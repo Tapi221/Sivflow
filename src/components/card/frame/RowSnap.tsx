@@ -1,8 +1,11 @@
-import React from 'react';
+import React from "react";
 
 type RowSnapProps = {
   rowPx: number;
-  children: (ctx: { snapPaddingBottomPx: number; snapRef: (node: HTMLElement | null) => void }) => React.ReactNode;
+  children: (ctx: {
+    snapPaddingBottomPx: number;
+    snapRef: (node: HTMLElement | null) => void;
+  }) => React.ReactNode;
   afterGapRows?: number;
 };
 
@@ -34,31 +37,35 @@ export function RowSnap({ rowPx, children, afterGapRows = 0 }: RowSnapProps) {
       const measuredPx = Math.max(0, measuredPxRaw);
       const remainder = measuredPx % safeRowPx;
       const isAlreadySnapped =
-        remainder <= SNAP_TOLERANCE_PX || safeRowPx - remainder <= SNAP_TOLERANCE_PX;
+        remainder <= SNAP_TOLERANCE_PX ||
+        safeRowPx - remainder <= SNAP_TOLERANCE_PX;
       const snapPadding = isAlreadySnapped ? 0 : safeRowPx - remainder;
       const nextExtra = Math.max(0, Math.round(snapPadding + gapPx));
 
       setSnapPaddingBottomPx((prev) =>
-        Math.abs(prev - nextExtra) < EPSILON ? prev : nextExtra
+        Math.abs(prev - nextExtra) < EPSILON ? prev : nextExtra,
       );
     });
   }, [gapPx, safeRowPx]);
 
-  const setSnapRef = React.useCallback((node: HTMLElement | null) => {
-    if (observerRef.current && targetRef.current) {
-      observerRef.current.unobserve(targetRef.current);
-    }
+  const setSnapRef = React.useCallback(
+    (node: HTMLElement | null) => {
+      if (observerRef.current && targetRef.current) {
+        observerRef.current.unobserve(targetRef.current);
+      }
 
-    targetRef.current = node;
+      targetRef.current = node;
 
-    if (!node || typeof ResizeObserver === 'undefined') return;
-    if (!observerRef.current) {
-      observerRef.current = new ResizeObserver(() => scheduleMeasure());
-    }
+      if (!node || typeof ResizeObserver === "undefined") return;
+      if (!observerRef.current) {
+        observerRef.current = new ResizeObserver(() => scheduleMeasure());
+      }
 
-    observerRef.current.observe(node);
-    scheduleMeasure();
-  }, [scheduleMeasure]);
+      observerRef.current.observe(node);
+      scheduleMeasure();
+    },
+    [scheduleMeasure],
+  );
 
   React.useLayoutEffect(() => {
     scheduleMeasure();

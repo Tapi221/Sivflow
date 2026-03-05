@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useLiveQuery } from 'dexie-react-hooks';
+import React, { useEffect, useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useLiveQuery } from "dexie-react-hooks";
 import {
   getLocalDb,
   getLocalDBRuntimeStatus,
   subscribeLocalDBRuntimeStatus,
-} from '@/services/localDB';
-import { snapshotService } from '@/services/SnapshotService';
+} from "@/services/localDB";
+import { snapshotService } from "@/services/SnapshotService";
 import {
   Dialog,
   DialogContent,
@@ -14,22 +14,25 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
-import { AlertTriangle, Folder, Loader2, CheckCircle } from '@/ui/icons';
-import { Download } from '@/ui/icons';
-import { Database } from '@/ui/icons';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { AlertTriangle, Folder, Loader2, CheckCircle } from "@/ui/icons";
+import { Download } from "@/ui/icons";
+import { Database } from "@/ui/icons";
 
 interface ExportDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export default function ExportDialog({ open, onOpenChange }: ExportDialogProps) {
+export default function ExportDialog({
+  open,
+  onOpenChange,
+}: ExportDialogProps) {
   const { currentUser } = useAuth();
-  const [exportType, setExportType] = useState<'all' | 'folder'>('all');
+  const [exportType, setExportType] = useState<"all" | "folder">("all");
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [exportComplete, setExportComplete] = useState(false);
@@ -39,7 +42,7 @@ export default function ExportDialog({ open, onOpenChange }: ExportDialogProps) 
     return subscribeLocalDBRuntimeStatus(setRuntimeStatus);
   }, []);
 
-  const isFallbackMode = runtimeStatus.mode === 'fallback';
+  const isFallbackMode = runtimeStatus.mode === "fallback";
 
   // フォルダ一覧を取得
   const folders = useLiveQuery(
@@ -47,40 +50,40 @@ export default function ExportDialog({ open, onOpenChange }: ExportDialogProps) 
       if (!currentUser) return [];
       const db = await getLocalDb();
       const allFolders = await db.getAllFolders();
-      return allFolders.filter(f => !f.isDeleted);
+      return allFolders.filter((f) => !f.isDeleted);
     },
     [currentUser],
-    []
+    [],
   );
 
   const handleExport = async () => {
     if (!currentUser || isFallbackMode) return;
-    
+
     setIsExporting(true);
     setExportComplete(false);
-    
+
     try {
-      if (exportType === 'all') {
+      if (exportType === "all") {
         await snapshotService.exportToFile(currentUser.uid);
       } else if (selectedFolderId) {
         await snapshotService.exportFolder(currentUser.uid, selectedFolderId);
       }
       setExportComplete(true);
-      
+
       // 3秒後にダイアログを閉じる
       setTimeout(() => {
         onOpenChange(false);
         setExportComplete(false);
       }, 2000);
     } catch (error) {
-      console.error('Export failed:', error);
-      alert('エクスポートに失敗しました');
+      console.error("Export failed:", error);
+      alert("エクスポートに失敗しました");
     } finally {
       setIsExporting(false);
     }
   };
 
-  const selectedFolder = folders?.find(f => f.id === selectedFolderId);
+  const selectedFolder = folders?.find((f) => f.id === selectedFolderId);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -99,8 +102,12 @@ export default function ExportDialog({ open, onOpenChange }: ExportDialogProps) 
         {exportComplete ? (
           <div className="py-8 text-center">
             <CheckCircle className="w-16 h-16 mx-auto mb-4 text-green-500" />
-            <p className="text-lg font-medium text-gray-900">エクスポート完了！</p>
-            <p className="text-sm text-gray-500 mt-1">ファイルがダウンロードされました</p>
+            <p className="text-lg font-medium text-gray-900">
+              エクスポート完了！
+            </p>
+            <p className="text-sm text-gray-500 mt-1">
+              ファイルがダウンロードされました
+            </p>
           </div>
         ) : (
           <>
@@ -116,13 +123,18 @@ export default function ExportDialog({ open, onOpenChange }: ExportDialogProps) 
 
               <RadioGroup
                 value={exportType}
-                onValueChange={(value) => setExportType(value as 'all' | 'folder')}
+                onValueChange={(value) =>
+                  setExportType(value as "all" | "folder")
+                }
                 className="space-y-3"
                 disabled={isFallbackMode}
               >
                 <div className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-gray-50 cursor-pointer">
                   <RadioGroupItem value="all" id="all" />
-                  <Label htmlFor="all" className="flex items-center gap-2 cursor-pointer flex-1">
+                  <Label
+                    htmlFor="all"
+                    className="flex items-center gap-2 cursor-pointer flex-1"
+                  >
                     <Database className="w-5 h-5 text-gray-500" />
                     <div>
                       <div className="font-medium">すべてのデータ</div>
@@ -135,7 +147,10 @@ export default function ExportDialog({ open, onOpenChange }: ExportDialogProps) 
 
                 <div className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-gray-50 cursor-pointer">
                   <RadioGroupItem value="folder" id="folder" />
-                  <Label htmlFor="folder" className="flex items-center gap-2 cursor-pointer flex-1">
+                  <Label
+                    htmlFor="folder"
+                    className="flex items-center gap-2 cursor-pointer flex-1"
+                  >
                     <Folder className="w-5 h-5 text-gray-500" />
                     <div>
                       <div className="font-medium">フォルダを選択</div>
@@ -147,14 +162,16 @@ export default function ExportDialog({ open, onOpenChange }: ExportDialogProps) 
                 </div>
               </RadioGroup>
 
-              {exportType === 'folder' && (
+              {exportType === "folder" && (
                 <div className="mt-4 pl-8">
                   <Label className="text-sm text-gray-600 mb-2 block">
                     エクスポートするフォルダを選択:
                   </Label>
                   <select
-                    value={selectedFolderId || ''}
-                    onChange={(e) => setSelectedFolderId(e.target.value || null)}
+                    value={selectedFolderId || ""}
+                    onChange={(e) =>
+                      setSelectedFolderId(e.target.value || null)
+                    }
                     className="w-full p-2 border rounded-lg text-sm"
                     disabled={isFallbackMode}
                   >
@@ -171,7 +188,8 @@ export default function ExportDialog({ open, onOpenChange }: ExportDialogProps) 
 
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm">
               <p className="text-amber-800">
-                💡 <strong>ヒント:</strong> 定期的にエクスポートしてバックアップを取ることをお勧めします。
+                💡 <strong>ヒント:</strong>{" "}
+                定期的にエクスポートしてバックアップを取ることをお勧めします。
                 エクスポートしたファイルは安全な場所に保存してください。
               </p>
             </div>
@@ -185,7 +203,11 @@ export default function ExportDialog({ open, onOpenChange }: ExportDialogProps) 
           {!exportComplete && (
             <Button
               onClick={handleExport}
-              disabled={isFallbackMode || isExporting || (exportType === 'folder' && !selectedFolderId)}
+              disabled={
+                isFallbackMode ||
+                isExporting ||
+                (exportType === "folder" && !selectedFolderId)
+              }
               className="bg-primary-600 hover:bg-primary-700"
             >
               {isExporting ? (

@@ -1,7 +1,7 @@
 // Folder.ts
 
-import { Timestamp } from 'firebase/firestore';
-import type { BaseEntity, UploadedFile } from './index'; // BaseEntity は index.ts からエクスポートされている
+import { Timestamp } from "firebase/firestore";
+import type { BaseEntity, UploadedFile } from "./index"; // BaseEntity は index.ts からエクスポートされている
 
 export type Folder = BaseEntity & {
   parentFolderId?: string | null;

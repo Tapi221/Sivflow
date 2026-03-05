@@ -1,10 +1,16 @@
-import { normalizeCrossSideId, normalizeOrderIndex } from "@/components/card/editor/cardEditorUtils";
+import {
+  normalizeCrossSideId,
+  normalizeOrderIndex,
+} from "@/components/card/editor/cardEditorUtils";
 
 import type { Dispatch, MutableRefObject, SetStateAction } from "react";
 import type { CardBlock } from "@/types";
 
 type DndLocation = { droppableId: string; index: number };
-export type DndResult = { source: DndLocation; destination?: DndLocation | null };
+export type DndResult = {
+  source: DndLocation;
+  destination?: DndLocation | null;
+};
 
 type DraftShape = {
   questionBlocks: CardBlock[];
@@ -28,7 +34,11 @@ export function useCardBlocksDnd<TDraft extends DraftShape | null>({
     allowAutoMinHeightSyncRef.current = true;
 
     const { source, destination } = result;
-    if (source.droppableId === destination.droppableId && source.index === destination.index) return;
+    if (
+      source.droppableId === destination.droppableId &&
+      source.index === destination.index
+    )
+      return;
 
     const listFor = (id: string) => {
       if (id === "question-blocks") return [...draft.questionBlocks];
@@ -43,7 +53,9 @@ export function useCardBlocksDnd<TDraft extends DraftShape | null>({
       const re = normalizeOrderIndex(list as CardBlock[]);
       setDraft((prev) => {
         if (!prev) return prev;
-        return source.droppableId === "question-blocks" ? { ...prev, questionBlocks: re } : { ...prev, answerBlocks: re };
+        return source.droppableId === "question-blocks"
+          ? { ...prev, questionBlocks: re }
+          : { ...prev, answerBlocks: re };
       });
       return;
     }
@@ -52,7 +64,8 @@ export function useCardBlocksDnd<TDraft extends DraftShape | null>({
     const destList = listFor(destination.droppableId);
 
     const [rawMoved] = sourceList.splice(source.index, 1);
-    const nextSide: "question" | "answer" = destination.droppableId === "question-blocks" ? "question" : "answer";
+    const nextSide: "question" | "answer" =
+      destination.droppableId === "question-blocks" ? "question" : "answer";
     const movedBlock = rawMoved as CardBlock & { id?: unknown };
     const maybeNewId = normalizeCrossSideId(movedBlock?.id, nextSide);
     const moved = maybeNewId ? { ...movedBlock, id: maybeNewId } : rawMoved;
@@ -69,7 +82,8 @@ export function useCardBlocksDnd<TDraft extends DraftShape | null>({
       if (source.droppableId === "question-blocks") next.questionBlocks = reS;
       else next.answerBlocks = reS;
 
-      if (destination.droppableId === "question-blocks") next.questionBlocks = reD;
+      if (destination.droppableId === "question-blocks")
+        next.questionBlocks = reD;
       else next.answerBlocks = reD;
 
       return next;

@@ -1,15 +1,15 @@
-import React from 'react';
+import React from "react";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import AutoResizeTextarea from '@/components/ui/AutoResizeTextarea';
-import { MathBlockContent } from './MathBlockContent';
-import { cn } from '@/lib/utils';
-import type { MathBlockData } from '@/types';
+} from "@/components/ui/dialog";
+import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
+import { MathBlockContent } from "./MathBlockContent";
+import { cn } from "@/lib/utils";
+import type { MathBlockData } from "@/types";
 
 type CSSCustomProperties = React.CSSProperties & Record<`--${string}`, string>;
 
@@ -39,9 +39,9 @@ export const MathEditorDialog: React.FC<MathEditorDialogProps> = ({
   const ringColor =
     accentColor && isHexColor(accentColor)
       ? `${accentColor}40`
-      : 'var(--primary-color-alpha-40)';
+      : "var(--primary-color-alpha-40)";
 
-  const latex = data?.latex ?? '';
+  const latex = data?.latex ?? "";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -50,13 +50,17 @@ export const MathEditorDialog: React.FC<MathEditorDialogProps> = ({
           <DialogTitle className="font-serif text-[11px] font-medium tracking-[0.12em] uppercase text-slate-500">
             Math Editor
           </DialogTitle>
-          <DialogDescription className="sr-only">数式を編集するダイアログ</DialogDescription>
+          <DialogDescription className="sr-only">
+            数式を編集するダイアログ
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3 px-3 pt-3 pb-4">
           <AutoResizeTextarea
             value={latex}
-            onChange={(event) => onChange({ ...data, latex: event.target.value })}
+            onChange={(event) =>
+              onChange({ ...data, latex: event.target.value })
+            }
             placeholder="例: x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}"
             aria-label="LaTeX入力"
             minRows={EDITOR_MIN_ROWS}
@@ -66,22 +70,26 @@ export const MathEditorDialog: React.FC<MathEditorDialogProps> = ({
             autoFocus
             textareaClassName="font-serif"
             className={cn(
-              'w-full font-serif text-base leading-relaxed text-slate-700 placeholder:text-slate-300',
-              'border border-slate-200 rounded-xl px-3 py-2 transition-all duration-300',
-              'focus-visible:ring-2 focus-visible:ring-offset-0 bg-white focus:border-slate-300',
-              'shadow-inner focus:shadow-sm resize-none whitespace-pre-wrap'
+              "w-full font-serif text-base leading-relaxed text-slate-700 placeholder:text-slate-300",
+              "border border-slate-200 rounded-xl px-3 py-2 transition-all duration-300",
+              "focus-visible:ring-2 focus-visible:ring-offset-0 bg-white focus:border-slate-300",
+              "shadow-inner focus:shadow-sm resize-none whitespace-pre-wrap",
             )}
-            style={
-              { '--tw-ring-color': ringColor } as CSSCustomProperties
-            }
+            style={{ "--tw-ring-color": ringColor } as CSSCustomProperties}
           />
 
           {latex.trim() && (
-            <MathBlockContent latex={latex} displayMode={data.displayMode ?? 'block'} />
+            <MathBlockContent
+              latex={latex}
+              displayMode={data.displayMode ?? "block"}
+            />
           )}
 
           {error && (
-            <p className="text-[10px] text-red-600 mt-1 font-medium" role="alert">
+            <p
+              className="text-[10px] text-red-600 mt-1 font-medium"
+              role="alert"
+            >
               {error}
             </p>
           )}

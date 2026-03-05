@@ -1,13 +1,13 @@
-import React, { useCallback } from 'react';
-import { Star } from '@/ui/icons';
-import { CircleHelp } from '@/ui/icons';
-import { cn } from '@/lib/utils';
+import React, { useCallback } from "react";
+import { Star } from "@/ui/icons";
+import { CircleHelp } from "@/ui/icons";
+import { cn } from "@/lib/utils";
 import {
   CARD_ACTION_BG_CLASS,
   CARD_ACTION_COLOR_ACTIVE_CLASS,
   CARD_ACTION_COLOR_IDLE_CLASS,
   CARD_ACTION_ICON_CLASS,
-} from '@/components/card/common/constants';
+} from "@/components/card/common/constants";
 
 interface CardCornerActionsProps {
   onHelp?: () => void;
@@ -33,12 +33,12 @@ export function CardCornerActions({
   }, []);
 
   const buttonBaseClass =
-    'rounded-full h-7 w-7 min-h-0 min-w-0 transition-colors flex items-center justify-center bg-transparent hover:bg-transparent active:bg-transparent ' +
-    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40';
-  const disabledClass = disabled ? 'opacity-50 pointer-events-none' : '';
+    "rounded-full h-7 w-7 min-h-0 min-w-0 transition-colors flex items-center justify-center bg-transparent hover:bg-transparent active:bg-transparent " +
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40";
+  const disabledClass = disabled ? "opacity-50 pointer-events-none" : "";
 
   return (
-    <div className={cn('flex items-center gap-1', className)}>
+    <div className={cn("flex items-center gap-1", className)}>
       {onHelp ? (
         <button
           type="button"
@@ -58,10 +58,12 @@ export function CardCornerActions({
             CARD_ACTION_BG_CLASS,
             helpActive
               ? CARD_ACTION_COLOR_ACTIVE_CLASS
-              : CARD_ACTION_COLOR_IDLE_CLASS
+              : CARD_ACTION_COLOR_IDLE_CLASS,
           )}
         >
-          <CircleHelp className={cn(CARD_ACTION_ICON_CLASS, helpActive && 'opacity-90')} />
+          <CircleHelp
+            className={cn(CARD_ACTION_ICON_CLASS, helpActive && "opacity-90")}
+          />
         </button>
       ) : null}
 
@@ -84,10 +86,12 @@ export function CardCornerActions({
             CARD_ACTION_BG_CLASS,
             starActive
               ? CARD_ACTION_COLOR_ACTIVE_CLASS
-              : CARD_ACTION_COLOR_IDLE_CLASS
+              : CARD_ACTION_COLOR_IDLE_CLASS,
           )}
         >
-          <Star className={cn(CARD_ACTION_ICON_CLASS, starActive && 'fill-current')} />
+          <Star
+            className={cn(CARD_ACTION_ICON_CLASS, starActive && "fill-current")}
+          />
         </button>
       ) : null}
     </div>

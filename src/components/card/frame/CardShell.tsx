@@ -1,16 +1,16 @@
-import React from 'react';
-import { cn } from '@/lib/utils';
+import React from "react";
+import { cn } from "@/lib/utils";
 import {
   cardHeightPxToLayoutRows,
   layoutRowsToCardHeightPx,
   snapMinCardHeightPx,
-} from '@/components/card/common/constants';
+} from "@/components/card/common/constants";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 
 interface CardShellProps extends React.HTMLAttributes<HTMLDivElement> {
   actions?: React.ReactNode;
@@ -31,29 +31,34 @@ interface CardShellProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
-  ({
-    actions,
-    actionsTopLeft,
-    actionsTopRight,
-    children,
-    className,
-    style,
-    drawMode = false,
-    resizable = false,
-    resizeStepPx = 24,
-    resizeStorageKey,
-    heightPx,
-    onHeightChange,
-    onMinHeightChange,
-    onResizeStart,
-    onResizeEnd,
-    showResizeHandle = true,
-    lockHeight = false,
-    ...props
-  }, ref) => {
+  (
+    {
+      actions,
+      actionsTopLeft,
+      actionsTopRight,
+      children,
+      className,
+      style,
+      drawMode = false,
+      resizable = false,
+      resizeStepPx = 24,
+      resizeStorageKey,
+      heightPx,
+      onHeightChange,
+      onMinHeightChange,
+      onResizeStart,
+      onResizeEnd,
+      showResizeHandle = true,
+      lockHeight = false,
+      ...props
+    },
+    ref,
+  ) => {
     const shellRef = React.useRef<HTMLDivElement | null>(null);
     const [panZoom, setPanZoom] = React.useState({ x: 0, y: 0, scale: 1 });
-    const pointersRef = React.useRef(new Map<number, { x: number; y: number }>());
+    const pointersRef = React.useRef(
+      new Map<number, { x: number; y: number }>(),
+    );
     const panRef = React.useRef<{
       pointerId: number;
       startX: number;
@@ -68,8 +73,11 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
       startTranslate: { x: number; y: number };
     } | null>(null);
 
-    const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
-    const [customHeightPx, setCustomHeightPx] = React.useState<number | null>(null);
+    const clamp = (value: number, min: number, max: number) =>
+      Math.min(max, Math.max(min, value));
+    const [customHeightPx, setCustomHeightPx] = React.useState<number | null>(
+      null,
+    );
     const resizeRef = React.useRef<{
       pointerId: number;
       startY: number;
@@ -84,20 +92,32 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
       const contentBaseMin = resizeStepPx * 2;
       if (!element) return contentBaseMin;
 
-      const widthRatio = resizable ? (1 / 8) : (3 / 4);
-      const widthBasedMin = Math.ceil(((element.clientWidth || element.offsetWidth || 0) * widthRatio) / resizeStepPx) * resizeStepPx;
+      const widthRatio = resizable ? 1 / 8 : 3 / 4;
+      const widthBasedMin =
+        Math.ceil(
+          ((element.clientWidth || element.offsetWidth || 0) * widthRatio) /
+            resizeStepPx,
+        ) * resizeStepPx;
       const baseMin = Math.max(contentBaseMin, widthBasedMin || 0);
 
-      const body = element.querySelector('.card-shell-body') as HTMLElement | null;
+      const body = element.querySelector(
+        ".card-shell-body",
+      ) as HTMLElement | null;
       if (!body) return baseMin;
 
-      const blockRows = Array.from(body.querySelectorAll('[data-block-row="true"]')) as HTMLElement[];
+      const blockRows = Array.from(
+        body.querySelectorAll('[data-block-row="true"]'),
+      ) as HTMLElement[];
       if (blockRows.length > 0) {
-        const surface = body.querySelector('[data-card-surface="true"]') as HTMLElement | null;
+        const surface = body.querySelector(
+          '[data-card-surface="true"]',
+        ) as HTMLElement | null;
         const surfaceStyle = surface ? window.getComputedStyle(surface) : null;
         const ruledBottomOffsetPx = Math.max(
           0,
-          Number.parseFloat(surfaceStyle?.getPropertyValue('--ruled-bottom-offset-px') || '0') || 0
+          Number.parseFloat(
+            surfaceStyle?.getPropertyValue("--ruled-bottom-offset-px") || "0",
+          ) || 0,
         );
         // NOTE:
         // getBoundingClientRect() is affected by parent transforms (ScaleToFitFrame).
@@ -111,17 +131,22 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
         let maxBottom = 0;
         for (const row of blockRows) {
           const measureTarget =
-            (row.querySelector('[data-block-measure-root="true"]') as HTMLElement | null) ?? row;
+            (row.querySelector(
+              '[data-block-measure-root="true"]',
+            ) as HTMLElement | null) ?? row;
           const style = window.getComputedStyle(row);
-          const marginBottom = Number.parseFloat(style.marginBottom || '0') || 0;
-          const targetOffsetTop = measureTarget === row ? 0 : measureTarget.offsetTop;
+          const marginBottom =
+            Number.parseFloat(style.marginBottom || "0") || 0;
+          const targetOffsetTop =
+            measureTarget === row ? 0 : measureTarget.offsetTop;
           const layoutBottom =
             row.offsetTop +
             targetOffsetTop +
             Math.max(measureTarget.offsetHeight, measureTarget.scrollHeight) +
             marginBottom;
           const targetRect = measureTarget.getBoundingClientRect();
-          const visualBottom = ((targetRect.bottom - bodyRect.top) / safeBodyScaleY) + marginBottom;
+          const visualBottom =
+            (targetRect.bottom - bodyRect.top) / safeBodyScaleY + marginBottom;
           const rowBottom = Math.max(layoutBottom, visualBottom);
           if (rowBottom > maxBottom) {
             maxBottom = rowBottom;
@@ -142,41 +167,49 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
 
     const computeMaxHeight = React.useCallback(() => {
       if (resizable) return Number.POSITIVE_INFINITY;
-      if (typeof window === 'undefined') return 900;
+      if (typeof window === "undefined") return 900;
       return Math.max(Math.floor(window.innerHeight * 0.9), 420);
     }, [resizable]);
 
-    const clampHeight = React.useCallback((height: number) => {
-      return clamp(height, computeMinHeight(), computeMaxHeight());
-    }, [computeMaxHeight, computeMinHeight]);
+    const clampHeight = React.useCallback(
+      (height: number) => {
+        return clamp(height, computeMinHeight(), computeMaxHeight());
+      },
+      [computeMaxHeight, computeMinHeight],
+    );
 
-    const isControlledResize = typeof onHeightChange === 'function';
+    const isControlledResize = typeof onHeightChange === "function";
     const resolvedHeightPx = heightPx ?? customHeightPx;
-    const commitHeight = React.useCallback((nextHeight: number) => {
-      if (isControlledResize && onHeightChange) {
-        onHeightChange(nextHeight);
-        return;
-      }
-      setCustomHeightPx(nextHeight);
-    }, [isControlledResize, onHeightChange]);
+    const commitHeight = React.useCallback(
+      (nextHeight: number) => {
+        if (isControlledResize && onHeightChange) {
+          onHeightChange(nextHeight);
+          return;
+        }
+        setCustomHeightPx(nextHeight);
+      },
+      [isControlledResize, onHeightChange],
+    );
 
     const isInteractiveTarget = (target: EventTarget | null) => {
       const element = target as HTMLElement | null;
       if (!element) return false;
       return Boolean(
-        element.closest('button, a, input, textarea, select, [role="button"], [data-card-no-pan="true"]')
+        element.closest(
+          'button, a, input, textarea, select, [role="button"], [data-card-no-pan="true"]',
+        ),
       );
     };
 
     React.useEffect(() => {
       const element = shellRef.current;
-      if (!element || typeof ResizeObserver === 'undefined') return;
+      if (!element || typeof ResizeObserver === "undefined") return;
 
       const updateWidth = () => {
         const width = element.clientWidth || element.offsetWidth;
         if (!width) return;
 
-        element.style.setProperty('--card-w', `${width}px`);
+        element.style.setProperty("--card-w", `${width}px`);
 
         setCustomHeightPx((prev) => {
           if (prev == null) return prev;
@@ -197,7 +230,8 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
     }, [clampHeight, computeMinHeight, onMinHeightChange]);
 
     React.useEffect(() => {
-      if (!resizable || !resizeStorageKey || typeof window === 'undefined') return;
+      if (!resizable || !resizeStorageKey || typeof window === "undefined")
+        return;
 
       const raw = window.localStorage.getItem(resizeStorageKey);
       if (!raw) return;
@@ -208,22 +242,30 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
     }, [clampHeight, resizeStorageKey, resizable]);
 
     React.useEffect(() => {
-      if (!resizable || !resizeStorageKey || customHeightPx == null || typeof window === 'undefined') return;
+      if (
+        !resizable ||
+        !resizeStorageKey ||
+        customHeightPx == null ||
+        typeof window === "undefined"
+      )
+        return;
       window.localStorage.setItem(resizeStorageKey, String(customHeightPx));
     }, [customHeightPx, resizeStorageKey, resizable]);
 
     React.useEffect(() => {
-      if (!onMinHeightChange || typeof ResizeObserver === 'undefined') return;
+      if (!onMinHeightChange || typeof ResizeObserver === "undefined") return;
 
       const element = shellRef.current;
       if (!element) return;
 
-      const body = element.querySelector('.card-shell-body') as HTMLElement | null;
+      const body = element.querySelector(
+        ".card-shell-body",
+      ) as HTMLElement | null;
       if (!body) return;
 
       let rafId: number | null = null;
       const scheduleNotify = () => {
-        if (rafId != null || typeof window === 'undefined') return;
+        if (rafId != null || typeof window === "undefined") return;
         rafId = window.requestAnimationFrame(() => {
           rafId = null;
           if (resizeRef.current) return;
@@ -236,7 +278,9 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
 
       const syncRowObservers = () => {
         const nextRows = new Set(
-          Array.from(body.querySelectorAll('[data-block-row="true"]')) as HTMLElement[]
+          Array.from(
+            body.querySelectorAll('[data-block-row="true"]'),
+          ) as HTMLElement[],
         );
 
         rowElements.forEach((row) => {
@@ -270,14 +314,14 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
         characterData: true,
       });
 
-      body.addEventListener('input', scheduleNotify, true);
+      body.addEventListener("input", scheduleNotify, true);
 
       return () => {
-        body.removeEventListener('input', scheduleNotify, true);
+        body.removeEventListener("input", scheduleNotify, true);
         mutationObserver.disconnect();
         bodyObserver.disconnect();
         rowObserver.disconnect();
-        if (rafId != null && typeof window !== 'undefined') {
+        if (rafId != null && typeof window !== "undefined") {
           window.cancelAnimationFrame(rafId);
         }
       };
@@ -289,27 +333,34 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
       }
     }, [drawMode]);
 
-    const setRefs = React.useCallback((node: HTMLDivElement | null) => {
-      shellRef.current = node;
-      if (!ref) return;
-      if (typeof ref === 'function') {
-        ref(node);
-      } else {
-        ref.current = node;
-      }
-    }, [ref]);
+    const setRefs = React.useCallback(
+      (node: HTMLDivElement | null) => {
+        shellRef.current = node;
+        if (!ref) return;
+        if (typeof ref === "function") {
+          ref(node);
+        } else {
+          ref.current = node;
+        }
+      },
+      [ref],
+    );
 
     const topLeftItems = React.Children.toArray(actionsTopLeft).filter(Boolean);
-    const topRightItems = React.Children.toArray(actionsTopRight ?? actions).filter(Boolean);
+    const topRightItems = React.Children.toArray(
+      actionsTopRight ?? actions,
+    ).filter(Boolean);
     const primaryTopRight = topRightItems.slice(0, 2);
     const overflowTopRight = topRightItems.slice(2);
-
 
     const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
       if (!drawMode) return;
       if (isInteractiveTarget(event.target)) return;
 
-      pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      pointersRef.current.set(event.pointerId, {
+        x: event.clientX,
+        y: event.clientY,
+      });
 
       panRef.current = {
         pointerId: event.pointerId,
@@ -321,7 +372,10 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
 
       if (pointersRef.current.size === 2) {
         const points = Array.from(pointersRef.current.values());
-        const distance = Math.hypot(points[1].x - points[0].x, points[1].y - points[0].y);
+        const distance = Math.hypot(
+          points[1].x - points[0].x,
+          points[1].y - points[0].y,
+        );
         const center = {
           x: (points[0].x + points[1].x) / 2,
           y: (points[0].y + points[1].y) / 2,
@@ -341,12 +395,18 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
       if (!drawMode) return;
       if (!pointersRef.current.has(event.pointerId)) return;
 
-      pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      pointersRef.current.set(event.pointerId, {
+        x: event.clientX,
+        y: event.clientY,
+      });
 
       if (pointersRef.current.size >= 2 && pinchRef.current) {
         event.preventDefault();
         const points = Array.from(pointersRef.current.values());
-        const distance = Math.hypot(points[1].x - points[0].x, points[1].y - points[0].y);
+        const distance = Math.hypot(
+          points[1].x - points[0].x,
+          points[1].y - points[0].y,
+        );
         const center = {
           x: (points[0].x + points[1].x) / 2,
           y: (points[0].y + points[1].y) / 2,
@@ -355,14 +415,18 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
         const nextScale = clamp(
           pinchRef.current.startScale * (distance / pinchRef.current.distance),
           0.5,
-          3
+          3,
         );
         const nextX =
           center.x -
-          ((pinchRef.current.center.x - pinchRef.current.startTranslate.x) / pinchRef.current.startScale) * nextScale;
+          ((pinchRef.current.center.x - pinchRef.current.startTranslate.x) /
+            pinchRef.current.startScale) *
+            nextScale;
         const nextY =
           center.y -
-          ((pinchRef.current.center.y - pinchRef.current.startTranslate.y) / pinchRef.current.startScale) * nextScale;
+          ((pinchRef.current.center.y - pinchRef.current.startTranslate.y) /
+            pinchRef.current.startScale) *
+            nextScale;
 
         setPanZoom({ x: nextX, y: nextY, scale: nextScale });
         return;
@@ -388,20 +452,25 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
     };
 
     const enforcedShellOverflowStyle: React.CSSProperties = {
-      overflowY: 'visible',
-      overflowX: 'visible',
+      overflowY: "visible",
+      overflowX: "visible",
     };
 
     const shell = (
       <div
         ref={setRefs}
-        className={cn('card-shell', drawMode && 'card-shell--paper', resizable && !drawMode && 'card-shell--resizable', className)}
+        className={cn(
+          "card-shell",
+          drawMode && "card-shell--paper",
+          resizable && !drawMode && "card-shell--resizable",
+          className,
+        )}
         style={
           resolvedHeightPx != null
             ? ({
                 ...(style ?? {}),
                 ...enforcedShellOverflowStyle,
-                ['--card-resize-height' as any]: `${resolvedHeightPx}px`,
+                ["--card-resize-height" as any]: `${resolvedHeightPx}px`,
                 minHeight: `${resolvedHeightPx}px`,
                 ...(lockHeight
                   ? {
@@ -419,7 +488,12 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
         onClick={(e) => {
           // ★ card-shell-actions 内のボタン等からのバブリングは無視する
           // overflow:hidden によるクリッピングで stopPropagation が効かない場合の保険
-          if ((e.target as HTMLElement).closest('.card-shell-header, .card-shell-footer, .card-shell-action, .card-shell-overflow')) return;
+          if (
+            (e.target as HTMLElement).closest(
+              ".card-shell-header, .card-shell-footer, .card-shell-action, .card-shell-overflow",
+            )
+          )
+            return;
           props.onClick?.(e);
         }}
       >
@@ -453,7 +527,11 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
                   <DropdownMenuContent align="end" sideOffset={6}>
                     {overflowTopRight.map((action, index) => (
                       <DropdownMenuItem key={`overflow-${index}`} asChild>
-                        {React.isValidElement(action) ? action : <span>{action}</span>}
+                        {React.isValidElement(action) ? (
+                          action
+                        ) : (
+                          <span>{action}</span>
+                        )}
                       </DropdownMenuItem>
                     ))}
                   </DropdownMenuContent>
@@ -464,11 +542,11 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
         )}
         <div
           className="card-shell-body"
-          style={{ overflowY: 'clip', overflowX: 'visible' }}
+          style={{ overflowY: "clip", overflowX: "visible" }}
         >
           {children}
         </div>
-        
+
         {resizable && !drawMode && showResizeHandle && (
           <button
             type="button"
@@ -487,21 +565,37 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
                 pointerId,
                 startY: event.clientY,
                 baseHeight: resolvedHeightPx ?? element.offsetHeight,
-                baseRows: cardHeightPxToLayoutRows(resolvedHeightPx ?? element.offsetHeight),
+                baseRows: cardHeightPxToLayoutRows(
+                  resolvedHeightPx ?? element.offsetHeight,
+                ),
               };
 
               const target = event.currentTarget;
               target.setPointerCapture(pointerId);
 
               const onMove = (moveEvent: PointerEvent) => {
-                if (!resizeRef.current || moveEvent.pointerId !== resizeRef.current.pointerId) return;
+                if (
+                  !resizeRef.current ||
+                  moveEvent.pointerId !== resizeRef.current.pointerId
+                )
+                  return;
                 moveEvent.preventDefault();
 
                 const deltaY = moveEvent.clientY - resizeRef.current.startY;
                 const snappedSteps =
                   deltaY >= 0
-                    ? Math.max(0, Math.floor((deltaY + resizeStepPx * 0.75) / resizeStepPx))
-                    : Math.min(0, Math.ceil((deltaY - resizeStepPx * 0.25) / resizeStepPx));
+                    ? Math.max(
+                        0,
+                        Math.floor(
+                          (deltaY + resizeStepPx * 0.75) / resizeStepPx,
+                        ),
+                      )
+                    : Math.min(
+                        0,
+                        Math.ceil(
+                          (deltaY - resizeStepPx * 0.25) / resizeStepPx,
+                        ),
+                      );
                 const nextRowsRaw = resizeRef.current.baseRows + snappedSteps;
                 const nextHeightRaw = layoutRowsToCardHeightPx(nextRowsRaw);
                 const nextHeight = clampHeight(nextHeightRaw);
@@ -519,7 +613,11 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
               };
 
               const onEnd = (endEvent: PointerEvent) => {
-                if (!resizeRef.current || endEvent.pointerId !== resizeRef.current.pointerId) return;
+                if (
+                  !resizeRef.current ||
+                  endEvent.pointerId !== resizeRef.current.pointerId
+                )
+                  return;
                 resizeRef.current = null;
                 if (resizeRafRef.current != null) {
                   window.cancelAnimationFrame(resizeRafRef.current);
@@ -530,21 +628,21 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
                 if (pendingHeight != null) {
                   commitHeight(pendingHeight);
                 }
-                if (typeof window !== 'undefined') {
+                if (typeof window !== "undefined") {
                   window.requestAnimationFrame(() => {
                     onResizeEnd?.();
                   });
                 } else {
                   onResizeEnd?.();
                 }
-                window.removeEventListener('pointermove', onMove);
-                window.removeEventListener('pointerup', onEnd);
-                window.removeEventListener('pointercancel', onEnd);
+                window.removeEventListener("pointermove", onMove);
+                window.removeEventListener("pointerup", onEnd);
+                window.removeEventListener("pointercancel", onEnd);
               };
 
-              window.addEventListener('pointermove', onMove);
-              window.addEventListener('pointerup', onEnd);
-              window.addEventListener('pointercancel', onEnd);
+              window.addEventListener("pointermove", onMove);
+              window.addEventListener("pointerup", onEnd);
+              window.addEventListener("pointercancel", onEnd);
             }}
           >
             <span className="card-shell-resize-knob" />
@@ -567,13 +665,15 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
       >
         <div
           className="card-shell-panzoom"
-          style={{ transform: `translate(${panZoom.x}px, ${panZoom.y}px) scale(${panZoom.scale})` }}
+          style={{
+            transform: `translate(${panZoom.x}px, ${panZoom.y}px) scale(${panZoom.scale})`,
+          }}
         >
           {shell}
         </div>
       </div>
     );
-  }
+  },
 );
 
-CardShell.displayName = 'CardShell';
+CardShell.displayName = "CardShell";

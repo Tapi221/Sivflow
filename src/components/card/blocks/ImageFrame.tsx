@@ -1,7 +1,8 @@
-import React from 'react';
-import { cn } from '@/lib/utils';
+import React from "react";
+import { cn } from "@/lib/utils";
 
-const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
+const clamp = (v: number, min: number, max: number) =>
+  Math.min(max, Math.max(min, v));
 const DRAG_START_THRESHOLD_PX = 6;
 
 type ImageFrameProps = {
@@ -50,16 +51,21 @@ export function ImageFrame({
   const safeX = clamp(Number(x ?? 0), -1, 1);
   const safeNaturalW = Number(naturalW ?? 0);
   const safeNaturalH = Number(naturalH ?? 0);
-  const ratio = safeNaturalW > 0 && safeNaturalH > 0 ? safeNaturalH / safeNaturalW : 1;
+  const ratio =
+    safeNaturalW > 0 && safeNaturalH > 0 ? safeNaturalH / safeNaturalW : 1;
   const frameH = Math.max(1, frameW * ratio * safeScale);
   const imgW = frameW * safeScale;
   const empty = Math.max(0, frameW - imgW);
   const leftPx = clamp(((safeX + 1) / 2) * empty, 0, empty);
-  const dragEnabled = editable && safeScale < 0.999 && empty > 0 && typeof onTransformChange === 'function';
+  const dragEnabled =
+    editable &&
+    safeScale < 0.999 &&
+    empty > 0 &&
+    typeof onTransformChange === "function";
 
   React.useEffect(() => {
     const node = frameRef.current;
-    if (!node || typeof ResizeObserver === 'undefined') return;
+    if (!node || typeof ResizeObserver === "undefined") return;
     const update = () => setFrameW(node.getBoundingClientRect().width);
     update();
     const observer = new ResizeObserver(update);
@@ -70,11 +76,11 @@ export function ImageFrame({
   return (
     <div
       ref={frameRef}
-      className={cn('relative w-full overflow-hidden', className)}
+      className={cn("relative w-full overflow-hidden", className)}
       style={{
         height: `${frameH}px`,
-        touchAction: dragEnabled ? 'none' : 'auto',
-        cursor: dragEnabled ? (isDragging ? 'grabbing' : 'grab') : undefined,
+        touchAction: dragEnabled ? "none" : "auto",
+        cursor: dragEnabled ? (isDragging ? "grabbing" : "grab") : undefined,
       }}
       onPointerDown={(event) => {
         if (!dragEnabled || !onTransformChange) return;
@@ -99,11 +105,16 @@ export function ImageFrame({
         }
         event.preventDefault();
         event.stopPropagation();
-        const nextX = clamp(dragRef.current.startNormalizedX + (deltaX / empty) * 2, -1, 1);
+        const nextX = clamp(
+          dragRef.current.startNormalizedX + (deltaX / empty) * 2,
+          -1,
+          1,
+        );
         onTransformChange({ scale: safeScale, x: nextX });
       }}
       onPointerUp={(event) => {
-        if (!dragRef.current || event.pointerId !== dragRef.current.pointerId) return;
+        if (!dragRef.current || event.pointerId !== dragRef.current.pointerId)
+          return;
         const started = dragRef.current.started;
         if (started && event.currentTarget.hasPointerCapture(event.pointerId)) {
           event.currentTarget.releasePointerCapture(event.pointerId);
@@ -117,7 +128,8 @@ export function ImageFrame({
         }
       }}
       onPointerCancel={(event) => {
-        if (!dragRef.current || event.pointerId !== dragRef.current.pointerId) return;
+        if (!dragRef.current || event.pointerId !== dragRef.current.pointerId)
+          return;
         const started = dragRef.current.started;
         if (started && event.currentTarget.hasPointerCapture(event.pointerId)) {
           event.currentTarget.releasePointerCapture(event.pointerId);
@@ -134,7 +146,7 @@ export function ImageFrame({
       <img
         src={src}
         alt={alt}
-        className={cn('absolute top-0 h-auto max-w-none', imgClassName)}
+        className={cn("absolute top-0 h-auto max-w-none", imgClassName)}
         style={{ width: `${safeScale * 100}%`, left: `${leftPx}px` }}
         draggable={false}
         onClick={() => {
@@ -146,7 +158,10 @@ export function ImageFrame({
         }}
         onLoad={(event) => {
           const target = event.currentTarget;
-          onNaturalSize?.({ naturalW: target.naturalWidth, naturalH: target.naturalHeight });
+          onNaturalSize?.({
+            naturalW: target.naturalWidth,
+            naturalH: target.naturalHeight,
+          });
         }}
         onError={() => onError?.()}
       />

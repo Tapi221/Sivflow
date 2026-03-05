@@ -10,7 +10,7 @@
 export interface SyncError {
   id: string;
   occurredAt: number;
-  phase: 'upload' | 'download' | 'merge' | 'queue_dlq';
+  phase: "upload" | "download" | "merge" | "queue_dlq";
   message: string;
   stack?: string;
   retryCount: number;
@@ -26,7 +26,7 @@ export interface SyncHistory {
   id: string;
   startedAt: number;
   finishedAt: number;
-  result: 'success' | 'partial' | 'failed' | 'skipped_wifi';
+  result: "success" | "partial" | "failed" | "skipped_wifi";
   uploaded: number;
   downloaded: number;
 }
@@ -50,22 +50,22 @@ export interface SyncSettings {
 export interface SyncQueueItem {
   id: string; // Queue ID
   idempotencyKey: string; // Idempotency Key for Cloud Functions
-  
+
   targetId: string; // Entity ID (Card ID, etc.)
-  entity: 'card' | 'folder' | 'asset';
-  operationType: 'create' | 'update' | 'delete'; // Unified operation type
-  type: 'upload' | 'download'; // Added for compatibility with SyncTask
-  
+  entity: "card" | "folder" | "asset";
+  operationType: "create" | "update" | "delete"; // Unified operation type
+  type: "upload" | "download"; // Added for compatibility with SyncTask
+
   // Legacy compatibility: action field is deprecated but kept if needed for migration
-  action?: 'create' | 'update' | 'delete'; 
+  action?: "create" | "update" | "delete";
 
   payload: unknown;
-  priority: 'critical' | 'high' | 'medium' | 'low';
-  
+  priority: "critical" | "high" | "medium" | "low";
+
   createdAt: number;
   updatedAt: number;
 
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: "pending" | "processing" | "completed" | "failed";
   retryCount: number;
   nextRetryAt?: number;
   lastRetryAt?: number; // Added
@@ -73,8 +73,8 @@ export interface SyncQueueItem {
   processingStartedAt?: number; // Added for orphan detection
 
   // Legacy fields (kept for migration safety, can be removed later)
-  clientSeq?: number;       
-  migrationKey?: string;    
+  clientSeq?: number;
+  migrationKey?: string;
 }
 
 /**
@@ -84,7 +84,7 @@ export interface SyncQueueItem {
 export interface SyncConflict {
   id: string;
   entityId: string;
-  entityType: 'card' | 'folder';
+  entityType: "card" | "folder";
   autoMerged: unknown;
   conflicts: Record<string, { local: unknown; remote: unknown }>;
   detectedAt: number;
@@ -114,7 +114,7 @@ export interface SyncResult {
  * デフォルトの同期設定
  */
 export const DEFAULT_SYNC_SETTINGS: SyncSettings = {
-  id: 'default',
+  id: "default",
   autoSync: true,
   intervalMinutes: 5,
   wifiOnly: false,

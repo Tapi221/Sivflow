@@ -1,16 +1,16 @@
-import React from 'react';
-import MediaUploader from '../media/MediaUploader';
-import { ImageGallery } from '../media/CardMedia';
+import React from "react";
+import MediaUploader from "../media/MediaUploader";
+import { ImageGallery } from "../media/CardMedia";
 
 type ImageBlockContentProps =
   | {
-      mode: 'view';
+      mode: "view";
       urls: string[];
       items?: unknown[];
       onFullscreenChange?: (isFullscreen: boolean) => void;
     }
   | {
-      mode: 'edit';
+      mode: "edit";
       urls: unknown[];
       onChange: (data: unknown[]) => void;
       initialFile?: File;
@@ -20,8 +20,14 @@ type ImageBlockContentProps =
     };
 
 export function ImageBlockContent(props: ImageBlockContentProps) {
-  if (props.mode === 'view') {
-    return <ImageGallery urls={props.urls} items={props.items} onFullscreenChange={props.onFullscreenChange} />;
+  if (props.mode === "view") {
+    return (
+      <ImageGallery
+        urls={props.urls}
+        items={props.items}
+        onFullscreenChange={props.onFullscreenChange}
+      />
+    );
   }
 
   return (

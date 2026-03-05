@@ -40,7 +40,12 @@ const asFiniteNumber = (value: unknown): number | null => {
 const isHttpUrl = (value: string): boolean => /^https?:\/\//i.test(value);
 
 const normalizeStatus = (value: unknown): ConversionStatus | null => {
-  if (value === "queued" || value === "processing" || value === "ready" || value === "failed") {
+  if (
+    value === "queued" ||
+    value === "processing" ||
+    value === "ready" ||
+    value === "failed"
+  ) {
     return value;
   }
   return null;
@@ -52,19 +57,24 @@ const toSafeErrorMessage = (error: unknown): string => {
   if (!error) return "unknown_error";
   if (typeof error === "string") return error.slice(0, ERROR_MESSAGE_LIMIT);
 
-  const maybeName = (error as { name?: string } | null)?.name ? `${(error as { name: string }).name}: ` : "";
+  const maybeName = (error as { name?: string } | null)?.name
+    ? `${(error as { name: string }).name}: `
+    : "";
   const maybeMessage =
     (error as { message?: unknown } | null)?.message ?? JSON.stringify(error);
   return `${maybeName}${String(maybeMessage)}`.slice(0, ERROR_MESSAGE_LIMIT);
 };
 
-const isSafeManifestPathValue = (value: string, userId: string, docId: string): boolean =>
-  isHttpUrl(value) || isScopedStoragePath(value, userId, docId);
+const isSafeManifestPathValue = (
+  value: string,
+  userId: string,
+  docId: string,
+): boolean => isHttpUrl(value) || isScopedStoragePath(value, userId, docId);
 
 const resolveManifestMetadata = async (
   manifestPath: string,
   userId: string,
-  docId: string
+  docId: string,
 ): Promise<ExternalConversionResult> => {
   if (!isScopedStoragePath(manifestPath, userId, docId)) {
     throw new Error(`manifest_scope_violation:${manifestPath}`);
@@ -115,12 +125,17 @@ const resolveManifestMetadata = async (
   }
 
   const fallbackPdfPath = asNonEmptyString(parsed.fallbackPdfPath);
-  if (fallbackPdfPath && !isSafeManifestPathValue(fallbackPdfPath, userId, docId)) {
+  if (
+    fallbackPdfPath &&
+    !isSafeManifestPathValue(fallbackPdfPath, userId, docId)
+  ) {
     throw new Error("manifest_fallback_scope_violation");
   }
 
   const slideCountFromField = asFiniteNumber(parsed.slideCount);
-  const slideCountFromSlides = Array.isArray(parsed.slides) ? parsed.slides.length : null;
+  const slideCountFromSlides = Array.isArray(parsed.slides)
+    ? parsed.slides.length
+    : null;
   const slideCount = slideCountFromField ?? slideCountFromSlides;
 
   return {
@@ -147,12 +162,18 @@ const getIdTokenClient = (audience: string): Promise<IdTokenClient> => {
   return created;
 };
 
-const parseConverterErrorPayload = async (response: Response): Promise<string | null> => {
+const parseConverterErrorPayload = async (
+  response: Response,
+): Promise<string | null> => {
   const contentType = response.headers.get("content-type") ?? "";
   try {
     if (contentType.includes("application/json")) {
       const parsed = (await response.json()) as Record<string, unknown>;
-      return asNonEmptyString(parsed.error) ?? asNonEmptyString(parsed.message) ?? null;
+      return (
+        asNonEmptyString(parsed.error) ??
+        asNonEmptyString(parsed.message) ??
+        null
+      );
     }
     const text = await response.text();
     return asNonEmptyString(text);
@@ -163,7 +184,10 @@ const parseConverterErrorPayload = async (response: Response): Promise<string | 
 
 const shouldTreatAsEndpointUnavailable = (error: unknown): boolean => {
   const message =
-    typeof error === "string" ? error : asNonEmptyString((error as { message?: unknown } | null)?.message) ?? "";
+    typeof error === "string"
+      ? error
+      : (asNonEmptyString((error as { message?: unknown } | null)?.message) ??
+        "");
 
   if (!message) return false;
   if (message === "converter_token_not_configured") return true;
@@ -178,7 +202,7 @@ const shouldTreatAsEndpointUnavailable = (error: unknown): boolean => {
 const requestExternalConversion = async (
   userId: string,
   docId: string,
-  sourceStoragePath: string
+  sourceStoragePath: string,
 ): Promise<ExternalConversionResult> => {
   if (!CONVERTER_ENDPOINT) {
     throw new Error("converter_endpoint_not_configured");
@@ -191,7 +215,7 @@ const requestExternalConversion = async (
   const idTokenHeaders = await idTokenClient.getRequestHeaders(audience);
   const authorization = asNonEmptyString(
     (idTokenHeaders as Record<string, unknown>).Authorization ??
-      (idTokenHeaders as Record<string, unknown>).authorization
+      (idTokenHeaders as Record<string, unknown>).authorization,
   );
   if (!authorization) {
     throw new Error("converter_id_token_missing");
@@ -249,31 +273,43 @@ const requestExternalConversion = async (
 const runConversion = async (
   userId: string,
   docId: string,
-  sourceStoragePath: string
+  sourceStoragePath: string,
 ): Promise<ExternalConversionResult> => {
   const defaultManifestPath = `users/${userId}/documents/${docId}/pptx/manifest.json`;
 
   if (CONVERTER_ENDPOINT) {
     try {
-      const external = await requestExternalConversion(userId, docId, sourceStoragePath);
-      const fromStorage = await resolveManifestMetadata(external.manifestPath, userId, docId);
+      const external = await requestExternalConversion(
+        userId,
+        docId,
+        sourceStoragePath,
+      );
+      const fromStorage = await resolveManifestMetadata(
+        external.manifestPath,
+        userId,
+        docId,
+      );
 
       return {
         manifestPath: fromStorage.manifestPath,
         slideCount: external.slideCount ?? fromStorage.slideCount,
-        fallbackPdfPath: external.fallbackPdfPath ?? fromStorage.fallbackPdfPath,
+        fallbackPdfPath:
+          external.fallbackPdfPath ?? fromStorage.fallbackPdfPath,
       };
     } catch (error) {
       if (!shouldTreatAsEndpointUnavailable(error)) {
         throw error;
       }
 
-      console.warn("[PptxConversion] Converter endpoint unavailable, falling back to storage manifest", {
-        userId,
-        docId,
-        sourceStoragePath,
-        error: toSafeErrorMessage(error),
-      });
+      console.warn(
+        "[PptxConversion] Converter endpoint unavailable, falling back to storage manifest",
+        {
+          userId,
+          docId,
+          sourceStoragePath,
+          error: toSafeErrorMessage(error),
+        },
+      );
       return resolveManifestMetadata(defaultManifestPath, userId, docId);
     }
   }
@@ -295,13 +331,18 @@ export const onPptxConversionQueued = functions
     const userId = String(context.params.userId ?? "").trim();
     const docId = String(context.params.docId ?? "").trim();
     if (!userId || !docId) {
-      console.warn("[PptxConversion] Missing userId/docId in trigger context", context.params);
+      console.warn(
+        "[PptxConversion] Missing userId/docId in trigger context",
+        context.params,
+      );
       return;
     }
 
     const sourceStoragePath = asNonEmptyString(afterData.sourceStoragePath);
     const conversionRef = after.ref;
-    const documentRef = admin.firestore().doc(`users/${userId}/documents/${docId}`);
+    const documentRef = admin
+      .firestore()
+      .doc(`users/${userId}/documents/${docId}`);
 
     if (!sourceStoragePath) {
       const reason = "source_storage_path_missing";
@@ -311,7 +352,7 @@ export const onPptxConversionQueued = functions
           errorMessage: reason,
           updatedAt: FieldValue.serverTimestamp(),
         },
-        { merge: true }
+        { merge: true },
       );
       await documentRef.set(
         {
@@ -324,7 +365,7 @@ export const onPptxConversionQueued = functions
           },
           updatedAt: FieldValue.serverTimestamp(),
         },
-        { merge: true }
+        { merge: true },
       );
       return;
     }
@@ -337,7 +378,7 @@ export const onPptxConversionQueued = functions
           errorMessage: reason,
           updatedAt: FieldValue.serverTimestamp(),
         },
-        { merge: true }
+        { merge: true },
       );
       await documentRef.set(
         {
@@ -350,7 +391,7 @@ export const onPptxConversionQueued = functions
           },
           updatedAt: FieldValue.serverTimestamp(),
         },
-        { merge: true }
+        { merge: true },
       );
       return;
     }
@@ -359,7 +400,9 @@ export const onPptxConversionQueued = functions
       const snap = await tx.get(conversionRef);
       if (!snap.exists) return false;
 
-      const currentStatus = normalizeStatus((snap.data() as Record<string, unknown> | undefined)?.status);
+      const currentStatus = normalizeStatus(
+        (snap.data() as Record<string, unknown> | undefined)?.status,
+      );
       if (currentStatus !== "queued") return false;
 
       tx.set(
@@ -369,7 +412,7 @@ export const onPptxConversionQueued = functions
           processingStartedAt: FieldValue.serverTimestamp(),
           updatedAt: FieldValue.serverTimestamp(),
         },
-        { merge: true }
+        { merge: true },
       );
       return true;
     });
@@ -389,7 +432,7 @@ export const onPptxConversionQueued = functions
         },
         updatedAt: FieldValue.serverTimestamp(),
       },
-      { merge: true }
+      { merge: true },
     );
 
     try {
@@ -405,7 +448,7 @@ export const onPptxConversionQueued = functions
           convertedAt: FieldValue.serverTimestamp(),
           updatedAt: FieldValue.serverTimestamp(),
         },
-        { merge: true }
+        { merge: true },
       );
 
       await documentRef.set(
@@ -425,7 +468,7 @@ export const onPptxConversionQueued = functions
           },
           updatedAt: FieldValue.serverTimestamp(),
         },
-        { merge: true }
+        { merge: true },
       );
 
       console.info("[PptxConversion] Conversion succeeded", {
@@ -449,7 +492,7 @@ export const onPptxConversionQueued = functions
           errorMessage: reason,
           updatedAt: FieldValue.serverTimestamp(),
         },
-        { merge: true }
+        { merge: true },
       );
       await documentRef.set(
         {
@@ -462,7 +505,7 @@ export const onPptxConversionQueued = functions
           },
           updatedAt: FieldValue.serverTimestamp(),
         },
-        { merge: true }
+        { merge: true },
       );
     }
   });

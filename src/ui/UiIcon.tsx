@@ -1,9 +1,9 @@
-import type { SVGProps } from 'react'
+import type { SVGProps } from "react";
 
 export type UiIconProps = SVGProps<SVGSVGElement> & {
-  size?: number
-  strokeWidth?: number
-}
+  size?: number;
+  strokeWidth?: number;
+};
 
 export function UiIcon({
   size = 20,
@@ -22,7 +22,7 @@ export function UiIcon({
       strokeWidth={strokeWidth}
       strokeLinecap="round"
       strokeLinejoin="round"
-      style={{ vectorEffect: 'non-scaling-stroke', ...style }}
+      style={{ vectorEffect: "non-scaling-stroke", ...style }}
     />
-  )
+  );
 }

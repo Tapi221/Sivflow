@@ -1,4 +1,8 @@
-import { INK_PAPER_H, INK_PAPER_W, type InkPoint } from '@/components/ink/inkTypes';
+import {
+  INK_PAPER_H,
+  INK_PAPER_W,
+  type InkPoint,
+} from "@/components/ink/inkTypes";
 
 export type RectLike = {
   left: number;
@@ -7,10 +11,11 @@ export type RectLike = {
   height: number;
 };
 
-const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+const clamp = (value: number, min: number, max: number) =>
+  Math.min(max, Math.max(min, value));
 
 const safePressure = (pressure: number | undefined): number => {
-  if (typeof pressure !== 'number' || !Number.isFinite(pressure)) return 0.5;
+  if (typeof pressure !== "number" || !Number.isFinite(pressure)) return 0.5;
   return clamp(pressure, 0, 1);
 };
 
@@ -23,7 +28,7 @@ export const clientPointToPaperPoint = (
     now?: number;
     paperWidth?: number;
     paperHeight?: number;
-  }
+  },
 ): InkPoint => {
   const paperWidth = options?.paperWidth ?? INK_PAPER_W;
   const paperHeight = options?.paperHeight ?? INK_PAPER_H;
@@ -32,7 +37,11 @@ export const clientPointToPaperPoint = (
   const height = rect.height > 0 ? rect.height : 1;
 
   const x = clamp(((clientX - rect.left) / width) * paperWidth, 0, paperWidth);
-  const y = clamp(((clientY - rect.top) / height) * paperHeight, 0, paperHeight);
+  const y = clamp(
+    ((clientY - rect.top) / height) * paperHeight,
+    0,
+    paperHeight,
+  );
 
   return {
     x,
@@ -43,13 +52,13 @@ export const clientPointToPaperPoint = (
 };
 
 export const paperPointToCanvasPoint = (
-  point: Pick<InkPoint, 'x' | 'y'>,
+  point: Pick<InkPoint, "x" | "y">,
   canvasWidth: number,
   canvasHeight: number,
   options?: {
     paperWidth?: number;
     paperHeight?: number;
-  }
+  },
 ) => {
   const paperWidth = options?.paperWidth ?? INK_PAPER_W;
   const paperHeight = options?.paperHeight ?? INK_PAPER_H;
@@ -64,8 +73,8 @@ export const paperPointToCanvasPoint = (
 };
 
 export const squaredDistance = (
-  a: Pick<InkPoint, 'x' | 'y'>,
-  b: Pick<InkPoint, 'x' | 'y'>
+  a: Pick<InkPoint, "x" | "y">,
+  b: Pick<InkPoint, "x" | "y">,
 ): number => {
   const dx = a.x - b.x;
   const dy = a.y - b.y;

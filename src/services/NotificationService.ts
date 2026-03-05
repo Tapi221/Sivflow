@@ -1,8 +1,12 @@
-import type { Notification, NotificationLevel, NotificationOptions } from '../types/notification';
+import type {
+  Notification,
+  NotificationLevel,
+  NotificationOptions,
+} from "../types/notification";
 
 /**
  * 通知サービス
- * 
+ *
  * エラーレベルに応じた通知を管理する
  * - INFO: 状態通知（自動で消える／邪魔しない）
  * - WARNING: 放置すると困る（閉じられる／軽い行動導線）
@@ -25,12 +29,12 @@ class NotificationService {
    */
   private notify(notification: Notification): void {
     this.notifications.set(notification.id, notification);
-    this.listeners.forEach(listener => listener(notification));
+    this.listeners.forEach((listener) => listener(notification));
   }
 
   /**
    * INFO レベルの通知
-   * 
+   *
    * 特徴:
    * - 自動で消える
    * - 邪魔しない
@@ -39,7 +43,7 @@ class NotificationService {
   info(title: string, message: string, options?: NotificationOptions): void {
     const notification: Notification = {
       id: `info-${Date.now()}`,
-      level: 'info',
+      level: "info",
       title,
       message,
       details: options?.details,
@@ -54,7 +58,7 @@ class NotificationService {
 
   /**
    * WARNING レベルの通知
-   * 
+   *
    * 特徴:
    * - 閉じられる
    * - 軽い行動導線
@@ -63,7 +67,7 @@ class NotificationService {
   warning(title: string, message: string, options?: NotificationOptions): void {
     const notification: Notification = {
       id: `warning-${Date.now()}`,
-      level: 'warning',
+      level: "warning",
       title,
       message,
       details: options?.details,
@@ -78,7 +82,7 @@ class NotificationService {
 
   /**
    * ERROR レベルの通知
-   * 
+   *
    * 特徴:
    * - 明確なアクション必須
    * - 続行不可
@@ -87,7 +91,7 @@ class NotificationService {
   error(title: string, message: string, options?: NotificationOptions): void {
     const notification: Notification = {
       id: `error-${Date.now()}`,
-      level: 'error',
+      level: "error",
       title,
       message,
       details: options?.details,
@@ -96,10 +100,10 @@ class NotificationService {
       closeable: false,
       actions: options?.actions ?? [
         {
-          label: 'サポートに連絡',
+          label: "サポートに連絡",
           onClick: () => {
             // サポート連絡処理
-            window.open('mailto:support@example.com', '_blank');
+            window.open("mailto:support@example.com", "_blank");
           },
           primary: true,
         },
@@ -115,7 +119,7 @@ class NotificationService {
   dismiss(id: string): void {
     this.notifications.delete(id);
     // リスナーに削除を通知（null を送る）
-    this.listeners.forEach(listener => listener({ id } as any));
+    this.listeners.forEach((listener) => listener({ id } as any));
   }
 
   /**

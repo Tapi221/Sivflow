@@ -1,19 +1,19 @@
 // src/services/SyncServiceFactory.ts
 
-import { flags } from '../features/flags';
-import { SyncService } from './syncService'; // Legacy
-import { SyncServiceV2 } from './SyncServiceV2';
-import { QueueManager } from './logic/QueueManager';
-import { NetworkMonitor } from './logic/NetworkMonitor';
-import { DiffEngine } from './logic/DiffEngine';
-import { CloudSyncAdapter } from './logic/CloudSyncAdapter';
-import { TelemetryService } from './logic/TelemetryService';
+import { flags } from "../features/flags";
+import { SyncService } from "./syncService"; // Legacy
+import { SyncServiceV2 } from "./SyncServiceV2";
+import { QueueManager } from "./logic/QueueManager";
+import { NetworkMonitor } from "./logic/NetworkMonitor";
+import { DiffEngine } from "./logic/DiffEngine";
+import { CloudSyncAdapter } from "./logic/CloudSyncAdapter";
+import { TelemetryService } from "./logic/TelemetryService";
 import {
   getLocalDb,
   getLocalDBTelemetrySnapshot,
   telemetryOncePerSession,
-} from './localDB';
-import type { ISyncService } from './interfaces/ISyncService';
+} from "./localDB";
+import type { ISyncService } from "./interfaces/ISyncService";
 
 /**
  * SyncServiceFactory
@@ -33,11 +33,11 @@ export class SyncServiceFactory {
   }
 
   private static async createInstance(userId: string): Promise<ISyncService> {
-    if (flags.isEnabled('USE_SYNC_V2')) {
+    if (flags.isEnabled("USE_SYNC_V2")) {
       return await this.createV2(userId);
     }
 
-    console.log('[SyncServiceFactory] Initializing Legacy SyncService');
+    console.log("[SyncServiceFactory] Initializing Legacy SyncService");
 
     const db = await getLocalDb(userId);
     const legacy = new SyncService(userId, db);
@@ -45,7 +45,7 @@ export class SyncServiceFactory {
     // ✅ ここが A 案の本体：Legacy が欠けてたら V2 にフォールバック
     // NOTE: mustHave は "実際に呼ばれる可能性があるメソッド" を必須にする
     const mustHave = [
-      'getQueueStatus',
+      "getQueueStatus",
       // ↓ ここはあなたの ISyncService / AuthContext の実装に合わせて揃える
       // 'synchronize',
       // 'performStartupSync',
@@ -53,11 +53,11 @@ export class SyncServiceFactory {
     ] as const;
 
     const legacyObj = legacy as unknown as Record<string, unknown>;
-    const missing = mustHave.filter((k) => typeof legacyObj[k] !== 'function');
+    const missing = mustHave.filter((k) => typeof legacyObj[k] !== "function");
 
     if (missing.length > 0) {
       const msg =
-        `[SyncServiceFactory] Legacy SyncService is missing methods: ${missing.join(', ')}. ` +
+        `[SyncServiceFactory] Legacy SyncService is missing methods: ${missing.join(", ")}. ` +
         `Falling back to SyncService V2.`;
 
       // DEV は早めに気付けるようにしておく（ただし “Aでいく” なら本番は死なせない）
@@ -75,7 +75,7 @@ export class SyncServiceFactory {
   }
 
   private static async createV2(userId: string): Promise<ISyncService> {
-    console.log('[SyncServiceFactory] Initializing SyncService V2');
+    console.log("[SyncServiceFactory] Initializing SyncService V2");
 
     const db = await getLocalDb(userId);
     const queueManager = new QueueManager(db);
@@ -84,13 +84,15 @@ export class SyncServiceFactory {
     const cloudAdapter = new CloudSyncAdapter(userId);
     const telemetry = new TelemetryService();
 
-    if (telemetryOncePerSession('localdb_runtime')) {
+    if (telemetryOncePerSession("localdb_runtime")) {
       const localDbTelemetry = getLocalDBTelemetrySnapshot();
-      telemetry.recordMetric('localdb_runtime', 1, {
+      telemetry.recordMetric("localdb_runtime", 1, {
         localdb_mode: localDbTelemetry.localdb_mode,
         localdb_reason_code: localDbTelemetry.localdb_reason_code,
         localdb_fallback_reason: localDbTelemetry.localdb_fallback_reason,
-        localdb_generation_bumped: String(localDbTelemetry.localdb_generation_bumped),
+        localdb_generation_bumped: String(
+          localDbTelemetry.localdb_generation_bumped,
+        ),
         localdb_reset_failed: String(localDbTelemetry.localdb_reset_failed),
       });
     }
@@ -102,7 +104,7 @@ export class SyncServiceFactory {
       networkMonitor,
       diffEngine,
       cloudAdapter,
-      telemetry
+      telemetry,
     );
   }
 

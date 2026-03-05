@@ -4,17 +4,26 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="robots" content="%VITE_ROBOTS_CONTENT%" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="description" content="効率的な暗記学習をサポートする manifolmia" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta
+      name="description"
+      content="効率的な暗記学習をサポートする manifolmia"
+    />
     <script>
-      (function() {
+      (function () {
         // ロード時の緑色フラッシュを防ぐため、localStorageから即座に色を反映
-        const color = localStorage.getItem('flashcard-accent-color') || '#689A98';
+        const color =
+          localStorage.getItem("flashcard-accent-color") || "#689A98";
         const root = document.documentElement;
 
         const toRgb = (hex) => {
-          const match = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex || '');
-          if (!match) return '104 154 152';
+          const match = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(
+            hex || "",
+          );
+          if (!match) return "104 154 152";
           const r = parseInt(match[1], 16);
           const g = parseInt(match[2], 16);
           const b = parseInt(match[3], 16);
@@ -22,12 +31,12 @@
         };
 
         // Tailwindのprimary系ユーティリティが初回描画から正しい色を使えるようにする
-        root.style.setProperty('--color-primary-600-hex', color);
-        root.style.setProperty('--color-primary-600', toRgb(color));
-        root.style.setProperty('--accent-color', color);
+        root.style.setProperty("--color-primary-600-hex", color);
+        root.style.setProperty("--color-primary-600", toRgb(color));
+        root.style.setProperty("--accent-color", color);
 
-        const meta = document.createElement('meta');
-        meta.name = 'theme-color';
+        const meta = document.createElement("meta");
+        meta.name = "theme-color";
         meta.content = color;
         document.head.appendChild(meta);
       })();
@@ -40,13 +49,14 @@
     <link rel="manifest" href="/manifest.webmanifest" />
     <title>manifolmia - 学習アプリ</title>
     <style>
-      html, body {
-        background-color: #F8FAFB;
+      html,
+      body {
+        background-color: #f8fafb;
         margin: 0;
         padding: 0;
       }
       #root {
-        background-color: #F8FAFB;
+        background-color: #f8fafb;
         min-height: 100dvh;
       }
     </style>

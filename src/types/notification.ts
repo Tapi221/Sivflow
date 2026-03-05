@@ -1,5 +1,5 @@
 // 通知レベルの型定義
-export type NotificationLevel = 'info' | 'warning' | 'error';
+export type NotificationLevel = "info" | "warning" | "error";
 
 // 通知アクションの型定義
 export interface NotificationAction {

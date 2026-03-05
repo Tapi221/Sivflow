@@ -21,12 +21,12 @@
     background-color: rgba(148, 163, 184, 0.12);
   }
 
-  .sidebar-row[data-selected='true'] {
+  .sidebar-row[data-selected="true"] {
     background-color: color-mix(in srgb, var(--sidebar-active-bg) 78%, white);
   }
 
-  .sidebar-row[data-selected='true']::before {
-    content: '';
+  .sidebar-row[data-selected="true"]::before {
+    content: "";
     position: absolute;
     inset: 3px auto 3px 0;
     width: 2px;

@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { ref, getDownloadURL } from 'firebase/storage'; // IDE Check: firebase/storage
-import { storage } from '@/services/firebase';
-import { cn } from '@/lib/utils';
+import React, { useEffect, useRef, useState } from "react";
+import { ref, getDownloadURL } from "firebase/storage"; // IDE Check: firebase/storage
+import { storage } from "@/services/firebase";
+import { cn } from "@/lib/utils";
 
 export interface SlideData {
   index: number;
@@ -70,7 +70,14 @@ const resolveSlideUrl = async (pathOrUrl: string): Promise<string> => {
   }
 };
 
-export function SlideImage({ slide, renderWidth, rootEl, onVisibilityChange, onContainerRef, className }: SlideImageProps) {
+export function SlideImage({
+  slide,
+  renderWidth,
+  rootEl,
+  onVisibilityChange,
+  onContainerRef,
+  className,
+}: SlideImageProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [shouldLoad, setShouldLoad] = useState(false);
   const [src, setSrc] = useState<string | null>(slide.url ?? null);
@@ -103,9 +110,9 @@ export function SlideImage({ slide, renderWidth, rootEl, onVisibilityChange, onC
       },
       {
         root: rootEl,
-        rootMargin: '800px 0px',
+        rootMargin: "800px 0px",
         threshold: [0, 0.05, 0.1, 0.25, 0.5, 0.75, 1],
-      }
+      },
     );
 
     observer.observe(target);
@@ -119,7 +126,7 @@ export function SlideImage({ slide, renderWidth, rootEl, onVisibilityChange, onC
       return;
     }
     if (!slide.path) {
-      setError('スライドのURLがありません');
+      setError("スライドのURLがありません");
       return;
     }
 
@@ -132,8 +139,8 @@ export function SlideImage({ slide, renderWidth, rootEl, onVisibilityChange, onC
         if (!cancelled) setSrc(resolved);
       } catch (err) {
         if (!cancelled) {
-          console.error('[SlideImage] failed to resolve slide url', err);
-          setError('スライドの読み込みに失敗しました');
+          console.error("[SlideImage] failed to resolve slide url", err);
+          setError("スライドの読み込みに失敗しました");
         }
       }
     };
@@ -145,13 +152,16 @@ export function SlideImage({ slide, renderWidth, rootEl, onVisibilityChange, onC
     };
   }, [shouldLoad, src, requested, slide.path, slide.url]);
 
-  const ratio = slide.width > 0 && slide.height > 0 ? slide.height / slide.width : DEFAULT_RATIO;
+  const ratio =
+    slide.width > 0 && slide.height > 0
+      ? slide.height / slide.width
+      : DEFAULT_RATIO;
   const renderHeight = Math.max(1, Math.floor(renderWidth * ratio));
 
   return (
     <div
       ref={containerRef}
-      className={cn('w-full flex justify-center', className)}
+      className={cn("w-full flex justify-center", className)}
       style={{ minHeight: `${renderHeight}px` }}
     >
       <div className="inline-block bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
@@ -170,7 +180,7 @@ export function SlideImage({ slide, renderWidth, rootEl, onVisibilityChange, onC
             draggable={false}
             className="block"
             style={{ width: `${renderWidth}px`, height: `${renderHeight}px` }}
-            onError={() => setError('スライド画像の読み込みに失敗しました')}
+            onError={() => setError("スライド画像の読み込みに失敗しました")}
           />
         )}
       </div>

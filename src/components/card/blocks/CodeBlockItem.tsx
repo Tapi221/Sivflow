@@ -1,9 +1,9 @@
-import React from 'react';
-import { Code } from '@/ui/icons';
-import { BlockWrapper } from './BlockWrapper';
-import { CodeBlockEditor } from './CodeBlockEditor';
-import type { CodeBlockData } from '@/types/code-block';
-import { cn } from '@/lib/utils';
+import React from "react";
+import { Code } from "@/ui/icons";
+import { BlockWrapper } from "./BlockWrapper";
+import { CodeBlockEditor } from "./CodeBlockEditor";
+import type { CodeBlockData } from "@/types/code-block";
+import { cn } from "@/lib/utils";
 
 interface CodeBlockItemProps {
   data: CodeBlockData;
@@ -24,17 +24,34 @@ interface CodeBlockItemProps {
   onMoveDragEnd?: () => void;
 }
 
-export const CodeBlockItem = ({ data, onChange, onDelete, onDuplicate, dragHandleProps, dragEnabled = true, dragHandleClassName, accentColor, isActive, showDelete, canMoveUp, canMoveDown, onMoveUp, onMoveDown, onMoveDragStart, onMoveDragEnd }: CodeBlockItemProps) => {
-  const isCodeEmpty = (data?.code ?? '').trim().length === 0;
+export const CodeBlockItem = ({
+  data,
+  onChange,
+  onDelete,
+  onDuplicate,
+  dragHandleProps,
+  dragEnabled = true,
+  dragHandleClassName,
+  accentColor,
+  isActive,
+  showDelete,
+  canMoveUp,
+  canMoveDown,
+  onMoveUp,
+  onMoveDown,
+  onMoveDragStart,
+  onMoveDragEnd,
+}: CodeBlockItemProps) => {
+  const isCodeEmpty = (data?.code ?? "").trim().length === 0;
 
   return (
-    <BlockWrapper 
-      onDelete={onDelete} 
-      onDuplicate={onDuplicate} 
+    <BlockWrapper
+      onDelete={onDelete}
+      onDuplicate={onDuplicate}
       dragHandleProps={dragHandleProps}
       dragEnabled={dragEnabled}
       dragHandleClassName={dragHandleClassName}
-      className={cn('bg-transparent px-0 py-0', !isCodeEmpty && 'border-0')}
+      className={cn("bg-transparent px-0 py-0", !isCodeEmpty && "border-0")}
       label="Code"
       icon={Code}
       accentColor={accentColor}
@@ -48,7 +65,7 @@ export const CodeBlockItem = ({ data, onChange, onDelete, onDuplicate, dragHandl
       onMoveDragEnd={onMoveDragEnd}
       contentClassName="relative px-0"
     >
-      <CodeBlockEditor 
+      <CodeBlockEditor
         value={data}
         onChange={onChange}
         className="border-none shadow-none"
@@ -56,4 +73,3 @@ export const CodeBlockItem = ({ data, onChange, onDelete, onDuplicate, dragHandl
     </BlockWrapper>
   );
 };
-

@@ -1,4 +1,4 @@
-import { Plus, Image as ImageIcon, Link as LinkIcon } from '@/ui/icons';
+import { Plus, Image as ImageIcon, Link as LinkIcon } from "@/ui/icons";
 import { useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { sanitizeReferences } from "@/components/card/editor/cardEditorUtils";
@@ -19,7 +19,11 @@ type UseCardMediaDialogsParams = {
   getSideBlocks: (side: Side) => CardBlock[];
   setSideBlocks: (side: Side, nextBlocks: CardBlock[]) => void;
   removeBlockByTypeIfExists: (side: Side, type: CardBlock["type"]) => void;
-  upsertSingleBlock: (side: Side, type: CardBlock["type"], payload: Partial<CardBlock>) => void;
+  upsertSingleBlock: (
+    side: Side,
+    type: CardBlock["type"],
+    payload: Partial<CardBlock>,
+  ) => void;
 };
 
 export function useCardMediaDialogs({
@@ -41,7 +45,9 @@ export function useCardMediaDialogs({
   const setDialogImages = (side: Side, images: UploadedImage[]) => {
     setDraft((prev) => {
       if (!prev) return prev;
-      return side === "question" ? { ...prev, questionImages: images } : { ...prev, answerImages: images };
+      return side === "question"
+        ? { ...prev, questionImages: images }
+        : { ...prev, answerImages: images };
     });
   };
 
@@ -72,16 +78,23 @@ export function useCardMediaDialogs({
     upsertSingleBlock(side, "reference", { references: nextRefs });
   };
 
-  const getImageCount = (side: Side) =>
-    getDialogImages(side).length;
+  const getImageCount = (side: Side) => getDialogImages(side).length;
 
   const getAudioCount = (side: Side) =>
-    getSideBlocks(side).filter((b) => b.type === "audio").reduce((sum, b) => sum + (b.audios?.length ?? 0), 0);
+    getSideBlocks(side)
+      .filter((b) => b.type === "audio")
+      .reduce((sum, b) => sum + (b.audios?.length ?? 0), 0);
 
   const getLinkCount = (side: Side) =>
     getSideBlocks(side)
       .filter((b) => b.type === "reference")
-      .reduce((sum, b) => sum + (sanitizeReferences(("references" in b ? b.references : []) ?? []).length ?? 0), 0);
+      .reduce(
+        (sum, b) =>
+          sum +
+          (sanitizeReferences(("references" in b ? b.references : []) ?? [])
+            .length ?? 0),
+        0,
+      );
 
   const renderMediaDialogButtons = (side: Side) => {
     const imageCount = getImageCount(side);
@@ -98,7 +111,10 @@ export function useCardMediaDialogs({
     };
 
     return (
-      <div className="flex flex-nowrap items-center gap-1.5 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="flex flex-nowrap items-center gap-1.5 whitespace-nowrap"
+        onClick={(e) => e.stopPropagation()}
+      >
         <button
           type="button"
           className={cn(base, "bg-slate-50 text-slate-500 hover:bg-slate-100")}
@@ -116,7 +132,12 @@ export function useCardMediaDialogs({
           onClick={() => setAudioDialogSide(side)}
           aria-label="音声を追加"
         >
-          <span aria-hidden="true" className="shrink-0 text-[13px] leading-none">♪</span>
+          <span
+            aria-hidden="true"
+            className="shrink-0 text-[13px] leading-none"
+          >
+            ♪
+          </span>
           <Plus className={cn(CARD_ACTION_ICON_CLASS, "shrink-0")} />
           {audioCount > 0 ? <span>x{audioCount}</span> : null}
         </button>
@@ -128,7 +149,11 @@ export function useCardMediaDialogs({
           aria-label="リンクを追加"
         >
           <LinkIcon className={cn(CARD_ACTION_ICON_CLASS, "shrink-0")} />
-          {linkCount > 0 ? <span>x{linkCount}</span> : <Plus className={cn(CARD_ACTION_ICON_CLASS, "shrink-0")} />}
+          {linkCount > 0 ? (
+            <span>x{linkCount}</span>
+          ) : (
+            <Plus className={cn(CARD_ACTION_ICON_CLASS, "shrink-0")} />
+          )}
         </button>
       </div>
     );
@@ -150,7 +175,3 @@ export function useCardMediaDialogs({
     setReferenceItems,
   };
 }
-
-
-
-

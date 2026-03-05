@@ -1,5 +1,5 @@
-import { useCallback, useMemo, useState } from 'react';
-import { useTodayStudyStore } from '@/stores/useTodayStudyStore';
+import { useCallback, useMemo, useState } from "react";
+import { useTodayStudyStore } from "@/stores/useTodayStudyStore";
 
 type PracticeState = {
   sourceSessionId: string;
@@ -9,7 +9,7 @@ type PracticeState = {
   roundTotal: number;
   remaining: string[];
   doneCount: number;
-  phase: 'cards' | 'summary';
+  phase: "cards" | "summary";
 } | null;
 
 const shuffle = (items: string[]) => {
@@ -38,66 +38,81 @@ export function usePracticeMode({
 
   const isPracticeMode = useMemo(() => Boolean(practiceState), [practiceState]);
 
-  const handleStartPractice = useCallback((rating: string) => {
-    if (!isPracticeFeatureEnabled) return;
+  const handleStartPractice = useCallback(
+    (rating: string) => {
+      if (!isPracticeFeatureEnabled) return;
 
-    const cardIds = Array.from(finalRatingByCardId.entries())
-      .filter(([, finalRating]) => finalRating === rating)
-      .map(([cardId]) => cardId);
+      const cardIds = Array.from(finalRatingByCardId.entries())
+        .filter(([, finalRating]) => finalRating === rating)
+        .map(([cardId]) => cardId);
 
-    if (cardIds.length === 0) return;
+      if (cardIds.length === 0) return;
 
-    const roundQueue = shuffle(cardIds);
-    setPracticeState({
-      sourceSessionId,
-      filterRating: rating,
-      roundNumber: 1,
-      roundQueue,
-      roundTotal: roundQueue.length,
-      remaining: [],
-      doneCount: 0,
-      phase: 'cards',
-    });
-
-    logPracticeEvent('practice_open', { rating, count: cardIds.length });
-  }, [finalRatingByCardId, isPracticeFeatureEnabled, logPracticeEvent, sourceSessionId]);
-
-  const handlePracticeAnswer = useCallback((answer: 'ok' | 'anxious') => {
-    // setPracticeState の setter は同期的に呼ばれるため、
-    // ここで消化したカード ID を捕捉して store 側へ反映する
-    let doneCardId: string | null = null;
-
-    setPracticeState((prev) => {
-      if (!prev || prev.phase !== 'cards') return prev;
-      const [currentCardId, ...nextRoundQueue] = prev.roundQueue;
-      if (!currentCardId) return prev;
-
-      const nextRemaining = answer === 'anxious' ? [...prev.remaining, currentCardId] : prev.remaining;
-      const nextDoneCount = answer === 'ok' ? prev.doneCount + 1 : prev.doneCount;
-      const isRoundEnded = nextRoundQueue.length === 0;
-
-      if (answer === 'ok') doneCardId = currentCardId;
-
-      logPracticeEvent('practice_answer', {
-        rating: prev.filterRating,
-        roundNumber: prev.roundNumber,
-        answer,
+      const roundQueue = shuffle(cardIds);
+      setPracticeState({
+        sourceSessionId,
+        filterRating: rating,
+        roundNumber: 1,
+        roundQueue,
+        roundTotal: roundQueue.length,
+        remaining: [],
+        doneCount: 0,
+        phase: "cards",
       });
 
-      return {
-        ...prev,
-        roundQueue: nextRoundQueue,
-        remaining: nextRemaining,
-        doneCount: nextDoneCount,
-        phase: isRoundEnded ? 'summary' : 'cards',
-      };
-    });
+      logPracticeEvent("practice_open", { rating, count: cardIds.length });
+    },
+    [
+      finalRatingByCardId,
+      isPracticeFeatureEnabled,
+      logPracticeEvent,
+      sourceSessionId,
+    ],
+  );
 
-    // 追い復習キューから消化済みカードを除外（ダッシュボード即時反映）
-    if (doneCardId) {
-      useTodayStudyStore.getState().markExtraDone(doneCardId);
-    }
-  }, [logPracticeEvent]);
+  const handlePracticeAnswer = useCallback(
+    (answer: "ok" | "anxious") => {
+      // setPracticeState の setter は同期的に呼ばれるため、
+      // ここで消化したカード ID を捕捉して store 側へ反映する
+      let doneCardId: string | null = null;
+
+      setPracticeState((prev) => {
+        if (!prev || prev.phase !== "cards") return prev;
+        const [currentCardId, ...nextRoundQueue] = prev.roundQueue;
+        if (!currentCardId) return prev;
+
+        const nextRemaining =
+          answer === "anxious"
+            ? [...prev.remaining, currentCardId]
+            : prev.remaining;
+        const nextDoneCount =
+          answer === "ok" ? prev.doneCount + 1 : prev.doneCount;
+        const isRoundEnded = nextRoundQueue.length === 0;
+
+        if (answer === "ok") doneCardId = currentCardId;
+
+        logPracticeEvent("practice_answer", {
+          rating: prev.filterRating,
+          roundNumber: prev.roundNumber,
+          answer,
+        });
+
+        return {
+          ...prev,
+          roundQueue: nextRoundQueue,
+          remaining: nextRemaining,
+          doneCount: nextDoneCount,
+          phase: isRoundEnded ? "summary" : "cards",
+        };
+      });
+
+      // 追い復習キューから消化済みカードを除外（ダッシュボード即時反映）
+      if (doneCardId) {
+        useTodayStudyStore.getState().markExtraDone(doneCardId);
+      }
+    },
+    [logPracticeEvent],
+  );
 
   const handlePracticeContinueRound = useCallback(() => {
     setPracticeState((prev) => {
@@ -109,26 +124,30 @@ export function usePracticeMode({
         roundQueue,
         roundTotal: roundQueue.length,
         remaining: [],
-        phase: 'cards',
+        phase: "cards",
       };
     });
   }, []);
 
-  const handlePracticeExit = useCallback((reason = 'manual') => {
-    setPracticeState((prev) => {
-      if (!prev) return prev;
-      const remainingCount = prev.phase === 'summary'
-        ? prev.remaining.length
-        : prev.remaining.length + prev.roundQueue.length;
-      logPracticeEvent('practice_exit', {
-        reason,
-        rating: prev.filterRating,
-        roundNumber: prev.roundNumber,
-        remainingCount,
+  const handlePracticeExit = useCallback(
+    (reason = "manual") => {
+      setPracticeState((prev) => {
+        if (!prev) return prev;
+        const remainingCount =
+          prev.phase === "summary"
+            ? prev.remaining.length
+            : prev.remaining.length + prev.roundQueue.length;
+        logPracticeEvent("practice_exit", {
+          reason,
+          rating: prev.filterRating,
+          roundNumber: prev.roundNumber,
+          remainingCount,
+        });
+        return null;
       });
-      return null;
-    });
-  }, [logPracticeEvent]);
+    },
+    [logPracticeEvent],
+  );
 
   return {
     practiceState,

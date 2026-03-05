@@ -9,7 +9,9 @@ const { Storage } = require("@google-cloud/storage");
 const TOKEN_ENV = "PPTX_CONVERTER_TOKEN";
 const STORAGE_BUCKET_ENV = "PPTX_STORAGE_BUCKET";
 const PORT = Number(process.env.PORT || 8080);
-const COMMAND_TIMEOUT_MS = Number(process.env.PPTX_COMMAND_TIMEOUT_MS || 120000);
+const COMMAND_TIMEOUT_MS = Number(
+  process.env.PPTX_COMMAND_TIMEOUT_MS || 120000,
+);
 const CONVERSION_DPI = Number(process.env.PPTX_CONVERSION_DPI || 160);
 const MAX_SLIDES = Number(process.env.PPTX_MAX_SLIDES || 200);
 
@@ -48,7 +50,8 @@ const PROJECT_ID =
 const hasUnsafePathFragments = (value) =>
   value.includes("..") || value.includes("\\") || value.includes("//");
 
-const buildDocumentPrefix = (userId, docId) => `users/${userId}/documents/${docId}/`;
+const buildDocumentPrefix = (userId, docId) =>
+  `users/${userId}/documents/${docId}/`;
 
 const isScopedSourcePath = (value, userId, docId) =>
   value.startsWith(buildDocumentPrefix(userId, docId));
@@ -124,8 +127,8 @@ const runCommand = (command, args, options = {}) =>
         new ConverterError(
           timedOut ? `${command}_timeout` : `${command}_spawn_failed`,
           500,
-          error.message
-        )
+          error.message,
+        ),
       );
     });
     child.on("close", (code) => {
@@ -138,8 +141,8 @@ const runCommand = (command, args, options = {}) =>
         new ConverterError(
           timedOut ? `${command}_timeout` : `${command}_failed`,
           500,
-          stderr.trim().slice(0, 800) || stdout.trim().slice(0, 800) || null
-        )
+          stderr.trim().slice(0, 800) || stdout.trim().slice(0, 800) || null,
+        ),
       );
     });
   });
@@ -343,12 +346,17 @@ const convertHandler = async (req, res) => {
       throw new ConverterError("source_not_found", 404);
     }
 
-    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "pptx-converter-"));
+    const tempRoot = await fs.mkdtemp(
+      path.join(os.tmpdir(), "pptx-converter-"),
+    );
     try {
       const localPptxPath = path.join(tempRoot, "source.pptx");
       await sourceObject.download({ destination: localPptxPath });
 
-      const generatedSlides = await convertPptxToSlides(localPptxPath, tempRoot);
+      const generatedSlides = await convertPptxToSlides(
+        localPptxPath,
+        tempRoot,
+      );
       const conversionResult = await uploadSlidesAndManifest(bucket, {
         userId,
         docId,

@@ -1,17 +1,23 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { AlertCircle, RefreshCw, Trash2, ChevronDown, ChevronUp } from '@/ui/icons';
-import { getLocalDb } from '@/services/localDB';
-import { useAuth } from '@/contexts/AuthContext';
-import type { SyncError } from '@/types/sync';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  AlertCircle,
+  RefreshCw,
+  Trash2,
+  ChevronDown,
+  ChevronUp,
+} from "@/ui/icons";
+import { getLocalDb } from "@/services/localDB";
+import { useAuth } from "@/contexts/AuthContext";
+import type { SyncError } from "@/types/sync";
 
 interface SyncErrorDialogProps {
   open: boolean;
@@ -35,10 +41,13 @@ export function SyncErrorDialog({ open, onClose }: SyncErrorDialogProps) {
   const loadErrors = useCallback(async () => {
     try {
       const db = await getLocalDb();
-      const allErrors = await db.syncErrors.orderBy('occurredAt').reverse().toArray();
+      const allErrors = await db.syncErrors
+        .orderBy("occurredAt")
+        .reverse()
+        .toArray();
       setErrors(allErrors);
     } catch (error) {
-      console.error('Failed to load sync errors:', error);
+      console.error("Failed to load sync errors:", error);
     }
   }, []);
 
@@ -77,36 +86,36 @@ export function SyncErrorDialog({ open, onClose }: SyncErrorDialogProps) {
 
   const getPhaseColor = (phase: string) => {
     switch (phase) {
-      case 'upload':
-        return 'bg-blue-500 hover:bg-blue-600';
-      case 'download':
-        return 'bg-green-500 hover:bg-green-600';
-      case 'merge':
-        return 'bg-purple-500 hover:bg-purple-600';
+      case "upload":
+        return "bg-blue-500 hover:bg-blue-600";
+      case "download":
+        return "bg-green-500 hover:bg-green-600";
+      case "merge":
+        return "bg-purple-500 hover:bg-purple-600";
       default:
-        return 'bg-gray-500 hover:bg-gray-600';
+        return "bg-gray-500 hover:bg-gray-600";
     }
   };
 
   const getPhaseLabel = (phase: string) => {
     switch (phase) {
-      case 'upload':
-        return 'アップロード';
-      case 'download':
-        return 'ダウンロード';
-      case 'merge':
-        return 'マージ';
+      case "upload":
+        return "アップロード";
+      case "download":
+        return "ダウンロード";
+      case "merge":
+        return "マージ";
       default:
         return phase;
     }
   };
 
   const formatDate = (timestamp: number) => {
-    return new Date(timestamp).toLocaleString('ja-JP', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return new Date(timestamp).toLocaleString("ja-JP", {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -142,10 +151,7 @@ export function SyncErrorDialog({ open, onClose }: SyncErrorDialogProps) {
 
             <div className="flex-1 overflow-y-auto space-y-3">
               {errors.map((error) => (
-                <div
-                  key={error.id}
-                  className="border rounded-lg p-4 bg-white"
-                >
+                <div key={error.id} className="border rounded-lg p-4 bg-white">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2 flex-wrap">
                       <Badge className={getPhaseColor(error.phase)}>
@@ -155,14 +161,15 @@ export function SyncErrorDialog({ open, onClose }: SyncErrorDialogProps) {
                         {formatDate(error.occurredAt)}
                       </span>
                       {error.retryCount > 0 && (
-                        <Badge variant="outline" className="text-orange-600 border-orange-300">
+                        <Badge
+                          variant="outline"
+                          className="text-orange-600 border-orange-300"
+                        >
                           リトライ {error.retryCount}回
                         </Badge>
                       )}
                       {!error.retryable && (
-                        <Badge variant="destructive">
-                          リトライ不可
-                        </Badge>
+                        <Badge variant="destructive">リトライ不可</Badge>
                       )}
                     </div>
 
@@ -218,7 +225,8 @@ export function SyncErrorDialog({ open, onClose }: SyncErrorDialogProps) {
 
                   {!error.retryable && (
                     <p className="text-xs text-red-600 mt-2">
-                      ※ このエラーは3回リトライに失敗したため、自動リトライは無効です
+                      ※
+                      このエラーは3回リトライに失敗したため、自動リトライは無効です
                     </p>
                   )}
                 </div>

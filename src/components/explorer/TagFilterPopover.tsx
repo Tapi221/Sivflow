@@ -1,19 +1,26 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { Filter, Search, Tag } from '@/ui/icons';
-import { useExplorerStore } from '@/hooks/useExplorerStore';
-import { useTags } from '@/hooks/useTags';
-import { cn } from '@/lib/utils';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { TagBadge } from '@/components/tag/TagBadge';
-import { Switch } from '@/components/ui/switch';
-import { SurfaceButton } from '@/components/ui/surface-button';
+import React, { useState, useMemo, useRef, useEffect } from "react";
+import { Filter, Search, Tag } from "@/ui/icons";
+import { useExplorerStore } from "@/hooks/useExplorerStore";
+import { useTags } from "@/hooks/useTags";
+import { cn } from "@/lib/utils";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { TagBadge } from "@/components/tag/TagBadge";
+import { Switch } from "@/components/ui/switch";
+import { SurfaceButton } from "@/components/ui/surface-button";
 
 interface TagFilterPopoverProps {
   allTags: string[]; // 全タグ一覧（呼び出し元から渡す）
   className?: string;
 }
 
-export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) {
+export function TagFilterPopover({
+  allTags,
+  className,
+}: TagFilterPopoverProps) {
   const { getTagColor } = useTags();
   const {
     tagFilter,
@@ -31,7 +38,7 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
     toggleContentType,
   } = useExplorerStore();
 
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -42,24 +49,24 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
         inputRef.current?.focus();
       }, 100);
     } else {
-      setSearchQuery(''); // 閉じたら検索クリア
+      setSearchQuery(""); // 閉じたら検索クリア
     }
   }, [isOpen]);
 
   // タグ検索フィルタリング
   const filteredTags = useMemo(() => {
     if (!searchQuery.trim()) return allTags;
-    return allTags.filter(tag =>
-      tag.toLowerCase().includes(searchQuery.toLowerCase())
+    return allTags.filter((tag) =>
+      tag.toLowerCase().includes(searchQuery.toLowerCase()),
     );
   }, [allTags, searchQuery]);
 
   // フィルタ有効状態
   const isFilterActive =
     tagFilter.length > 0 ||
-    uncertaintyFilter !== 'any' ||
-    bookmarkedFilter !== 'any' ||
-    draftFilter !== 'any' ||
+    uncertaintyFilter !== "any" ||
+    bookmarkedFilter !== "any" ||
+    draftFilter !== "any" ||
     contentTypeFilter.length < 3;
 
   return (
@@ -70,7 +77,7 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
             "flex items-center justify-center px-2 py-1 text-xs font-medium transition-colors relative whitespace-nowrap",
             "hover:text-primary-700",
             isFilterActive ? "text-primary-700" : "text-slate-500",
-            className
+            className,
           )}
         >
           <Filter className="w-4 h-4" />
@@ -85,14 +92,16 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
         align="center"
         className={cn(
           "w-64 p-0 rounded-xl surface-dialog-convex",
-          "overflow-hidden"
+          "overflow-hidden",
         )}
       >
         <div className="flex flex-col max-h-[400px]">
           {/* Header & Search */}
           <div className="p-3 border-b border-[var(--surface-border)]">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-slate-800">タグで絞り込み</span>
+              <span className="text-xs font-semibold text-slate-800">
+                タグで絞り込み
+              </span>
               {isFilterActive && (
                 <SurfaceButton
                   onClick={clearAllFilters}
@@ -116,7 +125,7 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
                   "surface-concave",
                   "focus:bg-white focus:outline-none focus:ring-0 focus:border-[#cfcfcf]",
                   "placeholder:text-[var(--surface-placeholder-text)]",
-                  "transition-colors"
+                  "transition-colors",
                 )}
                 placeholder="タグを検索..."
                 value={searchQuery}
@@ -130,15 +139,15 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
             <span className="text-slate-500">条件:</span>
             <div className="flex bg-white rounded border border-[var(--surface-border)] p-0.5 shadow-sm">
               <SurfaceButton
-                onClick={() => setTagMatchMode('any')}
-                surface={tagMatchMode === 'any' ? 'convexActive' : 'concave'}
+                onClick={() => setTagMatchMode("any")}
+                surface={tagMatchMode === "any" ? "convexActive" : "concave"}
                 size="xs"
               >
                 いずれか (OR)
               </SurfaceButton>
               <SurfaceButton
-                onClick={() => setTagMatchMode('all')}
-                surface={tagMatchMode === 'all' ? 'convexActive' : 'concave'}
+                onClick={() => setTagMatchMode("all")}
+                surface={tagMatchMode === "all" ? "convexActive" : "concave"}
                 size="xs"
               >
                 すべて (AND)
@@ -151,14 +160,18 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
               <span className="text-slate-600">表示:</span>
               <div className="flex bg-white rounded border border-[var(--surface-border)] p-0.5 shadow-sm">
                 {[
-                  { label: 'カード', value: 'card' as const },
-                  { label: 'PDF', value: 'pdf' as const },
-                  { label: 'PPTX', value: 'pptx' as const },
+                  { label: "カード", value: "card" as const },
+                  { label: "PDF", value: "pdf" as const },
+                  { label: "PPTX", value: "pptx" as const },
                 ].map((item) => (
                   <SurfaceButton
                     key={item.value}
                     onClick={() => toggleContentType(item.value)}
-                    surface={contentTypeFilter.includes(item.value) ? 'convexActive' : 'concave'}
+                    surface={
+                      contentTypeFilter.includes(item.value)
+                        ? "convexActive"
+                        : "concave"
+                    }
                     size="xs"
                   >
                     {item.label}
@@ -168,41 +181,44 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
             </div>
             {[
               {
-                label: 'はてな',
+                label: "はてな",
                 value: uncertaintyFilter,
                 onChange: setUncertaintyFilter,
               },
               {
-                label: 'お気に入り',
+                label: "お気に入り",
                 value: bookmarkedFilter,
                 onChange: setBookmarkedFilter,
               },
               {
-                label: '下書き',
+                label: "下書き",
                 value: draftFilter,
                 onChange: setDraftFilter,
               },
             ].map((item) => (
-              <div key={item.label} className="flex items-center justify-between gap-2 text-[11px]">
+              <div
+                key={item.label}
+                className="flex items-center justify-between gap-2 text-[11px]"
+              >
                 <span className="text-slate-600">{item.label}:</span>
                 <div className="flex bg-white rounded border border-[var(--surface-border)] p-0.5 shadow-sm">
                   <SurfaceButton
-                    onClick={() => item.onChange('any')}
-                    surface={item.value === 'any' ? 'convexActive' : 'concave'}
+                    onClick={() => item.onChange("any")}
+                    surface={item.value === "any" ? "convexActive" : "concave"}
                     size="xs"
                   >
                     指定なし
                   </SurfaceButton>
                   <SurfaceButton
-                    onClick={() => item.onChange('on')}
-                    surface={item.value === 'on' ? 'convexActive' : 'concave'}
+                    onClick={() => item.onChange("on")}
+                    surface={item.value === "on" ? "convexActive" : "concave"}
                     size="xs"
                   >
                     あり
                   </SurfaceButton>
                   <SurfaceButton
-                    onClick={() => item.onChange('off')}
-                    surface={item.value === 'off' ? 'convexActive' : 'concave'}
+                    onClick={() => item.onChange("off")}
+                    surface={item.value === "off" ? "convexActive" : "concave"}
                     size="xs"
                   >
                     なし
@@ -221,7 +237,7 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
               </div>
             ) : (
               <div className="space-y-0.5">
-                {filteredTags.map(tag => {
+                {filteredTags.map((tag) => {
                   const isSelected = tagFilter.includes(tag);
                   return (
                     <div
@@ -231,7 +247,7 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
                         "w-full flex items-center px-2 py-1 text-xs rounded transition-colors text-left group",
                         isSelected
                           ? "bg-slate-100 text-slate-800"
-                          : "hover:bg-slate-100 text-slate-800"
+                          : "hover:bg-slate-100 text-slate-800",
                       )}
                     >
                       <Switch
@@ -239,7 +255,7 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
                         onCheckedChange={() => toggleTag(tag)}
                         onClick={(e) => e.stopPropagation()}
                         className="mr-2"
-                        aria-label={`${tag} を${isSelected ? '除外' : '追加'}`}
+                        aria-label={`${tag} を${isSelected ? "除外" : "追加"}`}
                       />
                       <div className="min-w-0 flex-1">
                         <TagBadge
@@ -260,6 +276,3 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
     </Popover>
   );
 }
-
-
-

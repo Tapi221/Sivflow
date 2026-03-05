@@ -1,27 +1,30 @@
-import React from 'react';
-import { DragDropContext } from '@hello-pangea/dnd';
-import { Flashcard } from '@/components/card/frame/Flashcard';
-import { CardFrame } from '@/components/card/frame/CardFrame';
-import { SharedCardContent } from '@/components/card/common/SharedCardContent';
-import { CANONICAL_CARD_WIDTH, CARD_SAFE_PADDING_PX } from '@/components/card/common/constants';
-import { MobileScalableCard } from '@/components/card/frame/MobileScalableCard';
-import type { CardBlock } from '@/types';
+import React from "react";
+import { DragDropContext } from "@hello-pangea/dnd";
+import { Flashcard } from "@/components/card/frame/Flashcard";
+import { CardFrame } from "@/components/card/frame/CardFrame";
+import { SharedCardContent } from "@/components/card/common/SharedCardContent";
+import {
+  CANONICAL_CARD_WIDTH,
+  CARD_SAFE_PADDING_PX,
+} from "@/components/card/common/constants";
+import { MobileScalableCard } from "@/components/card/frame/MobileScalableCard";
+import type { CardBlock } from "@/types";
 
 const FIXTURE_BLOCKS: CardBlock[] = [
   {
-    id: 'fixture-code-1',
-    type: 'code',
+    id: "fixture-code-1",
+    type: "code",
     orderIndex: 0,
     code: {
-      language: 'typescript',
+      language: "typescript",
       code: `export const sum = (a: number, b: number) => a + b;\nconsole.log(sum(2, 3));`,
     },
   },
 ];
 
 const FIXTURE_CARD = {
-  id: 'layout-fixture-card',
-  title: 'Layout Fixture',
+  id: "layout-fixture-card",
+  title: "Layout Fixture",
   questionBlocks: FIXTURE_BLOCKS,
   answerBlocks: FIXTURE_BLOCKS,
   questionExtraRows: 2,
@@ -30,11 +33,12 @@ const FIXTURE_CARD = {
 
 export default function CardLayoutConsistencyTest() {
   const canRender =
-    typeof window !== 'undefined' &&
-    new URLSearchParams(window.location.search).get('test_bypass') === 'true';
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("test_bypass") === "true";
   if (!canRender) return null;
 
-  const [editBlocks, setEditBlocks] = React.useState<CardBlock[]>(FIXTURE_BLOCKS);
+  const [editBlocks, setEditBlocks] =
+    React.useState<CardBlock[]>(FIXTURE_BLOCKS);
 
   return (
     <div className="min-h-screen bg-slate-50 p-4 md:p-8">

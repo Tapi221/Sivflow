@@ -1,15 +1,15 @@
-import { useEffect, useRef, useState, type ComponentProps } from 'react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Volume2 } from '@/ui/icons';
-import { Flashcard } from '@/components/card/frame/Flashcard';
-import type { Card } from '@/types';
+import { useEffect, useRef, useState, type ComponentProps } from "react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Volume2 } from "@/ui/icons";
+import { Flashcard } from "@/components/card/frame/Flashcard";
+import type { Card } from "@/types";
 
-type FlashcardCardLike = ComponentProps<typeof Flashcard>['card'];
+type FlashcardCardLike = ComponentProps<typeof Flashcard>["card"];
 
-type StudyPhase = 'timing' | 'answer';
+type StudyPhase = "timing" | "answer";
 
-type PracticeScore = 'ok' | 'anxious';
+type PracticeScore = "ok" | "anxious";
 type ReviewScore = 0 | 1 | 2 | 3;
 
 type BaseProps = {
@@ -33,12 +33,12 @@ type BaseProps = {
 };
 
 type ReviewProps = BaseProps & {
-  mode?: 'review';
+  mode?: "review";
   onResult?: (subjectiveScore: ReviewScore, responseTime: number) => void;
 };
 
 type PracticeProps = BaseProps & {
-  mode: 'practice';
+  mode: "practice";
   onResult?: (subjectiveScore: PracticeScore, responseTime: number) => void;
 };
 
@@ -53,22 +53,23 @@ type Keyable = {
 };
 
 function stableKeyPart(value: unknown): string {
-  if (typeof value === 'string') return value;
-  if (typeof value === 'number') return String(value);
+  if (typeof value === "string") return value;
+  if (typeof value === "number") return String(value);
   if (value instanceof Date) return value.toISOString();
 
-  if (typeof value === 'object' && value) {
+  if (typeof value === "object" && value) {
     const obj = value as { toMillis?: () => number; toDate?: () => Date };
-    if (typeof obj.toMillis === 'function') return String(obj.toMillis());
-    if (typeof obj.toDate === 'function') return obj.toDate().toISOString();
+    if (typeof obj.toMillis === "function") return String(obj.toMillis());
+    if (typeof obj.toDate === "function") return obj.toDate().toISOString();
   }
-  return '';
+  return "";
 }
 
 function getCardKey(card: Card): string {
   const k = card as unknown as Keyable;
-  const direct = k.id ?? k.cardId ?? k.docId ?? k.uid ?? stableKeyPart(k.createdAt);
-  return direct && direct.length > 0 ? direct : 'card';
+  const direct =
+    k.id ?? k.cardId ?? k.docId ?? k.uid ?? stableKeyPart(k.createdAt);
+  return direct && direct.length > 0 ? direct : "card";
 }
 
 export default function StudyCard(props: StudyCardProps) {
@@ -86,7 +87,7 @@ export default function StudyCard(props: StudyCardProps) {
   return <StudyCardInner key={getCardKey(card)} {...props} card={card} />;
 }
 
-type InnerProps = Omit<StudyCardProps, 'card'> & { card: Card };
+type InnerProps = Omit<StudyCardProps, "card"> & { card: Card };
 
 function StudyCardInner({
   card,
@@ -94,14 +95,14 @@ function StudyCardInner({
   onToggleUncertainty,
   onToggleBookmark,
   onEdit,
-  mode = 'review',
+  mode = "review",
   showHard = true,
   showEasy = true,
   flipTrigger,
 }: InnerProps) {
-  const isPracticeMode = mode === 'practice';
+  const isPracticeMode = mode === "practice";
 
-  const [studyPhase, setStudyPhase] = useState<StudyPhase>('timing');
+  const [studyPhase, setStudyPhase] = useState<StudyPhase>("timing");
   const [elapsedTime, setElapsedTime] = useState(0);
 
   const startTimeRef = useRef<number>(0);
@@ -135,25 +136,31 @@ function StudyCardInner({
     const responseTime = elapsedTime;
 
     if (isPracticeMode) {
-      (onResult as PracticeProps['onResult'])?.(score as PracticeScore, responseTime);
+      (onResult as PracticeProps["onResult"])?.(
+        score as PracticeScore,
+        responseTime,
+      );
     } else {
-      (onResult as ReviewProps['onResult'])?.(score as ReviewScore, responseTime);
+      (onResult as ReviewProps["onResult"])?.(
+        score as ReviewScore,
+        responseTime,
+      );
     }
   };
 
   const handleShowAnswer = () => {
-    setStudyPhase('answer');
+    setStudyPhase("answer");
     stopTiming();
   };
 
   const handleFlip = () => {
-    if (studyPhase === 'timing') {
+    if (studyPhase === "timing") {
       handleShowAnswer();
       return;
     }
 
     // answer -> timing: イベント内でリセット（effect 内 setState を避ける）
-    setStudyPhase('timing');
+    setStudyPhase("timing");
     setElapsedTime(0);
     startTiming();
   };
@@ -171,7 +178,7 @@ function StudyCardInner({
         className="w-24 h-20 md:w-28 md:h-24 rounded-2xl bg-white border border-[var(--surface-border)] surface-convex flex flex-col items-center justify-center gap-2 transition-all hover:-translate-y-1 active:scale-95 group"
         onClick={(e) => {
           e.stopPropagation();
-          emitResult('anxious');
+          emitResult("anxious");
         }}
       >
         <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-red-50 face-badge-convex flex items-center justify-center text-[#FF5A65] group-hover:scale-110 transition-transform">
@@ -191,14 +198,16 @@ function StudyCardInner({
             <line x1="15" y1="9" x2="15.01" y2="9" />
           </svg>
         </div>
-        <span className="text-xs md:text-sm font-bold text-slate-600 group-hover:text-[#FF5A65]">不安</span>
+        <span className="text-xs md:text-sm font-bold text-slate-600 group-hover:text-[#FF5A65]">
+          不安
+        </span>
       </button>
 
       <button
         className="w-24 h-20 md:w-28 md:h-24 rounded-2xl bg-white border border-[var(--surface-border)] surface-convex flex flex-col items-center justify-center gap-2 transition-all hover:-translate-y-1 active:scale-95 group"
         onClick={(e) => {
           e.stopPropagation();
-          emitResult('ok');
+          emitResult("ok");
         }}
       >
         <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-blue-50 face-badge-convex flex items-center justify-center text-[#00A3FF] group-hover:scale-110 transition-transform">
@@ -218,7 +227,9 @@ function StudyCardInner({
             <line x1="15" y1="9" x2="15.01" y2="9" />
           </svg>
         </div>
-        <span className="text-xs md:text-sm font-bold text-slate-600 group-hover:text-[#00A3FF]">OK</span>
+        <span className="text-xs md:text-sm font-bold text-slate-600 group-hover:text-[#00A3FF]">
+          OK
+        </span>
       </button>
     </div>
   );
@@ -250,7 +261,9 @@ function StudyCardInner({
             <line x1="15" y1="9" x2="15.01" y2="9" />
           </svg>
         </div>
-        <span className="text-[10px] md:text-xs font-bold text-slate-600 group-hover:text-[#FF5A65]">忘れた</span>
+        <span className="text-[10px] md:text-xs font-bold text-slate-600 group-hover:text-[#FF5A65]">
+          忘れた
+        </span>
       </button>
 
       {showHard && (
@@ -278,7 +291,9 @@ function StudyCardInner({
               <line x1="15" y1="9" x2="15.01" y2="9" />
             </svg>
           </div>
-          <span className="text-[10px] md:text-xs font-bold text-slate-600 group-hover:text-[#F9A825]">あいまい</span>
+          <span className="text-[10px] md:text-xs font-bold text-slate-600 group-hover:text-[#F9A825]">
+            あいまい
+          </span>
         </button>
       )}
 
@@ -306,7 +321,9 @@ function StudyCardInner({
             <line x1="15" y1="9" x2="15.01" y2="9" />
           </svg>
         </div>
-        <span className="text-[10px] md:text-xs font-bold text-slate-600 group-hover:text-[#00A3FF]">覚えた</span>
+        <span className="text-[10px] md:text-xs font-bold text-slate-600 group-hover:text-[#00A3FF]">
+          覚えた
+        </span>
       </button>
 
       {showEasy && (
@@ -334,7 +351,9 @@ function StudyCardInner({
               <line x1="15" y1="9" x2="15.01" y2="9" />
             </svg>
           </div>
-          <span className="text-[10px] md:text-xs font-bold text-slate-600 group-hover:text-[#00B67A]">余裕</span>
+          <span className="text-[10px] md:text-xs font-bold text-slate-600 group-hover:text-[#00B67A]">
+            余裕
+          </span>
         </button>
       )}
     </div>
@@ -342,61 +361,66 @@ function StudyCardInner({
 
   const flashcardCard = card as unknown as FlashcardCardLike;
 
-  const handleToggleUncertainty = onToggleUncertainty ? () => onToggleUncertainty(card) : undefined;
-  const handleToggleBookmark = onToggleBookmark ? () => onToggleBookmark(card) : undefined;
+  const handleToggleUncertainty = onToggleUncertainty
+    ? () => onToggleUncertainty(card)
+    : undefined;
+  const handleToggleBookmark = onToggleBookmark
+    ? () => onToggleBookmark(card)
+    : undefined;
   const handleEdit = onEdit ? () => onEdit(card) : undefined;
 
-  const reviewCount = (card as unknown as { reviewCount?: unknown }).reviewCount;
-  const showReviewCount = typeof reviewCount === 'number' && reviewCount >= 0;
+  const reviewCount = (card as unknown as { reviewCount?: unknown })
+    .reviewCount;
+  const showReviewCount = typeof reviewCount === "number" && reviewCount >= 0;
 
   return (
     <div className="reviewStudyCard flex flex-col gap-6 w-full mx-auto max-w-[520px]">
       <div className="reviewCardViewport">
         <div>
-            <Flashcard
-              card={flashcardCard}
-              isFlipped={studyPhase === 'answer'}
-              onFlip={handleFlip}
-              extraHeaderLeft={
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="rounded-full w-8 h-8 md:w-9 md:h-9 min-w-0 min-h-0 bg-slate-50 text-primary-600 hover:bg-primary-50 hover:text-primary-700"
-                >
-                  <Volume2 className="w-4 h-4 md:w-5 h-5" />
-                </Button>
-              }
-              extraHeaderRight={
-                <div className="flex flex-col items-end pointer-events-none mb-2">
-                  {showReviewCount && (
-                    <Badge
-                      variant="outline"
-                      className="text-[10px] text-slate-400 border-slate-200 bg-slate-50/50 backdrop-blur-sm whitespace-nowrap tabular-nums font-bold"
-                    >
-                      {reviewCount + 1}回目の復習
-                    </Badge>
-                  )}
-                  {/* 「次回学習日」バッジは削除 */}
+          <Flashcard
+            card={flashcardCard}
+            isFlipped={studyPhase === "answer"}
+            onFlip={handleFlip}
+            extraHeaderLeft={
+              <Button
+                size="icon"
+                variant="ghost"
+                className="rounded-full w-8 h-8 md:w-9 md:h-9 min-w-0 min-h-0 bg-slate-50 text-primary-600 hover:bg-primary-50 hover:text-primary-700"
+              >
+                <Volume2 className="w-4 h-4 md:w-5 h-5" />
+              </Button>
+            }
+            extraHeaderRight={
+              <div className="flex flex-col items-end pointer-events-none mb-2">
+                {showReviewCount && (
+                  <Badge
+                    variant="outline"
+                    className="text-[10px] text-slate-400 border-slate-200 bg-slate-50/50 backdrop-blur-sm whitespace-nowrap tabular-nums font-bold"
+                  >
+                    {reviewCount + 1}回目の復習
+                  </Badge>
+                )}
+                {/* 「次回学習日」バッジは削除 */}
+              </div>
+            }
+            extraFooter={
+              studyPhase === "timing" && (
+                <div className="text-center">
+                  <p className="text-sm text-slate-400 animate-pulse">
+                    カードをクリックまたはスワイプして解答を表示
+                  </p>
                 </div>
-              }
-              extraFooter={
-                studyPhase === 'timing' && (
-                  <div className="text-center">
-                    <p className="text-sm text-slate-400 animate-pulse">
-                      カードをクリックまたはスワイプして解答を表示
-                    </p>
-                  </div>
-                )
-              }
-              onToggleUncertainty={handleToggleUncertainty}
-              onToggleBookmark={handleToggleBookmark}
-              onEdit={handleEdit}
-            />
+              )
+            }
+            onToggleUncertainty={handleToggleUncertainty}
+            onToggleBookmark={handleToggleBookmark}
+            onEdit={handleEdit}
+          />
         </div>
       </div>
 
-      {studyPhase === 'answer' && (isPracticeMode ? renderPracticeButtons() : renderReviewButtons())}
+      {studyPhase === "answer" &&
+        (isPracticeMode ? renderPracticeButtons() : renderReviewButtons())}
     </div>
   );
 }
-

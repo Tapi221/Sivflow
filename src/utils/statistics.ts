@@ -1,17 +1,17 @@
-import type { Card } from '../types/Card';
-import { normalizeMemoryStability } from './reviewUtils';
+import type { Card } from "../types/Card";
+import { normalizeMemoryStability } from "./reviewUtils";
 
 /**
  * Determines if a card has been reviewed by the user.
- * 
+ *
  * @param card - The card to check.
  * @returns True if the card has been reviewed, false otherwise.
- * 
+ *
  * @remarks
  * **Definition of "Reviewed":**
  * A card is considered reviewed ONLY if `reviewCount > 0`.
  * This means the user has explicitly performed a review action at least once.
- * 
+ *
  * **Important Notes:**
  * - `memoryStability` is NOT used for this check, as it may be initialized to a non-zero value (e.g., 0.3) in some contexts or future features (AI generation).
  * - `lastReviewAt` is NOT used for this check, as it may be set during import or migration without an actual review taking place.
@@ -23,11 +23,13 @@ export const isReviewed = (card: Partial<Card>): boolean => {
 
 /**
  * Calculates the average stability of a set of cards.
- * 
+ *
  * @param cards - Array of cards to calculate average from.
  * @returns The average stability (0-1) of reviewed cards, or `null` if no reviewed cards exist.
  */
-export const calculateAverageStability = (cards: Partial<Card>[]): number | null => {
+export const calculateAverageStability = (
+  cards: Partial<Card>[],
+): number | null => {
   const reviewedCards = cards.filter(isReviewed);
 
   if (reviewedCards.length === 0) {
@@ -37,7 +39,7 @@ export const calculateAverageStability = (cards: Partial<Card>[]): number | null
   const totalStability = reviewedCards.reduce((sum, c) => {
     const stability = normalizeMemoryStability(
       c.memoryStability ?? (c as any).memory_stability,
-      c.currentLevel ?? (c as any).current_level ?? (c as any).level
+      c.currentLevel ?? (c as any).current_level ?? (c as any).level,
     );
     return sum + stability;
   }, 0);

@@ -18,25 +18,41 @@ type UseCardEditorContentControllerParams<TDraft extends DraftShape | null> = {
   resetDialogsRef: MutableRefObject<() => void>;
 };
 
-export function useCardEditorContentController<TDraft extends DraftShape | null>({
+export function useCardEditorContentController<
+  TDraft extends DraftShape | null,
+>({
   draft,
   setDraft,
   allowAutoMinHeightSyncRef,
   resetDialogsRef,
 }: UseCardEditorContentControllerParams<TDraft>) {
   const getSideBlocks = (side: "question" | "answer") =>
-    side === "question" ? (draft?.questionBlocks ?? []) : (draft?.answerBlocks ?? []);
+    side === "question"
+      ? (draft?.questionBlocks ?? [])
+      : (draft?.answerBlocks ?? []);
 
-  const setSideBlocks = (side: "question" | "answer", nextBlocks: CardBlock[]) => {
+  const setSideBlocks = (
+    side: "question" | "answer",
+    nextBlocks: CardBlock[],
+  ) => {
     allowAutoMinHeightSyncRef.current = true;
     setDraft((prev) => {
       if (!prev) return prev;
-      const reindexed = nextBlocks.map((block, index) => ({ ...block, orderIndex: index }));
-      return side === "question" ? { ...prev, questionBlocks: reindexed } : { ...prev, answerBlocks: reindexed };
+      const reindexed = nextBlocks.map((block, index) => ({
+        ...block,
+        orderIndex: index,
+      }));
+      return side === "question"
+        ? { ...prev, questionBlocks: reindexed }
+        : { ...prev, answerBlocks: reindexed };
     });
   };
 
-  const upsertSingleBlock = (side: "question" | "answer", type: CardBlock["type"], payload: Partial<CardBlock>) => {
+  const upsertSingleBlock = (
+    side: "question" | "answer",
+    type: CardBlock["type"],
+    payload: Partial<CardBlock>,
+  ) => {
     const uniqueId =
       typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
         ? crypto.randomUUID()
@@ -63,11 +79,14 @@ export function useCardEditorContentController<TDraft extends DraftShape | null>
     setSideBlocks(side, [...blocks, nextBlock]);
   };
 
-  const removeBlockByTypeIfExists = (side: "question" | "answer", type: CardBlock["type"]) => {
+  const removeBlockByTypeIfExists = (
+    side: "question" | "answer",
+    type: CardBlock["type"],
+  ) => {
     const blocks = getSideBlocks(side);
     setSideBlocks(
       side,
-      blocks.filter((block) => block.type !== type)
+      blocks.filter((block) => block.type !== type),
     );
   };
 

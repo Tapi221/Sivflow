@@ -1,10 +1,10 @@
-import * as Y from 'yjs';
+import * as Y from "yjs";
 
 /**
  * Phase 1.5 PoC 4: CRDT差分同期
- * 
+ *
  * 目的: Yjsを使った差分同期で通信量を1/10に削減
- * 
+ *
  * 仕組み:
  * 1. カードデータをY.Docで管理
  * 2. 変更をDelta（差分）として保存
@@ -36,7 +36,7 @@ export class CRDTSyncService {
 
   constructor() {
     this.ydoc = new Y.Doc();
-    this.cards = this.ydoc.getMap('cards');
+    this.cards = this.ydoc.getMap("cards");
   }
 
   /**
@@ -67,18 +67,20 @@ export class CRDTSyncService {
    */
   async saveDelta(cardId: string, userId: string): Promise<void> {
     const delta = this.getDelta();
-    
+
     // Firestoreに保存（実装は省略、実際にはFirebase SDKを使用）
     const deltaRecord: DeltaRecord = {
       cardId,
       userId,
       delta,
       version: this.ydoc.clientID,
-      createdAt: Date.now()
+      createdAt: Date.now(),
     };
 
-    console.log(`[CRDT] Saved delta for card ${cardId}, size: ${delta.length} bytes`);
-    
+    console.log(
+      `[CRDT] Saved delta for card ${cardId}, size: ${delta.length} bytes`,
+    );
+
     // 実際の保存処理はここに実装
     // await firestore.collection('crdt_deltas').add(deltaRecord);
   }
@@ -110,17 +112,17 @@ export class CRDTSyncService {
 
   /**
    * スナップショットを抽出（バッチ処理用）
-   * 
+   *
    * Phase 1のMVCC統計更新と互換性を保つため、
    * CRDT構造から通常のCardデータ配列を抽出
    */
   extractSnapshot(): CardData[] {
     const snapshot: CardData[] = [];
-    
+
     this.cards.forEach((value, key) => {
       snapshot.push({
         id: key,
-        ...value
+        ...value,
       });
     });
 
@@ -129,17 +131,17 @@ export class CRDTSyncService {
 
   /**
    * コンパクション（古い差分を統合）
-   * 
+   *
    * 差分が蓄積しすぎた場合、スナップショットを作成して
    * 古い差分を削除することでストレージを節約
    */
   async compactDeltas(cardId: string, userId: string): Promise<void> {
     // 現在の状態をスナップショットとして保存
     const snapshot = this.extractSnapshot();
-    
+
     // スナップショットをFirestoreに保存
     console.log(`[CRDT] Compacted ${snapshot.length} cards into snapshot`);
-    
+
     // 古い差分を削除（実装は省略）
     // await firestore.collection('crdt_deltas')
     //   .where('cardId', '==', cardId)
@@ -152,7 +154,7 @@ export class CRDTSyncService {
 
   /**
    * 通信量の比較
-   * 
+   *
    * 全同期方式とCRDT差分方式の通信量を比較
    */
   compareDataSize(fullData: CardData[]): {
@@ -173,13 +175,13 @@ export class CRDTSyncService {
     console.log(`[CRDT] Data size comparison:`, {
       fullSyncSize: `${fullSyncSize} bytes`,
       deltaSize: `${deltaSize} bytes`,
-      reduction: `${reduction.toFixed(1)}%`
+      reduction: `${reduction.toFixed(1)}%`,
     });
 
     return {
       fullSyncSize,
       deltaSize,
-      reduction
+      reduction,
     };
   }
 
@@ -189,6 +191,6 @@ export class CRDTSyncService {
   reset(): void {
     this.ydoc.destroy();
     this.ydoc = new Y.Doc();
-    this.cards = this.ydoc.getMap('cards');
+    this.cards = this.ydoc.getMap("cards");
   }
 }

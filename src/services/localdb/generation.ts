@@ -1,18 +1,20 @@
-import { Dexie } from 'dexie';
+import { Dexie } from "dexie";
 import {
   LOCALDB_GENERATION_KEY_PREFIX,
   LOCALDB_GENERATION_MAX,
   LOCALDB_SCHEMA_VERSION_FOR_NAME,
   LOCALDB_NAME_PREFIX,
-} from './constants';
-import { safeStringifyError } from './errors';
-import { warnOncePerSession } from '../localDBRuntimeState';
+} from "./constants";
+import { safeStringifyError } from "./errors";
+import { warnOncePerSession } from "../localDBRuntimeState";
 
 export const readGenerationFromStorage = (userId: string): number => {
-  if (typeof window === 'undefined') return 0;
+  if (typeof window === "undefined") return 0;
   try {
-    const raw = window.localStorage.getItem(`${LOCALDB_GENERATION_KEY_PREFIX}${userId}`);
-    const parsed = Number(raw ?? '0');
+    const raw = window.localStorage.getItem(
+      `${LOCALDB_GENERATION_KEY_PREFIX}${userId}`,
+    );
+    const parsed = Number(raw ?? "0");
     if (!Number.isFinite(parsed) || parsed < 0) return 0;
     return Math.min(Math.floor(parsed), LOCALDB_GENERATION_MAX);
   } catch {
@@ -20,12 +22,17 @@ export const readGenerationFromStorage = (userId: string): number => {
   }
 };
 
-export const writeGenerationToStorage = (userId: string, generation: number): void => {
-  if (typeof window === 'undefined') return;
+export const writeGenerationToStorage = (
+  userId: string,
+  generation: number,
+): void => {
+  if (typeof window === "undefined") return;
   try {
     window.localStorage.setItem(
       `${LOCALDB_GENERATION_KEY_PREFIX}${userId}`,
-      String(Math.min(Math.max(0, Math.floor(generation)), LOCALDB_GENERATION_MAX))
+      String(
+        Math.min(Math.max(0, Math.floor(generation)), LOCALDB_GENERATION_MAX),
+      ),
     );
   } catch {
     // ignore localStorage write failures
@@ -55,7 +62,7 @@ export function bumpGenerationForUser(userId: string): number {
   return next;
 }
 
-export function getDatabaseNameForUser(userId: string = 'anonymous'): string {
+export function getDatabaseNameForUser(userId: string = "anonymous"): string {
   const generation = getGenerationForUser(userId);
   return `FlashcardMasterDB_${userId}_v${LOCALDB_SCHEMA_VERSION_FOR_NAME}_g${generation}`;
 }
@@ -64,17 +71,26 @@ export function getFallbackDatabaseNameForUser(userId: string): string {
   return `FlashcardMasterDB_mem_${userId}`;
 }
 
-export async function listUserPersistentDbNames(userId: string): Promise<string[]> {
+export async function listUserPersistentDbNames(
+  userId: string,
+): Promise<string[]> {
   const names = new Set<string>();
   const generationPrefix = makeGenerationDbPrefix(userId);
 
-  for (let generation = 0; generation <= LOCALDB_GENERATION_MAX; generation += 1) {
+  for (
+    let generation = 0;
+    generation <= LOCALDB_GENERATION_MAX;
+    generation += 1
+  ) {
     names.add(`${generationPrefix}${generation}`);
   }
 
   names.add(`${LOCALDB_NAME_PREFIX}${userId}`);
 
-  if (typeof indexedDB !== 'undefined' && typeof indexedDB.databases === 'function') {
+  if (
+    typeof indexedDB !== "undefined" &&
+    typeof indexedDB.databases === "function"
+  ) {
     try {
       const dbs = await indexedDB.databases();
       for (const db of dbs) {
@@ -86,9 +102,9 @@ export async function listUserPersistentDbNames(userId: string): Promise<string[
       }
     } catch (error) {
       warnOncePerSession(
-        'localdb:list-user-db-names-failed',
+        "localdb:list-user-db-names-failed",
         `[LocalDB] Failed to enumerate user DB names during reset. Continuing with known generations for user=${userId}.`,
-        error
+        error,
       );
     }
   }
@@ -96,7 +112,9 @@ export async function listUserPersistentDbNames(userId: string): Promise<string[
   return Array.from(names.values());
 }
 
-export async function deleteUserPersistentDatabases(userId: string): Promise<string | null> {
+export async function deleteUserPersistentDatabases(
+  userId: string,
+): Promise<string | null> {
   const names = await listUserPersistentDbNames(userId);
   let failureReason: string | null = null;
 

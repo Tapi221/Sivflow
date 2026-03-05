@@ -10,11 +10,6 @@
     "skipLibCheck": true
   },
   "compileOnSave": true,
-  "include": [
-    "src"
-  ],
-  "exclude": [
-    "node_modules",
-    "src/_archive"
-  ]
+  "include": ["src"],
+  "exclude": ["node_modules", "src/_archive"]
 }

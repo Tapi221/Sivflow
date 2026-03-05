@@ -1,40 +1,41 @@
-import { useLiveQuery } from 'dexie-react-hooks';
-import { Timestamp } from 'firebase/firestore';
-import { nanoid } from 'nanoid';
-import { getLocalDb } from '../services/localDB';
-import { useAuth } from '../contexts/AuthContext';
-import type { Folder } from '../types';
-import { normalizeFolder } from '../utils';
+import { useLiveQuery } from "dexie-react-hooks";
+import { Timestamp } from "firebase/firestore";
+import { nanoid } from "nanoid";
+import { getLocalDb } from "../services/localDB";
+import { useAuth } from "../contexts/AuthContext";
+import type { Folder } from "../types";
+import { normalizeFolder } from "../utils";
 
 export function useFolders() {
   const { currentUser } = useAuth();
 
-  const folders = useLiveQuery(
-    async () => {
-      if (!currentUser) return [];
-      const db = await getLocalDb();
-      const rawFolders = await db.folders.toArray();
+  const folders = useLiveQuery(async () => {
+    if (!currentUser) return [];
+    const db = await getLocalDb();
+    const rawFolders = await db.folders.toArray();
 
-      const filtered = rawFolders.filter(f => !((f as any).isDeleted ?? (f as any).is_deleted));
+    const filtered = rawFolders.filter(
+      (f) => !((f as any).isDeleted ?? (f as any).is_deleted),
+    );
 
-      return filtered.map(normalizeFolder);
-    },
-    [currentUser?.uid]
-  );
+    return filtered.map(normalizeFolder);
+  }, [currentUser?.uid]);
 
   const createFolder = async (
-    name: string, 
-    parentId: string | null = null, 
+    name: string,
+    parentId: string | null = null,
     color?: string,
-    cloudSyncEnabled: boolean = true
+    cloudSyncEnabled: boolean = true,
   ) => {
-    if (!currentUser) throw new Error('認証が必要です');
+    if (!currentUser) throw new Error("認証が必要です");
 
     const db = await getLocalDb();
 
     // orderIndexの設定
-    const currentFolders = folders || []; 
-    const siblings = currentFolders.filter((f) => f.parentFolderId === parentId);
+    const currentFolders = folders || [];
+    const siblings = currentFolders.filter(
+      (f) => f.parentFolderId === parentId,
+    );
     const orderIndex = siblings.length;
 
     const now = Timestamp.now();
@@ -51,29 +52,34 @@ export function useFolders() {
     };
 
     // 1. ローカル側で一意IDを生成（Firestore オブジェクトを誤って渡すバグ回避）
-    const folderId = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
-      ? crypto.randomUUID()
-      : (nanoid());
+    const folderId =
+      typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+        ? crypto.randomUUID()
+        : nanoid();
 
     // 2. LocalDBへ書き込み (Local First & Sync Queued)
     const localData = {
-        ...folderData,
-        id: folderId,
-        folderId: folderId, // Ensure consistency
-        createdAt: now.toDate(),
-        updatedAt: now.toDate()
+      ...folderData,
+      id: folderId,
+      folderId: folderId, // Ensure consistency
+      createdAt: now.toDate(),
+      updatedAt: now.toDate(),
     };
     try {
-      await db.addItem('folders', localData as any);
+      await db.addItem("folders", localData as any);
       return folderId;
     } catch (err) {
-      console.error('[createFolder] ERROR during LocalDB add', { table: 'folders', folderId, error: err });
+      console.error("[createFolder] ERROR during LocalDB add", {
+        table: "folders",
+        folderId,
+        error: err,
+      });
       throw err;
     }
   };
 
   const updateFolder = async (folderId: string, data: Partial<Folder>) => {
-    if (!currentUser) throw new Error('認証が必要です');
+    if (!currentUser) throw new Error("認証が必要です");
 
     const now = Timestamp.now();
     const payload = {
@@ -83,36 +89,41 @@ export function useFolders() {
 
     // 1. LocalDB更新 (Local First & Sync Queued)
     const db = await getLocalDb();
-    await db.updateItem('folders', folderId, payload);
+    await db.updateItem("folders", folderId, payload);
   };
 
-  const reorderFolders = async (folderIds: string[], parentId: string | null = null) => {
-    if (!currentUser) throw new Error('認証が必要です');
+  const reorderFolders = async (
+    folderIds: string[],
+    parentId: string | null = null,
+  ) => {
+    if (!currentUser) throw new Error("認証が必要です");
 
     const now = Timestamp.now();
-    
+
     // 1. LocalDB Updates (Sync Queued for each)
     const db = await getLocalDb();
     const updates = folderIds.map((folderId, index) => {
-        return db.updateItem('folders', folderId, {
-            orderIndex: index,
-            updatedAt: now.toDate()
-        });
+      return db.updateItem("folders", folderId, {
+        orderIndex: index,
+        updatedAt: now.toDate(),
+      });
     });
     await Promise.all(updates);
   };
 
   const deleteFolder = async (folderId: string) => {
-    if (!currentUser) throw new Error('認証が必要です');
-    
+    if (!currentUser) throw new Error("認証が必要です");
+
     const now = Timestamp.now();
     // 1. LocalDB softDelete (Sync Queued)
     const db = await getLocalDb();
-    await db.softDelete('folders', folderId);
-    
+    await db.softDelete("folders", folderId);
+
     // Recursive delete
     const currentFolders = folders || [];
-    const subfolders = currentFolders.filter(f => f.parentFolderId === folderId);
+    const subfolders = currentFolders.filter(
+      (f) => f.parentFolderId === folderId,
+    );
     for (const subfolder of subfolders) {
       await deleteFolder(subfolder.id);
     }
@@ -120,7 +131,9 @@ export function useFolders() {
 
   const getFolderTree = () => {
     const currentFolders = folders || [];
-    const buildTree = (parentId: string | null): (Folder & { children: Folder[] })[] => {
+    const buildTree = (
+      parentId: string | null,
+    ): (Folder & { children: Folder[] })[] => {
       return currentFolders
         .filter((f) => f.parentFolderId === parentId)
         .sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0))

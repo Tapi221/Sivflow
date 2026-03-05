@@ -1,6 +1,6 @@
-import type { CSSProperties } from 'react';
+import type { CSSProperties } from "react";
 
-export type RuledStyleKind = 'repeat+bottom' | 'repeat-only' | 'bottom-only';
+export type RuledStyleKind = "repeat+bottom" | "repeat-only" | "bottom-only";
 
 export interface RuledParams {
   kind: RuledStyleKind;
@@ -27,10 +27,16 @@ function toDataUri(svg: string): string {
  * - rowPx ごとに 1px の水平線を描く。
  * - SVG の viewBox はピクセル等倍なので拡縮しても線幅は保たれる。
  */
-function makeRepeatSvg(rowPx: number, phasePx: number, color: string, linePx: number): string {
+function makeRepeatSvg(
+  rowPx: number,
+  phasePx: number,
+  color: string,
+  linePx: number,
+): string {
   const y = phasePx % rowPx;
   // patternUnits="userSpaceOnUse" + patternTransform で位相をシフト
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1" height="${rowPx}">` +
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" width="1" height="${rowPx}">` +
     `<line x1="0" y1="${y + linePx / 2}" x2="1" y2="${y + linePx / 2}" ` +
     `stroke="${color}" stroke-width="${linePx}"/>` +
     `</svg>`;
@@ -42,7 +48,8 @@ function makeRepeatSvg(rowPx: number, phasePx: number, color: string, linePx: nu
  * width=1, height=linePx で background-size 100% linePxpx と合わせる。
  */
 function makeLineSvg(color: string, linePx: number): string {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1" height="${linePx}">` +
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" width="1" height="${linePx}">` +
     `<line x1="0" y1="${linePx / 2}" x2="1" y2="${linePx / 2}" ` +
     `stroke="${color}" stroke-width="${linePx}"/>` +
     `</svg>`;
@@ -54,9 +61,9 @@ function makeLineSvg(color: string, linePx: number): string {
  * rowPx=24, linePx=1 をデフォルトとして使う。
  */
 export function getPageRuledBg(
-  color = 'rgba(0,0,0,0.03)',
+  color = "rgba(0,0,0,0.03)",
   rowPx = 24,
-  linePx = 1
+  linePx = 1,
 ): { backgroundImage: string; backgroundSize: string } {
   return {
     backgroundImage: makeRepeatSvg(rowPx, 0, color, linePx),
@@ -64,43 +71,52 @@ export function getPageRuledBg(
   };
 }
 
-export function getRuledStyle(params: RuledParams): Pick<
+export function getRuledStyle(
+  params: RuledParams,
+): Pick<
   CSSProperties,
-  'backgroundImage' | 'backgroundSize' | 'backgroundPosition' | 'backgroundRepeat'
+  | "backgroundImage"
+  | "backgroundSize"
+  | "backgroundPosition"
+  | "backgroundRepeat"
 > {
   const { kind, rowPx, phasePx, color, linePx, bottomLinePx } = params;
 
   const repeatUri = makeRepeatSvg(rowPx, phasePx, color, linePx);
   const lineUri = makeLineSvg(color, linePx);
 
-  if (kind === 'repeat-only') {
+  if (kind === "repeat-only") {
     return {
       backgroundImage: repeatUri,
       backgroundSize: `100% ${rowPx}px`,
       backgroundPosition: `0 ${phasePx}px`,
-      backgroundRepeat: 'repeat-y',
+      backgroundRepeat: "repeat-y",
     };
   }
 
-  if (kind === 'bottom-only') {
-    const pos = bottomLinePx !== null ? `0 ${bottomLinePx}px` : `0 calc(100% - ${linePx}px)`;
+  if (kind === "bottom-only") {
+    const pos =
+      bottomLinePx !== null
+        ? `0 ${bottomLinePx}px`
+        : `0 calc(100% - ${linePx}px)`;
     return {
       backgroundImage: lineUri,
       backgroundSize: `100% ${linePx}px`,
       backgroundPosition: pos,
-      backgroundRepeat: 'no-repeat',
+      backgroundRepeat: "no-repeat",
     };
   }
 
   // repeat+bottom
-  const bottomPos = bottomLinePx !== null
-    ? `0 ${bottomLinePx}px`
-    : `0 calc(100% - ${linePx}px)`;
+  const bottomPos =
+    bottomLinePx !== null
+      ? `0 ${bottomLinePx}px`
+      : `0 calc(100% - ${linePx}px)`;
 
   return {
     backgroundImage: `${lineUri}, ${repeatUri}`,
     backgroundSize: `100% ${linePx}px, 100% ${rowPx}px`,
     backgroundPosition: `${bottomPos}, 0 ${phasePx}px`,
-    backgroundRepeat: 'no-repeat, repeat-y',
+    backgroundRepeat: "no-repeat, repeat-y",
   };
 }

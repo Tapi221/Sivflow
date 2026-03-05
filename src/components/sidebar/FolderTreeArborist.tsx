@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Tree } from 'react-arborist';
-import type { NodeApi, TreeApi, MoveHandler } from 'react-arborist';
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Tree } from "react-arborist";
+import type { NodeApi, TreeApi, MoveHandler } from "react-arborist";
 
 export type FolderTreeArboristNode = {
   id: string;
@@ -25,7 +25,13 @@ type Props<T extends FolderTreeArboristNode> = {
   renderNode: (args: RenderArgs<T>) => React.ReactNode;
   onMove?: MoveHandler<T>;
   disableDrag?: boolean | ((node: NodeApi<T>) => boolean);
-  disableDrop?: boolean | ((args: { parentNode: NodeApi<T>; dragNodes: NodeApi<T>[]; index: number }) => boolean);
+  disableDrop?:
+    | boolean
+    | ((args: {
+        parentNode: NodeApi<T>;
+        dragNodes: NodeApi<T>[];
+        index: number;
+      }) => boolean);
 };
 
 export function FolderTreeArborist<T extends FolderTreeArboristNode>({
@@ -70,10 +76,8 @@ export function FolderTreeArborist<T extends FolderTreeArboristNode>({
 
   const initialOpenState = useMemo(
     () =>
-      Object.fromEntries(
-        (expandedIds ?? []).map((id) => [id, true] as const)
-      ),
-    [expandedIds]
+      Object.fromEntries((expandedIds ?? []).map((id) => [id, true] as const)),
+    [expandedIds],
   );
 
   useEffect(() => {

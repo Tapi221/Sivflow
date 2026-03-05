@@ -4,29 +4,29 @@
 /**
  * Blob URL 専用型
  * 例: blob:http://localhost:5173/abc-123-def
- * 
+ *
  * 用途: 一時的なプレビュー表示のみ
  * 禁止: DB保存、同期データへの混入
  */
-export type BlobUrl = string & { readonly __brand: 'BlobUrl' };
+export type BlobUrl = string & { readonly __brand: "BlobUrl" };
 
 /**
  * Firebase Storage URL 専用型
  * 例: https://firebasestorage.googleapis.com/v0/b/...
- * 
+ *
  * 用途: クラウドに保存された画像の参照
  * 禁止: Base64、Blob URL、ローカルパス
  */
-export type StorageUrl = string & { readonly __brand: 'StorageUrl' };
+export type StorageUrl = string & { readonly __brand: "StorageUrl" };
 
 /**
  * Base64 Data URL 専用型
  * 例: data:image/png;base64,iVBORw0KG...
- * 
+ *
  * 用途: 計算途中の一時変数のみ
  * 禁止: DB保存、UploadedImage への代入
  */
-export type Base64DataUrl = string & { readonly __brand: 'Base64DataUrl' };
+export type Base64DataUrl = string & { readonly __brand: "Base64DataUrl" };
 
 // ============================================
 // Type Guards（型判定）
@@ -35,21 +35,22 @@ export type Base64DataUrl = string & { readonly __brand: 'Base64DataUrl' };
 /**
  * Blob URL かどうかを判定
  */
-export const isBlobUrl = (url: string): url is BlobUrl => 
-  url.startsWith('blob:');
+export const isBlobUrl = (url: string): url is BlobUrl =>
+  url.startsWith("blob:");
 
 /**
  * Firebase Storage URL かどうかを判定
  */
-export const isStorageUrl = (url: string): url is StorageUrl => 
-  url.startsWith('https://') && 
-  (url.includes('firebasestorage.googleapis.com') || url.includes('storage.googleapis.com'));
+export const isStorageUrl = (url: string): url is StorageUrl =>
+  url.startsWith("https://") &&
+  (url.includes("firebasestorage.googleapis.com") ||
+    url.includes("storage.googleapis.com"));
 
 /**
  * Base64 Data URL かどうかを判定
  */
-export const isBase64DataUrl = (url: string): url is Base64DataUrl => 
-  url.startsWith('data:');
+export const isBase64DataUrl = (url: string): url is Base64DataUrl =>
+  url.startsWith("data:");
 
 // ============================================
 // Constructors（実行時バリデーション付き生成）
@@ -80,7 +81,7 @@ export const createStorageUrl = (url: string): StorageUrl => {
 /**
  * Base64 Data URL を生成（実行時バリデーション付き）
  * @throws {Error} 不正な URL の場合
- * 
+ *
  * ⚠️ 警告: この関数は内部処理でのみ使用すること
  * DB や UploadedImage に Base64 を保存してはならない
  */

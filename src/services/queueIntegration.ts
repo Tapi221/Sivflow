@@ -1,9 +1,9 @@
 // Operation Queue の既存システムへの統合ヘルパー
 // LocalDB との連携を強化
 
-import { operationQueue } from './operationQueue';
-import { getLocalDb } from './localDB';
-import type { Card, Folder } from '../types';
+import { operationQueue } from "./operationQueue";
+import { getLocalDb } from "./localDB";
+import type { Card, Folder } from "../types";
 
 /**
  * Operation Queue 統合サービス
@@ -23,20 +23,20 @@ export class QueueIntegrationService {
     const db = await getLocalDb(this.userId);
     // 1. ローカルDBに即座に反映（楽観的更新）
     // addItem returns the ID string
-    const id = await db.addItem('cards', cardData as Card);
+    const id = await db.addItem("cards", cardData as Card);
     const localCard = await db.cards.get(id);
 
     if (!localCard) {
-      throw new Error('Failed to create local card');
+      throw new Error("Failed to create local card");
     }
 
     // 2. Operation Queueに追加（バックグラウンド同期）
     await operationQueue.enqueueChange(
-      'card',
+      "card",
       localCard.id,
-      'create',
+      "create",
       localCard,
-      'medium'
+      "medium",
     );
 
     return localCard;
@@ -48,17 +48,17 @@ export class QueueIntegrationService {
   async updateCard(cardId: string, updates: Partial<Card>): Promise<void> {
     const db = await getLocalDb(this.userId);
     // 1. ローカルDBに即座に反映
-    await db.updateItem('cards', cardId, updates);
+    await db.updateItem("cards", cardId, updates);
 
     // 2. Operation Queueに追加
     const updated = await db.cards.get(cardId);
     if (updated) {
       await operationQueue.enqueueChange(
-        'card',
+        "card",
         cardId,
-        'update',
+        "update",
         updated,
-        'medium'
+        "medium",
       );
     }
   }
@@ -69,15 +69,15 @@ export class QueueIntegrationService {
   async deleteCard(cardId: string): Promise<void> {
     const db = await getLocalDb(this.userId);
     // 1. ローカルDBに即座に反映
-    await db.softDelete('cards', cardId);
+    await db.softDelete("cards", cardId);
 
     // 2. Operation Queueに追加
     await operationQueue.enqueueChange(
-      'card',
+      "card",
       cardId,
-      'delete',
+      "delete",
       { id: cardId, isDeleted: true },
-      'medium'
+      "medium",
     );
   }
 

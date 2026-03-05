@@ -1,9 +1,9 @@
-declare module '@/components/ui/button' {
+declare module "@/components/ui/button" {
   export const Button: unknown;
   export const buttonVariants: unknown;
 }
 
-declare module '@/components/ui/card' {
+declare module "@/components/ui/card" {
   export const Card: unknown;
   export const CardContent: unknown;
   export const CardHeader: unknown;
@@ -12,7 +12,7 @@ declare module '@/components/ui/card' {
   export const CardFooter: unknown;
 }
 
-declare module '@/components/ui/dropdown-menu' {
+declare module "@/components/ui/dropdown-menu" {
   export const DropdownMenu: unknown;
   export const DropdownMenuTrigger: unknown;
   export const DropdownMenuContent: unknown;
@@ -30,9 +30,9 @@ declare module '@/components/ui/dropdown-menu' {
   export const DropdownMenuRadioGroup: unknown;
 }
 
-declare module '@/components/ui/AutoResizeTextarea' {
+declare module "@/components/ui/AutoResizeTextarea" {
   export default any;
 }
 
-declare module '@/components/*';
-declare module '@/components/*';
+declare module "@/components/*";
+declare module "@/components/*";

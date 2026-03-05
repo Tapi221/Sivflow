@@ -28,26 +28,26 @@ class FeatureFlagService {
    * 本番では完全に無視（安全優先）
    */
   private loadOverrides() {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     if (!import.meta.env.DEV) return;
 
     try {
-      const raw = localStorage.getItem('FEATURE_FLAGS');
+      const raw = localStorage.getItem("FEATURE_FLAGS");
       if (!raw) return;
 
       const parsed: unknown = JSON.parse(raw);
-      if (parsed == null || typeof parsed !== 'object') return;
+      if (parsed == null || typeof parsed !== "object") return;
 
       const obj = parsed as Record<string, unknown>;
 
       for (const key of Object.keys(obj) as (keyof FeatureFlags)[]) {
         const value = obj[key as unknown as string];
-        if (key in this.flags && typeof value === 'boolean') {
+        if (key in this.flags && typeof value === "boolean") {
           this.flags[key] = value;
         }
       }
     } catch (err) {
-      console.warn('[FeatureFlags] Failed to load overrides:', err);
+      console.warn("[FeatureFlags] Failed to load overrides:", err);
     }
   }
 
@@ -62,17 +62,19 @@ class FeatureFlagService {
   public setFlag(flag: keyof FeatureFlags, value: boolean) {
     this.flags[flag] = value;
 
-    if (import.meta.env.DEV && typeof window !== 'undefined') {
+    if (import.meta.env.DEV && typeof window !== "undefined") {
       try {
-        const raw = localStorage.getItem('FEATURE_FLAGS') || '{}';
+        const raw = localStorage.getItem("FEATURE_FLAGS") || "{}";
         const parsed: unknown = JSON.parse(raw);
         const current: Record<string, unknown> =
-          parsed != null && typeof parsed === 'object' ? (parsed as Record<string, unknown>) : {};
+          parsed != null && typeof parsed === "object"
+            ? (parsed as Record<string, unknown>)
+            : {};
 
         current[flag] = value;
-        localStorage.setItem('FEATURE_FLAGS', JSON.stringify(current));
+        localStorage.setItem("FEATURE_FLAGS", JSON.stringify(current));
       } catch (err) {
-        console.warn('[FeatureFlags] Failed to persist override:', err);
+        console.warn("[FeatureFlags] Failed to persist override:", err);
       }
     }
   }
@@ -83,8 +85,8 @@ class FeatureFlagService {
   public resetToDefaults() {
     this.flags = { ...DEFAULT_FLAGS };
 
-    if (import.meta.env.DEV && typeof window !== 'undefined') {
-      localStorage.removeItem('FEATURE_FLAGS');
+    if (import.meta.env.DEV && typeof window !== "undefined") {
+      localStorage.removeItem("FEATURE_FLAGS");
     }
   }
 
@@ -100,10 +102,10 @@ export const featureFlags = new FeatureFlagService();
  * 既存コードの flags.isEnabled('USE_SYNC_V2') を壊さないためのアダプタ。
  * 早めに featureFlags.getFlag('useSyncV2') へ移行して、最終的に削除する。
  */
-export type LegacyFlagName = 'USE_SYNC_V2';
+export type LegacyFlagName = "USE_SYNC_V2";
 
 const legacyToKey: Record<LegacyFlagName, keyof FeatureFlags> = {
-  USE_SYNC_V2: 'useSyncV2',
+  USE_SYNC_V2: "useSyncV2",
 };
 
 export const flags = {

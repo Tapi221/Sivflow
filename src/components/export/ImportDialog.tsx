@@ -1,13 +1,13 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useLiveQuery } from 'dexie-react-hooks';
+import React, { useEffect, useState, useRef } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useLiveQuery } from "dexie-react-hooks";
 import {
   getLocalDb,
   getLocalDBRuntimeStatus,
   subscribeLocalDBRuntimeStatus,
-} from '@/services/localDB';
-import { snapshotService } from '@/services/SnapshotService';
-import type { AppSnapshot, SnapshotComparison } from '@/types/snapshot';
+} from "@/services/localDB";
+import { snapshotService } from "@/services/SnapshotService";
+import type { AppSnapshot, SnapshotComparison } from "@/types/snapshot";
 import {
   Dialog,
   DialogContent,
@@ -15,47 +15,52 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
-import { CheckCircle, Loader2, ArrowRight, AlertTriangle } from '@/ui/icons';
-import { Upload } from '@/ui/icons';
-import { FileJson } from '@/ui/icons';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { CheckCircle, Loader2, ArrowRight, AlertTriangle } from "@/ui/icons";
+import { Upload } from "@/ui/icons";
+import { FileJson } from "@/ui/icons";
 
 interface ImportDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-type ImportStep = 'select' | 'preview' | 'confirm' | 'processing' | 'complete';
-type ImportAction = 'replace' | 'keep' | 'cancel';
+type ImportStep = "select" | "preview" | "confirm" | "processing" | "complete";
+type ImportAction = "replace" | "keep" | "cancel";
 
-export default function ImportDialog({ open, onOpenChange }: ImportDialogProps) {
+export default function ImportDialog({
+  open,
+  onOpenChange,
+}: ImportDialogProps) {
   const { currentUser } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
-  const [step, setStep] = useState<ImportStep>('select');
+
+  const [step, setStep] = useState<ImportStep>("select");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [parsedSnapshot, setParsedSnapshot] = useState<AppSnapshot | null>(null);
+  const [parsedSnapshot, setParsedSnapshot] = useState<AppSnapshot | null>(
+    null,
+  );
   const [comparison, setComparison] = useState<SnapshotComparison | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [importAction, setImportAction] = useState<ImportAction>('keep');
+  const [importAction, setImportAction] = useState<ImportAction>("keep");
   const [runtimeStatus, setRuntimeStatus] = useState(getLocalDBRuntimeStatus());
 
   useEffect(() => {
     return subscribeLocalDBRuntimeStatus(setRuntimeStatus);
   }, []);
 
-  const isFallbackMode = runtimeStatus.mode === 'fallback';
+  const isFallbackMode = runtimeStatus.mode === "fallback";
 
   const resetState = () => {
-    setStep('select');
+    setStep("select");
     setSelectedFile(null);
     setParsedSnapshot(null);
     setComparison(null);
     setError(null);
-    setImportAction('keep');
+    setImportAction("keep");
   };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -71,31 +76,39 @@ export default function ImportDialog({ open, onOpenChange }: ImportDialogProps) 
       setParsedSnapshot(snapshot);
 
       if (currentUser) {
-        const comp = await snapshotService.compareWithLocal(snapshot, currentUser.uid);
+        const comp = await snapshotService.compareWithLocal(
+          snapshot,
+          currentUser.uid,
+        );
         setComparison(comp);
       }
 
-      setStep('preview');
+      setStep("preview");
     } catch (err: unknown) {
-      setError(err.message || 'ファイルの読み込みに失敗しました');
+      setError(err.message || "ファイルの読み込みに失敗しました");
     }
   };
 
   const handleImport = async () => {
-    if (isFallbackMode || !parsedSnapshot || !currentUser || importAction === 'cancel') {
+    if (
+      isFallbackMode ||
+      !parsedSnapshot ||
+      !currentUser ||
+      importAction === "cancel"
+    ) {
       onOpenChange(false);
       resetState();
       return;
     }
 
-    if (importAction === 'keep') {
+    if (importAction === "keep") {
       onOpenChange(false);
       resetState();
       return;
     }
 
     // replace: インポートしたデータで上書き
-      setStep('processing');
+    setStep("processing");
 
     try {
       // 全データをクリアして新しいデータをインポート
@@ -104,32 +117,35 @@ export default function ImportDialog({ open, onOpenChange }: ImportDialogProps) 
 
       // カードをインポート
       for (const card of parsedSnapshot.data.cards) {
-        await db.table('cards').put(card);
+        await db.table("cards").put(card);
       }
 
       // フォルダをインポート
       for (const folder of parsedSnapshot.data.folders) {
-        await db.table('folders').put(folder);
+        await db.table("folders").put(folder);
       }
 
-      setStep('complete');
-      
+      setStep("complete");
+
       setTimeout(() => {
         onOpenChange(false);
         resetState();
         window.location.reload(); // データを反映するためにリロード
       }, 2000);
     } catch (err: unknown) {
-      setError(err.message || 'インポートに失敗しました');
-      setStep('preview');
+      setError(err.message || "インポートに失敗しました");
+      setStep("preview");
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={(o) => {
-      if (!o) resetState();
-      onOpenChange(o);
-    }}>
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) resetState();
+        onOpenChange(o);
+      }}
+    >
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -142,7 +158,7 @@ export default function ImportDialog({ open, onOpenChange }: ImportDialogProps) 
         </DialogHeader>
 
         {/* Step: Select File */}
-        {step === 'select' && (
+        {step === "select" && (
           <div className="py-6">
             {isFallbackMode && (
               <div className="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
@@ -158,15 +174,15 @@ export default function ImportDialog({ open, onOpenChange }: ImportDialogProps) 
               className="hidden"
               disabled={isFallbackMode}
             />
-            
-            <div 
+
+            <div
               onClick={() => {
                 if (!isFallbackMode) fileInputRef.current?.click();
               }}
               className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${
                 isFallbackMode
-                  ? 'cursor-not-allowed border-gray-200 bg-gray-50 opacity-70'
-                  : 'cursor-pointer border-gray-300 hover:border-primary-600 hover:bg-gray-50'
+                  ? "cursor-not-allowed border-gray-200 bg-gray-50 opacity-70"
+                  : "cursor-pointer border-gray-300 hover:border-primary-600 hover:bg-gray-50"
               }`}
             >
               <FileJson className="w-12 h-12 mx-auto mb-3 text-gray-400" />
@@ -188,7 +204,7 @@ export default function ImportDialog({ open, onOpenChange }: ImportDialogProps) 
         )}
 
         {/* Step: Preview */}
-        {step === 'preview' && parsedSnapshot && comparison && (
+        {step === "preview" && parsedSnapshot && comparison && (
           <div className="py-4 space-y-4">
             {/* ファイル情報 */}
             <div className="bg-gray-50 rounded-lg p-3">
@@ -200,10 +216,12 @@ export default function ImportDialog({ open, onOpenChange }: ImportDialogProps) 
             <div className="space-y-3">
               <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
                 <div>
-                  <p className="text-xs text-blue-600 font-medium">インポートファイル</p>
+                  <p className="text-xs text-blue-600 font-medium">
+                    インポートファイル
+                  </p>
                   <p className="text-sm">
-                    カード: {parsedSnapshot.data.cards.length}枚 / 
-                    フォルダ: {parsedSnapshot.data.folders.length}件
+                    カード: {parsedSnapshot.data.cards.length}枚 / フォルダ:{" "}
+                    {parsedSnapshot.data.folders.length}件
                   </p>
                   <p className="text-xs text-gray-500">
                     世代: {comparison.importedGeneration}
@@ -211,19 +229,21 @@ export default function ImportDialog({ open, onOpenChange }: ImportDialogProps) 
                 </div>
                 <ArrowRight className="w-5 h-5 text-gray-400" />
                 <div className="text-right">
-                  <p className="text-xs text-green-600 font-medium">現在のデータ</p>
+                  <p className="text-xs text-green-600 font-medium">
+                    現在のデータ
+                  </p>
                   <p className="text-sm">世代: {comparison.localGeneration}</p>
                 </div>
               </div>
 
-              {comparison.newerSnapshot === 'imported' && (
+              {comparison.newerSnapshot === "imported" && (
                 <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
                   <AlertTriangle className="w-4 h-4 inline mr-1" />
                   インポートファイルの方が新しいデータです
                 </div>
               )}
 
-              {comparison.newerSnapshot === 'local' && (
+              {comparison.newerSnapshot === "local" && (
                 <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-800">
                   <CheckCircle className="w-4 h-4 inline mr-1" />
                   現在のデータの方が新しいです
@@ -233,36 +253,46 @@ export default function ImportDialog({ open, onOpenChange }: ImportDialogProps) 
 
             {/* アクション選択 */}
             <div className="space-y-2">
-              <p className="text-sm font-medium text-gray-700">どうしますか？</p>
-              <RadioGroup value={importAction} onValueChange={(v) => setImportAction(v as ImportAction)}>
+              <p className="text-sm font-medium text-gray-700">
+                どうしますか？
+              </p>
+              <RadioGroup
+                value={importAction}
+                onValueChange={(v) => setImportAction(v as ImportAction)}
+              >
                 <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-gray-50">
                   <RadioGroupItem value="replace" id="replace" />
                   <Label htmlFor="replace" className="flex-1 cursor-pointer">
                     <span className="font-medium text-red-600">上書きする</span>
-                    <p className="text-xs text-gray-500">現在のデータを破棄してインポート</p>
+                    <p className="text-xs text-gray-500">
+                      現在のデータを破棄してインポート
+                    </p>
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-gray-50">
                   <RadioGroupItem value="keep" id="keep" />
                   <Label htmlFor="keep" className="flex-1 cursor-pointer">
                     <span className="font-medium">現在のデータを保持</span>
-                    <p className="text-xs text-gray-500">インポートをキャンセル</p>
+                    <p className="text-xs text-gray-500">
+                      インポートをキャンセル
+                    </p>
                   </Label>
                 </div>
               </RadioGroup>
             </div>
 
-            {importAction === 'replace' && (
+            {importAction === "replace" && (
               <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
                 <AlertTriangle className="w-4 h-4 inline mr-1" />
-                <strong>警告:</strong> 現在のデータは上書きされます。事前にバックアップを取ることをお勧めします。
+                <strong>警告:</strong>{" "}
+                現在のデータは上書きされます。事前にバックアップを取ることをお勧めします。
               </div>
             )}
           </div>
         )}
 
         {/* Step: Processing */}
-        {step === 'processing' && (
+        {step === "processing" && (
           <div className="py-8 text-center">
             <Loader2 className="w-12 h-12 mx-auto mb-4 text-primary-600 animate-spin" />
             <p className="text-sm text-gray-600">インポート中...</p>
@@ -270,31 +300,44 @@ export default function ImportDialog({ open, onOpenChange }: ImportDialogProps) 
         )}
 
         {/* Step: Complete */}
-        {step === 'complete' && (
+        {step === "complete" && (
           <div className="py-8 text-center">
             <CheckCircle className="w-16 h-16 mx-auto mb-4 text-green-500" />
-            <p className="text-lg font-medium text-gray-900">インポート完了！</p>
-            <p className="text-sm text-gray-500 mt-1">ページをリロードしています...</p>
+            <p className="text-lg font-medium text-gray-900">
+              インポート完了！
+            </p>
+            <p className="text-sm text-gray-500 mt-1">
+              ページをリロードしています...
+            </p>
           </div>
         )}
 
         <DialogFooter>
-          {step === 'select' && (
+          {step === "select" && (
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               キャンセル
             </Button>
           )}
-          {step === 'preview' && (
+          {step === "preview" && (
             <>
-              <Button variant="outline" onClick={() => { resetState(); }}>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  resetState();
+                }}
+              >
                 戻る
               </Button>
               <Button
                 onClick={handleImport}
                 disabled={isFallbackMode}
-                className={importAction === 'replace' ? 'bg-red-600 hover:bg-red-700' : 'bg-primary-600 hover:bg-primary-700'}
+                className={
+                  importAction === "replace"
+                    ? "bg-red-600 hover:bg-red-700"
+                    : "bg-primary-600 hover:bg-primary-700"
+                }
               >
-                {importAction === 'replace' ? '上書きインポート' : '閉じる'}
+                {importAction === "replace" ? "上書きインポート" : "閉じる"}
               </Button>
             </>
           )}

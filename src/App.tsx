@@ -1,62 +1,64 @@
 // ルーティングに必要なコンポーネント・フックを react-router-dom から読み込み
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 // React 本体からサスペンス（遅延読み込み用）、lazy（動的 import）、状態管理・副作用フック
-import { Suspense, lazy, useState, useEffect } from 'react';
+import { Suspense, lazy, useState, useEffect } from "react";
 // 認証状態をアプリ全体に配るコンテキスト
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider } from "./contexts/AuthContext";
 // トースト（画面右上などに出る通知）を配るコンテキスト
-import { ToastProvider } from './contexts/ToastContext';
+import { ToastProvider } from "./contexts/ToastContext";
 // 通知用の Provider（多分リアルタイム通知など）
-import { NotificationProvider } from './components/notifications/NotificationProvider';
+import { NotificationProvider } from "./components/notifications/NotificationProvider";
 // 認証状態を取得するためのカスタムフック
-import { useAuth } from './contexts/AuthContext';
+import { useAuth } from "./contexts/AuthContext";
 // 画面の共通レイアウトコンポーネント（ヘッダーやサイドバーなど）
-import Layout from './Layout';
+import Layout from "./Layout";
 // 初期化済みの Firebase Auth インスタンス
-import { auth } from './services/firebase';
+import { auth } from "./services/firebase";
 // 自動バックアップ関連のサービス
-import { autoBackupService } from './services/AutoBackupService';
+import { autoBackupService } from "./services/AutoBackupService";
 // データ整合性チェックのサービス
-import { dataIntegrityService } from './services/DataIntegrityService';
-import { sanitizeForLog } from '@/utils/logSanitizer';
+import { dataIntegrityService } from "./services/DataIntegrityService";
+import { sanitizeForLog } from "@/utils/logSanitizer";
 // 同期の進捗などを扱うカスタムフック
-import { useSync } from './hooks/useSync';
+import { useSync } from "./hooks/useSync";
 // アカウントロック時に表示する画面
-import { AccountLockedScreen } from './components/security/AccountLockedScreen';
+import { AccountLockedScreen } from "./components/security/AccountLockedScreen";
 // 同期サービスを生成するファクトリ
-import { SyncServiceFactory } from './services/SyncServiceFactory';
+import { SyncServiceFactory } from "./services/SyncServiceFactory";
 // 機能フラグ（Feature Flag）管理
-import { flags } from './features/flags';
-import { DEV_MODE, isLocalHost } from './utils/envGuards';
-
+import { flags } from "./features/flags";
+import { DEV_MODE, isLocalHost } from "./utils/envGuards";
 
 // ===== ページコンポーネントを遅延読み込み（コード分割） =====
 // 初回ロードを軽くするために、各ページを lazy で動的 import する
-const Calendar = lazy(() => import('./Pages/Calendar'));
-const Folders = lazy(() => import('./Pages/Folders'));
-const CardEdit = lazy(() => import('./Pages/CardEdit'));
-const CardView = lazy(() => import('./Pages/CardView'));
-const StudyMode = lazy(() => import('./Pages/StudyMode'));
-const Trash = lazy(() => import('./Pages/Trash'));
-const ImageDiagnostics = lazy(() => import('./Pages/ImageDiagnostics'));
-const Gallery = lazy(() => import('./Pages/Gallery'));
-const TodayStudy = lazy(() => import('./Pages/TodayStudy'));
-const NotImplementedPlaceholder = lazy(() => import('./Pages/NotImplementedPlaceholder'));
-const OneQAMode = lazy(() => import('./Pages/OneQAMode'));
-const PairMode = lazy(() => import('./Pages/PairMode'));
-const FourChoiceMode = lazy(() => import('./Pages/FourChoiceMode'));
+const Calendar = lazy(() => import("./Pages/Calendar"));
+const Folders = lazy(() => import("./Pages/Folders"));
+const CardEdit = lazy(() => import("./Pages/CardEdit"));
+const CardView = lazy(() => import("./Pages/CardView"));
+const StudyMode = lazy(() => import("./Pages/StudyMode"));
+const Trash = lazy(() => import("./Pages/Trash"));
+const ImageDiagnostics = lazy(() => import("./Pages/ImageDiagnostics"));
+const Gallery = lazy(() => import("./Pages/Gallery"));
+const TodayStudy = lazy(() => import("./Pages/TodayStudy"));
+const NotImplementedPlaceholder = lazy(
+  () => import("./Pages/NotImplementedPlaceholder"),
+);
+const OneQAMode = lazy(() => import("./Pages/OneQAMode"));
+const PairMode = lazy(() => import("./Pages/PairMode"));
+const FourChoiceMode = lazy(() => import("./Pages/FourChoiceMode"));
 const PdfScrollTest = DEV_MODE
-  ? lazy(() => import('./Pages/PdfScrollTest'))
+  ? lazy(() => import("./Pages/PdfScrollTest"))
   : null;
 const CodeBlockVisualTest = DEV_MODE
-  ? lazy(() => import('./Pages/CodeBlockVisualTest'))
+  ? lazy(() => import("./Pages/CodeBlockVisualTest"))
   : null;
 const CardLayoutConsistencyTest = DEV_MODE
-  ? lazy(() => import('./Pages/CardLayoutConsistencyTest'))
+  ? lazy(() => import("./Pages/CardLayoutConsistencyTest"))
   : null;
 
 const isTestBypassEnabled = () => {
-  const hasBypassParam = new URLSearchParams(window.location.search).get('test_bypass') === 'true';
+  const hasBypassParam =
+    new URLSearchParams(window.location.search).get("test_bypass") === "true";
   if (!hasBypassParam) return false;
   // Guard 1: development mode 以外（production build 含む）では絶対に有効化しない
   // NOTE: 一部環境で NODE_ENV=production が常時セットされるため、DEV ではなく MODE を使う。
@@ -64,7 +66,6 @@ const isTestBypassEnabled = () => {
   // Guard 2: 開発中でも localhost 系ホストのみ許可
   return isLocalHost(window.location.hostname);
 };
-
 
 // ===== サスペンス用ローディング UI =====
 function LoadingFallback() {
@@ -84,7 +85,6 @@ function LoadingFallback() {
     </div>
   );
 }
-
 
 // ===== 認証が必要なルートを守るコンポーネント =====
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -111,7 +111,6 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-
 // ===== ログインページ（トップで表示される画面） =====
 function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -121,17 +120,18 @@ function LoginPage() {
     setIsLoading(true);
     try {
       // firebase/auth を動的 import（初期表示を軽くするため）
-      const { GoogleAuthProvider, signInWithPopup } = await import('firebase/auth');
+      const { GoogleAuthProvider, signInWithPopup } =
+        await import("firebase/auth");
       const provider = new GoogleAuthProvider();
       // ポップアップで Google 認証
       await signInWithPopup(auth, provider);
       // 成功すると AuthProvider 側の onAuthStateChanged が発火して画面遷移する想定
     } catch (error: unknown) {
-      console.error('ログインエラー:', error);
-      if (error.code === 'auth/popup-closed-by-user') {
+      console.error("ログインエラー:", error);
+      if (error.code === "auth/popup-closed-by-user") {
         // ユーザーがポップアップを閉じた場合は無視
       } else {
-        alert('ログインに失敗しました: ' + (error.message || '不明なエラー'));
+        alert("ログインに失敗しました: " + (error.message || "不明なエラー"));
       }
     } finally {
       setIsLoading(false);
@@ -149,7 +149,9 @@ function LoginPage() {
           <div className="relative px-7 py-9 md:px-10 md:py-12">
             <div className="inline-flex items-center gap-2 rounded-full border border-[#7BACAA]/25 bg-[#7BACAA]/10 px-3 py-1">
               <span className="h-2 w-2 rounded-full bg-[#689A98]" />
-              <span className="text-[10px] font-bold tracking-[0.22em] text-[#5A8684]">MANIFOLMIA</span>
+              <span className="text-[10px] font-bold tracking-[0.22em] text-[#5A8684]">
+                MANIFOLMIA
+              </span>
             </div>
             <h1 className="mt-6 text-3xl font-black leading-tight text-slate-800 md:text-5xl">
               学習カードを
@@ -161,18 +163,32 @@ function LoginPage() {
             </p>
 
             <div className="mt-8 grid gap-3 text-xs text-slate-700 sm:grid-cols-2">
-              <div className="rounded-2xl border border-slate-200/70 bg-white/75 px-4 py-3">復習キューと自動下書きに対応</div>
-              <div className="rounded-2xl border border-slate-200/70 bg-white/75 px-4 py-3">カード編集はPC/モバイル最適化済み</div>
-              <div className="rounded-2xl border border-slate-200/70 bg-white/75 px-4 py-3">ローカル保存 + クラウド同期</div>
-              <div className="rounded-2xl border border-slate-200/70 bg-white/75 px-4 py-3">フォルダ/タグで横断検索</div>
+              <div className="rounded-2xl border border-slate-200/70 bg-white/75 px-4 py-3">
+                復習キューと自動下書きに対応
+              </div>
+              <div className="rounded-2xl border border-slate-200/70 bg-white/75 px-4 py-3">
+                カード編集はPC/モバイル最適化済み
+              </div>
+              <div className="rounded-2xl border border-slate-200/70 bg-white/75 px-4 py-3">
+                ローカル保存 + クラウド同期
+              </div>
+              <div className="rounded-2xl border border-slate-200/70 bg-white/75 px-4 py-3">
+                フォルダ/タグで横断検索
+              </div>
             </div>
           </div>
 
           <div className="flex items-center bg-[linear-gradient(160deg,rgba(104,154,152,0.06),rgba(104,154,152,0.14))] px-6 py-9 md:px-8">
             <div className="w-full rounded-[28px] border border-slate-200/70 bg-white p-6 shadow-[0_8px_30px_rgba(15,23,42,0.08)] md:p-7">
-              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">Sign In</p>
-              <h2 className="mt-2 text-2xl font-extrabold text-slate-800">ログイン</h2>
-              <p className="mt-2 text-sm text-slate-500">続行するにはGoogleアカウントで認証してください。</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
+                Sign In
+              </p>
+              <h2 className="mt-2 text-2xl font-extrabold text-slate-800">
+                ログイン
+              </h2>
+              <p className="mt-2 text-sm text-slate-500">
+                続行するにはGoogleアカウントで認証してください。
+              </p>
 
               <button
                 onClick={handleGoogleLogin}
@@ -186,11 +202,27 @@ function LoginPage() {
                   </>
                 ) : (
                   <>
-                    <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
-                      <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.2-.9 2.2-1.9 2.9l3.1 2.4c1.8-1.7 2.9-4.2 2.9-7.2 0-.7-.1-1.4-.2-2H12z" />
-                      <path fill="#34A853" d="M12 22c2.6 0 4.8-.9 6.4-2.4l-3.1-2.4c-.9.6-2 .9-3.3.9-2.5 0-4.6-1.7-5.4-3.9l-3.3 2.5C5 19.9 8.2 22 12 22z" />
-                      <path fill="#FBBC05" d="M6.6 14.2c-.2-.6-.3-1.3-.3-2s.1-1.4.3-2L3.3 7.7C2.5 9.2 2 10.6 2 12.2s.5 3 1.3 4.5l3.3-2.5z" />
-                      <path fill="#4285F4" d="M12 6.2c1.4 0 2.7.5 3.6 1.4l2.7-2.7C16.7 3.4 14.5 2.4 12 2.4c-3.8 0-7 2.1-8.7 5.3l3.3 2.5c.8-2.3 2.9-4 5.4-4z" />
+                    <svg
+                      className="h-5 w-5 shrink-0"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path
+                        fill="#EA4335"
+                        d="M12 10.2v3.9h5.5c-.2 1.2-.9 2.2-1.9 2.9l3.1 2.4c1.8-1.7 2.9-4.2 2.9-7.2 0-.7-.1-1.4-.2-2H12z"
+                      />
+                      <path
+                        fill="#34A853"
+                        d="M12 22c2.6 0 4.8-.9 6.4-2.4l-3.1-2.4c-.9.6-2 .9-3.3.9-2.5 0-4.6-1.7-5.4-3.9l-3.3 2.5C5 19.9 8.2 22 12 22z"
+                      />
+                      <path
+                        fill="#FBBC05"
+                        d="M6.6 14.2c-.2-.6-.3-1.3-.3-2s.1-1.4.3-2L3.3 7.7C2.5 9.2 2 10.6 2 12.2s.5 3 1.3 4.5l3.3-2.5z"
+                      />
+                      <path
+                        fill="#4285F4"
+                        d="M12 6.2c1.4 0 2.7.5 3.6 1.4l2.7-2.7C16.7 3.4 14.5 2.4 12 2.4c-3.8 0-7 2.1-8.7 5.3l3.3 2.5c.8-2.3 2.9-4 5.4-4z"
+                      />
                     </svg>
                     Googleでログイン
                   </>
@@ -207,7 +239,6 @@ function LoginPage() {
     </div>
   );
 }
-
 
 /**
  * "/" は常に folders へ。
@@ -230,46 +261,56 @@ function AppContent() {
     const runStartupTasks = async () => {
       try {
         // 1. Operation Queue 初期化（オフライン操作のキューなど？）
-        const { initializeOperationQueue } = await import('./utils/queueUtils');
+        const { initializeOperationQueue } = await import("./utils/queueUtils");
         await initializeOperationQueue();
-        console.log('[Queue] Operation Queue initialized');
+        console.log("[Queue] Operation Queue initialized");
 
         // 2. 自動バックアップ（1日1回だけ実行される想定）
-        const didBackup = await autoBackupService.performAutoBackup(currentUser.uid);
+        const didBackup = await autoBackupService.performAutoBackup(
+          currentUser.uid,
+        );
         if (didBackup) {
-          console.log('Auto backup completed on startup');
+          console.log("Auto backup completed on startup");
         }
 
         // 3. データ整合性チェック（DB 健全性チェック）
         const report = await dataIntegrityService.checkIntegrity();
         if (!report.isHealthy) {
-          const issueSummary = report.issues.reduce<Record<string, number>>((acc, issue) => {
-            acc[issue.code] = (acc[issue.code] || 0) + 1;
-            return acc;
-          }, {});
+          const issueSummary = report.issues.reduce<Record<string, number>>(
+            (acc, issue) => {
+              acc[issue.code] = (acc[issue.code] || 0) + 1;
+              return acc;
+            },
+            {},
+          );
           console.error(
-            '[Critical] Data integrity issues found:',
+            "[Critical] Data integrity issues found:",
             report.issues.length,
             sanitizeForLog(issueSummary),
           );
         } else {
           console.log(
-            '[Safe] Data integrity check passed (0 errors). Healthy items:',
+            "[Safe] Data integrity check passed (0 errors). Healthy items:",
             report.totalCards,
-            'cards,',
+            "cards,",
             report.totalFolders,
-            'folders.',
+            "folders.",
           );
         }
 
         // 4. V2 同期（Feature Flag が ON のときのみ起動時同期を実行）
-        if (flags.isEnabled('USE_SYNC_V2')) {
-          console.log('[Sync] Startup sync initiated');
-          const syncService = await SyncServiceFactory.getInstance(currentUser.uid);
+        if (flags.isEnabled("USE_SYNC_V2")) {
+          console.log("[Sync] Startup sync initiated");
+          const syncService = await SyncServiceFactory.getInstance(
+            currentUser.uid,
+          );
           await syncService.performStartupSync();
         }
       } catch (error) {
-        console.error('[Critical] Startup tasks failed:', sanitizeForLog(error));
+        console.error(
+          "[Critical] Startup tasks failed:",
+          sanitizeForLog(error),
+        );
       }
     };
 
@@ -291,7 +332,11 @@ function AppContent() {
   }
 
   // test-only page for PDF wheel/trackpad scroll E2E checks
-  if (PdfScrollTest && isTestBypass && window.location.pathname === '/pdf-scroll-test') {
+  if (
+    PdfScrollTest &&
+    isTestBypass &&
+    window.location.pathname === "/pdf-scroll-test"
+  ) {
     return (
       <Suspense fallback={<LoadingFallback />}>
         <PdfScrollTest />
@@ -299,7 +344,11 @@ function AppContent() {
     );
   }
 
-  if (CodeBlockVisualTest && isTestBypass && window.location.pathname === '/codeblock-visual-test') {
+  if (
+    CodeBlockVisualTest &&
+    isTestBypass &&
+    window.location.pathname === "/codeblock-visual-test"
+  ) {
     return (
       <Suspense fallback={<LoadingFallback />}>
         <CodeBlockVisualTest />
@@ -316,7 +365,14 @@ function AppContent() {
       {/* ルーティング定義 */}
       <Routes>
         {/* ルートパス "/" のレイアウト（ProtectedRoute でログインを強制） */}
-        <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }
+        >
           {/* "/" にアクセスされたら "/folders" にリダイレクト */}
           <Route index element={<DefaultRedirect />} />
 
@@ -464,7 +520,6 @@ function AppContent() {
     </>
   );
 }
-
 
 // ===== アプリ全体のルートコンポーネント =====
 function App() {

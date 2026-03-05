@@ -1,15 +1,23 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
-import { Clock, ArrowUpDown, CheckCircle2 as CheckCircle, AlertTriangle, AlertCircle as XCircle, ChevronUp, ChevronDown } from '@/ui/icons';
-import { getLocalDb } from '@/services/localDB';
-import type { SyncHistory } from '@/types/sync';
+} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import {
+  Clock,
+  ArrowUpDown,
+  CheckCircle2 as CheckCircle,
+  AlertTriangle,
+  AlertCircle as XCircle,
+  ChevronUp,
+  ChevronDown,
+} from "@/ui/icons";
+import { getLocalDb } from "@/services/localDB";
+import type { SyncHistory } from "@/types/sync";
 
 interface SyncHistoryDialogProps {
   open: boolean;
@@ -30,13 +38,13 @@ export function SyncHistoryDialog({ open, onClose }: SyncHistoryDialogProps) {
     try {
       const db = await getLocalDb();
       const allHistories = await db.syncHistory
-        .orderBy('finishedAt')
+        .orderBy("finishedAt")
         .reverse()
         .limit(30)
         .toArray();
       setHistories(allHistories);
     } catch (error) {
-      console.error('Failed to load sync histories:', error);
+      console.error("Failed to load sync histories:", error);
     }
   }, []);
 
@@ -48,35 +56,45 @@ export function SyncHistoryDialog({ open, onClose }: SyncHistoryDialogProps) {
 
   const getResultBadge = (result: string) => {
     switch (result) {
-      case 'success':
+      case "success":
         return (
-          <Badge className="bg-green-500 hover:bg-green-600" variant="secondary">
+          <Badge
+            className="bg-green-500 hover:bg-green-600"
+            variant="secondary"
+          >
             <CheckCircle className="w-3 h-3 mr-1" />
             成功
           </Badge>
         );
-      case 'partial':
+      case "partial":
         return (
-          <Badge className="bg-yellow-500 hover:bg-yellow-600" variant="secondary">
+          <Badge
+            className="bg-yellow-500 hover:bg-yellow-600"
+            variant="secondary"
+          >
             <AlertTriangle className="w-3 h-3 mr-1" />
             部分成功
           </Badge>
         );
-      case 'failed':
+      case "failed":
         return (
           <Badge className="bg-red-500 hover:bg-red-600" variant="destructive">
             <XCircle className="w-3 h-3 mr-1" />
             失敗
           </Badge>
         );
-       case 'skipped_wifi':
+      case "skipped_wifi":
         return (
           <Badge className="bg-gray-500 hover:bg-gray-600" variant="secondary">
             WiFi待機
           </Badge>
         );
       default:
-        return <Badge className="bg-gray-200 text-gray-800" variant="secondary">{result}</Badge>;
+        return (
+          <Badge className="bg-gray-200 text-gray-800" variant="secondary">
+            {result}
+          </Badge>
+        );
     }
   };
 
@@ -84,18 +102,19 @@ export function SyncHistoryDialog({ open, onClose }: SyncHistoryDialogProps) {
     const date = new Date(timestamp);
     const now = new Date();
     const isToday = date.toDateString() === now.toDateString();
-    const isYesterday = new Date(now.getTime() - 86400000).toDateString() === date.toDateString();
+    const isYesterday =
+      new Date(now.getTime() - 86400000).toDateString() === date.toDateString();
 
     if (isToday) {
-      return `今日 ${date.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}`;
+      return `今日 ${date.toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" })}`;
     } else if (isYesterday) {
-      return `昨日 ${date.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}`;
+      return `昨日 ${date.toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" })}`;
     } else {
-      return date.toLocaleString('ja-JP', {
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
+      return date.toLocaleString("ja-JP", {
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
       });
     }
   };
@@ -113,16 +132,16 @@ export function SyncHistoryDialog({ open, onClose }: SyncHistoryDialogProps) {
 
   const getTimelineColor = (result: string) => {
     switch (result) {
-      case 'success':
-        return 'border-green-500';
-      case 'partial':
-        return 'border-yellow-500';
-      case 'failed':
-        return 'border-red-500';
-      case 'skipped_wifi':
-        return 'border-gray-400';
+      case "success":
+        return "border-green-500";
+      case "partial":
+        return "border-yellow-500";
+      case "failed":
+        return "border-red-500";
+      case "skipped_wifi":
+        return "border-gray-400";
       default:
-        return 'border-gray-300';
+        return "border-gray-300";
     }
   };
 
@@ -173,7 +192,12 @@ export function SyncHistoryDialog({ open, onClose }: SyncHistoryDialogProps) {
                       {/* 所要時間 */}
                       <div className="flex items-center gap-1 text-gray-500">
                         <Clock className="w-4 h-4" />
-                        <span>{formatDuration(history.startedAt, history.finishedAt)}</span>
+                        <span>
+                          {formatDuration(
+                            history.startedAt,
+                            history.finishedAt,
+                          )}
+                        </span>
                       </div>
                     </div>
                   </div>

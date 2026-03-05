@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -8,36 +8,40 @@ import {
   SelectSeparator,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import type { CodeBlockData } from '@/types/code-block';
-import { CodeBlockContent } from './CodeBlockContent';
-import { normalizeEditorLanguage } from './codeBlockLanguage';
+} from "@/components/ui/select";
+import type { CodeBlockData } from "@/types/code-block";
+import { CodeBlockContent } from "./CodeBlockContent";
+import { normalizeEditorLanguage } from "./codeBlockLanguage";
 
-const STORAGE_KEY = 'codeblock_recent_langs';
+const STORAGE_KEY = "codeblock_recent_langs";
 const MAX_RECENT = 3;
 
 const SUPPORTED_LANGUAGES = [
-  { value: 'javascript', label: 'JavaScript' },
-  { value: 'typescript', label: 'TypeScript' },
-  { value: 'python', label: 'Python' },
-  { value: 'java', label: 'Java' },
-  { value: 'c', label: 'C' },
-  { value: 'cpp', label: 'C++' },
-  { value: 'csharp', label: 'C#' },
-  { value: 'go', label: 'Go' },
-  { value: 'rust', label: 'Rust' },
-  { value: 'sql', label: 'SQL' },
-  { value: 'markup', label: 'HTML' },
-  { value: 'css', label: 'CSS' },
-  { value: 'json', label: 'JSON' },
-  { value: 'bash', label: 'Bash' },
-  { value: 'markdown', label: 'Markdown' },
+  { value: "javascript", label: "JavaScript" },
+  { value: "typescript", label: "TypeScript" },
+  { value: "python", label: "Python" },
+  { value: "java", label: "Java" },
+  { value: "c", label: "C" },
+  { value: "cpp", label: "C++" },
+  { value: "csharp", label: "C#" },
+  { value: "go", label: "Go" },
+  { value: "rust", label: "Rust" },
+  { value: "sql", label: "SQL" },
+  { value: "markup", label: "HTML" },
+  { value: "css", label: "CSS" },
+  { value: "json", label: "JSON" },
+  { value: "bash", label: "Bash" },
+  { value: "markdown", label: "Markdown" },
 ];
 const SUPPORTED_LANGUAGE_SET = new Set(SUPPORTED_LANGUAGES.map((l) => l.value));
 
 function canUseLocalStorage(): boolean {
   try {
-    return typeof window !== 'undefined' && 'localStorage' in window && !!window.localStorage;
+    return (
+      typeof window !== "undefined" &&
+      "localStorage" in window &&
+      !!window.localStorage
+    );
   } catch {
     return false;
   }
@@ -51,7 +55,7 @@ function getRecentLangs(): string[] {
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
     return parsed
-      .filter((v): v is string => typeof v === 'string')
+      .filter((v): v is string => typeof v === "string")
       .map(normalizeEditorLanguage)
       .filter((v) => SUPPORTED_LANGUAGE_SET.has(v));
   } catch {
@@ -77,11 +81,19 @@ interface CodeBlockEditorProps {
   className?: string;
 }
 
-export function CodeBlockEditor({ value, onChange, className }: CodeBlockEditorProps) {
-  const [recentLangs, setRecentLangs] = useState<string[]>(() => getRecentLangs());
+export function CodeBlockEditor({
+  value,
+  onChange,
+  className,
+}: CodeBlockEditorProps) {
+  const [recentLangs, setRecentLangs] = useState<string[]>(() =>
+    getRecentLangs(),
+  );
 
-  const code = value?.code ?? '';
-  const normalizedLanguage = normalizeEditorLanguage(value?.language ?? 'javascript');
+  const code = value?.code ?? "";
+  const normalizedLanguage = normalizeEditorLanguage(
+    value?.language ?? "javascript",
+  );
 
   const handleLanguageChange = useCallback(
     (newLang: string) => {
@@ -90,7 +102,7 @@ export function CodeBlockEditor({ value, onChange, className }: CodeBlockEditorP
       pushRecentLang(nextLanguage);
       setRecentLangs(getRecentLangs());
     },
-    [onChange, code]
+    [onChange, code],
   );
 
   const recentLangItems = useMemo(() => {
@@ -135,7 +147,11 @@ export function CodeBlockEditor({ value, onChange, className }: CodeBlockEditorP
                 最近使った言語
               </SelectLabel>
               {recentLangItems.map((lang) => (
-                <SelectItem key={`recent-${lang.value}`} value={lang.value} className="text-xs">
+                <SelectItem
+                  key={`recent-${lang.value}`}
+                  value={lang.value}
+                  className="text-xs"
+                >
                   {lang.label}
                 </SelectItem>
               ))}
@@ -165,10 +181,11 @@ export function CodeBlockEditor({ value, onChange, className }: CodeBlockEditorP
       mode="editor"
       code={code}
       language={normalizedLanguage}
-      onCodeChange={(nextCode) => onChange({ language: normalizedLanguage, code: nextCode })}
+      onCodeChange={(nextCode) =>
+        onChange({ language: normalizedLanguage, code: nextCode })
+      }
       headerLeft={languageSelector}
       className={className}
     />
   );
 }
-

@@ -1,10 +1,10 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { BookOpen, ChevronDown, ChevronRight, FolderTree } from '@/ui/icons';
-import { cn } from '@/lib/utils';
-import type { Card, SelectedExplorerItem } from '@/types';
-import type { TreeNode } from './viewTypes';
-import { ExplorerRow } from './explorer/rows/ExplorerRow';
-import { ExplorerRowContent } from './explorer/rows/ExplorerRowContent';
+import React, { useEffect, useMemo, useState } from "react";
+import { BookOpen, ChevronDown, ChevronRight, FolderTree } from "@/ui/icons";
+import { cn } from "@/lib/utils";
+import type { Card, SelectedExplorerItem } from "@/types";
+import type { TreeNode } from "./viewTypes";
+import { ExplorerRow } from "./explorer/rows/ExplorerRow";
+import { ExplorerRowContent } from "./explorer/rows/ExplorerRowContent";
 
 interface VirtualTreeViewProps {
   nodes: TreeNode[];
@@ -14,16 +14,23 @@ interface VirtualTreeViewProps {
 }
 
 const getCardTitle = (card: Card): string => {
-  if (typeof card.title === 'string' && card.title.trim()) return card.title;
-  if (typeof card.questionText === 'string' && card.questionText.trim()) {
-    const plain = card.questionText.replace(/<[^>]*>/g, '').trim();
+  if (typeof card.title === "string" && card.title.trim()) return card.title;
+  if (typeof card.questionText === "string" && card.questionText.trim()) {
+    const plain = card.questionText.replace(/<[^>]*>/g, "").trim();
     if (plain) return plain.length > 50 ? `${plain.slice(0, 50)}...` : plain;
   }
-  return '無題のカード';
+  return "無題のカード";
 };
 
-export function VirtualTreeView({ nodes, cards, selectedItem, onItemSelect }: VirtualTreeViewProps) {
-  const [expandedGroupIds, setExpandedGroupIds] = useState<Set<string>>(new Set());
+export function VirtualTreeView({
+  nodes,
+  cards,
+  selectedItem,
+  onItemSelect,
+}: VirtualTreeViewProps) {
+  const [expandedGroupIds, setExpandedGroupIds] = useState<Set<string>>(
+    new Set(),
+  );
 
   const cardById = useMemo(() => {
     const map = new Map<string, Card>();
@@ -36,8 +43,11 @@ export function VirtualTreeView({ nodes, cards, selectedItem, onItemSelect }: Vi
 
     const visit = (entries: TreeNode[], path: string[]) => {
       for (const entry of entries) {
-        if (entry.type === 'card') {
-          if (selectedItem?.type === 'card' && selectedItem.id === entry.cardId) {
+        if (entry.type === "card") {
+          if (
+            selectedItem?.type === "card" &&
+            selectedItem.id === entry.cardId
+          ) {
             for (const ancestorId of path) ancestorIds.add(ancestorId);
           }
           continue;
@@ -62,25 +72,31 @@ export function VirtualTreeView({ nodes, cards, selectedItem, onItemSelect }: Vi
   };
 
   const renderNode = (node: TreeNode, depth: number): React.ReactNode => {
-    if (node.type === 'card') {
+    if (node.type === "card") {
       const card = cardById.get(node.cardId);
       if (!card) return null;
-      const isSelected = selectedItem?.type === 'card' && selectedItem.id === node.cardId;
+      const isSelected =
+        selectedItem?.type === "card" && selectedItem.id === node.cardId;
       return (
         <ExplorerRow
           key={node.id}
           depth={depth + 1}
           selected={isSelected}
-          className={cn('pr-2 cursor-pointer')}
-          onClick={() => onItemSelect({ type: 'card', id: node.cardId })}
+          className={cn("pr-2 cursor-pointer")}
+          onClick={() => onItemSelect({ type: "card", id: node.cardId })}
         >
           <div className="flex h-full min-w-0 flex-1 items-center pr-1">
-            <BookOpen className={cn('sidebar-icon mr-1 h-4 w-4 shrink-0 text-[#6E6E80]', isSelected && 'text-primary-700')} />
+            <BookOpen
+              className={cn(
+                "sidebar-icon mr-1 h-4 w-4 shrink-0 text-[#6E6E80]",
+                isSelected && "text-primary-700",
+              )}
+            />
             <ExplorerRowContent
               title={getCardTitle(card)}
               titleClassName={cn(
-                'lining-nums tabular-nums',
-                isSelected ? 'font-medium text-primary-700' : 'text-[#202123]'
+                "lining-nums tabular-nums",
+                isSelected ? "font-medium text-primary-700" : "text-[#202123]",
               )}
             />
           </div>
@@ -111,7 +127,11 @@ export function VirtualTreeView({ nodes, cards, selectedItem, onItemSelect }: Vi
             />
           </div>
         </ExplorerRow>
-        {isExpanded ? <div>{node.children.map((child) => renderNode(child, depth + 1))}</div> : null}
+        {isExpanded ? (
+          <div>
+            {node.children.map((child) => renderNode(child, depth + 1))}
+          </div>
+        ) : null}
       </div>
     );
   };
@@ -126,5 +146,9 @@ export function VirtualTreeView({ nodes, cards, selectedItem, onItemSelect }: Vi
     );
   }
 
-  return <div className="space-y-0.5 p-2">{nodes.map((node) => renderNode(node, 0))}</div>;
+  return (
+    <div className="space-y-0.5 p-2">
+      {nodes.map((node) => renderNode(node, 0))}
+    </div>
+  );
 }

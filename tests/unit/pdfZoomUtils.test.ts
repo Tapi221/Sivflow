@@ -1,29 +1,29 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from "vitest";
 import {
   clampScale,
   computeNextScaleFromGesture,
   computeNextScaleFromWheel,
   normalizeScale,
-} from '@/components/pdf/pdfZoomUtils';
+} from "@/components/pdf/pdfZoomUtils";
 
-describe('pdfZoomUtils', () => {
-  describe('normalizeScale', () => {
-    it('rounds to 3 decimal places', () => {
+describe("pdfZoomUtils", () => {
+  describe("normalizeScale", () => {
+    it("rounds to 3 decimal places", () => {
       expect(normalizeScale(1.23456)).toBe(1.235);
       expect(normalizeScale(1.23444)).toBe(1.234);
     });
   });
 
-  describe('clampScale', () => {
-    it('clamps to min/max and supports inverted bounds', () => {
+  describe("clampScale", () => {
+    it("clamps to min/max and supports inverted bounds", () => {
       expect(clampScale(0.4, 0.5, 3)).toBe(0.5);
       expect(clampScale(4, 0.5, 3)).toBe(3);
       expect(clampScale(2, 3, 0.5)).toBe(2);
     });
   });
 
-  describe('computeNextScaleFromWheel', () => {
-    it('decreases scale for positive deltaY and increases for negative deltaY', () => {
+  describe("computeNextScaleFromWheel", () => {
+    it("decreases scale for positive deltaY and increases for negative deltaY", () => {
       expect(
         computeNextScaleFromWheel({
           currentScale: 1,
@@ -31,7 +31,7 @@ describe('pdfZoomUtils', () => {
           zoomStep: 0.1,
           minScale: 0.5,
           maxScale: 3,
-        })
+        }),
       ).toBe(0.9);
 
       expect(
@@ -41,11 +41,11 @@ describe('pdfZoomUtils', () => {
           zoomStep: 0.1,
           minScale: 0.5,
           maxScale: 3,
-        })
+        }),
       ).toBe(1.1);
     });
 
-    it('returns null when direction is 0', () => {
+    it("returns null when direction is 0", () => {
       expect(
         computeNextScaleFromWheel({
           currentScale: 1,
@@ -53,11 +53,11 @@ describe('pdfZoomUtils', () => {
           zoomStep: 0.1,
           minScale: 0.5,
           maxScale: 3,
-        })
+        }),
       ).toBeNull();
     });
 
-    it('applies clamp and 3-digit normalization', () => {
+    it("applies clamp and 3-digit normalization", () => {
       expect(
         computeNextScaleFromWheel({
           currentScale: 0.52,
@@ -65,7 +65,7 @@ describe('pdfZoomUtils', () => {
           zoomStep: 0.1,
           minScale: 0.5,
           maxScale: 3,
-        })
+        }),
       ).toBe(0.5);
 
       expect(
@@ -75,7 +75,7 @@ describe('pdfZoomUtils', () => {
           zoomStep: 0.1,
           minScale: 0.5,
           maxScale: 3,
-        })
+        }),
       ).toBe(3);
 
       expect(
@@ -85,13 +85,13 @@ describe('pdfZoomUtils', () => {
           zoomStep: 0.3333,
           minScale: 0.5,
           maxScale: 3,
-        })
+        }),
       ).toBe(1.333);
     });
   });
 
-  describe('computeNextScaleFromGesture', () => {
-    it('uses baseScale * gestureScale and normalizes', () => {
+  describe("computeNextScaleFromGesture", () => {
+    it("uses baseScale * gestureScale and normalizes", () => {
       expect(
         computeNextScaleFromGesture({
           currentScale: 1,
@@ -99,11 +99,11 @@ describe('pdfZoomUtils', () => {
           gestureScale: 1.25,
           minScale: 0.5,
           maxScale: 3,
-        })
+        }),
       ).toBe(1.5);
     });
 
-    it('falls back to currentScale when baseScale is null', () => {
+    it("falls back to currentScale when baseScale is null", () => {
       expect(
         computeNextScaleFromGesture({
           currentScale: 1.23456,
@@ -111,11 +111,11 @@ describe('pdfZoomUtils', () => {
           gestureScale: 1,
           minScale: 0.5,
           maxScale: 3,
-        })
+        }),
       ).toBe(1.235);
     });
 
-    it('returns null for invalid gesture scale', () => {
+    it("returns null for invalid gesture scale", () => {
       expect(
         computeNextScaleFromGesture({
           currentScale: 1,
@@ -123,11 +123,11 @@ describe('pdfZoomUtils', () => {
           gestureScale: 0,
           minScale: 0.5,
           maxScale: 3,
-        })
+        }),
       ).toBeNull();
     });
 
-    it('applies clamp', () => {
+    it("applies clamp", () => {
       expect(
         computeNextScaleFromGesture({
           currentScale: 2.9,
@@ -135,7 +135,7 @@ describe('pdfZoomUtils', () => {
           gestureScale: 1.5,
           minScale: 0.5,
           maxScale: 3,
-        })
+        }),
       ).toBe(3);
     });
   });

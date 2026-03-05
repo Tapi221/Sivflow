@@ -1,6 +1,6 @@
-import { GripVertical, Trash2, Copy } from '@/ui/icons';
-import React from 'react';
-import { cn } from '@/lib/utils';
+import { GripVertical, Trash2, Copy } from "@/ui/icons";
+import React from "react";
+import { cn } from "@/lib/utils";
 interface BlockWrapperProps {
   children: React.ReactNode;
   onDelete: () => void;
@@ -56,12 +56,18 @@ export const BlockWrapper = ({
   const [isEditingWithin, setIsEditingWithin] = React.useState(false);
   const isEditableFocusTarget = (target: EventTarget | null) => {
     if (!(target instanceof HTMLElement)) return false;
-    return Boolean(target.closest('input, textarea, [contenteditable="true"], [contenteditable=""]'));
+    return Boolean(
+      target.closest(
+        'input, textarea, [contenteditable="true"], [contenteditable=""]',
+      ),
+    );
   };
 
   // 実ボーダーは高さを+2pxして24pxグリッドを崩すため、常に inset box-shadow で描画する。
   const isOutlineVisible = Boolean(isActive || isEditingWithin);
-  const outlineColor = accentColor ? `${accentColor}40` : 'rgba(59, 130, 246, 0.35)';
+  const outlineColor = accentColor
+    ? `${accentColor}40`
+    : "rgba(59, 130, 246, 0.35)";
   const baseOutline = `inset 0 0 0 var(--card-ruled-line-px, 1px) var(--card-ruled-color, rgba(0,0,0,0.05))`;
   const activeOutline = `inset 0 0 0 var(--card-ruled-line-px, 1px) ${outlineColor}`;
 
@@ -115,7 +121,11 @@ export const BlockWrapper = ({
     target.setPointerCapture(pointerId);
 
     const onPointerMove = (moveEvent: PointerEvent) => {
-      if (!stepDragRef.current || moveEvent.pointerId !== stepDragRef.current.pointerId) return;
+      if (
+        !stepDragRef.current ||
+        moveEvent.pointerId !== stepDragRef.current.pointerId
+      )
+        return;
 
       const deltaY = moveEvent.clientY - stepDragRef.current.startY;
       const nextSteps = Math.round(deltaY / STEP_PX);
@@ -128,20 +138,24 @@ export const BlockWrapper = ({
     };
 
     const onPointerEnd = (endEvent: PointerEvent) => {
-      if (!stepDragRef.current || endEvent.pointerId !== stepDragRef.current.pointerId) return;
+      if (
+        !stepDragRef.current ||
+        endEvent.pointerId !== stepDragRef.current.pointerId
+      )
+        return;
 
       stepDragRef.current = null;
 
       onMoveDragEnd?.();
 
-      window.removeEventListener('pointermove', onPointerMove);
-      window.removeEventListener('pointerup', onPointerEnd);
-      window.removeEventListener('pointercancel', onPointerEnd);
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", onPointerEnd);
+      window.removeEventListener("pointercancel", onPointerEnd);
     };
 
-    window.addEventListener('pointermove', onPointerMove);
-    window.addEventListener('pointerup', onPointerEnd);
-    window.addEventListener('pointercancel', onPointerEnd);
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerEnd);
+    window.addEventListener("pointercancel", onPointerEnd);
   };
 
   return (
@@ -158,18 +172,18 @@ export const BlockWrapper = ({
         setIsEditingWithin(isEditableFocusTarget(nextFocused));
       }}
       className={cn(
-        'group relative overflow-visible bg-transparent py-0 px-1.5',
-        isOutlineVisible && 'z-40',
-        className
+        "group relative overflow-visible bg-transparent py-0 px-1.5",
+        isOutlineVisible && "z-40",
+        className,
       )}
       style={{
         boxShadow: isOutlineVisible ? activeOutline : baseOutline,
-        borderRadius: 'var(--block-frame-radius, 12px)',
+        borderRadius: "var(--block-frame-radius, 12px)",
       }}
     >
       {/* 操作メニュー (アクティブ時に表示) */}
       <div
-        data-active={isActive ? 'true' : 'false'}
+        data-active={isActive ? "true" : "false"}
         className="absolute -right-1 top-1/2 -translate-y-1/2 flex flex-col items-center gap-0 -space-y-px opacity-0 pointer-events-none
         group-hover:opacity-100 group-hover:pointer-events-auto
         group-focus-within:opacity-100 group-focus-within:pointer-events-auto
@@ -181,9 +195,9 @@ export const BlockWrapper = ({
             {...dragHandleProps}
             onPointerDown={startStepDrag}
             className={cn(
-              'w-5 h-5 min-w-0 min-h-0 p-0 bg-white border border-slate-100 rounded-full text-slate-400 shadow-sm flex items-center justify-center flex-none transition-colors',
-              'cursor-grab active:cursor-grabbing',
-              dragHandleClassName
+              "w-5 h-5 min-w-0 min-h-0 p-0 bg-white border border-slate-100 rounded-full text-slate-400 shadow-sm flex items-center justify-center flex-none transition-colors",
+              "cursor-grab active:cursor-grabbing",
+              dragHandleClassName,
             )}
           >
             <GripVertical className="w-2.5 h-2.5" />
@@ -211,10 +225,12 @@ export const BlockWrapper = ({
         )}
       </div>
 
-      <div data-block-measure-root="true" className={cn('relative px-1', contentClassName)}>
+      <div
+        data-block-measure-root="true"
+        className={cn("relative px-1", contentClassName)}
+      >
         {children}
       </div>
     </div>
   );
 };
-

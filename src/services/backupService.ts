@@ -1,6 +1,6 @@
-import type { Folder, Card, User, UserSettings, UserStats } from '../types';
-import { firestoreDb } from './firebase';
-import { collection, writeBatch, doc, setDoc } from 'firebase/firestore';
+import type { Folder, Card, User, UserSettings, UserStats } from "../types";
+import { firestoreDb } from "./firebase";
+import { collection, writeBatch, doc, setDoc } from "firebase/firestore";
 
 /**
  * 手動バックアップサービス
@@ -12,7 +12,7 @@ export class BackupService {
 
   constructor(userId: string) {
     if (!userId) {
-      throw new Error('BackupService requires a user ID.');
+      throw new Error("BackupService requires a user ID.");
     }
     this.userId = userId;
   }
@@ -26,11 +26,11 @@ export class BackupService {
     folders: Folder[],
     cards: Card[],
     userSettings: UserSettings,
-    userStats: UserStats
+    userStats: UserStats,
   ): Promise<{ success: boolean; itemCount: number; error?: string }> {
     try {
       if (!firestoreDb) {
-        throw new Error('Firestore is not initialized.');
+        throw new Error("Firestore is not initialized.");
       }
 
       // Firestore batch 制限対策
@@ -62,7 +62,8 @@ export class BackupService {
 
       const addSet = async (ref: unknown, data: unknown): Promise<void> => {
         const payloadBytes = estimateBytes(data) + 512;
-        const wouldExceed = ops > 0 && (ops + 1 > MAX_OPS || bytes + payloadBytes > MAX_BYTES);
+        const wouldExceed =
+          ops > 0 && (ops + 1 > MAX_OPS || bytes + payloadBytes > MAX_BYTES);
         if (wouldExceed) {
           await commit();
         }
@@ -76,42 +77,54 @@ export class BackupService {
 
       // フォルダをバックアップ（cloud_sync_enabledの状態に関わらずバックアップ）
       for (const folder of folders) {
-        const folderRef = doc(firestoreDb, `users/${this.userId}/folders/${folder.id}`);
+        const folderRef = doc(
+          firestoreDb,
+          `users/${this.userId}/folders/${folder.id}`,
+        );
         await addSet(folderRef, {
           ...folder,
           // バックアップ時のメタデータを追加
           backupAt: now,
-          source: 'manual_backup',
+          source: "manual_backup",
         });
       }
 
       // カードをバックアップ
       for (const card of cards) {
-        const cardRef = doc(firestoreDb, `users/${this.userId}/cards/${card.id}`);
+        const cardRef = doc(
+          firestoreDb,
+          `users/${this.userId}/cards/${card.id}`,
+        );
         await addSet(cardRef, {
           ...card,
           backupAt: now,
-          source: 'manual_backup',
+          source: "manual_backup",
         });
       }
 
       // ユーザー設定をバックアップ
       {
-        const userSettingsRef = doc(firestoreDb, `users/${this.userId}/userSettings/settings`);
+        const userSettingsRef = doc(
+          firestoreDb,
+          `users/${this.userId}/userSettings/settings`,
+        );
         await addSet(userSettingsRef, {
           ...userSettings,
           backupAt: now,
-          source: 'manual_backup',
+          source: "manual_backup",
         });
       }
 
       // ユーザー統計をバックアップ
       {
-        const userStatsRef = doc(firestoreDb, `users/${this.userId}/userStats/stats`);
+        const userStatsRef = doc(
+          firestoreDb,
+          `users/${this.userId}/userStats/stats`,
+        );
         await addSet(userStatsRef, {
           ...userStats,
           backupAt: now,
-          source: 'manual_backup',
+          source: "manual_backup",
         });
       }
 
@@ -124,8 +137,9 @@ export class BackupService {
         itemCount,
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error('[Backup] Error during backup:', error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      console.error("[Backup] Error during backup:", error);
       return {
         success: false,
         itemCount: 0,
@@ -141,10 +155,12 @@ export class BackupService {
   async getLastBackupTime(): Promise<Date | null> {
     try {
       // ローカルストレージから取得（簡易実装）
-      const lastBackupTime = localStorage.getItem(`${this.userId}_lastBackupTime`);
+      const lastBackupTime = localStorage.getItem(
+        `${this.userId}_lastBackupTime`,
+      );
       return lastBackupTime ? new Date(lastBackupTime) : null;
     } catch (error) {
-      console.error('[Backup] Error retrieving last backup time:', error);
+      console.error("[Backup] Error retrieving last backup time:", error);
       return null;
     }
   }
@@ -154,9 +170,12 @@ export class BackupService {
    */
   async recordBackupTime(): Promise<void> {
     try {
-      localStorage.setItem(`${this.userId}_lastBackupTime`, new Date().toISOString());
+      localStorage.setItem(
+        `${this.userId}_lastBackupTime`,
+        new Date().toISOString(),
+      );
     } catch (error) {
-      console.error('[Backup] Error recording backup time:', error);
+      console.error("[Backup] Error recording backup time:", error);
     }
   }
 }
@@ -167,7 +186,7 @@ export class BackupService {
 let backupServiceInstance: BackupService | null = null;
 
 export function initializeBackupService(userId: string): BackupService {
-  if (!backupServiceInstance || backupServiceInstance['userId'] !== userId) {
+  if (!backupServiceInstance || backupServiceInstance["userId"] !== userId) {
     backupServiceInstance = new BackupService(userId);
   }
   return backupServiceInstance;
@@ -175,7 +194,9 @@ export function initializeBackupService(userId: string): BackupService {
 
 export function getBackupService(): BackupService {
   if (!backupServiceInstance) {
-    throw new Error('BackupService is not initialized. Call initializeBackupService first.');
+    throw new Error(
+      "BackupService is not initialized. Call initializeBackupService first.",
+    );
   }
   return backupServiceInstance;
 }

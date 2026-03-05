@@ -9,21 +9,21 @@
  * - キーボード: Space/Enter=flip, ↑/↓=prev/next
  */
 
-import { useRef } from 'react';
-import { useVerticalCardPager } from '@/hooks/useVerticalCardPager';
-import { CANONICAL_CARD_WIDTH } from '@/components/card/common/constants';
+import { useRef } from "react";
+import { useVerticalCardPager } from "@/hooks/useVerticalCardPager";
+import { CANONICAL_CARD_WIDTH } from "@/components/card/common/constants";
 
 // ── レイアウト定数 ──────────────────────────────────────────────────────────
-const DEFAULT_CARD_WIDTH = CANONICAL_CARD_WIDTH;   // カード列の固定幅 (px) = カード設計幅と一致させて青枠を正確に合わせる
-const CARD_GAP = 32;              // カード間の縦方向ギャップ (px)
-const SCROLL_PADDING = '50vh';    // 先頭・末尾カードを中央に寄せるための余白
+const DEFAULT_CARD_WIDTH = CANONICAL_CARD_WIDTH; // カード列の固定幅 (px) = カード設計幅と一致させて青枠を正確に合わせる
+const CARD_GAP = 32; // カード間の縦方向ギャップ (px)
+const SCROLL_PADDING = "50vh"; // 先頭・末尾カードを中央に寄せるための余白
 
 // ── アクティブ/非アクティブスタイル ──────────────────────────────────────
-const ACTIVE_BOX_SHADOW = '0 0 0 2px #3b82f6, 0 12px 40px rgba(0,0,0,0.18)';
-const INACTIVE_BOX_SHADOW = '0 2px 10px rgba(0,0,0,0.1)';
+const ACTIVE_BOX_SHADOW = "0 0 0 2px #3b82f6, 0 12px 40px rgba(0,0,0,0.18)";
+const INACTIVE_BOX_SHADOW = "0 2px 10px rgba(0,0,0,0.1)";
 /** cardWidth に合わせてスケールした角丸を返す (px 指定で縦横ともに一致) */
 function cardBorderRadius(cardWidth: number): string {
-  return `${Math.round(40 * cardWidth / CANONICAL_CARD_WIDTH)}px`;
+  return `${Math.round((40 * cardWidth) / CANONICAL_CARD_WIDTH)}px`;
 }
 const ACTIVE_OPACITY = 1;
 const INACTIVE_OPACITY = 0.75;
@@ -73,16 +73,16 @@ export function VerticalCardPager<T>({
     <div
       ref={containerRef}
       style={{
-        overflowY: 'auto',
-        height: '100%',
+        overflowY: "auto",
+        height: "100%",
       }}
     >
       {/* カード列 */}
       <div
         style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
           gap: CARD_GAP,
           // 先頭・末尾カードが中央に来られるよう上下に余白を確保
           paddingBlock: SCROLL_PADDING,
@@ -96,16 +96,18 @@ export function VerticalCardPager<T>({
           return (
             <div
               key={key}
-              ref={(el) => { itemRefs.current[idx] = el; }}
-              aria-current={isActive ? 'true' : undefined}
+              ref={(el) => {
+                itemRefs.current[idx] = el;
+              }}
+              aria-current={isActive ? "true" : undefined}
               style={{
                 width: cardWidth,
-                maxWidth: '100%',
+                maxWidth: "100%",
                 // アクティブ: 青枠＋濃い影、非アクティブ: 薄い影
                 boxShadow: isActive ? ACTIVE_BOX_SHADOW : INACTIVE_BOX_SHADOW,
                 borderRadius: cardBorderRadius(cardWidth),
                 opacity: isActive ? ACTIVE_OPACITY : INACTIVE_OPACITY,
-                transition: 'opacity 220ms ease, box-shadow 220ms ease',
+                transition: "opacity 220ms ease, box-shadow 220ms ease",
                 // 非アクティブカードへの誤タップを防ぐ（オプション: コメントアウトで解除）
                 // pointerEvents: isActive ? 'auto' : 'none',
               }}

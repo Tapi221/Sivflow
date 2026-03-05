@@ -12,7 +12,9 @@ import { normalizeLayoutRows } from "@/domain/card/extraRows";
 
 type Side = "question" | "answer";
 
-type UseLayoutRowsControllerParams<TDraft extends { layoutRows: number } | null> = {
+type UseLayoutRowsControllerParams<
+  TDraft extends { layoutRows: number } | null,
+> = {
   draft: TDraft;
   setDraft: Dispatch<SetStateAction<TDraft>>;
   defaultLayoutRows: number;
@@ -20,7 +22,9 @@ type UseLayoutRowsControllerParams<TDraft extends { layoutRows: number } | null>
   isEditing: boolean;
 };
 
-export function useLayoutRowsController<TDraft extends { layoutRows: number } | null>({
+export function useLayoutRowsController<
+  TDraft extends { layoutRows: number } | null,
+>({
   draft,
   setDraft,
   defaultLayoutRows,
@@ -39,13 +43,15 @@ export function useLayoutRowsController<TDraft extends { layoutRows: number } | 
 
   const rowsFromMinHeightPx = useCallback((minHeightPx: number): number => {
     const safeHeight = Number.isFinite(minHeightPx) ? minHeightPx : 0;
-    return normalizeLayoutRows(minCardHeightPxToLayoutRows(Math.max(0, safeHeight)));
+    return normalizeLayoutRows(
+      minCardHeightPxToLayoutRows(Math.max(0, safeHeight)),
+    );
   }, []);
 
   const getRequiredMinRows = useCallback((): number => {
     const requiredHeightPx = Math.max(
       minHeightPxBySideRef.current.question,
-      minHeightPxBySideRef.current.answer
+      minHeightPxBySideRef.current.answer,
     );
     return rowsFromMinHeightPx(requiredHeightPx);
   }, [rowsFromMinHeightPx]);
@@ -55,7 +61,7 @@ export function useLayoutRowsController<TDraft extends { layoutRows: number } | 
       const safeRows = normalizeLayoutRows(nextRows);
       setDraft((prev) => (prev ? { ...prev, layoutRows: safeRows } : prev));
     },
-    [setDraft]
+    [setDraft],
   );
 
   const scheduleLayoutRowsFromHeight = useCallback(
@@ -64,7 +70,9 @@ export function useLayoutRowsController<TDraft extends { layoutRows: number } | 
       const currentHeightPx = layoutRowsToCardHeightPx(currentRows);
       const rawRows = (nextHeightPx - CARD_HEIGHT_PHASE_PX) / CARD_ROW_PX;
       const requestedRows = normalizeLayoutRows(
-        nextHeightPx < currentHeightPx ? Math.floor(rawRows) : cardHeightPxToLayoutRows(nextHeightPx)
+        nextHeightPx < currentHeightPx
+          ? Math.floor(rawRows)
+          : cardHeightPxToLayoutRows(nextHeightPx),
       );
       const nextRows = Math.max(requestedRows, getRequiredMinRows());
       pendingRowsRef.current = nextRows;
@@ -78,7 +86,7 @@ export function useLayoutRowsController<TDraft extends { layoutRows: number } | 
         setLayoutRows(pending);
       });
     },
-    [getRequiredMinRows, setLayoutRows]
+    [getRequiredMinRows, setLayoutRows],
   );
 
   const handleSideMinHeightChange = useCallback(
@@ -94,17 +102,17 @@ export function useLayoutRowsController<TDraft extends { layoutRows: number } | 
         return { ...prev, layoutRows: requiredRows };
       });
     },
-    [getRequiredMinRows, setDraft]
+    [getRequiredMinRows, setDraft],
   );
 
   const handleQuestionMinHeightChange = useCallback(
     (minHeightPx: number) => handleSideMinHeightChange("question", minHeightPx),
-    [handleSideMinHeightChange]
+    [handleSideMinHeightChange],
   );
 
   const handleAnswerMinHeightChange = useCallback(
     (minHeightPx: number) => handleSideMinHeightChange("answer", minHeightPx),
-    [handleSideMinHeightChange]
+    [handleSideMinHeightChange],
   );
 
   useEffect(() => {

@@ -1,5 +1,5 @@
-import React from 'react';
-import { cn } from '@/lib/utils';
+import React from "react";
+import { cn } from "@/lib/utils";
 
 export interface ScaleToFitFrameProps {
   children: React.ReactNode;
@@ -52,7 +52,7 @@ export function ScaleToFitFrame({
       setScale(1);
       return;
     }
-    if (typeof ResizeObserver === 'undefined') return;
+    if (typeof ResizeObserver === "undefined") return;
     if (!frameRef.current) return;
 
     const frame = frameRef.current;
@@ -69,9 +69,14 @@ export function ScaleToFitFrame({
           : Number.POSITIVE_INFINITY;
       const fitScale = Math.min(fitByWidth, fitByHeight);
       const upperBound = allowUpscale ? Math.max(1, maxScale) : 1;
-      const nextScale = Math.max(0.1, Math.min(upperBound, fitScale * scaleMultiplier));
+      const nextScale = Math.max(
+        0.1,
+        Math.min(upperBound, fitScale * scaleMultiplier),
+      );
 
-      setScale((prev) => (Math.abs(prev - nextScale) < 0.0001 ? prev : nextScale));
+      setScale((prev) =>
+        Math.abs(prev - nextScale) < 0.0001 ? prev : nextScale,
+      );
     };
 
     calcScale();
@@ -80,10 +85,19 @@ export function ScaleToFitFrame({
     observer.observe(frame);
 
     return () => observer.disconnect();
-  }, [baseWidth, scaleMultiplier, disableScale, fitHeight, contentHeight, allowUpscale, maxScale, schedule]);
+  }, [
+    baseWidth,
+    scaleMultiplier,
+    disableScale,
+    fitHeight,
+    contentHeight,
+    allowUpscale,
+    maxScale,
+    schedule,
+  ]);
 
   React.useEffect(() => {
-    if (typeof ResizeObserver === 'undefined') return;
+    if (typeof ResizeObserver === "undefined") return;
     if (!contentRef.current) return;
 
     const content = contentRef.current;
@@ -103,36 +117,52 @@ export function ScaleToFitFrame({
   }, [schedule]);
 
   const scaledHeight =
-    contentHeight != null ? Math.ceil(contentHeight * (disableScale ? 1 : scale)) : null;
+    contentHeight != null
+      ? Math.ceil(contentHeight * (disableScale ? 1 : scale))
+      : null;
   const safePaddingPx = Math.max(0, contentPaddingPx);
 
   return (
     <div
       ref={frameRef}
-      className={cn('w-full min-h-0 overflow-visible', fitHeight && 'h-full', className)}
-      style={!fitHeight && scaledHeight != null ? { height: `${scaledHeight}px` } : undefined}
+      className={cn(
+        "w-full min-h-0 overflow-visible",
+        fitHeight && "h-full",
+        className,
+      )}
+      style={
+        !fitHeight && scaledHeight != null
+          ? { height: `${scaledHeight}px` }
+          : undefined
+      }
     >
       <div
         className={cn(
-          fitHeight && centerContent ? 'h-full flex items-center justify-center' : 'flex justify-center'
+          fitHeight && centerContent
+            ? "h-full flex items-center justify-center"
+            : "flex justify-center",
         )}
       >
-      <div
-        style={{
-          width: disableScale ? '100%' : `${Math.max(1, baseWidth)}px`,
-          transform: disableScale ? 'none' : `scale(${scale})`,
-          transformOrigin: disableScale
-            ? 'initial'
-            : fitHeight && centerContent
-              ? 'center center'
-              : 'top left',
-          willChange: disableScale ? undefined : 'transform',
-        }}
-      >
-        <div ref={contentRef} className="flow-root" style={{ padding: safePaddingPx }}>
-          {children}
+        <div
+          style={{
+            width: disableScale ? "100%" : `${Math.max(1, baseWidth)}px`,
+            transform: disableScale ? "none" : `scale(${scale})`,
+            transformOrigin: disableScale
+              ? "initial"
+              : fitHeight && centerContent
+                ? "center center"
+                : "top left",
+            willChange: disableScale ? undefined : "transform",
+          }}
+        >
+          <div
+            ref={contentRef}
+            className="flow-root"
+            style={{ padding: safePaddingPx }}
+          >
+            {children}
+          </div>
         </div>
-      </div>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
-import React from 'react';
-import { cn } from '@/lib/utils';
-import { TagBadge } from '@/components/tag/TagBadge';
+import React from "react";
+import { cn } from "@/lib/utils";
+import { TagBadge } from "@/components/tag/TagBadge";
 
 interface TagChipProps {
   label: string;
@@ -26,7 +26,7 @@ export function TagChip({
       label={label}
       size="xs"
       colorClass={colorClass}
-      className={cn('max-w-full', className, badgeClassName)}
+      className={cn("max-w-full", className, badgeClassName)}
       onClick={onClick}
       onRemove={onRemove}
       removeAriaLabel={removeAriaLabel}

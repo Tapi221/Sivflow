@@ -1,26 +1,32 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from '@/ui/icons';
-import { FolderTreeWithCards } from './FolderTreeWithCards';
-import { RightPane } from './RightPane';
-import { ExplorerTabs } from '../explorer/ExplorerTabs';
-import { PinnedPanel } from '../explorer/PinnedPanel';
-import { RecentPanel } from '../explorer/RecentPanel';
-import { cn } from '@/lib/utils';
-import { useFolders } from '@/hooks/useFolders';
-import { useDocuments } from '@/hooks/useDocuments';
-import { createPageUrl } from '@/utils';
-import { useUserSettings } from '@/hooks/useUserSettings';
-import { useTags, resolveCardTagNames } from '@/hooks/useTags';
-import type { Card, DocumentItem, Folder, SelectedExplorerItem } from '@/types';
-import { useCards } from '@/hooks/useCards';
-import { useExplorerStore } from '@/hooks/useExplorerStore';
-import CreateCardSelectionDialog from '@/components/card/overlays/CreateCardSelectionDialog';
-import CreationModeDialog from '@/components/card/overlays/CreationModeDialog';
-import { ViewManagerDialog } from './ViewManagerDialog';
-import { ViewsPanel } from './ViewsPanel';
-import { buildVirtualTree, type ViewDef, type ViewKind } from './viewTypes';
-import { ExplorerFilterSummary } from './ExplorerFilterSummary';
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useMemo,
+} from "react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "@/ui/icons";
+import { FolderTreeWithCards } from "./FolderTreeWithCards";
+import { RightPane } from "./RightPane";
+import { ExplorerTabs } from "../explorer/ExplorerTabs";
+import { PinnedPanel } from "../explorer/PinnedPanel";
+import { RecentPanel } from "../explorer/RecentPanel";
+import { cn } from "@/lib/utils";
+import { useFolders } from "@/hooks/useFolders";
+import { useDocuments } from "@/hooks/useDocuments";
+import { createPageUrl } from "@/utils";
+import { useUserSettings } from "@/hooks/useUserSettings";
+import { useTags, resolveCardTagNames } from "@/hooks/useTags";
+import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
+import { useCards } from "@/hooks/useCards";
+import { useExplorerStore } from "@/hooks/useExplorerStore";
+import CreateCardSelectionDialog from "@/components/card/overlays/CreateCardSelectionDialog";
+import CreationModeDialog from "@/components/card/overlays/CreationModeDialog";
+import { ViewManagerDialog } from "./ViewManagerDialog";
+import { ViewsPanel } from "./ViewsPanel";
+import { buildVirtualTree, type ViewDef, type ViewKind } from "./viewTypes";
+import { ExplorerFilterSummary } from "./ExplorerFilterSummary";
 
 interface TreeViewLayoutProps {
   folders: Folder[];
@@ -51,26 +57,30 @@ type CardLike = Card & LegacyCardFields;
 const MIN_SIDEBAR_W = 200;
 const MAX_SIDEBAR_W = 600;
 const DEFAULT_SIDEBAR_W = 320;
-const DEFAULT_FOLDER_VIEW: ViewDef = { id: 'folder-default', name: 'フォルダ', kind: 'folder' };
-const ACTIVE_VIEW_KINDS: ViewKind[] = ['folder', 'tagCategory', 'tagTree'];
+const DEFAULT_FOLDER_VIEW: ViewDef = {
+  id: "folder-default",
+  name: "フォルダ",
+  kind: "folder",
+};
+const ACTIVE_VIEW_KINDS: ViewKind[] = ["folder", "tagCategory", "tagTree"];
 
 const createViewId = () =>
-  (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+  typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
     ? crypto.randomUUID()
-    : `view-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`);
+    : `view-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
 const toDate = (value: unknown): Date | null => {
   if (value === null || value === undefined) return null;
-  if (typeof value?.toDate === 'function') {
+  if (typeof value?.toDate === "function") {
     const d = value.toDate();
     return d instanceof Date && !isNaN(d.getTime()) ? d : null;
   }
   if (value instanceof Date) return isNaN(value.getTime()) ? null : value;
-  if (typeof value === 'number') {
+  if (typeof value === "number") {
     const d = new Date(value);
     return isNaN(d.getTime()) ? null : d;
   }
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     const d = new Date(value);
     return isNaN(d.getTime()) ? null : d;
   }
@@ -92,9 +102,11 @@ function TreeViewLayout({
   const navigate = useNavigate();
   const { settings, updateSettings } = useUserSettings();
   const { createFolder, updateFolder, deleteFolder } = useFolders();
-  const { createCard, updateCard, deleteCard, moveCardToFolder, reorderCards } = useCards();
+  const { createCard, updateCard, deleteCard, moveCardToFolder, reorderCards } =
+    useCards();
   const { updateDocument } = useDocuments();
-  const { getTagColor, getCategoryName, listCategoryIdsInUse, tagById, tags } = useTags();
+  const { getTagColor, getCategoryName, listCategoryIdsInUse, tagById, tags } =
+    useTags();
 
   const {
     explorerTab,
@@ -114,25 +126,25 @@ function TreeViewLayout({
   } = useExplorerStore();
 
   useEffect(() => {
-    if (explorerTab === 'inbox') {
-      setExplorerTab('explorer');
+    if (explorerTab === "inbox") {
+      setExplorerTab("explorer");
     }
   }, [explorerTab, setExplorerTab]);
 
   const [sidebarWidth, setSidebarWidth] = useState(() => {
-    if (typeof window === 'undefined') return DEFAULT_SIDEBAR_W;
-    const saved = localStorage.getItem('ui.sidebarWidth');
+    if (typeof window === "undefined") return DEFAULT_SIDEBAR_W;
+    const saved = localStorage.getItem("ui.sidebarWidth");
     return saved ? parseInt(saved, 10) : DEFAULT_SIDEBAR_W;
   });
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
-    if (typeof window === 'undefined') return true;
-    const saved = localStorage.getItem('ui.sidebarOpen');
-    return saved !== null ? saved === 'true' : true;
+    if (typeof window === "undefined") return true;
+    const saved = localStorage.getItem("ui.sidebarOpen");
+    return saved !== null ? saved === "true" : true;
   });
 
   const [isMobile, setIsMobile] = useState(() =>
-    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+    typeof window !== "undefined" ? window.innerWidth < 768 : false,
   );
 
   const [isResizing, setIsResizing] = useState(false);
@@ -149,7 +161,8 @@ function TreeViewLayout({
   const pendingWRef = useRef(sidebarWidth);
   const rafIdRef = useRef<number | null>(null);
 
-  const clamp = (w: number) => Math.min(Math.max(w, MIN_SIDEBAR_W), MAX_SIDEBAR_W);
+  const clamp = (w: number) =>
+    Math.min(Math.max(w, MIN_SIDEBAR_W), MAX_SIDEBAR_W);
 
   const applyWidthDom = useCallback(
     (w: number) => {
@@ -161,50 +174,59 @@ function TreeViewLayout({
         rafIdRef.current = null;
         const el = sidebarRef.current;
         if (!el) return;
-        el.style.width = isSidebarOpen ? `${pendingWRef.current}px` : '0px';
+        el.style.width = isSidebarOpen ? `${pendingWRef.current}px` : "0px";
       });
     },
-    [isMobile, isSidebarOpen]
+    [isMobile, isSidebarOpen],
   );
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 768);
     onResize();
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, []);
 
   useEffect(() => {
     const el = sidebarRef.current;
     if (!el) return;
     if (!isMobile) {
-      el.style.width = isSidebarOpen ? `${sidebarWidth}px` : '0px';
+      el.style.width = isSidebarOpen ? `${sidebarWidth}px` : "0px";
     } else {
       // モバイル時は常に画面幅優先。desktop時のinline widthを完全に破棄する。
-      el.style.width = '';
+      el.style.width = "";
     }
     pendingWRef.current = sidebarWidth;
   }, [isMobile, sidebarWidth, isSidebarOpen]);
 
-  const showMobileDetail = isMobile && Boolean(selectedFolderId || selectedCardId || selectedDocumentId || selectedItem);
+  const showMobileDetail =
+    isMobile &&
+    Boolean(
+      selectedFolderId || selectedCardId || selectedDocumentId || selectedItem,
+    );
 
   const handleFolderSelectWithRecent = (folderId: string | null) => {
     onFolderSelect(folderId);
     if (folderId) {
-      addRecent({ type: 'folder', id: folderId });
+      addRecent({ type: "folder", id: folderId });
     }
   };
 
-  const getFolderPath = useCallback((folderId: string | null): string => {
-    if (!folderId) return '';
-    const path: string[] = [];
-    let currentFolder = folders.find((folder) => folder.id === folderId);
-    while (currentFolder) {
-      path.unshift(currentFolder.folderName);
-      currentFolder = folders.find((folder) => folder.id === currentFolder?.parentFolderId);
-    }
-    return path.join(' / ');
-  }, [folders]);
+  const getFolderPath = useCallback(
+    (folderId: string | null): string => {
+      if (!folderId) return "";
+      const path: string[] = [];
+      let currentFolder = folders.find((folder) => folder.id === folderId);
+      while (currentFolder) {
+        path.unshift(currentFolder.folderName);
+        currentFolder = folders.find(
+          (folder) => folder.id === currentFolder?.parentFolderId,
+        );
+      }
+      return path.join(" / ");
+    },
+    [folders],
+  );
 
   const selectedFolder = useMemo(() => {
     if (!selectedFolderId) return null;
@@ -213,19 +235,24 @@ function TreeViewLayout({
 
   const selectedDocument = useMemo(() => {
     if (!selectedDocumentId) return null;
-    return documents.find((document) => (document.id || document.documentId) === selectedDocumentId) ?? null;
+    return (
+      documents.find(
+        (document) =>
+          (document.id || document.documentId) === selectedDocumentId,
+      ) ?? null
+    );
   }, [documents, selectedDocumentId]);
 
   const mobileDetailTitle = useMemo(() => {
-    if (selectedItem?.type === 'directory') return 'ディレクトリ';
-    if (selectedItem?.type === 'today-study') return '今日の学習';
-    if (selectedItem?.type === 'gallery') return 'ギャラリー';
-    if (selectedItem?.type === 'calendar') return '予定表';
-    if (selectedItem?.type === 'settings') return '設定';
-    if (selectedItem?.type === 'trash') return 'ごみ箱';
-    if (selectedItem?.type === 'card') return 'カード';
-    if (selectedItem?.type === 'document') return 'ドキュメント';
-    return selectedFolder?.folderName ?? 'フォルダ';
+    if (selectedItem?.type === "directory") return "ディレクトリ";
+    if (selectedItem?.type === "today-study") return "今日の学習";
+    if (selectedItem?.type === "gallery") return "ギャラリー";
+    if (selectedItem?.type === "calendar") return "予定表";
+    if (selectedItem?.type === "settings") return "設定";
+    if (selectedItem?.type === "trash") return "ごみ箱";
+    if (selectedItem?.type === "card") return "カード";
+    if (selectedItem?.type === "document") return "ドキュメント";
+    return selectedFolder?.folderName ?? "フォルダ";
   }, [selectedItem, selectedFolder]);
 
   const folderCards = useMemo(() => {
@@ -241,7 +268,11 @@ function TreeViewLayout({
   const folderStats = useMemo(() => {
     const autoCarryOver = settings?.autoCarryOver ?? true;
     const today = new Date();
-    const tDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const tDate = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+    );
     let dueCount = 0;
     let unlearnedCount = 0;
     let lastReviewedAt: Date | null = null;
@@ -251,8 +282,14 @@ function TreeViewLayout({
       if (!isDraft) {
         const reviewDate = toDate(card.nextReviewDate ?? card.next_review_date);
         if (reviewDate) {
-          const rDate = new Date(reviewDate.getFullYear(), reviewDate.getMonth(), reviewDate.getDate());
-          if (autoCarryOver ? rDate <= tDate : rDate.getTime() === tDate.getTime()) {
+          const rDate = new Date(
+            reviewDate.getFullYear(),
+            reviewDate.getMonth(),
+            reviewDate.getDate(),
+          );
+          if (
+            autoCarryOver ? rDate <= tDate : rDate.getTime() === tDate.getTime()
+          ) {
             dueCount += 1;
           }
         }
@@ -292,16 +329,16 @@ function TreeViewLayout({
   }, [selectedFolderId]);
 
   const handleSelectCreateMode = useCallback(
-    (mode: 'single' | 'continuous') => {
+    (mode: "single" | "continuous") => {
       if (!selectedFolderId) return;
       setIsCreateSelectionOpen(false);
-      if (mode === 'single') {
+      if (mode === "single") {
         navigate(createPageUrl(`CardEdit?folderId=${selectedFolderId}`));
         return;
       }
       setIsModeSelectionOpen(true);
     },
-    [navigate, selectedFolderId]
+    [navigate, selectedFolderId],
   );
 
   const handleSelectDetailedMode = useCallback(
@@ -309,61 +346,84 @@ function TreeViewLayout({
       if (!selectedFolderId) return;
       setIsModeSelectionOpen(false);
 
-      if (mode === 'qa') {
-        const hideTitle = options?.hideTitle ? '&hideTitle=true' : '';
-        navigate(createPageUrl(`one-qa-mode?folderId=${selectedFolderId}${hideTitle}`));
+      if (mode === "qa") {
+        const hideTitle = options?.hideTitle ? "&hideTitle=true" : "";
+        navigate(
+          createPageUrl(`one-qa-mode?folderId=${selectedFolderId}${hideTitle}`),
+        );
         return;
       }
-      if (mode === 'pair') {
+      if (mode === "pair") {
         navigate(createPageUrl(`pair-mode?folderId=${selectedFolderId}`));
         return;
       }
-      if (mode === 'choice') {
-        navigate(createPageUrl(`four-choice-mode?folderId=${selectedFolderId}`));
+      if (mode === "choice") {
+        navigate(
+          createPageUrl(`four-choice-mode?folderId=${selectedFolderId}`),
+        );
         return;
       }
-      navigate(createPageUrl(`create-mode/placeholder?folderId=${selectedFolderId}`));
+      navigate(
+        createPageUrl(`create-mode/placeholder?folderId=${selectedFolderId}`),
+      );
     },
-    [navigate, selectedFolderId]
+    [navigate, selectedFolderId],
   );
 
   const allTags = useMemo(() => {
     const tagNames = new Set<string>();
     cards.forEach((c) => {
-      resolveCardTagNames(c.tagIds, c.tags, tagById).forEach(t => tagNames.add(t));
+      resolveCardTagNames(c.tagIds, c.tags, tagById).forEach((t) =>
+        tagNames.add(t),
+      );
     });
     return Array.from(tagNames).sort();
   }, [cards, tagById]);
 
   const viewDefs = useMemo(() => {
-    const storedViews = Array.isArray(settings?.explorerViews) ? settings.explorerViews : [];
-    const validStoredViews = storedViews.filter((view): view is ViewDef => ACTIVE_VIEW_KINDS.includes(view.kind as ViewKind));
-    const folderView = validStoredViews.find((view) => view.kind === 'folder') ?? DEFAULT_FOLDER_VIEW;
-    return [folderView, ...validStoredViews.filter((view) => view.kind !== 'folder')];
+    const storedViews = Array.isArray(settings?.explorerViews)
+      ? settings.explorerViews
+      : [];
+    const validStoredViews = storedViews.filter((view): view is ViewDef =>
+      ACTIVE_VIEW_KINDS.includes(view.kind as ViewKind),
+    );
+    const folderView =
+      validStoredViews.find((view) => view.kind === "folder") ??
+      DEFAULT_FOLDER_VIEW;
+    return [
+      folderView,
+      ...validStoredViews.filter((view) => view.kind !== "folder"),
+    ];
   }, [settings]);
 
   const selectedViewId = useMemo(() => {
     const savedViewId = settings?.selectedExplorerViewId;
-    if (savedViewId && viewDefs.some((view) => view.id === savedViewId)) return savedViewId;
+    if (savedViewId && viewDefs.some((view) => view.id === savedViewId))
+      return savedViewId;
     return viewDefs[0]?.id ?? DEFAULT_FOLDER_VIEW.id;
   }, [settings?.selectedExplorerViewId, viewDefs]);
 
   const selectedView = useMemo(
-    () => viewDefs.find((view) => view.id === selectedViewId) ?? DEFAULT_FOLDER_VIEW,
-    [selectedViewId, viewDefs]
+    () =>
+      viewDefs.find((view) => view.id === selectedViewId) ??
+      DEFAULT_FOLDER_VIEW,
+    [selectedViewId, viewDefs],
   );
 
   const customViews = useMemo(
-    () => viewDefs.filter((view) => view.kind !== 'folder'),
-    [viewDefs]
+    () => viewDefs.filter((view) => view.kind !== "folder"),
+    [viewDefs],
   );
 
   const activeCustomView = useMemo(() => {
-    if (selectedView.kind !== 'folder') return selectedView;
+    if (selectedView.kind !== "folder") return selectedView;
     return customViews[0] ?? null;
   }, [customViews, selectedView]);
 
-  const categoryIdsInUse = useMemo(() => listCategoryIdsInUse(), [listCategoryIdsInUse]);
+  const categoryIdsInUse = useMemo(
+    () => listCategoryIdsInUse(),
+    [listCategoryIdsInUse],
+  );
 
   const categoryNameById = useMemo(() => {
     const map = new Map<string, string>();
@@ -377,64 +437,79 @@ function TreeViewLayout({
     setCreateFolderRequestToken((prev) => prev + 1);
   }, []);
 
-  const isFilterTargetTab = explorerTab === 'explorer';
+  const isFilterTargetTab = explorerTab === "explorer";
   const isFilterActive =
     isFilterTargetTab &&
     (tagFilter.length > 0 ||
-      uncertaintyFilter !== 'any' ||
-      bookmarkedFilter !== 'any' ||
-      draftFilter !== 'any' ||
+      uncertaintyFilter !== "any" ||
+      bookmarkedFilter !== "any" ||
+      draftFilter !== "any" ||
       contentTypeFilter.length < 3);
 
   const { filteredCards, filteredDocuments, isFiltering } = useMemo(() => {
     const active =
       isFilterTargetTab &&
       (tagFilter.length > 0 ||
-        uncertaintyFilter !== 'any' ||
-        bookmarkedFilter !== 'any' ||
-        draftFilter !== 'any' ||
+        uncertaintyFilter !== "any" ||
+        bookmarkedFilter !== "any" ||
+        draftFilter !== "any" ||
         contentTypeFilter.length < 3);
-    if (!active) return { filteredCards: cards, filteredDocuments: documents, isFiltering: false };
+    if (!active)
+      return {
+        filteredCards: cards,
+        filteredDocuments: documents,
+        isFiltering: false,
+      };
 
-    const allowCards = contentTypeFilter.includes('card');
-    const allowPdf = contentTypeFilter.includes('pdf');
-    const allowPptx = contentTypeFilter.includes('pptx');
+    const allowCards = contentTypeFilter.includes("card");
+    const allowPdf = contentTypeFilter.includes("pdf");
+    const allowPptx = contentTypeFilter.includes("pptx");
 
     const filtered = cards.filter((card) => {
       if (!allowCards) return false;
       if (tagFilter.length > 0) {
-        const resolvedNames = resolveCardTagNames(card.tagIds, card.tags, tagById);
+        const resolvedNames = resolveCardTagNames(
+          card.tagIds,
+          card.tags,
+          tagById,
+        );
         if (resolvedNames.length === 0) return false;
         const cardTagSet = new Set(resolvedNames);
         const tagMatched =
-          tagMatchMode === 'any'
+          tagMatchMode === "any"
             ? tagFilter.some((t) => cardTagSet.has(t))
             : tagFilter.every((t) => cardTagSet.has(t));
         if (!tagMatched) return false;
       }
 
-      const hasUncertainty = Boolean(card.hasUncertainty ?? card.has_uncertainty);
+      const hasUncertainty = Boolean(
+        card.hasUncertainty ?? card.has_uncertainty,
+      );
       const isBookmarked = Boolean(card.isBookmarked ?? card.is_bookmarked);
       const isDraft = Boolean(card.isDraft ?? card.is_draft);
 
-      if (uncertaintyFilter === 'on' && !hasUncertainty) return false;
-      if (uncertaintyFilter === 'off' && hasUncertainty) return false;
-      if (bookmarkedFilter === 'on' && !isBookmarked) return false;
-      if (bookmarkedFilter === 'off' && isBookmarked) return false;
-      if (draftFilter === 'on' && !isDraft) return false;
-      if (draftFilter === 'off' && isDraft) return false;
+      if (uncertaintyFilter === "on" && !hasUncertainty) return false;
+      if (uncertaintyFilter === "off" && hasUncertainty) return false;
+      if (bookmarkedFilter === "on" && !isBookmarked) return false;
+      if (bookmarkedFilter === "off" && isBookmarked) return false;
+      if (draftFilter === "on" && !isDraft) return false;
+      if (draftFilter === "off" && isDraft) return false;
 
       return true;
     });
 
     const nextDocuments = documents.filter((document) => {
       if (document.isDeleted) return false;
-      if (document.kind === 'pdf') return allowPdf;
-      if (document.kind === 'pptx') return allowPptx;
+      if (document.kind === "pdf") return allowPdf;
+      if (document.kind === "pptx") return allowPptx;
       return false;
     });
 
-    return { filteredCards: filtered, filteredDocuments: nextDocuments, isFiltering: true };
+    return {
+      filteredCards: filtered,
+      filteredDocuments: nextDocuments,
+      isFiltering: true,
+    };
   }, [
     cards,
     documents,
@@ -450,104 +525,146 @@ function TreeViewLayout({
 
   const virtualTreeNodes = useMemo(() => {
     if (!activeCustomView) return [];
-    return buildVirtualTree(activeCustomView, filteredCards, tags, categoryNameById);
+    return buildVirtualTree(
+      activeCustomView,
+      filteredCards,
+      tags,
+      categoryNameById,
+    );
   }, [activeCustomView, filteredCards, tags, categoryNameById]);
 
-  const persistSettings = useCallback(async (patch: Partial<typeof settings>) => {
-    await updateSettings(patch);
-  }, [updateSettings]);
+  const persistSettings = useCallback(
+    async (patch: Partial<typeof settings>) => {
+      await updateSettings(patch);
+    },
+    [updateSettings],
+  );
 
-  const handleViewChange = useCallback(async (viewId: string) => {
-    await persistSettings({ selectedExplorerViewId: viewId });
-    const nextView = viewDefs.find((view) => view.id === viewId);
-    if (nextView && nextView.kind !== 'folder') {
-      onFolderSelect(null);
-    }
-  }, [onFolderSelect, persistSettings, viewDefs]);
+  const handleViewChange = useCallback(
+    async (viewId: string) => {
+      await persistSettings({ selectedExplorerViewId: viewId });
+      const nextView = viewDefs.find((view) => view.id === viewId);
+      if (nextView && nextView.kind !== "folder") {
+        onFolderSelect(null);
+      }
+    },
+    [onFolderSelect, persistSettings, viewDefs],
+  );
 
-  const handleAddView = useCallback(async (kind: ViewKind) => {
-    if (kind === 'folder') return;
-    const nextView: ViewDef = {
-      id: createViewId(),
-      name: kind === 'tagCategory' ? '新しいタグビュー' : '新しいタグツリー',
-      kind,
-      options: kind === 'tagCategory'
-        ? { categoryMode: 'user-defined', ungroupedLabel: '未分類' }
-        : { scopeMode: 'all', hideZeroUsage: true, ungroupedLabel: '未分類' },
-    };
-    await persistSettings({
-      explorerViews: [...viewDefs, nextView],
-      selectedExplorerViewId: nextView.id,
-    });
-  }, [persistSettings, viewDefs]);
-
-  const handleRenameView = useCallback(async (viewId: string, name: string) => {
-    await persistSettings({
-      explorerViews: viewDefs.map((view) => (view.id === viewId ? { ...view, name } : view)),
-    });
-  }, [persistSettings, viewDefs]);
-
-  const handleDeleteView = useCallback(async (viewId: string) => {
-    const nextViews = viewDefs.filter((view) => view.id !== viewId);
-    await persistSettings({
-      explorerViews: nextViews,
-      selectedExplorerViewId: selectedViewId === viewId ? DEFAULT_FOLDER_VIEW.id : selectedViewId,
-    });
-  }, [persistSettings, selectedViewId, viewDefs]);
-
-  const handleUpdateCategoryName = useCallback(async (categoryId: string, displayName: string) => {
-    await updateSettings({
-      tagCategoryDisplayNames: {
-        ...(settings?.tagCategoryDisplayNames ?? {}),
-        [categoryId]: displayName,
-      },
-    });
-  }, [settings?.tagCategoryDisplayNames, updateSettings]);
-
-  const handleUpdateUngroupedLabel = useCallback(async (viewId: string, label: string) => {
-    await persistSettings({
-      explorerViews: viewDefs.map((view) => (
-        view.id === viewId
-          ? {
-              ...view,
-              options: {
-                ...view.options,
-                ungroupedLabel: label,
+  const handleAddView = useCallback(
+    async (kind: ViewKind) => {
+      if (kind === "folder") return;
+      const nextView: ViewDef = {
+        id: createViewId(),
+        name: kind === "tagCategory" ? "新しいタグビュー" : "新しいタグツリー",
+        kind,
+        options:
+          kind === "tagCategory"
+            ? { categoryMode: "user-defined", ungroupedLabel: "未分類" }
+            : {
+                scopeMode: "all",
+                hideZeroUsage: true,
+                ungroupedLabel: "未分類",
               },
-            }
-          : view
-      )),
-    });
-  }, [persistSettings, viewDefs]);
+      };
+      await persistSettings({
+        explorerViews: [...viewDefs, nextView],
+        selectedExplorerViewId: nextView.id,
+      });
+    },
+    [persistSettings, viewDefs],
+  );
 
-  const handleUpdateViewOptions = useCallback(async (viewId: string, options: NonNullable<ViewDef['options']>) => {
-    await persistSettings({
-      explorerViews: viewDefs.map((view) => (
-        view.id === viewId
-          ? {
-              ...view,
-              options,
-            }
-          : view
-      )),
-    });
-  }, [persistSettings, viewDefs]);
+  const handleRenameView = useCallback(
+    async (viewId: string, name: string) => {
+      await persistSettings({
+        explorerViews: viewDefs.map((view) =>
+          view.id === viewId ? { ...view, name } : view,
+        ),
+      });
+    },
+    [persistSettings, viewDefs],
+  );
+
+  const handleDeleteView = useCallback(
+    async (viewId: string) => {
+      const nextViews = viewDefs.filter((view) => view.id !== viewId);
+      await persistSettings({
+        explorerViews: nextViews,
+        selectedExplorerViewId:
+          selectedViewId === viewId ? DEFAULT_FOLDER_VIEW.id : selectedViewId,
+      });
+    },
+    [persistSettings, selectedViewId, viewDefs],
+  );
+
+  const handleUpdateCategoryName = useCallback(
+    async (categoryId: string, displayName: string) => {
+      await updateSettings({
+        tagCategoryDisplayNames: {
+          ...(settings?.tagCategoryDisplayNames ?? {}),
+          [categoryId]: displayName,
+        },
+      });
+    },
+    [settings?.tagCategoryDisplayNames, updateSettings],
+  );
+
+  const handleUpdateUngroupedLabel = useCallback(
+    async (viewId: string, label: string) => {
+      await persistSettings({
+        explorerViews: viewDefs.map((view) =>
+          view.id === viewId
+            ? {
+                ...view,
+                options: {
+                  ...view.options,
+                  ungroupedLabel: label,
+                },
+              }
+            : view,
+        ),
+      });
+    },
+    [persistSettings, viewDefs],
+  );
+
+  const handleUpdateViewOptions = useCallback(
+    async (viewId: string, options: NonNullable<ViewDef["options"]>) => {
+      await persistSettings({
+        explorerViews: viewDefs.map((view) =>
+          view.id === viewId
+            ? {
+                ...view,
+                options,
+              }
+            : view,
+        ),
+      });
+    },
+    [persistSettings, viewDefs],
+  );
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "b") {
         const target = e.target as HTMLElement;
-        if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) return;
+        if (
+          target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable
+        )
+          return;
         e.preventDefault();
         setIsSidebarOpen((prev) => {
           const newState = !prev;
-          localStorage.setItem('ui.sidebarOpen', String(newState));
+          localStorage.setItem("ui.sidebarOpen", String(newState));
           return newState;
         });
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   const startResizing = useCallback(
@@ -563,10 +680,10 @@ function TreeViewLayout({
       startXRef.current = e.clientX;
       startWRef.current = pendingWRef.current;
 
-      document.body.style.userSelect = 'none';
-      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = "none";
+      document.body.style.cursor = "col-resize";
     },
-    [isSidebarOpen]
+    [isSidebarOpen],
   );
 
   const stopResizing = useCallback(() => {
@@ -575,12 +692,12 @@ function TreeViewLayout({
     resizingRef.current = false;
     setIsResizing(false);
 
-    document.body.style.userSelect = '';
-    document.body.style.cursor = '';
+    document.body.style.userSelect = "";
+    document.body.style.cursor = "";
 
     const finalW = pendingWRef.current;
     setSidebarWidth(finalW);
-    localStorage.setItem('ui.sidebarWidth', String(finalW));
+    localStorage.setItem("ui.sidebarWidth", String(finalW));
   }, []);
 
   const onResizeMove = useCallback(
@@ -589,20 +706,20 @@ function TreeViewLayout({
       const dx = e.clientX - startXRef.current;
       applyWidthDom(startWRef.current + dx);
     },
-    [applyWidthDom]
+    [applyWidthDom],
   );
 
   useEffect(() => {
     if (!isResizing) return;
 
-    window.addEventListener('pointermove', onResizeMove, { passive: true });
-    window.addEventListener('pointerup', stopResizing);
-    window.addEventListener('pointercancel', stopResizing);
+    window.addEventListener("pointermove", onResizeMove, { passive: true });
+    window.addEventListener("pointerup", stopResizing);
+    window.addEventListener("pointercancel", stopResizing);
 
     return () => {
-      window.removeEventListener('pointermove', onResizeMove);
-      window.removeEventListener('pointerup', stopResizing);
-      window.removeEventListener('pointercancel', stopResizing);
+      window.removeEventListener("pointermove", onResizeMove);
+      window.removeEventListener("pointerup", stopResizing);
+      window.removeEventListener("pointercancel", stopResizing);
       if (rafIdRef.current != null) cancelAnimationFrame(rafIdRef.current);
       rafIdRef.current = null;
     };
@@ -610,7 +727,7 @@ function TreeViewLayout({
 
   const renderTabContent = () => {
     switch (explorerTab) {
-      case 'pinned':
+      case "pinned":
         return (
           <PinnedPanel
             pinnedItems={pinnedItems}
@@ -623,7 +740,7 @@ function TreeViewLayout({
             getFolderPath={getFolderPath}
           />
         );
-      case 'recent':
+      case "recent":
         return (
           <RecentPanel
             recent={recent}
@@ -635,7 +752,7 @@ function TreeViewLayout({
             onClearRecent={clearRecent}
           />
         );
-      case 'views':
+      case "views":
         return (
           <ViewsPanel
             views={customViews}
@@ -648,32 +765,34 @@ function TreeViewLayout({
             onOpenManager={() => setIsViewManagerOpen(true)}
           />
         );
-      case 'explorer':
+      case "explorer":
       default:
         return (
           <FolderTreeWithCards
-              folders={folders}
-              cards={filteredCards}
-              documents={filteredDocuments}
-              selectedFolderId={selectedFolderId}
-              selectedItem={selectedItem}
-              onFolderSelect={handleFolderSelectWithRecent}
-              onItemSelect={onItemSelect}
-              onCreateFolder={createFolder}
-              onUpdateFolder={updateFolder}
-              onDeleteFolder={deleteFolder}
-              onCreateCard={createCard}
-              onUpdateCard={updateCard}
-              onDeleteCard={deleteCard}
-              moveCardToFolder={moveCardToFolder}
-              moveDocumentToFolder={(id, folderId) => updateDocument(id, { folderId })}
-              reorderCards={reorderCards}
-              pinnedItems={pinnedItems}
-              onPinItem={pinItem}
-              onUnpinItem={unpinItem}
-              isFiltering={isFiltering}
-              createFolderRequestToken={createFolderRequestToken}
-            />
+            folders={folders}
+            cards={filteredCards}
+            documents={filteredDocuments}
+            selectedFolderId={selectedFolderId}
+            selectedItem={selectedItem}
+            onFolderSelect={handleFolderSelectWithRecent}
+            onItemSelect={onItemSelect}
+            onCreateFolder={createFolder}
+            onUpdateFolder={updateFolder}
+            onDeleteFolder={deleteFolder}
+            onCreateCard={createCard}
+            onUpdateCard={updateCard}
+            onDeleteCard={deleteCard}
+            moveCardToFolder={moveCardToFolder}
+            moveDocumentToFolder={(id, folderId) =>
+              updateDocument(id, { folderId })
+            }
+            reorderCards={reorderCards}
+            pinnedItems={pinnedItems}
+            onPinItem={pinItem}
+            onUnpinItem={unpinItem}
+            isFiltering={isFiltering}
+            createFolderRequestToken={createFolderRequestToken}
+          />
         );
     }
   };
@@ -682,7 +801,7 @@ function TreeViewLayout({
     <div
       className={cn(
         "relative flex h-full min-h-0 items-stretch overflow-hidden border-0 bg-transparent",
-        isResizing && "select-none cursor-col-resize"
+        isResizing && "select-none cursor-col-resize",
       )}
     >
       {/* =====================================================
@@ -706,40 +825,45 @@ function TreeViewLayout({
         className={cn(
           "shrink-0 flex-col border border-[#d7d9de] rounded-r-xl relative group/sidebar select-none",
           showMobileDetail ? "hidden md:flex" : "flex",
-          isResizing ? "transition-none will-change-[width]" : "transition-all duration-300 ease-in-out",
+          isResizing
+            ? "transition-none will-change-[width]"
+            : "transition-all duration-300 ease-in-out",
           "w-[100dvw] max-w-[100dvw] md:w-auto md:max-w-none",
-          !isSidebarOpen && "md:w-0 md:border-0 md:overflow-hidden md:shadow-none"
+          !isSidebarOpen &&
+            "md:w-0 md:border-0 md:overflow-hidden md:shadow-none",
         )}
       >
         <div className="flex flex-col h-full min-h-0 w-full overflow-hidden">
-            {/* ExplorerTabs: 常に固定ヘッダー */}
-            <div className="shrink-0">
-              <ExplorerTabs
-                activeTab={explorerTab}
-                onTabChange={setExplorerTab}
-                allTags={allTags}
-                onCreateRootFolder={handleCreateRootFolder}
-                showExplorerActions={explorerTab === 'explorer'}
-              />
-            </div>
+          {/* ExplorerTabs: 常に固定ヘッダー */}
+          <div className="shrink-0">
+            <ExplorerTabs
+              activeTab={explorerTab}
+              onTabChange={setExplorerTab}
+              allTags={allTags}
+              onCreateRootFolder={handleCreateRootFolder}
+              showExplorerActions={explorerTab === "explorer"}
+            />
+          </div>
 
-            <div className="shrink-0">
-              <ExplorerFilterSummary
-                getTagColor={getTagColor}
-                isFilterActive={isFilterActive}
-                resultCount={filteredCards.length + filteredDocuments.length}
-              />
-            </div>
+          <div className="shrink-0">
+            <ExplorerFilterSummary
+              getTagColor={getTagColor}
+              isFilterActive={isFilterActive}
+              resultCount={filteredCards.length + filteredDocuments.length}
+            />
+          </div>
 
-            <div
-              ref={contentScrollRef}
-              className={cn(
-                "flex-1 min-h-0 outline-none min-w-0",
-                explorerTab === 'explorer' ? 'overflow-hidden' : 'overflow-y-auto'
-              )}
-            >
-              {renderTabContent()}
-            </div>
+          <div
+            ref={contentScrollRef}
+            className={cn(
+              "flex-1 min-h-0 outline-none min-w-0",
+              explorerTab === "explorer"
+                ? "overflow-hidden"
+                : "overflow-y-auto",
+            )}
+          >
+            {renderTabContent()}
+          </div>
         </div>
 
         {/* 子要素の背景に潰されないよう、最前面に凸オーバーレイを重ねる */}
@@ -747,7 +871,7 @@ function TreeViewLayout({
           aria-hidden
           className={cn(
             "pointer-events-none absolute inset-0 z-20",
-            "rounded-r-xl"
+            "rounded-r-xl",
           )}
           style={{
             boxShadow:
@@ -760,19 +884,19 @@ function TreeViewLayout({
           <div
             className={cn(
               "hidden md:block absolute top-0 right-0 w-1.5 h-full cursor-col-resize z-50 group/resize select-none outline-none transition-colors hover:bg-slate-300/20 focus-visible:outline-none",
-              isResizing && "bg-slate-300/30"
+              isResizing && "bg-slate-300/30",
             )}
             onPointerDown={startResizing}
             role="separator"
             aria-label="サイドバーのサイズ変更"
             tabIndex={0}
-            style={{ touchAction: 'none' }}
+            style={{ touchAction: "none" }}
           >
             <div
               className={cn(
                 "absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-full bg-slate-200 transition-colors",
                 "group-hover/resize:bg-slate-400",
-                isResizing && "bg-slate-500"
+                isResizing && "bg-slate-500",
               )}
             />
           </div>
@@ -786,10 +910,12 @@ function TreeViewLayout({
           作り、サイドバー内の Radix UI DropdownMenu のイベント伝播を
           妨害していた。
       ===================================================== */}
-      <div className={cn(
-        "flex-1 min-h-0 min-w-0 bg-white flex-col",
-        showMobileDetail ? "flex" : "hidden md:flex"
-      )}>
+      <div
+        className={cn(
+          "flex-1 min-h-0 min-w-0 bg-white flex-col",
+          showMobileDetail ? "flex" : "hidden md:flex",
+        )}
+      >
         {isMobile && showMobileDetail && (
           <div className="shrink-0 flex items-center gap-2 px-3 py-2 border-b border-slate-100 bg-white">
             <button
@@ -803,7 +929,9 @@ function TreeViewLayout({
             >
               <ArrowLeft className="w-4 h-4" />
             </button>
-            <span className="text-sm font-semibold text-slate-700">{mobileDetailTitle}</span>
+            <span className="text-sm font-semibold text-slate-700">
+              {mobileDetailTitle}
+            </span>
           </div>
         )}
         <RightPane
@@ -811,7 +939,7 @@ function TreeViewLayout({
           selectedCardId={selectedCardId}
           selectedDocument={selectedDocument}
           selectedFolderId={selectedFolderId}
-          selectedFolderName={selectedFolder?.folderName ?? 'フォルダ'}
+          selectedFolderName={selectedFolder?.folderName ?? "フォルダ"}
           folders={folders}
           cards={cards}
           documents={documents}

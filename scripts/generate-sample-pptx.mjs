@@ -20,7 +20,9 @@ const getArgValue = (name, fallback = null) => {
 
 const outArg = getArgValue("--out", "tmp/sample.pptx");
 const slidesArg = Number.parseInt(String(getArgValue("--slides", "3")), 10);
-const slideCount = Number.isFinite(slidesArg) ? Math.min(Math.max(slidesArg, 1), 10) : 3;
+const slideCount = Number.isFinite(slidesArg)
+  ? Math.min(Math.max(slidesArg, 1), 10)
+  : 3;
 
 const outputPath = path.resolve(process.cwd(), outArg);
 fs.mkdirSync(path.dirname(outputPath), { recursive: true });
@@ -66,7 +68,7 @@ for (let i = 0; i < slideCount; i += 1) {
       h: 1.5,
       fontSize: 16,
       color: "334155",
-    }
+    },
   );
 
   slide.addImage({

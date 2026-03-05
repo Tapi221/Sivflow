@@ -1,12 +1,12 @@
 // DEV時だけ devtools を有効化（index.ts を経由しない構成でも確実に動く）
-if (import.meta.env.DEV && typeof window !== 'undefined') {
-  import('./devtools')
+if (import.meta.env.DEV && typeof window !== "undefined") {
+  import("./devtools")
     .then((m) => m.installLocalDbDevtools?.())
     .catch(() => {});
 }
 
-import { Dexie } from 'dexie';
-import { nanoid } from 'nanoid';
+import { Dexie } from "dexie";
+import { nanoid } from "nanoid";
 import type {
   Folder,
   Card,
@@ -22,21 +22,21 @@ import type {
   SyncConflict,
   UploadedImage,
   AssetRecord,
-} from '../../types';
-import type { IntegrityRepairResult } from '../dataIntegrityTypes';
+} from "../../types";
+import type { IntegrityRepairResult } from "../dataIntegrityTypes";
 
-import { getDatabaseNameForUser as _getDatabaseNameForUser } from './generation';
-import { defineSchema } from './schema';
-import { attachHooks } from './hooks';
+import { getDatabaseNameForUser as _getDatabaseNameForUser } from "./generation";
+import { defineSchema } from "./schema";
+import { attachHooks } from "./hooks";
 import {
   importFromDatabase as rescueImportFromDatabase,
   extractFromFirestoreSDK as rescueExtractFromFirestoreSDK,
-} from './rescue';
-import { repairDataIntegrity as repairDataIntegrityImpl } from './integrityRepair';
-import * as forensics from './forensics';
-import * as crud from './crud';
-import * as queries from './queries';
-import * as maintenance from './maintenance';
+} from "./rescue";
+import { repairDataIntegrity as repairDataIntegrityImpl } from "./integrityRepair";
+import * as forensics from "./forensics";
+import * as crud from "./crud";
+import * as queries from "./queries";
+import * as maintenance from "./maintenance";
 
 // NOTE: creates a circular dependency with instanceManager.ts; safe in ESM (all usages inside function bodies)
 import {
@@ -48,7 +48,7 @@ import {
   getLocalDbSync,
   initializeDB,
   resetLocalDBForLogout,
-} from './instanceManager';
+} from "./instanceManager";
 
 export type {
   CardRelation,
@@ -58,7 +58,7 @@ export type {
   TagV3Record,
   LocalDBLike,
   LocalDBInstance,
-} from './types';
+} from "./types";
 
 declare global {
   interface GlobalThis {
@@ -66,26 +66,26 @@ declare global {
   }
 }
 
-type SyncDirection = 'upload' | 'download';
-type SyncQueuePayload = SyncQueueItem['payload'];
+type SyncDirection = "upload" | "download";
+type SyncQueuePayload = SyncQueueItem["payload"];
 
 // ✅ SyncQueueItem.entity が "card" | "folder" | "asset" しか許してない前提に合わせる
-const syncableTables = ['cards', 'folders'] as const;
-type SyncableTableName = typeof syncableTables[number];
+const syncableTables = ["cards", "folders"] as const;
+type SyncableTableName = (typeof syncableTables)[number];
 
 const isSyncableTableName = (t: string): t is SyncableTableName =>
   (syncableTables as readonly string[]).includes(t);
 
-const entityNameMap: Record<SyncableTableName, SyncQueueItem['entity']> = {
-  cards: 'card',
-  folders: 'folder',
+const entityNameMap: Record<SyncableTableName, SyncQueueItem["entity"]> = {
+  cards: "card",
+  folders: "folder",
 };
 
 function getPayloadId(payload: unknown): string | null {
-  if (!payload || typeof payload !== 'object') return null;
+  if (!payload || typeof payload !== "object") return null;
   const p = payload as Record<string, unknown>;
   const id = p.id;
-  return typeof id === 'string' && id.length > 0 ? id : null;
+  return typeof id === "string" && id.length > 0 ? id : null;
 }
 
 function asArray<T>(v: unknown): T[] {
@@ -123,7 +123,7 @@ export class LocalDB extends Dexie {
   projectMaps!: Dexie.Table<Record<string, unknown>, string>;
   tags!: Dexie.Table<Record<string, unknown>, [string, string]>;
   tags_v2!: Dexie.Table<Record<string, unknown>, [string, string]>;
-  tags_v3!: Dexie.Table<import('./types').TagV3Record, string>;
+  tags_v3!: Dexie.Table<import("./types").TagV3Record, string>;
 
   public userId?: string;
 
@@ -131,7 +131,9 @@ export class LocalDB extends Dexie {
     return forensics.listDatabases();
   }
 
-  static async fullOriginForensicAudit(onProgress?: (msg: string) => void): Promise<unknown> {
+  static async fullOriginForensicAudit(
+    onProgress?: (msg: string) => void,
+  ): Promise<unknown> {
     return forensics.fullOriginForensicAudit(onProgress);
   }
 
@@ -139,8 +141,19 @@ export class LocalDB extends Dexie {
     sourceDbName: string,
     currentUserId: string,
     onProgress?: (progress: string) => void,
-  ): Promise<{ cards: number; folders: number; stats: number; studyLogs: number; firstCardKeys: string[] }> {
-    return rescueImportFromDatabase(this, sourceDbName, currentUserId, onProgress);
+  ): Promise<{
+    cards: number;
+    folders: number;
+    stats: number;
+    studyLogs: number;
+    firstCardKeys: string[];
+  }> {
+    return rescueImportFromDatabase(
+      this,
+      sourceDbName,
+      currentUserId,
+      onProgress,
+    );
   }
 
   async extractFromFirestoreSDK(
@@ -148,7 +161,12 @@ export class LocalDB extends Dexie {
     currentUserId: string,
     onProgress?: (progress: string) => void,
   ): Promise<{ cards: number; folders: number; firstCardKeys: string[] }> {
-    return rescueExtractFromFirestoreSDK(this, sourceDbName, currentUserId, onProgress);
+    return rescueExtractFromFirestoreSDK(
+      this,
+      sourceDbName,
+      currentUserId,
+      onProgress,
+    );
   }
 
   async repairDataIntegrity(
@@ -160,12 +178,16 @@ export class LocalDB extends Dexie {
 
   private constructor(userId?: string) {
     // Prevent direct construction from browser code; enforce using LocalDB.getInstance()
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       try {
         const allow = globalThis.__ALLOW_LOCAL_DB_CONSTRUCTION === true;
         if (!allow) {
-          console.error('[LocalDB] Direct construction forbidden in browser. Use LocalDB.getInstance() instead.');
-          throw new Error('Direct LocalDB construction forbidden in browser. Use LocalDB.getInstance() instead.');
+          console.error(
+            "[LocalDB] Direct construction forbidden in browser. Use LocalDB.getInstance() instead.",
+          );
+          throw new Error(
+            "Direct LocalDB construction forbidden in browser. Use LocalDB.getInstance() instead.",
+          );
         }
       } finally {
         try {
@@ -176,13 +198,19 @@ export class LocalDB extends Dexie {
       }
     }
 
-    super(LocalDB.getDatabaseNameForUser(userId ?? 'anonymous'));
+    super(LocalDB.getDatabaseNameForUser(userId ?? "anonymous"));
     this.userId = userId;
     this.syncTrigger = null;
 
     try {
-      console.log('[LocalDB] constructor created', { name: this.name, userId: this.userId });
-      console.debug('[LocalDB] constructor stack (info only):', new Error().stack);
+      console.log("[LocalDB] constructor created", {
+        name: this.name,
+        userId: this.userId,
+      });
+      console.debug(
+        "[LocalDB] constructor stack (info only):",
+        new Error().stack,
+      );
     } catch {
       // swallow logging errors to avoid interfering with initialization
     }
@@ -218,11 +246,18 @@ export class LocalDB extends Dexie {
     return asArray<Folder>(rows);
   }
 
-  async getDirtyItems(table: string, userId: string, lastSyncTime: Date): Promise<unknown[]> {
+  async getDirtyItems(
+    table: string,
+    userId: string,
+    lastSyncTime: Date,
+  ): Promise<unknown[]> {
     return queries.getDirtyItems(this, table, userId, lastSyncTime);
   }
 
-  async getUpdatedCards(folderId: string, lastSyncTime: Date): Promise<unknown[]> {
+  async getUpdatedCards(
+    folderId: string,
+    lastSyncTime: Date,
+  ): Promise<unknown[]> {
     return queries.getUpdatedCards(this, folderId, lastSyncTime);
   }
 
@@ -234,18 +269,41 @@ export class LocalDB extends Dexie {
     return queries.updateLastSyncTime(this, userId, syncTime);
   }
 
-  async addItem(table: string, item: unknown, skipSync = false): Promise<string> {
+  async addItem(
+    table: string,
+    item: unknown,
+    skipSync = false,
+  ): Promise<string> {
     if (!(this instanceof LocalDB)) {
-      console.error('[Diagnostic] CRITICAL: addItem called on non-LocalDB instance!', this);
+      console.error(
+        "[Diagnostic] CRITICAL: addItem called on non-LocalDB instance!",
+        this,
+      );
     }
-    return crud.addItem(this, table, item, skipSync, (t: string, type: SyncDirection, p: SyncQueuePayload) =>
-      this.enqueueSync(t, type, p),
+    return crud.addItem(
+      this,
+      table,
+      item,
+      skipSync,
+      (t: string, type: SyncDirection, p: SyncQueuePayload) =>
+        this.enqueueSync(t, type, p),
     );
   }
 
-  async updateItem(table: string, id: string, changes: Record<string, unknown>, skipSync = false): Promise<number> {
-    return crud.updateItem(this, table, id, changes, skipSync, (t: string, type: SyncDirection, p: SyncQueuePayload) =>
-      this.enqueueSync(t, type, p),
+  async updateItem(
+    table: string,
+    id: string,
+    changes: Record<string, unknown>,
+    skipSync = false,
+  ): Promise<number> {
+    return crud.updateItem(
+      this,
+      table,
+      id,
+      changes,
+      skipSync,
+      (t: string, type: SyncDirection, p: SyncQueuePayload) =>
+        this.enqueueSync(t, type, p),
     );
   }
 
@@ -254,28 +312,54 @@ export class LocalDB extends Dexie {
   }
 
   async softDelete(table: string, id: string): Promise<number> {
-    return crud.softDelete(this, table, id, (t: string, i: string, c: Record<string, unknown>) =>
-      this.updateItem(t, i, c),
+    return crud.softDelete(
+      this,
+      table,
+      id,
+      (t: string, i: string, c: Record<string, unknown>) =>
+        this.updateItem(t, i, c),
     );
   }
 
   async restore(table: string, id: string): Promise<number> {
-    return this.updateItem(table, id, { isDeleted: false, deletedAt: null, updatedAt: new Date() });
+    return this.updateItem(table, id, {
+      isDeleted: false,
+      deletedAt: null,
+      updatedAt: new Date(),
+    });
   }
 
   async purge(table: string, id: string): Promise<void> {
     return this.deleteItem(table, id);
   }
 
-  async bulkUpsert(table: string, items: unknown[], skipSync = false): Promise<void> {
-    return crud.bulkUpsert(this, table, items, skipSync, (t: string, type: SyncDirection, p: SyncQueuePayload) =>
-      this.enqueueSync(t, type, p),
+  async bulkUpsert(
+    table: string,
+    items: unknown[],
+    skipSync = false,
+  ): Promise<void> {
+    return crud.bulkUpsert(
+      this,
+      table,
+      items,
+      skipSync,
+      (t: string, type: SyncDirection, p: SyncQueuePayload) =>
+        this.enqueueSync(t, type, p),
     );
   }
 
-  async upsert(tableName: string, data: unknown, skipSync = false): Promise<void> {
-    return crud.upsert(this, tableName, data, skipSync, (t: string, type: SyncDirection, p: SyncQueuePayload) =>
-      this.enqueueSync(t, type, p),
+  async upsert(
+    tableName: string,
+    data: unknown,
+    skipSync = false,
+  ): Promise<void> {
+    return crud.upsert(
+      this,
+      tableName,
+      data,
+      skipSync,
+      (t: string, type: SyncDirection, p: SyncQueuePayload) =>
+        this.enqueueSync(t, type, p),
     );
   }
 
@@ -295,9 +379,11 @@ export class LocalDB extends Dexie {
     return maintenance.cleanupSyncErrors(this);
   }
 
-  async getDeviceMeta(userId: string): Promise<Record<string, unknown> | undefined> {
+  async getDeviceMeta(
+    userId: string,
+  ): Promise<Record<string, unknown> | undefined> {
     const v = await maintenance.getDeviceMeta(this, userId);
-    if (v && typeof v === 'object') return v as Record<string, unknown>;
+    if (v && typeof v === "object") return v as Record<string, unknown>;
     return undefined;
   }
 
@@ -316,15 +402,22 @@ export class LocalDB extends Dexie {
     this.syncTrigger = callback;
   }
 
-  private async enqueueSync(tableName: string, type: SyncDirection, payload: SyncQueuePayload): Promise<void> {
+  private async enqueueSync(
+    tableName: string,
+    type: SyncDirection,
+    payload: SyncQueuePayload,
+  ): Promise<void> {
     // documents.localFileId は端末ローカル専用のため同期対象にしない。
-    if (tableName === 'documents') return;
+    if (tableName === "documents") return;
 
     if (!isSyncableTableName(tableName)) return;
 
     const payloadId = getPayloadId(payload);
     if (!payloadId) {
-      console.warn('[LocalDB] enqueueSync skipped: payload.id is missing or invalid', { tableName, type, payload });
+      console.warn(
+        "[LocalDB] enqueueSync skipped: payload.id is missing or invalid",
+        { tableName, type, payload },
+      );
       return;
     }
 
@@ -336,36 +429,38 @@ export class LocalDB extends Dexie {
       targetId: payloadId,
       type,
       entity: entityNameMap[tableName],
-      operationType: type === 'upload' ? 'update' : 'create',
+      operationType: type === "upload" ? "update" : "create",
       payload,
-      priority: 'high',
+      priority: "high",
       createdAt: now,
       updatedAt: now,
-      status: 'pending',
+      status: "pending",
       retryCount: 0,
     };
 
     console.log(
       `[Diagnostic] enqueueSync -> pushing to syncQueue table. targetId=${task.targetId}, action=${task.type}, entity=${task.entity}`,
     );
-    console.log(`[LocalDB] enqueueSync -> table=${tableName} type=${type} targetId=${task.targetId} id=${task.id}`);
+    console.log(
+      `[LocalDB] enqueueSync -> table=${tableName} type=${type} targetId=${task.targetId} id=${task.id}`,
+    );
 
     await this.syncQueue.add(task);
 
     if (this.syncTrigger) {
-      console.log('[Diagnostic] enqueueSync -> triggering sync callback');
+      console.log("[Diagnostic] enqueueSync -> triggering sync callback");
       setTimeout(() => {
         if (this.syncTrigger) {
-          console.log('[Diagnostic] Calling syncTrigger callback now');
+          console.log("[Diagnostic] Calling syncTrigger callback now");
           this.syncTrigger();
         }
       }, 0);
     } else {
-      console.warn('[Diagnostic] enqueueSync -> No syncTrigger registered!');
+      console.warn("[Diagnostic] enqueueSync -> No syncTrigger registered!");
     }
   }
 
-  static getDatabaseNameForUser(userId: string = 'anonymous'): string {
+  static getDatabaseNameForUser(userId: string = "anonymous"): string {
     return _getDatabaseNameForUser(userId);
   }
 

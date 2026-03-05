@@ -1,8 +1,9 @@
-import React from 'react';
-import { cn } from '@/lib/utils';
-import { RuledLayer } from '../frame/RuledLayer';
+import React from "react";
+import { cn } from "@/lib/utils";
+import { RuledLayer } from "../frame/RuledLayer";
 
-type CSSVarStyle = React.CSSProperties & Partial<Record<`--${string}`, string | number>>;
+type CSSVarStyle = React.CSSProperties &
+  Partial<Record<`--${string}`, string | number>>;
 
 type BlockSurfaceProps = {
   className?: string;
@@ -46,17 +47,29 @@ export function BlockSurface({
 
   const cssVars: CSSVarStyle = {
     ...(style ?? {}),
-    '--card-row-px': `${Math.max(8, ruledRowPx)}px`,
-    '--card-line-height': `${Math.max(8, ruledRowPx)}px`,
-    ...(topRows !== 0 ? { paddingTop: `calc(var(--card-row-px) * ${topRows})` } : {}),
-    ...(bottomRows !== 0 ? { paddingBottom: `calc(var(--card-row-px) * ${bottomRows})` } : {}),
-    ...(leftRows !== 0 ? { paddingLeft: `calc(var(--card-row-px) * ${leftRows})` } : {}),
-    ...(rightRows !== 0 ? { paddingRight: `calc(var(--card-row-px) * ${rightRows})` } : {}),
+    "--card-row-px": `${Math.max(8, ruledRowPx)}px`,
+    "--card-line-height": `${Math.max(8, ruledRowPx)}px`,
+    ...(topRows !== 0
+      ? { paddingTop: `calc(var(--card-row-px) * ${topRows})` }
+      : {}),
+    ...(bottomRows !== 0
+      ? { paddingBottom: `calc(var(--card-row-px) * ${bottomRows})` }
+      : {}),
+    ...(leftRows !== 0
+      ? { paddingLeft: `calc(var(--card-row-px) * ${leftRows})` }
+      : {}),
+    ...(rightRows !== 0
+      ? { paddingRight: `calc(var(--card-row-px) * ${rightRows})` }
+      : {}),
   };
 
   return (
     <div
-      className={cn('blockSurface', bleedX && 'blockSurface--bleedX', className)}
+      className={cn(
+        "blockSurface",
+        bleedX && "blockSurface--bleedX",
+        className,
+      )}
       style={{ ...cssVars, ...(background ? { background } : {}) }}
     >
       {ruled ? (
@@ -68,7 +81,9 @@ export function BlockSurface({
           ruledBottomOffsetPx={ruledBottomOffsetPx}
         />
       ) : null}
-      <div className={cn('blockSurfaceContent', contentClassName)}>{children}</div>
+      <div className={cn("blockSurfaceContent", contentClassName)}>
+        {children}
+      </div>
     </div>
   );
 }

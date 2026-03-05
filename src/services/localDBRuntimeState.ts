@@ -1,11 +1,11 @@
-export type LocalDBMode = 'persistent' | 'fallback';
+export type LocalDBMode = "persistent" | "fallback";
 export type LocalDBFallbackReasonCode =
-  | 'none'
-  | 'backing_store_open_error'
-  | 'quota_exceeded'
-  | 'indexeddb_blocked'
-  | 'upgrade_needed_or_blocked'
-  | 'unknown';
+  | "none"
+  | "backing_store_open_error"
+  | "quota_exceeded"
+  | "indexeddb_blocked"
+  | "upgrade_needed_or_blocked"
+  | "unknown";
 
 export interface LocalDBRuntimeStatus {
   mode: LocalDBMode;
@@ -26,14 +26,14 @@ export interface LocalDBTelemetrySnapshot {
   localdb_reset_failed: boolean;
 }
 
-const RESET_FAILED_REASON_KEY = 'flashcard.localdb.resetFailedReason';
+const RESET_FAILED_REASON_KEY = "flashcard.localdb.resetFailedReason";
 
 const listeners = new Set<(status: LocalDBRuntimeStatus) => void>();
 const warnedKeys = new Set<string>();
 const telemetryKeys = new Set<string>();
 
 const readLocalStorage = (key: string): string | null => {
-  if (typeof window === 'undefined') return null;
+  if (typeof window === "undefined") return null;
   try {
     return window.localStorage.getItem(key);
   } catch {
@@ -42,7 +42,7 @@ const readLocalStorage = (key: string): string | null => {
 };
 
 const writeLocalStorage = (key: string, value: string | null) => {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
   try {
     if (value === null) {
       window.localStorage.removeItem(key);
@@ -55,11 +55,11 @@ const writeLocalStorage = (key: string, value: string | null) => {
 };
 
 let currentStatus: LocalDBRuntimeStatus = {
-  mode: 'persistent',
+  mode: "persistent",
   userId: null,
   dbName: null,
   fallbackReason: null,
-  fallbackReasonCode: 'none',
+  fallbackReasonCode: "none",
   generationBumped: false,
   resetFailedReason: readLocalStorage(RESET_FAILED_REASON_KEY),
   updatedAt: Date.now(),
@@ -70,7 +70,7 @@ export function getLocalDBRuntimeStatus(): LocalDBRuntimeStatus {
 }
 
 export function subscribeLocalDBRuntimeStatus(
-  listener: (status: LocalDBRuntimeStatus) => void
+  listener: (status: LocalDBRuntimeStatus) => void,
 ): () => void {
   listeners.add(listener);
   listener(getLocalDBRuntimeStatus());
@@ -78,7 +78,7 @@ export function subscribeLocalDBRuntimeStatus(
 }
 
 export function updateLocalDBRuntimeStatus(
-  next: Partial<LocalDBRuntimeStatus>
+  next: Partial<LocalDBRuntimeStatus>,
 ): LocalDBRuntimeStatus {
   currentStatus = {
     ...currentStatus,
@@ -89,13 +89,17 @@ export function updateLocalDBRuntimeStatus(
     try {
       listener(getLocalDBRuntimeStatus());
     } catch (err) {
-      console.error('[LocalDB] Failed to notify runtime status listener', err);
+      console.error("[LocalDB] Failed to notify runtime status listener", err);
     }
   });
   return getLocalDBRuntimeStatus();
 }
 
-export function warnOncePerSession(key: string, message: string, error?: unknown): void {
+export function warnOncePerSession(
+  key: string,
+  message: string,
+  error?: unknown,
+): void {
   if (warnedKeys.has(key)) return;
   warnedKeys.add(key);
   if (error !== undefined) {
@@ -129,8 +133,8 @@ export function getStoredLocalDBResetFailureReason(): string | null {
 }
 
 const toShortReason = (value: string | null): string => {
-  if (!value) return 'none';
-  const compact = value.replace(/\s+/g, ' ').trim();
+  if (!value) return "none";
+  const compact = value.replace(/\s+/g, " ").trim();
   return compact.length > 120 ? `${compact.slice(0, 120)}...` : compact;
 };
 

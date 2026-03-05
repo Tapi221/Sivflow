@@ -6,11 +6,8 @@
   user-select: text !important;
 }
 
-.markdownBlockPreview.markdown-block-view :is(
-  p, ul, ol, li,
-  h1, h2, h3, h4, h5, h6,
-  blockquote, pre, table, hr
-) {
+.markdownBlockPreview.markdown-block-view
+  :is(p, ul, ol, li, h1, h2, h3, h4, h5, h6, blockquote, pre, table, hr) {
   margin-top: 0;
   margin-bottom: 0;
 }

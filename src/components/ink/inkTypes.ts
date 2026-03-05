@@ -1,12 +1,12 @@
-import type { Card } from '@/types';
+import type { Card } from "@/types";
 
 export const INK_DOCUMENT_VERSION = 2;
 export const INK_PAPER_W = 1000;
 export const INK_PAPER_H = 1414;
 
-export type InkSide = 'question' | 'answer';
-export type InkTool = 'pen' | 'highlighter';
-export type InkEditTool = InkTool | 'eraser';
+export type InkSide = "question" | "answer";
+export type InkTool = "pen" | "highlighter";
+export type InkEditTool = InkTool | "eraser";
 
 export type InkPoint = {
   x: number;
@@ -32,10 +32,10 @@ export type InkDocument = {
   deletedStrokeIds?: string[];
 };
 
-export type CardInkFields = Pick<Card, 'inkQuestion' | 'inkAnswer'>;
+export type CardInkFields = Pick<Card, "inkQuestion" | "inkAnswer">;
 
 const isFiniteNumber = (value: unknown): value is number =>
-  typeof value === 'number' && Number.isFinite(value);
+  typeof value === "number" && Number.isFinite(value);
 
 const clamp = (value: number, min: number, max: number) =>
   Math.min(max, Math.max(min, value));
@@ -47,7 +47,7 @@ export const createEmptyInkDocument = (): InkDocument => ({
 });
 
 export const normalizeInkDocument = (value: unknown): InkDocument => {
-  if (!value || typeof value !== 'object') {
+  if (!value || typeof value !== "object") {
     return createEmptyInkDocument();
   }
 
@@ -55,23 +55,39 @@ export const normalizeInkDocument = (value: unknown): InkDocument => {
   const strokes = Array.isArray(maybe.strokes)
     ? maybe.strokes
         .map((stroke): InkStroke | null => {
-          if (!stroke || typeof stroke !== 'object') return null;
+          if (!stroke || typeof stroke !== "object") return null;
 
           const raw = stroke as Partial<InkStroke>;
-          const tool: InkTool = raw.tool === 'highlighter' ? 'highlighter' : 'pen';
-          const color = typeof raw.color === 'string' && raw.color.trim().length > 0 ? raw.color : '#1f2937';
+          const tool: InkTool =
+            raw.tool === "highlighter" ? "highlighter" : "pen";
+          const color =
+            typeof raw.color === "string" && raw.color.trim().length > 0
+              ? raw.color
+              : "#1f2937";
           const width = isFiniteNumber(raw.width) ? clamp(raw.width, 1, 96) : 3;
-          const opacity = isFiniteNumber(raw.opacity) ? clamp(raw.opacity, 0.05, 1) : 1;
-          const createdAt = isFiniteNumber(raw.createdAt) ? raw.createdAt : Date.now();
+          const opacity = isFiniteNumber(raw.opacity)
+            ? clamp(raw.opacity, 0.05, 1)
+            : 1;
+          const createdAt = isFiniteNumber(raw.createdAt)
+            ? raw.createdAt
+            : Date.now();
 
           const points = Array.isArray(raw.points)
             ? raw.points
                 .map((point): InkPoint | null => {
-                  if (!point || typeof point !== 'object') return null;
+                  if (!point || typeof point !== "object") return null;
                   const maybePoint = point as Partial<InkPoint>;
-                  if (!isFiniteNumber(maybePoint.x) || !isFiniteNumber(maybePoint.y)) return null;
-                  const t = isFiniteNumber(maybePoint.t) ? maybePoint.t : Date.now();
-                  const p = isFiniteNumber(maybePoint.p) ? clamp(maybePoint.p, 0, 1) : 0.5;
+                  if (
+                    !isFiniteNumber(maybePoint.x) ||
+                    !isFiniteNumber(maybePoint.y)
+                  )
+                    return null;
+                  const t = isFiniteNumber(maybePoint.t)
+                    ? maybePoint.t
+                    : Date.now();
+                  const p = isFiniteNumber(maybePoint.p)
+                    ? clamp(maybePoint.p, 0, 1)
+                    : 0.5;
                   return { x: maybePoint.x, y: maybePoint.y, t, p };
                 })
                 .filter((point): point is InkPoint => point !== null)
@@ -80,7 +96,10 @@ export const normalizeInkDocument = (value: unknown): InkDocument => {
           if (points.length === 0) return null;
 
           return {
-            id: typeof raw.id === 'string' && raw.id.trim().length > 0 ? raw.id : `${createdAt}-${Math.random().toString(16).slice(2)}`,
+            id:
+              typeof raw.id === "string" && raw.id.trim().length > 0
+                ? raw.id
+                : `${createdAt}-${Math.random().toString(16).slice(2)}`,
             tool,
             color,
             width,
@@ -93,21 +112,29 @@ export const normalizeInkDocument = (value: unknown): InkDocument => {
     : [];
 
   const deletedStrokeIds = Array.isArray(maybe.deletedStrokeIds)
-    ? maybe.deletedStrokeIds.filter((id): id is string => typeof id === 'string')
+    ? maybe.deletedStrokeIds.filter(
+        (id): id is string => typeof id === "string",
+      )
     : undefined;
 
   return {
-    version: isFiniteNumber(maybe.version) ? maybe.version : INK_DOCUMENT_VERSION,
+    version: isFiniteNumber(maybe.version)
+      ? maybe.version
+      : INK_DOCUMENT_VERSION,
     updatedAt: isFiniteNumber(maybe.updatedAt) ? maybe.updatedAt : 0,
     strokes,
-    ...(deletedStrokeIds && deletedStrokeIds.length > 0 ? { deletedStrokeIds } : {}),
+    ...(deletedStrokeIds && deletedStrokeIds.length > 0
+      ? { deletedStrokeIds }
+      : {}),
   };
 };
 
 export const cloneInkDocument = (doc: InkDocument): InkDocument => ({
   version: doc.version,
   updatedAt: doc.updatedAt,
-  deletedStrokeIds: doc.deletedStrokeIds ? [...doc.deletedStrokeIds] : undefined,
+  deletedStrokeIds: doc.deletedStrokeIds
+    ? [...doc.deletedStrokeIds]
+    : undefined,
   strokes: doc.strokes.map((stroke) => ({
     ...stroke,
     points: stroke.points.map((point) => ({ ...point })),

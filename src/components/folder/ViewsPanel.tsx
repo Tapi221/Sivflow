@@ -1,10 +1,10 @@
-import React from 'react';
-import { Settings2 } from '@/ui/icons';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import type { Card, SelectedExplorerItem } from '@/types';
-import { VirtualTreeView } from './VirtualTreeView';
-import type { TreeNode, ViewDef } from './viewTypes';
+import React from "react";
+import { Settings2 } from "@/ui/icons";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import type { Card, SelectedExplorerItem } from "@/types";
+import { VirtualTreeView } from "./VirtualTreeView";
+import type { TreeNode, ViewDef } from "./viewTypes";
 
 interface ViewsPanelProps {
   views: ViewDef[];
@@ -31,9 +31,18 @@ export function ViewsPanel({
     return (
       <div className="flex min-h-full items-start justify-center px-4 py-10">
         <div className="w-full max-w-sm rounded-2xl border border-dashed border-slate-200 bg-white/70 p-5 text-center">
-          <p className="text-sm font-medium text-slate-700">ビューはまだありません</p>
-          <p className="mt-1 text-xs text-slate-500">右上の設定からタグビューやタグツリーを追加できます。</p>
-          <Button type="button" variant="outline" className="mt-4" onClick={onOpenManager}>
+          <p className="text-sm font-medium text-slate-700">
+            ビューはまだありません
+          </p>
+          <p className="mt-1 text-xs text-slate-500">
+            右上の設定からタグビューやタグツリーを追加できます。
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            className="mt-4"
+            onClick={onOpenManager}
+          >
             ビュー管理を開く
           </Button>
         </div>
@@ -55,10 +64,10 @@ export function ViewsPanel({
                   void onSelectView(view.id);
                 }}
                 className={cn(
-                  'inline-flex shrink-0 items-center rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
+                  "inline-flex shrink-0 items-center rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
                   isActive
-                    ? 'border-primary-200 bg-primary-50 text-primary-700'
-                    : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900'
+                    ? "border-primary-200 bg-primary-50 text-primary-700"
+                    : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900",
                 )}
               >
                 {view.name}

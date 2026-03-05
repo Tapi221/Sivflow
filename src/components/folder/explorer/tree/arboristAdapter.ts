@@ -1,9 +1,14 @@
-import type { Card, DocumentItem, ExplorerItem, SelectedExplorerItem } from '@/types';
-import type { FolderTreeArboristNode } from '@/components/sidebar/FolderTreeArborist';
-import type { FolderTreeNode } from '../model/utils';
+import type {
+  Card,
+  DocumentItem,
+  ExplorerItem,
+  SelectedExplorerItem,
+} from "@/types";
+import type { FolderTreeArboristNode } from "@/components/sidebar/FolderTreeArborist";
+import type { FolderTreeNode } from "../model/utils";
 
 export type ExplorerTreeNode = FolderTreeArboristNode & {
-  kind: 'folder' | 'card' | 'document';
+  kind: "folder" | "card" | "document";
   rawId: string;
   folder?: FolderTreeNode;
   card?: Card;
@@ -13,11 +18,12 @@ export type ExplorerTreeNode = FolderTreeArboristNode & {
   children?: ExplorerTreeNode[];
 };
 
-const FOLDER_PREFIX = 'folder:';
-const CARD_PREFIX = 'card:';
-const DOCUMENT_PREFIX = 'document:';
+const FOLDER_PREFIX = "folder:";
+const CARD_PREFIX = "card:";
+const DOCUMENT_PREFIX = "document:";
 
-export const toTreeFolderId = (folderId: string): string => `${FOLDER_PREFIX}${folderId}`;
+export const toTreeFolderId = (folderId: string): string =>
+  `${FOLDER_PREFIX}${folderId}`;
 
 export const toExpandedTreeIds = (expandedFolderIds: Set<string>): string[] =>
   Array.from(expandedFolderIds, (id) => toTreeFolderId(id));
@@ -40,20 +46,24 @@ export const buildExplorerTreeData = ({
   getFolderId: (folder: FolderTreeNode) => string;
 }): ExplorerTreeNode[] => {
   const buildItemNode = (item: ExplorerItem): ExplorerTreeNode => {
-    if (item.type === 'card') {
+    if (item.type === "card") {
       const cardTitle =
         item.data.title ||
-        ((item.data as any).questionText || (item.data as any).question_text || '')
-          .replace(/<[^>]*>/g, '')
+        (
+          (item.data as any).questionText ||
+          (item.data as any).question_text ||
+          ""
+        )
+          .replace(/<[^>]*>/g, "")
           .trim()
           .slice(0, 50) ||
-        '無題のカード';
+        "無題のカード";
 
       return {
         id: `${CARD_PREFIX}${item.data.id}`,
         rawId: item.data.id,
         name: cardTitle,
-        kind: 'card',
+        kind: "card",
         card: item.data,
       };
     }
@@ -61,8 +71,8 @@ export const buildExplorerTreeData = ({
     return {
       id: `${DOCUMENT_PREFIX}${item.data.id}`,
       rawId: item.data.id,
-      name: item.data.title || '無題のドキュメント',
-      kind: 'document',
+      name: item.data.title || "無題のドキュメント",
+      kind: "document",
       document: item.data,
     };
   };
@@ -82,8 +92,8 @@ export const buildExplorerTreeData = ({
     return {
       id: toTreeFolderId(folderId),
       rawId: folderId,
-      name: folder.folderName || folder.folder_name || '無題のフォルダ',
-      kind: 'folder',
+      name: folder.folderName || folder.folder_name || "無題のフォルダ",
+      kind: "folder",
       folder,
       isDimmed: false,
       matchCount,
@@ -92,26 +102,32 @@ export const buildExplorerTreeData = ({
   };
 
   return [
-    ...rootFolders.map(buildFolderNode).filter((node): node is ExplorerTreeNode => node !== null),
+    ...rootFolders
+      .map(buildFolderNode)
+      .filter((node): node is ExplorerTreeNode => node !== null),
     ...rootItems.map(buildItemNode),
   ];
 };
 
 export const toSelectedTreeId = (
   selectedFolderId: string | null,
-  selectedItem: SelectedExplorerItem
+  selectedItem: SelectedExplorerItem,
 ): string | null => {
-  if (selectedItem?.type === 'card') return `${CARD_PREFIX}${selectedItem.id}`;
-  if (selectedItem?.type === 'document') return `${DOCUMENT_PREFIX}${selectedItem.id}`;
+  if (selectedItem?.type === "card") return `${CARD_PREFIX}${selectedItem.id}`;
+  if (selectedItem?.type === "document")
+    return `${DOCUMENT_PREFIX}${selectedItem.id}`;
   if (selectedFolderId) return toTreeFolderId(selectedFolderId);
   return null;
 };
 
 export const parseSelectedTreeId = (
-  treeId: string
-): { type: 'folder' | 'card' | 'document'; id: string } | null => {
-  if (treeId.startsWith(FOLDER_PREFIX)) return { type: 'folder', id: treeId.slice(FOLDER_PREFIX.length) };
-  if (treeId.startsWith(CARD_PREFIX)) return { type: 'card', id: treeId.slice(CARD_PREFIX.length) };
-  if (treeId.startsWith(DOCUMENT_PREFIX)) return { type: 'document', id: treeId.slice(DOCUMENT_PREFIX.length) };
+  treeId: string,
+): { type: "folder" | "card" | "document"; id: string } | null => {
+  if (treeId.startsWith(FOLDER_PREFIX))
+    return { type: "folder", id: treeId.slice(FOLDER_PREFIX.length) };
+  if (treeId.startsWith(CARD_PREFIX))
+    return { type: "card", id: treeId.slice(CARD_PREFIX.length) };
+  if (treeId.startsWith(DOCUMENT_PREFIX))
+    return { type: "document", id: treeId.slice(DOCUMENT_PREFIX.length) };
   return null;
 };

@@ -14,18 +14,10 @@ import {
 describe("pptxConverterGuards", () => {
   it("validates scoped storage path", () => {
     expect(
-      isScopedStoragePath(
-        "users/u1/documents/d1/source.pptx",
-        "u1",
-        "d1"
-      )
+      isScopedStoragePath("users/u1/documents/d1/source.pptx", "u1", "d1"),
     ).toBe(true);
     expect(
-      isScopedStoragePath(
-        "users/u2/documents/d1/source.pptx",
-        "u1",
-        "d1"
-      )
+      isScopedStoragePath("users/u2/documents/d1/source.pptx", "u1", "d1"),
     ).toBe(false);
   });
 
@@ -39,19 +31,19 @@ describe("pptxConverterGuards", () => {
     expect(
       isPlaceholderImplementationEnabled({
         [CONVERTER_IMPLEMENTATION_ENV]: "placeholder",
-      } as NodeJS.ProcessEnv)
+      } as NodeJS.ProcessEnv),
     ).toBe(true);
 
     expect(
       isPlaceholderImplementationEnabled({
         [CONVERTER_IMPLEMENTATION_ENV]: "real",
-      } as NodeJS.ProcessEnv)
+      } as NodeJS.ProcessEnv),
     ).toBe(false);
 
     expect(
       isPlaceholderImplementationEnabled({
         [CONVERTER_PLACEHOLDER_ENABLED_ENV]: "1",
-      } as NodeJS.ProcessEnv)
+      } as NodeJS.ProcessEnv),
     ).toBe(true);
   });
 

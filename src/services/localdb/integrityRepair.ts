@@ -1,11 +1,17 @@
-import type { LocalDB } from './LocalDB';
-import { normalizeUploadedImages, denormalizeUploadedImages } from '../../utils/imageUtils';
-import type { IntegrityIssue, IntegrityRepairResult } from '../dataIntegrityTypes';
+import type { LocalDB } from "./LocalDB";
+import {
+  normalizeUploadedImages,
+  denormalizeUploadedImages,
+} from "../../utils/imageUtils";
+import type {
+  IntegrityIssue,
+  IntegrityRepairResult,
+} from "../dataIntegrityTypes";
 
-type Side = 'question' | 'answer';
+type Side = "question" | "answer";
 type UnknownRecord = Record<string, unknown>;
 
-type UploadedImageStatus = 'ready' | 'failed' | 'uploading';
+type UploadedImageStatus = "ready" | "failed" | "uploading";
 
 type UploadedImage = {
   id: string;
@@ -21,38 +27,44 @@ type UploadedImage = {
   [key: string]: unknown;
 };
 
-const isRecord = (v: unknown): v is UnknownRecord => typeof v === 'object' && v !== null;
+const isRecord = (v: unknown): v is UnknownRecord =>
+  typeof v === "object" && v !== null;
 
 const isNonEmptyString = (v: unknown): v is string =>
-  typeof v === 'string' && v.trim().length > 0;
+  typeof v === "string" && v.trim().length > 0;
 
-const toStringOrNull = (v: unknown): string | null => (isNonEmptyString(v) ? v : null);
+const toStringOrNull = (v: unknown): string | null =>
+  isNonEmptyString(v) ? v : null;
 
-const notNull = <T,>(v: T | null): v is T => v !== null;
+const notNull = <T>(v: T | null): v is T => v !== null;
 
 const createUuid = (): string => {
   const c = globalThis.crypto;
 
-  if (c && 'randomUUID' in c && typeof c.randomUUID === 'function') return c.randomUUID();
+  if (c && "randomUUID" in c && typeof c.randomUUID === "function")
+    return c.randomUUID();
 
   const bytes = new Uint8Array(16);
-  if (c && 'getRandomValues' in c && typeof c.getRandomValues === 'function') {
+  if (c && "getRandomValues" in c && typeof c.getRandomValues === "function") {
     c.getRandomValues(bytes);
   } else {
-    for (let i = 0; i < bytes.length; i += 1) bytes[i] = Math.floor(Math.random() * 256);
+    for (let i = 0; i < bytes.length; i += 1)
+      bytes[i] = Math.floor(Math.random() * 256);
   }
 
   // RFC4122 v4
   bytes[6] = (bytes[6] & 0x0f) | 0x40;
   bytes[8] = (bytes[8] & 0x3f) | 0x80;
 
-  const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+  const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join(
+    "",
+  );
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 };
 
 const normalizeImageStatus = (v: unknown): UploadedImageStatus => {
-  if (v === 'ready' || v === 'failed' || v === 'uploading') return v;
-  return 'ready';
+  if (v === "ready" || v === "failed" || v === "uploading") return v;
+  return "ready";
 };
 
 const toUploadedImage = (img: UnknownRecord): UploadedImage => {
@@ -72,21 +84,22 @@ const pickString = (obj: UnknownRecord, keys: string[]): string | null => {
 export async function repairDataIntegrity(
   db: LocalDB,
   currentUserId: string,
-  onProgress?: (msg: string) => void
+  onProgress?: (msg: string) => void,
 ): Promise<IntegrityRepairResult> {
   const issues: IntegrityIssue[] = [];
 
   const normalizedTimestamp = (value: unknown): Date | null => {
-    if (value == null || value === '') return null;
+    if (value == null || value === "") return null;
 
-    if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value;
+    if (value instanceof Date)
+      return Number.isNaN(value.getTime()) ? null : value;
 
-    if (typeof value === 'string' || typeof value === 'number') {
+    if (typeof value === "string" || typeof value === "number") {
       const parsed = new Date(value);
       return Number.isNaN(parsed.getTime()) ? null : parsed;
     }
 
-    if (isRecord(value) && typeof value.toDate === 'function') {
+    if (isRecord(value) && typeof value.toDate === "function") {
       try {
         const dt = (value.toDate as () => unknown)();
         return dt instanceof Date && !Number.isNaN(dt.getTime()) ? dt : null;
@@ -98,10 +111,13 @@ export async function repairDataIntegrity(
     return null;
   };
 
-  const extractSideText = (blocks: UnknownRecord[], side: Side): string | null => {
+  const extractSideText = (
+    blocks: UnknownRecord[],
+    side: Side,
+  ): string | null => {
     const found = blocks.find((block) => {
-      const role = String(block.side ?? block.role ?? '').toLowerCase();
-      const type = String(block.type ?? '').toLowerCase();
+      const role = String(block.side ?? block.role ?? "").toLowerCase();
+      const type = String(block.type ?? "").toLowerCase();
       return role === side || type === side || type === `${side}_text`;
     });
 
@@ -114,21 +130,24 @@ export async function repairDataIntegrity(
   const pushBlobRepairIssue = (
     entityId: string,
     side: Side,
-    details: Record<string, unknown>
+    details: Record<string, unknown>,
   ) => {
     issues.push({
-      code: 'MISSING_REQUIRED_FIELD',
-      entityType: 'card',
+      code: "MISSING_REQUIRED_FIELD",
+      entityType: "card",
       entityId,
-      severity: 'warning',
+      severity: "warning",
       fixed: true,
       details: { side, ...details },
     });
   };
 
-  const getAnyBlocks = (cardRecord: UnknownRecord, side: Side): UnknownRecord[] => {
+  const getAnyBlocks = (
+    cardRecord: UnknownRecord,
+    side: Side,
+  ): UnknownRecord[] => {
     const raw =
-      side === 'question'
+      side === "question"
         ? (cardRecord.questionBlocks ?? cardRecord.question_blocks)
         : (cardRecord.answerBlocks ?? cardRecord.answer_blocks);
 
@@ -138,12 +157,15 @@ export async function repairDataIntegrity(
 
   const resolveImageUrls = (img: unknown) => {
     const rec = isRecord(img) ? img : {};
-    const localUrl = pickString(rec, ['localUrl', 'local_url']);
-    const remoteUrl = pickString(rec, ['remoteUrl', 'remote_url', 'url']);
+    const localUrl = pickString(rec, ["localUrl", "local_url"]);
+    const remoteUrl = pickString(rec, ["remoteUrl", "remote_url", "url"]);
     return { localUrl, remoteUrl };
   };
 
-  const makeMissingLocalImage = (img: unknown, remoteUrl: string | null): UnknownRecord => {
+  const makeMissingLocalImage = (
+    img: unknown,
+    remoteUrl: string | null,
+  ): UnknownRecord => {
     const rec = isRecord(img) ? img : {};
     const hasRemote = isNonEmptyString(remoteUrl);
 
@@ -154,12 +176,22 @@ export async function repairDataIntegrity(
       ...rec,
       localUrl: null,
       local_url: null,
-      status: hasRemote ? (isNonEmptyString(status) ? status : 'ready') : 'failed',
-      error: hasRemote ? error : '画像が端末内に存在しません。再添付してください。',
+      status: hasRemote
+        ? isNonEmptyString(status)
+          ? status
+          : "ready"
+        : "failed",
+      error: hasRemote
+        ? error
+        : "画像が端末内に存在しません。再添付してください。",
     };
   };
 
-  const repairBlockImages = (blocks: UnknownRecord[], entityId: string, side: Side) => {
+  const repairBlockImages = (
+    blocks: UnknownRecord[],
+    entityId: string,
+    side: Side,
+  ) => {
     if (blocks.length === 0) return { blocks, changed: false };
 
     let changed = false;
@@ -174,13 +206,13 @@ export async function repairDataIntegrity(
           if (!isRecord(img)) return img;
 
           const { localUrl, remoteUrl } = resolveImageUrls(img);
-          if (!localUrl || !localUrl.startsWith('blob:')) return img;
+          if (!localUrl || !localUrl.startsWith("blob:")) return img;
 
           blockChanged = true;
           pushBlobRepairIssue(entityId, side, {
             blockId: toStringOrNull(nextBlock.id),
             imageId: toStringOrNull(img.id),
-            reason: 'removed_persisted_blob_url',
+            reason: "removed_persisted_blob_url",
           });
 
           return makeMissingLocalImage(img, remoteUrl);
@@ -189,23 +221,28 @@ export async function repairDataIntegrity(
         if (blockChanged) nextBlock = { ...nextBlock, images: repairedImages };
       }
 
-      const blockStringFields = ['src', 'url', 'localUrl', 'local_url'] as const;
+      const blockStringFields = [
+        "src",
+        "url",
+        "localUrl",
+        "local_url",
+      ] as const;
       for (const key of blockStringFields) {
         const value = nextBlock[key];
-        if (!isNonEmptyString(value) || !value.startsWith('blob:')) continue;
+        if (!isNonEmptyString(value) || !value.startsWith("blob:")) continue;
 
         blockChanged = true;
         pushBlobRepairIssue(entityId, side, {
           blockId: toStringOrNull(nextBlock.id),
-          reason: 'removed_persisted_blob_url_block_field',
+          reason: "removed_persisted_blob_url_block_field",
           field: key,
         });
 
         nextBlock = {
           ...nextBlock,
           [key]: null,
-          status: 'failed',
-          error: '画像が端末内に存在しません。再添付してください。',
+          status: "failed",
+          error: "画像が端末内に存在しません。再添付してください。",
         };
       }
 
@@ -217,45 +254,54 @@ export async function repairDataIntegrity(
     return { blocks: repairedBlocks, changed };
   };
 
-  const repairLegacyImages = (imagesRaw: unknown, entityId: string, side: Side) => {
+  const repairLegacyImages = (
+    imagesRaw: unknown,
+    entityId: string,
+    side: Side,
+  ) => {
     const normalized = normalizeUploadedImages(imagesRaw ?? []) as unknown[];
 
     const normalizedImages: UploadedImage[] = normalized
       .filter(isRecord)
       .map(toUploadedImage);
 
-    if (normalizedImages.length === 0) return { cleaned: normalizedImages, changed: false };
+    if (normalizedImages.length === 0)
+      return { cleaned: normalizedImages, changed: false };
 
     let changed = false;
 
     const cleaned: UploadedImage[] = normalizedImages.map((img) => {
-      const localUrl = typeof img.localUrl === 'string' ? img.localUrl : undefined;
-      if (!localUrl || !localUrl.startsWith('blob:')) return img;
+      const localUrl =
+        typeof img.localUrl === "string" ? img.localUrl : undefined;
+      if (!localUrl || !localUrl.startsWith("blob:")) return img;
 
       changed = true;
       pushBlobRepairIssue(entityId, side, {
         imageId: img.id ?? null,
-        reason: 'removed_persisted_blob_url_legacy_array',
+        reason: "removed_persisted_blob_url_legacy_array",
       });
 
-      const hasRemote = typeof img.remoteUrl === 'string' && img.remoteUrl.trim().length > 0;
+      const hasRemote =
+        typeof img.remoteUrl === "string" && img.remoteUrl.trim().length > 0;
 
       return {
         ...img,
         localUrl: undefined, // null禁止（TS2345回避）
-        status: hasRemote ? img.status : 'failed',
-        error: hasRemote ? img.error : '画像が端末内に存在しません。再添付してください。',
+        status: hasRemote ? img.status : "failed",
+        error: hasRemote
+          ? img.error
+          : "画像が端末内に存在しません。再添付してください。",
       };
     });
 
     return { cleaned, changed };
   };
 
-  onProgress?.('整合性修復を開始...');
+  onProgress?.("整合性修復を開始...");
 
   const allFolders = (await db.folders.toArray()) as unknown[];
   const allCards = (await db.cards.toArray()) as unknown[];
-  const rescueFolderId = 'RESCUE_ORPHANS_FOLDER';
+  const rescueFolderId = "RESCUE_ORPHANS_FOLDER";
 
   let foldersUpdated = 0;
   let cardsUpdated = 0;
@@ -263,8 +309,8 @@ export async function repairDataIntegrity(
   const folderIds = new Set(
     allFolders
       .filter(isRecord)
-      .map((f) => String(f.id ?? f.folderId ?? ''))
-      .filter((s) => s.trim().length > 0)
+      .map((f) => String(f.id ?? f.folderId ?? ""))
+      .filter((s) => s.trim().length > 0),
   );
 
   const folderUpdates = allFolders
@@ -302,7 +348,7 @@ export async function repairDataIntegrity(
         toStringOrNull(update.folder_name);
 
       if (!name) {
-        update.folderName = 'Recovered Folder';
+        update.folderName = "Recovered Folder";
         changed = true;
       } else if (!toStringOrNull(update.folderName)) {
         update.folderName = name;
@@ -318,38 +364,39 @@ export async function repairDataIntegrity(
     .filter(notNull);
 
   if (folderUpdates.length > 0) {
-    await db.folders.bulkPut(folderUpdates as unknown as Parameters<typeof db.folders.bulkPut>[0]);
+    await db.folders.bulkPut(
+      folderUpdates as unknown as Parameters<typeof db.folders.bulkPut>[0],
+    );
   }
 
   if (!folderIds.has(rescueFolderId)) {
-    await db.folders.put(
-      {
-        id: rescueFolderId,
-        folderId: rescueFolderId,
-        folderName: 'Recovered Folder',
-        userId: currentUserId,
-        parentFolderId: null,
-        isDeleted: false,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      } as unknown as Parameters<typeof db.folders.put>[0]
-    );
+    await db.folders.put({
+      id: rescueFolderId,
+      folderId: rescueFolderId,
+      folderName: "Recovered Folder",
+      userId: currentUserId,
+      parentFolderId: null,
+      isDeleted: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as unknown as Parameters<typeof db.folders.put>[0]);
 
     folderIds.add(rescueFolderId);
     foldersUpdated += 1;
   }
 
-  onProgress?.('カード不整合を修復中...');
+  onProgress?.("カード不整合を修復中...");
 
   const cardUpdates = allCards
     .filter(isRecord)
     .map((card) => {
       const update: UnknownRecord = { ...card };
-      const entityId = String(update.id ?? update.cardId ?? 'unknown');
+      const entityId = String(update.id ?? update.cardId ?? "unknown");
       let changed = false;
 
       const id = toStringOrNull(update.id);
-      const cardId = toStringOrNull(update.cardId) ?? toStringOrNull(update.card_id);
+      const cardId =
+        toStringOrNull(update.cardId) ?? toStringOrNull(update.card_id);
 
       if (!id) {
         update.id = cardId ?? createUuid();
@@ -374,10 +421,10 @@ export async function repairDataIntegrity(
         update.isDeleted = hasDeletedAt;
         changed = true;
         issues.push({
-          code: 'DELETED_FLAG_MISMATCH',
-          entityType: 'card',
+          code: "DELETED_FLAG_MISMATCH",
+          entityType: "card",
           entityId,
-          severity: 'warning',
+          severity: "warning",
           fixed: true,
           details: {
             hasDeletedAt,
@@ -388,20 +435,20 @@ export async function repairDataIntegrity(
       }
 
       if (update.is_deleted !== undefined) {
-        Reflect.deleteProperty(update, 'is_deleted');
+        Reflect.deleteProperty(update, "is_deleted");
         changed = true;
       }
       if (update.deleted !== undefined) {
-        Reflect.deleteProperty(update, 'deleted');
+        Reflect.deleteProperty(update, "deleted");
         changed = true;
       }
 
       const timestampFields = [
-        'createdAt',
-        'updatedAt',
-        'deletedAt',
-        'nextReviewDate',
-        'lastReviewAt',
+        "createdAt",
+        "updatedAt",
+        "deletedAt",
+        "nextReviewDate",
+        "lastReviewAt",
       ] as const;
 
       for (const key of timestampFields) {
@@ -415,10 +462,10 @@ export async function repairDataIntegrity(
           update[key] = normalized;
           changed = true;
           issues.push({
-            code: 'TIMESTAMP_TYPE_MIXED',
-            entityType: 'card',
+            code: "TIMESTAMP_TYPE_MIXED",
+            entityType: "card",
             entityId,
-            severity: 'info',
+            severity: "info",
             fixed: true,
             details: { field: key, originalType: typeof raw },
           });
@@ -426,16 +473,16 @@ export async function repairDataIntegrity(
       }
 
       const folderIdNow = toStringOrNull(update.folderId);
-      const missingFolder = folderIdNow == null || folderIdNow.trim() === '';
+      const missingFolder = folderIdNow == null || folderIdNow.trim() === "";
 
       if (!isDeleted && missingFolder) {
         update.folderId = rescueFolderId;
         changed = true;
         issues.push({
-          code: 'MISSING_FOLDER',
-          entityType: 'card',
+          code: "MISSING_FOLDER",
+          entityType: "card",
           entityId,
-          severity: 'error',
+          severity: "error",
           fixed: true,
           details: { assignedFolderId: rescueFolderId },
         });
@@ -450,7 +497,7 @@ export async function repairDataIntegrity(
         let blockChanged = false;
 
         blocks.forEach((block, index) => {
-          if (typeof block.orderIndex !== 'number') {
+          if (typeof block.orderIndex !== "number") {
             block.orderIndex = index;
             blockChanged = true;
           }
@@ -460,23 +507,29 @@ export async function repairDataIntegrity(
           update.blocks = blocks;
           changed = true;
           issues.push({
-            code: 'BLOCK_ORDER_INDEX_MISSING',
-            entityType: 'card',
+            code: "BLOCK_ORDER_INDEX_MISSING",
+            entityType: "card",
             entityId,
-            severity: 'warning',
+            severity: "warning",
             fixed: true,
             details: { blockCount: blocks.length },
           });
         }
 
-        const qBlockText = extractSideText(blocks, 'question');
-        const aBlockText = extractSideText(blocks, 'answer');
+        const qBlockText = extractSideText(blocks, "question");
+        const aBlockText = extractSideText(blocks, "answer");
 
-        const qText = isNonEmptyString(update.questionText) ? update.questionText.trim() : '';
-        const aText = isNonEmptyString(update.answerText) ? update.answerText.trim() : '';
+        const qText = isNonEmptyString(update.questionText)
+          ? update.questionText.trim()
+          : "";
+        const aText = isNonEmptyString(update.answerText)
+          ? update.answerText.trim()
+          : "";
 
-        const hasQMismatch = qBlockText !== null && qText !== '' && qBlockText !== qText;
-        const hasAMismatch = aBlockText !== null && aText !== '' && aBlockText !== aText;
+        const hasQMismatch =
+          qBlockText !== null && qText !== "" && qBlockText !== qText;
+        const hasAMismatch =
+          aBlockText !== null && aText !== "" && aBlockText !== aText;
 
         if (hasQMismatch || hasAMismatch) {
           if (qBlockText) update.questionText = qBlockText;
@@ -484,10 +537,10 @@ export async function repairDataIntegrity(
 
           changed = true;
           issues.push({
-            code: 'TEXT_BLOCK_MISMATCH',
-            entityType: 'card',
+            code: "TEXT_BLOCK_MISMATCH",
+            entityType: "card",
             entityId,
-            severity: 'warning',
+            severity: "warning",
             fixed: true,
             details: {
               hasQuestionMismatch: hasQMismatch,
@@ -497,55 +550,79 @@ export async function repairDataIntegrity(
         }
       }
 
-      const questionBlocksRaw = getAnyBlocks(update, 'question');
-      const answerBlocksRaw = getAnyBlocks(update, 'answer');
+      const questionBlocksRaw = getAnyBlocks(update, "question");
+      const answerBlocksRaw = getAnyBlocks(update, "answer");
 
-      const questionBlockRepair = repairBlockImages(questionBlocksRaw, entityId, 'question');
+      const questionBlockRepair = repairBlockImages(
+        questionBlocksRaw,
+        entityId,
+        "question",
+      );
       if (questionBlockRepair.changed) {
         update.questionBlocks = questionBlockRepair.blocks;
-        if (update.question_blocks !== undefined) Reflect.deleteProperty(update, 'question_blocks');
+        if (update.question_blocks !== undefined)
+          Reflect.deleteProperty(update, "question_blocks");
         changed = true;
       }
 
-      const answerBlockRepair = repairBlockImages(answerBlocksRaw, entityId, 'answer');
+      const answerBlockRepair = repairBlockImages(
+        answerBlocksRaw,
+        entityId,
+        "answer",
+      );
       if (answerBlockRepair.changed) {
         update.answerBlocks = answerBlockRepair.blocks;
-        if (update.answer_blocks !== undefined) Reflect.deleteProperty(update, 'answer_blocks');
+        if (update.answer_blocks !== undefined)
+          Reflect.deleteProperty(update, "answer_blocks");
         changed = true;
       }
 
-      if (update.questionImages !== undefined || update.question_images !== undefined) {
+      if (
+        update.questionImages !== undefined ||
+        update.question_images !== undefined
+      ) {
         const repairedQuestionImages = repairLegacyImages(
           update.questionImages ?? update.question_images,
           entityId,
-          'question'
+          "question",
         );
 
         if (repairedQuestionImages.changed) {
-          update.questionImages = denormalizeUploadedImages(repairedQuestionImages.cleaned, {
-            case: 'camel',
-            stripUndefined: true,
-          }) as unknown;
+          update.questionImages = denormalizeUploadedImages(
+            repairedQuestionImages.cleaned,
+            {
+              case: "camel",
+              stripUndefined: true,
+            },
+          ) as unknown;
 
-          if (update.question_images !== undefined) Reflect.deleteProperty(update, 'question_images');
+          if (update.question_images !== undefined)
+            Reflect.deleteProperty(update, "question_images");
           changed = true;
         }
       }
 
-      if (update.answerImages !== undefined || update.answer_images !== undefined) {
+      if (
+        update.answerImages !== undefined ||
+        update.answer_images !== undefined
+      ) {
         const repairedAnswerImages = repairLegacyImages(
           update.answerImages ?? update.answer_images,
           entityId,
-          'answer'
+          "answer",
         );
 
         if (repairedAnswerImages.changed) {
-          update.answerImages = denormalizeUploadedImages(repairedAnswerImages.cleaned, {
-            case: 'camel',
-            stripUndefined: true,
-          }) as unknown;
+          update.answerImages = denormalizeUploadedImages(
+            repairedAnswerImages.cleaned,
+            {
+              case: "camel",
+              stripUndefined: true,
+            },
+          ) as unknown;
 
-          if (update.answer_images !== undefined) Reflect.deleteProperty(update, 'answer_images');
+          if (update.answer_images !== undefined)
+            Reflect.deleteProperty(update, "answer_images");
           changed = true;
         }
       }
@@ -556,7 +633,8 @@ export async function repairDataIntegrity(
       }
 
       if (!update.updatedAt) {
-        update.updatedAt = update.createdAt instanceof Date ? update.createdAt : new Date();
+        update.updatedAt =
+          update.createdAt instanceof Date ? update.createdAt : new Date();
         changed = true;
       }
 
@@ -569,11 +647,20 @@ export async function repairDataIntegrity(
     .filter(notNull);
 
   if (cardUpdates.length > 0) {
-    await db.cards.bulkPut(cardUpdates as unknown as Parameters<typeof db.cards.bulkPut>[0]);
+    await db.cards.bulkPut(
+      cardUpdates as unknown as Parameters<typeof db.cards.bulkPut>[0],
+    );
   }
 
-  onProgress?.('復旧データの正規化完了');
-  onProgress?.(`整合性修復完了: folders=${foldersUpdated}, cards=${cardsUpdated}, issues=${issues.length}`);
+  onProgress?.("復旧データの正規化完了");
+  onProgress?.(
+    `整合性修復完了: folders=${foldersUpdated}, cards=${cardsUpdated}, issues=${issues.length}`,
+  );
 
-  return { folders: foldersUpdated, cards: cardsUpdated, canonicalId: null, issues };
+  return {
+    folders: foldersUpdated,
+    cards: cardsUpdated,
+    canonicalId: null,
+    issues,
+  };
 }

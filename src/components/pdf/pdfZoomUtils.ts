@@ -1,6 +1,11 @@
-export const normalizeScale = (value: number): number => Number(value.toFixed(3));
+export const normalizeScale = (value: number): number =>
+  Number(value.toFixed(3));
 
-export const clampScale = (value: number, minScale: number, maxScale: number): number => {
+export const clampScale = (
+  value: number,
+  minScale: number,
+  maxScale: number,
+): number => {
   const lower = Math.min(minScale, maxScale);
   const upper = Math.max(minScale, maxScale);
   return Math.min(Math.max(value, lower), upper);
@@ -24,7 +29,8 @@ export const computeNextScaleFromWheel = ({
   if (!direction) return null;
 
   const step = Math.max(0.001, Number.isFinite(zoomStep) ? zoomStep : 0.1);
-  const rawNextScale = direction > 0 ? currentScale - step : currentScale + step;
+  const rawNextScale =
+    direction > 0 ? currentScale - step : currentScale + step;
   return normalizeScale(clampScale(rawNextScale, minScale, maxScale));
 };
 
@@ -45,7 +51,9 @@ export const computeNextScaleFromGesture = ({
   if (!Number.isFinite(gestureScale) || gestureScale <= 0) return null;
 
   const effectiveBaseScale =
-    typeof baseScale === 'number' && Number.isFinite(baseScale) ? baseScale : currentScale;
+    typeof baseScale === "number" && Number.isFinite(baseScale)
+      ? baseScale
+      : currentScale;
   const rawNextScale = effectiveBaseScale * gestureScale;
   if (!Number.isFinite(rawNextScale)) return null;
 

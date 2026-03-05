@@ -1,8 +1,8 @@
-import { useMemo } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { getLocalDb } from '../services/localDB';
-import { useAuth } from '../contexts/AuthContext';
-import { normalizeCard } from '../utils';
+import { useMemo } from "react";
+import { useLiveQuery } from "dexie-react-hooks";
+import { getLocalDb } from "../services/localDB";
+import { useAuth } from "../contexts/AuthContext";
+import { normalizeCard } from "../utils";
 
 /**
  * 指定されたフォルダとその全子孫フォルダに含まれる全てのカードを取得するフック
@@ -11,27 +11,18 @@ export function useAllDescendantCards(rootFolderId?: string) {
   const { currentUser } = useAuth();
 
   // 1. 全フォルダを取得
-  const allFolders = useLiveQuery(
-    async () => {
-      if (!currentUser) return [];
-      const db = await getLocalDb();
-      return await db.folders
-        .where('userId')
-        .equals(currentUser.uid)
-        .toArray();
-    },
-    [currentUser]
-  );
+  const allFolders = useLiveQuery(async () => {
+    if (!currentUser) return [];
+    const db = await getLocalDb();
+    return await db.folders.where("userId").equals(currentUser.uid).toArray();
+  }, [currentUser]);
 
   // 2. 全カードを取得
-  const rawCards = useLiveQuery(
-    async () => {
-      if (!currentUser) return [];
-      const db = await getLocalDb();
-      return await db.getAllCards();
-    },
-    [currentUser]
-  );
+  const rawCards = useLiveQuery(async () => {
+    if (!currentUser) return [];
+    const db = await getLocalDb();
+    return await db.getAllCards();
+  }, [currentUser]);
 
   // 3. 再帰的に対象フォルダIDをリストアップし、カードをフィルタリング
   const descendantCards = useMemo(() => {
@@ -66,17 +57,15 @@ export function useAllDescendantCards(rootFolderId?: string) {
     const targetFolderIds = getDescendantIds(rootFolderId);
 
     // フィルタリングと正規化
-    const filtered = rawCards
-      .map(normalizeCard)
-      .filter((c) => {
-        const isDel = c.isDeleted ?? (c as { is_deleted?: boolean }).is_deleted;
-        // c.folderId が targetFolderIds に含まれているか
-        return !isDel && targetFolderIds.includes(c.folderId);
-      });
+    const filtered = rawCards.map(normalizeCard).filter((c) => {
+      const isDel = c.isDeleted ?? (c as { is_deleted?: boolean }).is_deleted;
+      // c.folderId が targetFolderIds に含まれているか
+      return !isDel && targetFolderIds.includes(c.folderId);
+    });
 
     // デバッグログ: 必要に応じて有効化
     console.log(
-      `[Diagnostic] useAllDescendantCards: Root=${rootFolderId}, Folders=${allFolders.length}, TargetIDs=${targetFolderIds.length}, HitCards=${filtered.length}`
+      `[Diagnostic] useAllDescendantCards: Root=${rootFolderId}, Folders=${allFolders.length}, TargetIDs=${targetFolderIds.length}, HitCards=${filtered.length}`,
     );
 
     return filtered;

@@ -1,12 +1,12 @@
-import React from 'react';
-import { FileText, MoreVertical } from '@/ui/icons';
-import { Draggable } from '@hello-pangea/dnd';
-import { cn } from '@/lib/utils';
-import { ContextMenu } from '../../ContextMenu';
-import { lockToVerticalTransform } from '../dnd/lockToVertical';
-import { DnDHelpers } from '@/hooks/useFolderDnD';
-import type { Card, SelectedExplorerItem } from '@/types';
-import { getExplorerRowStyle } from './shared';
+import React from "react";
+import { FileText, MoreVertical } from "@/ui/icons";
+import { Draggable } from "@hello-pangea/dnd";
+import { cn } from "@/lib/utils";
+import { ContextMenu } from "../../ContextMenu";
+import { lockToVerticalTransform } from "../dnd/lockToVertical";
+import { DnDHelpers } from "@/hooks/useFolderDnD";
+import type { Card, SelectedExplorerItem } from "@/types";
+import { getExplorerRowStyle } from "./shared";
 
 interface CardRowProps {
   card: Card;
@@ -22,7 +22,7 @@ interface CardRowProps {
   editInputRef: React.RefObject<HTMLInputElement>;
   onItemSelect: (item: SelectedExplorerItem) => void;
   handleMoveCard: (id: string) => void;
-  handleDelete: (id: string, type: 'card') => Promise<void>;
+  handleDelete: (id: string, type: "card") => Promise<void>;
   handleRenameConfirm: () => Promise<void>;
   renameCancelledRef: React.MutableRefObject<boolean>;
   isPinned: boolean;
@@ -63,22 +63,25 @@ export const CardRow: React.FC<CardRowProps> = ({
   onMenuOpenChange,
 }) => {
   const cardId = card.id;
-  
+
   // タイトルがない場合は questionText の最初の部分を表示
   const getCardTitle = () => {
     if (card.title) return card.title;
-    if (isNewlyCreated) return '新規カード';
-    
+    if (isNewlyCreated) return "新規カード";
+
     // questionText から最初の50文字を取得（HTMLタグを除去）
-    const questionText = (card as any).questionText || (card as any).question_text || '';
-    const textOnly = questionText.replace(/<[^>]*>/g, '').trim();
+    const questionText =
+      (card as any).questionText || (card as any).question_text || "";
+    const textOnly = questionText.replace(/<[^>]*>/g, "").trim();
     if (textOnly.length > 0) {
-      return textOnly.length > 50 ? textOnly.substring(0, 50) + '...' : textOnly;
+      return textOnly.length > 50
+        ? textOnly.substring(0, 50) + "..."
+        : textOnly;
     }
-    
-    return '無題のカード';
+
+    return "無題のカード";
   };
-  
+
   const cardTitle = getCardTitle();
   const isOptimisticCard = Boolean((card as any).__optimistic);
   const isDragDisabled = isOptimisticCard || isEditing;
@@ -91,9 +94,11 @@ export const CardRow: React.FC<CardRowProps> = ({
       isDragDisabled={isDragDisabled}
     >
       {(provided, snapshot) => {
-        const lockedStyle = lockToVerticalTransform(provided.draggableProps.style);
+        const lockedStyle = lockToVerticalTransform(
+          provided.draggableProps.style,
+        );
         return (
-          <div 
+          <div
             ref={(node) => {
               provided.innerRef(node);
               setRowRef(cardId, node);
@@ -103,30 +108,31 @@ export const CardRow: React.FC<CardRowProps> = ({
             className={cn(
               rowBaseClassName,
               "pr-9",
-              snapshot.isDragging && "bg-white shadow-lg opacity-90 z-50 ring-1 ring-primary-200",
-              snapshot.isDragging && "pointer-events-none"
+              snapshot.isDragging &&
+                "bg-white shadow-lg opacity-90 z-50 ring-1 ring-primary-200",
+              snapshot.isDragging && "pointer-events-none",
             )}
-            data-selected={isSelected ? 'true' : undefined}
+            data-selected={isSelected ? "true" : undefined}
             style={{
               ...lockedStyle,
               ...getExplorerRowStyle(depth),
-              pointerEvents: snapshot.isDragging ? "none" : "auto", 
+              pointerEvents: snapshot.isDragging ? "none" : "auto",
             }}
             onClick={() => {
               if (snapshot.isDragging) return;
-              if (!isEditing) onItemSelect({ type: 'card', id: cardId });
+              if (!isEditing) onItemSelect({ type: "card", id: cardId });
             }}
           >
             <div
               className={cn(
                 "flex-1 flex min-w-0 cursor-pointer",
-                "items-center h-full"
+                "items-center h-full",
               )}
             >
               <FileText
                 className={cn(
                   "sidebar-icon w-4 h-4 flex-shrink-0 mr-1 text-[#6E6E80] group-hover:text-[#202123]",
-                  isSelected && "text-primary-700"
+                  isSelected && "text-primary-700",
                 )}
               />
 
@@ -141,11 +147,11 @@ export const CardRow: React.FC<CardRowProps> = ({
                     editingNameRef.current = e.target.value;
                   }}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
+                    if (e.key === "Enter") {
                       e.preventDefault();
                       e.currentTarget.blur();
                     }
-                    if (e.key === 'Escape') {
+                    if (e.key === "Escape") {
                       e.preventDefault();
                       e.stopPropagation();
                       renameCancelledRef.current = true;
@@ -159,14 +165,16 @@ export const CardRow: React.FC<CardRowProps> = ({
                 <div
                   className={cn(
                     "flex gap-1 flex-1 overflow-hidden pr-1",
-                    "items-center"
+                    "items-center",
                   )}
                 >
                   <span
                     className={cn(
                       "sidebar-title text-sm lining-nums tabular-nums",
                       "truncate",
-                      isSelected ? "text-primary-700 font-medium" : "text-[#202123]"
+                      isSelected
+                        ? "text-primary-700 font-medium"
+                        : "text-[#202123]",
                     )}
                   >
                     {cardTitle}
@@ -186,7 +194,7 @@ export const CardRow: React.FC<CardRowProps> = ({
                     setEditingName(cardTitle);
                   }}
                   onMove={() => handleMoveCard(cardId)}
-                  onDelete={() => handleDelete(cardId, 'card')}
+                  onDelete={() => handleDelete(cardId, "card")}
                   isPinned={isPinned}
                   onTogglePin={handleTogglePin}
                 >
@@ -196,7 +204,7 @@ export const CardRow: React.FC<CardRowProps> = ({
                     className={cn(
                       "sidebar-action h-6 w-6 p-0 grid place-items-center rounded-md hover:bg-slate-200 text-[#6E6E80] hover:text-[#202123] outline-none pointer-events-auto transition-all shrink-0",
                       "opacity-0 group-hover:opacity-100",
-                      (isSelected || menuOpen) && "opacity-100"
+                      (isSelected || menuOpen) && "opacity-100",
                     )}
                     onClick={(e) => e.stopPropagation()}
                     onPointerDown={(e) => e.stopPropagation()}

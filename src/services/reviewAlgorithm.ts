@@ -1,5 +1,5 @@
-import { Timestamp } from 'firebase/firestore';
-import type { SubjectiveScore } from '@/utils/reviewUtils';
+import { Timestamp } from "firebase/firestore";
+import type { SubjectiveScore } from "@/utils/reviewUtils";
 
 export type ReviewAlgorithmInput = {
   card: {
@@ -33,7 +33,7 @@ export type ReviewAlgorithmResult = {
 };
 
 // Constants
-const MIN_STABILITY = 0.01;  // Prevent division by zero
+const MIN_STABILITY = 0.01; // Prevent division by zero
 const MAX_STABILITY = 1.0;
 const MAX_INTERVAL_DAYS = 90;
 
@@ -42,27 +42,28 @@ const MIN_DIFFICULTY = 0.0;
 const MAX_DIFFICULTY = 1.0;
 
 // EMA smoothing factor (smaller = more stable, larger = more reactive)
-const DIFFICULTY_ALPHA = 0.10;
+const DIFFICULTY_ALPHA = 0.1;
 
 // Interval brake strength (0.0..1.0). Example: 0.30 => max 30% shorter at difficulty=1
-const DIFFICULTY_INTERVAL_BRAKE = 0.30;
+const DIFFICULTY_INTERVAL_BRAKE = 0.3;
 
 // Helper: Convert Firestore Timestamp or Date to Date
 const toDate = (value?: Date | Timestamp | null): Date | null => {
   if (!value) return null;
   if (value instanceof Date) return value;
-  if (typeof (value as any)?.toDate === 'function') return (value as any).toDate();
-  if (typeof value === 'object') {
+  if (typeof (value as any)?.toDate === "function")
+    return (value as any).toDate();
+  if (typeof value === "object") {
     const seconds =
-      typeof (value as any)?.seconds === 'number'
+      typeof (value as any)?.seconds === "number"
         ? (value as any).seconds
-        : typeof (value as any)?._seconds === 'number'
+        : typeof (value as any)?._seconds === "number"
           ? (value as any)._seconds
           : null;
     const nanoseconds =
-      typeof (value as any)?.nanoseconds === 'number'
+      typeof (value as any)?.nanoseconds === "number"
         ? (value as any).nanoseconds
-        : typeof (value as any)?._nanoseconds === 'number'
+        : typeof (value as any)?._nanoseconds === "number"
           ? (value as any)._nanoseconds
           : 0;
     if (seconds !== null) {
@@ -107,10 +108,10 @@ const legacyLevelToStability = (level: number): number => {
 // Get initial stability for a card
 export const getInitialStability = (
   memoryStability?: number | null,
-  legacyLevel?: number | null
+  legacyLevel?: number | null,
 ): number => {
   // If we have a valid 0-1 stability, use it directly
-  if (typeof memoryStability === 'number' && Number.isFinite(memoryStability)) {
+  if (typeof memoryStability === "number" && Number.isFinite(memoryStability)) {
     if (memoryStability > 0 && memoryStability <= 1) {
       return clampStability(memoryStability);
     }
@@ -121,12 +122,12 @@ export const getInitialStability = (
   }
 
   // Fall back to legacy level if available
-  if (typeof legacyLevel === 'number' && Number.isFinite(legacyLevel)) {
+  if (typeof legacyLevel === "number" && Number.isFinite(legacyLevel)) {
     return legacyLevelToStability(legacyLevel);
   }
 
   // Default: 30% stability for new cards
-  return 0.30;
+  return 0.3;
 };
 
 // ✅ Initial difficulty (0..1)
@@ -134,15 +135,15 @@ export const getInitialStability = (
 // 既存値があればそれを採用。なければ stability から雑に推定（新規でも極端にならないように弱める）。
 export const getInitialDifficulty = (
   difficulty?: number | null,
-  stability?: number | null
+  stability?: number | null,
 ): number => {
-  if (typeof difficulty === 'number' && Number.isFinite(difficulty)) {
+  if (typeof difficulty === "number" && Number.isFinite(difficulty)) {
     return clampDifficulty(difficulty);
   }
 
   // Derive a conservative default from stability if available:
   // Higher stability => lower difficulty, but dampened so new cards aren't instantly "hardest".
-  if (typeof stability === 'number' && Number.isFinite(stability)) {
+  if (typeof stability === "number" && Number.isFinite(stability)) {
     const derived = (1 - clamp01(stability)) * 0.6; // 0..0.6 range
     return clampDifficulty(derived);
   }
@@ -168,7 +169,10 @@ const calculateIntervalDays = (stability: number): number => {
  * Score 2 (OK): S' = S + (1-S) × 0.1
  * Score 3 (余裕): S' = S + (1-S) × 0.25
  */
-const updateStability = (currentStability: number, score: SubjectiveScore): number => {
+const updateStability = (
+  currentStability: number,
+  score: SubjectiveScore,
+): number => {
   let newStability: number;
 
   switch (score) {
@@ -199,24 +203,36 @@ const updateStability = (currentStability: number, score: SubjectiveScore): numb
 // 3 (Easy)   : 0.0
 const scoreToFailish = (score: SubjectiveScore): number => {
   switch (score) {
-    case 0: return 1.0;
-    case 1: return 0.6;
-    case 2: return 0.2;
-    case 3: return 0.0;
-    default: return 0.2;
+    case 0:
+      return 1.0;
+    case 1:
+      return 0.6;
+    case 2:
+      return 0.2;
+    case 3:
+      return 0.0;
+    default:
+      return 0.2;
   }
 };
 
 // ✅ Update difficulty via EMA:
 // d' = d*(1-α) + failish*α
-const updateDifficulty = (currentDifficulty: number, score: SubjectiveScore): number => {
+const updateDifficulty = (
+  currentDifficulty: number,
+  score: SubjectiveScore,
+): number => {
   const failish = scoreToFailish(score);
-  const next = currentDifficulty * (1 - DIFFICULTY_ALPHA) + failish * DIFFICULTY_ALPHA;
+  const next =
+    currentDifficulty * (1 - DIFFICULTY_ALPHA) + failish * DIFFICULTY_ALPHA;
   return clampDifficulty(next);
 };
 
 // ✅ Apply difficulty as a mild interval brake (safe and explainable internally)
-const applyDifficultyBrakeToInterval = (baseIntervalDays: number, difficulty: number): number => {
+const applyDifficultyBrakeToInterval = (
+  baseIntervalDays: number,
+  difficulty: number,
+): number => {
   const factor = 1 - DIFFICULTY_INTERVAL_BRAKE * clampDifficulty(difficulty); // [1-k, 1]
   const adjusted = Math.round(baseIntervalDays * factor);
   return Math.max(1, Math.min(MAX_INTERVAL_DAYS, adjusted));
@@ -229,18 +245,32 @@ export const computeNextReview = ({
   card,
   subjectiveScore,
   now = new Date(),
-  delayBonusEnabled = false
-}: ReviewAlgorithmInput & { delayBonusEnabled?: boolean }): ReviewAlgorithmResult => {
+  delayBonusEnabled = false,
+}: ReviewAlgorithmInput & {
+  delayBonusEnabled?: boolean;
+}): ReviewAlgorithmResult => {
   const c: unknown = card as any;
   // Get current stability (with legacy conversion)
-  const legacyLevel = (card.currentLevel ?? c.current_level ?? card.level ?? c.level ?? null) as any;
-  const currentStability = getInitialStability((card.memoryStability ?? c.memory_stability ?? null) as any, legacyLevel);
+  const legacyLevel = (card.currentLevel ??
+    c.current_level ??
+    card.level ??
+    c.level ??
+    null) as any;
+  const currentStability = getInitialStability(
+    (card.memoryStability ?? c.memory_stability ?? null) as any,
+    legacyLevel,
+  );
 
   // ✅ Get current difficulty
-  const currentDifficulty = getInitialDifficulty((card.difficulty ?? c.difficulty ?? null) as any, currentStability);
+  const currentDifficulty = getInitialDifficulty(
+    (card.difficulty ?? c.difficulty ?? null) as any,
+    currentStability,
+  );
 
   // Calculate delay (days overdue)
-  const plannedDate = toDate((card.nextReviewDate ?? c.next_review_date ?? null) as any);
+  const plannedDate = toDate(
+    (card.nextReviewDate ?? c.next_review_date ?? null) as any,
+  );
   const diff = plannedDate ? diffDays(now, plannedDate) : 0;
   const delayDays = Math.max(0, diff);
 
@@ -264,7 +294,10 @@ export const computeNextReview = ({
   const baseIntervalDays = calculateIntervalDays(newStability);
 
   // ✅ Apply difficulty brake (mild encourage for “problem cards”)
-  const intervalDays = applyDifficultyBrakeToInterval(baseIntervalDays, newDifficulty);
+  const intervalDays = applyDifficultyBrakeToInterval(
+    baseIntervalDays,
+    newDifficulty,
+  );
 
   // Calculate next review date
   const nextReviewDate = new Date(now);
@@ -298,7 +331,10 @@ export const computeNextReview = ({
  * @param daysSinceReview Days since last review
  * @returns Recall probability (0-1)
  */
-export const calculateRecallProbability = (stability: number, daysSinceReview: number): number => {
+export const calculateRecallProbability = (
+  stability: number,
+  daysSinceReview: number,
+): number => {
   if (stability <= 0) return 0;
   if (daysSinceReview <= 0) return 1;
 
@@ -314,7 +350,7 @@ export const calculateRecallProbability = (stability: number, daysSinceReview: n
 /**
  * 4択モードでの確信度（正解時のみ取得）
  */
-export type MultipleChoiceConfidence = 'high' | 'mid' | 'luck';
+export type MultipleChoiceConfidence = "high" | "mid" | "luck";
 
 /**
  * 4択モードの復習メタデータ
@@ -322,20 +358,20 @@ export type MultipleChoiceConfidence = 'high' | 'mid' | 'luck';
 export type MultipleChoiceReviewMeta = {
   /** 選択した答えが正解かどうか */
   isCorrect: boolean;
-  
+
   /** 「分からない」を選択したか（明示的なギブアップ） */
   isUnknown?: boolean;
-  
+
   /** 正解時の確信度（未入力時は自動的に 'mid' 扱い） */
   confidence?: MultipleChoiceConfidence;
-  
+
   /** 選択肢表示後から回答までの時間（ミリ秒） */
   choiceTimeMs?: number;
 };
 
 /**
  * 4択結果を SubjectiveScore に変換する
- * 
+ *
  * 変換ルール:
  * - isUnknown === true → 0
  * - isCorrect === false → 0
@@ -343,16 +379,16 @@ export type MultipleChoiceReviewMeta = {
  *   - confidence === 'high' → 3
  *   - confidence === 'mid' or undefined → 2
  *   - confidence === 'luck' → 1
- * 
+ *
  * 反応時間による弱い制限:
  * - choiceTimeMs > 9000ms → score を最大 1 に制限
  * - choiceTimeMs > 6000ms → score を最大 2 に制限
- * 
+ *
  * @param meta 4択モードの復習メタデータ
  * @returns SubjectiveScore (0..3)
  */
 export const convertMultipleChoiceToSubjectiveScore = (
-  meta: MultipleChoiceReviewMeta
+  meta: MultipleChoiceReviewMeta,
 ): SubjectiveScore => {
   // 分からないを選択 or 不正解 → 0
   if (meta.isUnknown === true || meta.isCorrect === false) {
@@ -360,17 +396,17 @@ export const convertMultipleChoiceToSubjectiveScore = (
   }
 
   // 正解時: 確信度から base score を決定
-  const confidence = meta.confidence ?? 'mid'; // 未入力時は自動的に 'mid'
+  const confidence = meta.confidence ?? "mid"; // 未入力時は自動的に 'mid'
   let score: SubjectiveScore;
 
   switch (confidence) {
-    case 'high':
+    case "high":
       score = 3;
       break;
-    case 'mid':
+    case "mid":
       score = 2;
       break;
-    case 'luck':
+    case "luck":
       score = 1;
       break;
     default:
@@ -378,7 +414,7 @@ export const convertMultipleChoiceToSubjectiveScore = (
   }
 
   // 反応時間による弱い制限（オプショナル）
-  if (typeof meta.choiceTimeMs === 'number' && meta.choiceTimeMs > 0) {
+  if (typeof meta.choiceTimeMs === "number" && meta.choiceTimeMs > 0) {
     if (meta.choiceTimeMs > 9000) {
       // 9秒超: 最大 1 に制限（時間かかりすぎ）
       score = Math.min(score, 1) as SubjectiveScore;

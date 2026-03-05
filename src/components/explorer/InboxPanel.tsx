@@ -1,8 +1,14 @@
 /**
  * InboxPanel - 未分類カード一覧表示コンポーネント
  */
-import React, { useMemo, useState, useRef, useEffect } from 'react';
-import { BookOpen, Folder, ArrowRight, ChevronRight, ChevronDown } from '@/ui/icons';
+import React, { useMemo, useState, useRef, useEffect } from "react";
+import {
+  BookOpen,
+  Folder,
+  ArrowRight,
+  ChevronRight,
+  ChevronDown,
+} from "@/ui/icons";
 
 interface InboxPanelProps {
   cards: unknown[];
@@ -25,21 +31,21 @@ export function InboxPanel({
 
   // 未分類カード（folderId が null または undefined）
   const inboxCards = useMemo(() => {
-    return cards.filter(c => !c.folderId);
+    return cards.filter((c) => !c.folderId);
   }, [cards]);
 
   // 移動先フォルダ候補（最近使ったもの + ルートフォルダ）
   const moveFolderOptions = useMemo(() => {
-    const rootFolders = folders.filter(f => !f.parentId);
+    const rootFolders = folders.filter((f) => !f.parentId);
     const recentFolders = recentFolderIds
-      .map(id => folders.find(f => (f.id || f.folderId) === id))
+      .map((id) => folders.find((f) => (f.id || f.folderId) === id))
       .filter(Boolean)
       .slice(0, 5);
-    
+
     // 重複を除去
     const seen = new Set<string>();
     const options: unknown[] = [];
-    
+
     for (const f of recentFolders) {
       const id = f.id || f.folderId;
       if (!seen.has(id)) {
@@ -47,7 +53,7 @@ export function InboxPanel({
         options.push(f);
       }
     }
-    
+
     for (const f of rootFolders) {
       const id = f.id || f.folderId;
       if (!seen.has(id)) {
@@ -55,21 +61,24 @@ export function InboxPanel({
         options.push(f);
       }
     }
-    
+
     return options.slice(0, 8);
   }, [folders, recentFolderIds]);
 
   // ドロップダウンを閉じる（外側クリック時）
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
         setMovingCardId(null);
       }
     };
     if (movingCardId) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     }
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [movingCardId]);
 
   const handleMoveToFolder = async (cardId: string, folderId: string) => {
@@ -78,7 +87,7 @@ export function InboxPanel({
       await onMoveCard(cardId, folderId);
       setMovingCardId(null);
     } catch (e) {
-      console.error('Failed to move card:', e);
+      console.error("Failed to move card:", e);
     } finally {
       setIsMoving(false);
     }
@@ -102,13 +111,13 @@ export function InboxPanel({
           未分類カード ({inboxCards.length})
         </span>
       </div>
-      
+
       {/* リスト */}
       <div className="flex-1 overflow-y-auto py-1">
         {inboxCards.map((card) => {
           const cardId = card.id || card.cardId;
           const isOpen = movingCardId === cardId;
-          
+
           return (
             <div
               key={cardId}
@@ -122,11 +131,11 @@ export function InboxPanel({
                 <BookOpen className="w-4 h-4 shrink-0 text-[#6E6E80]" />
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-medium text-[#202123] truncate">
-                    {card.title || '無題のカード'}
+                    {card.title || "無題のカード"}
                   </div>
                 </div>
               </div>
-              
+
               {/* 移動ボタン + ドロップダウン */}
               <div className="relative" ref={isOpen ? dropdownRef : undefined}>
                 <button
@@ -138,7 +147,7 @@ export function InboxPanel({
                   <span className="hidden sm:inline">移動</span>
                   <ChevronDown className="w-3 h-3" />
                 </button>
-                
+
                 {/* ドロップダウンメニュー */}
                 {isOpen && (
                   <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-slate-200 rounded-lg shadow-lg z-50 py-1">
@@ -148,8 +157,9 @@ export function InboxPanel({
                     <div className="border-t border-slate-100">
                       {moveFolderOptions.map((folder) => {
                         const folderId = folder.id || folder.folderId;
-                        const folderName = folder.folderName || folder.folder_name;
-                        
+                        const folderName =
+                          folder.folderName || folder.folder_name;
+
                         return (
                           <button
                             key={folderId}
@@ -158,7 +168,9 @@ export function InboxPanel({
                             disabled={isMoving}
                           >
                             <ChevronRight className="w-3 h-3 text-[#6E6E80]" />
-                            <span className="text-sm text-[#202123] truncate">{folderName}</span>
+                            <span className="text-sm text-[#202123] truncate">
+                              {folderName}
+                            </span>
                           </button>
                         );
                       })}
@@ -178,4 +190,3 @@ export function InboxPanel({
     </div>
   );
 }
-

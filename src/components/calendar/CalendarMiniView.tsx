@@ -1,33 +1,37 @@
 /**
  * CalendarMiniView - ダッシュボード埋め込み用コンパクトカレンダー
  */
-import React, { useState, useMemo } from 'react';
-import { 
-  format, 
-  startOfMonth, 
-  endOfMonth, 
-  startOfWeek, 
+import React, { useState, useMemo } from "react";
+import {
+  format,
+  startOfMonth,
+  endOfMonth,
+  startOfWeek,
   endOfWeek,
   addDays,
   addMonths,
   isSameMonth,
   isSameDay,
   isToday,
-} from 'date-fns';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from '@/ui/icons';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/types';
+} from "date-fns";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Calendar as CalendarIcon,
+} from "@/ui/icons";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/types";
 
 interface CalendarMiniViewProps {
   cards: Card[];
-  weekStartDay?: 'monday' | 'sunday';
+  weekStartDay?: "monday" | "sunday";
   accentColor?: string;
 }
 
 const toDate = (value: unknown): Date | null => {
   if (!value) return null;
-  if (typeof value?.toDate === 'function') {
+  if (typeof value?.toDate === "function") {
     const d = value.toDate();
     return d instanceof Date && !isNaN(d.getTime()) ? d : null;
   }
@@ -36,10 +40,10 @@ const toDate = (value: unknown): Date | null => {
   return isNaN(d.getTime()) ? null : d;
 };
 
-export function CalendarMiniView({ 
-  cards, 
-  weekStartDay = 'monday',
-  accentColor = '#689A98'
+export function CalendarMiniView({
+  cards,
+  weekStartDay = "monday",
+  accentColor = "#689A98",
 }: CalendarMiniViewProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -47,12 +51,12 @@ export function CalendarMiniView({
   // 日付ごとのカード枚数を算出
   const cardsByDate = useMemo(() => {
     const grouped: Record<string, Card[]> = {};
-    cards.forEach(card => {
+    cards.forEach((card) => {
       const dateVal = card.nextReviewDate || (card as any).next_review_date;
       const dateObj = toDate(dateVal);
       if (!dateObj) return;
 
-      const dateKey = format(dateObj, 'yyyy-MM-dd');
+      const dateKey = format(dateObj, "yyyy-MM-dd");
       if (!grouped[dateKey]) grouped[dateKey] = [];
       grouped[dateKey].push(card);
     });
@@ -63,8 +67,12 @@ export function CalendarMiniView({
   const calendarDays = useMemo(() => {
     const monthStart = startOfMonth(currentMonth);
     const monthEnd = endOfMonth(currentMonth);
-    const startDate = startOfWeek(monthStart, { weekStartsOn: weekStartDay === 'sunday' ? 0 : 1 });
-    const endDate = endOfWeek(monthEnd, { weekStartsOn: weekStartDay === 'sunday' ? 0 : 1 });
+    const startDate = startOfWeek(monthStart, {
+      weekStartsOn: weekStartDay === "sunday" ? 0 : 1,
+    });
+    const endDate = endOfWeek(monthEnd, {
+      weekStartsOn: weekStartDay === "sunday" ? 0 : 1,
+    });
 
     const days = [];
     let day = startDate;
@@ -75,12 +83,13 @@ export function CalendarMiniView({
     return days;
   }, [currentMonth, weekStartDay]);
 
-  const weekDays = weekStartDay === 'sunday' 
-    ? ['S', 'M', 'T', 'W', 'T', 'F', 'S']
-    : ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+  const weekDays =
+    weekStartDay === "sunday"
+      ? ["S", "M", "T", "W", "T", "F", "S"]
+      : ["M", "T", "W", "T", "F", "S", "S"];
 
   const selectedCards = useMemo(() => {
-    const key = format(selectedDate, 'yyyy-MM-dd');
+    const key = format(selectedDate, "yyyy-MM-dd");
     return cardsByDate[key] || [];
   }, [selectedDate, cardsByDate]);
 
@@ -90,21 +99,21 @@ export function CalendarMiniView({
         <div className="flex items-center gap-2">
           <CalendarIcon className="w-4 h-4 text-slate-400" />
           <span className="text-sm font-bold text-slate-700 uppercase tracking-wider">
-            {format(currentMonth, 'MMMM yyyy')}
+            {format(currentMonth, "MMMM yyyy")}
           </span>
         </div>
         <div className="flex items-center gap-1">
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             className="h-7 w-7 rounded-full"
             onClick={() => setCurrentMonth(addMonths(currentMonth, -1))}
           >
             <ChevronLeft className="w-4 h-4" />
           </Button>
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             className="h-7 w-7 rounded-full"
             onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
           >
@@ -115,7 +124,10 @@ export function CalendarMiniView({
 
       <div className="grid grid-cols-7 mb-2">
         {weekDays.map((d, i) => (
-          <div key={i} className="text-center text-[10px] font-bold text-slate-300">
+          <div
+            key={i}
+            className="text-center text-[10px] font-bold text-slate-300"
+          >
             {d}
           </div>
         ))}
@@ -126,7 +138,7 @@ export function CalendarMiniView({
           const isCurrentMonth = isSameMonth(day, currentMonth);
           const isSelected = isSameDay(day, selectedDate);
           const isTodayDate = isToday(day);
-          const dateKey = format(day, 'yyyy-MM-dd');
+          const dateKey = format(day, "yyyy-MM-dd");
           const dayCards = cardsByDate[dateKey] || [];
           const count = dayCards.length;
 
@@ -137,16 +149,18 @@ export function CalendarMiniView({
               className={cn(
                 "h-10 rounded-xl flex flex-col items-center justify-center transition-all relative overflow-hidden",
                 !isCurrentMonth && "opacity-20",
-                isSelected 
-                  ? "bg-primary-50 text-primary-700 ring-1 ring-primary-200" 
+                isSelected
+                  ? "bg-primary-50 text-primary-700 ring-1 ring-primary-200"
                   : "hover:bg-slate-50 text-slate-500",
-                isTodayDate && !isSelected && "bg-slate-100 font-bold"
+                isTodayDate && !isSelected && "bg-slate-100 font-bold",
               )}
             >
-              <span className="text-[11px] font-medium leading-none mb-1">{format(day, 'd')}</span>
+              <span className="text-[11px] font-medium leading-none mb-1">
+                {format(day, "d")}
+              </span>
               {count > 0 && (
-                <div 
-                  className="w-1 h-1 rounded-full" 
+                <div
+                  className="w-1 h-1 rounded-full"
                   style={{ backgroundColor: accentColor }}
                 />
               )}
@@ -158,12 +172,15 @@ export function CalendarMiniView({
       {selectedCards.length > 0 && (
         <div className="mt-4 pt-4 border-t border-slate-100 animate-in fade-in slide-in-from-top-2 duration-300">
           <div className="text-[10px] font-bold text-slate-400 uppercase mb-2">
-            {format(selectedDate, 'MMM d')} - {selectedCards.length} Cards
+            {format(selectedDate, "MMM d")} - {selectedCards.length} Cards
           </div>
           <div className="space-y-1.5 max-h-[120px] overflow-y-auto pr-1 no-scrollbar">
             {selectedCards.slice(0, 5).map((card, i) => (
-              <div key={i} className="text-[11px] text-slate-600 truncate bg-slate-50/50 rounded-lg px-2 py-1.5 border border-slate-100/50">
-                {card.title || '無題のカード'}
+              <div
+                key={i}
+                className="text-[11px] text-slate-600 truncate bg-slate-50/50 rounded-lg px-2 py-1.5 border border-slate-100/50"
+              >
+                {card.title || "無題のカード"}
               </div>
             ))}
             {selectedCards.length > 5 && (

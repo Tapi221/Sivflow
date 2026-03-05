@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import type { Notification } from '../../types/notification';
-import { AlertCircle, ChevronDown } from '@/ui/icons';
+import React, { useState } from "react";
+import type { Notification } from "../../types/notification";
+import { AlertCircle, ChevronDown } from "@/ui/icons";
 
 interface ErrorDialogProps {
   notification: Notification;
@@ -9,13 +9,16 @@ interface ErrorDialogProps {
 
 /**
  * ERROR レベルの通知
- * 
+ *
  * 特徴:
  * - 明確なアクション必須
  * - 続行不可
  * - 閉じられない
  */
-export const ErrorDialog: React.FC<ErrorDialogProps> = ({ notification, onDismiss }) => {
+export const ErrorDialog: React.FC<ErrorDialogProps> = ({
+  notification,
+  onDismiss,
+}) => {
   const [showDetails, setShowDetails] = useState(false);
 
   return (
@@ -46,7 +49,9 @@ export const ErrorDialog: React.FC<ErrorDialogProps> = ({ notification, onDismis
                 onClick={() => setShowDetails(!showDetails)}
                 className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900"
               >
-                <ChevronDown className={`w-4 h-4 transition-transform ${showDetails ? 'rotate-180' : ''}`} />
+                <ChevronDown
+                  className={`w-4 h-4 transition-transform ${showDetails ? "rotate-180" : ""}`}
+                />
                 詳細を見る
               </button>
               {showDetails && (
@@ -69,8 +74,8 @@ export const ErrorDialog: React.FC<ErrorDialogProps> = ({ notification, onDismis
               }}
               className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${
                 action.primary
-                  ? 'bg-red-500 text-white hover:bg-red-600'
-                  : 'bg-slate-100 text-slate-900 hover:bg-slate-200'
+                  ? "bg-red-500 text-white hover:bg-red-600"
+                  : "bg-slate-100 text-slate-900 hover:bg-slate-200"
               }`}
             >
               {action.label}

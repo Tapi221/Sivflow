@@ -1,15 +1,15 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { getPageRuledBg } from '@/components/card/frame/ruledStyles';
-import { useNavigate } from 'react-router-dom';
-import { useCards } from '@/hooks/useCards';
-import { useFolders } from '@/hooks/useFolders';
-import { useQuery } from '@tanstack/react-query';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { getLocalDb } from '../services/localDB';
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
-import { firestoreDb } from '@/services/firebase';
-import { useAuth } from '@/contexts/AuthContext';
-import { Skeleton } from '@/components/ui/skeleton';
+import React, { useState, useMemo, useEffect } from "react";
+import { getPageRuledBg } from "@/components/card/frame/ruledStyles";
+import { useNavigate } from "react-router-dom";
+import { useCards } from "@/hooks/useCards";
+import { useFolders } from "@/hooks/useFolders";
+import { useQuery } from "@tanstack/react-query";
+import { useLiveQuery } from "dexie-react-hooks";
+import { getLocalDb } from "../services/localDB";
+import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
+import { firestoreDb } from "@/services/firebase";
+import { useAuth } from "@/contexts/AuthContext";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Flame,
   Clock,
@@ -20,42 +20,44 @@ import {
   Download,
   Upload,
   Brain,
-  Zap
-} from '@/ui/icons';
-import { createPageUrl } from '@/utils';
-import { RatingCountTiles } from '@/features/study/RatingCountTiles';
-import { useTodayStudyStore } from '@/stores/useTodayStudyStore';
+  Zap,
+} from "@/ui/icons";
+import { createPageUrl } from "@/utils";
+import { RatingCountTiles } from "@/features/study/RatingCountTiles";
+import { useTodayStudyStore } from "@/stores/useTodayStudyStore";
 
-import ExportDialog from '@/components/export/ExportDialog';
-import ImportDialog from '@/components/export/ImportDialog';
-import { useUserSettings } from '@/hooks/useUserSettings';
+import ExportDialog from "@/components/export/ExportDialog";
+import ImportDialog from "@/components/export/ImportDialog";
+import { useUserSettings } from "@/hooks/useUserSettings";
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const { settings } = useUserSettings();
-  
+
   // 当日学習ストア（評価集計 & 追い復習キュー）
   const { ratings, extraQueue } = useTodayStudyStore();
 
   // マウント時 / userId 変更時: 日付・userId の齟齬をリセット
   useEffect(() => {
-    const uid = currentUser?.uid ?? 'anon';
+    const uid = currentUser?.uid ?? "anon";
     useTodayStudyStore.getState().hydrate(uid);
   }, [currentUser?.uid]);
 
   // フォーカス復帰・タブ切り替え・別タブ変更でリセット確認
   useEffect(() => {
-    const uid = () => currentUser?.uid ?? 'anon';
+    const uid = () => currentUser?.uid ?? "anon";
     const sync = () => useTodayStudyStore.getState().resetIfNewDay(uid());
-    const onVisible = () => { if (!document.hidden) sync(); };
-    window.addEventListener('focus', sync);
-    document.addEventListener('visibilitychange', onVisible);
-    window.addEventListener('storage', sync);
+    const onVisible = () => {
+      if (!document.hidden) sync();
+    };
+    window.addEventListener("focus", sync);
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("storage", sync);
     return () => {
-      window.removeEventListener('focus', sync);
-      document.removeEventListener('visibilitychange', onVisible);
-      window.removeEventListener('storage', sync);
+      window.removeEventListener("focus", sync);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("storage", sync);
     };
   }, [currentUser?.uid]);
 
@@ -63,78 +65,81 @@ export default function Dashboard() {
   const { folders = [], loading: foldersLoading } = useFolders();
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
-  
+
   // Study logs for streak calculation
   const { data: studyLogs = [], isLoading: logsLoading } = useQuery({
-    queryKey: ['studyLogs', currentUser?.uid],
+    queryKey: ["studyLogs", currentUser?.uid],
     queryFn: async () => {
       if (!currentUser || !firestoreDb) return [];
       const q = query(
-        collection(firestoreDb, 'studyLogs'),
-        where('userId', '==', currentUser.uid),
-        orderBy('createdAt', 'desc')
+        collection(firestoreDb, "studyLogs"),
+        where("userId", "==", currentUser.uid),
+        orderBy("createdAt", "desc"),
       );
       const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })).slice(0, 100);
-    }, 
+      return snapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }))
+        .slice(0, 100);
+    },
     enabled: !!currentUser,
   });
 
   // Local Study logs (Rescued/Offline)
-  const localStudyLogs = useLiveQuery(
-    async () => {
-      if (!currentUser) return [];
-      const db = await getLocalDb(currentUser.uid);
-      return await db.table('studyLogs').toArray();
-    },
-    [currentUser]
-  );
-  
+  const localStudyLogs = useLiveQuery(async () => {
+    if (!currentUser) return [];
+    const db = await getLocalDb(currentUser.uid);
+    return await db.table("studyLogs").toArray();
+  }, [currentUser]);
+
   // Filter out deleted cards
-  const validFolderIds = new Set(folders.map(f => f.id || f.folderId));
-  
-  const activeCards = cards.filter(card => {
+  const validFolderIds = new Set(folders.map((f) => f.id || f.folderId));
+
+  const activeCards = cards.filter((card) => {
     if (card.isDeleted || card.is_deleted) return false;
     if (foldersLoading) return true;
     const cardFolderId = card.folderId || card.folder_id;
     if (cardFolderId && !validFolderIds.has(cardFolderId)) return false;
     return true;
   });
-  
+
   // Filtered lists for dashboard
-  const todayCards = activeCards.filter(card => {
+  const todayCards = activeCards.filter((card) => {
     if (card.isDraft || card.is_draft) return false;
     if (!card.nextReviewDate && !card.next_review_date) return false;
-    
+
     let reviewDate = card.nextReviewDate || card.next_review_date;
-    if (typeof reviewDate?.toDate === 'function') {
+    if (typeof reviewDate?.toDate === "function") {
       reviewDate = reviewDate.toDate();
     } else if (!(reviewDate instanceof Date)) {
       reviewDate = new Date(reviewDate);
     }
-    
+
     if (isNaN(reviewDate.getTime())) return false;
-
-
-
-
 
     const today = new Date();
     // Reset time components for accurate date comparison
-    const rDate = new Date(reviewDate.getFullYear(), reviewDate.getMonth(), reviewDate.getDate());
-    const tDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const rDate = new Date(
+      reviewDate.getFullYear(),
+      reviewDate.getMonth(),
+      reviewDate.getDate(),
+    );
+    const tDate = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+    );
 
     const autoCarryOver = settings?.autoCarryOver ?? true;
 
     if (autoCarryOver) {
-        // Include past due dates
-        return rDate <= tDate;
+      // Include past due dates
+      return rDate <= tDate;
     } else {
-        // Only strictly today
-        return rDate.getTime() === tDate.getTime();
+      // Only strictly today
+      return rDate.getTime() === tDate.getTime();
     }
   });
 
@@ -158,36 +163,40 @@ export default function Dashboard() {
       mergedStudyLogs
         .map(getLogDate)
         .filter(Boolean)
-        .map((d) => d.toDateString())
+        .map((d) => d.toDateString()),
     );
-    
+
     // Check if we studied today
     const today = new Date();
     const studiedToday = dates.has(today.toDateString());
-    
+
     let count = 0;
     for (let i = 0; i < 365; i++) {
-        const d = new Date();
-        d.setDate(today.getDate() - i);
-        if (dates.has(d.toDateString())) {
-            count++;
-        } else if (i === 0) {
-            continue;
-        } else {
-            break;
-        }
+      const d = new Date();
+      d.setDate(today.getDate() - i);
+      if (dates.has(d.toDateString())) {
+        count++;
+      } else if (i === 0) {
+        continue;
+      } else {
+        break;
+      }
     }
-    
+
     // User Request: Count today if ANY review is done (studiedToday is true)
     // if (studiedToday && todayCards.length > 0) { ... } <- Removed constraint
-    
+
     return count;
     // @ts-ignore
   }, [mergedStudyLogs, todayCards.length]);
 
   const todayRatingCounts = useMemo(() => {
     const today = new Date();
-    const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const start = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+    );
     const end = new Date(start);
     end.setDate(end.getDate() + 1);
 
@@ -201,32 +210,31 @@ export default function Dashboard() {
     return counts;
   }, [mergedStudyLogs]);
 
-  const draftCards = activeCards.filter(c => 
-    (c.isDraft || c.is_draft)
-  );
+  const draftCards = activeCards.filter((c) => c.isDraft || c.is_draft);
 
   const lastStudiedFolder = useMemo(() => {
     if (studyLogs.length === 0) return null;
     const lastLog = studyLogs[0];
     const cardId = lastLog.cardId || lastLog.card_id;
-    const card = cards.find(c => c.id === cardId);
+    const card = cards.find((c) => c.id === cardId);
     if (!card) return null;
     const fId = card.folderId || card.folder_id;
-    return folders.find(f => f.id === fId);
+    return folders.find((f) => f.id === fId);
   }, [studyLogs, cards, folders]);
-  
+
   const isLoading = cardsLoading || foldersLoading || logsLoading;
   const dueCount = todayCards.length;
   const isNoDueCards = dueCount === 0;
   const priorityDescriptionLine1 = isNoDueCards
-    ? '今日の復習はありません。'
-    : '忘れる前に復習しましょう。';
+    ? "今日の復習はありません。"
+    : "忘れる前に復習しましょう。";
   const priorityDescriptionLine2 = isNoDueCards
-    ? 'カードを追加するか、学習を進めましょう。'
+    ? "カードを追加するか、学習を進めましょう。"
     : null;
 
   // ストアから当日集計と追い復習残数を取得
-  const todayTotalRated = ratings.forgot + ratings.vague + ratings.remembered + ratings.easy;
+  const todayTotalRated =
+    ratings.forgot + ratings.vague + ratings.remembered + ratings.easy;
   // due > 0: まだ未完了 / todayTotalRated === 0: 今日まだ1枚もやっていない → どちらも表示
   const showTodayReview = dueCount > 0 || todayTotalRated === 0;
   const extraRemaining = extraQueue.length;
@@ -234,100 +242,129 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-[#F5F7FA] text-slate-800 selection:bg-teal-100 selection:text-teal-900 relative overflow-hidden">
       {/* Background Ruled Lines */}
-      <div 
-        className="absolute inset-0 opacity-100 pointer-events-none z-0" 
-        style={{ 
-          ...getPageRuledBg()
+      <div
+        className="absolute inset-0 opacity-100 pointer-events-none z-0"
+        style={{
+          ...getPageRuledBg(),
         }}
       />
       <div className="max-w-[1100px] mx-auto p-4 md:p-12 relative z-10">
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
-           <div className="flex-1">
-              <div className="flex items-center gap-2 md:gap-3 mb-1 md:mb-2">
-                {/* Icon removed as requested */}
-                <h1 className="text-xl md:text-2xl font-bold text-slate-700 leading-tight">
-                  こんにちは、{settings?.displayName || '学習者'}さん
-                </h1>
+          <div className="flex-1">
+            <div className="flex items-center gap-2 md:gap-3 mb-1 md:mb-2">
+              {/* Icon removed as requested */}
+              <h1 className="text-xl md:text-2xl font-bold text-slate-700 leading-tight">
+                こんにちは、{settings?.displayName || "学習者"}さん
+              </h1>
+            </div>
+            <p className="text-xs md:text-sm text-slate-400 font-medium ml-1">
+              今日も着実に知識を積み上げましょう。
+            </p>
+          </div>
+
+          {/* Desktop Streak Display (Hidden on Mobile) */}
+          <div className="hidden md:flex items-center gap-4 bg-white px-4 md:px-6 py-2 md:py-3 rounded-2xl md:rounded-3xl border border-slate-50 shadow-sm transition-all hover:shadow-md h-fit">
+            <div
+              className="flex flex-col items-center cursor-default"
+              aria-label="1枚でも復習するとストリークが増えます"
+            >
+              <div className="text-[8px] md:text-[9px] font-bold text-slate-300 uppercase tracking-widest mb-0.5 md:mb-1">
+                Streak
               </div>
-              <p className="text-xs md:text-sm text-slate-400 font-medium ml-1">今日も着実に知識を積み上げましょう。</p>
-           </div>
-           
-           {/* Desktop Streak Display (Hidden on Mobile) */}
-           <div className="hidden md:flex items-center gap-4 bg-white px-4 md:px-6 py-2 md:py-3 rounded-2xl md:rounded-3xl border border-slate-50 shadow-sm transition-all hover:shadow-md h-fit">
-              <div
-                className="flex flex-col items-center cursor-default"
-                aria-label="1枚でも復習するとストリークが増えます"
-              >
-                 <div className="text-[8px] md:text-[9px] font-bold text-slate-300 uppercase tracking-widest mb-0.5 md:mb-1">Streak</div>
-                 <div className="flex items-center gap-1.5">
-                    <Flame className="w-4 h-4 md:w-5 md:h-5 text-orange-400 fill-orange-400" />
-                    <span className="text-lg md:text-xl font-bold text-slate-700">{streak}</span>
-                    <span className="text-[10px] font-bold text-slate-400 mt-1">days</span>
-                 </div>
+              <div className="flex items-center gap-1.5">
+                <Flame className="w-4 h-4 md:w-5 md:h-5 text-orange-400 fill-orange-400" />
+                <span className="text-lg md:text-xl font-bold text-slate-700">
+                  {streak}
+                </span>
+                <span className="text-[10px] font-bold text-slate-400 mt-1">
+                  days
+                </span>
               </div>
-           </div>
+            </div>
+          </div>
         </div>
 
         {/* Mobile Streak Display (Positioned below settings icon) */}
         <div className="md:hidden flex justify-end mb-8 -mt-10 relative z-10 pr-0">
-            <div className="bg-white/90 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white shadow-[0_8px_20px_-4px_rgba(0,0,0,0.12)] flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-500">
-               <div className="flex flex-col items-end">
-                 <span className="text-[7px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-0.5">STREAK</span>
-                 <div className="flex items-center gap-1.5">
-                   <Flame className="w-4 h-4 text-orange-400 fill-orange-400" />
-                   <span className="text-sm font-bold text-slate-700 leading-none">{streak}</span>
-                   <span className="text-[9px] font-bold text-slate-400 mt-0.5">days</span>
-                 </div>
-               </div>
+          <div className="bg-white/90 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white shadow-[0_8px_20px_-4px_rgba(0,0,0,0.12)] flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-500">
+            <div className="flex flex-col items-end">
+              <span className="text-[7px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-0.5">
+                STREAK
+              </span>
+              <div className="flex items-center gap-1.5">
+                <Flame className="w-4 h-4 text-orange-400 fill-orange-400" />
+                <span className="text-sm font-bold text-slate-700 leading-none">
+                  {streak}
+                </span>
+                <span className="text-[9px] font-bold text-slate-400 mt-0.5">
+                  days
+                </span>
+              </div>
             </div>
+          </div>
         </div>
 
         {/* Priority Section (Today's Review) — 完了済みの日は非表示 */}
-        {showTodayReview && <section className="mb-8 md:mb-12">
-            <div 
+        {showTodayReview && (
+          <section className="mb-8 md:mb-12">
+            <div
               className={`
                 rounded-3xl md:rounded-[40px] py-6 px-6 md:p-12 border-t border-white/50 ring-1 ring-slate-900/5 
                 transition-all duration-300 group overflow-hidden relative
-                ${todayCards.length === 0 
-                  ? 'bg-slate-100/50 shadow-[inset_0_2px_4px_0_rgba(0,0,0,0.06)] scale-[0.99] cursor-default' 
-                  : 'bg-[#FAFAFA] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1),0_15px_30px_-5px_rgba(var(--color-primary-600),0.3)] cursor-pointer hover:shadow-[0_25px_50px_-10px_rgba(0,0,0,0.15),0_20px_40px_-5px_rgba(var(--color-primary-600),0.4)] hover:-translate-y-0.5'
+                ${
+                  todayCards.length === 0
+                    ? "bg-slate-100/50 shadow-[inset_0_2px_4px_0_rgba(0,0,0,0.06)] scale-[0.99] cursor-default"
+                    : "bg-[#FAFAFA] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1),0_15px_30px_-5px_rgba(var(--color-primary-600),0.3)] cursor-pointer hover:shadow-[0_25px_50px_-10px_rgba(0,0,0,0.15),0_20px_40px_-5px_rgba(var(--color-primary-600),0.4)] hover:-translate-y-0.5"
                 }
               `}
-              onClick={() => todayCards.length > 0 && navigate(createPageUrl('study'))}
+              onClick={() =>
+                todayCards.length > 0 && navigate(createPageUrl("study"))
+              }
             >
-                <div className="absolute top-0 right-0 w-48 h-48 md:w-64 md:h-64 bg-primary-100/50 rounded-full -translate-y-1/2 translate-x-1/2 opacity-20 group-hover:scale-110 transition-transform duration-700"></div>
-                
-                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-8">
-                    <div className="space-y-2 md:space-y-5">
-                        <div className="hidden md:flex items-center gap-2">
-                           <div className="px-3 md:px-4 py-1 bg-primary-600 text-white text-[10px] md:text-xs font-bold rounded-full uppercase tracking-wider shadow-sm">優先タスク</div>
-                           {todayCards.length > 0 && <div className="animate-pulse w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]"></div>}
-                        </div>
-                        <h2 className="text-2xl md:text-5xl font-bold text-slate-800 tracking-tight">今日の復習</h2>
-                        <p className="text-xs md:text-base text-slate-500 font-medium max-w-sm mt-1 md:mt-3 leading-relaxed">
-                           {priorityDescriptionLine1}
-                           {priorityDescriptionLine2 && (
-                             <>
-                               <br className="hidden md:block" />
-                               {priorityDescriptionLine2}
-                             </>
-                           )}
-                        </p>
+              <div className="absolute top-0 right-0 w-48 h-48 md:w-64 md:h-64 bg-primary-100/50 rounded-full -translate-y-1/2 translate-x-1/2 opacity-20 group-hover:scale-110 transition-transform duration-700"></div>
+
+              <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-8">
+                <div className="space-y-2 md:space-y-5">
+                  <div className="hidden md:flex items-center gap-2">
+                    <div className="px-3 md:px-4 py-1 bg-primary-600 text-white text-[10px] md:text-xs font-bold rounded-full uppercase tracking-wider shadow-sm">
+                      優先タスク
                     </div>
-                    
-                    <div className="flex items-center gap-5 md:gap-8">
-                        <div className="flex flex-col items-center">
-                           <span className="text-4xl md:text-7xl font-bold text-primary-600 italic leading-none tracking-tighter">{dueCount}</span>
-                           <span className="text-[9px] md:text-[11px] font-bold text-slate-400 uppercase mt-1 md:mt-2 tracking-[0.2em]">Cards Due</span>
-                        </div>
-                        <div className="w-14 h-14 md:w-20 md:h-20 rounded-full bg-primary-600 flex items-center justify-center text-white shadow-lg shadow-primary-600/30 group-hover:scale-110 group-hover:bg-primary-500 transition-all duration-300">
-                           <ChevronRight className="w-7 h-7 md:w-10 md:h-10" />
-                        </div>
-                    </div>
+                    {todayCards.length > 0 && (
+                      <div className="animate-pulse w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]"></div>
+                    )}
+                  </div>
+                  <h2 className="text-2xl md:text-5xl font-bold text-slate-800 tracking-tight">
+                    今日の復習
+                  </h2>
+                  <p className="text-xs md:text-base text-slate-500 font-medium max-w-sm mt-1 md:mt-3 leading-relaxed">
+                    {priorityDescriptionLine1}
+                    {priorityDescriptionLine2 && (
+                      <>
+                        <br className="hidden md:block" />
+                        {priorityDescriptionLine2}
+                      </>
+                    )}
+                  </p>
                 </div>
+
+                <div className="flex items-center gap-5 md:gap-8">
+                  <div className="flex flex-col items-center">
+                    <span className="text-4xl md:text-7xl font-bold text-primary-600 italic leading-none tracking-tighter">
+                      {dueCount}
+                    </span>
+                    <span className="text-[9px] md:text-[11px] font-bold text-slate-400 uppercase mt-1 md:mt-2 tracking-[0.2em]">
+                      Cards Due
+                    </span>
+                  </div>
+                  <div className="w-14 h-14 md:w-20 md:h-20 rounded-full bg-primary-600 flex items-center justify-center text-white shadow-lg shadow-primary-600/30 group-hover:scale-110 group-hover:bg-primary-500 transition-all duration-300">
+                    <ChevronRight className="w-7 h-7 md:w-10 md:h-10" />
+                  </div>
+                </div>
+              </div>
             </div>
-        </section>}
+          </section>
+        )}
 
         {/* 追い復習セクション — 未消化カードがある場合のみ表示 */}
         {extraRemaining > 0 && (
@@ -340,14 +377,20 @@ export default function Dashboard() {
             </div>
             <div
               className="bg-amber-50/60 rounded-3xl py-5 px-6 md:py-7 md:px-10 border border-amber-100/80 cursor-pointer hover:bg-amber-50 transition-all duration-300 group"
-              onClick={() => navigate(createPageUrl('study'))}
+              onClick={() => navigate(createPageUrl("study"))}
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[10px] font-bold text-amber-500 uppercase tracking-[0.15em] mb-1">忘れた・あいまいのカード</p>
+                  <p className="text-[10px] font-bold text-amber-500 uppercase tracking-[0.15em] mb-1">
+                    忘れた・あいまいのカード
+                  </p>
                   <div className="flex items-baseline gap-1.5">
-                    <span className="text-4xl md:text-5xl font-bold text-amber-700 italic leading-none tracking-tighter">{extraRemaining}</span>
-                    <span className="text-sm font-medium text-amber-500">枚残り</span>
+                    <span className="text-4xl md:text-5xl font-bold text-amber-700 italic leading-none tracking-tighter">
+                      {extraRemaining}
+                    </span>
+                    <span className="text-sm font-medium text-amber-500">
+                      枚残り
+                    </span>
                   </div>
                 </div>
                 <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-amber-400 flex items-center justify-center text-white shadow-md shadow-amber-400/30 group-hover:scale-110 group-hover:bg-amber-500 transition-all duration-300">
@@ -381,7 +424,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-6 lg:gap-8 mb-12">
           {/* RESUME Section */}
           {isLoading ? (
-              <Skeleton className="h-20 w-full rounded-3xl" />
+            <Skeleton className="h-20 w-full rounded-3xl" />
           ) : lastStudiedFolder ? (
             <section>
               <div className="flex items-center gap-2 mb-4">
@@ -390,17 +433,28 @@ export default function Dashboard() {
                   Resume Learning
                 </h2>
               </div>
-              <div 
+              <div
                 className="bg-[#FCFCFC] rounded-3xl p-5 cursor-pointer hover:bg-white hover:border-slate-300 transition-all duration-300 shadow-none border border-slate-200/60 group h-full"
-                onClick={() => navigate(createPageUrl(`Folders?folderId=${lastStudiedFolder.id || lastStudiedFolder.folderId}`))}
+                onClick={() =>
+                  navigate(
+                    createPageUrl(
+                      `Folders?folderId=${lastStudiedFolder.id || lastStudiedFolder.folderId}`,
+                    ),
+                  )
+                }
               >
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 group-hover:text-primary-600 group-hover:bg-primary-50 transition-colors">
                     <Clock className="w-4 h-4" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[9px] text-slate-400 font-bold mb-0.5 uppercase tracking-wider">前回の続き</p>
-                    <p className="text-base font-bold text-slate-600 group-hover:text-slate-800 transition-colors truncate">{lastStudiedFolder.folderName || lastStudiedFolder.folder_name}</p>
+                    <p className="text-[9px] text-slate-400 font-bold mb-0.5 uppercase tracking-wider">
+                      前回の続き
+                    </p>
+                    <p className="text-base font-bold text-slate-600 group-hover:text-slate-800 transition-colors truncate">
+                      {lastStudiedFolder.folderName ||
+                        lastStudiedFolder.folder_name}
+                    </p>
                   </div>
                   <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-primary-600 transition-colors" />
                 </div>
@@ -409,10 +463,10 @@ export default function Dashboard() {
           ) : (
             <div className="hidden lg:block" /> // Empty placeholder on desktop when no last studied folder
           )}
-          
+
           {/* DRAFTS Section */}
           {isLoading ? (
-               <Skeleton className="h-32 w-full rounded-3xl" />
+            <Skeleton className="h-32 w-full rounded-3xl" />
           ) : (
             <section className={!lastStudiedFolder ? "lg:col-span-2" : ""}>
               <div className="flex items-center gap-2 mb-4">
@@ -421,28 +475,37 @@ export default function Dashboard() {
                   Drafts in Progress
                 </h2>
               </div>
-              
+
               {draftCards.length > 0 ? (
                 <div className="relative group/scroll">
                   <div className="flex gap-4 overflow-x-auto pb-6 pt-2 no-scrollbar mask-gradient-right -mx-4 px-4 scroll-smooth">
-                    {draftCards.slice(0, 15).map(card => {
-                      const folder = folders.find(f => f.id === card.folderId);
-                      const folderName = folder?.folderName || '無所属';
-                      const title = card.title || card.questionText || card.question_text;
-                      
+                    {draftCards.slice(0, 15).map((card) => {
+                      const folder = folders.find(
+                        (f) => f.id === card.folderId,
+                      );
+                      const folderName = folder?.folderName || "無所属";
+                      const title =
+                        card.title || card.questionText || card.question_text;
+
                       return (
-                        <div 
+                        <div
                           key={card.id}
                           className="flex-shrink-0 w-[200px] bg-[#FCFCFC] rounded-3xl p-5 cursor-pointer hover:bg-white hover:border-slate-300 transition-all duration-300 shadow-none border border-slate-200/60 group/card"
-                          onClick={() => navigate(createPageUrl(`CardEdit?id=${card.id}`))}
+                          onClick={() =>
+                            navigate(createPageUrl(`CardEdit?id=${card.id}`))
+                          }
                         >
                           <div className="flex items-start justify-end mb-4">
                             <span className="text-[8px] font-bold text-slate-300 uppercase tracking-widest">
                               Draft
                             </span>
                           </div>
-                          <h3 className="text-sm font-bold text-slate-600 group-hover/card:text-slate-800 transition-colors mb-1 truncate">{title}</h3>
-                          <p className="text-[10px] text-slate-400 font-medium truncate">{folderName}</p>
+                          <h3 className="text-sm font-bold text-slate-600 group-hover/card:text-slate-800 transition-colors mb-1 truncate">
+                            {title}
+                          </h3>
+                          <p className="text-[10px] text-slate-400 font-medium truncate">
+                            {folderName}
+                          </p>
                         </div>
                       );
                     })}
@@ -453,17 +516,25 @@ export default function Dashboard() {
               ) : (
                 <div className="bg-white/50 border border-dashed border-slate-200 rounded-3xl p-8 flex flex-col items-center justify-center text-center">
                   <FileText className="w-8 h-8 text-slate-200 mb-2" />
-                  <p className="text-xs font-bold text-slate-300 italic">作成中のカードはありません</p>
+                  <p className="text-xs font-bold text-slate-300 italic">
+                    作成中のカードはありません
+                  </p>
                 </div>
               )}
             </section>
           )}
         </div>
       </div>
-      
+
       {/* Dialogs */}
-      <ExportDialog open={exportDialogOpen} onOpenChange={setExportDialogOpen} />
-      <ImportDialog open={importDialogOpen} onOpenChange={setImportDialogOpen} />
+      <ExportDialog
+        open={exportDialogOpen}
+        onOpenChange={setExportDialogOpen}
+      />
+      <ImportDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+      />
     </div>
   );
 }

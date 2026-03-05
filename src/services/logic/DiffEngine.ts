@@ -1,4 +1,4 @@
-import type { IDiffEngine } from '../interfaces/ISyncService';
+import type { IDiffEngine } from "../interfaces/ISyncService";
 
 type TimestampLike = {
   toMillis?: () => number;
@@ -13,10 +13,12 @@ type TimestampLike = {
 const toMillis = (value: unknown): number => {
   if (value == null) return 0;
 
-  if (typeof value === 'number') {
+  if (typeof value === "number") {
     if (!Number.isFinite(value)) return 0;
     // epoch seconds が混ざっても耐える（ms は 1e12 台、sec は 1e9 台）
-    return value < 100_000_000_000 ? Math.floor(value * 1000) : Math.floor(value);
+    return value < 100_000_000_000
+      ? Math.floor(value * 1000)
+      : Math.floor(value);
   }
 
   if (value instanceof Date) {
@@ -24,19 +26,19 @@ const toMillis = (value: unknown): number => {
     return Number.isFinite(t) ? t : 0;
   }
 
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     const t = Date.parse(value);
     return Number.isFinite(t) ? t : 0;
   }
 
-  if (typeof value === 'object') {
+  if (typeof value === "object") {
     const ts = value as TimestampLike;
-    if (typeof ts.toMillis === 'function') {
+    if (typeof ts.toMillis === "function") {
       const t = ts.toMillis();
       return Number.isFinite(t) ? t : 0;
     }
-    if (typeof ts.seconds === 'number') {
-      const nanos = typeof ts.nanoseconds === 'number' ? ts.nanoseconds : 0;
+    if (typeof ts.seconds === "number") {
+      const nanos = typeof ts.nanoseconds === "number" ? ts.nanoseconds : 0;
       return Math.floor(ts.seconds * 1000 + nanos / 1_000_000);
     }
   }
@@ -49,7 +51,6 @@ const toMillis = (value: unknown): number => {
  * 状態を持たず、副作用もない
  */
 export class DiffEngine implements IDiffEngine {
-  
   /**
    * 2つのエンティティの差分を計算する
    * @param local ローカルのデータ
@@ -58,20 +59,25 @@ export class DiffEngine implements IDiffEngine {
    */
   calculateDiff(local: unknown, remote: unknown): unknown | null {
     if (!local || !remote) return null;
-    
+
     const diff: unknown = {};
     let hasChanges = false;
-    
+
     // オブジェクトのキーを走査
     const allKeys = new Set([...Object.keys(local), ...Object.keys(remote)]);
-    
+
     for (const key of allKeys) {
       // 無視するフィールド
-      if (['updatedAt', 'lastSyncedAt', 'localUpdatedAt', '_metadata'].includes(key)) continue;
-      
+      if (
+        ["updatedAt", "lastSyncedAt", "localUpdatedAt", "_metadata"].includes(
+          key,
+        )
+      )
+        continue;
+
       const localValue = local[key];
       const remoteValue = remote[key];
-      
+
       // 単純な等価比較（深い比較はコスト削減のため行わない、プリミティブ想定）
       // 必要に応じてJSON.stringifyでの比較を入れる
       if (JSON.stringify(localValue) !== JSON.stringify(remoteValue)) {
@@ -79,7 +85,7 @@ export class DiffEngine implements IDiffEngine {
         hasChanges = true;
       }
     }
-    
+
     return hasChanges ? diff : null;
   }
 
@@ -89,7 +95,11 @@ export class DiffEngine implements IDiffEngine {
    * client_wins: クライアントの値を優先
    * Manualはここでは扱わず、呼び出し元で処理することを想定
    */
-  merge(local: unknown, remote: unknown, strategy: 'server_wins' | 'client_wins' | 'manual' = 'server_wins'): {
+  merge(
+    local: unknown,
+    remote: unknown,
+    strategy: "server_wins" | "client_wins" | "manual" = "server_wins",
+  ): {
     merged: unknown;
     conflict: boolean;
   } {
@@ -100,20 +110,22 @@ export class DiffEngine implements IDiffEngine {
 
     const merged = { ...local };
     let conflict = false;
-    
+
     // 更新日時の比較 (Time based conflict detection)
     // サーバーのupdatedAtとローカルのupdatedAtを比較
     // もしローカルが最後にsyncした時刻よりも、サーバーの更新日時が新しいなら、サーバー側で誰かが更新している
-    const serverHasUpdates = toMillis(remote.updatedAt) > toMillis(local.lastSyncedAt || 0);
-    const localHasUpdates = toMillis(local.localUpdatedAt) > toMillis(local.lastSyncedAt || 0);
-    
+    const serverHasUpdates =
+      toMillis(remote.updatedAt) > toMillis(local.lastSyncedAt || 0);
+    const localHasUpdates =
+      toMillis(local.localUpdatedAt) > toMillis(local.lastSyncedAt || 0);
+
     if (serverHasUpdates && localHasUpdates) {
       conflict = true;
       // 競合時の戦略適用
-      if (strategy === 'server_wins') {
+      if (strategy === "server_wins") {
         Object.assign(merged, remote);
         // ローカル固有の変更を上書きするリスクがあるが、server_winsなので許容
-      } else if (strategy === 'client_wins') {
+      } else if (strategy === "client_wins") {
         // クライアント優先なら何もしない（ベースがlocalなので）
         // ただし、remoteの新しいフィールドは取り込むべきか？
         // ここでは単純に「クライアントの意思」を優先し、マージしないフィールドも維持
@@ -124,12 +136,12 @@ export class DiffEngine implements IDiffEngine {
     } else {
       // ローカルのみ更新、あるいは両方更新なし -> ローカルのまま
     }
-    
+
     // メタデータの調整
     if (toMillis(remote.updatedAt) > toMillis(merged.updatedAt)) {
       merged.updatedAt = remote.updatedAt;
     }
-    
+
     return { merged, conflict };
   }
 
@@ -139,14 +151,14 @@ export class DiffEngine implements IDiffEngine {
    */
   validateConsistency(local: unknown, remote: unknown): boolean {
     if (!local || !remote) return false;
-    
+
     // IDの一致確認
     if (local.id !== remote.id) return false;
-    
+
     // 重要なビジネスロジック上の不整合がないか
     // 例: 親フォルダが存在しない、などの参照整合性はここではチェックできない（単体データ比較のため）
     // ここでは「データ構造として壊れていないか」を見る
-    
+
     return true;
   }
 
@@ -157,7 +169,11 @@ export class DiffEngine implements IDiffEngine {
    * @param allFolders 全フォルダのリスト
    * @returns 循環が発生する場合はtrue
    */
-  detectCycle(targetId: string, newParentId: string | null, allFolders: unknown[]): boolean {
+  detectCycle(
+    targetId: string,
+    newParentId: string | null,
+    allFolders: unknown[],
+  ): boolean {
     if (!newParentId) return false;
     if (targetId === newParentId) return true;
 
@@ -169,7 +185,7 @@ export class DiffEngine implements IDiffEngine {
       if (visited.has(currentId)) return true; // 循環検知
       visited.add(currentId);
 
-      const parent = allFolders.find(f => (f.id || f.folderId) === currentId);
+      const parent = allFolders.find((f) => (f.id || f.folderId) === currentId);
       if (!parent) break;
 
       currentId = parent.parentFolderId || parent.parent_folder_id || null;

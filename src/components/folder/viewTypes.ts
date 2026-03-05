@@ -1,15 +1,15 @@
-import type { Card } from '@/types';
-import type { Tag } from '@/hooks/useTags';
+import type { Card } from "@/types";
+import type { Tag } from "@/hooks/useTags";
 
-export type ViewKind = 'folder' | 'tagCategory' | 'tagTree';
+export type ViewKind = "folder" | "tagCategory" | "tagTree";
 
 export type ViewDef = {
   id: string;
   name: string;
   kind: ViewKind;
   options?: {
-    categoryMode?: 'user-defined' | 'none';
-    scopeMode?: 'all' | 'selectedRoots' | 'selectedTags' | 'prefix';
+    categoryMode?: "user-defined" | "none";
+    scopeMode?: "all" | "selectedRoots" | "selectedTags" | "prefix";
     includedTagIds?: string[];
     rootTagIds?: string[];
     tagNamePrefix?: string;
@@ -19,17 +19,19 @@ export type ViewDef = {
 };
 
 export type TreeNode =
-  | { type: 'group'; id: string; label: string; children: TreeNode[] }
-  | { type: 'card'; id: string; cardId: string };
+  | { type: "group"; id: string; label: string; children: TreeNode[] }
+  | { type: "card"; id: string; cardId: string };
 
 const getCardTagIds = (card: Card): string[] =>
-  Array.isArray(card.tagIds) ? card.tagIds.filter((id): id is string => typeof id === 'string') : [];
+  Array.isArray(card.tagIds)
+    ? card.tagIds.filter((id): id is string => typeof id === "string")
+    : [];
 
 const sortByName = <T extends { name: string }>(items: T[]) =>
-  [...items].sort((a, b) => a.name.localeCompare(b.name, 'ja'));
+  [...items].sort((a, b) => a.name.localeCompare(b.name, "ja"));
 
 const createCardNode = (card: Card): TreeNode => ({
-  type: 'card',
+  type: "card",
   id: `card:${card.id}`,
   cardId: card.id,
 });
@@ -38,7 +40,8 @@ const buildChildrenMap = (tags: Tag[]): Map<string | null, Tag[]> => {
   const tagIds = new Set(tags.map((tag) => tag.id));
   const childrenMap = new Map<string | null, Tag[]>();
   for (const tag of tags) {
-    const parentId = tag.parentId && tagIds.has(tag.parentId) ? tag.parentId : null;
+    const parentId =
+      tag.parentId && tagIds.has(tag.parentId) ? tag.parentId : null;
     const siblings = childrenMap.get(parentId) ?? [];
     siblings.push(tag);
     childrenMap.set(parentId, siblings);
@@ -54,13 +57,15 @@ export function buildVirtualTree(
 ): TreeNode[] {
   const activeCards = cards.filter((card) => !card.isDeleted);
 
-  if (view.kind === 'tagTree') {
+  if (view.kind === "tagTree") {
     const cardsByTagId = new Map<string, Card[]>();
-    const scopeMode = view.options?.scopeMode ?? 'all';
+    const scopeMode = view.options?.scopeMode ?? "all";
     const hideZeroUsage = view.options?.hideZeroUsage ?? true;
     const selectedTagIds = new Set(view.options?.includedTagIds ?? []);
     const selectedRootTagIds = new Set(view.options?.rootTagIds ?? []);
-    const normalizedPrefix = (view.options?.tagNamePrefix ?? '').trim().toLowerCase();
+    const normalizedPrefix = (view.options?.tagNamePrefix ?? "")
+      .trim()
+      .toLowerCase();
     for (const card of activeCards) {
       for (const tagId of getCardTagIds(card)) {
         const taggedCards = cardsByTagId.get(tagId) ?? [];
@@ -71,13 +76,16 @@ export function buildVirtualTree(
 
     const isTagIncluded = (tag: Tag): boolean => {
       switch (scopeMode) {
-        case 'selectedTags':
+        case "selectedTags":
           return selectedTagIds.has(tag.id);
-        case 'selectedRoots':
+        case "selectedRoots":
           return true;
-        case 'prefix':
-          return normalizedPrefix.length === 0 || tag.nameLower.startsWith(normalizedPrefix);
-        case 'all':
+        case "prefix":
+          return (
+            normalizedPrefix.length === 0 ||
+            tag.nameLower.startsWith(normalizedPrefix)
+          );
+        case "all":
         default:
           return true;
       }
@@ -86,23 +94,24 @@ export function buildVirtualTree(
     const initialScopedTags = tags.filter(isTagIncluded);
     const childrenMapForAll = buildChildrenMap(tags);
 
-    const scopedTags = scopeMode === 'selectedRoots'
-      ? (() => {
-          if (selectedRootTagIds.size === 0) return tags;
-          const allowedIds = new Set<string>();
-          const stack = Array.from(selectedRootTagIds);
-          while (stack.length > 0) {
-            const currentTagId = stack.pop();
-            if (!currentTagId || allowedIds.has(currentTagId)) continue;
-            allowedIds.add(currentTagId);
-            const children = childrenMapForAll.get(currentTagId) ?? [];
-            for (const child of children) {
-              stack.push(child.id);
+    const scopedTags =
+      scopeMode === "selectedRoots"
+        ? (() => {
+            if (selectedRootTagIds.size === 0) return tags;
+            const allowedIds = new Set<string>();
+            const stack = Array.from(selectedRootTagIds);
+            while (stack.length > 0) {
+              const currentTagId = stack.pop();
+              if (!currentTagId || allowedIds.has(currentTagId)) continue;
+              allowedIds.add(currentTagId);
+              const children = childrenMapForAll.get(currentTagId) ?? [];
+              for (const child of children) {
+                stack.push(child.id);
+              }
             }
-          }
-          return tags.filter((tag) => allowedIds.has(tag.id));
-        })()
-      : initialScopedTags;
+            return tags.filter((tag) => allowedIds.has(tag.id));
+          })()
+        : initialScopedTags;
 
     const childTagsByParentId = buildChildrenMap(scopedTags);
     const rootTags = childTagsByParentId.get(null) ?? [];
@@ -123,7 +132,7 @@ export function buildVirtualTree(
       }
 
       return {
-        type: 'group',
+        type: "group",
         id: `tag:${tag.id}`,
         label: tag.name,
         children: [...childNodes, ...cardNodes],
@@ -135,13 +144,13 @@ export function buildVirtualTree(
       .filter((node): node is TreeNode => node !== null);
   }
 
-  const ungroupedLabel = view.options?.ungroupedLabel?.trim() || '未分類';
+  const ungroupedLabel = view.options?.ungroupedLabel?.trim() || "未分類";
   const tagsByCategoryId = new Map<string, Tag[]>();
   const ungroupedTags: Tag[] = [];
   const cardsByTagId = new Map<string, Card[]>();
 
   for (const tag of tags) {
-    const categoryId = typeof tag.categoryId === 'string' ? tag.categoryId : '';
+    const categoryId = typeof tag.categoryId === "string" ? tag.categoryId : "";
     if (!categoryId) {
       ungroupedTags.push(tag);
       continue;
@@ -163,14 +172,14 @@ export function buildVirtualTree(
     .sort(([leftId], [rightId]) => {
       const leftLabel = categoryNameById.get(leftId) ?? leftId;
       const rightLabel = categoryNameById.get(rightId) ?? rightId;
-      return leftLabel.localeCompare(rightLabel, 'ja');
+      return leftLabel.localeCompare(rightLabel, "ja");
     })
     .map(([categoryId, categoryTags]) => ({
-      type: 'group',
+      type: "group",
       id: `category:${categoryId}`,
       label: categoryNameById.get(categoryId)?.trim() || categoryId,
       children: sortByName(categoryTags).map((tag) => ({
-        type: 'group',
+        type: "group",
         id: `tag:${tag.id}`,
         label: tag.name,
         children: (cardsByTagId.get(tag.id) ?? []).map(createCardNode),
@@ -179,11 +188,11 @@ export function buildVirtualTree(
 
   if (ungroupedTags.length > 0) {
     categoryNodes.push({
-      type: 'group',
-      id: 'category:ungrouped',
+      type: "group",
+      id: "category:ungrouped",
       label: ungroupedLabel,
       children: sortByName(ungroupedTags).map((tag) => ({
-        type: 'group',
+        type: "group",
         id: `tag:${tag.id}`,
         label: tag.name,
         children: (cardsByTagId.get(tag.id) ?? []).map(createCardNode),

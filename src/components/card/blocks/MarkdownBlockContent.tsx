@@ -1,11 +1,14 @@
-import React, { useMemo } from 'react';
-import ReactMarkdown, { type Components } from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import remarkBreaks from 'remark-breaks';
-import { cn } from '@/lib/utils';
-import { CodeRenderer } from './CodeRenderer';
-import { BlockSurface } from '@/components/card/blocks/BlockSurface';
-import { BLOCK_BODY_TEXT_COLOR_CLASS, TEXT_BLOCK_CONTENT_CLASS } from './textBlockStyles';
+import React, { useMemo } from "react";
+import ReactMarkdown, { type Components } from "react-markdown";
+import remarkGfm from "remark-gfm";
+import remarkBreaks from "remark-breaks";
+import { cn } from "@/lib/utils";
+import { CodeRenderer } from "./CodeRenderer";
+import { BlockSurface } from "@/components/card/blocks/BlockSurface";
+import {
+  BLOCK_BODY_TEXT_COLOR_CLASS,
+  TEXT_BLOCK_CONTENT_CLASS,
+} from "./textBlockStyles";
 
 const TYPE = {
   body: { fontSize: 16, lineHeight: 24 },
@@ -34,17 +37,17 @@ const ALLOWED_IMAGE_HOSTS = new Set<string>([
  * ✅ 相対パスで許可する画像プレフィックス（運用に合わせて追加/変更）
  * - 将来 ALLOW_MARKDOWN_IMAGES=true にした時、/api/... 等へ飛ばないように絞る
  */
-const ALLOWED_IMAGE_PATH_PREFIXES = ['/uploads/'] as const;
+const ALLOWED_IMAGE_PATH_PREFIXES = ["/uploads/"] as const;
 
 const extractTextDeep = (node: React.ReactNode): string => {
-  if (node == null || typeof node === 'boolean') return '';
-  if (typeof node === 'string' || typeof node === 'number') return String(node);
-  if (Array.isArray(node)) return node.map(extractTextDeep).join('');
+  if (node == null || typeof node === "boolean") return "";
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(extractTextDeep).join("");
   if (React.isValidElement(node)) {
     const element = node as React.ReactElement<{ children?: React.ReactNode }>;
     return extractTextDeep(element.props.children);
   }
-  return '';
+  return "";
 };
 
 // ✅ 制御文字は一律拒否（安全）
@@ -57,17 +60,17 @@ const hasWhitespace = (s: string) => /\s/.test(s);
 // - # は %23（ブラウザのフラグメント扱い回避）
 // - 値に未エンコードの & / = が混ざるケースは原理的に救えない（入力自体が壊れている）
 const rebuildMailtoQuery = (rawQuery: string): string => {
-  const safe = rawQuery.replace(/#/g, '%23');
+  const safe = rawQuery.replace(/#/g, "%23");
 
-  const pairs = safe.split('&');
+  const pairs = safe.split("&");
   const out: string[] = [];
 
   for (const p of pairs) {
     if (!p) continue;
 
-    const eq = p.indexOf('=');
+    const eq = p.indexOf("=");
     const kRaw = eq >= 0 ? p.slice(0, eq) : p;
-    const vRaw = eq >= 0 ? p.slice(eq + 1) : '';
+    const vRaw = eq >= 0 ? p.slice(eq + 1) : "";
 
     const safeDecode = (x: string) => {
       try {
@@ -86,7 +89,7 @@ const rebuildMailtoQuery = (rawQuery: string): string => {
     else out.push(enc(k));
   }
 
-  return out.join('&');
+  return out.join("&");
 };
 
 const sanitizeLinkHref = (href: string | undefined): string | null => {
@@ -96,28 +99,28 @@ const sanitizeLinkHref = (href: string | undefined): string | null => {
   if (!h0 || hasControlChars(h0)) return null;
 
   // protocol-relative は拒否（//example.com）
-  if (h0.startsWith('//')) return null;
+  if (h0.startsWith("//")) return null;
 
   // 相対URL / アンカーは許可（空白は拒否）
-  if (h0.startsWith('/') || h0.startsWith('#')) {
+  if (h0.startsWith("/") || h0.startsWith("#")) {
     return hasWhitespace(h0) ? null : h0;
   }
 
   const lower = h0.toLowerCase();
 
   // tel: は実用入力を救済（空白・()・.・- を除去）
-  if (lower.startsWith('tel:')) {
+  if (lower.startsWith("tel:")) {
     const after = h0.slice(4);
 
     // tel: に ? や # は通常想定しない（挙動ブレの温床）ので拒否
     if (/[?#]/.test(after)) return null;
 
     // パラメータ（;ext=... など）が付く可能性に備え、最初の ; で分割
-    const semi = after.indexOf(';');
+    const semi = after.indexOf(";");
     const numPart = semi >= 0 ? after.slice(0, semi) : after;
-    const paramPartRaw = semi >= 0 ? after.slice(semi) : '';
+    const paramPartRaw = semi >= 0 ? after.slice(semi) : "";
 
-    const normalizedNum = numPart.replace(/[\s().-]+/g, '');
+    const normalizedNum = numPart.replace(/[\s().-]+/g, "");
     if (!normalizedNum) return null;
 
     // ざっくり許可（+ / 数字 / * #）
@@ -125,19 +128,19 @@ const sanitizeLinkHref = (href: string | undefined): string | null => {
 
     // ✅ paramPart は許可するなら軽く制限（運用方針に合わせて調整OK）
     // 例: ;ext=123 / ;phone-context=... などを想定し、記号は ; = . _ - のみに絞る
-    const paramPart = paramPartRaw.replace(/\s+/g, '');
+    const paramPart = paramPartRaw.replace(/\s+/g, "");
     if (paramPart && !/^([;][A-Za-z0-9=._-]+)*$/.test(paramPart)) return null;
 
     return `tel:${normalizedNum}${paramPart}`;
   }
 
   // mailto: は ? 以降を再構築して壊れにくくする
-  if (lower.startsWith('mailto:')) {
+  if (lower.startsWith("mailto:")) {
     const after = h0.slice(7);
 
-    const qIndex = after.indexOf('?');
+    const qIndex = after.indexOf("?");
     const address = qIndex >= 0 ? after.slice(0, qIndex) : after;
-    const rawQuery = qIndex >= 0 ? after.slice(qIndex + 1) : '';
+    const rawQuery = qIndex >= 0 ? after.slice(qIndex + 1) : "";
 
     // `mailto:?subject=...` は仕様上あり得るので address 空は許可（ただし空白/制御は拒否）
     if (hasControlChars(address) || hasWhitespace(address)) return null;
@@ -158,7 +161,7 @@ const sanitizeLinkHref = (href: string | undefined): string | null => {
 
   try {
     const u = new URL(h0);
-    const ok = ['http:', 'https:'].includes(u.protocol);
+    const ok = ["http:", "https:"].includes(u.protocol);
     return ok ? u.toString() : null;
   } catch {
     return null;
@@ -172,10 +175,10 @@ const sanitizeImageSrc = (src: string): string | null => {
   if (!s || hasControlChars(s) || hasWhitespace(s)) return null;
 
   // protocol-relative は拒否（//example.com/a.png）
-  if (s.startsWith('//')) return null;
+  if (s.startsWith("//")) return null;
 
   // ✅ 相対URLは prefix を絞って許可（/uploads/ のみ等）
-  if (s.startsWith('/')) {
+  if (s.startsWith("/")) {
     const ok = ALLOWED_IMAGE_PATH_PREFIXES.some((p) => s.startsWith(p));
     return ok ? s : null;
   }
@@ -184,7 +187,7 @@ const sanitizeImageSrc = (src: string): string | null => {
     const u = new URL(s);
 
     // https のみに寄せる
-    if (u.protocol !== 'https:') return null;
+    if (u.protocol !== "https:") return null;
 
     // 許可ホストのみ
     if (!ALLOWED_IMAGE_HOSTS.has(u.hostname)) return null;
@@ -197,7 +200,7 @@ const sanitizeImageSrc = (src: string): string | null => {
 
 interface MarkdownBlockContentProps {
   markdown: string;
-  align?: 'left' | 'center';
+  align?: "left" | "center";
   className?: string;
   bleedX?: boolean;
 }
@@ -208,14 +211,14 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
   className,
   bleedX = false,
 }) => {
-  const alignClass = align === 'center' ? 'text-center' : 'text-left';
+  const alignClass = align === "center" ? "text-center" : "text-left";
 
   const bodyStyle = useMemo<React.CSSProperties>(
     () => ({
       fontSize: TYPE.body.fontSize,
       lineHeight: `var(--card-line-height, ${TYPE.body.lineHeight}px)`,
     }),
-    []
+    [],
   );
 
   const components = useMemo<Components>(
@@ -288,24 +291,33 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
         </BlockSurface>
       ),
 
-      p: ({ children }) => <ParagraphRenderer children={children} bodyStyle={bodyStyle} />,
+      p: ({ children }) => (
+        <ParagraphRenderer children={children} bodyStyle={bodyStyle} />
+      ),
       del: ({ children }) => <del className="line-through">{children}</del>,
       hr: () => <HrRenderer />,
 
       // ✅ node を受け取らない（unused-vars 回避）
       a: ({ href, children, ...props }) => {
-        const safeHref = sanitizeLinkHref(typeof href === 'string' ? href : undefined);
+        const safeHref = sanitizeLinkHref(
+          typeof href === "string" ? href : undefined,
+        );
         if (!safeHref) return <span className="break-words">{children}</span>;
 
-        const isInternal = safeHref.startsWith('/') || safeHref.startsWith('#');
-        const isHttp = safeHref.startsWith('http://') || safeHref.startsWith('https://');
+        const isInternal = safeHref.startsWith("/") || safeHref.startsWith("#");
+        const isHttp =
+          safeHref.startsWith("http://") || safeHref.startsWith("https://");
 
         return (
           <a
             {...props}
             href={safeHref}
-            target={!isInternal && isHttp ? '_blank' : undefined}
-            rel={!isInternal && isHttp ? 'noopener noreferrer nofollow ugc' : undefined}
+            target={!isInternal && isHttp ? "_blank" : undefined}
+            rel={
+              !isInternal && isHttp
+                ? "noopener noreferrer nofollow ugc"
+                : undefined
+            }
             className="underline text-primary-600 hover:text-primary-800 break-words"
           >
             {children}
@@ -314,17 +326,22 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
       },
 
       // ✅ node を受け取らない（unused-vars 回避）
-      img: ({ src = '', alt = '', title }) => {
+      img: ({ src = "", alt = "", title }) => {
         if (!ALLOW_MARKDOWN_IMAGES) {
           return (
             <span className="text-slate-500">
-              [画像は画像ブロックで追加してください{alt ? `: ${alt}` : ''}]
+              [画像は画像ブロックで追加してください{alt ? `: ${alt}` : ""}]
             </span>
           );
         }
 
         const safe = sanitizeImageSrc(src);
-        if (!safe) return <span className="text-slate-500">[許可されていない画像URLです]</span>;
+        if (!safe)
+          return (
+            <span className="text-slate-500">
+              [許可されていない画像URLです]
+            </span>
+          );
 
         return (
           <img
@@ -353,14 +370,16 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
         >
           <blockquote
             className="markdownBlockquote m-0 border-l-4 border-slate-300 text-left italic"
-            style={{ ...bodyStyle, paddingLeft: 'var(--card-row-px)' }}
+            style={{ ...bodyStyle, paddingLeft: "var(--card-row-px)" }}
           >
             {children}
           </blockquote>
         </BlockSurface>
       ),
 
-      ul: ({ children }) => <ListRenderer ordered={false}>{children}</ListRenderer>,
+      ul: ({ children }) => (
+        <ListRenderer ordered={false}>{children}</ListRenderer>
+      ),
       ol: ({ children }) => <ListRenderer ordered>{children}</ListRenderer>,
       li: ({ children }) => (
         <li className="m-0" style={bodyStyle}>
@@ -369,22 +388,31 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
       ),
 
       table: ({ children }) => <TableRenderer>{children}</TableRenderer>,
-      thead: ({ children }) => <thead className="bg-slate-50">{children}</thead>,
+      thead: ({ children }) => (
+        <thead className="bg-slate-50">{children}</thead>
+      ),
       tbody: ({ children }) => <tbody>{children}</tbody>,
-      tr: ({ children }) => <tr className="border-b border-slate-200">{children}</tr>,
+      tr: ({ children }) => (
+        <tr className="border-b border-slate-200">{children}</tr>
+      ),
       th: ({ children }) => (
         <th className="border border-slate-200 px-2 py-1 text-left font-semibold whitespace-nowrap">
           {children}
         </th>
       ),
-      td: ({ children }) => <td className="border border-slate-200 px-2 py-1 align-top">{children}</td>,
+      td: ({ children }) => (
+        <td className="border border-slate-200 px-2 py-1 align-top">
+          {children}
+        </td>
+      ),
 
       // ✅ node を受け取らない（unused-vars 回避）
       code: ({ className: codeClassName, children }) => {
-        const classStr = typeof codeClassName === 'string' ? codeClassName : '';
-        const isBlockCode = classStr.includes('language-');
+        const classStr = typeof codeClassName === "string" ? codeClassName : "";
+        const isBlockCode = classStr.includes("language-");
 
-        if (isBlockCode) return <code className={codeClassName}>{children}</code>;
+        if (isBlockCode)
+          return <code className={codeClassName}>{children}</code>;
 
         return (
           <code
@@ -401,25 +429,45 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
 
       pre: ({ children }) => {
         const nodes = React.Children.toArray(children);
-        const firstEl = nodes.find((n): n is React.ReactElement => React.isValidElement(n));
+        const firstEl = nodes.find((n): n is React.ReactElement =>
+          React.isValidElement(n),
+        );
 
         if (!firstEl) {
-          const raw = extractTextDeep(children).replace(/\r\n/g, '\n').replace(/(?:\n)+$/, '');
-          return <MarkdownFencedCodeBlock code={raw} language="clike" bleedX={bleedX} />;
+          const raw = extractTextDeep(children)
+            .replace(/\r\n/g, "\n")
+            .replace(/(?:\n)+$/, "");
+          return (
+            <MarkdownFencedCodeBlock
+              code={raw}
+              language="clike"
+              bleedX={bleedX}
+            />
+          );
         }
 
-        const childProps = firstEl.props as { className?: string; children?: React.ReactNode };
-        const classStr = typeof childProps.className === 'string' ? childProps.className : '';
+        const childProps = firstEl.props as {
+          className?: string;
+          children?: React.ReactNode;
+        };
+        const classStr =
+          typeof childProps.className === "string" ? childProps.className : "";
         const langMatch = /language-([^\s]+)/.exec(classStr);
-        const language = langMatch?.[1] ?? 'clike';
+        const language = langMatch?.[1] ?? "clike";
         const rawCode = extractTextDeep(childProps.children)
-          .replace(/\r\n/g, '\n')
-          .replace(/(?:\n)+$/, '');
+          .replace(/\r\n/g, "\n")
+          .replace(/(?:\n)+$/, "");
 
-        return <MarkdownFencedCodeBlock code={rawCode} language={language} bleedX={bleedX} />;
+        return (
+          <MarkdownFencedCodeBlock
+            code={rawCode}
+            language={language}
+            bleedX={bleedX}
+          />
+        );
       },
     }),
-    [bleedX, bodyStyle]
+    [bleedX, bodyStyle],
   );
 
   return (
@@ -427,10 +475,13 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
       className={cn(
         `markdown-block-view markdownBlockPreview markdownBlockCardView max-w-none font-serif text-[16px] font-medium leading-[24px] ${BLOCK_BODY_TEXT_COLOR_CLASS} [font-variant-numeric:lining-nums_tabular-nums] [font-feature-settings:"lnum"_1]`,
         alignClass,
-        className
+        className,
       )}
     >
-      <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]} components={components}>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm, remarkBreaks]}
+        components={components}
+      >
         {markdown}
       </ReactMarkdown>
     </div>
@@ -446,7 +497,10 @@ function ParagraphRenderer({
 }) {
   return (
     <p
-      className={cn(TEXT_BLOCK_CONTENT_CLASS, 'm-0 border-none bg-transparent p-0')}
+      className={cn(
+        TEXT_BLOCK_CONTENT_CLASS,
+        "m-0 border-none bg-transparent p-0",
+      )}
       style={bodyStyle}
     >
       {children}
@@ -464,7 +518,12 @@ function MarkdownFencedCodeBlock({
   bleedX: boolean;
 }) {
   return (
-    <BlockSurface ruled={false} bleedX={bleedX} background="var(--card-surface)" className="m-0">
+    <BlockSurface
+      ruled={false}
+      bleedX={bleedX}
+      background="var(--card-surface)"
+      className="m-0"
+    >
       <CodeRenderer code={code} language={language} />
     </BlockSurface>
   );
@@ -474,13 +533,19 @@ function HrRenderer() {
   return <hr className="m-0 border-slate-200" />;
 }
 
-function ListRenderer({ ordered, children }: { ordered: boolean; children: React.ReactNode }) {
-  const Tag = ordered ? 'ol' : 'ul';
+function ListRenderer({
+  ordered,
+  children,
+}: {
+  ordered: boolean;
+  children: React.ReactNode;
+}) {
+  const Tag = ordered ? "ol" : "ul";
   const listClass = cn(
-    ordered ? 'list-decimal list-outside' : 'list-disc list-outside',
-    'm-0 pl-6 space-y-0',
-    ordered ? '[&>li>ol]:pl-5 [&>li>ul]:pl-5' : '[&>li>ul]:pl-5 [&>li>ol]:pl-5',
-    ordered ? '[&>li>ol]:mt-0 [&>li>ul]:mt-0' : '[&>li>ul]:mt-0 [&>li>ol]:mt-0'
+    ordered ? "list-decimal list-outside" : "list-disc list-outside",
+    "m-0 pl-6 space-y-0",
+    ordered ? "[&>li>ol]:pl-5 [&>li>ul]:pl-5" : "[&>li>ul]:pl-5 [&>li>ol]:pl-5",
+    ordered ? "[&>li>ol]:mt-0 [&>li>ul]:mt-0" : "[&>li>ul]:mt-0 [&>li>ol]:mt-0",
   );
 
   return <Tag className={listClass}>{children}</Tag>;

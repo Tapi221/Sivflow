@@ -1,14 +1,14 @@
-import React from 'react';
-import type { Card, DocumentItem, Folder, SelectedExplorerItem } from '@/types';
-import { CardPane } from './CardPane';
-import { FolderDashboard } from './FolderDashboard';
-import { DirectoryDiagramPane } from './DirectoryDiagramPane';
-import { PdfPane } from '@/components/pdf/PdfPane';
-import { PowerPointPane } from '@/components/pptx/PowerPointPane';
-import Dashboard from '@/pages/Dashboard';
-import Gallery from '@/pages/Gallery';
-import Calendar from '@/pages/Calendar';
-import Trash from '@/pages/Trash';
+import React from "react";
+import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
+import { CardPane } from "./CardPane";
+import { FolderDashboard } from "./FolderDashboard";
+import { DirectoryDiagramPane } from "./DirectoryDiagramPane";
+import { PdfPane } from "@/components/pdf/PdfPane";
+import { PowerPointPane } from "@/components/pptx/PowerPointPane";
+import Dashboard from "@/pages/Dashboard";
+import Gallery from "@/pages/Gallery";
+import Calendar from "@/pages/Calendar";
+import Trash from "@/pages/Trash";
 
 interface RightPaneProps {
   selectedItem: SelectedExplorerItem;
@@ -26,7 +26,10 @@ interface RightPaneProps {
     lastReviewedAt: Date | null;
   };
   onCardUpdated: () => void;
-  onDocumentUpdated?: (documentId: string, updates: Partial<DocumentItem>) => Promise<void>;
+  onDocumentUpdated?: (
+    documentId: string,
+    updates: Partial<DocumentItem>,
+  ) => Promise<void>;
   handlers: {
     onStartStudy: () => void;
     onViewCards: () => void;
@@ -49,27 +52,33 @@ export function RightPane({
   onDocumentUpdated,
   handlers,
 }: RightPaneProps) {
-  if (selectedItem?.type === 'today-study') {
+  if (selectedItem?.type === "today-study") {
     return <Dashboard />;
   }
-  if (selectedItem?.type === 'gallery') {
+  if (selectedItem?.type === "gallery") {
     return <Gallery />;
   }
-  if (selectedItem?.type === 'directory') {
-    return <DirectoryDiagramPane folders={folders} cards={cards} documents={documents} />;
+  if (selectedItem?.type === "directory") {
+    return (
+      <DirectoryDiagramPane
+        folders={folders}
+        cards={cards}
+        documents={documents}
+      />
+    );
   }
-  if (selectedItem?.type === 'calendar') {
+  if (selectedItem?.type === "calendar") {
     return <Calendar />;
   }
-  if (selectedItem?.type === 'settings') {
+  if (selectedItem?.type === "settings") {
     return <Dashboard />;
   }
-  if (selectedItem?.type === 'trash') {
+  if (selectedItem?.type === "trash") {
     return <Trash />;
   }
 
   if (selectedDocument) {
-    if (selectedDocument.kind === 'pptx') {
+    if (selectedDocument.kind === "pptx") {
       return <PowerPointPane doc={selectedDocument} />;
     }
     return (
@@ -77,7 +86,11 @@ export function RightPane({
         doc={selectedDocument}
         onDocumentUpdate={
           onDocumentUpdated
-            ? (updates) => onDocumentUpdated(selectedDocument.id, updates as Partial<DocumentItem>)
+            ? (updates) =>
+                onDocumentUpdated(
+                  selectedDocument.id,
+                  updates as Partial<DocumentItem>,
+                )
             : undefined
         }
       />
@@ -85,7 +98,9 @@ export function RightPane({
   }
 
   if (selectedCardId) {
-    return <CardPane selectedCardId={selectedCardId} onCardUpdated={onCardUpdated} />;
+    return (
+      <CardPane selectedCardId={selectedCardId} onCardUpdated={onCardUpdated} />
+    );
   }
 
   if (selectedFolderId) {

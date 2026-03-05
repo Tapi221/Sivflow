@@ -14,15 +14,15 @@ export type SanitizeResult<T> = {
 };
 
 export const isBlobUrl = (v: unknown): v is string =>
-  typeof v === 'string' && v.startsWith('blob:');
+  typeof v === "string" && v.startsWith("blob:");
 
 export function sanitizeBlobUrlsDeep<T>(input: T): SanitizeResult<T> {
   const fixes: BlobUrlFix[] = [];
 
   const shouldPreserveObject = (value: unknown): boolean => {
-    if (!value || typeof value !== 'object') return false;
+    if (!value || typeof value !== "object") return false;
     if (value instanceof Date) return true;
-    if (typeof (value as DateLike).toDate === 'function') return true;
+    if (typeof (value as DateLike).toDate === "function") return true;
     const proto = Object.getPrototypeOf(value);
     return proto !== Object.prototype && proto !== null;
   };
@@ -35,10 +35,12 @@ export function sanitizeBlobUrlsDeep<T>(input: T): SanitizeResult<T> {
     if (Array.isArray(value)) {
       return value.map((entry, index) => visit(entry, `${path}[${index}]`));
     }
-    if (value && typeof value === 'object') {
+    if (value && typeof value === "object") {
       if (shouldPreserveObject(value)) return value;
       const out: Record<string, unknown> = {};
-      for (const [key, nested] of Object.entries(value as Record<string, unknown>)) {
+      for (const [key, nested] of Object.entries(
+        value as Record<string, unknown>,
+      )) {
         const childPath = path ? `${path}.${key}` : key;
         out[key] = visit(nested, childPath);
       }
@@ -47,7 +49,7 @@ export function sanitizeBlobUrlsDeep<T>(input: T): SanitizeResult<T> {
     return value;
   };
 
-  const value = visit(input, '') as T;
+  const value = visit(input, "") as T;
   return {
     value,
     changed: fixes.length > 0,

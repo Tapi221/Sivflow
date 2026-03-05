@@ -6,4 +6,3 @@
     padding-bottom: calc(var(--math-root-base-pad-b) + var(--snap-pad-b, 0px));
   }
 }
-

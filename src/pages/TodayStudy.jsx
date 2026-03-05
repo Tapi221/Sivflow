@@ -1,38 +1,38 @@
 // 今日の学習ページ
 // 今日復習すべきカードの一覧を表示し、学習を開始できる
-import React, { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useCards } from '@/hooks/useCards';
-import { useFolders } from '@/hooks/useFolders';
-import { useUserSettings } from '@/hooks/useUserSettings';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { createPageUrl } from '@/utils';
-import { BookOpen, Play, ChevronRight, CheckCircle2, Clock } from '@/ui/icons';
-import { cn } from '@/lib/utils';
+import React, { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useCards } from "@/hooks/useCards";
+import { useFolders } from "@/hooks/useFolders";
+import { useUserSettings } from "@/hooks/useUserSettings";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { createPageUrl } from "@/utils";
+import { BookOpen, Play, ChevronRight, CheckCircle2, Clock } from "@/ui/icons";
+import { cn } from "@/lib/utils";
 
 // ---------------------------------------------------------
 // 日付変換ユーティリティ（Firestore タイムスタンプ対応）
 // ---------------------------------------------------------
 const toDate = (value) => {
   if (!value) return null;
-  if (typeof value?.toDate === 'function') {
+  if (typeof value?.toDate === "function") {
     const d = value.toDate();
     return d instanceof Date && !isNaN(d.getTime()) ? d : null;
   }
   if (value instanceof Date) return isNaN(value.getTime()) ? null : value;
-  if (typeof value === 'object') {
+  if (typeof value === "object") {
     const seconds =
-      typeof value.seconds === 'number'
+      typeof value.seconds === "number"
         ? value.seconds
-        : typeof value._seconds === 'number'
+        : typeof value._seconds === "number"
           ? value._seconds
           : null;
     const nanoseconds =
-      typeof value.nanoseconds === 'number'
+      typeof value.nanoseconds === "number"
         ? value.nanoseconds
-        : typeof value._nanoseconds === 'number'
+        : typeof value._nanoseconds === "number"
           ? value._nanoseconds
           : 0;
     if (seconds !== null) {
@@ -47,15 +47,15 @@ const toDate = (value) => {
 // カードタイトルを安全に取得する
 const getCardTitle = (card) => {
   const rawTitle = card?.title;
-  if (typeof rawTitle === 'string' && rawTitle.trim().length > 0) {
+  if (typeof rawTitle === "string" && rawTitle.trim().length > 0) {
     return rawTitle.trim();
   }
-  const questionText = String(card?.questionText ?? card?.question_text ?? '');
-  const textOnly = questionText.replace(/<[^>]*>/g, '').trim();
+  const questionText = String(card?.questionText ?? card?.question_text ?? "");
+  const textOnly = questionText.replace(/<[^>]*>/g, "").trim();
   if (textOnly.length > 0) {
     return textOnly.length > 60 ? `${textOnly.substring(0, 60)}...` : textOnly;
   }
-  return '無題のカード';
+  return "無題のカード";
 };
 
 export default function TodayStudy() {
@@ -80,11 +80,21 @@ export default function TodayStudy() {
 
     const autoCarryOver = settings?.autoCarryOver ?? true;
     const today = new Date();
-    const tDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const tDate = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+    );
 
     return cards.filter((card) => {
       // 削除済み・下書き・サイレントは除外
-      const isDeleted = Boolean(card?.isDeleted ?? card?.is_deleted ?? card?.deleted ?? card?.deletedAt ?? card?.deleted_at);
+      const isDeleted = Boolean(
+        card?.isDeleted ??
+        card?.is_deleted ??
+        card?.deleted ??
+        card?.deletedAt ??
+        card?.deleted_at,
+      );
       const isDraft = Boolean(card?.isDraft ?? card?.is_draft);
       const isSilent = Boolean(card?.isSilent ?? card?.is_silent);
       if (isDeleted || isDraft || isSilent) return false;
@@ -95,14 +105,18 @@ export default function TodayStudy() {
 
       // 孤立カード（存在しないフォルダ）を除外
       const folderId = card?.folderId ?? card?.folder_id;
-      if (folderId !== null && folderId !== undefined && folderId !== '') {
+      if (folderId !== null && folderId !== undefined && folderId !== "") {
         const normalizedFolderId = String(folderId);
         const folder = folderMap.get(normalizedFolderId);
         if (!folder) return false;
         if (Boolean(folder?.isDeleted ?? folder?.is_deleted)) return false;
       }
 
-      const rDate = new Date(reviewDate.getFullYear(), reviewDate.getMonth(), reviewDate.getDate());
+      const rDate = new Date(
+        reviewDate.getFullYear(),
+        reviewDate.getMonth(),
+        reviewDate.getDate(),
+      );
       if (autoCarryOver) {
         return rDate <= tDate;
       }
@@ -115,23 +129,26 @@ export default function TodayStudy() {
     const groups = {};
     todayCards.forEach((card) => {
       const fidRaw = card.folderId || card.folder_id;
-      const fid = fidRaw ? String(fidRaw) : 'uncategorized';
+      const fid = fidRaw ? String(fidRaw) : "uncategorized";
       if (!groups[fid]) {
         groups[fid] = [];
       }
       groups[fid].push(card);
     });
-    return Object.entries(groups).map(([folderId, groupCards]) => {
-      if (folderId === 'uncategorized') {
-        return { folderName: '未分類', cards: groupCards, folderId };
-      }
-      const folder = folderMap.get(folderId);
-      return {
-        folderName: folder?.folderName || folder?.folder_name || '不明なフォルダ',
-        cards: groupCards,
-        folderId,
-      };
-    }).sort((a, b) => b.cards.length - a.cards.length);
+    return Object.entries(groups)
+      .map(([folderId, groupCards]) => {
+        if (folderId === "uncategorized") {
+          return { folderName: "未分類", cards: groupCards, folderId };
+        }
+        const folder = folderMap.get(folderId);
+        return {
+          folderName:
+            folder?.folderName || folder?.folder_name || "不明なフォルダ",
+          cards: groupCards,
+          folderId,
+        };
+      })
+      .sort((a, b) => b.cards.length - a.cards.length);
   }, [todayCards, folderMap]);
 
   const isLoading = cardsLoading || foldersLoading;
@@ -139,7 +156,6 @@ export default function TodayStudy() {
 
   return (
     <div className="min-h-screen bg-[#F5F7FA]">
-      
       {/* ヘッダーエリア */}
       <div className="bg-white border-b border-slate-100 px-5 pt-8 pb-6">
         <div className="max-w-2xl mx-auto">
@@ -148,32 +164,41 @@ export default function TodayStudy() {
               <BookOpen className="w-5 h-5 text-primary-600" />
             </div>
             <div>
-              <p className="text-[10px] font-bold tracking-[0.2em] text-primary-500 uppercase">Today's Learning</p>
-              <h1 className="text-xl font-black text-slate-800 leading-tight">今日の学習</h1>
+              <p className="text-[10px] font-bold tracking-[0.2em] text-primary-500 uppercase">
+                Today's Learning
+              </p>
+              <h1 className="text-xl font-black text-slate-800 leading-tight">
+                今日の学習
+              </h1>
             </div>
           </div>
         </div>
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-4 pb-28">
-
         {/* サマリーカード */}
         <div className="grid grid-cols-2 gap-3">
           <Card className="rounded-2xl border-none shadow-sm bg-white">
             <CardContent className="pt-4 pb-4 px-4">
               <div className="flex items-center gap-2 mb-1">
                 <Clock className="w-3.5 h-3.5 text-primary-400" />
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">今日の復習</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                  今日の復習
+                </span>
               </div>
               {isLoading ? (
                 <div className="h-8 w-16 bg-slate-100 rounded animate-pulse" />
               ) : (
-                <p className={cn(
-                  "text-3xl font-black leading-none",
-                  reviewCount > 0 ? "text-primary-600" : "text-slate-300"
-                )}>
+                <p
+                  className={cn(
+                    "text-3xl font-black leading-none",
+                    reviewCount > 0 ? "text-primary-600" : "text-slate-300",
+                  )}
+                >
                   {reviewCount}
-                  <span className="text-sm font-bold text-slate-400 ml-1">枚</span>
+                  <span className="text-sm font-bold text-slate-400 ml-1">
+                    枚
+                  </span>
                 </p>
               )}
             </CardContent>
@@ -183,14 +208,18 @@ export default function TodayStudy() {
             <CardContent className="pt-4 pb-4 px-4">
               <div className="flex items-center gap-2 mb-1">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">フォルダ数</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                  フォルダ数
+                </span>
               </div>
               {isLoading ? (
                 <div className="h-8 w-16 bg-slate-100 rounded animate-pulse" />
               ) : (
                 <p className="text-3xl font-black leading-none text-slate-700">
                   {groupedCards.length}
-                  <span className="text-sm font-bold text-slate-400 ml-1">件</span>
+                  <span className="text-sm font-bold text-slate-400 ml-1">
+                    件
+                  </span>
                 </p>
               )}
             </CardContent>
@@ -203,19 +232,23 @@ export default function TodayStudy() {
             "w-full h-14 rounded-2xl font-bold text-sm tracking-widest shadow-lg transition-all active:scale-[0.98]",
             reviewCount > 0
               ? "bg-primary-600 hover:bg-primary-700 text-white shadow-primary-600/25"
-              : "bg-slate-100 text-slate-400 cursor-not-allowed"
+              : "bg-slate-100 text-slate-400 cursor-not-allowed",
           )}
           disabled={reviewCount === 0 || isLoading}
-          onClick={() => navigate(createPageUrl('StudyMode'))}
+          onClick={() => navigate(createPageUrl("StudyMode"))}
         >
           <Play className="w-4 h-4 mr-2" />
-          {reviewCount > 0 ? `${reviewCount}枚を学習スタート` : '今日の復習はありません'}
+          {reviewCount > 0
+            ? `${reviewCount}枚を学習スタート`
+            : "今日の復習はありません"}
         </Button>
 
         {/* フォルダ別カード一覧 */}
         {!isLoading && reviewCount > 0 && (
           <div className="space-y-3">
-            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest px-1">フォルダ別</h2>
+            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest px-1">
+              フォルダ別
+            </h2>
             {groupedCards.map((group) => (
               <Card
                 key={group.folderId}
@@ -279,7 +312,10 @@ export default function TodayStudy() {
         {isLoading && (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-20 bg-white rounded-2xl animate-pulse" />
+              <div
+                key={i}
+                className="h-20 bg-white rounded-2xl animate-pulse"
+              />
             ))}
           </div>
         )}
@@ -291,7 +327,9 @@ export default function TodayStudy() {
               <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center mb-4">
                 <CheckCircle2 className="w-8 h-8 text-emerald-400" />
               </div>
-              <h2 className="text-lg font-bold text-slate-700 mb-2">今日の復習は完了！</h2>
+              <h2 className="text-lg font-bold text-slate-700 mb-2">
+                今日の復習は完了！
+              </h2>
               <p className="text-slate-400 text-sm max-w-xs leading-relaxed">
                 今日分の復習カードはありません。新しいカードを追加するか、明日また確認してください。
               </p>
@@ -307,7 +345,15 @@ export default function TodayStudy() {
 // インラインアイコンコンポーネント
 // ---------------------------------------------------------
 const FolderIcon = ({ className }) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
     <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
   </svg>
 );

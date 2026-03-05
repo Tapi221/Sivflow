@@ -1,6 +1,6 @@
 /**
  * ストレージ監視サービス
- * 
+ *
  * ブラウザのストレージ容量を監視し、
  * 容量不足を事前に検知する（インラインバリデーション）
  */
@@ -68,7 +68,7 @@ class StorageMonitor {
    */
   private async checkAndNotify(): Promise<void> {
     const quota = await this.checkQuota();
-    this.listeners.forEach(listener => listener(quota));
+    this.listeners.forEach((listener) => listener(quota));
   }
 }
 

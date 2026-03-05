@@ -1,66 +1,69 @@
 /**
  * ストレージの状態を管理する唯一のクラス
- * 
+ *
  * 🔥 重要: 状態は userId スコープ（グローバルではない）
- * 
+ *
  * 状態遷移:
  * NORMAL → QUOTA_EXCEEDED → READ_ONLY
  * READ_ONLY → (cache cleared) → NORMAL
  */
 export class StorageStateManager {
-  private static states = new Map<string, {
-    state: 'NORMAL' | 'READ_ONLY';
-    lastError: Date | null;
-  }>();
-  
+  private static states = new Map<
+    string,
+    {
+      state: "NORMAL" | "READ_ONLY";
+      lastError: Date | null;
+    }
+  >();
+
   /**
    * READ_ONLY モードに遷移
    */
   static setReadOnly(userId: string, reason: string): void {
     const current = this.getState(userId);
-    if (current.state === 'READ_ONLY') return;
-    
+    if (current.state === "READ_ONLY") return;
+
     this.states.set(userId, {
-      state: 'READ_ONLY',
-      lastError: new Date()
+      state: "READ_ONLY",
+      lastError: new Date(),
     });
-    
+
     console.error(`[Storage:${userId}] Entered READ_ONLY mode:`, reason);
-    
+
     // ログ記録（後で分析）
-    this.logStorageEvent(userId, 'quota_exceeded', { reason });
-    
+    this.logStorageEvent(userId, "quota_exceeded", { reason });
+
     // 高コストキャッシュを非同期削除
     this.clearHighCostCache(userId);
   }
-  
+
   /**
    * READ_ONLY モードかどうか
    */
   static isReadOnly(userId: string): boolean {
-    return this.getState(userId).state === 'READ_ONLY';
+    return this.getState(userId).state === "READ_ONLY";
   }
-  
+
   /**
    * 状態をリセット（NORMAL に戻す）
    */
   static reset(userId: string): void {
     this.states.set(userId, {
-      state: 'NORMAL',
-      lastError: null
+      state: "NORMAL",
+      lastError: null,
     });
   }
-  
+
   /**
    * 状態を取得（なければ初期化）
    */
   private static getState(userId: string) {
     if (!this.states.has(userId)) {
-      this.states.set(userId, { state: 'NORMAL', lastError: null });
+      this.states.set(userId, { state: "NORMAL", lastError: null });
     }
     return this.states.get(userId)!;
   }
-  
+
   /**
    * 高コストキャッシュを削除（レイヤーC）
    */
@@ -74,21 +77,25 @@ export class StorageStateManager {
       console.error(`[Storage:${userId}] Failed to clear cache:`, error);
     }
   }
-  
+
   /**
    * ストレージイベントをログ記録
    */
-  private static logStorageEvent(userId: string, event: string, data: unknown): void {
+  private static logStorageEvent(
+    userId: string,
+    event: string,
+    data: unknown,
+  ): void {
     // 運用ログ記録
     const logEntry = {
       timestamp: new Date().toISOString(),
       userId,
       event,
-      data
+      data,
     };
-    
+
     console.log(`[StorageEvent:${userId}]`, event, data);
-    
+
     // TODO: 本番環境では外部ログサービスに送信
     // - Sentry
     // - Firebase Analytics

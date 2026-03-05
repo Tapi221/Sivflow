@@ -10,11 +10,20 @@
  *  - 左右カードは opacity/scale で "peek" 演出、pointer-events: none で誤タップ防止
  */
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Flashcard } from '@/components/card/frame/Flashcard';
-import { MobileScalableCard } from '@/components/card/frame/MobileScalableCard';
-import { CANONICAL_CARD_WIDTH, CARD_SAFE_PADDING_PX } from '@/components/card/common/constants';
-import type { Card } from '@/types';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
+import { Flashcard } from "@/components/card/frame/Flashcard";
+import { MobileScalableCard } from "@/components/card/frame/MobileScalableCard";
+import {
+  CANONICAL_CARD_WIDTH,
+  CARD_SAFE_PADDING_PX,
+} from "@/components/card/common/constants";
+import type { Card } from "@/types";
 
 // ── レイアウト定数 (ここを変えれば見た目を調整できる) ──────────────────
 /** カードスロットの固定横幅 (px) */
@@ -33,7 +42,7 @@ const SCROLL_DEBOUNCE_MS = 120;
 const HEIGHT_TRANSITION_MS = 200;
 
 // ── 型 ──────────────────────────────────────────────────────────────────
-type FlashcardCardLike = React.ComponentProps<typeof Flashcard>['card'];
+type FlashcardCardLike = React.ComponentProps<typeof Flashcard>["card"];
 
 export type CardCarousel3DProps = {
   cards: Card[];
@@ -54,8 +63,15 @@ export type CardCarousel3DProps = {
 // ── デフォルトプレビュー ─────────────────────────────────────────────────
 function DefaultPreview({ card }: { card: Card }) {
   return (
-    <MobileScalableCard cardDesignWidth={CANONICAL_CARD_WIDTH} safePadding={CARD_SAFE_PADDING_PX}>
-      <Flashcard card={card as unknown as FlashcardCardLike} isFlipped={false} previewMode={true} />
+    <MobileScalableCard
+      cardDesignWidth={CANONICAL_CARD_WIDTH}
+      safePadding={CARD_SAFE_PADDING_PX}
+    >
+      <Flashcard
+        card={card as unknown as FlashcardCardLike}
+        isFlipped={false}
+        previewMode={true}
+      />
     </MobileScalableCard>
   );
 }
@@ -86,7 +102,7 @@ export function CardCarousel3D({
 
   // ── スクロールトラックをインデックスにジャンプ ───────────────────────────
   const scrollToIndex = useCallback(
-    (idx: number, behavior: ScrollBehavior = 'smooth') => {
+    (idx: number, behavior: ScrollBehavior = "smooth") => {
       trackRef.current?.scrollTo({ left: scrollLeftForIndex(idx), behavior });
     },
     [],
@@ -103,7 +119,7 @@ export function CardCarousel3D({
 
   // ── 初期マウント: syncIndex 位置にジャンプして高さを確定 ────────────────
   useLayoutEffect(() => {
-    scrollToIndex(syncIndex, 'instant');
+    scrollToIndex(syncIndex, "instant");
     // rAF で DOM 更新後に高さ計測
     const id = requestAnimationFrame(() => updateStageHeight(syncIndex));
     return () => cancelAnimationFrame(id);
@@ -113,7 +129,7 @@ export function CardCarousel3D({
   // ── syncIndex が外から変化したとき (回答後など) ─────────────────────────
   useLayoutEffect(() => {
     if (syncIndex === activeIdx) return;
-    scrollToIndex(syncIndex, 'instant');
+    scrollToIndex(syncIndex, "instant");
     setActiveIdx(syncIndex);
   }, [syncIndex]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -175,8 +191,14 @@ export function CardCarousel3D({
   // ── キーボード ────────────────────────────────────────────────────────────
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') { e.preventDefault(); goPrev(); }
-      if (e.key === 'ArrowRight') { e.preventDefault(); goNext(); }
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        goPrev();
+      }
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        goNext();
+      }
     },
     [goPrev, goNext],
   );
@@ -189,7 +211,12 @@ export function CardCarousel3D({
 
   return (
     <div
-      style={{ width: STAGE_WIDTH, maxWidth: '100vw', margin: '0 auto', position: 'relative' }}
+      style={{
+        width: STAGE_WIDTH,
+        maxWidth: "100vw",
+        margin: "0 auto",
+        position: "relative",
+      }}
       aria-label={`カード ${activeIdx + 1} / ${cards.length}`}
     >
       {/* ── ステージ: クリップ + 高さ管理 ─────────────────────────────── */}
@@ -198,11 +225,14 @@ export function CardCarousel3D({
         tabIndex={0}
         onKeyDown={handleKeyDown}
         style={{
-          overflow: 'hidden',
+          overflow: "hidden",
           height: stageHeight,
           // 初回計測前はトランジション無効 (0→実高さ のアニメを防ぐ)
-          transition: stageHeight !== undefined ? `height ${HEIGHT_TRANSITION_MS}ms ease` : undefined,
-          outline: 'none',
+          transition:
+            stageHeight !== undefined
+              ? `height ${HEIGHT_TRANSITION_MS}ms ease`
+              : undefined,
+          outline: "none",
         }}
       >
         {/* ── スクロールトラック ─────────────────────────────────────── */}
@@ -210,15 +240,15 @@ export function CardCarousel3D({
           ref={trackRef}
           onScroll={handleScroll}
           style={{
-            display: 'flex',
+            display: "flex",
             gap: GAP,
             // padding-inline で最初/最後カードがステージ中央に吸着できるようにする
             paddingInline: PEEK + GAP,
-            overflowX: 'scroll',
-            overflowY: 'visible',
-            scrollSnapType: 'x mandatory',
-            scrollbarWidth: 'none',           // Firefox
-            alignItems: 'flex-start',          // 各カードが自然な高さを保つ
+            overflowX: "scroll",
+            overflowY: "visible",
+            scrollSnapType: "x mandatory",
+            scrollbarWidth: "none", // Firefox
+            alignItems: "flex-start", // 各カードが自然な高さを保つ
           }}
         >
           {cards.map((card, idx) => {
@@ -228,25 +258,25 @@ export function CardCarousel3D({
             return (
               <div
                 key={(card as { id?: string }).id ?? idx}
-                ref={(el) => { itemRefs.current[idx] = el; }}
+                ref={(el) => {
+                  itemRefs.current[idx] = el;
+                }}
                 aria-hidden={!isActive}
                 style={{
                   flexShrink: 0,
                   width: CARD_WIDTH,
-                  scrollSnapAlign: 'center',
+                  scrollSnapAlign: "center",
                   // スクロール中にアクティブ判定が遅れても見た目は CSS transition で補う
                   opacity: isActive ? 1 : 0.5,
-                  transform: isActive ? 'scale(1)' : 'scale(0.92)',
-                  transition: 'opacity 200ms ease, transform 200ms ease',
-                  pointerEvents: isActive ? 'auto' : 'none',
+                  transform: isActive ? "scale(1)" : "scale(0.92)",
+                  transition: "opacity 200ms ease, transform 200ms ease",
+                  pointerEvents: isActive ? "auto" : "none",
                   // スクロール外のカードは content-visibility で描画コスト軽減
                   // (仮想化の足がかり — 現状は全描画)
-                  contentVisibility: isNear ? 'visible' : 'auto',
+                  contentVisibility: isNear ? "visible" : "auto",
                 }}
               >
-                {isActive
-                  ? renderCenter(card, idx)
-                  : resolvePreview(card)}
+                {isActive ? renderCenter(card, idx) : resolvePreview(card)}
               </div>
             );
           })}
@@ -254,11 +284,7 @@ export function CardCarousel3D({
       </div>
 
       {/* ── Prev / Next ボタン ─────────────────────────────────────────── */}
-      <NavButton
-        direction="prev"
-        onClick={goPrev}
-        disabled={activeIdx === 0}
-      />
+      <NavButton direction="prev" onClick={goPrev} disabled={activeIdx === 0} />
       <NavButton
         direction="next"
         onClick={goNext}
@@ -274,37 +300,37 @@ function NavButton({
   onClick,
   disabled,
 }: {
-  direction: 'prev' | 'next';
+  direction: "prev" | "next";
   onClick: () => void;
   disabled: boolean;
 }) {
-  const isPrev = direction === 'prev';
+  const isPrev = direction === "prev";
   return (
     <button
       onClick={onClick}
       disabled={disabled}
-      aria-label={isPrev ? '前のカード' : '次のカード'}
+      aria-label={isPrev ? "前のカード" : "次のカード"}
       style={{
-        position: 'absolute',
-        top: '50%',
-        [isPrev ? 'left' : 'right']: -48,
-        transform: 'translateY(-50%)',
+        position: "absolute",
+        top: "50%",
+        [isPrev ? "left" : "right"]: -48,
+        transform: "translateY(-50%)",
         width: 40,
         height: 40,
-        borderRadius: '50%',
-        border: '1px solid rgba(0,0,0,0.15)',
-        background: 'rgba(255,255,255,0.9)',
-        cursor: disabled ? 'default' : 'pointer',
+        borderRadius: "50%",
+        border: "1px solid rgba(0,0,0,0.15)",
+        background: "rgba(255,255,255,0.9)",
+        cursor: disabled ? "default" : "pointer",
         opacity: disabled ? 0.3 : 1,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
         fontSize: 20,
-        transition: 'opacity 150ms',
+        transition: "opacity 150ms",
         zIndex: 10,
       }}
     >
-      {isPrev ? '‹' : '›'}
+      {isPrev ? "‹" : "›"}
     </button>
   );
 }

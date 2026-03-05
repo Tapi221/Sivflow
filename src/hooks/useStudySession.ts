@@ -1,18 +1,21 @@
-import { useCallback, useMemo, useState } from 'react';
-import { Timestamp } from 'firebase/firestore';
-import { computeNextReview } from '@/services/reviewAlgorithm';
-import { normalizeMemoryStability } from '@/utils/reviewUtils';
-import { calculateResistanceScore } from '@/utils/reviewMetrics';
-import { getDebugStreak } from '@/utils/debugStreak';
-import { sanitizeStreak } from '@/utils/streak';
-import { getLocalDb } from '@/services/localDB';
-import { useTodayStudyStore } from '@/stores/useTodayStudyStore';
+import { useCallback, useMemo, useState } from "react";
+import { Timestamp } from "firebase/firestore";
+import { computeNextReview } from "@/services/reviewAlgorithm";
+import { normalizeMemoryStability } from "@/utils/reviewUtils";
+import { calculateResistanceScore } from "@/utils/reviewMetrics";
+import { getDebugStreak } from "@/utils/debugStreak";
+import { sanitizeStreak } from "@/utils/streak";
+import { getLocalDb } from "@/services/localDB";
+import { useTodayStudyStore } from "@/stores/useTodayStudyStore";
 
-const SCORE_TO_RATING: Record<number, 'forgot' | 'vague' | 'remembered' | 'easy'> = {
-  0: 'forgot',
-  1: 'vague',
-  2: 'remembered',
-  3: 'easy',
+const SCORE_TO_RATING: Record<
+  number,
+  "forgot" | "vague" | "remembered" | "easy"
+> = {
+  0: "forgot",
+  1: "vague",
+  2: "remembered",
+  3: "easy",
 };
 
 type Params = {
@@ -25,7 +28,10 @@ type Params = {
 };
 
 const createSessionId = () => {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+  if (
+    typeof crypto !== "undefined" &&
+    typeof crypto.randomUUID === "function"
+  ) {
     return crypto.randomUUID();
   }
   return `session-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
@@ -45,12 +51,15 @@ export function useStudySession({
   const [sessionResults, setSessionResults] = useState<any[]>([]);
   const [sourceSessionId] = useState(createSessionId);
 
-  const safeSessionResults = Array.isArray(sessionResults) ? sessionResults : [];
+  const safeSessionResults = Array.isArray(sessionResults)
+    ? sessionResults
+    : [];
   const debugStreak = getDebugStreak();
   const effectiveStreak = debugStreak ?? sanitizeStreak(results?.streak);
-  const stampRallyStreak = studyComplete && debugStreak === null
-    ? Math.max(1, effectiveStreak)
-    : effectiveStreak;
+  const stampRallyStreak =
+    studyComplete && debugStreak === null
+      ? Math.max(1, effectiveStreak)
+      : effectiveStreak;
 
   const fetchStreak = useCallback(async () => {
     if (!currentUser) return;
@@ -59,105 +68,121 @@ export function useStudySession({
     } catch {}
   }, [currentUser]);
 
-  const handleResult = useCallback(async (subjectiveScore: number, responseTime: number) => {
-    const card = studyCards[currentIndex];
-    if (!card) return;
+  const handleResult = useCallback(
+    async (subjectiveScore: number, responseTime: number) => {
+      const card = studyCards[currentIndex];
+      if (!card) return;
 
-    const memoryStabilityBefore = normalizeMemoryStability(
-      card.memoryStability,
-      card.currentLevel ?? card.level
-    );
+      const memoryStabilityBefore = normalizeMemoryStability(
+        card.memoryStability,
+        card.currentLevel ?? card.level,
+      );
 
-    const reviewUpdate = computeNextReview({
-      card,
-      subjectiveScore,
-      now: new Date(),
-      delayBonusEnabled: settings?.delayBonusEnabled ?? false,
-    });
-
-    if (updateCard) {
-      const newLog = {
-        reviewedAt: new Date().toISOString(),
-        rating: (subjectiveScore + 1) as 1 | 2 | 3 | 4,
-        resistanceScore: calculateResistanceScore(reviewUpdate.intervalDays),
-      };
-      await updateCard(card.id, {
-        ...reviewUpdate,
-        reviewLogs: [...(card.reviewLogs ?? []), newLog],
-        updatedAt: new Date(),
-      });
-    }
-
-    if (currentUser) {
-      createStudyLogMutation.mutate({
-        userId: currentUser.uid,
-        cardId: card.id,
-        folderId: card.folderId,
+      const reviewUpdate = computeNextReview({
+        card,
         subjectiveScore,
-        responseTime,
-        createdAt: Timestamp.now(),
+        now: new Date(),
+        delayBonusEnabled: settings?.delayBonusEnabled ?? false,
       });
 
-      // Dashboardの即時反映用にローカルにも保存する
-      try {
-        const localDb = await getLocalDb(currentUser.uid);
-        await localDb.addItem('studyLogs', {
+      if (updateCard) {
+        const newLog = {
+          reviewedAt: new Date().toISOString(),
+          rating: (subjectiveScore + 1) as 1 | 2 | 3 | 4,
+          resistanceScore: calculateResistanceScore(reviewUpdate.intervalDays),
+        };
+        await updateCard(card.id, {
+          ...reviewUpdate,
+          reviewLogs: [...(card.reviewLogs ?? []), newLog],
+          updatedAt: new Date(),
+        });
+      }
+
+      if (currentUser) {
+        createStudyLogMutation.mutate({
           userId: currentUser.uid,
           cardId: card.id,
           folderId: card.folderId,
           subjectiveScore,
           responseTime,
-          createdAt: new Date(),
-          studiedAt: new Date(),
+          createdAt: Timestamp.now(),
         });
-      } catch {}
-    }
 
-    if (Math.round(reviewUpdate.memoryStability) !== Math.round(memoryStabilityBefore) && currentUser) {
-      createLevelHistoryMutation.mutate({
-        userId: currentUser.uid,
-        cardId: card.id,
-        beforeLevel: memoryStabilityBefore,
-        afterLevel: reviewUpdate.memoryStability,
-        createdAt: new Date(),
-      });
-    }
+        // Dashboardの即時反映用にローカルにも保存する
+        try {
+          const localDb = await getLocalDb(currentUser.uid);
+          await localDb.addItem("studyLogs", {
+            userId: currentUser.uid,
+            cardId: card.id,
+            folderId: card.folderId,
+            subjectiveScore,
+            responseTime,
+            createdAt: new Date(),
+            studiedAt: new Date(),
+          });
+        } catch {}
+      }
 
-    setSessionResults((prev) => {
-      const base = Array.isArray(prev) ? prev : [];
-      return [
-        ...base,
-        {
+      if (
+        Math.round(reviewUpdate.memoryStability) !==
+          Math.round(memoryStabilityBefore) &&
+        currentUser
+      ) {
+        createLevelHistoryMutation.mutate({
+          userId: currentUser.uid,
           cardId: card.id,
-          rating: SCORE_TO_RATING[subjectiveScore] ?? 'forgot',
-          subjectiveScore,
-          responseTimeMs: responseTime,
-          studiedAt: new Date(),
-        },
-      ];
-    });
+          beforeLevel: memoryStabilityBefore,
+          afterLevel: reviewUpdate.memoryStability,
+          createdAt: new Date(),
+        });
+      }
 
-    // 当日集計ストアを即時更新（ダッシュボードへの即時反映用）
-    const ratingKey = SCORE_TO_RATING[subjectiveScore] ?? 'forgot';
-    const todayStore = useTodayStudyStore.getState();
-    todayStore.addRating(ratingKey);
-    if (subjectiveScore === 0 || subjectiveScore === 1) {
-      todayStore.markForExtra(card.id);
-    }
+      setSessionResults((prev) => {
+        const base = Array.isArray(prev) ? prev : [];
+        return [
+          ...base,
+          {
+            cardId: card.id,
+            rating: SCORE_TO_RATING[subjectiveScore] ?? "forgot",
+            subjectiveScore,
+            responseTimeMs: responseTime,
+            studiedAt: new Date(),
+          },
+        ];
+      });
 
-    setResults((prev) => ({
-      ...prev,
-      [subjectiveScore]: prev[subjectiveScore as keyof typeof prev] + 1,
-    }));
+      // 当日集計ストアを即時更新（ダッシュボードへの即時反映用）
+      const ratingKey = SCORE_TO_RATING[subjectiveScore] ?? "forgot";
+      const todayStore = useTodayStudyStore.getState();
+      todayStore.addRating(ratingKey);
+      if (subjectiveScore === 0 || subjectiveScore === 1) {
+        todayStore.markForExtra(card.id);
+      }
 
-    if (currentIndex < studyCards.length - 1) {
-      setCurrentIndex((prev) => prev + 1);
-      return;
-    }
+      setResults((prev) => ({
+        ...prev,
+        [subjectiveScore]: prev[subjectiveScore as keyof typeof prev] + 1,
+      }));
 
-    await fetchStreak();
-    setStudyComplete(true);
-  }, [createLevelHistoryMutation, createStudyLogMutation, currentIndex, currentUser, fetchStreak, settings?.delayBonusEnabled, studyCards, updateCard]);
+      if (currentIndex < studyCards.length - 1) {
+        setCurrentIndex((prev) => prev + 1);
+        return;
+      }
+
+      await fetchStreak();
+      setStudyComplete(true);
+    },
+    [
+      createLevelHistoryMutation,
+      createStudyLogMutation,
+      currentIndex,
+      currentUser,
+      fetchStreak,
+      settings?.delayBonusEnabled,
+      studyCards,
+      updateCard,
+    ],
+  );
 
   return {
     currentIndex,

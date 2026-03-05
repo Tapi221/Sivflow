@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
-import type { Notification } from '../../types/notification';
-import { Info } from '@/ui/icons';
+import React, { useEffect } from "react";
+import type { Notification } from "../../types/notification";
+import { Info } from "@/ui/icons";
 
 interface InfoToastProps {
   notification: Notification;
@@ -9,13 +9,16 @@ interface InfoToastProps {
 
 /**
  * INFO レベルの通知
- * 
+ *
  * 特徴:
  * - 自動で消える
  * - 邪魔しない
  * - ユーザーの操作不要
  */
-export const InfoToast: React.FC<InfoToastProps> = ({ notification, onDismiss }) => {
+export const InfoToast: React.FC<InfoToastProps> = ({
+  notification,
+  onDismiss,
+}) => {
   useEffect(() => {
     // 自動で消える
     if (notification.autoClose && notification.duration) {
@@ -40,9 +43,7 @@ export const InfoToast: React.FC<InfoToastProps> = ({ notification, onDismiss })
           <p className="text-sm font-bold text-slate-700">
             {notification.title}
           </p>
-          <p className="mt-1 text-xs text-slate-500">
-            {notification.message}
-          </p>
+          <p className="mt-1 text-xs text-slate-500">{notification.message}</p>
         </div>
       </div>
 
@@ -52,7 +53,7 @@ export const InfoToast: React.FC<InfoToastProps> = ({ notification, onDismiss })
           <div
             className="h-full bg-primary-500 rounded-full transition-all ease-linear"
             style={{
-              width: '100%',
+              width: "100%",
               animation: `shrink ${notification.duration}ms linear`,
             }}
           />

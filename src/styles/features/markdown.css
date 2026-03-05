@@ -77,7 +77,7 @@
   /* Remove list indent only for task-list containers so wrapped lines align naturally. */
   .markdownBlockCardView ul.contains-task-list,
   .markdownBlockCardView ul:has(> li.task-list-item),
-  .markdownBlockCardView ul:has(> li:has(> input[type='checkbox'])) {
+  .markdownBlockCardView ul:has(> li:has(> input[type="checkbox"])) {
     padding-left: 0;
   }
 
@@ -106,7 +106,7 @@
   }
 
   .markdownBlockCardView li.task-list-item,
-  .markdownBlockCardView li:has(> input[type='checkbox']) {
+  .markdownBlockCardView li:has(> input[type="checkbox"]) {
     list-style: none;
     padding-left: 0;
     display: grid;
@@ -118,12 +118,14 @@
   }
 
   .markdownBlockCardView li.task-list-item::marker,
-  .markdownBlockCardView li:has(> input[type='checkbox'])::marker {
-    content: '';
+  .markdownBlockCardView li:has(> input[type="checkbox"])::marker {
+    content: "";
   }
 
-  .markdownBlockCardView li.task-list-item > input[type='checkbox'],
-  .markdownBlockCardView li:has(> input[type='checkbox']) > input[type='checkbox'] {
+  .markdownBlockCardView li.task-list-item > input[type="checkbox"],
+  .markdownBlockCardView
+    li:has(> input[type="checkbox"])
+    > input[type="checkbox"] {
     appearance: none;
     -webkit-appearance: none;
     width: 16px;
@@ -137,26 +139,34 @@
     position: relative;
   }
 
-  .markdownBlockCardView li.task-list-item > :not(input[type='checkbox']),
-  .markdownBlockCardView li:has(> input[type='checkbox']) > :not(input[type='checkbox']) {
+  .markdownBlockCardView li.task-list-item > :not(input[type="checkbox"]),
+  .markdownBlockCardView
+    li:has(> input[type="checkbox"])
+    > :not(input[type="checkbox"]) {
     grid-column: 2;
   }
 
   .markdownBlockCardView li.task-list-item > :is(ul, ol),
-  .markdownBlockCardView li:has(> input[type='checkbox']) > :is(ul, ol) {
+  .markdownBlockCardView li:has(> input[type="checkbox"]) > :is(ul, ol) {
     grid-column: 2;
     margin-top: 0;
   }
 
-  .markdownBlockCardView li.task-list-item > input[type='checkbox']:checked,
-  .markdownBlockCardView li:has(> input[type='checkbox']) > input[type='checkbox']:checked {
+  .markdownBlockCardView li.task-list-item > input[type="checkbox"]:checked,
+  .markdownBlockCardView
+    li:has(> input[type="checkbox"])
+    > input[type="checkbox"]:checked {
     background-color: var(--task-checkbox-fill-color);
     border-color: var(--task-checkbox-fill-color);
   }
 
-  .markdownBlockCardView li.task-list-item > input[type='checkbox']:checked::after,
-  .markdownBlockCardView li:has(> input[type='checkbox']) > input[type='checkbox']:checked::after {
-    content: '';
+  .markdownBlockCardView
+    li.task-list-item
+    > input[type="checkbox"]:checked::after,
+  .markdownBlockCardView
+    li:has(> input[type="checkbox"])
+    > input[type="checkbox"]:checked::after {
+    content: "";
     position: absolute;
     left: 4px;
     top: 1px;

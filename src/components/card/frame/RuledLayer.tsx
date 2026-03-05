@@ -1,6 +1,6 @@
-import React from 'react';
-import { cn } from '@/lib/utils';
-import { getRuledStyle, type RuledStyleKind } from './ruledStyles';
+import React from "react";
+import { cn } from "@/lib/utils";
+import { getRuledStyle, type RuledStyleKind } from "./ruledStyles";
 
 type CSSVars = React.CSSProperties & Record<`--${string}`, string>;
 
@@ -23,14 +23,14 @@ const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 
 export function RuledLayer({
   className,
-  kind = 'repeat+bottom',
+  kind = "repeat+bottom",
   ruledOpacity,
   ruledRowPx = 24,
   ruledPhasePx = 0,
   ruledInsetX = 0,
   ruledOffsetPx = 0,
   ruledBottomOffsetPx = 0,
-  ruledColor = 'rgba(0,0,0,0.05)',
+  ruledColor = "rgba(0,0,0,0.05)",
   ruledLinePx = 1,
 }: RuledLayerProps) {
   const rowPx = Math.max(8, ruledRowPx);
@@ -42,22 +42,35 @@ export function RuledLayer({
   const bottomLinePx = null;
 
   const layerStyle: CSSVars = {
-    '--card-row-px': `${rowPx}px`,
-    '--card-ruled-phase-px': `${ruledPhasePx}px`,
-    left: typeof ruledInsetX === 'number' ? `${ruledInsetX}px` : String(ruledInsetX),
-    right: typeof ruledInsetX === 'number' ? `${ruledInsetX}px` : String(ruledInsetX),
+    "--card-row-px": `${rowPx}px`,
+    "--card-ruled-phase-px": `${ruledPhasePx}px`,
+    left:
+      typeof ruledInsetX === "number"
+        ? `${ruledInsetX}px`
+        : String(ruledInsetX),
+    right:
+      typeof ruledInsetX === "number"
+        ? `${ruledInsetX}px`
+        : String(ruledInsetX),
     top: `${topPx}px`,
     bottom: `${bottomPx}px`,
     opacity:
-      typeof ruledOpacity === 'number'
+      typeof ruledOpacity === "number"
         ? String(clamp01(ruledOpacity))
-        : (ruledOpacity ?? 'var(--card-ruled-opacity, 1)'),
-    ...getRuledStyle({ kind, rowPx, phasePx: ruledPhasePx, color: ruledColor, linePx: ruledLinePx, bottomLinePx }),
+        : (ruledOpacity ?? "var(--card-ruled-opacity, 1)"),
+    ...getRuledStyle({
+      kind,
+      rowPx,
+      phasePx: ruledPhasePx,
+      color: ruledColor,
+      linePx: ruledLinePx,
+      bottomLinePx,
+    }),
   };
 
   return (
     <div
-      className={cn('ruledLayer pointer-events-none absolute z-0', className)}
+      className={cn("ruledLayer pointer-events-none absolute z-0", className)}
       style={layerStyle}
     />
   );

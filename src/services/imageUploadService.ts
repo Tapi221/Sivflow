@@ -12,8 +12,8 @@
  * - ユーザーUID配下に保存（セキュリティルール準拠）
  */
 
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from '@/services/firebase';
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from "@/services/firebase";
 
 export interface UploadProfileImageOptions {
   uid: string;
@@ -38,11 +38,11 @@ export async function uploadProfileImage({
   file,
 }: UploadProfileImageOptions): Promise<string> {
   if (!uid) {
-    throw new Error('ユーザーIDが必要です');
+    throw new Error("ユーザーIDが必要です");
   }
 
   if (!file) {
-    throw new Error('ファイルが選択されていません');
+    throw new Error("ファイルが選択されていません");
   }
 
   // ファイル検証: サイズチェック（最大10MB）
@@ -53,23 +53,28 @@ export async function uploadProfileImage({
   }
 
   // MIME型検証: 画像形式のみ許可
-  const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+  const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
   if (!ALLOWED_TYPES.includes(file.type)) {
     throw new Error(
-      `サポートされていないファイル形式です: ${file.type}。対応形式: ${ALLOWED_TYPES.join(', ')}`
+      `サポートされていないファイル形式です: ${file.type}。対応形式: ${ALLOWED_TYPES.join(", ")}`,
     );
   }
 
   // Storage パス: `users/{uid}/profile_${timestamp}.${ext}`
   // タイムスタンプを含めることでキャッシュ問題を回避
-  const ext = file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : 'jpg';
+  const ext =
+    file.type === "image/png"
+      ? "png"
+      : file.type === "image/webp"
+        ? "webp"
+        : "jpg";
   const storagePath = `users/${uid}/profile_${Date.now()}.${ext}`;
 
   try {
     // アップロード実行
     const storageRef = ref(storage, storagePath);
     const uploadResult = await uploadBytes(storageRef, file, {
-      cacheControl: 'public,max-age=31536000',
+      cacheControl: "public,max-age=31536000",
       contentType: file.type,
       customMetadata: {
         uploadedAt: new Date().toISOString(),
@@ -80,15 +85,15 @@ export async function uploadProfileImage({
     const downloadUrl = await getDownloadURL(uploadResult.ref);
 
     if (import.meta.env.DEV) {
-      console.log('[ImageUploadService] ✅ Upload successful:', {
-        downloadUrl: downloadUrl.substring(0, 60) + '...',
+      console.log("[ImageUploadService] ✅ Upload successful:", {
+        downloadUrl: downloadUrl.substring(0, 60) + "...",
       });
     }
 
     return downloadUrl;
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error('[ImageUploadService] ❌ Upload failed:', errorMessage);
+    console.error("[ImageUploadService] ❌ Upload failed:", errorMessage);
     throw new Error(`画像のアップロードに失敗しました: ${errorMessage}`);
   }
 }
@@ -110,7 +115,7 @@ export async function uploadProfileImages({
       uploadProfileImage({
         uid,
         file,
-      })
-    )
+      }),
+    ),
   );
 }

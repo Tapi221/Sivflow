@@ -1,9 +1,12 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
-import { Flashcard } from './Flashcard';
-import { useUserSettings } from '@/hooks/useUserSettings';
-import { CANONICAL_CARD_WIDTH, CARD_SAFE_PADDING_PX } from '../common/constants';
-import { MobileScalableCard } from './MobileScalableCard';
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { Flashcard } from "./Flashcard";
+import { useUserSettings } from "@/hooks/useUserSettings";
+import {
+  CANONICAL_CARD_WIDTH,
+  CARD_SAFE_PADDING_PX,
+} from "../common/constants";
+import { MobileScalableCard } from "./MobileScalableCard";
 
 // アプリに合わせてちゃんとした型に置き換えてね（最低限の例）
 export type Card = {
@@ -29,12 +32,12 @@ function isTypingTarget(target: EventTarget | null) {
   if (!target || !(target instanceof HTMLElement)) return false;
 
   const tag = target.tagName;
-  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
+  if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return true;
   if (target.isContentEditable) return true;
 
   // shadcn/ui みたいに div に role="textbox" を付けるケースも吸う
-  const role = target.getAttribute('role');
-  if (role === 'textbox' || role === 'combobox') return true;
+  const role = target.getAttribute("role");
+  if (role === "textbox" || role === "combobox") return true;
 
   return false;
 }
@@ -45,7 +48,7 @@ export default function CardViewer({
   onIndexChange,
   onEdit,
   onToggleUncertainty,
-  onToggleBookmark
+  onToggleBookmark,
 }: CardViewerProps) {
   const { settings } = useUserSettings();
   const [isFlipped, setIsFlipped] = useState(false);
@@ -66,7 +69,7 @@ export default function CardViewer({
       setIsFlipped(false);
       onIndexChange(newIndex);
     },
-    [onIndexChange]
+    [onIndexChange],
   );
 
   const handlePrev = useCallback(() => {
@@ -78,7 +81,7 @@ export default function CardViewer({
   }, [currentIndex, cards.length, handleIndexChange]);
 
   const handleFlip = useCallback(() => {
-    setIsFlipped(prev => !prev);
+    setIsFlipped((prev) => !prev);
   }, []);
 
   // useKeyboardShortcuts が「Eventを渡してくれる」設計じゃない場合があるので
@@ -86,30 +89,30 @@ export default function CardViewer({
   const shortcuts = useMemo(
     () => [
       {
-        key: 'ArrowLeft',
+        key: "ArrowLeft",
         action: handlePrev,
-        description: '前のカードへ移動',
-        when: (e: KeyboardEvent) => !isTypingTarget(e.target)
+        description: "前のカードへ移動",
+        when: (e: KeyboardEvent) => !isTypingTarget(e.target),
       },
       {
-        key: 'ArrowRight',
+        key: "ArrowRight",
         action: handleNext,
-        description: '次のカードへ移動',
-        when: (e: KeyboardEvent) => !isTypingTarget(e.target)
+        description: "次のカードへ移動",
+        when: (e: KeyboardEvent) => !isTypingTarget(e.target),
       },
       {
         // できれば event.code === 'Space' で判定したいけど、フック次第なので key で置く
-        key: ' ',
+        key: " ",
         action: (e?: KeyboardEvent) => {
           // Space のデフォスクロール殺す
           if (e) e.preventDefault();
           handleFlip();
         },
-        description: '裏表を切り替え',
-        when: (e: KeyboardEvent) => !isTypingTarget(e.target)
-      }
+        description: "裏表を切り替え",
+        when: (e: KeyboardEvent) => !isTypingTarget(e.target),
+      },
     ],
-    [handlePrev, handleNext, handleFlip]
+    [handlePrev, handleNext, handleFlip],
   );
 
   useKeyboardShortcuts(shortcuts as any);
@@ -117,12 +120,20 @@ export default function CardViewer({
   const card = cards[currentIndex];
 
   if (!card) {
-    return <div className="text-center py-12 text-gray-500">カードがありません</div>;
+    return (
+      <div className="text-center py-12 text-gray-500">カードがありません</div>
+    );
   }
 
   return (
-    <div className="mx-auto w-full" style={{ maxWidth: `${CANONICAL_CARD_WIDTH + 40}px` }}>
-      <MobileScalableCard cardDesignWidth={CANONICAL_CARD_WIDTH} safePadding={CARD_SAFE_PADDING_PX}>
+    <div
+      className="mx-auto w-full"
+      style={{ maxWidth: `${CANONICAL_CARD_WIDTH + 40}px` }}
+    >
+      <MobileScalableCard
+        cardDesignWidth={CANONICAL_CARD_WIDTH}
+        safePadding={CARD_SAFE_PADDING_PX}
+      >
         <Flashcard
           card={card}
           isFlipped={isFlipped}

@@ -9,7 +9,11 @@ import {
   shouldAutoOpenEditorForCard,
   type EditorDraft,
 } from "@/components/card/editor/cardEditorUtils";
-import { LEGACY_BASE_LAYOUT_ROWS, normalizeExtraRows, normalizeLayoutRows } from "@/domain/card/extraRows";
+import {
+  LEGACY_BASE_LAYOUT_ROWS,
+  normalizeExtraRows,
+  normalizeLayoutRows,
+} from "@/domain/card/extraRows";
 import { resolveCardTagNames } from "@/hooks/useTags";
 
 import type { CardBlock, Card, UploadedImage } from "@/types";
@@ -47,7 +51,9 @@ export function useCardEditorSession({
   onSelectCardId,
   resetDialogs,
 }: UseCardEditorSessionParams) {
-  const [localSelectedCardId, setLocalSelectedCardId] = useState<string | null>(null);
+  const [localSelectedCardId, setLocalSelectedCardId] = useState<string | null>(
+    null,
+  );
   const [isFlipped, setIsFlipped] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -64,7 +70,7 @@ export function useCardEditorSession({
   const effectiveSelectedCardId = selectedCardId ?? localSelectedCardId;
   const normalizedSelectedCardId = useMemo(
     () => normalizeSelectedCardId(effectiveSelectedCardId),
-    [effectiveSelectedCardId]
+    [effectiveSelectedCardId],
   );
   const isNew = normalizedSelectedCardId === NEW_SENTINEL;
 
@@ -73,22 +79,43 @@ export function useCardEditorSession({
     return cards.find((card) => card.id === normalizedSelectedCardId) ?? null;
   }, [cards, normalizedSelectedCardId, isNew]);
 
-  const buildDraftFromCard = useCallback((card: Card): EditorDraft => {
-    const legacyQuestionRows = normalizeExtraRows((card as any)?.questionExtraRows ?? (card as any)?.question_extra_rows ?? 0);
-    const legacyAnswerRows = normalizeExtraRows((card as any)?.answerExtraRows ?? (card as any)?.answer_extra_rows ?? 0);
-    const migratedRows = LEGACY_BASE_LAYOUT_ROWS + Math.max(legacyQuestionRows, legacyAnswerRows);
+  const buildDraftFromCard = useCallback(
+    (card: Card): EditorDraft => {
+      const legacyQuestionRows = normalizeExtraRows(
+        (card as any)?.questionExtraRows ??
+          (card as any)?.question_extra_rows ??
+          0,
+      );
+      const legacyAnswerRows = normalizeExtraRows(
+        (card as any)?.answerExtraRows ?? (card as any)?.answer_extra_rows ?? 0,
+      );
+      const migratedRows =
+        LEGACY_BASE_LAYOUT_ROWS +
+        Math.max(legacyQuestionRows, legacyAnswerRows);
 
-    return {
-      title: card.title ?? "",
-      tags: resolveCardTagNames(card.tagIds, (card as any).tags, tagById as any),
-      isDraft: card.isDraft ?? false,
-      questionImages: ((card as any).questionImages ?? []) as UploadedImage[],
-      answerImages: ((card as any).answerImages ?? []) as UploadedImage[],
-      questionBlocks: sortBlocksByOrderIndex((card.questionBlocks ?? []) as CardBlock[]),
-      answerBlocks: sortBlocksByOrderIndex((card.answerBlocks ?? []) as CardBlock[]),
-      layoutRows: normalizeLayoutRows((card as any).layoutRows ?? (card as any).layout_rows ?? migratedRows),
-    };
-  }, [tagById]);
+      return {
+        title: card.title ?? "",
+        tags: resolveCardTagNames(
+          card.tagIds,
+          (card as any).tags,
+          tagById as any,
+        ),
+        isDraft: card.isDraft ?? false,
+        questionImages: ((card as any).questionImages ?? []) as UploadedImage[],
+        answerImages: ((card as any).answerImages ?? []) as UploadedImage[],
+        questionBlocks: sortBlocksByOrderIndex(
+          (card.questionBlocks ?? []) as CardBlock[],
+        ),
+        answerBlocks: sortBlocksByOrderIndex(
+          (card.answerBlocks ?? []) as CardBlock[],
+        ),
+        layoutRows: normalizeLayoutRows(
+          (card as any).layoutRows ?? (card as any).layout_rows ?? migratedRows,
+        ),
+      };
+    },
+    [tagById],
+  );
 
   useEffect(() => {
     if (!normalizedSelectedCardId) {
@@ -120,7 +147,13 @@ export function useCardEditorSession({
   }, [autoEdit, normalizedSelectedCardId]);
 
   useEffect(() => {
-    if (!normalizedSelectedCardId || normalizedSelectedCardId === NEW_SENTINEL || !selectedCard || isEditing) return;
+    if (
+      !normalizedSelectedCardId ||
+      normalizedSelectedCardId === NEW_SENTINEL ||
+      !selectedCard ||
+      isEditing
+    )
+      return;
     if (autoOpenCheckedIdRef.current === normalizedSelectedCardId) return;
     autoOpenCheckedIdRef.current = normalizedSelectedCardId;
     if (shouldAutoOpenEditorForCard(selectedCard)) setIsEditing(true);
@@ -128,7 +161,9 @@ export function useCardEditorSession({
 
   useEffect(() => {
     if (isEditing) {
-      editingCardIdRef.current = isNew ? NEW_SENTINEL : normalizedSelectedCardId;
+      editingCardIdRef.current = isNew
+        ? NEW_SENTINEL
+        : normalizedSelectedCardId;
       return;
     }
     editingCardIdRef.current = null;
@@ -153,7 +188,13 @@ export function useCardEditorSession({
 
     setDraft(buildDraftFromCard(selectedCard));
     hydratedFromIdRef.current = selectedCard.id;
-  }, [isEditing, isNew, normalizedSelectedCardId, selectedCard, buildDraftFromCard]);
+  }, [
+    isEditing,
+    isNew,
+    normalizedSelectedCardId,
+    selectedCard,
+    buildDraftFromCard,
+  ]);
 
   const handleStartNew = useCallback(() => {
     setDraft(makeNewDraft());
@@ -184,7 +225,9 @@ export function useCardEditorSession({
         const next: CardBlock[] = [];
         for (const block of blocks ?? []) {
           if (block?.type === "reference") {
-            const cleaned = sanitizeReferences((block as any)?.references ?? []);
+            const cleaned = sanitizeReferences(
+              (block as any)?.references ?? [],
+            );
             if (cleaned.length === 0) continue;
             next.push({ ...(block as any), references: cleaned } as CardBlock);
             continue;
@@ -194,7 +237,9 @@ export function useCardEditorSession({
         return normalizeOrderIndex(next);
       };
 
-      const resolvedTags = await Promise.all(draft.tags.map((name) => addTag(name)));
+      const resolvedTags = await Promise.all(
+        draft.tags.map((name) => addTag(name)),
+      );
       const tagIds = resolvedTags.map((tag) => tag.id);
       const payload: Partial<Card> = {
         title: draft.title,
@@ -209,14 +254,22 @@ export function useCardEditorSession({
 
       if (isNew) {
         if (typeof createCard !== "function") {
-          console.error("[CardEditorPane] createCard が useCards にありません。useCards の作成関数名に合わせて置き換えてください。");
+          console.error(
+            "[CardEditorPane] createCard が useCards にありません。useCards の作成関数名に合わせて置き換えてください。",
+          );
           toastError?.("カードの作成関数が見つかりません");
           return;
         }
 
-        const created = await createCard({ ...payload, folderId: folderId ?? "" });
+        const created = await createCard({
+          ...payload,
+          folderId: folderId ?? "",
+        });
         const newId =
-          (typeof created === "object" && created !== null && "id" in created && (created as any).id) ||
+          (typeof created === "object" &&
+            created !== null &&
+            "id" in created &&
+            (created as any).id) ||
           (typeof created === "string" ? created : null);
 
         onCardUpdated?.();
@@ -239,7 +292,8 @@ export function useCardEditorSession({
       setIsEditing(false);
     } catch (error) {
       console.error("カード保存に失敗しました:", error);
-      const message = error instanceof Error ? error.message : "カード保存に失敗しました";
+      const message =
+        error instanceof Error ? error.message : "カード保存に失敗しました";
       toastError?.(message);
     } finally {
       setIsSaving(false);
@@ -258,54 +312,71 @@ export function useCardEditorSession({
     updateCard,
   ]);
 
-  const handleToggleBookmark = useCallback(async (card: Card) => {
-    try {
-      await updateCard(card.id, { isBookmarked: !card.isBookmarked });
+  const handleToggleBookmark = useCallback(
+    async (card: Card) => {
+      try {
+        await updateCard(card.id, { isBookmarked: !card.isBookmarked });
+        onCardUpdated?.();
+      } catch (error) {
+        console.error("ブックマークの更新に失敗しました:", error);
+      }
+    },
+    [onCardUpdated, updateCard],
+  );
+
+  const handleToggleUncertainty = useCallback(
+    async (card: Card) => {
+      try {
+        await updateCard(card.id, { hasUncertainty: !card.hasUncertainty });
+        onCardUpdated?.();
+      } catch (error) {
+        console.error("不確証マークの更新に失敗しました:", error);
+      }
+    },
+    [onCardUpdated, updateCard],
+  );
+
+  const handleUpdateTags = useCallback(
+    async (nextTags: string[]) => {
+      if (isEditing) {
+        setDraft((prev) => (prev ? { ...prev, tags: nextTags } : prev));
+        return;
+      }
+      if (!selectedCard) return;
+      const resolved = await Promise.all(nextTags.map((name) => addTag(name)));
+      await updateCard(selectedCard.id, {
+        tagIds: resolved.map((tag) => tag.id),
+      });
       onCardUpdated?.();
-    } catch (error) {
-      console.error("ブックマークの更新に失敗しました:", error);
-    }
-  }, [onCardUpdated, updateCard]);
+    },
+    [addTag, isEditing, onCardUpdated, selectedCard, updateCard],
+  );
 
-  const handleToggleUncertainty = useCallback(async (card: Card) => {
-    try {
-      await updateCard(card.id, { hasUncertainty: !card.hasUncertainty });
+  const handleToggleDraft = useCallback(
+    async (nextIsDraft: boolean) => {
+      if (isEditing) {
+        setDraft((prev) => (prev ? { ...prev, isDraft: nextIsDraft } : prev));
+      }
+      // 既存カード編集中は即同期する。新規カード（selectedCardなし）のみローカル保持。
+      if (!selectedCard) return;
+      await updateCard(selectedCard.id, { isDraft: nextIsDraft });
       onCardUpdated?.();
-    } catch (error) {
-      console.error("不確証マークの更新に失敗しました:", error);
-    }
-  }, [onCardUpdated, updateCard]);
+    },
+    [isEditing, onCardUpdated, selectedCard, updateCard],
+  );
 
-  const handleUpdateTags = useCallback(async (nextTags: string[]) => {
-    if (isEditing) {
-      setDraft((prev) => (prev ? { ...prev, tags: nextTags } : prev));
-      return;
-    }
-    if (!selectedCard) return;
-    const resolved = await Promise.all(nextTags.map((name) => addTag(name)));
-    await updateCard(selectedCard.id, { tagIds: resolved.map((tag) => tag.id) });
-    onCardUpdated?.();
-  }, [addTag, isEditing, onCardUpdated, selectedCard, updateCard]);
-
-  const handleToggleDraft = useCallback(async (nextIsDraft: boolean) => {
-    if (isEditing) {
-      setDraft((prev) => (prev ? { ...prev, isDraft: nextIsDraft } : prev));
-    }
-    // 既存カード編集中は即同期する。新規カード（selectedCardなし）のみローカル保持。
-    if (!selectedCard) return;
-    await updateCard(selectedCard.id, { isDraft: nextIsDraft });
-    onCardUpdated?.();
-  }, [isEditing, onCardUpdated, selectedCard, updateCard]);
-
-  const handleUpdateTitle = useCallback(async (nextTitle: string) => {
-    if (isEditing) {
-      setDraft((prev) => (prev ? { ...prev, title: nextTitle } : prev));
-      return;
-    }
-    if (!selectedCard) return;
-    await updateCard(selectedCard.id, { title: nextTitle });
-    onCardUpdated?.();
-  }, [isEditing, onCardUpdated, selectedCard, updateCard]);
+  const handleUpdateTitle = useCallback(
+    async (nextTitle: string) => {
+      if (isEditing) {
+        setDraft((prev) => (prev ? { ...prev, title: nextTitle } : prev));
+        return;
+      }
+      if (!selectedCard) return;
+      await updateCard(selectedCard.id, { title: nextTitle });
+      onCardUpdated?.();
+    },
+    [isEditing, onCardUpdated, selectedCard, updateCard],
+  );
 
   const panelCard = useMemo(() => {
     if (selectedCard) {

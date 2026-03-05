@@ -1,33 +1,49 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, Edit, Image as ImageIcon, X, Volume2 } from '@/ui/icons';
-import { Link } from '@/ui/icons';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { cn } from '@/lib/utils';
-import { AudioPlayer } from '../media/CardMedia';
-import { ReferencePopup } from '../overlays/ReferencePopup';
-import type { CardBlock, ReferenceBlockData } from '@/types';
-import { InkLayer, InkToolbar, type InkHistoryState, type InkLayerHandle } from '@/components/ink/InkLayer';
-import { resolveInkDocument } from '@/components/ink/inkStorage';
-import { INK_DOCUMENT_VERSION, type InkDocument, type InkEditTool } from '@/components/ink/inkTypes';
-import { CardFrame } from './CardFrame';
-import { CardCornerActions } from './CardCornerActions';
-import { SharedCardContent } from '../common/SharedCardContent';
+import React, { useState, useEffect, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Edit,
+  Image as ImageIcon,
+  X,
+  Volume2,
+} from "@/ui/icons";
+import { Link } from "@/ui/icons";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
+import { AudioPlayer } from "../media/CardMedia";
+import { ReferencePopup } from "../overlays/ReferencePopup";
+import type { CardBlock, ReferenceBlockData } from "@/types";
+import {
+  InkLayer,
+  InkToolbar,
+  type InkHistoryState,
+  type InkLayerHandle,
+} from "@/components/ink/InkLayer";
+import { resolveInkDocument } from "@/components/ink/inkStorage";
+import {
+  INK_DOCUMENT_VERSION,
+  type InkDocument,
+  type InkEditTool,
+} from "@/components/ink/inkTypes";
+import { CardFrame } from "./CardFrame";
+import { CardCornerActions } from "./CardCornerActions";
+import { SharedCardContent } from "../common/SharedCardContent";
 import {
   CANONICAL_CARD_WIDTH,
   CARD_ACTION_BG_CLASS,
   CARD_ACTION_COLOR_IDLE_CLASS,
   CARD_ACTION_ICON_CLASS,
   layoutRowsToCardHeightPx,
-} from '../common/constants';
-import { sortBlocksByOrderIndex } from '../blocks/blockOrdering';
+} from "../common/constants";
+import { sortBlocksByOrderIndex } from "../blocks/blockOrdering";
 import {
   DEFAULT_LAYOUT_ROWS,
   LEGACY_BASE_LAYOUT_ROWS,
   normalizeExtraRows,
   normalizeLayoutRows,
-} from '@/domain/card/extraRows';
-import { useCards } from '@/hooks/useCards';
+} from "@/domain/card/extraRows";
+import { useCards } from "@/hooks/useCards";
 
 type FlashcardMediaLike =
   | string
@@ -98,7 +114,10 @@ interface FlashcardProps {
   extraFooter?: React.ReactNode;
   drawMode?: boolean;
   inkEditingEnabled?: boolean;
-  onInkDocumentChange?: (side: 'question' | 'answer', nextDocument: InkDocument) => void;
+  onInkDocumentChange?: (
+    side: "question" | "answer",
+    nextDocument: InkDocument,
+  ) => void;
   allowUpscale?: boolean;
   maxScale?: number;
   scaleMultiplier?: number;
@@ -144,7 +163,9 @@ export function Flashcard({
 
   const previewInkRef = useRef<InkLayerHandle | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
-  const [previewInkTool, setPreviewInkTool] = useState<InkEditTool | null>(null);
+  const [previewInkTool, setPreviewInkTool] = useState<InkEditTool | null>(
+    null,
+  );
   const [previewInkHistory, setPreviewInkHistory] = useState<InkHistoryState>({
     canUndo: false,
     canRedo: false,
@@ -153,14 +174,20 @@ export function Flashcard({
   const [layoutStable, setLayoutStable] = useState(false);
 
   // ✅ side も含めて保持（debounce中のflipでも保存先を間違えない）
-  const pendingInkRef = useRef<{ side: 'question' | 'answer'; doc: InkDocument } | null>(null);
+  const pendingInkRef = useRef<{
+    side: "question" | "answer";
+    doc: InkDocument;
+  } | null>(null);
   const inkSaveTimerRef = useRef<number | null>(null);
 
   // ---- 先に派生値を確定（TDZ回避） ----
   const cardIdForInk = cardData?.id ?? cardData?.cardId ?? null;
   const enableDrawMode = drawMode ?? false;
-  const effectiveIsFlipped = isFlipped ?? (previewMode ? previewFlipped : false);
-  const activeInkSide: 'question' | 'answer' = effectiveIsFlipped ? 'answer' : 'question';
+  const effectiveIsFlipped =
+    isFlipped ?? (previewMode ? previewFlipped : false);
+  const activeInkSide: "question" | "answer" = effectiveIsFlipped
+    ? "answer"
+    : "question";
 
   useEffect(() => {
     if (!previewMode) return;
@@ -172,7 +199,7 @@ export function Flashcard({
       setPreviewInkTool(null);
       return;
     }
-    setPreviewInkTool((prev) => prev ?? 'pen');
+    setPreviewInkTool((prev) => prev ?? "pen");
   }, [inkEditingEnabled]);
 
   useEffect(() => {
@@ -201,7 +228,7 @@ export function Flashcard({
       setLayoutStable(false);
 
       const fontsReady = (document as any).fonts?.ready;
-      if (fontsReady && typeof fontsReady.then === 'function') {
+      if (fontsReady && typeof fontsReady.then === "function") {
         try {
           await fontsReady;
         } catch {
@@ -216,20 +243,20 @@ export function Flashcard({
         return;
       }
 
-      const images = Array.from(root.querySelectorAll('img'));
+      const images = Array.from(root.querySelectorAll("img"));
       const imageWaiters = images
         .filter((img) => !img.complete)
         .map(
           (img) =>
             new Promise<void>((resolve) => {
               const done = () => {
-                img.removeEventListener('load', done);
-                img.removeEventListener('error', done);
+                img.removeEventListener("load", done);
+                img.removeEventListener("error", done);
                 resolve();
               };
-              img.addEventListener('load', done, { once: true });
-              img.addEventListener('error', done, { once: true });
-            })
+              img.addEventListener("load", done, { once: true });
+              img.addEventListener("error", done, { once: true });
+            }),
         );
 
       if (imageWaiters.length > 0) {
@@ -239,7 +266,7 @@ export function Flashcard({
 
       scheduleStable();
 
-      if (typeof ResizeObserver !== 'undefined') {
+      if (typeof ResizeObserver !== "undefined") {
         resizeObserver = new ResizeObserver(() => {
           setLayoutStable(false);
           scheduleStable();
@@ -265,7 +292,8 @@ export function Flashcard({
     const refs: ReferenceBlockData[] = [];
     const qBlocks: CardBlock[] = cardData?.questionBlocks ?? [];
     qBlocks.forEach((block) => {
-      if (block.type === 'reference' && (block as any).references) refs.push(...((block as any).references as ReferenceBlockData[]));
+      if (block.type === "reference" && (block as any).references)
+        refs.push(...((block as any).references as ReferenceBlockData[]));
     });
     return refs.filter((r) => r.url);
   }, [cardData?.questionBlocks]);
@@ -274,7 +302,8 @@ export function Flashcard({
     const refs: ReferenceBlockData[] = [];
     const aBlocks: CardBlock[] = cardData?.answerBlocks ?? [];
     aBlocks.forEach((block) => {
-      if (block.type === 'reference' && (block as any).references) refs.push(...((block as any).references as ReferenceBlockData[]));
+      if (block.type === "reference" && (block as any).references)
+        refs.push(...((block as any).references as ReferenceBlockData[]));
     });
     return refs.filter((r) => r.url);
   }, [cardData?.answerBlocks]);
@@ -283,66 +312,102 @@ export function Flashcard({
   const hasUncertainty = card?.has_uncertainty ?? card?.hasUncertainty ?? false;
   const isBookmarked = card?.is_bookmarked ?? card?.isBookmarked ?? false;
 
-  const questionText = cardData?.question_text ?? cardData?.questionText ?? '';
-  const questionImages = cardData?.question_images ?? cardData?.questionImages ?? [];
-  const questionAudios = cardData?.question_audios ?? cardData?.questionAudios ?? [];
+  const questionText = cardData?.question_text ?? cardData?.questionText ?? "";
+  const questionImages =
+    cardData?.question_images ?? cardData?.questionImages ?? [];
+  const questionAudios =
+    cardData?.question_audios ?? cardData?.questionAudios ?? [];
 
-  const answerText = cardData?.answer_text ?? cardData?.answerText ?? '';
+  const answerText = cardData?.answer_text ?? cardData?.answerText ?? "";
   const answerImages = cardData?.answer_images ?? cardData?.answerImages ?? [];
   const answerAudios = cardData?.answer_audios ?? cardData?.answerAudios ?? [];
 
-  const questionCode = cardData?.questionCode || cardData?.question_code || null;
+  const questionCode =
+    cardData?.questionCode || cardData?.question_code || null;
   const answerCode = cardData?.answerCode || cardData?.answer_code || null;
 
-  const legacyQuestionExtraRows = normalizeExtraRows(cardData?.questionExtraRows ?? cardData?.question_extra_rows ?? 0);
-  const legacyAnswerExtraRows = normalizeExtraRows(cardData?.answerExtraRows ?? cardData?.answer_extra_rows ?? 0);
+  const legacyQuestionExtraRows = normalizeExtraRows(
+    cardData?.questionExtraRows ?? cardData?.question_extra_rows ?? 0,
+  );
+  const legacyAnswerExtraRows = normalizeExtraRows(
+    cardData?.answerExtraRows ?? cardData?.answer_extra_rows ?? 0,
+  );
 
   // ✅ B案（raw/safe分離 + finiteガード）
   const rawLayoutRows =
     cardData?.layoutRows ??
     cardData?.layout_rows ??
-    (LEGACY_BASE_LAYOUT_ROWS + Math.max(legacyQuestionExtraRows, legacyAnswerExtraRows));
+    LEGACY_BASE_LAYOUT_ROWS +
+      Math.max(legacyQuestionExtraRows, legacyAnswerExtraRows);
 
-  const safeLayoutRows = Number.isFinite(rawLayoutRows) ? rawLayoutRows : DEFAULT_LAYOUT_ROWS;
+  const safeLayoutRows = Number.isFinite(rawLayoutRows)
+    ? rawLayoutRows
+    : DEFAULT_LAYOUT_ROWS;
   const layoutRows = normalizeLayoutRows(safeLayoutRows);
 
   const questionInkDocument = React.useMemo(
-    () => resolveInkDocument(cardIdForInk, 'question', cardData?.inkQuestion ?? null),
-    [cardData?.inkQuestion, cardIdForInk]
+    () =>
+      resolveInkDocument(
+        cardIdForInk,
+        "question",
+        cardData?.inkQuestion ?? null,
+      ),
+    [cardData?.inkQuestion, cardIdForInk],
   );
 
   const answerInkDocument = React.useMemo(
-    () => resolveInkDocument(cardIdForInk, 'answer', cardData?.inkAnswer ?? null),
-    [cardData?.inkAnswer, cardIdForInk]
+    () =>
+      resolveInkDocument(cardIdForInk, "answer", cardData?.inkAnswer ?? null),
+    [cardData?.inkAnswer, cardIdForInk],
   );
 
   const questionImageUrls = (questionImages ?? [])
-    .map((image: unknown) => image?.remoteUrl ?? image?.localUrl ?? image?.url ?? image)
+    .map(
+      (image: unknown) =>
+        image?.remoteUrl ?? image?.localUrl ?? image?.url ?? image,
+    )
     .filter(Boolean);
 
   const answerImageUrls = (answerImages ?? [])
-    .map((image: unknown) => image?.remoteUrl ?? image?.localUrl ?? image?.url ?? image)
+    .map(
+      (image: unknown) =>
+        image?.remoteUrl ?? image?.localUrl ?? image?.url ?? image,
+    )
     .filter(Boolean);
 
-  const handleGalleryFullscreenChange = React.useCallback((isFullscreen: boolean) => {
-    setIsImageModalOpen(isFullscreen);
-  }, []);
+  const handleGalleryFullscreenChange = React.useCallback(
+    (isFullscreen: boolean) => {
+      setIsImageModalOpen(isFullscreen);
+    },
+    [],
+  );
 
   if (!cardData) {
     return <div className="text-center py-12 text-gray-500">No Card Data</div>;
   }
 
-  const activeReferences = effectiveIsFlipped ? answerReferences : questionReferences;
-  const activeInkDocument = effectiveIsFlipped ? answerInkDocument : questionInkDocument;
+  const activeReferences = effectiveIsFlipped
+    ? answerReferences
+    : questionReferences;
+  const activeInkDocument = effectiveIsFlipped
+    ? answerInkDocument
+    : questionInkDocument;
 
   // Flip阻害条件を集約（増えてもここだけ直せば良い）
   const isModalBlockingFlip =
-    isImageModalOpen || isImagePopupOpen || isAudioPopupOpen || isReferencePopupOpen;
+    isImageModalOpen ||
+    isImagePopupOpen ||
+    isAudioPopupOpen ||
+    isReferencePopupOpen;
 
-  const isInkEditingActive = Boolean(previewMode && inkEditingEnabled && previewInkTool);
+  const isInkEditingActive = Boolean(
+    previewMode && inkEditingEnabled && previewInkTool,
+  );
 
   // ✅ stable になってからマウント（書けない/ズレないを優先）
-  const shouldMountInkLayer = Boolean(previewMode && inkEditingEnabled && cardIdForInk && layoutStable);
+  const shouldMountInkLayer = Boolean(
+    previewMode && inkEditingEnabled && cardIdForInk && layoutStable,
+  );
 
   const flushPendingInk = React.useCallback(() => {
     if (!cardIdForInk) return;
@@ -354,14 +419,16 @@ export function Flashcard({
 
     updateCard(
       cardIdForInk,
-      pending.side === 'question' ? { inkQuestion: pending.doc } : { inkAnswer: pending.doc }
+      pending.side === "question"
+        ? { inkQuestion: pending.doc }
+        : { inkAnswer: pending.doc },
     ).catch((error) => {
-      console.error('[Flashcard] Failed to persist ink document', error);
+      console.error("[Flashcard] Failed to persist ink document", error);
     });
   }, [cardIdForInk, updateCard]);
 
   const handleInkDocumentChange = React.useCallback(
-    (side: 'question' | 'answer', nextDocument: InkDocument) => {
+    (side: "question" | "answer", nextDocument: InkDocument) => {
       const next: InkDocument = {
         ...nextDocument,
         version: nextDocument.version ?? INK_DOCUMENT_VERSION,
@@ -381,7 +448,7 @@ export function Flashcard({
         inkSaveTimerRef.current = null;
       }, 300);
     },
-    [flushPendingInk, onInkDocumentChange]
+    [flushPendingInk, onInkDocumentChange],
   );
 
   useEffect(() => {
@@ -409,7 +476,7 @@ export function Flashcard({
         onFlip();
       }
     },
-    [isModalBlockingFlip, isInkEditingActive, previewMode, onFlip]
+    [isModalBlockingFlip, isInkEditingActive, previewMode, onFlip],
   );
 
   const actionsTopLeft: React.ReactNode[] = [];
@@ -418,9 +485,13 @@ export function Flashcard({
   // extraHeaderLeft は名前通り TopLeft 側へ
   if (extraHeaderLeft) {
     actionsTopLeft.push(
-      <div key="extra-header-left" className="flex" onClick={(e) => e.stopPropagation()}>
+      <div
+        key="extra-header-left"
+        className="flex"
+        onClick={(e) => e.stopPropagation()}
+      >
         {extraHeaderLeft}
-      </div>
+      </div>,
     );
   }
 
@@ -439,7 +510,7 @@ export function Flashcard({
       >
         <ImageIcon className={CARD_ACTION_ICON_CLASS} />
         <span className="text-[10px] font-bold">x{activeImages.length}</span>
-      </button>
+      </button>,
     );
   }
 
@@ -447,14 +518,20 @@ export function Flashcard({
   const activeAudios = effectiveIsFlipped ? answerAudios : questionAudios;
 
   // データ構造の正規化（urlプロパティを持つオブジェクトか、文字列か）
-  const toMediaUrl = React.useCallback((m: FlashcardMediaLike): string | null => {
-    if (typeof m === 'string') return m;
-    return m.remoteUrl ?? m.localUrl ?? m.url ?? null;
-  }, []);
+  const toMediaUrl = React.useCallback(
+    (m: FlashcardMediaLike): string | null => {
+      if (typeof m === "string") return m;
+      return m.remoteUrl ?? m.localUrl ?? m.url ?? null;
+    },
+    [],
+  );
 
   const activeAudioUrls = React.useMemo(
-    () => (activeAudios ?? []).map(toMediaUrl).filter((u): u is string => Boolean(u)),
-    [activeAudios, toMediaUrl]
+    () =>
+      (activeAudios ?? [])
+        .map(toMediaUrl)
+        .filter((u): u is string => Boolean(u)),
+    [activeAudios, toMediaUrl],
   );
 
   if (activeAudioUrls.length > 0) {
@@ -469,7 +546,7 @@ export function Flashcard({
       >
         <Volume2 className={CARD_ACTION_ICON_CLASS} />
         <span className="text-[10px] font-bold">x{activeAudioUrls.length}</span>
-      </button>
+      </button>,
     );
   }
 
@@ -484,16 +561,22 @@ export function Flashcard({
         className="flex items-center gap-1 px-2 py-1 h-8 min-h-0 min-w-0 rounded-full transition-all bg-cyan-500 text-white shadow-[0_2px_0_#0e7490] active:shadow-none active:translate-y-[2px] hover:bg-cyan-400"
       >
         <Link className={CARD_ACTION_ICON_CLASS} />
-        <span className="text-[10px] font-bold">x{activeReferences.length}</span>
-      </button>
+        <span className="text-[10px] font-bold">
+          x{activeReferences.length}
+        </span>
+      </button>,
     );
   }
 
   if (mediaActionNodes.length > 0) {
     actionsTopRight.push(
-      <div key="media-actions" className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+      <div
+        key="media-actions"
+        className="flex items-center gap-2"
+        onClick={(e) => e.stopPropagation()}
+      >
         {mediaActionNodes}
-      </div>
+      </div>,
     );
   }
 
@@ -502,11 +585,13 @@ export function Flashcard({
     actionsTopLeft.push(
       <CardCornerActions
         key="corner-actions"
-        onHelp={onToggleUncertainty ? () => onToggleUncertainty(cardData) : undefined}
+        onHelp={
+          onToggleUncertainty ? () => onToggleUncertainty(cardData) : undefined
+        }
         onStar={onToggleBookmark ? () => onToggleBookmark(cardData) : undefined}
         helpActive={hasUncertainty}
         starActive={isBookmarked}
-      />
+      />,
     );
   }
 
@@ -523,45 +608,45 @@ export function Flashcard({
         className={cn(
           "rounded-none w-8 h-8 md:w-9 md:h-9 transition-colors",
           CARD_ACTION_BG_CLASS,
-          CARD_ACTION_COLOR_IDLE_CLASS
+          CARD_ACTION_COLOR_IDLE_CLASS,
         )}
       >
         <Edit className={CARD_ACTION_ICON_CLASS} />
-      </Button>
+      </Button>,
     );
   }
 
   const resolveSideBlocks = React.useCallback(
-    (side: 'question' | 'answer'): CardBlock[] => {
+    (side: "question" | "answer"): CardBlock[] => {
       const sideBlocks =
-        side === 'question'
+        side === "question"
           ? (cardData?.questionBlocks ?? [])
           : (cardData?.answerBlocks ?? []);
       if (sideBlocks.length > 0) {
         return sortBlocksByOrderIndex(sideBlocks);
       }
 
-      const text = side === 'question' ? questionText : answerText;
-      const images = side === 'question' ? questionImageUrls : answerImageUrls;
-      const audios = side === 'question' ? questionAudios : answerAudios;
-      const code = side === 'question' ? questionCode : answerCode;
+      const text = side === "question" ? questionText : answerText;
+      const images = side === "question" ? questionImageUrls : answerImageUrls;
+      const audios = side === "question" ? questionAudios : answerAudios;
+      const code = side === "question" ? questionCode : answerCode;
 
       const fallbackBlocks: CardBlock[] = [];
       let orderIndex = 0;
 
-      if ((text ?? '').trim() !== '') {
+      if ((text ?? "").trim() !== "") {
         fallbackBlocks.push({
           id: `${side}-legacy-text`,
-          type: 'text',
+          type: "text",
           orderIndex: orderIndex++,
           content: String(text),
         } as CardBlock);
       }
 
-      if ((code?.code ?? '').trim() !== '') {
+      if ((code?.code ?? "").trim() !== "") {
         fallbackBlocks.push({
           id: `${side}-legacy-code`,
-          type: 'code',
+          type: "code",
           orderIndex: orderIndex++,
           code,
         } as CardBlock);
@@ -570,7 +655,7 @@ export function Flashcard({
       if ((images?.length ?? 0) > 0) {
         fallbackBlocks.push({
           id: `${side}-legacy-image`,
-          type: 'image',
+          type: "image",
           orderIndex: orderIndex++,
           images: images as any,
         } as CardBlock);
@@ -579,7 +664,7 @@ export function Flashcard({
       if ((audios?.length ?? 0) > 0) {
         fallbackBlocks.push({
           id: `${side}-legacy-audio`,
-          type: 'audio',
+          type: "audio",
           orderIndex,
           audios: audios as any,
         } as CardBlock);
@@ -598,14 +683,16 @@ export function Flashcard({
       questionCode,
       questionImageUrls,
       questionText,
-    ]
+    ],
   );
 
   // overlay を安定化（Inkが余計に再マウント/再描画されにくい）
   const overlayNode = React.useMemo(() => {
     const hasHeaderOverlay = Boolean(extraHeaderRight && !previewMode);
     const hasFooterOverlay = Boolean(extraFooter);
-    const hasInkOverlay = Boolean(previewMode && inkEditingEnabled && cardIdForInk);
+    const hasInkOverlay = Boolean(
+      previewMode && inkEditingEnabled && cardIdForInk,
+    );
     if (!hasHeaderOverlay && !hasFooterOverlay && !hasInkOverlay) return null;
 
     return (
@@ -637,10 +724,14 @@ export function Flashcard({
                 ref={previewInkRef}
                 cardId={cardIdForInk}
                 side={activeInkSide}
-                editable={Boolean(previewMode && inkEditingEnabled && layoutStable)}
-                tool={previewInkTool ?? 'pen'}
+                editable={Boolean(
+                  previewMode && inkEditingEnabled && layoutStable,
+                )}
+                tool={previewInkTool ?? "pen"}
                 value={activeInkDocument}
-                onChange={(next) => handleInkDocumentChange(activeInkSide, next)}
+                onChange={(next) =>
+                  handleInkDocumentChange(activeInkSide, next)
+                }
                 onHistoryChange={setPreviewInkHistory}
               />
             )}
@@ -686,12 +777,19 @@ export function Flashcard({
   ]);
 
   const fixedHeightPx = layoutRowsToCardHeightPx(layoutRows);
-  const activeSide: 'question' | 'answer' = effectiveIsFlipped ? 'answer' : 'question';
+  const activeSide: "question" | "answer" = effectiveIsFlipped
+    ? "answer"
+    : "question";
   const activeBlocks = resolveSideBlocks(activeSide);
   const ruledPhasePx = 0;
 
   return (
-    <div className={cn('w-full flex flex-col select-none overflow-visible', className)}>
+    <div
+      className={cn(
+        "w-full flex flex-col select-none overflow-visible",
+        className,
+      )}
+    >
       <div className="relative">
         <CardFrame
           baseWidth={CANONICAL_CARD_WIDTH}
@@ -699,20 +797,31 @@ export function Flashcard({
           allowUpscale={allowUpscale}
           maxScale={maxScale}
           scaleMultiplier={scaleMultiplier}
-          className={cn('premium-paper-depth', !previewMode && 'cursor-pointer', 'card-shell--paper')}
+          className={cn(
+            "premium-paper-depth",
+            !previewMode && "cursor-pointer",
+            "card-shell--paper",
+          )}
           onClick={handleFlip}
           resizable={false}
           resizeStepPx={undefined}
           showResizeHandle={false}
           heightPx={fixedHeightPx}
           lockHeight
-          actionsTopLeft={actionsTopLeft.length > 0 ? actionsTopLeft : undefined}
-          actionsTopRight={actionsTopRight.length > 0 ? actionsTopRight : undefined}
+          actionsTopLeft={
+            actionsTopLeft.length > 0 ? actionsTopLeft : undefined
+          }
+          actionsTopRight={
+            actionsTopRight.length > 0 ? actionsTopRight : undefined
+          }
           drawMode={enableDrawMode}
           ruledPhasePx={ruledPhasePx}
           overlay={overlayNode}
         >
-          <div ref={contentRef} className="animate-in fade-in zoom-in-95 duration-300 w-full max-w-full flex min-h-0 flex-1">
+          <div
+            ref={contentRef}
+            className="animate-in fade-in zoom-in-95 duration-300 w-full max-w-full flex min-h-0 flex-1"
+          >
             <SharedCardContent
               mode="view"
               blocks={activeBlocks}
@@ -750,7 +859,11 @@ export function Flashcard({
                 </div>
               ))}
             </div>
-            {activeImages.length === 0 && <div className="flex items-center justify-center py-20 text-slate-400">画像がありません</div>}
+            {activeImages.length === 0 && (
+              <div className="flex items-center justify-center py-20 text-slate-400">
+                画像がありません
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
@@ -776,41 +889,56 @@ export function Flashcard({
             <AudioPlayer urls={activeAudioUrls} />
           </div>
 
-          {activeAudioUrls.length === 0 && <div className="text-center py-8 text-slate-400 text-sm">音声がありません</div>}
+          {activeAudioUrls.length === 0 && (
+            <div className="text-center py-8 text-slate-400 text-sm">
+              音声がありません
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
       {/* ナビゲーション（オプション） - プレビュー時は非表示 */}
-      {!previewMode && (onNext || onPrev || (currentIndex !== undefined && totalCards !== undefined)) && (
-        <div className="flex items-center justify-between mt-8 px-4">
-          <Button
-            variant="ghost"
-            onClick={onPrev}
-            disabled={!hasPrev && (!onPrev || (currentIndex !== undefined && currentIndex === 0))}
-            className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full h-12 px-6"
-          >
-            <ChevronLeft className="w-5 h-5 mr-2" />
-            <span className="font-medium">Previous</span>
-          </Button>
+      {!previewMode &&
+        (onNext ||
+          onPrev ||
+          (currentIndex !== undefined && totalCards !== undefined)) && (
+          <div className="flex items-center justify-between mt-8 px-4">
+            <Button
+              variant="ghost"
+              onClick={onPrev}
+              disabled={
+                !hasPrev &&
+                (!onPrev || (currentIndex !== undefined && currentIndex === 0))
+              }
+              className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full h-12 px-6"
+            >
+              <ChevronLeft className="w-5 h-5 mr-2" />
+              <span className="font-medium">Previous</span>
+            </Button>
 
-          {currentIndex !== undefined && totalCards !== undefined && (
-            <span className="text-sm font-bold text-slate-300 tracking-widest">
-              {currentIndex + 1} / {totalCards}
-            </span>
-          )}
+            {currentIndex !== undefined && totalCards !== undefined && (
+              <span className="text-sm font-bold text-slate-300 tracking-widest">
+                {currentIndex + 1} / {totalCards}
+              </span>
+            )}
 
-          <Button
-            variant="ghost"
-            onClick={onNext}
-            disabled={!hasNext && (!onNext || (currentIndex !== undefined && totalCards !== undefined && currentIndex === totalCards - 1))}
-            className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full h-12 px-6"
-          >
-            <span className="font-medium">Next</span>
-            <ChevronRight className="w-5 h-5 ml-2" />
-          </Button>
-        </div>
-      )}
+            <Button
+              variant="ghost"
+              onClick={onNext}
+              disabled={
+                !hasNext &&
+                (!onNext ||
+                  (currentIndex !== undefined &&
+                    totalCards !== undefined &&
+                    currentIndex === totalCards - 1))
+              }
+              className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full h-12 px-6"
+            >
+              <span className="font-medium">Next</span>
+              <ChevronRight className="w-5 h-5 ml-2" />
+            </Button>
+          </div>
+        )}
     </div>
   );
 }
-

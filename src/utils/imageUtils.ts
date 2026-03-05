@@ -1,65 +1,66 @@
-import type { UploadSource, UploadFallbackReason } from '@/types';
-import type { BlobUrl, StorageUrl, Base64DataUrl } from '@/types/branded';
-import { createBlobUrl, createBase64DataUrl } from '@/types/branded';
+import type { UploadSource, UploadFallbackReason } from "@/types";
+import type { BlobUrl, StorageUrl, Base64DataUrl } from "@/types/branded";
+import { createBlobUrl, createBase64DataUrl } from "@/types/branded";
 
 /**
  * 画像を圧縮してBase64 data URLに変換（内部使用のみ）
- * 
+ *
  * ⚠️ 警告: この関数は内部処理でのみ使用すること
  * - DB や UploadedImage に Base64 を保存してはならない
  * - 外部からは compressImageToBlob を使用すること
- * 
+ *
  * @internal
  */
 const compressAndConvertToBase64Internal = (
   file: File,
   maxWidth: number = 1920,
   maxHeight: number = 1920,
-  quality: number = 0.8
+  quality: number = 0.8,
 ): Promise<Base64DataUrl> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    
+
     reader.onload = (e) => {
       const img = new Image();
-      
+
       img.onload = () => {
         // 画像サイズを計算
         let width = img.width;
         let height = img.height;
-        
+
         // 最大サイズを超えている場合はリサイズ
         if (width > maxWidth || height > maxHeight) {
           const ratio = Math.min(maxWidth / width, maxHeight / height);
           width = width * ratio;
           height = height * ratio;
         }
-        
+
         // Canvasで画像を描画して圧縮
-        const canvas = document.createElement('canvas');
+        const canvas = document.createElement("canvas");
         canvas.width = width;
         canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        
+        const ctx = canvas.getContext("2d");
+
         if (!ctx) {
-          reject(new Error('Canvas context not available'));
+          reject(new Error("Canvas context not available"));
           return;
         }
-        
+
         ctx.drawImage(img, 0, 0, width, height);
-        
+
         // JPEG形式でBase64に変換（PNGの場合は透過を保持）
-        const mimeType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+        const mimeType = file.type === "image/png" ? "image/png" : "image/jpeg";
         const dataUrl = canvas.toDataURL(mimeType, quality);
-        
+
         resolve(createBase64DataUrl(dataUrl));
       };
-      
-      img.onerror = () => reject(new Error('画像の読み込みに失敗しました'));
+
+      img.onerror = () => reject(new Error("画像の読み込みに失敗しました"));
       img.src = e.target?.result as string;
     };
-    
-    reader.onerror = () => reject(new Error('ファイルの読み込みに失敗しました'));
+
+    reader.onerror = () =>
+      reject(new Error("ファイルの読み込みに失敗しました"));
     reader.readAsDataURL(file);
   });
 };
@@ -72,23 +73,28 @@ export const compressImageToBlob = async (
   file: File,
   maxWidth: number = 1920,
   maxHeight: number = 1920,
-  quality: number = 0.8
+  quality: number = 0.8,
 ): Promise<Blob> => {
-  const base64 = await compressAndConvertToBase64Internal(file, maxWidth, maxHeight, quality);
+  const base64 = await compressAndConvertToBase64Internal(
+    file,
+    maxWidth,
+    maxHeight,
+    quality,
+  );
   const response = await fetch(base64);
   return response.blob();
 };
 
 /**
  * 画像を圧縮して Blob URL に変換（UI プレビュー用）
- * 
+ *
  * ⚠️ 注意: 返された Blob URL は使用後に必ず revokeBlobUrl で解放すること
  */
 export const compressImageToBlobUrl = async (
   file: File,
   maxWidth: number = 1920,
   maxHeight: number = 1920,
-  quality: number = 0.8
+  quality: number = 0.8,
 ): Promise<BlobUrl> => {
   const blob = await compressImageToBlob(file, maxWidth, maxHeight, quality);
   const url = URL.createObjectURL(blob);
@@ -101,8 +107,12 @@ export const compressImageToBlobUrl = async (
  */
 export const sanitizeUploadedImages = (images: unknown[]) => {
   if (!Array.isArray(images)) return [];
-  return images.map(img => {
-    if (img && typeof img.localUrl === 'string' && img.localUrl.startsWith('blob:')) {
+  return images.map((img) => {
+    if (
+      img &&
+      typeof img.localUrl === "string" &&
+      img.localUrl.startsWith("blob:")
+    ) {
       return { ...img, localUrl: null };
     }
     return img;
@@ -111,7 +121,7 @@ export const sanitizeUploadedImages = (images: unknown[]) => {
 
 /**
  * @deprecated 後方互換性のため残すが、compressImageToBlob を使用すること
- * 
+ *
  * @internal
  */
 export const compressAndConvertToBase64 = compressAndConvertToBase64Internal;
@@ -124,16 +134,16 @@ export const uploadImageAsBase64 = async (file: File): Promise<string> => {
 };
 
 export type NormalizeUploadedImageOptions = {
-  onInvalid?: 'skip' | 'throw';
+  onInvalid?: "skip" | "throw";
 };
 
 export type DenormalizeUploadedImageOptions = {
-  case?: 'camel' | 'snake';
+  case?: "camel" | "snake";
   stripUndefined?: boolean;
 };
 
 const generateUploadedImageId = (): string => {
-  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return crypto.randomUUID();
   }
   return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
@@ -147,7 +157,7 @@ export const createUploadedImage = (file: File) => {
     localFileId: id,
     localUrl: createBlobUrl(URL.createObjectURL(file)),
     remoteUrl: null,
-    status: 'uploading' as const,
+    status: "uploading" as const,
     contentType: file.type || null,
     size: Number.isFinite(file.size) ? file.size : null,
     storagePath: null,
@@ -166,7 +176,7 @@ export const createFailedUploadedImage = (file: File) => {
     localFileId: id,
     localUrl: null,
     remoteUrl: null,
-    status: 'failed' as const,
+    status: "failed" as const,
     contentType: file.type || null,
     size: Number.isFinite(file.size) ? file.size : null,
     storagePath: null,
@@ -178,39 +188,49 @@ export const createFailedUploadedImage = (file: File) => {
 };
 
 export const isHeicFile = (file: File) => {
-  const type = (file.type || '').toLowerCase();
-  const name = (file.name || '').toLowerCase();
-  return type === 'image/heic' || type === 'image/heif' || name.endsWith('.heic') || name.endsWith('.heif');
+  const type = (file.type || "").toLowerCase();
+  const name = (file.name || "").toLowerCase();
+  return (
+    type === "image/heic" ||
+    type === "image/heif" ||
+    name.endsWith(".heic") ||
+    name.endsWith(".heif")
+  );
 };
 
 export const convertHeicToJpeg = async (file: File): Promise<File> => {
-  const heic2anyModule = await import('heic2any');
+  const heic2anyModule = await import("heic2any");
   const heic2any = (heic2anyModule as any).default || heic2anyModule;
-  const result = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.9 });
+  const result = await heic2any({
+    blob: file,
+    toType: "image/jpeg",
+    quality: 0.9,
+  });
   const blob = Array.isArray(result) ? result[0] : result;
-  const name = file.name.replace(/\.(heic|heif)$/i, '.jpg');
-  return new File([blob], name, { type: (blob as Blob).type || 'image/jpeg' });
+  const name = file.name.replace(/\.(heic|heif)$/i, ".jpg");
+  return new File([blob], name, { type: (blob as Blob).type || "image/jpeg" });
 };
 
 const resolveString = (value: unknown): string | undefined => {
-  if (typeof value === 'string' && value.trim().length > 0) {
+  if (typeof value === "string" && value.trim().length > 0) {
     return value;
   }
   return undefined;
 };
 
 const resolveNumber = (value: unknown): number | undefined => {
-  if (typeof value === 'number' && Number.isFinite(value)) {
+  if (typeof value === "number" && Number.isFinite(value)) {
     return value;
   }
-  if (typeof value === 'string' && value.trim().length > 0) {
+  if (typeof value === "string" && value.trim().length > 0) {
     const parsed = Number(value);
     return Number.isFinite(parsed) ? parsed : undefined;
   }
   return undefined;
 };
 
-const clampNumber = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
+const clampNumber = (v: number, min: number, max: number) =>
+  Math.min(max, Math.max(min, v));
 
 const pickFirst = (obj: Record<string, unknown>, keys: string[]): unknown => {
   for (const key of keys) {
@@ -221,15 +241,15 @@ const pickFirst = (obj: Record<string, unknown>, keys: string[]): unknown => {
 
 export const normalizeUploadedImage = (
   raw: unknown,
-  options: NormalizeUploadedImageOptions = {}
+  options: NormalizeUploadedImageOptions = {},
 ) => {
   if (raw == null) return null;
 
-  if (typeof raw === 'string') {
+  if (typeof raw === "string") {
     return {
       id: generateUploadedImageId(),
       remoteUrl: raw as StorageUrl,
-      status: 'ready' as const,
+      status: "ready" as const,
       localUrl: null,
       contentType: null,
       size: null,
@@ -237,38 +257,54 @@ export const normalizeUploadedImage = (
     };
   }
 
-  if (typeof raw !== 'object') {
-    if (options.onInvalid === 'throw') {
-      throw new Error('Invalid UploadedImage input');
+  if (typeof raw !== "object") {
+    if (options.onInvalid === "throw") {
+      throw new Error("Invalid UploadedImage input");
     }
     return null;
   }
 
   const record = raw as Record<string, unknown>;
 
-  const remoteUrl = resolveString(pickFirst(record, ['remoteUrl', 'remote_url', 'url']));
-  const localUrl = resolveString(pickFirst(record, ['localUrl', 'local_url']));
-  const status = resolveString(pickFirst(record, ['status'])) as
-    | 'uploading'
-    | 'ready'
-    | 'failed'
+  const remoteUrl = resolveString(
+    pickFirst(record, ["remoteUrl", "remote_url", "url"]),
+  );
+  const localUrl = resolveString(pickFirst(record, ["localUrl", "local_url"]));
+  const status = resolveString(pickFirst(record, ["status"])) as
+    | "uploading"
+    | "ready"
+    | "failed"
     | undefined;
-  const contentType = resolveString(pickFirst(record, ['contentType', 'content_type', 'mimeType', 'mime_type']));
-  const size = resolveNumber(pickFirst(record, ['size', 'sizeBytes', 'size_bytes']));
-  const storagePath = resolveString(pickFirst(record, ['storagePath', 'storage_path', 'path']));
-  const localFileId = resolveString(pickFirst(record, ['localFileId', 'local_file_id']));
-  const assetId = resolveString(pickFirst(record, ['assetId', 'asset_id'])) ?? resolveString(pickFirst(record, ['id']));
-  const scale = resolveNumber(pickFirst(record, ['scale']));
-  const x = resolveNumber(pickFirst(record, ['x']));
-  const naturalW = resolveNumber(pickFirst(record, ['naturalW', 'natural_w']));
-  const naturalH = resolveNumber(pickFirst(record, ['naturalH', 'natural_h']));
+  const contentType = resolveString(
+    pickFirst(record, ["contentType", "content_type", "mimeType", "mime_type"]),
+  );
+  const size = resolveNumber(
+    pickFirst(record, ["size", "sizeBytes", "size_bytes"]),
+  );
+  const storagePath = resolveString(
+    pickFirst(record, ["storagePath", "storage_path", "path"]),
+  );
+  const localFileId = resolveString(
+    pickFirst(record, ["localFileId", "local_file_id"]),
+  );
+  const assetId =
+    resolveString(pickFirst(record, ["assetId", "asset_id"])) ??
+    resolveString(pickFirst(record, ["id"]));
+  const scale = resolveNumber(pickFirst(record, ["scale"]));
+  const x = resolveNumber(pickFirst(record, ["x"]));
+  const naturalW = resolveNumber(pickFirst(record, ["naturalW", "natural_w"]));
+  const naturalH = resolveNumber(pickFirst(record, ["naturalH", "natural_h"]));
 
-  const source = resolveString(pickFirst(record, ['source'])) as UploadSource | undefined;
-  const fallbackReason = resolveString(pickFirst(record, ['fallbackReason', 'fallback_reason'])) as UploadFallbackReason | undefined;
+  const source = resolveString(pickFirst(record, ["source"])) as
+    | UploadSource
+    | undefined;
+  const fallbackReason = resolveString(
+    pickFirst(record, ["fallbackReason", "fallback_reason"]),
+  ) as UploadFallbackReason | undefined;
 
   if (!remoteUrl && !localUrl && !localFileId && !assetId) {
-    if (options.onInvalid === 'throw') {
-      throw new Error('UploadedImage missing url');
+    if (options.onInvalid === "throw") {
+      throw new Error("UploadedImage missing url");
     }
     return null;
   }
@@ -277,16 +313,16 @@ export const normalizeUploadedImage = (
   const normalizedX = normalizedScale >= 0.999 ? 0 : clampNumber(x ?? 0, -1, 1);
 
   return {
-    id: resolveString(pickFirst(record, ['id'])) ?? generateUploadedImageId(),
+    id: resolveString(pickFirst(record, ["id"])) ?? generateUploadedImageId(),
     assetId: assetId ?? null,
     localUrl: (localUrl ?? null) as BlobUrl | null,
     remoteUrl: (remoteUrl ?? null) as StorageUrl | null,
     localFileId: localFileId ?? null,
-    status: status ?? (remoteUrl ? 'ready' : 'uploading'),
+    status: status ?? (remoteUrl ? "ready" : "uploading"),
     contentType: contentType ?? null,
     size: size ?? null,
     storagePath: storagePath ?? null,
-    source: source ?? (remoteUrl && !localUrl ? 'cloud' : null),
+    source: source ?? (remoteUrl && !localUrl ? "cloud" : null),
     fallbackReason: fallbackReason ?? null,
     scale: normalizedScale,
     x: normalizedX,
@@ -297,7 +333,7 @@ export const normalizeUploadedImage = (
 
 export const normalizeUploadedImages = (
   raw: unknown,
-  options: NormalizeUploadedImageOptions = {}
+  options: NormalizeUploadedImageOptions = {},
 ) => {
   if (raw == null) return [];
   const items = Array.isArray(raw) ? raw : [raw];
@@ -313,32 +349,33 @@ export const denormalizeUploadedImage = (
     localFileId?: string | null;
     localUrl?: string | null;
     remoteUrl?: string | null;
-    status: 'uploading' | 'ready' | 'failed';
+    status: "uploading" | "ready" | "failed";
     contentType?: string | null;
     size?: number | null;
     storagePath?: string | null;
   },
-  options: DenormalizeUploadedImageOptions = {}
+  options: DenormalizeUploadedImageOptions = {},
 ) => {
-  const output: Record<string, unknown> = options.case === 'snake'
-    ? {
-        id: image.id,
-        asset_id: image.assetId ?? image.id,
-        url: image.remoteUrl ?? null,
-        content_type: image.contentType ?? null,
-        size: image.size ?? null,
-        storage_path: image.storagePath ?? null,
-        status: image.status,
-      }
-    : {
-        id: image.id,
-        assetId: image.assetId ?? image.id,
-        url: image.remoteUrl ?? null,
-        contentType: image.contentType ?? null,
-        size: image.size ?? null,
-        storagePath: image.storagePath ?? null,
-        status: image.status,
-      };
+  const output: Record<string, unknown> =
+    options.case === "snake"
+      ? {
+          id: image.id,
+          asset_id: image.assetId ?? image.id,
+          url: image.remoteUrl ?? null,
+          content_type: image.contentType ?? null,
+          size: image.size ?? null,
+          storage_path: image.storagePath ?? null,
+          status: image.status,
+        }
+      : {
+          id: image.id,
+          assetId: image.assetId ?? image.id,
+          url: image.remoteUrl ?? null,
+          contentType: image.contentType ?? null,
+          size: image.size ?? null,
+          storagePath: image.storagePath ?? null,
+          status: image.status,
+        };
 
   if (options.stripUndefined) {
     for (const key of Object.keys(output)) {
@@ -358,12 +395,12 @@ export const denormalizeUploadedImages = (
     localFileId?: string | null;
     localUrl?: string | null;
     remoteUrl?: string | null;
-    status: 'uploading' | 'ready' | 'failed';
+    status: "uploading" | "ready" | "failed";
     contentType?: string | null;
     size?: number | null;
     storagePath?: string | null;
   }>,
-  options: DenormalizeUploadedImageOptions = {}
+  options: DenormalizeUploadedImageOptions = {},
 ) => {
   return images.map((image) => denormalizeUploadedImage(image, options));
 };

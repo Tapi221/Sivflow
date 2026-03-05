@@ -1,12 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { cn } from '@/lib/utils';
+import React, { useEffect, useRef, useState } from "react";
+import { cn } from "@/lib/utils";
 
 /**
  * モバイル縮小表示ラッパー
- * 
+ *
  * 紙型カード（固定幅480px）をモバイル画面でも横スクロールなしで表示するため、
  * 画面幅に応じてカード全体を縮小する。
- * 
+ *
  * @param cardDesignWidth - カードの設計幅（px）。デフォルト480px
  * @param safePadding - 左右の安全マージン（合計px）。デフォルト24px
  * @param enableEditMode - 編集モードを有効化するか（将来の拡張用）
@@ -25,7 +25,7 @@ export function MobileScalableCard({
   cardDesignWidth = 480,
   safePadding = 24,
   enableEditMode = false,
-  className
+  className,
 }: MobileScalableCardProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -36,18 +36,18 @@ export function MobileScalableCard({
   // スケール計算と適用
   useEffect(() => {
     const updateScale = () => {
-      if (typeof window === 'undefined') return;
+      if (typeof window === "undefined") return;
 
       const host = containerRef.current;
       const parentWidth =
-        host?.parentElement?.getBoundingClientRect?.().width
-        ?? host?.getBoundingClientRect?.().width
-        ?? window.innerWidth;
+        host?.parentElement?.getBoundingClientRect?.().width ??
+        host?.getBoundingClientRect?.().width ??
+        window.innerWidth;
       const availableWidth = Math.max(0, parentWidth - safePadding);
-      
+
       // カードが画面幅を超える場合のみ縮小
       const calculatedScale = Math.min(1, availableWidth / cardDesignWidth);
-      
+
       setScale(calculatedScale);
     };
 
@@ -55,17 +55,17 @@ export function MobileScalableCard({
     updateScale();
 
     // リサイズ監視
-    window.addEventListener('resize', updateScale);
-    
+    window.addEventListener("resize", updateScale);
+
     // モダンブラウザ向けのResizeObserver（より正確なタイミングで検知）
     let resizeObserver: ResizeObserver | null = null;
-    if (typeof ResizeObserver !== 'undefined' && containerRef.current) {
+    if (typeof ResizeObserver !== "undefined" && containerRef.current) {
       resizeObserver = new ResizeObserver(updateScale);
       resizeObserver.observe(document.body);
     }
 
     return () => {
-      window.removeEventListener('resize', updateScale);
+      window.removeEventListener("resize", updateScale);
       if (resizeObserver) {
         resizeObserver.disconnect();
       }
@@ -74,7 +74,7 @@ export function MobileScalableCard({
 
   useEffect(() => {
     const content = contentRef.current;
-    if (!content || typeof ResizeObserver === 'undefined') return;
+    if (!content || typeof ResizeObserver === "undefined") return;
 
     const updateHeight = () => {
       const nextHeight = Math.max(0, Math.ceil(content.offsetHeight));
@@ -95,30 +95,33 @@ export function MobileScalableCard({
 
     const handleFocusIn = (e: FocusEvent) => {
       const target = e.target as HTMLElement;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") {
         setIsEditMode(true);
       }
     };
 
     const handleFocusOut = (e: FocusEvent) => {
       const target = e.target as HTMLElement;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") {
         // 少し遅延させて、次のフォーカスがない場合のみ解除
         setTimeout(() => {
           const activeElement = document.activeElement;
-          if (activeElement?.tagName !== 'INPUT' && activeElement?.tagName !== 'TEXTAREA') {
+          if (
+            activeElement?.tagName !== "INPUT" &&
+            activeElement?.tagName !== "TEXTAREA"
+          ) {
             setIsEditMode(false);
           }
         }, 100);
       }
     };
 
-    document.addEventListener('focusin', handleFocusIn);
-    document.addEventListener('focusout', handleFocusOut);
+    document.addEventListener("focusin", handleFocusIn);
+    document.addEventListener("focusout", handleFocusOut);
 
     return () => {
-      document.removeEventListener('focusin', handleFocusIn);
-      document.removeEventListener('focusout', handleFocusOut);
+      document.removeEventListener("focusin", handleFocusIn);
+      document.removeEventListener("focusout", handleFocusOut);
     };
   }, [enableEditMode]);
 
@@ -127,7 +130,7 @@ export function MobileScalableCard({
     if (!isEditMode) return;
 
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         setIsEditMode(false);
         // フォーカスを外す
         if (document.activeElement instanceof HTMLElement) {
@@ -136,8 +139,8 @@ export function MobileScalableCard({
       }
     };
 
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
   }, [isEditMode]);
 
   return (
@@ -147,7 +150,7 @@ export function MobileScalableCard({
         <div
           className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 animate-in fade-in duration-200"
           onClick={() => setIsEditMode(false)}
-          style={{ touchAction: 'none' }}
+          style={{ touchAction: "none" }}
         />
       )}
 
@@ -156,28 +159,29 @@ export function MobileScalableCard({
         ref={containerRef}
         className={cn(
           "w-full mx-auto transition-[height] duration-300 ease-out",
-          isEditMode && enableEditMode && "fixed inset-0 z-50 flex items-center justify-center p-4",
-          className
+          isEditMode &&
+            enableEditMode &&
+            "fixed inset-0 z-50 flex items-center justify-center p-4",
+          className,
         )}
         style={{
           height:
             !isEditMode && contentHeight != null
               ? `${Math.ceil(contentHeight * scale)}px`
-              : undefined
+              : undefined,
         }}
       >
         <div
           style={{
             width: `${Math.max(1, cardDesignWidth)}px`,
-            margin: '0 auto',
-            transform: isEditMode && enableEditMode ? 'scale(1)' : `scale(${scale})`,
-            transformOrigin: 'top center',
-            willChange: 'transform',
+            margin: "0 auto",
+            transform:
+              isEditMode && enableEditMode ? "scale(1)" : `scale(${scale})`,
+            transformOrigin: "top center",
+            willChange: "transform",
           }}
         >
-          <div ref={contentRef}>
-            {children}
-          </div>
+          <div ref={contentRef}>{children}</div>
         </div>
       </div>
     </>

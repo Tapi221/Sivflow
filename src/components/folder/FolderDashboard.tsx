@@ -1,16 +1,29 @@
-import { useMemo, useRef, useState, useEffect, useCallback } from 'react';
-import type { CSSProperties, KeyboardEvent, ReactNode } from 'react';
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Cell } from 'recharts';
-import { Button } from '@/components/ui/button';
-import { CardHeader } from '@/components/ui/CardHeader';
-import { EmptyState } from '@/components/ui/EmptyState';
-import { extractTextFromBlocks } from '@/utils';
-import { formatLastAccess } from '@/utils/dateUtils';
-import { calculateResistanceScore } from '@/utils/reviewMetrics';
-import type { Card } from '@/types';
-import { Calendar, FileText, History, Star, ChevronLeft, ChevronRight } from '@/ui/icons';
-import { getPageRuledBg } from '@/components/card/frame/ruledStyles';
-
+import { useMemo, useRef, useState, useEffect, useCallback } from "react";
+import type { CSSProperties, KeyboardEvent, ReactNode } from "react";
+import {
+  Bar,
+  BarChart,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  Cell,
+} from "recharts";
+import { Button } from "@/components/ui/button";
+import { CardHeader } from "@/components/ui/CardHeader";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { extractTextFromBlocks } from "@/utils";
+import { formatLastAccess } from "@/utils/dateUtils";
+import { calculateResistanceScore } from "@/utils/reviewMetrics";
+import type { Card } from "@/types";
+import {
+  Calendar,
+  FileText,
+  History,
+  Star,
+  ChevronLeft,
+  ChevronRight,
+} from "@/ui/icons";
+import { getPageRuledBg } from "@/components/card/frame/ruledStyles";
 
 type FolderStats = {
   dueCount: number;
@@ -34,16 +47,16 @@ interface FolderDashboardProps {
 
 const toDate = (value: unknown): Date | null => {
   if (value === null || value === undefined) return null;
-  if (typeof (value as { toDate?: () => unknown })?.toDate === 'function') {
+  if (typeof (value as { toDate?: () => unknown })?.toDate === "function") {
     const d = (value as { toDate: () => unknown }).toDate();
     return d instanceof Date && !isNaN(d.getTime()) ? d : null;
   }
   if (value instanceof Date) return isNaN(value.getTime()) ? null : value;
-  if (typeof value === 'number') {
+  if (typeof value === "number") {
     const d = new Date(value);
     return isNaN(d.getTime()) ? null : d;
   }
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     const d = new Date(value);
     return isNaN(d.getTime()) ? null : d;
   }
@@ -57,36 +70,41 @@ const getPreviewText = (card: Card): string => {
   if (a) return a;
   if (card.questionText) return card.questionText;
   if (card.answerText) return card.answerText;
-  return '';
+  return "";
 };
 
-const normalizeInlineText = (value: string): string => value.replace(/\s+/g, ' ').trim();
+const normalizeInlineText = (value: string): string =>
+  value.replace(/\s+/g, " ").trim();
 
 const displayTitle = (card: Card): string => {
   const title = card.title?.trim();
   if (title) return title;
   const preview = normalizeInlineText(getPreviewText(card));
   if (preview) return preview.slice(0, 28);
-  return '無題のカード';
+  return "無題のカード";
 };
 
 const previewSnippet = (card: Card, headingText: string): string => {
-  const questionText = normalizeInlineText(extractTextFromBlocks(card.questionBlocks ?? []) || card.questionText || '');
-  const answerText = normalizeInlineText(extractTextFromBlocks(card.answerBlocks ?? []) || card.answerText || '');
+  const questionText = normalizeInlineText(
+    extractTextFromBlocks(card.questionBlocks ?? []) || card.questionText || "",
+  );
+  const answerText = normalizeInlineText(
+    extractTextFromBlocks(card.answerBlocks ?? []) || card.answerText || "",
+  );
   const heading = normalizeInlineText(headingText);
 
   let text = questionText || answerText;
-  if (!text) return '';
+  if (!text) return "";
 
   const isDuplicatedWithHeading =
     text === heading || text.startsWith(heading) || heading.startsWith(text);
 
   if (isDuplicatedWithHeading) {
     // 見出しと本文の二重表示を避ける。代替本文がない場合は本文を出さない。
-    text = answerText && answerText !== questionText ? answerText : '';
+    text = answerText && answerText !== questionText ? answerText : "";
   }
 
-  if (!text) return '';
+  if (!text) return "";
   return text.length > 92 ? `${text.slice(0, 92)}...` : text;
 };
 
@@ -116,9 +134,9 @@ export function FolderDashboard({
 }: FolderDashboardProps) {
   const lastReviewedText = useMemo(() => {
     const d = toDate(stats.lastReviewedAt);
-    if (!d) return '未学習';
+    if (!d) return "未学習";
     const formatted = formatLastAccess(d);
-    return formatted?.text || d.toLocaleDateString('ja-JP');
+    return formatted?.text || d.toLocaleDateString("ja-JP");
   }, [stats.lastReviewedAt]);
 
   const todayStart = useMemo(() => startOfToday(), []);
@@ -130,24 +148,33 @@ export function FolderDashboard({
 
   const completedToday = useMemo(() => {
     return activeCards.filter((card) => {
-      const lastReview = toDate(card.lastReviewAt ?? (card as any).last_review_at);
+      const lastReview = toDate(
+        card.lastReviewAt ?? (card as any).last_review_at,
+      );
       return isWithinRange(lastReview, todayStart, tomorrowStart);
     }).length;
   }, [activeCards, todayStart, tomorrowStart]);
 
   const todayPlanned = Math.max(0, (stats.dueCount ?? 0) + completedToday);
-  const todayProgressPercent = todayPlanned > 0 ? Math.round((completedToday / todayPlanned) * 100) : 0;
+  const todayProgressPercent =
+    todayPlanned > 0 ? Math.round((completedToday / todayPlanned) * 100) : 0;
 
   const sliderCards = useMemo(() => {
     return [...activeCards]
-      .sort((a, b) => (a.orderIndex ?? (a as any).order_index ?? 0) - (b.orderIndex ?? (b as any).order_index ?? 0))
+      .sort(
+        (a, b) =>
+          (a.orderIndex ?? (a as any).order_index ?? 0) -
+          (b.orderIndex ?? (b as any).order_index ?? 0),
+      )
       .slice(0, 24);
   }, [activeCards]);
 
   const reviewedCards = useMemo(() => {
     return activeCards.filter((card) => {
       const reviewCount = card.reviewCount ?? (card as any).review_count ?? 0;
-      const lastReview = toDate(card.lastReviewAt ?? (card as any).last_review_at);
+      const lastReview = toDate(
+        card.lastReviewAt ?? (card as any).last_review_at,
+      );
       return reviewCount > 0 || !!lastReview;
     });
   }, [activeCards]);
@@ -166,15 +193,23 @@ export function FolderDashboard({
     });
 
     reviewedCards.forEach((card) => {
-      const lastReview = toDate(card.lastReviewAt ?? (card as any).last_review_at);
-      const nextReview = toDate(card.nextReviewDate ?? (card as any).next_review_date);
+      const lastReview = toDate(
+        card.lastReviewAt ?? (card as any).last_review_at,
+      );
+      const nextReview = toDate(
+        card.nextReviewDate ?? (card as any).next_review_date,
+      );
       let intervalDays = 0;
 
       if (lastReview && nextReview && nextReview > lastReview) {
-        intervalDays = (nextReview.getTime() - lastReview.getTime()) / (1000 * 60 * 60 * 24);
+        intervalDays =
+          (nextReview.getTime() - lastReview.getTime()) / (1000 * 60 * 60 * 24);
       }
 
-      const score = Math.max(0, Math.min(100, calculateResistanceScore(intervalDays)));
+      const score = Math.max(
+        0,
+        Math.min(100, calculateResistanceScore(intervalDays)),
+      );
       const bucketIndex = Math.min(19, Math.floor(score / 5));
       buckets[bucketIndex].count += 1;
     });
@@ -184,12 +219,15 @@ export function FolderDashboard({
 
   const hasResilienceData = useMemo(
     () => resilienceBuckets.some((bucket) => bucket.count > 0),
-    [resilienceBuckets]
+    [resilienceBuckets],
   );
   const canShowDistribution = hasMinimumReviewedCards && hasResilienceData;
 
   const maxBucketCount = useMemo(() => {
-    const maxCount = Math.max(...resilienceBuckets.map((bucket) => bucket.count), 0);
+    const maxCount = Math.max(
+      ...resilienceBuckets.map((bucket) => bucket.count),
+      0,
+    );
     return maxCount === 0 ? 1 : maxCount;
   }, [resilienceBuckets]);
 
@@ -201,18 +239,21 @@ export function FolderDashboard({
     return 0.38;
   };
 
-  const cardClass = 'rounded-xl border border-slate-200 p-4 bg-white shadow-none';
+  const cardClass =
+    "rounded-xl border border-slate-200 p-4 bg-white shadow-none";
 
   return (
     <div className="relative h-full overflow-y-auto">
       <div
         className="pointer-events-none absolute inset-0"
-        style={getPageRuledBg('rgba(15,23,42,0.035)')}
+        style={getPageRuledBg("rgba(15,23,42,0.035)")}
       />
       <div className="relative z-[1] max-w-[1120px] mx-auto w-full px-4 py-5 space-y-4">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
           <div>
-            <p className="text-[10px] text-slate-400 font-bold tracking-wider uppercase">Folder Dashboard</p>
+            <p className="text-[10px] text-slate-400 font-bold tracking-wider uppercase">
+              Folder Dashboard
+            </p>
             <h2 className="text-[22px] md:text-[28px] font-semibold text-slate-900 tracking-[-0.01em] leading-[1.15] mt-1">
               {folderName || folderId}
             </h2>
@@ -222,34 +263,59 @@ export function FolderDashboard({
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-slate-200 text-slate-500 bg-white shadow-none">
               <FileText size={11} className="text-slate-400" />
               <span className="text-[10px] font-medium">カード</span>
-              <span className="text-xs font-bold text-slate-700">{cards.length}</span>
+              <span className="text-xs font-bold text-slate-700">
+                {cards.length}
+              </span>
             </div>
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-slate-200 text-slate-500 bg-white shadow-none">
               <Calendar size={11} className="text-slate-400" />
               <span className="text-[10px] font-medium">今日やる</span>
-              <span className="text-xs font-bold text-slate-700">{stats.dueCount ?? 0}</span>
+              <span className="text-xs font-bold text-slate-700">
+                {stats.dueCount ?? 0}
+              </span>
             </div>
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-slate-200 text-slate-500 bg-white shadow-none">
               <Star size={11} className="text-slate-400" />
               <span className="text-[10px] font-medium">未学習</span>
-              <span className="text-xs font-bold text-slate-700">{stats.unlearnedCount ?? 0}</span>
+              <span className="text-xs font-bold text-slate-700">
+                {stats.unlearnedCount ?? 0}
+              </span>
             </div>
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-slate-200 text-slate-500 bg-white shadow-none">
               <History size={11} className="text-slate-400" />
               <span className="text-[10px] font-medium">前回</span>
-              <span className="text-[10px] font-bold text-slate-700 truncate max-w-[92px]">{lastReviewedText}</span>
+              <span className="text-[10px] font-bold text-slate-700 truncate max-w-[92px]">
+                {lastReviewedText}
+              </span>
             </div>
           </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Button type="button" size="sm" onClick={handlers.onStartStudy} className="h-8 px-4 text-xs font-semibold">
+          <Button
+            type="button"
+            size="sm"
+            onClick={handlers.onStartStudy}
+            className="h-8 px-4 text-xs font-semibold"
+          >
             学習開始
           </Button>
-          <Button type="button" size="sm" variant="secondary" onClick={handlers.onViewCards} className="h-8 px-4 text-xs">
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            onClick={handlers.onViewCards}
+            className="h-8 px-4 text-xs"
+          >
             閲覧
           </Button>
-          <Button type="button" size="sm" variant="secondary" onClick={handlers.onCreateCard} className="h-8 px-4 text-xs">
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            onClick={handlers.onCreateCard}
+            className="h-8 px-4 text-xs"
+          >
             カード作成
           </Button>
         </div>
@@ -261,22 +327,33 @@ export function FolderDashboard({
                 title="カード一覧"
                 description="横にスワイプして確認"
                 action={
-                  <Button type="button" size="sm" variant="ghost" onClick={handlers.onViewCards} className="h-8 px-3 text-xs">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={handlers.onViewCards}
+                    className="h-8 px-3 text-xs"
+                  >
                     すべて開く
                   </Button>
                 }
               />
 
-              <CardScrollSection cards={sliderCards} onEmpty={
-                <EmptyState
-                  title="カードがありません"
-                  description="新規カードを作成するとここに表示されます"
-                  className="py-3"
-                />
-              } />
+              <CardScrollSection
+                cards={sliderCards}
+                onEmpty={
+                  <EmptyState
+                    title="カードがありません"
+                    description="新規カードを作成するとここに表示されます"
+                    className="py-3"
+                  />
+                }
+              />
             </section>
 
-            <section className={`${cardClass} md:aspect-square md:flex md:flex-col`}>
+            <section
+              className={`${cardClass} md:aspect-square md:flex md:flex-col`}
+            >
               <CardHeader
                 title="今日の学習"
                 description={`今日やる: ${todayPlanned} / 完了: ${completedToday}`}
@@ -284,14 +361,21 @@ export function FolderDashboard({
 
               <div className="mt-4 flex flex-col items-center gap-2 md:flex-1 md:justify-center">
                 {(() => {
-                  const progress = Math.max(0, Math.min(100, todayProgressPercent));
+                  const progress = Math.max(
+                    0,
+                    Math.min(100, todayProgressPercent),
+                  );
                   const radius = 46;
                   const circumference = 2 * Math.PI * radius;
                   const dashOffset = circumference * (1 - progress / 100);
 
                   return (
                     <div className="relative w-[120px] h-[120px] md:w-[132px] md:h-[132px]">
-                      <svg viewBox="0 0 120 120" className="w-full h-full -rotate-90" aria-hidden="true">
+                      <svg
+                        viewBox="0 0 120 120"
+                        className="w-full h-full -rotate-90"
+                        aria-hidden="true"
+                      >
                         <circle
                           cx="60"
                           cy="60"
@@ -314,24 +398,41 @@ export function FolderDashboard({
                         />
                       </svg>
                       <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className="text-2xl md:text-3xl font-bold text-slate-800 tabular-nums">{completedToday}</span>
-                        <span className="text-[10px] font-semibold tracking-wide text-slate-400">完了</span>
+                        <span className="text-2xl md:text-3xl font-bold text-slate-800 tabular-nums">
+                          {completedToday}
+                        </span>
+                        <span className="text-[10px] font-semibold tracking-wide text-slate-400">
+                          完了
+                        </span>
                       </div>
                     </div>
                   );
                 })()}
                 <div className="text-[11px] text-slate-500">
-                  {todayPlanned > 0 ? `${todayProgressPercent}% 完了` : '今日の予定はありません'}
+                  {todayPlanned > 0
+                    ? `${todayProgressPercent}% 完了`
+                    : "今日の予定はありません"}
                 </div>
               </div>
 
               <div className="flex flex-wrap gap-2 mt-3 md:mt-auto">
                 {(stats.dueCount ?? 0) > 0 ? (
-                  <Button type="button" size="sm" onClick={handlers.onStartStudy} className="h-8 px-4 text-xs">
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={handlers.onStartStudy}
+                    className="h-8 px-4 text-xs"
+                  >
                     復習を始める
                   </Button>
                 ) : todayProgressPercent < 100 ? (
-                  <Button type="button" size="sm" variant="secondary" onClick={handlers.onStartStudy} className="h-8 px-4 text-xs">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    onClick={handlers.onStartStudy}
+                    className="h-8 px-4 text-xs"
+                  >
                     学習を進める
                   </Button>
                 ) : null}
@@ -348,16 +449,29 @@ export function FolderDashboard({
             <div className="h-[340px] mt-3 rounded-2xl bg-white border border-slate-200 px-3 py-4">
               {canShowDistribution ? (
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={resilienceBuckets} margin={{ top: 18, right: 16, bottom: 20, left: 4 }}>
-                    <XAxis 
-                      dataKey="min" 
-                      tickLine={false} 
-                      axisLine={false} 
-                      fontSize={10} 
-                      stroke="#94a3b8" 
-                      tickFormatter={(v) => v % 20 === 0 || v === 0 ? `${v}%` : ''}
+                  <BarChart
+                    data={resilienceBuckets}
+                    margin={{ top: 18, right: 16, bottom: 20, left: 4 }}
+                  >
+                    <XAxis
+                      dataKey="min"
+                      tickLine={false}
+                      axisLine={false}
+                      fontSize={10}
+                      stroke="#94a3b8"
+                      tickFormatter={(v) =>
+                        v % 20 === 0 || v === 0 ? `${v}%` : ""
+                      }
                     />
-                    <YAxis domain={[0, maxBucketCount]} tickLine={false} axisLine={false} fontSize={11} stroke="#94a3b8" width={28} tickFormatter={(v) => v === 0 ? '' : String(v)} />
+                    <YAxis
+                      domain={[0, maxBucketCount]}
+                      tickLine={false}
+                      axisLine={false}
+                      fontSize={11}
+                      stroke="#94a3b8"
+                      width={28}
+                      tickFormatter={(v) => (v === 0 ? "" : String(v))}
+                    />
                     <Bar dataKey="count" radius={[4, 4, 0, 0]}>
                       {resilienceBuckets.map((bucket) => (
                         <Cell
@@ -374,7 +488,13 @@ export function FolderDashboard({
                   title="まだデータがありません"
                   description="カードを復習すると分布が表示されます"
                   action={
-                    <Button type="button" size="sm" variant="secondary" onClick={handlers.onStartStudy} className="h-8 px-4 text-xs">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="secondary"
+                      onClick={handlers.onStartStudy}
+                      className="h-8 px-4 text-xs"
+                    >
                       学習を始める
                     </Button>
                   }
@@ -382,7 +502,6 @@ export function FolderDashboard({
               )}
             </div>
           </section>
-
         </div>
       </div>
     </div>
@@ -402,7 +521,7 @@ interface CardScrollSectionProps {
 
 function CardScrollSection({ cards, onEmpty }: CardScrollSectionProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft]   = useState(false);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
   // スクロール状態を更新
@@ -423,31 +542,42 @@ function CardScrollSection({ cards, onEmpty }: CardScrollSectionProps) {
 
     const ro = new ResizeObserver(updateScrollState);
     ro.observe(el);
-    el.addEventListener('scroll', updateScrollState, { passive: true });
+    el.addEventListener("scroll", updateScrollState, { passive: true });
     return () => {
       cancelAnimationFrame(id);
       ro.disconnect();
-      el.removeEventListener('scroll', updateScrollState);
+      el.removeEventListener("scroll", updateScrollState);
     };
   }, [cards, updateScrollState]);
 
   // 矢印クリックでスムーススクロール
-  const scrollBy = useCallback((dir: 'left' | 'right') => {
-    scrollRef.current?.scrollBy({ left: dir === 'right' ? CARD_SCROLL_AMOUNT : -CARD_SCROLL_AMOUNT, behavior: 'smooth' });
+  const scrollBy = useCallback((dir: "left" | "right") => {
+    scrollRef.current?.scrollBy({
+      left: dir === "right" ? CARD_SCROLL_AMOUNT : -CARD_SCROLL_AMOUNT,
+      behavior: "smooth",
+    });
   }, []);
 
   // キーボード左右矢印対応
-  const handleKeyDown = useCallback((e: KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === 'ArrowRight') { e.preventDefault(); scrollBy('right'); }
-    if (e.key === 'ArrowLeft')  { e.preventDefault(); scrollBy('left');  }
-  }, [scrollBy]);
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLDivElement>) => {
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        scrollBy("right");
+      }
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        scrollBy("left");
+      }
+    },
+    [scrollBy],
+  );
 
   if (cards.length === 0) return <div className="mt-3">{onEmpty}</div>;
 
   return (
     // 外側ラッパー: relative にして矢印・フェードを重ねる
     <div className="relative mt-3 -mx-4 px-4">
-
       {/* スクロールコンテナ
           pr-16 で右端に余白を作り「最後のカードが見切れる」感を演出
           scrollbar は非表示にして見た目をクリーンに保つ */}
@@ -456,17 +586,26 @@ function CardScrollSection({ cards, onEmpty }: CardScrollSectionProps) {
         onKeyDown={handleKeyDown}
         tabIndex={0}
         className="overflow-x-auto overscroll-x-contain outline-none focus-visible:ring-2 focus-visible:ring-primary-300 rounded-lg pr-16"
-        style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as CSSProperties}
+        style={
+          {
+            scrollbarWidth: "none",
+            WebkitOverflowScrolling: "touch",
+          } as CSSProperties
+        }
         aria-label="カード一覧（横スクロール）"
       >
         <div
           className="flex gap-3 snap-x snap-mandatory pb-2"
-          style={{ width: 'max-content' }}
+          style={{ width: "max-content" }}
         >
           {cards.map((card) => {
             const isDraft = card.isDraft ?? (card as any).is_draft;
-            const nextReview = toDate(card.nextReviewDate ?? (card as any).next_review_date);
-            const reviewText = nextReview ? nextReview.toLocaleDateString('ja-JP') : '未設定';
+            const nextReview = toDate(
+              card.nextReviewDate ?? (card as any).next_review_date,
+            );
+            const reviewText = nextReview
+              ? nextReview.toLocaleDateString("ja-JP")
+              : "未設定";
             const title = displayTitle(card);
             const snippet = previewSnippet(card, title);
 
@@ -486,7 +625,9 @@ function CardScrollSection({ cards, onEmpty }: CardScrollSectionProps) {
                   ) : null}
                 </div>
                 {snippet ? (
-                  <p className="mt-2 text-xs leading-5 text-slate-500 line-clamp-3">{snippet}</p>
+                  <p className="mt-2 text-xs leading-5 text-slate-500 line-clamp-3">
+                    {snippet}
+                  </p>
                 ) : null}
                 <div className="mt-3 text-[10px] font-medium text-slate-400">
                   次回: <span className="text-slate-500">{reviewText}</span>
@@ -504,7 +645,8 @@ function CardScrollSection({ cards, onEmpty }: CardScrollSectionProps) {
         aria-hidden="true"
         className="pointer-events-none absolute left-0 top-0 h-full w-12 transition-opacity duration-200"
         style={{
-          background: 'linear-gradient(to right, rgb(255,255,255) 0%, transparent 100%)',
+          background:
+            "linear-gradient(to right, rgb(255,255,255) 0%, transparent 100%)",
           opacity: canScrollLeft ? 1 : 0,
         }}
       />
@@ -514,7 +656,8 @@ function CardScrollSection({ cards, onEmpty }: CardScrollSectionProps) {
         aria-hidden="true"
         className="pointer-events-none absolute right-0 top-0 h-full w-20 transition-opacity duration-200"
         style={{
-          background: 'linear-gradient(to left, rgb(255,255,255) 10%, transparent 100%)',
+          background:
+            "linear-gradient(to left, rgb(255,255,255) 10%, transparent 100%)",
           opacity: canScrollRight ? 1 : 0,
         }}
       />
@@ -523,7 +666,7 @@ function CardScrollSection({ cards, onEmpty }: CardScrollSectionProps) {
       {canScrollLeft && (
         <button
           type="button"
-          onClick={() => scrollBy('left')}
+          onClick={() => scrollBy("left")}
           aria-label="左にスクロール"
           className="absolute left-1 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-7 h-7 rounded-full bg-white border border-slate-200 shadow-md text-slate-500 hover:text-primary-600 hover:border-primary-300 active:scale-95 transition-all duration-150"
         >
@@ -535,7 +678,7 @@ function CardScrollSection({ cards, onEmpty }: CardScrollSectionProps) {
       {canScrollRight && (
         <button
           type="button"
-          onClick={() => scrollBy('right')}
+          onClick={() => scrollBy("right")}
           aria-label="右にスクロール"
           className="absolute right-1 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-7 h-7 rounded-full bg-white border border-slate-200 shadow-md text-slate-500 hover:text-primary-600 hover:border-primary-300 active:scale-95 transition-all duration-150"
         >

@@ -1,5 +1,5 @@
-import { LocalDB, initializeDB, getLocalDb } from '../src/services/localDB';
-import { Card } from '../src/types';
+import { LocalDB, initializeDB, getLocalDb } from "../src/services/localDB";
+import { Card } from "../src/types";
 
 // データ補正用スクリプト
 async function patchAllCards(userId: string) {
@@ -14,13 +14,16 @@ async function patchAllCards(userId: string) {
     const changes: Partial<Card> = {};
 
     // S（記憶強度）
-    if (typeof card.memoryStability !== 'number' || isNaN(card.memoryStability)) {
+    if (
+      typeof card.memoryStability !== "number" ||
+      isNaN(card.memoryStability)
+    ) {
       changes.memoryStability = 35; // S_init: 初期値
       changed = true;
     }
     // 状態
-    if (!('state' in card) || !card.state) {
-      changes.state = card.lastReviewAt ? 'STABLE' : 'PRE-LEARN';
+    if (!("state" in card) || !card.state) {
+      changes.state = card.lastReviewAt ? "STABLE" : "PRE-LEARN";
       changed = true;
     }
     // 次回復習日
@@ -29,13 +32,13 @@ async function patchAllCards(userId: string) {
       changed = true;
     }
     // 型変換（Timestamp→Date）
-    if (card.nextReviewDate && typeof card.nextReviewDate !== 'object') {
+    if (card.nextReviewDate && typeof card.nextReviewDate !== "object") {
       changes.nextReviewDate = new Date(card.nextReviewDate);
       changed = true;
     }
     // ここでpatch
     if (changed) {
-      await db.updateItem('cards', card.id, changes);
+      await db.updateItem("cards", card.id, changes);
       patched++;
     }
   }
@@ -43,6 +46,6 @@ async function patchAllCards(userId: string) {
 }
 
 // 実行例（ユーザーIDは適宜指定）
-patchAllCards('test-user-id').then(() => {
-  console.log('カードデータ補正完了');
+patchAllCards("test-user-id").then(() => {
+  console.log("カードデータ補正完了");
 });

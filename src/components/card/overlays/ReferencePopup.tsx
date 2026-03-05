@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Dialog,
   DialogContent,
@@ -6,9 +6,9 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import type { ReferenceBlockData } from '@/types';
-import { Globe, ExternalLink, Link as LinkIcon } from '@/ui/icons';
-import { cn } from '@/lib/utils';
+import type { ReferenceBlockData } from "@/types";
+import { Globe, ExternalLink, Link as LinkIcon } from "@/ui/icons";
+import { cn } from "@/lib/utils";
 
 interface ReferencePopupProps {
   isOpen: boolean;
@@ -16,7 +16,11 @@ interface ReferencePopupProps {
   references: ReferenceBlockData[];
 }
 
-export const ReferencePopup = ({ isOpen, onClose, references }: ReferencePopupProps) => {
+export const ReferencePopup = ({
+  isOpen,
+  onClose,
+  references,
+}: ReferencePopupProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-[425px] rounded-[32px] border-none shadow-2xl p-0 overflow-hidden">
@@ -47,7 +51,7 @@ export const ReferencePopup = ({ isOpen, onClose, references }: ReferencePopupPr
                   <div className="flex-1 min-w-0 py-0.5">
                     <div className="flex items-start justify-between gap-2">
                       <h4 className="font-bold text-slate-800 truncate group-hover:text-primary-700 transition-colors">
-                        {ref.name || '外部リンク'}
+                        {ref.name || "外部リンク"}
                       </h4>
                       <ExternalLink className="w-4 h-4 text-slate-300 group-hover:text-primary-400 shrink-0 mt-0.5" />
                     </div>
@@ -72,4 +76,3 @@ export const ReferencePopup = ({ isOpen, onClose, references }: ReferencePopupPr
     </Dialog>
   );
 };
-

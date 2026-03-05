@@ -1,12 +1,29 @@
-import type { ISyncService, IQueueManager, INetworkMonitor, IDiffEngine, ICloudSyncAdapter, SyncTask } from './interfaces/ISyncService';
-import { nanoid } from 'nanoid';
-import type { SyncContextSource } from '../types/telemetry';
-import type { SyncResult } from '../types/sync';
-import { doc, getDoc, updateDoc, collection, query, getDocs, deleteDoc, Timestamp, where } from 'firebase/firestore';
-import { firestoreDb } from './firebase';
-import { TelemetryService } from './logic/TelemetryService';
-import { SecurityMonitor } from './logic/SecurityMonitor';
-import type { LocalDBLike } from './localDB';
+import type {
+  ISyncService,
+  IQueueManager,
+  INetworkMonitor,
+  IDiffEngine,
+  ICloudSyncAdapter,
+  SyncTask,
+} from "./interfaces/ISyncService";
+import { nanoid } from "nanoid";
+import type { SyncContextSource } from "../types/telemetry";
+import type { SyncResult } from "../types/sync";
+import {
+  doc,
+  getDoc,
+  updateDoc,
+  collection,
+  query,
+  getDocs,
+  deleteDoc,
+  Timestamp,
+  where,
+} from "firebase/firestore";
+import { firestoreDb } from "./firebase";
+import { TelemetryService } from "./logic/TelemetryService";
+import { SecurityMonitor } from "./logic/SecurityMonitor";
+import type { LocalDBLike } from "./localDB";
 
 /**
  * SyncServiceV2: オーケストレーターとしての同期サービス
@@ -21,7 +38,7 @@ export class SyncServiceV2 implements ISyncService {
   private telemetry: TelemetryService;
   private securityMonitor: SecurityMonitor;
   private localDB: LocalDBLike;
-  
+
   private isSyncing = false;
   private fallbackCount = 0;
 
@@ -32,7 +49,7 @@ export class SyncServiceV2 implements ISyncService {
     networkMonitor: INetworkMonitor,
     diffEngine: IDiffEngine,
     cloudAdapter: ICloudSyncAdapter,
-    telemetry: TelemetryService
+    telemetry: TelemetryService,
   ) {
     this.localDB = localDB;
     this.queueManager = queueManager;
@@ -40,12 +57,15 @@ export class SyncServiceV2 implements ISyncService {
     this.diffEngine = diffEngine;
     this.cloudAdapter = cloudAdapter;
     this.telemetry = telemetry;
-    this.securityMonitor = new SecurityMonitor(userId, localStorage.getItem('deviceId') || 'unknown');
+    this.securityMonitor = new SecurityMonitor(
+      userId,
+      localStorage.getItem("deviceId") || "unknown",
+    );
 
     // LocalDB の更新を監視してバックグラウンド同期をトリガー
     this.localDB.setSyncTrigger(() => {
-      this.sync('background').catch(err => {
-        console.error('[SyncServiceV2] Background sync failed:', err);
+      this.sync("background").catch((err) => {
+        console.error("[SyncServiceV2] Background sync failed:", err);
       });
     });
   }
@@ -54,15 +74,15 @@ export class SyncServiceV2 implements ISyncService {
    * レガシー互換の同期エントリーポイント
    */
   async synchronize(onProgress?: (msg: string) => void): Promise<SyncResult> {
-    onProgress?.('同期を開始しています...');
+    onProgress?.("同期を開始しています...");
     try {
-      await this.sync('user_initiated');
+      await this.sync("user_initiated");
       return {
         success: true,
         uploaded: 0, // 詳細数は将来的に telemetry から取得
         downloaded: 0,
         conflicts: 0,
-        errors: []
+        errors: [],
       };
     } catch (error: unknown) {
       return {
@@ -70,7 +90,7 @@ export class SyncServiceV2 implements ISyncService {
         uploaded: 0,
         downloaded: 0,
         conflicts: 0,
-        errors: [error.message]
+        errors: [error.message],
       };
     }
   }
@@ -84,60 +104,63 @@ export class SyncServiceV2 implements ISyncService {
   async sync(source: SyncContextSource): Promise<void> {
     // 同期中の重複実行を防ぐ
     if (this.isSyncing) {
-      this.telemetry.log('warn', 'Sync already in progress, skipping', { source });
+      this.telemetry.log("warn", "Sync already in progress, skipping", {
+        source,
+      });
       return;
     }
 
     this.isSyncing = true;
-    const transaction = this.telemetry.startTransaction('sync');
+    const transaction = this.telemetry.startTransaction("sync");
 
     try {
-      this.telemetry.log('info', 'Sync started', { 
-        source, 
-        networkStatus: this.networkMonitor.status 
+      this.telemetry.log("info", "Sync started", {
+        source,
+        networkStatus: this.networkMonitor.status,
       });
 
       // 0. デバイスステータスをチェック (Security Guard)
       await this.checkDeviceStatus();
-      
+
       // 1. ネットワーク状態をチェック
-      if (this.networkMonitor.status === 'offline') {
-        this.telemetry.log('warn', 'Offline, sync deferred');
+      if (this.networkMonitor.status === "offline") {
+        this.telemetry.log("warn", "Offline, sync deferred");
         return;
       }
-      
-      if (this.networkMonitor.status === 'poor') {
-        this.telemetry.log('info', 'Network poor, deferring heavy sync');
+
+      if (this.networkMonitor.status === "poor") {
+        this.telemetry.log("info", "Network poor, deferring heavy sync");
         return;
       }
 
       // 2. クラウドからの差分取得 (Pull)
-      this.telemetry.log('info', 'Checking for remote changes (Pull)');
+      this.telemetry.log("info", "Checking for remote changes (Pull)");
       const lastSyncTime = await this.localDB.getLastSyncTime(this.userId);
       const lastSyncTimestamp = lastSyncTime ? lastSyncTime.getTime() : 0;
 
-      const { changes, serverTime } = await this.cloudAdapter.pullDiff(lastSyncTimestamp);
+      const { changes, serverTime } =
+        await this.cloudAdapter.pullDiff(lastSyncTimestamp);
       if (changes.length > 0) {
-        this.telemetry.log('info', `Applying ${changes.length} remote changes`);
+        this.telemetry.log("info", `Applying ${changes.length} remote changes`);
         await this.applyRemoteChanges(changes);
       }
 
       // 3. ローカルの変更を送信 (Push)
       const constraint = this.networkMonitor.getBatchConstraint(source);
       const tasks = await this.queueManager.peekBatch(constraint);
-      
+
       if (tasks.length > 0) {
-        this.telemetry.log('info', `Pushing ${tasks.length} local changes`);
+        this.telemetry.log("info", `Pushing ${tasks.length} local changes`);
         await this.processBatch(tasks);
       }
 
       // 4. 同期時刻を更新 (成功時のみ)
       await this.localDB.updateLastSyncTime(this.userId, new Date(serverTime));
 
-      transaction.end('success');
+      transaction.end("success");
     } catch (error) {
-      this.telemetry.log('error', 'Sync failed', { source }, error as Error);
-      transaction.end('failure');
+      this.telemetry.log("error", "Sync failed", { source }, error as Error);
+      transaction.end("failure");
       throw error;
     } finally {
       this.isSyncing = false;
@@ -154,20 +177,22 @@ export class SyncServiceV2 implements ISyncService {
 
     for (const task of tasks) {
       try {
-        if (task.type === 'upload') {
+        if (task.type === "upload") {
           // アップロード処理
-          const result = await this.cloudAdapter.pushBatch([{
-            type: task.entity,
-            id: task.payload.id,
-            data: task.payload
-          }]);
+          const result = await this.cloudAdapter.pushBatch([
+            {
+              type: task.entity,
+              id: task.payload.id,
+              data: task.payload,
+            },
+          ]);
 
           if (result.successIds.length > 0) {
             successIds.push(task.id);
           } else {
             failedIds.push(task.id);
           }
-        } else if (task.type === 'download') {
+        } else if (task.type === "download") {
           // ダウンロード処理
           const { changes } = await this.cloudAdapter.pullDiff(0);
           if (changes.length > 0) {
@@ -175,15 +200,26 @@ export class SyncServiceV2 implements ISyncService {
           }
         }
       } catch (error: unknown) {
-        this.telemetry.log('error', 'Task failed', { taskId: task.id }, error as Error);
-        
+        this.telemetry.log(
+          "error",
+          "Task failed",
+          { taskId: task.id },
+          error as Error,
+        );
+
         // 【正常遷移: Delta Sync 失敗 → Full Sync】
         // 特定の致命的エラー（バージョン競合等）が発生した場合、フル同期による修復を試みる
-        if (error.message?.includes('conflict') || error.message?.includes('version_mismatch')) {
-          this.telemetry.log('warn', 'Fatal sync conflict detected. Triggering self-healing full resync.');
+        if (
+          error.message?.includes("conflict") ||
+          error.message?.includes("version_mismatch")
+        ) {
+          this.telemetry.log(
+            "warn",
+            "Fatal sync conflict detected. Triggering self-healing full resync.",
+          );
           await this.forceFullResync();
           // フル同期が成功すれば、個別のタスク失敗は無視して良い（全体が最新になるため）
-          return; 
+          return;
         }
 
         failedIds.push(task.id);
@@ -193,22 +229,22 @@ export class SyncServiceV2 implements ISyncService {
     // 5. 結果を報告
     const duration = performance.now() - startTime;
     const success = failedIds.length === 0;
-    
+
     this.networkMonitor.reportResult(success, duration);
-    
+
     // 6. キューを更新
     if (successIds.length > 0) {
       await this.queueManager.complete(successIds);
     }
-    
+
     if (failedIds.length > 0) {
-      await this.queueManager.fail(failedIds, 'Batch processing failed', true);
+      await this.queueManager.fail(failedIds, "Batch processing failed", true);
     }
 
     // メトリクス記録
-    this.telemetry.recordMetric('sync_batch_size', tasks.length);
-    this.telemetry.recordMetric('sync_success_count', successIds.length);
-    this.telemetry.recordMetric('sync_failure_count', failedIds.length);
+    this.telemetry.recordMetric("sync_batch_size", tasks.length);
+    this.telemetry.recordMetric("sync_success_count", successIds.length);
+    this.telemetry.recordMetric("sync_failure_count", failedIds.length);
   }
 
   /**
@@ -216,40 +252,41 @@ export class SyncServiceV2 implements ISyncService {
    */
   async performStartupSync(): Promise<void> {
     if (this.isSyncing) return;
-    
+
     this.isSyncing = true;
-    const transaction = this.telemetry.startTransaction('startup_sync');
-    
+    const transaction = this.telemetry.startTransaction("startup_sync");
+
     try {
-      this.telemetry.log('info', 'Starting startup sync (Pull priorities)');
+      this.telemetry.log("info", "Starting startup sync (Pull priorities)");
 
       // 1. 前回の同期時刻を取得
       const lastSyncTime = await this.localDB.getLastSyncTime(this.userId);
       const lastSyncTimestamp = lastSyncTime ? lastSyncTime.getTime() : 0;
 
       // 2. クラウドから差分を取得して適用 (Pull & Apply)
-      const { changes, serverTime } = await this.cloudAdapter.pullDiff(lastSyncTimestamp);
+      const { changes, serverTime } =
+        await this.cloudAdapter.pullDiff(lastSyncTimestamp);
       if (changes.length > 0) {
-        this.telemetry.log('info', `Applying ${changes.length} remote changes`);
+        this.telemetry.log("info", `Applying ${changes.length} remote changes`);
         await this.applyRemoteChanges(changes);
       }
 
       // 3. ローカルの待機中タスクを処理 (Push)
-      const constraint = this.networkMonitor.getBatchConstraint('system');
+      const constraint = this.networkMonitor.getBatchConstraint("system");
       const tasks = await this.queueManager.peekBatch(constraint);
       if (tasks.length > 0) {
-        this.telemetry.log('info', `Pushing ${tasks.length} local changes`);
+        this.telemetry.log("info", `Pushing ${tasks.length} local changes`);
         await this.processBatch(tasks);
       }
 
       // 4. 同期時刻を更新
       await this.localDB.updateLastSyncTime(this.userId, new Date(serverTime));
 
-      this.telemetry.log('info', 'Startup sync completed successfully');
-      transaction.end('success');
+      this.telemetry.log("info", "Startup sync completed successfully");
+      transaction.end("success");
     } catch (error) {
-      this.telemetry.log('error', 'Startup sync failed', {}, error as Error);
-      transaction.end('failure');
+      this.telemetry.log("error", "Startup sync failed", {}, error as Error);
+      transaction.end("failure");
       throw error;
     } finally {
       this.isSyncing = false;
@@ -265,42 +302,50 @@ export class SyncServiceV2 implements ISyncService {
 
     for (const change of changes) {
       const tableByType: Record<string, string> = {
-        card: 'cards',
-        folder: 'folders',
-        userSetting: 'userSettings',
+        card: "cards",
+        folder: "folders",
+        userSetting: "userSettings",
       };
       const table = tableByType[change.type] ?? `${change.type}s`; // e.g., 'card' -> 'cards'
       const remoteData = { ...(change.data ?? {}) };
       if (!remoteData.id && change.id) {
         remoteData.id = change.id;
       }
-      if (change.type === 'userSetting') {
+      if (change.type === "userSetting") {
         remoteData.id = this.userId;
         remoteData.userId = this.userId;
       }
 
       // documents.localFileId / blob localUrl は端末ローカル専用のため、受信時に除外する。
-      if (change.type === 'document') {
+      if (change.type === "document") {
         delete (remoteData as any).localFileId;
         delete (remoteData as any).blobUrl;
-        if (typeof (remoteData as any).localUrl === 'string' && (remoteData as any).localUrl.startsWith('blob:')) {
+        if (
+          typeof (remoteData as any).localUrl === "string" &&
+          (remoteData as any).localUrl.startsWith("blob:")
+        ) {
           (remoteData as any).localUrl = null;
         }
       }
 
       // フォルダの場合、循環参照をチェックして防止
-      if (change.type === 'folder') {
-        const parentId = remoteData.parentFolderId ?? remoteData.parent_folder_id ?? null;
+      if (change.type === "folder") {
+        const parentId =
+          remoteData.parentFolderId ?? remoteData.parent_folder_id ?? null;
         if (this.diffEngine.detectCycle(change.id, parentId, allFolders)) {
-          this.telemetry.log('error', 'Circular reference detected during applyRemoteChanges, healing by setting parent to null', { 
-            folderId: change.id,
-            parentId 
-          });
+          this.telemetry.log(
+            "error",
+            "Circular reference detected during applyRemoteChanges, healing by setting parent to null",
+            {
+              folderId: change.id,
+              parentId,
+            },
+          );
           remoteData.parentFolderId = null;
           remoteData.parent_folder_id = null;
         }
       }
-      
+
       // IDが一致する既存データを取得
       const localData = await this.localDB.getItem(table, change.id);
 
@@ -309,25 +354,33 @@ export class SyncServiceV2 implements ISyncService {
         await this.localDB.upsert(table, remoteData, true); // skipSync=true でループ防止
       } else {
         // マージロジック
-        const { merged, conflict } = this.diffEngine.merge(localData, remoteData, 'server_wins');
-        
+        const { merged, conflict } = this.diffEngine.merge(
+          localData,
+          remoteData,
+          "server_wins",
+        );
+
         if (conflict) {
-          this.telemetry.log('warn', 'Conflict detected during applyRemoteChanges', { 
-            entity: change.type, 
-            id: change.id 
-          });
+          this.telemetry.log(
+            "warn",
+            "Conflict detected during applyRemoteChanges",
+            {
+              entity: change.type,
+              id: change.id,
+            },
+          );
           // 競合情報を記録（将来的なUI解決用）
-          await this.localDB.upsert('conflicts', {
+          await this.localDB.upsert("conflicts", {
             id: nanoid(),
             entityId: change.id,
             entityType: change.type,
             localData,
             remoteData,
             resolved: false,
-            occurredAt: new Date()
+            occurredAt: new Date(),
           });
         }
-        
+
         // ローカルDBを更新
         await this.localDB.upsert(table, merged, true); // skipSync=true でループ防止
       }
@@ -348,28 +401,28 @@ export class SyncServiceV2 implements ISyncService {
    * ※ ローカルにのみ存在する変更は失われる可能性があります。
    */
   async forceFullResync(): Promise<void> {
-    this.telemetry.log('warn', 'Force full resync initiated');
-    
+    this.telemetry.log("warn", "Force full resync initiated");
+
     // セキュリティイベント: 競合過多として記録
-    await this.securityMonitor.logEvent('SYNC_CONFLICT_EXCESS');
+    await this.securityMonitor.logEvent("SYNC_CONFLICT_EXCESS");
 
     // フォールバックカウントを記録
     this.fallbackCount++;
-    this.telemetry.recordMetric('sync_fallback_count', this.fallbackCount);
-    
+    this.telemetry.recordMetric("sync_fallback_count", this.fallbackCount);
+
     try {
       // 1. クラウドから全データを取得 (since=0)
       const diff = await this.cloudAdapter.pullDiff(0);
-      
-      this.telemetry.log('info', 'Pulling all data for resync', { 
-        changesCount: diff.changes.length 
+
+      this.telemetry.log("info", "Pulling all data for resync", {
+        changesCount: diff.changes.length,
       });
 
       // 2. ローカルDBをトランザクション内で更新
       // 主なエンティティをリセットしてクラウドデータで埋める
-      const tables = ['folders', 'cards'];
-      
-      await this.localDB.transaction('rw', tables, async () => {
+      const tables = ["folders", "cards"];
+
+      await this.localDB.transaction("rw", tables, async () => {
         // すべてのデータを一旦削除（ソフトデリートではなく物理削除して再構築）
         for (const table of tables) {
           await (this.localDB as any)[table].clear();
@@ -388,16 +441,19 @@ export class SyncServiceV2 implements ISyncService {
       });
 
       // 3. 同期時刻を更新 (次回の差分同期はここから始まる)
-// ✅ syncMetadata を直に触ると起点がズレて差分同期が壊れやすいので、既存ルートに統一する
-if (diff.serverTime) {
-  await this.localDB.updateLastSyncTime(this.userId, new Date(diff.serverTime));
-} else {
-  await this.localDB.updateLastSyncTime(this.userId, new Date());
-}
+      // ✅ syncMetadata を直に触ると起点がズレて差分同期が壊れやすいので、既存ルートに統一する
+      if (diff.serverTime) {
+        await this.localDB.updateLastSyncTime(
+          this.userId,
+          new Date(diff.serverTime),
+        );
+      } else {
+        await this.localDB.updateLastSyncTime(this.userId, new Date());
+      }
 
-this.telemetry.log('info', 'Full resync completed successfully');
+      this.telemetry.log("info", "Full resync completed successfully");
     } catch (error) {
-      this.telemetry.log('error', 'Full resync failed', {}, error as Error);
+      this.telemetry.log("error", "Full resync failed", {}, error as Error);
       throw error;
     }
   }
@@ -407,22 +463,30 @@ this.telemetry.log('info', 'Full resync completed successfully');
    * @spec 誤操作防止・監査ログのため、物理削除ではなく revoked ステータスに変更する
    */
   async removeDevice(deviceId: string): Promise<void> {
-    this.telemetry.log('info', 'Revoking device access', { deviceId });
+    this.telemetry.log("info", "Revoking device access", { deviceId });
     if (!firestoreDb) {
-      this.telemetry.log('error', 'Security Alert: firestoreDb is undefined during removeDevice');
+      this.telemetry.log(
+        "error",
+        "Security Alert: firestoreDb is undefined during removeDevice",
+      );
       return; // サイレントに失敗させるか、上位でハンドリング
     }
-    const deviceRef = doc(firestoreDb, `sync_metadata/${this.userId}/devices/${deviceId}`);
-    
+    const deviceRef = doc(
+      firestoreDb,
+      `sync_metadata/${this.userId}/devices/${deviceId}`,
+    );
+
     // 論理削除 (Revoked)
-    await updateDoc(deviceRef, { 
-      status: 'revoked',
+    await updateDoc(deviceRef, {
+      status: "revoked",
       revokedAt: Timestamp.now(),
-      isActive: false
+      isActive: false,
     });
-    
+
     // セキュリティイベント: デバイス解除
-    await this.securityMonitor.logEvent('DEVICE_REVOKED', { revokedDeviceId: deviceId });
+    await this.securityMonitor.logEvent("DEVICE_REVOKED", {
+      revokedDeviceId: deviceId,
+    });
   }
 
   /**
@@ -431,35 +495,49 @@ this.telemetry.log('info', 'Full resync completed successfully');
    */
   private async checkDeviceStatus(): Promise<void> {
     // クライアント側で自分のdeviceIdを取得 (localStorage)
-    const currentDeviceId = localStorage.getItem('deviceId');
+    const currentDeviceId = localStorage.getItem("deviceId");
     if (!currentDeviceId) return; // 初回起動時などはスキップ
 
     if (!firestoreDb) {
-      this.telemetry.log('error', 'Security Alert: firestoreDb is undefined during checkDeviceStatus');
+      this.telemetry.log(
+        "error",
+        "Security Alert: firestoreDb is undefined during checkDeviceStatus",
+      );
       // 初期化待ちの可能性もあるが、ここでは明確にエラーとして報告
-      throw new Error('Firebase Firestore is not initialized during security check.');
+      throw new Error(
+        "Firebase Firestore is not initialized during security check.",
+      );
     }
 
     try {
-      const deviceRef = doc(firestoreDb, `sync_metadata/${this.userId}/devices/${currentDeviceId}`);
+      const deviceRef = doc(
+        firestoreDb,
+        `sync_metadata/${this.userId}/devices/${currentDeviceId}`,
+      );
       const snapshot = await getDoc(deviceRef);
-      
+
       if (snapshot.exists()) {
         const data = snapshot.data();
-        if (data.status === 'revoked') {
+        if (data.status === "revoked") {
           const msg = `Device ${currentDeviceId} has been revoked access.`;
-          this.telemetry.log('error', 'Security Alert: Access attempt from revoked device', { deviceId: currentDeviceId });
-          
+          this.telemetry.log(
+            "error",
+            "Security Alert: Access attempt from revoked device",
+            { deviceId: currentDeviceId },
+          );
+
           // セキュリティイベント: アクセス拒否
-          await this.securityMonitor.logEvent('ACCESS_DENIED_REVOKED');
-          
-          throw new Error('DEVICE_REVOKED: This device has been removed from the account.');
+          await this.securityMonitor.logEvent("ACCESS_DENIED_REVOKED");
+
+          throw new Error(
+            "DEVICE_REVOKED: This device has been removed from the account.",
+          );
         }
       }
     } catch (error: unknown) {
       // ネットワークやパーミッション起因のエラーもACCESS_DENIED扱いすべきか検討が必要だが、
       // ここでは明示的なRevokeエラーのみを扱う。
-      if (error.message?.includes('DEVICE_REVOKED')) {
+      if (error.message?.includes("DEVICE_REVOKED")) {
         throw error;
       }
       // ネットワークエラー等はここでは無視（Syncそのものの失敗として扱う）
@@ -470,12 +548,17 @@ this.telemetry.log('info', 'Full resync completed successfully');
    * デバイス名を更新
    */
   async updateDeviceName(deviceId: string, newName: string): Promise<void> {
-    this.telemetry.log('info', 'Updating device name', { deviceId, newName });
+    this.telemetry.log("info", "Updating device name", { deviceId, newName });
     if (!firestoreDb) {
-      console.warn('[SyncServiceV2] firestoreDb is not initialized. Skipping updateDeviceName.');
+      console.warn(
+        "[SyncServiceV2] firestoreDb is not initialized. Skipping updateDeviceName.",
+      );
       return;
     }
-    const deviceRef = doc(firestoreDb, `sync_metadata/${this.userId}/devices/${deviceId}`);
+    const deviceRef = doc(
+      firestoreDb,
+      `sync_metadata/${this.userId}/devices/${deviceId}`,
+    );
     await updateDoc(deviceRef, { deviceName: newName });
   }
 
@@ -484,23 +567,25 @@ this.telemetry.log('info', 'Full resync completed successfully');
    * ※ ここでは「ゴミ掃除」の意味合いが強いため、古いセッションは物理削除する
    */
   async cleanupInactiveDevices(): Promise<number> {
-    this.telemetry.log('info', 'Cleaning up inactive devices');
+    this.telemetry.log("info", "Cleaning up inactive devices");
     if (!firestoreDb) {
-      console.warn('[SyncServiceV2] firestoreDb is not initialized. Skipping cleanup.');
+      console.warn(
+        "[SyncServiceV2] firestoreDb is not initialized. Skipping cleanup.",
+      );
       return 0;
     }
     const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
     const q = query(
       collection(firestoreDb, `sync_metadata/${this.userId}/devices`),
-      where('lastSyncTime', '<', Timestamp.fromDate(sixtyDaysAgo))
+      where("lastSyncTime", "<", Timestamp.fromDate(sixtyDaysAgo)),
     );
-    
+
     const snapshot = await getDocs(q);
     let count = 0;
     for (const doc of snapshot.docs) {
       // Revokedデバイスは証跡として残すため、ここでは削除しない（statusチェックを入れる）
       const data = doc.data();
-      if (data.status === 'revoked') continue;
+      if (data.status === "revoked") continue;
 
       await deleteDoc(doc.ref);
       count++;
@@ -516,7 +601,7 @@ this.telemetry.log('info', 'Full resync completed successfully');
       successRate: 100,
       avgDuration: 0,
       errorRate: 0,
-      totalSyncs: 0
+      totalSyncs: 0,
     };
   }
 
@@ -534,7 +619,7 @@ this.telemetry.log('info', 'Full resync completed successfully');
     return {
       autoSync: true,
       intervalMinutes: 30,
-      wifiOnly: false
+      wifiOnly: false,
     };
   }
 
@@ -542,21 +627,27 @@ this.telemetry.log('info', 'Full resync completed successfully');
    * フル同期実行 (Syncを呼び出す)
    */
   async performFullSync(): Promise<void> {
-    return this.sync('force_resync');
+    return this.sync("force_resync");
   }
 
   /**
    * キュー処理実行 (Syncを呼び出す)
    */
   async processQueue(): Promise<{ processed: number; errors: unknown[] }> {
-    await this.sync('background');
+    await this.sync("background");
     return { processed: 0, errors: [] };
   }
 
   /**
    * セキュリティ状態の監視開始 for AuthContext
    */
-  monitorSecurity(callback: (state: { isLocked: boolean; requires2FA: boolean; alerts: unknown[] }) => void): () => void {
+  monitorSecurity(
+    callback: (state: {
+      isLocked: boolean;
+      requires2FA: boolean;
+      alerts: unknown[];
+    }) => void,
+  ): () => void {
     this.securityMonitor.startMonitoring(callback);
     return () => this.securityMonitor.stopMonitoring();
   }

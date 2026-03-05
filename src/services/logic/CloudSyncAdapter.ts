@@ -1,5 +1,5 @@
-import type { ICloudSyncAdapter } from '../interfaces/ISyncService';
-import { firestoreDb } from '../firebase';
+import type { ICloudSyncAdapter } from "../interfaces/ISyncService";
+import { firestoreDb } from "../firebase";
 import {
   collection,
   query,
@@ -11,10 +11,10 @@ import {
   doc,
   getDoc,
   Timestamp,
-} from 'firebase/firestore';
-import * as Firestore from 'firebase/firestore';
-import { sanitizeBlobUrlsDeep } from '@/utils/blobUrlSanitizer';
-import { sanitizeForLog } from '@/utils/logSanitizer';
+} from "firebase/firestore";
+import * as Firestore from "firebase/firestore";
+import { sanitizeBlobUrlsDeep } from "@/utils/blobUrlSanitizer";
+import { sanitizeForLog } from "@/utils/logSanitizer";
 
 /**
  * undefined は Firestore に投げた瞬間に爆発するので、深い階層まで除去する。
@@ -32,7 +32,7 @@ function deepStripUndefined(input: unknown): unknown {
     return input.map(deepStripUndefined).filter((v) => v !== undefined);
   }
 
-  if (typeof input === 'object') {
+  if (typeof input === "object") {
     const out: unknown = {};
     for (const [k, v] of Object.entries(input)) {
       const cleaned = deepStripUndefined(v);
@@ -50,14 +50,14 @@ function deepStripUndefined(input: unknown): unknown {
  */
 function cloudUpdatedAt(): unknown {
   const fn = (Firestore as any).serverTimestamp;
-  if (typeof fn === 'function') return fn();
+  if (typeof fn === "function") return fn();
   return Timestamp.now();
 }
 
 const COLLECTION_BY_TYPE: Record<string, string> = {
-  card: 'cards',
-  folder: 'folders',
-  userSetting: 'userSettings',
+  card: "cards",
+  folder: "folders",
+  userSetting: "userSettings",
 };
 
 /**
@@ -97,8 +97,10 @@ function chunkChangesBySize(changes: unknown[]): unknown[][] {
     const docBytes = estimateBytes(ch?.data ?? {});
     const extra = docBytes + 512;
 
-    const wouldExceedBytes = current.length > 0 && bytes + extra > MAX_BATCH_BYTES;
-    const wouldExceedOps = current.length > 0 && current.length + 1 > MAX_BATCH_OPS;
+    const wouldExceedBytes =
+      current.length > 0 && bytes + extra > MAX_BATCH_BYTES;
+    const wouldExceedOps =
+      current.length > 0 && current.length + 1 > MAX_BATCH_OPS;
 
     if (wouldExceedBytes || wouldExceedOps) {
       chunks.push(current);
@@ -138,29 +140,38 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
     const sanitized = sanitizeBlobUrlsDeep(stripped);
     if (sanitized.changed) {
       console.warn(
-        '[CloudSyncAdapter] sanitize_blob_url_from_cloud',
+        "[CloudSyncAdapter] sanitize_blob_url_from_cloud",
         sanitizeForLog({
           type,
           id: data?.id,
           fixes: sanitized.fixes,
-        })
+        }),
       );
     }
     return sanitized.value;
   }
 
-  async pullDiff(since: number): Promise<{ changes: unknown[]; serverTime: number }> {
-    console.log('🔄 [CloudSyncAdapter] pullDiff START', { since, userId: this.userId });
+  async pullDiff(
+    since: number,
+  ): Promise<{ changes: unknown[]; serverTime: number }> {
+    console.log("🔄 [CloudSyncAdapter] pullDiff START", {
+      since,
+      userId: this.userId,
+    });
     const changes: unknown[] = [];
 
     if (!firestoreDb) {
-      console.warn('⚠️ [CloudSyncAdapter] firestoreDb is not initialized. Skipping pullDiff.');
+      console.warn(
+        "⚠️ [CloudSyncAdapter] firestoreDb is not initialized. Skipping pullDiff.",
+      );
       return { changes: [], serverTime: Date.now() };
     }
 
     try {
       const sinceTimestamp = Timestamp.fromMillis(since);
-      const startAfterFn = (Firestore as any).startAfter as undefined | ((snapshot: unknown) => any);
+      const startAfterFn = (Firestore as any).startAfter as
+        | undefined
+        | ((snapshot: unknown) => any);
 
       // cards
       {
@@ -171,20 +182,25 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
 
         while (true) {
           const constraints: unknown[] = [
-            where('updatedAt', '>', sinceTimestamp),
-            orderBy('updatedAt', 'asc'),
+            where("updatedAt", ">", sinceTimestamp),
+            orderBy("updatedAt", "asc"),
             limit(PAGE_SIZE),
           ];
 
           // typings に startAfter が無い環境でも動くよう any 経由で呼ぶ
-          if (startAfterFn && lastDoc) constraints.splice(2, 0, startAfterFn(lastDoc));
+          if (startAfterFn && lastDoc)
+            constraints.splice(2, 0, startAfterFn(lastDoc));
 
           const qy = query(ref, ...constraints);
           const snap = await getDocs(qy);
           total += snap.size;
 
           snap.forEach((d) => {
-            changes.push({ type: 'card', id: d.id, data: this.sanitizeFromCloud('card', d.data()) });
+            changes.push({
+              type: "card",
+              id: d.id,
+              data: this.sanitizeFromCloud("card", d.data()),
+            });
           });
 
           // startAfter が無い環境では1ページで止める（現状より悪化させない）
@@ -204,19 +220,24 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
 
         while (true) {
           const constraints: unknown[] = [
-            where('updatedAt', '>', sinceTimestamp),
-            orderBy('updatedAt', 'asc'),
+            where("updatedAt", ">", sinceTimestamp),
+            orderBy("updatedAt", "asc"),
             limit(PAGE_SIZE),
           ];
 
-          if (startAfterFn && lastDoc) constraints.splice(2, 0, startAfterFn(lastDoc));
+          if (startAfterFn && lastDoc)
+            constraints.splice(2, 0, startAfterFn(lastDoc));
 
           const qy = query(ref, ...constraints);
           const snap = await getDocs(qy);
           total += snap.size;
 
           snap.forEach((d) => {
-            changes.push({ type: 'folder', id: d.id, data: this.sanitizeFromCloud('folder', d.data()) });
+            changes.push({
+              type: "folder",
+              id: d.id,
+              data: this.sanitizeFromCloud("folder", d.data()),
+            });
           });
 
           if (!startAfterFn || snap.empty || snap.size < PAGE_SIZE) break;
@@ -228,40 +249,51 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
 
       // userSettings (top-level document)
       {
-        const settingsRef = doc(firestoreDb, 'userSettings', this.userId);
+        const settingsRef = doc(firestoreDb, "userSettings", this.userId);
         const snap = await getDoc(settingsRef);
         if (snap.exists()) {
-          const data: unknown = this.sanitizeFromCloud('userSetting', snap.data());
+          const data: unknown = this.sanitizeFromCloud(
+            "userSetting",
+            snap.data(),
+          );
           const updatedAt =
             data?.updatedAt?.toMillis?.() ??
             data?.updatedAt?.getTime?.() ??
             (data?.updatedAt instanceof Date ? data.updatedAt.getTime() : 0);
           if (!since || updatedAt > since) {
-            changes.push({ type: 'userSetting', id: snap.id, data });
+            changes.push({ type: "userSetting", id: snap.id, data });
           }
         }
       }
 
-      console.log(`🔄 [CloudSyncAdapter] pullDiff SUCCESS. Total changes: ${changes.length}`);
+      console.log(
+        `🔄 [CloudSyncAdapter] pullDiff SUCCESS. Total changes: ${changes.length}`,
+      );
       return { changes, serverTime: Date.now() };
     } catch (error) {
-      console.error('❌ [CloudSyncAdapter] pullDiff ERROR:', error);
+      console.error("❌ [CloudSyncAdapter] pullDiff ERROR:", error);
       throw error;
     }
   }
 
-  async pushBatch(changes: unknown[]): Promise<{ successIds: string[]; failedIds: string[]; error?: unknown }> {
-    console.log(`📤 [CloudSyncAdapter] pushBatch START. Count: ${changes.length}`);
+  async pushBatch(
+    changes: unknown[],
+  ): Promise<{ successIds: string[]; failedIds: string[]; error?: unknown }> {
+    console.log(
+      `📤 [CloudSyncAdapter] pushBatch START. Count: ${changes.length}`,
+    );
     const successIds: string[] = [];
     const failedIds: string[] = [];
 
     try {
       if (!firestoreDb) {
-        console.error('❌ [CloudSyncAdapter] firestoreDb is null during pushBatch');
+        console.error(
+          "❌ [CloudSyncAdapter] firestoreDb is null during pushBatch",
+        );
         return {
           successIds: [],
           failedIds: changes.map((c) => c.id),
-          error: new Error('Firestore not initialized'),
+          error: new Error("Firestore not initialized"),
         };
       }
 
@@ -278,15 +310,17 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
           console.log(`   - Adding to batch: ${col}/${id}`);
 
           const docRef =
-            type === 'userSetting'
-              ? doc(firestoreDb, 'userSettings', id || this.userId)
+            type === "userSetting"
+              ? doc(firestoreDb, "userSettings", id || this.userId)
               : doc(firestoreDb, `users/${this.userId}/${col}`, id);
 
           const sanitized = this.sanitizeForCloud(type, data);
 
           // sanitized が null とか来たら普通に事故るので最低限の防御
-          if (!sanitized || typeof sanitized !== 'object') {
-            throw new Error(`Invalid payload for ${type}/${id}: expected object`);
+          if (!sanitized || typeof sanitized !== "object") {
+            throw new Error(
+              `Invalid payload for ${type}/${id}: expected object`,
+            );
           }
 
           batch.set(
@@ -295,7 +329,7 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
               ...sanitized,
               updatedAt: cloudUpdatedAt(),
             },
-            { merge: true }
+            { merge: true },
           );
 
           chunkIds.push(id);
@@ -306,7 +340,10 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
           await batch.commit();
           successIds.push(...chunkIds);
         } catch (error) {
-          console.error('❌ [CloudSyncAdapter] pushBatch chunk commit ERROR:', error);
+          console.error(
+            "❌ [CloudSyncAdapter] pushBatch chunk commit ERROR:",
+            error,
+          );
           failedIds.push(...chunkIds);
           if (!firstError) firstError = error;
           // 次のチャンクへ（成功分は残す）
@@ -317,10 +354,10 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
         return { successIds, failedIds, error: firstError };
       }
 
-      console.log('📤 [CloudSyncAdapter] pushBatch SUCCESS');
+      console.log("📤 [CloudSyncAdapter] pushBatch SUCCESS");
       return { successIds, failedIds };
     } catch (error) {
-      console.error('❌ [CloudSyncAdapter] pushBatch ERROR:', error);
+      console.error("❌ [CloudSyncAdapter] pushBatch ERROR:", error);
       return {
         successIds: [],
         failedIds: changes.map((c) => c.id),
@@ -333,13 +370,23 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
     const results: unknown[] = [];
 
     for (const id of entityIds) {
-      if (!firestoreDb) throw new Error('Firebase Firestore is not initialized.');
+      if (!firestoreDb)
+        throw new Error("Firebase Firestore is not initialized.");
 
       // card
       {
-        const snap = await getDocs(query(collection(firestoreDb, `users/${this.userId}/cards`), where('id', '==', id)));
+        const snap = await getDocs(
+          query(
+            collection(firestoreDb, `users/${this.userId}/cards`),
+            where("id", "==", id),
+          ),
+        );
         if (!snap.empty) {
-          results.push({ type: 'card', id, data: this.sanitizeFromCloud('card', snap.docs[0].data()) });
+          results.push({
+            type: "card",
+            id,
+            data: this.sanitizeFromCloud("card", snap.docs[0].data()),
+          });
           continue;
         }
       }
@@ -347,22 +394,31 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
       // folder
       {
         const snap = await getDocs(
-          query(collection(firestoreDb, `users/${this.userId}/folders`), where('id', '==', id))
+          query(
+            collection(firestoreDb, `users/${this.userId}/folders`),
+            where("id", "==", id),
+          ),
         );
         if (!snap.empty) {
-          results.push({ type: 'folder', id, data: this.sanitizeFromCloud('folder', snap.docs[0].data()) });
+          results.push({
+            type: "folder",
+            id,
+            data: this.sanitizeFromCloud("folder", snap.docs[0].data()),
+          });
           continue;
         }
       }
 
       // userSetting
       {
-        const snap = await getDoc(doc(firestoreDb, 'userSettings', this.userId));
+        const snap = await getDoc(
+          doc(firestoreDb, "userSettings", this.userId),
+        );
         if (snap.exists()) {
           results.push({
-            type: 'userSetting',
+            type: "userSetting",
             id: this.userId,
-            data: this.sanitizeFromCloud('userSetting', snap.data()),
+            data: this.sanitizeFromCloud("userSetting", snap.data()),
           });
         }
       }

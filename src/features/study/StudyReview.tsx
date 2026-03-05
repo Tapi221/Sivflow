@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { CardCarousel } from '@/features/study/CardCarousel';
-import { VerticalCardPager } from '@/features/review/VerticalCardPager';
-import { useIsDesktop } from '@/hooks/useIsDesktop';
-import StudyCard from '@/features/study/StudyCard';
-import type { Card } from '@/types';
+import React, { useEffect, useState } from "react";
+import { CardCarousel } from "@/features/study/CardCarousel";
+import { VerticalCardPager } from "@/features/review/VerticalCardPager";
+import { useIsDesktop } from "@/hooks/useIsDesktop";
+import StudyCard from "@/features/study/StudyCard";
+import type { Card } from "@/types";
 
 type Props = {
   cards: Card[];
@@ -44,7 +44,7 @@ export function StudyReview({
           // StudyMode はセッションが index を管理するため IO では変更しない
           onActiveIndexChange={() => {}}
           onFlip={() => setFlipTrigger((t) => t + 1)}
-          getKey={(card) => (card as { id?: string }).id ?? ''}
+          getKey={(card) => (card as { id?: string }).id ?? ""}
           renderCard={(card, idx, isActive) => (
             <StudyCard
               card={card}

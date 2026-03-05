@@ -1,12 +1,23 @@
-import React from 'react';
-import { ChevronRight, ChevronDown, FolderIcon, FolderOutlineIcon, MoreVertical } from '@/ui/icons';
-import { Droppable } from '@hello-pangea/dnd';
-import { cn } from '@/lib/utils';
-import { ContextMenu } from '../../ContextMenu';
-import { DnDHelpers } from '@/hooks/useFolderDnD';
-import { getParentFolderId, normalizeFolderId, ROOT_FOLDER_ID, type FolderTreeNode } from '../model/utils';
-import { ExplorerRow } from './ExplorerRow';
-import { ExplorerRowContent } from './ExplorerRowContent';
+import React from "react";
+import {
+  ChevronRight,
+  ChevronDown,
+  FolderIcon,
+  FolderOutlineIcon,
+  MoreVertical,
+} from "@/ui/icons";
+import { Droppable } from "@hello-pangea/dnd";
+import { cn } from "@/lib/utils";
+import { ContextMenu } from "../../ContextMenu";
+import { DnDHelpers } from "@/hooks/useFolderDnD";
+import {
+  getParentFolderId,
+  normalizeFolderId,
+  ROOT_FOLDER_ID,
+  type FolderTreeNode,
+} from "../model/utils";
+import { ExplorerRow } from "./ExplorerRow";
+import { ExplorerRowContent } from "./ExplorerRowContent";
 
 interface FolderRowProps {
   folder: FolderTreeNode;
@@ -25,7 +36,7 @@ interface FolderRowProps {
   onNavigate?: () => void;
   handleCreateFolderAction: (parentId: string) => Promise<void>;
   handleCreateCardAction: (parentId: string) => Promise<void>;
-  handleDelete: (id: string, type: 'folder') => Promise<void>;
+  handleDelete: (id: string, type: "folder") => Promise<void>;
   handleRenameConfirm: () => Promise<void>;
   renameCancelledRef: React.MutableRefObject<boolean>;
   isPinned: boolean;
@@ -91,14 +102,15 @@ export const FolderRow: React.FC<FolderRowProps> = ({
   children,
 }) => {
   const folderId = folder.id || (folder as any).folderId;
-  const folderName = folder.folderName || folder.folder_name || '無題のフォルダ';
+  const folderName =
+    folder.folderName || folder.folder_name || "無題のフォルダ";
   const isOptimisticFolder = Boolean(folder.__optimistic);
   const hasContextMenu = !isOptimisticFolder && hasUpdateOrDelete;
   const parentFolderId = normalizeFolderId(getParentFolderId(folder));
   const isTopLevelFolder = parentFolderId === ROOT_FOLDER_ID;
   const FolderGlyph = isTopLevelFolder ? FolderIcon : FolderOutlineIcon;
   const nestedToggleOffsetStyle = !isTopLevelFolder
-    ? ({ marginLeft: 'calc(var(--tree-indent-px) * -0.5)' } as const)
+    ? ({ marginLeft: "calc(var(--tree-indent-px) * -0.5)" } as const)
     : undefined;
 
   return (
@@ -114,7 +126,8 @@ export const FolderRow: React.FC<FolderRowProps> = ({
             {...provided.droppableProps}
             className={cn(
               "relative",
-              snapshot.isDraggingOver && "bg-blue-50/50 ring-1 ring-blue-200/50 rounded-sm"
+              snapshot.isDraggingOver &&
+                "bg-blue-50/50 ring-1 ring-blue-200/50 rounded-sm",
             )}
           >
             <ExplorerRow
@@ -125,7 +138,7 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                 rowBaseClassName,
                 snapshot.isDraggingOver && "bg-blue-100 ring-1 ring-blue-300",
                 isFileDraggingOver && "bg-blue-50 ring-1 ring-blue-400",
-                "group pr-8"
+                "group pr-8",
               )}
               onClick={onSelect}
               onDragEnterCapture={onDragEnterCapture}
@@ -147,14 +160,14 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                       <ChevronDown
                         className={cn(
                           "sidebar-icon w-4 h-4 text-[#6E6E80] group-hover:text-[#202123]",
-                          isSelected && "text-primary-700"
+                          isSelected && "text-primary-700",
                         )}
                       />
                     ) : (
                       <ChevronRight
                         className={cn(
                           "sidebar-icon w-4 h-4 text-[#6E6E80] group-hover:text-[#202123]",
-                          isSelected && "text-primary-700"
+                          isSelected && "text-primary-700",
                         )}
                       />
                     )
@@ -164,7 +177,7 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                 <FolderGlyph
                   className={cn(
                     "sidebar-icon w-4 h-4 flex-shrink-0 mr-0 text-[#6E6E80] group-hover:text-[#202123]",
-                    isSelected && "text-primary-700"
+                    isSelected && "text-primary-700",
                   )}
                 />
 
@@ -179,11 +192,11 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                       editingNameRef.current = e.target.value;
                     }}
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
+                      if (e.key === "Enter") {
                         e.preventDefault();
                         e.currentTarget.blur();
                       }
-                      if (e.key === 'Escape') {
+                      if (e.key === "Escape") {
                         e.preventDefault();
                         e.stopPropagation();
                         renameCancelledRef.current = true;
@@ -198,8 +211,17 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                     <ExplorerRowContent
                       left={null}
                       title={folderName}
-                      titleClassName={cn("lining-nums tabular-nums", isSelected ? "text-primary-700 font-medium" : "text-[#202123]")}
-                      right={isFiltering && matchCount === 0 ? <span className="text-xs text-[#6E6E80]">(0)</span> : null}
+                      titleClassName={cn(
+                        "lining-nums tabular-nums",
+                        isSelected
+                          ? "text-primary-700 font-medium"
+                          : "text-[#202123]",
+                      )}
+                      right={
+                        isFiltering && matchCount === 0 ? (
+                          <span className="text-xs text-[#6E6E80]">(0)</span>
+                        ) : null
+                      }
                     />
                   </div>
                 )}
@@ -220,42 +242,42 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                   </button>
 
                   {hasContextMenu && (
-                  <ContextMenu
-                    open={menuOpen}
-                    onOpenChange={onMenuOpenChange}
-                    type="folder"
-                    onCreateSubfolder={() => void handleCreateFolderAction(folderId)}
-                    onCreateCard={() => void handleCreateCardAction(folderId)}
-                    onRename={() => {
-                      setEditingId(folderId);
-                      setEditingName(folderName);
-                    }}
-                    onDelete={() => handleDelete(folderId, 'folder')}
-                    onBulkTag={onBulkTag}
-                    isPinned={isPinned}
-                    onTogglePin={handleTogglePin}
-                  >
-                    <button
-                      type="button"
-                      aria-label="フォルダメニューを開く"
-                      className={cn(
-                        "sidebar-action h-6 w-6 p-0 grid place-items-center rounded-md hover:bg-slate-200 text-[#6E6E80] hover:text-[#202123] outline-none pointer-events-auto transition-all shrink-0",
-                        "opacity-0 group-hover:opacity-100",
-                        (isSelected || menuOpen) && "opacity-100"
-                      )}
-                      onClick={(e) => e.stopPropagation()}
+                    <ContextMenu
+                      open={menuOpen}
+                      onOpenChange={onMenuOpenChange}
+                      type="folder"
+                      onCreateSubfolder={() =>
+                        void handleCreateFolderAction(folderId)
+                      }
+                      onCreateCard={() => void handleCreateCardAction(folderId)}
+                      onRename={() => {
+                        setEditingId(folderId);
+                        setEditingName(folderName);
+                      }}
+                      onDelete={() => handleDelete(folderId, "folder")}
+                      onBulkTag={onBulkTag}
+                      isPinned={isPinned}
+                      onTogglePin={handleTogglePin}
                     >
-                      <MoreVertical className="sidebar-icon h-4 w-4" />
-                    </button>
-                  </ContextMenu>
+                      <button
+                        type="button"
+                        aria-label="フォルダメニューを開く"
+                        className={cn(
+                          "sidebar-action h-6 w-6 p-0 grid place-items-center rounded-md hover:bg-slate-200 text-[#6E6E80] hover:text-[#202123] outline-none pointer-events-auto transition-all shrink-0",
+                          "opacity-0 group-hover:opacity-100",
+                          (isSelected || menuOpen) && "opacity-100",
+                        )}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <MoreVertical className="sidebar-icon h-4 w-4" />
+                      </button>
+                    </ContextMenu>
                   )}
                 </div>
               )}
             </ExplorerRow>
 
-            <div className="h-0 overflow-hidden">
-              {provided.placeholder}
-            </div>
+            <div className="h-0 overflow-hidden">{provided.placeholder}</div>
           </div>
         )}
       </Droppable>
@@ -264,4 +286,3 @@ export const FolderRow: React.FC<FolderRowProps> = ({
     </div>
   );
 };
-

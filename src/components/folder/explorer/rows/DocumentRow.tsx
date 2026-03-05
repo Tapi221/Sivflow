@@ -1,15 +1,15 @@
-import React from 'react';
-import { FileText, MoreVertical } from '@/ui/icons';
-import { cn } from '@/lib/utils';
-import { DocumentRowMenu } from '../../DocumentRowMenu';
-import type { Card, DocumentItem, FolderTreeNode } from '../model/utils';
-import { getExplorerRowStyle } from './shared';
+import React from "react";
+import { FileText, MoreVertical } from "@/ui/icons";
+import { cn } from "@/lib/utils";
+import { DocumentRowMenu } from "../../DocumentRowMenu";
+import type { Card, DocumentItem, FolderTreeNode } from "../model/utils";
+import { getExplorerRowStyle } from "./shared";
 
 interface DocumentRowProps {
   doc: DocumentItem;
   depth: number;
   isSelected: boolean;
-  onSelect: (item: { type: 'document'; id: string }) => void;
+  onSelect: (item: { type: "document"; id: string }) => void;
   // 以下、ContextMenu 用のプロップス
   treeFolders: unknown[];
   treeCards: unknown[];
@@ -42,31 +42,29 @@ export const DocumentRow: React.FC<DocumentRowProps> = ({
   onMenuOpenChange,
 }) => {
   const docId = doc.id;
-  const title = doc.title || '無題のドキュメント';
+  const title = doc.title || "無題のドキュメント";
 
   return (
     <div
       ref={(node) => setRowRef(docId, node)}
-      className={cn(
-        rowBaseClassName,
-        "pr-9",
-        "cursor-pointer"
-      )}
-      data-selected={isSelected ? 'true' : undefined}
+      className={cn(rowBaseClassName, "pr-9", "cursor-pointer")}
+      data-selected={isSelected ? "true" : undefined}
       style={getExplorerRowStyle(depth)}
-      onClick={() => onSelect({ type: 'document', id: docId })}
+      onClick={() => onSelect({ type: "document", id: docId })}
     >
       <div className="flex-1 flex items-center min-w-0 h-full pr-1">
         <FileText
           className={cn(
             "sidebar-icon w-4 h-4 mr-2 shrink-0 text-[#6E6E80] group-hover:text-[#202123]",
-            isSelected && "text-primary-700"
+            isSelected && "text-primary-700",
           )}
         />
-        <span className={cn(
-          "sidebar-title text-sm truncate lining-nums tabular-nums",
-          isSelected ? "text-primary-700 font-medium" : "text-[#202123]"
-        )}>
+        <span
+          className={cn(
+            "sidebar-title text-sm truncate lining-nums tabular-nums",
+            isSelected ? "text-primary-700 font-medium" : "text-[#202123]",
+          )}
+        >
           {title}
         </span>
         {doc.sizeBytes && (
@@ -94,7 +92,7 @@ export const DocumentRow: React.FC<DocumentRowProps> = ({
             className={cn(
               "sidebar-action h-6 w-6 p-0 grid place-items-center rounded-md hover:bg-slate-200 text-[#6E6E80] hover:text-[#202123] outline-none pointer-events-auto transition-all shrink-0",
               "opacity-0 group-hover:opacity-100",
-              (isSelected || menuOpen) && "opacity-100"
+              (isSelected || menuOpen) && "opacity-100",
             )}
             onClick={(e) => e.stopPropagation()}
             onPointerDown={(e) => e.stopPropagation()}

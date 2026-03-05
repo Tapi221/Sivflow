@@ -1,11 +1,17 @@
 /**
  * ExplorerTabs - Explorerタブ切替UIコンポーネント
  */
-import React from 'react';
-import { Folder as FolderIcon, Clock, Pin, FolderPlus, PanelsTopLeft } from '@/ui/icons';
-import { cn } from '@/lib/utils';
-import type { ExplorerTab } from '@/hooks/useExplorerStore';
-import { TagFilterPopover } from './TagFilterPopover';
+import React from "react";
+import {
+  Folder as FolderIcon,
+  Clock,
+  Pin,
+  FolderPlus,
+  PanelsTopLeft,
+} from "@/ui/icons";
+import { cn } from "@/lib/utils";
+import type { ExplorerTab } from "@/hooks/useExplorerStore";
+import { TagFilterPopover } from "./TagFilterPopover";
 
 interface ExplorerTabsProps {
   activeTab: ExplorerTab;
@@ -17,10 +23,10 @@ interface ExplorerTabsProps {
 
 // タブ定義
 const TABS: { id: ExplorerTab; label: string; icon: React.ElementType }[] = [
-  { id: 'pinned', label: 'ピン留め', icon: Pin },
-  { id: 'explorer', label: 'エクスプローラー', icon: FolderIcon },
-  { id: 'views', label: 'ビュー', icon: PanelsTopLeft },
-  { id: 'recent', label: '最近', icon: Clock },
+  { id: "pinned", label: "ピン留め", icon: Pin },
+  { id: "explorer", label: "エクスプローラー", icon: FolderIcon },
+  { id: "views", label: "ビュー", icon: PanelsTopLeft },
+  { id: "recent", label: "最近", icon: Clock },
 ];
 
 export function ExplorerTabs({
@@ -30,21 +36,25 @@ export function ExplorerTabs({
   onCreateRootFolder,
   showExplorerActions = false,
 }: ExplorerTabsProps) {
-  const shouldShowExplorerActions = showExplorerActions && activeTab === 'explorer';
+  const shouldShowExplorerActions =
+    showExplorerActions && activeTab === "explorer";
 
   return (
-    <div className={cn(
-      "flex items-center justify-between pr-2 h-9",
-      "border border-[#d7d9de] rounded-md",
-      "surface-panel-convex",
-      // 左上の固定ハンバーガーボタンと重ならないよう、全画面幅で左余白を確保する。
-      "pl-10"
-    )} style={{ backgroundColor: "var(--sidebar-bg)" }}>
+    <div
+      className={cn(
+        "flex items-center justify-between pr-2 h-9",
+        "border border-[#d7d9de] rounded-md",
+        "surface-panel-convex",
+        // 左上の固定ハンバーガーボタンと重ならないよう、全画面幅で左余白を確保する。
+        "pl-10",
+      )}
+      style={{ backgroundColor: "var(--sidebar-bg)" }}
+    >
       <div className="flex items-center flex-1 overflow-x-auto no-scrollbar">
-        {TABS.map(tab => {
+        {TABS.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
-          
+
           return (
             <button
               key={tab.id}
@@ -53,9 +63,7 @@ export function ExplorerTabs({
               className={cn(
                 "flex items-center justify-center px-2 py-1 text-xs font-medium transition-colors relative whitespace-nowrap",
                 "hover:text-primary-700",
-                isActive 
-                  ? "text-primary-700" 
-                  : "text-[#6E6E80]"
+                isActive ? "text-primary-700" : "text-[#6E6E80]",
               )}
             >
               <Icon className="w-4 h-4" />
@@ -69,29 +77,28 @@ export function ExplorerTabs({
           );
         })}
       </div>
-      
+
       {/* フィルタボタン (Explorerのみ表示) */}
       <div
         className={cn(
           "flex items-center gap-1 flex-shrink-0 overflow-hidden transition-all duration-200 ease-out",
           shouldShowExplorerActions
             ? "ml-1 pl-1 border-l border-slate-200 opacity-100 translate-x-0 max-w-[120px]"
-            : "ml-0 pl-0 border-l-0 opacity-0 translate-x-1 max-w-0 pointer-events-none"
+            : "ml-0 pl-0 border-l-0 opacity-0 translate-x-1 max-w-0 pointer-events-none",
         )}
         aria-hidden={!shouldShowExplorerActions}
       >
-          <button
-            type="button"
-            onClick={() => {
-              void onCreateRootFolder?.();
-            }}
-            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-[#6E6E80] transition-colors hover:bg-slate-100 hover:text-primary-700"
-          >
-            <FolderPlus className="w-4 h-4" />
-          </button>
-          <TagFilterPopover allTags={allTags} />
+        <button
+          type="button"
+          onClick={() => {
+            void onCreateRootFolder?.();
+          }}
+          className="inline-flex h-7 w-7 items-center justify-center rounded-md text-[#6E6E80] transition-colors hover:bg-slate-100 hover:text-primary-700"
+        >
+          <FolderPlus className="w-4 h-4" />
+        </button>
+        <TagFilterPopover allTags={allTags} />
       </div>
     </div>
   );
 }
-

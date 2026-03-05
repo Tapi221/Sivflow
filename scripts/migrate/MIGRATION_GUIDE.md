@@ -51,6 +51,7 @@ npx tsx scripts/migrate/migrateFirestoreToSubcollections.ts --dry-run --verbose
 ```
 
 **確認項目**:
+
 - ✅ 合計件数が想定通りか
 - ✅ userId が存在しないドキュメントがないか
 - ✅ 既にサブコレクションに存在するドキュメント数
@@ -60,6 +61,7 @@ npx tsx scripts/migrate/migrateFirestoreToSubcollections.ts --dry-run --verbose
 万が一のため、移行前にFirestoreをエクスポートします。
 
 #### Firebase Console からエクスポート:
+
 1. Firebase Console → **Firestore Database**
 2. 画面右上の **︙** → **データをエクスポート**
 3. エクスポート先（Cloud Storage バケット）を指定
@@ -67,6 +69,7 @@ npx tsx scripts/migrate/migrateFirestoreToSubcollections.ts --dry-run --verbose
 5. **エクスポート** をクリック
 
 #### または gcloud CLI を使用:
+
 ```powershell
 gcloud firestore export gs://[YOUR-BUCKET-NAME]/firestore-backup-$(Get-Date -Format "yyyyMMdd-HHmmss")
 ```
@@ -165,6 +168,7 @@ npx tsx scripts/migrate/migrateFirestoreToSubcollections.ts --verbose
 **原因**: `serviceAccountKey.json` が正しい場所にない
 
 **解決策**:
+
 ```powershell
 # ファイルの存在確認
 Test-Path .\serviceAccountKey.json
@@ -177,6 +181,7 @@ Test-Path .\serviceAccountKey.json
 **原因**: サービスアカウントにFirestoreの書き込み権限がない
 
 **解決策**:
+
 1. Firebase Console → **プロジェクトの設定** → **サービスアカウント**
 2. 使用中のサービスアカウントを確認
 3. IAMロールで `Cloud Datastore User` または `Editor` が付与されているか確認
@@ -186,6 +191,7 @@ Test-Path .\serviceAccountKey.json
 **原因**: データ整合性の問題（古いデータなど）
 
 **解決策**:
+
 ```powershell
 # 該当ドキュメントを手動で確認
 # Firebase Console で該当IDのドキュメントを開き、userIdフィールドを確認
@@ -198,6 +204,7 @@ Test-Path .\serviceAccountKey.json
 **チェック項目**:
 
 1. **Firestore Rules が更新されているか確認**:
+
    ```plaintext
    match /users/{userId} {
      match /folders/{id} { allow read, write: if isAuthenticated() && isOwner(userId); }
@@ -231,6 +238,7 @@ Test-Path .\serviceAccountKey.json
 ```
 
 または Firebase Console から手動削除:
+
 1. **Firestore Database** → `folders` コレクション
 2. 右クリック → **コレクションを削除**
 3. 同様に `cards` コレクションも削除
@@ -244,26 +252,27 @@ Test-Path .\serviceAccountKey.json
 ```diff
 - // フォルダ
 - match /folders/{folderId} {
--   allow read: if isAuthenticated() && 
+-   allow read: if isAuthenticated() &&
 -     (resource == null || resource.data.userId == request.auth.uid);
--   allow create: if isAuthenticated() && 
+-   allow create: if isAuthenticated() &&
 -     request.resource.data.userId == request.auth.uid;
--   allow update, delete: if isAuthenticated() && 
+-   allow update, delete: if isAuthenticated() &&
 -     resource.data.userId == request.auth.uid;
 - }
-- 
+-
 - // カード
 - match /cards/{cardId} {
--   allow read: if isAuthenticated() && 
+-   allow read: if isAuthenticated() &&
 -     (resource == null || resource.data.userId == request.auth.uid);
--   allow create: if isAuthenticated() && 
+-   allow create: if isAuthenticated() &&
 -     request.resource.data.userId == request.auth.uid;
--   allow update, delete: if isAuthenticated() && 
+-   allow update, delete: if isAuthenticated() &&
 -     resource.data.userId == request.auth.uid;
 - }
 ```
 
 更新後、デプロイ:
+
 ```powershell
 firebase deploy --only firestore:rules
 ```
@@ -282,12 +291,12 @@ firebase deploy
 
 ## 📊 想定される実行時間
 
-| データ量 | 実行時間（目安） |
-|---------|----------------|
-| 100件 | 5-10秒 |
-| 1,000件 | 30秒-1分 |
-| 10,000件 | 5-10分 |
-| 100,000件 | 30-60分 |
+| データ量  | 実行時間（目安） |
+| --------- | ---------------- |
+| 100件     | 5-10秒           |
+| 1,000件   | 30秒-1分         |
+| 10,000件  | 5-10分           |
+| 100,000件 | 30-60分          |
 
 実行時間はネットワーク速度とFirestoreのレート制限に依存します。
 

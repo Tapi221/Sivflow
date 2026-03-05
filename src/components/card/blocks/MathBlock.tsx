@@ -1,11 +1,11 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState } from "react";
 
-import { Sigma } from '@/ui/icons';
-import { BlockWrapper } from './BlockWrapper';
-import { MathBlockContent } from './MathBlockContent';
-import { MathEditorDialog } from './MathEditorDialog';
-import { cn } from '@/lib/utils';
-import type { MathBlockData } from '@/types';
+import { Sigma } from "@/ui/icons";
+import { BlockWrapper } from "./BlockWrapper";
+import { MathBlockContent } from "./MathBlockContent";
+import { MathEditorDialog } from "./MathEditorDialog";
+import { cn } from "@/lib/utils";
+import type { MathBlockData } from "@/types";
 
 const MAX_LATEX_LENGTH = 10000;
 
@@ -55,7 +55,7 @@ export const MathBlock: React.FC<MathBlockProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
 
-  const latex = data?.latex ?? '';
+  const latex = data?.latex ?? "";
 
   // KaTeX入力の変更ハンドラ
   const handleLatexChange = useCallback(
@@ -63,7 +63,9 @@ export const MathBlock: React.FC<MathBlockProps> = ({
       // 文字数制限チェック（超過分は切り詰めて反映）
       if (nextLatex.length > MAX_LATEX_LENGTH) {
         const truncated = nextLatex.slice(0, MAX_LATEX_LENGTH);
-        setError(`KaTeX文字列は最大 ${MAX_LATEX_LENGTH.toLocaleString()} 文字までです`);
+        setError(
+          `KaTeX文字列は最大 ${MAX_LATEX_LENGTH.toLocaleString()} 文字までです`,
+        );
         onChange({ ...data, latex: truncated });
         return;
       }
@@ -71,14 +73,14 @@ export const MathBlock: React.FC<MathBlockProps> = ({
       if (error) setError(null);
       onChange({ ...data, latex: nextLatex });
     },
-    [data, onChange, error]
+    [data, onChange, error],
   );
 
   return (
     <BlockWrapper
       onDelete={onDelete}
       onDuplicate={onDuplicate}
-      className={cn(latex.trim().length > 0 && 'border-transparent')}
+      className={cn(latex.trim().length > 0 && "border-transparent")}
       dragHandleProps={dragHandleProps}
       dragHandleClassName={dragHandleClassName}
       label="Math"
@@ -97,22 +99,22 @@ export const MathBlock: React.FC<MathBlockProps> = ({
       <div className="space-y-1.5 px-2 py-0.5">
         <div
           className={cn(
-            'cursor-text rounded-lg p-2 transition-colors',
-            'hover:bg-slate-50'
+            "cursor-text rounded-lg p-2 transition-colors",
+            "hover:bg-slate-50",
           )}
           role="button"
           tabIndex={0}
           aria-label="数式を編集"
           onClick={() => setIsEditorOpen(true)}
           onKeyDown={(event) => {
-            if (event.key !== 'Enter' && event.key !== ' ') return;
+            if (event.key !== "Enter" && event.key !== " ") return;
             event.preventDefault();
             setIsEditorOpen(true);
           }}
         >
           <MathBlockContent
             latex={latex}
-            displayMode={data.displayMode ?? 'block'}
+            displayMode={data.displayMode ?? "block"}
             showPlaceholder
             placeholder="数式を入力..."
           />
@@ -121,13 +123,14 @@ export const MathBlock: React.FC<MathBlockProps> = ({
         <div className="px-1">
           <span
             className={cn(
-              'text-[10px] tabular-nums',
+              "text-[10px] tabular-nums",
               latex.length >= MAX_LATEX_LENGTH
-                ? 'text-red-600 font-semibold'
-                : 'text-slate-400'
+                ? "text-red-600 font-semibold"
+                : "text-slate-400",
             )}
           >
-            {latex.length.toLocaleString()} / {MAX_LATEX_LENGTH.toLocaleString()}
+            {latex.length.toLocaleString()} /{" "}
+            {MAX_LATEX_LENGTH.toLocaleString()}
           </span>
         </div>
 
@@ -143,4 +146,3 @@ export const MathBlock: React.FC<MathBlockProps> = ({
     </BlockWrapper>
   );
 };
-
