@@ -10,7 +10,6 @@ import { firestoreDb } from '@/services/firebase';
 import { useAuth } from '@/contexts/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft } from '@/ui/icons';
-import { FaceIcons } from '@/components/ui/FaceIcons';
 import { createPageUrl } from '@/utils';
 import { getDebugStreak } from '@/utils/debugStreak';
 import { sanitizeStreak } from '@/utils/streak';
@@ -35,10 +34,10 @@ const RATING_LABELS = {
 };
 
 const RATING_TILES = [
-  { rating: 'forgot', score: 0, Icon: FaceIcons.Forgot },
-  { rating: 'vague', score: 1, Icon: FaceIcons.Vague },
-  { rating: 'remembered', score: 2, Icon: FaceIcons.Good },
-  { rating: 'easy', score: 3, Icon: FaceIcons.Easy },
+  { rating: 'forgot', score: 0, Icon: null },
+  { rating: 'vague', score: 1, Icon: null },
+  { rating: 'remembered', score: 2, Icon: null },
+  { rating: 'easy', score: 3, Icon: null },
 ];
 
 export default function StudyMode() {

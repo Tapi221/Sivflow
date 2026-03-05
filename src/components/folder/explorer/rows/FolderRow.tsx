@@ -4,7 +4,7 @@ import { Droppable } from '@hello-pangea/dnd';
 import { cn } from '@/lib/utils';
 import { ContextMenu } from '../../ContextMenu';
 import { DnDHelpers } from '@/hooks/useFolderDnD';
-import type { FolderTreeNode } from '../model/utils';
+import { getParentFolderId, normalizeFolderId, ROOT_FOLDER_ID, type FolderTreeNode } from '../model/utils';
 import { ExplorerRow } from './ExplorerRow';
 import { ExplorerRowContent } from './ExplorerRowContent';
 
@@ -94,7 +94,8 @@ export const FolderRow: React.FC<FolderRowProps> = ({
   const folderName = folder.folderName || folder.folder_name || '無題のフォルダ';
   const isOptimisticFolder = Boolean(folder.__optimistic);
   const hasContextMenu = !isOptimisticFolder && hasUpdateOrDelete;
-  const isTopLevelFolder = depth <= 1;
+  const parentFolderId = normalizeFolderId(getParentFolderId(folder));
+  const isTopLevelFolder = parentFolderId === ROOT_FOLDER_ID;
   const FolderGlyph = isTopLevelFolder ? FolderIcon : FolderOutlineIcon;
 
   return (
