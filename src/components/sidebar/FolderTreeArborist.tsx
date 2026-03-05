@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Tree } from 'react-arborist';
-import type { NodeApi, TreeApi } from 'react-arborist';
+import type { NodeApi, TreeApi, MoveHandler } from 'react-arborist';
 
 export type FolderTreeArboristNode = {
   id: string;
@@ -23,6 +23,9 @@ type Props<T extends FolderTreeArboristNode> = {
   expandedIds?: string[];
   onToggleExpand?: (id: string, nextOpen: boolean) => void;
   renderNode: (args: RenderArgs<T>) => React.ReactNode;
+  onMove?: MoveHandler<T>;
+  disableDrag?: boolean | ((node: NodeApi<T>) => boolean);
+  disableDrop?: boolean | ((args: { parentNode: NodeApi<T>; dragNodes: NodeApi<T>[]; index: number }) => boolean);
 };
 
 export function FolderTreeArborist<T extends FolderTreeArboristNode>({
@@ -32,6 +35,9 @@ export function FolderTreeArborist<T extends FolderTreeArboristNode>({
   expandedIds,
   onToggleExpand,
   renderNode,
+  onMove,
+  disableDrag = true,
+  disableDrop = true,
 }: Props<T>) {
   const rowHeight = 24;
   const indent = 12;
@@ -100,8 +106,9 @@ export function FolderTreeArborist<T extends FolderTreeArboristNode>({
         indent={indent}
         selection={selectedId ?? undefined}
         initialOpenState={initialOpenState}
-        disableDrag
-        disableDrop
+        onMove={onMove}
+        disableDrag={disableDrag}
+        disableDrop={disableDrop}
         disableEdit
         openByDefault={false}
         onSelect={(nodes) => {

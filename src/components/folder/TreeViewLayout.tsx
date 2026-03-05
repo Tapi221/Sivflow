@@ -667,6 +667,7 @@ function TreeViewLayout({
               onUpdateCard={updateCard}
               onDeleteCard={deleteCard}
               moveCardToFolder={moveCardToFolder}
+              moveDocumentToFolder={(id, folderId) => updateDocument(id, { folderId })}
               reorderCards={reorderCards}
               pinnedItems={pinnedItems}
               onPinItem={pinItem}

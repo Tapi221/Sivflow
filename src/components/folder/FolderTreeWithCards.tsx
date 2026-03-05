@@ -62,6 +62,7 @@ interface FolderTreeWithCardsProps {
   onUpdateCard?: (cardId: string, data: unknown) => Promise<void>;
   onDeleteCard?: (cardId: string) => Promise<void>;
   moveCardToFolder?: (cardId: string, targetFolderId: string) => Promise<void>;
+  moveDocumentToFolder?: (documentId: string, targetFolderId: string) => Promise<void>;
   reorderCards?: (folderId: string, cardIds: string[]) => Promise<void>;
   pinnedItems?: Array<{ type: 'folder' | 'card' | 'document'; id: string }>;
   onPinItem?: (item: { type: 'folder' | 'card' | 'document'; id: string }) => void;
@@ -88,6 +89,7 @@ export function FolderTreeWithCards({
   onUpdateCard,
   onDeleteCard,
   moveCardToFolder,
+  moveDocumentToFolder,
   reorderCards,
   pinnedItems,
   onPinItem,
@@ -494,6 +496,72 @@ export function FolderTreeWithCards({
       return (matchCountMap.get(folderId) ?? 0) > 0;
     });
   }, [isFiltering, rootItems, rootFolders, matchCountMap]);
+
+  const handleArboristMove = useCallback(
+    async ({
+      dragIds,
+      parentId,
+    }: {
+      dragIds: string[];
+      parentId: string | null;
+      index: number;
+    }) => {
+      // parentId が null のときは root（ROOT_FOLDER_ID = ''）
+      const newFolderRawId =
+        parentId !== null ? (parseSelectedTreeId(parentId)?.id ?? ROOT_FOLDER_ID) : ROOT_FOLDER_ID;
+
+      for (const dragId of dragIds) {
+        const parsed = parseSelectedTreeId(dragId);
+        if (!parsed) continue;
+
+        if (parsed.type === 'folder') {
+          await onUpdateFolder?.(parsed.id, { parentFolderId: newFolderRawId || null });
+        } else if (parsed.type === 'card') {
+          await moveCardToFolder?.(parsed.id, newFolderRawId);
+        } else if (parsed.type === 'document') {
+          await moveDocumentToFolder?.(parsed.id, newFolderRawId);
+        }
+      }
+    },
+    [onUpdateFolder, moveCardToFolder, moveDocumentToFolder]
+  );
+
+  const arboristDisableDrag = useCallback(
+    (node: import('react-arborist').NodeApi<ExplorerTreeNode>) => {
+      // データのないノード（virtual root など）はドラッグ不可
+      return !node.data?.kind;
+    },
+    []
+  );
+
+  const arboristDisableDrop = useCallback(
+    ({
+      parentNode,
+      dragNodes,
+    }: {
+      parentNode: import('react-arborist').NodeApi<ExplorerTreeNode>;
+      dragNodes: import('react-arborist').NodeApi<ExplorerTreeNode>[];
+      index: number;
+    }) => {
+      const parentKind = parentNode?.data?.kind;
+
+      // カード・ドキュメントへのドロップは禁止
+      if (parentKind === 'card' || parentKind === 'document') return true;
+
+      // フォルダを自分の子孫へ移動しようとしている場合は禁止
+      for (const dragNode of dragNodes) {
+        if (dragNode.data?.kind !== 'folder') continue;
+        let check: import('react-arborist').NodeApi<ExplorerTreeNode> | null = parentNode;
+        while (check) {
+          if (check.id === dragNode.id) return true;
+          check = check.parent;
+        }
+      }
+
+      return false;
+    },
+    []
+  );
 
   const explorerTreeData = useMemo<ExplorerTreeNode[]>(
     () =>
@@ -1488,6 +1556,9 @@ export function FolderTreeWithCards({
                 });
               }}
               renderNode={renderTreeNode}
+              onMove={handleArboristMove}
+              disableDrag={arboristDisableDrag}
+              disableDrop={arboristDisableDrop}
             />
           </div>
         )}
