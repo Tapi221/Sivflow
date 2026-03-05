@@ -44,7 +44,6 @@ export default function Layout() {
     if (path === "") return "Folders";
     if (path === "study") return "StudyMode";
     if (path === "uncertain") return "UncertainMode";
-    if (path === "today-study") return "TodayStudy";
     if (path === "gallery") return "Gallery";
     if (path === "calendar") return "Calendar";
     // Default capitalize for others which match component names largely

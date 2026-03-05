@@ -191,7 +191,7 @@ export function useTags() {
   const tags = useLiveQuery(
     async () => {
       if (!currentUser) return [] as Tag[];
-      const db = await getLocalDb();
+      const db = await getLocalDb(currentUser.uid);
       return db.tags_v3.where("userId").equals(currentUser.uid).toArray();
     },
     [currentUser],
@@ -302,7 +302,7 @@ export function useTags() {
     categoryId: string | null,
   ): Promise<void> => {
     if (!currentUser) return;
-    const db = await getLocalDb();
+    const db = await getLocalDb(currentUser.uid);
     const nextCategoryId =
       typeof categoryId === "string" && categoryId.trim()
         ? categoryId
@@ -340,7 +340,7 @@ export function useTags() {
       currentParentId = tagById.get(currentParentId)?.parentId;
     }
 
-    const db = await getLocalDb();
+    const db = await getLocalDb(currentUser.uid);
     await db.tags_v3.update(tagId, {
       parentId: normalizedParentId,
       updatedAt: new Date(),
@@ -351,7 +351,7 @@ export function useTags() {
 
   const getTagUsageCount = async (nameOrId: string): Promise<number> => {
     if (!currentUser) return 0;
-    const db = await getLocalDb();
+    const db = await getLocalDb(currentUser.uid);
 
     // nameOrId が id なら直接、そうでなければ名前解決
     const tagId = tagById.has(nameOrId)
@@ -414,7 +414,7 @@ export function useTags() {
     categoryId?: TagCategory,
     parentId?: string,
   ): Promise<Tag> => {
-    const db = await getLocalDb();
+    const db = await getLocalDb(currentUser.uid);
     if (!currentUser) throw new Error("not authenticated");
 
     const nameLower = name.toLowerCase();
@@ -465,7 +465,7 @@ export function useTags() {
     const parsed = parseTagPath(fullPath);
     if ("error" in parsed) return parsed;
 
-    const db = await getLocalDb();
+    const db = await getLocalDb(currentUser.uid);
     let parentId: string | undefined = undefined;
     let lastTagId = "";
 
@@ -522,7 +522,7 @@ export function useTags() {
     const parsed = parseTagPath(trimmed);
     if ("error" in parsed) return parsed;
 
-    const db = await getLocalDb();
+    const db = await getLocalDb(currentUser.uid);
     // tagById は live query 由来なので新規作成分を手動で追跡する
     const localMap = new Map<string, Pick<Tag, "parentId">>(tagById);
     let parentId: string | undefined = undefined;
@@ -611,7 +611,7 @@ export function useTags() {
     const trimmedName = newName.trim();
     if (!trimmedName) return { error: "タグ名を入力してください。" };
     const newNameLower = trimmedName.toLowerCase();
-    const db = await getLocalDb();
+    const db = await getLocalDb(currentUser.uid);
 
     if (newNameLower !== tag.nameLower) {
       const existing = await db.tags_v3
@@ -640,7 +640,7 @@ export function useTags() {
   ): Promise<{ updatedCards: number } | { error: string }> => {
     if (!currentUser) return { error: "ログイン状態を確認してください。" };
     if (fromTagId === intoTagId) return { error: "統合元と統合先が同じです。" };
-    const db = await getLocalDb();
+    const db = await getLocalDb(currentUser.uid);
     const fromTag = tagById.get(fromTagId);
     const intoTag = tagById.get(intoTagId);
     if (!fromTag || !intoTag)
@@ -681,7 +681,7 @@ export function useTags() {
     color: string,
   ): Promise<void> => {
     if (!currentUser) return;
-    const db = await getLocalDb();
+    const db = await getLocalDb(currentUser.uid);
     const tag =
       tagById.get(nameOrId) ??
       tagByName.get(nameOrId) ??
@@ -705,7 +705,7 @@ export function useTags() {
     if (!tag) return 0;
 
     const { id: tagId, name: tagName } = tag;
-    const db = await getLocalDb();
+    const db = await getLocalDb(currentUser.uid);
     let removedFromCards = 0;
 
     await db.transaction("rw", db.tags_v3, db.cards, async () => {
@@ -754,7 +754,7 @@ export function useTags() {
     includeSubfolders: boolean,
   ): Promise<number> => {
     if (!currentUser) return 0;
-    const db = await getLocalDb();
+    const db = await getLocalDb(currentUser.uid);
 
     // 対象 folderId 収集
     const targetFolderIds = new Set<string>([folderId]);
@@ -817,7 +817,7 @@ export function useTags() {
     includeSubfolders: boolean,
   ): Promise<number> => {
     if (!currentUser) return 0;
-    const db = await getLocalDb();
+    const db = await getLocalDb(currentUser.uid);
 
     const targetFolderIds = new Set<string>([folderId]);
     if (includeSubfolders) {

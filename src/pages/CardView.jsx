@@ -3,15 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { useCards } from "@/hooks/useCards";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft } from "@/ui/icons";
+import { ChevronLeft, ChevronRight } from "@/ui/icons";
 import { createPageUrl } from "@/utils";
 import { CardCarousel3D } from "@/features/review/CardCarousel3D";
 import { VerticalCardPager } from "@/features/review/VerticalCardPager";
 import { MobileScalableCard } from "@/components/card/frame/MobileScalableCard";
 import { Flashcard } from "@/components/card/frame/Flashcard";
+import { CardMetaPanel } from "@/components/card/panels/CardMetaPanel";
 import {
   CANONICAL_CARD_WIDTH,
-  CARD_SAFE_PADDING_PX,
 } from "@/components/card/common/constants";
 import { useCardEntity } from "@/hooks/useCardEntity";
 import { useUserSettings } from "@/hooks/useUserSettings";
@@ -27,6 +27,10 @@ export default function CardView() {
 
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [isMetaOpen, setIsMetaOpen] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return window.localStorage.getItem("card-view.meta-panel-open") !== "false";
+  });
 
   const {
     cards = [],
@@ -35,6 +39,11 @@ export default function CardView() {
   } = useCards(folderId || undefined);
   const { settings } = useUserSettings();
   const isDesktop = useIsDesktop();
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem("card-view.meta-panel-open", String(isMetaOpen));
+  }, [isMetaOpen]);
 
   const sortedCards = useMemo(() => {
     return [...cards].sort(
@@ -61,13 +70,13 @@ export default function CardView() {
 
   const currentCard = sortedCards[currentIndex];
   const { effectiveCard } = useCardEntity(currentCard?.id);
-  const visibleCard = effectiveCard ?? currentCard;
   const effectiveCards = useMemo(() => {
     if (!effectiveCard) return sortedCards;
     return sortedCards.map((card) =>
       card.id === effectiveCard.id ? effectiveCard : card,
     );
   }, [sortedCards, effectiveCard]);
+  const selectedCard = effectiveCards[currentIndex] ?? null;
 
   const handleEdit = (card) => {
     navigate(
@@ -96,108 +105,149 @@ export default function CardView() {
   }
 
   return (
-    <div className="h-[100dvh] bg-[#F5F7F8] flex flex-col overflow-hidden text-slate-800">
-      {/* Header */}
-      <div className="shrink-0 max-w-[1600px] w-full mx-auto px-3 md:px-8 py-3 md:py-4">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() =>
-              navigate(createPageUrl(`Folders?folderId=${folderId}`))
-            }
-            className="w-10 h-10 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div>
-            <div className="text-[10px] font-bold tracking-[0.2em] text-slate-400 uppercase mb-0.5">
-              Knowledge Review
-            </div>
-            <h1 className="text-xl font-bold text-slate-700">
-              {visibleCard?.title || "Untitled Card"}
-            </h1>
+    <div className="h-[100dvh] overflow-hidden bg-[#F5F7F8] pt-0 card-editor-right-pane-font">
+      <div className="relative flex h-full min-h-0 overflow-hidden">
+      <div className="pointer-events-none absolute left-4 top-3 z-20 flex items-center gap-3">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() =>
+            navigate(createPageUrl(`Folders?folderId=${folderId}`))
+          }
+          className="pointer-events-auto w-10 h-10 rounded-xl border border-slate-200 bg-white text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-600"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </Button>
+        <div className="pointer-events-auto hidden md:block">
+          <div className="text-[10px] font-bold tracking-[0.2em] text-slate-400 uppercase mb-0.5">
+            Knowledge Review
           </div>
+          <h1 className="text-base font-bold text-slate-700">
+            {selectedCard?.title || "Untitled Card"}
+          </h1>
         </div>
       </div>
 
-      {/* Carousel area */}
-      <div className="flex-1 min-h-0 overflow-hidden">
-        {isLoading ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="space-y-4 w-full max-w-md px-4">
-              <Skeleton className="h-12 w-full" />
-              <Skeleton className="h-[400px] w-full" />
-            </div>
-          </div>
-        ) : isDesktop ? (
-          // ── PC: 縦スクロール式ページャ ──
-          <VerticalCardPager
-            cards={effectiveCards}
-            activeIndex={currentIndex}
-            onActiveIndexChange={setCurrentIndex}
-            onFlip={() => setIsFlipped((f) => !f)}
-            getKey={(card) => card.id ?? card.docId ?? card.uid}
-            renderCard={(card, idx, isActive) => (
-              <MobileScalableCard
-                cardDesignWidth={CANONICAL_CARD_WIDTH}
-                safePadding={CARD_SAFE_PADDING_PX}
-              >
-                <Flashcard
-                  card={card}
-                  isFlipped={isActive ? isFlipped : false}
-                  onFlip={isActive ? () => setIsFlipped((f) => !f) : undefined}
-                  onEdit={isActive ? handleEdit : undefined}
-                  onToggleUncertainty={
-                    isActive ? handleToggleUncertainty : undefined
-                  }
-                  onToggleBookmark={isActive ? handleToggleBookmark : undefined}
-                  editorSharedHeightPx={settings?.cardEditorHeightPx ?? null}
-                />
-              </MobileScalableCard>
-            )}
-          />
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="hidden md:flex absolute top-3 z-20 h-8 w-8 rounded-full border border-[var(--sidebar-border)] bg-[var(--sidebar-bg)] text-[var(--sidebar-text)] shadow-sm hover:bg-[var(--sidebar-active-bg)]"
+        style={{
+          right: isMetaOpen ? "calc(20rem - 0.75rem)" : "0.25rem",
+          transform: "none",
+        }}
+        onClick={() => setIsMetaOpen((prev) => !prev)}
+        aria-label={isMetaOpen ? "close meta panel" : "open meta panel"}
+      >
+        {isMetaOpen ? (
+          <ChevronRight className="h-4 w-4" />
         ) : (
-          // ── モバイル: 横カルーセル（既存）──
-          <CardCarousel3D
-            cards={effectiveCards}
-            syncIndex={currentIndex}
-            onIndexChange={setCurrentIndex}
-            renderCenter={(card, idx) => (
-              <MobileScalableCard
-                cardDesignWidth={CANONICAL_CARD_WIDTH}
-                safePadding={CARD_SAFE_PADDING_PX}
-              >
-                <Flashcard
-                  card={card}
-                  isFlipped={isFlipped}
-                  onFlip={() => setIsFlipped((f) => !f)}
-                  onEdit={handleEdit}
-                  onToggleUncertainty={handleToggleUncertainty}
-                  onToggleBookmark={handleToggleBookmark}
-                  onPrev={() => idx > 0 && setCurrentIndex(idx - 1)}
-                  onNext={() =>
-                    idx < effectiveCards.length - 1 && setCurrentIndex(idx + 1)
-                  }
-                  hasNext={idx < effectiveCards.length - 1}
-                  hasPrev={idx > 0}
-                  currentIndex={idx}
-                  totalCards={effectiveCards.length}
-                  editorSharedHeightPx={settings?.cardEditorHeightPx ?? null}
-                />
-              </MobileScalableCard>
-            )}
-            renderPreview={(card) => (
-              <MobileScalableCard
-                cardDesignWidth={CANONICAL_CARD_WIDTH}
-                safePadding={CARD_SAFE_PADDING_PX}
-              >
-                <Flashcard card={card} isFlipped={false} previewMode={true} />
-              </MobileScalableCard>
-            )}
-          />
+          <ChevronLeft className="h-4 w-4" />
         )}
+      </Button>
+      <div className="min-h-0 min-w-0 flex-1 overflow-hidden p-4">
+          {isLoading ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="space-y-4 w-full max-w-md px-4">
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-[400px] w-full" />
+              </div>
+            </div>
+          ) : isDesktop ? (
+            // ── PC: 縦スクロール式ページャ ──
+            <VerticalCardPager
+              cards={effectiveCards}
+              activeIndex={currentIndex}
+              onActiveIndexChange={setCurrentIndex}
+              onFlip={() => setIsFlipped((f) => !f)}
+              getKey={(card) => card.id ?? card.docId ?? card.uid}
+              renderCard={(card, idx, isActive) => (
+                <MobileScalableCard
+                  cardDesignWidth={CANONICAL_CARD_WIDTH}
+                  safePadding={0}
+                >
+                  <Flashcard
+                    card={card}
+                    isFlipped={isActive ? isFlipped : false}
+                    onFlip={isActive ? () => setIsFlipped((f) => !f) : undefined}
+                    onEdit={isActive ? handleEdit : undefined}
+                    onToggleUncertainty={
+                      isActive ? handleToggleUncertainty : undefined
+                    }
+                    onToggleBookmark={isActive ? handleToggleBookmark : undefined}
+                    editorSharedHeightPx={settings?.cardEditorHeightPx ?? null}
+                  />
+                </MobileScalableCard>
+              )}
+            />
+          ) : (
+            // ── モバイル: 横カルーセル（既存）──
+            <CardCarousel3D
+              cards={effectiveCards}
+              syncIndex={currentIndex}
+              onIndexChange={setCurrentIndex}
+              renderCenter={(card, idx) => (
+                <MobileScalableCard
+                  cardDesignWidth={CANONICAL_CARD_WIDTH}
+                  safePadding={0}
+                >
+                  <Flashcard
+                    card={card}
+                    isFlipped={isFlipped}
+                    onFlip={() => setIsFlipped((f) => !f)}
+                    onEdit={handleEdit}
+                    onToggleUncertainty={handleToggleUncertainty}
+                    onToggleBookmark={handleToggleBookmark}
+                    onPrev={() => idx > 0 && setCurrentIndex(idx - 1)}
+                    onNext={() =>
+                      idx < effectiveCards.length - 1 && setCurrentIndex(idx + 1)
+                    }
+                    hasNext={idx < effectiveCards.length - 1}
+                    hasPrev={idx > 0}
+                    currentIndex={idx}
+                    totalCards={effectiveCards.length}
+                    editorSharedHeightPx={settings?.cardEditorHeightPx ?? null}
+                  />
+                </MobileScalableCard>
+              )}
+              renderPreview={(card) => (
+                <MobileScalableCard
+                  cardDesignWidth={CANONICAL_CARD_WIDTH}
+                  safePadding={0}
+                >
+                  <Flashcard
+                    card={card}
+                    isFlipped={false}
+                    previewMode={true}
+                  />
+                </MobileScalableCard>
+              )}
+            />
+          )}
       </div>
-    </div>
+
+      {isMetaOpen && (
+        <div className="hidden h-full min-h-0 md:block">
+          <CardMetaPanel
+            card={selectedCard}
+            reviewLogs={selectedCard?.reviewLogs ?? []}
+            onUpdateTags={(nextTags) => {
+              if (!selectedCard?.id) return;
+              void updateCard(selectedCard.id, { tags: nextTags });
+            }}
+            onToggleDraft={(nextDraft) => {
+              if (!selectedCard?.id) return;
+              void updateCard(selectedCard.id, { isDraft: nextDraft });
+            }}
+            onUpdateTitle={(nextTitle) => {
+              if (!selectedCard?.id) return;
+              void updateCard(selectedCard.id, { title: nextTitle });
+            }}
+          />
+        </div>
+      )}
+      </div>
+      </div>
   );
 }

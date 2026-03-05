@@ -1,10 +1,15 @@
 import React, { useState, useMemo, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { useLiveQuery } from "dexie-react-hooks";
 import { useCards } from "@/hooks/useCards";
 import { useFolders } from "@/hooks/useFolders";
 import { useUserSettings } from "@/hooks/useUserSettings";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { EmptyMetaPanel } from "@/components/card/panels/EmptyMetaPanel";
+import { RatingCountTiles } from "@/features/study/RatingCountTiles";
 import { ChevronLeft, ChevronRight } from "@/ui/icons";
 import {
   format,
@@ -19,6 +24,11 @@ import {
   isToday,
 } from "date-fns";
 import { cn } from "@/lib/utils";
+import { createPageUrl } from "@/utils";
+import { useTodayStudyStore } from "@/stores/useTodayStudyStore";
+import { getLocalDb } from "@/services/localDB";
+import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
+import { firestoreDb } from "@/services/firebase";
 
 // ---------------------------------------------------------------------------
 // RESISTANCE LEGEND (Static Definition for Maturity/Resistance)
@@ -64,6 +74,8 @@ const toDate = (value) => {
 };
 
 export default function Calendar() {
+  const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const [isMetaOpen, setIsMetaOpen] = useState(true);
 
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -111,6 +123,31 @@ export default function Calendar() {
   const { cards = [] } = useCards();
   const { folders = [], loading: foldersLoading } = useFolders();
   const { settings } = useUserSettings();
+  const { ratings } = useTodayStudyStore();
+  const { data: studyLogs = [] } = useQuery({
+    queryKey: ["studyLogs", currentUser?.uid],
+    queryFn: async () => {
+      if (!currentUser || !firestoreDb) return [];
+      const q = query(
+        collection(firestoreDb, "studyLogs"),
+        where("userId", "==", currentUser.uid),
+        orderBy("createdAt", "desc"),
+      );
+      const snapshot = await getDocs(q);
+      return snapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }))
+        .slice(0, 100);
+    },
+    enabled: !!currentUser,
+  });
+  const localStudyLogs = useLiveQuery(async () => {
+    if (!currentUser) return [];
+    const db = await getLocalDb(currentUser.uid);
+    return await db.table("studyLogs").toArray();
+  }, [currentUser]);
 
   const folderMap = useMemo(() => {
     const map = new Map();
@@ -192,6 +229,42 @@ export default function Calendar() {
     return grouped;
   }, [cards, folderMap, foldersLoading, settings?.autoCarryOver]);
 
+  const todayDateKey = format(new Date(), "yyyy-MM-dd");
+  const todayDueCount = (cardsByDate[todayDateKey] || []).length;
+  const todayDescription =
+    todayDueCount === 0
+      ? "今日の復習はありません。"
+      : "忘れる前に復習しましょう。";
+  const isTodaySelected = isSameDay(selectedDate, new Date());
+  const mergedStudyLogs = useMemo(() => {
+    const combined = [...studyLogs];
+    if (localStudyLogs) combined.push(...localStudyLogs);
+    return combined;
+  }, [studyLogs, localStudyLogs]);
+  const getLogDate = (log) => {
+    const raw = log?.studiedAt ?? log?.createdAt;
+    const date = raw?.toDate?.() || new Date(raw);
+    return date instanceof Date && !Number.isNaN(date.getTime()) ? date : null;
+  };
+  const streak = useMemo(() => {
+    if (mergedStudyLogs.length === 0) return 0;
+    const dates = new Set(
+      mergedStudyLogs
+        .map(getLogDate)
+        .filter(Boolean)
+        .map((d) => d.toDateString()),
+    );
+    const today = new Date();
+    let count = 0;
+    for (let i = 0; i < 365; i++) {
+      const d = new Date();
+      d.setDate(today.getDate() - i);
+      if (dates.has(d.toDateString())) count++;
+      else if (i !== 0) break;
+    }
+    return count;
+  }, [mergedStudyLogs]);
+
   const renderCalendarGrid = () => {
     const weekStartDay = settings?.weekStartDay === "sunday" ? 0 : 1; // 0=Sun, 1=Mon
     const monthStart = startOfMonth(currentDate);
@@ -219,7 +292,7 @@ export default function Calendar() {
             <div
               key={d}
               className={cn(
-                "text-center text-[10px] font-bold tracking-[0.2em] text-slate-300",
+                "text-center text-[10px] font-bold tracking-[0.2em] text-slate-500",
                 d === "SUN" && "text-[#FF5A65]", // Sun
                 d === "SAT" && "text-[#00A3FF]", // Sat
               )}
@@ -271,7 +344,7 @@ export default function Calendar() {
                   <div className="flex flex-col items-center mt-0 gap-1 w-full">
                     <span
                       className={cn(
-                        "text-lg md:text-xl font-black leading-none tracking-tight",
+                        "text-convex text-lg md:text-xl font-black leading-none tracking-tight",
                         dayCards.some((c) => c.is_overdue)
                           ? "text-[#FF5A65]"
                           : "text-primary-600",
@@ -284,7 +357,7 @@ export default function Calendar() {
                         <div
                           key={i}
                           className={cn(
-                            "w-1.5 h-1.5 rounded-full calendar-dot-3d",
+                            "w-1.5 h-1.5 rounded-full calendar-dot-3d face-badge-convex",
                             dayCards.some((c) => c.is_overdue)
                               ? "bg-[#FF5A65]"
                               : "bg-primary-400",
@@ -310,7 +383,7 @@ export default function Calendar() {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#F5F7FA] text-slate-800 selection:bg-indigo-100 selection:text-indigo-900 flex">
+    <div className="relative min-h-screen bg-[#F5F7F8] text-slate-800 selection:bg-indigo-100 selection:text-indigo-900 flex">
       <Button
         type="button"
         variant="ghost"
@@ -331,9 +404,23 @@ export default function Calendar() {
       </Button>
 
       <div className="min-w-0 flex-1 flex flex-col pl-4 pr-4 pt-4 pb-0 md:p-8">
-        {/* Top Header */}
-        <div className="flex flex-col sm:flex-row items-center sm:items-center justify-start mb-2 md:mb-6 w-full gap-4">
-          <div className="flex items-center gap-4 w-full md:w-auto">
+        {/* Main Content Split View */}
+        <div className="flex-1 w-full grid grid-cols-1 gap-6 md:gap-8 items-start mb-20 md:mb-0">
+          {/* Left: Calendar Grid */}
+          <Card className="relative rounded-[32px] md:rounded-[40px] border border-[var(--surface-border)] surface-panel-convex bg-[var(--sidebar-bg)] p-4 md:p-10 h-fit md:min-h-[600px]">
+            <div className="absolute top-4 left-4 md:top-8 md:left-8 rounded-full border border-[var(--surface-border)] bg-white px-2.5 py-1.5 surface-panel-convex z-10 min-w-[98px]">
+              <div className="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-300">
+                STREAK
+              </div>
+              <div className="mt-0.5 flex items-baseline gap-1">
+                <span className="inline-block h-3 w-3 rounded-sm bg-[#FB923C]" />
+                <span className="text-2xl font-bold leading-none text-slate-700">
+                  {streak}
+                </span>
+                <span className="text-sm font-semibold text-[#8EA2C2]">days</span>
+              </div>
+            </div>
+
             <Button
               variant="outline"
               size="sm"
@@ -342,40 +429,36 @@ export default function Calendar() {
                 setCurrentDate(now);
                 setSelectedDate(now);
               }}
-              className="h-10 rounded-full border border-[var(--surface-border)] text-slate-500 font-bold px-4 hover:border-primary-600 hover:text-primary-600 bg-white face-badge-convex"
+              className="absolute top-4 right-4 md:top-8 md:right-8 h-10 rounded-full border border-[var(--surface-border)] text-slate-500 font-bold px-4 hover:border-primary-600 hover:text-primary-600 bg-white face-badge-convex z-10"
             >
               Today
             </Button>
 
-            <div className="flex items-center bg-white rounded-full p-1 border border-[var(--surface-border)] face-badge-convex h-10 w-full sm:w-auto justify-between">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setCurrentDate(addMonths(currentDate, -1))}
-                className="h-8 w-8 rounded-full text-slate-400 hover:text-primary-600 bg-white border border-[var(--surface-border)] face-badge-convex hover:bg-white shrink-0"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
-              <span className="flex-1 sm:w-32 text-center text-[11px] sm:text-xs font-extrabold text-[#334155] tracking-wider uppercase">
-                {format(currentDate, "MMMM yyyy")}
-              </span>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setCurrentDate(addMonths(currentDate, 1))}
-                className="h-8 w-8 rounded-full text-slate-400 hover:text-primary-600 bg-white border border-[var(--surface-border)] face-badge-convex hover:bg-white shrink-0"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </Button>
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 md:top-8 z-10">
+              <div className="flex items-center bg-white rounded-full p-1 border border-[var(--surface-border)] face-badge-convex h-10 min-w-[280px] md:min-w-[320px] justify-between">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setCurrentDate(addMonths(currentDate, -1))}
+                  className="h-8 w-8 rounded-full text-slate-400 hover:text-primary-600 bg-white border border-[var(--surface-border)] face-badge-convex hover:bg-white shrink-0"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                <span className="flex-1 text-center text-[11px] sm:text-xs font-extrabold text-[#334155] tracking-wider uppercase">
+                  {format(currentDate, "MMMM yyyy")}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setCurrentDate(addMonths(currentDate, 1))}
+                  className="h-8 w-8 rounded-full text-slate-400 hover:text-primary-600 bg-white border border-[var(--surface-border)] face-badge-convex hover:bg-white shrink-0"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
-          </div>
-        </div>
 
-        {/* Main Content Split View */}
-        <div className="flex-1 w-full grid grid-cols-1 gap-6 md:gap-8 items-start mb-20 md:mb-0">
-          {/* Left: Calendar Grid */}
-          <Card className="rounded-[32px] md:rounded-[40px] border-none shadow-sm bg-white p-4 md:p-10 h-fit md:min-h-[600px]">
-            {renderCalendarGrid()}
+            <div className="pt-12 md:pt-14">{renderCalendarGrid()}</div>
           </Card>
         </div>
 
@@ -404,7 +487,67 @@ export default function Calendar() {
         </div>
       </div>
 
-      {isMetaOpen && <EmptyMetaPanel />}
+      {isMetaOpen && (
+        <EmptyMetaPanel contentClassName="space-y-3">
+          {isTodaySelected && (
+            <>
+              <button
+                type="button"
+                onClick={() => navigate(createPageUrl("study"))}
+                className="w-full text-left rounded-2xl border border-[var(--surface-border)] bg-white p-3 surface-panel-convex transition-colors hover:bg-[var(--sidebar-active-bg)]"
+              >
+                <div className="mb-2 flex items-center gap-2">
+                  <span className="rounded-full bg-primary-600 px-2.5 py-0.5 text-[10px] font-bold tracking-wide text-white">
+                    優先タスク
+                  </span>
+                  {todayDueCount > 0 && (
+                    <span className="h-2 w-2 rounded-full bg-[#FF5A65]" />
+                  )}
+                </div>
+
+                <h3 className="text-2xl font-bold leading-tight text-slate-800">
+                  今日の復習
+                </h3>
+                <p className="mt-2 text-xs leading-relaxed text-slate-500">
+                  {todayDescription}
+                </p>
+
+                <div className="mt-3 flex items-end justify-between gap-2">
+                  <div className="min-w-0">
+                  <div className="text-convex text-4xl font-bold italic leading-none tracking-tight text-primary-600">
+                    {todayDueCount}
+                  </div>
+                    <div className="mt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">
+                      Cards Due
+                    </div>
+                  </div>
+                  <div className="face-badge-convex flex h-10 w-10 items-center justify-center rounded-full bg-primary-600 text-white">
+                    <ChevronRight className="h-5 w-5" />
+                  </div>
+                </div>
+              </button>
+
+              <section>
+                <h3 className="mb-2 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">
+                  TODAY'S RATINGS
+                </h3>
+                <RatingCountTiles
+                  counts={{
+                    forgot: ratings.forgot,
+                    vague: ratings.vague,
+                    remembered: ratings.remembered,
+                    easy: ratings.easy,
+                  }}
+                  compact
+                  disableHover
+                  singleRow
+                  surface="concave"
+                />
+              </section>
+            </>
+          )}
+        </EmptyMetaPanel>
+      )}
     </div>
   );
 }

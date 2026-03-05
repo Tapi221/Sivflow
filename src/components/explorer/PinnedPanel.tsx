@@ -11,7 +11,6 @@ import {
   Folder as FolderIcon,
   FolderTree,
   Globe,
-  Home,
   Settings,
   Trash2,
   X,
@@ -366,18 +365,6 @@ export function PinnedPanel({
       <ExplorerRow
         depth={1}
         className="cursor-pointer"
-        onClick={() => onItemSelect({ type: "today-study" })}
-      >
-        <ExplorerRowContent
-          left={
-            <Home className="sidebar-icon w-4 h-4 mr-2 shrink-0 text-primary-600" />
-          }
-          title="今日の学習"
-        />
-      </ExplorerRow>
-      <ExplorerRow
-        depth={1}
-        className="cursor-pointer"
         onClick={() => onItemSelect({ type: "directory" })}
       >
         <ExplorerRowContent
@@ -408,7 +395,7 @@ export function PinnedPanel({
           left={
             <Calendar className="sidebar-icon w-4 h-4 mr-2 shrink-0 text-primary-600" />
           }
-          title="予定表"
+          title="学習予定"
         />
       </ExplorerRow>
       <ExplorerRow

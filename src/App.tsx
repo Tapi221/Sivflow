@@ -39,7 +39,6 @@ const StudyMode = lazy(() => import("./Pages/StudyMode"));
 const Trash = lazy(() => import("./Pages/Trash"));
 const ImageDiagnostics = lazy(() => import("./Pages/ImageDiagnostics"));
 const Gallery = lazy(() => import("./Pages/Gallery"));
-const TodayStudy = lazy(() => import("./Pages/TodayStudy"));
 const NotImplementedPlaceholder = lazy(
   () => import("./Pages/NotImplementedPlaceholder"),
 );
@@ -391,16 +390,6 @@ function AppContent() {
           <Route path="CardView" element={<CardView />} />
           <Route path="study" element={<StudyMode />} />
           <Route path="calendar" element={<Calendar />} />
-
-          {/* 今日の学習ページ */}
-          <Route
-            path="today-study"
-            element={
-              <Suspense fallback={<LoadingFallback />}>
-                <TodayStudy />
-              </Suspense>
-            }
-          />
 
           {/* ギャラリーなど、重そうなページは Suspense でラップ */}
           <Route

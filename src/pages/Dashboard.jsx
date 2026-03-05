@@ -13,7 +13,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   Flame,
   Clock,
-  FileText,
   Sparkles,
   ChevronRight,
   CheckCheck,
@@ -209,8 +208,6 @@ export default function Dashboard() {
     }
     return counts;
   }, [mergedStudyLogs]);
-
-  const draftCards = activeCards.filter((c) => c.isDraft || c.is_draft);
 
   const lastStudiedFolder = useMemo(() => {
     if (studyLogs.length === 0) return null;
@@ -420,9 +417,8 @@ export default function Dashboard() {
           />
         </section>
 
-        {/* RESUME & DRAFTS Section - Side by Side on Desktop */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-6 lg:gap-8 mb-12">
-          {/* RESUME Section */}
+        {/* RESUME Section */}
+        <div className="mb-12">
           {isLoading ? (
             <Skeleton className="h-20 w-full rounded-3xl" />
           ) : lastStudiedFolder ? (
@@ -460,69 +456,7 @@ export default function Dashboard() {
                 </div>
               </div>
             </section>
-          ) : (
-            <div className="hidden lg:block" /> // Empty placeholder on desktop when no last studied folder
-          )}
-
-          {/* DRAFTS Section */}
-          {isLoading ? (
-            <Skeleton className="h-32 w-full rounded-3xl" />
-          ) : (
-            <section className={!lastStudiedFolder ? "lg:col-span-2" : ""}>
-              <div className="flex items-center gap-2 mb-4">
-                <FileText className="w-3.5 h-3.5 text-primary-600" />
-                <h2 className="text-[10px] font-bold text-slate-300 tracking-[0.2em] uppercase">
-                  Drafts in Progress
-                </h2>
-              </div>
-
-              {draftCards.length > 0 ? (
-                <div className="relative group/scroll">
-                  <div className="flex gap-4 overflow-x-auto pb-6 pt-2 no-scrollbar mask-gradient-right -mx-4 px-4 scroll-smooth">
-                    {draftCards.slice(0, 15).map((card) => {
-                      const folder = folders.find(
-                        (f) => f.id === card.folderId,
-                      );
-                      const folderName = folder?.folderName || "無所属";
-                      const title =
-                        card.title || card.questionText || card.question_text;
-
-                      return (
-                        <div
-                          key={card.id}
-                          className="flex-shrink-0 w-[200px] bg-[#FCFCFC] rounded-3xl p-5 cursor-pointer hover:bg-white hover:border-slate-300 transition-all duration-300 shadow-none border border-slate-200/60 group/card"
-                          onClick={() =>
-                            navigate(createPageUrl(`CardEdit?id=${card.id}`))
-                          }
-                        >
-                          <div className="flex items-start justify-end mb-4">
-                            <span className="text-[8px] font-bold text-slate-300 uppercase tracking-widest">
-                              Draft
-                            </span>
-                          </div>
-                          <h3 className="text-sm font-bold text-slate-600 group-hover/card:text-slate-800 transition-colors mb-1 truncate">
-                            {title}
-                          </h3>
-                          <p className="text-[10px] text-slate-400 font-medium truncate">
-                            {folderName}
-                          </p>
-                        </div>
-                      );
-                    })}
-                    {/* スクロール末尾の余白確保 */}
-                    <div className="flex-shrink-0 w-4" />
-                  </div>
-                </div>
-              ) : (
-                <div className="bg-white/50 border border-dashed border-slate-200 rounded-3xl p-8 flex flex-col items-center justify-center text-center">
-                  <FileText className="w-8 h-8 text-slate-200 mb-2" />
-                  <p className="text-xs font-bold text-slate-300 italic">
-                    作成中のカードはありません
-                  </p>
-                </div>
-              )}
-            </section>
-          )}
+          ) : null}
         </div>
       </div>
 

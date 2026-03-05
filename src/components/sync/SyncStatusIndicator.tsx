@@ -161,7 +161,7 @@ export function SyncStatusIndicator({
       <div
         className={cn(
           "flex items-center p-0.5 rounded-full cursor-pointer transition-all duration-300 motion-reduce:transition-none",
-          "bg-white/20 backdrop-blur-xl border border-white/30 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)]",
+          "bg-[var(--sidebar-bg)] border border-[var(--surface-border)] surface-panel-convex",
           compact &&
             "p-0 bg-transparent backdrop-blur-none border-none shadow-none", // compact時はシンプルに
           className,
@@ -232,7 +232,7 @@ export function SyncStatusIndicator({
                 )}
 
                 {/* セパレーター */}
-                <div className="w-[1px] h-3 bg-white/30 mx-1" />
+                <div className="w-[1px] h-3 bg-[var(--sidebar-border)] mx-1" />
 
                 {/* アクション群 */}
                 <div
@@ -244,7 +244,7 @@ export function SyncStatusIndicator({
                     size="icon"
                     onClick={triggerSync}
                     disabled={syncStatus === "syncing" || !navigator.onLine}
-                    className="h-7 w-7 text-slate-500 hover:text-primary-600 hover:bg-white/30 rounded-full transition-colors"
+                    className="h-7 w-7 text-slate-500 hover:text-primary-600 hover:bg-[var(--sidebar-active-bg)] rounded-full transition-colors"
                   >
                     <RefreshCw
                       className={cn(
@@ -259,7 +259,7 @@ export function SyncStatusIndicator({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7 text-slate-500 hover:text-slate-700 hover:bg-white/30 rounded-full"
+                        className="h-7 w-7 text-slate-500 hover:text-slate-700 hover:bg-[var(--sidebar-active-bg)] rounded-full"
                       >
                         <MoreVertical className="w-3.5 h-3.5" />
                       </Button>

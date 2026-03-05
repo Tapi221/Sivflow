@@ -118,13 +118,13 @@ export function RatingCountTiles({
                 >
                   {design.label}
                 </span>
-                <span className="text-base font-bold text-[#1e293b] tabular-nums">
+                <span className="text-convex text-base font-bold text-[#1e293b] tabular-nums">
                   {counts[key] ?? 0}
                 </span>
               </>
             ) : (
               <>
-                <span className="text-base font-bold text-[#1e293b]">
+                <span className="text-convex text-base font-bold text-[#1e293b] tabular-nums">
                   {counts[key] ?? 0}
                 </span>
                 <span

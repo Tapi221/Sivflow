@@ -244,6 +244,7 @@ export function CardEditorPane({
                     </div>
                     <CardFrame
                       baseWidth={CANONICAL_CARD_WIDTH}
+                      contentPaddingPx={0}
                       className={cn("premium-paper-depth", "card-shell--paper")}
                       resizable
                       showResizeHandle
@@ -284,6 +285,7 @@ export function CardEditorPane({
                     </div>
                     <CardFrame
                       baseWidth={CANONICAL_CARD_WIDTH}
+                      contentPaddingPx={0}
                       className={cn("premium-paper-depth", "card-shell--paper")}
                       resizable
                       showResizeHandle

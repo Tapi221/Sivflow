@@ -245,9 +245,8 @@ function TreeViewLayout({
 
   const mobileDetailTitle = useMemo(() => {
     if (selectedItem?.type === "directory") return "ディレクトリ";
-    if (selectedItem?.type === "today-study") return "今日の学習";
     if (selectedItem?.type === "gallery") return "ギャラリー";
-    if (selectedItem?.type === "calendar") return "予定表";
+    if (selectedItem?.type === "calendar") return "学習予定";
     if (selectedItem?.type === "settings") return "設定";
     if (selectedItem?.type === "trash") return "ごみ箱";
     if (selectedItem?.type === "card") return "カード";

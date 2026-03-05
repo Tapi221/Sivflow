@@ -193,11 +193,6 @@ export default function Folders() {
       handleSelectDocumentInWork(item.id);
       return;
     }
-    if (item.type === "today-study") {
-      setSelectedItem({ type: "today-study" });
-      setSelectedFolderId(null);
-      return;
-    }
     if (item.type === "directory") {
       setSelectedItem({ type: "directory" });
       setSelectedFolderId(null);

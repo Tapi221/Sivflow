@@ -1,29 +1,31 @@
 @layer components {
   .calendar-day-base {
-    @apply relative transition-all duration-200 rounded-2xl flex flex-col items-center pt-2 md:pt-4 overflow-hidden border border-slate-100;
+    @apply relative transition-all duration-200 rounded-2xl flex flex-col items-center pt-2 md:pt-4 overflow-hidden border;
+    border-color: var(--surface-border);
   }
 
   .calendar-day-flat {
     @apply bg-white text-slate-400;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    box-shadow: var(--surface-shadow-concave);
   }
 
   .calendar-day-flat:hover {
-    @apply transform -translate-y-0.5 border-primary-100 text-slate-600;
-    box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
+    @apply border-primary-100 text-slate-600;
+    background-color: rgba(148, 163, 184, 0.12);
+    box-shadow: var(--surface-shadow-concave);
   }
 
   .calendar-day-selected {
     @apply bg-white border-primary-200 text-primary-600 z-10;
-    box-shadow: 0 10px 24px rgba(37, 99, 235, 0.16);
+    box-shadow: var(--surface-shadow-convex);
   }
 
   .calendar-day-today {
-    @apply ring-2 ring-primary-200 border-primary-200;
+    border-color: var(--surface-border);
   }
 
   .calendar-dot-3d {
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.2);
+    box-shadow: var(--surface-shadow-convex);
   }
 
   .calendar-day-selected .calendar-date-text {

@@ -96,6 +96,12 @@
     box-shadow: var(--surface-shadow-concave);
   }
 
+  .text-convex {
+    text-shadow:
+      0 -1px 0 rgba(255, 255, 255, 0.7),
+      0 1px 1px rgba(15, 23, 42, 0.2);
+  }
+
   /* 凸(パネル) */
   .surface-panel-convex {
     box-shadow:

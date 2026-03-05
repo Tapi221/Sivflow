@@ -9,27 +9,12 @@ import {
   Cell,
 } from "recharts";
 import { Button } from "@/components/ui/button";
-import { CardHeader } from "@/components/ui/CardHeader";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { extractTextFromBlocks } from "@/utils";
-import { formatLastAccess } from "@/utils/dateUtils";
 import { calculateResistanceScore } from "@/utils/reviewMetrics";
 import type { Card } from "@/types";
-import {
-  Calendar,
-  FileText,
-  History,
-  Star,
-  ChevronLeft,
-  ChevronRight,
-} from "@/ui/icons";
+import { ChevronLeft, ChevronRight } from "@/ui/icons";
 import { getPageRuledBg } from "@/components/card/frame/ruledStyles";
-
-type FolderStats = {
-  dueCount: number;
-  unlearnedCount: number;
-  lastReviewedAt?: Date | string | null;
-};
 
 type FolderDashboardHandlers = {
   onStartStudy: () => void;
@@ -41,7 +26,6 @@ interface FolderDashboardProps {
   folderId: string;
   folderName: string;
   cards: Card[];
-  stats: FolderStats;
   handlers: FolderDashboardHandlers;
 }
 
@@ -108,56 +92,15 @@ const previewSnippet = (card: Card, headingText: string): string => {
   return text.length > 92 ? `${text.slice(0, 92)}...` : text;
 };
 
-const startOfToday = (): Date => {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d;
-};
-
-const plusDays = (base: Date, days: number): Date => {
-  const next = new Date(base);
-  next.setDate(next.getDate() + days);
-  return next;
-};
-
-const isWithinRange = (value: Date | null, start: Date, end: Date): boolean => {
-  if (!value) return false;
-  return value >= start && value < end;
-};
-
 export function FolderDashboard({
   folderId,
   folderName,
   cards,
-  stats,
   handlers,
 }: FolderDashboardProps) {
-  const lastReviewedText = useMemo(() => {
-    const d = toDate(stats.lastReviewedAt);
-    if (!d) return "未学習";
-    const formatted = formatLastAccess(d);
-    return formatted?.text || d.toLocaleDateString("ja-JP");
-  }, [stats.lastReviewedAt]);
-
-  const todayStart = useMemo(() => startOfToday(), []);
-  const tomorrowStart = useMemo(() => plusDays(todayStart, 1), [todayStart]);
-
   const activeCards = useMemo(() => {
     return cards.filter((c) => !(c.isDeleted ?? (c as unknown).is_deleted));
   }, [cards]);
-
-  const completedToday = useMemo(() => {
-    return activeCards.filter((card) => {
-      const lastReview = toDate(
-        card.lastReviewAt ?? (card as unknown).last_review_at,
-      );
-      return isWithinRange(lastReview, todayStart, tomorrowStart);
-    }).length;
-  }, [activeCards, todayStart, tomorrowStart]);
-
-  const todayPlanned = Math.max(0, (stats.dueCount ?? 0) + completedToday);
-  const todayProgressPercent =
-    todayPlanned > 0 ? Math.round((completedToday / todayPlanned) * 100) : 0;
 
   const sliderCards = useMemo(() => {
     return [...activeCards]
@@ -240,7 +183,7 @@ export function FolderDashboard({
   };
 
   const cardClass =
-    "rounded-xl border border-slate-200 p-4 bg-white shadow-none";
+    "rounded-2xl border border-[var(--surface-border)] p-4 bg-[var(--sidebar-bg)] surface-concave";
 
   return (
     <div className="relative h-full overflow-y-auto">
@@ -248,46 +191,15 @@ export function FolderDashboard({
         className="pointer-events-none absolute inset-0"
         style={getPageRuledBg("rgba(15,23,42,0.035)")}
       />
-      <div className="relative z-[1] max-w-[1120px] mx-auto w-full px-4 py-5 space-y-4">
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+      <div className="relative z-[1] max-w-[1120px] mx-auto w-full px-4 pt-2 pb-6 space-y-4">
+        <div className="flex flex-col gap-2">
           <div>
-            <p className="text-[10px] text-slate-400 font-bold tracking-wider uppercase">
+            <p className="h-[var(--app-row-px)] text-[12px] leading-[var(--app-row-px)] text-slate-400 font-bold tracking-[0.08em] uppercase">
               Folder Dashboard
             </p>
-            <h2 className="text-[22px] md:text-[28px] font-semibold text-slate-900 tracking-[-0.01em] leading-[1.15] mt-1">
+            <h2 className="text-[length:var(--app-row-px)] font-semibold text-slate-900 tracking-[-0.01em] leading-[var(--app-row-px)]">
               {folderName || folderId}
             </h2>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-slate-200 text-slate-500 bg-white shadow-none">
-              <FileText size={11} className="text-slate-400" />
-              <span className="text-[10px] font-medium">カード</span>
-              <span className="text-xs font-bold text-slate-700">
-                {cards.length}
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-slate-200 text-slate-500 bg-white shadow-none">
-              <Calendar size={11} className="text-slate-400" />
-              <span className="text-[10px] font-medium">今日やる</span>
-              <span className="text-xs font-bold text-slate-700">
-                {stats.dueCount ?? 0}
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-slate-200 text-slate-500 bg-white shadow-none">
-              <Star size={11} className="text-slate-400" />
-              <span className="text-[10px] font-medium">未学習</span>
-              <span className="text-xs font-bold text-slate-700">
-                {stats.unlearnedCount ?? 0}
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-slate-200 text-slate-500 bg-white shadow-none">
-              <History size={11} className="text-slate-400" />
-              <span className="text-[10px] font-medium">前回</span>
-              <span className="text-[10px] font-bold text-slate-700 truncate max-w-[92px]">
-                {lastReviewedText}
-              </span>
-            </div>
           </div>
         </div>
 
@@ -321,12 +233,18 @@ export function FolderDashboard({
         </div>
 
         <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_280px] gap-4 items-stretch">
+          <div className="grid grid-cols-1 gap-4 items-stretch">
             <section className={cardClass}>
-              <CardHeader
-                title="カード一覧"
-                description="横にスワイプして確認"
-                action={
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <h3 className="h-[var(--app-row-px)] text-[12px] leading-[var(--app-row-px)] font-semibold tracking-[0.08em] text-[var(--sidebar-text-muted)] uppercase">
+                    カード一覧
+                  </h3>
+                  <p className="text-xs text-[var(--sidebar-text-muted)] mt-1">
+                    横にスワイプして確認
+                  </p>
+                </div>
+                <div className="shrink-0">
                   <Button
                     type="button"
                     size="sm"
@@ -336,8 +254,8 @@ export function FolderDashboard({
                   >
                     すべて開く
                   </Button>
-                }
-              />
+                </div>
+              </div>
 
               <CardScrollSection
                 cards={sliderCards}
@@ -350,103 +268,19 @@ export function FolderDashboard({
                 }
               />
             </section>
-
-            <section
-              className={`${cardClass} md:aspect-square md:flex md:flex-col`}
-            >
-              <CardHeader
-                title="今日の学習"
-                description={`今日やる: ${todayPlanned} / 完了: ${completedToday}`}
-              />
-
-              <div className="mt-4 flex flex-col items-center gap-2 md:flex-1 md:justify-center">
-                {(() => {
-                  const progress = Math.max(
-                    0,
-                    Math.min(100, todayProgressPercent),
-                  );
-                  const radius = 46;
-                  const circumference = 2 * Math.PI * radius;
-                  const dashOffset = circumference * (1 - progress / 100);
-
-                  return (
-                    <div className="relative w-[120px] h-[120px] md:w-[132px] md:h-[132px]">
-                      <svg
-                        viewBox="0 0 120 120"
-                        className="w-full h-full -rotate-90"
-                        aria-hidden="true"
-                      >
-                        <circle
-                          cx="60"
-                          cy="60"
-                          r={radius}
-                          fill="none"
-                          stroke="rgba(148,163,184,0.22)"
-                          strokeWidth="10"
-                        />
-                        <circle
-                          cx="60"
-                          cy="60"
-                          r={radius}
-                          fill="none"
-                          stroke="var(--color-primary-600-hex, #689A98)"
-                          strokeWidth="10"
-                          strokeLinecap="round"
-                          strokeDasharray={circumference}
-                          strokeDashoffset={dashOffset}
-                          className="transition-all duration-500 ease-out"
-                        />
-                      </svg>
-                      <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className="text-2xl md:text-3xl font-bold text-slate-800 tabular-nums">
-                          {completedToday}
-                        </span>
-                        <span className="text-[10px] font-semibold tracking-wide text-slate-400">
-                          完了
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })()}
-                <div className="text-[11px] text-slate-500">
-                  {todayPlanned > 0
-                    ? `${todayProgressPercent}% 完了`
-                    : "今日の予定はありません"}
-                </div>
-              </div>
-
-              <div className="flex flex-wrap gap-2 mt-3 md:mt-auto">
-                {(stats.dueCount ?? 0) > 0 ? (
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={handlers.onStartStudy}
-                    className="h-8 px-4 text-xs"
-                  >
-                    復習を始める
-                  </Button>
-                ) : todayProgressPercent < 100 ? (
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="secondary"
-                    onClick={handlers.onStartStudy}
-                    className="h-8 px-4 text-xs"
-                  >
-                    学習を進める
-                  </Button>
-                ) : null}
-              </div>
-            </section>
           </div>
 
           <section className={cardClass}>
-            <CardHeader
-              title="耐性スコア分布"
-              description="学習の定着度をざっくり可視化"
-            />
+            <div className="min-w-0">
+              <h3 className="h-[var(--app-row-px)] text-[12px] leading-[var(--app-row-px)] font-semibold tracking-[0.08em] text-[var(--sidebar-text-muted)] uppercase">
+                耐性スコア分布
+              </h3>
+              <p className="text-xs text-[var(--sidebar-text-muted)] mt-1">
+                学習の定着度をざっくり可視化
+              </p>
+            </div>
 
-            <div className="h-[340px] mt-3 rounded-2xl bg-white border border-slate-200 px-3 py-4">
+            <div className="h-[340px] mt-3 rounded-2xl bg-[var(--sidebar-bg)] border border-[var(--surface-border)] surface-concave px-3 py-4">
               {canShowDistribution ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
@@ -612,7 +446,7 @@ function CardScrollSection({ cards, onEmpty }: CardScrollSectionProps) {
             return (
               <article
                 key={card.id}
-                className="snap-start shrink-0 w-[240px] md:w-[260px] rounded-xl border border-slate-200 bg-white p-3 shadow-[0_1px_8px_rgba(15,23,42,0.04)] hover:shadow-[0_2px_14px_rgba(15,23,42,0.08)] transition-shadow duration-150"
+                className="snap-start shrink-0 w-[240px] md:w-[260px] rounded-xl border border-[var(--surface-border)] bg-white surface-convex p-3 transition-shadow duration-150 hover:shadow-[0_2px_10px_rgba(86,72,74,0.2)]"
               >
                 <div className="flex items-start justify-between gap-2">
                   <h4 className="text-sm font-semibold text-slate-800 leading-snug line-clamp-2">
