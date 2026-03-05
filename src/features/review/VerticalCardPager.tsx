@@ -75,9 +75,6 @@ export function VerticalCardPager<T>({
       style={{
         overflowY: 'auto',
         height: '100%',
-        // スクロールバーは細めに（デザイン調整）
-        scrollbarWidth: 'thin',
-        scrollbarColor: 'rgba(0,0,0,0.2) transparent',
       }}
     >
       {/* カード列 */}

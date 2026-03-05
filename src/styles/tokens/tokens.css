@@ -36,5 +36,10 @@
     --code-token-string: #2f6b3c;
     --code-token-number: #a35f1a;
     --code-token-operator: #374151;
+
+    --scrollbar-track: #f7f7f8;
+    --scrollbar-thumb: #cfcfd6;
+    --scrollbar-thumb-hover: #b8b8c2;
+    --scrollbar-thumb-active: #9e9eaa;
   }
 }
