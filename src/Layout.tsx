@@ -1,26 +1,11 @@
 import React, { useEffect, Suspense } from 'react';
-import { Outlet, Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
+import { Outlet, useLocation, useSearchParams } from 'react-router-dom';
 import SettingsDialog from '@/components/settings/SettingsDialog';
 import { SyncStatusIndicator } from '@/components/sync/SyncStatusIndicator';
 import { cn } from '@/lib/utils';
 import { UI_TYPO } from '@/styles/tokens/typography';
-// Added hooks for review count
-import { useCards } from '@/hooks/useCards';
-import { useFolders } from '@/hooks/useFolders';
-
-import {
-  Folder, 
-  BookOpen, 
-  Settings
-} from '@/ui/icons';
-import { createPageUrl } from '@/utils';
-import { useUserSettings } from '@/hooks/useUserSettings';
 import { useSettingsQueryParam } from '@/hooks/useSettingsQueryParam';
-import { useReviewCount } from '@/hooks/useReviewCount';
 import { useKatexLoader } from '@/hooks/useKatexLoader';
-
-import { useHeaderCompact } from '@/hooks/useHeaderCompact';
 
 import { ThemeManager } from '@/components/common/ThemeManager';
 import { SecurityAlertBanner } from './components/security/SecurityAlertBanner';
@@ -32,7 +17,6 @@ export default function Layout() {
   // ... (existing logic)
 
   const location = useLocation();
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const isFoldersRoute = /^\/folders(?:\/|$)/i.test(location.pathname);
   const isCardEditRoute = /^\/cardedit(?:\/|$)/i.test(location.pathname);
@@ -52,21 +36,6 @@ export default function Layout() {
   }, [isFoldersRoute, location.pathname]);
   
   const { isSettingsOpen, settingsTab, setIsSettingsOpen } = useSettingsQueryParam(searchParams, setSearchParams);
-  const { settings } = useUserSettings();
-
-  // ヘッダー縮小状態の管理（モバイルのみ）
-  const isHeaderCompact = useHeaderCompact(32, 8);
-
-  // --- Review Count Logic ---
-  const { cards = [], loading: cardsLoading } = useCards();
-  const { folders = [], loading: foldersLoading } = useFolders();
-  const { reviewCount } = useReviewCount({
-    settings,
-    cards,
-    cardsLoading,
-    folders,
-    foldersLoading,
-  });
   
   // Determine currentPageName from location pathname
   const currentPageName = React.useMemo(() => {
@@ -85,7 +54,6 @@ export default function Layout() {
 
   const isStudyModePage = currentPageName === 'StudyMode';
   const isCardEditPage = currentPageName === 'CardEdit';
-  const showMobileHeader = currentPageName === 'Folders';
 
   return (
     <div className={cn("relative flex h-[100dvh] w-full flex-col overflow-hidden", UI_TYPO)}>
@@ -98,86 +66,7 @@ export default function Layout() {
         )}
       </div>
 
-      {/* Mobile Header */}
-      {showMobileHeader && (
-      <header 
-        data-compact={isHeaderCompact}
-        className={cn(
-          "md:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-100 shadow-sm",
-          "transition-[height,padding] duration-200 ease-out",
-          "motion-reduce:transition-none",
-          isHeaderCompact ? "h-12" : "h-14"
-        )}
-      >
-        <div className={cn(
-          "flex items-center justify-between transition-[padding] duration-200 ease-out motion-reduce:transition-none",
-          isHeaderCompact ? "px-3 h-12" : "px-4 h-14"
-        )}>
-          <Link to={createPageUrl('Folders')} className="flex items-center gap-2 select-none">
-            <BookOpen className={cn(
-              "text-primary-600 transition-all duration-200 ease-out motion-reduce:transition-none",
-              isHeaderCompact ? "w-5 h-5" : "w-6 h-6"
-            )} />
-            <span className={cn(
-              "font-bold text-slate-800 transition-all duration-200 ease-out motion-reduce:transition-none",
-              isHeaderCompact ? "text-base" : "text-lg"
-            )}>manifolmia</span>
-            {reviewCount > 0 && (
-                <span className={cn(
-                  "bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center",
-                  "transition-all duration-200 ease-out motion-reduce:transition-none",
-                  isHeaderCompact && "scale-90"
-                )}>
-                    {reviewCount > 99 ? '99+' : reviewCount}
-                </span>
-            )}
-          </Link>
-          
-           <div className="flex items-center gap-2">
-            {!['StudyMode'].includes(currentPageName) && (
-                <SyncStatusIndicator 
-                    dropdownAlign="end"
-                    compact={isHeaderCompact}
-                />
-            )}
-            {/* フォルダ一覧へのリンク（モバイル） */}
-            <Button
-              variant="ghost"
-              size={isHeaderCompact ? "sm" : "icon"}
-              className={cn(
-                "text-slate-400 hover:text-slate-600 hover:bg-slate-50",
-                "transition-all duration-200 ease-out motion-reduce:transition-none",
-                isHeaderCompact ? "w-8 h-8" : "w-10 h-10",
-                location.pathname.toLowerCase().includes('folder') && "text-primary-600 bg-primary-50"
-              )}
-              onClick={() => navigate(createPageUrl('Folders'))}
-              aria-label="フォルダ一覧"
-            >
-              <Folder className={cn(
-                "transition-all duration-200 ease-out motion-reduce:transition-none",
-                isHeaderCompact ? "w-4 h-4" : "w-5 h-5"
-              )} />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size={isHeaderCompact ? "sm" : "icon"}
-              className={cn(
-                "text-slate-400 hover:text-slate-600 hover:bg-slate-50",
-                "transition-all duration-200 ease-out motion-reduce:transition-none",
-                isHeaderCompact ? "ml-0.5 w-8 h-8" : "ml-1 w-10 h-10"
-              )}
-              onClick={() => setIsSettingsOpen(true)}
-            >
-              <Settings className={cn(
-                "transition-all duration-200 ease-out motion-reduce:transition-none",
-                isHeaderCompact ? "w-4 h-4" : "w-5 h-5"
-              )} />
-            </Button>
-          </div>
-
-        </div>
-      </header>
-      )}
+      {/* Mobile Header intentionally disabled */}
       
       <SettingsDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen} initialTab={settingsTab ?? 'account'} />
 
@@ -197,9 +86,7 @@ export default function Layout() {
               : "overflow-y-auto",
             isFoldersRoute || isCardEditRoute || isStudyModePage
               ? ""
-              : showMobileHeader
-                ? "pt-14 md:pt-0 pb-10"
-                : "pb-10"
+              : "pb-10"
           )}
         >
           <Suspense fallback={<LoadingFallback />}>
