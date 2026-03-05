@@ -1,5 +1,6 @@
 import { forwardRef } from 'react'
 import type { SVGProps } from 'react'
+import { UiIcon } from './UiIcon'
 import {
   StratisAlertCircleIcon,
   StratisAlertTriangleIcon,
@@ -155,6 +156,65 @@ function makeIcon(name: string) {
   return Icon
 }
 
+const ExplorerChevronDownIcon = forwardRef<SVGSVGElement, IconProps>(function ExplorerChevronDownIcon(
+  { size = 16, ...props },
+  ref
+) {
+  return (
+    <UiIcon ref={ref} size={size} {...props}>
+      <path d="m7 10 5 5 5-5" />
+    </UiIcon>
+  )
+})
+
+const ExplorerChevronRightIcon = forwardRef<SVGSVGElement, IconProps>(function ExplorerChevronRightIcon(
+  { size = 16, ...props },
+  ref
+) {
+  return (
+    <UiIcon ref={ref} size={size} {...props}>
+      <path d="m10 7 5 5-5 5" />
+    </UiIcon>
+  )
+})
+
+const ExplorerFileTextIcon = forwardRef<SVGSVGElement, IconProps>(function ExplorerFileTextIcon(
+  { size = 16, ...props },
+  ref
+) {
+  return (
+    <UiIcon ref={ref} size={size} {...props}>
+      <path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z" />
+      <path d="M14 2v5h5" />
+      <path d="M9 13h6" />
+      <path d="M9 17h6" />
+    </UiIcon>
+  )
+})
+
+const ExplorerFolderOpenIcon = forwardRef<SVGSVGElement, IconProps>(function ExplorerFolderOpenIcon(
+  { size = 16, ...props },
+  ref
+) {
+  return (
+    <UiIcon ref={ref} size={size} {...props}>
+      <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1H3z" />
+      <path d="M3 10h18l-1.4 8.4A2 2 0 0 1 17.6 20H6.4a2 2 0 0 1-1.98-1.6z" />
+    </UiIcon>
+  )
+})
+
+const ExplorerFolderOutlineIcon = forwardRef<SVGSVGElement, IconProps>(function ExplorerFolderOutlineIcon(
+  { size = 16, ...props },
+  ref
+) {
+  return (
+    <UiIcon ref={ref} size={size} {...props}>
+      <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+    </UiIcon>
+  )
+})
+
 // mapped to StratisAlertCircleIcon
 export const AlertCircle = StratisAlertCircleIcon
 // mapped to StratisAlertTriangleIcon
@@ -175,11 +235,11 @@ export const CheckCheck = makeIcon('CheckCheck')
 export const CheckCircle = makeIcon('CheckCircle')
 export const CheckCircle2 = makeIcon('CheckCircle2')
 // mapped to StratisChevronDownIcon
-export const ChevronDown = StratisChevronDownIcon
+export const ChevronDown = ExplorerChevronDownIcon
 // mapped to StratisChevronLeftIcon
 export const ChevronLeft = StratisChevronLeftIcon
 // mapped to StratisChevronRightIcon
-export const ChevronRight = StratisChevronRightIcon
+export const ChevronRight = ExplorerChevronRightIcon
 // mapped to StratisChevronUpIcon
 export const ChevronUp = StratisChevronUpIcon
 export const Circle = makeIcon('Circle')
@@ -203,14 +263,14 @@ export const FileAudio = makeIcon('FileAudio')
 export const FileEdit = StratisFileEdit02Icon
 export const FileJson = makeIcon('FileJson')
 // mapped to StratisFile02Icon
-export const FileText = StratisFile02Icon
+export const FileText = ExplorerFileTextIcon
 export const FileWarning = makeIcon('FileWarning')
 export const FileX = makeIcon('FileX')
 // mapped to StratisFilterIcon
 export const Filter = StratisFilterIcon
 export const Flame = makeIcon('Flame')
 // mapped to StratisFolderOpen03Icon
-export const Folder = StratisFolderOpen03Icon
+export const Folder = ExplorerFolderOpenIcon
 export const FolderInput = makeIcon('FolderInput')
 // mapped to StratisFolderPlus01Icon
 export const FolderPlus = StratisFolderPlus01Icon
@@ -293,7 +353,7 @@ export const Zap = makeIcon('Zap')
 export const CodeIcon = StratisCode01Icon
 export const FilterIcon = Filter
 export const FolderIcon = Folder
-export const FolderOutlineIcon = StratisFolderIcon
+export const FolderOutlineIcon = ExplorerFolderOutlineIcon
 export const GripIcon = GripVertical
 export const ImageIcon = Image
 export const LinkIcon = Link

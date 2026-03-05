@@ -140,14 +140,29 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                 >
                   {hasExpandableContent ? (
                     isExpanded ? (
-                      <ChevronDown className="sidebar-icon w-4 h-4 text-slate-500" />
+                      <ChevronDown
+                        className={cn(
+                          "sidebar-icon w-4 h-4 text-foreground/60 group-hover:text-foreground/80",
+                          isSelected && "text-foreground"
+                        )}
+                      />
                     ) : (
-                      <ChevronRight className="sidebar-icon w-4 h-4 text-slate-500" />
+                      <ChevronRight
+                        className={cn(
+                          "sidebar-icon w-4 h-4 text-foreground/60 group-hover:text-foreground/80",
+                          isSelected && "text-foreground"
+                        )}
+                      />
                     )
                   ) : null}
                 </div>
 
-                <FolderGlyph className={cn("sidebar-icon w-4 h-4 flex-shrink-0 mr-1", isPinned ? "text-amber-500" : "text-slate-400")} />
+                <FolderGlyph
+                  className={cn(
+                    "sidebar-icon w-4 h-4 flex-shrink-0 mr-1 text-foreground/60 group-hover:text-foreground/80",
+                    isSelected && "text-foreground"
+                  )}
+                />
 
                 {isEditing ? (
                   <input

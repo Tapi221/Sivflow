@@ -57,7 +57,12 @@ export const DocumentRow: React.FC<DocumentRowProps> = ({
       onClick={() => onSelect({ type: 'document', id: docId })}
     >
       <div className="flex-1 flex items-center min-w-0 h-full pr-1">
-        <FileText className="sidebar-icon w-4 h-4 text-rose-500 mr-2 shrink-0" />
+        <FileText
+          className={cn(
+            "sidebar-icon w-4 h-4 mr-2 shrink-0 text-foreground/60 group-hover:text-foreground/80",
+            isSelected && "text-foreground"
+          )}
+        />
         <span className={cn(
           "sidebar-title text-sm truncate lining-nums tabular-nums",
           isSelected ? "text-primary-700 font-medium" : "text-slate-700"

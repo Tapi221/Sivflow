@@ -11,8 +11,34 @@ export const StratisMarkdownIcon = forwardRef<SVGSVGElement, StratisMarkdownIcon
   return (
     <StratisFrameIcon ref={ref} {...props} className={className}>
       <path
-        d="M6.8 7.6H8.45L10.35 10.15L12.25 7.6H13.9V15.9H12.25V10.25L10.35 12.75L8.45 10.25V15.9H6.8V7.6ZM13.9 12.35H15.9V10.85H17.4V12.35H19.4L16.65 15.3L13.9 12.35Z"
-        fill="currentColor"
+        d="M7.2 15.8V8.2L10.35 12.05L13.5 8.2V15.8"
+        stroke="currentColor"
+        strokeWidth="2.1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        vectorEffect="non-scaling-stroke"
+        shapeRendering="geometricPrecision"
+        fill="none"
+      />
+      <path
+        d="M16.65 9.2V15.5"
+        stroke="currentColor"
+        strokeWidth="2.1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        vectorEffect="non-scaling-stroke"
+        shapeRendering="geometricPrecision"
+        fill="none"
+      />
+      <path
+        d="M14.7 13.55L16.65 15.5L18.6 13.55"
+        stroke="currentColor"
+        strokeWidth="2.1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        vectorEffect="non-scaling-stroke"
+        shapeRendering="geometricPrecision"
+        fill="none"
       />
     </StratisFrameIcon>
   );

@@ -125,8 +125,8 @@ export const CardRow: React.FC<CardRowProps> = ({
             >
               <FileText
                 className={cn(
-                  "sidebar-icon w-4 h-4 flex-shrink-0 mr-1",
-                  isPinned ? "text-amber-500" : "text-slate-400"
+                  "sidebar-icon w-4 h-4 flex-shrink-0 mr-1 text-foreground/60 group-hover:text-foreground/80",
+                  isSelected && "text-foreground"
                 )}
               />
 

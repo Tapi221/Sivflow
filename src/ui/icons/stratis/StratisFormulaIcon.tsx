@@ -11,8 +11,14 @@ export const StratisFormulaIcon = forwardRef<SVGSVGElement, StratisFormulaIconPr
   return (
     <StratisFrameIcon ref={ref} {...props} className={className}>
       <path
-        d="M7.2 7.5H16.8V9.3H11.05L14.9 12L11.05 14.7H16.8V16.5H7.2V14.45L11.95 12L7.2 9.55V7.5Z"
-        fill="currentColor"
+        d="M16.4 8.2H8L12 12L8 15.8H16.4"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        vectorEffect="non-scaling-stroke"
+        shapeRendering="geometricPrecision"
+        fill="none"
       />
     </StratisFrameIcon>
   );
