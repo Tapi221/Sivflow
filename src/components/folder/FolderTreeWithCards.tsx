@@ -35,10 +35,14 @@ import {
 import { FolderRow } from './explorer/rows/FolderRow';
 import { EXPLORER_ROW_BASE_CLASS_NAME } from './explorer/rows/shared';
 import BulkTagDialog from '@/components/tag/BulkTagDialog';
+import { FolderTreeArborist } from '@/components/sidebar/FolderTreeArborist';
 import {
-  FolderTreeArborist,
-  type FolderTreeArboristNode,
-} from '@/components/sidebar/FolderTreeArborist';
+  buildExplorerTreeData,
+  parseSelectedTreeId,
+  toExpandedTreeIds,
+  toSelectedTreeId,
+  type ExplorerTreeNode,
+} from './explorer/tree/arboristAdapter';
 
 const isSoftDeleted = (entity?: { isDeleted?: boolean; is_deleted?: boolean } | null) =>
   Boolean(entity?.isDeleted ?? entity?.is_deleted);
@@ -68,17 +72,6 @@ interface FolderTreeWithCardsProps {
   /** サイドバー外側のclass（任意） */
   className?: string;
 }
-
-type ExplorerTreeNode = FolderTreeArboristNode & {
-  kind: 'folder' | 'card' | 'document';
-  rawId: string;
-  folder?: FolderTreeNode;
-  card?: Card;
-  document?: DocumentItem;
-  isDimmed?: boolean;
-  matchCount?: number;
-  children?: ExplorerTreeNode[];
-};
 
 export function FolderTreeWithCards({
   folders,
@@ -502,64 +495,34 @@ export function FolderTreeWithCards({
     });
   }, [isFiltering, rootItems, rootFolders, matchCountMap]);
 
-  const explorerTreeData = useMemo<ExplorerTreeNode[]>(() => {
-    const buildItemNode = (item: ExplorerItem): ExplorerTreeNode => {
-      if (item.type === 'card') {
-        const cardTitle =
-          item.data.title ||
-          ((item.data as any).questionText || (item.data as any).question_text || '')
-            .replace(/<[^>]*>/g, '')
-            .trim()
-            .slice(0, 50) ||
-          '無題のカード';
-
-        return {
-          id: `card:${item.data.id}`,
-          rawId: item.data.id,
-          name: cardTitle,
-          kind: 'card',
-          card: item.data,
-        };
-      }
-
-      return {
-        id: `document:${item.data.id}`,
-        rawId: item.data.id,
-        name: item.data.title || '無題のドキュメント',
-        kind: 'document',
-        document: item.data,
-      };
-    };
-
-    const buildFolderNode = (folder: FolderTreeNode): ExplorerTreeNode => {
-      const folderId = getFolderId(folder);
-      const childFolderNodes = getChildFolders(folderId).map(buildFolderNode);
-      const itemNodes = getFolderItems(folderId).map(buildItemNode);
-
-      return {
-        id: `folder:${folderId}`,
-        rawId: folderId,
-        name: folder.folderName || folder.folder_name || '無題のフォルダ',
-        kind: 'folder',
-        folder,
-        isDimmed: isFiltering ? (matchCountMap.get(folderId) ?? 0) === 0 : false,
-        matchCount: isFiltering ? (matchCountMap.get(folderId) ?? 0) : -1,
-        children: [...childFolderNodes, ...itemNodes],
-      };
-    };
-
-    return [
-      ...rootFolders.map(buildFolderNode),
-      ...rootItems.map(buildItemNode),
-    ];
-  }, [getChildFolders, getFolderItems, isFiltering, matchCountMap, rootFolders, rootItems]);
+  const explorerTreeData = useMemo<ExplorerTreeNode[]>(
+    () =>
+      buildExplorerTreeData({
+        rootFolders,
+        rootItems,
+        getChildFolders,
+        getFolderItems,
+        isFiltering,
+        matchCountMap,
+        getFolderId,
+      }),
+    [getChildFolders, getFolderItems, isFiltering, matchCountMap, rootFolders, rootItems]
+  );
 
   const selectedTreeId = useMemo(() => {
-    if (selectedItem?.type === 'card') return `card:${selectedItem.id}`;
-    if (selectedItem?.type === 'document') return `document:${selectedItem.id}`;
-    if (selectedFolderId) return `folder:${selectedFolderId}`;
-    return null;
+    return toSelectedTreeId(selectedFolderId, selectedItem);
   }, [selectedFolderId, selectedItem]);
+
+  const handleTreeSelect = useCallback(
+    (id: string) => {
+      const parsed = parseSelectedTreeId(id);
+      if (!parsed) return;
+      if (parsed.type === 'folder') onFolderSelect(parsed.id);
+      if (parsed.type === 'card') onItemSelect({ type: 'card', id: parsed.id });
+      if (parsed.type === 'document') onItemSelect({ type: 'document', id: parsed.id });
+    },
+    [onFolderSelect, onItemSelect]
+  );
 
   const getNextOrderIndex = useCallback(
     (folderId: string | null) => {
@@ -1512,12 +1475,8 @@ export function FolderTreeWithCards({
             <FolderTreeArborist
               data={explorerTreeData}
               selectedId={selectedTreeId}
-              expandedIds={Array.from(expandedFolders, (id) => `folder:${id}`)}
-              onSelect={(id) => {
-                if (id.startsWith('folder:')) onFolderSelect(id.slice('folder:'.length));
-                if (id.startsWith('card:')) onItemSelect({ type: 'card', id: id.slice('card:'.length) });
-                if (id.startsWith('document:')) onItemSelect({ type: 'document', id: id.slice('document:'.length) });
-              }}
+              expandedIds={toExpandedTreeIds(expandedFolders)}
+              onSelect={handleTreeSelect}
               onToggleExpand={(id, nextOpen) => {
                 if (!id.startsWith('folder:')) return;
                 const folderId = id.slice('folder:'.length);
