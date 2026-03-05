@@ -173,7 +173,13 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
           {isMetaOpen ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </Button>
 
-        <div className="min-w-0 flex-1 overflow-y-auto overflow-x-clip p-4">
+        <div
+          className="min-w-0 flex-1 overflow-y-auto overflow-x-clip p-4"
+          style={{
+            background:
+              "radial-gradient(1200px 800px at 50% 120px, #FBFAF8 0%, var(--app-bg, #F8FAFB) 50%, #F6F4F1 100%)",
+          }}
+        >
           {isEditing ? (
             <div className="flex flex-col items-center gap-4">
               <div className="flex w-full items-center justify-end gap-2">

@@ -730,7 +730,10 @@ function TreeViewLayout({
 
             <div
               ref={contentScrollRef}
-              className="flex-1 min-h-0 overflow-y-auto outline-none min-w-0"
+              className={cn(
+                "flex-1 min-h-0 outline-none min-w-0",
+                explorerTab === 'explorer' ? 'overflow-hidden' : 'overflow-y-auto'
+              )}
             >
               {renderTabContent()}
             </div>
