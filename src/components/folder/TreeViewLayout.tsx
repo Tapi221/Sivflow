@@ -699,7 +699,7 @@ function TreeViewLayout({
       <div
         ref={sidebarRef}
         className={cn(
-          "shrink-0 flex-col bg-[#F8FAFB] md:bg-[#F8FAFB] border-r-0 md:border-r border-sidebar-border relative group/sidebar select-none",
+          "shrink-0 flex-col bg-[var(--sidebar-bg)] md:bg-[var(--sidebar-bg)] border-r-0 md:border-r border-sidebar-border relative group/sidebar select-none",
           showMobileDetail ? "hidden md:flex" : "flex",
           "md:ring-1 md:ring-black/5 md:shadow-[inset_0_1px_0_rgba(255,255,255,0.75),inset_-1px_0_0_rgba(255,255,255,0.5),10px_0_24px_-20px_rgba(15,23,42,0.35)]",
           isResizing ? "transition-none will-change-[width]" : "transition-all duration-300 ease-in-out",
