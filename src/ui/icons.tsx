@@ -21,6 +21,7 @@ import {
   StratisFile02Icon,
   StratisFileEdit02Icon,
   StratisFilterIcon,
+  StratisFormulaIcon,
   StratisFolderIcon,
   StratisFolderOpen03Icon,
   StratisFolderSearch01Icon,
@@ -29,6 +30,7 @@ import {
   StratisHelpCircleContainedIcon,
   StratisHome05Icon,
   StratisImageIcon,
+  StratisMarkdownIcon,
   StratisInfoSquare01ContainedIcon,
   StratisLinkAngledIcon,
   StratisLinkExternalIcon,
@@ -308,3 +310,4 @@ export const Code = CodeIcon
 export const Sigma = SigmaIcon
 export const NotebookPen = NotebookPenIcon
 export const StickyNote = StickyNoteIcon
+export { StratisFormulaIcon, StratisMarkdownIcon }

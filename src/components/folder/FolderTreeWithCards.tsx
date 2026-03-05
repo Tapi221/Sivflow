@@ -1512,7 +1512,7 @@ export function FolderTreeWithCards({
       <div
         ref={treeRootRef}
         className={cn(
-          'h-full w-full bg-[#F1F4F7] border-r border-black/5',
+          'h-full w-full border-r border-black/5',
           className
         )}
       >

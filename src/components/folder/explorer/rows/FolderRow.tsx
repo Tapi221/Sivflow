@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronRight, ChevronDown, FolderOutlineIcon, MoreVertical } from '@/ui/icons';
+import { ChevronRight, ChevronDown, FolderIcon, FolderOutlineIcon, MoreVertical } from '@/ui/icons';
 import { Droppable } from '@hello-pangea/dnd';
 import { cn } from '@/lib/utils';
 import { ContextMenu } from '../../ContextMenu';
@@ -94,6 +94,8 @@ export const FolderRow: React.FC<FolderRowProps> = ({
   const folderName = folder.folderName || folder.folder_name || '無題のフォルダ';
   const isOptimisticFolder = Boolean(folder.__optimistic);
   const hasContextMenu = !isOptimisticFolder && hasUpdateOrDelete;
+  const isTopLevelFolder = depth === 0;
+  const FolderGlyph = isTopLevelFolder ? FolderIcon : FolderOutlineIcon;
 
   return (
     <div key={folderId} className={cn(isDimmed && "opacity-50")}>
@@ -144,7 +146,7 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                   ) : null}
                 </div>
 
-                <FolderOutlineIcon className={cn("sidebar-icon w-4 h-4 flex-shrink-0 mr-1", isPinned ? "text-amber-500" : "text-slate-400")} />
+                <FolderGlyph className={cn("sidebar-icon w-4 h-4 flex-shrink-0 mr-1", isPinned ? "text-amber-500" : "text-slate-400")} />
 
                 {isEditing ? (
                   <input

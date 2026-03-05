@@ -5,8 +5,8 @@ import {
 import { Type } from '@/ui/icons';
 import { Code } from '@/ui/icons';
 import { ImageIcon } from '@/ui/icons';
-import { Sigma } from '@/ui/icons';
-import { NotebookPen } from '@/ui/icons';
+import { StratisFormulaIcon } from '@/ui/icons';
+import { StratisMarkdownIcon } from '@/ui/icons';
 import { cn } from '@/lib/utils'; // clsx + tailwind-merge のユーティリティ
 import type { CardBlock } from '@/types';
 
@@ -80,9 +80,9 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
       switch (iconName) {
         case 'Type':       return Type;
         case 'Image':      return ImageIcon;
-        case 'Sigma':      return Sigma;
+        case 'Sigma':      return StratisFormulaIcon;
         case 'Code':       return Code;
-        case 'NotebookPen':return NotebookPen;
+        case 'NotebookPen':return StratisMarkdownIcon;
       }
     }
     // iconName が未定義 or 未知の値だった場合のフォールバック
@@ -90,8 +90,8 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
       case 'text':      return Type;
       case 'code':      return Code;
       case 'image':     return ImageIcon;
-      case 'markdown':  return NotebookPen;
-      case 'math':      return Sigma;
+      case 'markdown':  return StratisMarkdownIcon;
+      case 'math':      return StratisFormulaIcon;
       default:          return Plus; // 想定外の type には「＋」アイコンを表示
     }
   };
