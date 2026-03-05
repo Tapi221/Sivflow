@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { getPageRuledBg } from '@/components/card/frame/ruledStyles';
 import { useNavigate } from 'react-router-dom';
 import { useCards } from '@/hooks/useCards';
 import { useFolders } from '@/hooks/useFolders';
@@ -236,8 +237,7 @@ export default function Dashboard() {
       <div 
         className="absolute inset-0 opacity-100 pointer-events-none z-0" 
         style={{ 
-          backgroundImage: 'repeating-linear-gradient(to bottom, rgba(0,0,0,0.03) 0px, rgba(0,0,0,0.03) 1px, transparent 1px, transparent 24px)',
-          backgroundSize: '100% 24px'
+          ...getPageRuledBg()
         }}
       />
       <div className="max-w-[1100px] mx-auto p-4 md:p-12 relative z-10">

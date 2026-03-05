@@ -9,6 +9,7 @@ import { formatLastAccess } from '@/utils/dateUtils';
 import { calculateResistanceScore } from '@/utils/reviewMetrics';
 import type { Card } from '@/types';
 import { Calendar, FileText, History, Star, ChevronLeft, ChevronRight } from '@/ui/icons';
+import { getPageRuledBg } from '@/components/card/frame/ruledStyles';
 
 
 type FolderStats = {
@@ -206,11 +207,7 @@ export function FolderDashboard({
     <div className="relative h-full overflow-y-auto">
       <div
         className="pointer-events-none absolute inset-0"
-        style={{
-          backgroundImage:
-            'repeating-linear-gradient(to bottom, rgba(15,23,42,0.035) 0px, rgba(15,23,42,0.035) 1px, transparent 1px, transparent 24px)',
-          backgroundSize: '100% 24px',
-        }}
+        style={getPageRuledBg('rgba(15,23,42,0.035)')}
       />
       <div className="relative z-[1] max-w-[1120px] mx-auto w-full px-4 py-5 space-y-4">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3">

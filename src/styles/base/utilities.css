@@ -51,17 +51,6 @@
     word-break: break-all;
   }
 
-  .bg-ruled {
-    --ruled-line-pitch: var(--card-line-height, 24px);
-    background-image: repeating-linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 0.03),
-      rgba(0, 0, 0, 0.03) 1px,
-      transparent 1px,
-      transparent var(--ruled-line-pitch)
-    );
-    background-size: 100% var(--ruled-line-pitch);
-  }
 
   .bg-sidebar {
     background-color: var(--sidebar-bg) !important;

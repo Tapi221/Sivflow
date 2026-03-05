@@ -49,6 +49,21 @@ function makeLineSvg(color: string, linePx: number): string {
   return toDataUri(svg);
 }
 
+/**
+ * ページ背景用の繰り返し罫線 backgroundImage 値を返す。
+ * rowPx=24, linePx=1 をデフォルトとして使う。
+ */
+export function getPageRuledBg(
+  color = 'rgba(0,0,0,0.03)',
+  rowPx = 24,
+  linePx = 1
+): { backgroundImage: string; backgroundSize: string } {
+  return {
+    backgroundImage: makeRepeatSvg(rowPx, 0, color, linePx),
+    backgroundSize: `100% ${rowPx}px`,
+  };
+}
+
 export function getRuledStyle(params: RuledParams): Pick<
   CSSProperties,
   'backgroundImage' | 'backgroundSize' | 'backgroundPosition' | 'backgroundRepeat'

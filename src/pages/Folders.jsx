@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { getPageRuledBg } from '@/components/card/frame/ruledStyles';
 import { useSearchParams } from 'react-router-dom';
 import { useCards } from '@/hooks/useCards';
 import { useFolders } from '@/hooks/useFolders';
@@ -221,8 +222,7 @@ export default function Folders() {
       <div 
         className="absolute inset-0 opacity-100 pointer-events-none z-0" 
         style={{ 
-          backgroundImage: 'repeating-linear-gradient(to bottom, rgba(0,0,0,0.03) 0px, rgba(0,0,0,0.03) 1px, transparent 1px, transparent 24px)',
-          backgroundSize: '100% 24px'
+          ...getPageRuledBg()
         }}
       />
       <div className="w-full mx-auto h-full">
