@@ -94,7 +94,7 @@ export const FolderRow: React.FC<FolderRowProps> = ({
   const folderName = folder.folderName || folder.folder_name || '無題のフォルダ';
   const isOptimisticFolder = Boolean(folder.__optimistic);
   const hasContextMenu = !isOptimisticFolder && hasUpdateOrDelete;
-  const isTopLevelFolder = depth === 0;
+  const isTopLevelFolder = depth <= 1;
   const FolderGlyph = isTopLevelFolder ? FolderIcon : FolderOutlineIcon;
 
   return (

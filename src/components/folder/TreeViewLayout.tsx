@@ -710,13 +710,12 @@ function TreeViewLayout({
         )}
       >
         <div className={cn(
-            "flex flex-col h-full w-full",
-             "bg-[#F8FAFB] md:bg-[#F8FAFB]"
+            "flex flex-col h-full w-full"
         )}>
             {/* ExplorerTabs: 常にSticky表示 */}
             <div
               className={cn(
-                "sticky top-0 z-10 bg-[#F8FAFB] md:bg-[#F8FAFB]",
+                "sticky top-0 z-10",
                 "transition-all duration-200 ease-out",
                 "motion-reduce:transition-none",
                 "md:relative"
