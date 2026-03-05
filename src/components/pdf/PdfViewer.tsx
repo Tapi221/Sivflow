@@ -115,7 +115,7 @@ function PdfPage({
 
   useEffect(() => {
     if (!baseSize) return;
-    setPageSize(baseSize);
+    queueMicrotask(() => setPageSize(baseSize));
   }, [baseSize?.width, baseSize?.height]);
 
   useEffect(() => {
@@ -219,7 +219,9 @@ function PdfPage({
       if (renderTask?.cancel) {
         try {
           renderTask.cancel();
-        } catch {}
+        } catch {
+          // noop
+        }
       }
     };
   }, [pdf, pageNumber, scale, shouldRender, opaqueCanvas]);
@@ -277,12 +279,12 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
     const scrollRafRef = useRef<number | null>(null);
     const pageChangeRafRef = useRef<number | null>(null);
     const pendingPageForCallbackRef = useRef<number | null>(null);
-    const docRef = useRef<any | null>(null);
+    const docRef = useRef<unknown | null>(null);
     const visibilityRatiosRef = useRef<Record<number, number>>({});
     const currentPageRef = useRef(1);
     const onPageChangeRef = useRef(onPageChange);
 
-    const [doc, setDoc] = useState<any | null>(null);
+    const [doc, setDoc] = useState<unknown | null>(null);
     const [numPages, setNumPages] = useState(0);
     const [pageSizes, setPageSizes] = useState<Record<number, PageSize>>({});
     const [loading, setLoading] = useState(false);
@@ -540,7 +542,9 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       if (docRef.current?.destroy) {
         try {
           docRef.current.destroy();
-        } catch {}
+        } catch {
+          // noop
+        }
       }
       docRef.current = null;
 
@@ -627,7 +631,9 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
           if (docRef.current?.destroy) {
             try {
               docRef.current.destroy();
-            } catch {}
+            } catch {
+              // noop
+            }
           }
           docRef.current = pdf;
 
@@ -688,10 +694,14 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
         cancelled = true;
         try {
           loadingTask?.destroy?.();
-        } catch {}
+        } catch {
+          // noop
+        }
         try {
           docRef.current?.destroy?.();
-        } catch {}
+        } catch {
+          // noop
+        }
         docRef.current = null;
       };
     }, [
@@ -754,7 +764,9 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
         if (docRef.current?.destroy) {
           try {
             docRef.current.destroy();
-          } catch {}
+          } catch {
+            // noop
+          }
         }
         docRef.current = null;
       };

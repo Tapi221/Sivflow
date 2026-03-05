@@ -27,10 +27,10 @@ const normalizeTimestampValue = (value: unknown): Date | null => {
   }
   if (
     typeof value === "object" &&
-    typeof (value as any).toDate === "function"
+    typeof (value as unknown).toDate === "function"
   ) {
     try {
-      const dt = (value as any).toDate();
+      const dt = (value as unknown).toDate();
       return dt instanceof Date && !Number.isNaN(dt.getTime()) ? dt : null;
     } catch {
       return null;
@@ -66,7 +66,7 @@ class DataIntegrityService {
       const folders = allFolders.map(normalizeFolder);
       const folderIds = new Set(folders.map((f) => f.id));
 
-      for (const card of cards as any[]) {
+      for (const card of cards as unknown[]) {
         const deletedAtExists = card.deletedAt != null;
         const isDeleted = readDeletedState(card);
         if (deletedAtExists !== isDeleted) {
@@ -163,8 +163,8 @@ class DataIntegrityService {
         }
       }
 
-      for (const folder of folders as any[]) {
-        if (!folder.folderName && !(folder as any).folder_name) {
+      for (const folder of folders as unknown[]) {
+        if (!folder.folderName && !(folder as unknown).folder_name) {
           issues.push({
             code: "MISSING_REQUIRED_FIELD",
             entityType: "folder",

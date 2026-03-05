@@ -1,7 +1,6 @@
 import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Play, Pause, Volume2, Image as ImageIcon } from "@/ui/icons";
-import { cn } from "@/lib/utils";
 import { ImageFrame } from "../blocks/ImageFrame";
 import { useAuth } from "@/contexts/AuthContext";
 import { getOrCreateImageBlobUrl } from "@/services/imageBlobUrlSessionCache";
@@ -156,7 +155,9 @@ export function ImageGallery({ urls, items }: ImageGalleryProps) {
   }, [urlKey]);
 
   React.useEffect(() => {
-    const source = (items && items.length > 0 ? items : urls) as Array<any>;
+    const source = (items && items.length > 0 ? items : urls) as Array<
+      unknown
+    >;
     const candidates = source.filter(
       (entry) => typeof entry === "object" && Boolean(entry),
     );
@@ -169,10 +170,14 @@ export function ImageGallery({ urls, items }: ImageGalleryProps) {
           v.trim().length > 0,
       );
     };
-    const unresolved = candidates.filter(
-      (entry) =>
-        !hasUsableLegacyUrl(entry) && (entry.localFileId || entry.assetId),
-    );
+    const unresolved = candidates.filter((entry) => {
+      if (typeof entry !== "object" || entry === null) return false;
+      const media = entry as {
+        localFileId?: string | null;
+        assetId?: string | null;
+      };
+      return !hasUsableLegacyUrl(entry) && Boolean(media.localFileId || media.assetId);
+    });
     if (unresolved.length === 0) return;
 
     let cancelled = false;
@@ -180,8 +185,13 @@ export function ImageGallery({ urls, items }: ImageGalleryProps) {
       const userId = currentUser?.uid;
       const localEntries = await Promise.all(
         unresolved.map(async (entry) => {
-          const assetId = entry.assetId ?? null;
-          const localBlobId = entry.localFileId ?? assetId;
+          if (typeof entry !== "object" || entry === null) return null;
+          const media = entry as {
+            assetId?: string | null;
+            localFileId?: string | null;
+          };
+          const assetId = media.assetId ?? null;
+          const localBlobId = media.localFileId ?? assetId;
           if (localBlobId) {
             const url = await getOrCreateImageBlobUrl(localBlobId, { userId });
             if (url) {
@@ -196,8 +206,10 @@ export function ImageGallery({ urls, items }: ImageGalleryProps) {
           }
           if (!assetId || !userId) return null;
           const db = await getLocalDb(userId);
-          const asset = await db.images.get(assetId);
-          const remoteKey = (asset as any)?.remoteKey as string | undefined;
+          const asset = (await db.images.get(assetId)) as
+            | { remoteKey?: string }
+            | undefined;
+          const remoteKey = asset?.remoteKey;
           if (!remoteKey) return null;
           try {
             const remoteUrl = await getDownloadURL(

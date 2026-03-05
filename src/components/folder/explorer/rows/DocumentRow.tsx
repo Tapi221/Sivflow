@@ -2,7 +2,7 @@ import React from "react";
 import { FileText, MoreVertical } from "@/ui/icons";
 import { cn } from "@/lib/utils";
 import { DocumentRowMenu } from "../../DocumentRowMenu";
-import type { Card, DocumentItem, FolderTreeNode } from "../model/utils";
+import type { DocumentItem } from "../model/utils";
 import { getExplorerRowStyle } from "./shared";
 
 interface DocumentRowProps {
@@ -19,7 +19,6 @@ interface DocumentRowProps {
   handleTogglePin: () => void;
   rowBaseClassName: string;
   setRowRef: (id: string, node: HTMLElement | null) => void;
-  isDragging: boolean;
   menuOpen: boolean;
   onMenuOpenChange: (open: boolean) => void;
 }
@@ -37,7 +36,6 @@ export const DocumentRow: React.FC<DocumentRowProps> = ({
   handleTogglePin,
   rowBaseClassName,
   setRowRef,
-  isDragging,
   menuOpen,
   onMenuOpenChange,
 }) => {

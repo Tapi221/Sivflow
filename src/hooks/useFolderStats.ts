@@ -45,14 +45,14 @@ export function useFolderStats(cards: Card[]): FolderStats {
 
     for (const card of cards) {
       // Skip deleted cards
-      if (card.isDeleted || (card as any).is_deleted) continue;
+      if (card.isDeleted || (card as unknown).is_deleted) continue;
 
-      const isDraft = card.isDraft ?? (card as any).is_draft;
+      const isDraft = card.isDraft ?? (card as unknown).is_draft;
 
       // Calculate due cards
       if (!isDraft) {
         const reviewDate = toDate(
-          card.nextReviewDate ?? (card as any).next_review_date,
+          card.nextReviewDate ?? (card as unknown).next_review_date,
         );
         if (reviewDate) {
           const rDate = new Date(
@@ -69,14 +69,14 @@ export function useFolderStats(cards: Card[]): FolderStats {
       }
 
       // Calculate unlearned cards
-      const reviewCount = card.reviewCount ?? (card as any).review_count ?? 0;
+      const reviewCount = card.reviewCount ?? (card as unknown).review_count ?? 0;
       if (!isDraft && reviewCount === 0) {
         unlearnedCount += 1;
       }
 
       // Track last review date
       const lastReview = toDate(
-        card.lastReviewAt ?? (card as any).last_review_at,
+        card.lastReviewAt ?? (card as unknown).last_review_at,
       );
       if (lastReview && (!lastReviewedAt || lastReview > lastReviewedAt)) {
         lastReviewedAt = lastReview;

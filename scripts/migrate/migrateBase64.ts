@@ -7,7 +7,7 @@
  * - 次回同期時に自動アップロード
  */
 
-import { LocalDB, initializeDB, getLocalDb } from "../src/services/localDB";
+import { initializeDB, getLocalDb } from "../src/services/localDB";
 import { isBase64DataUrl } from "../src/types/branded";
 
 interface MigrationResult {

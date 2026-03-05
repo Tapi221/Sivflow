@@ -50,8 +50,8 @@ export const buildExplorerTreeData = ({
       const cardTitle =
         item.data.title ||
         (
-          (item.data as any).questionText ||
-          (item.data as any).question_text ||
+          (item.data as unknown).questionText ||
+          (item.data as unknown).question_text ||
           ""
         )
           .replace(/<[^>]*>/g, "")

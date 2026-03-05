@@ -1,4 +1,4 @@
-import { LocalDB, initializeDB, getLocalDb } from "../src/services/localDB";
+import { initializeDB, getLocalDb } from "../src/services/localDB";
 import { Card } from "../src/types";
 
 // データ補正用スクリプト

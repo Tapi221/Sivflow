@@ -71,11 +71,11 @@ const serializeKey = (key: unknown): string => {
   return String(key);
 };
 
-const ensureObject = <T extends Record<string, any>>(value: T): T => ({
+const ensureObject = <T extends Record<string, unknown>>(value: T): T => ({
   ...value,
 });
 
-class InMemoryCollection<T extends Record<string, any>> {
+class InMemoryCollection<T extends Record<string, unknown>> {
   constructor(
     private readonly table: InMemoryTable<T>,
     private readonly predicates: Predicate<T>[] = [],
@@ -262,7 +262,12 @@ class InMemoryCollection<T extends Record<string, any>> {
 
   async sortBy(field: keyof T | string): Promise<T[]> {
     const rows = await this.toArray();
-    rows.sort((a, b) => compareValues((a as any)[field], (b as any)[field]));
+    rows.sort((a, b) =>
+      compareValues(
+        (a as Record<string, unknown>)[field],
+        (b as Record<string, unknown>)[field],
+      ),
+    );
     return rows;
   }
 
@@ -314,7 +319,7 @@ class InMemoryCollection<T extends Record<string, any>> {
   }
 }
 
-class InMemoryTable<T extends Record<string, any>> {
+class InMemoryTable<T extends Record<string, unknown>> {
   private readonly rows = new Map<string, T>();
 
   constructor(
@@ -339,7 +344,7 @@ class InMemoryTable<T extends Record<string, any>> {
         typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
           ? crypto.randomUUID()
           : nanoid();
-      (record as any)[this.keyPath] = key;
+      (record as Record<string, unknown>)[this.keyPath] = key;
     }
     return key;
   }
@@ -372,7 +377,7 @@ class InMemoryTable<T extends Record<string, any>> {
     this.rows.set(nextSerializedKey, value);
   }
 
-  async add(record: T): Promise<any> {
+  async add(record: T): Promise<unknown> {
     const value = ensureObject(record);
     const serialized = this.serializeRecord(value);
     if (this.rows.has(serialized)) {
@@ -382,7 +387,7 @@ class InMemoryTable<T extends Record<string, any>> {
     return this.deriveKeyFromRecord(value);
   }
 
-  async put(record: T): Promise<any> {
+  async put(record: T): Promise<unknown> {
     const value = ensureObject(record);
     const serialized = this.serializeRecord(value);
     this.rows.set(serialized, value);
@@ -437,7 +442,7 @@ class InMemoryTable<T extends Record<string, any>> {
     return Array.from(this.rows.values()).map((value) => ensureObject(value));
   }
 
-  where(index: string | Record<string, any>): InMemoryCollection<T> {
+  where(index: string | Record<string, unknown>): InMemoryCollection<T> {
     if (typeof index === "string") {
       return new InMemoryCollection<T>(
         this,
@@ -507,30 +512,33 @@ export class InMemoryLocalDB {
   public readonly isInMemoryFallback = true;
   public userId?: string;
 
-  folders!: InMemoryTable<any>;
-  cards!: InMemoryTable<any>;
-  documents!: InMemoryTable<any>;
-  users!: InMemoryTable<any>;
-  userSettings!: InMemoryTable<any>;
-  userStats!: InMemoryTable<any>;
-  syncMetadata!: InMemoryTable<any>;
-  levelHistories!: InMemoryTable<any>;
-  deviceMeta!: InMemoryTable<any>;
-  syncErrors!: InMemoryTable<any>;
-  syncHistory!: InMemoryTable<any>;
-  syncSettings!: InMemoryTable<any>;
-  syncQueue!: InMemoryTable<any>;
-  conflicts!: InMemoryTable<any>;
-  metadata!: InMemoryTable<any>;
-  images!: InMemoryTable<any>;
-  cardRelations!: InMemoryTable<any>;
-  projectMaps!: InMemoryTable<any>;
-  tags!: InMemoryTable<any>;
-  tags_v2!: InMemoryTable<any>;
-  tags_v3!: InMemoryTable<any>;
+  folders!: InMemoryTable<Record<string, unknown>>;
+  cards!: InMemoryTable<Record<string, unknown>>;
+  documents!: InMemoryTable<Record<string, unknown>>;
+  users!: InMemoryTable<Record<string, unknown>>;
+  userSettings!: InMemoryTable<Record<string, unknown>>;
+  userStats!: InMemoryTable<Record<string, unknown>>;
+  syncMetadata!: InMemoryTable<Record<string, unknown>>;
+  levelHistories!: InMemoryTable<Record<string, unknown>>;
+  deviceMeta!: InMemoryTable<Record<string, unknown>>;
+  syncErrors!: InMemoryTable<Record<string, unknown>>;
+  syncHistory!: InMemoryTable<Record<string, unknown>>;
+  syncSettings!: InMemoryTable<Record<string, unknown>>;
+  syncQueue!: InMemoryTable<Record<string, unknown>>;
+  conflicts!: InMemoryTable<Record<string, unknown>>;
+  metadata!: InMemoryTable<Record<string, unknown>>;
+  images!: InMemoryTable<Record<string, unknown>>;
+  cardRelations!: InMemoryTable<Record<string, unknown>>;
+  projectMaps!: InMemoryTable<Record<string, unknown>>;
+  tags!: InMemoryTable<Record<string, unknown>>;
+  tags_v2!: InMemoryTable<Record<string, unknown>>;
+  tags_v3!: InMemoryTable<Record<string, unknown>>;
 
-  tables: InMemoryTable<any>[] = [];
-  private readonly tableMap = new Map<string, InMemoryTable<any>>();
+  tables: InMemoryTable<Record<string, unknown>>[] = [];
+  private readonly tableMap = new Map<
+    string,
+    InMemoryTable<Record<string, unknown>>
+  >();
   private opened = true;
   private syncTrigger: (() => void) | null = null;
 
@@ -562,14 +570,17 @@ export class InMemoryLocalDB {
     this.registerTable("studyLogs", "id");
   }
 
-  private registerTable(name: string, keyPath: KeyPath): InMemoryTable<any> {
+  private registerTable(
+    name: string,
+    keyPath: KeyPath,
+  ): InMemoryTable<Record<string, unknown>> {
     const table = new InMemoryTable(name, keyPath);
     this.tableMap.set(name, table);
     this.tables.push(table);
     return table;
   }
 
-  table(name: string): InMemoryTable<any> {
+  table(name: string): InMemoryTable<Record<string, unknown>> {
     const table = this.tableMap.get(name);
     if (!table) {
       throw new Error(`[InMemoryLocalDB] Unknown table requested: ${name}`);
@@ -605,7 +616,7 @@ export class InMemoryLocalDB {
     return await scope();
   }
 
-  async getItem(tableName: string, id: string): Promise<any> {
+  async getItem(tableName: string, id: string): Promise<unknown> {
     const item = await this.table(tableName).get(id);
     if (tableName === "cards") return item ? normalizeCard(item) : item;
     if (tableName === "folders")
@@ -613,7 +624,7 @@ export class InMemoryLocalDB {
     return item;
   }
 
-  async getAllItems(tableName: string): Promise<any[]> {
+  async getAllItems(tableName: string): Promise<unknown[]> {
     const items = await this.table(tableName).toArray();
     if (tableName === "cards") return items.map(normalizeCard);
     if (tableName === "folders") return items.map(normalizeFolderWithSilent);
@@ -641,7 +652,7 @@ export class InMemoryLocalDB {
       retryCount: 0,
     };
 
-    await this.syncQueue.put(task as any);
+    await this.syncQueue.put(task as unknown as Record<string, unknown>);
     if (this.syncTrigger) {
       setTimeout(() => this.syncTrigger?.(), 0);
     }
@@ -664,7 +675,10 @@ export class InMemoryLocalDB {
     changes: object,
     skipSync = false,
   ): Promise<number> {
-    const result = await this.table(tableName).update(id, changes as any);
+    const result = await this.table(tableName).update(
+      id,
+      changes as Record<string, unknown>,
+    );
     if (!skipSync && result > 0) {
       const fullItem = await this.table(tableName).get(id);
       if (fullItem) await this.enqueueSync(tableName, fullItem);
@@ -702,7 +716,9 @@ export class InMemoryLocalDB {
     skipSync = false,
   ): Promise<void> {
     if (!Array.isArray(items) || items.length === 0) return;
-    await this.table(tableName).bulkPut(items as any[]);
+    await this.table(tableName).bulkPut(
+      items as Array<Record<string, unknown>>,
+    );
     if (!skipSync) {
       for (const item of items) {
         await this.enqueueSync(tableName, item);
@@ -748,7 +764,7 @@ export class InMemoryLocalDB {
     tableName: string,
     userId: string,
     lastSyncTime: Date,
-  ): Promise<any[]> {
+  ): Promise<Array<Record<string, unknown>>> {
     const rows = await this.table(tableName).toArray();
     const threshold = toTimestamp(lastSyncTime);
     return rows.filter(
@@ -787,7 +803,9 @@ export class InMemoryLocalDB {
     await this.syncErrors.bulkDelete(oldErrors.map((item: unknown) => item.id));
   }
 
-  async getDeviceMeta(userId: string): Promise<any | undefined> {
+  async getDeviceMeta(
+    userId: string,
+  ): Promise<Record<string, unknown> | undefined> {
     return this.deviceMeta.where("userId").equals(userId).first();
   }
 
@@ -795,7 +813,9 @@ export class InMemoryLocalDB {
     await this.deviceMeta.put(meta);
   }
 
-  async getSyncEnabledFolders(userId: string): Promise<any[]> {
+  async getSyncEnabledFolders(
+    userId: string,
+  ): Promise<Array<Record<string, unknown>>> {
     return this.folders
       .where("userId")
       .equals(userId)
@@ -803,7 +823,10 @@ export class InMemoryLocalDB {
       .toArray();
   }
 
-  async getUpdatedCards(folderId: string, lastSyncTime: Date): Promise<any[]> {
+  async getUpdatedCards(
+    folderId: string,
+    lastSyncTime: Date,
+  ): Promise<Array<Record<string, unknown>>> {
     const threshold = toTimestamp(lastSyncTime);
     return this.cards
       .where("folderId")
@@ -825,11 +848,7 @@ export class InMemoryLocalDB {
     this.syncTrigger = callback;
   }
 
-  async importFromDatabase(
-    _sourceDbName: string,
-    _currentUserId: string,
-    _onProgress?: (progress: string) => void,
-  ): Promise<{
+  async importFromDatabase(): Promise<{
     cards: number;
     folders: number;
     stats: number;
@@ -839,20 +858,17 @@ export class InMemoryLocalDB {
     throw new Error("Local fallback mode: database import is unavailable.");
   }
 
-  async extractFromFirestoreSDK(
-    _sourceDbName: string,
-    _currentUserId: string,
-    _onProgress?: (progress: string) => void,
-  ): Promise<{ cards: number; folders: number; firstCardKeys: string[] }> {
+  async extractFromFirestoreSDK(): Promise<{
+    cards: number;
+    folders: number;
+    firstCardKeys: string[];
+  }> {
     throw new Error(
       "Local fallback mode: Firestore cache extraction is unavailable.",
     );
   }
 
-  async repairDataIntegrity(
-    _currentUserId: string,
-    _onProgress?: (msg: string) => void,
-  ): Promise<{
+  async repairDataIntegrity(): Promise<{
     folders: number;
     cards: number;
     canonicalId: string | null;

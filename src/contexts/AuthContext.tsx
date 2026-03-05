@@ -18,7 +18,6 @@ import {
 import { SyncServiceFactory } from "../services/SyncServiceFactory";
 import type { ISyncService } from "../services/interfaces/ISyncService";
 import type { SyncSettings } from "../types/sync";
-import type { SyncContextSource } from "../types/telemetry";
 
 import type { SecurityState } from "../services/logic/SecurityMonitor";
 
@@ -92,7 +91,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   );
 
   // 同期設定とインターバル管理用ref
-  const syncIntervalRef = useRef<any | null>(null);
+  const syncIntervalRef = useRef<unknown | null>(null);
   const syncSettingsRef = useRef<SyncSettings | null>(null);
 
   /**
@@ -150,8 +149,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   /**
    * 内部同期トリガー（循環参照を避けるため分離）
    */
-  const triggerSyncInternal = useCallback(
-    async (source: SyncContextSource = "user_initiated") => {
+  const triggerSyncInternal = useCallback(async () => {
       if (!syncService || !currentUser) {
         console.warn("[Auth] Cannot sync: No sync service or user");
         return;
@@ -201,13 +199,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // If we wanted to guarantee exit from 'syncing', we could check in finally.
       // However, the explicit sets above covers it.
       // The user's issue might be in initialization.
-    },
-    [syncService, currentUser, updateCounts],
-  );
+  }, [syncService, currentUser, updateCounts]);
 
   // Manual sync trigger function
   const triggerSync = useCallback(async () => {
-    await triggerSyncInternal("user_initiated");
+    await triggerSyncInternal();
   }, [triggerSyncInternal]);
 
   useEffect(() => {

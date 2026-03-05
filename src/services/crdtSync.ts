@@ -32,7 +32,7 @@ interface DeltaRecord {
 
 export class CRDTSyncService {
   private ydoc: Y.Doc;
-  private cards: Y.Map<any>;
+  private cards: Y.Map<unknown>;
 
   constructor() {
     this.ydoc = new Y.Doc();

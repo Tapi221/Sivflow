@@ -135,7 +135,7 @@ window.addEventListener("unhandledrejection", (event) => {
   }
 });
 
-window.addEventListener("vite:preloadError" as any, () => {
+window.addEventListener("vite:preloadError" as unknown, () => {
   logBootstrapFault("vite.preloadError", {});
   hardReloadOnce(VITE_PRELOAD_RELOAD_KEY);
 });

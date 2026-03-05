@@ -1,17 +1,13 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   BarChart,
   Bar,
   XAxis,
   YAxis,
   ResponsiveContainer,
-  PieChart,
-  Pie,
   Cell,
-  Legend,
   ReferenceLine,
-  ReferenceArea,
 } from "recharts";
 import {
   normalizeMemoryStability,
@@ -28,7 +24,6 @@ export function StabilityDistributionChart({
   className,
 
   data: manualData = null,
-  barOpacity = 1,
   showReferenceLines = true,
   compact = false,
   tiny = false,
@@ -37,9 +32,7 @@ export function StabilityDistributionChart({
   onStartStudy,
 }) {
   // Use utility for calculation
-  const avgStability = calculateAverageStability(cards);
-
-  const [isDesktop, setIsDesktop] = useState(false);
+  const [, setIsDesktop] = useState(false);
   useEffect(() => {
     const handleResize = () => {
       setIsDesktop(window.innerWidth >= 768);

@@ -20,8 +20,8 @@ export const formatLastAccess = (
 
   // Firestore Timestamp の場合は Date に変換
   let accessDate: Date;
-  if (typeof (lastAccessAt as any)?.toDate === "function") {
-    accessDate = (lastAccessAt as any).toDate();
+  if (typeof (lastAccessAt as { toDate?: () => Date })?.toDate === "function") {
+    accessDate = (lastAccessAt as { toDate: () => Date }).toDate();
   } else if (lastAccessAt instanceof Date) {
     accessDate = lastAccessAt;
   } else {

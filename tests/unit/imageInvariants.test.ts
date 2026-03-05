@@ -11,7 +11,7 @@ describe("Image Invariants", () => {
     it("should reject Base64 in remoteUrl", () => {
       const image: UploadedImage = {
         id: "test-1",
-        remoteUrl: "data:image/png;base64,iVBORw0KG..." as any,
+        remoteUrl: "data:image/png;base64,iVBORw0KG..." as unknown,
         status: "ready",
       };
 
@@ -26,7 +26,7 @@ describe("Image Invariants", () => {
     it("should reject Base64 in localUrl", () => {
       const image: UploadedImage = {
         id: "test-2",
-        localUrl: "data:image/png;base64,iVBORw0KG..." as any,
+        localUrl: "data:image/png;base64,iVBORw0KG..." as unknown,
         status: "uploading",
       };
 
@@ -41,7 +41,7 @@ describe("Image Invariants", () => {
     it("should accept valid Blob URL in localUrl", () => {
       const image: UploadedImage = {
         id: "test-3",
-        localUrl: "blob:http://localhost:5173/abc-123" as any,
+        localUrl: "blob:http://localhost:5173/abc-123" as unknown,
         status: "uploading",
       };
 
@@ -52,7 +52,7 @@ describe("Image Invariants", () => {
       const image: UploadedImage = {
         id: "test-4",
         remoteUrl:
-          "https://firebasestorage.googleapis.com/v0/b/bucket/o/image.jpg" as any,
+          "https://firebasestorage.googleapis.com/v0/b/bucket/o/image.jpg" as unknown,
         status: "ready",
       };
 
@@ -65,7 +65,7 @@ describe("Image Invariants", () => {
       const image: UploadedImage = {
         id: "test-5",
         remoteUrl:
-          "https://firebasestorage.googleapis.com/v0/b/bucket/o/image.jpg" as any,
+          "https://firebasestorage.googleapis.com/v0/b/bucket/o/image.jpg" as unknown,
         status: "ready",
       };
 
@@ -75,7 +75,7 @@ describe("Image Invariants", () => {
     it("should pass for valid image with Blob URL", () => {
       const image: UploadedImage = {
         id: "test-6",
-        localUrl: "blob:http://localhost:5173/abc-123" as any,
+        localUrl: "blob:http://localhost:5173/abc-123" as unknown,
         status: "uploading",
       };
 
@@ -85,7 +85,7 @@ describe("Image Invariants", () => {
     it("should reject invalid remoteUrl (not HTTPS)", () => {
       const image: UploadedImage = {
         id: "test-7",
-        remoteUrl: "http://example.com/image.jpg" as any,
+        remoteUrl: "http://example.com/image.jpg" as unknown,
         status: "ready",
       };
 
@@ -97,7 +97,7 @@ describe("Image Invariants", () => {
     it("should reject invalid localUrl (not Blob URL)", () => {
       const image: UploadedImage = {
         id: "test-8",
-        localUrl: "file:///C:/Users/image.jpg" as any,
+        localUrl: "file:///C:/Users/image.jpg" as unknown,
         status: "uploading",
       };
 

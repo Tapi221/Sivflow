@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useUserSettings } from "@/hooks/useUserSettings";
 
 // Helper to convert hex to RGB object

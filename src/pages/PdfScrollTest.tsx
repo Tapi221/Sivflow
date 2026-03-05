@@ -74,7 +74,7 @@ export default function PdfScrollTest() {
   const pdfBlobUrl = useMemo(
     () =>
       URL.createObjectURL(
-        new Blob([pdfData as any], { type: "application/pdf" }),
+        new Blob([pdfData as unknown], { type: "application/pdf" }),
       ),
     [pdfData],
   );

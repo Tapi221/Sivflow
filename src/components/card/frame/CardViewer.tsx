@@ -28,20 +28,6 @@ function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
 }
 
-function isTypingTarget(target: EventTarget | null) {
-  if (!target || !(target instanceof HTMLElement)) return false;
-
-  const tag = target.tagName;
-  if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return true;
-  if (target.isContentEditable) return true;
-
-  // shadcn/ui みたいに div に role="textbox" を付けるケースも吸う
-  const role = target.getAttribute("role");
-  if (role === "textbox" || role === "combobox") return true;
-
-  return false;
-}
-
 export default function CardViewer({
   cards,
   currentIndex,
@@ -92,30 +78,23 @@ export default function CardViewer({
         key: "ArrowLeft",
         action: handlePrev,
         description: "前のカードへ移動",
-        when: (e: KeyboardEvent) => !isTypingTarget(e.target),
       },
       {
         key: "ArrowRight",
         action: handleNext,
         description: "次のカードへ移動",
-        when: (e: KeyboardEvent) => !isTypingTarget(e.target),
       },
       {
         // できれば event.code === 'Space' で判定したいけど、フック次第なので key で置く
         key: " ",
-        action: (e?: KeyboardEvent) => {
-          // Space のデフォスクロール殺す
-          if (e) e.preventDefault();
-          handleFlip();
-        },
+        action: handleFlip,
         description: "裏表を切り替え",
-        when: (e: KeyboardEvent) => !isTypingTarget(e.target),
       },
     ],
     [handlePrev, handleNext, handleFlip],
   );
 
-  useKeyboardShortcuts(shortcuts as any);
+  useKeyboardShortcuts(shortcuts);
 
   const card = cards[currentIndex];
 

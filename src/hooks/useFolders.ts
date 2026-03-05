@@ -15,7 +15,7 @@ export function useFolders() {
     const rawFolders = await db.folders.toArray();
 
     const filtered = rawFolders.filter(
-      (f) => !((f as any).isDeleted ?? (f as any).is_deleted),
+      (f) => !((f as unknown).isDeleted ?? (f as unknown).is_deleted),
     );
 
     return filtered.map(normalizeFolder);
@@ -23,7 +23,7 @@ export function useFolders() {
 
   const createFolder = async (
     name: string,
-    parentId: string | null = null,
+    
     color?: string,
     cloudSyncEnabled: boolean = true,
   ) => {
@@ -37,8 +37,6 @@ export function useFolders() {
       (f) => f.parentFolderId === parentId,
     );
     const orderIndex = siblings.length;
-
-    const now = Timestamp.now();
     const folderData = {
       userId: currentUser.uid,
       folderName: name,
@@ -66,7 +64,7 @@ export function useFolders() {
       updatedAt: now.toDate(),
     };
     try {
-      await db.addItem("folders", localData as any);
+      await db.addItem("folders", localData as unknown);
       return folderId;
     } catch (err) {
       console.error("[createFolder] ERROR during LocalDB add", {
@@ -80,8 +78,6 @@ export function useFolders() {
 
   const updateFolder = async (folderId: string, data: Partial<Folder>) => {
     if (!currentUser) throw new Error("認証が必要です");
-
-    const now = Timestamp.now();
     const payload = {
       ...data,
       updatedAt: now.toDate(),
@@ -94,11 +90,9 @@ export function useFolders() {
 
   const reorderFolders = async (
     folderIds: string[],
-    parentId: string | null = null,
+    
   ) => {
     if (!currentUser) throw new Error("認証が必要です");
-
-    const now = Timestamp.now();
 
     // 1. LocalDB Updates (Sync Queued for each)
     const db = await getLocalDb();
@@ -113,8 +107,6 @@ export function useFolders() {
 
   const deleteFolder = async (folderId: string) => {
     if (!currentUser) throw new Error("認証が必要です");
-
-    const now = Timestamp.now();
     // 1. LocalDB softDelete (Sync Queued)
     const db = await getLocalDb();
     await db.softDelete("folders", folderId);

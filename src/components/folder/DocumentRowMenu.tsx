@@ -50,12 +50,12 @@ export function DocumentRowMenu({
   const getNextOrderIndex = (folderId: string) => {
     let maxOrder = -1;
     for (const card of cards) {
-      if (card.folderId !== folderId || isSoftDeleted(card as any)) continue;
+      if (card.folderId !== folderId || isSoftDeleted(card as unknown)) continue;
       const order = card.orderIndex ?? -1;
       if (order > maxOrder) maxOrder = order;
     }
     for (const d of documents) {
-      if (d.folderId !== folderId || isSoftDeleted(d as any) || d.id === doc.id)
+      if (d.folderId !== folderId || isSoftDeleted(d as unknown) || d.id === doc.id)
         continue;
       const order = d.orderIndex ?? -1;
       if (order > maxOrder) maxOrder = order;
@@ -64,7 +64,7 @@ export function DocumentRowMenu({
   };
 
   const getDocDisplayName = () => {
-    const legacyName = (doc as any)?.name as string | undefined;
+    const legacyName = (doc as unknown)?.name as string | undefined;
     return doc.title || doc.fileName || legacyName || "無題のドキュメント";
   };
 

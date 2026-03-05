@@ -4,7 +4,6 @@ import { AlertCircle, ChevronDown } from "@/ui/icons";
 
 interface ErrorDialogProps {
   notification: Notification;
-  onDismiss: () => void;
 }
 
 /**
@@ -15,10 +14,7 @@ interface ErrorDialogProps {
  * - 続行不可
  * - 閉じられない
  */
-export const ErrorDialog: React.FC<ErrorDialogProps> = ({
-  notification,
-  onDismiss,
-}) => {
+export const ErrorDialog: React.FC<ErrorDialogProps> = ({ notification }) => {
   const [showDetails, setShowDetails] = useState(false);
 
   return (

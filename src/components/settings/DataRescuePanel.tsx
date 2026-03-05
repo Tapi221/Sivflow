@@ -12,7 +12,6 @@ import {
 import { LocalDB, initializeDB, getLocalDb } from "@/services/localDB";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  Clock,
   RefreshCw,
   AlertTriangle,
   CheckCircle,
@@ -45,7 +44,6 @@ export default function DataRescuePanel() {
   const [progressMsg, setProgressMsg] = useState<string>("");
   const [logs, setLogs] = useState<string[]>([]);
   const [scanResult, setScanResult] = useState<string>("");
-  const [expandedDb, setExpandedDb] = useState<string | null>(null);
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
 
   // Live Stats for Summary Section
@@ -105,7 +103,9 @@ export default function DataRescuePanel() {
             try {
               const count = await table.count();
               tableDetails[table.name] = count;
-            } catch (e) {}
+            } catch {
+              // ignore per-table scan failure
+            }
           }
 
           const counts: unknown = {
@@ -216,6 +216,10 @@ export default function DataRescuePanel() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
+      <div className="hidden">
+        {progressMsg}
+        {scanResult}
+      </div>
       {/* 1. Summary Section */}
       <div className="grid grid-cols-2 gap-4">
         <Card className="bg-white/5 border-white/10 shadow-sm rounded-xl">

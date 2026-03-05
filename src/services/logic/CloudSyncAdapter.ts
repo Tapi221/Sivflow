@@ -49,7 +49,7 @@ function deepStripUndefined(input: unknown): unknown {
  * （大規模運用なら最終的には serverTimestamp に統一したいが、まず死なないのが最優先）
  */
 function cloudUpdatedAt(): unknown {
-  const fn = (Firestore as any).serverTimestamp;
+  const fn = (Firestore as unknown).serverTimestamp;
   if (typeof fn === "function") return fn();
   return Timestamp.now();
 }
@@ -169,9 +169,9 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
 
     try {
       const sinceTimestamp = Timestamp.fromMillis(since);
-      const startAfterFn = (Firestore as any).startAfter as
+      const startAfterFn = (Firestore as unknown).startAfter as
         | undefined
-        | ((snapshot: unknown) => any);
+        | ((snapshot: unknown) => unknown);
 
       // cards
       {
@@ -187,7 +187,7 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
             limit(PAGE_SIZE),
           ];
 
-          // typings に startAfter が無い環境でも動くよう any 経由で呼ぶ
+          // typings に startAfter が無い環境でも動くよう unknown 経由で呼ぶ
           if (startAfterFn && lastDoc)
             constraints.splice(2, 0, startAfterFn(lastDoc));
 
@@ -366,7 +366,7 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
     }
   }
 
-  async pullFull(entityIds: string[]): Promise<any[]> {
+  async pullFull(entityIds: string[]): Promise<unknown[]> {
     const results: unknown[] = [];
 
     for (const id of entityIds) {

@@ -58,7 +58,7 @@ export function useReviewCount({
   foldersLoading,
 }: UseReviewCountParams) {
   const folderMap = useMemo(() => {
-    const map = new Map<string, any>();
+    const map = new Map<string, unknown>();
     folders.forEach((folder: unknown) => {
       const id = folder?.id ?? folder?.folderId;
       if (id) map.set(String(id), folder);

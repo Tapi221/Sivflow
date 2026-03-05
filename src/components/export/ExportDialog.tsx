@@ -83,8 +83,6 @@ export default function ExportDialog({
     }
   };
 
-  const selectedFolder = folders?.find((f) => f.id === selectedFolderId);
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">

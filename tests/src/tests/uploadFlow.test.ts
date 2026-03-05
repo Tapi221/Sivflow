@@ -1,8 +1,6 @@
-import { renderHook, act } from "@testing-library/react-hooks";
+import { renderHook } from "@testing-library/react-hooks";
 import { useReliableFileUpload } from "../hooks/useReliableFileUpload";
 import { vi, describe, it, expect, beforeEach } from "vitest";
-import * as firebaseStorage from "firebase/storage";
-import * as firestore from "firebase/firestore";
 
 // Mock Firebase
 vi.mock("@/services/firebase", () => ({

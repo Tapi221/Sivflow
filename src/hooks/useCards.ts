@@ -3,7 +3,6 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { getLocalDb } from "../services/localDB";
 import { useAuth } from "../contexts/AuthContext";
 import { normalizeCard } from "../utils";
-import { normalizeMemoryStability } from "../utils/reviewUtils";
 import { useUserSettings, DEFAULT_SETTINGS } from "./useUserSettings";
 import type { Card } from "../types";
 import { normalizeInkDocument } from "@/components/ink/inkTypes";
@@ -21,25 +20,9 @@ function isCardDeleted(
     deleted_at?: unknown;
   },
 ) {
-  const deletedAt = (card as any).deletedAt ?? (card as any).deleted_at;
+  const deletedAt = (card as unknown).deletedAt ?? (card as unknown).deleted_at;
   return Boolean(
-    card.isDeleted ?? card.is_deleted ?? (card as any).deleted ?? deletedAt,
-  );
-}
-
-function hasBlocksContent(blocks?: unknown[]): boolean {
-  return (
-    blocks?.some((b) => {
-      if (b.type === "text") return b.content?.trim();
-      if (b.type === "markdown") return b.markdown?.trim();
-      if (b.type === "code") return b.code?.code?.trim();
-      if (b.type === "image") return b.images?.length > 0;
-      if (b.type === "audio") return b.audios?.length > 0;
-      if (b.type === "math") return b.math?.latex?.trim();
-      if (b.type === "reference")
-        return b.references?.some((r: unknown) => r.url?.trim());
-      return false;
-    }) || false
+    card.isDeleted ?? card.is_deleted ?? (card as unknown).deleted ?? deletedAt,
   );
 }
 
@@ -48,7 +31,7 @@ export function useCards(folderId?: string) {
   const [error] = useState<string | null>(null);
 
   // Use settings to determine init schedule
-  const { settings } = useUserSettings();
+  useUserSettings();
 
   // useLiveQueryでリアクティブにカードを取得
   const rawCards = useLiveQuery(
@@ -114,15 +97,6 @@ export function useCards(folderId?: string) {
         }) || false
       );
     };
-
-    const isCompletelyEmpty =
-      !cardData.title?.trim() &&
-      !(Array.isArray(cardData.tagIds) && cardData.tagIds.length > 0) &&
-      !cardData.tags?.length &&
-      !hasBlocksContent(cardData.questionBlocks) &&
-      !hasBlocksContent(cardData.answerBlocks) &&
-      !cardData.questionText?.trim() && // Legacy support
-      !cardData.answerText?.trim(); // Legacy support
 
     // 新規作成時はタイトルが空であることを許容する（あとで編集するため）
     // そのため、作成時のバリデーションはスキップする
@@ -201,8 +175,8 @@ export function useCards(folderId?: string) {
       questionBlocks: cardData.questionBlocks || [],
       answerBlocks: cardData.answerBlocks || [],
       layoutRows: normalizeLayoutRows(
-        (cardData as any).layoutRows ??
-          (cardData as any).layout_rows ??
+        (cardData as unknown).layoutRows ??
+          (cardData as unknown).layout_rows ??
           DEFAULT_LAYOUT_ROWS,
       ),
       inkQuestion: normalizeInkDocument(cardData.inkQuestion),
@@ -246,13 +220,12 @@ export function useCards(folderId?: string) {
       return;
     }
 
-    const mergedCard = { ...currentCard, ...data };
     const patch: Partial<Card> = { ...data };
     // Legacy rows fields are read-only migration inputs. Never persist them again.
-    delete (patch as any).questionExtraRows;
-    delete (patch as any).answerExtraRows;
-    delete (patch as any).question_extra_rows;
-    delete (patch as any).answer_extra_rows;
+    delete (patch as unknown).questionExtraRows;
+    delete (patch as unknown).answerExtraRows;
+    delete (patch as unknown).question_extra_rows;
+    delete (patch as unknown).answer_extra_rows;
     if (Array.isArray(patch.reviewLogs)) {
       patch.reviewLogs = [...patch.reviewLogs].sort(
         (a, b) =>

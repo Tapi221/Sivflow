@@ -105,7 +105,7 @@ export class IndexedDBRebuildOrchestrator {
       // 4. 物理的に削除 (Dexie.delete)
       const dbName =
         oldDb?.name ||
-        (LocalDBClass as any).getDatabaseNameForUser?.(userId) ||
+        (LocalDBClass as unknown).getDatabaseNameForUser?.(userId) ||
         `FlashcardMasterDB_${userId}`;
       console.log(`[Rebuild] Deleting database: ${dbName}`);
       await Dexie.delete(dbName);
@@ -135,9 +135,9 @@ export class IndexedDBRebuildOrchestrator {
           newDb.syncMetadata,
           newDb.levelHistories,
           newDb.deviceMeta,
-          (newDb as any).tags,
-          (newDb as any).cardRelations,
-          (newDb as any).projectMaps,
+          (newDb as unknown).tags,
+          (newDb as unknown).cardRelations,
+          (newDb as unknown).projectMaps,
         ],
         async () => {
           console.log(
@@ -159,7 +159,7 @@ export class IndexedDBRebuildOrchestrator {
             }
 
             try {
-              await newDb.upsert(table as any, sanitizeResult.value, true);
+              await newDb.upsert(table as unknown, sanitizeResult.value, true);
               insertedCount += 1;
             } catch (error) {
               const itemFailure = {

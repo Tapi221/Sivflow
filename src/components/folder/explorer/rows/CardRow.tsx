@@ -29,7 +29,6 @@ interface CardRowProps {
   handleTogglePin: () => void;
   rowBaseClassName: string;
   setRowRef: (id: string, node: HTMLElement | null) => void;
-  isDragging: boolean;
   hasUpdateOrDelete: boolean;
   isNewlyCreated?: boolean;
   menuOpen: boolean;
@@ -56,7 +55,6 @@ export const CardRow: React.FC<CardRowProps> = ({
   handleTogglePin,
   rowBaseClassName,
   setRowRef,
-  isDragging,
   hasUpdateOrDelete,
   isNewlyCreated,
   menuOpen,
@@ -71,7 +69,7 @@ export const CardRow: React.FC<CardRowProps> = ({
 
     // questionText から最初の50文字を取得（HTMLタグを除去）
     const questionText =
-      (card as any).questionText || (card as any).question_text || "";
+      (card as unknown).questionText || (card as unknown).question_text || "";
     const textOnly = questionText.replace(/<[^>]*>/g, "").trim();
     if (textOnly.length > 0) {
       return textOnly.length > 50
@@ -83,7 +81,7 @@ export const CardRow: React.FC<CardRowProps> = ({
   };
 
   const cardTitle = getCardTitle();
-  const isOptimisticCard = Boolean((card as any).__optimistic);
+  const isOptimisticCard = Boolean((card as unknown).__optimistic);
   const isDragDisabled = isOptimisticCard || isEditing;
   const hasContextMenu = !isOptimisticCard && hasUpdateOrDelete;
   return (

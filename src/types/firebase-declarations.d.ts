@@ -4,8 +4,8 @@ declare module "firebase/firestore" {
     ...pathSegments: string[]
   ): unknown;
   export function doc(firestore: unknown, ...pathSegments: string[]): unknown;
-  export function getDoc(reference: unknown): Promise<any>;
-  export function getDocs(query: unknown): Promise<any>;
+  export function getDoc(reference: unknown): Promise<unknown>;
+  export function getDocs(query: unknown): Promise<unknown>;
   export function setDoc(
     reference: unknown,
     data: unknown,
@@ -13,7 +13,7 @@ declare module "firebase/firestore" {
   ): Promise<void>;
   export function updateDoc(reference: unknown, data: unknown): Promise<void>;
   export function deleteDoc(reference: unknown): Promise<void>;
-  export function addDoc(reference: unknown, data: unknown): Promise<any>;
+  export function addDoc(reference: unknown, data: unknown): Promise<unknown>;
   export function query(reference: unknown, ...constraints: unknown[]): unknown;
   export function where(field: string, op: string, value: unknown): unknown;
   export function orderBy(field: string, dir?: "asc" | "desc"): unknown;
@@ -45,7 +45,7 @@ declare module "firebase/functions" {
     host: string,
     port: number,
   ): void;
-  export function httpsCallable<RequestData = any, ResponseData = any>(
+  export function httpsCallable<RequestData = unknown, ResponseData = unknown>(
     functionsInstance: unknown,
     name: string,
     options?: unknown,

@@ -8,7 +8,6 @@ import {
   onSnapshot,
   deleteDoc,
   doc,
-  Timestamp,
 } from "firebase/firestore";
 import { ref, deleteObject } from "firebase/storage";
 import { Button } from "@/components/ui/button";
@@ -25,7 +24,6 @@ import {
 } from "@/ui/icons";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import type { UploadMetadata } from "@/types";
-import { Separator } from "@/components/ui/separator";
 
 export const StorageManager = () => {
   const { currentUser } = useAuth();
@@ -231,8 +229,8 @@ export const StorageManager = () => {
                           {(() => {
                             const d = file.uploadedAt;
                             const date =
-                              d && typeof (d as any).toDate === "function"
-                                ? (d as any).toDate()
+                              d && typeof (d as unknown).toDate === "function"
+                                ? (d as unknown).toDate()
                                 : d;
                             return date
                               ? new Date(date).toLocaleDateString()

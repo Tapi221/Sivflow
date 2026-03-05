@@ -107,7 +107,7 @@ export function BlockRenderer({
                 urls={(block.images ?? [])
                   .map(toMediaUrl)
                   .filter((u): u is string => Boolean(u))}
-                items={(block.images ?? []) as any[]}
+                items={block.images ?? []}
                 onFullscreenChange={onGalleryFullscreenChange}
               />
             )}

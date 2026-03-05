@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { Timestamp } from "firebase/firestore";
 import { computeNextReview } from "@/services/reviewAlgorithm";
 import { normalizeMemoryStability } from "@/utils/reviewUtils";
@@ -20,7 +20,7 @@ const SCORE_TO_RATING: Record<
 
 type Params = {
   studyCards: unknown[];
-  updateCard?: ((id: string, patch: unknown) => Promise<any>) | null;
+  updateCard?: ((id: string, patch: unknown) => Promise<unknown>) | null;
   currentUser: unknown;
   settings: unknown;
   createStudyLogMutation: unknown;
@@ -48,7 +48,7 @@ export function useStudySession({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [studyComplete, setStudyComplete] = useState(false);
   const [results, setResults] = useState({ 0: 0, 1: 0, 2: 0, 3: 0, streak: 0 });
-  const [sessionResults, setSessionResults] = useState<any[]>([]);
+  const [sessionResults, setSessionResults] = useState<unknown[]>([]);
   const [sourceSessionId] = useState(createSessionId);
 
   const safeSessionResults = Array.isArray(sessionResults)
@@ -65,7 +65,7 @@ export function useStudySession({
     if (!currentUser) return;
     try {
       setResults((prev) => ({ ...prev, streak: prev?.streak ?? 0 }));
-    } catch {}
+    } catch { /* noop */ }
   }, [currentUser]);
 
   const handleResult = useCallback(
@@ -120,7 +120,7 @@ export function useStudySession({
             createdAt: new Date(),
             studiedAt: new Date(),
           });
-        } catch {}
+        } catch { /* noop */ }
       }
 
       if (

@@ -27,7 +27,6 @@ import {
   type FolderTreeNode,
   ROOT_FOLDER_ID,
   DEFAULT_NEW_FOLDER_NAME,
-  DEFAULT_NEW_CARD_NAME,
   getFolderId,
   getParentFolderId,
   normalizeFolderId,
@@ -70,7 +69,7 @@ interface FolderTreeWithCardsProps {
   onCreateFolder?: (name: string, parentId?: string) => Promise<string>;
   onUpdateFolder?: (folderId: string, data: unknown) => Promise<void>;
   onDeleteFolder?: (folderId: string) => Promise<void>;
-  onCreateCard?: (data: unknown) => Promise<any>;
+  onCreateCard?: (data: unknown) => Promise<unknown>;
   onUpdateCard?: (cardId: string, data: unknown) => Promise<void>;
   onDeleteCard?: (cardId: string) => Promise<void>;
   moveCardToFolder?: (cardId: string, targetFolderId: string) => Promise<void>;
@@ -94,6 +93,16 @@ interface FolderTreeWithCardsProps {
   /** サイドバー外側のclass（任意） */
   className?: string;
 }
+
+type SoftDeletedEntity = {
+  isDeleted?: boolean;
+  is_deleted?: boolean;
+  folder_id?: string | null;
+  blobUrl?: string | null;
+};
+
+const withLegacyFields = <T extends object>(value: T): T & SoftDeletedEntity =>
+  value as T & SoftDeletedEntity;
 
 export function FolderTreeWithCards({
   folders,
@@ -131,7 +140,7 @@ export function FolderTreeWithCards({
     try {
       const saved = localStorage.getItem("folder_expandedFolders");
       return saved ? new Set(JSON.parse(saved)) : new Set();
-    } catch (e) {
+    } catch {
       return new Set();
     }
   });
@@ -290,7 +299,7 @@ export function FolderTreeWithCards({
   const keyHandlerRef = useRef<(e: KeyboardEvent) => void>(() => {});
 
   const cardsForDnD = useMemo(
-    () => treeCards.filter((card) => !(card as any).__optimistic),
+    () => treeCards.filter((card) => !withLegacyFields(card).__optimistic),
     [treeCards],
   );
 
@@ -419,11 +428,11 @@ export function FolderTreeWithCards({
   const directCardCountByFolderId = useMemo(() => {
     const map = new Map<string, number>();
     for (const card of treeCards) {
-      if (isSoftDeleted(card as any)) continue;
-      if (!hasValidFolderBinding(card.folderId ?? (card as any).folder_id))
+      if (isSoftDeleted(withLegacyFields(card))) continue;
+      if (!hasValidFolderBinding(card.folderId ?? withLegacyFields(card).folder_id))
         continue;
       const folderId = resolveTreeFolderId(
-        card.folderId ?? (card as any).folder_id,
+        card.folderId ?? withLegacyFields(card).folder_id,
       );
       map.set(folderId, (map.get(folderId) ?? 0) + 1);
     }
@@ -473,19 +482,19 @@ export function FolderTreeWithCards({
     };
 
     for (const card of treeCards) {
-      if (isSoftDeleted(card as any)) continue;
-      if (!hasValidFolderBinding(card.folderId ?? (card as any).folder_id))
+      if (isSoftDeleted(withLegacyFields(card))) continue;
+      if (!hasValidFolderBinding(card.folderId ?? withLegacyFields(card).folder_id))
         continue;
-      pushItem(resolveTreeFolderId(card.folderId ?? (card as any).folder_id), {
+      pushItem(resolveTreeFolderId(card.folderId ?? withLegacyFields(card).folder_id), {
         type: "card",
         data: card,
       });
     }
     for (const doc of documents) {
-      if (isSoftDeleted(doc as any)) continue;
-      if (!hasValidFolderBinding(doc.folderId ?? (doc as any).folder_id))
+      if (isSoftDeleted(withLegacyFields(doc))) continue;
+      if (!hasValidFolderBinding(doc.folderId ?? withLegacyFields(doc).folder_id))
         continue;
-      pushItem(resolveTreeFolderId(doc.folderId ?? (doc as any).folder_id), {
+      pushItem(resolveTreeFolderId(doc.folderId ?? withLegacyFields(doc).folder_id), {
         type: "document",
         data: doc,
       });
@@ -662,18 +671,18 @@ export function FolderTreeWithCards({
       const targetFolderId = resolveTreeFolderId(folderId);
       let maxOrder = -1;
       for (const card of treeCards) {
-        if (isSoftDeleted(card as any)) continue;
+        if (isSoftDeleted(withLegacyFields(card))) continue;
         const cardFolderId = resolveTreeFolderId(
-          card.folderId ?? (card as any).folder_id,
+          card.folderId ?? withLegacyFields(card).folder_id,
         );
         if (!isSameFolder(cardFolderId, targetFolderId)) continue;
         const order = card.orderIndex ?? -1;
         if (order > maxOrder) maxOrder = order;
       }
       for (const doc of documents) {
-        if (isSoftDeleted(doc as any)) continue;
+        if (isSoftDeleted(withLegacyFields(doc))) continue;
         const docFolderId = resolveTreeFolderId(
-          doc.folderId ?? (doc as any).folder_id,
+          doc.folderId ?? withLegacyFields(doc).folder_id,
         );
         if (!isSameFolder(docFolderId, targetFolderId)) continue;
         const order = doc.orderIndex ?? -1;
@@ -732,7 +741,7 @@ export function FolderTreeWithCards({
 
         try {
           await saveDocumentBlob(docId, file, { userId: currentUser.uid });
-          await db.documents.put(baseDoc as any);
+          await db.documents.put(baseDoc as unknown as Record<string, unknown>);
           nextOrderIndex += 1;
         } catch (localErr: unknown) {
           console.error(
@@ -772,7 +781,9 @@ export function FolderTreeWithCards({
                 uploadStatus: latestDoc?.uploadStatus ?? null,
                 localFileId: latestDoc?.localFileId ?? null,
                 blobUrl:
-                  (latestDoc as any)?.blobUrl ?? latestDoc?.localUrl ?? null,
+                  withLegacyFields(latestDoc ?? {}).blobUrl ??
+                    latestDoc?.localUrl ??
+                    null,
               },
             );
           }
@@ -790,7 +801,9 @@ export function FolderTreeWithCards({
                 docId,
                 localFileId: failedDoc?.localFileId ?? null,
                 blobUrl:
-                  (failedDoc as any)?.blobUrl ?? failedDoc?.localUrl ?? null,
+                  withLegacyFields(failedDoc ?? {}).blobUrl ??
+                    failedDoc?.localUrl ??
+                    null,
               },
             );
           } catch (markErr) {
@@ -872,7 +885,7 @@ export function FolderTreeWithCards({
 
         try {
           await saveDocumentBlob(docId, file, { userId: currentUser.uid });
-          await db.documents.put(baseDoc as any);
+          await db.documents.put(baseDoc as unknown as Record<string, unknown>);
           nextOrderIndex += 1;
         } catch (localErr: unknown) {
           console.error(
@@ -913,7 +926,9 @@ export function FolderTreeWithCards({
                 uploadStatus: latestDoc?.uploadStatus ?? null,
                 localFileId: latestDoc?.localFileId ?? null,
                 blobUrl:
-                  (latestDoc as any)?.blobUrl ?? latestDoc?.localUrl ?? null,
+                  withLegacyFields(latestDoc ?? {}).blobUrl ??
+                    latestDoc?.localUrl ??
+                    null,
               },
             );
           }
@@ -940,7 +955,9 @@ export function FolderTreeWithCards({
                 docId,
                 localFileId: failedDoc?.localFileId ?? null,
                 blobUrl:
-                  (failedDoc as any)?.blobUrl ?? failedDoc?.localUrl ?? null,
+                  withLegacyFields(failedDoc ?? {}).blobUrl ??
+                    failedDoc?.localUrl ??
+                    null,
               },
             );
           } catch (markErr) {
@@ -980,32 +997,6 @@ export function FolderTreeWithCards({
       return `${DEFAULT_NEW_FOLDER_NAME} (${next})`;
     },
     [treeFolders],
-  );
-
-  const getUniqueCardName = useCallback(
-    (folderId: string | null) => {
-      const targetFolderId = resolveTreeFolderId(folderId);
-      const names = new Set(
-        treeCards
-          .filter((card) => {
-            if (isSoftDeleted(card as any)) return false;
-            const cardFolderId = resolveTreeFolderId(
-              card.folderId ?? (card as any).folder_id,
-            );
-            return isSameFolder(cardFolderId, targetFolderId);
-          })
-          .map((card) => String(card.title ?? "").trim())
-          .filter(Boolean),
-      );
-      if (!names.has(DEFAULT_NEW_CARD_NAME)) return DEFAULT_NEW_CARD_NAME;
-
-      let next = 2;
-      while (names.has(`${DEFAULT_NEW_CARD_NAME} (${next})`)) {
-        next += 1;
-      }
-      return `${DEFAULT_NEW_CARD_NAME} (${next})`;
-    },
-    [treeCards, resolveTreeFolderId],
   );
 
   const handleCreateFolderAction = async (parentId: string | null) => {
@@ -1338,9 +1329,9 @@ export function FolderTreeWithCards({
             flatList.push({
               id:
                 item.data.id ||
-                (item.data as any).cardId ||
-                (item.data as any).documentId,
-              type: item.type as any,
+                withLegacyFields(item.data).cardId ||
+                withLegacyFields(item.data).documentId,
+              type: item.type as ExplorerItem["type"],
               parentId: id,
             });
           });
@@ -1356,9 +1347,9 @@ export function FolderTreeWithCards({
       flatList.push({
         id:
           item.data.id ||
-          (item.data as any).cardId ||
-          (item.data as any).documentId,
-        type: item.type as any,
+          withLegacyFields(item.data).cardId ||
+          withLegacyFields(item.data).documentId,
+        type: item.type as ExplorerItem["type"],
         parentId: null,
       });
     });
@@ -1388,8 +1379,8 @@ export function FolderTreeWithCards({
             type: folderItems[0].type === "card" ? "card" : "document",
             id:
               folderItems[0].data.id ||
-              (folderItems[0].data as any).cardId ||
-              (folderItems[0].data as any).documentId,
+              withLegacyFields(folderItems[0].data).cardId ||
+              withLegacyFields(folderItems[0].data).documentId,
           });
         }
       }
@@ -1532,7 +1523,7 @@ export function FolderTreeWithCards({
               onNavigate={() => onFolderSelect(folderId)}
               handleCreateFolderAction={handleCreateFolderAction}
               handleCreateCardAction={handleCreateCardAction}
-              handleDelete={handleDelete as any}
+              handleDelete={handleDelete}
               handleRenameConfirm={handleRenameConfirm}
               renameCancelledRef={renameCancelledRef}
               isPinned={isPinned}

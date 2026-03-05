@@ -303,7 +303,7 @@ export class SyncService {
    * Network Information APIが未対応の場合はtrue（同期許可）を返す
    */
   private isWifiConnection(): boolean {
-    const conn = (navigator as any).connection;
+    const conn = (navigator as unknown).connection;
     if (!conn || !conn.type) return true; // 判定不能 → 許可
     return conn.type === "wifi";
   }
@@ -535,7 +535,7 @@ export class SyncService {
                 remoteStatus: "failed",
                 updatedAt: new Date(),
                 createdAt: new Date(),
-              } as any);
+              } as unknown);
               throw new Error(`Asset blob missing: ${assetId}`);
             }
             const task = uploadBytesResumable(
@@ -552,16 +552,16 @@ export class SyncService {
             const remoteUrl = await getDownloadURL(task.snapshot.ref);
             const existingAsset = await this.localDB.images.get(assetId);
             await this.localDB.images.put({
-              ...((existingAsset as any) ?? {}),
+              ...((existingAsset as unknown) ?? {}),
               id: assetId,
               userId: this.userId,
               mime:
                 blob.type ||
                 payload.mime ||
-                (existingAsset as any)?.mime ||
+                (existingAsset as unknown)?.mime ||
                 "application/octet-stream",
               size:
-                blob.size || payload.size || (existingAsset as any)?.size || 0,
+                blob.size || payload.size || (existingAsset as unknown)?.size || 0,
               localBlobId,
               localStatus: "present",
               remoteKey,
@@ -569,8 +569,8 @@ export class SyncService {
               remoteUrlCache: remoteUrl,
               retryCount: 0,
               updatedAt: new Date(),
-              createdAt: (existingAsset as any)?.createdAt ?? new Date(),
-            } as any);
+              createdAt: (existingAsset as unknown)?.createdAt ?? new Date(),
+            } as unknown);
             if (import.meta.env.DEV) {
               console.info("[AssetSync] syncQueue upload success", {
                 assetId,
@@ -588,7 +588,7 @@ export class SyncService {
             await this.localDB.images.update(item.payload.id ?? item.targetId, {
               remoteStatus: "none",
               updatedAt: new Date(),
-            } as any);
+            } as unknown);
           } else if (item.entity === "card") {
             await this.cloudProvider.deleteCard(item.payload.id, this.userId);
           } else {

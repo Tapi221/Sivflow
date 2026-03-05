@@ -73,7 +73,7 @@ export function CardMetaPanel({
   const [period, setPeriod] = useState<Period>("30d");
   const [titleInput, setTitleInput] = useState(card?.title ?? "");
   const [draftChecked, setDraftChecked] = useState(
-    Boolean(card?.isDraft ?? (card as any)?.is_draft),
+    Boolean(card?.isDraft ?? (card as unknown)?.is_draft),
   );
   const [, setSearchParams] = useSearchParams();
   const { tagById } = useTags();
@@ -84,9 +84,9 @@ export function CardMetaPanel({
 
   useEffect(() => {
     queueMicrotask(() =>
-      setDraftChecked(Boolean(card?.isDraft ?? (card as any)?.is_draft)),
+      setDraftChecked(Boolean(card?.isDraft ?? (card as unknown)?.is_draft)),
     );
-  }, [card?.id, card?.isDraft, (card as any)?.is_draft]);
+  }, [card?.id, card?.isDraft, (card as unknown)?.is_draft]);
 
   const safeLogs = useMemo(
     () =>
@@ -111,9 +111,9 @@ export function CardMetaPanel({
       return latestReview.resistanceScore;
     }
     const next = toValidDate(
-      card.nextReviewDate ?? (card as any).next_review_date,
+      card.nextReviewDate ?? (card as unknown).next_review_date,
     );
-    const last = toValidDate(card.lastReviewAt ?? (card as any).last_review_at);
+    const last = toValidDate(card.lastReviewAt ?? (card as unknown).last_review_at);
     if (!next || !last) return null;
     const intervalDays = Math.max(
       0,
@@ -124,7 +124,7 @@ export function CardMetaPanel({
 
   // reviewCount は snake_case で入ってくるケースがあるので両対応しておく（UI側は事故らないのが正義）
   const rawReviewCount = (card?.reviewCount ??
-    (card as any)?.review_count ??
+    (card as unknown)?.review_count ??
     0) as unknown;
   const normalizedReviewCount = Number.isFinite(Number(rawReviewCount))
     ? Math.max(0, Math.trunc(Number(rawReviewCount)))
@@ -215,7 +215,7 @@ export function CardMetaPanel({
                   if (!card) return;
                   void Promise.resolve(onToggleDraft(next)).catch(() => {
                     setDraftChecked(
-                      Boolean(card?.isDraft ?? (card as any)?.is_draft),
+                      Boolean(card?.isDraft ?? (card as unknown)?.is_draft),
                     );
                   });
                 }}
@@ -259,24 +259,24 @@ export function CardMetaPanel({
           <div className="space-y-0">
             <p className={infoRowClass}>
               作成日:{" "}
-              {formatDateLabel(card?.createdAt ?? (card as any)?.created_at)}
+              {formatDateLabel(card?.createdAt ?? (card as unknown)?.created_at)}
             </p>
             <p className={infoRowClass}>
               更新日:{" "}
-              {formatDateLabel(card?.updatedAt ?? (card as any)?.updated_at)}
+              {formatDateLabel(card?.updatedAt ?? (card as unknown)?.updated_at)}
             </p>
             <p className={infoRowClass}>
               最終復習日:{" "}
               {latestReview
                 ? formatDateLabel(latestReview.reviewedAt)
                 : formatDateLabel(
-                    card?.lastReviewAt ?? (card as any)?.last_review_at,
+                    card?.lastReviewAt ?? (card as unknown)?.last_review_at,
                   )}
             </p>
             <p className={infoRowClass}>
               次回復習日 ({nextReviewAttempt}回目):{" "}
               {formatDateLabel(
-                card?.nextReviewDate ?? (card as any)?.next_review_date,
+                card?.nextReviewDate ?? (card as unknown)?.next_review_date,
               )}
             </p>
           </div>

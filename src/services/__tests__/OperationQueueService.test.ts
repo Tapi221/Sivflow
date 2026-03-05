@@ -143,11 +143,11 @@ describe("OperationQueueService", () => {
 
       // Mock performSyncOperation to always fail
       const processorSpy = vi
-        .spyOn(operationQueue as any, "performSyncOperation")
+        .spyOn(operationQueue as unknown, "performSyncOperation")
         .mockRejectedValue(new Error("Network Error"));
 
       // Mock trigger to do nothing automatically, we drive manually
-      vi.spyOn(operationQueue as any, "triggerProcess").mockImplementation(
+      vi.spyOn(operationQueue as unknown, "triggerProcess").mockImplementation(
         () => {},
       );
 
@@ -224,7 +224,7 @@ describe("OperationQueueService", () => {
       });
 
       // 2. Trigger cleanup directly to inspect state before processing picks it up
-      await (operationQueue as any).cleanupStaleProcessing();
+      await (operationQueue as unknown).cleanupStaleProcessing();
 
       // 3. Verify status reverted
       const item = await db.syncQueue.get("stale-item-id");

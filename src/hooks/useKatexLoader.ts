@@ -2,7 +2,7 @@ import { useEffect } from "react";
 
 export function useKatexLoader() {
   useEffect(() => {
-    if ((window as any).katex) return;
+    if ((window as unknown).katex) return;
 
     const link = document.createElement("link");
     link.rel = "stylesheet";

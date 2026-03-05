@@ -119,7 +119,7 @@ class NotificationService {
   dismiss(id: string): void {
     this.notifications.delete(id);
     // リスナーに削除を通知（null を送る）
-    this.listeners.forEach((listener) => listener({ id } as any));
+    this.listeners.forEach((listener) => listener({ id } as unknown));
   }
 
   /**

@@ -289,7 +289,7 @@ export default function MediaUploader({
   const upsertAssetRecord = useCallback(
     async (asset: AssetRecord) => {
       const db = await getLocalDb(currentUser?.uid);
-      await db.images.put(asset as any);
+      await db.images.put(asset as unknown);
     },
     [currentUser?.uid],
   );
@@ -326,7 +326,7 @@ export default function MediaUploader({
         updatedAt: now,
         status: "pending",
         retryCount: 0,
-      } as any);
+      } as unknown);
       if (import.meta.env.DEV) {
         console.info("[Asset] Enqueued upload", payload);
       }
@@ -457,7 +457,7 @@ export default function MediaUploader({
                   assetId,
                   localFileId: blobRecord.localBlobId,
                   storagePath: remoteKey,
-                  localUrl: (previewUrl ?? image.localUrl) as any,
+                  localUrl: (previewUrl ?? image.localUrl) as unknown,
                 },
               };
             } catch (error) {
@@ -508,7 +508,7 @@ export default function MediaUploader({
               assetId,
               localFileId: blobRecord.localBlobId,
               storagePath: remoteKey,
-              localUrl: (previewUrl ?? image.localUrl) as any,
+              localUrl: (previewUrl ?? image.localUrl) as unknown,
             },
           };
         }),
@@ -667,7 +667,7 @@ export default function MediaUploader({
         assetId,
         localFileId: blobRecord.localBlobId,
         storagePath: remoteKey,
-        localUrl: (previewUrl ?? created.localUrl) as any,
+        localUrl: (previewUrl ?? created.localUrl) as unknown,
       };
       const replaced = current.map((item, i) =>
         i === index ? newImage : item,

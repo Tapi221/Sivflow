@@ -1,13 +1,13 @@
 import { useMemo } from "react";
 
-type StudyCard = Record<string, any>;
+type StudyCard = Record<string, unknown>;
 
 type Params = {
   folderId: string | null;
   allCards: StudyCard[];
-  folders: Record<string, any>[];
+  folders: Record<string, unknown>[];
   foldersLoading: boolean;
-  settings: Record<string, any> | null | undefined;
+  settings: Record<string, unknown> | null | undefined;
 };
 
 export function useStudyCards({

@@ -51,8 +51,12 @@ export function CalendarMiniView({
   // 日付ごとのカード枚数を算出
   const cardsByDate = useMemo(() => {
     const grouped: Record<string, Card[]> = {};
+    const pickLegacyNextReviewDate = (input: Card): unknown => {
+      const legacy = input as Card & { next_review_date?: unknown };
+      return legacy.next_review_date;
+    };
     cards.forEach((card) => {
-      const dateVal = card.nextReviewDate || (card as any).next_review_date;
+      const dateVal = card.nextReviewDate || pickLegacyNextReviewDate(card);
       const dateObj = toDate(dateVal);
       if (!dateObj) return;
 

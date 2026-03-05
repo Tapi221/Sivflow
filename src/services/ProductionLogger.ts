@@ -11,7 +11,7 @@ class ProductionLogger {
     step: string,
     message: string,
     error: unknown,
-    context?: Record<string, any>,
+    context?: Record<string, unknown>,
   ): void {
     console.error(`[ImageUpload:${step}] ${message}`, error);
 
@@ -24,7 +24,7 @@ class ProductionLogger {
   /**
    * 警告ログ（Sentry に送信）
    */
-  warn(step: string, message: string, context?: Record<string, any>): void {
+  warn(step: string, message: string, context?: Record<string, unknown>): void {
     console.warn(`[ImageUpload:${step}] ${message}`, context);
 
     // 本番環境では Sentry に送信(自動キャプチャ)
@@ -36,7 +36,7 @@ class ProductionLogger {
   /**
    * 情報ログ
    */
-  info(step: string, message: string, context?: Record<string, any>): void {
+  info(step: string, message: string, context?: Record<string, unknown>): void {
     console.log(`[ImageUpload:${step}] ${message}`, context);
 
     // 本番環境では Sentry の breadcrumb に追加(自動キャプチャ)
@@ -51,7 +51,7 @@ class ProductionLogger {
   measurePerformance(
     step: string,
     duration: number,
-    context?: Record<string, any>,
+    context?: Record<string, unknown>,
   ): void {
     console.log(`[Performance:${step}] ${duration}ms`, context);
 

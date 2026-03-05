@@ -52,7 +52,7 @@ describe("LocalDB repairDataIntegrity", () => {
       questionText: "Q",
       answerText: "A",
       blocks: [],
-    } as any);
+    } as unknown);
 
     const result = await db.repairDataIntegrity(userId);
     const repaired = await db.cards.get("card-a");
@@ -82,7 +82,7 @@ describe("LocalDB repairDataIntegrity", () => {
       isDeleted: false,
       createdAt: new Date(),
       updatedAt: new Date(),
-    } as any);
+    } as unknown);
 
     await db.cards.put({
       id: "card-b",
@@ -97,7 +97,7 @@ describe("LocalDB repairDataIntegrity", () => {
         { side: "question", type: "question", text: "Q from block" },
         { side: "answer", type: "answer", text: "A from block" },
       ],
-    } as any);
+    } as unknown);
 
     const first = await db.repairDataIntegrity(userId);
     const onceRepaired = await db.cards.get("card-b");
@@ -133,7 +133,7 @@ describe("LocalDB repairDataIntegrity", () => {
       isDeleted: false,
       createdAt: new Date(),
       updatedAt: new Date(),
-    } as any);
+    } as unknown);
 
     await rawPutCard(db.name, {
       id: "card-c",
@@ -158,7 +158,7 @@ describe("LocalDB repairDataIntegrity", () => {
         },
       ],
       answerBlocks: [],
-    } as any);
+    } as unknown);
 
     const result = await db.repairDataIntegrity(userId);
     const repaired = await db.cards.get("card-c");
@@ -214,7 +214,7 @@ describe("LocalDB repairDataIntegrity", () => {
           status: "ready",
         },
       ],
-    } as any);
+    } as unknown);
 
     const result = await db.repairDataIntegrity(userId);
     const repaired = await db.cards.get("card-e");
@@ -262,7 +262,7 @@ describe("LocalDB repairDataIntegrity", () => {
           },
         ],
         answerBlocks: [],
-      } as any),
+      } as unknown),
     ).rejects.toThrow(/画像の保存形式が不正|InvalidImageUrlError/);
   });
 
@@ -286,7 +286,7 @@ describe("LocalDB repairDataIntegrity", () => {
             images: [{ id: "img-h", localUrl: "blob:http://localhost/h" }],
           },
         ],
-      } as any),
+      } as unknown),
     ).rejects.toThrow(/path=.*questionBlocks\[0\]\.images\[0\]\.localUrl/);
   });
 
@@ -303,7 +303,7 @@ describe("LocalDB repairDataIntegrity", () => {
       updatedAt: new Date(),
       questionBlocks: [],
       answerBlocks: [],
-    } as any);
+    } as unknown);
 
     await expect(
       db.updateItem("cards", "card-f", {
@@ -315,7 +315,7 @@ describe("LocalDB repairDataIntegrity", () => {
             status: "uploading",
           },
         ],
-      } as any),
+      } as unknown),
     ).rejects.toThrow("画像の保存形式が不正");
   });
 
@@ -346,7 +346,7 @@ describe("LocalDB repairDataIntegrity", () => {
             ],
           },
         ],
-      } as any),
+      } as unknown),
     ).rejects.toThrow("画像の保存形式が不正");
   });
 });

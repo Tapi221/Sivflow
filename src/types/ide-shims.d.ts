@@ -25,7 +25,7 @@ declare module "firebase/storage" {
     ref: unknown,
     data: Blob | Uint8Array | ArrayBuffer,
     metadata?: unknown,
-  ): Promise<any>;
+  ): Promise<unknown>;
   export function uploadBytesResumable(
     ref: unknown,
     data: Blob | Uint8Array | ArrayBuffer,

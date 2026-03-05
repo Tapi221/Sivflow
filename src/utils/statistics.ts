@@ -30,6 +30,17 @@ export const isReviewed = (card: Partial<Card>): boolean => {
 export const calculateAverageStability = (
   cards: Partial<Card>[],
 ): number | null => {
+  const getLegacyNumeric = (
+    card: Partial<Card>,
+    ...keys: string[]
+  ): number | undefined => {
+    const rec = card as Record<string, unknown>;
+    for (const key of keys) {
+      const value = rec[key];
+      if (typeof value === "number") return value;
+    }
+    return undefined;
+  };
   const reviewedCards = cards.filter(isReviewed);
 
   if (reviewedCards.length === 0) {
@@ -38,8 +49,8 @@ export const calculateAverageStability = (
 
   const totalStability = reviewedCards.reduce((sum, c) => {
     const stability = normalizeMemoryStability(
-      c.memoryStability ?? (c as any).memory_stability,
-      c.currentLevel ?? (c as any).current_level ?? (c as any).level,
+      c.memoryStability ?? getLegacyNumeric(c, "memory_stability"),
+      c.currentLevel ?? getLegacyNumeric(c, "current_level", "level"),
     );
     return sum + stability;
   }, 0);

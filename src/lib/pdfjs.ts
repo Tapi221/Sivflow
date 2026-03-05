@@ -6,11 +6,11 @@ import workerSrc from "pdfjs-dist/legacy/build/pdf.worker.min.mjs?url";
 
 // Vite向け: worker URL をバンドル時に確定させる
 pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc;
-if (import.meta.env.DEV && !(globalThis as any).__pdfWorkerLogged) {
-  (globalThis as any).__pdfWorkerLogged = true;
+if (import.meta.env.DEV && !(globalThis as unknown).__pdfWorkerLogged) {
+  (globalThis as unknown).__pdfWorkerLogged = true;
   console.info(
     "[pdfjs] workerSrc",
-    (pdfjsLib as any).GlobalWorkerOptions?.workerSrc,
+    (pdfjsLib as unknown).GlobalWorkerOptions?.workerSrc,
   );
 }
 

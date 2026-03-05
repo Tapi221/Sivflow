@@ -1,12 +1,9 @@
 import { firestoreDb, storage } from "@/services/firebase";
 import {
   collection,
-  query,
-  where,
   getDocs,
   deleteDoc,
   doc,
-  Timestamp,
 } from "firebase/firestore";
 import { ref, deleteObject } from "firebase/storage";
 import type { UploadMetadata } from "@/types";
@@ -26,8 +23,6 @@ export const cleanupFailedUploads = async (userId: string) => {
   try {
     // 24時間前の閾値
     const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const yesterdayTimestamp = Timestamp.fromDate(yesterday);
-
     // アップロードメタデータのコレクション
     const uploadsRef = collection(firestoreDb, `users/${userId}/uploads`);
 
@@ -42,8 +37,9 @@ export const cleanupFailedUploads = async (userId: string) => {
 
       // Timestamp か Date かを判定して比較
       const date =
-        uploadedAt && typeof (uploadedAt as any).toDate === "function"
-          ? (uploadedAt as any).toDate()
+        uploadedAt &&
+        typeof (uploadedAt as { toDate?: () => Date }).toDate === "function"
+          ? (uploadedAt as { toDate: () => Date }).toDate()
           : uploadedAt;
 
       const isOld = date && new Date(date) < yesterday;

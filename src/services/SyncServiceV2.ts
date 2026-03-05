@@ -318,13 +318,13 @@ export class SyncServiceV2 implements ISyncService {
 
       // documents.localFileId / blob localUrl は端末ローカル専用のため、受信時に除外する。
       if (change.type === "document") {
-        delete (remoteData as any).localFileId;
-        delete (remoteData as any).blobUrl;
+        delete (remoteData as unknown).localFileId;
+        delete (remoteData as unknown).blobUrl;
         if (
-          typeof (remoteData as any).localUrl === "string" &&
-          (remoteData as any).localUrl.startsWith("blob:")
+          typeof (remoteData as unknown).localUrl === "string" &&
+          (remoteData as unknown).localUrl.startsWith("blob:")
         ) {
-          (remoteData as any).localUrl = null;
+          (remoteData as unknown).localUrl = null;
         }
       }
 
@@ -425,7 +425,7 @@ export class SyncServiceV2 implements ISyncService {
       await this.localDB.transaction("rw", tables, async () => {
         // すべてのデータを一旦削除（ソフトデリートではなく物理削除して再構築）
         for (const table of tables) {
-          await (this.localDB as any)[table].clear();
+          await (this.localDB as unknown)[table].clear();
         }
 
         // 取得したデータを投入
@@ -435,7 +435,7 @@ export class SyncServiceV2 implements ISyncService {
             const data = { ...(change.data ?? {}) };
             // Dexie put は key が無いと insert できずに死ぬので補正
             if (!data.id && change.id) data.id = change.id;
-            await (this.localDB as any)[tableName].put(data);
+            await (this.localDB as unknown)[tableName].put(data);
           }
         }
       });
@@ -596,7 +596,7 @@ export class SyncServiceV2 implements ISyncService {
   /**
    * 統計情報を取得 (Legacy互換ダミー)
    */
-  async getSyncStats(): Promise<any> {
+  async getSyncStats(): Promise<unknown> {
     return {
       successRate: 100,
       avgDuration: 0,
@@ -608,14 +608,14 @@ export class SyncServiceV2 implements ISyncService {
   /**
    * 未解決の競合を取得 (Legacy互換ダミー)
    */
-  async getUnresolvedConflicts(): Promise<any[]> {
+  async getUnresolvedConflicts(): Promise<unknown[]> {
     return [];
   }
 
   /**
    * 設定読み込み (Legacy互換ダミー)
    */
-  async loadSettings(): Promise<any> {
+  async loadSettings(): Promise<unknown> {
     return {
       autoSync: true,
       intervalMinutes: 30,

@@ -200,7 +200,7 @@ export const isHeicFile = (file: File) => {
 
 export const convertHeicToJpeg = async (file: File): Promise<File> => {
   const heic2anyModule = await import("heic2any");
-  const heic2any = (heic2anyModule as any).default || heic2anyModule;
+  const heic2any = (heic2anyModule as unknown).default || heic2anyModule;
   const result = await heic2any({
     blob: file,
     toType: "image/jpeg",

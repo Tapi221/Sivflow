@@ -142,7 +142,7 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
                * - カード内の別コンポーネント（例えば横幅計算やレイアウト）で参照するための共有値
                * - baseWidth が 0/負にならないよう最低 1px に丸める
                */
-              ["--card-base-width" as any]: `${Math.max(1, baseWidth)}px`,
+              ["--card-base-width" as unknown]: `${Math.max(1, baseWidth)}px`,
             }}
             {...shellProps}
           >

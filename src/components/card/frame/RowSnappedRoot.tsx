@@ -22,7 +22,7 @@ export function RowSnappedRoot({
           className={className}
           style={{
             ...(style ?? {}),
-            ["--snap-pad-b" as any]: `${snapPaddingBottomPx}px`,
+            ["--snap-pad-b" as const]: `${snapPaddingBottomPx}px`,
           }}
         >
           {children}

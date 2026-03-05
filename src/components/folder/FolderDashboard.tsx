@@ -143,13 +143,13 @@ export function FolderDashboard({
   const tomorrowStart = useMemo(() => plusDays(todayStart, 1), [todayStart]);
 
   const activeCards = useMemo(() => {
-    return cards.filter((c) => !(c.isDeleted ?? (c as any).is_deleted));
+    return cards.filter((c) => !(c.isDeleted ?? (c as unknown).is_deleted));
   }, [cards]);
 
   const completedToday = useMemo(() => {
     return activeCards.filter((card) => {
       const lastReview = toDate(
-        card.lastReviewAt ?? (card as any).last_review_at,
+        card.lastReviewAt ?? (card as unknown).last_review_at,
       );
       return isWithinRange(lastReview, todayStart, tomorrowStart);
     }).length;
@@ -163,17 +163,17 @@ export function FolderDashboard({
     return [...activeCards]
       .sort(
         (a, b) =>
-          (a.orderIndex ?? (a as any).order_index ?? 0) -
-          (b.orderIndex ?? (b as any).order_index ?? 0),
+          (a.orderIndex ?? (a as unknown).order_index ?? 0) -
+          (b.orderIndex ?? (b as unknown).order_index ?? 0),
       )
       .slice(0, 24);
   }, [activeCards]);
 
   const reviewedCards = useMemo(() => {
     return activeCards.filter((card) => {
-      const reviewCount = card.reviewCount ?? (card as any).review_count ?? 0;
+      const reviewCount = card.reviewCount ?? (card as unknown).review_count ?? 0;
       const lastReview = toDate(
-        card.lastReviewAt ?? (card as any).last_review_at,
+        card.lastReviewAt ?? (card as unknown).last_review_at,
       );
       return reviewCount > 0 || !!lastReview;
     });
@@ -194,10 +194,10 @@ export function FolderDashboard({
 
     reviewedCards.forEach((card) => {
       const lastReview = toDate(
-        card.lastReviewAt ?? (card as any).last_review_at,
+        card.lastReviewAt ?? (card as unknown).last_review_at,
       );
       const nextReview = toDate(
-        card.nextReviewDate ?? (card as any).next_review_date,
+        card.nextReviewDate ?? (card as unknown).next_review_date,
       );
       let intervalDays = 0;
 
@@ -599,9 +599,9 @@ function CardScrollSection({ cards, onEmpty }: CardScrollSectionProps) {
           style={{ width: "max-content" }}
         >
           {cards.map((card) => {
-            const isDraft = card.isDraft ?? (card as any).is_draft;
+            const isDraft = card.isDraft ?? (card as unknown).is_draft;
             const nextReview = toDate(
-              card.nextReviewDate ?? (card as any).next_review_date,
+              card.nextReviewDate ?? (card as unknown).next_review_date,
             );
             const reviewText = nextReview
               ? nextReview.toLocaleDateString("ja-JP")

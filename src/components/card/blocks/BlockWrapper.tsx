@@ -37,8 +37,6 @@ export const BlockWrapper = ({
   dragHandleProps,
   dragHandleClassName,
   className,
-  label,
-  icon: Icon,
   accentColor,
   isActive,
   showDelete = true,

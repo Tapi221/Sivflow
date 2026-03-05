@@ -101,7 +101,6 @@ interface FlashcardProps {
   onToggleUncertainty?: (card: FlashcardCardLike) => void;
   onToggleBookmark?: (card: FlashcardCardLike) => void;
   className?: string;
-  showNavigation?: boolean;
   onNext?: () => void;
   onPrev?: () => void;
   hasNext?: boolean;
@@ -132,7 +131,6 @@ export function Flashcard({
   onToggleUncertainty,
   onToggleBookmark,
   className,
-  showNavigation,
   onNext,
   onPrev,
   hasNext,
@@ -191,20 +189,20 @@ export function Flashcard({
 
   useEffect(() => {
     if (!previewMode) return;
-    setPreviewFlipped(false);
+    queueMicrotask(() => setPreviewFlipped(false));
   }, [previewMode, cardData?.id]);
 
   useEffect(() => {
     if (!inkEditingEnabled) {
-      setPreviewInkTool(null);
+      queueMicrotask(() => setPreviewInkTool(null));
       return;
     }
-    setPreviewInkTool((prev) => prev ?? "pen");
+    queueMicrotask(() => setPreviewInkTool((prev) => prev ?? "pen"));
   }, [inkEditingEnabled]);
 
   useEffect(() => {
     if (!previewMode || !inkEditingEnabled) {
-      setLayoutStable(false);
+      queueMicrotask(() => setLayoutStable(false));
       return;
     }
 
@@ -227,7 +225,9 @@ export function Flashcard({
     const init = async () => {
       setLayoutStable(false);
 
-      const fontsReady = (document as any).fonts?.ready;
+      const fontsReady = (
+        document as Document & { fonts?: { ready?: Promise<unknown> } }
+      ).fonts?.ready;
       if (fontsReady && typeof fontsReady.then === "function") {
         try {
           await fontsReady;
@@ -289,21 +289,29 @@ export function Flashcard({
 
   // 参考リンク抽出
   const questionReferences = React.useMemo(() => {
+    const extractReferences = (block: CardBlock): ReferenceBlockData[] => {
+      const maybeBlock = block as CardBlock & { references?: unknown };
+      const refs = maybeBlock.references;
+      return Array.isArray(refs) ? (refs as ReferenceBlockData[]) : [];
+    };
     const refs: ReferenceBlockData[] = [];
     const qBlocks: CardBlock[] = cardData?.questionBlocks ?? [];
     qBlocks.forEach((block) => {
-      if (block.type === "reference" && (block as any).references)
-        refs.push(...((block as any).references as ReferenceBlockData[]));
+      if (block.type === "reference") refs.push(...extractReferences(block));
     });
     return refs.filter((r) => r.url);
   }, [cardData?.questionBlocks]);
 
   const answerReferences = React.useMemo(() => {
+    const extractReferences = (block: CardBlock): ReferenceBlockData[] => {
+      const maybeBlock = block as CardBlock & { references?: unknown };
+      const refs = maybeBlock.references;
+      return Array.isArray(refs) ? (refs as ReferenceBlockData[]) : [];
+    };
     const refs: ReferenceBlockData[] = [];
     const aBlocks: CardBlock[] = cardData?.answerBlocks ?? [];
     aBlocks.forEach((block) => {
-      if (block.type === "reference" && (block as any).references)
-        refs.push(...((block as any).references as ReferenceBlockData[]));
+      if (block.type === "reference") refs.push(...extractReferences(block));
     });
     return refs.filter((r) => r.url);
   }, [cardData?.answerBlocks]);
@@ -381,10 +389,6 @@ export function Flashcard({
     },
     [],
   );
-
-  if (!cardData) {
-    return <div className="text-center py-12 text-gray-500">No Card Data</div>;
-  }
 
   const activeReferences = effectiveIsFlipped
     ? answerReferences
@@ -657,7 +661,7 @@ export function Flashcard({
           id: `${side}-legacy-image`,
           type: "image",
           orderIndex: orderIndex++,
-          images: images as any,
+          images: images as unknown as CardBlock["images"],
         } as CardBlock);
       }
 
@@ -666,7 +670,7 @@ export function Flashcard({
           id: `${side}-legacy-audio`,
           type: "audio",
           orderIndex,
-          audios: audios as any,
+          audios: audios as unknown as CardBlock["audios"],
         } as CardBlock);
       }
 
@@ -777,6 +781,9 @@ export function Flashcard({
   ]);
 
   const fixedHeightPx = layoutRowsToCardHeightPx(layoutRows);
+  if (!cardData) {
+    return <div className="text-center py-12 text-gray-500">No Card Data</div>;
+  }
   const activeSide: "question" | "answer" = effectiveIsFlipped
     ? "answer"
     : "question";

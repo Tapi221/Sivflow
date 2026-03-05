@@ -1,6 +1,5 @@
 import { getLocalDb } from "./localDB";
 import type { SyncQueueItem } from "../types/sync";
-import { getFunctions, httpsCallable } from "firebase/functions";
 
 export type QueuePriority = "critical" | "high" | "medium" | "low";
 export type OperationType = "create" | "update" | "delete";

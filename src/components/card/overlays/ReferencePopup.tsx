@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/dialog";
 import type { ReferenceBlockData } from "@/types";
 import { Globe, ExternalLink, Link as LinkIcon } from "@/ui/icons";
-import { cn } from "@/lib/utils";
 
 interface ReferencePopupProps {
   isOpen: boolean;
@@ -60,7 +59,7 @@ export const ReferencePopup = ({
                         {(() => {
                           try {
                             return new URL(ref.url).hostname;
-                          } catch (e) {
+                          } catch {
                             return ref.url;
                           }
                         })()}

@@ -3,7 +3,7 @@
 
 import { operationQueue } from "./operationQueue";
 import { getLocalDb } from "./localDB";
-import type { Card, Folder } from "../types";
+import type { Card } from "../types";
 
 /**
  * Operation Queue 統合サービス

@@ -82,12 +82,12 @@ export function useCardEditorSession({
   const buildDraftFromCard = useCallback(
     (card: Card): EditorDraft => {
       const legacyQuestionRows = normalizeExtraRows(
-        (card as any)?.questionExtraRows ??
-          (card as any)?.question_extra_rows ??
+        (card as unknown)?.questionExtraRows ??
+          (card as unknown)?.question_extra_rows ??
           0,
       );
       const legacyAnswerRows = normalizeExtraRows(
-        (card as any)?.answerExtraRows ?? (card as any)?.answer_extra_rows ?? 0,
+        (card as unknown)?.answerExtraRows ?? (card as unknown)?.answer_extra_rows ?? 0,
       );
       const migratedRows =
         LEGACY_BASE_LAYOUT_ROWS +
@@ -97,12 +97,12 @@ export function useCardEditorSession({
         title: card.title ?? "",
         tags: resolveCardTagNames(
           card.tagIds,
-          (card as any).tags,
-          tagById as any,
+          (card as unknown).tags,
+          tagById as unknown,
         ),
         isDraft: card.isDraft ?? false,
-        questionImages: ((card as any).questionImages ?? []) as UploadedImage[],
-        answerImages: ((card as any).answerImages ?? []) as UploadedImage[],
+        questionImages: ((card as unknown).questionImages ?? []) as UploadedImage[],
+        answerImages: ((card as unknown).answerImages ?? []) as UploadedImage[],
         questionBlocks: sortBlocksByOrderIndex(
           (card.questionBlocks ?? []) as CardBlock[],
         ),
@@ -110,7 +110,7 @@ export function useCardEditorSession({
           (card.answerBlocks ?? []) as CardBlock[],
         ),
         layoutRows: normalizeLayoutRows(
-          (card as any).layoutRows ?? (card as any).layout_rows ?? migratedRows,
+          (card as unknown).layoutRows ?? (card as unknown).layout_rows ?? migratedRows,
         ),
       };
     },
@@ -226,10 +226,10 @@ export function useCardEditorSession({
         for (const block of blocks ?? []) {
           if (block?.type === "reference") {
             const cleaned = sanitizeReferences(
-              (block as any)?.references ?? [],
+              (block as unknown)?.references ?? [],
             );
             if (cleaned.length === 0) continue;
-            next.push({ ...(block as any), references: cleaned } as CardBlock);
+            next.push({ ...(block as unknown), references: cleaned } as CardBlock);
             continue;
           }
           next.push(block);
@@ -269,7 +269,7 @@ export function useCardEditorSession({
           (typeof created === "object" &&
             created !== null &&
             "id" in created &&
-            (created as any).id) ||
+            (created as unknown).id) ||
           (typeof created === "string" ? created : null);
 
         onCardUpdated?.();

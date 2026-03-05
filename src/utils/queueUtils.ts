@@ -2,7 +2,6 @@
 // 既存のカード操作フックに統合可能な形で提供
 
 import { operationQueue } from "../services/operationQueue";
-import type { QueuePriority } from "../services/operationQueue";
 import type { Card } from "../types";
 
 /**

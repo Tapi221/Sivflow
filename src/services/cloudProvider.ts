@@ -23,10 +23,10 @@ import {
 
 const denormalizeCardForCloud = (card: Card) => {
   const questionImages = normalizeUploadedImages(
-    (card as any).questionImages ?? (card as any).question_images ?? [],
+    (card as unknown).questionImages ?? (card as unknown).question_images ?? [],
   );
   const answerImages = normalizeUploadedImages(
-    (card as any).answerImages ?? (card as any).answer_images ?? [],
+    (card as unknown).answerImages ?? (card as unknown).answer_images ?? [],
   );
   return {
     ...card,
@@ -96,22 +96,22 @@ export class FirebaseCloudProvider implements ICloudProvider {
     const sinceTimestamp = Timestamp.fromDate(lastSyncTime);
 
     // 型定義が欠けていても死なないように namespace 経由で参照（存在すればページング）
-    const orderByFn = (Firestore as any).orderBy as
+    const orderByFn = (Firestore as unknown).orderBy as
       | undefined
-      | ((field: string, dir?: "asc" | "desc") => any);
-    const limitFn = (Firestore as any).limit as
+      | ((field: string, dir?: "asc" | "desc") => unknown);
+    const limitFn = (Firestore as unknown).limit as
       | undefined
-      | ((n: number) => any);
-    const startAfterFn = (Firestore as any).startAfter as
+      | ((n: number) => unknown);
+    const startAfterFn = (Firestore as unknown).startAfter as
       | undefined
-      | ((snapshot: unknown) => any);
+      | ((snapshot: unknown) => unknown);
 
     const PAGE_SIZE = 500;
     const canOrder = typeof orderByFn === "function";
     const canLimit = typeof limitFn === "function";
     const canPage = canOrder && canLimit && typeof startAfterFn === "function";
 
-    const fetchPagedDocs = async (colRef: unknown): Promise<any[]> => {
+    const fetchPagedDocs = async (colRef: unknown): Promise<unknown[]> => {
       const out: unknown[] = [];
       let lastDoc: unknown = null;
 
@@ -123,7 +123,7 @@ export class FirebaseCloudProvider implements ICloudProvider {
         if (canPage && lastDoc) constraints.push(startAfterFn(lastDoc));
         if (canLimit) constraints.push(limitFn(PAGE_SIZE));
 
-        const qy = query(colRef, ...(constraints as any));
+        const qy = query(colRef, ...(constraints as unknown));
         const snap = await getDocs(qy);
         out.push(...snap.docs);
 
@@ -140,14 +140,14 @@ export class FirebaseCloudProvider implements ICloudProvider {
     const foldersCol = collection(firestoreDb, ...foldersPathSegments(userId));
     const folderDocs = await fetchPagedDocs(foldersCol);
     const folders = folderDocs.map(
-      (d: unknown) => ({ id: d.id, ...d.data() }) as any as Folder,
+      (d: unknown) => ({ id: d.id, ...d.data() }) as unknown as Folder,
     );
 
     // カードの取得（フォルダに関わらずユーザー単位で取得）
     const cardsCol = collection(firestoreDb, ...cardsPathSegments(userId));
     const cardDocs = await fetchPagedDocs(cardsCol);
     const cards = cardDocs.map(
-      (d: unknown) => ({ id: d.id, ...d.data() }) as any as Card,
+      (d: unknown) => ({ id: d.id, ...d.data() }) as unknown as Card,
     );
 
     return { folders, cards };

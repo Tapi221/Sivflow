@@ -58,7 +58,7 @@ export function CardEditorPane({
   const { settings } = useUserSettings();
   const { success: toastSuccess, error: toastError } = useToast();
   const { tagById, addTag } = useTags();
-  const { cards, updateCard, createCard } = useCards() as any;
+  const { cards, updateCard, createCard } = useCards() as unknown;
 
   const [isMetaOpen, setIsMetaOpen] = useState<boolean>(() => {
     if (typeof window === "undefined") return true;

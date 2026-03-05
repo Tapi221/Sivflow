@@ -1,5 +1,4 @@
 import type { UploadedImage } from "@/types";
-import { firestoreDb as db } from "../services/firebase";
 
 /**
  * DB 保存前の厳格なバリデーション（全保存パスで必須）

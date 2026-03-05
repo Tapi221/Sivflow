@@ -4,7 +4,6 @@ import {
 } from "../utils/reviewMetrics";
 import {
   getStabilityPhase,
-  normalizeMemoryStability,
 } from "../utils/reviewUtils";
 
 describe("Review Metrics", () => {

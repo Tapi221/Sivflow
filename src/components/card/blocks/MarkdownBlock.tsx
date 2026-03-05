@@ -550,14 +550,6 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
 
 /**
  * Markdown文字列をコードフェンスで分割し、
- * markdown / code ブロックの配列を返す（従来API）。
- */
-function parseAndSplitFences(md: string): EditorBlock[] {
-  return parseAndSplitFencesWithRanges(md).blocks;
-}
-
-/**
- * Markdown文字列をコードフェンスで分割し、
  * blocks に加えて「元文字列内での範囲（start/end）」も返す。
  *
  * 重要:

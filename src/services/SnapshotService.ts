@@ -167,7 +167,7 @@ class SnapshotService {
     };
 
     const folderName =
-      (folder as any).folderName || (folder as any).folder_name || "unknown";
+      (folder as unknown).folderName || (folder as unknown).folder_name || "unknown";
     const date = new Date().toISOString().split("T")[0];
     const gen = partialSnapshot.metadata.generationCounter;
     const filename = `flashcard_${folderName}_${date}_gen${gen}.json`;

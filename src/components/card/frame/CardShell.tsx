@@ -470,7 +470,7 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
             ? ({
                 ...(style ?? {}),
                 ...enforcedShellOverflowStyle,
-                ["--card-resize-height" as any]: `${resolvedHeightPx}px`,
+                ["--card-resize-height" as unknown]: `${resolvedHeightPx}px`,
                 minHeight: `${resolvedHeightPx}px`,
                 ...(lockHeight
                   ? {

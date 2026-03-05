@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useLiveQuery } from "dexie-react-hooks";
 import {
   getLocalDb,
   getLocalDBRuntimeStatus,

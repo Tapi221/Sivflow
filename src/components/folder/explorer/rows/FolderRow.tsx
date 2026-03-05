@@ -44,7 +44,6 @@ interface FolderRowProps {
   isFiltering: boolean;
   matchCount: number;
   rowBaseClassName: string;
-  isDragging: boolean;
   hasUpdateOrDelete: boolean;
   menuOpen: boolean;
   onMenuOpenChange: (open: boolean) => void;
@@ -86,7 +85,6 @@ export const FolderRow: React.FC<FolderRowProps> = ({
   isFiltering,
   matchCount,
   rowBaseClassName,
-  isDragging,
   hasUpdateOrDelete,
   menuOpen,
   onMenuOpenChange,
@@ -101,7 +99,7 @@ export const FolderRow: React.FC<FolderRowProps> = ({
   onBulkTag,
   children,
 }) => {
-  const folderId = folder.id || (folder as any).folderId;
+  const folderId = folder.id || (folder as unknown).folderId;
   const folderName =
     folder.folderName || folder.folder_name || "無題のフォルダ";
   const isOptimisticFolder = Boolean(folder.__optimistic);

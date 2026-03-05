@@ -1,5 +1,4 @@
 import { isReviewed, calculateAverageStability } from "../utils/statistics";
-import { normalizeMemoryStability } from "../utils/reviewUtils";
 import assert from "assert";
 
 // Mock Card type for testing

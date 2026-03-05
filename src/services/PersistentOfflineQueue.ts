@@ -284,7 +284,7 @@ class PersistentOfflineQueue {
                   kind: this.getDocumentKindLabel(item),
                   localFileId: refreshedDoc?.localFileId ?? null,
                   blobUrl:
-                    (refreshedDoc as any)?.blobUrl ??
+                    (refreshedDoc as unknown)?.blobUrl ??
                     refreshedDoc?.localUrl ??
                     null,
                   remoteUrl: refreshedDoc?.remoteUrl ?? null,
@@ -299,34 +299,34 @@ class PersistentOfflineQueue {
             const existingAsset = await localDb.images.get(updatedImage.id);
             const now = new Date();
             await localDb.images.put({
-              ...((existingAsset as any) ?? {}),
+              ...((existingAsset as unknown) ?? {}),
               id: updatedImage.id,
               userId:
-                auth.currentUser?.uid ?? (existingAsset as any)?.userId ?? "",
+                auth.currentUser?.uid ?? (existingAsset as unknown)?.userId ?? "",
               mime:
                 item.fileType ||
-                (existingAsset as any)?.mime ||
+                (existingAsset as unknown)?.mime ||
                 "application/octet-stream",
               size:
-                item.fileData.byteLength ?? (existingAsset as any)?.size ?? 0,
+                item.fileData.byteLength ?? (existingAsset as unknown)?.size ?? 0,
               localBlobId:
-                (existingAsset as any)?.localBlobId ??
+                (existingAsset as unknown)?.localBlobId ??
                 updatedImage.localFileId ??
                 updatedImage.id,
-              localStatus: (existingAsset as any)?.localStatus ?? "present",
+              localStatus: (existingAsset as unknown)?.localStatus ?? "present",
               remoteKey:
                 updatedImage.storagePath ??
-                (existingAsset as any)?.remoteKey ??
+                (existingAsset as unknown)?.remoteKey ??
                 null,
               remoteStatus: "ready",
               remoteUrlCache:
                 updatedImage.remoteUrl ??
-                (existingAsset as any)?.remoteUrlCache ??
+                (existingAsset as unknown)?.remoteUrlCache ??
                 null,
               updatedAt: now,
-              createdAt: (existingAsset as any)?.createdAt ?? now,
+              createdAt: (existingAsset as unknown)?.createdAt ?? now,
               retryCount: 0,
-            } as any);
+            } as unknown);
 
             const pendingAssetSyncItems = await localDb.syncQueue
               .where("targetId")
@@ -394,7 +394,7 @@ class PersistentOfflineQueue {
                       kind: this.getDocumentKindLabel(item),
                       localFileId: failedDoc?.localFileId ?? null,
                       blobUrl:
-                        (failedDoc as any)?.blobUrl ??
+                        (failedDoc as unknown)?.blobUrl ??
                         failedDoc?.localUrl ??
                         null,
                       remoteUrl: failedDoc?.remoteUrl ?? null,
@@ -415,30 +415,30 @@ class PersistentOfflineQueue {
                 const existingAsset = await localDb.images.get(item.id);
                 const now = new Date();
                 await localDb.images.put({
-                  ...((existingAsset as any) ?? {}),
+                  ...((existingAsset as unknown) ?? {}),
                   id: item.id,
                   userId:
                     auth.currentUser?.uid ??
-                    (existingAsset as any)?.userId ??
+                    (existingAsset as unknown)?.userId ??
                     "",
                   mime:
                     item.fileType ||
-                    (existingAsset as any)?.mime ||
+                    (existingAsset as unknown)?.mime ||
                     "application/octet-stream",
                   size:
                     item.fileData.byteLength ??
-                    (existingAsset as any)?.size ??
+                    (existingAsset as unknown)?.size ??
                     0,
-                  localBlobId: (existingAsset as any)?.localBlobId ?? item.id,
-                  localStatus: (existingAsset as any)?.localStatus ?? "present",
-                  remoteKey: (existingAsset as any)?.remoteKey ?? null,
+                  localBlobId: (existingAsset as unknown)?.localBlobId ?? item.id,
+                  localStatus: (existingAsset as unknown)?.localStatus ?? "present",
+                  remoteKey: (existingAsset as unknown)?.remoteKey ?? null,
                   remoteStatus: "failed",
                   updatedAt: now,
-                  createdAt: (existingAsset as any)?.createdAt ?? now,
-                  retryCount: (existingAsset as any)?.retryCount
-                    ? (existingAsset as any).retryCount + 1
+                  createdAt: (existingAsset as unknown)?.createdAt ?? now,
+                  retryCount: (existingAsset as unknown)?.retryCount
+                    ? (existingAsset as unknown).retryCount + 1
                     : 1,
-                } as any);
+                } as unknown);
                 if (import.meta.env.DEV) {
                   console.warn("[AssetSync] upload failed", {
                     assetId: item.id,

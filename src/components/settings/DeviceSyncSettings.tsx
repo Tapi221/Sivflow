@@ -5,7 +5,6 @@ import { useAuth } from "../../contexts/AuthContext";
 import type { SyncMetadata } from "../../types";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
-import { SyncService } from "../../services/syncService";
 import { initializeDB, getLocalDb } from "../../services/localDB";
 import { RefreshCw, Pencil, Check, X, Trash2 } from "@/ui/icons";
 import { Smartphone } from "@/ui/icons";

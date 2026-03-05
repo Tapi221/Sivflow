@@ -13,7 +13,7 @@ import {
 
 describe("LocalDB resilience", () => {
   const resetStaticState = () => {
-    const localDBClass = LocalDB as any;
+    const localDBClass = LocalDB as unknown;
     localDBClass.persistentOpenDisabled = false;
     localDBClass.openingPromise = null;
     localDBClass.openingUserId = null;
@@ -39,7 +39,7 @@ describe("LocalDB resilience", () => {
       .mockImplementation(function mockOpen(this: Dexie) {
         return new Promise((resolve) => {
           setTimeout(() => resolve(this), 25);
-        }) as any;
+        }) as unknown;
       });
 
     const [db1, db2] = await Promise.all([
@@ -77,7 +77,7 @@ describe("LocalDB resilience", () => {
     const db = await getLocalDb("test-user");
     const status = getLocalDBRuntimeStatus();
 
-    expect((db as any).isInMemoryFallback).toBe(true);
+    expect((db as unknown).isInMemoryFallback).toBe(true);
     expect(status.mode).toBe("fallback");
     expect(status.generationBumped).toBe(true);
     expect(status.fallbackReason?.toLowerCase()).toContain("backing store");
@@ -112,7 +112,7 @@ describe("LocalDB resilience", () => {
   it("attempts to delete all known generations during logout reset", async () => {
     const originalDatabases = indexedDB.databases;
     try {
-      (indexedDB as any).databases = vi
+      (indexedDB as unknown).databases = vi
         .fn()
         .mockResolvedValue([
           { name: "FlashcardMasterDB_reset-user_v19_g2" },
@@ -122,7 +122,7 @@ describe("LocalDB resilience", () => {
 
       const deleteSpy = vi
         .spyOn(Dexie, "delete")
-        .mockResolvedValue(undefined as any);
+        .mockResolvedValue(undefined as unknown);
 
       await resetLocalDBForLogout("reset-user");
 
@@ -133,7 +133,7 @@ describe("LocalDB resilience", () => {
       expect(deletedNames).toContain("FlashcardMasterDB_reset-user_v19_g3");
       expect(deletedNames).toContain("FlashcardMasterDB_reset-user");
     } finally {
-      (indexedDB as any).databases = originalDatabases;
+      (indexedDB as unknown).databases = originalDatabases;
     }
   });
 

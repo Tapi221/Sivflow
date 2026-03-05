@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { getLocalDb } from "../services/localDB";
 import { useAuth } from "../contexts/AuthContext";
-import type { Document, DocumentItem } from "../types";
+import type { DocumentItem } from "../types";
 
 /**
  * PDFドキュメントを取得・管理するためのフック
@@ -31,7 +31,7 @@ export function useDocuments(folderId?: string) {
     if (!rawDocuments) return [];
 
     let filtered = rawDocuments.filter(
-      (d) => !(d.isDeleted ?? (d as any).is_deleted),
+      (d) => !(d.isDeleted ?? (d as unknown).is_deleted),
     );
 
     if (folderId) {

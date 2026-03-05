@@ -54,7 +54,6 @@ export default function Layout() {
   useKatexLoader();
 
   const isStudyModePage = currentPageName === "StudyMode";
-  const isCardEditPage = currentPageName === "CardEdit";
 
   return (
     <div

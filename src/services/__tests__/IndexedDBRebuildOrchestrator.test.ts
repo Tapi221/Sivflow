@@ -79,8 +79,8 @@ describe("IndexedDBRebuildOrchestrator", () => {
       ],
     });
     getLocalDbMock
-      .mockResolvedValueOnce(oldDb as any)
-      .mockResolvedValueOnce(newDb as any);
+      .mockResolvedValueOnce(oldDb as unknown)
+      .mockResolvedValueOnce(newDb as unknown);
 
     const { IndexedDBRebuildOrchestrator } =
       await import("../IndexedDBRebuildOrchestrator");

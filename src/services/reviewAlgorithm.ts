@@ -51,20 +51,20 @@ const DIFFICULTY_INTERVAL_BRAKE = 0.3;
 const toDate = (value?: Date | Timestamp | null): Date | null => {
   if (!value) return null;
   if (value instanceof Date) return value;
-  if (typeof (value as any)?.toDate === "function")
-    return (value as any).toDate();
+  if (typeof (value as unknown)?.toDate === "function")
+    return (value as unknown).toDate();
   if (typeof value === "object") {
     const seconds =
-      typeof (value as any)?.seconds === "number"
-        ? (value as any).seconds
-        : typeof (value as any)?._seconds === "number"
-          ? (value as any)._seconds
+      typeof (value as unknown)?.seconds === "number"
+        ? (value as unknown).seconds
+        : typeof (value as unknown)?._seconds === "number"
+          ? (value as unknown)._seconds
           : null;
     const nanoseconds =
-      typeof (value as any)?.nanoseconds === "number"
-        ? (value as any).nanoseconds
-        : typeof (value as any)?._nanoseconds === "number"
-          ? (value as any)._nanoseconds
+      typeof (value as unknown)?.nanoseconds === "number"
+        ? (value as unknown).nanoseconds
+        : typeof (value as unknown)?._nanoseconds === "number"
+          ? (value as unknown)._nanoseconds
           : 0;
     if (seconds !== null) {
       const ms = seconds * 1000 + Math.floor(nanoseconds / 1e6);
@@ -72,7 +72,7 @@ const toDate = (value?: Date | Timestamp | null): Date | null => {
       return Number.isNaN(d.getTime()) ? null : d;
     }
   }
-  const parsed = new Date(value as any);
+  const parsed = new Date(value as unknown);
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 };
 
@@ -249,27 +249,27 @@ export const computeNextReview = ({
 }: ReviewAlgorithmInput & {
   delayBonusEnabled?: boolean;
 }): ReviewAlgorithmResult => {
-  const c: unknown = card as any;
+  const c: unknown = card as unknown;
   // Get current stability (with legacy conversion)
   const legacyLevel = (card.currentLevel ??
     c.current_level ??
     card.level ??
     c.level ??
-    null) as any;
+    null) as unknown;
   const currentStability = getInitialStability(
-    (card.memoryStability ?? c.memory_stability ?? null) as any,
+    (card.memoryStability ?? c.memory_stability ?? null) as unknown,
     legacyLevel,
   );
 
   // ✅ Get current difficulty
   const currentDifficulty = getInitialDifficulty(
-    (card.difficulty ?? c.difficulty ?? null) as any,
+    (card.difficulty ?? c.difficulty ?? null) as unknown,
     currentStability,
   );
 
   // Calculate delay (days overdue)
   const plannedDate = toDate(
-    (card.nextReviewDate ?? c.next_review_date ?? null) as any,
+    (card.nextReviewDate ?? c.next_review_date ?? null) as unknown,
   );
   const diff = plannedDate ? diffDays(now, plannedDate) : 0;
   const delayDays = Math.max(0, diff);
@@ -305,7 +305,7 @@ export const computeNextReview = ({
   nextReviewDate.setHours(0, 0, 0, 0);
 
   // Increment review count
-  const currentReviewCount = (card.reviewCount ?? c.review_count ?? 0) as any;
+  const currentReviewCount = (card.reviewCount ?? c.review_count ?? 0) as unknown;
   const reviewCount = currentReviewCount + 1;
 
   return {

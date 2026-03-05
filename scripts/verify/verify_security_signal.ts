@@ -1,5 +1,5 @@
 import * as admin from "firebase-admin";
-import { getFirestore, Timestamp, FieldValue } from "firebase-admin/firestore";
+import { getFirestore, Timestamp } from "firebase-admin/firestore";
 
 // Initialize Admin SDK
 process.env.FIRESTORE_EMULATOR_HOST = "localhost:8080";
@@ -30,7 +30,7 @@ async function verifySecuritySignal() {
 
   // 2. Set up listener on user document to catch the lock signal
   const userRef = db.doc(`users/${testUserId}`);
-  const unsubscribe = userRef.onSnapshot((snap) => {
+  userRef.onSnapshot((snap) => {
     const data = snap.data();
     if (data?.isAccountLocked) {
       console.log("✅ [SUCCESS] Account lock signal received!");

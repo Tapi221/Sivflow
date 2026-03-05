@@ -26,8 +26,7 @@ interface UseReliableFileUploadReturn {
   uploadFile: (
     file: File,
     pathGenerator: (fileName: string) => string,
-    context?: UploadMetadata["context"],
-    onProgress?: (progress: number) => void,
+    context?: UploadMetadata["context"]
   ) => Promise<UploadResult>;
   isUploading: boolean;
   uploadProgress: number;
@@ -90,7 +89,7 @@ const performFirebaseUpload = async (
   return new Promise<UploadedImage>((resolve, reject) => {
     uploadTask.on(
       "state_changed",
-      (snapshot) => {
+      () => {
         // Progress could be reported here if we had a global event bus
       },
       (error) => {
@@ -101,7 +100,7 @@ const performFirebaseUpload = async (
           const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
           resolve({
             ...image,
-            remoteUrl: downloadUrl as any, // Branded type cast
+            remoteUrl: downloadUrl as unknown, // Branded type cast
             status: "ready",
           });
         } catch (e) {
@@ -167,8 +166,7 @@ export const useReliableFileUpload = (): UseReliableFileUploadReturn => {
     async (
       file: File,
       pathGenerator: (fileName: string) => string,
-      context?: UploadMetadata["context"],
-      onProgress?: (progress: number) => void,
+      context?: UploadMetadata["context"]
     ): Promise<UploadResult> => {
       reset();
 
@@ -194,13 +192,13 @@ export const useReliableFileUpload = (): UseReliableFileUploadReturn => {
       try {
         // 1. Generate Safe Path and ID
         const contextType =
-          (context as any)?.type ||
+          (context as unknown)?.type ||
           (typeof context === "string" ? context : "card_image");
         const forcedId =
           typeof context === "object" &&
           context !== null &&
-          typeof (context as any).docId === "string"
-            ? (context as any).docId.trim()
+          typeof (context as unknown).docId === "string"
+            ? (context as unknown).docId.trim()
             : "";
         const { safeName, id: generatedId } = generateSafeStoragePath(
           file.name,
@@ -214,7 +212,7 @@ export const useReliableFileUpload = (): UseReliableFileUploadReturn => {
         // Note: saveToIndexedDB returns void, so we construct savedImage first
         const storableImage: UploadedImage = {
           id,
-          localUrl: URL.createObjectURL(file) as any,
+          localUrl: URL.createObjectURL(file) as unknown,
           remoteUrl: null,
           status: "uploading",
           source: "local_fallback",
@@ -256,7 +254,7 @@ export const useReliableFileUpload = (): UseReliableFileUploadReturn => {
             originalFilename: file.name,
             mimeType: file.type,
             sizeBytes: file.size,
-            context: context as any, // Cast to avoid complex union checks
+            context: context as unknown, // Cast to avoid complex union checks
             userId: currentUser.uid,
           },
         };
