@@ -53,7 +53,7 @@ export function LinkEditor({ items, onChange }: LinkEditorProps) {
                 spellCheck={false}
                 data-lpignore="true"
                 data-1p-ignore
-                className="h-8 flex-[3] rounded-lg border-slate-100 bg-slate-50/30 text-[11px] focus-visible:ring-primary-100"
+                className="h-8 flex-[3] rounded-lg border border-[#d9d9d9] bg-white text-[11px] text-[#202123] shadow-[inset_0_1px_2px_rgba(86,72,74,0.16)] placeholder:text-[#978d90] focus-visible:ring-0 focus-visible:border-[#cfcfcf] focus-visible:bg-white"
                 autoFocus={index === refs.length - 1}
               />
               <Input
@@ -64,7 +64,7 @@ export function LinkEditor({ items, onChange }: LinkEditorProps) {
                 spellCheck={false}
                 data-lpignore="true"
                 data-1p-ignore
-                className="h-8 flex-[2] rounded-lg border-slate-100 bg-slate-50/30 text-[11px] focus-visible:ring-primary-100"
+                className="h-8 flex-[2] rounded-lg border border-[#d9d9d9] bg-white text-[11px] text-[#202123] shadow-[inset_0_1px_2px_rgba(86,72,74,0.16)] placeholder:text-[#978d90] focus-visible:ring-0 focus-visible:border-[#cfcfcf] focus-visible:bg-white"
               />
             </div>
           </div>

@@ -65,16 +65,21 @@ export function CardMetaPanel({
   onToggleDraft,
   onUpdateTitle,
 }: CardMetaPanelProps) {
-  const infoRowClass = "h-[var(--meta-row-px)] leading-[var(--meta-row-px)] text-sm text-[var(--sidebar-text)]";
-  const actionRowClass = "min-h-[var(--meta-action-min-h)] flex items-center";
+  const infoRowClass = "h-[var(--meta-row-px)] leading-[var(--meta-row-px)] text-[length:var(--meta-font-size)] text-[var(--sidebar-text)]";
+  const actionRowClass = "h-[var(--meta-row-px)] min-h-[var(--meta-row-px)] flex items-center";
   const [period, setPeriod] = useState<Period>("30d");
   const [titleInput, setTitleInput] = useState(card?.title ?? "");
+  const [draftChecked, setDraftChecked] = useState(Boolean(card?.isDraft ?? (card as any)?.is_draft));
   const [, setSearchParams] = useSearchParams();
   const { tagById } = useTags();
 
   useEffect(() => {
     setTitleInput(card?.title ?? "");
   }, [card?.id, card?.title]);
+
+  useEffect(() => {
+    setDraftChecked(Boolean(card?.isDraft ?? (card as any)?.is_draft));
+  }, [card?.id, card?.isDraft, (card as any)?.is_draft]);
 
   const safeLogs = useMemo(
     () => [...reviewLogs].sort((a, b) => {
@@ -158,20 +163,20 @@ export function CardMetaPanel({
 
   return (
     <aside
-      className={`meta-panel h-full w-80 shrink-0 border-l border-sidebar-border bg-sidebar font-serif text-[var(--sidebar-text)] ${UI_TYPO} ${NUMERIC_TYPO}`}
+      className={`meta-panel h-full w-80 shrink-0 border-l border-[#d9d9d9] bg-sidebar font-serif text-sm text-[var(--sidebar-text)] ${UI_TYPO} ${NUMERIC_TYPO}`}
       style={
         {
-          "--meta-row-px": "24px",
-          "--meta-action-min-h": "44px",
+          "--meta-row-px": "var(--app-row-px)",
+          "--meta-font-size": "0.875rem",
+          "--meta-action-min-h": "var(--meta-row-px)",
           backgroundColor: "var(--sidebar-bg)",
         } as CSSProperties
       }
     >
-      <div className="h-full overflow-y-auto bg-sidebar p-4">
+      <div className="h-full overflow-y-auto bg-sidebar p-2">
         <div className="space-y-6">
           <section>
-            <h3 className="text-xs font-semibold tracking-wide text-[var(--sidebar-text-muted)] uppercase">基本情報</h3>
-            <div className="mt-3 space-y-2 text-sm text-[var(--sidebar-text)]">
+            <div className="mt-2 space-y-2 text-[length:var(--meta-font-size)] text-[var(--sidebar-text)]">
               <div className={actionRowClass}>
                 <input
                   value={titleInput}
@@ -184,24 +189,38 @@ export function CardMetaPanel({
                       commitTitle();
                     }
                   }}
-                  className="h-[var(--meta-action-min-h)] w-full rounded-md border border-[var(--sidebar-border)] bg-[var(--sidebar-bg)] px-2 text-sm leading-[var(--meta-row-px)] outline-none focus:border-[var(--sidebar-text-muted)]"
+                  className="h-[var(--meta-row-px)] w-full rounded-md border border-[#d9d9d9] bg-white px-2 text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] text-[#6e6466] shadow-[inset_0_1px_2px_rgba(86,72,74,0.16)] outline-none placeholder:text-[#978d90] focus:border-[#cfcfcf] focus:bg-white"
                   placeholder="タイトル"
                 />
               </div>
+              <div className={`${actionRowClass} justify-start gap-2`}>
+                <Switch
+                  checked={draftChecked}
+                  onCheckedChange={(next) => {
+                    setDraftChecked(next);
+                    if (!card) return;
+                    void Promise.resolve(onToggleDraft(next)).catch(() => {
+                      setDraftChecked(Boolean(card?.isDraft ?? (card as any)?.is_draft));
+                    });
+                  }}
+                  disabled={!card}
+                />
+                <span className="text-[length:var(--meta-font-size)] font-medium leading-[var(--meta-row-px)] text-[var(--sidebar-text-muted)]">下書き</span>
+              </div>
               <section>
                 <div className={`${actionRowClass} justify-between`}>
-                  <h3 className="text-xs font-semibold tracking-wide text-[var(--sidebar-text-muted)] uppercase">タグ管理</h3>
+                  <h3 className="h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] font-semibold tracking-wide text-[var(--sidebar-text-muted)] uppercase">タグ管理</h3>
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="h-[var(--meta-action-min-h)] px-3 text-xs leading-[var(--meta-row-px)]"
+                    className="h-[var(--meta-row-px)] px-2 text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] border-[#d9d9d9] bg-white text-[#6e6466] shadow-[0_1px_0_rgba(255,255,255,0.95)_inset,0_-1px_0_rgba(86,72,74,0.10)_inset,0_1px_2px_rgba(86,72,74,0.16)] hover:bg-white"
                     onClick={openTagSettings}
                   >
                     設定で管理
                   </Button>
                 </div>
-                <div className="mt-3 rounded-md border border-[var(--sidebar-border)] bg-[var(--sidebar-active-bg)] px-2 py-2">
+                <div className="mt-2 rounded-md border border-[var(--sidebar-border)] bg-[var(--sidebar-active-bg)] px-2 py-1">
                   <TagInput
                     tags={tags}
                     onChange={(nextTags) => {
@@ -214,10 +233,6 @@ export function CardMetaPanel({
                   />
                 </div>
               </section>
-              <div className={`${actionRowClass} justify-between rounded border border-[var(--sidebar-border)] bg-[var(--sidebar-active-bg)] px-2`}>
-                <span className="text-xs font-medium leading-[var(--meta-row-px)] text-[var(--sidebar-text-muted)]">下書き</span>
-                <Switch checked={Boolean(card?.isDraft)} onCheckedChange={onToggleDraft} disabled={!card} />
-              </div>
               <div className="space-y-0">
                 <p className={infoRowClass}>作成日: {formatDateLabel(card?.createdAt ?? (card as any)?.created_at)}</p>
                 <p className={infoRowClass}>更新日: {formatDateLabel(card?.updatedAt ?? (card as any)?.updated_at)}</p>
@@ -228,16 +243,14 @@ export function CardMetaPanel({
           </section>
 
           <section>
-            <h3 className="text-xs font-semibold tracking-wide text-[var(--sidebar-text-muted)] uppercase">復習</h3>
-            <p className={`mt-3 ${infoRowClass}`}>復習回数: {completedReviewCount}</p>
             <div className="mt-3 space-y-2">
               {recent10.length === 0 ? (
-                <p className="h-[var(--meta-row-px)] leading-[var(--meta-row-px)] text-sm text-[var(--sidebar-text-muted)]">未復習</p>
+                null
               ) : (
                 recent10.map((log, idx) => (
                   <div
                     key={`${log.reviewedAt}-${idx}`}
-                    className="flex h-[var(--meta-row-px)] items-center justify-between text-xs leading-[var(--meta-row-px)] text-[var(--sidebar-text)]"
+                    className="flex h-[var(--meta-row-px)] items-center justify-between text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] text-[var(--sidebar-text)]"
                   >
                     <span>{formatDateLabel(log.reviewedAt)}</span>
                     <span className="rounded bg-[var(--sidebar-active-bg)] px-2 leading-[var(--meta-row-px)]">R{log.rating}</span>
@@ -245,19 +258,19 @@ export function CardMetaPanel({
                 ))
               )}
             </div>
-            <RatingCountTiles counts={distribution20} compact disableHover className="mt-3" />
+            <RatingCountTiles counts={distribution20} compact disableHover singleRow className="mt-3" />
           </section>
 
           <section>
             {currentResistanceScore !== null && (
-              <div className="mb-3 flex min-h-[var(--meta-action-min-h)] items-center justify-between rounded border border-[var(--sidebar-border)] bg-[var(--sidebar-active-bg)] px-3">
-                <span className="text-xs font-medium leading-[var(--meta-row-px)] text-[var(--sidebar-text-muted)]">現在の耐性スコア</span>
-                <span className="text-sm font-semibold leading-[var(--meta-row-px)] tabular-nums text-[var(--sidebar-text)]">{currentResistanceScore}%</span>
+              <div className="mb-3 flex min-h-[var(--meta-action-min-h)] items-center justify-between rounded border border-[var(--sidebar-border)] bg-[var(--sidebar-active-bg)] px-2">
+                <span className="text-[length:var(--meta-font-size)] font-medium leading-[var(--meta-row-px)] text-[var(--sidebar-text-muted)]">現在の耐性スコア</span>
+                <span className="text-[length:var(--meta-font-size)] font-semibold leading-[var(--meta-row-px)] tabular-nums text-[var(--sidebar-text)]">{currentResistanceScore}%</span>
               </div>
             )}
             <div className="flex min-h-[var(--meta-action-min-h)] items-center justify-between">
-              <h3 className="text-xs font-semibold tracking-wide text-[var(--sidebar-text-muted)] uppercase">耐性スコア推移</h3>
-              <div className="flex rounded-md border border-[var(--sidebar-border)] p-0.5 text-xs">
+              <h3 className="h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] font-semibold tracking-wide text-[var(--sidebar-text-muted)] uppercase">耐性スコア推移</h3>
+              <div className="flex rounded-md border border-[var(--sidebar-border)] p-0.5 text-[length:var(--meta-font-size)]">
                 {(["7d", "30d", "all"] as const).map((p) => (
                   <button
                     key={p}
@@ -270,7 +283,7 @@ export function CardMetaPanel({
                 ))}
               </div>
             </div>
-            <div className="mt-3 h-40 w-full rounded border border-[var(--sidebar-border)] bg-[var(--sidebar-active-bg)] p-2">
+            <div className="mt-3 h-40 w-full rounded border border-[var(--sidebar-border)] bg-[var(--sidebar-active-bg)] p-1.5">
               {chartData.length === 0 ? (
                 <div className="flex h-full items-center justify-center text-sm text-[var(--sidebar-text-muted)]">データなし</div>
               ) : (

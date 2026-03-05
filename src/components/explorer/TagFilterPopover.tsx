@@ -85,19 +85,19 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
           "w-64 p-0",
           "bg-white/95 backdrop-blur-md",
           "text-slate-800",
-          "shadow-2xl ring-1 ring-slate-200/80",
+          "shadow-2xl ring-1 ring-[#d9d9d9]",
           "overflow-hidden"
         )}
       >
         <div className="flex flex-col max-h-[400px]">
           {/* Header & Search */}
-          <div className="p-3 border-b border-slate-200/70">
+          <div className="p-3 border-b border-[#d9d9d9]">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-semibold text-slate-800">タグで絞り込み</span>
               {isFilterActive && (
                 <button
                   onClick={clearAllFilters}
-                  className="text-[11px] px-2 py-0.5 rounded-md border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition-colors"
+                  className="text-[11px] px-2 py-0.5 rounded-md border border-[#d9d9d9] bg-white text-[#6e6466] shadow-[0_1px_0_rgba(255,255,255,0.95)_inset,0_-1px_0_rgba(86,72,74,0.10)_inset,0_1px_2px_rgba(86,72,74,0.16)] hover:bg-white hover:text-[#5f5557] transition-colors"
                 >
                   すべてクリア
                 </button>
@@ -111,9 +111,10 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
                 type="text"
                 className={cn(
                   "w-full pl-8 pr-2 py-1.5 text-xs rounded",
-                  "border border-slate-200 bg-white/90",
-                  "focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-400/60 focus:border-primary-300",
-                  "placeholder:text-slate-400",
+                  "border border-[#d9d9d9] bg-white text-[#202123]",
+                  "shadow-[inset_0_1px_2px_rgba(86,72,74,0.16)]",
+                  "focus:bg-white focus:outline-none focus:ring-0 focus:border-[#cfcfcf]",
+                  "placeholder:text-[#978d90]",
                   "transition-colors"
                 )}
                 placeholder="タグを検索..."
@@ -124,16 +125,16 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
           </div>
 
           {/* Match Mode Toggle */}
-          <div className="px-3 py-2 border-b border-slate-200/70 flex items-center gap-2 text-[11px] bg-white/70">
+          <div className="px-3 py-2 border-b border-[#d9d9d9] flex items-center gap-2 text-[11px] bg-white/70">
             <span className="text-slate-500">条件:</span>
-            <div className="flex bg-white rounded border border-slate-200 p-0.5 shadow-sm">
+            <div className="flex bg-white rounded border border-[#d9d9d9] p-0.5 shadow-sm">
               <button
                 onClick={() => setTagMatchMode('any')}
                 className={cn(
-                  "px-2 py-0.5 rounded transition-colors text-[11px]",
+                  "px-2 py-0.5 rounded text-[11px] border border-[#d9d9d9] transition-colors shadow-[0_1px_0_rgba(255,255,255,0.95)_inset,0_-1px_0_rgba(86,72,74,0.10)_inset,0_1px_2px_rgba(86,72,74,0.16)]",
                   tagMatchMode === 'any'
-                    ? "bg-primary-100 text-primary-800 font-medium"
-                    : "text-slate-600 hover:text-slate-800 hover:bg-slate-50"
+                    ? "bg-[#dfe7f3] text-[#2f5ea8] font-medium border-[#cfd9e8]"
+                    : "bg-white text-slate-600 hover:text-slate-800"
                 )}
               >
                 いずれか (OR)
@@ -141,10 +142,10 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
               <button
                 onClick={() => setTagMatchMode('all')}
                 className={cn(
-                  "px-2 py-0.5 rounded transition-colors text-[11px]",
+                  "px-2 py-0.5 rounded text-[11px] border border-[#d9d9d9] transition-colors shadow-[0_1px_0_rgba(255,255,255,0.95)_inset,0_-1px_0_rgba(86,72,74,0.10)_inset,0_1px_2px_rgba(86,72,74,0.16)]",
                   tagMatchMode === 'all'
-                    ? "bg-primary-100 text-primary-800 font-medium"
-                    : "text-slate-600 hover:text-slate-800 hover:bg-slate-50"
+                    ? "bg-[#dfe7f3] text-[#2f5ea8] font-medium border-[#cfd9e8]"
+                    : "bg-white text-slate-600 hover:text-slate-800"
                 )}
               >
                 すべて (AND)
@@ -152,10 +153,10 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
             </div>
           </div>
 
-          <div className="px-3 py-2 border-b border-slate-200/70 bg-white/70 space-y-2">
+          <div className="px-3 py-2 border-b border-[#d9d9d9] bg-white/70 space-y-2">
             <div className="flex items-center justify-between gap-2 text-[11px]">
               <span className="text-slate-600">表示:</span>
-              <div className="flex bg-white rounded border border-slate-200 p-0.5 shadow-sm">
+              <div className="flex bg-white rounded border border-[#d9d9d9] p-0.5 shadow-sm">
                 {[
                   { label: 'カード', value: 'card' as const },
                   { label: 'PDF', value: 'pdf' as const },
@@ -165,10 +166,10 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
                     key={item.value}
                     onClick={() => toggleContentType(item.value)}
                     className={cn(
-                      'px-2 py-0.5 rounded transition-colors',
+                      'px-2 py-0.5 rounded border border-[#d9d9d9] transition-colors shadow-[0_1px_0_rgba(255,255,255,0.95)_inset,0_-1px_0_rgba(86,72,74,0.10)_inset,0_1px_2px_rgba(86,72,74,0.16)]',
                       contentTypeFilter.includes(item.value)
-                        ? 'bg-primary-100 text-primary-800 font-medium'
-                        : 'text-slate-600 hover:text-slate-800 hover:bg-slate-50'
+                        ? 'bg-[#dfe7f3] text-[#2f5ea8] font-medium border-[#cfd9e8]'
+                        : 'bg-white text-slate-600 hover:text-slate-800'
                     )}
                   >
                     {item.label}
@@ -195,14 +196,14 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
             ].map((item) => (
               <div key={item.label} className="flex items-center justify-between gap-2 text-[11px]">
                 <span className="text-slate-600">{item.label}:</span>
-                <div className="flex bg-white rounded border border-slate-200 p-0.5 shadow-sm">
+                <div className="flex bg-white rounded border border-[#d9d9d9] p-0.5 shadow-sm">
                   <button
                     onClick={() => item.onChange('any')}
                     className={cn(
-                      'px-2 py-0.5 rounded transition-colors',
+                      'px-2 py-0.5 rounded border border-[#d9d9d9] transition-colors shadow-[0_1px_0_rgba(255,255,255,0.95)_inset,0_-1px_0_rgba(86,72,74,0.10)_inset,0_1px_2px_rgba(86,72,74,0.16)]',
                       item.value === 'any'
-                        ? 'bg-primary-100 text-primary-800 font-medium'
-                        : 'text-slate-600 hover:text-slate-800 hover:bg-slate-50'
+                        ? 'bg-[#dfe7f3] text-[#2f5ea8] font-medium border-[#cfd9e8]'
+                        : 'bg-white text-slate-600 hover:text-slate-800'
                     )}
                   >
                     指定なし
@@ -210,10 +211,10 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
                   <button
                     onClick={() => item.onChange('on')}
                     className={cn(
-                      'px-2 py-0.5 rounded transition-colors',
+                      'px-2 py-0.5 rounded border border-[#d9d9d9] transition-colors shadow-[0_1px_0_rgba(255,255,255,0.95)_inset,0_-1px_0_rgba(86,72,74,0.10)_inset,0_1px_2px_rgba(86,72,74,0.16)]',
                       item.value === 'on'
-                        ? 'bg-primary-100 text-primary-800 font-medium'
-                        : 'text-slate-600 hover:text-slate-800 hover:bg-slate-50'
+                        ? 'bg-[#dfe7f3] text-[#2f5ea8] font-medium border-[#cfd9e8]'
+                        : 'bg-white text-slate-600 hover:text-slate-800'
                     )}
                   >
                     あり
@@ -221,10 +222,10 @@ export function TagFilterPopover({ allTags, className }: TagFilterPopoverProps) 
                   <button
                     onClick={() => item.onChange('off')}
                     className={cn(
-                      'px-2 py-0.5 rounded transition-colors',
+                      'px-2 py-0.5 rounded border border-[#d9d9d9] transition-colors shadow-[0_1px_0_rgba(255,255,255,0.95)_inset,0_-1px_0_rgba(86,72,74,0.10)_inset,0_1px_2px_rgba(86,72,74,0.16)]',
                       item.value === 'off'
-                        ? 'bg-primary-100 text-primary-800 font-medium'
-                        : 'text-slate-600 hover:text-slate-800 hover:bg-slate-50'
+                        ? 'bg-[#dfe7f3] text-[#2f5ea8] font-medium border-[#cfd9e8]'
+                        : 'bg-white text-slate-600 hover:text-slate-800'
                     )}
                   >
                     なし

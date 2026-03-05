@@ -290,8 +290,8 @@ export function useCardEditorSession({
   const handleToggleDraft = useCallback(async (nextIsDraft: boolean) => {
     if (isEditing) {
       setDraft((prev) => (prev ? { ...prev, isDraft: nextIsDraft } : prev));
-      return;
     }
+    // 既存カード編集中は即同期する。新規カード（selectedCardなし）のみローカル保持。
     if (!selectedCard) return;
     await updateCard(selectedCard.id, { isDraft: nextIsDraft });
     onCardUpdated?.();

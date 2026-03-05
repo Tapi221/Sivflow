@@ -165,7 +165,7 @@ export function TagInput({
               placeholder="タグを検索・作成..." 
               value={inputValue}
               onValueChange={setInputValue}
-              className="h-9 bg-slate-50 border-none rounded-lg focus:ring-0"
+              className="h-9 rounded-lg border border-[#d9d9d9] bg-white text-[#202123] shadow-[inset_0_1px_2px_rgba(86,72,74,0.16)] placeholder:text-[#978d90] focus:ring-0 focus:border-[#cfcfcf] focus:bg-white"
             />
           </div>
           <CommandList className="max-h-[350px]">

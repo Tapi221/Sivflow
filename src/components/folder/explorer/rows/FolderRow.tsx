@@ -172,7 +172,7 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                   <input
                     ref={editInputRef}
                     aria-label="フォルダ名の編集"
-                    className="text-sm bg-white border border-primary-300 rounded px-1 outline-none ring-1 ring-primary-100 z-10 h-6 w-full leading-5"
+                    className="text-sm text-[#202123] bg-white border border-[#d9d9d9] rounded px-1 outline-none z-10 h-6 w-full leading-5 shadow-[inset_0_1px_2px_rgba(86,72,74,0.16)] placeholder:text-[#6E6E80] focus:border-[#cfcfcf] focus:bg-white"
                     value={editingName}
                     onChange={(e) => {
                       setEditingName(e.target.value);
