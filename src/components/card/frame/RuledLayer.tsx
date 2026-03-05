@@ -13,6 +13,10 @@ type RuledLayerProps = {
   ruledInsetX?: number | string;
   ruledOffsetPx?: number;
   ruledBottomOffsetPx?: number;
+  /** 罫線の色。デフォルト: rgba(0,0,0,0.05) */
+  ruledColor?: string;
+  /** 罫線の太さ(px)。デフォルト: 1 */
+  ruledLinePx?: number;
 };
 
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
@@ -31,6 +35,8 @@ export function RuledLayer({
   ruledInsetX = 0,
   ruledOffsetPx = 0,
   ruledBottomOffsetPx = 0,
+  ruledColor = 'rgba(0,0,0,0.05)',
+  ruledLinePx = 1,
 }: RuledLayerProps) {
   const rowPx = Math.max(8, ruledRowPx);
   const topPx = Math.max(0, ruledOffsetPx);
@@ -66,7 +72,7 @@ export function RuledLayer({
       typeof ruledOpacity === 'number'
         ? String(clamp01(ruledOpacity))
         : (ruledOpacity ?? 'var(--card-ruled-opacity, 1)'),
-    ...getRuledStyle(kind, bottomLinePx),
+    ...getRuledStyle({ kind, rowPx, phasePx: ruledPhasePx, color: ruledColor, linePx: ruledLinePx, bottomLinePx }),
   };
 
   return (
