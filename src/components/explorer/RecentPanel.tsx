@@ -92,7 +92,7 @@ export function RecentPanel({
 
   if (validRecent.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full py-12 text-slate-400">
+      <div className="flex flex-col items-center justify-center h-full py-12 text-[#6E6E80]">
         <Clock className="w-10 h-10 mb-3 opacity-30" />
         <p className="text-sm font-medium">履歴がありません</p>
         <p className="text-xs mt-1">フォルダやカードを開くと履歴に追加されます</p>
@@ -103,10 +103,10 @@ export function RecentPanel({
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between px-3 py-2 border-b border-slate-100">
-        <span className="text-xs font-medium text-slate-500">最近開いたアイテム</span>
+        <span className="text-xs font-medium text-[#6E6E80]">最近開いたアイテム</span>
         <button
           onClick={onClearRecent}
-          className="text-xs text-slate-400 hover:text-red-500 flex items-center gap-1 transition-colors"
+          className="text-xs text-[#6E6E80] hover:text-red-500 flex items-center gap-1 transition-colors"
         >
           <Trash2 className="w-3 h-3" />
           <span>クリア</span>
@@ -129,11 +129,11 @@ export function RecentPanel({
                 left={
                   <Icon className={cn(
                     'sidebar-icon w-4 h-4 shrink-0 mr-2',
-                    item.type === 'folder' ? 'text-[#E8A858]' : item.type === 'document' ? 'text-rose-500' : 'text-slate-400'
+                    item.type === 'folder' ? 'text-[#E8A858]' : item.type === 'document' ? 'text-rose-500' : 'text-[#6E6E80]'
                   )} />
                 }
                 title={info.name}
-                right={<span className="text-[10px] text-slate-400 shrink-0">{getRelativeTime(item.ts)}</span>}
+                right={<span className="text-[10px] text-[#6E6E80] shrink-0">{getRelativeTime(item.ts)}</span>}
               />
             </ExplorerRow>
           );
@@ -142,3 +142,4 @@ export function RecentPanel({
     </div>
   );
 }
+

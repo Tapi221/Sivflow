@@ -59,18 +59,18 @@ export const DocumentRow: React.FC<DocumentRowProps> = ({
       <div className="flex-1 flex items-center min-w-0 h-full pr-1">
         <FileText
           className={cn(
-            "sidebar-icon w-4 h-4 mr-2 shrink-0 text-foreground/60 group-hover:text-foreground/80",
+            "sidebar-icon w-4 h-4 mr-2 shrink-0 text-[#6E6E80] group-hover:text-[#202123]",
             isSelected && "text-foreground"
           )}
         />
         <span className={cn(
           "sidebar-title text-sm truncate lining-nums tabular-nums",
-          isSelected ? "text-primary-700 font-medium" : "text-slate-700"
+          isSelected ? "text-primary-700 font-medium" : "text-[#202123]"
         )}>
           {title}
         </span>
         {doc.sizeBytes && (
-          <span className="ml-2 text-[10px] text-slate-400 shrink-0 lining-nums tabular-nums">
+          <span className="ml-2 text-[10px] text-[#6E6E80] shrink-0 lining-nums tabular-nums">
             {(doc.sizeBytes / 1024).toFixed(1)}KB
           </span>
         )}
@@ -91,7 +91,7 @@ export const DocumentRow: React.FC<DocumentRowProps> = ({
           <button
             type="button"
             aria-label="ドキュメントメニューを開く"
-            className="sidebar-action h-6 w-6 p-0 grid place-items-center rounded-md hover:bg-slate-200 text-slate-400 hover:text-slate-600 outline-none pointer-events-auto transition-colors shrink-0"
+            className="sidebar-action h-6 w-6 p-0 grid place-items-center rounded-md hover:bg-slate-200 text-[#6E6E80] hover:text-[#202123] outline-none pointer-events-auto transition-colors shrink-0"
             onClick={(e) => e.stopPropagation()}
             onPointerDown={(e) => e.stopPropagation()}
           >

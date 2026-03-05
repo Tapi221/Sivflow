@@ -125,7 +125,7 @@ export const CardRow: React.FC<CardRowProps> = ({
             >
               <FileText
                 className={cn(
-                  "sidebar-icon w-4 h-4 flex-shrink-0 mr-1 text-foreground/60 group-hover:text-foreground/80",
+                  "sidebar-icon w-4 h-4 flex-shrink-0 mr-1 text-[#6E6E80] group-hover:text-[#202123]",
                   isSelected && "text-foreground"
                 )}
               />
@@ -166,7 +166,7 @@ export const CardRow: React.FC<CardRowProps> = ({
                     className={cn(
                       "sidebar-title text-sm lining-nums tabular-nums",
                       "truncate",
-                      isSelected ? "text-primary-700 font-medium" : "text-slate-600"
+                      isSelected ? "text-primary-700 font-medium" : "text-[#202123]"
                     )}
                   >
                     {cardTitle}
@@ -193,7 +193,7 @@ export const CardRow: React.FC<CardRowProps> = ({
                   <button
                     type="button"
                     aria-label="カードメニューを開く"
-                    className="sidebar-action h-6 w-6 p-0 grid place-items-center rounded-md hover:bg-slate-200 text-slate-400 hover:text-slate-600 outline-none pointer-events-auto transition-colors shrink-0"
+                    className="sidebar-action h-6 w-6 p-0 grid place-items-center rounded-md hover:bg-slate-200 text-[#6E6E80] hover:text-[#202123] outline-none pointer-events-auto transition-colors shrink-0"
                     onClick={(e) => e.stopPropagation()}
                     onPointerDown={(e) => e.stopPropagation()}
                   >

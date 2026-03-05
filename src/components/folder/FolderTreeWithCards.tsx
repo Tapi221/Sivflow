@@ -1439,7 +1439,7 @@ export function FolderTreeWithCards({
       }
 
       const iconClassName =
-        treeNode.kind === 'document' ? 'text-rose-500' : 'text-slate-400';
+        treeNode.kind === 'document' ? 'text-rose-500' : 'text-[#6E6E80]';
 
       return (
         <div style={style}>
@@ -1465,7 +1465,7 @@ export function FolderTreeWithCards({
             <span
               className={cn(
                 'truncate text-sm',
-                isSelected ? 'font-medium text-primary-700' : 'text-slate-700'
+                isSelected ? 'font-medium text-primary-700' : 'text-[#202123]'
               )}
             >
               {treeNode.name}
@@ -1583,5 +1583,6 @@ export function FolderTreeWithCards({
     </DragDropContext>
   );
 }
+
 
 

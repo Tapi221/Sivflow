@@ -217,7 +217,7 @@ export function PinnedPanel({
                 {hasChildren ? (
                   <button
                     type="button"
-                    className="sidebar-action w-4 h-4 mr-1 flex items-center justify-center text-foreground/60 group-hover:text-foreground/80"
+                    className="sidebar-action w-4 h-4 mr-1 flex items-center justify-center text-[#6E6E80] group-hover:text-[#202123]"
                     onClick={(e) => {
                       e.stopPropagation();
                       toggleFolder(folderId);
@@ -228,7 +228,7 @@ export function PinnedPanel({
                 ) : (
                   <span className="w-4 h-4 mr-1 shrink-0" />
                 )}
-                <FolderIcon className="sidebar-icon w-4 h-4 mr-2 shrink-0 text-foreground/60 group-hover:text-foreground/80" />
+                <FolderIcon className="sidebar-icon w-4 h-4 mr-2 shrink-0 text-[#6E6E80] group-hover:text-[#202123]" />
               </>
             }
             title={folderName}
@@ -240,7 +240,7 @@ export function PinnedPanel({
                 }}
                 className="sidebar-action opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-200 rounded transition-all"
               >
-                <X className="sidebar-icon w-3 h-3 text-slate-400" />
+                <X className="sidebar-icon w-3 h-3 text-[#6E6E80]" />
               </button>
             ) : null}
           />
@@ -261,7 +261,7 @@ export function PinnedPanel({
                     onClick={() => onItemSelect({ type: 'card', id: entry.id })}
                   >
                     <ExplorerRowContent
-                      left={<BookOpen className="sidebar-icon w-4 h-4 mr-2 shrink-0 text-foreground/60 group-hover:text-foreground/80" />}
+                      left={<BookOpen className="sidebar-icon w-4 h-4 mr-2 shrink-0 text-[#6E6E80] group-hover:text-[#202123]" />}
                       title={card?.title || '無題のカード'}
                       right={isPinned ? (
                         <button
@@ -271,7 +271,7 @@ export function PinnedPanel({
                           }}
                           className="sidebar-action opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-200 rounded transition-all"
                         >
-                          <X className="sidebar-icon w-3 h-3 text-slate-400" />
+                          <X className="sidebar-icon w-3 h-3 text-[#6E6E80]" />
                         </button>
                       ) : null}
                     />
@@ -289,7 +289,7 @@ export function PinnedPanel({
                   onClick={() => onItemSelect({ type: 'document', id: entry.id })}
                 >
                   <ExplorerRowContent
-                    left={<FileText className="sidebar-icon w-4 h-4 mr-2 shrink-0 text-foreground/60 group-hover:text-foreground/80" />}
+                    left={<FileText className="sidebar-icon w-4 h-4 mr-2 shrink-0 text-[#6E6E80] group-hover:text-[#202123]" />}
                     title={doc?.title || doc?.fileName || '無題のドキュメント'}
                     right={isPinned ? (
                       <button
@@ -299,7 +299,7 @@ export function PinnedPanel({
                         }}
                         className="sidebar-action opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-200 rounded transition-all"
                       >
-                        <X className="sidebar-icon w-3 h-3 text-slate-400" />
+                        <X className="sidebar-icon w-3 h-3 text-[#6E6E80]" />
                       </button>
                     ) : null}
                   />
@@ -376,7 +376,7 @@ export function PinnedPanel({
       </ExplorerRow>
 
       {validPinnedItems.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-full py-12 text-slate-400">
+        <div className="flex flex-col items-center justify-center h-full py-12 text-[#6E6E80]">
           <FolderTree className="w-10 h-10 mb-3 text-foreground/40" />
           <p className="text-sm font-medium">ピン留めがありません</p>
           <p className="text-xs mt-1">フォルダやカードを右クリックして追加</p>
@@ -400,7 +400,7 @@ export function PinnedPanel({
               left={
                 <Icon className={cn(
                   'sidebar-icon w-4 h-4 mr-2 shrink-0',
-                  'text-foreground/60 group-hover:text-foreground/80'
+                  'text-[#6E6E80] group-hover:text-[#202123]'
                 )} />
               }
               title={info.name}
@@ -413,7 +413,7 @@ export function PinnedPanel({
                   }}
                   className="sidebar-action opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-200 rounded transition-all"
                 >
-                  <X className="sidebar-icon w-3 h-3 text-slate-400" />
+                  <X className="sidebar-icon w-3 h-3 text-[#6E6E80]" />
                 </button>
               }
             />
@@ -423,3 +423,4 @@ export function PinnedPanel({
     </div>
   );
 }
+

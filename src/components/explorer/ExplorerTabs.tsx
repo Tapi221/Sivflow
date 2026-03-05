@@ -53,7 +53,7 @@ export function ExplorerTabs({
                 "hover:text-primary-600",
                 isActive 
                   ? "text-primary-600" 
-                  : "text-slate-500"
+                  : "text-[#6E6E80]"
               )}
             >
               <Icon className="w-4 h-4" />
@@ -83,7 +83,7 @@ export function ExplorerTabs({
             onClick={() => {
               void onCreateRootFolder?.();
             }}
-            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-slate-500 transition-colors hover:bg-slate-100 hover:text-primary-600"
+            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-[#6E6E80] transition-colors hover:bg-slate-100 hover:text-primary-600"
           >
             <FolderPlus className="w-4 h-4" />
           </button>
@@ -92,3 +92,4 @@ export function ExplorerTabs({
     </div>
   );
 }
+

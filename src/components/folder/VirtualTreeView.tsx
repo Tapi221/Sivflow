@@ -75,12 +75,12 @@ export function VirtualTreeView({ nodes, cards, selectedItem, onItemSelect }: Vi
           onClick={() => onItemSelect({ type: 'card', id: node.cardId })}
         >
           <div className="flex h-full min-w-0 flex-1 items-center pr-1">
-            <BookOpen className={cn('sidebar-icon mr-1 h-4 w-4 shrink-0 text-slate-400', isSelected && 'text-primary-600')} />
+            <BookOpen className={cn('sidebar-icon mr-1 h-4 w-4 shrink-0 text-[#6E6E80]', isSelected && 'text-primary-600')} />
             <ExplorerRowContent
               title={getCardTitle(card)}
               titleClassName={cn(
                 'lining-nums tabular-nums',
-                isSelected ? 'font-medium text-primary-700' : 'text-slate-600'
+                isSelected ? 'font-medium text-primary-700' : 'text-[#202123]'
               )}
             />
           </div>
@@ -99,15 +99,15 @@ export function VirtualTreeView({ nodes, cards, selectedItem, onItemSelect }: Vi
           <div className="flex h-full min-w-0 flex-1 items-center pr-1">
             <div className="mr-1 flex h-4 w-4 flex-shrink-0 items-center justify-center">
               {isExpanded ? (
-                <ChevronDown className="sidebar-icon h-4 w-4 text-slate-500" />
+                <ChevronDown className="sidebar-icon h-4 w-4 text-[#6E6E80]" />
               ) : (
-                <ChevronRight className="sidebar-icon h-4 w-4 text-slate-500" />
+                <ChevronRight className="sidebar-icon h-4 w-4 text-[#6E6E80]" />
               )}
             </div>
-            <FolderTree className="sidebar-icon mr-1 h-4 w-4 flex-shrink-0 text-slate-400" />
+            <FolderTree className="sidebar-icon mr-1 h-4 w-4 flex-shrink-0 text-[#6E6E80]" />
             <ExplorerRowContent
               title={node.label}
-              titleClassName="font-medium text-slate-700 lining-nums tabular-nums"
+              titleClassName="font-medium text-[#202123] lining-nums tabular-nums"
             />
           </div>
         </ExplorerRow>
