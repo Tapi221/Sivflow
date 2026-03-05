@@ -3,7 +3,6 @@ import React, {
   useMemo, 
   useEffect 
 } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useCards } from '@/hooks/useCards';
 import { useFolders } from '@/hooks/useFolders';
 import { useUserSettings } from '@/hooks/useUserSettings';
@@ -14,7 +13,6 @@ import {
   ChevronLeft,
   ChevronRight,
 } from '@/ui/icons';
-import { createPageUrl } from '@/utils';
 import { 
   format, 
   startOfMonth, 
@@ -73,7 +71,6 @@ const toDate = (value) => {
 };
 
 export default function Calendar() {
-  const navigate = useNavigate();
   const [isMetaOpen, setIsMetaOpen] = useState(true);
   
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -112,7 +109,7 @@ export default function Calendar() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedDate, currentDate]);
 
-  const { cards = [], loading: cardsLoading } = useCards();
+  const { cards = [] } = useCards();
   const { folders = [], loading: foldersLoading } = useFolders();
   const { settings } = useUserSettings();
 
@@ -208,7 +205,7 @@ export default function Calendar() {
         <div className="w-full">
             {/* Days Header */}
             <div className="grid grid-cols-7 mb-4">
-                {weekDays.map((d, i) => (
+                {weekDays.map((d) => (
                     <div key={d} className={cn(
                         "text-center text-[10px] font-bold tracking-[0.2em] text-slate-300",
                         d === 'SUN' && "text-[#FF5A65]", // Sun
@@ -221,7 +218,7 @@ export default function Calendar() {
 
             {/* Grid */}
             <div className="grid grid-cols-7 gap-y-2 md:gap-y-4 gap-x-0">
-                {calendarDays.map((dayItem, index) => {
+                {calendarDays.map((dayItem) => {
                     const dateStr = format(dayItem, 'yyyy-MM-dd');
                     const isCurrentMonth = isSameMonth(dayItem, currentDate);
                     const isSelected = isSameDay(dayItem, selectedDate);

@@ -1,8 +1,9 @@
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 import { MetaPanelShell } from "@/components/card/panels/MetaPanelShell";
 
 type EmptyMetaPanelProps = {
+  children?: ReactNode;
   className?: string;
   bodyClassName?: string;
   contentClassName?: string;
@@ -10,6 +11,7 @@ type EmptyMetaPanelProps = {
 };
 
 export function EmptyMetaPanel({
+  children,
   className,
   bodyClassName,
   contentClassName,
@@ -21,6 +23,8 @@ export function EmptyMetaPanel({
       bodyClassName={bodyClassName}
       contentClassName={contentClassName}
       style={style}
-    />
+    >
+      {children}
+    </MetaPanelShell>
   );
 }
