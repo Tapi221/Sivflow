@@ -26,11 +26,10 @@ export function CardCornerActions({
   disabled = false,
   className,
 }: CardCornerActionsProps) {
-  if (!onHelp && !onStar) return null;
-
   const stop = useCallback((e: React.SyntheticEvent) => {
     e.stopPropagation();
   }, []);
+  if (!onHelp && !onStar) return null;
 
   const buttonBaseClass =
     "rounded-full h-7 w-7 min-h-0 min-w-0 transition-colors flex items-center justify-center bg-transparent hover:bg-transparent active:bg-transparent " +

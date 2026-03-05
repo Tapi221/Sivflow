@@ -33,12 +33,12 @@ function ImageItem({ item, index, onRetry, onUpdate }) {
   const isFailed = item.status === "failed";
   const safeScale = clamp(Number(item.scale ?? 1), 0.2, 1);
   useEffect(() => {
-    setLoadFailed(false);
+    queueMicrotask(() => setLoadFailed(false));
   }, [displayUrl]);
   useEffect(() => {
     const localFileId = item?.localFileId;
     if (!localFileId) {
-      setResolvedLocalUrl(null);
+      queueMicrotask(() => setResolvedLocalUrl(null));
       return;
     }
     if (item?.remoteUrl || item?.localUrl) return;

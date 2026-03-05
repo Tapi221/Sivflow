@@ -32,13 +32,12 @@ const FIXTURE_CARD = {
 };
 
 export default function CardLayoutConsistencyTest() {
+  const [editBlocks, setEditBlocks] =
+    React.useState<CardBlock[]>(FIXTURE_BLOCKS);
   const canRender =
     typeof window !== "undefined" &&
     new URLSearchParams(window.location.search).get("test_bypass") === "true";
   if (!canRender) return null;
-
-  const [editBlocks, setEditBlocks] =
-    React.useState<CardBlock[]>(FIXTURE_BLOCKS);
 
   return (
     <div className="min-h-screen bg-slate-50 p-4 md:p-8">

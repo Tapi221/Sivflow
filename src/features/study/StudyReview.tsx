@@ -32,7 +32,7 @@ export function StudyReview({
   const [flipTrigger, setFlipTrigger] = useState(0);
   // 新しいカードに移ったらトリガーをリセット
   useEffect(() => {
-    setFlipTrigger(0);
+    queueMicrotask(() => setFlipTrigger(0));
   }, [sessionCurrentIndex]);
 
   if (isDesktop) {

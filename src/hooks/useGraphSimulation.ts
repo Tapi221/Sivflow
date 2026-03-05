@@ -111,11 +111,12 @@ export function useGraphSimulation({
       simulation.current.alpha(1).restart();
     }
   };
+  const getSimulation = () => simulation.current;
 
   return {
     nodes: currentNodes,
     links: currentLinks,
-    simulation: simulation.current,
+    getSimulation,
     restart,
   };
 }

@@ -70,7 +70,9 @@ const isEditableTarget = (target: EventTarget | null) => {
 const useRafThrottledCallback = (fn: () => void) => {
   const rafIdRef = useRef<number | null>(null);
   const fnRef = useRef(fn);
-  fnRef.current = fn;
+  useEffect(() => {
+    fnRef.current = fn;
+  }, [fn]);
 
   const schedule = useCallback(() => {
     if (rafIdRef.current != null) return;
@@ -194,6 +196,9 @@ export const BlockEditor = React.forwardRef<
     // コンテナのスケール計測用
     const containerRef = useRef<HTMLDivElement | null>(null);
     const [measurement, setMeasurement] = useState({ scale: 1 });
+    const [toolbarMount, setToolbarMount] = useState<HTMLDivElement | null>(
+      null,
+    );
 
     const updateMeasurement = useCallback(() => {
       const el = containerRef.current;
@@ -223,7 +228,11 @@ export const BlockEditor = React.forwardRef<
     const scheduleMeasurement = useRafThrottledCallback(updateMeasurement);
 
     useEffect(() => {
-      updateMeasurement();
+      queueMicrotask(() => setToolbarMount(toolbarMountRef?.current ?? null));
+    }, [toolbarMountRef]);
+
+    useEffect(() => {
+      queueMicrotask(() => updateMeasurement());
 
       const el = containerRef.current;
       if (!el) return;
@@ -238,12 +247,6 @@ export const BlockEditor = React.forwardRef<
         window.removeEventListener("resize", scheduleMeasurement);
       };
     }, [scheduleMeasurement, updateMeasurement]);
-
-    useImperativeHandle(ref, () => ({
-      addBlock: (type: CardBlock["type"]) => {
-        handleAddBlock(type);
-      },
-    }));
 
     const clampDragStyle = (
       style: React.CSSProperties | undefined,
@@ -271,7 +274,7 @@ export const BlockEditor = React.forwardRef<
           : style;
       }
 
-      const s = style as DndStyle | any;
+      const s = style as DndStyle;
 
       const result: unknown = { ...style };
 
@@ -505,6 +508,11 @@ export const BlockEditor = React.forwardRef<
       blocksRef.current = next;
       emitChange(next, { reindex: true });
     };
+    useImperativeHandle(ref, () => ({
+      addBlock: (type: CardBlock["type"]) => {
+        handleAddBlock(type);
+      },
+    }));
 
     const handleUpdateBlock = (id: string, updates: Partial<CardBlock>) => {
       const source = blocksRef.current;
@@ -652,7 +660,6 @@ export const BlockEditor = React.forwardRef<
       />
     );
 
-    const toolbarMount = toolbarMountRef?.current ?? null;
     const inlineToolbar =
       toolbarNode && !toolbarMount ? (
         <div className="mb-2">{toolbarNode}</div>

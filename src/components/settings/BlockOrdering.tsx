@@ -36,7 +36,7 @@ export const BlockOrdering = () => {
     const animation = requestAnimationFrame(() => setEnabled(true));
     return () => {
       cancelAnimationFrame(animation);
-      setEnabled(false);
+      queueMicrotask(() => setEnabled(false));
     };
   }, []);
 
@@ -48,10 +48,12 @@ export const BlockOrdering = () => {
       const sorted = sanitizeBlockSettings([...settings.editorBlockSettings]);
 
       // 文字列表現で比較し、実際に変更がある場合のみステートを更新する（チラツキ防止）
-      setBlocks((prev) => {
-        if (JSON.stringify(prev) === JSON.stringify(sorted)) return prev;
-        return sorted;
-      });
+      queueMicrotask(() =>
+        setBlocks((prev) => {
+          if (JSON.stringify(prev) === JSON.stringify(sorted)) return prev;
+          return sorted;
+        }),
+      );
     } else {
       const defaults: BlockConfig[] = [
         {
@@ -90,7 +92,7 @@ export const BlockOrdering = () => {
           orderIndex: 4,
         },
       ];
-      setBlocks(sanitizeBlockSettings(defaults));
+      queueMicrotask(() => setBlocks(sanitizeBlockSettings(defaults)));
     }
   }, [settings?.editorBlockSettings]);
 
@@ -185,7 +187,7 @@ export const BlockOrdering = () => {
                               : undefined,
                             "--drag-z-index": snapshot.isDragging ? 9999 : 1,
                             zIndex: "var(--drag-z-index)",
-                          } as any
+                          } as React.CSSProperties
                         }
                       >
                         <div

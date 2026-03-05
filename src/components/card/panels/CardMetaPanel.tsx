@@ -79,11 +79,13 @@ export function CardMetaPanel({
   const { tagById } = useTags();
 
   useEffect(() => {
-    setTitleInput(card?.title ?? "");
+    queueMicrotask(() => setTitleInput(card?.title ?? ""));
   }, [card?.id, card?.title]);
 
   useEffect(() => {
-    setDraftChecked(Boolean(card?.isDraft ?? (card as any)?.is_draft));
+    queueMicrotask(() =>
+      setDraftChecked(Boolean(card?.isDraft ?? (card as any)?.is_draft)),
+    );
   }, [card?.id, card?.isDraft, (card as any)?.is_draft]);
 
   const safeLogs = useMemo(

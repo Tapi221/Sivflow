@@ -36,11 +36,7 @@ import { Folder as FolderIcon } from "@/ui/icons";
 import { Tag as TagIcon } from "@/ui/icons";
 import { X } from "@/ui/icons";
 import { Filter } from "@/ui/icons";
-interface GlobalSearchPanelProps {
-  // Props are managed by CommandPaletteProvider
-}
-
-export function GlobalSearchPanel(_props: GlobalSearchPanelProps) {
+export function GlobalSearchPanel() {
   const navigate = useNavigate();
   const {
     isGlobalSearchOpen,
@@ -66,7 +62,7 @@ export function GlobalSearchPanel(_props: GlobalSearchPanelProps) {
   const { tags } = useTags();
 
   // インデックス構築
-  const { quickOpenIndex, fullTextIndex } = useMemo(() => {
+  const { fullTextIndex } = useMemo(() => {
     const qoIndex = buildQuickOpenIndex(cards || [], folders || [], tags || []);
     const ftIndex = buildFullTextIndex(
       cards || [],
@@ -74,7 +70,7 @@ export function GlobalSearchPanel(_props: GlobalSearchPanelProps) {
       tags || [],
       qoIndex.folderPathMap,
     );
-    return { quickOpenIndex: qoIndex, fullTextIndex: ftIndex };
+    return { fullTextIndex: ftIndex };
   }, [cards, folders, tags]);
 
   // 検索フィルタ
@@ -102,10 +98,12 @@ export function GlobalSearchPanel(_props: GlobalSearchPanelProps) {
   // ダイアログが開いたらフォーカスと初期値設定
   useEffect(() => {
     if (isGlobalSearchOpen) {
-      setQuery(globalSearchInitialQuery);
-      setTagFilter(globalSearchInitialTagFilter);
-      setSelectedIndex(0);
-      setTypeFilter("all");
+      queueMicrotask(() => {
+        setQuery(globalSearchInitialQuery);
+        setTagFilter(globalSearchInitialTagFilter);
+        setSelectedIndex(0);
+        setTypeFilter("all");
+      });
       setTimeout(() => {
         inputRef.current?.focus();
         inputRef.current?.select();
@@ -119,7 +117,7 @@ export function GlobalSearchPanel(_props: GlobalSearchPanelProps) {
 
   // 選択インデックスのリセット
   useEffect(() => {
-    setSelectedIndex(0);
+    queueMicrotask(() => setSelectedIndex(0));
   }, [results]);
 
   // 選択項目が見えるようにスクロール
@@ -134,6 +132,26 @@ export function GlobalSearchPanel(_props: GlobalSearchPanelProps) {
     }
   }, [selectedIndex, results.length]);
 
+  // 項目選択時の処理
+  const handleSelect = useCallback(
+    (item: FullTextResult) => {
+      closeGlobalSearch();
+
+      switch (item.type) {
+        case "card":
+          navigate(`/CardEdit?id=${item.id}`);
+          break;
+        case "folder":
+          navigate(`/folders?folderId=${item.id}`);
+          break;
+        case "tag":
+          // タグをクリックしたらタグでフィルタ
+          openGlobalSearch("", item.name);
+          break;
+      }
+    },
+    [navigate, closeGlobalSearch, openGlobalSearch],
+  );
   // キーボード操作
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -158,28 +176,7 @@ export function GlobalSearchPanel(_props: GlobalSearchPanelProps) {
           break;
       }
     },
-    [results, selectedIndex, closeGlobalSearch],
-  );
-
-  // 項目選択時の処理
-  const handleSelect = useCallback(
-    (item: FullTextResult) => {
-      closeGlobalSearch();
-
-      switch (item.type) {
-        case "card":
-          navigate(`/CardEdit?id=${item.id}`);
-          break;
-        case "folder":
-          navigate(`/folders?folderId=${item.id}`);
-          break;
-        case "tag":
-          // タグをクリックしたらタグでフィルタ
-          openGlobalSearch("", item.name);
-          break;
-      }
-    },
-    [navigate, closeGlobalSearch, openGlobalSearch],
+    [results, selectedIndex, closeGlobalSearch, handleSelect],
   );
 
   // アイコン取得

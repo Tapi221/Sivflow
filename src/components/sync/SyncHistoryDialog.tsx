@@ -9,7 +9,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import {
   Clock,
-  ArrowUpDown,
   CheckCircle2 as CheckCircle,
   AlertTriangle,
   AlertCircle as XCircle,
@@ -42,7 +41,7 @@ export function SyncHistoryDialog({ open, onClose }: SyncHistoryDialogProps) {
         .reverse()
         .limit(30)
         .toArray();
-      setHistories(allHistories);
+      queueMicrotask(() => setHistories(allHistories));
     } catch (error) {
       console.error("Failed to load sync histories:", error);
     }
@@ -163,7 +162,7 @@ export function SyncHistoryDialog({ open, onClose }: SyncHistoryDialogProps) {
         ) : (
           <div className="flex-1 overflow-y-auto">
             <div className="space-y-1">
-              {histories.map((history, index) => (
+              {histories.map((history) => (
                 <div
                   key={history.id}
                   className={`border-l-4 ${getTimelineColor(history.result)} pl-4 py-3 hover:bg-gray-50 transition-colors`}

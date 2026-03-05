@@ -60,7 +60,7 @@ export default function CardViewer({
     if (next !== currentIndex) {
       onIndexChange(next);
       // 表示カードが変わるので flip もリセット
-      setIsFlipped(false);
+      queueMicrotask(() => setIsFlipped(false));
     }
   }, [cards.length, currentIndex, onIndexChange]);
 

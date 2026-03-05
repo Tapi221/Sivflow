@@ -49,7 +49,7 @@ export function TagFilterPopover({
         inputRef.current?.focus();
       }, 100);
     } else {
-      setSearchQuery(""); // 閉じたら検索クリア
+      queueMicrotask(() => setSearchQuery("")); // 閉じたら検索クリア
     }
   }, [isOpen]);
 

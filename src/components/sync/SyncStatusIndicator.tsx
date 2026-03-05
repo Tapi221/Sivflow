@@ -7,7 +7,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -39,7 +38,6 @@ interface SyncStatusIndicatorProps {
 
 export function SyncStatusIndicator({
   className,
-  showText: showTextProp,
   dropdownAlign = "end",
   dropdownSide = "bottom",
   compact = false,
@@ -64,7 +62,7 @@ export function SyncStatusIndicator({
       syncStatus === "error" ||
       conflictCount > 0
     ) {
-      setIsExpanded(true);
+      queueMicrotask(() => setIsExpanded(true));
     }
   }, [syncStatus, conflictCount, compact]);
 

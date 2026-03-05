@@ -97,7 +97,7 @@ const getUpdatedAtKey = (value: unknown): string => {
   if (value instanceof Date) return String(value.getTime());
   if (typeof value === "number" || typeof value === "string")
     return String(value);
-  const maybeDate = (value as any)?.toDate?.();
+  const maybeDate = (value as { toDate?: () => Date } | null)?.toDate?.();
   if (maybeDate instanceof Date) return String(maybeDate.getTime());
   return "";
 };
@@ -264,29 +264,29 @@ export function PdfPane({
     // 初期復元フラグをリセット（次の hydration に備える）
     isHydratingRef.current = false;
     initializedRef.current = false;
-    setRestoredBlobUrl(null);
-    setCachedBlobUrl(null);
-    setLocalDataStatus("idle");
-    setFailedRemoteSourceKey(null);
-    setFailedBlobUrl(null);
+    queueMicrotask(() => setRestoredBlobUrl(null));
+    queueMicrotask(() => setCachedBlobUrl(null));
+    queueMicrotask(() => setLocalDataStatus("idle"));
+    queueMicrotask(() => setFailedRemoteSourceKey(null));
+    queueMicrotask(() => setFailedBlobUrl(null));
     triedRemoteSourceKeysRef.current.clear();
     triedBlobUrlsRef.current.clear();
     triedLocalRestoreKeysRef.current.clear();
   }, [doc.id]);
 
   useEffect(() => {
-    setFailedRemoteSourceKey(null);
+    queueMicrotask(() => setFailedRemoteSourceKey(null));
   }, [remoteSourceKey]);
 
   useEffect(() => {
     if (!localBlobId) {
-      setCachedBlobUrl(null);
+      queueMicrotask(() => setCachedBlobUrl(null));
       return;
     }
     const nextCached = getCachedDocumentBlobUrl(localBlobId, {
       userId: currentUser?.uid,
     });
-    setCachedBlobUrl(nextCached);
+    queueMicrotask(() => setCachedBlobUrl(nextCached));
   }, [currentUser?.uid, localBlobId]);
 
   // ✅ 表示状態の初期化（一度だけ実行）
@@ -312,16 +312,20 @@ export function PdfPane({
     // 3. 復元状態を適用
     if (restoredState) {
       if (typeof restoredState.currentPage === "number") {
-        setCurrentPage(Math.max(1, restoredState.currentPage));
+        queueMicrotask(() =>
+          setCurrentPage(Math.max(1, restoredState.currentPage)),
+        );
       }
       if (typeof restoredState.scale === "number") {
-        setScale(clamp(restoredState.scale, FIT_MIN_SCALE, FIT_MAX_SCALE));
+        queueMicrotask(() =>
+          setScale(clamp(restoredState.scale, FIT_MIN_SCALE, FIT_MAX_SCALE)),
+        );
       }
       if (
         restoredState.fitMode === "width" ||
         restoredState.fitMode === "manual"
       ) {
-        setFitMode(restoredState.fitMode);
+        queueMicrotask(() => setFitMode(restoredState.fitMode));
       }
     }
 
@@ -339,7 +343,7 @@ export function PdfPane({
     let cancelled = false;
 
     if (effectiveRemoteUrl) {
-      setLocalDataStatus("idle");
+      queueMicrotask(() => setLocalDataStatus("idle"));
       return;
     }
 
@@ -348,21 +352,21 @@ export function PdfPane({
       usableRestoredBlobUrl ||
       usablePersistedBlobUrl
     ) {
-      setLocalDataStatus("ready");
+      queueMicrotask(() => setLocalDataStatus("ready"));
       return;
     }
 
     if (!localBlobId) {
-      setLocalDataStatus("failed");
+      queueMicrotask(() => setLocalDataStatus("failed"));
       return;
     }
 
     if (triedLocalRestoreKeysRef.current.has(localBlobId)) {
-      setLocalDataStatus("failed");
+      queueMicrotask(() => setLocalDataStatus("failed"));
       return;
     }
     triedLocalRestoreKeysRef.current.add(localBlobId);
-    setLocalDataStatus("loading");
+    queueMicrotask(() => setLocalDataStatus("loading"));
     getDocumentBlob(localBlobId, { userId: currentUser?.uid })
       .then(async (blob) => {
         if (cancelled) return;
@@ -493,12 +497,16 @@ export function PdfPane({
   // fitMode === 'width' の時のスケール自動更新
   useEffect(() => {
     if (fitMode !== "width") return;
-    setScale((prev) => (Math.abs(prev - fitScale) < EPSILON ? prev : fitScale));
+    queueMicrotask(() =>
+      setScale((prev) =>
+        Math.abs(prev - fitScale) < EPSILON ? prev : fitScale,
+      ),
+    );
   }, [fitMode, fitScale]);
 
   useEffect(() => {
     if (!numPages) return;
-    if (currentPage > numPages) setCurrentPage(numPages);
+    if (currentPage > numPages) queueMicrotask(() => setCurrentPage(numPages));
   }, [numPages, currentPage]);
 
   useEffect(() => {

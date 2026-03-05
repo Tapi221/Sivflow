@@ -109,8 +109,8 @@ function PdfPage({
   }, [pageRef]);
 
   useEffect(() => {
-    setRendered(false);
-    setError(null);
+    queueMicrotask(() => setRendered(false));
+    queueMicrotask(() => setError(null));
   }, [pdf, pageNumber, scale, opaqueCanvas]);
 
   useEffect(() => {

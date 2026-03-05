@@ -90,10 +90,10 @@ export function SlideImage({
   }, [onContainerRef]);
 
   useEffect(() => {
-    setSrc(slide.url ?? null);
-    setError(null);
-    setRequested(false);
-    setShouldLoad(false);
+    queueMicrotask(() => setSrc(slide.url ?? null));
+    queueMicrotask(() => setError(null));
+    queueMicrotask(() => setRequested(false));
+    queueMicrotask(() => setShouldLoad(false));
   }, [slide.url, slide.path, slide.index]);
 
   useEffect(() => {
@@ -122,16 +122,16 @@ export function SlideImage({
   useEffect(() => {
     if (!shouldLoad || src || requested) return;
     if (slide.url) {
-      setSrc(slide.url);
+      queueMicrotask(() => setSrc(slide.url));
       return;
     }
     if (!slide.path) {
-      setError("スライドのURLがありません");
+      queueMicrotask(() => setError("スライドのURLがありません"));
       return;
     }
 
     let cancelled = false;
-    setRequested(true);
+    queueMicrotask(() => setRequested(true));
 
     const load = async () => {
       try {

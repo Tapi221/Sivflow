@@ -30,11 +30,7 @@ import { Search } from "@/ui/icons";
 import { StickyNote } from "@/ui/icons";
 import { Folder as FolderIcon } from "@/ui/icons";
 import { Tag as TagIcon } from "@/ui/icons";
-interface QuickOpenDialogProps {
-  // Props are managed by CommandPaletteProvider
-}
-
-export function QuickOpenDialog(_props: QuickOpenDialogProps) {
+export function QuickOpenDialog() {
   const navigate = useNavigate();
   const { isQuickOpenOpen, closeQuickOpen, openGlobalSearch } =
     useCommandPalette();
@@ -78,8 +74,10 @@ export function QuickOpenDialog(_props: QuickOpenDialogProps) {
   // ダイアログが開いたらフォーカス
   useEffect(() => {
     if (isQuickOpenOpen) {
-      setQuery("");
-      setSelectedIndex(0);
+      queueMicrotask(() => {
+        setQuery("");
+        setSelectedIndex(0);
+      });
       // 少し遅延してフォーカス
       setTimeout(() => {
         inputRef.current?.focus();
@@ -89,7 +87,7 @@ export function QuickOpenDialog(_props: QuickOpenDialogProps) {
 
   // 選択インデックスのリセット
   useEffect(() => {
-    setSelectedIndex(0);
+    queueMicrotask(() => setSelectedIndex(0));
   }, [results]);
 
   // 選択項目が見えるようにスクロール
@@ -104,6 +102,28 @@ export function QuickOpenDialog(_props: QuickOpenDialogProps) {
     }
   }, [selectedIndex, results.length]);
 
+  // 項目選択時の処理
+  const handleSelect = useCallback(
+    (item: QuickOpenItem) => {
+      closeQuickOpen();
+
+      switch (item.type) {
+        case "card":
+          // カード編集画面へ遷移
+          navigate(`/CardEdit?id=${item.id}`);
+          break;
+        case "folder":
+          // フォルダ画面へ遷移（将来的にはフォルダを選択状態に）
+          navigate(`/folders?folderId=${item.id}`);
+          break;
+        case "tag":
+          // 全文検索を開き、タグでフィルタ
+          openGlobalSearch("", item.name);
+          break;
+      }
+    },
+    [navigate, closeQuickOpen, openGlobalSearch],
+  );
   // キーボード操作
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -128,30 +148,7 @@ export function QuickOpenDialog(_props: QuickOpenDialogProps) {
           break;
       }
     },
-    [results, selectedIndex, closeQuickOpen],
-  );
-
-  // 項目選択時の処理
-  const handleSelect = useCallback(
-    (item: QuickOpenItem) => {
-      closeQuickOpen();
-
-      switch (item.type) {
-        case "card":
-          // カード編集画面へ遷移
-          navigate(`/CardEdit?id=${item.id}`);
-          break;
-        case "folder":
-          // フォルダ画面へ遷移（将来的にはフォルダを選択状態に）
-          navigate(`/folders?folderId=${item.id}`);
-          break;
-        case "tag":
-          // 全文検索を開き、タグでフィルタ
-          openGlobalSearch("", item.name);
-          break;
-      }
-    },
-    [navigate, closeQuickOpen, openGlobalSearch],
+    [results, selectedIndex, closeQuickOpen, handleSelect],
   );
 
   // アイコン取得

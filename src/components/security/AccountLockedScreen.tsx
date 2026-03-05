@@ -4,7 +4,7 @@ import { Shield } from "@/ui/icons"; // IDE Check: Shield icon
 // CSSはApp.tsx等でグローバル定義するか、インラインでシンプルに実装
 
 export const AccountLockedScreen: React.FC = () => {
-  const { securityState } = useAuth();
+  const { securityState, currentUser } = useAuth();
 
   if (!securityState.isLocked) return null;
 
@@ -64,7 +64,7 @@ export const AccountLockedScreen: React.FC = () => {
         <p style={{ fontSize: "0.9rem", color: "#9ca3af" }}>
           管理者にお問い合わせください。
           <br />
-          Reference ID: {useAuth().currentUser?.uid}
+          Reference ID: {currentUser?.uid}
         </p>
       </div>
     </div>

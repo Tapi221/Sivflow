@@ -1,6 +1,7 @@
 import { useCardBlocksDnd } from "@/components/card/editor/useCardBlocksDnd";
 import { useCardMediaDialogs } from "@/components/card/editor/useCardMediaDialogs";
 
+import { useEffect } from "react";
 import type { Dispatch, MutableRefObject, SetStateAction } from "react";
 import type { CardBlock, UploadedImage } from "@/types";
 
@@ -105,11 +106,13 @@ export function useCardEditorContentController<
     upsertSingleBlock,
   });
 
-  resetDialogsRef.current = () => {
-    mediaDialogs.setImageDialogSide(null);
-    mediaDialogs.setAudioDialogSide(null);
-    mediaDialogs.setLinkDialogSide(null);
-  };
+  useEffect(() => {
+    resetDialogsRef.current = () => {
+      mediaDialogs.setImageDialogSide(null);
+      mediaDialogs.setAudioDialogSide(null);
+      mediaDialogs.setLinkDialogSide(null);
+    };
+  }, [mediaDialogs, resetDialogsRef]);
 
   return {
     onDragEnd,

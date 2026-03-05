@@ -14,13 +14,11 @@ interface MathRendererProps {
  */
 export const MathRenderer: React.FC<MathRendererProps> = React.memo(
   ({ latex, displayMode = "block", className = "" }) => {
-    // 数式が空の場合は何も表示しない
-    if (!latex || !latex.trim()) {
-      return null;
-    }
-
     // レンダリング結果のキャッシュ
     const { html, error } = useMemo(() => {
+      if (!latex || !latex.trim()) {
+        return { html: null, error: null };
+      }
       try {
         // 非常に長い文字列の制限（パフォーマンス・セキュリティの安全弁）
         if (latex.length > 5000) {
@@ -44,6 +42,11 @@ export const MathRenderer: React.FC<MathRendererProps> = React.memo(
         };
       }
     }, [latex, displayMode]);
+
+    // 数式が空の場合は何も表示しない
+    if (!latex || !latex.trim()) {
+      return null;
+    }
 
     // 解析エラー時のフォールバックUI
     if (error || html === null) {

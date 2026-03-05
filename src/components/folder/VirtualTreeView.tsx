@@ -59,7 +59,9 @@ export function VirtualTreeView({
     visit(nodes, []);
     if (ancestorIds.size === 0) return;
 
-    setExpandedGroupIds((prev) => new Set([...prev, ...ancestorIds]));
+    queueMicrotask(() =>
+      setExpandedGroupIds((prev) => new Set([...prev, ...ancestorIds])),
+    );
   }, [nodes, selectedItem]);
 
   const toggleGroup = (groupId: string) => {
