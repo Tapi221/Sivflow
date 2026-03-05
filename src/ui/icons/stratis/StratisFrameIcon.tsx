@@ -7,7 +7,7 @@ export type StratisFrameIconProps = SVGProps<SVGSVGElement> & {
 
 export const STRATIS_INNER_STROKE_PATH_PROPS: SVGProps<SVGPathElement> = {
   stroke: 'currentColor',
-  strokeWidth: 1.8,
+  strokeWidth: 2,
   strokeLinecap: 'round',
   strokeLinejoin: 'round',
   vectorEffect: 'non-scaling-stroke',

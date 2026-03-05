@@ -446,7 +446,7 @@ function ParagraphRenderer({
 }) {
   return (
     <p
-      className={cn(TEXT_BLOCK_CONTENT_CLASS, 'm-0 border-none bg-transparent p-0 whitespace-pre-wrap')}
+      className={cn(TEXT_BLOCK_CONTENT_CLASS, 'm-0 border-none bg-transparent p-0')}
       style={bodyStyle}
     >
       {children}
