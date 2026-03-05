@@ -16,12 +16,6 @@ interface FlushConfig {
 }
 
 // ネットワーク計測値を表す型（将来拡張用）
-interface NetworkMetrics {
-  rtt: number; // Round Trip Time (片道ではなく往復時間, ms)
-  throughput: number; // スループット（1 秒あたりの処理件数 ops/sec）
-  timestamp: number; // この計測値を取った時刻
-}
-
 // ネットワーク状況に応じてバッチサイズ/間隔を調整するサービスクラス
 export class AdaptiveFlushService {
   // RTT・スループットの履歴を何件まで保持するか

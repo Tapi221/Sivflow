@@ -1,7 +1,5 @@
 import type {
-  Notification,
-  NotificationLevel,
-  NotificationOptions,
+  Notification,  NotificationOptions,
 } from "../types/notification";
 
 /**

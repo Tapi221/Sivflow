@@ -1,7 +1,6 @@
-import { storage, firestoreDb as db } from "./firebase";
+import { storage } from "./firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { doc, updateDoc, arrayUnion } from "firebase/firestore";
-import { getLocalDb, type LocalDBLike } from "./localDB";
+import type { LocalDBLike } from "./localDB";
 import type { UploadedImage } from "../types";
 import { createStorageUrl } from "../types/branded";
 
@@ -211,7 +210,7 @@ export class ImageSyncService {
         checksum: checksum,
         lastAttempt: new Date(),
       };
-    } catch (e) {
+    } catch {
       // Not found, proceed with upload
     }
 
@@ -223,13 +222,6 @@ export class ImageSyncService {
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
       try {
         // Update state to inProgress
-        const inProgressImage = {
-          ...image,
-          uploadState: "inProgress" as const,
-          lastAttempt: new Date(),
-          checksum: checksum,
-        };
-
         // 1. 高解像度版のアップロード
         const highResPath = `users/${userId}/images/${image.id}_full`;
         const highResRef = ref(storage, highResPath);
@@ -295,10 +287,11 @@ export class ImageSyncService {
   /**
    * [DEPRECATED/REMOVED]
    * Previously used to download images to creating local blobs.
-   * Removed to prevent "Not allowed to load local resource" errors and blob leaks.
-   * We now rely on standard browser caching for remote URLs.
-   */
+  * Removed to prevent "Not allowed to load local resource" errors and blob leaks.
+  * We now rely on standard browser caching for remote URLs.
+  */
   async downloadHighResImage(image: UploadedImage): Promise<string | null> {
+    void image;
     return null;
   }
 }

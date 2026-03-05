@@ -1,4 +1,3 @@
-import * as Sentry from "@sentry/react";
 
 /**
  * 本番環境用のロギング・監視

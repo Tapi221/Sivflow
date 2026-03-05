@@ -81,23 +81,6 @@ export function useCards(folderId?: string) {
   const createCard = async (cardData: Partial<Card>) => {
     if (!currentUser) throw new Error("認証が必要です");
 
-    // Validation: カードが完全に空（タイトルもコンテンツもタグもない）場合は保存を拒否
-    const hasBlocksContent = (blocks?: unknown[]) => {
-      return (
-        blocks?.some((b) => {
-          if (b.type === "text") return b.content?.trim();
-          if (b.type === "markdown") return b.markdown?.trim();
-          if (b.type === "code") return b.code?.code?.trim();
-          if (b.type === "image") return b.images?.length > 0;
-          if (b.type === "audio") return b.audios?.length > 0;
-          if (b.type === "math") return b.math?.latex?.trim();
-          if (b.type === "reference")
-            return b.references?.some((r: unknown) => r.url?.trim());
-          return false;
-        }) || false
-      );
-    };
-
     // 新規作成時はタイトルが空であることを許容する（あとで編集するため）
     // そのため、作成時のバリデーションはスキップする
     /*

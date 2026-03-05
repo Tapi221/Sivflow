@@ -3,7 +3,6 @@ import {
   collection,
   addDoc,
   serverTimestamp,
-  Timestamp,
   onSnapshot,
   doc,
   query,
@@ -129,7 +128,6 @@ export class SecurityMonitor {
    */
   private evaluateRules(triggerType: SecurityEventType): void {
     const now = Date.now();
-    let scoreAdded = 0;
 
     for (const rule of DETECTION_RULES) {
       if (rule.type !== triggerType) continue;
@@ -153,7 +151,6 @@ export class SecurityMonitor {
           `[Security] Risk score added: +${rule.riskScore} by ${rule.type}`,
         );
         this.currentRiskScore += rule.riskScore;
-        scoreAdded += rule.riskScore;
       }
     }
 

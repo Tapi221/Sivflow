@@ -3,7 +3,6 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { getLocalDb } from "../services/localDB";
 import { useAuth } from "../contexts/AuthContext";
 import type { TagV3Record } from "../services/localdb/types";
-import type { Card } from "../types";
 import { useUserSettings } from "./useUserSettings";
 
 export type TagCategory = string;

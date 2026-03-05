@@ -20,15 +20,13 @@ vi.mock("framer-motion", () => ({
       props: React.HTMLAttributes<HTMLDivElement> & Record<string, unknown>,
       ref: React.Ref<HTMLDivElement>,
     ) {
-      const {
-        animate: _a,
-        transition: _t,
-        drag: _d,
-        dragConstraints: _dc,
-        dragElastic: _de,
-        onDragEnd: _ode,
-        ...rest
-      } = props;
+      const rest = { ...props } as Record<string, unknown>;
+      delete rest.animate;
+      delete rest.transition;
+      delete rest.drag;
+      delete rest.dragConstraints;
+      delete rest.dragElastic;
+      delete rest.onDragEnd;
       return <div ref={ref} {...rest} />;
     }),
   },

@@ -1,6 +1,5 @@
 import { getLocalDb } from "./localDB";
 import { StorageStateManager } from "./StorageStateManager";
-import { SafeIndexedDBWriter } from "./SafeIndexedDBWriter";
 
 /**
  * 圧縮された履歴データの型定義

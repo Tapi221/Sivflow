@@ -519,7 +519,6 @@ export class SyncServiceV2 implements ISyncService {
       if (snapshot.exists()) {
         const data = snapshot.data();
         if (data.status === "revoked") {
-          const msg = `Device ${currentDeviceId} has been revoked access.`;
           this.telemetry.log(
             "error",
             "Security Alert: Access attempt from revoked device",

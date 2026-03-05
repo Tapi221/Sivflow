@@ -13,9 +13,7 @@ import { firestoreDb } from "./firebase";
 import {
   collection,
   addDoc,
-  query,
-  where,
-  orderBy,
+  query,  orderBy,
   limit,
   getDocs,
   deleteDoc,

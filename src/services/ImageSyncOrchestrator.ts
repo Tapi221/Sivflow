@@ -186,7 +186,6 @@ export class ImageSyncOrchestrator {
     cardId: string,
     imageField: "questionImages" | "answerImages",
     imageIndex: number,
-    error: Error,
   ): Promise<void> {
     const db = await getLocalDb();
     const card = await db.cards.get(cardId);

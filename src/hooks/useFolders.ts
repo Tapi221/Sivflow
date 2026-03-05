@@ -1,5 +1,4 @@
 import { useLiveQuery } from "dexie-react-hooks";
-import { Timestamp } from "firebase/firestore";
 import { nanoid } from "nanoid";
 import { getLocalDb } from "../services/localDB";
 import { useAuth } from "../contexts/AuthContext";

@@ -1,10 +1,7 @@
 // @vitest-environment jsdom
 import "fake-indexeddb/auto";
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
-import { OperationQueueService, operationQueue } from "../operationQueue";
-import type { OperationType, QueuePriority } from "../operationQueue";
-import { getLocalDb } from "../localDB";
-import type { SyncQueueItem } from "../../types/sync";
+import { operationQueue } from "../operationQueue";
 
 // Mock DB
 // Dexie is actually persistent in JSDOM unless cleared.
@@ -142,9 +139,9 @@ describe("OperationQueueService", () => {
       await operationQueue.enqueueChange("card", targetId, "create", { v: 1 });
 
       // Mock performSyncOperation to always fail
-      const processorSpy = vi
-        .spyOn(operationQueue as unknown, "performSyncOperation")
-        .mockRejectedValue(new Error("Network Error"));
+      vi.spyOn(operationQueue as unknown, "performSyncOperation").mockRejectedValue(
+        new Error("Network Error"),
+      );
 
       // Mock trigger to do nothing automatically, we drive manually
       vi.spyOn(operationQueue as unknown, "triggerProcess").mockImplementation(

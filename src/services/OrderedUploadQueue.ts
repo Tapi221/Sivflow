@@ -2,7 +2,6 @@ import pLimit from "p-limit";
 import { strictValidateBeforeSave } from "@/utils/imageValidation";
 import type { UploadedImage } from "@/types";
 import { imageDB } from "@/services/ImageDatabaseWriter";
-import * as Sentry from "@sentry/react";
 
 /**
  * 順序保証付き並列アップロード

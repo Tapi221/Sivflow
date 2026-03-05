@@ -13,23 +13,18 @@ import {
   Timestamp,
   doc,
   getDoc,
-  setDoc,
-  limit,
-  orderBy,
-} from "firebase/firestore";
+  setDoc,} from "firebase/firestore";
 import {
   ref as storageRef,
   uploadBytesResumable,
   getDownloadURL,
 } from "firebase/storage";
-import type { Folder, Card, User, UserSettings, UserStats } from "../types";
+import type { UserStats } from "../types";
 import type {
   SyncError,
   SyncHistory,
   SyncSettings,
-  SyncConflict,
-  SyncQueueItem,
-  DiffResult,
+  SyncConflict,  DiffResult,
   SyncResult,
 } from "../types/sync";
 import { DEFAULT_SYNC_SETTINGS } from "../types/sync";
@@ -44,18 +39,6 @@ type SyncableCollection =
   | "folders"
   | "cards"
   | "userStats";
-
-const normalizeFolderForSync = (folder: unknown) => {
-  if (!folder) return folder;
-  const isSilent = folder.isSilent ?? folder.is_silent ?? folder.silent;
-  const normalized = { ...folder };
-  if (isSilent !== undefined) {
-    normalized.isSilent = isSilent;
-  }
-  delete normalized.is_silent;
-  delete normalized.silent;
-  return normalized;
-};
 
 /**
  * FirestoreとローカルDB (Dexie) 間の差分同期を管理するサービスクラス。
@@ -469,7 +452,7 @@ export class SyncService {
           `[Sync] Storage high usage detected (${Math.round((storage.usage / storage.quota) * 100)}%). Reducing queue limit to 500.`,
         );
       }
-    } catch (e) {
+    } catch {
       /* ignore */
     }
 
@@ -1097,7 +1080,7 @@ export class SyncService {
           let serverSnap;
           try {
             serverSnap = await getDoc(docRef);
-          } catch (e) {
+          } catch {
             skippedCount += 1;
             console.warn(
               "[Sync][Push] Skipped item: failed to check server state.",

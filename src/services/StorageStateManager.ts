@@ -86,14 +86,6 @@ export class StorageStateManager {
     event: string,
     data: unknown,
   ): void {
-    // 運用ログ記録
-    const logEntry = {
-      timestamp: new Date().toISOString(),
-      userId,
-      event,
-      data,
-    };
-
     console.log(`[StorageEvent:${userId}]`, event, data);
 
     // TODO: 本番環境では外部ログサービスに送信

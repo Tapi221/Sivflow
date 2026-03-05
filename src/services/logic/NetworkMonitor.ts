@@ -89,8 +89,6 @@ export class NetworkMonitor implements INetworkMonitor {
   }
 
   private getBaseConstraintByNetwork(): BatchConstraint {
-    const avgDuration = this.getAverageDuration();
-
     switch (this._status) {
       case "excellent":
         return { maxSize: 50, concurrency: 2, timeoutMs: 20000 };

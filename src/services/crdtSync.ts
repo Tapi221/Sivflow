@@ -22,14 +22,6 @@ interface CardData {
   reviewCount?: number;
 }
 
-interface DeltaRecord {
-  cardId: string;
-  userId: string;
-  delta: Uint8Array;
-  version: number;
-  createdAt: number;
-}
-
 export class CRDTSyncService {
   private ydoc: Y.Doc;
   private cards: Y.Map<unknown>;
@@ -68,17 +60,8 @@ export class CRDTSyncService {
   async saveDelta(cardId: string, userId: string): Promise<void> {
     const delta = this.getDelta();
 
-    // Firestoreに保存（実装は省略、実際にはFirebase SDKを使用）
-    const deltaRecord: DeltaRecord = {
-      cardId,
-      userId,
-      delta,
-      version: this.ydoc.clientID,
-      createdAt: Date.now(),
-    };
-
     console.log(
-      `[CRDT] Saved delta for card ${cardId}, size: ${delta.length} bytes`,
+      `[CRDT] Saved delta for card ${cardId} (${userId}), size: ${delta.length} bytes`,
     );
 
     // 実際の保存処理はここに実装
@@ -136,6 +119,8 @@ export class CRDTSyncService {
    * 古い差分を削除することでストレージを節約
    */
   async compactDeltas(cardId: string, userId: string): Promise<void> {
+    void cardId;
+    void userId;
     // 現在の状態をスナップショットとして保存
     const snapshot = this.extractSnapshot();
 
