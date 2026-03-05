@@ -2,6 +2,7 @@ import React, { useCallback } from 'react';
 import { Star } from '@/ui/icons';
 import { CircleHelp } from '@/ui/icons';
 import { cn } from '@/lib/utils';
+import { CARD_ACTION_ICON_CLASS } from '@/components/card/common/constants';
 
 interface CardCornerActionsProps {
   onHelp?: () => void;
@@ -29,7 +30,6 @@ export function CardCornerActions({
   const buttonBaseClass =
     'rounded-full h-7 w-7 min-h-0 min-w-0 transition-colors flex items-center justify-center border border-transparent ' +
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40';
-
   const disabledClass = disabled ? 'opacity-50 pointer-events-none' : '';
 
   return (
@@ -55,7 +55,7 @@ export function CardCornerActions({
               : 'bg-slate-50/80 text-slate-400 hover:bg-slate-100 hover:text-slate-600'
           )}
         >
-          <CircleHelp size={12} className={cn(helpActive && 'opacity-90')} />
+          <CircleHelp className={cn(CARD_ACTION_ICON_CLASS, helpActive && 'opacity-90')} />
         </button>
       ) : null}
 
@@ -80,7 +80,7 @@ export function CardCornerActions({
               : 'bg-slate-50/80 text-slate-400 hover:bg-primary-600/10 hover:text-primary-600'
           )}
         >
-          <Star size={12} className={cn(starActive && 'fill-current')} />
+          <Star className={cn(CARD_ACTION_ICON_CLASS, starActive && 'fill-current')} />
         </button>
       ) : null}
     </div>

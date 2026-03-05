@@ -2,6 +2,7 @@ import { Plus, Image as ImageIcon, Link as LinkIcon } from '@/ui/icons';
 import { useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { sanitizeReferences } from "@/components/card/editor/cardEditorUtils";
+import { CARD_ACTION_ICON_CLASS } from "@/components/card/common/constants";
 import { cn } from "@/lib/utils";
 
 import type { CardBlock, ReferenceBlockData, UploadedImage } from "@/types";
@@ -86,7 +87,6 @@ export function useCardMediaDialogs({
     const imageCount = getImageCount(side);
     const audioCount = getAudioCount(side);
     const linkCount = getLinkCount(side);
-
     const base =
       "inline-flex shrink-0 items-center justify-center gap-1 rounded-full h-7 min-h-0 min-w-0 px-2 text-[10px] font-bold leading-none whitespace-nowrap";
 
@@ -105,8 +105,8 @@ export function useCardMediaDialogs({
           onClick={() => setImageDialogSide(side)}
           aria-label="画像を追加"
         >
-          <ImageIcon className="w-3 h-3 shrink-0" />
-          <Plus className="w-3 h-3 shrink-0" />
+          <ImageIcon className={cn(CARD_ACTION_ICON_CLASS, "shrink-0")} />
+          <Plus className={cn(CARD_ACTION_ICON_CLASS, "shrink-0")} />
           {imageCount > 0 ? <span>x{imageCount}</span> : null}
         </button>
 
@@ -117,7 +117,7 @@ export function useCardMediaDialogs({
           aria-label="音声を追加"
         >
           <span aria-hidden="true" className="shrink-0 text-[13px] leading-none">♪</span>
-          <Plus className="w-3 h-3 shrink-0" />
+          <Plus className={cn(CARD_ACTION_ICON_CLASS, "shrink-0")} />
           {audioCount > 0 ? <span>x{audioCount}</span> : null}
         </button>
 
@@ -127,8 +127,8 @@ export function useCardMediaDialogs({
           onClick={openLinkDialog}
           aria-label="リンクを追加"
         >
-          <LinkIcon className="w-3 h-3 shrink-0" />
-          {linkCount > 0 ? <span>x{linkCount}</span> : <Plus className="w-3 h-3 shrink-0" />}
+          <LinkIcon className={cn(CARD_ACTION_ICON_CLASS, "shrink-0")} />
+          {linkCount > 0 ? <span>x{linkCount}</span> : <Plus className={cn(CARD_ACTION_ICON_CLASS, "shrink-0")} />}
         </button>
       </div>
     );

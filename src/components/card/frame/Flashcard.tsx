@@ -13,7 +13,7 @@ import { INK_DOCUMENT_VERSION, type InkDocument, type InkEditTool } from '@/comp
 import { CardFrame } from './CardFrame';
 import { CardCornerActions } from './CardCornerActions';
 import { SharedCardContent } from '../common/SharedCardContent';
-import { CANONICAL_CARD_WIDTH, layoutRowsToCardHeightPx } from '../common/constants';
+import { CANONICAL_CARD_WIDTH, CARD_ACTION_ICON_CLASS, layoutRowsToCardHeightPx } from '../common/constants';
 import { sortBlocksByOrderIndex } from '../blocks/blockOrdering';
 import {
   DEFAULT_LAYOUT_ROWS,
@@ -409,7 +409,6 @@ export function Flashcard({
   const actionsTopLeft: React.ReactNode[] = [];
   const actionsTopRight: React.ReactNode[] = [];
   const mediaActionNodes: React.ReactNode[] = [];
-
   // extraHeaderLeft は名前通り TopLeft 側へ
   if (extraHeaderLeft) {
     actionsTopLeft.push(
@@ -432,7 +431,7 @@ export function Flashcard({
         }}
         className="flex items-center gap-1 px-2 py-1 h-8 min-h-0 min-w-0 rounded-full bg-indigo-500 text-white shadow-[0_2px_0_#4338ca] active:shadow-none active:translate-y-[2px] transition-all hover:bg-indigo-400 hover:shadow-[0_2px_0_#4338ca]"
       >
-        <ImageIcon className="w-3 h-3 stroke-[2.25]" />
+        <ImageIcon className={CARD_ACTION_ICON_CLASS} />
         <span className="text-[10px] font-bold">x{activeImages.length}</span>
       </button>
     );
@@ -462,7 +461,7 @@ export function Flashcard({
         }}
         className="flex items-center gap-1 px-2 py-1 h-8 min-h-0 min-w-0 rounded-full transition-all bg-amber-500 text-white shadow-[0_2px_0_#b45309] active:shadow-none active:translate-y-[2px] hover:bg-amber-400 hover:shadow-[0_2px_0_#b45309]"
       >
-        <Volume2 className="w-3 h-3 stroke-[2.25]" />
+        <Volume2 className={CARD_ACTION_ICON_CLASS} />
         <span className="text-[10px] font-bold">x{activeAudioUrls.length}</span>
       </button>
     );
@@ -478,7 +477,7 @@ export function Flashcard({
         }}
         className="flex items-center gap-1 px-2 py-1 h-8 min-h-0 min-w-0 rounded-full transition-all bg-cyan-500 text-white shadow-[0_2px_0_#0e7490] active:shadow-none active:translate-y-[2px] hover:bg-cyan-400"
       >
-        <Link className="w-3 h-3 stroke-[2.25]" />
+        <Link className={CARD_ACTION_ICON_CLASS} />
         <span className="text-[10px] font-bold">x{activeReferences.length}</span>
       </button>
     );
@@ -517,7 +516,7 @@ export function Flashcard({
         }}
         className="rounded-none w-8 h-8 md:w-9 md:h-9 bg-transparent text-slate-400 hover:bg-transparent hover:text-slate-600 shadow-none transition-colors"
       >
-        <Edit className="w-4 h-4 md:w-5 h-5" />
+        <Edit className={CARD_ACTION_ICON_CLASS} />
       </Button>
     );
   }

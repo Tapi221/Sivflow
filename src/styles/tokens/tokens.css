@@ -41,5 +41,6 @@
     --scrollbar-thumb: #cfcfd6;
     --scrollbar-thumb-hover: #b8b8c2;
     --scrollbar-thumb-active: #9e9eaa;
+    --scrollbar-size: 6px;
   }
 }
