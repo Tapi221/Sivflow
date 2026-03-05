@@ -173,7 +173,7 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
           {isMetaOpen ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </Button>
 
-        <div className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-4">
+        <div className={cn("min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-4", isMetaOpen && "pr-0")}>
           {isEditing ? (
             <div className="space-y-4">
               <div className="flex items-center justify-end gap-2">

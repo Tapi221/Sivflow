@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, Pencil, Image as ImageIcon, X, Volume2 } from '@/ui/icons';
+import { ChevronLeft, ChevronRight, Edit, Image as ImageIcon, X, Volume2 } from '@/ui/icons';
 import { Link } from '@/ui/icons';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
@@ -515,9 +515,9 @@ export function Flashcard({
           e.stopPropagation();
           onEdit(cardData);
         }}
-        className="rounded-full w-8 h-8 md:w-9 h-9 bg-slate-50/80 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+        className="rounded-none w-8 h-8 md:w-9 md:h-9 bg-transparent text-slate-400 hover:bg-transparent hover:text-slate-600 shadow-none transition-colors"
       >
-        <Pencil className="w-4 h-4 md:w-5 h-5" />
+        <Edit className="w-4 h-4 md:w-5 h-5" />
       </Button>
     );
   }
