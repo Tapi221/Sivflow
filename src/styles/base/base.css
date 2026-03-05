@@ -76,7 +76,11 @@
   }
 
   ::selection {
-    @apply bg-primary-200 text-primary-900;
+    background-color: #e6e6eb;
+  }
+
+  ::-moz-selection {
+    background-color: #e6e6eb;
   }
 
   html.no-page-scroll,
