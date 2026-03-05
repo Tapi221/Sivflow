@@ -1,7 +1,7 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Layers, FileEdit } from 'lucide-react';
+import { Layers, FileEdit } from '@/ui/icons';
 
 /**
  * カード作成方法を選択するダイアログ

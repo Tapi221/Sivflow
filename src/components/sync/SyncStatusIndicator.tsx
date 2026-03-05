@@ -19,7 +19,7 @@ import {
   History,
   AlertTriangle,
   MoreVertical,
-} from 'lucide-react';
+} from '@/ui/icons';
 import { cn } from '@/lib/utils';
 import { SyncErrorDialog } from './SyncErrorDialog';
 import { SyncHistoryDialog } from './SyncHistoryDialog';

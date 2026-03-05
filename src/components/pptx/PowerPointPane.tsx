@@ -10,7 +10,7 @@ import {
   Minus,
   Plus,
   RefreshCw,
-} from 'lucide-react';
+} from '@/ui/icons';
 import { ref, getDownloadURL } from 'firebase/storage';
 import { doc as firestoreDoc, onSnapshot, serverTimestamp, setDoc } from 'firebase/firestore';
 import { storage, firestoreDb } from '@/services/firebase';

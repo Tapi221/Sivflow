@@ -89,7 +89,7 @@ export const useExplorerStore = create<ExplorerState>()(
         pinnedItems: state.pinnedItems.filter(p => !(p.type === item.type && p.id === item.id))
       })),
       reorderPinnedItems: (newPinnedItems) => set({ pinnedItems: newPinnedItems }),
-      isPinned: (_type, _id) => {
+      isPinned: () => {
         // state helper
         return false; // Not used directly, hook consumers check state.pinnedItems
       },

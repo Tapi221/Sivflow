@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { DragDropContext } from "@hello-pangea/dnd";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from '@/ui/icons';
 
 import {
   CardEditorLoadingState,

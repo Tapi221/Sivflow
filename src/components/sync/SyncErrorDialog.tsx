@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, RefreshCw, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
+import { AlertCircle, RefreshCw, Trash2, ChevronDown, ChevronUp } from '@/ui/icons';
 import { getLocalDb } from '@/services/localDB';
 import { useAuth } from '@/contexts/AuthContext';
 import type { SyncError } from '@/types/sync';

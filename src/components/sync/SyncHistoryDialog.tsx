@@ -7,7 +7,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Clock, ArrowUpDown, CheckCircle2 as CheckCircle, AlertTriangle, AlertCircle as XCircle, ChevronUp, ChevronDown } from 'lucide-react';
+import { Clock, ArrowUpDown, CheckCircle2 as CheckCircle, AlertTriangle, AlertCircle as XCircle, ChevronUp, ChevronDown } from '@/ui/icons';
 import { getLocalDb } from '@/services/localDB';
 import type { SyncHistory } from '@/types/sync';
 

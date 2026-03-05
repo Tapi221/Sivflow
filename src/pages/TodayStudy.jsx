@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { createPageUrl } from '@/utils';
-import { BookOpen, Play, ChevronRight, CheckCircle2, Clock } from 'lucide-react';
+import { BookOpen, Play, ChevronRight, CheckCircle2, Clock } from '@/ui/icons';
 import { cn } from '@/lib/utils';
 
 // ---------------------------------------------------------

@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import { Folder, SearchX } from 'lucide-react';
+import { FileText, Folder as FolderIcon, SearchX } from '@/ui/icons';
 // DnD types and components
-import { DragDropContext, Droppable } from '@hello-pangea/dnd';
+import { DragDropContext } from '@hello-pangea/dnd';
 import { cn } from '@/lib/utils';
 import type { Card, DocumentItem, ExplorerItem, SelectedExplorerItem } from '@/types';
 import DeleteFolderDialog from './DeleteFolderDialog';
-import { useFolderDnD, DnDHelpers } from '@/hooks/useFolderDnD';
+import { useFolderDnD } from '@/hooks/useFolderDnD';
 import { useReliableFileUpload } from '@/hooks/useReliableFileUpload';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
@@ -32,12 +32,13 @@ import {
   extractPptxFiles,
   PPTX_MIME,
 } from './explorer/model/utils';
-import { DocumentRow } from './explorer/rows/DocumentRow';
-import { CardRow } from './explorer/rows/CardRow';
 import { FolderRow } from './explorer/rows/FolderRow';
 import { EXPLORER_ROW_BASE_CLASS_NAME } from './explorer/rows/shared';
 import BulkTagDialog from '@/components/tag/BulkTagDialog';
-import { useTags } from '@/hooks/useTags';
+import {
+  FolderTreeArborist,
+  type FolderTreeArboristNode,
+} from '@/components/sidebar/FolderTreeArborist';
 
 const isSoftDeleted = (entity?: { isDeleted?: boolean; is_deleted?: boolean } | null) =>
   Boolean(entity?.isDeleted ?? entity?.is_deleted);
@@ -68,6 +69,17 @@ interface FolderTreeWithCardsProps {
   className?: string;
 }
 
+type ExplorerTreeNode = FolderTreeArboristNode & {
+  kind: 'folder' | 'card' | 'document';
+  rawId: string;
+  folder?: FolderTreeNode;
+  card?: Card;
+  document?: DocumentItem;
+  isDimmed?: boolean;
+  matchCount?: number;
+  children?: ExplorerTreeNode[];
+};
+
 export function FolderTreeWithCards({
   folders,
   cards,
@@ -96,7 +108,6 @@ export function FolderTreeWithCards({
   const ROW_BASE = EXPLORER_ROW_BASE_CLASS_NAME;
 
   const { currentUser } = useAuth();
-  const { getTagColor } = useTags();
   const { uploadFile } = useReliableFileUpload();
   const { error: toastError } = useToast();
 
@@ -454,24 +465,6 @@ export function FolderTreeWithCards({
     [itemsByFolderId]
   );
 
-  const rootItems = useMemo(() => getFolderItems(null), [getFolderItems]);
-
-  const hasFilterMatches = useMemo(() => {
-    if (!isFiltering) return true;
-    if (rootItems.length > 0) return true;
-
-    return rootFolders.some((folder) => {
-      const folderId = getFolderId(folder);
-      return (matchCountMap.get(folderId) ?? 0) > 0;
-    });
-  }, [isFiltering, rootItems, rootFolders, matchCountMap]);
-
-  const selectedFolderName = useMemo(() => {
-    if (!selectedFolderId) return 'ルート';
-    const folder = treeFolders.find((f) => getFolderId(f) === selectedFolderId);
-    return folder?.folderName ?? folder?.folder_name ?? 'ルート';
-  }, [selectedFolderId, treeFolders]);
-
   // Memoize match counts for filtering to avoid expensive recursive recalculation
   const matchCountMap = useMemo(() => {
     if (!isFiltering) return new Map<string, number>();
@@ -496,6 +489,77 @@ export function FolderTreeWithCards({
     }
     return map;
   }, [isFiltering, treeFolders, getFolderItems, getChildFolders]);
+
+  const rootItems = useMemo(() => getFolderItems(null), [getFolderItems]);
+
+  const hasFilterMatches = useMemo(() => {
+    if (!isFiltering) return true;
+    if (rootItems.length > 0) return true;
+
+    return rootFolders.some((folder) => {
+      const folderId = getFolderId(folder);
+      return (matchCountMap.get(folderId) ?? 0) > 0;
+    });
+  }, [isFiltering, rootItems, rootFolders, matchCountMap]);
+
+  const explorerTreeData = useMemo<ExplorerTreeNode[]>(() => {
+    const buildItemNode = (item: ExplorerItem): ExplorerTreeNode => {
+      if (item.type === 'card') {
+        const cardTitle =
+          item.data.title ||
+          ((item.data as any).questionText || (item.data as any).question_text || '')
+            .replace(/<[^>]*>/g, '')
+            .trim()
+            .slice(0, 50) ||
+          '無題のカード';
+
+        return {
+          id: `card:${item.data.id}`,
+          rawId: item.data.id,
+          name: cardTitle,
+          kind: 'card',
+          card: item.data,
+        };
+      }
+
+      return {
+        id: `document:${item.data.id}`,
+        rawId: item.data.id,
+        name: item.data.title || '無題のドキュメント',
+        kind: 'document',
+        document: item.data,
+      };
+    };
+
+    const buildFolderNode = (folder: FolderTreeNode): ExplorerTreeNode => {
+      const folderId = getFolderId(folder);
+      const childFolderNodes = getChildFolders(folderId).map(buildFolderNode);
+      const itemNodes = getFolderItems(folderId).map(buildItemNode);
+
+      return {
+        id: `folder:${folderId}`,
+        rawId: folderId,
+        name: folder.folderName || folder.folder_name || '無題のフォルダ',
+        kind: 'folder',
+        folder,
+        isDimmed: isFiltering ? (matchCountMap.get(folderId) ?? 0) === 0 : false,
+        matchCount: isFiltering ? (matchCountMap.get(folderId) ?? 0) : -1,
+        children: [...childFolderNodes, ...itemNodes],
+      };
+    };
+
+    return [
+      ...rootFolders.map(buildFolderNode),
+      ...rootItems.map(buildItemNode),
+    ];
+  }, [getChildFolders, getFolderItems, isFiltering, matchCountMap, rootFolders, rootItems]);
+
+  const selectedTreeId = useMemo(() => {
+    if (selectedItem?.type === 'card') return `card:${selectedItem.id}`;
+    if (selectedItem?.type === 'document') return `document:${selectedItem.id}`;
+    if (selectedFolderId) return `folder:${selectedFolderId}`;
+    return null;
+  }, [selectedFolderId, selectedItem]);
 
   const getNextOrderIndex = useCallback(
     (folderId: string | null) => {
@@ -1096,20 +1160,7 @@ export function FolderTreeWithCards({
     [onDeleteFolder]
   );
 
-  const handleMoveCard = async (cardId: string) => {
-    const targetFolderName = prompt('移動先のフォルダ名を入力してください(完全一致)');
-    if (!targetFolderName) return;
-
-    const targetFolder = treeFolders.find((f) => (f.folderName || f.folder_name) === targetFolderName);
-
-    if (targetFolder) {
-      await onUpdateCard?.(cardId, { folderId: getFolderId(targetFolder) });
-    } else {
-      alert('フォルダが見つかりませんでした。');
-    }
-  };
-
-  const handleArrowNavigation = (key: string, currentId: string, _hasItemSelection: boolean) => {
+  const handleArrowNavigation = (key: string, currentId: string) => {
     const flatList: Array<{ id: string; type: 'folder' | 'card' | 'document'; parentId: string | null }> =
       [];
 
@@ -1219,21 +1270,12 @@ export function FolderTreeWithCards({
 
       if (e.key === 'F2') {
         e.preventDefault();
-        if (selectedItem?.type === 'document') return;
+        if (!selectedFolderId || isCard || isDoc) return;
 
-        let name = '';
-        if (selectedItem?.type === 'card') {
-          const card = treeCards.find((c) => c.id === selectedItem.id);
-          name = card?.title || '無題のカード';
-        } else if (selectedFolderId) {
-          const folder = treeFolders.find((f) => getFolderId(f) === selectedFolderId);
-          name = folder?.folderName || folder?.folder_name || '';
-        }
-
-        if (name || selectedFolderId) {
-          setEditingId(currentId);
-          setEditingName(name || '');
-        }
+        const folder = treeFolders.find((f) => getFolderId(f) === selectedFolderId);
+        const name = folder?.folderName || folder?.folder_name || '';
+        setEditingId(currentId);
+        setEditingName(name);
       }
 
       if (e.key === 'Delete' || e.key === 'Backspace') {
@@ -1251,7 +1293,7 @@ export function FolderTreeWithCards({
 
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
         e.preventDefault();
-        handleArrowNavigation(e.key, currentId, !!selectedItem);
+        handleArrowNavigation(e.key, currentId);
       }
     };
   }, [
@@ -1269,215 +1311,169 @@ export function FolderTreeWithCards({
     handleToolbarAddFile,
   ]);
 
-  const renderFolder = (folder: FolderTreeNode, depth: number = 0) => {
-    const folderId = getFolderId(folder);
-    const isExpanded = expandedFolders.has(folderId);
-    const isSelected = selectedFolderId === folderId;
-    const isEditing = editingId === folderId;
-    const childFolders = getChildFolders(folderId);
+  const renderTreeNode = useCallback(
+    ({
+      node,
+      style,
+      isOpen,
+      isSelected,
+      toggle,
+    }: {
+      node: { data: ExplorerTreeNode; level: number };
+      style: React.CSSProperties;
+      isOpen: boolean;
+      isSelected: boolean;
+      toggle: () => void;
+    }) => {
+      const treeNode = node.data;
 
-    const isPinned = pinnedItems?.some((f) => f.type === 'folder' && f.id === folderId);
-    const handleTogglePin = () => {
-      if (isPinned) onUnpinItem?.({ type: 'folder', id: folderId });
-      else onPinItem?.({ type: 'folder', id: folderId });
-    };
+      if (treeNode.kind === 'folder' && treeNode.folder) {
+        const folderId = treeNode.rawId;
+        const isPinned = pinnedItems?.some((item) => item.type === 'folder' && item.id === folderId) ?? false;
 
-    const matchCount = isFiltering ? matchCountMap.get(folderId) ?? 0 : -1;
-    const hasExpandableContent =
-      childFolders.length > 0 || (isFiltering ? matchCount > 0 : getFolderItems(folderId).length > 0);
-    const isDimmed = isFiltering && matchCount === 0;
-    const isFileDraggingOver = fileDragFolderId === folderId;
-    return (
-      <FolderRow
-        key={folderId}
-        folder={folder}
-        depth={depth}
-        isExpanded={isExpanded}
-        isSelected={isSelected}
-        isEditing={isEditing}
-        editingId={editingId}
-        setEditingId={setEditingId}
-        editingName={editingName}
-        setEditingName={setEditingName}
-        editingNameRef={editingNameRef}
-        editInputRef={editInputRef}
-        onToggle={() => toggleFolder(folderId)}
-        onSelect={() => onFolderSelect(folderId)}
-        onNavigate={() => onFolderSelect(folderId)}
-        handleCreateFolderAction={handleCreateFolderAction}
-        handleCreateCardAction={handleCreateCardAction}
-        handleDelete={handleDelete as any}
-        handleRenameConfirm={handleRenameConfirm}
-        renameCancelledRef={renameCancelledRef}
-        isPinned={isPinned}
-        handleTogglePin={handleTogglePin}
-        isFiltering={Boolean(isFiltering)}
-        matchCount={matchCount}
-        rowBaseClassName={ROW_BASE}
-        isDragging={isDragging}
-        hasUpdateOrDelete={Boolean(onUpdateFolder || onDeleteFolder)}
-        menuOpen={openRowMenuId === `folder:${folderId}`}
-        onMenuOpenChange={(open) =>
-          setOpenRowMenuId(open ? `folder:${folderId}` : (prev) => (prev === `folder:${folderId}` ? null : prev))
-        }
-        onBulkTag={() => setBulkTagFolderId(folderId)}
-        setRowRef={setRowRef}
-        isDimmed={isDimmed}
-        isFileDraggingOver={isFileDraggingOver}
-        getTagColor={getTagColor}
-        onDragEnterCapture={(e) => {
-          if (!isFileDragEvent(e)) return;
-          e.preventDefault();
-          e.stopPropagation();
-          setFileDragFolderId(folderId);
-        }}
-        onDragOverCapture={(e) => {
-          if (!isFileDragEvent(e)) return;
-          e.preventDefault();
-          e.stopPropagation();
-          e.dataTransfer.dropEffect = 'copy';
-          setFileDragFolderId(folderId);
-        }}
-        onDragLeaveCapture={(e) => {
-          if (!isFileDragEvent(e)) return;
-          const nextTarget = e.relatedTarget as Node | null;
-          if (nextTarget && e.currentTarget.contains(nextTarget)) return;
-          setFileDragFolderId((prev) => (prev === folderId ? null : prev));
-        }}
-        onDropCapture={(e) => {
-          if (!isFileDragEvent(e)) return;
-          e.preventDefault();
-          e.stopPropagation();
-          setFileDragFolderId(null);
-          const files = e.dataTransfer?.files ?? null;
-          const pdfFiles = extractPdfFiles(files);
-          const pptxFiles = extractPptxFiles(files);
-          if (pdfFiles.length > 0) void handlePdfDropped(folderId, pdfFiles);
-          if (pptxFiles.length > 0) void handlePptxDropped(folderId, pptxFiles);
-        }}
-        hasExpandableContent={hasExpandableContent}
-      >
-        {/* 子要素（サブフォルダとカードリスト） */}
-        <div>
-          {childFolders.map((childFolder) => renderFolder(childFolder, depth + 1))}
+        return (
+          <div style={style}>
+            <FolderRow
+              folder={treeNode.folder}
+              depth={node.level}
+              isExpanded={isOpen}
+              isSelected={isSelected}
+              isEditing={editingId === folderId}
+              editingId={editingId}
+              setEditingId={setEditingId}
+              editingName={editingName}
+              setEditingName={setEditingName}
+              editingNameRef={editingNameRef}
+              editInputRef={editInputRef}
+              onToggle={toggle}
+              onSelect={() => onFolderSelect(folderId)}
+              onNavigate={() => onFolderSelect(folderId)}
+              handleCreateFolderAction={handleCreateFolderAction}
+              handleCreateCardAction={handleCreateCardAction}
+              handleDelete={handleDelete as any}
+              handleRenameConfirm={handleRenameConfirm}
+              renameCancelledRef={renameCancelledRef}
+              isPinned={isPinned}
+              handleTogglePin={() => {
+                if (isPinned) onUnpinItem?.({ type: 'folder', id: folderId });
+                else onPinItem?.({ type: 'folder', id: folderId });
+              }}
+              isFiltering={Boolean(isFiltering)}
+              matchCount={treeNode.matchCount ?? -1}
+              rowBaseClassName={ROW_BASE}
+              isDragging={isDragging}
+              hasUpdateOrDelete={Boolean(onUpdateFolder || onDeleteFolder)}
+              menuOpen={openRowMenuId === `folder:${folderId}`}
+              onMenuOpenChange={(open) =>
+                setOpenRowMenuId(open ? `folder:${folderId}` : (prev) => (prev === `folder:${folderId}` ? null : prev))
+              }
+              onBulkTag={() => setBulkTagFolderId(folderId)}
+              setRowRef={setRowRef}
+              isDimmed={Boolean(treeNode.isDimmed)}
+              isFileDraggingOver={fileDragFolderId === folderId}
+              onDragEnterCapture={(e) => {
+                if (!isFileDragEvent(e)) return;
+                e.preventDefault();
+                e.stopPropagation();
+                setFileDragFolderId(folderId);
+              }}
+              onDragOverCapture={(e) => {
+                if (!isFileDragEvent(e)) return;
+                e.preventDefault();
+                e.stopPropagation();
+                e.dataTransfer.dropEffect = 'copy';
+                setFileDragFolderId(folderId);
+              }}
+              onDragLeaveCapture={(e) => {
+                if (!isFileDragEvent(e)) return;
+                const nextTarget = e.relatedTarget as Node | null;
+                if (nextTarget && e.currentTarget.contains(nextTarget)) return;
+                setFileDragFolderId((prev) => (prev === folderId ? null : prev));
+              }}
+              onDropCapture={(e) => {
+                if (!isFileDragEvent(e)) return;
+                e.preventDefault();
+                e.stopPropagation();
+                setFileDragFolderId(null);
+                const files = e.dataTransfer?.files ?? null;
+                const pdfFiles = extractPdfFiles(files);
+                const pptxFiles = extractPptxFiles(files);
+                if (pdfFiles.length > 0) void handlePdfDropped(folderId, pdfFiles);
+                if (pptxFiles.length > 0) void handlePptxDropped(folderId, pptxFiles);
+              }}
+              hasExpandableContent={Boolean(treeNode.children?.length)}
+            />
+          </div>
+        );
+      }
 
-          <Droppable droppableId={DnDHelpers.createCardListDroppableId(folderId)} direction="vertical">
-            {(provided, snapshot) => {
-              const folderItems = getFolderItems(folderId);
-              let cardIndexForFolder = 0;
-              const isOrigin = Boolean(snapshot.draggingFromThisWith) && !snapshot.isDraggingOver;
-              const hasItems = folderItems.length > 0;
-              const isDragActive = snapshot.isDraggingOver || isOrigin;
+      const iconClassName =
+        treeNode.kind === 'document' ? 'text-rose-500' : 'text-slate-400';
 
-              return (
-                <div
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                  className={cn(
-                    'block',
-                    // アイテムがあるか、ドラッグ中の場合のみ最小高さを設定
-                    (hasItems || isDragActive) && 'min-h-[32px]',
-                    snapshot.isDraggingOver && 'bg-blue-100 ring-1 ring-blue-300',
-                    isOrigin && 'bg-blue-50 ring-1 ring-blue-200'
-                  )}
-                >
-                  {folderItems.map((item) =>
-                    item.type === 'card'
-                      ? renderCard(item.data, depth + 1, cardIndexForFolder++)
-                      : renderDocument(item.data, depth + 1, 0)
-                  )}
-                  {provided.placeholder}
-                </div>
-              );
+      return (
+        <div style={style}>
+          <div
+            ref={(el) => setRowRef(treeNode.rawId, el)}
+            className={cn(
+              ROW_BASE,
+              'flex h-6 min-h-6 items-center px-2 leading-6 select-none',
+              'hover:bg-muted/60',
+              isSelected && 'bg-muted'
+            )}
+            style={{ paddingLeft: `calc(8px + ${node.level} * 12px)` }}
+            onClick={() => {
+              if (treeNode.kind === 'card') onItemSelect({ type: 'card', id: treeNode.rawId });
+              if (treeNode.kind === 'document') onItemSelect({ type: 'document', id: treeNode.rawId });
             }}
-          </Droppable>
+          >
+            <span className="mr-1 size-4 shrink-0" />
+            <FileText
+              className={cn('mr-2 h-4 w-4 shrink-0', iconClassName)}
+              style={{ transform: 'translateY(-1px)' }}
+            />
+            <span
+              className={cn(
+                'truncate text-sm',
+                isSelected ? 'font-medium text-primary-700' : 'text-slate-700'
+              )}
+            >
+              {treeNode.name}
+            </span>
+          </div>
         </div>
-      </FolderRow>
-    );
-  };
+      );
+    },
+    [
+      ROW_BASE,
+      editInputRef,
+      editingId,
+      editingName,
+      editingNameRef,
+      fileDragFolderId,
+      handleCreateCardAction,
+      handleCreateFolderAction,
+      handleDelete,
+      handlePdfDropped,
+      handlePptxDropped,
+      handleRenameConfirm,
+      isDragging,
+      isFiltering,
+      onDeleteFolder,
+      onFolderSelect,
+      onItemSelect,
+      onPinItem,
+      onUnpinItem,
+      openRowMenuId,
+      pinnedItems,
+      renameCancelledRef,
+      setRowRef,
+      setEditingId,
+      setEditingName,
+      onUpdateFolder,
+    ]
+  );
 
-  /**
-   * ✅追加: PDFドキュメントのレンダリング
-   */
-  const renderDocument = (doc: DocumentItem, depth: number, _index: number) => {
-    const docId = doc.id;
-    const isSelected = selectedItem?.type === 'document' && selectedItem.id === docId;
-    const isPinned = pinnedItems?.some((f) => f.type === 'document' && f.id === docId);
-    const handleTogglePin = () => {
-      if (isPinned) onUnpinItem?.({ type: 'document', id: docId });
-      else onPinItem?.({ type: 'document', id: docId });
-    };
-
-    return (
-      <DocumentRow
-        key={docId}
-        doc={doc}
-        depth={depth}
-        isSelected={isSelected}
-        onSelect={onItemSelect}
-        treeFolders={treeFolders}
-        treeCards={treeCards}
-        documents={documents}
-        onUpdateFolder={onUpdateFolder}
-        isPinned={isPinned}
-        handleTogglePin={handleTogglePin}
-        rowBaseClassName={ROW_BASE}
-        setRowRef={setRowRef}
-        isDragging={isDragging}
-        menuOpen={openRowMenuId === `document:${docId}`}
-        onMenuOpenChange={(open) =>
-          setOpenRowMenuId(open ? `document:${docId}` : (prev) => (prev === `document:${docId}` ? null : prev))
-        }
-      />
-    );
-  };
-
-  const renderCard = (card: Card, depth: number, index: number) => {
-    const cardId = card.id;
-    const isSelected = selectedItem?.type === 'card' && selectedItem.id === cardId;
-    const isEditing = editingId === cardId;
-    const isPinned = pinnedItems?.some((f) => f.type === 'card' && f.id === cardId);
-
-    const handleTogglePin = () => {
-      if (isPinned) onUnpinItem?.({ type: 'card', id: cardId });
-      else onPinItem?.({ type: 'card', id: cardId });
-    };
-
-    return (
-      <CardRow
-        key={cardId}
-        card={card}
-        depth={depth}
-        index={index}
-        isSelected={isSelected}
-        isEditing={isEditing}
-        editingId={editingId}
-        setEditingId={setEditingId}
-        editingName={editingName}
-        setEditingName={setEditingName}
-        editingNameRef={editingNameRef}
-        editInputRef={editInputRef}
-        onItemSelect={onItemSelect}
-        handleMoveCard={handleMoveCard}
-        handleDelete={handleDelete as any}
-        handleRenameConfirm={handleRenameConfirm}
-        renameCancelledRef={renameCancelledRef}
-        isPinned={isPinned}
-        handleTogglePin={handleTogglePin}
-        rowBaseClassName={ROW_BASE}
-        setRowRef={setRowRef}
-        isDragging={isDragging}
-        hasUpdateOrDelete={Boolean(onUpdateCard || onDeleteCard)}
-        isNewlyCreated={cardId === newlyCreatedCardId}
-        menuOpen={openRowMenuId === `card:${cardId}`}
-        onMenuOpenChange={(open) =>
-          setOpenRowMenuId(open ? `card:${cardId}` : (prev) => (prev === `card:${cardId}` ? null : prev))
-        }
-      />
-    );
-  };
-
-  const hasRootContent = rootFolders.length > 0 || rootItems.length > 0;
+  const hasRootContent = explorerTreeData.length > 0;
 
   return (
     <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
@@ -1500,7 +1496,7 @@ export function FolderTreeWithCards({
 
         {!hasRootContent ? (
           <div className="text-center py-8 text-slate-400">
-            <Folder className="w-8 h-8 mx-auto mb-2 opacity-30" />
+            <FolderIcon className="w-8 h-8 mx-auto mb-2 opacity-30" />
             <p className="text-xs">フォルダとカードがありません</p>
           </div>
         ) : isFiltering && !hasFilterMatches ? (
@@ -1512,40 +1508,28 @@ export function FolderTreeWithCards({
             </div>
           </div>
         ) : (
-          <div>
-            {rootFolders.map((folder) => renderFolder(folder, 0))}
-            {rootItems.length > 0 && (
-              <div className="mt-1">
-                <Droppable
-                  droppableId={DnDHelpers.createCardListDroppableId(ROOT_FOLDER_ID)}
-                  direction="vertical"
-                >
-                  {(provided, snapshot) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.droppableProps}
-                      className={cn(
-                        'min-h-[32px] block',
-                        snapshot.isDraggingOver && 'bg-blue-100 ring-1 ring-blue-300',
-                        snapshot.draggingFromThisWith &&
-                          !snapshot.isDraggingOver &&
-                          'bg-blue-50 ring-1 ring-blue-200'
-                      )}
-                    >
-                      {(() => {
-                        let rootCardIndex = 0;
-                        return rootItems.map((item) =>
-                          item.type === 'card'
-                            ? renderCard(item.data, 0, rootCardIndex++)
-                            : renderDocument(item.data, 0, 0)
-                        );
-                      })()}
-                      {provided.placeholder}
-                    </div>
-                  )}
-                </Droppable>
-              </div>
-            )}
+          <div className="h-full min-h-0">
+            <FolderTreeArborist
+              data={explorerTreeData}
+              selectedId={selectedTreeId}
+              expandedIds={Array.from(expandedFolders, (id) => `folder:${id}`)}
+              onSelect={(id) => {
+                if (id.startsWith('folder:')) onFolderSelect(id.slice('folder:'.length));
+                if (id.startsWith('card:')) onItemSelect({ type: 'card', id: id.slice('card:'.length) });
+                if (id.startsWith('document:')) onItemSelect({ type: 'document', id: id.slice('document:'.length) });
+              }}
+              onToggleExpand={(id, nextOpen) => {
+                if (!id.startsWith('folder:')) return;
+                const folderId = id.slice('folder:'.length);
+                setExpandedFolders((prev) => {
+                  const next = new Set(prev);
+                  if (nextOpen) next.add(folderId);
+                  else next.delete(folderId);
+                  return next;
+                });
+              }}
+              renderNode={renderTreeNode}
+            />
           </div>
         )}
 
@@ -1569,4 +1553,5 @@ export function FolderTreeWithCards({
     </DragDropContext>
   );
 }
+
 

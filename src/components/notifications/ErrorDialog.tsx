@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { Notification } from '../../types/notification';
-import { AlertCircle, ChevronDown } from 'lucide-react';
+import { AlertCircle, ChevronDown } from '@/ui/icons';
 
 interface ErrorDialogProps {
   notification: Notification;

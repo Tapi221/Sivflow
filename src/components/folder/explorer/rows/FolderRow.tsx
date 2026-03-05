@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronRight, ChevronDown, Folder, MoreVertical } from 'lucide-react';
+import { ChevronRight, ChevronDown, FolderOutlineIcon, MoreVertical } from '@/ui/icons';
 import { Droppable } from '@hello-pangea/dnd';
 import { cn } from '@/lib/utils';
 import { ContextMenu } from '../../ContextMenu';
@@ -114,10 +114,9 @@ export const FolderRow: React.FC<FolderRowProps> = ({
             <ExplorerRow
               rowRef={(node) => setRowRef(folderId, node)}
               depth={depth}
+              selected={isSelected}
               className={cn(
                 rowBaseClassName,
-                !isDragging && "hover:bg-slate-100",
-                isSelected && "bg-primary-100/80",
                 snapshot.isDraggingOver && "bg-blue-100 ring-1 ring-blue-300",
                 isFileDraggingOver && "bg-blue-50 ring-1 ring-blue-400",
                 "group pr-8"
@@ -130,7 +129,7 @@ export const FolderRow: React.FC<FolderRowProps> = ({
             >
               <div className="flex-1 flex items-center min-w-0 h-full pr-1 cursor-pointer">
                 <div
-                  className="w-4 h-4 flex items-center justify-center flex-shrink-0 mr-1"
+                  className="sidebar-action w-4 h-4 flex items-center justify-center flex-shrink-0 mr-1"
                   onClick={(e) => {
                     e.stopPropagation();
                     onToggle();
@@ -138,14 +137,14 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                 >
                   {hasExpandableContent ? (
                     isExpanded ? (
-                      <ChevronDown className="w-4 h-4 text-slate-500" />
+                      <ChevronDown className="sidebar-icon w-4 h-4 text-slate-500" />
                     ) : (
-                      <ChevronRight className="w-4 h-4 text-slate-500" />
+                      <ChevronRight className="sidebar-icon w-4 h-4 text-slate-500" />
                     )
                   ) : null}
                 </div>
 
-                <Folder className={cn("w-4 h-4 flex-shrink-0 mr-1", isPinned ? "text-amber-500 fill-amber-100" : "text-slate-400")} />
+                <FolderOutlineIcon className={cn("sidebar-icon w-4 h-4 flex-shrink-0 mr-1", isPinned ? "text-amber-500" : "text-slate-400")} />
 
                 {isEditing ? (
                   <input
@@ -189,13 +188,13 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                   <button
                     type="button"
                     aria-label="このフォルダを開く"
-                    className="md:hidden h-6 w-6 p-0 grid place-items-center rounded-md hover:bg-slate-200 text-slate-400 hover:text-slate-600 outline-none pointer-events-auto transition-colors shrink-0"
+                    className="sidebar-action md:hidden h-6 w-6 p-0 grid place-items-center rounded-md hover:bg-slate-200 text-slate-400 hover:text-slate-600 outline-none pointer-events-auto transition-colors shrink-0"
                     onClick={(e) => {
                       e.stopPropagation();
                       (onNavigate ?? onSelect)();
                     }}
                   >
-                    <ChevronRight className="h-4 w-4" />
+                    <ChevronRight className="sidebar-icon h-4 w-4" />
                   </button>
 
                   {hasContextMenu && (
@@ -217,10 +216,10 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                     <button
                       type="button"
                       aria-label="フォルダメニューを開く"
-                      className="h-6 w-6 p-0 grid place-items-center rounded-md hover:bg-slate-200 text-slate-400 hover:text-slate-600 outline-none pointer-events-auto transition-colors shrink-0"
+                      className="sidebar-action h-6 w-6 p-0 grid place-items-center rounded-md hover:bg-slate-200 text-slate-400 hover:text-slate-600 outline-none pointer-events-auto transition-colors shrink-0"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <MoreVertical className="h-4 w-4" />
+                      <MoreVertical className="sidebar-icon h-4 w-4" />
                     </button>
                   </ContextMenu>
                   )}

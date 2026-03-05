@@ -6,9 +6,7 @@ import { ref, deleteObject } from 'firebase/storage';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { formatBytes } from '@/utils/fileUtils';
-import { Trash2, FileText, Image, AlertCircle, Loader2 } from 'lucide-react';
-import FileAudio from 'lucide-react/dist/esm/icons/file-audio';
-import Database from 'lucide-react/dist/esm/icons/database';
+import { Trash2, FileText, Image as ImageIcon, AlertCircle, Loader2, FileAudio, Database } from '@/ui/icons';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import type { UploadMetadata } from '@/types';
 import { Separator } from '@/components/ui/separator';
@@ -211,7 +209,7 @@ export const StorageManager = () => {
 };
 
 const getFileIcon = (mimeType) => {
-    if (mimeType.startsWith('image/')) return <Image className="w-4 h-4" />;
+    if (mimeType.startsWith('image/')) return <ImageIcon className="w-4 h-4" />;
     if (mimeType.startsWith('audio/')) return <FileAudio className="w-4 h-4" />;
     if (mimeType === 'application/pdf') return <FileText className="w-4 h-4" />;
     return <FileText className="w-4 h-4" />;

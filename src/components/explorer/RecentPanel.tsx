@@ -2,7 +2,7 @@
  * RecentPanel - 最近開いた履歴表示コンポーネント
  */
 import React, { useMemo } from 'react';
-import { Folder, FileText, BookOpen, Clock, Trash2 } from 'lucide-react';
+import { BookOpen, Clock, FileText, Folder as FolderIcon, Trash2 } from '@/ui/icons';
 import { cn } from '@/lib/utils';
 import { ExplorerRow } from '@/components/folder/explorer/rows/ExplorerRow';
 import { ExplorerRowContent } from '@/components/folder/explorer/rows/ExplorerRowContent';
@@ -13,21 +13,20 @@ interface RecentPanelProps {
   recent: RecentItem[];
   folders: Folder[];
   cards: Card[];
-  documents?: DocumentItem[]; // ✅追加
+  documents?: DocumentItem[];
   onFolderSelect: (folderId: string) => void;
   onItemSelect: (item: SelectedExplorerItem) => void;
   onClearRecent: () => void;
 }
 
-// 相対時刻を生成
 function getRelativeTime(ts: number): string {
   const now = Date.now();
   const diff = now - ts;
-  
+
   const minutes = Math.floor(diff / (1000 * 60));
   const hours = Math.floor(diff / (1000 * 60 * 60));
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  
+
   if (minutes < 1) return 'たった今';
   if (minutes < 60) return `${minutes}分前`;
   if (hours < 24) return `${hours}時間前`;
@@ -44,43 +43,41 @@ export function RecentPanel({
   onItemSelect,
   onClearRecent,
 }: RecentPanelProps) {
-  // 有効な履歴のみフィルタリング（削除済みを除外）
   const validRecent = useMemo(() => {
-    return recent.filter(rec => {
+    return recent.filter((rec) => {
       if (rec.type === 'folder') {
-        return folders.some(f => (f.id || f.folderId) === rec.id);
+        return folders.some((folder) => String(folder.id || folder.folderId) === rec.id);
       }
       if (rec.type === 'card') {
-        return cards.some(c => c.id === rec.id || c.cardId === rec.id);
+        return cards.some((card) => card.id === rec.id || card.cardId === rec.id);
       }
       if (rec.type === 'document') {
-        return documents.some(d => d.id === rec.id || d.documentId === rec.id);
+        return documents.some((doc) => doc.id === rec.id || doc.documentId === rec.id);
       }
       return false;
     });
   }, [recent, folders, cards, documents]);
 
-  // アイテム情報を取得
   const getItemInfo = (item: RecentItem) => {
     if (item.type === 'folder') {
-      const folder = folders.find(f => (f.id || f.folderId) === item.id);
+      const folder = folders.find((entry) => String(entry.id || entry.folderId) === item.id);
       return {
         name: folder?.folderName || '不明なフォルダ',
-        icon: Folder,
+        icon: FolderIcon,
       };
-    } else if (item.type === 'card') {
-      const card = cards.find(c => c.id === item.id || c.cardId === item.id);
+    }
+    if (item.type === 'card') {
+      const card = cards.find((entry) => entry.id === item.id || entry.cardId === item.id);
       return {
         name: card?.title || '無題のカード',
         icon: BookOpen,
       };
-    } else {
-      const doc = documents.find(d => d.id === item.id || d.documentId === item.id);
-      return {
-        name: doc?.title || '無題のドキュメント',
-        icon: FileText,
-      };
     }
+    const doc = documents.find((entry) => entry.id === item.id || entry.documentId === item.id);
+    return {
+      name: doc?.title || '無題のドキュメント',
+      icon: FileText,
+    };
   };
 
   const handleClick = (item: RecentItem) => {
@@ -105,7 +102,6 @@ export function RecentPanel({
 
   return (
     <div className="flex flex-col h-full">
-      {/* ヘッダー */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-slate-100">
         <span className="text-xs font-medium text-slate-500">最近開いたアイテム</span>
         <button
@@ -116,25 +112,24 @@ export function RecentPanel({
           <span>クリア</span>
         </button>
       </div>
-      
-      {/* リスト */}
+
       <div className="flex-1 overflow-y-auto py-1">
         {validRecent.map((item) => {
           const info = getItemInfo(item);
           const Icon = info.icon;
-          
+
           return (
             <ExplorerRow
               key={`${item.type}:${item.id}:${item.ts}`}
               depth={1}
-              className="cursor-pointer hover:bg-slate-100"
+              className="cursor-pointer"
               onClick={() => handleClick(item)}
             >
               <ExplorerRowContent
                 left={
                   <Icon className={cn(
-                    "w-4 h-4 shrink-0 mr-2",
-                    item.type === 'folder' ? "text-[#E8A858]" : item.type === 'document' ? "text-rose-500" : "text-slate-400"
+                    'sidebar-icon w-4 h-4 shrink-0 mr-2',
+                    item.type === 'folder' ? 'text-[#E8A858]' : item.type === 'document' ? 'text-rose-500' : 'text-slate-400'
                   )} />
                 }
                 title={info.name}

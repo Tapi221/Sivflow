@@ -1,4 +1,4 @@
-import { CheckCircle2, X, Loader2, FileText } from 'lucide-react';
+import { CheckCircle2, X, Loader2, FileText } from '@/ui/icons';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';

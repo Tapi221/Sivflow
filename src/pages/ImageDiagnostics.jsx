@@ -5,7 +5,7 @@ import { cardsPathSegments } from '@/services/firestorePaths';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, CheckCircle, XCircle, AlertTriangle, RefreshCw } from 'lucide-react';
+import { Loader2, CheckCircle, XCircle, AlertTriangle, RefreshCw } from '@/ui/icons';
 
 export default function ImageDiagnostics() {
   const { currentUser } = useAuth();

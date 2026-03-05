@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileText, MoreVertical } from 'lucide-react';
+import { FileText, MoreVertical } from '@/ui/icons';
 import { cn } from '@/lib/utils';
 import { DocumentRowMenu } from '../../DocumentRowMenu';
 import type { Card, DocumentItem, FolderTreeNode } from '../model/utils';
@@ -49,18 +49,17 @@ export const DocumentRow: React.FC<DocumentRowProps> = ({
       ref={(node) => setRowRef(docId, node)}
       className={cn(
         rowBaseClassName,
-        !isDragging && "hover:bg-slate-100",
-        isSelected && "bg-primary-100/80",
         "pr-9",
         "cursor-pointer"
       )}
+      data-selected={isSelected ? 'true' : undefined}
       style={getExplorerRowStyle(depth)}
       onClick={() => onSelect({ type: 'document', id: docId })}
     >
       <div className="flex-1 flex items-center min-w-0 h-full pr-1">
-        <FileText className="w-4 h-4 text-rose-500 mr-2 shrink-0" />
+        <FileText className="sidebar-icon w-4 h-4 text-rose-500 mr-2 shrink-0" />
         <span className={cn(
-          "text-sm truncate leading-5 lining-nums tabular-nums",
+          "sidebar-title text-sm truncate lining-nums tabular-nums",
           isSelected ? "text-primary-700 font-medium" : "text-slate-700"
         )}>
           {title}
@@ -87,11 +86,11 @@ export const DocumentRow: React.FC<DocumentRowProps> = ({
           <button
             type="button"
             aria-label="ドキュメントメニューを開く"
-            className="h-6 w-6 p-0 grid place-items-center rounded-md hover:bg-slate-200 text-slate-400 hover:text-slate-600 outline-none pointer-events-auto transition-colors shrink-0"
+            className="sidebar-action h-6 w-6 p-0 grid place-items-center rounded-md hover:bg-slate-200 text-slate-400 hover:text-slate-600 outline-none pointer-events-auto transition-colors shrink-0"
             onClick={(e) => e.stopPropagation()}
             onPointerDown={(e) => e.stopPropagation()}
           >
-            <MoreVertical className="h-4 w-4" />
+            <MoreVertical className="sidebar-icon h-4 w-4" />
           </button>
         </DocumentRowMenu>
       </div>

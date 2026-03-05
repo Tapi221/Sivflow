@@ -20,7 +20,7 @@ import {
   Upload,
   Brain,
   Zap
-} from 'lucide-react';
+} from '@/ui/icons';
 import { createPageUrl } from '@/utils';
 import { RatingCountTiles } from '@/features/study/RatingCountTiles';
 import { useTodayStudyStore } from '@/stores/useTodayStudyStore';

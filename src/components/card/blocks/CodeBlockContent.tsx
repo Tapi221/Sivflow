@@ -1,10 +1,9 @@
+import { Check, Copy } from '@/ui/icons';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Highlight } from 'prism-react-renderer';
 import type { RenderProps } from 'prism-react-renderer';
 import Editor from 'react-simple-code-editor';
 import Prism from 'prismjs';
-import CheckIcon from 'lucide-react/dist/esm/icons/check';
-import CopyIcon from 'lucide-react/dist/esm/icons/copy';
 import { cn } from '@/lib/utils';
 import { codeTheme } from '@/theme/codeTheme';
 import { CodeBlockFrame } from './CodeBlockFrame';
@@ -128,7 +127,7 @@ export function CodeBlockContent(props: CodeBlockContentProps) {
       aria-label="コードをコピー"
       type="button"
     >
-      {copied ? <CheckIcon size={11} strokeWidth={2.5} /> : <CopyIcon size={11} strokeWidth={2} />}
+      {copied ? <Check size={11} strokeWidth={2.5} /> : <Copy size={11} strokeWidth={2} />}
       <span>{copied ? 'Copied' : 'Copy'}</span>
     </button>
   );
@@ -186,3 +185,4 @@ export function CodeBlockContent(props: CodeBlockContentProps) {
     </div>
   );
 }
+

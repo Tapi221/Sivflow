@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { 
   ChevronLeft,
   ChevronRight,
-} from 'lucide-react';
+} from '@/ui/icons';
 import { createPageUrl } from '@/utils';
 import { 
   format, 

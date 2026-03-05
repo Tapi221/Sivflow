@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, MessageSquare, List, Layers, ArrowUpDown, ChevronRight, FileText, FileX, Copy } from 'lucide-react';
+import { ArrowLeft, MessageSquare, List, Layers, ArrowUpDown, ChevronRight, FileText, FileX, Copy } from '@/ui/icons';
 
 /**
  * 作成モードを選択するダイアログ

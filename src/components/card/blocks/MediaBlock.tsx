@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image as ImageIcon } from 'lucide-react';
+import { Image as ImageIcon } from '@/ui/icons';
 import { BlockWrapper } from './BlockWrapper';
 import { ImageBlockContent } from './ImageBlockContent';
 import { cn } from '@/lib/utils';

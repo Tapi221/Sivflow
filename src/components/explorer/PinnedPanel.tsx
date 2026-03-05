@@ -2,8 +2,20 @@
  * PinnedPanel - ピン留め一覧表示コンポーネント
  */
 import React, { useMemo, useState } from 'react';
-import { Folder, BookOpen, FileText, ChevronRight, ChevronDown, X } from 'lucide-react';
-import Pin from 'lucide-react/dist/esm/icons/pin';
+import {
+  BookOpen,
+  Calendar,
+  ChevronDown,
+  ChevronRight,
+  FileText,
+  Folder as FolderIcon,
+  FolderTree,
+  Globe,
+  Home,
+  Settings,
+  Trash2,
+  X,
+} from '@/ui/icons';
 import { cn } from '@/lib/utils';
 import { ExplorerRow } from '@/components/folder/explorer/rows/ExplorerRow';
 import { ExplorerRowContent } from '@/components/folder/explorer/rows/ExplorerRowContent';
@@ -24,7 +36,6 @@ interface PinnedPanelProps {
   onFolderSelect: (folderId: string) => void;
   onItemSelect: (item: SelectedExplorerItem) => void;
   onUnpinItem: (item: PinnedItem) => void;
-  // フォルダパス取得用
   getFolderPath?: (folderId: string) => string;
 }
 
@@ -40,17 +51,16 @@ export function PinnedPanel({
 }: PinnedPanelProps) {
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
 
-  // 有効なピン留めのみフィルタリング（削除済みを除外）
   const validPinnedItems = useMemo(() => {
     return pinnedItems.filter((item) => {
       if (item.type === 'folder') {
-        return folders.some(f => (f.id || f.folderId) === item.id);
+        return folders.some((folder) => String(folder.id || folder.folderId) === item.id);
       }
       if (item.type === 'card') {
-        return cards.some(c => c.id === item.id);
+        return cards.some((card) => card.id === item.id);
       }
       if (item.type === 'document') {
-        return documents.some(d => d.id === item.id);
+        return documents.some((doc) => doc.id === item.id);
       }
       return false;
     });
@@ -59,7 +69,7 @@ export function PinnedPanel({
   const folderById = useMemo(() => {
     const map = new Map<string, Folder>();
     folders.forEach((folder) => {
-      const id = String(folder.id || folder.folderId);
+      const id = String(folder.id || folder.folderId || '');
       if (!id) return;
       map.set(id, folder);
     });
@@ -69,7 +79,7 @@ export function PinnedPanel({
   const folderChildrenMap = useMemo(() => {
     const map = new Map<string, string[]>();
     folders.forEach((folder) => {
-      const id = String(folder.id || folder.folderId);
+      const id = String(folder.id || folder.folderId || '');
       if (!id) return;
       const parentId = String(folder.parentFolderId || '');
       const key = parentId || '__root__';
@@ -134,37 +144,35 @@ export function PinnedPanel({
 
   const isPinnedFolder = (folderId: string) => pinnedFolderIdSet.has(folderId);
 
-  // アイテム情報を取得
   const getItemInfo = (item: PinnedItem) => {
     if (item.type === 'folder') {
-      const folder = folders.find(f => (f.id || f.folderId) === item.id);
+      const folder = folders.find((entry) => String(entry.id || entry.folderId) === item.id);
       return {
         name: folder?.folderName || '不明なフォルダ',
         path: getFolderPath ? getFolderPath(item.id) : '',
-        icon: Folder,
+        icon: FolderIcon,
       };
-    } else if (item.type === 'card') {
-      const card = cards.find(c => c.id === item.id);
-      const cardFolder = card?.folderId 
-        ? folders.find(f => (f.id || f.folderId) === card.folderId)
+    }
+    if (item.type === 'card') {
+      const card = cards.find((entry) => entry.id === item.id);
+      const cardFolder = card?.folderId
+        ? folders.find((entry) => String(entry.id || entry.folderId) === card.folderId)
         : null;
       return {
         name: card?.title || '無題のカード',
         path: cardFolder?.folderName ?? '',
         icon: BookOpen,
       };
-    } else if (item.type === 'document') {
-      const doc = documents.find((d) => d.id === item.id);
-      const docFolder = doc?.folderId
-        ? folders.find(f => (f.id || f.folderId) === doc.folderId)
-        : null;
-      return {
-        name: doc?.title || doc?.fileName || '無題のドキュメント',
-        path: docFolder?.folderName ?? '',
-        icon: FileText,
-      };
     }
-    return { name: '', path: '', icon: BookOpen };
+    const doc = documents.find((entry) => entry.id === item.id);
+    const docFolder = doc?.folderId
+      ? folders.find((entry) => String(entry.id || entry.folderId) === doc.folderId)
+      : null;
+    return {
+      name: doc?.title || doc?.fileName || '無題のドキュメント',
+      path: docFolder?.folderName ?? '',
+      icon: FileText,
+    };
   };
 
   const handleClick = (item: PinnedItem) => {
@@ -200,7 +208,7 @@ export function PinnedPanel({
       <div key={`folder-subtree:${folderId}`}>
         <ExplorerRow
           depth={depth + 1}
-          className="cursor-pointer hover:bg-slate-100"
+          className="cursor-pointer"
           onClick={() => onFolderSelect(folderId)}
         >
           <ExplorerRowContent
@@ -209,18 +217,18 @@ export function PinnedPanel({
                 {hasChildren ? (
                   <button
                     type="button"
-                    className="w-4 h-4 mr-1 flex items-center justify-center text-slate-500"
+                    className="sidebar-action w-4 h-4 mr-1 flex items-center justify-center text-slate-500"
                     onClick={(e) => {
                       e.stopPropagation();
                       toggleFolder(folderId);
                     }}
                   >
-                    {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                    {isExpanded ? <ChevronDown className="sidebar-icon w-4 h-4" /> : <ChevronRight className="sidebar-icon w-4 h-4" />}
                   </button>
                 ) : (
                   <span className="w-4 h-4 mr-1 shrink-0" />
                 )}
-                <Folder className="w-4 h-4 mr-2 shrink-0 text-[#E8A858]" />
+                <FolderIcon className="sidebar-icon w-4 h-4 mr-2 shrink-0 text-[#E8A858]" />
               </>
             }
             title={folderName}
@@ -230,9 +238,9 @@ export function PinnedPanel({
                   e.stopPropagation();
                   onUnpinItem({ type: 'folder', id: folderId });
                 }}
-                className="opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-200 rounded transition-all"
+                className="sidebar-action opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-200 rounded transition-all"
               >
-                <X className="w-3 h-3 text-slate-400" />
+                <X className="sidebar-icon w-3 h-3 text-slate-400" />
               </button>
             ) : null}
           />
@@ -243,17 +251,17 @@ export function PinnedPanel({
             {childFolderIds.map((id) => renderSubtree(id, depth + 1))}
             {folderItems.map((entry) => {
               if (entry.type === 'card') {
-                const card = cards.find((c) => c.id === entry.id);
+                const card = cards.find((item) => item.id === entry.id);
                 const isPinned = validPinnedItems.some((item) => item.type === 'card' && item.id === entry.id);
                 return (
                   <ExplorerRow
                     key={`card-in-folder:${entry.id}`}
                     depth={depth + 2}
-                    className="cursor-pointer hover:bg-slate-100"
+                    className="cursor-pointer"
                     onClick={() => onItemSelect({ type: 'card', id: entry.id })}
                   >
                     <ExplorerRowContent
-                      left={<BookOpen className="w-4 h-4 mr-2 shrink-0 text-slate-400" />}
+                      left={<BookOpen className="sidebar-icon w-4 h-4 mr-2 shrink-0 text-slate-400" />}
                       title={card?.title || '無題のカード'}
                       right={isPinned ? (
                         <button
@@ -261,9 +269,9 @@ export function PinnedPanel({
                             e.stopPropagation();
                             onUnpinItem({ type: 'card', id: entry.id });
                           }}
-                          className="opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-200 rounded transition-all"
+                          className="sidebar-action opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-200 rounded transition-all"
                         >
-                          <X className="w-3 h-3 text-slate-400" />
+                          <X className="sidebar-icon w-3 h-3 text-slate-400" />
                         </button>
                       ) : null}
                     />
@@ -271,33 +279,33 @@ export function PinnedPanel({
                 );
               }
 
-              const doc = documents.find((d) => d.id === entry.id);
+              const doc = documents.find((item) => item.id === entry.id);
               const isPinned = validPinnedItems.some((item) => item.type === 'document' && item.id === entry.id);
               return (
-              <ExplorerRow
-                key={`doc-in-folder:${entry.id}`}
-                depth={depth + 2}
-                className="cursor-pointer hover:bg-slate-100"
-                onClick={() => onItemSelect({ type: 'document', id: entry.id })}
-              >
-                <ExplorerRowContent
-                  left={<FileText className="w-4 h-4 mr-2 shrink-0 text-slate-400" />}
-                  title={doc?.title || doc?.fileName || '無題のドキュメント'}
-                  right={isPinned ? (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onUnpinItem({ type: 'document', id: entry.id });
-                      }}
-                      className="opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-200 rounded transition-all"
-                    >
-                      <X className="w-3 h-3 text-slate-400" />
-                    </button>
-                  ) : null}
-                />
-              </ExplorerRow>
-            );
-          })}
+                <ExplorerRow
+                  key={`doc-in-folder:${entry.id}`}
+                  depth={depth + 2}
+                  className="cursor-pointer"
+                  onClick={() => onItemSelect({ type: 'document', id: entry.id })}
+                >
+                  <ExplorerRowContent
+                    left={<FileText className="sidebar-icon w-4 h-4 mr-2 shrink-0 text-slate-400" />}
+                    title={doc?.title || doc?.fileName || '無題のドキュメント'}
+                    right={isPinned ? (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onUnpinItem({ type: 'document', id: entry.id });
+                        }}
+                        className="sidebar-action opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-200 rounded transition-all"
+                      >
+                        <X className="sidebar-icon w-3 h-3 text-slate-400" />
+                      </button>
+                    ) : null}
+                  />
+                </ExplorerRow>
+              );
+            })}
           </>
         ) : null}
       </div>
@@ -308,68 +316,68 @@ export function PinnedPanel({
     <div className="py-1">
       <ExplorerRow
         depth={1}
-        className="cursor-pointer hover:bg-slate-100"
+        className="cursor-pointer"
         onClick={() => onItemSelect({ type: 'today-study' })}
       >
         <ExplorerRowContent
-          left={<Pin className="w-4 h-4 mr-2 shrink-0 text-primary-600 fill-primary-100" strokeWidth={2.2} />}
+          left={<Home className="sidebar-icon w-4 h-4 mr-2 shrink-0 text-primary-600" />}
           title="今日の学習"
         />
       </ExplorerRow>
       <ExplorerRow
         depth={1}
-        className="cursor-pointer hover:bg-slate-100"
+        className="cursor-pointer"
         onClick={() => onItemSelect({ type: 'directory' })}
       >
         <ExplorerRowContent
-          left={<Pin className="w-4 h-4 mr-2 shrink-0 text-primary-600 fill-primary-100" strokeWidth={2.2} />}
+          left={<FolderTree className="sidebar-icon w-4 h-4 mr-2 shrink-0 text-primary-600" />}
           title="ディレクトリ"
         />
       </ExplorerRow>
       <ExplorerRow
         depth={1}
-        className="cursor-pointer hover:bg-slate-100"
+        className="cursor-pointer"
         onClick={() => onItemSelect({ type: 'gallery' })}
       >
         <ExplorerRowContent
-          left={<Pin className="w-4 h-4 mr-2 shrink-0 text-primary-600 fill-primary-100" strokeWidth={2.2} />}
+          left={<Globe className="sidebar-icon w-4 h-4 mr-2 shrink-0 text-primary-600" />}
           title="ギャラリー"
         />
       </ExplorerRow>
       <ExplorerRow
         depth={1}
-        className="cursor-pointer hover:bg-slate-100"
+        className="cursor-pointer"
         onClick={() => onItemSelect({ type: 'calendar' })}
       >
         <ExplorerRowContent
-          left={<Pin className="w-4 h-4 mr-2 shrink-0 text-primary-600 fill-primary-100" strokeWidth={2.2} />}
+          left={<Calendar className="sidebar-icon w-4 h-4 mr-2 shrink-0 text-primary-600" />}
           title="予定表"
         />
       </ExplorerRow>
       <ExplorerRow
         depth={1}
-        className="cursor-pointer hover:bg-slate-100"
+        className="cursor-pointer"
         onClick={() => onItemSelect({ type: 'settings' })}
       >
         <ExplorerRowContent
-          left={<Pin className="w-4 h-4 mr-2 shrink-0 text-primary-600 fill-primary-100" strokeWidth={2.2} />}
+          left={<Settings className="sidebar-icon w-4 h-4 mr-2 shrink-0 text-primary-600" />}
           title="設定"
         />
       </ExplorerRow>
       <ExplorerRow
         depth={1}
-        className="cursor-pointer hover:bg-slate-100"
+        className="cursor-pointer"
         onClick={() => onItemSelect({ type: 'trash' })}
       >
         <ExplorerRowContent
-          left={<Pin className="w-4 h-4 mr-2 shrink-0 text-primary-600 fill-primary-100" strokeWidth={2.2} />}
+          left={<Trash2 className="sidebar-icon w-4 h-4 mr-2 shrink-0 text-primary-600" />}
           title="ごみ箱"
         />
       </ExplorerRow>
 
       {validPinnedItems.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-full py-12 text-slate-400">
-          <Pin className="w-10 h-10 mb-3 opacity-30" />
+          <FolderTree className="w-10 h-10 mb-3 opacity-30" />
           <p className="text-sm font-medium">ピン留めがありません</p>
           <p className="text-xs mt-1">フォルダやカードを右クリックして追加</p>
         </div>
@@ -380,19 +388,19 @@ export function PinnedPanel({
       {validPinnedItems.filter((item) => item.type !== 'folder').map((item) => {
         const info = getItemInfo(item);
         const Icon = info.icon;
-        
+
         return (
           <ExplorerRow
             key={`${item.type}:${item.id}`}
             depth={1}
-            className="cursor-pointer hover:bg-slate-100"
+            className="cursor-pointer"
             onClick={() => handleClick(item)}
           >
             <ExplorerRowContent
               left={
                 <Icon className={cn(
-                  "w-4 h-4 mr-2 shrink-0",
-                  item.type === 'folder' ? "text-[#E8A858]" : "text-slate-400"
+                  'sidebar-icon w-4 h-4 mr-2 shrink-0',
+                  item.type === 'folder' ? 'text-[#E8A858]' : 'text-slate-400'
                 )} />
               }
               title={info.name}
@@ -403,9 +411,9 @@ export function PinnedPanel({
                     e.stopPropagation();
                     onUnpinItem(item);
                   }}
-                  className="opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-200 rounded transition-all"
+                  className="sidebar-action opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-200 rounded transition-all"
                 >
-                  <X className="w-3 h-3 text-slate-400" />
+                  <X className="sidebar-icon w-3 h-3 text-slate-400" />
                 </button>
               }
             />

@@ -1,7 +1,7 @@
 import React, { useCallback, useState, useEffect, useRef, useId } from 'react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
-import { Upload, X, Play, Pause, RotateCcw, Check } from 'lucide-react';
+import { Upload, X, Play, Pause, RotateCcw, Check } from '@/ui/icons';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import type { UploadedImage, AssetRecord } from '@/types';

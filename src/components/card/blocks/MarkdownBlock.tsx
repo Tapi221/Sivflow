@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import NotebookPenIcon from 'lucide-react/dist/esm/icons/notebook-pen';
+import { NotebookPen } from '@/ui/icons';
 import { BlockWrapper } from './BlockWrapper';
 import { MarkdownBlockView } from './MarkdownBlockPreview';
 import { MarkdownEditorDialog } from './MarkdownEditorDialog';
@@ -449,7 +449,7 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
       className={cn('bg-transparent px-0 py-0', !isMarkdownEmpty && 'border-0')}
       contentClassName="px-0"
       label="Markdown"
-      icon={NotebookPenIcon}
+      icon={NotebookPen}
       accentColor={accentColor}
       isActive={isActive}
       showDelete={showDelete}
@@ -658,3 +658,4 @@ function parseAndSplitFencesWithRanges(md: string): { blocks: EditorBlock[]; ran
 
   return { blocks, ranges };
 }
+

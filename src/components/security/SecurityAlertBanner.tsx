@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { AlertTriangle, X } from 'lucide-react';
+import { AlertTriangle, X } from '@/ui/icons';
 
 export const SecurityAlertBanner: React.FC = () => {
   const { securityState, dismissSecurityAlert } = useAuth();

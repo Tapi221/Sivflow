@@ -22,8 +22,8 @@ export const ExplorerRowContent: React.FC<ExplorerRowContentProps> = ({
 }) => (
   <>
     {left}
-    <div className={cn('flex-1 min-w-0', contentClassName)}>
-      {title ? <div className={cn('text-sm text-slate-700 truncate leading-5', titleClassName)}>{title}</div> : null}
+    <div className={cn('sidebar-label flex-1 min-w-0', contentClassName)}>
+      {title ? <div className={cn('sidebar-title text-sm text-slate-700 truncate', titleClassName)}>{title}</div> : null}
       {subtitle ? <div className={cn('text-[10px] text-slate-400 truncate', subtitleClassName)}>{subtitle}</div> : null}
     </div>
     {right}

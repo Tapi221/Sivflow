@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Check, Plus, Tag as TagIcon, Palette } from "lucide-react"
+import { Check, Plus, Tag as TagIcon, Palette } from '@/ui/icons'
 import { cn } from "@/lib/utils"
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronRight, ChevronDown, Folder as FolderIcon } from 'lucide-react';
+import { ChevronRight, ChevronDown, Folder as FolderIcon } from '@/ui/icons';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 

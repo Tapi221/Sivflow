@@ -1,4 +1,4 @@
-import { FileText, Plus } from "lucide-react";
+import { FileText, Plus } from '@/ui/icons';
 
 import { Button } from "@/components/ui/button";
 

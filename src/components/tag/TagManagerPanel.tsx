@@ -1,7 +1,7 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Tag as TagIcon, Check, Trash2, Pencil, GitMerge, FolderInput, Move } from 'lucide-react';
+import { Tag as TagIcon, Check, Trash2, Pencil, GitMerge, FolderInput, Move } from '@/ui/icons';
 import { useTags, DEFAULT_COLORS } from '@/hooks/useTags';
 import { cn } from '@/lib/utils';
 import { TagChip } from '@/components/tag/TagChip';

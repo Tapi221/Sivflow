@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Construction } from 'lucide-react';
+import { ArrowLeft, Construction } from '@/ui/icons';
 
 export default function NotImplementedPlaceholder() {
   const navigate = useNavigate();

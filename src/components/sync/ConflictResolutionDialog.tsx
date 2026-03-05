@@ -19,7 +19,7 @@ import {
   Cloud,
   HardDrive,
   Merge,
-} from 'lucide-react';
+} from '@/ui/icons';
 import { useAuth } from '@/contexts/AuthContext';
 import type { SyncConflict } from '@/types/sync';
 

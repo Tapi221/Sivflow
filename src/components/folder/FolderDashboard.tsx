@@ -1,4 +1,5 @@
-import React, { useMemo, useRef, useState, useEffect, useCallback } from 'react';
+import { useMemo, useRef, useState, useEffect, useCallback } from 'react';
+import type { CSSProperties, KeyboardEvent, ReactNode } from 'react';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Cell } from 'recharts';
 import { Button } from '@/components/ui/button';
 import { CardHeader } from '@/components/ui/CardHeader';
@@ -7,7 +8,7 @@ import { extractTextFromBlocks } from '@/utils';
 import { formatLastAccess } from '@/utils/dateUtils';
 import { calculateResistanceScore } from '@/utils/reviewMetrics';
 import type { Card } from '@/types';
-import { Calendar, FileText, History, Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, FileText, History, Star, ChevronLeft, ChevronRight } from '@/ui/icons';
 
 
 type FolderStats = {
@@ -374,7 +375,7 @@ export function FolderDashboard({
               ) : (
                 <EmptyState
                   title="まだデータがありません"
-                  description="1回以上学習すると分布が表示されます"
+                  description="カードを復習すると分布が表示されます"
                   action={
                     <Button type="button" size="sm" variant="secondary" onClick={handlers.onStartStudy} className="h-8 px-4 text-xs">
                       学習を始める
@@ -399,7 +400,7 @@ const CARD_SCROLL_AMOUNT = 264; // scrollByの量 (px)
 
 interface CardScrollSectionProps {
   cards: Card[];
-  onEmpty: React.ReactNode;
+  onEmpty: ReactNode;
 }
 
 function CardScrollSection({ cards, onEmpty }: CardScrollSectionProps) {
@@ -439,7 +440,7 @@ function CardScrollSection({ cards, onEmpty }: CardScrollSectionProps) {
   }, []);
 
   // キーボード左右矢印対応
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+  const handleKeyDown = useCallback((e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'ArrowRight') { e.preventDefault(); scrollBy('right'); }
     if (e.key === 'ArrowLeft')  { e.preventDefault(); scrollBy('left');  }
   }, [scrollBy]);
@@ -458,7 +459,7 @@ function CardScrollSection({ cards, onEmpty }: CardScrollSectionProps) {
         onKeyDown={handleKeyDown}
         tabIndex={0}
         className="overflow-x-auto overscroll-x-contain outline-none focus-visible:ring-2 focus-visible:ring-primary-300 rounded-lg pr-16"
-        style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
+        style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as CSSProperties}
         aria-label="カード一覧（横スクロール）"
       >
         <div

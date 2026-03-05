@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Flashcard } from '../frame/Flashcard';
 import { Button } from '../../ui/button';
-import { X } from 'lucide-react';
+import { X } from '@/ui/icons';
 import { useUserSettings } from '@/hooks/useUserSettings';
 import { MobileScalableCard } from '../frame/MobileScalableCard';
 import { CANONICAL_CARD_WIDTH, CARD_SAFE_PADDING_PX } from '../common/constants';

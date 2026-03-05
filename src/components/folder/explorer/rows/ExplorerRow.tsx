@@ -4,6 +4,7 @@ import { EXPLORER_ROW_BASE_CLASS_NAME, getExplorerRowStyle } from './shared';
 
 interface ExplorerRowProps extends React.HTMLAttributes<HTMLDivElement> {
   depth: number;
+  selected?: boolean;
   className?: string;
   rowRef?: React.Ref<HTMLDivElement>;
   children: React.ReactNode;
@@ -11,6 +12,7 @@ interface ExplorerRowProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export const ExplorerRow: React.FC<ExplorerRowProps> = ({
   depth,
+  selected,
   className,
   rowRef,
   children,
@@ -20,6 +22,7 @@ export const ExplorerRow: React.FC<ExplorerRowProps> = ({
   <div
     ref={rowRef}
     className={cn(EXPLORER_ROW_BASE_CLASS_NAME, className)}
+    data-selected={selected ? 'true' : undefined}
     style={{ ...getExplorerRowStyle(depth), ...style }}
     {...props}
   >

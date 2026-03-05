@@ -13,7 +13,7 @@ import {
   Folder, 
   BookOpen, 
   Settings
-} from 'lucide-react';
+} from '@/ui/icons';
 import { createPageUrl } from '@/utils';
 import { useUserSettings } from '@/hooks/useUserSettings';
 import { useSettingsQueryParam } from '@/hooks/useSettingsQueryParam';

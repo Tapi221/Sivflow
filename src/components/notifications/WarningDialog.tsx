@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { Notification } from '../../types/notification';
-import { AlertTriangle, X, ChevronDown } from 'lucide-react';
+import { AlertTriangle, X, ChevronDown } from '@/ui/icons';
 
 interface WarningDialogProps {
   notification: Notification;

@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, Pencil, Image as ImageIcon, X, Volume2 } from 'lucide-react';
-import LinkIcon from 'lucide-react/dist/esm/icons/link';
-
+import { ChevronLeft, ChevronRight, Pencil, Image as ImageIcon, X, Volume2 } from '@/ui/icons';
+import { Link } from '@/ui/icons';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { AudioPlayer } from '../media/CardMedia';
@@ -479,7 +478,7 @@ export function Flashcard({
         }}
         className="flex items-center gap-1 px-2 py-1 h-8 min-h-0 min-w-0 rounded-full transition-all bg-cyan-500 text-white shadow-[0_2px_0_#0e7490] active:shadow-none active:translate-y-[2px] hover:bg-cyan-400"
       >
-        <LinkIcon className="w-3 h-3 stroke-[2.25]" />
+        <Link className="w-3 h-3 stroke-[2.25]" />
         <span className="text-[10px] font-bold">x{activeReferences.length}</span>
       </button>
     );
@@ -680,7 +679,7 @@ export function Flashcard({
   const fixedHeightPx = layoutRowsToCardHeightPx(layoutRows);
   const activeSide: 'question' | 'answer' = effectiveIsFlipped ? 'answer' : 'question';
   const activeBlocks = resolveSideBlocks(activeSide);
-  const ruledPhasePx = activeBlocks.some((block) => block.type === 'markdown') ? 12 : 0;
+  const ruledPhasePx = 0;
 
   return (
     <div className={cn('w-full flex flex-col select-none overflow-visible', className)}>
@@ -805,3 +804,4 @@ export function Flashcard({
     </div>
   );
 }
+

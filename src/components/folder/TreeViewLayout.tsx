@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from '@/ui/icons';
 import { FolderTreeWithCards } from './FolderTreeWithCards';
 import { RightPane } from './RightPane';
 import { ExplorerTabs } from '../explorer/ExplorerTabs';

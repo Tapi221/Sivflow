@@ -1,13 +1,12 @@
 import React from 'react';
 import {
   Plus
-} from 'lucide-react';
-// lucide-react のアイコンを個別インポート（named export が無いアイコンは dist から直接取得）
-import TypeIcon from 'lucide-react/dist/esm/icons/type';
-import CodeIcon from 'lucide-react/dist/esm/icons/code';
-import ImageIcon from 'lucide-react/dist/esm/icons/image';
-import SigmaIcon from 'lucide-react/dist/esm/icons/sigma';
-import NotebookPenIcon from 'lucide-react/dist/esm/icons/notebook-pen';
+} from '@/ui/icons';
+import { Type } from '@/ui/icons';
+import { Code } from '@/ui/icons';
+import { ImageIcon } from '@/ui/icons';
+import { Sigma } from '@/ui/icons';
+import { NotebookPen } from '@/ui/icons';
 import { cn } from '@/lib/utils'; // clsx + tailwind-merge のユーティリティ
 import type { CardBlock } from '@/types';
 
@@ -79,20 +78,20 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
   const getIcon = (iconName: string | undefined, type: CardBlock['type']) => {
     if (iconName) {
       switch (iconName) {
-        case 'Type':       return TypeIcon;
+        case 'Type':       return Type;
         case 'Image':      return ImageIcon;
-        case 'Sigma':      return SigmaIcon;
-        case 'Code':       return CodeIcon;
-        case 'NotebookPen':return NotebookPenIcon;
+        case 'Sigma':      return Sigma;
+        case 'Code':       return Code;
+        case 'NotebookPen':return NotebookPen;
       }
     }
     // iconName が未定義 or 未知の値だった場合のフォールバック
     switch (type) {
-      case 'text':      return TypeIcon;
-      case 'code':      return CodeIcon;
+      case 'text':      return Type;
+      case 'code':      return Code;
       case 'image':     return ImageIcon;
-      case 'markdown':  return NotebookPenIcon;
-      case 'math':      return SigmaIcon;
+      case 'markdown':  return NotebookPen;
+      case 'math':      return Sigma;
       default:          return Plus; // 想定外の type には「＋」アイコンを表示
     }
   };
@@ -230,3 +229,4 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
     </div>
   );
 };
+

@@ -27,7 +27,7 @@ import {
   Search,
   Filter,
   ChevronDown
-} from 'lucide-react';
+} from '@/ui/icons';
 import { createPageUrl, normalizeCard, normalizeFolder } from '@/utils';
 import { format } from 'date-fns';
 import { ja } from 'date-fns/locale';

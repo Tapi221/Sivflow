@@ -1,0 +1,13 @@
+import { forwardRef } from 'react';
+import type { SVGProps } from 'react';
+
+export type StratisLogout01IconProps = SVGProps<SVGSVGElement>;
+
+export const StratisLogout01Icon = forwardRef<SVGSVGElement, StratisLogout01IconProps>(function StratisLogout01Icon(
+  { className, ...props },
+  ref
+) {
+  return (
+    <svg ref={ref} {...props} fill="none" viewBox="0 0 24 24" className={['block', className].filter(Boolean).join(' ')} xmlns="http://www.w3.org/2000/svg"><path d="M15.2199 20.4L18.9258 20.4C19.4874 20.4 20.0261 20.1787 20.4232 19.7849C20.8203 19.3911 21.0435 18.8569 21.0435 18.3L21.0435 5.69999C21.0435 5.14304 20.8203 4.6089 20.4232 4.21507C20.0261 3.82124 19.4874 3.59999 18.9258 3.59999L15.2199 3.59999M14.9567 12L2.95674 12M2.95674 12L7.54189 16.8M2.95674 12L7.54189 7.19999" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+  );
+});

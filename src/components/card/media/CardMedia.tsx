@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Play, Pause, Volume2, Image as ImageIcon } from 'lucide-react';
+import { Play, Pause, Volume2, Image as ImageIcon } from '@/ui/icons';
 import { cn } from '@/lib/utils';
 import { ImageFrame } from '../blocks/ImageFrame';
 import { useAuth } from '@/contexts/AuthContext';

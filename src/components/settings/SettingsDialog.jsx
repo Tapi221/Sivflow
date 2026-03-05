@@ -16,7 +16,7 @@ import {
   ChevronRight,
   Keyboard,
   Cloud
-} from 'lucide-react';
+} from '@/ui/icons';
 import { getLocalDb } from '@/services/localDB';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -39,7 +39,7 @@ import { uploadProfileImage } from '@/services/imageUploadService';
 import { useReliableFileUpload } from '@/hooks/useReliableFileUpload';
 import { Slider } from '@/components/ui/slider';
 import { useUserSettings } from '@/hooks/useUserSettings';
-import { BookOpen } from 'lucide-react';
+import { BookOpen } from '@/ui/icons';
 import { FaceIcons } from '@/components/ui/FaceIcons';
 import { StorageManager } from './StorageManager';
 import { 

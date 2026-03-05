@@ -2,7 +2,7 @@
  * InboxPanel - 未分類カード一覧表示コンポーネント
  */
 import React, { useMemo, useState, useRef, useEffect } from 'react';
-import { BookOpen, Folder, ArrowRight, ChevronRight, ChevronDown } from 'lucide-react';
+import { BookOpen, Folder, ArrowRight, ChevronRight, ChevronDown } from '@/ui/icons';
 
 interface InboxPanelProps {
   cards: unknown[];

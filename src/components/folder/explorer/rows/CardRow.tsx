@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, MoreVertical } from 'lucide-react';
+import { FileText, MoreVertical } from '@/ui/icons';
 import { Draggable } from '@hello-pangea/dnd';
 import { cn } from '@/lib/utils';
 import { ContextMenu } from '../../ContextMenu';
@@ -102,12 +102,11 @@ export const CardRow: React.FC<CardRowProps> = ({
             {...provided.dragHandleProps}
             className={cn(
               rowBaseClassName,
-              !isDragging && "hover:bg-slate-100",
-              isSelected && "bg-primary-100/80",
               "pr-9",
               snapshot.isDragging && "bg-white shadow-lg opacity-90 z-50 ring-1 ring-primary-200",
               snapshot.isDragging && "pointer-events-none"
             )}
+            data-selected={isSelected ? 'true' : undefined}
             style={{
               ...lockedStyle,
               ...getExplorerRowStyle(depth),
@@ -124,9 +123,9 @@ export const CardRow: React.FC<CardRowProps> = ({
                 "items-center h-full"
               )}
             >
-              <BookOpen
+              <FileText
                 className={cn(
-                  "w-4 h-4 flex-shrink-0 mr-1",
+                  "sidebar-icon w-4 h-4 flex-shrink-0 mr-1",
                   isPinned ? "text-amber-500" : "text-slate-400"
                 )}
               />
@@ -165,7 +164,7 @@ export const CardRow: React.FC<CardRowProps> = ({
                 >
                   <span
                     className={cn(
-                      "text-sm leading-5 lining-nums tabular-nums",
+                      "sidebar-title text-sm lining-nums tabular-nums",
                       "truncate",
                       isSelected ? "text-primary-700 font-medium" : "text-slate-600"
                     )}
@@ -194,11 +193,11 @@ export const CardRow: React.FC<CardRowProps> = ({
                   <button
                     type="button"
                     aria-label="カードメニューを開く"
-                    className="h-6 w-6 p-0 grid place-items-center rounded-md hover:bg-slate-200 text-slate-400 hover:text-slate-600 outline-none pointer-events-auto transition-colors shrink-0"
+                    className="sidebar-action h-6 w-6 p-0 grid place-items-center rounded-md hover:bg-slate-200 text-slate-400 hover:text-slate-600 outline-none pointer-events-auto transition-colors shrink-0"
                     onClick={(e) => e.stopPropagation()}
                     onPointerDown={(e) => e.stopPropagation()}
                   >
-                    <MoreVertical className="h-4 w-4" />
+                    <MoreVertical className="sidebar-icon h-4 w-4" />
                   </button>
                 </ContextMenu>
               </div>

@@ -1,9 +1,10 @@
 export const EXPLORER_ROW_BASE_CLASS_NAME =
-  'group flex items-center h-8 min-h-0 box-border pr-2 py-0 relative w-full text-left rounded-md overflow-hidden transition-colors';
+  'sidebar-row group box-border py-0 relative w-full text-left';
 
 export const getExplorerRowStyle = (depth: number) => ({
-  paddingLeft: `${depth * 12 + 4}px`,
-  height: 32,
-  minHeight: 32,
+  paddingLeft: `calc(4px + ${depth} * var(--tree-indent-px))`,
+  height: 'var(--app-row-px)',
+  minHeight: 'var(--app-row-px)',
+  lineHeight: 'var(--app-row-px)',
   boxSizing: 'border-box' as const,
 });

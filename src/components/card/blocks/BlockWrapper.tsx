@@ -1,9 +1,6 @@
+import { GripVertical, Trash2, Copy } from '@/ui/icons';
 import React from 'react';
 import { cn } from '@/lib/utils';
-import GripIcon from 'lucide-react/dist/esm/icons/grip-vertical';
-import TrashIcon from 'lucide-react/dist/esm/icons/trash-2';
-import CopyIcon from 'lucide-react/dist/esm/icons/copy';
-
 interface BlockWrapperProps {
   children: React.ReactNode;
   onDelete: () => void;
@@ -189,7 +186,7 @@ export const BlockWrapper = ({
               dragHandleClassName
             )}
           >
-            <GripIcon className="w-2.5 h-2.5" />
+            <GripVertical className="w-2.5 h-2.5" />
           </div>
         )}
 
@@ -199,7 +196,7 @@ export const BlockWrapper = ({
             className="w-5 h-5 min-w-0 min-h-0 p-0 bg-white border border-slate-100 rounded-full text-slate-400 hover:text-indigo-600 hover:border-indigo-100 shadow-sm flex items-center justify-center flex-none"
             type="button"
           >
-            <CopyIcon className="w-2.5 h-2.5" />
+            <Copy className="w-2.5 h-2.5" />
           </button>
         )}
 
@@ -209,7 +206,7 @@ export const BlockWrapper = ({
             className="w-5 h-5 min-w-0 min-h-0 p-0 bg-white border border-slate-100 rounded-full text-slate-400 hover:text-red-600 hover:border-red-100 shadow-sm flex items-center justify-center flex-none"
             type="button"
           >
-            <TrashIcon className="w-2.5 h-2.5" />
+            <Trash2 className="w-2.5 h-2.5" />
           </button>
         )}
       </div>
@@ -220,3 +217,4 @@ export const BlockWrapper = ({
     </div>
   );
 };
+

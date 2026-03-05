@@ -1,5 +1,5 @@
 import React from 'react';
-import CodeIcon from 'lucide-react/dist/esm/icons/code';
+import { Code } from '@/ui/icons';
 import { BlockWrapper } from './BlockWrapper';
 import { CodeBlockEditor } from './CodeBlockEditor';
 import type { CodeBlockData } from '@/types/code-block';
@@ -36,7 +36,7 @@ export const CodeBlockItem = ({ data, onChange, onDelete, onDuplicate, dragHandl
       dragHandleClassName={dragHandleClassName}
       className={cn('bg-transparent px-0 py-0', !isCodeEmpty && 'border-0')}
       label="Code"
-      icon={CodeIcon}
+      icon={Code}
       accentColor={accentColor}
       isActive={isActive}
       showDelete={showDelete}
@@ -56,3 +56,4 @@ export const CodeBlockItem = ({ data, onChange, onDelete, onDuplicate, dragHandl
     </BlockWrapper>
   );
 };
+

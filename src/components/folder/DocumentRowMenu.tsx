@@ -1,7 +1,7 @@
 import React from 'react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { ArrowRight, ExternalLink, Pencil, Trash2 } from 'lucide-react';
-import Pin from 'lucide-react/dist/esm/icons/pin';
+import { ArrowRight, ExternalLink, Pencil, Trash2 } from '@/ui/icons';
+import { Pin } from '@/ui/icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
 import { getLocalDb } from '@/services/localDB';

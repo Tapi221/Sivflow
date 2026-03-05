@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ComponentProps } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Volume2 } from 'lucide-react';
+import { Volume2 } from '@/ui/icons';
 import { Flashcard } from '@/components/card/frame/Flashcard';
 import type { Card } from '@/types';
 

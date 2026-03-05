@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { BookOpen, ChevronDown, ChevronRight, FolderTree } from 'lucide-react';
+import { BookOpen, ChevronDown, ChevronRight, FolderTree } from '@/ui/icons';
 import { cn } from '@/lib/utils';
 import type { Card, SelectedExplorerItem } from '@/types';
 import type { TreeNode } from './viewTypes';
@@ -70,11 +70,12 @@ export function VirtualTreeView({ nodes, cards, selectedItem, onItemSelect }: Vi
         <ExplorerRow
           key={node.id}
           depth={depth + 1}
-          className={cn('pr-2 hover:bg-slate-100 cursor-pointer', isSelected && 'bg-primary-100/80')}
+          selected={isSelected}
+          className={cn('pr-2 cursor-pointer')}
           onClick={() => onItemSelect({ type: 'card', id: node.cardId })}
         >
           <div className="flex h-full min-w-0 flex-1 items-center pr-1">
-            <BookOpen className={cn('mr-1 h-4 w-4 shrink-0 text-slate-400', isSelected && 'text-primary-600')} />
+            <BookOpen className={cn('sidebar-icon mr-1 h-4 w-4 shrink-0 text-slate-400', isSelected && 'text-primary-600')} />
             <ExplorerRowContent
               title={getCardTitle(card)}
               titleClassName={cn(
@@ -92,18 +93,18 @@ export function VirtualTreeView({ nodes, cards, selectedItem, onItemSelect }: Vi
       <div key={node.id}>
         <ExplorerRow
           depth={depth}
-          className="pr-2 hover:bg-slate-100 cursor-pointer"
+          className="pr-2 cursor-pointer"
           onClick={() => toggleGroup(node.id)}
         >
           <div className="flex h-full min-w-0 flex-1 items-center pr-1">
             <div className="mr-1 flex h-4 w-4 flex-shrink-0 items-center justify-center">
               {isExpanded ? (
-                <ChevronDown className="h-4 w-4 text-slate-500" />
+                <ChevronDown className="sidebar-icon h-4 w-4 text-slate-500" />
               ) : (
-                <ChevronRight className="h-4 w-4 text-slate-500" />
+                <ChevronRight className="sidebar-icon h-4 w-4 text-slate-500" />
               )}
             </div>
-            <FolderTree className="mr-1 h-4 w-4 flex-shrink-0 text-slate-400" />
+            <FolderTree className="sidebar-icon mr-1 h-4 w-4 flex-shrink-0 text-slate-400" />
             <ExplorerRowContent
               title={node.label}
               titleClassName="font-medium text-slate-700 lining-nums tabular-nums"

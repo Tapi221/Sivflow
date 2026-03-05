@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useSpring, animated } from 'react-spring';
-import { Star } from 'lucide-react';
+import { Star } from '@/ui/icons';
 import { sanitizeStreak } from '@/utils/streak';
 
 export const StampRally = ({ currentStreak = 1, compact = false }) => {

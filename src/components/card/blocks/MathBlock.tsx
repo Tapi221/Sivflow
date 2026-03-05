@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 
-import SigmaIcon from 'lucide-react/dist/esm/icons/sigma';
+import { Sigma } from '@/ui/icons';
 import { BlockWrapper } from './BlockWrapper';
 import { MathBlockContent } from './MathBlockContent';
 import { MathEditorDialog } from './MathEditorDialog';
@@ -82,7 +82,7 @@ export const MathBlock: React.FC<MathBlockProps> = ({
       dragHandleProps={dragHandleProps}
       dragHandleClassName={dragHandleClassName}
       label="Math"
-      icon={SigmaIcon}
+      icon={Sigma}
       accentColor={accentColor}
       isActive={isActive}
       showDelete={showDelete}
@@ -143,3 +143,4 @@ export const MathBlock: React.FC<MathBlockProps> = ({
     </BlockWrapper>
   );
 };
+

@@ -16,11 +16,10 @@ import { buildQuickOpenIndex, searchQuickOpen, type QuickOpenItem } from '@/util
 import { highlightMatches } from '@/utils/highlightText';
 
 // アイコン
-import SearchIcon from 'lucide-react/dist/esm/icons/search';
-import StickyNoteIcon from 'lucide-react/dist/esm/icons/sticky-note';
-import FolderIcon from 'lucide-react/dist/esm/icons/folder';
-import TagIcon from 'lucide-react/dist/esm/icons/tag';
-
+import { Search } from '@/ui/icons';
+import { StickyNote } from '@/ui/icons';
+import { Folder as FolderIcon } from '@/ui/icons';
+import { Tag as TagIcon } from '@/ui/icons';
 interface QuickOpenDialogProps {
   // Props are managed by CommandPaletteProvider
 }
@@ -140,7 +139,7 @@ export function QuickOpenDialog(_props: QuickOpenDialogProps) {
   const getIcon = (type: QuickOpenItem['type']) => {
     switch (type) {
       case 'card':
-        return <StickyNoteIcon className="w-4 h-4 text-blue-500" />;
+        return <StickyNote className="w-4 h-4 text-blue-500" />;
       case 'folder':
         return <FolderIcon className="w-4 h-4 text-amber-500" />;
       case 'tag':
@@ -168,7 +167,7 @@ export function QuickOpenDialog(_props: QuickOpenDialogProps) {
       >
         {/* 検索入力欄 */}
         <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-100">
-          <SearchIcon className="w-5 h-5 text-slate-400 shrink-0" />
+          <Search className="w-5 h-5 text-slate-400 shrink-0" />
           <Input
             ref={inputRef}
             value={query}
@@ -252,3 +251,5 @@ export function QuickOpenDialog(_props: QuickOpenDialogProps) {
     </Dialog>
   );
 }
+
+

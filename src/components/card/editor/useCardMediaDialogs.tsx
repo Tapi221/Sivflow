@@ -1,10 +1,6 @@
+import { Plus, Image as ImageIcon, Link as LinkIcon } from '@/ui/icons';
 import { useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
-import { Plus } from "lucide-react";
-import ImageIcon from "lucide-react/dist/esm/icons/image";
-import LinkIcon from "lucide-react/dist/esm/icons/link";
-import Volume2Icon from "lucide-react/dist/esm/icons/volume-2";
-
 import { sanitizeReferences } from "@/components/card/editor/cardEditorUtils";
 import { cn } from "@/lib/utils";
 
@@ -120,7 +116,7 @@ export function useCardMediaDialogs({
           onClick={() => setAudioDialogSide(side)}
           aria-label="音声を追加"
         >
-          <Volume2Icon className="w-3 h-3 shrink-0" />
+          <span aria-hidden="true" className="shrink-0 text-[13px] leading-none">♪</span>
           <Plus className="w-3 h-3 shrink-0" />
           {audioCount > 0 ? <span>x{audioCount}</span> : null}
         </button>
@@ -154,3 +150,7 @@ export function useCardMediaDialogs({
     setReferenceItems,
   };
 }
+
+
+
+

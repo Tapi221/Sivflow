@@ -18,9 +18,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { AlertTriangle, Folder, Loader2, CheckCircle } from 'lucide-react';
-import Download from 'lucide-react/dist/esm/icons/download';
-import Database from 'lucide-react/dist/esm/icons/database';
+import { AlertTriangle, Folder, Loader2, CheckCircle } from '@/ui/icons';
+import { Download } from '@/ui/icons';
+import { Database } from '@/ui/icons';
 
 interface ExportDialogProps {
   open: boolean;

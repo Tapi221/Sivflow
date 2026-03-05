@@ -1,6 +1,5 @@
-import { Plus } from "lucide-react";
-import LinkIcon from "lucide-react/dist/esm/icons/link";
-
+import { Plus } from '@/ui/icons';
+import { Link } from '@/ui/icons';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -43,7 +42,7 @@ export function LinkEditor({ items, onChange }: LinkEditorProps) {
 
           <div className="flex items-center gap-2">
             <div className="rounded-lg bg-slate-50 p-1.5 text-slate-400">
-              <LinkIcon className="h-3.5 w-3.5" />
+              <Link className="h-3.5 w-3.5" />
             </div>
             <div className="flex flex-1 gap-2">
               <Input
@@ -87,3 +86,4 @@ export function LinkEditor({ items, onChange }: LinkEditorProps) {
     </div>
   );
 }
+

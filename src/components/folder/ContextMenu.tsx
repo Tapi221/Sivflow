@@ -1,5 +1,5 @@
-import { Plus, Pencil, Trash2, Folder, ArrowRight, Tag } from 'lucide-react';
-import Pin from 'lucide-react/dist/esm/icons/pin';
+import { Plus, Pencil, Trash2, Folder, ArrowRight, Tag } from '@/ui/icons';
+import { Pin } from '@/ui/icons';
 // Note: If IDE still reports Star as missing, we verify that npm run typecheck passes.
 import {
   DropdownMenu,

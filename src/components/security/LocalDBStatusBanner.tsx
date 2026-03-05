@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { AlertTriangle, Database, X } from 'lucide-react';
+import { AlertTriangle, Database, X } from '@/ui/icons';
 import {
   clearLocalDBResetFailureReason,
   getLocalDBRuntimeStatus,

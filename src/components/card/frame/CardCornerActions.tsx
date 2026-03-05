@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
-import Star from 'lucide-react/dist/esm/icons/star';
-import CircleHelp from 'lucide-react/dist/esm/icons/circle-help';
+import { Star } from '@/ui/icons';
+import { CircleHelp } from '@/ui/icons';
 import { cn } from '@/lib/utils';
 
 interface CardCornerActionsProps {

@@ -1,5 +1,5 @@
 import React from 'react';
-import TypeIcon from 'lucide-react/dist/esm/icons/type';
+import { Type } from '@/ui/icons';
 import { BlockWrapper } from './BlockWrapper';
 import { TextBlockContent } from './TextBlockContent';
 import { cn } from '@/lib/utils';
@@ -38,7 +38,7 @@ export const TextBlock = ({ content, onChange, onDelete, onDuplicate, dragHandle
       className={cn('bg-transparent px-0 py-0', !isContentEmpty && 'border-0')}
       contentClassName="px-0"
       label="Text"
-      icon={TypeIcon}
+      icon={Type}
       accentColor={accentColor}
       isActive={isActive}
       showDelete={showDelete}
@@ -59,3 +59,4 @@ export const TextBlock = ({ content, onChange, onDelete, onDuplicate, dragHandle
     </BlockWrapper>
   );
 };
+

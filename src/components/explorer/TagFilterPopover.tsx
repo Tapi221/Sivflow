@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { Filter, Search, Check, Tag } from 'lucide-react';
+import { Filter, Search, Check, Tag } from '@/ui/icons';
 import { useExplorerStore } from '@/hooks/useExplorerStore';
 import { useTags } from '@/hooks/useTags';
 import { cn } from '@/lib/utils';

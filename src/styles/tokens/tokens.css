@@ -13,6 +13,8 @@
 
     --card-base-width: 480px;
     --card-max-height: min(70vh, 560px);
+    --app-row-px: var(--card-row-px, 24px);
+    --tree-indent-px: 12px;
 
     --sidebar-bg: #f8fafb;
     --sidebar-border: #e3e6ea;

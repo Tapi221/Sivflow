@@ -1,0 +1,13 @@
+import { forwardRef } from 'react';
+import type { SVGProps } from 'react';
+
+export type StratisFolderIconProps = SVGProps<SVGSVGElement>;
+
+export const StratisFolderIcon = forwardRef<SVGSVGElement, StratisFolderIconProps>(function StratisFolderIcon(
+  { className, ...props },
+  ref
+) {
+  return (
+    <svg ref={ref} {...props} fill="none" viewBox="0 0 24 24" className={['block', className].filter(Boolean).join(' ')} xmlns="http://www.w3.org/2000/svg"><path d="M2.40093 8.41667L2.40084 17.941C2.40083 19.0456 3.29626 19.941 4.40084 19.941L19.5996 19.941C20.7041 19.941 21.5995 19.0457 21.5996 17.9411L21.5999 8.01244C21.5999 7.46015 21.1522 7.01241 20.5999 7.01241H12.0836L9.31857 4.05878H3.40028C2.84785 4.05878 2.40007 4.50599 2.40024 5.05842C2.40055 6.00924 2.40094 7.43615 2.40093 8.41667Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+  );
+});

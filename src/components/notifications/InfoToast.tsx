@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import type { Notification } from '../../types/notification';
-import { Info } from 'lucide-react';
+import { Info } from '@/ui/icons';
 
 interface InfoToastProps {
   notification: Notification;

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCards } from '@/hooks/useCards';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from '@/ui/icons';
 import { createPageUrl } from '@/utils';
 import { CardCarousel3D } from '@/features/review/CardCarousel3D';
 import { VerticalCardPager } from '@/features/review/VerticalCardPager';

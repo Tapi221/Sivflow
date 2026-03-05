@@ -9,7 +9,7 @@ import { getLocalDb } from '../services/localDB';
 import { firestoreDb } from '@/services/firebase';
 import { useAuth } from '@/contexts/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from '@/ui/icons';
 import { FaceIcons } from '@/components/ui/FaceIcons';
 import { createPageUrl } from '@/utils';
 import { getDebugStreak } from '@/utils/debugStreak';

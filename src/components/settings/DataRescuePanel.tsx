@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LocalDB, initializeDB, getLocalDb } from '@/services/localDB';
 import { useAuth } from '@/contexts/AuthContext';
-import { Clock, RefreshCw, AlertTriangle, CheckCircle, Loader2, Folder, FileText, ChevronDown, ChevronRight } from 'lucide-react';
+import { Clock, RefreshCw, AlertTriangle, CheckCircle, Loader2, Folder, FileText, ChevronDown, ChevronRight } from '@/ui/icons';
 import { useToast } from '@/contexts/ToastContext';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
 

@@ -19,13 +19,12 @@ import { buildFullTextIndex, searchFullText, type FullTextResult, type SearchFil
 import { highlightMatches } from '@/utils/highlightText';
 
 // アイコン
-import SearchIcon from 'lucide-react/dist/esm/icons/search';
-import StickyNoteIcon from 'lucide-react/dist/esm/icons/sticky-note';
-import FolderIcon from 'lucide-react/dist/esm/icons/folder';
-import TagIcon from 'lucide-react/dist/esm/icons/tag';
-import XIcon from 'lucide-react/dist/esm/icons/x';
-import FilterIcon from 'lucide-react/dist/esm/icons/filter';
-
+import { Search } from '@/ui/icons';
+import { StickyNote } from '@/ui/icons';
+import { Folder as FolderIcon } from '@/ui/icons';
+import { Tag as TagIcon } from '@/ui/icons';
+import { X } from '@/ui/icons';
+import { Filter } from '@/ui/icons';
 interface GlobalSearchPanelProps {
   // Props are managed by CommandPaletteProvider
 }
@@ -159,7 +158,7 @@ export function GlobalSearchPanel(_props: GlobalSearchPanelProps) {
   const getIcon = (type: FullTextResult['type']) => {
     switch (type) {
       case 'card':
-        return <StickyNoteIcon className="w-4 h-4 text-blue-500" />;
+        return <StickyNote className="w-4 h-4 text-blue-500" />;
       case 'folder':
         return <FolderIcon className="w-4 h-4 text-amber-500" />;
       case 'tag':
@@ -189,7 +188,7 @@ export function GlobalSearchPanel(_props: GlobalSearchPanelProps) {
       >
         {/* ヘッダー: 検索入力 */}
         <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-100">
-          <SearchIcon className="w-5 h-5 text-slate-400 shrink-0" />
+          <Search className="w-5 h-5 text-slate-400 shrink-0" />
           <Input
             ref={inputRef}
             value={query}
@@ -206,7 +205,7 @@ export function GlobalSearchPanel(_props: GlobalSearchPanelProps) {
               showFilters && "bg-slate-100"
             )}
           >
-            <FilterIcon className="w-4 h-4" />
+            <Filter className="w-4 h-4" />
           </Button>
           <kbd className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium text-slate-400 bg-slate-100 rounded">
             ESC
@@ -241,7 +240,7 @@ export function GlobalSearchPanel(_props: GlobalSearchPanelProps) {
               >
                 <TagIcon className="w-3 h-3" />
                 {tagFilter}
-                <XIcon className="w-3 h-3" />
+                <X className="w-3 h-3" />
               </Badge>
             )}
           </div>
@@ -317,3 +316,5 @@ export function GlobalSearchPanel(_props: GlobalSearchPanelProps) {
     </Dialog>
   );
 }
+
+

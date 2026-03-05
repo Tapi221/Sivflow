@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { HelpCircle, Settings2, Star, Tag as TagIcon } from 'lucide-react';
+import { HelpCircle, Settings2, Star, Tag as TagIcon } from '@/ui/icons';
 import type { Card, DocumentItem, Folder } from '@/types';
 import { TagBadge } from '@/components/tag/TagBadge';
 import { resolveCardTagNames, useTags } from '@/hooks/useTags';

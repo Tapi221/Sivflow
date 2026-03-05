@@ -46,24 +46,3 @@ declare module 'firebase/firestore' {
     // ... add more as discovered missing
 }
 
-// Fix for: "Module 'lucide-react' has no exported member 'Star', 'Shield', etc."
-// Note: We cannot easily augment "lucide-react" if it already exists as a module.
-// However, declaring it again as an ambient module might merge or shadow it for the IDE.
-// We only add the missing ones.
-declare module 'lucide-react' {
-    import {  FC, SVGProps } from 'react';
-    export interface LucideProps extends SVGProps<SVGSVGElement> {
-        size?: string | number;
-        absoluteStrokeWidth?: boolean;
-    }
-    export type Icon = FC<LucideProps>;
-
-    // Re-declare the specific missing icons
-    export const Star: Icon;
-    export const Shield: Icon;
-    export const Minus: Icon;
-    export const ExternalLink: Icon;
-    
-    // Fallback for everything else
-    // export * from 'lucide-react/dist/lucide-react'; // Circular reference risk?
-}

@@ -7,9 +7,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import type { ReferenceBlockData } from '@/types';
-import Globe from 'lucide-react/dist/esm/icons/globe';
-import ExternalLink from 'lucide-react/dist/esm/icons/external-link';
-import LinkIcon from 'lucide-react/dist/esm/icons/link';
+import { Globe, ExternalLink, Link as LinkIcon } from '@/ui/icons';
 import { cn } from '@/lib/utils';
 
 interface ReferencePopupProps {
@@ -74,3 +72,4 @@ export const ReferencePopup = ({ isOpen, onClose, references }: ReferencePopupPr
     </Dialog>
   );
 };
+

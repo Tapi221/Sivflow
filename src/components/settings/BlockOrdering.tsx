@@ -2,21 +2,21 @@ import React, { useEffect, useState, useRef } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
 import { Switch } from '@/components/ui/switch';
-import GripVertical from 'lucide-react/dist/esm/icons/grip-vertical';
-import TypeIcon from 'lucide-react/dist/esm/icons/type';
-import CodeIcon from 'lucide-react/dist/esm/icons/code';
-import ImageIcon from 'lucide-react/dist/esm/icons/image';
-import SigmaIcon from 'lucide-react/dist/esm/icons/sigma';
+import { GripVertical } from '@/ui/icons';
+import { Type } from '@/ui/icons';
+import { Code } from '@/ui/icons';
+import { ImageIcon } from '@/ui/icons';
+import { Sigma } from '@/ui/icons';
 import { cn } from '@/lib/utils';
 import type { BlockConfig } from '@/types';
 import { useUserSettings } from '@/hooks/useUserSettings';
 
 // Icon mapping
 const ICONS = {
-  text: TypeIcon,
-  code: CodeIcon,
+  text: Type,
+  code: Code,
   image: ImageIcon,
-  math: SigmaIcon
+  math: Sigma
 };
 
 const sanitizeBlockSettings = (items: BlockConfig[]) =>
@@ -124,7 +124,7 @@ export const BlockOrdering = () => {
               className="space-y-2"
             >
               {blocks.map((block, index) => {
-                const Icon = ICONS[block.type as keyof typeof ICONS] || TypeIcon;
+                const Icon = ICONS[block.type as keyof typeof ICONS] || Type;
                 
                 return (
                   <Draggable key={block.id} draggableId={block.id} index={index}>
@@ -186,4 +186,5 @@ export const BlockOrdering = () => {
     </div>
   );
 };
+
 

@@ -32,7 +32,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { PdfViewer } from './PdfViewer';
 import type { PdfViewerHandle } from './PdfViewer';
-import { ChevronLeft, ChevronRight, Minus, Plus, ExternalLink } from 'lucide-react'; // IDE Check: Icons
+import { ChevronLeft, ChevronRight, Minus, Plus, ExternalLink } from '@/ui/icons'; // IDE Check: Icons
 import { getDocumentBlob } from '@/services/documentFileStore';
 import {
   cacheDocumentBlobUrl,
