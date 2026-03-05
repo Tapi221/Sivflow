@@ -160,12 +160,12 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
       <div className="relative flex h-full gap-4 overflow-hidden">
         <Button
           type="button"
-          variant="outline"
+          variant="ghost"
           size="icon"
-          className="absolute top-3 z-20 h-8 w-8 rounded-full bg-white/90 shadow-sm"
+          className="absolute top-3 z-20 h-8 w-8 rounded-full border-0 bg-transparent shadow-none hover:bg-[var(--sidebar-active-bg)]"
           style={{
-            right: isMetaOpen ? "calc(20rem + 1rem)" : "0",
-            transform: "translateX(50%)",
+            right: isMetaOpen ? "calc(20rem - 0.75rem)" : "0.25rem",
+            transform: "none",
           }}
           onClick={() => setIsMetaOpen((prev) => !prev)}
           aria-label={isMetaOpen ? "close meta panel" : "open meta panel"}
