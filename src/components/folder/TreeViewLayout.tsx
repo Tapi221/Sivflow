@@ -651,8 +651,7 @@ function TreeViewLayout({
       case 'explorer':
       default:
         return (
-          <div className="block">
-            <FolderTreeWithCards
+          <FolderTreeWithCards
               folders={folders}
               cards={filteredCards}
               documents={filteredDocuments}
@@ -675,7 +674,6 @@ function TreeViewLayout({
               isFiltering={isFiltering}
               createFolderRequestToken={createFolderRequestToken}
             />
-          </div>
         );
     }
   };
@@ -709,18 +707,9 @@ function TreeViewLayout({
           !isSidebarOpen && "md:w-0 md:border-r-0 md:overflow-hidden"
         )}
       >
-        <div className={cn(
-            "flex flex-col h-full w-full"
-        )}>
-            {/* ExplorerTabs: 常にSticky表示 */}
-            <div
-              className={cn(
-                "sticky top-0 z-10",
-                "transition-all duration-200 ease-out",
-                "motion-reduce:transition-none",
-                "md:relative"
-              )}
-            >
+        <div className="flex flex-col h-full min-h-0 w-full overflow-hidden">
+            {/* ExplorerTabs: 常に固定ヘッダー */}
+            <div className="shrink-0">
               <ExplorerTabs
                 activeTab={explorerTab}
                 onTabChange={setExplorerTab}
@@ -730,15 +719,17 @@ function TreeViewLayout({
               />
             </div>
 
-            <ExplorerFilterSummary
-              getTagColor={getTagColor}
-              isFilterActive={isFilterActive}
-              resultCount={filteredCards.length + filteredDocuments.length}
-            />
+            <div className="shrink-0">
+              <ExplorerFilterSummary
+                getTagColor={getTagColor}
+                isFilterActive={isFilterActive}
+                resultCount={filteredCards.length + filteredDocuments.length}
+              />
+            </div>
 
             <div
               ref={contentScrollRef}
-              className="flex-1 overflow-y-auto outline-none min-w-0"
+              className="flex-1 min-h-0 overflow-y-auto outline-none min-w-0"
             >
               {renderTabContent()}
             </div>

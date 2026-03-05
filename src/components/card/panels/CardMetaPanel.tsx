@@ -65,7 +65,7 @@ export function CardMetaPanel({
   onToggleDraft,
   onUpdateTitle,
 }: CardMetaPanelProps) {
-  const infoRowClass = "h-[var(--meta-row-px)] leading-[var(--meta-row-px)] text-sm text-slate-700";
+  const infoRowClass = "h-[var(--meta-row-px)] leading-[var(--meta-row-px)] text-sm text-[var(--sidebar-text)]";
   const actionRowClass = "min-h-[var(--meta-action-min-h)] flex items-center";
   const [period, setPeriod] = useState<Period>("30d");
   const [titleInput, setTitleInput] = useState(card?.title ?? "");
@@ -158,7 +158,7 @@ export function CardMetaPanel({
 
   return (
     <aside
-      className={`meta-panel h-full w-80 shrink-0 border-l border-slate-200 bg-white ${UI_TYPO} ${NUMERIC_TYPO}`}
+      className={`meta-panel h-full w-80 shrink-0 border-l border-[var(--sidebar-border)] bg-[var(--sidebar-bg)] font-serif text-[var(--sidebar-text)] ${UI_TYPO} ${NUMERIC_TYPO}`}
       style={
         {
           "--meta-row-px": "24px",
@@ -169,8 +169,8 @@ export function CardMetaPanel({
       <div className="h-full overflow-y-auto p-4">
         <div className="space-y-6">
           <section>
-            <h3 className="text-xs font-semibold tracking-wide text-slate-500 uppercase">基本情報</h3>
-            <div className="mt-3 space-y-2 text-sm text-slate-700">
+            <h3 className="text-xs font-semibold tracking-wide text-[var(--sidebar-text-muted)] uppercase">基本情報</h3>
+            <div className="mt-3 space-y-2 text-sm text-[var(--sidebar-text)]">
               <div className={actionRowClass}>
                 <input
                   value={titleInput}
@@ -183,13 +183,13 @@ export function CardMetaPanel({
                       commitTitle();
                     }
                   }}
-                  className="h-[var(--meta-action-min-h)] w-full rounded-md border border-slate-300 px-2 text-sm leading-[var(--meta-row-px)] outline-none focus:border-slate-500"
+                  className="h-[var(--meta-action-min-h)] w-full rounded-md border border-[var(--sidebar-border)] bg-[var(--sidebar-bg)] px-2 text-sm leading-[var(--meta-row-px)] outline-none focus:border-[var(--sidebar-text-muted)]"
                   placeholder="タイトル"
                 />
               </div>
               <section>
                 <div className={`${actionRowClass} justify-between`}>
-                  <h3 className="text-xs font-semibold tracking-wide text-slate-500 uppercase">タグ管理</h3>
+                  <h3 className="text-xs font-semibold tracking-wide text-[var(--sidebar-text-muted)] uppercase">タグ管理</h3>
                   <Button
                     type="button"
                     variant="outline"
@@ -200,7 +200,7 @@ export function CardMetaPanel({
                     設定で管理
                   </Button>
                 </div>
-                <div className="mt-3 rounded-md border border-slate-200 bg-slate-50 px-2 py-2">
+                <div className="mt-3 rounded-md border border-[var(--sidebar-border)] bg-[var(--sidebar-active-bg)] px-2 py-2">
                   <TagInput
                     tags={tags}
                     onChange={(nextTags) => {
@@ -213,8 +213,8 @@ export function CardMetaPanel({
                   />
                 </div>
               </section>
-              <div className={`${actionRowClass} justify-between rounded border border-slate-200 bg-slate-50 px-2`}>
-                <span className="text-xs font-medium leading-[var(--meta-row-px)] text-slate-600">下書き</span>
+              <div className={`${actionRowClass} justify-between rounded border border-[var(--sidebar-border)] bg-[var(--sidebar-active-bg)] px-2`}>
+                <span className="text-xs font-medium leading-[var(--meta-row-px)] text-[var(--sidebar-text-muted)]">下書き</span>
                 <Switch checked={Boolean(card?.isDraft)} onCheckedChange={onToggleDraft} disabled={!card} />
               </div>
               <p className={infoRowClass}>作成日: {formatDateLabel(card?.createdAt ?? (card as any)?.created_at)}</p>
@@ -225,19 +225,19 @@ export function CardMetaPanel({
           </section>
 
           <section>
-            <h3 className="text-xs font-semibold tracking-wide text-slate-500 uppercase">復習</h3>
+            <h3 className="text-xs font-semibold tracking-wide text-[var(--sidebar-text-muted)] uppercase">復習</h3>
             <p className={`mt-3 ${infoRowClass}`}>復習回数: {completedReviewCount}</p>
             <div className="mt-3 space-y-2">
               {recent10.length === 0 ? (
-                <p className="h-[var(--meta-row-px)] leading-[var(--meta-row-px)] text-sm text-slate-500">未復習</p>
+                <p className="h-[var(--meta-row-px)] leading-[var(--meta-row-px)] text-sm text-[var(--sidebar-text-muted)]">未復習</p>
               ) : (
                 recent10.map((log, idx) => (
                   <div
                     key={`${log.reviewedAt}-${idx}`}
-                    className="flex h-[var(--meta-row-px)] items-center justify-between text-xs leading-[var(--meta-row-px)] text-slate-700"
+                    className="flex h-[var(--meta-row-px)] items-center justify-between text-xs leading-[var(--meta-row-px)] text-[var(--sidebar-text)]"
                   >
                     <span>{formatDateLabel(log.reviewedAt)}</span>
-                    <span className="rounded bg-slate-100 px-2 leading-[var(--meta-row-px)]">R{log.rating}</span>
+                    <span className="rounded bg-[var(--sidebar-active-bg)] px-2 leading-[var(--meta-row-px)]">R{log.rating}</span>
                   </div>
                 ))
               )}
@@ -247,19 +247,19 @@ export function CardMetaPanel({
 
           <section>
             {currentResistanceScore !== null && (
-              <div className="mb-3 flex min-h-[var(--meta-action-min-h)] items-center justify-between rounded border border-slate-200 bg-slate-50 px-3">
-                <span className="text-xs font-medium leading-[var(--meta-row-px)] text-slate-600">現在の耐性スコア</span>
-                <span className="text-sm font-semibold leading-[var(--meta-row-px)] tabular-nums text-slate-900">{currentResistanceScore}%</span>
+              <div className="mb-3 flex min-h-[var(--meta-action-min-h)] items-center justify-between rounded border border-[var(--sidebar-border)] bg-[var(--sidebar-active-bg)] px-3">
+                <span className="text-xs font-medium leading-[var(--meta-row-px)] text-[var(--sidebar-text-muted)]">現在の耐性スコア</span>
+                <span className="text-sm font-semibold leading-[var(--meta-row-px)] tabular-nums text-[var(--sidebar-text)]">{currentResistanceScore}%</span>
               </div>
             )}
             <div className="flex min-h-[var(--meta-action-min-h)] items-center justify-between">
-              <h3 className="text-xs font-semibold tracking-wide text-slate-500 uppercase">耐性スコア推移</h3>
-              <div className="flex rounded-md border border-slate-200 p-0.5 text-xs">
+              <h3 className="text-xs font-semibold tracking-wide text-[var(--sidebar-text-muted)] uppercase">耐性スコア推移</h3>
+              <div className="flex rounded-md border border-[var(--sidebar-border)] p-0.5 text-xs">
                 {(["7d", "30d", "all"] as const).map((p) => (
                   <button
                     key={p}
                     type="button"
-                    className={`min-h-[var(--meta-action-min-h)] rounded px-2 leading-[var(--meta-row-px)] ${period === p ? "bg-slate-900 text-white" : "text-slate-600"}`}
+                    className={`min-h-[var(--meta-action-min-h)] rounded px-2 leading-[var(--meta-row-px)] ${period === p ? "bg-[var(--sidebar-text)] text-white" : "text-[var(--sidebar-text-muted)]"}`}
                     onClick={() => setPeriod(p)}
                   >
                     {p === "all" ? "全期間" : p === "7d" ? "直近7" : "直近30"}
@@ -267,9 +267,9 @@ export function CardMetaPanel({
                 ))}
               </div>
             </div>
-            <div className="mt-3 h-40 w-full rounded border border-slate-200 bg-slate-50 p-2">
+            <div className="mt-3 h-40 w-full rounded border border-[var(--sidebar-border)] bg-[var(--sidebar-active-bg)] p-2">
               {chartData.length === 0 ? (
-                <div className="flex h-full items-center justify-center text-sm text-slate-500">データなし</div>
+                <div className="flex h-full items-center justify-center text-sm text-[var(--sidebar-text-muted)]">データなし</div>
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData}>
