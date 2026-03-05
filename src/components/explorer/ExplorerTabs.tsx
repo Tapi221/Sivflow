@@ -37,7 +37,7 @@ export function ExplorerTabs({
       "flex items-center justify-between border-b border-sidebar-border bg-sidebar pr-2 h-9",
       // 左上の固定ハンバーガーボタンと重ならないよう、全画面幅で左余白を確保する。
       "pl-10"
-    )}>
+    )} style={{ backgroundColor: "var(--sidebar-bg)" }}>
       <div className="flex items-center flex-1 overflow-x-auto no-scrollbar">
         {TABS.map(tab => {
           const Icon = tab.icon;

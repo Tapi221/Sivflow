@@ -698,10 +698,11 @@ function TreeViewLayout({
       ===================================================== */}
       <div
         ref={sidebarRef}
+        style={{ backgroundColor: "var(--sidebar-bg)" }}
         className={cn(
           "shrink-0 flex-col bg-sidebar md:bg-sidebar border-r-0 md:border-r border-sidebar-border relative group/sidebar select-none",
           showMobileDetail ? "hidden md:flex" : "flex",
-          "md:ring-1 md:ring-black/5 md:shadow-[inset_0_1px_0_rgba(255,255,255,0.75),inset_-1px_0_0_rgba(255,255,255,0.5),10px_0_24px_-20px_rgba(15,23,42,0.35)]",
+          "md:shadow-none",
           isResizing ? "transition-none will-change-[width]" : "transition-all duration-300 ease-in-out",
           "w-[100dvw] max-w-[100dvw] md:w-auto md:max-w-none",
           !isSidebarOpen && "md:w-0 md:border-r-0 md:overflow-hidden"

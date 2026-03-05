@@ -30,7 +30,7 @@ export function ExplorerFilterSummary({
   const matchModeLabel = tagMatchMode === 'any' ? 'どれか一致（OR）' : '全部一致（AND）';
 
   return (
-    <div className={className ?? 'px-2 py-2 bg-sidebar border-b border-sidebar-border'}>
+    <div className={className ?? 'px-2 py-2 bg-sidebar border-b border-sidebar-border'} style={{ backgroundColor: 'var(--sidebar-bg)' }}>
       <div className="flex items-center justify-between gap-2 mb-2">
         <div className="min-w-0 flex items-center gap-2">
           <span className="text-xs font-medium text-slate-600 shrink-0">絞り込み中</span>

@@ -156,7 +156,7 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
   }
 
   return (
-    <div className="h-full px-4 pb-4 pt-0 card-editor-right-pane-font">
+    <div className={cn("h-full bg-sidebar pb-4 pt-0 card-editor-right-pane-font", isMetaOpen ? "pl-4 pr-0" : "px-4")}>
       <div className={cn("relative flex h-full overflow-hidden", isMetaOpen ? "gap-0" : "gap-4")}>
         <Button
           type="button"

@@ -163,10 +163,11 @@ export function CardMetaPanel({
         {
           "--meta-row-px": "24px",
           "--meta-action-min-h": "44px",
+          backgroundColor: "var(--sidebar-bg)",
         } as CSSProperties
       }
     >
-      <div className="h-full overflow-y-auto p-4">
+      <div className="h-full overflow-y-auto bg-sidebar p-4">
         <div className="space-y-6">
           <section>
             <h3 className="text-xs font-semibold tracking-wide text-[var(--sidebar-text-muted)] uppercase">基本情報</h3>
