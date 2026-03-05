@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Line, LineChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 
@@ -65,6 +65,8 @@ export function CardMetaPanel({
   onToggleDraft,
   onUpdateTitle,
 }: CardMetaPanelProps) {
+  const infoRowClass = "h-[var(--meta-row-px)] leading-[var(--meta-row-px)] text-sm text-slate-700";
+  const actionRowClass = "min-h-[var(--meta-action-min-h)] flex items-center";
   const [period, setPeriod] = useState<Period>("30d");
   const [titleInput, setTitleInput] = useState(card?.title ?? "");
   const [, setSearchParams] = useSearchParams();
@@ -155,13 +157,21 @@ export function CardMetaPanel({
   };
 
   return (
-    <aside className={`h-full w-80 shrink-0 border-l border-slate-200 bg-white ${UI_TYPO} ${NUMERIC_TYPO}`}>
+    <aside
+      className={`meta-panel h-full w-80 shrink-0 border-l border-slate-200 bg-white ${UI_TYPO} ${NUMERIC_TYPO}`}
+      style={
+        {
+          "--meta-row-px": "24px",
+          "--meta-action-min-h": "44px",
+        } as CSSProperties
+      }
+    >
       <div className="h-full overflow-y-auto p-4">
         <div className="space-y-6">
           <section>
             <h3 className="text-xs font-semibold tracking-wide text-slate-500 uppercase">基本情報</h3>
             <div className="mt-3 space-y-2 text-sm text-slate-700">
-              <div>
+              <div className={actionRowClass}>
                 <input
                   value={titleInput}
                   onChange={(e) => setTitleInput(e.target.value)}
@@ -173,14 +183,20 @@ export function CardMetaPanel({
                       commitTitle();
                     }
                   }}
-                  className="h-9 w-full rounded-md border border-slate-300 px-2 text-sm outline-none focus:border-slate-500"
+                  className="h-[var(--meta-action-min-h)] w-full rounded-md border border-slate-300 px-2 text-sm leading-[var(--meta-row-px)] outline-none focus:border-slate-500"
                   placeholder="タイトル"
                 />
               </div>
               <section>
-                <div className="flex items-center justify-between">
+                <div className={`${actionRowClass} justify-between`}>
                   <h3 className="text-xs font-semibold tracking-wide text-slate-500 uppercase">タグ管理</h3>
-                  <Button type="button" variant="outline" size="sm" className="h-7 px-2 text-xs" onClick={openTagSettings}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-[var(--meta-action-min-h)] px-3 text-xs leading-[var(--meta-row-px)]"
+                    onClick={openTagSettings}
+                  >
                     設定で管理
                   </Button>
                 </div>
@@ -197,28 +213,31 @@ export function CardMetaPanel({
                   />
                 </div>
               </section>
-              <div className="flex items-center justify-between rounded border border-slate-200 bg-slate-50 px-2 py-1.5">
-                <span className="text-xs font-medium text-slate-600">下書き</span>
+              <div className={`${actionRowClass} justify-between rounded border border-slate-200 bg-slate-50 px-2`}>
+                <span className="text-xs font-medium leading-[var(--meta-row-px)] text-slate-600">下書き</span>
                 <Switch checked={Boolean(card?.isDraft)} onCheckedChange={onToggleDraft} disabled={!card} />
               </div>
-              <p>作成日: {formatDateLabel(card?.createdAt ?? (card as any)?.created_at)}</p>
-              <p>更新日: {formatDateLabel(card?.updatedAt ?? (card as any)?.updated_at)}</p>
-              <p>最終復習日: {latestReview ? formatDateLabel(latestReview.reviewedAt) : formatDateLabel(card?.lastReviewAt ?? (card as any)?.last_review_at)}</p>
-              <p>次回復習日 ({nextReviewAttempt}回目): {formatDateLabel(card?.nextReviewDate ?? (card as any)?.next_review_date)}</p>
+              <p className={infoRowClass}>作成日: {formatDateLabel(card?.createdAt ?? (card as any)?.created_at)}</p>
+              <p className={infoRowClass}>更新日: {formatDateLabel(card?.updatedAt ?? (card as any)?.updated_at)}</p>
+              <p className={infoRowClass}>最終復習日: {latestReview ? formatDateLabel(latestReview.reviewedAt) : formatDateLabel(card?.lastReviewAt ?? (card as any)?.last_review_at)}</p>
+              <p className={infoRowClass}>次回復習日 ({nextReviewAttempt}回目): {formatDateLabel(card?.nextReviewDate ?? (card as any)?.next_review_date)}</p>
             </div>
           </section>
 
           <section>
             <h3 className="text-xs font-semibold tracking-wide text-slate-500 uppercase">復習</h3>
-            <p className="mt-3 text-sm text-slate-700">復習回数: {completedReviewCount}</p>
+            <p className={`mt-3 ${infoRowClass}`}>復習回数: {completedReviewCount}</p>
             <div className="mt-3 space-y-2">
               {recent10.length === 0 ? (
-                <p className="text-sm text-slate-500">未復習</p>
+                <p className="h-[var(--meta-row-px)] leading-[var(--meta-row-px)] text-sm text-slate-500">未復習</p>
               ) : (
                 recent10.map((log, idx) => (
-                  <div key={`${log.reviewedAt}-${idx}`} className="flex items-center justify-between text-xs text-slate-700">
+                  <div
+                    key={`${log.reviewedAt}-${idx}`}
+                    className="flex h-[var(--meta-row-px)] items-center justify-between text-xs leading-[var(--meta-row-px)] text-slate-700"
+                  >
                     <span>{formatDateLabel(log.reviewedAt)}</span>
-                    <span className="rounded bg-slate-100 px-2 py-0.5">R{log.rating}</span>
+                    <span className="rounded bg-slate-100 px-2 leading-[var(--meta-row-px)]">R{log.rating}</span>
                   </div>
                 ))
               )}
@@ -228,19 +247,19 @@ export function CardMetaPanel({
 
           <section>
             {currentResistanceScore !== null && (
-              <div className="mb-3 flex items-center justify-between rounded border border-slate-200 bg-slate-50 px-3 py-2">
-                <span className="text-xs font-medium text-slate-600">現在の耐性スコア</span>
-                <span className="text-sm font-semibold tabular-nums text-slate-900">{currentResistanceScore}%</span>
+              <div className="mb-3 flex min-h-[var(--meta-action-min-h)] items-center justify-between rounded border border-slate-200 bg-slate-50 px-3">
+                <span className="text-xs font-medium leading-[var(--meta-row-px)] text-slate-600">現在の耐性スコア</span>
+                <span className="text-sm font-semibold leading-[var(--meta-row-px)] tabular-nums text-slate-900">{currentResistanceScore}%</span>
               </div>
             )}
-            <div className="flex items-center justify-between">
+            <div className="flex min-h-[var(--meta-action-min-h)] items-center justify-between">
               <h3 className="text-xs font-semibold tracking-wide text-slate-500 uppercase">耐性スコア推移</h3>
               <div className="flex rounded-md border border-slate-200 p-0.5 text-xs">
                 {(["7d", "30d", "all"] as const).map((p) => (
                   <button
                     key={p}
                     type="button"
-                    className={`rounded px-2 py-1 ${period === p ? "bg-slate-900 text-white" : "text-slate-600"}`}
+                    className={`min-h-[var(--meta-action-min-h)] rounded px-2 leading-[var(--meta-row-px)] ${period === p ? "bg-slate-900 text-white" : "text-slate-600"}`}
                     onClick={() => setPeriod(p)}
                   >
                     {p === "all" ? "全期間" : p === "7d" ? "直近7" : "直近30"}
