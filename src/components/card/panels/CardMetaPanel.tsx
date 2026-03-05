@@ -218,10 +218,12 @@ export function CardMetaPanel({
                 <span className="text-xs font-medium leading-[var(--meta-row-px)] text-[var(--sidebar-text-muted)]">下書き</span>
                 <Switch checked={Boolean(card?.isDraft)} onCheckedChange={onToggleDraft} disabled={!card} />
               </div>
-              <p className={infoRowClass}>作成日: {formatDateLabel(card?.createdAt ?? (card as any)?.created_at)}</p>
-              <p className={infoRowClass}>更新日: {formatDateLabel(card?.updatedAt ?? (card as any)?.updated_at)}</p>
-              <p className={infoRowClass}>最終復習日: {latestReview ? formatDateLabel(latestReview.reviewedAt) : formatDateLabel(card?.lastReviewAt ?? (card as any)?.last_review_at)}</p>
-              <p className={infoRowClass}>次回復習日 ({nextReviewAttempt}回目): {formatDateLabel(card?.nextReviewDate ?? (card as any)?.next_review_date)}</p>
+              <div className="space-y-0">
+                <p className={infoRowClass}>作成日: {formatDateLabel(card?.createdAt ?? (card as any)?.created_at)}</p>
+                <p className={infoRowClass}>更新日: {formatDateLabel(card?.updatedAt ?? (card as any)?.updated_at)}</p>
+                <p className={infoRowClass}>最終復習日: {latestReview ? formatDateLabel(latestReview.reviewedAt) : formatDateLabel(card?.lastReviewAt ?? (card as any)?.last_review_at)}</p>
+                <p className={infoRowClass}>次回復習日 ({nextReviewAttempt}回目): {formatDateLabel(card?.nextReviewDate ?? (card as any)?.next_review_date)}</p>
+              </div>
             </div>
           </section>
 

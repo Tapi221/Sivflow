@@ -97,6 +97,9 @@ export const FolderRow: React.FC<FolderRowProps> = ({
   const parentFolderId = normalizeFolderId(getParentFolderId(folder));
   const isTopLevelFolder = parentFolderId === ROOT_FOLDER_ID;
   const FolderGlyph = isTopLevelFolder ? FolderIcon : FolderOutlineIcon;
+  const nestedToggleOffsetStyle = !isTopLevelFolder
+    ? ({ marginLeft: 'calc(var(--tree-indent-px) * -0.5)' } as const)
+    : undefined;
 
   return (
     <div key={folderId} className={cn(isDimmed && "opacity-50")}>
@@ -133,6 +136,7 @@ export const FolderRow: React.FC<FolderRowProps> = ({
               <div className="flex-1 flex items-center min-w-0 h-full pr-1 cursor-pointer">
                 <div
                   className="sidebar-action w-4 h-4 flex items-center justify-center flex-shrink-0 mr-0"
+                  style={nestedToggleOffsetStyle}
                   onClick={(e) => {
                     e.stopPropagation();
                     onToggle();

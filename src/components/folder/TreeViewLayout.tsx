@@ -740,8 +740,8 @@ function TreeViewLayout({
         {isSidebarOpen && (
           <div
             className={cn(
-              "hidden md:block absolute top-0 right-0 w-1.5 h-full cursor-col-resize z-50 hover:bg-primary-600/10 transition-colors",
-              isResizing && "bg-primary-600/20"
+              "hidden md:block absolute top-0 right-0 w-1.5 h-full cursor-col-resize z-50 group/resize select-none outline-none transition-colors hover:bg-slate-300/20 focus-visible:outline-none",
+              isResizing && "bg-slate-300/30"
             )}
             onPointerDown={startResizing}
             role="separator"
@@ -752,7 +752,8 @@ function TreeViewLayout({
             <div
               className={cn(
                 "absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-full bg-slate-200 transition-colors",
-                "group-hover/sidebar:bg-primary-400 md:group-hover/sidebar:bg-primary-400"
+                "group-hover/resize:bg-slate-400",
+                isResizing && "bg-slate-500"
               )}
             />
           </div>

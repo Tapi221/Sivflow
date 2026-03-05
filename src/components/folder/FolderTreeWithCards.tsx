@@ -1366,7 +1366,7 @@ export function FolderTreeWithCards({
           <div style={style}>
             <FolderRow
               folder={treeNode.folder}
-              depth={node.level}
+              depth={0}
               isExpanded={isOpen}
               isSelected={isSelected}
               isEditing={editingId === folderId}
@@ -1447,11 +1447,11 @@ export function FolderTreeWithCards({
             ref={(el) => setRowRef(treeNode.rawId, el)}
             className={cn(
               ROW_BASE,
-              'flex h-6 min-h-6 items-center px-2 leading-6 select-none',
+              'flex h-6 min-h-6 items-center pr-2 pl-0 leading-6 select-none',
               'hover:bg-muted/60',
               isSelected && 'bg-muted'
             )}
-            style={{ paddingLeft: `calc(8px + ${node.level} * 12px)` }}
+            style={{ paddingLeft: '4px' }}
             onClick={() => {
               if (treeNode.kind === 'card') onItemSelect({ type: 'card', id: treeNode.rawId });
               if (treeNode.kind === 'document') onItemSelect({ type: 'document', id: treeNode.rawId });

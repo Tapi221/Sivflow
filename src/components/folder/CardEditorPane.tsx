@@ -156,7 +156,7 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
   }
 
   return (
-    <div className="h-full bg-sidebar pb-4 pt-0 card-editor-right-pane-font px-4">
+    <div className="h-full bg-sidebar pb-4 pt-0 card-editor-right-pane-font">
       <div className="relative flex h-full overflow-hidden">
         <Button
           type="button"
@@ -173,10 +173,10 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
           {isMetaOpen ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </Button>
 
-        <div className={cn("min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-4", isMetaOpen && "pr-[20.5rem]")}>
+        <div className="min-w-0 flex-1 overflow-y-auto overflow-x-clip p-4">
           {isEditing ? (
-            <div className="space-y-4">
-              <div className="flex items-center justify-end gap-2">
+            <div className="flex flex-col items-center gap-4">
+              <div className="flex w-full items-center justify-end gap-2">
                 <div className="flex items-center gap-2">
                   <Button type="button" variant="ghost" className="h-9 rounded-full px-4" onClick={handleCancel} disabled={isSaving}>
                     キャンセル
@@ -188,7 +188,7 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
               </div>
 
               <DragDropContext onDragEnd={onDragEnd}>
-                <div className="mx-auto grid w-fit max-w-full grid-cols-1 gap-6 lg:grid-cols-2">
+                <div className="grid w-fit max-w-full grid-cols-1 gap-6 lg:grid-cols-2">
                   <div className="flex min-h-0 w-full flex-col gap-2">
                     <div className="flex shrink-0 justify-center">
                       <div ref={toolbarMountRefQ} />
@@ -286,15 +286,13 @@ export function CardEditorPane({ selectedCardId, folderId, autoEdit, onCardUpdat
         </div>
 
         {isMetaOpen && (
-          <div className="absolute right-0 top-0 h-full z-10">
-            <CardMetaPanel
-              card={panelCard}
-              reviewLogs={panelCard?.reviewLogs ?? []}
-              onUpdateTags={handleUpdateTags}
-              onToggleDraft={handleToggleDraft}
-              onUpdateTitle={handleUpdateTitle}
-            />
-          </div>
+          <CardMetaPanel
+            card={panelCard}
+            reviewLogs={panelCard?.reviewLogs ?? []}
+            onUpdateTags={handleUpdateTags}
+            onToggleDraft={handleToggleDraft}
+            onUpdateTitle={handleUpdateTitle}
+          />
         )}
       </div>
 

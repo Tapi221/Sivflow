@@ -113,7 +113,11 @@ export function ScaleToFitFrame({
       style={!fitHeight && scaledHeight != null ? { height: `${scaledHeight}px` } : undefined}
     >
       <div
-        className={cn('mx-auto', fitHeight && centerContent && 'h-full flex items-center justify-center')}
+        className={cn(
+          fitHeight && centerContent ? 'h-full flex items-center justify-center' : 'flex justify-center'
+        )}
+      >
+      <div
         style={{
           width: disableScale ? '100%' : `${Math.max(1, baseWidth)}px`,
           transform: disableScale ? 'none' : `scale(${scale})`,
@@ -121,13 +125,14 @@ export function ScaleToFitFrame({
             ? 'initial'
             : fitHeight && centerContent
               ? 'center center'
-              : 'top center',
+              : 'top left',
           willChange: disableScale ? undefined : 'transform',
         }}
       >
         <div ref={contentRef} className="flow-root" style={{ padding: safePaddingPx }}>
           {children}
         </div>
+      </div>
       </div>
     </div>
   );
