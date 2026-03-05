@@ -2,7 +2,12 @@ import React, { useCallback } from 'react';
 import { Star } from '@/ui/icons';
 import { CircleHelp } from '@/ui/icons';
 import { cn } from '@/lib/utils';
-import { CARD_ACTION_ICON_CLASS } from '@/components/card/common/constants';
+import {
+  CARD_ACTION_BG_CLASS,
+  CARD_ACTION_COLOR_ACTIVE_CLASS,
+  CARD_ACTION_COLOR_IDLE_CLASS,
+  CARD_ACTION_ICON_CLASS,
+} from '@/components/card/common/constants';
 
 interface CardCornerActionsProps {
   onHelp?: () => void;
@@ -28,7 +33,7 @@ export function CardCornerActions({
   }, []);
 
   const buttonBaseClass =
-    'rounded-full h-7 w-7 min-h-0 min-w-0 transition-colors flex items-center justify-center border border-transparent ' +
+    'rounded-full h-7 w-7 min-h-0 min-w-0 transition-colors flex items-center justify-center bg-transparent hover:bg-transparent active:bg-transparent ' +
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40';
   const disabledClass = disabled ? 'opacity-50 pointer-events-none' : '';
 
@@ -50,9 +55,10 @@ export function CardCornerActions({
           className={cn(
             buttonBaseClass,
             disabledClass,
+            CARD_ACTION_BG_CLASS,
             helpActive
-              ? 'bg-amber-100 text-amber-600 hover:bg-amber-200'
-              : 'bg-slate-50/80 text-slate-400 hover:bg-slate-100 hover:text-slate-600'
+              ? CARD_ACTION_COLOR_ACTIVE_CLASS
+              : CARD_ACTION_COLOR_IDLE_CLASS
           )}
         >
           <CircleHelp className={cn(CARD_ACTION_ICON_CLASS, helpActive && 'opacity-90')} />
@@ -75,9 +81,10 @@ export function CardCornerActions({
           className={cn(
             buttonBaseClass,
             disabledClass,
+            CARD_ACTION_BG_CLASS,
             starActive
-              ? 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200'
-              : 'bg-slate-50/80 text-slate-400 hover:bg-primary-600/10 hover:text-primary-600'
+              ? CARD_ACTION_COLOR_ACTIVE_CLASS
+              : CARD_ACTION_COLOR_IDLE_CLASS
           )}
         >
           <Star className={cn(CARD_ACTION_ICON_CLASS, starActive && 'fill-current')} />

@@ -46,6 +46,9 @@ export const CARD_TOP_PADDING_PX = 10;
  * - card 上に載る操作アイコンはこれを参照する
  */
 export const CARD_ACTION_ICON_CLASS = 'w-4 h-4 md:w-5 md:h-5 stroke-2';
+export const CARD_ACTION_COLOR_IDLE_CLASS = 'text-slate-400 hover:text-slate-600';
+export const CARD_ACTION_COLOR_ACTIVE_CLASS = 'text-slate-600';
+export const CARD_ACTION_BG_CLASS = 'bg-transparent hover:bg-transparent shadow-none';
 
 /**
  * カード本文の開始Y(px)。

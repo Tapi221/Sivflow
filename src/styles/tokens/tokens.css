@@ -40,7 +40,8 @@
     --scrollbar-track: #f7f7f8;
     --scrollbar-thumb: #cfcfd6;
     --scrollbar-thumb-hover: #b8b8c2;
-    --scrollbar-thumb-active: #9e9eaa;
+    --card-resize-handle-active: #9e9eaa;
+    --scrollbar-thumb-active: var(--card-resize-handle-active);
     --scrollbar-size: 6px;
   }
 }

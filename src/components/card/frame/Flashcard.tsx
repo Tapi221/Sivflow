@@ -13,7 +13,13 @@ import { INK_DOCUMENT_VERSION, type InkDocument, type InkEditTool } from '@/comp
 import { CardFrame } from './CardFrame';
 import { CardCornerActions } from './CardCornerActions';
 import { SharedCardContent } from '../common/SharedCardContent';
-import { CANONICAL_CARD_WIDTH, CARD_ACTION_ICON_CLASS, layoutRowsToCardHeightPx } from '../common/constants';
+import {
+  CANONICAL_CARD_WIDTH,
+  CARD_ACTION_BG_CLASS,
+  CARD_ACTION_COLOR_IDLE_CLASS,
+  CARD_ACTION_ICON_CLASS,
+  layoutRowsToCardHeightPx,
+} from '../common/constants';
 import { sortBlocksByOrderIndex } from '../blocks/blockOrdering';
 import {
   DEFAULT_LAYOUT_ROWS,
@@ -514,7 +520,11 @@ export function Flashcard({
           e.stopPropagation();
           onEdit(cardData);
         }}
-        className="rounded-none w-8 h-8 md:w-9 md:h-9 bg-transparent text-slate-400 hover:bg-transparent hover:text-slate-600 shadow-none transition-colors"
+        className={cn(
+          "rounded-none w-8 h-8 md:w-9 md:h-9 transition-colors",
+          CARD_ACTION_BG_CLASS,
+          CARD_ACTION_COLOR_IDLE_CLASS
+        )}
       >
         <Edit className={CARD_ACTION_ICON_CLASS} />
       </Button>
