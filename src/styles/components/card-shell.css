@@ -23,7 +23,7 @@
 
     width: var(--card-base-width);
     max-width: 100%;
-    max-height: var(--card-max-height);
+    max-height: var(--card-display-max-height);
 
     /* 最小高さ = 44 + 24 + 44 = 112px */
     min-height: calc(

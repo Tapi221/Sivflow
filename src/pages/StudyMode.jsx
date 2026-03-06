@@ -381,7 +381,7 @@ export default function StudyMode() {
     <div
       data-page="review"
       className="reviewPage bg-[#F5F7F8] text-slate-800 h-[100dvh] overflow-hidden flex flex-col"
-      style={{ "--card-max-height": "100%" }}
+      style={{ "--card-display-max-height": "100%" }}
     >
       <div className="reviewShell max-w-[1600px] mx-auto w-full p-3 md:py-4 md:px-8 h-full flex flex-col min-h-0">
         {!isCompletionView && (
