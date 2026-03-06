@@ -44,6 +44,7 @@ export type TagV3Record = {
   id: string;
   name: string;
   nameLower: string;
+  // legacy互換で string のまま。保存値は colorKey を想定。
   color: string;
   userId: string;
   updatedAt: Date;

@@ -1,11 +1,19 @@
 import React from "react";
 import { X } from "@/ui/icons";
 import { cn } from "@/lib/utils";
+import {
+  DEFAULT_TAG_COLOR_CLASS_NAME,
+  getTagColorClassName,
+  type TagColorKey,
+} from "@/lib/tags/tagColor";
 
 type TagBadgeSize = "xs" | "sm" | "md";
 
 interface TagBadgeProps {
   label: string;
+  colorKey?: TagColorKey;
+  legacyColor?: string;
+  // 互換用。将来削除予定。
   colorClass?: string;
   size?: TagBadgeSize;
   selected?: boolean;
@@ -24,7 +32,9 @@ const sizeClassMap: Record<TagBadgeSize, string> = {
 
 export function TagBadge({
   label,
-  colorClass = "bg-slate-100 text-slate-600 border-slate-200",
+  colorKey,
+  legacyColor,
+  colorClass,
   size = "sm",
   selected = false,
   className,
@@ -33,6 +43,13 @@ export function TagBadge({
   onRemove,
   removeAriaLabel,
 }: TagBadgeProps) {
+  const resolvedColorClassName =
+    colorKey !== undefined
+      ? getTagColorClassName(colorKey)
+      : getTagColorClassName(
+          legacyColor ?? colorClass ?? DEFAULT_TAG_COLOR_CLASS_NAME,
+        );
+
   const content = (
     <>
       <span className={cn("truncate", textClassName)}>{label}</span>
@@ -55,7 +72,7 @@ export function TagBadge({
   const rootClassName = cn(
     "inline-flex max-w-full items-center rounded-full border font-bold surface-convex transition-all",
     sizeClassMap[size],
-    colorClass,
+    resolvedColorClassName,
     selected && "ring-2 ring-primary-500/40 scale-[1.02]",
     onClick &&
       "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/50",

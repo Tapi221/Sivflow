@@ -18,6 +18,10 @@ import {
 import { useTags } from "@/hooks/useTags";
 import { TagBadge } from "@/components/tag/TagBadge";
 import { TagChip } from "@/components/tag/TagChip";
+import {
+  getTagColorSwatchClassName,
+  type TagColorKey,
+} from "@/lib/tags/tagColor";
 
 interface TagInputProps {
   tags: string[];
@@ -36,7 +40,9 @@ export function TagInput({
 }: TagInputProps) {
   const [open, setOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState("");
-  const [selectedColor, setSelectedColor] = React.useState<string | null>(null);
+  const [selectedColor, setSelectedColor] = React.useState<TagColorKey | null>(
+    null,
+  );
 
   const { tags: allTags, availableColors, addTag, getTagColor } = useTags();
 
@@ -197,22 +203,21 @@ export function TagInput({
                       <Palette className="w-3.5 h-3.5" /> カラーを選択
                     </div>
                     <div className="flex flex-wrap gap-2.5 rounded-xl border border-slate-200 bg-slate-50/70 p-2">
-                      {availableColors.map((color) => (
+                      {availableColors.map((colorKey) => (
                         <button
-                          key={color}
-                          aria-label={`${color.split(" ")[0]}を選択`}
+                          key={colorKey}
+                          aria-label={`${colorKey}を選択`}
                           className={cn(
                             "w-8 h-8 rounded-full border-2 ring-1 ring-slate-300/70 shadow-sm transition-all",
-                            color.split(" ")[0],
-                            color.split(" ")[2],
-                            selectedColor === color ||
-                              (!selectedColor && color === availableColors[0])
+                            getTagColorSwatchClassName(colorKey),
+                            selectedColor === colorKey ||
+                              (!selectedColor && colorKey === availableColors[0])
                               ? "ring-2 ring-offset-2 ring-primary-600 scale-110 shadow-md"
                               : "hover:scale-105 hover:ring-slate-400",
                           )}
                           onClick={(e) => {
                             e.stopPropagation();
-                            setSelectedColor(color);
+                            setSelectedColor(colorKey);
                           }}
                         />
                       ))}

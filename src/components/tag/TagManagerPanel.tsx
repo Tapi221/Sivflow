@@ -10,9 +10,14 @@ import {
   FolderInput,
   Move,
 } from "@/ui/icons";
-import { useTags, DEFAULT_COLORS } from "@/hooks/useTags";
+import { useTags, DEFAULT_TAG_COLOR_KEYS } from "@/hooks/useTags";
 import { cn } from "@/lib/utils";
 import { TagChip } from "@/components/tag/TagChip";
+import {
+  getTagColorKey,
+  getTagColorSwatchClassName,
+  type TagColorKey,
+} from "@/lib/tags/tagColor";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -130,7 +135,7 @@ export function TagManagerPanel({ className }: TagManagerPanelProps) {
     }
   };
 
-  const handleColorChange = async (tagId: string, newColor: string) => {
+  const handleColorChange = async (tagId: string, newColor: TagColorKey) => {
     await updateTagColor(tagId, newColor);
   };
 
@@ -344,7 +349,7 @@ export function TagManagerPanel({ className }: TagManagerPanelProps) {
                           >
                             <TagChip
                               label={tag.name}
-                              colorClass={tag.color}
+                              colorKey={getTagColorKey(tag.color)}
                               className={cn(
                                 "shadow-none",
                                 isExpanded && "ring-2 ring-primary-500/35",
@@ -405,7 +410,7 @@ export function TagManagerPanel({ className }: TagManagerPanelProps) {
                           ) : (
                             <TagChip
                               label={expandedTag.name}
-                              colorClass={expandedTag.color}
+                              colorKey={getTagColorKey(expandedTag.color)}
                               className="w-fit px-2.5 py-1.5"
                             />
                           )}
@@ -475,25 +480,25 @@ export function TagManagerPanel({ className }: TagManagerPanelProps) {
                                 </p>
                               </details>
                               <div className="flex flex-wrap items-center gap-1.5">
-                                {DEFAULT_COLORS.map((color) => (
+                                {DEFAULT_TAG_COLOR_KEYS.map((colorKey) => (
                                   <button
-                                    key={color}
+                                    key={colorKey}
                                     onClick={() =>
                                       void handleColorChange(
                                         expandedTag.id,
-                                        color,
+                                        colorKey,
                                       )
                                     }
                                     className={cn(
                                       "h-6 w-6 shrink-0 rounded-full border-2 ring-1 ring-slate-300/70 shadow-sm transition-all hover:scale-105",
-                                      color.split(" ")[0],
-                                      color.split(" ")[2],
-                                      expandedTag.color === color
+                                      getTagColorSwatchClassName(colorKey),
+                                      getTagColorKey(expandedTag.color) === colorKey
                                         ? "scale-110 ring-2 ring-primary-600 ring-offset-2 opacity-100 shadow-md"
                                         : "opacity-80 hover:opacity-100",
                                     )}
                                   >
-                                    {expandedTag.color === color && (
+                                    {getTagColorKey(expandedTag.color) ===
+                                      colorKey && (
                                       <Check className="mx-auto h-3 w-3 text-slate-700/70" />
                                     )}
                                   </button>

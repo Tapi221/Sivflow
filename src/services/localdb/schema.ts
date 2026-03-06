@@ -1,4 +1,5 @@
 import type { LocalDB } from "./LocalDB";
+import { getTagColorKey } from "@/lib/tags/tagColor";
 
 export const defineSchema = (db: LocalDB): void => {
   db.version(1).stores({
@@ -712,4 +713,44 @@ export const defineSchema = (db: LocalDB): void => {
       "id, userId, fromCardId, toCardId, updatedAt, [userId+updatedAt]",
     projectMaps: "id, userId, folderId, updatedAt, [userId+updatedAt]",
   });
+
+  db.version(23)
+    .stores({
+      folders:
+        "id, userId, parentFolderId, updatedAt, cloudSyncEnabled, isDeleted, [userId+updatedAt], [userId+isDeleted]",
+      cards:
+        "id, userId, folderId, updatedAt, nextReviewDate, isDeleted, difficulty, reviewCount, [userId+updatedAt], [userId+isDeleted], [userId+nextReviewDate], *tagIds",
+      documents:
+        "id, userId, folderId, updatedAt, isDeleted, [userId+updatedAt], [userId+folderId]",
+      users: "id, userId, updatedAt",
+      userSettings: "id, userId, updatedAt, isDeleted, [userId+updatedAt]",
+      userStats: "id, userId, updatedAt, isDeleted, [userId+updatedAt]",
+      syncMetadata: "userId, deviceId",
+      levelHistories: "id, userId, cardId, changedAt",
+      deviceMeta: "deviceId, userId",
+      syncErrors: "id, occurredAt, phase, retryable",
+      syncHistory: "id, finishedAt",
+      syncSettings: "id",
+      syncQueue:
+        "id, targetId, status, priority, [status+priority], [targetId+status], idempotencyKey, &migrationKey",
+      conflicts: "id, entityId",
+      tags: "[rootFolderId+name], rootFolderId, userId, updatedAt",
+      tags_v2: "[userId+name], userId, updatedAt",
+      tags_v3:
+        "id, userId, parentId, [userId+parentId], [userId+nameLower], updatedAt",
+      studyLogs: "id, userId, cardId, studiedAt",
+      metadata: "key",
+      images: "id, userId, status, [userId+status]",
+      cardRelations:
+        "id, userId, fromCardId, toCardId, updatedAt, [userId+updatedAt]",
+      projectMaps: "id, userId, folderId, updatedAt, [userId+updatedAt]",
+    })
+    .upgrade(async (tx) => {
+      // legacy互換: class文字列保存を colorKey に正規化
+      const tagsTable = tx.table("tags_v3");
+      await tagsTable.toCollection().modify((raw: unknown) => {
+        const tag = raw as { color?: string };
+        tag.color = getTagColorKey(tag.color);
+      });
+    });
 };

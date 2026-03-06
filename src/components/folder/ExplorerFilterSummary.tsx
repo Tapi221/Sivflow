@@ -1,5 +1,6 @@
 import { TagBadge } from "@/components/tag/TagBadge";
 import { useExplorerStore } from "@/hooks/useExplorerStore";
+import { DEFAULT_TAG_COLOR_CLASS_NAME } from "@/lib/tags/tagColor";
 
 interface ExplorerFilterSummaryProps {
   getTagColor: (tagNameOrId: string) => string;
@@ -70,7 +71,7 @@ export function ExplorerFilterSummary({
                 key={type}
                 label={type === "card" ? "カード" : type.toUpperCase()}
                 size="sm"
-                colorClass="bg-slate-100 text-slate-700 border-slate-200"
+                colorClass={DEFAULT_TAG_COLOR_CLASS_NAME}
               />
             ))
           : null}
@@ -86,25 +87,25 @@ export function ExplorerFilterSummary({
           />
         ))}
         {uncertaintyFilter !== "any" ? (
-          <TagBadge
-            label={`はてな: ${uncertaintyFilter === "on" ? "あり" : "なし"}`}
-            size="sm"
-            colorClass="bg-slate-100 text-slate-700 border-slate-200"
-          />
+            <TagBadge
+              label={`はてな: ${uncertaintyFilter === "on" ? "あり" : "なし"}`}
+              size="sm"
+              colorClass={DEFAULT_TAG_COLOR_CLASS_NAME}
+            />
         ) : null}
         {bookmarkedFilter !== "any" ? (
-          <TagBadge
-            label={`星: ${bookmarkedFilter === "on" ? "あり" : "なし"}`}
-            size="sm"
-            colorClass="bg-slate-100 text-slate-700 border-slate-200"
-          />
+            <TagBadge
+              label={`星: ${bookmarkedFilter === "on" ? "あり" : "なし"}`}
+              size="sm"
+              colorClass={DEFAULT_TAG_COLOR_CLASS_NAME}
+            />
         ) : null}
         {draftFilter !== "any" ? (
-          <TagBadge
-            label={`下書き: ${draftFilter === "on" ? "あり" : "なし"}`}
-            size="sm"
-            colorClass="bg-slate-100 text-slate-700 border-slate-200"
-          />
+            <TagBadge
+              label={`下書き: ${draftFilter === "on" ? "あり" : "なし"}`}
+              size="sm"
+              colorClass={DEFAULT_TAG_COLOR_CLASS_NAME}
+            />
         ) : null}
       </div>
 

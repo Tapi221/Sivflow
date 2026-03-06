@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useTags } from "@/hooks/useTags";
 import { TagBadge } from "@/components/tag/TagBadge";
+import { getTagColorKey } from "@/lib/tags/tagColor";
 
 interface BulkTagDialogProps {
   open: boolean;
@@ -89,7 +90,7 @@ export default function BulkTagDialog({
                   <TagBadge
                     label={tag.name}
                     size="md"
-                    colorClass={tag.color}
+                    colorKey={getTagColorKey(tag.color)}
                     className="pointer-events-none"
                   />
                 </button>

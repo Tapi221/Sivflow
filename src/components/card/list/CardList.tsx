@@ -7,6 +7,7 @@ import { HelpCircle, Edit, Trash2, Volume2, Star } from "@/ui/icons";
 import { cn } from "@/lib/utils";
 import { normalizeMemoryStability } from "@/utils/reviewUtils";
 import { resolveCardTagNames } from "@/hooks/useTags";
+import { DEFAULT_TAG_COLOR_CLASS_NAME } from "@/lib/tags/tagColor";
 
 function CardItem({
   card,
@@ -44,7 +45,7 @@ function CardItem({
       label: tagName,
       color: getTagColor
         ? getTagColor(tagName)
-        : "bg-slate-100 text-slate-600 border-slate-200",
+        : DEFAULT_TAG_COLOR_CLASS_NAME,
     }),
   );
 

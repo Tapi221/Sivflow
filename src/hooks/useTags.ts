@@ -4,6 +4,12 @@ import { getLocalDb } from "../services/localDB";
 import { useAuth } from "../contexts/AuthContext";
 import type { TagV3Record } from "../services/localdb/types";
 import { useUserSettings } from "./useUserSettings";
+import {
+  getTagColorClassName as resolveTagColorClassName,
+  getTagColorKey as normalizeTagColorKey,
+  TAG_COLOR_KEYS,
+  type TagColorKey,
+} from "@/lib/tags/tagColor";
 
 export type TagCategory = string;
 
@@ -18,24 +24,9 @@ type CardTagFields = {
   updatedAt?: Date;
 };
 
-export const DEFAULT_COLORS = [
-  "bg-slate-100 text-slate-600 border-slate-200",
-  "bg-red-50 text-red-600 border-red-200",
-  "bg-orange-50 text-orange-600 border-orange-200",
-  "bg-amber-50 text-amber-600 border-amber-200",
-  "bg-green-50 text-green-600 border-green-200",
-  "bg-emerald-50 text-emerald-600 border-emerald-200",
-  "bg-teal-50 text-teal-600 border-teal-200",
-  "bg-cyan-50 text-cyan-600 border-cyan-200",
-  "bg-sky-50 text-sky-600 border-sky-200",
-  "bg-blue-50 text-blue-600 border-blue-200",
-  "bg-indigo-50 text-indigo-600 border-indigo-200",
-  "bg-violet-50 text-violet-600 border-violet-200",
-  "bg-purple-50 text-purple-600 border-purple-200",
-  "bg-fuchsia-50 text-fuchsia-600 border-fuchsia-200",
-  "bg-pink-50 text-pink-600 border-pink-200",
-  "bg-rose-50 text-rose-600 border-rose-200",
-];
+export const DEFAULT_TAG_COLOR_KEYS: TagColorKey[] = [...TAG_COLOR_KEYS];
+// 互換用。将来削除予定。
+export const DEFAULT_COLORS = DEFAULT_TAG_COLOR_KEYS;
 
 const genId = (): string => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto)
@@ -188,7 +179,7 @@ export function useTags() {
   const { currentUser } = useAuth();
   const { settings, updateSettings } = useUserSettings();
 
-  const tags = useLiveQuery(
+  const rawTags = useLiveQuery(
     async () => {
       if (!currentUser) return [] as Tag[];
       const db = await getLocalDb(currentUser.uid);
@@ -197,6 +188,11 @@ export function useTags() {
     [currentUser],
     [] as Tag[],
   );
+  const tags = (rawTags ?? []).map((tag) => ({
+    ...tag,
+    // legacy互換: 読み取り時は常に colorKey として扱う
+    color: normalizeTagColorKey(tag.color),
+  }));
 
   const tagByName = useMemo(() => {
     const map = new Map<string, Tag>();
@@ -249,13 +245,26 @@ export function useTags() {
     });
   }, [categoryNameMap, tags]);
 
-  /** name または nameLower で色を返す（UI互換） */
-  const getTagColor = (tagNameOrId: string) => {
-    const byName =
+  const resolveTagByNameOrId = (tagNameOrId: string): Tag | undefined => {
+    return (
       tagByName.get(tagNameOrId) ??
       tagByNameLower.get(tagNameOrId.toLowerCase()) ??
-      tagById.get(tagNameOrId);
-    return byName?.color || DEFAULT_COLORS[0];
+      tagById.get(tagNameOrId)
+    );
+  };
+
+  const getTagColorKey = (tagNameOrId: string): TagColorKey => {
+    const storedColor = resolveTagByNameOrId(tagNameOrId)?.color;
+    return normalizeTagColorKey(storedColor);
+  };
+
+  const getTagColorClassName = (tagNameOrId: string): string => {
+    return resolveTagColorClassName(getTagColorKey(tagNameOrId));
+  };
+
+  /** name または id で色クラスを返す（UI互換） */
+  const getTagColor = (tagNameOrId: string): string => {
+    return getTagColorClassName(tagNameOrId);
   };
 
   const getTagIdByName = (tagName: string): string | null => {
@@ -410,7 +419,7 @@ export function useTags() {
    */
   const addTag = async (
     name: string,
-    color: string = DEFAULT_COLORS[0],
+    color: string = DEFAULT_TAG_COLOR_KEYS[0],
     categoryId?: TagCategory,
     parentId?: string,
   ): Promise<Tag> => {
@@ -418,6 +427,7 @@ export function useTags() {
     if (!currentUser) throw new Error("not authenticated");
 
     const nameLower = name.toLowerCase();
+    const normalizedColor = normalizeTagColorKey(color);
 
     // 既存チェック（idempotent）
     const existing = await db.tags_v3
@@ -428,7 +438,7 @@ export function useTags() {
     if (existing) {
       // color/categoryId に差分があれば更新
       const patch: Partial<Tag> = {};
-      if (existing.color !== color) patch.color = color;
+      if (existing.color !== normalizedColor) patch.color = normalizedColor;
       if (categoryId && existing.categoryId !== categoryId)
         patch.categoryId = categoryId;
       if (parentId && existing.parentId !== parentId) patch.parentId = parentId;
@@ -444,7 +454,8 @@ export function useTags() {
       id: genId(),
       name,
       nameLower,
-      color,
+      // color は colorKey を保存する
+      color: normalizedColor,
       userId: currentUser.uid,
       updatedAt: new Date(),
       ...(categoryId ? { categoryId } : {}),
@@ -488,7 +499,7 @@ export function useTags() {
           id: genId(),
           name: segment,
           nameLower,
-          color: DEFAULT_COLORS[0],
+          color: DEFAULT_TAG_COLOR_KEYS[0],
           userId: currentUser.uid,
           updatedAt: new Date(),
           ...(parentId ? { parentId } : {}),
@@ -546,7 +557,7 @@ export function useTags() {
           id: genId(),
           name: segment,
           nameLower,
-          color: DEFAULT_COLORS[0],
+          color: DEFAULT_TAG_COLOR_KEYS[0],
           userId: currentUser.uid,
           updatedAt: new Date(),
           ...(parentId ? { parentId } : {}),
@@ -687,7 +698,10 @@ export function useTags() {
       tagByName.get(nameOrId) ??
       tagByNameLower.get(nameOrId.toLowerCase());
     if (!tag) return;
-    await db.tags_v3.update(tag.id, { color, updatedAt: new Date() });
+    await db.tags_v3.update(tag.id, {
+      color: normalizeTagColorKey(color),
+      updatedAt: new Date(),
+    });
   };
 
   /**
@@ -872,7 +886,9 @@ export function useTags() {
   return {
     tags,
     tagById,
-    availableColors: DEFAULT_COLORS,
+    availableColors: DEFAULT_TAG_COLOR_KEYS,
+    getTagColorKey,
+    getTagColorClassName,
     getTagColor,
     getCategoryName,
     setCategoryName,
