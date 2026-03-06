@@ -18,7 +18,7 @@ export const codeTheme = {
     },
     {
       types: ["function"],
-      style: { color: "var(--tok-func)" },
+      style: { color: "var(--tok-function)" },
     },
     {
       types: ["string", "char", "inserted"],

@@ -5,7 +5,7 @@
 
   --tok-keyword: #8b5fbf;
   --tok-type: #5fa8a3;
-  --tok-func: #c06c84;
+  --tok-function: #c06c84;
   --tok-string: #4e9a6a;
   --tok-number: #d08a3c;
   --tok-comment: rgba(47, 42, 54, 0.55);
@@ -16,7 +16,7 @@
   --code-token-punctuation: var(--tok-plain);
   --code-token-keyword: var(--tok-keyword);
   --code-token-type: var(--tok-type);
-  --code-token-function: var(--tok-func);
+  --code-token-function: var(--tok-function);
   --code-token-string: var(--tok-string);
   --code-token-number: var(--tok-number);
   --code-token-operator: var(--tok-plain);
