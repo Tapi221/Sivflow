@@ -135,16 +135,16 @@
   }
 
   .image-full-width {
-    margin-left: -0.5rem;
-    margin-right: -0.5rem;
-    width: calc(100% + 1rem);
+    margin-left: calc(var(--ui-space-2) * -1);
+    margin-right: calc(var(--ui-space-2) * -1);
+    width: calc(100% + var(--ui-space-2) * 2);
   }
 
   @media (min-width: 768px) {
     .image-full-width {
-      margin-left: -0.75rem;
-      margin-right: -0.75rem;
-      width: calc(100% + 1.5rem);
+      margin-left: calc(var(--ui-space-3) * -1);
+      margin-right: calc(var(--ui-space-3) * -1);
+      width: calc(100% + var(--ui-space-3) * 2);
     }
   }
 

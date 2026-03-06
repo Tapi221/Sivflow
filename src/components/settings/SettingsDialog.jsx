@@ -1576,7 +1576,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
 
             <div
               className={cn(
-                "mx-auto max-w-4xl space-y-8 p-4 pb-[max(5rem,env(safe-area-inset-bottom))] md:p-8 lg:p-10",
+                "mx-auto max-w-4xl space-y-8 p-4 pb-[var(--ui-safe-area-bottom-padding)] md:p-8 lg:p-10",
                 activeTab === "tags" && "max-w-5xl space-y-4 md:p-6 lg:p-6",
               )}
             >
@@ -1588,3 +1588,4 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
     </Dialog>
   );
 }
+

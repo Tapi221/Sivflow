@@ -1,5 +1,7 @@
 @layer base {
   html {
+    --ui-scale: 1;
+
     --color-primary-50: #f5f5f5;
     --color-primary-100: #e6f0ef;
     --color-primary-200: #cfe0df;
@@ -13,8 +15,28 @@
 
     --card-base-width: 480px;
     --card-display-max-height: min(70vh, 560px);
-    --app-row-px: var(--card-row-px, 24px);
-    --tree-indent-px: 12px;
+    --ui-space-1: calc(4px * var(--ui-scale));
+    --ui-space-1_8: calc(7.2px * var(--ui-scale));
+    --ui-space-2: calc(8px * var(--ui-scale));
+    --ui-space-3: calc(12px * var(--ui-scale));
+    --ui-space-4: calc(16px * var(--ui-scale));
+    --ui-space-8: calc(32px * var(--ui-scale));
+    --ui-space-12: calc(48px * var(--ui-scale));
+    --ui-space-20: calc(80px * var(--ui-scale));
+    --ui-panel-width: calc(320px * var(--ui-scale));
+    --ui-menu-min-width: calc(128px * var(--ui-scale));
+    --ui-font-size-xs: calc(12.8px * var(--ui-scale));
+    --ui-font-size-sm: calc(14px * var(--ui-scale));
+    --ui-font-size-sm-plus: calc(14.4px * var(--ui-scale));
+    --ui-font-size-md-plus: calc(17.6px * var(--ui-scale));
+    --ui-font-size-2xl: calc(32px * var(--ui-scale));
+    --ui-radius-sm: calc(8px * var(--ui-scale));
+    --ui-radius-md: calc(10px * var(--ui-scale));
+    --ui-safe-area-top-offset: calc(env(safe-area-inset-top, 0px) + var(--ui-space-2));
+    --ui-safe-area-bottom-padding: max(var(--ui-space-20), env(safe-area-inset-bottom));
+
+    --app-row-px: calc(var(--card-row-px, 24px) * var(--ui-scale));
+    --tree-indent-px: calc(12px * var(--ui-scale));
 
     --sidebar-bg: #f7f7f8;
     --sidebar-border: #e3e6ea;
@@ -22,9 +44,10 @@
     --sidebar-text-muted: #6e6e80;
     --sidebar-active-bg: #e7ebef;
     --sidebar-active-accent: #7aa6a1;
+    
     --surface-border: #d9d9d9;
     --surface-placeholder-text: #978d90;
-    --surface-placeholder-font-size: 0.875rem;
+    --surface-placeholder-font-size: var(--ui-font-size-sm);
     --surface-shadow-concave: inset 0 1px 2px rgba(86, 72, 74, 0.16);
     --surface-shadow-convex:
       0 1px 0 rgba(255, 255, 255, 0.9) inset,
@@ -33,7 +56,7 @@
     --code-bg: #f7f8f9;
     --code-fg: #24292f;
     --code-border: rgba(0, 0, 0, 0.06);
-    --block-frame-radius: 12px;
+    --block-frame-radius: calc(12px * var(--ui-scale));
     --code-frame-border-width: 1px;
     --code-frame-accent-width: 2px;
     --code-font-size: 14px;
@@ -57,6 +80,6 @@
     --scrollbar-thumb-hover: #b8b8c2;
     --card-resize-handle-active: #9e9eaa;
     --scrollbar-thumb-active: var(--card-resize-handle-active);
-    --scrollbar-size: 6px;
+    --scrollbar-size: calc(6px * var(--ui-scale));
   }
 }

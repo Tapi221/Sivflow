@@ -30,20 +30,22 @@ export const AccountLockedScreen: React.FC = () => {
       <div
         style={{
           backgroundColor: "#ef4444",
-          padding: "2rem",
+          padding: "var(--ui-space-8)",
           borderRadius: "50%",
-          marginBottom: "2rem",
+          marginBottom: "var(--ui-space-8)",
         }}
       >
         <Shield size={64} color="#fff" />
       </div>
 
-      <h1 style={{ marginBottom: "1rem", fontSize: "2rem" }}>Account Locked</h1>
+      <h1 style={{ marginBottom: "var(--ui-space-4)", fontSize: "var(--ui-font-size-2xl)" }}>
+        Account Locked
+      </h1>
 
       <p
         style={{
           maxWidth: "600px",
-          fontSize: "1.1rem",
+          fontSize: "var(--ui-font-size-md-plus)",
           lineHeight: "1.6",
           color: "#d1d5db",
         }}
@@ -55,13 +57,13 @@ export const AccountLockedScreen: React.FC = () => {
 
       <div
         style={{
-          marginTop: "3rem",
-          padding: "1rem",
+          marginTop: "var(--ui-space-12)",
+          padding: "var(--ui-space-4)",
           backgroundColor: "#333",
-          borderRadius: "8px",
+          borderRadius: "var(--ui-radius-sm)",
         }}
       >
-        <p style={{ fontSize: "0.9rem", color: "#9ca3af" }}>
+        <p style={{ fontSize: "var(--ui-font-size-sm-plus)", color: "#9ca3af" }}>
           管理者にお問い合わせください。
           <br />
           Reference ID: {currentUser?.uid}

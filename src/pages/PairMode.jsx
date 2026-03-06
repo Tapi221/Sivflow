@@ -32,7 +32,7 @@ export default function PairMode() {
       <div className="flex-shrink-0 max-w-[1400px] w-full mx-auto px-0 md:pt-8 md:px-4">
         <div
           className="flex items-center mb-1 px-4 md:px-0"
-          style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 0.5rem)" }}
+          style={{ paddingTop: "var(--ui-safe-area-top-offset)" }}
         >
           <Button variant="ghost" size="icon" onClick={handleCardUpdated}>
             <ArrowLeft className="w-5 h-5" />
@@ -50,3 +50,4 @@ export default function PairMode() {
     </div>
   );
 }
+

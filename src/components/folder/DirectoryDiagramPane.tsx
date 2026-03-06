@@ -138,7 +138,7 @@ function DirectoryTreeNode({
             <div
               className="absolute left-0 top-1/2 border-slate-300"
               style={{
-                width: "0.75rem",
+                width: "var(--ui-space-3)",
                 borderTopWidth: "1px",
                 transform: "translateY(-0.5px)",
               }}

@@ -26,7 +26,7 @@ export function MetaPanelShell({
       style={
         {
           "--meta-row-px": "var(--app-row-px)",
-          "--meta-font-size": "0.875rem",
+          "--meta-font-size": "var(--ui-font-size-sm)",
           "--meta-action-min-h": "var(--meta-row-px)",
           backgroundColor: "var(--sidebar-bg)",
           ...style,

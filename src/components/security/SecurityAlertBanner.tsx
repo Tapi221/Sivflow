@@ -21,12 +21,12 @@ export const SecurityAlertBanner: React.FC = () => {
           style={{
             backgroundColor: "#eff6ff", // blue-50
             borderBottom: "1px solid #93c5fd", // blue-300
-            padding: "0.75rem 1rem",
+            padding: "var(--ui-space-3) var(--ui-space-4)",
             display: "flex",
             alignItems: "center",
-            gap: "0.5rem",
+            gap: "var(--ui-space-2)",
             color: "#1d4ed8", // blue-700
-            fontSize: "0.9rem",
+            fontSize: "var(--ui-font-size-sm-plus)",
           }}
         >
           <AlertTriangle size={18} />
@@ -43,15 +43,17 @@ export const SecurityAlertBanner: React.FC = () => {
           style={{
             backgroundColor: "#fff7ed", // orange-50
             borderBottom: "1px solid #fdba74", // orange-300
-            padding: "0.75rem 1rem",
+            padding: "var(--ui-space-3) var(--ui-space-4)",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             color: "#c2410c", // orange-700
-            fontSize: "0.9rem",
+            fontSize: "var(--ui-font-size-sm-plus)",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <div
+            style={{ display: "flex", alignItems: "center", gap: "var(--ui-space-2)" }}
+          >
             <AlertTriangle size={18} />
             <span>
               {alert.message ||
