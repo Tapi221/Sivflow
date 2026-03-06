@@ -1,23 +1,82 @@
 :root {
+  /* コードブロック基本色 */
   --code-bg: #f3f4f6;
   --code-fg: #2f2a36;
   --code-border: rgba(47, 42, 54, 0.12);
+  --code-selection: rgba(139, 95, 191, 0.14);
+  --code-line-highlight: rgba(47, 42, 54, 0.04);
 
+  /* シンタックスカラー */
+  --tok-plain: var(--code-fg);
+  --tok-comment: rgba(47, 42, 54, 0.55);
   --tok-keyword: #8b5fbf;
   --tok-type: #5fa8a3;
   --tok-function: #c06c84;
   --tok-string: #4e9a6a;
   --tok-number: #d08a3c;
-  --tok-comment: rgba(47, 42, 54, 0.55);
-  --tok-plain: var(--code-fg);
+  --tok-constant: #a56ad6;
+  --tok-parameter: #6e78d6;
+  --tok-property: #4b8fb8;
+  --tok-variable: #3b3542;
+  --tok-operator: #7d7482;
+  --tok-punctuation: #918997;
+  --tok-class: #4f93a8;
+  --tok-builtin: #9a63be;
+  --tok-namespace: #5877b8;
+  --tok-tag: #c85f7c;
+  --tok-attr-name: #4f9bb3;
+  --tok-attr-value: #529b72;
+  --tok-regex: #b97b24;
+  --tok-escape: #c45a5a;
+  --tok-decorator: #9a5fd0;
+  --tok-boolean: #b06a35;
+  --tok-null: #b06a35;
+  --tok-symbol: #8f63c7;
+  --tok-enum: #4f8da6;
+  --tok-module: #6170b9;
+  --tok-heading: #7a58c1;
+  --tok-link: #3f81c5;
 
+  /* diff / 状態表示 */
+  --tok-diff-added: #2f9e5a;
+  --tok-diff-removed: #c85c5c;
+  --tok-diff-changed: #c2922e;
+  --tok-error: #c85c5c;
+  --tok-warning: #c2922e;
+
+  /* レンダラー用マッピング */
   --code-token-text: var(--tok-plain);
   --code-token-comment: var(--tok-comment);
-  --code-token-punctuation: var(--tok-plain);
+  --code-token-punctuation: var(--tok-punctuation);
   --code-token-keyword: var(--tok-keyword);
   --code-token-type: var(--tok-type);
   --code-token-function: var(--tok-function);
   --code-token-string: var(--tok-string);
   --code-token-number: var(--tok-number);
-  --code-token-operator: var(--tok-plain);
+  --code-token-constant: var(--tok-constant);
+  --code-token-parameter: var(--tok-parameter);
+  --code-token-property: var(--tok-property);
+  --code-token-variable: var(--tok-variable);
+  --code-token-operator: var(--tok-operator);
+  --code-token-class: var(--tok-class);
+  --code-token-builtin: var(--tok-builtin);
+  --code-token-namespace: var(--tok-namespace);
+  --code-token-tag: var(--tok-tag);
+  --code-token-attr-name: var(--tok-attr-name);
+  --code-token-attr-value: var(--tok-attr-value);
+  --code-token-regex: var(--tok-regex);
+  --code-token-escape: var(--tok-escape);
+  --code-token-decorator: var(--tok-decorator);
+  --code-token-boolean: var(--tok-boolean);
+  --code-token-null: var(--tok-null);
+  --code-token-symbol: var(--tok-symbol);
+  --code-token-enum: var(--tok-enum);
+  --code-token-module: var(--tok-module);
+  --code-token-heading: var(--tok-heading);
+  --code-token-link: var(--tok-link);
+  --code-token-diff-added: var(--tok-diff-added);
+  --code-token-diff-removed: var(--tok-diff-removed);
+  --code-token-diff-changed: var(--tok-diff-changed);
+  --code-token-error: var(--tok-error);
+  --code-token-warning: var(--tok-warning);
 }
