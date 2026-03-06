@@ -15,7 +15,7 @@ import { CANONICAL_CARD_WIDTH } from "@/components/card/common/constants";
 
 // ── レイアウト定数 ──────────────────────────────────────────────────────────
 const DEFAULT_CARD_WIDTH = CANONICAL_CARD_WIDTH; // カード列の固定幅 (px) = カード設計幅と一致させて青枠を正確に合わせる
-const CARD_GAP = 32; // カード間の縦方向ギャップ (px)
+const CARD_GAP = 16; // カード間の縦方向ギャップ (px)
 const SCROLL_PADDING = "50vh"; // 先頭・末尾カードを中央に寄せるための余白
 
 // ── アクティブ/非アクティブスタイル ──────────────────────────────────────
