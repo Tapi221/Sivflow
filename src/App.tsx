@@ -12,8 +12,6 @@ import { NotificationProvider } from "./components/notifications/NotificationPro
 import { useAuth } from "./contexts/AuthContext";
 // 画面の共通レイアウトコンポーネント（ヘッダーやサイドバーなど）
 import Layout from "./Layout";
-// 初期化済みの Firebase Auth インスタンス
-import { auth } from "./services/firebase";
 // 自動バックアップ関連のサービス
 import { autoBackupService } from "./services/AutoBackupService";
 // データ整合性チェックのサービス
@@ -28,6 +26,7 @@ import { SyncServiceFactory } from "./services/SyncServiceFactory";
 // 機能フラグ（Feature Flag）管理
 import { flags } from "./features/flags";
 import { DEV_MODE, isLocalHost } from "./utils/envGuards";
+import { signInWithGoogle } from "./services/auth/googleSignIn";
 
 // ===== ページコンポーネントを遅延読み込み（コード分割） =====
 // 初回ロードを軽くするために、各ページを lazy で動的 import する
@@ -113,24 +112,24 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 // ===== ログインページ（トップで表示される画面） =====
 function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const isAuthPopupClosedByUserError = (error: unknown): boolean =>
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    error.code === "auth/popup-closed-by-user";
 
   // Google ログインボタンが押されたときの処理
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     try {
-      // firebase/auth を動的 import（初期表示を軽くするため）
-      const { GoogleAuthProvider, signInWithPopup } =
-        await import("firebase/auth");
-      const provider = new GoogleAuthProvider();
-      // ポップアップで Google 認証
-      await signInWithPopup(auth, provider);
-      // 成功すると AuthProvider 側の onAuthStateChanged が発火して画面遷移する想定
+      await signInWithGoogle();
     } catch (error: unknown) {
       console.error("ログインエラー:", error);
-      if (error.code === "auth/popup-closed-by-user") {
+      if (isAuthPopupClosedByUserError(error)) {
         // ユーザーがポップアップを閉じた場合は無視
       } else {
-        alert("ログインに失敗しました: " + (error.message || "不明なエラー"));
+        const message = error instanceof Error ? error.message : "不明なエラー";
+        alert("ログインに失敗しました: " + message);
       }
     } finally {
       setIsLoading(false);

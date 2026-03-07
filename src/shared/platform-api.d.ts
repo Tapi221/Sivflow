@@ -11,5 +11,12 @@ export interface PlatformApi {
   shell: PlatformShellApi;
 }
 
-export type DesktopBridgeApi = PlatformApi;
+export type DesktopOauthCallbackHandler = (callbackUrl: string) => void;
 
+export interface DesktopOauthApi {
+  onCallback(handler: DesktopOauthCallbackHandler): () => void;
+}
+
+export interface DesktopBridgeApi extends PlatformApi {
+  oauth: DesktopOauthApi;
+}
