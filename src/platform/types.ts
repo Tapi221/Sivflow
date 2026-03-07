@@ -3,4 +3,4 @@ export type {
   PlatformApi,
   PlatformAppApi,
   PlatformShellApi,
-} from "@/shared/platform-api";
+} from "@/types/desktop-api";

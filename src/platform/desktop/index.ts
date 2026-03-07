@@ -1,12 +1,5 @@
-import { hasDesktopBridge } from "@/platform/runtime";
-import type { DesktopBridgeApi, PlatformApi } from "@/shared/platform-api";
-
-const getDesktopBridge = (): DesktopBridgeApi => {
-  if (!hasDesktopBridge()) {
-    throw new Error("Desktop bridge is not available");
-  }
-  return window.desktop;
-};
+import type { PlatformApi } from "@/types/desktop-api";
+import { getDesktopBridge } from "./bridge";
 
 const canUseDesktopShell = (url: string): boolean =>
   /^(https?:|mailto:)/i.test(url);

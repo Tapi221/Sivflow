@@ -1,19 +1,43 @@
 import { app, BrowserWindow, ipcMain, shell } from "electron";
+import * as http from "node:http";
 import * as path from "node:path";
+import { URL } from "node:url";
 
 const IPC_CHANNELS = {
   appGetVersion: "desktop:app:getVersion",
   shellOpenExternal: "desktop:shell:openExternal",
-  oauthCallback: "desktop:oauth:callback",
+  oauthStart: "oauth:start",
+  oauthCancel: "oauth:cancel",
+  oauthExchangeIdToken: "oauth:exchangeIdToken",
+  oauthCallback: "oauth:callback",
 } as const;
 
 const ALLOWED_EXTERNAL_PROTOCOLS = new Set(["http:", "https:", "mailto:"]);
-const CUSTOM_PROTOCOL = "manifolia";
-const OAUTH_CALLBACK_HOST = "auth";
-const OAUTH_CALLBACK_PATH = "/callback";
+const OAUTH_LOOPBACK_HOST = "127.0.0.1";
+const OAUTH_LOOPBACK_PORT = 42813;
+const OAUTH_LOOPBACK_PATH = "/auth/google/callback";
+const GOOGLE_OAUTH_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 
 let mainWindow: BrowserWindow | null = null;
 let pendingOauthCallbackUrl: string | null = null;
+let oauthLoopbackServer: http.Server | null = null;
+
+function toOauthCallbackPayload(url: string): {
+  url: string;
+  code?: string;
+  state?: string;
+  error?: string;
+  errorDescription?: string;
+} {
+  const parsed = new URL(url);
+  return {
+    url,
+    code: parsed.searchParams.get("code") ?? undefined,
+    state: parsed.searchParams.get("state") ?? undefined,
+    error: parsed.searchParams.get("error") ?? undefined,
+    errorDescription: parsed.searchParams.get("error_description") ?? undefined,
+  };
+}
 
 function getRendererUrlFromArgv(): string | null {
   const arg = process.argv.find((value) =>
@@ -40,34 +64,6 @@ async function openExternal(rawUrl: string): Promise<void> {
   await shell.openExternal(rawUrl);
 }
 
-function normalizeArgValue(rawValue: string): string {
-  return rawValue.replace(/^['"]|['"]$/g, "");
-}
-
-function isOauthCallbackUrl(rawUrl: string): boolean {
-  try {
-    const parsed = new URL(rawUrl);
-    return (
-      parsed.protocol === `${CUSTOM_PROTOCOL}:` &&
-      parsed.hostname === OAUTH_CALLBACK_HOST &&
-      parsed.pathname.startsWith(OAUTH_CALLBACK_PATH)
-    );
-  } catch {
-    return false;
-  }
-}
-
-function getCustomProtocolUrlFromArgv(argv: string[]): string | null {
-  for (const rawArg of argv) {
-    const arg = normalizeArgValue(rawArg);
-    if (!arg.startsWith(`${CUSTOM_PROTOCOL}://`)) continue;
-    if (isOauthCallbackUrl(arg)) {
-      return arg;
-    }
-  }
-  return null;
-}
-
 function focusMainWindow(): void {
   if (!mainWindow || mainWindow.isDestroyed()) return;
   if (mainWindow.isMinimized()) {
@@ -81,16 +77,12 @@ function flushPendingOauthCallback(): void {
   if (!mainWindow || mainWindow.isDestroyed()) return;
   mainWindow.webContents.send(
     IPC_CHANNELS.oauthCallback,
-    pendingOauthCallbackUrl,
+    toOauthCallbackPayload(pendingOauthCallbackUrl),
   );
   pendingOauthCallbackUrl = null;
 }
 
 function handleOauthCallback(rawUrl: string): void {
-  if (!isOauthCallbackUrl(rawUrl)) {
-    return;
-  }
-
   if (
     !mainWindow ||
     mainWindow.isDestroyed() ||
@@ -100,17 +92,85 @@ function handleOauthCallback(rawUrl: string): void {
     return;
   }
 
-  mainWindow.webContents.send(IPC_CHANNELS.oauthCallback, rawUrl);
+  mainWindow.webContents.send(
+    IPC_CHANNELS.oauthCallback,
+    toOauthCallbackPayload(rawUrl),
+  );
 }
 
-function registerCustomProtocol(): void {
-  if (process.defaultApp && process.argv.length >= 2) {
-    app.setAsDefaultProtocolClient(CUSTOM_PROTOCOL, process.execPath, [
-      path.resolve(process.argv[1]),
-    ]);
-    return;
+function stopOauthLoopbackServer(): void {
+  if (!oauthLoopbackServer) return;
+  oauthLoopbackServer.close(() => {
+    console.info("[electron][oauth] loopback server closed");
+  });
+  oauthLoopbackServer = null;
+}
+
+function startOauthLoopbackServer(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    stopOauthLoopbackServer();
+
+    const server = http.createServer((req, res) => {
+      const requestUrl = new URL(
+        req.url || "/",
+        `http://${OAUTH_LOOPBACK_HOST}:${OAUTH_LOOPBACK_PORT}`,
+      );
+      const fullUrl = requestUrl.toString();
+      console.info("[electron][oauth] callback received", { url: fullUrl });
+
+      if (req.method !== "GET" || requestUrl.pathname !== OAUTH_LOOPBACK_PATH) {
+        res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
+        res.end("Not found");
+        return;
+      }
+
+      handleOauthCallback(fullUrl);
+      res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+      res.end(
+        "<!doctype html><html><body><h1>ログイン完了。アプリに戻ってください。</h1></body></html>",
+      );
+      stopOauthLoopbackServer();
+    });
+
+    server.on("error", (error) => {
+      oauthLoopbackServer = null;
+      reject(error);
+    });
+
+    server.listen(OAUTH_LOOPBACK_PORT, OAUTH_LOOPBACK_HOST, () => {
+      oauthLoopbackServer = server;
+      console.info("[electron][oauth] loopback listen started", {
+        host: OAUTH_LOOPBACK_HOST,
+        port: OAUTH_LOOPBACK_PORT,
+        path: OAUTH_LOOPBACK_PATH,
+      });
+      resolve();
+    });
+  });
+}
+
+function ensureOauthLoopbackRedirect(authorizeUrl: string): void {
+  const parsed = new URL(authorizeUrl);
+  const redirectUri = parsed.searchParams.get("redirect_uri");
+  const expectedRedirectUri = `http://${OAUTH_LOOPBACK_HOST}:${OAUTH_LOOPBACK_PORT}${OAUTH_LOOPBACK_PATH}`;
+  if (!redirectUri || redirectUri !== expectedRedirectUri) {
+    throw new Error(
+      `OAuth redirect URI mismatch. expected=${expectedRedirectUri}, actual=${redirectUri ?? "missing"}`,
+    );
   }
-  app.setAsDefaultProtocolClient(CUSTOM_PROTOCOL);
+}
+
+function getDesktopOauthClientSecret(): string {
+  const secret =
+    process.env.GOOGLE_OAUTH_WEB_CLIENT_SECRET?.trim() ||
+    process.env.GOOGLE_OAUTH_CLIENT_SECRET?.trim() ||
+    process.env.DESKTOP_GOOGLE_OAUTH_CLIENT_SECRET?.trim();
+  if (!secret) {
+    throw new Error(
+      "GOOGLE_OAUTH_WEB_CLIENT_SECRET is not configured in main process environment",
+    );
+  }
+  return secret;
 }
 
 function createMainWindow() {
@@ -178,6 +238,89 @@ function registerIpcHandlers(): void {
       await openExternal(rawUrl);
     },
   );
+  ipcMain.handle(
+    IPC_CHANNELS.oauthStart,
+    async (_event, authorizeUrl: string) => {
+      ensureOauthLoopbackRedirect(authorizeUrl);
+      await startOauthLoopbackServer();
+      await openExternal(authorizeUrl);
+    },
+  );
+  ipcMain.handle(IPC_CHANNELS.oauthCancel, async () => {
+    pendingOauthCallbackUrl = null;
+    stopOauthLoopbackServer();
+  });
+  ipcMain.handle(
+    IPC_CHANNELS.oauthExchangeIdToken,
+    async (
+      _event,
+      input: {
+        clientId: string;
+        code: string;
+        codeVerifier: string;
+        redirectUri: string;
+      },
+    ) => {
+      const clientSecret = getDesktopOauthClientSecret();
+      const requestBody = new URLSearchParams({
+        client_id: input.clientId,
+        client_secret: clientSecret,
+        code: input.code,
+        code_verifier: input.codeVerifier,
+        grant_type: "authorization_code",
+        redirect_uri: input.redirectUri,
+      });
+      console.info("[electron][oauth] token request", {
+        client_id: input.clientId,
+        redirect_uri: input.redirectUri,
+        grant_type: "authorization_code",
+        code_verifier_length: input.codeVerifier.length,
+        client_secret_present: clientSecret.length > 0,
+        client_secret_length: clientSecret.length,
+      });
+
+      const response = await fetch(GOOGLE_OAUTH_TOKEN_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: requestBody,
+      });
+
+      const responseText = await response.text();
+      console.info("[electron][oauth] token response", {
+        status: response.status,
+        ok: response.ok,
+        body: responseText,
+      });
+
+      let payload: { error?: string; error_description?: string; id_token?: string } =
+        {};
+      try {
+        payload = JSON.parse(responseText) as {
+          error?: string;
+          error_description?: string;
+          id_token?: string;
+        };
+      } catch {
+        payload = {};
+      }
+
+      if (!response.ok || payload.error) {
+        throw new Error(
+          payload.error_description ||
+            payload.error ||
+            `Google token exchange failed (${response.status})`,
+        );
+      }
+
+      if (!payload.id_token) {
+        throw new Error("Google token exchange did not return id_token");
+      }
+
+      return payload.id_token;
+    },
+  );
 }
 
 const gotSingleInstanceLock = app.requestSingleInstanceLock();
@@ -185,29 +328,13 @@ const gotSingleInstanceLock = app.requestSingleInstanceLock();
 if (!gotSingleInstanceLock) {
   app.quit();
 } else {
-  app.on("second-instance", (_event, argv) => {
+  app.on("second-instance", () => {
     focusMainWindow();
-    const callbackUrl = getCustomProtocolUrlFromArgv(argv);
-    if (callbackUrl) {
-      handleOauthCallback(callbackUrl);
-    }
-  });
-
-  app.on("open-url", (event, url) => {
-    event.preventDefault();
-    focusMainWindow();
-    handleOauthCallback(url);
   });
 
   app.whenReady().then(() => {
-    registerCustomProtocol();
     registerIpcHandlers();
     createMainWindow();
-
-    const callbackUrl = getCustomProtocolUrlFromArgv(process.argv);
-    if (callbackUrl) {
-      handleOauthCallback(callbackUrl);
-    }
 
     app.on("activate", () => {
       if (BrowserWindow.getAllWindows().length === 0) {
@@ -218,6 +345,7 @@ if (!gotSingleInstanceLock) {
 }
 
 app.on("window-all-closed", () => {
+  stopOauthLoopbackServer();
   if (process.platform !== "darwin") {
     app.quit();
   }
