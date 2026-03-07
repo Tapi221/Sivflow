@@ -115,4 +115,10 @@
     color: var(--accent-main, var(--primary-color));
   }
 
+  button,
+  [role="button"] {
+    transition-property: none;
+    transition-duration: 0ms;
+  }
+
 }

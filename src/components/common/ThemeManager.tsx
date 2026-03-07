@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { useUserSettings } from "@/hooks/useUserSettings";
 
 // Helper to convert hex to RGB object
@@ -49,18 +49,21 @@ const generatePalette = (baseHex: string) => {
 export function ThemeManager() {
   const { settings } = useUserSettings();
   const accentColor = settings?.accentColor || "#689A98"; // Default fallback
+  const latestAccentRef = useRef(accentColor);
 
-  useEffect(() => {
+  const applyTheme = (nextAccent: string) => {
+    const safeAccent = nextAccent || "#689A98";
     const root = document.documentElement;
-    const rgb = hexToRgb(accentColor);
+    const rgb = hexToRgb(safeAccent);
 
     // Set Base RGB for Tailwind opacity (e.g. bg-primary-600/50)
     // The format must be "r g b" (space separated)
     root.style.setProperty("--color-primary-600", `${rgb.r} ${rgb.g} ${rgb.b}`);
     // Set Base Hex for non-Tailwind usage (e.g. Scrollbar)
-    root.style.setProperty("--color-primary-600-hex", accentColor);
+    root.style.setProperty("--color-primary-600-hex", safeAccent);
+    root.style.setProperty("--accent-color", safeAccent);
 
-    const palette = generatePalette(accentColor);
+    const palette = generatePalette(safeAccent);
 
     // Set other shades as Hex strings
     root.style.setProperty("--color-primary-50", palette[50]);
@@ -102,11 +105,50 @@ export function ThemeManager() {
     // Let's look at StatusBar.tsx later.
     // For now, I will set meta theme-color to the `accentColor` itself (or maybe slightly darkened?)
     // to be very obvious that it has changed.
-    metaThemeColor.setAttribute("content", accentColor);
+    metaThemeColor.setAttribute("content", safeAccent);
 
     // Save to localStorage for index.html head script to prevent green flash on reload
-    localStorage.setItem("flashcard-accent-color", accentColor);
+    localStorage.setItem("flashcard-accent-color", safeAccent);
+  };
+
+  // Paint前に反映（復帰直後の白飛び/無色化を減らす）
+  useLayoutEffect(() => {
+    const immediate =
+      (typeof window !== "undefined" &&
+        window.localStorage.getItem("flashcard-accent-color")) ||
+      accentColor;
+    latestAccentRef.current = immediate;
+    applyTheme(immediate);
+  }, []);
+
+  useEffect(() => {
+    latestAccentRef.current = accentColor;
+    applyTheme(accentColor);
   }, [accentColor]);
+
+  // 最小化/非表示→再表示時に、CSS変数を念のため即再適用する
+  useEffect(() => {
+    const reapply = () => {
+      const persisted = localStorage.getItem("flashcard-accent-color");
+      const next = persisted || latestAccentRef.current || "#689A98";
+      latestAccentRef.current = next;
+      applyTheme(next);
+    };
+
+    const onVisibility = () => {
+      if (!document.hidden) reapply();
+    };
+
+    window.addEventListener("focus", reapply);
+    window.addEventListener("pageshow", reapply);
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      window.removeEventListener("focus", reapply);
+      window.removeEventListener("pageshow", reapply);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, []);
 
   return null;
 }

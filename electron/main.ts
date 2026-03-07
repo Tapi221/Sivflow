@@ -179,11 +179,13 @@ function createMainWindow() {
     height: 820,
     minWidth: 1024,
     minHeight: 700,
+    backgroundColor: "#F8FAFB",
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
+      backgroundThrottling: false,
     },
   });
   mainWindow = windowRef;

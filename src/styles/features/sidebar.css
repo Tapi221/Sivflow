@@ -24,10 +24,6 @@
     pointer-events: none;
   }
 
-  .sidebar-row:hover {
-    background-color: rgba(148, 163, 184, 0.12);
-  }
-
   .sidebar-row--card {
     background-color: #f2f2ef;
   }

@@ -27,6 +27,7 @@ import { SyncServiceFactory } from "./services/SyncServiceFactory";
 import { flags } from "./features/flags";
 import { DEV_MODE, isLocalHost } from "./utils/envGuards";
 import { signInWithGoogle } from "./services/auth/googleSignIn";
+import { ThemeManager } from "@/components/common/ThemeManager";
 
 // ===== ページコンポーネントを遅延読み込み（コード分割） =====
 // 初回ロードを軽くするために、各ページを lazy で動的 import する
@@ -514,6 +515,7 @@ function App() {
   return (
     // 各種コンテキストでアプリ全体をラップし、どの子コンポーネントからも利用できるようにする
     <AuthProvider>
+      <ThemeManager />
       <ToastProvider>
         <NotificationProvider>
           {/* ブラウザの URL に応じて画面を切り替えるための Router */}

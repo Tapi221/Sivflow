@@ -6,8 +6,6 @@ import { cn } from "@/lib/utils";
 import { UI_TYPO } from "@/styles/tokens/typography";
 import { useSettingsQueryParam } from "@/hooks/useSettingsQueryParam";
 import { useKatexLoader } from "@/hooks/useKatexLoader";
-
-import { ThemeManager } from "@/components/common/ThemeManager";
 import { SecurityAlertBanner } from "./components/security/SecurityAlertBanner";
 import { LocalDBStatusBanner } from "./components/security/LocalDBStatusBanner";
 
@@ -61,8 +59,6 @@ export default function Layout() {
         UI_TYPO,
       )}
     >
-      <ThemeManager />
-
       {/* Desktop Sync Indicator (Fixed Top Right) */}
       <div className="hidden md:flex fixed top-1 right-2 z-50">
         {!["StudyMode"].includes(currentPageName) && <SyncStatusIndicator />}

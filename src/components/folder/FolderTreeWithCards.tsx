@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps -- large legacy explorer handlers intentionally stabilized to avoid interaction regressions. */
 import React, {
+  startTransition,
   useState,
   useRef,
   useEffect,
@@ -680,6 +681,9 @@ export function FolderTreeWithCards({
   );
 
   const [activeRootFolderId, setActiveRootFolderId] = useState<string | null>(
+    null,
+  );
+  const [hoveredRootFolderId, setHoveredRootFolderId] = useState<string | null>(
     null,
   );
 
@@ -1786,7 +1790,11 @@ export function FolderTreeWithCards({
                 {rootFolderPanels.map((folder) => (
                   <div
                     key={folder.id}
-                    className="group relative w-full h-16 rounded-2xl border border-[var(--surface-border)] bg-white surface-convex hover:bg-[var(--sidebar-active-bg)] px-3 text-left"
+                    className={cn(
+                      "group relative w-full h-16 rounded-2xl border border-[var(--surface-border)] bg-white surface-convex px-3 text-left",
+                      hoveredRootFolderId === folder.id &&
+                        "bg-[var(--sidebar-active-bg)]",
+                    )}
                     role="button"
                     tabIndex={0}
                     onClick={() => {
@@ -1794,8 +1802,16 @@ export function FolderTreeWithCards({
                       onFolderSelect(folder.id);
                     }}
                     onMouseEnter={() => {
-                      onFolderSelect(folder.id);
-                      onItemSelect(null);
+                      setHoveredRootFolderId(folder.id);
+                      startTransition(() => {
+                        onFolderSelect(folder.id);
+                        onItemSelect(null);
+                      });
+                    }}
+                    onMouseLeave={() => {
+                      setHoveredRootFolderId((prev) =>
+                        prev === folder.id ? null : prev,
+                      );
                     }}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") {
