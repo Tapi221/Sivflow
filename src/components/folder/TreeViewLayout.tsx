@@ -817,12 +817,11 @@ function TreeViewLayout({
       <div
         ref={sidebarRef}
         style={{
-          background: "linear-gradient(180deg, #fafbfd 0%, #eef2f6 100%)",
-          boxShadow:
-            "inset 0 1px 0 rgba(255,255,255,0.98), inset 0 -1px 0 rgba(148,163,184,0.34), inset -1px 0 0 rgba(148,163,184,0.28), 0 1px 2px rgba(15,23,42,0.08)",
+          backgroundColor: "var(--sidebar-bg)",
+          borderColor: "#d7d9de",
         }}
         className={cn(
-          "shrink-0 flex-col border border-[#d7d9de] rounded-r-xl relative group/sidebar select-none",
+          "shrink-0 flex-col border border-[#d7d9de] rounded-r-xl relative z-10 group/sidebar select-none bg-sidebar surface-panel-convex",
           showMobileDetail ? "hidden md:flex" : "flex",
           isResizing
             ? "transition-none will-change-[width]"
@@ -865,24 +864,11 @@ function TreeViewLayout({
           </div>
         </div>
 
-        {/* 子要素の背景に潰されないよう、最前面に凸オーバーレイを重ねる */}
-        <div
-          aria-hidden
-          className={cn(
-            "pointer-events-none absolute inset-0 z-20",
-            "rounded-r-xl",
-          )}
-          style={{
-            boxShadow:
-              "inset 1px 1px 0 rgba(255,255,255,0.94), inset -1px -1px 0 rgba(148,163,184,0.42), inset 0 0 0 1px rgba(203,213,225,0.55)",
-          }}
-        />
-
         {/* リサイズハンドル: デスクトップのみ表示 */}
         {isSidebarOpen && (
           <div
             className={cn(
-              "hidden md:block absolute top-0 right-0 w-1.5 h-full cursor-col-resize z-50 group/resize select-none outline-none transition-colors hover:bg-slate-300/20 focus-visible:outline-none",
+              "hidden md:block absolute top-0 -right-[3px] w-1.5 h-full cursor-col-resize z-50 group/resize select-none outline-none transition-colors hover:bg-slate-300/20 focus-visible:outline-none",
               isResizing && "bg-slate-300/30",
             )}
             onPointerDown={startResizing}
@@ -893,9 +879,9 @@ function TreeViewLayout({
           >
             <div
               className={cn(
-                "absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-full bg-slate-200 transition-colors",
-                "group-hover/resize:bg-slate-400",
-                isResizing && "bg-slate-500",
+                "absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-full transition-colors",
+                "bg-[#d7d9de] group-hover/resize:bg-[#b8bec8]",
+                isResizing && "bg-[#8f99a8]",
               )}
             />
           </div>
