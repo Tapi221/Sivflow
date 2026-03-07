@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, shell } from "electron";
+import { app, BrowserWindow, ipcMain, Menu, shell } from "electron";
 import * as http from "node:http";
 import * as path from "node:path";
 import { URL } from "node:url";
@@ -333,6 +333,7 @@ if (!gotSingleInstanceLock) {
   });
 
   app.whenReady().then(() => {
+    Menu.setApplicationMenu(null);
     registerIpcHandlers();
     createMainWindow();
 

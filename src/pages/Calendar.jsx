@@ -410,16 +410,18 @@ export default function Calendar() {
         <div className="flex-1 w-full grid grid-cols-1 gap-6 md:gap-8 items-start mb-20 md:mb-0">
           {/* Left: Calendar Grid */}
           <Card className="relative rounded-[32px] md:rounded-[40px] border border-[var(--surface-border)] surface-panel-convex bg-[var(--sidebar-bg)] p-4 md:p-10 h-fit md:min-h-[600px]">
-            <div className="absolute top-4 left-4 md:top-8 md:left-8 rounded-full border border-[var(--surface-border)] bg-white px-2.5 py-1.5 surface-panel-convex z-10 min-w-[98px]">
-              <div className="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-300">
-                STREAK
-              </div>
-              <div className="mt-0.5 flex items-baseline gap-1">
-                <span className="inline-block h-3 w-3 rounded-sm bg-[#FB923C]" />
-                <span className="text-2xl font-bold leading-none text-slate-700">
-                  {streak}
-                </span>
-                <span className="text-sm font-semibold text-[#8EA2C2]">days</span>
+            <div className="absolute top-4 left-4 md:top-8 md:left-8 h-10 rounded-full border border-[var(--surface-border)] bg-white px-3 face-badge-convex z-10 min-w-[112px] text-slate-500 flex items-center">
+              <div className="leading-none">
+                <div className="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-500">
+                  STREAK
+                </div>
+                <div className="mt-0.5 flex items-baseline gap-1">
+                  <span className="inline-block h-3 w-3 rounded-sm bg-[#FB923C]" />
+                  <span className="text-lg font-bold leading-none text-slate-500">
+                    {streak}
+                  </span>
+                  <span className="text-sm font-semibold text-slate-500">days</span>
+                </div>
               </div>
             </div>
 
