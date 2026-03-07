@@ -191,13 +191,13 @@ export function FolderDashboard({
         className="pointer-events-none absolute inset-0"
         style={getPageRuledBg("rgba(15,23,42,0.035)")}
       />
-      <div className="relative z-[1] max-w-[1120px] mx-auto w-full px-4 pt-2 pb-6 space-y-4">
+      <div className="relative z-[1] max-w-[1120px] mx-auto w-full px-4 pt-4 pb-6 space-y-4">
         <div className="flex flex-col gap-2">
-          <div>
-            <p className="h-[var(--app-row-px)] text-[12px] leading-[var(--app-row-px)] text-slate-400 font-bold tracking-[0.08em] uppercase">
+          <div className="rounded-xl border border-[var(--surface-border)] bg-[var(--sidebar-bg)] px-4 py-3 surface-concave">
+            <p className="text-[11px] leading-4 text-[var(--sidebar-text-muted)] font-semibold tracking-[0.14em] uppercase">
               Folder Dashboard
             </p>
-            <h2 className="text-[length:var(--app-row-px)] font-semibold text-slate-900 tracking-[-0.01em] leading-[var(--app-row-px)]">
+            <h2 className="mt-1 text-[clamp(1.4rem,2.4vw,1.9rem)] leading-tight font-bold text-[var(--sidebar-text)] tracking-[-0.01em] break-words">
               {folderName || folderId}
             </h2>
           </div>

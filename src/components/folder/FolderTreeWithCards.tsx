@@ -1687,7 +1687,7 @@ export function FolderTreeWithCards({
             <span
               className={cn(
                 "truncate text-sm",
-                isSelected ? "font-medium text-primary-700" : "text-[#202123]",
+                isSelected ? "font-medium text-[#202123]" : "text-[#202123]",
               )}
             >
               {treeNode.name}
@@ -1898,7 +1898,7 @@ export function FolderTreeWithCards({
                     onClick={() => setActiveRootFolderId(null)}
                   >
                     <ChevronLeft className="h-3.5 w-3.5" />
-                    ルート一覧
+                    セクション一覧
                   </button>
                 </div>
                 <div className="flex-1 min-h-0">
