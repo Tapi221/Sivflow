@@ -42,8 +42,8 @@ export const CodeBlockFrame: React.FC<CodeBlockFrameProps> = ({
           <div
             className="absolute z-20"
             style={{
-              left: "var(--code-header-inset-x)",
-              top: "var(--code-header-inset-y)",
+              left: "var(--code-header-inset-x, 10px)",
+              top: "var(--code-header-inset-y, 6px)",
             }}
             // ラベルクリックで親のカード選択やD&Dに干渉しにくくする
             onPointerDown={(e) => e.stopPropagation()}
@@ -58,8 +58,8 @@ export const CodeBlockFrame: React.FC<CodeBlockFrameProps> = ({
           <div
             className="absolute z-20"
             style={{
-              left: "var(--code-header-inset-x)",
-              top: "var(--code-header-inset-y)",
+              left: "var(--code-header-inset-x, 10px)",
+              top: "var(--code-header-inset-y, 6px)",
             }}
             onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
@@ -72,8 +72,8 @@ export const CodeBlockFrame: React.FC<CodeBlockFrameProps> = ({
           <div
             className="absolute z-20"
             style={{
-              right: "var(--code-header-inset-x)",
-              top: "var(--code-header-inset-y)",
+              right: "var(--code-header-inset-x, 10px)",
+              top: "var(--code-header-inset-y, 6px)",
             }}
             onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
