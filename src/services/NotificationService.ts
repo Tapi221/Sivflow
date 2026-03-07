@@ -1,6 +1,7 @@
 import type {
   Notification,  NotificationOptions,
 } from "../types/notification";
+import platform from "@/platform";
 
 /**
  * 通知サービス
@@ -101,7 +102,7 @@ class NotificationService {
           label: "サポートに連絡",
           onClick: () => {
             // サポート連絡処理
-            window.open("mailto:support@example.com", "_blank");
+            void platform.shell.openExternal("mailto:support@example.com");
           },
           primary: true,
         },

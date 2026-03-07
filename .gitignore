@@ -5,6 +5,7 @@ pnpm-lock.yaml
 
 # Build / dist artifacts
 dist/
+dist-electron/
 dist-ssr/
 dist_test/
 dist_final_check/

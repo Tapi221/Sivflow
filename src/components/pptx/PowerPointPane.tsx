@@ -43,6 +43,7 @@ import { PowerPointViewer } from "./PowerPointViewer";
 import type { PowerPointViewerHandle } from "./PowerPointViewer";
 import type { SlideData } from "./SlideImage";
 import type { DocumentItem } from "@/types";
+import platform from "@/platform";
 
 interface PowerPointPaneProps {
   doc: DocumentItem;
@@ -1216,7 +1217,7 @@ export function PowerPointPane({ doc, className }: PowerPointPaneProps) {
   const handleOpenSource = () => {
     const url = sourceUrlForOpen ?? fallbackUrl;
     if (!url) return;
-    window.open(url, "_blank", "noopener,noreferrer");
+    void platform.shell.openExternal(url);
   };
 
   const handleRetryConversion = () => {

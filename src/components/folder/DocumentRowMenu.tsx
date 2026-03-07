@@ -11,6 +11,7 @@ import { Pin } from "@/ui/icons";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/contexts/ToastContext";
 import { getLocalDb } from "@/services/localDB";
+import platform from "@/platform";
 import type { Card, DocumentItem } from "@/types";
 
 interface DocumentRowMenuProps {
@@ -196,7 +197,7 @@ export function DocumentRowMenu({
   const handleOpenNewTab = () => {
     const url = doc.remoteUrl ?? doc.localUrl ?? doc.downloadUrl;
     if (url) {
-      window.open(url, "_blank", "noopener,noreferrer");
+      void platform.shell.openExternal(url);
     } else {
       toastError("PDFのURLが見つかりません");
     }

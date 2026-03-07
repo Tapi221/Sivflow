@@ -20,6 +20,7 @@ import {
   AlertTriangle,
   RefreshCw,
 } from "@/ui/icons";
+import platform from "@/platform";
 
 export default function ImageDiagnostics() {
   const { currentUser } = useAuth();
@@ -311,7 +312,9 @@ export default function ImageDiagnostics() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => window.open(r.url, "_blank")}
+                          onClick={() => {
+                            void platform.shell.openExternal(r.url);
+                          }}
                         >
                           開く
                         </Button>

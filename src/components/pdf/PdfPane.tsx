@@ -54,6 +54,7 @@ import {
   unpinDocumentBlobUrl,
 } from "@/services/documentBlobUrlSessionCache";
 import { useAuth } from "@/contexts/AuthContext";
+import platform from "@/platform";
 import type { PdfViewerState } from "@/types";
 import { DEV_MODE, isLocalHost } from "@/utils/envGuards";
 
@@ -569,7 +570,7 @@ export function PdfPane({
   const handleOpenNewTab = () => {
     const openUrl = effectiveRemoteUrl ?? localBlobUrl ?? null;
     if (!openUrl) return;
-    window.open(openUrl, "_blank", "noopener,noreferrer");
+    void platform.shell.openExternal(openUrl);
   };
 
   // 自動スクロールは行わず、ページ移動はユーザー操作時のみ実行する。

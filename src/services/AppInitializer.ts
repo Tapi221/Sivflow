@@ -7,6 +7,7 @@ import { IndexedDBMetadataService } from "./IndexedDBMetadataService";
 import { IndexedDBRebuildOrchestrator } from "./IndexedDBRebuildOrchestrator";
 import { notificationService } from "./NotificationService";
 import { contextService } from "./ContextService";
+import platform from "@/platform";
 // NOTE: 初期化時のユーザー向け INFO 通知は UI 上で邪魔になるため表示しない。
 import { warnOncePerSession } from "./localDBRuntimeState";
 
@@ -105,9 +106,8 @@ export class AppInitializer {
               {
                 label: "サポートに連絡",
                 onClick: () => {
-                  window.open(
+                  void platform.shell.openExternal(
                     "mailto:support@example.com?subject=再構築ループエラー&body=エラーコード: rebuild_loop",
-                    "_blank",
                   );
                 },
                 primary: true,
