@@ -136,7 +136,7 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                 rowBaseClassName,
                 snapshot.isDraggingOver && "bg-blue-100 ring-1 ring-blue-300",
                 isFileDraggingOver && "bg-blue-50 ring-1 ring-blue-400",
-                "group pr-8",
+                "group pr-8 sidebar-row--folder",
               )}
               onClick={onSelect}
               onDragEnterCapture={onDragEnterCapture}
@@ -230,7 +230,7 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                   <button
                     type="button"
                     aria-label="このフォルダを開く"
-                    className="sidebar-action md:hidden h-6 w-6 p-0 grid place-items-center rounded-md hover:bg-slate-200 text-[#6E6E80] hover:text-[#202123] outline-none pointer-events-auto transition-colors shrink-0"
+                    className="sidebar-action md:hidden h-6 w-6 p-0 grid place-items-center rounded-md hover:bg-slate-200 text-[#6E6E80] hover:text-[#202123] outline-none pointer-events-auto shrink-0"
                     onClick={(e) => {
                       e.stopPropagation();
                       (onNavigate ?? onSelect)();
@@ -261,7 +261,7 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                         type="button"
                         aria-label="フォルダメニューを開く"
                         className={cn(
-                          "sidebar-action h-6 w-6 p-0 grid place-items-center rounded-md hover:bg-slate-200 text-[#6E6E80] hover:text-[#202123] outline-none pointer-events-auto transition-all shrink-0",
+                          "sidebar-action h-6 w-6 p-0 grid place-items-center rounded-md hover:bg-slate-200 text-[#6E6E80] hover:text-[#202123] outline-none pointer-events-auto shrink-0",
                           "opacity-0 group-hover:opacity-100",
                           (isSelected || menuOpen) && "opacity-100",
                         )}

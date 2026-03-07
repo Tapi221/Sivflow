@@ -114,4 +114,5 @@
   .restore-notification-text {
     color: var(--accent-main, var(--primary-color));
   }
+
 }

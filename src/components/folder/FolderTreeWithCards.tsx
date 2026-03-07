@@ -6,7 +6,13 @@ import React, {
   useMemo,
   useCallback,
 } from "react";
-import { FileText, Folder as FolderIcon, SearchX } from "@/ui/icons";
+import {
+  ChevronLeft,
+  FileText,
+  Folder as FolderIcon,
+  MoreVertical,
+  SearchX,
+} from "@/ui/icons";
 // DnD types and components
 import { DragDropContext } from "@hello-pangea/dnd";
 import { cn } from "@/lib/utils";
@@ -17,6 +23,7 @@ import type {
   SelectedExplorerItem,
 } from "@/types";
 import DeleteFolderDialog from "./DeleteFolderDialog";
+import { ContextMenu } from "./ContextMenu";
 import { useFolderDnD } from "@/hooks/useFolderDnD";
 import { useReliableFileUpload } from "@/hooks/useReliableFileUpload";
 import { useAuth } from "@/contexts/AuthContext";
@@ -650,6 +657,62 @@ export function FolderTreeWithCards({
       rootItems,
     ],
   );
+
+  const rootFolderPanels = useMemo(
+    () =>
+      rootFolders
+        .map((folder) => {
+          const id = getFolderId(folder);
+          if (!id) return null;
+          return {
+            id,
+            name: folder.folderName || folder.folder_name || "無題のフォルダ",
+            folder,
+          };
+        })
+        .filter(
+          (
+            item,
+          ): item is { id: string; name: string; folder: FolderTreeNode } =>
+            item !== null,
+        ),
+    [rootFolders],
+  );
+
+  const [activeRootFolderId, setActiveRootFolderId] = useState<string | null>(
+    null,
+  );
+
+  useEffect(() => {
+    if (!selectedFolderId) return;
+    const rootFolderIds = new Set(
+      rootFolders.map((folder) => getFolderId(folder)).filter(Boolean),
+    );
+    let currentId: string | null = selectedFolderId;
+    let rootId: string | null = null;
+    while (currentId) {
+      if (rootFolderIds.has(currentId)) {
+        rootId = currentId;
+        break;
+      }
+      const folder = treeFolders.find((f) => getFolderId(f) === currentId);
+      if (!folder) break;
+      currentId = normalizeFolderId(getParentFolderId(folder));
+    }
+    // ホバーによる selectedFolderId 変化では左ペイン表示を切り替えない。
+    // 既にルート内ツリー表示中のときだけ同期する。
+    if (activeRootFolderId !== null && rootId && activeRootFolderId !== rootId) {
+      setActiveRootFolderId(rootId);
+    }
+  }, [selectedFolderId, rootFolders, treeFolders, activeRootFolderId]);
+
+  const scopedTreeData = useMemo<ExplorerTreeNode[]>(() => {
+    if (!activeRootFolderId) return [];
+    const rootNode = explorerTreeData.find(
+      (node) => node.kind === "folder" && node.rawId === activeRootFolderId,
+    );
+    return rootNode?.children ?? [];
+  }, [activeRootFolderId, explorerTreeData]);
 
   const selectedTreeId = useMemo(() => {
     return toSelectedTreeId(selectedFolderId, selectedItem);
@@ -1599,6 +1662,8 @@ export function FolderTreeWithCards({
             className={cn(
               ROW_BASE,
               "flex h-6 min-h-6 items-center pr-2 pl-0 leading-6 select-none",
+              treeNode.kind === "card" && "sidebar-row--card",
+              treeNode.kind === "document" && "sidebar-row--folder",
               "hover:bg-muted/60",
               isSelected && "bg-muted",
             )}
@@ -1657,7 +1722,8 @@ export function FolderTreeWithCards({
     ],
   );
 
-  const hasRootContent = explorerTreeData.length > 0;
+  const hasRootContent =
+    rootFolderPanels.length > 0 || explorerTreeData.length > 0;
 
   return (
     <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
@@ -1694,26 +1760,155 @@ export function FolderTreeWithCards({
           </div>
         ) : (
           <div className="h-full min-h-0">
-            <FolderTreeArborist
-              data={explorerTreeData}
-              selectedId={selectedTreeId}
-              expandedIds={toExpandedTreeIds(expandedFolders)}
-              onSelect={handleTreeSelect}
-              onToggleExpand={(id, nextOpen) => {
-                if (!id.startsWith("folder:")) return;
-                const folderId = id.slice("folder:".length);
-                setExpandedFolders((prev) => {
-                  const next = new Set(prev);
-                  if (nextOpen) next.add(folderId);
-                  else next.delete(folderId);
-                  return next;
-                });
-              }}
-              renderNode={renderTreeNode}
-              onMove={handleArboristMove}
-              disableDrag={arboristDisableDrag}
-              disableDrop={arboristDisableDrop}
-            />
+            {rootFolderPanels.length === 0 ? (
+              <FolderTreeArborist
+                data={explorerTreeData}
+                selectedId={selectedTreeId}
+                expandedIds={toExpandedTreeIds(expandedFolders)}
+                onSelect={handleTreeSelect}
+                onToggleExpand={(id, nextOpen) => {
+                  if (!id.startsWith("folder:")) return;
+                  const folderId = id.slice("folder:".length);
+                  setExpandedFolders((prev) => {
+                    const next = new Set(prev);
+                    if (nextOpen) next.add(folderId);
+                    else next.delete(folderId);
+                    return next;
+                  });
+                }}
+                renderNode={renderTreeNode}
+                onMove={handleArboristMove}
+                disableDrag={arboristDisableDrag}
+                disableDrop={arboristDisableDrop}
+              />
+            ) : !activeRootFolderId ? (
+              <div className="h-full overflow-y-auto p-2 space-y-2">
+                {rootFolderPanels.map((folder) => (
+                  <div
+                    key={folder.id}
+                    className="group relative w-full h-16 rounded-2xl border border-[var(--surface-border)] bg-white surface-convex hover:bg-[var(--sidebar-active-bg)] px-3 text-left"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => {
+                      setActiveRootFolderId(folder.id);
+                      onFolderSelect(folder.id);
+                    }}
+                    onMouseEnter={() => {
+                      onFolderSelect(folder.id);
+                      onItemSelect(null);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setActiveRootFolderId(folder.id);
+                        onFolderSelect(folder.id);
+                      }
+                    }}
+                  >
+                    <div className="flex h-full items-center gap-3 pr-8">
+                      <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#d7d9de] bg-[var(--sidebar-bg)] surface-concave text-[#334155]">
+                        <FolderIcon className="h-5 w-5" />
+                      </span>
+                      <span className="truncate text-[15px] font-medium text-[#334155]">
+                        {folder.name}
+                      </span>
+                    </div>
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                      <ContextMenu
+                        open={openRowMenuId === `folder:${folder.id}:panel`}
+                        onOpenChange={(open) =>
+                          setOpenRowMenuId(
+                            open
+                              ? `folder:${folder.id}:panel`
+                              : (prev) =>
+                                  prev === `folder:${folder.id}:panel`
+                                    ? null
+                                    : prev,
+                          )
+                        }
+                        type="folder"
+                        onCreateSubfolder={() =>
+                          void handleCreateFolderAction(folder.id)
+                        }
+                        onCreateCard={() => void handleCreateCardAction(folder.id)}
+                        onRename={() => {
+                          setEditingId(folder.id);
+                          setEditingName(folder.name);
+                        }}
+                        onDelete={() => handleDelete(folder.id, "folder")}
+                        isPinned={
+                          pinnedItems?.some(
+                            (item) =>
+                              item.type === "folder" && item.id === folder.id,
+                          ) ?? false
+                        }
+                        onTogglePin={() => {
+                          const isPinned =
+                            pinnedItems?.some(
+                              (item) =>
+                                item.type === "folder" &&
+                                item.id === folder.id,
+                            ) ?? false;
+                          if (isPinned)
+                            onUnpinItem?.({ type: "folder", id: folder.id });
+                          else onPinItem?.({ type: "folder", id: folder.id });
+                        }}
+                      >
+                        <button
+                          type="button"
+                          aria-label="フォルダメニューを開く"
+                          className={cn(
+                            "pointer-events-auto h-7 w-7 grid place-items-center rounded-md text-[#6E6E80] hover:text-[#202123] hover:bg-slate-200",
+                            "opacity-0 group-hover:opacity-100",
+                            openRowMenuId === `folder:${folder.id}:panel` &&
+                              "opacity-100",
+                          )}
+                          onClick={(e) => e.stopPropagation()}
+                          onPointerDown={(e) => e.stopPropagation()}
+                        >
+                          <MoreVertical className="h-4 w-4" />
+                        </button>
+                      </ContextMenu>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="h-full min-h-0 flex flex-col">
+                <div className="shrink-0 px-2 py-1.5">
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1.5 h-7 rounded-full px-2 text-[12px] text-[#334155] bg-[var(--sidebar-bg)] surface-control-convex"
+                    onClick={() => setActiveRootFolderId(null)}
+                  >
+                    <ChevronLeft className="h-3.5 w-3.5" />
+                    ルート一覧
+                  </button>
+                </div>
+                <div className="flex-1 min-h-0">
+                  <FolderTreeArborist
+                    data={scopedTreeData}
+                    selectedId={selectedTreeId}
+                    expandedIds={toExpandedTreeIds(expandedFolders)}
+                    onSelect={handleTreeSelect}
+                    onToggleExpand={(id, nextOpen) => {
+                      if (!id.startsWith("folder:")) return;
+                      const folderId = id.slice("folder:".length);
+                      setExpandedFolders((prev) => {
+                        const next = new Set(prev);
+                        if (nextOpen) next.add(folderId);
+                        else next.delete(folderId);
+                        return next;
+                      });
+                    }}
+                    renderNode={renderTreeNode}
+                    onMove={handleArboristMove}
+                    disableDrag={arboristDisableDrag}
+                    disableDrop={arboristDisableDrop}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         )}
 

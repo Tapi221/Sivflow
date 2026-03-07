@@ -10,15 +10,33 @@
     box-sizing: border-box;
     padding-right: 8px;
     border-radius: 8px;
-    overflow: hidden;
-    transition:
-      background-color 160ms ease,
-      box-shadow 160ms ease,
-      border-color 160ms ease;
+    overflow: visible;
+  }
+
+  .sidebar-row::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: #d7d9de;
+    pointer-events: none;
   }
 
   .sidebar-row:hover {
     background-color: rgba(148, 163, 184, 0.12);
+  }
+
+  .sidebar-row--card {
+    background-color: #f2f2ef;
+  }
+
+  .sidebar-row--folder {
+    background-color: var(--sidebar-bg);
+    border: 1px solid #d7d9de;
+    box-shadow: var(--surface-shadow-convex);
+    color: #334155;
   }
 
   .sidebar-row[data-selected="true"] {
@@ -47,6 +65,7 @@
 
   .sidebar-row .sidebar-title {
     line-height: var(--app-row-px);
+    font-size: 15px;
   }
 
   .sidebar-row .sidebar-icon {
