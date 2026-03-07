@@ -1,14 +1,5 @@
 import { contextBridge, ipcRenderer } from "electron";
-
-interface DesktopBridgeApi {
-  app: {
-    getVersion(): Promise<string>;
-  };
-  shell: {
-    openExternal(url: string): Promise<void>;
-  };
-}
-
+import type { DesktopBridgeApi } from "../src/shared/platform-api";
 
 const IPC_CHANNELS = {
   appGetVersion: "desktop:app:getVersion",

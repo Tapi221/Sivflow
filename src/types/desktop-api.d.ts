@@ -1,4 +1,4 @@
-import type { DesktopBridgeApi } from "@/platform/types";
+import type { DesktopBridgeApi } from "@/shared/platform-api";
 
 declare global {
   interface Window {

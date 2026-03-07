@@ -1,4 +1,4 @@
-import type { PlatformApi } from "../types";
+import type { PlatformApi } from "@/shared/platform-api";
 
 const WEB_APP_VERSION =
   import.meta.env.VITE_BUILD_VERSION ?? import.meta.env.MODE;

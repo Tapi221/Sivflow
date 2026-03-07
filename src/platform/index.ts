@@ -1,13 +1,11 @@
 import { desktopPlatform } from "./desktop";
-import type { PlatformApi } from "./types";
+import { hasDesktopBridge } from "./runtime";
+import type { PlatformApi } from "@/shared/platform-api";
 import { webPlatform } from "./web";
-
-const hasDesktopBridge = (): boolean =>
-  typeof window !== "undefined" && typeof window.desktop !== "undefined";
 
 export const platform: PlatformApi = hasDesktopBridge()
   ? desktopPlatform
   : webPlatform;
 
 export default platform;
-export type { PlatformApi } from "./types";
+export type { PlatformApi } from "@/shared/platform-api";

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { CardCarousel } from "@/features/study/CardCarousel";
 import { VerticalCardPager } from "@/features/review/VerticalCardPager";
-import { useIsDesktop } from "@/hooks/useIsDesktop";
+import { useIsDesktopRuntime } from "@/hooks/useIsDesktopRuntime";
 import StudyCard from "@/features/study/StudyCard";
 import type { Card } from "@/types";
 
@@ -26,7 +26,7 @@ export function StudyReview({
   showHard,
   showEasy,
 }: Props) {
-  const isDesktop = useIsDesktop();
+  const isDesktop = useIsDesktopRuntime();
 
   // Space/Enter でアクティブカードをめくるためのトリガーカウンタ
   const [flipTrigger, setFlipTrigger] = useState(0);

@@ -1,7 +1,8 @@
-import type { DesktopBridgeApi, PlatformApi } from "../types";
+import { hasDesktopBridge } from "@/platform/runtime";
+import type { DesktopBridgeApi, PlatformApi } from "@/shared/platform-api";
 
 const getDesktopBridge = (): DesktopBridgeApi => {
-  if (typeof window === "undefined" || !window.desktop) {
+  if (!hasDesktopBridge()) {
     throw new Error("Desktop bridge is not available");
   }
   return window.desktop;

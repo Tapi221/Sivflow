@@ -15,7 +15,7 @@ import {
 } from "@/components/card/common/constants";
 import { useCardEntity } from "@/hooks/useCardEntity";
 import { useUserSettings } from "@/hooks/useUserSettings";
-import { useIsDesktop } from "@/hooks/useIsDesktop";
+import { useIsDesktopRuntime } from "@/hooks/useIsDesktopRuntime";
 
 export default function CardView() {
   const navigate = useNavigate();
@@ -38,7 +38,7 @@ export default function CardView() {
     updateCard,
   } = useCards(folderId || undefined);
   const { settings } = useUserSettings();
-  const isDesktop = useIsDesktop();
+  const isDesktop = useIsDesktopRuntime();
 
   useEffect(() => {
     if (typeof window === "undefined") return;

@@ -4,7 +4,7 @@ import { useSearchParams } from "react-router-dom";
 import { useCards } from "@/hooks/useCards";
 import { useFolders } from "@/hooks/useFolders";
 import { useDocuments } from "@/hooks/useDocuments";
-import { useIsDesktop } from "@/hooks/useIsDesktop";
+import { useIsDesktopRuntime } from "@/hooks/useIsDesktopRuntime";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/contexts/ToastContext";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -20,7 +20,7 @@ export default function Folders() {
     setSearchParams,
   );
   const queryClient = useQueryClient();
-  const isDesktop = useIsDesktop();
+  const isDesktop = useIsDesktopRuntime();
   const queryFolderId = searchParams.get("folderId");
   const queryCardId = searchParams.get("cardId");
   const queryDocId = searchParams.get("docId");
