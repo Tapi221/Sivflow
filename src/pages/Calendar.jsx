@@ -388,7 +388,7 @@ export default function Calendar() {
         type="button"
         variant="ghost"
         size="icon"
-        className="absolute top-3 z-20 h-8 w-8 rounded-full border border-[var(--sidebar-border)] bg-[var(--sidebar-bg)] text-[var(--sidebar-text)] shadow-sm hover:bg-[var(--sidebar-active-bg)]"
+        className="absolute top-3 z-20 h-8 w-8 rounded-full bg-[var(--sidebar-bg)] text-[#334155] surface-control-convex hover:bg-[var(--sidebar-active-bg)]"
         style={{
           right: isMetaOpen
             ? "calc(var(--ui-panel-width) - var(--ui-space-3))"
@@ -444,7 +444,7 @@ export default function Calendar() {
                   variant="ghost"
                   size="icon"
                   onClick={() => setCurrentDate(addMonths(currentDate, -1))}
-                  className="h-8 w-8 rounded-full text-slate-400 hover:text-primary-600 bg-white border border-[var(--surface-border)] face-badge-convex hover:bg-white shrink-0"
+                  className="h-8 w-8 rounded-full text-[#334155] hover:text-primary-600 bg-white surface-control-convex hover:bg-white shrink-0"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </Button>
@@ -455,7 +455,7 @@ export default function Calendar() {
                   variant="ghost"
                   size="icon"
                   onClick={() => setCurrentDate(addMonths(currentDate, 1))}
-                  className="h-8 w-8 rounded-full text-slate-400 hover:text-primary-600 bg-white border border-[var(--surface-border)] face-badge-convex hover:bg-white shrink-0"
+                  className="h-8 w-8 rounded-full text-[#334155] hover:text-primary-600 bg-white surface-control-convex hover:bg-white shrink-0"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </Button>

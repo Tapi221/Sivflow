@@ -132,7 +132,7 @@ export default function CardView() {
         type="button"
         variant="ghost"
         size="icon"
-        className="hidden md:flex absolute top-3 z-20 h-8 w-8 rounded-full border border-[var(--sidebar-border)] bg-[var(--sidebar-bg)] text-[var(--sidebar-text)] shadow-sm hover:bg-[var(--sidebar-active-bg)]"
+        className="hidden md:flex absolute top-3 z-20 h-8 w-8 rounded-full bg-[var(--sidebar-bg)] text-[#334155] surface-control-convex hover:bg-[var(--sidebar-active-bg)]"
         style={{
           right: isMetaOpen
             ? "calc(var(--ui-panel-width) - var(--ui-space-3))"

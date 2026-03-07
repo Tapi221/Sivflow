@@ -91,6 +91,13 @@
   .surface-convex {
     box-shadow: var(--surface-shadow-convex);
   }
+  
+  /* 顔アイコンの凸感、同期ボタンとかペイン開閉のやつとかのボタン */ 
+  .surface-control-convex {
+    border: 1px solid #d7d9de;
+    color: #334155;
+    box-shadow: var(--surface-shadow-convex);
+  }
 
   .surface-concave {
     box-shadow: var(--surface-shadow-concave);

@@ -120,7 +120,7 @@ export function RightPane({
           type="button"
           variant="ghost"
           size="icon"
-          className="absolute top-3 z-20 h-8 w-8 rounded-full border border-[var(--sidebar-border)] bg-[var(--sidebar-bg)] text-[var(--sidebar-text)] shadow-sm hover:bg-[var(--sidebar-active-bg)]"
+          className="absolute top-3 z-20 h-8 w-8 rounded-full bg-[var(--sidebar-bg)] text-[#334155] surface-control-convex hover:bg-[var(--sidebar-active-bg)]"
           style={{
             right: isMetaOpen
               ? "calc(var(--ui-panel-width) - var(--ui-space-3))"
@@ -154,7 +154,7 @@ export function RightPane({
               <h3 className="text-[12px] font-semibold tracking-[0.08em] uppercase text-[var(--sidebar-text-muted)]">
                 フォルダ情報
               </h3>
-              <p className="text-sm text-[var(--sidebar-text)] break-anywhere">
+              <p className="text-sm text-[#334155] break-anywhere">
                 {selectedFolderName}
               </p>
               <div className="text-xs text-[var(--sidebar-text-muted)] space-y-1">
