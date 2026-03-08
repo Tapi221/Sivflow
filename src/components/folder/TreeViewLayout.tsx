@@ -1,6 +1,5 @@
 import CreateCardSelectionDialog from "@/components/card/overlays/CreateCardSelectionDialog";
 import CreationModeDialog from "@/components/card/overlays/CreationModeDialog";
-import { ExplorerTabs } from "@/components/explorer/ExplorerTabs";
 import { PinnedPanel } from "@/components/explorer/PinnedPanel";
 import { RecentPanel } from "@/components/explorer/RecentPanel";
 import { useCards } from "@/hooks/card/useCards";
@@ -11,21 +10,16 @@ import { resolveCardTagNames, useTags } from "@/hooks/settings/useTags";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { cn } from "@/lib/utils";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
-import { ArrowLeft } from "@/ui/icons";
 import { createPageUrl } from "@/utils";
-import React, {
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ExplorerFilterSummary } from "./ExplorerFilterSummary";
+import { TreeViewMainPane } from "./components/TreeViewMainPane";
+import { TreeViewSidebar } from "./components/TreeViewSidebar";
 import { FolderTreeWithCards } from "./FolderTreeWithCards";
-import { RightPane } from "./RightPane";
 import { ViewManagerDialog } from "./ViewManagerDialog";
 import { ViewsPanel } from "./ViewsPanel";
+import { useTreeViewDerivedState } from "./hooks/useTreeViewDerivedState";
+import { useTreeViewSidebar } from "./hooks/useTreeViewSidebar";
 import { buildVirtualTree, type ViewDef, type ViewKind } from "./viewTypes";
 
 interface TreeViewLayoutProps {
@@ -42,44 +36,18 @@ interface TreeViewLayoutProps {
   navigateToSectionListToken?: number;
 }
 
-const MIN_SIDEBAR_W = 200;
-const MAX_SIDEBAR_W = 600;
-const DEFAULT_SIDEBAR_W = 320;
 const DEFAULT_FOLDER_VIEW: ViewDef = {
   id: "folder-default",
   name: "フォルダ",
   kind: "folder",
 };
+
 const ACTIVE_VIEW_KINDS: ViewKind[] = ["folder", "tagCategory", "tagTree"];
 
 const createViewId = () =>
   typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
     ? crypto.randomUUID()
     : `view-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-
-const toDate = (value: unknown): Date | null => {
-  if (value == null) return null;
-
-  if (
-    typeof value === "object" &&
-    "toDate" in value &&
-    typeof (value as { toDate: () => unknown }).toDate === "function"
-  ) {
-    const raw = (value as { toDate: () => unknown }).toDate();
-    return raw instanceof Date && !Number.isNaN(raw.getTime()) ? raw : null;
-  }
-
-  if (value instanceof Date) {
-    return Number.isNaN(value.getTime()) ? null : value;
-  }
-
-  if (typeof value === "number" || typeof value === "string") {
-    const d = new Date(value);
-    return Number.isNaN(d.getTime()) ? null : d;
-  }
-
-  return null;
-};
 
 function TreeViewLayout({
   folders,
@@ -103,23 +71,52 @@ function TreeViewLayout({
   const { getTagColor, getCategoryName, listCategoryIdsInUse, tagById, tags } =
     useTags();
 
-const explorerTab = useExplorerStore((s) => s.explorerTab);
-const setExplorerTab = useExplorerStore((s) => s.setExplorerTab);
+  const {
+    sidebarRef,
+    contentScrollRef,
+    isSidebarOpen,
+    isMobile,
+    isResizing,
+    startResizing,
+  } = useTreeViewSidebar();
 
-const pinnedItems = useExplorerStore((s) => s.pinnedItems);
-const pinItem = useExplorerStore((s) => s.pinItem);
-const unpinItem = useExplorerStore((s) => s.unpinItem);
+  const {
+    getFolderPath,
+    selectedFolder,
+    selectedDocument,
+    mobileDetailTitle,
+    folderCards,
+    folderStats,
+    showMobileDetail,
+  } = useTreeViewDerivedState({
+    folders,
+    cards,
+    documents,
+    selectedFolderId,
+    selectedItem,
+    selectedCardId,
+    selectedDocumentId,
+    autoCarryOver: settings?.autoCarryOver ?? true,
+    isMobile,
+  });
 
-const recent = useExplorerStore((s) => s.recent);
-const addRecent = useExplorerStore((s) => s.addRecent);
-const clearRecent = useExplorerStore((s) => s.clearRecent);
+  const explorerTab = useExplorerStore((s) => s.explorerTab);
+  const setExplorerTab = useExplorerStore((s) => s.setExplorerTab);
 
-const tagFilter = useExplorerStore((s) => s.tagFilter);
-const tagMatchMode = useExplorerStore((s) => s.tagMatchMode);
-const uncertaintyFilter = useExplorerStore((s) => s.uncertaintyFilter);
-const bookmarkedFilter = useExplorerStore((s) => s.bookmarkedFilter);
-const draftFilter = useExplorerStore((s) => s.draftFilter);
-const contentTypeFilter = useExplorerStore((s) => s.contentTypeFilter);
+  const pinnedItems = useExplorerStore((s) => s.pinnedItems);
+  const pinItem = useExplorerStore((s) => s.pinItem);
+  const unpinItem = useExplorerStore((s) => s.unpinItem);
+
+  const recent = useExplorerStore((s) => s.recent);
+  const addRecent = useExplorerStore((s) => s.addRecent);
+  const clearRecent = useExplorerStore((s) => s.clearRecent);
+
+  const tagFilter = useExplorerStore((s) => s.tagFilter);
+  const tagMatchMode = useExplorerStore((s) => s.tagMatchMode);
+  const uncertaintyFilter = useExplorerStore((s) => s.uncertaintyFilter);
+  const bookmarkedFilter = useExplorerStore((s) => s.bookmarkedFilter);
+  const draftFilter = useExplorerStore((s) => s.draftFilter);
+  const contentTypeFilter = useExplorerStore((s) => s.contentTypeFilter);
 
   useEffect(() => {
     if (explorerTab === "inbox") {
@@ -127,79 +124,10 @@ const contentTypeFilter = useExplorerStore((s) => s.contentTypeFilter);
     }
   }, [explorerTab, setExplorerTab]);
 
-  const [sidebarWidth, setSidebarWidth] = useState(() => {
-    if (typeof window === "undefined") return DEFAULT_SIDEBAR_W;
-    const saved = localStorage.getItem("ui.sidebarWidth");
-    return saved ? parseInt(saved, 10) : DEFAULT_SIDEBAR_W;
-  });
-
-  const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
-    if (typeof window === "undefined") return true;
-    const saved = localStorage.getItem("ui.sidebarOpen");
-    return saved !== null ? saved === "true" : true;
-  });
-
-  const [isMobile, setIsMobile] = useState(() =>
-    typeof window !== "undefined" ? window.innerWidth < 768 : false,
-  );
-
-  const [isResizing, setIsResizing] = useState(false);
   const [isCreateSelectionOpen, setIsCreateSelectionOpen] = useState(false);
   const [isModeSelectionOpen, setIsModeSelectionOpen] = useState(false);
   const [isViewManagerOpen, setIsViewManagerOpen] = useState(false);
   const [createFolderRequestToken, setCreateFolderRequestToken] = useState(0);
-  const sidebarRef = useRef<HTMLDivElement>(null);
-  const contentScrollRef = useRef<HTMLDivElement>(null);
-
-  const resizingRef = useRef(false);
-  const startXRef = useRef(0);
-  const startWRef = useRef(0);
-  const pendingWRef = useRef(sidebarWidth);
-  const rafIdRef = useRef<number | null>(null);
-
-  const clamp = (w: number) =>
-    Math.min(Math.max(w, MIN_SIDEBAR_W), MAX_SIDEBAR_W);
-
-  const applyWidthDom = useCallback(
-    (w: number) => {
-      if (isMobile) return;
-      pendingWRef.current = clamp(w);
-
-      if (rafIdRef.current != null) return;
-      rafIdRef.current = window.requestAnimationFrame(() => {
-        rafIdRef.current = null;
-        const el = sidebarRef.current;
-        if (!el) return;
-        el.style.width = isSidebarOpen ? `${pendingWRef.current}px` : "0px";
-      });
-    },
-    [isMobile, isSidebarOpen],
-  );
-
-  useEffect(() => {
-    const onResize = () => setIsMobile(window.innerWidth < 768);
-    onResize();
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
-
-  useEffect(() => {
-    const el = sidebarRef.current;
-    if (!el) return;
-    if (!isMobile) {
-      el.style.width = isSidebarOpen ? `${sidebarWidth}px` : "0px";
-    } else {
-      // モバイル時は常に画面幅優先。desktop時のinline widthを完全に破棄する。
-      el.style.width = "";
-    }
-    pendingWRef.current = sidebarWidth;
-  }, [isMobile, sidebarWidth, isSidebarOpen]);
-
-  const showMobileDetail =
-    isMobile &&
-    Boolean(
-      selectedFolderId || selectedCardId || selectedDocumentId || selectedItem,
-    );
 
   const handleFolderSelectWithRecent = (folderId: string | null) => {
     onFolderSelect(folderId);
@@ -207,106 +135,6 @@ const contentTypeFilter = useExplorerStore((s) => s.contentTypeFilter);
       addRecent({ type: "folder", id: folderId });
     }
   };
-
-  const getFolderPath = useCallback(
-    (folderId: string | null): string => {
-      if (!folderId) return "";
-      const path: string[] = [];
-      let currentFolder = folders.find((folder) => folder.id === folderId);
-      while (currentFolder) {
-        path.unshift(currentFolder.folderName);
-        currentFolder = folders.find(
-          (folder) => folder.id === currentFolder?.parentFolderId,
-        );
-      }
-      return path.join(" / ");
-    },
-    [folders],
-  );
-
-  const selectedFolder = useMemo(() => {
-    if (!selectedFolderId) return null;
-    return folders.find((folder) => folder.id === selectedFolderId) ?? null;
-  }, [folders, selectedFolderId]);
-
-  const selectedDocument = useMemo(() => {
-    if (!selectedDocumentId) return null;
-    return (
-      documents.find(
-        (document) =>
-          (document.id || document.documentId) === selectedDocumentId,
-      ) ?? null
-    );
-  }, [documents, selectedDocumentId]);
-
-  const mobileDetailTitle = useMemo(() => {
-    if (selectedItem?.type === "directory") return "ディレクトリ";
-    if (selectedItem?.type === "gallery") return "ギャラリー";
-    if (selectedItem?.type === "calendar") return "学習予定";
-    if (selectedItem?.type === "settings") return "設定";
-    if (selectedItem?.type === "trash") return "ごみ箱";
-    if (selectedItem?.type === "card") return "カード";
-    if (selectedItem?.type === "document") return "ドキュメント";
-    return selectedFolder?.folderName ?? "フォルダ";
-  }, [selectedItem, selectedFolder]);
-
-  const folderCards = useMemo(() => {
-    if (!selectedFolderId) return [];
-    return cards.filter((card) => {
-      const fid = card.folderId ?? card.folderId;
-      if (fid !== selectedFolderId) return false;
-      const isDeleted = card.isDeleted ?? card.isDeleted;
-      return !isDeleted;
-    });
-  }, [cards, selectedFolderId]);
-
-  const folderStats = useMemo(() => {
-    const autoCarryOver = settings?.autoCarryOver ?? true;
-    const today = new Date();
-    const tDate = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate(),
-    );
-    let dueCount = 0;
-    let unlearnedCount = 0;
-    let lastReviewedAt: Date | null = null;
-
-    for (const card of folderCards) {
-      const isDraft = card.isDraft ?? card.isDraft;
-      if (!isDraft) {
-        const reviewDate = toDate(card.nextReviewDate ?? card.nextReviewDate);
-        if (reviewDate) {
-          const rDate = new Date(
-            reviewDate.getFullYear(),
-            reviewDate.getMonth(),
-            reviewDate.getDate(),
-          );
-          if (
-            autoCarryOver ? rDate <= tDate : rDate.getTime() === tDate.getTime()
-          ) {
-            dueCount += 1;
-          }
-        }
-      }
-
-      const reviewCount = card.reviewCount ?? card.reviewCount ?? 0;
-      if (!isDraft && reviewCount === 0) {
-        unlearnedCount += 1;
-      }
-
-      const lastReview = toDate(card.lastReviewAt ?? card.lastReviewAt);
-      if (lastReview && (!lastReviewedAt || lastReview > lastReviewedAt)) {
-        lastReviewedAt = lastReview;
-      }
-    }
-
-    return {
-      dueCount,
-      unlearnedCount,
-      lastReviewedAt,
-    };
-  }, [folderCards, settings?.autoCarryOver]);
 
   const handleStartStudy = useCallback(() => {
     if (!selectedFolderId) return;
@@ -393,8 +221,9 @@ const contentTypeFilter = useExplorerStore((s) => s.contentTypeFilter);
 
   const selectedViewId = useMemo(() => {
     const savedViewId = settings?.selectedExplorerViewId;
-    if (savedViewId && viewDefs.some((view) => view.id === savedViewId))
+    if (savedViewId && viewDefs.some((view) => view.id === savedViewId)) {
       return savedViewId;
+    }
     return viewDefs[0]?.id ?? DEFAULT_FOLDER_VIEW.id;
   }, [settings?.selectedExplorerViewId, viewDefs]);
 
@@ -449,12 +278,14 @@ const contentTypeFilter = useExplorerStore((s) => s.contentTypeFilter);
         bookmarkedFilter !== "any" ||
         draftFilter !== "any" ||
         contentTypeFilter.length < 3);
-    if (!active)
+
+    if (!active) {
       return {
         filteredCards: cards,
         filteredDocuments: documents,
         isFiltering: false,
       };
+    }
 
     const allowCards = contentTypeFilter.includes("card");
     const allowPdf = contentTypeFilter.includes("pdf");
@@ -462,6 +293,7 @@ const contentTypeFilter = useExplorerStore((s) => s.contentTypeFilter);
 
     const filtered = cards.filter((card) => {
       if (!allowCards) return false;
+
       if (tagFilter.length > 0) {
         const resolvedNames = resolveCardTagNames(
           card.tagIds,
@@ -469,11 +301,13 @@ const contentTypeFilter = useExplorerStore((s) => s.contentTypeFilter);
           tagById,
         );
         if (resolvedNames.length === 0) return false;
+
         const cardTagSet = new Set(resolvedNames);
         const tagMatched =
           tagMatchMode === "any"
             ? tagFilter.some((t) => cardTagSet.has(t))
             : tagFilter.every((t) => cardTagSet.has(t));
+
         if (!tagMatched) return false;
       }
 
@@ -549,6 +383,7 @@ const contentTypeFilter = useExplorerStore((s) => s.contentTypeFilter);
   const handleAddView = useCallback(
     async (kind: ViewKind) => {
       if (kind === "folder") return;
+
       const nextView: ViewDef = {
         id: createViewId(),
         name: kind === "tagCategory" ? "新しいタグビュー" : "新しいタグツリー",
@@ -562,6 +397,7 @@ const contentTypeFilter = useExplorerStore((s) => s.contentTypeFilter);
                 ungroupedLabel: "未分類",
               },
       };
+
       await persistSettings({
         explorerViews: [...viewDefs, nextView],
         selectedExplorerViewId: nextView.id,
@@ -640,86 +476,6 @@ const contentTypeFilter = useExplorerStore((s) => s.contentTypeFilter);
     [persistSettings, viewDefs],
   );
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "b") {
-        const target = e.target as HTMLElement;
-        if (
-          target.tagName === "INPUT" ||
-          target.tagName === "TEXTAREA" ||
-          target.isContentEditable
-        )
-          return;
-        e.preventDefault();
-        setIsSidebarOpen((prev) => {
-          const newState = !prev;
-          localStorage.setItem("ui.sidebarOpen", String(newState));
-          return newState;
-        });
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
-
-  const startResizing = useCallback(
-    (e: React.PointerEvent) => {
-      if (!isSidebarOpen) return;
-      e.preventDefault();
-
-      (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
-
-      resizingRef.current = true;
-      setIsResizing(true);
-
-      startXRef.current = e.clientX;
-      startWRef.current = pendingWRef.current;
-
-      document.body.style.userSelect = "none";
-      document.body.style.cursor = "col-resize";
-    },
-    [isSidebarOpen],
-  );
-
-  const stopResizing = useCallback(() => {
-    if (!resizingRef.current) return;
-
-    resizingRef.current = false;
-    setIsResizing(false);
-
-    document.body.style.userSelect = "";
-    document.body.style.cursor = "";
-
-    const finalW = pendingWRef.current;
-    setSidebarWidth(finalW);
-    localStorage.setItem("ui.sidebarWidth", String(finalW));
-  }, []);
-
-  const onResizeMove = useCallback(
-    (e: PointerEvent) => {
-      if (!resizingRef.current) return;
-      const dx = e.clientX - startXRef.current;
-      applyWidthDom(startWRef.current + dx);
-    },
-    [applyWidthDom],
-  );
-
-  useEffect(() => {
-    if (!isResizing) return;
-
-    window.addEventListener("pointermove", onResizeMove, { passive: true });
-    window.addEventListener("pointerup", stopResizing);
-    window.addEventListener("pointercancel", stopResizing);
-
-    return () => {
-      window.removeEventListener("pointermove", onResizeMove);
-      window.removeEventListener("pointerup", stopResizing);
-      window.removeEventListener("pointercancel", stopResizing);
-      if (rafIdRef.current != null) cancelAnimationFrame(rafIdRef.current);
-      rafIdRef.current = null;
-    };
-  }, [isResizing, onResizeMove, stopResizing]);
-
   const renderTabContent = () => {
     switch (explorerTab) {
       case "pinned":
@@ -735,6 +491,7 @@ const contentTypeFilter = useExplorerStore((s) => s.contentTypeFilter);
             getFolderPath={getFolderPath}
           />
         );
+
       case "recent":
         return (
           <RecentPanel
@@ -747,6 +504,7 @@ const contentTypeFilter = useExplorerStore((s) => s.contentTypeFilter);
             onClearRecent={clearRecent}
           />
         );
+
       case "views":
         return (
           <ViewsPanel
@@ -760,6 +518,7 @@ const contentTypeFilter = useExplorerStore((s) => s.contentTypeFilter);
             onOpenManager={() => setIsViewManagerOpen(true)}
           />
         );
+
       case "explorer":
       default:
         return (
@@ -800,145 +559,51 @@ const contentTypeFilter = useExplorerStore((s) => s.contentTypeFilter);
         isResizing && "select-none cursor-col-resize",
       )}
     >
-      {/* =====================================================
-          サイドバー
-          【修正】overflow-hidden を常時から削除。
-          will-change-[width] もリサイズ中のみに限定。
-          理由: overflow-hidden + will-change の組み合わせが新しい
-          スタッキングコンテキストを形成し、Radix UI の DropdownMenu
-          (ContextMenu) がポータル経由で描画されてもポインターイベントが
-          サイドバー要素に届かなくなっていた。
-          サイドバーを閉じた時は !isSidebarOpen 条件クラスの
-          md:overflow-hidden が適用されるため見た目は壊れない。
-      ===================================================== */}
-      <div
-        ref={sidebarRef}
-        style={{
-          backgroundColor: "var(--sidebar-bg)",
-          borderColor: "#d7d9de",
+      <TreeViewSidebar
+        sidebarRef={sidebarRef}
+        contentScrollRef={contentScrollRef}
+        isSidebarOpen={isSidebarOpen}
+        isResizing={isResizing}
+        showMobileDetail={showMobileDetail}
+        explorerTab={explorerTab}
+        setExplorerTab={setExplorerTab}
+        allTags={allTags}
+        getTagColor={getTagColor}
+        isFilterActive={isFilterActive}
+        resultCount={filteredCards.length + filteredDocuments.length}
+        onCreateRootFolder={handleCreateRootFolder}
+        onStartResizing={startResizing}
+      >
+        {renderTabContent()}
+      </TreeViewSidebar>
+
+      <TreeViewMainPane
+        isMobile={isMobile}
+        showMobileDetail={showMobileDetail}
+        mobileDetailTitle={mobileDetailTitle}
+        selectedItem={selectedItem}
+        selectedCardId={selectedCardId}
+        selectedDocument={selectedDocument}
+        selectedFolderId={selectedFolderId}
+        selectedFolderName={selectedFolder?.folderName ?? "フォルダ"}
+        folders={folders}
+        cards={cards}
+        documents={documents}
+        folderCards={folderCards}
+        folderStats={folderStats}
+        onItemSelect={onItemSelect}
+        onFolderSelect={onFolderSelect}
+        onCardUpdated={onCardUpdated}
+        onDocumentUpdated={updateDocument}
+        onRenameFolder={async (folderId, newName) => {
+          await updateFolder(folderId, { folderName: newName });
         }}
-        className={cn(
-          "shrink-0 flex-col border-r border-[#e3e6ea] relative z-10 group/sidebar select-none",
-          showMobileDetail ? "hidden md:flex" : "flex",
-          isResizing
-            ? "transition-none will-change-[width]"
-            : "transition-all duration-300 ease-in-out",
-          "w-[100dvw] max-w-[100dvw] md:w-auto md:max-w-none",
-          !isSidebarOpen &&
-            "md:w-0 md:border-0 md:overflow-hidden md:shadow-none",
-        )}
-      >
-        <div className="flex flex-col h-full min-h-0 w-full overflow-hidden">
-          {/* ExplorerTabs: 常に固定ヘッダー */}
-          <div className="shrink-0">
-            <ExplorerTabs
-              activeTab={explorerTab}
-              onTabChange={setExplorerTab}
-              allTags={allTags}
-              onCreateRootFolder={handleCreateRootFolder}
-              showExplorerActions={explorerTab === "explorer"}
-            />
-          </div>
-
-          <div className="shrink-0">
-            <ExplorerFilterSummary
-              getTagColor={getTagColor}
-              isFilterActive={isFilterActive}
-              resultCount={filteredCards.length + filteredDocuments.length}
-            />
-          </div>
-
-          <div
-            ref={contentScrollRef}
-            className={cn(
-              "flex-1 min-h-0 outline-none min-w-0",
-              explorerTab === "explorer"
-                ? "overflow-hidden"
-                : "overflow-y-auto",
-            )}
-          >
-            {renderTabContent()}
-          </div>
-        </div>
-
-        {/* リサイズハンドル: デスクトップのみ表示 */}
-        {isSidebarOpen && (
-          <div
-            className={cn(
-              "hidden md:block absolute top-0 -right-[3px] w-1.5 h-full cursor-col-resize z-50 group/resize select-none outline-none transition-colors hover:bg-slate-300/20 focus-visible:outline-none",
-              isResizing && "bg-slate-300/30",
-            )}
-            onPointerDown={startResizing}
-            role="separator"
-            aria-label="サイドバーのサイズ変更"
-            tabIndex={0}
-            style={{ touchAction: "none" }}
-          >
-            <div
-              className={cn(
-                "absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-full transition-colors",
-                "bg-[#d7d9de] group-hover/resize:bg-[#b8bec8]",
-                isResizing && "bg-[#8f99a8]",
-              )}
-            />
-          </div>
-        )}
-      </div>
-
-      {/* =====================================================
-          右ペイン
-          【修正】overflow-hidden を削除。
-          理由: 右ペインの overflow-hidden も新しいスタッキングコンテキストを
-          作り、サイドバー内の Radix UI DropdownMenu のイベント伝播を
-          妨害していた。
-      ===================================================== */}
-      <div
-        className={cn(
-          "flex-1 min-h-0 min-w-0 bg-white flex-col",
-          showMobileDetail ? "flex" : "hidden md:flex",
-        )}
-      >
-        {isMobile && showMobileDetail && (
-          <div className="shrink-0 flex items-center gap-2 px-3 py-2 border-b border-slate-100 bg-white">
-            <button
-              type="button"
-              onClick={() => {
-                onItemSelect(null);
-                onFolderSelect(null);
-              }}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50"
-              aria-label="一覧に戻る"
-            >
-              <ArrowLeft className="w-4 h-4" />
-            </button>
-            <span className="text-sm font-semibold text-slate-700">
-              {mobileDetailTitle}
-            </span>
-          </div>
-        )}
-        <RightPane
-          selectedItem={selectedItem}
-          selectedCardId={selectedCardId}
-          selectedDocument={selectedDocument}
-          selectedFolderId={selectedFolderId}
-          selectedFolderName={selectedFolder?.folderName ?? "フォルダ"}
-          folders={folders}
-          cards={cards}
-          documents={documents}
-          folderCards={folderCards}
-          folderStats={folderStats}
-          onCardUpdated={onCardUpdated}
-          onDocumentUpdated={updateDocument}
-          onRenameFolder={async (folderId, newName) => {
-            await updateFolder(folderId, { folderName: newName });
-          }}
-          handlers={{
-            onStartStudy: handleStartStudy,
-            onViewCards: handleViewCards,
-            onCreateCard: handleOpenCreateCard,
-          }}
-        />
-      </div>
+        handlers={{
+          onStartStudy: handleStartStudy,
+          onViewCards: handleViewCards,
+          onCreateCard: handleOpenCreateCard,
+        }}
+      />
 
       <CreateCardSelectionDialog
         open={isCreateSelectionOpen}
@@ -955,6 +620,7 @@ const contentTypeFilter = useExplorerStore((s) => s.contentTypeFilter);
           setIsCreateSelectionOpen(true);
         }}
       />
+
       <ViewManagerDialog
         open={isViewManagerOpen}
         onOpenChange={setIsViewManagerOpen}
@@ -973,11 +639,3 @@ const contentTypeFilter = useExplorerStore((s) => s.contentTypeFilter);
 }
 
 export default TreeViewLayout;
-
-
-
-
-
-
-
-
