@@ -821,7 +821,7 @@ function TreeViewLayout({
           borderColor: "#d7d9de",
         }}
         className={cn(
-          "shrink-0 flex-col border border-[#d7d9de] rounded-r-xl relative z-10 group/sidebar select-none bg-sidebar surface-panel-convex",
+          "shrink-0 flex-col border-r border-[#e3e6ea] relative z-10 group/sidebar select-none",
           showMobileDetail ? "hidden md:flex" : "flex",
           isResizing
             ? "transition-none will-change-[width]"

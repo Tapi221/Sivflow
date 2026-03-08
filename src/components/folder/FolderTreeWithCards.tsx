@@ -1786,14 +1786,15 @@ export function FolderTreeWithCards({
                 disableDrop={arboristDisableDrop}
               />
             ) : !activeRootFolderId ? (
-              <div className="h-full overflow-y-auto p-2 space-y-2">
+              <div className="h-full overflow-y-auto px-1 py-1">
                 {rootFolderPanels.map((folder) => (
                   <div
                     key={folder.id}
                     className={cn(
-                      "group relative w-full h-16 rounded-2xl border border-[var(--surface-border)] bg-white surface-convex px-3 text-left",
-                      hoveredRootFolderId === folder.id &&
-                        "bg-[var(--sidebar-active-bg)]",
+                      "group relative w-full h-8 rounded-[4px] px-2 text-left flex items-center cursor-pointer",
+                      hoveredRootFolderId === folder.id
+                        ? "bg-black/5"
+                        : "bg-transparent",
                     )}
                     role="button"
                     tabIndex={0}
@@ -1821,11 +1822,9 @@ export function FolderTreeWithCards({
                       }
                     }}
                   >
-                    <div className="flex h-full items-center gap-3 pr-8">
-                      <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#d7d9de] bg-[var(--sidebar-bg)] surface-concave text-[#334155]">
-                        <FolderIcon className="h-5 w-5" />
-                      </span>
-                      <span className="truncate text-[15px] font-medium text-[#334155]">
+                    <div className="flex items-center gap-1.5 pr-8 min-w-0">
+                      <FolderIcon className="h-4 w-4 shrink-0 text-[#6e7280]" />
+                      <span className="truncate text-[14px] font-medium text-[#1f2328]">
                         {folder.name}
                       </span>
                     </div>

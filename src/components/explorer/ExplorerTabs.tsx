@@ -43,8 +43,7 @@ export function ExplorerTabs({
     <div
       className={cn(
         "flex items-center justify-between pr-2 h-9",
-        "border border-[#d7d9de] rounded-md",
-        "surface-panel-convex",
+        "border-b border-[#e3e6ea]",
         // 左上の固定ハンバーガーボタンと重ならないよう、全画面幅で左余白を確保する。
         "pl-10",
       )}

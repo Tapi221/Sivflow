@@ -9,36 +9,41 @@
     line-height: var(--app-row-px);
     box-sizing: border-box;
     padding-right: 8px;
-    border-radius: 8px;
+    border-radius: 4px;
     overflow: visible;
+    /* hover は Tailwind の hover:bg-* で付与するため、ここでは背景なし */
+    background-color: transparent;
+    color: #1f2328;
   }
 
+  /* 行間の区切り線は廃止 */
   .sidebar-row::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 1px;
-    background: #d7d9de;
-    pointer-events: none;
+    display: none;
   }
 
   .sidebar-row--card {
     background-color: transparent;
   }
 
+  /* フォルダ行: カード感を除去 → 背景・枠・影なし */
   .sidebar-row--folder {
-    background-color: var(--sidebar-bg);
-    border: 1px solid #d7d9de;
-    box-shadow: var(--surface-shadow-convex);
-    color: #334155;
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    color: #1f2328;
   }
 
+  /* hover: 薄いグレー */
+  .sidebar-row--folder:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  /* 選択中: 薄いブルー系 */
   .sidebar-row[data-selected="true"] {
-    background-color: color-mix(in srgb, var(--sidebar-active-bg) 78%, white);
+    background-color: rgba(104, 154, 152, 0.12);
   }
 
+  /* 選択インジケーター（左端の細線）は維持 */
   .sidebar-row[data-selected="true"]::before {
     content: "";
     position: absolute;
@@ -48,10 +53,9 @@
     background: var(--sidebar-active-accent);
   }
 
-  .sidebar-row:focus-visible,
-  .sidebar-row:focus-within {
+  .sidebar-row:focus-visible {
     outline: none;
-    box-shadow: inset 0 0 0 1px rgba(var(--color-primary-600), 0.22);
+    box-shadow: inset 0 0 0 1px rgba(104, 154, 152, 0.35);
   }
 
   .sidebar-row .sidebar-label {
@@ -61,7 +65,8 @@
 
   .sidebar-row .sidebar-title {
     line-height: var(--app-row-px);
-    font-size: 15px;
+    font-size: 14px;
+    font-weight: 500;
   }
 
   .sidebar-row .sidebar-icon {
