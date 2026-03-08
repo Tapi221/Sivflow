@@ -4,15 +4,11 @@
 import React, { useMemo, useState } from "react";
 import {
   BookOpen,
-  Calendar,
   ChevronDown,
   ChevronRight,
   FileText,
   Folder as FolderIcon,
   FolderTree,
-  Globe,
-  Settings,
-  Trash2,
   X,
 } from "@/ui/icons";
 import { cn } from "@/lib/utils";
@@ -107,11 +103,13 @@ export function PinnedPanel({
       string,
       Array<{ type: "card" | "document"; id: string; orderIndex: number }>
     >();
+
     cards.forEach((card) => {
       const folderId = String(
         (card as CardLike).folderId || (card as CardLike).folder_id || "",
       );
       if (!folderId) return;
+
       const list = map.get(folderId) ?? [];
       list.push({
         type: "card",
@@ -120,9 +118,11 @@ export function PinnedPanel({
       });
       map.set(folderId, list);
     });
+
     documents.forEach((doc) => {
       const folderId = String(doc.folderId || "");
       if (!folderId) return;
+
       const list = map.get(folderId) ?? [];
       list.push({
         type: "document",
@@ -131,9 +131,11 @@ export function PinnedPanel({
       });
       map.set(folderId, list);
     });
+
     for (const list of map.values()) {
       list.sort((a, b) => a.orderIndex - b.orderIndex);
     }
+
     return map;
   }, [cards, documents]);
 
@@ -153,14 +155,17 @@ export function PinnedPanel({
   const pinnedRootFolderIds = useMemo(() => {
     const isDescendantOfPinned = (folderId: string): boolean => {
       let current = folderById.get(folderId);
+
       while (current) {
         const parentId = String(current.parentFolderId || "");
         if (!parentId) return false;
         if (pinnedFolderIdSet.has(parentId)) return true;
         current = folderById.get(parentId);
       }
+
       return false;
     };
+
     return pinnedFolderIds.filter((id) => !isDescendantOfPinned(id));
   }, [pinnedFolderIds, pinnedFolderIdSet, folderById]);
 
@@ -171,12 +176,14 @@ export function PinnedPanel({
       const folder = folders.find(
         (entry) => String(entry.id || entry.folderId) === item.id,
       );
+
       return {
         name: folder?.folderName || "不明なフォルダ",
         path: getFolderPath ? getFolderPath(item.id) : "",
         icon: FolderIcon,
       };
     }
+
     if (item.type === "card") {
       const card = cards.find((entry) => entry.id === item.id);
       const cardFolder = card?.folderId
@@ -184,18 +191,21 @@ export function PinnedPanel({
             (entry) => String(entry.id || entry.folderId) === card.folderId,
           )
         : null;
+
       return {
         name: card?.title || "無題のカード",
         path: cardFolder?.folderName ?? "",
         icon: BookOpen,
       };
     }
+
     const doc = documents.find((entry) => entry.id === item.id);
     const docFolder = doc?.folderId
       ? folders.find(
           (entry) => String(entry.id || entry.folderId) === doc.folderId,
         )
       : null;
+
     return {
       name: doc?.title || doc?.fileName || "無題のドキュメント",
       path: docFolder?.folderName ?? "",
@@ -225,6 +235,7 @@ export function PinnedPanel({
   const renderSubtree = (folderId: string, depth: number) => {
     const folder = folderById.get(folderId);
     if (!folder) return null;
+
     const folderName = folder.folderName || "無題のフォルダ";
     const childFolderIds = folderChildrenMap.get(folderId) ?? [];
     const folderItems = itemsByFolderId.get(folderId) ?? [];
@@ -283,12 +294,14 @@ export function PinnedPanel({
         {isExpanded ? (
           <>
             {childFolderIds.map((id) => renderSubtree(id, depth + 1))}
+
             {folderItems.map((entry) => {
               if (entry.type === "card") {
                 const card = cards.find((item) => item.id === entry.id);
                 const isPinned = validPinnedItems.some(
                   (item) => item.type === "card" && item.id === entry.id,
                 );
+
                 return (
                   <ExplorerRow
                     key={`card-in-folder:${entry.id}`}
@@ -323,6 +336,7 @@ export function PinnedPanel({
               const isPinned = validPinnedItems.some(
                 (item) => item.type === "document" && item.id === entry.id,
               );
+
               return (
                 <ExplorerRow
                   key={`doc-in-folder:${entry.id}`}
@@ -362,67 +376,6 @@ export function PinnedPanel({
 
   return (
     <div className="py-1">
-      <ExplorerRow
-        depth={1}
-        className="cursor-pointer"
-        onClick={() => onItemSelect({ type: "directory" })}
-      >
-        <ExplorerRowContent
-          left={
-            <FolderTree className="sidebar-icon w-4 h-4 mr-2 shrink-0 text-primary-600" />
-          }
-          title="ディレクトリ"
-        />
-      </ExplorerRow>
-      <ExplorerRow
-        depth={1}
-        className="cursor-pointer"
-        onClick={() => onItemSelect({ type: "gallery" })}
-      >
-        <ExplorerRowContent
-          left={
-            <Globe className="sidebar-icon w-4 h-4 mr-2 shrink-0 text-primary-600" />
-          }
-          title="ギャラリー"
-        />
-      </ExplorerRow>
-      <ExplorerRow
-        depth={1}
-        className="cursor-pointer"
-        onClick={() => onItemSelect({ type: "calendar" })}
-      >
-        <ExplorerRowContent
-          left={
-            <Calendar className="sidebar-icon w-4 h-4 mr-2 shrink-0 text-primary-600" />
-          }
-          title="学習予定"
-        />
-      </ExplorerRow>
-      <ExplorerRow
-        depth={1}
-        className="cursor-pointer"
-        onClick={() => onItemSelect({ type: "settings" })}
-      >
-        <ExplorerRowContent
-          left={
-            <Settings className="sidebar-icon w-4 h-4 mr-2 shrink-0 text-primary-600" />
-          }
-          title="設定"
-        />
-      </ExplorerRow>
-      <ExplorerRow
-        depth={1}
-        className="cursor-pointer"
-        onClick={() => onItemSelect({ type: "trash" })}
-      >
-        <ExplorerRowContent
-          left={
-            <Trash2 className="sidebar-icon w-4 h-4 mr-2 shrink-0 text-primary-600" />
-          }
-          title="ごみ箱"
-        />
-      </ExplorerRow>
-
       {validPinnedItems.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-full py-12 text-[#6E6E80]">
           <FolderTree className="w-10 h-10 mb-3 text-foreground/40" />
