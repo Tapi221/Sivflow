@@ -1,0 +1,918 @@
+[93m[4mUnused files[24m[39m (189)
+functions/src/tools/verify_security.ts                         
+functions/src/tools/verify_security_signal_v2.ts               
+src/layout/PageHeader.tsx                                      
+src/pages/Calendar.jsx                                         
+src/pages/CardEdit.jsx                                         
+src/pages/CardLayoutConsistencyTest.tsx                        
+src/pages/CardView.jsx                                         
+src/pages/CodeBlockVisualTest.tsx                              
+src/pages/Dashboard.jsx                                        
+src/pages/Directory.tsx                                        
+src/pages/Folders.jsx                                          
+src/pages/FourChoiceMode.jsx                                   
+src/pages/Gallery.jsx                                          
+src/pages/ImageDiagnostics.jsx                                 
+src/pages/NotImplementedPlaceholder.jsx                        
+src/pages/OneQAMode.jsx                                        
+src/pages/PairMode.jsx                                         
+src/pages/PdfScrollTest.tsx                                    
+src/pages/StudyMode.jsx                                        
+src/pages/Trash.jsx                                            
+src/platform/types.ts                                          
+src/services/adaptiveFlush.ts                                  
+src/services/backupService.ts                                  
+src/services/crdtSync.ts                                       
+src/services/ImageSyncOrchestrator.ts                          
+src/services/OrderedUploadQueue.ts                             
+src/services/ProductionLogger.ts                               
+src/services/queueIntegration.ts                               
+src/services/statsService.ts                                   
+src/services/StorageMonitor.ts                                 
+src/utils/dateUtils.ts                                         
+src/utils/fullTextSearch.ts                                    
+src/utils/highlightText.tsx                                    
+src/utils/messageTemplates.ts                                  
+src/utils/recommendation.ts                                    
+src/utils/responsive.ts                                        
+src/utils/searchIndex.ts                                       
+src/utils/statistics.ts                                        
+src/components/calendar/DayFolderGroup.jsx                     
+src/components/card/index.ts                                   
+src/components/explorer/InboxPanel.tsx                         
+src/components/export/ExportDialog.tsx                         
+src/components/export/ImportDialog.tsx                         
+src/components/folder/index.ts                                 
+src/components/pdf/PdfPage.tsx                                 
+src/components/pdf/PdfPane.tsx                                 
+src/components/pdf/PdfPaneToolbar.tsx                          
+src/components/pdf/pdfViewerStateStorage.ts                    
+src/components/pptx/PowerPointPane.tsx                         
+src/components/pptx/PowerPointPaneHeader.tsx                   
+src/components/pptx/PowerPointPaneState.tsx                    
+src/components/pptx/PowerPointViewer.tsx                       
+src/components/pptx/SlideImage.tsx                             
+src/components/search/GlobalSearchPanel.tsx                    
+src/components/search/QuickOpenDialog.tsx                      
+src/components/sidebar/FolderTreeArborist.tsx                  
+src/components/skeletons/DashboardSkeleton.tsx                 
+src/components/stats/StatsCharts.tsx                           
+src/components/tag/BulkTagDialog.tsx                           
+src/components/ui/accordion.tsx                                
+src/components/ui/avatar.tsx                                   
+src/components/ui/calendar.tsx                                 
+src/components/ui/CardHeader.tsx                               
+src/components/ui/chart.tsx                                    
+src/components/ui/context-menu.tsx                             
+src/components/ui/drawer.tsx                                   
+src/components/ui/EmptyState.tsx                               
+src/components/ui/form.tsx                                     
+src/components/ui/hover-card.tsx                               
+src/components/ui/input-otp.tsx                                
+src/components/ui/ListRow.tsx                                  
+src/components/ui/separator.tsx                                
+src/components/ui/sheet.tsx                                    
+src/components/ui/table.tsx                                    
+src/components/ui/tabs.tsx                                     
+src/components/ui/textarea.tsx                                 
+src/components/ui/toast.tsx                                    
+src/components/ui/toaster.tsx                                  
+src/components/ui/toggle.tsx                                   
+src/components/ui/use-toast.tsx                                
+src/hooks/card/useAllDescendantCards.ts                        
+src/hooks/card/useCardAutosave.ts                              
+src/hooks/card/useReviewCount.ts                               
+src/hooks/folder/useFolderDnD.ts                               
+src/hooks/folder/useFolderStats.ts                             
+src/hooks/platform/useGraphSimulation.ts                       
+src/hooks/platform/useNetworkStatus.ts                         
+src/hooks/platform/useProfileImageMonitor.ts                   
+src/hooks/ui/useCommandPalette.tsx                             
+src/hooks/ui/useHeaderCompact.ts                               
+src/hooks/ui/useKeyboardShortcuts.ts                           
+src/services/app/adaptiveFlush.ts                              
+src/services/app/AppInitializer.ts                             
+src/services/app/AutoBackupService.ts                          
+src/services/app/backupService.ts                              
+src/services/app/ContextService.ts                             
+src/services/app/NotificationService.ts                        
+src/services/db/IndexedDBMetadataService.ts                    
+src/services/db/IndexedDBRebuildOrchestrator.ts                
+src/services/db/InMemoryLocalDB.ts                             
+src/services/db/localDB.ts                                     
+src/services/db/localDBRuntimeState.ts                         
+src/services/db/SafeIndexedDBWriter.ts                         
+src/services/domain/crdtSync.ts                                
+src/services/domain/DataIntegrityService.ts                    
+src/services/domain/dataIntegrityTypes.ts                      
+src/services/domain/HistoryCompressionService.ts               
+src/services/domain/reviewAlgorithm.ts                         
+src/services/image/documentBlobUrlSessionCache.ts              
+src/services/image/documentFileStore.ts                        
+src/services/image/imageBlobUrlSessionCache.ts                 
+src/services/image/ImageDatabaseWriter.ts                      
+src/services/image/imageFileStore.ts                           
+src/services/image/ImageSyncOrchestrator.ts                    
+src/services/image/imageSyncService.ts                         
+src/services/image/imageUploadService.ts                       
+src/services/infra/cloudProvider.ts                            
+src/services/infra/firestorePaths.ts                           
+src/services/infra/StorageMonitor.ts                           
+src/services/infra/StorageStateManager.ts                      
+src/services/queue/operationQueue.ts                           
+src/services/queue/OrderedUploadQueue.ts                       
+src/services/queue/PersistentOfflineQueue.ts                   
+src/services/queue/queueIntegration.ts                         
+src/services/snapshot/SnapshotService.ts                       
+src/services/sync/syncService.ts                               
+src/services/sync/SyncServiceFactory.ts                        
+src/services/sync/SyncServiceV2.ts                             
+src/services/telemetry/ProductionLogger.ts                     
+src/services/telemetry/statsService.ts                         
+src/types/externals/firebase-declarations.d.ts                 
+src/types/externals/ide-shims.d.ts                             
+src/types/externals/jsx-pages.d.ts                             
+src/types/externals/ui-shims.d.ts                              
+src/utils/uploaded-image/index.ts                              
+src/components/card/blocks/BlockMoveProps.ts                   
+src/components/card/frame/CardViewer.tsx                       
+src/components/card/frame/PaperCardScaleFrame.tsx              
+src/components/card/list/CardList.tsx                          
+src/components/card/overlays/CardPopup.tsx                     
+src/components/folder/components/ExplorerEmptyState.tsx        
+src/components/folder/components/ExplorerNoResultsState.tsx    
+src/components/folder/components/ExplorerTreeNode.tsx          
+src/components/folder/components/RootFolderPanelList.tsx       
+src/components/folder/hooks/useEnsureAncestorFoldersExpanded.ts
+src/components/folder/hooks/useExpandedFolders.ts              
+src/components/folder/hooks/useExplorerDerivedData.ts          
+src/components/folder/hooks/useExplorerDialogs.ts              
+src/components/folder/hooks/useExplorerKeyboardNavigation.ts   
+src/components/folder/hooks/useExplorerPanelState.ts           
+src/components/folder/hooks/useFolderActions.ts                
+src/components/folder/hooks/useFolderDocumentUpload.ts         
+src/components/folder/hooks/useTreeViewViews.ts                
+src/components/folder/panes/CardPane.tsx                       
+src/components/folder/panes/RightPane.tsx                      
+src/components/pdf/hooks/usePdfContainerWidth.ts               
+src/components/pdf/hooks/usePdfCurrentPage.ts                  
+src/components/pdf/hooks/usePdfDocument.ts                     
+src/components/pdf/hooks/usePdfScrollDiagnostics.ts            
+src/components/pdf/hooks/usePdfSourceResolver.ts               
+src/components/pdf/hooks/usePdfViewerPersistence.ts            
+src/components/pdf/hooks/usePdfZoomControls.ts                 
+src/components/pptx/domain/pptxConversion.ts                   
+src/components/pptx/domain/pptxErrors.ts                       
+src/components/pptx/domain/pptxTypes.ts                        
+src/components/pptx/hooks/useLocalDocumentSource.ts            
+src/components/pptx/hooks/usePowerPointPaneController.ts       
+src/components/pptx/hooks/usePptxConversionSubscription.ts     
+src/components/pptx/hooks/usePptxDocumentSync.ts               
+src/components/pptx/hooks/usePptxManifestLoader.ts             
+src/services/sync/interfaces/ISyncService.ts                   
+src/services/sync/logic/CloudSyncAdapter.ts                    
+src/services/sync/logic/DiffEngine.ts                          
+src/services/sync/logic/NetworkMonitor.ts                      
+src/services/sync/logic/QueueManager.ts                        
+src/services/sync/logic/SecurityMonitor.ts                     
+src/services/sync/logic/TelemetryService.ts                    
+src/components/folder/components/dialogs/DeleteFolderDialog.tsx
+src/components/folder/components/menus/ContextMenu.tsx         
+src/components/folder/components/menus/DocumentRowMenu.tsx     
+src/components/folder/components/views/FolderDashboard.tsx     
+src/components/folder/components/views/FolderTreeWithCards.tsx 
+src/components/folder/components/views/ViewsPanel.tsx          
+src/components/folder/components/views/VirtualTreeView.tsx     
+src/components/folder/explorer/dnd/lockToVertical.ts           
+src/components/folder/explorer/model/utils.ts                  
+src/components/folder/explorer/rows/DocumentRow.tsx            
+src/components/folder/explorer/rows/FolderRow.tsx              
+src/components/folder/explorer/tree/arboristAdapter.ts         
+[93m[4mUnused dependencies[24m[39m (29)
+@flaticon/flaticon-uicons     package.json:35:6 
+@google-cloud/notebooks       package.json:36:6 
+@radix-ui/react-accordion     package.json:38:6 
+@radix-ui/react-aspect-ratio  package.json:40:6 
+@radix-ui/react-context-menu  package.json:43:6 
+@radix-ui/react-hover-card    package.json:46:6 
+@radix-ui/react-separator     package.json:53:6 
+@radix-ui/react-tabs          package.json:57:6 
+@radix-ui/react-toggle        package.json:58:6 
+@radix-ui/react-toggle-group  package.json:59:6 
+@sentry/react                 package.json:60:6 
+@stripe/stripe-js             package.json:61:6 
+canvas-confetti               package.json:64:6 
+chart.js                      package.json:65:6 
+d3-force                      package.json:69:6 
+d3-selection                  package.json:70:6 
+d3-zoom                       package.json:71:6 
+embla-carousel-react          package.json:76:6 
+input-otp                     package.json:81:6 
+p-limit                       package.json:84:6 
+qrcode.react                  package.json:90:6 
+react-arborist                package.json:92:6 
+react-chartjs-2               package.json:93:6 
+react-hook-form               package.json:95:6 
+react-katex                   package.json:96:6 
+react-swipeable               package.json:101:6
+sonner                        package.json:105:6
+vaul                          package.json:109:6
+yjs                           package.json:111:6
+[93m[4mUnused devDependencies[24m[39m (9)
+@types/d3-force         package.json:119:6
+@types/d3-selection     package.json:120:6
+@types/d3-zoom          package.json:121:6
+@types/dompurify        package.json:122:6
+@types/katex            package.json:123:6
+@types/react-katex      package.json:128:6
+@types/recharts         package.json:129:6
+eslint-config-prettier  package.json:135:6
+eslint-plugin-prettier  package.json:136:6
+[93m[4mUnlisted dependencies[24m[39m (11)
+@testing-library/react-hooks  tests/src/tests/uploadFlow.test.ts:1:29    
+workbox-core                  src/sw.ts:3:31                             
+workbox-precaching            src/sw.ts:8:9                              
+workbox-routing               src/sw.ts:9:49                             
+workbox-strategies            src/sw.ts:10:43                            
+workbox-cacheable-response    src/sw.ts:11:42                            
+workbox-expiration            src/sw.ts:12:35                            
+[90m[39m[97mfirebase-functions[39m[90m/v1[39m         functions/src/security/index.ts:1:29       
+[90m[39m[97mfirebase-functions[39m[90m/v1[39m         functions/src/pptxConversion.ts:1:29       
+google-auth-library           functions/src/pptxConversion.ts:4:44       
+[90m[39m[97mfirebase-functions[39m[90m/v1[39m         functions/src/pptxConverterEndpoint.ts:1:29
+[93m[4mUnresolved imports[24m[39m (36)
+../utils/reviewMetrics                     tests/src/tests/reviewMetrics.test.ts:4:9                           
+../utils/reviewUtils                       tests/src/tests/reviewMetrics.test.ts:7:9                           
+../utils/statistics                        tests/src/tests/statistics.spec.ts:1:56                             
+../hooks/useReliableFileUpload             tests/src/tests/uploadFlow.test.ts:2:40                             
+../utils                                   tests/src/__tests__/cardNormalization.test.ts:2:32                  
+../services/logic/DiffEngine               tests/src/__tests__/DiffEngine.test.ts:2:29                         
+../services/logic/NetworkMonitor           tests/src/__tests__/NetworkMonitor.test.ts:3:33                     
+@/types/code-block                         src/components/card/blocks/CodeBlockEditor.tsx:12:37                
+@/types/code-block                         src/components/card/blocks/CodeBlockItem.tsx:5:37                   
+@/components/study/CardCarousel            tests/unit/components/study/CardCarousel.test.tsx:59:31             
+../src/services/localDB                    scripts/dev/card_data_patch.ts:1:43                                 
+../src/types                               scripts/dev/card_data_patch.ts:2:23                                 
+../src/types/index                         scripts/dev/card_simulation.ts:1:28                                 
+../src/services/localDB                    scripts/migrate/migrateBase64.ts:10:43                              
+../src/types/branded                       scripts/migrate/migrateBase64.ts:11:34                              
+@/types/notification                       src/components/notifications/NotificationProvider.tsx:2:36          
+@/types/desktop-api                        src/services/auth/googleSignIn.ts:4:51                              
+@/types/telemetry                          src/services/interfaces/ISyncService.ts:1:56                        
+@/types/desktop-api                        src/platform/desktop/index.ts:1:35                                  
+@/types/desktop-api                        src/platform/web/index.ts:1:35                                      
+@/types/desktop-api                        src/platform/index.ts:3:35                                          
+@/types/notification                       src/services/NotificationService.ts:3:9                             
+@/types/telemetry                          src/services/logic/NetworkMonitor.ts:5:56                           
+@/types/telemetry                          src/services/logic/TelemetryService.ts:7:9                          
+@/types/telemetry                          src/services/SyncServiceV2.ts:10:41                                 
+@/types/notification                       src/components/notifications/ErrorDialog.tsx:2:36                   
+@/types/notification                       src/components/notifications/InfoToast.tsx:2:36                     
+@/types/notification                       src/components/notifications/WarningDialog.tsx:2:36                 
+@/types/desktop-api                        src/platform/desktop/bridge.ts:2:57                                 
+./viewTypes                                src/components/folder/components/dialogs/ViewManagerDialog.tsx:14:41
+@/components/folder/viewTypes              src/components/folder/components/TreeViewDialogs.tsx:5:41           
+@/components/folder/RightPane              src/components/folder/components/TreeViewMainPane.tsx:5:28          
+@/components/folder/ExplorerFilterSummary  src/components/folder/components/TreeViewSidebar.tsx:4:40           
+@/components/folder/FolderTreeWithCards    src/components/folder/components/TreeViewTabContent.tsx:5:38        
+@/components/folder/ViewsPanel             src/components/folder/components/TreeViewTabContent.tsx:6:29        
+@/components/folder/viewTypes              src/components/folder/components/TreeViewTabContent.tsx:7:31        
+[93m[4mUnused exports[24m[39m (293)
+PLACEHOLDER_IMPLEMENTATION                        functions/src/pptxConverterGuards.ts:8:14                  
+REAL_IMPLEMENTATION                               functions/src/pptxConverterGuards.ts:9:14                  
+buildDocumentPathPrefix                           functions/src/pptxConverterGuards.ts:19:14                 
+fileToBlobUrl                                     src/types/core/branded.ts:102:14                           
+revokeBlobUrl                                     src/types/core/branded.ts:110:14                           
+assertValidRemoteUrl                              src/utils/imageAssertions.ts:44:14                         
+assertValidLocalUrl                               src/utils/imageAssertions.ts:60:14                         
+warnImageInvariant                                src/utils/imageAssertions.ts:96:14                         
+OperationQueueService                   class     src/services/operationQueue.ts:40:14                       
+MAX_EXTRA_ROWS                                    src/domain/card/extraRows.ts:1:14                          
+MIN_LAYOUT_ROWS                                   src/domain/card/extraRows.ts:4:14                          
+MarkdownBlockDisplay                              src/components/card/blocks/MarkdownBlockPreview.tsx:23:14  
+MarkdownBlockPreview                              src/components/card/blocks/MarkdownBlockPreview.tsx:44:14  
+CARD_TOP_PADDING_PX                               src/components/card/common/constants.ts:41:14              
+default                                           src/services/DataIntegrityService.ts:232:16                
+featureFlags                                      src/features/flags.ts:98:14                                
+isDevLocalHost                                    src/utils/envGuards.ts:10:14                               
+queuedCardOperations                              src/utils/queueUtils.ts:11:14                              
+functions                                         src/services/firebase.ts:30:14                             
+debugFirebase                           function  src/services/firebase.ts:94:17                             
+default                                 variable  src/services/firebase.ts:114:16                            
+platform                                          src/platform/index.ts:6:14                                 
+default                                           src/services/SnapshotService.ts:369:16                     
+normalizeUploadedImage                            src/utils/uploaded-image/normalizer.ts:42:14               
+denormalizeUploadedImage                          src/utils/uploaded-image/normalizer.ts:146:14              
+uploadsPathSegments                               src/services/firestorePaths.ts:63:14                       
+uploadDocPathSegments                             src/services/firestorePaths.ts:74:14                       
+securityLogsPathSegments                          src/services/firestorePaths.ts:88:14                       
+imagesPathSegments                                src/services/firestorePaths.ts:98:14                       
+documentsPathSegments                             src/services/firestorePaths.ts:123:14                      
+documentDocPathSegments                           src/services/firestorePaths.ts:134:14                      
+pptxConversionsPathSegments                       src/services/firestorePaths.ts:149:14                      
+pptxConversionDocPathSegments                     src/services/firestorePaths.ts:160:14                      
+getCachedDocumentBlobUrl                          src/services/documentBlobUrlSessionCache.ts:60:14          
+cacheDocumentBlobUrl                              src/services/documentBlobUrlSessionCache.ts:73:14          
+pinDocumentBlobUrl                                src/services/documentBlobUrlSessionCache.ts:101:14         
+unpinDocumentBlobUrl                              src/services/documentBlobUrlSessionCache.ts:113:14         
+invalidateDocumentBlobUrl                         src/services/documentBlobUrlSessionCache.ts:150:14         
+saveDocumentBlob                                  src/services/documentFileStore.ts:35:14                    
+getDocumentBlob                                   src/services/documentFileStore.ts:75:14                    
+getCachedImageBlobUrl                             src/services/imageBlobUrlSessionCache.ts:61:14             
+cacheImageBlobUrl                                 src/services/imageBlobUrlSessionCache.ts:73:14             
+uploadProfileImages                     function  src/services/imageUploadService.ts:106:23                  
+getLocalDbSync                                    src/services/localdb/index.ts:11:5                         
+CARD_STATE_LABELS                                 src/utils/reviewUtils.ts:2:14                              
+CARD_STATE_COLORS                                 src/utils/reviewUtils.ts:10:14                             
+SUBJECTIVE_OPTIONS                                src/utils/reviewUtils.ts:20:14                             
+SUBJECTIVE_LABELS                                 src/utils/reviewUtils.ts:47:14                             
+SUBJECTIVE_EMOJIS                                 src/utils/reviewUtils.ts:54:14                             
+mapLegacyLevelToStability                         src/utils/reviewUtils.ts:66:14                             
+getStabilityPhase                                 src/utils/reviewUtils.ts:166:14                            
+getResistancePhase                                src/utils/reviewUtils.ts:186:14                            
+clampStability                                    src/utils/reviewUtils.ts:222:14                            
+getInitialStability                               src/services/reviewAlgorithm.ts:109:14                     
+getInitialDifficulty                              src/services/reviewAlgorithm.ts:136:14                     
+calculateRecallProbability                        src/services/reviewAlgorithm.ts:334:14                     
+convertMultipleChoiceToSubjectiveScore            src/services/reviewAlgorithm.ts:390:14                     
+StratisActivityIcon                               src/ui/icons/stratis/index.ts:1:10                         
+StratisAddSquare01Icon                            src/ui/icons/stratis/index.ts:3:10                         
+StratisAddSquare02Icon                            src/ui/icons/stratis/index.ts:5:10                         
+StratisAddSquare03Icon                            src/ui/icons/stratis/index.ts:7:10                         
+StratisAddSquare04Icon                            src/ui/icons/stratis/index.ts:9:10                         
+StratisAlertSquareIcon                            src/ui/icons/stratis/index.ts:13:10                        
+StratisArrowRefresh02Icon                         src/ui/icons/stratis/index.ts:21:10                        
+StratisArrowRefresh03Icon                         src/ui/icons/stratis/index.ts:23:10                        
+StratisArrowRefresh04Icon                         src/ui/icons/stratis/index.ts:25:10                        
+StratisArrowRefresh05Icon                         src/ui/icons/stratis/index.ts:27:10                        
+StratisArrowRefresh06Icon                         src/ui/icons/stratis/index.ts:29:10                        
+StratisAttatchment01Icon                          src/ui/icons/stratis/index.ts:35:10                        
+StratisAttatchment02Icon                          src/ui/icons/stratis/index.ts:37:10                        
+StratisAudioSettings02Icon                        src/ui/icons/stratis/index.ts:41:10                        
+StratisBoxIcon                                    src/ui/icons/stratis/index.ts:43:10                        
+StratisCalendarCheckIcon                          src/ui/icons/stratis/index.ts:45:10                        
+StratisChevronDownIcon                            src/ui/icons/stratis/index.ts:49:10                        
+StratisChevronRightIcon                           src/ui/icons/stratis/index.ts:53:10                        
+StratisClockPlusIcon                              src/ui/icons/stratis/index.ts:61:10                        
+StratisCode02Icon                                 src/ui/icons/stratis/index.ts:65:10                        
+StratisComponentIcon                              src/ui/icons/stratis/index.ts:67:10                        
+StratisCopyRightIcon                              src/ui/icons/stratis/index.ts:71:10                        
+StratisEdit01Icon                                 src/ui/icons/stratis/index.ts:75:10                        
+StratisFile02Icon                                 src/ui/icons/stratis/index.ts:79:10                        
+StratisFileMultipleIcon                           src/ui/icons/stratis/index.ts:83:10                        
+StratisFileNoneIcon                               src/ui/icons/stratis/index.ts:85:10                        
+StratisFolderOpen03Icon                           src/ui/icons/stratis/index.ts:91:10                        
+StratisFolderIcon                                 src/ui/icons/stratis/index.ts:97:10                        
+StratisGlobe05Icon                                src/ui/icons/stratis/index.ts:101:10                       
+StratisGrid01Icon                                 src/ui/icons/stratis/index.ts:103:10                       
+StratisHeader02Icon                               src/ui/icons/stratis/index.ts:105:10                       
+StratisInbox02Icon                                src/ui/icons/stratis/index.ts:115:10                       
+StratisLayoutLeftIcon                             src/ui/icons/stratis/index.ts:119:10                       
+StratisLayoutRightIcon                            src/ui/icons/stratis/index.ts:121:10                       
+StratisLightbulb02Icon                            src/ui/icons/stratis/index.ts:123:10                       
+StratisLinkBrokenIcon                             src/ui/icons/stratis/index.ts:127:10                       
+StratisLogout02Icon                               src/ui/icons/stratis/index.ts:133:10                       
+StratisMap01Icon                                  src/ui/icons/stratis/index.ts:135:10                       
+StratisMap03Icon                                  src/ui/icons/stratis/index.ts:137:10                       
+StratisMarker01Icon                               src/ui/icons/stratis/index.ts:139:10                       
+StratisMenu04Icon                                 src/ui/icons/stratis/index.ts:141:10                       
+StratisNote02Icon                                 src/ui/icons/stratis/index.ts:145:10                       
+StratisNotificationBoxIcon                        src/ui/icons/stratis/index.ts:147:10                       
+StratisPenTool01Icon                              src/ui/icons/stratis/index.ts:149:10                       
+StratisPieChart01Icon                             src/ui/icons/stratis/index.ts:151:10                       
+StratisPieChart02Icon                             src/ui/icons/stratis/index.ts:153:10                       
+StratisPieChart03Icon                             src/ui/icons/stratis/index.ts:155:10                       
+StratisPlus02Icon                                 src/ui/icons/stratis/index.ts:159:10                       
+StratisPlus03Icon                                 src/ui/icons/stratis/index.ts:161:10                       
+StratisQuoteIcon                                  src/ui/icons/stratis/index.ts:163:10                       
+StratisSave01Icon                                 src/ui/icons/stratis/index.ts:165:10                       
+StratisSave02Icon                                 src/ui/icons/stratis/index.ts:167:10                       
+StratisSearch02Icon                               src/ui/icons/stratis/index.ts:171:10                       
+StratisServer02Icon                               src/ui/icons/stratis/index.ts:173:10                       
+StratisShareIcon                                  src/ui/icons/stratis/index.ts:177:10                       
+StratisShuffleIcon                                src/ui/icons/stratis/index.ts:179:10                       
+StratisSortHorizontalIcon                         src/ui/icons/stratis/index.ts:181:10                       
+StratisSortVertical01Icon                         src/ui/icons/stratis/index.ts:183:10                       
+StratisSuperscriptIcon                            src/ui/icons/stratis/index.ts:187:10                       
+StratisTrash02Icon                                src/ui/icons/stratis/index.ts:191:10                       
+StratisUserProfileGroupIcon                       src/ui/icons/stratis/index.ts:197:10                       
+StratisVariantIcon                                src/ui/icons/stratis/index.ts:199:10                       
+StratisX02Icon                                    src/ui/icons/stratis/index.ts:205:10                       
+StratisX03Icon                                    src/ui/icons/stratis/index.ts:207:10                       
+StratisXSquareContainedIcon                       src/ui/icons/stratis/index.ts:211:10                       
+ArrowRight                                        src/ui/icons.tsx:215:14                                    
+Brain                                             src/ui/icons.tsx:219:14                                    
+CheckCheck                                        src/ui/icons.tsx:224:14                                    
+Construction                                      src/ui/icons.tsx:241:14                                    
+Download                                          src/ui/icons.tsx:245:14                                    
+FileJson                                          src/ui/icons.tsx:254:14                                    
+FileWarning                                       src/ui/icons.tsx:257:14                                    
+Flame                                             src/ui/icons.tsx:261:14                                    
+Home                                              src/ui/icons.tsx:276:14                                    
+Minus                                             src/ui/icons.tsx:293:14                                    
+NotebookPenIcon                                   src/ui/icons.tsx:297:14                                    
+PanelsTopLeft                                     src/ui/icons.tsx:299:14                                    
+Pin                                               src/ui/icons.tsx:303:14                                    
+SearchX                                           src/ui/icons.tsx:314:14                                    
+Settings                                          src/ui/icons.tsx:316:14                                    
+SigmaIcon                                         src/ui/icons.tsx:319:14                                    
+Sparkles                                          src/ui/icons.tsx:321:14                                    
+TypeIcon                                          src/ui/icons.tsx:330:14                                    
+XCircle                                           src/ui/icons.tsx:339:14                                    
+Zap                                               src/ui/icons.tsx:340:14                                    
+CodeIcon                                          src/ui/icons.tsx:343:14                                    
+FilterIcon                                        src/ui/icons.tsx:344:14                                    
+FolderIcon                                        src/ui/icons.tsx:345:14                                    
+FolderOutlineIcon                                 src/ui/icons.tsx:346:14                                    
+GripIcon                                          src/ui/icons.tsx:347:14                                    
+LinkIcon                                          src/ui/icons.tsx:349:14                                    
+SearchIcon                                        src/ui/icons.tsx:350:14                                    
+StickyNoteIcon                                    src/ui/icons.tsx:352:14                                    
+TagIcon                                           src/ui/icons.tsx:353:14                                    
+TrashIcon                                         src/ui/icons.tsx:354:14                                    
+XIcon                                             src/ui/icons.tsx:355:14                                    
+StickyNote                                        src/ui/icons.tsx:362:14                                    
+getValidatedExtension                             src/utils/fileUtils.ts:13:14                               
+prepareUploadMetadata                             src/utils/fileUtils.ts:50:14                               
+GRID_OFFSET_TYPES                                 src/components/card/frame/rowOffset.ts:9:14                
+USERNAME_VALIDATION                               src/utils/userValidation.ts:12:14                          
+CardFooter                                        src/components/ui/card.tsx:79:3                            
+DEFAULT_COLORS                                    src/hooks/settings/useTags.ts:29:14                        
+parseTagPath                                      src/hooks/settings/useTags.ts:42:14                        
+PopoverAnchor                                     src/components/ui/popover.tsx:31:51                        
+EMPTY_INK_HISTORY                                 src/components/ink/InkLayer.tsx:777:14                     
+PdfViewer                                         src/components/pdf/PdfViewer.tsx:254:14                    
+DialogClose                                       src/components/ui/dialog.tsx:119:3                         
+DialogTrigger                                     src/components/ui/dialog.tsx:120:3                         
+SelectScrollUpButton                              src/components/ui/select.tsx:157:3                         
+SelectScrollDownButton                            src/components/ui/select.tsx:158:3                         
+compressImageToBlob                               src/utils/uploaded-image/imageCompression.ts:67:14         
+compressImageToBlobUrl                            src/utils/uploaded-image/imageCompression.ts:88:14         
+uploadImageAsBase64                               src/utils/uploaded-image/imageCompression.ts:109:14        
+ScrollBar                                         src/components/ui/scroll-area.tsx:46:22                    
+badgeVariants                                     src/components/ui/badge.tsx:33:17                          
+DropdownMenuCheckboxItem                          src/components/ui/dropdown-menu.tsx:201:3                  
+DropdownMenuRadioItem                             src/components/ui/dropdown-menu.tsx:202:3                  
+DropdownMenuLabel                                 src/components/ui/dropdown-menu.tsx:203:3                  
+DropdownMenuSeparator                             src/components/ui/dropdown-menu.tsx:204:3                  
+DropdownMenuShortcut                              src/components/ui/dropdown-menu.tsx:205:3                  
+DropdownMenuGroup                                 src/components/ui/dropdown-menu.tsx:206:3                  
+DropdownMenuPortal                                src/components/ui/dropdown-menu.tsx:207:3                  
+DropdownMenuSub                                   src/components/ui/dropdown-menu.tsx:208:3                  
+DropdownMenuSubContent                            src/components/ui/dropdown-menu.tsx:209:3                  
+DropdownMenuSubTrigger                            src/components/ui/dropdown-menu.tsx:210:3                  
+DropdownMenuRadioGroup                            src/components/ui/dropdown-menu.tsx:211:3                  
+DEFAULT_TAG_COLOR_KEY                             src/lib/tags/tagColor.ts:22:14                             
+LEGACY_TAG_COLOR_TO_KEY                           src/lib/tags/tagColor.ts:25:14                             
+isTagColorKey                                     src/lib/tags/tagColor.ts:46:14                             
+AlertDialogPortal                                 src/components/ui/alert-dialog.tsx:129:3                   
+AlertDialogOverlay                                src/components/ui/alert-dialog.tsx:130:3                   
+AlertDialogTrigger                                src/components/ui/alert-dialog.tsx:131:3                   
+Checkbox                                          src/components/ui/checkbox.tsx:28:10                       
+CommandDialog                                     src/components/ui/command.tsx:139:3                        
+CommandEmpty                                      src/components/ui/command.tsx:142:3                        
+CommandShortcut                                   src/components/ui/command.tsx:145:3                        
+CommandSeparator                                  src/components/ui/command.tsx:146:3                        
+Skeleton                                          src/components/ui/skeleton.tsx:15:10                       
+PracticeCards                           function  src/features/study/PracticeCards.tsx:17:17                 
+PracticeSummary                         function  src/features/study/PracticeSummary.tsx:12:17               
+StudyComplete                           function  src/features/study/StudyComplete.tsx:22:17                 
+StudyEmpty                              function  src/features/study/StudyEmpty.tsx:13:17                    
+StudyReview                             function  src/features/study/StudyReview.tsx:19:17                   
+getCardDraftKey                         function  src/hooks/card/useCardEntity.ts:30:17                      
+readCardDraft                           function  src/hooks/card/useCardEntity.ts:34:17                      
+useCardEntity                           function  src/hooks/card/useCardEntity.ts:52:17                      
+usePracticeMode                         function  src/hooks/study/usePracticeMode.ts:31:17                   
+useStudyCards                           function  src/hooks/study/useStudyCards.ts:13:17                     
+useStudySession                         function  src/hooks/study/useStudySession.ts:40:17                   
+InvalidImageUrlError                    class     src/services/localdb/blobUrl.ts:42:14                      
+setNestedPath                                     src/services/localdb/blobUrl.ts:113:14                     
+denormalizeUserSettingsForStorage                 src/services/localdb/transforms.ts:122:14                  
+canDeleteDocumentBlob                   function  src/services/localdb/documentsLifecycle.ts:30:23           
+initializeDB                                      src/services/localdb/LocalDB.ts:500:38                     
+resetLocalDBForLogout                             src/services/localdb/LocalDB.ts:500:52                     
+extractErrorTexts                                 src/services/localdb/errors.ts:80:14                       
+readGenerationFromStorage                         src/services/localdb/generation.ts:11:14                   
+writeGenerationToStorage                          src/services/localdb/generation.ts:25:14                   
+makeGenerationDbPrefix                            src/services/localdb/generation.ts:42:14                   
+generationBumpedUsers                             src/services/localdb/generation.ts:46:14                   
+getGenerationForUser                    function  src/services/localdb/generation.ts:48:17                   
+listUserPersistentDbNames               function  src/services/localdb/generation.ts:74:23                   
+imageToMediaAsset                                 src/types/domain/media.ts:50:14                            
+mediaAssetToImage                                 src/types/domain/media.ts:86:14                            
+isBlockEmpty                            function  src/components/card/editor/cardEditorUtils.ts:65:17        
+toMediaUrl                              function  src/components/card/frame/flashcardDerived.ts:150:17       
+getPageRuledBg                          function  src/components/card/frame/ruledStyles.ts:63:17             
+default                                 function  src/components/folder/layout/TreeViewLayout.tsx:461:16     
+CardEditorPane                          function  src/components/folder/panes/CardEditorPane.tsx:65:17       
+DirectoryDiagramPane                    function  src/components/folder/panes/DirectoryDiagramPane.tsx:183:17
+StratisActivityIcon                               src/ui/icons/stratis/StratisActivityIcon.tsx:6:14          
+StratisAddSquare01Icon                            src/ui/icons/stratis/StratisAddSquare01Icon.tsx:6:14       
+StratisAddSquare02Icon                            src/ui/icons/stratis/StratisAddSquare02Icon.tsx:6:14       
+StratisAddSquare03Icon                            src/ui/icons/stratis/StratisAddSquare03Icon.tsx:6:14       
+StratisAddSquare04Icon                            src/ui/icons/stratis/StratisAddSquare04Icon.tsx:6:14       
+StratisAlertSquareIcon                            src/ui/icons/stratis/StratisAlertSquareIcon.tsx:6:14       
+StratisArrowRefresh02Icon                         src/ui/icons/stratis/StratisArrowRefresh02Icon.tsx:6:14    
+StratisArrowRefresh03Icon                         src/ui/icons/stratis/StratisArrowRefresh03Icon.tsx:6:14    
+StratisArrowRefresh04Icon                         src/ui/icons/stratis/StratisArrowRefresh04Icon.tsx:6:14    
+StratisArrowRefresh05Icon                         src/ui/icons/stratis/StratisArrowRefresh05Icon.tsx:6:14    
+StratisArrowRefresh06Icon                         src/ui/icons/stratis/StratisArrowRefresh06Icon.tsx:6:14    
+StratisAttatchment01Icon                          src/ui/icons/stratis/StratisAttatchment01Icon.tsx:6:14     
+StratisAttatchment02Icon                          src/ui/icons/stratis/StratisAttatchment02Icon.tsx:6:14     
+StratisAudioSettings02Icon                        src/ui/icons/stratis/StratisAudioSettings02Icon.tsx:6:14   
+StratisBoxIcon                                    src/ui/icons/stratis/StratisBoxIcon.tsx:6:14               
+StratisCalendarCheckIcon                          src/ui/icons/stratis/StratisCalendarCheckIcon.tsx:6:14     
+StratisChevronDownIcon                            src/ui/icons/stratis/StratisChevronDownIcon.tsx:6:14       
+StratisChevronRightIcon                           src/ui/icons/stratis/StratisChevronRightIcon.tsx:6:14      
+StratisClockPlusIcon                              src/ui/icons/stratis/StratisClockPlusIcon.tsx:6:14         
+StratisCode02Icon                                 src/ui/icons/stratis/StratisCode02Icon.tsx:6:14            
+StratisComponentIcon                              src/ui/icons/stratis/StratisComponentIcon.tsx:6:14         
+StratisCopyRightIcon                              src/ui/icons/stratis/StratisCopyRightIcon.tsx:6:14         
+StratisEdit01Icon                                 src/ui/icons/stratis/StratisEdit01Icon.tsx:6:14            
+StratisFile02Icon                                 src/ui/icons/stratis/StratisFile02Icon.tsx:6:14            
+StratisFileMultipleIcon                           src/ui/icons/stratis/StratisFileMultipleIcon.tsx:6:14      
+StratisFileNoneIcon                               src/ui/icons/stratis/StratisFileNoneIcon.tsx:6:14          
+StratisFolderOpen03Icon                           src/ui/icons/stratis/StratisFolderOpen03Icon.tsx:6:14      
+StratisFolderIcon                                 src/ui/icons/stratis/StratisFolderIcon.tsx:6:14            
+StratisGlobe05Icon                                src/ui/icons/stratis/StratisGlobe05Icon.tsx:6:14           
+StratisGrid01Icon                                 src/ui/icons/stratis/StratisGrid01Icon.tsx:6:14            
+StratisHeader02Icon                               src/ui/icons/stratis/StratisHeader02Icon.tsx:6:14          
+StratisInbox02Icon                                src/ui/icons/stratis/StratisInbox02Icon.tsx:6:14           
+StratisLayoutLeftIcon                             src/ui/icons/stratis/StratisLayoutLeftIcon.tsx:6:14        
+StratisLayoutRightIcon                            src/ui/icons/stratis/StratisLayoutRightIcon.tsx:6:14       
+StratisLightbulb02Icon                            src/ui/icons/stratis/StratisLightbulb02Icon.tsx:6:14       
+StratisLinkBrokenIcon                             src/ui/icons/stratis/StratisLinkBrokenIcon.tsx:6:14        
+StratisLogout02Icon                               src/ui/icons/stratis/StratisLogout02Icon.tsx:6:14          
+StratisMap01Icon                                  src/ui/icons/stratis/StratisMap01Icon.tsx:6:14             
+StratisMap03Icon                                  src/ui/icons/stratis/StratisMap03Icon.tsx:6:14             
+StratisMarker01Icon                               src/ui/icons/stratis/StratisMarker01Icon.tsx:6:14          
+StratisMenu04Icon                                 src/ui/icons/stratis/StratisMenu04Icon.tsx:6:14            
+StratisNote02Icon                                 src/ui/icons/stratis/StratisNote02Icon.tsx:6:14            
+StratisNotificationBoxIcon                        src/ui/icons/stratis/StratisNotificationBoxIcon.tsx:6:14   
+StratisPenTool01Icon                              src/ui/icons/stratis/StratisPenTool01Icon.tsx:6:14         
+StratisPieChart01Icon                             src/ui/icons/stratis/StratisPieChart01Icon.tsx:6:14        
+StratisPieChart02Icon                             src/ui/icons/stratis/StratisPieChart02Icon.tsx:6:14        
+StratisPieChart03Icon                             src/ui/icons/stratis/StratisPieChart03Icon.tsx:6:14        
+StratisPlus02Icon                                 src/ui/icons/stratis/StratisPlus02Icon.tsx:6:14            
+StratisPlus03Icon                                 src/ui/icons/stratis/StratisPlus03Icon.tsx:6:14            
+StratisQuoteIcon                                  src/ui/icons/stratis/StratisQuoteIcon.tsx:6:14             
+StratisSave01Icon                                 src/ui/icons/stratis/StratisSave01Icon.tsx:6:14            
+StratisSave02Icon                                 src/ui/icons/stratis/StratisSave02Icon.tsx:6:14            
+StratisSearch02Icon                               src/ui/icons/stratis/StratisSearch02Icon.tsx:6:14          
+StratisServer02Icon                               src/ui/icons/stratis/StratisServer02Icon.tsx:6:14          
+StratisShareIcon                                  src/ui/icons/stratis/StratisShareIcon.tsx:6:14             
+StratisShuffleIcon                                src/ui/icons/stratis/StratisShuffleIcon.tsx:6:14           
+StratisSortHorizontalIcon                         src/ui/icons/stratis/StratisSortHorizontalIcon.tsx:6:14    
+StratisSortVertical01Icon                         src/ui/icons/stratis/StratisSortVertical01Icon.tsx:6:14    
+StratisSuperscriptIcon                            src/ui/icons/stratis/StratisSuperscriptIcon.tsx:6:14       
+StratisTrash02Icon                                src/ui/icons/stratis/StratisTrash02Icon.tsx:6:14           
+StratisUserProfileGroupIcon                       src/ui/icons/stratis/StratisUserProfileGroupIcon.tsx:6:14  
+StratisVariantIcon                                src/ui/icons/stratis/StratisVariantIcon.tsx:6:14           
+StratisX02Icon                                    src/ui/icons/stratis/StratisX02Icon.tsx:6:14               
+StratisX03Icon                                    src/ui/icons/stratis/StratisX03Icon.tsx:6:14               
+StratisXSquareContainedIcon                       src/ui/icons/stratis/StratisXSquareContainedIcon.tsx:6:14  
+[93m[4mUnused exported types[24m[39m (318)
+ConverterTokenValidation                       type       functions/src/pptxConverterGuards.ts:11:13                    
+QueuePriority                                  type       src/services/operationQueue.ts:4:13                           
+OperationType                                  type       src/services/operationQueue.ts:5:13                           
+QueueStatus                                    type       src/services/operationQueue.ts:9:13                           
+SanitizeResult                                 type       src/utils/blobUrlSanitizer.ts:10:13                           
+MarkdownBlockPreviewProps                      type       src/components/card/blocks/MarkdownBlockPreview.tsx:12:13     
+FlashcardCardLike                              type       src/components/card/frame/Flashcard.tsx:22:15                 
+SharedCardContentProps                         type       src/components/card/common/SharedCardContent.tsx:38:13        
+CardInkFields                                  type       src/components/ink/inkTypes.ts:35:13                          
+PlatformAppApi                                 interface  src/types/externals/desktop-api.d.ts:1:18                     
+PlatformShellApi                               interface  src/types/externals/desktop-api.d.ts:5:18                     
+PlatformApi                                    interface  src/types/externals/desktop-api.d.ts:9:18                     
+DesktopOauthCallbackHandler                    type       src/types/externals/desktop-api.d.ts:22:13                    
+Toast                                          interface  src/contexts/ToastContext.tsx:5:18                            
+AutoBackup                                     interface  src/services/AutoBackupService.ts:7:18                        
+FeatureFlags                                   type       src/features/flags.ts:3:13                                    
+LegacyFlagName                                 type       src/features/flags.ts:105:13                                  
+BreadcrumbCrumb                                type       src/contexts/BreadcrumbContext.tsx:10:13                      
+JsonPrimitive                                  type       src/services/interfaces/ISyncService.ts:7:13                  
+JsonValue                                      type       src/services/interfaces/ISyncService.ts:8:13                  
+JsonObject                                     type       src/services/interfaces/ISyncService.ts:9:13                  
+JsonArray                                      type       src/services/interfaces/ISyncService.ts:10:13                 
+SecurityAlert                                  interface  src/services/interfaces/ISyncService.ts:168:18                
+PlatformApi                                    type       src/platform/index.ts:11:15                                   
+LocalDBMode                                    type       src/services/localDBRuntimeState.ts:1:13                      
+LocalDBRuntimeStatus                           interface  src/services/localDBRuntimeState.ts:10:18                     
+LocalDBTelemetrySnapshot                       interface  src/services/localDBRuntimeState.ts:21:18                     
+NormalizeUploadedImageOptions                  type       src/utils/uploaded-image/normalizer.ts:5:13                   
+DenormalizeUploadedImageOptions                type       src/utils/uploaded-image/normalizer.ts:9:13                   
+PutImageBlobOptions                            type       src/services/imageFileStore.ts:15:13                          
+ImageBlobRecord                                type       src/services/imageFileStore.ts:20:13                          
+UploadProfileImageOptions                      interface  src/services/imageUploadService.ts:18:18                      
+CardRelation                                   type       src/services/localdb/index.ts:4:5                             
+LocalDBInstance                                type       src/services/localdb/index.ts:4:19                            
+ProjectMap                                     type       src/services/localdb/index.ts:4:49                            
+TagLegacyRecord                                type       src/services/localdb/index.ts:5:5                             
+TagV2Record                                    type       src/services/localdb/index.ts:6:5                             
+StabilityPhase                                 type       src/utils/reviewUtils.ts:96:13                                
+ReviewAlgorithmInput                           type       src/services/reviewAlgorithm.ts:4:13                          
+ReviewAlgorithmResult                          type       src/services/reviewAlgorithm.ts:21:13                         
+MultipleChoiceConfidence                       type       src/services/reviewAlgorithm.ts:353:13                        
+MultipleChoiceReviewMeta                       type       src/services/reviewAlgorithm.ts:358:13                        
+RatingKey                                      type       src/stores/useTodayStudyStore.ts:11:13                        
+TodayStudyStore                                type       src/stores/useTodayStudyStore.ts:49:13                        
+UiIconProps                                    type       src/ui/UiIcon.tsx:3:13                                        
+StratisActivityIconProps                       type       src/ui/icons/stratis/index.ts:2:15                            
+StratisAddSquare01IconProps                    type       src/ui/icons/stratis/index.ts:4:15                            
+StratisAddSquare02IconProps                    type       src/ui/icons/stratis/index.ts:6:15                            
+StratisAddSquare03IconProps                    type       src/ui/icons/stratis/index.ts:8:15                            
+StratisAddSquare04IconProps                    type       src/ui/icons/stratis/index.ts:10:15                           
+StratisAlertCircleIconProps                    type       src/ui/icons/stratis/index.ts:12:15                           
+StratisAlertSquareIconProps                    type       src/ui/icons/stratis/index.ts:14:15                           
+StratisAlertTriangleIconProps                  type       src/ui/icons/stratis/index.ts:16:15                           
+StratisArrowLeftSquareContainedIconPro窶ｦ        type       src/ui/icons/stratis/index.ts:18:15                           
+StratisArrowRefresh01IconProps                 type       src/ui/icons/stratis/index.ts:20:15                           
+StratisArrowRefresh02IconProps                 type       src/ui/icons/stratis/index.ts:22:15                           
+StratisArrowRefresh03IconProps                 type       src/ui/icons/stratis/index.ts:24:15                           
+StratisArrowRefresh04IconProps                 type       src/ui/icons/stratis/index.ts:26:15                           
+StratisArrowRefresh05IconProps                 type       src/ui/icons/stratis/index.ts:28:15                           
+StratisArrowRefresh06IconProps                 type       src/ui/icons/stratis/index.ts:30:15                           
+StratisArrowRightSquareContainedIconPr窶ｦ        type       src/ui/icons/stratis/index.ts:32:15                           
+StratisArrowSwitchHorizontalIconProps          type       src/ui/icons/stratis/index.ts:34:15                           
+StratisAttatchment01IconProps                  type       src/ui/icons/stratis/index.ts:36:15                           
+StratisAttatchment02IconProps                  type       src/ui/icons/stratis/index.ts:38:15                           
+StratisAudioSettings01IconProps                type       src/ui/icons/stratis/index.ts:40:15                           
+StratisAudioSettings02IconProps                type       src/ui/icons/stratis/index.ts:42:15                           
+StratisBoxIconProps                            type       src/ui/icons/stratis/index.ts:44:15                           
+StratisCalendarCheckIconProps                  type       src/ui/icons/stratis/index.ts:46:15                           
+StratisCalendarNumberIconProps                 type       src/ui/icons/stratis/index.ts:48:15                           
+StratisChevronDownIconProps                    type       src/ui/icons/stratis/index.ts:50:15                           
+StratisChevronLeftIconProps                    type       src/ui/icons/stratis/index.ts:52:15                           
+StratisChevronRightIconProps                   type       src/ui/icons/stratis/index.ts:54:15                           
+StratisChevronUpIconProps                      type       src/ui/icons/stratis/index.ts:56:15                           
+StratisClock01IconProps                        type       src/ui/icons/stratis/index.ts:58:15                           
+StratisClockBackwardIconProps                  type       src/ui/icons/stratis/index.ts:60:15                           
+StratisClockPlusIconProps                      type       src/ui/icons/stratis/index.ts:62:15                           
+StratisCode01IconProps                         type       src/ui/icons/stratis/index.ts:64:15                           
+StratisCode02IconProps                         type       src/ui/icons/stratis/index.ts:66:15                           
+StratisComponentIconProps                      type       src/ui/icons/stratis/index.ts:68:15                           
+StratisCopyLeftIconProps                       type       src/ui/icons/stratis/index.ts:70:15                           
+StratisCopyRightIconProps                      type       src/ui/icons/stratis/index.ts:72:15                           
+StratisDotVerticalIconProps                    type       src/ui/icons/stratis/index.ts:74:15                           
+StratisEdit01IconProps                         type       src/ui/icons/stratis/index.ts:76:15                           
+StratisEditContainedIconProps                  type       src/ui/icons/stratis/index.ts:78:15                           
+StratisFile02IconProps                         type       src/ui/icons/stratis/index.ts:80:15                           
+StratisFileEdit02IconProps                     type       src/ui/icons/stratis/index.ts:82:15                           
+StratisFileMultipleIconProps                   type       src/ui/icons/stratis/index.ts:84:15                           
+StratisFileNoneIconProps                       type       src/ui/icons/stratis/index.ts:86:15                           
+StratisFilterIconProps                         type       src/ui/icons/stratis/index.ts:88:15                           
+StratisFormulaIconProps                        type       src/ui/icons/stratis/index.ts:90:15                           
+StratisFolderOpen03IconProps                   type       src/ui/icons/stratis/index.ts:92:15                           
+StratisFolderPlus01IconProps                   type       src/ui/icons/stratis/index.ts:94:15                           
+StratisFolderSearch01IconProps                 type       src/ui/icons/stratis/index.ts:96:15                           
+StratisFolderIconProps                         type       src/ui/icons/stratis/index.ts:98:15                           
+StratisGlobe02IconProps                        type       src/ui/icons/stratis/index.ts:100:15                          
+StratisGlobe05IconProps                        type       src/ui/icons/stratis/index.ts:102:15                          
+StratisGrid01IconProps                         type       src/ui/icons/stratis/index.ts:104:15                          
+StratisHeader02IconProps                       type       src/ui/icons/stratis/index.ts:106:15                          
+StratisHelpCircleContainedIconProps            type       src/ui/icons/stratis/index.ts:108:15                          
+StratisHome05IconProps                         type       src/ui/icons/stratis/index.ts:110:15                          
+StratisImageIconProps                          type       src/ui/icons/stratis/index.ts:112:15                          
+StratisMarkdownIconProps                       type       src/ui/icons/stratis/index.ts:114:15                          
+StratisInbox02IconProps                        type       src/ui/icons/stratis/index.ts:116:15                          
+StratisInfoSquare01ContainedIconProps          type       src/ui/icons/stratis/index.ts:118:15                          
+StratisLayoutLeftIconProps                     type       src/ui/icons/stratis/index.ts:120:15                          
+StratisLayoutRightIconProps                    type       src/ui/icons/stratis/index.ts:122:15                          
+StratisLightbulb02IconProps                    type       src/ui/icons/stratis/index.ts:124:15                          
+StratisLinkAngledIconProps                     type       src/ui/icons/stratis/index.ts:126:15                          
+StratisLinkBrokenIconProps                     type       src/ui/icons/stratis/index.ts:128:15                          
+StratisLinkExternalIconProps                   type       src/ui/icons/stratis/index.ts:130:15                          
+StratisLogout01IconProps                       type       src/ui/icons/stratis/index.ts:132:15                          
+StratisLogout02IconProps                       type       src/ui/icons/stratis/index.ts:134:15                          
+StratisMap01IconProps                          type       src/ui/icons/stratis/index.ts:136:15                          
+StratisMap03IconProps                          type       src/ui/icons/stratis/index.ts:138:15                          
+StratisMarker01IconProps                       type       src/ui/icons/stratis/index.ts:140:15                          
+StratisMenu04IconProps                         type       src/ui/icons/stratis/index.ts:142:15                          
+StratisNote01IconProps                         type       src/ui/icons/stratis/index.ts:144:15                          
+StratisNote02IconProps                         type       src/ui/icons/stratis/index.ts:146:15                          
+StratisNotificationBoxIconProps                type       src/ui/icons/stratis/index.ts:148:15                          
+StratisPenTool01IconProps                      type       src/ui/icons/stratis/index.ts:150:15                          
+StratisPieChart01IconProps                     type       src/ui/icons/stratis/index.ts:152:15                          
+StratisPieChart02IconProps                     type       src/ui/icons/stratis/index.ts:154:15                          
+StratisPieChart03IconProps                     type       src/ui/icons/stratis/index.ts:156:15                          
+StratisPlus01IconProps                         type       src/ui/icons/stratis/index.ts:158:15                          
+StratisPlus02IconProps                         type       src/ui/icons/stratis/index.ts:160:15                          
+StratisPlus03IconProps                         type       src/ui/icons/stratis/index.ts:162:15                          
+StratisQuoteIconProps                          type       src/ui/icons/stratis/index.ts:164:15                          
+StratisSave01IconProps                         type       src/ui/icons/stratis/index.ts:166:15                          
+StratisSave02IconProps                         type       src/ui/icons/stratis/index.ts:168:15                          
+StratisSearch01IconProps                       type       src/ui/icons/stratis/index.ts:170:15                          
+StratisSearch02IconProps                       type       src/ui/icons/stratis/index.ts:172:15                          
+StratisServer02IconProps                       type       src/ui/icons/stratis/index.ts:174:15                          
+StratisSettingsIconProps                       type       src/ui/icons/stratis/index.ts:176:15                          
+StratisShareIconProps                          type       src/ui/icons/stratis/index.ts:178:15                          
+StratisShuffleIconProps                        type       src/ui/icons/stratis/index.ts:180:15                          
+StratisSortHorizontalIconProps                 type       src/ui/icons/stratis/index.ts:182:15                          
+StratisSortVertical01IconProps                 type       src/ui/icons/stratis/index.ts:184:15                          
+StratisStar02IconProps                         type       src/ui/icons/stratis/index.ts:186:15                          
+StratisSuperscriptIconProps                    type       src/ui/icons/stratis/index.ts:188:15                          
+StratisTagIconProps                            type       src/ui/icons/stratis/index.ts:190:15                          
+StratisTrash02IconProps                        type       src/ui/icons/stratis/index.ts:192:15                          
+StratisTrash03IconProps                        type       src/ui/icons/stratis/index.ts:194:15                          
+StratisType03IconProps                         type       src/ui/icons/stratis/index.ts:196:15                          
+StratisUserProfileGroupIconProps               type       src/ui/icons/stratis/index.ts:198:15                          
+StratisVariantIconProps                        type       src/ui/icons/stratis/index.ts:200:15                          
+StratisWrenchIconProps                         type       src/ui/icons/stratis/index.ts:202:15                          
+StratisX01IconProps                            type       src/ui/icons/stratis/index.ts:204:15                          
+StratisX02IconProps                            type       src/ui/icons/stratis/index.ts:206:15                          
+StratisX03IconProps                            type       src/ui/icons/stratis/index.ts:208:15                          
+StratisXCircleContainedIconProps               type       src/ui/icons/stratis/index.ts:210:15                          
+StratisXSquareContainedIconProps               type       src/ui/icons/stratis/index.ts:212:15                          
+IconProps                                      type       src/ui/icons.tsx:48:13                                        
+ValidationResult                               interface  src/utils/userValidation.ts:4:18                              
+ButtonProps                                    interface  src/components/ui/button.tsx:38:18                            
+ExplorerTab                                    type       src/hooks/folder/useExplorerStore.ts:10:13                    
+PinnedItem                                     interface  src/hooks/folder/useExplorerStore.ts:12:18                    
+RecentItem                                     interface  src/hooks/folder/useExplorerStore.ts:17:18                    
+ExplorerState                                  interface  src/hooks/folder/useExplorerStore.ts:23:18                    
+TagCategory                                    type       src/hooks/settings/useTags.ts:14:13                           
+SurfaceButtonProps                             interface  src/components/ui/surface-button.tsx:31:18                    
+PdfViewerHandle                                interface  src/components/pdf/PdfViewer.tsx:17:18                        
+InputProps                                     type       src/components/ui/input.tsx:5:13                              
+UploadStatus                                   type       src/hooks/platform/useReliableFileUpload.ts:23:13             
+UploadProgressProps                            interface  src/components/ui/UploadProgress.tsx:6:18                     
+CardCarousel3DProps                            type       src/features/review/CardCarousel3D.tsx:47:13                  
+UseVerticalCardPagerOptions                    type       src/hooks/study/useVerticalCardPager.ts:14:13                 
+UseVerticalCardPagerReturn                     type       src/hooks/study/useVerticalCardPager.ts:27:13                 
+VerticalCardPagerProps                         type       src/features/review/VerticalCardPager.tsx:32:13               
+CardRelation                                   type       src/services/localdb/types.ts:5:13                            
+ProjectMap                                     type       src/services/localdb/types.ts:17:13                           
+TagLegacyRecord                                type       src/services/localdb/types.ts:28:13                           
+TagV2Record                                    type       src/services/localdb/types.ts:36:13                           
+EnqueueSync                              crud  type       src/services/localdb/crud.ts:16:13                            
+TableLike                                crud  interface  src/services/localdb/crud.ts:25:18                            
+DbLike                                   crud  interface  src/services/localdb/crud.ts:34:18                            
+CardRelation                                   type       src/services/localdb/LocalDB.ts:54:5                          
+LocalDBInstance                                type       src/services/localdb/LocalDB.ts:54:19                         
+LocalDBLike                                    type       src/services/localdb/LocalDB.ts:54:36                         
+ProjectMap                                     type       src/services/localdb/LocalDB.ts:54:49                         
+TagLegacyRecord                                type       src/services/localdb/LocalDB.ts:55:5                          
+TagV2Record                                    type       src/services/localdb/LocalDB.ts:56:5                          
+TagV3Record                                    type       src/services/localdb/LocalDB.ts:57:5                          
+LogLevel                                       type       src/types/domain/telemetry.ts:1:13                            
+SyncContextSource                              type       src/types/domain/telemetry.ts:3:13                            
+NetworkStatus                                  type       src/types/domain/telemetry.ts:10:13                           
+TelemetryEventName                             type       src/types/domain/telemetry.ts:11:13                           
+LogContext                                     interface  src/types/domain/telemetry.ts:17:18                           
+SystemMetrics                                  interface  src/types/domain/telemetry.ts:28:18                           
+UserMetrics                                    interface  src/types/domain/telemetry.ts:35:18                           
+SyncLogEntry                                   interface  src/types/domain/telemetry.ts:41:18                           
+ITelemetryService                              interface  src/types/domain/telemetry.ts:58:18                           
+CardImageRef                                   interface  src/types/domain/assets.ts:37:18                              
+PdfDocument                                    type       src/types/domain/document.ts:56:13                            
+ExplorerItem                                   type       src/types/domain/explorer.ts:4:13                             
+MediaKind                                      type       src/types/domain/media.ts:6:13                                
+MediaStatus                                    type       src/types/domain/media.ts:11:13                               
+MediaAsset                                     interface  src/types/domain/media.ts:23:18                               
+NotificationLevel                              type       src/types/domain/notification.ts:2:13                         
+NotificationAction                             interface  src/types/domain/notification.ts:5:18                         
+Notification                                   interface  src/types/domain/notification.ts:12:18                        
+NotificationOptions                            interface  src/types/domain/notification.ts:26:18                        
+BlockEditorHandle                              interface  src/components/card/blocks/BlockEditor.tsx:36:18              
+DndResult                                      type       src/components/card/editor/useCardBlocksDnd.ts:10:13          
+ScaleToFitFrameProps                           interface  src/components/card/frame/ScaleToFitFrame.tsx:4:18            
+CardFrameProps                                 interface  src/components/card/frame/CardFrame.tsx:21:18                 
+FlashcardCornerControlsResult                  interface  src/components/card/frame/FlashcardCornerControls.tsx:37:18   
+FlashcardDerived                               interface  src/components/card/frame/useFlashcardDerived.ts:31:18        
+FlashcardInkResult                             interface  src/components/card/frame/useFlashcardInk.ts:32:18            
+FlashcardMediaState                            interface  src/components/card/frame/useFlashcardMediaState.ts:6:18      
+RuledParams                                    interface  src/components/card/frame/ruledStyles.ts:5:18                 
+TreeNode                                       type       src/components/folder/types/viewTypes.ts:21:13                
+StratisActivityIconProps                       type       src/ui/icons/stratis/StratisActivityIcon.tsx:4:13             
+StratisAddSquare01IconProps                    type       src/ui/icons/stratis/StratisAddSquare01Icon.tsx:4:13          
+StratisAddSquare02IconProps                    type       src/ui/icons/stratis/StratisAddSquare02Icon.tsx:4:13          
+StratisAddSquare03IconProps                    type       src/ui/icons/stratis/StratisAddSquare03Icon.tsx:4:13          
+StratisAddSquare04IconProps                    type       src/ui/icons/stratis/StratisAddSquare04Icon.tsx:4:13          
+StratisAlertCircleIconProps                    type       src/ui/icons/stratis/StratisAlertCircleIcon.tsx:4:13          
+StratisAlertSquareIconProps                    type       src/ui/icons/stratis/StratisAlertSquareIcon.tsx:4:13          
+StratisAlertTriangleIconProps                  type       src/ui/icons/stratis/StratisAlertTriangleIcon.tsx:4:13        
+StratisArrowLeftSquareContainedIconPro窶ｦ        type       窶ｦui/icons/stratis/StratisArrowLeftSquareContainedIcon.tsx:4:13
+StratisArrowRefresh01IconProps                 type       src/ui/icons/stratis/StratisArrowRefresh01Icon.tsx:4:13       
+StratisArrowRefresh02IconProps                 type       src/ui/icons/stratis/StratisArrowRefresh02Icon.tsx:4:13       
+StratisArrowRefresh03IconProps                 type       src/ui/icons/stratis/StratisArrowRefresh03Icon.tsx:4:13       
+StratisArrowRefresh04IconProps                 type       src/ui/icons/stratis/StratisArrowRefresh04Icon.tsx:4:13       
+StratisArrowRefresh05IconProps                 type       src/ui/icons/stratis/StratisArrowRefresh05Icon.tsx:4:13       
+StratisArrowRefresh06IconProps                 type       src/ui/icons/stratis/StratisArrowRefresh06Icon.tsx:4:13       
+StratisArrowRightSquareContainedIconPr窶ｦ        type       窶ｦi/icons/stratis/StratisArrowRightSquareContainedIcon.tsx:4:13
+StratisArrowSwitchHorizontalIconProps          type       src/ui/icons/stratis/StratisArrowSwitchHorizontalIcon.tsx:4:13
+StratisAttatchment01IconProps                  type       src/ui/icons/stratis/StratisAttatchment01Icon.tsx:4:13        
+StratisAttatchment02IconProps                  type       src/ui/icons/stratis/StratisAttatchment02Icon.tsx:4:13        
+StratisAudioSettings01IconProps                type       src/ui/icons/stratis/StratisAudioSettings01Icon.tsx:4:13      
+StratisAudioSettings02IconProps                type       src/ui/icons/stratis/StratisAudioSettings02Icon.tsx:4:13      
+StratisBoxIconProps                            type       src/ui/icons/stratis/StratisBoxIcon.tsx:4:13                  
+StratisCalendarCheckIconProps                  type       src/ui/icons/stratis/StratisCalendarCheckIcon.tsx:4:13        
+StratisCalendarNumberIconProps                 type       src/ui/icons/stratis/StratisCalendarNumberIcon.tsx:4:13       
+StratisChevronDownIconProps                    type       src/ui/icons/stratis/StratisChevronDownIcon.tsx:4:13          
+StratisChevronLeftIconProps                    type       src/ui/icons/stratis/StratisChevronLeftIcon.tsx:4:13          
+StratisChevronRightIconProps                   type       src/ui/icons/stratis/StratisChevronRightIcon.tsx:4:13         
+StratisChevronUpIconProps                      type       src/ui/icons/stratis/StratisChevronUpIcon.tsx:4:13            
+StratisClock01IconProps                        type       src/ui/icons/stratis/StratisClock01Icon.tsx:4:13              
+StratisClockBackwardIconProps                  type       src/ui/icons/stratis/StratisClockBackwardIcon.tsx:4:13        
+StratisClockPlusIconProps                      type       src/ui/icons/stratis/StratisClockPlusIcon.tsx:4:13            
+StratisCode01IconProps                         type       src/ui/icons/stratis/StratisCode01Icon.tsx:4:13               
+StratisCode02IconProps                         type       src/ui/icons/stratis/StratisCode02Icon.tsx:4:13               
+StratisComponentIconProps                      type       src/ui/icons/stratis/StratisComponentIcon.tsx:4:13            
+StratisCopyLeftIconProps                       type       src/ui/icons/stratis/StratisCopyLeftIcon.tsx:4:13             
+StratisCopyRightIconProps                      type       src/ui/icons/stratis/StratisCopyRightIcon.tsx:4:13            
+StratisDotVerticalIconProps                    type       src/ui/icons/stratis/StratisDotVerticalIcon.tsx:4:13          
+StratisEdit01IconProps                         type       src/ui/icons/stratis/StratisEdit01Icon.tsx:4:13               
+StratisEditContainedIconProps                  type       src/ui/icons/stratis/StratisEditContainedIcon.tsx:4:13        
+StratisFile02IconProps                         type       src/ui/icons/stratis/StratisFile02Icon.tsx:4:13               
+StratisFileEdit02IconProps                     type       src/ui/icons/stratis/StratisFileEdit02Icon.tsx:4:13           
+StratisFileMultipleIconProps                   type       src/ui/icons/stratis/StratisFileMultipleIcon.tsx:4:13         
+StratisFileNoneIconProps                       type       src/ui/icons/stratis/StratisFileNoneIcon.tsx:4:13             
+StratisFilterIconProps                         type       src/ui/icons/stratis/StratisFilterIcon.tsx:4:13               
+StratisFormulaIconProps                        type       src/ui/icons/stratis/StratisFormulaIcon.tsx:8:13              
+StratisFolderOpen03IconProps                   type       src/ui/icons/stratis/StratisFolderOpen03Icon.tsx:4:13         
+StratisFolderPlus01IconProps                   type       src/ui/icons/stratis/StratisFolderPlus01Icon.tsx:4:13         
+StratisFolderSearch01IconProps                 type       src/ui/icons/stratis/StratisFolderSearch01Icon.tsx:4:13       
+StratisFolderIconProps                         type       src/ui/icons/stratis/StratisFolderIcon.tsx:4:13               
+StratisGlobe02IconProps                        type       src/ui/icons/stratis/StratisGlobe02Icon.tsx:4:13              
+StratisGlobe05IconProps                        type       src/ui/icons/stratis/StratisGlobe05Icon.tsx:4:13              
+StratisGrid01IconProps                         type       src/ui/icons/stratis/StratisGrid01Icon.tsx:4:13               
+StratisHeader02IconProps                       type       src/ui/icons/stratis/StratisHeader02Icon.tsx:4:13             
+StratisHelpCircleContainedIconProps            type       src/ui/icons/stratis/StratisHelpCircleContainedIcon.tsx:4:13  
+StratisHome05IconProps                         type       src/ui/icons/stratis/StratisHome05Icon.tsx:4:13               
+StratisImageIconProps                          type       src/ui/icons/stratis/StratisImageIcon.tsx:4:13                
+StratisMarkdownIconProps                       type       src/ui/icons/stratis/StratisMarkdownIcon.tsx:8:13             
+StratisInbox02IconProps                        type       src/ui/icons/stratis/StratisInbox02Icon.tsx:4:13              
+StratisInfoSquare01ContainedIconProps          type       src/ui/icons/stratis/StratisInfoSquare01ContainedIcon.tsx:4:13
+StratisLayoutLeftIconProps                     type       src/ui/icons/stratis/StratisLayoutLeftIcon.tsx:4:13           
+StratisLayoutRightIconProps                    type       src/ui/icons/stratis/StratisLayoutRightIcon.tsx:4:13          
+StratisLightbulb02IconProps                    type       src/ui/icons/stratis/StratisLightbulb02Icon.tsx:4:13          
+StratisLinkAngledIconProps                     type       src/ui/icons/stratis/StratisLinkAngledIcon.tsx:4:13           
+StratisLinkBrokenIconProps                     type       src/ui/icons/stratis/StratisLinkBrokenIcon.tsx:4:13           
+StratisLinkExternalIconProps                   type       src/ui/icons/stratis/StratisLinkExternalIcon.tsx:4:13         
+StratisLogout01IconProps                       type       src/ui/icons/stratis/StratisLogout01Icon.tsx:4:13             
+StratisLogout02IconProps                       type       src/ui/icons/stratis/StratisLogout02Icon.tsx:4:13             
+StratisMap01IconProps                          type       src/ui/icons/stratis/StratisMap01Icon.tsx:4:13                
+StratisMap03IconProps                          type       src/ui/icons/stratis/StratisMap03Icon.tsx:4:13                
+StratisMarker01IconProps                       type       src/ui/icons/stratis/StratisMarker01Icon.tsx:4:13             
+StratisMenu04IconProps                         type       src/ui/icons/stratis/StratisMenu04Icon.tsx:4:13               
+StratisNote01IconProps                         type       src/ui/icons/stratis/StratisNote01Icon.tsx:4:13               
+StratisNote02IconProps                         type       src/ui/icons/stratis/StratisNote02Icon.tsx:4:13               
+StratisNotificationBoxIconProps                type       src/ui/icons/stratis/StratisNotificationBoxIcon.tsx:4:13      
+StratisPenTool01IconProps                      type       src/ui/icons/stratis/StratisPenTool01Icon.tsx:4:13            
+StratisPieChart01IconProps                     type       src/ui/icons/stratis/StratisPieChart01Icon.tsx:4:13           
+StratisPieChart02IconProps                     type       src/ui/icons/stratis/StratisPieChart02Icon.tsx:4:13           
+StratisPieChart03IconProps                     type       src/ui/icons/stratis/StratisPieChart03Icon.tsx:4:13           
+StratisPlus01IconProps                         type       src/ui/icons/stratis/StratisPlus01Icon.tsx:4:13               
+StratisPlus02IconProps                         type       src/ui/icons/stratis/StratisPlus02Icon.tsx:4:13               
+StratisPlus03IconProps                         type       src/ui/icons/stratis/StratisPlus03Icon.tsx:4:13               
+StratisQuoteIconProps                          type       src/ui/icons/stratis/StratisQuoteIcon.tsx:4:13                
+StratisSave01IconProps                         type       src/ui/icons/stratis/StratisSave01Icon.tsx:4:13               
+StratisSave02IconProps                         type       src/ui/icons/stratis/StratisSave02Icon.tsx:4:13               
+StratisSearch01IconProps                       type       src/ui/icons/stratis/StratisSearch01Icon.tsx:4:13             
+StratisSearch02IconProps                       type       src/ui/icons/stratis/StratisSearch02Icon.tsx:4:13             
+StratisServer02IconProps                       type       src/ui/icons/stratis/StratisServer02Icon.tsx:4:13             
+StratisSettingsIconProps                       type       src/ui/icons/stratis/StratisSettingsIcon.tsx:4:13             
+StratisShareIconProps                          type       src/ui/icons/stratis/StratisShareIcon.tsx:4:13                
+StratisShuffleIconProps                        type       src/ui/icons/stratis/StratisShuffleIcon.tsx:4:13              
+StratisSortHorizontalIconProps                 type       src/ui/icons/stratis/StratisSortHorizontalIcon.tsx:4:13       
+StratisSortVertical01IconProps                 type       src/ui/icons/stratis/StratisSortVertical01Icon.tsx:4:13       
+StratisStar02IconProps                         type       src/ui/icons/stratis/StratisStar02Icon.tsx:4:13               
+StratisSuperscriptIconProps                    type       src/ui/icons/stratis/StratisSuperscriptIcon.tsx:4:13          
+StratisTagIconProps                            type       src/ui/icons/stratis/StratisTagIcon.tsx:4:13                  
+StratisTrash02IconProps                        type       src/ui/icons/stratis/StratisTrash02Icon.tsx:4:13              
+StratisTrash03IconProps                        type       src/ui/icons/stratis/StratisTrash03Icon.tsx:4:13              
+StratisType03IconProps                         type       src/ui/icons/stratis/StratisType03Icon.tsx:4:13               
+StratisUserProfileGroupIconProps               type       src/ui/icons/stratis/StratisUserProfileGroupIcon.tsx:4:13     
+StratisVariantIconProps                        type       src/ui/icons/stratis/StratisVariantIcon.tsx:4:13              
+StratisWrenchIconProps                         type       src/ui/icons/stratis/StratisWrenchIcon.tsx:4:13               
+StratisX01IconProps                            type       src/ui/icons/stratis/StratisX01Icon.tsx:4:13                  
+StratisX02IconProps                            type       src/ui/icons/stratis/StratisX02Icon.tsx:4:13                  
+StratisX03IconProps                            type       src/ui/icons/stratis/StratisX03Icon.tsx:4:13                  
+StratisXCircleContainedIconProps               type       src/ui/icons/stratis/StratisXCircleContainedIcon.tsx:4:13     
+StratisXSquareContainedIconProps               type       src/ui/icons/stratis/StratisXSquareContainedIcon.tsx:4:13     
+StratisFrameIconProps                          type       src/ui/icons/stratis/StratisFrameIcon.tsx:5:13                
+[93m[4mDuplicate exports[24m[39m (20)
+CARD_BASE_WIDTH|CANONICAL_CARD_WIDTH   src/components/card/common/constants.ts
+dataIntegrityService|default           src/services/DataIntegrityService.ts   
+platform|default                       src/platform/index.ts                  
+snapshotService|default                src/services/SnapshotService.ts        
+Filter|FilterIcon                      src/ui/icons.tsx                       
+Folder|FolderIcon                      src/ui/icons.tsx                       
+GripVertical|GripIcon                  src/ui/icons.tsx                       
+Image|ImageIcon                        src/ui/icons.tsx                       
+Link|LinkIcon                          src/ui/icons.tsx                       
+Search|SearchIcon                      src/ui/icons.tsx                       
+Tag|TagIcon                            src/ui/icons.tsx                       
+Trash2|TrashIcon                       src/ui/icons.tsx                       
+X|XIcon                                src/ui/icons.tsx                       
+HelpCircle|CircleHelp                  src/ui/icons.tsx                       
+TypeIcon|Type                          src/ui/icons.tsx                       
+CodeIcon|Code                          src/ui/icons.tsx                       
+SigmaIcon|Sigma                        src/ui/icons.tsx                       
+NotebookPenIcon|NotebookPen            src/ui/icons.tsx                       
+StickyNoteIcon|StickyNote              src/ui/icons.tsx                       
+DEFAULT_TAG_COLOR_KEYS|DEFAULT_COLORS  src/hooks/settings/useTags.ts          
+[33m[4mConfiguration hints[24m (4)[39m
+. (root)                         knip.json  Add entry and/or refine project files (189 unused files)
+dist/**/*                        knip.json  Remove from ignore                                      
+coverage/**/*                    knip.json  Remove from ignore                                      
+vitest.config.{ts,js,mjs,mts}    knip.json  Refine entry pattern (no matches)                       

@@ -8,14 +8,17 @@ import { cn } from "@/lib/utils";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 import { useCallback, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { TreeViewDialogs } from "../components/TreeViewDialogs";
-import { TreeViewMainPane } from "../components/TreeViewMainPane";
-import { TreeViewSidebar } from "../components/TreeViewSidebar";
-import { TreeViewTabContent } from "../components/TreeViewTabContent";
-import { useTreeViewActions } from "../hooks/useTreeViewActions";
-import { useTreeViewDerivedState } from "../hooks/useTreeViewDerivedState";
-import { useTreeViewFilters } from "../hooks/useTreeViewFilters";
-import { useTreeViewSidebar } from "../hooks/useTreeViewSidebar";
+
+import { TreeViewDialogs } from "@/components/folder/components/TreeViewDialogs";
+import { TreeViewMainPane } from "@/components/folder/components/TreeViewMainPane";
+import { TreeViewSidebar } from "@/components/folder/components/TreeViewSidebar";
+import { TreeViewTabContent } from "@/components/folder/components/TreeViewTabContent";
+
+import { useTreeViewActions } from "@/components/folder/hooks/useTreeViewActions";
+import { useTreeViewDerivedState } from "@/components/folder/hooks/useTreeViewDerivedState";
+import { useTreeViewFilters } from "@/components/folder/hooks/useTreeViewFilters";
+import { useTreeViewSidebar } from "@/components/folder/hooks/useTreeViewSidebar";
+
 import {
   ACTIVE_VIEW_KINDS,
   DEFAULT_FOLDER_VIEW,
@@ -23,7 +26,7 @@ import {
   createViewId,
   type ViewDef,
   type ViewKind,
-} from "../types/viewTypes";
+} from "@/components/folder/types/viewTypes";
 
 interface TreeViewLayoutProps {
   folders: Folder[];
