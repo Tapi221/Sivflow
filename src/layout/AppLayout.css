@@ -1,0 +1,25 @@
+.app-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  grid-template-rows: 1fr;
+  height: 100dvh;
+  width: 100%;
+  overflow: hidden;
+  background: #fff;
+}
+
+.app-layout__content {
+  display: grid;
+  grid-template-rows: 48px 1fr;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.app-layout__main {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.app-layout__main--locked {
+  overflow: hidden;
+}
