@@ -1,5 +1,4 @@
 import { useCards } from "@/hooks/card/useCards";
-import { useExplorerPanelState } from "./hooks/useExplorerPanelState";
 import { useFolders } from "@/hooks/folder/useFolders";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { useDocuments } from "@/hooks/platform/useDocuments";
@@ -16,7 +15,14 @@ import { TreeViewDialogs } from "./components/TreeViewDialogs";
 import { useTreeViewDerivedState } from "./hooks/useTreeViewDerivedState";
 import { useTreeViewSidebar } from "./hooks/useTreeViewSidebar";
 import { useTreeViewFilters } from "./hooks/useTreeViewFilters";
-import { type ViewDef, type ViewKind } from "./viewTypes";
+import {
+  ACTIVE_VIEW_KINDS,
+  DEFAULT_FOLDER_VIEW,
+  buildVirtualTree,
+  createViewId,
+  type ViewDef,
+  type ViewKind,
+} from "./viewTypes";
 import { useTreeViewViews } from "./hooks/useTreeViewViews";
 import { useTreeViewActions } from "./hooks/useTreeViewActions";
 
