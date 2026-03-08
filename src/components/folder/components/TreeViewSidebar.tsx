@@ -1,5 +1,5 @@
 import { ExplorerTabs } from "@/components/explorer/ExplorerTabs";
-import { ExplorerFilterSummary } from "@/components/folder/ExplorerFilterSummary";
+import { ExplorerFilterSummary } from "@/components/folder/components/explorer/ExplorerFilterSummary";
 import type { ExplorerTab } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
 import React from "react";
@@ -109,5 +109,6 @@ export function TreeViewSidebar({
     </div>
   );
 }
+
 
 

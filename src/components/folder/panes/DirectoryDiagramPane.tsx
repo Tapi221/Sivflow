@@ -512,7 +512,3 @@ export function DirectoryDiagramPane({
     </div>
   );
 }
-
-
-
-

@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 import { ArrowLeft } from "@/ui/icons";
 import React from "react";
-import { RightPane } from "@/components/folder/RightPane";
+import { RightPane } from "@/components/folder/panes/RightPane";
 
 interface TreeViewMainPaneProps {
   isMobile: boolean;
@@ -103,4 +103,5 @@ export function TreeViewMainPane({
     </div>
   );
 }
+
 

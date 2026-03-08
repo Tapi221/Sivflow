@@ -2,8 +2,8 @@ import type { ComponentProps } from "react";
 import { PinnedPanel } from "@/components/explorer/PinnedPanel";
 import { RecentPanel } from "@/components/explorer/RecentPanel";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
-import { FolderTreeWithCards } from "@/components/folder/FolderTreeWithCards";
-import { ViewsPanel } from "@/src/components/folder/components/views/ViewsPanel";
+import { FolderTreeWithCards } from "@/components/folder/components/views/FolderTreeWithCards";
+import { ViewsPanel } from "@/components/folder/components/views/ViewsPanel";
 import type { ViewDef } from "@/components/folder/viewTypes";
 
 type FolderTreeWithCardsProps = ComponentProps<typeof FolderTreeWithCards>;
@@ -154,5 +154,6 @@ export function TreeViewTabContent({
       );
   }
 }
+
 
 
