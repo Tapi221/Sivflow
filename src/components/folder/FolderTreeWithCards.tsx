@@ -1,33 +1,20 @@
 /* eslint-disable react-hooks/exhaustive-deps -- large legacy explorer handlers intentionally stabilized to avoid interaction regressions. */
 import React, {
-  startTransition,
   useState,
   useRef,
   useEffect,
   useMemo,
   useCallback,
 } from "react";
-import {
-  FileText,
-  Folder as FolderIcon,
-  MoreVertical,
-  SearchX,
-} from "@/ui/icons";
+import { FileText } from "@/ui/icons";
 import { cn } from "@/lib/utils";
 import type {
   Card,
-  DocumentItem,
   ExplorerItem,
   SelectedExplorerItem,
 } from "@/types";
 import DeleteFolderDialog from "./DeleteFolderDialog";
-import { ContextMenu } from "./ContextMenu";
-import { useReliableFileUpload } from "@/hooks/useReliableFileUpload";
-import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/contexts/ToastContext";
-import { getLocalDb } from "@/services/localDB";
-import { saveDocumentBlob } from "@/services/documentFileStore";
-import { getOrCreateDeviceId } from "@/utils/device";
 import {
   type FolderTreeNode,
   ROOT_FOLDER_ID,
@@ -38,15 +25,11 @@ import {
   isSameFolder,
   getEntityTime,
   createOptimisticId,
-  createDocumentId,
-  buildStoragePath,
-  isTextInputTarget,
-  hasOpenModalDialog,
   isFileDragEvent,
   extractPdfFiles,
   extractPptxFiles,
-  PPTX_MIME,
 } from "./explorer/model/utils";
+// useAuth / useReliableFileUpload は useFolderDocumentUpload hook 内で使用
 import { FolderRow } from "./explorer/rows/FolderRow";
 import { EXPLORER_ROW_BASE_CLASS_NAME } from "./explorer/rows/shared";
 import BulkTagDialog from "@/components/tag/BulkTagDialog";
@@ -58,6 +41,12 @@ import {
   toSelectedTreeId,
   type ExplorerTreeNode,
 } from "./explorer/tree/arboristAdapter";
+import { useEnsureAncestorFoldersExpanded } from "./hooks/useEnsureAncestorFoldersExpanded";
+import { useFolderDocumentUpload } from "./hooks/useFolderDocumentUpload";
+import { useExplorerKeyboardNavigation } from "./hooks/useExplorerKeyboardNavigation";
+import { RootFolderPanelList } from "./components/RootFolderPanelList";
+import { ExplorerEmptyState } from "./components/ExplorerEmptyState";
+import { ExplorerNoResultsState } from "./components/ExplorerNoResultsState";
 
 type LegacyEntityFields = {
   isDeleted?: boolean;
@@ -176,8 +165,6 @@ export function FolderTreeWithCards({
 }: FolderTreeWithCardsProps) {
   const ROW_BASE = EXPLORER_ROW_BASE_CLASS_NAME;
 
-  const { currentUser } = useAuth();
-  const { uploadFile } = useReliableFileUpload();
   const { error: toastError } = useToast();
 
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(() => {
@@ -227,76 +214,13 @@ export function FolderTreeWithCards({
     return Array.from(map.values());
   }, [cards, optimisticCards]);
 
-  useEffect(() => {
-    if (!selectedFolderId) return;
-
-    const getAncestorFolderIds = (folderId: string): string[] => {
-      const ancestors: string[] = [];
-      let currentId: string | null = folderId;
-
-      while (currentId) {
-        ancestors.push(currentId);
-        const folder = treeFolders.find((f) => getFolderId(f) === currentId);
-        if (!folder) break;
-        currentId = normalizeFolderId(getParentFolderId(folder));
-      }
-
-      return ancestors;
-    };
-
-    const ancestorIds = getAncestorFolderIds(selectedFolderId);
-
-    setExpandedFolders((prev) => {
-      const next = new Set(prev);
-      let changed = false;
-
-      for (const id of ancestorIds) {
-        if (!next.has(id)) {
-          next.add(id);
-          changed = true;
-        }
-      }
-
-      return changed ? next : prev;
-    });
-  }, [selectedFolderId, treeFolders]);
-
-  useEffect(() => {
-    if (!selectedItem || selectedItem.type !== "card") return;
-
-    const card = treeCards.find((c) => c.id === selectedItem.id);
-    if (!card || !card.folderId) return;
-
-    const getAncestorFolderIds = (folderId: string): string[] => {
-      const ancestors: string[] = [];
-      let currentId: string | null = folderId;
-
-      while (currentId) {
-        ancestors.push(currentId);
-        const folder = treeFolders.find((f) => getFolderId(f) === currentId);
-        if (!folder) break;
-        currentId = normalizeFolderId(getParentFolderId(folder));
-      }
-
-      return ancestors;
-    };
-
-    const ancestorIds = getAncestorFolderIds(card.folderId);
-
-    setExpandedFolders((prev) => {
-      const next = new Set(prev);
-      let changed = false;
-
-      for (const id of ancestorIds) {
-        if (!next.has(id)) {
-          next.add(id);
-          changed = true;
-        }
-      }
-
-      return changed ? next : prev;
-    });
-  }, [selectedItem, treeCards, treeFolders]);
+  useEnsureAncestorFoldersExpanded({
+    selectedFolderId,
+    selectedItem,
+    treeFolders,
+    treeCards,
+    setExpandedFolders,
+  });
 
   const [newlyCreatedCardId, setNewlyCreatedCardId] = useState<string | null>(
     null,
@@ -327,15 +251,12 @@ export function FolderTreeWithCards({
   const editInputRef = useRef<HTMLInputElement>(null);
   const rowRefs = useRef<Map<string, HTMLElement>>(new Map());
   const treeRootRef = useRef<HTMLDivElement | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const uploadTargetFolderIdRef = useRef<string | null>(null);
   const editingIdRef = useRef<string | null>(null);
   const editingNameRef = useRef("");
   const optimisticFolderNameRef = useRef<Map<string, string>>(new Map());
   const optimisticCardNameRef = useRef<Map<string, string>>(new Map());
   const renameCancelledRef = useRef(false);
   const inFlightRef = useRef(false);
-  const keyHandlerRef = useRef<(e: KeyboardEvent) => void>(() => {});
 
 
   useEffect(() => {
@@ -369,11 +290,6 @@ export function FolderTreeWithCards({
     else rowRefs.current.delete(id);
   }, []);
 
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => keyHandlerRef.current(e);
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, []);
 
   const toggleFolder = useCallback((folderId: string) => {
     setExpandedFolders((prev) => {
@@ -700,14 +616,10 @@ export function FolderTreeWithCards({
   const [activeRootFolderId, setActiveRootFolderId] = useState<string | null>(
     null,
   );
-  const [hoveredRootFolderId, setHoveredRootFolderId] = useState<string | null>(
-    null,
-  );
 
   useEffect(() => {
     if (navigateToSectionListToken <= 0) return;
     setActiveRootFolderId(null);
-    setHoveredRootFolderId(null);
   }, [navigateToSectionListToken]);
 
   useEffect(() => {
@@ -783,292 +695,17 @@ export function FolderTreeWithCards({
     [treeCards, documents, resolveTreeFolderId],
   );
 
-  const handlePdfDropped = useCallback(
-    async (folderId: string, files: File[]) => {
-      if (!files.length) return;
-      if (!currentUser) {
-        toastError?.("PDFの追加にはログインが必要です");
-        return;
-      }
-
-      const pdfFiles = files.filter((file) => {
-        const name = file.name?.toLowerCase() ?? "";
-        return file.type === "application/pdf" || name.endsWith(".pdf");
-      });
-
-      if (pdfFiles.length === 0) return;
-
-      const db = await getLocalDb(currentUser.uid);
-      let nextOrderIndex = getNextOrderIndex(folderId);
-
-      for (const file of pdfFiles) {
-        const now = new Date();
-        const docId = createDocumentId();
-        const storagePath = buildStoragePath(currentUser.uid, docId, "pdf");
-        const mimeType = file.type || "application/pdf";
-        const baseDoc: DocumentItem = {
-          id: docId,
-          userId: currentUser.uid,
-          deviceId: getOrCreateDeviceId(),
-          createdAt: now,
-          updatedAt: now,
-          isDeleted: false,
-          kind: "pdf",
-          folderId,
-          orderIndex: nextOrderIndex,
-          title: file.name,
-          fileName: file.name,
-          mimeType,
-          sizeBytes: file.size,
-          blobUrl: null,
-          localUrl: null,
-          localFileId: docId,
-          remoteUrl: null,
-          storagePath,
-          downloadUrl: null,
-          uploadStatus: "pending",
-        };
-
-        try {
-          await saveDocumentBlob(docId, file, { userId: currentUser.uid });
-          await db.documents.put(baseDoc as DocumentItem & Record<string, unknown>);
-          nextOrderIndex += 1;
-        } catch (localErr: unknown) {
-          console.error(
-            "[FolderTreeWithCards] Failed to prepare local PDF source",
-            {
-              error: localErr,
-              docId,
-              fileName: file.name,
-            },
-          );
-          toastError?.(
-            getErrorMessage(localErr, "PDFのローカル保存に失敗しました"),
-          );
-          continue;
-        }
-
-        try {
-          const result = await uploadFile(file, () => storagePath, {
-            type: "pdf",
-            folderId,
-            docId,
-          });
-
-          const remoteDownloadUrl = result.metadata?.downloadUrl ?? null;
-          await db.updateItem("documents", docId, {
-            storagePath: result.storagePath || storagePath,
-            remoteUrl: remoteDownloadUrl,
-            downloadUrl: remoteDownloadUrl,
-            uploadStatus: remoteDownloadUrl ? "ready" : "queued",
-            updatedAt: new Date(),
-          });
-          if (!remoteDownloadUrl) {
-            const latestDoc = await db.documents.get(docId);
-            console.info(
-              "[FolderTreeWithCards] PDF upload queued in local-only mode",
-              {
-                docId,
-                uploadSource: result.source,
-                uploadStatus: latestDoc?.uploadStatus ?? null,
-                localFileId: latestDoc?.localFileId ?? null,
-                blobUrl:
-                  withLegacyFields(latestDoc ?? {}).blobUrl ??
-                  latestDoc?.localUrl ??
-                  null,
-              },
-            );
-          }
-        } catch (err: unknown) {
-          console.error("[FolderTreeWithCards] PDF upload failed", err);
-          try {
-            await db.updateItem("documents", docId, {
-              uploadStatus: "failed",
-              updatedAt: new Date(),
-            });
-            const failedDoc = await db.documents.get(docId);
-            console.error(
-              "[FolderTreeWithCards] PDF upload failed but local source kept",
-              {
-                docId,
-                localFileId: failedDoc?.localFileId ?? null,
-                blobUrl:
-                  withLegacyFields(failedDoc ?? {}).blobUrl ??
-                  failedDoc?.localUrl ??
-                  null,
-              },
-            );
-          } catch (markErr) {
-            console.error(
-              "[FolderTreeWithCards] Failed to mark PDF upload failure",
-              markErr,
-            );
-          }
-          toastError?.(getErrorMessage(err, "PDFの追加に失敗しました"));
-        }
-      }
-
-      if (pdfFiles.length > 0) {
-        setExpandedFolders((prev) => new Set(prev).add(folderId));
-      }
-    },
-    [currentUser, getNextOrderIndex, toastError, uploadFile],
-  );
-
-  const handlePptxDropped = useCallback(
-    async (folderId: string, files: File[]) => {
-      if (!files.length) return;
-      if (!currentUser) {
-        toastError?.("PPTXの追加にはログインが必要です");
-        return;
-      }
-
-      const pptxFiles = files.filter((file) => {
-        const name = file.name?.toLowerCase() ?? "";
-        return file.type === PPTX_MIME || name.endsWith(".pptx");
-      });
-
-      if (pptxFiles.length === 0) return;
-
-      const db = await getLocalDb(currentUser.uid);
-      let nextOrderIndex = getNextOrderIndex(folderId);
-
-      for (const file of pptxFiles) {
-        const now = new Date();
-        const docId = createDocumentId();
-        const storagePath = buildStoragePath(currentUser.uid, docId, "pptx");
-        const mimeType = file.type || PPTX_MIME;
-        const baseDoc: DocumentItem = {
-          id: docId,
-          userId: currentUser.uid,
-          deviceId: getOrCreateDeviceId(),
-          createdAt: now,
-          updatedAt: now,
-          isDeleted: false,
-          kind: "pptx",
-          convertStatus: "processing",
-          pptxManifestStatus: "none",
-          pptxManifestPath: null,
-          pptxSlideCount: null,
-          pptxLastError: null,
-          pptxConvertRequestedAt: null,
-          pptxConvertedAt: null,
-          pptx: {
-            manifestPath: null,
-            fallbackPdfPath: null,
-            slideCount: null,
-            updatedAt: now,
-            error: null,
-          },
-          folderId,
-          orderIndex: nextOrderIndex,
-          title: file.name,
-          fileName: file.name,
-          mimeType,
-          sizeBytes: file.size,
-          blobUrl: null,
-          localUrl: null,
-          localFileId: docId,
-          remoteUrl: null,
-          storagePath,
-          downloadUrl: null,
-          uploadStatus: "pending",
-        };
-
-        try {
-          await saveDocumentBlob(docId, file, { userId: currentUser.uid });
-          await db.documents.put(baseDoc as DocumentItem & Record<string, unknown>);
-          nextOrderIndex += 1;
-        } catch (localErr: unknown) {
-          console.error(
-            "[FolderTreeWithCards] Failed to prepare local PPTX source",
-            {
-              error: localErr,
-              docId,
-              fileName: file.name,
-            },
-          );
-          toastError?.(
-            getErrorMessage(localErr, "PPTXのローカル保存に失敗しました"),
-          );
-          continue;
-        }
-
-        try {
-          const result = await uploadFile(file, () => storagePath, {
-            type: "pptx",
-            folderId,
-            docId,
-          });
-
-          const remoteDownloadUrl = result.metadata?.downloadUrl ?? null;
-          await db.updateItem("documents", docId, {
-            storagePath: result.storagePath || storagePath,
-            remoteUrl: remoteDownloadUrl,
-            downloadUrl: remoteDownloadUrl,
-            uploadStatus: remoteDownloadUrl ? "ready" : "queued",
-            updatedAt: new Date(),
-          });
-
-          if (!remoteDownloadUrl) {
-            const latestDoc = await db.documents.get(docId);
-            console.info(
-              "[FolderTreeWithCards] PPTX upload queued in local-only mode",
-              {
-                docId,
-                uploadSource: result.source,
-                uploadStatus: latestDoc?.uploadStatus ?? null,
-                localFileId: latestDoc?.localFileId ?? null,
-                blobUrl:
-                  withLegacyFields(latestDoc ?? {}).blobUrl ??
-                  latestDoc?.localUrl ??
-                  null,
-              },
-            );
-          }
-        } catch (err: unknown) {
-          console.error("[FolderTreeWithCards] PPTX upload failed", err);
-          try {
-            const failedAt = new Date();
-            const message = getErrorMessage(err, "upload_failed");
-            await db.updateItem("documents", docId, {
-              uploadStatus: "failed",
-              convertStatus: "failed",
-              pptxManifestStatus: "failed",
-              pptxLastError: message,
-              pptx: {
-                ...(baseDoc.pptx ?? {}),
-                error: message,
-                updatedAt: failedAt,
-              },
-              updatedAt: failedAt,
-            });
-            const failedDoc = await db.documents.get(docId);
-            console.error(
-              "[FolderTreeWithCards] PPTX upload failed but local source kept",
-              {
-                docId,
-                localFileId: failedDoc?.localFileId ?? null,
-                blobUrl:
-                  withLegacyFields(failedDoc ?? {}).blobUrl ??
-                  failedDoc?.localUrl ??
-                  null,
-              },
-            );
-          } catch (markErr) {
-            console.error(
-              "[FolderTreeWithCards] Failed to mark PPTX upload failure",
-              markErr,
-            );
-          }
-          toastError?.(getErrorMessage(err, "PPTXの追加に失敗しました"));
-        }
-      }
-
-      setExpandedFolders((prev) => new Set(prev).add(folderId));
-    },
-    [currentUser, getNextOrderIndex, toastError, uploadFile],
-  );
+  const {
+    fileInputRef,
+    handlePdfDropped,
+    handlePptxDropped,
+    handleToolbarAddFile,
+    handleToolbarFileInputChange,
+  } = useFolderDocumentUpload({
+    selectedFolderId,
+    getNextOrderIndex,
+    setExpandedFolders,
+  });
 
   const getUniqueFolderName = useCallback(
     (parentId: string | null) => {
@@ -1255,36 +892,6 @@ export function FolderTreeWithCards({
     }
   };
 
-  const handleToolbarAddFile = useCallback(() => {
-    const targetFolderId = selectedFolderId;
-    if (!targetFolderId) {
-      toastError?.("ファイル追加先のフォルダを選択してください");
-      return;
-    }
-    uploadTargetFolderIdRef.current = targetFolderId;
-    fileInputRef.current?.click();
-  }, [selectedFolderId, toastError]);
-
-  const handleToolbarFileInputChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const targetFolderId = uploadTargetFolderIdRef.current;
-    const files = event.target.files;
-    event.target.value = "";
-
-    if (!targetFolderId || !files) return;
-
-    const pdfFiles = extractPdfFiles(files);
-    const pptxFiles = extractPptxFiles(files);
-
-    if (pdfFiles.length > 0) void handlePdfDropped(targetFolderId, pdfFiles);
-    if (pptxFiles.length > 0) void handlePptxDropped(targetFolderId, pptxFiles);
-
-    if (pdfFiles.length === 0 && pptxFiles.length === 0) {
-      toastError?.("PDFまたはPPTXファイルを選択してください");
-    }
-  };
-
   const handleRenameConfirm = async () => {
     if (inFlightRef.current) return;
     inFlightRef.current = true;
@@ -1395,165 +1002,24 @@ export function FolderTreeWithCards({
     [onDeleteFolder],
   );
 
-  const handleArrowNavigation = (key: string, currentId: string) => {
-    const flatList: Array<{
-      id: string;
-      type: "folder" | "card" | "document";
-      parentId: string | null;
-    }> = [];
-
-    const addFolderAndChildren = (folderId: string | null) => {
-      const folderList =
-        folderId === null ? rootFolders : getChildFolders(folderId);
-
-      folderList.forEach((folder) => {
-        const id = getFolderId(folder);
-        flatList.push({ id, type: "folder", parentId: folderId });
-
-        if (expandedFolders.has(id)) {
-          addFolderAndChildren(id);
-          getFolderItems(id).forEach((item) => {
-            flatList.push({
-              id: getExplorerItemId(item),
-              type: item.type as ExplorerItem["type"],
-              parentId: id,
-            });
-          });
-        }
-      });
-    };
-
-    addFolderAndChildren(null);
-
-    getFolderItems(null).forEach((item) => {
-      flatList.push({
-        id: getExplorerItemId(item),
-        type: item.type as ExplorerItem["type"],
-        parentId: null,
-      });
-    });
-
-    const currentIndex = flatList.findIndex((item) => item.id === currentId);
-    if (currentIndex === -1) return;
-
-    const currentItem = flatList[currentIndex];
-
-    if (key === "ArrowUp" && currentIndex > 0) {
-      const prevItem = flatList[currentIndex - 1];
-      if (prevItem.type === "folder") onFolderSelect(prevItem.id);
-      else onItemSelect({ type: prevItem.type, id: prevItem.id });
-    } else if (key === "ArrowDown" && currentIndex < flatList.length - 1) {
-      const nextItem = flatList[currentIndex + 1];
-      if (nextItem.type === "folder") onFolderSelect(nextItem.id);
-      else onItemSelect({ type: nextItem.type, id: nextItem.id });
-    } else if (key === "ArrowRight" && currentItem.type === "folder") {
-      if (!expandedFolders.has(currentId)) {
-        toggleFolder(currentId);
-      } else {
-        const children = getChildFolders(currentId);
-        const folderItems = getFolderItems(currentId);
-        if (children.length > 0) onFolderSelect(getFolderId(children[0]));
-        else if (folderItems.length > 0) {
-          onItemSelect({
-            type: folderItems[0].type === "card" ? "card" : "document",
-            id: getExplorerItemId(folderItems[0]),
-          });
-        }
-      }
-    } else if (key === "ArrowLeft") {
-      if (currentItem.type === "folder" && expandedFolders.has(currentId)) {
-        toggleFolder(currentId);
-      } else if (currentItem.parentId) {
-        onFolderSelect(currentItem.parentId);
-      }
-    }
-  };
-
-  useEffect(() => {
-    keyHandlerRef.current = (e: KeyboardEvent) => {
-      if (e.defaultPrevented) return;
-      const target = e.target as HTMLElement;
-      const treeRoot = treeRootRef.current;
-      if (!treeRoot) return;
-      const activeEl = document.activeElement as HTMLElement | null;
-      const isTreeFocused =
-        treeRoot.contains(target) ||
-        (activeEl ? treeRoot.contains(activeEl) : false);
-      if (!isTreeFocused) return;
-      if (isTextInputTarget(target)) return;
-      if (hasOpenModalDialog()) return;
-
-      if (
-        (e.ctrlKey || e.metaKey) &&
-        e.shiftKey &&
-        e.key.toLowerCase() === "n"
-      ) {
-        e.preventDefault();
-        void handleCreateFolderAction(selectedFolderId ?? null);
-        return;
-      }
-
-      if (
-        (e.ctrlKey || e.metaKey) &&
-        e.shiftKey &&
-        e.key.toLowerCase() === "o"
-      ) {
-        e.preventDefault();
-        handleToolbarAddFile();
-        return;
-      }
-
-      const currentSelectedEntityId = getSelectedEntityId(selectedItem);
-      const currentId = currentSelectedEntityId || selectedFolderId;
-      if (!currentId) return;
-
-      const isCard = selectedItem?.type === "card";
-      const isDoc = selectedItem?.type === "document";
-
-      if (e.key === "F2") {
-        e.preventDefault();
-        if (!selectedFolderId || isCard || isDoc) return;
-
-        const folder = treeFolders.find(
-          (f) => getFolderId(f) === selectedFolderId,
-        );
-        const name = folder?.folderName || folder?.folder_name || "";
-        setEditingId(currentId);
-        setEditingName(name);
-      }
-
-      if (e.key === "Delete" || e.key === "Backspace") {
-        e.preventDefault();
-        if (isCard) void handleDelete(currentId, "card");
-        else if (isDoc) {
-          /* ドキュメント削除は未実装 */
-        } else void handleDelete(currentId, "folder");
-      }
-
-      if (e.key === "Enter" && isCard) {
-        e.preventDefault();
-        onItemSelect({ type: "card", id: currentId });
-      }
-
-      if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
-        e.preventDefault();
-        handleArrowNavigation(e.key, currentId);
-      }
-    };
-  }, [
-    selectedItem,
+  useExplorerKeyboardNavigation({
     selectedFolderId,
-    treeCards,
+    selectedItem,
     treeFolders,
     expandedFolders,
-    onItemSelect,
-    onFolderSelect,
+    treeRootRef,
+    rootFolders,
+    getChildFolders,
+    getFolderItems,
     toggleFolder,
+    onFolderSelect,
+    onItemSelect,
     handleCreateFolderAction,
-    handleDelete,
-    handleArrowNavigation,
     handleToolbarAddFile,
-  ]);
+    handleDelete,
+    setEditingId,
+    setEditingName,
+  });
 
   const renderTreeNode = useCallback(
     ({
@@ -1751,22 +1217,9 @@ export function FolderTreeWithCards({
       />
 
       {!hasRootContent ? (
-        <div className="text-center py-8 text-slate-400">
-          <FolderIcon className="w-8 h-8 mx-auto mb-2 opacity-30" />
-          <p className="text-xs">フォルダとカードがありません</p>
-        </div>
+        <ExplorerEmptyState />
       ) : isFiltering && !hasFilterMatches ? (
-        <div className="flex min-h-full items-start justify-center px-4 py-10">
-          <div className="text-center text-slate-500">
-            <SearchX className="mx-auto mb-3 h-8 w-8 text-slate-300" />
-            <p className="text-sm font-medium text-slate-600">
-              一致する項目がありません
-            </p>
-            <p className="mt-1 text-xs text-slate-400">
-              条件を変えるか、絞り込みをクリアしてください。
-            </p>
-          </div>
-        </div>
+        <ExplorerNoResultsState />
       ) : (
         <div className="h-full min-h-0">
           {rootFolderPanels.length === 0 ? (
@@ -1791,108 +1244,24 @@ export function FolderTreeWithCards({
               disableDrop={arboristDisableDrop}
             />
           ) : !activeRootFolderId ? (
-            <div className="h-full overflow-y-auto px-1 py-1">
-              {rootFolderPanels.map((folder) => (
-                <div
-                  key={folder.id}
-                  className={cn(
-                    "group relative w-full h-8 rounded-[4px] px-2 text-left flex items-center cursor-pointer",
-                    selectedFolderId === folder.id ||
-                      hoveredRootFolderId === folder.id
-                      ? "bg-[var(--sidebar-active-bg,#e7ebef)]"
-                      : "bg-transparent",
-                  )}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => {
-                    setActiveRootFolderId(folder.id);
-                    onFolderSelect(folder.id);
-                  }}
-                  onMouseEnter={() => {
-                    setHoveredRootFolderId(folder.id);
-                    startTransition(() => {
-                      onFolderSelect(folder.id);
-                      onItemSelect(null as never);
-                    });
-                  }}
-                  onMouseLeave={() => {
-                    setHoveredRootFolderId((prev) =>
-                      prev === folder.id ? null : prev,
-                    );
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      setActiveRootFolderId(folder.id);
-                      onFolderSelect(folder.id);
-                    }
-                  }}
-                >
-                  <div className="flex items-center gap-1.5 pr-8 min-w-0">
-                    <FolderIcon className="h-4 w-4 shrink-0 text-[#6e7280]" />
-                    <span className="truncate text-[14px] font-medium text-[#1f2328]">
-                      {folder.name}
-                    </span>
-                  </div>
-                  <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
-                    <ContextMenu
-                      open={openRowMenuId === `folder:${folder.id}:panel`}
-                      onOpenChange={(open) =>
-                        setOpenRowMenuId(
-                          open
-                            ? `folder:${folder.id}:panel`
-                            : (prev) =>
-                                prev === `folder:${folder.id}:panel`
-                                  ? null
-                                  : prev,
-                        )
-                      }
-                      type="folder"
-                      onCreateSubfolder={() =>
-                        void handleCreateFolderAction(folder.id)
-                      }
-                      onCreateCard={() => void handleCreateCardAction(folder.id)}
-                      onRename={() => {
-                        setEditingId(folder.id);
-                        setEditingName(folder.name);
-                      }}
-                      onDelete={() => handleDelete(folder.id, "folder")}
-                      isPinned={
-                        pinnedItems?.some(
-                          (item) =>
-                            item.type === "folder" && item.id === folder.id,
-                        ) ?? false
-                      }
-                      onTogglePin={() => {
-                        const isPinned =
-                          pinnedItems?.some(
-                            (item) =>
-                              item.type === "folder" && item.id === folder.id,
-                          ) ?? false;
-                        if (isPinned)
-                          onUnpinItem?.({ type: "folder", id: folder.id });
-                        else onPinItem?.({ type: "folder", id: folder.id });
-                      }}
-                    >
-                      <button
-                        type="button"
-                        aria-label="フォルダメニューを開く"
-                        className={cn(
-                          "pointer-events-auto h-7 w-7 grid place-items-center rounded-md text-[#6E6E80] hover:text-[#202123] hover:bg-slate-200",
-                          "opacity-0 group-hover:opacity-100",
-                          openRowMenuId === `folder:${folder.id}:panel` &&
-                            "opacity-100",
-                        )}
-                        onClick={(e) => e.stopPropagation()}
-                        onPointerDown={(e) => e.stopPropagation()}
-                      >
-                        <MoreVertical className="h-4 w-4" />
-                      </button>
-                    </ContextMenu>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <RootFolderPanelList
+              rootFolderPanels={rootFolderPanels}
+              selectedFolderId={selectedFolderId}
+              openRowMenuId={openRowMenuId}
+              setOpenRowMenuId={setOpenRowMenuId}
+              onSelectFolder={(id) => {
+                setActiveRootFolderId(id);
+                onFolderSelect(id);
+              }}
+              handleCreateFolderAction={handleCreateFolderAction}
+              handleCreateCardAction={handleCreateCardAction}
+              handleDelete={handleDelete}
+              pinnedItems={pinnedItems}
+              onPinItem={onPinItem}
+              onUnpinItem={onUnpinItem}
+              setEditingId={setEditingId}
+              setEditingName={setEditingName}
+            />
           ) : (
             <div className="h-full min-h-0 flex flex-col">
               <div className="flex-1 min-h-0">

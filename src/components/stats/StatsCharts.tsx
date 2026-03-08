@@ -1,5 +1,9 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Card as UiCard,
+  CardContent as UiCardContent,
+} from "@/components/ui/card";
+import { Button as UiButton } from "@/components/ui/button";
 import {
   BarChart,
   Bar,
@@ -16,13 +20,53 @@ import {
 import { calculateAverageStability, isReviewed } from "@/utils/statistics";
 import { calculateResistanceScore } from "@/utils/reviewMetrics";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-// ... (omitted lines)
+
+type DateLike =
+  | string
+  | number
+  | Date
+  | { toDate?: () => Date }
+  | null
+  | undefined;
+
+type StatsCardLike = {
+  lastReviewAt?: DateLike;
+  nextReviewDate?: DateLike;
+  next_review_date?: DateLike;
+  memoryStability?: number | null;
+  memory_stability?: number | null;
+  currentLevel?: number | null;
+  current_level?: number | null;
+  level?: number | null;
+};
+
+type DistributionBucket = {
+  range: string;
+  count: number;
+  min: number;
+  mid: number;
+  max: number;
+};
+
+type StabilityDistributionChartProps = {
+  cards: StatsCardLike[];
+  className?: string;
+  data?: DistributionBucket[] | null;
+  showReferenceLines?: boolean;
+  compact?: boolean;
+  tiny?: boolean;
+  studyCount?: number;
+  minStudyCount?: number;
+  onStartStudy?: () => void;
+};
+
+type LevelSummaryProps = {
+  cards: StatsCardLike[];
+};
 
 export function StabilityDistributionChart({
   cards,
   className,
-
   data: manualData = null,
   showReferenceLines = true,
   compact = false,
@@ -30,35 +74,32 @@ export function StabilityDistributionChart({
   studyCount,
   minStudyCount = 1,
   onStartStudy,
-}) {
-  // Use utility for calculation
+}: StabilityDistributionChartProps) {
   const [, setIsDesktop] = useState(false);
+
   useEffect(() => {
     const handleResize = () => {
       setIsDesktop(window.innerWidth >= 768);
     };
 
-    handleResize(); // Initial check
-
+    handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Calculate Average Resistance Score
   const averageResistance = useMemo(() => {
     let totalScore = 0;
     let count = 0;
 
-    cards.forEach((card) => {
+    cards.forEach((card: StatsCardLike) => {
       if (!isReviewed(card)) return;
 
-      // Same logic as buckets
       let intervalDays = 0;
       const lastReview = card.lastReviewAt
-        ? new Date(card.lastReviewAt).getTime()
+        ? new Date(card.lastReviewAt as string | number | Date).getTime()
         : 0;
       const nextReview = card.nextReviewDate
-        ? new Date(card.nextReviewDate).getTime()
+        ? new Date(card.nextReviewDate as string | number | Date).getTime()
         : 0;
 
       if (lastReview > 0 && nextReview > lastReview) {
@@ -76,34 +117,30 @@ export function StabilityDistributionChart({
   const hasData = averageResistance > 0;
   const avgPercent = averageResistance;
 
-  // Calculate buckets only if manualData is not provided
-  const buckets = useMemo(() => {
+  const buckets = useMemo<DistributionBucket[]>(() => {
     if (manualData) return manualData;
 
-    // Create 5% buckets: 0-5%, 5-10%, ..., 95-100%
-    const newBuckets = Array.from({ length: 20 }, (_, i) => ({
-      range: `${i * 5}-${(i + 1) * 5}%`,
-      count: 0,
-      min: i * 5,
-      mid: i * 5 + 2.5,
-      max: (i + 1) * 5,
-    }));
+    const newBuckets: DistributionBucket[] = Array.from(
+      { length: 20 },
+      (_, i) => ({
+        range: `${i * 5}-${(i + 1) * 5}%`,
+        count: 0,
+        min: i * 5,
+        mid: i * 5 + 2.5,
+        max: (i + 1) * 5,
+      }),
+    );
 
-    // Count cards in each bucket (Only reviewed cards)
-    cards.forEach((card) => {
-      // Only count reviewed cards for the distribution
+    cards.forEach((card: StatsCardLike) => {
       if (!isReviewed(card)) return;
 
-      // Calculate interval based on dates
-      // If nextReviewDate or lastReviewAt is missing, fallback to 0 or other logic
-      // Try to determine interval from schedule first
       let intervalDays = 0;
 
       const lastReview = card.lastReviewAt
-        ? new Date(card.lastReviewAt).getTime()
+        ? new Date(card.lastReviewAt as string | number | Date).getTime()
         : 0;
       const nextReview = card.nextReviewDate
-        ? new Date(card.nextReviewDate).getTime()
+        ? new Date(card.nextReviewDate as string | number | Date).getTime()
         : 0;
 
       if (lastReview > 0 && nextReview > lastReview) {
@@ -112,38 +149,36 @@ export function StabilityDistributionChart({
       }
 
       const resistanceScore = calculateResistanceScore(intervalDays);
-
       const percentage = Math.min(100, Math.max(0, resistanceScore));
       const bucketIndex = Math.min(19, Math.floor(percentage / 5));
       newBuckets[bucketIndex].count++;
     });
+
     return newBuckets;
   }, [cards, manualData]);
 
-  const yDomainMax = Math.max(...buckets.map((b) => b.count)) + 2; // More padding for labels
+  const yDomainMax = Math.max(...buckets.map((b: DistributionBucket) => b.count)) + 2;
 
-  // Refined Color Palette (Sophisticated/Muted)
-  // Low Tolerance -> Red-Orange muted
-  // Mid Tolerance -> Yellow-Teal muted
-  // High Tolerance -> Teal-Green muted
   const getBarColor = (min: number) => {
-    if (min >= 85) return "#5A8684"; // Dark Primary (Stable/Long Term)
-    if (min >= 65) return "#7BACAA"; // Primary (Stable)
-    if (min >= 40) return "#94bab8"; // Light Primary (Learning)
-    if (min >= 20) return "#cbdad9"; // Very Light / Neutral (New)
-    return "#e2e8f0"; // Gray (Need Review)
+    if (min >= 85) return "#5A8684";
+    if (min >= 65) return "#7BACAA";
+    if (min >= 40) return "#94bab8";
+    if (min >= 20) return "#cbdad9";
+    return "#e2e8f0";
   };
 
   const isTight = compact || tiny;
+
   const effectiveStudyCount = useMemo(() => {
     if (typeof studyCount === "number") return studyCount;
-    return cards.filter((card) => isReviewed(card)).length;
+    return cards.filter((card: StatsCardLike) => isReviewed(card)).length;
   }, [cards, studyCount]);
+
   const isChartReady = effectiveStudyCount >= minStudyCount;
   const dummyBarHeights = [30, 55, 20, 70, 40, 60, 35];
 
   return (
-    <Card
+    <UiCard
       className={cn(
         "rounded-[32px] border-none shadow-[0_8px_30px_rgb(0,0,0,0.05)] bg-white/80 backdrop-blur-sm",
         tiny
@@ -182,6 +217,7 @@ export function StabilityDistributionChart({
             学習の定着度と忘れにくさを可視化
           </p>
         </div>
+
         {isChartReady && hasData && (
           <div
             className={cn(
@@ -217,7 +253,7 @@ export function StabilityDistributionChart({
         )}
       </div>
 
-      <CardContent className="p-0">
+      <UiCardContent className="p-0">
         <style>{`
           .recharts-wrapper, .recharts-surface, .recharts-layer { outline: none !important; }
           *:focus { outline: none !important; }
@@ -226,6 +262,7 @@ export function StabilityDistributionChart({
             50% { opacity: 0.25; }
           }
         `}</style>
+
         <div
           className="w-full outline-none focus:outline-none"
           style={{
@@ -249,16 +286,8 @@ export function StabilityDistributionChart({
               >
                 <defs>
                   <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop
-                      offset="0%"
-                      stopColor="currentColor"
-                      stopOpacity={1}
-                    />
-                    <stop
-                      offset="100%"
-                      stopColor="currentColor"
-                      stopOpacity={0.7}
-                    />
+                    <stop offset="0%" stopColor="currentColor" stopOpacity={1} />
+                    <stop offset="100%" stopColor="currentColor" stopOpacity={0.7} />
                   </linearGradient>
                   <filter id="shadow" height="130%">
                     <feGaussianBlur in="SourceAlpha" stdDeviation="2" />
@@ -273,12 +302,7 @@ export function StabilityDistributionChart({
                   </filter>
                 </defs>
 
-                <XAxis
-                  type="number"
-                  dataKey="mid"
-                  hide={true}
-                  domain={[0, 100]}
-                />
+                <XAxis type="number" dataKey="mid" hide domain={[0, 100]} />
                 <YAxis
                   hide={isTight}
                   domain={[0, yDomainMax]}
@@ -296,7 +320,7 @@ export function StabilityDistributionChart({
                   animationDuration={800}
                   isAnimationActive
                 >
-                  {buckets.map((entry, index) => (
+                  {buckets.map((entry: DistributionBucket, index: number) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={getBarColor(entry.min)}
@@ -311,8 +335,8 @@ export function StabilityDistributionChart({
                     stroke="#689A98"
                     strokeWidth={2}
                     strokeDasharray="4 4"
-                    label={({ viewBox }) => {
-                      const xPos = viewBox.x;
+                    label={({ viewBox }: { viewBox?: { x?: number } }) => {
+                      const xPos = viewBox?.x ?? 0;
                       return (
                         <foreignObject
                           x={xPos - 50}
@@ -339,7 +363,7 @@ export function StabilityDistributionChart({
                 animation: "dummyBarPulse 2.5s ease-in-out infinite",
               }}
             >
-              {dummyBarHeights.map((height, index) => (
+              {dummyBarHeights.map((height: number, index: number) => (
                 <div
                   key={`dummy-bar-${index}`}
                   className="flex-1 min-w-0 bg-slate-500 rounded-t-[6px]"
@@ -350,7 +374,6 @@ export function StabilityDistributionChart({
           )}
         </div>
 
-        {/* Phase Visualization Bar - Redesigned */}
         {isChartReady ? (
           <div
             className={cn(
@@ -379,11 +402,11 @@ export function StabilityDistributionChart({
               )}
             >
               {[
-                { width: "20%", color: "#f1f5f9" }, // Gray/Neutral
-                { width: "20%", color: "#cbdad9" }, // Very Light Primary
-                { width: "25%", color: "#94bab8" }, // Light Primary
-                { width: "20%", color: "#7BACAA" }, // Primary
-                { width: "15%", color: "#5A8684" }, // Dark Primary
+                { width: "20%", color: "#f1f5f9" },
+                { width: "20%", color: "#cbdad9" },
+                { width: "25%", color: "#94bab8" },
+                { width: "20%", color: "#7BACAA" },
+                { width: "15%", color: "#5A8684" },
               ].map((phase, i) => (
                 <div
                   key={i}
@@ -435,9 +458,10 @@ export function StabilityDistributionChart({
             >
               1回以上学習すると表示されます
             </p>
+
             {onStartStudy && (
               <div className="mt-2 flex justify-center">
-                <Button
+                <UiButton
                   type="button"
                   size="sm"
                   variant="outline"
@@ -448,31 +472,26 @@ export function StabilityDistributionChart({
                   )}
                 >
                   学習を始める
-                </Button>
+                </UiButton>
               </div>
             )}
           </div>
         )}
-      </CardContent>
-    </Card>
+      </UiCardContent>
+    </UiCard>
   );
 }
 
-export function LevelSummary({ cards }) {
+export function LevelSummary({ cards }: LevelSummaryProps) {
   const totalCards = cards.length;
-
-  // Use utility for calculation
   const avgStability = calculateAverageStability(cards);
 
-  // Choose phase label based on result
-  // If null -> Unmeasured
-  // If number -> Get phase label
   const avgPhaseLabel =
     avgStability !== null
       ? getStabilityPhase(avgStability).shortLabel
       : "未計測";
 
-  const masteredCards = cards.filter((c) => {
+  const masteredCards = cards.filter((c: StatsCardLike) => {
     const stability = normalizeMemoryStability(
       c.memoryStability ?? c.memory_stability,
       c.currentLevel ?? c.current_level ?? c.level,
@@ -480,42 +499,47 @@ export function LevelSummary({ cards }) {
     return getStabilityPhase(stability).key === "solid";
   }).length;
 
-  const needReviewCards = cards.filter((c) => {
+  const needReviewCards = cards.filter((c: StatsCardLike) => {
     const reviewDate = c.nextReviewDate ?? c.next_review_date;
     if (!reviewDate) return false;
+
     const normalized =
-      typeof reviewDate?.toDate === "function"
-        ? reviewDate.toDate()
-        : new Date(reviewDate);
+      typeof (reviewDate as { toDate?: () => Date })?.toDate === "function"
+        ? (reviewDate as { toDate: () => Date }).toDate()
+        : new Date(reviewDate as string | number | Date);
+
     return normalized <= new Date();
   }).length;
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <Card>
-        <CardContent className="pt-6">
+      <UiCard>
+        <UiCardContent className="pt-6">
           <p className="text-sm text-gray-500">総カード数</p>
           <p className="text-3xl font-bold text-indigo-600">{totalCards}</p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardContent className="pt-6">
+        </UiCardContent>
+      </UiCard>
+
+      <UiCard>
+        <UiCardContent className="pt-6">
           <p className="text-sm text-gray-500">平均フェーズ</p>
           <p className="text-3xl font-bold text-cyan-600">{avgPhaseLabel}</p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardContent className="pt-6">
+        </UiCardContent>
+      </UiCard>
+
+      <UiCard>
+        <UiCardContent className="pt-6">
           <p className="text-sm text-gray-500">習得済み</p>
           <p className="text-3xl font-bold text-green-600">{masteredCards}</p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardContent className="pt-6">
+        </UiCardContent>
+      </UiCard>
+
+      <UiCard>
+        <UiCardContent className="pt-6">
           <p className="text-sm text-gray-500">要復習</p>
           <p className="text-3xl font-bold text-red-600">{needReviewCards}</p>
-        </CardContent>
-      </Card>
+        </UiCardContent>
+      </UiCard>
     </div>
   );
 }

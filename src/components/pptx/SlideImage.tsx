@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { ref, getDownloadURL } from "firebase/storage"; // IDE Check: firebase/storage
+import { ref, getDownloadURL } from "firebase/storage";
 import { storage } from "@/services/firebase";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +23,7 @@ interface SlideImageProps {
 const isHttpUrl = (value: string) => /^https?:\/\//i.test(value);
 const DEFAULT_RATIO = 9 / 16;
 const MAX_CONCURRENT = 6;
+
 let activeRequests = 0;
 const requestQueue: Array<() => void> = [];
 const urlCache = new Map<string, string>();
@@ -63,6 +64,7 @@ const resolveSlideUrl = async (pathOrUrl: string): Promise<string> => {
   });
 
   pendingCache.set(pathOrUrl, promise);
+
   try {
     return await promise;
   } finally {
@@ -104,6 +106,7 @@ export function SlideImage({
       (entries) => {
         const entry = entries[0];
         onVisibilityChange?.(slide.index, entry.intersectionRatio);
+
         if (entry.isIntersecting || entry.intersectionRatio > 0) {
           setShouldLoad(true);
         }
@@ -121,11 +124,15 @@ export function SlideImage({
 
   useEffect(() => {
     if (!shouldLoad || src || requested) return;
-    if (slide.url) {
-      queueMicrotask(() => setSrc(slide.url));
+
+    const directUrl = slide.url ?? null;
+    if (directUrl) {
+      queueMicrotask(() => setSrc(directUrl));
       return;
     }
-    if (!slide.path) {
+
+    const slidePath = slide.path ?? null;
+    if (!slidePath) {
       queueMicrotask(() => setError("スライドのURLがありません"));
       return;
     }
@@ -135,7 +142,7 @@ export function SlideImage({
 
     const load = async () => {
       try {
-        const resolved = await resolveSlideUrl(slide.path!);
+        const resolved = await resolveSlideUrl(slidePath);
         if (!cancelled) setSrc(resolved);
       } catch (err) {
         if (!cancelled) {
@@ -156,6 +163,7 @@ export function SlideImage({
     slide.width > 0 && slide.height > 0
       ? slide.height / slide.width
       : DEFAULT_RATIO;
+
   const renderHeight = Math.max(1, Math.floor(renderWidth * ratio));
 
   return (
@@ -164,13 +172,15 @@ export function SlideImage({
       className={cn("w-full flex justify-center", className)}
       style={{ minHeight: `${renderHeight}px` }}
     >
-      <div className="inline-block bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+      <div className="inline-block overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
         {!src && !error && (
-          <div className="text-xs text-slate-400 px-3 py-2">読み込み中...</div>
+          <div className="px-3 py-2 text-xs text-slate-400">読み込み中...</div>
         )}
+
         {error && (
-          <div className="text-xs text-rose-500 px-3 py-2">{error}</div>
+          <div className="px-3 py-2 text-xs text-rose-500">{error}</div>
         )}
+
         {src && (
           <img
             src={src}
