@@ -11,6 +11,11 @@ const IPC_CHANNELS = {
   oauthCancel: "oauth:cancel",
   oauthExchangeIdToken: "oauth:exchangeIdToken",
   oauthCallback: "oauth:callback",
+  windowMinimize: "window:minimize",
+  windowMaximizeToggle: "window:maximizeToggle",
+  windowClose: "window:close",
+  windowIsMaximized: "window:isMaximized",
+  windowMaximizedState: "window:maximizedState",
 } as const;
 
 const desktopApi: DesktopBridgeApi = {
@@ -35,6 +40,20 @@ const desktopApi: DesktopBridgeApi = {
       ipcRenderer.on(IPC_CHANNELS.oauthCallback, listener);
       return () => {
         ipcRenderer.removeListener(IPC_CHANNELS.oauthCallback, listener);
+      };
+    },
+  },
+  window: {
+    minimize: () => ipcRenderer.invoke(IPC_CHANNELS.windowMinimize),
+    maximizeToggle: () => ipcRenderer.invoke(IPC_CHANNELS.windowMaximizeToggle),
+    close: () => ipcRenderer.invoke(IPC_CHANNELS.windowClose),
+    isMaximized: () => ipcRenderer.invoke(IPC_CHANNELS.windowIsMaximized),
+    onMaximizedStateChange: (handler: (isMaximized: boolean) => void) => {
+      const listener = (_event: Electron.IpcRendererEvent, isMaximized: boolean) =>
+        handler(isMaximized);
+      ipcRenderer.on(IPC_CHANNELS.windowMaximizedState, listener);
+      return () => {
+        ipcRenderer.removeListener(IPC_CHANNELS.windowMaximizedState, listener);
       };
     },
   },

@@ -10,6 +10,11 @@ const IPC_CHANNELS = {
   oauthCancel: "oauth:cancel",
   oauthExchangeIdToken: "oauth:exchangeIdToken",
   oauthCallback: "oauth:callback",
+  windowMinimize: "window:minimize",
+  windowMaximizeToggle: "window:maximizeToggle",
+  windowClose: "window:close",
+  windowIsMaximized: "window:isMaximized",
+  windowMaximizedState: "window:maximizedState",
 } as const;
 
 const ALLOWED_EXTERNAL_PROTOCOLS = new Set(["http:", "https:", "mailto:"]);
@@ -180,6 +185,7 @@ function createMainWindow() {
     minWidth: 1024,
     minHeight: 700,
     backgroundColor: "#F8FAFB",
+    frame: false,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
@@ -227,6 +233,14 @@ function createMainWindow() {
 
   windowRef.on("closed", () => {
     mainWindow = null;
+  });
+
+  windowRef.on("maximize", () => {
+    windowRef.webContents.send(IPC_CHANNELS.windowMaximizedState, true);
+  });
+
+  windowRef.on("unmaximize", () => {
+    windowRef.webContents.send(IPC_CHANNELS.windowMaximizedState, false);
   });
 
   return windowRef;
@@ -323,6 +337,22 @@ function registerIpcHandlers(): void {
       return payload.id_token;
     },
   );
+  ipcMain.handle(IPC_CHANNELS.windowMinimize, () => {
+    mainWindow?.minimize();
+  });
+  ipcMain.handle(IPC_CHANNELS.windowMaximizeToggle, () => {
+    if (mainWindow?.isMaximized()) {
+      mainWindow?.restore();
+    } else {
+      mainWindow?.maximize();
+    }
+  });
+  ipcMain.handle(IPC_CHANNELS.windowClose, () => {
+    mainWindow?.close();
+  });
+  ipcMain.handle(IPC_CHANNELS.windowIsMaximized, () => {
+    return mainWindow?.isMaximized() ?? false;
+  });
 }
 
 const gotSingleInstanceLock = app.requestSingleInstanceLock();

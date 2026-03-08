@@ -35,8 +35,17 @@ export interface DesktopOauthApi {
   onCallback(handler: DesktopOauthCallbackHandler): () => void;
 }
 
+export interface DesktopWindowApi {
+  minimize(): Promise<void>;
+  maximizeToggle(): Promise<void>;
+  close(): Promise<void>;
+  isMaximized(): Promise<boolean>;
+  onMaximizedStateChange(handler: (isMaximized: boolean) => void): () => void;
+}
+
 export interface DesktopBridgeApi extends PlatformApi {
   oauth: DesktopOauthApi;
+  window: DesktopWindowApi;
 }
 
 declare global {

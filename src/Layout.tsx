@@ -9,6 +9,8 @@ import { useKatexLoader } from "@/hooks/useKatexLoader";
 import { SecurityAlertBanner } from "./components/security/SecurityAlertBanner";
 import { LocalDBStatusBanner } from "./components/security/LocalDBStatusBanner";
 import { AppLayout } from "./layout/AppLayout";
+import { TitleBar } from "./layout/TitleBar";
+import { isDesktopRuntime } from "@/platform/runtime";
 
 export default function Layout() {
   const location = useLocation();
@@ -34,9 +36,12 @@ export default function Layout() {
 
   useKatexLoader();
 
+  const isDesktop = isDesktopRuntime();
+
   return (
-    <div className={cn("relative h-[100dvh] w-full overflow-hidden", UI_TYPO)}>
-      <div className="hidden md:flex fixed top-1 right-2 z-50">
+    <div className={cn("flex flex-col relative h-[100dvh] w-full overflow-hidden", UI_TYPO)}>
+      <TitleBar />
+      <div className={cn("hidden md:flex fixed right-2 z-50", isDesktop ? "top-10" : "top-1")}>
         {!isStudyModePage && <SyncStatusIndicator />}
       </div>
 

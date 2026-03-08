@@ -2,7 +2,8 @@
   display: grid;
   grid-template-columns: 260px 1fr;
   grid-template-rows: 1fr;
-  height: 100dvh;
+  height: 100%;
+  flex: 1;
   width: 100%;
   overflow: hidden;
   background: #fff;
