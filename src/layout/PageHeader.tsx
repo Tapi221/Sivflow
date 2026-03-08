@@ -17,10 +17,12 @@ const PAGE_LABELS: Record<string, string> = {
   "four-choice-mode": "四択モード",
 };
 
+export function PageHeader() {
   const { pathname } = useLocation();
 
-  return useMemo(() => {
+  const crumbs = useMemo(() => {
     const segments = pathname.split("/").filter(Boolean);
+
     const crumbs: Crumb[] = [{ label: "ホーム", to: "/folders" }];
 
     segments.forEach((seg, i) => {
@@ -29,18 +31,13 @@ const PAGE_LABELS: Record<string, string> = {
       crumbs.push({ label, to });
     });
 
-    const last = crumbs[crumbs.length - 1];
-
-    // Remove `to` from last crumb — it's the current page
     if (crumbs.length > 1) {
+      const last = crumbs[crumbs.length - 1];
       crumbs[crumbs.length - 1] = { label: last.label };
     }
 
-    return { crumbs, title };
+    return crumbs;
   }, [pathname]);
-}
-
-export function PageHeader() {
 
   return (
     <header className="page-header">
@@ -61,8 +58,3 @@ export function PageHeader() {
     </header>
   );
 }
-
-
-
-
-
