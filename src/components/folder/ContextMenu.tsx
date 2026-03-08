@@ -1,5 +1,13 @@
 import type { ReactNode } from "react";
-import { Plus, Pencil, Trash2, Folder, ArrowRight, Tag, Pin } from "@/ui/icons";
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  Folder,
+  ChevronRight,
+  Tag,
+  Pin,
+} from "@/ui/icons";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -78,7 +86,7 @@ export function ContextMenu({
 
         {type === "card" && onMove && (
           <DropdownMenuItem onClick={onMove} className="gap-2">
-            <ArrowRight className="h-4 w-4" />
+            <ChevronRight className="h-4 w-4" />
             移動
           </DropdownMenuItem>
         )}
