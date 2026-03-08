@@ -14,6 +14,7 @@ const PAGE_LABELS: Record<string, string> = {
   "one-qa-mode": "一問一答",
   "pair-mode": "ペアモード",
   "four-choice-mode": "四択モード",
+  directory: "ディレクトリ",
 };
 
 function useBreadcrumbs() {

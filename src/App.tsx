@@ -39,6 +39,7 @@ const StudyMode = lazy(() => import("./Pages/StudyMode"));
 const Trash = lazy(() => import("./Pages/Trash"));
 const ImageDiagnostics = lazy(() => import("./Pages/ImageDiagnostics"));
 const Gallery = lazy(() => import("./Pages/Gallery"));
+const Directory = lazy(() => import("./Pages/Directory"));
 const NotImplementedPlaceholder = lazy(
   () => import("./Pages/NotImplementedPlaceholder"),
 );
@@ -402,6 +403,14 @@ function AppContent() {
           />
 
           <Route path="trash" element={<Trash />} />
+          <Route
+            path="directory"
+            element={
+              <Suspense fallback={<LoadingFallback />}>
+                <Directory />
+              </Suspense>
+            }
+          />
 
           <Route
             path="diagnostics"
