@@ -1,15 +1,16 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, connectAuthEmulator } from "firebase/auth";
+import { connectAuthEmulator, getAuth } from "firebase/auth";
+import type { Firestore } from "firebase/firestore";
 import {
+  collection,
+  connectFirestoreEmulator,
+  getFirestore,
   initializeFirestore,
   persistentLocalCache,
   persistentMultipleTabManager,
-  connectFirestoreEmulator,
-  getFirestore,
-  collection,
 } from "firebase/firestore";
-import { getStorage, connectStorageEmulator } from "firebase/storage";
-import { getFunctions, connectFunctionsEmulator } from "firebase/functions";
+import { connectFunctionsEmulator, getFunctions } from "firebase/functions";
+import { connectStorageEmulator, getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -29,10 +30,9 @@ export const storage = getStorage(app);
 export const functions = getFunctions(app, "asia-northeast1");
 
 // Firestore の初期化
-let _firestoreDb: unknown = null;
+let _firestoreDb: Firestore | null = null;
 
 try {
-  // まずは推奨される方法でキャッシュ設定付き初期化を試行
   _firestoreDb = initializeFirestore(app, {
     localCache: persistentLocalCache({
       tabManager: persistentMultipleTabManager(),
@@ -40,11 +40,12 @@ try {
   });
   console.log("[Firebase] Firestore initialized with persistent cache");
 } catch (e: unknown) {
+  const message = e instanceof Error ? e.message : String(e);
   console.warn(
     "[Firebase] initializeFirestore failed, falling back to getFirestore:",
-    e.message,
+    message,
   );
-  // すでに初期化されている場合などは getFirestore で既存インスタンスを取得
+
   try {
     _firestoreDb = getFirestore(app);
     console.log("[Firebase] Fallback to getFirestore() successful");
@@ -59,7 +60,7 @@ try {
 /**
  * firestoreDb を取得する。
  */
-export const firestoreDb = _firestoreDb;
+export const firestoreDb: Firestore | null = _firestoreDb;
 
 // 開発環境では Storage エミュレータを利用して課金を回避
 if (typeof window !== "undefined") {
@@ -71,7 +72,9 @@ if (typeof window !== "undefined") {
   if (useEmulators && isLocalhost) {
     try {
       connectAuthEmulator(auth, "http://localhost:9099");
-      connectFirestoreEmulator(firestoreDb, "localhost", 8080);
+      if (firestoreDb) {
+        connectFirestoreEmulator(firestoreDb, "localhost", 8080);
+      }
       connectStorageEmulator(storage, "localhost", 9199);
       connectFunctionsEmulator(functions, "localhost", 5001);
       console.log(
@@ -85,20 +88,15 @@ if (typeof window !== "undefined") {
   }
 }
 
-// Firestoreのオフライン永続化は initializeFirestore で有効化済み
-
-// Functions: リージョンを明示的に指定（デフォルトは us-central1、firebase.json では asia-northeast1）
-
 /**
  * Firebase の初期化状態を診断するための関数
  */
-export function debugFirebase() {
+export function debugFirebase(): void {
   console.log("🔍 === Firebase Debug Info ===");
   try {
     console.log("App name:", app.name);
     console.log("DB instance:", firestoreDb ? "exists" : "MISSING");
     if (firestoreDb) {
-      console.log("DB type:", firestoreDb.type);
       const testRef = collection(firestoreDb, "test_connection");
       console.log("✅ collection() basic check passed:", testRef.path);
     }
@@ -114,7 +112,3 @@ if (import.meta.env.DEV) {
 }
 
 export default app;
-
-
-
-

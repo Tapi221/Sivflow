@@ -3,7 +3,14 @@ import type {
   SecurityEventType,
   SecurityLog,
   SecurityMetadata,
-} from "@/types/telemetry";
+} from "@/types/domain/telemetry";
+import type {
+  DocumentData,
+  FirestoreError,
+  QueryDocumentSnapshot,
+  QuerySnapshot,
+  Unsubscribe,
+} from "firebase/firestore";
 import {
   addDoc,
   collection,
@@ -21,10 +28,15 @@ import {
  */
 interface DetectionRule {
   type: SecurityEventType;
-  riskScore: number; // イベントごとの加算スコア
-  alwaysTrigger?: boolean; // 閾値なしで即座に加算するか
-  timeWindowMs?: number; // 監視窓（ミリ秒）
-  countThreshold?: number; // 閾値（回数）
+  riskScore: number;
+  alwaysTrigger?: boolean;
+  timeWindowMs?: number;
+  countThreshold?: number;
+}
+
+interface SecurityAlert {
+  id: string;
+  [key: string]: unknown;
 }
 
 /**
@@ -72,7 +84,7 @@ const DETECTION_RULES: DetectionRule[] = [
 export interface SecurityState {
   isLocked: boolean;
   requires2FA: boolean;
-  alerts: unknown[];
+  alerts: SecurityAlert[];
 }
 
 /**
@@ -82,13 +94,16 @@ export class SecurityMonitor {
   private userId: string;
   private deviceId: string;
   private eventHistory: { type: SecurityEventType; timestamp: number }[] = [];
-  private currentRiskScore: number = 0;
-  private lastEvaluationTime: number = Date.now();
+  private currentRiskScore = 0;
+  private lastEvaluationTime = Date.now();
   private internalState: SecurityState = {
     isLocked: false,
     requires2FA: false,
     alerts: [],
   };
+
+  private unsubscribeMetadata: Unsubscribe | null = null;
+  private unsubscribeNotifications: Unsubscribe | null = null;
 
   constructor(userId: string, deviceId: string) {
     this.userId = userId;
@@ -106,20 +121,14 @@ export class SecurityMonitor {
     const now = Date.now();
     this.eventHistory.push({ type, timestamp: now });
 
-    // 履歴のクリーンアップ (古いイベントを削除)
-    // 最大の時間窓を持つルールに合わせる (ここでは10分程度あれば十分)
+    // 履歴のクリーンアップ
     const maxWindow = 10 * 60 * 1000;
     this.eventHistory = this.eventHistory.filter(
-      (e) => e.timestamp > now - maxWindow,
+      (event) => event.timestamp > now - maxWindow,
     );
 
-    // ログをFirestoreへ送信
     await this.sendSecurityLog(type, metadata);
-
-    // ルール評価
     this.evaluateRules(type);
-
-    // 永続化
     this.saveState();
   }
 
@@ -138,9 +147,11 @@ export class SecurityMonitor {
         shouldTrigger = true;
       } else if (rule.timeWindowMs && rule.countThreshold) {
         const recentCount = this.eventHistory.filter(
-          (e) => e.type === rule.type && e.timestamp > now - rule.timeWindowMs!,
+          (event) =>
+            event.type === rule.type &&
+            event.timestamp > now - rule.timeWindowMs!,
         ).length;
-        // 今回のイベントで閾値に達した、あるいは超えている場合に加算（多重加算防止は簡易）
+
         if (recentCount >= rule.countThreshold) {
           shouldTrigger = true;
         }
@@ -154,10 +165,7 @@ export class SecurityMonitor {
       }
     }
 
-    // 減衰処理（自然復旧）
     this.applyDecay(now);
-
-    // 上限キャップ (0-100)
     this.currentRiskScore = Math.min(100, Math.max(0, this.currentRiskScore));
   }
 
@@ -167,12 +175,12 @@ export class SecurityMonitor {
    */
   private applyDecay(now: number): void {
     const hoursElapsed = (now - this.lastEvaluationTime) / (1000 * 60 * 60);
-    if (hoursElapsed > 0) {
-      const decay = Math.floor(hoursElapsed * 3); // 1時間で3減少
-      if (decay > 0) {
-        this.currentRiskScore = Math.max(0, this.currentRiskScore - decay);
-        this.lastEvaluationTime = now;
-      }
+    if (hoursElapsed <= 0) return;
+
+    const decay = Math.floor(hoursElapsed * 3);
+    if (decay > 0) {
+      this.currentRiskScore = Math.max(0, this.currentRiskScore - decay);
+      this.lastEvaluationTime = now;
     }
   }
 
@@ -190,6 +198,7 @@ export class SecurityMonitor {
         );
         return;
       }
+
       const logData: Omit<SecurityLog, "logId"> = {
         userId: this.userId,
         deviceId: this.deviceId,
@@ -208,7 +217,6 @@ export class SecurityMonitor {
       );
     } catch (error) {
       console.error("[Security] Failed to send log:", error);
-      // 送信失敗自体もリスクだが、無限ループ防止のためここでは握りつぶす
     }
   }
 
@@ -238,8 +246,6 @@ export class SecurityMonitor {
    * ユーザーに表示すべきかどうか
    */
   private isUserVisible(type: SecurityEventType): boolean {
-    // 基本的に内部的な異常検知はユーザーに見せないが、
-    // アカウントロックや新しいデバイス登録などは見せる
     switch (type) {
       case "DEVICE_NEW_REGISTER":
       case "LOGIN_SUCCESS":
@@ -255,7 +261,6 @@ export class SecurityMonitor {
    * デフォルトの説明文
    */
   private getDescription(type: SecurityEventType): string {
-    // 簡易的なマッピング。多言語対応が必要な場合は別途翻訳リソースを使う。
     const descMap: Record<SecurityEventType, string> = {
       LOGIN_SUCCESS: "ログインに成功しました",
       LOGIN_FAILED: "ログインに失敗しました",
@@ -271,22 +276,19 @@ export class SecurityMonitor {
       ADMIN_ACCOUNT_LOCK: "管理者によりアカウントがロックされました",
       ADMIN_LOG_EXPORT: "監査ログが出力されました",
     };
-    return descMap[type] || "セキュリティイベントが発生しました";
+
+    return descMap[type] ?? "セキュリティイベントが発生しました";
   }
 
   /**
    * 現在のセキュリティ状態（SafeModeかどうか等）を取得
    */
   getSecurityStatus(): { isSafeMode: boolean; riskScore: number } {
-    // リスクスコア 10以上で SafeMode
     return {
       isSafeMode: this.currentRiskScore >= 10,
       riskScore: this.currentRiskScore,
     };
   }
-
-  private unsubscribeMetadata: (() => void) | null = null;
-  private unsubscribeNotifications: (() => void) | null = null;
 
   /**
    * リアルタイム監視を開始する
@@ -300,42 +302,48 @@ export class SecurityMonitor {
       );
       return;
     }
-    // 1. メタデータ監視
+
+    this.stopMonitoring();
+
     this.unsubscribeMetadata = onSnapshot(
       doc(firestoreDb, `users/${this.userId}`),
       (snapshot) => {
-        if (snapshot.exists()) {
-          const data = snapshot.data();
-          this.internalState.isLocked = data.isAccountLocked === true;
-          this.internalState.requires2FA = data.requires2FA === true;
+        if (!snapshot.exists()) return;
 
-          onStateChange({ ...this.internalState });
-        }
+        const data = snapshot.data() as {
+          isAccountLocked?: boolean;
+          requires2FA?: boolean;
+        };
+
+        this.internalState.isLocked = data.isAccountLocked === true;
+        this.internalState.requires2FA = data.requires2FA === true;
+
+        onStateChange({ ...this.internalState });
       },
-      (error) => {
+      (error: FirestoreError) => {
         console.error("[Security] Metadata monitoring failed:", error);
       },
     );
 
-    // 2. 通知監視 (SecurityAlertの未読)
-    const q = query(
+    const notificationQuery = query(
       collection(firestoreDb, `users/${this.userId}/notifications`),
       where("type", "==", "SECURITY_ALERT"),
       where("read", "==", false),
     );
 
     this.unsubscribeNotifications = onSnapshot(
-      q,
-      (snapshot) => {
-        this.internalState.alerts = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+      notificationQuery,
+      (snapshot: QuerySnapshot<DocumentData>) => {
+        this.internalState.alerts = snapshot.docs.map(
+          (docSnap: QueryDocumentSnapshot<DocumentData>): SecurityAlert => ({
+            id: docSnap.id,
+            ...docSnap.data(),
+          }),
+        );
 
         onStateChange({ ...this.internalState });
       },
-      (error) => {
-        // Permisson errors are expected if rules are not set up. Suppress to avoid spam.
+      (error: FirestoreError) => {
         if (error.code !== "permission-denied") {
           console.warn(
             "[Security] Notification monitoring failed (non-permission error):",
@@ -351,13 +359,16 @@ export class SecurityMonitor {
    */
   async dismissAlert(alertId: string): Promise<void> {
     try {
-      if (!firestoreDb)
+      if (!firestoreDb) {
         throw new Error("Firebase Firestore is not initialized.");
+      }
+
       const alertRef = doc(
         firestoreDb,
         `users/${this.userId}/notifications`,
         alertId,
       );
+
       await updateDoc(alertRef, { read: true });
     } catch (error) {
       console.error("[Security] Failed to dismiss alert:", error);
@@ -372,6 +383,7 @@ export class SecurityMonitor {
       this.unsubscribeMetadata();
       this.unsubscribeMetadata = null;
     }
+
     if (this.unsubscribeNotifications) {
       this.unsubscribeNotifications();
       this.unsubscribeNotifications = null;
@@ -398,11 +410,13 @@ export class SecurityMonitor {
   private loadState(): void {
     const score = localStorage.getItem(`security_score_${this.userId}`);
     const time = localStorage.getItem(`security_last_eval_${this.userId}`);
-    if (score) this.currentRiskScore = parseInt(score, 10);
-    if (time) this.lastEvaluationTime = parseInt(time, 10);
+
+    if (score) {
+      this.currentRiskScore = Number.parseInt(score, 10);
+    }
+
+    if (time) {
+      this.lastEvaluationTime = Number.parseInt(time, 10);
+    }
   }
 }
-
-
-
-
