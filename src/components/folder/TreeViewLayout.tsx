@@ -1,20 +1,21 @@
 import { useCards } from "@/hooks/card/useCards";
-import { useFolders } from "@/hooks/folder/useFolders";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
+import { useFolders } from "@/hooks/folder/useFolders";
 import { useDocuments } from "@/hooks/platform/useDocuments";
 import { resolveCardTagNames, useTags } from "@/hooks/settings/useTags";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { cn } from "@/lib/utils";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
-import React, { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { TreeViewDialogs } from "./components/TreeViewDialogs";
 import { TreeViewMainPane } from "./components/TreeViewMainPane";
 import { TreeViewSidebar } from "./components/TreeViewSidebar";
 import { TreeViewTabContent } from "./components/TreeViewTabContent";
-import { TreeViewDialogs } from "./components/TreeViewDialogs";
+import { useTreeViewActions } from "./hooks/useTreeViewActions";
 import { useTreeViewDerivedState } from "./hooks/useTreeViewDerivedState";
-import { useTreeViewSidebar } from "./hooks/useTreeViewSidebar";
 import { useTreeViewFilters } from "./hooks/useTreeViewFilters";
+import { useTreeViewSidebar } from "./hooks/useTreeViewSidebar";
 import {
   ACTIVE_VIEW_KINDS,
   DEFAULT_FOLDER_VIEW,
@@ -23,8 +24,6 @@ import {
   type ViewDef,
   type ViewKind,
 } from "./viewTypes";
-import { useTreeViewViews } from "./hooks/useTreeViewViews";
-import { useTreeViewActions } from "./hooks/useTreeViewActions";
 
 interface TreeViewLayoutProps {
   folders: Folder[];
