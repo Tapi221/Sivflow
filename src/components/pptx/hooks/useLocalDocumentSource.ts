@@ -80,14 +80,21 @@ export function useLocalDocumentSource({
 }
 
     if (triedKeysRef.current.has(localBlobId)) {
-      setIsRestoring(false);
-      return () => {
-        cancelled = true;
-      };
-    }
+  const rafId = requestAnimationFrame(() => {
+    setIsRestoring(false);
+  });
+
+  return () => {
+    cancelled = true;
+    cancelAnimationFrame(rafId);
+  };
+}
 
     triedKeysRef.current.add(localBlobId);
-    setIsRestoring(true);
+
+const startRestoreRafId = requestAnimationFrame(() => {
+  setIsRestoring(true);
+});
 
     getDocumentBlob(localBlobId, { userId })
       .then((blob) => {
@@ -113,8 +120,9 @@ export function useLocalDocumentSource({
       });
 
     return () => {
-      cancelled = true;
-    };
+  cancelled = true;
+  cancelAnimationFrame(startRestoreRafId);
+};
   }, [cachedBlobUrl, userId, localBlobId, restoredLocalBlobUrl]);
 
   const localBlobUrl =
@@ -139,6 +147,9 @@ export function useLocalDocumentSource({
 
   return { localBlobUrl, localSourceStatus };
 }
+
+
+
 
 
 
