@@ -1,5 +1,5 @@
 import { TagBadge } from "@/components/tag/TagBadge";
-import { useExplorerStore } from "@/hooks/useExplorerStore";
+import { useExplorerStore } from "@/components/folder/explorer/model/types";
 import { DEFAULT_TAG_COLOR_CLASS_NAME } from "@/lib/tags/tagColor";
 
 interface ExplorerFilterSummaryProps {

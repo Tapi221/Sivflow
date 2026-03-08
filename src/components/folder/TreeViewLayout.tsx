@@ -20,7 +20,7 @@ import { useUserSettings } from "@/hooks/useUserSettings";
 import { useTags, resolveCardTagNames } from "@/hooks/useTags";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 import { useCards } from "@/hooks/useCards";
-import { useExplorerStore } from "@/hooks/useExplorerStore";
+import { useExplorerStore } from "@/components/folder/explorer/model/types";
 import CreateCardSelectionDialog from "@/components/card/overlays/CreateCardSelectionDialog";
 import CreationModeDialog from "@/components/card/overlays/CreationModeDialog";
 import { ViewManagerDialog } from "./ViewManagerDialog";

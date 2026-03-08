@@ -5,7 +5,7 @@
 import React from "react";
 import { FolderPlus } from "@/ui/icons";
 import { cn } from "@/lib/utils";
-import type { ExplorerTab } from "@/hooks/useExplorerStore";
+import type { ExplorerTab } from "@/components/folder/explorer/model/types";
 import { TagFilterPopover } from "./TagFilterPopover";
 
 interface ExplorerTabsProps {

@@ -12,7 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 import { ExplorerRow } from "@/components/folder/explorer/rows/ExplorerRow";
 import { ExplorerRowContent } from "@/components/folder/explorer/rows/ExplorerRowContent";
-import type { RecentItem } from "@/hooks/useExplorerStore";
+import type { RecentItem } from "@/components/folder/explorer/model/types";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 
 interface RecentPanelProps {

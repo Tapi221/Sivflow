@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { Filter, Search, Tag } from "@/ui/icons";
-import { useExplorerStore } from "@/hooks/useExplorerStore";
+import { useExplorerStore } from "@/components/folder/explorer/model/types";
 import { useTags } from "@/hooks/useTags";
 import { cn } from "@/lib/utils";
 import {

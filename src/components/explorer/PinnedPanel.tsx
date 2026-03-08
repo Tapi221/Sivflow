@@ -14,7 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 import { ExplorerRow } from "@/components/folder/explorer/rows/ExplorerRow";
 import { ExplorerRowContent } from "@/components/folder/explorer/rows/ExplorerRowContent";
-import type { PinnedItem } from "@/hooks/useExplorerStore";
+import type { PinnedItem } from "@/components/folder/explorer/model/types";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 
 type LegacyCardFields = {

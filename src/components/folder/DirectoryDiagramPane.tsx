@@ -4,7 +4,7 @@ import type { Card, DocumentItem, Folder } from "@/types";
 import { TagBadge } from "@/components/tag/TagBadge";
 import { resolveCardTagNames, useTags } from "@/hooks/useTags";
 import { cn } from "@/lib/utils";
-import { useExplorerStore } from "@/hooks/useExplorerStore";
+import { useExplorerStore } from "@/components/folder/explorer/model/types";
 import { ExplorerFilterSummary } from "./ExplorerFilterSummary";
 import { TagFilterPopover } from "@/components/explorer/TagFilterPopover";
 import {
