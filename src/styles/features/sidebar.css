@@ -20,22 +20,16 @@
     box-shadow: none;
   }
 
-  .sidebar-row--folder:hover {
-    background-color: var(--hover-bg, rgba(0, 0, 0, 0.04));
+  .sidebar-row--folder:hover,
+  .sidebar-row--document:hover,
+  .sidebar-row--card:hover {
+    background-color: var(--sidebar-active-bg, #e7ebef);
   }
 
   .sidebar-row[data-selected="true"] {
-    background-color: rgba(104, 154, 152, 0.12);
+    background-color: var(--sidebar-active-bg, #e7ebef);
   }
 
-  .sidebar-row[data-selected="true"]::before {
-    content: "";
-    position: absolute;
-    inset: 3px auto 3px 0;
-    width: 2px;
-    border-radius: 999px;
-    background: var(--sidebar-active-accent);
-  }
 
   .sidebar-row:focus-visible {
     outline: none;

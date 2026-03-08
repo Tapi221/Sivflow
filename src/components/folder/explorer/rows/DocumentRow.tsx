@@ -45,7 +45,7 @@ export const DocumentRow: React.FC<DocumentRowProps> = ({
   return (
     <div
       ref={(node) => setRowRef(docId, node)}
-      className={cn(rowBaseClassName, "pr-9", "cursor-pointer")}
+      className={cn(rowBaseClassName, "sidebar-row--document pr-9 cursor-pointer")}
       data-selected={isSelected ? "true" : undefined}
       style={getExplorerRowStyle(depth)}
       onClick={() => onSelect({ type: "document", id: docId })}
