@@ -1,5 +1,4 @@
 import { Flashcard } from "@/components/card/frame/Flashcard";
-import type { FlashcardCardLike } from "@/components/card/frame/Flashcard";
 import { TagFilterPopover } from "@/components/explorer/TagFilterPopover";
 import { TagBadge } from "@/components/tag/TagBadge";
 import {
@@ -497,7 +496,7 @@ export function DirectoryDiagramPane({
                   onClick={(event) => event.stopPropagation()}
                 >
                   <Flashcard
-                    card={previewCard}
+                    card={previewCard as unknown as import("@/components/card/frame/Flashcard").FlashcardCardLike | null}
                     previewMode
                     className="mx-auto"
                     allowUpscale
@@ -513,5 +512,7 @@ export function DirectoryDiagramPane({
     </div>
   );
 }
+
+
 
 

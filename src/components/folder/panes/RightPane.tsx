@@ -1,5 +1,6 @@
 import { PdfPane } from "@/components/pdf/PdfPane";
 import { PowerPointPane } from "@/components/pptx/PowerPointPane";
+import { FolderDashboard } from "@/components/views/FolderDashboard";
 import Calendar from "@/pages/Calendar";
 import Dashboard from "@/pages/Dashboard";
 import Gallery from "@/pages/Gallery";
@@ -7,7 +8,6 @@ import Trash from "@/pages/Trash";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 import { CardPane } from "./CardPane";
 import { DirectoryDiagramPane } from "./DirectoryDiagramPane";
-import { FolderDashboard } from "./FolderDashboard";
 
 interface RightPaneProps {
   selectedItem: SelectedExplorerItem;
@@ -111,7 +111,7 @@ export function RightPane({
             handlers={handlers}
             onRenameFolder={
               onRenameFolder
-                ? (newName) => onRenameFolder(selectedFolderId, newName)
+                ? (newName: string) => onRenameFolder(selectedFolderId, newName)
                 : undefined
             }
           />
@@ -122,6 +122,8 @@ export function RightPane({
 
   return <CardPane selectedCardId={null} onCardUpdated={onCardUpdated} />;
 }
+
+
 
 
 
