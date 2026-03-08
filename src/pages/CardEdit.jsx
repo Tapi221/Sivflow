@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "@/ui/icons";
 import { createPageUrl } from "@/utils";
-import { CardEditorPane } from "@/components/folder/CardEditorPane";
+import { CardEditorPane } from "@/components/folder/panes/CardEditorPane";
 
 const CARD_EDIT_FOLDER_ID_KEY = "card-edit:folder-id";
 
@@ -94,6 +94,7 @@ export default function CardEdit() {
     </div>
   );
 }
+
 
 
 

@@ -2,7 +2,7 @@ import React, { useCallback, useRef, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "@/ui/icons";
-import { CardEditorPane } from "@/components/folder/CardEditorPane";
+import { CardEditorPane } from "@/components/folder/panes/CardEditorPane";
 
 export default function PairMode() {
   const [searchParams] = useSearchParams();
@@ -50,6 +50,7 @@ export default function PairMode() {
     </div>
   );
 }
+
 
 
 

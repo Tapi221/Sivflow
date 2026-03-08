@@ -2,7 +2,7 @@ import React from "react";
 import { useCards } from "@/hooks/card/useCards";
 import { useFolders } from "@/hooks/folder/useFolders";
 import { useDocuments } from "@/hooks/platform/useDocuments";
-import { DirectoryDiagramPane } from "@/components/folder/DirectoryDiagramPane";
+import { DirectoryDiagramPane } from "@/components/folder/panes/DirectoryDiagramPane";
 
 export default function Directory() {
   const { cards = [] } = useCards();
@@ -15,6 +15,7 @@ export default function Directory() {
     </div>
   );
 }
+
 
 
 
