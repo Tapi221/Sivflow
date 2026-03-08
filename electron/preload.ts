@@ -2,7 +2,7 @@ import { contextBridge, ipcRenderer } from "electron";
 import type {
   DesktopBridgeApi,
   DesktopOauthCallbackPayload,
-} from "../src/types/desktop-api";
+} from "../src/types/externals/desktop-api";
 
 const IPC_CHANNELS = {
   appGetVersion: "desktop:app:getVersion",
@@ -60,3 +60,4 @@ const desktopApi: DesktopBridgeApi = {
 };
 
 contextBridge.exposeInMainWorld("desktop", desktopApi);
+

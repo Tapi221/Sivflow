@@ -26,7 +26,7 @@ interface LocalDocumentSource {
   localSourceStatus: LocalSourceStatus;
 }
 
-export function useLocalDocumentSource({
+export function usePptxDocumentSync({
   userId,
   localBlobId,
   persistedBlobUrl,
@@ -89,7 +89,7 @@ export function useLocalDocumentSource({
       .catch((error) => {
         if (cancelled) return;
 
-        console.error("[useLocalDocumentSource] local restore failed", {
+        console.error("[usePptxDocumentSync] local restore failed", {
           localBlobId,
           error,
         });
