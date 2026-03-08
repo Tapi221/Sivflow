@@ -25,3 +25,6 @@ export const StratisBoxIcon = forwardRef<SVGSVGElement, StratisBoxIconProps>(
     );
   },
 );
+
+
+

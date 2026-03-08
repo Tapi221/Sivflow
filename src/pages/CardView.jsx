@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useCards } from "@/hooks/useCards";
+import { useCards } from "@/hooks/card/useCards";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronLeft, ChevronRight } from "@/ui/icons";
@@ -13,9 +13,9 @@ import { CardMetaPanel } from "@/components/card/panels/CardMetaPanel";
 import {
   CANONICAL_CARD_WIDTH,
 } from "@/components/card/common/constants";
-import { useCardEntity } from "@/hooks/useCardEntity";
-import { useUserSettings } from "@/hooks/useUserSettings";
-import { useIsDesktopRuntime } from "@/hooks/useIsDesktopRuntime";
+import { useCardEntity } from "@/hooks/card/useCardEntity";
+import { useUserSettings } from "@/hooks/settings/useUserSettings";
+import { useIsDesktopRuntime } from "@/hooks/platform/useIsDesktopRuntime";
 
 export default function CardView() {
   const navigate = useNavigate();
@@ -253,3 +253,10 @@ export default function CardView() {
       </div>
   );
 }
+
+
+
+
+
+
+

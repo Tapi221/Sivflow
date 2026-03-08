@@ -25,3 +25,6 @@ export const StratisMenu04Icon = forwardRef<
     </svg>
   );
 });
+
+
+

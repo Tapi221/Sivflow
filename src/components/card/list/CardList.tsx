@@ -6,7 +6,7 @@ import { CardShell } from "../frame/CardShell";
 import { HelpCircle, Edit, Trash2, Volume2, Star } from "@/ui/icons";
 import { cn } from "@/lib/utils";
 import { normalizeMemoryStability } from "@/utils/reviewUtils";
-import { resolveCardTagNames } from "@/hooks/useTags";
+import { resolveCardTagNames } from "@/hooks/settings/useTags";
 import { DEFAULT_TAG_COLOR_CLASS_NAME } from "@/lib/tags/tagColor";
 
 function CardItem({
@@ -309,3 +309,7 @@ export default function CardList({
     </DragDropContext>
   );
 }
+
+
+
+

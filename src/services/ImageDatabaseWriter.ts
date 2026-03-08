@@ -319,3 +319,6 @@ class ImageDatabaseWriter {
  * すべての画像DB保存はこのインスタンスを経由する
  */
 export const imageDB = new ImageDatabaseWriter();
+
+
+

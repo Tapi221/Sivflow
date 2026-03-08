@@ -2,9 +2,9 @@ import React, { useMemo, useState } from "react";
 import { HelpCircle, Settings2, Star, Tag as TagIcon } from "@/ui/icons";
 import type { Card, DocumentItem, Folder } from "@/types";
 import { TagBadge } from "@/components/tag/TagBadge";
-import { resolveCardTagNames, useTags } from "@/hooks/useTags";
+import { resolveCardTagNames, useTags } from "@/hooks/settings/useTags";
 import { cn } from "@/lib/utils";
-import { useExplorerStore } from "@/components/folder/explorer/model/types";
+import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { ExplorerFilterSummary } from "./ExplorerFilterSummary";
 import { TagFilterPopover } from "@/components/explorer/TagFilterPopover";
 import {
@@ -521,3 +521,9 @@ export function DirectoryDiagramPane({
     </div>
   );
 }
+
+
+
+
+
+

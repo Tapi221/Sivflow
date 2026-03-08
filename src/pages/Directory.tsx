@@ -1,7 +1,7 @@
 import React from "react";
-import { useCards } from "@/hooks/useCards";
-import { useFolders } from "@/hooks/useFolders";
-import { useDocuments } from "@/hooks/useDocuments";
+import { useCards } from "@/hooks/card/useCards";
+import { useFolders } from "@/hooks/folder/useFolders";
+import { useDocuments } from "@/hooks/platform/useDocuments";
 import { DirectoryDiagramPane } from "@/components/folder/DirectoryDiagramPane";
 
 export default function Directory() {
@@ -15,3 +15,9 @@ export default function Directory() {
     </div>
   );
 }
+
+
+
+
+
+

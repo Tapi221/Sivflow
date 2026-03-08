@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import type { Notification } from "../../types/notification";
+import type { Notification } from "@/types/notification";
 import { AlertTriangle, X, ChevronDown } from "@/ui/icons";
 
 interface WarningDialogProps {
@@ -98,3 +98,6 @@ export const WarningDialog: React.FC<WarningDialogProps> = ({
     </div>
   );
 };
+
+
+

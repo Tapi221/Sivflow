@@ -26,3 +26,6 @@ export const StratisLogout02Icon = forwardRef<
     </svg>
   );
 });
+
+
+

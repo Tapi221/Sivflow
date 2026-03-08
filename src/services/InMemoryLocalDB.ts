@@ -1,7 +1,7 @@
 import { nanoid } from "nanoid";
 import { normalizeCard, normalizeFolder } from "../utils";
-import { getDeviceName, getOrCreateDeviceId } from "../utils/device";
-import type { Card, Folder, SyncQueueItem } from "../types";
+import { getDeviceName, getOrCreateDeviceId } from "@/utils/device";
+import type { Card, Folder, SyncQueueItem } from "@/types";
 
 type KeyPath = string | string[];
 type Predicate<T> = (value: T) => boolean;
@@ -877,3 +877,6 @@ export class InMemoryLocalDB {
     return { folders: 0, cards: 0, canonicalId: null, issues: [] };
   }
 }
+
+
+

@@ -26,3 +26,6 @@ export const StratisType03Icon = forwardRef<
     </svg>
   );
 });
+
+
+

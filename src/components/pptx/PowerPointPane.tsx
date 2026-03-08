@@ -81,3 +81,6 @@ export function PowerPointPane({ doc, className }: PowerPointPaneProps) {
     </div>
   );
 }
+
+
+

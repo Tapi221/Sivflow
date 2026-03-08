@@ -29,3 +29,6 @@ describe("Math block consistency", () => {
     expect(previewLike.container.querySelector(".mathBlockRoot")).toBeTruthy();
   });
 });
+
+
+

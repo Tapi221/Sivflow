@@ -120,3 +120,6 @@ export function getRuledStyle(
     backgroundRepeat: "no-repeat, repeat-y",
   };
 }
+
+
+

@@ -13,7 +13,7 @@ import type {
   SecurityEventType,
   SecurityLog,
   SecurityMetadata,
-} from "../../types/telemetry";
+} from "@/types/telemetry";
 
 /**
  * リスク検知ルールの定義
@@ -402,3 +402,6 @@ export class SecurityMonitor {
     if (time) this.lastEvaluationTime = parseInt(time, 10);
   }
 }
+
+
+

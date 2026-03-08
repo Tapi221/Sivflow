@@ -18,7 +18,7 @@ import { autoBackupService } from "./services/AutoBackupService";
 import { dataIntegrityService } from "./services/DataIntegrityService";
 import { sanitizeForLog } from "@/utils/logSanitizer";
 // 同期の進捗などを扱うカスタムフック
-import { useSync } from "./hooks/useSync";
+import { useSync } from "./hooks/sync/useSync";
 // アカウントロック時に表示する画面
 import { AccountLockedScreen } from "./components/security/AccountLockedScreen";
 // 同期サービスを生成するファクトリ
@@ -544,3 +544,7 @@ function App() {
 }
 
 export default App;
+
+
+
+

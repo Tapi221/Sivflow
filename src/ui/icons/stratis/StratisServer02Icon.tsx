@@ -24,3 +24,6 @@ export const StratisServer02Icon = forwardRef<
     </svg>
   );
 });
+
+
+

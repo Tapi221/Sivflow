@@ -25,3 +25,6 @@ export const StratisAttatchment01Icon = forwardRef<
     </svg>
   );
 });
+
+
+

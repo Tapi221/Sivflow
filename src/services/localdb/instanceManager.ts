@@ -343,3 +343,6 @@ export async function initializeDB(userId: string): Promise<void> {
 export async function resetLocalDBForLogout(userId?: string): Promise<void> {
   await resetForLogout(userId);
 }
+
+
+

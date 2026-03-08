@@ -82,3 +82,6 @@ export interface UserStats extends BaseEntity {
   totalHighResBytes?: number;
   totalStorageUsedBytes?: number;
 }
+
+
+

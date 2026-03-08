@@ -67,3 +67,6 @@ export function usePdfScrollDiagnostics({
 
   return { getScrollDiagnostics, logScrollDiagnostics };
 }
+
+
+

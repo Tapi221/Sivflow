@@ -26,3 +26,6 @@ export const StratisArrowLeftSquareContainedIcon = forwardRef<
     </svg>
   );
 });
+
+
+

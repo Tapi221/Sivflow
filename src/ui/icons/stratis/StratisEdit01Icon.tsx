@@ -26,3 +26,6 @@ export const StratisEdit01Icon = forwardRef<
     </svg>
   );
 });
+
+
+

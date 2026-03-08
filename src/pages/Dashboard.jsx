@@ -1,11 +1,11 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { getPageRuledBg } from "@/components/card/frame/ruledStyles";
 import { useNavigate } from "react-router-dom";
-import { useCards } from "@/hooks/useCards";
-import { useFolders } from "@/hooks/useFolders";
+import { useCards } from "@/hooks/card/useCards";
+import { useFolders } from "@/hooks/folder/useFolders";
 import { useQuery } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";
-import { getLocalDb } from "../services/localDB";
+import { getLocalDb } from "@/services/localDB";
 import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
 import { firestoreDb } from "@/services/firebase";
 import { useAuth } from "@/contexts/AuthContext";
@@ -27,7 +27,7 @@ import { useTodayStudyStore } from "@/stores/useTodayStudyStore";
 
 import ExportDialog from "@/components/export/ExportDialog";
 import ImportDialog from "@/components/export/ImportDialog";
-import { useUserSettings } from "@/hooks/useUserSettings";
+import { useUserSettings } from "@/hooks/settings/useUserSettings";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -472,3 +472,9 @@ export default function Dashboard() {
     </div>
   );
 }
+
+
+
+
+
+

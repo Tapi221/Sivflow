@@ -123,3 +123,6 @@ export function RightPane({
 
   return <CardPane selectedCardId={null} onCardUpdated={onCardUpdated} />;
 }
+
+
+

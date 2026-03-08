@@ -24,3 +24,6 @@ export const StratisAudioSettings02Icon = forwardRef<
     </svg>
   );
 });
+
+
+

@@ -23,8 +23,8 @@ import type {
   SnapshotMetadata,
   SnapshotData,
   SnapshotComparison,
-} from "@/types/snapshot";
-import { CURRENT_SCHEMA_VERSION, APP_VERSION } from "@/types/snapshot";
+} from "@/types/domain/snapshot";
+import { CURRENT_SCHEMA_VERSION, APP_VERSION } from "@/types/domain/snapshot";
 import { normalizeCard, normalizeFolder } from "@/utils";
 
 /** ローカルストレージのキー */
@@ -367,3 +367,7 @@ class SnapshotService {
 
 export const snapshotService = new SnapshotService();
 export default snapshotService;
+
+
+
+

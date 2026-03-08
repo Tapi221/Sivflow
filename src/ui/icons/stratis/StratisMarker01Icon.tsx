@@ -26,3 +26,6 @@ export const StratisMarker01Icon = forwardRef<
     </svg>
   );
 });
+
+
+

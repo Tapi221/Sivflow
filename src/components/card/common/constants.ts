@@ -104,3 +104,6 @@ export function minCardHeightPxToLayoutRows(heightPx: number): number {
 export function snapMinCardHeightPx(heightPx: number): number {
   return layoutRowsToCardHeightPx(minCardHeightPxToLayoutRows(heightPx));
 }
+
+
+

@@ -4,8 +4,8 @@ import SettingsDialog from "@/components/settings/SettingsDialog";
 import { SyncStatusIndicator } from "@/components/sync/SyncStatusIndicator";
 import { cn } from "@/lib/utils";
 import { UI_TYPO } from "@/styles/tokens/typography";
-import { useSettingsQueryParam } from "@/hooks/useSettingsQueryParam";
-import { useKatexLoader } from "@/hooks/useKatexLoader";
+import { useSettingsQueryParam } from "@/hooks/settings/useSettingsQueryParam";
+import { useKatexLoader } from "@/hooks/platform/useKatexLoader";
 import { SecurityAlertBanner } from "./components/security/SecurityAlertBanner";
 import { LocalDBStatusBanner } from "./components/security/LocalDBStatusBanner";
 import { AppLayout } from "./layout/AppLayout";
@@ -58,3 +58,10 @@ export default function Layout() {
     </div>
   );
 }
+
+
+
+
+
+
+

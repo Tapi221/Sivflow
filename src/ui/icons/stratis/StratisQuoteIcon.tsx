@@ -26,3 +26,6 @@ export const StratisQuoteIcon = forwardRef<
     </svg>
   );
 });
+
+
+

@@ -3,7 +3,7 @@ import type { LocalDBLike } from "./localDB";
 import type { ICloudProvider } from "./cloudProvider";
 import { FirebaseCloudProvider } from "./cloudProvider";
 import { ImageSyncService } from "./imageSyncService";
-import { getOrCreateDeviceId, getDeviceName } from "../utils/device";
+import { getOrCreateDeviceId, getDeviceName } from "@/utils/device";
 import {
   collection,
   getDocs,
@@ -19,15 +19,15 @@ import {
   uploadBytesResumable,
   getDownloadURL,
 } from "firebase/storage";
-import type { UserStats } from "../types";
+import type { UserStats } from "@/types";
 import type {
   SyncError,
   SyncHistory,
   SyncSettings,
   SyncConflict,  DiffResult,
   SyncResult,
-} from "../types/sync";
-import { DEFAULT_SYNC_SETTINGS } from "../types/sync";
+} from "@/types/domain/sync";
+import { DEFAULT_SYNC_SETTINGS } from "@/types/domain/sync";
 import { sanitizeProfileImage } from "@/utils/profileImageSanitizer";
 import { sanitizeForLog } from "@/utils/logSanitizer";
 import { storage } from "./firebase";
@@ -1455,3 +1455,7 @@ export class SyncService {
     return { successRate, avgDuration, errorRate, totalSyncs };
   }
 }
+
+
+
+

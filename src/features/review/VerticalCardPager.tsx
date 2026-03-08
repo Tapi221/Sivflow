@@ -10,7 +10,7 @@
  */
 
 import { useRef } from "react";
-import { useVerticalCardPager } from "@/hooks/useVerticalCardPager";
+import { useVerticalCardPager } from "@/hooks/study/useVerticalCardPager";
 import { CANONICAL_CARD_WIDTH } from "@/components/card/common/constants";
 
 // ── レイアウト定数 ──────────────────────────────────────────────────────────
@@ -120,3 +120,7 @@ export function VerticalCardPager<T>({
     </div>
   );
 }
+
+
+
+

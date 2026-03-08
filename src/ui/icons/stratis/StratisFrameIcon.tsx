@@ -36,3 +36,6 @@ export const StratisFrameIcon = forwardRef<
     </svg>
   );
 });
+
+
+

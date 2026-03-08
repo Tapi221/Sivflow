@@ -3,7 +3,7 @@
 
 import { operationQueue } from "./operationQueue";
 import { getLocalDb } from "./localDB";
-import type { Card } from "../types";
+import type { Card } from "@/types";
 
 /**
  * Operation Queue 統合サービス
@@ -103,3 +103,6 @@ export function getQueueIntegration(userId: string): QueueIntegrationService {
   }
   return _instance;
 }
+
+
+

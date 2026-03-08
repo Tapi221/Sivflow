@@ -361,3 +361,6 @@ export const Sigma = SigmaIcon;
 export const NotebookPen = NotebookPenIcon;
 export const StickyNote = StickyNoteIcon;
 export { StratisFormulaIcon, StratisMarkdownIcon };
+
+
+

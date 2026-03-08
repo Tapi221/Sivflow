@@ -147,3 +147,6 @@ export function getLocalDBTelemetrySnapshot(): LocalDBTelemetrySnapshot {
     localdb_reset_failed: !!currentStatus.resetFailedReason,
   };
 }
+
+
+

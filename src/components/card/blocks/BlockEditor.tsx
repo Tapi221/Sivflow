@@ -18,7 +18,7 @@ import { MarkdownBlock } from "./MarkdownBlock";
 
 import type { CardBlock } from "@/types";
 import { cn } from "@/lib/utils";
-import { useUserSettings } from "@/hooks/useUserSettings";
+import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { CARD_ROW_PX } from "../common/constants";
 import { sortBlocksByOrderIndex } from "./blockOrdering";
 import {
@@ -995,3 +995,7 @@ export const BlockEditor = React.forwardRef<
 );
 
 BlockEditor.displayName = "BlockEditor";
+
+
+
+

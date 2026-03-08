@@ -25,3 +25,6 @@ export const StratisPlus02Icon = forwardRef<
     </svg>
   );
 });
+
+
+

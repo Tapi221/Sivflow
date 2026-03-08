@@ -110,3 +110,6 @@ export const uploadImageAsBase64 = async (file: File): Promise<string> => {
   return compressAndConvertToBase64Internal(file);
 };
 
+
+
+

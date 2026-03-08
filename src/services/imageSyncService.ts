@@ -1,8 +1,8 @@
 import { storage } from "./firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import type { LocalDBLike } from "./localDB";
-import type { UploadedImage } from "../types";
-import { createStorageUrl } from "../types/branded";
+import type { UploadedImage } from "@/types";
+import { createStorageUrl } from "@/types/core/branded";
 
 const MAX_QUOTA = 500 * 1024 * 1024; // 500MB
 const MAX_RETRIES = 5;
@@ -295,3 +295,7 @@ export class ImageSyncService {
     return null;
   }
 }
+
+
+
+

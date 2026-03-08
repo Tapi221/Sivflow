@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import type { Card } from "@/types";
-import { useUserSettings } from "@/hooks/useUserSettings";
+import { useUserSettings } from "@/hooks/settings/useUserSettings";
 
 export interface FolderStats {
   dueCount: number;
@@ -90,3 +90,7 @@ export function useFolderStats(cards: Card[]): FolderStats {
     };
   }, [cards, settings?.autoCarryOver]);
 }
+
+
+
+

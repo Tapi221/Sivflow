@@ -25,3 +25,6 @@ export const StratisSave02Icon = forwardRef<
     </svg>
   );
 });
+
+
+

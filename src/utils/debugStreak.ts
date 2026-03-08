@@ -34,3 +34,6 @@ export const getDebugStreak = (): number | null => {
 
   return parseDebugStreakValue(window.localStorage.getItem("debug_streak"));
 };
+
+
+

@@ -1,6 +1,6 @@
 import type { LocalDBLike } from "./localDB";
-import type { IndexedDBMetadata } from "../types/storage";
-import { CURRENT_SCHEMA_VERSION } from "../types/storage";
+import type { IndexedDBMetadata } from "@/types/domain/storage";
+import { CURRENT_SCHEMA_VERSION } from "@/types/domain/storage";
 import { SafeIndexedDBWriter } from "./SafeIndexedDBWriter";
 
 /**
@@ -239,3 +239,7 @@ export class IndexedDBMetadataService {
     return meta?.rebuildCount || 0;
   }
 }
+
+
+
+

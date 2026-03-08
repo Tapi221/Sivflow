@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import type { Notification } from "../../types/notification";
+import type { Notification } from "@/types/notification";
 import { AlertCircle, ChevronDown } from "@/ui/icons";
 
 interface ErrorDialogProps {
@@ -82,3 +82,6 @@ export const ErrorDialog: React.FC<ErrorDialogProps> = ({ notification }) => {
     </div>
   );
 };
+
+
+

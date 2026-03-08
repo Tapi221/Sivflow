@@ -3,8 +3,8 @@
  * カード/フォルダ/タグを曖昧検索でスコアリングして返す
  */
 
-import type { Card } from "../types";
-import type { Folder } from "../types";
+import type { Card } from "@/types";
+import type { Folder } from "@/types";
 
 // タグの型定義（useTags.tsと同じ）
 export interface Tag {
@@ -235,3 +235,6 @@ export function searchQuickOpen(
 
   return results.slice(0, maxResults);
 }
+
+
+

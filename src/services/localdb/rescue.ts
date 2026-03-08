@@ -1,10 +1,10 @@
 import { Dexie } from "dexie";
 import type { LocalDB } from "./LocalDB";
-import type { Card } from "../../types";
+import type { Card } from "@/types";
 import { denormalizeCardForStorage } from "./transforms";
 import { hasBlobUrlDeep, scrubBlobUrlsDeep } from "./blobUrl";
 import { telemetryOncePerSession } from "../localDBRuntimeState";
-import { getOrCreateDeviceId, getDeviceName } from "../../utils/device";
+import { getOrCreateDeviceId, getDeviceName } from "@/utils/device";
 
 type LocalDBWithTags = LocalDB & {
   tags: { bulkPut(items: unknown[]): Promise<unknown> };
@@ -556,3 +556,6 @@ export async function importFromDatabase(
     sourceDb.close();
   }
 }
+
+
+

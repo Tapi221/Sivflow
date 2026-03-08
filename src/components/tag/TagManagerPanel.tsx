@@ -10,7 +10,7 @@ import {
   FolderInput,
   Move,
 } from "@/ui/icons";
-import { useTags, DEFAULT_TAG_COLOR_KEYS } from "@/hooks/useTags";
+import { useTags, DEFAULT_TAG_COLOR_KEYS } from "@/hooks/settings/useTags";
 import { cn } from "@/lib/utils";
 import { TagChip } from "@/components/tag/TagChip";
 import {
@@ -645,3 +645,7 @@ export function TagManagerPanel({ className }: TagManagerPanelProps) {
     </div>
   );
 }
+
+
+
+

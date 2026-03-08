@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { CardCarousel } from "@/features/study/CardCarousel";
 import { VerticalCardPager } from "@/features/review/VerticalCardPager";
-import { useIsDesktopRuntime } from "@/hooks/useIsDesktopRuntime";
+import { useIsDesktopRuntime } from "@/hooks/platform/useIsDesktopRuntime";
 import StudyCard from "@/features/study/StudyCard";
 import type { Card } from "@/types";
 
@@ -78,3 +78,7 @@ export function StudyReview({
     </div>
   );
 }
+
+
+
+

@@ -231,3 +231,6 @@ export function usePdfViewerPersistence({
 
 // clampScale は pdfViewerStateStorage から再エクスポート（外部参照用）
 export { FIT_MIN_SCALE, FIT_MAX_SCALE };
+
+
+

@@ -1,5 +1,5 @@
 import type { Card } from "@/types";
-import type { Tag } from "@/hooks/useTags";
+import type { Tag } from "@/hooks/settings/useTags";
 
 export type ViewKind = "folder" | "tagCategory" | "tagTree";
 
@@ -202,3 +202,7 @@ export function buildVirtualTree(
 
   return categoryNodes;
 }
+
+
+
+

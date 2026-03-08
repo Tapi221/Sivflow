@@ -3,3 +3,6 @@ export const sanitizeStreak = (value: unknown): number => {
   if (!Number.isFinite(numeric)) return 0;
   return Math.max(0, Math.floor(numeric));
 };
+
+
+

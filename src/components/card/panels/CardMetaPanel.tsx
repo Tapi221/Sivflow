@@ -10,7 +10,7 @@ import { EmptyMetaPanel } from "@/components/card/panels/EmptyMetaPanel";
 import { MetaPanelLeadSection } from "@/components/card/panels/MetaPanelShell";
 import type { Card, ReviewLog } from "@/types";
 import { calculateResistanceScore } from "@/utils/reviewMetrics";
-import { useTags, resolveCardTagNames } from "@/hooks/useTags";
+import { useTags, resolveCardTagNames } from "@/hooks/settings/useTags";
 
 type Period = "7d" | "30d" | "all";
 
@@ -368,3 +368,8 @@ export function CardMetaPanel({
     </EmptyMetaPanel>
   );
 }
+
+
+
+
+

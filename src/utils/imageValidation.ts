@@ -47,3 +47,6 @@ export const strictValidateBeforeSave = (image: UploadedImage): void => {
     console.log("[Validation] UploadedImage passed strict validation", image);
   }
 };
+
+
+

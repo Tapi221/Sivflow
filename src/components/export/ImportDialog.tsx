@@ -6,7 +6,7 @@ import {
   subscribeLocalDBRuntimeStatus,
 } from "@/services/localDB";
 import { snapshotService } from "@/services/SnapshotService";
-import type { AppSnapshot, SnapshotComparison } from "@/types/snapshot";
+import type { AppSnapshot, SnapshotComparison } from "@/types/domain/snapshot";
 import {
   Dialog,
   DialogContent,
@@ -345,3 +345,6 @@ export default function ImportDialog({
     </Dialog>
   );
 }
+
+
+

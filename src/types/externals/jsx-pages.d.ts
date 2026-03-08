@@ -21,3 +21,6 @@ declare module "@/pages/Trash" {
   const Trash: ComponentType;
   export default Trash;
 }
+
+
+

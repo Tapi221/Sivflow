@@ -26,3 +26,6 @@ export const StratisMap01Icon = forwardRef<
     </svg>
   );
 });
+
+
+

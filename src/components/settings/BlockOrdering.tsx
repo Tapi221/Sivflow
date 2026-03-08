@@ -9,7 +9,7 @@ import { ImageIcon } from "@/ui/icons";
 import { Sigma } from "@/ui/icons";
 import { cn } from "@/lib/utils";
 import type { BlockConfig } from "@/types";
-import { useUserSettings } from "@/hooks/useUserSettings";
+import { useUserSettings } from "@/hooks/settings/useUserSettings";
 
 // Icon mapping
 const ICONS = {
@@ -234,3 +234,7 @@ export const BlockOrdering = () => {
     </div>
   );
 };
+
+
+
+

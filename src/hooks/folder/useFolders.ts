@@ -1,9 +1,9 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { nanoid } from "nanoid";
-import { getLocalDb } from "../services/localDB";
-import { useAuth } from "../contexts/AuthContext";
-import type { Folder } from "../types";
-import { normalizeFolder } from "../utils";
+import { getLocalDb } from "@/services/localDB";
+import { useAuth } from "@/contexts/AuthContext";
+import type { Folder } from "@/types";
+import { normalizeFolder } from "@/utils";
 
 export function useFolders() {
   const { currentUser } = useAuth();
@@ -147,3 +147,7 @@ export function useFolders() {
     getFolderTree,
   };
 }
+
+
+
+

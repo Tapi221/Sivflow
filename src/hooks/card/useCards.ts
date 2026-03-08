@@ -1,10 +1,10 @@
 import { useState, useMemo } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { getLocalDb } from "../services/localDB";
-import { useAuth } from "../contexts/AuthContext";
-import { normalizeCard } from "../utils";
-import { useUserSettings, DEFAULT_SETTINGS } from "./useUserSettings";
-import type { Card } from "../types";
+import { getLocalDb } from "@/services/localDB";
+import { useAuth } from "@/contexts/AuthContext";
+import { normalizeCard } from "@/utils";
+import { useUserSettings, DEFAULT_SETTINGS } from "@/hooks/settings/useUserSettings";
+import type { Card } from "@/types";
 import { normalizeInkDocument } from "@/components/ink/inkTypes";
 import {
   DEFAULT_LAYOUT_ROWS,
@@ -306,3 +306,8 @@ export function useCards(folderId?: string) {
     reorderCards,
   };
 }
+
+
+
+
+

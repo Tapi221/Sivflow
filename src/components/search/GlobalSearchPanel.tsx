@@ -16,10 +16,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { useCards } from "@/hooks/useCards";
-import { useFolders } from "@/hooks/useFolders";
-import { useTags } from "@/hooks/useTags";
-import { useCommandPalette } from "@/hooks/useCommandPalette";
+import { useCards } from "@/hooks/card/useCards";
+import { useFolders } from "@/hooks/folder/useFolders";
+import { useTags } from "@/hooks/settings/useTags";
+import { useCommandPalette } from "@/hooks/ui/useCommandPalette";
 import { buildQuickOpenIndex } from "@/utils/searchIndex";
 import {
   buildFullTextIndex,
@@ -356,3 +356,10 @@ export function GlobalSearchPanel() {
     </Dialog>
   );
 }
+
+
+
+
+
+
+

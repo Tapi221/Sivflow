@@ -36,7 +36,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
   private async getPendingSyncCount(): Promise<number | null> {
     try {
-      const { getLocalDb } = await import("../../services/localDB");
+      const { getLocalDb } = await import("@/services/localDB");
       const db = await getLocalDb();
       const pending = await db.syncQueue
         .where("status")
@@ -113,7 +113,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
   private async closeLocalDbBestEffort(): Promise<void> {
     try {
-      const { getLocalDb } = await import("../../services/localDB");
+      const { getLocalDb } = await import("@/services/localDB");
       const db = await getLocalDb();
       (db as unknown)?.close?.();
     } catch {
@@ -236,3 +236,6 @@ export class ErrorBoundary extends Component<Props, State> {
     return (this as unknown).props.children;
   }
 }
+
+
+

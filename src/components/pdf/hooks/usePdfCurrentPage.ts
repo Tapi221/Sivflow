@@ -141,3 +141,6 @@ export function usePdfCurrentPage({
 
   return { currentPage, handleScroll, handleVisibilityChange, scrollToPage };
 }
+
+
+

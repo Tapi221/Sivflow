@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Flashcard } from "../frame/Flashcard";
 import { Button } from "../../ui/button";
 import { X } from "@/ui/icons";
-import { useUserSettings } from "@/hooks/useUserSettings";
+import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { MobileScalableCard } from "../frame/MobileScalableCard";
 import {
   CANONICAL_CARD_WIDTH,
@@ -66,3 +66,7 @@ export function CardPopup({
     </div>
   );
 }
+
+
+
+

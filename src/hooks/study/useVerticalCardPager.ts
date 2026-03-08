@@ -193,3 +193,6 @@ export function useVerticalCardPager({
 
   return { itemRefs, scrollToIndex, goNext, goPrev };
 }
+
+
+

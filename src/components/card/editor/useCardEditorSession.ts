@@ -14,7 +14,7 @@ import {
   normalizeExtraRows,
   normalizeLayoutRows,
 } from "@/domain/card/extraRows";
-import { resolveCardTagNames } from "@/hooks/useTags";
+import { resolveCardTagNames } from "@/hooks/settings/useTags";
 
 import type { CardBlock, Card, UploadedImage } from "@/types";
 
@@ -446,3 +446,8 @@ export function useCardEditorSession({
     panelCard,
   };
 }
+
+
+
+
+

@@ -25,3 +25,6 @@ export const StratisNotificationBoxIcon = forwardRef<
     </svg>
   );
 });
+
+
+

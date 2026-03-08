@@ -31,3 +31,6 @@ export const StratisSettingsIcon = forwardRef<
     </svg>
   );
 });
+
+
+

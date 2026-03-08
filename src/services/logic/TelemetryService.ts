@@ -4,7 +4,7 @@ import type {
   LogContext,
   SyncLogEntry,
   TelemetryEventName,
-} from "../../types/telemetry";
+} from "@/types/telemetry";
 import { sanitizeForLog } from "@/utils/logSanitizer";
 
 /**
@@ -163,3 +163,6 @@ export class TelemetryService implements ITelemetryService {
     return this.logs.filter((log) => log.level === "error").slice(-limit);
   }
 }
+
+
+

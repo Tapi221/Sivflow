@@ -15,7 +15,7 @@ import {
   type InkHistoryState,
   type InkLayerHandle,
 } from "@/components/ink/InkLayer";
-import { useCards } from "@/hooks/useCards";
+import { useCards } from "@/hooks/card/useCards";
 
 interface UseFlashcardInkOptions {
   cardId: string | null;
@@ -221,3 +221,7 @@ export function useFlashcardInk({
     handleInkDocumentChange,
   };
 }
+
+
+
+

@@ -9,17 +9,17 @@ import {
   type ReactNode,
 } from "react";
 import { type User as FirebaseUser, onAuthStateChanged } from "firebase/auth";
-import { auth } from "../services/firebase";
+import { auth } from "@/services/firebase";
 import {
   getLocalDb,
   initializeDB,
   resetLocalDBForLogout,
-} from "../services/localDB";
-import { SyncServiceFactory } from "../services/SyncServiceFactory";
-import type { ISyncService } from "../services/interfaces/ISyncService";
-import type { SyncSettings } from "../types/sync";
+} from "@/services/localDB";
+import { SyncServiceFactory } from "@/services/SyncServiceFactory";
+import type { ISyncService } from "@/services/interfaces/ISyncService";
+import type { SyncSettings } from "@/types/domain/sync";
 
-import type { SecurityState } from "../services/logic/SecurityMonitor";
+import type { SecurityState } from "@/services/logic/SecurityMonitor";
 
 interface AuthContextType {
   currentUser: FirebaseUser | null;
@@ -231,7 +231,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           // - IndexedDB の健全性チェック
           // - 異常検知 → 即破棄 → 再構築
           // - UI 描画前に完了を保証
-          const { AppInitializer } = await import("../services/AppInitializer");
+          const { AppInitializer } = await import("@/services/AppInitializer");
           const initResult = await AppInitializer.initialize(user.uid);
           if (initResult?.degraded) {
             console.warn("[Auth] startup_degraded=true", {
@@ -449,3 +449,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // loading 状態のハンドリングは ProtectedRoute / AppContent に委譲する。
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
+
+
+

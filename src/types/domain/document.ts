@@ -54,3 +54,6 @@ export interface DocumentItem extends BaseEntity {
 
 export type Document = DocumentItem;
 export type PdfDocument = DocumentItem;
+
+
+

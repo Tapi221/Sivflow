@@ -14,10 +14,10 @@ import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { useCards } from "@/hooks/useCards";
-import { useFolders } from "@/hooks/useFolders";
-import { useTags, resolveCardTagNames } from "@/hooks/useTags";
-import { useCommandPalette } from "@/hooks/useCommandPalette";
+import { useCards } from "@/hooks/card/useCards";
+import { useFolders } from "@/hooks/folder/useFolders";
+import { useTags, resolveCardTagNames } from "@/hooks/settings/useTags";
+import { useCommandPalette } from "@/hooks/ui/useCommandPalette";
 import {
   buildQuickOpenIndex,
   searchQuickOpen,
@@ -277,3 +277,10 @@ export function QuickOpenDialog() {
     </Dialog>
   );
 }
+
+
+
+
+
+
+

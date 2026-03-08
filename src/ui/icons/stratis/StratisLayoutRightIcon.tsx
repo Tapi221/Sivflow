@@ -24,3 +24,6 @@ export const StratisLayoutRightIcon = forwardRef<
     </svg>
   );
 });
+
+
+

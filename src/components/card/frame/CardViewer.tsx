@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { useKeyboardShortcuts } from "@/hooks/ui/useKeyboardShortcuts";
 import { Flashcard } from "./Flashcard";
-import { useUserSettings } from "@/hooks/useUserSettings";
+import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import {
   CANONICAL_CARD_WIDTH,
   CARD_SAFE_PADDING_PX,
@@ -132,3 +132,8 @@ export default function CardViewer({
     </div>
   );
 }
+
+
+
+
+

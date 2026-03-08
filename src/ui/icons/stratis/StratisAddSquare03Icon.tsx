@@ -25,3 +25,6 @@ export const StratisAddSquare03Icon = forwardRef<
     </svg>
   );
 });
+
+
+

@@ -9,11 +9,11 @@ import {
   Timestamp,
 } from "firebase/firestore";
 import * as Firestore from "firebase/firestore";
-import type { Folder, Card } from "../types";
+import type { Folder, Card } from "@/types";
 import {
   denormalizeUploadedImages,
   normalizeUploadedImages,
-} from "../utils/uploaded-image/normalizer";
+} from "@/utils/uploaded-image/normalizer";
 import {
   foldersPathSegments,
   folderDocPathSegments,
@@ -173,4 +173,7 @@ export class FirebaseCloudProvider implements ICloudProvider {
     );
   }
 }
+
+
+
 

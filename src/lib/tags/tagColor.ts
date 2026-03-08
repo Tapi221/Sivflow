@@ -79,3 +79,6 @@ export const getTagColorClassName = (input?: string): string =>
 
 export const getTagColorSwatchClassName = (input?: string): string =>
   `tag-color-swatch-${getTagColorKey(input)}`;
+
+
+

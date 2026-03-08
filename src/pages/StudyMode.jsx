@@ -1,11 +1,11 @@
 import React, { useMemo, useEffect, useCallback, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useUserSettings } from "@/hooks/useUserSettings";
-import { useCards } from "@/hooks/useCards";
-import { useFolders } from "@/hooks/useFolders";
+import { useUserSettings } from "@/hooks/settings/useUserSettings";
+import { useCards } from "@/hooks/card/useCards";
+import { useFolders } from "@/hooks/folder/useFolders";
 import { useMutation } from "@tanstack/react-query";
 import { addDoc, collection } from "firebase/firestore";
-import { getLocalDb } from "../services/localDB";
+import { getLocalDb } from "@/services/localDB";
 import { firestoreDb } from "@/services/firebase";
 import { useAuth } from "@/contexts/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,9 +17,9 @@ import { flags } from "@/features/flags";
 import { TelemetryService } from "@/services/logic/TelemetryService";
 import confetti from "canvas-confetti";
 import { StampRally } from "@/features/study/StampRally";
-import { useStudyCards } from "@/hooks/useStudyCards";
-import { useStudySession } from "@/hooks/useStudySession";
-import { usePracticeMode } from "@/hooks/usePracticeMode";
+import { useStudyCards } from "@/hooks/study/useStudyCards";
+import { useStudySession } from "@/hooks/study/useStudySession";
+import { usePracticeMode } from "@/hooks/study/usePracticeMode";
 import { StudyEmpty } from "@/features/study/StudyEmpty";
 import { StudyReview } from "@/features/study/StudyReview";
 import { StudyComplete } from "@/features/study/StudyComplete";
@@ -517,3 +517,10 @@ export default function StudyMode() {
     </div>
   );
 }
+
+
+
+
+
+
+

@@ -26,3 +26,6 @@ export const StratisGlobe02Icon = forwardRef<
     </svg>
   );
 });
+
+
+

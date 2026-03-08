@@ -26,3 +26,6 @@ export const StratisLinkAngledIcon = forwardRef<
     </svg>
   );
 });
+
+
+

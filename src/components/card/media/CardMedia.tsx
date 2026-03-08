@@ -313,3 +313,6 @@ export function ImageGallery({ urls, items }: ImageGalleryProps) {
     </>
   );
 }
+
+
+

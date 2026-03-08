@@ -5,7 +5,7 @@ import { useToast } from "@/contexts/ToastContext";
 import { getLocalDb } from "@/services/localDB";
 import { saveDocumentBlob } from "@/services/documentFileStore";
 import { getOrCreateDeviceId } from "@/utils/device";
-import { useReliableFileUpload } from "@/hooks/useReliableFileUpload";
+import { useReliableFileUpload } from "@/hooks/platform/useReliableFileUpload";
 import {
   createDocumentId,
   buildStoragePath,
@@ -357,3 +357,7 @@ export function useFolderDocumentUpload({
     handleToolbarFileInputChange,
   };
 }
+
+
+
+

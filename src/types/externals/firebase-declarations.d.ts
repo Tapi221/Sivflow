@@ -51,3 +51,6 @@ declare module "firebase/functions" {
     options?: unknown,
   ): (data?: RequestData) => Promise<{ data: ResponseData }>;
 }
+
+
+

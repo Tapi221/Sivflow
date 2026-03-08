@@ -2,9 +2,9 @@ import React, { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";
-import { useCards } from "@/hooks/useCards";
-import { useFolders } from "@/hooks/useFolders";
-import { useUserSettings } from "@/hooks/useUserSettings";
+import { useCards } from "@/hooks/card/useCards";
+import { useFolders } from "@/hooks/folder/useFolders";
+import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -555,3 +555,9 @@ export default function Calendar() {
     </div>
   );
 }
+
+
+
+
+
+

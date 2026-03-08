@@ -59,3 +59,6 @@ export const computeNextScaleFromGesture = ({
 
   return normalizeScale(clampScale(rawNextScale, minScale, maxScale));
 };
+
+
+

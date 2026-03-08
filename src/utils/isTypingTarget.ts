@@ -21,3 +21,6 @@ export function isTypingTarget(target: EventTarget | null): boolean {
 
   return false;
 }
+
+
+

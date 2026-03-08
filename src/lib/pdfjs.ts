@@ -15,3 +15,6 @@ if (import.meta.env.DEV && !(globalThis as unknown).__pdfWorkerLogged) {
 }
 
 export { pdfjsLib };
+
+
+

@@ -1,5 +1,5 @@
-import type { SyncContextSource, NetworkStatus } from "../../types/telemetry";
-import type { SyncResult } from "../../types/sync";
+import type { SyncContextSource, NetworkStatus } from "@/types/telemetry";
+import type { SyncResult } from "@/types/domain/sync";
 
 /**
  * JSONっぽい値を表現したい時用（ログ/永続化/ネットワーク境界で便利）
@@ -257,3 +257,6 @@ export interface ISyncService {
    */
   dismissSecurityAlert(alertId: string): Promise<void>;
 }
+
+
+

@@ -12,3 +12,6 @@ export const getDesktopMediaQuery = (): MediaQueryList | null => {
   if (typeof window === "undefined" || !window.matchMedia) return null;
   return window.matchMedia(`(min-width: ${DESKTOP_MIN_WIDTH}px)`);
 };
+
+
+

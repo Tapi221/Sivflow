@@ -26,3 +26,6 @@ export const StratisClockPlusIcon = forwardRef<
     </svg>
   );
 });
+
+
+

@@ -26,3 +26,6 @@ export const StratisInbox02Icon = forwardRef<
     </svg>
   );
 });
+
+
+

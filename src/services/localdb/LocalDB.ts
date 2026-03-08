@@ -22,7 +22,7 @@ import type {
   SyncConflict,
   UploadedImage,
   AssetRecord,
-} from "../../types";
+} from "@/types";
 import type { IntegrityRepairResult } from "../dataIntegrityTypes";
 
 import { getDatabaseNameForUser as _getDatabaseNameForUser } from "./generation";
@@ -501,3 +501,6 @@ export function createLocalDBInternal(userId?: string): LocalDB {
 
 // devtools.ts が './LocalDB' から import するため、instanceManager の関数を re-export する
 export { getLocalDb, getLocalDbSync, initializeDB, resetLocalDBForLogout };
+
+
+

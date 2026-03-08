@@ -1,4 +1,4 @@
-import type { Card } from "../types";
+import type { Card } from "@/types";
 
 interface RecommendationScore {
   card: Card;
@@ -94,3 +94,6 @@ export function getRecommendedCards(
 
   return recommended;
 }
+
+
+

@@ -12,7 +12,7 @@ import {
 } from "firebase/firestore";
 import { firestoreDb } from "@/services/firebase";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import { useNetworkStatus } from "@/hooks/platform/useNetworkStatus";
 import { pptxConversionDocPathSegments } from "@/services/firestorePaths";
 import type { DocumentItem } from "@/types";
 import type { SlideData } from "../SlideImage";
@@ -561,3 +561,7 @@ function usePptxManifestLoaderWithReset(
     setManifestError,
   };
 }
+
+
+
+

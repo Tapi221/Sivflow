@@ -5,3 +5,6 @@ export const LOCALDB_RECOVERY_GUIDE_URL =
 export const LOCALDB_GENERATION_KEY_PREFIX = "flashcard.localdb.generation.";
 export const LOCALDB_ERROR_MESSAGE_LIMIT = 400;
 export const LOCALDB_NAME_PREFIX = "FlashcardMasterDB_";
+
+
+

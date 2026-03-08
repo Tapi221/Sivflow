@@ -1,16 +1,16 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { firestoreDb } from "../../services/firebase";
+import { firestoreDb } from "@/services/firebase";
 import { collection, query, getDocs, Timestamp } from "firebase/firestore";
-import { useAuth } from "../../contexts/AuthContext";
-import type { SyncMetadata } from "../../types";
+import { useAuth } from "@/contexts/AuthContext";
+import type { SyncMetadata } from "@/types";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
-import { initializeDB, getLocalDb } from "../../services/localDB";
+import { initializeDB, getLocalDb } from "@/services/localDB";
 import { RefreshCw, Pencil, Check, X, Trash2 } from "@/ui/icons";
 import { Smartphone } from "@/ui/icons";
-import { SyncServiceFactory } from "../../services/SyncServiceFactory";
-import type { UserStats } from "../../types";
-import { useSyncSettings } from "../../hooks/useSyncSettings";
+import { SyncServiceFactory } from "@/services/SyncServiceFactory";
+import type { UserStats } from "@/types";
+import { useSyncSettings } from "@/hooks/sync/useSyncSettings";
 import { Switch } from "../ui/switch";
 
 export const DeviceSyncSettings: React.FC = () => {
@@ -438,3 +438,7 @@ export const DeviceSyncSettings: React.FC = () => {
     </div>
   );
 };
+
+
+
+

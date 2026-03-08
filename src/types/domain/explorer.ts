@@ -14,3 +14,6 @@ export type SelectedExplorerItem =
   | { type: "settings" }
   | { type: "trash" }
   | null;
+
+
+

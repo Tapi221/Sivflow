@@ -35,15 +35,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
-import { useFolders } from "@/hooks/useFolders";
+import { useFolders } from "@/hooks/folder/useFolders";
 import { cn } from "@/lib/utils";
 import { signOut } from "firebase/auth";
 import { auth } from "@/services/firebase";
 import { useNavigate } from "react-router-dom";
 import { uploadProfileImage } from "@/services/imageUploadService";
-import { useReliableFileUpload } from "@/hooks/useReliableFileUpload";
+import { useReliableFileUpload } from "@/hooks/platform/useReliableFileUpload";
 import { Slider } from "@/components/ui/slider";
-import { useUserSettings } from "@/hooks/useUserSettings";
+import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { BookOpen } from "@/ui/icons";
 import { StorageManager } from "./StorageManager";
 import {
@@ -57,7 +57,7 @@ import { getAvatarColors, getInitials } from "@/utils/avatarUtils";
 import DataRescuePanel from "@/components/settings/DataRescuePanel";
 import { DeviceSyncSettings } from "@/components/settings/DeviceSyncSettings";
 import { BlockOrdering } from "@/components/settings/BlockOrdering";
-import { useSyncSettings } from "@/hooks/useSyncSettings";
+import { useSyncSettings } from "@/hooks/sync/useSyncSettings";
 import {
   validateUsername,
   truncateUsername,
@@ -1587,5 +1587,13 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
     </Dialog>
   );
 }
+
+
+
+
+
+
+
+
 
 

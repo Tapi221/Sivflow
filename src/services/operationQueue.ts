@@ -1,5 +1,5 @@
 import { getLocalDb } from "./localDB";
-import type { SyncQueueItem } from "../types/sync";
+import type { SyncQueueItem } from "@/types/domain/sync";
 
 export type QueuePriority = "critical" | "high" | "medium" | "low";
 export type OperationType = "create" | "update" | "delete";
@@ -387,3 +387,6 @@ export class OperationQueueService {
 }
 
 export const operationQueue = new OperationQueueService();
+
+
+

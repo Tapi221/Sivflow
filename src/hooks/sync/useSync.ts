@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { SyncServiceFactory } from "../services/SyncServiceFactory";
-import { useAuth } from "../contexts/AuthContext";
-import type { ISyncService } from "../services/interfaces/ISyncService";
+import { SyncServiceFactory } from "@/services/SyncServiceFactory";
+import { useAuth } from "@/contexts/AuthContext";
+import type { ISyncService } from "@/services/interfaces/ISyncService";
 
 export const useSync = () => {
   const { currentUser } = useAuth();
@@ -36,3 +36,6 @@ export const useSync = () => {
 
   return { forceSync, syncProgress };
 };
+
+
+

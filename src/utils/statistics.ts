@@ -1,4 +1,4 @@
-import type { Card } from "../types/Card";
+import type { Card } from "@/types/Card";
 import { normalizeMemoryStability } from "./reviewUtils";
 
 /**
@@ -57,3 +57,6 @@ export const calculateAverageStability = (
 
   return totalStability / reviewedCards.length;
 };
+
+
+

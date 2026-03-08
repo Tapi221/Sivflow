@@ -1,5 +1,5 @@
 import { getLocalDb, getLocalDbSync } from "./LocalDB";
-import { auditAndRepairTags } from "@/hooks/useTags";
+import { auditAndRepairTags } from "@/hooks/settings/useTags";
 import { auth } from "@/services/firebase";
 
 type WindowWithLocalDbDevtools = Window & {
@@ -205,3 +205,7 @@ export function installLocalDbDevtools(): void {
     rawDB: async () => getLocalDb(),
   };
 }
+
+
+
+

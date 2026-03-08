@@ -1,4 +1,4 @@
-import type { Folder, Card, UserSettings, UserStats } from "../types";
+import type { Folder, Card, UserSettings, UserStats } from "@/types";
 import { firestoreDb } from "./firebase";
 import { writeBatch, doc } from "firebase/firestore";
 
@@ -200,3 +200,6 @@ export function getBackupService(): BackupService {
   }
   return backupServiceInstance;
 }
+
+
+

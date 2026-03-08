@@ -26,3 +26,6 @@ export const StratisTrash02Icon = forwardRef<
     </svg>
   );
 });
+
+
+

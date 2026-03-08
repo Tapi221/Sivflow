@@ -1,6 +1,6 @@
 import type {
   Notification,  NotificationOptions,
-} from "../types/notification";
+} from "@/types/notification";
 import platform from "@/platform";
 
 /**
@@ -131,3 +131,6 @@ class NotificationService {
 
 // シングルトンインスタンス
 export const notificationService = new NotificationService();
+
+
+

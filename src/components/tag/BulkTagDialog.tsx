@@ -3,7 +3,7 @@ import { Tag as TagIcon } from "@/ui/icons";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useTags } from "@/hooks/useTags";
+import { useTags } from "@/hooks/settings/useTags";
 import { TagBadge } from "@/components/tag/TagBadge";
 import { getTagColorKey } from "@/lib/tags/tagColor";
 
@@ -132,3 +132,7 @@ export default function BulkTagDialog({
     </Dialog>
   );
 }
+
+
+
+

@@ -22,3 +22,6 @@ export const StratisImageIcon = forwardRef<
     </svg>
   );
 });
+
+
+

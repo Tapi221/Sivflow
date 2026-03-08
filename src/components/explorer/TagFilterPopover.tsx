@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { Filter, Search, Tag } from "@/ui/icons";
-import { useExplorerStore } from "@/components/folder/explorer/model/types";
-import { useTags } from "@/hooks/useTags";
+import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
+import { useTags } from "@/hooks/settings/useTags";
 import { cn } from "@/lib/utils";
 import {
   Popover,
@@ -276,3 +276,8 @@ export function TagFilterPopover({
     </Popover>
   );
 }
+
+
+
+
+

@@ -1,8 +1,8 @@
 // Operation Queue とLocalDB の統合ユーティリティ
 // 既存のカード操作フックに統合可能な形で提供
 
-import { operationQueue } from "../services/operationQueue";
-import type { Card } from "../types";
+import { operationQueue } from "@/services/operationQueue";
+import type { Card } from "@/types";
 
 /**
  * カード操作のQueue化ラッパー
@@ -59,3 +59,6 @@ export async function initializeOperationQueue(): Promise<void> {
     });
   }
 }
+
+
+

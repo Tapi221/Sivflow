@@ -31,7 +31,7 @@ import {
 import { createPageUrl, normalizeCard, normalizeFolder } from "@/utils";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
-import { getLocalDb } from "../services/localDB";
+import { getLocalDb } from "@/services/localDB";
 import { firestoreDb } from "@/services/firebase";
 import { updateDoc, deleteDoc, doc, Timestamp } from "firebase/firestore";
 import {
@@ -1063,3 +1063,6 @@ export default function Trash() {
     </div>
   );
 }
+
+
+

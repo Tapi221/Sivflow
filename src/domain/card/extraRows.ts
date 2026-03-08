@@ -17,3 +17,6 @@ export function normalizeLayoutRows(value: unknown): number {
   if (!Number.isFinite(parsed)) return DEFAULT_LAYOUT_ROWS;
   return Math.max(MIN_LAYOUT_ROWS, Math.round(parsed));
 }
+
+
+

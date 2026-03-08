@@ -424,3 +424,6 @@ function StudyCardInner({
     </div>
   );
 }
+
+
+

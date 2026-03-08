@@ -7,8 +7,8 @@ import type {
   SyncTask,
 } from "./interfaces/ISyncService";
 import { nanoid } from "nanoid";
-import type { SyncContextSource } from "../types/telemetry";
-import type { SyncResult } from "../types/sync";
+import type { SyncContextSource } from "@/types/telemetry";
+import type { SyncResult } from "@/types/domain/sync";
 import {
   doc,
   getDoc,
@@ -658,3 +658,6 @@ export class SyncServiceV2 implements ISyncService {
     await this.securityMonitor.dismissAlert(alertId);
   }
 }
+
+
+

@@ -26,3 +26,6 @@ export const StratisArrowRefresh03Icon = forwardRef<
     </svg>
   );
 });
+
+
+

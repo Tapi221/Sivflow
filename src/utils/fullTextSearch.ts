@@ -3,10 +3,10 @@
  * カード本文（問題/解答/コード/数式）をテキスト化して検索
  */
 
-import type { Card } from "../types";
-import type { Folder } from "../types";
+import type { Card } from "@/types";
+import type { Folder } from "@/types";
 import type { Tag, QuickOpenItemType } from "./searchIndex";
-import { resolveCardTagNames } from "@/hooks/useTags";
+import { resolveCardTagNames } from "@/hooks/settings/useTags";
 
 // 検索フィールドの種類
 export type MatchField =
@@ -289,3 +289,7 @@ export function searchFullText(
 
   return results.slice(0, maxResults);
 }
+
+
+
+

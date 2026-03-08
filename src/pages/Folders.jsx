@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import { getPageRuledBg } from "@/components/card/frame/ruledStyles";
 import { useSearchParams } from "react-router-dom";
-import { useCards } from "@/hooks/useCards";
-import { useFolders } from "@/hooks/useFolders";
-import { useDocuments } from "@/hooks/useDocuments";
-import { useIsDesktopRuntime } from "@/hooks/useIsDesktopRuntime";
+import { useCards } from "@/hooks/card/useCards";
+import { useFolders } from "@/hooks/folder/useFolders";
+import { useDocuments } from "@/hooks/platform/useDocuments";
+import { useIsDesktopRuntime } from "@/hooks/platform/useIsDesktopRuntime";
 import { Skeleton } from "@/components/ui/skeleton";
 import TreeViewLayout from "@/components/folder/TreeViewLayout";
 import { cn } from "@/lib/utils";
-import { useSettingsQueryParam } from "@/hooks/useSettingsQueryParam";
+import { useSettingsQueryParam } from "@/hooks/settings/useSettingsQueryParam";
 import { useBreadcrumbContext } from "@/contexts/BreadcrumbContext";
 
 export default function Folders() {
@@ -327,3 +327,10 @@ export default function Folders() {
     </div>
   );
 }
+
+
+
+
+
+
+

@@ -120,3 +120,6 @@ export const DEFAULT_SYNC_SETTINGS: SyncSettings = {
   wifiOnly: false,
   autoCleanupDevices: true,
 };
+
+
+

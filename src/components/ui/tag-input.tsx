@@ -15,7 +15,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useTags } from "@/hooks/useTags";
+import { useTags } from "@/hooks/settings/useTags";
 import { TagBadge } from "@/components/tag/TagBadge";
 import { TagChip } from "@/components/tag/TagChip";
 import {
@@ -277,3 +277,7 @@ export function TagInput({
     </Popover>
   );
 }
+
+
+
+

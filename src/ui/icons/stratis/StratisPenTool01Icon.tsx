@@ -22,3 +22,6 @@ export const StratisPenTool01Icon = forwardRef<
     </svg>
   );
 });
+
+
+

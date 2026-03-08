@@ -19,3 +19,6 @@ export interface IndexedDBMetadata {
  * 現在のスキーマバージョン
  */
 export const CURRENT_SCHEMA_VERSION = 11;
+
+
+

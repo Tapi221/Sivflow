@@ -52,3 +52,6 @@ declare module "firebase/firestore" {
   export function getFirestore(app?: unknown): unknown;
   // ... add more as discovered missing
 }
+
+
+

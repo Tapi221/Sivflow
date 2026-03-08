@@ -26,3 +26,6 @@ export const StratisLinkExternalIcon = forwardRef<
     </svg>
   );
 });
+
+
+

@@ -9,3 +9,6 @@ export type PaperCardScaleFrameProps = ScaleToFitFrameProps;
 
 /** @deprecated Use ScaleToFitFrame instead */
 export const PaperCardScaleFrame = ScaleToFitFrame;
+
+
+

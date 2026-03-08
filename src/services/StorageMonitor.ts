@@ -80,3 +80,6 @@ export interface StorageQuota {
 
 // シングルトンインスタンス
 export const storageMonitor = new StorageMonitor();
+
+
+

@@ -24,3 +24,6 @@ export const StratisX01Icon = forwardRef<SVGSVGElement, StratisX01IconProps>(
     );
   },
 );
+
+
+

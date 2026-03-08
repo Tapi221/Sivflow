@@ -26,3 +26,6 @@ export const StratisChevronRightIcon = forwardRef<
     </svg>
   );
 });
+
+
+

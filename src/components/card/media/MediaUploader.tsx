@@ -12,7 +12,7 @@ import {
 import { isHeicFile, convertHeicToJpeg } from "@/utils/uploaded-image/heic";
 import type { UploadedImageStatus } from "@/types";
 import type { StorageUrl } from "@/types/core/branded";
-import { useReliableFileUpload } from "@/hooks/useReliableFileUpload";
+import { useReliableFileUpload } from "@/hooks/platform/useReliableFileUpload";
 import { ImageFrame } from "../blocks/ImageFrame";
 import { putImageBlob, deleteImageBlob } from "@/services/imageFileStore";
 import {
@@ -942,5 +942,9 @@ export default function MediaUploader({
     </div>
   );
 }
+
+
+
+
 
 

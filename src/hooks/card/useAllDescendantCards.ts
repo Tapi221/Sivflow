@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { getLocalDb } from "../services/localDB";
-import { useAuth } from "../contexts/AuthContext";
+import { getLocalDb } from "@/services/localDB";
+import { useAuth } from "@/contexts/AuthContext";
 import { normalizeCard } from "../utils";
 
 /**
@@ -79,3 +79,6 @@ export function useAllDescendantCards(rootFolderId?: string) {
     loading,
   };
 }
+
+
+

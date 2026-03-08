@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react";
-import { useCards } from "@/hooks/useCards";
+import { useCards } from "@/hooks/card/useCards";
 import { normalizeCard } from "@/utils";
 
 const DRAFT_KEY_PREFIX = "card-editor-draft-";
@@ -94,3 +94,7 @@ export function useCardEntity(cardId?: string | null) {
     flushDraft,
   };
 }
+
+
+
+

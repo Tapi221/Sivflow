@@ -2,7 +2,7 @@ import { normalizeCard } from "../../utils";
 import { normalizeFolderWithSilent } from "./transforms";
 import { Dexie, type Table } from "dexie";
 import { Timestamp } from "firebase/firestore";
-import { getOrCreateDeviceId, getDeviceName } from "../../utils/device";
+import { getOrCreateDeviceId, getDeviceName } from "@/utils/device";
 import { warnOncePerSession } from "../localDBRuntimeState";
 
 /** queries.ts が必要とする LocalDB プロパティの最小インターフェース */
@@ -123,3 +123,6 @@ export async function normalizeDocumentBlobUrlsForSession(
     );
   }
 }
+
+
+

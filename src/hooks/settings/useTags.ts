@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { getLocalDb } from "../services/localDB";
-import { useAuth } from "../contexts/AuthContext";
-import type { TagV3Record } from "../services/localdb/types";
+import { getLocalDb } from "@/services/localDB";
+import { useAuth } from "@/contexts/AuthContext";
+import type { TagV3Record } from "@/services/localdb/types";
 import { useUserSettings } from "./useUserSettings";
 import {
   getTagColorClassName as resolveTagColorClassName,
@@ -917,3 +917,6 @@ export function useTags() {
     getTagNameById,
   };
 }
+
+
+

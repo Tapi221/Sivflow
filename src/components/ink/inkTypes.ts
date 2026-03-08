@@ -140,3 +140,6 @@ export const cloneInkDocument = (doc: InkDocument): InkDocument => ({
     points: stroke.points.map((point) => ({ ...point })),
   })),
 });
+
+
+

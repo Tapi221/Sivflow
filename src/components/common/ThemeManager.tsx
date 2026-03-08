@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
-import { useUserSettings } from "@/hooks/useUserSettings";
+import { useUserSettings } from "@/hooks/settings/useUserSettings";
 
 // Helper to convert hex to RGB object
 const hexToRgb = (hex: string) => {
@@ -152,3 +152,8 @@ export function ThemeManager() {
 
   return null;
 }
+
+
+
+
+

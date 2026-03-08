@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid";
-import type { UploadMetadata } from "../types";
+import type { UploadMetadata } from "@/types";
 
 const ALLOWED_EXTENSIONS: Record<string, string[]> = {
   image: ["jpg", "jpeg", "png", "gif", "webp", "heic", "heif", "avif", "svg"],
@@ -76,3 +76,6 @@ export const formatBytes = (bytes: number, decimals = 2) => {
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 };
+
+
+

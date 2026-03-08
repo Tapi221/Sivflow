@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
-import { SyncServiceFactory } from "../services/SyncServiceFactory";
-import type { SyncSettings } from "../types";
-import { DEFAULT_SYNC_SETTINGS } from "../types";
-import { useAuth } from "../contexts/AuthContext";
+import { SyncServiceFactory } from "@/services/SyncServiceFactory";
+import type { SyncSettings } from "@/types";
+import { DEFAULT_SYNC_SETTINGS } from "@/types";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const useSyncSettings = () => {
   const { currentUser } = useAuth();
@@ -47,3 +47,6 @@ export const useSyncSettings = () => {
 
   return { settings, updateSettings, loading, refresh: loadSettings };
 };
+
+
+

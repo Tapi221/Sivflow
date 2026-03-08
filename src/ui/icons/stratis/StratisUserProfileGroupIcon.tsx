@@ -22,3 +22,6 @@ export const StratisUserProfileGroupIcon = forwardRef<
     </svg>
   );
 });
+
+
+
