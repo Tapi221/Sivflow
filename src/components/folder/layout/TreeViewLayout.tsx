@@ -207,7 +207,6 @@ function TreeViewLayout({
   }, []);
 
   const {
-    isFilterTargetTab,
     isFilterActive,
     filteredCards,
     filteredDocuments,
@@ -462,5 +461,3 @@ function TreeViewLayout({
 }
 
 export default TreeViewLayout;
-
-

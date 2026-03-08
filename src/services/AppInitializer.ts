@@ -1,13 +1,13 @@
+import platform from "@/platform";
+import { contextService } from "./ContextService";
+import { IndexedDBMetadataService } from "./IndexedDBMetadataService";
+import { IndexedDBRebuildOrchestrator } from "./IndexedDBRebuildOrchestrator";
 import {
   getLocalDb,
   getLocalDBRuntimeStatus,
   LOCALDB_RECOVERY_GUIDE_URL,
 } from "./localDB";
-import { IndexedDBMetadataService } from "./IndexedDBMetadataService";
-import { IndexedDBRebuildOrchestrator } from "./IndexedDBRebuildOrchestrator";
 import { notificationService } from "./NotificationService";
-import { contextService } from "./ContextService";
-import platform from "@/platform";
 // NOTE: 初期化時のユーザー向け INFO 通知は UI 上で邪魔になるため表示しない。
 import { warnOncePerSession } from "./localDBRuntimeState";
 

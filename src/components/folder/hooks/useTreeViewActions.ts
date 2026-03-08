@@ -103,6 +103,7 @@ export function useTreeViewActions({
     isViewManagerOpen,
     setIsViewManagerOpen,
     createFolderRequestToken,
+    setCreateFolderRequestToken,
     handleFolderSelectWithRecent,
     handleStartStudy,
     handleViewCards,
@@ -112,4 +113,8 @@ export function useTreeViewActions({
     handleCreateRootFolder,
   };
 }
+
+
+
+
 

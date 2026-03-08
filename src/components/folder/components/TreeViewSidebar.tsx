@@ -1,7 +1,8 @@
 import { ExplorerTabs } from "@/components/explorer/ExplorerTabs";
+import { ExplorerFilterSummary } from "@/components/folder/ExplorerFilterSummary";
+import type { ExplorerTab } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
 import React from "react";
-import { ExplorerFilterSummary } from "@/components/folder/ExplorerFilterSummary";
 
 interface TreeViewSidebarProps {
   sidebarRef: React.RefObject<HTMLDivElement | null>;
@@ -9,8 +10,8 @@ interface TreeViewSidebarProps {
   isSidebarOpen: boolean;
   isResizing: boolean;
   showMobileDetail: boolean;
-  explorerTab: string;
-  setExplorerTab: (tab: string) => void;
+  explorerTab: ExplorerTab;
+  setExplorerTab: (tab: ExplorerTab) => void;
   allTags: string[];
   getTagColor: (tagName: string) => string | undefined;
   isFilterActive: boolean;
@@ -108,4 +109,5 @@ export function TreeViewSidebar({
     </div>
   );
 }
+
 

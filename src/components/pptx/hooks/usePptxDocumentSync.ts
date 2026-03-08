@@ -1,8 +1,3 @@
-/**
- * Manages local blob URL restoration from IndexedDB / session cache.
- * Handles: cache lookup → IndexedDB restore → URL.createObjectURL → pin/unpin.
- */
-
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   cacheDocumentBlobUrl,
@@ -26,13 +21,30 @@ interface LocalDocumentSource {
   localSourceStatus: LocalSourceStatus;
 }
 
+interface RestoredState {
+  key: string | null;
+  url: string | null;
+}
+
+interface RestoreAttemptState {
+  key: string | null;
+  attempted: boolean;
+}
+
 export function usePptxDocumentSync({
   userId,
   localBlobId,
   persistedBlobUrl,
 }: Options): LocalDocumentSource {
-  const [restoredLocalBlobUrl, setRestoredLocalBlobUrl] = useState<string | null>(null);
-  const [restoreAttempted, setRestoreAttempted] = useState(false);
+  const [restoredState, setRestoredState] = useState<RestoredState>({
+    key: null,
+    url: null,
+  });
+  const [restoreAttemptState, setRestoreAttemptState] =
+    useState<RestoreAttemptState>({
+      key: null,
+      attempted: false,
+    });
 
   const triedKeysRef = useRef<Set<string>>(new Set());
 
@@ -41,14 +53,14 @@ export function usePptxDocumentSync({
     return getCachedDocumentBlobUrl(localBlobId, { userId }) ?? null;
   }, [userId, localBlobId]);
 
-  // Reset when localBlobId changes (doc switched)
-  useEffect(() => {
-    triedKeysRef.current.clear();
-    setRestoredLocalBlobUrl(null);
-    setRestoreAttempted(false);
-  }, [localBlobId]);
+  const restoredLocalBlobUrl =
+    restoredState.key === localBlobId ? restoredState.url : null;
 
-  // IndexedDB restore
+  const restoreAttempted =
+    restoreAttemptState.key === localBlobId
+      ? restoreAttemptState.attempted
+      : false;
+
   useEffect(() => {
     let cancelled = false;
 
@@ -76,7 +88,10 @@ export function usePptxDocumentSync({
       .then((blob) => {
         if (cancelled) return;
 
-        setRestoreAttempted(true);
+        setRestoreAttemptState({
+          key: localBlobId,
+          attempted: true,
+        });
 
         if (!blob) {
           return;
@@ -84,7 +99,11 @@ export function usePptxDocumentSync({
 
         const blobUrl = URL.createObjectURL(blob);
         cacheDocumentBlobUrl(localBlobId, blobUrl, { userId });
-        setRestoredLocalBlobUrl(blobUrl);
+
+        setRestoredState({
+          key: localBlobId,
+          url: blobUrl,
+        });
       })
       .catch((error) => {
         if (cancelled) return;
@@ -93,7 +112,11 @@ export function usePptxDocumentSync({
           localBlobId,
           error,
         });
-        setRestoreAttempted(true);
+
+        setRestoreAttemptState({
+          key: localBlobId,
+          attempted: true,
+        });
       });
 
     return () => {
@@ -111,7 +134,6 @@ export function usePptxDocumentSync({
     return persistedBlobUrl ? "ready" : "failed";
   }, [localBlobId, localBlobUrl, persistedBlobUrl, restoreAttempted]);
 
-  // Pin / unpin in session cache while component is mounted
   useEffect(() => {
     if (!localBlobId || !localBlobUrl || !localBlobUrl.startsWith("blob:")) {
       return;
@@ -124,6 +146,8 @@ export function usePptxDocumentSync({
     };
   }, [userId, localBlobId, localBlobUrl]);
 
-  return { localBlobUrl, localSourceStatus };
+  return {
+    localBlobUrl,
+    localSourceStatus,
+  };
 }
-

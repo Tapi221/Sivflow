@@ -1,5 +1,5 @@
-import type { Card } from "@/types";
 import type { Tag } from "@/hooks/settings/useTags";
+import type { Card } from "@/types";
 
 export type ViewKind = "folder" | "tagCategory" | "tagTree";
 
@@ -203,7 +203,19 @@ export function buildVirtualTree(
   return categoryNodes;
 }
 
+export const ACTIVE_VIEW_KINDS: readonly ViewKind[] = [
+  "folder",
+  "tagCategory",
+  "tagTree",
+];
 
+export const DEFAULT_FOLDER_VIEW: ViewDef = {
+  id: "folder",
+  name: "フォルダ",
+  kind: "folder",
+};
 
-
+export function createViewId(): string {
+  return `view_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+}
 
