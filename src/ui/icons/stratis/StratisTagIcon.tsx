@@ -28,3 +28,4 @@ export const StratisTagIcon = forwardRef<SVGSVGElement, StratisTagIconProps>(
 
 
 
+

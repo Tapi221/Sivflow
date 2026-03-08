@@ -28,3 +28,4 @@ export const StratisAttatchment02Icon = forwardRef<
 
 
 
+

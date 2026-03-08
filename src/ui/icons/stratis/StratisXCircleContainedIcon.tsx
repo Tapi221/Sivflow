@@ -25,3 +25,4 @@ export const StratisXCircleContainedIcon = forwardRef<
 
 
 
+

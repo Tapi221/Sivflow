@@ -27,3 +27,4 @@ export const StratisLayoutRightIcon = forwardRef<
 
 
 
+

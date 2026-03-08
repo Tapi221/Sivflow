@@ -29,3 +29,4 @@ export const StratisLightbulb02Icon = forwardRef<
 
 
 
+

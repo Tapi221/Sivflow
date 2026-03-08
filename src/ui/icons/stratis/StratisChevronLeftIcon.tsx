@@ -29,3 +29,4 @@ export const StratisChevronLeftIcon = forwardRef<
 
 
 
+

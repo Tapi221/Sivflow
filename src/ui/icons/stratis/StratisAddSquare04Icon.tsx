@@ -25,3 +25,4 @@ export const StratisAddSquare04Icon = forwardRef<
 
 
 
+

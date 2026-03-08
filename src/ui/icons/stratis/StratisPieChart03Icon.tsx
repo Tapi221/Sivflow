@@ -29,3 +29,4 @@ export const StratisPieChart03Icon = forwardRef<
 
 
 
+

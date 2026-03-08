@@ -28,3 +28,4 @@ export const StratisPlus01Icon = forwardRef<
 
 
 
+

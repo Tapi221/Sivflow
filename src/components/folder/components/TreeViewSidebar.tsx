@@ -108,3 +108,4 @@ export function TreeViewSidebar({
     </div>
   );
 }
+

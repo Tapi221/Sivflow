@@ -29,3 +29,4 @@ export const StratisSortVertical01Icon = forwardRef<
 
 
 
+

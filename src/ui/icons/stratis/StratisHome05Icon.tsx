@@ -28,3 +28,4 @@ export const StratisHome05Icon = forwardRef<
 
 
 
+

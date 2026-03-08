@@ -28,3 +28,4 @@ export const StratisSearch02Icon = forwardRef<
 
 
 
+

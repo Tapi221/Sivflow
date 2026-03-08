@@ -29,3 +29,4 @@ export const StratisFolderOpen03Icon = forwardRef<
 
 
 
+

@@ -27,3 +27,4 @@ export const StratisX03Icon = forwardRef<SVGSVGElement, StratisX03IconProps>(
 
 
 
+
