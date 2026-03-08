@@ -125,9 +125,14 @@ export function usePdfCurrentPage({
   }, [doc, scale, schedulePageUpdate]);
 
   useEffect(() => {
-    if (!doc || numPages <= 0) return;
+  if (!doc || numPages <= 0) return;
+
+  const rafId = requestAnimationFrame(() => {
     estimateCurrentPageFromScroll();
-  }, [doc, numPages, estimateCurrentPageFromScroll]);
+  });
+
+  return () => cancelAnimationFrame(rafId);
+}, [doc, numPages, estimateCurrentPageFromScroll]);
 
   // Cleanup all RAFs on unmount
   useEffect(() => {
@@ -141,6 +146,7 @@ export function usePdfCurrentPage({
 
   return { currentPage, handleScroll, handleVisibilityChange, scrollToPage };
 }
+
 
 
 

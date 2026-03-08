@@ -43,28 +43,41 @@ export function useLocalDocumentSource({
 
   // Reset when localBlobId changes (doc switched)
   useEffect(() => {
-    triedKeysRef.current.clear();
+  triedKeysRef.current.clear();
+
+  const rafId = requestAnimationFrame(() => {
     setRestoredLocalBlobUrl(null);
     setIsRestoring(false);
-  }, [localBlobId]);
+  });
+
+  return () => cancelAnimationFrame(rafId);
+}, [localBlobId]);
 
   // IndexedDB restore
   useEffect(() => {
     let cancelled = false;
 
     if (!localBlobId) {
-      setIsRestoring(false);
-      return () => {
-        cancelled = true;
-      };
-    }
+  const rafId = requestAnimationFrame(() => {
+    setIsRestoring(false);
+  });
+
+  return () => {
+    cancelled = true;
+    cancelAnimationFrame(rafId);
+  };
+}
 
     if (cachedBlobUrl || restoredLocalBlobUrl) {
-      setIsRestoring(false);
-      return () => {
-        cancelled = true;
-      };
-    }
+  const rafId = requestAnimationFrame(() => {
+    setIsRestoring(false);
+  });
+
+  return () => {
+    cancelled = true;
+    cancelAnimationFrame(rafId);
+  };
+}
 
     if (triedKeysRef.current.has(localBlobId)) {
       setIsRestoring(false);
@@ -126,3 +139,6 @@ export function useLocalDocumentSource({
 
   return { localBlobUrl, localSourceStatus };
 }
+
+
+
