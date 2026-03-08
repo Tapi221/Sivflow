@@ -1,7 +1,7 @@
 import type {
   ITelemetryService,
-  LogLevel,
   LogContext,
+  LogLevel,
   SyncLogEntry,
   TelemetryEventName,
 } from "@/types/telemetry";

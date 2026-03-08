@@ -1,7 +1,7 @@
 import type {
-    BatchConstraint,
-    IQueueManager,
-    SyncTask,
+  BatchConstraint,
+  IQueueManager,
+  SyncTask,
 } from "@/services/interfaces/ISyncService";
 import type { LocalDBLike } from "@/services/localDB";
 
