@@ -1,7 +1,11 @@
 import React, { useEffect, useRef } from "react";
 import type { ExplorerItem, SelectedExplorerItem } from "@/types";
 import type { FolderTreeNode } from "../explorer/model/utils";
-import { getFolderId, isTextInputTarget, hasOpenModalDialog } from "../explorer/model/utils";
+import {
+  getFolderId,
+  isTextInputTarget,
+  hasOpenModalDialog,
+} from "../explorer/model/utils";
 
 interface UseExplorerKeyboardNavigationParams {
   selectedFolderId: string | null;
@@ -23,16 +27,26 @@ interface UseExplorerKeyboardNavigationParams {
 }
 
 const getExplorerItemId = (item: ExplorerItem): string => {
-  const d = item.data as Record<string, unknown>;
-  return (
-    (typeof item.data.id === "string" ? item.data.id : null) ??
-    (typeof d.cardId === "string" ? d.cardId : null) ??
-    (typeof d.documentId === "string" ? d.documentId : null) ??
-    ""
-  );
+  const data = item.data;
+
+  if (typeof data.id === "string") {
+    return data.id;
+  }
+
+  if ("cardId" in data && typeof data.cardId === "string") {
+    return data.cardId;
+  }
+
+  if ("documentId" in data && typeof data.documentId === "string") {
+    return data.documentId;
+  }
+
+  return "";
 };
 
-const getSelectedEntityId = (item: SelectedExplorerItem | null | undefined): string | null => {
+const getSelectedEntityId = (
+  item: SelectedExplorerItem | null | undefined,
+): string | null => {
   if (!item || typeof item !== "object") return null;
   return "id" in item && typeof item.id === "string" ? item.id : null;
 };
@@ -80,10 +94,11 @@ export function useExplorerKeyboardNavigation({
 
           if (expandedFolders.has(id)) {
             addFolderAndChildren(id);
+
             getFolderItems(id).forEach((item) => {
               flatList.push({
                 id: getExplorerItemId(item),
-                type: item.type as ExplorerItem["type"],
+                type: item.type,
                 parentId: id,
               });
             });
@@ -96,7 +111,7 @@ export function useExplorerKeyboardNavigation({
       getFolderItems(null).forEach((item) => {
         flatList.push({
           id: getExplorerItemId(item),
-          type: item.type as ExplorerItem["type"],
+          type: item.type,
           parentId: null,
         });
       });
@@ -108,22 +123,30 @@ export function useExplorerKeyboardNavigation({
 
       if (key === "ArrowUp" && currentIndex > 0) {
         const prevItem = flatList[currentIndex - 1];
-        if (prevItem.type === "folder") onFolderSelect(prevItem.id);
-        else onItemSelect({ type: prevItem.type, id: prevItem.id });
+        if (prevItem.type === "folder") {
+          onFolderSelect(prevItem.id);
+        } else {
+          onItemSelect({ type: prevItem.type, id: prevItem.id });
+        }
       } else if (key === "ArrowDown" && currentIndex < flatList.length - 1) {
         const nextItem = flatList[currentIndex + 1];
-        if (nextItem.type === "folder") onFolderSelect(nextItem.id);
-        else onItemSelect({ type: nextItem.type, id: nextItem.id });
+        if (nextItem.type === "folder") {
+          onFolderSelect(nextItem.id);
+        } else {
+          onItemSelect({ type: nextItem.type, id: nextItem.id });
+        }
       } else if (key === "ArrowRight" && currentItem.type === "folder") {
         if (!expandedFolders.has(currentId)) {
           toggleFolder(currentId);
         } else {
           const children = getChildFolders(currentId);
           const folderItems = getFolderItems(currentId);
-          if (children.length > 0) onFolderSelect(getFolderId(children[0]));
-          else if (folderItems.length > 0) {
+
+          if (children.length > 0) {
+            onFolderSelect(getFolderId(children[0]));
+          } else if (folderItems.length > 0) {
             onItemSelect({
-              type: folderItems[0].type === "card" ? "card" : "document",
+              type: folderItems[0].type,
               id: getExplorerItemId(folderItems[0]),
             });
           }
@@ -139,12 +162,15 @@ export function useExplorerKeyboardNavigation({
 
     keyHandlerRef.current = (e: KeyboardEvent) => {
       if (e.defaultPrevented) return;
+
       const target = e.target as HTMLElement;
       const treeRoot = treeRootRef.current;
       if (!treeRoot) return;
+
       const activeEl = document.activeElement as HTMLElement | null;
       const isTreeFocused =
         treeRoot.contains(target) || (activeEl ? treeRoot.contains(activeEl) : false);
+
       if (!isTreeFocused) return;
       if (isTextInputTarget(target)) return;
       if (hasOpenModalDialog()) return;
@@ -180,10 +206,14 @@ export function useExplorerKeyboardNavigation({
 
       if (e.key === "Delete" || e.key === "Backspace") {
         e.preventDefault();
-        if (isCard) void handleDelete(currentId, "card");
-        else if (isDoc) {
+
+        if (isCard) {
+          void handleDelete(currentId, "card");
+        } else if (isDoc) {
           /* ドキュメント削除は未実装 */
-        } else void handleDelete(currentId, "folder");
+        } else {
+          void handleDelete(currentId, "folder");
+        }
       }
 
       if (e.key === "Enter" && isCard) {

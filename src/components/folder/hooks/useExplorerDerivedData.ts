@@ -1,0 +1,272 @@
+import { useMemo, useCallback } from "react";
+import type { Card, ExplorerItem } from "@/types";
+import type { DocumentItem } from "@/types";
+import type { FolderTreeNode } from "../explorer/model/utils";
+import {
+  ROOT_FOLDER_ID,
+  getFolderId,
+  getParentFolderId,
+  normalizeFolderId,
+  isSameFolder,
+  getEntityTime,
+} from "../explorer/model/utils";
+
+type LegacyEntityFields = {
+  isDeleted?: boolean;
+  is_deleted?: boolean;
+  folder_id?: string | null;
+  orderIndex?: number;
+};
+
+const isSoftDeleted = (
+  entity?: { isDeleted?: boolean; is_deleted?: boolean } | null,
+) => Boolean(entity?.isDeleted ?? entity?.is_deleted);
+
+const withLegacy = <T extends object>(v: T): T & LegacyEntityFields =>
+  v as T & LegacyEntityFields;
+
+interface Params {
+  treeFolders: FolderTreeNode[];
+  treeCards: Card[];
+  documents: DocumentItem[];
+  isFiltering: boolean;
+}
+
+export function useExplorerDerivedData({
+  treeFolders,
+  treeCards,
+  documents,
+  isFiltering,
+}: Params) {
+  const childFoldersByParentId = useMemo(() => {
+    const map = new Map<string, FolderTreeNode[]>();
+    for (const folder of treeFolders) {
+      const isHidden = (folder as { isHidden?: boolean; is_hidden?: boolean }).isHidden ??
+        (folder as { isHidden?: boolean; is_hidden?: boolean }).is_hidden;
+      if (isSoftDeleted(folder) || isHidden) continue;
+      const parentId = normalizeFolderId(getParentFolderId(folder));
+      const siblings = map.get(parentId);
+      if (siblings) siblings.push(folder);
+      else map.set(parentId, [folder]);
+    }
+    for (const siblings of map.values()) {
+      siblings.sort((a, b) => {
+        const orderA = ((a as { orderIndex?: number; order_index?: number }).orderIndex ??
+          (a as { orderIndex?: number; order_index?: number }).order_index ?? 0) as number;
+        const orderB = ((b as { orderIndex?: number; order_index?: number }).orderIndex ??
+          (b as { orderIndex?: number; order_index?: number }).order_index ?? 0) as number;
+        return orderA - orderB;
+      });
+    }
+    return map;
+  }, [treeFolders]);
+
+  const rootFolders = useMemo(
+    () => childFoldersByParentId.get(ROOT_FOLDER_ID) ?? [],
+    [childFoldersByParentId],
+  );
+
+  const getChildFolders = useCallback(
+    (parentId: string) => childFoldersByParentId.get(parentId) ?? [],
+    [childFoldersByParentId],
+  );
+
+  const visibleFolderIdSet = useMemo(() => {
+    const set = new Set<string>();
+    for (const folder of treeFolders) {
+      const isHidden = (folder as { isHidden?: boolean; is_hidden?: boolean }).isHidden ??
+        (folder as { isHidden?: boolean; is_hidden?: boolean }).is_hidden;
+      if (isSoftDeleted(folder) || isHidden) continue;
+      const id = getFolderId(folder);
+      if (id) set.add(id);
+    }
+    return set;
+  }, [treeFolders]);
+
+  const resolveTreeFolderId = useCallback(
+    (folderId: string | null | undefined) => {
+      const normalized = normalizeFolderId(folderId);
+      if (normalized === ROOT_FOLDER_ID) return ROOT_FOLDER_ID;
+      return visibleFolderIdSet.has(normalized) ? normalized : ROOT_FOLDER_ID;
+    },
+    [visibleFolderIdSet],
+  );
+
+  const hasValidFolderBinding = useCallback(
+    (folderId: string | null | undefined) => {
+      const normalized = normalizeFolderId(folderId);
+      if (normalized === ROOT_FOLDER_ID) return false;
+      return visibleFolderIdSet.has(normalized);
+    },
+    [visibleFolderIdSet],
+  );
+
+  const directCardCountByFolderId = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const card of treeCards) {
+      if (isSoftDeleted(withLegacy(card))) continue;
+      if (!hasValidFolderBinding(card.folderId ?? withLegacy(card).folder_id)) continue;
+      const folderId = resolveTreeFolderId(card.folderId ?? withLegacy(card).folder_id);
+      map.set(folderId, (map.get(folderId) ?? 0) + 1);
+    }
+    return map;
+  }, [treeCards, resolveTreeFolderId, hasValidFolderBinding]);
+
+  const itemsByFolderId = useMemo(() => {
+    const map = new Map<string, ExplorerItem[]>();
+    const pushItem = (folderId: string | null | undefined, item: ExplorerItem) => {
+      const key = normalizeFolderId(folderId);
+      const list = map.get(key);
+      if (list) list.push(item);
+      else map.set(key, [item]);
+    };
+
+    for (const card of treeCards) {
+      if (isSoftDeleted(withLegacy(card))) continue;
+      if (!hasValidFolderBinding(card.folderId ?? withLegacy(card).folder_id)) continue;
+      pushItem(resolveTreeFolderId(card.folderId ?? withLegacy(card).folder_id), {
+        type: "card",
+        data: card,
+      });
+    }
+    for (const doc of documents) {
+      if (isSoftDeleted(withLegacy(doc))) continue;
+      if (!hasValidFolderBinding(doc.folderId ?? withLegacy(doc).folder_id)) continue;
+      pushItem(resolveTreeFolderId(doc.folderId ?? withLegacy(doc).folder_id), {
+        type: "document",
+        data: doc,
+      });
+    }
+
+    for (const list of map.values()) {
+      list.sort((a, b) => {
+        const orderA = withLegacy(a.data).orderIndex ?? Number.MAX_SAFE_INTEGER;
+        const orderB = withLegacy(b.data).orderIndex ?? Number.MAX_SAFE_INTEGER;
+        if (orderA !== orderB) return orderA - orderB;
+        const timeA = getEntityTime(
+          (a.data as { updatedAt?: unknown }).updatedAt,
+        );
+        const timeB = getEntityTime(
+          (b.data as { updatedAt?: unknown }).updatedAt,
+        );
+        return timeB - timeA;
+      });
+    }
+    return map;
+  }, [treeCards, documents, resolveTreeFolderId, hasValidFolderBinding]);
+
+  const getFolderItems = useCallback(
+    (folderId: string | null): ExplorerItem[] =>
+      itemsByFolderId.get(normalizeFolderId(folderId)) ?? [],
+    [itemsByFolderId],
+  );
+
+  const matchCountMap = useMemo(() => {
+    if (!isFiltering) return new Map<string, number>();
+    const map = new Map<string, number>();
+    const calc = (folderId: string): number => {
+      if (map.has(folderId)) return map.get(folderId)!;
+      const directCount = getFolderItems(folderId).length;
+      const children = getChildFolders(folderId);
+      const childCount = children.reduce(
+        (acc, child) => acc + calc(getFolderId(child)),
+        0,
+      );
+      const total = directCount + childCount;
+      map.set(folderId, total);
+      return total;
+    };
+    for (const folder of treeFolders) {
+      const folderId = getFolderId(folder);
+      if (!map.has(folderId)) calc(folderId);
+    }
+    return map;
+  }, [isFiltering, treeFolders, getFolderItems, getChildFolders]);
+
+  const deleteTargetCounts = useCallback(
+    (deleteTargetFolderId: string | null) => {
+      if (!deleteTargetFolderId) return { cardCount: 0, subfolderCount: 0 };
+      let cardCount = 0;
+      let subfolderCount = 0;
+      const stack = [deleteTargetFolderId];
+      while (stack.length > 0) {
+        const folderId = stack.pop()!;
+        cardCount += directCardCountByFolderId.get(folderId) ?? 0;
+        const children = childFoldersByParentId.get(folderId) ?? [];
+        subfolderCount += children.length;
+        for (const child of children) stack.push(getFolderId(child));
+      }
+      return { cardCount, subfolderCount };
+    },
+    [directCardCountByFolderId, childFoldersByParentId],
+  );
+
+  const getNextOrderIndex = useCallback(
+    (folderId: string | null, resolvedFolderId?: string) => {
+      const targetFolderId =
+        resolvedFolderId ?? resolveTreeFolderId(folderId);
+      let maxOrder = -1;
+      for (const card of treeCards) {
+        if (isSoftDeleted(withLegacy(card))) continue;
+        const cardFolderId = resolveTreeFolderId(
+          card.folderId ?? withLegacy(card).folder_id,
+        );
+        if (!isSameFolder(cardFolderId, targetFolderId)) continue;
+        const order = withLegacy(card).orderIndex ?? -1;
+        if (order > maxOrder) maxOrder = order;
+      }
+      for (const doc of documents) {
+        if (isSoftDeleted(withLegacy(doc))) continue;
+        const docFolderId = resolveTreeFolderId(
+          doc.folderId ?? withLegacy(doc).folder_id,
+        );
+        if (!isSameFolder(docFolderId, targetFolderId)) continue;
+        const order = withLegacy(doc).orderIndex ?? -1;
+        if (order > maxOrder) maxOrder = order;
+      }
+      return maxOrder + 1;
+    },
+    [treeCards, documents, resolveTreeFolderId],
+  );
+
+  const getUniqueFolderName = useCallback(
+    (parentId: string | null, defaultName: string) => {
+      const siblings = treeFolders.filter((folder) => {
+        if (isSoftDeleted(folder)) return false;
+        return isSameFolder(getParentFolderId(folder), parentId);
+      });
+      const names = new Set(
+        siblings
+          .map((f) =>
+            String(
+              (f as { folderName?: string; folder_name?: string }).folderName ??
+                (f as { folderName?: string; folder_name?: string }).folder_name ??
+                "",
+            ).trim(),
+          )
+          .filter(Boolean),
+      );
+      if (!names.has(defaultName)) return defaultName;
+      let next = 2;
+      while (names.has(`${defaultName} (${next})`)) next += 1;
+      return `${defaultName} (${next})`;
+    },
+    [treeFolders],
+  );
+
+  return {
+    childFoldersByParentId,
+    rootFolders,
+    getChildFolders,
+    visibleFolderIdSet,
+    resolveTreeFolderId,
+    hasValidFolderBinding,
+    directCardCountByFolderId,
+    itemsByFolderId,
+    getFolderItems,
+    matchCountMap,
+    deleteTargetCounts,
+    getNextOrderIndex,
+    getUniqueFolderName,
+  };
+}
