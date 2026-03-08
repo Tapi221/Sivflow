@@ -17,7 +17,6 @@ const PAGE_LABELS: Record<string, string> = {
   "four-choice-mode": "四択モード",
 };
 
-function useBreadcrumbs(): { crumbs: Crumb[]; title: string } {
   const { pathname } = useLocation();
 
   return useMemo(() => {
@@ -62,6 +61,7 @@ export function PageHeader() {
     </header>
   );
 }
+
 
 
 

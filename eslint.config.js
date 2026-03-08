@@ -26,7 +26,7 @@ export default defineConfig([
         {
           paths: [
             {
-              name: "@/types/core/branded",
+              name: "@/types/branded",
               message: "Use '@/types/core/branded' instead.",
             },
           ],
@@ -62,7 +62,7 @@ export default defineConfig([
         {
           paths: [
             {
-              name: "@/types/core/branded",
+              name: "@/types/branded",
               message: "Use '@/types/core/branded' instead.",
             },
           ],
@@ -71,4 +71,5 @@ export default defineConfig([
     },
   },
 ]);
+
 
