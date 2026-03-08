@@ -48,7 +48,6 @@ export function RightPane({
   cards,
   documents,
   folderCards,
-  folderStats,
   onCardUpdated,
   onDocumentUpdated,
   onRenameFolder,
