@@ -1,6 +1,9 @@
 import React from "react";
 import { cn } from "@/lib/utils";
-import { EXPLORER_ROW_BASE_CLASS_NAME, getExplorerRowStyle } from "./shared";
+import {
+  EXPLORER_ROW_BASE_CLASS_NAME,
+  getExplorerRowStyle,
+} from "./shared";
 
 interface ExplorerRowProps extends React.HTMLAttributes<HTMLDivElement> {
   depth: number;
@@ -10,7 +13,7 @@ interface ExplorerRowProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
 }
 
-export const ExplorerRow: React.FC<ExplorerRowProps> = ({
+export const ExplorerRow = React.memo(function ExplorerRow({
   depth,
   selected,
   className,
@@ -18,17 +21,16 @@ export const ExplorerRow: React.FC<ExplorerRowProps> = ({
   children,
   style,
   ...props
-}) => (
-  <div
-    ref={rowRef}
-    className={cn(EXPLORER_ROW_BASE_CLASS_NAME, className)}
-    data-selected={selected ? "true" : undefined}
-    style={{ ...getExplorerRowStyle(depth), ...style }}
-    {...props}
-  >
-    {children}
-  </div>
-);
-
-
-
+}: ExplorerRowProps) {
+  return (
+    <div
+      ref={rowRef}
+      className={cn(EXPLORER_ROW_BASE_CLASS_NAME, className)}
+      data-selected={selected ? "true" : undefined}
+      style={{ ...getExplorerRowStyle(depth), ...style }}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+});
