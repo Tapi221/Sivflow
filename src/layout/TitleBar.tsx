@@ -20,17 +20,24 @@ const PAGE_LABELS: Record<string, string> = {
 
 function useBreadcrumbs() {
   const { pathname } = useLocation();
+
   return useMemo(() => {
     const segments = pathname.split("/").filter(Boolean);
     const crumbs = [{ label: "ホーム", to: "/folders" as string | undefined }];
+
     segments.forEach((seg, i) => {
       const label = PAGE_LABELS[seg.toLowerCase()] ?? seg;
       const to = "/" + segments.slice(0, i + 1).join("/");
       crumbs.push({ label, to });
     });
+
     if (crumbs.length > 1) {
-      crumbs[crumbs.length - 1] = { label: crumbs[crumbs.length - 1].label, to: undefined };
+      crumbs[crumbs.length - 1] = {
+        label: crumbs[crumbs.length - 1].label,
+        to: undefined,
+      };
     }
+
     return crumbs;
   }, [pathname]);
 }
@@ -44,13 +51,13 @@ export const TitleBar: React.FC = () => {
   useEffect(() => {
     if (!isDesktop) return;
 
-    // 初期状態の取得
     window.desktop?.window.isMaximized().then(setIsMaximized);
 
-    // 最大化状態の変更を監視
-    const cleanup = window.desktop?.window.onMaximizedStateChange((maximized) => {
-      setIsMaximized(maximized);
-    });
+    const cleanup = window.desktop?.window.onMaximizedStateChange(
+      (maximized) => {
+        setIsMaximized(maximized);
+      },
+    );
 
     return () => {
       if (cleanup) cleanup();
@@ -61,14 +68,15 @@ export const TitleBar: React.FC = () => {
   // extraCrumbs がある場合は末尾クラムに to を復元して続きを表示する。
   const allCrumbs = useMemo(() => {
     if (extraCrumbs.length === 0) return crumbs;
+
     const base = crumbs.map((c, i) =>
-      i === crumbs.length - 1
-        ? { ...c, to: "/folders" }
-        : c,
+      i === crumbs.length - 1 ? { ...c, to: "/folders" } : c,
     );
+
     const extra = extraCrumbs.map((c, i) =>
       i === extraCrumbs.length - 1 ? { ...c, to: undefined } : c,
     );
+
     return [...base, ...extra];
   }, [crumbs, extraCrumbs]);
 
@@ -81,27 +89,44 @@ export const TitleBar: React.FC = () => {
       )}
       style={{ WebkitAppRegion: "drag", zIndex: 9999 } as React.CSSProperties}
     >
-      <div className="flex h-full items-center gap-1 px-4" style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}>
-        <span className="font-semibold tracking-wide text-gray-500 text-xs mr-3">
+      <div
+        className="flex h-full items-center gap-1 px-4"
+        style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
+      >
+        <span className="mr-3 text-xs font-semibold tracking-wide text-gray-500">
           Manifolia.
         </span>
-        <nav className="flex items-center gap-1 text-xs text-gray-400 overflow-hidden">
-          {allCrumbs.map((crumb, i) => (
-            <React.Fragment key={i}>
-              {i > 0 && <span className="text-gray-300 select-none">/</span>}
-              {crumb.to ? (
-                <Link
-                  to={crumb.to}
-                  className="hover:text-gray-600 transition-colors"
-                  onClick={crumb.folderId ? () => notifyFolderSelect(crumb.folderId!) : undefined}
-                >
-                  {crumb.label}
-                </Link>
-              ) : (
-                <span className="text-gray-600 font-medium">{crumb.label}</span>
-              )}
-            </React.Fragment>
-          ))}
+
+        <nav className="flex items-center gap-1 overflow-hidden text-xs text-gray-400">
+          {allCrumbs.map((crumb, i) => {
+            const hasFolderId = "folderId" in crumb;
+            const isFoldersLabel = crumb.label === "フォルダ";
+            const isClickable = Boolean(crumb.to) && !isFoldersLabel;
+
+            return (
+              <React.Fragment key={i}>
+                {i > 0 && <span className="select-none text-gray-300">/</span>}
+
+                {isClickable ? (
+                  <Link
+                    to={crumb.to!}
+                    className="transition-colors hover:text-gray-600"
+                    onClick={() => {
+                      if (hasFolderId) {
+                        notifyFolderSelect(crumb.folderId ?? null);
+                      }
+                    }}
+                  >
+                    {crumb.label}
+                  </Link>
+                ) : (
+                  <span className="font-medium text-gray-600">
+                    {crumb.label}
+                  </span>
+                )}
+              </React.Fragment>
+            );
+          })}
         </nav>
       </div>
 
@@ -111,7 +136,7 @@ export const TitleBar: React.FC = () => {
       >
         <button
           onClick={() => window.desktop?.window.minimize()}
-          className="flex h-full w-[46px] items-center justify-center hover:bg-black/5 transition-colors"
+          className="flex h-full w-[46px] items-center justify-center transition-colors hover:bg-black/5"
           title="最小化"
           tabIndex={-1}
         >
@@ -122,12 +147,18 @@ export const TitleBar: React.FC = () => {
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <path d="M1 5H9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+            <path
+              d="M1 5H9"
+              stroke="currentColor"
+              strokeWidth="1.2"
+              strokeLinecap="round"
+            />
           </svg>
         </button>
+
         <button
           onClick={() => window.desktop?.window.maximizeToggle()}
-          className="flex h-full w-[46px] items-center justify-center hover:bg-black/5 transition-colors"
+          className="flex h-full w-[46px] items-center justify-center transition-colors hover:bg-black/5"
           title={isMaximized ? "元に戻す" : "最大化"}
           tabIndex={-1}
         >
@@ -150,13 +181,21 @@ export const TitleBar: React.FC = () => {
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <rect x="1" y="1" width="8" height="8" stroke="currentColor" strokeWidth="1.2" />
+              <rect
+                x="1"
+                y="1"
+                width="8"
+                height="8"
+                stroke="currentColor"
+                strokeWidth="1.2"
+              />
             </svg>
           )}
         </button>
+
         <button
           onClick={() => window.desktop?.window.close()}
-          className="flex h-full w-[46px] items-center justify-center hover:bg-[#E81123] hover:text-white transition-colors"
+          className="flex h-full w-[46px] items-center justify-center transition-colors hover:bg-[#E81123] hover:text-white"
           title="閉じる"
           tabIndex={-1}
         >

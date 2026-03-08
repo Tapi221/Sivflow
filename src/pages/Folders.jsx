@@ -5,8 +5,6 @@ import { useCards } from "@/hooks/useCards";
 import { useFolders } from "@/hooks/useFolders";
 import { useDocuments } from "@/hooks/useDocuments";
 import { useIsDesktopRuntime } from "@/hooks/useIsDesktopRuntime";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useToast } from "@/contexts/ToastContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import TreeViewLayout from "@/components/folder/TreeViewLayout";
 import { cn } from "@/lib/utils";
@@ -20,7 +18,6 @@ export default function Folders() {
     searchParams,
     setSearchParams,
   );
-  const queryClient = useQueryClient();
   const isDesktop = useIsDesktopRuntime();
   const queryFolderId = searchParams.get("folderId");
   const queryCardId = searchParams.get("cardId");
@@ -47,7 +44,7 @@ export default function Folders() {
     if (queryCardId) return { type: "card", id: queryCardId };
     if (queryDocId) return { type: "document", id: queryDocId };
     return null;
-  }); // { type: 'card' | 'document', id: string } | null
+  });
 
   const selectedCardId = selectedItem?.type === "card" ? selectedItem.id : null;
   const selectedDocumentId =
@@ -55,6 +52,7 @@ export default function Folders() {
 
   useEffect(() => {
     const next = new URLSearchParams(queryString);
+
     if (selectedFolderId) {
       next.set("folderId", selectedFolderId);
     } else {
@@ -74,11 +72,13 @@ export default function Folders() {
 
     const current = queryString;
     const target = next.toString();
+
     if (current !== target) {
       pendingUrlSyncRef.current = target;
       setSearchParams(next, { replace: true });
       return;
     }
+
     if (pendingUrlSyncRef.current === current) {
       pendingUrlSyncRef.current = null;
     }
@@ -132,11 +132,6 @@ export default function Folders() {
   const { folders = [], loading: foldersLoading } = useFolders();
   const { cards = [], loading: cardsLoading } = useCards();
   const { documents = [] } = useDocuments();
-  const { updateFolder } = useFolders();
-
-  const updateFolderMutation = useMutation({
-    mutationFn: ({ id, data }) => updateFolder(id, data),
-  });
 
   // 作業モード（固定）はデスクトップのみ。モバイルは通常スクロールを維持する。
   useEffect(() => {
@@ -153,31 +148,15 @@ export default function Folders() {
 
   // --- 選択ハンドラ ---
   const handleSelectFolderInWork = (folderId) => {
-    // モバイル/デスクトップともに選択状態を直接更新する。
-    // URL同期は useEffect 側で一元管理する。
     setSelectedFolderId(folderId);
     setSelectedItem(null);
   };
 
   const handleSelectCardInWork = (cardId) => {
-    // PC/モバイル共通で右ペインの編集UIを表示する
     setSelectedItem({ type: "card", id: cardId });
   };
 
   const handleSelectDocumentInWork = (docId) => {
-    // PDF等も同様に、モバイルなら開く必要があるかもしれないが、
-    // 現状PDFビューアーは埋め込みのみか？
-    // いったんPCと同じ挙動（選択）にしておくが、
-    // Layout側でRightPaneが隠れるため、何も起きないように見える可能性がある。
-    // モバイルでPDFを開く手段が必要。
-    // ここでは単純に「何もしない」か「遷移」だが、DocumentView的なものはないかもしれない。
-    // RightPane相当のものを別画面で開く必要がある。
-    // とりあえずカード同様に状態だけ更新するが、
-    // TreeViewLayout側でモバイル時にRightPaneがないので、
-    // ユーザーは「開けない」ことになる。
-    // (実装計画には詳細がなかったが、今回はフォルダ一覧の統一が主眼)
-    // 既存のFolders画面でもPDFは表示されるはず。ここでのクリックは「スルー」でもよい？
-    // いったんPCと同じ処理にする。
     setSelectedItem({ type: "document", id: docId });
   };
 
@@ -186,33 +165,40 @@ export default function Folders() {
       setSelectedItem(null);
       return;
     }
+
     if (item.type === "card") {
       handleSelectCardInWork(item.id);
       return;
     }
+
     if (item.type === "document") {
       handleSelectDocumentInWork(item.id);
       return;
     }
+
     if (item.type === "directory") {
       setSelectedItem({ type: "directory" });
       setSelectedFolderId(null);
       return;
     }
+
     if (item.type === "gallery") {
       setSelectedItem({ type: "gallery" });
       setSelectedFolderId(null);
       return;
     }
+
     if (item.type === "calendar") {
       setSelectedItem({ type: "calendar" });
       setSelectedFolderId(null);
       return;
     }
+
     if (item.type === "settings") {
       setIsSettingsOpen(true);
       return;
     }
+
     if (item.type === "trash") {
       setSelectedItem({ type: "trash" });
       setSelectedFolderId(null);
@@ -221,16 +207,28 @@ export default function Folders() {
 
   const isLoading = foldersLoading || cardsLoading;
 
-  const { setExtraCrumbs, registerFolderSelectHandler } = useBreadcrumbContext();
-  const [navigateToSectionListToken, setNavigateToSectionListToken] = useState(0);
+  const { setExtraCrumbs, registerFolderSelectHandler } =
+    useBreadcrumbContext();
+  const [navigateToSectionListToken, setNavigateToSectionListToken] =
+    useState(0);
   const foldersRef = useRef(folders);
-  useEffect(() => { foldersRef.current = folders; }, [folders]);
+
+  useEffect(() => {
+    foldersRef.current = folders;
+  }, [folders]);
 
   useEffect(() => {
     registerFolderSelectHandler((folderId) => {
-      setSelectedFolderId(folderId);
+      setSelectedFolderId(folderId ?? null);
       setSelectedItem(null);
-      // ルートフォルダ（parentFolderId なし）の場合はセクション一覧に戻す
+
+      // パンくずの「フォルダ」クリック時に、大元のフォルダ一覧へ戻す
+      if (!folderId) {
+        setNavigateToSectionListToken((n) => n + 1);
+        return;
+      }
+
+      // ルート直下フォルダを選んだときもセクション一覧側を同期
       const folder = foldersRef.current.find((f) => f.id === folderId);
       if (folder && !folder.parentFolderId) {
         setNavigateToSectionListToken((n) => n + 1);
@@ -239,16 +237,18 @@ export default function Folders() {
   }, [registerFolderSelectHandler]);
 
   useEffect(() => {
-    const crumbs = [];
+    const crumbs = [ ];
 
     // フォルダ階層を構築（祖先 → 選択フォルダ）
     if (selectedFolderId) {
       const path = [];
       let cur = folders.find((f) => f.id === selectedFolderId);
+
       while (cur) {
         path.unshift(cur);
         cur = folders.find((f) => f.id === cur.parentFolderId);
       }
+
       path.forEach((folder) => {
         crumbs.push({
           label: folder.folderName,
@@ -293,7 +293,6 @@ export default function Folders() {
           : "h-full overflow-x-hidden overflow-y-auto",
       )}
     >
-      {/* Background Ruled Lines */}
       <div
         className="absolute inset-0 opacity-100 pointer-events-none z-0"
         style={{
