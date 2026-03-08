@@ -1,12 +1,13 @@
 import { useCards } from "@/hooks/card/useCards";
 import { useExplorerPanelState } from "./hooks/useExplorerPanelState";
 import { useFolders } from "@/hooks/folder/useFolders";
+import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { useDocuments } from "@/hooks/platform/useDocuments";
 import { resolveCardTagNames, useTags } from "@/hooks/settings/useTags";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { cn } from "@/lib/utils";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
-import React, { useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { TreeViewMainPane } from "./components/TreeViewMainPane";
 import { TreeViewSidebar } from "./components/TreeViewSidebar";
@@ -122,7 +123,6 @@ function TreeViewLayout({
     handleOpenCreateCard,
     handleSelectCreateMode,
     handleSelectDetailedMode,
-    handleCreateRootFolder,
   } = useTreeViewActions({
     navigate,
     selectedFolderId,
