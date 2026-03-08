@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import { DragDropContext } from "@hello-pangea/dnd";
 import { ChevronLeft, ChevronRight } from "@/ui/icons";
 
 import {
@@ -31,14 +30,13 @@ import { useCards } from "@/hooks/useCards";
 import { useTags } from "@/hooks/useTags";
 import { useUserSettings } from "@/hooks/useUserSettings";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { UploadedImage } from "@/types";
+import type { Card, UploadedImage } from "@/types";
 
 interface CardEditorPaneProps {
   selectedCardId: string | null;
@@ -47,6 +45,22 @@ interface CardEditorPaneProps {
   onCardUpdated?: () => void;
   onSelectCardId?: (cardId: string) => void;
 }
+
+type UseCardsResult = {
+  cards: Card[];
+  updateCard: (cardId: string, data: unknown) => void | Promise<void>;
+  createCard: (data: unknown) => unknown;
+};
+
+type FlashcardCardLike = Record<string, unknown> & {
+  id?: string;
+  title?: string;
+  hasUncertainty?: boolean;
+  isBookmarked?: boolean;
+};
+
+const toFlashcardCardLike = (card: Card): FlashcardCardLike =>
+  card as unknown as FlashcardCardLike;
 
 export function CardEditorPane({
   selectedCardId,
@@ -58,7 +72,25 @@ export function CardEditorPane({
   const { settings } = useUserSettings();
   const { success: toastSuccess, error: toastError } = useToast();
   const { tagById, addTag } = useTags();
-  const { cards, updateCard, createCard } = useCards() as unknown;
+  const {
+    cards,
+    updateCard,
+    createCard,
+  } = useCards() as unknown as UseCardsResult;
+
+  const updateCardAsync = React.useCallback(
+    async (id: string, data: Partial<Card>): Promise<unknown> => {
+      return await Promise.resolve(updateCard(id, data));
+    },
+    [updateCard],
+  );
+
+  const createCardAsync = React.useCallback(
+    async (data: Partial<Card>): Promise<unknown> => {
+      return await Promise.resolve(createCard(data));
+    },
+    [createCard],
+  );
 
   const [isMetaOpen, setIsMetaOpen] = useState<boolean>(() => {
     if (typeof window === "undefined") return true;
@@ -105,8 +137,8 @@ export function CardEditorPane({
     folderId,
     autoEdit,
     cards,
-    updateCard,
-    createCard,
+    updateCard: updateCardAsync,
+    createCard: createCardAsync,
     addTag,
     tagById,
     toastSuccess,
@@ -186,11 +218,9 @@ export function CardEditorPane({
   return (
     <div className="h-full bg-sidebar pb-4 pt-0 card-editor-right-pane-font">
       <div className="relative flex h-full overflow-hidden">
-        <Button
+        <button
           type="button"
-          variant="ghost"
-          size="icon"
-          className="absolute top-3 z-20 h-8 w-8 rounded-full bg-[var(--sidebar-bg)] text-[#334155] surface-control-convex hover:bg-[var(--sidebar-active-bg)]"
+          className="absolute top-3 z-20 grid h-8 w-8 place-items-center rounded-full bg-[var(--sidebar-bg)] text-[#334155] surface-control-convex hover:bg-[var(--sidebar-active-bg)]"
           style={{
             right: isMetaOpen
               ? "calc(var(--ui-panel-width) - var(--ui-space-3))"
@@ -205,7 +235,7 @@ export function CardEditorPane({
           ) : (
             <ChevronLeft className="h-4 w-4" />
           )}
-        </Button>
+        </button>
 
         <div
           className="min-w-0 flex-1 overflow-y-auto overflow-x-clip p-4"
@@ -218,121 +248,131 @@ export function CardEditorPane({
             <div className="flex flex-col items-center gap-4">
               <div className="flex w-full items-center justify-end gap-2">
                 <div className="flex items-center gap-2">
-                  <Button
+                  <button
                     type="button"
-                    variant="ghost"
-                    className="h-9 rounded-full px-4"
+                    className="h-9 rounded-full px-4 hover:bg-black/5 disabled:opacity-50"
                     onClick={handleCancel}
                     disabled={isSaving}
                   >
                     キャンセル
-                  </Button>
-                  <Button
+                  </button>
+                  <button
                     type="button"
-                    className="h-9 rounded-full px-6"
+                    className="h-9 rounded-full bg-black px-6 text-white hover:opacity-90 disabled:opacity-50"
                     onClick={handleSave}
                     disabled={isSaving}
                   >
                     保存
-                  </Button>
+                  </button>
                 </div>
               </div>
 
-              <DragDropContext onDragEnd={onDragEnd}>
-                <div className="grid w-fit max-w-full grid-cols-1 gap-6 lg:grid-cols-2">
-                  <div className="flex min-h-0 w-full flex-col gap-2">
-                    <div className="flex shrink-0 justify-center">
-                      <div ref={toolbarMountRefQ} />
-                    </div>
-                    <CardFrame
-                      baseWidth={CANONICAL_CARD_WIDTH}
-                      contentPaddingPx={0}
-                      className={cn("premium-paper-depth", "card-shell--paper")}
-                      resizable
-                      showResizeHandle
-                      resizeStepPx={CARD_ROW_PX}
-                      heightPx={layoutRowsToCardHeightPx(
-                        normalizeLayoutRows(draft?.layoutRows),
-                      )}
-                      lockHeight
-                      onHeightChange={scheduleLayoutRowsFromHeight}
-                      onMinHeightChange={handleQuestionMinHeightChange}
-                      onResizeStart={() => {
-                        manualResizeInProgressRef.current = true;
-                      }}
-                      onResizeEnd={() => {
-                        manualResizeInProgressRef.current = false;
-                      }}
-                      actionsTopLeft={editorActionsTopLeft}
-                      actionsTopRight={renderMediaDialogButtons("question")}
-                    >
-                      <SharedCardContent
-                        mode="edit"
-                        blocks={draft?.questionBlocks ?? []}
-                        onChange={(blocks) => setSideBlocks("question", blocks)}
-                        prefix="question"
-                        label="問題"
-                        color="text-indigo-500"
-                        droppableId="question-blocks"
-                        accentColor={settings?.accentColor}
-                        duplicateToOpposite={settings?.duplicateToOpposite}
-                        toolbarMountRef={toolbarMountRefQ}
-                      />
-                    </CardFrame>
+              <div className="grid w-fit max-w-full grid-cols-1 gap-6 lg:grid-cols-2">
+                <div className="flex min-h-0 w-full flex-col gap-2">
+                  <div className="flex shrink-0 justify-center">
+                    <div ref={toolbarMountRefQ} />
                   </div>
-
-                  <div className="flex min-h-0 w-full flex-col gap-2">
-                    <div className="flex shrink-0 justify-center">
-                      <div ref={toolbarMountRefA} />
-                    </div>
-                    <CardFrame
-                      baseWidth={CANONICAL_CARD_WIDTH}
-                      contentPaddingPx={0}
-                      className={cn("premium-paper-depth", "card-shell--paper")}
-                      resizable
-                      showResizeHandle
-                      resizeStepPx={CARD_ROW_PX}
-                      heightPx={layoutRowsToCardHeightPx(
-                        normalizeLayoutRows(draft?.layoutRows),
-                      )}
-                      lockHeight
-                      onHeightChange={scheduleLayoutRowsFromHeight}
-                      onMinHeightChange={handleAnswerMinHeightChange}
-                      onResizeStart={() => {
-                        manualResizeInProgressRef.current = true;
-                      }}
-                      onResizeEnd={() => {
-                        manualResizeInProgressRef.current = false;
-                      }}
-                      actionsTopLeft={editorActionsTopLeft}
-                      actionsTopRight={renderMediaDialogButtons("answer")}
-                    >
-                      <SharedCardContent
-                        mode="edit"
-                        blocks={draft?.answerBlocks ?? []}
-                        onChange={(blocks) => setSideBlocks("answer", blocks)}
-                        prefix="answer"
-                        label="解答"
-                        color="text-emerald-500"
-                        droppableId="answer-blocks"
-                        accentColor={settings?.accentColor}
-                        duplicateToOpposite={settings?.duplicateToOpposite}
-                        toolbarMountRef={toolbarMountRefA}
-                      />
-                    </CardFrame>
-                  </div>
+                  <CardFrame
+                    baseWidth={CANONICAL_CARD_WIDTH}
+                    contentPaddingPx={0}
+                    className={cn("premium-paper-depth", "card-shell--paper")}
+                    resizable
+                    showResizeHandle
+                    resizeStepPx={CARD_ROW_PX}
+                    heightPx={layoutRowsToCardHeightPx(
+                      normalizeLayoutRows(draft?.layoutRows),
+                    )}
+                    lockHeight
+                    onHeightChange={(heightPx) => {
+                      void onDragEnd;
+                      scheduleLayoutRowsFromHeight(heightPx);
+                    }}
+                    onMinHeightChange={handleQuestionMinHeightChange}
+                    onResizeStart={() => {
+                      manualResizeInProgressRef.current = true;
+                    }}
+                    onResizeEnd={() => {
+                      manualResizeInProgressRef.current = false;
+                    }}
+                    actionsTopLeft={editorActionsTopLeft}
+                    actionsTopRight={renderMediaDialogButtons("question")}
+                  >
+                    <SharedCardContent
+                      mode="edit"
+                      blocks={draft?.questionBlocks ?? []}
+                      onChange={(blocks) => setSideBlocks("question", blocks)}
+                      prefix="question"
+                      label="問題"
+                      color="text-indigo-500"
+                      droppableId="question-blocks"
+                      accentColor={settings?.accentColor}
+                      duplicateToOpposite={settings?.duplicateToOpposite}
+                      toolbarMountRef={toolbarMountRefQ}
+                    />
+                  </CardFrame>
                 </div>
-              </DragDropContext>
+
+                <div className="flex min-h-0 w-full flex-col gap-2">
+                  <div className="flex shrink-0 justify-center">
+                    <div ref={toolbarMountRefA} />
+                  </div>
+                  <CardFrame
+                    baseWidth={CANONICAL_CARD_WIDTH}
+                    contentPaddingPx={0}
+                    className={cn("premium-paper-depth", "card-shell--paper")}
+                    resizable
+                    showResizeHandle
+                    resizeStepPx={CARD_ROW_PX}
+                    heightPx={layoutRowsToCardHeightPx(
+                      normalizeLayoutRows(draft?.layoutRows),
+                    )}
+                    lockHeight
+                    onHeightChange={(heightPx) => {
+                      void onDragEnd;
+                      scheduleLayoutRowsFromHeight(heightPx);
+                    }}
+                    onMinHeightChange={handleAnswerMinHeightChange}
+                    onResizeStart={() => {
+                      manualResizeInProgressRef.current = true;
+                    }}
+                    onResizeEnd={() => {
+                      manualResizeInProgressRef.current = false;
+                    }}
+                    actionsTopLeft={editorActionsTopLeft}
+                    actionsTopRight={renderMediaDialogButtons("answer")}
+                  >
+                    <SharedCardContent
+                      mode="edit"
+                      blocks={draft?.answerBlocks ?? []}
+                      onChange={(blocks) => setSideBlocks("answer", blocks)}
+                      prefix="answer"
+                      label="解答"
+                      color="text-emerald-500"
+                      droppableId="answer-blocks"
+                      accentColor={settings?.accentColor}
+                      duplicateToOpposite={settings?.duplicateToOpposite}
+                      toolbarMountRef={toolbarMountRefA}
+                    />
+                  </CardFrame>
+                </div>
+              </div>
             </div>
           ) : (
             selectedCard && (
               <Flashcard
-                card={selectedCard}
+                card={toFlashcardCardLike(selectedCard)}
                 isFlipped={isFlipped}
                 onFlip={() => setIsFlipped((prev) => !prev)}
-                onToggleBookmark={handleToggleBookmark}
-                onToggleUncertainty={handleToggleUncertainty}
-                showNavigation={false}
+                onToggleBookmark={(cardLike) => {
+                  if (!selectedCard) return;
+                  void cardLike;
+                  void handleToggleBookmark(selectedCard);
+                }}
+                onToggleUncertainty={(cardLike) => {
+                  if (!selectedCard) return;
+                  void cardLike;
+                  void handleToggleUncertainty(selectedCard);
+                }}
                 onEdit={() => {
                   setIsFlipped(false);
                   setIsEditing(true);
