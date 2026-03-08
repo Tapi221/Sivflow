@@ -13,14 +13,14 @@ import { ExplorerTabs } from "../explorer/ExplorerTabs";
 import { PinnedPanel } from "../explorer/PinnedPanel";
 import { RecentPanel } from "../explorer/RecentPanel";
 import { cn } from "@/lib/utils";
-import { useFolders } from "@/hooks/useFolders";
-import { useDocuments } from "@/hooks/useDocuments";
+import { useFolders } from "@/hooks/folder/useFolders";
+import { useDocuments } from "@/hooks/platform/useDocuments";
 import { createPageUrl } from "@/utils";
-import { useUserSettings } from "@/hooks/useUserSettings";
-import { useTags, resolveCardTagNames } from "@/hooks/useTags";
+import { useUserSettings } from "@/hooks/settings/useUserSettings";
+import { useTags, resolveCardTagNames } from "@/hooks/settings/useTags";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
-import { useCards } from "@/hooks/useCards";
-import { useExplorerStore } from "@/components/folder/explorer/model/types";
+import { useCards } from "@/hooks/card/useCards";
+import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import CreateCardSelectionDialog from "@/components/card/overlays/CreateCardSelectionDialog";
 import CreationModeDialog from "@/components/card/overlays/CreationModeDialog";
 import { ViewManagerDialog } from "./ViewManagerDialog";
@@ -42,19 +42,6 @@ interface TreeViewLayoutProps {
   navigateToSectionListToken?: number;
 }
 
-type LegacyCardFields = {
-  folder_id?: string;
-  is_deleted?: boolean;
-  is_draft?: boolean;
-  next_review_date?: unknown;
-  review_count?: number;
-  last_review_at?: unknown;
-  has_uncertainty?: boolean;
-  is_bookmarked?: boolean;
-};
-
-type CardLike = Card & LegacyCardFields;
-
 const MIN_SIDEBAR_W = 200;
 const MAX_SIDEBAR_W = 600;
 const DEFAULT_SIDEBAR_W = 320;
@@ -71,20 +58,26 @@ const createViewId = () =>
     : `view-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
 const toDate = (value: unknown): Date | null => {
-  if (value === null || value === undefined) return null;
-  if (typeof value?.toDate === "function") {
-    const d = value.toDate();
-    return d instanceof Date && !isNaN(d.getTime()) ? d : null;
+  if (value == null) return null;
+
+  if (
+    typeof value === "object" &&
+    "toDate" in value &&
+    typeof (value as { toDate: () => unknown }).toDate === "function"
+  ) {
+    const raw = (value as { toDate: () => unknown }).toDate();
+    return raw instanceof Date && !Number.isNaN(raw.getTime()) ? raw : null;
   }
-  if (value instanceof Date) return isNaN(value.getTime()) ? null : value;
-  if (typeof value === "number") {
+
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : value;
+  }
+
+  if (typeof value === "number" || typeof value === "string") {
     const d = new Date(value);
-    return isNaN(d.getTime()) ? null : d;
+    return Number.isNaN(d.getTime()) ? null : d;
   }
-  if (typeof value === "string") {
-    const d = new Date(value);
-    return isNaN(d.getTime()) ? null : d;
-  }
+
   return null;
 };
 
@@ -258,10 +251,10 @@ function TreeViewLayout({
 
   const folderCards = useMemo(() => {
     if (!selectedFolderId) return [];
-    return cards.filter((card): card is CardLike => {
-      const fid = card.folderId ?? card.folder_id;
+    return cards.filter((card) => {
+      const fid = card.folderId ?? card.folderId;
       if (fid !== selectedFolderId) return false;
-      const isDeleted = card.isDeleted ?? card.is_deleted;
+      const isDeleted = card.isDeleted ?? card.isDeleted;
       return !isDeleted;
     });
   }, [cards, selectedFolderId]);
@@ -279,9 +272,9 @@ function TreeViewLayout({
     let lastReviewedAt: Date | null = null;
 
     for (const card of folderCards) {
-      const isDraft = card.isDraft ?? card.is_draft;
+      const isDraft = card.isDraft ?? card.isDraft;
       if (!isDraft) {
-        const reviewDate = toDate(card.nextReviewDate ?? card.next_review_date);
+        const reviewDate = toDate(card.nextReviewDate ?? card.nextReviewDate);
         if (reviewDate) {
           const rDate = new Date(
             reviewDate.getFullYear(),
@@ -296,12 +289,12 @@ function TreeViewLayout({
         }
       }
 
-      const reviewCount = card.reviewCount ?? card.review_count ?? 0;
+      const reviewCount = card.reviewCount ?? card.reviewCount ?? 0;
       if (!isDraft && reviewCount === 0) {
         unlearnedCount += 1;
       }
 
-      const lastReview = toDate(card.lastReviewAt ?? card.last_review_at);
+      const lastReview = toDate(card.lastReviewAt ?? card.lastReviewAt);
       if (lastReview && (!lastReviewedAt || lastReview > lastReviewedAt)) {
         lastReviewedAt = lastReview;
       }
@@ -484,10 +477,10 @@ function TreeViewLayout({
       }
 
       const hasUncertainty = Boolean(
-        card.hasUncertainty ?? card.has_uncertainty,
+        card.hasUncertainty ?? card.hasUncertainty,
       );
-      const isBookmarked = Boolean(card.isBookmarked ?? card.is_bookmarked);
-      const isDraft = Boolean(card.isDraft ?? card.is_draft);
+      const isBookmarked = Boolean(card.isBookmarked ?? card.isBookmarked);
+      const isDraft = Boolean(card.isDraft ?? card.isDraft);
 
       if (uncertaintyFilter === "on" && !hasUncertainty) return false;
       if (uncertaintyFilter === "off" && hasUncertainty) return false;
@@ -979,3 +972,7 @@ function TreeViewLayout({
 }
 
 export default TreeViewLayout;
+
+
+
+
