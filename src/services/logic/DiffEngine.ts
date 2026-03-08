@@ -1,9 +1,29 @@
-import type { IDiffEngine } from "@/services/interfaces/ISyncService";
+import type { FolderLike, IDiffEngine } from "@/services/interfaces/ISyncService";
 
 type TimestampLike = {
   toMillis?: () => number;
   seconds?: number;
   nanoseconds?: number;
+};
+
+type PlainObject = Record<string, unknown>;
+
+type DiffableEntity = PlainObject & {
+  id?: string;
+  folderId?: string;
+  updatedAt?: unknown;
+  lastSyncedAt?: unknown;
+  localUpdatedAt?: unknown;
+  parentFolderId?: string | null;
+  parent_folder_id?: string | null;
+};
+
+const isPlainObject = (value: unknown): value is PlainObject => {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+};
+
+const asDiffableEntity = (value: unknown): DiffableEntity | null => {
+  return isPlainObject(value) ? (value as DiffableEntity) : null;
 };
 
 /**
@@ -15,7 +35,6 @@ const toMillis = (value: unknown): number => {
 
   if (typeof value === "number") {
     if (!Number.isFinite(value)) return 0;
-    // epoch seconds が混ざっても耐える（ms は 1e12 台、sec は 1e9 台）
     return value < 100_000_000_000
       ? Math.floor(value * 1000)
       : Math.floor(value);
@@ -33,10 +52,12 @@ const toMillis = (value: unknown): number => {
 
   if (typeof value === "object") {
     const ts = value as TimestampLike;
+
     if (typeof ts.toMillis === "function") {
       const t = ts.toMillis();
       return Number.isFinite(t) ? t : 0;
     }
+
     if (typeof ts.seconds === "number") {
       const nanos = typeof ts.nanoseconds === "number" ? ts.nanoseconds : 0;
       return Math.floor(ts.seconds * 1000 + nanos / 1_000_000);
@@ -57,31 +78,34 @@ export class DiffEngine implements IDiffEngine {
    * @param remote リモートのデータ
    * @returns 差分オブジェクト（変更がない場合はnull）
    */
-  calculateDiff(local: unknown, remote: unknown): unknown | null {
-    if (!local || !remote) return null;
+  calculateDiff(local: unknown, remote: unknown): PlainObject | null {
+    const localObj = asDiffableEntity(local);
+    const remoteObj = asDiffableEntity(remote);
 
-    const diff: unknown = {};
+    if (!localObj || !remoteObj) return null;
+
+    const diff: PlainObject = {};
     let hasChanges = false;
 
-    // オブジェクトのキーを走査
-    const allKeys = new Set([...Object.keys(local), ...Object.keys(remote)]);
+    const allKeys = new Set([
+      ...Object.keys(localObj),
+      ...Object.keys(remoteObj),
+    ]);
 
     for (const key of allKeys) {
-      // 無視するフィールド
       if (
         ["updatedAt", "lastSyncedAt", "localUpdatedAt", "_metadata"].includes(
           key,
         )
-      )
+      ) {
         continue;
+      }
 
-      const localValue = local[key];
-      const remoteValue = remote[key];
+      const localValue = localObj[key];
+      const remoteValue = remoteObj[key];
 
-      // 単純な等価比較（深い比較はコスト削減のため行わない、プリミティブ想定）
-      // 必要に応じてJSON.stringifyでの比較を入れる
       if (JSON.stringify(localValue) !== JSON.stringify(remoteValue)) {
-        diff[key] = localValue; // ローカルの値を正として差分を作成（送信用途）
+        diff[key] = localValue;
         hasChanges = true;
       }
     }
@@ -93,53 +117,54 @@ export class DiffEngine implements IDiffEngine {
    * マージを実行する
    * server_wins: サーバーの値を優先（競合時）
    * client_wins: クライアントの値を優先
-   * Manualはここでは扱わず、呼び出し元で処理することを想定
+   * manual はここでは扱わず、呼び出し元で処理することを想定
    */
   merge(
     local: unknown,
     remote: unknown,
     strategy: "server_wins" | "client_wins" | "manual" = "server_wins",
   ): {
-    merged: unknown;
+    merged: PlainObject | null;
     conflict: boolean;
   } {
-    // データがない場合の処理
-    if (!local && remote) return { merged: { ...remote }, conflict: false };
-    if (local && !remote) return { merged: { ...local }, conflict: false };
-    if (!local && !remote) return { merged: null, conflict: false };
+    const localObj = asDiffableEntity(local);
+    const remoteObj = asDiffableEntity(remote);
 
-    const merged = { ...local };
+    if (!localObj && remoteObj) {
+      return { merged: { ...remoteObj }, conflict: false };
+    }
+
+    if (localObj && !remoteObj) {
+      return { merged: { ...localObj }, conflict: false };
+    }
+
+    if (!localObj && !remoteObj) {
+      return { merged: null, conflict: false };
+    }
+
+    const merged: DiffableEntity = { ...localObj };
     let conflict = false;
 
-    // 更新日時の比較 (Time based conflict detection)
-    // サーバーのupdatedAtとローカルのupdatedAtを比較
-    // もしローカルが最後にsyncした時刻よりも、サーバーの更新日時が新しいなら、サーバー側で誰かが更新している
     const serverHasUpdates =
-      toMillis(remote.updatedAt) > toMillis(local.lastSyncedAt || 0);
+      toMillis(remoteObj.updatedAt) > toMillis(localObj.lastSyncedAt ?? 0);
+
     const localHasUpdates =
-      toMillis(local.localUpdatedAt) > toMillis(local.lastSyncedAt || 0);
+      toMillis(localObj.localUpdatedAt) > toMillis(localObj.lastSyncedAt ?? 0);
 
     if (serverHasUpdates && localHasUpdates) {
       conflict = true;
-      // 競合時の戦略適用
+
       if (strategy === "server_wins") {
-        Object.assign(merged, remote);
-        // ローカル固有の変更を上書きするリスクがあるが、server_winsなので許容
+        Object.assign(merged, remoteObj);
       } else if (strategy === "client_wins") {
-        // クライアント優先なら何もしない（ベースがlocalなので）
-        // ただし、remoteの新しいフィールドは取り込むべきか？
-        // ここでは単純に「クライアントの意思」を優先し、マージしないフィールドも維持
+        // base が localObj なので何もしない
       }
     } else if (serverHasUpdates) {
-      // サーバーのみ更新 -> 安全に書き換え
-      Object.assign(merged, remote);
-    } else {
-      // ローカルのみ更新、あるいは両方更新なし -> ローカルのまま
+      Object.assign(merged, remoteObj);
     }
 
-    // メタデータの調整
-    if (toMillis(remote.updatedAt) > toMillis(merged.updatedAt)) {
-      merged.updatedAt = remote.updatedAt;
+    if (toMillis(remoteObj.updatedAt) > toMillis(merged.updatedAt)) {
+      merged.updatedAt = remoteObj.updatedAt;
     }
 
     return { merged, conflict };
@@ -150,16 +175,13 @@ export class DiffEngine implements IDiffEngine {
    * 単純なフィールド一致率や必須フィールドの存在確認
    */
   validateConsistency(local: unknown, remote: unknown): boolean {
-    if (!local || !remote) return false;
+    const localObj = asDiffableEntity(local);
+    const remoteObj = asDiffableEntity(remote);
 
-    // IDの一致確認
-    if (local.id !== remote.id) return false;
+    if (!localObj || !remoteObj) return false;
+    if (!localObj.id || !remoteObj.id) return false;
 
-    // 重要なビジネスロジック上の不整合がないか
-    // 例: 親フォルダが存在しない、などの参照整合性はここではチェックできない（単体データ比較のため）
-    // ここでは「データ構造として壊れていないか」を見る
-
-    return true;
+    return localObj.id === remoteObj.id;
   }
 
   /**
@@ -172,30 +194,34 @@ export class DiffEngine implements IDiffEngine {
   detectCycle(
     targetId: string,
     newParentId: string | null,
-    allFolders: unknown[],
+    allFolders: readonly FolderLike[],
   ): boolean {
     if (!newParentId) return false;
     if (targetId === newParentId) return true;
 
-    let currentId = newParentId;
-    const visited = new Set<string>();
-    visited.add(targetId);
+    let currentId: string | null = newParentId;
+    const visited = new Set<string>([targetId]);
 
     while (currentId) {
-      if (visited.has(currentId)) return true; // 循環検知
+      if (visited.has(currentId)) return true;
       visited.add(currentId);
 
-      const parent = allFolders.find((f) => (f.id || f.folderId) === currentId);
+      const parent = allFolders.find((f) => {
+        const id = "id" in f ? f.id : undefined;
+        const folderId = "folderId" in f ? f.folderId : undefined;
+        return id === currentId || folderId === currentId;
+      });
+
       if (!parent) break;
 
-      currentId = parent.parentFolderId || parent.parent_folder_id || null;
+      currentId =
+        ("parentFolderId" in parent ? parent.parentFolderId : undefined) ??
+        ("parent_folder_id" in parent ? parent.parent_folder_id : undefined) ??
+        null;
+
       if (currentId === targetId) return true;
     }
 
     return false;
   }
 }
-
-
-
-
