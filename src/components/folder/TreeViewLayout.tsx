@@ -6,8 +6,7 @@ import { resolveCardTagNames, useTags } from "@/hooks/settings/useTags";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { cn } from "@/lib/utils";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
-import { createPageUrl } from "@/utils";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { TreeViewMainPane } from "./components/TreeViewMainPane";
 import { TreeViewSidebar } from "./components/TreeViewSidebar";
@@ -18,6 +17,7 @@ import { useTreeViewSidebar } from "./hooks/useTreeViewSidebar";
 import { useTreeViewFilters } from "./hooks/useTreeViewFilters";
 import { type ViewDef, type ViewKind } from "./viewTypes";
 import { useTreeViewViews } from "./hooks/useTreeViewViews";
+import { useTreeViewActions } from "./hooks/useTreeViewActions";
 
 interface TreeViewLayoutProps {
   folders: Folder[];
@@ -108,74 +108,27 @@ function TreeViewLayout({
     }
   }, [explorerTab, setExplorerTab]);
 
-  const [isCreateSelectionOpen, setIsCreateSelectionOpen] = useState(false);
-  const [isModeSelectionOpen, setIsModeSelectionOpen] = useState(false);
-  const [isViewManagerOpen, setIsViewManagerOpen] = useState(false);
-  const [createFolderRequestToken, setCreateFolderRequestToken] = useState(0);
-
-  const handleFolderSelectWithRecent = (folderId: string | null) => {
-    onFolderSelect(folderId);
-    if (folderId) {
-      addRecent({ type: "folder", id: folderId });
-    }
-  };
-
-  const handleStartStudy = useCallback(() => {
-    if (!selectedFolderId) return;
-    navigate(createPageUrl(`StudyMode?folderId=${selectedFolderId}`));
-  }, [navigate, selectedFolderId]);
-
-  const handleViewCards = useCallback(() => {
-    if (!selectedFolderId) return;
-    navigate(createPageUrl(`CardView?folderId=${selectedFolderId}`));
-  }, [navigate, selectedFolderId]);
-
-  const handleOpenCreateCard = useCallback(() => {
-    if (!selectedFolderId) return;
-    setIsCreateSelectionOpen(true);
-  }, [selectedFolderId]);
-
-  const handleSelectCreateMode = useCallback(
-    (mode: "single" | "continuous") => {
-      if (!selectedFolderId) return;
-      setIsCreateSelectionOpen(false);
-      if (mode === "single") {
-        navigate(createPageUrl(`CardEdit?folderId=${selectedFolderId}`));
-        return;
-      }
-      setIsModeSelectionOpen(true);
-    },
-    [navigate, selectedFolderId],
-  );
-
-  const handleSelectDetailedMode = useCallback(
-    (mode: string, options?: { hideTitle?: boolean }) => {
-      if (!selectedFolderId) return;
-      setIsModeSelectionOpen(false);
-
-      if (mode === "qa") {
-        const hideTitle = options?.hideTitle ? "&hideTitle=true" : "";
-        navigate(
-          createPageUrl(`one-qa-mode?folderId=${selectedFolderId}${hideTitle}`),
-        );
-        return;
-      }
-      if (mode === "pair") {
-        navigate(createPageUrl(`pair-mode?folderId=${selectedFolderId}`));
-        return;
-      }
-      if (mode === "choice") {
-        navigate(
-          createPageUrl(`four-choice-mode?folderId=${selectedFolderId}`),
-        );
-        return;
-      }
-      navigate(
-        createPageUrl(`create-mode/placeholder?folderId=${selectedFolderId}`),
-      );
-    },
-    [navigate, selectedFolderId],
-  );
+  const {
+    isCreateSelectionOpen,
+    setIsCreateSelectionOpen,
+    isModeSelectionOpen,
+    setIsModeSelectionOpen,
+    isViewManagerOpen,
+    setIsViewManagerOpen,
+    createFolderRequestToken,
+    handleFolderSelectWithRecent,
+    handleStartStudy,
+    handleViewCards,
+    handleOpenCreateCard,
+    handleSelectCreateMode,
+    handleSelectDetailedMode,
+    handleCreateRootFolder,
+  } = useTreeViewActions({
+    navigate,
+    selectedFolderId,
+    onFolderSelect,
+    addRecent,
+  });
 
   const allTags = useMemo(() => {
     const tagNames = new Set<string>();
@@ -501,6 +454,7 @@ function TreeViewLayout({
 }
 
 export default TreeViewLayout;
+
 
 
 
