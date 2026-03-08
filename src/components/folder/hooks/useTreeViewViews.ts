@@ -2,7 +2,11 @@ import { useCallback, useMemo } from "react";
 import type { Card } from "@/types";
 import type { useTags } from "@/hooks/settings/useTags";
 import type { useUserSettings } from "@/hooks/settings/useUserSettings";
-import { buildVirtualTree, type ViewDef, type ViewKind } from "@/components/folder/viewTypes";
+import {
+  buildVirtualTree,
+  type ViewDef,
+  type ViewKind,
+} from "@/components/folder/types/viewTypes";
 
 const DEFAULT_FOLDER_VIEW: ViewDef = {
   id: "folder-default",
@@ -19,7 +23,6 @@ const createViewId = () =>
 
 type Settings = ReturnType<typeof useUserSettings>["settings"];
 type UpdateSettings = ReturnType<typeof useUserSettings>["updateSettings"];
-
 type TagsApi = ReturnType<typeof useTags>;
 
 interface UseTreeViewViewsParams {
@@ -42,12 +45,15 @@ export function useTreeViewViews({
   onFolderSelect,
 }: UseTreeViewViewsParams) {
   const viewDefs = useMemo(() => {
-    const storedViews = Array.isArray(settings?.explorerViews)
-      ? settings.explorerViews
+    const storedViews: ViewDef[] = Array.isArray(settings?.explorerViews)
+      ? (settings.explorerViews as ViewDef[])
       : [];
-    const validStoredViews = storedViews.filter((view): view is ViewDef =>
-      ACTIVE_VIEW_KINDS.includes(view.kind as ViewKind),
+
+    const validStoredViews = storedViews.filter(
+      (view): view is ViewDef =>
+        ACTIVE_VIEW_KINDS.includes(view.kind as ViewKind),
     );
+
     const folderView =
       validStoredViews.find((view) => view.kind === "folder") ??
       DEFAULT_FOLDER_VIEW;
@@ -238,5 +244,3 @@ export function useTreeViewViews({
     handleUpdateViewOptions,
   };
 }
-
-
