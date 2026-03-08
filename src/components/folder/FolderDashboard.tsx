@@ -191,48 +191,40 @@ export function FolderDashboard({
         className="pointer-events-none absolute inset-0"
         style={getPageRuledBg("rgba(15,23,42,0.035)")}
       />
-      <div className="relative z-[1] max-w-[1120px] mx-auto w-full px-4 pt-4 pb-6 space-y-4">
-        <div className="flex flex-col gap-2">
-          <div className="rounded-xl border border-[var(--surface-border)] bg-[var(--sidebar-bg)] px-4 py-3 surface-concave">
-            <p className="text-[11px] leading-4 text-[var(--sidebar-text-muted)] font-semibold tracking-[0.14em] uppercase">
-              Folder Dashboard
-            </p>
-            <h2 className="mt-1 text-[clamp(1.4rem,2.4vw,1.9rem)] leading-tight font-bold text-[var(--sidebar-text)] tracking-[-0.01em] break-words">
-              {folderName || folderId}
-            </h2>
+      <div className="relative z-[1] max-w-[1120px] mx-auto w-full">
+        <div
+          className="flex items-center justify-between gap-4 px-4 border-b border-[var(--surface-border)]"
+          style={{ height: 50 }}
+        >
+          <h2 className="text-[20px] font-semibold text-[var(--sidebar-text)] tracking-[-0.01em] truncate">
+            {folderName || folderId}
+          </h2>
+          <div className="flex items-center gap-1 shrink-0">
+            <button
+              type="button"
+              onClick={handlers.onStartStudy}
+              className="px-3 py-1 text-[13px] text-[var(--sidebar-text)] rounded-md hover:bg-[var(--sidebar-active-bg)] transition-colors"
+            >
+              学習する
+            </button>
+            <button
+              type="button"
+              onClick={handlers.onViewCards}
+              className="px-3 py-1 text-[13px] text-[var(--sidebar-text-muted)] rounded-md hover:bg-[var(--sidebar-active-bg)] transition-colors"
+            >
+              閲覧
+            </button>
+            <button
+              type="button"
+              onClick={handlers.onCreateCard}
+              className="px-3 py-1 text-[13px] text-[var(--sidebar-text-muted)] rounded-md hover:bg-[var(--sidebar-active-bg)] transition-colors"
+            >
+              作成
+            </button>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <Button
-            type="button"
-            size="sm"
-            onClick={handlers.onStartStudy}
-            className="h-8 px-4 text-xs font-semibold"
-          >
-            学習開始
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            variant="secondary"
-            onClick={handlers.onViewCards}
-            className="h-8 px-4 text-xs"
-          >
-            閲覧
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            variant="secondary"
-            onClick={handlers.onCreateCard}
-            className="h-8 px-4 text-xs"
-          >
-            カード作成
-          </Button>
-        </div>
-
-        <div className="space-y-4">
+        <div className="px-4 pt-4 pb-6 space-y-4">
           <div className="grid grid-cols-1 gap-4 items-stretch">
             <section className={cardClass}>
               <div className="flex items-start justify-between gap-3">

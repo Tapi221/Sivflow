@@ -11,39 +11,23 @@
     padding-right: 8px;
     border-radius: 4px;
     overflow: visible;
-    /* hover は Tailwind の hover:bg-* で付与するため、ここでは背景なし */
     background-color: transparent;
     color: #1f2328;
   }
 
-  /* 行間の区切り線は廃止 */
-  .sidebar-row::after {
-    display: none;
-  }
-
-  .sidebar-row--card {
-    background-color: transparent;
-  }
-
-  /* フォルダ行: カード感を除去 → 背景・枠・影なし */
   .sidebar-row--folder {
-    background-color: transparent;
     border: none;
     box-shadow: none;
-    color: #1f2328;
   }
 
-  /* hover: 薄いグレー */
   .sidebar-row--folder:hover {
     background-color: rgba(0, 0, 0, 0.05);
   }
 
-  /* 選択中: 薄いブルー系 */
   .sidebar-row[data-selected="true"] {
     background-color: rgba(104, 154, 152, 0.12);
   }
 
-  /* 選択インジケーター（左端の細線）は維持 */
   .sidebar-row[data-selected="true"]::before {
     content: "";
     position: absolute;
