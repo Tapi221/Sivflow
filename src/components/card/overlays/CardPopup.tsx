@@ -1,13 +1,13 @@
-import React, { useState } from "react";
-import { Flashcard } from "../frame/Flashcard";
-import { Button } from "../../ui/button";
-import { X } from "@/ui/icons";
-import { useUserSettings } from "@/hooks/settings/useUserSettings";
-import { MobileScalableCard } from "../frame/MobileScalableCard";
 import {
-  CANONICAL_CARD_WIDTH,
-  CARD_SAFE_PADDING_PX,
-} from "../common/constants";
+    CANONICAL_CARD_WIDTH,
+    CARD_SAFE_PADDING_PX,
+} from "@/components/card/common/constants";
+import { Flashcard } from "@/components/card/frame/Flashcard";
+import { MobileScalableCard } from "@/components/card/frame/MobileScalableCard";
+import { Button } from "@/components/ui/button";
+import { useUserSettings } from "@/hooks/settings/useUserSettings";
+import { X } from "@/ui/icons";
+import { useState } from "react";
 
 interface CardPopupProps {
   card: unknown;

@@ -1,12 +1,12 @@
+import { warnOncePerSession } from "@/services/localDBRuntimeState";
 import { Dexie } from "dexie";
 import {
-  LOCALDB_GENERATION_KEY_PREFIX,
-  LOCALDB_GENERATION_MAX,
-  LOCALDB_SCHEMA_VERSION_FOR_NAME,
-  LOCALDB_NAME_PREFIX,
+    LOCALDB_GENERATION_KEY_PREFIX,
+    LOCALDB_GENERATION_MAX,
+    LOCALDB_NAME_PREFIX,
+    LOCALDB_SCHEMA_VERSION_FOR_NAME,
 } from "./constants";
 import { safeStringifyError } from "./errors";
-import { warnOncePerSession } from "../localDBRuntimeState";
 
 export const readGenerationFromStorage = (userId: string): number => {
   if (typeof window === "undefined") return 0;

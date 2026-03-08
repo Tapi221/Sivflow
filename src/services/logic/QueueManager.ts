@@ -1,9 +1,9 @@
 import type {
-  IQueueManager,
-  BatchConstraint,
-  SyncTask,
-} from "../interfaces/ISyncService";
-import type { LocalDBLike } from "../localDB";
+    BatchConstraint,
+    IQueueManager,
+    SyncTask,
+} from "@/services/interfaces/ISyncService";
+import type { LocalDBLike } from "@/services/localDB";
 
 /**
  * QueueManager: オフライン時の同期タスクを永続化し、順序保証とリトライ制御を行う

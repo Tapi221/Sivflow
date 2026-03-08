@@ -1,4 +1,4 @@
-import type { IDiffEngine } from "../interfaces/ISyncService";
+import type { IDiffEngine } from "@/services/interfaces/ISyncService";
 
 type TimestampLike = {
   toMillis?: () => number;

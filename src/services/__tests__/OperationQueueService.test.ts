@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
+import { operationQueue } from "@/services/operationQueue";
 import "fake-indexeddb/auto";
-import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
-import { operationQueue } from "../operationQueue";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock DB
 // Dexie is actually persistent in JSDOM unless cleared.

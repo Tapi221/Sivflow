@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
+import { getLocalDb, LocalDB } from "@/services/localDB";
 import "fake-indexeddb/auto";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { getLocalDb, LocalDB } from "../localDB";
 
 const rawPutCard = async (dbName: string, card: unknown): Promise<void> => {
   await new Promise<void>((resolve, reject) => {

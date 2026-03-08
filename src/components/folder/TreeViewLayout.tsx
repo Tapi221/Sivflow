@@ -1,32 +1,32 @@
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-  useRef,
-  useMemo,
-} from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft } from "@/ui/icons";
-import { FolderTreeWithCards } from "./FolderTreeWithCards";
-import { RightPane } from "./RightPane";
-import { ExplorerTabs } from "../explorer/ExplorerTabs";
-import { PinnedPanel } from "../explorer/PinnedPanel";
-import { RecentPanel } from "../explorer/RecentPanel";
-import { cn } from "@/lib/utils";
-import { useFolders } from "@/hooks/folder/useFolders";
-import { useDocuments } from "@/hooks/platform/useDocuments";
-import { createPageUrl } from "@/utils";
-import { useUserSettings } from "@/hooks/settings/useUserSettings";
-import { useTags, resolveCardTagNames } from "@/hooks/settings/useTags";
-import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
-import { useCards } from "@/hooks/card/useCards";
-import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import CreateCardSelectionDialog from "@/components/card/overlays/CreateCardSelectionDialog";
 import CreationModeDialog from "@/components/card/overlays/CreationModeDialog";
+import { ExplorerTabs } from "@/components/explorer/ExplorerTabs";
+import { PinnedPanel } from "@/components/explorer/PinnedPanel";
+import { RecentPanel } from "@/components/explorer/RecentPanel";
+import { useCards } from "@/hooks/card/useCards";
+import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
+import { useFolders } from "@/hooks/folder/useFolders";
+import { useDocuments } from "@/hooks/platform/useDocuments";
+import { resolveCardTagNames, useTags } from "@/hooks/settings/useTags";
+import { useUserSettings } from "@/hooks/settings/useUserSettings";
+import { cn } from "@/lib/utils";
+import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
+import { ArrowLeft } from "@/ui/icons";
+import { createPageUrl } from "@/utils";
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
+import { useNavigate } from "react-router-dom";
+import { ExplorerFilterSummary } from "./ExplorerFilterSummary";
+import { FolderTreeWithCards } from "./FolderTreeWithCards";
+import { RightPane } from "./RightPane";
 import { ViewManagerDialog } from "./ViewManagerDialog";
 import { ViewsPanel } from "./ViewsPanel";
 import { buildVirtualTree, type ViewDef, type ViewKind } from "./viewTypes";
-import { ExplorerFilterSummary } from "./ExplorerFilterSummary";
 
 interface TreeViewLayoutProps {
   folders: Folder[];

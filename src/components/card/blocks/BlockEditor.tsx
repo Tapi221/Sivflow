@@ -1,32 +1,32 @@
+import { Draggable, Droppable } from "@hello-pangea/dnd";
 import React, {
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useMemo,
-  useRef,
-  useState,
+    useCallback,
+    useEffect,
+    useImperativeHandle,
+    useMemo,
+    useRef,
+    useState,
 } from "react";
 import { createPortal } from "react-dom";
-import { Droppable, Draggable } from "@hello-pangea/dnd";
 
 import { BlockToolbar } from "./BlockToolbar";
-import { TextBlock } from "./TextBlock";
 import { CodeBlockItem } from "./CodeBlockItem";
-import { MediaBlock } from "./MediaBlock";
-import { MathBlock } from "./MathBlock";
 import { MarkdownBlock } from "./MarkdownBlock";
+import { MathBlock } from "./MathBlock";
+import { MediaBlock } from "./MediaBlock";
+import { TextBlock } from "./TextBlock";
 
-import type { CardBlock } from "@/types";
-import { cn } from "@/lib/utils";
-import { useUserSettings } from "@/hooks/settings/useUserSettings";
-import { CARD_ROW_PX } from "../common/constants";
-import { sortBlocksByOrderIndex } from "./blockOrdering";
+import { CARD_ROW_PX } from "@/components/card/common/constants";
 import {
-  getNormalizedGridOffsetRows,
-  getNormalizedRowOffset,
-  isGridOffsetType,
-  isRowPositionableType,
-} from "../frame/rowOffset";
+    getNormalizedGridOffsetRows,
+    getNormalizedRowOffset,
+    isGridOffsetType,
+    isRowPositionableType,
+} from "@/components/card/frame/rowOffset";
+import { useUserSettings } from "@/hooks/settings/useUserSettings";
+import { cn } from "@/lib/utils";
+import type { CardBlock } from "@/types";
+import { sortBlocksByOrderIndex } from "./blockOrdering";
 
 const uid = () =>
   typeof crypto !== "undefined" && "randomUUID" in crypto

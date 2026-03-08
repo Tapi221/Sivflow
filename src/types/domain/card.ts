@@ -1,15 +1,15 @@
-import { Timestamp } from "firebase/firestore";
 import type { InkDocument } from "@/components/ink/inkTypes";
-import type { CodeBlockData } from "../core/code-block";
-import type {
-  BaseEntity,
-  CardState,
-  SubjectiveScoreValue,
-  ReviewLog,
-  ReferenceBlockData,
-  MathBlockData,
-} from "./base";
+import type { CodeBlockData } from "@/types/core/code-block";
+import { Timestamp } from "firebase/firestore";
 import type { UploadedImage } from "./assets";
+import type {
+    BaseEntity,
+    CardState,
+    MathBlockData,
+    ReferenceBlockData,
+    ReviewLog,
+    SubjectiveScoreValue,
+} from "./base";
 
 export type CardBlock = {
   id: string;

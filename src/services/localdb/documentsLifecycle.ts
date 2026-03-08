@@ -1,5 +1,5 @@
-import { deleteDocumentBlob } from "../documentFileStore";
-import { removeDocumentBlobUrl } from "../documentBlobUrlSessionCache";
+import { removeDocumentBlobUrl } from "@/services/documentBlobUrlSessionCache";
+import { deleteDocumentBlob } from "@/services/documentFileStore";
 import { safeRevokeBlobUrl } from "./blobUrl";
 
 type DocumentRecord = {

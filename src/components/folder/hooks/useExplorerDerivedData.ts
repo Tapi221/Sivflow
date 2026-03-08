@@ -1,15 +1,14 @@
-import { useMemo, useCallback } from "react";
-import type { Card, ExplorerItem } from "@/types";
-import type { DocumentItem } from "@/types";
-import type { FolderTreeNode } from "../explorer/model/utils";
+import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import {
-  ROOT_FOLDER_ID,
-  getFolderId,
-  getParentFolderId,
-  normalizeFolderId,
-  isSameFolder,
-  getEntityTime,
-} from "../explorer/model/utils";
+    ROOT_FOLDER_ID,
+    getEntityTime,
+    getFolderId,
+    getParentFolderId,
+    isSameFolder,
+    normalizeFolderId,
+} from "@/components/folder/explorer/model/utils";
+import type { Card, DocumentItem, ExplorerItem } from "@/types";
+import { useCallback, useMemo } from "react";
 
 type LegacyEntityFields = {
   isDeleted?: boolean;

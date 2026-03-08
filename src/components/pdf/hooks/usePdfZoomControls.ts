@@ -1,10 +1,10 @@
-import { useEffect, useRef } from "react";
 import {
-  clampScale,
-  computeNextScaleFromGesture,
-  computeNextScaleFromWheel,
-  normalizeScale,
-} from "../pdfZoomUtils";
+    clampScale,
+    computeNextScaleFromGesture,
+    computeNextScaleFromWheel,
+    normalizeScale,
+} from "@/components/pdf/pdfZoomUtils";
+import { useEffect, useRef } from "react";
 
 interface UsePdfZoomControlsParams {
   scrollContainerEl: HTMLDivElement | null;

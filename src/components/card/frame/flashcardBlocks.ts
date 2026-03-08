@@ -4,8 +4,8 @@
  * - questionBlocks/answerBlocks がある場合はそちらを優先
  * - ない場合は legacy テキスト/コード/画像/音声フィールドから生成
  */
+import { sortBlocksByOrderIndex } from "@/components/card/blocks/blockOrdering";
 import type { CardBlock } from "@/types";
-import { sortBlocksByOrderIndex } from "../blocks/blockOrdering";
 import type { FlashcardMediaLike } from "./flashcardDerived";
 
 interface SideData {

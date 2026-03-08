@@ -1,5 +1,5 @@
+import type { LocalDBFallbackReasonCode } from "@/services/localDBRuntimeState";
 import { LOCALDB_ERROR_MESSAGE_LIMIT } from "./constants";
-import type { LocalDBFallbackReasonCode } from "../localDBRuntimeState";
 
 const MAX_ERROR_NESTING_DEPTH = 4;
 

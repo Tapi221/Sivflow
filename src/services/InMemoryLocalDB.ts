@@ -1,7 +1,7 @@
-import { nanoid } from "nanoid";
-import { normalizeCard, normalizeFolder } from "../utils";
-import { getDeviceName, getOrCreateDeviceId } from "@/utils/device";
 import type { Card, Folder, SyncQueueItem } from "@/types";
+import { normalizeCard, normalizeFolder } from "@/utils";
+import { getDeviceName, getOrCreateDeviceId } from "@/utils/device";
+import { nanoid } from "nanoid";
 
 type KeyPath = string | string[];
 type Predicate<T> = (value: T) => boolean;

@@ -4,39 +4,38 @@
  * and derives all UI-visible computed values.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { SlideData } from "@/components/pptx/SlideImage";
 import {
-  doc as firestoreDoc,
-  serverTimestamp,
-  setDoc,
-} from "firebase/firestore";
-import { firestoreDb } from "@/services/firebase";
+    autoRetryDelayMs,
+    buildSourceSignature,
+    formatConversionError,
+    getManifestPendingWindowMs,
+    getUpdatedAtMs,
+    isAutoRetryableConversionRequestFailure,
+    isConversionRequestFailure,
+    isFirestoreDiagnosticsEnabled,
+    MAX_AUTO_RETRY_ATTEMPTS,
+    normalizeManifestStatus,
+    normalizeRetryCount,
+    normalizeString
+} from "@/components/pptx/domain/pptxConversion";
+import { classifyConversionRequestError } from "@/components/pptx/domain/pptxErrors";
+import { ENQUEUE_DEDUPE_WINDOW_MS } from "@/components/pptx/domain/pptxTypes";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNetworkStatus } from "@/hooks/platform/useNetworkStatus";
+import { firestoreDb } from "@/services/firebase";
 import { pptxConversionDocPathSegments } from "@/services/firestorePaths";
 import type { DocumentItem } from "@/types";
-import type { SlideData } from "../SlideImage";
 import {
-  autoRetryDelayMs,
-  buildSourceSignature,
-  formatConversionError,
-  getManifestPendingWindowMs,
-  getUpdatedAtMs,
-  isAutoRetryableConversionRequestFailure,
-  isConversionRequestFailure,
-  isFirestoreDiagnosticsEnabled,
-  isWithinPendingWindow,
-  MAX_AUTO_RETRY_ATTEMPTS,
-  normalizeManifestStatus,
-  normalizeRetryCount,
-  normalizeString,
-} from "../domain/pptxConversion";
-import { classifyConversionRequestError } from "../domain/pptxErrors";
-import { ENQUEUE_DEDUPE_WINDOW_MS } from "../domain/pptxTypes";
-import { usePptxDocumentSync } from "./usePptxDocumentSync";
-import { usePptxConversionSubscription } from "./usePptxConversionSubscription";
-import { usePptxManifestLoader } from "./usePptxManifestLoader";
+    doc as firestoreDoc,
+    serverTimestamp,
+    setDoc,
+} from "firebase/firestore";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocalDocumentSource } from "./useLocalDocumentSource";
+import { usePptxConversionSubscription } from "./usePptxConversionSubscription";
+import { usePptxDocumentSync } from "./usePptxDocumentSync";
+import { usePptxManifestLoader } from "./usePptxManifestLoader";
 
 // ─── Public interface ─────────────────────────────────────────────────────────
 

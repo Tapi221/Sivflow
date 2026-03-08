@@ -1,10 +1,10 @@
-import { Dexie } from "dexie";
-import type { LocalDB } from "./LocalDB";
+import { telemetryOncePerSession } from "@/services/localDBRuntimeState";
 import type { Card } from "@/types";
-import { denormalizeCardForStorage } from "./transforms";
+import { getDeviceName, getOrCreateDeviceId } from "@/utils/device";
+import { Dexie } from "dexie";
 import { hasBlobUrlDeep, scrubBlobUrlsDeep } from "./blobUrl";
-import { telemetryOncePerSession } from "../localDBRuntimeState";
-import { getOrCreateDeviceId, getDeviceName } from "@/utils/device";
+import type { LocalDB } from "./LocalDB";
+import { denormalizeCardForStorage } from "./transforms";
 
 type LocalDBWithTags = LocalDB & {
   tags: { bulkPut(items: unknown[]): Promise<unknown> };

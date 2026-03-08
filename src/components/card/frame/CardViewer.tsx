@@ -1,11 +1,11 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useKeyboardShortcuts } from "@/hooks/ui/useKeyboardShortcuts";
-import { Flashcard } from "./Flashcard";
-import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import {
-  CANONICAL_CARD_WIDTH,
-  CARD_SAFE_PADDING_PX,
-} from "../common/constants";
+    CANONICAL_CARD_WIDTH,
+    CARD_SAFE_PADDING_PX,
+} from "@/components/card/common/constants";
+import { useUserSettings } from "@/hooks/settings/useUserSettings";
+import { useKeyboardShortcuts } from "@/hooks/ui/useKeyboardShortcuts";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Flashcard } from "./Flashcard";
 import { MobileScalableCard } from "./MobileScalableCard";
 
 // アプリに合わせてちゃんとした型に置き換えてね（最低限の例）

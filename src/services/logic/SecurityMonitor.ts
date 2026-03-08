@@ -1,19 +1,19 @@
-import { firestoreDb } from "../firebase";
-import {
-  collection,
-  addDoc,
-  serverTimestamp,
-  onSnapshot,
-  doc,
-  query,
-  where,
-  updateDoc,
-} from "firebase/firestore";
+import { firestoreDb } from "@/services/firebase";
 import type {
-  SecurityEventType,
-  SecurityLog,
-  SecurityMetadata,
+    SecurityEventType,
+    SecurityLog,
+    SecurityMetadata,
 } from "@/types/telemetry";
+import {
+    addDoc,
+    collection,
+    doc,
+    onSnapshot,
+    query,
+    serverTimestamp,
+    updateDoc,
+    where,
+} from "firebase/firestore";
 
 /**
  * リスク検知ルールの定義

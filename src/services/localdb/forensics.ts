@@ -1,5 +1,5 @@
+import { warnOncePerSession } from "@/services/localDBRuntimeState";
 import { isBackingStoreOpenError } from "./errors";
-import { warnOncePerSession } from "../localDBRuntimeState";
 
 export async function listDatabases(): Promise<IDBDatabaseInfo[]> {
   if (!indexedDB.databases) return [];

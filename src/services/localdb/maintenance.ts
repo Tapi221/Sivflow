@@ -1,5 +1,5 @@
-import { deleteDocumentBlobsByUser } from "../documentFileStore";
-import { deleteImageBlobsByUser } from "../imageFileStore";
+import { deleteDocumentBlobsByUser } from "@/services/documentFileStore";
+import { deleteImageBlobsByUser } from "@/services/imageFileStore";
 
 type Clearable = { clear(): Promise<void> };
 type DBWithLegacyTables = {

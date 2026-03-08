@@ -1,8 +1,8 @@
-import React, { Component, type ErrorInfo, type ReactNode } from "react";
-import { Button } from "../ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertTriangle, RefreshCw, Trash2 } from "@/ui/icons";
 import { getActiveTabCountEstimate } from "@/utils/tabPresence";
+import { Component, type ErrorInfo, type ReactNode } from "react";
 
 interface Props {
   children: ReactNode;

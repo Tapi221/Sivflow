@@ -1,22 +1,22 @@
-import React, { useState, useEffect, useRef } from "react";
+import { SharedCardContent } from "@/components/card/common/SharedCardContent";
+import {
+    CANONICAL_CARD_WIDTH,
+    layoutRowsToCardHeightPx,
+} from "@/components/card/common/constants";
+import type { InkDocument } from "@/components/ink/inkTypes";
 import { cn } from "@/lib/utils";
+import React, { useEffect, useRef, useState } from "react";
 import { CardFrame } from "./CardFrame";
-import { SharedCardContent } from "../common/SharedCardContent";
-import {
-  CANONICAL_CARD_WIDTH,
-  layoutRowsToCardHeightPx,
-} from "../common/constants";
-import {
-  type FlashcardCardLike,
-} from "./flashcardDerived";
-import { useFlashcardInk } from "./useFlashcardInk";
-import { useFlashcardDerived } from "./useFlashcardDerived";
-import { useFlashcardMediaState } from "./useFlashcardMediaState";
 import { useFlashcardCornerControls } from "./FlashcardCornerControls";
+import { FlashcardInkOverlay } from "./FlashcardInkOverlay";
 import { FlashcardMediaDialogs } from "./FlashcardMediaDialogs";
 import { FlashcardNavigation } from "./FlashcardNavigation";
-import { FlashcardInkOverlay } from "./FlashcardInkOverlay";
-import type { InkDocument } from "@/components/ink/inkTypes";
+import {
+    type FlashcardCardLike,
+} from "./flashcardDerived";
+import { useFlashcardDerived } from "./useFlashcardDerived";
+import { useFlashcardInk } from "./useFlashcardInk";
+import { useFlashcardMediaState } from "./useFlashcardMediaState";
 
 // Re-export for consumers who import the type from this file
 export type { FlashcardCardLike };

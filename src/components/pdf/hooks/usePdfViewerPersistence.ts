@@ -16,18 +16,18 @@
  *    - docId 変更時に isHydratingRef をリセット
  *    - PDF A の viewerState が PDF B に適用されない
  */
-import { useCallback, useEffect, useRef, useState } from "react";
-import type { PdfViewerState } from "@/types";
 import {
-  clampScale,
-  FIT_MIN_SCALE,
-  FIT_MAX_SCALE,
-  EPSILON,
-  ZOOM_STEP,
-  VIEWER_STATE_DEBOUNCE_MS,
-  getViewerStateFromSession,
-  saveViewerStateToSession,
-} from "../pdfViewerStateStorage";
+    clampScale,
+    EPSILON,
+    FIT_MAX_SCALE,
+    FIT_MIN_SCALE,
+    getViewerStateFromSession,
+    saveViewerStateToSession,
+    VIEWER_STATE_DEBOUNCE_MS,
+    ZOOM_STEP,
+} from "@/components/pdf/pdfViewerStateStorage";
+import type { PdfViewerState } from "@/types";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface UsePdfViewerPersistenceOptions {
   docId: string;
@@ -230,7 +230,7 @@ export function usePdfViewerPersistence({
 }
 
 // clampScale は pdfViewerStateStorage から再エクスポート（外部参照用）
-export { FIT_MIN_SCALE, FIT_MAX_SCALE };
+export { FIT_MAX_SCALE, FIT_MIN_SCALE };
 
 
 

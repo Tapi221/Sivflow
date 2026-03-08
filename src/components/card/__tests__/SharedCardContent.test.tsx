@@ -1,10 +1,9 @@
 // @vitest-environment jsdom
-import React from "react";
-import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
-import { DragDropContext } from "@hello-pangea/dnd";
-import { SharedCardContent } from "../common/SharedCardContent";
+import { SharedCardContent } from "@/components/card/common/SharedCardContent";
 import type { CardBlock } from "@/types";
+import { DragDropContext } from "@hello-pangea/dnd";
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 
 vi.mock("../blocks/BlockRenderer", () => ({
   BlockRenderer: () => <div data-testid="mock-block-renderer" />,

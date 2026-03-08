@@ -1,14 +1,14 @@
-import React from "react";
-import { FileText } from "@/ui/icons";
-import { cn } from "@/lib/utils";
-import { FolderRow } from "../explorer/rows/FolderRow";
-import { EXPLORER_ROW_BASE_CLASS_NAME } from "../explorer/rows/shared";
-import type { ExplorerTreeNode as TreeNode } from "../explorer/tree/arboristAdapter";
 import {
-  isFileDragEvent,
-  extractPdfFiles,
-  extractPptxFiles,
-} from "../explorer/model/utils";
+    extractPdfFiles,
+    extractPptxFiles,
+    isFileDragEvent,
+} from "@/components/folder/explorer/model/utils";
+import { FolderRow } from "@/components/folder/explorer/rows/FolderRow";
+import { EXPLORER_ROW_BASE_CLASS_NAME } from "@/components/folder/explorer/rows/shared";
+import type { ExplorerTreeNode as TreeNode } from "@/components/folder/explorer/tree/arboristAdapter";
+import { cn } from "@/lib/utils";
+import { FileText } from "@/ui/icons";
+import React from "react";
 
 interface ExplorerTreeNodeProps {
   node: { data: TreeNode; level: number };

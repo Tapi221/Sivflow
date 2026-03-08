@@ -1,27 +1,27 @@
+import { InMemoryLocalDB } from "@/services/InMemoryLocalDB";
 import { Dexie } from "dexie";
-import { InMemoryLocalDB } from "../InMemoryLocalDB";
 // NOTE: createLocalDBInternal import creates a circular dependency with LocalDB.ts.
 // This is safe in ESM because both modules only use each other inside function bodies,
 // never at module initialization time.
-import { createLocalDBInternal } from "./LocalDB";
-import type { LocalDB } from "./LocalDB";
 import {
-  isBackingStoreOpenError,
-  safeStringifyError,
-  classifyFallbackReasonCode,
+    getStoredLocalDBResetFailureReason,
+    markLocalDBGenerationBumped,
+    saveLocalDBResetFailureReason,
+    updateLocalDBRuntimeStatus,
+    warnOncePerSession,
+} from "@/services/localDBRuntimeState";
+import type { LocalDB } from "./LocalDB";
+import { createLocalDBInternal } from "./LocalDB";
+import {
+    classifyFallbackReasonCode,
+    isBackingStoreOpenError,
+    safeStringifyError,
 } from "./errors";
 import {
-  getFallbackDatabaseNameForUser,
-  bumpGenerationForUser as _bumpGenerationForUser,
-  deleteUserPersistentDatabases,
+    bumpGenerationForUser as _bumpGenerationForUser,
+    deleteUserPersistentDatabases,
+    getFallbackDatabaseNameForUser,
 } from "./generation";
-import {
-  getStoredLocalDBResetFailureReason,
-  markLocalDBGenerationBumped,
-  saveLocalDBResetFailureReason,
-  updateLocalDBRuntimeStatus,
-  warnOncePerSession,
-} from "../localDBRuntimeState";
 import type { LocalDBInstance, LocalDBLike } from "./types";
 
 // --- シングルトン状態 ---

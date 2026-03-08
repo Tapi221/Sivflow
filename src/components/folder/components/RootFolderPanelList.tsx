@@ -1,8 +1,8 @@
-import React from "react";
+import { ContextMenu } from "@/components/folder/ContextMenu";
+import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import { cn } from "@/lib/utils";
 import { Folder as FolderIcon, MoreVertical } from "@/ui/icons";
-import { ContextMenu } from "../ContextMenu";
-import type { FolderTreeNode } from "../explorer/model/utils";
+import React from "react";
 
 interface RootFolderPanelListProps {
   rootFolderPanels: Array<{ id: string; name: string; folder: FolderTreeNode }>;

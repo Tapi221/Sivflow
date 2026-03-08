@@ -29,6 +29,12 @@ export default defineConfig([
               message: "Use '@/types/core/branded' instead.",
             },
           ],
+          patterns: [
+            {
+              group: ["../*", "../../*", "../../../*", "../../../../*", "../../../../../*"],
+              message: "Cross-folder imports must use @/ alias. Use relative paths only for same-folder imports like './x'.",
+            },
+          ],
         },
       ],
     },

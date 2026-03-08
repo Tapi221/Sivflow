@@ -1,15 +1,15 @@
 // @vitest-environment jsdom
-import "fake-indexeddb/auto";
-import Dexie from "dexie";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  LocalDB,
-  getLocalDBTelemetrySnapshot,
-  getLocalDBRuntimeStatus,
-  getLocalDb,
-  resetLocalDBForLogout,
-  telemetryOncePerSession,
-} from "../localDB";
+    LocalDB,
+    getLocalDBRuntimeStatus,
+    getLocalDBTelemetrySnapshot,
+    getLocalDb,
+    resetLocalDBForLogout,
+    telemetryOncePerSession,
+} from "@/services/localDB";
+import Dexie from "dexie";
+import "fake-indexeddb/auto";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 describe("LocalDB resilience", () => {
   const resetStaticState = () => {

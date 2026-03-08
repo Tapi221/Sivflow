@@ -1,7 +1,7 @@
 import type {
-  INetworkMonitor,
-  BatchConstraint,
-} from "../interfaces/ISyncService";
+    BatchConstraint,
+    INetworkMonitor,
+} from "@/services/interfaces/ISyncService";
 import type { NetworkStatus, SyncContextSource } from "@/types/telemetry";
 
 /**

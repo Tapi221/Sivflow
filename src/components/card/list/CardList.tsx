@@ -1,13 +1,13 @@
-import React from "react";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { CardShell } from "@/components/card/frame/CardShell";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { CardShell } from "../frame/CardShell";
-import { HelpCircle, Edit, Trash2, Volume2, Star } from "@/ui/icons";
-import { cn } from "@/lib/utils";
-import { normalizeMemoryStability } from "@/utils/reviewUtils";
 import { resolveCardTagNames } from "@/hooks/settings/useTags";
 import { DEFAULT_TAG_COLOR_CLASS_NAME } from "@/lib/tags/tagColor";
+import { cn } from "@/lib/utils";
+import { Edit, HelpCircle, Star, Trash2, Volume2 } from "@/ui/icons";
+import { normalizeMemoryStability } from "@/utils/reviewUtils";
+import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
+import React from "react";
 
 function CardItem({
   card,

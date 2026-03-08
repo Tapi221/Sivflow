@@ -1,19 +1,19 @@
-import React from "react";
+import { ContextMenu } from "@/components/folder/ContextMenu";
 import {
-  ChevronRight,
-  ChevronDown,
-  FolderIcon,
-  FolderOutlineIcon,
-  MoreVertical,
-} from "@/ui/icons";
+    getParentFolderId,
+    normalizeFolderId,
+    ROOT_FOLDER_ID,
+    type FolderTreeNode,
+} from "@/components/folder/explorer/model/utils";
 import { cn } from "@/lib/utils";
-import { ContextMenu } from "../../ContextMenu";
 import {
-  getParentFolderId,
-  normalizeFolderId,
-  ROOT_FOLDER_ID,
-  type FolderTreeNode,
-} from "../model/utils";
+    ChevronDown,
+    ChevronRight,
+    FolderIcon,
+    FolderOutlineIcon,
+    MoreVertical,
+} from "@/ui/icons";
+import React from "react";
 import { ExplorerRow } from "./ExplorerRow";
 import { ExplorerRowContent } from "./ExplorerRowContent";
 

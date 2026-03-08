@@ -1,20 +1,20 @@
-import type { ICloudSyncAdapter } from "../interfaces/ISyncService";
-import { firestoreDb } from "../firebase";
-import {
-  collection,
-  query,
-  where,
-  orderBy,
-  limit,
-  getDocs,
-  writeBatch,
-  doc,
-  getDoc,
-  Timestamp,
-} from "firebase/firestore";
-import * as Firestore from "firebase/firestore";
+import { firestoreDb } from "@/services/firebase";
+import type { ICloudSyncAdapter } from "@/services/interfaces/ISyncService";
 import { sanitizeBlobUrlsDeep } from "@/utils/blobUrlSanitizer";
 import { sanitizeForLog } from "@/utils/logSanitizer";
+import * as Firestore from "firebase/firestore";
+import {
+    collection,
+    doc,
+    getDoc,
+    getDocs,
+    limit,
+    orderBy,
+    query,
+    Timestamp,
+    where,
+    writeBatch,
+} from "firebase/firestore";
 
 /**
  * undefined は Firestore に投げた瞬間に爆発するので、深い階層まで除去する。

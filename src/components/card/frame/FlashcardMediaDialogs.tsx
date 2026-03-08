@@ -5,12 +5,12 @@
  * - 音声ダイアログ
  * - 参考リンクポップアップ（ReferencePopup）
  */
+import { AudioPlayer } from "@/components/card/media/CardMedia";
+import { ReferencePopup } from "@/components/card/overlays/ReferencePopup";
 import { Button } from "@/components/ui/button";
-import { X, Volume2 } from "@/ui/icons";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { AudioPlayer } from "../media/CardMedia";
-import { ReferencePopup } from "../overlays/ReferencePopup";
 import type { ReferenceBlockData } from "@/types";
+import { Volume2, X } from "@/ui/icons";
 
 interface FlashcardMediaDialogsProps {
   isImagePopupOpen: boolean;

@@ -1,16 +1,15 @@
-import { useRef, useCallback } from "react";
-import type { Card } from "@/types";
-import type { FolderTreeNode } from "../explorer/model/utils";
-import type { SelectedExplorerItem } from "@/types";
+import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import {
-  DEFAULT_NEW_FOLDER_NAME,
-  getFolderId,
-  getParentFolderId,
-  normalizeFolderId,
-  isSameFolder,
-  createOptimisticId,
-} from "../explorer/model/utils";
+    createOptimisticId,
+    DEFAULT_NEW_FOLDER_NAME,
+    getFolderId,
+    getParentFolderId,
+    isSameFolder,
+    normalizeFolderId,
+} from "@/components/folder/explorer/model/utils";
 import { useToast } from "@/contexts/ToastContext";
+import type { Card, SelectedExplorerItem } from "@/types";
+import { useCallback, useRef } from "react";
 
 type LegacyFolder = FolderTreeNode & {
   is_hidden?: boolean;

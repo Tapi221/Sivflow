@@ -1,18 +1,18 @@
-import React, { useRef, useCallback } from "react";
-import type { DocumentItem } from "@/types";
+import {
+    buildStoragePath,
+    createDocumentId,
+    extractPdfFiles,
+    extractPptxFiles,
+    PPTX_MIME,
+} from "@/components/folder/explorer/model/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/contexts/ToastContext";
-import { getLocalDb } from "@/services/localDB";
-import { saveDocumentBlob } from "@/services/documentFileStore";
-import { getOrCreateDeviceId } from "@/utils/device";
 import { useReliableFileUpload } from "@/hooks/platform/useReliableFileUpload";
-import {
-  createDocumentId,
-  buildStoragePath,
-  PPTX_MIME,
-  extractPdfFiles,
-  extractPptxFiles,
-} from "../explorer/model/utils";
+import { saveDocumentBlob } from "@/services/documentFileStore";
+import { getLocalDb } from "@/services/localDB";
+import type { DocumentItem } from "@/types";
+import { getOrCreateDeviceId } from "@/utils/device";
+import React, { useCallback, useRef } from "react";
 
 interface UseFolderDocumentUploadParams {
   selectedFolderId: string | null;

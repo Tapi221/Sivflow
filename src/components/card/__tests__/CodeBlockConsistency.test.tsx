@@ -1,12 +1,11 @@
 // @vitest-environment jsdom
-import React from "react";
-import { afterEach, describe, expect, it } from "vitest";
-import { cleanup, render } from "@testing-library/react";
-import { BlockRenderer } from "../blocks/BlockRenderer";
-import { CodeBlockEditor } from "../blocks/CodeBlockEditor";
-import { MarkdownBlockView } from "../blocks/MarkdownBlockPreview";
-import { CodeBlockItem } from "../blocks/CodeBlockItem";
+import { BlockRenderer } from "@/components/card/blocks/BlockRenderer";
+import { CodeBlockEditor } from "@/components/card/blocks/CodeBlockEditor";
+import { CodeBlockItem } from "@/components/card/blocks/CodeBlockItem";
+import { MarkdownBlockView } from "@/components/card/blocks/MarkdownBlockPreview";
 import type { CardBlock } from "@/types";
+import { cleanup, render } from "@testing-library/react";
+import { afterEach, describe, expect, it } from "vitest";
 
 afterEach(() => {
   cleanup();

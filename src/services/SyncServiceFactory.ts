@@ -1,19 +1,19 @@
 // src/services/SyncServiceFactory.ts
 
-import { flags } from "../features/flags";
+import { flags } from "@/features/flags";
+import type { ISyncService } from "./interfaces/ISyncService";
+import {
+    getLocalDb,
+    getLocalDBTelemetrySnapshot,
+    telemetryOncePerSession,
+} from "./localDB";
+import { CloudSyncAdapter } from "./logic/CloudSyncAdapter";
+import { DiffEngine } from "./logic/DiffEngine";
+import { NetworkMonitor } from "./logic/NetworkMonitor";
+import { QueueManager } from "./logic/QueueManager";
+import { TelemetryService } from "./logic/TelemetryService";
 import { SyncService } from "./syncService"; // Legacy
 import { SyncServiceV2 } from "./SyncServiceV2";
-import { QueueManager } from "./logic/QueueManager";
-import { NetworkMonitor } from "./logic/NetworkMonitor";
-import { DiffEngine } from "./logic/DiffEngine";
-import { CloudSyncAdapter } from "./logic/CloudSyncAdapter";
-import { TelemetryService } from "./logic/TelemetryService";
-import {
-  getLocalDb,
-  getLocalDBTelemetrySnapshot,
-  telemetryOncePerSession,
-} from "./localDB";
-import type { ISyncService } from "./interfaces/ISyncService";
 
 /**
  * SyncServiceFactory

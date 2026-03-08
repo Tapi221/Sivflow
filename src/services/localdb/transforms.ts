@@ -1,12 +1,12 @@
-import { normalizeFolder, extractTextFromBlocks } from "../../utils";
+import type { UploadedImage } from "@/types";
+import { extractTextFromBlocks, normalizeFolder } from "@/utils";
+import { assertImageArrayInvariant } from "@/utils/imageAssertions";
+import { sanitizeProfileImage } from "@/utils/profileImageSanitizer";
 import {
-  denormalizeUploadedImages,
-  normalizeUploadedImages,
+    denormalizeUploadedImages,
+    normalizeUploadedImages,
 } from "@/utils/uploaded-image/normalizer";
 import { sanitizeUploadedImages } from "@/utils/uploaded-image/sanitizer";
-import { sanitizeProfileImage } from "@/utils/profileImageSanitizer";
-import { assertImageArrayInvariant } from "@/utils/imageAssertions";
-import type { UploadedImage } from "@/types";
 
 export const denormalizeCardForStorage = (card: unknown) => {
   if (!card) return card;

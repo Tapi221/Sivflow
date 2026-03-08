@@ -1,9 +1,9 @@
-import { normalizeCard } from "../../utils";
-import { normalizeFolderWithSilent } from "./transforms";
+import { warnOncePerSession } from "@/services/localDBRuntimeState";
+import { normalizeCard } from "@/utils";
+import { getDeviceName, getOrCreateDeviceId } from "@/utils/device";
 import { Dexie, type Table } from "dexie";
 import { Timestamp } from "firebase/firestore";
-import { getOrCreateDeviceId, getDeviceName } from "@/utils/device";
-import { warnOncePerSession } from "../localDBRuntimeState";
+import { normalizeFolderWithSilent } from "./transforms";
 
 /** queries.ts が必要とする LocalDB プロパティの最小インターフェース */
 type QueryDb = Dexie & {

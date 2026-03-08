@@ -4,18 +4,18 @@
  * - actionsTopLeft / actionsTopRight / mediaActionNodes の組み立てロジックを Flashcard.tsx から分離
  * - CardFrame の actionsTopLeft / actionsTopRight props へ渡す ReactNode 配列を返す
  */
-import React from "react";
-import { Button } from "@/components/ui/button";
-import { Edit, Image as ImageIcon, Volume2, Link } from "@/ui/icons";
-import { cn } from "@/lib/utils";
-import { CardCornerActions } from "./CardCornerActions";
 import {
-  CARD_ACTION_BG_CLASS,
-  CARD_ACTION_COLOR_IDLE_CLASS,
-  CARD_ACTION_ICON_CLASS,
-} from "../common/constants";
-import type { FlashcardCardLike } from "./flashcardDerived";
+    CARD_ACTION_BG_CLASS,
+    CARD_ACTION_COLOR_IDLE_CLASS,
+    CARD_ACTION_ICON_CLASS,
+} from "@/components/card/common/constants";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import type { ReferenceBlockData } from "@/types";
+import { Edit, Image as ImageIcon, Link, Volume2 } from "@/ui/icons";
+import React from "react";
+import { CardCornerActions } from "./CardCornerActions";
+import type { FlashcardCardLike } from "./flashcardDerived";
 
 interface FlashcardCornerControlsProps {
   card: FlashcardCardLike;

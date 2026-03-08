@@ -1,5 +1,5 @@
+import type { BlobUrl, StorageUrl } from "@/types/core/branded";
 import { Timestamp } from "firebase/firestore";
-import type { BlobUrl, StorageUrl } from "../core/branded";
 import type { BaseEntity } from "./base";
 
 export type DocumentKind = "pdf" | "pptx";

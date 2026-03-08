@@ -1,19 +1,19 @@
-import { useMemo, useCallback } from "react";
-import type { CardBlock } from "@/types";
-import { CodeRenderer } from "./CodeRenderer";
-import { AudioPlayer } from "../media/CardMedia";
-import { ImageBlockContent } from "./ImageBlockContent";
-import { MathBlockContent } from "./MathBlockContent";
-import { MarkdownBlockView } from "./MarkdownBlockPreview";
-import { TextBlockContent } from "./TextBlockContent";
+import { CARD_ROW_PX } from "@/components/card/common/constants";
 import {
-  getNormalizedGridOffsetRows,
-  getRowOffsetPx,
-  getRowOffsetStyle,
-  isGridOffsetType,
-  isRowPositionableType,
-} from "../frame/rowOffset";
-import { CARD_ROW_PX } from "../common/constants";
+    getNormalizedGridOffsetRows,
+    getRowOffsetPx,
+    getRowOffsetStyle,
+    isGridOffsetType,
+    isRowPositionableType,
+} from "@/components/card/frame/rowOffset";
+import { AudioPlayer } from "@/components/card/media/CardMedia";
+import type { CardBlock } from "@/types";
+import { useCallback, useMemo } from "react";
+import { CodeRenderer } from "./CodeRenderer";
+import { ImageBlockContent } from "./ImageBlockContent";
+import { MarkdownBlockView } from "./MarkdownBlockPreview";
+import { MathBlockContent } from "./MathBlockContent";
+import { TextBlockContent } from "./TextBlockContent";
 
 interface BlockRendererProps {
   blocks?: CardBlock[];

@@ -1,7 +1,7 @@
-import React, { useEffect } from "react";
+import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
+import { getFolderId, getParentFolderId, normalizeFolderId } from "@/components/folder/explorer/model/utils";
 import type { Card, SelectedExplorerItem } from "@/types";
-import type { FolderTreeNode } from "../explorer/model/utils";
-import { getFolderId, getParentFolderId, normalizeFolderId } from "../explorer/model/utils";
+import React, { useEffect } from "react";
 
 interface UseEnsureAncestorFoldersExpandedParams {
   selectedFolderId: string | null;

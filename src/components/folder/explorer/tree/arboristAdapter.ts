@@ -1,11 +1,11 @@
-import type {
-  Card,
-  DocumentItem,
-  ExplorerItem,
-  SelectedExplorerItem,
-} from "@/types";
+import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import type { FolderTreeArboristNode } from "@/components/sidebar/FolderTreeArborist";
-import type { FolderTreeNode } from "../model/utils";
+import type {
+    Card,
+    DocumentItem,
+    ExplorerItem,
+    SelectedExplorerItem,
+} from "@/types";
 
 export type ExplorerTreeNode = FolderTreeArboristNode & {
   kind: "folder" | "card" | "document";

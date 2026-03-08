@@ -1,12 +1,12 @@
-import type { LocalDB } from "./LocalDB";
-import {
-  normalizeUploadedImages,
-  denormalizeUploadedImages,
-} from "@/utils/uploaded-image/normalizer";
 import type {
-  IntegrityIssue,
-  IntegrityRepairResult,
-} from "../dataIntegrityTypes";
+    IntegrityIssue,
+    IntegrityRepairResult,
+} from "@/services/dataIntegrityTypes";
+import {
+    denormalizeUploadedImages,
+    normalizeUploadedImages,
+} from "@/utils/uploaded-image/normalizer";
+import type { LocalDB } from "./LocalDB";
 
 type Side = "question" | "answer";
 type UnknownRecord = Record<string, unknown>;

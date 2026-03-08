@@ -1,8 +1,8 @@
-import React from "react";
-import { FileText, MoreVertical } from "@/ui/icons";
+import { DocumentRowMenu } from "@/components/folder/DocumentRowMenu";
+import type { DocumentItem } from "@/components/folder/explorer/model/utils";
 import { cn } from "@/lib/utils";
-import { DocumentRowMenu } from "../../DocumentRowMenu";
-import type { DocumentItem } from "../model/utils";
+import { FileText, MoreVertical } from "@/ui/icons";
+import React from "react";
 import { getExplorerRowStyle } from "./shared";
 
 interface DocumentRowProps {

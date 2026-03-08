@@ -5,59 +5,56 @@ if (import.meta.env.DEV && typeof window !== "undefined") {
     .catch(() => {});
 }
 
+import type { IntegrityRepairResult } from "@/services/dataIntegrityTypes";
+import type {
+    AssetRecord,
+    Card,
+    Document,
+    Folder,
+    SyncConflict,
+    SyncError,
+    SyncHistory,
+    SyncMetadata,
+    SyncQueueItem,
+    SyncSettings,
+    UploadedImage,
+    User,
+    UserSettings,
+    UserStats,
+} from "@/types";
 import { Dexie } from "dexie";
 import { nanoid } from "nanoid";
-import type {
-  Folder,
-  Card,
-  Document,
-  User,
-  UserSettings,
-  UserStats,
-  SyncMetadata,
-  SyncError,
-  SyncHistory,
-  SyncSettings,
-  SyncQueueItem,
-  SyncConflict,
-  UploadedImage,
-  AssetRecord,
-} from "@/types";
-import type { IntegrityRepairResult } from "../dataIntegrityTypes";
 
-import { getDatabaseNameForUser as _getDatabaseNameForUser } from "./generation";
-import { defineSchema } from "./schema";
-import { attachHooks } from "./hooks";
-import {
-  importFromDatabase as rescueImportFromDatabase,
-  extractFromFirestoreSDK as rescueExtractFromFirestoreSDK,
-} from "./rescue";
-import { repairDataIntegrity as repairDataIntegrityImpl } from "./integrityRepair";
-import * as forensics from "./forensics";
 import * as crud from "./crud";
-import * as queries from "./queries";
+import * as forensics from "./forensics";
+import { getDatabaseNameForUser as _getDatabaseNameForUser } from "./generation";
+import { attachHooks } from "./hooks";
+import { repairDataIntegrity as repairDataIntegrityImpl } from "./integrityRepair";
 import * as maintenance from "./maintenance";
+import * as queries from "./queries";
+import {
+    extractFromFirestoreSDK as rescueExtractFromFirestoreSDK,
+    importFromDatabase as rescueImportFromDatabase,
+} from "./rescue";
+import { defineSchema } from "./schema";
 
 // NOTE: creates a circular dependency with instanceManager.ts; safe in ESM (all usages inside function bodies)
 import {
-  getInstance as getInstanceImpl,
-  resetForLogout as resetForLogoutImpl,
-  clearInstance as clearInstanceImpl,
-  getInstanceUserId as getInstanceUserIdImpl,
-  getLocalDb,
-  getLocalDbSync,
-  initializeDB,
-  resetLocalDBForLogout,
+    clearInstance as clearInstanceImpl,
+    getInstance as getInstanceImpl,
+    getInstanceUserId as getInstanceUserIdImpl,
+    getLocalDb,
+    getLocalDbSync,
+    initializeDB,
+    resetForLogout as resetForLogoutImpl,
+    resetLocalDBForLogout,
 } from "./instanceManager";
 
 export type {
-  CardRelation,
-  ProjectMap,
-  TagLegacyRecord,
-  TagV2Record,
-  TagV3Record,
-  LocalDBLike,
-  LocalDBInstance,
+    CardRelation, LocalDBInstance, LocalDBLike, ProjectMap,
+    TagLegacyRecord,
+    TagV2Record,
+    TagV3Record
 } from "./types";
 
 declare global {

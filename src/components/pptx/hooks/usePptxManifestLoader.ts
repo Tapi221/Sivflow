@@ -4,21 +4,21 @@
  * fallback PDF URL resolution, and slide navigation boundary enforcement.
  */
 
-import { useEffect, useRef, useState } from "react";
-import { ref, getDownloadURL } from "firebase/storage";
+import type { SlideData } from "@/components/pptx/SlideImage";
+import {
+    appendCacheBust,
+    isHttpUrl,
+    isWithinPendingWindow,
+    manifestRetryDelayMs,
+    normalizeString,
+    waitFor,
+} from "@/components/pptx/domain/pptxConversion";
+import { isStorageObjectNotFound } from "@/components/pptx/domain/pptxErrors";
+import type { PptxManifest, PptxManifestStatus } from "@/components/pptx/domain/pptxTypes";
 import { storage } from "@/services/firebase";
 import type { DocumentItem } from "@/types";
-import type { SlideData } from "../SlideImage";
-import type { PptxManifest, PptxManifestStatus } from "../domain/pptxTypes";
-import {
-  appendCacheBust,
-  isHttpUrl,
-  isWithinPendingWindow,
-  manifestRetryDelayMs,
-  normalizeString,
-  waitFor,
-} from "../domain/pptxConversion";
-import { isStorageObjectNotFound } from "../domain/pptxErrors";
+import { getDownloadURL, ref } from "firebase/storage";
+import { useEffect, useRef, useState } from "react";
 
 interface Options {
   docId: string | undefined;

@@ -3,22 +3,22 @@
  * back via applyLocalDocumentPatch. Pure I/O bridge — no UI concerns.
  */
 
-import { useEffect, useRef } from "react";
 import {
-  doc as firestoreDoc,
-  onSnapshot,
-  type DocumentSnapshot,
-} from "firebase/firestore";
+    getUpdatedAtMs,
+    isWithinPendingWindow,
+    normalizeConversionStatus,
+    normalizeString,
+} from "@/components/pptx/domain/pptxConversion";
+import type { PptxConversionRecord } from "@/components/pptx/domain/pptxTypes";
 import { firestoreDb } from "@/services/firebase";
 import { pptxConversionDocPathSegments } from "@/services/firestorePaths";
 import type { DocumentItem } from "@/types";
 import {
-  getUpdatedAtMs,
-  isWithinPendingWindow,
-  normalizeConversionStatus,
-  normalizeString,
-} from "../domain/pptxConversion";
-import type { PptxConversionRecord } from "../domain/pptxTypes";
+    doc as firestoreDoc,
+    onSnapshot,
+    type DocumentSnapshot,
+} from "firebase/firestore";
+import { useEffect, useRef } from "react";
 
 interface Options {
   docId: string | undefined;

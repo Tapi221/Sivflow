@@ -1,25 +1,24 @@
-import React, { useCallback, useState, useEffect, useRef, useId } from "react";
+import { ImageFrame } from "@/components/card/blocks/ImageFrame";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Upload, X, Play, Pause, RotateCcw, Check } from "@/ui/icons";
-import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
-import type { UploadedImage, AssetRecord } from "@/types";
-import {
-  createUploadedImage,
-  createFailedUploadedImage,
-} from "@/utils/uploaded-image/factory";
-import { isHeicFile, convertHeicToJpeg } from "@/utils/uploaded-image/heic";
-import type { UploadedImageStatus } from "@/types";
-import type { StorageUrl } from "@/types/core/branded";
 import { useReliableFileUpload } from "@/hooks/platform/useReliableFileUpload";
-import { ImageFrame } from "../blocks/ImageFrame";
-import { putImageBlob, deleteImageBlob } from "@/services/imageFileStore";
+import { cn } from "@/lib/utils";
 import {
-  getOrCreateImageBlobUrl,
-  removeImageBlobUrl,
+    getOrCreateImageBlobUrl,
+    removeImageBlobUrl,
 } from "@/services/imageBlobUrlSessionCache";
+import { deleteImageBlob, putImageBlob } from "@/services/imageFileStore";
 import { getLocalDb } from "@/services/localDB";
+import type { AssetRecord, UploadedImage, UploadedImageStatus } from "@/types";
+import type { StorageUrl } from "@/types/core/branded";
+import { Check, Pause, Play, RotateCcw, Upload, X } from "@/ui/icons";
+import {
+    createFailedUploadedImage,
+    createUploadedImage,
+} from "@/utils/uploaded-image/factory";
+import { convertHeicToJpeg, isHeicFile } from "@/utils/uploaded-image/heic";
+import React, { useCallback, useEffect, useId, useRef, useState } from "react";
 
 const clamp = (v: number, min: number, max: number) =>
   Math.min(max, Math.max(min, v));

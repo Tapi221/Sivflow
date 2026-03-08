@@ -1,9 +1,9 @@
-import React from "react";
-import type { CardBlock } from "@/types";
+import { BlockEditor } from "@/components/card/blocks/BlockEditor";
+import { BlockRenderer } from "@/components/card/blocks/BlockRenderer";
 import { cn } from "@/lib/utils";
 import { CONTENT_TYPO } from "@/styles/tokens/typography";
-import { BlockRenderer } from "../blocks/BlockRenderer";
-import { BlockEditor } from "../blocks/BlockEditor";
+import type { CardBlock } from "@/types";
+import React from "react";
 import { CARD_CONTENT_TOP_PX } from "./constants";
 
 type SharedCardContentBaseProps = {

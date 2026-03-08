@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
+import { CARD_ROW_PX } from "@/components/card/common/constants";
+import { Flashcard } from "@/components/card/frame/Flashcard";
+import { render, screen } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
-import { Flashcard } from "../frame/Flashcard";
-import { CARD_ROW_PX } from "../common/constants";
 
 vi.mock("../frame/CardFrame", () => ({
   CardFrame: ({
