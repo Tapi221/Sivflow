@@ -1,12 +1,12 @@
-import { useCallback, useMemo } from "react";
-import type { Card } from "@/types";
-import type { useTags } from "@/hooks/settings/useTags";
-import type { useUserSettings } from "@/hooks/settings/useUserSettings";
 import {
   buildVirtualTree,
   type ViewDef,
   type ViewKind,
 } from "@/components/folder/types/viewTypes";
+import type { useTags } from "@/hooks/settings/useTags";
+import type { useUserSettings } from "@/hooks/settings/useUserSettings";
+import type { Card } from "@/types";
+import { useCallback, useMemo } from "react";
 
 const DEFAULT_FOLDER_VIEW: ViewDef = {
   id: "folder-default",

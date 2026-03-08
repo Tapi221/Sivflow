@@ -1,8 +1,8 @@
-import { useCallback, useMemo } from "react";
-import type { Card } from "@/types";
+import { buildVirtualTree } from "@/components/folder/viewTypes";
 import type { useTags } from "@/hooks/settings/useTags";
 import type { useUserSettings } from "@/hooks/settings/useUserSettings";
-import { buildVirtualTree } from "@/components/folder/viewTypes";
+import type { Card } from "@/types";
+import { useCallback, useMemo } from "react";
 
 type ViewKind = "folder" | "tagCategory" | "tagTree";
 
@@ -26,8 +26,6 @@ const DEFAULT_FOLDER_VIEW: ViewDef = {
   kind: "folder",
 };
 
-const ACTIVE_VIEW_KINDS: ViewKind[] = ["folder", "tagCategory", "tagTree"];
-
 const createViewId = () =>
   typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
     ? crypto.randomUUID()
@@ -48,11 +46,7 @@ interface UseTreeViewViewsParams {
 }
 
 function isViewKind(value: unknown): value is ViewKind {
-  return (
-    value === "folder" ||
-    value === "tagCategory" ||
-    value === "tagTree"
-  );
+  return value === "folder" || value === "tagCategory" || value === "tagTree";
 }
 
 function isViewDef(value: unknown): value is ViewDef {
@@ -76,9 +70,13 @@ export function useTreeViewViews({
   filteredCards,
   onFolderSelect,
 }: UseTreeViewViewsParams) {
+  const explorerViews = settings?.explorerViews;
+  const selectedExplorerViewId = settings?.selectedExplorerViewId;
+  const tagCategoryDisplayNames = settings?.tagCategoryDisplayNames;
+
   const viewDefs = useMemo(() => {
-    const storedViewsRaw: unknown[] = Array.isArray(settings?.explorerViews)
-      ? (settings.explorerViews as unknown[])
+    const storedViewsRaw: unknown[] = Array.isArray(explorerViews)
+      ? explorerViews
       : [];
 
     const validStoredViews = storedViewsRaw.filter(isViewDef);
@@ -91,15 +89,18 @@ export function useTreeViewViews({
       folderView,
       ...validStoredViews.filter((view) => view.kind !== "folder"),
     ];
-  }, [settings?.explorerViews]);
+  }, [explorerViews]);
 
   const selectedViewId = useMemo(() => {
-    const savedViewId = settings?.selectedExplorerViewId;
-    if (savedViewId && viewDefs.some((view) => view.id === savedViewId)) {
-      return savedViewId;
+    if (
+      selectedExplorerViewId &&
+      viewDefs.some((view) => view.id === selectedExplorerViewId)
+    ) {
+      return selectedExplorerViewId;
     }
+
     return viewDefs[0]?.id ?? DEFAULT_FOLDER_VIEW.id;
-  }, [settings?.selectedExplorerViewId, viewDefs]);
+  }, [selectedExplorerViewId, viewDefs]);
 
   const selectedView = useMemo(
     () =>
@@ -220,12 +221,12 @@ export function useTreeViewViews({
     async (categoryId: string, displayName: string) => {
       await updateSettings({
         tagCategoryDisplayNames: {
-          ...(settings?.tagCategoryDisplayNames ?? {}),
+          ...(tagCategoryDisplayNames ?? {}),
           [categoryId]: displayName,
         },
       });
     },
-    [settings?.tagCategoryDisplayNames, updateSettings],
+    [tagCategoryDisplayNames, updateSettings],
   );
 
   const handleUpdateUngroupedLabel = useCallback(
