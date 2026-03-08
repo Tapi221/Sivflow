@@ -24,18 +24,15 @@ const compressAndConvertToBase64Internal = (
       const img = new Image();
 
       img.onload = () => {
-        // 画像サイズを計算
         let width = img.width;
         let height = img.height;
 
-        // 最大サイズを超えている場合はリサイズ
         if (width > maxWidth || height > maxHeight) {
           const ratio = Math.min(maxWidth / width, maxHeight / height);
           width = width * ratio;
           height = height * ratio;
         }
 
-        // Canvasで画像を描画して圧縮
         const canvas = document.createElement("canvas");
         canvas.width = width;
         canvas.height = height;
@@ -48,7 +45,6 @@ const compressAndConvertToBase64Internal = (
 
         ctx.drawImage(img, 0, 0, width, height);
 
-        // JPEG形式でBase64に変換（PNGの場合は透過を保持）
         const mimeType = file.type === "image/png" ? "image/png" : "image/jpeg";
         const dataUrl = canvas.toDataURL(mimeType, quality);
 
@@ -101,20 +97,29 @@ export const compressImageToBlobUrl = async (
   return createBlobUrl(url);
 };
 
+const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === "object" && value !== null;
+};
+
+const isBlob = (value: unknown): value is Blob => {
+  return value instanceof Blob;
+};
+
 /**
  * アップロードされた画像リストから Blob URL を削除してサニタイズする
  * (永続化前に呼び出すことで、有効期限切れの Blob URL 保存を防止する)
  */
 export const sanitizeUploadedImages = (images: unknown[]) => {
   if (!Array.isArray(images)) return [];
+
   return images.map((img) => {
-    if (
-      img &&
-      typeof img.localUrl === "string" &&
-      img.localUrl.startsWith("blob:")
-    ) {
+    if (!isRecord(img)) return img;
+
+    const localUrl = img["localUrl"];
+    if (typeof localUrl === "string" && localUrl.startsWith("blob:")) {
       return { ...img, localUrl: null };
     }
+
     return img;
   });
 };
@@ -200,15 +205,32 @@ export const isHeicFile = (file: File) => {
 
 export const convertHeicToJpeg = async (file: File): Promise<File> => {
   const heic2anyModule = await import("heic2any");
-  const heic2any = (heic2anyModule as unknown).default || heic2anyModule;
-  const result = await heic2any({
+  const heic2any = (heic2anyModule as { default?: unknown }).default ?? heic2anyModule;
+
+  if (typeof heic2any !== "function") {
+    throw new Error("heic2any の読み込みに失敗しました");
+  }
+
+  const result = await (heic2any as (options: {
+    blob: File;
+    toType: string;
+    quality: number;
+  }) => Promise<unknown>)({
     blob: file,
     toType: "image/jpeg",
     quality: 0.9,
   });
-  const blob = Array.isArray(result) ? result[0] : result;
+
+  const candidate = Array.isArray(result) ? result[0] : result;
+
+  if (!isBlob(candidate)) {
+    throw new Error("HEIC 変換結果が Blob ではありません");
+  }
+
+  const blob = candidate;
   const name = file.name.replace(/\.(heic|heif)$/i, ".jpg");
-  return new File([blob], name, { type: (blob as Blob).type || "image/jpeg" });
+
+  return new File([blob], name, { type: blob.type || "image/jpeg" });
 };
 
 const resolveString = (value: unknown): string | undefined => {
@@ -404,5 +426,3 @@ export const denormalizeUploadedImages = (
 ) => {
   return images.map((image) => denormalizeUploadedImage(image, options));
 };
-
-// denormalize* の戻り値が将来的な Wire 相当

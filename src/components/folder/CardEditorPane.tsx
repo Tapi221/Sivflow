@@ -26,9 +26,9 @@ import {
   normalizeLayoutRows,
 } from "@/domain/card/extraRows";
 import { useToast } from "@/contexts/ToastContext";
-import { useCards } from "@/hooks/useCards";
-import { useTags } from "@/hooks/useTags";
-import { useUserSettings } from "@/hooks/useUserSettings";
+import { useCards } from "@/hooks/card/useCards";
+import { useTags } from "@/hooks/settings/useTags";
+import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
@@ -455,3 +455,4 @@ export function CardEditorPane({
     </div>
   );
 }
+
