@@ -57,13 +57,13 @@ export function useFlashcardDerived(
   const questionCode = cardData ? resolveQuestionCode(cardData) : null;
   const answerCode = cardData ? resolveAnswerCode(cardData) : null;
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   const questionImageUrls = React.useMemo(
     () => resolveImageUrls(cardData ? resolveQuestionImages(cardData) : []),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [cardData?.question_images, cardData?.questionImages],
   );
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   const answerImageUrls = React.useMemo(
     () => resolveImageUrls(cardData ? resolveAnswerImages(cardData) : []),
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -31,7 +31,6 @@ function useBreadcrumbs(): { crumbs: Crumb[]; title: string } {
     });
 
     const last = crumbs[crumbs.length - 1];
-    const title = last?.label ?? "Manifolmia";
 
     // Remove `to` from last crumb — it's the current page
     if (crumbs.length > 1) {
@@ -43,7 +42,6 @@ function useBreadcrumbs(): { crumbs: Crumb[]; title: string } {
 }
 
 export function PageHeader() {
-  const { crumbs, title } = useBreadcrumbs();
 
   return (
     <header className="page-header">
@@ -64,6 +62,7 @@ export function PageHeader() {
     </header>
   );
 }
+
 
 
 

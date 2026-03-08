@@ -540,7 +540,6 @@ function usePptxManifestLoaderWithReset(
   options: Parameters<typeof usePptxManifestLoader>[0] & { docIdKey: string | undefined },
 ) {
   const {
-    docIdKey: _docIdKey,
     ...rest
   } = options;
 
@@ -560,6 +559,7 @@ function usePptxManifestLoaderWithReset(
     setManifestError,
   };
 }
+
 
 
 

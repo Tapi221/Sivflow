@@ -5,7 +5,7 @@ import {
   isBase64DataUrl,
   createBlobUrl,
   createStorageUrl,
-} from "@/types/branded";
+} from "@/types/core/branded";
 
 describe("Branded Types", () => {
   describe("isBlobUrl", () => {
@@ -87,3 +87,4 @@ describe("Branded Types", () => {
     });
   });
 });
+
