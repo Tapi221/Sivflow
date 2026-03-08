@@ -1,4 +1,4 @@
-import { normalizeUploadedImages } from "./imageUtils";
+import { normalizeUploadedImages } from "./uploaded-image/normalizer";
 import { normalizeMemoryStability } from "./reviewUtils";
 import { normalizeInkDocument } from "@/components/ink/inkTypes";
 import {
@@ -633,3 +633,4 @@ export const normalizeFolder = (raw: unknown) => {
     updatedAt: normalizeDate(pick(r.updatedAt, r.updated_at)) ?? new Date(),
   };
 };
+

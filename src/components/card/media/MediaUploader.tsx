@@ -8,9 +8,8 @@ import type { UploadedImage, AssetRecord } from "@/types";
 import {
   createUploadedImage,
   createFailedUploadedImage,
-  isHeicFile,
-  convertHeicToJpeg,
-} from "@/utils/imageUtils";
+} from "@/utils/uploaded-image/factory";
+import { isHeicFile, convertHeicToJpeg } from "@/utils/uploaded-image/heic";
 import type { UploadedImageStatus } from "@/types";
 import type { StorageUrl } from "@/types/branded";
 import { useReliableFileUpload } from "@/hooks/useReliableFileUpload";
@@ -943,3 +942,4 @@ export default function MediaUploader({
     </div>
   );
 }
+

@@ -1,0 +1,48 @@
+import { createBlobUrl } from "@/types/branded";
+
+const generateUploadedImageId = (): string => {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+};
+
+export const createUploadedImage = (file: File) => {
+  const id = generateUploadedImageId();
+  return {
+    id,
+    assetId: id,
+    localFileId: id,
+    localUrl: createBlobUrl(URL.createObjectURL(file)),
+    remoteUrl: null,
+    status: "uploading" as const,
+    contentType: file.type || null,
+    size: Number.isFinite(file.size) ? file.size : null,
+    storagePath: null,
+    scale: 1,
+    x: 0,
+    naturalW: null,
+    naturalH: null,
+  };
+};
+
+export const createFailedUploadedImage = (file: File) => {
+  const id = generateUploadedImageId();
+  return {
+    id,
+    assetId: id,
+    localFileId: id,
+    localUrl: null,
+    remoteUrl: null,
+    status: "failed" as const,
+    contentType: file.type || null,
+    size: Number.isFinite(file.size) ? file.size : null,
+    storagePath: null,
+    scale: 1,
+    x: 0,
+    naturalW: null,
+    naturalH: null,
+  };
+};
+
+export { generateUploadedImageId };

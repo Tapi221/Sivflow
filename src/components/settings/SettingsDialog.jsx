@@ -49,10 +49,9 @@ import { StorageManager } from "./StorageManager";
 import {
   createUploadedImage,
   createFailedUploadedImage,
-  isHeicFile,
-  convertHeicToJpeg,
-  compressAndConvertToBase64,
-} from "@/utils/imageUtils";
+} from "@/utils/uploaded-image/factory";
+import { isHeicFile, convertHeicToJpeg } from "@/utils/uploaded-image/heic";
+import { compressAndConvertToBase64 } from "@/utils/uploaded-image/imageCompression";
 import { UploadProgress } from "@/components/ui/UploadProgress";
 import { getAvatarColors, getInitials } from "@/utils/avatarUtils";
 import DataRescuePanel from "@/components/settings/DataRescuePanel";
@@ -1588,4 +1587,5 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
     </Dialog>
   );
 }
+
 
