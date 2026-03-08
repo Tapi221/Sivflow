@@ -221,7 +221,22 @@ export default function Folders() {
 
   const isLoading = foldersLoading || cardsLoading;
 
-  const { setExtraCrumbs } = useBreadcrumbContext();
+  const { setExtraCrumbs, registerFolderSelectHandler } = useBreadcrumbContext();
+  const [navigateToSectionListToken, setNavigateToSectionListToken] = useState(0);
+  const foldersRef = useRef(folders);
+  useEffect(() => { foldersRef.current = folders; }, [folders]);
+
+  useEffect(() => {
+    registerFolderSelectHandler((folderId) => {
+      setSelectedFolderId(folderId);
+      setSelectedItem(null);
+      // ルートフォルダ（parentFolderId なし）の場合はセクション一覧に戻す
+      const folder = foldersRef.current.find((f) => f.id === folderId);
+      if (folder && !folder.parentFolderId) {
+        setNavigateToSectionListToken((n) => n + 1);
+      }
+    });
+  }, [registerFolderSelectHandler]);
 
   useEffect(() => {
     const crumbs = [];
@@ -238,6 +253,7 @@ export default function Folders() {
         crumbs.push({
           label: folder.folderName,
           to: `/folders?folderId=${folder.id}`,
+          folderId: folder.id,
         });
       });
     }
@@ -305,6 +321,7 @@ export default function Folders() {
             onCardUpdated={() => {
               // カード更新後の処理
             }}
+            navigateToSectionListToken={navigateToSectionListToken}
           />
         )}
       </div>

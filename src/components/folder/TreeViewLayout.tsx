@@ -39,6 +39,7 @@ interface TreeViewLayoutProps {
   onFolderSelect: (folderId: string | null) => void;
   onItemSelect: (item: SelectedExplorerItem) => void;
   onCardUpdated: () => void;
+  navigateToSectionListToken?: number;
 }
 
 type LegacyCardFields = {
@@ -98,6 +99,7 @@ function TreeViewLayout({
   onFolderSelect,
   onItemSelect,
   onCardUpdated,
+  navigateToSectionListToken = 0,
 }: TreeViewLayoutProps) {
   const navigate = useNavigate();
   const { settings, updateSettings } = useUserSettings();
@@ -791,6 +793,7 @@ function TreeViewLayout({
             onUnpinItem={unpinItem}
             isFiltering={isFiltering}
             createFolderRequestToken={createFolderRequestToken}
+            navigateToSectionListToken={navigateToSectionListToken}
           />
         );
     }

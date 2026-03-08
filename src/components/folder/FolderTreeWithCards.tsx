@@ -99,6 +99,8 @@ interface FolderTreeWithCardsProps {
   isFiltering?: boolean;
   createFolderRequestToken?: number;
 
+  /** セクション一覧に戻るよう外部から要求するトークン（変化のたびにセクション一覧へ） */
+  navigateToSectionListToken?: number;
   /** サイドバー外側のclass（任意） */
   className?: string;
 }
@@ -135,6 +137,7 @@ export function FolderTreeWithCards({
   onUnpinItem,
   isFiltering = false,
   createFolderRequestToken = 0,
+  navigateToSectionListToken = 0,
   className,
 }: FolderTreeWithCardsProps) {
   // フォルダ・カード共通の行スタイル（高さ・padding・背景の描画範囲を完全統一）
@@ -703,9 +706,11 @@ export function FolderTreeWithCards({
       if (!folder) break;
       currentId = normalizeFolderId(getParentFolderId(folder));
     }
-    // ホバーによる selectedFolderId 変化では左ペイン表示を切り替えない。
-    // 既にルート内ツリー表示中のときだけ同期する。
-    if (activeRootFolderId !== null && rootId && activeRootFolderId !== rootId) {
+    // ルートフォルダ自体が選択された場合は activeRootFolderId を変更しない。
+    // （セクション一覧でのハイライト表示のみ行う）
+    if (rootId === selectedFolderId) return;
+    // 対応するルートフォルダのツリーを表示する。
+    if (rootId && activeRootFolderId !== rootId) {
       setActiveRootFolderId(rootId);
     }
   }, [selectedFolderId, rootFolders, treeFolders, activeRootFolderId]);
@@ -1791,8 +1796,8 @@ export function FolderTreeWithCards({
                     key={folder.id}
                     className={cn(
                       "group relative w-full h-8 rounded-[4px] px-2 text-left flex items-center cursor-pointer",
-                      hoveredRootFolderId === folder.id
-                        ? "bg-black/5"
+                      selectedFolderId === folder.id || hoveredRootFolderId === folder.id
+                        ? "bg-[var(--sidebar-active-bg,#e7ebef)]"
                         : "bg-transparent",
                     )}
                     role="button"

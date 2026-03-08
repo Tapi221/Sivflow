@@ -39,7 +39,7 @@ export const TitleBar: React.FC = () => {
   const [isMaximized, setIsMaximized] = useState(false);
   const isDesktop = isDesktopRuntime();
   const crumbs = useBreadcrumbs();
-  const { extraCrumbs } = useBreadcrumbContext();
+  const { extraCrumbs, notifyFolderSelect } = useBreadcrumbContext();
 
   useEffect(() => {
     if (!isDesktop) return;
@@ -67,7 +67,7 @@ export const TitleBar: React.FC = () => {
         : c,
     );
     const extra = extraCrumbs.map((c, i) =>
-      i === extraCrumbs.length - 1 ? { label: c.label, to: undefined } : c,
+      i === extraCrumbs.length - 1 ? { ...c, to: undefined } : c,
     );
     return [...base, ...extra];
   }, [crumbs, extraCrumbs]);
@@ -90,7 +90,11 @@ export const TitleBar: React.FC = () => {
             <React.Fragment key={i}>
               {i > 0 && <span className="text-gray-300 select-none">/</span>}
               {crumb.to ? (
-                <Link to={crumb.to} className="hover:text-gray-600 transition-colors">
+                <Link
+                  to={crumb.to}
+                  className="hover:text-gray-600 transition-colors"
+                  onClick={crumb.folderId ? () => notifyFolderSelect(crumb.folderId!) : undefined}
+                >
                   {crumb.label}
                 </Link>
               ) : (
