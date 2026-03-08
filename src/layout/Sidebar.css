@@ -3,7 +3,8 @@
   flex-direction: column;
   width: 260px;
   height: 100%;
-  background: #fafafa;
+  background: var(--sidebar-bg, #f7f7f8);
+  color: var(--sidebar-text, #202123);
   border-right: 1px solid #eee;
   overflow-y: auto;
   padding: 12px 12px;
@@ -29,7 +30,7 @@
   padding: 7px 12px;
   border-radius: 6px;
   font-size: 14px;
-  color: #555;
+  color: var(--sidebar-text-muted, #6e6e80);
   text-decoration: none;
   transition: background 0.12s, color 0.12s;
   width: 100%;
@@ -37,13 +38,13 @@
 }
 
 .sidebar__nav-item:hover {
-  background: #f0f0f0;
-  color: #111;
+  background: var(--sidebar-active-bg, #f0f0f0);
+  color: var(--sidebar-text, #202123);
 }
 
 .sidebar__nav-item--active {
-  background: #efefef;
-  color: #111;
+  background: var(--sidebar-active-bg, #efefef);
+  color: var(--sidebar-text, #202123);
   font-weight: 600;
 }
 
