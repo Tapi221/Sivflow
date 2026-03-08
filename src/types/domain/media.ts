@@ -1,4 +1,4 @@
-import type { BlobUrl, StorageUrl } from "./branded";
+import type { BlobUrl, StorageUrl } from "../core/branded";
 
 /**
  * メディアアセットの種類

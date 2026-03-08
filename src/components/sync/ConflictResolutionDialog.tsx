@@ -21,7 +21,7 @@ import {
   Merge,
 } from "@/ui/icons";
 import { useAuth } from "@/contexts/AuthContext";
-import type { SyncConflict } from "@/types/sync";
+import type { SyncConflict } from "@/types";
 
 interface ConflictResolutionDialogProps {
   open: boolean;

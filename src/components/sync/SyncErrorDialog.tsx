@@ -17,7 +17,7 @@ import {
 } from "@/ui/icons";
 import { getLocalDb } from "@/services/localDB";
 import { useAuth } from "@/contexts/AuthContext";
-import type { SyncError } from "@/types/sync";
+import type { SyncError } from "@/types";
 
 interface SyncErrorDialogProps {
   open: boolean;

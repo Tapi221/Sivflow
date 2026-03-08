@@ -16,7 +16,7 @@ import {
   ChevronDown,
 } from "@/ui/icons";
 import { getLocalDb } from "@/services/localDB";
-import type { SyncHistory } from "@/types/sync";
+import type { SyncHistory } from "@/types";
 
 interface SyncHistoryDialogProps {
   open: boolean;

@@ -1,0 +1,102 @@
+import { Timestamp } from "firebase/firestore";
+import type { BlobUrl, StorageUrl } from "../core/branded";
+
+export type UploadedImageStatus = "pending" | "uploading" | "ready" | "failed";
+
+/** @deprecated Use UploadedImageStatus instead */
+export type UploadState = "pending" | "inProgress" | "completed" | "failed";
+
+export type UploadSource = "cloud" | "local_fallback";
+export type UploadFallbackReason =
+  | "timeout"
+  | "network_error"
+  | "permission_error"
+  | "unknown";
+
+export type AssetRemoteStatus = "none" | "uploading" | "ready" | "failed";
+export type AssetLocalStatus = "present" | "missing";
+
+export interface AssetRecord {
+  id: string;
+  userId: string;
+  mime: string;
+  size: number;
+  createdAt: Date | Timestamp;
+  updatedAt: Date | Timestamp;
+  localBlobId: string | null;
+  localStatus: AssetLocalStatus;
+  remoteKey?: string | null;
+  remoteStatus: AssetRemoteStatus;
+  remoteUrlCache?: string | null;
+  retryCount?: number;
+  width?: number | null;
+  height?: number | null;
+  sha256?: string | null;
+}
+
+export interface CardImageRef {
+  assetId: string;
+}
+
+export interface ProfileImage {
+  remoteUrl: string | null;
+  updatedAt: number;
+}
+
+export interface UploadedImage {
+  id: string;
+  assetId?: string | null;
+  localUrl?: BlobUrl | null;
+  remoteUrl?: StorageUrl | null;
+  thumbnailUrl?: StorageUrl | null;
+  remoteId?: string | null;
+  storagePath?: string | null;
+  localFileId?: string | null;
+  status: UploadedImageStatus;
+  progress?: number;
+  contentType?: string | null;
+  size?: number | null;
+  sizeBytes?: number | null;
+  checksum?: string;
+  retryCount?: number;
+  error?: string;
+  uploadOrder?: number;
+  scale?: number | null;
+  x?: number | null;
+  naturalW?: number | null;
+  naturalH?: number | null;
+  uploadState?: UploadState;
+  lastAttempt?: Date | Timestamp | null;
+  source?: UploadSource;
+  fallbackReason?: UploadFallbackReason;
+  updatedAt?: Date | Timestamp | null;
+}
+
+export interface UploadedFile {
+  id: string;
+  name: string;
+  remoteUrl: string;
+  storagePath: string;
+  contentType?: string | null;
+  size?: number | null;
+}
+
+export interface UploadMetadata {
+  id: string;
+  userId: string;
+  originalFilename: string;
+  storagePath: string;
+  mimeType: string;
+  sizeBytes: number;
+  context:
+    | "card_image"
+    | "profile"
+    | "card_audio"
+    | "pdf"
+    | "pptx"
+    | { type: string; [key: string]: unknown };
+  status: "pending" | "uploading" | "ready" | "failed";
+  userAgent?: string;
+  downloadUrl?: string;
+  uploadedAt?: Date | Timestamp;
+}
