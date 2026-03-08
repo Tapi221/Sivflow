@@ -1,0 +1,24 @@
+{
+  "$schema": "https://unpkg.com/knip/schema.json",
+  "entry": [
+    "src/main.{ts,tsx,js,jsx}",
+    "electron/main.ts",
+    "electron/preload.ts",
+    "functions/src/index.ts",
+    "src/sw.ts",
+    "vite.config.{ts,js,mjs,mts}",
+    "vitest.config.{ts,js,mjs,mts}",
+    "scripts/**/*.{js,mjs,cjs,ts}"
+  ],
+  "project": [
+    "src/**/*.{ts,tsx,js,jsx}",
+    "electron/**/*.{ts,tsx,js,jsx}",
+    "functions/src/**/*.{ts,tsx,js,jsx}",
+    "scripts/**/*.{ts,js,mjs,cjs}",
+    "tests/**/*.{ts,tsx,js,jsx}"
+  ],
+  "ignore": [
+    "dist/**/*",
+    "coverage/**/*"
+  ]
+}

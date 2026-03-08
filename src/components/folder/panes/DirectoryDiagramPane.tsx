@@ -5,7 +5,7 @@ import { TagBadge } from "@/components/tag/TagBadge";
 import { resolveCardTagNames, useTags } from "@/hooks/settings/useTags";
 import { cn } from "@/lib/utils";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
-import { ExplorerFilterSummary } from "./ExplorerFilterSummary";
+import { ExplorerFilterSummary } from "../components/explorer/ExplorerFilterSummary";
 import { TagFilterPopover } from "@/components/explorer/TagFilterPopover";
 import {
   Popover,
@@ -521,6 +521,7 @@ export function DirectoryDiagramPane({
     </div>
   );
 }
+
 
 
 

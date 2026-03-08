@@ -8,14 +8,14 @@ import { cn } from "@/lib/utils";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 import { useCallback, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { TreeViewDialogs } from "./components/TreeViewDialogs";
-import { TreeViewMainPane } from "./components/TreeViewMainPane";
-import { TreeViewSidebar } from "./components/TreeViewSidebar";
-import { TreeViewTabContent } from "./components/TreeViewTabContent";
-import { useTreeViewActions } from "./hooks/useTreeViewActions";
-import { useTreeViewDerivedState } from "./hooks/useTreeViewDerivedState";
-import { useTreeViewFilters } from "./hooks/useTreeViewFilters";
-import { useTreeViewSidebar } from "./hooks/useTreeViewSidebar";
+import { TreeViewDialogs } from "../components/TreeViewDialogs";
+import { TreeViewMainPane } from "../components/TreeViewMainPane";
+import { TreeViewSidebar } from "../components/TreeViewSidebar";
+import { TreeViewTabContent } from "../components/TreeViewTabContent";
+import { useTreeViewActions } from "../hooks/useTreeViewActions";
+import { useTreeViewDerivedState } from "../hooks/useTreeViewDerivedState";
+import { useTreeViewFilters } from "../hooks/useTreeViewFilters";
+import { useTreeViewSidebar } from "../hooks/useTreeViewSidebar";
 import {
   ACTIVE_VIEW_KINDS,
   DEFAULT_FOLDER_VIEW,
@@ -23,7 +23,7 @@ import {
   createViewId,
   type ViewDef,
   type ViewKind,
-} from "./viewTypes";
+} from "../types/viewTypes";
 
 interface TreeViewLayoutProps {
   folders: Folder[];
@@ -459,4 +459,5 @@ function TreeViewLayout({
 }
 
 export default TreeViewLayout;
+
 

@@ -427,7 +427,3 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
     return results;
   }
 }
-
-
-
-
