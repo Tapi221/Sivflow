@@ -1,5 +1,5 @@
 import type { UploadedImage } from "@/types";
-import { isBase64DataUrl, isBlobUrl, isStorageUrl } from "@/types/branded";
+import { isBase64DataUrl, isBlobUrl, isStorageUrl } from "@/types/core/branded";
 
 /**
  * 画像ドメインの不変条件違反を示すエラー
@@ -101,3 +101,4 @@ export const warnImageInvariant = (message: string, imageId?: string): void => {
     );
   }
 };
+

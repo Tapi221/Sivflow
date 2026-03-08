@@ -2,8 +2,8 @@ import { storage } from "./firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { initializeDB, getLocalDb } from "./localDB";
 import type { UploadedImage } from "@/types";
-import type { BlobUrl, StorageUrl } from "@/types/branded";
-import { createStorageUrl, revokeBlobUrl } from "@/types/branded";
+import type { BlobUrl, StorageUrl } from "@/types/core/branded";
+import { createStorageUrl, revokeBlobUrl } from "@/types/core/branded";
 import { assertImageInvariant } from "@/utils/imageAssertions";
 
 /**
@@ -256,3 +256,4 @@ export class ImageSyncOrchestrator {
     onProgress?.(`完了: ${totalProcessed} 件の画像を同期しました`);
   }
 }
+

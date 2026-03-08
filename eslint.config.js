@@ -19,5 +19,18 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "@/types/branded",
+              message: "Use '@/types/core/branded' instead.",
+            },
+          ],
+        },
+      ],
+    },
   },
 ]);

@@ -1,5 +1,5 @@
-import type { Base64DataUrl, BlobUrl } from "@/types/branded";
-import { createBase64DataUrl, createBlobUrl } from "@/types/branded";
+import type { Base64DataUrl, BlobUrl } from "@/types/core/branded";
+import { createBase64DataUrl, createBlobUrl } from "@/types/core/branded";
 
 /**
  * 画像を圧縮してBase64 data URLに変換（内部使用のみ）
@@ -109,3 +109,4 @@ export const compressAndConvertToBase64 = compressAndConvertToBase64Internal;
 export const uploadImageAsBase64 = async (file: File): Promise<string> => {
   return compressAndConvertToBase64Internal(file);
 };
+

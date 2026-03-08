@@ -1,5 +1,5 @@
 import type { UploadSource, UploadFallbackReason } from "@/types";
-import type { BlobUrl, StorageUrl } from "@/types/branded";
+import type { BlobUrl, StorageUrl } from "@/types/core/branded";
 import { generateUploadedImageId } from "./factory";
 
 export type NormalizeUploadedImageOptions = {
@@ -205,3 +205,4 @@ export const denormalizeUploadedImages = (
 ) => {
   return images.map((image) => denormalizeUploadedImage(image, options));
 };
+
