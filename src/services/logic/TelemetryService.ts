@@ -163,7 +163,3 @@ export class TelemetryService implements ITelemetryService {
     return this.logs.filter((log) => log.level === "error").slice(-limit);
   }
 }
-
-
-
-
