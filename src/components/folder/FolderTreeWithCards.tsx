@@ -1894,16 +1894,6 @@ export function FolderTreeWithCards({
               </div>
             ) : (
               <div className="h-full min-h-0 flex flex-col">
-                <div className="shrink-0 px-2 py-1.5">
-                  <button
-                    type="button"
-                    className="inline-flex items-center gap-1.5 h-7 rounded-full px-2 text-[12px] text-[#334155] bg-[var(--sidebar-bg)] surface-control-convex"
-                    onClick={() => setActiveRootFolderId(null)}
-                  >
-                    <ChevronLeft className="h-3.5 w-3.5" />
-                    セクション一覧
-                  </button>
-                </div>
                 <div className="flex-1 min-h-0">
                   <FolderTreeArborist
                     data={scopedTreeData}
