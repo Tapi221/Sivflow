@@ -3,7 +3,11 @@ import { pdfjsLib } from "@/lib/pdfjs";
 
 export type PageSize = { width: number; height: number };
 
-export type SourceLoadErrorKind = "remote-url" | "blob-url" | "data" | "unknown";
+export type SourceLoadErrorKind =
+  | "remote-url"
+  | "blob-url"
+  | "data"
+  | "unknown";
 
 export interface PdfDocumentProxy {
   numPages: number;
@@ -26,7 +30,9 @@ export interface PdfDocumentResult {
   pageSizes: Record<number, PageSize>;
   loading: boolean;
   error: string | null;
-  setPageSizes: React.Dispatch<React.SetStateAction<Record<number, PageSize>>>;
+  setPageSizes: React.Dispatch<
+    React.SetStateAction<Record<number, PageSize>>
+  >;
 }
 
 interface UsePdfDocumentParams {
@@ -104,10 +110,17 @@ export function usePdfDocument({
   // Load
   useEffect(() => {
     let cancelled = false;
-    let loadingTask: { promise: Promise<PdfDocumentProxy>; destroy?(): void } | null = null;
+    let loadingTask: {
+      promise: Promise<PdfDocumentProxy>;
+      destroy?(): void;
+    } | null = null;
 
     if (docRef.current) {
-      try { docRef.current.destroy(); } catch { /* noop */ }
+      try {
+        docRef.current.destroy();
+      } catch {
+        /* noop */
+      }
       docRef.current = null;
     }
 
@@ -115,10 +128,14 @@ export function usePdfDocument({
     setNumPages(0);
     setPageSizes({});
     setError(null);
+
     currentPageRef.current = 1;
     pageRefsRef.current = [];
     visibilityRatiosRef.current = {};
-    if (scrollContainerRef.current) scrollContainerRef.current.scrollTop = 0;
+
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 0;
+    }
 
     const hasUrl = sourceUrl.length > 0;
     const hasData = sourceDataLength > 0;
@@ -159,35 +176,51 @@ export function usePdfDocument({
         params.data = sourceData;
         return params;
       }
+
       if (hasUrl) {
         if (sourceUrl.startsWith("blob:")) {
           const res = await fetch(sourceUrl);
-          if (!res.ok) throw new Error(`blob fetch failed: ${res.status}`);
+          if (!res.ok) {
+            throw new Error(`blob fetch failed: ${res.status}`);
+          }
           params.data = new Uint8Array(await res.arrayBuffer());
           return params;
         }
+
         params.url = sourceUrl;
         return params;
       }
+
       return null;
     };
 
-    (async () => {
+    void (async () => {
       try {
         const params = await buildParams();
-        if (!params) throw new Error("missing pdf source");
+        if (!params) {
+          throw new Error("missing pdf source");
+        }
 
         loadingTask = pdfjsLib.getDocument(params) as {
           promise: Promise<PdfDocumentProxy>;
           destroy?(): void;
         };
+
         const pdf = await loadingTask.promise;
 
-        if (cancelled) { pdf.destroy?.(); return; }
+        if (cancelled) {
+          pdf.destroy?.();
+          return;
+        }
 
         if (docRef.current) {
-          try { docRef.current.destroy(); } catch { /* noop */ }
+          try {
+            docRef.current.destroy();
+          } catch {
+            /* noop */
+          }
         }
+
         docRef.current = pdf;
         setDoc(pdf);
         setNumPages(pdf.numPages || 0);
@@ -197,9 +230,13 @@ export function usePdfDocument({
         setError(null);
       } catch (err: unknown) {
         if (cancelled) return;
+
         const msg = String((err as { message?: string })?.message ?? err ?? "");
+
         console.error("[PdfViewer] load error", {
-          error: err, hasUrl, hasData,
+          error: err,
+          hasUrl,
+          hasData,
           dataByteLength: sourceDataLength,
           url: sourceMetaUrl ?? (sourceUrl || null),
           blobUrl: sourceMetaBlobUrl,
@@ -207,46 +244,87 @@ export function usePdfDocument({
           remoteUrl: sourceMetaRemoteUrl,
           sourceUpdatedAt: sourceMetaUpdatedAt,
         });
+
         setDoc(null);
         setNumPages(0);
         onNumPages(0);
         onFirstPageSize?.(null);
         setError(`PDFの読み込みに失敗しました: ${msg}`);
+
         if (onSourceLoadError) {
           const kind: SourceLoadErrorKind = hasData
             ? "data"
             : hasUrl && sourceUrl.startsWith("blob:")
               ? "blob-url"
-              : hasUrl ? "remote-url" : "unknown";
+              : hasUrl
+                ? "remote-url"
+                : "unknown";
+
           try {
-            onSourceLoadError({ kind, url: hasUrl ? sourceUrl : null, message: msg });
+            onSourceLoadError({
+              kind,
+              url: hasUrl ? sourceUrl : null,
+              message: msg,
+            });
           } catch (cbErr) {
-            console.warn("[PdfViewer] onSourceLoadError callback failed", cbErr);
+            console.warn(
+              "[PdfViewer] onSourceLoadError callback failed",
+              cbErr,
+            );
           }
         }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     })();
 
     return () => {
       cancelled = true;
-      try { loadingTask?.destroy?.(); } catch { /* noop */ }
-      try { docRef.current?.destroy(); } catch { /* noop */ }
+      try {
+        loadingTask?.destroy?.();
+      } catch {
+        /* noop */
+      }
+      try {
+        docRef.current?.destroy();
+      } catch {
+        /* noop */
+      }
       docRef.current = null;
     };
   }, [
-    sourceKey, sourceData, sourceDataLength, sourceUrl,
-    onNumPages, onFirstPageSize, onSourceLoadError,
-    enableXfa, useSystemFonts, cMapUrl, standardFontDataUrl,
-    sourceMetaUrl, sourceMetaBlobUrl, sourceMetaLocalFileId,
-    sourceMetaRemoteUrl, sourceMetaUpdatedAt,
+    sourceKey,
+    sourceData,
+    sourceDataLength,
+    sourceUrl,
+    onNumPages,
+    onFirstPageSize,
+    onSourceLoadError,
+    enableXfa,
+    useSystemFonts,
+    cMapUrl,
+    standardFontDataUrl,
+    sourceMetaUrl,
+    sourceMetaBlobUrl,
+    sourceMetaLocalFileId,
+    sourceMetaRemoteUrl,
+    sourceMetaUpdatedAt,
+    currentPageRef,
+    pageRefsRef,
+    scrollContainerRef,
+    visibilityRatiosRef,
   ]);
 
   // Unmount cleanup
   useEffect(() => {
     return () => {
-      try { docRef.current?.destroy(); } catch { /* noop */ }
+      try {
+        docRef.current?.destroy();
+      } catch {
+        /* noop */
+      }
       docRef.current = null;
     };
   }, []);
@@ -254,11 +332,14 @@ export function usePdfDocument({
   // First page size
   useEffect(() => {
     if (!doc) return;
+
     let cancelled = false;
-    (async () => {
+
+    void (async () => {
       try {
         const page = await doc.getPage(1);
         if (cancelled) return;
+
         const vp = page.getViewport({ scale: 1 });
         const size: PageSize = { width: vp.width, height: vp.height };
         setPageSizes({ 1: size });
@@ -271,12 +352,16 @@ export function usePdfDocument({
         }
       }
     })();
-    return () => { cancelled = true; };
+
+    return () => {
+      cancelled = true;
+    };
   }, [doc, onFirstPageSize]);
 
   // numPages 変化時に visibility を trim
   useEffect(() => {
     if (!numPages) return;
+
     const next: Record<number, number> = {};
     for (const [key, ratio] of Object.entries(visibilityRatiosRef.current)) {
       const page = Number(key);
@@ -288,6 +373,3 @@ export function usePdfDocument({
 
   return { doc, numPages, pageSizes, loading, error, setPageSizes };
 }
-
-
-

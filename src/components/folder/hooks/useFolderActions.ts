@@ -11,13 +11,6 @@ import { useToast } from "@/contexts/ToastContext";
 import type { Card, SelectedExplorerItem } from "@/types";
 import { useCallback, useRef } from "react";
 
-type LegacyFolder = FolderTreeNode & {
-  is_hidden?: boolean;
-  isHidden?: boolean;
-  folder_name?: string;
-  order_index?: number;
-};
-
 const isSoftDeleted = (entity?: { isDeleted?: boolean; is_deleted?: boolean } | null) =>
   Boolean(entity?.isDeleted ?? entity?.is_deleted);
 
@@ -329,6 +322,7 @@ export function useFolderActions({
     editingIdRef,
     editingNameRef,
     renameCancelledRef,
+    toastError,
   ]);
 
   const handleDelete = useCallback(
@@ -373,6 +367,9 @@ export function useFolderActions({
     handleConfirmDeleteFolder,
   };
 }
+
+
+
 
 
 

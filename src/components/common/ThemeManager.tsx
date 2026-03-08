@@ -119,7 +119,7 @@ export function ThemeManager() {
       accentColor;
     latestAccentRef.current = immediate;
     applyTheme(immediate);
-  }, []);
+  }, [accentColor]);
 
   useEffect(() => {
     latestAccentRef.current = accentColor;
@@ -148,10 +148,11 @@ export function ThemeManager() {
       window.removeEventListener("pageshow", reapply);
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, []);
+  }, [accentColor]);
 
   return null;
 }
+
 
 
 

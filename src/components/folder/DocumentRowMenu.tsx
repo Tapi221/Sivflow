@@ -127,7 +127,7 @@ export function DocumentRowMenu({
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("keydown", handleEscape);
     };
-  }, [menuOpen]);
+  }, [menuOpen, setMenuOpen]);
 
   const enabledFolders = useMemo(
     () => folders.filter((folder) => !isSoftDeleted(asFolderLike(folder))),
@@ -402,6 +402,8 @@ export function DocumentRowMenu({
     </div>
   );
 }
+
+
 
 
 
