@@ -1,3 +1,4 @@
+import type { UploadedImage } from "@/types";
 import { createBlobUrl } from "@/types/branded";
 
 const generateUploadedImageId = (): string => {
@@ -7,15 +8,16 @@ const generateUploadedImageId = (): string => {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 };
 
-export const createUploadedImage = (file: File) => {
+export const createUploadedImage = (file: File): UploadedImage => {
   const id = generateUploadedImageId();
+
   return {
     id,
     assetId: id,
     localFileId: id,
     localUrl: createBlobUrl(URL.createObjectURL(file)),
     remoteUrl: null,
-    status: "uploading" as const,
+    status: "uploading",
     contentType: file.type || null,
     size: Number.isFinite(file.size) ? file.size : null,
     storagePath: null,
@@ -26,15 +28,16 @@ export const createUploadedImage = (file: File) => {
   };
 };
 
-export const createFailedUploadedImage = (file: File) => {
+export const createFailedUploadedImage = (file: File): UploadedImage => {
   const id = generateUploadedImageId();
+
   return {
     id,
     assetId: id,
     localFileId: id,
     localUrl: null,
     remoteUrl: null,
-    status: "failed" as const,
+    status: "failed",
     contentType: file.type || null,
     size: Number.isFinite(file.size) ? file.size : null,
     storagePath: null,
