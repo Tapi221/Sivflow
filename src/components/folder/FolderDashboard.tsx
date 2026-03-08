@@ -8,13 +8,10 @@ import {
   YAxis,
   Cell,
 } from "recharts";
-import { Button } from "@/components/ui/button";
-import { EmptyState } from "@/components/ui/EmptyState";
 import { extractTextFromBlocks } from "@/utils";
 import { calculateResistanceScore } from "@/utils/reviewMetrics";
 import type { Card } from "@/types";
 import { ChevronLeft, ChevronRight } from "@/ui/icons";
-import { getPageRuledBg } from "@/components/card/frame/ruledStyles";
 
 type FolderDashboardHandlers = {
   onStartStudy: () => void;
@@ -84,14 +81,87 @@ const previewSnippet = (card: Card, headingText: string): string => {
     text === heading || text.startsWith(heading) || heading.startsWith(text);
 
   if (isDuplicatedWithHeading) {
-    // 見出しと本文の二重表示を避ける。代替本文がない場合は本文を出さない。
     text = answerText && answerText !== questionText ? answerText : "";
   }
 
   if (!text) return "";
-  return text.length > 92 ? `${text.slice(0, 92)}...` : text;
+  return text.length > 80 ? `${text.slice(0, 80)}...` : text;
 };
 
+// ── Section header ────────────────────────────────────────────────────────────
+interface SectionHeaderProps {
+  title: string;
+  action?: ReactNode;
+}
+
+function SectionHeader({ title, action }: SectionHeaderProps) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        paddingBottom: 6,
+        borderBottom: "1px solid var(--section-divider, #ebebeb)",
+        marginBottom: 0,
+      }}
+    >
+      <span
+        style={{
+          fontSize: "var(--font-size-section, 13px)",
+          fontWeight: 500,
+          color: "var(--section-header-color, #6b6b6b)",
+          letterSpacing: "0.01em",
+        }}
+      >
+        {title}
+      </span>
+      {action}
+    </div>
+  );
+}
+
+// ── Properties panel ──────────────────────────────────────────────────────────
+interface PropertyRowProps {
+  label: string;
+  value: ReactNode;
+}
+
+function PropertyRow({ label, value }: PropertyRowProps) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "baseline",
+        gap: 8,
+        padding: "4px 0",
+        borderBottom: "1px solid var(--section-divider, #ebebeb)",
+      }}
+    >
+      <span
+        style={{
+          width: 88,
+          flexShrink: 0,
+          fontSize: "var(--font-size-meta, 12px)",
+          color: "var(--property-label-color, #8a8a8a)",
+        }}
+      >
+        {label}
+      </span>
+      <span
+        style={{
+          fontSize: "var(--font-size-body, 13px)",
+          color: "var(--property-value-color, #1a1a1a)",
+          fontVariantNumeric: "tabular-nums",
+        }}
+      >
+        {value}
+      </span>
+    </div>
+  );
+}
+
+// ── Main component ────────────────────────────────────────────────────────────
 export function FolderDashboard({
   folderId,
   folderName,
@@ -122,17 +192,40 @@ export function FolderDashboard({
     });
   }, [activeCards]);
 
+  const dueToday = useMemo(() => {
+    const today = new Date();
+    today.setHours(23, 59, 59, 999);
+    return activeCards.filter((card) => {
+      const next = toDate(
+        card.nextReviewDate ?? (card as unknown).next_review_date,
+      );
+      return next && next <= today;
+    }).length;
+  }, [activeCards]);
+
+  const unlearned = useMemo(() => {
+    return activeCards.filter((card) => {
+      const reviewCount = card.reviewCount ?? (card as unknown).review_count ?? 0;
+      return reviewCount === 0;
+    }).length;
+  }, [activeCards]);
+
+  const lastReviewedDate = useMemo(() => {
+    let latest: Date | null = null;
+    for (const card of reviewedCards) {
+      const d = toDate(card.lastReviewAt ?? (card as unknown).last_review_at);
+      if (d && (!latest || d > latest)) latest = d;
+    }
+    return latest;
+  }, [reviewedCards]);
+
   const hasMinimumReviewedCards = reviewedCards.length >= 1;
 
   const resilienceBuckets = useMemo(() => {
     const buckets = Array.from({ length: 20 }, (_, i) => {
       const min = i * 5;
       const max = min + 5;
-      return {
-        label: `${min}-${max}%`,
-        min,
-        count: 0,
-      };
+      return { label: `${min}-${max}%`, min, count: 0 };
     });
 
     reviewedCards.forEach((card) => {
@@ -175,170 +268,295 @@ export function FolderDashboard({
   }, [resilienceBuckets]);
 
   const getDistributionOpacity = (min: number) => {
-    if (min >= 80) return 0.92;
-    if (min >= 60) return 0.8;
-    if (min >= 40) return 0.66;
-    if (min >= 20) return 0.5;
-    return 0.38;
+    if (min >= 80) return 0.9;
+    if (min >= 60) return 0.75;
+    if (min >= 40) return 0.6;
+    if (min >= 20) return 0.44;
+    return 0.32;
   };
 
-  const cardClass =
-    "rounded-2xl border border-[var(--surface-border)] p-4 bg-[var(--sidebar-bg)] surface-concave";
-
   return (
-    <div className="relative h-full overflow-y-auto">
+    <div
+      style={{
+        height: "100%",
+        overflowY: "auto",
+        background: "#ffffff",
+      }}
+    >
+      {/* ── Page header ── */}
       <div
-        className="pointer-events-none absolute inset-0"
-        style={getPageRuledBg("rgba(15,23,42,0.035)")}
-      />
-      <div className="relative z-[1] max-w-[1120px] mx-auto w-full">
-        <div
-          className="flex items-center justify-between gap-4 px-4 border-b border-[var(--surface-border)]"
-          style={{ height: 50 }}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "0 20px",
+          height: 48,
+          borderBottom: "1px solid var(--pane-border, #e8e8e8)",
+          flexShrink: 0,
+        }}
+      >
+        <h1
+          style={{
+            fontSize: "var(--font-size-page-title, 22px)",
+            fontWeight: 600,
+            color: "var(--text-primary, #1a1a1a)",
+            letterSpacing: "-0.015em",
+            margin: 0,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
         >
-          <h2 className="text-[20px] font-semibold text-[var(--sidebar-text)] tracking-[-0.01em] truncate">
-            {folderName || folderId}
-          </h2>
-          <div className="flex items-center gap-1 shrink-0">
-            <button
-              type="button"
-              onClick={handlers.onStartStudy}
-              className="px-3 py-1 text-[13px] text-[var(--sidebar-text)] rounded-md hover:bg-[var(--sidebar-active-bg)] transition-colors"
-            >
-              学習する
-            </button>
-            <button
-              type="button"
-              onClick={handlers.onViewCards}
-              className="px-3 py-1 text-[13px] text-[var(--sidebar-text-muted)] rounded-md hover:bg-[var(--sidebar-active-bg)] transition-colors"
-            >
-              閲覧
-            </button>
-            <button
-              type="button"
-              onClick={handlers.onCreateCard}
-              className="px-3 py-1 text-[13px] text-[var(--sidebar-text-muted)] rounded-md hover:bg-[var(--sidebar-active-bg)] transition-colors"
-            >
-              作成
-            </button>
-          </div>
+          {folderName || folderId}
+        </h1>
+
+        {/* Toolbar */}
+        <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <ToolbarButton onClick={handlers.onStartStudy} primary>
+            学習する
+          </ToolbarButton>
+          <ToolbarButton onClick={handlers.onCreateCard}>作成</ToolbarButton>
+          <ToolbarButton onClick={handlers.onViewCards}>カード一覧</ToolbarButton>
         </div>
+      </div>
 
-        <div className="px-4 pt-4 pb-6 space-y-4">
-          <div className="grid grid-cols-1 gap-4 items-stretch">
-            <section className={cardClass}>
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <h3 className="h-[var(--app-row-px)] text-[12px] leading-[var(--app-row-px)] font-semibold tracking-[0.08em] text-[var(--sidebar-text-muted)] uppercase">
-                    カード一覧
-                  </h3>
-                  <p className="text-xs text-[var(--sidebar-text-muted)] mt-1">
-                    横にスワイプして確認
-                  </p>
-                </div>
-                <div className="shrink-0">
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="ghost"
-                    onClick={handlers.onViewCards}
-                    className="h-8 px-3 text-xs"
-                  >
-                    すべて開く
-                  </Button>
-                </div>
-              </div>
-
+      {/* ── Main layout: content + properties ── */}
+      <div
+        style={{
+          display: "flex",
+          height: "calc(100% - 48px)",
+          overflow: "hidden",
+        }}
+      >
+        {/* ── Center content ── */}
+        <div
+          style={{
+            flex: 1,
+            minWidth: 0,
+            overflowY: "auto",
+            padding: "20px 24px",
+          }}
+        >
+          {/* Cards section */}
+          <section style={{ marginBottom: 28 }}>
+            <SectionHeader
+              title="カード"
+              action={
+                <button
+                  type="button"
+                  onClick={handlers.onViewCards}
+                  style={{
+                    fontSize: "var(--font-size-meta, 12px)",
+                    color: "var(--text-muted, #8a8a8a)",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    padding: "2px 6px",
+                    borderRadius: 3,
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.background =
+                      "var(--hover-bg, rgba(0,0,0,0.04))";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.background = "none";
+                  }}
+                >
+                  すべて表示
+                </button>
+              }
+            />
+            <div style={{ marginTop: 12 }}>
               <CardScrollSection
                 cards={sliderCards}
-                onEmpty={
-                  <EmptyState
-                    title="カードがありません"
-                    description="新規カードを作成するとここに表示されます"
-                    className="py-3"
-                  />
-                }
+                onEmpty={<InlineEmptyState text="カードがまだありません" action="作成する" onAction={handlers.onCreateCard} />}
               />
-            </section>
-          </div>
-
-          <section className={cardClass}>
-            <div className="min-w-0">
-              <h3 className="h-[var(--app-row-px)] text-[12px] leading-[var(--app-row-px)] font-semibold tracking-[0.08em] text-[var(--sidebar-text-muted)] uppercase">
-                耐性スコア分布
-              </h3>
-              <p className="text-xs text-[var(--sidebar-text-muted)] mt-1">
-                学習の定着度をざっくり可視化
-              </p>
             </div>
+          </section>
 
-            <div className="h-[340px] mt-3 rounded-2xl bg-[var(--sidebar-bg)] border border-[var(--surface-border)] surface-concave px-3 py-4">
+          {/* Resilience distribution section */}
+          <section>
+            <SectionHeader title="定着度分布" />
+            <div style={{ marginTop: 12 }}>
               {canShowDistribution ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={resilienceBuckets}
-                    margin={{ top: 18, right: 16, bottom: 20, left: 4 }}
-                  >
-                    <XAxis
-                      dataKey="min"
-                      tickLine={false}
-                      axisLine={false}
-                      fontSize={10}
-                      stroke="#94a3b8"
-                      tickFormatter={(v) =>
-                        v % 20 === 0 || v === 0 ? `${v}%` : ""
-                      }
-                    />
-                    <YAxis
-                      domain={[0, maxBucketCount]}
-                      tickLine={false}
-                      axisLine={false}
-                      fontSize={11}
-                      stroke="#94a3b8"
-                      width={28}
-                      tickFormatter={(v) => (v === 0 ? "" : String(v))}
-                    />
-                    <Bar dataKey="count" radius={[4, 4, 0, 0]}>
-                      {resilienceBuckets.map((bucket) => (
-                        <Cell
-                          key={bucket.label}
-                          fill="var(--color-primary-600-hex, #689A98)"
-                          fillOpacity={getDistributionOpacity(bucket.min)}
-                        />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              ) : (
-                <EmptyState
-                  title="まだデータがありません"
-                  description="カードを復習すると分布が表示されます"
-                  action={
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="secondary"
-                      onClick={handlers.onStartStudy}
-                      className="h-8 px-4 text-xs"
+                <div style={{ height: 200 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={resilienceBuckets}
+                      margin={{ top: 4, right: 8, bottom: 16, left: 0 }}
                     >
-                      学習を始める
-                    </Button>
-                  }
+                      <XAxis
+                        dataKey="min"
+                        tickLine={false}
+                        axisLine={false}
+                        fontSize={10}
+                        stroke="var(--text-muted, #8a8a8a)"
+                        tickFormatter={(v) =>
+                          v % 20 === 0 || v === 0 ? `${v}%` : ""
+                        }
+                      />
+                      <YAxis
+                        domain={[0, maxBucketCount]}
+                        tickLine={false}
+                        axisLine={false}
+                        fontSize={10}
+                        stroke="var(--text-muted, #8a8a8a)"
+                        width={24}
+                        tickFormatter={(v) => (v === 0 ? "" : String(v))}
+                      />
+                      <Bar dataKey="count" radius={[2, 2, 0, 0]}>
+                        {resilienceBuckets.map((bucket) => (
+                          <Cell
+                            key={bucket.label}
+                            fill="var(--color-primary-600-hex, #689A98)"
+                            fillOpacity={getDistributionOpacity(bucket.min)}
+                          />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <InlineEmptyState
+                  text="復習するとここに定着度が表示されます"
+                  action="学習を始める"
+                  onAction={handlers.onStartStudy}
                 />
               )}
             </div>
           </section>
         </div>
+
+        {/* ── Right: Properties pane ── */}
+        <aside
+          style={{
+            width: 200,
+            flexShrink: 0,
+            borderLeft: "1px solid var(--pane-border, #e8e8e8)",
+            padding: "20px 16px",
+            overflowY: "auto",
+          }}
+        >
+          <p
+            style={{
+              fontSize: "var(--font-size-meta, 12px)",
+              fontWeight: 500,
+              color: "var(--section-header-color, #6b6b6b)",
+              marginBottom: 8,
+              letterSpacing: "0.04em",
+              textTransform: "uppercase",
+            }}
+          >
+            Properties
+          </p>
+          <PropertyRow label="カード数" value={activeCards.length} />
+          <PropertyRow label="今日やる" value={dueToday} />
+          <PropertyRow label="未学習" value={unlearned} />
+          <PropertyRow label="学習済み" value={reviewedCards.length} />
+          <PropertyRow
+            label="最終復習"
+            value={
+              lastReviewedDate
+                ? lastReviewedDate.toLocaleDateString("ja-JP", {
+                    month: "short",
+                    day: "numeric",
+                  })
+                : "—"
+            }
+          />
+        </aside>
       </div>
     </div>
   );
 }
 
-// ----------------------------------------------------------
-// カード一覧の横スクロールセクション
-// 右端見切れ・フェードオーバーレイ・矢印ボタンを備えたカルーセルUI
-// ----------------------------------------------------------
-const CARD_SCROLL_AMOUNT = 264; // scrollByの量 (px)
+// ── Toolbar button ────────────────────────────────────────────────────────────
+interface ToolbarButtonProps {
+  onClick: () => void;
+  children: ReactNode;
+  primary?: boolean;
+}
+
+function ToolbarButton({ onClick, children, primary }: ToolbarButtonProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        fontSize: "var(--font-size-body, 13px)",
+        fontWeight: primary ? 500 : 400,
+        color: primary
+          ? "var(--sidebar-active-accent, #7aa6a1)"
+          : "var(--text-secondary, #4b4b4b)",
+        background: "none",
+        border: "none",
+        cursor: "pointer",
+        padding: "4px 8px",
+        borderRadius: 4,
+        transition: "background 0.1s",
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLElement).style.background =
+          "var(--toolbar-btn-hover, rgba(0,0,0,0.06))";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLElement).style.background = "none";
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
+// ── Inline empty state ────────────────────────────────────────────────────────
+interface InlineEmptyStateProps {
+  text: string;
+  action?: string;
+  onAction?: () => void;
+}
+
+function InlineEmptyState({ text, action, onAction }: InlineEmptyStateProps) {
+  return (
+    <div
+      style={{
+        padding: "16px 0",
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+      }}
+    >
+      <span
+        style={{
+          fontSize: "var(--font-size-body, 13px)",
+          color: "var(--text-muted, #8a8a8a)",
+        }}
+      >
+        {text}
+      </span>
+      {action && onAction ? (
+        <button
+          type="button"
+          onClick={onAction}
+          style={{
+            fontSize: "var(--font-size-meta, 12px)",
+            color: "var(--sidebar-active-accent, #7aa6a1)",
+            background: "none",
+            border: "1px solid currentColor",
+            borderRadius: 3,
+            padding: "2px 8px",
+            cursor: "pointer",
+            opacity: 0.85,
+          }}
+        >
+          {action}
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+// ── Card scroll section ───────────────────────────────────────────────────────
+const CARD_SCROLL_AMOUNT = 264;
 
 interface CardScrollSectionProps {
   cards: Card[];
@@ -350,7 +568,6 @@ function CardScrollSection({ cards, onEmpty }: CardScrollSectionProps) {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
-  // スクロール状態を更新
   const updateScrollState = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
@@ -359,9 +576,7 @@ function CardScrollSection({ cards, onEmpty }: CardScrollSectionProps) {
     setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 4);
   }, []);
 
-  // 初期表示・カード変化・リサイズ時に再判定
   useEffect(() => {
-    // 描画完了後に判定する
     const id = requestAnimationFrame(updateScrollState);
     const el = scrollRef.current;
     if (!el) return () => cancelAnimationFrame(id);
@@ -376,7 +591,6 @@ function CardScrollSection({ cards, onEmpty }: CardScrollSectionProps) {
     };
   }, [cards, updateScrollState]);
 
-  // 矢印クリックでスムーススクロール
   const scrollBy = useCallback((dir: "left" | "right") => {
     scrollRef.current?.scrollBy({
       left: dir === "right" ? CARD_SCROLL_AMOUNT : -CARD_SCROLL_AMOUNT,
@@ -384,7 +598,6 @@ function CardScrollSection({ cards, onEmpty }: CardScrollSectionProps) {
     });
   }, []);
 
-  // キーボード左右矢印対応
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLDivElement>) => {
       if (e.key === "ArrowRight") {
@@ -399,30 +612,33 @@ function CardScrollSection({ cards, onEmpty }: CardScrollSectionProps) {
     [scrollBy],
   );
 
-  if (cards.length === 0) return <div className="mt-3">{onEmpty}</div>;
+  if (cards.length === 0) return <>{onEmpty}</>;
 
   return (
-    // 外側ラッパー: relative にして矢印・フェードを重ねる
-    <div className="relative mt-3 -mx-4 px-4">
-      {/* スクロールコンテナ
-          pr-16 で右端に余白を作り「最後のカードが見切れる」感を演出
-          scrollbar は非表示にして見た目をクリーンに保つ */}
+    <div style={{ position: "relative" }}>
       <div
         ref={scrollRef}
         onKeyDown={handleKeyDown}
         tabIndex={0}
-        className="overflow-x-auto overscroll-x-contain outline-none focus-visible:ring-2 focus-visible:ring-primary-300 rounded-lg pr-16"
+        aria-label="カード一覧（横スクロール）"
         style={
           {
+            overflowX: "auto",
+            overscrollBehaviorX: "contain",
+            outline: "none",
             scrollbarWidth: "none",
             WebkitOverflowScrolling: "touch",
+            paddingRight: 48,
           } as CSSProperties
         }
-        aria-label="カード一覧（横スクロール）"
       >
         <div
-          className="flex gap-3 snap-x snap-mandatory pb-2"
-          style={{ width: "max-content" }}
+          style={{
+            display: "flex",
+            gap: 8,
+            width: "max-content",
+            paddingBottom: 4,
+          }}
         >
           {cards.map((card) => {
             const isDraft = card.isDraft ?? (card as unknown).is_draft;
@@ -430,87 +646,187 @@ function CardScrollSection({ cards, onEmpty }: CardScrollSectionProps) {
               card.nextReviewDate ?? (card as unknown).next_review_date,
             );
             const reviewText = nextReview
-              ? nextReview.toLocaleDateString("ja-JP")
-              : "未設定";
+              ? nextReview.toLocaleDateString("ja-JP", {
+                  month: "short",
+                  day: "numeric",
+                })
+              : null;
             const title = displayTitle(card);
             const snippet = previewSnippet(card, title);
 
             return (
               <article
                 key={card.id}
-                className="snap-start shrink-0 w-[240px] md:w-[260px] rounded-xl border border-[var(--surface-border)] bg-white surface-convex p-3 transition-shadow duration-150 hover:shadow-[0_2px_10px_rgba(86,72,74,0.2)]"
+                style={{
+                  flexShrink: 0,
+                  width: 200,
+                  border: "1px solid var(--pane-border, #e8e8e8)",
+                  borderRadius: 4,
+                  padding: "10px 12px",
+                  background: "#fafafa",
+                  transition: "border-color 0.15s",
+                  cursor: "default",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.borderColor =
+                    "var(--sidebar-active-accent, #7aa6a1)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.borderColor =
+                    "var(--pane-border, #e8e8e8)";
+                }}
               >
-                <div className="flex items-start justify-between gap-2">
-                  <h4 className="text-sm font-semibold text-slate-800 leading-snug line-clamp-2">
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                    gap: 6,
+                  }}
+                >
+                  <h4
+                    style={{
+                      fontSize: "var(--font-size-body, 13px)",
+                      fontWeight: 500,
+                      color: "var(--text-primary, #1a1a1a)",
+                      lineHeight: 1.4,
+                      margin: 0,
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical",
+                      overflow: "hidden",
+                    }}
+                  >
                     {title}
                   </h4>
                   {isDraft ? (
-                    <span className="shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-bold bg-slate-100 text-slate-500 border border-slate-200">
+                    <span
+                      style={{
+                        flexShrink: 0,
+                        fontSize: 10,
+                        color: "var(--text-muted, #8a8a8a)",
+                        border: "1px solid var(--section-divider, #ebebeb)",
+                        borderRadius: 2,
+                        padding: "0 4px",
+                        lineHeight: "16px",
+                      }}
+                    >
                       下書き
                     </span>
                   ) : null}
                 </div>
                 {snippet ? (
-                  <p className="mt-2 text-xs leading-5 text-slate-500 line-clamp-3">
+                  <p
+                    style={{
+                      fontSize: "var(--font-size-meta, 12px)",
+                      color: "var(--text-muted, #8a8a8a)",
+                      lineHeight: 1.5,
+                      marginTop: 6,
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical",
+                      overflow: "hidden",
+                    }}
+                  >
                     {snippet}
                   </p>
                 ) : null}
-                <div className="mt-3 text-[10px] font-medium text-slate-400">
-                  次回: <span className="text-slate-500">{reviewText}</span>
-                </div>
+                {reviewText ? (
+                  <p
+                    style={{
+                      fontSize: 11,
+                      color: "var(--text-placeholder, #b0b0b0)",
+                      marginTop: 8,
+                    }}
+                  >
+                    次回 {reviewText}
+                  </p>
+                ) : null}
               </article>
             );
           })}
-          {/* 末尾の余白（フェード領域がカードに被らないように） */}
-          <div className="shrink-0 w-4" aria-hidden="true" />
+          <div style={{ flexShrink: 0, width: 8 }} aria-hidden="true" />
         </div>
       </div>
 
-      {/* 左フェード: 戻れることを示す */}
+      {/* Left fade */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute left-0 top-0 h-full w-12 transition-opacity duration-200"
         style={{
-          background:
-            "linear-gradient(to right, rgb(255,255,255) 0%, transparent 100%)",
+          pointerEvents: "none",
+          position: "absolute",
+          left: 0,
+          top: 0,
+          height: "100%",
+          width: 40,
+          background: "linear-gradient(to right, #fff 0%, transparent 100%)",
           opacity: canScrollLeft ? 1 : 0,
+          transition: "opacity 0.2s",
         }}
       />
 
-      {/* 右フェード: 続きがあることを示す（常にレンダリング、opacityで制御） */}
+      {/* Right fade */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute right-0 top-0 h-full w-20 transition-opacity duration-200"
         style={{
-          background:
-            "linear-gradient(to left, rgb(255,255,255) 10%, transparent 100%)",
+          pointerEvents: "none",
+          position: "absolute",
+          right: 0,
+          top: 0,
+          height: "100%",
+          width: 48,
+          background: "linear-gradient(to left, #fff 0%, transparent 100%)",
           opacity: canScrollRight ? 1 : 0,
+          transition: "opacity 0.2s",
         }}
       />
 
-      {/* 左矢印ボタン（スクロール可能時のみ表示） */}
       {canScrollLeft && (
-        <button
-          type="button"
-          onClick={() => scrollBy("left")}
-          aria-label="左にスクロール"
-          className="absolute left-1 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-7 h-7 rounded-full bg-white border border-slate-200 shadow-md text-slate-500 hover:text-primary-600 hover:border-primary-300 active:scale-95 transition-all duration-150"
-        >
-          <ChevronLeft className="w-3.5 h-3.5" />
-        </button>
+        <ScrollArrow dir="left" onClick={() => scrollBy("left")} />
       )}
-
-      {/* 右矢印ボタン（スクロール可能時のみ表示） */}
       {canScrollRight && (
-        <button
-          type="button"
-          onClick={() => scrollBy("right")}
-          aria-label="右にスクロール"
-          className="absolute right-1 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-7 h-7 rounded-full bg-white border border-slate-200 shadow-md text-slate-500 hover:text-primary-600 hover:border-primary-300 active:scale-95 transition-all duration-150"
-        >
-          <ChevronRight className="w-3.5 h-3.5" />
-        </button>
+        <ScrollArrow dir="right" onClick={() => scrollBy("right")} />
       )}
     </div>
+  );
+}
+
+function ScrollArrow({
+  dir,
+  onClick,
+}: {
+  dir: "left" | "right";
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={dir === "left" ? "左にスクロール" : "右にスクロール"}
+      style={{
+        position: "absolute",
+        [dir]: 2,
+        top: "50%",
+        transform: "translateY(-50%)",
+        zIndex: 10,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: 22,
+        height: 22,
+        borderRadius: "50%",
+        background: "#fff",
+        border: "1px solid var(--pane-border, #e8e8e8)",
+        color: "var(--text-secondary, #4b4b4b)",
+        cursor: "pointer",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+      }}
+    >
+      {dir === "left" ? (
+        <ChevronLeft style={{ width: 12, height: 12 }} />
+      ) : (
+        <ChevronRight style={{ width: 12, height: 12 }} />
+      )}
+    </button>
   );
 }

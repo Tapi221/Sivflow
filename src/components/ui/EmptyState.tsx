@@ -7,6 +7,8 @@ interface EmptyStateProps {
   description?: string;
   action?: React.ReactNode;
   className?: string;
+  /** align left instead of centered */
+  align?: "left" | "center";
 }
 
 export function EmptyState({
@@ -15,25 +17,60 @@ export function EmptyState({
   description,
   action,
   className,
+  align = "center",
 }: EmptyStateProps) {
   return (
     <div
       className={cn(
-        "h-full w-full flex items-center justify-center",
+        "h-full w-full flex",
+        align === "center" ? "items-center justify-center" : "items-start",
         className,
       )}
     >
-      <div className="text-center space-y-3 max-w-sm">
+      <div
+        className={cn(
+          "space-y-2",
+          align === "center" ? "text-center max-w-xs" : "text-left",
+        )}
+      >
         {icon ? (
-          <div className="flex justify-center text-slate-400">{icon}</div>
+          <div
+            className={cn(
+              "text-[var(--text-muted,#8a8a8a)]",
+              align === "center" ? "flex justify-center" : "",
+            )}
+          >
+            {icon}
+          </div>
         ) : null}
         <div>
-          <p className="text-sm font-semibold text-slate-700">{title}</p>
+          <p
+            style={{
+              fontSize: "var(--font-size-body, 13px)",
+              color: "var(--text-secondary, #4b4b4b)",
+              fontWeight: 400,
+              margin: 0,
+            }}
+          >
+            {title}
+          </p>
           {description ? (
-            <p className="text-xs text-slate-500 mt-1">{description}</p>
+            <p
+              style={{
+                fontSize: "var(--font-size-meta, 12px)",
+                color: "var(--text-muted, #8a8a8a)",
+                marginTop: 4,
+              }}
+            >
+              {description}
+            </p>
           ) : null}
         </div>
-        {action ? <div className="flex justify-center">{action}</div> : null}
+        {action ? (
+          <div className={cn(align === "center" ? "flex justify-center" : "")}>
+            {action}
+          </div>
+        ) : null}
       </div>
     </div>
   );
