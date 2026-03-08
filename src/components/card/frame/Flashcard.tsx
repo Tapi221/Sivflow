@@ -1,45 +1,21 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Button } from "@/components/ui/button";
-import { Edit, Image as ImageIcon, Volume2 } from "@/ui/icons";
-import { Link } from "@/ui/icons";
 import { cn } from "@/lib/utils";
-import {
-  InkLayer,
-  InkToolbar,
-} from "@/components/ink/InkLayer";
-import { resolveInkDocument } from "@/components/ink/inkStorage";
 import { CardFrame } from "./CardFrame";
-import { CardCornerActions } from "./CardCornerActions";
 import { SharedCardContent } from "../common/SharedCardContent";
 import {
   CANONICAL_CARD_WIDTH,
-  CARD_ACTION_BG_CLASS,
-  CARD_ACTION_COLOR_IDLE_CLASS,
-  CARD_ACTION_ICON_CLASS,
   layoutRowsToCardHeightPx,
 } from "../common/constants";
 import {
   type FlashcardCardLike,
-  resolveCardId,
-  resolveHasUncertainty,
-  resolveIsBookmarked,
-  resolveQuestionText,
-  resolveAnswerText,
-  resolveQuestionImages,
-  resolveAnswerImages,
-  resolveQuestionAudios,
-  resolveAnswerAudios,
-  resolveQuestionCode,
-  resolveAnswerCode,
-  resolveLayoutRows,
-  resolveImageUrls,
-  resolveAudioUrls,
-  resolveReferences,
 } from "./flashcardDerived";
-import { resolveSideBlocks } from "./flashcardBlocks";
 import { useFlashcardInk } from "./useFlashcardInk";
+import { useFlashcardDerived } from "./useFlashcardDerived";
+import { useFlashcardMediaState } from "./useFlashcardMediaState";
+import { useFlashcardCornerControls } from "./FlashcardCornerControls";
 import { FlashcardMediaDialogs } from "./FlashcardMediaDialogs";
 import { FlashcardNavigation } from "./FlashcardNavigation";
+import { FlashcardInkOverlay } from "./FlashcardInkOverlay";
 import type { InkDocument } from "@/components/ink/inkTypes";
 
 // Re-export for consumers who import the type from this file
@@ -101,17 +77,10 @@ export function Flashcard({
   scaleMultiplier = 1,
   contentPaddingPx,
 }: FlashcardProps) {
-  const cardData = card;
   const contentRef = useRef<HTMLDivElement | null>(null);
 
   const [previewFlipped, setPreviewFlipped] = useState(false);
-  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const [isReferencePopupOpen, setIsReferencePopupOpen] = useState(false);
-  const [isImagePopupOpen, setIsImagePopupOpen] = useState(false);
-  const [isAudioPopupOpen, setIsAudioPopupOpen] = useState(false);
 
-  // ---- 先に派生値を確定（TDZ回避） ----
-  const cardIdForInk = cardData ? resolveCardId(cardData) : null;
   const enableDrawMode = drawMode ?? false;
   const effectiveIsFlipped =
     isFlipped ?? (previewMode ? previewFlipped : false);
@@ -123,22 +92,18 @@ export function Flashcard({
   useEffect(() => {
     if (!previewMode) return;
     queueMicrotask(() => setPreviewFlipped(false));
-  }, [previewMode, cardData?.id]);
+  }, [previewMode, card?.id]);
+
+  // ---------------------------------------------------------------------------
+  // Derived data（active-side 含む）
+  // ---------------------------------------------------------------------------
+  const derived = useFlashcardDerived(card, effectiveIsFlipped);
 
   // ---------------------------------------------------------------------------
   // Ink hook
   // ---------------------------------------------------------------------------
-  const {
-    previewInkRef,
-    previewInkTool,
-    setPreviewInkTool,
-    previewInkHistory,
-    setPreviewInkHistory,
-    layoutStable,
-    shouldMountInkLayer,
-    handleInkDocumentChange,
-  } = useFlashcardInk({
-    cardId: cardIdForInk,
+  const ink = useFlashcardInk({
+    cardId: derived.cardId,
     effectiveIsFlipped,
     inkEditingEnabled,
     previewMode: previewMode ?? false,
@@ -147,130 +112,20 @@ export function Flashcard({
   });
 
   // ---------------------------------------------------------------------------
-  // Derived data
+  // Modal state
   // ---------------------------------------------------------------------------
-  const hasUncertainty = cardData ? resolveHasUncertainty(cardData) : false;
-  const isBookmarked = cardData ? resolveIsBookmarked(cardData) : false;
-
-  const questionText = cardData ? resolveQuestionText(cardData) : "";
-  const answerText = cardData ? resolveAnswerText(cardData) : "";
-
-  const questionCode = cardData ? resolveQuestionCode(cardData) : null;
-  const answerCode = cardData ? resolveAnswerCode(cardData) : null;
-
-  const questionImageUrls = React.useMemo(
-    () => resolveImageUrls(cardData ? resolveQuestionImages(cardData) : []),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [cardData?.question_images, cardData?.questionImages],
-  );
-  const answerImageUrls = React.useMemo(
-    () => resolveImageUrls(cardData ? resolveAnswerImages(cardData) : []),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [cardData?.answer_images, cardData?.answerImages],
-  );
-  const questionAudios = React.useMemo(
-    () => (cardData ? resolveQuestionAudios(cardData) : []),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [cardData?.question_audios, cardData?.questionAudios],
-  );
-  const answerAudios = React.useMemo(
-    () => (cardData ? resolveAnswerAudios(cardData) : []),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [cardData?.answer_audios, cardData?.answerAudios],
-  );
-  const questionAudioUrls = React.useMemo(
-    () => resolveAudioUrls(questionAudios),
-    [questionAudios],
-  );
-  const answerAudioUrls = React.useMemo(
-    () => resolveAudioUrls(answerAudios),
-    [answerAudios],
-  );
-
-  const questionReferences = React.useMemo(
-    () => resolveReferences(cardData?.questionBlocks ?? []),
-    [cardData?.questionBlocks],
-  );
-  const answerReferences = React.useMemo(
-    () => resolveReferences(cardData?.answerBlocks ?? []),
-    [cardData?.answerBlocks],
-  );
-
-  const layoutRows = cardData ? resolveLayoutRows(cardData) : 0;
-
-  const questionInkDocument = React.useMemo(
-    () =>
-      resolveInkDocument(cardIdForInk, "question", cardData?.inkQuestion ?? null),
-    [cardData?.inkQuestion, cardIdForInk],
-  );
-  const answerInkDocument = React.useMemo(
-    () =>
-      resolveInkDocument(cardIdForInk, "answer", cardData?.inkAnswer ?? null),
-    [cardData?.inkAnswer, cardIdForInk],
-  );
-
-  // ---------------------------------------------------------------------------
-  // Active-side derived values
-  // ---------------------------------------------------------------------------
-  const activeSide: "question" | "answer" = effectiveIsFlipped
-    ? "answer"
-    : "question";
-  const activeImages = effectiveIsFlipped ? answerImageUrls : questionImageUrls;
-  const activeAudioUrls = effectiveIsFlipped
-    ? answerAudioUrls
-    : questionAudioUrls;
-  const activeReferences = effectiveIsFlipped
-    ? answerReferences
-    : questionReferences;
-  const activeInkDocument = effectiveIsFlipped
-    ? answerInkDocument
-    : questionInkDocument;
-
-  const activeBlocks = React.useMemo(
-    () =>
-      resolveSideBlocks(activeSide, {
-        blocks:
-          activeSide === "question"
-            ? (cardData?.questionBlocks ?? [])
-            : (cardData?.answerBlocks ?? []),
-        text: activeSide === "question" ? questionText : answerText,
-        imageUrls: activeSide === "question" ? questionImageUrls : answerImageUrls,
-        audios: activeSide === "question" ? questionAudios : answerAudios,
-        code: activeSide === "question" ? questionCode : answerCode,
-      }),
-    [
-      activeSide,
-      cardData?.questionBlocks,
-      cardData?.answerBlocks,
-      questionText,
-      answerText,
-      questionImageUrls,
-      answerImageUrls,
-      questionAudios,
-      answerAudios,
-      questionCode,
-      answerCode,
-    ],
-  );
+  const media = useFlashcardMediaState();
 
   // ---------------------------------------------------------------------------
   // Flip handling
   // ---------------------------------------------------------------------------
-
-  // Flip阻害条件を集約（増えてもここだけ直せば良い）
-  const isModalBlockingFlip =
-    isImageModalOpen ||
-    isImagePopupOpen ||
-    isAudioPopupOpen ||
-    isReferencePopupOpen;
-
   const isInkEditingActive = Boolean(
-    previewMode && inkEditingEnabled && previewInkTool,
+    previewMode && inkEditingEnabled && ink.previewInkTool,
   );
 
   const handleFlip = React.useCallback(
     (e?: React.MouseEvent) => {
-      if (isModalBlockingFlip) return;
+      if (media.isModalBlockingFlip) return;
       if (isInkEditingActive) return;
 
       if (previewMode) {
@@ -284,239 +139,37 @@ export function Flashcard({
         onFlip();
       }
     },
-    [isModalBlockingFlip, isInkEditingActive, previewMode, onFlip],
-  );
-
-  const handleGalleryFullscreenChange = React.useCallback(
-    (isFullscreen: boolean) => {
-      setIsImageModalOpen(isFullscreen);
-    },
-    [],
+    [media.isModalBlockingFlip, isInkEditingActive, previewMode, onFlip],
   );
 
   // ---------------------------------------------------------------------------
-  // Corner actions assembly
+  // Corner actions
   // ---------------------------------------------------------------------------
-  const actionsTopLeft: React.ReactNode[] = [];
-  const actionsTopRight: React.ReactNode[] = [];
-  const mediaActionNodes: React.ReactNode[] = [];
-
-  // extraHeaderLeft は名前通り TopLeft 側へ
-  if (extraHeaderLeft) {
-    actionsTopLeft.push(
-      <div
-        key="extra-header-left"
-        className="flex"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {extraHeaderLeft}
-      </div>,
-    );
-  }
-
-  if (activeImages.length > 0) {
-    mediaActionNodes.push(
-      <button
-        key="images"
-        onClick={(e) => {
-          e.stopPropagation();
-          setIsImagePopupOpen(true);
-        }}
-        className="flex items-center gap-1 px-2 py-1 h-8 min-h-0 min-w-0 rounded-full bg-indigo-500 text-white shadow-[0_2px_0_#4338ca] active:shadow-none active:translate-y-[2px] transition-all hover:bg-indigo-400 hover:shadow-[0_2px_0_#4338ca]"
-      >
-        <ImageIcon className={CARD_ACTION_ICON_CLASS} />
-        <span className="text-[10px] font-bold">x{activeImages.length}</span>
-      </button>,
-    );
-  }
-
-  if (activeAudioUrls.length > 0) {
-    mediaActionNodes.push(
-      <button
-        key="audios"
-        onClick={(e) => {
-          e.stopPropagation();
-          setIsAudioPopupOpen(true);
-        }}
-        className="flex items-center gap-1 px-2 py-1 h-8 min-h-0 min-w-0 rounded-full transition-all bg-amber-500 text-white shadow-[0_2px_0_#b45309] active:shadow-none active:translate-y-[2px] hover:bg-amber-400 hover:shadow-[0_2px_0_#b45309]"
-      >
-        <Volume2 className={CARD_ACTION_ICON_CLASS} />
-        <span className="text-[10px] font-bold">x{activeAudioUrls.length}</span>
-      </button>,
-    );
-  }
-
-  if (activeReferences.length > 0) {
-    mediaActionNodes.push(
-      <button
-        key="references"
-        onClick={(e) => {
-          e.stopPropagation();
-          setIsReferencePopupOpen(true);
-        }}
-        className="flex items-center gap-1 px-2 py-1 h-8 min-h-0 min-w-0 rounded-full transition-all bg-cyan-500 text-white shadow-[0_2px_0_#0e7490] active:shadow-none active:translate-y-[2px] hover:bg-cyan-400"
-      >
-        <Link className={CARD_ACTION_ICON_CLASS} />
-        <span className="text-[10px] font-bold">
-          x{activeReferences.length}
-        </span>
-      </button>,
-    );
-  }
-
-  if (mediaActionNodes.length > 0) {
-    actionsTopRight.push(
-      <div
-        key="media-actions"
-        className="flex items-center gap-2"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {mediaActionNodes}
-      </div>,
-    );
-  }
-
-  // アクション表示（編集(onEdit)以外はプレビューでも表示）
-  if (onToggleUncertainty || onToggleBookmark) {
-    actionsTopLeft.push(
-      <CardCornerActions
-        key="corner-actions"
-        onHelp={
-          onToggleUncertainty ? () => onToggleUncertainty(cardData!) : undefined
-        }
-        onStar={onToggleBookmark ? () => onToggleBookmark(cardData!) : undefined}
-        helpActive={hasUncertainty}
-        starActive={isBookmarked}
-      />,
-    );
-  }
-
-  if (onEdit && !previewMode) {
-    actionsTopRight.push(
-      <Button
-        key="edit"
-        variant="ghost"
-        size="icon"
-        onClick={(e: React.MouseEvent) => {
-          e.stopPropagation();
-          onEdit(cardData!);
-        }}
-        className={cn(
-          "rounded-none w-8 h-8 md:w-9 md:h-9 transition-colors",
-          CARD_ACTION_BG_CLASS,
-          CARD_ACTION_COLOR_IDLE_CLASS,
-        )}
-      >
-        <Edit className={CARD_ACTION_ICON_CLASS} />
-      </Button>,
-    );
-  }
-
-  // ---------------------------------------------------------------------------
-  // Overlay node（ink / header / footer）
-  // ---------------------------------------------------------------------------
-
-  // overlay を安定化（Inkが余計に再マウント/再描画されにくい）
-  const overlayNode = React.useMemo(() => {
-    const hasHeaderOverlay = Boolean(extraHeaderRight && !previewMode);
-    const hasFooterOverlay = Boolean(extraFooter);
-    const hasInkOverlay = Boolean(
-      previewMode && inkEditingEnabled && cardIdForInk,
-    );
-    if (!hasHeaderOverlay && !hasFooterOverlay && !hasInkOverlay) return null;
-
-    return (
-      <>
-        {hasHeaderOverlay && (
-          <div className="absolute right-2 top-2 z-30 pointer-events-none">
-            <div
-              className="pointer-events-auto"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {extraHeaderRight}
-            </div>
-          </div>
-        )}
-        {hasFooterOverlay && (
-          <div className="absolute inset-x-0 bottom-2 z-30 pointer-events-none">
-            <div
-              className="flex justify-center pointer-events-auto"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {extraFooter}
-            </div>
-          </div>
-        )}
-        {hasInkOverlay && (
-          <>
-            {shouldMountInkLayer && (
-              <InkLayer
-                ref={previewInkRef}
-                cardId={cardIdForInk}
-                side={activeInkSide}
-                editable={Boolean(
-                  previewMode && inkEditingEnabled && layoutStable,
-                )}
-                tool={previewInkTool ?? "pen"}
-                value={activeInkDocument}
-                onChange={(next) =>
-                  handleInkDocumentChange(activeInkSide, next)
-                }
-                onHistoryChange={setPreviewInkHistory}
-              />
-            )}
-
-            {previewMode && inkEditingEnabled && !layoutStable && (
-              <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/25 text-slate-600 text-xs font-semibold">
-                レイアウト準備中...
-              </div>
-            )}
-
-            {/* ✅ stable 前は ref が null なので出さない */}
-            {previewMode && inkEditingEnabled && layoutStable && (
-              <div className="absolute bottom-2 left-2 z-30 pointer-events-auto">
-                <InkToolbar
-                  tool={previewInkTool}
-                  canUndo={previewInkHistory.canUndo}
-                  canRedo={previewInkHistory.canRedo}
-                  onToolChange={setPreviewInkTool}
-                  onUndo={() => previewInkRef.current?.undo()}
-                  onRedo={() => previewInkRef.current?.redo()}
-                  onClear={() => previewInkRef.current?.clear()}
-                />
-              </div>
-            )}
-          </>
-        )}
-      </>
-    );
-  }, [
-    cardIdForInk,
-    handleInkDocumentChange,
-    activeInkSide,
-    activeInkDocument,
-    inkEditingEnabled,
-    layoutStable,
-    previewInkTool,
-    previewInkHistory.canUndo,
-    previewInkHistory.canRedo,
-    extraFooter,
-    extraHeaderRight,
+  const { actionsTopLeft, actionsTopRight } = useFlashcardCornerControls({
+    card: card ?? ({} as FlashcardCardLike),
     previewMode,
-    shouldMountInkLayer,
-    previewInkRef,
-    setPreviewInkHistory,
-    setPreviewInkTool,
-  ]);
+    hasUncertainty: derived.hasUncertainty,
+    isBookmarked: derived.isBookmarked,
+    activeImages: derived.activeImages,
+    activeAudioUrls: derived.activeAudioUrls,
+    activeReferences: derived.activeReferences,
+    extraHeaderLeft,
+    onEdit: card ? onEdit : undefined,
+    onToggleUncertainty: card ? onToggleUncertainty : undefined,
+    onToggleBookmark: card ? onToggleBookmark : undefined,
+    onOpenImagePopup: () => media.setIsImagePopupOpen(true),
+    onOpenAudioPopup: () => media.setIsAudioPopupOpen(true),
+    onOpenReferencePopup: () => media.setIsReferencePopupOpen(true),
+  });
 
   // ---------------------------------------------------------------------------
   // Render
   // ---------------------------------------------------------------------------
-  const fixedHeightPx = layoutRowsToCardHeightPx(layoutRows);
-
-  if (!cardData) {
+  if (!card) {
     return <div className="text-center py-12 text-gray-500">No Card Data</div>;
   }
+
+  const fixedHeightPx = layoutRowsToCardHeightPx(derived.layoutRows);
 
   return (
     <div
@@ -543,15 +196,29 @@ export function Flashcard({
           showResizeHandle={false}
           heightPx={fixedHeightPx}
           lockHeight
-          actionsTopLeft={
-            actionsTopLeft.length > 0 ? actionsTopLeft : undefined
-          }
-          actionsTopRight={
-            actionsTopRight.length > 0 ? actionsTopRight : undefined
-          }
+          actionsTopLeft={actionsTopLeft}
+          actionsTopRight={actionsTopRight}
           drawMode={enableDrawMode}
           ruledPhasePx={0}
-          overlay={overlayNode}
+          overlay={
+            <FlashcardInkOverlay
+              extraHeaderRight={extraHeaderRight}
+              extraFooter={extraFooter}
+              previewMode={previewMode ?? false}
+              inkEditingEnabled={inkEditingEnabled}
+              cardId={derived.cardId}
+              activeInkSide={activeInkSide}
+              activeInkDocument={derived.activeInkDocument}
+              layoutStable={ink.layoutStable}
+              shouldMountInkLayer={ink.shouldMountInkLayer}
+              previewInkRef={ink.previewInkRef}
+              previewInkTool={ink.previewInkTool}
+              previewInkHistory={ink.previewInkHistory}
+              onInkDocumentChange={ink.handleInkDocumentChange}
+              setPreviewInkTool={ink.setPreviewInkTool}
+              setPreviewInkHistory={ink.setPreviewInkHistory}
+            />
+          }
         >
           <div
             ref={contentRef}
@@ -559,26 +226,25 @@ export function Flashcard({
           >
             <SharedCardContent
               mode="view"
-              blocks={activeBlocks}
-              onGalleryFullscreenChange={handleGalleryFullscreenChange}
+              blocks={derived.activeBlocks}
+              onGalleryFullscreenChange={media.handleGalleryFullscreenChange}
             />
           </div>
         </CardFrame>
       </div>
 
       <FlashcardMediaDialogs
-        isImagePopupOpen={isImagePopupOpen}
-        setIsImagePopupOpen={setIsImagePopupOpen}
-        isAudioPopupOpen={isAudioPopupOpen}
-        setIsAudioPopupOpen={setIsAudioPopupOpen}
-        isReferencePopupOpen={isReferencePopupOpen}
-        setIsReferencePopupOpen={setIsReferencePopupOpen}
-        activeImages={activeImages}
-        activeAudioUrls={activeAudioUrls}
-        activeReferences={activeReferences}
+        isImagePopupOpen={media.isImagePopupOpen}
+        setIsImagePopupOpen={media.setIsImagePopupOpen}
+        isAudioPopupOpen={media.isAudioPopupOpen}
+        setIsAudioPopupOpen={media.setIsAudioPopupOpen}
+        isReferencePopupOpen={media.isReferencePopupOpen}
+        setIsReferencePopupOpen={media.setIsReferencePopupOpen}
+        activeImages={derived.activeImages}
+        activeAudioUrls={derived.activeAudioUrls}
+        activeReferences={derived.activeReferences}
       />
 
-      {/* ナビゲーション（オプション）- プレビュー時は非表示 */}
       {!previewMode && (
         <FlashcardNavigation
           onNext={onNext}

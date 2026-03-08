@@ -10,7 +10,8 @@
       "Bash(grep -r \"export.*\" c:/Manifolmia/src/Components/card/*.tsx c:/Manifolmia/src/Components/card/*.jsx)",
       "Bash(npx tsc --noEmit --skipLibCheck)",
       "Bash(npx tsc --noEmit --project tsconfig.app.json)",
-      "Bash(npx tsc --noEmit --project c:/Manifolmia/tsconfig.app.json)"
+      "Bash(npx tsc --noEmit --project c:/Manifolmia/tsconfig.app.json)",
+      "Bash(npx tsc --noEmit --project tsconfig.json)"
     ],
     "additionalDirectories": [
       "C:\\Manifolmia\\src\\components\\folder",
