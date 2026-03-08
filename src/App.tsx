@@ -28,6 +28,7 @@ import { flags } from "./features/flags";
 import { DEV_MODE, isLocalHost } from "./utils/envGuards";
 import { signInWithGoogle } from "./services/auth/googleSignIn";
 import { ThemeManager } from "@/components/common/ThemeManager";
+import { BreadcrumbProvider } from "@/contexts/BreadcrumbContext";
 
 // ===== ページコンポーネントを遅延読み込み（コード分割） =====
 // 初回ロードを軽くするために、各ページを lazy で動的 import する
@@ -529,10 +530,12 @@ function App() {
         <NotificationProvider>
           {/* ブラウザの URL に応じて画面を切り替えるための Router */}
           <BrowserRouter>
-            {/* lazy で遅延読み込みしたページのローディング中に表示する UI の定義 */}
-            <Suspense fallback={<LoadingFallback />}>
-              <AppContent />
-            </Suspense>
+            <BreadcrumbProvider>
+              {/* lazy で遅延読み込みしたページのローディング中に表示する UI の定義 */}
+              <Suspense fallback={<LoadingFallback />}>
+                <AppContent />
+              </Suspense>
+            </BreadcrumbProvider>
           </BrowserRouter>
         </NotificationProvider>
       </ToastProvider>

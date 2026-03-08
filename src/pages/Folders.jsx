@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import TreeViewLayout from "@/components/folder/TreeViewLayout";
 import { cn } from "@/lib/utils";
 import { useSettingsQueryParam } from "@/hooks/useSettingsQueryParam";
+import { useBreadcrumbContext } from "@/contexts/BreadcrumbContext";
 
 export default function Folders() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -219,6 +220,53 @@ export default function Folders() {
   };
 
   const isLoading = foldersLoading || cardsLoading;
+
+  const { setExtraCrumbs } = useBreadcrumbContext();
+
+  useEffect(() => {
+    const crumbs = [];
+
+    // フォルダ階層を構築（祖先 → 選択フォルダ）
+    if (selectedFolderId) {
+      const path = [];
+      let cur = folders.find((f) => f.id === selectedFolderId);
+      while (cur) {
+        path.unshift(cur);
+        cur = folders.find((f) => f.id === cur.parentFolderId);
+      }
+      path.forEach((folder) => {
+        crumbs.push({
+          label: folder.folderName,
+          to: `/folders?folderId=${folder.id}`,
+        });
+      });
+    }
+
+    // カードまたはドキュメントのクラム
+    if (selectedItem?.type === "card") {
+      const card = cards.find((c) => c.id === selectedItem.id);
+      if (card) {
+        const label =
+          card.title?.trim() ||
+          card.questionText?.trim().slice(0, 20) ||
+          "カード";
+        crumbs.push({ label });
+      }
+    } else if (selectedItem?.type === "document") {
+      const doc = documents.find(
+        (d) => (d.id || d.documentId) === selectedItem.id,
+      );
+      if (doc) {
+        crumbs.push({ label: doc.title || doc.fileName || "ドキュメント" });
+      }
+    }
+
+    setExtraCrumbs(crumbs);
+
+    return () => {
+      setExtraCrumbs([]);
+    };
+  }, [selectedFolderId, selectedItem, folders, cards, documents, setExtraCrumbs]);
 
   return (
     <div

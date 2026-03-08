@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { isDesktopRuntime } from "@/platform/runtime";
 import { cn } from "@/lib/utils";
+import { useBreadcrumbContext } from "@/contexts/BreadcrumbContext";
 
 const PAGE_LABELS: Record<string, string> = {
   folders: "フォルダ",
@@ -37,6 +38,8 @@ function useBreadcrumbs() {
 export const TitleBar: React.FC = () => {
   const [isMaximized, setIsMaximized] = useState(false);
   const isDesktop = isDesktopRuntime();
+  const crumbs = useBreadcrumbs();
+  const { extraCrumbs } = useBreadcrumbContext();
 
   useEffect(() => {
     if (!isDesktop) return;
@@ -54,9 +57,22 @@ export const TitleBar: React.FC = () => {
     };
   }, [isDesktop]);
 
-  if (!isDesktop) return null;
+  // URL ベースのクラムにフォルダ/カード/ドキュメントのクラムを結合する。
+  // extraCrumbs がある場合は末尾クラムに to を復元して続きを表示する。
+  const allCrumbs = useMemo(() => {
+    if (extraCrumbs.length === 0) return crumbs;
+    const base = crumbs.map((c, i) =>
+      i === crumbs.length - 1
+        ? { ...c, to: "/folders" }
+        : c,
+    );
+    const extra = extraCrumbs.map((c, i) =>
+      i === extraCrumbs.length - 1 ? { label: c.label, to: undefined } : c,
+    );
+    return [...base, ...extra];
+  }, [crumbs, extraCrumbs]);
 
-  const crumbs = useBreadcrumbs();
+  if (!isDesktop) return null;
 
   return (
     <div
@@ -69,8 +85,8 @@ export const TitleBar: React.FC = () => {
         <span className="font-semibold tracking-wide text-gray-500 text-xs mr-3">
           Manifolia.
         </span>
-        <nav className="flex items-center gap-1 text-xs text-gray-400">
-          {crumbs.map((crumb, i) => (
+        <nav className="flex items-center gap-1 text-xs text-gray-400 overflow-hidden">
+          {allCrumbs.map((crumb, i) => (
             <React.Fragment key={i}>
               {i > 0 && <span className="text-gray-300 select-none">/</span>}
               {crumb.to ? (
