@@ -63,4 +63,29 @@
     min-height: var(--row-height-normal, 30px);
     height: var(--row-height-normal, 30px);
   }
+
+  /* ── Section density: document rows are slightly smaller ── */
+  .sidebar-row--document {
+    min-height: var(--row-height-dense, 28px);
+    height: var(--row-height-dense, 28px);
+    line-height: var(--row-height-dense, 28px);
+  }
+
+  /* ── Top-level folder separator ── */
+  .sidebar-section-divider {
+    height: 1px;
+    background: var(--section-divider, #ebebeb);
+    margin: 2px 8px;
+  }
+
+  /* ── Section group label (pinned/recent etc.) ── */
+  .sidebar-group-label {
+    padding: 6px 8px 2px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--section-header-color, #6b6b6b);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    user-select: none;
+  }
 }

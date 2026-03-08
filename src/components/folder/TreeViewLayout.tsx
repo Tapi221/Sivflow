@@ -932,6 +932,9 @@ function TreeViewLayout({
           folderStats={folderStats}
           onCardUpdated={onCardUpdated}
           onDocumentUpdated={updateDocument}
+          onRenameFolder={async (folderId, newName) => {
+            await updateFolder(folderId, { folderName: newName });
+          }}
           handlers={{
             onStartStudy: handleStartStudy,
             onViewCards: handleViewCards,

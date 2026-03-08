@@ -1,4 +1,10 @@
-import { useMemo, useRef, useState, useEffect, useCallback } from "react";
+import {
+  useMemo,
+  useRef,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
 import type { CSSProperties, KeyboardEvent, ReactNode } from "react";
 import {
   Bar,
@@ -13,6 +19,8 @@ import { calculateResistanceScore } from "@/utils/reviewMetrics";
 import type { Card } from "@/types";
 import { ChevronLeft, ChevronRight } from "@/ui/icons";
 
+// ── Types ──────────────────────────────────────────────────────────────────────
+
 type FolderDashboardHandlers = {
   onStartStudy: () => void;
   onViewCards: () => void;
@@ -24,7 +32,14 @@ interface FolderDashboardProps {
   folderName: string;
   cards: Card[];
   handlers: FolderDashboardHandlers;
+  onRenameFolder?: (newName: string) => Promise<void>;
 }
+
+type ViewMode = "carousel" | "table";
+type SortKey = "order" | "title" | "nextReview" | "reviewCount";
+type SortDir = "asc" | "desc";
+
+// ── Utilities ──────────────────────────────────────────────────────────────────
 
 const toDate = (value: unknown): Date | null => {
   if (value === null || value === undefined) return null;
@@ -73,28 +88,45 @@ const previewSnippet = (card: Card, headingText: string): string => {
     extractTextFromBlocks(card.answerBlocks ?? []) || card.answerText || "",
   );
   const heading = normalizeInlineText(headingText);
-
   let text = questionText || answerText;
   if (!text) return "";
-
   const isDuplicatedWithHeading =
     text === heading || text.startsWith(heading) || heading.startsWith(text);
-
   if (isDuplicatedWithHeading) {
     text = answerText && answerText !== questionText ? answerText : "";
   }
-
   if (!text) return "";
   return text.length > 80 ? `${text.slice(0, 80)}...` : text;
 };
 
+// ── Design tokens (inline) ────────────────────────────────────────────────────
+
+const T = {
+  border: "var(--pane-border, #e8e8e8)",
+  divider: "var(--section-divider, #ebebeb)",
+  textPrimary: "var(--text-primary, #1a1a1a)",
+  textSecondary: "var(--text-secondary, #4b4b4b)",
+  textMuted: "var(--text-muted, #8a8a8a)",
+  textPlaceholder: "var(--text-placeholder, #b0b0b0)",
+  hoverBg: "var(--hover-bg, rgba(0,0,0,0.04))",
+  activeBg: "var(--active-bg, rgba(104,154,152,0.1))",
+  accent: "var(--sidebar-active-accent, #7aa6a1)",
+  sectionLabel: "var(--section-header-color, #6b6b6b)",
+  fsMeta: "var(--font-size-meta, 12px)",
+  fsBody: "var(--font-size-body, 13px)",
+  fsSection: "var(--font-size-section, 13px)",
+  fsTitle: "var(--font-size-page-title, 22px)",
+};
+
 // ── Section header ────────────────────────────────────────────────────────────
-interface SectionHeaderProps {
+
+function SectionHeader({
+  title,
+  action,
+}: {
   title: string;
   action?: ReactNode;
-}
-
-function SectionHeader({ title, action }: SectionHeaderProps) {
+}) {
   return (
     <div
       style={{
@@ -102,15 +134,14 @@ function SectionHeader({ title, action }: SectionHeaderProps) {
         alignItems: "center",
         justifyContent: "space-between",
         paddingBottom: 6,
-        borderBottom: "1px solid var(--section-divider, #ebebeb)",
-        marginBottom: 0,
+        borderBottom: `1px solid ${T.divider}`,
       }}
     >
       <span
         style={{
-          fontSize: "var(--font-size-section, 13px)",
+          fontSize: T.fsSection,
           fontWeight: 500,
-          color: "var(--section-header-color, #6b6b6b)",
+          color: T.sectionLabel,
           letterSpacing: "0.01em",
         }}
       >
@@ -121,13 +152,91 @@ function SectionHeader({ title, action }: SectionHeaderProps) {
   );
 }
 
-// ── Properties panel ──────────────────────────────────────────────────────────
-interface PropertyRowProps {
-  label: string;
-  value: ReactNode;
+// ── Toolbar button ────────────────────────────────────────────────────────────
+
+function ToolbarBtn({
+  onClick,
+  children,
+  active,
+  primary,
+  title,
+}: {
+  onClick?: () => void;
+  children: ReactNode;
+  active?: boolean;
+  primary?: boolean;
+  title?: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={title}
+      style={{
+        fontSize: T.fsBody,
+        fontWeight: primary ? 500 : 400,
+        color: active ? T.accent : primary ? T.accent : T.textSecondary,
+        background: active ? T.activeBg : "none",
+        border: "none",
+        cursor: "pointer",
+        padding: "3px 8px",
+        borderRadius: 4,
+        transition: "background 0.1s",
+        whiteSpace: "nowrap",
+      }}
+      onMouseEnter={(e) => {
+        if (!active)
+          (e.currentTarget as HTMLElement).style.background =
+            "var(--toolbar-btn-hover,rgba(0,0,0,0.06))";
+      }}
+      onMouseLeave={(e) => {
+        if (!active) (e.currentTarget as HTMLElement).style.background = active ? T.activeBg : "none";
+      }}
+    >
+      {children}
+    </button>
+  );
 }
 
-function PropertyRow({ label, value }: PropertyRowProps) {
+// ── Inline empty state ────────────────────────────────────────────────────────
+
+function InlineEmpty({
+  text,
+  action,
+  onAction,
+}: {
+  text: string;
+  action?: string;
+  onAction?: () => void;
+}) {
+  return (
+    <div style={{ padding: "14px 0", display: "flex", alignItems: "center", gap: 10 }}>
+      <span style={{ fontSize: T.fsBody, color: T.textMuted }}>{text}</span>
+      {action && onAction ? (
+        <button
+          type="button"
+          onClick={onAction}
+          style={{
+            fontSize: T.fsMeta,
+            color: T.accent,
+            background: "none",
+            border: `1px solid ${T.accent}`,
+            borderRadius: 3,
+            padding: "2px 8px",
+            cursor: "pointer",
+            opacity: 0.85,
+          }}
+        >
+          {action}
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+// ── Property row ──────────────────────────────────────────────────────────────
+
+function PropertyRow({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div
       style={{
@@ -135,23 +244,23 @@ function PropertyRow({ label, value }: PropertyRowProps) {
         alignItems: "baseline",
         gap: 8,
         padding: "4px 0",
-        borderBottom: "1px solid var(--section-divider, #ebebeb)",
+        borderBottom: `1px solid ${T.divider}`,
       }}
     >
       <span
         style={{
-          width: 88,
+          width: 80,
           flexShrink: 0,
-          fontSize: "var(--font-size-meta, 12px)",
-          color: "var(--property-label-color, #8a8a8a)",
+          fontSize: T.fsMeta,
+          color: T.textMuted,
         }}
       >
         {label}
       </span>
       <span
         style={{
-          fontSize: "var(--font-size-body, 13px)",
-          color: "var(--property-value-color, #1a1a1a)",
+          fontSize: T.fsBody,
+          color: T.textPrimary,
           fontVariantNumeric: "tabular-nums",
         }}
       >
@@ -161,36 +270,81 @@ function PropertyRow({ label, value }: PropertyRowProps) {
   );
 }
 
+// ── Sort indicator ────────────────────────────────────────────────────────────
+
+function SortIcon({ dir }: { dir: SortDir }) {
+  return (
+    <span style={{ fontSize: 10, marginLeft: 2, opacity: 0.7 }}>
+      {dir === "asc" ? "↑" : "↓"}
+    </span>
+  );
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
+
 export function FolderDashboard({
   folderId,
   folderName,
   cards,
   handlers,
+  onRenameFolder,
 }: FolderDashboardProps) {
-  const activeCards = useMemo(() => {
-    return cards.filter((c) => !(c.isDeleted ?? (c as unknown).is_deleted));
-  }, [cards]);
+  // ── View state ──────────────────────────────────────────────────────────────
+  const [viewMode, setViewMode] = useState<ViewMode>("carousel");
+  const [sortKey, setSortKey] = useState<SortKey>("order");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+  const [filterDraftState, setFilterDraftState] = useState<
+    "all" | "draft" | "published"
+  >("all");
+  const [filterReviewed, setFilterReviewed] = useState<
+    "all" | "unlearned" | "reviewed"
+  >("all");
+  const [showFilterBar, setShowFilterBar] = useState(false);
 
-  const sliderCards = useMemo(() => {
-    return [...activeCards]
-      .sort(
-        (a, b) =>
-          (a.orderIndex ?? (a as unknown).order_index ?? 0) -
-          (b.orderIndex ?? (b as unknown).order_index ?? 0),
-      )
-      .slice(0, 24);
-  }, [activeCards]);
+  // ── Rename state ─────────────────────────────────────────────────────────────
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editedName, setEditedName] = useState(folderName);
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
-  const reviewedCards = useMemo(() => {
-    return activeCards.filter((card) => {
-      const reviewCount = card.reviewCount ?? (card as unknown).review_count ?? 0;
-      const lastReview = toDate(
-        card.lastReviewAt ?? (card as unknown).last_review_at,
-      );
-      return reviewCount > 0 || !!lastReview;
-    });
-  }, [activeCards]);
+  useEffect(() => {
+    setEditedName(folderName);
+  }, [folderName]);
+
+  const commitRename = useCallback(async () => {
+    const trimmed = editedName.trim();
+    if (!trimmed || trimmed === folderName) {
+      setEditedName(folderName);
+      setIsEditingName(false);
+      return;
+    }
+    await onRenameFolder?.(trimmed);
+    setIsEditingName(false);
+  }, [editedName, folderName, onRenameFolder]);
+
+  const startEditing = useCallback(() => {
+    if (!onRenameFolder) return;
+    setIsEditingName(true);
+    requestAnimationFrame(() => nameInputRef.current?.select());
+  }, [onRenameFolder]);
+
+  // ── Derived card lists ───────────────────────────────────────────────────────
+  const activeCards = useMemo(
+    () => cards.filter((c) => !(c.isDeleted ?? (c as unknown).is_deleted)),
+    [cards],
+  );
+
+  const reviewedCards = useMemo(
+    () =>
+      activeCards.filter((card) => {
+        const reviewCount =
+          card.reviewCount ?? (card as unknown).review_count ?? 0;
+        const lastReview = toDate(
+          card.lastReviewAt ?? (card as unknown).last_review_at,
+        );
+        return reviewCount > 0 || !!lastReview;
+      }),
+    [activeCards],
+  );
 
   const dueToday = useMemo(() => {
     const today = new Date();
@@ -203,12 +357,14 @@ export function FolderDashboard({
     }).length;
   }, [activeCards]);
 
-  const unlearned = useMemo(() => {
-    return activeCards.filter((card) => {
-      const reviewCount = card.reviewCount ?? (card as unknown).review_count ?? 0;
-      return reviewCount === 0;
-    }).length;
-  }, [activeCards]);
+  const unlearned = useMemo(
+    () =>
+      activeCards.filter(
+        (card) =>
+          (card.reviewCount ?? (card as unknown).review_count ?? 0) === 0,
+      ).length,
+    [activeCards],
+  );
 
   const lastReviewedDate = useMemo(() => {
     let latest: Date | null = null;
@@ -219,15 +375,75 @@ export function FolderDashboard({
     return latest;
   }, [reviewedCards]);
 
-  const hasMinimumReviewedCards = reviewedCards.length >= 1;
+  // ── Filtered + sorted cards ──────────────────────────────────────────────────
+  const displayCards = useMemo(() => {
+    let list = [...activeCards];
 
-  const resilienceBuckets = useMemo(() => {
-    const buckets = Array.from({ length: 20 }, (_, i) => {
-      const min = i * 5;
-      const max = min + 5;
-      return { label: `${min}-${max}%`, min, count: 0 };
+    // draft filter
+    if (filterDraftState === "draft") {
+      list = list.filter(
+        (c) => c.isDraft ?? (c as unknown).is_draft,
+      );
+    } else if (filterDraftState === "published") {
+      list = list.filter(
+        (c) => !(c.isDraft ?? (c as unknown).is_draft),
+      );
+    }
+
+    // reviewed filter
+    if (filterReviewed === "unlearned") {
+      list = list.filter(
+        (c) => (c.reviewCount ?? (c as unknown).review_count ?? 0) === 0,
+      );
+    } else if (filterReviewed === "reviewed") {
+      list = list.filter(
+        (c) => (c.reviewCount ?? (c as unknown).review_count ?? 0) > 0,
+      );
+    }
+
+    // sort
+    list.sort((a, b) => {
+      let cmp = 0;
+      if (sortKey === "order") {
+        cmp =
+          (a.orderIndex ?? (a as unknown).order_index ?? 0) -
+          (b.orderIndex ?? (b as unknown).order_index ?? 0);
+      } else if (sortKey === "title") {
+        cmp = displayTitle(a).localeCompare(displayTitle(b), "ja");
+      } else if (sortKey === "nextReview") {
+        const da = toDate(
+          a.nextReviewDate ?? (a as unknown).next_review_date,
+        );
+        const db = toDate(
+          b.nextReviewDate ?? (b as unknown).next_review_date,
+        );
+        if (!da && !db) cmp = 0;
+        else if (!da) cmp = 1;
+        else if (!db) cmp = -1;
+        else cmp = da.getTime() - db.getTime();
+      } else if (sortKey === "reviewCount") {
+        cmp =
+          (a.reviewCount ?? (a as unknown).review_count ?? 0) -
+          (b.reviewCount ?? (b as unknown).review_count ?? 0);
+      }
+      return sortDir === "asc" ? cmp : -cmp;
     });
 
+    return list;
+  }, [activeCards, filterDraftState, filterReviewed, sortKey, sortDir]);
+
+  const carouselCards = useMemo(
+    () => displayCards.slice(0, 24),
+    [displayCards],
+  );
+
+  // ── Resilience buckets ───────────────────────────────────────────────────────
+  const resilienceBuckets = useMemo(() => {
+    const buckets = Array.from({ length: 20 }, (_, i) => ({
+      label: `${i * 5}-${i * 5 + 5}%`,
+      min: i * 5,
+      count: 0,
+    }));
     reviewedCards.forEach((card) => {
       const lastReview = toDate(
         card.lastReviewAt ?? (card as unknown).last_review_at,
@@ -236,36 +452,28 @@ export function FolderDashboard({
         card.nextReviewDate ?? (card as unknown).next_review_date,
       );
       let intervalDays = 0;
-
       if (lastReview && nextReview && nextReview > lastReview) {
         intervalDays =
-          (nextReview.getTime() - lastReview.getTime()) / (1000 * 60 * 60 * 24);
+          (nextReview.getTime() - lastReview.getTime()) /
+          (1000 * 60 * 60 * 24);
       }
-
       const score = Math.max(
         0,
         Math.min(100, calculateResistanceScore(intervalDays)),
       );
-      const bucketIndex = Math.min(19, Math.floor(score / 5));
-      buckets[bucketIndex].count += 1;
+      buckets[Math.min(19, Math.floor(score / 5))].count += 1;
     });
-
     return buckets;
   }, [reviewedCards]);
 
-  const hasResilienceData = useMemo(
-    () => resilienceBuckets.some((bucket) => bucket.count > 0),
-    [resilienceBuckets],
-  );
-  const canShowDistribution = hasMinimumReviewedCards && hasResilienceData;
-
   const maxBucketCount = useMemo(() => {
-    const maxCount = Math.max(
-      ...resilienceBuckets.map((bucket) => bucket.count),
-      0,
-    );
-    return maxCount === 0 ? 1 : maxCount;
+    const m = Math.max(...resilienceBuckets.map((b) => b.count), 0);
+    return m === 0 ? 1 : m;
   }, [resilienceBuckets]);
+
+  const canShowDistribution =
+    reviewedCards.length >= 1 &&
+    resilienceBuckets.some((b) => b.count > 0);
 
   const getDistributionOpacity = (min: number) => {
     if (min >= 80) return 0.9;
@@ -275,15 +483,24 @@ export function FolderDashboard({
     return 0.32;
   };
 
+  // ── Sort column handler ──────────────────────────────────────────────────────
+  const handleSortColumn = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  };
+
+  // ── Filter active ────────────────────────────────────────────────────────────
+  const isFilterActive =
+    filterDraftState !== "all" || filterReviewed !== "all";
+
   return (
-    <div
-      style={{
-        height: "100%",
-        overflowY: "auto",
-        background: "#ffffff",
-      }}
-    >
-      {/* ── Page header ── */}
+    <div style={{ height: "100%", overflowY: "auto", background: "#ffffff" }}>
+
+      {/* ── Page header ──────────────────────────────────────────────────────── */}
       <div
         style={{
           display: "flex",
@@ -291,95 +508,248 @@ export function FolderDashboard({
           justifyContent: "space-between",
           padding: "0 20px",
           height: 48,
-          borderBottom: "1px solid var(--pane-border, #e8e8e8)",
+          borderBottom: `1px solid ${T.border}`,
           flexShrink: 0,
+          gap: 8,
         }}
       >
-        <h1
-          style={{
-            fontSize: "var(--font-size-page-title, 22px)",
-            fontWeight: 600,
-            color: "var(--text-primary, #1a1a1a)",
-            letterSpacing: "-0.015em",
-            margin: 0,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-          }}
-        >
-          {folderName || folderId}
-        </h1>
+        {/* Folder name — editable */}
+        {isEditingName ? (
+          <input
+            ref={nameInputRef}
+            value={editedName}
+            onChange={(e) => setEditedName(e.target.value)}
+            onBlur={() => { void commitRename(); }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") { void commitRename(); }
+              if (e.key === "Escape") {
+                setEditedName(folderName);
+                setIsEditingName(false);
+              }
+            }}
+            style={{
+              fontSize: T.fsTitle,
+              fontWeight: 600,
+              color: T.textPrimary,
+              letterSpacing: "-0.015em",
+              border: "none",
+              borderBottom: `1.5px solid ${T.accent}`,
+              background: "transparent",
+              outline: "none",
+              flex: 1,
+              minWidth: 0,
+              padding: "0 2px",
+            }}
+            autoFocus
+          />
+        ) : (
+          <h1
+            onClick={startEditing}
+            title={onRenameFolder ? "クリックで編集" : undefined}
+            style={{
+              fontSize: T.fsTitle,
+              fontWeight: 600,
+              color: T.textPrimary,
+              letterSpacing: "-0.015em",
+              margin: 0,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              flex: 1,
+              minWidth: 0,
+              cursor: onRenameFolder ? "text" : "default",
+            }}
+          >
+            {folderName || folderId}
+          </h1>
+        )}
 
         {/* Toolbar */}
-        <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <ToolbarButton onClick={handlers.onStartStudy} primary>
+        <div style={{ display: "flex", alignItems: "center", gap: 1, flexShrink: 0 }}>
+          <ToolbarBtn onClick={handlers.onStartStudy} primary>
             学習する
-          </ToolbarButton>
-          <ToolbarButton onClick={handlers.onCreateCard}>作成</ToolbarButton>
-          <ToolbarButton onClick={handlers.onViewCards}>カード一覧</ToolbarButton>
+          </ToolbarBtn>
+          <Divider />
+          <ToolbarBtn onClick={handlers.onCreateCard}>作成</ToolbarBtn>
+          <ToolbarBtn onClick={handlers.onViewCards}>カード一覧</ToolbarBtn>
+          <Divider />
+          {/* View toggle */}
+          <ToolbarBtn
+            onClick={() => setViewMode("carousel")}
+            active={viewMode === "carousel"}
+            title="カルーセル表示"
+          >
+            ☷
+          </ToolbarBtn>
+          <ToolbarBtn
+            onClick={() => setViewMode("table")}
+            active={viewMode === "table"}
+            title="テーブル表示"
+          >
+            ≡
+          </ToolbarBtn>
+          <Divider />
+          {/* Filter toggle */}
+          <ToolbarBtn
+            onClick={() => setShowFilterBar((v) => !v)}
+            active={showFilterBar || isFilterActive}
+            title="フィルタ"
+          >
+            {isFilterActive ? "フィルタ中" : "フィルタ"}
+          </ToolbarBtn>
         </div>
       </div>
 
-      {/* ── Main layout: content + properties ── */}
+      {/* ── Filter bar ───────────────────────────────────────────────────────── */}
+      {showFilterBar && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            padding: "6px 20px",
+            borderBottom: `1px solid ${T.divider}`,
+            background: "#fafafa",
+            flexWrap: "wrap",
+          }}
+        >
+          <FilterGroup label="状態">
+            {(["all", "published", "draft"] as const).map((v) => (
+              <FilterChip
+                key={v}
+                label={v === "all" ? "すべて" : v === "published" ? "完成" : "下書き"}
+                active={filterDraftState === v}
+                onClick={() => setFilterDraftState(v)}
+              />
+            ))}
+          </FilterGroup>
+          <FilterGroup label="学習">
+            {(["all", "unlearned", "reviewed"] as const).map((v) => (
+              <FilterChip
+                key={v}
+                label={
+                  v === "all" ? "すべて" : v === "unlearned" ? "未学習" : "学習済み"
+                }
+                active={filterReviewed === v}
+                onClick={() => setFilterReviewed(v)}
+              />
+            ))}
+          </FilterGroup>
+          <FilterGroup label="並び替え">
+            {(
+              [
+                ["order", "順番"],
+                ["title", "タイトル"],
+                ["nextReview", "次回復習"],
+                ["reviewCount", "学習回数"],
+              ] as [SortKey, string][]
+            ).map(([key, label]) => (
+              <FilterChip
+                key={key}
+                label={
+                  sortKey === key
+                    ? `${label} ${sortDir === "asc" ? "↑" : "↓"}`
+                    : label
+                }
+                active={sortKey === key}
+                onClick={() => handleSortColumn(key)}
+              />
+            ))}
+          </FilterGroup>
+          {isFilterActive && (
+            <button
+              type="button"
+              onClick={() => {
+                setFilterDraftState("all");
+                setFilterReviewed("all");
+              }}
+              style={{
+                fontSize: T.fsMeta,
+                color: T.textMuted,
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                padding: "2px 6px",
+                borderRadius: 3,
+                marginLeft: "auto",
+              }}
+            >
+              リセット
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* ── Main layout ──────────────────────────────────────────────────────── */}
       <div
         style={{
           display: "flex",
-          height: "calc(100% - 48px)",
+          height: showFilterBar ? "calc(100% - 48px - 36px)" : "calc(100% - 48px)",
           overflow: "hidden",
         }}
       >
-        {/* ── Center content ── */}
+        {/* ── Center content ──────────────────────────────────────────────── */}
         <div
           style={{
             flex: 1,
             minWidth: 0,
             overflowY: "auto",
-            padding: "20px 24px",
+            padding: "18px 24px",
           }}
         >
           {/* Cards section */}
           <section style={{ marginBottom: 28 }}>
             <SectionHeader
-              title="カード"
+              title={`カード${displayCards.length !== activeCards.length ? ` (${displayCards.length}/${activeCards.length})` : ""}`}
               action={
-                <button
-                  type="button"
-                  onClick={handlers.onViewCards}
-                  style={{
-                    fontSize: "var(--font-size-meta, 12px)",
-                    color: "var(--text-muted, #8a8a8a)",
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    padding: "2px 6px",
-                    borderRadius: 3,
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.background =
-                      "var(--hover-bg, rgba(0,0,0,0.04))";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = "none";
-                  }}
-                >
-                  すべて表示
-                </button>
+                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  {viewMode === "table" && (
+                    <span style={{ fontSize: T.fsMeta, color: T.textMuted }}>
+                      {displayCards.length} 件
+                    </span>
+                  )}
+                  <ToolbarBtn onClick={handlers.onViewCards}>
+                    すべて表示
+                  </ToolbarBtn>
+                </div>
               }
             />
             <div style={{ marginTop: 12 }}>
-              <CardScrollSection
-                cards={sliderCards}
-                onEmpty={<InlineEmptyState text="カードがまだありません" action="作成する" onAction={handlers.onCreateCard} />}
-              />
+              {viewMode === "carousel" ? (
+                <CardScrollSection
+                  cards={carouselCards}
+                  onEmpty={
+                    <InlineEmpty
+                      text="カードがまだありません"
+                      action="作成する"
+                      onAction={handlers.onCreateCard}
+                    />
+                  }
+                />
+              ) : (
+                <CardTableSection
+                  cards={displayCards}
+                  sortKey={sortKey}
+                  sortDir={sortDir}
+                  onSort={handleSortColumn}
+                  onEmpty={
+                    <InlineEmpty
+                      text="カードがまだありません"
+                      action="作成する"
+                      onAction={handlers.onCreateCard}
+                    />
+                  }
+                />
+              )}
             </div>
           </section>
 
-          {/* Resilience distribution section */}
+          {/* Resilience distribution */}
           <section>
             <SectionHeader title="定着度分布" />
             <div style={{ marginTop: 12 }}>
               {canShowDistribution ? (
-                <div style={{ height: 200 }}>
+                <div style={{ height: 180 }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       data={resilienceBuckets}
@@ -390,7 +760,7 @@ export function FolderDashboard({
                         tickLine={false}
                         axisLine={false}
                         fontSize={10}
-                        stroke="var(--text-muted, #8a8a8a)"
+                        stroke={T.textMuted}
                         tickFormatter={(v) =>
                           v % 20 === 0 || v === 0 ? `${v}%` : ""
                         }
@@ -400,7 +770,7 @@ export function FolderDashboard({
                         tickLine={false}
                         axisLine={false}
                         fontSize={10}
-                        stroke="var(--text-muted, #8a8a8a)"
+                        stroke={T.textMuted}
                         width={24}
                         tickFormatter={(v) => (v === 0 ? "" : String(v))}
                       />
@@ -417,7 +787,7 @@ export function FolderDashboard({
                   </ResponsiveContainer>
                 </div>
               ) : (
-                <InlineEmptyState
+                <InlineEmpty
                   text="復習するとここに定着度が表示されます"
                   action="学習を始める"
                   onAction={handlers.onStartStudy}
@@ -427,28 +797,47 @@ export function FolderDashboard({
           </section>
         </div>
 
-        {/* ── Right: Properties pane ── */}
+        {/* ── Properties pane ─────────────────────────────────────────────── */}
         <aside
           style={{
-            width: 200,
+            width: 196,
             flexShrink: 0,
-            borderLeft: "1px solid var(--pane-border, #e8e8e8)",
-            padding: "20px 16px",
+            borderLeft: `1px solid ${T.border}`,
+            padding: "18px 16px",
             overflowY: "auto",
           }}
         >
           <p
             style={{
-              fontSize: "var(--font-size-meta, 12px)",
+              fontSize: 11,
               fontWeight: 500,
-              color: "var(--section-header-color, #6b6b6b)",
+              color: T.sectionLabel,
               marginBottom: 8,
-              letterSpacing: "0.04em",
+              letterSpacing: "0.06em",
               textTransform: "uppercase",
             }}
           >
             Properties
           </p>
+
+          {/* Editable folder name */}
+          <div
+            style={{
+              padding: "4px 0",
+              borderBottom: `1px solid ${T.divider}`,
+              marginBottom: 0,
+            }}
+          >
+            <span style={{ fontSize: T.fsMeta, color: T.textMuted, display: "block", marginBottom: 2 }}>
+              フォルダ名
+            </span>
+            <EditablePropertyValue
+              value={folderName}
+              onCommit={onRenameFolder}
+              placeholder="フォルダ名を入力"
+            />
+          </div>
+
           <PropertyRow label="カード数" value={activeCards.length} />
           <PropertyRow label="今日やる" value={dueToday} />
           <PropertyRow label="未学習" value={unlearned} />
@@ -470,100 +859,339 @@ export function FolderDashboard({
   );
 }
 
-// ── Toolbar button ────────────────────────────────────────────────────────────
-interface ToolbarButtonProps {
-  onClick: () => void;
-  children: ReactNode;
-  primary?: boolean;
+// ── Divider ───────────────────────────────────────────────────────────────────
+
+function Divider() {
+  return (
+    <span
+      style={{
+        display: "inline-block",
+        width: 1,
+        height: 14,
+        background: "var(--section-divider, #ebebeb)",
+        margin: "0 4px",
+        verticalAlign: "middle",
+      }}
+    />
+  );
 }
 
-function ToolbarButton({ onClick, children, primary }: ToolbarButtonProps) {
+// ── Filter chip ───────────────────────────────────────────────────────────────
+
+function FilterGroup({
+  label,
+  children,
+}: {
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+      <span
+        style={{
+          fontSize: 11,
+          color: "var(--text-muted,#8a8a8a)",
+          marginRight: 4,
+        }}
+      >
+        {label}:
+      </span>
+      {children}
+    </div>
+  );
+}
+
+function FilterChip({
+  label,
+  active,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
   return (
     <button
       type="button"
       onClick={onClick}
       style={{
-        fontSize: "var(--font-size-body, 13px)",
-        fontWeight: primary ? 500 : 400,
-        color: primary
-          ? "var(--sidebar-active-accent, #7aa6a1)"
-          : "var(--text-secondary, #4b4b4b)",
-        background: "none",
-        border: "none",
+        fontSize: 11,
+        padding: "2px 7px",
+        borderRadius: 3,
+        border: `1px solid ${active ? "var(--sidebar-active-accent,#7aa6a1)" : "var(--section-divider,#ebebeb)"}`,
+        background: active
+          ? "var(--active-bg,rgba(104,154,152,0.1))"
+          : "transparent",
+        color: active
+          ? "var(--sidebar-active-accent,#7aa6a1)"
+          : "var(--text-muted,#8a8a8a)",
         cursor: "pointer",
-        padding: "4px 8px",
-        borderRadius: 4,
-        transition: "background 0.1s",
-      }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLElement).style.background =
-          "var(--toolbar-btn-hover, rgba(0,0,0,0.06))";
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLElement).style.background = "none";
+        transition: "all 0.1s",
       }}
     >
-      {children}
+      {label}
     </button>
   );
 }
 
-// ── Inline empty state ────────────────────────────────────────────────────────
-interface InlineEmptyStateProps {
-  text: string;
-  action?: string;
-  onAction?: () => void;
-}
+// ── Editable property value ───────────────────────────────────────────────────
 
-function InlineEmptyState({ text, action, onAction }: InlineEmptyStateProps) {
+function EditablePropertyValue({
+  value,
+  onCommit,
+  placeholder,
+}: {
+  value: string;
+  onCommit?: (v: string) => Promise<void>;
+  placeholder?: string;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setDraft(value);
+  }, [value]);
+
+  const commit = async () => {
+    const trimmed = draft.trim();
+    if (trimmed && trimmed !== value) {
+      await onCommit?.(trimmed);
+    } else {
+      setDraft(value);
+    }
+    setEditing(false);
+  };
+
+  if (!onCommit) {
+    return (
+      <span style={{ fontSize: "var(--font-size-body,13px)", color: "var(--text-primary,#1a1a1a)" }}>
+        {value || placeholder}
+      </span>
+    );
+  }
+
+  if (editing) {
+    return (
+      <input
+        ref={inputRef}
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={() => { void commit(); }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") { void commit(); }
+          if (e.key === "Escape") { setDraft(value); setEditing(false); }
+        }}
+        style={{
+          fontSize: "var(--font-size-body,13px)",
+          color: "var(--text-primary,#1a1a1a)",
+          border: "none",
+          borderBottom: "1.5px solid var(--sidebar-active-accent,#7aa6a1)",
+          background: "transparent",
+          outline: "none",
+          width: "100%",
+          padding: "1px 0",
+        }}
+        autoFocus
+      />
+    );
+  }
+
   return (
-    <div
+    <span
+      onClick={() => {
+        setEditing(true);
+        requestAnimationFrame(() => inputRef.current?.select());
+      }}
+      title="クリックで編集"
       style={{
-        padding: "16px 0",
-        display: "flex",
-        alignItems: "center",
-        gap: 12,
+        fontSize: "var(--font-size-body,13px)",
+        color: "var(--text-primary,#1a1a1a)",
+        cursor: "text",
+        display: "block",
+        padding: "1px 0",
+        borderBottom: "1px solid transparent",
+        transition: "border-color 0.1s",
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLElement).style.borderBottomColor =
+          "var(--section-divider,#ebebeb)";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLElement).style.borderBottomColor = "transparent";
       }}
     >
-      <span
+      {value || (
+        <span style={{ color: "var(--text-placeholder,#b0b0b0)" }}>
+          {placeholder}
+        </span>
+      )}
+    </span>
+  );
+}
+
+// ── Card table section ────────────────────────────────────────────────────────
+
+interface CardTableSectionProps {
+  cards: Card[];
+  sortKey: SortKey;
+  sortDir: SortDir;
+  onSort: (key: SortKey) => void;
+  onEmpty: ReactNode;
+}
+
+function CardTableSection({
+  cards,
+  sortKey,
+  sortDir,
+  onSort,
+  onEmpty,
+}: CardTableSectionProps) {
+  if (cards.length === 0) return <>{onEmpty}</>;
+
+  const thStyle = (key: SortKey): React.CSSProperties => ({
+    padding: "4px 8px",
+    fontSize: 11,
+    fontWeight: 500,
+    color:
+      sortKey === key
+        ? "var(--sidebar-active-accent,#7aa6a1)"
+        : "var(--text-muted,#8a8a8a)",
+    textAlign: "left",
+    cursor: "pointer",
+    userSelect: "none",
+    whiteSpace: "nowrap",
+    borderBottom: "1px solid var(--section-divider,#ebebeb)",
+    background: "#fafafa",
+  });
+
+  return (
+    <div style={{ overflowX: "auto" }}>
+      <table
         style={{
-          fontSize: "var(--font-size-body, 13px)",
-          color: "var(--text-muted, #8a8a8a)",
+          width: "100%",
+          borderCollapse: "collapse",
+          fontSize: "var(--font-size-body,13px)",
         }}
       >
-        {text}
-      </span>
-      {action && onAction ? (
-        <button
-          type="button"
-          onClick={onAction}
-          style={{
-            fontSize: "var(--font-size-meta, 12px)",
-            color: "var(--sidebar-active-accent, #7aa6a1)",
-            background: "none",
-            border: "1px solid currentColor",
-            borderRadius: 3,
-            padding: "2px 8px",
-            cursor: "pointer",
-            opacity: 0.85,
-          }}
-        >
-          {action}
-        </button>
-      ) : null}
+        <thead>
+          <tr>
+            <th style={thStyle("title")} onClick={() => onSort("title")}>
+              タイトル{sortKey === "title" && <SortIcon dir={sortDir} />}
+            </th>
+            <th style={thStyle("reviewCount")} onClick={() => onSort("reviewCount")}>
+              復習回数{sortKey === "reviewCount" && <SortIcon dir={sortDir} />}
+            </th>
+            <th style={thStyle("nextReview")} onClick={() => onSort("nextReview")}>
+              次回復習{sortKey === "nextReview" && <SortIcon dir={sortDir} />}
+            </th>
+            <th
+              style={{
+                ...thStyle("order"),
+                width: 60,
+              }}
+            >
+              状態
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {cards.map((card, i) => {
+            const isDraft = card.isDraft ?? (card as unknown).is_draft;
+            const reviewCount =
+              card.reviewCount ?? (card as unknown).review_count ?? 0;
+            const nextReview = toDate(
+              card.nextReviewDate ?? (card as unknown).next_review_date,
+            );
+            const title = displayTitle(card);
+
+            return (
+              <tr
+                key={card.id}
+                style={{
+                  borderBottom: "1px solid var(--section-divider,#ebebeb)",
+                  background: i % 2 === 0 ? "#fff" : "#fafafa",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.background =
+                    "var(--hover-bg,rgba(0,0,0,0.03))";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.background =
+                    i % 2 === 0 ? "#fff" : "#fafafa";
+                }}
+              >
+                <td
+                  style={{
+                    padding: "6px 8px",
+                    color: "var(--text-primary,#1a1a1a)",
+                    maxWidth: 320,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {title}
+                </td>
+                <td
+                  style={{
+                    padding: "6px 8px",
+                    color: "var(--text-secondary,#4b4b4b)",
+                    fontVariantNumeric: "tabular-nums",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {reviewCount}
+                </td>
+                <td
+                  style={{
+                    padding: "6px 8px",
+                    color: "var(--text-muted,#8a8a8a)",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {nextReview
+                    ? nextReview.toLocaleDateString("ja-JP", {
+                        month: "short",
+                        day: "numeric",
+                      })
+                    : "—"}
+                </td>
+                <td style={{ padding: "6px 8px" }}>
+                  {isDraft ? (
+                    <span
+                      style={{
+                        fontSize: 10,
+                        color: "var(--text-muted,#8a8a8a)",
+                        border: "1px solid var(--section-divider,#ebebeb)",
+                        borderRadius: 2,
+                        padding: "1px 5px",
+                      }}
+                    >
+                      下書き
+                    </span>
+                  ) : null}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }
 
 // ── Card scroll section ───────────────────────────────────────────────────────
-const CARD_SCROLL_AMOUNT = 264;
 
-interface CardScrollSectionProps {
+const CARD_SCROLL_AMOUNT = 216;
+
+function CardScrollSection({
+  cards,
+  onEmpty,
+}: {
   cards: Card[];
   onEmpty: ReactNode;
-}
-
-function CardScrollSection({ cards, onEmpty }: CardScrollSectionProps) {
+}) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -580,7 +1208,6 @@ function CardScrollSection({ cards, onEmpty }: CardScrollSectionProps) {
     const id = requestAnimationFrame(updateScrollState);
     const el = scrollRef.current;
     if (!el) return () => cancelAnimationFrame(id);
-
     const ro = new ResizeObserver(updateScrollState);
     ro.observe(el);
     el.addEventListener("scroll", updateScrollState, { passive: true });
@@ -640,7 +1267,7 @@ function CardScrollSection({ cards, onEmpty }: CardScrollSectionProps) {
             paddingBottom: 4,
           }}
         >
-          {cards.map((card) => {
+          {cards.map((card, i) => {
             const isDraft = card.isDraft ?? (card as unknown).is_draft;
             const nextReview = toDate(
               card.nextReviewDate ?? (card as unknown).next_review_date,
@@ -659,21 +1286,19 @@ function CardScrollSection({ cards, onEmpty }: CardScrollSectionProps) {
                 key={card.id}
                 style={{
                   flexShrink: 0,
-                  width: 200,
-                  border: "1px solid var(--pane-border, #e8e8e8)",
+                  width: 196,
+                  border: `1px solid ${T.border}`,
                   borderRadius: 4,
                   padding: "10px 12px",
-                  background: "#fafafa",
+                  background: i % 3 === 0 ? "#fff" : "#fafafa",
                   transition: "border-color 0.15s",
                   cursor: "default",
                 }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.borderColor =
-                    "var(--sidebar-active-accent, #7aa6a1)";
+                  (e.currentTarget as HTMLElement).style.borderColor = T.accent;
                 }}
                 onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.borderColor =
-                    "var(--pane-border, #e8e8e8)";
+                  (e.currentTarget as HTMLElement).style.borderColor = T.border;
                 }}
               >
                 <div
@@ -686,9 +1311,9 @@ function CardScrollSection({ cards, onEmpty }: CardScrollSectionProps) {
                 >
                   <h4
                     style={{
-                      fontSize: "var(--font-size-body, 13px)",
+                      fontSize: T.fsBody,
                       fontWeight: 500,
-                      color: "var(--text-primary, #1a1a1a)",
+                      color: T.textPrimary,
                       lineHeight: 1.4,
                       margin: 0,
                       display: "-webkit-box",
@@ -699,13 +1324,13 @@ function CardScrollSection({ cards, onEmpty }: CardScrollSectionProps) {
                   >
                     {title}
                   </h4>
-                  {isDraft ? (
+                  {isDraft && (
                     <span
                       style={{
                         flexShrink: 0,
                         fontSize: 10,
-                        color: "var(--text-muted, #8a8a8a)",
-                        border: "1px solid var(--section-divider, #ebebeb)",
+                        color: T.textMuted,
+                        border: `1px solid ${T.divider}`,
                         borderRadius: 2,
                         padding: "0 4px",
                         lineHeight: "16px",
@@ -713,13 +1338,13 @@ function CardScrollSection({ cards, onEmpty }: CardScrollSectionProps) {
                     >
                       下書き
                     </span>
-                  ) : null}
+                  )}
                 </div>
                 {snippet ? (
                   <p
                     style={{
-                      fontSize: "var(--font-size-meta, 12px)",
-                      color: "var(--text-muted, #8a8a8a)",
+                      fontSize: T.fsMeta,
+                      color: T.textMuted,
                       lineHeight: 1.5,
                       marginTop: 6,
                       display: "-webkit-box",
@@ -731,17 +1356,17 @@ function CardScrollSection({ cards, onEmpty }: CardScrollSectionProps) {
                     {snippet}
                   </p>
                 ) : null}
-                {reviewText ? (
+                {reviewText && (
                   <p
                     style={{
                       fontSize: 11,
-                      color: "var(--text-placeholder, #b0b0b0)",
+                      color: T.textPlaceholder,
                       marginTop: 8,
                     }}
                   >
                     次回 {reviewText}
                   </p>
-                ) : null}
+                )}
               </article>
             );
           })}
@@ -749,7 +1374,7 @@ function CardScrollSection({ cards, onEmpty }: CardScrollSectionProps) {
         </div>
       </div>
 
-      {/* Left fade */}
+      {/* Fades */}
       <div
         aria-hidden="true"
         style={{
@@ -759,13 +1384,11 @@ function CardScrollSection({ cards, onEmpty }: CardScrollSectionProps) {
           top: 0,
           height: "100%",
           width: 40,
-          background: "linear-gradient(to right, #fff 0%, transparent 100%)",
+          background: "linear-gradient(to right,#fff 0%,transparent 100%)",
           opacity: canScrollLeft ? 1 : 0,
           transition: "opacity 0.2s",
         }}
       />
-
-      {/* Right fade */}
       <div
         aria-hidden="true"
         style={{
@@ -775,7 +1398,7 @@ function CardScrollSection({ cards, onEmpty }: CardScrollSectionProps) {
           top: 0,
           height: "100%",
           width: 48,
-          background: "linear-gradient(to left, #fff 0%, transparent 100%)",
+          background: "linear-gradient(to left,#fff 0%,transparent 100%)",
           opacity: canScrollRight ? 1 : 0,
           transition: "opacity 0.2s",
         }}
@@ -816,8 +1439,8 @@ function ScrollArrow({
         height: 22,
         borderRadius: "50%",
         background: "#fff",
-        border: "1px solid var(--pane-border, #e8e8e8)",
-        color: "var(--text-secondary, #4b4b4b)",
+        border: `1px solid ${T.border}`,
+        color: "var(--text-secondary,#4b4b4b)",
         cursor: "pointer",
         boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
       }}

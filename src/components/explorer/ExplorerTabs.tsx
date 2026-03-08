@@ -1,14 +1,9 @@
 /**
  * ExplorerTabs - Explorerタブ切替UIコンポーネント
+ * Linear/Notion 系のテキストリンクスタイル
  */
 import React from "react";
-import {
-  Folder as FolderIcon,
-  Clock,
-  Pin,
-  FolderPlus,
-  PanelsTopLeft,
-} from "@/ui/icons";
+import { FolderPlus } from "@/ui/icons";
 import { cn } from "@/lib/utils";
 import type { ExplorerTab } from "@/hooks/useExplorerStore";
 import { TagFilterPopover } from "./TagFilterPopover";
@@ -21,12 +16,11 @@ interface ExplorerTabsProps {
   showExplorerActions?: boolean;
 }
 
-// タブ定義
-const TABS: { id: ExplorerTab; label: string; icon: React.ElementType }[] = [
-  { id: "pinned", label: "ピン留め", icon: Pin },
-  { id: "explorer", label: "エクスプローラー", icon: FolderIcon },
-  { id: "views", label: "ビュー", icon: PanelsTopLeft },
-  { id: "recent", label: "最近", icon: Clock },
+const TABS: { id: ExplorerTab; label: string }[] = [
+  { id: "explorer", label: "フォルダ" },
+  { id: "pinned", label: "ピン" },
+  { id: "views", label: "ビュー" },
+  { id: "recent", label: "最近" },
 ];
 
 export function ExplorerTabs({
@@ -41,60 +35,67 @@ export function ExplorerTabs({
 
   return (
     <div
-      className={cn(
-        "flex items-center justify-between pr-2 h-9",
-        "border-b border-[#e3e6ea]",
-        // 左上の固定ハンバーガーボタンと重ならないよう、全画面幅で左余白を確保する。
-        "pl-10",
-      )}
-      style={{ backgroundColor: "var(--sidebar-bg)" }}
+      className="flex items-center justify-between pl-10 pr-2"
+      style={{
+        height: 36,
+        borderBottom: "1px solid var(--pane-border, #e8e8e8)",
+        backgroundColor: "var(--sidebar-bg)",
+      }}
     >
-      <div className="flex items-center flex-1 overflow-x-auto no-scrollbar">
+      {/* Tab links */}
+      <div className="flex items-center gap-0.5 overflow-x-auto no-scrollbar">
         {TABS.map((tab) => {
-          const Icon = tab.icon;
           const isActive = activeTab === tab.id;
-
           return (
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
-              title={tab.label}
               className={cn(
-                "flex items-center justify-center px-2 py-1 text-xs font-medium transition-colors relative whitespace-nowrap",
-                "hover:text-primary-700",
-                isActive ? "text-primary-700" : "text-[#6E6E80]",
+                "relative px-2.5 h-full flex items-center whitespace-nowrap transition-colors duration-100",
+                "text-[12px] font-medium",
+                isActive
+                  ? "text-[var(--text-primary,#1a1a1a)]"
+                  : "text-[var(--text-muted,#8a8a8a)] hover:text-[var(--text-secondary,#4b4b4b)]",
               )}
+              style={{ height: 36 }}
             >
-              <Icon className="w-4 h-4" />
-              {/* スクリーンリーダー用にラベルは保持し、視覚的に隠す */}
-              <span className="sr-only">{tab.label}</span>
-              {/* アクティブインジケーター */}
+              {tab.label}
               {isActive && (
-                <div className="absolute bottom-0 left-1 right-1 h-0.5 bg-primary-500 rounded-full" />
+                <span
+                  aria-hidden="true"
+                  style={{
+                    position: "absolute",
+                    bottom: 0,
+                    left: 6,
+                    right: 6,
+                    height: 1.5,
+                    borderRadius: 2,
+                    background: "var(--sidebar-active-accent, #7aa6a1)",
+                  }}
+                />
               )}
             </button>
           );
         })}
       </div>
 
-      {/* フィルタボタン (Explorerのみ表示) */}
+      {/* Explorer actions: フォルダ作成 + フィルタ */}
       <div
         className={cn(
-          "flex items-center gap-1 flex-shrink-0 overflow-hidden transition-all duration-200 ease-out",
+          "flex items-center gap-0.5 flex-shrink-0 transition-all duration-150",
           shouldShowExplorerActions
-            ? "ml-1 pl-1 border-l border-slate-200 opacity-100 translate-x-0 max-w-[120px]"
-            : "ml-0 pl-0 border-l-0 opacity-0 translate-x-1 max-w-0 pointer-events-none",
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none",
         )}
         aria-hidden={!shouldShowExplorerActions}
       >
         <button
           type="button"
-          onClick={() => {
-            void onCreateRootFolder?.();
-          }}
-          className="inline-flex h-7 w-7 items-center justify-center rounded-md text-[#6E6E80] transition-colors hover:bg-slate-100 hover:text-primary-700"
+          onClick={() => { void onCreateRootFolder?.(); }}
+          title="フォルダを作成"
+          className="flex items-center justify-center w-6 h-6 rounded text-[var(--text-muted,#8a8a8a)] hover:text-[var(--text-secondary,#4b4b4b)] hover:bg-[var(--hover-bg,rgba(0,0,0,0.04))] transition-colors"
         >
-          <FolderPlus className="w-4 h-4" />
+          <FolderPlus className="w-3.5 h-3.5" />
         </button>
         <TagFilterPopover allTags={allTags} />
       </div>

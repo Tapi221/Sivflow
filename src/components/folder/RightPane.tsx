@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 import { CardPane } from "./CardPane";
 import { FolderDashboard } from "./FolderDashboard";
@@ -9,9 +9,6 @@ import Dashboard from "@/pages/Dashboard";
 import Gallery from "@/pages/Gallery";
 import Calendar from "@/pages/Calendar";
 import Trash from "@/pages/Trash";
-import { EmptyMetaPanel } from "@/components/card/panels/EmptyMetaPanel";
-import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "@/ui/icons";
 
 interface RightPaneProps {
   selectedItem: SelectedExplorerItem;
@@ -33,6 +30,7 @@ interface RightPaneProps {
     documentId: string,
     updates: Partial<DocumentItem>,
   ) => Promise<void>;
+  onRenameFolder?: (folderId: string, newName: string) => Promise<void>;
   handlers: {
     onStartStudy: () => void;
     onViewCards: () => void;
@@ -53,18 +51,9 @@ export function RightPane({
   folderStats,
   onCardUpdated,
   onDocumentUpdated,
+  onRenameFolder,
   handlers,
 }: RightPaneProps) {
-  const [isMetaOpen, setIsMetaOpen] = useState<boolean>(() => {
-    if (typeof window === "undefined") return true;
-    return window.localStorage.getItem("folder-dashboard.meta-panel-open") !== "false";
-  });
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    window.localStorage.setItem("folder-dashboard.meta-panel-open", String(isMetaOpen));
-  }, [isMetaOpen]);
-
   if (selectedItem?.type === "gallery") {
     return <Gallery />;
   }
@@ -115,56 +104,20 @@ export function RightPane({
 
   if (selectedFolderId) {
     return (
-      <div className="h-full min-h-0 flex relative">
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          className="absolute top-3 z-20 h-8 w-8 rounded-full bg-[var(--sidebar-bg)] text-[#334155] surface-control-convex hover:bg-[var(--sidebar-active-bg)]"
-          style={{
-            right: isMetaOpen
-              ? "calc(var(--ui-panel-width) - var(--ui-space-3))"
-              : "var(--ui-space-1)",
-            transform: "none",
-          }}
-          onClick={() => setIsMetaOpen((prev) => !prev)}
-          aria-label={isMetaOpen ? "close meta panel" : "open meta panel"}
-        >
-          {isMetaOpen ? (
-            <ChevronRight className="h-4 w-4" />
-          ) : (
-            <ChevronLeft className="h-4 w-4" />
-          )}
-        </Button>
-
+      <div className="h-full min-h-0 flex">
         <div className="min-w-0 flex-1">
           <FolderDashboard
             folderId={selectedFolderId}
             folderName={selectedFolderName}
             cards={folderCards}
             handlers={handlers}
+            onRenameFolder={
+              onRenameFolder
+                ? (newName) => onRenameFolder(selectedFolderId, newName)
+                : undefined
+            }
           />
         </div>
-        {isMetaOpen && (
-          <EmptyMetaPanel
-            className="hidden md:block"
-            contentClassName="space-y-3"
-          >
-            <section className="rounded-2xl border border-[var(--surface-border)] bg-white surface-concave p-3">
-              <h3 className="text-[12px] font-semibold tracking-[0.08em] uppercase text-[var(--sidebar-text-muted)]">
-                フォルダ情報
-              </h3>
-              <p className="text-sm text-[#334155] break-anywhere">
-                {selectedFolderName}
-              </p>
-              <div className="text-xs text-[var(--sidebar-text-muted)] space-y-1">
-                <p>カード数: {folderCards.length}</p>
-                <p>今日やる: {folderStats.dueCount ?? 0}</p>
-                <p>未学習: {folderStats.unlearnedCount ?? 0}</p>
-              </div>
-            </section>
-          </EmptyMetaPanel>
-        )}
       </div>
     );
   }
