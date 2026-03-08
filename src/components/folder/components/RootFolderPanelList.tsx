@@ -1,4 +1,4 @@
-import { ContextMenu } from "@/components/folder/ContextMenu";
+import { ContextMenu } from "@/components/folder/components/menus/ContextMenu";
 import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import { cn } from "@/lib/utils";
 import { Folder as FolderIcon, MoreVertical } from "@/ui/icons";

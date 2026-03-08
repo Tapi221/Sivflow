@@ -1,4 +1,4 @@
-import { DocumentRowMenu } from "@/components/folder/DocumentRowMenu";
+import { DocumentRowMenu } from "@/components/folder/components/menus/DocumentRowMenu";
 import type { DocumentItem } from "@/components/folder/explorer/model/utils";
 import { cn } from "@/lib/utils";
 import { FileText, MoreVertical } from "@/ui/icons";

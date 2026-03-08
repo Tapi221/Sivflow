@@ -1,7 +1,7 @@
 import type { ComponentProps } from "react";
 import CreateCardSelectionDialog from "@/components/card/overlays/CreateCardSelectionDialog";
 import CreationModeDialog from "@/components/card/overlays/CreationModeDialog";
-import { ViewManagerDialog } from "@/components/folder/ViewManagerDialog";
+import { ViewManagerDialog } from "@/components/folder/components/dialogs/ViewManagerDialog";
 import type { ViewDef, ViewKind } from "@/components/folder/viewTypes";
 
 type ViewManagerTags = ComponentProps<typeof ViewManagerDialog>["tags"];

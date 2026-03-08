@@ -1,4 +1,4 @@
-import { ContextMenu } from "@/components/folder/ContextMenu";
+import { ContextMenu } from "@/components/folder/components/menus/ContextMenu";
 import {
     getParentFolderId,
     normalizeFolderId,

@@ -6,7 +6,7 @@ import { useFolders } from "@/hooks/folder/useFolders";
 import { useDocuments } from "@/hooks/platform/useDocuments";
 import { useIsDesktopRuntime } from "@/hooks/platform/useIsDesktopRuntime";
 import { Skeleton } from "@/components/ui/skeleton";
-import TreeViewLayout from "@/components/folder/TreeViewLayout";
+import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
 import { cn } from "@/lib/utils";
 import { useSettingsQueryParam } from "@/hooks/settings/useSettingsQueryParam";
 import { useBreadcrumbContext } from "@/contexts/BreadcrumbContext";
