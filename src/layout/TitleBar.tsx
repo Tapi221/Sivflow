@@ -1,6 +1,37 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
+import { useLocation, Link } from "react-router-dom";
 import { isDesktopRuntime } from "@/platform/runtime";
 import { cn } from "@/lib/utils";
+
+const PAGE_LABELS: Record<string, string> = {
+  folders: "フォルダ",
+  calendar: "カレンダー",
+  gallery: "ギャラリー",
+  trash: "ゴミ箱",
+  study: "学習モード",
+  cardedit: "カード編集",
+  cardview: "カード閲覧",
+  "one-qa-mode": "一問一答",
+  "pair-mode": "ペアモード",
+  "four-choice-mode": "四択モード",
+};
+
+function useBreadcrumbs() {
+  const { pathname } = useLocation();
+  return useMemo(() => {
+    const segments = pathname.split("/").filter(Boolean);
+    const crumbs = [{ label: "ホーム", to: "/folders" as string | undefined }];
+    segments.forEach((seg, i) => {
+      const label = PAGE_LABELS[seg.toLowerCase()] ?? seg;
+      const to = "/" + segments.slice(0, i + 1).join("/");
+      crumbs.push({ label, to });
+    });
+    if (crumbs.length > 1) {
+      crumbs[crumbs.length - 1] = { label: crumbs[crumbs.length - 1].label, to: undefined };
+    }
+    return crumbs;
+  }, [pathname]);
+}
 
 export const TitleBar: React.FC = () => {
   const [isMaximized, setIsMaximized] = useState(false);
@@ -24,6 +55,8 @@ export const TitleBar: React.FC = () => {
 
   if (!isDesktop) return null;
 
+  const crumbs = useBreadcrumbs();
+
   return (
     <div
       className={cn(
@@ -31,11 +64,24 @@ export const TitleBar: React.FC = () => {
       )}
       style={{ WebkitAppRegion: "drag", zIndex: 9999 } as React.CSSProperties}
     >
-      <div className="flex h-full items-center px-4">
-        {/* レトロ・ミニマルなタイトル */}
-        <span className="font-semibold tracking-wide text-gray-500 text-xs mt-[1px]">
+      <div className="flex h-full items-center gap-1 px-4" style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}>
+        <span className="font-semibold tracking-wide text-gray-500 text-xs mr-3">
           Manifolia.
         </span>
+        <nav className="flex items-center gap-1 text-xs text-gray-400">
+          {crumbs.map((crumb, i) => (
+            <React.Fragment key={i}>
+              {i > 0 && <span className="text-gray-300 select-none">/</span>}
+              {crumb.to ? (
+                <Link to={crumb.to} className="hover:text-gray-600 transition-colors">
+                  {crumb.label}
+                </Link>
+              ) : (
+                <span className="text-gray-600 font-medium">{crumb.label}</span>
+              )}
+            </React.Fragment>
+          ))}
+        </nav>
       </div>
 
       <div

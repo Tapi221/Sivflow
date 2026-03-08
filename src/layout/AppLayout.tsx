@@ -1,7 +1,6 @@
 import React, { Suspense } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
-import { PageHeader } from "./PageHeader";
 import "./AppLayout.css";
 
 function LoadingFallback() {
@@ -26,7 +25,6 @@ export function AppLayout() {
     <div className="app-layout">
       <Sidebar />
       <div className="app-layout__content">
-        <PageHeader />
         <main
           className={[
             "app-layout__main",

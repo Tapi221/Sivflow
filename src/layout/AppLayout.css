@@ -11,7 +11,7 @@
 
 .app-layout__content {
   display: grid;
-  grid-template-rows: 48px 1fr;
+  grid-template-rows: 1fr;
   min-height: 0;
   overflow: hidden;
 }
