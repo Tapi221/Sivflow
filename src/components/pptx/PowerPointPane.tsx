@@ -13,74 +13,105 @@ interface PowerPointPaneProps {
 }
 
 export function PowerPointPane({ doc, className }: PowerPointPaneProps) {
-  const ctrl = usePowerPointPaneController(doc);
+  const {
+  docState,
+  displayName,
+  currentSlide,
+  setCurrentSlide,
+  effectiveSlideCount,
+  slides,
+  scale,
+  setScale,
+  loadingManifest,
+  manifestPending,
+  manifestError,
+  manifestStatus,
+  conversionError,
+  conversionErrorLabel,
+  hasReachedAutoRetryLimit,
+  hasScheduledAutoRetry,
+  nextRetryLabel,
+  isOnline,
+  offlineWithoutReadyManifest,
+  viewerReady,
+  canOpenSource,
+  handleOpenSource,
+  localSourceStatus,
+  handlePrev,
+  handleNext,
+  handleRetryConversion,
+  viewerRef,
+} = usePowerPointPaneController(doc);
 
   const remoteSourceUrl = normalizeString(
-    ctrl.docState.remoteUrl ?? ctrl.docState.downloadUrl ?? null,
+    docState.remoteUrl ?? docState.downloadUrl ?? null,
   );
 
   return (
     <div className={cn("flex flex-col h-full min-w-0", className)}>
       <PowerPointPaneHeader
-        displayName={ctrl.displayName}
-        isOnline={ctrl.isOnline}
-        manifestStatus={ctrl.manifestStatus}
-        uploadStatus={ctrl.docState.uploadStatus}
+        displayName={displayName}
+        isOnline={isOnline}
+        manifestStatus={manifestStatus}
+        uploadStatus={docState.uploadStatus}
         remoteSourceUrl={remoteSourceUrl}
-        localSourceStatus={ctrl.localSourceStatus}
-        currentSlide={ctrl.currentSlide}
-        effectiveSlideCount={ctrl.effectiveSlideCount}
-        viewerReady={ctrl.viewerReady}
-        onPrev={ctrl.handlePrev}
-        onNext={ctrl.handleNext}
-        scale={ctrl.scale}
-        onScaleChange={ctrl.setScale}
-        canOpenSource={ctrl.canOpenSource}
-        onOpenSource={ctrl.handleOpenSource}
+        localSourceStatus={localSourceStatus}
+        currentSlide={currentSlide}
+        effectiveSlideCount={effectiveSlideCount}
+        viewerReady={viewerReady}
+        onPrev={handlePrev}
+        onNext={handleNext}
+        scale={scale}
+        onScaleChange={setScale}
+        canOpenSource={canOpenSource}
+        onOpenSource={handleOpenSource}
       />
 
       <div className="flex-1 min-w-0 w-full bg-slate-50">
-        {ctrl.loadingManifest && ctrl.manifestStatus === "ready" && (
+        {loadingManifest && manifestStatus === "ready" && (
           <div className="text-sm text-slate-500 p-4 flex items-center gap-2">
             <Loader2 className="w-4 h-4 animate-spin" />
-            {ctrl.manifestPending
+            {manifestPending
               ? "変換結果の manifest 生成を待機中..."
               : "スライド情報を読み込み中..."}
           </div>
         )}
 
-        {ctrl.viewerReady && (
+        {viewerReady && (
           <PowerPointViewer
-            ref={ctrl.viewerRef}
-            slides={ctrl.slides}
-            scale={ctrl.scale}
-            onSlideChange={ctrl.setCurrentSlide}
+            ref={viewerRef}
+            slides={slides}
+            scale={scale}
+            onSlideChange={setCurrentSlide}
             className="h-full w-full"
           />
         )}
 
-        {!ctrl.viewerReady && !ctrl.loadingManifest && (
+        {!viewerReady && !loadingManifest && (
           <PowerPointPaneState
-            offlineWithoutReadyManifest={ctrl.offlineWithoutReadyManifest}
-            manifestPending={ctrl.manifestPending}
-            manifestStatus={ctrl.manifestStatus}
-            manifestError={ctrl.manifestError}
-            conversionError={ctrl.conversionError}
-            conversionErrorLabel={ctrl.conversionErrorLabel}
-            uploadStatus={ctrl.docState.uploadStatus}
-            isOnline={ctrl.isOnline}
-            hasScheduledAutoRetry={ctrl.hasScheduledAutoRetry}
-            hasReachedAutoRetryLimit={ctrl.hasReachedAutoRetryLimit}
-            nextRetryLabel={ctrl.nextRetryLabel}
-            canOpenSource={ctrl.canOpenSource}
-            onRetry={ctrl.handleRetryConversion}
-            onOpenSource={ctrl.handleOpenSource}
+            offlineWithoutReadyManifest={offlineWithoutReadyManifest}
+            manifestPending={manifestPending}
+            manifestStatus={manifestStatus}
+            manifestError={manifestError}
+            conversionError={conversionError}
+            conversionErrorLabel={conversionErrorLabel}
+            uploadStatus={docState.uploadStatus}
+            isOnline={isOnline}
+            hasScheduledAutoRetry={hasScheduledAutoRetry}
+            hasReachedAutoRetryLimit={hasReachedAutoRetryLimit}
+            nextRetryLabel={nextRetryLabel}
+            canOpenSource={canOpenSource}
+            onRetry={handleRetryConversion}
+            onOpenSource={handleOpenSource}
           />
         )}
       </div>
     </div>
   );
 }
+
+
+
 
 
 
