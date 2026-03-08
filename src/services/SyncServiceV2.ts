@@ -7,7 +7,7 @@ import type {
   SyncTask,
 } from "./interfaces/ISyncService";
 import { nanoid } from "nanoid";
-import type { SyncContextSource } from "@/types/telemetry";
+import type { SyncContextSource } from "@/types/domain/telemetry";
 import type { SyncResult } from "@/types/domain/sync";
 import {
   doc,

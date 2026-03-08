@@ -4,7 +4,7 @@ import type {
   LogLevel,
   SyncLogEntry,
   TelemetryEventName,
-} from "@/types/telemetry";
+} from "@/types/domain/telemetry";
 import { sanitizeForLog } from "@/utils/logSanitizer";
 
 /**

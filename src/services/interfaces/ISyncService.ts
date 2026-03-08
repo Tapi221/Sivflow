@@ -1,4 +1,4 @@
-import type { SyncContextSource, NetworkStatus } from "@/types/telemetry";
+import type { SyncContextSource, NetworkStatus } from "@/types/domain/telemetry";
 import type { SyncResult } from "@/types/domain/sync";
 
 /**

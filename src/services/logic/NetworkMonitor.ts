@@ -2,7 +2,7 @@ import type {
     BatchConstraint,
     INetworkMonitor,
 } from "@/services/interfaces/ISyncService";
-import type { NetworkStatus, SyncContextSource } from "@/types/telemetry";
+import type { NetworkStatus, SyncContextSource } from "@/types/domain/telemetry";
 
 /**
  * NetworkMonitor: ネットワーク状態を監視し、実測値ベースで健全性を判断

@@ -1,4 +1,4 @@
-import type { Card } from "@/types/Card";
+import type { Card } from "@/types/domain/card";
 import { normalizeMemoryStability } from "./reviewUtils";
 
 /**
