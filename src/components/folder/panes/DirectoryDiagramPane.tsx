@@ -1,24 +1,24 @@
-import React, { useMemo, useState } from "react";
-import { HelpCircle, Settings2, Star, Tag as TagIcon } from "@/ui/icons";
-import type { Card, DocumentItem, Folder } from "@/types";
-import { TagBadge } from "@/components/tag/TagBadge";
-import { resolveCardTagNames, useTags } from "@/hooks/settings/useTags";
-import { cn } from "@/lib/utils";
-import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
-import { ExplorerFilterSummary } from "@/components/explorer/ExplorerFilterSummary";
+import { Flashcard } from "@/components/card/frame/Flashcard";
+import type { FlashcardCardLike } from "@/components/card/frame/Flashcard";
 import { TagFilterPopover } from "@/components/explorer/TagFilterPopover";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { TagBadge } from "@/components/tag/TagBadge";
 import {
   Dialog,
   DialogContent,
   DialogOverlay,
   DialogPortal,
 } from "@/components/ui/dialog";
-import { Flashcard } from "@/components/card/frame/Flashcard";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
+import { resolveCardTagNames, useTags } from "@/hooks/settings/useTags";
+import { cn } from "@/lib/utils";
+import type { Card, DocumentItem, Folder } from "@/types";
+import { HelpCircle, Settings2, Star, Tag as TagIcon } from "@/ui/icons";
+import { useMemo, useState } from "react";
 
 interface DirectoryDiagramPaneProps {
   folders: Folder[];
@@ -241,10 +241,10 @@ export function DirectoryDiagramPane({
       }
 
       const hasUncertainty = Boolean(
-        card.hasUncertainty ?? card.has_uncertainty,
+        card.hasUncertainty ?? card.hasUncertainty,
       );
-      const isBookmarked = Boolean(card.isBookmarked ?? card.is_bookmarked);
-      const isDraft = Boolean(card.isDraft ?? card.is_draft);
+      const isBookmarked = Boolean(card.isBookmarked);
+      const isDraft = Boolean(card.isDraft);
 
       if (uncertaintyFilter === "on" && !hasUncertainty) return false;
       if (uncertaintyFilter === "off" && hasUncertainty) return false;
@@ -303,8 +303,8 @@ export function DirectoryDiagramPane({
         name: getCardLabel(card),
         sourceCardId: card.id,
         tags: cardTags,
-        hasUncertainty: Boolean(card.hasUncertainty ?? card.has_uncertainty),
-        isBookmarked: Boolean(card.isBookmarked ?? card.is_bookmarked),
+        hasUncertainty: Boolean(card.hasUncertainty),
+        isBookmarked: Boolean(card.isBookmarked),
         showTags: true,
         children: [],
       });
@@ -458,14 +458,6 @@ export function DirectoryDiagramPane({
           </div>
         </div>
       </div>
-
-      <ExplorerFilterSummary
-        getTagColor={getTagColor}
-        isFilterActive={isFilterActive}
-        resultCount={filteredCards.length + filteredDocuments.length}
-        className="border-b border-slate-100 bg-slate-50/60 px-5 py-3"
-      />
-
       <div className="p-3">
         {rootNodes.length > 0 ? (
           <div className="relative">
@@ -521,14 +513,5 @@ export function DirectoryDiagramPane({
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
 
 

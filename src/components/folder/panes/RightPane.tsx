@@ -1,14 +1,13 @@
-import React from "react";
-import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
-import { CardPane } from "./CardPane";
-import { FolderDashboard } from "./FolderDashboard";
-import { DirectoryDiagramPane } from "./DirectoryDiagramPane";
 import { PdfPane } from "@/components/pdf/PdfPane";
 import { PowerPointPane } from "@/components/pptx/PowerPointPane";
+import Calendar from "@/pages/Calendar";
 import Dashboard from "@/pages/Dashboard";
 import Gallery from "@/pages/Gallery";
-import Calendar from "@/pages/Calendar";
 import Trash from "@/pages/Trash";
+import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
+import { CardPane } from "./CardPane";
+import { DirectoryDiagramPane } from "./DirectoryDiagramPane";
+import { FolderDashboard } from "./FolderDashboard";
 
 interface RightPaneProps {
   selectedItem: SelectedExplorerItem;
