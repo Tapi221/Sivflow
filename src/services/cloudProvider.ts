@@ -13,7 +13,7 @@ import type { Folder, Card } from "../types";
 import {
   denormalizeUploadedImages,
   normalizeUploadedImages,
-} from "../utils/imageUtils";
+} from "../utils/uploaded-image/normalizer";
 import {
   foldersPathSegments,
   folderDocPathSegments,
@@ -173,3 +173,4 @@ export class FirebaseCloudProvider implements ICloudProvider {
     );
   }
 }
+

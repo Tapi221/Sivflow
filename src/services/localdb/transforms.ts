@@ -2,8 +2,8 @@ import { normalizeFolder, extractTextFromBlocks } from "../../utils";
 import {
   denormalizeUploadedImages,
   normalizeUploadedImages,
-  sanitizeUploadedImages,
-} from "../../utils/imageUtils";
+} from "../../utils/uploaded-image/normalizer";
+import { sanitizeUploadedImages } from "../../utils/uploaded-image/sanitizer";
 import { sanitizeProfileImage } from "@/utils/profileImageSanitizer";
 import { assertImageArrayInvariant } from "../../utils/imageAssertions";
 import type { UploadedImage } from "@/types";
@@ -128,3 +128,4 @@ export const denormalizeUserSettingsForStorage = (settings: unknown) => {
     profileImage,
   };
 };
+

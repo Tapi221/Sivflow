@@ -2,7 +2,7 @@ import type { LocalDB } from "./LocalDB";
 import {
   normalizeUploadedImages,
   denormalizeUploadedImages,
-} from "../../utils/imageUtils";
+} from "../../utils/uploaded-image/normalizer";
 import type {
   IntegrityIssue,
   IntegrityRepairResult,
@@ -664,3 +664,4 @@ export async function repairDataIntegrity(
     issues,
   };
 }
+
