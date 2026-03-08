@@ -1,7 +1,7 @@
 import { ExplorerTabs } from "@/components/explorer/ExplorerTabs";
 import { cn } from "@/lib/utils";
 import React from "react";
-import { ExplorerFilterSummary } from "../ExplorerFilterSummary";
+import { ExplorerFilterSummary } from "@/components/folder/ExplorerFilterSummary";
 
 interface TreeViewSidebarProps {
   sidebarRef: React.RefObject<HTMLDivElement | null>;

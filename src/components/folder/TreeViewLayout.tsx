@@ -1,9 +1,5 @@
-import CreateCardSelectionDialog from "@/components/card/overlays/CreateCardSelectionDialog";
-import CreationModeDialog from "@/components/card/overlays/CreationModeDialog";
-import { PinnedPanel } from "@/components/explorer/PinnedPanel";
-import { RecentPanel } from "@/components/explorer/RecentPanel";
 import { useCards } from "@/hooks/card/useCards";
-import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
+import { useExplorerPanelState } from "./hooks/useExplorerPanelState";
 import { useFolders } from "@/hooks/folder/useFolders";
 import { useDocuments } from "@/hooks/platform/useDocuments";
 import { resolveCardTagNames, useTags } from "@/hooks/settings/useTags";
@@ -15,12 +11,13 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { TreeViewMainPane } from "./components/TreeViewMainPane";
 import { TreeViewSidebar } from "./components/TreeViewSidebar";
-import { FolderTreeWithCards } from "./FolderTreeWithCards";
-import { ViewManagerDialog } from "./ViewManagerDialog";
-import { ViewsPanel } from "./ViewsPanel";
+import { TreeViewTabContent } from "./components/TreeViewTabContent";
+import { TreeViewDialogs } from "./components/TreeViewDialogs";
 import { useTreeViewDerivedState } from "./hooks/useTreeViewDerivedState";
 import { useTreeViewSidebar } from "./hooks/useTreeViewSidebar";
-import { buildVirtualTree, type ViewDef, type ViewKind } from "./viewTypes";
+import { useTreeViewFilters } from "./hooks/useTreeViewFilters";
+import { type ViewDef, type ViewKind } from "./viewTypes";
+import { useTreeViewViews } from "./hooks/useTreeViewViews";
 
 interface TreeViewLayoutProps {
   folders: Folder[];
@@ -35,19 +32,6 @@ interface TreeViewLayoutProps {
   onCardUpdated: () => void;
   navigateToSectionListToken?: number;
 }
-
-const DEFAULT_FOLDER_VIEW: ViewDef = {
-  id: "folder-default",
-  name: "フォルダ",
-  kind: "folder",
-};
-
-const ACTIVE_VIEW_KINDS: ViewKind[] = ["folder", "tagCategory", "tagTree"];
-
-const createViewId = () =>
-  typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
-    ? crypto.randomUUID()
-    : `view-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
 function TreeViewLayout({
   folders,
@@ -261,96 +245,24 @@ function TreeViewLayout({
     setCreateFolderRequestToken((prev) => prev + 1);
   }, []);
 
-  const isFilterTargetTab = explorerTab === "explorer";
-  const isFilterActive =
-    isFilterTargetTab &&
-    (tagFilter.length > 0 ||
-      uncertaintyFilter !== "any" ||
-      bookmarkedFilter !== "any" ||
-      draftFilter !== "any" ||
-      contentTypeFilter.length < 3);
-
-  const { filteredCards, filteredDocuments, isFiltering } = useMemo(() => {
-    const active =
-      isFilterTargetTab &&
-      (tagFilter.length > 0 ||
-        uncertaintyFilter !== "any" ||
-        bookmarkedFilter !== "any" ||
-        draftFilter !== "any" ||
-        contentTypeFilter.length < 3);
-
-    if (!active) {
-      return {
-        filteredCards: cards,
-        filteredDocuments: documents,
-        isFiltering: false,
-      };
-    }
-
-    const allowCards = contentTypeFilter.includes("card");
-    const allowPdf = contentTypeFilter.includes("pdf");
-    const allowPptx = contentTypeFilter.includes("pptx");
-
-    const filtered = cards.filter((card) => {
-      if (!allowCards) return false;
-
-      if (tagFilter.length > 0) {
-        const resolvedNames = resolveCardTagNames(
-          card.tagIds,
-          card.tags,
-          tagById,
-        );
-        if (resolvedNames.length === 0) return false;
-
-        const cardTagSet = new Set(resolvedNames);
-        const tagMatched =
-          tagMatchMode === "any"
-            ? tagFilter.some((t) => cardTagSet.has(t))
-            : tagFilter.every((t) => cardTagSet.has(t));
-
-        if (!tagMatched) return false;
-      }
-
-      const hasUncertainty = Boolean(
-        card.hasUncertainty ?? card.hasUncertainty,
-      );
-      const isBookmarked = Boolean(card.isBookmarked ?? card.isBookmarked);
-      const isDraft = Boolean(card.isDraft ?? card.isDraft);
-
-      if (uncertaintyFilter === "on" && !hasUncertainty) return false;
-      if (uncertaintyFilter === "off" && hasUncertainty) return false;
-      if (bookmarkedFilter === "on" && !isBookmarked) return false;
-      if (bookmarkedFilter === "off" && isBookmarked) return false;
-      if (draftFilter === "on" && !isDraft) return false;
-      if (draftFilter === "off" && isDraft) return false;
-
-      return true;
-    });
-
-    const nextDocuments = documents.filter((document) => {
-      if (document.isDeleted) return false;
-      if (document.kind === "pdf") return allowPdf;
-      if (document.kind === "pptx") return allowPptx;
-      return false;
-    });
-
-    return {
-      filteredCards: filtered,
-      filteredDocuments: nextDocuments,
-      isFiltering: true,
-    };
-  }, [
+  const {
+    isFilterTargetTab,
+    isFilterActive,
+    filteredCards,
+    filteredDocuments,
+    isFiltering,
+  } = useTreeViewFilters({
     cards,
     documents,
+    explorerTab,
     tagFilter,
     tagMatchMode,
-    isFilterTargetTab,
     uncertaintyFilter,
     bookmarkedFilter,
     draftFilter,
     contentTypeFilter,
     tagById,
-  ]);
+  });
 
   const virtualTreeNodes = useMemo(() => {
     if (!activeCustomView) return [];
@@ -476,82 +388,43 @@ function TreeViewLayout({
     [persistSettings, viewDefs],
   );
 
-  const renderTabContent = () => {
-    switch (explorerTab) {
-      case "pinned":
-        return (
-          <PinnedPanel
-            pinnedItems={pinnedItems}
-            folders={folders}
-            cards={cards}
-            documents={documents}
-            onFolderSelect={handleFolderSelectWithRecent}
-            onItemSelect={onItemSelect}
-            onUnpinItem={unpinItem}
-            getFolderPath={getFolderPath}
-          />
-        );
-
-      case "recent":
-        return (
-          <RecentPanel
-            recent={recent}
-            folders={folders}
-            cards={cards}
-            documents={documents}
-            onFolderSelect={handleFolderSelectWithRecent}
-            onItemSelect={onItemSelect}
-            onClearRecent={clearRecent}
-          />
-        );
-
-      case "views":
-        return (
-          <ViewsPanel
-            views={customViews}
-            selectedViewId={activeCustomView?.id ?? null}
-            nodes={virtualTreeNodes}
-            cards={filteredCards}
-            selectedItem={selectedItem}
-            onSelectView={handleViewChange}
-            onItemSelect={onItemSelect}
-            onOpenManager={() => setIsViewManagerOpen(true)}
-          />
-        );
-
-      case "explorer":
-      default:
-        return (
-          <FolderTreeWithCards
-            folders={folders}
-            cards={filteredCards}
-            documents={filteredDocuments}
-            selectedFolderId={selectedFolderId}
-            selectedItem={selectedItem}
-            onFolderSelect={handleFolderSelectWithRecent}
-            onItemSelect={onItemSelect}
-            onCreateFolder={createFolder}
-            onUpdateFolder={updateFolder}
-            onDeleteFolder={deleteFolder}
-            onCreateCard={createCard}
-            onUpdateCard={updateCard}
-            onDeleteCard={deleteCard}
-            moveCardToFolder={moveCardToFolder}
-            moveDocumentToFolder={(id, folderId) =>
-              updateDocument(id, { folderId })
-            }
-            reorderCards={reorderCards}
-            pinnedItems={pinnedItems}
-            onPinItem={pinItem}
-            onUnpinItem={unpinItem}
-            isFiltering={isFiltering}
-            createFolderRequestToken={createFolderRequestToken}
-            navigateToSectionListToken={navigateToSectionListToken}
-          />
-        );
-    }
-  };
-
+  const tabContent = (
+    <TreeViewTabContent
+      explorerTab={explorerTab}
+      pinnedItems={pinnedItems}
+      recent={recent}
+      folders={folders}
+      cards={cards}
+      documents={documents}
+      filteredCards={filteredCards}
+      filteredDocuments={filteredDocuments}
+      selectedFolderId={selectedFolderId}
+      selectedItem={selectedItem}
+      activeCustomView={activeCustomView}
+      customViews={customViews}
+      virtualTreeNodes={virtualTreeNodes}
+      isFiltering={isFiltering}
+      createFolderRequestToken={createFolderRequestToken}
+      navigateToSectionListToken={navigateToSectionListToken}
+      getFolderPath={getFolderPath}
+      onFolderSelect={handleFolderSelectWithRecent}
+      onItemSelect={onItemSelect}
+      onClearRecent={clearRecent}
+      onSelectView={handleViewChange}
+      onOpenManager={() => setIsViewManagerOpen(true)}
+      onCreateFolder={createFolder}
+      onUpdateFolder={updateFolder}
+      onDeleteFolder={deleteFolder}
+      onCreateCard={createCard}
+      onUpdateCard={updateCard}
+      onDeleteCard={deleteCard}
+      moveCardToFolder={moveCardToFolder}
+      moveDocumentToFolder={(id, folderId) => updateDocument(id, { folderId })}
+      reorderCards={reorderCards}
+      onPinItem={pinItem}
+      onUnpinItem={unpinItem}
+    />
+  );
   return (
     <div
       className={cn(
@@ -574,7 +447,7 @@ function TreeViewLayout({
         onCreateRootFolder={handleCreateRootFolder}
         onStartResizing={startResizing}
       >
-        {renderTabContent()}
+        {tabContent}
       </TreeViewSidebar>
 
       <TreeViewMainPane
@@ -605,25 +478,15 @@ function TreeViewLayout({
         }}
       />
 
-      <CreateCardSelectionDialog
-        open={isCreateSelectionOpen}
-        onOpenChange={setIsCreateSelectionOpen}
-        onSelectMode={handleSelectCreateMode}
-      />
-
-      <CreationModeDialog
-        open={isModeSelectionOpen}
-        onOpenChange={setIsModeSelectionOpen}
-        onSelectMode={handleSelectDetailedMode}
-        onBack={() => {
-          setIsModeSelectionOpen(false);
-          setIsCreateSelectionOpen(true);
-        }}
-      />
-
-      <ViewManagerDialog
-        open={isViewManagerOpen}
-        onOpenChange={setIsViewManagerOpen}
+      <TreeViewDialogs
+        isCreateSelectionOpen={isCreateSelectionOpen}
+        setIsCreateSelectionOpen={setIsCreateSelectionOpen}
+        isModeSelectionOpen={isModeSelectionOpen}
+        setIsModeSelectionOpen={setIsModeSelectionOpen}
+        isViewManagerOpen={isViewManagerOpen}
+        setIsViewManagerOpen={setIsViewManagerOpen}
+        onSelectCreateMode={handleSelectCreateMode}
+        onSelectDetailedMode={handleSelectDetailedMode}
         views={viewDefs}
         tags={tags}
         categoryNameEntries={Array.from(categoryNameById.entries())}
@@ -633,9 +496,20 @@ function TreeViewLayout({
         onUpdateCategoryName={handleUpdateCategoryName}
         onUpdateUngroupedLabel={handleUpdateUngroupedLabel}
         onUpdateViewOptions={handleUpdateViewOptions}
-      />
-    </div>
+      />    </div>
   );
 }
 
 export default TreeViewLayout;
+
+
+
+
+
+
+
+
+
+
+
+
