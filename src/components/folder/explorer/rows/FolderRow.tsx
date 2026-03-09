@@ -284,9 +284,3 @@ setEditingName(folderName);
     </div>
   );
 };
-
-
-
-
-
-
