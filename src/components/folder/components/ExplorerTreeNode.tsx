@@ -34,7 +34,7 @@ interface ExplorerTreeNodeProps {
   setOpenRowMenuId: React.Dispatch<React.SetStateAction<string | null>>;
   // actions
   onFolderSelect: (folderId: string | null) => void;
-  onItemSelect: (item: { type: "card" | "document"; id: string }) => void;
+  onItemSelect: (item: { type: "card" | "cardSet" | "document"; id: string }) => void;
   handleCreateFolderAction: (parentId: string | null) => void;
   handleCreateCardAction: (folderId: string | null) => void;
   handleDelete: (id: string, type: "folder" | "card") => void;

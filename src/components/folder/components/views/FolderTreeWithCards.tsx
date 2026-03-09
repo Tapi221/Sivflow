@@ -104,6 +104,9 @@ export function FolderTreeWithCards({
 }: FolderTreeWithCardsProps) {
   const { expandedFolders, setExpandedFolders, toggleFolder } =
     useExpandedFolders();
+  const [expandedCardSets, setExpandedCardSets] = useState<Set<string>>(
+    () => new Set(),
+  );
 
   const dialogs = useExplorerDialogs();
 
@@ -531,14 +534,26 @@ export function FolderTreeWithCards({
 
   const onToggleExpand = useCallback(
     (id: string, nextOpen: boolean) => {
-      if (!id.startsWith("folder:")) return;
-      const folderId = id.slice("folder:".length);
-      setExpandedFolders((prev) => {
-        const next = new Set(prev);
-        if (nextOpen) next.add(folderId);
-        else next.delete(folderId);
-        return next;
-      });
+      if (id.startsWith("folder:")) {
+        const folderId = id.slice("folder:".length);
+        setExpandedFolders((prev) => {
+          const next = new Set(prev);
+          if (nextOpen) next.add(folderId);
+          else next.delete(folderId);
+          return next;
+        });
+        return;
+      }
+
+      if (id.startsWith("cardSet:")) {
+        const cardSetId = id.slice("cardSet:".length);
+        setExpandedCardSets((prev) => {
+          const next = new Set(prev);
+          if (nextOpen) next.add(cardSetId);
+          else next.delete(cardSetId);
+          return next;
+        });
+      }
     },
     [setExpandedFolders],
   );
@@ -570,7 +585,7 @@ export function FolderTreeWithCards({
             <FolderTreeArborist
               data={explorerTreeData}
               selectedId={selectedTreeId}
-              expandedIds={toExpandedTreeIds(expandedFolders)}
+              expandedIds={toExpandedTreeIds(expandedFolders, expandedCardSets)}
               onSelect={handleTreeSelect}
               onToggleExpand={onToggleExpand}
               renderNode={renderTreeNode}
@@ -606,7 +621,7 @@ export function FolderTreeWithCards({
                 <FolderTreeArborist
                   data={scopedTreeData}
                   selectedId={selectedTreeId}
-                  expandedIds={toExpandedTreeIds(expandedFolders)}
+                  expandedIds={toExpandedTreeIds(expandedFolders, expandedCardSets)}
                   onSelect={handleTreeSelect}
                   onToggleExpand={onToggleExpand}
                   renderNode={renderTreeNode}

@@ -28,8 +28,13 @@ const DOCUMENT_PREFIX = "document:";
 export const toTreeFolderId = (folderId: string): string =>
   `${FOLDER_PREFIX}${folderId}`;
 
-export const toExpandedTreeIds = (expandedFolderIds: Set<string>): string[] =>
-  Array.from(expandedFolderIds, (id) => toTreeFolderId(id));
+export const toExpandedTreeIds = (
+  expandedFolderIds: Set<string>,
+  expandedCardSetIds: Set<string> = new Set<string>(),
+): string[] => [
+  ...Array.from(expandedFolderIds, (id) => toTreeFolderId(id)),
+  ...Array.from(expandedCardSetIds, (id) => `${CARD_SET_PREFIX}${id}`),
+];
 
 export const buildExplorerTreeData = ({
   rootFolders,
