@@ -5,6 +5,7 @@ import { CardShell } from "@/components/card/frame/CardShell";
 import { CardSurface } from "@/components/card/frame/CardSurface";
 import {
   CARD_BASE_WIDTH,
+  CARD_DISPLAY_SCALE,
   CARD_RULED_OFFSET_BOTTOM_PX,
   CARD_ROW_PX,
   CARD_RULED_OFFSET_TOP_PX,
@@ -79,9 +80,9 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
 
       // 画面側の余白。小さいと画面端ギリギリまでカードが来て事故りやすい
       contentPaddingPx = 12,
-      allowUpscale = false,
+      allowUpscale = true,
       maxScale = 1.6,
-      scaleMultiplier = 1,
+      scaleMultiplier = CARD_DISPLAY_SCALE,
 
       // 追加のクラス（標準の見た目に合成）
       className,

@@ -10,6 +10,16 @@
 export const CARD_BASE_WIDTH = 480;
 
 /**
+ * カードの表示スケール倍率。
+ * - 内部レイアウト（文字・罫線・padding）は CARD_BASE_WIDTH(480px) 基準のまま
+ * - この倍率を ScaleToFitFrame の scaleMultiplier に渡すことで
+ *   「見た目サイズだけ拡大、内部レイアウトは不変」を実現する
+ * - 例: 1.25 → 480px設計を 600px相当で表示
+ * - ここを変えるだけで全画面の表示サイズが変わる
+ */
+export const CARD_DISPLAY_SCALE = 1.25;
+
+/**
  * 正規(=canonical)カード幅(px)。
  * - 現状は BASE と同一
  * - 将来 BASE と CANONICAL を分けても参照先を固定できるようにするための別名

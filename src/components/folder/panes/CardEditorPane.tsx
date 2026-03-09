@@ -241,15 +241,12 @@ export function CardEditorPane({
 
         <div
           className={cn("min-w-0 flex-1 overflow-y-auto overflow-x-clip flex flex-col items-center", isEditing ? "px-4 pt-0 pb-4" : "p-4")}
-          style={{
-            background:
-              "radial-gradient(1200px 800px at 50% 120px, #FBFAF8 0%, var(--app-bg, #F8FAFB) 50%, #F6F4F1 100%)",
-          }}
+          style={{ background: "#fafafa" }}
         >
           {isEditing ? (
-            <div className="flex w-full max-w-5xl flex-col items-center gap-4">
+            <div className="flex w-full max-w-[820px] flex-col items-center gap-4">
               <div className="grid w-fit max-w-full grid-cols-1 gap-6 lg:grid-cols-2">
-                <div className="flex min-h-0 w-full flex-col gap-1">
+                <div className="flex min-h-0 w-full flex-col gap-2">
                   <div className="flex shrink-0 items-center rounded-md border border-slate-100 bg-white/60">
                     <div ref={toolbarMountRefQ} className="w-full" />
                   </div>
@@ -293,7 +290,7 @@ export function CardEditorPane({
                   </CardFrame>
                 </div>
 
-                <div className="flex min-h-0 w-full flex-col gap-1">
+                <div className="flex min-h-0 w-full flex-col gap-2">
                   <div className="flex shrink-0 items-center rounded-md border border-slate-100 bg-white/60">
                     <div ref={toolbarMountRefA} className="w-full" />
                   </div>

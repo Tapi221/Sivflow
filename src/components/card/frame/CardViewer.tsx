@@ -1,7 +1,11 @@
 import {
     CANONICAL_CARD_WIDTH,
+    CARD_BASE_WIDTH,
+    CARD_DISPLAY_SCALE,
     CARD_SAFE_PADDING_PX,
 } from "@/components/card/common/constants";
+
+const CARD_DISPLAY_WIDTH = Math.round(CARD_BASE_WIDTH * CARD_DISPLAY_SCALE);
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { useKeyboardShortcuts } from "@/hooks/ui/useKeyboardShortcuts";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -107,10 +111,10 @@ export default function CardViewer({
   return (
     <div
       className="mx-auto w-full"
-      style={{ maxWidth: `${CANONICAL_CARD_WIDTH + 40}px` }}
+      style={{ maxWidth: `${CARD_DISPLAY_WIDTH + 40}px` }}
     >
       <MobileScalableCard
-        cardDesignWidth={CANONICAL_CARD_WIDTH}
+        cardDesignWidth={CARD_DISPLAY_WIDTH}
         safePadding={CARD_SAFE_PADDING_PX}
       >
         <Flashcard

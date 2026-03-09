@@ -1,6 +1,7 @@
 import { SharedCardContent } from "@/components/card/common/SharedCardContent";
 import {
     CANONICAL_CARD_WIDTH,
+    CARD_DISPLAY_SCALE,
     layoutRowsToCardHeightPx,
 } from "@/components/card/common/constants";
 import type { InkDocument } from "@/components/ink/inkTypes";
@@ -74,7 +75,7 @@ export function Flashcard({
   onInkDocumentChange,
   allowUpscale = false,
   maxScale = 1.6,
-  scaleMultiplier = 1,
+  scaleMultiplier = CARD_DISPLAY_SCALE,
   contentPaddingPx,
 }: FlashcardProps) {
   const contentRef = useRef<HTMLDivElement | null>(null);

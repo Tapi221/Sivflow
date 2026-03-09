@@ -1,7 +1,10 @@
 import {
-    CANONICAL_CARD_WIDTH,
+    CARD_BASE_WIDTH,
+    CARD_DISPLAY_SCALE,
     CARD_SAFE_PADDING_PX,
 } from "@/components/card/common/constants";
+
+const CARD_DISPLAY_WIDTH = Math.round(CARD_BASE_WIDTH * CARD_DISPLAY_SCALE);
 import { Flashcard } from "@/components/card/frame/Flashcard";
 import { MobileScalableCard } from "@/components/card/frame/MobileScalableCard";
 import { Button } from "@/components/ui/button";
@@ -45,7 +48,7 @@ export function CardPopup({
           <X className="w-6 h-6" />
         </Button>
         <MobileScalableCard
-          cardDesignWidth={CANONICAL_CARD_WIDTH}
+          cardDesignWidth={CARD_DISPLAY_WIDTH}
           safePadding={CARD_SAFE_PADDING_PX}
         >
           <Flashcard

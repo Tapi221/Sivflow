@@ -1,5 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { CARD_BASE_WIDTH, CARD_DISPLAY_SCALE } from "@/components/card/common/constants";
+
+const CARD_DISPLAY_WIDTH = Math.round(CARD_BASE_WIDTH * CARD_DISPLAY_SCALE);
 
 /**
  * モバイル縮小表示ラッパー
@@ -22,7 +25,7 @@ interface MobileScalableCardProps {
 
 export function MobileScalableCard({
   children,
-  cardDesignWidth = 480,
+  cardDesignWidth = CARD_DISPLAY_WIDTH,
   safePadding = 24,
   enableEditMode = false,
   className,

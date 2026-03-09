@@ -20,9 +20,12 @@ import {
 import { Flashcard } from "@/components/card/frame/Flashcard";
 import { MobileScalableCard } from "@/components/card/frame/MobileScalableCard";
 import {
-  CANONICAL_CARD_WIDTH,
+  CARD_BASE_WIDTH,
+  CARD_DISPLAY_SCALE,
   CARD_SAFE_PADDING_PX,
 } from "@/components/card/common/constants";
+
+const CARD_DISPLAY_WIDTH = Math.round(CARD_BASE_WIDTH * CARD_DISPLAY_SCALE);
 import type { Card } from "@/types";
 
 // ── レイアウト定数 (ここを変えれば見た目を調整できる) ──────────────────
@@ -64,7 +67,7 @@ export type CardCarousel3DProps = {
 function DefaultPreview({ card }: { card: Card }) {
   return (
     <MobileScalableCard
-      cardDesignWidth={CANONICAL_CARD_WIDTH}
+      cardDesignWidth={CARD_DISPLAY_WIDTH}
       safePadding={CARD_SAFE_PADDING_PX}
     >
       <Flashcard
