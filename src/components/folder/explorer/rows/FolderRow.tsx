@@ -202,8 +202,7 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                   }
                 }}
                 onBlur={() => {
-                  console.log("[rename confirm]", { editingId, editingName });
-                  void handleRenameConfirm();
+void handleRenameConfirm();
                 }}
                 onClick={(e) => e.stopPropagation()}
               />
@@ -252,10 +251,8 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                   }
                   onCreateCard={() => void handleCreateCardAction(folderId)}
                   onRename={() => {
-                    console.log("[rename click]", { folderId, folderName: typedFolder?.name, editingId });
-                    setEditingId(folderId);
-                    console.log("[setEditingId called]", { nextEditingId: folderId });
-                    setEditingName(folderName);
+setEditingId(folderId);
+setEditingName(folderName);
                     editingNameRef.current = folderName;
                   }}
                   onDelete={() => handleDelete(folderId, "folder")}
@@ -287,6 +284,7 @@ export const FolderRow: React.FC<FolderRowProps> = ({
     </div>
   );
 };
+
 
 
 
