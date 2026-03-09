@@ -10,6 +10,7 @@ import {
 import { notificationService } from "./NotificationService";
 // NOTE: 初期化時のユーザー向け INFO 通知は UI 上で邪魔になるため表示しない。
 import { warnOncePerSession } from "./localDBRuntimeState";
+import type { CardSet } from "@/types";
 
 /**
  * アプリ起動時の初期化処理
@@ -153,19 +154,34 @@ export class AppInitializer {
       // 移行失敗してもアプリは継続
     }
 
-    // 🔥 Phase 4: 履歴圧縮（バックグラウンド）
-    console.log(`[AppInit:${userId}] Phase4: Scheduling compression...`);
+    // 🔥 Phase 4: CardSet 移行補完（cardSetId 未設定カードの救済）
+    console.log(`[AppInit:${userId}] Phase4: CardSet migration backfill...`);
+    try {
+      await this.backfillLegacyCardsToCardSets(userId);
+      console.log(
+        `[AppInit:${userId}] Phase4: CardSet migration backfill complete ✓`,
+      );
+    } catch (error) {
+      console.error(
+        `[AppInit:${userId}] Phase4: CardSet migration backfill FAILED (will retry next time)`,
+        error,
+      );
+      // 補完失敗してもアプリは継続
+    }
+
+    // 🔥 Phase 5: 履歴圧縮（バックグラウンド）
+    console.log(`[AppInit:${userId}] Phase5: Scheduling compression...`);
     requestIdleCallback(() => {
       import("./HistoryCompressionService").then(
         ({ HistoryCompressionService }) => {
           console.log(
-            `[AppInit:${userId}] Phase4: Compression started (background)`,
+            `[AppInit:${userId}] Phase5: Compression started (background)`,
           );
           new HistoryCompressionService().compress(userId);
         },
       );
     });
-    console.log(`[AppInit:${userId}] Phase4: Compression scheduled ✓`);
+    console.log(`[AppInit:${userId}] Phase5: Compression scheduled ✓`);
 
     // Phase 6: CLEAN マーク（再構築内で実行される）
 
@@ -247,5 +263,81 @@ export class AppInitializer {
   static reset(): void {
     this.initialized = false;
     this.initPromise = null;
+  }
+
+  /**
+   * 旧カード方式からの取りこぼし救済:
+   * cardSetId が未設定のカードを、所属フォルダ配下の CardSet へ割り当てる。
+   * 既存セットがなければフォルダごとに 1 セット作成する（冪等）。
+   */
+  private static async backfillLegacyCardsToCardSets(
+    userId: string,
+  ): Promise<void> {
+    const db = await getLocalDb(userId);
+    const now = new Date();
+
+    const legacyCards = await db.cards
+      .where("userId")
+      .equals(userId)
+      .and((c) => !c.isDeleted && !c.cardSetId)
+      .toArray();
+
+    if (legacyCards.length === 0) return;
+
+    const folders = await db.folders.where("userId").equals(userId).toArray();
+    const folderNameById = new Map(
+      folders.map((f) => [String(f.id ?? f.folderId ?? ""), String(f.folderName ?? "")]),
+    );
+
+    const sets = await db.cardSets.where("userId").equals(userId).toArray();
+    const activeSets = sets.filter((s) => !s.isDeleted);
+    const setByFolder = new Map<string, CardSet>();
+    for (const set of activeSets) {
+      const key = set.folderId ?? "__root__";
+      if (!setByFolder.has(key)) setByFolder.set(key, set);
+    }
+
+    const groups = new Map<string, typeof legacyCards>();
+    for (const card of legacyCards) {
+      const key = card.folderId ? String(card.folderId) : "__root__";
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)!.push(card);
+    }
+
+    await db.transaction("rw", db.cardSets, db.cards, async () => {
+      for (const [folderKey, cards] of groups.entries()) {
+        let targetSet = setByFolder.get(folderKey);
+        if (!targetSet) {
+          const folderId = folderKey === "__root__" ? null : folderKey;
+          const folderName = folderId
+            ? folderNameById.get(folderId) || "インポート済みカード"
+            : "インポート済みカード";
+          const createdSet: CardSet = {
+            id: crypto.randomUUID(),
+            userId,
+            folderId,
+            name: `${folderName} セット`,
+            orderIndex: 0,
+            isDeleted: false,
+            createdAt: now,
+            updatedAt: now,
+          };
+          await db.cardSets.add(createdSet);
+          targetSet = createdSet;
+          setByFolder.set(folderKey, createdSet);
+        }
+
+        for (const card of cards) {
+          await db.cards.update(card.id, {
+            cardSetId: targetSet.id,
+            updatedAt: now,
+          });
+        }
+      }
+    });
+
+    console.info(
+      `[AppInit:${userId}] CardSet backfill moved ${legacyCards.length} legacy cards.`,
+    );
   }
 }
