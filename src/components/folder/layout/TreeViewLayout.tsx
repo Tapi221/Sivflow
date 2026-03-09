@@ -152,6 +152,7 @@ function TreeViewLayout({
     isViewManagerOpen,
     setIsViewManagerOpen,
     createFolderRequestToken,
+    setCreateFolderRequestToken,
     handleFolderSelectWithRecent,
     handleStartStudy,
     handleViewCards,
@@ -407,6 +408,7 @@ function TreeViewLayout({
       onUpdateCard={updateCard}
       onDeleteCard={deleteCard}
       moveCardToFolder={moveCardToFolder}
+      moveCardSetToFolder={moveCardSetToFolder}
       moveDocumentToFolder={(id, folderId) => updateDocument(id, { folderId })}
       reorderCards={reorderCards}
       onPinItem={pinItem}

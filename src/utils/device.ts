@@ -12,7 +12,7 @@ export function getDeviceName(): string {
   if (typeof window === "undefined") return "Server";
   const ua = navigator.userAgent;
 
-  // OS Detection
+  // 実行環境のOSを判定
   let os = "Web Browser";
   if (/Android/i.test(ua)) os = "Android";
   else if (/iPhone|iPad|iPod/i.test(ua)) os = "iOS";

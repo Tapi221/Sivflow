@@ -53,6 +53,7 @@ interface FolderTreeWithCardsProps {
   onUpdateCard?: (cardId: string, data: unknown) => Promise<void>;
   onDeleteCard?: (cardId: string) => Promise<void>;
   moveCardToFolder?: (cardId: string, targetFolderId: string) => Promise<void>;
+  moveCardSetToFolder?: (cardSetId: string, targetFolderId: string | null) => Promise<void>;
   moveDocumentToFolder?: (
     documentId: string,
     targetFolderId: string,
@@ -90,6 +91,7 @@ export function FolderTreeWithCards({
   onUpdateCard,
   onDeleteCard,
   moveCardToFolder,
+  moveCardSetToFolder,
   moveDocumentToFolder,
   pinnedItems,
   onPinItem,
@@ -403,6 +405,8 @@ export function FolderTreeWithCards({
           await onUpdateFolder?.(parsed.id, {
             parentFolderId: newFolderRawId || null,
           });
+        } else if (parsed.type === "cardSet") {
+          await moveCardSetToFolder?.(parsed.id, newFolderRawId || null);
         } else if (parsed.type === "card") {
           await moveCardToFolder?.(parsed.id, newFolderRawId);
         } else if (parsed.type === "document") {
@@ -410,7 +414,7 @@ export function FolderTreeWithCards({
         }
       }
     },
-    [onUpdateFolder, moveCardToFolder, moveDocumentToFolder],
+    [onUpdateFolder, moveCardSetToFolder, moveCardToFolder, moveDocumentToFolder],
   );
 
   const arboristDisableDrag = useCallback(
@@ -428,7 +432,7 @@ export function FolderTreeWithCards({
       index: number;
     }) => {
       const parentKind = parentNode?.data?.kind;
-      if (parentKind === "card" || parentKind === "document") return true;
+      if (parentKind === "card" || parentKind === "document" || parentKind === "cardSet") return true;
       for (const dragNode of dragNodes) {
         if (dragNode.data?.kind !== "folder") continue;
         let check: NodeApi<ExplorerTreeNode> | null = parentNode;
