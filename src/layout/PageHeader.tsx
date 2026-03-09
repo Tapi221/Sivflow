@@ -5,7 +5,7 @@ import "./PageHeader.css";
 type Crumb = { label: string; to?: string };
 
 const PAGE_LABELS: Record<string, string> = {
-  folders: "フォルダ",
+  folders: "セクション一覧",
   calendar: "カレンダー",
   gallery: "ギャラリー",
   trash: "ゴミ箱",

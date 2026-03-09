@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { useBreadcrumbContext } from "@/contexts/BreadcrumbContext";
 
 const PAGE_LABELS: Record<string, string> = {
-  folders: "フォルダ",
+  folders: "セクション一覧",
   calendar: "カレンダー",
   gallery: "ギャラリー",
   trash: "ゴミ箱",
@@ -100,8 +100,8 @@ export const TitleBar: React.FC = () => {
         <nav className="flex items-center gap-1 overflow-hidden text-xs text-gray-400">
           {allCrumbs.map((crumb, i) => {
             const hasFolderId = "folderId" in crumb;
-            const isFoldersLabel = crumb.label === "フォルダ";
-            const isClickable = Boolean(crumb.to) && !isFoldersLabel;
+            const isSectionListCrumb = crumb.to === "/folders" && !hasFolderId;
+            const isClickable = Boolean(crumb.to);
 
             return (
               <React.Fragment key={i}>
@@ -114,6 +114,10 @@ export const TitleBar: React.FC = () => {
                     onClick={() => {
                       if (hasFolderId) {
                         notifyFolderSelect(crumb.folderId ?? null);
+                        return;
+                      }
+                      if (isSectionListCrumb) {
+                        notifyFolderSelect(null);
                       }
                     }}
                   >

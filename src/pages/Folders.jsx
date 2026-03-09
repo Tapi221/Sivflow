@@ -222,7 +222,7 @@ export default function Folders() {
       setSelectedFolderId(folderId ?? null);
       setSelectedItem(null);
 
-      // パンくずの「フォルダ」クリック時に、大元のフォルダ一覧へ戻す
+      // パンくずの「セクション一覧」クリック時に、大元のフォルダ一覧へ戻す
       if (!folderId) {
         setNavigateToSectionListToken((n) => n + 1);
         return;
