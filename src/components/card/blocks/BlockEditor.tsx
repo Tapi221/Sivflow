@@ -661,9 +661,7 @@ export const BlockEditor = React.forwardRef<
     );
 
     const inlineToolbar =
-      toolbarNode && !toolbarMount ? (
-        <div className="mb-2">{toolbarNode}</div>
-      ) : null;
+      toolbarNode && !toolbarMount ? toolbarNode : null;
 
     return (
       <div

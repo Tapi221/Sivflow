@@ -1,20 +1,20 @@
-import React, { useEffect, useRef, useState } from "react";
-import { DragDropContext } from "@hello-pangea/dnd";
 import { ChevronLeft, ChevronRight } from "@/ui/icons";
+import { DragDropContext } from "@hello-pangea/dnd";
+import React, { useEffect, useRef, useState } from "react";
 
+import { SharedCardContent } from "@/components/card/common/SharedCardContent";
+import {
+  CANONICAL_CARD_WIDTH,
+  CARD_ROW_PX,
+  layoutRowsToCardHeightPx,
+} from "@/components/card/common/constants";
 import {
   CardEditorLoadingState,
   EmptySelectionState,
   NewCardIdleState,
 } from "@/components/card/editor/CardEditorPaneStates";
-import { SharedCardContent } from "@/components/card/common/SharedCardContent";
-import {
-  CARD_ROW_PX,
-  CANONICAL_CARD_WIDTH,
-  layoutRowsToCardHeightPx,
-} from "@/components/card/common/constants";
-import { useCardEditorContentController } from "@/components/card/editor/useCardEditorContentController";
 import { LinkEditor } from "@/components/card/editor/LinkEditor";
+import { useCardEditorContentController } from "@/components/card/editor/useCardEditorContentController";
 import { useCardEditorSession } from "@/components/card/editor/useCardEditorSession";
 import { useLayoutRowsController } from "@/components/card/editor/useLayoutRowsController";
 import { CardCornerActions } from "@/components/card/frame/CardCornerActions";
@@ -23,20 +23,20 @@ import { Flashcard } from "@/components/card/frame/Flashcard";
 import MediaUploader from "@/components/card/media/MediaUploader";
 import { CardMetaPanel } from "@/components/card/panels/CardMetaPanel";
 import {
-  DEFAULT_LAYOUT_ROWS,
-  normalizeLayoutRows,
-} from "@/domain/card/extraRows";
-import { useToast } from "@/contexts/ToastContext";
-import { useCards } from "@/hooks/card/useCards";
-import { useTags } from "@/hooks/settings/useTags";
-import { useUserSettings } from "@/hooks/settings/useUserSettings";
-import { cn } from "@/lib/utils";
-import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useToast } from "@/contexts/ToastContext";
+import {
+  DEFAULT_LAYOUT_ROWS,
+  normalizeLayoutRows,
+} from "@/domain/card/extraRows";
+import { useCards } from "@/hooks/card/useCards";
+import { useTags } from "@/hooks/settings/useTags";
+import { useUserSettings } from "@/hooks/settings/useUserSettings";
+import { cn } from "@/lib/utils";
 import type { Card, UploadedImage } from "@/types";
 
 interface CardEditorPaneProps {
@@ -270,9 +270,9 @@ export function CardEditorPane({
               </div>
 
               <div className="grid w-fit max-w-full grid-cols-1 gap-6 lg:grid-cols-2">
-                <div className="flex min-h-0 w-full flex-col gap-2">
-                  <div className="flex shrink-0 justify-center">
-                    <div ref={toolbarMountRefQ} />
+                <div className="flex min-h-0 w-full flex-col gap-1">
+                  <div className="flex shrink-0 items-center rounded-md border border-slate-100 bg-white/60 min-h-[28px]">
+                    <div ref={toolbarMountRefQ} className="w-full" />
                   </div>
                   <CardFrame
                     baseWidth={CANONICAL_CARD_WIDTH}
@@ -314,9 +314,9 @@ export function CardEditorPane({
                   </CardFrame>
                 </div>
 
-                <div className="flex min-h-0 w-full flex-col gap-2">
-                  <div className="flex shrink-0 justify-center">
-                    <div ref={toolbarMountRefA} />
+                <div className="flex min-h-0 w-full flex-col gap-1">
+                  <div className="flex shrink-0 items-center rounded-md border border-slate-100 bg-white/60 min-h-[28px]">
+                    <div ref={toolbarMountRefA} className="w-full" />
                   </div>
                   <CardFrame
                     baseWidth={CANONICAL_CARD_WIDTH}

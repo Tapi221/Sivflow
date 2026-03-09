@@ -154,57 +154,61 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
     return true;
   });
 
-  // ---- カラーテーマキー → Tailwind クラス の対応表 ----
-  // Tailwind は動的クラス名を認識できないため、ここで完全なクラス文字列を列挙する必要がある
-  const colorMap: Record<string, string> = {
-    primary: "hover:shadow-primary-500/20 hover:text-primary-600",
-    indigo: "hover:shadow-indigo-500/30 hover:text-indigo-600",
-    emerald: "hover:shadow-emerald-500/30 hover:text-emerald-600",
-    cyan: "hover:shadow-cyan-500/30 hover:text-cyan-600",
-    rose: "hover:shadow-rose-500/30 hover:text-rose-600",
-    purple: "hover:shadow-purple-500/30 hover:text-purple-600",
-    slate: "hover:shadow-slate-500/20 hover:text-slate-600",
-  };
+  // ---- ツールバー共通ボタンリスト ----
+  const toolbarButtons = visibleConfigs.map((config) => {
+    const Icon = getIcon(config.icon, config.type);
+    return (
+      <button
+        key={config.type}
+        type="button"
+        onClick={() => onAddBlock(config.type)}
+        className={cn(
+          "flex items-center gap-1.5 px-2 h-6 rounded text-slate-400",
+          "text-[10px] font-medium leading-none transition-colors duration-100",
+          "hover:text-slate-700 hover:bg-slate-100/70",
+          "active:scale-95",
+        )}
+        aria-label={`${config.label}を追加`}
+      >
+        <Icon className="w-3 h-3 shrink-0" />
+        <span>{config.label}</span>
+      </button>
+    );
+  });
 
   return (
-    <div className={cn("mb-1.5 md:mb-2", className)}>
-      {/* =====================================================
-          モバイル (<md): 「追加」ボタン1つ → ドロップダウンで種別選択
-          画面が狭いため、全ボタンを並べず DropdownMenu に集約する
-         ===================================================== */}
-      <div className="flex md:hidden items-center gap-2">
-        {/* ラベルバッジ */}
-        <div className="flex items-center gap-1.5 px-2 py-1 bg-slate-100/50 rounded-full border border-slate-200/50">
-          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">
-            {label}
-          </span>
-        </div>
+    <div
+      className={cn(
+        "flex w-full items-center gap-0.5 px-3 py-1",
+        className,
+      )}
+    >
+      {/* ラベル */}
+      <span className="text-[9px] font-semibold text-slate-300 uppercase tracking-widest leading-none mr-2 shrink-0 select-none">
+        {label}
+      </span>
 
-        {/* ドロップダウントリガー */}
+      {/* 区切り */}
+      <div className="w-px h-3.5 bg-slate-200 mr-1.5 shrink-0" />
+
+      {/* モバイル: ドロップダウン */}
+      <div className="flex md:hidden">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className={cn(
-                "h-6 px-2.5 rounded-full bg-white text-slate-600 font-bold text-[10px]",
-                "inline-flex items-center gap-1",
-                "shadow-[0_1px_4px_rgba(0,0,0,0.06)] border border-slate-200/60",
-                "active:scale-95 transition-all",
-              )}
+              className="flex items-center gap-1 px-2 h-6 rounded text-slate-400 text-[10px] font-medium hover:text-slate-700 hover:bg-slate-100/70 transition-colors"
               aria-label={`${label} にブロックを追加`}
             >
               <Plus className="w-3 h-3" />
-              <span className="leading-none">追加</span>
+              <span>追加</span>
             </button>
           </DropdownMenuTrigger>
-
-          {/* ドロップダウンの中身：visibleConfigs を 1行ずつリスト表示 */}
           <DropdownMenuContent
             align="start"
             className="rounded-2xl border-slate-100 shadow-xl p-2 min-w-[220px]"
           >
             {visibleConfigs.length === 0 ? (
-              // 表示できるブロックが0件の場合のフォールバックメッセージ
               <div className="px-2 py-2 text-xs text-slate-400">
                 追加できるブロックがありません
               </div>
@@ -214,19 +218,13 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
                 return (
                   <DropdownMenuItem
                     key={config.type}
-                    onClick={() => onAddBlock(config.type)} // 選択時にブロック追加を親に通知
-                    className={cn(
-                      "rounded-xl flex items-center gap-2 py-2",
-                      "text-slate-600 focus:text-slate-800",
-                    )}
+                    onClick={() => onAddBlock(config.type)}
+                    className="rounded-xl flex items-center gap-2 py-2 text-slate-600 focus:text-slate-800"
                   >
-                    {/* アイコン */}
                     <span className="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-slate-50 border border-slate-200/60">
                       <Icon className="w-4 h-4" />
                     </span>
-                    <span className="text-[12px] font-bold">
-                      {config.label}
-                    </span>
+                    <span className="text-[12px] font-bold">{config.label}</span>
                   </DropdownMenuItem>
                 );
               })
@@ -235,42 +233,9 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
         </DropdownMenu>
       </div>
 
-      {/* =====================================================
-          デスクトップ (md+): ブロック種別ボタンを横並びで全表示
-          overflow-x-auto + no-scrollbar で画面幅が足りない場合もスクロール可能
-         ===================================================== */}
-      <div className="hidden md:flex md:items-center md:gap-1.5 md:flex-nowrap md:overflow-x-auto no-scrollbar">
-        {/* ラベルバッジ（モバイルと同じ見た目） */}
-        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-100/50 rounded-full border border-slate-200/50 shrink-0">
-          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">
-            {label}
-          </span>
-        </div>
-
-        {/* ブロック追加ボタンを種別ごとに並べる */}
-        <div className="flex items-center gap-1 shrink-0">
-          {visibleConfigs.map((config) => {
-            const Icon = getIcon(config.icon, config.type);
-            return (
-              <button
-                key={config.type}
-                type="button"
-                onClick={() => onAddBlock(config.type)} // クリックでブロック追加を親に通知
-                className={cn(
-                  "group flex items-center gap-1.5 px-2.5 h-7 rounded-full bg-white text-slate-500 transition-all shrink-0",
-                  "active:scale-95 shadow-[0_1px_4px_rgba(0,0,0,0.06)] hover:shadow-md border border-transparent",
-                  colorMap[config.color || "primary"], // カラーテーマを適用
-                )}
-                aria-label={`${config.label}を追加`}
-              >
-                <Icon className="w-3 h-3" />
-                <span className="text-[9px] font-bold leading-none">
-                  {config.label}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+      {/* デスクトップ: 横一列ボタン */}
+      <div className="hidden md:flex items-center gap-0.5 flex-nowrap overflow-x-auto no-scrollbar">
+        {toolbarButtons}
       </div>
     </div>
   );
