@@ -40,7 +40,3 @@ export function getDeviceName(): string {
 
   return `${client} (${os})`;
 }
-
-
-
-

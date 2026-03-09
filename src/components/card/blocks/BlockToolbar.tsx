@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Plus } from "@/ui/icons";
 import { Type } from "@/ui/icons";
 import { Code } from "@/ui/icons";
@@ -67,7 +68,84 @@ function getIcon(iconName: string | undefined, type: CardBlock["type"]) {
   return typeMap[type] ?? Plus;
 }
 
-// 小さな pill ボタン（アクション群用）
+// Tooltip コンポーネント — portal で body 直下に描画し overflow クリップを回避
+function Tooltip({ label, children }: { label: string; children: React.ReactNode }) {
+  const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
+  const anchorRef = useRef<HTMLDivElement>(null);
+
+  const show = () => {
+    if (!anchorRef.current) return;
+    const r = anchorRef.current.getBoundingClientRect();
+    setPos({ x: r.left + r.width / 2, y: r.top - 6 });
+  };
+  const hide = () => setPos(null);
+
+  useEffect(() => {
+    if (!pos) return;
+    const onScroll = () => setPos(null);
+    window.addEventListener("scroll", onScroll, true);
+    return () => window.removeEventListener("scroll", onScroll, true);
+  }, [pos]);
+
+  return (
+    <>
+      <div
+        ref={anchorRef}
+        className="relative inline-flex"
+        onMouseEnter={show}
+        onMouseLeave={hide}
+        onFocus={show}
+        onBlur={hide}
+      >
+        {children}
+      </div>
+      {pos && createPortal(
+        <>
+          <style>{`
+            @keyframes bt-tooltip-in {
+              from { opacity: 0; transform: translate(-50%, -4px); }
+              to   { opacity: 1; transform: translate(-50%, 0); }
+            }
+          `}</style>
+          <div
+            role="tooltip"
+            style={{
+              position: "fixed",
+              left: pos.x,
+              top: pos.y,
+              transform: "translate(-50%, -100%)",
+              zIndex: 9999,
+              pointerEvents: "none",
+              animation: "bt-tooltip-in 0.15s ease forwards",
+            }}
+          >
+            <span
+              style={{
+                display: "inline-block",
+                whiteSpace: "nowrap",
+                background: "rgba(22,27,34,0.92)",
+                color: "#e6edf3",
+                fontSize: "11px",
+                fontWeight: 500,
+                lineHeight: 1,
+                padding: "4px 8px",
+                borderRadius: "6px",
+                backdropFilter: "blur(4px)",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.28)",
+                letterSpacing: "0.01em",
+              }}
+            >
+              {label}
+            </span>
+          </div>
+        </>,
+        document.body,
+      )}
+    </>
+  );
+}
+
+// アイコン only ボタン（ツールチップ付き）
 function ActionButton({
   onClick,
   icon: Icon,
@@ -78,21 +156,22 @@ function ActionButton({
   label: string;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={`${label}を追加`}
-      className={cn(
-        "inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md",
-        "text-[11px] font-medium leading-none select-none",
-        "text-slate-500 transition-colors duration-100",
-        "hover:text-slate-900 hover:bg-slate-100",
-        "active:bg-slate-200 active:text-slate-900 active:scale-95",
-      )}
-    >
-      <Icon className="w-3 h-3 shrink-0" />
-      <span>{label}</span>
-    </button>
+    <Tooltip label={`${label}を追加`}>
+      <button
+        type="button"
+        onClick={onClick}
+        aria-label={`${label}を追加`}
+        className={cn(
+          "inline-flex items-center justify-center w-8 h-8 rounded-md",
+          "text-slate-400 transition-colors duration-100 select-none",
+          "hover:text-slate-700 hover:bg-slate-100",
+          "active:bg-slate-200 active:text-slate-800 active:scale-95",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-1",
+        )}
+      >
+        <Icon className="w-4 h-4 shrink-0" />
+      </button>
+    </Tooltip>
   );
 }
 
@@ -100,7 +179,7 @@ function ActionButton({
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <span
-      className="inline-flex items-center h-full mr-2 shrink-0 select-none text-[12px] font-semibold text-slate-900 leading-none"
+      className="inline-flex items-center h-full mr-1.5 shrink-0 select-none text-[11px] font-semibold text-slate-700 leading-none"
     >
       {children}
     </span>
@@ -109,7 +188,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 // ラベルとアクション群の間の縦仕切り
 function Divider() {
-  return <div className="w-px h-4 bg-slate-200/80 shrink-0 mr-2" />;
+  return <div className="w-px h-3.5 bg-slate-200/80 shrink-0 mr-1.5" />;
 }
 
 export const BlockToolbar: React.FC<BlockToolbarProps> = ({
@@ -145,8 +224,8 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
   return (
     <div
       className={cn(
-        "flex w-full items-center px-3 gap-0",
-        "h-10 min-h-[40px]",
+        "flex w-full items-center px-2.5 gap-0",
+        "h-8 min-h-[32px]",
         "bg-slate-50/60 border-b border-slate-200",
         className,
       )}
@@ -204,8 +283,8 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
         </DropdownMenu>
       </div>
 
-      {/* デスクトップ: pill ボタン横並び */}
-      <div className="hidden md:flex items-center gap-0.5 flex-nowrap overflow-x-auto no-scrollbar">
+      {/* デスクトップ: アイコン only ボタン横並び */}
+      <div className="hidden md:flex items-center gap-1 flex-nowrap overflow-x-auto no-scrollbar">
         {visibleConfigs.map((config) => {
           const Icon = getIcon(config.icon, config.type);
           return (
