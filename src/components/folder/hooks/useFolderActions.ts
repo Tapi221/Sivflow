@@ -121,6 +121,7 @@ export function useFolderActions({
 
       setOptimisticFolders((prev) => [...prev, optimisticFolder]);
       if (parentId) setExpandedFolders((prev) => new Set(prev).add(parentId));
+      onFolderSelect(tempId);
       setEditingId(tempId);
       setEditingName(name);
       editingIdRef.current = tempId;

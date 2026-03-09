@@ -366,10 +366,10 @@ export function FolderTreeWithCards({
     return rootNode?.children ?? [];
   }, [activeRootFolderId, explorerTreeData]);
 
-  const selectedTreeId = useMemo(
-    () => toSelectedTreeId(selectedFolderId, selectedItem),
-    [selectedFolderId, selectedItem],
-  );
+  const selectedTreeId = useMemo(() => {
+    if (selectedFolderId) return `folder:${selectedFolderId}`;
+    return toSelectedTreeId(selectedFolderId, selectedItem);
+  }, [selectedFolderId, selectedItem]);
 
   const handleTreeSelect = useCallback(
     (id: string) => {

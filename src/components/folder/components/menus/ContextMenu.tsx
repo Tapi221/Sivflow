@@ -14,7 +14,7 @@ import {
   Tag,
   Trash2,
 } from "@/ui/icons";
-import type { ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
 
 interface ContextMenuProps {
   type: "folder" | "card";
@@ -45,11 +45,21 @@ export function ContextMenu({
   isPinned,
   onTogglePin,
 }: ContextMenuProps) {
+  const suppressCloseAutoFocusRef = useRef(false);
+
   return (
-    <DropdownMenu open={open} onOpenChange={onOpenChange}>
+    <DropdownMenu open={open} onOpenChange={onOpenChange} modal={false}>
       <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
 
-      <DropdownMenuContent align="start" className="w-48">
+      <DropdownMenuContent
+        align="start"
+        className="w-48"
+        onCloseAutoFocus={(e) => {
+          if (!suppressCloseAutoFocusRef.current) return;
+          suppressCloseAutoFocusRef.current = false;
+          e.preventDefault();
+        }}
+      >
         {type === "folder" && (
           <>
             {onCreateSubfolder && (
@@ -103,6 +113,7 @@ export function ContextMenu({
             onSelect={(e) => {
               e.preventDefault();
               e.stopPropagation();
+              suppressCloseAutoFocusRef.current = true;
               onRename?.();
             }}
             className="gap-2"

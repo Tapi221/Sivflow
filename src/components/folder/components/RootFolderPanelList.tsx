@@ -111,7 +111,15 @@ export function RootFolderPanelList({
               {isEditing ? (
                 <input
                   ref={inputRef}
+                  className="h-6 w-full rounded border border-slate-300 bg-white px-1 text-[14px] text-[#1f2328] outline-none select-text"
+                  style={{ userSelect: "text", WebkitUserSelect: "text" }}
                   value={editingName}
+                  onFocus={(e) => {
+                    e.currentTarget.select();
+                  }}
+                  onMouseUp={(e) => {
+                    e.preventDefault();
+                  }}
                   onChange={(e) => setEditingName(e.target.value)}
                   onClick={(e) => e.stopPropagation()}
                   onPointerDown={(e) => e.stopPropagation()}
@@ -127,7 +135,6 @@ export function RootFolderPanelList({
                     }
                   }}
                   onBlur={() => void handleRenameConfirm()}
-                  className="h-6 w-full rounded border border-slate-300 bg-white px-1 text-[14px] text-[#1f2328] outline-none"
                 />
               ) : (
                 <span
@@ -155,8 +162,26 @@ export function RootFolderPanelList({
                 onCreateSubfolder={() => void handleCreateFolderAction(folder.id)}
                 onCreateCard={() => void handleCreateCardAction(folder.id)}
                 onRename={() => {
+                  const forceSelectRenameInput = () => {
+                    const input = inputRef.current;
+                    if (!input) return;
+                    input.focus({ preventScroll: true });
+                    input.select();
+                    try {
+                      input.setSelectionRange(0, input.value.length);
+                    } catch {}
+                  };
                   setEditingId(folder.id);
                   setEditingName(folder.name);
+                  requestAnimationFrame(() => {
+                    forceSelectRenameInput();
+                    requestAnimationFrame(() => {
+                      forceSelectRenameInput();
+                    });
+                  });
+                  window.setTimeout(() => {
+                    forceSelectRenameInput();
+                  }, 40);
                 }}
                 onDelete={() => handleDelete(folder.id, "folder")}
                 isPinned={

@@ -13,7 +13,7 @@ import {
   FolderOutlineIcon,
   MoreVertical,
 } from "@/ui/icons";
-import React from "react";
+import React, { useEffect } from "react";
 import { ExplorerRow } from "./ExplorerRow";
 import { ExplorerRowContent } from "./ExplorerRowContent";
 
@@ -116,6 +116,40 @@ export const FolderRow: React.FC<FolderRowProps> = ({
   const nestedToggleOffsetStyle = !isTopLevelFolder
     ? ({ marginLeft: "calc(var(--tree-indent-px) * -0.5)" } as const)
     : undefined;
+  useEffect(() => {
+    if (!isEditing) return;
+
+    let rafId1 = 0;
+    let rafId2 = 0;
+    let timeoutId = 0;
+
+    const applySelection = () => {
+      const input = editInputRef.current;
+      if (!input) return;
+      input.focus({ preventScroll: true });
+      input.select();
+      try {
+        input.setSelectionRange(0, input.value.length);
+      } catch {}
+    };
+
+    rafId1 = requestAnimationFrame(() => {
+      applySelection();
+      rafId2 = requestAnimationFrame(() => {
+        applySelection();
+      });
+    });
+
+    timeoutId = window.setTimeout(() => {
+      applySelection();
+    }, 30);
+
+    return () => {
+      cancelAnimationFrame(rafId1);
+      cancelAnimationFrame(rafId2);
+      window.clearTimeout(timeoutId);
+    };
+  }, [isEditing, editInputRef, editingName]);
 
   return (
     <div key={folderId} className={cn(isDimmed && "opacity-50")}>
@@ -176,15 +210,18 @@ export const FolderRow: React.FC<FolderRowProps> = ({
             />
 
             {isEditing ? (
-              // eslint-disable-next-line no-console
-              (() => { console.log("[rename input mounted]", { folderId }); return null; })()
-            ) : null}
-            {isEditing ? (
               <input
                 ref={editInputRef}
                 aria-label="フォルダ名の編集"
-                className="text-sm text-[#202123] bg-white border border-[var(--surface-border)] rounded px-1 outline-none z-10 h-6 w-full leading-5 surface-concave placeholder:text-[#6E6E80] focus:border-[#cfcfcf] focus:bg-white"
+                className="text-sm text-[#202123] bg-white border border-slate-300 rounded px-1 outline-none z-10 h-6 w-full leading-5 surface-concave placeholder:text-[#6E6E80] focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:bg-white select-text"
+                style={{ userSelect: "text", WebkitUserSelect: "text" }}
                 value={editingName}
+                onFocus={(e) => {
+                  e.currentTarget.select();
+                }}
+                onMouseUp={(e) => {
+                  e.preventDefault();
+                }}
                 onChange={(e) => {
                   setEditingName(e.target.value);
                   editingNameRef.current = e.target.value;
@@ -251,9 +288,31 @@ void handleRenameConfirm();
                   }
                   onCreateCard={() => void handleCreateCardAction(folderId)}
                   onRename={() => {
-setEditingId(folderId);
-setEditingName(folderName);
-                    editingNameRef.current = folderName;
+                    onSelect();
+                    onMenuOpenChange(false);
+                    const forceSelectRenameInput = () => {
+                      const input = editInputRef.current;
+                      if (!input) return;
+                      input.focus({ preventScroll: true });
+                      input.select();
+                      try {
+                        input.setSelectionRange(0, input.value.length);
+                      } catch {}
+                    };
+                    window.setTimeout(() => {
+                      setEditingId(folderId);
+                      setEditingName(folderName);
+                      editingNameRef.current = folderName;
+                      requestAnimationFrame(() => {
+                        forceSelectRenameInput();
+                        requestAnimationFrame(() => {
+                          forceSelectRenameInput();
+                        });
+                      });
+                      window.setTimeout(() => {
+                        forceSelectRenameInput();
+                      }, 40);
+                    }, 0);
                   }}
                   onDelete={() => handleDelete(folderId, "folder")}
                   onBulkTag={onBulkTag}
