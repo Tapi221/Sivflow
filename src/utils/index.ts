@@ -329,6 +329,7 @@ export const normalizeCard = (raw: unknown) => {
     userId: toStringOr(pick(r.userId, r.user_id), ""),
     deviceId: toStringOr(pick(r.deviceId, r.device_id), ""),
     folderId: toStringOr(pick(r.folderId, r.folder_id), ""),
+    cardSetId: toStringOr(pick(r.cardSetId, r.card_set_id), ""),
     orderIndex: toFiniteNumber(pick(r.orderIndex, r.order_index), 0),
     questionNumber: toStringOr(pick(r.questionNumber, r.question_number), ""),
     title: toStringOr(r.title, ""),
