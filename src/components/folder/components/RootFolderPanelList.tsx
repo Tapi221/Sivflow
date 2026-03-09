@@ -82,7 +82,7 @@ export function RootFolderPanelList({
             key={folder.id}
             className={cn(
               "group relative w-full h-8 rounded-[4px] px-2 text-left flex items-center cursor-pointer",
-              "hover:bg-[var(--sidebar-hover-bg,#f3f4f6)]",
+              "hover:bg-[var(--sidebar-active-bg,#e7ebef)]",
               selectedFolderId === folder.id && "bg-[var(--sidebar-active-bg,#e7ebef)]",
             )}
             role="button"
@@ -105,7 +105,9 @@ export function RootFolderPanelList({
               <FolderIcon
                 className={cn(
                   "h-4 w-4 shrink-0",
-                  selectedFolderId === folder.id ? "text-[#4b5563]" : "text-[#6e7280]",
+                  selectedFolderId === folder.id
+                    ? "text-[var(--sidebar-text,#202123)]"
+                    : "text-[var(--sidebar-text-muted,#6e6e80)]",
                 )}
               />
               {isEditing ? (
@@ -139,7 +141,7 @@ export function RootFolderPanelList({
               ) : (
                 <span
                   className={cn(
-                    "truncate text-[14px] text-[#1f2328]",
+                    "truncate text-[14px] text-[var(--sidebar-text,#202123)]",
                     selectedFolderId === folder.id ? "font-medium" : "font-normal",
                   )}
                 >
@@ -202,7 +204,7 @@ export function RootFolderPanelList({
                   type="button"
                   aria-label="フォルダメニューを開く"
                   className={cn(
-                    "pointer-events-auto grid h-7 w-7 place-items-center rounded-md text-[#6E6E80] hover:bg-slate-200 hover:text-[#202123]",
+                    "pointer-events-auto grid h-7 w-7 place-items-center rounded-md text-[var(--sidebar-text-muted,#6e6e80)] hover:bg-[var(--sidebar-active-bg,#e7ebef)] hover:text-[var(--sidebar-text,#202123)]",
                     "opacity-0 group-hover:opacity-100",
                     isMenuOpen && "opacity-100",
                   )}

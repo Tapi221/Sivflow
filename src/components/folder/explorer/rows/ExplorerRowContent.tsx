@@ -27,7 +27,7 @@ export const ExplorerRowContent = React.memo(function ExplorerRowContent({
         {title ? (
           <div
             className={cn(
-              "sidebar-title text-sm text-[#202123] truncate",
+              "sidebar-title text-sm text-[var(--sidebar-text,#202123)] truncate",
               titleClassName,
             )}
           >
@@ -37,7 +37,7 @@ export const ExplorerRowContent = React.memo(function ExplorerRowContent({
         {subtitle ? (
           <div
             className={cn(
-              "text-[10px] text-[#6E6E80] truncate",
+              "text-[10px] text-[var(--sidebar-text-muted,#6e6e80)] truncate",
               subtitleClassName,
             )}
           >

@@ -12,7 +12,7 @@
     border-radius: 3px;
     overflow: visible;
     background-color: transparent;
-    color: var(--text-primary, #1a1a1a);
+    color: var(--sidebar-text, #202123);
   }
 
   .sidebar-row--folder {
@@ -28,12 +28,13 @@
 
   .sidebar-row[data-selected="true"] {
     background-color: var(--sidebar-active-bg, #e7ebef);
+    color: var(--sidebar-text, #202123);
   }
 
 
   .sidebar-row:focus-visible {
     outline: none;
-    box-shadow: inset 0 0 0 1px rgba(104, 154, 152, 0.35);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--sidebar-active-accent, #7aa6a1) 42%, transparent);
   }
 
   .sidebar-row .sidebar-label {
@@ -51,6 +52,7 @@
   .sidebar-row .sidebar-icon {
     transform: translateY(-1px);
     transform-origin: center;
+    color: var(--sidebar-text-muted, #6e6e80);
   }
 
   .sidebar-row .sidebar-action {

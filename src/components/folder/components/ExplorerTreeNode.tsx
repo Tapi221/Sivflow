@@ -185,8 +185,8 @@ const isPinned =
               ROW_BASE,
               "flex h-7 min-h-7 items-center pr-2 leading-7 select-none cursor-pointer",
               isSelected
-                ? "bg-blue-50 text-blue-700"
-                : "hover:bg-slate-50 text-slate-700",
+                ? "bg-[var(--sidebar-active-bg,#e7ebef)] text-[var(--sidebar-text,#202123)]"
+                : "hover:bg-[var(--sidebar-active-bg,#e7ebef)] text-[var(--sidebar-text,#202123)]",
             )}
             data-selected={isSelected || undefined}
             style={{ paddingLeft: `${node.level * 12 + 4}px` }}
@@ -195,18 +195,20 @@ const isPinned =
               onItemSelect({ type: "cardSet", id: treeNode.rawId });
             }}
           >
-            <Chevron className="mr-1 h-3 w-3 shrink-0 text-slate-400" />
+            <Chevron className="mr-1 h-3 w-3 shrink-0 text-[var(--sidebar-text-muted,#6e6e80)]" />
             <Layers
               className={cn(
                 "mr-2 h-4 w-4 shrink-0",
-                isSelected ? "text-blue-500" : "text-slate-400",
+                isSelected
+                  ? "text-[var(--sidebar-text,#202123)]"
+                  : "text-[var(--sidebar-text-muted,#6e6e80)]",
               )}
             />
             <span className="truncate text-sm font-medium">
               {treeNode.name}
             </span>
             {(treeNode.children?.length ?? 0) > 0 && (
-              <span className="ml-auto text-[10px] text-slate-400 tabular-nums">
+              <span className="ml-auto text-[10px] text-[var(--sidebar-text-muted,#6e6e80)] tabular-nums">
                 {treeNode.children!.length}
               </span>
             )}
@@ -216,7 +218,9 @@ const isPinned =
     }
 
     const iconClassName =
-      treeNode.kind === "document" ? "text-rose-500" : "text-[#6E6E80]";
+      treeNode.kind === "document"
+        ? "text-[var(--sidebar-text-muted,#6e6e80)]"
+        : "text-[var(--sidebar-text-muted,#6e6e80)]";
 
     return (
       <div style={style}>
@@ -245,7 +249,9 @@ const isPinned =
           <span
             className={cn(
               "truncate text-sm",
-              isSelected ? "font-medium text-[#202123]" : "text-[#202123]",
+              isSelected
+                ? "font-medium text-[var(--sidebar-text,#202123)]"
+                : "text-[var(--sidebar-text,#202123)]",
             )}
           >
             {treeNode.name}

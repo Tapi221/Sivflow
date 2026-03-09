@@ -90,15 +90,17 @@ export function VirtualTreeView({
           <div className="flex h-full min-w-0 flex-1 items-center pr-1">
             <BookOpen
               className={cn(
-                "sidebar-icon mr-1 h-4 w-4 shrink-0 text-[#6E6E80]",
-                isSelected && "text-primary-700",
+                "sidebar-icon mr-1 h-4 w-4 shrink-0 text-[var(--sidebar-text-muted,#6e6e80)]",
+                isSelected && "text-[var(--sidebar-text,#202123)]",
               )}
             />
             <ExplorerRowContent
               title={getCardTitle(card)}
               titleClassName={cn(
                 "lining-nums tabular-nums",
-                isSelected ? "font-medium text-primary-700" : "text-[#202123]",
+                isSelected
+                  ? "font-medium text-[var(--sidebar-text,#202123)]"
+                  : "text-[var(--sidebar-text,#202123)]",
               )}
             />
           </div>
@@ -117,15 +119,15 @@ export function VirtualTreeView({
           <div className="flex h-full min-w-0 flex-1 items-center pr-1">
             <div className="mr-0 flex h-4 w-4 flex-shrink-0 items-center justify-center">
               {isExpanded ? (
-                <ChevronDown className="sidebar-icon h-4 w-4 text-[#6E6E80]" />
+                <ChevronDown className="sidebar-icon h-4 w-4 text-[var(--sidebar-text-muted,#6e6e80)]" />
               ) : (
-                <ChevronRight className="sidebar-icon h-4 w-4 text-[#6E6E80]" />
+                <ChevronRight className="sidebar-icon h-4 w-4 text-[var(--sidebar-text-muted,#6e6e80)]" />
               )}
             </div>
-            <FolderTree className="sidebar-icon mr-0 h-4 w-4 flex-shrink-0 text-[#6E6E80]" />
+            <FolderTree className="sidebar-icon mr-0 h-4 w-4 flex-shrink-0 text-[var(--sidebar-text-muted,#6e6e80)]" />
             <ExplorerRowContent
               title={node.label}
-              titleClassName="font-medium text-[#202123] lining-nums tabular-nums"
+              titleClassName="font-medium text-[var(--sidebar-text,#202123)] lining-nums tabular-nums"
             />
           </div>
         </ExplorerRow>

@@ -53,20 +53,22 @@ export const DocumentRow: React.FC<DocumentRowProps> = ({
       <div className="flex-1 flex items-center min-w-0 h-full pr-1">
         <FileText
           className={cn(
-            "sidebar-icon w-4 h-4 mr-2 shrink-0 text-[#6E6E80] group-hover:text-[#202123]",
-            isSelected && "text-primary-700",
+            "sidebar-icon w-4 h-4 mr-2 shrink-0 text-[var(--sidebar-text-muted,#6e6e80)] group-hover:text-[var(--sidebar-text,#202123)]",
+            isSelected && "text-[var(--sidebar-text,#202123)]",
           )}
         />
         <span
           className={cn(
             "sidebar-title text-sm truncate lining-nums tabular-nums",
-            isSelected ? "text-primary-700 font-medium" : "text-[#202123]",
+            isSelected
+              ? "text-[var(--sidebar-text,#202123)] font-medium"
+              : "text-[var(--sidebar-text,#202123)]",
           )}
         >
           {title}
         </span>
         {doc.sizeBytes && (
-          <span className="ml-2 text-[10px] text-[#6E6E80] shrink-0 lining-nums tabular-nums">
+          <span className="ml-2 text-[10px] text-[var(--sidebar-text-muted,#6e6e80)] shrink-0 lining-nums tabular-nums">
             {(doc.sizeBytes / 1024).toFixed(1)}KB
           </span>
         )}
@@ -88,7 +90,7 @@ export const DocumentRow: React.FC<DocumentRowProps> = ({
             type="button"
             aria-label="ドキュメントメニューを開く"
             className={cn(
-              "sidebar-action h-6 w-6 p-0 grid place-items-center rounded-md hover:bg-slate-200 text-[#6E6E80] hover:text-[#202123] outline-none pointer-events-auto transition-all shrink-0",
+              "sidebar-action h-6 w-6 p-0 grid place-items-center rounded-md hover:bg-[var(--sidebar-active-bg,#e7ebef)] text-[var(--sidebar-text-muted,#6e6e80)] hover:text-[var(--sidebar-text,#202123)] outline-none pointer-events-auto transition-all shrink-0",
               "opacity-0 group-hover:opacity-100",
               (isSelected || menuOpen) && "opacity-100",
             )}

@@ -40,12 +40,9 @@ export function TreeViewSidebar({
   return (
     <div
       ref={sidebarRef}
-      style={{
-        backgroundColor: "var(--sidebar-bg)",
-        borderColor: "#d7d9de",
-      }}
+      style={{ backgroundColor: "var(--sidebar-bg)" }}
       className={cn(
-        "shrink-0 flex-col border-r border-[#e3e6ea] relative z-10 group/sidebar select-none",
+        "shrink-0 flex-col border-r border-[var(--sidebar-border,#e3e6ea)] relative z-10 group/sidebar select-none",
         showMobileDetail ? "hidden md:flex" : "flex",
         isResizing
           ? "transition-none will-change-[width]"
@@ -88,8 +85,9 @@ export function TreeViewSidebar({
       {isSidebarOpen && (
         <div
           className={cn(
-            "hidden md:block absolute top-0 -right-[3px] w-1.5 h-full cursor-col-resize z-50 group/resize select-none outline-none transition-colors hover:bg-slate-300/20 focus-visible:outline-none",
-            isResizing && "bg-slate-300/30",
+            "hidden md:block absolute top-0 -right-[3px] w-1.5 h-full cursor-col-resize z-50 group/resize select-none outline-none transition-colors hover:bg-[color-mix(in_srgb,var(--sidebar-text-muted,#6e6e80)_20%,transparent)] focus-visible:outline-none",
+            isResizing &&
+              "bg-[color-mix(in_srgb,var(--sidebar-text-muted,#6e6e80)_30%,transparent)]",
           )}
           onPointerDown={onStartResizing}
           role="separator"
@@ -100,8 +98,8 @@ export function TreeViewSidebar({
           <div
             className={cn(
               "absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-full transition-colors",
-              "bg-[#d7d9de] group-hover/resize:bg-[#b8bec8]",
-              isResizing && "bg-[#8f99a8]",
+              "bg-[var(--sidebar-border,#e3e6ea)] group-hover/resize:bg-[var(--sidebar-text-muted,#6e6e80)]",
+              isResizing && "bg-[var(--sidebar-text,#202123)]",
             )}
           />
         </div>

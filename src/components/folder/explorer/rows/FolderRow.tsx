@@ -187,15 +187,15 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                 isExpanded ? (
                   <ChevronDown
                     className={cn(
-                      "sidebar-icon w-4 h-4 text-[#6E6E80] group-hover:text-[#202123]",
-                      isSelected && "text-primary-700",
+                      "sidebar-icon w-4 h-4 text-[var(--sidebar-text-muted,#6e6e80)] group-hover:text-[var(--sidebar-text,#202123)]",
+                      isSelected && "text-[var(--sidebar-text,#202123)]",
                     )}
                   />
                 ) : (
                   <ChevronRight
                     className={cn(
-                      "sidebar-icon w-4 h-4 text-[#6E6E80] group-hover:text-[#202123]",
-                      isSelected && "text-primary-700",
+                      "sidebar-icon w-4 h-4 text-[var(--sidebar-text-muted,#6e6e80)] group-hover:text-[var(--sidebar-text,#202123)]",
+                      isSelected && "text-[var(--sidebar-text,#202123)]",
                     )}
                   />
                 )
@@ -204,8 +204,8 @@ export const FolderRow: React.FC<FolderRowProps> = ({
 
             <FolderGlyph
               className={cn(
-                "sidebar-icon w-4 h-4 flex-shrink-0 mr-0 text-[#6E6E80] group-hover:text-[#202123]",
-                isSelected && "text-primary-700",
+                "sidebar-icon w-4 h-4 flex-shrink-0 mr-0 text-[var(--sidebar-text-muted,#6e6e80)] group-hover:text-[var(--sidebar-text,#202123)]",
+                isSelected && "text-[var(--sidebar-text,#202123)]",
               )}
             />
 
@@ -251,12 +251,12 @@ void handleRenameConfirm();
                   titleClassName={cn(
                     "lining-nums tabular-nums",
                     isSelected
-                      ? "text-primary-700 font-medium"
-                      : "text-[#202123]",
+                      ? "text-[var(--sidebar-text,#202123)] font-medium"
+                      : "text-[var(--sidebar-text,#202123)]",
                   )}
                   right={
                     isFiltering && matchCount === 0 ? (
-                      <span className="text-xs text-[#6E6E80]">(0)</span>
+                      <span className="text-xs text-[var(--sidebar-text-muted,#6e6e80)]">(0)</span>
                     ) : null
                   }
                 />
@@ -269,7 +269,7 @@ void handleRenameConfirm();
               <button
                 type="button"
                 aria-label="このフォルダを開く"
-                className="sidebar-action md:hidden h-6 w-6 p-0 grid place-items-center rounded-md hover:bg-slate-200 text-[#6E6E80] hover:text-[#202123] outline-none pointer-events-auto shrink-0"
+                className="sidebar-action md:hidden h-6 w-6 p-0 grid place-items-center rounded-md hover:bg-[var(--sidebar-active-bg,#e7ebef)] text-[var(--sidebar-text-muted,#6e6e80)] hover:text-[var(--sidebar-text,#202123)] outline-none pointer-events-auto shrink-0"
                 onClick={(e) => {
                   e.stopPropagation();
                   (onNavigate ?? onSelect)();
@@ -323,7 +323,7 @@ void handleRenameConfirm();
                     type="button"
                     aria-label="フォルダメニューを開く"
                     className={cn(
-                      "sidebar-action h-6 w-6 p-0 grid place-items-center rounded-md hover:bg-slate-200 text-[#6E6E80] hover:text-[#202123] outline-none pointer-events-auto shrink-0",
+                      "sidebar-action h-6 w-6 p-0 grid place-items-center rounded-md hover:bg-[var(--sidebar-active-bg,#e7ebef)] text-[var(--sidebar-text-muted,#6e6e80)] hover:text-[var(--sidebar-text,#202123)] outline-none pointer-events-auto shrink-0",
                       "opacity-0 group-hover:opacity-100",
                       (isSelected || menuOpen) && "opacity-100",
                     )}
