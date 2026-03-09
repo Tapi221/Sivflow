@@ -78,7 +78,7 @@ export function ContextMenu({
         )}
 
         {onRename && (
-          <DropdownMenuItem onClick={onRename} className="gap-2">
+          <DropdownMenuItem onSelect={onRename} className="gap-2">
             <Pencil className="h-4 w-4" />
             名前を変更
           </DropdownMenuItem>

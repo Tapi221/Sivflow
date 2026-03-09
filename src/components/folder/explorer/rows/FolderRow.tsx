@@ -112,6 +112,9 @@ export const FolderRow: React.FC<FolderRowProps> = ({
   const parentFolderId = normalizeFolderId(getParentFolderId(folder));
   const isTopLevelFolder = parentFolderId === ROOT_FOLDER_ID;
   const FolderGlyph = isTopLevelFolder ? FolderIcon : FolderOutlineIcon;
+
+  // [D] render log
+  console.log("[folder row render]", { folderId, editingId, isEditing });
   const nestedToggleOffsetStyle = !isTopLevelFolder
     ? ({ marginLeft: "calc(var(--tree-indent-px) * -0.5)" } as const)
     : undefined;
@@ -175,6 +178,10 @@ export const FolderRow: React.FC<FolderRowProps> = ({
             />
 
             {isEditing ? (
+              // eslint-disable-next-line no-console
+              (() => { console.log("[rename input mounted]", { folderId }); return null; })()
+            ) : null}
+            {isEditing ? (
               <input
                 ref={editInputRef}
                 aria-label="フォルダ名の編集"
@@ -196,7 +203,10 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                     e.currentTarget.blur();
                   }
                 }}
-                onBlur={() => void handleRenameConfirm()}
+                onBlur={() => {
+                  console.log("[rename confirm]", { editingId, editingName });
+                  void handleRenameConfirm();
+                }}
                 onClick={(e) => e.stopPropagation()}
               />
             ) : (
@@ -244,7 +254,9 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                   }
                   onCreateCard={() => void handleCreateCardAction(folderId)}
                   onRename={() => {
+                    console.log("[rename click]", { folderId, folderName: typedFolder?.name, editingId });
                     setEditingId(folderId);
+                    console.log("[setEditingId called]", { nextEditingId: folderId });
                     setEditingName(folderName);
                     editingNameRef.current = folderName;
                   }}

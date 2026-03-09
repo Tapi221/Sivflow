@@ -91,6 +91,12 @@ export const ExplorerTreeNodeRenderer = React.memo(
 
     if (treeNode.kind === "folder" && treeNode.folder) {
       const folderId = treeNode.rawId;
+      console.log("[tree node render]", {
+        rawId: treeNode.rawId,
+        folderId,
+        editingId,
+        isEditing: editingId === folderId,
+      });
       const isPinned =
         pinnedItems?.some((item) => item.type === "folder" && item.id === folderId) ??
         false;
