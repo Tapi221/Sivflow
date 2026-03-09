@@ -56,6 +56,7 @@ export function ScaleToFitFrame({
     if (!frameRef.current) return;
 
     const frame = frameRef.current;
+    const observeTarget = frame.parentElement ?? frame;
 
     const calcScale = () => {
       const availableWidth = frame.clientWidth;
@@ -82,7 +83,7 @@ export function ScaleToFitFrame({
     calcScale();
 
     const observer = new ResizeObserver(() => schedule(calcScale));
-    observer.observe(frame);
+    observer.observe(observeTarget);
 
     return () => observer.disconnect();
   }, [
