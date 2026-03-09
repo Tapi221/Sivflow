@@ -99,6 +99,17 @@ export function FolderTreeArborist<T extends FolderTreeArboristNode>({
     tree.root.children?.forEach(syncNode);
   }, [expandedIds, data]);
 
+  useEffect(() => {
+    const tree = treeRef.current;
+    if (!tree || data.length === 0) return;
+
+    const targetId = selectedId ?? data[0]?.id;
+    if (!targetId) return;
+
+    // Prevent stale virtual-list scroll offset from hiding rows on remount/tab switch.
+    tree.scrollTo(targetId, "start");
+  }, [data, selectedId]);
+
   return (
     <div ref={containerRef} className="h-full min-h-0">
       <Tree<T>
