@@ -1,24 +1,24 @@
-import { firestoreDb } from "./firebase";
-import {
-  collection,
-  doc,
-  setDoc,
-  query,
-  where,
-  getDocs,
-  Timestamp,
-} from "firebase/firestore";
-import * as Firestore from "firebase/firestore";
-import type { Folder, Card } from "@/types";
+import type { Card, Folder } from "@/types";
 import {
   denormalizeUploadedImages,
   normalizeUploadedImages,
 } from "@/utils/uploaded-image/normalizer";
+import * as Firestore from "firebase/firestore";
 import {
-  foldersPathSegments,
-  folderDocPathSegments,
-  cardsPathSegments,
+  collection,
+  doc,
+  getDocs,
+  query,
+  setDoc,
+  Timestamp,
+  where,
+} from "firebase/firestore";
+import { firestoreDb } from "./firebase";
+import {
   cardDocPathSegments,
+  cardsPathSegments,
+  folderDocPathSegments,
+  foldersPathSegments,
 } from "./firestorePaths";
 
 const denormalizeCardForCloud = (card: Card) => {

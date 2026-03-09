@@ -9,12 +9,12 @@ import React, {
 import { cn } from "@/lib/utils";
 import type { Card, SelectedExplorerItem } from "@/types";
 import type { DocumentItem } from "@/types";
-import DeleteFolderDialog from "./DeleteFolderDialog";
+import DeleteFolderDialog from "../dialogs/DeleteFolderDialog";
 import {
   type FolderTreeNode,
   getFolderId,
   normalizeFolderId,
-} from "./explorer/model/utils";
+} from "@/components/folder/explorer/model/utils";
 import BulkTagDialog from "@/components/tag/BulkTagDialog";
 import { FolderTreeArborist } from "@/components/sidebar/FolderTreeArborist";
 import {
@@ -23,18 +23,18 @@ import {
   toExpandedTreeIds,
   toSelectedTreeId,
   type ExplorerTreeNode,
-} from "./explorer/tree/arboristAdapter";
-import { useEnsureAncestorFoldersExpanded } from "./hooks/useEnsureAncestorFoldersExpanded";
-import { useFolderDocumentUpload } from "./hooks/useFolderDocumentUpload";
-import { useExplorerKeyboardNavigation } from "./hooks/useExplorerKeyboardNavigation";
-import { useExpandedFolders } from "./hooks/useExpandedFolders";
-import { useExplorerDialogs } from "./hooks/useExplorerDialogs";
-import { useExplorerDerivedData } from "./hooks/useExplorerDerivedData";
-import { useFolderActions } from "./hooks/useFolderActions";
-import { RootFolderPanelList } from "./components/RootFolderPanelList";
-import { ExplorerEmptyState } from "./components/ExplorerEmptyState";
-import { ExplorerNoResultsState } from "./components/ExplorerNoResultsState";
-import { ExplorerTreeNodeRenderer } from "./components/ExplorerTreeNode";
+} from "@/components/folder/explorer/tree/arboristAdapter";
+import { useEnsureAncestorFoldersExpanded } from "@/components/folder/hooks/useEnsureAncestorFoldersExpanded";
+import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
+import { useExplorerKeyboardNavigation } from "@/components/folder/hooks/useExplorerKeyboardNavigation";
+import { useExpandedFolders } from "@/components/folder/hooks/useExpandedFolders";
+import { useExplorerDialogs } from "@/components/folder/hooks/useExplorerDialogs";
+import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
+import { useFolderActions } from "@/components/folder/hooks/useFolderActions";
+import { RootFolderPanelList } from "@/components/folder/components/RootFolderPanelList";
+import { ExplorerEmptyState } from "@/components/folder/components/ExplorerEmptyState";
+import { ExplorerNoResultsState } from "@/components/folder/components/ExplorerNoResultsState";
+import { ExplorerTreeNodeRenderer } from "@/components/folder/components/ExplorerTreeNode";
 import type { NodeApi } from "react-arborist";
 
 interface FolderTreeWithCardsProps {

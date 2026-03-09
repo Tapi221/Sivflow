@@ -1,5 +1,5 @@
-import { useCallback, useMemo } from "react";
 import { type Card, type DocumentItem, type Folder, type SelectedExplorerItem } from "@/types";
+import { useCallback, useMemo } from "react";
 
 const toDate = (value: unknown): Date | null => {
   if (value == null) return null;
@@ -48,22 +48,24 @@ export function useTreeViewDerivedState({
   autoCarryOver = true,
   isMobile,
 }: UseTreeViewDerivedStateParams) {
-  const getFolderPath = useCallback(
-    (folderId: string | null): string => {
-      if (!folderId) return "";
-      const path: string[] = [];
-      let currentFolder = folders.find((folder) => folder.id === folderId);
+ const getFolderPath = useCallback(
+  (folderId: string | null): string => {
+    if (!folderId) return "";
 
-      while (currentFolder) {
-        path.unshift(currentFolder.folderName);
-        currentFolder =
-          folders.find((folder) => folder.id === currentFolder?.parentFolderId) ?? null;
-      }
+    const path: string[] = [];
+    let currentFolder = folders.find((folder) => folder.id === folderId);
 
-      return path.join(" / ");
-    },
-    [folders],
-  );
+    while (currentFolder) {
+      path.unshift(currentFolder.folderName);
+
+      const parentFolderId = currentFolder.parentFolderId;
+      currentFolder = folders.find((folder) => folder.id === parentFolderId);
+    }
+
+    return path.join(" / ");
+  },
+  [folders],
+);
 
   const selectedFolder = useMemo(() => {
     if (!selectedFolderId) return null;

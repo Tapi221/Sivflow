@@ -1,6 +1,6 @@
-import type { Folder, Card, UserSettings, UserStats } from "@/types";
+import type { Card, Folder, UserSettings, UserStats } from "@/types";
+import { doc, writeBatch } from "firebase/firestore";
 import { firestoreDb } from "./firebase";
-import { writeBatch, doc } from "firebase/firestore";
 
 /**
  * 手動バックアップサービス

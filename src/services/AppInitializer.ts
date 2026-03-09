@@ -204,17 +204,21 @@ export class AppInitializer {
       ReturnType<typeof IndexedDBRebuildOrchestrator.rebuild>
     >;
     try {
-      rebuildResult = await IndexedDBRebuildOrchestrator.rebuild(
-        userId,
-        reason,
-      );
-    } catch (error: unknown) {
-      console.error(
-        `[AppInit:${userId}] Rebuild FAILED:`,
-        error.message || error,
-      );
-      throw error; // 上位で捕捉されることを期待
-    }
+  rebuildResult = await IndexedDBRebuildOrchestrator.rebuild(
+    userId,
+    reason,
+  );
+} catch (error: unknown) {
+  const errorMessage =
+    error instanceof Error ? error.message : String(error);
+
+  console.error(
+    `[AppInit:${userId}] Rebuild FAILED: ${errorMessage}`,
+    error,
+  );
+
+  throw error;
+}
 
     // 🔥 再構築 + 同期完了後に CLEAN をマーク
     // 新しい DB インスタンスを作成（削除後のため）
@@ -245,7 +249,3 @@ export class AppInitializer {
     this.initPromise = null;
   }
 }
-
-
-
-

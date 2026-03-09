@@ -1,6 +1,8 @@
-import { useMemo } from "react";
-import { resolveCardTagNames, type TagMapLike } from "@/hooks/settings/useTags";
+import { resolveCardTagNames } from "@/hooks/settings/useTags";
 import type { Card, DocumentItem } from "@/types";
+import { useMemo } from "react";
+
+type TagMapLike = Parameters<typeof resolveCardTagNames>[2];
 
 interface UseTreeViewFiltersParams {
   cards: Card[];
@@ -67,6 +69,7 @@ export function useTreeViewFilters({
           card.tags,
           tagById,
         );
+
         if (resolvedNames.length === 0) return false;
 
         const cardTagSet = new Set(resolvedNames);
@@ -125,4 +128,3 @@ export function useTreeViewFilters({
     isFiltering,
   };
 }
-

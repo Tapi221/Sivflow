@@ -1,1 +1,1 @@
-export { TreeViewLayout } from "./layout/TreeViewLayout";
+export { default as TreeViewLayout } from "./layout/TreeViewLayout";

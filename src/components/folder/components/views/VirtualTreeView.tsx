@@ -1,10 +1,10 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { BookOpen, ChevronDown, ChevronRight, FolderTree } from "@/ui/icons";
 import { cn } from "@/lib/utils";
 import type { Card, SelectedExplorerItem } from "@/types";
-import type { TreeNode } from "./viewTypes";
-import { ExplorerRow } from "./explorer/rows/ExplorerRow";
-import { ExplorerRowContent } from "./explorer/rows/ExplorerRowContent";
+import { BookOpen, ChevronDown, ChevronRight, FolderTree } from "@/ui/icons";
+import React, { useEffect, useMemo, useState } from "react";
+import type { TreeNode } from "@/components/folder/types/viewTypes";
+import { ExplorerRow } from "@/components/folder/explorer/rows/ExplorerRow";
+import { ExplorerRowContent } from "@/components/folder/explorer/rows/ExplorerRowContent";
 
 interface VirtualTreeViewProps {
   nodes: TreeNode[];

@@ -11,7 +11,8 @@
       "Bash(npx tsc --noEmit --skipLibCheck)",
       "Bash(npx tsc --noEmit --project tsconfig.app.json)",
       "Bash(npx tsc --noEmit --project c:/Manifolmia/tsconfig.app.json)",
-      "Bash(npx tsc --noEmit --project tsconfig.json)"
+      "Bash(npx tsc --noEmit --project tsconfig.json)",
+      "Bash(npx vite build)"
     ],
     "additionalDirectories": [
       "C:\\Manifolmia\\src\\components\\folder",
