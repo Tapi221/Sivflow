@@ -1,17 +1,17 @@
 import { ContextMenu } from "@/components/folder/components/menus/ContextMenu";
 import {
-    getParentFolderId,
-    normalizeFolderId,
-    ROOT_FOLDER_ID,
-    type FolderTreeNode,
+  getParentFolderId,
+  normalizeFolderId,
+  ROOT_FOLDER_ID,
+  type FolderTreeNode,
 } from "@/components/folder/explorer/model/utils";
 import { cn } from "@/lib/utils";
 import {
-    ChevronDown,
-    ChevronRight,
-    FolderIcon,
-    FolderOutlineIcon,
-    MoreVertical,
+  ChevronDown,
+  ChevronRight,
+  FolderIcon,
+  FolderOutlineIcon,
+  MoreVertical,
 } from "@/ui/icons";
 import React from "react";
 import { ExplorerRow } from "./ExplorerRow";
