@@ -5,7 +5,7 @@ import { Code } from "@/ui/icons";
 import { ImageIcon } from "@/ui/icons";
 import { StratisFormulaIcon } from "@/ui/icons";
 import { StratisMarkdownIcon } from "@/ui/icons";
-import { cn } from "@/lib/utils"; // clsx + tailwind-merge のユーティリティ
+import { cn } from "@/lib/utils";
 import type { CardBlock } from "@/types";
 
 import {
@@ -15,26 +15,23 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-// ---- Props 定義 ----
 interface BlockToolbarProps {
-  label: string; // ツールバー左端に表示するラベル（例: "表面" / "裏面"）
-  onAddBlock: (type: CardBlock["type"]) => void; // ブロック追加時に呼ばれるコールバック
-  settings?: unknown; // ユーザー設定（ブロックの表示順・可視状態など）
-  hiddenBlockTypes?: CardBlock["type"][]; // 強制的に非表示にするブロック種別リスト
+  label: string;
+  onAddBlock: (type: CardBlock["type"]) => void;
+  settings?: unknown;
+  hiddenBlockTypes?: CardBlock["type"][];
   className?: string;
 }
 
-// ブロック設定の内部型（設定オブジェクト1件分）
 type BlockConfig = {
   type: CardBlock["type"];
   label: string;
-  icon?: string; // アイコン名（文字列）
-  isVisible?: boolean; // 表示するか（UserSettings 由来）
-  enabled?: boolean; // 有効か（isVisible の別名的なフラグ）
-  color?: string; // ホバー時のカラーテーマキー
+  icon?: string;
+  isVisible?: boolean;
+  enabled?: boolean;
+  color?: string;
 };
 
-// このツールバーが扱える型の許可リスト（settings に未知の type が混入しても無視する）
 const ALLOWED_TYPES: readonly CardBlock["type"][] = [
   "text",
   "code",
@@ -43,6 +40,81 @@ const ALLOWED_TYPES: readonly CardBlock["type"][] = [
   "math",
 ] as const;
 
+const DEFAULT_CONFIGS: BlockConfig[] = [
+  { type: "text",     label: "テキスト",  icon: "Type",        isVisible: true },
+  { type: "code",     label: "コード",    icon: "Code",        isVisible: true },
+  { type: "image",    label: "画像",      icon: "Image",       isVisible: true },
+  { type: "math",     label: "数式",      icon: "Sigma",       isVisible: true },
+  { type: "markdown", label: "Markdown",  icon: "NotebookPen", isVisible: true },
+];
+
+function getIcon(iconName: string | undefined, type: CardBlock["type"]) {
+  const map: Record<string, React.ComponentType<{ className?: string }>> = {
+    Type: Type,
+    Image: ImageIcon,
+    Sigma: StratisFormulaIcon,
+    Code: Code,
+    NotebookPen: StratisMarkdownIcon,
+  };
+  if (iconName && map[iconName]) return map[iconName];
+  const typeMap: Record<string, React.ComponentType<{ className?: string }>> = {
+    text: Type,
+    code: Code,
+    image: ImageIcon,
+    markdown: StratisMarkdownIcon,
+    math: StratisFormulaIcon,
+  };
+  return typeMap[type] ?? Plus;
+}
+
+// 小さな pill ボタン（アクション群用）
+function ActionButton({
+  onClick,
+  icon: Icon,
+  label,
+}: {
+  onClick: () => void;
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={`${label}を追加`}
+      className={cn(
+        "inline-flex items-center gap-[5px] px-2.5 h-[28px] rounded-md",
+        "text-[11px] font-medium leading-none select-none",
+        "text-slate-400 transition-colors duration-100",
+        "hover:text-slate-700 hover:bg-slate-200/60",
+        "active:bg-slate-200 active:text-slate-800 active:scale-95",
+      )}
+    >
+      <Icon className="w-3 h-3 shrink-0" />
+      <span>{label}</span>
+    </button>
+  );
+}
+
+// セクションラベル（「問題」「解答」など）
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center h-[28px] px-1 shrink-0 select-none",
+        "text-[11px] font-semibold tracking-wide text-slate-600 leading-none",
+      )}
+    >
+      {children}
+    </span>
+  );
+}
+
+// ラベルとアクション群の間の仕切り
+function Divider() {
+  return <div className="w-px h-4 bg-slate-200 shrink-0 mx-1" />;
+}
+
 export const BlockToolbar: React.FC<BlockToolbarProps> = ({
   label,
   onAddBlock,
@@ -50,146 +122,44 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
   hiddenBlockTypes = [],
   className,
 }) => {
-  // ---- ブロック設定を解決する ----
-  // settings.editorBlockSettings があればそれを使い、なければハードコードされたデフォルトを使う
-  // filter で ALLOWED_TYPES に含まれない type を弾いてセキュリティ的な安全を確保
+  type RawSettings = { editorBlockSettings?: Record<string, unknown>[] };
+  const rawSettings = (settings as RawSettings | undefined)?.editorBlockSettings;
+
   const blockSettings: BlockConfig[] =
-    settings?.editorBlockSettings && settings.editorBlockSettings.length > 0
-      ? settings.editorBlockSettings
-          .map((x: unknown) => ({
-            type: x.type as CardBlock["type"],
-            label: x.label ?? String(x.type),
-            icon: x.icon,
-            isVisible: x.isVisible,
-            enabled: x.enabled,
-            color: x.color,
+    rawSettings && rawSettings.length > 0
+      ? rawSettings
+          .map((x) => ({
+            type: x["type"] as CardBlock["type"],
+            label: (x["label"] as string | undefined) ?? String(x["type"]),
+            icon: x["icon"] as string | undefined,
+            isVisible: x["isVisible"] as boolean | undefined,
+            enabled: x["enabled"] as boolean | undefined,
+            color: x["color"] as string | undefined,
           }))
-          .filter((x: BlockConfig) => ALLOWED_TYPES.includes(x.type))
-      : [
-          // ↓ デフォルト設定（設定が無い場合のフォールバック）
-          {
-            type: "text",
-            label: "テキスト",
-            icon: "Type",
-            isVisible: true,
-            color: "primary",
-          },
-          {
-            type: "code",
-            label: "コード",
-            icon: "Code",
-            isVisible: true,
-            color: "indigo",
-          },
-          {
-            type: "image",
-            label: "画像",
-            icon: "Image",
-            isVisible: true,
-            color: "emerald",
-          },
-          {
-            type: "markdown",
-            label: "Markdown",
-            icon: "NotebookPen",
-            isVisible: true,
-            color: "rose",
-          },
-          {
-            type: "math",
-            label: "数式",
-            icon: "Sigma",
-            isVisible: true,
-            color: "purple",
-          },
-        ];
+          .filter((x) => ALLOWED_TYPES.includes(x.type))
+      : DEFAULT_CONFIGS;
 
-  // ---- アイコン名の文字列 → React コンポーネントへの変換 ----
-  // iconName が指定されていればそちらを優先し、なければ type から推測する
-  const getIcon = (iconName: string | undefined, type: CardBlock["type"]) => {
-    if (iconName) {
-      switch (iconName) {
-        case "Type":
-          return Type;
-        case "Image":
-          return ImageIcon;
-        case "Sigma":
-          return StratisFormulaIcon;
-        case "Code":
-          return Code;
-        case "NotebookPen":
-          return StratisMarkdownIcon;
-      }
-    }
-    // iconName が未定義 or 未知の値だった場合のフォールバック
-    switch (type) {
-      case "text":
-        return Type;
-      case "code":
-        return Code;
-      case "image":
-        return ImageIcon;
-      case "markdown":
-        return StratisMarkdownIcon;
-      case "math":
-        return StratisFormulaIcon;
-      default:
-        return Plus; // 想定外の type には「＋」アイコンを表示
-    }
-  };
-
-  // ---- 特定 type を非表示にすべきか判定 ----
-  // hiddenBlockTypes に含まれる / Prop で禁止されている場合は true を返す
-  const isTypeHidden = (type: CardBlock["type"]) => {
-    if (hiddenBlockTypes.includes(type)) return true;
-    return false;
-  };
-
-  // ---- 実際に表示するブロック設定を絞り込む ----
-  // isVisible / enabled のどちらも未設定なら表示する（true がデフォルト）
   const visibleConfigs = blockSettings.filter((config) => {
-    const isVisible = config.isVisible ?? config.enabled ?? true;
-    if (!isVisible) return false;
-    if (isTypeHidden(config.type)) return false;
+    if (!(config.isVisible ?? config.enabled ?? true)) return false;
+    if (hiddenBlockTypes.includes(config.type)) return false;
     return true;
-  });
-
-  // ---- ツールバー共通ボタンリスト ----
-  const toolbarButtons = visibleConfigs.map((config) => {
-    const Icon = getIcon(config.icon, config.type);
-    return (
-      <button
-        key={config.type}
-        type="button"
-        onClick={() => onAddBlock(config.type)}
-        className={cn(
-          "flex items-center gap-1.5 px-2 h-6 rounded text-slate-400",
-          "text-[10px] font-medium leading-none transition-colors duration-100",
-          "hover:text-slate-700 hover:bg-slate-100/70",
-          "active:scale-95",
-        )}
-        aria-label={`${config.label}を追加`}
-      >
-        <Icon className="w-3 h-3 shrink-0" />
-        <span>{config.label}</span>
-      </button>
-    );
   });
 
   return (
     <div
       className={cn(
-        "flex w-full items-center gap-0.5 px-3 py-1",
+        // 帯としての見た目: 薄い背景 + 下辺ボーダー
+        "flex w-full items-center gap-1 px-3",
+        "h-10 min-h-[40px]",
+        "bg-slate-50/80 border-b border-slate-200",
         className,
       )}
     >
-      {/* ラベル */}
-      <span className="text-[9px] font-semibold text-slate-300 uppercase tracking-widest leading-none mr-2 shrink-0 select-none">
-        {label}
-      </span>
+      {/* セクションラベル（問題 / 解答 など） */}
+      <SectionLabel>{label}</SectionLabel>
 
-      {/* 区切り */}
-      <div className="w-px h-3.5 bg-slate-200 mr-1.5 shrink-0" />
+      {/* ラベルとアクション群の区切り */}
+      <Divider />
 
       {/* モバイル: ドロップダウン */}
       <div className="flex md:hidden">
@@ -197,16 +167,21 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="flex items-center gap-1 px-2 h-6 rounded text-slate-400 text-[10px] font-medium hover:text-slate-700 hover:bg-slate-100/70 transition-colors"
+              className={cn(
+                "inline-flex items-center gap-[5px] px-2.5 h-[28px] rounded-md",
+                "text-[11px] font-medium text-slate-400 transition-colors duration-100",
+                "hover:text-slate-700 hover:bg-slate-200/60",
+                "active:bg-slate-200 active:text-slate-800",
+              )}
               aria-label={`${label} にブロックを追加`}
             >
               <Plus className="w-3 h-3" />
-              <span>追加</span>
+              <span>ブロックを追加</span>
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="start"
-            className="rounded-2xl border-slate-100 shadow-xl p-2 min-w-[220px]"
+            className="rounded-xl border-slate-100 shadow-lg p-1.5 min-w-[200px]"
           >
             {visibleConfigs.length === 0 ? (
               <div className="px-2 py-2 text-xs text-slate-400">
@@ -219,12 +194,12 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
                   <DropdownMenuItem
                     key={config.type}
                     onClick={() => onAddBlock(config.type)}
-                    className="rounded-xl flex items-center gap-2 py-2 text-slate-600 focus:text-slate-800"
+                    className="rounded-lg flex items-center gap-2.5 py-2 px-2 text-slate-600 focus:text-slate-800 focus:bg-slate-100"
                   >
-                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-slate-50 border border-slate-200/60">
-                      <Icon className="w-4 h-4" />
+                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-slate-100 border border-slate-200/70">
+                      <Icon className="w-3.5 h-3.5" />
                     </span>
-                    <span className="text-[12px] font-bold">{config.label}</span>
+                    <span className="text-[12px] font-medium">{config.label}</span>
                   </DropdownMenuItem>
                 );
               })
@@ -233,14 +208,20 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
         </DropdownMenu>
       </div>
 
-      {/* デスクトップ: 横一列ボタン */}
+      {/* デスクトップ: pill ボタン横並び */}
       <div className="hidden md:flex items-center gap-0.5 flex-nowrap overflow-x-auto no-scrollbar">
-        {toolbarButtons}
+        {visibleConfigs.map((config) => {
+          const Icon = getIcon(config.icon, config.type);
+          return (
+            <ActionButton
+              key={config.type}
+              onClick={() => onAddBlock(config.type)}
+              icon={Icon}
+              label={config.label}
+            />
+          );
+        })}
       </div>
     </div>
   );
 };
-
-
-
-
