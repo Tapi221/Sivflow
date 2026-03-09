@@ -53,14 +53,28 @@ export function ContextMenu({
         {type === "folder" && (
           <>
             {onCreateSubfolder && (
-              <DropdownMenuItem onClick={onCreateSubfolder} className="gap-2">
+              <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onCreateSubfolder?.();
+                }}
+                className="gap-2"
+              >
                 <Folder className="h-4 w-4" />
                 新規フォルダ
               </DropdownMenuItem>
             )}
 
             {onCreateCard && (
-              <DropdownMenuItem onClick={onCreateCard} className="gap-2">
+              <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onCreateCard?.();
+                }}
+                className="gap-2"
+              >
                 <Plus className="h-4 w-4 text-blue-500" />
                 新規カード
               </DropdownMenuItem>
@@ -71,28 +85,56 @@ export function ContextMenu({
         )}
 
         {onTogglePin && (
-          <DropdownMenuItem onClick={onTogglePin} className="gap-2">
+          <DropdownMenuItem
+            onSelect={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onTogglePin?.();
+            }}
+            className="gap-2"
+          >
             <Pin className={`h-4 w-4 ${isPinned ? "text-amber-500" : ""}`} />
             {isPinned ? "ピン留め解除" : "ピン留め"}
           </DropdownMenuItem>
         )}
 
         {onRename && (
-          <DropdownMenuItem onSelect={onRename} className="gap-2">
+          <DropdownMenuItem
+            onSelect={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onRename?.();
+            }}
+            className="gap-2"
+          >
             <Pencil className="h-4 w-4" />
             名前を変更
           </DropdownMenuItem>
         )}
 
         {type === "card" && onMove && (
-          <DropdownMenuItem onClick={onMove} className="gap-2">
+          <DropdownMenuItem
+            onSelect={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onMove?.();
+            }}
+            className="gap-2"
+          >
             <ChevronRight className="h-4 w-4" />
             移動
           </DropdownMenuItem>
         )}
 
         {type === "folder" && onBulkTag && (
-          <DropdownMenuItem onClick={onBulkTag} className="gap-2">
+          <DropdownMenuItem
+            onSelect={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onBulkTag?.();
+            }}
+            className="gap-2"
+          >
             <Tag className="h-4 w-4 text-violet-500" />
             タグを一括付与
           </DropdownMenuItem>
@@ -114,3 +156,4 @@ export function ContextMenu({
     </DropdownMenu>
   );
 }
+

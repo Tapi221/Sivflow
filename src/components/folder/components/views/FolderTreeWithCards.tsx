@@ -596,6 +596,9 @@ export function FolderTreeWithCards({
               onUnpinItem={onUnpinItem}
               setEditingId={dialogs.setEditingId}
               setEditingName={dialogs.setEditingName}
+              editingId={dialogs.editingId}
+              editingName={dialogs.editingName}
+              handleRenameConfirm={actions.handleRenameConfirm}
             />
           ) : (
             <div className="flex h-full min-h-0 flex-col">
@@ -638,6 +641,7 @@ export function FolderTreeWithCards({
     </div>
   );
 }
+
 
 
 

@@ -113,8 +113,6 @@ export const FolderRow: React.FC<FolderRowProps> = ({
   const isTopLevelFolder = parentFolderId === ROOT_FOLDER_ID;
   const FolderGlyph = isTopLevelFolder ? FolderIcon : FolderOutlineIcon;
 
-  // [D] render log
-  console.log("[folder row render]", { folderId, editingId, isEditing });
   const nestedToggleOffsetStyle = !isTopLevelFolder
     ? ({ marginLeft: "calc(var(--tree-indent-px) * -0.5)" } as const)
     : undefined;
@@ -289,6 +287,7 @@ export const FolderRow: React.FC<FolderRowProps> = ({
     </div>
   );
 };
+
 
 
 
