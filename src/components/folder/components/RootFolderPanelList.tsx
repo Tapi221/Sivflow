@@ -45,12 +45,30 @@ export function RootFolderPanelList({
 
   React.useEffect(() => {
     if (!editingId) return;
-    const input = inputRef.current;
-    if (!input) return;
-    requestAnimationFrame(() => {
+
+    let raf1 = 0;
+    let raf2 = 0;
+
+    raf1 = requestAnimationFrame(() => {
+      const input = inputRef.current;
+      if (!input) return;
+
       input.focus();
-      input.select();
+
+      raf2 = requestAnimationFrame(() => {
+        const finalInput = inputRef.current;
+        if (!finalInput) return;
+
+        finalInput.focus();
+        finalInput.select();
+        finalInput.setSelectionRange(0, finalInput.value.length);
+      });
     });
+
+    return () => {
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+    };
   }, [editingId]);
 
   return (
