@@ -177,6 +177,7 @@ const isPinned =
     // CardSet ノード
     if (treeNode.kind === "cardSet") {
       const Chevron = isOpen ? ChevronDown : ChevronRight;
+      const hasChildren = (treeNode.children?.length ?? 0) > 0;
       return (
         <div style={style}>
           <div
@@ -191,11 +192,22 @@ const isPinned =
             data-selected={isSelected || undefined}
             style={{ paddingLeft: `${node.level * 12 + 4}px` }}
             onClick={() => {
-              toggle();
               onItemSelect({ type: "cardSet", id: treeNode.rawId });
             }}
           >
-            <Chevron className="mr-1 h-3 w-3 shrink-0 text-[var(--sidebar-text-muted,#6e6e80)]" />
+            <button
+              type="button"
+              className="mr-1 grid h-4 w-4 shrink-0 place-items-center"
+              onClick={(event) => {
+                event.stopPropagation();
+                if (hasChildren) toggle();
+              }}
+              aria-label={isOpen ? "カードセットを折りたたむ" : "カードセットを展開する"}
+            >
+              {hasChildren ? (
+                <Chevron className="h-3 w-3 text-[var(--sidebar-text-muted,#6e6e80)]" />
+              ) : null}
+            </button>
             <Layers
               className={cn(
                 "mr-2 h-4 w-4 shrink-0",
@@ -207,7 +219,7 @@ const isPinned =
             <span className="truncate text-sm font-medium">
               {treeNode.name}
             </span>
-            {(treeNode.children?.length ?? 0) > 0 && (
+            {hasChildren && (
               <span className="ml-auto text-[10px] text-[var(--sidebar-text-muted,#6e6e80)] tabular-nums">
                 {treeNode.children!.length}
               </span>
