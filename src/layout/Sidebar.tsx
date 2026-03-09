@@ -1,5 +1,5 @@
 import React from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import "./Sidebar.css";
 
 type NavItem = {
@@ -63,6 +63,14 @@ const NAV_ITEMS: NavItem[] = [
 
 export function Sidebar() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleOpenSettings = () => {
+    const next = new URLSearchParams(location.search);
+    next.set("settings", "true");
+    next.set("settingsTab", "account");
+    navigate({ search: `?${next.toString()}` });
+  };
 
   return (
     <aside className="sidebar">
@@ -86,7 +94,7 @@ export function Sidebar() {
       <div className="sidebar__footer">
         <button
           className="sidebar__nav-item sidebar__settings-btn"
-          onClick={() => navigate("?settings=account")}
+          onClick={handleOpenSettings}
         >
           <span className="sidebar__nav-icon"><SettingsIcon /></span>
           設定
