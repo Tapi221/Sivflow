@@ -7,6 +7,7 @@ export type ExplorerItem =
 
 export type SelectedExplorerItem =
   | { type: "card"; id: string }
+  | { type: "cardSet"; id: string }
   | { type: "document"; id: string }
   | { type: "directory" }
   | { type: "gallery" }

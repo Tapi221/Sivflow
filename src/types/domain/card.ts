@@ -27,7 +27,10 @@ export type CardBlock = {
 };
 
 export type Card = BaseEntity & {
-  folderId: string;
+  /** CardSet への参照（必須）。移行前データは空文字で残る場合がある */
+  cardSetId: string;
+  /** @deprecated folderId は CardSet.folderId から辿る。後方互換のため残す */
+  folderId?: string;
   orderIndex: number;
   questionNumber: string;
   title?: string;

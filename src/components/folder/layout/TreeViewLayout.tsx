@@ -1,4 +1,5 @@
 import { useCards } from "@/hooks/card/useCards";
+import { useCardSets } from "@/hooks/cardSet/useCardSets";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { useFolders } from "@/hooks/folder/useFolders";
 import { useDocuments } from "@/hooks/platform/useDocuments";
@@ -6,7 +7,7 @@ import { resolveCardTagNames, useTags } from "@/hooks/settings/useTags";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { cn } from "@/lib/utils";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { TreeViewDialogs } from "@/components/folder/components/TreeViewDialogs";
@@ -60,6 +61,15 @@ function TreeViewLayout({
   const { createFolder, updateFolder, deleteFolder } = useFolders();
   const { createCard, updateCard, deleteCard, moveCardToFolder, reorderCards } =
     useCards();
+
+  // CardSet 選択状態
+  const [selectedCardSetId, setSelectedCardSetId] = useState<string | null>(null);
+  const { moveCardSetToFolder } = useCardSets();
+
+  // フォルダ変更時に CardSet 選択をリセット
+  useEffect(() => {
+    setSelectedCardSetId(null);
+  }, [selectedFolderId]);
   const { updateDocument } = useDocuments();
   const { getTagColor, getCategoryName, listCategoryIdsInUse, tagById, tags } =
     useTags();
@@ -416,6 +426,7 @@ function TreeViewLayout({
         mobileDetailTitle={mobileDetailTitle}
         selectedItem={selectedItem}
         selectedCardId={selectedCardId}
+        selectedCardSetId={selectedCardSetId}
         selectedDocument={selectedDocument}
         selectedFolderId={selectedFolderId}
         selectedFolderName={selectedFolder?.folderName ?? "フォルダ"}
@@ -426,6 +437,7 @@ function TreeViewLayout({
         folderStats={folderStats}
         onItemSelect={onItemSelect}
         onFolderSelect={onFolderSelect}
+        onCardSetSelect={setSelectedCardSetId}
         onCardUpdated={onCardUpdated}
         onDocumentUpdated={updateDocument}
         onRenameFolder={async (folderId, newName) => {

@@ -753,6 +753,125 @@ export const defineSchema = (db: LocalDB): void => {
         tag.color = getTagColorKey(tag.color);
       });
     });
+
+  // Version 24: CardSet 導入
+  // - cardSets テーブル追加 (Folder -> CardSet -> Card 階層)
+  // - cards に cardSetId インデックス追加
+  // - 既存 Card を Folder 単位で CardSet へ自動移行 (冪等)
+  db.version(24)
+    .stores({
+      folders:
+        "id, userId, parentFolderId, updatedAt, cloudSyncEnabled, isDeleted, [userId+updatedAt], [userId+isDeleted]",
+      cardSets:
+        "id, userId, folderId, updatedAt, isDeleted, [userId+updatedAt], [userId+folderId]",
+      cards:
+        "id, userId, folderId, cardSetId, updatedAt, nextReviewDate, isDeleted, difficulty, reviewCount, [userId+updatedAt], [userId+isDeleted], [userId+nextReviewDate], [cardSetId+isDeleted], *tagIds",
+      documents:
+        "id, userId, folderId, updatedAt, isDeleted, [userId+updatedAt], [userId+folderId]",
+      users: "id, userId, updatedAt",
+      userSettings: "id, userId, updatedAt, isDeleted, [userId+updatedAt]",
+      userStats: "id, userId, updatedAt, isDeleted, [userId+updatedAt]",
+      syncMetadata: "userId, deviceId",
+      levelHistories: "id, userId, cardId, changedAt",
+      deviceMeta: "deviceId, userId",
+      syncErrors: "id, occurredAt, phase, retryable",
+      syncHistory: "id, finishedAt",
+      syncSettings: "id",
+      syncQueue:
+        "id, targetId, status, priority, [status+priority], [targetId+status], idempotencyKey, &migrationKey",
+      conflicts: "id, entityId",
+      tags: "[rootFolderId+name], rootFolderId, userId, updatedAt",
+      tags_v2: "[userId+name], userId, updatedAt",
+      tags_v3:
+        "id, userId, parentId, [userId+parentId], [userId+nameLower], updatedAt",
+      studyLogs: "id, userId, cardId, studiedAt",
+      metadata: "key",
+      images: "id, userId, status, [userId+status]",
+      cardRelations:
+        "id, userId, fromCardId, toCardId, updatedAt, [userId+updatedAt]",
+      projectMaps: "id, userId, folderId, updatedAt, [userId+updatedAt]",
+    })
+    .upgrade(async (tx) => {
+      const genId = (): string => {
+        if (typeof crypto !== "undefined" && "randomUUID" in crypto)
+          return crypto.randomUUID();
+        return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+      };
+
+      const now = new Date();
+
+      // 既存 CardSet を確認（idempotent: _migratedFromV24 フラグで二重実行防止）
+      const existingSets: Record<string, unknown>[] = await tx.table("cardSets").toArray();
+      const migratedFolderIds = new Set<string>(
+        existingSets
+          .filter((s) => s._migratedFromV24 === true)
+          .map((s) => String(s.folderId ?? "__root__")),
+      );
+
+      type RawCard = {
+        id: string;
+        userId: string;
+        folderId?: string;
+        cardSetId?: string;
+        [key: string]: unknown;
+      };
+
+      // cards を全件取得して folderId ごとにグループ化
+      const allCards: RawCard[] = await tx.table("cards").toArray();
+      const byFolder = new Map<string, RawCard[]>();
+      for (const card of allCards) {
+        if (card.cardSetId) continue; // 既に cardSetId がある場合はスキップ
+        const key = card.folderId ?? "__root__";
+        if (!byFolder.has(key)) byFolder.set(key, []);
+        byFolder.get(key)!.push(card);
+      }
+
+      for (const [folderKey, folderCards] of byFolder.entries()) {
+        if (migratedFolderIds.has(folderKey)) continue; // 既に移行済み
+
+        const folderId = folderKey === "__root__" ? null : folderKey;
+
+        let folderName = "インポート済みカード";
+        if (folderId) {
+          const folder = await tx.table("folders").get(folderId);
+          if (folder?.folderName) {
+            folderName = `${folder.folderName} セット`;
+          }
+        }
+
+        const userId = folderCards[0]?.userId ?? "";
+        const cardSetId = genId();
+
+        await tx.table("cardSets").add({
+          id: cardSetId,
+          userId,
+          folderId,
+          name: folderName,
+          orderIndex: 0,
+          isDeleted: false,
+          createdAt: now,
+          updatedAt: now,
+          _migratedFromV24: true,
+        });
+
+        const CHUNK = 100;
+        for (let i = 0; i < folderCards.length; i += CHUNK) {
+          const chunk = folderCards.slice(i, i + CHUNK);
+          await Promise.all(
+            chunk.map((c) =>
+              tx.table("cards").update(c.id, {
+                cardSetId,
+                updatedAt: now,
+              }),
+            ),
+          );
+        }
+
+        console.log(
+          `[Migration v24] CardSet "${folderName}" (${cardSetId}) folderId=${folderId ?? "root"}, ${folderCards.length} cards moved.`,
+        );
+      }
+    });
 };
 
 

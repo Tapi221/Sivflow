@@ -12,7 +12,10 @@
       "Bash(npx tsc --noEmit --project tsconfig.app.json)",
       "Bash(npx tsc --noEmit --project c:/Manifolmia/tsconfig.app.json)",
       "Bash(npx tsc --noEmit --project tsconfig.json)",
-      "Bash(npx vite build)"
+      "Bash(npx vite build)",
+      "Bash(grep -E '\\\\.\\(ts|tsx\\)$')",
+      "Bash(xargs grep -l \"Card\\\\|Folder\")",
+      "Bash(npx vite build --mode development)"
     ],
     "additionalDirectories": [
       "C:\\Manifolmia\\src\\components\\folder",

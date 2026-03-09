@@ -9,6 +9,7 @@ import type { IntegrityRepairResult } from "@/services/dataIntegrityTypes";
 import type {
     AssetRecord,
     Card,
+    CardSet,
     Document,
     Folder,
     SyncConflict,
@@ -95,6 +96,7 @@ function asArray<T>(v: unknown): T[] {
  */
 export class LocalDB extends Dexie {
   folders!: Dexie.Table<Folder, string>;
+  cardSets!: Dexie.Table<CardSet, string>;
   cards!: Dexie.Table<Card, string>;
   // ✅ PDF/Document テーブル（テーブル名は documents で統一）
   documents!: Dexie.Table<Document, string>;

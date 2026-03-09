@@ -1,0 +1,128 @@
+import { useMemo } from "react";
+import { useLiveQuery } from "dexie-react-hooks";
+import { getLocalDb } from "@/services/localDB";
+import { useAuth } from "@/contexts/AuthContext";
+import type { CardSet } from "@/types";
+
+export function useCardSets(folderId?: string | null) {
+  const { currentUser } = useAuth();
+
+  const rawSets = useLiveQuery(async () => {
+    if (!currentUser) return [];
+    try {
+      const db = await getLocalDb(currentUser.uid);
+      return db.cardSets.where("userId").equals(currentUser.uid).toArray();
+    } catch (err) {
+      console.error("[useCardSets] Error:", err);
+      return [];
+    }
+  }, [currentUser?.uid]);
+
+  const cardSets = useMemo(() => {
+    if (!rawSets) return [];
+    let sets = rawSets.filter((s) => !s.isDeleted);
+    if (folderId !== undefined) {
+      sets = sets.filter((s) => s.folderId === (folderId ?? null));
+    }
+    return sets.sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0));
+  }, [rawSets, folderId]);
+
+  const loading = rawSets === undefined;
+
+  const createCardSet = async (
+    name: string,
+    folderId: string | null,
+    opts?: { description?: string },
+  ): Promise<CardSet> => {
+    if (!currentUser) throw new Error("認証が必要です");
+    const db = await getLocalDb(currentUser.uid);
+
+    const siblingSets = (rawSets ?? []).filter(
+      (s) => !s.isDeleted && s.folderId === folderId,
+    );
+    const maxOrder = siblingSets.reduce(
+      (m, s) => Math.max(m, s.orderIndex ?? 0),
+      -1,
+    );
+
+    const now = new Date();
+    const cardSet: CardSet = {
+      id: crypto.randomUUID(),
+      userId: currentUser.uid,
+      deviceId: "web",
+      folderId,
+      name,
+      description: opts?.description,
+      orderIndex: maxOrder + 1,
+      isDeleted: false,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    await db.cardSets.add(cardSet);
+    return cardSet;
+  };
+
+  const updateCardSet = async (
+    id: string,
+    data: Partial<Pick<CardSet, "name" | "description" | "orderIndex">>,
+  ): Promise<void> => {
+    if (!currentUser) throw new Error("認証が必要です");
+    const db = await getLocalDb(currentUser.uid);
+    await db.cardSets.update(id, { ...data, updatedAt: new Date() });
+  };
+
+  /**
+   * CardSet を別フォルダへ移動
+   */
+  const moveCardSetToFolder = async (
+    cardSetId: string,
+    targetFolderId: string | null,
+  ): Promise<void> => {
+    if (!currentUser) throw new Error("認証が必要です");
+    const db = await getLocalDb(currentUser.uid);
+    const siblingSets = (rawSets ?? []).filter(
+      (s) => !s.isDeleted && s.folderId === targetFolderId,
+    );
+    const maxOrder = siblingSets.reduce(
+      (m, s) => Math.max(m, s.orderIndex ?? 0),
+      -1,
+    );
+    await db.cardSets.update(cardSetId, {
+      folderId: targetFolderId,
+      orderIndex: maxOrder + 1,
+      updatedAt: new Date(),
+    });
+  };
+
+  /**
+   * CardSet を削除（配下 Card は cascade soft-delete）
+   */
+  const deleteCardSet = async (id: string): Promise<void> => {
+    if (!currentUser) throw new Error("認証が必要です");
+    const db = await getLocalDb(currentUser.uid);
+    const now = new Date();
+
+    // cascade: 配下 Card を soft-delete
+    const cards = await db.cards
+      .where("cardSetId")
+      .equals(id)
+      .toArray();
+    await Promise.all(
+      cards.map((c) =>
+        db.cards.update(c.id, { isDeleted: true, updatedAt: now }),
+      ),
+    );
+
+    await db.cardSets.update(id, { isDeleted: true, updatedAt: now });
+  };
+
+  return {
+    cardSets,
+    loading,
+    createCardSet,
+    updateCardSet,
+    moveCardSetToFolder,
+    deleteCardSet,
+  };
+}

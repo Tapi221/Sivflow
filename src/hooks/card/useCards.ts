@@ -26,7 +26,7 @@ function isCardDeleted(
   );
 }
 
-export function useCards(folderId?: string) {
+export function useCards(folderId?: string, cardSetId?: string) {
   const { currentUser } = useAuth();
   const [error] = useState<string | null>(null);
 
@@ -64,8 +64,11 @@ export function useCards(folderId?: string) {
       (c) => !isCardDeleted(c as Partial<Card> & { is_deleted?: boolean }),
     );
 
-    // folderId でfilter
-    if (folderId) {
+    // cardSetId でフィルタ（優先）
+    if (cardSetId) {
+      normalized = normalized.filter((c) => c.cardSetId === cardSetId);
+    } else if (folderId) {
+      // 後方互換: cardSetId がない場合は folderId でフィルタ
       normalized = normalized.filter((c) => c.folderId === folderId);
     }
 
@@ -73,13 +76,16 @@ export function useCards(folderId?: string) {
     normalized.sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
 
     return normalized;
-  }, [rawCards, folderId]);
+  }, [rawCards, folderId, cardSetId]);
 
   // useLiveQueryはundefinedを返すことがあるのでloadingを判定
   const loading = rawCards === undefined;
 
-  const createCard = async (cardData: Partial<Card>) => {
+  const createCard = async (cardData: Partial<Card> & { cardSetId: string }) => {
     if (!currentUser) throw new Error("認証が必要です");
+    if (!cardData.cardSetId) {
+      throw new Error("[createCard] cardSetId は必須です");
+    }
 
     // 新規作成時はタイトルが空であることを許容する（あとで編集するため）
     // そのため、作成時のバリデーションはスキップする
@@ -133,6 +139,7 @@ export function useCards(folderId?: string) {
       id,
       userId: currentUser.uid,
       deviceId: cardData.deviceId || "web",
+      cardSetId: cardData.cardSetId,
       folderId: cardData.folderId || "",
       orderIndex,
       questionNumber,
@@ -245,9 +252,31 @@ export function useCards(folderId?: string) {
   };
 
   /**
-   * カードを別フォルダへ移動
-   * - folderId を更新
-   * - 移動先フォルダの末尾に追加（orderIndex を最大値+1に設定）
+   * カードを別 CardSet へ移動
+   */
+  const moveCardToSet = async (cardId: string, targetCardSetId: string) => {
+    if (!currentUser) throw new Error("認証が必要です");
+    const db = await getLocalDb(currentUser.uid);
+    const allCards = await db.getAllCards();
+    const targetSetCards = allCards.filter(
+      (c) =>
+        c.cardSetId === targetCardSetId &&
+        !isCardDeleted(c as Partial<Card> & { is_deleted?: boolean }),
+    );
+    const maxOrderIndex = targetSetCards.reduce(
+      (max, c) => Math.max(max, c.orderIndex || 0),
+      0,
+    );
+    await db.updateItem("cards", cardId, {
+      cardSetId: targetCardSetId,
+      orderIndex: maxOrderIndex + 1,
+      updatedAt: new Date(),
+    });
+  };
+
+  /**
+   * カードを別フォルダへ移動 (後方互換)
+   * @deprecated moveCardToSet を使用してください
    */
   const moveCardToFolder = async (cardId: string, targetFolderId: string) => {
     if (!currentUser) throw new Error("認証が必要です");
@@ -302,6 +331,7 @@ export function useCards(folderId?: string) {
     updateCard,
     deleteCard,
     toggleFlag,
+    moveCardToSet,
     moveCardToFolder,
     reorderCards,
   };

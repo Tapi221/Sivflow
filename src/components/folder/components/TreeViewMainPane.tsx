@@ -10,9 +10,11 @@ interface TreeViewMainPaneProps {
   mobileDetailTitle: string;
   selectedItem: SelectedExplorerItem;
   selectedCardId: string | null;
+  selectedCardSetId?: string | null;
   selectedDocument: DocumentItem | null;
   selectedFolderId: string | null;
   selectedFolderName: string;
+  onCardSetSelect?: (cardSetId: string) => void;
   folders: Folder[];
   cards: Card[];
   documents: DocumentItem[];
@@ -43,6 +45,7 @@ export function TreeViewMainPane({
   mobileDetailTitle,
   selectedItem,
   selectedCardId,
+  selectedCardSetId,
   selectedDocument,
   selectedFolderId,
   selectedFolderName,
@@ -56,6 +59,7 @@ export function TreeViewMainPane({
   onCardUpdated,
   onDocumentUpdated,
   onRenameFolder,
+  onCardSetSelect,
   handlers,
 }: TreeViewMainPaneProps) {
   return (
@@ -87,6 +91,7 @@ export function TreeViewMainPane({
       <RightPane
         selectedItem={selectedItem}
         selectedCardId={selectedCardId}
+        selectedCardSetId={selectedCardSetId}
         selectedDocument={selectedDocument}
         selectedFolderId={selectedFolderId}
         selectedFolderName={selectedFolderName}
@@ -98,6 +103,7 @@ export function TreeViewMainPane({
         onCardUpdated={onCardUpdated}
         onDocumentUpdated={onDocumentUpdated}
         onRenameFolder={onRenameFolder}
+        onCardSetSelect={onCardSetSelect}
         handlers={handlers}
       />
     </div>
