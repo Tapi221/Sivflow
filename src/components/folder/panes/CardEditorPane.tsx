@@ -240,7 +240,7 @@ export function CardEditorPane({
         </button>
 
         <div
-          className="min-w-0 flex-1 overflow-y-auto overflow-x-clip p-4 flex flex-col items-center"
+          className={cn("min-w-0 flex-1 overflow-y-auto overflow-x-clip flex flex-col items-center", isEditing ? "px-4 pt-0 pb-4" : "p-4")}
           style={{
             background:
               "radial-gradient(1200px 800px at 50% 120px, #FBFAF8 0%, var(--app-bg, #F8FAFB) 50%, #F6F4F1 100%)",
@@ -248,30 +248,9 @@ export function CardEditorPane({
         >
           {isEditing ? (
             <div className="flex w-full max-w-5xl flex-col items-center gap-4">
-              <div className="flex w-full items-center justify-end gap-2">
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    className="h-9 rounded-full px-4 hover:bg-black/5 disabled:opacity-50"
-                    onClick={handleCancel}
-                    disabled={isSaving}
-                  >
-                    キャンセル
-                  </button>
-                  <button
-                    type="button"
-                    className="h-9 rounded-full bg-black px-6 text-white hover:opacity-90 disabled:opacity-50"
-                    onClick={handleSave}
-                    disabled={isSaving}
-                  >
-                    保存
-                  </button>
-                </div>
-              </div>
-
               <div className="grid w-fit max-w-full grid-cols-1 gap-6 lg:grid-cols-2">
                 <div className="flex min-h-0 w-full flex-col gap-1">
-                  <div className="flex shrink-0 items-center rounded-md border border-slate-100 bg-white/60 min-h-[28px]">
+                  <div className="flex shrink-0 items-center rounded-md border border-slate-100 bg-white/60">
                     <div ref={toolbarMountRefQ} className="w-full" />
                   </div>
                   <CardFrame
@@ -315,7 +294,7 @@ export function CardEditorPane({
                 </div>
 
                 <div className="flex min-h-0 w-full flex-col gap-1">
-                  <div className="flex shrink-0 items-center rounded-md border border-slate-100 bg-white/60 min-h-[28px]">
+                  <div className="flex shrink-0 items-center rounded-md border border-slate-100 bg-white/60">
                     <div ref={toolbarMountRefA} className="w-full" />
                   </div>
                   <CardFrame
@@ -357,6 +336,24 @@ export function CardEditorPane({
                     />
                   </CardFrame>
                 </div>
+              </div>
+              <div className="sticky bottom-4 flex w-full justify-end gap-2">
+                <button
+                  type="button"
+                  className="h-9 rounded-full px-4 hover:bg-black/5 disabled:opacity-50"
+                  onClick={handleCancel}
+                  disabled={isSaving}
+                >
+                  キャンセル
+                </button>
+                <button
+                  type="button"
+                  className="h-9 rounded-full bg-black px-6 text-white hover:opacity-90 disabled:opacity-50"
+                  onClick={handleSave}
+                  disabled={isSaving}
+                >
+                  保存
+                </button>
               </div>
             </div>
           ) : (
