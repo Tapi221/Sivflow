@@ -9,7 +9,7 @@ import React, {
 import { cn } from "@/lib/utils";
 import type { Card, CardSet, SelectedExplorerItem } from "@/types";
 import type { DocumentItem } from "@/types";
-import DeleteFolderDialog from "../dialogs/DeleteFolderDialog";
+import DeleteFolderDialog from "@/components/folder/components/dialogs/DeleteFolderDialog";
 import {
   type FolderTreeNode,
   getFolderId,
@@ -104,9 +104,10 @@ export function FolderTreeWithCards({
 }: FolderTreeWithCardsProps) {
   const { expandedFolders, setExpandedFolders, toggleFolder } =
     useExpandedFolders();
-  const [expandedCardSets, setExpandedCardSets] = useState<Set<string>>(
-    () => new Set(),
-  );
+  const {
+    expandedFolders: expandedCardSets,
+    setExpandedFolders: setExpandedCardSets,
+  } = useExpandedFolders("folder_expandedCardSets");
 
   const dialogs = useExplorerDialogs();
 

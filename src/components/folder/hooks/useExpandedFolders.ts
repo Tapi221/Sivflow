@@ -2,26 +2,23 @@ import { useState, useEffect, useCallback } from "react";
 
 const STORAGE_KEY = "folder_expandedFolders";
 
-function loadFromStorage(): Set<string> {
+function loadFromStorage(storageKey: string): Set<string> {
   try {
-    const saved = localStorage.getItem(STORAGE_KEY);
+    const saved = localStorage.getItem(storageKey);
     return saved ? new Set<string>(JSON.parse(saved) as string[]) : new Set();
   } catch {
     return new Set();
   }
 }
 
-export function useExpandedFolders() {
+export function useExpandedFolders(storageKey = STORAGE_KEY) {
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
-    loadFromStorage,
+    () => loadFromStorage(storageKey),
   );
 
   useEffect(() => {
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(Array.from(expandedFolders)),
-    );
-  }, [expandedFolders]);
+    localStorage.setItem(storageKey, JSON.stringify(Array.from(expandedFolders)));
+  }, [expandedFolders, storageKey]);
 
   const toggleFolder = useCallback((folderId: string) => {
     setExpandedFolders((prev) => {
