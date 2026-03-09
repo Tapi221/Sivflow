@@ -22,7 +22,7 @@ export function useFolders() {
 
   const createFolder = async (
     name: string,
-    
+    parentId?: string,
     color?: string,
     cloudSyncEnabled: boolean = true,
   ) => {
@@ -44,8 +44,8 @@ export function useFolders() {
       folderColor: color || null,
       cloudSyncEnabled,
       orderIndex,
-      createdAt: now,
-      updatedAt: now,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
 
     // 1. ローカル側で一意IDを生成（Firestore オブジェクトを誤って渡すバグ回避）
@@ -59,8 +59,8 @@ export function useFolders() {
       ...folderData,
       id: folderId,
       folderId: folderId, // Ensure consistency
-      createdAt: now.toDate(),
-      updatedAt: now.toDate(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
     try {
       await db.addItem("folders", localData as unknown);
@@ -79,7 +79,7 @@ export function useFolders() {
     if (!currentUser) throw new Error("認証が必要です");
     const payload = {
       ...data,
-      updatedAt: now.toDate(),
+      updatedAt: new Date(),
     };
 
     // 1. LocalDB更新 (Local First & Sync Queued)
@@ -98,7 +98,7 @@ export function useFolders() {
     const updates = folderIds.map((folderId, index) => {
       return db.updateItem("folders", folderId, {
         orderIndex: index,
-        updatedAt: now.toDate(),
+        updatedAt: new Date(),
       });
     });
     await Promise.all(updates);
