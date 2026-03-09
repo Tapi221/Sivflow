@@ -228,7 +228,7 @@ const isPinned =
                 ref={editInputRef}
                 aria-label="カードセット名の編集"
                 className="h-6 w-full rounded border border-slate-300 bg-white px-1 text-sm text-[#1f2328] outline-none select-text"
-                value={editingName}
+                defaultValue={editingName}
                 onFocus={(e) => {
                   if (shouldPartialSelect && cardSetNameSelection) {
                     e.currentTarget.setSelectionRange(
@@ -244,7 +244,6 @@ const isPinned =
                   e.preventDefault();
                 }}
                 onChange={(e) => {
-                  setEditingName(e.target.value);
                   editingNameRef.current = e.target.value;
                 }}
                 onClick={(e) => e.stopPropagation()}

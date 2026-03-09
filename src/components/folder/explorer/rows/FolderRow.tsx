@@ -155,7 +155,7 @@ export const FolderRow: React.FC<FolderRowProps> = ({
       cancelAnimationFrame(rafId2);
       window.clearTimeout(timeoutId);
     };
-  }, [isEditing, editInputRef, editingName]);
+  }, [isEditing, editInputRef]);
 
   return (
     <div key={folderId} className={cn(isDimmed && "opacity-50")}>
@@ -230,7 +230,7 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                 aria-label="フォルダ名の編集"
                 className="text-sm text-[#202123] bg-white border border-slate-300 rounded px-1 outline-none z-10 h-6 w-full leading-5 surface-concave placeholder:text-[#6E6E80] focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:bg-white select-text"
                 style={{ userSelect: "text", WebkitUserSelect: "text" }}
-                value={editingName}
+                defaultValue={editingName}
                 onFocus={(e) => {
                   e.currentTarget.select();
                 }}
@@ -238,7 +238,6 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                   e.preventDefault();
                 }}
                 onChange={(e) => {
-                  setEditingName(e.target.value);
                   editingNameRef.current = e.target.value;
                 }}
                 onKeyDown={(e) => {
