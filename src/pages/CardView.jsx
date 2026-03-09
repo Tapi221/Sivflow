@@ -16,9 +16,12 @@ import {
 import { useCardEntity } from "@/hooks/card/useCardEntity";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { useIsDesktopRuntime } from "@/hooks/platform/useIsDesktopRuntime";
+import { useCardSets } from "@/hooks/cardSet/useCardSets";
+import { useBreadcrumbContext } from "@/contexts/BreadcrumbContext";
 
 export default function CardView() {
   const navigate = useNavigate();
+  const { setExtraCrumbs } = useBreadcrumbContext();
 
   const urlParams = new URLSearchParams(window.location.search);
   const folderId = urlParams.get("folderId");
@@ -38,6 +41,7 @@ export default function CardView() {
     loading: isLoading,
     updateCard,
   } = useCards(folderId || undefined, cardSetId || undefined);
+  const { cardSets } = useCardSets();
   const { settings } = useUserSettings();
   const isDesktop = useIsDesktopRuntime();
 
@@ -78,6 +82,41 @@ export default function CardView() {
     );
   }, [sortedCards, effectiveCard]);
   const selectedCard = effectiveCards[currentIndex] ?? null;
+  const selectedCardSet = useMemo(() => {
+    if (!cardSetId) return null;
+    return cardSets.find((set) => set.id === cardSetId) ?? null;
+  }, [cardSetId, cardSets]);
+
+  useEffect(() => {
+    const crumbs = [];
+
+    if (selectedCardSet) {
+      const crumbFolderId = folderId ?? selectedCardSet.folderId ?? null;
+      const to = new URLSearchParams();
+      if (crumbFolderId) to.set("folderId", crumbFolderId);
+      to.set("cardSetId", selectedCardSet.id);
+
+      crumbs.push({
+        label: selectedCardSet.name || "カードセット",
+        to: `/folders?${to.toString()}`,
+        folderId: crumbFolderId,
+      });
+    }
+
+    if (selectedCard) {
+      const label =
+        selectedCard.title?.trim() ||
+        selectedCard.questionText?.trim().slice(0, 20) ||
+        "カード";
+      crumbs.push({ label });
+    }
+
+    setExtraCrumbs(crumbs);
+
+    return () => {
+      setExtraCrumbs([]);
+    };
+  }, [selectedCardSet, selectedCard, folderId, setExtraCrumbs]);
 
   const handleEdit = (card) => {
     navigate(
@@ -106,30 +145,8 @@ export default function CardView() {
   }
 
   return (
-    <div className="h-[100dvh] overflow-hidden bg-[#F5F7F8] pt-0 card-editor-right-pane-font">
+    <div className="h-full overflow-hidden bg-[#F5F7F8] pt-0 card-editor-right-pane-font">
       <div className="relative flex h-full min-h-0 overflow-hidden">
-      <div className="pointer-events-none absolute left-4 top-2 z-20 flex items-start gap-3">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() =>
-            navigate(
-              createPageUrl(
-                `Folders${folderId ? `?folderId=${folderId}` : ""}`,
-              ),
-            )
-          }
-          className="pointer-events-auto w-10 h-10 rounded-xl border border-slate-200 bg-white text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-600"
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </Button>
-        <div className="pointer-events-auto hidden md:block">
-          <h1 className="text-base font-bold text-slate-700">
-            {selectedCard?.title || "Untitled Card"}
-          </h1>
-        </div>
-      </div>
-
       <Button
         type="button"
         variant="ghost"
@@ -150,7 +167,7 @@ export default function CardView() {
           <ChevronLeft className="h-4 w-4" />
         )}
       </Button>
-      <div className="min-h-0 min-w-0 flex-1 overflow-hidden p-4">
+      <div className="min-h-0 min-w-0 flex-1 overflow-hidden px-4 py-0">
           {isLoading ? (
             <div className="flex items-center justify-center h-full">
               <div className="space-y-4 w-full max-w-md px-4">
