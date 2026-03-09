@@ -1,13 +1,3 @@
-import type { ReactNode } from "react";
-import {
-  Plus,
-  Pencil,
-  Trash2,
-  Folder,
-  ChevronRight,
-  Tag,
-  Pin,
-} from "@/ui/icons";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,6 +5,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  ChevronRight,
+  Folder,
+  Pencil,
+  Pin,
+  Plus,
+  Tag,
+  Trash2,
+} from "@/ui/icons";
+import type { ReactNode } from "react";
 
 interface ContextMenuProps {
   type: "folder" | "card";
@@ -156,5 +156,3 @@ export function ContextMenu({
     </DropdownMenu>
   );
 }
-
-
