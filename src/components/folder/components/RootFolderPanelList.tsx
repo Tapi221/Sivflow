@@ -75,8 +75,7 @@ export function RootFolderPanelList({
     <div className="h-full overflow-y-auto px-1 py-1">
       {rootFolderPanels.map((folder) => {
         const isEditing = editingId === folder.id;
-
-        const __debugText = `id:${folder.id} editing:${String(editingId)} match:${String(isEditing)}`;
+        const isMenuOpen = openRowMenuId === `folder:${folder.id}:panel`;
 
         return (
           <div
@@ -90,30 +89,26 @@ export function RootFolderPanelList({
             tabIndex={0}
             onClick={() => {
               if (isEditing) return;
-              if (openRowMenuId === `folder:${folder.id}:panel`) return;
+              if (isMenuOpen) return;
               onSelectFolder(folder.id);
             }}
-            onMouseEnter={() => {}}
-            onMouseLeave={() => {}}
             onKeyDown={(e) => {
               if (isEditing) return;
-              if (openRowMenuId === `folder:${folder.id}:panel`) return;
+              if (isMenuOpen) return;
               if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
                 onSelectFolder(folder.id);
               }
             }}
           >
-            <div className="flex items-center gap-1.5 pr-8 min-w-0 flex-1">
+            <div className="flex min-w-0 flex-1 items-center gap-1.5 pr-8">
               <FolderIcon
                 className={cn(
                   "h-4 w-4 shrink-0",
                   selectedFolderId === folder.id ? "text-[#4b5563]" : "text-[#6e7280]",
                 )}
               />
-              
-              <span className="text-red-500 text-[10px]">TEST</span>
-              <span className="text-blue-500 text-[10px]">{__debugText}</span>{isEditing ? (
+              {isEditing ? (
                 <input
                   ref={inputRef}
                   value={editingName}
@@ -145,15 +140,15 @@ export function RootFolderPanelList({
                 </span>
               )}
             </div>
-            <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+
+            <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2">
               <ContextMenu
-                open={openRowMenuId === `folder:${folder.id}:panel`}
+                open={isMenuOpen}
                 onOpenChange={(open) =>
                   setOpenRowMenuId(
                     open
                       ? `folder:${folder.id}:panel`
-                      : (prev) =>
-                          prev === `folder:${folder.id}:panel` ? null : prev,
+                      : (prev) => (prev === `folder:${folder.id}:panel` ? null : prev),
                   )
                 }
                 type="folder"
@@ -165,15 +160,15 @@ export function RootFolderPanelList({
                 }}
                 onDelete={() => handleDelete(folder.id, "folder")}
                 isPinned={
-                  pinnedItems?.some(
-                    (item) => item.type === "folder" && item.id === folder.id,
-                  ) ?? false
+                  pinnedItems?.some((item) => item.type === "folder" && item.id === folder.id) ??
+                  false
                 }
                 onTogglePin={() => {
                   const isPinned =
                     pinnedItems?.some(
                       (item) => item.type === "folder" && item.id === folder.id,
                     ) ?? false;
+
                   if (isPinned) onUnpinItem?.({ type: "folder", id: folder.id });
                   else onPinItem?.({ type: "folder", id: folder.id });
                 }}
@@ -182,9 +177,9 @@ export function RootFolderPanelList({
                   type="button"
                   aria-label="フォルダメニューを開く"
                   className={cn(
-                    "pointer-events-auto h-7 w-7 grid place-items-center rounded-md text-[#6E6E80] hover:text-[#202123] hover:bg-slate-200",
+                    "pointer-events-auto grid h-7 w-7 place-items-center rounded-md text-[#6E6E80] hover:bg-slate-200 hover:text-[#202123]",
                     "opacity-0 group-hover:opacity-100",
-                    openRowMenuId === `folder:${folder.id}:panel` && "opacity-100",
+                    isMenuOpen && "opacity-100",
                   )}
                   onClick={(e) => e.stopPropagation()}
                   onPointerDown={(e) => e.stopPropagation()}
@@ -199,4 +194,3 @@ export function RootFolderPanelList({
     </div>
   );
 }
-
