@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { DragDropContext } from "@hello-pangea/dnd";
 import { ChevronLeft, ChevronRight } from "@/ui/icons";
 
 import {
@@ -216,6 +217,7 @@ export function CardEditorPane({
   }
 
   return (
+    <DragDropContext onDragEnd={onDragEnd}>
     <div className="h-full bg-sidebar pb-4 pt-0 card-editor-right-pane-font">
       <div className="relative flex h-full overflow-hidden">
         <button
@@ -453,6 +455,7 @@ export function CardEditorPane({
         </DialogContent>
       </Dialog>
     </div>
+    </DragDropContext>
   );
 }
 
