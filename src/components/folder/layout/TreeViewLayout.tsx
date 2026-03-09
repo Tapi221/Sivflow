@@ -65,7 +65,7 @@ function TreeViewLayout({
 
   // CardSet 選択状態 + 全件取得（ツリー表示用）
   const [selectedCardSetId, setSelectedCardSetId] = useState<string | null>(null);
-  const { cardSets, moveCardSetToFolder } = useCardSets();
+  const { cardSets, createCardSet, updateCardSet, deleteCardSet, moveCardSetToFolder } = useCardSets();
 
   // フォルダ変更時に CardSet 選択をリセット
   useEffect(() => {
@@ -408,6 +408,9 @@ function TreeViewLayout({
       onCreateFolder={createFolder}
       onUpdateFolder={updateFolder}
       onDeleteFolder={deleteFolder}
+      onCreateCardSet={createCardSet}
+      onUpdateCardSet={updateCardSet}
+      onDeleteCardSet={deleteCardSet}
       onCreateCard={createCard}
       onUpdateCard={updateCard}
       onDeleteCard={deleteCard}

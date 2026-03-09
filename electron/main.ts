@@ -184,6 +184,7 @@ function createMainWindow() {
     height: 820,
     minWidth: 1024,
     minHeight: 700,
+    show: false,
     backgroundColor: "#F8FAFB",
     frame: false,
     webPreferences: {
@@ -229,6 +230,12 @@ function createMainWindow() {
 
   windowRef.webContents.on("did-finish-load", () => {
     flushPendingOauthCallback();
+  });
+
+  windowRef.once("ready-to-show", () => {
+    if (!windowRef.isDestroyed()) {
+      windowRef.show();
+    }
   });
 
   windowRef.on("closed", () => {

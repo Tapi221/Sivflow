@@ -22,7 +22,7 @@ interface ContextMenuProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   onCreateSubfolder?: () => void;
-  onCreateCard?: () => void;
+  onCreateCardSet?: () => void;
   onRename?: () => void;
   onDelete?: () => void;
   onMove?: () => void;
@@ -37,7 +37,7 @@ export function ContextMenu({
   open,
   onOpenChange,
   onCreateSubfolder,
-  onCreateCard,
+  onCreateCardSet,
   onRename,
   onDelete,
   onMove,
@@ -65,8 +65,8 @@ export function ContextMenu({
             {onCreateSubfolder && (
               <DropdownMenuItem
                 onSelect={(e) => {
-                  e.preventDefault();
                   e.stopPropagation();
+                  onOpenChange?.(false);
                   onCreateSubfolder?.();
                 }}
                 className="gap-2"
@@ -76,21 +76,21 @@ export function ContextMenu({
               </DropdownMenuItem>
             )}
 
-            {onCreateCard && (
+            {onCreateCardSet && (
               <DropdownMenuItem
                 onSelect={(e) => {
-                  e.preventDefault();
                   e.stopPropagation();
-                  onCreateCard?.();
+                  onOpenChange?.(false);
+                  onCreateCardSet?.();
                 }}
                 className="gap-2"
               >
                 <Plus className="h-4 w-4 text-blue-500" />
-                新規カード
+                新規カードセット
               </DropdownMenuItem>
             )}
 
-            {(onCreateSubfolder || onCreateCard) && <DropdownMenuSeparator />}
+            {(onCreateSubfolder || onCreateCardSet) && <DropdownMenuSeparator />}
           </>
         )}
 

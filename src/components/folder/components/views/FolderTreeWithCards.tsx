@@ -49,6 +49,13 @@ interface FolderTreeWithCardsProps {
   onCreateFolder?: (name: string, parentId?: string) => Promise<string>;
   onUpdateFolder?: (folderId: string, data: unknown) => Promise<void>;
   onDeleteFolder?: (folderId: string) => Promise<void>;
+  onCreateCardSet?: (
+    name: string,
+    folderId: string | null,
+    opts?: { description?: string },
+  ) => Promise<CardSet>;
+  onUpdateCardSet?: (cardSetId: string, data: unknown) => Promise<void>;
+  onDeleteCardSet?: (cardSetId: string) => Promise<void>;
   onCreateCard?: (data: unknown) => Promise<unknown>;
   onUpdateCard?: (cardId: string, data: unknown) => Promise<void>;
   onDeleteCard?: (cardId: string) => Promise<void>;
@@ -87,6 +94,9 @@ export function FolderTreeWithCards({
   onCreateFolder,
   onUpdateFolder,
   onDeleteFolder,
+  onCreateCardSet,
+  onUpdateCardSet,
+  onDeleteCardSet,
   onCreateCard,
   onUpdateCard,
   onDeleteCard,
@@ -113,10 +123,17 @@ export function FolderTreeWithCards({
 
   const [optimisticFolders, setOptimisticFolders] = useState<FolderTreeNode[]>([]);
   const [optimisticCards, setOptimisticCards] = useState<Card[]>([]);
+  const [optimisticCardSets, setOptimisticCardSets] = useState<CardSet[]>([]);
   const [newlyCreatedCardId, setNewlyCreatedCardId] = useState<string | null>(null);
   const [fileDragFolderId, setFileDragFolderId] = useState<string | null>(null);
   const [pendingScrollId, setPendingScrollId] = useState<string | null>(null);
   const [activeRootFolderId, setActiveRootFolderId] = useState<string | null>(null);
+
+  const [cardSetNameSelection, setCardSetNameSelection] = useState<{
+    id: string;
+    start: number;
+    end: number;
+  } | null>(null);
 
   const rowRefs = useRef<Map<string, HTMLElement>>(new Map());
   const treeRootRef = useRef<HTMLDivElement | null>(null);
@@ -145,10 +162,19 @@ export function FolderTreeWithCards({
     return Array.from(map.values());
   }, [cards, optimisticCards]);
 
+  const treeCardSets = useMemo(() => {
+    const map = new Map<string, CardSet>();
+    for (const cs of cardSets) map.set(cs.id, cs);
+    for (const cs of optimisticCardSets) {
+      if (!map.has(cs.id)) map.set(cs.id, cs);
+    }
+    return Array.from(map.values());
+  }, [cardSets, optimisticCardSets]);
+
   const derived = useExplorerDerivedData({
     treeFolders,
     treeCards,
-    cardSets,
+    cardSets: treeCardSets,
     documents,
     isFiltering,
   });
@@ -167,9 +193,13 @@ export function FolderTreeWithCards({
 
   const actions = useFolderActions({
     treeFolders,
+    treeCardSets,
     onCreateFolder,
     onUpdateFolder,
     onDeleteFolder,
+    onCreateCardSet,
+    onUpdateCardSet,
+    onDeleteCardSet,
     onCreateCard,
     onUpdateCard,
     onDeleteCard,
@@ -183,8 +213,10 @@ export function FolderTreeWithCards({
     openDeleteFolderDialog: dialogs.openDeleteFolderDialog,
     setOptimisticFolders,
     setOptimisticCards,
+    setOptimisticCardSets,
     optimisticFolders,
     optimisticCards,
+    optimisticCardSets,
     setExpandedFolders,
     setPendingScrollId,
     onFolderSelect,
@@ -229,6 +261,12 @@ export function FolderTreeWithCards({
       setNewlyCreatedCardId(null);
     }
   }, [selectedItem, newlyCreatedCardId]);
+
+  useEffect(() => {
+    if (dialogs.editingId === null) {
+      setCardSetNameSelection(null);
+    }
+  }, [dialogs.editingId]);
 
   // scroll to pending row
   useEffect(() => {
@@ -314,6 +352,33 @@ export function FolderTreeWithCards({
   });
 
   const rootItems = useMemo(() => getFolderItems(null), [getFolderItems]);
+
+  const handleCreateCardSetFromMenu = useCallback(
+    async (folderId: string | null) => {
+      const defaultName = "新規カードセット";
+      await actions.handleCreateCardSetAction(folderId);
+      const currentEditingId = dialogs.editingIdRef.current;
+      if (currentEditingId) {
+        setCardSetNameSelection({
+          id: currentEditingId,
+          start: defaultName.indexOf("カード"),
+          end: defaultName.indexOf("カード") + "カード".length,
+        });
+      }
+    },
+    [actions.handleCreateCardSetAction, dialogs.editingIdRef],
+  );
+
+  const handleCreateCardSetFromRootPanel = useCallback(
+    async (folderId: string | null) => {
+      if (folderId) {
+        setActiveRootFolderId(folderId);
+        onFolderSelect(folderId);
+      }
+      await handleCreateCardSetFromMenu(folderId);
+    },
+    [handleCreateCardSetFromMenu, onFolderSelect],
+  );
 
   const hasFilterMatches = useMemo(() => {
     if (!isFiltering) return true;
@@ -483,7 +548,7 @@ export function FolderTreeWithCards({
     onFolderSelect,
     onItemSelect,
     handleCreateFolderAction: actions.handleCreateFolderAction,
-    handleCreateCardAction: actions.handleCreateCardAction,
+    handleCreateCardSetAction: handleCreateCardSetFromMenu,
     handleDelete: actions.handleDelete,
     handleRenameConfirm: actions.handleRenameConfirm,
     setRowRef,
@@ -493,6 +558,8 @@ export function FolderTreeWithCards({
     isFiltering,
     hasUpdateOrDelete: Boolean(onUpdateFolder || onDeleteFolder),
     setBulkTagFolderId: dialogs.setBulkTagFolderId,
+    cardSetNameSelection,
+    clearCardSetNameSelection: () => setCardSetNameSelection(null),
   } as const;
 
   const renderTreeNode = useCallback(
@@ -520,7 +587,7 @@ export function FolderTreeWithCards({
       onFolderSelect,
       onItemSelect,
       actions.handleCreateFolderAction,
-      actions.handleCreateCardAction,
+      handleCreateCardSetFromMenu,
       actions.handleDelete,
       actions.handleRenameConfirm,
       setRowRef,
@@ -530,6 +597,7 @@ export function FolderTreeWithCards({
       isFiltering,
       onUpdateFolder,
       onDeleteFolder,
+      cardSetNameSelection,
     ],
   );
 
@@ -605,7 +673,7 @@ export function FolderTreeWithCards({
                 onFolderSelect(id);
               }}
               handleCreateFolderAction={actions.handleCreateFolderAction}
-              handleCreateCardAction={actions.handleCreateCardAction}
+              handleCreateCardSetAction={handleCreateCardSetFromRootPanel}
               handleDelete={actions.handleDelete}
               pinnedItems={pinnedItems}
               onPinItem={onPinItem}
@@ -657,9 +725,4 @@ export function FolderTreeWithCards({
     </div>
   );
 }
-
-
-
-
-
 

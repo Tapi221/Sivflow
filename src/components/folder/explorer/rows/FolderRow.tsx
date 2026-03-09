@@ -47,7 +47,7 @@ interface FolderRowProps {
   onSelect: () => void;
   onNavigate?: () => void;
   handleCreateFolderAction: (parentId: string) => Promise<void>;
-  handleCreateCardAction: (parentId: string) => Promise<void>;
+  handleCreateCardSetAction: (parentId: string) => Promise<void>;
   handleDelete: (id: string, type: "folder") => Promise<void>;
   handleRenameConfirm: () => Promise<void>;
   renameCancelledRef: React.MutableRefObject<boolean>;
@@ -86,7 +86,7 @@ export const FolderRow: React.FC<FolderRowProps> = ({
   onSelect,
   onNavigate,
   handleCreateFolderAction,
-  handleCreateCardAction,
+  handleCreateCardSetAction,
   handleDelete,
   handleRenameConfirm,
   renameCancelledRef,
@@ -302,7 +302,7 @@ void handleRenameConfirm();
                   onCreateSubfolder={() =>
                     void handleCreateFolderAction(folderId)
                   }
-                  onCreateCard={() => void handleCreateCardAction(folderId)}
+                  onCreateCardSet={() => void handleCreateCardSetAction(folderId)}
                   onRename={() => {
                     onSelect();
                     onMenuOpenChange(false);

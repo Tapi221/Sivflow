@@ -38,6 +38,9 @@ interface TreeViewTabContentProps {
   onCreateFolder: FolderTreeWithCardsProps["onCreateFolder"];
   onUpdateFolder: FolderTreeWithCardsProps["onUpdateFolder"];
   onDeleteFolder: FolderTreeWithCardsProps["onDeleteFolder"];
+  onCreateCardSet: FolderTreeWithCardsProps["onCreateCardSet"];
+  onUpdateCardSet: FolderTreeWithCardsProps["onUpdateCardSet"];
+  onDeleteCardSet: FolderTreeWithCardsProps["onDeleteCardSet"];
   onCreateCard: FolderTreeWithCardsProps["onCreateCard"];
   onUpdateCard: FolderTreeWithCardsProps["onUpdateCard"];
   onDeleteCard: FolderTreeWithCardsProps["onDeleteCard"];
@@ -77,6 +80,9 @@ export function TreeViewTabContent({
   onCreateFolder,
   onUpdateFolder,
   onDeleteFolder,
+  onCreateCardSet,
+  onUpdateCardSet,
+  onDeleteCardSet,
   onCreateCard,
   onUpdateCard,
   onDeleteCard,
@@ -145,6 +151,9 @@ export function TreeViewTabContent({
           onCreateFolder={onCreateFolder}
           onUpdateFolder={onUpdateFolder}
           onDeleteFolder={onDeleteFolder}
+          onCreateCardSet={onCreateCardSet}
+          onUpdateCardSet={onUpdateCardSet}
+          onDeleteCardSet={onDeleteCardSet}
           onCreateCard={onCreateCard}
           onUpdateCard={onUpdateCard}
           onDeleteCard={onDeleteCard}
@@ -163,6 +172,5 @@ export function TreeViewTabContent({
       );
   }
 }
-
 
 

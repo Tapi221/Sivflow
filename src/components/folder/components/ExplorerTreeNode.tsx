@@ -36,7 +36,7 @@ interface ExplorerTreeNodeProps {
   onFolderSelect: (folderId: string | null) => void;
   onItemSelect: (item: { type: "card" | "cardSet" | "document"; id: string }) => void;
   handleCreateFolderAction: (parentId: string | null) => void;
-  handleCreateCardAction: (folderId: string | null) => void;
+  handleCreateCardSetAction: (folderId: string | null) => void;
   handleDelete: (id: string, type: "folder" | "card") => void;
   handleRenameConfirm: () => Promise<void>;
   setRowRef: (id: string, node: HTMLElement | null) => void;
@@ -50,6 +50,8 @@ interface ExplorerTreeNodeProps {
   hasUpdateOrDelete: boolean;
   // bulk tag
   setBulkTagFolderId: React.Dispatch<React.SetStateAction<string | null>>;
+  cardSetNameSelection?: { id: string; start: number; end: number } | null;
+  clearCardSetNameSelection?: () => void;
 }
 
 export const ExplorerTreeNodeRenderer = React.memo(
@@ -75,7 +77,7 @@ export const ExplorerTreeNodeRenderer = React.memo(
     onFolderSelect,
     onItemSelect,
     handleCreateFolderAction,
-    handleCreateCardAction,
+    handleCreateCardSetAction,
     handleDelete,
     handleRenameConfirm,
     setRowRef,
@@ -85,6 +87,8 @@ export const ExplorerTreeNodeRenderer = React.memo(
     isFiltering,
     hasUpdateOrDelete,
     setBulkTagFolderId,
+    cardSetNameSelection,
+    clearCardSetNameSelection,
   }: ExplorerTreeNodeProps) {
     const ROW_BASE = EXPLORER_ROW_BASE_CLASS_NAME;
     const treeNode = node.data;
@@ -113,7 +117,7 @@ const isPinned =
             onSelect={() => onFolderSelect(folderId)}
             onNavigate={() => onFolderSelect(folderId)}
             handleCreateFolderAction={handleCreateFolderAction}
-            handleCreateCardAction={handleCreateCardAction}
+            handleCreateCardSetAction={handleCreateCardSetAction}
             handleDelete={handleDelete}
             handleRenameConfirm={handleRenameConfirm}
             renameCancelledRef={renameCancelledRef}
@@ -178,6 +182,9 @@ const isPinned =
     if (treeNode.kind === "cardSet") {
       const Chevron = isOpen ? ChevronDown : ChevronRight;
       const hasChildren = (treeNode.children?.length ?? 0) > 0;
+      const isEditing = editingId === treeNode.rawId;
+      const shouldPartialSelect =
+        Boolean(cardSetNameSelection) && cardSetNameSelection?.id === treeNode.rawId;
       return (
         <div style={style}>
           <div
@@ -216,9 +223,52 @@ const isPinned =
                   : "text-[var(--sidebar-text-muted,#6e6e80)]",
               )}
             />
-            <span className="truncate text-sm font-medium">
-              {treeNode.name}
-            </span>
+            {isEditing ? (
+              <input
+                ref={editInputRef}
+                aria-label="カードセット名の編集"
+                className="h-6 w-full rounded border border-slate-300 bg-white px-1 text-sm text-[#1f2328] outline-none select-text"
+                value={editingName}
+                onFocus={(e) => {
+                  if (shouldPartialSelect && cardSetNameSelection) {
+                    e.currentTarget.setSelectionRange(
+                      cardSetNameSelection.start,
+                      cardSetNameSelection.end,
+                    );
+                    clearCardSetNameSelection?.();
+                    return;
+                  }
+                  e.currentTarget.select();
+                }}
+                onMouseUp={(e) => {
+                  e.preventDefault();
+                }}
+                onChange={(e) => {
+                  setEditingName(e.target.value);
+                  editingNameRef.current = e.target.value;
+                }}
+                onClick={(e) => e.stopPropagation()}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    e.currentTarget.blur();
+                  }
+                  if (e.key === "Escape") {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    renameCancelledRef.current = true;
+                    e.currentTarget.blur();
+                  }
+                }}
+                onBlur={() => {
+                  void handleRenameConfirm();
+                }}
+              />
+            ) : (
+              <span className="truncate text-sm font-medium">
+                {treeNode.name}
+              </span>
+            )}
             {hasChildren && (
               <span className="ml-auto text-[10px] text-[var(--sidebar-text-muted,#6e6e80)] tabular-nums">
                 {treeNode.children!.length}

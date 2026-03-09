@@ -17,7 +17,7 @@ interface RootFolderPanelListProps {
   setOpenRowMenuId: React.Dispatch<React.SetStateAction<string | null>>;
   onSelectFolder: (folderId: string) => void;
   handleCreateFolderAction: (parentId: string | null) => void;
-  handleCreateCardAction: (folderId: string | null) => void;
+  handleCreateCardSetAction: (folderId: string | null) => void;
   handleDelete: (id: string, type: "folder" | "card") => void;
   pinnedItems?: Array<{ type: "folder" | "card" | "document"; id: string }>;
   onPinItem?: (item: { type: "folder" | "card" | "document"; id: string }) => void;
@@ -36,7 +36,7 @@ export function RootFolderPanelList({
   setOpenRowMenuId,
   onSelectFolder,
   handleCreateFolderAction,
-  handleCreateCardAction,
+  handleCreateCardSetAction,
   handleDelete,
   pinnedItems,
   onPinItem,
@@ -169,7 +169,7 @@ export function RootFolderPanelList({
                 }
                 type="folder"
                 onCreateSubfolder={() => void handleCreateFolderAction(folder.id)}
-                onCreateCard={() => void handleCreateCardAction(folder.id)}
+                onCreateCardSet={() => void handleCreateCardSetAction(folder.id)}
                 onRename={() => {
                   const forceSelectRenameInput = () => {
                     const input = inputRef.current;
