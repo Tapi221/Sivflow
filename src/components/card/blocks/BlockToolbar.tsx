@@ -163,13 +163,13 @@ function ActionButton({
         aria-label={`${label}を追加`}
         className={cn(
           "inline-flex items-center justify-center w-9 h-9 rounded-md",
-          "text-slate-500 transition-colors duration-100 select-none",
-          "hover:text-slate-700 hover:bg-slate-100 hover:shadow-sm",
+          "text-slate-700 transition-colors duration-100 select-none",
+          "hover:text-slate-900 hover:bg-slate-100",
           "active:bg-slate-200 active:text-slate-900",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400",
         )}
       >
-        <Icon className="w-4 h-4 shrink-0" />
+        <Icon className="w-[17px] h-[17px] shrink-0" style={{ strokeWidth: 2 }} />
       </button>
     </Tooltip>
   );
@@ -225,7 +225,7 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
     <div
       className={cn(
         "flex w-full items-center px-2.5 gap-0",
-        "h-8 min-h-[32px]",
+        "h-10 min-h-[40px]",
         "bg-slate-50/60 border-b border-slate-200",
         className,
       )}
@@ -284,7 +284,7 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
       </div>
 
       {/* デスクトップ: アイコン only ボタン横並び */}
-      <div className="hidden md:flex items-center gap-1 flex-nowrap overflow-x-auto no-scrollbar">
+      <div className="hidden md:flex items-center gap-2 flex-nowrap overflow-x-auto no-scrollbar">
         {visibleConfigs.map((config) => {
           const Icon = getIcon(config.icon, config.type);
           return (
