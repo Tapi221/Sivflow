@@ -108,7 +108,7 @@ export default function CardView() {
   return (
     <div className="h-[100dvh] overflow-hidden bg-[#F5F7F8] pt-0 card-editor-right-pane-font">
       <div className="relative flex h-full min-h-0 overflow-hidden">
-      <div className="pointer-events-none absolute left-4 top-3 z-20 flex items-center gap-3">
+      <div className="pointer-events-none absolute left-4 top-2 z-20 flex items-start gap-3">
         <Button
           variant="ghost"
           size="icon"
@@ -124,9 +124,6 @@ export default function CardView() {
           <ChevronLeft className="w-5 h-5" />
         </Button>
         <div className="pointer-events-auto hidden md:block">
-          <div className="text-[10px] font-bold tracking-[0.2em] text-slate-400 uppercase mb-0.5">
-            Knowledge Review
-          </div>
           <h1 className="text-base font-bold text-slate-700">
             {selectedCard?.title || "Untitled Card"}
           </h1>
