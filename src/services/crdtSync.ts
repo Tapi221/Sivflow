@@ -24,18 +24,17 @@ interface CardData {
 
 export class CRDTSyncService {
   private ydoc: Y.Doc;
-  private cards: Y.Map<unknown>;
+  private cards: Y.Map<CardData>;
 
   constructor() {
     this.ydoc = new Y.Doc();
-    this.cards = this.ydoc.getMap("cards");
+    this.cards = this.ydoc.getMap<CardData>("cards");
   }
 
   /**
    * カードデータをCRDTに保存
    */
   async saveCard(cardId: string, cardData: CardData): Promise<void> {
-    // Y.Mapに保存
     this.cards.set(cardId, cardData);
   }
 
@@ -50,7 +49,6 @@ export class CRDTSyncService {
    * 差分（Delta）を取得
    */
   getDelta(): Uint8Array {
-    // 最後の状態からの差分を取得
     return Y.encodeStateAsUpdate(this.ydoc);
   }
 
@@ -104,8 +102,8 @@ export class CRDTSyncService {
 
     this.cards.forEach((value, key) => {
       snapshot.push({
-        id: key,
         ...value,
+        id: key,
       });
     });
 
@@ -121,16 +119,15 @@ export class CRDTSyncService {
   async compactDeltas(cardId: string, userId: string): Promise<void> {
     void cardId;
     void userId;
-    // 現在の状態をスナップショットとして保存
+
     const snapshot = this.extractSnapshot();
 
-    // スナップショットをFirestoreに保存
     console.log(`[CRDT] Compacted ${snapshot.length} cards into snapshot`);
 
     // 古い差分を削除（実装は省略）
     // await firestore.collection('crdt_deltas')
     //   .where('cardId', '==', cardId)
-    //   .where('createdAt', '<', Date.now() - 7 * 24 * 60 * 60 * 1000) // 7日以上前
+    //   .where('createdAt', '<', Date.now() - 7 * 24 * 60 * 60 * 1000)
     //   .get()
     //   .then(snapshot => {
     //     snapshot.docs.forEach(doc => doc.ref.delete());
@@ -147,15 +144,12 @@ export class CRDTSyncService {
     deltaSize: number;
     reduction: number;
   } {
-    // 全同期のサイズ（JSON文字列化）
     const fullSyncSize = JSON.stringify(fullData).length;
-
-    // CRDT差分のサイズ
     const delta = this.getDelta();
     const deltaSize = delta.length;
-
-    // 削減率
-    const reduction = ((fullSyncSize - deltaSize) / fullSyncSize) * 100;
+    const reduction = fullSyncSize === 0
+      ? 0
+      : ((fullSyncSize - deltaSize) / fullSyncSize) * 100;
 
     console.log(`[CRDT] Data size comparison:`, {
       fullSyncSize: `${fullSyncSize} bytes`,
@@ -176,10 +170,6 @@ export class CRDTSyncService {
   reset(): void {
     this.ydoc.destroy();
     this.ydoc = new Y.Doc();
-    this.cards = this.ydoc.getMap("cards");
+    this.cards = this.ydoc.getMap<CardData>("cards");
   }
 }
-
-
-
-

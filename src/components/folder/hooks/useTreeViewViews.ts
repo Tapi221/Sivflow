@@ -1,8 +1,4 @@
-import {
-  buildVirtualTree,
-  type ViewDef,
-  type ViewKind,
-} from "@/components/folder/types/viewTypes";
+import { buildVirtualTree, type ViewDef, type ViewKind } from "@/components/folder/types/viewTypes";
 import type { useTags } from "@/hooks/settings/useTags";
 import type { useUserSettings } from "@/hooks/settings/useUserSettings";
 import type { Card } from "@/types";
@@ -13,8 +9,6 @@ const DEFAULT_FOLDER_VIEW: ViewDef = {
   name: "フォルダ",
   kind: "folder",
 };
-
-const ACTIVE_VIEW_KINDS: ViewKind[] = ["folder", "tagCategory", "tagTree"];
 
 const createViewId = () =>
   typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
@@ -35,6 +29,22 @@ interface UseTreeViewViewsParams {
   onFolderSelect: (folderId: string | null) => void;
 }
 
+function isViewKind(value: unknown): value is ViewKind {
+  return value === "folder" || value === "tagCategory" || value === "tagTree";
+}
+
+function isViewDef(value: unknown): value is ViewDef {
+  if (!value || typeof value !== "object") return false;
+
+  const candidate = value as Record<string, unknown>;
+
+  return (
+    typeof candidate.id === "string" &&
+    typeof candidate.name === "string" &&
+    isViewKind(candidate.kind)
+  );
+}
+
 export function useTreeViewViews({
   settings,
   updateSettings,
@@ -44,15 +54,16 @@ export function useTreeViewViews({
   filteredCards,
   onFolderSelect,
 }: UseTreeViewViewsParams) {
+  const explorerViews = settings?.explorerViews;
+  const selectedExplorerViewId = settings?.selectedExplorerViewId;
+  const tagCategoryDisplayNames = settings?.tagCategoryDisplayNames;
+
   const viewDefs = useMemo(() => {
-    const storedViews: ViewDef[] = Array.isArray(settings?.explorerViews)
-      ? (settings.explorerViews as ViewDef[])
+    const storedViewsRaw: unknown[] = Array.isArray(explorerViews)
+      ? explorerViews
       : [];
 
-    const validStoredViews = storedViews.filter(
-      (view): view is ViewDef =>
-        ACTIVE_VIEW_KINDS.includes(view.kind as ViewKind),
-    );
+    const validStoredViews = storedViewsRaw.filter(isViewDef);
 
     const folderView =
       validStoredViews.find((view) => view.kind === "folder") ??
@@ -62,15 +73,18 @@ export function useTreeViewViews({
       folderView,
       ...validStoredViews.filter((view) => view.kind !== "folder"),
     ];
-  }, [settings]);
+  }, [explorerViews]);
 
   const selectedViewId = useMemo(() => {
-    const savedViewId = settings?.selectedExplorerViewId;
-    if (savedViewId && viewDefs.some((view) => view.id === savedViewId)) {
-      return savedViewId;
+    if (
+      selectedExplorerViewId &&
+      viewDefs.some((view) => view.id === selectedExplorerViewId)
+    ) {
+      return selectedExplorerViewId;
     }
+
     return viewDefs[0]?.id ?? DEFAULT_FOLDER_VIEW.id;
-  }, [settings?.selectedExplorerViewId, viewDefs]);
+  }, [selectedExplorerViewId, viewDefs]);
 
   const selectedView = useMemo(
     () =>
@@ -96,14 +110,17 @@ export function useTreeViewViews({
 
   const categoryNameById = useMemo(() => {
     const map = new Map<string, string>();
+
     for (const categoryId of categoryIdsInUse) {
       map.set(categoryId, getCategoryName(categoryId));
     }
+
     return map;
   }, [categoryIdsInUse, getCategoryName]);
 
   const virtualTreeNodes = useMemo(() => {
     if (!activeCustomView) return [];
+
     return buildVirtualTree(
       activeCustomView,
       filteredCards,
@@ -122,6 +139,7 @@ export function useTreeViewViews({
   const handleViewChange = useCallback(
     async (viewId: string) => {
       await persistSettings({ selectedExplorerViewId: viewId });
+
       const nextView = viewDefs.find((view) => view.id === viewId);
       if (nextView && nextView.kind !== "folder") {
         onFolderSelect(null);
@@ -140,7 +158,10 @@ export function useTreeViewViews({
         kind,
         options:
           kind === "tagCategory"
-            ? { categoryMode: "user-defined", ungroupedLabel: "未分類" }
+            ? {
+                categoryMode: "user-defined",
+                ungroupedLabel: "未分類",
+              }
             : {
                 scopeMode: "all",
                 hideZeroUsage: true,
@@ -170,6 +191,7 @@ export function useTreeViewViews({
   const handleDeleteView = useCallback(
     async (viewId: string) => {
       const nextViews = viewDefs.filter((view) => view.id !== viewId);
+
       await persistSettings({
         explorerViews: nextViews,
         selectedExplorerViewId:
@@ -183,12 +205,12 @@ export function useTreeViewViews({
     async (categoryId: string, displayName: string) => {
       await updateSettings({
         tagCategoryDisplayNames: {
-          ...(settings?.tagCategoryDisplayNames ?? {}),
+          ...(tagCategoryDisplayNames ?? {}),
           [categoryId]: displayName,
         },
       });
     },
-    [settings?.tagCategoryDisplayNames, updateSettings],
+    [tagCategoryDisplayNames, updateSettings],
   );
 
   const handleUpdateUngroupedLabel = useCallback(
@@ -199,7 +221,7 @@ export function useTreeViewViews({
             ? {
                 ...view,
                 options: {
-                  ...view.options,
+                  ...(view.options ?? {}),
                   ungroupedLabel: label,
                 },
               }
