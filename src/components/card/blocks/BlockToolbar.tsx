@@ -83,11 +83,11 @@ function ActionButton({
       onClick={onClick}
       aria-label={`${label}を追加`}
       className={cn(
-        "inline-flex items-center gap-[5px] px-2.5 h-[28px] rounded-md",
+        "inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md",
         "text-[11px] font-medium leading-none select-none",
-        "text-slate-400 transition-colors duration-100",
-        "hover:text-slate-700 hover:bg-slate-200/60",
-        "active:bg-slate-200 active:text-slate-800 active:scale-95",
+        "text-slate-500 transition-colors duration-100",
+        "hover:text-slate-900 hover:bg-slate-100",
+        "active:bg-slate-200 active:text-slate-900 active:scale-95",
       )}
     >
       <Icon className="w-3 h-3 shrink-0" />
@@ -96,23 +96,20 @@ function ActionButton({
   );
 }
 
-// セクションラベル（「問題」「解答」など）
+// セクションラベル（「問題」「解答」など） — インタラクションなし
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <span
-      className={cn(
-        "inline-flex items-center h-[28px] px-1 shrink-0 select-none",
-        "text-[11px] font-semibold tracking-wide text-slate-600 leading-none",
-      )}
+      className="inline-flex items-center h-full mr-2 shrink-0 select-none text-[12px] font-semibold text-slate-900 leading-none"
     >
       {children}
     </span>
   );
 }
 
-// ラベルとアクション群の間の仕切り
+// ラベルとアクション群の間の縦仕切り
 function Divider() {
-  return <div className="w-px h-4 bg-slate-200 shrink-0 mx-1" />;
+  return <div className="w-px h-4 bg-slate-200/80 shrink-0 mr-2" />;
 }
 
 export const BlockToolbar: React.FC<BlockToolbarProps> = ({
@@ -148,10 +145,9 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
   return (
     <div
       className={cn(
-        // 帯としての見た目: 薄い背景 + 下辺ボーダー
-        "flex w-full items-center gap-1 px-3",
+        "flex w-full items-center px-3 gap-0",
         "h-10 min-h-[40px]",
-        "bg-slate-50/80 border-b border-slate-200",
+        "bg-slate-50/60 border-b border-slate-200",
         className,
       )}
     >
@@ -168,10 +164,10 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
             <button
               type="button"
               className={cn(
-                "inline-flex items-center gap-[5px] px-2.5 h-[28px] rounded-md",
-                "text-[11px] font-medium text-slate-400 transition-colors duration-100",
-                "hover:text-slate-700 hover:bg-slate-200/60",
-                "active:bg-slate-200 active:text-slate-800",
+                "inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md",
+                "text-[11px] font-medium text-slate-500 transition-colors duration-100",
+                "hover:text-slate-900 hover:bg-slate-100",
+                "active:bg-slate-200 active:text-slate-900",
               )}
               aria-label={`${label} にブロックを追加`}
             >
