@@ -1,13 +1,11 @@
 import { cn } from "@/lib/utils";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
-import { ArrowLeft } from "@/ui/icons";
 import React from "react";
 import { RightPane } from "@/components/folder/panes/RightPane";
 
 interface TreeViewMainPaneProps {
   isMobile: boolean;
   showMobileDetail: boolean;
-  mobileDetailTitle: string;
   selectedItem: SelectedExplorerItem;
   selectedCardId: string | null;
   selectedDocument: DocumentItem | null;
@@ -51,8 +49,6 @@ export function TreeViewMainPane({
   documents,
   folderCards,
   folderStats,
-  onItemSelect,
-  onFolderSelect,
   onCardUpdated,
   onDocumentUpdated,
   onRenameFolder,
@@ -65,25 +61,6 @@ export function TreeViewMainPane({
         showMobileDetail ? "flex" : "hidden md:flex",
       )}
     >
-      {isMobile && showMobileDetail && (
-        <div className="shrink-0 flex items-center gap-2 px-3 py-2 border-b border-slate-100 bg-white">
-          <button
-            type="button"
-            onClick={() => {
-              onItemSelect(null);
-              onFolderSelect(null);
-            }}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50"
-            aria-label="一覧に戻る"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </button>
-          <span className="text-sm font-semibold text-slate-700">
-            {mobileDetailTitle}
-          </span>
-        </div>
-      )}
-
       <RightPane
         selectedItem={selectedItem}
         selectedCardId={selectedCardId}

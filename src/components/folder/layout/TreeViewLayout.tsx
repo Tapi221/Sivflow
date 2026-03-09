@@ -109,7 +109,6 @@ function TreeViewLayout({
     getFolderPath,
     selectedFolder,
     selectedDocument,
-    mobileDetailTitle,
     folderCards,
     folderStats,
     showMobileDetail,
@@ -449,7 +448,6 @@ function TreeViewLayout({
       <TreeViewMainPane
         isMobile={isMobile}
         showMobileDetail={showMobileDetail}
-        mobileDetailTitle={mobileDetailTitle}
         selectedItem={selectedItem}
         selectedCardId={selectedCardId}
         selectedDocument={selectedDocument}
@@ -460,8 +458,6 @@ function TreeViewLayout({
         documents={documents}
         folderCards={folderCards}
         folderStats={folderStats}
-        onItemSelect={handleItemSelect}
-        onFolderSelect={onFolderSelect}
         onCardUpdated={onCardUpdated}
         onDocumentUpdated={updateDocument}
         onRenameFolder={async (folderId, newName) => {
