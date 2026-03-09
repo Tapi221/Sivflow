@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 
 import { TreeViewDialogs } from "@/components/folder/components/TreeViewDialogs";
 import { TreeViewMainPane } from "@/components/folder/components/TreeViewMainPane";
@@ -80,12 +81,16 @@ function TreeViewLayout({
           // 対応フォルダも選択状態に
           onFolderSelect(cs.folderId ?? null);
           setSelectedCardSetId(item.id);
+          const query = new URLSearchParams();
+          query.set("cardSetId", item.id);
+          if (cs.folderId) query.set("folderId", cs.folderId);
+          navigate(createPageUrl(`CardView?${query.toString()}`));
         }
         return;
       }
       onItemSelect(item);
     },
-    [cardSets, onFolderSelect, onItemSelect],
+    [cardSets, navigate, onFolderSelect, onItemSelect],
   );
   const { updateDocument } = useDocuments();
   const { getTagColor, getCategoryName, listCategoryIdsInUse, tagById, tags } =

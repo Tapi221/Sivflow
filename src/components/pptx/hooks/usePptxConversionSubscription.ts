@@ -4,19 +4,19 @@
  */
 
 import {
-    getUpdatedAtMs,
-    isWithinPendingWindow,
-    normalizeConversionStatus,
-    normalizeString,
+  getUpdatedAtMs,
+  isWithinPendingWindow,
+  normalizeConversionStatus,
+  normalizeString,
 } from "@/components/pptx/domain/pptxConversion";
 import type { PptxConversionRecord } from "@/components/pptx/domain/pptxTypes";
 import { firestoreDb } from "@/services/firebase";
 import { pptxConversionDocPathSegments } from "@/services/firestorePaths";
 import type { DocumentItem } from "@/types";
 import {
-    doc as firestoreDoc,
-    onSnapshot,
-    type DocumentSnapshot,
+  doc as firestoreDoc,
+  onSnapshot,
+  type DocumentSnapshot,
 } from "firebase/firestore";
 import { useEffect, useRef } from "react";
 
@@ -185,7 +185,3 @@ export function usePptxConversionSubscription({
     userId,
   ]);
 }
-
-
-
-

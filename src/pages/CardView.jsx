@@ -22,6 +22,7 @@ export default function CardView() {
 
   const urlParams = new URLSearchParams(window.location.search);
   const folderId = urlParams.get("folderId");
+  const cardSetId = urlParams.get("cardSetId");
   const initialIndex = parseInt(urlParams.get("index") || "0");
   const targetCardId = urlParams.get("cardId");
 
@@ -36,7 +37,7 @@ export default function CardView() {
     cards = [],
     loading: isLoading,
     updateCard,
-  } = useCards(folderId || undefined);
+  } = useCards(folderId || undefined, cardSetId || undefined);
   const { settings } = useUserSettings();
   const isDesktop = useIsDesktopRuntime();
 
@@ -81,7 +82,7 @@ export default function CardView() {
   const handleEdit = (card) => {
     navigate(
       createPageUrl(
-        `CardEdit?id=${card.id}&folderId=${folderId}&returnTo=card-view`,
+        `CardEdit?id=${card.id}${folderId ? `&folderId=${folderId}` : ""}${cardSetId ? `&cardSetId=${cardSetId}` : ""}&returnTo=card-view`,
       ),
     );
   };
@@ -96,10 +97,10 @@ export default function CardView() {
     await updateCard(card.id, { isBookmarked: !current });
   };
 
-  if (!folderId) {
+  if (!folderId && !cardSetId) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">フォルダが指定されていません</p>
+        <p className="text-gray-500">フォルダまたはカードセットが指定されていません</p>
       </div>
     );
   }
@@ -112,7 +113,11 @@ export default function CardView() {
           variant="ghost"
           size="icon"
           onClick={() =>
-            navigate(createPageUrl(`Folders?folderId=${folderId}`))
+            navigate(
+              createPageUrl(
+                `Folders${folderId ? `?folderId=${folderId}` : ""}`,
+              ),
+            )
           }
           className="pointer-events-auto w-10 h-10 rounded-xl border border-slate-200 bg-white text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-600"
         >
