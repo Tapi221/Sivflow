@@ -151,7 +151,7 @@ export function ScaleToFitFrame({
               ? "initial"
               : fitHeight && centerContent
                 ? "center center"
-                : "top left",
+                : "top center",
             willChange: disableScale ? undefined : "transform",
           }}
         >

@@ -240,14 +240,14 @@ export function CardEditorPane({
         </button>
 
         <div
-          className="min-w-0 flex-1 overflow-y-auto overflow-x-clip p-4"
+          className="min-w-0 flex-1 overflow-y-auto overflow-x-clip p-4 flex flex-col items-center"
           style={{
             background:
               "radial-gradient(1200px 800px at 50% 120px, #FBFAF8 0%, var(--app-bg, #F8FAFB) 50%, #F6F4F1 100%)",
           }}
         >
           {isEditing ? (
-            <div className="flex flex-col items-center gap-4">
+            <div className="flex w-full max-w-5xl flex-col items-center gap-4">
               <div className="flex w-full items-center justify-end gap-2">
                 <div className="flex items-center gap-2">
                   <button
@@ -361,25 +361,29 @@ export function CardEditorPane({
             </div>
           ) : (
             selectedCard && (
-              <Flashcard
-                card={toFlashcardCardLike(selectedCard)}
-                isFlipped={isFlipped}
-                onFlip={() => setIsFlipped((prev) => !prev)}
-                onToggleBookmark={(cardLike) => {
-                  if (!selectedCard) return;
-                  void cardLike;
-                  void handleToggleBookmark(selectedCard);
-                }}
-                onToggleUncertainty={(cardLike) => {
-                  if (!selectedCard) return;
-                  void cardLike;
-                  void handleToggleUncertainty(selectedCard);
-                }}
-                onEdit={() => {
-                  setIsFlipped(false);
-                  setIsEditing(true);
-                }}
-              />
+              <div className="flex w-full justify-center">
+              <div className="w-full max-w-xl">
+                <Flashcard
+                  card={toFlashcardCardLike(selectedCard)}
+                  isFlipped={isFlipped}
+                  onFlip={() => setIsFlipped((prev) => !prev)}
+                  onToggleBookmark={(cardLike) => {
+                    if (!selectedCard) return;
+                    void cardLike;
+                    void handleToggleBookmark(selectedCard);
+                  }}
+                  onToggleUncertainty={(cardLike) => {
+                    if (!selectedCard) return;
+                    void cardLike;
+                    void handleToggleUncertainty(selectedCard);
+                  }}
+                  onEdit={() => {
+                    setIsFlipped(false);
+                    setIsEditing(true);
+                  }}
+                />
+              </div>
+              </div>
             )
           )}
         </div>
