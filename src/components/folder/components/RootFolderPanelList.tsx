@@ -1,5 +1,11 @@
 import { ContextMenu } from "@/components/folder/components/menus/ContextMenu";
 import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
+import {
+  FOLDER_ROW_ICON_ACTIVE_CLASS,
+  FOLDER_ROW_ICON_MUTED_CLASS,
+  FOLDER_ROW_ICON_SIZE_CLASS,
+  FOLDER_ROW_TITLE_CLASS,
+} from "@/components/folder/explorer/rows/shared";
 import { cn } from "@/lib/utils";
 import { Folder as FolderIcon, MoreVertical } from "@/ui/icons";
 import React from "react";
@@ -104,10 +110,11 @@ export function RootFolderPanelList({
             <div className="flex min-w-0 flex-1 items-center gap-1.5 pr-8">
               <FolderIcon
                 className={cn(
-                  "h-4 w-4 shrink-0",
+                  FOLDER_ROW_ICON_SIZE_CLASS,
+                  "shrink-0",
                   selectedFolderId === folder.id
-                    ? "text-[var(--sidebar-text,#202123)]"
-                    : "text-[var(--sidebar-text-muted,#6e6e80)]",
+                    ? FOLDER_ROW_ICON_ACTIVE_CLASS
+                    : FOLDER_ROW_ICON_MUTED_CLASS,
                 )}
               />
               {isEditing ? (
@@ -141,7 +148,7 @@ export function RootFolderPanelList({
               ) : (
                 <span
                   className={cn(
-                    "truncate text-[14px] text-[var(--sidebar-text,#202123)]",
+                    FOLDER_ROW_TITLE_CLASS,
                     selectedFolderId === folder.id ? "font-medium" : "font-normal",
                   )}
                 >

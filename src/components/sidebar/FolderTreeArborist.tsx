@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Tree } from "react-arborist";
 import type { NodeApi, TreeApi, MoveHandler } from "react-arborist";
+import { FOLDER_ROW_HEIGHT_PX } from "@/components/folder/explorer/rows/shared";
 
 export type FolderTreeArboristNode = {
   id: string;
@@ -45,7 +46,7 @@ export function FolderTreeArborist<T extends FolderTreeArboristNode>({
   disableDrag = true,
   disableDrop = true,
 }: Props<T>) {
-  const rowHeight = 24;
+  const rowHeight = FOLDER_ROW_HEIGHT_PX;
   const indent = 12;
 
   const containerRef = useRef<HTMLDivElement | null>(null);

@@ -16,6 +16,12 @@ import {
 import React, { useEffect } from "react";
 import { ExplorerRow } from "./ExplorerRow";
 import { ExplorerRowContent } from "./ExplorerRowContent";
+import {
+  FOLDER_ROW_ICON_ACTIVE_CLASS,
+  FOLDER_ROW_ICON_MUTED_CLASS,
+  FOLDER_ROW_ICON_SIZE_CLASS,
+  FOLDER_ROW_TITLE_CLASS,
+} from "./shared";
 
 type FolderRowFolder = FolderTreeNode & {
   id?: string;
@@ -187,15 +193,21 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                 isExpanded ? (
                   <ChevronDown
                     className={cn(
-                      "sidebar-icon w-4 h-4 text-[var(--sidebar-text-muted,#6e6e80)] group-hover:text-[var(--sidebar-text,#202123)]",
-                      isSelected && "text-[var(--sidebar-text,#202123)]",
+                      "sidebar-icon",
+                      FOLDER_ROW_ICON_SIZE_CLASS,
+                      FOLDER_ROW_ICON_MUTED_CLASS,
+                      "group-hover:text-[var(--sidebar-text,#202123)]",
+                      isSelected && FOLDER_ROW_ICON_ACTIVE_CLASS,
                     )}
                   />
                 ) : (
                   <ChevronRight
                     className={cn(
-                      "sidebar-icon w-4 h-4 text-[var(--sidebar-text-muted,#6e6e80)] group-hover:text-[var(--sidebar-text,#202123)]",
-                      isSelected && "text-[var(--sidebar-text,#202123)]",
+                      "sidebar-icon",
+                      FOLDER_ROW_ICON_SIZE_CLASS,
+                      FOLDER_ROW_ICON_MUTED_CLASS,
+                      "group-hover:text-[var(--sidebar-text,#202123)]",
+                      isSelected && FOLDER_ROW_ICON_ACTIVE_CLASS,
                     )}
                   />
                 )
@@ -204,8 +216,11 @@ export const FolderRow: React.FC<FolderRowProps> = ({
 
             <FolderGlyph
               className={cn(
-                "sidebar-icon w-4 h-4 flex-shrink-0 mr-0 text-[var(--sidebar-text-muted,#6e6e80)] group-hover:text-[var(--sidebar-text,#202123)]",
-                isSelected && "text-[var(--sidebar-text,#202123)]",
+                "sidebar-icon flex-shrink-0 mr-0",
+                FOLDER_ROW_ICON_SIZE_CLASS,
+                FOLDER_ROW_ICON_MUTED_CLASS,
+                "group-hover:text-[var(--sidebar-text,#202123)]",
+                isSelected && FOLDER_ROW_ICON_ACTIVE_CLASS,
               )}
             />
 
@@ -250,9 +265,10 @@ void handleRenameConfirm();
                   title={folderName}
                   titleClassName={cn(
                     "lining-nums tabular-nums",
+                    FOLDER_ROW_TITLE_CLASS,
                     isSelected
-                      ? "text-[var(--sidebar-text,#202123)] font-medium"
-                      : "text-[var(--sidebar-text,#202123)]",
+                      ? "font-medium"
+                      : "font-normal",
                   )}
                   right={
                     isFiltering && matchCount === 0 ? (
