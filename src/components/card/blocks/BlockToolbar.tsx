@@ -162,11 +162,11 @@ function ActionButton({
         onClick={onClick}
         aria-label={`${label}を追加`}
         className={cn(
-          "inline-flex items-center justify-center w-8 h-8 rounded-md",
-          "text-slate-400 transition-colors duration-100 select-none",
-          "hover:text-slate-700 hover:bg-slate-100",
-          "active:bg-slate-200 active:text-slate-800 active:scale-95",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-1",
+          "inline-flex items-center justify-center w-9 h-9 rounded-md",
+          "text-slate-500 transition-colors duration-100 select-none",
+          "hover:text-slate-700 hover:bg-slate-100 hover:shadow-sm",
+          "active:bg-slate-200 active:text-slate-900",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400",
         )}
       >
         <Icon className="w-4 h-4 shrink-0" />
