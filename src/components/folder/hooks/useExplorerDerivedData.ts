@@ -7,7 +7,7 @@ import {
     isSameFolder,
     normalizeFolderId,
 } from "@/components/folder/explorer/model/utils";
-import type { Card, DocumentItem, ExplorerItem } from "@/types";
+import type { Card, CardSet, DocumentItem, ExplorerItem } from "@/types";
 import { useCallback, useMemo } from "react";
 
 type LegacyEntityFields = {
@@ -27,6 +27,7 @@ const withLegacy = <T extends object>(v: T): T & LegacyEntityFields =>
 interface Params {
   treeFolders: FolderTreeNode[];
   treeCards: Card[];
+  cardSets?: CardSet[];
   documents: DocumentItem[];
   isFiltering: boolean;
 }
@@ -34,6 +35,7 @@ interface Params {
 export function useExplorerDerivedData({
   treeFolders,
   treeCards,
+  cardSets = [],
   documents,
   isFiltering,
 }: Params) {
@@ -253,6 +255,56 @@ export function useExplorerDerivedData({
     [treeFolders],
   );
 
+  // CardSet: folderId 単位でグルーピング
+  const cardSetsByFolderId = useMemo(() => {
+    const map = new Map<string, CardSet[]>();
+    for (const cs of cardSets) {
+      if ((cs as unknown as { isDeleted?: boolean }).isDeleted) continue;
+      const key = normalizeFolderId(cs.folderId);
+      const list = map.get(key);
+      if (list) list.push(cs);
+      else map.set(key, [cs]);
+    }
+    for (const list of map.values()) {
+      list.sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0));
+    }
+    return map;
+  }, [cardSets]);
+
+  const getCardSets = useCallback(
+    (folderId: string | null): CardSet[] =>
+      cardSetsByFolderId.get(normalizeFolderId(folderId)) ?? [],
+    [cardSetsByFolderId],
+  );
+
+  // CardSet に属するカード (ExplorerItem形式)
+  const itemsByCardSetId = useMemo(() => {
+    const map = new Map<string, ExplorerItem[]>();
+    if (cardSets.length === 0) return map;
+    for (const card of treeCards) {
+      if (isSoftDeleted(withLegacy(card))) continue;
+      const csId = card.cardSetId;
+      if (!csId) continue;
+      const list = map.get(csId);
+      const item: ExplorerItem = { type: "card", data: card };
+      if (list) list.push(item);
+      else map.set(csId, [item]);
+    }
+    for (const list of map.values()) {
+      list.sort((a, b) => {
+        const orderA = withLegacy(a.data).orderIndex ?? Number.MAX_SAFE_INTEGER;
+        const orderB = withLegacy(b.data).orderIndex ?? Number.MAX_SAFE_INTEGER;
+        return orderA - orderB;
+      });
+    }
+    return map;
+  }, [cardSets, treeCards]);
+
+  const getCardSetItems = useCallback(
+    (cardSetId: string): ExplorerItem[] => itemsByCardSetId.get(cardSetId) ?? [],
+    [itemsByCardSetId],
+  );
+
   return {
     childFoldersByParentId,
     rootFolders,
@@ -263,6 +315,8 @@ export function useExplorerDerivedData({
     directCardCountByFolderId,
     itemsByFolderId,
     getFolderItems,
+    getCardSets,
+    getCardSetItems,
     matchCountMap,
     deleteTargetCounts,
     getNextOrderIndex,

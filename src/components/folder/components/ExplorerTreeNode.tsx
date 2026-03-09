@@ -7,7 +7,7 @@ import { FolderRow } from "@/components/folder/explorer/rows/FolderRow";
 import { EXPLORER_ROW_BASE_CLASS_NAME } from "@/components/folder/explorer/rows/shared";
 import type { ExplorerTreeNode as TreeNode } from "@/components/folder/explorer/tree/arboristAdapter";
 import { cn } from "@/lib/utils";
-import { FileText } from "@/ui/icons";
+import { FileText, Layers, ChevronRight, ChevronDown } from "@/ui/icons";
 import React from "react";
 
 interface ExplorerTreeNodeProps {
@@ -170,6 +170,47 @@ export const ExplorerTreeNodeRenderer = React.memo(
             }}
             hasExpandableContent={Boolean(treeNode.children?.length)}
           />
+        </div>
+      );
+    }
+
+    // CardSet ノード
+    if (treeNode.kind === "cardSet") {
+      const Chevron = isOpen ? ChevronDown : ChevronRight;
+      return (
+        <div style={style}>
+          <div
+            ref={(el) => setRowRef(treeNode.rawId, el)}
+            className={cn(
+              ROW_BASE,
+              "flex h-7 min-h-7 items-center pr-2 leading-7 select-none cursor-pointer",
+              isSelected
+                ? "bg-blue-50 text-blue-700"
+                : "hover:bg-slate-50 text-slate-700",
+            )}
+            data-selected={isSelected || undefined}
+            style={{ paddingLeft: `${node.level * 12 + 4}px` }}
+            onClick={() => {
+              toggle();
+              onItemSelect({ type: "cardSet", id: treeNode.rawId });
+            }}
+          >
+            <Chevron className="mr-1 h-3 w-3 shrink-0 text-slate-400" />
+            <Layers
+              className={cn(
+                "mr-2 h-4 w-4 shrink-0",
+                isSelected ? "text-blue-500" : "text-slate-400",
+              )}
+            />
+            <span className="truncate text-sm font-medium">
+              {treeNode.name}
+            </span>
+            {(treeNode.children?.length ?? 0) > 0 && (
+              <span className="ml-auto text-[10px] text-slate-400 tabular-nums">
+                {treeNode.children!.length}
+              </span>
+            )}
+          </div>
         </div>
       );
     }

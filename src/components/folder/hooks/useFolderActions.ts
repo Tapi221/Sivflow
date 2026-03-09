@@ -38,6 +38,7 @@ interface UseFolderActionsParams {
   onCreateCard?: (data: unknown) => Promise<unknown>;
   onUpdateCard?: (cardId: string, data: unknown) => Promise<void>;
   onDeleteCard?: (cardId: string) => Promise<void>;
+  selectedCardSetId?: string | null;
   // dialog state
   editingIdRef: React.MutableRefObject<string | null>;
   editingNameRef: React.MutableRefObject<string>;
@@ -70,6 +71,7 @@ export function useFolderActions({
   onCreateCard,
   onUpdateCard,
   onDeleteCard,
+  selectedCardSetId,
   editingIdRef,
   editingNameRef,
   renameCancelledRef,
@@ -192,6 +194,7 @@ export function useFolderActions({
       const optimisticCard = {
         id: tempId,
         folderId: normalizedFolderId,
+        cardSetId: selectedCardSetId ?? "",
         title,
         orderIndex: getNextOrderIndex(targetFolderId),
         isDeleted: false,
@@ -207,8 +210,10 @@ export function useFolderActions({
       setPendingScrollId(tempId);
 
       try {
+        if (!selectedCardSetId) return;
         const createdCardRaw = await onCreateCard({
           folderId: normalizedFolderId,
+          cardSetId: selectedCardSetId,
           title,
           blocks: [],
         });
@@ -245,6 +250,7 @@ export function useFolderActions({
     [
       onCreateCard,
       onUpdateCard,
+      selectedCardSetId,
       getNextOrderIndex,
       setOptimisticCards,
       setExpandedFolders,

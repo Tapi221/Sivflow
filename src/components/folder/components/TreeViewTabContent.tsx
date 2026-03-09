@@ -1,7 +1,7 @@
 import type { ComponentProps } from "react";
 import { PinnedPanel } from "@/components/explorer/PinnedPanel";
 import { RecentPanel } from "@/components/explorer/RecentPanel";
-import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
+import type { Card, CardSet, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 import { FolderTreeWithCards } from "@/components/folder/components/views/FolderTreeWithCards";
 import { ViewsPanel } from "@/components/folder/components/views/ViewsPanel";
 import type { ViewDef } from "@/components/folder/viewTypes";
@@ -17,6 +17,7 @@ interface TreeViewTabContentProps {
   recent: RecentPanelProps["recent"];
   folders: Folder[];
   cards: Card[];
+  cardSets?: CardSet[];
   documents: DocumentItem[];
   filteredCards: Card[];
   filteredDocuments: DocumentItem[];
@@ -45,6 +46,7 @@ interface TreeViewTabContentProps {
   reorderCards: FolderTreeWithCardsProps["reorderCards"];
   onPinItem: FolderTreeWithCardsProps["onPinItem"];
   onUnpinItem: FolderTreeWithCardsProps["onUnpinItem"];
+  selectedCardSetId?: string | null;
 }
 
 export function TreeViewTabContent({
@@ -53,6 +55,7 @@ export function TreeViewTabContent({
   recent,
   folders,
   cards,
+  cardSets,
   documents,
   filteredCards,
   filteredDocuments,
@@ -81,6 +84,7 @@ export function TreeViewTabContent({
   reorderCards,
   onPinItem,
   onUnpinItem,
+  selectedCardSetId,
 }: TreeViewTabContentProps) {
   switch (explorerTab) {
     case "pinned":
@@ -130,6 +134,7 @@ export function TreeViewTabContent({
         <FolderTreeWithCards
           folders={folders}
           cards={filteredCards}
+          cardSets={cardSets}
           documents={filteredDocuments}
           selectedFolderId={selectedFolderId}
           selectedItem={selectedItem}
@@ -147,6 +152,7 @@ export function TreeViewTabContent({
           pinnedItems={pinnedItems}
           onPinItem={onPinItem}
           onUnpinItem={onUnpinItem}
+          selectedCardSetId={selectedCardSetId}
           isFiltering={isFiltering}
           createFolderRequestToken={createFolderRequestToken}
           navigateToSectionListToken={navigateToSectionListToken}

@@ -62,14 +62,31 @@ function TreeViewLayout({
   const { createCard, updateCard, deleteCard, moveCardToFolder, reorderCards } =
     useCards();
 
-  // CardSet 選択状態
+  // CardSet 選択状態 + 全件取得（ツリー表示用）
   const [selectedCardSetId, setSelectedCardSetId] = useState<string | null>(null);
-  const { moveCardSetToFolder } = useCardSets();
+  const { cardSets, moveCardSetToFolder } = useCardSets();
 
   // フォルダ変更時に CardSet 選択をリセット
   useEffect(() => {
     setSelectedCardSetId(null);
   }, [selectedFolderId]);
+
+  // onItemSelect のラッパー: cardSet選択時にselectedCardSetIdもセット
+  const handleItemSelect = useCallback(
+    (item: SelectedExplorerItem) => {
+      if (item?.type === "cardSet") {
+        const cs = cardSets.find((s) => s.id === item.id);
+        if (cs) {
+          // 対応フォルダも選択状態に
+          onFolderSelect(cs.folderId ?? null);
+          setSelectedCardSetId(item.id);
+        }
+        return;
+      }
+      onItemSelect(item);
+    },
+    [cardSets, onFolderSelect, onItemSelect],
+  );
   const { updateDocument } = useDocuments();
   const { getTagColor, getCategoryName, listCategoryIdsInUse, tagById, tags } =
     useTags();
@@ -365,6 +382,7 @@ function TreeViewLayout({
       recent={recent}
       folders={folders}
       cards={cards}
+      cardSets={cardSets}
       documents={documents}
       filteredCards={filteredCards}
       filteredDocuments={filteredDocuments}
@@ -378,7 +396,7 @@ function TreeViewLayout({
       navigateToSectionListToken={navigateToSectionListToken}
       getFolderPath={getFolderPath}
       onFolderSelect={handleFolderSelectWithRecent}
-      onItemSelect={onItemSelect}
+      onItemSelect={handleItemSelect}
       onClearRecent={clearRecent}
       onSelectView={handleViewChange}
       onOpenManager={() => setIsViewManagerOpen(true)}
@@ -393,6 +411,7 @@ function TreeViewLayout({
       reorderCards={reorderCards}
       onPinItem={pinItem}
       onUnpinItem={unpinItem}
+      selectedCardSetId={selectedCardSetId}
     />
   );
   return (
@@ -426,7 +445,6 @@ function TreeViewLayout({
         mobileDetailTitle={mobileDetailTitle}
         selectedItem={selectedItem}
         selectedCardId={selectedCardId}
-        selectedCardSetId={selectedCardSetId}
         selectedDocument={selectedDocument}
         selectedFolderId={selectedFolderId}
         selectedFolderName={selectedFolder?.folderName ?? "フォルダ"}
@@ -435,9 +453,8 @@ function TreeViewLayout({
         documents={documents}
         folderCards={folderCards}
         folderStats={folderStats}
-        onItemSelect={onItemSelect}
+        onItemSelect={handleItemSelect}
         onFolderSelect={onFolderSelect}
-        onCardSetSelect={setSelectedCardSetId}
         onCardUpdated={onCardUpdated}
         onDocumentUpdated={updateDocument}
         onRenameFolder={async (folderId, newName) => {

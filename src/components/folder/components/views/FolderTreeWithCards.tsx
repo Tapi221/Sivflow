@@ -7,7 +7,7 @@ import React, {
   useCallback,
 } from "react";
 import { cn } from "@/lib/utils";
-import type { Card, SelectedExplorerItem } from "@/types";
+import type { Card, CardSet, SelectedExplorerItem } from "@/types";
 import type { DocumentItem } from "@/types";
 import DeleteFolderDialog from "../dialogs/DeleteFolderDialog";
 import {
@@ -40,6 +40,7 @@ import type { NodeApi } from "react-arborist";
 interface FolderTreeWithCardsProps {
   folders: FolderTreeNode[];
   cards: Card[];
+  cardSets?: CardSet[];
   documents: DocumentItem[];
   selectedFolderId: string | null;
   selectedItem: SelectedExplorerItem;
@@ -66,6 +67,7 @@ interface FolderTreeWithCardsProps {
     type: "folder" | "card" | "document";
     id: string;
   }) => void;
+  selectedCardSetId?: string | null;
   isFiltering?: boolean;
   createFolderRequestToken?: number;
   navigateToSectionListToken?: number;
@@ -75,6 +77,7 @@ interface FolderTreeWithCardsProps {
 export function FolderTreeWithCards({
   folders,
   cards,
+  cardSets = [],
   documents,
   selectedFolderId,
   selectedItem,
@@ -91,6 +94,7 @@ export function FolderTreeWithCards({
   pinnedItems,
   onPinItem,
   onUnpinItem,
+  selectedCardSetId = null,
   isFiltering = false,
   createFolderRequestToken = 0,
   navigateToSectionListToken = 0,
@@ -138,6 +142,7 @@ export function FolderTreeWithCards({
   const derived = useExplorerDerivedData({
     treeFolders,
     treeCards,
+    cardSets,
     documents,
     isFiltering,
   });
@@ -146,6 +151,8 @@ export function FolderTreeWithCards({
     rootFolders,
     getChildFolders,
     getFolderItems,
+    getCardSets,
+    getCardSetItems,
     matchCountMap,
     deleteTargetCounts,
     getNextOrderIndex,
@@ -160,6 +167,7 @@ export function FolderTreeWithCards({
     onCreateCard,
     onUpdateCard,
     onDeleteCard,
+    selectedCardSetId,
     editingIdRef: dialogs.editingIdRef,
     editingNameRef: dialogs.editingNameRef,
     renameCancelledRef: dialogs.renameCancelledRef,
@@ -317,11 +325,13 @@ export function FolderTreeWithCards({
         rootItems,
         getChildFolders,
         getFolderItems,
+        getCardSets,
+        getCardSetItems,
         isFiltering,
         matchCountMap,
         getFolderId,
       }),
-    [getChildFolders, getFolderItems, isFiltering, matchCountMap, rootFolders, rootItems],
+    [getChildFolders, getFolderItems, getCardSets, getCardSetItems, isFiltering, matchCountMap, rootFolders, rootItems],
   );
 
   const rootFolderPanels = useMemo(
@@ -364,6 +374,7 @@ export function FolderTreeWithCards({
       const parsed = parseSelectedTreeId(id);
       if (!parsed) return;
       if (parsed.type === "folder") onFolderSelect(parsed.id);
+      if (parsed.type === "cardSet") onItemSelect({ type: "cardSet", id: parsed.id });
       if (parsed.type === "card") onItemSelect({ type: "card", id: parsed.id });
       if (parsed.type === "document")
         onItemSelect({ type: "document", id: parsed.id });

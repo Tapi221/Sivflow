@@ -20,7 +20,7 @@ export function getDeviceName(): string {
   else if (/Macintosh/i.test(ua)) os = "Mac";
   else if (/Linux/i.test(ua)) os = "Linux PC";
 
-  // Browser/App Detection
+  // ブラウザ
   let client = "";
   // PWA standalone mode check
   const nav = navigator as Navigator & { standalone?: boolean };

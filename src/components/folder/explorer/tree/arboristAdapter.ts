@@ -2,15 +2,17 @@ import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import type { FolderTreeArboristNode } from "@/components/sidebar/FolderTreeArborist";
 import type {
     Card,
+    CardSet,
     DocumentItem,
     ExplorerItem,
     SelectedExplorerItem,
 } from "@/types";
 
 export type ExplorerTreeNode = FolderTreeArboristNode & {
-  kind: "folder" | "card" | "document";
+  kind: "folder" | "cardSet" | "card" | "document";
   rawId: string;
   folder?: FolderTreeNode;
+  cardSet?: CardSet;
   card?: Card;
   document?: DocumentItem;
   isDimmed?: boolean;
@@ -19,6 +21,7 @@ export type ExplorerTreeNode = FolderTreeArboristNode & {
 };
 
 const FOLDER_PREFIX = "folder:";
+const CARD_SET_PREFIX = "cardSet:";
 const CARD_PREFIX = "card:";
 const DOCUMENT_PREFIX = "document:";
 
@@ -33,6 +36,8 @@ export const buildExplorerTreeData = ({
   rootItems,
   getChildFolders,
   getFolderItems,
+  getCardSets,
+  getCardSetItems,
   isFiltering,
   matchCountMap,
   getFolderId,
@@ -41,6 +46,10 @@ export const buildExplorerTreeData = ({
   rootItems: ExplorerItem[];
   getChildFolders: (folderId: string) => FolderTreeNode[];
   getFolderItems: (folderId: string | null) => ExplorerItem[];
+  /** フォルダIDに属するCardSetの一覧を返す */
+  getCardSets?: (folderId: string | null) => CardSet[];
+  /** CardSetIDに属するカード一覧を返す（ExplorerItem形式） */
+  getCardSetItems?: (cardSetId: string) => ExplorerItem[];
   isFiltering: boolean;
   matchCountMap: Map<string, number>;
   getFolderId: (folder: FolderTreeNode) => string;
@@ -77,6 +86,18 @@ export const buildExplorerTreeData = ({
     };
   };
 
+  const buildCardSetNode = (cs: CardSet): ExplorerTreeNode => {
+    const cardItems = getCardSetItems ? getCardSetItems(cs.id) : [];
+    return {
+      id: `${CARD_SET_PREFIX}${cs.id}`,
+      rawId: cs.id,
+      name: cs.name || "無題のセット",
+      kind: "cardSet",
+      cardSet: cs,
+      children: cardItems.map(buildItemNode),
+    };
+  };
+
   const buildFolderNode = (folder: FolderTreeNode): ExplorerTreeNode | null => {
     const folderId = getFolderId(folder);
     const matchCount = isFiltering ? (matchCountMap.get(folderId) ?? 0) : -1;
@@ -87,7 +108,20 @@ export const buildExplorerTreeData = ({
     const childFolderNodes = getChildFolders(folderId)
       .map(buildFolderNode)
       .filter((node): node is ExplorerTreeNode => node !== null);
-    const itemNodes = getFolderItems(folderId).map(buildItemNode);
+
+    // CardSet がある場合はCardSetノードを表示、ない場合は従来通りアイテム直接表示
+    const cardSets = getCardSets ? getCardSets(folderId) : [];
+    const childItems: ExplorerTreeNode[] =
+      cardSets.length > 0
+        ? cardSets.map(buildCardSetNode)
+        : getFolderItems(folderId).map(buildItemNode);
+
+    // ドキュメントは常にフォルダ直下に表示（CardSetと無関係）
+    const docItems = getCardSets
+      ? getFolderItems(folderId)
+          .filter((i) => i.type === "document")
+          .map(buildItemNode)
+      : [];
 
     return {
       id: toTreeFolderId(folderId),
@@ -97,7 +131,7 @@ export const buildExplorerTreeData = ({
       folder,
       isDimmed: false,
       matchCount,
-      children: [...childFolderNodes, ...itemNodes],
+      children: [...childFolderNodes, ...childItems, ...docItems],
     };
   };
 
@@ -112,19 +146,24 @@ export const buildExplorerTreeData = ({
 export const toSelectedTreeId = (
   selectedFolderId: string | null,
   selectedItem: SelectedExplorerItem,
+  selectedCardSetId?: string | null,
 ): string | null => {
   if (selectedItem?.type === "card") return `${CARD_PREFIX}${selectedItem.id}`;
+  if (selectedItem?.type === "cardSet") return `${CARD_SET_PREFIX}${selectedItem.id}`;
   if (selectedItem?.type === "document")
     return `${DOCUMENT_PREFIX}${selectedItem.id}`;
+  if (selectedCardSetId) return `${CARD_SET_PREFIX}${selectedCardSetId}`;
   if (selectedFolderId) return toTreeFolderId(selectedFolderId);
   return null;
 };
 
 export const parseSelectedTreeId = (
   treeId: string,
-): { type: "folder" | "card" | "document"; id: string } | null => {
+): { type: "folder" | "cardSet" | "card" | "document"; id: string } | null => {
   if (treeId.startsWith(FOLDER_PREFIX))
     return { type: "folder", id: treeId.slice(FOLDER_PREFIX.length) };
+  if (treeId.startsWith(CARD_SET_PREFIX))
+    return { type: "cardSet", id: treeId.slice(CARD_SET_PREFIX.length) };
   if (treeId.startsWith(CARD_PREFIX))
     return { type: "card", id: treeId.slice(CARD_PREFIX.length) };
   if (treeId.startsWith(DOCUMENT_PREFIX))
