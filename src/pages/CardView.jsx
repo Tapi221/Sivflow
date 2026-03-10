@@ -1,15 +1,14 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { useCards } from "@/hooks/card/useCards";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronLeft, ChevronRight } from "@/ui/icons";
-import { createPageUrl } from "@/utils";
 import { CardCarousel3D } from "@/features/review/CardCarousel3D";
 import { VerticalCardPager } from "@/features/review/VerticalCardPager";
 import { MobileScalableCard } from "@/components/card/frame/MobileScalableCard";
 import { Flashcard } from "@/components/card/frame/Flashcard";
 import { CardMetaPanel } from "@/components/card/panels/CardMetaPanel";
+import { CardEditorPane } from "@/components/folder/panes/CardEditorPane";
 import {
   CANONICAL_CARD_WIDTH,
 } from "@/components/card/common/constants";
@@ -20,7 +19,6 @@ import { useCardSets } from "@/hooks/cardSet/useCardSets";
 import { useBreadcrumbContext } from "@/contexts/BreadcrumbContext";
 
 export default function CardView() {
-  const navigate = useNavigate();
   const { setExtraCrumbs } = useBreadcrumbContext();
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -31,6 +29,8 @@ export default function CardView() {
 
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [isInlineEditing, setIsInlineEditing] = useState(false);
+  const [editingCardId, setEditingCardId] = useState(null);
   const [isMetaOpen, setIsMetaOpen] = useState(() => {
     if (typeof window === "undefined") return true;
     return window.localStorage.getItem("card-view.meta-panel-open") !== "false";
@@ -88,6 +88,14 @@ export default function CardView() {
   }, [cardSetId, cardSets]);
 
   useEffect(() => {
+    if (!isInlineEditing) return;
+    if (!editingCardId) return;
+    if (selectedCard?.id === editingCardId) return;
+    setIsInlineEditing(false);
+    setEditingCardId(null);
+  }, [isInlineEditing, editingCardId, selectedCard?.id]);
+
+  useEffect(() => {
     const crumbs = [];
 
     if (selectedCardSet) {
@@ -119,11 +127,9 @@ export default function CardView() {
   }, [selectedCardSet, selectedCard, folderId, setExtraCrumbs]);
 
   const handleEdit = (card) => {
-    navigate(
-      createPageUrl(
-        `CardEdit?id=${card.id}${folderId ? `&folderId=${folderId}` : ""}${cardSetId ? `&cardSetId=${cardSetId}` : ""}&returnTo=card-view`,
-      ),
-    );
+    if (!card?.id) return;
+    setEditingCardId(card.id);
+    setIsInlineEditing(true);
   };
 
   const handleToggleUncertainty = async (card) => {
@@ -167,7 +173,11 @@ export default function CardView() {
           <ChevronLeft className="h-4 w-4" />
         )}
       </Button>
-      <div className="min-h-0 min-w-0 flex-1 overflow-hidden px-4 py-0">
+      <div
+        className={`min-h-0 min-w-0 flex-1 overflow-hidden py-0 ${
+          isInlineEditing ? "px-0" : "px-4"
+        }`}
+      >
           {isLoading ? (
             <div className="flex items-center justify-center h-full">
               <div className="space-y-4 w-full max-w-md px-4">
@@ -182,24 +192,46 @@ export default function CardView() {
               activeIndex={currentIndex}
               onActiveIndexChange={setCurrentIndex}
               onFlip={() => setIsFlipped((f) => !f)}
+              paddingInlinePx={isInlineEditing ? 0 : 16}
+              getCardWidth={(card, idx, isActive) =>
+                isInlineEditing && isActive && card?.id === selectedCard?.id
+                  ? 1000
+                  : CANONICAL_CARD_WIDTH
+              }
               getKey={(card) => card.id ?? card.docId ?? card.uid}
               renderCard={(card, idx, isActive) => (
-                <MobileScalableCard
-                  cardDesignWidth={CANONICAL_CARD_WIDTH}
-                  safePadding={0}
-                >
-                  <Flashcard
-                    card={card}
-                    isFlipped={isActive ? isFlipped : false}
-                    onFlip={isActive ? () => setIsFlipped((f) => !f) : undefined}
-                    onEdit={isActive ? handleEdit : undefined}
-                    onToggleUncertainty={
-                      isActive ? handleToggleUncertainty : undefined
-                    }
-                    onToggleBookmark={isActive ? handleToggleBookmark : undefined}
-                    editorSharedHeightPx={settings?.cardEditorHeightPx ?? null}
-                  />
-                </MobileScalableCard>
+                isInlineEditing && isActive && card?.id === selectedCard?.id ? (
+                  <div className="w-full overflow-visible">
+                    <CardEditorPane
+                      selectedCardId={card.id}
+                      folderId={folderId || undefined}
+                      cardSetId={cardSetId || undefined}
+                      cardsOverride={effectiveCards}
+                      autoEdit
+                      hideMetaPanel
+                      dockToolbarsToTop
+                      pairGapClassName="gap-4"
+                      onRequestCloseEditing={() => setIsInlineEditing(false)}
+                    />
+                  </div>
+                ) : (
+                  <MobileScalableCard
+                    cardDesignWidth={CANONICAL_CARD_WIDTH}
+                    safePadding={0}
+                  >
+                    <Flashcard
+                      card={card}
+                      isFlipped={isActive ? isFlipped : false}
+                      onFlip={isActive ? () => setIsFlipped((f) => !f) : undefined}
+                      onEdit={isActive ? handleEdit : undefined}
+                      onToggleUncertainty={
+                        isActive ? handleToggleUncertainty : undefined
+                      }
+                      onToggleBookmark={isActive ? handleToggleBookmark : undefined}
+                      editorSharedHeightPx={settings?.cardEditorHeightPx ?? null}
+                    />
+                  </MobileScalableCard>
+                )
               )}
             />
           ) : (

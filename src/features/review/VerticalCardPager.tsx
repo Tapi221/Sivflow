@@ -44,6 +44,10 @@ export type VerticalCardPagerProps<T> = {
   onFlip?: () => void;
   /** カード列の幅 (px)。デフォルト 560 */
   cardWidth?: number;
+  /** カードごとの幅を動的に決める（指定時は cardWidth より優先） */
+  getCardWidth?: (card: T, idx: number, isActive: boolean) => number;
+  /** カード列全体の左右余白(px) */
+  paddingInlinePx?: number;
   /** カードの key を取り出す関数。省略時は idx を使う */
   getKey?: (card: T, idx: number) => string | number;
 };
@@ -56,6 +60,8 @@ export function VerticalCardPager<T>({
   renderCard,
   onFlip,
   cardWidth = DEFAULT_CARD_WIDTH,
+  getCardWidth,
+  paddingInlinePx = 16,
   getKey,
 }: VerticalCardPagerProps<T>) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -86,12 +92,16 @@ export function VerticalCardPager<T>({
           gap: CARD_GAP,
           // 先頭・末尾カードが中央に来られるよう上下に余白を確保
           paddingBlock: SCROLL_PADDING,
-          paddingInline: 16,
+          paddingInline: paddingInlinePx,
         }}
       >
         {cards.map((card, idx) => {
           const isActive = idx === activeIndex;
           const key = getKey ? getKey(card, idx) : idx;
+          const width = Math.max(
+            1,
+            getCardWidth ? getCardWidth(card, idx, isActive) : cardWidth,
+          );
 
           return (
             <div
@@ -101,11 +111,11 @@ export function VerticalCardPager<T>({
               }}
               aria-current={isActive ? "true" : undefined}
               style={{
-                width: cardWidth,
+                width,
                 maxWidth: "100%",
                 // アクティブ: 青枠＋濃い影、非アクティブ: 薄い影
                 boxShadow: isActive ? ACTIVE_BOX_SHADOW : INACTIVE_BOX_SHADOW,
-                borderRadius: cardBorderRadius(cardWidth),
+                borderRadius: cardBorderRadius(width),
                 opacity: isActive ? ACTIVE_OPACITY : INACTIVE_OPACITY,
                 transition: "opacity 220ms ease, box-shadow 220ms ease",
                 // 非アクティブカードへの誤タップを防ぐ（オプション: コメントアウトで解除）

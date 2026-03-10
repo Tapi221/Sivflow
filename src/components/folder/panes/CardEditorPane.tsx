@@ -42,9 +42,15 @@ import type { Card, UploadedImage } from "@/types";
 interface CardEditorPaneProps {
   selectedCardId: string | null;
   folderId?: string;
+  cardSetId?: string;
+  cardsOverride?: Card[];
   autoEdit?: boolean;
   onCardUpdated?: () => void;
   onSelectCardId?: (cardId: string) => void;
+  hideMetaPanel?: boolean;
+  dockToolbarsToTop?: boolean;
+  pairGapClassName?: string;
+  onRequestCloseEditing?: () => void;
 }
 
 type UseCardsResult = {
@@ -66,18 +72,25 @@ const toFlashcardCardLike = (card: Card): FlashcardCardLike =>
 export function CardEditorPane({
   selectedCardId,
   folderId,
+  cardSetId,
+  cardsOverride,
   autoEdit,
   onCardUpdated,
   onSelectCardId,
+  hideMetaPanel = false,
+  dockToolbarsToTop = false,
+  pairGapClassName = "gap-6",
+  onRequestCloseEditing,
 }: CardEditorPaneProps) {
   const { settings } = useUserSettings();
   const { success: toastSuccess, error: toastError } = useToast();
   const { tagById, addTag } = useTags();
   const {
-    cards,
+    cards: cardsFromHook,
     updateCard,
     createCard,
-  } = useCards() as unknown as UseCardsResult;
+  } = useCards(folderId, cardSetId) as unknown as UseCardsResult;
+  const cards = cardsOverride ?? cardsFromHook;
 
   const updateCardAsync = React.useCallback(
     async (id: string, data: Partial<Card>): Promise<unknown> => {
@@ -195,6 +208,16 @@ export function CardEditorPane({
     />
   ) : undefined;
 
+  const handleCancelEditing = React.useCallback(() => {
+    handleCancel();
+    onRequestCloseEditing?.();
+  }, [handleCancel, onRequestCloseEditing]);
+
+  const handleSaveEditing = React.useCallback(async () => {
+    await handleSave();
+    onRequestCloseEditing?.();
+  }, [handleSave, onRequestCloseEditing]);
+
   if (!normalizedSelectedCardId && !isEditing) {
     return <EmptySelectionState onStartNew={handleStartNew} />;
   }
@@ -220,39 +243,69 @@ export function CardEditorPane({
     <DragDropContext onDragEnd={onDragEnd}>
     <div className="h-full bg-sidebar pb-4 pt-0 card-editor-right-pane-font">
       <div className="relative flex h-full overflow-hidden">
-        <button
-          type="button"
-          className="absolute top-3 z-20 grid h-8 w-8 place-items-center rounded-full bg-[var(--sidebar-bg)] text-[#334155] surface-control-convex hover:bg-[var(--sidebar-active-bg)]"
-          style={{
-            right: isMetaOpen
-              ? "calc(var(--ui-panel-width) - var(--ui-space-3))"
-              : "var(--ui-space-1)",
-            transform: "none",
-          }}
-          onClick={() => setIsMetaOpen((prev) => !prev)}
-          aria-label={isMetaOpen ? "close meta panel" : "open meta panel"}
-        >
-          {isMetaOpen ? (
-            <ChevronRight className="h-4 w-4" />
-          ) : (
-            <ChevronLeft className="h-4 w-4" />
-          )}
-        </button>
+        {!hideMetaPanel && (
+          <button
+            type="button"
+            className="absolute top-3 z-20 grid h-8 w-8 place-items-center rounded-full bg-[var(--sidebar-bg)] text-[#334155] surface-control-convex hover:bg-[var(--sidebar-active-bg)]"
+            style={{
+              right: isMetaOpen
+                ? "calc(var(--ui-panel-width) - var(--ui-space-3))"
+                : "var(--ui-space-1)",
+              transform: "none",
+            }}
+            onClick={() => setIsMetaOpen((prev) => !prev)}
+            aria-label={isMetaOpen ? "close meta panel" : "open meta panel"}
+          >
+            {isMetaOpen ? (
+              <ChevronRight className="h-4 w-4" />
+            ) : (
+              <ChevronLeft className="h-4 w-4" />
+            )}
+          </button>
+        )}
 
         <div
-          className={cn("min-w-0 flex-1 overflow-y-auto overflow-x-clip flex flex-col items-center", isEditing ? "px-4 pt-0 pb-4" : "p-4")}
+          className={cn(
+            "min-w-0 flex-1 overflow-y-auto overflow-x-clip flex flex-col items-center",
+            isEditing
+              ? dockToolbarsToTop
+                ? "px-0 pt-0 pb-4"
+                : "px-4 pt-0 pb-4"
+              : "p-4",
+          )}
           style={{ background: "#fafafa" }}
         >
           {isEditing ? (
-            <div className="flex w-full max-w-[820px] flex-col items-center gap-4">
-              <div className="grid w-fit max-w-full grid-cols-1 gap-6 lg:grid-cols-2">
-                <div className="flex min-h-0 w-full flex-col gap-2">
-                  <div className="flex shrink-0 items-center rounded-md border border-slate-100 bg-white/60">
-                    <div ref={toolbarMountRefQ} className="w-full" />
+            <div
+              className={cn(
+                "flex w-full flex-col items-center gap-4",
+                dockToolbarsToTop ? "max-w-[1000px]" : "max-w-[820px]",
+              )}
+            >
+              {dockToolbarsToTop && (
+                <div className="sticky top-0 z-10 w-fit max-w-full bg-[#fafafa] pb-2">
+                  <div className={cn("grid w-fit max-w-full grid-cols-1 md:grid-cols-2", pairGapClassName)}>
+                    <div className="flex h-14 min-h-0 w-full items-center rounded-md border border-slate-100 bg-white/60 md:mx-2">
+                      <div ref={toolbarMountRefQ} className="w-full" />
+                    </div>
+                    <div className="flex h-14 min-h-0 w-full items-center rounded-md border border-slate-100 bg-white/60 md:mx-2">
+                      <div ref={toolbarMountRefA} className="w-full" />
+                    </div>
                   </div>
+                </div>
+              )}
+              <div className={cn("grid w-fit max-w-full grid-cols-1 md:grid-cols-2", pairGapClassName)}>
+                <div className="flex min-h-0 w-full flex-col gap-2 md:px-2">
+                  {!dockToolbarsToTop && (
+                    <div className="flex shrink-0 items-center rounded-md border border-slate-100 bg-white/60">
+                      <div ref={toolbarMountRefQ} className="w-full" />
+                    </div>
+                  )}
                   <CardFrame
                     baseWidth={CANONICAL_CARD_WIDTH}
                     contentPaddingPx={0}
+                    allowUpscale={false}
+                    scaleMultiplier={1}
                     className={cn("premium-paper-depth", "card-shell--paper")}
                     resizable
                     showResizeHandle
@@ -290,13 +343,17 @@ export function CardEditorPane({
                   </CardFrame>
                 </div>
 
-                <div className="flex min-h-0 w-full flex-col gap-2">
-                  <div className="flex shrink-0 items-center rounded-md border border-slate-100 bg-white/60">
-                    <div ref={toolbarMountRefA} className="w-full" />
-                  </div>
+                <div className="flex min-h-0 w-full flex-col gap-2 md:px-2">
+                  {!dockToolbarsToTop && (
+                    <div className="flex shrink-0 items-center rounded-md border border-slate-100 bg-white/60">
+                      <div ref={toolbarMountRefA} className="w-full" />
+                    </div>
+                  )}
                   <CardFrame
                     baseWidth={CANONICAL_CARD_WIDTH}
                     contentPaddingPx={0}
+                    allowUpscale={false}
+                    scaleMultiplier={1}
                     className={cn("premium-paper-depth", "card-shell--paper")}
                     resizable
                     showResizeHandle
@@ -338,7 +395,7 @@ export function CardEditorPane({
                 <button
                   type="button"
                   className="h-9 rounded-full px-4 hover:bg-black/5 disabled:opacity-50"
-                  onClick={handleCancel}
+                  onClick={handleCancelEditing}
                   disabled={isSaving}
                 >
                   キャンセル
@@ -346,7 +403,7 @@ export function CardEditorPane({
                 <button
                   type="button"
                   className="h-9 rounded-full bg-black px-6 text-white hover:opacity-90 disabled:opacity-50"
-                  onClick={handleSave}
+                  onClick={() => void handleSaveEditing()}
                   disabled={isSaving}
                 >
                   保存
@@ -382,7 +439,7 @@ export function CardEditorPane({
           )}
         </div>
 
-        {isMetaOpen && (
+        {!hideMetaPanel && isMetaOpen && (
           <CardMetaPanel
             card={panelCard}
             reviewLogs={panelCard?.reviewLogs ?? []}

@@ -73,7 +73,7 @@ export function NewCardIdleState({
 }
 
 export function CardEditorLoadingState() {
-  return <div className="h-full p-4 text-slate-400">Loading...</div>;
+  return null;
 }
 
 
