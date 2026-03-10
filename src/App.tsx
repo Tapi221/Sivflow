@@ -32,29 +32,29 @@ import { BreadcrumbProvider } from "@/contexts/BreadcrumbContext";
 
 // ===== ページコンポーネントを遅延読み込み（コード分割） =====
 // 初回ロードを軽くするために、各ページを lazy で動的 import する
-const Calendar = lazy(() => import("./Pages/Calendar"));
-const Folders = lazy(() => import("./Pages/Folders"));
-const CardEdit = lazy(() => import("./Pages/CardEdit"));
-const CardView = lazy(() => import("./Pages/CardView"));
-const StudyMode = lazy(() => import("./Pages/StudyMode"));
-const Trash = lazy(() => import("./Pages/Trash"));
-const ImageDiagnostics = lazy(() => import("./Pages/ImageDiagnostics"));
-const Gallery = lazy(() => import("./Pages/Gallery"));
-const Directory = lazy(() => import("./Pages/Directory"));
+const Calendar = lazy(() => import("./pages/Calendar"));
+const Folders = lazy(() => import("./pages/Folders"));
+const CardEdit = lazy(() => import("./pages/CardEdit"));
+const CardView = lazy(() => import("./pages/CardView"));
+const StudyMode = lazy(() => import("./pages/StudyMode"));
+const Trash = lazy(() => import("./pages/Trash"));
+const ImageDiagnostics = lazy(() => import("./pages/ImageDiagnostics"));
+const Gallery = lazy(() => import("./pages/Gallery"));
+const Directory = lazy(() => import("./pages/Directory"));
 const NotImplementedPlaceholder = lazy(
-  () => import("./Pages/NotImplementedPlaceholder"),
+  () => import("./pages/NotImplementedPlaceholder"),
 );
-const OneQAMode = lazy(() => import("./Pages/OneQAMode"));
-const PairMode = lazy(() => import("./Pages/PairMode"));
-const FourChoiceMode = lazy(() => import("./Pages/FourChoiceMode"));
+const OneQAMode = lazy(() => import("./pages/OneQAMode"));
+const PairMode = lazy(() => import("./pages/PairMode"));
+const FourChoiceMode = lazy(() => import("./pages/FourChoiceMode"));
 const PdfScrollTest = DEV_MODE
-  ? lazy(() => import("./Pages/PdfScrollTest"))
+  ? lazy(() => import("./pages/PdfScrollTest"))
   : null;
 const CodeBlockVisualTest = DEV_MODE
-  ? lazy(() => import("./Pages/CodeBlockVisualTest"))
+  ? lazy(() => import("./pages/CodeBlockVisualTest"))
   : null;
 const CardLayoutConsistencyTest = DEV_MODE
-  ? lazy(() => import("./Pages/CardLayoutConsistencyTest"))
+  ? lazy(() => import("./pages/CardLayoutConsistencyTest"))
   : null;
 
 const isTestBypassEnabled = () => {

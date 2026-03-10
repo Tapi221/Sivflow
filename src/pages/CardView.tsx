@@ -1,27 +1,27 @@
-import React, {
-  useState,
-  useMemo,
-  useEffect,
-  useCallback,
-  useRef,
-} from "react";
-import type { Card } from "@/types";
-import { useCards } from "@/hooks/card/useCards";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronLeft, ChevronRight } from "@/ui/icons";
-import { CardCarousel3D } from "@/features/review/CardCarousel3D";
-import { VerticalCardPager } from "@/features/review/VerticalCardPager";
-import { MobileScalableCard } from "@/components/card/frame/MobileScalableCard";
+import { CANONICAL_CARD_WIDTH } from "@/components/card/common/constants";
 import { Flashcard } from "@/components/card/frame/Flashcard";
+import { MobileScalableCard } from "@/components/card/frame/MobileScalableCard";
 import { CardMetaPanel } from "@/components/card/panels/CardMetaPanel";
 import { CardEditorPane } from "@/components/folder/panes/CardEditorPane";
-import { CANONICAL_CARD_WIDTH } from "@/components/card/common/constants";
-import { useCardEntity } from "@/hooks/card/useCardEntity";
-import { useUserSettings } from "@/hooks/settings/useUserSettings";
-import { useIsDesktopRuntime } from "@/hooks/platform/useIsDesktopRuntime";
-import { useCardSets } from "@/hooks/cardSet/useCardSets";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useBreadcrumbContext } from "@/contexts/BreadcrumbContext";
+import { CardCarousel3D } from "@/features/review/CardCarousel3D";
+import { VerticalCardPager } from "@/features/review/VerticalCardPager";
+import { useCardEntity } from "@/hooks/card/useCardEntity";
+import { useCards } from "@/hooks/card/useCards";
+import { useCardSets } from "@/hooks/cardSet/useCardSets";
+import { useIsDesktopRuntime } from "@/hooks/platform/useIsDesktopRuntime";
+import { useUserSettings } from "@/hooks/settings/useUserSettings";
+import type { Card } from "@/types";
+import { ChevronLeft, ChevronRight } from "@/ui/icons";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 const CARDVIEW_PAGER_PADDING_INLINE = 16;
 const CARDVIEW_PAGER_PADDING_BLOCK = "50vh";

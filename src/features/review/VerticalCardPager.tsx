@@ -129,8 +129,3 @@ export function VerticalCardPager<T>({
     </div>
   );
 }
-
-
-
-
-
