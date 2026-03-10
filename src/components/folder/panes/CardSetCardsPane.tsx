@@ -79,10 +79,10 @@ export function CardSetCardsPane({
                 type="button"
                 onClick={() => onCardSelect(card.id)}
                 className={cn(
-                  "flex w-full items-center gap-2 rounded-md border px-3 py-2 text-left transition-colors",
+                  "flex w-full items-center gap-2 rounded-md border px-3 py-2 text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--sidebar-active-accent,#7aa6a1)]",
                   selectedCardId === card.id
-                    ? "border-blue-200 bg-blue-50 text-blue-700"
-                    : "border-transparent text-slate-700 hover:bg-slate-50",
+                    ? "border-[color-mix(in_srgb,var(--sidebar-active-accent,#7aa6a1)_45%,transparent)] bg-[var(--sidebar-active-bg,#e7ebef)] text-[var(--sidebar-text,#202123)]"
+                    : "border-transparent text-slate-700 hover:bg-[var(--sidebar-active-bg,#e7ebef)]",
                 )}
               >
                 <span className="w-6 shrink-0 text-xs tabular-nums text-slate-400">
@@ -97,3 +97,4 @@ export function CardSetCardsPane({
     </div>
   );
 }
+

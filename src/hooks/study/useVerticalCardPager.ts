@@ -46,6 +46,8 @@ export function useVerticalCardPager({
   const ioTriggeredRef = useRef(false);
   // プログラマティックスクロール中フラグ（IO をスキップするため）
   const pendingScrollRef = useRef(false);
+  const pendingScrollTimerRef = useRef<number | null>(null);
+  const scrollRafRef = useRef<number | null>(null);
   // activeIndex の最新値を ref でも保持（stale closure 回避）
   const activeIndexRef = useRef(activeIndex);
   useEffect(() => {
@@ -58,14 +60,47 @@ export function useVerticalCardPager({
       const el = itemRefs.current[idx];
       if (!el) return;
       pendingScrollRef.current = true;
+      if (pendingScrollTimerRef.current != null) {
+        window.clearTimeout(pendingScrollTimerRef.current);
+      }
       el.scrollIntoView({ behavior, block: "center" });
-      // スクロールアニメーション完了後にフラグを解除（smooth は ~600ms 想定）
-      setTimeout(() => {
+      // フラグ解除を短めにしてフォーカス切り替え遅延を抑える。
+      pendingScrollTimerRef.current = window.setTimeout(() => {
         pendingScrollRef.current = false;
-      }, 700);
+        pendingScrollTimerRef.current = null;
+      }, behavior === "smooth" ? 220 : 80);
     },
     [],
   );
+
+  const computeNearestIndex = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    if (pendingScrollRef.current) return;
+
+    const containerRect = container.getBoundingClientRect();
+    const containerCenter = containerRect.top + containerRect.height / 2;
+
+    let minDist = Infinity;
+    let nearestIdx = -1;
+
+    for (let idx = 0; idx < itemRefs.current.length; idx += 1) {
+      const el = itemRefs.current[idx];
+      if (!el) continue;
+      const rect = el.getBoundingClientRect();
+      const elCenter = (rect.top + rect.bottom) / 2;
+      const dist = Math.abs(elCenter - containerCenter);
+      if (dist < minDist) {
+        minDist = dist;
+        nearestIdx = idx;
+      }
+    }
+
+    if (nearestIdx !== -1 && nearestIdx !== activeIndexRef.current) {
+      ioTriggeredRef.current = true;
+      onActiveIndexChange(nearestIdx);
+    }
+  }, [onActiveIndexChange, scrollContainerRef]);
 
   // ── goNext / goPrev ──────────────────────────────────────────────────
   const goNext = useCallback(() => {
@@ -101,61 +136,37 @@ export function useVerticalCardPager({
     return () => cancelAnimationFrame(id);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── IntersectionObserver: 自然スクロールでアクティブ検出 ───────────────
+  // ── 自然スクロールでアクティブ検出（scroll + rAF）──────────────────────
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
 
-    // 現在 intersection している要素のセット
-    const intersectingSet = new Set<Element>();
+    const schedule = () => {
+      if (scrollRafRef.current != null) return;
+      scrollRafRef.current = window.requestAnimationFrame(() => {
+        scrollRafRef.current = null;
+        computeNearestIndex();
+      });
+    };
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        // intersection セットを更新
-        for (const entry of entries) {
-          if (entry.isIntersecting) intersectingSet.add(entry.target);
-          else intersectingSet.delete(entry.target);
-        }
+    container.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule, { passive: true });
+    // 初期状態を即判定
+    schedule();
 
-        // プログラマティックスクロール中は無視
-        if (pendingScrollRef.current) return;
-
-        // コンテナ中心に最も近いカードを探す
-        const containerRect = container.getBoundingClientRect();
-        const containerCenter = containerRect.top + containerRect.height / 2;
-
-        let minDist = Infinity;
-        let nearestIdx = -1;
-
-        for (const el of intersectingSet) {
-          const rect = el.getBoundingClientRect();
-          const elCenter = (rect.top + rect.bottom) / 2;
-          const dist = Math.abs(elCenter - containerCenter);
-          const idx = itemRefs.current.indexOf(el as HTMLElement);
-          if (idx !== -1 && dist < minDist) {
-            minDist = dist;
-            nearestIdx = idx;
-          }
-        }
-
-        if (nearestIdx !== -1 && nearestIdx !== activeIndexRef.current) {
-          ioTriggeredRef.current = true;
-          onActiveIndexChange(nearestIdx);
-        }
-      },
-      {
-        root: container,
-        // コンテナの上下 25% を除いた中央 50% 帯でのみ検出
-        rootMargin: "-25% 0px -25% 0px",
-        threshold: 0,
-      },
-    );
-
-    const els = itemRefs.current.filter(Boolean) as HTMLElement[];
-    els.forEach((el) => observer.observe(el));
-
-    return () => observer.disconnect();
-  }, [count, scrollContainerRef, onActiveIndexChange]); // count 変化で再セットアップ
+    return () => {
+      container.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      if (scrollRafRef.current != null) {
+        window.cancelAnimationFrame(scrollRafRef.current);
+        scrollRafRef.current = null;
+      }
+      if (pendingScrollTimerRef.current != null) {
+        window.clearTimeout(pendingScrollTimerRef.current);
+        pendingScrollTimerRef.current = null;
+      }
+    };
+  }, [count, scrollContainerRef, computeNearestIndex]); // count 変化で再セットアップ
 
   // ── キーボードリスナー ─────────────────────────────────────────────────
   useEffect(() => {

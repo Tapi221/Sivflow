@@ -49,6 +49,12 @@ interface CardEditorPaneProps {
   onSelectCardId?: (cardId: string) => void;
   hideMetaPanel?: boolean;
   dockToolbarsToTop?: boolean;
+  hideBlockToolbars?: boolean;
+  externalToolbarMountQ?: HTMLDivElement | null;
+  externalToolbarMountA?: HTMLDivElement | null;
+  saveSignal?: number;
+  hideFooterActions?: boolean;
+  embeddedInPager?: boolean;
   pairGapClassName?: string;
   onRequestCloseEditing?: () => void;
 }
@@ -79,6 +85,12 @@ export function CardEditorPane({
   onSelectCardId,
   hideMetaPanel = false,
   dockToolbarsToTop = false,
+  hideBlockToolbars = false,
+  externalToolbarMountQ = null,
+  externalToolbarMountA = null,
+  saveSignal,
+  hideFooterActions = false,
+  embeddedInPager = false,
   pairGapClassName = "gap-6",
   onRequestCloseEditing,
 }: CardEditorPaneProps) {
@@ -121,8 +133,14 @@ export function CardEditorPane({
     );
   }, [isMetaOpen]);
 
-  const toolbarMountRefQ = useRef<HTMLDivElement | null>(null);
-  const toolbarMountRefA = useRef<HTMLDivElement | null>(null);
+  const [toolbarMountQInternal, setToolbarMountQInternal] =
+    useState<HTMLDivElement | null>(null);
+  const [toolbarMountAInternal, setToolbarMountAInternal] =
+    useState<HTMLDivElement | null>(null);
+  const toolbarMountQ = externalToolbarMountQ ?? toolbarMountQInternal;
+  const toolbarMountA = externalToolbarMountA ?? toolbarMountAInternal;
+  const usesExternalToolbarMount =
+    Boolean(externalToolbarMountQ) && Boolean(externalToolbarMountA);
 
   const resetDialogsRef = useRef<() => void>(() => {});
 
@@ -218,6 +236,15 @@ export function CardEditorPane({
     onRequestCloseEditing?.();
   }, [handleSave, onRequestCloseEditing]);
 
+  const prevSaveSignalRef = useRef<number | undefined>(saveSignal);
+  useEffect(() => {
+    if (saveSignal == null) return;
+    if (prevSaveSignalRef.current === saveSignal) return;
+    prevSaveSignalRef.current = saveSignal;
+    if (!isEditing || isSaving) return;
+    void handleSaveEditing();
+  }, [saveSignal, isEditing, isSaving, handleSaveEditing]);
+
   if (!normalizedSelectedCardId && !isEditing) {
     return <EmptySelectionState onStartNew={handleStartNew} />;
   }
@@ -241,8 +268,19 @@ export function CardEditorPane({
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-    <div className="h-full bg-sidebar pb-4 pt-0 card-editor-right-pane-font">
-      <div className="relative flex h-full overflow-hidden">
+    <div
+      className={cn(
+        "bg-sidebar pt-0 card-editor-right-pane-font",
+        embeddedInPager ? "pb-0" : "pb-4",
+        embeddedInPager ? "h-auto" : "h-full",
+      )}
+    >
+      <div
+        className={cn(
+          "relative flex",
+          embeddedInPager ? "h-auto overflow-visible" : "h-full overflow-hidden",
+        )}
+      >
         {!hideMetaPanel && (
           <button
             type="button"
@@ -266,11 +304,16 @@ export function CardEditorPane({
 
         <div
           className={cn(
-            "min-w-0 flex-1 overflow-y-auto overflow-x-clip flex flex-col items-center",
+            "min-w-0 flex-1 overflow-x-clip flex flex-col items-center",
+            embeddedInPager ? "overflow-y-visible" : "overflow-y-auto",
             isEditing
               ? dockToolbarsToTop
-                ? "px-0 pt-0 pb-4"
-                : "px-4 pt-0 pb-4"
+                ? embeddedInPager
+                  ? "px-0 pt-0 pb-0"
+                  : "px-0 pt-0 pb-4"
+                : embeddedInPager
+                  ? "px-4 pt-0 pb-0"
+                  : "px-4 pt-0 pb-4"
               : "p-4",
           )}
           style={{ background: "#fafafa" }}
@@ -282,23 +325,27 @@ export function CardEditorPane({
                 dockToolbarsToTop ? "max-w-[1000px]" : "max-w-[820px]",
               )}
             >
-              {dockToolbarsToTop && (
+              {dockToolbarsToTop &&
+                !hideBlockToolbars &&
+                !usesExternalToolbarMount && (
                 <div className="sticky top-0 z-10 w-fit max-w-full bg-[#fafafa] pb-2">
                   <div className={cn("grid w-fit max-w-full grid-cols-1 md:grid-cols-2", pairGapClassName)}>
                     <div className="flex h-14 min-h-0 w-full items-center rounded-md border border-slate-100 bg-white/60 md:mx-2">
-                      <div ref={toolbarMountRefQ} className="w-full" />
+                      <div ref={setToolbarMountQInternal} className="w-full" />
                     </div>
                     <div className="flex h-14 min-h-0 w-full items-center rounded-md border border-slate-100 bg-white/60 md:mx-2">
-                      <div ref={toolbarMountRefA} className="w-full" />
+                      <div ref={setToolbarMountAInternal} className="w-full" />
                     </div>
                   </div>
                 </div>
               )}
               <div className={cn("grid w-fit max-w-full grid-cols-1 md:grid-cols-2", pairGapClassName)}>
                 <div className="flex min-h-0 w-full flex-col gap-2 md:px-2">
-                  {!dockToolbarsToTop && (
+                  {!dockToolbarsToTop &&
+                    !hideBlockToolbars &&
+                    !usesExternalToolbarMount && (
                     <div className="flex shrink-0 items-center rounded-md border border-slate-100 bg-white/60">
-                      <div ref={toolbarMountRefQ} className="w-full" />
+                      <div ref={setToolbarMountQInternal} className="w-full" />
                     </div>
                   )}
                   <CardFrame
@@ -338,15 +385,18 @@ export function CardEditorPane({
                       droppableId="question-blocks"
                       accentColor={settings?.accentColor}
                       duplicateToOpposite={settings?.duplicateToOpposite}
-                      toolbarMountRef={toolbarMountRefQ}
+                      hideToolbar={hideBlockToolbars}
+                      toolbarMount={toolbarMountQ}
                     />
                   </CardFrame>
                 </div>
 
                 <div className="flex min-h-0 w-full flex-col gap-2 md:px-2">
-                  {!dockToolbarsToTop && (
+                  {!dockToolbarsToTop &&
+                    !hideBlockToolbars &&
+                    !usesExternalToolbarMount && (
                     <div className="flex shrink-0 items-center rounded-md border border-slate-100 bg-white/60">
-                      <div ref={toolbarMountRefA} className="w-full" />
+                      <div ref={setToolbarMountAInternal} className="w-full" />
                     </div>
                   )}
                   <CardFrame
@@ -386,29 +436,32 @@ export function CardEditorPane({
                       droppableId="answer-blocks"
                       accentColor={settings?.accentColor}
                       duplicateToOpposite={settings?.duplicateToOpposite}
-                      toolbarMountRef={toolbarMountRefA}
+                      hideToolbar={hideBlockToolbars}
+                      toolbarMount={toolbarMountA}
                     />
                   </CardFrame>
                 </div>
               </div>
-              <div className="sticky bottom-4 flex w-full justify-end gap-2">
-                <button
-                  type="button"
-                  className="h-9 rounded-full px-4 hover:bg-black/5 disabled:opacity-50"
-                  onClick={handleCancelEditing}
-                  disabled={isSaving}
-                >
-                  キャンセル
-                </button>
-                <button
-                  type="button"
-                  className="h-9 rounded-full bg-black px-6 text-white hover:opacity-90 disabled:opacity-50"
-                  onClick={() => void handleSaveEditing()}
-                  disabled={isSaving}
-                >
-                  保存
-                </button>
-              </div>
+              {!hideFooterActions && (
+                <div className="sticky bottom-4 flex w-full justify-end gap-2">
+                  <button
+                    type="button"
+                    className="h-9 rounded-full px-4 hover:bg-black/5 disabled:opacity-50"
+                    onClick={handleCancelEditing}
+                    disabled={isSaving}
+                  >
+                    キャンセル
+                  </button>
+                  <button
+                    type="button"
+                    className="h-9 rounded-full bg-black px-6 text-white hover:opacity-90 disabled:opacity-50"
+                    onClick={() => void handleSaveEditing()}
+                    disabled={isSaving}
+                  >
+                    保存
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             selectedCard && (

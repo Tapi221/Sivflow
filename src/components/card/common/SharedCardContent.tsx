@@ -32,7 +32,7 @@ type SharedCardContentEditProps = SharedCardContentBaseProps & {
   onDelete?: (index: number) => void;
   minDeletableIndex?: number;
   hiddenBlockTypes?: CardBlock["type"][];
-  toolbarMountRef?: React.RefObject<HTMLDivElement | null>;
+  toolbarMount?: HTMLDivElement | null;
 };
 
 export type SharedCardContentProps =
@@ -69,7 +69,7 @@ export function SharedCardContent(props: SharedCardContentProps) {
           onDelete={props.onDelete}
           minDeletableIndex={props.minDeletableIndex}
           hiddenBlockTypes={props.hiddenBlockTypes}
-          toolbarMountRef={props.toolbarMountRef}
+          toolbarMount={props.toolbarMount}
         />
       ) : (
         <BlockRenderer

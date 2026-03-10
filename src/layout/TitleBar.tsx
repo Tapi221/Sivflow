@@ -44,9 +44,12 @@ function useBreadcrumbs() {
 
 export const TitleBar: React.FC = () => {
   const [isMaximized, setIsMaximized] = useState(false);
+  const [isCardViewEditing, setIsCardViewEditing] = useState(false);
   const isDesktop = isDesktopRuntime();
+  const { pathname } = useLocation();
   const crumbs = useBreadcrumbs();
   const { extraCrumbs, notifyFolderSelect } = useBreadcrumbContext();
+  const isCardViewPage = pathname.toLowerCase().startsWith("/cardview");
 
   useEffect(() => {
     if (!isDesktop) return;
@@ -63,6 +66,16 @@ export const TitleBar: React.FC = () => {
       if (cleanup) cleanup();
     };
   }, [isDesktop]);
+
+  useEffect(() => {
+    const onEditingChange = (event: Event) => {
+      const next = (event as CustomEvent<boolean>).detail;
+      setIsCardViewEditing(Boolean(next));
+    };
+    window.addEventListener("cardview:editing-change", onEditingChange);
+    return () =>
+      window.removeEventListener("cardview:editing-change", onEditingChange);
+  }, []);
 
   // URL ベースのクラムにフォルダ/カード/ドキュメントのクラムを結合する。
   // extraCrumbs がある場合は末尾クラムに to を復元して続きを表示する。
@@ -138,6 +151,106 @@ export const TitleBar: React.FC = () => {
         className="flex h-full items-center text-gray-500"
         style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
       >
+        {isCardViewPage && (
+          <>
+          {isCardViewEditing && (
+            <button
+              onClick={() =>
+                window.dispatchEvent(new CustomEvent("cardview:save-request"))
+              }
+              className="flex h-full w-[46px] items-center justify-center transition-colors hover:bg-black/5"
+              title="保存"
+              aria-label="保存"
+              tabIndex={-1}
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M5 4H17L20 7V20H5V4Z"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M8 4V10H16V4"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M9 20V14H15V20"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          )}
+          <button
+            onClick={() =>
+              window.dispatchEvent(new CustomEvent("cardview:toggle-editing-request"))
+            }
+            className="flex h-full w-[46px] items-center justify-center transition-colors hover:bg-black/5"
+            title={isCardViewEditing ? "閲覧モードに切り替え" : "編集モードに切り替え"}
+            tabIndex={-1}
+          >
+            {isCardViewEditing ? (
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M2 12C2 12 5.8 6 12 6C18.2 6 22 12 22 12C22 12 18.2 18 12 18C5.8 18 2 12 2 12Z"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="3"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                />
+              </svg>
+            ) : (
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 20H21"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M16.5 3.5C17.3284 2.67157 18.6716 2.67157 19.5 3.5C20.3284 4.32843 20.3284 5.67157 19.5 6.5L7 19L3 20L4 16L16.5 3.5Z"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            )}
+          </button>
+          </>
+        )}
         <button
           onClick={() => window.desktop?.window.minimize()}
           className="flex h-full w-[46px] items-center justify-center transition-colors hover:bg-black/5"

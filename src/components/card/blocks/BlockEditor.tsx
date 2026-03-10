@@ -55,7 +55,7 @@ interface BlockEditorProps {
   minDeletableIndex?: number;
   hiddenBlockTypes?: CardBlock["type"][];
 
-  toolbarMountRef?: React.RefObject<HTMLDivElement | null>;
+  toolbarMount?: HTMLDivElement | null;
 }
 
 type DndStyle = React.CSSProperties & { transform?: string };
@@ -114,7 +114,7 @@ export const BlockEditor = React.forwardRef<
       onDelete,
       minDeletableIndex = 0,
       hiddenBlockTypes = [],
-      toolbarMountRef,
+      toolbarMount = null,
     },
     ref,
   ) => {
@@ -196,9 +196,6 @@ export const BlockEditor = React.forwardRef<
     // コンテナのスケール計測用
     const containerRef = useRef<HTMLDivElement | null>(null);
     const [measurement, setMeasurement] = useState({ scale: 1 });
-    const [toolbarMount, setToolbarMount] = useState<HTMLDivElement | null>(
-      null,
-    );
 
     const updateMeasurement = useCallback(() => {
       const el = containerRef.current;
@@ -226,10 +223,6 @@ export const BlockEditor = React.forwardRef<
     }, []);
 
     const scheduleMeasurement = useRafThrottledCallback(updateMeasurement);
-
-    useEffect(() => {
-      queueMicrotask(() => setToolbarMount(toolbarMountRef?.current ?? null));
-    }, [toolbarMountRef]);
 
     useEffect(() => {
       queueMicrotask(() => updateMeasurement());

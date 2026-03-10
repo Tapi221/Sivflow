@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { useCards } from "@/hooks/card/useCards";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -18,6 +18,9 @@ import { useIsDesktopRuntime } from "@/hooks/platform/useIsDesktopRuntime";
 import { useCardSets } from "@/hooks/cardSet/useCardSets";
 import { useBreadcrumbContext } from "@/contexts/BreadcrumbContext";
 
+const CARDVIEW_PAGER_PADDING_INLINE = 16;
+const CARDVIEW_PAGER_PADDING_BLOCK = "50vh";
+
 export default function CardView() {
   const { setExtraCrumbs } = useBreadcrumbContext();
 
@@ -29,8 +32,13 @@ export default function CardView() {
 
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [isFlipped, setIsFlipped] = useState(false);
-  const [isInlineEditing, setIsInlineEditing] = useState(false);
-  const [editingCardId, setEditingCardId] = useState(null);
+  const [isGlobalEditing, setIsGlobalEditing] = useState(false);
+  const [saveSignal, setSaveSignal] = useState(0);
+  const pendingFocusCardIdRef = useRef(null);
+  const suppressPagerSyncRef = useRef(false);
+  const lockedIndexRef = useRef(null);
+  const [globalToolbarMountQ, setGlobalToolbarMountQ] = useState(null);
+  const [globalToolbarMountA, setGlobalToolbarMountA] = useState(null);
   const [isMetaOpen, setIsMetaOpen] = useState(() => {
     if (typeof window === "undefined") return true;
     return window.localStorage.getItem("card-view.meta-panel-open") !== "false";
@@ -88,14 +96,6 @@ export default function CardView() {
   }, [cardSetId, cardSets]);
 
   useEffect(() => {
-    if (!isInlineEditing) return;
-    if (!editingCardId) return;
-    if (selectedCard?.id === editingCardId) return;
-    setIsInlineEditing(false);
-    setEditingCardId(null);
-  }, [isInlineEditing, editingCardId, selectedCard?.id]);
-
-  useEffect(() => {
     const crumbs = [];
 
     if (selectedCardSet) {
@@ -126,11 +126,7 @@ export default function CardView() {
     };
   }, [selectedCardSet, selectedCard, folderId, setExtraCrumbs]);
 
-  const handleEdit = (card) => {
-    if (!card?.id) return;
-    setEditingCardId(card.id);
-    setIsInlineEditing(true);
-  };
+  const handleEdit = () => setIsGlobalEditing(true);
 
   const handleToggleUncertainty = async (card) => {
     const current = card.hasUncertainty ?? card.has_uncertainty ?? false;
@@ -142,6 +138,64 @@ export default function CardView() {
     await updateCard(card.id, { isBookmarked: !current });
   };
 
+  const handleToggleViewMode = useCallback(() => {
+    const targetId = selectedCard?.id ?? null;
+    pendingFocusCardIdRef.current = targetId;
+    suppressPagerSyncRef.current = true;
+    lockedIndexRef.current =
+      targetId != null
+        ? effectiveCards.findIndex((c) => c.id === targetId)
+        : null;
+    setIsFlipped(false);
+    setIsGlobalEditing((prev) => !prev);
+  }, [selectedCard?.id, effectiveCards]);
+
+  useEffect(() => {
+    const targetId = pendingFocusCardIdRef.current;
+    if (!targetId) return;
+    const nextIndex = effectiveCards.findIndex((c) => c.id === targetId);
+    if (nextIndex >= 0) {
+      setCurrentIndex(nextIndex);
+      lockedIndexRef.current = nextIndex;
+    }
+    pendingFocusCardIdRef.current = null;
+    const timer = window.setTimeout(() => {
+      suppressPagerSyncRef.current = false;
+      lockedIndexRef.current = null;
+    }, 220);
+    return () => window.clearTimeout(timer);
+  }, [isGlobalEditing, effectiveCards]);
+
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent("cardview:editing-change", { detail: isGlobalEditing }),
+    );
+  }, [isGlobalEditing]);
+
+  useEffect(() => {
+    const onToggleEditingRequest = () => {
+      handleToggleViewMode();
+    };
+    window.addEventListener(
+      "cardview:toggle-editing-request",
+      onToggleEditingRequest,
+    );
+    return () =>
+      window.removeEventListener(
+        "cardview:toggle-editing-request",
+        onToggleEditingRequest,
+      );
+  }, [handleToggleViewMode]);
+
+  useEffect(() => {
+    const onSaveRequest = () => {
+      setSaveSignal((prev) => prev + 1);
+    };
+    window.addEventListener("cardview:save-request", onSaveRequest);
+    return () =>
+      window.removeEventListener("cardview:save-request", onSaveRequest);
+  }, []);
+
   if (!folderId && !cardSetId) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -152,6 +206,36 @@ export default function CardView() {
 
   return (
     <div className="h-full overflow-hidden bg-[#F5F7F8] pt-0 card-editor-right-pane-font">
+      <div className="flex h-full min-h-0 flex-col overflow-hidden">
+      {isDesktop && (
+        <div
+          className="shrink-0 border-b border-gray-200/70 bg-[#F8FAFB] px-3 py-2 transition-[padding] duration-150"
+          style={{
+            paddingRight: isMetaOpen ? "calc(var(--ui-panel-width) + 0.75rem)" : undefined,
+          }}
+        >
+          <div className="mx-auto grid w-full max-w-[1000px] grid-cols-1 gap-4 md:grid-cols-2">
+            <div
+              className={`flex h-14 min-h-0 w-full items-center rounded-md ${
+                isGlobalEditing
+                  ? "border border-slate-100 bg-white/60"
+                  : "border border-transparent bg-transparent"
+              }`}
+            >
+              <div ref={setGlobalToolbarMountQ} className="w-full" />
+            </div>
+            <div
+              className={`flex h-14 min-h-0 w-full items-center rounded-md ${
+                isGlobalEditing
+                  ? "border border-slate-100 bg-white/60"
+                  : "border border-transparent bg-transparent"
+              }`}
+            >
+              <div ref={setGlobalToolbarMountA} className="w-full" />
+            </div>
+          </div>
+        </div>
+      )}
       <div className="relative flex h-full min-h-0 overflow-hidden">
       <Button
         type="button"
@@ -175,7 +259,7 @@ export default function CardView() {
       </Button>
       <div
         className={`min-h-0 min-w-0 flex-1 overflow-hidden py-0 ${
-          isInlineEditing ? "px-0" : "px-4"
+          isGlobalEditing ? "px-0" : "px-4"
         }`}
       >
           {isLoading ? (
@@ -186,22 +270,35 @@ export default function CardView() {
               </div>
             </div>
           ) : isDesktop ? (
-            // ── PC: 縦スクロール式ページャ ──
             <VerticalCardPager
               cards={effectiveCards}
               activeIndex={currentIndex}
-              onActiveIndexChange={setCurrentIndex}
+              onActiveIndexChange={(idx) => {
+                if (
+                  suppressPagerSyncRef.current &&
+                  lockedIndexRef.current != null &&
+                  idx !== lockedIndexRef.current
+                ) {
+                  return;
+                }
+                setCurrentIndex(idx);
+              }}
               onFlip={() => setIsFlipped((f) => !f)}
-              paddingInlinePx={isInlineEditing ? 0 : 16}
-              getCardWidth={(card, idx, isActive) =>
-                isInlineEditing && isActive && card?.id === selectedCard?.id
-                  ? 1000
-                  : CANONICAL_CARD_WIDTH
+              paddingInlinePx={CARDVIEW_PAGER_PADDING_INLINE}
+              paddingBlock={CARDVIEW_PAGER_PADDING_BLOCK}
+              getCardWidth={() =>
+                isGlobalEditing ? 1000 : CANONICAL_CARD_WIDTH
               }
               getKey={(card) => card.id ?? card.docId ?? card.uid}
               renderCard={(card, idx, isActive) => (
-                isInlineEditing && isActive && card?.id === selectedCard?.id ? (
-                  <div className="w-full overflow-visible">
+                isGlobalEditing ? (
+                  <div
+                    className="w-full overflow-visible"
+                    style={{
+                      contentVisibility: "auto",
+                      containIntrinsicSize: "900px 1200px",
+                    }}
+                  >
                     <CardEditorPane
                       selectedCardId={card.id}
                       folderId={folderId || undefined}
@@ -210,8 +307,13 @@ export default function CardView() {
                       autoEdit
                       hideMetaPanel
                       dockToolbarsToTop
+                      hideBlockToolbars={!isActive}
+                      saveSignal={saveSignal}
+                      hideFooterActions
+                      embeddedInPager
+                      externalToolbarMountQ={isActive ? globalToolbarMountQ : null}
+                      externalToolbarMountA={isActive ? globalToolbarMountA : null}
                       pairGapClassName="gap-4"
-                      onRequestCloseEditing={() => setIsInlineEditing(false)}
                     />
                   </div>
                 ) : (
@@ -300,6 +402,7 @@ export default function CardView() {
           />
         </div>
       )}
+      </div>
       </div>
       </div>
   );

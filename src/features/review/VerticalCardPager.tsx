@@ -18,15 +18,14 @@ const DEFAULT_CARD_WIDTH = CANONICAL_CARD_WIDTH; // カード列の固定幅 (px
 const CARD_GAP = 16; // カード間の縦方向ギャップ (px)
 const SCROLL_PADDING = "50vh"; // 先頭・末尾カードを中央に寄せるための余白
 
-// ── アクティブ/非アクティブスタイル ──────────────────────────────────────
-const ACTIVE_BOX_SHADOW = "0 0 0 2px #3b82f6, 0 12px 40px rgba(0,0,0,0.18)";
-const INACTIVE_BOX_SHADOW = "0 2px 10px rgba(0,0,0,0.1)";
-/** cardWidth に合わせてスケールした角丸を返す (px 指定で縦横ともに一致) */
+// アクティブ強調（カルーセル風のフォーカス感）
+const ACTIVE_BOX_SHADOW = "0 0 0 2px #3b82f6, 0 10px 30px rgba(15,23,42,0.16)";
+const INACTIVE_BOX_SHADOW = "0 2px 10px rgba(15,23,42,0.08)";
 function cardBorderRadius(cardWidth: number): string {
   return `${Math.round((40 * cardWidth) / CANONICAL_CARD_WIDTH)}px`;
 }
 const ACTIVE_OPACITY = 1;
-const INACTIVE_OPACITY = 0.75;
+const INACTIVE_OPACITY = 0.78;
 
 // ── Props ───────────────────────────────────────────────────────────────────
 export type VerticalCardPagerProps<T> = {
@@ -48,6 +47,8 @@ export type VerticalCardPagerProps<T> = {
   getCardWidth?: (card: T, idx: number, isActive: boolean) => number;
   /** カード列全体の左右余白(px) */
   paddingInlinePx?: number;
+  /** カード列全体の上下余白 */
+  paddingBlock?: string | number;
   /** カードの key を取り出す関数。省略時は idx を使う */
   getKey?: (card: T, idx: number) => string | number;
 };
@@ -62,6 +63,7 @@ export function VerticalCardPager<T>({
   cardWidth = DEFAULT_CARD_WIDTH,
   getCardWidth,
   paddingInlinePx = 16,
+  paddingBlock = SCROLL_PADDING,
   getKey,
 }: VerticalCardPagerProps<T>) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -91,7 +93,7 @@ export function VerticalCardPager<T>({
           alignItems: "center",
           gap: CARD_GAP,
           // 先頭・末尾カードが中央に来られるよう上下に余白を確保
-          paddingBlock: SCROLL_PADDING,
+          paddingBlock,
           paddingInline: paddingInlinePx,
         }}
       >
@@ -113,13 +115,10 @@ export function VerticalCardPager<T>({
               style={{
                 width,
                 maxWidth: "100%",
-                // アクティブ: 青枠＋濃い影、非アクティブ: 薄い影
                 boxShadow: isActive ? ACTIVE_BOX_SHADOW : INACTIVE_BOX_SHADOW,
                 borderRadius: cardBorderRadius(width),
                 opacity: isActive ? ACTIVE_OPACITY : INACTIVE_OPACITY,
-                transition: "opacity 220ms ease, box-shadow 220ms ease",
-                // 非アクティブカードへの誤タップを防ぐ（オプション: コメントアウトで解除）
-                // pointerEvents: isActive ? 'auto' : 'none',
+                transition: "opacity 180ms ease, box-shadow 180ms ease",
               }}
             >
               {renderCard(card, idx, isActive)}
