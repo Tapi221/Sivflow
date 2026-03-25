@@ -5,6 +5,30 @@ export default {
   theme: {
     extend: {
       colors: {
+        border: "hsl(var(--border) / <alpha-value>)",
+        input: "hsl(var(--input) / <alpha-value>)",
+        ring: "hsl(var(--ring) / <alpha-value>)",
+        foreground: "hsl(var(--foreground) / <alpha-value>)",
+        popover: {
+          DEFAULT: "hsl(var(--popover) / <alpha-value>)",
+          foreground: "hsl(var(--popover-foreground) / <alpha-value>)",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted) / <alpha-value>)",
+          foreground: "hsl(var(--muted-foreground) / <alpha-value>)",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent) / <alpha-value>)",
+          foreground: "hsl(var(--accent-foreground) / <alpha-value>)",
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--secondary) / <alpha-value>)",
+          foreground: "hsl(var(--secondary-foreground) / <alpha-value>)",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive) / <alpha-value>)",
+          foreground: "hsl(var(--destructive-foreground) / <alpha-value>)",
+        },
         // メインカラー（ティールグリーン系）
         primary: {
           DEFAULT: "var(--color-primary-500)", // Default to 500
@@ -32,7 +56,7 @@ export default {
         },
         // 背景
         background: {
-          DEFAULT: "#FFFFFF",
+          DEFAULT: "hsl(var(--background) / <alpha-value>)",
           light: "#FFFFFF",
           subtle: "#F5F5F5",
         },

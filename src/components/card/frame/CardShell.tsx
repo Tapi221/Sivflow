@@ -452,8 +452,7 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
     };
 
     const enforcedShellOverflowStyle: React.CSSProperties = {
-      overflowY: "visible",
-      overflowX: "visible",
+      overflow: "hidden",
     };
 
     const shell = (

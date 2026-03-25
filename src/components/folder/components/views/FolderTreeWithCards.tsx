@@ -138,6 +138,7 @@ export function FolderTreeWithCards({
   const rowRefs = useRef<Map<string, HTMLElement>>(new Map());
   const treeRootRef = useRef<HTMLDivElement | null>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
+  const handledCreateFolderTokenRef = useRef(0);
 
   // merge optimistic
   const treeFolders = useMemo(() => {
@@ -312,8 +313,10 @@ export function FolderTreeWithCards({
   // trigger folder creation from external token
   useEffect(() => {
     if (createFolderRequestToken <= 0) return;
-    void actions.handleCreateFolderAction(null);
-  }, [createFolderRequestToken]);
+    if (handledCreateFolderTokenRef.current === createFolderRequestToken) return;
+    handledCreateFolderTokenRef.current = createFolderRequestToken;
+    void actions.handleCreateFolderAction(selectedFolderId ?? null);
+  }, [createFolderRequestToken, actions.handleCreateFolderAction, selectedFolderId]);
 
   const setRowRef = useCallback((id: string, node: HTMLElement | null) => {
     if (node) rowRefs.current.set(id, node);

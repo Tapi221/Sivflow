@@ -11,6 +11,7 @@ import { VerticalCardPager } from "@/features/review/VerticalCardPager";
 import { useCardEntity } from "@/hooks/card/useCardEntity";
 import { useCards } from "@/hooks/card/useCards";
 import { useCardSets } from "@/hooks/cardSet/useCardSets";
+import { useFolders } from "@/hooks/folder/useFolders";
 import { useIsDesktopRuntime } from "@/hooks/platform/useIsDesktopRuntime";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import type { Card } from "@/types";
@@ -157,6 +158,7 @@ const DesktopCardSurface = React.memo(function DesktopCardSurface({
 
 export default function CardView() {
   const { setExtraCrumbs } = useBreadcrumbContext();
+  const lastCrumbsSignatureRef = useRef<string>("");
 
   const initialParamsRef = useRef<ParsedParams>(parseCardViewParams());
   const { folderId, cardSetId, initialIndex, targetCardId } =
@@ -184,6 +186,7 @@ export default function CardView() {
     updateCard,
   } = useCards(folderId || undefined, cardSetId || undefined);
   const { cardSets } = useCardSets();
+  const { folders = [] } = useFolders();
   const { settings } = useUserSettings();
   const isDesktop = useIsDesktopRuntime();
 
@@ -264,12 +267,28 @@ export default function CardView() {
       folderId?: string | null;
     }> = [];
 
+    const crumbFolderId = folderId ?? selectedCardSet?.folderId ?? null;
+    if (crumbFolderId) {
+      const path = [];
+      let cur = folders.find((f) => f.id === crumbFolderId);
+      while (cur) {
+        path.unshift(cur);
+        cur = folders.find((f) => f.id === cur.parentFolderId);
+      }
+
+      path.forEach((folder) => {
+        crumbs.push({
+          label: folder.folderName,
+          to: `/folders?folderId=${folder.id}`,
+          folderId: folder.id,
+        });
+      });
+    }
+
     if (selectedCardSet) {
-      const crumbFolderId = folderId ?? selectedCardSet.folderId ?? null;
       const to = new URLSearchParams();
       if (crumbFolderId) to.set("folderId", crumbFolderId);
       to.set("cardSetId", selectedCardSet.id);
-
       crumbs.push({
         label: selectedCardSet.name || "カードセット",
         to: `/folders?${to.toString()}`,
@@ -285,12 +304,19 @@ export default function CardView() {
       crumbs.push({ label });
     }
 
-    setExtraCrumbs(crumbs);
+    const signature = JSON.stringify(crumbs);
+    if (lastCrumbsSignatureRef.current !== signature) {
+      lastCrumbsSignatureRef.current = signature;
+      setExtraCrumbs(crumbs);
+    }
+  }, [selectedCardSet, selectedCard, folderId, folders, setExtraCrumbs]);
 
+  useEffect(() => {
     return () => {
+      lastCrumbsSignatureRef.current = "";
       setExtraCrumbs([]);
     };
-  }, [selectedCardSet, selectedCard, folderId, setExtraCrumbs]);
+  }, [setExtraCrumbs]);
 
   const handleEdit = useCallback(() => {
     setIsGlobalEditing(true);
@@ -445,7 +471,7 @@ export default function CardView() {
   return (
     <div className="h-full overflow-hidden bg-[#F5F7F8] pt-0 card-editor-right-pane-font">
       <div className="flex h-full min-h-0 flex-col overflow-hidden">
-        {isDesktop && (
+        {isDesktop && isGlobalEditing && (
           <div
             className="shrink-0 border-b border-gray-200/70 bg-[#F8FAFB] px-3 py-2 transition-[padding] duration-150"
             style={{

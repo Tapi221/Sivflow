@@ -82,8 +82,13 @@ export const TitleBar: React.FC = () => {
   const allCrumbs = useMemo(() => {
     if (extraCrumbs.length === 0) return crumbs;
 
-    const base = crumbs.map((c, i) =>
-      i === crumbs.length - 1 ? { ...c, to: "/folders" } : c,
+    const baseCrumbs =
+      pathname.toLowerCase().startsWith("/cardview") && crumbs.length > 1
+        ? [crumbs[0]]
+        : crumbs;
+
+    const base = baseCrumbs.map((c, i) =>
+      i === baseCrumbs.length - 1 ? { ...c, to: "/folders" } : c,
     );
 
     const extra = extraCrumbs.map((c, i) =>
@@ -91,7 +96,7 @@ export const TitleBar: React.FC = () => {
     );
 
     return [...base, ...extra];
-  }, [crumbs, extraCrumbs]);
+  }, [crumbs, extraCrumbs, pathname]);
 
   if (!isDesktop) return null;
 
