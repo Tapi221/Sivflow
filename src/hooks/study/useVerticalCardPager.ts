@@ -14,6 +14,8 @@ export type UseVerticalCardPagerOptions = {
   onFlip?: () => void;
   /** 自然スクロール時の activeIndex 反映遅延(ms)。0 なら即時反映 */
   naturalIndexCommitDelayMs?: number;
+  /** true の間は自然スクロールや矢印操作で activeIndex を変更しない */
+  freezeActiveIndex?: boolean;
 };
 
 export type UseVerticalCardPagerReturn = {
@@ -32,6 +34,7 @@ export function useVerticalCardPager({
   scrollContainerRef,
   onFlip,
   naturalIndexCommitDelayMs = 0,
+  freezeActiveIndex = false,
 }: UseVerticalCardPagerOptions): UseVerticalCardPagerReturn {
   const itemRefs = useRef<(HTMLElement | null)[]>([]);
 
@@ -146,6 +149,7 @@ export function useVerticalCardPager({
     const container = scrollContainerRef.current;
     if (!container) return;
     if (pendingScrollRef.current) return;
+    if (freezeActiveIndex) return;
 
     const containerCenter = container.scrollTop + container.clientHeight / 2;
 
@@ -168,25 +172,38 @@ export function useVerticalCardPager({
     if (nearestIdx !== -1 && nearestIdx !== activeIndexRef.current) {
       queueNaturalIndexCommit(nearestIdx);
     }
-  }, [queueNaturalIndexCommit, scrollContainerRef]);
+  }, [freezeActiveIndex, queueNaturalIndexCommit, scrollContainerRef]);
 
   const goNext = useCallback(() => {
+    if (freezeActiveIndex) return;
     const next = Math.min(activeIndexRef.current + 1, count - 1);
     if (next === activeIndexRef.current) return;
     clearNaturalIndexTimer();
     queuedNaturalIndexRef.current = null;
     onActiveIndexChange(next);
     scrollToIndex(next, "smooth");
-  }, [clearNaturalIndexTimer, count, onActiveIndexChange, scrollToIndex]);
+  }, [
+    clearNaturalIndexTimer,
+    count,
+    freezeActiveIndex,
+    onActiveIndexChange,
+    scrollToIndex,
+  ]);
 
   const goPrev = useCallback(() => {
+    if (freezeActiveIndex) return;
     const prev = Math.max(activeIndexRef.current - 1, 0);
     if (prev === activeIndexRef.current) return;
     clearNaturalIndexTimer();
     queuedNaturalIndexRef.current = null;
     onActiveIndexChange(prev);
     scrollToIndex(prev, "smooth");
-  }, [clearNaturalIndexTimer, onActiveIndexChange, scrollToIndex]);
+  }, [
+    clearNaturalIndexTimer,
+    freezeActiveIndex,
+    onActiveIndexChange,
+    scrollToIndex,
+  ]);
 
   // 外部から activeIndex が変わったときに中央へ寄せる
   // 自然スクロール起因の変更では二重スクロールしない

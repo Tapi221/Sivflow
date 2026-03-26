@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  INITIAL_REVIEW_INTERVAL_DAYS,
   computeNextReview,
   createReviewPatchFromRating,
 } from "@/services/reviewAlgorithm";
@@ -10,7 +9,7 @@ import { calculateResistanceScore } from "@/utils/reviewMetrics";
 const now = new Date("2026-03-26T13:33:00.000Z");
 
 describe("reviewAlgorithm", () => {
-  it("keeps the first review interval identical across all subjective scores", () => {
+  it("changes the first review interval by subjective score", () => {
     const card = {
       memoryStability: 0,
       nextReviewDate: new Date("2026-03-26T00:00:00.000Z"),
@@ -26,8 +25,8 @@ describe("reviewAlgorithm", () => {
         }).intervalDays,
     );
 
-    expect(new Set(intervals).size).toBe(1);
-    expect(intervals[0]).toBe(INITIAL_REVIEW_INTERVAL_DAYS);
+    expect(new Set(intervals).size).toBe(intervals.length);
+    expect(intervals).toEqual([2, 3, 8, 15]);
   });
 
   it("uses the computed interval when creating a persisted review patch", () => {
@@ -38,7 +37,7 @@ describe("reviewAlgorithm", () => {
       reviewLogs: [],
     };
 
-    const { patch, reviewLog } = createReviewPatchFromRating({
+    const { patch, reviewLog, reviewUpdate } = createReviewPatchFromRating({
       card,
       rating: 4,
       now,
@@ -49,7 +48,7 @@ describe("reviewAlgorithm", () => {
     expect(patch.reviewLogs).toHaveLength(1);
     expect(patch.reviewLogs[0]).toEqual(reviewLog);
     expect(reviewLog.resistanceScore).toBe(
-      calculateResistanceScore(INITIAL_REVIEW_INTERVAL_DAYS),
+      calculateResistanceScore(reviewUpdate.intervalDays),
     );
   });
 

@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type SetStateAction,
+} from "react";
 
 import { sortBlocksByOrderIndex } from "@/components/card/blocks/blockOrdering";
 import {
@@ -58,7 +65,19 @@ export function useCardEditorSession({
   const [isFlipped, setIsFlipped] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [draft, setDraft] = useState<EditorDraft | null>(null);
+  const [draft, setDraftState] = useState<EditorDraft | null>(null);
+  const draftRef = useRef<EditorDraft | null>(null);
+
+  const setDraft = useCallback((next: SetStateAction<EditorDraft | null>) => {
+    const resolved =
+      typeof next === "function"
+        ? (next as (prevState: EditorDraft | null) => EditorDraft | null)(
+            draftRef.current,
+          )
+        : next;
+    draftRef.current = resolved;
+    setDraftState(resolved);
+  }, []);
 
   const editingCardIdRef = useRef<string | null>(null);
   const hydratedFromIdRef = useRef<string | null>(null);
@@ -217,7 +236,8 @@ export function useCardEditorSession({
   }, [localSelectedCardId, resetDialogs, selectedCardId]);
 
   const handleSave = useCallback(async (): Promise<boolean> => {
-    if (!draft) return false;
+    const currentDraft = draftRef.current;
+    if (!currentDraft) return false;
 
     try {
       setIsSaving(true);
@@ -248,18 +268,22 @@ export function useCardEditorSession({
       };
 
       const resolvedTags = await Promise.all(
-        draft.tags.map((name) => addTag(name)),
+        currentDraft.tags.map((name) => addTag(name)),
       );
       const tagIds = resolvedTags.map((tag) => tag.id);
       const payload: Partial<Card> = {
-        title: draft.title,
+        title: currentDraft.title,
         tagIds,
-        isDraft: draft.isDraft,
-        questionImages: sanitizeUploadedImages(draft.questionImages) as UploadedImage[],
-        answerImages: sanitizeUploadedImages(draft.answerImages) as UploadedImage[],
-        questionBlocks: sanitizeBlocksForSave(draft.questionBlocks),
-        answerBlocks: sanitizeBlocksForSave(draft.answerBlocks),
-        layoutRows: normalizeLayoutRows(draft.layoutRows),
+        isDraft: currentDraft.isDraft,
+        questionImages: sanitizeUploadedImages(
+          currentDraft.questionImages,
+        ) as UploadedImage[],
+        answerImages: sanitizeUploadedImages(
+          currentDraft.answerImages,
+        ) as UploadedImage[],
+        questionBlocks: sanitizeBlocksForSave(currentDraft.questionBlocks),
+        answerBlocks: sanitizeBlocksForSave(currentDraft.answerBlocks),
+        layoutRows: normalizeLayoutRows(currentDraft.layoutRows),
       };
 
       if (isNew) {
@@ -313,7 +337,6 @@ export function useCardEditorSession({
   }, [
     addTag,
     createCard,
-    draft,
     folderId,
     isNew,
     onCardUpdated,

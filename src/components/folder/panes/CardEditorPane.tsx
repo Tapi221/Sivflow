@@ -79,6 +79,7 @@ type FlashcardCardLike = Record<string, unknown> & {
 };
 
 const CARDVIEW_SAVE_FINISHED_EVENT = "cardview:save-finished";
+const CARDVIEW_EDITING_DRAFT_PATCH_EVENT = "cardview:editing-draft-patch";
 const CARD_PANE_VIEW_DEFAULT_WIDTH_PX = 576;
 const CARD_PANE_EDIT_DEFAULT_WIDTH_PX = 820;
 const CARD_PANE_DOCKED_EDIT_DEFAULT_WIDTH_PX = 1000;
@@ -196,6 +197,11 @@ function CardPaneWidthControl({
 
 const toFlashcardCardLike = (card: Card): FlashcardCardLike =>
   card as unknown as FlashcardCardLike;
+
+type EditingDraftPatchDetail = {
+  cardId: string;
+  patch: Partial<Pick<Card, "title" | "isDraft">> & { tags?: string[] };
+};
 
 export function CardEditorPane({
   selectedCardId,
@@ -315,6 +321,47 @@ export function CardEditorPane({
     onSelectCardId,
     resetDialogs: () => resetDialogsRef.current(),
   });
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handler = (event: Event) => {
+      const detail = (event as CustomEvent<EditingDraftPatchDetail>)?.detail;
+      if (!detail || !selectedCard || !isEditing) return;
+      if (detail.cardId !== selectedCard.id) return;
+
+      const nextTitle =
+        typeof detail.patch.title === "string" ? detail.patch.title : undefined;
+      const nextIsDraft =
+        typeof detail.patch.isDraft === "boolean"
+          ? detail.patch.isDraft
+          : undefined;
+      const nextTags = Array.isArray(detail.patch.tags)
+        ? detail.patch.tags
+        : undefined;
+      if (
+        nextTitle === undefined &&
+        nextIsDraft === undefined &&
+        nextTags === undefined
+      ) {
+        return;
+      }
+
+      setDraft((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          ...(nextTitle !== undefined ? { title: nextTitle } : {}),
+          ...(nextIsDraft !== undefined ? { isDraft: nextIsDraft } : {}),
+          ...(nextTags !== undefined ? { tags: nextTags } : {}),
+        };
+      });
+    };
+
+    window.addEventListener(CARDVIEW_EDITING_DRAFT_PATCH_EVENT, handler);
+    return () =>
+      window.removeEventListener(CARDVIEW_EDITING_DRAFT_PATCH_EVENT, handler);
+  }, [isEditing, selectedCard, setDraft]);
 
   const {
     allowAutoMinHeightSyncRef,
@@ -860,19 +907,27 @@ export function CardEditorPane({
             <CardMetaPanel
               card={panelCard}
               reviewLogs={panelCard?.reviewLogs ?? []}
-              onAddReviewLog={({ reviewedAt, rating }) => {
+              onAddReviewLog={({ reviewedAt, rating, durationMinutes }) => {
                 if (!selectedCard?.id) return Promise.resolve();
                 const { patch } = createReviewPatchFromRating({
                   card: selectedCard,
                   rating,
                   now: new Date(reviewedAt),
                   delayBonusEnabled: settings?.delayBonusEnabled ?? false,
+                  durationMinutes,
                 });
-                return updateCard(selectedCard.id, patch).then(() => {
-                  onCardUpdated?.();
-                });
+                return Promise.resolve(updateCard(selectedCard.id, patch)).then(
+                  () => {
+                    onCardUpdated?.();
+                  },
+                );
               }}
-              onUpdateLatestReviewLog={({ reviewLogs, reviewedAt, rating }) => {
+              onUpdateLatestReviewLog={({
+                reviewLogs,
+                reviewedAt,
+                rating,
+                durationMinutes,
+              }) => {
                 if (!selectedCard?.id) return Promise.resolve();
                 const { patch } = createLatestReviewLogPatch({
                   action: "update",
@@ -882,10 +937,13 @@ export function CardEditorPane({
                   reviewedAt: new Date(reviewedAt),
                   reviewLogs,
                   reviewStartNextDay: settings?.reviewStartNextDay ?? true,
+                  durationMinutes,
                 });
-                return updateCard(selectedCard.id, patch).then(() => {
-                  onCardUpdated?.();
-                });
+                return Promise.resolve(updateCard(selectedCard.id, patch)).then(
+                  () => {
+                    onCardUpdated?.();
+                  },
+                );
               }}
               onDeleteLatestReviewLog={({ reviewLogs }) => {
                 if (!selectedCard?.id) return Promise.resolve();
@@ -896,7 +954,26 @@ export function CardEditorPane({
                   reviewLogs,
                   reviewStartNextDay: settings?.reviewStartNextDay ?? true,
                 });
-                return updateCard(selectedCard.id, patch).then(() => {
+                return Promise.resolve(updateCard(selectedCard.id, patch)).then(
+                  () => {
+                    onCardUpdated?.();
+                  },
+                );
+              }}
+              onUpdateReviewLogDuration={({
+                reviewLogs,
+                logIndex,
+                durationMinutes,
+              }) => {
+                if (!selectedCard?.id) return Promise.resolve();
+                const nextReviewLogs = reviewLogs.map((log, index) =>
+                  index === logIndex ? { ...log, durationMinutes } : log,
+                );
+                return Promise.resolve(
+                  updateCard(selectedCard.id, {
+                    reviewLogs: nextReviewLogs,
+                  }),
+                ).then(() => {
                   onCardUpdated?.();
                 });
               }}

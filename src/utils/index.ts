@@ -162,6 +162,7 @@ type NormalizedReviewLog = {
   reviewedAt: string;
   rating: 1 | 2 | 3 | 4;
   resistanceScore: number;
+  durationMinutes: number | null;
 };
 
 const normalizeReviewLogs = (rawLogs: unknown): NormalizedReviewLog[] => {
@@ -204,6 +205,14 @@ const normalizeReviewLogs = (rawLogs: unknown): NormalizedReviewLog[] => {
         ),
       );
       const scoreNum = scoreRaw ?? 0;
+      const durationMinutesRaw = pickNumber(
+        pick(
+          log.durationMinutes,
+          log.duration_minutes,
+          log.durationMin,
+          log.duration_min,
+        ),
+      );
 
       if (!reviewed || ratingRaw === null) return null;
 
@@ -214,6 +223,8 @@ const normalizeReviewLogs = (rawLogs: unknown): NormalizedReviewLog[] => {
         reviewedAt: reviewed.toISOString(),
         rating,
         resistanceScore: Math.max(0, Math.min(100, scoreNum)),
+        durationMinutes:
+          durationMinutesRaw === null ? null : Math.max(0, Math.round(durationMinutesRaw)),
       } satisfies NormalizedReviewLog;
     })
     .filter((v): v is NormalizedReviewLog => v !== null);

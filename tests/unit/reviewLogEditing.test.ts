@@ -45,6 +45,7 @@ describe("latest review log editing", () => {
       card: afterFirst,
       rating: 1,
       now: secondReviewedAt,
+      durationMinutes: 17,
     });
 
     const { patch } = createLatestReviewLogPatch({
@@ -53,6 +54,7 @@ describe("latest review log editing", () => {
       rating: 1,
       reviewedAt: secondReviewedAt,
       reviewLogs: afterSecond.reviewLogs,
+      durationMinutes: 17,
     });
 
     expect(patch.reviewCount).toBe(expected.patch.reviewCount);
@@ -65,6 +67,45 @@ describe("latest review log editing", () => {
       expected.patch.nextReviewDate.toISOString(),
     );
     expect(patch.reviewLogs).toEqual(expected.patch.reviewLogs);
+  });
+
+  it("preserves the latest duration when updating without a new duration", () => {
+    const { afterFirst, afterSecond } = createReviewedCard();
+    const reviewLogs = [
+      {
+        ...afterFirst.reviewLogs[0],
+        durationMinutes: 9,
+      },
+      {
+        ...afterSecond.reviewLogs[1],
+        durationMinutes: 14,
+      },
+    ];
+
+    const { patch } = createLatestReviewLogPatch({
+      action: "update",
+      card: {
+        ...afterSecond,
+        reviewLogs,
+      },
+      rating: 2,
+      reviewedAt: secondReviewedAt,
+      reviewLogs,
+    });
+
+    expect(patch.reviewLogs.at(-1)?.durationMinutes).toBe(14);
+  });
+
+  it("stores duration minutes when creating a new review patch", () => {
+    const initialCard = createInitialCard();
+    const { patch } = createReviewPatchFromRating({
+      card: initialCard,
+      rating: 4,
+      now: firstReviewedAt,
+      durationMinutes: 12,
+    });
+
+    expect(patch.reviewLogs.at(-1)?.durationMinutes).toBe(12);
   });
 
   it("rolls the card back to the previous review when deleting the latest log", () => {

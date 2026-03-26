@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactElement } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";
 import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
@@ -36,6 +36,7 @@ type MetaReviewLog = {
   reviewedAt: string;
   rating: MetaRating;
   resistanceScore: number | null;
+  durationMinutes: number | null;
   reviewIndexHint?: number;
 };
 
@@ -45,15 +46,22 @@ type CardMetaPanelProps = {
   onAddReviewLog: (input: {
     reviewedAt: string;
     rating: ReviewLog["rating"];
-  }) => void | Promise<void>;
+    durationMinutes?: number | null;
+  }) => void | Promise<void> | Promise<unknown>;
   onUpdateLatestReviewLog?: (input: {
     reviewLogs: ReviewLog[];
     reviewedAt: string;
     rating: ReviewLog["rating"];
-  }) => void | Promise<void>;
+    durationMinutes?: number | null;
+  }) => void | Promise<void> | Promise<unknown>;
   onDeleteLatestReviewLog?: (input: {
     reviewLogs: ReviewLog[];
-  }) => void | Promise<void>;
+  }) => void | Promise<void> | Promise<unknown>;
+  onUpdateReviewLogDuration?: (input: {
+    reviewLogs: ReviewLog[];
+    logIndex: number;
+    durationMinutes: number | null;
+  }) => void | Promise<void> | Promise<unknown>;
   onTitleInputChange?: (nextTitle: string) => void | Promise<void>;
   onUpdateTags: (nextTags: string[]) => void;
   onToggleDraft: (isDraft: boolean) => void;
@@ -87,7 +95,7 @@ const RATING_TONE_CLASS: Record<ReviewLog["rating"], string> = {
 
 const RATING_FACE_DESIGN: Record<
   ReviewLog["rating"],
-  { iconWrap: string; svg: JSX.Element }
+  { iconWrap: string; svg: ReactElement }
 > = {
   1: {
     iconWrap: "bg-red-50 text-[#FF5A65] face-badge-convex",
@@ -194,6 +202,17 @@ function toRatingValue(value: unknown): ReviewLog["rating"] | null {
   return rounded as ReviewLog["rating"];
 }
 
+function normalizeDurationMinutes(value: unknown): number | null {
+  const numeric = toFiniteNumber(value);
+  if (numeric === null) return null;
+  return Math.max(0, Math.round(numeric));
+}
+
+function formatDurationMinutes(value: number | null): string {
+  if (typeof value !== "number" || !Number.isFinite(value)) return "-";
+  return `${Math.max(0, Math.round(value))} min.`;
+}
+
 function normalizeMetaReviewLog(value: unknown): MetaReviewLog | null {
   const log = asRecord(value);
   if (!log) return null;
@@ -235,6 +254,12 @@ function normalizeMetaReviewLog(value: unknown): MetaReviewLog | null {
       resistanceScoreRaw === null
         ? null
         : Math.max(0, Math.min(100, resistanceScoreRaw)),
+    durationMinutes: normalizeDurationMinutes(
+      log.durationMinutes ??
+        log.duration_minutes ??
+        log.durationMin ??
+        log.duration_min,
+    ),
   };
 }
 
@@ -301,6 +326,7 @@ function toEditableReviewLogs(logs: MetaReviewLog[]): ReviewLog[] {
         Number.isFinite(log.resistanceScore)
           ? log.resistanceScore
           : 0,
+      durationMinutes: log.durationMinutes ?? null,
     }));
 }
 
@@ -310,6 +336,7 @@ export function CardMetaPanel({
   onAddReviewLog,
   onUpdateLatestReviewLog,
   onDeleteLatestReviewLog,
+  onUpdateReviewLogDuration,
   onTitleInputChange,
   onUpdateTags,
   onToggleDraft,
@@ -334,13 +361,23 @@ export function CardMetaPanel({
   const [pendingReviewRatingInput, setPendingReviewRatingInput] = useState<
     ReviewLog["rating"] | null
   >(null);
+  const [pendingReviewDurationInput, setPendingReviewDurationInput] =
+    useState("");
   const [isEditingLatestReview, setIsEditingLatestReview] = useState(false);
   const [latestReviewDateInput, setLatestReviewDateInput] = useState("");
   const [latestReviewRatingInput, setLatestReviewRatingInput] = useState<
     ReviewLog["rating"] | null
   >(null);
+  const [latestReviewDurationInput, setLatestReviewDurationInput] =
+    useState("");
   const [isMutatingLatestReview, setIsMutatingLatestReview] = useState(false);
   const [latestReviewError, setLatestReviewError] = useState<string | null>(
+    null,
+  );
+  const [durationDrafts, setDurationDrafts] = useState<Record<number, string>>(
+    {},
+  );
+  const [durationSavingIndex, setDurationSavingIndex] = useState<number | null>(
     null,
   );
   const [, setSearchParams] = useSearchParams();
@@ -367,6 +404,7 @@ export function CardMetaPanel({
   useEffect(() => {
     setPendingReviewTimestamp(null);
     setPendingReviewRatingInput(null);
+    setPendingReviewDurationInput("");
   }, [card?.id]);
 
   const shouldLoadStudyLogs =
@@ -492,6 +530,7 @@ export function CardMetaPanel({
         reviewedAt: lastReviewAt.toISOString(),
         rating: null,
         resistanceScore: derivedResistanceScore,
+        durationMinutes: null,
         reviewIndexHint: normalizedReviewCount,
       } satisfies MetaReviewLog,
     ];
@@ -537,6 +576,7 @@ export function CardMetaPanel({
         rating: pendingReviewRatingInput,
         now: new Date(pendingReviewTimestamp),
         delayBonusEnabled,
+        durationMinutes: normalizeDurationMinutes(pendingReviewDurationInput),
       });
       return reviewLog.resistanceScore;
     } catch {
@@ -567,6 +607,7 @@ export function CardMetaPanel({
         reviewStartNextDay,
         reviewedAt,
         rating: latestReviewRatingInput,
+        durationMinutes: normalizeDurationMinutes(latestReviewDurationInput),
       });
       return reviewLog?.resistanceScore ?? null;
     } catch {
@@ -659,6 +700,10 @@ export function CardMetaPanel({
         ratingLabel: getRatingLabel(log.rating),
         ratingToneClass: getRatingToneClass(log.rating),
         ratingFaceDesign: getRatingFaceDesign(log.rating),
+        durationMinutes: log.durationMinutes ?? null,
+        durationLabel: formatDurationMinutes(log.durationMinutes ?? null),
+        editableLogIndex:
+          idx < editableReviewLogs.length && log.rating !== null ? idx : null,
         isLatestEditable: idx === safeLogs.length - 1 && canManageLatestReview,
         resistanceScore: (() => {
           const score =
@@ -676,6 +721,7 @@ export function CardMetaPanel({
     [
       canManageLatestReview,
       safeLogs,
+      editableReviewLogs.length,
       isEditingLatestReview,
       editingPreviewResistanceScore,
     ],
@@ -693,6 +739,11 @@ export function CardMetaPanel({
         ratingLabel: "選択",
         ratingToneClass: getRatingToneClass(null),
         ratingFaceDesign: null,
+        durationMinutes: normalizeDurationMinutes(pendingReviewDurationInput),
+        durationLabel: formatDurationMinutes(
+          normalizeDurationMinutes(pendingReviewDurationInput),
+        ),
+        editableLogIndex: null,
         resistanceScore:
           pendingPreviewResistanceScore != null
             ? `${pendingPreviewResistanceScore}%`
@@ -706,6 +757,7 @@ export function CardMetaPanel({
     historyRows,
     completedReviewCount,
     pendingPreviewResistanceScore,
+    pendingReviewDurationInput,
   ]);
 
   // tagIds 優先、fallback: card.tags（移行期間互換）
@@ -745,6 +797,7 @@ export function CardMetaPanel({
     if (isEditingLatestReview || isMutatingLatestReview) return;
     setPendingReviewTimestamp(new Date().toISOString());
     setPendingReviewRatingInput(null);
+    setPendingReviewDurationInput("");
   };
 
   const handleSelectReviewRating = (rating: ReviewLog["rating"]) => {
@@ -753,10 +806,17 @@ export function CardMetaPanel({
     setPendingReviewRatingInput(rating);
     setIsSavingPendingReview(true);
     const reviewedAt = pendingReviewTimestamp ?? new Date().toISOString();
-    void Promise.resolve(onAddReviewLog({ reviewedAt, rating }))
+    void Promise.resolve(
+      onAddReviewLog({
+        reviewedAt,
+        rating,
+        durationMinutes: normalizeDurationMinutes(pendingReviewDurationInput),
+      }),
+    )
       .then(() => {
         setPendingReviewTimestamp(null);
         setPendingReviewRatingInput(null);
+        setPendingReviewDurationInput("");
       })
       .catch(() => {
         setPendingReviewRatingInput(null);
@@ -769,6 +829,7 @@ export function CardMetaPanel({
   const handleCancelPendingReview = () => {
     setPendingReviewTimestamp(null);
     setPendingReviewRatingInput(null);
+    setPendingReviewDurationInput("");
   };
 
   useEffect(() => {
@@ -777,10 +838,18 @@ export function CardMetaPanel({
       toDateTimeLocalValue(latestEditableReview?.reviewedAt),
     );
     setLatestReviewRatingInput(latestEditableReview?.rating ?? null);
+    setLatestReviewDurationInput(
+      latestEditableReview?.durationMinutes != null
+        ? String(latestEditableReview.durationMinutes)
+        : "",
+    );
     setIsMutatingLatestReview(false);
     setLatestReviewError(null);
+    setDurationDrafts({});
+    setDurationSavingIndex(null);
   }, [
     card?.id,
+    latestEditableReview?.durationMinutes,
     latestEditableReview?.rating,
     latestEditableReview?.reviewedAt,
   ]);
@@ -791,6 +860,11 @@ export function CardMetaPanel({
       toDateTimeLocalValue(latestEditableReview.reviewedAt),
     );
     setLatestReviewRatingInput(latestEditableReview.rating);
+    setLatestReviewDurationInput(
+      latestEditableReview.durationMinutes != null
+        ? String(latestEditableReview.durationMinutes)
+        : "",
+    );
     setLatestReviewError(null);
     setIsEditingLatestReview(true);
   };
@@ -801,6 +875,11 @@ export function CardMetaPanel({
       toDateTimeLocalValue(latestEditableReview?.reviewedAt),
     );
     setLatestReviewRatingInput(latestEditableReview?.rating ?? null);
+    setLatestReviewDurationInput(
+      latestEditableReview?.durationMinutes != null
+        ? String(latestEditableReview.durationMinutes)
+        : "",
+    );
     setLatestReviewError(null);
   };
 
@@ -834,6 +913,7 @@ export function CardMetaPanel({
         reviewLogs: editableReviewLogs,
         reviewedAt: reviewedAt.toISOString(),
         rating: latestReviewRatingInput,
+        durationMinutes: normalizeDurationMinutes(latestReviewDurationInput),
       }),
     )
       .then(() => {
@@ -844,6 +924,71 @@ export function CardMetaPanel({
       })
       .finally(() => {
         setIsMutatingLatestReview(false);
+      });
+  };
+
+  const handleChangeDurationDraft = (logIndex: number, nextValue: string) => {
+    setDurationDrafts((prev) => ({ ...prev, [logIndex]: nextValue }));
+  };
+
+  const handleSaveReviewDuration = (logIndex: number, rawValue: string) => {
+    if (!onUpdateReviewLogDuration) return;
+    if (durationSavingIndex !== null) return;
+    const currentLog = editableReviewLogs[logIndex];
+    if (!currentLog) return;
+
+    const trimmed = rawValue.trim();
+    if (trimmed !== "" && !/^\d+$/.test(trimmed)) {
+      setLatestReviewError("所要時間は分単位の整数で入力してください。");
+      setDurationDrafts((prev) => ({
+        ...prev,
+        [logIndex]:
+          currentLog.durationMinutes != null
+            ? String(currentLog.durationMinutes)
+            : "",
+      }));
+      return;
+    }
+
+    const durationMinutes =
+      trimmed === "" ? null : normalizeDurationMinutes(trimmed);
+    if ((currentLog.durationMinutes ?? null) === durationMinutes) {
+      setDurationDrafts((prev) => {
+        const next = { ...prev };
+        delete next[logIndex];
+        return next;
+      });
+      return;
+    }
+
+    setLatestReviewError(null);
+    setDurationSavingIndex(logIndex);
+    void Promise.resolve(
+      onUpdateReviewLogDuration({
+        reviewLogs: editableReviewLogs,
+        logIndex,
+        durationMinutes,
+      }),
+    )
+      .then(() => {
+        setDurationDrafts((prev) => {
+          const next = { ...prev };
+          delete next[logIndex];
+          return next;
+        });
+      })
+      .catch(() => {
+        setLatestReviewError("所要時間を更新できませんでした。");
+        setDurationDrafts((prev) => ({
+          ...prev,
+          [logIndex]:
+            currentLog.durationMinutes != null
+              ? String(currentLog.durationMinutes)
+              : "",
+        }));
+      })
+      .finally(() => {
+        setDurationSavingIndex(null);
       });
   };
 
@@ -1087,7 +1232,7 @@ export function CardMetaPanel({
           </div>
           {canManageLatestReview && (
             <p className="mt-2 text-[11px] text-[var(--sidebar-text-muted)]">
-              最新1件のみ日時・評価の編集と削除ができます。
+              所要時間は全件編集できます。日時・評価の編集と削除は最新1件のみです。
             </p>
           )}
           {latestReviewError && (
@@ -1112,6 +1257,9 @@ export function CardMetaPanel({
                     </TableHead>
                     <TableHead className="min-w-[6.5rem] whitespace-nowrap text-[var(--sidebar-text-muted)]">
                       評価
+                    </TableHead>
+                    <TableHead className="min-w-[6rem] whitespace-nowrap text-[var(--sidebar-text-muted)]">
+                      所要時間
                     </TableHead>
                     <TableHead className="w-[4.25rem] px-1 whitespace-normal break-words text-right leading-tight text-[var(--sidebar-text-muted)]">
                       耐性スコア
@@ -1258,6 +1406,104 @@ export function CardMetaPanel({
                           >
                             {row.ratingLabel}
                           </span>
+                        )}
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap text-[var(--sidebar-text)]">
+                        {"isPending" in row && row.isPending ? (
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="text"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                              value={pendingReviewDurationInput}
+                              onChange={(e) =>
+                                setPendingReviewDurationInput(e.target.value)
+                              }
+                              disabled={isSavingPendingReview}
+                              className="h-8 w-16 rounded border border-[var(--surface-border)] bg-white px-2 text-[11px] tabular-nums outline-none focus:border-[#cfcfcf]"
+                              placeholder="-"
+                            />
+                            <span className="text-[11px] text-[var(--sidebar-text-muted)]">
+                              min.
+                            </span>
+                          </div>
+                        ) : row.isLatestEditable && isEditingLatestReview ? (
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="text"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                              value={latestReviewDurationInput}
+                              onChange={(e) =>
+                                setLatestReviewDurationInput(e.target.value)
+                              }
+                              disabled={isMutatingLatestReview}
+                              className="h-8 w-16 rounded border border-[var(--surface-border)] bg-white px-2 text-[11px] tabular-nums outline-none focus:border-[#cfcfcf]"
+                              placeholder="-"
+                            />
+                            <span className="text-[11px] text-[var(--sidebar-text-muted)]">
+                              min.
+                            </span>
+                          </div>
+                        ) : row.editableLogIndex != null &&
+                          onUpdateReviewLogDuration ? (
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="text"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                              value={
+                                durationDrafts[row.editableLogIndex] ??
+                                (row.durationMinutes != null
+                                  ? String(row.durationMinutes)
+                                  : "")
+                              }
+                              onChange={(e) =>
+                                handleChangeDurationDraft(
+                                  row.editableLogIndex as number,
+                                  e.target.value,
+                                )
+                              }
+                              onBlur={(e) =>
+                                handleSaveReviewDuration(
+                                  row.editableLogIndex as number,
+                                  e.target.value,
+                                )
+                              }
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  handleSaveReviewDuration(
+                                    row.editableLogIndex!,
+                                    e.currentTarget.value,
+                                  );
+                                  e.currentTarget.blur();
+                                }
+                                if (e.key === "Escape") {
+                                  e.preventDefault();
+                                  setDurationDrafts((prev) => ({
+                                    ...prev,
+                                    [row.editableLogIndex!]:
+                                      row.durationMinutes != null
+                                        ? String(row.durationMinutes)
+                                        : "",
+                                  }));
+                                  e.currentTarget.blur();
+                                }
+                              }}
+                              disabled={
+                                isMutatingLatestReview ||
+                                durationSavingIndex === row.editableLogIndex
+                              }
+                              className="h-8 w-16 rounded border border-[var(--surface-border)] bg-white px-2 text-[11px] tabular-nums outline-none focus:border-[#cfcfcf]"
+                              placeholder="-"
+                            />
+                            <span className="text-[11px] text-[var(--sidebar-text-muted)]">
+                              min.
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="tabular-nums">{row.durationLabel}</span>
                         )}
                       </TableCell>
                       <TableCell className="w-[4.25rem] px-1 text-right font-semibold tabular-nums text-[var(--sidebar-text)]">

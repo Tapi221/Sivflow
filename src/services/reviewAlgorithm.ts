@@ -330,10 +330,15 @@ export const computeNextReview = ({
   const baseIntervalDays = calculateIntervalDays(newStability);
 
   // ✅ Apply difficulty brake (mild encourage for “problem cards”)
-  const intervalDays = applyDifficultyBrakeToInterval(
+  const brakedInterval = applyDifficultyBrakeToInterval(
     baseIntervalDays,
     newDifficulty,
   );
+
+  // Score-based minimum interval so that different poor scores are distinguishable.
+  // score=0 (忘れた) → min 1 day, score=1 (あいまい) → min 2 days
+  const scoreMinInterval = subjectiveScore <= 0 ? 1 : subjectiveScore === 1 ? 2 : 1;
+  const intervalDays = Math.max(scoreMinInterval, brakedInterval);
 
   // Calculate next review date
   const nextReviewDate = new Date(now);
@@ -367,15 +372,21 @@ export const createReviewLogEntry = ({
   reviewedAt,
   rating,
   intervalDays,
+  durationMinutes = null,
 }: {
   reviewedAt: Date;
   rating: ReviewLog["rating"];
   intervalDays: number;
+  durationMinutes?: number | null;
 }): ReviewLog => {
   return {
     reviewedAt: reviewedAt.toISOString(),
     rating,
     resistanceScore: calculateResistanceScore(intervalDays),
+    durationMinutes:
+      typeof durationMinutes === "number" && Number.isFinite(durationMinutes)
+        ? Math.max(0, Math.round(durationMinutes))
+        : null,
   };
 };
 
@@ -384,6 +395,7 @@ export const createReviewPatchFromRating = ({
   rating,
   now = new Date(),
   delayBonusEnabled = false,
+  durationMinutes = null,
 }: {
   card: ReviewAlgorithmInput["card"] & {
     reviewLogs?: ReviewLog[] | null;
@@ -391,6 +403,7 @@ export const createReviewPatchFromRating = ({
   rating: ReviewLog["rating"];
   now?: Date;
   delayBonusEnabled?: boolean;
+  durationMinutes?: number | null;
 }) => {
   const subjectiveScore = ratingToSubjectiveScore(rating);
   const reviewUpdate = computeNextReview({
@@ -403,6 +416,7 @@ export const createReviewPatchFromRating = ({
     reviewedAt: now,
     rating,
     intervalDays: reviewUpdate.intervalDays,
+    durationMinutes,
   });
 
   return {
@@ -600,6 +614,7 @@ type LatestReviewLogPatchParams =
       reviewStartNextDay?: boolean;
       reviewedAt: Date;
       rating: ReviewLog["rating"];
+      durationMinutes?: number | null;
     }
   | {
       action: "delete";
@@ -657,6 +672,10 @@ export const createLatestReviewLogPatch = (
     reviewedAt: params.reviewedAt,
     rating: params.rating,
     intervalDays: reviewUpdate.intervalDays,
+    durationMinutes:
+      params.durationMinutes ??
+      reviewLogs.at(-1)?.durationMinutes ??
+      null,
   });
 
   return {

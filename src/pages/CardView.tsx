@@ -196,6 +196,7 @@ export default function CardView() {
           <div className="hidden h-full min-h-0 shrink-0 md:block">
             <CardViewMetaPanel
               selectedCard={state.selectedCard}
+              isGlobalEditing={state.isGlobalEditing}
               settings={settings}
               updateCard={data.updateCard}
             />
