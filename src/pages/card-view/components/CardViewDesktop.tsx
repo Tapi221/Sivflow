@@ -65,7 +65,7 @@ export function CardViewDesktop({
           isGlobalEditing={isGlobalEditing}
           showEditPreview={showEditPreview}
           editPaneWidthPx={editPaneWidthPx}
-          isFlipped={isFlipped}
+          isFlipped={flippedCardIds.has(card.id ?? "")}
           folderId={folderId}
           cardSetId={cardSetId}
           cardsOverride={cardsForPager}
@@ -81,7 +81,7 @@ export function CardViewDesktop({
     },
     [
       isGlobalEditing,
-      isFlipped,
+      flippedCardIds,
       folderId,
       cardSetId,
       cardsForPager,

@@ -141,7 +141,7 @@ export const DesktopCardSurface = React.memo(function DesktopCardSurface({
     <div className="w-full overflow-visible">
       <Flashcard
         card={card}
-        isFlipped={isActive ? isFlipped : false}
+        isFlipped={isFlipped}
         onFlip={isActive ? onFlip : undefined}
         onEdit={isActive ? onEdit : undefined}
         onToggleUncertainty={isActive ? onToggleUncertainty : undefined}
