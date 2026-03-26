@@ -568,7 +568,7 @@ export function CardMetaPanel({
         reviewedAt,
         rating: latestReviewRatingInput,
       });
-      return reviewLog.resistanceScore;
+      return reviewLog?.resistanceScore ?? null;
     } catch {
       return null;
     }
