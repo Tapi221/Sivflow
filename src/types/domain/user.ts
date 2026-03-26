@@ -50,6 +50,8 @@ export interface UserSettings extends BaseEntity {
   autoSaveEnabled?: boolean;
   duplicateToOpposite?: boolean;
   cardEditorHeightPx?: number | null;
+  cardViewPaneWidthPx?: number | null;
+  cardEditPaneWidthPx?: number | null;
   editorBlockSettings?: BlockConfig[];
   blockButtonShowLabel?: boolean;
   explorerViews?: Array<{

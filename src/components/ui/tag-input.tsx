@@ -18,10 +18,7 @@ import {
 import { useTags } from "@/hooks/settings/useTags";
 import { TagBadge } from "@/components/tag/TagBadge";
 import { TagChip } from "@/components/tag/TagChip";
-import {
-  getTagColorSwatchClassName,
-  type TagColorKey,
-} from "@/lib/tags/tagColor";
+import { getTagColorSwatchStyle, type TagColorKey } from "@/lib/tags/tagColor";
 
 interface TagInputProps {
   tags: string[];
@@ -205,16 +202,18 @@ export function TagInput({
                     <div className="flex flex-wrap gap-2.5 rounded-xl border border-slate-200 bg-slate-50/70 p-2">
                       {availableColors.map((colorKey) => (
                         <button
+                          type="button"
                           key={colorKey}
                           aria-label={`${colorKey}を選択`}
                           className={cn(
                             "w-8 h-8 rounded-full border-2 ring-1 ring-slate-300/70 shadow-sm transition-all",
-                            getTagColorSwatchClassName(colorKey),
                             selectedColor === colorKey ||
-                              (!selectedColor && colorKey === availableColors[0])
+                              (!selectedColor &&
+                                colorKey === availableColors[0])
                               ? "ring-2 ring-offset-2 ring-primary-600 scale-110 shadow-md"
                               : "hover:scale-105 hover:ring-slate-400",
                           )}
+                          style={getTagColorSwatchStyle(colorKey)}
                           onClick={(e) => {
                             e.stopPropagation();
                             setSelectedColor(colorKey);
@@ -277,8 +276,3 @@ export function TagInput({
     </Popover>
   );
 }
-
-
-
-
-

@@ -18,6 +18,7 @@ import {
     createUploadedImage,
 } from "@/utils/uploaded-image/factory";
 import { convertHeicToJpeg, isHeicFile } from "@/utils/uploaded-image/heic";
+import { loadImageNaturalSize } from "@/utils/uploaded-image/naturalSize";
 import React, { useCallback, useEffect, useId, useRef, useState } from "react";
 
 const clamp = (v: number, min: number, max: number) =>
@@ -34,15 +35,15 @@ function ImageItem({ item, index, onRetry, onUpdate }) {
     queueMicrotask(() => setLoadFailed(false));
   }, [displayUrl]);
   useEffect(() => {
-    const localFileId = item?.localFileId;
-    if (!localFileId) {
+    const localBlobId = item?.localFileId ?? item?.assetId ?? item?.id;
+    if (!localBlobId) {
       queueMicrotask(() => setResolvedLocalUrl(null));
       return;
     }
     if (item?.remoteUrl || item?.localUrl) return;
     let cancelled = false;
     const run = async () => {
-      const url = await getOrCreateImageBlobUrl(localFileId, {
+      const url = await getOrCreateImageBlobUrl(localBlobId, {
         userId: currentUser?.uid,
       });
       if (cancelled) return;
@@ -52,105 +53,115 @@ function ImageItem({ item, index, onRetry, onUpdate }) {
     return () => {
       cancelled = true;
     };
-  }, [currentUser?.uid, item?.localFileId, item?.localUrl, item?.remoteUrl]);
+  }, [
+    currentUser?.uid,
+    item?.assetId,
+    item?.id,
+    item?.localFileId,
+    item?.localUrl,
+    item?.remoteUrl,
+  ]);
 
   return (
     <>
-      <div className="relative group rounded-lg overflow-hidden w-full">
-        {displayUrl && !loadFailed ? (
-          <ImageFrame
-            src={displayUrl}
-            alt={`Image ${index + 1}`}
-            className="bg-transparent"
-            imgClassName="cursor-pointer"
-            scale={item.scale ?? 1}
-            x={item.x ?? 0}
-            naturalW={item.naturalW ?? null}
-            naturalH={item.naturalH ?? null}
-            editable
-            onError={() => setLoadFailed(true)}
-            onNaturalSize={({ naturalW, naturalH }) => {
-              if (
-                (item.naturalW ?? 0) === naturalW &&
-                (item.naturalH ?? 0) === naturalH
-              )
-                return;
-              onUpdate(index, { naturalW, naturalH });
-            }}
-            onTransformChange={({ scale, x }) => {
-              onUpdate(index, { scale, x });
-            }}
-          />
-        ) : (
-          <div className="w-full h-48 bg-white flex items-center justify-center text-slate-400 text-xs">
-            画像を表示できません
-          </div>
-        )}
-        {displayUrl && !loadFailed && (
-          <div className="pointer-events-none absolute inset-x-3 bottom-2 z-30 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 supports-[hover:none]:opacity-100 transition-opacity">
-            <div
-              className="pointer-events-auto ml-auto w-full max-w-[300px] rounded-lg border border-slate-200/70 bg-white/75 px-2 py-1 shadow-sm backdrop-blur"
-              onPointerDown={(event) => event.stopPropagation()}
-            >
-              <Slider
-                min={20}
-                max={100}
-                step={1}
-                value={[Math.round(safeScale * 100)]}
-                onValueChange={(values) => {
-                  const nextScaleRaw = clamp((values[0] ?? 100) / 100, 0.2, 1);
-                  const nextScale = nextScaleRaw >= 0.98 ? 1 : nextScaleRaw;
-                  const baseX =
-                    nextScale >= 0.999 ? 0 : clamp(Number(item.x ?? 0), -1, 1);
-                  onUpdate(index, { scale: nextScale, x: baseX });
-                }}
-                className="w-full scale-[0.92]"
-                aria-label="画像サイズ"
-              />
+      <div className="relative group w-full">
+        <div className="relative w-full overflow-hidden rounded-lg">
+          {displayUrl && !loadFailed ? (
+            <ImageFrame
+              src={displayUrl}
+              alt={`Image ${index + 1}`}
+              className="bg-transparent"
+              imgClassName="cursor-pointer"
+              scale={item.scale ?? 1}
+              x={item.x ?? 0}
+              naturalW={item.naturalW ?? null}
+              naturalH={item.naturalH ?? null}
+              editable
+              onError={() => setLoadFailed(true)}
+              onNaturalSize={({ naturalW, naturalH }) => {
+                if (
+                  (item.naturalW ?? 0) === naturalW &&
+                  (item.naturalH ?? 0) === naturalH
+                )
+                  return;
+                onUpdate(index, { naturalW, naturalH });
+              }}
+              onTransformChange={({ scale, x }) => {
+                onUpdate(index, { scale, x });
+              }}
+            />
+          ) : (
+            <div className="w-full h-48 bg-white flex items-center justify-center text-slate-400 text-xs">
+              画像を表示できません
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Optimistic Status Badges & Progress */}
-        <div className="absolute inset-x-2 bottom-2 z-20">
-          {item.status === "uploading" &&
-            item.progress !== undefined &&
-            item.progress < 100 && (
-              <div className="bg-white/90 rounded-full h-1 overflow-hidden shadow-sm">
-                <div
-                  className="h-full progress-bar-fill"
-                  style={
-                    {
-                      "--progress": `${item.progress}%`,
-                      "--progress-color": "var(--primary-color)",
-                    } as React.CSSProperties
-                  }
-                />
+          {/* Optimistic Status Badges & Progress */}
+          <div className="absolute inset-x-2 bottom-2 z-20">
+            {item.status === "uploading" &&
+              item.progress !== undefined &&
+              item.progress < 100 && (
+                <div className="bg-white/90 rounded-full h-1 overflow-hidden shadow-sm">
+                  <div
+                    className="h-full progress-bar-fill"
+                    style={
+                      {
+                        "--progress": `${item.progress}%`,
+                        "--progress-color": "var(--primary-color)",
+                      } as React.CSSProperties
+                    }
+                  />
+                </div>
+              )}
+          </div>
+
+          <div className="absolute bottom-1 right-1 flex gap-1 z-20">
+            {item.source === "cloud" && (
+              <div className="p-0.5 bg-green-500 rounded-full shadow-sm">
+                <Check className="w-3 h-3 text-white" />
               </div>
             )}
-        </div>
+            {item.source === "local_fallback" && (
+              <div className="p-1.5 bg-amber-500 rounded-full shadow-sm"></div>
+            )}
+          </div>
 
-        <div className="absolute bottom-1 right-1 flex gap-1 z-20">
-          {item.source === "cloud" && (
-            <div className="p-0.5 bg-green-500 rounded-full shadow-sm">
-              <Check className="w-3 h-3 text-white" />
+          <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            {isFailed && (
+              <Button
+                variant="secondary"
+                size="icon"
+                className="h-7 w-7 bg-white/80"
+                onClick={() => onRetry(index)}
+              >
+                <RotateCcw className="w-3 h-3" />
+              </Button>
+            )}
+          </div>
+
+          {displayUrl && !loadFailed && (
+            <div className="pointer-events-none absolute inset-x-3 bottom-0 z-30 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 supports-[hover:none]:opacity-100 transition-opacity">
+              <div
+                className="pointer-events-auto ml-auto w-full max-w-[300px] rounded-lg border border-slate-200/70 bg-white/75 px-2 py-1 shadow-sm backdrop-blur"
+                onPointerDown={(event) => event.stopPropagation()}
+              >
+                <Slider
+                  min={20}
+                  max={100}
+                  step={1}
+                  value={[Math.round(safeScale * 100)]}
+                  onValueChange={(values) => {
+                    const nextScaleRaw = clamp((values[0] ?? 100) / 100, 0.2, 1);
+                    const nextScale = nextScaleRaw >= 0.98 ? 1 : nextScaleRaw;
+                    const baseX =
+                      nextScale >= 0.999 ? 0 : clamp(Number(item.x ?? 0), -1, 1);
+                    onUpdate(index, { scale: nextScale, x: baseX });
+                  }}
+                  className="w-full"
+                  aria-label="画像サイズ"
+                />
+              </div>
             </div>
-          )}
-          {item.source === "local_fallback" && (
-            <div className="p-1.5 bg-amber-500 rounded-full shadow-sm"></div>
-          )}
-        </div>
-
-        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          {isFailed && (
-            <Button
-              variant="secondary"
-              size="icon"
-              className="h-7 w-7 bg-white/80"
-              onClick={() => onRetry(index)}
-            >
-              <RotateCcw className="w-3 h-3" />
-            </Button>
           )}
         </div>
       </div>
@@ -235,16 +246,6 @@ export default function MediaUploader({
 
   const uniqueId = useId();
   const inputId = `file-${type}-${uniqueId}`;
-
-  // Handle initialFile (pending upload from overflow)
-  useEffect(() => {
-    if (initialFile && onConsumeInitialFile) {
-      // Automatically start uploading the file
-      handleUpload([initialFile]);
-      // Notify parent that the file has been consumed so it can be cleared from state
-      onConsumeInitialFile();
-    }
-  }, [handleUpload, initialFile, onConsumeInitialFile]);
 
   useEffect(() => {
     latestItemsRef.current = urls;
@@ -423,6 +424,9 @@ export default function MediaUploader({
                 blobRecord.localBlobId,
                 { userId: currentUser.uid },
               );
+              const naturalSize = await loadImageNaturalSize(
+                String(previewUrl ?? image.localUrl ?? ""),
+              );
               const remoteKey = buildAssetRemoteKey(currentUser.uid, assetId);
               await upsertAssetRecord({
                 id: assetId,
@@ -457,6 +461,8 @@ export default function MediaUploader({
                   localFileId: blobRecord.localBlobId,
                   storagePath: remoteKey,
                   localUrl: (previewUrl ?? image.localUrl) as unknown,
+                  naturalW: naturalSize?.naturalW ?? image.naturalW,
+                  naturalH: naturalSize?.naturalH ?? image.naturalH,
                 },
               };
             } catch (error) {
@@ -473,6 +479,9 @@ export default function MediaUploader({
           const previewUrl = await getOrCreateImageBlobUrl(
             blobRecord.localBlobId,
             { userId: currentUser.uid },
+          );
+          const naturalSize = await loadImageNaturalSize(
+            String(previewUrl ?? image.localUrl ?? ""),
           );
           const remoteKey = buildAssetRemoteKey(currentUser.uid, assetId);
           await upsertAssetRecord({
@@ -508,6 +517,8 @@ export default function MediaUploader({
               localFileId: blobRecord.localBlobId,
               storagePath: remoteKey,
               localUrl: (previewUrl ?? image.localUrl) as unknown,
+              naturalW: naturalSize?.naturalW ?? image.naturalW,
+              naturalH: naturalSize?.naturalH ?? image.naturalH,
             },
           };
         }),
@@ -604,6 +615,16 @@ export default function MediaUploader({
     }
   };
 
+  // Handle initialFile (pending upload from overflow)
+  useEffect(() => {
+    if (initialFile && onConsumeInitialFile) {
+      // Automatically start uploading the file
+      handleUpload([initialFile]);
+      // Notify parent that the file has been consumed so it can be cleared from state
+      onConsumeInitialFile();
+    }
+  }, [handleUpload, initialFile, onConsumeInitialFile]);
+
   const handleRetry = (index: number) => {
     if (type !== "image") return;
     setRetryIndex(index);
@@ -636,6 +657,9 @@ export default function MediaUploader({
       const previewUrl = await getOrCreateImageBlobUrl(blobRecord.localBlobId, {
         userId: currentUser.uid,
       });
+      const naturalSize = await loadImageNaturalSize(
+        String(previewUrl ?? created.localUrl ?? ""),
+      );
       await upsertAssetRecord({
         id: assetId,
         userId: currentUser.uid,
@@ -667,6 +691,8 @@ export default function MediaUploader({
         localFileId: blobRecord.localBlobId,
         storagePath: remoteKey,
         localUrl: (previewUrl ?? created.localUrl) as unknown,
+        naturalW: naturalSize?.naturalW ?? created.naturalW,
+        naturalH: naturalSize?.naturalH ?? created.naturalH,
       };
       const replaced = current.map((item, i) =>
         i === index ? newImage : item,
@@ -791,9 +817,11 @@ export default function MediaUploader({
     if (type === "image") {
       const items = urls as UploadedImage[];
       const removed = items[index];
-      if (removed?.localFileId) {
-        removeImageBlobUrl(removed.localFileId, { userId: currentUser?.uid });
-        void deleteImageBlob(removed.localFileId, { userId: currentUser?.uid });
+      const localBlobId =
+        removed?.localFileId ?? removed?.assetId ?? removed?.id ?? null;
+      if (localBlobId) {
+        removeImageBlobUrl(localBlobId, { userId: currentUser?.uid });
+        void deleteImageBlob(localBlobId, { userId: currentUser?.uid });
       }
       const next = items.filter((_, i) => i !== index);
       onChange(next);

@@ -1,11 +1,18 @@
-import { CANONICAL_CARD_WIDTH } from "@/components/card/common/constants";
+import { SharedCardContent } from "@/components/card/common/SharedCardContent";
+import {
+  CANONICAL_CARD_WIDTH,
+  layoutRowsToCardHeightPx,
+} from "@/components/card/common/constants";
 import { Flashcard } from "@/components/card/frame/Flashcard";
+import { CardFrame } from "@/components/card/frame/CardFrame";
 import { MobileScalableCard } from "@/components/card/frame/MobileScalableCard";
 import { CardMetaPanel } from "@/components/card/panels/CardMetaPanel";
 import { CardEditorPane } from "@/components/folder/panes/CardEditorPane";
 import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBreadcrumbContext } from "@/contexts/BreadcrumbContext";
+import { useToast } from "@/contexts/ToastContext";
 import { CardCarousel3D } from "@/features/review/CardCarousel3D";
 import { VerticalCardPager } from "@/features/review/VerticalCardPager";
 import { useCardEntity } from "@/hooks/card/useCardEntity";
@@ -14,8 +21,13 @@ import { useCardSets } from "@/hooks/cardSet/useCardSets";
 import { useFolders } from "@/hooks/folder/useFolders";
 import { useIsDesktopRuntime } from "@/hooks/platform/useIsDesktopRuntime";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
+import { normalizeLayoutRows } from "@/domain/card/extraRows";
+import {
+  createLatestReviewLogPatch,
+  createReviewPatchFromRating,
+} from "@/services/reviewAlgorithm";
 import type { Card } from "@/types";
-import { ChevronLeft, ChevronRight } from "@/ui/icons";
+import { ChevronLeft, ChevronRight, Minus, Plus, RefreshCw } from "@/ui/icons";
 import React, {
   useCallback,
   useEffect,
@@ -26,6 +38,123 @@ import React, {
 
 const CARDVIEW_PAGER_PADDING_INLINE = 16;
 const CARDVIEW_PAGER_PADDING_BLOCK = "50vh";
+const CARDVIEW_NATURAL_INDEX_COMMIT_DELAY_VIEW_MS = 0;
+const CARDVIEW_NATURAL_INDEX_COMMIT_DELAY_EDIT_MS = 16;
+const EDIT_PREVIEW_RANGE = 2;
+const CARDVIEW_SAVE_FINISHED_EVENT = "cardview:save-finished";
+const CARD_PANE_VIEW_DEFAULT_WIDTH_PX = 576;
+const CARD_PANE_EDIT_DEFAULT_WIDTH_PX = 1000;
+const CARD_PANE_VIEW_MIN_WIDTH_PX = 360;
+const CARD_PANE_EDIT_MIN_WIDTH_PX = 640;
+const CARD_PANE_WIDTH_STEP_PX = 40;
+const CARD_PANE_AUTO_MAX_SCALE = 4;
+const CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX = 72;
+
+function clampPaneWidthPx(
+  value: number | null | undefined,
+  min: number,
+  max?: number,
+): number {
+  const fallback = Math.max(1, min);
+  const safeValue =
+    typeof value === "number" && Number.isFinite(value) ? value : fallback;
+  const clampedMin = Math.max(1, min);
+  const clampedMax =
+    typeof max === "number" && Number.isFinite(max)
+      ? Math.max(clampedMin, max)
+      : Number.POSITIVE_INFINITY;
+  return Math.min(clampedMax, Math.max(clampedMin, Math.round(safeValue)));
+}
+
+interface CardPaneWidthControlProps {
+  modeLabel: string;
+  value: number;
+  min: number;
+  max: number;
+  defaultValue: number;
+  onPreviewChange: (value: number) => void;
+  onCommit: (value: number) => void;
+  onStepDown: () => void;
+  onStepUp: () => void;
+  onReset: () => void;
+}
+
+function CardPaneWidthControl({
+  modeLabel,
+  value,
+  min,
+  max,
+  defaultValue,
+  onPreviewChange,
+  onCommit,
+  onStepDown,
+  onStepUp,
+  onReset,
+}: CardPaneWidthControlProps) {
+  const resetDisabled = value === defaultValue;
+
+  return (
+    <div className="pointer-events-auto flex items-center gap-1.5 rounded-[20px] border border-slate-200/80 bg-white/82 px-2.5 py-1.5 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-md">
+      <div className="min-w-[72px] leading-none">
+        <div className="text-[10px] font-medium tracking-[0.06em] text-slate-500">
+          {modeLabel}
+        </div>
+        <div className="mt-1 text-[13px] font-semibold tabular-nums text-slate-700">
+          {value}px
+        </div>
+      </div>
+
+      <button
+        type="button"
+        className="grid h-7 w-7 place-items-center rounded-full border border-slate-200/70 bg-white/55 text-slate-500 transition hover:bg-white hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-35"
+        onClick={onStepDown}
+        disabled={value <= min}
+        aria-label={`${modeLabel}を縮小`}
+      >
+        <Minus className="h-3.5 w-3.5" />
+      </button>
+
+      <div className="w-24 px-0.5">
+        <Slider
+          min={min}
+          max={max}
+          step={8}
+          value={[value]}
+          onValueChange={(next) => {
+            const [raw] = next;
+            onPreviewChange(clampPaneWidthPx(raw, min, max));
+          }}
+          onValueCommit={(next) => {
+            const [raw] = next;
+            onCommit(clampPaneWidthPx(raw, min, max));
+          }}
+          aria-label={`${modeLabel}スライダー`}
+        />
+      </div>
+
+      <button
+        type="button"
+        className="grid h-7 w-7 place-items-center rounded-full border border-slate-200/70 bg-white/55 text-slate-500 transition hover:bg-white hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-35"
+        onClick={onStepUp}
+        disabled={value >= max}
+        aria-label={`${modeLabel}を拡大`}
+      >
+        <Plus className="h-3.5 w-3.5" />
+      </button>
+
+      <button
+        type="button"
+        className="grid h-7 w-7 place-items-center rounded-full border border-slate-200/70 bg-white/55 text-slate-500 transition hover:bg-white hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-35"
+        onClick={onReset}
+        disabled={resetDisabled}
+        aria-label={`${modeLabel}を既定値に戻す`}
+        title="既定値に戻す"
+      >
+        <RefreshCw className="h-3.5 w-3.5" />
+      </button>
+    </div>
+  );
+}
 
 type ParsedParams = {
   folderId: string | null;
@@ -53,9 +182,10 @@ function parseCardViewParams(): ParsedParams {
   return {
     folderId,
     cardSetId,
-    initialIndex: Number.isFinite(initialIndexRaw) && initialIndexRaw >= 0
-      ? initialIndexRaw
-      : 0,
+    initialIndex:
+      Number.isFinite(initialIndexRaw) && initialIndexRaw >= 0
+        ? initialIndexRaw
+        : 0,
     targetCardId,
   };
 }
@@ -64,6 +194,8 @@ interface DesktopCardSurfaceProps {
   card: Card;
   isActive: boolean;
   isGlobalEditing: boolean;
+  showEditPreview: boolean;
+  editPaneWidthPx: number;
   isFlipped: boolean;
   folderId: string | null;
   cardSetId: string | null;
@@ -71,7 +203,6 @@ interface DesktopCardSurfaceProps {
   saveSignal: number;
   globalToolbarMountQ: HTMLDivElement | null;
   globalToolbarMountA: HTMLDivElement | null;
-  editorSharedHeightPx: number | null;
   onFlip: () => void;
   onEdit: () => void;
   onToggleUncertainty: (card: Card) => void | Promise<void>;
@@ -82,6 +213,8 @@ const DesktopCardSurface = React.memo(function DesktopCardSurface({
   card,
   isActive,
   isGlobalEditing,
+  showEditPreview,
+  editPaneWidthPx,
   isFlipped,
   folderId,
   cardSetId,
@@ -89,7 +222,6 @@ const DesktopCardSurface = React.memo(function DesktopCardSurface({
   saveSignal,
   globalToolbarMountQ,
   globalToolbarMountA,
-  editorSharedHeightPx,
   onFlip,
   onEdit,
   onToggleUncertainty,
@@ -97,6 +229,57 @@ const DesktopCardSurface = React.memo(function DesktopCardSurface({
 }: DesktopCardSurfaceProps) {
   if (isGlobalEditing) {
     if (!isActive) {
+      if (showEditPreview) {
+        const previewHeightPx = layoutRowsToCardHeightPx(
+          normalizeLayoutRows(card.layoutRows),
+        );
+        return (
+          <div className="w-full overflow-visible">
+            <div
+              className="mx-auto w-full pointer-events-none select-none"
+              style={{ width: `${editPaneWidthPx}px`, maxWidth: "100%" }}
+            >
+              <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
+                <CardFrame
+                  baseWidth={CANONICAL_CARD_WIDTH}
+                  contentPaddingPx={0}
+                  allowUpscale
+                  maxScale={CARD_PANE_AUTO_MAX_SCALE}
+                  scaleMultiplier={1}
+                  className="premium-paper-depth card-shell--paper"
+                  resizable={false}
+                  showResizeHandle={false}
+                  heightPx={previewHeightPx}
+                  lockHeight
+                >
+                  <SharedCardContent
+                    mode="view"
+                    blocks={card.questionBlocks ?? []}
+                  />
+                </CardFrame>
+                <CardFrame
+                  baseWidth={CANONICAL_CARD_WIDTH}
+                  contentPaddingPx={0}
+                  allowUpscale
+                  maxScale={CARD_PANE_AUTO_MAX_SCALE}
+                  scaleMultiplier={1}
+                  className="premium-paper-depth card-shell--paper"
+                  resizable={false}
+                  showResizeHandle={false}
+                  heightPx={previewHeightPx}
+                  lockHeight
+                >
+                  <SharedCardContent
+                    mode="view"
+                    blocks={card.answerBlocks ?? []}
+                  />
+                </CardFrame>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
       return (
         <div
           className="w-full overflow-visible"
@@ -111,17 +294,12 @@ const DesktopCardSurface = React.memo(function DesktopCardSurface({
     }
 
     return (
-      <div
-        className="w-full overflow-visible"
-        style={{
-          contentVisibility: "auto",
-          containIntrinsicSize: "900px 1200px",
-        }}
-      >
+      <div className="w-full overflow-visible">
         <CardEditorPane
           selectedCardId={card.id}
           folderId={folderId || undefined}
           cardSetId={cardSetId || undefined}
+          forcedPaneWidthPx={editPaneWidthPx}
           cardsOverride={cardsOverride}
           autoEdit
           hideMetaPanel
@@ -139,10 +317,7 @@ const DesktopCardSurface = React.memo(function DesktopCardSurface({
   }
 
   return (
-    <MobileScalableCard
-      cardDesignWidth={CANONICAL_CARD_WIDTH}
-      safePadding={0}
-    >
+    <div className="w-full overflow-visible">
       <Flashcard
         card={card}
         isFlipped={isActive ? isFlipped : false}
@@ -150,9 +325,11 @@ const DesktopCardSurface = React.memo(function DesktopCardSurface({
         onEdit={isActive ? onEdit : undefined}
         onToggleUncertainty={isActive ? onToggleUncertainty : undefined}
         onToggleBookmark={isActive ? onToggleBookmark : undefined}
-        editorSharedHeightPx={editorSharedHeightPx}
+        allowUpscale
+        maxScale={CARD_PANE_AUTO_MAX_SCALE}
+        scaleMultiplier={1}
       />
-    </MobileScalableCard>
+    </div>
   );
 });
 
@@ -168,6 +345,8 @@ export default function CardView() {
   const [isFlipped, setIsFlipped] = useState(false);
   const [isGlobalEditing, setIsGlobalEditing] = useState(false);
   const [saveSignal, setSaveSignal] = useState(0);
+  const pendingExitAfterSaveRef = useRef(false);
+  const pendingCreateCardAfterSaveRef = useRef(false);
   const pendingFocusCardIdRef = useRef<string | null>(null);
   const suppressPagerSyncRef = useRef(false);
   const lockedIndexRef = useRef<number | null>(null);
@@ -183,17 +362,151 @@ export default function CardView() {
   const {
     cards = [],
     loading: isLoading,
+    createCard,
     updateCard,
   } = useCards(folderId || undefined, cardSetId || undefined);
   const { cardSets } = useCardSets();
   const { folders = [] } = useFolders();
-  const { settings } = useUserSettings();
+  const { settings, updateSettings } = useUserSettings();
+  const { error: toastError } = useToast();
   const isDesktop = useIsDesktopRuntime();
+  const autoInitializedCardSetIdsRef = useRef<Set<string>>(new Set());
+  const contentViewportRef = useRef<HTMLDivElement | null>(null);
+  const [contentViewportWidth, setContentViewportWidth] = useState<number>(
+    () => (typeof window === "undefined" ? 1024 : window.innerWidth),
+  );
+  const [viewPaneWidthPx, setViewPaneWidthPx] = useState<number>(
+    CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
+  );
+  const [editPaneWidthPx, setEditPaneWidthPx] = useState<number>(
+    CARD_PANE_EDIT_DEFAULT_WIDTH_PX,
+  );
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    window.localStorage.setItem("card-view.meta-panel-open", String(isMetaOpen));
+    window.localStorage.setItem(
+      "card-view.meta-panel-open",
+      String(isMetaOpen),
+    );
   }, [isMetaOpen]);
+
+  useEffect(() => {
+    setViewPaneWidthPx(
+      clampPaneWidthPx(
+        settings?.cardViewPaneWidthPx ?? CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
+        CARD_PANE_VIEW_MIN_WIDTH_PX,
+      ),
+    );
+  }, [settings?.cardViewPaneWidthPx]);
+
+  useEffect(() => {
+    setEditPaneWidthPx(
+      clampPaneWidthPx(
+        settings?.cardEditPaneWidthPx ?? CARD_PANE_EDIT_DEFAULT_WIDTH_PX,
+        CARD_PANE_EDIT_MIN_WIDTH_PX,
+      ),
+    );
+  }, [settings?.cardEditPaneWidthPx]);
+
+  useEffect(() => {
+    const element = contentViewportRef.current;
+    if (!element || typeof ResizeObserver === "undefined") return;
+
+    const updateWidth = () => {
+      const nextWidth = Math.max(0, Math.round(element.clientWidth));
+      setContentViewportWidth((prev) =>
+        prev === nextWidth ? prev : nextWidth,
+      );
+    };
+
+    updateWidth();
+    const observer = new ResizeObserver(updateWidth);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [isDesktop, isGlobalEditing, isMetaOpen, currentIndex]);
+
+  const activePaneMode = isGlobalEditing ? "edit" : "view";
+  const activePaneMinWidthPx = isGlobalEditing
+    ? CARD_PANE_EDIT_MIN_WIDTH_PX
+    : CARD_PANE_VIEW_MIN_WIDTH_PX;
+  const activePaneDefaultWidthPx = isGlobalEditing
+    ? CARD_PANE_EDIT_DEFAULT_WIDTH_PX
+    : CARD_PANE_VIEW_DEFAULT_WIDTH_PX;
+  const activePaneStoredWidthPx = isGlobalEditing
+    ? editPaneWidthPx
+    : viewPaneWidthPx;
+  const activePaneMaxWidthPx =
+    contentViewportWidth > 0
+      ? Math.max(activePaneMinWidthPx, contentViewportWidth)
+      : activePaneStoredWidthPx;
+  const activePaneWidthPx = clampPaneWidthPx(
+    activePaneStoredWidthPx,
+    activePaneMinWidthPx,
+    activePaneMaxWidthPx,
+  );
+  const activePaneDisplayedDefaultWidthPx = clampPaneWidthPx(
+    activePaneDefaultWidthPx,
+    activePaneMinWidthPx,
+    activePaneMaxWidthPx,
+  );
+  const showWidthControl = isDesktop;
+  const shouldReserveWidthControlSpace = showWidthControl && isGlobalEditing;
+
+  const persistPaneWidth = useCallback(
+    async (mode: "view" | "edit", widthPx: number) => {
+      const minWidth =
+        mode === "edit"
+          ? CARD_PANE_EDIT_MIN_WIDTH_PX
+          : CARD_PANE_VIEW_MIN_WIDTH_PX;
+      const nextWidth = clampPaneWidthPx(widthPx, minWidth);
+      if (mode === "edit") {
+        setEditPaneWidthPx(nextWidth);
+        await updateSettings({ cardEditPaneWidthPx: nextWidth });
+        return;
+      }
+      setViewPaneWidthPx(nextWidth);
+      await updateSettings({ cardViewPaneWidthPx: nextWidth });
+    },
+    [updateSettings],
+  );
+
+  const previewPaneWidth = useCallback(
+    (mode: "view" | "edit", widthPx: number) => {
+      const minWidth =
+        mode === "edit"
+          ? CARD_PANE_EDIT_MIN_WIDTH_PX
+          : CARD_PANE_VIEW_MIN_WIDTH_PX;
+      const nextWidth = clampPaneWidthPx(widthPx, minWidth);
+      if (mode === "edit") {
+        setEditPaneWidthPx(nextWidth);
+        return;
+      }
+      setViewPaneWidthPx(nextWidth);
+    },
+    [],
+  );
+
+  const stepPaneWidth = useCallback(
+    (deltaPx: number) => {
+      const nextWidth = clampPaneWidthPx(
+        activePaneWidthPx + deltaPx,
+        activePaneMinWidthPx,
+        activePaneMaxWidthPx,
+      );
+      void persistPaneWidth(activePaneMode, nextWidth);
+    },
+    [
+      activePaneMaxWidthPx,
+      activePaneMinWidthPx,
+      activePaneMode,
+      activePaneWidthPx,
+      persistPaneWidth,
+    ],
+  );
+
+  const resetActivePaneWidth = useCallback(() => {
+    void persistPaneWidth(activePaneMode, activePaneDefaultWidthPx);
+  }, [activePaneDefaultWidthPx, activePaneMode, persistPaneWidth]);
 
   const sortedCards = useMemo(() => {
     return [...cards].sort(
@@ -259,6 +572,102 @@ export default function CardView() {
     if (!cardSetId) return null;
     return cardSets.find((set) => set.id === cardSetId) ?? null;
   }, [cardSetId, cardSets]);
+
+  const createAndFocusCard = useCallback(async (): Promise<boolean> => {
+    const targetCardSetId =
+      cardSetId ?? selectedCard?.cardSetId ?? currentCard?.cardSetId ?? null;
+    const targetFolderId =
+      folderId ??
+      selectedCardSet?.folderId ??
+      selectedCard?.folderId ??
+      currentCard?.folderId ??
+      "";
+
+    if (!targetCardSetId) {
+      toastError("新規カードの追加先カードセットが見つかりません");
+      return false;
+    }
+
+    try {
+      setIsFlipped(false);
+      setIsGlobalEditing(true);
+
+      const created = await createCard({
+        cardSetId: targetCardSetId,
+        folderId: targetFolderId,
+      });
+      const createdId =
+        (typeof created === "object" &&
+          created !== null &&
+          "id" in created &&
+          typeof (created as { id?: unknown }).id === "string" &&
+          (created as { id: string }).id) ||
+        (typeof created === "string" ? created : null);
+
+      if (!createdId) {
+        toastError("新規カードの作成結果を取得できませんでした");
+        return false;
+      }
+
+      pendingFocusCardIdRef.current = createdId;
+      return true;
+    } catch (error) {
+      console.error("[CardView] Failed to create new card:", error);
+      toastError(
+        error instanceof Error ? error.message : "新規カードの作成に失敗しました",
+      );
+      return false;
+    }
+  }, [
+    cardSetId,
+    createCard,
+    currentCard?.cardSetId,
+    currentCard?.folderId,
+    folderId,
+    selectedCard?.cardSetId,
+    selectedCard?.folderId,
+    selectedCardSet?.folderId,
+    toastError,
+  ]);
+
+  useEffect(() => {
+    if (!cardSetId || isLoading) return;
+    if (sortedCards.length > 0) return;
+    if (autoInitializedCardSetIdsRef.current.has(cardSetId)) return;
+    autoInitializedCardSetIdsRef.current.add(cardSetId);
+
+    setIsGlobalEditing(true);
+    const targetFolderId = folderId ?? selectedCardSet?.folderId ?? "";
+
+    void (async () => {
+      try {
+        const created = await createCard({
+          cardSetId,
+          folderId: targetFolderId,
+        });
+        const createdId =
+          (typeof created === "object" &&
+            created !== null &&
+            "id" in created &&
+            typeof (created as { id?: unknown }).id === "string" &&
+            (created as { id: string }).id) ||
+          (typeof created === "string" ? created : null);
+
+        if (createdId) {
+          pendingFocusCardIdRef.current = createdId;
+        }
+      } catch (error) {
+        console.error("[CardView] Failed to bootstrap empty card set:", error);
+      }
+    })();
+  }, [
+    cardSetId,
+    createCard,
+    folderId,
+    isLoading,
+    selectedCardSet?.folderId,
+    sortedCards.length,
+  ]);
 
   useEffect(() => {
     const crumbs: Array<{
@@ -343,10 +752,17 @@ export default function CardView() {
     pendingFocusCardIdRef.current = targetId;
     suppressPagerSyncRef.current = true;
     lockedIndexRef.current =
-      targetId != null ? cardIndexById.get(targetId) ?? null : null;
+      targetId != null ? (cardIndexById.get(targetId) ?? null) : null;
     setIsFlipped(false);
-    setIsGlobalEditing((prev) => !prev);
-  }, [selectedCard?.id, cardIndexById]);
+
+    if (isGlobalEditing) {
+      pendingExitAfterSaveRef.current = true;
+      setSaveSignal((prev) => prev + 1);
+      return;
+    }
+
+    setIsGlobalEditing(true);
+  }, [selectedCard?.id, cardIndexById, isGlobalEditing]);
 
   useEffect(() => {
     const targetId = pendingFocusCardIdRef.current;
@@ -393,7 +809,33 @@ export default function CardView() {
   }, [handleToggleViewMode]);
 
   useEffect(() => {
+    const onCreateCardRequest = () => {
+      pendingExitAfterSaveRef.current = false;
+
+      if (isGlobalEditing) {
+        pendingCreateCardAfterSaveRef.current = true;
+        setSaveSignal((prev) => prev + 1);
+        return;
+      }
+
+      void createAndFocusCard();
+    };
+
+    window.addEventListener("cardview:create-card-request", onCreateCardRequest);
+
+    return () => {
+      window.removeEventListener(
+        "cardview:create-card-request",
+        onCreateCardRequest,
+      );
+    };
+  }, [createAndFocusCard, isGlobalEditing]);
+
+  useEffect(() => {
     const onSaveRequest = () => {
+      if (isGlobalEditing) {
+        pendingExitAfterSaveRef.current = true;
+      }
       setSaveSignal((prev) => prev + 1);
     };
 
@@ -402,7 +844,37 @@ export default function CardView() {
     return () => {
       window.removeEventListener("cardview:save-request", onSaveRequest);
     };
-  }, []);
+  }, [isGlobalEditing]);
+
+  useEffect(() => {
+    const onSaveFinished = (event: Event) => {
+      const saved = Boolean(
+        (event as CustomEvent<{ saved?: boolean }>)?.detail?.saved,
+      );
+
+      if (pendingCreateCardAfterSaveRef.current) {
+        pendingCreateCardAfterSaveRef.current = false;
+        if (!saved) return;
+        void createAndFocusCard();
+        return;
+      }
+
+      if (!pendingExitAfterSaveRef.current) return;
+      if (!saved) {
+        pendingExitAfterSaveRef.current = false;
+        return;
+      }
+
+      pendingExitAfterSaveRef.current = false;
+      setIsGlobalEditing(false);
+    };
+
+    window.addEventListener(CARDVIEW_SAVE_FINISHED_EVENT, onSaveFinished);
+
+    return () => {
+      window.removeEventListener(CARDVIEW_SAVE_FINISHED_EVENT, onSaveFinished);
+    };
+  }, [createAndFocusCard]);
 
   const handlePagerIndexChange = useCallback((idx: number) => {
     if (
@@ -421,11 +893,15 @@ export default function CardView() {
 
   const renderDesktopCard = useCallback(
     (card: Card, idx: number, isActive: boolean) => {
+      const showEditPreview =
+        Math.abs(idx - safeCurrentIndex) <= EDIT_PREVIEW_RANGE;
       return (
         <DesktopCardSurface
           card={card}
           isActive={isActive}
           isGlobalEditing={isGlobalEditing}
+          showEditPreview={showEditPreview}
+          editPaneWidthPx={editPaneWidthPx}
           isFlipped={isFlipped}
           folderId={folderId}
           cardSetId={cardSetId}
@@ -433,7 +909,6 @@ export default function CardView() {
           saveSignal={saveSignal}
           globalToolbarMountQ={globalToolbarMountQ}
           globalToolbarMountA={globalToolbarMountA}
-          editorSharedHeightPx={settings?.cardEditorHeightPx ?? null}
           onFlip={handleFlip}
           onEdit={handleEdit}
           onToggleUncertainty={handleToggleUncertainty}
@@ -450,11 +925,12 @@ export default function CardView() {
       saveSignal,
       globalToolbarMountQ,
       globalToolbarMountA,
-      settings?.cardEditorHeightPx,
       handleFlip,
       handleEdit,
       handleToggleUncertainty,
       handleToggleBookmark,
+      safeCurrentIndex,
+      editPaneWidthPx,
     ],
   );
 
@@ -470,62 +946,87 @@ export default function CardView() {
 
   return (
     <div className="h-full overflow-hidden bg-[#F5F7F8] pt-0 card-editor-right-pane-font">
-      <div className="flex h-full min-h-0 flex-col overflow-hidden">
-        {isDesktop && isGlobalEditing && (
-          <div
-            className="shrink-0 border-b border-gray-200/70 bg-[#F8FAFB] px-3 py-2 transition-[padding] duration-150"
-            style={{
-              paddingRight: isMetaOpen
-                ? "calc(var(--ui-panel-width) + 0.75rem)"
-                : undefined,
-            }}
-          >
-            <div className="mx-auto grid w-full max-w-[1000px] grid-cols-1 gap-4 md:grid-cols-2">
-              <div
-                className={`flex h-14 min-h-0 w-full items-center rounded-md ${
-                  isGlobalEditing
-                    ? "border border-slate-100 bg-white/60"
-                    : "border border-transparent bg-transparent"
-                }`}
-              >
-                <div ref={setGlobalToolbarMountQ} className="w-full" />
-              </div>
-              <div
-                className={`flex h-14 min-h-0 w-full items-center rounded-md ${
-                  isGlobalEditing
-                    ? "border border-slate-100 bg-white/60"
-                    : "border border-transparent bg-transparent"
-                }`}
-              >
-                <div ref={setGlobalToolbarMountA} className="w-full" />
-              </div>
-            </div>
+      <div className="relative flex h-full min-h-0 overflow-hidden">
+        {showWidthControl && (
+          <div className="pointer-events-none absolute left-3 top-3 z-30 hidden md:flex">
+            <CardPaneWidthControl
+              modeLabel={isGlobalEditing ? "編集幅" : "閲覧幅"}
+              value={activePaneWidthPx}
+              min={activePaneMinWidthPx}
+              max={activePaneMaxWidthPx}
+              defaultValue={activePaneDisplayedDefaultWidthPx}
+              onPreviewChange={(value) =>
+                previewPaneWidth(activePaneMode, value)
+              }
+              onCommit={(value) => {
+                void persistPaneWidth(activePaneMode, value);
+              }}
+              onStepDown={() => stepPaneWidth(-CARD_PANE_WIDTH_STEP_PX)}
+              onStepUp={() => stepPaneWidth(CARD_PANE_WIDTH_STEP_PX)}
+              onReset={resetActivePaneWidth}
+            />
           </div>
         )}
 
-        <div className="relative flex h-full min-h-0 overflow-hidden">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="hidden md:flex absolute top-3 z-20 h-8 w-8 rounded-full bg-[var(--sidebar-bg)] text-[#334155] surface-control-convex hover:bg-[var(--sidebar-active-bg)]"
-            style={{
-              right: isMetaOpen
-                ? "calc(var(--ui-panel-width) - var(--ui-space-3))"
-                : "var(--ui-space-1)",
-              transform: "none",
-            }}
-            onClick={() => setIsMetaOpen((prev) => !prev)}
-            aria-label={isMetaOpen ? "close meta panel" : "open meta panel"}
-          >
-            {isMetaOpen ? (
-              <ChevronRight className="h-4 w-4" />
-            ) : (
-              <ChevronLeft className="h-4 w-4" />
-            )}
-          </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="hidden md:flex absolute top-3 z-20 h-8 w-8 rounded-full bg-[var(--sidebar-bg)] text-[#334155] surface-control-convex hover:bg-[var(--sidebar-active-bg)]"
+          style={{
+            right: isMetaOpen
+              ? "calc(var(--ui-panel-width) - var(--ui-space-3))"
+              : "var(--ui-space-1)",
+            transform: "none",
+          }}
+          onClick={() => setIsMetaOpen((prev) => !prev)}
+          aria-label={isMetaOpen ? "close meta panel" : "open meta panel"}
+        >
+          {isMetaOpen ? (
+            <ChevronRight className="h-4 w-4" />
+          ) : (
+            <ChevronLeft className="h-4 w-4" />
+          )}
+        </Button>
+
+        <div
+          className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
+          style={
+            shouldReserveWidthControlSpace
+              ? { paddingTop: CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX }
+              : undefined
+          }
+        >
+          {isDesktop && isGlobalEditing && (
+            <div className="shrink-0 border-b border-gray-200/70 bg-[#F8FAFB] px-3 py-2">
+              <div
+                className="mx-auto grid w-full grid-cols-1 gap-4 md:grid-cols-2"
+                style={{ width: `${editPaneWidthPx}px`, maxWidth: "100%" }}
+              >
+                <div
+                  className={`flex h-14 min-h-0 w-full items-center rounded-md ${
+                    isGlobalEditing
+                      ? "border border-slate-100 bg-white/60"
+                      : "border border-transparent bg-transparent"
+                  }`}
+                >
+                  <div ref={setGlobalToolbarMountQ} className="w-full" />
+                </div>
+                <div
+                  className={`flex h-14 min-h-0 w-full items-center rounded-md ${
+                    isGlobalEditing
+                      ? "border border-slate-100 bg-white/60"
+                      : "border border-transparent bg-transparent"
+                  }`}
+                >
+                  <div ref={setGlobalToolbarMountA} className="w-full" />
+                </div>
+              </div>
+            </div>
+          )}
 
           <div
+            ref={contentViewportRef}
             className={`min-h-0 min-w-0 flex-1 overflow-hidden py-0 ${
               isGlobalEditing ? "px-0" : "px-4"
             }`}
@@ -545,9 +1046,12 @@ export default function CardView() {
                 onFlip={handleFlip}
                 paddingInlinePx={CARDVIEW_PAGER_PADDING_INLINE}
                 paddingBlock={CARDVIEW_PAGER_PADDING_BLOCK}
-                getCardWidth={() =>
-                  isGlobalEditing ? 1000 : CANONICAL_CARD_WIDTH
+                naturalIndexCommitDelayMs={
+                  isGlobalEditing
+                    ? CARDVIEW_NATURAL_INDEX_COMMIT_DELAY_EDIT_MS
+                    : CARDVIEW_NATURAL_INDEX_COMMIT_DELAY_VIEW_MS
                 }
+                getCardWidth={() => activePaneWidthPx}
                 getKey={(card) => card.id ?? card.docId ?? card.uid}
                 renderCard={renderDesktopCard}
               />
@@ -577,7 +1081,9 @@ export default function CardView() {
                       hasPrev={idx > 0}
                       currentIndex={idx}
                       totalCards={cardsForPager.length}
-                      editorSharedHeightPx={settings?.cardEditorHeightPx ?? null}
+                      editorSharedHeightPx={
+                        settings?.cardEditorHeightPx ?? null
+                      }
                     />
                   </MobileScalableCard>
                 )}
@@ -596,28 +1102,62 @@ export default function CardView() {
               />
             )}
           </div>
-
-          {isMetaOpen && (
-            <div className="hidden h-full min-h-0 md:block">
-              <CardMetaPanel
-                card={selectedCard}
-                reviewLogs={selectedCard?.reviewLogs ?? []}
-                onUpdateTags={(nextTags) => {
-                  if (!selectedCard?.id) return;
-                  void updateCard(selectedCard.id, { tags: nextTags });
-                }}
-                onToggleDraft={(nextDraft) => {
-                  if (!selectedCard?.id) return;
-                  void updateCard(selectedCard.id, { isDraft: nextDraft });
-                }}
-                onUpdateTitle={(nextTitle) => {
-                  if (!selectedCard?.id) return;
-                  void updateCard(selectedCard.id, { title: nextTitle });
-                }}
-              />
-            </div>
-          )}
         </div>
+
+        {isMetaOpen && (
+          <div className="hidden h-full min-h-0 shrink-0 md:block">
+            <CardMetaPanel
+              card={selectedCard}
+              reviewLogs={selectedCard?.reviewLogs ?? []}
+              onAddReviewLog={({ reviewedAt, rating }) => {
+                if (!selectedCard?.id) return Promise.resolve();
+                const { patch } = createReviewPatchFromRating({
+                  card: selectedCard,
+                  rating,
+                  now: new Date(reviewedAt),
+                  delayBonusEnabled: settings?.delayBonusEnabled ?? false,
+                });
+                return updateCard(selectedCard.id, patch);
+              }}
+              onUpdateLatestReviewLog={({ reviewLogs, reviewedAt, rating }) => {
+                if (!selectedCard?.id) return Promise.resolve();
+                const { patch } = createLatestReviewLogPatch({
+                  action: "update",
+                  card: selectedCard,
+                  delayBonusEnabled: settings?.delayBonusEnabled ?? false,
+                  rating,
+                  reviewedAt: new Date(reviewedAt),
+                  reviewLogs,
+                  reviewStartNextDay: settings?.reviewStartNextDay ?? true,
+                });
+                return updateCard(selectedCard.id, patch);
+              }}
+              onDeleteLatestReviewLog={({ reviewLogs }) => {
+                if (!selectedCard?.id) return Promise.resolve();
+                const { patch } = createLatestReviewLogPatch({
+                  action: "delete",
+                  card: selectedCard,
+                  delayBonusEnabled: settings?.delayBonusEnabled ?? false,
+                  reviewLogs,
+                  reviewStartNextDay: settings?.reviewStartNextDay ?? true,
+                });
+                return updateCard(selectedCard.id, patch);
+              }}
+              onUpdateTags={(nextTags) => {
+                if (!selectedCard?.id) return;
+                void updateCard(selectedCard.id, { tags: nextTags });
+              }}
+              onToggleDraft={(nextDraft) => {
+                if (!selectedCard?.id) return;
+                void updateCard(selectedCard.id, { isDraft: nextDraft });
+              }}
+              onUpdateTitle={(nextTitle) => {
+                if (!selectedCard?.id) return;
+                void updateCard(selectedCard.id, { title: nextTitle });
+              }}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

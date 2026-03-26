@@ -12,6 +12,8 @@ export type UseVerticalCardPagerOptions = {
   scrollContainerRef: React.RefObject<HTMLElement | null>;
   /** Space / Enter で呼ばれる flip コールバック（省略可） */
   onFlip?: () => void;
+  /** 自然スクロール時の activeIndex 反映遅延(ms)。0 なら即時反映 */
+  naturalIndexCommitDelayMs?: number;
 };
 
 export type UseVerticalCardPagerReturn = {
@@ -29,6 +31,7 @@ export function useVerticalCardPager({
   onActiveIndexChange,
   scrollContainerRef,
   onFlip,
+  naturalIndexCommitDelayMs = 0,
 }: UseVerticalCardPagerOptions): UseVerticalCardPagerReturn {
   const itemRefs = useRef<(HTMLElement | null)[]>([]);
 
@@ -38,6 +41,11 @@ export function useVerticalCardPager({
   // プログラマティックスクロール中は自然スクロール判定を止める
   const pendingScrollRef = useRef(false);
   const pendingScrollTimerRef = useRef<number | null>(null);
+
+  // 自然スクロール中は nearest index の反映を少し遅延させて
+  // 編集モード時の重い再マウント連打を避ける
+  const naturalIndexTimerRef = useRef<number | null>(null);
+  const queuedNaturalIndexRef = useRef<number | null>(null);
 
   // scroll / resize の多重実行防止
   const scrollRafRef = useRef<number | null>(null);
@@ -54,6 +62,40 @@ export function useVerticalCardPager({
       pendingScrollTimerRef.current = null;
     }
   }, []);
+
+  const clearNaturalIndexTimer = useCallback(() => {
+    if (naturalIndexTimerRef.current != null) {
+      window.clearTimeout(naturalIndexTimerRef.current);
+      naturalIndexTimerRef.current = null;
+    }
+  }, []);
+
+  const flushQueuedNaturalIndex = useCallback(() => {
+    const nearestIdx = queuedNaturalIndexRef.current;
+    queuedNaturalIndexRef.current = null;
+    clearNaturalIndexTimer();
+
+    if (nearestIdx == null || nearestIdx === activeIndexRef.current) return;
+    ioTriggeredRef.current = true;
+    onActiveIndexChange(nearestIdx);
+  }, [clearNaturalIndexTimer, onActiveIndexChange]);
+
+  const queueNaturalIndexCommit = useCallback(
+    (nearestIdx: number) => {
+      if (naturalIndexCommitDelayMs <= 0) {
+        queuedNaturalIndexRef.current = nearestIdx;
+        flushQueuedNaturalIndex();
+        return;
+      }
+
+      queuedNaturalIndexRef.current = nearestIdx;
+      clearNaturalIndexTimer();
+      naturalIndexTimerRef.current = window.setTimeout(() => {
+        flushQueuedNaturalIndex();
+      }, naturalIndexCommitDelayMs);
+    },
+    [clearNaturalIndexTimer, flushQueuedNaturalIndex, naturalIndexCommitDelayMs],
+  );
 
   const schedulePendingScrollRelease = useCallback(
     (behavior: ScrollBehavior) => {
@@ -75,6 +117,8 @@ export function useVerticalCardPager({
 
       pendingScrollRef.current = true;
       clearPendingScrollTimer();
+      clearNaturalIndexTimer();
+      queuedNaturalIndexRef.current = null;
 
       const targetTop =
         el.offsetTop - container.clientHeight / 2 + el.offsetHeight / 2;
@@ -89,7 +133,12 @@ export function useVerticalCardPager({
 
       schedulePendingScrollRelease(behavior);
     },
-    [clearPendingScrollTimer, schedulePendingScrollRelease, scrollContainerRef],
+    [
+      clearPendingScrollTimer,
+      clearNaturalIndexTimer,
+      schedulePendingScrollRelease,
+      scrollContainerRef,
+    ],
   );
 
   // 今のスクロール位置から、中央に最も近いカードを求める
@@ -117,24 +166,27 @@ export function useVerticalCardPager({
     }
 
     if (nearestIdx !== -1 && nearestIdx !== activeIndexRef.current) {
-      ioTriggeredRef.current = true;
-      onActiveIndexChange(nearestIdx);
+      queueNaturalIndexCommit(nearestIdx);
     }
-  }, [onActiveIndexChange, scrollContainerRef]);
+  }, [queueNaturalIndexCommit, scrollContainerRef]);
 
   const goNext = useCallback(() => {
     const next = Math.min(activeIndexRef.current + 1, count - 1);
     if (next === activeIndexRef.current) return;
+    clearNaturalIndexTimer();
+    queuedNaturalIndexRef.current = null;
     onActiveIndexChange(next);
     scrollToIndex(next, "smooth");
-  }, [count, onActiveIndexChange, scrollToIndex]);
+  }, [clearNaturalIndexTimer, count, onActiveIndexChange, scrollToIndex]);
 
   const goPrev = useCallback(() => {
     const prev = Math.max(activeIndexRef.current - 1, 0);
     if (prev === activeIndexRef.current) return;
+    clearNaturalIndexTimer();
+    queuedNaturalIndexRef.current = null;
     onActiveIndexChange(prev);
     scrollToIndex(prev, "smooth");
-  }, [onActiveIndexChange, scrollToIndex]);
+  }, [clearNaturalIndexTimer, onActiveIndexChange, scrollToIndex]);
 
   // 外部から activeIndex が変わったときに中央へ寄せる
   // 自然スクロール起因の変更では二重スクロールしない
@@ -184,8 +236,15 @@ export function useVerticalCardPager({
       }
 
       clearPendingScrollTimer();
+      clearNaturalIndexTimer();
     };
-  }, [count, clearPendingScrollTimer, computeNearestIndex, scrollContainerRef]);
+  }, [
+    count,
+    clearPendingScrollTimer,
+    clearNaturalIndexTimer,
+    computeNearestIndex,
+    scrollContainerRef,
+  ]);
 
   // キーボード操作
   useEffect(() => {

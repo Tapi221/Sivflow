@@ -15,6 +15,7 @@ import {
   normalizeLayoutRows,
 } from "@/domain/card/extraRows";
 import { resolveCardTagNames } from "@/hooks/settings/useTags";
+import { sanitizeUploadedImages } from "@/utils/uploaded-image/sanitizer";
 
 import type { CardBlock, Card, UploadedImage } from "@/types";
 
@@ -215,8 +216,8 @@ export function useCardEditorSession({
     }
   }, [localSelectedCardId, resetDialogs, selectedCardId]);
 
-  const handleSave = useCallback(async () => {
-    if (!draft) return;
+  const handleSave = useCallback(async (): Promise<boolean> => {
+    if (!draft) return false;
 
     try {
       setIsSaving(true);
@@ -224,6 +225,15 @@ export function useCardEditorSession({
       const sanitizeBlocksForSave = (blocks: CardBlock[]): CardBlock[] => {
         const next: CardBlock[] = [];
         for (const block of blocks ?? []) {
+          if (block?.type === "image") {
+            next.push({
+              ...(block as unknown),
+              images: sanitizeUploadedImages(
+                (block as unknown)?.images ?? [],
+              ) as UploadedImage[],
+            } as CardBlock);
+            continue;
+          }
           if (block?.type === "reference") {
             const cleaned = sanitizeReferences(
               (block as unknown)?.references ?? [],
@@ -245,8 +255,8 @@ export function useCardEditorSession({
         title: draft.title,
         tagIds,
         isDraft: draft.isDraft,
-        questionImages: draft.questionImages,
-        answerImages: draft.answerImages,
+        questionImages: sanitizeUploadedImages(draft.questionImages) as UploadedImage[],
+        answerImages: sanitizeUploadedImages(draft.answerImages) as UploadedImage[],
         questionBlocks: sanitizeBlocksForSave(draft.questionBlocks),
         answerBlocks: sanitizeBlocksForSave(draft.answerBlocks),
         layoutRows: normalizeLayoutRows(draft.layoutRows),
@@ -258,7 +268,7 @@ export function useCardEditorSession({
             "[CardEditorPane] createCard が useCards にありません。useCards の作成関数名に合わせて置き換えてください。",
           );
           toastError?.("カードの作成関数が見つかりません");
-          return;
+          return false;
         }
 
         const created = await createCard({
@@ -281,20 +291,22 @@ export function useCardEditorSession({
         }
 
         setIsEditing(false);
-        return;
+        return true;
       }
 
-      if (!selectedCard) return;
+      if (!selectedCard) return false;
 
       await updateCard(selectedCard.id, payload);
       onCardUpdated?.();
       toastSuccess?.("カードを更新しました");
       setIsEditing(false);
+      return true;
     } catch (error) {
       console.error("カード保存に失敗しました:", error);
       const message =
         error instanceof Error ? error.message : "カード保存に失敗しました";
       toastError?.(message);
+      return false;
     } finally {
       setIsSaving(false);
     }
@@ -372,11 +384,17 @@ export function useCardEditorSession({
         return;
       }
       if (!selectedCard) return;
+      if ((selectedCard.title ?? "") === nextTitle) return;
       await updateCard(selectedCard.id, { title: nextTitle });
       onCardUpdated?.();
     },
     [isEditing, onCardUpdated, selectedCard, updateCard],
   );
+
+  const handleTitleInputChange = useCallback((nextTitle: string) => {
+    if (!isEditing) return;
+    setDraft((prev) => (prev ? { ...prev, title: nextTitle } : prev));
+  }, [isEditing]);
 
   const panelCard = useMemo(() => {
     if (selectedCard) {
@@ -442,6 +460,7 @@ export function useCardEditorSession({
     handleToggleUncertainty,
     handleUpdateTags,
     handleToggleDraft,
+    handleTitleInputChange,
     handleUpdateTitle,
     panelCard,
   };

@@ -1,22 +1,56 @@
 import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useLiveQuery } from "dexie-react-hooks";
+import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
 import { useSearchParams } from "react-router-dom";
 import { Line, LineChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 
+import { useAuth } from "@/contexts/AuthContext";
 import { RatingCountTiles } from "@/features/study/RatingCountTiles";
 import { SurfaceButton } from "@/components/ui/surface-button";
 import { Switch } from "@/components/ui/switch";
 import { TagInput } from "@/components/ui/tag-input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { EmptyMetaPanel } from "@/components/card/panels/EmptyMetaPanel";
 import { MetaPanelLeadSection } from "@/components/card/panels/MetaPanelShell";
+import { firestoreDb } from "@/services/firebase";
+import { getLocalDb } from "@/services/localDB";
 import type { Card, ReviewLog } from "@/types";
 import { calculateResistanceScore } from "@/utils/reviewMetrics";
 import { useTags, resolveCardTagNames } from "@/hooks/settings/useTags";
 
 type Period = "7d" | "30d" | "all";
+type MetaRating = ReviewLog["rating"] | null;
+type MetaReviewLog = {
+  reviewedAt: string;
+  rating: MetaRating;
+  resistanceScore: number | null;
+  reviewIndexHint?: number;
+};
 
 type CardMetaPanelProps = {
   card: Card | null;
   reviewLogs?: ReviewLog[];
+  onAddReviewLog: (input: {
+    reviewedAt: string;
+    rating: ReviewLog["rating"];
+  }) => void | Promise<void>;
+  onUpdateLatestReviewLog?: (input: {
+    reviewLogs: ReviewLog[];
+    reviewedAt: string;
+    rating: ReviewLog["rating"];
+  }) => void | Promise<void>;
+  onDeleteLatestReviewLog?: (input: {
+    reviewLogs: ReviewLog[];
+  }) => void | Promise<void>;
+  onTitleInputChange?: (nextTitle: string) => void | Promise<void>;
   onUpdateTags: (nextTags: string[]) => void;
   onToggleDraft: (isDraft: boolean) => void;
   onUpdateTitle: (nextTitle: string) => void;
@@ -30,6 +64,82 @@ const META_DATE_FORMATTER = new Intl.DateTimeFormat("ja-JP", {
   hour: "2-digit",
   minute: "2-digit",
 });
+
+const RATING_LABELS: Record<ReviewLog["rating"], string> = {
+  1: "忘れた",
+  2: "あいまい",
+  3: "覚えた",
+  4: "余裕",
+};
+
+const RATING_TONE_CLASS: Record<ReviewLog["rating"], string> = {
+  1: "bg-red-50 text-[#c2410c]",
+  2: "bg-amber-50 text-[#b45309]",
+  3: "bg-sky-50 text-[#0369a1]",
+  4: "bg-emerald-50 text-[#047857]",
+};
+
+const RATING_FACE_DESIGN: Record<
+  ReviewLog["rating"],
+  { iconWrap: string; svg: JSX.Element }
+> = {
+  1: {
+    iconWrap: "bg-red-50 text-[#FF5A65] face-badge-convex",
+    svg: (
+      <>
+        <circle cx="12" cy="12" r="10" stroke="none" />
+        <path d="M16 16s-1.5-2-4-2-4 2-4 2" />
+        <line x1="9" y1="9" x2="9.01" y2="9" />
+        <line x1="15" y1="9" x2="15.01" y2="9" />
+      </>
+    ),
+  },
+  2: {
+    iconWrap: "bg-amber-50 text-[#F9A825] face-badge-convex",
+    svg: (
+      <>
+        <line x1="8" y1="15" x2="16" y2="15" />
+        <line x1="9" y1="9" x2="9.01" y2="9" />
+        <line x1="15" y1="9" x2="15.01" y2="9" />
+      </>
+    ),
+  },
+  3: {
+    iconWrap: "bg-blue-50 text-[#00A3FF] face-badge-convex",
+    svg: (
+      <>
+        <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+        <line x1="9" y1="9" x2="9.01" y2="9" />
+        <line x1="15" y1="9" x2="15.01" y2="9" />
+      </>
+    ),
+  },
+  4: {
+    iconWrap: "bg-emerald-50 text-[#00B67A] face-badge-convex",
+    svg: (
+      <>
+        <path d="M8 13s1.5 3 4 3 4-3 4-3" />
+        <line x1="9" y1="9" x2="9.01" y2="9" />
+        <line x1="15" y1="9" x2="15.01" y2="9" />
+      </>
+    ),
+  },
+};
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return value !== null && typeof value === "object"
+    ? (value as Record<string, unknown>)
+    : null;
+}
+
+function toFiniteNumber(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const numeric = Number(value);
+    if (Number.isFinite(numeric)) return numeric;
+  }
+  return null;
+}
 
 function toValidDate(value: unknown): Date | null {
   if (value instanceof Date) {
@@ -57,9 +167,144 @@ function formatDateLabel(value: unknown) {
   return META_DATE_FORMATTER.format(date);
 }
 
+function toDateTimeLocalValue(value: unknown): string {
+  const date = toValidDate(value);
+  if (!date) return "";
+  const localMs = date.getTime() - date.getTimezoneOffset() * 60 * 1000;
+  return new Date(localMs).toISOString().slice(0, 16);
+}
+
+function fromDateTimeLocalValue(value: string): Date | null {
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function toRatingValue(value: unknown): ReviewLog["rating"] | null {
+  const numeric = toFiniteNumber(value);
+  if (numeric === null) return null;
+  const rounded = Math.round(numeric);
+  if (rounded < 1 || rounded > 4) return null;
+  return rounded as ReviewLog["rating"];
+}
+
+function normalizeMetaReviewLog(value: unknown): MetaReviewLog | null {
+  const log = asRecord(value);
+  if (!log) return null;
+
+  const reviewedAt = toValidDate(
+    log.reviewedAt ??
+      log.reviewed_at ??
+      log.studiedAt ??
+      log.studied_at ??
+      log.createdAt ??
+      log.created_at,
+  );
+  if (!reviewedAt) return null;
+
+  const directRating = toRatingValue(
+    log.rating ?? log.ratingNum ?? log.rating_num,
+  );
+  const subjectiveScore = toFiniteNumber(
+    log.subjectiveScore ??
+      log.subjective_score ??
+      log.lastSubjectiveScore ??
+      log.last_subjective_score,
+  );
+  const rating =
+    directRating ??
+    (subjectiveScore === null ? null : toRatingValue(subjectiveScore + 1));
+
+  const resistanceScoreRaw = toFiniteNumber(
+    log.resistanceScore ??
+      log.resistance_score ??
+      log.endurance ??
+      log.endurance_score,
+  );
+
+  return {
+    reviewedAt: reviewedAt.toISOString(),
+    rating,
+    resistanceScore:
+      resistanceScoreRaw === null
+        ? null
+        : Math.max(0, Math.min(100, resistanceScoreRaw)),
+  };
+}
+
+function dedupeMetaReviewLogs(logs: MetaReviewLog[]): MetaReviewLog[] {
+  const unique = new Map<string, MetaReviewLog>();
+  for (const log of logs) {
+    const reviewedAt = toValidDate(log.reviewedAt);
+    const minuteKey = reviewedAt
+      ? Math.floor(reviewedAt.getTime() / 60000)
+      : log.reviewedAt;
+    const key = `${minuteKey}:${log.rating ?? "unknown"}`;
+    if (!unique.has(key)) {
+      unique.set(key, log);
+      continue;
+    }
+    const current = unique.get(key)!;
+    if (current.resistanceScore == null && log.resistanceScore != null) {
+      unique.set(key, log);
+    }
+  }
+
+  return [...unique.values()].sort((a, b) => {
+    const aTs =
+      toValidDate(a.reviewedAt)?.getTime() ?? Number.NEGATIVE_INFINITY;
+    const bTs =
+      toValidDate(b.reviewedAt)?.getTime() ?? Number.NEGATIVE_INFINITY;
+    return aTs - bTs;
+  });
+}
+
+function getRatingLabel(rating: MetaRating): string {
+  if (rating === null) return "不明";
+  return RATING_LABELS[rating] ?? String(rating);
+}
+
+function getRatingToneClass(rating: MetaRating): string {
+  if (rating === null) return "bg-slate-100 text-slate-500";
+  return RATING_TONE_CLASS[rating];
+}
+
+function getRatingFaceDesign(rating: MetaRating) {
+  if (rating === null) return null;
+  return RATING_FACE_DESIGN[rating];
+}
+
+function isWithinSameMinute(a: unknown, b: unknown): boolean {
+  const aDate = toValidDate(a);
+  const bDate = toValidDate(b);
+  if (!aDate || !bDate) return false;
+  return Math.abs(aDate.getTime() - bDate.getTime()) < 60 * 1000;
+}
+
+function toEditableReviewLogs(logs: MetaReviewLog[]): ReviewLog[] {
+  return logs
+    .filter(
+      (log): log is MetaReviewLog & { rating: ReviewLog["rating"] } =>
+        log.rating !== null,
+    )
+    .map((log) => ({
+      reviewedAt: log.reviewedAt,
+      rating: log.rating,
+      resistanceScore:
+        typeof log.resistanceScore === "number" &&
+        Number.isFinite(log.resistanceScore)
+          ? log.resistanceScore
+          : 0,
+    }));
+}
+
 export function CardMetaPanel({
   card,
   reviewLogs = [],
+  onAddReviewLog,
+  onUpdateLatestReviewLog,
+  onDeleteLatestReviewLog,
+  onTitleInputChange,
   onUpdateTags,
   onToggleDraft,
   onUpdateTitle,
@@ -73,53 +318,24 @@ export function CardMetaPanel({
   const [period, setPeriod] = useState<Period>("30d");
   const [titleInput, setTitleInput] = useState(card?.title ?? "");
   const draftFlag = Boolean(card?.isDraft ?? (card as unknown)?.is_draft);
-  const [draftChecked, setDraftChecked] = useState(
-    draftFlag,
+  const [draftChecked, setDraftChecked] = useState(draftFlag);
+  const [isSavingPendingReview, setIsSavingPendingReview] = useState(false);
+  const [pendingReviewTimestamp, setPendingReviewTimestamp] = useState<
+    string | null
+  >(null);
+  const [isEditingLatestReview, setIsEditingLatestReview] = useState(false);
+  const [latestReviewDateInput, setLatestReviewDateInput] = useState("");
+  const [latestReviewRatingInput, setLatestReviewRatingInput] = useState<
+    ReviewLog["rating"] | null
+  >(null);
+  const [isMutatingLatestReview, setIsMutatingLatestReview] = useState(false);
+  const [latestReviewError, setLatestReviewError] = useState<string | null>(
+    null,
   );
   const [, setSearchParams] = useSearchParams();
+  const { currentUser } = useAuth();
   const { tagById } = useTags();
-
-  useEffect(() => {
-    queueMicrotask(() => setTitleInput(card?.title ?? ""));
-  }, [card?.id, card?.title]);
-
-  useEffect(() => {
-    queueMicrotask(() => setDraftChecked(draftFlag));
-  }, [card?.id, draftFlag]);
-
-  const safeLogs = useMemo(
-    () =>
-      [...reviewLogs].sort((a, b) => {
-        const aTs =
-          toValidDate(a.reviewedAt)?.getTime() ?? Number.NEGATIVE_INFINITY;
-        const bTs =
-          toValidDate(b.reviewedAt)?.getTime() ?? Number.NEGATIVE_INFINITY;
-        return aTs - bTs;
-      }),
-    [reviewLogs],
-  );
-
-  const latestReview = safeLogs.at(-1);
-
-  const currentResistanceScore = useMemo(() => {
-    if (!card) return null;
-    if (
-      latestReview?.resistanceScore != null &&
-      latestReview.resistanceScore > 0
-    ) {
-      return latestReview.resistanceScore;
-    }
-    const next = toValidDate(
-      card.nextReviewDate ?? (card as unknown).next_review_date,
-    );
-    const last = toValidDate(card.lastReviewAt ?? (card as unknown).last_review_at);
-    if (!next || !last) return null;
-    const intervalDays = Math.max(
-      0,
-      (next.getTime() - last.getTime()) / (1000 * 60 * 60 * 24),
-    );
-    return calculateResistanceScore(intervalDays);
-  }, [card, latestReview]);
+  const canPersistReview = Boolean(card?.id && card.id !== "__draft__");
 
   // reviewCount は snake_case で入ってくるケースがあるので両対応しておく（UI側は事故らないのが正義）
   const rawReviewCount = (card?.reviewCount ??
@@ -129,8 +345,190 @@ export function CardMetaPanel({
     ? Math.max(0, Math.trunc(Number(rawReviewCount)))
     : 0;
 
+  useEffect(() => {
+    queueMicrotask(() => setTitleInput(card?.title ?? ""));
+  }, [card?.id, card?.title]);
+
+  useEffect(() => {
+    queueMicrotask(() => setDraftChecked(draftFlag));
+  }, [card?.id, draftFlag]);
+
+  useEffect(() => {
+    setPendingReviewTimestamp(null);
+  }, [card?.id]);
+
+  const shouldLoadStudyLogs =
+    reviewLogs.length === 0 && canPersistReview && Boolean(currentUser?.uid);
+
+  const localStudyLogs = useLiveQuery(async () => {
+    if (!shouldLoadStudyLogs || !currentUser?.uid || !card?.id) return [];
+    const db = await getLocalDb(currentUser.uid);
+    const logs = await db.table("studyLogs").toArray();
+    return logs.filter((log) => {
+      const record = asRecord(log);
+      const logCardId = record?.cardId ?? record?.card_id;
+      return typeof logCardId === "string" && logCardId === card.id;
+    });
+  }, [shouldLoadStudyLogs, currentUser?.uid, card?.id]);
+
+  const { data: remoteStudyLogs = [] } = useQuery({
+    queryKey: ["card-meta-study-logs", currentUser?.uid, card?.id],
+    queryFn: async () => {
+      if (!currentUser?.uid || !card?.id || !firestoreDb) return [];
+      const q = query(
+        collection(firestoreDb, "studyLogs"),
+        where("userId", "==", currentUser.uid),
+        orderBy("createdAt", "desc"),
+      );
+      const snapshot = await getDocs(q);
+      return snapshot.docs
+        .map((doc) => ({ id: doc.id, ...doc.data() }))
+        .filter((log) => {
+          const record = asRecord(log);
+          const logCardId = record?.cardId ?? record?.card_id;
+          return typeof logCardId === "string" && logCardId === card.id;
+        })
+        .slice(0, 200);
+    },
+    enabled: shouldLoadStudyLogs && Boolean(firestoreDb),
+  });
+
+  const derivedResistanceScore = useMemo(() => {
+    if (!card) return null;
+    const next = toValidDate(
+      card.nextReviewDate ?? (card as unknown).next_review_date,
+    );
+    const last = toValidDate(
+      card.lastReviewAt ?? (card as unknown).last_review_at,
+    );
+    if (!next || !last) return null;
+    const intervalDays = Math.max(
+      0,
+      (next.getTime() - last.getTime()) / (1000 * 60 * 60 * 24),
+    );
+    return calculateResistanceScore(intervalDays);
+  }, [card]);
+
+  const normalizedCardReviewLogs = useMemo(
+    () =>
+      dedupeMetaReviewLogs(
+        reviewLogs
+          .map((log) => normalizeMetaReviewLog(log))
+          .filter((log): log is MetaReviewLog => log !== null),
+      ),
+    [reviewLogs],
+  );
+
+  const fallbackStudyReviewLogs = useMemo(() => {
+    if (!shouldLoadStudyLogs) return [];
+    const merged = [...(localStudyLogs ?? []), ...remoteStudyLogs];
+    const normalized = dedupeMetaReviewLogs(
+      merged
+        .map((log) => normalizeMetaReviewLog(log))
+        .filter((log): log is MetaReviewLog => log !== null),
+    );
+    if (normalized.length === 0) return normalized;
+
+    const lastReviewAt = toValidDate(
+      card?.lastReviewAt ?? (card as unknown)?.last_review_at,
+    );
+    if (!lastReviewAt || derivedResistanceScore === null) return normalized;
+
+    const lastIndex = normalized.length - 1;
+    const lastLog = normalized[lastIndex];
+    if (
+      lastLog &&
+      lastLog.resistanceScore == null &&
+      isWithinSameMinute(lastLog.reviewedAt, lastReviewAt)
+    ) {
+      return [
+        ...normalized.slice(0, -1),
+        { ...lastLog, resistanceScore: derivedResistanceScore },
+      ];
+    }
+
+    return normalized;
+  }, [
+    shouldLoadStudyLogs,
+    localStudyLogs,
+    remoteStudyLogs,
+    card,
+    derivedResistanceScore,
+  ]);
+
+  const mergedStoredLogs = useMemo(
+    () =>
+      dedupeMetaReviewLogs([
+        ...normalizedCardReviewLogs,
+        ...fallbackStudyReviewLogs,
+      ]),
+    [normalizedCardReviewLogs, fallbackStudyReviewLogs],
+  );
+
+  const syntheticSummaryLogs = useMemo(() => {
+    if (!card) return [];
+    if (mergedStoredLogs.length > 0) return [];
+    if (normalizedReviewCount <= 0) return [];
+
+    const lastReviewAt = toValidDate(
+      card.lastReviewAt ?? (card as unknown).last_review_at,
+    );
+    if (!lastReviewAt) return [];
+
+    return [
+      {
+        reviewedAt: lastReviewAt.toISOString(),
+        rating: null,
+        resistanceScore: derivedResistanceScore,
+        reviewIndexHint: normalizedReviewCount,
+      } satisfies MetaReviewLog,
+    ];
+  }, [
+    card,
+    mergedStoredLogs.length,
+    normalizedReviewCount,
+    derivedResistanceScore,
+  ]);
+
+  const safeLogs = useMemo(() => {
+    if (mergedStoredLogs.length > 0) return mergedStoredLogs;
+    return syntheticSummaryLogs;
+  }, [mergedStoredLogs, syntheticSummaryLogs]);
+
+  const editableReviewLogs = useMemo(
+    () => toEditableReviewLogs(mergedStoredLogs),
+    [mergedStoredLogs],
+  );
+  const latestEditableReview = editableReviewLogs.at(-1) ?? null;
+  const previousEditableReview =
+    editableReviewLogs.length > 1 ? (editableReviewLogs.at(-2) ?? null) : null;
+  const canManageLatestReview = Boolean(
+    latestEditableReview &&
+    onUpdateLatestReviewLog &&
+    onDeleteLatestReviewLog &&
+    canPersistReview,
+  );
+
+  const latestReview = safeLogs.at(-1);
+
+  const currentResistanceScore = useMemo(() => {
+    if (
+      latestReview?.resistanceScore != null &&
+      latestReview.resistanceScore > 0
+    ) {
+      return latestReview.resistanceScore;
+    }
+    return derivedResistanceScore;
+  }, [latestReview, derivedResistanceScore]);
+
   // SSOT は card.reviewCount（互換あり）。ログはあってもなくても表示が壊れないよう max を取る。
-  const completedReviewCount = Math.max(normalizedReviewCount, safeLogs.length);
+  const completedReviewCount = Math.max(
+    normalizedReviewCount,
+    safeLogs.reduce(
+      (max, log, idx) => Math.max(max, log.reviewIndexHint ?? idx + 1),
+      0,
+    ),
+  );
   const nextReviewAttempt = completedReviewCount + 1;
 
   const distribution20 = useMemo(() => {
@@ -146,10 +544,15 @@ export function CardMetaPanel({
 
   const chartData = useMemo(() => {
     const all = safeLogs
-      .filter((log) => log.resistanceScore != null)
+      .filter(
+        (log) =>
+          typeof log.resistanceScore === "number" &&
+          Number.isFinite(log.resistanceScore) &&
+          log.resistanceScore > 0,
+      )
       .map((log, idx) => ({
-        reviewIndex: idx + 1,
-        resistanceScore: log.resistanceScore,
+        reviewIndex: log.reviewIndexHint ?? idx + 1,
+        resistanceScore: log.resistanceScore!,
       }));
     if (period === "all") return all;
     const count = period === "7d" ? 7 : 30;
@@ -163,14 +566,62 @@ export function CardMetaPanel({
       .map((d) => d.reviewIndex);
   }, [chartData]);
 
+  const historyRows = useMemo(
+    () =>
+      safeLogs.map((log, idx) => ({
+        reviewedAtRaw: log.reviewedAt,
+        reviewIndex: log.reviewIndexHint ?? idx + 1,
+        reviewedAtLabel: formatDateLabel(log.reviewedAt),
+        rating: log.rating,
+        ratingLabel: getRatingLabel(log.rating),
+        ratingToneClass: getRatingToneClass(log.rating),
+        ratingFaceDesign: getRatingFaceDesign(log.rating),
+        isLatestEditable: idx === safeLogs.length - 1 && canManageLatestReview,
+        resistanceScore:
+          typeof log.resistanceScore === "number" &&
+          Number.isFinite(log.resistanceScore)
+            ? `${log.resistanceScore}%`
+            : "-",
+      })),
+    [canManageLatestReview, safeLogs],
+  );
+
+  const displayHistoryRows = useMemo(() => {
+    if (!pendingReviewTimestamp) return historyRows;
+    return [
+      ...historyRows,
+      {
+        reviewedAtRaw: pendingReviewTimestamp,
+        reviewIndex: completedReviewCount + 1,
+        reviewedAtLabel: formatDateLabel(pendingReviewTimestamp),
+        rating: null,
+        ratingLabel: "選択",
+        ratingToneClass: getRatingToneClass(null),
+        ratingFaceDesign: null,
+        resistanceScore: "-",
+        isLatestEditable: false,
+        isPending: true,
+      },
+    ];
+  }, [pendingReviewTimestamp, historyRows, completedReviewCount]);
+
   // tagIds 優先、fallback: card.tags（移行期間互換）
   const tags = resolveCardTagNames(card?.tagIds, card?.tags, tagById);
 
   const commitTitle = () => {
     const next = titleInput.trim();
     const current = (card?.title ?? "").trim();
+    if (next !== titleInput) {
+      setTitleInput(next);
+    }
     if (next === current) return;
-    onUpdateTitle(next);
+    void Promise.resolve(onUpdateTitle(next)).catch(() => {});
+  };
+
+  const handleTitleInputChange = (next: string) => {
+    setTitleInput(next);
+    if (!onTitleInputChange) return;
+    void Promise.resolve(onTitleInputChange(next)).catch(() => {});
   };
 
   const openTagSettings = () => {
@@ -185,6 +636,136 @@ export function CardMetaPanel({
     );
   };
 
+  const handleStartAddReview = () => {
+    if (!canPersistReview) return;
+    if (pendingReviewTimestamp) return;
+    if (isEditingLatestReview || isMutatingLatestReview) return;
+    setPendingReviewTimestamp(new Date().toISOString());
+  };
+
+  const handleSelectReviewRating = (rating: ReviewLog["rating"]) => {
+    if (!pendingReviewTimestamp) return;
+    if (isSavingPendingReview) return;
+    setIsSavingPendingReview(true);
+    const reviewedAt = pendingReviewTimestamp ?? new Date().toISOString();
+    void Promise.resolve(onAddReviewLog({ reviewedAt, rating }))
+      .then(() => {
+        setPendingReviewTimestamp(null);
+      })
+      .catch(() => {})
+      .finally(() => {
+        setIsSavingPendingReview(false);
+      });
+  };
+
+  const handleCancelPendingReview = () => {
+    setPendingReviewTimestamp(null);
+  };
+
+  useEffect(() => {
+    setIsEditingLatestReview(false);
+    setLatestReviewDateInput(
+      toDateTimeLocalValue(latestEditableReview?.reviewedAt),
+    );
+    setLatestReviewRatingInput(latestEditableReview?.rating ?? null);
+    setIsMutatingLatestReview(false);
+    setLatestReviewError(null);
+  }, [
+    card?.id,
+    latestEditableReview?.rating,
+    latestEditableReview?.reviewedAt,
+  ]);
+
+  const handleStartEditLatestReview = () => {
+    if (!latestEditableReview) return;
+    setLatestReviewDateInput(
+      toDateTimeLocalValue(latestEditableReview.reviewedAt),
+    );
+    setLatestReviewRatingInput(latestEditableReview.rating);
+    setLatestReviewError(null);
+    setIsEditingLatestReview(true);
+  };
+
+  const handleCancelEditLatestReview = () => {
+    setIsEditingLatestReview(false);
+    setLatestReviewDateInput(
+      toDateTimeLocalValue(latestEditableReview?.reviewedAt),
+    );
+    setLatestReviewRatingInput(latestEditableReview?.rating ?? null);
+    setLatestReviewError(null);
+  };
+
+  const handleSaveLatestReview = () => {
+    if (!latestEditableReview || !onUpdateLatestReviewLog) return;
+    if (isMutatingLatestReview) return;
+
+    const reviewedAt = fromDateTimeLocalValue(latestReviewDateInput);
+    if (!reviewedAt) {
+      setLatestReviewError("日時を入力してください。");
+      return;
+    }
+    if (!latestReviewRatingInput) {
+      setLatestReviewError("評価を選択してください。");
+      return;
+    }
+
+    const previousReviewedAt = toValidDate(previousEditableReview?.reviewedAt);
+    if (
+      previousReviewedAt &&
+      reviewedAt.getTime() < previousReviewedAt.getTime()
+    ) {
+      setLatestReviewError("最新記録は1つ前の記録より前に移動できません。");
+      return;
+    }
+
+    setIsMutatingLatestReview(true);
+    setLatestReviewError(null);
+    void Promise.resolve(
+      onUpdateLatestReviewLog({
+        reviewLogs: editableReviewLogs,
+        reviewedAt: reviewedAt.toISOString(),
+        rating: latestReviewRatingInput,
+      }),
+    )
+      .then(() => {
+        setIsEditingLatestReview(false);
+      })
+      .catch(() => {
+        setLatestReviewError("最新の学習記録を更新できませんでした。");
+      })
+      .finally(() => {
+        setIsMutatingLatestReview(false);
+      });
+  };
+
+  const handleDeleteLatestReview = () => {
+    if (!latestEditableReview || !onDeleteLatestReviewLog) return;
+    if (isMutatingLatestReview) return;
+    if (
+      typeof window !== "undefined" &&
+      !window.confirm("一番新しい学習記録を削除します。")
+    ) {
+      return;
+    }
+
+    setIsMutatingLatestReview(true);
+    setLatestReviewError(null);
+    void Promise.resolve(
+      onDeleteLatestReviewLog({
+        reviewLogs: editableReviewLogs,
+      }),
+    )
+      .then(() => {
+        setIsEditingLatestReview(false);
+      })
+      .catch(() => {
+        setLatestReviewError("最新の学習記録を削除できませんでした。");
+      })
+      .finally(() => {
+        setIsMutatingLatestReview(false);
+      });
+  };
+
   return (
     <EmptyMetaPanel>
       <MetaPanelLeadSection>
@@ -193,7 +774,7 @@ export function CardMetaPanel({
             <div className={actionRowClass}>
               <input
                 value={titleInput}
-                onChange={(e) => setTitleInput(e.target.value)}
+                onChange={(e) => handleTitleInputChange(e.target.value)}
                 onBlur={commitTitle}
                 disabled={!card}
                 onKeyDown={(e) => {
@@ -258,11 +839,15 @@ export function CardMetaPanel({
           <div className="space-y-0">
             <p className={infoRowClass}>
               作成日:{" "}
-              {formatDateLabel(card?.createdAt ?? (card as unknown)?.created_at)}
+              {formatDateLabel(
+                card?.createdAt ?? (card as unknown)?.created_at,
+              )}
             </p>
             <p className={infoRowClass}>
               更新日:{" "}
-              {formatDateLabel(card?.updatedAt ?? (card as unknown)?.updated_at)}
+              {formatDateLabel(
+                card?.updatedAt ?? (card as unknown)?.updated_at,
+              )}
             </p>
             <p className={infoRowClass}>
               最終復習日:{" "}
@@ -365,12 +950,285 @@ export function CardMetaPanel({
           </div>
         </section>
       )}
+
+      {!isCalendarMode && (
+        <section>
+          <div className="flex min-h-[var(--meta-action-min-h)] items-center justify-between">
+            <h3 className="h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] font-semibold tracking-wide text-[var(--sidebar-text-muted)] uppercase">
+              学習記録
+            </h3>
+            <div className="flex items-center gap-2">
+              <span className="text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] text-[var(--sidebar-text-muted)]">
+                {displayHistoryRows.length}件
+              </span>
+              <SurfaceButton
+                type="button"
+                surface="convex"
+                size="xs"
+                className="h-[var(--meta-row-px)] leading-[var(--meta-row-px)]"
+                onClick={handleStartAddReview}
+                disabled={
+                  !canPersistReview ||
+                  !!pendingReviewTimestamp ||
+                  isSavingPendingReview ||
+                  isEditingLatestReview ||
+                  isMutatingLatestReview
+                }
+              >
+                + 追加
+              </SurfaceButton>
+            </div>
+          </div>
+          {canManageLatestReview && (
+            <p className="mt-2 text-[11px] text-[var(--sidebar-text-muted)]">
+              最新1件のみ日時・評価の編集と削除ができます。
+            </p>
+          )}
+          {latestReviewError && (
+            <div className="mt-2 rounded border border-red-200 bg-red-50 px-2 py-1 text-[11px] text-red-700">
+              {latestReviewError}
+            </div>
+          )}
+          <div className="mt-3 overflow-hidden rounded border border-[var(--sidebar-border)] bg-[var(--sidebar-active-bg)]">
+            {displayHistoryRows.length === 0 ? (
+              <div className="flex h-24 items-center justify-center text-sm text-[var(--sidebar-text-muted)]">
+                学習記録なし
+              </div>
+            ) : (
+              <Table className="text-[length:var(--meta-font-size)]">
+                <TableHeader className="bg-white/70">
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="w-12 text-[var(--sidebar-text-muted)]">
+                      &nbsp;
+                    </TableHead>
+                    <TableHead className="min-w-[8.5rem] whitespace-nowrap text-[var(--sidebar-text-muted)]">
+                      日時
+                    </TableHead>
+                    <TableHead className="min-w-[6.5rem] whitespace-nowrap text-[var(--sidebar-text-muted)]">
+                      評価
+                    </TableHead>
+                    <TableHead className="w-[4.25rem] px-1 whitespace-normal break-words text-right leading-tight text-[var(--sidebar-text-muted)]">
+                      耐性スコア
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {displayHistoryRows.map((row) => (
+                    <TableRow
+                      key={`${row.reviewIndex}-${row.reviewedAtRaw ?? row.reviewedAtLabel}`}
+                      className="bg-transparent hover:bg-white/40"
+                    >
+                      <TableCell className="font-medium tabular-nums text-[var(--sidebar-text)]">
+                        {row.reviewIndex}
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap tabular-nums text-[var(--sidebar-text)]">
+                        {row.isLatestEditable && isEditingLatestReview ? (
+                          <input
+                            type="datetime-local"
+                            value={latestReviewDateInput}
+                            onChange={(e) =>
+                              setLatestReviewDateInput(e.target.value)
+                            }
+                            disabled={isMutatingLatestReview}
+                            className="h-8 w-full min-w-[11rem] rounded border border-[var(--surface-border)] bg-white px-2 text-[11px] outline-none focus:border-[#cfcfcf]"
+                          />
+                        ) : (
+                          row.reviewedAtLabel
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {"isPending" in row && row.isPending ? (
+                          <div className="flex flex-col items-center gap-1 py-1">
+                            <div className="grid grid-cols-2 gap-1">
+                              {([1, 2, 3, 4] as const).map((rating) => {
+                                const faceDesign = getRatingFaceDesign(rating);
+                                return (
+                                  <button
+                                    key={rating}
+                                    type="button"
+                                    className="flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--surface-border)] bg-white surface-convex transition-colors hover:bg-[var(--sidebar-active-bg)] disabled:cursor-wait disabled:opacity-50"
+                                    onClick={() =>
+                                      handleSelectReviewRating(rating)
+                                    }
+                                    disabled={isSavingPendingReview}
+                                    aria-label={getRatingLabel(rating)}
+                                    title={getRatingLabel(rating)}
+                                  >
+                                    <div
+                                      className={`flex h-7 w-7 items-center justify-center rounded-full ${faceDesign?.iconWrap ?? getRatingToneClass(rating)}`}
+                                    >
+                                      <svg
+                                        width="14"
+                                        height="14"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2.5"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                      >
+                                        {faceDesign?.svg}
+                                      </svg>
+                                    </div>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            <button
+                              type="button"
+                              className="text-[10px] leading-none text-[var(--sidebar-text-muted)] underline-offset-2 hover:underline disabled:opacity-50"
+                              onClick={handleCancelPendingReview}
+                              disabled={isSavingPendingReview}
+                            >
+                              取消
+                            </button>
+                          </div>
+                        ) : row.isLatestEditable && isEditingLatestReview ? (
+                          <div className="flex flex-col items-center gap-1 py-1">
+                            <div className="grid grid-cols-2 gap-1">
+                              {([1, 2, 3, 4] as const).map((rating) => {
+                                const faceDesign = getRatingFaceDesign(rating);
+                                const isSelected =
+                                  latestReviewRatingInput === rating;
+                                return (
+                                  <button
+                                    key={rating}
+                                    type="button"
+                                    className={`flex h-9 w-9 items-center justify-center rounded-xl border bg-white transition-colors disabled:cursor-wait disabled:opacity-50 ${
+                                      isSelected
+                                        ? "border-slate-900 surface-convex"
+                                        : "border-[var(--surface-border)]"
+                                    }`}
+                                    onClick={() =>
+                                      setLatestReviewRatingInput(rating)
+                                    }
+                                    disabled={isMutatingLatestReview}
+                                    aria-label={getRatingLabel(rating)}
+                                    title={getRatingLabel(rating)}
+                                  >
+                                    <div
+                                      className={`flex h-7 w-7 items-center justify-center rounded-full ${faceDesign?.iconWrap ?? getRatingToneClass(rating)}`}
+                                    >
+                                      <svg
+                                        width="14"
+                                        height="14"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2.5"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                      >
+                                        {faceDesign?.svg}
+                                      </svg>
+                                    </div>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ) : row.ratingFaceDesign ? (
+                          <div className="flex items-center justify-center">
+                            <div
+                              className={`flex h-8 w-8 items-center justify-center rounded-full ${row.ratingFaceDesign.iconWrap}`}
+                            >
+                              <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                {row.ratingFaceDesign.svg}
+                              </svg>
+                            </div>
+                          </div>
+                        ) : (
+                          <span
+                            className={`inline-flex min-w-[4.5rem] items-center justify-center rounded-full px-2 py-0.5 text-[11px] font-medium ${row.ratingToneClass}`}
+                          >
+                            {row.ratingLabel}
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell className="w-[4.25rem] px-1 text-right font-semibold tabular-nums text-[var(--sidebar-text)]">
+                        {row.resistanceScore}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </div>
+          {canManageLatestReview && latestEditableReview && (
+            <div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded border border-[var(--sidebar-border)] bg-white/70 px-3 py-2">
+              <p className="text-[11px] leading-5 text-[var(--sidebar-text-muted)]">
+                {isEditingLatestReview
+                  ? "最新記録を編集中"
+                  : `最新記録: ${formatDateLabel(latestEditableReview.reviewedAt)} / ${getRatingLabel(latestEditableReview.rating)}`}
+              </p>
+              {isEditingLatestReview ? (
+                <div className="flex items-center justify-end gap-1">
+                  <SurfaceButton
+                    type="button"
+                    surface="convex"
+                    size="xs"
+                    className="h-7 px-2"
+                    onClick={handleSaveLatestReview}
+                    disabled={isMutatingLatestReview}
+                  >
+                    保存
+                  </SurfaceButton>
+                  <SurfaceButton
+                    type="button"
+                    surface="concave"
+                    size="xs"
+                    className="h-7 px-2"
+                    onClick={handleCancelEditLatestReview}
+                    disabled={isMutatingLatestReview}
+                  >
+                    取消
+                  </SurfaceButton>
+                </div>
+              ) : (
+                <div className="flex items-center justify-end gap-1">
+                  <SurfaceButton
+                    type="button"
+                    surface="concave"
+                    size="xs"
+                    className="h-7 px-2"
+                    onClick={handleStartEditLatestReview}
+                    disabled={
+                      Boolean(pendingReviewTimestamp) ||
+                      isSavingPendingReview ||
+                      isMutatingLatestReview
+                    }
+                  >
+                    編集
+                  </SurfaceButton>
+                  <SurfaceButton
+                    type="button"
+                    surface="concave"
+                    size="xs"
+                    className="h-7 px-2 text-red-700"
+                    onClick={handleDeleteLatestReview}
+                    disabled={
+                      Boolean(pendingReviewTimestamp) ||
+                      isSavingPendingReview ||
+                      isMutatingLatestReview
+                    }
+                  >
+                    削除
+                  </SurfaceButton>
+                </div>
+              )}
+            </div>
+          )}
+        </section>
+      )}
     </EmptyMetaPanel>
   );
 }
-
-
-
-
-
-

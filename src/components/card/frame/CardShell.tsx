@@ -580,7 +580,17 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
                   return;
                 moveEvent.preventDefault();
 
-                const deltaY = moveEvent.clientY - resizeRef.current.startY;
+                const shellRect = element.getBoundingClientRect();
+                const rawScaleY =
+                  element.offsetHeight > 0
+                    ? shellRect.height / element.offsetHeight
+                    : 1;
+                const safeScaleY =
+                  Number.isFinite(rawScaleY) && rawScaleY > 0
+                    ? rawScaleY
+                    : 1;
+                const deltaY =
+                  (moveEvent.clientY - resizeRef.current.startY) / safeScaleY;
                 const snappedSteps =
                   deltaY >= 0
                     ? Math.max(

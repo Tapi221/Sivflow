@@ -20,7 +20,7 @@ export function MetaPanelShell({
   return (
     <aside
       className={cn(
-        `meta-panel h-full w-80 shrink-0 rounded-l-xl border border-[#d7d9de] bg-sidebar font-serif text-sm text-[var(--sidebar-text)] surface-panel-convex ${UI_TYPO} ${NUMERIC_TYPO}`,
+        `meta-panel h-full w-80 shrink-0 border-l border-[#d7d9de] bg-sidebar font-serif text-sm text-[var(--sidebar-text)] ${UI_TYPO} ${NUMERIC_TYPO}`,
         className,
       )}
       style={
@@ -59,7 +59,3 @@ export function MetaPanelLeadSection({
     </section>
   );
 }
-
-
-
-

@@ -122,6 +122,18 @@ export function ScaleToFitFrame({
       ? Math.ceil(contentHeight * (disableScale ? 1 : scale))
       : null;
   const safePaddingPx = Math.max(0, contentPaddingPx);
+  const safeBaseWidth = Math.max(1, baseWidth);
+  const zoomSupported =
+    typeof CSS !== "undefined" &&
+    typeof CSS.supports === "function" &&
+    CSS.supports("zoom", "1.1");
+  // 拡大時だけ zoom を使ってテキスト/罫線のぼやけを抑える。
+  const shouldUseZoomScale = !disableScale && scale > 1.0001 && zoomSupported;
+  const shouldUseTransformScale =
+    !disableScale && !shouldUseZoomScale && Math.abs(scale - 1) > 0.0001;
+  const visualWidthPx = disableScale
+    ? null
+    : Math.ceil(safeBaseWidth * Math.max(0.1, scale));
 
   return (
     <div
@@ -145,23 +157,30 @@ export function ScaleToFitFrame({
         )}
       >
         <div
-          style={{
-            width: disableScale ? "100%" : `${Math.max(1, baseWidth)}px`,
-            transform: disableScale ? "none" : `scale(${scale})`,
-            transformOrigin: disableScale
-              ? "initial"
-              : fitHeight && centerContent
-                ? "center center"
-                : "top center",
-            willChange: disableScale ? undefined : "transform",
-          }}
+          style={
+            visualWidthPx != null ? { width: `${visualWidthPx}px` } : undefined
+          }
         >
           <div
-            ref={contentRef}
-            className="flow-root"
-            style={{ padding: safePaddingPx }}
+            style={{
+              width: disableScale ? "100%" : `${safeBaseWidth}px`,
+              transform: shouldUseTransformScale ? `scale(${scale})` : "none",
+              transformOrigin: disableScale
+                ? "initial"
+                : fitHeight && centerContent
+                  ? "center center"
+                  : "top left",
+              willChange: shouldUseTransformScale ? "transform" : undefined,
+              zoom: shouldUseZoomScale ? scale : undefined,
+            }}
           >
-            {children}
+            <div
+              ref={contentRef}
+              className="flow-root"
+              style={{ padding: safePaddingPx }}
+            >
+              {children}
+            </div>
           </div>
         </div>
       </div>

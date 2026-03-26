@@ -162,6 +162,7 @@ export const denormalizeUploadedImage = (
       ? {
           id: image.id,
           asset_id: image.assetId ?? image.id,
+          local_file_id: image.localFileId ?? image.assetId ?? image.id,
           url: image.remoteUrl ?? null,
           content_type: image.contentType ?? null,
           size: image.size ?? null,
@@ -171,6 +172,7 @@ export const denormalizeUploadedImage = (
       : {
           id: image.id,
           assetId: image.assetId ?? image.id,
+          localFileId: image.localFileId ?? image.assetId ?? image.id,
           url: image.remoteUrl ?? null,
           contentType: image.contentType ?? null,
           size: image.size ?? null,

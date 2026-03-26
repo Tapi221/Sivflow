@@ -1,8 +1,10 @@
 import { useCallback, useState } from "react";
 import { Timestamp } from "firebase/firestore";
-import { computeNextReview } from "@/services/reviewAlgorithm";
+import {
+  computeNextReview,
+  createReviewLogEntry,
+} from "@/services/reviewAlgorithm";
 import { normalizeMemoryStability } from "@/utils/reviewUtils";
-import { calculateResistanceScore } from "@/utils/reviewMetrics";
 import { getDebugStreak } from "@/utils/debugStreak";
 import { sanitizeStreak } from "@/utils/streak";
 import { getLocalDb } from "@/services/localDB";
@@ -65,13 +67,16 @@ export function useStudySession({
     if (!currentUser) return;
     try {
       setResults((prev) => ({ ...prev, streak: prev?.streak ?? 0 }));
-    } catch { /* noop */ }
+    } catch {
+      /* noop */
+    }
   }, [currentUser]);
 
   const handleResult = useCallback(
     async (subjectiveScore: number, responseTime: number) => {
       const card = studyCards[currentIndex];
       if (!card) return;
+      const reviewedAt = new Date();
 
       const memoryStabilityBefore = normalizeMemoryStability(
         card.memoryStability,
@@ -81,20 +86,20 @@ export function useStudySession({
       const reviewUpdate = computeNextReview({
         card,
         subjectiveScore,
-        now: new Date(),
+        now: reviewedAt,
         delayBonusEnabled: settings?.delayBonusEnabled ?? false,
       });
 
       if (updateCard) {
-        const newLog = {
-          reviewedAt: new Date().toISOString(),
+        const newLog = createReviewLogEntry({
+          reviewedAt,
           rating: (subjectiveScore + 1) as 1 | 2 | 3 | 4,
-          resistanceScore: calculateResistanceScore(reviewUpdate.intervalDays),
-        };
+          intervalDays: reviewUpdate.intervalDays,
+        });
         await updateCard(card.id, {
           ...reviewUpdate,
           reviewLogs: [...(card.reviewLogs ?? []), newLog],
-          updatedAt: new Date(),
+          updatedAt: reviewedAt,
         });
       }
 
@@ -117,10 +122,12 @@ export function useStudySession({
             folderId: card.folderId,
             subjectiveScore,
             responseTime,
-            createdAt: new Date(),
-            studiedAt: new Date(),
+            createdAt: reviewedAt,
+            studiedAt: reviewedAt,
           });
-        } catch { /* noop */ }
+        } catch {
+          /* noop */
+        }
       }
 
       if (
@@ -146,7 +153,7 @@ export function useStudySession({
             rating: SCORE_TO_RATING[subjectiveScore] ?? "forgot",
             subjectiveScore,
             responseTimeMs: responseTime,
-            studiedAt: new Date(),
+            studiedAt: reviewedAt,
           },
         ];
       });
@@ -201,7 +208,3 @@ export function useStudySession({
     stampRallyStreak,
   };
 }
-
-
-
-

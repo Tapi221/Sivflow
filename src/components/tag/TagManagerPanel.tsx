@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 import { TagChip } from "@/components/tag/TagChip";
 import {
   getTagColorKey,
-  getTagColorSwatchClassName,
+  getTagColorSwatchStyle,
   type TagColorKey,
 } from "@/lib/tags/tagColor";
 import {
@@ -483,6 +483,8 @@ export function TagManagerPanel({ className }: TagManagerPanelProps) {
                                 {DEFAULT_TAG_COLOR_KEYS.map((colorKey) => (
                                   <button
                                     key={colorKey}
+                                    type="button"
+                                    aria-label={`${colorKey}を選択`}
                                     onClick={() =>
                                       void handleColorChange(
                                         expandedTag.id,
@@ -491,11 +493,12 @@ export function TagManagerPanel({ className }: TagManagerPanelProps) {
                                     }
                                     className={cn(
                                       "h-6 w-6 shrink-0 rounded-full border-2 ring-1 ring-slate-300/70 shadow-sm transition-all hover:scale-105",
-                                      getTagColorSwatchClassName(colorKey),
-                                      getTagColorKey(expandedTag.color) === colorKey
+                                      getTagColorKey(expandedTag.color) ===
+                                        colorKey
                                         ? "scale-110 ring-2 ring-primary-600 ring-offset-2 opacity-100 shadow-md"
                                         : "opacity-80 hover:opacity-100",
                                     )}
+                                    style={getTagColorSwatchStyle(colorKey)}
                                   >
                                     {getTagColorKey(expandedTag.color) ===
                                       colorKey && (
@@ -645,8 +648,3 @@ export function TagManagerPanel({ className }: TagManagerPanelProps) {
     </div>
   );
 }
-
-
-
-
-

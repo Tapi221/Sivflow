@@ -40,6 +40,7 @@ export const denormalizeCardForStorage = (card: unknown) => {
           return {
             id: img.id ?? assetId,
             assetId,
+            localFileId: img.localFileId ?? assetId,
             remoteUrl,
             storagePath: img.storagePath ?? null,
             status: img.status ?? (remoteUrl ? "ready" : "uploading"),

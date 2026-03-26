@@ -51,6 +51,8 @@ export type VerticalCardPagerProps<T> = {
   paddingBlock?: string | number;
   /** カードの key を取り出す関数。省略時は idx を使う */
   getKey?: (card: T, idx: number) => string | number;
+  /** 自然スクロール時の activeIndex 反映遅延(ms)。0 なら即時反映 */
+  naturalIndexCommitDelayMs?: number;
 };
 
 // ── コンポーネント ───────────────────────────────────────────────────────────
@@ -65,6 +67,7 @@ export function VerticalCardPager<T>({
   paddingInlinePx = 16,
   paddingBlock = SCROLL_PADDING,
   getKey,
+  naturalIndexCommitDelayMs = 0,
 }: VerticalCardPagerProps<T>) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -74,6 +77,7 @@ export function VerticalCardPager<T>({
     onActiveIndexChange,
     scrollContainerRef: containerRef,
     onFlip,
+    naturalIndexCommitDelayMs,
   });
 
   return (

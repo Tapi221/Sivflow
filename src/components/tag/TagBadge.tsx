@@ -3,7 +3,7 @@ import { X } from "@/ui/icons";
 import { cn } from "@/lib/utils";
 import {
   DEFAULT_TAG_COLOR_CLASS_NAME,
-  getTagColorClassName,
+  getTagColorStyle,
   type TagColorKey,
 } from "@/lib/tags/tagColor";
 
@@ -43,10 +43,10 @@ export function TagBadge({
   onRemove,
   removeAriaLabel,
 }: TagBadgeProps) {
-  const resolvedColorClassName =
+  const resolvedColorStyle =
     colorKey !== undefined
-      ? getTagColorClassName(colorKey)
-      : getTagColorClassName(
+      ? getTagColorStyle(colorKey)
+      : getTagColorStyle(
           legacyColor ?? colorClass ?? DEFAULT_TAG_COLOR_CLASS_NAME,
         );
 
@@ -72,7 +72,6 @@ export function TagBadge({
   const rootClassName = cn(
     "inline-flex max-w-full items-center rounded-full border font-bold surface-convex transition-all",
     sizeClassMap[size],
-    resolvedColorClassName,
     selected && "ring-2 ring-primary-500/40 scale-[1.02]",
     onClick &&
       "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/50",
@@ -81,15 +80,20 @@ export function TagBadge({
 
   if (onClick) {
     return (
-      <button type="button" className={rootClassName} onClick={onClick}>
+      <button
+        type="button"
+        className={rootClassName}
+        style={resolvedColorStyle}
+        onClick={onClick}
+      >
         {content}
       </button>
     );
   }
 
-  return <span className={rootClassName}>{content}</span>;
+  return (
+    <span className={rootClassName} style={resolvedColorStyle}>
+      {content}
+    </span>
+  );
 }
-
-
-
-
