@@ -4,7 +4,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import { storage } from "@/services/firebase";
 import { getOrCreateImageBlobUrl } from "@/services/imageBlobUrlSessionCache";
 import { getLocalDb } from "@/services/localDB";
-import { Image as ImageIcon, Pause, Play, Volume2 } from "@/ui/icons";
+import {
+  Copy,
+  Download,
+  Image as ImageIcon,
+  Pause,
+  Play,
+  Volume2,
+} from "@/ui/icons";
 import { getDownloadURL, ref as storageRef } from "firebase/storage";
 import React, { useRef, useState } from "react";
 
@@ -267,48 +274,140 @@ export function ImageGallery({ urls, items }: ImageGalleryProps) {
       resolvedItems[index]?.url,
     );
   };
+  const copyImage = React.useCallback(async (imageUrl: string) => {
+    if (!imageUrl) return;
+    try {
+      const response = await fetch(imageUrl);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const blob = await response.blob();
+      if (
+        navigator.clipboard?.write &&
+        typeof ClipboardItem !== "undefined" &&
+        blob.type
+      ) {
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            [blob.type]: blob,
+          }),
+        ]);
+        return;
+      }
+      await navigator.clipboard.writeText(imageUrl);
+    } catch (error) {
+      console.error("Failed to copy image:", error);
+      try {
+        await navigator.clipboard.writeText(imageUrl);
+      } catch {
+        alert("画像のコピーに失敗しました。");
+      }
+    }
+  }, []);
+  const downloadImage = React.useCallback(
+    async (imageUrl: string, index: number) => {
+      if (!imageUrl) return;
+      try {
+        const response = await fetch(imageUrl);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const blob = await response.blob();
+        const objectUrl = URL.createObjectURL(blob);
+        const ext =
+          blob.type === "image/png"
+            ? "png"
+            : blob.type === "image/webp"
+              ? "webp"
+              : blob.type === "image/gif"
+                ? "gif"
+                : "jpg";
+        const a = document.createElement("a");
+        a.href = objectUrl;
+        a.download = `uploaded-image-${index + 1}.${ext}`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(objectUrl);
+      } catch (error) {
+        console.error("Failed to download image:", error);
+        const a = document.createElement("a");
+        a.href = imageUrl;
+        a.download = `uploaded-image-${index + 1}`;
+        a.rel = "noopener noreferrer";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
+    },
+    [],
+  );
 
   if (!resolvedItems || resolvedItems.length === 0) return null;
 
   return (
     <>
       <div className="w-full">
-        {resolvedItems.map((item, index) =>
-          !failedImages.has(index) && item.url ? (
-            <ImageFrame
-              key={item.key || index}
-              src={item.url}
-              alt={`Image ${index + 1}`}
-              scale={item.scale}
-              x={item.x}
-              naturalW={item.naturalW ?? naturalSizeMap[index]?.w ?? null}
-              naturalH={item.naturalH ?? naturalSizeMap[index]?.h ?? null}
-              className="bg-transparent"
-              imgClassName="cursor-pointer"
-              onNaturalSize={({ naturalW, naturalH }) => {
-                setNaturalSizeMap((prev) => {
-                  const current = prev[index];
-                  if (current?.w === naturalW && current?.h === naturalH)
-                    return prev;
-                  return { ...prev, [index]: { w: naturalW, h: naturalH } };
-                });
-              }}
-              onError={() => handleImageError(index)}
-            />
-          ) : (
-            <div
-              key={index}
-              className="w-full h-48 bg-slate-100 flex items-center justify-center text-slate-400 flex-col gap-2"
-            >
-              <ImageIcon className="w-8 h-8 text-slate-300" />
-              <span className="text-xs">
-                {item.url
-                  ? "画像の読み込みに失敗しました"
-                  : "画像が壊れているため表示できません"}
-              </span>
-            </div>
-          ),
-        )}
+        {resolvedItems.map((item, index) => (
+          <div key={item.key || index} className="relative group">
+            {!failedImages.has(index) && item.url ? (
+              <>
+                <ImageFrame
+                  src={item.url}
+                  alt={`Image ${index + 1}`}
+                  scale={item.scale}
+                  x={item.x}
+                  naturalW={item.naturalW ?? naturalSizeMap[index]?.w ?? null}
+                  naturalH={item.naturalH ?? naturalSizeMap[index]?.h ?? null}
+                  className="bg-transparent"
+                  imgClassName="cursor-pointer"
+                  onNaturalSize={({ naturalW, naturalH }) => {
+                    setNaturalSizeMap((prev) => {
+                      const current = prev[index];
+                      if (current?.w === naturalW && current?.h === naturalH)
+                        return prev;
+                      return { ...prev, [index]: { w: naturalW, h: naturalH } };
+                    });
+                  }}
+                  onError={() => handleImageError(index)}
+                />
+                <div className="absolute top-1 right-1 z-20 flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 supports-[hover:none]:opacity-100">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="icon"
+                    className="h-6 w-6 bg-white/90"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      void copyImage(item.url);
+                    }}
+                    aria-label="画像をコピー"
+                  >
+                    <Copy className="w-2.5 h-2.5" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="icon"
+                    className="h-6 w-6 bg-white/90"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      void downloadImage(item.url, index);
+                    }}
+                    aria-label="画像をダウンロード"
+                  >
+                    <Download className="w-2.5 h-2.5" />
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <div className="w-full h-48 bg-slate-100 flex items-center justify-center text-slate-400 flex-col gap-2">
+                <ImageIcon className="w-8 h-8 text-slate-300" />
+                <span className="text-xs">
+                  {item.url
+                    ? "画像の読み込みに失敗しました"
+                    : "画像が壊れているため表示できません"}
+                </span>
+              </div>
+            )}
+          </div>
+        ))}
       </div>
     </>
   );

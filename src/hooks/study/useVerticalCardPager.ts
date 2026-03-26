@@ -123,8 +123,10 @@ export function useVerticalCardPager({
       clearNaturalIndexTimer();
       queuedNaturalIndexRef.current = null;
 
+      const containerRect = container.getBoundingClientRect();
+      const elRect = el.getBoundingClientRect();
       const targetTop =
-        el.offsetTop - container.clientHeight / 2 + el.offsetHeight / 2;
+        container.scrollTop + (elRect.top - containerRect.top) - container.clientHeight / 2 + elRect.height / 2;
 
       const maxScrollTop = Math.max(0, container.scrollHeight - container.clientHeight);
       const nextTop = Math.min(Math.max(0, targetTop), maxScrollTop);
@@ -151,7 +153,8 @@ export function useVerticalCardPager({
     if (pendingScrollRef.current) return;
     if (freezeActiveIndex) return;
 
-    const containerCenter = container.scrollTop + container.clientHeight / 2;
+    const containerRect = container.getBoundingClientRect();
+    const containerCenter = containerRect.top + containerRect.height / 2;
 
     let minDist = Infinity;
     let nearestIdx = -1;
@@ -160,7 +163,8 @@ export function useVerticalCardPager({
       const el = itemRefs.current[idx];
       if (!el) continue;
 
-      const elCenter = el.offsetTop + el.offsetHeight / 2;
+      const elRect = el.getBoundingClientRect();
+      const elCenter = elRect.top + elRect.height / 2;
       const dist = Math.abs(elCenter - containerCenter);
 
       if (dist < minDist) {
@@ -237,7 +241,9 @@ export function useVerticalCardPager({
       });
     };
 
+    // container 自体がスクロールする場合と、祖先がスクロールする場合の両方を捕捉
     container.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("scroll", schedule, { passive: true, capture: true });
     window.addEventListener("resize", schedule, { passive: true });
 
     // 初期状態でも一度判定
@@ -245,6 +251,7 @@ export function useVerticalCardPager({
 
     return () => {
       container.removeEventListener("scroll", schedule);
+      window.removeEventListener("scroll", schedule, { capture: true });
       window.removeEventListener("resize", schedule);
 
       if (scrollRafRef.current != null) {

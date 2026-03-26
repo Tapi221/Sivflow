@@ -12,7 +12,7 @@ import { deleteImageBlob, putImageBlob } from "@/services/imageFileStore";
 import { getLocalDb } from "@/services/localDB";
 import type { AssetRecord, UploadedImage, UploadedImageStatus } from "@/types";
 import type { StorageUrl } from "@/types/core/branded";
-import { Check, Pause, Play, RotateCcw, Upload, X } from "@/ui/icons";
+import { Check, Copy, Download, Pause, Play, RotateCcw, Upload, X } from "@/ui/icons";
 import {
     createFailedUploadedImage,
     createUploadedImage,
@@ -24,7 +24,7 @@ import React, { useCallback, useEffect, useId, useRef, useState } from "react";
 const clamp = (v: number, min: number, max: number) =>
   Math.min(max, Math.max(min, v));
 
-function ImageItem({ item, index, onRetry, onUpdate }) {
+function ImageItem({ item, index, onRetry, onUpdate, onRemove }) {
   const [loadFailed, setLoadFailed] = useState(false);
   const { currentUser } = useAuth();
   const [resolvedLocalUrl, setResolvedLocalUrl] = useState<string | null>(null);
@@ -61,6 +61,67 @@ function ImageItem({ item, index, onRetry, onUpdate }) {
     item?.localUrl,
     item?.remoteUrl,
   ]);
+  const handleCopyImage = useCallback(async () => {
+    if (!displayUrl) return;
+    try {
+      const response = await fetch(displayUrl);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const blob = await response.blob();
+      if (
+        navigator.clipboard?.write &&
+        typeof ClipboardItem !== "undefined" &&
+        blob.type
+      ) {
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            [blob.type]: blob,
+          }),
+        ]);
+        return;
+      }
+      await navigator.clipboard.writeText(displayUrl);
+    } catch (error) {
+      console.error("Failed to copy image:", error);
+      try {
+        await navigator.clipboard.writeText(displayUrl);
+      } catch {
+        alert("画像のコピーに失敗しました。");
+      }
+    }
+  }, [displayUrl]);
+  const handleDownloadImage = useCallback(async () => {
+    if (!displayUrl) return;
+    try {
+      const response = await fetch(displayUrl);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const ext =
+        blob.type === "image/png"
+          ? "png"
+          : blob.type === "image/webp"
+            ? "webp"
+            : blob.type === "image/gif"
+              ? "gif"
+              : "jpg";
+      const a = document.createElement("a");
+      a.href = objectUrl;
+      a.download = `uploaded-image-${index + 1}.${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(objectUrl);
+    } catch (error) {
+      console.error("Failed to download image:", error);
+      const a = document.createElement("a");
+      a.href = displayUrl;
+      a.download = `uploaded-image-${index + 1}`;
+      a.rel = "noopener noreferrer";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+  }, [displayUrl, index]);
 
   return (
     <>
@@ -126,17 +187,55 @@ function ImageItem({ item, index, onRetry, onUpdate }) {
             )}
           </div>
 
-          <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="absolute top-1 right-1 flex gap-0.5 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 supports-[hover:none]:opacity-100 transition-opacity">
+            {displayUrl && (
+              <Button
+                type="button"
+                variant="secondary"
+                size="icon"
+                className="h-6 w-6 bg-white/90"
+                onClick={() => {
+                  void handleCopyImage();
+                }}
+                aria-label="画像をコピー"
+              >
+                <Copy className="w-2.5 h-2.5" />
+              </Button>
+            )}
+            {displayUrl && (
+              <Button
+                type="button"
+                variant="secondary"
+                size="icon"
+                className="h-6 w-6 bg-white/90"
+                onClick={() => {
+                  void handleDownloadImage();
+                }}
+                aria-label="画像をダウンロード"
+              >
+                <Download className="w-2.5 h-2.5" />
+              </Button>
+            )}
             {isFailed && (
               <Button
                 variant="secondary"
                 size="icon"
-                className="h-7 w-7 bg-white/80"
+                className="h-6 w-6 bg-white/90"
                 onClick={() => onRetry(index)}
               >
-                <RotateCcw className="w-3 h-3" />
+                <RotateCcw className="w-2.5 h-2.5" />
               </Button>
             )}
+            <Button
+              type="button"
+              variant="secondary"
+              size="icon"
+              className="h-6 w-6 bg-white/90"
+              onClick={() => onRemove(index)}
+              aria-label="画像を削除"
+            >
+              <X className="w-2.5 h-2.5" />
+            </Button>
           </div>
 
           {displayUrl && !loadFailed && (
@@ -920,6 +1019,7 @@ export default function MediaUploader({
               index={index}
               onRetry={handleRetry}
               onUpdate={handleUpdateImage}
+              onRemove={handleRemove}
             />
           ))}
 

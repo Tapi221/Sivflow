@@ -314,7 +314,7 @@ export function useCardEditorSession({
           else setLocalSelectedCardId(newId);
         }
 
-        setIsEditing(false);
+        if (!autoEdit) setIsEditing(false);
         return true;
       }
 
@@ -323,7 +323,7 @@ export function useCardEditorSession({
       await updateCard(selectedCard.id, payload);
       onCardUpdated?.();
       toastSuccess?.("カードを更新しました");
-      setIsEditing(false);
+      if (!autoEdit) setIsEditing(false);
       return true;
     } catch (error) {
       console.error("カード保存に失敗しました:", error);
@@ -339,6 +339,7 @@ export function useCardEditorSession({
     createCard,
     folderId,
     isNew,
+    autoEdit,
     onCardUpdated,
     onSelectCardId,
     selectedCard,
