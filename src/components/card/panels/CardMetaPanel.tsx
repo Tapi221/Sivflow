@@ -22,6 +22,10 @@ import { EmptyMetaPanel } from "@/components/card/panels/EmptyMetaPanel";
 import { MetaPanelLeadSection } from "@/components/card/panels/MetaPanelShell";
 import { firestoreDb } from "@/services/firebase";
 import { getLocalDb } from "@/services/localDB";
+import {
+  createLatestReviewLogPatch,
+  createReviewPatchFromRating,
+} from "@/services/reviewAlgorithm";
 import type { Card, ReviewLog } from "@/types";
 import { calculateResistanceScore } from "@/utils/reviewMetrics";
 import { useTags, resolveCardTagNames } from "@/hooks/settings/useTags";
@@ -54,6 +58,8 @@ type CardMetaPanelProps = {
   onUpdateTags: (nextTags: string[]) => void;
   onToggleDraft: (isDraft: boolean) => void;
   onUpdateTitle: (nextTitle: string) => void;
+  delayBonusEnabled?: boolean;
+  reviewStartNextDay?: boolean;
   mode?: "full" | "calendar";
 };
 
@@ -308,6 +314,8 @@ export function CardMetaPanel({
   onUpdateTags,
   onToggleDraft,
   onUpdateTitle,
+  delayBonusEnabled = false,
+  reviewStartNextDay = true,
   mode = "full",
 }: CardMetaPanelProps) {
   const isCalendarMode = mode === "calendar";
@@ -322,6 +330,9 @@ export function CardMetaPanel({
   const [isSavingPendingReview, setIsSavingPendingReview] = useState(false);
   const [pendingReviewTimestamp, setPendingReviewTimestamp] = useState<
     string | null
+  >(null);
+  const [pendingReviewRatingInput, setPendingReviewRatingInput] = useState<
+    ReviewLog["rating"] | null
   >(null);
   const [isEditingLatestReview, setIsEditingLatestReview] = useState(false);
   const [latestReviewDateInput, setLatestReviewDateInput] = useState("");
@@ -355,6 +366,7 @@ export function CardMetaPanel({
 
   useEffect(() => {
     setPendingReviewTimestamp(null);
+    setPendingReviewRatingInput(null);
   }, [card?.id]);
 
   const shouldLoadStudyLogs =
@@ -511,7 +523,72 @@ export function CardMetaPanel({
 
   const latestReview = safeLogs.at(-1);
 
+  const pendingPreviewResistanceScore = useMemo(() => {
+    if (!card || !pendingReviewTimestamp || !pendingReviewRatingInput) {
+      return null;
+    }
+
+    try {
+      const { reviewLog } = createReviewPatchFromRating({
+        card: {
+          ...card,
+          reviewLogs: editableReviewLogs,
+        },
+        rating: pendingReviewRatingInput,
+        now: new Date(pendingReviewTimestamp),
+        delayBonusEnabled,
+      });
+      return reviewLog.resistanceScore;
+    } catch {
+      return null;
+    }
+  }, [
+    card,
+    pendingReviewTimestamp,
+    pendingReviewRatingInput,
+    editableReviewLogs,
+    delayBonusEnabled,
+  ]);
+
+  const editingPreviewResistanceScore = useMemo(() => {
+    if (!card || !latestEditableReview || !latestReviewRatingInput) return null;
+    const reviewedAt = fromDateTimeLocalValue(latestReviewDateInput);
+    if (!reviewedAt) return null;
+
+    try {
+      const { reviewLog } = createLatestReviewLogPatch({
+        action: "update",
+        card: {
+          ...card,
+          reviewLogs: editableReviewLogs,
+        },
+        delayBonusEnabled,
+        reviewLogs: editableReviewLogs,
+        reviewStartNextDay,
+        reviewedAt,
+        rating: latestReviewRatingInput,
+      });
+      return reviewLog.resistanceScore;
+    } catch {
+      return null;
+    }
+  }, [
+    card,
+    latestEditableReview,
+    latestReviewRatingInput,
+    latestReviewDateInput,
+    editableReviewLogs,
+    delayBonusEnabled,
+    reviewStartNextDay,
+  ]);
+
   const currentResistanceScore = useMemo(() => {
+    if (isEditingLatestReview && editingPreviewResistanceScore != null) {
+      return editingPreviewResistanceScore;
+    }
+    if (pendingPreviewResistanceScore != null) {
+      return pendingPreviewResistanceScore;
+    }
     if (
       latestReview?.resistanceScore != null &&
       latestReview.resistanceScore > 0
@@ -519,7 +596,13 @@ export function CardMetaPanel({
       return latestReview.resistanceScore;
     }
     return derivedResistanceScore;
-  }, [latestReview, derivedResistanceScore]);
+  }, [
+    isEditingLatestReview,
+    editingPreviewResistanceScore,
+    pendingPreviewResistanceScore,
+    latestReview,
+    derivedResistanceScore,
+  ]);
 
   // SSOT は card.reviewCount（互換あり）。ログはあってもなくても表示が壊れないよう max を取る。
   const completedReviewCount = Math.max(
@@ -577,13 +660,25 @@ export function CardMetaPanel({
         ratingToneClass: getRatingToneClass(log.rating),
         ratingFaceDesign: getRatingFaceDesign(log.rating),
         isLatestEditable: idx === safeLogs.length - 1 && canManageLatestReview,
-        resistanceScore:
-          typeof log.resistanceScore === "number" &&
-          Number.isFinite(log.resistanceScore)
-            ? `${log.resistanceScore}%`
-            : "-",
+        resistanceScore: (() => {
+          const score =
+            idx === safeLogs.length - 1 &&
+            canManageLatestReview &&
+            isEditingLatestReview &&
+            editingPreviewResistanceScore != null
+              ? editingPreviewResistanceScore
+              : log.resistanceScore;
+          return typeof score === "number" && Number.isFinite(score)
+            ? `${score}%`
+            : "-";
+        })(),
       })),
-    [canManageLatestReview, safeLogs],
+    [
+      canManageLatestReview,
+      safeLogs,
+      isEditingLatestReview,
+      editingPreviewResistanceScore,
+    ],
   );
 
   const displayHistoryRows = useMemo(() => {
@@ -598,12 +693,20 @@ export function CardMetaPanel({
         ratingLabel: "選択",
         ratingToneClass: getRatingToneClass(null),
         ratingFaceDesign: null,
-        resistanceScore: "-",
+        resistanceScore:
+          pendingPreviewResistanceScore != null
+            ? `${pendingPreviewResistanceScore}%`
+            : "-",
         isLatestEditable: false,
         isPending: true,
       },
     ];
-  }, [pendingReviewTimestamp, historyRows, completedReviewCount]);
+  }, [
+    pendingReviewTimestamp,
+    historyRows,
+    completedReviewCount,
+    pendingPreviewResistanceScore,
+  ]);
 
   // tagIds 優先、fallback: card.tags（移行期間互換）
   const tags = resolveCardTagNames(card?.tagIds, card?.tags, tagById);
@@ -641,18 +744,23 @@ export function CardMetaPanel({
     if (pendingReviewTimestamp) return;
     if (isEditingLatestReview || isMutatingLatestReview) return;
     setPendingReviewTimestamp(new Date().toISOString());
+    setPendingReviewRatingInput(null);
   };
 
   const handleSelectReviewRating = (rating: ReviewLog["rating"]) => {
     if (!pendingReviewTimestamp) return;
     if (isSavingPendingReview) return;
+    setPendingReviewRatingInput(rating);
     setIsSavingPendingReview(true);
     const reviewedAt = pendingReviewTimestamp ?? new Date().toISOString();
     void Promise.resolve(onAddReviewLog({ reviewedAt, rating }))
       .then(() => {
         setPendingReviewTimestamp(null);
+        setPendingReviewRatingInput(null);
       })
-      .catch(() => {})
+      .catch(() => {
+        setPendingReviewRatingInput(null);
+      })
       .finally(() => {
         setIsSavingPendingReview(false);
       });
@@ -660,6 +768,7 @@ export function CardMetaPanel({
 
   const handleCancelPendingReview = () => {
     setPendingReviewTimestamp(null);
+    setPendingReviewRatingInput(null);
   };
 
   useEffect(() => {
@@ -958,9 +1067,6 @@ export function CardMetaPanel({
               学習記録
             </h3>
             <div className="flex items-center gap-2">
-              <span className="text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] text-[var(--sidebar-text-muted)]">
-                {displayHistoryRows.length}件
-              </span>
               <SurfaceButton
                 type="button"
                 surface="convex"

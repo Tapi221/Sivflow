@@ -904,6 +904,8 @@ export function CardEditorPane({
               onUpdateTags={handleUpdateTags}
               onToggleDraft={handleToggleDraft}
               onUpdateTitle={handleUpdateTitle}
+              delayBonusEnabled={settings?.delayBonusEnabled ?? false}
+              reviewStartNextDay={settings?.reviewStartNextDay ?? true}
             />
           )}
         </div>

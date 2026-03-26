@@ -1151,6 +1151,8 @@ export default function CardView() {
                 if (!selectedCard?.id) return;
                 void updateCard(selectedCard.id, { isDraft: nextDraft });
               }}
+              delayBonusEnabled={settings?.delayBonusEnabled ?? false}
+              reviewStartNextDay={settings?.reviewStartNextDay ?? true}
               onUpdateTitle={(nextTitle) => {
                 if (!selectedCard?.id) return;
                 void updateCard(selectedCard.id, { title: nextTitle });
