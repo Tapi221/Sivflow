@@ -4,10 +4,9 @@ import { useToast } from "@/contexts/ToastContext";
 import { useIsDesktopRuntime } from "@/hooks/platform/useIsDesktopRuntime";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { ChevronLeft, ChevronRight } from "@/ui/icons";
-import { useState } from "react";
-import { CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX, CARD_PANE_WIDTH_STEP_PX } from "./card-view/constants";
+import { CARD_PANE_WIDTH_STEP_PX } from "./card-view/constants";
 import { CardPaneWidthControl } from "./card-view/components/CardPaneWidthControl";
-import { CardViewDesktop, DesktopToolbarRow } from "./card-view/components/CardViewDesktop";
+import { CardViewDesktop } from "./card-view/components/CardViewDesktop";
 import { CardViewMetaPanel } from "./card-view/components/CardViewMetaPanel";
 import { CardViewMobile } from "./card-view/components/CardViewMobile";
 import { useCardViewBreadcrumbs } from "./card-view/hooks/useCardViewBreadcrumbs";
@@ -16,8 +15,6 @@ import { useCardViewPaneWidth } from "./card-view/hooks/useCardViewPaneWidth";
 import { useCardViewParams } from "./card-view/hooks/useCardViewParams";
 import { useCardViewState } from "./card-view/hooks/useCardViewState";
 import { useCardViewWindowEvents } from "./card-view/hooks/useCardViewWindowEvents";
-
-const CARDVIEW_TOOLBAR_ROW_HEIGHT_PX = 72;
 
 export default function CardView() {
   const { setExtraCrumbs } = useBreadcrumbContext();
@@ -70,12 +67,6 @@ export default function CardView() {
     pendingCreateCardAfterSaveRef: state.pendingCreateCardAfterSaveRef,
   });
 
-  // Toolbar mount refs for CardEditorPane's external toolbar portals
-  const [globalToolbarMountQ, setGlobalToolbarMountQ] =
-    useState<HTMLDivElement | null>(null);
-  const [globalToolbarMountA, setGlobalToolbarMountA] =
-    useState<HTMLDivElement | null>(null);
-
   if (!folderId && !cardSetId) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -87,19 +78,11 @@ export default function CardView() {
   }
 
   const showWidthControl = isDesktop;
-  const shouldReserveWidthControlSpace =
-    showWidthControl && state.isGlobalEditing;
-  const toolbarRowTopPx = shouldReserveWidthControlSpace
-    ? CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX
-    : 0;
-  const toolbarRowOffsetPx =
-    isDesktop && state.isGlobalEditing ? CARDVIEW_TOOLBAR_ROW_HEIGHT_PX : 0;
-
   return (
     <div className="h-full overflow-hidden bg-[#F5F7F8] pt-0 card-editor-right-pane-font">
       <div className="relative flex h-full min-h-0 overflow-hidden">
         {showWidthControl && (
-          <div className="pointer-events-none absolute left-3 top-3 z-30 hidden md:flex">
+          <div className="pointer-events-none absolute left-3 top-2 z-30 hidden md:flex">
             <CardPaneWidthControl
               modeLabel={state.isGlobalEditing ? "編集幅" : "閲覧幅"}
               value={paneWidth.activePaneWidthPx}
@@ -142,38 +125,12 @@ export default function CardView() {
 
         <div
           className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
-          style={
-            shouldReserveWidthControlSpace
-              ? { paddingTop: CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX }
-              : undefined
-          }
         >
-          {isDesktop && state.isGlobalEditing && (
-            <div
-              className="pointer-events-none absolute inset-x-0 z-20"
-              style={{ top: toolbarRowTopPx }}
-            >
-              <div className="pointer-events-auto">
-                <DesktopToolbarRow
-                  isGlobalEditing={state.isGlobalEditing}
-                  editPaneWidthPx={paneWidth.activePaneWidthPx}
-                  setGlobalToolbarMountQ={setGlobalToolbarMountQ}
-                  setGlobalToolbarMountA={setGlobalToolbarMountA}
-                />
-              </div>
-            </div>
-          )}
-
           <div
             ref={paneWidth.contentViewportRef}
             className={`min-h-0 min-w-0 flex-1 overflow-hidden py-0 ${
               state.isGlobalEditing || isDesktop ? "px-0" : "px-4"
             }`}
-            style={
-              toolbarRowOffsetPx > 0
-                ? { paddingTop: `${toolbarRowOffsetPx}px` }
-                : undefined
-            }
           >
             {isDesktop ? (
               <CardViewDesktop
@@ -194,8 +151,6 @@ export default function CardView() {
                 onEdit={state.handleEdit}
                 onToggleUncertainty={state.handleToggleUncertainty}
                 onToggleBookmark={state.handleToggleBookmark}
-                globalToolbarMountQ={globalToolbarMountQ}
-                globalToolbarMountA={globalToolbarMountA}
               />
             ) : (
               <CardViewMobile

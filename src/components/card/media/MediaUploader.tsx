@@ -940,6 +940,53 @@ export default function MediaUploader({
     onChange(next);
   };
 
+  const renderUploadDropzone = (withInput: boolean) => (
+    <div
+      className={cn(
+        "border-2 border-dashed rounded-[24px] p-5 text-center transition-all duration-300 cursor-pointer group/upload",
+        dragOver
+          ? "border-indigo-400 bg-indigo-50/50"
+          : "border-slate-200 hover:border-slate-300 hover:bg-slate-50/30",
+      )}
+      onDrop={handleDrop}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onClick={() => {
+        setRetryIndex(null);
+        fileInputRef.current?.click();
+      }}
+    >
+      {withInput ? (
+        <input
+          hidden
+          id={inputId}
+          type="file"
+          accept={accept}
+          multiple
+          className="hidden"
+          ref={fileInputRef}
+          onChange={handleFileInputChange}
+          aria-label={ariaLabel}
+        />
+      ) : null}
+
+      {isUploading ? (
+        <div className="flex items-center justify-center gap-2 text-indigo-600">
+          <Upload className="w-6 h-6 mx-auto mb-1.5 opacity-50" />
+          <p className="text-sm">アップロード中...</p>
+        </div>
+      ) : (
+        <div className="text-slate-400 group-hover/upload:text-slate-500 transition-colors select-none">
+          <Upload className="w-6 h-6 mx-auto mb-2 opacity-60" />
+          <p className="text-[10px] font-bold tracking-widest uppercase">
+            ドラッグ＆ドロップ、クリック、または Ctrl+V で
+            {type === "image" ? "画像を" : "音声を"}アップロード
+          </p>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="space-y-3" ref={containerRef}>
       {/* 
@@ -947,50 +994,7 @@ export default function MediaUploader({
           画像や音声が既に1つ以上ある場合は、この巨大なエリアは隠して
           コンテンツリストの末尾に小さな「追加」ボタンを表示する。
       */}
-      {urls.length === 0 && (
-        <div
-          className={cn(
-            "border-2 border-dashed rounded-[24px] p-5 text-center transition-all duration-300 cursor-pointer group/upload",
-            dragOver
-              ? "border-indigo-400 bg-indigo-50/50"
-              : "border-slate-200 hover:border-slate-300 hover:bg-slate-50/30",
-          )}
-          onDrop={handleDrop}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onClick={() => {
-            setRetryIndex(null);
-            fileInputRef.current?.click();
-          }}
-        >
-          <input
-            hidden
-            id={inputId}
-            type="file"
-            accept={accept}
-            multiple
-            className="hidden"
-            ref={fileInputRef}
-            onChange={handleFileInputChange}
-            aria-label={ariaLabel}
-          />
-
-          {isUploading ? (
-            <div className="flex items-center justify-center gap-2 text-indigo-600">
-              <Upload className="w-6 h-6 mx-auto mb-1.5 opacity-50" />
-              <p className="text-sm">アップロード中...</p>
-            </div>
-          ) : (
-            <div className="text-slate-400 group-hover/upload:text-slate-500 transition-colors select-none">
-              <Upload className="w-6 h-6 mx-auto mb-2 opacity-60" />
-              <p className="text-[10px] font-bold tracking-widest uppercase">
-                ドラッグ＆ドロップ、クリック、または Ctrl+V で
-                {type === "image" ? "画像を" : "音声を"}アップロード
-              </p>
-            </div>
-          )}
-        </div>
-      )}
+      {urls.length === 0 && renderUploadDropzone(true)}
 
       {/* 
           隠し input 要素: 
@@ -1024,18 +1028,7 @@ export default function MediaUploader({
           ))}
 
           {urls.length < maxFiles && (
-            <div
-              className="flex flex-col items-center justify-center h-24 border-2 border-dashed border-slate-200 rounded-lg cursor-pointer hover:border-slate-300 hover:bg-slate-50 transition-all text-slate-400"
-              onClick={() => {
-                setRetryIndex(null);
-                fileInputRef.current?.click();
-              }}
-            >
-              <Upload className="w-5 h-5 mb-1" />
-              <span className="text-[10px] font-bold uppercase tracking-tighter">
-                追加
-              </span>
-            </div>
+            renderUploadDropzone(false)
           )}
         </div>
       )}

@@ -113,6 +113,7 @@ export function VerticalCardPager<T>({
       ref={containerRef}
       style={{
         overflowY: "auto",
+        scrollbarGutter: "stable",
         height: "100%",
         position: "relative",
       }}

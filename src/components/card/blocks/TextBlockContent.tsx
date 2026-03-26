@@ -6,9 +6,7 @@ import {
 } from "./textBlockStyles";
 
 const normalizeTextBlockContent = (content: string) =>
-  String(content ?? "")
-    .replace(/\r\n/g, "\n")
-    .replace(/\n+$/g, "");
+  String(content ?? "").replace(/\r\n/g, "\n");
 
 type TextBlockContentProps =
   | {

@@ -9,6 +9,7 @@ import React from "react";
 import { resolveInkDocument } from "@/components/ink/inkStorage";
 import {
   type FlashcardCardLike,
+  type FlashcardMediaLike,
   resolveCardId,
   resolveHasUncertainty,
   resolveIsBookmarked,
@@ -34,6 +35,7 @@ export interface FlashcardDerived {
   isBookmarked: boolean;
   layoutRows: number;
   activeSide: "question" | "answer";
+  activeImageItems: FlashcardMediaLike[];
   activeImages: string[];
   activeAudioUrls: string[];
   activeReferences: ReturnType<typeof resolveReferences>;
@@ -57,17 +59,25 @@ export function useFlashcardDerived(
   const questionCode = cardData ? resolveQuestionCode(cardData) : null;
   const answerCode = cardData ? resolveAnswerCode(cardData) : null;
 
-   
-  const questionImageUrls = React.useMemo(
-    () => resolveImageUrls(cardData ? resolveQuestionImages(cardData) : []),
+  const questionImageItems = React.useMemo(
+    () => (cardData ? resolveQuestionImages(cardData) : []),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [cardData?.question_images, cardData?.questionImages],
   );
-   
-  const answerImageUrls = React.useMemo(
-    () => resolveImageUrls(cardData ? resolveAnswerImages(cardData) : []),
+
+  const answerImageItems = React.useMemo(
+    () => (cardData ? resolveAnswerImages(cardData) : []),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [cardData?.answer_images, cardData?.answerImages],
+  );
+
+  const questionImageUrls = React.useMemo(
+    () => resolveImageUrls(questionImageItems),
+    [questionImageItems],
+  );
+  const answerImageUrls = React.useMemo(
+    () => resolveImageUrls(answerImageItems),
+    [answerImageItems],
   );
 
   const questionAudios = React.useMemo(
@@ -114,6 +124,9 @@ export function useFlashcardDerived(
   const activeSide: "question" | "answer" = effectiveIsFlipped
     ? "answer"
     : "question";
+  const activeImageItems = effectiveIsFlipped
+    ? answerImageItems
+    : questionImageItems;
   const activeImages = effectiveIsFlipped ? answerImageUrls : questionImageUrls;
   const activeAudioUrls = effectiveIsFlipped
     ? answerAudioUrls
@@ -133,7 +146,6 @@ export function useFlashcardDerived(
             ? ((cardData?.questionBlocks ?? []) as CardBlock[])
             : ((cardData?.answerBlocks ?? []) as CardBlock[]),
         text: activeSide === "question" ? questionText : answerText,
-        imageUrls: activeSide === "question" ? questionImageUrls : answerImageUrls,
         audios: activeSide === "question" ? questionAudios : answerAudios,
         code: activeSide === "question" ? questionCode : answerCode,
       }),
@@ -143,8 +155,6 @@ export function useFlashcardDerived(
       cardData?.answerBlocks,
       questionText,
       answerText,
-      questionImageUrls,
-      answerImageUrls,
       questionAudios,
       answerAudios,
       questionCode,
@@ -158,6 +168,7 @@ export function useFlashcardDerived(
     isBookmarked,
     layoutRows,
     activeSide,
+    activeImageItems,
     activeImages,
     activeAudioUrls,
     activeReferences,

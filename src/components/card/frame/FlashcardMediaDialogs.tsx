@@ -5,12 +5,13 @@
  * - 音声ダイアログ
  * - 参考リンクポップアップ（ReferencePopup）
  */
-import { AudioPlayer } from "@/components/card/media/CardMedia";
+import { AudioPlayer, ImageGallery } from "@/components/card/media/CardMedia";
 import { ReferencePopup } from "@/components/card/overlays/ReferencePopup";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import type { ReferenceBlockData } from "@/types";
 import { Volume2, X } from "@/ui/icons";
+import type { FlashcardMediaLike } from "./flashcardDerived";
 
 interface FlashcardMediaDialogsProps {
   isImagePopupOpen: boolean;
@@ -19,6 +20,7 @@ interface FlashcardMediaDialogsProps {
   setIsAudioPopupOpen: (open: boolean) => void;
   isReferencePopupOpen: boolean;
   setIsReferencePopupOpen: (open: boolean) => void;
+  activeImageItems: FlashcardMediaLike[];
   activeImages: string[];
   activeAudioUrls: string[];
   activeReferences: ReferenceBlockData[];
@@ -31,6 +33,7 @@ export function FlashcardMediaDialogs({
   setIsAudioPopupOpen,
   isReferencePopupOpen,
   setIsReferencePopupOpen,
+  activeImageItems,
   activeImages,
   activeAudioUrls,
   activeReferences,
@@ -55,17 +58,9 @@ export function FlashcardMediaDialogs({
               <X className="w-5 h-5" />
             </Button>
             <div className="mt-8 space-y-4">
-              {activeImages.map((url, index) => (
-                <div key={`${url}-${index}`} className="w-full">
-                  <img
-                    src={url}
-                    alt={`Image ${index + 1}`}
-                    className="w-full h-auto rounded-lg border border-slate-100 shadow-sm"
-                  />
-                </div>
-              ))}
+              <ImageGallery urls={activeImages} items={activeImageItems} />
             </div>
-            {activeImages.length === 0 && (
+            {activeImageItems.length === 0 && activeImages.length === 0 && (
               <div className="flex items-center justify-center py-20 text-slate-400">
                 画像がありません
               </div>

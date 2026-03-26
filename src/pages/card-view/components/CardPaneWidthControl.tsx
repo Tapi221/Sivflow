@@ -30,12 +30,12 @@ export function CardPaneWidthControl({
   const resetDisabled = value === defaultValue;
 
   return (
-    <div className="pointer-events-auto flex items-center gap-1.5 rounded-[20px] border border-slate-200/80 bg-white/82 px-2.5 py-1.5 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-md">
+    <div className="pointer-events-auto flex items-center gap-1.5 rounded-[20px] border border-slate-200/80 bg-white/82 px-2.5 py-1 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-md">
       <div className="min-w-[72px] leading-none">
         <div className="text-[10px] font-medium tracking-[0.06em] text-slate-500">
           {modeLabel}
         </div>
-        <div className="mt-1 text-[13px] font-semibold tabular-nums text-slate-700">
+        <div className="mt-0.5 text-[13px] font-semibold tabular-nums text-slate-700">
           {value}px
         </div>
       </div>

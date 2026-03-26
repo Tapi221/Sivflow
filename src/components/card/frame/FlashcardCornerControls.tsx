@@ -15,14 +15,14 @@ import type { ReferenceBlockData } from "@/types";
 import { Edit, Image as ImageIcon, Link, Volume2 } from "@/ui/icons";
 import React from "react";
 import { CardCornerActions } from "./CardCornerActions";
-import type { FlashcardCardLike } from "./flashcardDerived";
+import type { FlashcardCardLike, FlashcardMediaLike } from "./flashcardDerived";
 
 interface FlashcardCornerControlsProps {
   card: FlashcardCardLike;
   previewMode: boolean | undefined;
   hasUncertainty: boolean;
   isBookmarked: boolean;
-  activeImages: string[];
+  activeImageItems: FlashcardMediaLike[];
   activeAudioUrls: string[];
   activeReferences: ReferenceBlockData[];
   extraHeaderLeft?: React.ReactNode;
@@ -44,7 +44,7 @@ export function useFlashcardCornerControls({
   previewMode,
   hasUncertainty,
   isBookmarked,
-  activeImages,
+  activeImageItems,
   activeAudioUrls,
   activeReferences,
   extraHeaderLeft,
@@ -58,6 +58,14 @@ export function useFlashcardCornerControls({
   const actionsTopLeft: React.ReactNode[] = [];
   const actionsTopRight: React.ReactNode[] = [];
   const mediaActionNodes: React.ReactNode[] = [];
+  const mediaButtonClass = cn(
+    "relative inline-flex h-7 w-7 min-h-0 min-w-0 items-center justify-center rounded-full transition-colors",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+    CARD_ACTION_BG_CLASS,
+    CARD_ACTION_COLOR_IDLE_CLASS,
+  );
+
+  const mediaCountLabel = (count: number) => (count > 9 ? "9+" : String(count));
 
   if (extraHeaderLeft) {
     actionsTopLeft.push(
@@ -83,7 +91,7 @@ export function useFlashcardCornerControls({
     );
   }
 
-  if (activeImages.length > 0) {
+  if (activeImageItems.length > 0) {
     mediaActionNodes.push(
       <button
         key="images"
@@ -91,10 +99,13 @@ export function useFlashcardCornerControls({
           e.stopPropagation();
           onOpenImagePopup();
         }}
-        className="flex items-center gap-1 px-2 py-1 h-8 min-h-0 min-w-0 rounded-full bg-indigo-500 text-white shadow-[0_2px_0_#4338ca] active:shadow-none active:translate-y-[2px] transition-all hover:bg-indigo-400 hover:shadow-[0_2px_0_#4338ca]"
+        className={mediaButtonClass}
+        aria-label={`画像 ${activeImageItems.length} 件`}
       >
         <ImageIcon className={CARD_ACTION_ICON_CLASS} />
-        <span className="text-[10px] font-bold">x{activeImages.length}</span>
+        <span className="pointer-events-none absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full border border-white bg-slate-100 px-1 text-[9px] font-semibold leading-none text-slate-500">
+          {mediaCountLabel(activeImageItems.length)}
+        </span>
       </button>,
     );
   }
@@ -107,10 +118,13 @@ export function useFlashcardCornerControls({
           e.stopPropagation();
           onOpenAudioPopup();
         }}
-        className="flex items-center gap-1 px-2 py-1 h-8 min-h-0 min-w-0 rounded-full transition-all bg-amber-500 text-white shadow-[0_2px_0_#b45309] active:shadow-none active:translate-y-[2px] hover:bg-amber-400 hover:shadow-[0_2px_0_#b45309]"
+        className={mediaButtonClass}
+        aria-label={`音声 ${activeAudioUrls.length} 件`}
       >
         <Volume2 className={CARD_ACTION_ICON_CLASS} />
-        <span className="text-[10px] font-bold">x{activeAudioUrls.length}</span>
+        <span className="pointer-events-none absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full border border-white bg-slate-100 px-1 text-[9px] font-semibold leading-none text-slate-500">
+          {mediaCountLabel(activeAudioUrls.length)}
+        </span>
       </button>,
     );
   }
@@ -123,11 +137,12 @@ export function useFlashcardCornerControls({
           e.stopPropagation();
           onOpenReferencePopup();
         }}
-        className="flex items-center gap-1 px-2 py-1 h-8 min-h-0 min-w-0 rounded-full transition-all bg-cyan-500 text-white shadow-[0_2px_0_#0e7490] active:shadow-none active:translate-y-[2px] hover:bg-cyan-400"
+        className={mediaButtonClass}
+        aria-label={`リンク ${activeReferences.length} 件`}
       >
         <Link className={CARD_ACTION_ICON_CLASS} />
-        <span className="text-[10px] font-bold">
-          x{activeReferences.length}
+        <span className="pointer-events-none absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full border border-white bg-slate-100 px-1 text-[9px] font-semibold leading-none text-slate-500">
+          {mediaCountLabel(activeReferences.length)}
         </span>
       </button>,
     );

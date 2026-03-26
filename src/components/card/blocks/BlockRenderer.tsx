@@ -12,8 +12,10 @@ import type { CardBlock } from "@/types";
 import { useCallback, useMemo, useState } from "react";
 import { CodeRenderer } from "./CodeRenderer";
 import { ImageBlockContent } from "./ImageBlockContent";
+import { ImageBlockShell } from "./ImageBlockShell";
 import { MarkdownBlockView } from "./MarkdownBlockPreview";
-import { MathBlockContent } from "./MathBlockContent";
+import { MathBlockPreviewPane } from "./MathBlockPreviewPane";
+import { QuestionBlockLayout } from "./QuestionBlockLayout";
 import { TextBlockContent } from "./TextBlockContent";
 
 interface BlockRendererProps {
@@ -32,47 +34,42 @@ function QuestionBlockView({
   const [revealed, setRevealed] = useState(displayMode === "always");
 
   return (
-    <div
-      className="rounded-r-md border-l-2 border-amber-400 bg-amber-50 pl-3 pr-2 py-2"
-      onClick={(e) => e.stopPropagation()}
-    >
-      {/* Q */}
-      <div className="flex items-start gap-1.5 mb-2">
-        <span className="shrink-0 text-[11px] font-bold text-amber-500 leading-none mt-[3px]">Q.</span>
-        <p className="flex-1 text-sm font-medium text-slate-700 leading-snug whitespace-pre-wrap">
+    <QuestionBlockLayout
+      containerProps={{
+        onClick: (e) => e.stopPropagation(),
+      }}
+      questionContent={
+        <p className="flex-1 text-xs font-medium text-slate-700 leading-snug whitespace-pre-wrap">
           {block.questionTitle || ""}
         </p>
-      </div>
-
-      {/* A */}
-      <div
-        className="flex items-start gap-1.5 border-t border-amber-200/60 pt-1.5"
-        onClick={(e) => {
+      }
+      answerContent={
+        <p
+          className="text-xs text-slate-600 leading-snug whitespace-pre-wrap transition-all duration-200"
+          style={
+            revealed
+              ? undefined
+              : { filter: "blur(5px)", userSelect: "none", pointerEvents: "none" }
+          }
+        >
+          {block.questionAnswer || "\u00a0"}
+        </p>
+      }
+      answerContainerProps={{
+        onClick: (e) => {
           e.stopPropagation();
           if (!revealed) setRevealed(true);
-        }}
-        style={{ cursor: revealed ? "default" : "pointer" }}
-      >
-        <span className="shrink-0 text-[11px] font-bold text-slate-400 leading-none mt-[3px]">A.</span>
-        <div className="flex-1 relative">
-          <p
-            className="text-sm text-slate-600 leading-snug whitespace-pre-wrap transition-all duration-200"
-            style={
-              revealed
-                ? undefined
-                : { filter: "blur(5px)", userSelect: "none", pointerEvents: "none" }
-            }
-          >
-            {block.questionAnswer || "\u00a0"}
-          </p>
-          {!revealed && (
-            <span className="absolute inset-0 flex items-center justify-center text-[11px] text-slate-400">
-              タップして表示
-            </span>
-          )}
-        </div>
-      </div>
-    </div>
+        },
+        style: { cursor: revealed ? "default" : "pointer" },
+      }}
+      answerOverlay={
+        !revealed ? (
+          <span className="absolute inset-0 flex items-center justify-center text-[10px] text-slate-400">
+            タップして表示
+          </span>
+        ) : undefined
+      }
+    />
   );
 }
 
@@ -127,11 +124,15 @@ export function BlockRenderer({
           : 0;
         const gridOffsetPx = gridOffsetRows * CARD_ROW_PX;
 
+        const blockLayoutKind: "normal" | "special" =
+          block.type === "code" || block.type === "question" ? "special" : "normal";
+
         return (
           <div
             key={block.id}
             className="w-full min-w-0 max-w-full flow-root"
             data-block-row="true"
+            data-block-layout-kind={blockLayoutKind}
             data-row-offset-applied={rowOffsetPx ? "true" : undefined}
             style={offsetStyle}
           >
@@ -166,10 +167,10 @@ export function BlockRenderer({
                     language={block.code!.language}
                   />
                 </div>
-              )}
+            )}
 
             {block.type === "image" && (block.images?.length ?? 0) > 0 && (
-              <div className="py-[4px]">
+              <ImageBlockShell>
                 <ImageBlockContent
                   mode="view"
                   urls={(block.images ?? [])
@@ -178,7 +179,7 @@ export function BlockRenderer({
                   items={block.images ?? []}
                   onFullscreenChange={onGalleryFullscreenChange}
                 />
-              </div>
+              </ImageBlockShell>
             )}
 
             {block.type === "audio" && (block.audios?.length ?? 0) > 0 && (
@@ -201,7 +202,7 @@ export function BlockRenderer({
                       style={{ height: `${gridOffsetPx}px` }}
                     />
                   )}
-                  <MathBlockContent
+                  <MathBlockPreviewPane
                     latex={block.math!.latex || ""}
                     displayMode={block.math!.displayMode || "block"}
                   />

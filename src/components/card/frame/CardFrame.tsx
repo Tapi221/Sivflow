@@ -43,6 +43,9 @@ export interface CardFrameProps
   /** 追加のスケール倍率 */
   scaleMultiplier?: number;
 
+  /** 親から与える固定スケール。指定時は自動計算より優先 */
+  fixedScale?: number;
+
   /** CardShell に渡す追加クラス（標準クラスに合成される） */
   className?: string;
 
@@ -64,6 +67,9 @@ export interface CardFrameProps
 
   /** カード表面に重ねる overlay（例: インク層、選択ハイライト、UIレイヤなど） */
   overlay?: React.ReactNode;
+
+  /** カード本体の直上に密着表示する付属UI（例: ブロック追加ツールバー） */
+  topAttachment?: React.ReactNode;
 }
 
 /**
@@ -83,6 +89,7 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
       allowUpscale = true,
       maxScale = 1.6,
       scaleMultiplier = CARD_DISPLAY_SCALE,
+      fixedScale,
 
       // 追加のクラス（標準の見た目に合成）
       className,
@@ -97,6 +104,7 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
 
       // 表面に重ねるUIレイヤ（例: インク、選択状態、ガイド）
       overlay,
+      topAttachment,
 
       // CardShell に渡す style（外から上書きできる）
       style,
@@ -119,9 +127,13 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
         allowUpscale={allowUpscale}
         maxScale={maxScale}
         scaleMultiplier={scaleMultiplier}
+        fixedScale={fixedScale}
       >
         {/* スケール後のカードを中央寄せしたいので mx-auto ラッパー */}
-        <div className="mx-auto">
+        <div className="mx-auto" style={{ width: `${Math.max(1, baseWidth)}px` }}>
+          {topAttachment ? (
+            <div className="w-full overflow-visible">{topAttachment}</div>
+          ) : null}
           {/**
            * CardShell:
            * - カード外枠（角丸/影/背景/ボーダーなど）を担う“器”

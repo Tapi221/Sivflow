@@ -2,6 +2,7 @@ import React from "react";
 import { Image as ImageIcon } from "@/ui/icons";
 import { BlockWrapper } from "./BlockWrapper";
 import { ImageBlockContent } from "./ImageBlockContent";
+import { ImageBlockShell } from "./ImageBlockShell";
 import { cn } from "@/lib/utils";
 
 interface MediaBlockProps {
@@ -55,7 +56,7 @@ export const MediaBlock = ({
     <BlockWrapper
       onDelete={onDelete}
       onDuplicate={onDuplicate}
-      className={cn("py-[4px] px-0", !isMediaEmpty && "border-transparent")}
+      className={cn("py-0 px-0", !isMediaEmpty && "border-transparent")}
       contentClassName="px-0"
       dragHandleProps={dragHandleProps}
       dragHandleClassName={dragHandleClassName}
@@ -73,7 +74,7 @@ export const MediaBlock = ({
       onMoveDragStart={onMoveDragStart}
       onMoveDragEnd={onMoveDragEnd}
     >
-      <div className="relative rounded-[11px] overflow-hidden">
+      <ImageBlockShell showBorderOverlay>
         <ImageBlockContent
           mode="edit"
           urls={data}
@@ -82,11 +83,7 @@ export const MediaBlock = ({
           onConsumeInitialFile={onConsumeInitialFile}
           onFilesExcess={onFilesExcess}
         />
-        <div
-          className="pointer-events-none absolute inset-0 z-20 rounded-[11px] border border-slate-200/80"
-          style={{ borderWidth: "var(--card-ruled-line-px, 1px)" }}
-        />
-      </div>
+      </ImageBlockShell>
     </BlockWrapper>
   );
 };

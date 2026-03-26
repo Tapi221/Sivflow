@@ -2,7 +2,9 @@
  * Flashcard の fallback blocks 生成ロジック
  *
  * - questionBlocks/answerBlocks がある場合はそちらを優先
- * - ない場合は legacy テキスト/コード/画像/音声フィールドから生成
+ * - ない場合は legacy テキスト/コード/音声フィールドから生成
+ * - legacy 画像フィールドは右上メディアダイアログ表示専用として扱い、
+ *   本文ブロックには自動挿入しない
  */
 import { sortBlocksByOrderIndex } from "@/components/card/blocks/blockOrdering";
 import type { CardBlock } from "@/types";
@@ -11,7 +13,6 @@ import type { FlashcardMediaLike } from "./flashcardDerived";
 interface SideData {
   blocks: CardBlock[];
   text: string;
-  imageUrls: string[];
   audios: FlashcardMediaLike[];
   code: { code?: string; language?: string } | null;
 }
@@ -42,15 +43,6 @@ export function resolveSideBlocks(
       type: "code",
       orderIndex: orderIndex++,
       code: data.code,
-    } as CardBlock);
-  }
-
-  if ((data.imageUrls?.length ?? 0) > 0) {
-    fallbackBlocks.push({
-      id: `${side}-legacy-image`,
-      type: "image",
-      orderIndex: orderIndex++,
-      images: data.imageUrls as unknown as CardBlock["images"],
     } as CardBlock);
   }
 

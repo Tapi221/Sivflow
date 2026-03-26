@@ -1,0 +1,19 @@
+@layer components {
+  .block-inset {
+    box-sizing: border-box;
+    display: block;
+    padding: 4px;
+  }
+
+  .block-inset--image {
+    line-height: 0;
+  }
+
+  .block-inset--image > * {
+    line-height: normal;
+  }
+
+  .block-inset > * {
+    margin: 0;
+  }
+}

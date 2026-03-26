@@ -175,33 +175,20 @@ function ActionButton({
         onClick={onClick}
         aria-label={`${label}を追加`}
         className={cn(
-          "inline-flex shrink-0 items-center justify-center w-9 h-9 rounded-md",
-          "text-slate-700 transition-colors duration-100 select-none",
-          "hover:text-slate-900 hover:bg-slate-100",
-          "active:bg-slate-200 active:text-slate-900",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400",
+          "group/toolbar inline-flex shrink-0 items-center justify-center w-8 h-8 rounded-md",
+          "text-[var(--sidebar-text-muted,#6e6e80)] transition-colors duration-100 select-none",
+          "hover:text-[var(--sidebar-text,#202123)] hover:bg-[var(--sidebar-active-bg,#e7ebef)]",
+          "active:bg-[var(--sidebar-active-bg,#e7ebef)] active:text-[var(--sidebar-text,#202123)]",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sidebar-active-accent,#7aa6a1)]",
         )}
       >
-        <Icon className="w-[17px] h-[17px] shrink-0" style={{ strokeWidth: 2 }} />
+        <Icon
+          className="w-4 h-4 shrink-0 opacity-70 transition-opacity duration-100 group-hover/toolbar:opacity-100 group-active/toolbar:opacity-100"
+          style={{ strokeWidth: 1.2 }}
+        />
       </button>
     </Tooltip>
   );
-}
-
-// セクションラベル（「問題」「解答」など） — インタラクションなし
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <span
-      className="inline-flex items-center h-full mr-1.5 shrink-0 select-none text-[11px] font-semibold text-slate-700 leading-none"
-    >
-      {children}
-    </span>
-  );
-}
-
-// ラベルとアクション群の間の縦仕切り
-function Divider() {
-  return <div className="w-px h-3.5 bg-slate-200/80 shrink-0 mr-1.5" />;
 }
 
 export const BlockToolbar: React.FC<BlockToolbarProps> = ({
@@ -260,18 +247,12 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
   return (
     <div
       className={cn(
-        "flex w-full items-center px-2.5 gap-0",
-        "h-10 min-h-[40px]",
-        "bg-slate-50/60 border-b border-slate-200",
+        "flex w-full items-center px-2 gap-0",
+        "h-8 min-h-[32px]",
+        "bg-transparent border-0",
         className,
       )}
     >
-      {/* セクションラベル（問題 / 解答 など） */}
-      <SectionLabel>{label}</SectionLabel>
-
-      {/* ラベルとアクション群の区切り */}
-      <Divider />
-
       {/* モバイル: ドロップダウン */}
       <div className="flex md:hidden">
         <DropdownMenu>
@@ -280,9 +261,9 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
               type="button"
               className={cn(
                 "inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md",
-                "text-[11px] font-medium text-slate-500 transition-colors duration-100",
-                "hover:text-slate-900 hover:bg-slate-100",
-                "active:bg-slate-200 active:text-slate-900",
+                "text-[11px] font-medium text-[var(--sidebar-text-muted,#6e6e80)] transition-colors duration-100",
+                "hover:text-[var(--sidebar-text,#202123)] hover:bg-[var(--sidebar-active-bg,#e7ebef)]",
+                "active:bg-[var(--sidebar-active-bg,#e7ebef)] active:text-[var(--sidebar-text,#202123)]",
               )}
               aria-label={`${label} にブロックを追加`}
             >
@@ -305,7 +286,7 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
                   <DropdownMenuItem
                     key={config.type}
                     onClick={() => onAddBlock(config.type)}
-                    className="rounded-lg flex items-center gap-2.5 py-2 px-2 text-slate-600 focus:text-slate-800 focus:bg-slate-100"
+                    className="rounded-lg flex items-center gap-2.5 py-2 px-2 text-[var(--sidebar-text-muted,#6e6e80)] focus:text-[var(--sidebar-text,#202123)] focus:bg-[var(--sidebar-active-bg,#e7ebef)]"
                   >
                     <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-slate-100 border border-slate-200/70">
                       <Icon className="w-3.5 h-3.5" />
@@ -320,7 +301,7 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
       </div>
 
       {/* デスクトップ: アイコン only ボタン横並び */}
-      <div className="hidden md:flex items-center gap-2 flex-nowrap overflow-x-hidden">
+      <div className="hidden md:flex items-center gap-1 flex-nowrap overflow-x-hidden">
         {visibleConfigs.map((config) => {
           const Icon = getIcon(config.icon, config.type);
           return (

@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { VerticalCardPager } from "@/features/review/VerticalCardPager";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Card, UserSettings } from "@/types";
@@ -31,8 +31,6 @@ interface CardViewDesktopProps {
   onEdit: () => void;
   onToggleUncertainty: (card: Card) => void | Promise<void>;
   onToggleBookmark: (card: Card) => void | Promise<void>;
-  globalToolbarMountQ: HTMLDivElement | null;
-  globalToolbarMountA: HTMLDivElement | null;
 }
 
 export function CardViewDesktop({
@@ -53,8 +51,6 @@ export function CardViewDesktop({
   onEdit,
   onToggleUncertainty,
   onToggleBookmark,
-  globalToolbarMountQ,
-  globalToolbarMountA,
 }: CardViewDesktopProps) {
   const renderCard = useCallback(
     (card: Card, idx: number, isActive: boolean) => {
@@ -73,8 +69,6 @@ export function CardViewDesktop({
           cardSetId={cardSetId}
           cardsOverride={cardsForPager}
           saveSignal={saveSignal}
-          globalToolbarMountQ={globalToolbarMountQ}
-          globalToolbarMountA={globalToolbarMountA}
           onFlip={onFlip}
           onEdit={onEdit}
           onToggleUncertainty={onToggleUncertainty}
@@ -89,8 +83,6 @@ export function CardViewDesktop({
       cardSetId,
       cardsForPager,
       saveSignal,
-      globalToolbarMountQ,
-      globalToolbarMountA,
       onFlip,
       onEdit,
       onToggleUncertainty,
@@ -125,53 +117,11 @@ export function CardViewDesktop({
           ? CARDVIEW_NATURAL_INDEX_COMMIT_DELAY_EDIT_MS
           : CARDVIEW_NATURAL_INDEX_COMMIT_DELAY_VIEW_MS
       }
-      freezeActiveIndex={isGlobalEditing}
       showActiveOutline={!isGlobalEditing}
       disableItemChrome={isGlobalEditing}
       getCardWidth={() => activePaneWidthPx}
       getKey={(card) => card.id ?? card.docId ?? card.uid}
       renderCard={renderCard}
     />
-  );
-}
-
-// Toolbar row rendered above the pager in edit mode
-interface DesktopToolbarRowProps {
-  isGlobalEditing: boolean;
-  editPaneWidthPx: number;
-  setGlobalToolbarMountQ: (el: HTMLDivElement | null) => void;
-  setGlobalToolbarMountA: (el: HTMLDivElement | null) => void;
-}
-
-export function DesktopToolbarRow({
-  isGlobalEditing,
-  editPaneWidthPx,
-  setGlobalToolbarMountQ,
-  setGlobalToolbarMountA,
-}: DesktopToolbarRowProps) {
-  const borderClass = isGlobalEditing
-    ? "border border-slate-100 bg-white/60"
-    : "border border-transparent bg-transparent";
-
-  return (
-    <div
-      className="shrink-0 border-b border-gray-200/70 bg-[#F8FAFB]/95 px-3 py-2 backdrop-blur-sm"
-      onWheelCapture={(event) => {
-        event.preventDefault();
-        event.stopPropagation();
-      }}
-    >
-      <div
-        className="mx-auto grid w-full grid-cols-1 gap-4 md:grid-cols-2"
-        style={{ width: `${editPaneWidthPx}px`, maxWidth: "100%" }}
-      >
-        <div className={`flex h-14 min-h-0 w-full items-center rounded-md ${borderClass}`}>
-          <div ref={setGlobalToolbarMountQ} className="w-full" />
-        </div>
-        <div className={`flex h-14 min-h-0 w-full items-center rounded-md ${borderClass}`}>
-          <div ref={setGlobalToolbarMountA} className="w-full" />
-        </div>
-      </div>
-    </div>
   );
 }

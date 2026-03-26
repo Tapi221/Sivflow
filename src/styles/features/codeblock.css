@@ -1,11 +1,12 @@
 @layer components {
   .codeBlockRoot {
     --code-frame-radius: var(--block-frame-radius);
-    --code-header-reserve: 28px;
-    --code-padding-top: 20px;
+    --code-header-inset-y: 3px;
+    --code-header-reserve: 18px;
+    --code-padding-top: 6px;
     --code-padding-inline: 10px;
     --code-padding-bottom: 0px;
-    --code-root-base-pad-b: 8px;
+    --code-root-base-pad-b: 6px;
     position: relative;
     border-radius: var(--code-frame-radius);
     border: var(--code-frame-border-width) solid var(--code-border);
@@ -16,8 +17,8 @@
   }
 
   .codeBlockOuter {
-    padding-top: 8px;
-    padding-bottom: 8px;
+    padding-top: 0;
+    padding-bottom: 0;
   }
 
   .codeBlockRoot::before {

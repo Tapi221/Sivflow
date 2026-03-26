@@ -90,6 +90,8 @@ const CARD_PANE_EDIT_MIN_WIDTH_PX = 640;
 const CARD_PANE_WIDTH_STEP_PX = 40;
 const CARD_PANE_AUTO_MAX_SCALE = 4;
 const CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX = 72;
+const CARD_EDITOR_PAIR_GAP_PX = 16;
+const CARD_PAGER_EDIT_RULED_OFFSET_TOP_PX = 20;
 
 function clampPaneWidthPx(
   value: number | null | undefined,
@@ -166,7 +168,7 @@ function CardPaneWidthControl({
   return (
     <div
       ref={controlRootRef}
-      className="pointer-events-auto flex items-center gap-1.5 rounded-[20px] border border-slate-200/80 bg-white/82 px-2.5 py-1.5 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-md"
+      className="pointer-events-auto flex items-center gap-1.5 rounded-[20px] border border-slate-200/80 bg-white/82 px-2.5 py-1 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-md"
       onPointerDownCapture={beginInteractionGuard}
       onPointerMoveCapture={beginInteractionGuard}
     >
@@ -174,7 +176,7 @@ function CardPaneWidthControl({
         <div className="text-[10px] font-medium tracking-[0.06em] text-slate-500">
           {modeLabel}
         </div>
-        <div className="mt-1 text-[13px] font-semibold tabular-nums text-slate-700">
+        <div className="mt-0.5 text-[13px] font-semibold tabular-nums text-slate-700">
           {value}px
         </div>
       </div>
@@ -516,7 +518,15 @@ export function CardEditorPane({
     if (!element || typeof ResizeObserver === "undefined") return;
 
     const updateWidth = () => {
-      const nextWidth = Math.max(0, Math.round(element.clientWidth));
+      const nextWidth = Math.max(
+        0,
+        Math.round(
+          Math.max(
+            element.clientWidth,
+            element.parentElement?.clientWidth ?? 0,
+          ),
+        ),
+      );
       setContentViewportWidth((prev) =>
         prev === nextWidth ? prev : nextWidth,
       );
@@ -563,8 +573,38 @@ export function CardEditorPane({
   );
   const shouldReserveWidthControlSpace =
     showWidthControl && dockToolbarsToTop && !usesExternalToolbarMount;
+  const hideCardShellHeader =
+    embeddedInPager && dockToolbarsToTop;
+  const shouldDockToolbarToCardTop =
+    dockToolbarsToTop &&
+    !hideBlockToolbars &&
+    !usesExternalToolbarMount;
+  const shouldShowInlineToolbarMount =
+    !dockToolbarsToTop &&
+    !hideBlockToolbars &&
+    !usesExternalToolbarMount;
   const shouldApplyPaneWidth =
     (showWidthControl && contentViewportWidth > 0) || forcedPaneWidthPx != null;
+  const effectivePaneWidthPx = shouldApplyPaneWidth
+    ? Math.max(
+        activePaneMinWidthPx,
+        Math.min(
+          resolvedPaneWidthPx,
+          contentViewportWidth > 0 ? contentViewportWidth : resolvedPaneWidthPx,
+        ),
+      )
+    : Math.max(activePaneMinWidthPx, contentViewportWidth || activePaneMinWidthPx);
+  const useTwoColumnEditorLayout = effectivePaneWidthPx >= 768;
+  const editorCardTargetWidthPx = useTwoColumnEditorLayout
+    ? Math.max(1, (effectivePaneWidthPx - CARD_EDITOR_PAIR_GAP_PX) / 2)
+    : Math.max(1, effectivePaneWidthPx);
+  const editorCardFixedScale = Math.max(
+    0.1,
+    Math.min(
+      CARD_PANE_AUTO_MAX_SCALE,
+      editorCardTargetWidthPx / Math.max(1, CANONICAL_CARD_WIDTH),
+    ),
+  );
   const activePaneWidthStyle = shouldApplyPaneWidth
     ? {
         width: `${resolvedPaneWidthPx}px`,
@@ -689,7 +729,7 @@ export function CardEditorPane({
           )}
 
           {showWidthControl && (
-            <div className="pointer-events-none absolute left-3 top-3 z-30 flex">
+            <div className="pointer-events-none absolute left-3 top-2 z-30 flex">
               <CardPaneWidthControl
                 modeLabel={isEditing ? "編集幅" : "閲覧幅"}
                 value={activePaneWidthPx}
@@ -741,54 +781,24 @@ export function CardEditorPane({
                     : {}),
                 }}
               >
-                {dockToolbarsToTop &&
-                  !hideBlockToolbars &&
-                  !usesExternalToolbarMount && (
-                    <div
-                      className="sticky z-10 w-fit max-w-full bg-[#fafafa] pb-2"
-                      style={{
-                        top: shouldReserveWidthControlSpace
-                          ? CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX
-                          : 0,
-                      }}
-                    >
-                      <div
-                        className={cn(
-                          "grid w-fit max-w-full grid-cols-1 md:grid-cols-2",
-                          pairGapClassName,
-                        )}
-                      >
-                        <div className="flex h-14 min-h-0 w-full items-center rounded-md border border-slate-100 bg-white/60 md:mx-2">
-                          <div
-                            ref={setToolbarMountQInternal}
-                            className="w-full"
-                          />
-                        </div>
-                        <div className="flex h-14 min-h-0 w-full items-center rounded-md border border-slate-100 bg-white/60 md:mx-2">
-                          <div
-                            ref={setToolbarMountAInternal}
-                            className="w-full"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 <div
                   className={cn(
-                    "grid w-fit max-w-full grid-cols-1 md:grid-cols-2",
+                    "grid w-full max-w-full grid-cols-1 md:grid-cols-2",
                     pairGapClassName,
                   )}
+                  style={{ columnGap: `${CARD_EDITOR_PAIR_GAP_PX}px` }}
                 >
-                  <div className="flex min-h-0 w-full flex-col gap-2 md:px-2">
-                    {!dockToolbarsToTop &&
-                      !hideBlockToolbars &&
-                      !usesExternalToolbarMount && (
-                        <div className="flex shrink-0 items-center rounded-md border border-slate-100 bg-white/60">
-                          <div
-                            ref={setToolbarMountQInternal}
-                            className="w-full"
-                          />
-                        </div>
+                  <div
+                    className={cn(
+                      "flex min-h-0 w-full flex-col",
+                      shouldShowInlineToolbarMount ? "gap-2" : "gap-0",
+                    )}
+                  >
+                    {shouldShowInlineToolbarMount && (
+                      <div
+                        ref={setToolbarMountQInternal}
+                        className="w-full"
+                      />
                       )}
                     <CardFrame
                       baseWidth={CANONICAL_CARD_WIDTH}
@@ -796,6 +806,22 @@ export function CardEditorPane({
                       allowUpscale
                       maxScale={CARD_PANE_AUTO_MAX_SCALE}
                       scaleMultiplier={1}
+                      ruledOffsetPx={
+                        hideCardShellHeader
+                          ? CARD_PAGER_EDIT_RULED_OFFSET_TOP_PX
+                          : undefined
+                      }
+                      fixedScale={editorCardFixedScale}
+                      topAttachment={
+                        shouldDockToolbarToCardTop ? (
+                          <div className="w-full">
+                            <div
+                              ref={setToolbarMountQInternal}
+                              className="w-full"
+                            />
+                          </div>
+                        ) : undefined
+                      }
                       className={cn(
                         "premium-paper-depth",
                         "card-shell--paper",
@@ -819,8 +845,14 @@ export function CardEditorPane({
                       onResizeEnd={() => {
                         manualResizeInProgressRef.current = false;
                       }}
-                      actionsTopLeft={editorActionsTopLeft}
-                      actionsTopRight={renderMediaDialogButtons("question")}
+                      actionsTopLeft={
+                        hideCardShellHeader ? undefined : editorActionsTopLeft
+                      }
+                      actionsTopRight={
+                        hideCardShellHeader
+                          ? undefined
+                          : renderMediaDialogButtons("question")
+                      }
                     >
                       <SharedCardContent
                         mode="edit"
@@ -839,16 +871,17 @@ export function CardEditorPane({
                     </CardFrame>
                   </div>
 
-                  <div className="flex min-h-0 w-full flex-col gap-2 md:px-2">
-                    {!dockToolbarsToTop &&
-                      !hideBlockToolbars &&
-                      !usesExternalToolbarMount && (
-                        <div className="flex shrink-0 items-center rounded-md border border-slate-100 bg-white/60">
-                          <div
-                            ref={setToolbarMountAInternal}
-                            className="w-full"
-                          />
-                        </div>
+                  <div
+                    className={cn(
+                      "flex min-h-0 w-full flex-col",
+                      shouldShowInlineToolbarMount ? "gap-2" : "gap-0",
+                    )}
+                  >
+                    {shouldShowInlineToolbarMount && (
+                      <div
+                        ref={setToolbarMountAInternal}
+                        className="w-full"
+                      />
                       )}
                     <CardFrame
                       baseWidth={CANONICAL_CARD_WIDTH}
@@ -856,6 +889,22 @@ export function CardEditorPane({
                       allowUpscale
                       maxScale={CARD_PANE_AUTO_MAX_SCALE}
                       scaleMultiplier={1}
+                      ruledOffsetPx={
+                        hideCardShellHeader
+                          ? CARD_PAGER_EDIT_RULED_OFFSET_TOP_PX
+                          : undefined
+                      }
+                      fixedScale={editorCardFixedScale}
+                      topAttachment={
+                        shouldDockToolbarToCardTop ? (
+                          <div className="w-full">
+                            <div
+                              ref={setToolbarMountAInternal}
+                              className="w-full"
+                            />
+                          </div>
+                        ) : undefined
+                      }
                       className={cn(
                         "premium-paper-depth",
                         "card-shell--paper",
@@ -879,8 +928,14 @@ export function CardEditorPane({
                       onResizeEnd={() => {
                         manualResizeInProgressRef.current = false;
                       }}
-                      actionsTopLeft={editorActionsTopLeft}
-                      actionsTopRight={renderMediaDialogButtons("answer")}
+                      actionsTopLeft={
+                        hideCardShellHeader ? undefined : editorActionsTopLeft
+                      }
+                      actionsTopRight={
+                        hideCardShellHeader
+                          ? undefined
+                          : renderMediaDialogButtons("answer")
+                      }
                     >
                       <SharedCardContent
                         mode="edit"

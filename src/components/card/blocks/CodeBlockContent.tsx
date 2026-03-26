@@ -13,6 +13,7 @@ import Editor from "react-simple-code-editor";
 import Prism from "prismjs";
 import { cn } from "@/lib/utils";
 import { codeTheme } from "@/theme/codeTheme";
+import { BlockInset } from "./BlockInset";
 import { CodeBlockFrame } from "./CodeBlockFrame";
 import {
   getViewerLanguageLabels,
@@ -153,53 +154,55 @@ export function CodeBlockContent(props: CodeBlockContentProps) {
   if (props.mode === "viewer") {
     return (
       <div className={props.className}>
-        <CodeBlockFrame
-          languageLabel={labels.short}
-          languageTitle={labels.full}
-          headerRight={copyButton}
-        >
-          <Highlight
-            theme={codeTheme}
-            code={normalizedCode}
-            language={viewerLanguage}
+        <BlockInset variant="code">
+          <CodeBlockFrame
+            languageLabel={labels.short}
+            languageTitle={labels.full}
+            headerRight={copyButton}
           >
-            {({
-              className: preClassName,
-              style,
-              tokens,
-              getLineProps,
-              getTokenProps,
-            }: RenderProps) => {
-              const lastLine = tokens[tokens.length - 1];
-              const lastLineIsTrailingEmpty =
-                Array.isArray(lastLine) &&
-                lastLine.every((token) => token.content.trim() === "");
-              const visibleTokens = lastLineIsTrailingEmpty
-                ? tokens.slice(0, -1)
-                : tokens;
+            <Highlight
+              theme={codeTheme}
+              code={normalizedCode}
+              language={viewerLanguage}
+            >
+              {({
+                className: preClassName,
+                style,
+                tokens,
+                getLineProps,
+                getTokenProps,
+              }: RenderProps) => {
+                const lastLine = tokens[tokens.length - 1];
+                const lastLineIsTrailingEmpty =
+                  Array.isArray(lastLine) &&
+                  lastLine.every((token) => token.content.trim() === "");
+                const visibleTokens = lastLineIsTrailingEmpty
+                  ? tokens.slice(0, -1)
+                  : tokens;
 
-              return (
-                <pre
-                  className={cn(preClassName, "codeBlockPre code-no-wrap")}
-                  style={{
-                    color: style.color,
-                    backgroundColor: style.backgroundColor,
-                  }}
-                >
-                  <code className="code-no-wrap">
-                    {visibleTokens.map((line, i) => (
-                      <div key={i} {...getLineProps({ line })}>
-                        {line.map((token, key) => (
-                          <span key={key} {...getTokenProps({ token })} />
-                        ))}
-                      </div>
-                    ))}
-                  </code>
-                </pre>
-              );
-            }}
-          </Highlight>
-        </CodeBlockFrame>
+                return (
+                  <pre
+                    className={cn(preClassName, "codeBlockPre code-no-wrap")}
+                    style={{
+                      color: style.color,
+                      backgroundColor: style.backgroundColor,
+                    }}
+                  >
+                    <code className="code-no-wrap">
+                      {visibleTokens.map((line, i) => (
+                        <div key={i} {...getLineProps({ line })}>
+                          {line.map((token, key) => (
+                            <span key={key} {...getTokenProps({ token })} />
+                          ))}
+                        </div>
+                      ))}
+                    </code>
+                  </pre>
+                );
+              }}
+            </Highlight>
+          </CodeBlockFrame>
+        </BlockInset>
       </div>
     );
   }
@@ -209,21 +212,23 @@ export function CodeBlockContent(props: CodeBlockContentProps) {
 
   return (
     <div ref={editorHostRef} className={props.className}>
-      <CodeBlockFrame
-        variant="editor"
-        headerLeft={props.headerLeft}
-        headerRight={copyButton}
-      >
-        <Editor
-          value={props.code}
-          onValueChange={props.onCodeChange}
-          highlight={highlightCode}
-          padding={0}
-          style={{ minHeight: 56 }}
-          className="code-editor-no-scroll code-no-wrap"
-          textareaClassName="code-no-wrap focus:outline-none"
-        />
-      </CodeBlockFrame>
+      <BlockInset variant="code">
+        <CodeBlockFrame
+          variant="editor"
+          headerLeft={props.headerLeft}
+          headerRight={copyButton}
+        >
+          <Editor
+            value={props.code}
+            onValueChange={props.onCodeChange}
+            highlight={highlightCode}
+            padding={0}
+            style={{ minHeight: 56 }}
+            className="code-editor-no-scroll code-no-wrap"
+            textareaClassName="code-no-wrap focus:outline-none"
+          />
+        </CodeBlockFrame>
+      </BlockInset>
     </div>
   );
 }

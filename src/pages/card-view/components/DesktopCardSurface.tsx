@@ -16,8 +16,6 @@ export interface DesktopCardSurfaceProps {
   cardSetId: string | null;
   cardsOverride: Card[];
   saveSignal: number;
-  globalToolbarMountQ: HTMLDivElement | null;
-  globalToolbarMountA: HTMLDivElement | null;
   onFlip: () => void;
   onEdit: () => void;
   onToggleUncertainty: (card: Card) => void | Promise<void>;
@@ -36,8 +34,6 @@ export const DesktopCardSurface = React.memo(function DesktopCardSurface({
   cardSetId,
   cardsOverride,
   saveSignal,
-  globalToolbarMountQ,
-  globalToolbarMountA,
   onFlip,
   onEdit,
   onToggleUncertainty,
@@ -77,8 +73,6 @@ export const DesktopCardSurface = React.memo(function DesktopCardSurface({
           hideFooterActions
           embeddedInPager
           settingsOverride={settings}
-          externalToolbarMountQ={isActive ? globalToolbarMountQ : null}
-          externalToolbarMountA={isActive ? globalToolbarMountA : null}
           pairGapClassName="gap-4"
           highlightActiveCards={isActive}
         />

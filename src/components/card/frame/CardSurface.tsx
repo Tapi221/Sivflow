@@ -1,6 +1,19 @@
-import React, { useMemo } from "react";
+import React, { createContext, useContext, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { RuledLayer } from "./RuledLayer";
+import { PositionalRuledLayer } from "./PositionalRuledLayer";
+
+// Context for children (e.g., SharedCardContent) to trigger positional ruled rendering
+export type CardRuledContextValue = {
+  surfaceRef: React.RefObject<HTMLDivElement | null>;
+  setVisibleRules: (rules: number[]) => void;
+};
+
+export const CardRuledContext = createContext<CardRuledContextValue | null>(null);
+
+export function useCardRuledContext(): CardRuledContextValue | null {
+  return useContext(CardRuledContext);
+}
 
 type CSSVars = React.CSSProperties & Record<`--${string}`, string>;
 
@@ -44,6 +57,14 @@ export function CardSurface({
   const topPx = Math.max(0, ruledOffsetPx);
   const bottomPx = Math.max(0, ruledBottomOffsetPx);
 
+  const surfaceRef = useRef<HTMLDivElement | null>(null);
+  const [visibleRules, setVisibleRules] = useState<number[] | null>(null);
+
+  const contextValue = useMemo<CardRuledContextValue>(
+    () => ({ surfaceRef, setVisibleRules }),
+    [],
+  );
+
   const surfaceStyle = useMemo(() => {
     const vars: CSSVars = {
       "--card-row-px": `${rowPx}px`,
@@ -62,45 +83,53 @@ export function CardSurface({
     return { ...vars, ...(style ?? {}) } as CSSVars;
   }, [rowPx, topPx, bottomPx, ruledOpacity, style]);
 
+  const opacity = clamp01(ruledOpacity);
+
   return (
-    <div
-      data-card-surface="true"
-      className={cn("relative flex min-h-0 flex-1 flex-col", className)}
-      style={{
-        ...surfaceStyle,
-        background: "var(--card-surface)",
-        paddingLeft: "var(--card-padding-x)",
-        paddingRight: "var(--card-padding-x)",
-      }}
-    >
-      {ruled && (
-        <RuledLayer
-          kind="repeat+bottom"
-          ruledOpacity={clamp01(ruledOpacity)}
-          ruledRowPx={rowPx}
-          ruledPhasePx={ruledPhasePx}
-          ruledInsetX="var(--card-padding-x)"
-          ruledOffsetPx={topPx}
-          ruledBottomOffsetPx={bottomPx}
-        />
-      )}
-
+    <CardRuledContext.Provider value={contextValue}>
       <div
-        className="relative z-10 flex min-h-0 flex-1 flex-col"
-        style={{ paddingBottom: "var(--card-padding-bottom)" }}
+        ref={surfaceRef}
+        data-card-surface="true"
+        className={cn("relative flex min-h-0 flex-1 flex-col", className)}
+        style={{
+          ...surfaceStyle,
+          background: "var(--card-surface)",
+          paddingLeft: "var(--card-padding-x)",
+          paddingRight: "var(--card-padding-x)",
+        }}
       >
-        {children}
-      </div>
+        {ruled && visibleRules === null && (
+          <RuledLayer
+            kind="repeat+bottom"
+            ruledOpacity={opacity}
+            ruledRowPx={rowPx}
+            ruledPhasePx={ruledPhasePx}
+            ruledInsetX="var(--card-padding-x)"
+            ruledOffsetPx={topPx}
+            ruledBottomOffsetPx={bottomPx}
+          />
+        )}
+        {ruled && visibleRules !== null && (
+          <PositionalRuledLayer
+            visibleRules={visibleRules}
+            insetX="var(--card-padding-x)"
+            opacity={opacity}
+          />
+        )}
 
-      {overlay ? (
-        <div className="pointer-events-none absolute inset-0 z-20">
-          {overlay}
+        <div
+          className="relative z-10 flex min-h-0 flex-1 flex-col"
+          style={{ paddingBottom: "var(--card-padding-bottom)" }}
+        >
+          {children}
         </div>
-      ) : null}
-    </div>
+
+        {overlay ? (
+          <div className="pointer-events-none absolute inset-0 z-20">
+            {overlay}
+          </div>
+        ) : null}
+      </div>
+    </CardRuledContext.Provider>
   );
 }
-
-
-
-

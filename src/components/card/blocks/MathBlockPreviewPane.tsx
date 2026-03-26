@@ -1,0 +1,50 @@
+import React from "react";
+import { cn } from "@/lib/utils";
+import { MathBlockContent } from "./MathBlockContent";
+
+type MathBlockPreviewPaneProps = {
+  latex: string;
+  displayMode?: "block" | "inline";
+  interactive?: boolean;
+  onActivate?: () => void;
+  showPlaceholder?: boolean;
+  placeholder?: string;
+  className?: string;
+};
+
+export function MathBlockPreviewPane({
+  latex,
+  displayMode = "block",
+  interactive = false,
+  onActivate,
+  showPlaceholder = false,
+  placeholder,
+  className,
+}: MathBlockPreviewPaneProps) {
+  return (
+    <div
+      className={cn(interactive && "cursor-text", className)}
+      role={interactive ? "button" : undefined}
+      tabIndex={interactive ? 0 : undefined}
+      aria-label={interactive ? "数式を編集" : undefined}
+      onClick={interactive ? onActivate : undefined}
+      onKeyDown={
+        interactive
+          ? (event) => {
+              if (event.key !== "Enter" && event.key !== " ") return;
+              event.preventDefault();
+              onActivate?.();
+            }
+          : undefined
+      }
+    >
+      <MathBlockContent
+        latex={latex}
+        displayMode={displayMode}
+        showPlaceholder={showPlaceholder}
+        placeholder={placeholder}
+      />
+    </div>
+  );
+}
+

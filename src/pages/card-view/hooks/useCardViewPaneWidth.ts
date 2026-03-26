@@ -59,7 +59,15 @@ export function useCardViewPaneWidth({
     const element = contentViewportRef.current;
     if (!element || typeof ResizeObserver === "undefined") return;
     const updateWidth = () => {
-      const next = Math.max(0, Math.round(element.clientWidth));
+      const next = Math.max(
+        0,
+        Math.round(
+          Math.max(
+            element.clientWidth,
+            element.parentElement?.clientWidth ?? 0,
+          ),
+        ),
+      );
       setContentViewportWidth((prev) => (prev === next ? prev : next));
     };
     updateWidth();

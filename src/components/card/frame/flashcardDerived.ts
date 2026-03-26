@@ -20,6 +20,8 @@ export type FlashcardMediaLike =
       remoteUrl?: string | null;
       localUrl?: string | null;
       url?: string | null;
+      localFileId?: string | null;
+      assetId?: string | null;
     };
 
 export type FlashcardCardLike = {

@@ -6,6 +6,7 @@ export interface ScaleToFitFrameProps {
   className?: string;
   baseWidth?: number;
   scaleMultiplier?: number;
+  fixedScale?: number;
   disableScale?: boolean;
   fitHeight?: boolean;
   centerContent?: boolean;
@@ -19,6 +20,7 @@ export function ScaleToFitFrame({
   className,
   baseWidth = 480,
   scaleMultiplier = 1,
+  fixedScale,
   disableScale = false,
   fitHeight = false,
   centerContent = false,
@@ -31,11 +33,21 @@ export function ScaleToFitFrame({
 
   const [scale, setScale] = React.useState(1);
   const [contentHeight, setContentHeight] = React.useState<number | null>(null);
+  const hasFixedScale =
+    typeof fixedScale === "number" &&
+    Number.isFinite(fixedScale) &&
+    fixedScale > 0;
+  const effectiveScale = disableScale
+    ? 1
+    : hasFixedScale
+      ? Math.max(0.1, fixedScale)
+      : scale;
   React.useLayoutEffect(() => {
     if (disableScale) {
       setScale(1);
       return;
     }
+    if (hasFixedScale) return;
     if (typeof ResizeObserver === "undefined") return;
     if (!frameRef.current) return;
 
@@ -43,7 +55,11 @@ export function ScaleToFitFrame({
     const observeTarget = frame.parentElement ?? frame;
 
     const calcScale = () => {
-      const availableWidth = frame.clientWidth;
+      const measuredWidth = frame.getBoundingClientRect().width;
+      const availableWidth =
+        Number.isFinite(measuredWidth) && measuredWidth > 0
+          ? measuredWidth
+          : frame.clientWidth;
       if (!availableWidth) return;
 
       const safeBase = Math.max(1, baseWidth);
@@ -73,6 +89,7 @@ export function ScaleToFitFrame({
   }, [
     baseWidth,
     scaleMultiplier,
+    hasFixedScale,
     disableScale,
     fitHeight,
     contentHeight,
@@ -102,15 +119,15 @@ export function ScaleToFitFrame({
 
   const scaledHeight =
     contentHeight != null
-      ? Math.ceil(contentHeight * (disableScale ? 1 : scale))
+      ? Math.ceil(contentHeight * effectiveScale)
       : null;
   const safePaddingPx = Math.max(0, contentPaddingPx);
   const safeBaseWidth = Math.max(1, baseWidth);
-  const shouldUseZoomScale = !disableScale && Math.abs(scale - 1) > 0.0001;
+  const shouldUseZoomScale = !disableScale && Math.abs(effectiveScale - 1) > 0.0001;
   const shouldUseTransformScale = false;
   const visualWidthPx = disableScale
     ? null
-    : Math.ceil(safeBaseWidth * Math.max(0.1, scale));
+    : safeBaseWidth * effectiveScale;
 
   return (
     <div
@@ -135,22 +152,26 @@ export function ScaleToFitFrame({
       >
         <div
           style={
-            visualWidthPx != null ? { width: `${visualWidthPx}px` } : undefined
+            visualWidthPx != null
+              ? { width: `${visualWidthPx.toFixed(3)}px` }
+              : undefined
           }
         >
-          <div
-            style={{
-              width: disableScale ? "100%" : `${safeBaseWidth}px`,
-              transform: shouldUseTransformScale ? `scale(${scale})` : "none",
-              transformOrigin: disableScale
-                ? "initial"
-                : fitHeight && centerContent
-                  ? "center center"
-                  : "top left",
-              willChange: shouldUseTransformScale ? "transform" : undefined,
-              zoom: shouldUseZoomScale ? scale : undefined,
-            }}
-          >
+            <div
+              style={{
+                width: disableScale ? "100%" : `${safeBaseWidth}px`,
+                transform: shouldUseTransformScale
+                  ? `scale(${effectiveScale})`
+                  : "none",
+                transformOrigin: disableScale
+                  ? "initial"
+                  : fitHeight && centerContent
+                    ? "center center"
+                    : "top left",
+                willChange: shouldUseTransformScale ? "transform" : undefined,
+                zoom: shouldUseZoomScale ? effectiveScale : undefined,
+              }}
+            >
             <div
               ref={contentRef}
               className="flow-root"

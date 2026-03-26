@@ -151,7 +151,7 @@ export function Flashcard({
     previewMode,
     hasUncertainty: derived.hasUncertainty,
     isBookmarked: derived.isBookmarked,
-    activeImages: derived.activeImages,
+    activeImageItems: derived.activeImageItems,
     activeAudioUrls: derived.activeAudioUrls,
     activeReferences: derived.activeReferences,
     extraHeaderLeft,
@@ -241,6 +241,7 @@ export function Flashcard({
         setIsAudioPopupOpen={media.setIsAudioPopupOpen}
         isReferencePopupOpen={media.isReferencePopupOpen}
         setIsReferencePopupOpen={media.setIsReferencePopupOpen}
+        activeImageItems={derived.activeImageItems}
         activeImages={derived.activeImages}
         activeAudioUrls={derived.activeAudioUrls}
         activeReferences={derived.activeReferences}

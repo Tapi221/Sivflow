@@ -2,7 +2,7 @@ import React, { useCallback, useState } from "react";
 
 import { Sigma } from "@/ui/icons";
 import { BlockWrapper } from "./BlockWrapper";
-import { MathBlockContent } from "./MathBlockContent";
+import { MathBlockPreviewPane } from "./MathBlockPreviewPane";
 import { MathEditorDialog } from "./MathEditorDialog";
 import { cn } from "@/lib/utils";
 import type { MathBlockData } from "@/types";
@@ -97,28 +97,15 @@ export const MathBlock: React.FC<MathBlockProps> = ({
       onMoveDragEnd={onMoveDragEnd}
     >
       <div className="space-y-1.5 px-2 py-0.5">
-        <div
-          className={cn(
-            "cursor-text rounded-lg p-2 transition-colors",
-            "hover:bg-slate-50",
-          )}
-          role="button"
-          tabIndex={0}
-          aria-label="数式を編集"
-          onClick={() => setIsEditorOpen(true)}
-          onKeyDown={(event) => {
-            if (event.key !== "Enter" && event.key !== " ") return;
-            event.preventDefault();
-            setIsEditorOpen(true);
-          }}
-        >
-          <MathBlockContent
-            latex={latex}
-            displayMode={data.displayMode ?? "block"}
-            showPlaceholder
-            placeholder="数式を入力..."
-          />
-        </div>
+        <MathBlockPreviewPane
+          interactive
+          onActivate={() => setIsEditorOpen(true)}
+          latex={latex}
+          displayMode={data.displayMode ?? "block"}
+          showPlaceholder
+          placeholder="数式を入力..."
+          className={cn("rounded-lg transition-colors", "hover:bg-slate-50")}
+        />
 
         <div className="px-1">
           <span
