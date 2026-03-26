@@ -161,6 +161,7 @@ export default function CardView() {
                 isLoading={data.isLoading}
                 isGlobalEditing={state.isGlobalEditing}
                 isFlipped={state.isFlipped}
+                flippedCardIds={state.flippedCardIds}
                 cardsForPager={state.cardsForPager}
                 safeCurrentIndex={state.safeCurrentIndex}
                 editPaneWidthPx={paneWidth.editPaneWidthPx}

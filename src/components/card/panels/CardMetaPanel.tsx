@@ -350,6 +350,11 @@ export function CardMetaPanel({
     "h-[var(--meta-row-px)] leading-[var(--meta-row-px)] text-[length:var(--meta-font-size)] text-[var(--sidebar-text)]";
   const actionRowClass =
     "h-[var(--meta-row-px)] min-h-[var(--meta-row-px)] flex items-center";
+  const getDurationInputWidthCh = (value: string): string => {
+    const digits = value.trim().length;
+    const widthCh = Math.min(6, Math.max(1, digits));
+    return `calc(${widthCh}ch + 0.4rem)`;
+  };
   const [period, setPeriod] = useState<Period>("30d");
   const [titleInput, setTitleInput] = useState(card?.title ?? "");
   const draftFlag = Boolean(card?.isDraft ?? (card as unknown)?.is_draft);
@@ -1249,20 +1254,17 @@ export function CardMetaPanel({
               <Table className="text-[length:var(--meta-font-size)]">
                 <TableHeader className="bg-white/70">
                   <TableRow className="hover:bg-transparent">
-                    <TableHead className="w-12 text-[var(--sidebar-text-muted)]">
+                    <TableHead className="w-px px-1 whitespace-nowrap text-[var(--sidebar-text-muted)]">
                       &nbsp;
                     </TableHead>
                     <TableHead className="min-w-[8.5rem] whitespace-nowrap text-[var(--sidebar-text-muted)]">
                       日時
                     </TableHead>
-                    <TableHead className="min-w-[6.5rem] whitespace-nowrap text-[var(--sidebar-text-muted)]">
+                    <TableHead className="min-w-[3.25rem] whitespace-nowrap px-1 text-[var(--sidebar-text-muted)]">
                       評価
                     </TableHead>
-                    <TableHead className="min-w-[6rem] whitespace-nowrap text-[var(--sidebar-text-muted)]">
+                    <TableHead className="min-w-[4.5rem] whitespace-nowrap px-1 text-[var(--sidebar-text-muted)]">
                       所要時間
-                    </TableHead>
-                    <TableHead className="w-[4.25rem] px-1 whitespace-normal break-words text-right leading-tight text-[var(--sidebar-text-muted)]">
-                      耐性スコア
                     </TableHead>
                   </TableRow>
                 </TableHeader>
@@ -1272,7 +1274,7 @@ export function CardMetaPanel({
                       key={`${row.reviewIndex}-${row.reviewedAtRaw ?? row.reviewedAtLabel}`}
                       className="bg-transparent hover:bg-white/40"
                     >
-                      <TableCell className="font-medium tabular-nums text-[var(--sidebar-text)]">
+                      <TableCell className="w-px px-1 whitespace-nowrap font-medium tabular-nums text-[var(--sidebar-text)]">
                         {row.reviewIndex}
                       </TableCell>
                       <TableCell className="whitespace-nowrap tabular-nums text-[var(--sidebar-text)]">
@@ -1290,17 +1292,17 @@ export function CardMetaPanel({
                           row.reviewedAtLabel
                         )}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="px-1">
                         {"isPending" in row && row.isPending ? (
                           <div className="flex flex-col items-center gap-1 py-1">
-                            <div className="grid grid-cols-2 gap-1">
+                            <div className="grid grid-cols-2 gap-0.5">
                               {([1, 2, 3, 4] as const).map((rating) => {
                                 const faceDesign = getRatingFaceDesign(rating);
                                 return (
                                   <button
                                     key={rating}
                                     type="button"
-                                    className="flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--surface-border)] bg-white surface-convex transition-colors hover:bg-[var(--sidebar-active-bg)] disabled:cursor-wait disabled:opacity-50"
+                                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--surface-border)] bg-white surface-convex transition-colors hover:bg-[var(--sidebar-active-bg)] disabled:cursor-wait disabled:opacity-50"
                                     onClick={() =>
                                       handleSelectReviewRating(rating)
                                     }
@@ -1309,11 +1311,11 @@ export function CardMetaPanel({
                                     title={getRatingLabel(rating)}
                                   >
                                     <div
-                                      className={`flex h-7 w-7 items-center justify-center rounded-full ${faceDesign?.iconWrap ?? getRatingToneClass(rating)}`}
+                                      className={`flex h-6 w-6 items-center justify-center rounded-full ${faceDesign?.iconWrap ?? getRatingToneClass(rating)}`}
                                     >
                                       <svg
-                                        width="14"
-                                        height="14"
+                                        width="12"
+                                        height="12"
                                         viewBox="0 0 24 24"
                                         fill="none"
                                         stroke="currentColor"
@@ -1337,80 +1339,85 @@ export function CardMetaPanel({
                               取消
                             </button>
                           </div>
-                        ) : row.isLatestEditable && isEditingLatestReview ? (
-                          <div className="flex flex-col items-center gap-1 py-1">
-                            <div className="grid grid-cols-2 gap-1">
-                              {([1, 2, 3, 4] as const).map((rating) => {
-                                const faceDesign = getRatingFaceDesign(rating);
-                                const isSelected =
-                                  latestReviewRatingInput === rating;
-                                return (
-                                  <button
-                                    key={rating}
-                                    type="button"
-                                    className={`flex h-9 w-9 items-center justify-center rounded-xl border bg-white transition-colors disabled:cursor-wait disabled:opacity-50 ${
-                                      isSelected
-                                        ? "border-slate-900 surface-convex"
-                                        : "border-[var(--surface-border)]"
-                                    }`}
-                                    onClick={() =>
-                                      setLatestReviewRatingInput(rating)
-                                    }
-                                    disabled={isMutatingLatestReview}
-                                    aria-label={getRatingLabel(rating)}
-                                    title={getRatingLabel(rating)}
-                                  >
-                                    <div
-                                      className={`flex h-7 w-7 items-center justify-center rounded-full ${faceDesign?.iconWrap ?? getRatingToneClass(rating)}`}
-                                    >
-                                      <svg
-                                        width="14"
-                                        height="14"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2.5"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                      >
-                                        {faceDesign?.svg}
-                                      </svg>
-                                    </div>
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        ) : row.ratingFaceDesign ? (
-                          <div className="flex items-center justify-center">
-                            <div
-                              className={`flex h-8 w-8 items-center justify-center rounded-full ${row.ratingFaceDesign.iconWrap}`}
-                            >
-                              <svg
-                                width="18"
-                                height="18"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              >
-                                {row.ratingFaceDesign.svg}
-                              </svg>
-                            </div>
-                          </div>
                         ) : (
-                          <span
-                            className={`inline-flex min-w-[4.5rem] items-center justify-center rounded-full px-2 py-0.5 text-[11px] font-medium ${row.ratingToneClass}`}
-                          >
-                            {row.ratingLabel}
-                          </span>
+                          <div className="flex flex-col items-center gap-0.5 py-0.5">
+                            {row.isLatestEditable && isEditingLatestReview ? (
+                              <div className="grid grid-cols-2 gap-0.5">
+                                {([1, 2, 3, 4] as const).map((rating) => {
+                                  const faceDesign = getRatingFaceDesign(rating);
+                                  const isSelected =
+                                    latestReviewRatingInput === rating;
+                                  return (
+                                    <button
+                                      key={rating}
+                                      type="button"
+                                      className={`flex h-8 w-8 items-center justify-center rounded-lg border bg-white transition-colors disabled:cursor-wait disabled:opacity-50 ${
+                                        isSelected
+                                          ? "border-slate-900 surface-convex"
+                                          : "border-[var(--surface-border)]"
+                                      }`}
+                                      onClick={() =>
+                                        setLatestReviewRatingInput(rating)
+                                      }
+                                      disabled={isMutatingLatestReview}
+                                      aria-label={getRatingLabel(rating)}
+                                      title={getRatingLabel(rating)}
+                                    >
+                                      <div
+                                        className={`flex h-6 w-6 items-center justify-center rounded-full ${faceDesign?.iconWrap ?? getRatingToneClass(rating)}`}
+                                      >
+                                        <svg
+                                          width="12"
+                                          height="12"
+                                          viewBox="0 0 24 24"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          strokeWidth="2.5"
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                        >
+                                          {faceDesign?.svg}
+                                        </svg>
+                                      </div>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            ) : row.ratingFaceDesign ? (
+                              <div className="flex items-center justify-center">
+                                <div
+                                  className={`flex h-7 w-7 items-center justify-center rounded-full ${row.ratingFaceDesign.iconWrap}`}
+                                >
+                                  <svg
+                                    width="14"
+                                    height="14"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2.5"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  >
+                                    {row.ratingFaceDesign.svg}
+                                  </svg>
+                                </div>
+                              </div>
+                            ) : (
+                              <span
+                                className={`inline-flex min-w-[2.75rem] items-center justify-center rounded-full px-1.5 py-0.5 text-[11px] font-medium ${row.ratingToneClass}`}
+                              >
+                                {row.ratingLabel}
+                              </span>
+                            )}
+                            <span className="text-[10px] leading-none tabular-nums text-[var(--sidebar-text-muted)]">
+                              耐性 {row.resistanceScore ?? "-"}
+                            </span>
+                          </div>
                         )}
                       </TableCell>
                       <TableCell className="whitespace-nowrap text-[var(--sidebar-text)]">
                         {"isPending" in row && row.isPending ? (
-                          <div className="flex items-center gap-1">
+                          <div className="flex items-center gap-0.5">
                             <input
                               type="text"
                               inputMode="numeric"
@@ -1419,8 +1426,16 @@ export function CardMetaPanel({
                               onChange={(e) =>
                                 setPendingReviewDurationInput(e.target.value)
                               }
+                              onFocus={(e) => e.currentTarget.select()}
                               disabled={isSavingPendingReview}
-                              className="h-8 w-16 rounded border border-[var(--surface-border)] bg-white px-2 text-[11px] tabular-nums outline-none focus:border-[#cfcfcf]"
+                              className="h-8 rounded border border-[var(--surface-border)] bg-white px-1.5 text-[11px] tabular-nums outline-none focus:border-[#cfcfcf]"
+                              style={{
+                                width: getDurationInputWidthCh(
+                                  pendingReviewDurationInput,
+                                ),
+                                minWidth: "1.65rem",
+                                fontVariantNumeric: "tabular-nums lining-nums",
+                              }}
                               placeholder="-"
                             />
                             <span className="text-[11px] text-[var(--sidebar-text-muted)]">
@@ -1428,7 +1443,7 @@ export function CardMetaPanel({
                             </span>
                           </div>
                         ) : row.isLatestEditable && isEditingLatestReview ? (
-                          <div className="flex items-center gap-1">
+                          <div className="flex items-center gap-0.5">
                             <input
                               type="text"
                               inputMode="numeric"
@@ -1437,8 +1452,16 @@ export function CardMetaPanel({
                               onChange={(e) =>
                                 setLatestReviewDurationInput(e.target.value)
                               }
+                              onFocus={(e) => e.currentTarget.select()}
                               disabled={isMutatingLatestReview}
-                              className="h-8 w-16 rounded border border-[var(--surface-border)] bg-white px-2 text-[11px] tabular-nums outline-none focus:border-[#cfcfcf]"
+                              className="h-8 rounded border border-[var(--surface-border)] bg-white px-1.5 text-[11px] tabular-nums outline-none focus:border-[#cfcfcf]"
+                              style={{
+                                width: getDurationInputWidthCh(
+                                  latestReviewDurationInput,
+                                ),
+                                minWidth: "1.65rem",
+                                fontVariantNumeric: "tabular-nums lining-nums",
+                              }}
                               placeholder="-"
                             />
                             <span className="text-[11px] text-[var(--sidebar-text-muted)]">
@@ -1447,7 +1470,7 @@ export function CardMetaPanel({
                           </div>
                         ) : row.editableLogIndex != null &&
                           onUpdateReviewLogDuration ? (
-                          <div className="flex items-center gap-1">
+                          <div className="flex items-center gap-0.5">
                             <input
                               type="text"
                               inputMode="numeric"
@@ -1464,6 +1487,7 @@ export function CardMetaPanel({
                                   e.target.value,
                                 )
                               }
+                              onFocus={(e) => e.currentTarget.select()}
                               onBlur={(e) =>
                                 handleSaveReviewDuration(
                                   row.editableLogIndex as number,
@@ -1495,7 +1519,17 @@ export function CardMetaPanel({
                                 isMutatingLatestReview ||
                                 durationSavingIndex === row.editableLogIndex
                               }
-                              className="h-8 w-16 rounded border border-[var(--surface-border)] bg-white px-2 text-[11px] tabular-nums outline-none focus:border-[#cfcfcf]"
+                              className="h-8 rounded border border-[var(--surface-border)] bg-white px-1.5 text-[11px] tabular-nums outline-none focus:border-[#cfcfcf]"
+                              style={{
+                                width: getDurationInputWidthCh(
+                                  durationDrafts[row.editableLogIndex] ??
+                                    (row.durationMinutes != null
+                                      ? String(row.durationMinutes)
+                                      : ""),
+                                ),
+                                minWidth: "1.65rem",
+                                fontVariantNumeric: "tabular-nums lining-nums",
+                              }}
                               placeholder="-"
                             />
                             <span className="text-[11px] text-[var(--sidebar-text-muted)]">
@@ -1505,9 +1539,6 @@ export function CardMetaPanel({
                         ) : (
                           <span className="tabular-nums">{row.durationLabel}</span>
                         )}
-                      </TableCell>
-                      <TableCell className="w-[4.25rem] px-1 text-right font-semibold tabular-nums text-[var(--sidebar-text)]">
-                        {row.resistanceScore}
                       </TableCell>
                     </TableRow>
                   ))}

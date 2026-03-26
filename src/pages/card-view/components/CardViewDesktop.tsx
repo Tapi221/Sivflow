@@ -17,6 +17,7 @@ interface CardViewDesktopProps {
   isLoading: boolean;
   isGlobalEditing: boolean;
   isFlipped: boolean;
+  flippedCardIds: Set<string>;
   cardsForPager: Card[];
   safeCurrentIndex: number;
   editPaneWidthPx: number;
@@ -37,6 +38,7 @@ export function CardViewDesktop({
   isLoading,
   isGlobalEditing,
   isFlipped,
+  flippedCardIds,
   cardsForPager,
   safeCurrentIndex,
   editPaneWidthPx,

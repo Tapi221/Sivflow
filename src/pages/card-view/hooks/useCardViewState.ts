@@ -265,6 +265,7 @@ export function useCardViewState({
     setCurrentIndex,
     safeCurrentIndex,
     isFlipped,
+    flippedCardIds,
     isGlobalEditing,
     setIsGlobalEditing,
     saveSignal,
