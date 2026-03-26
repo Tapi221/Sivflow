@@ -23,6 +23,7 @@ export const DEFAULT_SETTINGS: Partial<UserSettings> = {
   autoSaveEnabled: true,
   accentColor: "#689A98", // Default system accent color
   cardEditorHeightPx: null, // カードの高さ設定（nullの場合はデフォルトの4:3比率）
+  questionDisplayMode: "tap_to_reveal" as const,
   editorBlockSettings: [
     {
       id: "text",
@@ -32,26 +33,33 @@ export const DEFAULT_SETTINGS: Partial<UserSettings> = {
       orderIndex: 0,
     },
     {
+      id: "question",
+      type: "question",
+      label: "疑問",
+      isVisible: true,
+      orderIndex: 1,
+    },
+    {
       id: "code",
       type: "code",
       label: "コード",
       isVisible: true,
-      orderIndex: 1,
+      orderIndex: 2,
     },
     {
       id: "image",
       type: "image",
       label: "画像",
       isVisible: true,
-      orderIndex: 2,
+      orderIndex: 3,
     },
-    { id: "math", type: "math", label: "数式", isVisible: true, orderIndex: 3 },
+    { id: "math", type: "math", label: "数式", isVisible: true, orderIndex: 4 },
     {
       id: "markdown",
       type: "markdown",
       label: "Markdown",
       isVisible: true,
-      orderIndex: 4,
+      orderIndex: 5,
     },
   ],
 };

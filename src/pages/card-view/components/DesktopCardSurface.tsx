@@ -1,14 +1,7 @@
 import React from "react";
-import { SharedCardContent } from "@/components/card/common/SharedCardContent";
-import {
-  CANONICAL_CARD_WIDTH,
-  layoutRowsToCardHeightPx,
-} from "@/components/card/common/constants";
-import { CardFrame } from "@/components/card/frame/CardFrame";
 import { Flashcard } from "@/components/card/frame/Flashcard";
 import { CardEditorPane } from "@/components/folder/panes/CardEditorPane";
-import { normalizeLayoutRows } from "@/domain/card/extraRows";
-import type { Card } from "@/types";
+import type { Card, UserSettings } from "@/types";
 import { CARD_PANE_AUTO_MAX_SCALE, EDIT_PREVIEW_RANGE } from "../constants";
 
 export interface DesktopCardSurfaceProps {
@@ -17,6 +10,7 @@ export interface DesktopCardSurfaceProps {
   isGlobalEditing: boolean;
   showEditPreview: boolean;
   editPaneWidthPx: number;
+  settings?: Partial<UserSettings> | null;
   isFlipped: boolean;
   folderId: string | null;
   cardSetId: string | null;
@@ -36,6 +30,7 @@ export const DesktopCardSurface = React.memo(function DesktopCardSurface({
   isGlobalEditing,
   showEditPreview,
   editPaneWidthPx,
+  settings = null,
   isFlipped,
   folderId,
   cardSetId,
@@ -49,58 +44,7 @@ export const DesktopCardSurface = React.memo(function DesktopCardSurface({
   onToggleBookmark,
 }: DesktopCardSurfaceProps) {
   if (isGlobalEditing) {
-    if (!isActive) {
-      if (showEditPreview) {
-        const previewHeightPx = layoutRowsToCardHeightPx(
-          normalizeLayoutRows(card.layoutRows),
-        );
-        return (
-          <div className="w-full overflow-visible">
-            <div
-              className="mx-auto w-full pointer-events-none select-none"
-              style={{ width: `${editPaneWidthPx}px`, maxWidth: "100%" }}
-            >
-              <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
-                <CardFrame
-                  baseWidth={CANONICAL_CARD_WIDTH}
-                  contentPaddingPx={0}
-                  allowUpscale
-                  maxScale={CARD_PANE_AUTO_MAX_SCALE}
-                  scaleMultiplier={1}
-                  className="premium-paper-depth card-shell--paper"
-                  resizable={false}
-                  showResizeHandle={false}
-                  heightPx={previewHeightPx}
-                  lockHeight
-                >
-                  <SharedCardContent
-                    mode="view"
-                    blocks={card.questionBlocks ?? []}
-                  />
-                </CardFrame>
-                <CardFrame
-                  baseWidth={CANONICAL_CARD_WIDTH}
-                  contentPaddingPx={0}
-                  allowUpscale
-                  maxScale={CARD_PANE_AUTO_MAX_SCALE}
-                  scaleMultiplier={1}
-                  className="premium-paper-depth card-shell--paper"
-                  resizable={false}
-                  showResizeHandle={false}
-                  heightPx={previewHeightPx}
-                  lockHeight
-                >
-                  <SharedCardContent
-                    mode="view"
-                    blocks={card.answerBlocks ?? []}
-                  />
-                </CardFrame>
-              </div>
-            </div>
-          </div>
-        );
-      }
-
+    if (!isActive && !showEditPreview) {
       return (
         <div
           className="w-full overflow-visible"
@@ -115,7 +59,10 @@ export const DesktopCardSurface = React.memo(function DesktopCardSurface({
     }
 
     return (
-      <div className="w-full overflow-visible">
+      <div
+        className="w-full overflow-visible"
+        style={!isActive ? { pointerEvents: "none", userSelect: "none" } : undefined}
+      >
         <CardEditorPane
           selectedCardId={card.id}
           folderId={folderId || undefined}
@@ -125,13 +72,15 @@ export const DesktopCardSurface = React.memo(function DesktopCardSurface({
           autoEdit
           hideMetaPanel
           dockToolbarsToTop
-          hideBlockToolbars={false}
+          hideBlockToolbars={!isActive}
           saveSignal={saveSignal}
           hideFooterActions
           embeddedInPager
-          externalToolbarMountQ={globalToolbarMountQ}
-          externalToolbarMountA={globalToolbarMountA}
+          settingsOverride={settings}
+          externalToolbarMountQ={isActive ? globalToolbarMountQ : null}
+          externalToolbarMountA={isActive ? globalToolbarMountA : null}
           pairGapClassName="gap-4"
+          highlightActiveCards={isActive}
         />
       </div>
     );

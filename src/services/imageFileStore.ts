@@ -29,8 +29,11 @@ const makeScopedId = (id: string, options?: BlobScopeOptions): string => {
   return `${userId}:${id}`;
 };
 
-const openImageFileDb = async (): Promise<IDBDatabase> =>
-  new Promise((resolve, reject) => {
+let dbPromise: Promise<IDBDatabase> | null = null;
+
+const openImageFileDb = (): Promise<IDBDatabase> => {
+  if (dbPromise) return dbPromise;
+  dbPromise = new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
     request.onupgradeneeded = () => {
       const db = request.result;
@@ -39,9 +42,13 @@ const openImageFileDb = async (): Promise<IDBDatabase> =>
       }
     };
     request.onsuccess = () => resolve(request.result);
-    request.onerror = () =>
+    request.onerror = () => {
+      dbPromise = null;
       reject(request.error ?? new Error("Failed to open image file store"));
+    };
   });
+  return dbPromise;
+};
 
 const getStoredImageFile = async (
   id: string,

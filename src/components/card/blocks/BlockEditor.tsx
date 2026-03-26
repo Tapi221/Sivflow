@@ -14,6 +14,7 @@ import { CodeBlockItem } from "./CodeBlockItem";
 import { MarkdownBlock } from "./MarkdownBlock";
 import { MathBlock } from "./MathBlock";
 import { MediaBlock } from "./MediaBlock";
+import { QuestionBlock } from "./QuestionBlock";
 import { TextBlock } from "./TextBlock";
 
 import { CARD_ROW_PX } from "@/components/card/common/constants";
@@ -23,7 +24,6 @@ import {
     isGridOffsetType,
     isRowPositionableType,
 } from "@/components/card/frame/rowOffset";
-import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { cn } from "@/lib/utils";
 import type { CardBlock } from "@/types";
 import { sortBlocksByOrderIndex } from "./blockOrdering";
@@ -54,6 +54,7 @@ interface BlockEditorProps {
   onDelete?: (index: number) => void;
   minDeletableIndex?: number;
   hiddenBlockTypes?: CardBlock["type"][];
+  settings?: unknown;
 
   toolbarMount?: HTMLDivElement | null;
 }
@@ -64,34 +65,6 @@ const ROW_STEP_PX = CARD_ROW_PX;
 const isEditableTarget = (target: EventTarget | null) => {
   if (!(target instanceof HTMLElement)) return false;
   return !!target.closest("input, textarea, select, [contenteditable]");
-};
-
-// resize を rAF で間引く
-const useRafThrottledCallback = (fn: () => void) => {
-  const rafIdRef = useRef<number | null>(null);
-  const fnRef = useRef(fn);
-  useEffect(() => {
-    fnRef.current = fn;
-  }, [fn]);
-
-  const schedule = useCallback(() => {
-    if (rafIdRef.current != null) return;
-    rafIdRef.current = window.requestAnimationFrame(() => {
-      rafIdRef.current = null;
-      fnRef.current();
-    });
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      if (rafIdRef.current != null) {
-        window.cancelAnimationFrame(rafIdRef.current);
-        rafIdRef.current = null;
-      }
-    };
-  }, []);
-
-  return schedule;
 };
 
 export const BlockEditor = React.forwardRef<
@@ -114,11 +87,12 @@ export const BlockEditor = React.forwardRef<
       onDelete,
       minDeletableIndex = 0,
       hiddenBlockTypes = [],
+      settings = undefined,
       toolbarMount = null,
     },
     ref,
   ) => {
-    const { settings } = useUserSettings();
+    const [activeContainerBlockId, setActiveContainerBlockId] = useState<string | null>(null);
 
     // reference/audio は本文ブロックじゃない扱い（ここでは編集しない）
     const orderedBlocks = useMemo(
@@ -136,10 +110,11 @@ export const BlockEditor = React.forwardRef<
     useEffect(() => {
       nonBodyBlocksRef.current = nonBodyBlocks;
     }, [nonBodyBlocks]);
+    // トップレベルのみ（子ブロックは question コンテナ内でレンダリング）
     const bodyBlocks = useMemo(
       () =>
         orderedBlocks.filter(
-          (b) => b.type !== "reference" && b.type !== "audio",
+          (b) => b.type !== "reference" && b.type !== "audio" && !b.parentBlockId,
         ),
       [orderedBlocks],
     );
@@ -222,24 +197,24 @@ export const BlockEditor = React.forwardRef<
       );
     }, []);
 
-    const scheduleMeasurement = useRafThrottledCallback(updateMeasurement);
+    React.useLayoutEffect(() => {
+      updateMeasurement();
+    });
 
     useEffect(() => {
-      queueMicrotask(() => updateMeasurement());
-
       const el = containerRef.current;
       if (!el) return;
 
-      const obs = new ResizeObserver(() => scheduleMeasurement());
+      const obs = new ResizeObserver(updateMeasurement);
       obs.observe(el);
 
-      window.addEventListener("resize", scheduleMeasurement, { passive: true });
+      window.addEventListener("resize", updateMeasurement, { passive: true });
 
       return () => {
         obs.disconnect();
-        window.removeEventListener("resize", scheduleMeasurement);
+        window.removeEventListener("resize", updateMeasurement);
       };
-    }, [scheduleMeasurement, updateMeasurement]);
+    }, [updateMeasurement]);
 
     const clampDragStyle = (
       style: React.CSSProperties | undefined,
@@ -451,11 +426,16 @@ export const BlockEditor = React.forwardRef<
       });
     };
 
-    const handleAddBlock = (type: CardBlock["type"]) => {
+    const handleAddBlock = (type: CardBlock["type"], overrideContainerId?: string | null) => {
       // reference/audio は右上ポップアップ専用。本文ブロック追加経路では扱わない。
       if (type === "reference" || type === "audio") return;
 
       const source = blocksRef.current;
+
+      // question は常にトップレベル。それ以外は activeContainerBlockId に従う。
+      const resolvedContainerId = type === "question"
+        ? null
+        : (overrideContainerId !== undefined ? overrideContainerId : activeContainerBlockId);
 
       const tailRowOffset = (() => {
         for (let i = source.length - 1; i >= 0; i -= 1) {
@@ -487,6 +467,8 @@ export const BlockEditor = React.forwardRef<
           type === "code" ? { language: "javascript", code: "" } : undefined,
         math: type === "math" ? { latex: "", displayMode: "block" } : undefined,
         markdown: type === "markdown" ? "" : undefined,
+        questionTitle: type === "question" ? "" : undefined,
+        questionAnswer: type === "question" ? "" : undefined,
         rowOffset:
           isRowPositionableType(type) && !isGridOffsetType(type)
             ? tailRowOffset
@@ -494,6 +476,7 @@ export const BlockEditor = React.forwardRef<
         offsetRows: isGridOffsetType(type)
           ? Math.max(0, tailGridOffsetRows)
           : undefined,
+        parentBlockId: resolvedContainerId ?? undefined,
         orderIndex: 0,
       };
 
@@ -503,7 +486,7 @@ export const BlockEditor = React.forwardRef<
     };
     useImperativeHandle(ref, () => ({
       addBlock: (type: CardBlock["type"]) => {
-        handleAddBlock(type);
+        handleAddBlock(type, null);
       },
     }));
 
@@ -522,7 +505,8 @@ export const BlockEditor = React.forwardRef<
       }
 
       const source = blocksRef.current;
-      const next = source.filter((b) => b.id !== id);
+      // question ブロックを削除する場合、その子ブロックも一緒に削除する
+      const next = source.filter((b) => b.id !== id && b.parentBlockId !== id);
       blocksRef.current = next;
       emitChange(next, { reindex: true });
     };
@@ -663,6 +647,13 @@ export const BlockEditor = React.forwardRef<
           "space-y-0",
           prefix === "question" ? "js-question-editor" : "js-answer-editor",
         )}
+        onClick={(e) => {
+          // question コンテナ内のクリックでなければ activeContainerBlockId をリセット
+          const target = e.target as HTMLElement;
+          if (!target.closest("[data-block-type='question']")) {
+            setActiveContainerBlockId(null);
+          }
+        }}
       >
         {toolbarNode && toolbarMount
           ? createPortal(toolbarNode, toolbarMount)
@@ -903,6 +894,26 @@ export const BlockEditor = React.forwardRef<
                               canMoveDown={canMoveDown}
                             />
                           </div>
+                        )}
+
+                        {block.type === "question" && (
+                          <QuestionBlock
+                            block={block}
+                            onUpdateBlock={handleUpdateBlock}
+                            onDelete={() => handleDeleteBlock(block.id, index)}
+                            onDuplicate={() => handleDuplicateBlock(block.id)}
+                            onMoveUp={() => handleShiftBlockRow(block.id, "up")}
+                            onMoveDown={() => handleShiftBlockRow(block.id, "down")}
+                            onMoveDragStart={() => handleMoveDragStart(block.id)}
+                            onMoveDragEnd={() => handleMoveDragEnd(block.id)}
+                            canMoveUp={canMoveUp}
+                            canMoveDown={canMoveDown}
+                            dragHandleProps={undefined}
+                            dragEnabled={true}
+                            dragHandleClassName="js-block-drag-handle"
+                            accentColor={accentColor}
+                            isActive={snapshot.isDragging}
+                          />
                         )}
 
                         {block.type === "markdown" && (

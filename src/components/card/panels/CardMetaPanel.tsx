@@ -1176,7 +1176,7 @@ export function CardMetaPanel({
                 データなし
               </div>
             ) : (
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0} debounce={1}>
                 <LineChart data={chartData}>
                   <XAxis
                     dataKey="reviewIndex"
@@ -1254,16 +1254,16 @@ export function CardMetaPanel({
               <Table className="text-[length:var(--meta-font-size)]">
                 <TableHeader className="bg-white/70">
                   <TableRow className="hover:bg-transparent">
-                    <TableHead className="w-px px-1 whitespace-nowrap text-[var(--sidebar-text-muted)]">
+                    <TableHead className="h-7 w-px px-1 whitespace-nowrap text-[var(--sidebar-text-muted)]">
                       &nbsp;
                     </TableHead>
-                    <TableHead className="min-w-[8.5rem] whitespace-nowrap text-[var(--sidebar-text-muted)]">
+                    <TableHead className="h-7 min-w-[8.5rem] whitespace-nowrap py-0.5 text-[var(--sidebar-text-muted)]">
                       日時
                     </TableHead>
-                    <TableHead className="min-w-[3.25rem] whitespace-nowrap px-1 text-[var(--sidebar-text-muted)]">
+                    <TableHead className="h-7 min-w-[3.25rem] whitespace-nowrap px-1 py-0.5 text-[var(--sidebar-text-muted)]">
                       評価
                     </TableHead>
-                    <TableHead className="min-w-[4.5rem] whitespace-nowrap px-1 text-[var(--sidebar-text-muted)]">
+                    <TableHead className="h-7 min-w-[4.5rem] whitespace-nowrap px-1 py-0.5 text-[var(--sidebar-text-muted)]">
                       所要時間
                     </TableHead>
                   </TableRow>
@@ -1274,10 +1274,10 @@ export function CardMetaPanel({
                       key={`${row.reviewIndex}-${row.reviewedAtRaw ?? row.reviewedAtLabel}`}
                       className="bg-transparent hover:bg-white/40"
                     >
-                      <TableCell className="w-px px-1 whitespace-nowrap font-medium tabular-nums text-[var(--sidebar-text)]">
+                      <TableCell className="w-px px-1 py-0.5 whitespace-nowrap font-medium tabular-nums text-[var(--sidebar-text)]">
                         {row.reviewIndex}
                       </TableCell>
-                      <TableCell className="whitespace-nowrap tabular-nums text-[var(--sidebar-text)]">
+                      <TableCell className="py-0.5 whitespace-nowrap tabular-nums text-[var(--sidebar-text)]">
                         {row.isLatestEditable && isEditingLatestReview ? (
                           <input
                             type="datetime-local"
@@ -1286,23 +1286,23 @@ export function CardMetaPanel({
                               setLatestReviewDateInput(e.target.value)
                             }
                             disabled={isMutatingLatestReview}
-                            className="h-8 w-full min-w-[11rem] rounded border border-[var(--surface-border)] bg-white px-2 text-[11px] outline-none focus:border-[#cfcfcf]"
+                            className="h-7 w-full min-w-[11rem] rounded border border-[var(--surface-border)] bg-white px-1.5 text-[11px] outline-none focus:border-[#cfcfcf]"
                           />
                         ) : (
                           row.reviewedAtLabel
                         )}
                       </TableCell>
-                      <TableCell className="px-1">
+                      <TableCell className="px-1 py-0.5">
                         {"isPending" in row && row.isPending ? (
-                          <div className="flex flex-col items-center gap-1 py-1">
-                            <div className="grid grid-cols-2 gap-0.5">
+                          <div className="flex flex-col items-center gap-0.5 py-0.5">
+                            <div className="inline-grid grid-cols-2 gap-1 place-items-center">
                               {([1, 2, 3, 4] as const).map((rating) => {
                                 const faceDesign = getRatingFaceDesign(rating);
                                 return (
                                   <button
                                     key={rating}
                                     type="button"
-                                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--surface-border)] bg-white surface-convex transition-colors hover:bg-[var(--sidebar-active-bg)] disabled:cursor-wait disabled:opacity-50"
+                                    className="relative z-0 flex h-7 w-7 items-center justify-center rounded-md border border-[var(--surface-border)] bg-white transition-colors hover:bg-[var(--sidebar-active-bg)] disabled:cursor-wait disabled:opacity-50"
                                     onClick={() =>
                                       handleSelectReviewRating(rating)
                                     }
@@ -1311,7 +1311,7 @@ export function CardMetaPanel({
                                     title={getRatingLabel(rating)}
                                   >
                                     <div
-                                      className={`flex h-6 w-6 items-center justify-center rounded-full ${faceDesign?.iconWrap ?? getRatingToneClass(rating)}`}
+                                      className={`flex h-[22px] w-[22px] items-center justify-center rounded-full ${faceDesign?.iconWrap ?? getRatingToneClass(rating)}`}
                                     >
                                       <svg
                                         width="12"
@@ -1340,9 +1340,9 @@ export function CardMetaPanel({
                             </button>
                           </div>
                         ) : (
-                          <div className="flex flex-col items-center gap-0.5 py-0.5">
+                          <div className="flex flex-col items-center gap-0 py-0">
                             {row.isLatestEditable && isEditingLatestReview ? (
-                              <div className="grid grid-cols-2 gap-0.5">
+                              <div className="inline-grid grid-cols-2 gap-1 place-items-center">
                                 {([1, 2, 3, 4] as const).map((rating) => {
                                   const faceDesign = getRatingFaceDesign(rating);
                                   const isSelected =
@@ -1351,9 +1351,9 @@ export function CardMetaPanel({
                                     <button
                                       key={rating}
                                       type="button"
-                                      className={`flex h-8 w-8 items-center justify-center rounded-lg border bg-white transition-colors disabled:cursor-wait disabled:opacity-50 ${
+                                      className={`relative z-0 flex h-7 w-7 items-center justify-center rounded-md border bg-white transition-colors disabled:cursor-wait disabled:opacity-50 ${
                                         isSelected
-                                          ? "border-slate-900 surface-convex"
+                                          ? "border-slate-900 ring-1 ring-slate-300"
                                           : "border-[var(--surface-border)]"
                                       }`}
                                       onClick={() =>
@@ -1364,7 +1364,7 @@ export function CardMetaPanel({
                                       title={getRatingLabel(rating)}
                                     >
                                       <div
-                                        className={`flex h-6 w-6 items-center justify-center rounded-full ${faceDesign?.iconWrap ?? getRatingToneClass(rating)}`}
+                                        className={`flex h-[22px] w-[22px] items-center justify-center rounded-full ${faceDesign?.iconWrap ?? getRatingToneClass(rating)}`}
                                       >
                                         <svg
                                           width="12"
@@ -1386,11 +1386,11 @@ export function CardMetaPanel({
                             ) : row.ratingFaceDesign ? (
                               <div className="flex items-center justify-center">
                                 <div
-                                  className={`flex h-7 w-7 items-center justify-center rounded-full ${row.ratingFaceDesign.iconWrap}`}
+                                  className={`flex h-6 w-6 items-center justify-center rounded-full ${row.ratingFaceDesign.iconWrap}`}
                                 >
                                   <svg
-                                    width="14"
-                                    height="14"
+                                    width="12"
+                                    height="12"
                                     viewBox="0 0 24 24"
                                     fill="none"
                                     stroke="currentColor"
@@ -1409,15 +1409,15 @@ export function CardMetaPanel({
                                 {row.ratingLabel}
                               </span>
                             )}
-                            <span className="text-[10px] leading-none tabular-nums text-[var(--sidebar-text-muted)]">
+                            <span className="text-[9px] leading-none tabular-nums text-[var(--sidebar-text-muted)]">
                               耐性 {row.resistanceScore ?? "-"}
                             </span>
                           </div>
                         )}
                       </TableCell>
-                      <TableCell className="whitespace-nowrap text-[var(--sidebar-text)]">
+                      <TableCell className="py-0.5 whitespace-nowrap text-[var(--sidebar-text)]">
                         {"isPending" in row && row.isPending ? (
-                          <div className="flex items-center gap-0.5">
+                          <div className="flex items-center gap-0">
                             <input
                               type="text"
                               inputMode="numeric"
@@ -1428,7 +1428,7 @@ export function CardMetaPanel({
                               }
                               onFocus={(e) => e.currentTarget.select()}
                               disabled={isSavingPendingReview}
-                              className="h-8 rounded border border-[var(--surface-border)] bg-white px-1.5 text-[11px] tabular-nums outline-none focus:border-[#cfcfcf]"
+                              className="h-7 rounded border border-[var(--surface-border)] bg-white px-1 text-[11px] tabular-nums outline-none focus:border-[#cfcfcf]"
                               style={{
                                 width: getDurationInputWidthCh(
                                   pendingReviewDurationInput,
@@ -1443,7 +1443,7 @@ export function CardMetaPanel({
                             </span>
                           </div>
                         ) : row.isLatestEditable && isEditingLatestReview ? (
-                          <div className="flex items-center gap-0.5">
+                          <div className="flex items-center gap-0">
                             <input
                               type="text"
                               inputMode="numeric"
@@ -1454,7 +1454,7 @@ export function CardMetaPanel({
                               }
                               onFocus={(e) => e.currentTarget.select()}
                               disabled={isMutatingLatestReview}
-                              className="h-8 rounded border border-[var(--surface-border)] bg-white px-1.5 text-[11px] tabular-nums outline-none focus:border-[#cfcfcf]"
+                              className="h-7 rounded border border-[var(--surface-border)] bg-white px-1 text-[11px] tabular-nums outline-none focus:border-[#cfcfcf]"
                               style={{
                                 width: getDurationInputWidthCh(
                                   latestReviewDurationInput,
@@ -1470,7 +1470,7 @@ export function CardMetaPanel({
                           </div>
                         ) : row.editableLogIndex != null &&
                           onUpdateReviewLogDuration ? (
-                          <div className="flex items-center gap-0.5">
+                          <div className="flex items-center gap-0">
                             <input
                               type="text"
                               inputMode="numeric"
@@ -1519,7 +1519,7 @@ export function CardMetaPanel({
                                 isMutatingLatestReview ||
                                 durationSavingIndex === row.editableLogIndex
                               }
-                              className="h-8 rounded border border-[var(--surface-border)] bg-white px-1.5 text-[11px] tabular-nums outline-none focus:border-[#cfcfcf]"
+                              className="h-7 rounded border border-[var(--surface-border)] bg-white px-1 text-[11px] tabular-nums outline-none focus:border-[#cfcfcf]"
                               style={{
                                 width: getDurationInputWidthCh(
                                   durationDrafts[row.editableLogIndex] ??

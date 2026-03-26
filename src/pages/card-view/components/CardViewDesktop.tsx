@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { VerticalCardPager } from "@/features/review/VerticalCardPager";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { Card } from "@/types";
+import type { Card, UserSettings } from "@/types";
 import {
   CARDVIEW_NATURAL_INDEX_COMMIT_DELAY_EDIT_MS,
   CARDVIEW_NATURAL_INDEX_COMMIT_DELAY_VIEW_MS,
@@ -20,6 +20,7 @@ interface CardViewDesktopProps {
   flippedCardIds: Set<string>;
   cardsForPager: Card[];
   safeCurrentIndex: number;
+  settings?: Partial<UserSettings> | null;
   editPaneWidthPx: number;
   activePaneWidthPx: number;
   folderId: string | null;
@@ -41,6 +42,7 @@ export function CardViewDesktop({
   flippedCardIds,
   cardsForPager,
   safeCurrentIndex,
+  settings = null,
   editPaneWidthPx,
   activePaneWidthPx,
   folderId,
@@ -65,6 +67,7 @@ export function CardViewDesktop({
           isGlobalEditing={isGlobalEditing}
           showEditPreview={showEditPreview}
           editPaneWidthPx={editPaneWidthPx}
+          settings={settings}
           isFlipped={flippedCardIds.has(card.id ?? "")}
           folderId={folderId}
           cardSetId={cardSetId}
@@ -93,6 +96,7 @@ export function CardViewDesktop({
       onToggleUncertainty,
       onToggleBookmark,
       safeCurrentIndex,
+      settings,
       editPaneWidthPx,
     ],
   );
@@ -122,6 +126,8 @@ export function CardViewDesktop({
           : CARDVIEW_NATURAL_INDEX_COMMIT_DELAY_VIEW_MS
       }
       freezeActiveIndex={isGlobalEditing}
+      showActiveOutline={!isGlobalEditing}
+      disableItemChrome={isGlobalEditing}
       getCardWidth={() => activePaneWidthPx}
       getKey={(card) => card.id ?? card.docId ?? card.uid}
       renderCard={renderCard}
@@ -148,7 +154,13 @@ export function DesktopToolbarRow({
     : "border border-transparent bg-transparent";
 
   return (
-    <div className="shrink-0 border-b border-gray-200/70 bg-[#F8FAFB] px-3 py-2">
+    <div
+      className="shrink-0 border-b border-gray-200/70 bg-[#F8FAFB]/95 px-3 py-2 backdrop-blur-sm"
+      onWheelCapture={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      }}
+    >
       <div
         className="mx-auto grid w-full grid-cols-1 gap-4 md:grid-cols-2"
         style={{ width: `${editPaneWidthPx}px`, maxWidth: "100%" }}

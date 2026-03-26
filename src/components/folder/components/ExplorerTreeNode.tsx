@@ -290,8 +290,8 @@ const isPinned =
           className={cn(
             ROW_BASE,
             "flex h-6 min-h-6 items-center pr-2 pl-0 leading-6 select-none",
-            (treeNode.kind === "card" || treeNode.kind === "document") &&
-              "sidebar-row--document",
+            treeNode.kind === "card" && "sidebar-row--card",
+            treeNode.kind === "document" && "sidebar-row--document",
           )}
           data-selected={isSelected || undefined}
           style={{ paddingLeft: "4px" }}

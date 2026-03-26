@@ -17,6 +17,8 @@ import { useCardViewParams } from "./card-view/hooks/useCardViewParams";
 import { useCardViewState } from "./card-view/hooks/useCardViewState";
 import { useCardViewWindowEvents } from "./card-view/hooks/useCardViewWindowEvents";
 
+const CARDVIEW_TOOLBAR_ROW_HEIGHT_PX = 72;
+
 export default function CardView() {
   const { setExtraCrumbs } = useBreadcrumbContext();
   const { error: toastError } = useToast();
@@ -87,6 +89,11 @@ export default function CardView() {
   const showWidthControl = isDesktop;
   const shouldReserveWidthControlSpace =
     showWidthControl && state.isGlobalEditing;
+  const toolbarRowTopPx = shouldReserveWidthControlSpace
+    ? CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX
+    : 0;
+  const toolbarRowOffsetPx =
+    isDesktop && state.isGlobalEditing ? CARDVIEW_TOOLBAR_ROW_HEIGHT_PX : 0;
 
   return (
     <div className="h-full overflow-hidden bg-[#F5F7F8] pt-0 card-editor-right-pane-font">
@@ -142,19 +149,31 @@ export default function CardView() {
           }
         >
           {isDesktop && state.isGlobalEditing && (
-            <DesktopToolbarRow
-              isGlobalEditing={state.isGlobalEditing}
-              editPaneWidthPx={paneWidth.editPaneWidthPx}
-              setGlobalToolbarMountQ={setGlobalToolbarMountQ}
-              setGlobalToolbarMountA={setGlobalToolbarMountA}
-            />
+            <div
+              className="pointer-events-none absolute inset-x-0 z-20"
+              style={{ top: toolbarRowTopPx }}
+            >
+              <div className="pointer-events-auto">
+                <DesktopToolbarRow
+                  isGlobalEditing={state.isGlobalEditing}
+                  editPaneWidthPx={paneWidth.activePaneWidthPx}
+                  setGlobalToolbarMountQ={setGlobalToolbarMountQ}
+                  setGlobalToolbarMountA={setGlobalToolbarMountA}
+                />
+              </div>
+            </div>
           )}
 
           <div
             ref={paneWidth.contentViewportRef}
             className={`min-h-0 min-w-0 flex-1 overflow-hidden py-0 ${
-              state.isGlobalEditing ? "px-0" : "px-4"
+              state.isGlobalEditing || isDesktop ? "px-0" : "px-4"
             }`}
+            style={
+              toolbarRowOffsetPx > 0
+                ? { paddingTop: `${toolbarRowOffsetPx}px` }
+                : undefined
+            }
           >
             {isDesktop ? (
               <CardViewDesktop
@@ -164,7 +183,8 @@ export default function CardView() {
                 flippedCardIds={state.flippedCardIds}
                 cardsForPager={state.cardsForPager}
                 safeCurrentIndex={state.safeCurrentIndex}
-                editPaneWidthPx={paneWidth.editPaneWidthPx}
+                settings={settings}
+                editPaneWidthPx={paneWidth.activePaneWidthPx}
                 activePaneWidthPx={paneWidth.activePaneWidthPx}
                 folderId={folderId}
                 cardSetId={cardSetId}

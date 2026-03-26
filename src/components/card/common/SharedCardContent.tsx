@@ -33,6 +33,7 @@ type SharedCardContentEditProps = SharedCardContentBaseProps & {
   minDeletableIndex?: number;
   hiddenBlockTypes?: CardBlock["type"][];
   toolbarMount?: HTMLDivElement | null;
+  settings?: unknown;
 };
 
 export type SharedCardContentProps =
@@ -70,6 +71,7 @@ export function SharedCardContent(props: SharedCardContentProps) {
           minDeletableIndex={props.minDeletableIndex}
           hiddenBlockTypes={props.hiddenBlockTypes}
           toolbarMount={props.toolbarMount}
+          settings={props.settings}
         />
       ) : (
         <BlockRenderer

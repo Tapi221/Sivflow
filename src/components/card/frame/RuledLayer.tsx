@@ -37,13 +37,7 @@ export function RuledLayer({
   const topPx = Math.max(0, ruledOffsetPx);
   const bottomPx = Math.max(0, ruledBottomOffsetPx);
 
-  // 最下線は常に ruled layer の最下端に固定する。
-  // これにより「最下罫線 -> カード下端」の距離が ruledBottomOffsetPx と一致する。
-  const bottomLinePx = null;
-
-  const layerStyle: CSSVars = {
-    "--card-row-px": `${rowPx}px`,
-    "--card-ruled-phase-px": `${ruledPhasePx}px`,
+  const insetBase = {
     left:
       typeof ruledInsetX === "number"
         ? `${ruledInsetX}px`
@@ -53,18 +47,74 @@ export function RuledLayer({
         ? `${ruledInsetX}px`
         : String(ruledInsetX),
     top: `${topPx}px`,
+  } as const;
+
+  const opacityValue =
+    typeof ruledOpacity === "number"
+      ? String(clamp01(ruledOpacity))
+      : (ruledOpacity ?? "var(--card-ruled-opacity, 1)");
+
+  // repeat+bottom の場合はレイヤーを分離して、繰り返し線と最下線の重なりを防ぐ。
+  if (kind === "repeat+bottom") {
+    const repeatStyle: CSSVars = {
+      "--card-row-px": `${rowPx}px`,
+      "--card-ruled-phase-px": `${ruledPhasePx}px`,
+      ...insetBase,
+      bottom: `${bottomPx + ruledLinePx}px`,
+      opacity: opacityValue,
+      ...getRuledStyle({
+        kind: "repeat-only",
+        rowPx,
+        phasePx: ruledPhasePx,
+        color: ruledColor,
+        linePx: ruledLinePx,
+        bottomLinePx: null,
+      }),
+    };
+
+    const bottomStyle: CSSVars = {
+      "--card-row-px": `${rowPx}px`,
+      "--card-ruled-phase-px": `${ruledPhasePx}px`,
+      ...insetBase,
+      bottom: `${bottomPx}px`,
+      opacity: opacityValue,
+      ...getRuledStyle({
+        kind: "bottom-only",
+        rowPx,
+        phasePx: ruledPhasePx,
+        color: ruledColor,
+        linePx: ruledLinePx,
+        bottomLinePx: null,
+      }),
+    };
+
+    return (
+      <>
+        <div
+          className={cn(
+            "ruledLayer pointer-events-none absolute z-0",
+            className,
+          )}
+          style={repeatStyle}
+        />
+        <div className="ruledLayer pointer-events-none absolute z-0" style={bottomStyle} />
+      </>
+    );
+  }
+
+  const layerStyle: CSSVars = {
+    "--card-row-px": `${rowPx}px`,
+    "--card-ruled-phase-px": `${ruledPhasePx}px`,
+    ...insetBase,
     bottom: `${bottomPx}px`,
-    opacity:
-      typeof ruledOpacity === "number"
-        ? String(clamp01(ruledOpacity))
-        : (ruledOpacity ?? "var(--card-ruled-opacity, 1)"),
+    opacity: opacityValue,
     ...getRuledStyle({
       kind,
       rowPx,
       phasePx: ruledPhasePx,
       color: ruledColor,
       linePx: ruledLinePx,
-      bottomLinePx,
+      bottomLinePx: null,
     }),
   };
 
@@ -75,7 +125,3 @@ export function RuledLayer({
     />
   );
 }
-
-
-
-

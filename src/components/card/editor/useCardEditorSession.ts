@@ -24,6 +24,8 @@ import {
 import { resolveCardTagNames } from "@/hooks/settings/useTags";
 import { sanitizeUploadedImages } from "@/utils/uploaded-image/sanitizer";
 
+import { useCardEntity } from "@/hooks/card/useCardEntity";
+
 import type { CardBlock, Card, UploadedImage } from "@/types";
 
 const NEW_SENTINEL = "__new__" as const;
@@ -32,7 +34,7 @@ type UseCardEditorSessionParams = {
   selectedCardId: string | null;
   folderId?: string;
   autoEdit?: boolean;
-  cards: Card[];
+
   updateCard: (id: string, data: Partial<Card>) => Promise<unknown>;
   createCard?: (data: Partial<Card>) => Promise<unknown>;
   addTag: (name: string) => Promise<{ id: string }>;
@@ -48,7 +50,6 @@ export function useCardEditorSession({
   selectedCardId,
   folderId,
   autoEdit,
-  cards,
   updateCard,
   createCard,
   addTag,
@@ -83,6 +84,9 @@ export function useCardEditorSession({
   const hydratedFromIdRef = useRef<string | null>(null);
   const autoOpenCheckedIdRef = useRef<string | null>(null);
 
+  const isEditingRef = useRef(false);
+  isEditingRef.current = isEditing;
+
   useEffect(() => {
     if (selectedCardId != null) setLocalSelectedCardId(null);
   }, [selectedCardId]);
@@ -94,10 +98,14 @@ export function useCardEditorSession({
   );
   const isNew = normalizedSelectedCardId === NEW_SENTINEL;
 
-  const selectedCard = useMemo(() => {
-    if (!normalizedSelectedCardId || isNew) return null;
-    return cards.find((card) => card.id === normalizedSelectedCardId) ?? null;
-  }, [cards, normalizedSelectedCardId, isNew]);
+  const { effectiveCard } = useCardEntity(
+    !normalizedSelectedCardId || isNew ? null : normalizedSelectedCardId,
+  );
+  const selectedCard = effectiveCard ?? null;
+
+  // Mirror refs for use in effect cleanups (always current)
+  const selectedCardRef = useRef<Card | null>(null);
+  selectedCardRef.current = selectedCard ?? null;
 
   const buildDraftFromCard = useCallback(
     (card: Card): EditorDraft => {
@@ -159,8 +167,13 @@ export function useCardEditorSession({
       return;
     }
 
-    setIsEditing(!!autoEdit);
-    setDraft(null);
+    const shouldAutoEdit = Boolean(autoEdit);
+    setIsEditing(shouldAutoEdit);
+    // autoEdit 時に draft を即クリアすると、カード切替直後に編集面が一瞬空になる。
+    // 次カードの hydrate が走るまで現行 draft を保持し、チラつきを防ぐ。
+    if (!shouldAutoEdit) {
+      setDraft(null);
+    }
     editingCardIdRef.current = null;
     hydratedFromIdRef.current = null;
     autoOpenCheckedIdRef.current = null;
@@ -215,6 +228,75 @@ export function useCardEditorSession({
     selectedCard,
     buildDraftFromCard,
   ]);
+
+  // Auto-save: called with explicit card/draft to avoid stale closure issues
+  const autoSaveCard = useCallback(
+    async (cardId: string, currentDraft: EditorDraft) => {
+      try {
+        const sanitizeBlocksForSave = (blocks: CardBlock[]): CardBlock[] => {
+          const next: CardBlock[] = [];
+          for (const block of blocks ?? []) {
+            if (block?.type === "image") {
+              next.push({
+                ...(block as unknown),
+                images: sanitizeUploadedImages(
+                  (block as unknown)?.images ?? [],
+                ) as UploadedImage[],
+              } as CardBlock);
+              continue;
+            }
+            if (block?.type === "reference") {
+              const cleaned = sanitizeReferences(
+                (block as unknown)?.references ?? [],
+              );
+              if (cleaned.length === 0) continue;
+              next.push({ ...(block as unknown), references: cleaned } as CardBlock);
+              continue;
+            }
+            next.push(block);
+          }
+          return normalizeOrderIndex(next);
+        };
+
+        const resolvedTags = await Promise.all(
+          currentDraft.tags.map((name) => addTag(name)),
+        );
+        const tagIds = resolvedTags.map((tag) => tag.id);
+        const payload: Partial<Card> = {
+          title: currentDraft.title,
+          tagIds,
+          isDraft: currentDraft.isDraft,
+          questionImages: sanitizeUploadedImages(
+            currentDraft.questionImages,
+          ) as UploadedImage[],
+          answerImages: sanitizeUploadedImages(
+            currentDraft.answerImages,
+          ) as UploadedImage[],
+          questionBlocks: sanitizeBlocksForSave(currentDraft.questionBlocks),
+          answerBlocks: sanitizeBlocksForSave(currentDraft.answerBlocks),
+          layoutRows: normalizeLayoutRows(currentDraft.layoutRows),
+        };
+
+        await updateCard(cardId, payload);
+        onCardUpdated?.();
+      } catch (error) {
+        console.error("[AutoSave] カード自動保存に失敗しました:", error);
+      }
+    },
+    [addTag, onCardUpdated, updateCard],
+  );
+
+  // Auto-save when switching away from an edited card
+  useEffect(() => {
+    return () => {
+      if (!isEditingRef.current) return;
+      const card = selectedCardRef.current;
+      const draft = draftRef.current;
+      if (!card || !draft) return;
+      void autoSaveCard(card.id, draft);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [normalizedSelectedCardId]);
 
   const handleStartNew = useCallback(() => {
     setDraft(makeNewDraft());
@@ -302,8 +384,9 @@ export function useCardEditorSession({
         const newId =
           (typeof created === "object" &&
             created !== null &&
-            "id" in created &&
-            (created as unknown).id) ||
+            (("id" in created && (created as { id?: unknown }).id) ||
+              ("cardId" in created &&
+                (created as { cardId?: unknown }).cardId))) ||
           (typeof created === "string" ? created : null);
 
         onCardUpdated?.();

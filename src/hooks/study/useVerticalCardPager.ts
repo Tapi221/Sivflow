@@ -16,6 +16,11 @@ export type UseVerticalCardPagerOptions = {
   naturalIndexCommitDelayMs?: number;
   /** true の間は自然スクロールや矢印操作で activeIndex を変更しない */
   freezeActiveIndex?: boolean;
+  /**
+   * 最近傍インデックスが変わった直後（React state 更新より前）に呼ばれる即時コールバック。
+   * DOM 直接操作など、React 再レンダリングを待たずに実行したい処理に使う。
+   */
+  onNearestIndexImmediate?: (idx: number) => void;
 };
 
 export type UseVerticalCardPagerReturn = {
@@ -35,8 +40,13 @@ export function useVerticalCardPager({
   onFlip,
   naturalIndexCommitDelayMs = 0,
   freezeActiveIndex = false,
+  onNearestIndexImmediate,
 }: UseVerticalCardPagerOptions): UseVerticalCardPagerReturn {
   const itemRefs = useRef<(HTMLElement | null)[]>([]);
+
+  // stale closure 回避: onNearestIndexImmediate を ref で保持
+  const onNearestIndexImmediateRef = useRef(onNearestIndexImmediate);
+  onNearestIndexImmediateRef.current = onNearestIndexImmediate;
 
   // 自然スクロール起因の activeIndex 更新かどうか
   const ioTriggeredRef = useRef(false);
@@ -174,6 +184,7 @@ export function useVerticalCardPager({
     }
 
     if (nearestIdx !== -1 && nearestIdx !== activeIndexRef.current) {
+      onNearestIndexImmediateRef.current?.(nearestIdx);
       queueNaturalIndexCommit(nearestIdx);
     }
   }, [freezeActiveIndex, queueNaturalIndexCommit, scrollContainerRef]);

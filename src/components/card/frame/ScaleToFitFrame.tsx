@@ -31,23 +31,7 @@ export function ScaleToFitFrame({
 
   const [scale, setScale] = React.useState(1);
   const [contentHeight, setContentHeight] = React.useState<number | null>(null);
-
-  const rafIdRef = React.useRef<number | null>(null);
-  const schedule = React.useCallback((fn: () => void) => {
-    if (rafIdRef.current != null) cancelAnimationFrame(rafIdRef.current);
-    rafIdRef.current = requestAnimationFrame(() => {
-      rafIdRef.current = null;
-      fn();
-    });
-  }, []);
-
-  React.useEffect(() => {
-    return () => {
-      if (rafIdRef.current != null) cancelAnimationFrame(rafIdRef.current);
-    };
-  }, []);
-
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     if (disableScale) {
       setScale(1);
       return;
@@ -82,7 +66,7 @@ export function ScaleToFitFrame({
 
     calcScale();
 
-    const observer = new ResizeObserver(() => schedule(calcScale));
+    const observer = new ResizeObserver(calcScale);
     observer.observe(observeTarget);
 
     return () => observer.disconnect();
@@ -94,10 +78,9 @@ export function ScaleToFitFrame({
     contentHeight,
     allowUpscale,
     maxScale,
-    schedule,
   ]);
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     if (typeof ResizeObserver === "undefined") return;
     if (!contentRef.current) return;
 
@@ -111,11 +94,11 @@ export function ScaleToFitFrame({
 
     updateHeight();
 
-    const observer = new ResizeObserver(() => schedule(updateHeight));
+    const observer = new ResizeObserver(updateHeight);
     observer.observe(content);
 
     return () => observer.disconnect();
-  }, [schedule]);
+  }, []);
 
   const scaledHeight =
     contentHeight != null
@@ -123,14 +106,8 @@ export function ScaleToFitFrame({
       : null;
   const safePaddingPx = Math.max(0, contentPaddingPx);
   const safeBaseWidth = Math.max(1, baseWidth);
-  const zoomSupported =
-    typeof CSS !== "undefined" &&
-    typeof CSS.supports === "function" &&
-    CSS.supports("zoom", "1.1");
-  // 拡大時だけ zoom を使ってテキスト/罫線のぼやけを抑える。
-  const shouldUseZoomScale = !disableScale && scale > 1.0001 && zoomSupported;
-  const shouldUseTransformScale =
-    !disableScale && !shouldUseZoomScale && Math.abs(scale - 1) > 0.0001;
+  const shouldUseZoomScale = !disableScale && Math.abs(scale - 1) > 0.0001;
+  const shouldUseTransformScale = false;
   const visualWidthPx = disableScale
     ? null
     : Math.ceil(safeBaseWidth * Math.max(0.1, scale));

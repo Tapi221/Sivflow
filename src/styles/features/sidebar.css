@@ -21,8 +21,7 @@
   }
 
   .sidebar-row--folder:hover,
-  .sidebar-row--document:hover,
-  .sidebar-row--card:hover {
+  .sidebar-row--document:hover {
     background-color: var(--sidebar-active-bg, #e7ebef);
   }
 

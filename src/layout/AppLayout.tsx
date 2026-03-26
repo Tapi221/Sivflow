@@ -19,6 +19,7 @@ export function AppLayout() {
   const isScrollLocked =
     /^\/folders(?:\/|$)/i.test(pathname) ||
     /^\/cardedit(?:\/|$)/i.test(pathname) ||
+    /^\/cardview(?:\/|$)/i.test(pathname) ||
     /^\/study(?:\/|$)/i.test(pathname);
 
   return (

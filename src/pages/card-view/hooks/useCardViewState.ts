@@ -33,6 +33,14 @@ function extractCreatedId(created: unknown): string | null {
   ) {
     return (created as { id: string }).id;
   }
+  if (
+    typeof created === "object" &&
+    created !== null &&
+    "cardId" in created &&
+    typeof (created as { cardId?: unknown }).cardId === "string"
+  ) {
+    return (created as { cardId: string }).cardId;
+  }
   return null;
 }
 
@@ -52,6 +60,9 @@ export function useCardViewState({
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [flippedCardIds, setFlippedCardIds] = useState<Set<string>>(new Set());
   const currentCardIdRef = useRef<string | null>(null);
+  const [pendingFocusCardId, setPendingFocusCardId] = useState<string | null>(
+    null,
+  );
   const [isGlobalEditing, setIsGlobalEditing] = useState(false);
   const [saveSignal, setSaveSignal] = useState(0);
   const [isMetaOpen, setIsMetaOpen] = useState(() => {
@@ -61,10 +72,17 @@ export function useCardViewState({
 
   const pendingExitAfterSaveRef = useRef(false);
   const pendingCreateCardAfterSaveRef = useRef(false);
-  const pendingFocusCardIdRef = useRef<string | null>(null);
   const suppressPagerSyncRef = useRef(false);
   const lockedIndexRef = useRef<number | null>(null);
+  const suppressPagerUnlockTimerRef = useRef<number | null>(null);
   const autoInitializedCardSetIdsRef = useRef<Set<string>>(new Set());
+
+  const clearSuppressPagerUnlockTimer = useCallback(() => {
+    if (suppressPagerUnlockTimerRef.current != null) {
+      window.clearTimeout(suppressPagerUnlockTimerRef.current);
+      suppressPagerUnlockTimerRef.current = null;
+    }
+  }, []);
 
   // Persist meta panel open state
   useEffect(() => {
@@ -96,20 +114,28 @@ export function useCardViewState({
 
   // Resolve pending focus card id after card list updates
   useEffect(() => {
-    const targetId = pendingFocusCardIdRef.current;
-    if (!targetId) return;
-    const nextIndex = cardIndexById.get(targetId);
-    if (typeof nextIndex === "number") {
-      setCurrentIndex(nextIndex);
-      lockedIndexRef.current = nextIndex;
-    }
-    pendingFocusCardIdRef.current = null;
-    const timer = window.setTimeout(() => {
+    if (!pendingFocusCardId) return;
+    const nextIndex = cardIndexById.get(pendingFocusCardId);
+    if (typeof nextIndex !== "number") return;
+
+    setCurrentIndex(nextIndex);
+    lockedIndexRef.current = nextIndex;
+    setPendingFocusCardId(null);
+
+    clearSuppressPagerUnlockTimer();
+    suppressPagerUnlockTimerRef.current = window.setTimeout(() => {
       suppressPagerSyncRef.current = false;
       lockedIndexRef.current = null;
+      suppressPagerUnlockTimerRef.current = null;
     }, 220);
-    return () => window.clearTimeout(timer);
-  }, [isGlobalEditing, cardIndexById]);
+  }, [pendingFocusCardId, cardIndexById, clearSuppressPagerUnlockTimer]);
+
+  useEffect(
+    () => () => {
+      clearSuppressPagerUnlockTimer();
+    },
+    [clearSuppressPagerUnlockTimer],
+  );
 
   // Broadcast editing-change to window
   useEffect(() => {
@@ -152,7 +178,7 @@ export function useCardViewState({
       try {
         const created = await createCard({ cardSetId, folderId: targetFolderId });
         const createdId = extractCreatedId(created);
-        if (createdId) pendingFocusCardIdRef.current = createdId;
+        if (createdId) setPendingFocusCardId(createdId);
       } catch (error) {
         console.error("[CardView] Failed to bootstrap empty card set:", error);
       }
@@ -184,7 +210,7 @@ export function useCardViewState({
         toastError("新規カードの作成結果を取得できませんでした");
         return false;
       }
-      pendingFocusCardIdRef.current = createdId;
+      setPendingFocusCardId(createdId);
       return true;
     } catch (error) {
       console.error("[CardView] Failed to create new card:", error);
@@ -236,7 +262,7 @@ export function useCardViewState({
 
   const handleToggleViewMode = useCallback(() => {
     const targetId = selectedCard?.id ?? null;
-    pendingFocusCardIdRef.current = targetId;
+    setPendingFocusCardId(targetId);
     suppressPagerSyncRef.current = true;
     lockedIndexRef.current =
       targetId != null ? (cardIndexById.get(targetId) ?? null) : null;

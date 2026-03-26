@@ -55,7 +55,7 @@ export const MediaBlock = ({
     <BlockWrapper
       onDelete={onDelete}
       onDuplicate={onDuplicate}
-      className={cn("px-0", !isMediaEmpty && "border-transparent")}
+      className={cn("py-[4px] px-0", !isMediaEmpty && "border-transparent")}
       contentClassName="px-0"
       dragHandleProps={dragHandleProps}
       dragHandleClassName={dragHandleClassName}

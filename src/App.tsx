@@ -72,7 +72,7 @@ const isTestBypassEnabled = () => {
 function LoadingFallback() {
   return (
     // 画面全体を覆うローディング画面（Tailwind で中央寄せ＆背景など指定）
-    <div className="h-[100dvh] flex items-center justify-center bg-[#F8FAFB] animate-in fade-in duration-500">
+    <div className="h-[100dvh] flex items-center justify-center bg-[#EEF3F6] animate-in fade-in duration-500">
       <div className="text-center">
         {/* 二重の丸いボーダーでローディングスピナーを作っている */}
         <div className="relative w-16 h-16 mx-auto mb-6">

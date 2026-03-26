@@ -34,8 +34,11 @@ export function CardSetCardsPane({
       title: "",
       blocks: [],
     });
-    if (created?.id) {
-      onCardSelect(created.id);
+    const createdCardId =
+      (created as { id?: string; cardId?: string } | null)?.id ??
+      (created as { id?: string; cardId?: string } | null)?.cardId;
+    if (createdCardId) {
+      onCardSelect(createdCardId);
     }
   };
 

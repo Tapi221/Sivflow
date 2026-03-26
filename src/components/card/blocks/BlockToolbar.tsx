@@ -6,6 +6,7 @@ import { Code } from "@/ui/icons";
 import { ImageIcon } from "@/ui/icons";
 import { StratisFormulaIcon } from "@/ui/icons";
 import { StratisMarkdownIcon } from "@/ui/icons";
+import { HelpCircle } from "@/ui/icons";
 import { cn } from "@/lib/utils";
 import type { CardBlock } from "@/types";
 
@@ -31,10 +32,12 @@ type BlockConfig = {
   isVisible?: boolean;
   enabled?: boolean;
   color?: string;
+  orderIndex?: number;
 };
 
 const ALLOWED_TYPES: readonly CardBlock["type"][] = [
   "text",
+  "question",
   "code",
   "image",
   "markdown",
@@ -43,11 +46,19 @@ const ALLOWED_TYPES: readonly CardBlock["type"][] = [
 
 const DEFAULT_CONFIGS: BlockConfig[] = [
   { type: "text",     label: "テキスト",  icon: "Type",        isVisible: true },
+  { type: "question", label: "疑問",      icon: "HelpCircle",  isVisible: true },
   { type: "code",     label: "コード",    icon: "Code",        isVisible: true },
   { type: "image",    label: "画像",      icon: "Image",       isVisible: true },
   { type: "math",     label: "数式",      icon: "Sigma",       isVisible: true },
   { type: "markdown", label: "Markdown",  icon: "NotebookPen", isVisible: true },
 ];
+
+const DEFAULT_ORDER_INDEX_BY_TYPE = DEFAULT_CONFIGS.reduce<
+  Record<CardBlock["type"], number>
+>((acc, config, index) => {
+  acc[config.type] = index;
+  return acc;
+}, {} as Record<CardBlock["type"], number>);
 
 function getIcon(iconName: string | undefined, type: CardBlock["type"]) {
   const map: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -56,10 +67,12 @@ function getIcon(iconName: string | undefined, type: CardBlock["type"]) {
     Sigma: StratisFormulaIcon,
     Code: Code,
     NotebookPen: StratisMarkdownIcon,
+    HelpCircle: HelpCircle,
   };
   if (iconName && map[iconName]) return map[iconName];
   const typeMap: Record<string, React.ComponentType<{ className?: string }>> = {
     text: Type,
+    question: HelpCircle,
     code: Code,
     image: ImageIcon,
     markdown: StratisMarkdownIcon,
@@ -162,7 +175,7 @@ function ActionButton({
         onClick={onClick}
         aria-label={`${label}を追加`}
         className={cn(
-          "inline-flex items-center justify-center w-9 h-9 rounded-md",
+          "inline-flex shrink-0 items-center justify-center w-9 h-9 rounded-md",
           "text-slate-700 transition-colors duration-100 select-none",
           "hover:text-slate-900 hover:bg-slate-100",
           "active:bg-slate-200 active:text-slate-900",
@@ -201,19 +214,42 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
   type RawSettings = { editorBlockSettings?: Record<string, unknown>[] };
   const rawSettings = (settings as RawSettings | undefined)?.editorBlockSettings;
 
-  const blockSettings: BlockConfig[] =
-    rawSettings && rawSettings.length > 0
-      ? rawSettings
-          .map((x) => ({
-            type: x["type"] as CardBlock["type"],
-            label: (x["label"] as string | undefined) ?? String(x["type"]),
-            icon: x["icon"] as string | undefined,
-            isVisible: x["isVisible"] as boolean | undefined,
-            enabled: x["enabled"] as boolean | undefined,
-            color: x["color"] as string | undefined,
-          }))
-          .filter((x) => ALLOWED_TYPES.includes(x.type))
-      : DEFAULT_CONFIGS;
+  const blockSettings: BlockConfig[] = (() => {
+    if (!rawSettings || rawSettings.length === 0) return DEFAULT_CONFIGS;
+
+    const fromSettings = rawSettings
+      .map((x) => ({
+        type: x["type"] as CardBlock["type"],
+        label: (x["label"] as string | undefined) ?? String(x["type"]),
+        icon: x["icon"] as string | undefined,
+        isVisible: x["isVisible"] as boolean | undefined,
+        enabled: x["enabled"] as boolean | undefined,
+        color: x["color"] as string | undefined,
+        orderIndex:
+          typeof x["orderIndex"] === "number"
+            ? (x["orderIndex"] as number)
+            : undefined,
+      }))
+      .filter((x) => ALLOWED_TYPES.includes(x.type));
+
+    // DB に保存されていない新しいブロック型をデフォルト設定から補完する
+    const missingDefaults = DEFAULT_CONFIGS.filter(
+      (d) => !fromSettings.some((s) => s.type === d.type),
+    );
+
+    const merged = [...fromSettings, ...missingDefaults];
+
+    // 順序は配列の自然順ではなく orderIndex を優先し、UI の並びを安定化する。
+    return merged.sort((a, b) => {
+      const aOrder = a.orderIndex ?? DEFAULT_ORDER_INDEX_BY_TYPE[a.type] ?? 999;
+      const bOrder = b.orderIndex ?? DEFAULT_ORDER_INDEX_BY_TYPE[b.type] ?? 999;
+      if (aOrder !== bOrder) return aOrder - bOrder;
+      return (
+        (DEFAULT_ORDER_INDEX_BY_TYPE[a.type] ?? 999) -
+        (DEFAULT_ORDER_INDEX_BY_TYPE[b.type] ?? 999)
+      );
+    });
+  })();
 
   const visibleConfigs = blockSettings.filter((config) => {
     if (!(config.isVisible ?? config.enabled ?? true)) return false;
@@ -284,7 +320,7 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
       </div>
 
       {/* デスクトップ: アイコン only ボタン横並び */}
-      <div className="hidden md:flex items-center gap-2 flex-nowrap overflow-x-auto no-scrollbar">
+      <div className="hidden md:flex items-center gap-2 flex-nowrap overflow-x-hidden">
         {visibleConfigs.map((config) => {
           const Icon = getIcon(config.icon, config.type);
           return (

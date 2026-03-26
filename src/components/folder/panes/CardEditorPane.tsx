@@ -42,7 +42,7 @@ import {
   createLatestReviewLogPatch,
   createReviewPatchFromRating,
 } from "@/services/reviewAlgorithm";
-import type { Card, UploadedImage } from "@/types";
+import type { Card, UploadedImage, UserSettings } from "@/types";
 
 interface CardEditorPaneProps {
   selectedCardId: string | null;
@@ -58,11 +58,13 @@ interface CardEditorPaneProps {
   hideBlockToolbars?: boolean;
   externalToolbarMountQ?: HTMLDivElement | null;
   externalToolbarMountA?: HTMLDivElement | null;
+  settingsOverride?: Partial<UserSettings> | null;
   saveSignal?: number;
   hideFooterActions?: boolean;
   embeddedInPager?: boolean;
   pairGapClassName?: string;
   onRequestCloseEditing?: () => void;
+  highlightActiveCards?: boolean;
 }
 
 type UseCardsResult = {
@@ -131,9 +133,43 @@ function CardPaneWidthControl({
   onReset,
 }: CardPaneWidthControlProps) {
   const resetDisabled = value === defaultValue;
+  const controlRootRef = React.useRef<HTMLDivElement | null>(null);
+  const suppressOutsideClickUntilRef = React.useRef(0);
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handleClickCapture = (event: MouseEvent) => {
+      if (Date.now() > suppressOutsideClickUntilRef.current) return;
+      const target = event.target;
+      if (
+        target instanceof Node &&
+        controlRootRef.current?.contains(target)
+      ) {
+        return;
+      }
+      event.preventDefault();
+      event.stopPropagation();
+    };
+
+    window.addEventListener("click", handleClickCapture, true);
+    return () => {
+      window.removeEventListener("click", handleClickCapture, true);
+    };
+  }, []);
+
+  const beginInteractionGuard = () => {
+    // スライダー操作の pointerup/click が背面のブロック追加ボタンに落ちる誤作動を抑止する。
+    suppressOutsideClickUntilRef.current = Date.now() + 250;
+  };
 
   return (
-    <div className="pointer-events-auto flex items-center gap-1.5 rounded-[20px] border border-slate-200/80 bg-white/82 px-2.5 py-1.5 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-md">
+    <div
+      ref={controlRootRef}
+      className="pointer-events-auto flex items-center gap-1.5 rounded-[20px] border border-slate-200/80 bg-white/82 px-2.5 py-1.5 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-md"
+      onPointerDownCapture={beginInteractionGuard}
+      onPointerMoveCapture={beginInteractionGuard}
+    >
       <div className="min-w-[72px] leading-none">
         <div className="text-[10px] font-medium tracking-[0.06em] text-slate-500">
           {modeLabel}
@@ -217,13 +253,16 @@ export function CardEditorPane({
   hideBlockToolbars = false,
   externalToolbarMountQ = null,
   externalToolbarMountA = null,
+  settingsOverride = null,
   saveSignal,
   hideFooterActions = false,
   embeddedInPager = false,
   pairGapClassName = "gap-6",
   onRequestCloseEditing,
+  highlightActiveCards = false,
 }: CardEditorPaneProps) {
-  const { settings, updateSettings } = useUserSettings();
+  const { settings: settingsFromHook, updateSettings } = useUserSettings();
+  const settings = settingsOverride ?? settingsFromHook;
   const { success: toastSuccess, error: toastError } = useToast();
   const { tagById, addTag } = useTags();
   const {
@@ -310,7 +349,6 @@ export function CardEditorPane({
     selectedCardId,
     folderId,
     autoEdit,
-    cards,
     updateCard: updateCardAsync,
     createCard: createCardAsync,
     addTag,
@@ -615,7 +653,8 @@ export function CardEditorPane({
     <DragDropContext onDragEnd={onDragEnd}>
       <div
         className={cn(
-          "bg-sidebar pt-0 card-editor-right-pane-font",
+          "pt-0 card-editor-right-pane-font",
+          embeddedInPager ? "bg-transparent" : "bg-sidebar",
           embeddedInPager ? "pb-0" : "pb-4",
           embeddedInPager ? "h-auto" : "h-full",
         )}
@@ -685,7 +724,7 @@ export function CardEditorPane({
                     : "px-4 pt-0 pb-4"
                 : "p-4",
             )}
-            style={{ background: "#fafafa" }}
+            style={embeddedInPager ? undefined : { background: "#fafafa" }}
           >
             {isEditing ? (
               <div
@@ -757,7 +796,11 @@ export function CardEditorPane({
                       allowUpscale
                       maxScale={CARD_PANE_AUTO_MAX_SCALE}
                       scaleMultiplier={1}
-                      className={cn("premium-paper-depth", "card-shell--paper")}
+                      className={cn(
+                        "premium-paper-depth",
+                        "card-shell--paper",
+                        highlightActiveCards && "card-shell--active-outline",
+                      )}
                       resizable
                       showResizeHandle
                       resizeStepPx={CARD_ROW_PX}
@@ -791,6 +834,7 @@ export function CardEditorPane({
                         duplicateToOpposite={settings?.duplicateToOpposite}
                         hideToolbar={hideBlockToolbars}
                         toolbarMount={toolbarMountQ}
+                        settings={settings}
                       />
                     </CardFrame>
                   </div>
@@ -812,7 +856,11 @@ export function CardEditorPane({
                       allowUpscale
                       maxScale={CARD_PANE_AUTO_MAX_SCALE}
                       scaleMultiplier={1}
-                      className={cn("premium-paper-depth", "card-shell--paper")}
+                      className={cn(
+                        "premium-paper-depth",
+                        "card-shell--paper",
+                        highlightActiveCards && "card-shell--active-outline",
+                      )}
                       resizable
                       showResizeHandle
                       resizeStepPx={CARD_ROW_PX}
@@ -846,6 +894,7 @@ export function CardEditorPane({
                         duplicateToOpposite={settings?.duplicateToOpposite}
                         hideToolbar={hideBlockToolbars}
                         toolbarMount={toolbarMountA}
+                        settings={settings}
                       />
                     </CardFrame>
                   </div>

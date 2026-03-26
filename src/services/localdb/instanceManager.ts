@@ -149,7 +149,8 @@ export async function getInstance(userId?: string): Promise<LocalDBInstance> {
     try {
       await openPersistentDbWithRetry(persistentDb);
       if (persistentDb.isOpen()) {
-        await persistentDb.normalizeDocumentBlobUrlsForSession();
+        // バックグラウンドで実行 (stale blob URL の正規化は初回表示をブロックしない)
+        void persistentDb.normalizeDocumentBlobUrlsForSession();
       }
       instance = persistentDb;
       currentUserId = nextUserId;

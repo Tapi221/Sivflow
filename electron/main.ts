@@ -3,6 +3,11 @@ import * as http from "node:http";
 import * as path from "node:path";
 import { URL } from "node:url";
 
+if (process.platform === "win32") {
+  // 非最大化復帰時に発生するGPU合成起因の白飛び/薄化を回避
+  app.disableHardwareAcceleration();
+}
+
 const IPC_CHANNELS = {
   appGetVersion: "desktop:app:getVersion",
   shellOpenExternal: "desktop:shell:openExternal",
@@ -26,6 +31,15 @@ const GOOGLE_OAUTH_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 let mainWindow: BrowserWindow | null = null;
 let pendingOauthCallbackUrl: string | null = null;
 let oauthLoopbackServer: http.Server | null = null;
+
+// 復帰時の白飛び/描画遅延を抑える（Chromiumのバックグラウンド最適化を無効化）
+app.commandLine.appendSwitch("disable-backgrounding-occluded-windows");
+app.commandLine.appendSwitch("disable-renderer-backgrounding");
+app.commandLine.appendSwitch("disable-background-timer-throttling");
+app.commandLine.appendSwitch(
+  "disable-features",
+  "CalculateNativeWinOcclusion",
+);
 
 function toOauthCallbackPayload(url: string): {
   url: string;
@@ -74,7 +88,11 @@ function focusMainWindow(): void {
   if (mainWindow.isMinimized()) {
     mainWindow.restore();
   }
+  mainWindow.setOpacity(1);
   mainWindow.focus();
+  if (!mainWindow.webContents.isDestroyed()) {
+    mainWindow.webContents.invalidate();
+  }
 }
 
 function flushPendingOauthCallback(): void {
@@ -185,8 +203,11 @@ function createMainWindow() {
     minWidth: 1024,
     minHeight: 700,
     show: false,
-    backgroundColor: "#F8FAFB",
+    backgroundColor: "#EEF3F6",
+    transparent: false,
+    backgroundMaterial: "none",
     frame: false,
+    paintWhenInitiallyHidden: true,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
@@ -234,7 +255,14 @@ function createMainWindow() {
 
   windowRef.once("ready-to-show", () => {
     if (!windowRef.isDestroyed()) {
+      windowRef.setOpacity(1);
       windowRef.show();
+      if (!windowRef.isFocused()) {
+        windowRef.focus();
+      }
+      if (!windowRef.webContents.isDestroyed()) {
+        windowRef.webContents.invalidate();
+      }
     }
   });
 
@@ -244,10 +272,41 @@ function createMainWindow() {
 
   windowRef.on("maximize", () => {
     windowRef.webContents.send(IPC_CHANNELS.windowMaximizedState, true);
+    windowRef.setOpacity(1);
+    if (!windowRef.isFocused()) {
+      windowRef.focus();
+    }
+    windowRef.webContents.invalidate();
   });
 
   windowRef.on("unmaximize", () => {
     windowRef.webContents.send(IPC_CHANNELS.windowMaximizedState, false);
+    windowRef.setOpacity(1);
+    if (!windowRef.isFocused()) {
+      windowRef.focus();
+    }
+    windowRef.webContents.invalidate();
+  });
+
+  windowRef.on("restore", () => {
+    windowRef.setOpacity(1);
+    if (!windowRef.isFocused()) {
+      windowRef.focus();
+    }
+    windowRef.webContents.invalidate();
+  });
+
+  windowRef.on("focus", () => {
+    windowRef.setOpacity(1);
+    windowRef.webContents.invalidate();
+  });
+
+  windowRef.on("show", () => {
+    windowRef.setOpacity(1);
+    if (!windowRef.isFocused()) {
+      windowRef.focus();
+    }
+    windowRef.webContents.invalidate();
   });
 
   return windowRef;

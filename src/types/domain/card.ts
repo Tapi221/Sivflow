@@ -13,10 +13,16 @@ import type {
 
 export type CardBlock = {
   id: string;
-  type: "text" | "code" | "image" | "audio" | "reference" | "math" | "markdown";
+  type: "text" | "question" | "code" | "image" | "audio" | "reference" | "math" | "markdown";
   orderIndex: number;
   rowOffset?: number;
   offsetRows?: number;
+  /** 疑問ブロック内の子ブロックが持つ。null または未定義ならトップレベル */
+  parentBlockId?: string | null;
+  /** type === "question" 専用: 疑問文（Q） */
+  questionTitle?: string;
+  /** type === "question" 専用: 回答（A） */
+  questionAnswer?: string;
   content?: string;
   code?: CodeBlockData;
   images?: UploadedImage[];

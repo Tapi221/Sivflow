@@ -53,6 +53,7 @@ export interface UserSettings extends BaseEntity {
   cardViewPaneWidthPx?: number | null;
   cardEditPaneWidthPx?: number | null;
   editorBlockSettings?: BlockConfig[];
+  questionDisplayMode?: "always" | "tap_to_reveal";
   blockButtonShowLabel?: boolean;
   explorerViews?: Array<{
     id: string;

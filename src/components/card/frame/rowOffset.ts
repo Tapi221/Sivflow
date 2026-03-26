@@ -10,6 +10,7 @@ export const GRID_OFFSET_TYPES = new Set<CardBlock["type"]>(["math"]);
 
 export const isRowPositionableType = (type: CardBlock["type"]) =>
   type === "text" ||
+  type === "question" ||
   type === "code" ||
   type === "image" ||
   type === "math" ||
