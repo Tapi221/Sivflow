@@ -50,7 +50,8 @@ export function useCardViewState({
   toastError,
 }: UseCardViewStateOptions) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
-  const [isFlipped, setIsFlipped] = useState(false);
+  const [flippedCardIds, setFlippedCardIds] = useState<Set<string>>(new Set());
+  const currentCardIdRef = useRef<string | null>(null);
   const [isGlobalEditing, setIsGlobalEditing] = useState(false);
   const [saveSignal, setSaveSignal] = useState(0);
   const [isMetaOpen, setIsMetaOpen] = useState(() => {
@@ -78,10 +79,10 @@ export function useCardViewState({
     if (typeof found === "number") setCurrentIndex(found);
   }, [targetCardId, sortedCards.length, cardIndexById]);
 
-  // Reset flip when navigating
+  // カードセット・フォルダ切り替え時に flip 状態をリセット
   useEffect(() => {
-    setIsFlipped(false);
-  }, [currentIndex]);
+    setFlippedCardIds(new Set());
+  }, [cardSetId, folderId]);
 
   // Clamp index to valid range
   const safeCurrentIndex = useMemo(() => {
@@ -127,6 +128,11 @@ export function useCardViewState({
     return currentCard;
   }, [currentCard, effectiveCard]);
 
+  // stale closure 回避用の currentCardId ref
+  currentCardIdRef.current = selectedCard?.id ?? currentCard?.id ?? null;
+
+  const isFlipped = flippedCardIds.has(currentCardIdRef.current ?? "");
+
   const cardsForPager = useMemo(() => {
     if (!selectedCard) return sortedCards;
     const next = sortedCards.slice();
@@ -167,7 +173,7 @@ export function useCardViewState({
       return false;
     }
     try {
-      setIsFlipped(false);
+      setFlippedCardIds(new Set());
       setIsGlobalEditing(true);
       const created = await createCard({
         cardSetId: targetCardSetId,
@@ -201,7 +207,16 @@ export function useCardViewState({
 
   const handleEdit = useCallback(() => setIsGlobalEditing(true), []);
 
-  const handleFlip = useCallback(() => setIsFlipped((prev) => !prev), []);
+  const handleFlip = useCallback(() => {
+    const id = currentCardIdRef.current;
+    if (!id) return;
+    setFlippedCardIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
 
   const handleToggleUncertainty = useCallback(
     async (card: Card) => {
@@ -225,7 +240,7 @@ export function useCardViewState({
     suppressPagerSyncRef.current = true;
     lockedIndexRef.current =
       targetId != null ? (cardIndexById.get(targetId) ?? null) : null;
-    setIsFlipped(false);
+    setFlippedCardIds(new Set());
     if (isGlobalEditing) {
       pendingExitAfterSaveRef.current = true;
       setSaveSignal((prev) => prev + 1);

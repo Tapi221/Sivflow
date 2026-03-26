@@ -109,7 +109,6 @@ export function VerticalCardPager<T>({
           paddingInline: paddingInlinePx,
         }}
       >
-        {console.log("[VCP] render activeIndex=", activeIndex, "cards=", cards.length)}
         {cards.map((card, idx) => {
           const isActive = idx === activeIndex;
           const key = getKey ? getKey(card, idx) : idx;
