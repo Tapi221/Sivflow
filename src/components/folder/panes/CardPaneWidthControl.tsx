@@ -3,7 +3,7 @@ import React from "react";
 import { Minus, Plus, RefreshCw } from "@/ui/icons";
 import { Slider } from "@/components/ui/slider";
 
-export function clampPaneWidthPx(
+function clampPaneWidthPx(
   value: number | null | undefined,
   min: number,
   max?: number,

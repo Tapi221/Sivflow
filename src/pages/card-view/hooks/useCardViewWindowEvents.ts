@@ -6,6 +6,7 @@ interface UseCardViewWindowEventsOptions {
   createAndFocusCard: () => Promise<boolean>;
   isGlobalEditing: boolean;
   setIsGlobalEditing: (value: boolean) => void;
+  requestSave: () => void;
   requestSaveAndLockSelection: () => void;
   finishSaveSelectionLock: () => void;
   pendingExitAfterSaveRef: React.MutableRefObject<boolean>;
@@ -17,6 +18,7 @@ export function useCardViewWindowEvents({
   createAndFocusCard,
   isGlobalEditing,
   setIsGlobalEditing,
+  requestSave,
   requestSaveAndLockSelection,
   finishSaveSelectionLock,
   pendingExitAfterSaveRef,
@@ -37,10 +39,11 @@ export function useCardViewWindowEvents({
   useEffect(() => {
     const handler = () => {
       pendingExitAfterSaveRef.current = false;
+      pendingCreateCardAfterSaveRef.current = false;
       if (isGlobalEditing) {
-        pendingCreateCardAfterSaveRef.current = true;
-        requestSaveAndLockSelection();
-        return;
+        // 追加体感を優先し、新規作成を保存完了待ちにしない。
+        // 現在カードの保存は並行して走らせる。
+        requestSave();
       }
       void createAndFocusCard();
     };
@@ -48,7 +51,7 @@ export function useCardViewWindowEvents({
     return () => window.removeEventListener("cardview:create-card-request", handler);
   }, [
     createAndFocusCard,
-    requestSaveAndLockSelection,
+    requestSave,
     isGlobalEditing,
     pendingCreateCardAfterSaveRef,
     pendingExitAfterSaveRef,

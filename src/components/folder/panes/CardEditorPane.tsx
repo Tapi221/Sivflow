@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight } from "@/ui/icons";
 import { DragDropContext } from "@hello-pangea/dnd";
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 
 import { SharedCardContent } from "@/components/card/common/SharedCardContent";
 import {
@@ -154,18 +154,6 @@ export function CardEditorPane({
   const toolbarMountA = externalToolbarMountA ?? toolbarMountAInternal;
   const usesExternalToolbarMount =
     Boolean(externalToolbarMountQ) && Boolean(externalToolbarMountA);
-  const contentViewportRef = useRef<HTMLDivElement | null>(null);
-  const [contentViewportWidth, setContentViewportWidth] = useState<number>(
-    () => (typeof window === "undefined" ? 1024 : window.innerWidth),
-  );
-  const [viewPaneWidthPx, setViewPaneWidthPx] = useState<number>(
-    CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
-  );
-  const [editPaneWidthPx, setEditPaneWidthPx] = useState<number>(
-    dockToolbarsToTop
-      ? CARD_PANE_DOCKED_EDIT_DEFAULT_WIDTH_PX
-      : CARD_PANE_EDIT_DEFAULT_WIDTH_PX,
-  );
 
   const editorActionsTopLeft = selectedCard ? (
     <CardCornerActions
@@ -176,183 +164,40 @@ export function CardEditorPane({
     />
   ) : undefined;
 
-  const defaultEditPaneWidthPx = dockToolbarsToTop
-    ? CARD_PANE_DOCKED_EDIT_DEFAULT_WIDTH_PX
-    : CARD_PANE_EDIT_DEFAULT_WIDTH_PX;
-
-  useEffect(() => {
-    setViewPaneWidthPx(
-      clampPaneWidthPx(
-        settings?.cardViewPaneWidthPx ?? CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
-        CARD_PANE_VIEW_MIN_WIDTH_PX,
-      ),
-    );
-  }, [settings?.cardViewPaneWidthPx]);
-
-  useEffect(() => {
-    setEditPaneWidthPx(
-      clampPaneWidthPx(
-        settings?.cardEditPaneWidthPx ?? defaultEditPaneWidthPx,
-        CARD_PANE_EDIT_MIN_WIDTH_PX,
-      ),
-    );
-  }, [defaultEditPaneWidthPx, settings?.cardEditPaneWidthPx]);
-
-  useEffect(() => {
-    const element = contentViewportRef.current;
-    if (!element || typeof ResizeObserver === "undefined") return;
-
-    const updateWidth = () => {
-      const nextWidth = Math.max(
-        0,
-        Math.round(
-          Math.max(
-            element.clientWidth,
-            element.parentElement?.clientWidth ?? 0,
-          ),
-        ),
-      );
-      setContentViewportWidth((prev) =>
-        prev === nextWidth ? prev : nextWidth,
-      );
-    };
-
-    updateWidth();
-    const observer = new ResizeObserver(updateWidth);
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, [
+  const {
+    contentViewportRef,
+    showWidthControl,
+    activePaneMode,
+    activePaneMinWidthPx,
+    activePaneMaxWidthPx,
+    activePaneWidthPx,
+    activePaneDisplayedDefaultWidthPx,
+    shouldReserveWidthControlSpace,
+    hideCardShellHeader,
+    shouldDockToolbarToCardTop,
+    shouldShowInlineToolbarMount,
+    shouldShowEditingBadge,
+    editorCardFixedScale,
+    activePaneWidthStyle,
+    persistPaneWidth,
+    previewPaneWidth,
+    stepPaneWidth,
+    resetActivePaneWidth,
+  } = useCardEditorPaneWidth({
+    settings,
+    updateSettings,
+    dockToolbarsToTop,
     embeddedInPager,
+    hideBlockToolbars,
+    forcedPaneWidthPx,
+    usesExternalToolbarMount,
+    highlightActiveCards,
     isEditing,
     isMetaOpen,
     normalizedSelectedCardId,
-    selectedCard?.id,
-  ]);
-
-  const showWidthControl = !embeddedInPager;
-  const activePaneMode = isEditing ? "edit" : "view";
-  const activePaneMinWidthPx = isEditing
-    ? CARD_PANE_EDIT_MIN_WIDTH_PX
-    : CARD_PANE_VIEW_MIN_WIDTH_PX;
-  const activePaneDefaultWidthPx = isEditing
-    ? defaultEditPaneWidthPx
-    : CARD_PANE_VIEW_DEFAULT_WIDTH_PX;
-  const activeStoredPaneWidthPx = isEditing ? editPaneWidthPx : viewPaneWidthPx;
-  const activePaneMaxWidthPx =
-    contentViewportWidth > 0
-      ? Math.max(activePaneMinWidthPx, contentViewportWidth)
-      : activeStoredPaneWidthPx;
-  const activePaneWidthPx = clampPaneWidthPx(
-    activeStoredPaneWidthPx,
-    activePaneMinWidthPx,
-    activePaneMaxWidthPx,
-  );
-  const resolvedPaneWidthPx =
-    typeof forcedPaneWidthPx === "number" && Number.isFinite(forcedPaneWidthPx)
-      ? clampPaneWidthPx(forcedPaneWidthPx, activePaneMinWidthPx)
-      : activePaneWidthPx;
-  const activePaneDisplayedDefaultWidthPx = clampPaneWidthPx(
-    activePaneDefaultWidthPx,
-    activePaneMinWidthPx,
-    activePaneMaxWidthPx,
-  );
-  const shouldReserveWidthControlSpace =
-    showWidthControl && dockToolbarsToTop && !usesExternalToolbarMount;
-  const hideCardShellHeader =
-    embeddedInPager && dockToolbarsToTop;
-  const shouldDockToolbarToCardTop =
-    dockToolbarsToTop &&
-    !hideBlockToolbars &&
-    !usesExternalToolbarMount;
-  const shouldShowInlineToolbarMount =
-    !dockToolbarsToTop &&
-    !hideBlockToolbars &&
-    !usesExternalToolbarMount;
-  const shouldShowEditingBadge = !embeddedInPager || highlightActiveCards;
-  const shouldApplyPaneWidth =
-    (showWidthControl && contentViewportWidth > 0) || forcedPaneWidthPx != null;
-  const effectivePaneWidthPx = shouldApplyPaneWidth
-    ? Math.max(
-        activePaneMinWidthPx,
-        Math.min(
-          resolvedPaneWidthPx,
-          contentViewportWidth > 0 ? contentViewportWidth : resolvedPaneWidthPx,
-        ),
-      )
-    : Math.max(activePaneMinWidthPx, contentViewportWidth || activePaneMinWidthPx);
-  const useTwoColumnEditorLayout = effectivePaneWidthPx >= 768;
-  const editorCardTargetWidthPx = useTwoColumnEditorLayout
-    ? Math.max(1, (effectivePaneWidthPx - CARD_EDITOR_PAIR_GAP_PX) / 2)
-    : Math.max(1, effectivePaneWidthPx);
-  const editorCardFixedScale = Math.max(
-    0.1,
-    Math.min(
-      CARD_PANE_AUTO_MAX_SCALE,
-      editorCardTargetWidthPx / Math.max(1, CANONICAL_CARD_WIDTH),
-    ),
-  );
-  const activePaneWidthStyle = shouldApplyPaneWidth
-    ? {
-        width: `${resolvedPaneWidthPx}px`,
-        maxWidth: "100%",
-      }
-    : undefined;
-
-  const persistPaneWidth = React.useCallback(
-    async (mode: "view" | "edit", widthPx: number) => {
-      const minWidth =
-        mode === "edit"
-          ? CARD_PANE_EDIT_MIN_WIDTH_PX
-          : CARD_PANE_VIEW_MIN_WIDTH_PX;
-      const nextWidth = clampPaneWidthPx(widthPx, minWidth);
-      if (mode === "edit") {
-        setEditPaneWidthPx(nextWidth);
-        await updateSettings({ cardEditPaneWidthPx: nextWidth });
-        return;
-      }
-      setViewPaneWidthPx(nextWidth);
-      await updateSettings({ cardViewPaneWidthPx: nextWidth });
-    },
-    [updateSettings],
-  );
-
-  const previewPaneWidth = React.useCallback(
-    (mode: "view" | "edit", widthPx: number) => {
-      const minWidth =
-        mode === "edit"
-          ? CARD_PANE_EDIT_MIN_WIDTH_PX
-          : CARD_PANE_VIEW_MIN_WIDTH_PX;
-      const nextWidth = clampPaneWidthPx(widthPx, minWidth);
-      if (mode === "edit") {
-        setEditPaneWidthPx(nextWidth);
-        return;
-      }
-      setViewPaneWidthPx(nextWidth);
-    },
-    [],
-  );
-
-  const stepPaneWidth = React.useCallback(
-    (deltaPx: number) => {
-      const nextWidth = clampPaneWidthPx(
-        activePaneWidthPx + deltaPx,
-        activePaneMinWidthPx,
-        activePaneMaxWidthPx,
-      );
-      void persistPaneWidth(activePaneMode, nextWidth);
-    },
-    [
-      activePaneMaxWidthPx,
-      activePaneMinWidthPx,
-      activePaneMode,
-      activePaneWidthPx,
-      persistPaneWidth,
-    ],
-  );
-
-  const resetActivePaneWidth = React.useCallback(() => {
-    void persistPaneWidth(activePaneMode, activePaneDefaultWidthPx);
-  }, [activePaneDefaultWidthPx, activePaneMode, persistPaneWidth]);
+    selectedCardId: selectedCard?.id,
+    canonicalCardWidth: CANONICAL_CARD_WIDTH,
+  });
 
   if (!normalizedSelectedCardId && !isEditing) {
     return <EmptySelectionState onStartNew={handleStartNew} />;
@@ -534,7 +379,9 @@ export function CardEditorPane({
                         manualResizeInProgressRef.current = false;
                       }}
                       actionsTopLeft={
-                        hideCardShellHeader ? undefined : editorActionsTopLeft
+                        hideCardShellHeader
+                          ? undefined
+                          : editorActionsTopLeft
                       }
                       actionsTopRight={
                         hideCardShellHeader
@@ -619,7 +466,9 @@ export function CardEditorPane({
                         manualResizeInProgressRef.current = false;
                       }}
                       actionsTopLeft={
-                        hideCardShellHeader ? undefined : editorActionsTopLeft
+                        hideCardShellHeader
+                          ? undefined
+                          : editorActionsTopLeft
                       }
                       actionsTopRight={
                         hideCardShellHeader
@@ -715,65 +564,20 @@ export function CardEditorPane({
           )}
         </div>
 
-        <Dialog
-          modal={false}
-          open={Boolean(imageDialogSide)}
-          onOpenChange={(open) => !open && setImageDialogSide(null)}
-        >
-          <DialogContent nonModal className="max-w-3xl">
-            <DialogHeader>
-              <DialogTitle>画像を追加</DialogTitle>
-            </DialogHeader>
-            {imageDialogSide && (
-              <MediaUploader
-                type="image"
-                urls={getDialogImages(imageDialogSide)}
-                onChange={(next) =>
-                  setDialogImages(imageDialogSide, next as UploadedImage[])
-                }
-                maxFiles={10}
-              />
-            )}
-          </DialogContent>
-        </Dialog>
-
-        <Dialog
-          open={Boolean(audioDialogSide)}
-          onOpenChange={(open) => !open && setAudioDialogSide(null)}
-        >
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>音声を追加</DialogTitle>
-            </DialogHeader>
-            {audioDialogSide && (
-              <MediaUploader
-                type="audio"
-                urls={getDialogAudios(audioDialogSide)}
-                onChange={(next) =>
-                  setDialogAudios(audioDialogSide, next as unknown[])
-                }
-                maxFiles={10}
-              />
-            )}
-          </DialogContent>
-        </Dialog>
-
-        <Dialog
-          open={Boolean(linkDialogSide)}
-          onOpenChange={(open) => !open && setLinkDialogSide(null)}
-        >
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>リンクを追加</DialogTitle>
-            </DialogHeader>
-            {linkDialogSide && (
-              <LinkEditor
-                items={getReferenceItems(linkDialogSide)}
-                onChange={(next) => setReferenceItems(linkDialogSide, next)}
-              />
-            )}
-          </DialogContent>
-        </Dialog>
+        <CardEditorPaneMediaDialogs
+          imageDialogSide={imageDialogSide}
+          setImageDialogSide={setImageDialogSide}
+          audioDialogSide={audioDialogSide}
+          setAudioDialogSide={setAudioDialogSide}
+          linkDialogSide={linkDialogSide}
+          setLinkDialogSide={setLinkDialogSide}
+          getDialogImages={getDialogImages}
+          setDialogImages={setDialogImages}
+          getDialogAudios={getDialogAudios}
+          setDialogAudios={setDialogAudios}
+          getReferenceItems={getReferenceItems}
+          setReferenceItems={setReferenceItems}
+        />
       </div>
     </DragDropContext>
   );

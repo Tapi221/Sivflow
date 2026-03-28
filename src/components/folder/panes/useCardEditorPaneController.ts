@@ -64,7 +64,9 @@ export function useCardEditorPaneController({
     cards: cardsFromHook,
     updateCard,
     createCard,
-  } = useCards(folderId, cardSetId) as unknown as UseCardsResult;
+  } = useCards(folderId, cardSetId, {
+    enabled: cardsOverride == null,
+  }) as unknown as UseCardsResult;
 
   const cards = cardsOverride ?? cardsFromHook;
   const selectedCardSnapshot = React.useMemo(() => {
@@ -102,6 +104,7 @@ export function useCardEditorPaneController({
     selectedCardId,
     selectedCardSnapshot,
     folderId,
+    cardSetId,
     autoEdit,
     updateCard: updateCardAsync,
     createCard: createCardAsync,

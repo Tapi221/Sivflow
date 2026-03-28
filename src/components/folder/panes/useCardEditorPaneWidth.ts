@@ -1,6 +1,5 @@
 import React from "react";
 
-import { clampPaneWidthPx } from "@/components/folder/panes/CardPaneWidthControl";
 import type { UserSettings } from "@/types";
 
 const CARD_PANE_VIEW_DEFAULT_WIDTH_PX = 576;
@@ -13,6 +12,22 @@ const CARD_EDITOR_PAIR_GAP_PX = 16;
 
 export const CARD_PANE_WIDTH_STEP_PX = 40;
 export const CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX = 72;
+
+function clampPaneWidthPx(
+  value: number | null | undefined,
+  min: number,
+  max?: number,
+): number {
+  const fallback = Math.max(1, min);
+  const safeValue =
+    typeof value === "number" && Number.isFinite(value) ? value : fallback;
+  const clampedMin = Math.max(1, min);
+  const clampedMax =
+    typeof max === "number" && Number.isFinite(max)
+      ? Math.max(clampedMin, max)
+      : Number.POSITIVE_INFINITY;
+  return Math.min(clampedMax, Math.max(clampedMin, Math.round(safeValue)));
+}
 
 interface UseCardEditorPaneWidthParams {
   settings?: Partial<UserSettings> | null;

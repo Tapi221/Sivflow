@@ -307,7 +307,7 @@ export function FolderTreeWithCards({
       );
     }
     if (rootId === selectedFolderId) return;
-    if (rootId && activeRootFolderId !== rootId) setActiveRootFolderId(rootId);
+    if (activeRootFolderId !== selectedFolderId) setActiveRootFolderId(selectedFolderId);
   }, [selectedFolderId, rootFolders, treeFolders, activeRootFolderId]);
 
   // trigger folder creation from external token
@@ -432,10 +432,24 @@ export function FolderTreeWithCards({
 
   const scopedTreeData = useMemo<ExplorerTreeNode[]>(() => {
     if (!activeRootFolderId) return [];
-    const rootNode = explorerTreeData.find(
-      (node) => node.kind === "folder" && node.rawId === activeRootFolderId,
+
+    const stack: ExplorerTreeNode[] = [...explorerTreeData];
+    let scopedRootNode: ExplorerTreeNode | null = null;
+    while (stack.length > 0) {
+      const node = stack.pop()!;
+      if (node.kind === "folder" && node.rawId === activeRootFolderId) {
+        scopedRootNode = node;
+        break;
+      }
+      if (node.children?.length) stack.push(...node.children);
+    }
+
+    if (!scopedRootNode?.children?.length) return [];
+
+    // フォルダは常に次画面遷移で開くため、この画面では子フォルダのネストは持たせない。
+    return scopedRootNode.children.map((node) =>
+      node.kind === "folder" ? { ...node, children: undefined } : node,
     );
-    return rootNode?.children ?? [];
   }, [activeRootFolderId, explorerTreeData]);
 
   const selectedTreeId = useMemo(() => {
@@ -447,7 +461,10 @@ export function FolderTreeWithCards({
     (id: string) => {
       const parsed = parseSelectedTreeId(id);
       if (!parsed) return;
-      if (parsed.type === "folder") onFolderSelect(parsed.id);
+      if (parsed.type === "folder") {
+        setActiveRootFolderId(parsed.id);
+        onFolderSelect(parsed.id);
+      }
       if (parsed.type === "cardSet") onItemSelect({ type: "cardSet", id: parsed.id });
       if (parsed.type === "card") onItemSelect({ type: "card", id: parsed.id });
       if (parsed.type === "document")

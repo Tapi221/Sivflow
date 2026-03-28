@@ -279,14 +279,18 @@ export function useCardViewState({
     [updateCard],
   );
 
+  const requestSave = useCallback(() => {
+    setSaveSignal((prev) => prev + 1);
+  }, []);
+
   const requestSaveAndLockSelection = useCallback(() => {
     const selectedId = currentCardIdRef.current;
     if (selectedId) {
       saveSelectionCardIdRef.current = selectedId;
       lockSelectionToCard(selectedId);
     }
-    setSaveSignal((prev) => prev + 1);
-  }, [lockSelectionToCard]);
+    requestSave();
+  }, [lockSelectionToCard, requestSave]);
 
   const finishSaveSelectionLock = useCallback(() => {
     saveSelectionCardIdRef.current = null;
@@ -345,6 +349,7 @@ export function useCardViewState({
     setIsMetaOpen,
     pendingExitAfterSaveRef,
     pendingCreateCardAfterSaveRef,
+    requestSave,
     requestSaveAndLockSelection,
     finishSaveSelectionLock,
     selectedCard,

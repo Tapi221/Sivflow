@@ -114,19 +114,14 @@ export const buildExplorerTreeData = ({
       .map(buildFolderNode)
       .filter((node): node is ExplorerTreeNode => node !== null);
 
-    // CardSet がある場合はCardSetノードを表示、ない場合は従来通りアイテム直接表示
+    // Card は必ず CardSet 配下に表示する（フォルダ直下には表示しない）
     const cardSets = getCardSets ? getCardSets(folderId) : [];
-    const childItems: ExplorerTreeNode[] =
-      cardSets.length > 0
-        ? cardSets.map(buildCardSetNode)
-        : getFolderItems(folderId).map(buildItemNode);
+    const cardSetNodes: ExplorerTreeNode[] = cardSets.map(buildCardSetNode);
 
     // ドキュメントは常にフォルダ直下に表示（CardSetと無関係）
-    const docItems = getCardSets
-      ? getFolderItems(folderId)
-          .filter((i) => i.type === "document")
-          .map(buildItemNode)
-      : [];
+    const docItems = getFolderItems(folderId)
+      .filter((i) => i.type === "document")
+      .map(buildItemNode);
 
     return {
       id: toTreeFolderId(folderId),
@@ -136,15 +131,19 @@ export const buildExplorerTreeData = ({
       folder,
       isDimmed: false,
       matchCount,
-      children: [...childFolderNodes, ...childItems, ...docItems],
+      children: [...childFolderNodes, ...cardSetNodes, ...docItems],
     };
   };
+
+  const rootDocumentNodes = rootItems
+    .filter((item) => item.type === "document")
+    .map(buildItemNode);
 
   return [
     ...rootFolders
       .map(buildFolderNode)
       .filter((node): node is ExplorerTreeNode => node !== null),
-    ...rootItems.map(buildItemNode),
+    ...rootDocumentNodes,
   ];
 };
 

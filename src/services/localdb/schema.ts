@@ -872,6 +872,716 @@ export const defineSchema = (db: LocalDB): void => {
         );
       }
     });
+
+  // Version 25: CardSet 整合性を再修復
+  // - cardSetId が欠損/不正/削除済みを参照する Card を救済
+  // - Card と CardSet の folderId 不一致を補正
+  // - 救済対象 Card は「フォルダごとに1つの移行セット」へ集約
+  db.version(25)
+    .stores({
+      folders:
+        "id, userId, parentFolderId, updatedAt, cloudSyncEnabled, isDeleted, [userId+updatedAt], [userId+isDeleted]",
+      cardSets:
+        "id, userId, folderId, updatedAt, isDeleted, [userId+updatedAt], [userId+folderId]",
+      cards:
+        "id, userId, folderId, cardSetId, updatedAt, nextReviewDate, isDeleted, difficulty, reviewCount, [userId+updatedAt], [userId+isDeleted], [userId+nextReviewDate], [cardSetId+isDeleted], *tagIds",
+      documents:
+        "id, userId, folderId, updatedAt, isDeleted, [userId+updatedAt], [userId+folderId]",
+      users: "id, userId, updatedAt",
+      userSettings: "id, userId, updatedAt, isDeleted, [userId+updatedAt]",
+      userStats: "id, userId, updatedAt, isDeleted, [userId+updatedAt]",
+      syncMetadata: "userId, deviceId",
+      levelHistories: "id, userId, cardId, changedAt",
+      deviceMeta: "deviceId, userId",
+      syncErrors: "id, occurredAt, phase, retryable",
+      syncHistory: "id, finishedAt",
+      syncSettings: "id",
+      syncQueue:
+        "id, targetId, status, priority, [status+priority], [targetId+status], idempotencyKey, &migrationKey",
+      conflicts: "id, entityId",
+      tags: "[rootFolderId+name], rootFolderId, userId, updatedAt",
+      tags_v2: "[userId+name], userId, updatedAt",
+      tags_v3:
+        "id, userId, parentId, [userId+parentId], [userId+nameLower], updatedAt",
+      studyLogs: "id, userId, cardId, studiedAt",
+      metadata: "key",
+      images: "id, userId, status, [userId+status]",
+      cardRelations:
+        "id, userId, fromCardId, toCardId, updatedAt, [userId+updatedAt]",
+      projectMaps: "id, userId, folderId, updatedAt, [userId+updatedAt]",
+    })
+    .upgrade(async (tx) => {
+      const genId = (): string => {
+        if (typeof crypto !== "undefined" && "randomUUID" in crypto)
+          return crypto.randomUUID();
+        return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+      };
+
+      const toNormalizedFolderId = (value: unknown): string | null => {
+        if (typeof value !== "string") return null;
+        const trimmed = value.trim();
+        return trimmed.length > 0 ? trimmed : null;
+      };
+
+      const toCardFolderValue = (value: string | null): string => value ?? "";
+
+      const MIGRATION_SET_NAME = "移行カードセット";
+
+      type RawCard = {
+        id: string;
+        userId?: string;
+        folderId?: string;
+        cardSetId?: string;
+        isDeleted?: boolean;
+        is_deleted?: boolean;
+      } & Record<string, unknown>;
+
+      type RawCardSet = {
+        id: string;
+        userId?: string;
+        folderId?: string | null;
+        name?: string;
+        orderIndex?: number;
+        isDeleted?: boolean;
+        is_deleted?: boolean;
+      } & Record<string, unknown>;
+
+      const now = new Date();
+      const cardSetsTable = tx.table("cardSets");
+      const cardsTable = tx.table("cards");
+
+      const existingSets = (await cardSetsTable.toArray()) as RawCardSet[];
+      const cardSetById = new Map(existingSets.map((set) => [set.id, set]));
+
+      const maxOrderByFolder = new Map<string, number>();
+      for (const set of existingSets) {
+        if (set.isDeleted ?? set.is_deleted) continue;
+        const key = toNormalizedFolderId(set.folderId) ?? "__root__";
+        const order = Number.isFinite(set.orderIndex) ? Number(set.orderIndex) : 0;
+        maxOrderByFolder.set(key, Math.max(maxOrderByFolder.get(key) ?? -1, order));
+      }
+
+      const allCards = (await cardsTable.toArray()) as RawCard[];
+
+      let createdCardSetCount = 0;
+      let rescuedCardCount = 0;
+      let folderAlignedCardCount = 0;
+      const rescueCardSetIdByFolder = new Map<string, string>();
+
+      for (const card of allCards) {
+        if (!card?.id) continue;
+        if (card.isDeleted ?? card.is_deleted) continue;
+
+        const cardFolderId = toNormalizedFolderId(card.folderId);
+        const cardSetId = typeof card.cardSetId === "string" ? card.cardSetId.trim() : "";
+        const targetSet = cardSetId ? cardSetById.get(cardSetId) : undefined;
+        const setIsUsable = Boolean(targetSet && !(targetSet.isDeleted ?? targetSet.is_deleted));
+
+        if (setIsUsable && targetSet) {
+          const setFolderId = toNormalizedFolderId(targetSet.folderId);
+          if (cardFolderId !== setFolderId) {
+            await cardsTable.update(card.id, {
+              folderId: toCardFolderValue(setFolderId),
+              updatedAt: now,
+            });
+            folderAlignedCardCount += 1;
+          }
+          continue;
+        }
+
+        const folderKey = cardFolderId ?? "__root__";
+        let rescueCardSetId = rescueCardSetIdByFolder.get(folderKey);
+        if (!rescueCardSetId) {
+          const nextOrder = (maxOrderByFolder.get(folderKey) ?? -1) + 1;
+          maxOrderByFolder.set(folderKey, nextOrder);
+
+          const newCardSetId = genId();
+          const userId =
+            typeof card.userId === "string" && card.userId.length > 0
+              ? card.userId
+              : "";
+
+          await cardSetsTable.add({
+            id: newCardSetId,
+            userId,
+            folderId: cardFolderId,
+            name: MIGRATION_SET_NAME,
+            orderIndex: nextOrder,
+            isDeleted: false,
+            createdAt: now,
+            updatedAt: now,
+            _migratedFromV25: true,
+          });
+
+          cardSetById.set(newCardSetId, {
+            id: newCardSetId,
+            userId,
+            folderId: cardFolderId,
+            name: MIGRATION_SET_NAME,
+            orderIndex: nextOrder,
+            isDeleted: false,
+          });
+          rescueCardSetIdByFolder.set(folderKey, newCardSetId);
+          rescueCardSetId = newCardSetId;
+          createdCardSetCount += 1;
+        }
+
+        await cardsTable.update(card.id, {
+          cardSetId: rescueCardSetId,
+          folderId: toCardFolderValue(cardFolderId),
+          updatedAt: now,
+        });
+
+        rescuedCardCount += 1;
+      }
+
+      console.log(
+        `[Migration v25] cardSetsCreated=${createdCardSetCount}, cardsRescued=${rescuedCardCount}, folderAligned=${folderAlignedCardCount}`,
+      );
+    });
+
+  // Version 26: v25で分割された移行セットをフォルダ単位で統合
+  // - _migratedFromV25=true の CardSet を対象
+  // - 同一フォルダ内の複数移行セットを1つにまとめる
+  db.version(26)
+    .stores({
+      folders:
+        "id, userId, parentFolderId, updatedAt, cloudSyncEnabled, isDeleted, [userId+updatedAt], [userId+isDeleted]",
+      cardSets:
+        "id, userId, folderId, updatedAt, isDeleted, [userId+updatedAt], [userId+folderId]",
+      cards:
+        "id, userId, folderId, cardSetId, updatedAt, nextReviewDate, isDeleted, difficulty, reviewCount, [userId+updatedAt], [userId+isDeleted], [userId+nextReviewDate], [cardSetId+isDeleted], *tagIds",
+      documents:
+        "id, userId, folderId, updatedAt, isDeleted, [userId+updatedAt], [userId+folderId]",
+      users: "id, userId, updatedAt",
+      userSettings: "id, userId, updatedAt, isDeleted, [userId+updatedAt]",
+      userStats: "id, userId, updatedAt, isDeleted, [userId+updatedAt]",
+      syncMetadata: "userId, deviceId",
+      levelHistories: "id, userId, cardId, changedAt",
+      deviceMeta: "deviceId, userId",
+      syncErrors: "id, occurredAt, phase, retryable",
+      syncHistory: "id, finishedAt",
+      syncSettings: "id",
+      syncQueue:
+        "id, targetId, status, priority, [status+priority], [targetId+status], idempotencyKey, &migrationKey",
+      conflicts: "id, entityId",
+      tags: "[rootFolderId+name], rootFolderId, userId, updatedAt",
+      tags_v2: "[userId+name], userId, updatedAt",
+      tags_v3:
+        "id, userId, parentId, [userId+parentId], [userId+nameLower], updatedAt",
+      studyLogs: "id, userId, cardId, studiedAt",
+      metadata: "key",
+      images: "id, userId, status, [userId+status]",
+      cardRelations:
+        "id, userId, fromCardId, toCardId, updatedAt, [userId+updatedAt]",
+      projectMaps: "id, userId, folderId, updatedAt, [userId+updatedAt]",
+    })
+    .upgrade(async (tx) => {
+      const toNormalizedFolderId = (value: unknown): string | null => {
+        if (typeof value !== "string") return null;
+        const trimmed = value.trim();
+        return trimmed.length > 0 ? trimmed : null;
+      };
+      const normalizeFallbackTitleFromSetName = (
+        rawName: unknown,
+      ): string | null => {
+        if (typeof rawName !== "string") return null;
+        const name = rawName.trim();
+        if (!name) return null;
+        if (name === "移行カードセット" || name === "新規カードセット") return null;
+        const stripped = name.replace(/\s*セット$/, "").trim();
+        if (!stripped) return null;
+        if (stripped === "移行カード" || stripped === "新規カード") return null;
+        return stripped;
+      };
+      const normalizeCardTitle = (rawTitle: unknown): string => {
+        if (typeof rawTitle !== "string") return "";
+        return rawTitle.trim();
+      };
+
+      type RawCardSet = {
+        id: string;
+        folderId?: string | null;
+        orderIndex?: number;
+        isDeleted?: boolean;
+        is_deleted?: boolean;
+        _migratedFromV25?: boolean;
+      } & Record<string, unknown>;
+
+      type RawCard = {
+        id: string;
+        cardSetId?: string;
+        orderIndex?: number;
+        isDeleted?: boolean;
+        is_deleted?: boolean;
+      } & Record<string, unknown>;
+
+      const now = new Date();
+      const cardSetsTable = tx.table("cardSets");
+      const cardsTable = tx.table("cards");
+
+      const allSets = (await cardSetsTable.toArray()) as RawCardSet[];
+      const activeSets = allSets.filter((set) => !(set.isDeleted ?? set.is_deleted));
+      const allCards = (await cardsTable.toArray()) as RawCard[];
+      const activeCards = allCards.filter((card) => !(card.isDeleted ?? card.is_deleted));
+
+      const cardsBySetId = new Map<string, RawCard[]>();
+      for (const card of activeCards) {
+        const csId = typeof card.cardSetId === "string" ? card.cardSetId : "";
+        if (!csId) continue;
+        const list = cardsBySetId.get(csId);
+        if (list) list.push(card);
+        else cardsBySetId.set(csId, [card]);
+      }
+
+      const migratedSetsByFolder = new Map<string, RawCardSet[]>();
+      for (const set of activeSets) {
+        if (set._migratedFromV25 !== true) continue;
+        const folderKey = toNormalizedFolderId(set.folderId) ?? "__root__";
+        const list = migratedSetsByFolder.get(folderKey);
+        if (list) list.push(set);
+        else migratedSetsByFolder.set(folderKey, [set]);
+      }
+
+      let mergedSetCount = 0;
+      let movedCardCount = 0;
+
+      for (const [folderKey, migratedSets] of migratedSetsByFolder.entries()) {
+        if (migratedSets.length <= 1) continue;
+
+        const sameFolderNonMigrated = activeSets.filter((set) => {
+          if (set._migratedFromV25 === true) return false;
+          const key = toNormalizedFolderId(set.folderId) ?? "__root__";
+          return key === folderKey;
+        });
+
+        const targetSet: RawCardSet =
+          sameFolderNonMigrated.length === 1
+            ? sameFolderNonMigrated[0]
+            : [...migratedSets].sort((a, b) => {
+                const orderA = Number.isFinite(a.orderIndex) ? Number(a.orderIndex) : 0;
+                const orderB = Number.isFinite(b.orderIndex) ? Number(b.orderIndex) : 0;
+                return orderA - orderB;
+              })[0];
+
+        const targetId = targetSet.id;
+        const sourceSets = migratedSets.filter((set) => set.id !== targetId);
+
+        const targetCards = cardsBySetId.get(targetId) ?? [];
+        const usedOrderIndex = new Set<number>();
+        let maxOrder =
+          targetCards.reduce(
+            (max, card) =>
+              Math.max(max, Number.isFinite(card.orderIndex) ? Number(card.orderIndex) : -1),
+            -1,
+          ) ?? -1;
+        for (const card of targetCards) {
+          if (!Number.isFinite(card.orderIndex)) continue;
+          usedOrderIndex.add(Number(card.orderIndex));
+        }
+
+        const allocateOrderIndex = (desired: number | null): number => {
+          if (desired != null && !usedOrderIndex.has(desired)) {
+            usedOrderIndex.add(desired);
+            if (desired > maxOrder) maxOrder = desired;
+            return desired;
+          }
+          let candidate = maxOrder + 1;
+          while (usedOrderIndex.has(candidate)) candidate += 1;
+          usedOrderIndex.add(candidate);
+          maxOrder = candidate;
+          return candidate;
+        };
+
+        for (const source of sourceSets) {
+          const fallbackTitle = normalizeFallbackTitleFromSetName(source.name);
+          const sourceCards = [...(cardsBySetId.get(source.id) ?? [])].sort(
+            (a, b) =>
+              (Number.isFinite(a.orderIndex) ? Number(a.orderIndex) : 0) -
+              (Number.isFinite(b.orderIndex) ? Number(b.orderIndex) : 0),
+          );
+
+          for (const card of sourceCards) {
+            const currentTitle = normalizeCardTitle(card.title);
+            const desiredOrder = Number.isFinite(card.orderIndex)
+              ? Number(card.orderIndex)
+              : null;
+            const nextOrder = allocateOrderIndex(desiredOrder);
+            await cardsTable.update(card.id, {
+              cardSetId: targetId,
+              orderIndex: nextOrder,
+              ...(currentTitle.length === 0 && fallbackTitle
+                ? { title: fallbackTitle }
+                : {}),
+              updatedAt: now,
+            });
+            movedCardCount += 1;
+          }
+
+          await cardSetsTable.update(source.id, {
+            isDeleted: true,
+            updatedAt: now,
+          });
+          mergedSetCount += 1;
+        }
+      }
+
+      console.log(
+        `[Migration v26] mergedSets=${mergedSetCount}, movedCards=${movedCardCount}`,
+      );
+    });
+
+  // Version 27: 既存統合データの補正
+  // - v26 実行済み環境向けに、空タイトルを旧移行セット名から補完
+  // - questionNumber が十分ある場合は順序を再構成
+  db.version(27)
+    .stores({
+      folders:
+        "id, userId, parentFolderId, updatedAt, cloudSyncEnabled, isDeleted, [userId+updatedAt], [userId+isDeleted]",
+      cardSets:
+        "id, userId, folderId, updatedAt, isDeleted, [userId+updatedAt], [userId+folderId]",
+      cards:
+        "id, userId, folderId, cardSetId, updatedAt, nextReviewDate, isDeleted, difficulty, reviewCount, [userId+updatedAt], [userId+isDeleted], [userId+nextReviewDate], [cardSetId+isDeleted], *tagIds",
+      documents:
+        "id, userId, folderId, updatedAt, isDeleted, [userId+updatedAt], [userId+folderId]",
+      users: "id, userId, updatedAt",
+      userSettings: "id, userId, updatedAt, isDeleted, [userId+updatedAt]",
+      userStats: "id, userId, updatedAt, isDeleted, [userId+updatedAt]",
+      syncMetadata: "userId, deviceId",
+      levelHistories: "id, userId, cardId, changedAt",
+      deviceMeta: "deviceId, userId",
+      syncErrors: "id, occurredAt, phase, retryable",
+      syncHistory: "id, finishedAt",
+      syncSettings: "id",
+      syncQueue:
+        "id, targetId, status, priority, [status+priority], [targetId+status], idempotencyKey, &migrationKey",
+      conflicts: "id, entityId",
+      tags: "[rootFolderId+name], rootFolderId, userId, updatedAt",
+      tags_v2: "[userId+name], userId, updatedAt",
+      tags_v3:
+        "id, userId, parentId, [userId+parentId], [userId+nameLower], updatedAt",
+      studyLogs: "id, userId, cardId, studiedAt",
+      metadata: "key",
+      images: "id, userId, status, [userId+status]",
+      cardRelations:
+        "id, userId, fromCardId, toCardId, updatedAt, [userId+updatedAt]",
+      projectMaps: "id, userId, folderId, updatedAt, [userId+updatedAt]",
+    })
+    .upgrade(async (tx) => {
+      const toNormalizedFolderId = (value: unknown): string | null => {
+        if (typeof value !== "string") return null;
+        const trimmed = value.trim();
+        return trimmed.length > 0 ? trimmed : null;
+      };
+      const normalizeFallbackTitleFromSetName = (
+        rawName: unknown,
+      ): string | null => {
+        if (typeof rawName !== "string") return null;
+        const name = rawName.trim();
+        if (!name) return null;
+        if (name === "移行カードセット" || name === "新規カードセット") return null;
+        const stripped = name.replace(/\s*セット$/, "").trim();
+        if (!stripped) return null;
+        if (stripped === "移行カード" || stripped === "新規カード") return null;
+        return stripped;
+      };
+      const parseQuestionOrder = (questionNumber: unknown): number | null => {
+        if (typeof questionNumber !== "string") return null;
+        const trimmed = questionNumber.trim();
+        if (!trimmed) return null;
+        const match = trimmed.match(/^Q?\s*(\d+)$/i);
+        if (!match) return null;
+        const parsed = Number(match[1]);
+        return Number.isFinite(parsed) ? parsed : null;
+      };
+      const getOrderValue = (value: unknown): number =>
+        Number.isFinite(value) ? Number(value) : Number.MAX_SAFE_INTEGER;
+      const getTitleValue = (value: unknown): string =>
+        typeof value === "string" ? value.trim() : "";
+
+      type RawCardSet = {
+        id: string;
+        folderId?: string | null;
+        orderIndex?: number;
+        name?: string;
+        isDeleted?: boolean;
+        is_deleted?: boolean;
+        _migratedFromV25?: boolean;
+      } & Record<string, unknown>;
+
+      type RawCard = {
+        id: string;
+        cardSetId?: string;
+        orderIndex?: number;
+        title?: string;
+        questionNumber?: string;
+        isDeleted?: boolean;
+        is_deleted?: boolean;
+      } & Record<string, unknown>;
+
+      const now = new Date();
+      const cardSetsTable = tx.table("cardSets");
+      const cardsTable = tx.table("cards");
+
+      const allSets = (await cardSetsTable.toArray()) as RawCardSet[];
+      const allCards = (await cardsTable.toArray()) as RawCard[];
+      const activeSets = allSets.filter((set) => !(set.isDeleted ?? set.is_deleted));
+      const activeCards = allCards.filter((card) => !(card.isDeleted ?? card.is_deleted));
+
+      const activeSetsByFolder = new Map<string, RawCardSet[]>();
+      const migratedSetsByFolder = new Map<string, RawCardSet[]>();
+      for (const set of allSets) {
+        const key = toNormalizedFolderId(set.folderId) ?? "__root__";
+        if (!(set.isDeleted ?? set.is_deleted)) {
+          const list = activeSetsByFolder.get(key);
+          if (list) list.push(set);
+          else activeSetsByFolder.set(key, [set]);
+        }
+        if (set._migratedFromV25 === true) {
+          const list = migratedSetsByFolder.get(key);
+          if (list) list.push(set);
+          else migratedSetsByFolder.set(key, [set]);
+        }
+      }
+
+      const cardsBySetId = new Map<string, RawCard[]>();
+      for (const card of activeCards) {
+        const setId = typeof card.cardSetId === "string" ? card.cardSetId : "";
+        if (!setId) continue;
+        const list = cardsBySetId.get(setId);
+        if (list) list.push(card);
+        else cardsBySetId.set(setId, [card]);
+      }
+
+      let patchedTitles = 0;
+      let patchedOrders = 0;
+
+      for (const [folderKey, migratedSets] of migratedSetsByFolder.entries()) {
+        const folderActiveSets = activeSetsByFolder.get(folderKey) ?? [];
+        if (folderActiveSets.length === 0) continue;
+
+        const activeNonMigrated = folderActiveSets.filter(
+          (set) => set._migratedFromV25 !== true,
+        );
+        const sortedByOrder = [...folderActiveSets].sort(
+          (a, b) => getOrderValue(a.orderIndex) - getOrderValue(b.orderIndex),
+        );
+        const targetSet =
+          activeNonMigrated.length === 1
+            ? activeNonMigrated[0]
+            : activeNonMigrated.length > 1
+              ? [...activeNonMigrated].sort(
+                  (a, b) => getOrderValue(a.orderIndex) - getOrderValue(b.orderIndex),
+                )[0]
+              : sortedByOrder[0];
+
+        if (!targetSet?.id) continue;
+
+        const targetCards = [...(cardsBySetId.get(targetSet.id) ?? [])].sort(
+          (a, b) => getOrderValue(a.orderIndex) - getOrderValue(b.orderIndex),
+        );
+        if (targetCards.length === 0) continue;
+
+        const nameCandidates = [...migratedSets]
+          .sort((a, b) => getOrderValue(a.orderIndex) - getOrderValue(b.orderIndex))
+          .map((set) => normalizeFallbackTitleFromSetName(set.name))
+          .filter((name): name is string => Boolean(name));
+
+        if (nameCandidates.length > 0) {
+          const emptyTitleCards = targetCards.filter(
+            (card) => getTitleValue(card.title).length === 0,
+          );
+          const usedTitles = new Set(
+            targetCards.map((card) => getTitleValue(card.title)).filter(Boolean),
+          );
+          let cursor = 0;
+          for (const card of emptyTitleCards) {
+            while (cursor < nameCandidates.length && usedTitles.has(nameCandidates[cursor])) {
+              cursor += 1;
+            }
+            if (cursor >= nameCandidates.length) break;
+            const nextTitle = nameCandidates[cursor];
+            cursor += 1;
+            usedTitles.add(nextTitle);
+            await cardsTable.update(card.id, { title: nextTitle, updatedAt: now });
+            patchedTitles += 1;
+          }
+        }
+
+        const withQuestionOrder = targetCards
+          .map((card) => ({
+            card,
+            qn: parseQuestionOrder(card.questionNumber),
+            currentOrder: getOrderValue(card.orderIndex),
+          }))
+          .filter((entry) => entry.qn != null);
+
+        const hasEnoughSignal =
+          withQuestionOrder.length >= 2 &&
+          withQuestionOrder.length >= Math.ceil(targetCards.length * 0.6);
+        if (!hasEnoughSignal) continue;
+
+        const expectedOrder = [...targetCards].sort((a, b) => {
+          const aQ = parseQuestionOrder(a.questionNumber);
+          const bQ = parseQuestionOrder(b.questionNumber);
+          if (aQ != null && bQ != null && aQ !== bQ) return aQ - bQ;
+          if (aQ != null && bQ == null) return -1;
+          if (aQ == null && bQ != null) return 1;
+          return getOrderValue(a.orderIndex) - getOrderValue(b.orderIndex);
+        });
+
+        for (let i = 0; i < expectedOrder.length; i += 1) {
+          const card = expectedOrder[i];
+          if (getOrderValue(card.orderIndex) === i) continue;
+          await cardsTable.update(card.id, { orderIndex: i, updatedAt: now });
+          patchedOrders += 1;
+        }
+      }
+
+      console.log(
+        `[Migration v27] patchedTitles=${patchedTitles}, patchedOrders=${patchedOrders}`,
+      );
+    });
+
+  // Version 28: 移行由来タイトルの除去と順序再補正
+  // - "移行カードセット N" をカードタイトルから取り除く
+  // - 順序は既存の orderIndex を尊重しつつ、数値ヒントが十分ある場合のみ再採番
+  db.version(28)
+    .stores({
+      folders:
+        "id, userId, parentFolderId, updatedAt, cloudSyncEnabled, isDeleted, [userId+updatedAt], [userId+isDeleted]",
+      cardSets:
+        "id, userId, folderId, updatedAt, isDeleted, [userId+updatedAt], [userId+folderId]",
+      cards:
+        "id, userId, folderId, cardSetId, updatedAt, nextReviewDate, isDeleted, difficulty, reviewCount, [userId+updatedAt], [userId+isDeleted], [userId+nextReviewDate], [cardSetId+isDeleted], *tagIds",
+      documents:
+        "id, userId, folderId, updatedAt, isDeleted, [userId+updatedAt], [userId+folderId]",
+      users: "id, userId, updatedAt",
+      userSettings: "id, userId, updatedAt, isDeleted, [userId+updatedAt]",
+      userStats: "id, userId, updatedAt, isDeleted, [userId+updatedAt]",
+      syncMetadata: "userId, deviceId",
+      levelHistories: "id, userId, cardId, changedAt",
+      deviceMeta: "deviceId, userId",
+      syncErrors: "id, occurredAt, phase, retryable",
+      syncHistory: "id, finishedAt",
+      syncSettings: "id",
+      syncQueue:
+        "id, targetId, status, priority, [status+priority], [targetId+status], idempotencyKey, &migrationKey",
+      conflicts: "id, entityId",
+      tags: "[rootFolderId+name], rootFolderId, userId, updatedAt",
+      tags_v2: "[userId+name], userId, updatedAt",
+      tags_v3:
+        "id, userId, parentId, [userId+parentId], [userId+nameLower], updatedAt",
+      studyLogs: "id, userId, cardId, studiedAt",
+      metadata: "key",
+      images: "id, userId, status, [userId+status]",
+      cardRelations:
+        "id, userId, fromCardId, toCardId, updatedAt, [userId+updatedAt]",
+      projectMaps: "id, userId, folderId, updatedAt, [userId+updatedAt]",
+    })
+    .upgrade(async (tx) => {
+      const now = new Date();
+      const MIGRATION_TITLE_RE = /^\s*移行カードセット\s*(\d+)\s*$/;
+      const NUMERIC_TITLE_RE = /^\s*(\d+)\s*$/;
+      const Q_NUMBER_RE = /^Q?\s*(\d+)$/i;
+
+      const toNumberOrNull = (value: unknown): number | null =>
+        Number.isFinite(value) ? Number(value) : null;
+
+      const parseHintOrder = (card: Record<string, unknown>): number | null => {
+        const title = typeof card.title === "string" ? card.title.trim() : "";
+        const qn =
+          typeof card.questionNumber === "string"
+            ? card.questionNumber.trim()
+            : "";
+
+        const m1 = title.match(MIGRATION_TITLE_RE);
+        if (m1) return Number(m1[1]);
+
+        const m2 = qn.match(Q_NUMBER_RE);
+        if (m2) return Number(m2[1]);
+
+        const m3 = title.match(NUMERIC_TITLE_RE);
+        if (m3) return Number(m3[1]);
+
+        return null;
+      };
+
+      type RawCard = {
+        id: string;
+        cardSetId?: string;
+        orderIndex?: number;
+        title?: string;
+        questionNumber?: string;
+        isDeleted?: boolean;
+        is_deleted?: boolean;
+      } & Record<string, unknown>;
+
+      const cardsTable = tx.table("cards");
+      const allCards = (await cardsTable.toArray()) as RawCard[];
+      const activeCards = allCards.filter((c) => !(c.isDeleted ?? c.is_deleted));
+
+      // 1) 移行由来タイトルを除去
+      let clearedMigrationTitles = 0;
+      for (const card of activeCards) {
+        const title = typeof card.title === "string" ? card.title.trim() : "";
+        if (!MIGRATION_TITLE_RE.test(title)) continue;
+        await cardsTable.update(card.id, { title: "", updatedAt: now });
+        clearedMigrationTitles += 1;
+      }
+
+      // 2) カードセットごとに順序再補正（ヒントが十分あるときのみ）
+      const cardsBySetId = new Map<string, RawCard[]>();
+      for (const card of activeCards) {
+        const setId = typeof card.cardSetId === "string" ? card.cardSetId : "";
+        if (!setId) continue;
+        const list = cardsBySetId.get(setId);
+        if (list) list.push(card);
+        else cardsBySetId.set(setId, [card]);
+      }
+
+      let reorderedCards = 0;
+      for (const cards of cardsBySetId.values()) {
+        if (cards.length <= 1) continue;
+
+        const withHints = cards
+          .map((card, idx) => ({
+            card,
+            idx,
+            hint: parseHintOrder(card),
+            currentOrder: toNumberOrNull(card.orderIndex) ?? Number.MAX_SAFE_INTEGER,
+          }))
+          .filter((x) => x.hint != null);
+
+        const enoughHints =
+          withHints.length >= 2 &&
+          withHints.length >= Math.ceil(cards.length * 0.6);
+        if (!enoughHints) continue;
+
+        const sorted = [...cards].sort((a, b) => {
+          const ah = parseHintOrder(a);
+          const bh = parseHintOrder(b);
+          if (ah != null && bh != null && ah !== bh) return ah - bh;
+          if (ah != null && bh == null) return -1;
+          if (ah == null && bh != null) return 1;
+          const ao = toNumberOrNull(a.orderIndex) ?? Number.MAX_SAFE_INTEGER;
+          const bo = toNumberOrNull(b.orderIndex) ?? Number.MAX_SAFE_INTEGER;
+          return ao - bo;
+        });
+
+        for (let i = 0; i < sorted.length; i += 1) {
+          const card = sorted[i];
+          const current = toNumberOrNull(card.orderIndex);
+          if (current === i) continue;
+          await cardsTable.update(card.id, { orderIndex: i, updatedAt: now });
+          reorderedCards += 1;
+        }
+      }
+
+      console.log(
+        `[Migration v28] clearedMigrationTitles=${clearedMigrationTitles}, reorderedCards=${reorderedCards}`,
+      );
+    });
 };
 
 

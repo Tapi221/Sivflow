@@ -54,12 +54,19 @@ export function readCardDraft(cardId: string) {
  * - 画面遷移前に flushDraft() で未保存 draft を server へ確定させる
  */
 export function useCardEntity(cardId?: string | null) {
-  const { cards, updateCard } = useCards();
+  const { currentUser } = useAuth();
+  const { updateCard } = useCards(undefined, undefined, { enabled: false });
 
-  const serverCard = useMemo(() => {
-    if (!cardId) return null;
-    return cards.find((c) => c.id === cardId) ?? null;
-  }, [cardId, cards]);
+  const serverCard = useLiveQuery(
+    async (): Promise<Card | null> => {
+      if (!cardId || !currentUser?.uid) return null;
+      const db = await getLocalDb(currentUser.uid);
+      const row = await db.cards.get(cardId);
+      return row ? normalizeCard(row) : null;
+    },
+    [currentUser?.uid, cardId],
+    null,
+  );
 
   const draftCard = useMemo(() => {
     if (!cardId) return null;

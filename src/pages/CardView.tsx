@@ -62,6 +62,7 @@ export default function CardView() {
     createAndFocusCard: state.createAndFocusCard,
     isGlobalEditing: state.isGlobalEditing,
     setIsGlobalEditing: state.setIsGlobalEditing,
+    requestSave: state.requestSave,
     requestSaveAndLockSelection: state.requestSaveAndLockSelection,
     finishSaveSelectionLock: state.finishSaveSelectionLock,
     pendingExitAfterSaveRef: state.pendingExitAfterSaveRef,

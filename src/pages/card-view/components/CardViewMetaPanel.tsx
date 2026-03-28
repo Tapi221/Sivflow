@@ -108,6 +108,11 @@ export function CardViewMetaPanel({
         }
         void updateCard(selectedCard.id, { isDraft: nextDraft });
       }}
+      onTitleInputChange={(nextTitle) => {
+        if (!selectedCard?.id) return;
+        if (!isGlobalEditing) return;
+        patchEditingDraft({ title: nextTitle });
+      }}
       onUpdateTitle={(nextTitle) => {
         if (!selectedCard?.id) return;
         if (isGlobalEditing) {

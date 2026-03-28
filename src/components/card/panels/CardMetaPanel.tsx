@@ -777,10 +777,11 @@ export function CardMetaPanel({
   // tagIds 優先、fallback: card.tags（移行期間互換）
   const tags = resolveCardTagNames(card?.tagIds, card?.tags, tagById);
 
-  const commitTitle = () => {
-    const next = titleInput.trim();
+  const commitTitle = (rawValue?: string) => {
+    const source = rawValue ?? titleInput;
+    const next = source.trim();
     const current = (card?.title ?? "").trim();
-    if (next !== titleInput) {
+    if (next !== source) {
       setTitleInput(next);
     }
     if (next === current) return;
@@ -1043,12 +1044,15 @@ export function CardMetaPanel({
               <input
                 value={titleInput}
                 onChange={(e) => handleTitleInputChange(e.target.value)}
-                onBlur={commitTitle}
+                onCompositionEnd={(e) =>
+                  handleTitleInputChange(e.currentTarget.value)
+                }
+                onBlur={(e) => commitTitle(e.currentTarget.value)}
                 disabled={!card}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") {
+                  if (e.key === "Enter" && !e.nativeEvent.isComposing) {
                     e.preventDefault();
-                    commitTitle();
+                    commitTitle(e.currentTarget.value);
                   }
                 }}
                 className="h-[var(--meta-row-px)] w-full rounded-md border border-[var(--surface-border)] bg-white px-2 text-[length:var(--surface-placeholder-font-size)] leading-[var(--meta-row-px)] text-[#6e6466] surface-concave outline-none placeholder:text-[var(--surface-placeholder-text)] focus:border-[#cfcfcf] focus:bg-white"

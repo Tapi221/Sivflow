@@ -34,6 +34,7 @@ type UseCardEditorSessionParams = {
   selectedCardId: string | null;
   selectedCardSnapshot?: Card | null;
   folderId?: string;
+  cardSetId?: string;
   autoEdit?: boolean;
 
   updateCard: (id: string, data: Partial<Card>) => Promise<unknown>;
@@ -51,6 +52,7 @@ export function useCardEditorSession({
   selectedCardId,
   selectedCardSnapshot = null,
   folderId,
+  cardSetId,
   autoEdit,
   updateCard,
   createCard,
@@ -393,6 +395,7 @@ export function useCardEditorSession({
         const created = await createCard({
           ...payload,
           folderId: folderId ?? "",
+          cardSetId,
         });
         const newId =
           (typeof created === "object" &&
@@ -434,6 +437,7 @@ export function useCardEditorSession({
     addTag,
     createCard,
     folderId,
+    cardSetId,
     isNew,
     autoEdit,
     onCardUpdated,

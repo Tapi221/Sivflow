@@ -109,11 +109,8 @@ export function useCards(
   // useLiveQueryはundefinedを返すことがあるのでloadingを判定
   const loading = enabled && rawCards === undefined;
 
-  const createCard = async (cardData: Partial<Card> & { cardSetId: string }) => {
+  const createCard = async (cardData: Partial<Card> & { cardSetId?: string }) => {
     if (!currentUser) throw new Error("認証が必要です");
-    if (!cardData.cardSetId) {
-      throw new Error("[createCard] cardSetId は必須です");
-    }
 
     // 新規作成時はタイトルが空であることを許容する（あとで編集するため）
     // そのため、作成時のバリデーションはスキップする
@@ -129,6 +126,72 @@ export function useCards(
     const startNextDay = effectiveSettings.reviewStartNextDay ?? true;
 
     const now = new Date();
+
+    const normalizeFolderForCard = (value: unknown): string => {
+      if (typeof value !== "string") return "";
+      return value.trim();
+    };
+
+    const toNullableFolderId = (value: string): string | null =>
+      value.trim() === "" ? null : value;
+
+    const resolveCardSetForCreate = async (): Promise<{
+      cardSetId: string;
+      folderId: string | null;
+    }> => {
+      const requestedCardSetId =
+        typeof cardData.cardSetId === "string" ? cardData.cardSetId.trim() : "";
+      if (requestedCardSetId) {
+        const set = await db.cardSets.get(requestedCardSetId);
+        if (set && !set.isDeleted) {
+          return { cardSetId: set.id, folderId: set.folderId ?? null };
+        }
+      }
+
+      const targetFolderId = normalizeFolderForCard(cardData.folderId ?? folderId ?? "");
+      const targetFolderOrNull = toNullableFolderId(targetFolderId);
+
+      const siblingSets = (await db.cardSets.where("userId").equals(currentUser.uid).toArray())
+        .filter(
+          (set) =>
+            !set.isDeleted &&
+            (set.folderId ?? null) === targetFolderOrNull,
+        )
+        .sort((a, b) => {
+          const orderA = a.orderIndex ?? 0;
+          const orderB = b.orderIndex ?? 0;
+          if (orderA !== orderB) return orderA - orderB;
+          return new Date(a.createdAt ?? 0).getTime() - new Date(b.createdAt ?? 0).getTime();
+        });
+
+      const reusableSet = siblingSets[0];
+      if (reusableSet) {
+        return { cardSetId: reusableSet.id, folderId: reusableSet.folderId ?? null };
+      }
+
+      const fallbackSetId = crypto.randomUUID();
+      const fallbackSetName = "新規カードセット";
+      const fallbackSetOrder =
+        siblingSets.reduce((max, set) => Math.max(max, set.orderIndex ?? 0), -1) + 1;
+
+      await db.cardSets.add({
+        id: fallbackSetId,
+        userId: currentUser.uid,
+        deviceId: cardData.deviceId || "web",
+        folderId: targetFolderOrNull,
+        name: fallbackSetName,
+        orderIndex: fallbackSetOrder,
+        isDeleted: false,
+        createdAt: now,
+        updatedAt: now,
+      });
+
+      return { cardSetId: fallbackSetId, folderId: targetFolderOrNull };
+    };
+
+    const resolvedCardSet = await resolveCardSetForCreate();
+    const resolvedFolderId = resolvedCardSet.folderId ?? "";
+
     // orderIndex: 既存カードとの競合を避け、時間軸での並びを保証するタイムスタンプベース
     const orderIndex =
       cardData.orderIndex ??
@@ -136,7 +199,7 @@ export function useCards(
 
     // 表示用のQ番号は既存のカード数+1とする（orderIndexが巨大な数値になるため）
     const folderCards = cards.filter(
-      (c) => c.folderId === (cardData.folderId || ""),
+      (c) => (c.folderId ?? "") === resolvedFolderId,
     );
     const questionNumber =
       cardData.questionNumber ?? `Q${folderCards.length + 1}`;
@@ -165,8 +228,8 @@ export function useCards(
       id,
       userId: currentUser.uid,
       deviceId: cardData.deviceId || "web",
-      cardSetId: cardData.cardSetId,
-      folderId: cardData.folderId || "",
+      cardSetId: resolvedCardSet.cardSetId,
+      folderId: resolvedFolderId,
       orderIndex,
       questionNumber,
       title: cardData.title || "",
@@ -230,7 +293,9 @@ export function useCards(
     const db = await getLocalDb(currentUser.uid);
 
     // 更新後のカード状態をシミュレーション
-    const currentCard = cards.find((c) => c.id === id);
+    const fromCache = cards.find((c) => c.id === id) ?? null;
+    const fromDb = fromCache ? null : await db.cards.get(id);
+    const currentCard = fromCache ?? (fromDb ? normalizeCard(fromDb) : null);
     if (!currentCard) {
       console.warn("[updateCard] Card not found:", id);
       return;
