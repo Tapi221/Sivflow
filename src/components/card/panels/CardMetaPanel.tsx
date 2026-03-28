@@ -149,6 +149,7 @@ function asRecord(value: unknown): Record<string, unknown> | null {
 function toFiniteNumber(value: unknown): number | null {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value === "string") {
+    if (value.trim() === "") return null;
     const numeric = Number(value);
     if (Number.isFinite(numeric)) return numeric;
   }
@@ -530,10 +531,18 @@ export function CardMetaPanel({
     );
     if (!lastReviewAt) return [];
 
+    const rawLastSubjectiveScore = toFiniteNumber(
+      card.lastSubjectiveScore ?? (card as unknown).last_subjective_score,
+    );
+    const syntheticRating =
+      rawLastSubjectiveScore === null
+        ? null
+        : toRatingValue(rawLastSubjectiveScore + 1);
+
     return [
       {
         reviewedAt: lastReviewAt.toISOString(),
-        rating: null,
+        rating: syntheticRating,
         resistanceScore: derivedResistanceScore,
         durationMinutes: null,
         reviewIndexHint: normalizedReviewCount,

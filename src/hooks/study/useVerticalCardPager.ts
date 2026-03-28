@@ -53,6 +53,7 @@ export function useVerticalCardPager({
 
   // プログラマティックスクロール中は自然スクロール判定を止める
   const pendingScrollRef = useRef(false);
+  const pendingScrollStartedAtRef = useRef(0);
   const pendingScrollTimerRef = useRef<number | null>(null);
 
   // 自然スクロール中は nearest index の反映を少し遅延させて
@@ -75,6 +76,12 @@ export function useVerticalCardPager({
       pendingScrollTimerRef.current = null;
     }
   }, []);
+
+  const clearPendingScrollState = useCallback(() => {
+    pendingScrollRef.current = false;
+    pendingScrollStartedAtRef.current = 0;
+    clearPendingScrollTimer();
+  }, [clearPendingScrollTimer]);
 
   const clearNaturalIndexTimer = useCallback(() => {
     if (naturalIndexTimerRef.current != null) {
@@ -115,6 +122,7 @@ export function useVerticalCardPager({
       clearPendingScrollTimer();
       pendingScrollTimerRef.current = window.setTimeout(() => {
         pendingScrollRef.current = false;
+        pendingScrollStartedAtRef.current = 0;
         pendingScrollTimerRef.current = null;
       }, behavior === "smooth" ? 160 : 40);
     },
@@ -129,6 +137,7 @@ export function useVerticalCardPager({
       if (!container || !el) return;
 
       pendingScrollRef.current = true;
+      pendingScrollStartedAtRef.current = Date.now();
       clearPendingScrollTimer();
       clearNaturalIndexTimer();
       queuedNaturalIndexRef.current = null;
@@ -160,7 +169,11 @@ export function useVerticalCardPager({
   const computeNearestIndex = useCallback(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
-    if (pendingScrollRef.current) return;
+    if (pendingScrollRef.current) {
+      const elapsed = Date.now() - pendingScrollStartedAtRef.current;
+      if (elapsed <= 480) return;
+      clearPendingScrollState();
+    }
     if (freezeActiveIndex) return;
 
     const containerRect = container.getBoundingClientRect();
@@ -187,7 +200,12 @@ export function useVerticalCardPager({
       onNearestIndexImmediateRef.current?.(nearestIdx);
       queueNaturalIndexCommit(nearestIdx);
     }
-  }, [freezeActiveIndex, queueNaturalIndexCommit, scrollContainerRef]);
+  }, [
+    clearPendingScrollState,
+    freezeActiveIndex,
+    queueNaturalIndexCommit,
+    scrollContainerRef,
+  ]);
 
   const goNext = useCallback(() => {
     if (freezeActiveIndex) return;
@@ -251,9 +269,22 @@ export function useVerticalCardPager({
         computeNearestIndex();
       });
     };
+    const cancelPendingOnUserIntent = () => {
+      if (!pendingScrollRef.current) return;
+      clearPendingScrollState();
+    };
 
     // container 自体がスクロールする場合と、祖先がスクロールする場合の両方を捕捉
     container.addEventListener("scroll", schedule, { passive: true });
+    container.addEventListener("wheel", cancelPendingOnUserIntent, {
+      passive: true,
+    });
+    container.addEventListener("touchstart", cancelPendingOnUserIntent, {
+      passive: true,
+    });
+    container.addEventListener("pointerdown", cancelPendingOnUserIntent, {
+      passive: true,
+    });
     window.addEventListener("scroll", schedule, { passive: true, capture: true });
     window.addEventListener("resize", schedule, { passive: true });
 
@@ -262,6 +293,9 @@ export function useVerticalCardPager({
 
     return () => {
       container.removeEventListener("scroll", schedule);
+      container.removeEventListener("wheel", cancelPendingOnUserIntent);
+      container.removeEventListener("touchstart", cancelPendingOnUserIntent);
+      container.removeEventListener("pointerdown", cancelPendingOnUserIntent);
       window.removeEventListener("scroll", schedule, { capture: true });
       window.removeEventListener("resize", schedule);
 
@@ -270,12 +304,12 @@ export function useVerticalCardPager({
         scrollRafRef.current = null;
       }
 
-      clearPendingScrollTimer();
+      clearPendingScrollState();
       clearNaturalIndexTimer();
     };
   }, [
     count,
-    clearPendingScrollTimer,
+    clearPendingScrollState,
     clearNaturalIndexTimer,
     computeNearestIndex,
     scrollContainerRef,

@@ -107,7 +107,6 @@ function CardItem({
         "w-full min-w-0",
         showTitleOutside && "flex flex-col gap-2",
       )}
-      onClick={() => onView(card)}
     >
       {showTitleOutside && (
         <div className="px-1 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
@@ -115,9 +114,21 @@ function CardItem({
         </div>
       )}
       <CardShell
+        role="button"
+        tabIndex={0}
+        aria-pressed={isSelected}
+        data-card-selected={isSelected ? "true" : undefined}
+        data-card-editing={card.isDraft || card.is_draft ? "true" : undefined}
+        onClick={() => onView(card)}
+        onKeyDown={(event) => {
+          if (event.target !== event.currentTarget) return;
+          if (event.key !== "Enter" && event.key !== " ") return;
+          event.preventDefault();
+          onView(card);
+        }}
         className={cn(
-          "group w-full min-w-0 text-left transition-all select-none border border-slate-200 shadow-sm hover:shadow-md",
-          isSelected && "ring-2 ring-primary-600",
+          "group card-list-card card-shell--interactive w-full min-w-0 select-none border bg-white text-left",
+          isSelected && "card-shell--selected",
           (card.isDraft || card.is_draft) && "border-dashed border-slate-300",
           isDragging && "z-50 shadow-xl rotate-2",
         )}
@@ -170,7 +181,7 @@ function CardItem({
               ))}
 
               {(card.isDraft || card.is_draft) && (
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500 border border-slate-200">
+                <span className="card-list-editing-badge px-2 py-0.5 rounded-full border text-[10px] font-bold">
                   作成中
                 </span>
               )}

@@ -683,6 +683,7 @@ export function FolderTreeWithCards({
               onUnpinItem={onUnpinItem}
               setEditingId={dialogs.setEditingId}
               setEditingName={dialogs.setEditingName}
+              editingNameRef={dialogs.editingNameRef}
               editingId={dialogs.editingId}
               editingName={dialogs.editingName}
               handleRenameConfirm={actions.handleRenameConfirm}

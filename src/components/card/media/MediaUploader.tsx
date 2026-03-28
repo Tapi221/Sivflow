@@ -24,7 +24,7 @@ import React, { useCallback, useEffect, useId, useRef, useState } from "react";
 const clamp = (v: number, min: number, max: number) =>
   Math.min(max, Math.max(min, v));
 
-function ImageItem({ item, index, onRetry, onUpdate, onRemove }) {
+function ImageItem({ item, index, onRetry, onUpdate }) {
   const [loadFailed, setLoadFailed] = useState(false);
   const { currentUser } = useAuth();
   const [resolvedLocalUrl, setResolvedLocalUrl] = useState<string | null>(null);
@@ -226,16 +226,6 @@ function ImageItem({ item, index, onRetry, onUpdate, onRemove }) {
                 <RotateCcw className="w-2.5 h-2.5" />
               </Button>
             )}
-            <Button
-              type="button"
-              variant="secondary"
-              size="icon"
-              className="h-6 w-6 bg-white/90"
-              onClick={() => onRemove(index)}
-              aria-label="画像を削除"
-            >
-              <X className="w-2.5 h-2.5" />
-            </Button>
           </div>
 
           {displayUrl && !loadFailed && (
@@ -1023,7 +1013,6 @@ export default function MediaUploader({
               index={index}
               onRetry={handleRetry}
               onUpdate={handleUpdateImage}
-              onRemove={handleRemove}
             />
           ))}
 

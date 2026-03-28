@@ -26,32 +26,60 @@ function isCardDeleted(
   );
 }
 
-export function useCards(folderId?: string, cardSetId?: string) {
+type UseCardsOptions = {
+  enabled?: boolean;
+};
+
+export function useCards(
+  folderId?: string,
+  cardSetId?: string,
+  options?: UseCardsOptions,
+) {
   const { currentUser } = useAuth();
   const [error] = useState<string | null>(null);
+  const enabled = options?.enabled ?? true;
 
   // Use settings to determine init schedule
-  useUserSettings();
+  const { settings } = useUserSettings();
 
   // useLiveQueryでリアクティブにカードを取得
   const rawCards = useLiveQuery(
     async () => {
       try {
+        if (!enabled) return [];
         if (!currentUser) return [];
         const db = await getLocalDb(currentUser.uid);
-        const all = await db.getAllCards();
-        return all;
+
+        if (cardSetId) {
+          try {
+            return await db.cards.where("cardSetId").equals(cardSetId).toArray();
+          } catch (indexError) {
+            console.warn(
+              "[useCards] cardSetId index query failed. Falling back to full scan.",
+              indexError,
+            );
+          }
+        } else if (folderId) {
+          try {
+            return await db.cards.where("folderId").equals(folderId).toArray();
+          } catch (indexError) {
+            console.warn(
+              "[useCards] folderId index query failed. Falling back to full scan.",
+              indexError,
+            );
+          }
+        }
+
+        return await db.getAllCards();
       } catch (err: unknown) {
-        console.error(`[useCards] Error: ${err.message}`);
+        const message = err instanceof Error ? err.message : String(err);
+        console.error(`[useCards] Error: ${message}`);
         return [];
       }
     },
 
-    [currentUser?.uid], // localDb.name is removed as dependency because it's now internal to liveQuery
+    [currentUser?.uid, folderId, cardSetId, enabled], // localDb.name is removed as dependency because it's now internal to liveQuery
   );
-
-  // ... (rest of the hook code, I'll use multi_replace for accuracy if needed, but let's try one big block or smaller chunks)
-  // Actually, I'll do specific chunks for safety.
 
   // 正規化・フィルタ・ソートはuseMemoで処理
   const cards = useMemo(() => {
@@ -79,7 +107,7 @@ export function useCards(folderId?: string, cardSetId?: string) {
   }, [rawCards, folderId, cardSetId]);
 
   // useLiveQueryはundefinedを返すことがあるのでloadingを判定
-  const loading = rawCards === undefined;
+  const loading = enabled && rawCards === undefined;
 
   const createCard = async (cardData: Partial<Card> & { cardSetId: string }) => {
     if (!currentUser) throw new Error("認証が必要です");
@@ -96,10 +124,8 @@ export function useCards(folderId?: string, cardSetId?: string) {
     }
     */
 
-    // Force fetch settings to ensure freshness
     const db = await getLocalDb(currentUser.uid);
-    const userSettings = await db.userSettings.get(currentUser.uid);
-    const effectiveSettings = { ...DEFAULT_SETTINGS, ...(userSettings || {}) };
+    const effectiveSettings = { ...DEFAULT_SETTINGS, ...(settings || {}) };
     const startNextDay = effectiveSettings.reviewStartNextDay ?? true;
 
     const now = new Date();

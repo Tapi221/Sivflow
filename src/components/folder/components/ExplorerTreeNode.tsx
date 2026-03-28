@@ -248,8 +248,11 @@ const isPinned =
                 }}
                 onClick={(e) => e.stopPropagation()}
                 onKeyDown={(e) => {
+                  const isComposing = e.nativeEvent.isComposing || e.keyCode === 229;
+                  if (e.key === "Enter" && isComposing) return;
                   if (e.key === "Enter") {
                     e.preventDefault();
+                    editingNameRef.current = e.currentTarget.value;
                     e.currentTarget.blur();
                   }
                   if (e.key === "Escape") {
@@ -259,7 +262,8 @@ const isPinned =
                     e.currentTarget.blur();
                   }
                 }}
-                onBlur={() => {
+                onBlur={(e) => {
+                  editingNameRef.current = e.currentTarget.value;
                   void handleRenameConfirm();
                 }}
               />

@@ -154,7 +154,13 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
         }
 
         const contentHeight = Math.max(0, maxBottom);
-        const requiredHeight = contentHeight + ruledBottomOffsetPx;
+        // Fallback to scrollHeight to avoid underestimating min height when
+        // per-row measurements momentarily become smaller than rendered content.
+        const scrollContentHeight = Math.max(0, body.scrollHeight);
+        const requiredHeight = Math.max(
+          contentHeight + ruledBottomOffsetPx,
+          scrollContentHeight,
+        );
         // Subtract sub-pixel tolerance: getBoundingClientRect() can return fractional
         // CSS pixels (esp. on high-DPI screens), causing requiredHeight to land just
         // above a grid boundary and snapMinCardHeightPx (Math.ceil) to add an extra row.
@@ -541,7 +547,7 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
         )}
         <div
           className="card-shell-body"
-          style={{ overflowY: "clip", overflowX: "visible" }}
+          style={{ overflowY: "hidden", overflowX: "visible" }}
         >
           {children}
         </div>

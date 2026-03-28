@@ -34,7 +34,7 @@ export function MetaPanelShell({
       }
     >
       <div
-        className={cn("h-full overflow-y-auto bg-sidebar p-2", bodyClassName)}
+        className={cn("h-full overflow-y-auto bg-sidebar p-0", bodyClassName)}
       >
         <div className={cn("space-y-6", contentClassName)}>{children}</div>
       </div>

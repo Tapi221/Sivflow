@@ -1,5 +1,9 @@
 import { useCallback, useMemo } from "react";
+import { useLiveQuery } from "dexie-react-hooks";
+import { useAuth } from "@/contexts/AuthContext";
 import { useCards } from "@/hooks/card/useCards";
+import { getLocalDb } from "@/services/localDB";
+import type { Card } from "@/types";
 import { normalizeCard } from "@/utils";
 
 const DRAFT_KEY_PREFIX = "card-editor-draft-";

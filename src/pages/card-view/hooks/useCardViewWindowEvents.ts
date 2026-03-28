@@ -6,7 +6,8 @@ interface UseCardViewWindowEventsOptions {
   createAndFocusCard: () => Promise<boolean>;
   isGlobalEditing: boolean;
   setIsGlobalEditing: (value: boolean) => void;
-  setSaveSignal: React.Dispatch<React.SetStateAction<number>>;
+  requestSaveAndLockSelection: () => void;
+  finishSaveSelectionLock: () => void;
   pendingExitAfterSaveRef: React.MutableRefObject<boolean>;
   pendingCreateCardAfterSaveRef: React.MutableRefObject<boolean>;
 }
@@ -16,7 +17,8 @@ export function useCardViewWindowEvents({
   createAndFocusCard,
   isGlobalEditing,
   setIsGlobalEditing,
-  setSaveSignal,
+  requestSaveAndLockSelection,
+  finishSaveSelectionLock,
   pendingExitAfterSaveRef,
   pendingCreateCardAfterSaveRef,
 }: UseCardViewWindowEventsOptions) {
@@ -37,7 +39,7 @@ export function useCardViewWindowEvents({
       pendingExitAfterSaveRef.current = false;
       if (isGlobalEditing) {
         pendingCreateCardAfterSaveRef.current = true;
-        setSaveSignal((prev) => prev + 1);
+        requestSaveAndLockSelection();
         return;
       }
       void createAndFocusCard();
@@ -46,23 +48,28 @@ export function useCardViewWindowEvents({
     return () => window.removeEventListener("cardview:create-card-request", handler);
   }, [
     createAndFocusCard,
+    requestSaveAndLockSelection,
     isGlobalEditing,
     pendingCreateCardAfterSaveRef,
     pendingExitAfterSaveRef,
-    setSaveSignal,
   ]);
 
   useEffect(() => {
     const handler = () => {
       if (isGlobalEditing) pendingExitAfterSaveRef.current = true;
-      setSaveSignal((prev) => prev + 1);
+      requestSaveAndLockSelection();
     };
     window.addEventListener("cardview:save-request", handler);
     return () => window.removeEventListener("cardview:save-request", handler);
-  }, [isGlobalEditing, pendingExitAfterSaveRef, setSaveSignal]);
+  }, [
+    isGlobalEditing,
+    pendingExitAfterSaveRef,
+    requestSaveAndLockSelection,
+  ]);
 
   useEffect(() => {
     const handler = (event: Event) => {
+      finishSaveSelectionLock();
       const saved = Boolean(
         (event as CustomEvent<{ saved?: boolean }>)?.detail?.saved,
       );
@@ -80,6 +87,7 @@ export function useCardViewWindowEvents({
       window.removeEventListener(CARDVIEW_SAVE_FINISHED_EVENT, handler);
   }, [
     createAndFocusCard,
+    finishSaveSelectionLock,
     pendingCreateCardAfterSaveRef,
     pendingExitAfterSaveRef,
     setIsGlobalEditing,

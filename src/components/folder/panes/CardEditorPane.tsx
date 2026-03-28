@@ -1,6 +1,6 @@
-import { ChevronLeft, ChevronRight, Minus, Plus, RefreshCw } from "@/ui/icons";
+import { ChevronLeft, ChevronRight } from "@/ui/icons";
 import { DragDropContext } from "@hello-pangea/dnd";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 
 import { SharedCardContent } from "@/components/card/common/SharedCardContent";
 import {
@@ -13,36 +13,21 @@ import {
   EmptySelectionState,
   NewCardIdleState,
 } from "@/components/card/editor/CardEditorPaneStates";
-import { LinkEditor } from "@/components/card/editor/LinkEditor";
-import { useCardEditorContentController } from "@/components/card/editor/useCardEditorContentController";
-import { useCardEditorSession } from "@/components/card/editor/useCardEditorSession";
-import { useLayoutRowsController } from "@/components/card/editor/useLayoutRowsController";
 import { CardCornerActions } from "@/components/card/frame/CardCornerActions";
 import { CardFrame } from "@/components/card/frame/CardFrame";
 import { Flashcard } from "@/components/card/frame/Flashcard";
-import MediaUploader from "@/components/card/media/MediaUploader";
 import { CardMetaPanel } from "@/components/card/panels/CardMetaPanel";
+import { CardEditorPaneMediaDialogs } from "@/components/folder/panes/CardEditorPaneMediaDialogs";
+import { CardPaneWidthControl } from "@/components/folder/panes/CardPaneWidthControl";
+import { useCardEditorPaneController } from "@/components/folder/panes/useCardEditorPaneController";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Slider } from "@/components/ui/slider";
-import { useToast } from "@/contexts/ToastContext";
-import {
-  DEFAULT_LAYOUT_ROWS,
-  normalizeLayoutRows,
-} from "@/domain/card/extraRows";
-import { useCards } from "@/hooks/card/useCards";
-import { useTags } from "@/hooks/settings/useTags";
-import { useUserSettings } from "@/hooks/settings/useUserSettings";
+  CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX,
+  CARD_PANE_WIDTH_STEP_PX,
+  useCardEditorPaneWidth,
+} from "@/components/folder/panes/useCardEditorPaneWidth";
+import { normalizeLayoutRows } from "@/domain/card/extraRows";
 import { cn } from "@/lib/utils";
-import {
-  createLatestReviewLogPatch,
-  createReviewPatchFromRating,
-} from "@/services/reviewAlgorithm";
-import type { Card, UploadedImage, UserSettings } from "@/types";
+import type { Card, UserSettings } from "@/types";
 
 interface CardEditorPaneProps {
   selectedCardId: string | null;
@@ -60,18 +45,13 @@ interface CardEditorPaneProps {
   externalToolbarMountA?: HTMLDivElement | null;
   settingsOverride?: Partial<UserSettings> | null;
   saveSignal?: number;
+  saveSignalEnabled?: boolean;
   hideFooterActions?: boolean;
   embeddedInPager?: boolean;
   pairGapClassName?: string;
   onRequestCloseEditing?: () => void;
   highlightActiveCards?: boolean;
 }
-
-type UseCardsResult = {
-  cards: Card[];
-  updateCard: (cardId: string, data: unknown) => void | Promise<void>;
-  createCard: (data: unknown) => unknown;
-};
 
 type FlashcardCardLike = Record<string, unknown> & {
   id?: string;
@@ -80,166 +60,12 @@ type FlashcardCardLike = Record<string, unknown> & {
   isBookmarked?: boolean;
 };
 
-const CARDVIEW_SAVE_FINISHED_EVENT = "cardview:save-finished";
-const CARDVIEW_EDITING_DRAFT_PATCH_EVENT = "cardview:editing-draft-patch";
-const CARD_PANE_VIEW_DEFAULT_WIDTH_PX = 576;
-const CARD_PANE_EDIT_DEFAULT_WIDTH_PX = 820;
-const CARD_PANE_DOCKED_EDIT_DEFAULT_WIDTH_PX = 1000;
-const CARD_PANE_VIEW_MIN_WIDTH_PX = 360;
-const CARD_PANE_EDIT_MIN_WIDTH_PX = 640;
-const CARD_PANE_WIDTH_STEP_PX = 40;
 const CARD_PANE_AUTO_MAX_SCALE = 4;
-const CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX = 72;
 const CARD_EDITOR_PAIR_GAP_PX = 16;
 const CARD_PAGER_EDIT_RULED_OFFSET_TOP_PX = 20;
 
-function clampPaneWidthPx(
-  value: number | null | undefined,
-  min: number,
-  max?: number,
-): number {
-  const fallback = Math.max(1, min);
-  const safeValue =
-    typeof value === "number" && Number.isFinite(value) ? value : fallback;
-  const clampedMin = Math.max(1, min);
-  const clampedMax =
-    typeof max === "number" && Number.isFinite(max)
-      ? Math.max(clampedMin, max)
-      : Number.POSITIVE_INFINITY;
-  return Math.min(clampedMax, Math.max(clampedMin, Math.round(safeValue)));
-}
-
-interface CardPaneWidthControlProps {
-  modeLabel: string;
-  value: number;
-  min: number;
-  max: number;
-  defaultValue: number;
-  onPreviewChange: (value: number) => void;
-  onCommit: (value: number) => void;
-  onStepDown: () => void;
-  onStepUp: () => void;
-  onReset: () => void;
-}
-
-function CardPaneWidthControl({
-  modeLabel,
-  value,
-  min,
-  max,
-  defaultValue,
-  onPreviewChange,
-  onCommit,
-  onStepDown,
-  onStepUp,
-  onReset,
-}: CardPaneWidthControlProps) {
-  const resetDisabled = value === defaultValue;
-  const controlRootRef = React.useRef<HTMLDivElement | null>(null);
-  const suppressOutsideClickUntilRef = React.useRef(0);
-
-  React.useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const handleClickCapture = (event: MouseEvent) => {
-      if (Date.now() > suppressOutsideClickUntilRef.current) return;
-      const target = event.target;
-      if (
-        target instanceof Node &&
-        controlRootRef.current?.contains(target)
-      ) {
-        return;
-      }
-      event.preventDefault();
-      event.stopPropagation();
-    };
-
-    window.addEventListener("click", handleClickCapture, true);
-    return () => {
-      window.removeEventListener("click", handleClickCapture, true);
-    };
-  }, []);
-
-  const beginInteractionGuard = () => {
-    // スライダー操作の pointerup/click が背面のブロック追加ボタンに落ちる誤作動を抑止する。
-    suppressOutsideClickUntilRef.current = Date.now() + 250;
-  };
-
-  return (
-    <div
-      ref={controlRootRef}
-      className="pointer-events-auto flex items-center gap-1.5 rounded-[20px] border border-slate-200/80 bg-white/82 px-2.5 py-1 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-md"
-      onPointerDownCapture={beginInteractionGuard}
-      onPointerMoveCapture={beginInteractionGuard}
-    >
-      <div className="min-w-[72px] leading-none">
-        <div className="text-[10px] font-medium tracking-[0.06em] text-slate-500">
-          {modeLabel}
-        </div>
-        <div className="mt-0.5 text-[13px] font-semibold tabular-nums text-slate-700">
-          {value}px
-        </div>
-      </div>
-
-      <button
-        type="button"
-        className="grid h-7 w-7 place-items-center rounded-full border border-slate-200/70 bg-white/55 text-slate-500 transition hover:bg-white hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-35"
-        onClick={onStepDown}
-        disabled={value <= min}
-        aria-label={`${modeLabel}を縮小`}
-      >
-        <Minus className="h-3.5 w-3.5" />
-      </button>
-
-      <div className="w-24 px-0.5">
-        <Slider
-          min={min}
-          max={max}
-          step={8}
-          value={[value]}
-          onValueChange={(next) => {
-            const [raw] = next;
-            onPreviewChange(clampPaneWidthPx(raw, min, max));
-          }}
-          onValueCommit={(next) => {
-            const [raw] = next;
-            onCommit(clampPaneWidthPx(raw, min, max));
-          }}
-          aria-label={`${modeLabel}スライダー`}
-        />
-      </div>
-
-      <button
-        type="button"
-        className="grid h-7 w-7 place-items-center rounded-full border border-slate-200/70 bg-white/55 text-slate-500 transition hover:bg-white hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-35"
-        onClick={onStepUp}
-        disabled={value >= max}
-        aria-label={`${modeLabel}を拡大`}
-      >
-        <Plus className="h-3.5 w-3.5" />
-      </button>
-
-      <button
-        type="button"
-        className="grid h-7 w-7 place-items-center rounded-full border border-slate-200/70 bg-white/55 text-slate-500 transition hover:bg-white hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-35"
-        onClick={onReset}
-        disabled={resetDisabled}
-        aria-label={`${modeLabel}を既定値に戻す`}
-        title="既定値に戻す"
-      >
-        <RefreshCw className="h-3.5 w-3.5" />
-      </button>
-    </div>
-  );
-}
-
 const toFlashcardCardLike = (card: Card): FlashcardCardLike =>
   card as unknown as FlashcardCardLike;
-
-type EditingDraftPatchDetail = {
-  cardId: string;
-  patch: Partial<Pick<Card, "title" | "isDraft">> & { tags?: string[] };
-};
 
 export function CardEditorPane({
   selectedCardId,
@@ -257,51 +83,68 @@ export function CardEditorPane({
   externalToolbarMountA = null,
   settingsOverride = null,
   saveSignal,
+  saveSignalEnabled = true,
   hideFooterActions = false,
   embeddedInPager = false,
   pairGapClassName = "gap-6",
   onRequestCloseEditing,
   highlightActiveCards = false,
 }: CardEditorPaneProps) {
-  const { settings: settingsFromHook, updateSettings } = useUserSettings();
-  const settings = settingsOverride ?? settingsFromHook;
-  const { success: toastSuccess, error: toastError } = useToast();
-  const { tagById, addTag } = useTags();
-  const {
-    cards: cardsFromHook,
-    updateCard,
-    createCard,
-  } = useCards(folderId, cardSetId) as unknown as UseCardsResult;
-  const cards = cardsOverride ?? cardsFromHook;
-
-  const updateCardAsync = React.useCallback(
-    async (id: string, data: Partial<Card>): Promise<unknown> => {
-      return await Promise.resolve(updateCard(id, data));
-    },
-    [updateCard],
-  );
-
-  const createCardAsync = React.useCallback(
-    async (data: Partial<Card>): Promise<unknown> => {
-      return await Promise.resolve(createCard(data));
-    },
-    [createCard],
-  );
-
-  const [isMetaOpen, setIsMetaOpen] = useState<boolean>(() => {
-    if (typeof window === "undefined") return true;
-    return (
-      window.localStorage.getItem("card-editor.meta-panel-open") !== "false"
-    );
+  const controller = useCardEditorPaneController({
+    selectedCardId,
+    folderId,
+    cardSetId,
+    cardsOverride,
+    autoEdit,
+    onCardUpdated,
+    onSelectCardId,
+    onRequestCloseEditing,
+    settingsOverride,
+    saveSignal,
+    saveSignalEnabled,
   });
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    window.localStorage.setItem(
-      "card-editor.meta-panel-open",
-      String(isMetaOpen),
-    );
-  }, [isMetaOpen]);
+  const { settings, updateSettings, isMetaOpen, session, layout, content, actions } =
+    controller;
+  const {
+    draft,
+    normalizedSelectedCardId,
+    isNew,
+    selectedCard,
+    isFlipped,
+    setIsFlipped,
+    isEditing,
+    setIsEditing,
+    isSaving,
+    handleStartNew,
+    handleCancel,
+    handleToggleBookmark,
+    handleToggleUncertainty,
+    panelCard,
+  } = session;
+  const {
+    manualResizeInProgressRef,
+    scheduleLayoutRowsFromHeight,
+    handleQuestionMinHeightChange,
+    handleAnswerMinHeightChange,
+  } = layout;
+  const {
+    onDragEnd,
+    setSideBlocks,
+    imageDialogSide,
+    setImageDialogSide,
+    audioDialogSide,
+    setAudioDialogSide,
+    linkDialogSide,
+    setLinkDialogSide,
+    renderMediaDialogButtons,
+    getDialogImages,
+    setDialogImages,
+    getDialogAudios,
+    setDialogAudios,
+    getReferenceItems,
+    setReferenceItems,
+  } = content;
+  const { handleCancelEditing, handleSaveEditing, metaPanel } = actions;
 
   const [toolbarMountQInternal, setToolbarMountQInternal] =
     useState<HTMLDivElement | null>(null);
@@ -324,122 +167,6 @@ export function CardEditorPane({
       : CARD_PANE_EDIT_DEFAULT_WIDTH_PX,
   );
 
-  const resetDialogsRef = useRef<() => void>(() => {});
-
-  const {
-    draft,
-    setDraft,
-    normalizedSelectedCardId,
-    isNew,
-    selectedCard,
-    isFlipped,
-    setIsFlipped,
-    isEditing,
-    setIsEditing,
-    isSaving,
-    handleStartNew,
-    handleCancel,
-    handleSave,
-    handleToggleBookmark,
-    handleToggleUncertainty,
-    handleUpdateTags,
-    handleToggleDraft,
-    handleTitleInputChange,
-    handleUpdateTitle,
-    panelCard,
-  } = useCardEditorSession({
-    selectedCardId,
-    folderId,
-    autoEdit,
-    updateCard: updateCardAsync,
-    createCard: createCardAsync,
-    addTag,
-    tagById,
-    toastSuccess,
-    toastError,
-    onCardUpdated,
-    onSelectCardId,
-    resetDialogs: () => resetDialogsRef.current(),
-  });
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const handler = (event: Event) => {
-      const detail = (event as CustomEvent<EditingDraftPatchDetail>)?.detail;
-      if (!detail || !selectedCard || !isEditing) return;
-      if (detail.cardId !== selectedCard.id) return;
-
-      const nextTitle =
-        typeof detail.patch.title === "string" ? detail.patch.title : undefined;
-      const nextIsDraft =
-        typeof detail.patch.isDraft === "boolean"
-          ? detail.patch.isDraft
-          : undefined;
-      const nextTags = Array.isArray(detail.patch.tags)
-        ? detail.patch.tags
-        : undefined;
-      if (
-        nextTitle === undefined &&
-        nextIsDraft === undefined &&
-        nextTags === undefined
-      ) {
-        return;
-      }
-
-      setDraft((prev) => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          ...(nextTitle !== undefined ? { title: nextTitle } : {}),
-          ...(nextIsDraft !== undefined ? { isDraft: nextIsDraft } : {}),
-          ...(nextTags !== undefined ? { tags: nextTags } : {}),
-        };
-      });
-    };
-
-    window.addEventListener(CARDVIEW_EDITING_DRAFT_PATCH_EVENT, handler);
-    return () =>
-      window.removeEventListener(CARDVIEW_EDITING_DRAFT_PATCH_EVENT, handler);
-  }, [isEditing, selectedCard, setDraft]);
-
-  const {
-    allowAutoMinHeightSyncRef,
-    manualResizeInProgressRef,
-    scheduleLayoutRowsFromHeight,
-    handleQuestionMinHeightChange,
-    handleAnswerMinHeightChange,
-  } = useLayoutRowsController({
-    draft,
-    setDraft,
-    defaultLayoutRows: DEFAULT_LAYOUT_ROWS,
-    normalizedSelectedCardId,
-    isEditing,
-  });
-
-  const {
-    onDragEnd,
-    setSideBlocks,
-    imageDialogSide,
-    setImageDialogSide,
-    audioDialogSide,
-    setAudioDialogSide,
-    linkDialogSide,
-    setLinkDialogSide,
-    renderMediaDialogButtons,
-    getDialogImages,
-    setDialogImages,
-    getDialogAudios,
-    setDialogAudios,
-    getReferenceItems,
-    setReferenceItems,
-  } = useCardEditorContentController({
-    draft,
-    setDraft,
-    allowAutoMinHeightSyncRef,
-    resetDialogsRef,
-  });
-
   const editorActionsTopLeft = selectedCard ? (
     <CardCornerActions
       onHelp={() => handleToggleUncertainty(selectedCard)}
@@ -448,48 +175,6 @@ export function CardEditorPane({
       starActive={selectedCard.isBookmarked ?? false}
     />
   ) : undefined;
-
-  const handleCancelEditing = React.useCallback(() => {
-    handleCancel();
-    onRequestCloseEditing?.();
-  }, [handleCancel, onRequestCloseEditing]);
-
-  const dispatchCardViewSaveFinished = React.useCallback((saved: boolean) => {
-    if (typeof window === "undefined") return;
-    window.dispatchEvent(
-      new CustomEvent(CARDVIEW_SAVE_FINISHED_EVENT, { detail: { saved } }),
-    );
-  }, []);
-
-  const handleSaveEditing = React.useCallback(async (): Promise<boolean> => {
-    const saved = await handleSave();
-    if (saved) {
-      onRequestCloseEditing?.();
-    }
-    return saved;
-  }, [handleSave, onRequestCloseEditing]);
-
-  const prevSaveSignalRef = useRef<number | undefined>(saveSignal);
-  useEffect(() => {
-    if (saveSignal == null) return;
-    if (prevSaveSignalRef.current === saveSignal) return;
-    prevSaveSignalRef.current = saveSignal;
-    if (!isEditing) {
-      dispatchCardViewSaveFinished(true);
-      return;
-    }
-    if (isSaving) return;
-    void (async () => {
-      const saved = await handleSave();
-      dispatchCardViewSaveFinished(saved);
-    })();
-  }, [
-    saveSignal,
-    isEditing,
-    isSaving,
-    handleSave,
-    dispatchCardViewSaveFinished,
-  ]);
 
   const defaultEditPaneWidthPx = dockToolbarsToTop
     ? CARD_PANE_DOCKED_EDIT_DEFAULT_WIDTH_PX
@@ -583,6 +268,7 @@ export function CardEditorPane({
     !dockToolbarsToTop &&
     !hideBlockToolbars &&
     !usesExternalToolbarMount;
+  const shouldShowEditingBadge = !embeddedInPager || highlightActiveCards;
   const shouldApplyPaneWidth =
     (showWidthControl && contentViewportWidth > 0) || forcedPaneWidthPx != null;
   const effectivePaneWidthPx = shouldApplyPaneWidth
@@ -717,7 +403,7 @@ export function CardEditorPane({
                   : "var(--ui-space-1)",
                 transform: "none",
               }}
-              onClick={() => setIsMetaOpen((prev) => !prev)}
+              onClick={actions.toggleMetaOpen}
               aria-label={isMetaOpen ? "close meta panel" : "open meta panel"}
             >
               {isMetaOpen ? (
@@ -760,9 +446,9 @@ export function CardEditorPane({
                     ? "px-0 pt-0 pb-0"
                     : "px-0 pt-0 pb-4"
                   : embeddedInPager
-                    ? "px-4 pt-0 pb-0"
-                    : "px-4 pt-0 pb-4"
-                : "p-4",
+                    ? "px-0 pt-0 pb-0"
+                    : "px-0 pt-0 pb-4"
+                : "px-0 py-4",
             )}
             style={embeddedInPager ? undefined : { background: "#fafafa" }}
           >
@@ -814,10 +500,11 @@ export function CardEditorPane({
                       fixedScale={editorCardFixedScale}
                       topAttachment={
                         shouldDockToolbarToCardTop ? (
-                          <div className="w-full">
+                          <div className="relative h-0 w-full overflow-visible pointer-events-none">
                             <div
                               ref={setToolbarMountQInternal}
-                              className="w-full"
+                              className="absolute left-0 top-0 z-20 w-full pointer-events-auto"
+                              style={{ transform: "translateY(-100%)" }}
                             />
                           </div>
                         ) : undefined
@@ -825,6 +512,7 @@ export function CardEditorPane({
                       className={cn(
                         "premium-paper-depth",
                         "card-shell--paper",
+                        shouldShowEditingBadge && "card-shell--editing",
                         highlightActiveCards && "card-shell--active-outline",
                       )}
                       resizable
@@ -897,10 +585,11 @@ export function CardEditorPane({
                       fixedScale={editorCardFixedScale}
                       topAttachment={
                         shouldDockToolbarToCardTop ? (
-                          <div className="w-full">
+                          <div className="relative h-0 w-full overflow-visible pointer-events-none">
                             <div
                               ref={setToolbarMountAInternal}
-                              className="w-full"
+                              className="absolute left-0 top-0 z-20 w-full pointer-events-auto"
+                              style={{ transform: "translateY(-100%)" }}
                             />
                           </div>
                         ) : undefined
@@ -908,6 +597,7 @@ export function CardEditorPane({
                       className={cn(
                         "premium-paper-depth",
                         "card-shell--paper",
+                        shouldShowEditingBadge && "card-shell--editing",
                         highlightActiveCards && "card-shell--active-outline",
                       )}
                       resizable
@@ -1011,80 +701,14 @@ export function CardEditorPane({
             <CardMetaPanel
               card={panelCard}
               reviewLogs={panelCard?.reviewLogs ?? []}
-              onAddReviewLog={({ reviewedAt, rating, durationMinutes }) => {
-                if (!selectedCard?.id) return Promise.resolve();
-                const { patch } = createReviewPatchFromRating({
-                  card: selectedCard,
-                  rating,
-                  now: new Date(reviewedAt),
-                  delayBonusEnabled: settings?.delayBonusEnabled ?? false,
-                  durationMinutes,
-                });
-                return Promise.resolve(updateCard(selectedCard.id, patch)).then(
-                  () => {
-                    onCardUpdated?.();
-                  },
-                );
-              }}
-              onUpdateLatestReviewLog={({
-                reviewLogs,
-                reviewedAt,
-                rating,
-                durationMinutes,
-              }) => {
-                if (!selectedCard?.id) return Promise.resolve();
-                const { patch } = createLatestReviewLogPatch({
-                  action: "update",
-                  card: selectedCard,
-                  delayBonusEnabled: settings?.delayBonusEnabled ?? false,
-                  rating,
-                  reviewedAt: new Date(reviewedAt),
-                  reviewLogs,
-                  reviewStartNextDay: settings?.reviewStartNextDay ?? true,
-                  durationMinutes,
-                });
-                return Promise.resolve(updateCard(selectedCard.id, patch)).then(
-                  () => {
-                    onCardUpdated?.();
-                  },
-                );
-              }}
-              onDeleteLatestReviewLog={({ reviewLogs }) => {
-                if (!selectedCard?.id) return Promise.resolve();
-                const { patch } = createLatestReviewLogPatch({
-                  action: "delete",
-                  card: selectedCard,
-                  delayBonusEnabled: settings?.delayBonusEnabled ?? false,
-                  reviewLogs,
-                  reviewStartNextDay: settings?.reviewStartNextDay ?? true,
-                });
-                return Promise.resolve(updateCard(selectedCard.id, patch)).then(
-                  () => {
-                    onCardUpdated?.();
-                  },
-                );
-              }}
-              onUpdateReviewLogDuration={({
-                reviewLogs,
-                logIndex,
-                durationMinutes,
-              }) => {
-                if (!selectedCard?.id) return Promise.resolve();
-                const nextReviewLogs = reviewLogs.map((log, index) =>
-                  index === logIndex ? { ...log, durationMinutes } : log,
-                );
-                return Promise.resolve(
-                  updateCard(selectedCard.id, {
-                    reviewLogs: nextReviewLogs,
-                  }),
-                ).then(() => {
-                  onCardUpdated?.();
-                });
-              }}
-              onTitleInputChange={handleTitleInputChange}
-              onUpdateTags={handleUpdateTags}
-              onToggleDraft={handleToggleDraft}
-              onUpdateTitle={handleUpdateTitle}
+              onAddReviewLog={metaPanel.onAddReviewLog}
+              onUpdateLatestReviewLog={metaPanel.onUpdateLatestReviewLog}
+              onDeleteLatestReviewLog={metaPanel.onDeleteLatestReviewLog}
+              onUpdateReviewLogDuration={metaPanel.onUpdateReviewLogDuration}
+              onTitleInputChange={metaPanel.onTitleInputChange}
+              onUpdateTags={metaPanel.onUpdateTags}
+              onToggleDraft={metaPanel.onToggleDraft}
+              onUpdateTitle={metaPanel.onUpdateTitle}
               delayBonusEnabled={settings?.delayBonusEnabled ?? false}
               reviewStartNextDay={settings?.reviewStartNextDay ?? true}
             />

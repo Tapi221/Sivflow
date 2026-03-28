@@ -171,6 +171,7 @@ export function Flashcard({
   }
 
   const fixedHeightPx = layoutRowsToCardHeightPx(derived.layoutRows);
+  const isCardClickable = !previewMode;
 
   return (
     <div
@@ -186,12 +187,22 @@ export function Flashcard({
           allowUpscale={allowUpscale}
           maxScale={maxScale}
           scaleMultiplier={scaleMultiplier}
+          role={isCardClickable ? "button" : undefined}
+          tabIndex={isCardClickable ? 0 : undefined}
           className={cn(
             "premium-paper-depth",
-            !previewMode && "cursor-pointer",
+            "card-shell--interactive",
+            isCardClickable && "cursor-pointer",
             "card-shell--paper",
           )}
           onClick={handleFlip}
+          onKeyDown={(event) => {
+            if (!isCardClickable) return;
+            if (event.target !== event.currentTarget) return;
+            if (event.key !== "Enter" && event.key !== " ") return;
+            event.preventDefault();
+            handleFlip();
+          }}
           resizable={false}
           resizeStepPx={undefined}
           showResizeHandle={false}

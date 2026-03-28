@@ -241,8 +241,11 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                   editingNameRef.current = e.target.value;
                 }}
                 onKeyDown={(e) => {
+                  const isComposing = e.nativeEvent.isComposing || e.keyCode === 229;
+                  if (e.key === "Enter" && isComposing) return;
                   if (e.key === "Enter") {
                     e.preventDefault();
+                    editingNameRef.current = e.currentTarget.value;
                     e.currentTarget.blur();
                   }
                   if (e.key === "Escape") {
@@ -252,8 +255,9 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                     e.currentTarget.blur();
                   }
                 }}
-                onBlur={() => {
-void handleRenameConfirm();
+                onBlur={(e) => {
+                  editingNameRef.current = e.currentTarget.value;
+                  void handleRenameConfirm();
                 }}
                 onClick={(e) => e.stopPropagation()}
               />

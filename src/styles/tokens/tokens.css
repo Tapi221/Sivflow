@@ -121,6 +121,60 @@
     --scrollbar-thumb-active: var(--card-resize-handle-active);
     --scrollbar-size: calc(6px * var(--ui-scale));
 
+    /* Card interaction state tokens */
+    --card-border-default: rgba(15, 23, 42, 0.08);
+    --card-border-hover: rgba(15, 23, 42, 0.14);
+    --card-selected-outline-width: 1.6px;
+    --card-selected-outline-neutral: rgba(84, 95, 105, 0.42);
+    --card-selected-outline-accent: color-mix(
+      in srgb,
+      var(--sidebar-active-accent, #7aa6a1) 44%,
+      transparent
+    );
+    --card-selected-surface: color-mix(
+      in srgb,
+      #f3f4f6 94%,
+      var(--sidebar-active-accent, #7aa6a1) 6%
+    );
+    --card-border-selected: var(--card-selected-outline-neutral);
+    --card-shadow-default:
+      0 0 2px rgba(15, 23, 42, 0.04),
+      0 0 24px rgba(15, 23, 42, 0.08),
+      0 0 72px rgba(15, 23, 42, 0.08);
+    --card-shadow-rest:
+      0 1px 2px rgba(15, 23, 42, 0.05),
+      0 8px 18px rgba(15, 23, 42, 0.06);
+    --card-shadow-hover:
+      0 0 3px rgba(15, 23, 42, 0.05),
+      0 0 30px rgba(15, 23, 42, 0.1),
+      0 0 90px rgba(15, 23, 42, 0.1);
+    --card-shadow-selected:
+      0 0 4px rgba(15, 23, 42, 0.06),
+      0 0 36px rgba(15, 23, 42, 0.12),
+      0 0 96px rgba(15, 23, 42, 0.12);
+    --card-focus-ring: color-mix(
+      in srgb,
+      var(--sidebar-active-accent, #7aa6a1) 52%,
+      white
+    );
+    --card-focus-ring-shadow: 0 0 0 2px
+      color-mix(in srgb, var(--card-focus-ring) 34%, transparent);
+    --card-editing-badge-bg: color-mix(
+      in srgb,
+      var(--sidebar-active-accent, #7aa6a1) 12%,
+      white
+    );
+    --card-editing-badge-border: color-mix(
+      in srgb,
+      var(--sidebar-active-accent, #7aa6a1) 24%,
+      rgba(15, 23, 42, 0.08)
+    );
+    --card-editing-badge-text: color-mix(
+      in srgb,
+      var(--sidebar-active-accent, #7aa6a1) 70%,
+      #3f4a53
+    );
+
     /* Tag color tokens */
     --tag-slate-bg: #f3f4f6;
     --tag-slate-fg: #4b5563;

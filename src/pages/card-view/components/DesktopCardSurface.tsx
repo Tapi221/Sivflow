@@ -70,6 +70,7 @@ export const DesktopCardSurface = React.memo(function DesktopCardSurface({
           dockToolbarsToTop
           hideBlockToolbars={!isActive}
           saveSignal={saveSignal}
+          saveSignalEnabled={isActive}
           hideFooterActions
           embeddedInPager
           settingsOverride={settings}

@@ -32,6 +32,7 @@ const NEW_SENTINEL = "__new__" as const;
 
 type UseCardEditorSessionParams = {
   selectedCardId: string | null;
+  selectedCardSnapshot?: Card | null;
   folderId?: string;
   autoEdit?: boolean;
 
@@ -48,6 +49,7 @@ type UseCardEditorSessionParams = {
 
 export function useCardEditorSession({
   selectedCardId,
+  selectedCardSnapshot = null,
   folderId,
   autoEdit,
   updateCard,
@@ -101,7 +103,18 @@ export function useCardEditorSession({
   const { effectiveCard } = useCardEntity(
     !normalizedSelectedCardId || isNew ? null : normalizedSelectedCardId,
   );
-  const selectedCard = effectiveCard ?? null;
+  const selectedCard = useMemo(() => {
+    if (effectiveCard) return effectiveCard;
+    if (
+      selectedCardSnapshot &&
+      normalizedSelectedCardId &&
+      normalizedSelectedCardId !== NEW_SENTINEL &&
+      selectedCardSnapshot.id === normalizedSelectedCardId
+    ) {
+      return selectedCardSnapshot;
+    }
+    return null;
+  }, [effectiveCard, normalizedSelectedCardId, selectedCardSnapshot]);
 
   // Mirror refs for use in effect cleanups (always current)
   const selectedCardRef = useRef<Card | null>(null);

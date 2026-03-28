@@ -117,7 +117,7 @@ export function CardViewDesktop({
           ? CARDVIEW_NATURAL_INDEX_COMMIT_DELAY_EDIT_MS
           : CARDVIEW_NATURAL_INDEX_COMMIT_DELAY_VIEW_MS
       }
-      showActiveOutline={!isGlobalEditing}
+      showActiveState={!isGlobalEditing}
       disableItemChrome={isGlobalEditing}
       getCardWidth={() => activePaneWidthPx}
       getKey={(card) => card.id ?? card.docId ?? card.uid}

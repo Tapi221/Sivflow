@@ -24,6 +24,7 @@ interface RootFolderPanelListProps {
   onUnpinItem?: (item: { type: "folder" | "card" | "document"; id: string }) => void;
   setEditingId: React.Dispatch<React.SetStateAction<string | null>>;
   setEditingName: React.Dispatch<React.SetStateAction<string>>;
+  editingNameRef: React.MutableRefObject<string>;
   editingId: string | null;
   editingName: string;
   handleRenameConfirm: () => Promise<void>;
@@ -43,6 +44,7 @@ export function RootFolderPanelList({
   onUnpinItem,
   setEditingId,
   setEditingName,
+  editingNameRef,
   editingId,
   editingName,
   handleRenameConfirm,
@@ -129,13 +131,20 @@ export function RootFolderPanelList({
                   onMouseUp={(e) => {
                     e.preventDefault();
                   }}
-                  onChange={(e) => setEditingName(e.target.value)}
+                  onChange={(e) => {
+                    const nextName = e.target.value;
+                    editingNameRef.current = nextName;
+                    setEditingName(nextName);
+                  }}
                   onClick={(e) => e.stopPropagation()}
                   onPointerDown={(e) => e.stopPropagation()}
                   onKeyDown={(e) => {
                     e.stopPropagation();
+                    const isComposing = e.nativeEvent.isComposing || e.keyCode === 229;
+                    if (e.key === "Enter" && isComposing) return;
                     if (e.key === "Enter") {
                       e.preventDefault();
+                      editingNameRef.current = e.currentTarget.value;
                       void handleRenameConfirm();
                     } else if (e.key === "Escape") {
                       e.preventDefault();
@@ -143,7 +152,10 @@ export function RootFolderPanelList({
                       setEditingName("");
                     }
                   }}
-                  onBlur={() => void handleRenameConfirm()}
+                  onBlur={(e) => {
+                    editingNameRef.current = e.currentTarget.value;
+                    void handleRenameConfirm();
+                  }}
                 />
               ) : (
                 <span

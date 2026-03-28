@@ -247,9 +247,11 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
   return (
     <div
       className={cn(
-        "flex w-full items-center px-2 gap-0",
-        "h-8 min-h-[32px]",
-        "bg-transparent border-0",
+        "flex w-full items-center gap-0 px-2.5",
+        "h-8 min-h-[32px] rounded-xl",
+        "border border-[rgba(148,163,184,0.3)]",
+        "bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(243,246,250,0.9))]",
+        "shadow-[0_5px_14px_rgba(15,23,42,0.08)] backdrop-blur-[2px]",
         className,
       )}
     >

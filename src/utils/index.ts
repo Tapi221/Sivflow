@@ -171,6 +171,7 @@ const normalizeReviewLogs = (rawLogs: unknown): NormalizedReviewLog[] => {
   const pickNumber = (v: unknown): number | null => {
     if (typeof v === "number") return Number.isFinite(v) ? v : null;
     if (typeof v === "string") {
+      if (v.trim() === "") return null;
       const n = Number(v);
       return Number.isFinite(n) ? n : null;
     }
@@ -183,6 +184,16 @@ const normalizeReviewLogs = (rawLogs: unknown): NormalizedReviewLog[] => {
     return r as 1 | 2 | 3 | 4;
   };
 
+  const subjectiveScoreToRating = (n: number): 1 | 2 | 3 | 4 | null => {
+    const rounded = Math.round(n);
+    // Canonical subjectiveScore scale: 0..3 -> rating: 1..4
+    if (rounded >= 0 && rounded <= 3) {
+      return (rounded + 1) as 1 | 2 | 3 | 4;
+    }
+    // Tolerate inconsistent legacy data that already stores 1..4 here
+    return clampRating(rounded);
+  };
+
   const normalized = rawLogs
     .map((item) => {
       const log = asRecord(item);
@@ -191,10 +202,25 @@ const normalizeReviewLogs = (rawLogs: unknown): NormalizedReviewLog[] => {
       const reviewed = normalizeDate(pick(log.reviewedAt, log.reviewed_at));
 
       // ✅ rating が無いログを捨てない（subjectiveScore 系も拾う）
-      const ratingRaw =
-        pickNumber(pick(log.rating, log.ratingNum, log.rating_num)) ??
-        pickNumber(pick(log.subjectiveScore, log.subjective_score)) ??
-        pickNumber(pick(log.lastSubjectiveScore, log.last_subjective_score));
+      const directRatingRaw = pickNumber(
+        pick(log.rating, log.ratingNum, log.rating_num),
+      );
+      const subjectiveScoreRaw = pickNumber(
+        pick(log.subjectiveScore, log.subjective_score),
+      );
+      const lastSubjectiveScoreRaw = pickNumber(
+        pick(log.lastSubjectiveScore, log.last_subjective_score),
+      );
+      const directRating =
+        directRatingRaw === null ? null : clampRating(directRatingRaw);
+      const subjectiveRating =
+        subjectiveScoreRaw === null
+          ? null
+          : subjectiveScoreToRating(subjectiveScoreRaw);
+      const lastSubjectiveRating =
+        lastSubjectiveScoreRaw === null
+          ? null
+          : subjectiveScoreToRating(lastSubjectiveScoreRaw);
 
       const scoreRaw = pickNumber(
         pick(
@@ -214,10 +240,10 @@ const normalizeReviewLogs = (rawLogs: unknown): NormalizedReviewLog[] => {
         ),
       );
 
-      if (!reviewed || ratingRaw === null) return null;
+      if (!reviewed) return null;
 
-      const rating = clampRating(ratingRaw);
-      if (!rating) return null;
+      const rating = directRating ?? subjectiveRating ?? lastSubjectiveRating;
+      if (rating === null) return null;
 
       return {
         reviewedAt: reviewed.toISOString(),

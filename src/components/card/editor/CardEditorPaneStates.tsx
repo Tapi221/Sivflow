@@ -73,7 +73,11 @@ export function NewCardIdleState({
 }
 
 export function CardEditorLoadingState() {
-  return null;
+  return (
+    <div className="flex h-full min-h-[400px] items-center justify-center text-slate-400">
+      <p className="text-xs font-medium">カードを読み込み中...</p>
+    </div>
+  );
 }
 
 

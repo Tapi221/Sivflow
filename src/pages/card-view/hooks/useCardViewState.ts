@@ -74,6 +74,7 @@ export function useCardViewState({
   const pendingCreateCardAfterSaveRef = useRef(false);
   const suppressPagerSyncRef = useRef(false);
   const lockedIndexRef = useRef<number | null>(null);
+  const saveSelectionCardIdRef = useRef<string | null>(null);
   const suppressPagerUnlockTimerRef = useRef<number | null>(null);
   const autoInitializedCardSetIdsRef = useRef<Set<string>>(new Set());
 
@@ -105,12 +106,35 @@ export function useCardViewState({
   // Clamp index to valid range
   const safeCurrentIndex = useMemo(() => {
     if (sortedCards.length === 0) return 0;
-    return Math.min(Math.max(currentIndex, 0), sortedCards.length - 1);
+    const numericIndex = Number.isFinite(currentIndex) ? currentIndex : 0;
+    const integerIndex = Math.trunc(numericIndex);
+    return Math.min(Math.max(integerIndex, 0), sortedCards.length - 1);
   }, [currentIndex, sortedCards.length]);
 
   useEffect(() => {
     if (safeCurrentIndex !== currentIndex) setCurrentIndex(safeCurrentIndex);
   }, [safeCurrentIndex, currentIndex]);
+
+  const lockSelectionToCard = useCallback(
+    (cardId: string | null) => {
+      if (!cardId) return;
+      const nextIndex = cardIndexById.get(cardId);
+      suppressPagerSyncRef.current = true;
+      if (typeof nextIndex !== "number") return;
+      setCurrentIndex(nextIndex);
+      lockedIndexRef.current = nextIndex;
+    },
+    [cardIndexById],
+  );
+
+  const releaseSelectionLock = useCallback(() => {
+    clearSuppressPagerUnlockTimer();
+    suppressPagerUnlockTimerRef.current = window.setTimeout(() => {
+      suppressPagerSyncRef.current = false;
+      lockedIndexRef.current = null;
+      suppressPagerUnlockTimerRef.current = null;
+    }, 220);
+  }, [clearSuppressPagerUnlockTimer]);
 
   // Resolve pending focus card id after card list updates
   useEffect(() => {
@@ -122,13 +146,8 @@ export function useCardViewState({
     lockedIndexRef.current = nextIndex;
     setPendingFocusCardId(null);
 
-    clearSuppressPagerUnlockTimer();
-    suppressPagerUnlockTimerRef.current = window.setTimeout(() => {
-      suppressPagerSyncRef.current = false;
-      lockedIndexRef.current = null;
-      suppressPagerUnlockTimerRef.current = null;
-    }, 220);
-  }, [pendingFocusCardId, cardIndexById, clearSuppressPagerUnlockTimer]);
+    releaseSelectionLock();
+  }, [pendingFocusCardId, cardIndexById, releaseSelectionLock]);
 
   useEffect(
     () => () => {
@@ -260,6 +279,27 @@ export function useCardViewState({
     [updateCard],
   );
 
+  const requestSaveAndLockSelection = useCallback(() => {
+    const selectedId = currentCardIdRef.current;
+    if (selectedId) {
+      saveSelectionCardIdRef.current = selectedId;
+      lockSelectionToCard(selectedId);
+    }
+    setSaveSignal((prev) => prev + 1);
+  }, [lockSelectionToCard]);
+
+  const finishSaveSelectionLock = useCallback(() => {
+    saveSelectionCardIdRef.current = null;
+    releaseSelectionLock();
+  }, [releaseSelectionLock]);
+
+  // 保存中にカード一覧が再評価されても、保存開始時に選んでいたカードを維持する。
+  useEffect(() => {
+    const lockedCardId = saveSelectionCardIdRef.current;
+    if (!lockedCardId) return;
+    lockSelectionToCard(lockedCardId);
+  }, [cardIndexById, lockSelectionToCard]);
+
   const handleToggleViewMode = useCallback(() => {
     const targetId = selectedCard?.id ?? null;
     setPendingFocusCardId(targetId);
@@ -269,11 +309,16 @@ export function useCardViewState({
     setFlippedCardIds(new Set());
     if (isGlobalEditing) {
       pendingExitAfterSaveRef.current = true;
-      setSaveSignal((prev) => prev + 1);
+      requestSaveAndLockSelection();
       return;
     }
     setIsGlobalEditing(true);
-  }, [selectedCard?.id, cardIndexById, isGlobalEditing]);
+  }, [
+    selectedCard?.id,
+    cardIndexById,
+    isGlobalEditing,
+    requestSaveAndLockSelection,
+  ]);
 
   const handlePagerIndexChange = useCallback((idx: number) => {
     if (
@@ -300,6 +345,8 @@ export function useCardViewState({
     setIsMetaOpen,
     pendingExitAfterSaveRef,
     pendingCreateCardAfterSaveRef,
+    requestSaveAndLockSelection,
+    finishSaveSelectionLock,
     selectedCard,
     cardsForPager,
     createAndFocusCard,

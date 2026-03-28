@@ -3,31 +3,39 @@
  *
  * PC 向け縦スクロール式カードページャ。
  * - 固定幅カラムを画面中央に配置、左右は余白
- * - アクティブカード: 青枠＋影（opacity 1）
- * - 非アクティブ: opacity 0.75 程度
+ * - アクティブカード: 控えめな陰影 + 局所アクセント
+ * - 非アクティブ: opacity を少し落として主従を分離
  * - transform による 3D / scale は使わない（物理カード挙動）
  * - キーボード: Space/Enter=flip, ↑/↓=prev/next
  */
 
-import { useCallback, useLayoutEffect, useRef } from "react";
+import { useRef } from "react";
 import { useVerticalCardPager } from "@/hooks/study/useVerticalCardPager";
 import { CANONICAL_CARD_WIDTH } from "@/components/card/common/constants";
+import { cn } from "@/lib/utils";
 
 // ── レイアウト定数 ──────────────────────────────────────────────────────────
-const DEFAULT_CARD_WIDTH = CANONICAL_CARD_WIDTH; // カード列の固定幅 (px) = カード設計幅と一致させて青枠を正確に合わせる
+const DEFAULT_CARD_WIDTH = CANONICAL_CARD_WIDTH;
 const CARD_GAP = 16; // カード間の縦方向ギャップ (px)
 const SCROLL_PADDING = "50vh"; // 先頭・末尾カードを中央に寄せるための余白
+const CARD_RADIUS_SM = 32;
+const CARD_RADIUS_MD = 40;
 
-// アクティブ強調（カルーセル風のフォーカス感）
-const ACTIVE_BOX_SHADOW = "0 10px 30px rgba(15,23,42,0.16)";
-const INACTIVE_BOX_SHADOW = "0 2px 10px rgba(15,23,42,0.08)";
-function cardBorderRadius(cardWidth: number): string {
-  // 青枠がカード本体より丸くならないよう、角丸は 40px を上限にする。
-  const scaled = (40 * cardWidth) / CANONICAL_CARD_WIDTH;
-  return `${Math.round(Math.min(40, Math.max(0, scaled)))}px`;
+function resolveCardBaseRadius(): number {
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+    return CARD_RADIUS_MD;
+  }
+  return window.matchMedia("(min-width: 768px)").matches
+    ? CARD_RADIUS_MD
+    : CARD_RADIUS_SM;
 }
-const ACTIVE_OPACITY = 1;
-const INACTIVE_OPACITY = 0.78;
+
+function cardBorderRadius(cardWidth: number): string {
+  // CardFrame は scale で拡縮されるため、外側ラッパーも同じ比率で角丸を追従させる。
+  const baseRadius = resolveCardBaseRadius();
+  const scaled = (baseRadius * cardWidth) / CANONICAL_CARD_WIDTH;
+  return `${Math.round(Math.max(0, scaled))}px`;
+}
 
 // ── Props ───────────────────────────────────────────────────────────────────
 export type VerticalCardPagerProps<T> = {
@@ -57,7 +65,9 @@ export type VerticalCardPagerProps<T> = {
   naturalIndexCommitDelayMs?: number;
   /** true の間はスクロールで activeIndex を切り替えない */
   freezeActiveIndex?: boolean;
-  /** アクティブ項目の外枠青線を表示するか */
+  /** アクティブ項目の状態強調を表示するか */
+  showActiveState?: boolean;
+  /** @deprecated showActiveState を使用 */
   showActiveOutline?: boolean;
   /** 行ラッパーの見た目装飾（shadow/opacity）を無効化するか */
   disableItemChrome?: boolean;
@@ -77,19 +87,12 @@ export function VerticalCardPager<T>({
   getKey,
   naturalIndexCommitDelayMs = 0,
   freezeActiveIndex = false,
-  showActiveOutline = true,
+  showActiveState,
+  showActiveOutline,
   disableItemChrome = false,
 }: VerticalCardPagerProps<T>) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const outlineRefs = useRef<(HTMLDivElement | null)[]>([]);
-
-  // 青枠を React の再レンダリングを待たずに直接 DOM 更新する
-  const applyOutline = useCallback((idx: number) => {
-    outlineRefs.current.forEach((el, i) => {
-      if (!el) return;
-      el.style.display = i === idx ? "block" : "none";
-    });
-  }, []);
+  const shouldShowActiveState = showActiveState ?? showActiveOutline ?? true;
 
   const { itemRefs } = useVerticalCardPager({
     count: cards.length,
@@ -99,13 +102,7 @@ export function VerticalCardPager<T>({
     onFlip,
     naturalIndexCommitDelayMs,
     freezeActiveIndex,
-    onNearestIndexImmediate: showActiveOutline ? applyOutline : undefined,
   });
-
-  // activeIndex が外部から変わった場合（矢印キー・プログラム遷移）にも同期
-  useLayoutEffect(() => {
-    if (showActiveOutline) applyOutline(activeIndex);
-  }, [activeIndex, showActiveOutline, applyOutline]);
 
   return (
     // スクロールコンテナ: 親から height: 100% を受け取る前提
@@ -137,16 +134,9 @@ export function VerticalCardPager<T>({
             1,
             getCardWidth ? getCardWidth(card, idx, isActive) : cardWidth,
           );
-          const itemBoxShadow = disableItemChrome
-            ? "none"
-            : isActive
-              ? ACTIVE_BOX_SHADOW
-              : INACTIVE_BOX_SHADOW;
-          const itemOpacity = disableItemChrome
-            ? 1
-            : isActive
-              ? ACTIVE_OPACITY
-              : INACTIVE_OPACITY;
+          const shouldHighlight = Boolean(
+            shouldShowActiveState && !disableItemChrome && isActive,
+          );
 
           return (
             <div
@@ -155,26 +145,19 @@ export function VerticalCardPager<T>({
                 itemRefs.current[idx] = el;
               }}
               aria-current={isActive ? "true" : undefined}
-              className="relative"
+              data-card-active={shouldHighlight ? "true" : undefined}
+              data-card-hoverable={disableItemChrome ? undefined : "true"}
+              className={cn(
+                "card-pager-item",
+                disableItemChrome && "card-pager-item--plain",
+              )}
               style={{
                 width,
                 maxWidth: "100%",
-                boxShadow: itemBoxShadow,
                 borderRadius: cardBorderRadius(width),
-                overflow: "visible",
-                opacity: itemOpacity,
-                transition: "opacity 180ms ease, box-shadow 180ms ease",
               }}
             >
               {renderCard(card, idx, isActive)}
-              {showActiveOutline && (
-                <div
-                  ref={(el) => { outlineRefs.current[idx] = el; }}
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-0 border-2 border-[#3b82f6]"
-                  style={{ borderRadius: "inherit", display: isActive ? "block" : "none" }}
-                />
-              )}
             </div>
           );
         })}
