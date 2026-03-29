@@ -3,7 +3,15 @@ import { useQuery } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";
 import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
 import { useSearchParams } from "react-router-dom";
-import { Line, LineChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 import { useAuthSession } from "@/contexts/AuthContext";
 import { RatingCountTiles } from "@/features/study/RatingCountTiles";
@@ -1269,38 +1277,57 @@ function CardMetaPanelInner({
               ))}
             </div>
           </div>
-          <div className="mt-3 h-40 w-full rounded border border-[var(--sidebar-border)] bg-[var(--sidebar-active-bg)] p-1.5">
+          <div className="mt-3 h-40 w-full rounded border border-[var(--sidebar-border)] bg-white/70 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]">
             {chartData.length === 0 ? (
               <div className="flex h-full items-center justify-center text-sm text-[var(--sidebar-text-muted)]">
                 データなし
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0} debounce={1}>
-                <LineChart data={chartData}>
+                <LineChart
+                  data={chartData}
+                  margin={{ top: 8, right: 10, left: 2, bottom: 4 }}
+                >
+                  <CartesianGrid
+                    stroke="rgba(100,116,139,0.2)"
+                    strokeDasharray="3 5"
+                    vertical={false}
+                  />
                   <XAxis
                     dataKey="reviewIndex"
                     ticks={xTicks}
-                    tick={{ fontSize: 10 }}
-                    label={{
-                      value: "復習回数",
-                      position: "insideBottomRight",
-                      offset: -4,
-                      fontSize: 10,
-                    }}
+                    tick={{ fontSize: 10, fill: "var(--sidebar-text-muted)" }}
+                    tickLine={{ stroke: "rgba(100,116,139,0.4)" }}
+                    axisLine={{ stroke: "rgba(100,116,139,0.4)" }}
+                    minTickGap={12}
                   />
                   <YAxis
                     domain={[0, 100]}
-                    tickCount={6}
+                    ticks={[0, 20, 40, 60, 80, 100]}
                     allowDecimals={false}
                     width={36}
-                    tick={{ fontSize: 10 }}
+                    tick={{ fontSize: 10, fill: "var(--sidebar-text-muted)" }}
+                    tickLine={{ stroke: "rgba(100,116,139,0.4)" }}
+                    axisLine={{ stroke: "rgba(100,116,139,0.4)" }}
+                  />
+                  <Tooltip
+                    cursor={{ stroke: "rgba(15,23,42,0.15)", strokeWidth: 1 }}
+                    formatter={(value) => [`${value}%`, "耐性スコア"]}
+                    labelFormatter={(label) => `復習 ${label} 回目`}
+                    contentStyle={{
+                      borderRadius: 8,
+                      border: "1px solid rgba(100,116,139,0.25)",
+                      boxShadow: "0 6px 20px rgba(15, 23, 42, 0.12)",
+                    }}
                   />
                   <Line
                     type="monotone"
                     dataKey="resistanceScore"
-                    stroke="#0f172a"
-                    strokeWidth={2}
-                    dot={false}
+                    stroke="#0f766e"
+                    strokeWidth={2.5}
+                    dot={{ r: chartData.length === 1 ? 5 : 2.5, fill: "#0f766e" }}
+                    activeDot={{ r: 6, strokeWidth: 0 }}
+                    connectNulls
                   />
                 </LineChart>
               </ResponsiveContainer>

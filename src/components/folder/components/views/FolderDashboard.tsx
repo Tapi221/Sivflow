@@ -293,6 +293,7 @@ export function FolderDashboard({
   handlers,
   onRenameFolder,
 }: FolderDashboardProps) {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   // ── View state ──────────────────────────────────────────────────────────────
   const [viewMode, setViewMode] = useState<ViewMode>("carousel");
   const [sortKey, setSortKey] = useState<SortKey>("order");
@@ -518,8 +519,17 @@ export function FolderDashboard({
   const isFilterActive =
     filterDraftState !== "all" || filterReviewed !== "all";
 
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    container.scrollTop = 0;
+  }, [folderId]);
+
   return (
-    <div style={{ height: "100%", overflowY: "auto", background: "#ffffff" }}>
+    <div
+      ref={scrollContainerRef}
+      style={{ height: "100%", overflowY: "auto", background: "#ffffff" }}
+    >
 
       {/* ── Page header ──────────────────────────────────────────────────────── */}
       <div

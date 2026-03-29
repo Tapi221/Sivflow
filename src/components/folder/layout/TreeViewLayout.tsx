@@ -105,6 +105,12 @@ function TreeViewLayout({
     startResizing,
   } = useTreeViewSidebar();
 
+  useEffect(() => {
+    const scroller = contentScrollRef.current;
+    if (!scroller) return;
+    scroller.scrollTop = 0;
+  }, [contentScrollRef, selectedFolderId, navigateToSectionListToken]);
+
   const {
     getFolderPath,
     selectedFolder,
@@ -445,7 +451,7 @@ function TreeViewLayout({
   return (
     <div
       className={cn(
-        "relative flex h-full min-h-0 items-stretch overflow-hidden border-0 bg-transparent",
+        "relative flex h-full min-h-0 w-full items-stretch overflow-hidden border-0 bg-transparent",
         isResizing && "select-none cursor-col-resize",
       )}
     >

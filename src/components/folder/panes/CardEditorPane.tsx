@@ -50,7 +50,8 @@ interface CardEditorPaneProps {
   embeddedInPager?: boolean;
   pairGapClassName?: string;
   onRequestCloseEditing?: () => void;
-  highlightActiveCards?: boolean;
+  isPagerActiveCard?: boolean;
+  showResizeHandle?: boolean;
 }
 
 type FlashcardCardLike = Record<string, unknown> & {
@@ -86,7 +87,8 @@ type EditorSidePaneProps = {
   dockToolbarInsideCardEdge: boolean;
   setDockedToolbarMount: (value: HTMLDivElement | null) => void;
   shouldShowEditingBadge: boolean;
-  highlightActiveCards: boolean;
+  isPagerActiveCard: boolean;
+  showResizeHandle: boolean;
   editorCardFixedScale?: number;
   editorCardHeightPx: number;
   onHeightChange: (heightPx: number) => void;
@@ -118,7 +120,8 @@ function EditorSidePaneInner({
   dockToolbarInsideCardEdge,
   setDockedToolbarMount,
   shouldShowEditingBadge,
-  highlightActiveCards,
+  isPagerActiveCard,
+  showResizeHandle,
   editorCardFixedScale,
   editorCardHeightPx,
   onHeightChange,
@@ -174,10 +177,10 @@ function EditorSidePaneInner({
         className={cn(
           CARD_SHELL_COMMON_CLASS_NAME,
           shouldShowEditingBadge && "card-shell--editing",
-          highlightActiveCards && "card-shell--active",
+          isPagerActiveCard && "card-shell--active",
         )}
         resizable
-        showResizeHandle
+        showResizeHandle={showResizeHandle}
         resizeStepPx={CARD_ROW_PX}
         heightPx={editorCardHeightPx}
         lockHeight
@@ -230,7 +233,7 @@ const areEditorSidePanePropsEqual = (
   prev.shouldDockToolbarToCardTop === next.shouldDockToolbarToCardTop &&
   prev.dockToolbarInsideCardEdge === next.dockToolbarInsideCardEdge &&
   prev.shouldShowEditingBadge === next.shouldShowEditingBadge &&
-  prev.highlightActiveCards === next.highlightActiveCards &&
+  prev.isPagerActiveCard === next.isPagerActiveCard &&
   prev.editorCardFixedScale === next.editorCardFixedScale &&
   prev.editorCardHeightPx === next.editorCardHeightPx &&
   prev.actionsTopLeft === next.actionsTopLeft &&
@@ -263,7 +266,8 @@ export function CardEditorPane({
   embeddedInPager = false,
   pairGapClassName = "gap-6",
   onRequestCloseEditing,
-  highlightActiveCards = false,
+  isPagerActiveCard = false,
+  showResizeHandle: showResizeHandleProp = true,
 }: CardEditorPaneProps) {
   const controller = useCardEditorPaneController({
     selectedCardId,
@@ -386,7 +390,7 @@ export function CardEditorPane({
     hideBlockToolbars,
     forcedPaneWidthPx,
     usesExternalToolbarMount,
-    highlightActiveCards,
+    isPagerActiveCard,
     isEditing,
     isMetaOpen,
     normalizedSelectedCardId,
@@ -590,7 +594,8 @@ export function CardEditorPane({
                     dockToolbarInsideCardEdge={shouldKeepDockedToolbarInsideCard}
                     setDockedToolbarMount={setToolbarMountQInternal}
                     shouldShowEditingBadge={shouldShowEditingBadge}
-                    highlightActiveCards={highlightActiveCards}
+                    isPagerActiveCard={isPagerActiveCard}
+                    showResizeHandle={showResizeHandleProp}
                     editorCardFixedScale={editorCardFixedScale}
                     editorCardHeightPx={editorCardHeightPx}
                     onHeightChange={handleEditorHeightChange}
@@ -624,7 +629,8 @@ export function CardEditorPane({
                     dockToolbarInsideCardEdge={shouldKeepDockedToolbarInsideCard}
                     setDockedToolbarMount={setToolbarMountAInternal}
                     shouldShowEditingBadge={shouldShowEditingBadge}
-                    highlightActiveCards={highlightActiveCards}
+                    isPagerActiveCard={isPagerActiveCard}
+                    showResizeHandle={showResizeHandleProp}
                     editorCardFixedScale={editorCardFixedScale}
                     editorCardHeightPx={editorCardHeightPx}
                     onHeightChange={handleEditorHeightChange}

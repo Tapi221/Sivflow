@@ -38,7 +38,7 @@ interface UseCardEditorPaneWidthParams {
   hideBlockToolbars: boolean;
   forcedPaneWidthPx: number | null;
   usesExternalToolbarMount: boolean;
-  highlightActiveCards: boolean;
+  isPagerActiveCard: boolean;
   isEditing: boolean;
   isMetaOpen: boolean;
   normalizedSelectedCardId: string | null;
@@ -54,7 +54,7 @@ export function useCardEditorPaneWidth({
   hideBlockToolbars,
   forcedPaneWidthPx,
   usesExternalToolbarMount,
-  highlightActiveCards,
+  isPagerActiveCard,
   isEditing,
   isMetaOpen,
   normalizedSelectedCardId,
@@ -180,7 +180,7 @@ export function useCardEditorPaneWidth({
     !dockToolbarsToTop &&
     !hideBlockToolbars &&
     !usesExternalToolbarMount;
-  const shouldShowEditingBadge = !embeddedInPager || highlightActiveCards;
+  const shouldShowEditingBadge = !embeddedInPager || isPagerActiveCard;
 
   const shouldApplyPaneWidth =
     (showWidthControl && contentViewportWidth > 0) || forcedPaneWidthPx != null;

@@ -9,7 +9,13 @@
  * - キーボード: Space/Enter=flip, ↑/↓=prev/next
  */
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { useVerticalCardPager } from "@/hooks/study/useVerticalCardPager";
 import { CANONICAL_CARD_WIDTH } from "@/components/card/common/constants";
 import { cn } from "@/lib/utils";
@@ -18,6 +24,9 @@ import { cn } from "@/lib/utils";
 const DEFAULT_CARD_WIDTH = CANONICAL_CARD_WIDTH;
 const CARD_GAP = 16; // カード間の縦方向ギャップ (px)
 const SCROLL_PADDING = "50vh"; // 先頭・末尾カードを中央に寄せるための余白
+const VISIBLE_RANGE_OVERSCAN_PX = 2800; // 画面外を先描画して高速スクロール時の遅延を防ぐ
+const ACTIVE_INDEX_RENDER_RADIUS = 6; // 可視範囲更新前でも近傍は実描画して取りこぼしを減らす
+const PLACEHOLDER_HEIGHT_PX = 900;
 const CARD_RADIUS_SM = 32;
 const CARD_RADIUS_MD = 40;
 
@@ -65,22 +74,10 @@ export type VerticalCardPagerProps<T> = {
   naturalIndexCommitDelayMs?: number;
   /** true の間はスクロールで activeIndex を切り替えない */
   freezeActiveIndex?: boolean;
-  /** アクティブ項目の状態強調を表示するか */
-  showActiveState?: boolean;
-  /** @deprecated showActiveState を使用 */
-  showActiveOutline?: boolean;
   /** 行ラッパーの見た目装飾（shadow/opacity）を無効化するか */
   disableItemChrome?: boolean;
-  /**
-   * activeIndex の前後何枚まで実カードを描画するか。
-   * 範囲外は軽量プレースホルダに置き換えてレンダリング負荷を下げる。
-   * undefined/null の場合は全カードを描画する。
-   */
-  renderWindowRadius?: number | null;
-  /** プレースホルダの推定高さ(px)を返す関数 */
-  getEstimatedHeight?: (card: T, idx: number, isActive: boolean) => number;
-  /** レイアウト変更時の再センタリング用シグナル */
-  recenterSignal?: number | string;
+  /** true の場合、全カードを常時実描画して仮想化を無効化 */
+  disableVirtualization?: boolean;
 };
 
 // ── コンポーネント ───────────────────────────────────────────────────────────
@@ -97,22 +94,17 @@ export function VerticalCardPager<T>({
   getKey,
   naturalIndexCommitDelayMs = 0,
   freezeActiveIndex = false,
-  showActiveState,
-  showActiveOutline,
   disableItemChrome = false,
-  renderWindowRadius = null,
-  getEstimatedHeight,
-  recenterSignal,
+  disableVirtualization = false,
 }: VerticalCardPagerProps<T>) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const avgItemExtentRef = useRef(900);
   const visibleRangeRafRef = useRef<number | null>(null);
   const visibleRangeRef = useRef<{ start: number; end: number } | null>(null);
-  const shouldShowActiveState = showActiveState ?? showActiveOutline ?? true;
   const [visibleRange, setVisibleRange] = useState<{
     start: number;
     end: number;
   } | null>(null);
-  const [hasMeasuredVisibleRange, setHasMeasuredVisibleRange] = useState(false);
 
   const { itemRefs } = useVerticalCardPager({
     count: cards.length,
@@ -122,47 +114,100 @@ export function VerticalCardPager<T>({
     onFlip,
     naturalIndexCommitDelayMs,
     freezeActiveIndex,
-    recenterSignal,
   });
 
   const updateVisibleRange = useCallback(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    const containerRect = container.getBoundingClientRect();
-    const top = containerRect.top;
-    const bottom = containerRect.bottom;
-
-    let start = -1;
-    let end = -1;
-
-    for (let idx = 0; idx < cards.length; idx += 1) {
-      const el = itemRefs.current[idx];
-      if (!el) continue;
-      const rect = el.getBoundingClientRect();
-      if (rect.bottom < top) continue;
-      if (rect.top > bottom) {
-        if (start !== -1) break;
-        continue;
-      }
-      if (start === -1) start = idx;
-      end = idx;
+    if (disableVirtualization) {
+      visibleRangeRef.current = null;
+      setVisibleRange(null);
+      return;
     }
 
-    const nextRange = start === -1 ? null : { start, end };
+    if (cards.length === 0) {
+      visibleRangeRef.current = null;
+      setVisibleRange(null);
+      return;
+    }
+
+    const top = container.scrollTop - VISIBLE_RANGE_OVERSCAN_PX;
+    const bottom =
+      container.scrollTop + container.clientHeight + VISIBLE_RANGE_OVERSCAN_PX;
+    const estimatedIndex = Math.max(
+      0,
+      Math.min(
+        cards.length - 1,
+        Math.round(container.scrollTop / Math.max(1, avgItemExtentRef.current)),
+      ),
+    );
+
+    const getItemTop = (idx: number): number | null => {
+      const el = itemRefs.current[idx];
+      if (!el) return null;
+      return el.offsetTop;
+    };
+    const getItemBottom = (idx: number): number | null => {
+      const el = itemRefs.current[idx];
+      if (!el) return null;
+      return el.offsetTop + el.offsetHeight;
+    };
+
+    let start = Math.max(0, estimatedIndex - ACTIVE_INDEX_RENDER_RADIUS);
+
+    while (start > 0) {
+      const prevBottom = getItemBottom(start - 1);
+      if (prevBottom == null || prevBottom < top) break;
+      start -= 1;
+    }
+    while (start < cards.length) {
+      const currentBottom = getItemBottom(start);
+      if (currentBottom == null) {
+        start += 1;
+        continue;
+      }
+      if (currentBottom >= top) break;
+      start += 1;
+    }
+
+    let nextRange: { start: number; end: number } | null = null;
+    if (start < cards.length) {
+      let end = Math.max(start, estimatedIndex + ACTIVE_INDEX_RENDER_RADIUS);
+      if (end >= cards.length) end = cards.length - 1;
+
+      while (end + 1 < cards.length) {
+        const nextTop = getItemTop(end + 1);
+        if (nextTop == null || nextTop > bottom) break;
+        end += 1;
+      }
+      while (end >= start) {
+        const endTop = getItemTop(end);
+        if (endTop != null && endTop <= bottom) break;
+        end -= 1;
+      }
+      if (end >= start) nextRange = { start, end };
+    }
+
+    if (nextRange != null) {
+      const sampleEl = itemRefs.current[Math.min(nextRange.end, activeIndex)];
+      if (sampleEl) {
+        const extent = Math.max(1, sampleEl.offsetHeight + CARD_GAP);
+        avgItemExtentRef.current = avgItemExtentRef.current * 0.8 + extent * 0.2;
+      }
+    }
+
     const prevRange = visibleRangeRef.current;
     if (
       prevRange?.start === nextRange?.start &&
       prevRange?.end === nextRange?.end
     ) {
-      if (!hasMeasuredVisibleRange) setHasMeasuredVisibleRange(true);
       return;
     }
 
     visibleRangeRef.current = nextRange;
     setVisibleRange(nextRange);
-    if (!hasMeasuredVisibleRange) setHasMeasuredVisibleRange(true);
-  }, [cards.length, hasMeasuredVisibleRange, itemRefs]);
+  }, [activeIndex, cards.length, disableVirtualization, itemRefs]);
 
   const scheduleVisibleRangeUpdate = useCallback(() => {
     if (visibleRangeRafRef.current != null) return;
@@ -172,15 +217,27 @@ export function VerticalCardPager<T>({
     });
   }, [updateVisibleRange]);
 
+  useLayoutEffect(() => {
+    if (disableVirtualization) return;
+    updateVisibleRange();
+  }, [disableVirtualization, updateVisibleRange]);
+
   useEffect(() => {
+    if (disableVirtualization) {
+      visibleRangeRef.current = null;
+      setVisibleRange(null);
+      return;
+    }
     scheduleVisibleRangeUpdate();
 
     const container = containerRef.current;
     if (!container) return;
 
-    const handleScroll = () => scheduleVisibleRangeUpdate();
+    const handleScroll = () => updateVisibleRange();
     container.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", handleScroll, { passive: true });
+    window.addEventListener("resize", scheduleVisibleRangeUpdate, {
+      passive: true,
+    });
 
     const observer =
       typeof ResizeObserver !== "undefined"
@@ -190,14 +247,19 @@ export function VerticalCardPager<T>({
 
     return () => {
       container.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleScroll);
+      window.removeEventListener("resize", scheduleVisibleRangeUpdate);
       observer?.disconnect();
       if (visibleRangeRafRef.current != null) {
         window.cancelAnimationFrame(visibleRangeRafRef.current);
         visibleRangeRafRef.current = null;
       }
     };
-  }, [cards.length, scheduleVisibleRangeUpdate]);
+  }, [
+    cards.length,
+    disableVirtualization,
+    scheduleVisibleRangeUpdate,
+    updateVisibleRange,
+  ]);
 
   return (
     // スクロールコンテナ: 親から height: 100% を受け取る前提
@@ -228,21 +290,15 @@ export function VerticalCardPager<T>({
             visibleRange != null &&
             idx >= visibleRange.start &&
             idx <= visibleRange.end;
-          const withinRenderWindow =
-            renderWindowRadius == null
-              ? true
-              : Math.abs(idx - activeIndex) <= renderWindowRadius;
           const shouldRenderCard =
-            !hasMeasuredVisibleRange || withinRenderWindow || isVisibleInViewport;
+            disableVirtualization ||
+            isVisibleInViewport ||
+            Math.abs(idx - activeIndex) <= ACTIVE_INDEX_RENDER_RADIUS;
           const key = getKey ? getKey(card, idx) : idx;
           const width = Math.max(
             1,
             getCardWidth ? getCardWidth(card, idx, isActive) : cardWidth,
           );
-          const shouldHighlight = Boolean(
-            shouldShowActiveState && !disableItemChrome && isActive,
-          );
-
           return (
             <div
               key={key}
@@ -250,7 +306,7 @@ export function VerticalCardPager<T>({
                 itemRefs.current[idx] = el;
               }}
               aria-current={isActive ? "true" : undefined}
-              data-card-active={shouldHighlight ? "true" : undefined}
+              data-card-active={isActive ? "true" : undefined}
               data-card-hoverable={disableItemChrome ? undefined : "true"}
               className={cn(
                 "card-pager-item",
@@ -271,9 +327,7 @@ export function VerticalCardPager<T>({
                   style={{
                     height: `${Math.max(
                       1,
-                      Math.round(
-                        getEstimatedHeight?.(card, idx, isActive) ?? 900,
-                      ),
+                      Math.round(PLACEHOLDER_HEIGHT_PX),
                     )}px`,
                     contentVisibility: "auto",
                     containIntrinsicSize: "900px 1200px",

@@ -129,11 +129,8 @@ export function useCardViewState({
 
   const releaseSelectionLock = useCallback(() => {
     clearSuppressPagerUnlockTimer();
-    suppressPagerUnlockTimerRef.current = window.setTimeout(() => {
-      suppressPagerSyncRef.current = false;
-      lockedIndexRef.current = null;
-      suppressPagerUnlockTimerRef.current = null;
-    }, 220);
+    suppressPagerSyncRef.current = false;
+    lockedIndexRef.current = null;
   }, [clearSuppressPagerUnlockTimer]);
 
   // Resolve pending focus card id after card list updates

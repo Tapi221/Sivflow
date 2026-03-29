@@ -257,12 +257,12 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
 
   useEffect(() => {
     if (desktopLayout !== "vertical") {
-      setVerticalFixedLeft(null);
       return;
     }
     if (typeof window === "undefined") return;
 
     let rafId: number | null = null;
+    let resizeObserver: ResizeObserver | null = null;
     const VERTICAL_TOOLBAR_WIDTH_PX = 44; // w-11
     const update = () => {
       const el = verticalAnchorRef.current;
@@ -290,14 +290,21 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
 
     update();
     window.addEventListener("resize", scheduleUpdate);
-    window.addEventListener("scroll", scheduleUpdate, true);
+    const anchorEl = verticalAnchorRef.current;
+    if (anchorEl && typeof ResizeObserver !== "undefined") {
+      resizeObserver = new ResizeObserver(scheduleUpdate);
+      resizeObserver.observe(anchorEl);
+      if (anchorEl.parentElement) {
+        resizeObserver.observe(anchorEl.parentElement);
+      }
+    }
 
     return () => {
       if (rafId !== null) {
         window.cancelAnimationFrame(rafId);
       }
+      resizeObserver?.disconnect();
       window.removeEventListener("resize", scheduleUpdate);
-      window.removeEventListener("scroll", scheduleUpdate, true);
     };
   }, [desktopLayout]);
 

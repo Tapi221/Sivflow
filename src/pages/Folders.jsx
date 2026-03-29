@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { getPageRuledBg } from "@/components/card/frame/ruledStyles";
 import { useSearchParams } from "react-router-dom";
 import { useCards } from "@/hooks/card/useCards";
@@ -25,6 +25,46 @@ export default function Folders() {
 
   const pendingUrlSyncRef = useRef(null);
 
+  const notifyMainSidebarFolderSelection = useCallback((folderId) => {
+    window.dispatchEvent(
+      new CustomEvent("folders:selected-folder-changed", {
+        detail: { folderId: folderId ?? null },
+      }),
+    );
+  }, []);
+
+  const syncSelectionToUrl = useCallback(
+    (nextFolderId, nextItem) => {
+      const next = new URLSearchParams(queryString);
+
+      if (nextFolderId) {
+        next.set("folderId", nextFolderId);
+      } else {
+        next.delete("folderId");
+      }
+
+      if (nextItem?.type === "card") {
+        next.set("cardId", nextItem.id);
+        next.delete("docId");
+      } else if (nextItem?.type === "document") {
+        next.set("docId", nextItem.id);
+        next.delete("cardId");
+      } else {
+        next.delete("cardId");
+        next.delete("docId");
+      }
+
+      const target = next.toString();
+      if (queryString !== target) {
+        pendingUrlSyncRef.current = target;
+        setSearchParams(next, { replace: true });
+      } else if (pendingUrlSyncRef.current === queryString) {
+        pendingUrlSyncRef.current = null;
+      }
+    },
+    [queryString, setSearchParams],
+  );
+
   // 選択状態
   const [selectedFolderId, setSelectedFolderId] = useState(() => {
     if (queryFolderId) return queryFolderId;
@@ -49,6 +89,24 @@ export default function Folders() {
   const selectedCardId = selectedItem?.type === "card" ? selectedItem.id : null;
   const selectedDocumentId =
     selectedItem?.type === "document" ? selectedItem.id : null;
+
+  useEffect(() => {
+    const resetMainScroll = () => {
+      const main = document.querySelector(".app-layout__main");
+      if (main instanceof HTMLElement) {
+        main.scrollTop = 0;
+      }
+    };
+
+    resetMainScroll();
+    const raf = window.requestAnimationFrame(resetMainScroll);
+    return () => window.cancelAnimationFrame(raf);
+  }, [
+    selectedFolderId,
+    selectedItem?.type,
+    selectedItem?.id,
+    queryString,
+  ]);
 
   useEffect(() => {
     const next = new URLSearchParams(queryString);
@@ -148,21 +206,28 @@ export default function Folders() {
 
   // --- 選択ハンドラ ---
   const handleSelectFolderInWork = (folderId) => {
+    notifyMainSidebarFolderSelection(folderId);
     setSelectedFolderId(folderId);
     setSelectedItem(null);
+    syncSelectionToUrl(folderId, null);
   };
 
   const handleSelectCardInWork = (cardId) => {
-    setSelectedItem({ type: "card", id: cardId });
+    const nextItem = { type: "card", id: cardId };
+    setSelectedItem(nextItem);
+    syncSelectionToUrl(selectedFolderId, nextItem);
   };
 
   const handleSelectDocumentInWork = (docId) => {
-    setSelectedItem({ type: "document", id: docId });
+    const nextItem = { type: "document", id: docId };
+    setSelectedItem(nextItem);
+    syncSelectionToUrl(selectedFolderId, nextItem);
   };
 
   const handleSelectItemInWork = (item) => {
     if (!item) {
       setSelectedItem(null);
+      syncSelectionToUrl(selectedFolderId, null);
       return;
     }
 
@@ -177,20 +242,26 @@ export default function Folders() {
     }
 
     if (item.type === "directory") {
+      notifyMainSidebarFolderSelection(null);
       setSelectedItem({ type: "directory" });
       setSelectedFolderId(null);
+      syncSelectionToUrl(null, null);
       return;
     }
 
     if (item.type === "gallery") {
+      notifyMainSidebarFolderSelection(null);
       setSelectedItem({ type: "gallery" });
       setSelectedFolderId(null);
+      syncSelectionToUrl(null, null);
       return;
     }
 
     if (item.type === "calendar") {
+      notifyMainSidebarFolderSelection(null);
       setSelectedItem({ type: "calendar" });
       setSelectedFolderId(null);
+      syncSelectionToUrl(null, null);
       return;
     }
 
@@ -200,8 +271,10 @@ export default function Folders() {
     }
 
     if (item.type === "trash") {
+      notifyMainSidebarFolderSelection(null);
       setSelectedItem({ type: "trash" });
       setSelectedFolderId(null);
+      syncSelectionToUrl(null, null);
     }
   };
 
@@ -219,8 +292,10 @@ export default function Folders() {
 
   useEffect(() => {
     registerFolderSelectHandler((folderId) => {
+      notifyMainSidebarFolderSelection(folderId ?? null);
       setSelectedFolderId(folderId ?? null);
       setSelectedItem(null);
+      syncSelectionToUrl(folderId ?? null, null);
 
       // パンくずの「セクション一覧」クリック時に、大元のフォルダ一覧へ戻す
       if (!folderId) {
@@ -234,7 +309,11 @@ export default function Folders() {
         setNavigateToSectionListToken((n) => n + 1);
       }
     });
-  }, [registerFolderSelectHandler]);
+  }, [
+    registerFolderSelectHandler,
+    syncSelectionToUrl,
+    notifyMainSidebarFolderSelection,
+  ]);
 
   useEffect(() => {
     const crumbs = [ ];
@@ -287,10 +366,10 @@ export default function Folders() {
   return (
     <div
       className={cn(
-        "bg-[#F8FAFB] transition-colors duration-500 relative",
+        "bg-[#F8FAFB] transition-colors duration-500 relative flex min-h-0 h-full flex-col",
         isDesktop
-          ? "h-full overflow-hidden"
-          : "h-full overflow-x-hidden overflow-y-auto",
+          ? "overflow-hidden"
+          : "overflow-x-hidden overflow-y-auto",
       )}
     >
       <div
@@ -299,7 +378,7 @@ export default function Folders() {
           ...getPageRuledBg(),
         }}
       />
-      <div className="w-full mx-auto h-full">
+      <div className="relative z-10 w-full mx-auto h-full min-h-0 flex">
         {isLoading ? (
           <div className="space-y-3 p-4">
             {[...Array(3)].map((_, i) => (

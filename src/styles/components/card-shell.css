@@ -250,7 +250,7 @@
     content: "編集中";
     position: absolute;
     left: 50%;
-    top: 10px;
+    top: 0;
     transform: translateX(-50%);
     padding: 1px 8px;
     border-radius: 9999px;
@@ -322,6 +322,13 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.95);
   }
 
+  /* Pager上では、非アクティブ項目に編集バッジを出さない（誤選択表示の再発防止） */
+  .card-pager-item:not([data-card-active="true"])
+    .card-shell.card-shell--editing::before {
+    content: none;
+    display: none;
+  }
+
   .card-pager-item:has(:focus-visible) {
     box-shadow:
       var(--card-focus-ring-shadow, 0 0 0 2px rgba(122, 166, 161, 0.25)),
@@ -336,6 +343,14 @@
 
   .card-pager-item--plain {
     opacity: 1;
+    box-shadow: none;
+  }
+
+  .card-pager-item--plain[data-card-active="true"] {
+    box-shadow: none;
+  }
+
+  .card-pager-item--plain:has(:focus-visible) {
     box-shadow: none;
   }
 

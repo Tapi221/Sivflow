@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import React, { Suspense, useEffect, useRef, useState } from "react";
 import { Outlet, useLocation, useSearchParams } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import "./AppLayout.css";
@@ -22,14 +22,53 @@ export function AppLayout() {
   const isCardEditRoute = /^\/cardedit(?:\/|$)/i.test(pathname);
   const selectedFolderId = searchParams.get("folderId");
   const selectedCardSetId = searchParams.get("cardSetId");
+  const [instantFolderId, setInstantFolderId] = useState<string | null>(null);
+  const mainRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const onFolderSelectionChanged = (event: Event) => {
+      const customEvent = event as CustomEvent<{ folderId?: string | null }>;
+      setInstantFolderId(customEvent.detail?.folderId ?? null);
+    };
+
+    window.addEventListener(
+      "folders:selected-folder-changed",
+      onFolderSelectionChanged as EventListener,
+    );
+
+    return () => {
+      window.removeEventListener(
+        "folders:selected-folder-changed",
+        onFolderSelectionChanged as EventListener,
+      );
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isFoldersRoute) {
+      setInstantFolderId(null);
+      return;
+    }
+    setInstantFolderId(selectedFolderId ?? null);
+  }, [isFoldersRoute, selectedFolderId]);
+
+  const effectiveFolderId = instantFolderId ?? selectedFolderId;
   const shouldHideMainSidebar =
-    (isFoldersRoute && Boolean(selectedFolderId)) ||
+    (isFoldersRoute && Boolean(effectiveFolderId)) ||
     ((isCardViewRoute || isCardEditRoute) && Boolean(selectedCardSetId));
   const isScrollLocked =
     isFoldersRoute ||
     isCardEditRoute ||
     isCardViewRoute ||
     /^\/study(?:\/|$)/i.test(pathname);
+
+  useEffect(() => {
+    const main = mainRef.current;
+    if (!main) return;
+    // locked/unlocked に関わらず、ルート遷移時はスクロール位置を必ず初期化する。
+    // overflow: hidden 状態でも scrollTop は保持されるため、明示的にリセットする。
+    main.scrollTop = 0;
+  }, [pathname, isScrollLocked]);
 
   return (
     <div
@@ -40,9 +79,19 @@ export function AppLayout() {
         .filter(Boolean)
         .join(" ")}
     >
-      {!shouldHideMainSidebar && <Sidebar />}
+      <div
+        className={[
+          "app-layout__sidebar",
+          shouldHideMainSidebar ? "app-layout__sidebar--hidden" : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+      >
+        <Sidebar />
+      </div>
       <div className="app-layout__content">
         <main
+          ref={mainRef}
           className={[
             "app-layout__main",
             isScrollLocked ? "app-layout__main--locked" : "",

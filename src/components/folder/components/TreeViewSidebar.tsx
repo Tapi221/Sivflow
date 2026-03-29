@@ -52,7 +52,7 @@ export function TreeViewSidebar({
         showMobileDetail ? "hidden md:flex" : "flex",
         isResizing
           ? "transition-none will-change-[width]"
-          : "transition-all duration-300 ease-in-out",
+          : "transition-[width,border-color,box-shadow] duration-150 ease-out",
         "w-[100dvw] max-w-[100dvw] md:w-auto md:max-w-none",
         !isSidebarOpen &&
           "md:w-0 md:border-0 md:overflow-hidden md:shadow-none",

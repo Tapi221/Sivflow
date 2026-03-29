@@ -17,6 +17,7 @@ type ImageFrameProps = {
   editable?: boolean;
   onImageClick?: () => void;
   onTransformChange?: (next: { scale: number; x: number }) => void;
+  onTransformCommit?: (next: { scale: number; x: number }) => void;
   onNaturalSize?: (size: { naturalW: number; naturalH: number }) => void;
   onError?: () => void;
 };
@@ -33,6 +34,7 @@ export function ImageFrame({
   editable = false,
   onImageClick,
   onTransformChange,
+  onTransformCommit,
   onNaturalSize,
   onError,
 }: ImageFrameProps) {
@@ -42,12 +44,15 @@ export function ImageFrame({
     pointerId: number;
     startX: number;
     startNormalizedX: number;
+    currentNormalizedX: number;
     started: boolean;
   } | null>(null);
   const suppressClickRef = React.useRef(false);
   const [frameW, setFrameW] = React.useState(0);
   const [frameScaleX, setFrameScaleX] = React.useState(1);
+  const frameMetricsRef = React.useRef({ width: 0, scaleX: 1 });
   const [isDragging, setIsDragging] = React.useState(false);
+  const [dragX, setDragX] = React.useState<number | null>(null);
   const [loadedNaturalSize, setLoadedNaturalSize] = React.useState<{
     naturalW: number;
     naturalH: number;
@@ -55,6 +60,7 @@ export function ImageFrame({
 
   const safeScale = clamp(Number(scale ?? 1), 0.2, 1);
   const safeX = clamp(Number(x ?? 0), -1, 1);
+  const activeX = clamp(Number(dragX ?? safeX), -1, 1);
   const safeNaturalW = Number(loadedNaturalSize?.naturalW ?? naturalW ?? 0);
   const safeNaturalH = Number(loadedNaturalSize?.naturalH ?? naturalH ?? 0);
   const ratio =
@@ -62,12 +68,14 @@ export function ImageFrame({
   const frameH = Math.max(1, frameW * ratio * safeScale);
   const imgW = frameW * safeScale;
   const empty = Math.max(0, frameW - imgW);
-  const leftPx = clamp(((safeX + 1) / 2) * empty, 0, empty);
+  const leftPx = clamp(((activeX + 1) / 2) * empty, 0, empty);
+  const transformCallback =
+    onTransformCommit ?? onTransformChange ?? undefined;
   const dragEnabled =
     editable &&
     safeScale < 0.999 &&
     empty > 0 &&
-    typeof onTransformChange === "function";
+    typeof transformCallback === "function";
 
   React.useEffect(() => {
     const node = frameRef.current;
@@ -77,10 +85,18 @@ export function ImageFrame({
       const layoutW = node.offsetWidth || rectW;
       const nextScaleX =
         node.offsetWidth > 0 ? rectW / node.offsetWidth : 1;
+      const safeNextScaleX =
+        Number.isFinite(nextScaleX) && nextScaleX > 0 ? nextScaleX : 1;
+      const prev = frameMetricsRef.current;
+      if (
+        Math.abs(prev.width - layoutW) < 0.5 &&
+        Math.abs(prev.scaleX - safeNextScaleX) < 0.001
+      ) {
+        return;
+      }
+      frameMetricsRef.current = { width: layoutW, scaleX: safeNextScaleX };
       setFrameW(layoutW);
-      setFrameScaleX(
-        Number.isFinite(nextScaleX) && nextScaleX > 0 ? nextScaleX : 1,
-      );
+      setFrameScaleX(safeNextScaleX);
     };
     update();
     const observer = new ResizeObserver(update);
@@ -118,17 +134,18 @@ export function ImageFrame({
         cursor: dragEnabled ? (isDragging ? "grabbing" : "grab") : undefined,
       }}
       onPointerDown={(event) => {
-        if (!dragEnabled || !onTransformChange) return;
+        if (!dragEnabled) return;
         event.stopPropagation();
         dragRef.current = {
           pointerId: event.pointerId,
           startX: event.clientX,
-          startNormalizedX: safeX,
+          startNormalizedX: activeX,
+          currentNormalizedX: activeX,
           started: false,
         };
       }}
       onPointerMove={(event) => {
-        if (!dragEnabled || !onTransformChange || !dragRef.current) return;
+        if (!dragEnabled || !dragRef.current) return;
         if (event.pointerId !== dragRef.current.pointerId) return;
         const deltaX = event.clientX - dragRef.current.startX;
         if (!dragRef.current.started) {
@@ -146,17 +163,24 @@ export function ImageFrame({
           -1,
           1,
         );
-        onTransformChange({ scale: safeScale, x: nextX });
+        dragRef.current.currentNormalizedX = nextX;
+        setDragX(nextX);
+        onTransformChange?.({ scale: safeScale, x: nextX });
       }}
       onPointerUp={(event) => {
         if (!dragRef.current || event.pointerId !== dragRef.current.pointerId)
           return;
         const started = dragRef.current.started;
+        const finalX = dragRef.current.currentNormalizedX;
         if (started && event.currentTarget.hasPointerCapture(event.pointerId)) {
           event.currentTarget.releasePointerCapture(event.pointerId);
         }
         dragRef.current = null;
         setIsDragging(false);
+        setDragX(null);
+        if (started) {
+          transformCallback?.({ scale: safeScale, x: finalX });
+        }
         if (started) {
           window.setTimeout(() => {
             suppressClickRef.current = false;
@@ -172,6 +196,7 @@ export function ImageFrame({
         }
         dragRef.current = null;
         setIsDragging(false);
+        setDragX(null);
         if (started) {
           window.setTimeout(() => {
             suppressClickRef.current = false;
@@ -185,6 +210,8 @@ export function ImageFrame({
         alt={alt}
         className={cn("absolute top-0 h-auto max-w-none", imgClassName)}
         style={{ width: `${safeScale * 100}%`, left: `${leftPx}px` }}
+        loading="lazy"
+        decoding="async"
         draggable={false}
         onClick={() => {
           if (suppressClickRef.current) {

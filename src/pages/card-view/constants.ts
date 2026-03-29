@@ -2,10 +2,6 @@ export const CARDVIEW_PAGER_PADDING_INLINE = 0;
 export const CARDVIEW_PAGER_PADDING_BLOCK = "50vh";
 export const CARDVIEW_NATURAL_INDEX_COMMIT_DELAY_VIEW_MS = 0;
 export const CARDVIEW_NATURAL_INDEX_COMMIT_DELAY_EDIT_MS = 0;
-// 編集中の同時マウント数を抑えてレンダリング負荷を下げる
-export const EDIT_PREVIEW_RANGE = 1;
-// 閲覧中は前後1枚だけ実カードを描画し、遠いカードはプレースホルダにする
-export const VIEW_PREVIEW_RANGE = 1;
 export const CARDVIEW_SAVE_FINISHED_EVENT = "cardview:save-finished";
 export const CARD_PANE_VIEW_DEFAULT_WIDTH_PX = 576;
 export const CARD_PANE_EDIT_DEFAULT_WIDTH_PX = 1000;

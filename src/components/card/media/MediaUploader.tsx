@@ -28,9 +28,16 @@ function ImageItem({ item, index, onRetry, onUpdate }) {
   const [loadFailed, setLoadFailed] = useState(false);
   const { currentUser } = useAuthSession();
   const [resolvedLocalUrl, setResolvedLocalUrl] = useState<string | null>(null);
+  const [draftTransform, setDraftTransform] = useState<{
+    scale: number;
+    x: number;
+  } | null>(null);
   const displayUrl = item.remoteUrl ?? item.localUrl ?? resolvedLocalUrl ?? "";
   const isFailed = item.status === "failed";
-  const safeScale = clamp(Number(item.scale ?? 1), 0.2, 1);
+  const persistedScale = clamp(Number(item.scale ?? 1), 0.2, 1);
+  const persistedX = clamp(Number(item.x ?? 0), -1, 1);
+  const safeScale = draftTransform?.scale ?? persistedScale;
+  const safeX = draftTransform?.x ?? persistedX;
   useEffect(() => {
     queueMicrotask(() => setLoadFailed(false));
   }, [displayUrl]);
@@ -61,6 +68,15 @@ function ImageItem({ item, index, onRetry, onUpdate }) {
     item?.localUrl,
     item?.remoteUrl,
   ]);
+  useEffect(() => {
+    if (!draftTransform) return;
+    if (
+      Math.abs(draftTransform.scale - persistedScale) < 0.001 &&
+      Math.abs(draftTransform.x - persistedX) < 0.001
+    ) {
+      setDraftTransform(null);
+    }
+  }, [draftTransform, persistedScale, persistedX]);
   const handleCopyImage = useCallback(async () => {
     if (!displayUrl) return;
     try {
@@ -122,6 +138,17 @@ function ImageItem({ item, index, onRetry, onUpdate }) {
       a.remove();
     }
   }, [displayUrl, index]);
+  const commitTransform = useCallback(
+    (next: { scale: number; x: number }) => {
+      const normalized = {
+        scale: next.scale >= 0.98 ? 1 : clamp(next.scale, 0.2, 1),
+        x: next.scale >= 0.98 ? 0 : clamp(next.x, -1, 1),
+      };
+      setDraftTransform(normalized);
+      onUpdate(index, normalized);
+    },
+    [index, onUpdate],
+  );
 
   return (
     <>
@@ -133,8 +160,8 @@ function ImageItem({ item, index, onRetry, onUpdate }) {
               alt={`Image ${index + 1}`}
               className="bg-transparent"
               imgClassName="cursor-pointer"
-              scale={item.scale ?? 1}
-              x={item.x ?? 0}
+              scale={safeScale}
+              x={safeX}
               naturalW={item.naturalW ?? null}
               naturalH={item.naturalH ?? null}
               editable
@@ -148,7 +175,13 @@ function ImageItem({ item, index, onRetry, onUpdate }) {
                 onUpdate(index, { naturalW, naturalH });
               }}
               onTransformChange={({ scale, x }) => {
-                onUpdate(index, { scale, x });
+                setDraftTransform({
+                  scale: scale >= 0.98 ? 1 : clamp(scale, 0.2, 1),
+                  x: scale >= 0.98 ? 0 : clamp(x, -1, 1),
+                });
+              }}
+              onTransformCommit={({ scale, x }) => {
+                commitTransform({ scale, x });
               }}
             />
           ) : (
@@ -242,9 +275,14 @@ function ImageItem({ item, index, onRetry, onUpdate }) {
                   onValueChange={(values) => {
                     const nextScaleRaw = clamp((values[0] ?? 100) / 100, 0.2, 1);
                     const nextScale = nextScaleRaw >= 0.98 ? 1 : nextScaleRaw;
-                    const baseX =
-                      nextScale >= 0.999 ? 0 : clamp(Number(item.x ?? 0), -1, 1);
-                    onUpdate(index, { scale: nextScale, x: baseX });
+                    const baseX = nextScale >= 0.999 ? 0 : safeX;
+                    setDraftTransform({ scale: nextScale, x: baseX });
+                  }}
+                  onValueCommit={(values) => {
+                    const nextScaleRaw = clamp((values[0] ?? 100) / 100, 0.2, 1);
+                    const nextScale = nextScaleRaw >= 0.98 ? 1 : nextScaleRaw;
+                    const baseX = nextScale >= 0.999 ? 0 : safeX;
+                    commitTransform({ scale: nextScale, x: baseX });
                   }}
                   className="w-full"
                   aria-label="画像サイズ"
@@ -257,6 +295,10 @@ function ImageItem({ item, index, onRetry, onUpdate }) {
     </>
   );
 }
+const MemoizedImageItem = React.memo(
+  ImageItem,
+  (prev, next) => prev.item === next.item && prev.index === next.index,
+);
 
 function AudioItem({ url, index, onRemove }) {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -923,6 +965,12 @@ export default function MediaUploader({
 
   const handleUpdateImage = (index: number, patch: Partial<UploadedImage>) => {
     const current = (latestItemsRef.current as UploadedImage[]) || [];
+    const target = current[index];
+    if (!target) return;
+    const changed = Object.entries(patch).some(
+      ([key, value]) => target[key as keyof UploadedImage] !== value,
+    );
+    if (!changed) return;
     const next = current.map((image, i) =>
       i === index ? { ...image, ...patch } : image,
     );
@@ -1007,7 +1055,7 @@ export default function MediaUploader({
       {urls.length > 0 && type === "image" && (
         <div className="grid grid-cols-1 gap-2">
           {urls.map((item, index) => (
-            <ImageItem
+            <MemoizedImageItem
               key={`img-${(item as UploadedImage).id ?? index}-${index}`}
               item={item as UploadedImage}
               index={index}

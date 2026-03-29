@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useRef } from "react";
 import { isTypingTarget } from "@/utils/isTypingTarget";
 
+const CARD_STACK_GAP_PX = 16;
+const PENDING_SCROLL_RELEASE_SMOOTH_MS = 32;
+const PENDING_SCROLL_RELEASE_AUTO_MS = 0;
+const PENDING_SCROLL_FALLBACK_MS = 80;
+
 export type UseVerticalCardPagerOptions = {
   /** カード総数 */
   count: number;
@@ -16,8 +21,6 @@ export type UseVerticalCardPagerOptions = {
   naturalIndexCommitDelayMs?: number;
   /** true の間は自然スクロールや矢印操作で activeIndex を変更しない */
   freezeActiveIndex?: boolean;
-  /** レイアウト変更時に再センタリングするためのシグナル */
-  recenterSignal?: number | string;
   /**
    * 最近傍インデックスが変わった直後（React state 更新より前）に呼ばれる即時コールバック。
    * DOM 直接操作など、React 再レンダリングを待たずに実行したい処理に使う。
@@ -42,17 +45,15 @@ export function useVerticalCardPager({
   onFlip,
   naturalIndexCommitDelayMs = 0,
   freezeActiveIndex = false,
-  recenterSignal,
   onNearestIndexImmediate,
 }: UseVerticalCardPagerOptions): UseVerticalCardPagerReturn {
   const itemRefs = useRef<(HTMLElement | null)[]>([]);
+  const lastNearestIndexRef = useRef(Math.max(0, activeIndex));
+  const avgItemExtentRef = useRef(860);
 
   // stale closure 回避: onNearestIndexImmediate を ref で保持
   const onNearestIndexImmediateRef = useRef(onNearestIndexImmediate);
   onNearestIndexImmediateRef.current = onNearestIndexImmediate;
-
-  // 自然スクロール起因の activeIndex 更新かどうか
-  const ioTriggeredRef = useRef(false);
 
   // プログラマティックスクロール中は自然スクロール判定を止める
   const pendingScrollRef = useRef(false);
@@ -64,14 +65,79 @@ export function useVerticalCardPager({
   const naturalIndexTimerRef = useRef<number | null>(null);
   const queuedNaturalIndexRef = useRef<number | null>(null);
 
-  // scroll / resize の多重実行防止
-  const scrollRafRef = useRef<number | null>(null);
-
   // stale closure 回避
   const activeIndexRef = useRef(activeIndex);
   useEffect(() => {
     activeIndexRef.current = activeIndex;
+    if (Number.isFinite(activeIndex) && activeIndex >= 0) {
+      lastNearestIndexRef.current = activeIndex;
+    }
   }, [activeIndex]);
+
+  const clampIndex = useCallback(
+    (idx: number) => {
+      if (count <= 0) return -1;
+      if (!Number.isFinite(idx)) return 0;
+      return Math.max(0, Math.min(count - 1, Math.trunc(idx)));
+    },
+    [count],
+  );
+
+  const getItemCenterY = useCallback((idx: number): number | null => {
+    const el = itemRefs.current[idx];
+    if (!el) return null;
+    return el.offsetTop + el.offsetHeight / 2;
+  }, []);
+
+  const findNearestIndexByCenterY = useCallback(
+    (targetCenterY: number): number => {
+      if (count <= 0) return -1;
+
+      let low = 0;
+      let high = count - 1;
+      let bestIdx = clampIndex(lastNearestIndexRef.current);
+      if (bestIdx < 0) bestIdx = 0;
+
+      while (low <= high) {
+        const mid = (low + high) >> 1;
+        const centerY = getItemCenterY(mid);
+        if (centerY == null) break;
+
+        bestIdx = mid;
+        if (centerY < targetCenterY) {
+          low = mid + 1;
+        } else if (centerY > targetCenterY) {
+          high = mid - 1;
+        } else {
+          return mid;
+        }
+      }
+
+      const candidates = [
+        bestIdx - 2,
+        bestIdx - 1,
+        bestIdx,
+        bestIdx + 1,
+        bestIdx + 2,
+      ]
+        .map(clampIndex)
+        .filter((idx, pos, arr) => idx >= 0 && arr.indexOf(idx) === pos);
+
+      let nearest = bestIdx;
+      let nearestDist = Number.POSITIVE_INFINITY;
+      for (const idx of candidates) {
+        const centerY = getItemCenterY(idx);
+        if (centerY == null) continue;
+        const dist = Math.abs(centerY - targetCenterY);
+        if (dist < nearestDist) {
+          nearestDist = dist;
+          nearest = idx;
+        }
+      }
+      return nearest;
+    },
+    [clampIndex, count, getItemCenterY],
+  );
 
   const clearPendingScrollTimer = useCallback(() => {
     if (pendingScrollTimerRef.current != null) {
@@ -99,7 +165,6 @@ export function useVerticalCardPager({
     clearNaturalIndexTimer();
 
     if (nearestIdx == null || nearestIdx === activeIndexRef.current) return;
-    ioTriggeredRef.current = true;
     onActiveIndexChange(nearestIdx);
   }, [clearNaturalIndexTimer, onActiveIndexChange]);
 
@@ -125,9 +190,11 @@ export function useVerticalCardPager({
       clearPendingScrollTimer();
       pendingScrollTimerRef.current = window.setTimeout(() => {
         pendingScrollRef.current = false;
-        pendingScrollStartedAtRef.current = 0;
-        pendingScrollTimerRef.current = null;
-      }, behavior === "smooth" ? 160 : 40);
+      pendingScrollStartedAtRef.current = 0;
+      pendingScrollTimerRef.current = null;
+      }, behavior === "smooth"
+        ? PENDING_SCROLL_RELEASE_SMOOTH_MS
+        : PENDING_SCROLL_RELEASE_AUTO_MS);
     },
     [clearPendingScrollTimer],
   );
@@ -145,10 +212,8 @@ export function useVerticalCardPager({
       clearNaturalIndexTimer();
       queuedNaturalIndexRef.current = null;
 
-      const containerRect = container.getBoundingClientRect();
-      const elRect = el.getBoundingClientRect();
       const targetTop =
-        container.scrollTop + (elRect.top - containerRect.top) - container.clientHeight / 2 + elRect.height / 2;
+        el.offsetTop - container.clientHeight / 2 + el.offsetHeight / 2;
 
       const maxScrollTop = Math.max(0, container.scrollHeight - container.clientHeight);
       const nextTop = Math.min(Math.max(0, targetTop), maxScrollTop);
@@ -172,30 +237,24 @@ export function useVerticalCardPager({
   const computeNearestIndex = useCallback(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
+    if (count <= 0) return;
     if (pendingScrollRef.current) {
       const elapsed = Date.now() - pendingScrollStartedAtRef.current;
-      if (elapsed <= 480) return;
+      if (elapsed <= PENDING_SCROLL_FALLBACK_MS) return;
       clearPendingScrollState();
     }
     if (freezeActiveIndex) return;
 
-    const containerRect = container.getBoundingClientRect();
-    const containerCenter = containerRect.top + containerRect.height / 2;
+    const containerCenterY = container.scrollTop + container.clientHeight / 2;
+    const nearestIdx = findNearestIndexByCenterY(containerCenterY);
 
-    let minDist = Infinity;
-    let nearestIdx = -1;
-
-    for (let idx = 0; idx < itemRefs.current.length; idx += 1) {
-      const el = itemRefs.current[idx];
-      if (!el) continue;
-
-      const elRect = el.getBoundingClientRect();
-      const elCenter = elRect.top + elRect.height / 2;
-      const dist = Math.abs(elCenter - containerCenter);
-
-      if (dist < minDist) {
-        minDist = dist;
-        nearestIdx = idx;
+    if (nearestIdx !== -1) {
+      lastNearestIndexRef.current = nearestIdx;
+      const nearestEl = itemRefs.current[nearestIdx];
+      if (nearestEl) {
+        const extent = Math.max(1, nearestEl.offsetHeight + CARD_STACK_GAP_PX);
+        avgItemExtentRef.current =
+          avgItemExtentRef.current * 0.8 + extent * 0.2;
       }
     }
 
@@ -205,6 +264,8 @@ export function useVerticalCardPager({
     }
   }, [
     clearPendingScrollState,
+    count,
+    findNearestIndexByCenterY,
     freezeActiveIndex,
     queueNaturalIndexCommit,
     scrollContainerRef,
@@ -241,56 +302,26 @@ export function useVerticalCardPager({
     scrollToIndex,
   ]);
 
-  // 外部から activeIndex が変わったときに中央へ寄せる
-  // 自然スクロール起因の変更では二重スクロールしない
-  useEffect(() => {
-    if (ioTriggeredRef.current) {
-      ioTriggeredRef.current = false;
-      return;
-    }
-    scrollToIndex(activeIndex, "smooth");
-  }, [activeIndex, scrollToIndex]);
-
-  // 初回マウント時は即時寄せ
-  useEffect(() => {
-    const id = window.requestAnimationFrame(() => {
-      scrollToIndex(activeIndex, "auto");
-    });
-    return () => window.cancelAnimationFrame(id);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // レイアウト変更（例: カード幅変更）時も、現在の active カードを中央へ維持する
-  useEffect(() => {
-    if (recenterSignal == null) return;
-    const id = window.requestAnimationFrame(() => {
-      scrollToIndex(activeIndex, "auto");
-    });
-    return () => window.cancelAnimationFrame(id);
-  }, [activeIndex, recenterSignal, scrollToIndex]);
-
   // 自然スクロール時の active 判定
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
 
     const schedule = () => {
-      if (scrollRafRef.current != null) return;
-
-      scrollRafRef.current = window.requestAnimationFrame(() => {
-        scrollRafRef.current = null;
-        computeNearestIndex();
-      });
+      computeNearestIndex();
     };
     const cancelPendingOnUserIntent = () => {
       if (!pendingScrollRef.current) return;
       clearPendingScrollState();
     };
+    const handleWheel = () => {
+      cancelPendingOnUserIntent();
+      schedule();
+    };
 
     // container 自体がスクロールする場合と、祖先がスクロールする場合の両方を捕捉
     container.addEventListener("scroll", schedule, { passive: true });
-    container.addEventListener("wheel", cancelPendingOnUserIntent, {
-      passive: true,
-    });
+    container.addEventListener("wheel", handleWheel, { passive: true });
     container.addEventListener("touchstart", cancelPendingOnUserIntent, {
       passive: true,
     });
@@ -305,16 +336,11 @@ export function useVerticalCardPager({
 
     return () => {
       container.removeEventListener("scroll", schedule);
-      container.removeEventListener("wheel", cancelPendingOnUserIntent);
+      container.removeEventListener("wheel", handleWheel);
       container.removeEventListener("touchstart", cancelPendingOnUserIntent);
       container.removeEventListener("pointerdown", cancelPendingOnUserIntent);
       window.removeEventListener("scroll", schedule, { capture: true });
       window.removeEventListener("resize", schedule);
-
-      if (scrollRafRef.current != null) {
-        window.cancelAnimationFrame(scrollRafRef.current);
-        scrollRafRef.current = null;
-      }
 
       clearPendingScrollState();
       clearNaturalIndexTimer();

@@ -7,12 +7,8 @@ import {
   CARDVIEW_NATURAL_INDEX_COMMIT_DELAY_VIEW_MS,
   CARDVIEW_PAGER_PADDING_BLOCK,
   CARDVIEW_PAGER_PADDING_INLINE,
-  EDIT_PREVIEW_RANGE,
-  VIEW_PREVIEW_RANGE,
 } from "@/pages/card-view/constants";
 import { DesktopCardSurface } from "@/pages/card-view/components/DesktopCardSurface";
-import { layoutRowsToCardHeightPx } from "@/components/card/common/constants";
-import { normalizeLayoutRows } from "@/domain/card/extraRows";
 
 interface CardViewDesktopProps {
   isLoading: boolean;
@@ -52,20 +48,10 @@ export function CardViewDesktop({
   onToggleBookmark,
 }: CardViewDesktopProps) {
   const editingCardsOverride = isGlobalEditing ? cardsForPager : undefined;
-  const renderWindowRadius = isGlobalEditing
-    ? EDIT_PREVIEW_RANGE
-    : VIEW_PREVIEW_RANGE;
-
-  const estimateCardHeight = useCallback((card: Card) => {
-    const rawRows =
-      (card as { layoutRows?: number; layout_rows?: number }).layoutRows ??
-      (card as { layout_rows?: number }).layout_rows;
-    const baseHeight = layoutRowsToCardHeightPx(normalizeLayoutRows(rawRows));
-    return Math.max(520, baseHeight + 120);
-  }, []);
 
   const renderCard = useCallback(
-    (card: Card, _idx: number, isActive: boolean) => {
+    (card: Card, idx: number, isActive: boolean) => {
+      const mountEditor = isGlobalEditing && Math.abs(idx - safeCurrentIndex) <= 1;
       return (
         <DesktopCardSurface
           card={card}
@@ -77,6 +63,7 @@ export function CardViewDesktop({
           folderId={folderId}
           cardSetId={cardSetId}
           cardsOverride={editingCardsOverride}
+          mountEditor={mountEditor}
           saveSignal={saveSignal}
           onFlip={onFlip}
           onEdit={onEdit}
@@ -87,6 +74,7 @@ export function CardViewDesktop({
     },
     [
       isGlobalEditing,
+      safeCurrentIndex,
       flippedCardIds,
       folderId,
       cardSetId,
@@ -125,13 +113,10 @@ export function CardViewDesktop({
           ? CARDVIEW_NATURAL_INDEX_COMMIT_DELAY_EDIT_MS
           : CARDVIEW_NATURAL_INDEX_COMMIT_DELAY_VIEW_MS
       }
-      showActiveState={!isGlobalEditing}
       disableItemChrome={isGlobalEditing}
       getCardWidth={() => activePaneWidthPx}
       getKey={(card) => card.id ?? card.docId ?? card.uid}
-      renderWindowRadius={renderWindowRadius}
-      getEstimatedHeight={(card) => estimateCardHeight(card)}
-      recenterSignal={`${isGlobalEditing ? "edit" : "view"}:${activePaneWidthPx}`}
+      disableVirtualization
       renderCard={renderCard}
     />
   );

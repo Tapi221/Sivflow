@@ -290,6 +290,37 @@ export function FolderTreeWithCards({
     return () => window.cancelAnimationFrame(rafId);
   }, [pendingScrollId, treeFolders, treeCards, expandedFolders]);
 
+  // 選択中の行が常に可視範囲に入るようにする（編集時の選択遅延/見失い対策）
+  useEffect(() => {
+    const targetId = (() => {
+      if (selectedItem?.type === "card") return selectedItem.id;
+      if (selectedItem?.type === "cardSet") return selectedItem.id;
+      if (selectedItem?.type === "document") return selectedItem.id;
+      if (selectedCardSetId) return selectedCardSetId;
+      return selectedFolderId;
+    })();
+    if (!targetId) return;
+    const row = rowRefs.current.get(targetId);
+    if (!row) return;
+    const rafId = window.requestAnimationFrame(() => {
+      row.scrollIntoView({
+        block: "nearest",
+        inline: "nearest",
+        behavior: "auto",
+      });
+    });
+    return () => window.cancelAnimationFrame(rafId);
+  }, [
+    expandedCardSets,
+    expandedFolders,
+    selectedCardSetId,
+    selectedFolderId,
+    selectedItem,
+    treeCards,
+    treeCardSets,
+    treeFolders,
+  ]);
+
   // navigate to section list on token change
   useEffect(() => {
     if (navigateToSectionListToken <= 0) return;
