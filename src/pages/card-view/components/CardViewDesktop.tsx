@@ -7,16 +7,16 @@ import {
   CARDVIEW_NATURAL_INDEX_COMMIT_DELAY_VIEW_MS,
   CARDVIEW_PAGER_PADDING_BLOCK,
   CARDVIEW_PAGER_PADDING_INLINE,
-} from "../constants";
-import {
-  DesktopCardSurface,
   EDIT_PREVIEW_RANGE,
-} from "./DesktopCardSurface";
+  VIEW_PREVIEW_RANGE,
+} from "@/pages/card-view/constants";
+import { DesktopCardSurface } from "@/pages/card-view/components/DesktopCardSurface";
+import { layoutRowsToCardHeightPx } from "@/components/card/common/constants";
+import { normalizeLayoutRows } from "@/domain/card/extraRows";
 
 interface CardViewDesktopProps {
   isLoading: boolean;
   isGlobalEditing: boolean;
-  isFlipped: boolean;
   flippedCardIds: Set<string>;
   cardsForPager: Card[];
   safeCurrentIndex: number;
@@ -36,7 +36,6 @@ interface CardViewDesktopProps {
 export function CardViewDesktop({
   isLoading,
   isGlobalEditing,
-  isFlipped,
   flippedCardIds,
   cardsForPager,
   safeCurrentIndex,
@@ -53,17 +52,25 @@ export function CardViewDesktop({
   onToggleBookmark,
 }: CardViewDesktopProps) {
   const editingCardsOverride = isGlobalEditing ? cardsForPager : undefined;
+  const renderWindowRadius = isGlobalEditing
+    ? EDIT_PREVIEW_RANGE
+    : VIEW_PREVIEW_RANGE;
+
+  const estimateCardHeight = useCallback((card: Card) => {
+    const rawRows =
+      (card as { layoutRows?: number; layout_rows?: number }).layoutRows ??
+      (card as { layout_rows?: number }).layout_rows;
+    const baseHeight = layoutRowsToCardHeightPx(normalizeLayoutRows(rawRows));
+    return Math.max(520, baseHeight + 120);
+  }, []);
 
   const renderCard = useCallback(
-    (card: Card, idx: number, isActive: boolean) => {
-      const showEditPreview =
-        Math.abs(idx - safeCurrentIndex) <= EDIT_PREVIEW_RANGE;
+    (card: Card, _idx: number, isActive: boolean) => {
       return (
         <DesktopCardSurface
           card={card}
           isActive={isActive}
           isGlobalEditing={isGlobalEditing}
-          showEditPreview={showEditPreview}
           editPaneWidthPx={editPaneWidthPx}
           settings={settings}
           isFlipped={flippedCardIds.has(card.id ?? "")}
@@ -89,7 +96,6 @@ export function CardViewDesktop({
       onEdit,
       onToggleUncertainty,
       onToggleBookmark,
-      safeCurrentIndex,
       settings,
       editPaneWidthPx,
     ],
@@ -123,6 +129,9 @@ export function CardViewDesktop({
       disableItemChrome={isGlobalEditing}
       getCardWidth={() => activePaneWidthPx}
       getKey={(card) => card.id ?? card.docId ?? card.uid}
+      renderWindowRadius={renderWindowRadius}
+      getEstimatedHeight={(card) => estimateCardHeight(card)}
+      recenterSignal={`${isGlobalEditing ? "edit" : "view"}:${activePaneWidthPx}`}
       renderCard={renderCard}
     />
   );

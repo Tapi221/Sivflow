@@ -1,14 +1,14 @@
 import { useState, useMemo, useCallback } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { getLocalDb } from "@/services/localDB";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthSession } from "@/contexts/AuthContext";
 import type { DocumentItem } from "@/types";
 
 /**
  * PDFドキュメントを取得・管理するためのフック
  */
 export function useDocuments(folderId?: string) {
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthSession();
   const [error, setError] = useState<string | null>(null);
 
   // useLiveQueryでドキュメントを取得
@@ -81,6 +81,7 @@ export function useDocuments(folderId?: string) {
     updateDocument,
   };
 }
+
 
 
 

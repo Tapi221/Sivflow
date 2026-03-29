@@ -8,7 +8,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { getLocalDb } from "@/services/localDB";
 import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
 import { firestoreDb } from "@/services/firebase";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthSession } from "@/contexts/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Flame,
@@ -31,7 +31,7 @@ import { useUserSettings } from "@/hooks/settings/useUserSettings";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthSession();
   const { settings } = useUserSettings();
 
   // 当日学習ストア（評価集計 & 追い復習キュー）
@@ -472,6 +472,7 @@ export default function Dashboard() {
     </div>
   );
 }
+
 
 
 

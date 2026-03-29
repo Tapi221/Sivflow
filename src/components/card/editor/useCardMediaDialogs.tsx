@@ -1,5 +1,5 @@
 import { Plus, Image as ImageIcon, Link as LinkIcon } from "@/ui/icons";
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { sanitizeReferences } from "@/components/card/editor/cardEditorUtils";
 import { CARD_ACTION_ICON_CLASS } from "@/components/card/common/constants";
@@ -39,64 +39,111 @@ export function useCardMediaDialogs({
   const [audioDialogSide, setAudioDialogSide] = useState<Side | null>(null);
   const [linkDialogSide, setLinkDialogSide] = useState<Side | null>(null);
 
-  const getDialogImages = (side: Side): UploadedImage[] =>
-    (side === "question" ? draft?.questionImages : draft?.answerImages) ?? [];
+  const draftRef = useRef(draft);
+  const getSideBlocksRef = useRef(getSideBlocks);
+  const removeBlockByTypeIfExistsRef = useRef(removeBlockByTypeIfExists);
+  const upsertSingleBlockRef = useRef(upsertSingleBlock);
 
-  const setDialogImages = (side: Side, images: UploadedImage[]) => {
-    setDraft((prev) => {
-      if (!prev) return prev;
-      return side === "question"
-        ? { ...prev, questionImages: images }
-        : { ...prev, answerImages: images };
-    });
-  };
+  useEffect(() => {
+    draftRef.current = draft;
+  }, [draft]);
 
-  const getDialogAudios = (side: Side) => {
-    const block = getSideBlocks(side).find((b) => b.type === "audio");
+  useEffect(() => {
+    getSideBlocksRef.current = getSideBlocks;
+  }, [getSideBlocks]);
+
+  useEffect(() => {
+    removeBlockByTypeIfExistsRef.current = removeBlockByTypeIfExists;
+  }, [removeBlockByTypeIfExists]);
+
+  useEffect(() => {
+    upsertSingleBlockRef.current = upsertSingleBlock;
+  }, [upsertSingleBlock]);
+
+  const getDialogImages = useCallback((side: Side): UploadedImage[] => {
+    const currentDraft = draftRef.current;
+    return (
+      side === "question"
+        ? currentDraft?.questionImages
+        : currentDraft?.answerImages
+    ) ?? [];
+  }, []);
+
+  const setDialogImages = useCallback(
+    (side: Side, images: UploadedImage[]) => {
+      setDraft((prev) => {
+        if (!prev) return prev;
+        return side === "question"
+          ? { ...prev, questionImages: images }
+          : { ...prev, answerImages: images };
+      });
+    },
+    [setDraft],
+  );
+
+  const getDialogAudios = useCallback((side: Side) => {
+    const block = getSideBlocksRef.current(side).find((b) => b.type === "audio");
     return (block?.audios ?? []) as unknown as (string | UploadedImage)[];
-  };
+  }, []);
 
-  const setDialogAudios = (side: Side, items: unknown[]) => {
+  const setDialogAudios = useCallback((side: Side, items: unknown[]) => {
     if (!items || items.length === 0) {
-      removeBlockByTypeIfExists(side, "audio");
+      removeBlockByTypeIfExistsRef.current(side, "audio");
       return;
     }
-    upsertSingleBlock(side, "audio", { audios: items });
-  };
+    upsertSingleBlockRef.current(side, "audio", { audios: items });
+  }, []);
 
-  const getReferenceItems = (side: Side): ReferenceBlockData[] => {
-    const block = getSideBlocks(side).find((b) => b.type === "reference");
+  const getReferenceItems = useCallback((side: Side): ReferenceBlockData[] => {
+    const block = getSideBlocksRef.current(side).find(
+      (candidate) => candidate.type === "reference",
+    );
     return (block?.references ?? []) as ReferenceBlockData[];
-  };
+  }, []);
 
-  const setReferenceItems = (side: Side, refs: ReferenceBlockData[]) => {
-    const nextRefs = refs ?? [];
-    if (nextRefs.length === 0) {
-      removeBlockByTypeIfExists(side, "reference");
-      return;
-    }
-    upsertSingleBlock(side, "reference", { references: nextRefs });
-  };
+  const setReferenceItems = useCallback(
+    (side: Side, refs: ReferenceBlockData[]) => {
+      const nextRefs = refs ?? [];
+      if (nextRefs.length === 0) {
+        removeBlockByTypeIfExistsRef.current(side, "reference");
+        return;
+      }
+      upsertSingleBlockRef.current(side, "reference", { references: nextRefs });
+    },
+    [],
+  );
 
-  const getImageCount = (side: Side) => getDialogImages(side).length;
+  const getImageCount = useCallback(
+    (side: Side) => getDialogImages(side).length,
+    [getDialogImages],
+  );
 
-  const getAudioCount = (side: Side) =>
-    getSideBlocks(side)
-      .filter((b) => b.type === "audio")
-      .reduce((sum, b) => sum + (b.audios?.length ?? 0), 0);
+  const getAudioCount = useCallback(
+    (side: Side) =>
+      getSideBlocksRef
+        .current(side)
+        .filter((block) => block.type === "audio")
+        .reduce((sum, block) => sum + (block.audios?.length ?? 0), 0),
+    [],
+  );
 
-  const getLinkCount = (side: Side) =>
-    getSideBlocks(side)
-      .filter((b) => b.type === "reference")
-      .reduce(
-        (sum, b) =>
-          sum +
-          (sanitizeReferences(("references" in b ? b.references : []) ?? [])
-            .length ?? 0),
-        0,
-      );
+  const getLinkCount = useCallback(
+    (side: Side) =>
+      getSideBlocksRef
+        .current(side)
+        .filter((block) => block.type === "reference")
+        .reduce(
+          (sum, block) =>
+            sum +
+            (sanitizeReferences(
+              ("references" in block ? block.references : []) ?? [],
+            ).length ?? 0),
+          0,
+        ),
+    [],
+  );
 
-  const renderMediaDialogButtons = (side: Side) => {
+  const renderMediaDialogButtons = useCallback((side: Side) => {
     const imageCount = getImageCount(side);
     const audioCount = getAudioCount(side);
     const linkCount = getLinkCount(side);
@@ -157,23 +204,43 @@ export function useCardMediaDialogs({
         </button>
       </div>
     );
-  };
-
-  return {
-    imageDialogSide,
-    setImageDialogSide,
-    audioDialogSide,
-    setAudioDialogSide,
-    linkDialogSide,
-    setLinkDialogSide,
-    renderMediaDialogButtons,
-    getDialogImages,
-    setDialogImages,
-    getDialogAudios,
-    setDialogAudios,
+  }, [
+    getAudioCount,
+    getImageCount,
+    getLinkCount,
     getReferenceItems,
     setReferenceItems,
-  };
+  ]);
+
+  return useMemo(
+    () => ({
+      imageDialogSide,
+      setImageDialogSide,
+      audioDialogSide,
+      setAudioDialogSide,
+      linkDialogSide,
+      setLinkDialogSide,
+      renderMediaDialogButtons,
+      getDialogImages,
+      setDialogImages,
+      getDialogAudios,
+      setDialogAudios,
+      getReferenceItems,
+      setReferenceItems,
+    }),
+    [
+      audioDialogSide,
+      getDialogAudios,
+      getDialogImages,
+      getReferenceItems,
+      imageDialogSide,
+      linkDialogSide,
+      renderMediaDialogButtons,
+      setDialogAudios,
+      setDialogImages,
+      setReferenceItems,
+    ],
+  );
 }
 
 

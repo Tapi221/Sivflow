@@ -16,6 +16,8 @@ export type UseVerticalCardPagerOptions = {
   naturalIndexCommitDelayMs?: number;
   /** true の間は自然スクロールや矢印操作で activeIndex を変更しない */
   freezeActiveIndex?: boolean;
+  /** レイアウト変更時に再センタリングするためのシグナル */
+  recenterSignal?: number | string;
   /**
    * 最近傍インデックスが変わった直後（React state 更新より前）に呼ばれる即時コールバック。
    * DOM 直接操作など、React 再レンダリングを待たずに実行したい処理に使う。
@@ -40,6 +42,7 @@ export function useVerticalCardPager({
   onFlip,
   naturalIndexCommitDelayMs = 0,
   freezeActiveIndex = false,
+  recenterSignal,
   onNearestIndexImmediate,
 }: UseVerticalCardPagerOptions): UseVerticalCardPagerReturn {
   const itemRefs = useRef<(HTMLElement | null)[]>([]);
@@ -255,6 +258,15 @@ export function useVerticalCardPager({
     });
     return () => window.cancelAnimationFrame(id);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // レイアウト変更（例: カード幅変更）時も、現在の active カードを中央へ維持する
+  useEffect(() => {
+    if (recenterSignal == null) return;
+    const id = window.requestAnimationFrame(() => {
+      scrollToIndex(activeIndex, "auto");
+    });
+    return () => window.cancelAnimationFrame(id);
+  }, [activeIndex, recenterSignal, scrollToIndex]);
 
   // 自然スクロール時の active 判定
   useEffect(() => {

@@ -23,7 +23,7 @@ import { PdfPaneToolbar } from "./PdfPaneToolbar";
 import { usePdfViewerPersistence } from "./hooks/usePdfViewerPersistence";
 import { usePdfSourceResolver } from "./hooks/usePdfSourceResolver";
 import { usePdfContainerWidth } from "./hooks/usePdfContainerWidth";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthSession } from "@/contexts/AuthContext";
 import platform from "@/platform";
 import type { PdfViewerState } from "@/types";
 import { DEV_MODE, isLocalHost } from "@/utils/envGuards";
@@ -68,7 +68,7 @@ export function PdfPane({
   viewerOptions,
   onDocumentUpdate,
 }: PdfPaneProps) {
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthSession();
   const viewerRef = useRef<PdfViewerHandle>(null);
   const [numPages, setNumPages] = useState(0);
   const [basePageWidth, setBasePageWidth] = useState<number | null>(null);
@@ -225,6 +225,7 @@ export function PdfPane({
     </div>
   );
 }
+
 
 
 

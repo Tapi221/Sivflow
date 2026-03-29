@@ -1,6 +1,5 @@
 import { ChevronLeft, ChevronRight } from "@/ui/icons";
-import { DragDropContext } from "@hello-pangea/dnd";
-import React, { useCallback, useState } from "react";
+import React, { memo, useCallback, useMemo, useState } from "react";
 
 import { SharedCardContent } from "@/components/card/common/SharedCardContent";
 import {
@@ -16,6 +15,7 @@ import {
 import { CardCornerActions } from "@/components/card/frame/CardCornerActions";
 import { CardFrame } from "@/components/card/frame/CardFrame";
 import { Flashcard } from "@/components/card/frame/Flashcard";
+import { CARD_SHELL_COMMON_CLASS_NAME } from "@/components/card/frame/cardShellClassNames";
 import { CardMetaPanel } from "@/components/card/panels/CardMetaPanel";
 import { CardEditorPaneMediaDialogs } from "@/components/folder/panes/CardEditorPaneMediaDialogs";
 import { CardPaneWidthControl } from "@/components/folder/panes/CardPaneWidthControl";
@@ -63,6 +63,181 @@ type FlashcardCardLike = Record<string, unknown> & {
 const CARD_PANE_AUTO_MAX_SCALE = 4;
 const CARD_EDITOR_PAIR_GAP_PX = 16;
 const CARD_PAGER_EDIT_RULED_OFFSET_TOP_PX = 20;
+const EMPTY_BLOCKS: CardBlock[] = [];
+
+type EditorSidePaneProps = {
+  side: "question" | "answer";
+  blocks: CardBlock[];
+  onBlocksChange: (blocks: CardBlock[]) => void;
+  selectionScopeKey: string | null;
+  label: string;
+  color: string;
+  droppableId: string;
+  accentColor?: string;
+  duplicateToOpposite?: boolean;
+  hideToolbar: boolean;
+  toolbarMount: HTMLDivElement | null;
+  toolbarDesktopLayout: "horizontal" | "vertical";
+  settings: unknown;
+  shouldShowInlineToolbarMount: boolean;
+  setInlineToolbarMount: (value: HTMLDivElement | null) => void;
+  hideCardShellHeader: boolean;
+  shouldDockToolbarToCardTop: boolean;
+  dockToolbarInsideCardEdge: boolean;
+  setDockedToolbarMount: (value: HTMLDivElement | null) => void;
+  shouldShowEditingBadge: boolean;
+  highlightActiveCards: boolean;
+  editorCardFixedScale?: number;
+  editorCardHeightPx: number;
+  onHeightChange: (heightPx: number) => void;
+  onMinHeightChange: (minHeightPx: number) => void;
+  onResizeStart: () => void;
+  onResizeEnd: () => void;
+  actionsTopLeft?: React.ReactNode;
+  actionsTopRight?: React.ReactNode;
+};
+
+function EditorSidePaneInner({
+  side,
+  blocks,
+  onBlocksChange,
+  selectionScopeKey,
+  label,
+  color,
+  droppableId,
+  accentColor,
+  duplicateToOpposite,
+  hideToolbar,
+  toolbarMount,
+  toolbarDesktopLayout,
+  settings,
+  shouldShowInlineToolbarMount,
+  setInlineToolbarMount,
+  hideCardShellHeader,
+  shouldDockToolbarToCardTop,
+  dockToolbarInsideCardEdge,
+  setDockedToolbarMount,
+  shouldShowEditingBadge,
+  highlightActiveCards,
+  editorCardFixedScale,
+  editorCardHeightPx,
+  onHeightChange,
+  onMinHeightChange,
+  onResizeStart,
+  onResizeEnd,
+  actionsTopLeft,
+  actionsTopRight,
+}: EditorSidePaneProps) {
+  return (
+    <div
+      className={cn(
+        "flex min-h-0 w-full flex-col",
+        shouldShowInlineToolbarMount ? "gap-2" : "gap-0",
+      )}
+    >
+      {shouldShowInlineToolbarMount && (
+        <div ref={setInlineToolbarMount} className="w-full" />
+      )}
+      <CardFrame
+        baseWidth={CANONICAL_CARD_WIDTH}
+        contentPaddingPx={0}
+        allowUpscale
+        maxScale={CARD_PANE_AUTO_MAX_SCALE}
+        scaleMultiplier={1}
+        ruledOffsetPx={
+          hideCardShellHeader ? CARD_PAGER_EDIT_RULED_OFFSET_TOP_PX : undefined
+        }
+        fixedScale={editorCardFixedScale}
+        topAttachment={
+          shouldDockToolbarToCardTop ? (
+            <div className="relative h-0 w-full overflow-visible pointer-events-none">
+              <div
+                ref={setDockedToolbarMount}
+                className={cn(
+                  "absolute top-0 z-20 pointer-events-auto",
+                  side === "question" ? "left-0" : "right-0",
+                )}
+                style={{
+                  transform:
+                    side === "question"
+                      ? dockToolbarInsideCardEdge
+                        ? "translate(12px, 16px)"
+                        : "translate(calc(-100% - 12px), 16px)"
+                      : dockToolbarInsideCardEdge
+                        ? "translate(calc(-100% - 12px), 16px)"
+                        : "translate(calc(100% + 12px), 16px)",
+                }}
+              />
+            </div>
+          ) : undefined
+        }
+        className={cn(
+          CARD_SHELL_COMMON_CLASS_NAME,
+          shouldShowEditingBadge && "card-shell--editing",
+          highlightActiveCards && "card-shell--active",
+        )}
+        resizable
+        showResizeHandle
+        resizeStepPx={CARD_ROW_PX}
+        heightPx={editorCardHeightPx}
+        lockHeight
+        onHeightChange={onHeightChange}
+        onMinHeightChange={onMinHeightChange}
+        onResizeStart={onResizeStart}
+        onResizeEnd={onResizeEnd}
+        actionsTopLeft={hideCardShellHeader ? undefined : actionsTopLeft}
+        actionsTopRight={hideCardShellHeader ? undefined : actionsTopRight}
+      >
+        <SharedCardContent
+          mode="edit"
+          blocks={blocks}
+          onChange={onBlocksChange}
+          selectionScopeKey={selectionScopeKey}
+          prefix={side}
+          label={label}
+          color={color}
+          droppableId={droppableId}
+          accentColor={accentColor}
+          duplicateToOpposite={duplicateToOpposite}
+          hideToolbar={hideToolbar}
+          toolbarMount={toolbarMount}
+          toolbarDesktopLayout={toolbarDesktopLayout}
+          settings={settings}
+        />
+      </CardFrame>
+    </div>
+  );
+}
+
+const areEditorSidePanePropsEqual = (
+  prev: EditorSidePaneProps,
+  next: EditorSidePaneProps,
+) =>
+  prev.side === next.side &&
+  prev.blocks === next.blocks &&
+  prev.selectionScopeKey === next.selectionScopeKey &&
+  prev.label === next.label &&
+  prev.color === next.color &&
+  prev.droppableId === next.droppableId &&
+  prev.accentColor === next.accentColor &&
+  prev.duplicateToOpposite === next.duplicateToOpposite &&
+  prev.hideToolbar === next.hideToolbar &&
+  prev.toolbarMount === next.toolbarMount &&
+  prev.toolbarDesktopLayout === next.toolbarDesktopLayout &&
+  prev.settings === next.settings &&
+  prev.shouldShowInlineToolbarMount === next.shouldShowInlineToolbarMount &&
+  prev.hideCardShellHeader === next.hideCardShellHeader &&
+  prev.shouldDockToolbarToCardTop === next.shouldDockToolbarToCardTop &&
+  prev.dockToolbarInsideCardEdge === next.dockToolbarInsideCardEdge &&
+  prev.shouldShowEditingBadge === next.shouldShowEditingBadge &&
+  prev.highlightActiveCards === next.highlightActiveCards &&
+  prev.editorCardFixedScale === next.editorCardFixedScale &&
+  prev.editorCardHeightPx === next.editorCardHeightPx &&
+  prev.actionsTopLeft === next.actionsTopLeft &&
+  prev.actionsTopRight === next.actionsTopRight;
+
+const EditorSidePane = memo(EditorSidePaneInner, areEditorSidePanePropsEqual);
+EditorSidePane.displayName = "EditorSidePane";
 
 const toFlashcardCardLike = (card: Card): FlashcardCardLike =>
   card as unknown as FlashcardCardLike;
@@ -128,7 +303,6 @@ export function CardEditorPane({
     handleAnswerMinHeightChange,
   } = layout;
   const {
-    onDragEnd,
     setSideBlocks,
     imageDialogSide,
     setImageDialogSide,
@@ -166,16 +340,24 @@ export function CardEditorPane({
     },
     [setSideBlocks],
   );
-
-  const editorActionsTopLeft = selectedCard ? (
-    <CardCornerActions
-      onHelp={() => handleToggleUncertainty(selectedCard)}
-      onStar={() => handleToggleBookmark(selectedCard)}
-      helpActive={selectedCard.hasUncertainty ?? false}
-      starActive={selectedCard.isBookmarked ?? false}
-    />
-  ) : undefined;
-
+  const questionBlocks = draft?.questionBlocks ?? EMPTY_BLOCKS;
+  const answerBlocks = draft?.answerBlocks ?? EMPTY_BLOCKS;
+  const editorCardHeightPx = useMemo(
+    () => layoutRowsToCardHeightPx(normalizeLayoutRows(draft?.layoutRows)),
+    [draft?.layoutRows],
+  );
+  const handleEditorHeightChange = useCallback(
+    (heightPx: number) => {
+      scheduleLayoutRowsFromHeight(heightPx);
+    },
+    [scheduleLayoutRowsFromHeight],
+  );
+  const handleResizeStart = useCallback(() => {
+    manualResizeInProgressRef.current = true;
+  }, [manualResizeInProgressRef]);
+  const handleResizeEnd = useCallback(() => {
+    manualResizeInProgressRef.current = false;
+  }, [manualResizeInProgressRef]);
   const {
     contentViewportRef,
     showWidthControl,
@@ -211,6 +393,57 @@ export function CardEditorPane({
     selectedCardId: selectedCard?.id,
     canonicalCardWidth: CANONICAL_CARD_WIDTH,
   });
+  const shouldKeepDockedToolbarInsideCard =
+    shouldDockToolbarToCardTop && isMetaOpen && !embeddedInPager;
+
+  const editorActionsTopLeft = useMemo(
+    () =>
+      selectedCard ? (
+        <CardCornerActions
+          onHelp={() => handleToggleUncertainty(selectedCard)}
+          onStar={() => handleToggleBookmark(selectedCard)}
+          helpActive={selectedCard.hasUncertainty ?? false}
+          starActive={selectedCard.isBookmarked ?? false}
+        />
+      ) : undefined,
+    [handleToggleBookmark, handleToggleUncertainty, selectedCard],
+  );
+  const questionBlocksForToolbar = draft?.questionBlocks;
+  const questionImagesForToolbar = draft?.questionImages;
+  const questionActionsTopRight = useMemo(
+    () => {
+      // media count updates are derived inside renderMediaDialogButtons,
+      // but we still need this node to refresh when question-side data changes.
+      void questionBlocksForToolbar;
+      void questionImagesForToolbar;
+      return hideCardShellHeader
+        ? undefined
+        : renderMediaDialogButtons("question");
+    },
+    [
+      hideCardShellHeader,
+      questionBlocksForToolbar,
+      questionImagesForToolbar,
+      renderMediaDialogButtons,
+    ],
+  );
+  const answerBlocksForToolbar = draft?.answerBlocks;
+  const answerImagesForToolbar = draft?.answerImages;
+  const answerActionsTopRight = useMemo(
+    () => {
+      // media count updates are derived inside renderMediaDialogButtons,
+      // but we still need this node to refresh when answer-side data changes.
+      void answerBlocksForToolbar;
+      void answerImagesForToolbar;
+      return hideCardShellHeader ? undefined : renderMediaDialogButtons("answer");
+    },
+    [
+      hideCardShellHeader,
+      answerBlocksForToolbar,
+      answerImagesForToolbar,
+      renderMediaDialogButtons,
+    ],
+  );
 
   if (!normalizedSelectedCardId && !isEditing) {
     return <EmptySelectionState onStartNew={handleStartNew} />;
@@ -234,7 +467,7 @@ export function CardEditorPane({
   }
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
+    <>
       <div
         className={cn(
           "pt-0 card-editor-right-pane-font",
@@ -296,7 +529,8 @@ export function CardEditorPane({
           <div
             ref={contentViewportRef}
             className={cn(
-              "min-w-0 flex-1 overflow-x-clip flex flex-col items-center",
+              "min-w-0 flex-1 flex flex-col items-center",
+              dockToolbarsToTop ? "overflow-x-visible" : "overflow-x-clip",
               embeddedInPager ? "overflow-y-visible" : "overflow-y-auto",
               isEditing
                 ? dockToolbarsToTop
@@ -333,191 +567,73 @@ export function CardEditorPane({
                   )}
                   style={{ columnGap: `${CARD_EDITOR_PAIR_GAP_PX}px` }}
                 >
-                  <div
-                    className={cn(
-                      "flex min-h-0 w-full flex-col",
-                      shouldShowInlineToolbarMount ? "gap-2" : "gap-0",
-                    )}
-                  >
-                    {shouldShowInlineToolbarMount && (
-                      <div
-                        ref={setToolbarMountQInternal}
-                        className="w-full"
-                      />
-                      )}
-                    <CardFrame
-                      baseWidth={CANONICAL_CARD_WIDTH}
-                      contentPaddingPx={0}
-                      allowUpscale
-                      maxScale={CARD_PANE_AUTO_MAX_SCALE}
-                      scaleMultiplier={1}
-                      ruledOffsetPx={
-                        hideCardShellHeader
-                          ? CARD_PAGER_EDIT_RULED_OFFSET_TOP_PX
-                          : undefined
-                      }
-                      fixedScale={editorCardFixedScale}
-                      topAttachment={
-                        shouldDockToolbarToCardTop ? (
-                          <div className="relative h-0 w-full overflow-visible pointer-events-none">
-                            <div
-                              ref={setToolbarMountQInternal}
-                              className="absolute left-0 top-0 z-20 pointer-events-auto"
-                              style={{
-                                transform: "translate(calc(-100% - 12px), 16px)",
-                              }}
-                            />
-                          </div>
-                        ) : undefined
-                      }
-                      className={cn(
-                        "premium-paper-depth",
-                        "card-shell--paper",
-                        shouldShowEditingBadge && "card-shell--editing",
-                        highlightActiveCards && "card-shell--active-outline",
-                      )}
-                      resizable
-                      showResizeHandle
-                      resizeStepPx={CARD_ROW_PX}
-                      heightPx={layoutRowsToCardHeightPx(
-                        normalizeLayoutRows(draft?.layoutRows),
-                      )}
-                      lockHeight
-                      onHeightChange={(heightPx) => {
-                        void onDragEnd;
-                        scheduleLayoutRowsFromHeight(heightPx);
-                      }}
-                      onMinHeightChange={handleQuestionMinHeightChange}
-                      onResizeStart={() => {
-                        manualResizeInProgressRef.current = true;
-                      }}
-                      onResizeEnd={() => {
-                        manualResizeInProgressRef.current = false;
-                      }}
-                      actionsTopLeft={
-                        hideCardShellHeader
-                          ? undefined
-                          : editorActionsTopLeft
-                      }
-                      actionsTopRight={
-                        hideCardShellHeader
-                          ? undefined
-                          : renderMediaDialogButtons("question")
-                      }
-                    >
-                      <SharedCardContent
-                        mode="edit"
-                        blocks={draft?.questionBlocks ?? []}
-                        onChange={handleQuestionBlocksChange}
-                        selectionScopeKey={normalizedSelectedCardId}
-                        prefix="question"
-                        label="問題"
-                        color="text-indigo-500"
-                        droppableId="question-blocks"
-                        accentColor={settings?.accentColor}
-                        duplicateToOpposite={settings?.duplicateToOpposite}
-                        hideToolbar={hideBlockToolbars}
-                        toolbarMount={toolbarMountQ}
-                        toolbarDesktopLayout={
-                          shouldDockToolbarToCardTop ? "vertical" : "horizontal"
-                        }
-                        settings={settings}
-                      />
-                    </CardFrame>
-                  </div>
+                  <EditorSidePane
+                    side="question"
+                    blocks={questionBlocks}
+                    onBlocksChange={handleQuestionBlocksChange}
+                    selectionScopeKey={normalizedSelectedCardId}
+                    label="問題"
+                    color="text-indigo-500"
+                    droppableId="question-blocks"
+                    accentColor={settings?.accentColor}
+                    duplicateToOpposite={settings?.duplicateToOpposite}
+                    hideToolbar={hideBlockToolbars}
+                    toolbarMount={toolbarMountQ}
+                    toolbarDesktopLayout={
+                      shouldDockToolbarToCardTop ? "vertical" : "horizontal"
+                    }
+                    settings={settings}
+                    shouldShowInlineToolbarMount={shouldShowInlineToolbarMount}
+                    setInlineToolbarMount={setToolbarMountQInternal}
+                    hideCardShellHeader={hideCardShellHeader}
+                    shouldDockToolbarToCardTop={shouldDockToolbarToCardTop}
+                    dockToolbarInsideCardEdge={shouldKeepDockedToolbarInsideCard}
+                    setDockedToolbarMount={setToolbarMountQInternal}
+                    shouldShowEditingBadge={shouldShowEditingBadge}
+                    highlightActiveCards={highlightActiveCards}
+                    editorCardFixedScale={editorCardFixedScale}
+                    editorCardHeightPx={editorCardHeightPx}
+                    onHeightChange={handleEditorHeightChange}
+                    onMinHeightChange={handleQuestionMinHeightChange}
+                    onResizeStart={handleResizeStart}
+                    onResizeEnd={handleResizeEnd}
+                    actionsTopLeft={editorActionsTopLeft}
+                    actionsTopRight={questionActionsTopRight}
+                  />
 
-                  <div
-                    className={cn(
-                      "flex min-h-0 w-full flex-col",
-                      shouldShowInlineToolbarMount ? "gap-2" : "gap-0",
-                    )}
-                  >
-                    {shouldShowInlineToolbarMount && (
-                      <div
-                        ref={setToolbarMountAInternal}
-                        className="w-full"
-                      />
-                      )}
-                    <CardFrame
-                      baseWidth={CANONICAL_CARD_WIDTH}
-                      contentPaddingPx={0}
-                      allowUpscale
-                      maxScale={CARD_PANE_AUTO_MAX_SCALE}
-                      scaleMultiplier={1}
-                      ruledOffsetPx={
-                        hideCardShellHeader
-                          ? CARD_PAGER_EDIT_RULED_OFFSET_TOP_PX
-                          : undefined
-                      }
-                      fixedScale={editorCardFixedScale}
-                      topAttachment={
-                        shouldDockToolbarToCardTop ? (
-                          <div className="relative h-0 w-full overflow-visible pointer-events-none">
-                            <div
-                              ref={setToolbarMountAInternal}
-                              className="absolute right-0 top-0 z-20 pointer-events-auto"
-                              style={{
-                                transform: "translate(calc(100% + 12px), 16px)",
-                              }}
-                            />
-                          </div>
-                        ) : undefined
-                      }
-                      className={cn(
-                        "premium-paper-depth",
-                        "card-shell--paper",
-                        shouldShowEditingBadge && "card-shell--editing",
-                        highlightActiveCards && "card-shell--active-outline",
-                      )}
-                      resizable
-                      showResizeHandle
-                      resizeStepPx={CARD_ROW_PX}
-                      heightPx={layoutRowsToCardHeightPx(
-                        normalizeLayoutRows(draft?.layoutRows),
-                      )}
-                      lockHeight
-                      onHeightChange={(heightPx) => {
-                        void onDragEnd;
-                        scheduleLayoutRowsFromHeight(heightPx);
-                      }}
-                      onMinHeightChange={handleAnswerMinHeightChange}
-                      onResizeStart={() => {
-                        manualResizeInProgressRef.current = true;
-                      }}
-                      onResizeEnd={() => {
-                        manualResizeInProgressRef.current = false;
-                      }}
-                      actionsTopLeft={
-                        hideCardShellHeader
-                          ? undefined
-                          : editorActionsTopLeft
-                      }
-                      actionsTopRight={
-                        hideCardShellHeader
-                          ? undefined
-                          : renderMediaDialogButtons("answer")
-                      }
-                    >
-                      <SharedCardContent
-                        mode="edit"
-                        blocks={draft?.answerBlocks ?? []}
-                        onChange={handleAnswerBlocksChange}
-                        selectionScopeKey={normalizedSelectedCardId}
-                        prefix="answer"
-                        label="解答"
-                        color="text-emerald-500"
-                        droppableId="answer-blocks"
-                        accentColor={settings?.accentColor}
-                        duplicateToOpposite={settings?.duplicateToOpposite}
-                        hideToolbar={hideBlockToolbars}
-                        toolbarMount={toolbarMountA}
-                        toolbarDesktopLayout={
-                          shouldDockToolbarToCardTop ? "vertical" : "horizontal"
-                        }
-                        settings={settings}
-                      />
-                    </CardFrame>
-                  </div>
+                  <EditorSidePane
+                    side="answer"
+                    blocks={answerBlocks}
+                    onBlocksChange={handleAnswerBlocksChange}
+                    selectionScopeKey={normalizedSelectedCardId}
+                    label="解答"
+                    color="text-emerald-500"
+                    droppableId="answer-blocks"
+                    accentColor={settings?.accentColor}
+                    duplicateToOpposite={settings?.duplicateToOpposite}
+                    hideToolbar={hideBlockToolbars}
+                    toolbarMount={toolbarMountA}
+                    toolbarDesktopLayout={
+                      shouldDockToolbarToCardTop ? "vertical" : "horizontal"
+                    }
+                    settings={settings}
+                    shouldShowInlineToolbarMount={shouldShowInlineToolbarMount}
+                    setInlineToolbarMount={setToolbarMountAInternal}
+                    hideCardShellHeader={hideCardShellHeader}
+                    shouldDockToolbarToCardTop={shouldDockToolbarToCardTop}
+                    dockToolbarInsideCardEdge={shouldKeepDockedToolbarInsideCard}
+                    setDockedToolbarMount={setToolbarMountAInternal}
+                    shouldShowEditingBadge={shouldShowEditingBadge}
+                    highlightActiveCards={highlightActiveCards}
+                    editorCardFixedScale={editorCardFixedScale}
+                    editorCardHeightPx={editorCardHeightPx}
+                    onHeightChange={handleEditorHeightChange}
+                    onMinHeightChange={handleAnswerMinHeightChange}
+                    onResizeStart={handleResizeStart}
+                    onResizeEnd={handleResizeEnd}
+                    actionsTopLeft={editorActionsTopLeft}
+                    actionsTopRight={answerActionsTopRight}
+                  />
                 </div>
                 {!hideFooterActions && (
                   <div className="sticky bottom-4 flex w-full justify-end gap-2">
@@ -605,6 +721,6 @@ export function CardEditorPane({
           setReferenceItems={setReferenceItems}
         />
       </div>
-    </DragDropContext>
+    </>
   );
 }

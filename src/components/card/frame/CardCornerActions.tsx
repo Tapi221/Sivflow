@@ -37,7 +37,7 @@ export function CardCornerActions({
   const disabledClass = disabled ? "opacity-50 pointer-events-none" : "";
 
   return (
-    <div className={cn("flex items-center gap-1", className)}>
+    <div className={cn("flex items-center gap-0", className)}>
       {onHelp ? (
         <button
           type="button"

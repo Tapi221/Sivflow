@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowRight, ExternalLink, Pencil, Trash2, Pin } from "@/ui/icons";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthSession } from "@/contexts/AuthContext";
 import { useToast } from "@/contexts/ToastContext";
 import { getLocalDb } from "@/services/localDB";
 import platform from "@/platform";
@@ -90,7 +90,7 @@ export function DocumentRowMenu({
   onTogglePin,
   children,
 }: DocumentRowMenuProps) {
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthSession();
   const { error: toastError, success: toastSuccess } = useToast();
 
   const [internalOpen, setInternalOpen] = useState(false);

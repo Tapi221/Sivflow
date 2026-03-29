@@ -37,6 +37,8 @@ const PEEK = 60;
 const GAP = 20;
 /** ステージ(クリップ領域)の横幅 */
 const STAGE_WIDTH = CARD_WIDTH + 2 * (GAP + PEEK);
+/** active 近傍だけ実カードを描画する半径 */
+const PREVIEW_RENDER_RADIUS = 1;
 
 // ── タイミング定数 ───────────────────────────────────────────────────────
 /** スクロール停止と見なすまでの無操作時間 (ms) */
@@ -256,7 +258,8 @@ export function CardCarousel3D({
         >
           {cards.map((card, idx) => {
             const isActive = idx === activeIdx;
-            const isNear = Math.abs(idx - activeIdx) <= 1; // active ± 1 のみ描画優先
+            const isNear = Math.abs(idx - activeIdx) <= PREVIEW_RENDER_RADIUS;
+            const shouldRenderCard = isActive || isNear;
 
             return (
               <div
@@ -279,7 +282,23 @@ export function CardCarousel3D({
                   contentVisibility: isNear ? "visible" : "auto",
                 }}
               >
-                {isActive ? renderCenter(card, idx) : resolvePreview(card)}
+                {shouldRenderCard ? (
+                  isActive ? (
+                    renderCenter(card, idx)
+                  ) : (
+                    resolvePreview(card)
+                  )
+                ) : (
+                  <div
+                    aria-hidden
+                    className="w-full"
+                    style={{
+                      height: `${Math.max(520, Math.round(stageHeight ?? 720))}px`,
+                      contentVisibility: "auto",
+                      containIntrinsicSize: "720px 1200px",
+                    }}
+                  />
+                )}
               </div>
             );
           })}

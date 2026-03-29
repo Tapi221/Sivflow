@@ -55,136 +55,153 @@ export function useFlashcardCornerControls({
   onOpenAudioPopup,
   onOpenReferencePopup,
 }: FlashcardCornerControlsProps): FlashcardCornerControlsResult {
-  const actionsTopLeft: React.ReactNode[] = [];
-  const actionsTopRight: React.ReactNode[] = [];
-  const mediaActionNodes: React.ReactNode[] = [];
-  const mediaButtonClass = cn(
-    "relative inline-flex h-7 w-7 min-h-0 min-w-0 items-center justify-center rounded-full transition-colors",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
-    CARD_ACTION_BG_CLASS,
-    CARD_ACTION_COLOR_IDLE_CLASS,
-  );
-
-  const mediaCountLabel = (count: number) => (count > 9 ? "9+" : String(count));
-
-  if (extraHeaderLeft) {
-    actionsTopLeft.push(
-      <div
-        key="extra-header-left"
-        className="flex"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {extraHeaderLeft}
-      </div>,
+  return React.useMemo(() => {
+    const actionsTopLeft: React.ReactNode[] = [];
+    const actionsTopRight: React.ReactNode[] = [];
+    const mediaActionNodes: React.ReactNode[] = [];
+    const mediaButtonClass = cn(
+      "relative inline-flex h-7 w-7 min-h-0 min-w-0 items-center justify-center rounded-full transition-colors",
+      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+      CARD_ACTION_BG_CLASS,
+      CARD_ACTION_COLOR_IDLE_CLASS,
     );
-  }
 
-  if (onToggleUncertainty || onToggleBookmark) {
-    actionsTopLeft.push(
-      <CardCornerActions
-        key="corner-actions"
-        onHelp={onToggleUncertainty ? () => onToggleUncertainty(card) : undefined}
-        onStar={onToggleBookmark ? () => onToggleBookmark(card) : undefined}
-        helpActive={hasUncertainty}
-        starActive={isBookmarked}
-      />,
-    );
-  }
+    const mediaCountLabel = (count: number) => (count > 9 ? "9+" : String(count));
 
-  if (activeImageItems.length > 0) {
-    mediaActionNodes.push(
-      <button
-        key="images"
-        onClick={(e) => {
-          e.stopPropagation();
-          onOpenImagePopup();
-        }}
-        className={mediaButtonClass}
-        aria-label={`画像 ${activeImageItems.length} 件`}
-      >
-        <ImageIcon className={CARD_ACTION_ICON_CLASS} />
-        <span className="pointer-events-none absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full border border-white bg-slate-100 px-1 text-[9px] font-semibold leading-none text-slate-500">
-          {mediaCountLabel(activeImageItems.length)}
-        </span>
-      </button>,
-    );
-  }
+    if (extraHeaderLeft) {
+      actionsTopLeft.push(
+        <div
+          key="extra-header-left"
+          className="flex"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {extraHeaderLeft}
+        </div>,
+      );
+    }
 
-  if (activeAudioUrls.length > 0) {
-    mediaActionNodes.push(
-      <button
-        key="audios"
-        onClick={(e) => {
-          e.stopPropagation();
-          onOpenAudioPopup();
-        }}
-        className={mediaButtonClass}
-        aria-label={`音声 ${activeAudioUrls.length} 件`}
-      >
-        <Volume2 className={CARD_ACTION_ICON_CLASS} />
-        <span className="pointer-events-none absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full border border-white bg-slate-100 px-1 text-[9px] font-semibold leading-none text-slate-500">
-          {mediaCountLabel(activeAudioUrls.length)}
-        </span>
-      </button>,
-    );
-  }
+    if (onToggleUncertainty || onToggleBookmark) {
+      actionsTopLeft.push(
+        <CardCornerActions
+          key="corner-actions"
+          onHelp={onToggleUncertainty ? () => onToggleUncertainty(card) : undefined}
+          onStar={onToggleBookmark ? () => onToggleBookmark(card) : undefined}
+          helpActive={hasUncertainty}
+          starActive={isBookmarked}
+        />,
+      );
+    }
 
-  if (activeReferences.length > 0) {
-    mediaActionNodes.push(
-      <button
-        key="references"
-        onClick={(e) => {
-          e.stopPropagation();
-          onOpenReferencePopup();
-        }}
-        className={mediaButtonClass}
-        aria-label={`リンク ${activeReferences.length} 件`}
-      >
-        <Link className={CARD_ACTION_ICON_CLASS} />
-        <span className="pointer-events-none absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full border border-white bg-slate-100 px-1 text-[9px] font-semibold leading-none text-slate-500">
-          {mediaCountLabel(activeReferences.length)}
-        </span>
-      </button>,
-    );
-  }
+    if (activeImageItems.length > 0) {
+      mediaActionNodes.push(
+        <button
+          key="images"
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpenImagePopup();
+          }}
+          className={mediaButtonClass}
+          aria-label={`画像 ${activeImageItems.length} 件`}
+        >
+          <ImageIcon className={CARD_ACTION_ICON_CLASS} />
+          <span className="pointer-events-none absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full border border-white bg-slate-100 px-1 text-[9px] font-semibold leading-none text-slate-500">
+            {mediaCountLabel(activeImageItems.length)}
+          </span>
+        </button>,
+      );
+    }
 
-  if (mediaActionNodes.length > 0) {
-    actionsTopRight.push(
-      <div
-        key="media-actions"
-        className="flex items-center gap-2"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {mediaActionNodes}
-      </div>,
-    );
-  }
+    if (activeAudioUrls.length > 0) {
+      mediaActionNodes.push(
+        <button
+          key="audios"
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpenAudioPopup();
+          }}
+          className={mediaButtonClass}
+          aria-label={`音声 ${activeAudioUrls.length} 件`}
+        >
+          <Volume2 className={CARD_ACTION_ICON_CLASS} />
+          <span className="pointer-events-none absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full border border-white bg-slate-100 px-1 text-[9px] font-semibold leading-none text-slate-500">
+            {mediaCountLabel(activeAudioUrls.length)}
+          </span>
+        </button>,
+      );
+    }
 
-  if (onEdit && !previewMode) {
-    actionsTopRight.push(
-      <Button
-        key="edit"
-        variant="ghost"
-        size="icon"
-        onClick={(e: React.MouseEvent) => {
-          e.stopPropagation();
-          onEdit(card);
-        }}
-        className={cn(
-          "rounded-none w-8 h-8 md:w-9 md:h-9 transition-colors",
-          CARD_ACTION_BG_CLASS,
-          CARD_ACTION_COLOR_IDLE_CLASS,
-        )}
-      >
-        <Edit className={CARD_ACTION_ICON_CLASS} />
-      </Button>,
-    );
-  }
+    if (activeReferences.length > 0) {
+      mediaActionNodes.push(
+        <button
+          key="references"
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpenReferencePopup();
+          }}
+          className={mediaButtonClass}
+          aria-label={`リンク ${activeReferences.length} 件`}
+        >
+          <Link className={CARD_ACTION_ICON_CLASS} />
+          <span className="pointer-events-none absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full border border-white bg-slate-100 px-1 text-[9px] font-semibold leading-none text-slate-500">
+            {mediaCountLabel(activeReferences.length)}
+          </span>
+        </button>,
+      );
+    }
 
-  return {
-    actionsTopLeft: actionsTopLeft.length > 0 ? actionsTopLeft : undefined,
-    actionsTopRight: actionsTopRight.length > 0 ? actionsTopRight : undefined,
-  };
+    if (mediaActionNodes.length > 0) {
+      actionsTopRight.push(
+        <div
+          key="media-actions"
+          className="flex items-center gap-2"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {mediaActionNodes}
+        </div>,
+      );
+    }
+
+    if (onEdit && !previewMode) {
+      actionsTopRight.push(
+        <Button
+          key="edit"
+          variant="ghost"
+          size="icon"
+          onClick={(e: React.MouseEvent) => {
+            e.stopPropagation();
+            onEdit(card);
+          }}
+          className={cn(
+            "rounded-none w-8 h-8 md:w-9 md:h-9 transition-colors",
+            CARD_ACTION_BG_CLASS,
+            CARD_ACTION_COLOR_IDLE_CLASS,
+          )}
+        >
+          <Edit className={CARD_ACTION_ICON_CLASS} />
+        </Button>,
+      );
+    }
+
+    return {
+      actionsTopLeft: actionsTopLeft.length > 0 ? actionsTopLeft : undefined,
+      actionsTopRight: actionsTopRight.length > 0 ? actionsTopRight : undefined,
+    };
+  }, [
+    activeAudioUrls,
+    activeImageItems,
+    activeReferences,
+    card,
+    extraHeaderLeft,
+    hasUncertainty,
+    isBookmarked,
+    onEdit,
+    onOpenAudioPopup,
+    onOpenImagePopup,
+    onOpenReferencePopup,
+    onToggleBookmark,
+    onToggleUncertainty,
+    previewMode,
+  ]);
 }
 
 

@@ -21,7 +21,7 @@ import {
 } from "@/components/pptx/domain/pptxConversion";
 import { classifyConversionRequestError } from "@/components/pptx/domain/pptxErrors";
 import { ENQUEUE_DEDUPE_WINDOW_MS } from "@/components/pptx/domain/pptxTypes";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthSession } from "@/contexts/AuthContext";
 import { useNetworkStatus } from "@/hooks/platform/useNetworkStatus";
 import { firestoreDb } from "@/services/firebase";
 import { pptxConversionDocPathSegments } from "@/services/firestorePaths";
@@ -100,7 +100,7 @@ export interface PowerPointPaneController {
 export function usePowerPointPaneController(
   doc: DocumentItem,
 ): PowerPointPaneController {
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthSession();
   const { isOnline } = useNetworkStatus();
   const diagnosticsEnabled = useMemo(() => isFirestoreDiagnosticsEnabled(), []);
 
@@ -559,6 +559,7 @@ function usePptxManifestLoaderWithReset(
     setManifestError,
   };
 }
+
 
 
 

@@ -9,7 +9,7 @@
  * - キーボード: Space/Enter=flip, ↑/↓=prev/next
  */
 
-import { useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useVerticalCardPager } from "@/hooks/study/useVerticalCardPager";
 import { CANONICAL_CARD_WIDTH } from "@/components/card/common/constants";
 import { cn } from "@/lib/utils";
@@ -71,6 +71,16 @@ export type VerticalCardPagerProps<T> = {
   showActiveOutline?: boolean;
   /** 行ラッパーの見た目装飾（shadow/opacity）を無効化するか */
   disableItemChrome?: boolean;
+  /**
+   * activeIndex の前後何枚まで実カードを描画するか。
+   * 範囲外は軽量プレースホルダに置き換えてレンダリング負荷を下げる。
+   * undefined/null の場合は全カードを描画する。
+   */
+  renderWindowRadius?: number | null;
+  /** プレースホルダの推定高さ(px)を返す関数 */
+  getEstimatedHeight?: (card: T, idx: number, isActive: boolean) => number;
+  /** レイアウト変更時の再センタリング用シグナル */
+  recenterSignal?: number | string;
 };
 
 // ── コンポーネント ───────────────────────────────────────────────────────────
@@ -90,9 +100,19 @@ export function VerticalCardPager<T>({
   showActiveState,
   showActiveOutline,
   disableItemChrome = false,
+  renderWindowRadius = null,
+  getEstimatedHeight,
+  recenterSignal,
 }: VerticalCardPagerProps<T>) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const visibleRangeRafRef = useRef<number | null>(null);
+  const visibleRangeRef = useRef<{ start: number; end: number } | null>(null);
   const shouldShowActiveState = showActiveState ?? showActiveOutline ?? true;
+  const [visibleRange, setVisibleRange] = useState<{
+    start: number;
+    end: number;
+  } | null>(null);
+  const [hasMeasuredVisibleRange, setHasMeasuredVisibleRange] = useState(false);
 
   const { itemRefs } = useVerticalCardPager({
     count: cards.length,
@@ -102,7 +122,82 @@ export function VerticalCardPager<T>({
     onFlip,
     naturalIndexCommitDelayMs,
     freezeActiveIndex,
+    recenterSignal,
   });
+
+  const updateVisibleRange = useCallback(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const containerRect = container.getBoundingClientRect();
+    const top = containerRect.top;
+    const bottom = containerRect.bottom;
+
+    let start = -1;
+    let end = -1;
+
+    for (let idx = 0; idx < cards.length; idx += 1) {
+      const el = itemRefs.current[idx];
+      if (!el) continue;
+      const rect = el.getBoundingClientRect();
+      if (rect.bottom < top) continue;
+      if (rect.top > bottom) {
+        if (start !== -1) break;
+        continue;
+      }
+      if (start === -1) start = idx;
+      end = idx;
+    }
+
+    const nextRange = start === -1 ? null : { start, end };
+    const prevRange = visibleRangeRef.current;
+    if (
+      prevRange?.start === nextRange?.start &&
+      prevRange?.end === nextRange?.end
+    ) {
+      if (!hasMeasuredVisibleRange) setHasMeasuredVisibleRange(true);
+      return;
+    }
+
+    visibleRangeRef.current = nextRange;
+    setVisibleRange(nextRange);
+    if (!hasMeasuredVisibleRange) setHasMeasuredVisibleRange(true);
+  }, [cards.length, hasMeasuredVisibleRange, itemRefs]);
+
+  const scheduleVisibleRangeUpdate = useCallback(() => {
+    if (visibleRangeRafRef.current != null) return;
+    visibleRangeRafRef.current = window.requestAnimationFrame(() => {
+      visibleRangeRafRef.current = null;
+      updateVisibleRange();
+    });
+  }, [updateVisibleRange]);
+
+  useEffect(() => {
+    scheduleVisibleRangeUpdate();
+
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => scheduleVisibleRangeUpdate();
+    container.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll, { passive: true });
+
+    const observer =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(() => scheduleVisibleRangeUpdate())
+        : null;
+    observer?.observe(container);
+
+    return () => {
+      container.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+      observer?.disconnect();
+      if (visibleRangeRafRef.current != null) {
+        window.cancelAnimationFrame(visibleRangeRafRef.current);
+        visibleRangeRafRef.current = null;
+      }
+    };
+  }, [cards.length, scheduleVisibleRangeUpdate]);
 
   return (
     // スクロールコンテナ: 親から height: 100% を受け取る前提
@@ -129,6 +224,16 @@ export function VerticalCardPager<T>({
       >
         {cards.map((card, idx) => {
           const isActive = idx === activeIndex;
+          const isVisibleInViewport =
+            visibleRange != null &&
+            idx >= visibleRange.start &&
+            idx <= visibleRange.end;
+          const withinRenderWindow =
+            renderWindowRadius == null
+              ? true
+              : Math.abs(idx - activeIndex) <= renderWindowRadius;
+          const shouldRenderCard =
+            !hasMeasuredVisibleRange || withinRenderWindow || isVisibleInViewport;
           const key = getKey ? getKey(card, idx) : idx;
           const width = Math.max(
             1,
@@ -157,7 +262,24 @@ export function VerticalCardPager<T>({
                 borderRadius: cardBorderRadius(width),
               }}
             >
-              {renderCard(card, idx, isActive)}
+              {shouldRenderCard ? (
+                renderCard(card, idx, isActive)
+              ) : (
+                <div
+                  aria-hidden
+                  className="w-full"
+                  style={{
+                    height: `${Math.max(
+                      1,
+                      Math.round(
+                        getEstimatedHeight?.(card, idx, isActive) ?? 900,
+                      ),
+                    )}px`,
+                    contentVisibility: "auto",
+                    containIntrinsicSize: "900px 1200px",
+                  }}
+                />
+              )}
             </div>
           );
         })}

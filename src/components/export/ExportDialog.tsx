@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthSession } from "@/contexts/AuthContext";
 import { useLiveQuery } from "dexie-react-hooks";
 import {
   getLocalDb,
@@ -31,7 +31,7 @@ export default function ExportDialog({
   open,
   onOpenChange,
 }: ExportDialogProps) {
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthSession();
   const [exportType, setExportType] = useState<"all" | "folder">("all");
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
@@ -226,6 +226,7 @@ export default function ExportDialog({
     </Dialog>
   );
 }
+
 
 
 

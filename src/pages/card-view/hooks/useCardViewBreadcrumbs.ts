@@ -18,6 +18,7 @@ interface UseCardViewBreadcrumbsOptions {
   folderId: string | null;
   selectedCardSet: CardSet | null;
   selectedCard: Card | null;
+  sortedCards: Card[];
   folders: Folder[];
   setExtraCrumbs: (crumbs: Crumb[]) => void;
 }
@@ -26,6 +27,7 @@ export function useCardViewBreadcrumbs({
   folderId,
   selectedCardSet,
   selectedCard,
+  sortedCards,
   folders,
   setExtraCrumbs,
 }: UseCardViewBreadcrumbsOptions) {
@@ -64,10 +66,11 @@ export function useCardViewBreadcrumbs({
     }
 
     if (selectedCard) {
-      const label =
-        selectedCard.title?.trim() ||
-        selectedCard.questionText?.trim().slice(0, 20) ||
-        "カード";
+      const title = selectedCard.title?.trim() ?? "";
+      const cardIndex = sortedCards.findIndex((card) => card.id === selectedCard.id);
+      const current = cardIndex >= 0 ? cardIndex + 1 : 1;
+      const total = Math.max(1, sortedCards.length);
+      const label = title ? `${current}/${total} : ${title}` : `${current}/${total}`;
       crumbs.push({ label });
     }
 
@@ -76,7 +79,7 @@ export function useCardViewBreadcrumbs({
       lastSignatureRef.current = signature;
       setExtraCrumbs(crumbs);
     }
-  }, [selectedCardSet, selectedCard, folderId, folders, setExtraCrumbs]);
+  }, [selectedCardSet, selectedCard, sortedCards, folderId, folders, setExtraCrumbs]);
 
   // Cleanup on unmount
   useEffect(() => {

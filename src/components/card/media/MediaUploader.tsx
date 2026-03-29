@@ -1,7 +1,7 @@
 import { ImageFrame } from "@/components/card/blocks/ImageFrame";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthSession } from "@/contexts/AuthContext";
 import { useReliableFileUpload } from "@/hooks/platform/useReliableFileUpload";
 import { cn } from "@/lib/utils";
 import {
@@ -26,7 +26,7 @@ const clamp = (v: number, min: number, max: number) =>
 
 function ImageItem({ item, index, onRetry, onUpdate }) {
   const [loadFailed, setLoadFailed] = useState(false);
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthSession();
   const [resolvedLocalUrl, setResolvedLocalUrl] = useState<string | null>(null);
   const displayUrl = item.remoteUrl ?? item.localUrl ?? resolvedLocalUrl ?? "";
   const isFailed = item.status === "failed";
@@ -324,7 +324,7 @@ export default function MediaUploader({
   onFilesExcess,
   autoOpenPicker = false,
 }: MediaUploaderProps) {
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthSession();
   const [isUploading, setIsUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [retryIndex, setRetryIndex] = useState<number | null>(null);
@@ -1051,6 +1051,7 @@ export default function MediaUploader({
     </div>
   );
 }
+
 
 
 

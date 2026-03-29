@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { getLocalDb } from "@/services/localDB";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthSession } from "@/contexts/AuthContext";
 import type { TagV3Record } from "@/services/localdb/types";
 import { useUserSettings } from "./useUserSettings";
 import {
@@ -176,7 +176,7 @@ export async function auditAndRepairTags(
  * ✅ tags_v2 が存在する環境でも migration 後は tags_v3 を使う
  */
 export function useTags() {
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthSession();
   const { settings, updateSettings } = useUserSettings();
 
   const rawTags = useLiveQuery(
@@ -917,6 +917,7 @@ export function useTags() {
     getTagNameById,
   };
 }
+
 
 
 

@@ -5,7 +5,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { useCards } from "@/hooks/card/useCards";
 import { useFolders } from "@/hooks/folder/useFolders";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthSession } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { EmptyMetaPanel } from "@/components/card/panels/EmptyMetaPanel";
@@ -75,7 +75,7 @@ const toDate = (value) => {
 
 export default function Calendar() {
   const navigate = useNavigate();
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthSession();
   const [isMetaOpen, setIsMetaOpen] = useState(true);
 
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -555,6 +555,7 @@ export default function Calendar() {
     </div>
   );
 }
+
 
 
 

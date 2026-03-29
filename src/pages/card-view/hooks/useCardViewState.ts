@@ -175,20 +175,25 @@ export function useCardViewState({
     return currentCard;
   }, [currentCard, effectiveCard]);
 
-  // stale closure 回避用の currentCardId ref
-  currentCardIdRef.current = selectedCard?.id ?? currentCard?.id ?? null;
+  const currentCardId = selectedCard?.id ?? currentCard?.id ?? null;
 
-  const isFlipped = flippedCardIds.has(currentCardIdRef.current ?? "");
+  // stale closure 回避用の currentCardId ref
+  useEffect(() => {
+    currentCardIdRef.current = currentCardId;
+  }, [currentCardId]);
+
+  const isFlipped = flippedCardIds.has(currentCardId ?? "");
 
   const cardsForPager = useMemo(() => {
     if (!selectedCard) return sortedCards;
-    const idx = sortedCards.findIndex((c) => c.id === selectedCard.id);
+    const idx = cardIndexById.get(selectedCard.id);
+    if (typeof idx !== "number") return sortedCards;
     if (idx < 0) return sortedCards;
     if (sortedCards[idx] === selectedCard) return sortedCards;
     const next = sortedCards.slice();
     next[idx] = selectedCard;
     return next;
-  }, [sortedCards, selectedCard]);
+  }, [cardIndexById, sortedCards, selectedCard]);
 
   // Auto-init empty card set with a first card
   useEffect(() => {

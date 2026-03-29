@@ -51,7 +51,12 @@ export function FolderTreeArborist<T extends FolderTreeArboristNode>({
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const treeRef = useRef<TreeApi<T> | null>(null);
+  const selectedIdRef = useRef<string | null | undefined>(selectedId);
   const [height, setHeight] = useState(300);
+
+  useEffect(() => {
+    selectedIdRef.current = selectedId;
+  }, [selectedId]);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -104,12 +109,13 @@ export function FolderTreeArborist<T extends FolderTreeArboristNode>({
     const tree = treeRef.current;
     if (!tree || data.length === 0) return;
 
-    const targetId = selectedId ?? data[0]?.id;
+    const targetId = selectedIdRef.current ?? data[0]?.id;
     if (!targetId) return;
 
     // Prevent stale virtual-list scroll offset from hiding rows on remount/tab switch.
+    // Do not run on every selection change, otherwise switching cards forces scrolling.
     tree.scrollTo(targetId, "start");
-  }, [data, selectedId]);
+  }, [data]);
 
   return (
     <div ref={containerRef} className="h-full min-h-0">

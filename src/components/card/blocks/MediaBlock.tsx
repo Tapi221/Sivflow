@@ -96,8 +96,6 @@ const areMediaBlockPropsEqual = (
   prev.dragHandleClassName === next.dragHandleClassName &&
   prev.accentColor === next.accentColor &&
   prev.initialFile === next.initialFile &&
-  prev.onConsumeInitialFile === next.onConsumeInitialFile &&
-  prev.onFilesExcess === next.onFilesExcess &&
   prev.isActive === next.isActive &&
   prev.showDelete === next.showDelete &&
   prev.canMoveUp === next.canMoveUp &&

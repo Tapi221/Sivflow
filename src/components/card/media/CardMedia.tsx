@@ -1,6 +1,6 @@
 import { ImageFrame } from "@/components/card/blocks/ImageFrame";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthSession } from "@/contexts/AuthContext";
 import { storage } from "@/services/firebase";
 import { getOrCreateImageBlobUrl } from "@/services/imageBlobUrlSessionCache";
 import { getLocalDb } from "@/services/localDB";
@@ -91,7 +91,7 @@ interface ImageGalleryProps {
 }
 
 export function ImageGallery({ urls, items }: ImageGalleryProps) {
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthSession();
   const [failedImages, setFailedImages] = useState(new Set());
   const [naturalSizeMap, setNaturalSizeMap] = useState<
     Record<number, { w: number; h: number }>
@@ -412,6 +412,7 @@ export function ImageGallery({ urls, items }: ImageGalleryProps) {
     </>
   );
 }
+
 
 
 

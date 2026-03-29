@@ -6,6 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { memo } from "react";
 import type { UploadedImage } from "@/types";
 
 interface CardEditorPaneMediaDialogsProps {
@@ -23,7 +24,7 @@ interface CardEditorPaneMediaDialogsProps {
   setReferenceItems: (side: "question" | "answer", next: unknown[]) => void;
 }
 
-export function CardEditorPaneMediaDialogs({
+function CardEditorPaneMediaDialogsInner({
   imageDialogSide,
   setImageDialogSide,
   audioDialogSide,
@@ -101,3 +102,26 @@ export function CardEditorPaneMediaDialogs({
     </>
   );
 }
+
+const areMediaDialogsPropsEqual = (
+  prev: CardEditorPaneMediaDialogsProps,
+  next: CardEditorPaneMediaDialogsProps,
+): boolean => {
+  const prevClosed =
+    prev.imageDialogSide === null &&
+    prev.audioDialogSide === null &&
+    prev.linkDialogSide === null;
+  const nextClosed =
+    next.imageDialogSide === null &&
+    next.audioDialogSide === null &&
+    next.linkDialogSide === null;
+
+  if (prevClosed && nextClosed) return true;
+  return false;
+};
+
+export const CardEditorPaneMediaDialogs = memo(
+  CardEditorPaneMediaDialogsInner,
+  areMediaDialogsPropsEqual,
+);
+CardEditorPaneMediaDialogs.displayName = "CardEditorPaneMediaDialogs";

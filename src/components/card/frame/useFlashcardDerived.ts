@@ -43,6 +43,12 @@ export interface FlashcardDerived {
   activeInkDocument: ReturnType<typeof resolveInkDocument>;
 }
 
+const EMPTY_MEDIA_ITEMS: FlashcardMediaLike[] = [];
+const EMPTY_IMAGE_URLS: string[] = [];
+const EMPTY_AUDIO_URLS: string[] = [];
+const EMPTY_REFERENCES: ReturnType<typeof resolveReferences> = [];
+const EMPTY_BLOCKS: ReturnType<typeof resolveSideBlocks> = [];
+
 export function useFlashcardDerived(
   cardData: FlashcardCardLike | null | undefined,
   effectiveIsFlipped: boolean,
@@ -53,112 +59,97 @@ export function useFlashcardDerived(
   const isBookmarked = cardData ? resolveIsBookmarked(cardData) : false;
   const layoutRows = cardData ? resolveLayoutRows(cardData) : 0;
 
-  const questionText = cardData ? resolveQuestionText(cardData) : "";
-  const answerText = cardData ? resolveAnswerText(cardData) : "";
-
-  const questionCode = cardData ? resolveQuestionCode(cardData) : null;
-  const answerCode = cardData ? resolveAnswerCode(cardData) : null;
-
-  const questionImageItems = React.useMemo(
-    () => (cardData ? resolveQuestionImages(cardData) : []),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [cardData?.question_images, cardData?.questionImages],
-  );
-
-  const answerImageItems = React.useMemo(
-    () => (cardData ? resolveAnswerImages(cardData) : []),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [cardData?.answer_images, cardData?.answerImages],
-  );
-
-  const questionImageUrls = React.useMemo(
-    () => resolveImageUrls(questionImageItems),
-    [questionImageItems],
-  );
-  const answerImageUrls = React.useMemo(
-    () => resolveImageUrls(answerImageItems),
-    [answerImageItems],
-  );
-
-  const questionAudios = React.useMemo(
-    () => (cardData ? resolveQuestionAudios(cardData) : []),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [cardData?.question_audios, cardData?.questionAudios],
-  );
-  const answerAudios = React.useMemo(
-    () => (cardData ? resolveAnswerAudios(cardData) : []),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [cardData?.answer_audios, cardData?.answerAudios],
-  );
-
-  const questionAudioUrls = React.useMemo(
-    () => resolveAudioUrls(questionAudios),
-    [questionAudios],
-  );
-  const answerAudioUrls = React.useMemo(
-    () => resolveAudioUrls(answerAudios),
-    [answerAudios],
-  );
-
-  const questionReferences = React.useMemo(
-    () => resolveReferences((cardData?.questionBlocks ?? []) as CardBlock[]),
-    [cardData?.questionBlocks],
-  );
-  const answerReferences = React.useMemo(
-    () => resolveReferences((cardData?.answerBlocks ?? []) as CardBlock[]),
-    [cardData?.answerBlocks],
-  );
-
-  const questionInkDocument = React.useMemo(
-    () => resolveInkDocument(cardId, "question", cardData?.inkQuestion ?? null),
-    [cardData?.inkQuestion, cardId],
-  );
-  const answerInkDocument = React.useMemo(
-    () => resolveInkDocument(cardId, "answer", cardData?.inkAnswer ?? null),
-    [cardData?.inkAnswer, cardId],
-  );
-
-  // ---------------------------------------------------------------------------
-  // Active-side selection（effectiveIsFlipped に依存する処理を一箇所に集約）
-  // ---------------------------------------------------------------------------
   const activeSide: "question" | "answer" = effectiveIsFlipped
     ? "answer"
     : "question";
-  const activeImageItems = effectiveIsFlipped
-    ? answerImageItems
-    : questionImageItems;
-  const activeImages = effectiveIsFlipped ? answerImageUrls : questionImageUrls;
-  const activeAudioUrls = effectiveIsFlipped
-    ? answerAudioUrls
-    : questionAudioUrls;
-  const activeReferences = effectiveIsFlipped
-    ? answerReferences
-    : questionReferences;
-  const activeInkDocument = effectiveIsFlipped
-    ? answerInkDocument
-    : questionInkDocument;
+
+  const activeImageItems = React.useMemo(() => {
+    if (!cardData) return EMPTY_MEDIA_ITEMS;
+    return activeSide === "question"
+      ? resolveQuestionImages(cardData)
+      : resolveAnswerImages(cardData);
+  }, [activeSide, cardData]);
+
+  const activeImages = React.useMemo(
+    () =>
+      activeImageItems.length > 0
+        ? resolveImageUrls(activeImageItems)
+        : EMPTY_IMAGE_URLS,
+    [activeImageItems],
+  );
+
+  const activeAudios = React.useMemo(() => {
+    if (!cardData) return EMPTY_MEDIA_ITEMS;
+    return activeSide === "question"
+      ? resolveQuestionAudios(cardData)
+      : resolveAnswerAudios(cardData);
+  }, [activeSide, cardData]);
+
+  const activeAudioUrls = React.useMemo(
+    () =>
+      activeAudios.length > 0 ? resolveAudioUrls(activeAudios) : EMPTY_AUDIO_URLS,
+    [activeAudios],
+  );
+
+  const activeSourceBlocks = React.useMemo(
+    () =>
+      activeSide === "question"
+        ? ((cardData?.questionBlocks ?? []) as CardBlock[])
+        : ((cardData?.answerBlocks ?? []) as CardBlock[]),
+    [activeSide, cardData?.answerBlocks, cardData?.questionBlocks],
+  );
+
+  const activeReferences = React.useMemo(
+    () =>
+      activeSourceBlocks.length > 0
+        ? resolveReferences(activeSourceBlocks)
+        : EMPTY_REFERENCES,
+    [activeSourceBlocks],
+  );
+
+  const activeText = React.useMemo(() => {
+    if (!cardData) return "";
+    return activeSide === "question"
+      ? resolveQuestionText(cardData)
+      : resolveAnswerText(cardData);
+  }, [activeSide, cardData]);
+
+  const activeCode = React.useMemo(() => {
+    if (!cardData) return null;
+    return activeSide === "question"
+      ? resolveQuestionCode(cardData)
+      : resolveAnswerCode(cardData);
+  }, [activeSide, cardData]);
+
+  const activeInkDocument = React.useMemo(
+    () =>
+      resolveInkDocument(
+        cardId,
+        activeSide,
+        activeSide === "question"
+          ? cardData?.inkQuestion ?? null
+          : cardData?.inkAnswer ?? null,
+      ),
+    [activeSide, cardData?.inkAnswer, cardData?.inkQuestion, cardId],
+  );
 
   const activeBlocks = React.useMemo(
-    () =>
-      resolveSideBlocks(activeSide, {
-        blocks:
-          activeSide === "question"
-            ? ((cardData?.questionBlocks ?? []) as CardBlock[])
-            : ((cardData?.answerBlocks ?? []) as CardBlock[]),
-        text: activeSide === "question" ? questionText : answerText,
-        audios: activeSide === "question" ? questionAudios : answerAudios,
-        code: activeSide === "question" ? questionCode : answerCode,
-      }),
+    () => {
+      if (!cardData) return EMPTY_BLOCKS;
+      return resolveSideBlocks(activeSide, {
+        blocks: activeSourceBlocks,
+        text: activeText,
+        audios: activeAudios,
+        code: activeCode,
+      });
+    },
     [
       activeSide,
-      cardData?.questionBlocks,
-      cardData?.answerBlocks,
-      questionText,
-      answerText,
-      questionAudios,
-      answerAudios,
-      questionCode,
-      answerCode,
+      activeAudios,
+      activeCode,
+      activeSourceBlocks,
+      activeText,
+      cardData,
     ],
   );
 

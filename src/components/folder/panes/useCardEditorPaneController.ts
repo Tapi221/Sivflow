@@ -69,10 +69,17 @@ export function useCardEditorPaneController({
   }) as unknown as UseCardsResult;
 
   const cards = cardsOverride ?? cardsFromHook;
+  const cardsById = React.useMemo(() => {
+    const map = new Map<string, Card>();
+    for (const card of cards) {
+      map.set(card.id, card);
+    }
+    return map;
+  }, [cards]);
   const selectedCardSnapshot = React.useMemo(() => {
     if (!selectedCardId) return null;
-    return cards.find((card) => card.id === selectedCardId) ?? null;
-  }, [cards, selectedCardId]);
+    return cardsById.get(selectedCardId) ?? null;
+  }, [cardsById, selectedCardId]);
 
   const updateCardAsync = React.useCallback(
     async (id: string, data: Partial<Card>): Promise<unknown> => {

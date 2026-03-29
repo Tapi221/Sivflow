@@ -10,7 +10,7 @@ import {
   getDoc,
 } from "firebase/firestore";
 import { cardsPathSegments } from "@/services/firestorePaths";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthSession } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -23,7 +23,7 @@ import {
 import platform from "@/platform";
 
 export default function ImageDiagnostics() {
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthSession();
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [summary, setSummary] = useState({
@@ -330,6 +330,7 @@ export default function ImageDiagnostics() {
     </div>
   );
 }
+
 
 
 

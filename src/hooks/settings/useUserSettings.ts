@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { getLocalDb } from "@/services/localDB";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthSession } from "@/contexts/AuthContext";
 import type { UserSettings } from "@/types";
 import { sanitizeProfileImage } from "@/utils/profileImageSanitizer";
 
@@ -65,7 +65,7 @@ export const DEFAULT_SETTINGS: Partial<UserSettings> = {
 };
 
 export function useUserSettings() {
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthSession();
   const repairedBlobRef = useRef(false);
 
   useEffect(() => {
@@ -187,6 +187,7 @@ export function useUserSettings() {
     updateSettings,
   };
 }
+
 
 
 

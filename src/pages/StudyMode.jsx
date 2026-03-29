@@ -7,7 +7,7 @@ import { useMutation } from "@tanstack/react-query";
 import { addDoc, collection } from "firebase/firestore";
 import { getLocalDb } from "@/services/localDB";
 import { firestoreDb } from "@/services/firebase";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthSession } from "@/contexts/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft } from "@/ui/icons";
 import { createPageUrl } from "@/utils";
@@ -43,7 +43,7 @@ const RATING_TILES = [
 export default function StudyMode() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthSession();
   const { settings } = useUserSettings();
 
   const folderId = useMemo(
@@ -517,6 +517,7 @@ export default function StudyMode() {
     </div>
   );
 }
+
 
 
 

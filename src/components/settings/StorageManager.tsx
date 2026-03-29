@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthSession } from "@/contexts/AuthContext";
 import { firestoreDb, storage } from "@/services/firebase";
 import {
   collection,
@@ -26,7 +26,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import type { UploadMetadata } from "@/types";
 
 export const StorageManager = () => {
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthSession();
   const [uploads, setUploads] = useState<UploadMetadata[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -270,6 +270,7 @@ const getFileIcon = (mimeType) => {
   if (mimeType === "application/pdf") return <FileText className="w-4 h-4" />;
   return <FileText className="w-4 h-4" />;
 };
+
 
 
 

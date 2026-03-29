@@ -1,11 +1,11 @@
 import { useMemo } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { getLocalDb } from "@/services/localDB";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthSession } from "@/contexts/AuthContext";
 import type { CardSet } from "@/types";
 
 export function useCardSets(folderId?: string | null) {
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthSession();
 
   const rawSets = useLiveQuery(async () => {
     if (!currentUser) return [];
@@ -126,3 +126,4 @@ export function useCardSets(folderId?: string | null) {
     deleteCardSet,
   };
 }
+

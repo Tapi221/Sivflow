@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthSession } from "@/contexts/AuthContext";
 import { useCards } from "@/hooks/card/useCards";
 import { getLocalDb } from "@/services/localDB";
 import type { Card } from "@/types";
@@ -54,7 +54,7 @@ export function readCardDraft(cardId: string) {
  * - 画面遷移前に flushDraft() で未保存 draft を server へ確定させる
  */
 export function useCardEntity(cardId?: string | null) {
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthSession();
   const { updateCard } = useCards(undefined, undefined, { enabled: false });
 
   const serverCard = useLiveQuery(
@@ -105,6 +105,7 @@ export function useCardEntity(cardId?: string | null) {
     flushDraft,
   };
 }
+
 
 
 

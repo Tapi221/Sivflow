@@ -53,6 +53,7 @@ export default function CardView() {
     folderId,
     selectedCardSet: data.selectedCardSet,
     selectedCard: state.selectedCard,
+    sortedCards: data.sortedCards,
     folders: data.folders,
     setExtraCrumbs,
   });
@@ -138,7 +139,6 @@ export default function CardView() {
               <CardViewDesktop
                 isLoading={data.isLoading}
                 isGlobalEditing={state.isGlobalEditing}
-                isFlipped={state.isFlipped}
                 flippedCardIds={state.flippedCardIds}
                 cardsForPager={state.cardsForPager}
                 safeCurrentIndex={state.safeCurrentIndex}

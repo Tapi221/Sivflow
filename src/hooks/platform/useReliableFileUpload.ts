@@ -3,7 +3,7 @@ import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { storage, auth } from "@/services/firebase";
 import { imageDB } from "@/services/ImageDatabaseWriter";
 import { persistentQueue } from "@/services/PersistentOfflineQueue";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthSession } from "@/contexts/AuthContext";
 import { generateSafeStoragePath } from "@/utils/fileUtils";
 import type {
   UploadSource,
@@ -112,7 +112,7 @@ const performFirebaseUpload = async (
 };
 
 export const useReliableFileUpload = (): UseReliableFileUploadReturn => {
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthSession();
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>("idle");
@@ -278,6 +278,7 @@ export const useReliableFileUpload = (): UseReliableFileUploadReturn => {
     reset,
   };
 };
+
 
 
 

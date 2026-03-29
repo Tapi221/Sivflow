@@ -9,7 +9,7 @@ import { ToastProvider } from "./contexts/ToastContext";
 // 通知用の Provider（多分リアルタイム通知など）
 import { NotificationProvider } from "./components/notifications/NotificationProvider";
 // 認証状態を取得するためのカスタムフック
-import { useAuth } from "./contexts/AuthContext";
+import { useAuthSession } from "./contexts/AuthContext";
 // 画面の共通レイアウトコンポーネント（ヘッダーやサイドバーなど）
 import Layout from "./Layout";
 // 自動バックアップ関連のサービス
@@ -90,7 +90,7 @@ function LoadingFallback() {
 // ===== 認証が必要なルートを守るコンポーネント =====
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   // 現在のユーザーと認証状態読み込み中かどうかを取得
-  const { currentUser, loading } = useAuth();
+  const { currentUser, loading } = useAuthSession();
 
   // 認証状態をまだ取得中ならローディング画面を表示
   // ⚠ AuthProvider は children を常にレンダリングするようになったため、
@@ -251,7 +251,7 @@ function DefaultRedirect() {
 
 // ===== アプリ本体のルーティング・起動処理をまとめたコンポーネント =====
 function AppContent() {
-  const { currentUser, loading } = useAuth();
+  const { currentUser, loading } = useAuthSession();
   // 差分同期の進捗（文字列など）を取得
   const { syncProgress } = useSync();
 
@@ -544,6 +544,7 @@ function App() {
 }
 
 export default App;
+
 
 
 

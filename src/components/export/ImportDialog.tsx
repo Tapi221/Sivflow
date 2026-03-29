@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthSession } from "@/contexts/AuthContext";
 import {
   getLocalDb,
   getLocalDBRuntimeStatus,
@@ -34,7 +34,7 @@ export default function ImportDialog({
   open,
   onOpenChange,
 }: ImportDialogProps) {
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthSession();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [step, setStep] = useState<ImportStep>("select");
@@ -345,6 +345,7 @@ export default function ImportDialog({
     </Dialog>
   );
 }
+
 
 
 

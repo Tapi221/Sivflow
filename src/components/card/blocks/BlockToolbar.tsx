@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Plus } from "@/ui/icons";
 import { Type } from "@/ui/icons";
@@ -192,7 +192,7 @@ function ActionButton({
   );
 }
 
-export const BlockToolbar: React.FC<BlockToolbarProps> = ({
+const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
   label,
   onAddBlock,
   settings,
@@ -200,10 +200,15 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
   desktopLayout = "horizontal",
   className,
 }) => {
+  const verticalAnchorRef = useRef<HTMLDivElement | null>(null);
+  const [verticalFixedLeft, setVerticalFixedLeft] = useState<number | null>(
+    null,
+  );
+
   type RawSettings = { editorBlockSettings?: Record<string, unknown>[] };
   const rawSettings = (settings as RawSettings | undefined)?.editorBlockSettings;
 
-  const blockSettings: BlockConfig[] = (() => {
+  const blockSettings: BlockConfig[] = useMemo(() => {
     if (!rawSettings || rawSettings.length === 0) return DEFAULT_CONFIGS;
 
     const fromSettings = rawSettings
@@ -238,15 +243,65 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
         (DEFAULT_ORDER_INDEX_BY_TYPE[b.type] ?? 999)
       );
     });
-  })();
+  }, [rawSettings]);
 
-  const visibleConfigs = blockSettings.filter((config) => {
-    if (!(config.isVisible ?? config.enabled ?? true)) return false;
-    if (hiddenBlockTypes.includes(config.type)) return false;
-    return true;
-  });
+  const visibleConfigs = useMemo(
+    () =>
+      blockSettings.filter((config) => {
+        if (!(config.isVisible ?? config.enabled ?? true)) return false;
+        if (hiddenBlockTypes.includes(config.type)) return false;
+        return true;
+      }),
+    [blockSettings, hiddenBlockTypes],
+  );
 
-  return (
+  useEffect(() => {
+    if (desktopLayout !== "vertical") {
+      setVerticalFixedLeft(null);
+      return;
+    }
+    if (typeof window === "undefined") return;
+
+    let rafId: number | null = null;
+    const VERTICAL_TOOLBAR_WIDTH_PX = 44; // w-11
+    const update = () => {
+      const el = verticalAnchorRef.current;
+      if (!el) return;
+      const anchorLeft = el.getBoundingClientRect().left;
+      const mountTransform = (el.parentElement as HTMLElement | null)?.style
+        ?.transform;
+      // transform に "-100%" が含まれる配置では、アンカーがツールバー右端基準になる。
+      const shouldShiftByToolbarWidth =
+        typeof mountTransform === "string" && mountTransform.includes("-100%");
+      const nextLeft = shouldShiftByToolbarWidth
+        ? anchorLeft - VERTICAL_TOOLBAR_WIDTH_PX
+        : anchorLeft;
+      setVerticalFixedLeft((prev) =>
+        prev !== null && Math.abs(prev - nextLeft) < 0.5 ? prev : nextLeft,
+      );
+    };
+    const scheduleUpdate = () => {
+      if (rafId !== null) return;
+      rafId = window.requestAnimationFrame(() => {
+        rafId = null;
+        update();
+      });
+    };
+
+    update();
+    window.addEventListener("resize", scheduleUpdate);
+    window.addEventListener("scroll", scheduleUpdate, true);
+
+    return () => {
+      if (rafId !== null) {
+        window.cancelAnimationFrame(rafId);
+      }
+      window.removeEventListener("resize", scheduleUpdate);
+      window.removeEventListener("scroll", scheduleUpdate, true);
+    };
+  }, [desktopLayout]);
+
+  const renderToolbarShell = () => (
     <div
       className={cn(
         desktopLayout === "vertical"
@@ -328,4 +383,50 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
       </div>
     </div>
   );
+
+  if (desktopLayout === "vertical") {
+    return (
+      <>
+        <div ref={verticalAnchorRef} className="hidden md:block h-0 w-0" aria-hidden />
+        <div className="md:hidden">{renderToolbarShell()}</div>
+        {typeof document !== "undefined" &&
+          createPortal(
+            <div
+              className="hidden md:block"
+              style={{
+                position: "fixed",
+                top: "50dvh",
+                left: verticalFixedLeft ?? -9999,
+                transform: "translateY(-50%)",
+                zIndex: 30,
+              }}
+            >
+              {renderToolbarShell()}
+            </div>,
+            document.body,
+          )}
+      </>
+    );
+  }
+
+  return (
+    renderToolbarShell()
+  );
 };
+
+const areBlockToolbarPropsEqual = (
+  prev: BlockToolbarProps,
+  next: BlockToolbarProps,
+) =>
+  prev.label === next.label &&
+  prev.onAddBlock === next.onAddBlock &&
+  prev.settings === next.settings &&
+  prev.hiddenBlockTypes === next.hiddenBlockTypes &&
+  prev.desktopLayout === next.desktopLayout &&
+  prev.className === next.className;
+
+export const BlockToolbar = React.memo(
+  BlockToolbarInner,
+  areBlockToolbarPropsEqual,
+);
+BlockToolbar.displayName = "BlockToolbar";

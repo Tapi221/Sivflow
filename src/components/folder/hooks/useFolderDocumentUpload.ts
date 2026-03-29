@@ -5,7 +5,7 @@ import {
     extractPptxFiles,
     PPTX_MIME,
 } from "@/components/folder/explorer/model/utils";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthSession } from "@/contexts/AuthContext";
 import { useToast } from "@/contexts/ToastContext";
 import { useReliableFileUpload } from "@/hooks/platform/useReliableFileUpload";
 import { saveDocumentBlob } from "@/services/documentFileStore";
@@ -53,7 +53,7 @@ export function useFolderDocumentUpload({
   getNextOrderIndex,
   setExpandedFolders,
 }: UseFolderDocumentUploadParams): UseFolderDocumentUploadReturn {
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthSession();
   const { error: toastError } = useToast();
   const { uploadFile } = useReliableFileUpload();
 
@@ -411,6 +411,7 @@ export function useFolderDocumentUpload({
     handleToolbarFileInputChange,
   };
 }
+
 
 
 

@@ -6,6 +6,7 @@ import {
   useState,
   useRef,
   useCallback,
+  useMemo,
   type ReactNode,
 } from "react";
 import { type User as FirebaseUser, onAuthStateChanged } from "firebase/auth";
@@ -37,6 +38,11 @@ interface AuthContextType {
   dismissSecurityAlert: (alertId: string) => Promise<void>;
 }
 
+interface AuthSessionContextType {
+  currentUser: FirebaseUser | null;
+  loading: boolean;
+}
+
 const AuthContext = createContext<AuthContextType>({
   currentUser: null,
   loading: true,
@@ -53,8 +59,17 @@ const AuthContext = createContext<AuthContextType>({
   dismissSecurityAlert: async () => {},
 });
 
+const AuthSessionContext = createContext<AuthSessionContextType>({
+  currentUser: null,
+  loading: true,
+});
+
 export function useAuth() {
   return useContext(AuthContext);
+}
+
+export function useAuthSession() {
+  return useContext(AuthSessionContext);
 }
 
 interface AuthProviderProps {
@@ -93,6 +108,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // 同期設定とインターバル管理用ref
   const syncIntervalRef = useRef<unknown | null>(null);
   const syncSettingsRef = useRef<SyncSettings | null>(null);
+  const syncStatusRef = useRef(syncStatus);
+
+  useEffect(() => {
+    syncStatusRef.current = syncStatus;
+  }, [syncStatus]);
 
   /**
    * キュー件数と競合件数を更新
@@ -135,7 +155,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         );
 
         syncIntervalRef.current = setInterval(async () => {
-          if (navigator.onLine && syncStatus !== "syncing") {
+          if (navigator.onLine && syncStatusRef.current !== "syncing") {
             console.log("[Auth] Running background sync...");
             await service.synchronize();
             await updateCounts();
@@ -145,7 +165,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } catch (error) {
       console.error("[Auth] Failed to reload sync settings:", error);
     }
-  }, [currentUser, syncStatus, updateCounts]); // Added currentUser to dependencies
+  }, [currentUser, updateCounts]);
 
   /**
    * 内部同期トリガー（循環参照を避けるため分離）
@@ -390,7 +410,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Sync when coming back online (キュー処理優先)
   useEffect(() => {
     const handleOnline = async () => {
-      if (syncService && currentUser && syncStatus !== "syncing") {
+      if (
+        syncService &&
+        currentUser &&
+        syncStatusRef.current !== "syncing"
+      ) {
         console.log(
           "[Auth] Network reconnected. Processing queue and syncing...",
         );
@@ -406,7 +430,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     window.addEventListener("online", handleOnline);
     return () => window.removeEventListener("online", handleOnline);
-  }, [syncService, currentUser, syncStatus, triggerSync]);
+  }, [syncService, currentUser, triggerSync]);
 
   // 定期的にカウントを更新（5秒ごと）
   useEffect(() => {
@@ -416,38 +440,68 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return () => clearInterval(interval);
   }, [syncService, updateCounts]);
 
-  const value = {
-    currentUser,
-    loading,
-    syncStatus,
-    syncNotice,
-    lastSyncTime,
-    triggerSync,
-    // 高度化機能
-    syncService,
-    queueCount,
-    conflictCount,
-    reloadSyncSettings,
-    securityState,
-    dismissSecurityAlert,
-  };
+  const sessionValue = useMemo<AuthSessionContextType>(
+    () => ({
+      currentUser,
+      loading,
+    }),
+    [currentUser, loading],
+  );
+
+  const value = useMemo<AuthContextType>(
+    () => ({
+      currentUser,
+      loading,
+      syncStatus,
+      syncNotice,
+      lastSyncTime,
+      triggerSync,
+      // 高度化機能
+      syncService,
+      queueCount,
+      conflictCount,
+      reloadSyncSettings,
+      securityState,
+      dismissSecurityAlert,
+    }),
+    [
+      currentUser,
+      loading,
+      syncStatus,
+      syncNotice,
+      lastSyncTime,
+      triggerSync,
+      syncService,
+      queueCount,
+      conflictCount,
+      reloadSyncSettings,
+      securityState,
+      dismissSecurityAlert,
+    ],
+  );
 
   // Debug logging
-  console.log({
-    syncStatus,
-    syncNotice,
-    lastSyncTime,
-    lastSyncError: null, // access not straightforward here, assuming handled by syncService internally
-    totalSyncCount: 0, // transient, actual count in syncService. getSyncStats needed to verify
-    queueCount,
-    conflictCount,
-  });
+  if (import.meta.env.DEV) {
+    console.log({
+      syncStatus,
+      syncNotice,
+      lastSyncTime,
+      lastSyncError: null, // access not straightforward here, assuming handled by syncService internally
+      totalSyncCount: 0, // transient, actual count in syncService. getSyncStats needed to verify
+      queueCount,
+      conflictCount,
+    });
+  }
 
   // ⚠ 以前は {!loading && children} で children を条件レンダリングしていたが、
   // これにより BrowserRouter が loading 遷移のたびに破棄→再構築され、
   // React Router のルーティング状態が失われてリダイレクトが発生していた。
   // loading 状態のハンドリングは ProtectedRoute / AppContent に委譲する。
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthSessionContext.Provider value={sessionValue}>
+      <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+    </AuthSessionContext.Provider>
+  );
 }
 
 

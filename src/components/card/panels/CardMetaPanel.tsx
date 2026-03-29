@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState, type ReactElement } from "react";
+import { memo, useEffect, useMemo, useState, type ReactElement } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";
 import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
 import { useSearchParams } from "react-router-dom";
 import { Line, LineChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthSession } from "@/contexts/AuthContext";
 import { RatingCountTiles } from "@/features/study/RatingCountTiles";
 import { SurfaceButton } from "@/components/ui/surface-button";
 import { Switch } from "@/components/ui/switch";
@@ -331,7 +331,85 @@ function toEditableReviewLogs(logs: MetaReviewLog[]): ReviewLog[] {
     }));
 }
 
-export function CardMetaPanel({
+const cardMetaDraftFlag = (card: Card | null): boolean =>
+  Boolean(card?.isDraft ?? (card as Record<string, unknown> | null)?.is_draft);
+
+const cardMetaReviewCount = (card: Card | null): number =>
+  Number(
+    card?.reviewCount ?? (card as Record<string, unknown> | null)?.review_count ?? 0,
+  );
+
+const cardMetaLastSubjectiveScore = (card: Card | null): number | null => {
+  const value =
+    card?.lastSubjectiveScore ??
+    (card as Record<string, unknown> | null)?.last_subjective_score;
+  return toFiniteNumber(value);
+};
+
+const cardMetaDateTimeMs = (
+  value: unknown,
+): number | null => {
+  const date = toValidDate(value);
+  return date ? date.getTime() : null;
+};
+
+const areCardMetaCardsEqual = (
+  prev: Card | null,
+  next: Card | null,
+): boolean => {
+  if (prev === next) return true;
+  if (!prev || !next) return false;
+
+  if (prev.id !== next.id) return false;
+  if ((prev.title ?? "") !== (next.title ?? "")) return false;
+  if (cardMetaDraftFlag(prev) !== cardMetaDraftFlag(next)) return false;
+  if (cardMetaReviewCount(prev) !== cardMetaReviewCount(next)) return false;
+  if (cardMetaLastSubjectiveScore(prev) !== cardMetaLastSubjectiveScore(next))
+    return false;
+
+  const prevLegacy = prev as Record<string, unknown>;
+  const nextLegacy = next as Record<string, unknown>;
+  const prevNextReviewDate = cardMetaDateTimeMs(
+    prev.nextReviewDate ?? prevLegacy.next_review_date,
+  );
+  const nextNextReviewDate = cardMetaDateTimeMs(
+    next.nextReviewDate ?? nextLegacy.next_review_date,
+  );
+  if (prevNextReviewDate !== nextNextReviewDate) return false;
+
+  const prevLastReviewAt = cardMetaDateTimeMs(
+    prev.lastReviewAt ?? prevLegacy.last_review_at,
+  );
+  const nextLastReviewAt = cardMetaDateTimeMs(
+    next.lastReviewAt ?? nextLegacy.last_review_at,
+  );
+  if (prevLastReviewAt !== nextLastReviewAt) return false;
+
+  if (prev.tagIds !== next.tagIds) return false;
+  if (prevLegacy.tags !== nextLegacy.tags) return false;
+
+  return true;
+};
+
+const areCardMetaPanelPropsEqual = (
+  prev: CardMetaPanelProps,
+  next: CardMetaPanelProps,
+): boolean =>
+  areCardMetaCardsEqual(prev.card, next.card) &&
+  prev.reviewLogs === next.reviewLogs &&
+  prev.onAddReviewLog === next.onAddReviewLog &&
+  prev.onUpdateLatestReviewLog === next.onUpdateLatestReviewLog &&
+  prev.onDeleteLatestReviewLog === next.onDeleteLatestReviewLog &&
+  prev.onUpdateReviewLogDuration === next.onUpdateReviewLogDuration &&
+  prev.onTitleInputChange === next.onTitleInputChange &&
+  prev.onUpdateTags === next.onUpdateTags &&
+  prev.onToggleDraft === next.onToggleDraft &&
+  prev.onUpdateTitle === next.onUpdateTitle &&
+  prev.delayBonusEnabled === next.delayBonusEnabled &&
+  prev.reviewStartNextDay === next.reviewStartNextDay &&
+  prev.mode === next.mode;
+
+function CardMetaPanelInner({
   card,
   reviewLogs = [],
   onAddReviewLog,
@@ -387,7 +465,7 @@ export function CardMetaPanel({
     null,
   );
   const [, setSearchParams] = useSearchParams();
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthSession();
   const { tagById } = useTags();
   const canPersistReview = Boolean(card?.id && card.id !== "__draft__");
 
@@ -560,10 +638,18 @@ export function CardMetaPanel({
     return syntheticSummaryLogs;
   }, [mergedStoredLogs, syntheticSummaryLogs]);
 
-  const editableReviewLogs = useMemo(
-    () => toEditableReviewLogs(mergedStoredLogs),
-    [mergedStoredLogs],
-  );
+  const editableReviewLogs = useMemo(() => {
+    const storedLogs = toEditableReviewLogs(mergedStoredLogs);
+    if (storedLogs.length > 0) return storedLogs;
+
+    // reviewLogs が欠損している旧データでも、1回分だけなら安全に復元編集できる。
+    if (normalizedReviewCount === 1) {
+      const syntheticLogs = toEditableReviewLogs(syntheticSummaryLogs);
+      if (syntheticLogs.length > 0) return syntheticLogs;
+    }
+
+    return [];
+  }, [mergedStoredLogs, normalizedReviewCount, syntheticSummaryLogs]);
   const latestEditableReview = editableReviewLogs.at(-1) ?? null;
   const previousEditableReview =
     editableReviewLogs.length > 1 ? (editableReviewLogs.at(-2) ?? null) : null;
@@ -1628,3 +1714,10 @@ export function CardMetaPanel({
     </EmptyMetaPanel>
   );
 }
+
+export const CardMetaPanel = memo(
+  CardMetaPanelInner,
+  areCardMetaPanelPropsEqual,
+);
+CardMetaPanel.displayName = "CardMetaPanel";
+

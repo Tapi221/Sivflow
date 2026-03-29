@@ -1,5 +1,5 @@
 import { Switch } from "@/components/ui/switch";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthSession } from "@/contexts/AuthContext";
 import { useSyncSettings } from "@/hooks/sync/useSyncSettings";
 import { firestoreDb } from "@/services/firebase";
 import { getLocalDb, initializeDB } from "@/services/localDB";
@@ -12,7 +12,7 @@ import { collection, getDocs, query, Timestamp } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
 
 export const DeviceSyncSettings: React.FC = () => {
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthSession();
   const [devices, setDevices] = useState<SyncMetadata[]>([]);
   const [stats, setStats] = useState<UserStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -436,6 +436,7 @@ export const DeviceSyncSettings: React.FC = () => {
     </div>
   );
 };
+
 
 
 

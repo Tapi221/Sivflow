@@ -1,7 +1,6 @@
-import { useCardBlocksDnd } from "@/components/card/editor/useCardBlocksDnd";
 import { useCardMediaDialogs } from "@/components/card/editor/useCardMediaDialogs";
 
-import { useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import type { Dispatch, MutableRefObject, SetStateAction } from "react";
 import type { CardBlock, UploadedImage } from "@/types";
 
@@ -27,7 +26,7 @@ export function useCardEditorContentController<
   allowAutoMinHeightSyncRef,
   resetDialogsRef,
 }: UseCardEditorContentControllerParams<TDraft>) {
-  const reindexBlocks = (blocks: CardBlock[]): CardBlock[] => {
+  const reindexBlocks = useCallback((blocks: CardBlock[]): CardBlock[] => {
     let changed = false;
     const reindexed = blocks.map((block, index) => {
       if (block.orderIndex === index) return block;
@@ -38,28 +37,34 @@ export function useCardEditorContentController<
       };
     });
     return changed ? reindexed : blocks;
-  };
+  }, []);
 
-  const getSideBlocks = (side: "question" | "answer") =>
-    side === "question"
-      ? (draft?.questionBlocks ?? [])
-      : (draft?.answerBlocks ?? []);
+  const getSideBlocks = useCallback(
+    (side: "question" | "answer") =>
+      side === "question"
+        ? (draft?.questionBlocks ?? [])
+        : (draft?.answerBlocks ?? []),
+    [draft?.answerBlocks, draft?.questionBlocks],
+  );
 
-  const setSideBlocks = (
-    side: "question" | "answer",
-    nextBlocks: CardBlock[],
-  ) => {
-    allowAutoMinHeightSyncRef.current = true;
-    setDraft((prev) => {
-      if (!prev) return prev;
-      const reindexed = reindexBlocks(nextBlocks);
-      return side === "question"
-        ? { ...prev, questionBlocks: reindexed }
-        : { ...prev, answerBlocks: reindexed };
-    });
-  };
+  const setSideBlocks = useCallback(
+    (side: "question" | "answer", nextBlocks: CardBlock[]) => {
+      allowAutoMinHeightSyncRef.current = true;
+      setDraft((prev) => {
+        if (!prev) return prev;
+        const reindexed = reindexBlocks(nextBlocks);
+        const currentBlocks =
+          side === "question" ? prev.questionBlocks : prev.answerBlocks;
+        if (currentBlocks === reindexed) return prev;
+        return side === "question"
+          ? { ...prev, questionBlocks: reindexed }
+          : { ...prev, answerBlocks: reindexed };
+      });
+    },
+    [allowAutoMinHeightSyncRef, reindexBlocks, setDraft],
+  );
 
-  const upsertSingleBlock = (
+  const upsertSingleBlock = useCallback((
     side: "question" | "answer",
     type: CardBlock["type"],
     payload: Partial<CardBlock>,
@@ -88,24 +93,17 @@ export function useCardEditorContentController<
     } as CardBlock;
 
     setSideBlocks(side, [...blocks, nextBlock]);
-  };
+  }, [getSideBlocks, setSideBlocks]);
 
-  const removeBlockByTypeIfExists = (
+  const removeBlockByTypeIfExists = useCallback((
     side: "question" | "answer",
     type: CardBlock["type"],
   ) => {
     const blocks = getSideBlocks(side);
-    setSideBlocks(
-      side,
-      blocks.filter((block) => block.type !== type),
-    );
-  };
-
-  const { onDragEnd } = useCardBlocksDnd({
-    draft,
-    setDraft,
-    allowAutoMinHeightSyncRef,
-  });
+    const filtered = blocks.filter((block) => block.type !== type);
+    if (filtered.length === blocks.length) return;
+    setSideBlocks(side, filtered);
+  }, [getSideBlocks, setSideBlocks]);
 
   const mediaDialogs = useCardMediaDialogs({
     draft,
@@ -115,20 +113,24 @@ export function useCardEditorContentController<
     removeBlockByTypeIfExists,
     upsertSingleBlock,
   });
+  const { setImageDialogSide, setAudioDialogSide, setLinkDialogSide } =
+    mediaDialogs;
 
   useEffect(() => {
     resetDialogsRef.current = () => {
-      mediaDialogs.setImageDialogSide(null);
-      mediaDialogs.setAudioDialogSide(null);
-      mediaDialogs.setLinkDialogSide(null);
+      setImageDialogSide(null);
+      setAudioDialogSide(null);
+      setLinkDialogSide(null);
     };
-  }, [mediaDialogs, resetDialogsRef]);
+  }, [resetDialogsRef, setAudioDialogSide, setImageDialogSide, setLinkDialogSide]);
 
-  return {
-    onDragEnd,
-    setSideBlocks,
-    ...mediaDialogs,
-  };
+  return useMemo(
+    () => ({
+      setSideBlocks,
+      ...mediaDialogs,
+    }),
+    [mediaDialogs, setSideBlocks],
+  );
 }
 
 

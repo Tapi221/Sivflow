@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { LocalDB, initializeDB, getLocalDb } from "@/services/localDB";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthSession } from "@/contexts/AuthContext";
 import {
   RefreshCw,
   AlertTriangle,
@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/collapsible";
 
 export default function DataRescuePanel() {
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthSession();
   const { success, error } = useToast();
 
   const [databases, setDatabases] = useState<
@@ -484,6 +484,7 @@ function HistoryIcon(props: unknown) {
     </svg>
   );
 }
+
 
 
 

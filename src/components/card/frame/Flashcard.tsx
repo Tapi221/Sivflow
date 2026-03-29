@@ -8,6 +8,7 @@ import type { InkDocument } from "@/components/ink/inkTypes";
 import { cn } from "@/lib/utils";
 import React, { useEffect, useRef, useState } from "react";
 import { CardFrame } from "./CardFrame";
+import { CARD_SHELL_COMMON_CLASS_NAME } from "./cardShellClassNames";
 import { useFlashcardCornerControls } from "./FlashcardCornerControls";
 import { FlashcardInkOverlay } from "./FlashcardInkOverlay";
 import { FlashcardMediaDialogs } from "./FlashcardMediaDialogs";
@@ -52,7 +53,7 @@ interface FlashcardProps {
   contentPaddingPx?: number;
 }
 
-export function Flashcard({
+function FlashcardInner({
   card,
   isFlipped,
   onFlip,
@@ -190,10 +191,8 @@ export function Flashcard({
           role={isCardClickable ? "button" : undefined}
           tabIndex={isCardClickable ? 0 : undefined}
           className={cn(
-            "premium-paper-depth",
-            "card-shell--interactive",
+            CARD_SHELL_COMMON_CLASS_NAME,
             isCardClickable && "cursor-pointer",
-            "card-shell--paper",
           )}
           onClick={handleFlip}
           onKeyDown={(event) => {
@@ -271,6 +270,56 @@ export function Flashcard({
     </div>
   );
 }
+
+const areFlashcardPropsEqual = (
+  prev: FlashcardProps,
+  next: FlashcardProps,
+) => {
+  if (prev.card !== next.card) return false;
+  if (prev.previewMode !== next.previewMode) return false;
+
+  const previewOnly = Boolean(prev.previewMode && next.previewMode);
+  if (previewOnly) {
+    return (
+      prev.isFlipped === next.isFlipped &&
+      prev.className === next.className &&
+      prev.drawMode === next.drawMode &&
+      prev.inkEditingEnabled === next.inkEditingEnabled &&
+      prev.allowUpscale === next.allowUpscale &&
+      prev.maxScale === next.maxScale &&
+      prev.scaleMultiplier === next.scaleMultiplier &&
+      prev.contentPaddingPx === next.contentPaddingPx
+    );
+  }
+
+  return (
+    prev.isFlipped === next.isFlipped &&
+    prev.onFlip === next.onFlip &&
+    prev.onEdit === next.onEdit &&
+    prev.onToggleUncertainty === next.onToggleUncertainty &&
+    prev.onToggleBookmark === next.onToggleBookmark &&
+    prev.className === next.className &&
+    prev.onNext === next.onNext &&
+    prev.onPrev === next.onPrev &&
+    prev.hasNext === next.hasNext &&
+    prev.hasPrev === next.hasPrev &&
+    prev.currentIndex === next.currentIndex &&
+    prev.totalCards === next.totalCards &&
+    prev.extraHeaderLeft === next.extraHeaderLeft &&
+    prev.extraHeaderRight === next.extraHeaderRight &&
+    prev.extraFooter === next.extraFooter &&
+    prev.drawMode === next.drawMode &&
+    prev.inkEditingEnabled === next.inkEditingEnabled &&
+    prev.onInkDocumentChange === next.onInkDocumentChange &&
+    prev.allowUpscale === next.allowUpscale &&
+    prev.maxScale === next.maxScale &&
+    prev.scaleMultiplier === next.scaleMultiplier &&
+    prev.contentPaddingPx === next.contentPaddingPx
+  );
+};
+
+export const Flashcard = React.memo(FlashcardInner, areFlashcardPropsEqual);
+Flashcard.displayName = "Flashcard";
 
 
 

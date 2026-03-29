@@ -18,15 +18,8 @@ export function useCardViewData({ folderId, cardSetId }: UseCardViewDataOptions)
   const { cardSets } = useCardSets();
   const { folders = [] } = useFolders();
 
-  const sortedCards = useMemo(
-    () =>
-      [...cards].sort(
-        (a, b) =>
-          (a.orderIndex ?? a.order_index ?? 0) -
-          (b.orderIndex ?? b.order_index ?? 0),
-      ),
-    [cards],
-  );
+  // useCards が orderIndex 順に正規化済み配列を返すため、ここでは再ソートしない。
+  const sortedCards = cards;
 
   const cardIndexById = useMemo(() => {
     const map = new Map<string, number>();
