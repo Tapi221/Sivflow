@@ -27,7 +27,7 @@ const app = initializeApp(firebaseConfig);
 // 各サービスのエクスポート（シングルトンとして管理）
 export const auth = getAuth(app);
 export const storage = getStorage(app);
-export const functions = getFunctions(app, "asia-northeast1");
+const functions = getFunctions(app, "asia-northeast1");
 
 // Firestore の初期化
 let _firestoreDb: Firestore | null = null;
@@ -91,7 +91,7 @@ if (typeof window !== "undefined") {
 /**
  * Firebase の初期化状態を診断するための関数
  */
-export function debugFirebase(): void {
+function debugFirebase(): void {
   console.log("🔍 === Firebase Debug Info ===");
   try {
     console.log("App name:", app.name);
@@ -110,5 +110,3 @@ export function debugFirebase(): void {
 if (import.meta.env.DEV) {
   debugFirebase();
 }
-
-export default app;

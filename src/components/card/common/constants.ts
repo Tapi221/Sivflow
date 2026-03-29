@@ -48,7 +48,7 @@ export const CARD_ROW_PX = 24;
  * - 左上/右上のカード角アクション(例: ☆ / ? / メニュー)のために確保する上余白
  * - editor/view で一致させないと、片方だけボタンが被る・押せない・余白感が違う事故になる
  */
-export const CARD_TOP_PADDING_PX = 10;
+const CARD_TOP_PADDING_PX = 10;
 
 /**
  * カード上アクションアイコンの共通スタイル。

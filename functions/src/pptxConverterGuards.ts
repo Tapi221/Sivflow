@@ -5,8 +5,8 @@ export const CONVERTER_IMPLEMENTATION_ENV = "PPTX_CONVERTER_IMPLEMENTATION";
 export const CONVERTER_PLACEHOLDER_ENABLED_ENV =
   "PPTX_CONVERTER_PLACEHOLDER_ENABLED";
 
-export const PLACEHOLDER_IMPLEMENTATION = "placeholder";
-export const REAL_IMPLEMENTATION = "real";
+const PLACEHOLDER_IMPLEMENTATION = "placeholder";
+const REAL_IMPLEMENTATION = "real";
 
 export type ConverterTokenValidation = "ok" | "misconfigured" | "unauthorized";
 
@@ -16,7 +16,7 @@ export const asNonEmptyString = (value: unknown): string | null => {
   return trimmed.length > 0 ? trimmed : null;
 };
 
-export const buildDocumentPathPrefix = (
+const buildDocumentPathPrefix = (
   userId: string,
   docId: string,
 ): string => `users/${userId}/documents/${docId}/`;

@@ -1325,6 +1325,7 @@ function CardMetaPanelInner({
                     dataKey="resistanceScore"
                     stroke="#0f766e"
                     strokeWidth={2.5}
+                    isAnimationActive={false}
                     dot={{ r: chartData.length === 1 ? 5 : 2.5, fill: "#0f766e" }}
                     activeDot={{ r: 6, strokeWidth: 0 }}
                     connectNulls

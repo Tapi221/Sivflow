@@ -95,19 +95,10 @@ export const createBase64DataUrl = (url: string): Base64DataUrl => {
 // ============================================
 // Utility Functions
 // ============================================
-
-/**
- * File から Blob URL を安全に生成
- */
-export const fileToBlobUrl = (file: File): BlobUrl => {
-  const url = URL.createObjectURL(file);
-  return createBlobUrl(url);
-};
-
 /**
  * Blob URL を安全に解放
  */
-export const revokeBlobUrl = (url: BlobUrl): void => {
+const revokeBlobUrl = (url: BlobUrl): void => {
   URL.revokeObjectURL(url);
 };
 

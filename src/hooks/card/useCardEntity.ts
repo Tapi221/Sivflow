@@ -31,11 +31,7 @@ const withStableBlockIds = (raw: unknown) => {
   };
 };
 
-export function getCardDraftKey(cardId: string) {
-  return makeDraftKey(cardId);
-}
-
-export function readCardDraft(cardId: string) {
+function readCardDraft(cardId: string) {
   if (typeof window === "undefined") return null;
   const key = makeDraftKey(cardId);
   const raw = window.localStorage.getItem(key);

@@ -366,9 +366,3 @@ class SnapshotService {
 }
 
 export const snapshotService = new SnapshotService();
-export default snapshotService;
-
-
-
-
-

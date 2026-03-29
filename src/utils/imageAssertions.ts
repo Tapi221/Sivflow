@@ -41,7 +41,7 @@ export const assertNoBase64InImage = (image: UploadedImage): void => {
  *
  * @throws {ImageInvariantViolation} 不正な URL の場合
  */
-export const assertValidRemoteUrl = (image: UploadedImage): void => {
+const assertValidRemoteUrl = (image: UploadedImage): void => {
   if (!image.remoteUrl) return; // null/undefined は許可
 
   if (!isStorageUrl(image.remoteUrl as string)) {
@@ -57,7 +57,7 @@ export const assertValidRemoteUrl = (image: UploadedImage): void => {
  *
  * @throws {ImageInvariantViolation} 不正な URL の場合
  */
-export const assertValidLocalUrl = (image: UploadedImage): void => {
+const assertValidLocalUrl = (image: UploadedImage): void => {
   if (!image.localUrl) return; // null/undefined は許可
 
   if (!isBlobUrl(image.localUrl as string)) {
@@ -88,21 +88,3 @@ export const assertImageInvariant = (image: UploadedImage): void => {
 export const assertImageArrayInvariant = (images: UploadedImage[]): void => {
   images.forEach(assertImageInvariant);
 };
-
-/**
- * 開発環境でのみ警告を出す（本番では無視）
- * 軽微な違反や移行期の警告に使用
- */
-export const warnImageInvariant = (message: string, imageId?: string): void => {
-  if (import.meta.env.DEV) {
-    console.warn(
-      `[ImageInvariant Warning] ${message}`,
-      imageId ? `(ID: ${imageId})` : "",
-    );
-  }
-};
-
-
-
-
-

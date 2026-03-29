@@ -20,7 +20,7 @@ interface MarkdownBlockDisplayProps extends MarkdownBlockPreviewProps {
   contentClassName?: string;
 }
 
-export const MarkdownBlockDisplay: React.FC<MarkdownBlockDisplayProps> = ({
+const MarkdownBlockDisplay: React.FC<MarkdownBlockDisplayProps> = ({
   markdown,
   align,
   className,
@@ -41,7 +41,7 @@ export const MarkdownBlockDisplay: React.FC<MarkdownBlockDisplayProps> = ({
   );
 };
 
-export const MarkdownBlockPreview: React.FC<MarkdownBlockPreviewProps> = ({
+const MarkdownBlockPreview: React.FC<MarkdownBlockPreviewProps> = ({
   markdown,
   ...rest
 }) => {

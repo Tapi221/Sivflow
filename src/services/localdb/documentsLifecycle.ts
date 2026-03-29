@@ -27,7 +27,7 @@ type DocumentsTable = {
 
 export type DocDbCtx = { documents: DocumentsTable; userId?: string };
 
-export async function canDeleteDocumentBlob(
+async function canDeleteDocumentBlob(
   documents: DocumentsTable,
   blobId: string,
   excludeDocumentId: string,

@@ -58,7 +58,7 @@ const evictIfNeeded = (): void => {
   }
 };
 
-export const getCachedImageBlobUrl = (
+const getCachedImageBlobUrl = (
   id: string | null | undefined,
   options?: BlobScopeOptions,
 ): string | null => {
@@ -70,7 +70,7 @@ export const getCachedImageBlobUrl = (
   return entry.url;
 };
 
-export const cacheImageBlobUrl = (
+const cacheImageBlobUrl = (
   id: string,
   url: string,
   options?: BlobScopeOptions,

@@ -149,7 +149,7 @@ export function resolveLayoutRows(card: FlashcardCardLike): number {
 // Image URL extraction
 // ---------------------------------------------------------------------------
 
-export function toMediaUrl(m: FlashcardMediaLike): string | null {
+function toMediaUrl(m: FlashcardMediaLike): string | null {
   if (typeof m === "string") return m;
   return m.remoteUrl ?? m.localUrl ?? m.url ?? null;
 }

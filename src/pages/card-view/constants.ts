@@ -9,7 +9,7 @@ export const CARD_PANE_VIEW_MIN_WIDTH_PX = 360;
 export const CARD_PANE_EDIT_MIN_WIDTH_PX = 640;
 export const CARD_PANE_WIDTH_STEP_PX = 40;
 export const CARD_PANE_AUTO_MAX_SCALE = 4;
-export const CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX = 72;
+const CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX = 72;
 
 export function clampPaneWidthPx(
   value: number | null | undefined,

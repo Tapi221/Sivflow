@@ -97,29 +97,3 @@ export async function uploadProfileImage({
     throw new Error(`画像のアップロードに失敗しました: ${errorMessage}`);
   }
 }
-
-/**
- * 複数のプロフィール画像をアップロードする（バッチ）
- *
- * 通常は 1 個ずつアップロードするため、このメソッドは将来の拡張用
- */
-export async function uploadProfileImages({
-  uid,
-  files,
-}: {
-  uid: string;
-  files: File[];
-}): Promise<string[]> {
-  return Promise.all(
-    files.map((file) =>
-      uploadProfileImage({
-        uid,
-        file,
-      }),
-    ),
-  );
-}
-
-
-
-

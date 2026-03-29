@@ -77,7 +77,7 @@ export const safeStringifyError = (error: unknown): string => {
   }
 };
 
-export const extractErrorTexts = (
+const extractErrorTexts = (
   error: unknown,
   collector: string[],
   depth = 0,

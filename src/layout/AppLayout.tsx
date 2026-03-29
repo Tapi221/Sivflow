@@ -25,6 +25,27 @@ export function AppLayout() {
   const [instantFolderId, setInstantFolderId] = useState<string | null>(null);
   const mainRef = useRef<HTMLElement | null>(null);
 
+  const resetWorkspaceScroll = () => {
+    const containers = document.querySelectorAll<HTMLElement>(
+      ".app-layout, .app-layout__content, .app-layout__main",
+    );
+
+    containers.forEach((el) => {
+      el.scrollTop = 0;
+      el.scrollLeft = 0;
+    });
+
+    const main = mainRef.current;
+    if (main) {
+      main.scrollTop = 0;
+      main.scrollLeft = 0;
+    }
+
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  };
+
   useEffect(() => {
     const onFolderSelectionChanged = (event: Event) => {
       const customEvent = event as CustomEvent<{ folderId?: string | null }>;
@@ -63,12 +84,15 @@ export function AppLayout() {
     /^\/study(?:\/|$)/i.test(pathname);
 
   useEffect(() => {
-    const main = mainRef.current;
-    if (!main) return;
-    // locked/unlocked に関わらず、ルート遷移時はスクロール位置を必ず初期化する。
-    // overflow: hidden 状態でも scrollTop は保持されるため、明示的にリセットする。
-    main.scrollTop = 0;
-  }, [pathname, isScrollLocked]);
+    // overflow: hidden/clip 状態でも scrollTop が保持される場合があるため、
+    // フォルダ/カードセット選択のクエリ更新時も含めて、関連コンテナを明示的に初期化する。
+    resetWorkspaceScroll();
+    const raf1 = window.requestAnimationFrame(() => {
+      resetWorkspaceScroll();
+      window.requestAnimationFrame(resetWorkspaceScroll);
+    });
+    return () => window.cancelAnimationFrame(raf1);
+  }, [pathname, isScrollLocked, selectedFolderId, selectedCardSetId]);
 
   return (
     <div

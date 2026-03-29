@@ -6,7 +6,7 @@ const ROW_OFFSET_MIN = -999;
 const ROW_OFFSET_MAX = 999;
 const GRID_OFFSET_ROWS_MIN = 0;
 const GRID_OFFSET_ROWS_MAX = 999;
-export const GRID_OFFSET_TYPES = new Set<CardBlock["type"]>(["math"]);
+const GRID_OFFSET_TYPES = new Set<CardBlock["type"]>(["math"]);
 
 export const isRowPositionableType = (type: CardBlock["type"]) =>
   type === "text" ||

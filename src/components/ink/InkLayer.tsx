@@ -773,9 +773,3 @@ export const InkToolbar = React.memo(function InkToolbar({
 });
 
 InkToolbar.displayName = "InkToolbar";
-
-export const EMPTY_INK_HISTORY: InkHistoryState = HISTORY_EMPTY;
-
-
-
-

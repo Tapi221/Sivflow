@@ -39,7 +39,7 @@ const pickFirst = (obj: Record<string, unknown>, keys: string[]): unknown => {
   return undefined;
 };
 
-export const normalizeUploadedImage = (
+const normalizeUploadedImage = (
   raw: unknown,
   options: NormalizeUploadedImageOptions = {},
 ) => {
@@ -143,7 +143,7 @@ export const normalizeUploadedImages = (
     .filter((item): item is NonNullable<typeof item> => Boolean(item));
 };
 
-export const denormalizeUploadedImage = (
+const denormalizeUploadedImage = (
   image: {
     id: string;
     assetId?: string | null;

@@ -16,7 +16,9 @@ build_log*.txt
 build_output.txt
 all_ts_files.txt
 last_part_index.txt
-last_part_index.txt
+.tmp-*.txt
+*_tmp.txt
+*.bak
 
 # Logs
 logs/
@@ -63,6 +65,4 @@ public/sw.js
 
 # Local docs / reports
 MANIFEST_FIX_SUMMARY.md
-# Test artifacts
-test-results/
 

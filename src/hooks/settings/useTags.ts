@@ -26,8 +26,6 @@ type CardTagFields = {
 
 export const DEFAULT_TAG_COLOR_KEYS: TagColorKey[] = [...TAG_COLOR_KEYS];
 // 互換用。将来削除予定。
-export const DEFAULT_COLORS = DEFAULT_TAG_COLOR_KEYS;
-
 const genId = (): string => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto)
     return crypto.randomUUID();
@@ -39,7 +37,7 @@ const genCategoryId = (): string => `cat_${genId()}`;
 const MAX_PATH_DEPTH = 12;
 
 /** "/" 区切りのパス文字列をセグメント配列に変換する純関数 */
-export const parseTagPath = (pathStr: string): string[] | { error: string } => {
+const parseTagPath = (pathStr: string): string[] | { error: string } => {
   const segments = pathStr
     .split("/")
     .map((s) => s.trim())

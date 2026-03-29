@@ -45,5 +45,5 @@
 }
 
 .app-layout__main--locked {
-  overflow: hidden;
+  overflow: clip;
 }

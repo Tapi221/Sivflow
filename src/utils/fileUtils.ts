@@ -1,5 +1,4 @@
 import { nanoid } from "nanoid";
-import type { UploadMetadata } from "@/types";
 
 const ALLOWED_EXTENSIONS: Record<string, string[]> = {
   image: ["jpg", "jpeg", "png", "gif", "webp", "heic", "heif", "avif", "svg"],
@@ -10,7 +9,7 @@ const ALLOWED_EXTENSIONS: Record<string, string[]> = {
 /**
  * ファイル拡張子の検証と取得
  */
-export const getValidatedExtension = (
+const getValidatedExtension = (
   filename: string,
   expectedType?: string,
 ): string => {
@@ -43,28 +42,6 @@ export const generateSafeStoragePath = (
 
   return { safeName, extension, id };
 };
-
-/**
- * メタデータの準備（Storage URL取得前）
- */
-export const prepareUploadMetadata = (
-  file: File,
-  context: UploadMetadata["context"],
-  userId: string,
-): Omit<UploadMetadata, "downloadUrl" | "uploadedAt" | "id"> => {
-  return {
-    originalFilename: file.name,
-    storagePath: "", // 後で設定
-    mimeType: file.type,
-    sizeBytes: file.size,
-    context,
-    userId,
-    status: "uploading",
-    userAgent:
-      typeof navigator !== "undefined" ? navigator.userAgent : undefined,
-  };
-};
-
 /**
  * バイト数を読みやすい形式にフォーマット
  */

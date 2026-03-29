@@ -9,7 +9,7 @@ export interface ValidationResult {
 /**
  * ユーザーネームバリデーションユーティリティ
  */
-export const USERNAME_VALIDATION = {
+const USERNAME_VALIDATION = {
   MIN_LENGTH: 1,
   MAX_LENGTH: 20,
   // 許可される文字: 日本語（ひらがな、カタカナ、漢字）、英数字、スペース、ハイフン、アンダースコア

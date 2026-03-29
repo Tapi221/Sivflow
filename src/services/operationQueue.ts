@@ -37,7 +37,7 @@ const OPERATION_MATRIX: Record<
   },
 };
 
-export class OperationQueueService {
+class OperationQueueService {
   // Concurrency & Batch Settings
   private readonly MAX_CONCURRENCY = 5;
   private readonly BATCH_LIMIT = 20;

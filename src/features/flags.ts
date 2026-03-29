@@ -95,7 +95,7 @@ class FeatureFlagService {
   }
 }
 
-export const featureFlags = new FeatureFlagService();
+const featureFlags = new FeatureFlagService();
 
 /**
  * ✅ 互換レイヤー

@@ -50,19 +50,7 @@ export function normalizeOrderIndex(blocks: CardBlock[]): CardBlock[] {
   return (blocks ?? []).map((b, i) => ({ ...b, orderIndex: i }));
 }
 
-export function normalizeCrossSideId(
-  blockId: unknown,
-  nextSide: "question" | "answer",
-): string | null {
-  if (typeof blockId !== "string") return null;
-  if (blockId.startsWith("question-"))
-    return blockId.replace(/^question-/, `${nextSide}-`);
-  if (blockId.startsWith("answer-"))
-    return blockId.replace(/^answer-/, `${nextSide}-`);
-  return null;
-}
-
-export function isBlockEmpty(block: CardBlock): boolean {
+function isBlockEmpty(block: CardBlock): boolean {
   if (block.type === "reference" || block.type === "audio") return true;
   if (block.type === "text") return !String(block.content ?? "").trim();
   if (block.type === "markdown") return !String(block.markdown ?? "").trim();

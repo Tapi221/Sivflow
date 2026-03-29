@@ -33,6 +33,7 @@ interface TreeViewMainPaneProps {
     onViewCards: () => void;
     onCreateCard: () => void;
   };
+  folderSelectionNonce: number;
 }
 
 export function TreeViewMainPane({
@@ -53,6 +54,7 @@ export function TreeViewMainPane({
   onDocumentUpdated,
   onRenameFolder,
   handlers,
+  folderSelectionNonce,
 }: TreeViewMainPaneProps) {
   return (
     <div
@@ -80,6 +82,7 @@ export function TreeViewMainPane({
             : undefined
         }
         handlers={handlers}
+        folderSelectionNonce={folderSelectionNonce}
       />
     </div>
   );

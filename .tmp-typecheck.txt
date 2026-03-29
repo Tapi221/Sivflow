@@ -1,4 +1,0 @@
-
-> flashcard-master@0.0.0 typecheck
-> npm exec tsc -- --noEmit --pretty false
-

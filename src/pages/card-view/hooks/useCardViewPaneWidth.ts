@@ -6,7 +6,6 @@ import {
   CARD_PANE_EDIT_MIN_WIDTH_PX,
   CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
   CARD_PANE_VIEW_MIN_WIDTH_PX,
-  CARD_PANE_WIDTH_STEP_PX,
 } from "../constants";
 
 interface UseCardViewPaneWidthOptions {
@@ -176,5 +175,3 @@ export function useCardViewPaneWidth({
     resetActivePaneWidth,
   };
 }
-
-export { CARD_PANE_WIDTH_STEP_PX };

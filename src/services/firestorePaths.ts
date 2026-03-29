@@ -54,52 +54,6 @@ export const cardDocPathSegments = (
   if (!cardId) throw new Error("cardId is required for cardDocPath");
   return ["users", userId, "cards", cardId];
 };
-
-/**
- * ユーザーのアップロードファイルコレクションパスを生成（セグメント配列）
- * @param userId - ユーザーID
- * @returns ["users", userId, "uploads"]
- */
-export const uploadsPathSegments = (userId: string): string[] => {
-  if (!userId) throw new Error("userId is required for uploadsPath");
-  return ["users", userId, "uploads"];
-};
-
-/**
- * ユーザーの特定アップロードファイルDocumentパスを生成（セグメント配列）
- * @param userId - ユーザーID
- * @param uploadId - アップロードID
- * @returns ["users", userId, "uploads", uploadId]
- */
-export const uploadDocPathSegments = (
-  userId: string,
-  uploadId: string,
-): string[] => {
-  if (!userId) throw new Error("userId is required for uploadDocPath");
-  if (!uploadId) throw new Error("uploadId is required for uploadDocPath");
-  return ["users", userId, "uploads", uploadId];
-};
-
-/**
- * ユーザーのセキュリティログコレクションパスを生成（セグメント配列）
- * @param userId - ユーザーID
- * @returns ["users", userId, "securityLogs"]
- */
-export const securityLogsPathSegments = (userId: string): string[] => {
-  if (!userId) throw new Error("userId is required for securityLogsPath");
-  return ["users", userId, "securityLogs"];
-};
-
-/**
- * ユーザーの画像メタデータコレクションパスを生成（セグメント配列）
- * @param userId - ユーザーID
- * @returns ["users", userId, "images"]
- */
-export const imagesPathSegments = (userId: string): string[] => {
-  if (!userId) throw new Error("userId is required for imagesPath");
-  return ["users", userId, "images"];
-};
-
 /**
  * ユーザーの特定画像メタデータDocumentパスを生成（セグメント配列）
  * @param userId - ユーザーID
@@ -114,43 +68,6 @@ export const imageDocPathSegments = (
   if (!imageId) throw new Error("imageId is required for imageDocPath");
   return ["users", userId, "images", imageId];
 };
-
-/**
- * ユーザーのドキュメントコレクションパスを生成（セグメント配列）
- * @param userId - ユーザーID
- * @returns ["users", userId, "documents"]
- */
-export const documentsPathSegments = (userId: string): string[] => {
-  if (!userId) throw new Error("userId is required for documentsPath");
-  return ["users", userId, "documents"];
-};
-
-/**
- * ユーザーの特定ドキュメントDocumentパスを生成（セグメント配列）
- * @param userId - ユーザーID
- * @param documentId - ドキュメントID
- * @returns ["users", userId, "documents", documentId]
- */
-export const documentDocPathSegments = (
-  userId: string,
-  documentId: string,
-): string[] => {
-  if (!userId) throw new Error("userId is required for documentDocPath");
-  if (!documentId)
-    throw new Error("documentId is required for documentDocPath");
-  return ["users", userId, "documents", documentId];
-};
-
-/**
- * ユーザーのPPTX変換ジョブコレクションパスを生成（セグメント配列）
- * @param userId - ユーザーID
- * @returns ["users", userId, "pptxConversions"]
- */
-export const pptxConversionsPathSegments = (userId: string): string[] => {
-  if (!userId) throw new Error("userId is required for pptxConversionsPath");
-  return ["users", userId, "pptxConversions"];
-};
-
 /**
  * ユーザーの特定PPTX変換ジョブDocumentパスを生成（セグメント配列）
  * @param userId - ユーザーID

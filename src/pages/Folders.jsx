@@ -24,6 +24,25 @@ export default function Folders() {
   const queryDocId = searchParams.get("docId");
 
   const pendingUrlSyncRef = useRef(null);
+  const [folderSelectionNonce, setFolderSelectionNonce] = useState(0);
+
+  const forceResetWorkspaceScroll = useCallback(() => {
+    const reset = () => {
+      const main = document.querySelector(".app-layout__main");
+      if (main instanceof HTMLElement) {
+        main.scrollTop = 0;
+      }
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
+
+    reset();
+    window.requestAnimationFrame(() => {
+      reset();
+      window.requestAnimationFrame(reset);
+    });
+  }, []);
 
   const notifyMainSidebarFolderSelection = useCallback((folderId) => {
     window.dispatchEvent(
@@ -206,6 +225,8 @@ export default function Folders() {
 
   // --- 選択ハンドラ ---
   const handleSelectFolderInWork = (folderId) => {
+    forceResetWorkspaceScroll();
+    setFolderSelectionNonce((n) => n + 1);
     notifyMainSidebarFolderSelection(folderId);
     setSelectedFolderId(folderId);
     setSelectedItem(null);
@@ -400,6 +421,7 @@ export default function Folders() {
               // カード更新後の処理
             }}
             navigateToSectionListToken={navigateToSectionListToken}
+            folderSelectionNonce={folderSelectionNonce}
           />
         )}
       </div>

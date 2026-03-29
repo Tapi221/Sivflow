@@ -40,7 +40,7 @@ export const isStorageObjectNotFound = (error: unknown): boolean => {
   );
 };
 
-export const isFirestoreBlockedByClient = (error: unknown): boolean => {
+const isFirestoreBlockedByClient = (error: unknown): boolean => {
   const code = getErrorCode(error);
   const text = getErrorText(error);
   if (code === "blocked-by-client" || code === "err_blocked_by_client")
@@ -51,7 +51,7 @@ export const isFirestoreBlockedByClient = (error: unknown): boolean => {
   );
 };
 
-export const isFirestoreUnavailable = (error: unknown): boolean => {
+const isFirestoreUnavailable = (error: unknown): boolean => {
   const code = getErrorCode(error);
   const text = getErrorText(error);
   if (code === "unavailable" || code === "deadline-exceeded") return true;
@@ -63,7 +63,7 @@ export const isFirestoreUnavailable = (error: unknown): boolean => {
   );
 };
 
-export const isLikelyClientBlock = (
+const isLikelyClientBlock = (
   error: unknown,
   isOnline: boolean,
 ): boolean => {

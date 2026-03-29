@@ -229,8 +229,3 @@ class DataIntegrityService {
 }
 
 export const dataIntegrityService = new DataIntegrityService();
-export default dataIntegrityService;
-
-
-
-

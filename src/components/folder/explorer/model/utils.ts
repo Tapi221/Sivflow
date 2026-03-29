@@ -21,7 +21,6 @@ export type FolderTreeNode = {
 
 export const ROOT_FOLDER_ID = "";
 export const DEFAULT_NEW_FOLDER_NAME = "新規フォルダ";
-export const DEFAULT_NEW_CARD_NAME = "新規カード";
 export const DEFAULT_NEW_CARD_SET_NAME = "新規カードセット";
 
 export const getFolderId = (folder: FolderTreeNode): string =>

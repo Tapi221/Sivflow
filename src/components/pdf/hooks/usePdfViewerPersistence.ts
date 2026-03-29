@@ -19,8 +19,6 @@
 import {
     clampScale,
     EPSILON,
-    FIT_MAX_SCALE,
-    FIT_MIN_SCALE,
     getViewerStateFromSession,
     saveViewerStateToSession,
     VIEWER_STATE_DEBOUNCE_MS,
@@ -228,9 +226,6 @@ export function usePdfViewerPersistence({
     handleViewerScaleChange,
   };
 }
-
-// clampScale は pdfViewerStateStorage から再エクスポート（外部参照用）
-export { FIT_MAX_SCALE, FIT_MIN_SCALE };
 
 
 

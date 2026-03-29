@@ -38,6 +38,7 @@ interface RightPaneProps {
     onViewCards: () => void;
     onCreateCard: () => void;
   };
+  folderSelectionNonce: number;
 }
 
 export function RightPane({
@@ -54,6 +55,7 @@ export function RightPane({
   onDocumentUpdated,
   onRenameFolder,
   handlers,
+  folderSelectionNonce,
 }: RightPaneProps) {
   if (selectedItem?.type === "gallery") {
     return <Gallery />;
@@ -117,6 +119,7 @@ export function RightPane({
         cards={folderCards}
         handlers={handlers}
         onRenameFolder={onRenameFolder}
+        folderSelectionNonce={folderSelectionNonce}
       />
     );
   }

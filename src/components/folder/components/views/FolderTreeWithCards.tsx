@@ -82,6 +82,7 @@ interface FolderTreeWithCardsProps {
   addPdfRequestToken?: number;
   addPptxRequestToken?: number;
   navigateToSectionListToken?: number;
+  folderSelectionNonce?: number;
   className?: string;
 }
 
@@ -116,6 +117,7 @@ export function FolderTreeWithCards({
   addPdfRequestToken = 0,
   addPptxRequestToken = 0,
   navigateToSectionListToken = 0,
+  folderSelectionNonce = 0,
   className,
 }: FolderTreeWithCardsProps) {
   const { expandedFolders, setExpandedFolders, toggleFolder } =
@@ -148,6 +150,49 @@ export function FolderTreeWithCards({
   const handledCreateCardSetTokenRef = useRef(0);
   const handledAddPdfTokenRef = useRef(0);
   const handledAddPptxTokenRef = useRef(0);
+
+  const findScrollableAncestorWithinTree = useCallback(
+    (node: HTMLElement): HTMLElement | null => {
+      const boundary = treeRootRef.current;
+      let current: HTMLElement | null = node.parentElement;
+
+      while (current) {
+        if (boundary && !boundary.contains(current)) break;
+        const style = window.getComputedStyle(current);
+        const overflowY = style.overflowY;
+        const isScrollable =
+          (overflowY === "auto" || overflowY === "scroll") &&
+          current.scrollHeight > current.clientHeight;
+        if (isScrollable) return current;
+        current = current.parentElement;
+      }
+
+      return null;
+    },
+    [],
+  );
+
+  const scrollRowWithinSidebar = useCallback(
+    (row: HTMLElement, behavior: ScrollBehavior = "auto") => {
+      const container = findScrollableAncestorWithinTree(row);
+      if (!container) return;
+
+      const containerRect = container.getBoundingClientRect();
+      const rowRect = row.getBoundingClientRect();
+      const deltaTop = rowRect.top - containerRect.top;
+      const deltaBottom = rowRect.bottom - containerRect.bottom;
+
+      if (deltaTop < 0) {
+        container.scrollBy({ top: deltaTop, behavior });
+        return;
+      }
+
+      if (deltaBottom > 0) {
+        container.scrollBy({ top: deltaBottom, behavior });
+      }
+    },
+    [findScrollableAncestorWithinTree],
+  );
 
   // merge optimistic
   const treeFolders = useMemo(() => {
@@ -284,11 +329,17 @@ export function FolderTreeWithCards({
     const row = rowRefs.current.get(pendingScrollId);
     if (!row) return;
     const rafId = window.requestAnimationFrame(() => {
-      row.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      scrollRowWithinSidebar(row, "smooth");
       setPendingScrollId(null);
     });
     return () => window.cancelAnimationFrame(rafId);
-  }, [pendingScrollId, treeFolders, treeCards, expandedFolders]);
+  }, [
+    pendingScrollId,
+    treeFolders,
+    treeCards,
+    expandedFolders,
+    scrollRowWithinSidebar,
+  ]);
 
   // 選択中の行が常に可視範囲に入るようにする（編集時の選択遅延/見失い対策）
   useEffect(() => {
@@ -303,11 +354,7 @@ export function FolderTreeWithCards({
     const row = rowRefs.current.get(targetId);
     if (!row) return;
     const rafId = window.requestAnimationFrame(() => {
-      row.scrollIntoView({
-        block: "nearest",
-        inline: "nearest",
-        behavior: "auto",
-      });
+      scrollRowWithinSidebar(row, "auto");
     });
     return () => window.cancelAnimationFrame(rafId);
   }, [
@@ -319,6 +366,7 @@ export function FolderTreeWithCards({
     treeCards,
     treeCardSets,
     treeFolders,
+    scrollRowWithinSidebar,
   ]);
 
   // navigate to section list on token change
@@ -326,6 +374,26 @@ export function FolderTreeWithCards({
     if (navigateToSectionListToken <= 0) return;
     setActiveRootFolderId(null);
   }, [navigateToSectionListToken]);
+
+  useEffect(() => {
+    if (folderSelectionNonce <= 0) return;
+    const root = treeRootRef.current;
+    if (!root) return;
+
+    const resetIfScrollable = (node: HTMLElement) => {
+      const style = window.getComputedStyle(node);
+      const overflowY = style.overflowY;
+      const isScrollable =
+        (overflowY === "auto" || overflowY === "scroll") &&
+        node.scrollHeight > node.clientHeight;
+      if (isScrollable) {
+        node.scrollTop = 0;
+      }
+    };
+
+    resetIfScrollable(root);
+    root.querySelectorAll<HTMLElement>("*").forEach(resetIfScrollable);
+  }, [folderSelectionNonce]);
 
   // sync activeRootFolderId with selectedFolderId
   useEffect(() => {

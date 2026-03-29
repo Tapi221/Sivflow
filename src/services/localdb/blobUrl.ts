@@ -39,7 +39,7 @@ type InvalidImageUrlErrorParams = {
   message?: string;
 };
 
-export class InvalidImageUrlError extends Error {
+class InvalidImageUrlError extends Error {
   entityType?: string;
   entityId?: string;
   path?: string;
@@ -110,7 +110,7 @@ export const scrubBlobUrlsDeep = (value: unknown): unknown => {
   return value;
 };
 
-export const setNestedPath = (
+const setNestedPath = (
   target: Record<string, unknown>,
   path: string,
   value: unknown,

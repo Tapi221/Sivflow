@@ -25,7 +25,7 @@ const CARD_SET_PREFIX = "cardSet:";
 const CARD_PREFIX = "card:";
 const DOCUMENT_PREFIX = "document:";
 
-export const toTreeFolderId = (folderId: string): string =>
+const toTreeFolderId = (folderId: string): string =>
   `${FOLDER_PREFIX}${folderId}`;
 
 export const toExpandedTreeIds = (

@@ -9,7 +9,7 @@ export type CardRuledContextValue = {
   setVisibleRules: (rules: number[]) => void;
 };
 
-export const CardRuledContext = createContext<CardRuledContextValue | null>(null);
+const CardRuledContext = createContext<CardRuledContextValue | null>(null);
 
 export function useCardRuledContext(): CardRuledContextValue | null {
   return useContext(CardRuledContext);

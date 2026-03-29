@@ -42,6 +42,7 @@ interface TreeViewLayoutProps {
   onItemSelect: (item: SelectedExplorerItem) => void;
   onCardUpdated: () => void;
   navigateToSectionListToken?: number;
+  folderSelectionNonce?: number;
 }
 
 function TreeViewLayout({
@@ -56,6 +57,7 @@ function TreeViewLayout({
   onItemSelect,
   onCardUpdated,
   navigateToSectionListToken = 0,
+  folderSelectionNonce = 0,
 }: TreeViewLayoutProps) {
   const navigate = useNavigate();
   const { settings, updateSettings } = useUserSettings();
@@ -424,6 +426,7 @@ function TreeViewLayout({
       addPdfRequestToken={addPdfRequestToken}
       addPptxRequestToken={addPptxRequestToken}
       navigateToSectionListToken={navigateToSectionListToken}
+      folderSelectionNonce={folderSelectionNonce}
       getFolderPath={getFolderPath}
       onFolderSelect={handleFolderSelectWithRecent}
       onItemSelect={handleItemSelect}
@@ -499,6 +502,7 @@ function TreeViewLayout({
           onViewCards: handleViewCards,
           onCreateCard: handleOpenCreateCard,
         }}
+        folderSelectionNonce={folderSelectionNonce}
       />
 
       <TreeViewDialogs

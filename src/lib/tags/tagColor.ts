@@ -28,7 +28,7 @@ type TagColorPalette = {
   swatch: string;
 };
 
-export const DEFAULT_TAG_COLOR_KEY: TagColorKey = "slate";
+const DEFAULT_TAG_COLOR_KEY: TagColorKey = "slate";
 export const DEFAULT_TAG_COLOR_CLASS_NAME = `tag-color-${DEFAULT_TAG_COLOR_KEY}`;
 
 const TAG_COLOR_PALETTE: Record<TagColorKey, TagColorPalette> = {
@@ -130,7 +130,7 @@ const TAG_COLOR_PALETTE: Record<TagColorKey, TagColorPalette> = {
   },
 };
 
-export const LEGACY_TAG_COLOR_TO_KEY: Record<string, TagColorKey> = {
+const LEGACY_TAG_COLOR_TO_KEY: Record<string, TagColorKey> = {
   "bg-slate-100 text-slate-600 border-slate-200": "slate",
   "bg-red-50 text-red-600 border-red-200": "red",
   "bg-orange-50 text-orange-600 border-orange-200": "orange",
@@ -151,7 +151,7 @@ export const LEGACY_TAG_COLOR_TO_KEY: Record<string, TagColorKey> = {
 
 const TAG_COLOR_KEY_SET = new Set<string>(TAG_COLOR_KEYS);
 
-export const isTagColorKey = (value: unknown): value is TagColorKey =>
+const isTagColorKey = (value: unknown): value is TagColorKey =>
   typeof value === "string" && TAG_COLOR_KEY_SET.has(value);
 
 const detectLegacyKey = (legacyClassName: string): TagColorKey | null => {
@@ -184,11 +184,7 @@ export const getTagColorKey = (input?: string): TagColorKey => {
 // UI用クラス解決
 export const getTagColorClassName = (input?: string): string =>
   `tag-color-${getTagColorKey(input)}`;
-
-export const getTagColorSwatchClassName = (input?: string): string =>
-  `tag-color-swatch-${getTagColorKey(input)}`;
-
-export const getTagColorPalette = (input?: string): TagColorPalette =>
+const getTagColorPalette = (input?: string): TagColorPalette =>
   TAG_COLOR_PALETTE[getTagColorKey(input)];
 
 export const getTagColorStyle = (input?: string): CSSProperties => {

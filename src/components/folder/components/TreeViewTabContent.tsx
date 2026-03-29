@@ -32,6 +32,7 @@ interface TreeViewTabContentProps {
   addPdfRequestToken: number;
   addPptxRequestToken: number;
   navigateToSectionListToken: number;
+  folderSelectionNonce: number;
   getFolderPath: PinnedPanelProps["getFolderPath"];
   onFolderSelect: (folderId: string | null) => void;
   onItemSelect: (item: SelectedExplorerItem) => void;
@@ -77,6 +78,7 @@ export function TreeViewTabContent({
   addPdfRequestToken,
   addPptxRequestToken,
   navigateToSectionListToken,
+  folderSelectionNonce,
   getFolderPath,
   onFolderSelect,
   onItemSelect,
@@ -177,8 +179,8 @@ export function TreeViewTabContent({
           addPdfRequestToken={addPdfRequestToken}
           addPptxRequestToken={addPptxRequestToken}
           navigateToSectionListToken={navigateToSectionListToken}
+          folderSelectionNonce={folderSelectionNonce}
         />
       );
   }
 }
-

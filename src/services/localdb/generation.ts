@@ -8,7 +8,7 @@ import {
 } from "./constants";
 import { safeStringifyError } from "./errors";
 
-export const readGenerationFromStorage = (userId: string): number => {
+const readGenerationFromStorage = (userId: string): number => {
   if (typeof window === "undefined") return 0;
   try {
     const raw = window.localStorage.getItem(
@@ -22,7 +22,7 @@ export const readGenerationFromStorage = (userId: string): number => {
   }
 };
 
-export const writeGenerationToStorage = (
+const writeGenerationToStorage = (
   userId: string,
   generation: number,
 ): void => {
@@ -39,13 +39,13 @@ export const writeGenerationToStorage = (
   }
 };
 
-export const makeGenerationDbPrefix = (userId: string): string =>
+const makeGenerationDbPrefix = (userId: string): string =>
   `${LOCALDB_NAME_PREFIX}${userId}_v${LOCALDB_SCHEMA_VERSION_FOR_NAME}_g`;
 
 // Module-level set replacing LocalDB.generationBumpedUsers
-export const generationBumpedUsers = new Set<string>();
+const generationBumpedUsers = new Set<string>();
 
-export function getGenerationForUser(userId: string): number {
+function getGenerationForUser(userId: string): number {
   return readGenerationFromStorage(userId);
 }
 
@@ -71,7 +71,7 @@ export function getFallbackDatabaseNameForUser(userId: string): string {
   return `FlashcardMasterDB_mem_${userId}`;
 }
 
-export async function listUserPersistentDbNames(
+async function listUserPersistentDbNames(
   userId: string,
 ): Promise<string[]> {
   const names = new Set<string>();

@@ -1,7 +1,6 @@
 import type { UploadedImage } from "@/types";
 import { extractTextFromBlocks, normalizeFolder } from "@/utils";
 import { assertImageArrayInvariant } from "@/utils/imageAssertions";
-import { sanitizeProfileImage } from "@/utils/profileImageSanitizer";
 import {
     denormalizeUploadedImages,
     normalizeUploadedImages,
@@ -119,18 +118,3 @@ export const normalizeFolderWithSilent = (raw: unknown) => {
     !hasIsSilent && hasSilent ? { ...raw, isSilent: raw.silent } : raw;
   return normalizeFolder(normalizedInput);
 };
-
-export const denormalizeUserSettingsForStorage = (settings: unknown) => {
-  if (!settings) return settings;
-  const profileImage = sanitizeProfileImage(settings.profileImage).profileImage;
-
-  return {
-    ...settings,
-    profileImage,
-  };
-};
-
-
-
-
-

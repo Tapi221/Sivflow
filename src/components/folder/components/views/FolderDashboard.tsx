@@ -33,6 +33,7 @@ interface FolderDashboardProps {
   cards: Card[];
   handlers: FolderDashboardHandlers;
   onRenameFolder?: (newName: string) => Promise<void>;
+  folderSelectionNonce?: number;
 }
 
 type ViewMode = "carousel" | "table";
@@ -292,6 +293,7 @@ export function FolderDashboard({
   cards,
   handlers,
   onRenameFolder,
+  folderSelectionNonce = 0,
 }: FolderDashboardProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   // ── View state ──────────────────────────────────────────────────────────────
@@ -523,7 +525,7 @@ export function FolderDashboard({
     const container = scrollContainerRef.current;
     if (!container) return;
     container.scrollTop = 0;
-  }, [folderId]);
+  }, [folderId, folderSelectionNonce]);
 
   return (
     <div

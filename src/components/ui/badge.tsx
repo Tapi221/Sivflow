@@ -1,4 +1,4 @@
-/* eslint-disable react-refresh/only-export-components -- cva variant export is shared UI contract and split would expand diff. */
+ 
 import * as React from "react";
 import { cva } from "class-variance-authority";
 
@@ -30,7 +30,7 @@ function Badge({ className, variant, ...props }) {
   );
 }
 
-export { Badge, badgeVariants };
+export { Badge };
 
 
 
