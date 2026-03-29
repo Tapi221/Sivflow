@@ -56,7 +56,7 @@ export const BlockWrapper = ({
     if (!(target instanceof HTMLElement)) return false;
     return Boolean(
       target.closest(
-        'input, textarea, [contenteditable="true"], [contenteditable=""]',
+        "input, textarea, [contenteditable]",
       ),
     );
   };
@@ -171,7 +171,7 @@ export const BlockWrapper = ({
       }}
       className={cn(
         "group relative overflow-visible bg-transparent py-0 px-1.5",
-        isOutlineVisible && "z-40",
+        isEditingWithin && "z-40",
         className,
       )}
       style={{

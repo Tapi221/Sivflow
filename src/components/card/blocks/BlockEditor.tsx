@@ -40,6 +40,7 @@ export interface BlockEditorHandle {
 interface BlockEditorProps {
   blocks: CardBlock[];
   onChange: (blocks: CardBlock[]) => void;
+  selectionScopeKey?: string | null;
   prefix: "question" | "answer";
   label: string;
   color: string;
@@ -57,6 +58,7 @@ interface BlockEditorProps {
   settings?: unknown;
 
   toolbarMount?: HTMLDivElement | null;
+  toolbarDesktopLayout?: "horizontal" | "vertical";
 }
 
 type DndStyle = React.CSSProperties & { transform?: string };
@@ -75,6 +77,7 @@ export const BlockEditor = React.forwardRef<
     {
       blocks = [],
       onChange,
+      selectionScopeKey = null,
       prefix,
       label,
       droppableId,
@@ -89,10 +92,12 @@ export const BlockEditor = React.forwardRef<
       hiddenBlockTypes = [],
       settings = undefined,
       toolbarMount = null,
+      toolbarDesktopLayout = "horizontal",
     },
     ref,
   ) => {
     const [activeContainerBlockId, setActiveContainerBlockId] = useState<string | null>(null);
+    const [activeBlockId, setActiveBlockId] = useState<string | null>(null);
 
     // reference/audio は本文ブロックじゃない扱い（ここでは編集しない）
     const orderedBlocks = useMemo(
@@ -118,6 +123,15 @@ export const BlockEditor = React.forwardRef<
         ),
       [orderedBlocks],
     );
+    useEffect(() => {
+      if (!activeBlockId) return;
+      if (bodyBlocks.some((b) => b.id === activeBlockId)) return;
+      setActiveBlockId(null);
+    }, [activeBlockId, bodyBlocks]);
+    useEffect(() => {
+      setActiveBlockId(null);
+      setActiveContainerBlockId(null);
+    }, [selectionScopeKey]);
 
     const reindexBlocks = useCallback(
       (arr: CardBlock[]) => arr.map((b, i) => ({ ...b, orderIndex: i })),
@@ -197,24 +211,40 @@ export const BlockEditor = React.forwardRef<
       );
     }, []);
 
+    const measurementRafRef = useRef<number | null>(null);
+    const scheduleMeasurement = useCallback(() => {
+      if (typeof window === "undefined") return;
+      if (measurementRafRef.current != null) return;
+      measurementRafRef.current = window.requestAnimationFrame(() => {
+        measurementRafRef.current = null;
+        updateMeasurement();
+      });
+    }, [updateMeasurement]);
+
     React.useLayoutEffect(() => {
-      updateMeasurement();
-    });
+      scheduleMeasurement();
+      return () => {
+        if (measurementRafRef.current != null && typeof window !== "undefined") {
+          window.cancelAnimationFrame(measurementRafRef.current);
+          measurementRafRef.current = null;
+        }
+      };
+    }, [scheduleMeasurement]);
 
     useEffect(() => {
       const el = containerRef.current;
       if (!el) return;
 
-      const obs = new ResizeObserver(updateMeasurement);
+      const obs = new ResizeObserver(scheduleMeasurement);
       obs.observe(el);
 
-      window.addEventListener("resize", updateMeasurement, { passive: true });
+      window.addEventListener("resize", scheduleMeasurement, { passive: true });
 
       return () => {
         obs.disconnect();
-        window.removeEventListener("resize", updateMeasurement);
+        window.removeEventListener("resize", scheduleMeasurement);
       };
-    }, [updateMeasurement]);
+    }, [scheduleMeasurement]);
 
     const clampDragStyle = (
       style: React.CSSProperties | undefined,
@@ -634,6 +664,7 @@ export const BlockEditor = React.forwardRef<
         onAddBlock={handleAddBlock}
         settings={settings}
         hiddenBlockTypes={hiddenBlockTypes}
+        desktopLayout={toolbarDesktopLayout}
       />
     );
 
@@ -647,6 +678,24 @@ export const BlockEditor = React.forwardRef<
           "space-y-0",
           prefix === "question" ? "js-question-editor" : "js-answer-editor",
         )}
+        onPointerDownCapture={(e) => {
+          const target = e.target;
+          if (!(target instanceof HTMLElement)) return;
+          const nextActiveBlockId =
+            target.closest<HTMLElement>("[data-block-id]")?.dataset.blockId ??
+            null;
+          setActiveBlockId(nextActiveBlockId);
+        }}
+        onFocusCapture={(e) => {
+          const target = e.target;
+          if (!(target instanceof HTMLElement)) return;
+          const nextActiveBlockId =
+            target.closest<HTMLElement>("[data-block-id]")?.dataset.blockId ??
+            null;
+          if (nextActiveBlockId) {
+            setActiveBlockId(nextActiveBlockId);
+          }
+        }}
         onClick={(e) => {
           // question コンテナ内のクリックでなければ activeContainerBlockId をリセット
           const target = e.target as HTMLElement;
@@ -680,6 +729,8 @@ export const BlockEditor = React.forwardRef<
                   {(provided, snapshot) => {
                     const rowMovable = isRowPositionableType(block.type);
                     const isGridOffsetBlock = isGridOffsetType(block.type);
+                    const isBlockActive =
+                      snapshot.isDragging || activeBlockId === block.id;
 
                     const rowOffsetRows = rowMovable
                       ? getBlockOffsetRows(block)
@@ -764,7 +815,7 @@ export const BlockEditor = React.forwardRef<
                             dragEnabled={true}
                             dragHandleClassName="js-block-drag-handle"
                             accentColor={accentColor}
-                            isActive={snapshot.isDragging}
+                            isActive={isBlockActive}
                             placeholder={
                               customPlaceholders?.[index] || "文章を入力..."
                             }
@@ -813,7 +864,7 @@ export const BlockEditor = React.forwardRef<
                               dragEnabled={true}
                               dragHandleClassName="js-block-drag-handle"
                               accentColor={accentColor}
-                              isActive={snapshot.isDragging}
+                              isActive={isBlockActive}
                             />
                           </div>
                         )}
@@ -829,7 +880,7 @@ export const BlockEditor = React.forwardRef<
                             dragHandleProps={undefined}
                             dragHandleClassName="js-block-drag-handle"
                             accentColor={accentColor}
-                            isActive={snapshot.isDragging}
+                            isActive={isBlockActive}
                             initialFile={
                               pendingUploads[block.id] ??
                               pendingUploadsRef.current[block.id]
@@ -879,7 +930,7 @@ export const BlockEditor = React.forwardRef<
                               dragHandleProps={undefined}
                               dragHandleClassName="js-block-drag-handle"
                               accentColor={accentColor}
-                              isActive={snapshot.isDragging}
+                              isActive={isBlockActive}
                               onMoveUp={() =>
                                 handleShiftBlockRow(block.id, "up")
                               }
@@ -912,7 +963,7 @@ export const BlockEditor = React.forwardRef<
                             dragEnabled={true}
                             dragHandleClassName="js-block-drag-handle"
                             accentColor={accentColor}
-                            isActive={snapshot.isDragging}
+                            isActive={isBlockActive}
                           />
                         )}
 
@@ -927,7 +978,7 @@ export const BlockEditor = React.forwardRef<
                             dragHandleProps={undefined}
                             dragHandleClassName="js-block-drag-handle"
                             accentColor={accentColor}
-                            isActive={snapshot.isDragging}
+                            isActive={isBlockActive}
                             onMoveUp={() => handleShiftBlockRow(block.id, "up")}
                             onMoveDown={() =>
                               handleShiftBlockRow(block.id, "down")

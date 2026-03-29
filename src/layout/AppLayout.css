@@ -1,6 +1,6 @@
 .app-layout {
   display: grid;
-  grid-template-columns: 220px 1fr;
+  grid-template-columns: 220px minmax(0, 1fr);
   grid-template-rows: 1fr;
   height: 100%;
   flex: 1;
@@ -9,9 +9,14 @@
   background: #fff;
 }
 
+.app-layout--sidebar-hidden {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
 .app-layout__content {
   display: grid;
   grid-template-rows: 1fr;
+  min-width: 0;
   min-height: 0;
   overflow: hidden;
 }

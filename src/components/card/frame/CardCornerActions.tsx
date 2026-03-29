@@ -61,7 +61,13 @@ export function CardCornerActions({
           )}
         >
           <CircleHelp
-            className={cn(CARD_ACTION_ICON_CLASS, helpActive && "opacity-90")}
+            size={18}
+            strokeWidth={1.6}
+            className={cn(
+              CARD_ACTION_ICON_CLASS,
+              "!h-[18px] !w-[18px] md:!h-[18px] md:!w-[18px]",
+              helpActive && "opacity-90",
+            )}
           />
         </button>
       ) : null}
@@ -89,7 +95,13 @@ export function CardCornerActions({
           )}
         >
           <Star
-            className={cn(CARD_ACTION_ICON_CLASS, starActive && "fill-current")}
+            size={18}
+            strokeWidth={1.6}
+            className={cn(
+              CARD_ACTION_ICON_CLASS,
+              "!h-[18px] !w-[18px] md:!h-[18px] md:!w-[18px]",
+              starActive && "fill-current",
+            )}
           />
         </button>
       ) : null}

@@ -52,6 +52,8 @@ export function CardViewDesktop({
   onToggleUncertainty,
   onToggleBookmark,
 }: CardViewDesktopProps) {
+  const editingCardsOverride = isGlobalEditing ? cardsForPager : undefined;
+
   const renderCard = useCallback(
     (card: Card, idx: number, isActive: boolean) => {
       const showEditPreview =
@@ -67,7 +69,7 @@ export function CardViewDesktop({
           isFlipped={flippedCardIds.has(card.id ?? "")}
           folderId={folderId}
           cardSetId={cardSetId}
-          cardsOverride={cardsForPager}
+          cardsOverride={editingCardsOverride}
           saveSignal={saveSignal}
           onFlip={onFlip}
           onEdit={onEdit}
@@ -81,7 +83,7 @@ export function CardViewDesktop({
       flippedCardIds,
       folderId,
       cardSetId,
-      cardsForPager,
+      editingCardsOverride,
       saveSignal,
       onFlip,
       onEdit,

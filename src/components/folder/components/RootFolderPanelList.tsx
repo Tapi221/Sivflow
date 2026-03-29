@@ -7,7 +7,7 @@ import {
   FOLDER_ROW_TITLE_CLASS,
 } from "@/components/folder/explorer/rows/shared";
 import { cn } from "@/lib/utils";
-import { Folder as FolderIcon, MoreVertical } from "@/ui/icons";
+import { FolderOutlineIcon, MoreVertical } from "@/ui/icons";
 import React from "react";
 
 interface RootFolderPanelListProps {
@@ -110,7 +110,7 @@ export function RootFolderPanelList({
             }}
           >
             <div className="flex min-w-0 flex-1 items-center gap-1.5 pr-8">
-              <FolderIcon
+              <FolderOutlineIcon
                 className={cn(
                   FOLDER_ROW_ICON_SIZE_CLASS,
                   "shrink-0",

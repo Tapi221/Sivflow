@@ -106,13 +106,14 @@
 
   .card-shell-resize-handle {
     @apply absolute left-0 right-0 flex items-center justify-center;
-    bottom: 2px;
-    height: 18px;
+    bottom: 0;
+    height: 30px;
     border: 0;
     background: transparent;
     cursor: ns-resize;
-    z-index: 30;
+    z-index: 60;
     touch-action: none;
+    pointer-events: auto;
   }
 
   .card-shell-resize-handle:focus-visible {
@@ -181,9 +182,9 @@
       ),
       inset 0 1px 0 rgba(255, 255, 255, 0.9);
     transition:
-      box-shadow 180ms ease,
-      border-color 180ms ease,
-      background-color 180ms ease;
+      box-shadow 110ms ease,
+      border-color 110ms ease,
+      background-color 110ms ease;
   }
 
   .premium-paper-depth--hover:hover {
@@ -200,9 +201,9 @@
 
   .card-shell--interactive {
     transition:
-      box-shadow 180ms ease,
-      border-color 180ms ease,
-      background-color 180ms ease;
+      box-shadow 110ms ease,
+      border-color 110ms ease,
+      background-color 110ms ease;
   }
 
   .card-shell--interactive:not(.card-shell--selected):not(.card-shell--active) {
@@ -285,7 +286,7 @@
     overflow: visible;
     opacity: 0.82;
     box-shadow: 0 1px 6px rgba(15, 23, 42, 0.04);
-    transition: opacity 180ms ease, box-shadow 180ms ease;
+    transition: opacity 110ms ease, box-shadow 110ms ease;
   }
 
   .card-pager-item[data-card-hoverable="true"]:hover {
@@ -342,9 +343,9 @@
     border-color: var(--card-border-default, rgba(15, 23, 42, 0.08));
     box-shadow: 0 1px 6px rgba(15, 23, 42, 0.06);
     transition:
-      box-shadow 180ms ease,
-      border-color 180ms ease,
-      background-color 180ms ease;
+      box-shadow 110ms ease,
+      border-color 110ms ease,
+      background-color 110ms ease;
   }
 
   .card-list-card:hover {

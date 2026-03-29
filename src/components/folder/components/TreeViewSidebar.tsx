@@ -17,6 +17,9 @@ interface TreeViewSidebarProps {
   isFilterActive: boolean;
   resultCount: number;
   onCreateRootFolder: () => void;
+  onCreateCardSet: () => void;
+  onAddPdf: () => void;
+  onAddPptx: () => void;
   onStartResizing: (e: React.PointerEvent) => void;
   children: React.ReactNode;
 }
@@ -34,6 +37,9 @@ export function TreeViewSidebar({
   isFilterActive,
   resultCount,
   onCreateRootFolder,
+  onCreateCardSet,
+  onAddPdf,
+  onAddPptx,
   onStartResizing,
   children,
 }: TreeViewSidebarProps) {
@@ -59,6 +65,9 @@ export function TreeViewSidebar({
             onTabChange={setExplorerTab}
             allTags={allTags}
             onCreateRootFolder={onCreateRootFolder}
+            onCreateCardSet={onCreateCardSet}
+            onAddPdf={onAddPdf}
+            onAddPptx={onAddPptx}
             showExplorerActions={explorerTab === "explorer"}
           />
         </div>
@@ -94,15 +103,7 @@ export function TreeViewSidebar({
           aria-label="サイドバーのサイズ変更"
           tabIndex={0}
           style={{ touchAction: "none" }}
-        >
-          <div
-            className={cn(
-              "absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-full transition-colors",
-              "bg-[var(--sidebar-border,#e3e6ea)] group-hover/resize:bg-[var(--sidebar-text-muted,#6e6e80)]",
-              isResizing && "bg-[var(--sidebar-text,#202123)]",
-            )}
-          />
-        </div>
+        />
       )}
     </div>
   );

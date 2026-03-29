@@ -78,6 +78,9 @@ interface FolderTreeWithCardsProps {
   selectedCardSetId?: string | null;
   isFiltering?: boolean;
   createFolderRequestToken?: number;
+  createCardSetRequestToken?: number;
+  addPdfRequestToken?: number;
+  addPptxRequestToken?: number;
   navigateToSectionListToken?: number;
   className?: string;
 }
@@ -109,6 +112,9 @@ export function FolderTreeWithCards({
   selectedCardSetId = null,
   isFiltering = false,
   createFolderRequestToken = 0,
+  createCardSetRequestToken = 0,
+  addPdfRequestToken = 0,
+  addPptxRequestToken = 0,
   navigateToSectionListToken = 0,
   className,
 }: FolderTreeWithCardsProps) {
@@ -139,6 +145,9 @@ export function FolderTreeWithCards({
   const treeRootRef = useRef<HTMLDivElement | null>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
   const handledCreateFolderTokenRef = useRef(0);
+  const handledCreateCardSetTokenRef = useRef(0);
+  const handledAddPdfTokenRef = useRef(0);
+  const handledAddPptxTokenRef = useRef(0);
 
   // merge optimistic
   const treeFolders = useMemo(() => {
@@ -328,6 +337,9 @@ export function FolderTreeWithCards({
     handlePdfDropped,
     handlePptxDropped,
     handleToolbarAddFile,
+    handleToolbarAddPdf,
+    handleToolbarAddPptx,
+    currentFileAccept,
     handleToolbarFileInputChange,
   } = useFolderDocumentUpload({
     selectedFolderId,
@@ -371,6 +383,27 @@ export function FolderTreeWithCards({
     },
     [actions.handleCreateCardSetAction, dialogs.editingIdRef],
   );
+
+  useEffect(() => {
+    if (createCardSetRequestToken <= 0) return;
+    if (handledCreateCardSetTokenRef.current === createCardSetRequestToken) return;
+    handledCreateCardSetTokenRef.current = createCardSetRequestToken;
+    void handleCreateCardSetFromMenu(selectedFolderId ?? null);
+  }, [createCardSetRequestToken, handleCreateCardSetFromMenu, selectedFolderId]);
+
+  useEffect(() => {
+    if (addPdfRequestToken <= 0) return;
+    if (handledAddPdfTokenRef.current === addPdfRequestToken) return;
+    handledAddPdfTokenRef.current = addPdfRequestToken;
+    handleToolbarAddPdf();
+  }, [addPdfRequestToken, handleToolbarAddPdf]);
+
+  useEffect(() => {
+    if (addPptxRequestToken <= 0) return;
+    if (handledAddPptxTokenRef.current === addPptxRequestToken) return;
+    handledAddPptxTokenRef.current = addPptxRequestToken;
+    handleToolbarAddPptx();
+  }, [addPptxRequestToken, handleToolbarAddPptx]);
 
   const handleCreateCardSetFromRootPanel = useCallback(
     async (folderId: string | null) => {
@@ -653,12 +686,12 @@ export function FolderTreeWithCards({
   return (
     <div
       ref={treeRootRef}
-      className={cn("h-full w-full border-r border-black/5", className)}
+      className={cn("h-full w-full", className)}
     >
       <input
         ref={fileInputRef}
         type="file"
-        accept=".pdf,.pptx,application/pdf,application/vnd.openxmlformats-officedocument.presentationml.presentation"
+        accept={currentFileAccept}
         className="hidden"
         multiple
         onChange={handleToolbarFileInputChange}

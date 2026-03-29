@@ -238,6 +238,22 @@ function TreeViewLayout({
     setCreateFolderRequestToken((prev) => prev + 1);
   }, []);
 
+  const [createCardSetRequestToken, setCreateCardSetRequestToken] = useState(0);
+  const [addPdfRequestToken, setAddPdfRequestToken] = useState(0);
+  const [addPptxRequestToken, setAddPptxRequestToken] = useState(0);
+
+  const handleCreateCardSetFromHeader = useCallback(() => {
+    setCreateCardSetRequestToken((prev) => prev + 1);
+  }, []);
+
+  const handleAddPdfFromHeader = useCallback(() => {
+    setAddPdfRequestToken((prev) => prev + 1);
+  }, []);
+
+  const handleAddPptxFromHeader = useCallback(() => {
+    setAddPptxRequestToken((prev) => prev + 1);
+  }, []);
+
   const {
     isFilterActive,
     filteredCards,
@@ -398,6 +414,9 @@ function TreeViewLayout({
       virtualTreeNodes={virtualTreeNodes}
       isFiltering={isFiltering}
       createFolderRequestToken={createFolderRequestToken}
+      createCardSetRequestToken={createCardSetRequestToken}
+      addPdfRequestToken={addPdfRequestToken}
+      addPptxRequestToken={addPptxRequestToken}
       navigateToSectionListToken={navigateToSectionListToken}
       getFolderPath={getFolderPath}
       onFolderSelect={handleFolderSelectWithRecent}
@@ -443,6 +462,9 @@ function TreeViewLayout({
         isFilterActive={isFilterActive}
         resultCount={filteredCards.length + filteredDocuments.length}
         onCreateRootFolder={handleCreateRootFolder}
+        onCreateCardSet={handleCreateCardSetFromHeader}
+        onAddPdf={handleAddPdfFromHeader}
+        onAddPptx={handleAddPptxFromHeader}
         onStartResizing={startResizing}
       >
         {tabContent}

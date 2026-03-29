@@ -24,7 +24,7 @@ interface CodeBlockItemProps {
   onMoveDragEnd?: () => void;
 }
 
-export const CodeBlockItem = ({
+const CodeBlockItemInner = ({
   data,
   onChange,
   onDelete,
@@ -73,6 +73,25 @@ export const CodeBlockItem = ({
     </BlockWrapper>
   );
 };
+
+const areCodeBlockItemPropsEqual = (
+  prev: CodeBlockItemProps,
+  next: CodeBlockItemProps,
+) =>
+  prev.data === next.data &&
+  prev.dragEnabled === next.dragEnabled &&
+  prev.dragHandleClassName === next.dragHandleClassName &&
+  prev.accentColor === next.accentColor &&
+  prev.isActive === next.isActive &&
+  prev.showDelete === next.showDelete &&
+  prev.canMoveUp === next.canMoveUp &&
+  prev.canMoveDown === next.canMoveDown;
+
+export const CodeBlockItem = React.memo(
+  CodeBlockItemInner,
+  areCodeBlockItemPropsEqual,
+);
+CodeBlockItem.displayName = "CodeBlockItem";
 
 
 

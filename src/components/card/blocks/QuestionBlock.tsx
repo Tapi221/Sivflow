@@ -2,9 +2,13 @@ import React, { useCallback, useRef } from "react";
 import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
 import { BlockWrapper } from "./BlockWrapper";
 import { HelpCircle } from "@/ui/icons";
-import { TEXT_BLOCK_LINE_HEIGHT_PX } from "./textBlockStyles";
 import type { CardBlock } from "@/types";
 import { QuestionBlockLayout } from "./QuestionBlockLayout";
+import {
+  QUESTION_BLOCK_ANSWER_TEXT_CLASS,
+  QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX,
+  QUESTION_BLOCK_TITLE_TEXT_CLASS,
+} from "./questionBlockTextStyles";
 
 interface QuestionBlockProps {
   block: CardBlock;
@@ -26,7 +30,7 @@ interface QuestionBlockProps {
   onBlur?: () => void;
 }
 
-export const QuestionBlock: React.FC<QuestionBlockProps> = ({
+const QuestionBlockInner: React.FC<QuestionBlockProps> = ({
   block,
   onUpdateBlock,
   onDelete,
@@ -98,10 +102,10 @@ export const QuestionBlock: React.FC<QuestionBlockProps> = ({
             }
             placeholder="疑問・質問を入力..."
             minRows={1}
-            lineHeight={TEXT_BLOCK_LINE_HEIGHT_PX}
+            lineHeight={QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX}
             allowInternalScroll={false}
             className="flex-1"
-            textareaClassName="text-xs font-medium text-slate-700 leading-snug placeholder:text-slate-400 bg-transparent border-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0 w-full resize-none p-0"
+            textareaClassName={`${QUESTION_BLOCK_TITLE_TEXT_CLASS} placeholder:text-slate-400 bg-transparent border-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0 w-full resize-none p-0`}
           />
         }
         answerContent={
@@ -111,14 +115,32 @@ export const QuestionBlock: React.FC<QuestionBlockProps> = ({
               onUpdateBlock(block.id, { questionAnswer: e.target.value })
             }
             placeholder="答え・メモを入力..."
-            minRows={2}
-            lineHeight={TEXT_BLOCK_LINE_HEIGHT_PX}
+            minRows={1}
+            lineHeight={QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX}
             allowInternalScroll={false}
             className="flex-1"
-            textareaClassName="text-xs text-slate-600 leading-snug placeholder:text-slate-400 bg-transparent border-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0 w-full resize-none p-0"
+            textareaClassName={`${QUESTION_BLOCK_ANSWER_TEXT_CLASS} placeholder:text-slate-400 bg-transparent border-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0 w-full resize-none p-0`}
           />
         }
       />
     </BlockWrapper>
   );
 };
+
+const areQuestionBlockPropsEqual = (
+  prev: QuestionBlockProps,
+  next: QuestionBlockProps,
+) =>
+  prev.block === next.block &&
+  prev.dragEnabled === next.dragEnabled &&
+  prev.dragHandleClassName === next.dragHandleClassName &&
+  prev.accentColor === next.accentColor &&
+  prev.isActive === next.isActive &&
+  prev.canMoveUp === next.canMoveUp &&
+  prev.canMoveDown === next.canMoveDown;
+
+export const QuestionBlock = React.memo(
+  QuestionBlockInner,
+  areQuestionBlockPropsEqual,
+);
+QuestionBlock.displayName = "QuestionBlock";

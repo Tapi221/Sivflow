@@ -28,6 +28,9 @@ interface TreeViewTabContentProps {
   virtualTreeNodes: ViewsPanelProps["nodes"];
   isFiltering: boolean;
   createFolderRequestToken: number;
+  createCardSetRequestToken: number;
+  addPdfRequestToken: number;
+  addPptxRequestToken: number;
   navigateToSectionListToken: number;
   getFolderPath: PinnedPanelProps["getFolderPath"];
   onFolderSelect: (folderId: string | null) => void;
@@ -70,6 +73,9 @@ export function TreeViewTabContent({
   virtualTreeNodes,
   isFiltering,
   createFolderRequestToken,
+  createCardSetRequestToken,
+  addPdfRequestToken,
+  addPptxRequestToken,
   navigateToSectionListToken,
   getFolderPath,
   onFolderSelect,
@@ -167,10 +173,12 @@ export function TreeViewTabContent({
           selectedCardSetId={selectedCardSetId}
           isFiltering={isFiltering}
           createFolderRequestToken={createFolderRequestToken}
+          createCardSetRequestToken={createCardSetRequestToken}
+          addPdfRequestToken={addPdfRequestToken}
+          addPptxRequestToken={addPptxRequestToken}
           navigateToSectionListToken={navigateToSectionListToken}
         />
       );
   }
 }
-
 

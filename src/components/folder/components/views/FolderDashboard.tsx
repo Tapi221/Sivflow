@@ -38,6 +38,10 @@ interface FolderDashboardProps {
 type ViewMode = "carousel" | "table";
 type SortKey = "order" | "title" | "nextReview" | "reviewCount";
 type SortDir = "asc" | "desc";
+type CardPreviewMeta = {
+  title: string;
+  snippet: string;
+};
 
 // ── Utilities ──────────────────────────────────────────────────────────────────
 
@@ -59,44 +63,44 @@ const toDate = (value: unknown): Date | null => {
   return null;
 };
 
-const getPreviewText = (card: Card): string => {
-  const q = extractTextFromBlocks(card.questionBlocks ?? []);
-  if (q) return q;
-  const a = extractTextFromBlocks(card.answerBlocks ?? []);
-  if (a) return a;
-  if (card.questionText) return card.questionText;
-  if (card.answerText) return card.answerText;
-  return "";
-};
-
 const normalizeInlineText = (value: string): string =>
   value.replace(/\s+/g, " ").trim();
 
-const displayTitle = (card: Card): string => {
-  const title = card.title?.trim();
-  if (title) return title;
-  const preview = normalizeInlineText(getPreviewText(card));
-  if (preview) return preview.slice(0, 28);
-  return "無題のカード";
-};
-
-const previewSnippet = (card: Card, headingText: string): string => {
+const computeCardPreviewMeta = (card: Card): CardPreviewMeta => {
   const questionText = normalizeInlineText(
     extractTextFromBlocks(card.questionBlocks ?? []) || card.questionText || "",
   );
   const answerText = normalizeInlineText(
     extractTextFromBlocks(card.answerBlocks ?? []) || card.answerText || "",
   );
-  const heading = normalizeInlineText(headingText);
+
+  const titleCandidate = card.title?.trim();
+  const title = titleCandidate || (questionText || answerText).slice(0, 28) || "無題のカード";
+  const heading = normalizeInlineText(title);
+
   let text = questionText || answerText;
-  if (!text) return "";
+  if (!text) {
+    return {
+      title,
+      snippet: "",
+    };
+  }
+
   const isDuplicatedWithHeading =
     text === heading || text.startsWith(heading) || heading.startsWith(text);
   if (isDuplicatedWithHeading) {
     text = answerText && answerText !== questionText ? answerText : "";
   }
-  if (!text) return "";
-  return text.length > 80 ? `${text.slice(0, 80)}...` : text;
+  const snippet = !text
+    ? ""
+    : text.length > 80
+      ? `${text.slice(0, 80)}...`
+      : text;
+
+  return {
+    title,
+    snippet,
+  };
 };
 
 // ── Design tokens (inline) ────────────────────────────────────────────────────
@@ -333,6 +337,14 @@ export function FolderDashboard({
     [cards],
   );
 
+  const cardPreviewById = useMemo(() => {
+    const map = new Map<string, CardPreviewMeta>();
+    for (const card of activeCards) {
+      map.set(card.id, computeCardPreviewMeta(card));
+    }
+    return map;
+  }, [activeCards]);
+
   const reviewedCards = useMemo(
     () =>
       activeCards.filter((card) => {
@@ -409,7 +421,9 @@ export function FolderDashboard({
           (a.orderIndex ?? (a as unknown).order_index ?? 0) -
           (b.orderIndex ?? (b as unknown).order_index ?? 0);
       } else if (sortKey === "title") {
-        cmp = displayTitle(a).localeCompare(displayTitle(b), "ja");
+        const titleA = cardPreviewById.get(a.id)?.title ?? "無題のカード";
+        const titleB = cardPreviewById.get(b.id)?.title ?? "無題のカード";
+        cmp = titleA.localeCompare(titleB, "ja");
       } else if (sortKey === "nextReview") {
         const da = toDate(
           a.nextReviewDate ?? (a as unknown).next_review_date,
@@ -430,7 +444,14 @@ export function FolderDashboard({
     });
 
     return list;
-  }, [activeCards, filterDraftState, filterReviewed, sortKey, sortDir]);
+  }, [
+    activeCards,
+    cardPreviewById,
+    filterDraftState,
+    filterReviewed,
+    sortKey,
+    sortDir,
+  ]);
 
   const carouselCards = useMemo(
     () => displayCards.slice(0, 24),
@@ -718,6 +739,7 @@ export function FolderDashboard({
               {viewMode === "carousel" ? (
                 <CardScrollSection
                   cards={carouselCards}
+                  cardPreviewById={cardPreviewById}
                   onEmpty={
                     <InlineEmpty
                       text="カードがまだありません"
@@ -729,6 +751,7 @@ export function FolderDashboard({
               ) : (
                 <CardTableSection
                   cards={displayCards}
+                  cardPreviewById={cardPreviewById}
                   sortKey={sortKey}
                   sortDir={sortDir}
                   onSort={handleSortColumn}
@@ -1034,6 +1057,7 @@ function EditablePropertyValue({
 
 interface CardTableSectionProps {
   cards: Card[];
+  cardPreviewById: Map<string, CardPreviewMeta>;
   sortKey: SortKey;
   sortDir: SortDir;
   onSort: (key: SortKey) => void;
@@ -1042,6 +1066,7 @@ interface CardTableSectionProps {
 
 function CardTableSection({
   cards,
+  cardPreviewById,
   sortKey,
   sortDir,
   onSort,
@@ -1103,7 +1128,7 @@ function CardTableSection({
             const nextReview = toDate(
               card.nextReviewDate ?? (card as unknown).next_review_date,
             );
-            const title = displayTitle(card);
+            const title = cardPreviewById.get(card.id)?.title ?? "無題のカード";
 
             return (
               <tr
@@ -1187,36 +1212,87 @@ const CARD_SCROLL_AMOUNT = 216;
 
 function CardScrollSection({
   cards,
+  cardPreviewById,
   onEmpty,
 }: {
   cards: Card[];
+  cardPreviewById: Map<string, CardPreviewMeta>;
   onEmpty: ReactNode;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
+  const scrollRafRef = useRef<number | null>(null);
+  const [scrollState, setScrollState] = useState({
+    canScrollLeft: false,
+    canScrollRight: false,
+  });
+
+  const cardItems = useMemo(
+    () =>
+      cards.map((card) => {
+        const nextReview = toDate(
+          card.nextReviewDate ?? (card as unknown).next_review_date,
+        );
+        const reviewText = nextReview
+          ? nextReview.toLocaleDateString("ja-JP", {
+              month: "short",
+              day: "numeric",
+            })
+          : null;
+        const preview = cardPreviewById.get(card.id);
+
+        return {
+          id: card.id,
+          isDraft: Boolean(card.isDraft ?? (card as unknown).is_draft),
+          title: preview?.title ?? "無題のカード",
+          snippet: preview?.snippet ?? "",
+          reviewText,
+        };
+      }),
+    [cardPreviewById, cards],
+  );
 
   const updateScrollState = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
     const { scrollLeft, scrollWidth, clientWidth } = el;
-    setCanScrollLeft(scrollLeft > 4);
-    setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 4);
+    const canScrollLeft = scrollLeft > 4;
+    const canScrollRight = scrollLeft + clientWidth < scrollWidth - 4;
+
+    setScrollState((prev) => {
+      if (
+        prev.canScrollLeft === canScrollLeft &&
+        prev.canScrollRight === canScrollRight
+      ) {
+        return prev;
+      }
+      return { canScrollLeft, canScrollRight };
+    });
   }, []);
 
+  const scheduleScrollStateUpdate = useCallback(() => {
+    if (scrollRafRef.current != null) return;
+    scrollRafRef.current = requestAnimationFrame(() => {
+      scrollRafRef.current = null;
+      updateScrollState();
+    });
+  }, [updateScrollState]);
+
   useEffect(() => {
-    const id = requestAnimationFrame(updateScrollState);
+    scheduleScrollStateUpdate();
     const el = scrollRef.current;
-    if (!el) return () => cancelAnimationFrame(id);
-    const ro = new ResizeObserver(updateScrollState);
+    if (!el) return;
+    const ro = new ResizeObserver(scheduleScrollStateUpdate);
     ro.observe(el);
-    el.addEventListener("scroll", updateScrollState, { passive: true });
+    el.addEventListener("scroll", scheduleScrollStateUpdate, { passive: true });
     return () => {
-      cancelAnimationFrame(id);
+      if (scrollRafRef.current != null) {
+        cancelAnimationFrame(scrollRafRef.current);
+        scrollRafRef.current = null;
+      }
       ro.disconnect();
-      el.removeEventListener("scroll", updateScrollState);
+      el.removeEventListener("scroll", scheduleScrollStateUpdate);
     };
-  }, [cards, updateScrollState]);
+  }, [cards, scheduleScrollStateUpdate]);
 
   const scrollBy = useCallback((dir: "left" | "right") => {
     scrollRef.current?.scrollBy({
@@ -1267,23 +1343,10 @@ function CardScrollSection({
             paddingBottom: 4,
           }}
         >
-          {cards.map((card, i) => {
-            const isDraft = card.isDraft ?? (card as unknown).is_draft;
-            const nextReview = toDate(
-              card.nextReviewDate ?? (card as unknown).next_review_date,
-            );
-            const reviewText = nextReview
-              ? nextReview.toLocaleDateString("ja-JP", {
-                  month: "short",
-                  day: "numeric",
-                })
-              : null;
-            const title = displayTitle(card);
-            const snippet = previewSnippet(card, title);
-
+          {cardItems.map((cardItem, i) => {
             return (
               <article
-                key={card.id}
+                key={cardItem.id}
                 style={{
                   flexShrink: 0,
                   width: 196,
@@ -1322,9 +1385,9 @@ function CardScrollSection({
                       overflow: "hidden",
                     }}
                   >
-                    {title}
+                    {cardItem.title}
                   </h4>
-                  {isDraft && (
+                  {cardItem.isDraft && (
                     <span
                       style={{
                         flexShrink: 0,
@@ -1340,7 +1403,7 @@ function CardScrollSection({
                     </span>
                   )}
                 </div>
-                {snippet ? (
+                {cardItem.snippet ? (
                   <p
                     style={{
                       fontSize: T.fsMeta,
@@ -1353,10 +1416,10 @@ function CardScrollSection({
                       overflow: "hidden",
                     }}
                   >
-                    {snippet}
+                    {cardItem.snippet}
                   </p>
                 ) : null}
-                {reviewText && (
+                {cardItem.reviewText && (
                   <p
                     style={{
                       fontSize: 11,
@@ -1364,7 +1427,7 @@ function CardScrollSection({
                       marginTop: 8,
                     }}
                   >
-                    次回 {reviewText}
+                    次回 {cardItem.reviewText}
                   </p>
                 )}
               </article>
@@ -1385,7 +1448,7 @@ function CardScrollSection({
           height: "100%",
           width: 40,
           background: "linear-gradient(to right,#fff 0%,transparent 100%)",
-          opacity: canScrollLeft ? 1 : 0,
+          opacity: scrollState.canScrollLeft ? 1 : 0,
           transition: "opacity 0.2s",
         }}
       />
@@ -1399,15 +1462,15 @@ function CardScrollSection({
           height: "100%",
           width: 48,
           background: "linear-gradient(to left,#fff 0%,transparent 100%)",
-          opacity: canScrollRight ? 1 : 0,
+          opacity: scrollState.canScrollRight ? 1 : 0,
           transition: "opacity 0.2s",
         }}
       />
 
-      {canScrollLeft && (
+      {scrollState.canScrollLeft && (
         <ScrollArrow dir="left" onClick={() => scrollBy("left")} />
       )}
-      {canScrollRight && (
+      {scrollState.canScrollRight && (
         <ScrollArrow dir="right" onClick={() => scrollBy("right")} />
       )}
     </div>

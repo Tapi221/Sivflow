@@ -9,6 +9,7 @@ const CARD_PANE_VIEW_MIN_WIDTH_PX = 360;
 const CARD_PANE_EDIT_MIN_WIDTH_PX = 640;
 const CARD_PANE_AUTO_MAX_SCALE = 4;
 const CARD_EDITOR_PAIR_GAP_PX = 16;
+const CARD_EDITOR_TWO_COLUMN_MIN_WIDTH_PX = CARD_PANE_EDIT_MIN_WIDTH_PX;
 
 export const CARD_PANE_WIDTH_STEP_PX = 40;
 export const CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX = 72;
@@ -137,17 +138,31 @@ export function useCardEditorPaneWidth({
   const activeStoredPaneWidthPx = isEditing ? editPaneWidthPx : viewPaneWidthPx;
   const activePaneMaxWidthPx =
     contentViewportWidth > 0
-      ? Math.max(activePaneMinWidthPx, contentViewportWidth)
-      : activeStoredPaneWidthPx;
+      ? Math.max(
+          activePaneMinWidthPx,
+          contentViewportWidth,
+          activeStoredPaneWidthPx,
+          activePaneDefaultWidthPx,
+        )
+      : Math.max(
+          activePaneMinWidthPx,
+          activeStoredPaneWidthPx,
+          activePaneDefaultWidthPx,
+        );
   const activePaneWidthPx = clampPaneWidthPx(
     activeStoredPaneWidthPx,
     activePaneMinWidthPx,
     activePaneMaxWidthPx,
   );
+  const hasForcedPaneWidth =
+    typeof forcedPaneWidthPx === "number" && Number.isFinite(forcedPaneWidthPx);
+  const shouldUseEdgeToEdgePaneWidth = isMetaOpen && !embeddedInPager;
   const resolvedPaneWidthPx =
-    typeof forcedPaneWidthPx === "number" && Number.isFinite(forcedPaneWidthPx)
+    hasForcedPaneWidth
       ? clampPaneWidthPx(forcedPaneWidthPx, activePaneMinWidthPx)
-      : activePaneWidthPx;
+      : shouldUseEdgeToEdgePaneWidth
+        ? activePaneMaxWidthPx
+        : activePaneWidthPx;
   const activePaneDisplayedDefaultWidthPx = clampPaneWidthPx(
     activePaneDefaultWidthPx,
     activePaneMinWidthPx,
@@ -169,17 +184,17 @@ export function useCardEditorPaneWidth({
 
   const shouldApplyPaneWidth =
     (showWidthControl && contentViewportWidth > 0) || forcedPaneWidthPx != null;
-  const effectivePaneWidthPx = shouldApplyPaneWidth
-    ? Math.max(
-        activePaneMinWidthPx,
-        Math.min(
-          resolvedPaneWidthPx,
-          contentViewportWidth > 0 ? contentViewportWidth : resolvedPaneWidthPx,
-        ),
-      )
-    : Math.max(activePaneMinWidthPx, contentViewportWidth || activePaneMinWidthPx);
+  const availablePaneWidthPx =
+    contentViewportWidth > 0 ? contentViewportWidth : resolvedPaneWidthPx;
+  const effectivePaneWidthPx = hasForcedPaneWidth
+    ? resolvedPaneWidthPx
+    : shouldApplyPaneWidth
+    ? Math.max(1, Math.min(resolvedPaneWidthPx, availablePaneWidthPx))
+    : Math.max(1, availablePaneWidthPx || activePaneMinWidthPx);
 
-  const useTwoColumnEditorLayout = effectivePaneWidthPx >= 768;
+  const useTwoColumnEditorLayout =
+    (embeddedInPager && isEditing) ||
+    effectivePaneWidthPx >= CARD_EDITOR_TWO_COLUMN_MIN_WIDTH_PX;
   const editorCardTargetWidthPx = useTwoColumnEditorLayout
     ? Math.max(1, (effectivePaneWidthPx - CARD_EDITOR_PAIR_GAP_PX) / 2)
     : Math.max(1, effectivePaneWidthPx);
@@ -267,6 +282,7 @@ export function useCardEditorPaneWidth({
     shouldDockToolbarToCardTop,
     shouldShowInlineToolbarMount,
     shouldShowEditingBadge,
+    useTwoColumnEditorLayout,
     editorCardFixedScale,
     activePaneWidthStyle,
     persistPaneWidth,

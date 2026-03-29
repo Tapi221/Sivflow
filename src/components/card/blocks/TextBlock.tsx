@@ -25,7 +25,7 @@ interface TextBlockProps {
   onMoveDragEnd?: () => void;
 }
 
-export const TextBlock = ({
+const TextBlockInner = ({
   content,
   onChange,
   onDelete,
@@ -79,6 +79,21 @@ export const TextBlock = ({
     </BlockWrapper>
   );
 };
+
+const areTextBlockPropsEqual = (prev: TextBlockProps, next: TextBlockProps) =>
+  prev.content === next.content &&
+  prev.dragEnabled === next.dragEnabled &&
+  prev.dragHandleClassName === next.dragHandleClassName &&
+  prev.accentColor === next.accentColor &&
+  prev.autoFocus === next.autoFocus &&
+  prev.placeholder === next.placeholder &&
+  prev.isActive === next.isActive &&
+  prev.showDelete === next.showDelete &&
+  prev.canMoveUp === next.canMoveUp &&
+  prev.canMoveDown === next.canMoveDown;
+
+export const TextBlock = React.memo(TextBlockInner, areTextBlockPropsEqual);
+TextBlock.displayName = "TextBlock";
 
 
 

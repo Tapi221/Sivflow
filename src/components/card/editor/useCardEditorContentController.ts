@@ -27,6 +27,19 @@ export function useCardEditorContentController<
   allowAutoMinHeightSyncRef,
   resetDialogsRef,
 }: UseCardEditorContentControllerParams<TDraft>) {
+  const reindexBlocks = (blocks: CardBlock[]): CardBlock[] => {
+    let changed = false;
+    const reindexed = blocks.map((block, index) => {
+      if (block.orderIndex === index) return block;
+      changed = true;
+      return {
+        ...block,
+        orderIndex: index,
+      };
+    });
+    return changed ? reindexed : blocks;
+  };
+
   const getSideBlocks = (side: "question" | "answer") =>
     side === "question"
       ? (draft?.questionBlocks ?? [])
@@ -39,10 +52,7 @@ export function useCardEditorContentController<
     allowAutoMinHeightSyncRef.current = true;
     setDraft((prev) => {
       if (!prev) return prev;
-      const reindexed = nextBlocks.map((block, index) => ({
-        ...block,
-        orderIndex: index,
-      }));
+      const reindexed = reindexBlocks(nextBlocks);
       return side === "question"
         ? { ...prev, questionBlocks: reindexed }
         : { ...prev, answerBlocks: reindexed };

@@ -3,16 +3,25 @@
  * Linear/Notion 系のテキストリンクスタイル
  */
 import React from "react";
-import { FolderPlus } from "@/ui/icons";
+import { FileText, Folder, Plus } from "@/ui/icons";
 import { cn } from "@/lib/utils";
 import type { ExplorerTab } from "@/components/folder/explorer/model/types";
 import { TagFilterPopover } from "./TagFilterPopover";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface ExplorerTabsProps {
   activeTab: ExplorerTab;
   onTabChange: (tab: ExplorerTab) => void;
   allTags: string[];
   onCreateRootFolder?: () => void | Promise<void>;
+  onCreateCardSet?: () => void | Promise<void>;
+  onAddPdf?: () => void | Promise<void>;
+  onAddPptx?: () => void | Promise<void>;
   showExplorerActions?: boolean;
 }
 
@@ -28,6 +37,9 @@ export function ExplorerTabs({
   onTabChange,
   allTags,
   onCreateRootFolder,
+  onCreateCardSet,
+  onAddPdf,
+  onAddPptx,
   showExplorerActions = false,
 }: ExplorerTabsProps) {
   const shouldShowExplorerActions =
@@ -89,14 +101,36 @@ export function ExplorerTabs({
         )}
         aria-hidden={!shouldShowExplorerActions}
       >
-        <button
-          type="button"
-          onClick={() => { void onCreateRootFolder?.(); }}
-          title="フォルダを作成"
-          className="flex items-center justify-center w-6 h-6 rounded text-[var(--text-muted,#8a8a8a)] hover:text-[var(--text-secondary,#4b4b4b)] hover:bg-[var(--hover-bg,rgba(0,0,0,0.04))] transition-colors"
-        >
-          <FolderPlus className="w-3.5 h-3.5" />
-        </button>
+        <DropdownMenu modal={false}>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              title="追加"
+              aria-label="追加メニューを開く"
+              className="flex items-center justify-center w-6 h-6 rounded text-[var(--text-muted,#8a8a8a)] hover:text-[var(--text-secondary,#4b4b4b)] hover:bg-[var(--hover-bg,rgba(0,0,0,0.04))] transition-colors"
+            >
+              <Plus className="w-3.5 h-3.5" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-44">
+            <DropdownMenuItem onSelect={() => void onCreateRootFolder?.()} className="gap-2">
+              <Folder className="h-4 w-4" />
+              新規フォルダ
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => void onCreateCardSet?.()} className="gap-2">
+              <Plus className="h-4 w-4" />
+              新規カードセット
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => void onAddPdf?.()} className="gap-2">
+              <FileText className="h-4 w-4" />
+              PDF追加
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => void onAddPptx?.()} className="gap-2">
+              <FileText className="h-4 w-4" />
+              PPTX追加
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <TagFilterPopover allTags={allTags} />
       </div>
     </div>

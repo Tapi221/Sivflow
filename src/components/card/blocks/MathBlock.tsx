@@ -33,7 +33,7 @@ interface MathBlockProps {
  * 数式ブロックコンポーネント
  * KaTeX入力、リアルタイムプレビュー、入力バリデーションを提供
  */
-export const MathBlock: React.FC<MathBlockProps> = ({
+const MathBlockInner: React.FC<MathBlockProps> = ({
   data,
   onChange,
   onDelete,
@@ -133,6 +133,18 @@ export const MathBlock: React.FC<MathBlockProps> = ({
     </BlockWrapper>
   );
 };
+
+const areMathBlockPropsEqual = (prev: MathBlockProps, next: MathBlockProps) =>
+  prev.data === next.data &&
+  prev.dragHandleClassName === next.dragHandleClassName &&
+  prev.accentColor === next.accentColor &&
+  prev.isActive === next.isActive &&
+  prev.showDelete === next.showDelete &&
+  prev.canMoveUp === next.canMoveUp &&
+  prev.canMoveDown === next.canMoveDown;
+
+export const MathBlock = React.memo(MathBlockInner, areMathBlockPropsEqual);
+MathBlock.displayName = "MathBlock";
 
 
 

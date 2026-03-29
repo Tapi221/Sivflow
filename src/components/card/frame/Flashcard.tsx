@@ -234,7 +234,7 @@ export function Flashcard({
         >
           <div
             ref={contentRef}
-            className="animate-in fade-in zoom-in-95 duration-300 w-full max-w-full flex min-h-0 flex-1"
+            className="w-full max-w-full flex min-h-0 flex-1"
           >
             <SharedCardContent
               mode="view"

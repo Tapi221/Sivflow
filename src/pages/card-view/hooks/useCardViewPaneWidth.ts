@@ -86,8 +86,17 @@ export function useCardViewPaneWidth({
   const activePaneStoredWidthPx = isGlobalEditing ? editPaneWidthPx : viewPaneWidthPx;
   const activePaneMaxWidthPx =
     contentViewportWidth > 0
-      ? Math.max(activePaneMinWidthPx, contentViewportWidth)
-      : activePaneStoredWidthPx;
+      ? Math.max(
+          activePaneMinWidthPx,
+          contentViewportWidth,
+          activePaneStoredWidthPx,
+          activePaneDefaultWidthPx,
+        )
+      : Math.max(
+          activePaneMinWidthPx,
+          activePaneStoredWidthPx,
+          activePaneDefaultWidthPx,
+        );
   const activePaneWidthPx = clampPaneWidthPx(
     activePaneStoredWidthPx,
     activePaneMinWidthPx,
@@ -98,6 +107,10 @@ export function useCardViewPaneWidth({
     activePaneMinWidthPx,
     activePaneMaxWidthPx,
   );
+  const activePaneRenderWidthPx =
+    contentViewportWidth > 0
+      ? Math.max(1, Math.min(activePaneWidthPx, contentViewportWidth))
+      : activePaneWidthPx;
 
   const persistPaneWidth = useCallback(
     async (mode: "view" | "edit", widthPx: number) => {
@@ -155,6 +168,7 @@ export function useCardViewPaneWidth({
     activePaneMinWidthPx,
     activePaneMaxWidthPx,
     activePaneWidthPx,
+    activePaneRenderWidthPx,
     activePaneDisplayedDefaultWidthPx,
     previewPaneWidth,
     persistPaneWidth,

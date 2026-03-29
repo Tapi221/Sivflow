@@ -16,6 +16,10 @@ import { ImageBlockShell } from "./ImageBlockShell";
 import { MarkdownBlockView } from "./MarkdownBlockPreview";
 import { MathBlockPreviewPane } from "./MathBlockPreviewPane";
 import { QuestionBlockLayout } from "./QuestionBlockLayout";
+import {
+  QUESTION_BLOCK_ANSWER_TEXT_CLASS,
+  QUESTION_BLOCK_TITLE_TEXT_CLASS,
+} from "./questionBlockTextStyles";
 import { TextBlockContent } from "./TextBlockContent";
 
 interface BlockRendererProps {
@@ -39,13 +43,13 @@ function QuestionBlockView({
         onClick: (e) => e.stopPropagation(),
       }}
       questionContent={
-        <p className="flex-1 text-xs font-medium text-slate-700 leading-snug whitespace-pre-wrap">
+        <p className={`flex-1 ${QUESTION_BLOCK_TITLE_TEXT_CLASS}`}>
           {block.questionTitle || ""}
         </p>
       }
       answerContent={
         <p
-          className="text-xs text-slate-600 leading-snug whitespace-pre-wrap transition-all duration-200"
+          className={`${QUESTION_BLOCK_ANSWER_TEXT_CLASS} transition-all duration-200`}
           style={
             revealed
               ? undefined
@@ -223,7 +227,6 @@ export function BlockRenderer({
     </div>
   );
 }
-
 
 
 

@@ -103,6 +103,7 @@ export function useCardEditorPaneController({
   const session = useCardEditorSession({
     selectedCardId,
     selectedCardSnapshot,
+    resolveCardFromEntity: false,
     folderId,
     cardSetId,
     autoEdit,
@@ -156,7 +157,7 @@ export function useCardEditorPaneController({
     window.addEventListener(CARDVIEW_EDITING_DRAFT_PATCH_EVENT, handler);
     return () =>
       window.removeEventListener(CARDVIEW_EDITING_DRAFT_PATCH_EVENT, handler);
-  }, [session]);
+  }, [session.isEditing, session.selectedCard, session.setDraft]);
 
   const layout = useLayoutRowsController({
     draft: session.draft,

@@ -165,7 +165,9 @@ export function useCardViewState({
 
   // Derived card data
   const currentCard = sortedCards[safeCurrentIndex] ?? null;
-  const { effectiveCard } = useCardEntity(currentCard?.id);
+  const { effectiveCard } = useCardEntity(
+    isGlobalEditing ? currentCard?.id : null,
+  );
 
   const selectedCard = useMemo(() => {
     if (!currentCard) return null;
@@ -180,9 +182,11 @@ export function useCardViewState({
 
   const cardsForPager = useMemo(() => {
     if (!selectedCard) return sortedCards;
+    const idx = sortedCards.findIndex((c) => c.id === selectedCard.id);
+    if (idx < 0) return sortedCards;
+    if (sortedCards[idx] === selectedCard) return sortedCards;
     const next = sortedCards.slice();
-    const idx = next.findIndex((c) => c.id === selectedCard.id);
-    if (idx >= 0) next[idx] = selectedCard;
+    next[idx] = selectedCard;
     return next;
   }, [sortedCards, selectedCard]);
 

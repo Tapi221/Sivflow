@@ -22,6 +22,7 @@ interface BlockToolbarProps {
   onAddBlock: (type: CardBlock["type"]) => void;
   settings?: unknown;
   hiddenBlockTypes?: CardBlock["type"][];
+  desktopLayout?: "horizontal" | "vertical";
   className?: string;
 }
 
@@ -196,6 +197,7 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
   onAddBlock,
   settings,
   hiddenBlockTypes = [],
+  desktopLayout = "horizontal",
   className,
 }) => {
   type RawSettings = { editorBlockSettings?: Record<string, unknown>[] };
@@ -247,8 +249,9 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
   return (
     <div
       className={cn(
-        "flex w-full items-center gap-0 px-2.5",
-        "h-8 min-h-[32px] rounded-xl",
+        desktopLayout === "vertical"
+          ? "flex w-11 min-h-[220px] flex-col items-center gap-1 px-1.5 py-2 rounded-2xl"
+          : "flex w-full items-center gap-0 px-2.5 h-8 min-h-[32px] rounded-xl",
         "border border-[rgba(148,163,184,0.3)]",
         "bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(243,246,250,0.9))]",
         "shadow-[0_5px_14px_rgba(15,23,42,0.08)] backdrop-blur-[2px]",
@@ -302,8 +305,15 @@ export const BlockToolbar: React.FC<BlockToolbarProps> = ({
         </DropdownMenu>
       </div>
 
-      {/* デスクトップ: アイコン only ボタン横並び */}
-      <div className="hidden md:flex items-center gap-1 flex-nowrap overflow-x-hidden">
+      {/* デスクトップ: アイコン only ボタン（横/縦） */}
+      <div
+        className={cn(
+          "hidden md:flex items-center gap-1",
+          desktopLayout === "vertical"
+            ? "flex-col overflow-y-hidden"
+            : "flex-nowrap overflow-x-hidden",
+        )}
+      >
         {visibleConfigs.map((config) => {
           const Icon = getIcon(config.icon, config.type);
           return (

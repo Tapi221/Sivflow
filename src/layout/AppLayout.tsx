@@ -1,5 +1,5 @@
 import React, { Suspense } from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation, useSearchParams } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import "./AppLayout.css";
 
@@ -16,15 +16,31 @@ function LoadingFallback() {
 
 export function AppLayout() {
   const { pathname } = useLocation();
+  const [searchParams] = useSearchParams();
+  const isFoldersRoute = /^\/folders(?:\/|$)/i.test(pathname);
+  const isCardViewRoute = /^\/cardview(?:\/|$)/i.test(pathname);
+  const isCardEditRoute = /^\/cardedit(?:\/|$)/i.test(pathname);
+  const selectedFolderId = searchParams.get("folderId");
+  const selectedCardSetId = searchParams.get("cardSetId");
+  const shouldHideMainSidebar =
+    (isFoldersRoute && Boolean(selectedFolderId)) ||
+    ((isCardViewRoute || isCardEditRoute) && Boolean(selectedCardSetId));
   const isScrollLocked =
-    /^\/folders(?:\/|$)/i.test(pathname) ||
-    /^\/cardedit(?:\/|$)/i.test(pathname) ||
-    /^\/cardview(?:\/|$)/i.test(pathname) ||
+    isFoldersRoute ||
+    isCardEditRoute ||
+    isCardViewRoute ||
     /^\/study(?:\/|$)/i.test(pathname);
 
   return (
-    <div className="app-layout">
-      <Sidebar />
+    <div
+      className={[
+        "app-layout",
+        shouldHideMainSidebar ? "app-layout--sidebar-hidden" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
+      {!shouldHideMainSidebar && <Sidebar />}
       <div className="app-layout__content">
         <main
           className={[

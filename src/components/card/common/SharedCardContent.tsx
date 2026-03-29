@@ -26,6 +26,7 @@ type SharedCardContentViewProps = SharedCardContentBaseProps & {
 type SharedCardContentEditProps = SharedCardContentBaseProps & {
   mode: "edit";
   onChange: (blocks: CardBlock[]) => void;
+  selectionScopeKey?: string | null;
   prefix: "question" | "answer";
   label: string;
   color: string;
@@ -40,6 +41,7 @@ type SharedCardContentEditProps = SharedCardContentBaseProps & {
   minDeletableIndex?: number;
   hiddenBlockTypes?: CardBlock["type"][];
   toolbarMount?: HTMLDivElement | null;
+  toolbarDesktopLayout?: "horizontal" | "vertical";
   settings?: unknown;
 };
 
@@ -47,7 +49,7 @@ export type SharedCardContentProps =
   | SharedCardContentViewProps
   | SharedCardContentEditProps;
 
-export function SharedCardContent(props: SharedCardContentProps) {
+function SharedCardContentInner(props: SharedCardContentProps) {
   const rootClassName =
     props.mode === "edit"
       ? "card-content-root flex min-h-0 flex-col w-full max-w-full overflow-x-clip overflow-y-visible"
@@ -118,6 +120,7 @@ export function SharedCardContent(props: SharedCardContentProps) {
         <BlockEditor
           blocks={props.blocks}
           onChange={props.onChange}
+          selectionScopeKey={props.selectionScopeKey}
           prefix={props.prefix}
           label={props.label}
           color={props.color}
@@ -132,6 +135,7 @@ export function SharedCardContent(props: SharedCardContentProps) {
           minDeletableIndex={props.minDeletableIndex}
           hiddenBlockTypes={props.hiddenBlockTypes}
           toolbarMount={props.toolbarMount}
+          toolbarDesktopLayout={props.toolbarDesktopLayout}
           settings={props.settings}
         />
       ) : (
@@ -143,3 +147,6 @@ export function SharedCardContent(props: SharedCardContentProps) {
     </div>
   );
 }
+
+export const SharedCardContent = React.memo(SharedCardContentInner);
+SharedCardContent.displayName = "SharedCardContent";

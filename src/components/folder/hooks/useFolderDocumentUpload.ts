@@ -25,6 +25,9 @@ interface UseFolderDocumentUploadReturn {
   handlePdfDropped: (folderId: string, files: File[]) => Promise<void>;
   handlePptxDropped: (folderId: string, files: File[]) => Promise<void>;
   handleToolbarAddFile: () => void;
+  handleToolbarAddPdf: () => void;
+  handleToolbarAddPptx: () => void;
+  currentFileAccept: string;
   handleToolbarFileInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -56,6 +59,10 @@ export function useFolderDocumentUpload({
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const uploadTargetFolderIdRef = useRef<string | null>(null);
+  const [currentFileAccept, setCurrentFileAccept] = React.useState(
+    ".pdf,.pptx,application/pdf,application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  );
+  const uploadTypeRef = useRef<"all" | "pdf" | "pptx">("all");
 
   const handlePdfDropped = useCallback(
     async (folderId: string, files: File[]) => {
@@ -325,12 +332,43 @@ export function useFolderDocumentUpload({
       return;
     }
     uploadTargetFolderIdRef.current = targetFolderId;
+    uploadTypeRef.current = "all";
+    setCurrentFileAccept(
+      ".pdf,.pptx,application/pdf,application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    );
+    fileInputRef.current?.click();
+  }, [selectedFolderId, toastError]);
+
+  const handleToolbarAddPdf = useCallback(() => {
+    const targetFolderId = selectedFolderId;
+    if (!targetFolderId) {
+      toastError?.("ファイル追加先のフォルダを選択してください");
+      return;
+    }
+    uploadTargetFolderIdRef.current = targetFolderId;
+    uploadTypeRef.current = "pdf";
+    setCurrentFileAccept(".pdf,application/pdf");
+    fileInputRef.current?.click();
+  }, [selectedFolderId, toastError]);
+
+  const handleToolbarAddPptx = useCallback(() => {
+    const targetFolderId = selectedFolderId;
+    if (!targetFolderId) {
+      toastError?.("ファイル追加先のフォルダを選択してください");
+      return;
+    }
+    uploadTargetFolderIdRef.current = targetFolderId;
+    uploadTypeRef.current = "pptx";
+    setCurrentFileAccept(
+      ".pptx,application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    );
     fileInputRef.current?.click();
   }, [selectedFolderId, toastError]);
 
   const handleToolbarFileInputChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const targetFolderId = uploadTargetFolderIdRef.current;
+      const uploadType = uploadTypeRef.current;
       const files = event.target.files;
       event.target.value = "";
 
@@ -339,12 +377,25 @@ export function useFolderDocumentUpload({
       const pdfFiles = extractPdfFiles(files);
       const pptxFiles = extractPptxFiles(files);
 
-      if (pdfFiles.length > 0) void handlePdfDropped(targetFolderId, pdfFiles);
-      if (pptxFiles.length > 0) void handlePptxDropped(targetFolderId, pptxFiles);
+      if (uploadType !== "pptx" && pdfFiles.length > 0) {
+        void handlePdfDropped(targetFolderId, pdfFiles);
+      }
+      if (uploadType !== "pdf" && pptxFiles.length > 0) {
+        void handlePptxDropped(targetFolderId, pptxFiles);
+      }
 
-      if (pdfFiles.length === 0 && pptxFiles.length === 0) {
+      if (uploadType === "pdf" && pdfFiles.length === 0) {
+        toastError?.("PDFファイルを選択してください");
+      } else if (uploadType === "pptx" && pptxFiles.length === 0) {
+        toastError?.("PPTXファイルを選択してください");
+      } else if (uploadType === "all" && pdfFiles.length === 0 && pptxFiles.length === 0) {
         toastError?.("PDFまたはPPTXファイルを選択してください");
       }
+
+      uploadTypeRef.current = "all";
+      setCurrentFileAccept(
+        ".pdf,.pptx,application/pdf,application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      );
     },
     [handlePdfDropped, handlePptxDropped, toastError],
   );
@@ -354,6 +405,9 @@ export function useFolderDocumentUpload({
     handlePdfDropped,
     handlePptxDropped,
     handleToolbarAddFile,
+    handleToolbarAddPdf,
+    handleToolbarAddPptx,
+    currentFileAccept,
     handleToolbarFileInputChange,
   };
 }

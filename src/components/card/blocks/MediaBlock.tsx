@@ -28,7 +28,7 @@ interface MediaBlockProps {
   onMoveDragEnd?: () => void;
 }
 
-export const MediaBlock = ({
+const MediaBlockInner = ({
   data,
   onChange,
   onDelete,
@@ -87,6 +87,24 @@ export const MediaBlock = ({
     </BlockWrapper>
   );
 };
+
+const areMediaBlockPropsEqual = (
+  prev: MediaBlockProps,
+  next: MediaBlockProps,
+) =>
+  prev.data === next.data &&
+  prev.dragHandleClassName === next.dragHandleClassName &&
+  prev.accentColor === next.accentColor &&
+  prev.initialFile === next.initialFile &&
+  prev.onConsumeInitialFile === next.onConsumeInitialFile &&
+  prev.onFilesExcess === next.onFilesExcess &&
+  prev.isActive === next.isActive &&
+  prev.showDelete === next.showDelete &&
+  prev.canMoveUp === next.canMoveUp &&
+  prev.canMoveDown === next.canMoveDown;
+
+export const MediaBlock = React.memo(MediaBlockInner, areMediaBlockPropsEqual);
+MediaBlock.displayName = "MediaBlock";
 
 
 

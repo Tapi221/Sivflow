@@ -154,13 +154,11 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
         }
 
         const contentHeight = Math.max(0, maxBottom);
-        // Fallback to scrollHeight to avoid underestimating min height when
-        // per-row measurements momentarily become smaller than rendered content.
         const scrollContentHeight = Math.max(0, body.scrollHeight);
-        const requiredHeight = Math.max(
-          contentHeight + ruledBottomOffsetPx,
-          scrollContentHeight,
-        );
+        const hasVerticalOverflow = scrollContentHeight > body.clientHeight + 1;
+        const requiredHeight = hasVerticalOverflow
+          ? Math.max(contentHeight + ruledBottomOffsetPx, scrollContentHeight)
+          : contentHeight + ruledBottomOffsetPx;
         // Subtract sub-pixel tolerance: getBoundingClientRect() can return fractional
         // CSS pixels (esp. on high-DPI screens), causing requiredHeight to land just
         // above a grid boundary and snapMinCardHeightPx (Math.ceil) to add an extra row.
@@ -576,7 +574,12 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
               };
 
               const target = event.currentTarget;
-              target.setPointerCapture(pointerId);
+              try {
+                target.setPointerCapture(pointerId);
+              } catch {
+                // Pointer capture may fail on some scaled/embedded contexts.
+                // Continue with window-level listeners as a safe fallback.
+              }
 
               const onMove = (moveEvent: PointerEvent) => {
                 if (

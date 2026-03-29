@@ -84,7 +84,7 @@ export default function CardView() {
     <div className="h-full overflow-hidden bg-[#F5F7F8] pt-0 card-editor-right-pane-font">
       <div className="relative flex h-full min-h-0 overflow-hidden">
         {showWidthControl && (
-          <div className="pointer-events-none absolute left-3 top-2 z-30 hidden md:flex">
+          <div className="pointer-events-auto absolute left-3 top-2 z-30 hidden md:flex">
             <CardPaneWidthControl
               modeLabel={state.isGlobalEditing ? "編集幅" : "閲覧幅"}
               value={paneWidth.activePaneWidthPx}
@@ -143,8 +143,8 @@ export default function CardView() {
                 cardsForPager={state.cardsForPager}
                 safeCurrentIndex={state.safeCurrentIndex}
                 settings={settings}
-                editPaneWidthPx={paneWidth.activePaneWidthPx}
-                activePaneWidthPx={paneWidth.activePaneWidthPx}
+                editPaneWidthPx={paneWidth.activePaneRenderWidthPx}
+                activePaneWidthPx={paneWidth.activePaneRenderWidthPx}
                 folderId={folderId}
                 cardSetId={cardSetId}
                 saveSignal={state.saveSignal}

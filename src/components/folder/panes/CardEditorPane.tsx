@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight } from "@/ui/icons";
 import { DragDropContext } from "@hello-pangea/dnd";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 
 import { SharedCardContent } from "@/components/card/common/SharedCardContent";
 import {
@@ -27,7 +27,7 @@ import {
 } from "@/components/folder/panes/useCardEditorPaneWidth";
 import { normalizeLayoutRows } from "@/domain/card/extraRows";
 import { cn } from "@/lib/utils";
-import type { Card, UserSettings } from "@/types";
+import type { Card, CardBlock, UserSettings } from "@/types";
 
 interface CardEditorPaneProps {
   selectedCardId: string | null;
@@ -154,6 +154,18 @@ export function CardEditorPane({
   const toolbarMountA = externalToolbarMountA ?? toolbarMountAInternal;
   const usesExternalToolbarMount =
     Boolean(externalToolbarMountQ) && Boolean(externalToolbarMountA);
+  const handleQuestionBlocksChange = useCallback(
+    (blocks: CardBlock[]) => {
+      setSideBlocks("question", blocks);
+    },
+    [setSideBlocks],
+  );
+  const handleAnswerBlocksChange = useCallback(
+    (blocks: CardBlock[]) => {
+      setSideBlocks("answer", blocks);
+    },
+    [setSideBlocks],
+  );
 
   const editorActionsTopLeft = selectedCard ? (
     <CardCornerActions
@@ -177,6 +189,7 @@ export function CardEditorPane({
     shouldDockToolbarToCardTop,
     shouldShowInlineToolbarMount,
     shouldShowEditingBadge,
+    useTwoColumnEditorLayout,
     editorCardFixedScale,
     activePaneWidthStyle,
     persistPaneWidth,
@@ -260,7 +273,7 @@ export function CardEditorPane({
           )}
 
           {showWidthControl && (
-            <div className="pointer-events-none absolute left-3 top-2 z-30 flex">
+            <div className="pointer-events-auto absolute left-3 top-2 z-30 flex">
               <CardPaneWidthControl
                 modeLabel={isEditing ? "編集幅" : "閲覧幅"}
                 value={activePaneWidthPx}
@@ -314,7 +327,8 @@ export function CardEditorPane({
               >
                 <div
                   className={cn(
-                    "grid w-full max-w-full grid-cols-1 md:grid-cols-2",
+                    "grid w-full max-w-full",
+                    useTwoColumnEditorLayout ? "grid-cols-2" : "grid-cols-1",
                     pairGapClassName,
                   )}
                   style={{ columnGap: `${CARD_EDITOR_PAIR_GAP_PX}px` }}
@@ -348,8 +362,10 @@ export function CardEditorPane({
                           <div className="relative h-0 w-full overflow-visible pointer-events-none">
                             <div
                               ref={setToolbarMountQInternal}
-                              className="absolute left-0 top-0 z-20 w-full pointer-events-auto"
-                              style={{ transform: "translateY(-100%)" }}
+                              className="absolute left-0 top-0 z-20 pointer-events-auto"
+                              style={{
+                                transform: "translate(calc(-100% - 12px), 16px)",
+                              }}
                             />
                           </div>
                         ) : undefined
@@ -392,7 +408,8 @@ export function CardEditorPane({
                       <SharedCardContent
                         mode="edit"
                         blocks={draft?.questionBlocks ?? []}
-                        onChange={(blocks) => setSideBlocks("question", blocks)}
+                        onChange={handleQuestionBlocksChange}
+                        selectionScopeKey={normalizedSelectedCardId}
                         prefix="question"
                         label="問題"
                         color="text-indigo-500"
@@ -401,6 +418,9 @@ export function CardEditorPane({
                         duplicateToOpposite={settings?.duplicateToOpposite}
                         hideToolbar={hideBlockToolbars}
                         toolbarMount={toolbarMountQ}
+                        toolbarDesktopLayout={
+                          shouldDockToolbarToCardTop ? "vertical" : "horizontal"
+                        }
                         settings={settings}
                       />
                     </CardFrame>
@@ -435,8 +455,10 @@ export function CardEditorPane({
                           <div className="relative h-0 w-full overflow-visible pointer-events-none">
                             <div
                               ref={setToolbarMountAInternal}
-                              className="absolute left-0 top-0 z-20 w-full pointer-events-auto"
-                              style={{ transform: "translateY(-100%)" }}
+                              className="absolute right-0 top-0 z-20 pointer-events-auto"
+                              style={{
+                                transform: "translate(calc(100% + 12px), 16px)",
+                              }}
                             />
                           </div>
                         ) : undefined
@@ -479,7 +501,8 @@ export function CardEditorPane({
                       <SharedCardContent
                         mode="edit"
                         blocks={draft?.answerBlocks ?? []}
-                        onChange={(blocks) => setSideBlocks("answer", blocks)}
+                        onChange={handleAnswerBlocksChange}
+                        selectionScopeKey={normalizedSelectedCardId}
                         prefix="answer"
                         label="解答"
                         color="text-emerald-500"
@@ -488,6 +511,9 @@ export function CardEditorPane({
                         duplicateToOpposite={settings?.duplicateToOpposite}
                         hideToolbar={hideBlockToolbars}
                         toolbarMount={toolbarMountA}
+                        toolbarDesktopLayout={
+                          shouldDockToolbarToCardTop ? "vertical" : "horizontal"
+                        }
                         settings={settings}
                       />
                     </CardFrame>

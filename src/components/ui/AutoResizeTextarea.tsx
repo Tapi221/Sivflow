@@ -88,7 +88,7 @@ export default function AutoResizeTextarea({
       placeholder={placeholder}
       readOnly={readOnly}
       className={cn(
-        "flex w-full text-base focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 resize-none transition-all py-0",
+        "flex w-full focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 resize-none transition-all py-0",
         readOnly && "bg-gray-50/50 cursor-default",
         className,
         textareaClassName,

@@ -1,6 +1,7 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -33,6 +34,7 @@ const NEW_SENTINEL = "__new__" as const;
 type UseCardEditorSessionParams = {
   selectedCardId: string | null;
   selectedCardSnapshot?: Card | null;
+  resolveCardFromEntity?: boolean;
   folderId?: string;
   cardSetId?: string;
   autoEdit?: boolean;
@@ -51,6 +53,7 @@ type UseCardEditorSessionParams = {
 export function useCardEditorSession({
   selectedCardId,
   selectedCardSnapshot = null,
+  resolveCardFromEntity = true,
   folderId,
   cardSetId,
   autoEdit,
@@ -103,10 +106,9 @@ export function useCardEditorSession({
   const isNew = normalizedSelectedCardId === NEW_SENTINEL;
 
   const { effectiveCard } = useCardEntity(
-    !normalizedSelectedCardId || isNew ? null : normalizedSelectedCardId,
+    resolveCardFromEntity && !isNew ? normalizedSelectedCardId : null,
   );
   const selectedCard = useMemo(() => {
-    if (effectiveCard) return effectiveCard;
     if (
       selectedCardSnapshot &&
       normalizedSelectedCardId &&
@@ -114,6 +116,15 @@ export function useCardEditorSession({
       selectedCardSnapshot.id === normalizedSelectedCardId
     ) {
       return selectedCardSnapshot;
+    }
+    // useLiveQuery の再評価タイミングによっては、直前カードの値が一瞬残ることがある。
+    // 選択中IDと一致する card だけを採用して、切り替え遅延（前カード残留）を防ぐ。
+    if (
+      effectiveCard &&
+      normalizedSelectedCardId &&
+      effectiveCard.id === normalizedSelectedCardId
+    ) {
+      return effectiveCard;
     }
     return null;
   }, [effectiveCard, normalizedSelectedCardId, selectedCardSnapshot]);
@@ -219,7 +230,7 @@ export function useCardEditorSession({
     setDraft(null);
   }, [isEditing, isNew, normalizedSelectedCardId]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isEditing) return;
 
     const targetId = isNew ? NEW_SENTINEL : normalizedSelectedCardId;
@@ -520,18 +531,24 @@ export function useCardEditorSession({
     setDraft((prev) => (prev ? { ...prev, title: nextTitle } : prev));
   }, [isEditing]);
 
+  const hasDraft = draft != null;
+  const draftTitle = draft?.title ?? "";
+  const draftTags = draft?.tags ?? [];
+  const draftIsDraft = draft?.isDraft ?? false;
+  const draftLayoutRows = draft?.layoutRows;
+
   const panelCard = useMemo(() => {
     if (selectedCard) {
-      if (!isEditing || !draft) return selectedCard;
+      if (!isEditing || !hasDraft) return selectedCard;
       return {
         ...selectedCard,
-        title: draft.title,
-        tags: draft.tags,
-        isDraft: draft.isDraft,
-        layoutRows: draft.layoutRows,
+        title: draftTitle,
+        tags: draftTags,
+        isDraft: draftIsDraft,
+        layoutRows: draftLayoutRows,
       };
     }
-    if (!draft) return null;
+    if (!hasDraft) return null;
 
     const now = new Date();
     return {
@@ -541,9 +558,9 @@ export function useCardEditorSession({
       folderId: "",
       orderIndex: 0,
       questionNumber: "",
-      title: draft.title,
-      tags: draft.tags,
-      isDraft: draft.isDraft,
+      title: draftTitle,
+      tags: draftTags,
+      isDraft: draftIsDraft,
       isDeleted: false,
       hasUncertainty: false,
       isBookmarked: false,
@@ -562,9 +579,17 @@ export function useCardEditorSession({
       createdAt: now,
       updatedAt: now,
       reviewLogs: [],
-      layoutRows: draft.layoutRows,
+      layoutRows: draftLayoutRows,
     } as Card;
-  }, [draft, isEditing, selectedCard]);
+  }, [
+    draftIsDraft,
+    draftLayoutRows,
+    draftTags,
+    draftTitle,
+    hasDraft,
+    isEditing,
+    selectedCard,
+  ]);
 
   return {
     draft,

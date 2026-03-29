@@ -14,7 +14,7 @@ export interface DesktopCardSurfaceProps {
   isFlipped: boolean;
   folderId: string | null;
   cardSetId: string | null;
-  cardsOverride: Card[];
+  cardsOverride?: Card[];
   saveSignal: number;
   onFlip: () => void;
   onEdit: () => void;

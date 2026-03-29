@@ -229,7 +229,7 @@ const pickBlockIndexByPos = (ranges: BlockRange[], pos: number) => {
  * Markdownブロック（編集用）
  * textarea入力 + リアルタイムプレビュー
  */
-export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
+const MarkdownBlockInner: React.FC<MarkdownBlockProps> = ({
   markdown,
   onChange,
   onDelete,
@@ -547,6 +547,24 @@ export const MarkdownBlock: React.FC<MarkdownBlockProps> = ({
     </BlockWrapper>
   );
 };
+
+const areMarkdownBlockPropsEqual = (
+  prev: MarkdownBlockProps,
+  next: MarkdownBlockProps,
+) =>
+  prev.markdown === next.markdown &&
+  prev.dragHandleClassName === next.dragHandleClassName &&
+  prev.accentColor === next.accentColor &&
+  prev.isActive === next.isActive &&
+  prev.showDelete === next.showDelete &&
+  prev.canMoveUp === next.canMoveUp &&
+  prev.canMoveDown === next.canMoveDown;
+
+export const MarkdownBlock = React.memo(
+  MarkdownBlockInner,
+  areMarkdownBlockPropsEqual,
+);
+MarkdownBlock.displayName = "MarkdownBlock";
 
 /**
  * Markdown文字列をコードフェンスで分割し、
