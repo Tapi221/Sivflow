@@ -198,12 +198,17 @@ export function useCardEditorPaneController({
     return saved;
   }, [onRequestCloseEditing, session]);
 
-  const dispatchCardViewSaveFinished = React.useCallback((saved: boolean) => {
-    if (typeof window === "undefined") return;
-    window.dispatchEvent(
-      new CustomEvent(CARDVIEW_SAVE_FINISHED_EVENT, { detail: { saved } }),
-    );
-  }, []);
+  const dispatchCardViewSaveFinished = React.useCallback(
+    (saved: boolean, detail?: { signal?: number }) => {
+      if (typeof window === "undefined") return;
+      window.dispatchEvent(
+        new CustomEvent(CARDVIEW_SAVE_FINISHED_EVENT, {
+          detail: { saved, signal: detail?.signal },
+        }),
+      );
+    },
+    [],
+  );
 
   const prevSaveSignalRef = React.useRef<number | undefined>(saveSignal);
   React.useEffect(() => {
@@ -211,18 +216,26 @@ export function useCardEditorPaneController({
     if (saveSignal == null) return;
     if (prevSaveSignalRef.current === saveSignal) return;
     prevSaveSignalRef.current = saveSignal;
+    const eventDetail = {
+      signal: saveSignal,
+    };
 
     if (!session.isEditing) {
-      dispatchCardViewSaveFinished(true);
+      dispatchCardViewSaveFinished(true, eventDetail);
       return;
     }
     if (session.isSaving) return;
 
     void (async () => {
       const saved = await session.handleSave();
-      dispatchCardViewSaveFinished(saved);
+      dispatchCardViewSaveFinished(saved, eventDetail);
     })();
-  }, [dispatchCardViewSaveFinished, saveSignal, saveSignalEnabled, session]);
+  }, [
+    dispatchCardViewSaveFinished,
+    saveSignal,
+    saveSignalEnabled,
+    session,
+  ]);
 
   const onAddReviewLog = React.useCallback(
     ({ reviewedAt, rating, durationMinutes }) => {

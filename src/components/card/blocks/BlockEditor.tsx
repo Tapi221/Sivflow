@@ -101,18 +101,6 @@ export const BlockEditor = React.forwardRef<
     const [activeBlockId, setActiveBlockId] = useState<string | null>(null);
     const rootRef = useRef<HTMLDivElement | null>(null);
 
-    useEffect(() => {
-      if (enableBlockActiveState) return;
-      setActiveBlockId(null);
-      setActiveContainerBlockId(null);
-      const root = rootRef.current;
-      if (!root) return;
-      const activeEl = document.activeElement;
-      if (activeEl instanceof HTMLElement && root.contains(activeEl)) {
-        activeEl.blur();
-      }
-    }, [enableBlockActiveState]);
-
     const editorRootStyle = useMemo<CssVars | undefined>(() => {
       if (enableBlockActiveState) return undefined;
       return {

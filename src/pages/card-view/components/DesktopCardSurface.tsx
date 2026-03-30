@@ -164,8 +164,28 @@ function DesktopCardSurfaceInner({
   onToggleUncertainty,
   onToggleBookmark,
 }: DesktopCardSurfaceProps) {
+  const [hasFocusWithin, setHasFocusWithin] = React.useState(false);
+  const handleEditorFocusCapture = React.useCallback(() => {
+    setHasFocusWithin(true);
+  }, []);
+  const handleEditorBlurCapture = React.useCallback(
+    (event: React.FocusEvent<HTMLDivElement>) => {
+      const nextFocused = event.relatedTarget as Node | null;
+      if (!nextFocused || !event.currentTarget.contains(nextFocused)) {
+        setHasFocusWithin(false);
+      }
+    },
+    [],
+  );
+
+  React.useEffect(() => {
+    if (isGlobalEditing) return;
+    setHasFocusWithin(false);
+  }, [isGlobalEditing]);
+
   if (isGlobalEditing) {
-    const shouldMountEditor = isActive || mountEditor;
+    const shouldMountEditor = isActive || mountEditor || hasFocusWithin;
+    const canInteractWithEditor = isActive || hasFocusWithin;
     if (!shouldMountEditor) {
       return <InactiveEditorPairPreview card={card} paneWidthPx={editPaneWidthPx} />;
     }
@@ -173,7 +193,13 @@ function DesktopCardSurfaceInner({
     return (
       <div
         className="w-full overflow-visible"
-        style={!isActive ? { pointerEvents: "none", userSelect: "none" } : undefined}
+        onFocusCapture={handleEditorFocusCapture}
+        onBlurCapture={handleEditorBlurCapture}
+        style={
+          !isActive && !hasFocusWithin
+            ? { pointerEvents: "none", userSelect: "none" }
+            : undefined
+        }
       >
         <CardEditorPane
           selectedCardId={card.id}
@@ -184,15 +210,16 @@ function DesktopCardSurfaceInner({
           autoEdit
           hideMetaPanel
           dockToolbarsToTop
-          hideBlockToolbars={!isActive}
+          hideBlockToolbars={!canInteractWithEditor}
           saveSignal={saveSignal}
           saveSignalEnabled={isActive}
           hideFooterActions
           embeddedInPager
           isPagerActiveCard={isActive}
+          isPagerInteractionCard={canInteractWithEditor}
           settingsOverride={settings}
           pairGapClassName="gap-4"
-          showResizeHandle={isActive}
+          showResizeHandle={canInteractWithEditor}
         />
       </div>
     );

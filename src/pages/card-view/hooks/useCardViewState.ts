@@ -331,7 +331,9 @@ export function useCardViewState({
   ]);
 
   const handlePagerIndexChange = useCallback((idx: number) => {
+    const isSaveSelectionLockActive = saveSelectionCardIdRef.current != null;
     if (
+      isSaveSelectionLockActive &&
       suppressPagerSyncRef.current &&
       lockedIndexRef.current != null &&
       idx !== lockedIndexRef.current

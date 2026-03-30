@@ -51,6 +51,7 @@ interface CardEditorPaneProps {
   pairGapClassName?: string;
   onRequestCloseEditing?: () => void;
   isPagerActiveCard?: boolean;
+  isPagerInteractionCard?: boolean;
   showResizeHandle?: boolean;
 }
 
@@ -268,6 +269,7 @@ export function CardEditorPane({
   pairGapClassName = "gap-6",
   onRequestCloseEditing,
   isPagerActiveCard = false,
+  isPagerInteractionCard = isPagerActiveCard,
   showResizeHandle: showResizeHandleProp = true,
 }: CardEditorPaneProps) {
   const controller = useCardEditorPaneController({
@@ -593,7 +595,9 @@ export function CardEditorPane({
                     setDockedToolbarMount={setToolbarMountQInternal}
                     shouldShowEditingBadge={shouldShowEditingBadge}
                     isPagerActiveCard={isPagerActiveCard}
-                    enableBlockActiveState={!embeddedInPager || isPagerActiveCard}
+                    enableBlockActiveState={
+                      !embeddedInPager || isPagerInteractionCard
+                    }
                     showResizeHandle={showResizeHandleProp}
                     editorCardFixedScale={editorCardFixedScale}
                     editorCardHeightPx={editorCardHeightPx}
@@ -626,7 +630,9 @@ export function CardEditorPane({
                     setDockedToolbarMount={setToolbarMountAInternal}
                     shouldShowEditingBadge={shouldShowEditingBadge}
                     isPagerActiveCard={isPagerActiveCard}
-                    enableBlockActiveState={!embeddedInPager || isPagerActiveCard}
+                    enableBlockActiveState={
+                      !embeddedInPager || isPagerInteractionCard
+                    }
                     showResizeHandle={showResizeHandleProp}
                     editorCardFixedScale={editorCardFixedScale}
                     editorCardHeightPx={editorCardHeightPx}

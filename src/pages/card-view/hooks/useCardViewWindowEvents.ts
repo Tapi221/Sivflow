@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { CARDVIEW_SAVE_FINISHED_EVENT } from "../constants";
+import { useEffect, useRef } from "react";
+import { CARDVIEW_SAVE_FINISHED_EVENT } from "@/pages/card-view/constants";
 
 interface UseCardViewWindowEventsOptions {
   handleToggleViewMode: () => void;
@@ -24,6 +24,8 @@ export function useCardViewWindowEvents({
   pendingExitAfterSaveRef,
   pendingCreateCardAfterSaveRef,
 }: UseCardViewWindowEventsOptions) {
+  const handledSaveSignalRef = useRef<number | null>(null);
+
   useEffect(() => {
     window.addEventListener(
       "cardview:toggle-editing-request",
@@ -72,10 +74,18 @@ export function useCardViewWindowEvents({
 
   useEffect(() => {
     const handler = (event: Event) => {
+      const detail = (event as CustomEvent<{ saved?: boolean; signal?: number }>)
+        ?.detail;
+      const signal =
+        typeof detail?.signal === "number" && Number.isFinite(detail.signal)
+          ? detail.signal
+          : null;
+      if (signal != null) {
+        if (handledSaveSignalRef.current === signal) return;
+        handledSaveSignalRef.current = signal;
+      }
       finishSaveSelectionLock();
-      const saved = Boolean(
-        (event as CustomEvent<{ saved?: boolean }>)?.detail?.saved,
-      );
+      const saved = Boolean(detail?.saved);
       if (pendingCreateCardAfterSaveRef.current) {
         pendingCreateCardAfterSaveRef.current = false;
         if (saved) void createAndFocusCard();
