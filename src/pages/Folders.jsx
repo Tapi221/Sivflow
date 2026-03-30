@@ -40,17 +40,16 @@ export default function Folders() {
       if (main instanceof HTMLElement) {
         main.scrollTop = 0;
       }
-      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
+      if (!isDesktop) {
+        window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      }
     };
 
     reset();
-    window.requestAnimationFrame(() => {
-      reset();
-      window.requestAnimationFrame(reset);
-    });
-  }, []);
+    window.requestAnimationFrame(reset);
+  }, [isDesktop]);
 
   const notifyMainSidebarFolderSelection = useCallback((folderId) => {
     window.dispatchEvent(
