@@ -42,6 +42,7 @@ type SharedCardContentEditProps = SharedCardContentBaseProps & {
   hiddenBlockTypes?: CardBlock["type"][];
   toolbarMount?: HTMLDivElement | null;
   toolbarDesktopLayout?: "horizontal" | "vertical";
+  enableBlockActiveState?: boolean;
   settings?: unknown;
 };
 
@@ -136,6 +137,7 @@ function SharedCardContentInner(props: SharedCardContentProps) {
           hiddenBlockTypes={props.hiddenBlockTypes}
           toolbarMount={props.toolbarMount}
           toolbarDesktopLayout={props.toolbarDesktopLayout}
+          enableBlockActiveState={props.enableBlockActiveState}
           settings={props.settings}
         />
       ) : (

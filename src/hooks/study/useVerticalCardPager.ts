@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useRef } from "react";
 import { isTypingTarget } from "@/utils/isTypingTarget";
 
-const CARD_STACK_GAP_PX = 16;
 const PENDING_SCROLL_RELEASE_SMOOTH_MS = 32;
 const PENDING_SCROLL_RELEASE_AUTO_MS = 0;
 const PENDING_SCROLL_FALLBACK_MS = 80;
+const SCROLL_ACTIVE_WINDOW_MS = 110;
+const MIN_INDEX_JUMP_DURING_SCROLL = 4;
+const ACTIVE_SCROLL_COMMIT_COOLDOWN_MS = 48;
+const MAX_INDEX_JUMP_DURING_SCROLL = 12;
 
 export type UseVerticalCardPagerOptions = {
   /** カード総数 */
@@ -49,23 +52,24 @@ export function useVerticalCardPager({
 }: UseVerticalCardPagerOptions): UseVerticalCardPagerReturn {
   const itemRefs = useRef<(HTMLElement | null)[]>([]);
   const lastNearestIndexRef = useRef(Math.max(0, activeIndex));
-  const avgItemExtentRef = useRef(860);
 
-  // stale closure 回避: onNearestIndexImmediate を ref で保持
   const onNearestIndexImmediateRef = useRef(onNearestIndexImmediate);
-  onNearestIndexImmediateRef.current = onNearestIndexImmediate;
+  useEffect(() => {
+    onNearestIndexImmediateRef.current = onNearestIndexImmediate;
+  }, [onNearestIndexImmediate]);
 
   // プログラマティックスクロール中は自然スクロール判定を止める
   const pendingScrollRef = useRef(false);
   const pendingScrollStartedAtRef = useRef(0);
   const pendingScrollTimerRef = useRef<number | null>(null);
 
-  // 自然スクロール中は nearest index の反映を少し遅延させて
-  // 編集モード時の重い再マウント連打を避ける
   const naturalIndexTimerRef = useRef<number | null>(null);
   const queuedNaturalIndexRef = useRef<number | null>(null);
+  const computeNearestRafRef = useRef<number | null>(null);
+  const idleCommitTimerRef = useRef<number | null>(null);
+  const lastScrollActivityAtRef = useRef(0);
+  const activeScrollCommitAtRef = useRef(0);
 
-  // stale closure 回避
   const activeIndexRef = useRef(activeIndex);
   useEffect(() => {
     activeIndexRef.current = activeIndex;
@@ -114,11 +118,13 @@ export function useVerticalCardPager({
       }
 
       const candidates = [
+        bestIdx - 3,
         bestIdx - 2,
         bestIdx - 1,
         bestIdx,
         bestIdx + 1,
         bestIdx + 2,
+        bestIdx + 3,
       ]
         .map(clampIndex)
         .filter((idx, pos, arr) => idx >= 0 && arr.indexOf(idx) === pos);
@@ -149,6 +155,7 @@ export function useVerticalCardPager({
   const clearPendingScrollState = useCallback(() => {
     pendingScrollRef.current = false;
     pendingScrollStartedAtRef.current = 0;
+    activeScrollCommitAtRef.current = 0;
     clearPendingScrollTimer();
   }, [clearPendingScrollTimer]);
 
@@ -156,6 +163,20 @@ export function useVerticalCardPager({
     if (naturalIndexTimerRef.current != null) {
       window.clearTimeout(naturalIndexTimerRef.current);
       naturalIndexTimerRef.current = null;
+    }
+  }, []);
+
+  const clearComputeNearestRaf = useCallback(() => {
+    if (computeNearestRafRef.current != null) {
+      window.cancelAnimationFrame(computeNearestRafRef.current);
+      computeNearestRafRef.current = null;
+    }
+  }, []);
+
+  const clearIdleCommitTimer = useCallback(() => {
+    if (idleCommitTimerRef.current != null) {
+      window.clearTimeout(idleCommitTimerRef.current);
+      idleCommitTimerRef.current = null;
     }
   }, []);
 
@@ -170,14 +191,15 @@ export function useVerticalCardPager({
 
   const queueNaturalIndexCommit = useCallback(
     (nearestIdx: number) => {
+      queuedNaturalIndexRef.current = nearestIdx;
+      clearNaturalIndexTimer();
+
+      // 遅延ゼロのときは即時コミット（RAF待ちも入れない）
       if (naturalIndexCommitDelayMs <= 0) {
-        queuedNaturalIndexRef.current = nearestIdx;
         flushQueuedNaturalIndex();
         return;
       }
 
-      queuedNaturalIndexRef.current = nearestIdx;
-      clearNaturalIndexTimer();
       naturalIndexTimerRef.current = window.setTimeout(() => {
         flushQueuedNaturalIndex();
       }, naturalIndexCommitDelayMs);
@@ -190,8 +212,8 @@ export function useVerticalCardPager({
       clearPendingScrollTimer();
       pendingScrollTimerRef.current = window.setTimeout(() => {
         pendingScrollRef.current = false;
-      pendingScrollStartedAtRef.current = 0;
-      pendingScrollTimerRef.current = null;
+        pendingScrollStartedAtRef.current = 0;
+        pendingScrollTimerRef.current = null;
       }, behavior === "smooth"
         ? PENDING_SCROLL_RELEASE_SMOOTH_MS
         : PENDING_SCROLL_RELEASE_AUTO_MS);
@@ -247,22 +269,45 @@ export function useVerticalCardPager({
 
     const containerCenterY = container.scrollTop + container.clientHeight / 2;
     const nearestIdx = findNearestIndexByCenterY(containerCenterY);
+    if (nearestIdx === -1) return;
 
-    if (nearestIdx !== -1) {
-      lastNearestIndexRef.current = nearestIdx;
-      const nearestEl = itemRefs.current[nearestIdx];
-      if (nearestEl) {
-        const extent = Math.max(1, nearestEl.offsetHeight + CARD_STACK_GAP_PX);
-        avgItemExtentRef.current =
-          avgItemExtentRef.current * 0.8 + extent * 0.2;
+    lastNearestIndexRef.current = nearestIdx;
+    const diff = nearestIdx - activeIndexRef.current;
+    if (diff === 0) return;
+
+    const now =
+      typeof performance !== "undefined" && typeof performance.now === "function"
+        ? performance.now()
+        : Date.now();
+    const isActivelyScrolling =
+      now - lastScrollActivityAtRef.current <= SCROLL_ACTIVE_WINDOW_MS;
+    if (isActivelyScrolling) {
+      const absDiff = Math.abs(diff);
+      if (absDiff < MIN_INDEX_JUMP_DURING_SCROLL) return;
+      if (
+        now - activeScrollCommitAtRef.current <
+        ACTIVE_SCROLL_COMMIT_COOLDOWN_MS
+      ) {
+        return;
       }
+
+      const direction = diff > 0 ? 1 : -1;
+      const jump = Math.max(
+        MIN_INDEX_JUMP_DURING_SCROLL,
+        Math.min(MAX_INDEX_JUMP_DURING_SCROLL, absDiff),
+      );
+      const steppedIdx = clampIndex(activeIndexRef.current + direction * jump);
+      if (steppedIdx === -1 || steppedIdx === activeIndexRef.current) return;
+      activeScrollCommitAtRef.current = now;
+      onNearestIndexImmediateRef.current?.(steppedIdx);
+      queueNaturalIndexCommit(steppedIdx);
+      return;
     }
 
-    if (nearestIdx !== -1 && nearestIdx !== activeIndexRef.current) {
-      onNearestIndexImmediateRef.current?.(nearestIdx);
-      queueNaturalIndexCommit(nearestIdx);
-    }
+    onNearestIndexImmediateRef.current?.(nearestIdx);
+    queueNaturalIndexCommit(nearestIdx);
   }, [
+    clampIndex,
     clearPendingScrollState,
     count,
     findNearestIndexByCenterY,
@@ -308,7 +353,22 @@ export function useVerticalCardPager({
     if (!container) return;
 
     const schedule = () => {
-      computeNearestIndex();
+      const now =
+        typeof performance !== "undefined" && typeof performance.now === "function"
+          ? performance.now()
+          : Date.now();
+      lastScrollActivityAtRef.current = now;
+      clearIdleCommitTimer();
+      idleCommitTimerRef.current = window.setTimeout(() => {
+        idleCommitTimerRef.current = null;
+        computeNearestIndex();
+      }, SCROLL_ACTIVE_WINDOW_MS);
+
+      if (computeNearestRafRef.current != null) return;
+      computeNearestRafRef.current = window.requestAnimationFrame(() => {
+        computeNearestRafRef.current = null;
+        computeNearestIndex();
+      });
     };
     const cancelPendingOnUserIntent = () => {
       if (!pendingScrollRef.current) return;
@@ -319,7 +379,6 @@ export function useVerticalCardPager({
       schedule();
     };
 
-    // container 自体がスクロールする場合と、祖先がスクロールする場合の両方を捕捉
     container.addEventListener("scroll", schedule, { passive: true });
     container.addEventListener("wheel", handleWheel, { passive: true });
     container.addEventListener("touchstart", cancelPendingOnUserIntent, {
@@ -331,7 +390,6 @@ export function useVerticalCardPager({
     window.addEventListener("scroll", schedule, { passive: true, capture: true });
     window.addEventListener("resize", schedule, { passive: true });
 
-    // 初期状態でも一度判定
     schedule();
 
     return () => {
@@ -344,10 +402,14 @@ export function useVerticalCardPager({
 
       clearPendingScrollState();
       clearNaturalIndexTimer();
+      clearComputeNearestRaf();
+      clearIdleCommitTimer();
     };
   }, [
     count,
     clearPendingScrollState,
+    clearComputeNearestRaf,
+    clearIdleCommitTimer,
     clearNaturalIndexTimer,
     computeNearestIndex,
     scrollContainerRef,

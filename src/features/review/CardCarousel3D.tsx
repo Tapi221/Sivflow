@@ -97,6 +97,7 @@ export function CardCarousel3D({
   const [activeIdx, setActiveIdx] = useState(syncIndex);
   // ステージ高さ。undefined = まだ計測前 (トランジション無効)
   const [stageHeight, setStageHeight] = useState<number | undefined>(undefined);
+  const [isScrolling, setIsScrolling] = useState(false);
 
   const isScrollingRef = useRef(false);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout>>();
@@ -163,11 +164,13 @@ export function CardCarousel3D({
 
   // ── スクロールイベント ────────────────────────────────────────────────────
   const handleScroll = useCallback(() => {
+    setIsScrolling((prev) => (prev ? prev : true));
     isScrollingRef.current = true;
     clearTimeout(debounceTimerRef.current);
 
     debounceTimerRef.current = setTimeout(() => {
       isScrollingRef.current = false;
+      setIsScrolling(false);
       const track = trackRef.current;
       if (!track) return;
 
@@ -183,6 +186,12 @@ export function CardCarousel3D({
       updateStageHeight(clamped);
     }, SCROLL_DEBOUNCE_MS);
   }, [cards.length, onIndexChange, updateStageHeight]);
+
+  useEffect(() => {
+    return () => {
+      clearTimeout(debounceTimerRef.current);
+    };
+  }, []);
 
   // ── ナビゲーション ────────────────────────────────────────────────────────
   const goPrev = useCallback(() => {
@@ -259,7 +268,7 @@ export function CardCarousel3D({
           {cards.map((card, idx) => {
             const isActive = idx === activeIdx;
             const isNear = Math.abs(idx - activeIdx) <= PREVIEW_RENDER_RADIUS;
-            const shouldRenderCard = isActive || isNear;
+            const shouldRenderCard = isScrolling || isActive || isNear;
 
             return (
               <div

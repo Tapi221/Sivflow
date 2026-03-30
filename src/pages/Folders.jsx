@@ -1,4 +1,11 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, {
+  startTransition,
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 import { getPageRuledBg } from "@/components/card/frame/ruledStyles";
 import { useSearchParams } from "react-router-dom";
 import { useCards } from "@/hooks/card/useCards";
@@ -24,6 +31,7 @@ export default function Folders() {
   const queryDocId = searchParams.get("docId");
 
   const pendingUrlSyncRef = useRef(null);
+  const urlSyncTimerRef = useRef(0);
   const [folderSelectionNonce, setFolderSelectionNonce] = useState(0);
 
   const forceResetWorkspaceScroll = useCallback(() => {
@@ -52,38 +60,6 @@ export default function Folders() {
     );
   }, []);
 
-  const syncSelectionToUrl = useCallback(
-    (nextFolderId, nextItem) => {
-      const next = new URLSearchParams(queryString);
-
-      if (nextFolderId) {
-        next.set("folderId", nextFolderId);
-      } else {
-        next.delete("folderId");
-      }
-
-      if (nextItem?.type === "card") {
-        next.set("cardId", nextItem.id);
-        next.delete("docId");
-      } else if (nextItem?.type === "document") {
-        next.set("docId", nextItem.id);
-        next.delete("cardId");
-      } else {
-        next.delete("cardId");
-        next.delete("docId");
-      }
-
-      const target = next.toString();
-      if (queryString !== target) {
-        pendingUrlSyncRef.current = target;
-        setSearchParams(next, { replace: true });
-      } else if (pendingUrlSyncRef.current === queryString) {
-        pendingUrlSyncRef.current = null;
-      }
-    },
-    [queryString, setSearchParams],
-  );
-
   // 選択状態
   const [selectedFolderId, setSelectedFolderId] = useState(() => {
     if (queryFolderId) return queryFolderId;
@@ -104,6 +80,13 @@ export default function Folders() {
     if (queryDocId) return { type: "document", id: queryDocId };
     return null;
   });
+  const selectedFolderIdRef = useRef(selectedFolderId);
+  const selectedItemRef = useRef(selectedItem);
+
+  useEffect(() => {
+    selectedFolderIdRef.current = selectedFolderId;
+    selectedItemRef.current = selectedItem;
+  }, [selectedFolderId, selectedItem]);
 
   const selectedCardId = selectedItem?.type === "card" ? selectedItem.id : null;
   const selectedDocumentId =
@@ -124,7 +107,6 @@ export default function Folders() {
     selectedFolderId,
     selectedItem?.type,
     selectedItem?.id,
-    queryString,
   ]);
 
   useEffect(() => {
@@ -150,15 +132,35 @@ export default function Folders() {
     const current = queryString;
     const target = next.toString();
 
-    if (current !== target) {
-      pendingUrlSyncRef.current = target;
-      setSearchParams(next, { replace: true });
+    if (current === target) {
+      if (pendingUrlSyncRef.current === current) {
+        pendingUrlSyncRef.current = null;
+      }
+      if (urlSyncTimerRef.current) {
+        window.clearTimeout(urlSyncTimerRef.current);
+        urlSyncTimerRef.current = 0;
+      }
       return;
     }
 
-    if (pendingUrlSyncRef.current === current) {
-      pendingUrlSyncRef.current = null;
+    if (urlSyncTimerRef.current) {
+      window.clearTimeout(urlSyncTimerRef.current);
+      urlSyncTimerRef.current = 0;
     }
+
+    urlSyncTimerRef.current = window.setTimeout(() => {
+      pendingUrlSyncRef.current = target;
+      startTransition(() => {
+        setSearchParams(next, { replace: true });
+      });
+    }, 90);
+
+    return () => {
+      if (urlSyncTimerRef.current) {
+        window.clearTimeout(urlSyncTimerRef.current);
+        urlSyncTimerRef.current = 0;
+      }
+    };
   }, [selectedFolderId, selectedItem, queryString, setSearchParams]);
 
   useEffect(() => {
@@ -224,31 +226,46 @@ export default function Folders() {
   }, [isDesktop]);
 
   // --- 選択ハンドラ ---
-  const handleSelectFolderInWork = (folderId) => {
+  const handleSelectFolderInWork = useCallback((folderId) => {
+    if (
+      selectedFolderIdRef.current === folderId &&
+      selectedItemRef.current === null
+    ) {
+      return;
+    }
+
     forceResetWorkspaceScroll();
     setFolderSelectionNonce((n) => n + 1);
     notifyMainSidebarFolderSelection(folderId);
     setSelectedFolderId(folderId);
     setSelectedItem(null);
-    syncSelectionToUrl(folderId, null);
-  };
+    selectedFolderIdRef.current = folderId;
+    selectedItemRef.current = null;
+  }, [forceResetWorkspaceScroll, notifyMainSidebarFolderSelection]);
 
-  const handleSelectCardInWork = (cardId) => {
+  const handleSelectCardInWork = useCallback((cardId) => {
+    const current = selectedItemRef.current;
+    if (current?.type === "card" && current.id === cardId) return;
+
     const nextItem = { type: "card", id: cardId };
     setSelectedItem(nextItem);
-    syncSelectionToUrl(selectedFolderId, nextItem);
-  };
+    selectedItemRef.current = nextItem;
+  }, []);
 
-  const handleSelectDocumentInWork = (docId) => {
+  const handleSelectDocumentInWork = useCallback((docId) => {
+    const current = selectedItemRef.current;
+    if (current?.type === "document" && current.id === docId) return;
+
     const nextItem = { type: "document", id: docId };
     setSelectedItem(nextItem);
-    syncSelectionToUrl(selectedFolderId, nextItem);
-  };
+    selectedItemRef.current = nextItem;
+  }, []);
 
-  const handleSelectItemInWork = (item) => {
+  const handleSelectItemInWork = useCallback((item) => {
     if (!item) {
+      if (selectedItemRef.current === null) return;
       setSelectedItem(null);
-      syncSelectionToUrl(selectedFolderId, null);
+      selectedItemRef.current = null;
       return;
     }
 
@@ -266,7 +283,8 @@ export default function Folders() {
       notifyMainSidebarFolderSelection(null);
       setSelectedItem({ type: "directory" });
       setSelectedFolderId(null);
-      syncSelectionToUrl(null, null);
+      selectedFolderIdRef.current = null;
+      selectedItemRef.current = { type: "directory" };
       return;
     }
 
@@ -274,7 +292,8 @@ export default function Folders() {
       notifyMainSidebarFolderSelection(null);
       setSelectedItem({ type: "gallery" });
       setSelectedFolderId(null);
-      syncSelectionToUrl(null, null);
+      selectedFolderIdRef.current = null;
+      selectedItemRef.current = { type: "gallery" };
       return;
     }
 
@@ -282,7 +301,8 @@ export default function Folders() {
       notifyMainSidebarFolderSelection(null);
       setSelectedItem({ type: "calendar" });
       setSelectedFolderId(null);
-      syncSelectionToUrl(null, null);
+      selectedFolderIdRef.current = null;
+      selectedItemRef.current = { type: "calendar" };
       return;
     }
 
@@ -295,9 +315,15 @@ export default function Folders() {
       notifyMainSidebarFolderSelection(null);
       setSelectedItem({ type: "trash" });
       setSelectedFolderId(null);
-      syncSelectionToUrl(null, null);
+      selectedFolderIdRef.current = null;
+      selectedItemRef.current = { type: "trash" };
     }
-  };
+  }, [
+    handleSelectCardInWork,
+    handleSelectDocumentInWork,
+    notifyMainSidebarFolderSelection,
+    setIsSettingsOpen,
+  ]);
 
   const isLoading = foldersLoading || cardsLoading;
 
@@ -316,7 +342,8 @@ export default function Folders() {
       notifyMainSidebarFolderSelection(folderId ?? null);
       setSelectedFolderId(folderId ?? null);
       setSelectedItem(null);
-      syncSelectionToUrl(folderId ?? null, null);
+      selectedFolderIdRef.current = folderId ?? null;
+      selectedItemRef.current = null;
 
       // パンくずの「セクション一覧」クリック時に、大元のフォルダ一覧へ戻す
       if (!folderId) {
@@ -332,9 +359,36 @@ export default function Folders() {
     });
   }, [
     registerFolderSelectHandler,
-    syncSelectionToUrl,
     notifyMainSidebarFolderSelection,
   ]);
+
+  useEffect(() => {
+    return () => {
+      if (urlSyncTimerRef.current) {
+        window.clearTimeout(urlSyncTimerRef.current);
+        urlSyncTimerRef.current = 0;
+      }
+    };
+  }, []);
+
+  const folderById = useMemo(
+    () => new Map(folders.map((folder) => [folder.id, folder])),
+    [folders],
+  );
+
+  const cardById = useMemo(
+    () => new Map(cards.map((card) => [card.id, card])),
+    [cards],
+  );
+
+  const documentById = useMemo(() => {
+    const map = new Map();
+    for (const doc of documents) {
+      const key = doc.id || doc.documentId;
+      if (key) map.set(key, doc);
+    }
+    return map;
+  }, [documents]);
 
   useEffect(() => {
     const crumbs = [ ];
@@ -342,11 +396,11 @@ export default function Folders() {
     // フォルダ階層を構築（祖先 → 選択フォルダ）
     if (selectedFolderId) {
       const path = [];
-      let cur = folders.find((f) => f.id === selectedFolderId);
+      let cur = folderById.get(selectedFolderId);
 
       while (cur) {
         path.unshift(cur);
-        cur = folders.find((f) => f.id === cur.parentFolderId);
+        cur = cur.parentFolderId ? folderById.get(cur.parentFolderId) : null;
       }
 
       path.forEach((folder) => {
@@ -360,7 +414,7 @@ export default function Folders() {
 
     // カードまたはドキュメントのクラム
     if (selectedItem?.type === "card") {
-      const card = cards.find((c) => c.id === selectedItem.id);
+      const card = cardById.get(selectedItem.id);
       if (card) {
         const label =
           card.title?.trim() ||
@@ -369,9 +423,7 @@ export default function Folders() {
         crumbs.push({ label });
       }
     } else if (selectedItem?.type === "document") {
-      const doc = documents.find(
-        (d) => (d.id || d.documentId) === selectedItem.id,
-      );
+      const doc = documentById.get(selectedItem.id);
       if (doc) {
         crumbs.push({ label: doc.title || doc.fileName || "ドキュメント" });
       }
@@ -382,7 +434,14 @@ export default function Folders() {
     return () => {
       setExtraCrumbs([]);
     };
-  }, [selectedFolderId, selectedItem, folders, cards, documents, setExtraCrumbs]);
+  }, [
+    selectedFolderId,
+    selectedItem,
+    folderById,
+    cardById,
+    documentById,
+    setExtraCrumbs,
+  ]);
 
   return (
     <div

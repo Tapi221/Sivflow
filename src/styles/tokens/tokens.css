@@ -174,6 +174,11 @@
       var(--sidebar-active-accent, #7aa6a1) 70%,
       #3f4a53
     );
+    --card-editing-outline: color-mix(
+      in srgb,
+      var(--sidebar-active-accent, #7aa6a1) 42%,
+      #123126
+    );
 
     /* Tag color tokens */
     --tag-slate-bg: #f3f4f6;

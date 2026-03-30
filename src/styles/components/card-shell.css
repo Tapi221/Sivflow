@@ -266,6 +266,33 @@
     z-index: 31;
   }
 
+  .card-shell--editing {
+    border-color: var(--card-editing-outline, #1f4c3d);
+  }
+
+  .card-shell--editing::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    box-sizing: border-box;
+    border-radius: inherit;
+    border: 1px solid var(--card-editing-outline, #1f4c3d);
+    pointer-events: none;
+    z-index: 30;
+  }
+
+  .card-shell--editing.card-shell--selected,
+  .card-shell--editing.card-shell--active {
+    box-shadow:
+      var(
+        --card-shadow-selected,
+        0 0 4px rgba(15, 23, 42, 0.06),
+          0 0 36px rgba(15, 23, 42, 0.12),
+          0 0 96px rgba(15, 23, 42, 0.12)
+      ),
+      inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  }
+
   .card-shell--interactive:focus-visible,
   .card-shell--interactive:has(:focus-visible) {
     outline: none;
@@ -319,6 +346,18 @@
         var(--card-selected-outline-neutral, rgba(84, 95, 105, 0.42)),
       inset 0 0 0 calc(var(--card-selected-outline-width, 1.6px) + 0.75px)
         var(--card-selected-outline-accent, rgba(122, 166, 161, 0.32)),
+      inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  }
+
+  .card-pager-item[data-card-active="true"] .card-shell.card-shell--editing {
+    border-color: var(--card-editing-outline, #1f4c3d);
+    box-shadow:
+      var(
+        --card-shadow-selected,
+        0 0 4px rgba(15, 23, 42, 0.06),
+          0 0 36px rgba(15, 23, 42, 0.12),
+          0 0 96px rgba(15, 23, 42, 0.12)
+      ),
       inset 0 1px 0 rgba(255, 255, 255, 0.95);
   }
 

@@ -51,7 +51,6 @@ export function CardViewDesktop({
 
   const renderCard = useCallback(
     (card: Card, idx: number, isActive: boolean) => {
-      const mountEditor = isGlobalEditing && Math.abs(idx - safeCurrentIndex) <= 1;
       return (
         <DesktopCardSurface
           card={card}
@@ -63,7 +62,6 @@ export function CardViewDesktop({
           folderId={folderId}
           cardSetId={cardSetId}
           cardsOverride={editingCardsOverride}
-          mountEditor={mountEditor}
           saveSignal={saveSignal}
           onFlip={onFlip}
           onEdit={onEdit}
@@ -74,7 +72,6 @@ export function CardViewDesktop({
     },
     [
       isGlobalEditing,
-      safeCurrentIndex,
       flippedCardIds,
       folderId,
       cardSetId,
@@ -116,7 +113,7 @@ export function CardViewDesktop({
       disableItemChrome={isGlobalEditing}
       getCardWidth={() => activePaneWidthPx}
       getKey={(card) => card.id ?? card.docId ?? card.uid}
-      disableVirtualization
+      disableVirtualization={false}
       renderCard={renderCard}
     />
   );

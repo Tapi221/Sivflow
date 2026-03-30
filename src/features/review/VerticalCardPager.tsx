@@ -233,7 +233,7 @@ export function VerticalCardPager<T>({
     const container = containerRef.current;
     if (!container) return;
 
-    const handleScroll = () => updateVisibleRange();
+    const handleScroll = () => scheduleVisibleRangeUpdate();
     container.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("resize", scheduleVisibleRangeUpdate, {
       passive: true,
@@ -258,7 +258,6 @@ export function VerticalCardPager<T>({
     cards.length,
     disableVirtualization,
     scheduleVisibleRangeUpdate,
-    updateVisibleRange,
   ]);
 
   return (

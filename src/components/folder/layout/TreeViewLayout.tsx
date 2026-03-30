@@ -7,7 +7,7 @@ import { resolveCardTagNames, useTags } from "@/hooks/settings/useTags";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { cn } from "@/lib/utils";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
@@ -113,6 +113,11 @@ function TreeViewLayout({
     scroller.scrollTop = 0;
   }, [contentScrollRef, selectedFolderId, navigateToSectionListToken]);
 
+  const deferredMainSelectedFolderId = useDeferredValue(selectedFolderId);
+  const deferredMainSelectedItem = useDeferredValue(selectedItem);
+  const deferredMainSelectedCardId = useDeferredValue(selectedCardId);
+  const deferredMainSelectedDocumentId = useDeferredValue(selectedDocumentId);
+
   const {
     getFolderPath,
     selectedFolder,
@@ -124,10 +129,10 @@ function TreeViewLayout({
     folders,
     cards,
     documents,
-    selectedFolderId,
-    selectedItem,
-    selectedCardId,
-    selectedDocumentId,
+    selectedFolderId: deferredMainSelectedFolderId,
+    selectedItem: deferredMainSelectedItem,
+    selectedCardId: deferredMainSelectedCardId,
+    selectedDocumentId: deferredMainSelectedDocumentId,
     autoCarryOver: settings?.autoCarryOver ?? true,
     isMobile,
   });
@@ -482,10 +487,10 @@ function TreeViewLayout({
       <TreeViewMainPane
         isMobile={isMobile}
         showMobileDetail={showMobileDetail}
-        selectedItem={selectedItem}
-        selectedCardId={selectedCardId}
+        selectedItem={deferredMainSelectedItem}
+        selectedCardId={deferredMainSelectedCardId}
         selectedDocument={selectedDocument}
-        selectedFolderId={selectedFolderId}
+        selectedFolderId={deferredMainSelectedFolderId}
         selectedFolderName={selectedFolder?.folderName ?? "フォルダ"}
         folders={folders}
         cards={cards}

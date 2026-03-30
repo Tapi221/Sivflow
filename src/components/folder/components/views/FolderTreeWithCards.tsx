@@ -194,6 +194,15 @@ export function FolderTreeWithCards({
     [findScrollableAncestorWithinTree],
   );
 
+  const resetIfScrollable = useCallback((node: HTMLElement) => {
+    const style = window.getComputedStyle(node);
+    const overflowY = style.overflowY;
+    const isScrollable =
+      (overflowY === "auto" || overflowY === "scroll") &&
+      node.scrollHeight > node.clientHeight;
+    if (isScrollable) node.scrollTop = 0;
+  }, []);
+
   // merge optimistic
   const treeFolders = useMemo(() => {
     const map = new Map<string, FolderTreeNode>();
@@ -207,6 +216,22 @@ export function FolderTreeWithCards({
     }
     return Array.from(map.values());
   }, [folders, optimisticFolders]);
+
+  const parentFolderIdById = useMemo(() => {
+    const map = new Map<string, string | null>();
+    for (const folder of treeFolders) {
+      const folderId = getFolderId(folder);
+      if (!folderId) continue;
+      const parentId = normalizeFolderId(
+        (folder as { parentFolderId?: string | null; parent_folder_id?: string | null })
+          .parentFolderId ??
+          (folder as { parentFolderId?: string | null; parent_folder_id?: string | null })
+            .parent_folder_id,
+      );
+      map.set(folderId, parentId);
+    }
+    return map;
+  }, [treeFolders]);
 
   const treeCards = useMemo(() => {
     const map = new Map<string, Card>();
@@ -380,20 +405,23 @@ export function FolderTreeWithCards({
     const root = treeRootRef.current;
     if (!root) return;
 
-    const resetIfScrollable = (node: HTMLElement) => {
-      const style = window.getComputedStyle(node);
-      const overflowY = style.overflowY;
-      const isScrollable =
-        (overflowY === "auto" || overflowY === "scroll") &&
-        node.scrollHeight > node.clientHeight;
-      if (isScrollable) {
-        node.scrollTop = 0;
-      }
-    };
-
-    resetIfScrollable(root);
-    root.querySelectorAll<HTMLElement>("*").forEach(resetIfScrollable);
-  }, [folderSelectionNonce]);
+    const candidates = new Set<HTMLElement>();
+    candidates.add(root);
+    root
+      .querySelectorAll<HTMLElement>(
+        ".overflow-y-auto, .overflow-auto, [role='tree']",
+      )
+      .forEach((node) => {
+        candidates.add(node);
+        if (node.getAttribute("role") === "tree") {
+          const listScroller = node.querySelector<HTMLElement>(
+            "div[style*='overflow']",
+          );
+          if (listScroller) candidates.add(listScroller);
+        }
+      });
+    candidates.forEach(resetIfScrollable);
+  }, [folderSelectionNonce, resetIfScrollable]);
 
   // sync activeRootFolderId with selectedFolderId
   useEffect(() => {
@@ -405,18 +433,13 @@ export function FolderTreeWithCards({
     let rootId: string | null = null;
     while (currentId) {
       if (rootFolderIds.has(currentId)) { rootId = currentId; break; }
-      const folder = treeFolders.find((f) => getFolderId(f) === currentId);
-      if (!folder) break;
-      currentId = normalizeFolderId(
-        (folder as { parentFolderId?: string | null; parent_folder_id?: string | null })
-          .parentFolderId ??
-          (folder as { parentFolderId?: string | null; parent_folder_id?: string | null })
-            .parent_folder_id,
-      );
+      const parentId = parentFolderIdById.get(currentId);
+      if (parentId === undefined || parentId === currentId) break;
+      currentId = parentId;
     }
     if (rootId === selectedFolderId) return;
     if (activeRootFolderId !== selectedFolderId) setActiveRootFolderId(selectedFolderId);
-  }, [selectedFolderId, rootFolders, treeFolders, activeRootFolderId]);
+  }, [selectedFolderId, rootFolders, parentFolderIdById, activeRootFolderId]);
 
   // trigger folder creation from external token
   useEffect(() => {

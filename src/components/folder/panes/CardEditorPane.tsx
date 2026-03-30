@@ -78,7 +78,6 @@ type EditorSidePaneProps = {
   duplicateToOpposite?: boolean;
   hideToolbar: boolean;
   toolbarMount: HTMLDivElement | null;
-  toolbarDesktopLayout: "horizontal" | "vertical";
   settings: unknown;
   shouldShowInlineToolbarMount: boolean;
   setInlineToolbarMount: (value: HTMLDivElement | null) => void;
@@ -88,6 +87,7 @@ type EditorSidePaneProps = {
   setDockedToolbarMount: (value: HTMLDivElement | null) => void;
   shouldShowEditingBadge: boolean;
   isPagerActiveCard: boolean;
+  enableBlockActiveState: boolean;
   showResizeHandle: boolean;
   editorCardFixedScale?: number;
   editorCardHeightPx: number;
@@ -111,7 +111,6 @@ function EditorSidePaneInner({
   duplicateToOpposite,
   hideToolbar,
   toolbarMount,
-  toolbarDesktopLayout,
   settings,
   shouldShowInlineToolbarMount,
   setInlineToolbarMount,
@@ -121,6 +120,7 @@ function EditorSidePaneInner({
   setDockedToolbarMount,
   shouldShowEditingBadge,
   isPagerActiveCard,
+  enableBlockActiveState,
   showResizeHandle,
   editorCardFixedScale,
   editorCardHeightPx,
@@ -204,7 +204,8 @@ function EditorSidePaneInner({
           duplicateToOpposite={duplicateToOpposite}
           hideToolbar={hideToolbar}
           toolbarMount={toolbarMount}
-          toolbarDesktopLayout={toolbarDesktopLayout}
+          toolbarDesktopLayout="vertical"
+          enableBlockActiveState={enableBlockActiveState}
           settings={settings}
         />
       </CardFrame>
@@ -226,7 +227,6 @@ const areEditorSidePanePropsEqual = (
   prev.duplicateToOpposite === next.duplicateToOpposite &&
   prev.hideToolbar === next.hideToolbar &&
   prev.toolbarMount === next.toolbarMount &&
-  prev.toolbarDesktopLayout === next.toolbarDesktopLayout &&
   prev.settings === next.settings &&
   prev.shouldShowInlineToolbarMount === next.shouldShowInlineToolbarMount &&
   prev.hideCardShellHeader === next.hideCardShellHeader &&
@@ -234,6 +234,7 @@ const areEditorSidePanePropsEqual = (
   prev.dockToolbarInsideCardEdge === next.dockToolbarInsideCardEdge &&
   prev.shouldShowEditingBadge === next.shouldShowEditingBadge &&
   prev.isPagerActiveCard === next.isPagerActiveCard &&
+  prev.enableBlockActiveState === next.enableBlockActiveState &&
   prev.editorCardFixedScale === next.editorCardFixedScale &&
   prev.editorCardHeightPx === next.editorCardHeightPx &&
   prev.actionsTopLeft === next.actionsTopLeft &&
@@ -583,9 +584,6 @@ export function CardEditorPane({
                     duplicateToOpposite={settings?.duplicateToOpposite}
                     hideToolbar={hideBlockToolbars}
                     toolbarMount={toolbarMountQ}
-                    toolbarDesktopLayout={
-                      shouldDockToolbarToCardTop ? "vertical" : "horizontal"
-                    }
                     settings={settings}
                     shouldShowInlineToolbarMount={shouldShowInlineToolbarMount}
                     setInlineToolbarMount={setToolbarMountQInternal}
@@ -595,6 +593,7 @@ export function CardEditorPane({
                     setDockedToolbarMount={setToolbarMountQInternal}
                     shouldShowEditingBadge={shouldShowEditingBadge}
                     isPagerActiveCard={isPagerActiveCard}
+                    enableBlockActiveState={!embeddedInPager || isPagerActiveCard}
                     showResizeHandle={showResizeHandleProp}
                     editorCardFixedScale={editorCardFixedScale}
                     editorCardHeightPx={editorCardHeightPx}
@@ -618,9 +617,6 @@ export function CardEditorPane({
                     duplicateToOpposite={settings?.duplicateToOpposite}
                     hideToolbar={hideBlockToolbars}
                     toolbarMount={toolbarMountA}
-                    toolbarDesktopLayout={
-                      shouldDockToolbarToCardTop ? "vertical" : "horizontal"
-                    }
                     settings={settings}
                     shouldShowInlineToolbarMount={shouldShowInlineToolbarMount}
                     setInlineToolbarMount={setToolbarMountAInternal}
@@ -630,6 +626,7 @@ export function CardEditorPane({
                     setDockedToolbarMount={setToolbarMountAInternal}
                     shouldShowEditingBadge={shouldShowEditingBadge}
                     isPagerActiveCard={isPagerActiveCard}
+                    enableBlockActiveState={!embeddedInPager || isPagerActiveCard}
                     showResizeHandle={showResizeHandleProp}
                     editorCardFixedScale={editorCardFixedScale}
                     editorCardHeightPx={editorCardHeightPx}

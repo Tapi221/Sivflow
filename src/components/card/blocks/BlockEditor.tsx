@@ -27,6 +27,8 @@ import { cn } from "@/lib/utils";
 import type { CardBlock } from "@/types";
 import { sortBlocksByOrderIndex } from "./blockOrdering";
 
+type CssVars = React.CSSProperties & Record<`--${string}`, string>;
+
 const uid = () =>
   typeof crypto !== "undefined" && "randomUUID" in crypto
     ? crypto.randomUUID()
@@ -58,6 +60,7 @@ interface BlockEditorProps {
 
   toolbarMount?: HTMLDivElement | null;
   toolbarDesktopLayout?: "horizontal" | "vertical";
+  enableBlockActiveState?: boolean;
 }
 
 const ROW_STEP_PX = CARD_ROW_PX;
@@ -87,6 +90,7 @@ export const BlockEditor = React.forwardRef<
       settings = undefined,
       toolbarMount = null,
       toolbarDesktopLayout = "horizontal",
+      enableBlockActiveState = true,
     },
     ref,
   ) => {
@@ -95,6 +99,26 @@ export const BlockEditor = React.forwardRef<
 
     const [activeContainerBlockId, setActiveContainerBlockId] = useState<string | null>(null);
     const [activeBlockId, setActiveBlockId] = useState<string | null>(null);
+    const rootRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+      if (enableBlockActiveState) return;
+      setActiveBlockId(null);
+      setActiveContainerBlockId(null);
+      const root = rootRef.current;
+      if (!root) return;
+      const activeEl = document.activeElement;
+      if (activeEl instanceof HTMLElement && root.contains(activeEl)) {
+        activeEl.blur();
+      }
+    }, [enableBlockActiveState]);
+
+    const editorRootStyle = useMemo<CssVars | undefined>(() => {
+      if (enableBlockActiveState) return undefined;
+      return {
+        "--card-ruled-line-px": "0px",
+      };
+    }, [enableBlockActiveState]);
 
     // reference/audio は本文ブロックじゃない扱い（ここでは編集しない）
     const orderedBlocks = useMemo(
@@ -125,12 +149,14 @@ export const BlockEditor = React.forwardRef<
       nonBodyBlocksRef.current = nonBodyBlocks;
     }, [nonBodyBlocks]);
     const resolvedActiveBlockId = useMemo(() => {
+      if (!enableBlockActiveState) return null;
       if (!activeBlockId) return null;
       return bodyBlocks.some((block) => block.id === activeBlockId)
         ? activeBlockId
         : null;
-    }, [activeBlockId, bodyBlocks]);
+    }, [activeBlockId, bodyBlocks, enableBlockActiveState]);
     const resolvedActiveContainerBlockId = useMemo(() => {
+      if (!enableBlockActiveState) return null;
       if (!activeContainerBlockId) return null;
       return bodyBlocks.some(
         (block) =>
@@ -138,7 +164,7 @@ export const BlockEditor = React.forwardRef<
       )
         ? activeContainerBlockId
         : null;
-    }, [activeContainerBlockId, bodyBlocks]);
+    }, [activeContainerBlockId, bodyBlocks, enableBlockActiveState]);
 
     const reindexBlocks = useCallback(
       (arr: CardBlock[]) => arr.map((b, i) => ({ ...b, orderIndex: i })),
@@ -527,11 +553,14 @@ export const BlockEditor = React.forwardRef<
 
     return (
       <div
+        ref={rootRef}
+        style={editorRootStyle}
         className={cn(
           "space-y-0",
           prefix === "question" ? "js-question-editor" : "js-answer-editor",
         )}
         onPointerDownCapture={(e) => {
+          if (!enableBlockActiveState) return;
           const target = e.target;
           if (!(target instanceof HTMLElement)) return;
           const nextActiveBlockId =
@@ -542,6 +571,7 @@ export const BlockEditor = React.forwardRef<
           );
         }}
         onFocusCapture={(e) => {
+          if (!enableBlockActiveState) return;
           const target = e.target;
           if (!(target instanceof HTMLElement)) return;
           const nextActiveBlockId =
@@ -554,6 +584,7 @@ export const BlockEditor = React.forwardRef<
           }
         }}
         onClick={(e) => {
+          if (!enableBlockActiveState) return;
           // question コンテナ内のクリックでなければ activeContainerBlockId をリセット
           const target = e.target as HTMLElement;
           if (!target.closest("[data-block-type='question']")) {

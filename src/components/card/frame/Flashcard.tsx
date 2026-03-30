@@ -53,6 +53,19 @@ interface FlashcardProps {
   contentPaddingPx?: number;
 }
 
+const TAP_MOVE_CANCEL_THRESHOLD_PX = 8;
+const FLIP_SUPPRESS_AFTER_WHEEL_MS = 140;
+
+function shouldIgnoreFlipTarget(target: EventTarget | null): boolean {
+  const element = target as HTMLElement | null;
+  if (!element) return false;
+  return Boolean(
+    element.closest(
+      'button, a, input, textarea, select, label, [data-card-no-flip="true"]',
+    ),
+  );
+}
+
 function FlashcardInner({
   card,
   isFlipped,
@@ -80,6 +93,19 @@ function FlashcardInner({
   contentPaddingPx,
 }: FlashcardProps) {
   const contentRef = useRef<HTMLDivElement | null>(null);
+  const flipSuppressedUntilRef = useRef(0);
+  const suppressNextFlipRef = useRef(false);
+  const pointerGestureRef = useRef<{
+    pointerId: number | null;
+    startX: number;
+    startY: number;
+    moved: boolean;
+  }>({
+    pointerId: null,
+    startX: 0,
+    startY: 0,
+    moved: false,
+  });
 
   const [previewFlipped, setPreviewFlipped] = useState(false);
 
@@ -127,6 +153,12 @@ function FlashcardInner({
 
   const handleFlip = React.useCallback(
     (e?: React.MouseEvent) => {
+      if (suppressNextFlipRef.current) {
+        suppressNextFlipRef.current = false;
+        return;
+      }
+      if (Date.now() < flipSuppressedUntilRef.current) return;
+      if (e && shouldIgnoreFlipTarget(e.target)) return;
       if (media.isModalBlockingFlip) return;
       if (isInkEditingActive) return;
 
@@ -167,6 +199,29 @@ function FlashcardInner({
   // ---------------------------------------------------------------------------
   // Render
   // ---------------------------------------------------------------------------
+  const suppressFlipTemporarily = (
+    durationMs = FLIP_SUPPRESS_AFTER_WHEEL_MS,
+  ) => {
+    flipSuppressedUntilRef.current = Date.now() + durationMs;
+  };
+
+  const resetPointerGesture = () => {
+    pointerGestureRef.current = {
+      pointerId: null,
+      startX: 0,
+      startY: 0,
+      moved: false,
+    };
+  };
+
+  const finishPointerGesture = (pointerId: number | null) => {
+    const state = pointerGestureRef.current;
+    if (state.pointerId == null) return;
+    if (pointerId != null && state.pointerId !== pointerId) return;
+    if (state.moved) suppressNextFlipRef.current = true;
+    resetPointerGesture();
+  };
+
   if (!card) {
     return <div className="text-center py-12 text-gray-500">No Card Data</div>;
   }
@@ -194,6 +249,42 @@ function FlashcardInner({
             CARD_SHELL_COMMON_CLASS_NAME,
             isCardClickable && "cursor-pointer",
           )}
+          onPointerDownCapture={(event) => {
+            if (!isCardClickable) return;
+            if (shouldIgnoreFlipTarget(event.target)) {
+              resetPointerGesture();
+              return;
+            }
+            pointerGestureRef.current = {
+              pointerId: event.pointerId,
+              startX: event.clientX,
+              startY: event.clientY,
+              moved: false,
+            };
+          }}
+          onPointerMoveCapture={(event) => {
+            if (!isCardClickable) return;
+            const state = pointerGestureRef.current;
+            if (state.pointerId !== event.pointerId) return;
+            if (state.moved) return;
+            const dx = Math.abs(event.clientX - state.startX);
+            const dy = Math.abs(event.clientY - state.startY);
+            if (dx > TAP_MOVE_CANCEL_THRESHOLD_PX || dy > TAP_MOVE_CANCEL_THRESHOLD_PX) {
+              state.moved = true;
+            }
+          }}
+          onPointerUpCapture={(event) => {
+            if (!isCardClickable) return;
+            finishPointerGesture(event.pointerId);
+          }}
+          onPointerCancelCapture={(event) => {
+            if (!isCardClickable) return;
+            finishPointerGesture(event.pointerId);
+          }}
+          onWheelCapture={() => {
+            if (!isCardClickable) return;
+            suppressFlipTemporarily();
+          }}
           onClick={handleFlip}
           onKeyDown={(event) => {
             if (!isCardClickable) return;
