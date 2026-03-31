@@ -1,8 +1,8 @@
 import { ImageFrame } from "@/components/card/blocks/ImageFrame";
 import { Button } from "@/components/ui/button";
 import { useAuthSession } from "@/contexts/AuthContext";
-import { storage } from "@/services/firebase";
 import { useLocalImageBlobUrl } from "@/hooks/image/useLocalImageBlobUrl";
+import { storage } from "@/services/firebase";
 import { getCachedRemoteUrl } from "@/services/imagePreloadCache";
 import { getLocalDb } from "@/services/localDB";
 import {
@@ -388,11 +388,13 @@ export function ImageGallery({ urls, items }: ImageGalleryProps) {
             [blob.type]: blob,
           }),
         ]);
+        console.log("image copied");
         return;
       }
       await navigator.clipboard.writeText(imageUrl);
+      console.log("url copied");
     } catch (error) {
-      console.error("Failed to copy image:", error);
+      console.error("copy failed", error);
       try {
         await navigator.clipboard.writeText(imageUrl);
       } catch {
@@ -465,7 +467,7 @@ export function ImageGallery({ urls, items }: ImageGalleryProps) {
       ))}
       <div className="w-full">
         {resolvedItems.map((item, index) => (
-          <div key={item.key || index} className="relative group">
+          <div key={item.key || index} className="relative group isolate">
             {!failedImages.has(index) && item.url ? (
               <>
                 <ImageFrame
@@ -476,7 +478,7 @@ export function ImageGallery({ urls, items }: ImageGalleryProps) {
                   naturalW={item.naturalW ?? naturalSizeMap[index]?.w ?? null}
                   naturalH={item.naturalH ?? naturalSizeMap[index]?.h ?? null}
                   className="bg-transparent"
-                  imgClassName="cursor-pointer"
+                  imgClassName="cursor-pointer pointer-events-none"
                   onNaturalSize={({ naturalW, naturalH }) => {
                     setNaturalSizeMap((prev) => {
                       const current = prev[index];
@@ -487,7 +489,7 @@ export function ImageGallery({ urls, items }: ImageGalleryProps) {
                   }}
                   onError={() => handleImageError(index)}
                 />
-                <div className="absolute top-1 right-1 z-20 flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 supports-[hover:none]:opacity-100">
+                <div className="absolute top-1 right-1 z-[999] pointer-events-auto flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 supports-[hover:none]:opacity-100">
                   <Button
                     type="button"
                     variant="secondary"
@@ -536,8 +538,3 @@ export function ImageGallery({ urls, items }: ImageGalleryProps) {
     </>
   );
 }
-
-
-
-
-
