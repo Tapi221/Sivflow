@@ -1,6 +1,10 @@
 import React from "react";
 
 import type { UserSettings } from "@/types";
+import {
+  getCardSetWidthPreference,
+  setCardSetWidthPreference,
+} from "@/services/cardWidthPreferences";
 
 const CARD_PANE_VIEW_DEFAULT_WIDTH_PX = 576;
 const CARD_PANE_EDIT_DEFAULT_WIDTH_PX = 820;
@@ -31,8 +35,8 @@ function clampPaneWidthPx(
 }
 
 interface UseCardEditorPaneWidthParams {
+  /** Read-only fallback. Width is persisted to localStorage only (device-local). */
   settings?: Partial<UserSettings> | null;
-  updateSettings: (patch: Partial<UserSettings>) => Promise<unknown>;
   dockToolbarsToTop: boolean;
   embeddedInPager: boolean;
   hideBlockToolbars: boolean;
@@ -44,11 +48,11 @@ interface UseCardEditorPaneWidthParams {
   normalizedSelectedCardId: string | null;
   selectedCardId?: string;
   canonicalCardWidth: number;
+  cardSetId?: string | null;
 }
 
 export function useCardEditorPaneWidth({
   settings,
-  updateSettings,
   dockToolbarsToTop,
   embeddedInPager,
   hideBlockToolbars,
@@ -60,6 +64,7 @@ export function useCardEditorPaneWidth({
   normalizedSelectedCardId,
   selectedCardId,
   canonicalCardWidth,
+  cardSetId,
 }: UseCardEditorPaneWidthParams) {
   const contentViewportRef = React.useRef<HTMLDivElement | null>(null);
   const [contentViewportWidth, setContentViewportWidth] = React.useState<number>(
@@ -79,22 +84,32 @@ export function useCardEditorPaneWidth({
     : CARD_PANE_EDIT_DEFAULT_WIDTH_PX;
 
   React.useEffect(() => {
+    const localStored =
+      cardSetId ? getCardSetWidthPreference(cardSetId, "view") : undefined;
     setViewPaneWidthPx(
       clampPaneWidthPx(
-        settings?.cardViewPaneWidthPx ?? CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
+        localStored ??
+          settings?.cardViewPaneWidthPx ??
+          CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
         CARD_PANE_VIEW_MIN_WIDTH_PX,
       ),
     );
-  }, [settings?.cardViewPaneWidthPx]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cardSetId, settings?.cardViewPaneWidthPx]);
 
   React.useEffect(() => {
+    const localStored =
+      cardSetId ? getCardSetWidthPreference(cardSetId, "edit") : undefined;
     setEditPaneWidthPx(
       clampPaneWidthPx(
-        settings?.cardEditPaneWidthPx ?? defaultEditPaneWidthPx,
+        localStored ??
+          settings?.cardEditPaneWidthPx ??
+          defaultEditPaneWidthPx,
         CARD_PANE_EDIT_MIN_WIDTH_PX,
       ),
     );
-  }, [defaultEditPaneWidthPx, settings?.cardEditPaneWidthPx]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cardSetId, defaultEditPaneWidthPx, settings?.cardEditPaneWidthPx]);
 
   React.useEffect(() => {
     const element = contentViewportRef.current;
@@ -214,7 +229,7 @@ export function useCardEditorPaneWidth({
     : undefined;
 
   const persistPaneWidth = React.useCallback(
-    async (mode: "view" | "edit", widthPx: number) => {
+    (mode: "view" | "edit", widthPx: number) => {
       const minWidth =
         mode === "edit"
           ? CARD_PANE_EDIT_MIN_WIDTH_PX
@@ -222,13 +237,12 @@ export function useCardEditorPaneWidth({
       const nextWidth = clampPaneWidthPx(widthPx, minWidth);
       if (mode === "edit") {
         setEditPaneWidthPx(nextWidth);
-        await updateSettings({ cardEditPaneWidthPx: nextWidth });
-        return;
+      } else {
+        setViewPaneWidthPx(nextWidth);
       }
-      setViewPaneWidthPx(nextWidth);
-      await updateSettings({ cardViewPaneWidthPx: nextWidth });
+      if (cardSetId) setCardSetWidthPreference(cardSetId, mode, nextWidth);
     },
-    [updateSettings],
+    [cardSetId],
   );
 
   const previewPaneWidth = React.useCallback(

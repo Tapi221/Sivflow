@@ -285,7 +285,7 @@ export function CardEditorPane({
     saveSignal,
     saveSignalEnabled,
   });
-  const { settings, updateSettings, isMetaOpen, session, layout, content, actions } =
+  const { settings, isMetaOpen, session, layout, content, actions } =
     controller;
   const {
     draft,
@@ -387,7 +387,6 @@ export function CardEditorPane({
     resetActivePaneWidth,
   } = useCardEditorPaneWidth({
     settings,
-    updateSettings,
     dockToolbarsToTop,
     embeddedInPager,
     hideBlockToolbars,
@@ -399,6 +398,7 @@ export function CardEditorPane({
     normalizedSelectedCardId,
     selectedCardId: selectedCard?.id,
     canonicalCardWidth: CANONICAL_CARD_WIDTH,
+    cardSetId,
   });
   const shouldKeepDockedToolbarInsideCard =
     shouldDockToolbarToCardTop && isMetaOpen && !embeddedInPager;

@@ -20,7 +20,7 @@ export default function CardView() {
   const { setExtraCrumbs } = useBreadcrumbContext();
   const { error: toastError } = useToast();
   const isDesktop = useIsDesktopRuntime();
-  const { settings, updateSettings } = useUserSettings();
+  const { settings } = useUserSettings();
 
   const { folderId, cardSetId, initialIndex, targetCardId } = useCardViewParams();
 
@@ -46,7 +46,7 @@ export default function CardView() {
     isMetaOpen: state.isMetaOpen,
     currentIndex: state.currentIndex,
     settings,
-    updateSettings,
+    cardSetId,
   });
 
   useCardViewBreadcrumbs({
