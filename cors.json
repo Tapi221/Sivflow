@@ -3,7 +3,8 @@
     "origin": [
       "https://anki-70f73.web.app",
       "https://anki-70f73.firebaseapp.com",
-      "http://localhost:5173"
+      "http://localhost:5173",
+      "app://flashcard-master"
     ],
     "method": ["GET", "PUT", "POST", "DELETE", "HEAD", "OPTIONS"],
     "maxAgeSeconds": 3600,
