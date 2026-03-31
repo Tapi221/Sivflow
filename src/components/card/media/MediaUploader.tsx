@@ -4,9 +4,7 @@ import { Slider } from "@/components/ui/slider";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { useReliableFileUpload } from "@/hooks/platform/useReliableFileUpload";
 import { cn } from "@/lib/utils";
-import {
-    removeImageBlobUrl,
-} from "@/services/imageBlobUrlSessionCache";
+import { removeImageBlobUrl, getOrCreateImageBlobUrl } from "@/services/imageBlobUrlSessionCache";
 import { useLocalImageBlobUrl } from "@/hooks/image/useLocalImageBlobUrl";
 import { deleteImageBlob, putImageBlob } from "@/services/imageFileStore";
 import { getLocalDb } from "@/services/localDB";
@@ -1107,6 +1105,7 @@ export default function MediaUploader({
     </div>
   );
 }
+
 
 
 
