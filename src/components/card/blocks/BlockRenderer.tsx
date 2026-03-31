@@ -9,7 +9,8 @@ import {
 import { AudioPlayer } from "@/components/card/media/CardMedia";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import type { CardBlock } from "@/types";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useContext, useMemo, useState } from "react";
+import { BlockEditModeContext } from "./BlockWrapper";
 import { CodeRenderer } from "./CodeRenderer";
 import { ImageBlockContent } from "./ImageBlockContent";
 import { ImageBlockShell } from "./ImageBlockShell";
@@ -81,6 +82,10 @@ export function BlockRenderer({
   blocks,
   onGalleryFullscreenChange,
 }: BlockRendererProps) {
+  const inEditMode = useContext(BlockEditModeContext);
+  const blockOutline = inEditMode
+    ? "inset 0 0 0 1px rgba(59, 130, 246, 0.35)"
+    : undefined;
   const { settings } = useUserSettings();
   const questionDisplayMode = settings?.questionDisplayMode ?? "tap_to_reveal";
   const toMediaUrl = useCallback((item: unknown) => {
@@ -138,7 +143,7 @@ export function BlockRenderer({
             data-block-row="true"
             data-block-layout-kind={blockLayoutKind}
             data-row-offset-applied={rowOffsetPx ? "true" : undefined}
-            style={offsetStyle}
+            style={blockOutline ? { ...offsetStyle, boxShadow: blockOutline, borderRadius: "var(--block-frame-radius, 12px)" } : offsetStyle}
           >
             {block.type === "question" && (
               <QuestionBlockView

@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   VerticalCardPager,
   ACTIVE_INDEX_RENDER_RADIUS,
@@ -19,7 +19,6 @@ import type { Card, UserSettings } from "@/types";
  * 「コンテンツが見え始めている状態」に見せられる。
  */
 const CARD_LOADING_PREVIEW_RULED_STYLE: React.CSSProperties = {
-  // 罫線: 24px ピッチ、44px オフセット（= --card-header-h）から開始
   backgroundImage:
     "repeating-linear-gradient(to bottom, rgba(0,0,0,0.05) 0, rgba(0,0,0,0.05) 1px, transparent 1px, transparent 24px)",
   backgroundPosition: "12px 44px",
@@ -67,6 +66,7 @@ function CardLoadingPreview({ card }: { card: Card }) {
     </div>
   );
 }
+
 import { useAuthSession } from "@/contexts/AuthContext";
 import { useCardImagePreloader } from "@/hooks/card/useCardImagePreloader";
 import {
@@ -82,6 +82,7 @@ interface CardViewDesktopProps {
   isGlobalEditing: boolean;
   flippedCardIds: Set<string>;
   cardsForPager: Card[];
+  selectedCardId: string | null;
   safeCurrentIndex: number;
   settings?: Partial<UserSettings> | null;
   editPaneWidthPx: number;
@@ -101,6 +102,7 @@ export function CardViewDesktop({
   isGlobalEditing,
   flippedCardIds,
   cardsForPager,
+  selectedCardId,
   safeCurrentIndex,
   settings = null,
   editPaneWidthPx,
@@ -115,16 +117,10 @@ export function CardViewDesktop({
   onToggleBookmark,
 }: CardViewDesktopProps) {
   const { currentUser } = useAuthSession();
-  // safeCurrentIndex を ref で持つ。
-  // renderCard useCallback の deps から外すことで、activeIndex が変わるたびに
-  // renderCard が再生成されて VerticalCardPager が余分に再レンダーするのを防ぐ。
-  // (shouldKeepEditorMounted にのみ使用 — 編集モード限定の値)
+
   const safeCurrentIndexRef = useRef(safeCurrentIndex);
   safeCurrentIndexRef.current = safeCurrentIndex;
 
-  // 初回 mount 時点で shouldRenderCard が true になる範囲を同期シードする。
-  // VerticalCardPager が onRenderRangeChange を発火する前の 1 フレーム目から
-  // プリローダーが正しい eager 範囲で動き始める。
   const [renderRange, setRenderRange] = useState<{
     start: number;
     end: number;
@@ -135,24 +131,33 @@ export function CardViewDesktop({
       safeCurrentIndex + ACTIVE_INDEX_RENDER_RADIUS,
     ),
   }));
+
   const readySet = useCardImagePreloader(
     cardsForPager,
     safeCurrentIndex,
     currentUser?.uid ?? null,
     renderRange,
   );
-  // readySet は画像 ready のたびに新参照になるため、renderCard の useCallback deps に
-  // 含めると Pager の全カードが再レンダリングされる。ref 経由で参照することで
-  // renderCard の参照を安定させ、スクロール中の再レンダリング連鎖を断つ。
+
   const readySetRef = useRef(readySet);
   readySetRef.current = readySet;
 
   const editingCardsOverride = isGlobalEditing ? cardsForPager : undefined;
 
+  const selectedIndex = useMemo(() => {
+    if (!selectedCardId) return -1;
+    return cardsForPager.findIndex((card) => card.id === selectedCardId);
+  }, [cardsForPager, selectedCardId]);
+
+  useEffect(() => {
+    if (selectedIndex < 0) return;
+    if (selectedIndex === safeCurrentIndex) return;
+
+    onActiveIndexChange(selectedIndex);
+  }, [onActiveIndexChange, safeCurrentIndex, selectedIndex]);
+
   const renderCard = useCallback(
     (card: Card, idx: number, isActive: boolean) => {
-      // アクティブカードと編集中カードは readyToDisplay を待たずに描画する。
-      // それ以外は mediaReady になるまでスケルトンを表示する。
       const readyToDisplay =
         isActive ||
         isGlobalEditing ||
@@ -164,6 +169,7 @@ export function CardViewDesktop({
 
       const shouldKeepEditorMounted =
         isGlobalEditing && Math.abs(idx - safeCurrentIndexRef.current) <= 1;
+
       return (
         <DesktopCardSurface
           card={card}
@@ -186,11 +192,6 @@ export function CardViewDesktop({
     },
     [
       isGlobalEditing,
-      // safeCurrentIndex は ref 経由で参照するため deps 不要。
-      // 含めると activeIndex 変化のたびに renderCard が再生成され
-      // VerticalCardPager の全カード wrapper が再レンダーされる。
-      // readySet も ref 経由（readySetRef）で参照するため deps 不要。
-      // 含めると画像 ready のたびに renderCard が再生成され同様の問題が起きる。
       flippedCardIds,
       folderId,
       cardSetId,

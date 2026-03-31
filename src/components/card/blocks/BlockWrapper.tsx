@@ -1,6 +1,8 @@
 import { GripVertical, Trash2, Copy } from "@/ui/icons";
 import React from "react";
 import { cn } from "@/lib/utils";
+
+export const BlockEditModeContext = React.createContext(false);
 interface BlockWrapperProps {
   children: React.ReactNode;
   onDelete: () => void;
@@ -61,12 +63,15 @@ export const BlockWrapper = ({
     );
   };
 
+  const inEditMode = React.useContext(BlockEditModeContext);
   // 実ボーダーは高さを+2pxして24pxグリッドを崩すため、常に inset box-shadow で描画する。
-  const isOutlineVisible = Boolean(isActive || isEditingWithin);
+  const isOutlineVisible = inEditMode || Boolean(isActive || isEditingWithin);
   const outlineColor = accentColor
     ? `${accentColor}40`
     : "rgba(59, 130, 246, 0.35)";
-  const baseOutline = `inset 0 0 0 var(--card-ruled-line-px, 1px) var(--card-ruled-color, rgba(0,0,0,0.05))`;
+  const baseOutline = inEditMode
+    ? `inset 0 0 0 var(--card-ruled-line-px, 1px) ${outlineColor}`
+    : `inset 0 0 0 var(--card-ruled-line-px, 1px) var(--card-ruled-color, rgba(0,0,0,0.05))`;
   const activeOutline = `inset 0 0 0 var(--card-ruled-line-px, 1px) ${outlineColor}`;
 
   const stepDragRef = React.useRef<{

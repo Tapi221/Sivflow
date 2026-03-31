@@ -2,6 +2,7 @@ import { ChevronLeft, ChevronRight } from "@/ui/icons";
 import React, { memo, useCallback, useMemo, useState } from "react";
 
 import { SharedCardContent } from "@/components/card/common/SharedCardContent";
+import { BlockEditModeContext } from "@/components/card/blocks/BlockWrapper";
 import {
   CANONICAL_CARD_WIDTH,
   CARD_ROW_PX,
@@ -331,36 +332,44 @@ export function CardEditorPane({
   const toolbarMountA = externalToolbarMountA ?? toolbarMountAInternal;
   const usesExternalToolbarMount =
     Boolean(externalToolbarMountQ) && Boolean(externalToolbarMountA);
+
   const handleQuestionBlocksChange = useCallback(
     (blocks: CardBlock[]) => {
       setSideBlocks("question", blocks);
     },
     [setSideBlocks],
   );
+
   const handleAnswerBlocksChange = useCallback(
     (blocks: CardBlock[]) => {
       setSideBlocks("answer", blocks);
     },
     [setSideBlocks],
   );
+
   const questionBlocks = draft?.questionBlocks ?? EMPTY_BLOCKS;
   const answerBlocks = draft?.answerBlocks ?? EMPTY_BLOCKS;
+
   const editorCardHeightPx = useMemo(
     () => layoutRowsToCardHeightPx(normalizeLayoutRows(draft?.layoutRows)),
     [draft?.layoutRows],
   );
+
   const handleEditorHeightChange = useCallback(
     (heightPx: number) => {
       scheduleLayoutRowsFromHeight(heightPx);
     },
     [scheduleLayoutRowsFromHeight],
   );
+
   const handleResizeStart = useCallback(() => {
     manualResizeInProgressRef.current = true;
   }, [manualResizeInProgressRef]);
+
   const handleResizeEnd = useCallback(() => {
     manualResizeInProgressRef.current = false;
   }, [manualResizeInProgressRef]);
+
   const {
     contentViewportRef,
     showWidthControl,
@@ -392,10 +401,11 @@ export function CardEditorPane({
     isEditing,
     isMetaOpen,
     normalizedSelectedCardId,
-    selectedCardId: selectedCard?.id,
+    selectedCardId,
     canonicalCardWidth: CANONICAL_CARD_WIDTH,
     cardSetId,
   });
+
   const shouldKeepDockedToolbarInsideCard =
     shouldDockToolbarToCardTop && isMetaOpen && !embeddedInPager;
 
@@ -411,12 +421,11 @@ export function CardEditorPane({
       ) : undefined,
     [handleToggleBookmark, handleToggleUncertainty, selectedCard],
   );
+
   const questionBlocksForToolbar = draft?.questionBlocks;
   const questionImagesForToolbar = draft?.questionImages;
   const questionActionsTopRight = useMemo(
     () => {
-      // media count updates are derived inside renderMediaDialogButtons,
-      // but we still need this node to refresh when question-side data changes.
       void questionBlocksForToolbar;
       void questionImagesForToolbar;
       return renderMediaDialogButtons("question");
@@ -427,12 +436,11 @@ export function CardEditorPane({
       renderMediaDialogButtons,
     ],
   );
+
   const answerBlocksForToolbar = draft?.answerBlocks;
   const answerImagesForToolbar = draft?.answerImages;
   const answerActionsTopRight = useMemo(
     () => {
-      // media count updates are derived inside renderMediaDialogButtons,
-      // but we still need this node to refresh when answer-side data changes.
       void answerBlocksForToolbar;
       void answerImagesForToolbar;
       return renderMediaDialogButtons("answer");
@@ -466,262 +474,269 @@ export function CardEditorPane({
   }
 
   return (
-    <>
-      <div
-        className={cn(
-          "pt-0 card-editor-right-pane-font",
-          embeddedInPager ? "bg-transparent" : "bg-sidebar",
-          embeddedInPager ? "pb-0" : "pb-4",
-          embeddedInPager ? "h-auto" : "h-full",
-        )}
-      >
+    <BlockEditModeContext.Provider value={true}>
+      <>
         <div
           className={cn(
-            "relative flex",
-            embeddedInPager
-              ? "h-auto overflow-visible"
-              : "h-full overflow-hidden",
+            "pt-0 card-editor-right-pane-font",
+            embeddedInPager ? "bg-transparent" : "bg-sidebar",
+            embeddedInPager ? "pb-0" : "pb-4",
+            embeddedInPager ? "h-auto" : "h-full",
           )}
         >
-          {!hideMetaPanel && (
-            <button
-              type="button"
-              className="absolute top-3 z-20 grid h-8 w-8 place-items-center rounded-full bg-[var(--sidebar-bg)] text-[#334155] surface-control-convex hover:bg-[var(--sidebar-active-bg)]"
-              style={{
-                right: isMetaOpen
-                  ? "calc(var(--ui-panel-width) - var(--ui-space-3))"
-                  : "var(--ui-space-1)",
-                transform: "none",
-              }}
-              onClick={actions.toggleMetaOpen}
-              aria-label={isMetaOpen ? "close meta panel" : "open meta panel"}
-            >
-              {isMetaOpen ? (
-                <ChevronRight className="h-4 w-4" />
-              ) : (
-                <ChevronLeft className="h-4 w-4" />
-              )}
-            </button>
-          )}
-
-          {showWidthControl && (
-            <div className="pointer-events-auto absolute left-3 top-2 z-30 flex">
-              <CardPaneWidthControl
-                modeLabel={isEditing ? "編集幅" : "閲覧幅"}
-                value={activePaneWidthPx}
-                min={activePaneMinWidthPx}
-                max={activePaneMaxWidthPx}
-                defaultValue={activePaneDisplayedDefaultWidthPx}
-                onPreviewChange={(value) =>
-                  previewPaneWidth(activePaneMode, value)
-                }
-                onCommit={(value) => {
-                  void persistPaneWidth(activePaneMode, value);
-                }}
-                onStepDown={() => stepPaneWidth(-CARD_PANE_WIDTH_STEP_PX)}
-                onStepUp={() => stepPaneWidth(CARD_PANE_WIDTH_STEP_PX)}
-                onReset={resetActivePaneWidth}
-              />
-            </div>
-          )}
-
           <div
-            ref={contentViewportRef}
             className={cn(
-              "min-w-0 flex-1 flex flex-col items-center",
-              dockToolbarsToTop ? "overflow-x-visible" : "overflow-x-clip",
-              embeddedInPager ? "overflow-y-visible" : "overflow-y-auto",
-              isEditing
-                ? dockToolbarsToTop
-                  ? embeddedInPager
-                    ? "px-0 pt-0 pb-0"
-                    : "px-0 pt-0 pb-4"
-                  : embeddedInPager
-                    ? "px-0 pt-0 pb-0"
-                    : "px-0 pt-0 pb-4"
-                : "px-0 py-4",
+              "relative flex",
+              embeddedInPager
+                ? "h-auto overflow-visible"
+                : "h-full overflow-hidden",
             )}
-            style={embeddedInPager ? undefined : { background: "#fafafa" }}
           >
-            {isEditing ? (
-              <div
-                className={cn(
-                  "flex w-full flex-col items-center gap-4",
-                  embeddedInPager &&
-                    forcedPaneWidthPx == null &&
-                    (dockToolbarsToTop ? "max-w-[1000px]" : "max-w-[820px]"),
-                )}
+            {!hideMetaPanel && (
+              <button
+                type="button"
+                className="absolute top-3 z-20 grid h-8 w-8 place-items-center rounded-full bg-[var(--sidebar-bg)] text-[#334155] surface-control-convex hover:bg-[var(--sidebar-active-bg)]"
                 style={{
-                  ...(activePaneWidthStyle ?? {}),
-                  ...(shouldReserveWidthControlSpace
-                    ? { paddingTop: CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX }
-                    : {}),
+                  right: isMetaOpen
+                    ? "calc(var(--ui-panel-width) - var(--ui-space-3))"
+                    : "var(--ui-space-1)",
+                  transform: "none",
                 }}
+                onClick={actions.toggleMetaOpen}
+                aria-label={isMetaOpen ? "close meta panel" : "open meta panel"}
               >
+                {isMetaOpen ? (
+                  <ChevronRight className="h-4 w-4" />
+                ) : (
+                  <ChevronLeft className="h-4 w-4" />
+                )}
+              </button>
+            )}
+
+            {showWidthControl && (
+              <div className="pointer-events-auto absolute left-3 top-2 z-30 flex">
+                <CardPaneWidthControl
+                  modeLabel={isEditing ? "編集幅" : "閲覧幅"}
+                  value={activePaneWidthPx}
+                  min={activePaneMinWidthPx}
+                  max={activePaneMaxWidthPx}
+                  defaultValue={activePaneDisplayedDefaultWidthPx}
+                  onPreviewChange={(value) =>
+                    previewPaneWidth(activePaneMode, value)
+                  }
+                  onCommit={(value) => {
+                    void persistPaneWidth(activePaneMode, value);
+                  }}
+                  onStepDown={() => stepPaneWidth(-CARD_PANE_WIDTH_STEP_PX)}
+                  onStepUp={() => stepPaneWidth(CARD_PANE_WIDTH_STEP_PX)}
+                  onReset={resetActivePaneWidth}
+                />
+              </div>
+            )}
+
+            <div
+              ref={contentViewportRef}
+              className={cn(
+                "min-w-0 flex-1 flex flex-col items-center",
+                dockToolbarsToTop ? "overflow-x-visible" : "overflow-x-clip",
+                embeddedInPager ? "overflow-y-visible" : "overflow-y-auto",
+                isEditing
+                  ? dockToolbarsToTop
+                    ? embeddedInPager
+                      ? "px-0 pt-0 pb-0"
+                      : "px-0 pt-0 pb-4"
+                    : embeddedInPager
+                      ? "px-0 pt-0 pb-0"
+                      : "px-0 pt-0 pb-4"
+                  : "px-0 py-4",
+              )}
+              style={embeddedInPager ? undefined : { background: "#fafafa" }}
+            >
+              {isEditing ? (
                 <div
                   className={cn(
-                    "grid w-full max-w-full",
-                    useTwoColumnEditorLayout ? "grid-cols-2" : "grid-cols-1",
-                    pairGapClassName,
+                    "flex w-full flex-col items-center gap-4",
+                    embeddedInPager &&
+                      forcedPaneWidthPx == null &&
+                      (dockToolbarsToTop ? "max-w-[1000px]" : "max-w-[820px]"),
                   )}
-                  style={{ columnGap: `${CARD_EDITOR_PAIR_GAP_PX}px` }}
+                  style={{
+                    ...(activePaneWidthStyle ?? {}),
+                    ...(shouldReserveWidthControlSpace
+                      ? { paddingTop: CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX }
+                      : {}),
+                  }}
                 >
-                  <EditorSidePane
-                    side="question"
-                    blocks={questionBlocks}
-                    onBlocksChange={handleQuestionBlocksChange}
-                    selectionScopeKey={normalizedSelectedCardId}
-                    label="問題"
-                    color="text-indigo-500"
-                    droppableId="question-blocks"
-                    accentColor={settings?.accentColor}
-                    duplicateToOpposite={settings?.duplicateToOpposite}
-                    hideToolbar={hideBlockToolbars}
-                    toolbarMount={toolbarMountQ}
-                    settings={settings}
-                    shouldShowInlineToolbarMount={shouldShowInlineToolbarMount}
-                    setInlineToolbarMount={setToolbarMountQInternal}
-                    hideCardShellHeader={hideCardShellHeader}
-                    shouldDockToolbarToCardTop={shouldDockToolbarToCardTop}
-                    dockToolbarInsideCardEdge={shouldKeepDockedToolbarInsideCard}
-                    setDockedToolbarMount={setToolbarMountQInternal}
-                    shouldShowEditingBadge={shouldShowEditingBadge}
-                    isPagerActiveCard={isPagerActiveCard}
-                    enableBlockActiveState={
-                      !embeddedInPager || isPagerInteractionCard
-                    }
-                    showResizeHandle={showResizeHandleProp}
-                    editorCardFixedScale={editorCardFixedScale}
-                    editorCardHeightPx={editorCardHeightPx}
-                    onHeightChange={handleEditorHeightChange}
-                    onMinHeightChange={handleQuestionMinHeightChange}
-                    onResizeStart={handleResizeStart}
-                    onResizeEnd={handleResizeEnd}
-                    actionsTopLeft={editorActionsTopLeft}
-                    actionsTopRight={questionActionsTopRight}
-                  />
+                  <div
+                    className={cn(
+                      "grid w-full max-w-full",
+                      useTwoColumnEditorLayout ? "grid-cols-2" : "grid-cols-1",
+                      pairGapClassName,
+                    )}
+                    style={{ columnGap: `${CARD_EDITOR_PAIR_GAP_PX}px` }}
+                  >
+                    <EditorSidePane
+                      side="question"
+                      blocks={questionBlocks}
+                      onBlocksChange={handleQuestionBlocksChange}
+                      selectionScopeKey={normalizedSelectedCardId}
+                      label="問題"
+                      color="text-indigo-500"
+                      droppableId="question-blocks"
+                      accentColor={settings?.accentColor}
+                      duplicateToOpposite={settings?.duplicateToOpposite}
+                      hideToolbar={hideBlockToolbars}
+                      toolbarMount={toolbarMountQ}
+                      settings={settings}
+                      shouldShowInlineToolbarMount={shouldShowInlineToolbarMount}
+                      setInlineToolbarMount={setToolbarMountQInternal}
+                      hideCardShellHeader={hideCardShellHeader}
+                      shouldDockToolbarToCardTop={shouldDockToolbarToCardTop}
+                      dockToolbarInsideCardEdge={
+                        shouldKeepDockedToolbarInsideCard
+                      }
+                      setDockedToolbarMount={setToolbarMountQInternal}
+                      shouldShowEditingBadge={shouldShowEditingBadge}
+                      isPagerActiveCard={isPagerActiveCard}
+                      enableBlockActiveState={
+                        !embeddedInPager || isPagerInteractionCard
+                      }
+                      showResizeHandle={showResizeHandleProp}
+                      editorCardFixedScale={editorCardFixedScale}
+                      editorCardHeightPx={editorCardHeightPx}
+                      onHeightChange={handleEditorHeightChange}
+                      onMinHeightChange={handleQuestionMinHeightChange}
+                      onResizeStart={handleResizeStart}
+                      onResizeEnd={handleResizeEnd}
+                      actionsTopLeft={editorActionsTopLeft}
+                      actionsTopRight={questionActionsTopRight}
+                    />
 
-                  <EditorSidePane
-                    side="answer"
-                    blocks={answerBlocks}
-                    onBlocksChange={handleAnswerBlocksChange}
-                    selectionScopeKey={normalizedSelectedCardId}
-                    label="解答"
-                    color="text-emerald-500"
-                    droppableId="answer-blocks"
-                    accentColor={settings?.accentColor}
-                    duplicateToOpposite={settings?.duplicateToOpposite}
-                    hideToolbar={hideBlockToolbars}
-                    toolbarMount={toolbarMountA}
-                    settings={settings}
-                    shouldShowInlineToolbarMount={shouldShowInlineToolbarMount}
-                    setInlineToolbarMount={setToolbarMountAInternal}
-                    hideCardShellHeader={hideCardShellHeader}
-                    shouldDockToolbarToCardTop={shouldDockToolbarToCardTop}
-                    dockToolbarInsideCardEdge={shouldKeepDockedToolbarInsideCard}
-                    setDockedToolbarMount={setToolbarMountAInternal}
-                    shouldShowEditingBadge={shouldShowEditingBadge}
-                    isPagerActiveCard={isPagerActiveCard}
-                    enableBlockActiveState={
-                      !embeddedInPager || isPagerInteractionCard
-                    }
-                    showResizeHandle={showResizeHandleProp}
-                    editorCardFixedScale={editorCardFixedScale}
-                    editorCardHeightPx={editorCardHeightPx}
-                    onHeightChange={handleEditorHeightChange}
-                    onMinHeightChange={handleAnswerMinHeightChange}
-                    onResizeStart={handleResizeStart}
-                    onResizeEnd={handleResizeEnd}
-                    actionsTopLeft={editorActionsTopLeft}
-                    actionsTopRight={answerActionsTopRight}
-                  />
-                </div>
-                {!hideFooterActions && (
-                  <div className="sticky bottom-4 flex w-full justify-end gap-2">
-                    <button
-                      type="button"
-                      className="h-9 rounded-full px-4 hover:bg-black/5 disabled:opacity-50"
-                      onClick={handleCancelEditing}
-                      disabled={isSaving}
-                    >
-                      キャンセル
-                    </button>
-                    <button
-                      type="button"
-                      className="h-9 rounded-full bg-black px-6 text-white hover:opacity-90 disabled:opacity-50"
-                      onClick={() => void handleSaveEditing()}
-                      disabled={isSaving}
-                    >
-                      保存
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              selectedCard && (
-                <div className="flex w-full justify-center">
-                  <div className="w-full" style={activePaneWidthStyle}>
-                    <Flashcard
-                      card={toFlashcardCardLike(selectedCard)}
-                      isFlipped={isFlipped}
-                      onFlip={() => setIsFlipped((prev) => !prev)}
-                      onToggleBookmark={(cardLike) => {
-                        if (!selectedCard) return;
-                        void cardLike;
-                        void handleToggleBookmark(selectedCard);
-                      }}
-                      onToggleUncertainty={(cardLike) => {
-                        if (!selectedCard) return;
-                        void cardLike;
-                        void handleToggleUncertainty(selectedCard);
-                      }}
-                      onEdit={() => {
-                        setIsFlipped(false);
-                        setIsEditing(true);
-                      }}
-                      allowUpscale
-                      maxScale={CARD_PANE_AUTO_MAX_SCALE}
-                      scaleMultiplier={1}
+                    <EditorSidePane
+                      side="answer"
+                      blocks={answerBlocks}
+                      onBlocksChange={handleAnswerBlocksChange}
+                      selectionScopeKey={normalizedSelectedCardId}
+                      label="解答"
+                      color="text-emerald-500"
+                      droppableId="answer-blocks"
+                      accentColor={settings?.accentColor}
+                      duplicateToOpposite={settings?.duplicateToOpposite}
+                      hideToolbar={hideBlockToolbars}
+                      toolbarMount={toolbarMountA}
+                      settings={settings}
+                      shouldShowInlineToolbarMount={shouldShowInlineToolbarMount}
+                      setInlineToolbarMount={setToolbarMountAInternal}
+                      hideCardShellHeader={hideCardShellHeader}
+                      shouldDockToolbarToCardTop={shouldDockToolbarToCardTop}
+                      dockToolbarInsideCardEdge={
+                        shouldKeepDockedToolbarInsideCard
+                      }
+                      setDockedToolbarMount={setToolbarMountAInternal}
+                      shouldShowEditingBadge={shouldShowEditingBadge}
+                      isPagerActiveCard={isPagerActiveCard}
+                      enableBlockActiveState={
+                        !embeddedInPager || isPagerInteractionCard
+                      }
+                      showResizeHandle={showResizeHandleProp}
+                      editorCardFixedScale={editorCardFixedScale}
+                      editorCardHeightPx={editorCardHeightPx}
+                      onHeightChange={handleEditorHeightChange}
+                      onMinHeightChange={handleAnswerMinHeightChange}
+                      onResizeStart={handleResizeStart}
+                      onResizeEnd={handleResizeEnd}
+                      actionsTopLeft={editorActionsTopLeft}
+                      actionsTopRight={answerActionsTopRight}
                     />
                   </div>
+
+                  {!hideFooterActions && (
+                    <div className="sticky bottom-4 flex w-full justify-end gap-2">
+                      <button
+                        type="button"
+                        className="h-9 rounded-full px-4 hover:bg-black/5 disabled:opacity-50"
+                        onClick={handleCancelEditing}
+                        disabled={isSaving}
+                      >
+                        キャンセル
+                      </button>
+                      <button
+                        type="button"
+                        className="h-9 rounded-full bg-black px-6 text-white hover:opacity-90 disabled:opacity-50"
+                        onClick={() => void handleSaveEditing()}
+                        disabled={isSaving}
+                      >
+                        保存
+                      </button>
+                    </div>
+                  )}
                 </div>
-              )
+              ) : (
+                selectedCard && (
+                  <div className="flex w-full justify-center">
+                    <div className="w-full" style={activePaneWidthStyle}>
+                      <Flashcard
+                        card={toFlashcardCardLike(selectedCard)}
+                        isFlipped={isFlipped}
+                        onFlip={() => setIsFlipped((prev) => !prev)}
+                        onToggleBookmark={(cardLike) => {
+                          if (!selectedCard) return;
+                          void cardLike;
+                          void handleToggleBookmark(selectedCard);
+                        }}
+                        onToggleUncertainty={(cardLike) => {
+                          if (!selectedCard) return;
+                          void cardLike;
+                          void handleToggleUncertainty(selectedCard);
+                        }}
+                        onEdit={() => {
+                          setIsFlipped(false);
+                          setIsEditing(true);
+                        }}
+                        allowUpscale
+                        maxScale={CARD_PANE_AUTO_MAX_SCALE}
+                        scaleMultiplier={1}
+                      />
+                    </div>
+                  </div>
+                )
+              )}
+            </div>
+
+            {!hideMetaPanel && isMetaOpen && (
+              <CardMetaPanel
+                card={panelCard}
+                reviewLogs={panelCard?.reviewLogs ?? []}
+                onAddReviewLog={metaPanel.onAddReviewLog}
+                onUpdateLatestReviewLog={metaPanel.onUpdateLatestReviewLog}
+                onDeleteLatestReviewLog={metaPanel.onDeleteLatestReviewLog}
+                onUpdateReviewLogDuration={metaPanel.onUpdateReviewLogDuration}
+                onTitleInputChange={metaPanel.onTitleInputChange}
+                onUpdateTags={metaPanel.onUpdateTags}
+                onToggleDraft={metaPanel.onToggleDraft}
+                onUpdateTitle={metaPanel.onUpdateTitle}
+                delayBonusEnabled={settings?.delayBonusEnabled ?? false}
+                reviewStartNextDay={settings?.reviewStartNextDay ?? true}
+              />
             )}
           </div>
 
-          {!hideMetaPanel && isMetaOpen && (
-            <CardMetaPanel
-              card={panelCard}
-              reviewLogs={panelCard?.reviewLogs ?? []}
-              onAddReviewLog={metaPanel.onAddReviewLog}
-              onUpdateLatestReviewLog={metaPanel.onUpdateLatestReviewLog}
-              onDeleteLatestReviewLog={metaPanel.onDeleteLatestReviewLog}
-              onUpdateReviewLogDuration={metaPanel.onUpdateReviewLogDuration}
-              onTitleInputChange={metaPanel.onTitleInputChange}
-              onUpdateTags={metaPanel.onUpdateTags}
-              onToggleDraft={metaPanel.onToggleDraft}
-              onUpdateTitle={metaPanel.onUpdateTitle}
-              delayBonusEnabled={settings?.delayBonusEnabled ?? false}
-              reviewStartNextDay={settings?.reviewStartNextDay ?? true}
-            />
-          )}
+          <CardEditorPaneMediaDialogs
+            imageDialogSide={imageDialogSide}
+            setImageDialogSide={setImageDialogSide}
+            audioDialogSide={audioDialogSide}
+            setAudioDialogSide={setAudioDialogSide}
+            linkDialogSide={linkDialogSide}
+            setLinkDialogSide={setLinkDialogSide}
+            getDialogImages={getDialogImages}
+            setDialogImages={setDialogImages}
+            getDialogAudios={getDialogAudios}
+            setDialogAudios={setDialogAudios}
+            getReferenceItems={getReferenceItems}
+            setReferenceItems={setReferenceItems}
+          />
         </div>
-
-        <CardEditorPaneMediaDialogs
-          imageDialogSide={imageDialogSide}
-          setImageDialogSide={setImageDialogSide}
-          audioDialogSide={audioDialogSide}
-          setAudioDialogSide={setAudioDialogSide}
-          linkDialogSide={linkDialogSide}
-          setLinkDialogSide={setLinkDialogSide}
-          getDialogImages={getDialogImages}
-          setDialogImages={setDialogImages}
-          getDialogAudios={getDialogAudios}
-          setDialogAudios={setDialogAudios}
-          getReferenceItems={getReferenceItems}
-          setReferenceItems={setReferenceItems}
-        />
-      </div>
-    </>
+      </>
+    </BlockEditModeContext.Provider>
   );
 }

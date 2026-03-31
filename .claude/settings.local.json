@@ -19,7 +19,8 @@
       "Bash(ls -la \"c:\\\\Manifolmia\\\\src\\\\components\\\\folder\\\\explorer\\\\tree\"\" 2>/dev/null || echo \"Directory not found \")",
       "Bash(xargs grep:*)",
       "Bash(python3 -c \":*)",
-      "Bash(grep -r CARDVIEW_NATURAL_INDEX_COMMIT_DELAY /c/Manifolmia/src/pages/card-view/ --include=*.ts --include=*.tsx)"
+      "Bash(grep -r CARDVIEW_NATURAL_INDEX_COMMIT_DELAY /c/Manifolmia/src/pages/card-view/ --include=*.ts --include=*.tsx)",
+      "Bash(find /c/Manifolmia/src -name CardView* -o -name cardView*)"
     ],
     "additionalDirectories": [
       "C:\\Manifolmia\\src\\components\\folder",

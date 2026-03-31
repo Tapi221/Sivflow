@@ -15,6 +15,7 @@ import { MathBlock } from "./MathBlock";
 import { MediaBlock } from "./MediaBlock";
 import { QuestionBlock } from "./QuestionBlock";
 import { TextBlock } from "./TextBlock";
+import { BlockEditModeContext } from "./BlockWrapper";
 
 import { CARD_ROW_PX } from "@/components/card/common/constants";
 import {
