@@ -80,14 +80,15 @@ export function useFlashcardCornerControls({
       );
     }
 
-    if (onToggleUncertainty || onToggleBookmark) {
+    if (onToggleUncertainty || onToggleBookmark || hasUncertainty || isBookmarked) {
       actionsTopLeft.push(
         <CardCornerActions
           key="corner-actions"
-          onHelp={onToggleUncertainty ? () => onToggleUncertainty(card) : undefined}
-          onStar={onToggleBookmark ? () => onToggleBookmark(card) : undefined}
+          onHelp={onToggleUncertainty ? () => onToggleUncertainty(card) : hasUncertainty ? () => {} : undefined}
+          onStar={onToggleBookmark ? () => onToggleBookmark(card) : isBookmarked ? () => {} : undefined}
           helpActive={hasUncertainty}
           starActive={isBookmarked}
+          disabled={!onToggleUncertainty && !onToggleBookmark}
         />,
       );
     }

@@ -32,7 +32,7 @@ export function CardCornerActions({
   if (!onHelp && !onStar) return null;
 
   const buttonBaseClass =
-    "rounded-full h-7 w-7 min-h-0 min-w-0 transition-colors flex items-center justify-center bg-transparent hover:bg-transparent active:bg-transparent " +
+    "rounded-full h-7 w-7 min-h-0 min-w-0 flex items-center justify-center bg-transparent hover:bg-transparent " +
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40";
   const disabledClass = disabled ? "opacity-50 pointer-events-none" : "";
 
@@ -61,11 +61,11 @@ export function CardCornerActions({
           )}
         >
           <CircleHelp
-            size={18}
-            strokeWidth={1.6}
+            size={14}
+            strokeWidth={1.2}
             className={cn(
               CARD_ACTION_ICON_CLASS,
-              "!h-[18px] !w-[18px] md:!h-[18px] md:!w-[18px]",
+              "!h-[14px] !w-[14px] md:!h-[14px] md:!w-[14px]",
               helpActive && "opacity-90",
             )}
           />
@@ -95,12 +95,12 @@ export function CardCornerActions({
           )}
         >
           <Star
-            size={18}
-            strokeWidth={1.6}
+            size={14}
+            strokeWidth={1.2}
             className={cn(
               CARD_ACTION_ICON_CLASS,
-              "!h-[18px] !w-[18px] md:!h-[18px] md:!w-[18px]",
-              starActive && "fill-current",
+              "!h-[14px] !w-[14px] md:!h-[14px] md:!w-[14px]",
+              starActive && "fill-none",
             )}
           />
         </button>

@@ -1,8 +1,12 @@
-import { Plus, Image as ImageIcon, Link as LinkIcon } from "@/ui/icons";
+import { Image as ImageIcon, Link as LinkIcon } from "@/ui/icons";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { sanitizeReferences } from "@/components/card/editor/cardEditorUtils";
-import { CARD_ACTION_ICON_CLASS } from "@/components/card/common/constants";
+import {
+  CARD_ACTION_ICON_CLASS,
+  CARD_ACTION_BG_CLASS,
+  CARD_ACTION_COLOR_IDLE_CLASS,
+} from "@/components/card/common/constants";
 import { cn } from "@/lib/utils";
 
 import type { CardBlock, ReferenceBlockData, UploadedImage } from "@/types";
@@ -147,8 +151,11 @@ export function useCardMediaDialogs({
     const imageCount = getImageCount(side);
     const audioCount = getAudioCount(side);
     const linkCount = getLinkCount(side);
-    const base =
-      "inline-flex shrink-0 items-center justify-center gap-1 rounded-full h-7 min-h-0 min-w-0 px-2 text-[10px] font-bold leading-none whitespace-nowrap";
+    const base = cn(
+      "inline-flex shrink-0 items-center justify-center gap-0.5 rounded-full h-7 min-h-0 min-w-0 px-1.5 text-[10px] font-semibold leading-none whitespace-nowrap",
+      CARD_ACTION_BG_CLASS,
+      CARD_ACTION_COLOR_IDLE_CLASS,
+    );
 
     const openLinkDialog = () => {
       if (getReferenceItems(side).length === 0) {
@@ -164,18 +171,17 @@ export function useCardMediaDialogs({
       >
         <button
           type="button"
-          className={cn(base, "bg-slate-50 text-slate-500 hover:bg-slate-100")}
+          className={base}
           onClick={() => setImageDialogSide(side)}
           aria-label="画像を追加"
         >
           <ImageIcon className={cn(CARD_ACTION_ICON_CLASS, "shrink-0")} />
-          <Plus className={cn(CARD_ACTION_ICON_CLASS, "shrink-0")} />
           {imageCount > 0 ? <span>x{imageCount}</span> : null}
         </button>
 
         <button
           type="button"
-          className={cn(base, "bg-slate-50 text-slate-500 hover:bg-slate-100")}
+          className={base}
           onClick={() => setAudioDialogSide(side)}
           aria-label="音声を追加"
         >
@@ -185,22 +191,17 @@ export function useCardMediaDialogs({
           >
             ♪
           </span>
-          <Plus className={cn(CARD_ACTION_ICON_CLASS, "shrink-0")} />
           {audioCount > 0 ? <span>x{audioCount}</span> : null}
         </button>
 
         <button
           type="button"
-          className={cn(base, "bg-slate-50 text-slate-500 hover:bg-slate-100")}
+          className={base}
           onClick={openLinkDialog}
           aria-label="リンクを追加"
         >
           <LinkIcon className={cn(CARD_ACTION_ICON_CLASS, "shrink-0")} />
-          {linkCount > 0 ? (
-            <span>x{linkCount}</span>
-          ) : (
-            <Plus className={cn(CARD_ACTION_ICON_CLASS, "shrink-0")} />
-          )}
+          {linkCount > 0 ? <span>x{linkCount}</span> : null}
         </button>
       </div>
     );

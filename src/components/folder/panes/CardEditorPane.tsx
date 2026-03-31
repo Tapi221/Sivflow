@@ -64,7 +64,6 @@ type FlashcardCardLike = Record<string, unknown> & {
 
 const CARD_PANE_AUTO_MAX_SCALE = 4;
 const CARD_EDITOR_PAIR_GAP_PX = 16;
-const CARD_PAGER_EDIT_RULED_OFFSET_TOP_PX = 20;
 const EMPTY_BLOCKS: CardBlock[] = [];
 
 type EditorSidePaneProps = {
@@ -148,9 +147,6 @@ function EditorSidePaneInner({
         allowUpscale
         maxScale={CARD_PANE_AUTO_MAX_SCALE}
         scaleMultiplier={1}
-        ruledOffsetPx={
-          hideCardShellHeader ? CARD_PAGER_EDIT_RULED_OFFSET_TOP_PX : undefined
-        }
         fixedScale={editorCardFixedScale}
         topAttachment={
           shouldDockToolbarToCardTop ? (
@@ -189,8 +185,8 @@ function EditorSidePaneInner({
         onMinHeightChange={onMinHeightChange}
         onResizeStart={onResizeStart}
         onResizeEnd={onResizeEnd}
-        actionsTopLeft={hideCardShellHeader ? undefined : actionsTopLeft}
-        actionsTopRight={hideCardShellHeader ? undefined : actionsTopRight}
+        actionsTopLeft={actionsTopLeft}
+        actionsTopRight={actionsTopRight}
       >
         <SharedCardContent
           mode="edit"
@@ -423,12 +419,9 @@ export function CardEditorPane({
       // but we still need this node to refresh when question-side data changes.
       void questionBlocksForToolbar;
       void questionImagesForToolbar;
-      return hideCardShellHeader
-        ? undefined
-        : renderMediaDialogButtons("question");
+      return renderMediaDialogButtons("question");
     },
     [
-      hideCardShellHeader,
       questionBlocksForToolbar,
       questionImagesForToolbar,
       renderMediaDialogButtons,
@@ -442,10 +435,9 @@ export function CardEditorPane({
       // but we still need this node to refresh when answer-side data changes.
       void answerBlocksForToolbar;
       void answerImagesForToolbar;
-      return hideCardShellHeader ? undefined : renderMediaDialogButtons("answer");
+      return renderMediaDialogButtons("answer");
     },
     [
-      hideCardShellHeader,
       answerBlocksForToolbar,
       answerImagesForToolbar,
       renderMediaDialogButtons,

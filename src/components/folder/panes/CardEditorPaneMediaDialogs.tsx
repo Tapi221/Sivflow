@@ -1,3 +1,4 @@
+import React from "react";
 import { LinkEditor } from "@/components/card/editor/LinkEditor";
 import MediaUploader from "@/components/card/media/MediaUploader";
 import {
@@ -9,19 +10,42 @@ import {
 import { memo } from "react";
 import type { UploadedImage } from "@/types";
 
+type Side = "question" | "answer";
+
+interface MediaDialogProps {
+  title: string;
+  open: boolean;
+  onClose: () => void;
+  maxWidth?: string;
+  children: React.ReactNode;
+}
+
+function MediaDialog({ title, open, onClose, maxWidth = "max-w-2xl", children }: MediaDialogProps) {
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className={maxWidth}>
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+        </DialogHeader>
+        {children}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 interface CardEditorPaneMediaDialogsProps {
-  imageDialogSide: "question" | "answer" | null;
-  setImageDialogSide: (side: "question" | "answer" | null) => void;
-  audioDialogSide: "question" | "answer" | null;
-  setAudioDialogSide: (side: "question" | "answer" | null) => void;
-  linkDialogSide: "question" | "answer" | null;
-  setLinkDialogSide: (side: "question" | "answer" | null) => void;
-  getDialogImages: (side: "question" | "answer") => UploadedImage[];
-  setDialogImages: (side: "question" | "answer", next: UploadedImage[]) => void;
-  getDialogAudios: (side: "question" | "answer") => unknown[];
-  setDialogAudios: (side: "question" | "answer", next: unknown[]) => void;
-  getReferenceItems: (side: "question" | "answer") => unknown[];
-  setReferenceItems: (side: "question" | "answer", next: unknown[]) => void;
+  imageDialogSide: Side | null;
+  setImageDialogSide: (side: Side | null) => void;
+  audioDialogSide: Side | null;
+  setAudioDialogSide: (side: Side | null) => void;
+  linkDialogSide: Side | null;
+  setLinkDialogSide: (side: Side | null) => void;
+  getDialogImages: (side: Side) => UploadedImage[];
+  setDialogImages: (side: Side, next: UploadedImage[]) => void;
+  getDialogAudios: (side: Side) => unknown[];
+  setDialogAudios: (side: Side, next: unknown[]) => void;
+  getReferenceItems: (side: Side) => unknown[];
+  setReferenceItems: (side: Side, next: unknown[]) => void;
 }
 
 function CardEditorPaneMediaDialogsInner({
@@ -40,65 +64,49 @@ function CardEditorPaneMediaDialogsInner({
 }: CardEditorPaneMediaDialogsProps) {
   return (
     <>
-      <Dialog
-        modal={false}
+      <MediaDialog
+        title="画像を追加"
         open={Boolean(imageDialogSide)}
-        onOpenChange={(open) => !open && setImageDialogSide(null)}
+        onClose={() => setImageDialogSide(null)}
+        maxWidth="max-w-3xl"
       >
-        <DialogContent nonModal className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>画像を追加</DialogTitle>
-          </DialogHeader>
-          {imageDialogSide && (
-            <MediaUploader
-              type="image"
-              urls={getDialogImages(imageDialogSide)}
-              onChange={(next) =>
-                setDialogImages(imageDialogSide, next as UploadedImage[])
-              }
-              maxFiles={10}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+        {imageDialogSide && (
+          <MediaUploader
+            type="image"
+            urls={getDialogImages(imageDialogSide)}
+            onChange={(next) => setDialogImages(imageDialogSide, next as UploadedImage[])}
+            maxFiles={10}
+          />
+        )}
+      </MediaDialog>
 
-      <Dialog
+      <MediaDialog
+        title="音声を追加"
         open={Boolean(audioDialogSide)}
-        onOpenChange={(open) => !open && setAudioDialogSide(null)}
+        onClose={() => setAudioDialogSide(null)}
       >
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>音声を追加</DialogTitle>
-          </DialogHeader>
-          {audioDialogSide && (
-            <MediaUploader
-              type="audio"
-              urls={getDialogAudios(audioDialogSide)}
-              onChange={(next) =>
-                setDialogAudios(audioDialogSide, next as unknown[])
-              }
-              maxFiles={10}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+        {audioDialogSide && (
+          <MediaUploader
+            type="audio"
+            urls={getDialogAudios(audioDialogSide)}
+            onChange={(next) => setDialogAudios(audioDialogSide, next as unknown[])}
+            maxFiles={10}
+          />
+        )}
+      </MediaDialog>
 
-      <Dialog
+      <MediaDialog
+        title="リンクを追加"
         open={Boolean(linkDialogSide)}
-        onOpenChange={(open) => !open && setLinkDialogSide(null)}
+        onClose={() => setLinkDialogSide(null)}
       >
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>リンクを追加</DialogTitle>
-          </DialogHeader>
-          {linkDialogSide && (
-            <LinkEditor
-              items={getReferenceItems(linkDialogSide)}
-              onChange={(next) => setReferenceItems(linkDialogSide, next)}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+        {linkDialogSide && (
+          <LinkEditor
+            items={getReferenceItems(linkDialogSide)}
+            onChange={(next) => setReferenceItems(linkDialogSide, next)}
+          />
+        )}
+      </MediaDialog>
     </>
   );
 }
