@@ -56,6 +56,7 @@ function InactiveEditorPairPreviewInner({
   card,
   paneWidthPx,
 }: InactiveEditorPairPreviewProps) {
+  console.log(`InactiveEditorPairPreview render: cardId=${card.id}`);
   const cardLike = card as unknown as FlashcardCardLike;
   const questionBlocks = React.useMemo(
     () => resolvePreviewSideBlocks(cardLike, "question"),
@@ -186,6 +187,7 @@ function DesktopCardSurfaceInner({
   if (isGlobalEditing) {
     const shouldMountEditor = isActive || mountEditor || hasFocusWithin;
     const canInteractWithEditor = isActive || hasFocusWithin;
+    console.log(`DesktopCardSurface: card ${card.id}, isActive=${isActive}, mountEditor=${mountEditor}, hasFocusWithin=${hasFocusWithin}, shouldMountEditor=${shouldMountEditor}`);
     if (!shouldMountEditor) {
       return <InactiveEditorPairPreview card={card} paneWidthPx={editPaneWidthPx} />;
     }

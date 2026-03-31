@@ -165,6 +165,10 @@ function VerticalCardPagerFn<T>({
   const activeIndexRef = useRef(activeIndex);
   activeIndexRef.current = activeIndex;
 
+  React.useEffect(() => {
+    console.log(`VerticalCardPager: activeIndex changed to ${activeIndex}`);
+  }, [activeIndex]);
+
   const updateVisibleRange = useCallback(() => {
     const container = containerRef.current;
     if (!container) return;

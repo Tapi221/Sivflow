@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  VerticalCardPager,
-  ACTIVE_INDEX_RENDER_RADIUS,
-} from "@/features/review/VerticalCardPager";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  ACTIVE_INDEX_RENDER_RADIUS,
+  VerticalCardPager,
+} from "@/features/review/VerticalCardPager";
 import type { Card, UserSettings } from "@/types";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 /**
  * 急スクロール時（idle preload 範囲外へのジャンプ）で画像の decode が
@@ -69,13 +69,13 @@ function CardLoadingPreview({ card }: { card: Card }) {
 
 import { useAuthSession } from "@/contexts/AuthContext";
 import { useCardImagePreloader } from "@/hooks/card/useCardImagePreloader";
+import { DesktopCardSurface } from "@/pages/card-view/components/DesktopCardSurface";
 import {
   CARDVIEW_NATURAL_INDEX_COMMIT_DELAY_EDIT_MS,
   CARDVIEW_NATURAL_INDEX_COMMIT_DELAY_VIEW_MS,
   CARDVIEW_PAGER_PADDING_BLOCK,
   CARDVIEW_PAGER_PADDING_INLINE,
 } from "@/pages/card-view/constants";
-import { DesktopCardSurface } from "@/pages/card-view/components/DesktopCardSurface";
 
 interface CardViewDesktopProps {
   isLoading: boolean;
@@ -118,9 +118,6 @@ export function CardViewDesktop({
 }: CardViewDesktopProps) {
   const { currentUser } = useAuthSession();
 
-  const safeCurrentIndexRef = useRef(safeCurrentIndex);
-  safeCurrentIndexRef.current = safeCurrentIndex;
-
   const [renderRange, setRenderRange] = useState<{
     start: number;
     end: number;
@@ -158,6 +155,7 @@ export function CardViewDesktop({
 
   const renderCard = useCallback(
     (card: Card, idx: number, isActive: boolean) => {
+      console.log(`renderCard: idx=${idx}, isActive=${isActive}, cardId=${card.id}`);
       const readyToDisplay =
         isActive ||
         isGlobalEditing ||
@@ -166,9 +164,6 @@ export function CardViewDesktop({
       if (!readyToDisplay) {
         return <CardLoadingPreview card={card} />;
       }
-
-      const shouldKeepEditorMounted =
-        isGlobalEditing && Math.abs(idx - safeCurrentIndexRef.current) <= 1;
 
       return (
         <DesktopCardSurface
@@ -181,7 +176,6 @@ export function CardViewDesktop({
           folderId={folderId}
           cardSetId={cardSetId}
           cardsOverride={editingCardsOverride}
-          mountEditor={shouldKeepEditorMounted}
           saveSignal={saveSignal}
           onFlip={onFlip}
           onEdit={onEdit}

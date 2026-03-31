@@ -284,6 +284,9 @@ export function CardEditorPane({
   });
   const { settings, isMetaOpen, session, layout, content, actions } =
     controller;
+
+  console.log(`CardEditorPane render: cardId=${normalizedSelectedCardId}, isPagerActiveCard=${isPagerActiveCard}, isPagerInteractionCard=${isPagerInteractionCard}, embeddedInPager=${embeddedInPager}`);
+
   const {
     draft,
     normalizedSelectedCardId,
