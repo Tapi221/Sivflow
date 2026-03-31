@@ -2,7 +2,8 @@ import { ImageFrame } from "@/components/card/blocks/ImageFrame";
 import { Button } from "@/components/ui/button";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { storage } from "@/services/firebase";
-import { getOrCreateImageBlobUrl } from "@/services/imageBlobUrlSessionCache";
+import { useLocalImageBlobUrl } from "@/hooks/image/useLocalImageBlobUrl";
+import { getCachedRemoteUrl } from "@/services/imagePreloadCache";
 import { getLocalDb } from "@/services/localDB";
 import {
   Copy,
@@ -13,7 +14,35 @@ import {
   Volume2,
 } from "@/ui/icons";
 import { getDownloadURL, ref as storageRef } from "firebase/storage";
-import React, { useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+
+/**
+ * render-null ヘルパー。
+ *
+ * ImageGallery はカードリストを扱うため、hooks をループ内で呼べない。
+ * このコンポーネントを 1 画像 1 インスタンスでレンダリングすることで、
+ * useLocalImageBlobUrl の lifecycle（pin/unpin）を per-item で適用する。
+ *
+ * - url が解決されたら onResolved(localFileId, url) を呼ぶ。
+ * - unmount 時は hook の cleanup が自動的に unpin する。
+ */
+function LocalBlobUrlResolverEffect({
+  localFileId,
+  userId,
+  onResolved,
+}: {
+  localFileId: string;
+  userId: string | undefined;
+  onResolved: (localFileId: string, url: string | null) => void;
+}) {
+  const { url, loading } = useLocalImageBlobUrl(localFileId, userId);
+  useEffect(() => {
+    if (!loading) {
+      onResolved(localFileId, url);
+    }
+  }, [localFileId, url, loading, onResolved]);
+  return null;
+}
 
 interface AudioPlayerProps {
   urls: string[];
@@ -92,13 +121,16 @@ interface ImageGalleryProps {
 
 export function ImageGallery({ urls, items }: ImageGalleryProps) {
   const { currentUser } = useAuthSession();
-  const [failedImages, setFailedImages] = useState(new Set());
+  const [failedImages, setFailedImages] = useState(new Set<number>());
   const [naturalSizeMap, setNaturalSizeMap] = useState<
     Record<number, { w: number; h: number }>
   >({});
   const [resolvedLocalUrlMap, setResolvedLocalUrlMap] = useState<
     Record<string, string>
   >({});
+  const [failedLocalFileIds, setFailedLocalFileIds] = useState<Set<string>>(
+    () => new Set(),
+  );
   const [resolvedRemoteUrlMap, setResolvedRemoteUrlMap] = useState<
     Record<string, string>
   >({});
@@ -124,9 +156,40 @@ export function ImageGallery({ urls, items }: ImageGalleryProps) {
         }
         const assetId = entry.assetId ?? null;
         const localFileId = entry.localFileId ?? assetId;
+        //
+        // URL 優先順位（表示成功率の高い順）:
+        //
+        //   1. fallbackLocal    — 現セッションで IndexedDB から生成した blob URL。
+        //                         同一セッション内で作成済みのため最も信頼できる。
+        //
+        //   2. legacyLocalUrl   — カードデータの localUrl フィールド（非 blob）。
+        //                         端末ローカルで確認できる URL。
+        //                         blob: URL は sanitizeLegacyUrl で除去済みなので
+        //                         ここに来る場合は有効な非 blob パス。
+        //
+        //   3. cachedRemoteUrl  — useCardImagePreloader が同一セッションで取得した
+        //                         Firebase Storage URL。プリロード経路と同じ URL を
+        //                         使うことで、preload 済みブラウザキャッシュを活かせる。
+        //
+        //   4. fallbackRemote   — ImageGallery 自身が Firebase から取得した URL。
+        //                         cachedRemoteUrl より取得タイミングが遅い場合がある。
+        //
+        //   5. legacyRemoteUrl  — カードデータの remoteUrl フィールド（非 blob）。
+        //                         古い Firebase 署名 URL の可能性があり、期限切れリスク。
+        //                         上位で解決できなかった最終手段。
+        //
+        //   6. legacyUrl        — カードデータの url フィールド（非 blob）。
+        //                         旧データ形式の互換フィールド。最低優先。
+        //
+        // 【旧実装の問題点】
+        //   legacyRemoteUrl を先頭に置いていたため、現セッションで有効な local blob
+        //   よりも古い remoteUrl が優先された。remoteUrl が期限切れなら失敗 → failedImages
+        //   に積まれ、その後 blob が解決されても表示されない状態に陥っていた。
+        //
         const fallbackLocal = localFileId
           ? (resolvedLocalUrlMap[localFileId] ?? "")
           : "";
+        const cachedRemoteUrl = assetId ? (getCachedRemoteUrl(assetId) ?? "") : "";
         const fallbackRemote = assetId
           ? (resolvedRemoteUrlMap[assetId] ?? "")
           : "";
@@ -138,11 +201,12 @@ export function ImageGallery({ urls, items }: ImageGalleryProps) {
             entry.remoteUrl ?? entry.localUrl ?? entry.url ?? localFileId ?? "",
           localFileId,
           url:
-            legacyRemoteUrl ||
+            fallbackLocal ||
             legacyLocalUrl ||
-            legacyUrl ||
+            cachedRemoteUrl ||
             fallbackRemote ||
-            fallbackLocal,
+            legacyRemoteUrl ||
+            legacyUrl,
           assetId,
           scale: entry.scale ?? 1,
           x: entry.x ?? 0,
@@ -159,66 +223,114 @@ export function ImageGallery({ urls, items }: ImageGalleryProps) {
 
   React.useEffect(() => {
     setNaturalSizeMap({});
+    setFailedImages(new Set());
   }, [urlKey]);
 
-  React.useEffect(() => {
-    const source = (items && items.length > 0 ? items : urls) as Array<
-      unknown
-    >;
-    const candidates = source.filter(
-      (entry) => typeof entry === "object" && Boolean(entry),
-    );
-    const hasUsableLegacyUrl = (entry: unknown) => {
-      const values = [entry?.remoteUrl, entry?.localUrl, entry?.url];
-      return values.some(
-        (v) =>
-          typeof v === "string" &&
-          !v.startsWith("blob:") &&
-          v.trim().length > 0,
-      );
-    };
-    const unresolved = candidates.filter((entry) => {
-      if (typeof entry !== "object" || entry === null) return false;
+  // ── ローカル blob URL 解決のためのデータ収集 ──────────────────────────
+  // 非 blob の直接 URL を持たず、localFileId または assetId がある items だけが
+  // LocalBlobUrlResolverEffect の対象になる。
+  const unresolvedLocalItems = React.useMemo(() => {
+    const source = (items && items.length > 0 ? items : urls) as Array<unknown>;
+    const result: Array<{ localFileId: string; assetId: string | null }> = [];
+    for (const entry of source) {
+      if (typeof entry !== "object" || !entry) continue;
       const media = entry as {
+        remoteUrl?: unknown;
+        localUrl?: unknown;
+        url?: unknown;
         localFileId?: string | null;
         assetId?: string | null;
       };
-      return !hasUsableLegacyUrl(entry) && Boolean(media.localFileId || media.assetId);
+      const hasNonBlob = [media.remoteUrl, media.localUrl, media.url].some(
+        (v) =>
+          typeof v === "string" && !v.startsWith("blob:") && v.trim().length > 0,
+      );
+      if (hasNonBlob) continue;
+      const localFileId = media.localFileId ?? media.assetId ?? null;
+      if (!localFileId) continue;
+      result.push({ localFileId, assetId: media.assetId ?? null });
+    }
+    return result;
+  }, [items, urls]);
+
+  // ローカル blob 解決結果のコールバック（stable 参照を保つため useCallback）
+  const handleLocalResolved = useCallback(
+    (localFileId: string, url: string | null) => {
+      if (url) {
+        setResolvedLocalUrlMap((prev) => {
+          if (prev[localFileId] === url) return prev;
+          return { ...prev, [localFileId]: url };
+        });
+      } else {
+        // 解決失敗: pending → failed に遷移させる
+        setFailedLocalFileIds((prev) => {
+          if (prev.has(localFileId)) return prev;
+          const next = new Set(prev);
+          next.add(localFileId);
+          return next;
+        });
+      }
+    },
+    [],
+  );
+
+  // ── Firebase Storage fallback ─────────────────────────────────────────
+  // ローカル blob が取得できなかった（resolvedLocalUrlMap に入っていない）が
+  // assetId を持つ items に対して Firebase から URL を取得する。
+  const unresolvedRemoteItems = React.useMemo(() => {
+    return unresolvedLocalItems.filter(
+      ({ localFileId, assetId }) =>
+        !resolvedLocalUrlMap[localFileId] && Boolean(assetId),
+    );
+  }, [unresolvedLocalItems, resolvedLocalUrlMap]);
+
+  useEffect(() => {
+    if (unresolvedRemoteItems.length === 0) return;
+    const userId = currentUser?.uid;
+    if (!userId) return;
+
+    // ── preload キャッシュから即時反映 ──────────────────────────────────
+    // useCardImagePreloader が同一セッションで既に Firebase URL を取得している場合、
+    // imagePreloadCache.remoteUrlCache に格納済み。Firebase fetch を待たずに
+    // resolvedRemoteUrlMap へ即反映することで preload → 表示のラグを解消する。
+    const needsFetch: typeof unresolvedRemoteItems = [];
+    setResolvedRemoteUrlMap((prev) => {
+      let changed = false;
+      const next = { ...prev };
+      for (const item of unresolvedRemoteItems) {
+        if (!item.assetId) {
+          needsFetch.push(item);
+          continue;
+        }
+        const cached = getCachedRemoteUrl(item.assetId);
+        if (cached) {
+          // キャッシュヒット: 同じ値なら state を変えない
+          if (next[item.assetId] !== cached) {
+            next[item.assetId] = cached;
+            changed = true;
+          }
+          // Firebase fetch 不要
+        } else {
+          needsFetch.push(item);
+        }
+      }
+      return changed ? next : prev;
     });
-    if (unresolved.length === 0) return;
+
+    if (needsFetch.length === 0) return;
 
     let cancelled = false;
     const run = async () => {
-      const userId = currentUser?.uid;
-      const localEntries = await Promise.all(
-        unresolved.map(async (entry) => {
-          if (typeof entry !== "object" || entry === null) return null;
-          const media = entry as {
-            assetId?: string | null;
-            localFileId?: string | null;
-          };
-          const assetId = media.assetId ?? null;
-          const localBlobId = media.localFileId ?? assetId;
-          if (localBlobId) {
-            const url = await getOrCreateImageBlobUrl(localBlobId, { userId });
-            if (url) {
-              if (import.meta.env.DEV) {
-                console.info("[CardMedia] image source=local", {
-                  assetId,
-                  localBlobId,
-                });
-              }
-              return { type: "local" as const, id: localBlobId, url };
-            }
-          }
-          if (!assetId || !userId) return null;
-          const db = await getLocalDb(userId);
-          const asset = (await db.images.get(assetId)) as
-            | { remoteKey?: string }
-            | undefined;
-          const remoteKey = asset?.remoteKey;
-          if (!remoteKey) return null;
+      const entries = await Promise.all(
+        needsFetch.map(async ({ assetId }) => {
+          if (!assetId) return null;
           try {
+            const db = await getLocalDb(userId);
+            const asset = (await db.images.get(assetId)) as
+              | { remoteKey?: string }
+              | undefined;
+            const remoteKey = asset?.remoteKey;
+            if (!remoteKey) return null;
             const remoteUrl = await getDownloadURL(
               storageRef(storage, remoteKey),
             );
@@ -228,44 +340,30 @@ export function ImageGallery({ urls, items }: ImageGalleryProps) {
                 remoteKey,
               });
             }
-            return { type: "remote" as const, id: assetId, url: remoteUrl };
+            return { id: assetId, url: remoteUrl };
           } catch {
             return null;
           }
         }),
       );
       if (cancelled) return;
-      setResolvedLocalUrlMap((prev) => {
-        const next = { ...prev };
-        let changed = false;
-        for (const pair of localEntries) {
-          if (!pair || pair.type !== "local") continue;
-          const { id, url } = pair;
-          if (next[id] === url) continue;
-          next[id] = url;
-          changed = true;
-        }
-        return changed ? next : prev;
-      });
       setResolvedRemoteUrlMap((prev) => {
-        const next = { ...prev };
         let changed = false;
-        for (const pair of localEntries) {
-          if (!pair || pair.type !== "remote") continue;
-          const { id, url } = pair;
-          if (next[id] === url) continue;
-          next[id] = url;
+        const next = { ...prev };
+        for (const pair of entries) {
+          if (!pair) continue;
+          if (next[pair.id] === pair.url) continue;
+          next[pair.id] = pair.url;
           changed = true;
         }
         return changed ? next : prev;
       });
     };
     void run();
-
     return () => {
       cancelled = true;
     };
-  }, [currentUser?.uid, items, urls]);
+  }, [currentUser?.uid, unresolvedRemoteItems]);
 
   const handleImageError = (index: number) => {
     setFailedImages((prev) => new Set(prev).add(index));
@@ -339,10 +437,32 @@ export function ImageGallery({ urls, items }: ImageGalleryProps) {
     [],
   );
 
+  // item.localFileId が解決待ち（pending）かどうか判定するための Set
+  const pendingLocalFileIds = React.useMemo(() => {
+    const s = new Set<string>();
+    for (const { localFileId } of unresolvedLocalItems) {
+      if (!resolvedLocalUrlMap[localFileId] && !failedLocalFileIds.has(localFileId)) {
+        s.add(localFileId);
+      }
+    }
+    return s;
+  }, [unresolvedLocalItems, resolvedLocalUrlMap, failedLocalFileIds]);
+
   if (!resolvedItems || resolvedItems.length === 0) return null;
 
   return (
     <>
+      {/* ローカル blob URL を per-item で解決・pin する。
+          LocalBlobUrlResolverEffect は DOM を生成しない。
+          unmount 時に hook の cleanup が unpin を保証する。 */}
+      {unresolvedLocalItems.map(({ localFileId }) => (
+        <LocalBlobUrlResolverEffect
+          key={localFileId}
+          localFileId={localFileId}
+          userId={currentUser?.uid}
+          onResolved={handleLocalResolved}
+        />
+      ))}
       <div className="w-full">
         {resolvedItems.map((item, index) => (
           <div key={item.key || index} className="relative group">
@@ -396,6 +516,10 @@ export function ImageGallery({ urls, items }: ImageGalleryProps) {
                   </Button>
                 </div>
               </>
+            ) : item.localFileId && pendingLocalFileIds.has(item.localFileId) ? (
+              <div className="w-full h-48 bg-slate-100 flex items-center justify-center text-slate-400">
+                <div className="w-6 h-6 border-2 border-slate-300 border-t-slate-400 rounded-full animate-spin" />
+              </div>
             ) : (
               <div className="w-full h-48 bg-slate-100 flex items-center justify-center text-slate-400 flex-col gap-2">
                 <ImageIcon className="w-8 h-8 text-slate-300" />

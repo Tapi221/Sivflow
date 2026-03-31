@@ -210,7 +210,6 @@ export function ImageFrame({
         alt={alt}
         className={cn("absolute top-0 h-auto max-w-none", imgClassName)}
         style={{ width: `${safeScale * 100}%`, left: `${leftPx}px` }}
-        loading="lazy"
         decoding="async"
         draggable={false}
         onClick={() => {

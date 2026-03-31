@@ -14,6 +14,10 @@ type CacheEntry = {
 const MAX_CACHE_ENTRIES = 80;
 const cache = new Map<string, CacheEntry>();
 
+// eviction / revoke の累積カウンタ（モジュールスコープ、セッション単位）
+let _evictCount = 0;
+let _revokeCount = 0;
+
 const makeScopedId = (id: string, options?: BlobScopeOptions): string => {
   const userId = options?.userId?.trim();
   return userId ? `${userId}:${id}` : id;
@@ -25,6 +29,7 @@ const revokeBlobUrl = (url: string): void => {
     return;
   try {
     URL.revokeObjectURL(url);
+    _revokeCount++;
   } catch (error) {
     console.warn("[imageBlobUrlSessionCache] revokeObjectURL failed", {
       url,
@@ -55,6 +60,7 @@ const evictIfNeeded = (): void => {
     cleanupStaleUrls(entry);
     revokeBlobUrl(entry.url);
     cache.delete(key);
+    _evictCount++;
   }
 };
 
@@ -135,6 +141,67 @@ export const removeImageBlobUrl = (
   cache.delete(key);
 };
 
+/**
+ * blob URL を「使用中」としてマークする。
+ *
+ * evictIfNeeded は pinCount > 0 のエントリを eviction 対象外にする。
+ * これにより、<img src={blobUrl}> がマウントされている間は
+ * blob URL が revoke されることはない。
+ *
+ * 使い方:
+ *   mount 時: pinImageBlobUrl(localBlobId, { userId })
+ *   unmount 時: unpinImageBlobUrl(localBlobId, { userId })
+ */
+export const pinImageBlobUrl = (
+  id: string | null | undefined,
+  options?: BlobScopeOptions,
+): void => {
+  if (!id) return;
+  const key = makeScopedId(id, options);
+  const entry = cache.get(key);
+  if (!entry) return;
+  entry.pinCount += 1;
+};
 
+/**
+ * blob URL の使用中マークを解除する。
+ * pinCount が 0 になった時点で staleUrls を revoke する。
+ */
+export const unpinImageBlobUrl = (
+  id: string | null | undefined,
+  options?: BlobScopeOptions,
+): void => {
+  if (!id) return;
+  const key = makeScopedId(id, options);
+  const entry = cache.get(key);
+  if (!entry) return;
+  entry.pinCount = Math.max(0, entry.pinCount - 1);
+  if (entry.pinCount === 0) {
+    cleanupStaleUrls(entry);
+  }
+};
 
+// ── Observability ─────────────────────────────────────────────────────────
+
+export interface BlobCacheStats {
+  cacheSize: number;
+  cacheMax: number;
+  pinnedCount: number;
+  evictCount: number;
+  revokeCount: number;
+}
+
+export function getBlobCacheStats(): BlobCacheStats {
+  let pinnedCount = 0;
+  for (const entry of cache.values()) {
+    if (entry.pinCount > 0) pinnedCount++;
+  }
+  return {
+    cacheSize: cache.size,
+    cacheMax: MAX_CACHE_ENTRIES,
+    pinnedCount,
+    evictCount: _evictCount,
+    revokeCount: _revokeCount,
+  };
+}
 

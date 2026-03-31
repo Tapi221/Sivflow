@@ -16,7 +16,10 @@
       "Bash(grep -E '\\\\.\\(ts|tsx\\)$')",
       "Bash(xargs grep -l \"Card\\\\|Folder\")",
       "Bash(npx vite build --mode development)",
-      "Bash(ls -la \"c:\\\\Manifolmia\\\\src\\\\components\\\\folder\\\\explorer\\\\tree\"\" 2>/dev/null || echo \"Directory not found \")"
+      "Bash(ls -la \"c:\\\\Manifolmia\\\\src\\\\components\\\\folder\\\\explorer\\\\tree\"\" 2>/dev/null || echo \"Directory not found \")",
+      "Bash(xargs grep:*)",
+      "Bash(python3 -c \":*)",
+      "Bash(grep -r CARDVIEW_NATURAL_INDEX_COMMIT_DELAY /c/Manifolmia/src/pages/card-view/ --include=*.ts --include=*.tsx)"
     ],
     "additionalDirectories": [
       "C:\\Manifolmia\\src\\components\\folder",

@@ -5,9 +5,9 @@ import { useAuthSession } from "@/contexts/AuthContext";
 import { useReliableFileUpload } from "@/hooks/platform/useReliableFileUpload";
 import { cn } from "@/lib/utils";
 import {
-    getOrCreateImageBlobUrl,
     removeImageBlobUrl,
 } from "@/services/imageBlobUrlSessionCache";
+import { useLocalImageBlobUrl } from "@/hooks/image/useLocalImageBlobUrl";
 import { deleteImageBlob, putImageBlob } from "@/services/imageFileStore";
 import { getLocalDb } from "@/services/localDB";
 import type { AssetRecord, UploadedImage, UploadedImageStatus } from "@/types";
@@ -27,12 +27,40 @@ const clamp = (v: number, min: number, max: number) =>
 function ImageItem({ item, index, onRetry, onUpdate }) {
   const [loadFailed, setLoadFailed] = useState(false);
   const { currentUser } = useAuthSession();
-  const [resolvedLocalUrl, setResolvedLocalUrl] = useState<string | null>(null);
   const [draftTransform, setDraftTransform] = useState<{
     scale: number;
     x: number;
   } | null>(null);
-  const displayUrl = item.remoteUrl ?? item.localUrl ?? resolvedLocalUrl ?? "";
+
+  // ── blob URL 解決と pin/unpin ──────────────────────────────────────────
+  // 「非 blob の直接 URL」（remoteUrl または https: / data: の localUrl）が
+  // あればキャッシュ経由の解決は不要。それ以外（blob: URL を含む）は
+  // useLocalImageBlobUrl 経由で解決することで pin が保証される。
+  //
+  // item.localUrl が blob: の場合も hook 経由にする理由:
+  //   アップロードハンドラが localUrl に previewUrl (blob:) を直入れしているが、
+  //   その URL は imageBlobUrlSessionCache に localFileId キーで存在している。
+  //   hook がそのキーで getOrCreateImageBlobUrl を呼ぶと同じ URL を返し pin する。
+  //   → item.localUrl (blob:) 経由でもキャッシュの pin 機構が有効になる。
+  const nonBlobDirectUrl: string | null =
+    item?.remoteUrl && !String(item.remoteUrl).startsWith("blob:")
+      ? String(item.remoteUrl)
+      : item?.localUrl && !String(item.localUrl).startsWith("blob:")
+        ? String(item.localUrl)
+        : null;
+
+  const localBlobId: string | null = nonBlobDirectUrl
+    ? null
+    : (item?.localFileId ?? item?.assetId ?? item?.id ?? null);
+
+  const { url: resolvedUrl } = useLocalImageBlobUrl(
+    localBlobId,
+    currentUser?.uid,
+  );
+
+  const displayUrl = nonBlobDirectUrl ?? resolvedUrl ?? "";
+  // ─────────────────────────────────────────────────────────────────────
+
   const isFailed = item.status === "failed";
   const persistedScale = clamp(Number(item.scale ?? 1), 0.2, 1);
   const persistedX = clamp(Number(item.x ?? 0), -1, 1);
@@ -41,33 +69,6 @@ function ImageItem({ item, index, onRetry, onUpdate }) {
   useEffect(() => {
     queueMicrotask(() => setLoadFailed(false));
   }, [displayUrl]);
-  useEffect(() => {
-    const localBlobId = item?.localFileId ?? item?.assetId ?? item?.id;
-    if (!localBlobId) {
-      queueMicrotask(() => setResolvedLocalUrl(null));
-      return;
-    }
-    if (item?.remoteUrl || item?.localUrl) return;
-    let cancelled = false;
-    const run = async () => {
-      const url = await getOrCreateImageBlobUrl(localBlobId, {
-        userId: currentUser?.uid,
-      });
-      if (cancelled) return;
-      setResolvedLocalUrl(url);
-    };
-    void run();
-    return () => {
-      cancelled = true;
-    };
-  }, [
-    currentUser?.uid,
-    item?.assetId,
-    item?.id,
-    item?.localFileId,
-    item?.localUrl,
-    item?.remoteUrl,
-  ]);
   useEffect(() => {
     if (!draftTransform) return;
     if (
@@ -770,8 +771,15 @@ export default function MediaUploader({
 
     const current = (latestItemsRef.current as UploadedImage[]) || [];
     const previous = current[index];
-    if (previous?.localUrl) {
-      URL.revokeObjectURL(previous.localUrl);
+    // 直接 URL.revokeObjectURL を呼ぶと pinCount を無視して revoke してしまう。
+    // removeImageBlobUrl はキャッシュ側の pinCount を確認し、
+    // pin 中なら staleUrls に積んで unpin 後に revoke するため安全。
+    if (previous) {
+      const localBlobId =
+        previous.localFileId ?? previous.assetId ?? previous.id ?? null;
+      if (localBlobId) {
+        removeImageBlobUrl(localBlobId, { userId: currentUser?.uid });
+      }
     }
 
     try {

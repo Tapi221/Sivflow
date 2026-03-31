@@ -9,7 +9,7 @@
  * - キーボード: Space/Enter=flip, ↑/↓=prev/next
  */
 
-import {
+import React, {
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -26,6 +26,8 @@ const CARD_GAP = 16; // カード間の縦方向ギャップ (px)
 const SCROLL_PADDING = "50vh"; // 先頭・末尾カードを中央に寄せるための余白
 const VISIBLE_RANGE_OVERSCAN_PX = 2800; // 画面外を先描画して高速スクロール時の遅延を防ぐ
 const ACTIVE_INDEX_RENDER_RADIUS = 6; // 可視範囲更新前でも近傍は実描画して取りこぼしを減らす
+/** プリローダーが shouldRenderCard と同じ判定範囲を知るためにエクスポートする */
+export { ACTIVE_INDEX_RENDER_RADIUS };
 const PLACEHOLDER_HEIGHT_PX = 900;
 const CARD_RADIUS_SM = 32;
 const CARD_RADIUS_MD = 40;
@@ -39,11 +41,28 @@ function resolveCardBaseRadius(): number {
     : CARD_RADIUS_SM;
 }
 
+// cardWidth → borderRadius 文字列のモジュールレベルキャッシュ。
+// 全カードの毎フレームで window.matchMedia を呼ばないようにする。
+// width は少数パターン（activePaneWidthPx 固定値）しか取らないため
+// キャッシュサイズは実質 1–3 エントリに収まる。
+const borderRadiusCache = new Map<number, string>();
+// ブレークポイントが変わったらキャッシュを破棄する。
+// matchMedia はブラウザ環境にのみ存在するため遅延登録。
+if (typeof window !== "undefined" && typeof window.matchMedia === "function") {
+  window.matchMedia("(min-width: 768px)").addEventListener("change", () => {
+    borderRadiusCache.clear();
+  });
+}
+
 function cardBorderRadius(cardWidth: number): string {
+  const cached = borderRadiusCache.get(cardWidth);
+  if (cached !== undefined) return cached;
   // CardFrame は scale で拡縮されるため、外側ラッパーも同じ比率で角丸を追従させる。
   const baseRadius = resolveCardBaseRadius();
   const scaled = (baseRadius * cardWidth) / CANONICAL_CARD_WIDTH;
-  return `${Math.round(Math.max(0, scaled))}px`;
+  const result = `${Math.round(Math.max(0, scaled))}px`;
+  borderRadiusCache.set(cardWidth, result);
+  return result;
 }
 
 // ── Props ───────────────────────────────────────────────────────────────────
@@ -53,6 +72,14 @@ export type VerticalCardPagerProps<T> = {
   activeIndex: number;
   /** スクロールでアクティブが変わったとき呼ばれる */
   onActiveIndexChange: (idx: number) => void;
+  /**
+   * 実際にDOMレンダリングされているインデックス範囲が変化したとき呼ばれる。
+   * プリローダーがこの範囲を eager 対象として使うことで、
+   * 「描画済みだが未プリロード」のカードが出なくなる。
+   */
+  onRenderRangeChange?: (
+    range: { start: number; end: number } | null,
+  ) => void;
   /**
    * 各カードのレンダラー。
    * isActive=true のカードのみ完全インタラクティブにすること。
@@ -81,7 +108,13 @@ export type VerticalCardPagerProps<T> = {
 };
 
 // ── コンポーネント ───────────────────────────────────────────────────────────
-export function VerticalCardPager<T>({
+/**
+ * React.memo でラップしてジェネリック型を維持するパターン。
+ * CardViewDesktop が renderRange state 更新で再レンダーしても、
+ * VerticalCardPager の props（renderCard, activeIndex 等）が変わっていなければ
+ * VerticalCardPager は再レンダーされない。
+ */
+function VerticalCardPagerFn<T>({
   cards,
   activeIndex,
   onActiveIndexChange,
@@ -96,11 +129,21 @@ export function VerticalCardPager<T>({
   freezeActiveIndex = false,
   disableItemChrome = false,
   disableVirtualization = false,
+  onRenderRangeChange,
 }: VerticalCardPagerProps<T>) {
   const containerRef = useRef<HTMLDivElement>(null);
   const avgItemExtentRef = useRef(900);
   const visibleRangeRafRef = useRef<number | null>(null);
   const visibleRangeRef = useRef<{ start: number; end: number } | null>(null);
+  /**
+   * shouldRenderCard と同じロジック
+   *   = visibleRange ∪ [activeIndex ± ACTIVE_INDEX_RENDER_RADIUS]
+   * の union をキャッシュして onRenderRangeChange に渡す。
+   */
+  const effectiveRenderRangeRef = useRef<{
+    start: number;
+    end: number;
+  } | null>(null);
   const [visibleRange, setVisibleRange] = useState<{
     start: number;
     end: number;
@@ -116,19 +159,29 @@ export function VerticalCardPager<T>({
     freezeActiveIndex,
   });
 
+  // activeIndex を ref で保持。updateVisibleRange の deps から外すことで、
+  // activeIndex 変化のたびに scheduleVisibleRangeUpdate が再生成されず、
+  // scroll listener effect の不要な再アタッチを防ぐ。
+  const activeIndexRef = useRef(activeIndex);
+  activeIndexRef.current = activeIndex;
+
   const updateVisibleRange = useCallback(() => {
     const container = containerRef.current;
     if (!container) return;
 
     if (disableVirtualization) {
       visibleRangeRef.current = null;
+      effectiveRenderRangeRef.current = null;
       setVisibleRange(null);
+      onRenderRangeChange?.(null);
       return;
     }
 
     if (cards.length === 0) {
       visibleRangeRef.current = null;
+      effectiveRenderRangeRef.current = null;
       setVisibleRange(null);
+      onRenderRangeChange?.(null);
       return;
     }
 
@@ -190,24 +243,45 @@ export function VerticalCardPager<T>({
     }
 
     if (nextRange != null) {
-      const sampleEl = itemRefs.current[Math.min(nextRange.end, activeIndex)];
+      const sampleEl = itemRefs.current[Math.min(nextRange.end, activeIndexRef.current)];
       if (sampleEl) {
         const extent = Math.max(1, sampleEl.offsetHeight + CARD_GAP);
         avgItemExtentRef.current = avgItemExtentRef.current * 0.8 + extent * 0.2;
       }
     }
 
+    // shouldRenderCard と同じ union:
+    //   visibleRange ∪ [activeIndex ± ACTIVE_INDEX_RENDER_RADIUS]
+    const currentActiveIndex = activeIndexRef.current;
+    const radiusStart = Math.max(0, currentActiveIndex - ACTIVE_INDEX_RENDER_RADIUS);
+    const radiusEnd = Math.min(cards.length - 1, currentActiveIndex + ACTIVE_INDEX_RENDER_RADIUS);
+    const effectiveStart = nextRange
+      ? Math.min(nextRange.start, radiusStart)
+      : radiusStart;
+    const effectiveEnd = nextRange
+      ? Math.max(nextRange.end, radiusEnd)
+      : radiusEnd;
+    const nextEffective = { start: effectiveStart, end: effectiveEnd };
+
     const prevRange = visibleRangeRef.current;
+    const prevEffective = effectiveRenderRangeRef.current;
     if (
       prevRange?.start === nextRange?.start &&
-      prevRange?.end === nextRange?.end
+      prevRange?.end === nextRange?.end &&
+      prevEffective?.start === nextEffective.start &&
+      prevEffective?.end === nextEffective.end
     ) {
       return;
     }
 
     visibleRangeRef.current = nextRange;
+    effectiveRenderRangeRef.current = nextEffective;
     setVisibleRange(nextRange);
-  }, [activeIndex, cards.length, disableVirtualization, itemRefs]);
+    onRenderRangeChange?.(nextEffective);
+  // activeIndex は activeIndexRef 経由で参照するため deps 不要。
+  // 含めると activeIndex 変化のたびに scheduleVisibleRangeUpdate が再生成され、
+  // scroll listener effect が detach/attach を繰り返す。
+  }, [cards.length, disableVirtualization, itemRefs]);
 
   const scheduleVisibleRangeUpdate = useCallback(() => {
     if (visibleRangeRafRef.current != null) return;
@@ -329,7 +403,9 @@ export function VerticalCardPager<T>({
                       Math.round(PLACEHOLDER_HEIGHT_PX),
                     )}px`,
                     contentVisibility: "auto",
-                    containIntrinsicSize: "900px 1200px",
+                    // inline は wrapper の width が固定なので auto、
+                    // block は実際の placeholder 高さと一致させてレイアウトジャンプを防ぐ。
+                    containIntrinsicSize: `auto ${PLACEHOLDER_HEIGHT_PX}px`,
                   }}
                 />
               )}
@@ -340,3 +416,7 @@ export function VerticalCardPager<T>({
     </div>
   );
 }
+
+export const VerticalCardPager = React.memo(
+  VerticalCardPagerFn,
+) as typeof VerticalCardPagerFn;
