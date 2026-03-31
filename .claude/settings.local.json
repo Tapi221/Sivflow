@@ -20,7 +20,11 @@
       "Bash(xargs grep:*)",
       "Bash(python3 -c \":*)",
       "Bash(grep -r CARDVIEW_NATURAL_INDEX_COMMIT_DELAY /c/Manifolmia/src/pages/card-view/ --include=*.ts --include=*.tsx)",
-      "Bash(find /c/Manifolmia/src -name CardView* -o -name cardView*)"
+      "Bash(find /c/Manifolmia/src -name CardView* -o -name cardView*)",
+      "Bash(while read:*)",
+      "Bash(do echo:*)",
+      "Read(//c/Manifolmia/**)",
+      "Bash(done)"
     ],
     "additionalDirectories": [
       "C:\\Manifolmia\\src\\components\\folder",

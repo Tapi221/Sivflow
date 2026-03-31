@@ -1,4 +1,4 @@
-import React from "react";
+import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
 import {
   Dialog,
   DialogContent,
@@ -6,16 +6,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
-import { MathBlockContent } from "./MathBlockContent";
 import { cn } from "@/lib/utils";
-import type { MathBlockData } from "@/types";
+import type { MathBlockData } from "@/types/domain/base";
+import React from "react";
+import { MathRenderer } from "./MathBlockContent";
 
 type CSSCustomProperties = React.CSSProperties & Record<`--${string}`, string>;
 
 const EDITOR_LINE_HEIGHT = 24;
 const EDITOR_MIN_ROWS = 8;
 const EDITOR_MAX_HEIGHT = 420;
+const MAX_LATEX_LENGTH = 10000;
 
 const isHexColor = (color: string) => /^#[0-9a-fA-F]{3,8}$/.test(color);
 
@@ -61,7 +62,9 @@ export const MathEditorDialog: React.FC<MathEditorDialogProps> = ({
             onChange={(event) =>
               onChange({ ...data, latex: event.target.value })
             }
-            placeholder="例: x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}"
+            placeholder={
+              "例: x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}（複数式は空行 or $$...$$）"
+            }
             aria-label="LaTeX入力"
             minRows={EDITOR_MIN_ROWS}
             lineHeight={EDITOR_LINE_HEIGHT}
@@ -78,8 +81,22 @@ export const MathEditorDialog: React.FC<MathEditorDialogProps> = ({
             style={{ "--tw-ring-color": ringColor } as CSSCustomProperties}
           />
 
+          <div className="px-1">
+            <span
+              className={cn(
+                "text-[10px] tabular-nums",
+                latex.length >= MAX_LATEX_LENGTH
+                  ? "text-red-600 font-semibold"
+                  : "text-slate-400",
+              )}
+            >
+              {latex.length.toLocaleString()} /{" "}
+              {MAX_LATEX_LENGTH.toLocaleString()}
+            </span>
+          </div>
+
           {latex.trim() && (
-            <MathBlockContent
+            <MathRenderer
               latex={latex}
               displayMode={data.displayMode ?? "block"}
             />
@@ -98,7 +115,3 @@ export const MathEditorDialog: React.FC<MathEditorDialogProps> = ({
     </Dialog>
   );
 };
-
-
-
-

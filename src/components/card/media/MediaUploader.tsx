@@ -922,6 +922,11 @@ export default function MediaUploader({
       // Only handle paste if mouse is hovering over this uploader instance
       if (!containerRef.current?.matches(":hover")) return;
 
+      // ダイアログが開いているとき、ダイアログ外の MediaUploader はペーストを無視する
+      // （[role="dialog"] は Radix UI Dialog が必ず付与する標準属性）
+      const openDialog = document.querySelector("[role='dialog']");
+      if (openDialog && !containerRef.current?.closest("[role='dialog']")) return;
+
       const items = e.clipboardData?.items;
       if (!items) return;
 
@@ -1105,12 +1110,3 @@ export default function MediaUploader({
     </div>
   );
 }
-
-
-
-
-
-
-
-
-

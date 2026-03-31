@@ -43,8 +43,6 @@ const MathBlockInner: React.FC<MathBlockProps> = ({
   accentColor,
   isActive,
   showDelete,
-
-  // move props
   canMoveUp,
   canMoveDown,
   onMoveUp,
@@ -57,10 +55,8 @@ const MathBlockInner: React.FC<MathBlockProps> = ({
 
   const latex = data?.latex ?? "";
 
-  // KaTeX入力の変更ハンドラ
   const handleLatexChange = useCallback(
     (nextLatex: string) => {
-      // 文字数制限チェック（超過分は切り詰めて反映）
       if (nextLatex.length > MAX_LATEX_LENGTH) {
         const truncated = nextLatex.slice(0, MAX_LATEX_LENGTH);
         setError(
@@ -88,7 +84,6 @@ const MathBlockInner: React.FC<MathBlockProps> = ({
       accentColor={accentColor}
       isActive={isActive}
       showDelete={showDelete}
-      // 1行移動
       canMoveUp={canMoveUp}
       canMoveDown={canMoveDown}
       onMoveUp={onMoveUp}
@@ -106,20 +101,6 @@ const MathBlockInner: React.FC<MathBlockProps> = ({
           placeholder="数式を入力..."
           className={cn("rounded-lg transition-colors", "hover:bg-slate-50")}
         />
-
-        <div className="px-1">
-          <span
-            className={cn(
-              "text-[10px] tabular-nums",
-              latex.length >= MAX_LATEX_LENGTH
-                ? "text-red-600 font-semibold"
-                : "text-slate-400",
-            )}
-          >
-            {latex.length.toLocaleString()} /{" "}
-            {MAX_LATEX_LENGTH.toLocaleString()}
-          </span>
-        </div>
 
         <MathEditorDialog
           open={isEditorOpen}
@@ -145,7 +126,3 @@ const areMathBlockPropsEqual = (prev: MathBlockProps, next: MathBlockProps) =>
 
 export const MathBlock = React.memo(MathBlockInner, areMathBlockPropsEqual);
 MathBlock.displayName = "MathBlock";
-
-
-
-

@@ -98,6 +98,20 @@ export function CardSurface({
           paddingRight: "var(--card-padding-x)",
         }}
       >
+        {/* ヘッダー下固定セパレーター（ruled prop 不問で常時描画） */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute z-10"
+          style={{
+            top: "var(--ruled-offset-px, 44px)",
+            left: "var(--card-padding-x, 12px)",
+            right: "var(--card-padding-x, 12px)",
+            height: 1,
+            background: "var(--card-ruled-color, rgba(0,0,0,0.05))",
+            opacity,
+          }}
+        />
+
         {ruled && visibleRules === null && (
           <RuledLayer
             kind="repeat+bottom"

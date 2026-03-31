@@ -8,29 +8,40 @@ interface MathRendererProps {
   className?: string;
 }
 
+const normalizeSingleLatex = (input: string): string => {
+  if (!input) return "";
+
+  return input
+    .trim()
+    .replace(/^\$\$\s*/u, "")
+    .replace(/\s*\$\$$/u, "")
+    .trim();
+};
+
 /**
- * KaTeXレンダラーコンポーネント（最適化版）
- * 唯一のレンダリング窓口となり、renderToString + useMemo で高速化を実現
+ * KaTeXレンダラーコンポーネント
+ * 単一数式のみを受け付ける
  */
 export const MathRenderer: React.FC<MathRendererProps> = React.memo(
   ({ latex, displayMode = "block", className = "" }) => {
-    // レンダリング結果のキャッシュ
+    const normalizedLatex = useMemo(() => normalizeSingleLatex(latex), [latex]);
+
     const { html, error } = useMemo(() => {
-      if (!latex || !latex.trim()) {
+      if (!normalizedLatex) {
         return { html: null, error: null };
       }
+
       try {
-        // 非常に長い文字列の制限（パフォーマンス・セキュリティの安全弁）
-        if (latex.length > 5000) {
+        if (normalizedLatex.length > 5000) {
           throw new Error("LaTeX string is too long");
         }
 
-        const renderedHtml = katex.renderToString(latex, {
+        const renderedHtml = katex.renderToString(normalizedLatex, {
           displayMode: displayMode === "block",
-          throwOnError: false, // エラーを投げずに内部で処理
+          throwOnError: false,
           errorColor: "#dc2626",
           strict: "warn",
-          trust: false, // セキュリティ: 危険なマクロを無効化
+          trust: false,
         });
 
         return { html: renderedHtml, error: null };
@@ -41,14 +52,12 @@ export const MathRenderer: React.FC<MathRendererProps> = React.memo(
           error: err instanceof Error ? err.message : "Invalid LaTeX syntax",
         };
       }
-    }, [latex, displayMode]);
+    }, [normalizedLatex, displayMode]);
 
-    // 数式が空の場合は何も表示しない
-    if (!latex || !latex.trim()) {
+    if (!normalizedLatex) {
       return null;
     }
 
-    // 解析エラー時のフォールバックUI
     if (error || html === null) {
       return (
         <div
@@ -62,12 +71,11 @@ export const MathRenderer: React.FC<MathRendererProps> = React.memo(
           <span className="opacity-70 mr-2 text-[10px] uppercase font-bold">
             LaTeX Error:
           </span>
-          {latex}
+          {normalizedLatex}
         </div>
       );
     }
 
-    // 正常時のレンダリング
     const Container = displayMode === "inline" ? "span" : "div";
 
     return (
@@ -85,7 +93,3 @@ export const MathRenderer: React.FC<MathRendererProps> = React.memo(
 );
 
 MathRenderer.displayName = "MathRenderer";
-
-
-
-

@@ -1,52 +1,95 @@
-import React from "react";
+import React, { useMemo } from "react";
+import katex from "katex";
 import { cn } from "@/lib/utils";
-import { MathRenderer } from "./MathRenderer";
-import { MathBlockFrame } from "./MathBlockFrame";
-import { BLOCK_BODY_TEXT_COLOR_CLASS } from "./textBlockStyles";
 
-interface MathBlockContentProps {
+interface MathRendererProps {
   latex: string;
   displayMode?: "block" | "inline";
   className?: string;
-  showPlaceholder?: boolean;
-  placeholder?: string;
 }
 
-export const MathBlockContent: React.FC<MathBlockContentProps> = ({
-  latex,
-  displayMode = "block",
-  className,
-  showPlaceholder = false,
-  placeholder = "数式を入力...",
-}) => {
-  const hasLatex = Boolean(latex?.trim());
+const normalizeSingleLatex = (input: string): string => {
+  if (!input) return "";
 
-  if (!hasLatex && showPlaceholder) {
-    return (
-      <div className={cn("text-[12px] text-slate-400 px-1 py-2", className)}>
-        {placeholder}
-      </div>
-    );
-  }
-
-  if (!hasLatex) return null;
-
-  return (
-    <MathBlockFrame
-      className={cn(
-        "bg-slate-50 border border-slate-200 rounded-lg p-3 min-h-[50px] overflow-x-auto overflow-y-hidden flex justify-center",
-        className,
-      )}
-    >
-      <MathRenderer
-        latex={latex}
-        displayMode={displayMode}
-        className={BLOCK_BODY_TEXT_COLOR_CLASS}
-      />
-    </MathBlockFrame>
-  );
+  return input
+    .trim()
+    .replace(/^\$\$\s*/u, "")
+    .replace(/\s*\$\$$/u, "")
+    .trim();
 };
 
+/**
+ * KaTeXレンダラーコンポーネント
+ * 単一数式のみを受け付ける
+ */
+export const MathRenderer: React.FC<MathRendererProps> = React.memo(
+  ({ latex, displayMode = "block", className = "" }) => {
+    const normalizedLatex = useMemo(() => normalizeSingleLatex(latex), [latex]);
 
+    const { html, error } = useMemo(() => {
+      if (!normalizedLatex) {
+        return { html: null, error: null };
+      }
 
+      try {
+        if (normalizedLatex.length > 5000) {
+          throw new Error("LaTeX string is too long");
+        }
 
+        const renderedHtml = katex.renderToString(normalizedLatex, {
+          displayMode: displayMode === "block",
+          throwOnError: false,
+          errorColor: "#dc2626",
+          strict: "warn",
+          trust: false,
+        });
+
+        return { html: renderedHtml, error: null };
+      } catch (err) {
+        console.warn("KaTeX rendering error:", err);
+        return {
+          html: null,
+          error: err instanceof Error ? err.message : "Invalid LaTeX syntax",
+        };
+      }
+    }, [normalizedLatex, displayMode]);
+
+    if (!normalizedLatex) {
+      return null;
+    }
+
+    if (error || html === null) {
+      return (
+        <div
+          className={cn(
+            "px-3 py-2 rounded border border-red-200 bg-red-50 text-red-600 font-serif text-sm break-all",
+            displayMode === "block" ? "w-full my-2" : "inline-block mx-1",
+            className,
+          )}
+          title={error || "Rendering Error"}
+        >
+          <span className="opacity-70 mr-2 text-[10px] uppercase font-bold">
+            LaTeX Error:
+          </span>
+          {normalizedLatex}
+        </div>
+      );
+    }
+
+    const Container = displayMode === "inline" ? "span" : "div";
+
+    return (
+      <Container
+        className={cn(
+          "katex-display-wrapper break-words",
+          displayMode === "inline" ? "inline" : "block",
+          className,
+        )}
+        data-display-mode={displayMode}
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
+    );
+  },
+);
+
+MathRenderer.displayName = "MathRenderer";

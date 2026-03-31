@@ -133,6 +133,14 @@ export const BlockEditor = React.forwardRef<
         nonBodyBlocks: nextNonBodyBlocks,
       };
     }, [orderedBlocks]);
+    console.log("[BlockEditor]", {
+      prefix,
+      blocks,
+      orderedBlocks,
+      bodyBlocks,
+      nonBodyBlocks,
+    });
+
     const nonBodyBlocksRef = useRef<CardBlock[]>(nonBodyBlocks);
     useEffect(() => {
       nonBodyBlocksRef.current = nonBodyBlocks;
@@ -830,6 +838,8 @@ export const BlockEditor = React.forwardRef<
 );
 
 BlockEditor.displayName = "BlockEditor";
+
+
 
 
 

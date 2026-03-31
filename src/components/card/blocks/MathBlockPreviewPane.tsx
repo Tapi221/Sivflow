@@ -1,6 +1,5 @@
-import React from "react";
 import { cn } from "@/lib/utils";
-import { MathBlockContent } from "./MathBlockContent";
+import { MathRenderer } from "./MathBlockContent";
 
 type MathBlockPreviewPaneProps = {
   latex: string;
@@ -38,7 +37,7 @@ export function MathBlockPreviewPane({
           : undefined
       }
     >
-      <MathBlockContent
+      <MathRenderer
         latex={latex}
         displayMode={displayMode}
         showPlaceholder={showPlaceholder}
