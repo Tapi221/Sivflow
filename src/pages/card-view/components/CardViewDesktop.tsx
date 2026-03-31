@@ -155,7 +155,6 @@ export function CardViewDesktop({
 
   const renderCard = useCallback(
     (card: Card, idx: number, isActive: boolean) => {
-      console.log(`renderCard: idx=${idx}, isActive=${isActive}, cardId=${card.id}`);
       const readyToDisplay =
         isActive ||
         isGlobalEditing ||
@@ -233,3 +232,6 @@ export function CardViewDesktop({
     />
   );
 }
+
+
+
