@@ -9,7 +9,7 @@ import {
 import { AudioPlayer } from "@/components/card/media/CardMedia";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import type { CardBlock } from "@/types";
-import { useCallback, useContext, useMemo } from "react";
+import { useCallback, useContext, useMemo, useState } from "react";
 import { shouldRenderInterBlockSeparator } from "./blockDisplayPolicy";
 import { BlockEditModeContext } from "./BlockWrapper";
 import { CodeRenderer } from "./CodeRenderer";
@@ -105,8 +105,9 @@ function renderBlock(
       if (
         (block.questionTitle ?? "").trim() === "" &&
         (block.questionAnswer ?? "").trim() === ""
-      )
+      ) {
         return null;
+      }
 
       return (
         <QuestionBlockView
@@ -235,11 +236,12 @@ export function BlockRenderer({
 
   const isRenderableBlock = useCallback((block: CardBlock) => {
     if (block.type === "text") return (block.content ?? "").trim() !== "";
-    if (block.type === "question")
+    if (block.type === "question") {
       return (
         (block.questionTitle ?? "").trim() !== "" ||
         (block.questionAnswer ?? "").trim() !== ""
       );
+    }
     if (block.type === "code") return (block.code?.code ?? "").trim() !== "";
     if (block.type === "image") return (block.images?.length ?? 0) > 0;
     if (block.type === "audio") return (block.audios?.length ?? 0) > 0;
@@ -303,8 +305,7 @@ export function BlockRenderer({
                   ? {
                       ...offsetStyle,
                       boxShadow: blockOutline,
-                      borderRadius:
-                        "var(--block-frame-radius, 12px)",
+                      borderRadius: "var(--block-frame-radius, 12px)",
                     }
                   : offsetStyle
               }
