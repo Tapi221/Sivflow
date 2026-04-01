@@ -1,13 +1,13 @@
-import React, { useCallback, useRef } from "react";
 import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
-import { BlockWrapper } from "./BlockWrapper";
+import type { CardBlock } from "@/types/domain/card";
 import { HelpCircle } from "@/ui/icons";
-import type { CardBlock } from "@/types/domain/card
+import React, { useCallback, useRef } from "react";
+import { BlockWrapper } from "./BlockWrapper";
 import { QuestionBlockLayout } from "./QuestionBlockLayout";
 import {
-  QUESTION_BLOCK_ANSWER_TEXT_CLASS,
-  QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX,
-  QUESTION_BLOCK_TITLE_TEXT_CLASS,
+    QUESTION_BLOCK_ANSWER_TEXT_CLASS,
+    QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX,
+    QUESTION_BLOCK_TITLE_TEXT_CLASS,
 } from "./questionBlockTextStyles";
 
 interface QuestionBlockProps {

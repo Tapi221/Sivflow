@@ -8,7 +8,7 @@ import {
   CARD_SAFE_PADDING_PX,
 } from "@/components/card/common/constants";
 import { MobileScalableCard } from "@/components/card/frame/MobileScalableCard";
-import type { CardBlock } from "@/types/domain/card
+import type { CardBlock } from "@/types/domain/card";
 
 const FIXTURE_BLOCKS: CardBlock[] = [
   {
@@ -25,8 +25,12 @@ const FIXTURE_BLOCKS: CardBlock[] = [
 const FIXTURE_CARD = {
   id: "layout-fixture-card",
   title: "Layout Fixture",
-  questionBlocks: FIXTURE_BLOCKS,
-  answerBlocks: FIXTURE_BLOCKS,
+  front: {
+    blocks: FIXTURE_BLOCKS,
+  },
+  back: {
+    blocks: FIXTURE_BLOCKS,
+  },
   questionExtraRows: 2,
   answerExtraRows: 2,
 };
@@ -47,7 +51,7 @@ export default function CardLayoutConsistencyTest() {
             cardDesignWidth={CANONICAL_CARD_WIDTH}
             safePadding={CARD_SAFE_PADDING_PX}
           >
-            <Flashcard card={FIXTURE_CARD} />
+            <Flashcard card={adaptCard(FIXTURE_CARD)} />
           </MobileScalableCard>
         </section>
 
@@ -81,6 +85,13 @@ export default function CardLayoutConsistencyTest() {
     </div>
   );
 }
+
+
+
+
+
+
+
 
 
 

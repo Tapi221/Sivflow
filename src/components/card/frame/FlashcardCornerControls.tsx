@@ -5,9 +5,9 @@
  * - CardFrame の actionsTopLeft / actionsTopRight props へ渡す ReactNode 配列を返す
  */
 import {
-    CARD_ACTION_BG_CLASS,
-    CARD_ACTION_COLOR_IDLE_CLASS,
-    CARD_ACTION_ICON_CLASS,
+  CARD_ACTION_BG_CLASS,
+  CARD_ACTION_COLOR_IDLE_CLASS,
+  CARD_ACTION_ICON_CLASS,
 } from "@/components/card/common/constants";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -204,6 +204,8 @@ export function useFlashcardCornerControls({
     previewMode,
   ]);
 }
+
+
 
 
 

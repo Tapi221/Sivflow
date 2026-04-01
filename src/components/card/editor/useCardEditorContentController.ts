@@ -1,14 +1,13 @@
 import { useCardMediaDialogs } from "@/components/card/editor/useCardMediaDialogs";
 
-import { useCallback, useEffect, useMemo } from "react";
+import type { CardBlock, UploadedImage } from "@/types/domain/card";
 import type { Dispatch, MutableRefObject, SetStateAction } from "react";
-import type { CardBlock, UploadedImage } from "@/types/domain/card
-
+import { useCallback, useEffect, useMemo } from "react";
 type DraftShape = {
   questionImages: UploadedImage[];
   answerImages: UploadedImage[];
-  questionBlocks: CardBlock[];
-  answerBlocks: CardBlock[];
+  frontBlocks: CardBlock[];
+  backBlocks: CardBlock[];
 };
 
 type UseCardEditorContentControllerParams<TDraft extends DraftShape | null> = {
@@ -42,9 +41,9 @@ export function useCardEditorContentController<
   const getSideBlocks = useCallback(
     (side: "question" | "answer") =>
       side === "question"
-        ? (draft?.questionBlocks ?? [])
-        : (draft?.answerBlocks ?? []),
-    [draft?.answerBlocks, draft?.questionBlocks],
+        ? (draft?.frontBlocks?? [])
+        : (draft?.backBlocks ?? []),
+    [draft?.backBlocks, draft?.frontBlocks],
   );
 
   const setSideBlocks = useCallback(
@@ -54,11 +53,11 @@ export function useCardEditorContentController<
         if (!prev) return prev;
         const reindexed = reindexBlocks(nextBlocks);
         const currentBlocks =
-          side === "question" ? prev.questionBlocks : prev.answerBlocks;
+          side === "question" ? prev.frontBlocks: prev.backBlocks;
         if (currentBlocks === reindexed) return prev;
         return side === "question"
-          ? { ...prev, questionBlocks: reindexed }
-          : { ...prev, answerBlocks: reindexed };
+          ? { ...prev, frontBlocks: reindexed }
+          : { ...prev, backBlocks: reindexed };
       });
     },
     [allowAutoMinHeightSyncRef, reindexBlocks, setDraft],
@@ -132,6 +131,11 @@ export function useCardEditorContentController<
     [mediaDialogs, setSideBlocks],
   );
 }
+
+
+
+
+
 
 
 

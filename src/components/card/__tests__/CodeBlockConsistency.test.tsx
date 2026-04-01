@@ -3,7 +3,7 @@ import { BlockRenderer } from "@/components/card/blocks/BlockRenderer";
 import { CodeBlockEditor } from "@/components/card/blocks/CodeBlockEditor";
 import { CodeBlockItem } from "@/components/card/blocks/CodeBlockItem";
 import { MarkdownBlockView } from "@/components/card/blocks/MarkdownBlockPreview";
-import type { CardBlock } from "@/types/domain/card
+import type { CardBlock } from "@/types/domain/card";
 import { cleanup, render } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 

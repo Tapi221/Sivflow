@@ -1,4 +1,4 @@
-// @vitest-environment jsdom
+\n// @vitest-environment jsdom
 import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -20,8 +20,8 @@ function makeCard(overrides: Partial<Card> = {}): Card {
     title: "title",
     questionText: "Q",
     answerText: "A",
-    questionBlocks: [],
-    answerBlocks: [],
+    frontBlocks: [],
+    backBlocks: [],
     ...overrides,
   } as Card;
 }
@@ -66,4 +66,10 @@ describe("DesktopCardSurface flip state", () => {
     expect(inactiveCall?.previewMode).toBe(true);
   });
 });
+
+
+
+
+
+
 

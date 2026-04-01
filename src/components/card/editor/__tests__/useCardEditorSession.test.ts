@@ -13,8 +13,8 @@ function makeCard(overrides: Partial<Card> = {}): Card {
     tagIds: [],
     questionImages: [],
     answerImages: [],
-    questionBlocks: [],
-    answerBlocks: [],
+    frontBlocks: [],
+    backBlocks: [],
     layoutRows: 16,
     ...overrides,
   } as Card;
@@ -129,3 +129,7 @@ describe("useCardEditorSession", () => {
     expect(result.current.isEditing).toBe(false);
   });
 });
+
+
+
+

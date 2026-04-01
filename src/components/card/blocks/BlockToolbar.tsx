@@ -1,20 +1,14 @@
+import { cn } from "@/lib/utils";
+import type { CardBlock } from "@/types/domain/card";
+import { Code, HelpCircle, ImageIcon, Plus, StratisFormulaIcon, StratisMarkdownIcon, Type } from "@/ui/icons";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Plus } from "@/ui/icons";
-import { Type } from "@/ui/icons";
-import { Code } from "@/ui/icons";
-import { ImageIcon } from "@/ui/icons";
-import { StratisFormulaIcon } from "@/ui/icons";
-import { StratisMarkdownIcon } from "@/ui/icons";
-import { HelpCircle } from "@/ui/icons";
-import { cn } from "@/lib/utils";
-import type { CardBlock } from "@/types/domain/card
 
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
 interface BlockToolbarProps {

@@ -1,8 +1,8 @@
 import { ChevronLeft, ChevronRight } from "@/ui/icons";
 import React, { memo, useCallback, useMemo, useState } from "react";
 
-import { SharedCardContent } from "@/components/card/common/SharedCardContent";
 import { BlockEditModeContext } from "@/components/card/blocks/BlockWrapper";
+import { SharedCardContent } from "@/components/card/common/SharedCardContent";
 import {
   CANONICAL_CARD_WIDTH,
   CARD_ROW_PX,
@@ -28,7 +28,7 @@ import {
 } from "@/components/folder/panes/useCardEditorPaneWidth";
 import { normalizeLayoutRows } from "@/domain/card/extraRows";
 import { cn } from "@/lib/utils";
-import type { Card, CardBlock, UserSettings } from "@/types/domain/card
+import type { Card, CardBlock, UserSettings } from "@/types/domain/card";
 
 interface CardEditorPaneProps {
   selectedCardId: string | null;
@@ -349,8 +349,8 @@ export function CardEditorPane({
     [setSideBlocks],
   );
 
-  const questionBlocks = draft?.questionBlocks ?? EMPTY_BLOCKS;
-  const answerBlocks = draft?.answerBlocks ?? EMPTY_BLOCKS;
+  const frontBlocks= draft?.frontBlocks?? EMPTY_BLOCKS;
+  const backBlocks = draft?.backBlocks ?? EMPTY_BLOCKS;
 
   const editorCardHeightPx = useMemo(
     () => layoutRowsToCardHeightPx(normalizeLayoutRows(draft?.layoutRows)),
@@ -424,7 +424,7 @@ export function CardEditorPane({
     [handleToggleBookmark, handleToggleUncertainty, selectedCard],
   );
 
-  const questionBlocksForToolbar = draft?.questionBlocks;
+  const questionBlocksForToolbar = draft?.frontBlocks;
   const questionImagesForToolbar = draft?.questionImages;
   const questionActionsTopRight = useMemo(
     () => {
@@ -439,7 +439,7 @@ export function CardEditorPane({
     ],
   );
 
-  const answerBlocksForToolbar = draft?.answerBlocks;
+  const answerBlocksForToolbar = draft?.backBlocks;
   const answerImagesForToolbar = draft?.answerImages;
   const answerActionsTopRight = useMemo(
     () => {
@@ -579,7 +579,7 @@ export function CardEditorPane({
                   >
                     <EditorSidePane
                       side="question"
-                      blocks={questionBlocks}
+                      blocks={frontBlocks}
                       onBlocksChange={handleQuestionBlocksChange}
                       selectionScopeKey={normalizedSelectedCardId}
                       label="問題"
@@ -616,7 +616,7 @@ export function CardEditorPane({
 
                     <EditorSidePane
                       side="answer"
-                      blocks={answerBlocks}
+                      blocks={backBlocks}
                       onBlocksChange={handleAnswerBlocksChange}
                       selectionScopeKey={normalizedSelectedCardId}
                       label="解答"
@@ -677,8 +677,7 @@ export function CardEditorPane({
                 selectedCard && (
                   <div className="flex w-full justify-center">
                     <div className="w-full" style={activePaneWidthStyle}>
-                      <Flashcard
-                        card={toFlashcardCardLike(selectedCard)}
+                      <Flashcard card={adaptCard(toFlashcardCardLike(selectedCard))}
                         isFlipped={isFlipped}
                         onFlip={() => setIsFlipped((prev) => !prev)}
                         onToggleBookmark={(cardLike) => {

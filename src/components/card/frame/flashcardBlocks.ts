@@ -1,13 +1,13 @@
 /**
  * Flashcard の fallback blocks 生成ロジック
  *
- * - questionBlocks/answerBlocks がある場合はそちらを優先
+ * - frontBlocks/backBlocks がある場合はそちらを優先
  * - ない場合は legacy テキスト/コード/音声フィールドから生成
  * - legacy 画像フィールドは右上メディアダイアログ表示専用として扱い、
  *   本文ブロックには自動挿入しない
  */
 import { sortBlocksByOrderIndex } from "@/components/card/blocks/blockOrdering";
-import type { CardBlock } from "@/types/domain/card
+import type { CardBlock } from "@/types/domain/card";
 import type { FlashcardMediaLike } from "./flashcardDerived";
 
 interface SideData {
@@ -57,6 +57,12 @@ export function resolveSideBlocks(
 
   return fallbackBlocks;
 }
+
+
+
+
+
+
 
 
 

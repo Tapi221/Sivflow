@@ -1,33 +1,33 @@
 import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-  type SetStateAction,
+    useCallback,
+    useEffect,
+    useLayoutEffect,
+    useMemo,
+    useRef,
+    useState,
+    type SetStateAction,
 } from "react";
 
 import { sortBlocksByOrderIndex } from "@/components/card/blocks/blockOrdering";
 import {
-  makeNewDraft,
-  normalizeOrderIndex,
-  normalizeSelectedCardId,
-  sanitizeReferences,
-  shouldAutoOpenEditorForCard,
-  type EditorDraft,
+    makeNewDraft,
+    normalizeOrderIndex,
+    normalizeSelectedCardId,
+    sanitizeReferences,
+    shouldAutoOpenEditorForCard,
+    type EditorDraft,
 } from "@/components/card/editor/cardEditorUtils";
 import {
-  LEGACY_BASE_LAYOUT_ROWS,
-  normalizeExtraRows,
-  normalizeLayoutRows,
+    LEGACY_BASE_LAYOUT_ROWS,
+    normalizeExtraRows,
+    normalizeLayoutRows,
 } from "@/domain/card/extraRows";
 import { resolveCardTagNames } from "@/hooks/settings/useTags";
 import { sanitizeUploadedImages } from "@/utils/uploaded-image/sanitizer";
 
 import { useCardEntity } from "@/hooks/card/useCardEntity";
 
-import type { CardBlock, Card, UploadedImage } from "@/types/domain/card
+import type { Card, CardBlock, UploadedImage } from "@/types/domain/card";
 
 const NEW_SENTINEL = "__new__" as const;
 
@@ -157,11 +157,11 @@ export function useCardEditorSession({
         isDraft: card.isDraft ?? false,
         questionImages: ((card as unknown).questionImages ?? []) as UploadedImage[],
         answerImages: ((card as unknown).answerImages ?? []) as UploadedImage[],
-        questionBlocks: sortBlocksByOrderIndex(
-          (card.questionBlocks ?? []) as CardBlock[],
+        frontBlocks: sortBlocksByOrderIndex(
+          ((card.front?.blocks ?? []) ?? []) as CardBlock[],
         ),
-        answerBlocks: sortBlocksByOrderIndex(
-          (card.answerBlocks ?? []) as CardBlock[],
+        backBlocks: sortBlocksByOrderIndex(
+          ((card.back?.blocks ?? []) ?? []) as CardBlock[],
         ),
         layoutRows: normalizeLayoutRows(
           (card as unknown).layoutRows ?? (card as unknown).layout_rows ?? migratedRows,
@@ -298,8 +298,8 @@ export function useCardEditorSession({
           answerImages: sanitizeUploadedImages(
             currentDraft.answerImages,
           ) as UploadedImage[],
-          questionBlocks: sanitizeBlocksForSave(currentDraft.questionBlocks),
-          answerBlocks: sanitizeBlocksForSave(currentDraft.answerBlocks),
+          frontBlocks: sanitizeBlocksForSave(currentDraft.frontBlocks),
+          backBlocks: sanitizeBlocksForSave(currentDraft.backBlocks),
           layoutRows: normalizeLayoutRows(currentDraft.layoutRows),
         };
 
@@ -389,8 +389,8 @@ export function useCardEditorSession({
         answerImages: sanitizeUploadedImages(
           currentDraft.answerImages,
         ) as UploadedImage[],
-        questionBlocks: sanitizeBlocksForSave(currentDraft.questionBlocks),
-        answerBlocks: sanitizeBlocksForSave(currentDraft.answerBlocks),
+        frontBlocks: sanitizeBlocksForSave(currentDraft.frontBlocks),
+        backBlocks: sanitizeBlocksForSave(currentDraft.backBlocks),
         layoutRows: normalizeLayoutRows(currentDraft.layoutRows),
       };
 
@@ -614,6 +614,10 @@ export function useCardEditorSession({
     panelCard,
   };
 }
+
+
+
+
 
 
 

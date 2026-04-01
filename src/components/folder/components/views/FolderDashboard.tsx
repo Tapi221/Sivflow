@@ -69,10 +69,10 @@ const normalizeInlineText = (value: string): string =>
 
 const computeCardPreviewMeta = (card: Card): CardPreviewMeta => {
   const questionText = normalizeInlineText(
-    extractTextFromBlocks(card.questionBlocks ?? []) || card.questionText || "",
+    extractTextFromBlocks((card.front?.blocks ?? []) ?? []) || card.questionText || "",
   );
   const answerText = normalizeInlineText(
-    extractTextFromBlocks(card.answerBlocks ?? []) || card.answerText || "",
+    extractTextFromBlocks((card.back?.blocks ?? []) ?? []) || card.answerText || "",
   );
 
   const titleCandidate = card.title?.trim();
@@ -1528,6 +1528,10 @@ function ScrollArrow({
     </button>
   );
 }
+
+
+
+
 
 
 

@@ -5,29 +5,29 @@
  * - effectiveIsFlipped に基づく active-side 選択を一元管理
  * - useMemo の deps は既存パターンに準拠
  */
-import React from "react";
 import { resolveInkDocument } from "@/components/ink/inkStorage";
+import type { CardBlock } from "@/types/domain/card";
+import React from "react";
+import { resolveSideBlocks } from "./flashcardBlocks";
 import {
   type FlashcardCardLike,
   type FlashcardMediaLike,
+  resolveAnswerAudios,
+  resolveAnswerCode,
+  resolveAnswerImages,
+  resolveAnswerText,
+  resolveAudioUrls,
   resolveCardId,
   resolveHasUncertainty,
-  resolveIsBookmarked,
-  resolveQuestionText,
-  resolveAnswerText,
-  resolveQuestionImages,
-  resolveAnswerImages,
-  resolveQuestionAudios,
-  resolveAnswerAudios,
-  resolveQuestionCode,
-  resolveAnswerCode,
-  resolveLayoutRows,
   resolveImageUrls,
-  resolveAudioUrls,
+  resolveIsBookmarked,
+  resolveLayoutRows,
+  resolveQuestionAudios,
+  resolveQuestionCode,
+  resolveQuestionImages,
+  resolveQuestionText,
   resolveReferences,
 } from "./flashcardDerived";
-import { resolveSideBlocks } from "./flashcardBlocks";
-import type { CardBlock } from "@/types/domain/card
 
 export interface FlashcardDerived {
   cardId: string | null;
@@ -94,9 +94,9 @@ export function useFlashcardDerived(
   const activeSourceBlocks = React.useMemo(
     () =>
       activeSide === "question"
-        ? ((cardData?.questionBlocks ?? []) as CardBlock[])
-        : ((cardData?.answerBlocks ?? []) as CardBlock[]),
-    [activeSide, cardData?.answerBlocks, cardData?.questionBlocks],
+        ? ((cardData?.frontBlocks?? []) as CardBlock[])
+        : ((cardData?.backBlocks ?? []) as CardBlock[]),
+    [activeSide, cardData?.backBlocks, cardData?.frontBlocks],
   );
 
   const activeReferences = React.useMemo(
@@ -167,6 +167,12 @@ export function useFlashcardDerived(
     activeInkDocument,
   };
 }
+
+
+
+
+
+
 
 
 

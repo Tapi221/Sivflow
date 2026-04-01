@@ -1,7 +1,6 @@
 import { DEFAULT_LAYOUT_ROWS } from "@/domain/card/extraRows";
 
-import type { CardBlock, ReferenceBlockData, UploadedImage } from "@/types/domain/card
-
+import type { CardBlock, ReferenceBlockData, UploadedImage } from "@/types/domain/card";
 const NEW_SENTINEL = "__new__" as const;
 
 export type EditorDraft = {
@@ -10,8 +9,8 @@ export type EditorDraft = {
   isDraft: boolean;
   questionImages: UploadedImage[];
   answerImages: UploadedImage[];
-  questionBlocks: CardBlock[];
-  answerBlocks: CardBlock[];
+  frontBlocks: CardBlock[];
+  backBlocks: CardBlock[];
   layoutRows: number;
 };
 
@@ -29,8 +28,8 @@ export function makeNewDraft(): EditorDraft {
     isDraft: false,
     questionImages: [],
     answerImages: [],
-    questionBlocks: [],
-    answerBlocks: [],
+    frontBlocks: [],
+    backBlocks: [],
     layoutRows: DEFAULT_LAYOUT_ROWS,
   };
 }
@@ -66,17 +65,22 @@ export function shouldAutoOpenEditorForCard(card: unknown): boolean {
     title?: string;
     tagIds?: unknown[];
     tags?: unknown[];
-    questionBlocks?: CardBlock[];
-    answerBlocks?: CardBlock[];
+    frontBlocks?: CardBlock[];
+    backBlocks?: CardBlock[];
   };
   if (String(safeCard.title ?? "").trim().length > 0) return false;
   if ((safeCard.tagIds ?? safeCard.tags ?? []).length > 0) return false;
-  const questionBlocks = (safeCard.questionBlocks ?? []) as CardBlock[];
-  const answerBlocks = (safeCard.answerBlocks ?? []) as CardBlock[];
-  const hasQuestionContent = questionBlocks.some((b) => !isBlockEmpty(b));
-  const hasAnswerContent = answerBlocks.some((b) => !isBlockEmpty(b));
+  const frontBlocks= (safe(card.front?.blocks ?? []) ?? []) as CardBlock[];
+  const backBlocks = (safe(card.back?.blocks ?? []) ?? []) as CardBlock[];
+  const hasQuestionContent = frontBlocks.some((b) => !isBlockEmpty(b));
+  const hasAnswerContent = backBlocks.some((b) => !isBlockEmpty(b));
   return !hasQuestionContent && !hasAnswerContent;
 }
+
+
+
+
+
 
 
 

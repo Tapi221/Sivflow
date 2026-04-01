@@ -1,10 +1,10 @@
 import React, {
-    useCallback,
-    useEffect,
-    useImperativeHandle,
-    useMemo,
-    useRef,
-    useState,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
 } from "react";
 import { createPortal } from "react-dom";
 
@@ -15,18 +15,17 @@ import { MathBlock } from "./MathBlock";
 import { MediaBlock } from "./MediaBlock";
 import { QuestionBlock } from "./QuestionBlock";
 import { TextBlock } from "./TextBlock";
-import { BlockEditModeContext } from "./BlockWrapper";
 import { hasRuledLine, shouldRenderInterBlockSeparator } from "./blockDisplayPolicy";
 
 import { CARD_ROW_PX } from "@/components/card/common/constants";
 import {
-    getNormalizedGridOffsetRows,
-    getNormalizedRowOffset,
-    isGridOffsetType,
-    isRowPositionableType,
+  getNormalizedGridOffsetRows,
+  getNormalizedRowOffset,
+  isGridOffsetType,
+  isRowPositionableType,
 } from "@/components/card/frame/rowOffset";
 import { cn } from "@/lib/utils";
-import type { CardBlock } from "@/types/domain/card
+import type { CardBlock } from "@/types/domain/card";
 import { sortBlocksByOrderIndex } from "./blockOrdering";
 
 type CssVars = React.CSSProperties & Record<`--${string}`, string>;

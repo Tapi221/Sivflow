@@ -1,16 +1,15 @@
-import { Image as ImageIcon, Link as LinkIcon } from "@/ui/icons";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { Dispatch, SetStateAction } from "react";
-import { sanitizeReferences } from "@/components/card/editor/cardEditorUtils";
 import {
-  CARD_ACTION_ICON_CLASS,
   CARD_ACTION_BG_CLASS,
   CARD_ACTION_COLOR_IDLE_CLASS,
+  CARD_ACTION_ICON_CLASS,
 } from "@/components/card/common/constants";
+import { sanitizeReferences } from "@/components/card/editor/cardEditorUtils";
 import { cn } from "@/lib/utils";
+import { Image as ImageIcon, Link as LinkIcon } from "@/ui/icons";
+import type { Dispatch, SetStateAction } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import type { CardBlock, ReferenceBlockData, UploadedImage } from "@/types/domain/card
-
+import type { CardBlock, ReferenceBlockData, UploadedImage } from "@/types/domain/card";
 type Side = "question" | "answer";
 type DraftShape = {
   questionImages: UploadedImage[];
@@ -243,6 +242,7 @@ export function useCardMediaDialogs({
     ],
   );
 }
+
 
 
 

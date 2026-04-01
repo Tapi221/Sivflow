@@ -5,14 +5,13 @@
  * - legacy extra rows 吸収
  * - ink document resolve は含まない（副作用のある resolveInkDocument は呼び出し側）
  */
-import type { ReferenceBlockData } from "@/types/domain/card
-import type { CardBlock } from "@/types/domain/card
 import {
   DEFAULT_LAYOUT_ROWS,
   LEGACY_BASE_LAYOUT_ROWS,
   normalizeExtraRows,
   normalizeLayoutRows,
 } from "@/domain/card/extraRows";
+import type { CardBlock, ReferenceBlockData } from "@/types/domain/card";
 
 export type FlashcardMediaLike =
   | string
@@ -47,8 +46,8 @@ export type FlashcardCardLike = {
   question_code?: { code?: string; language?: string } | null;
   answerCode?: { code?: string; language?: string } | null;
   answer_code?: { code?: string; language?: string } | null;
-  questionBlocks?: CardBlock[];
-  answerBlocks?: CardBlock[];
+  frontBlocks?: CardBlock[];
+  backBlocks?: CardBlock[];
   layoutRows?: number;
   layout_rows?: number;
   /** @deprecated Read-only legacy field. Use layoutRows/layout_rows. */
@@ -183,6 +182,13 @@ export function resolveReferences(blocks: CardBlock[]): ReferenceBlockData[] {
   });
   return refs.filter((r) => r.url);
 }
+
+
+
+
+
+
+
 
 
 

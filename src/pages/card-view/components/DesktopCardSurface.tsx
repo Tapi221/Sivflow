@@ -98,8 +98,7 @@ function DesktopCardSurfaceInner({
 
   return (
     <div className="w-full overflow-visible">
-      <Flashcard
-        card={card}
+      <Flashcard card={adaptCard(card)}
         isFlipped={isFlipped}
         previewMode={!isActive}
         onFlip={isActive ? onFlip : undefined}

@@ -41,16 +41,16 @@ describe("Flashcard layoutRows height behavior", () => {
       questionText: "Q",
       answerText: "A",
       layoutRows: 22,
-      questionBlocks: [],
-      answerBlocks: [],
+      frontBlocks: [],
+      backBlocks: [],
     };
 
-    const { rerender } = render(<Flashcard card={card} isFlipped={false} />);
+    const { rerender } = render(<Flashcard card={adaptCard(card)} isFlipped={false} />);
     const before = screen
       .getByTestId("mock-card-frame")
       .getAttribute("data-height");
 
-    rerender(<Flashcard card={card} isFlipped={true} />);
+    rerender(<Flashcard card={adaptCard(card)} isFlipped={true} />);
     const after = screen
       .getByTestId("mock-card-frame")
       .getAttribute("data-height");
@@ -59,6 +59,12 @@ describe("Flashcard layoutRows height behavior", () => {
     expect(after).toBe(String(22 * CARD_ROW_PX));
   });
 });
+
+
+
+
+
+
 
 
 

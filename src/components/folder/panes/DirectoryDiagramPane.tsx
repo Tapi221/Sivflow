@@ -495,8 +495,7 @@ export function DirectoryDiagramPane({
                   className="mx-auto w-fit"
                   onClick={(event) => event.stopPropagation()}
                 >
-                  <Flashcard
-                    card={previewCard as unknown as import("@/components/card/frame/Flashcard").FlashcardCardLike | null}
+                  <Flashcard card={adaptCard(previewCard as unknown as import("@/components/card/frame/Flashcard").FlashcardCardLike | null)}
                     previewMode
                     className="mx-auto"
                     allowUpscale
@@ -512,3 +511,4 @@ export function DirectoryDiagramPane({
     </div>
   );
 }
+

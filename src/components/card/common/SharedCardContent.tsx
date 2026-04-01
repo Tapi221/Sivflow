@@ -3,7 +3,7 @@ import { BlockRendererWithoutSeparators } from "@/components/card/blocks/BlockRe
 import { shouldRenderInterBlockSeparator } from "@/components/card/blocks/blockDisplayPolicy";
 import { cn } from "@/lib/utils";
 import { CONTENT_TYPO } from "@/styles/tokens/typography";
-import type { CardBlock } from "@/types/domain/card
+import type { CardBlock } from "@/types/domain/card";
 import React from "react";
 import { CARD_CONTENT_TOP_PX } from "./constants";
 

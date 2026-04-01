@@ -16,8 +16,8 @@
  */
 
 import { useEffect, useRef, useState } from "react";
-import type { Card, CardBlock } from "@/types/domain/card
-import type { UploadedImage } from "@/types/domain/card
+import type { Card, CardBlock } from "@/types/domain/card";
+import type { UploadedImage } from "@/types/domain/card";
 import { getOrCreateImageBlobUrl } from "@/services/imageBlobUrlSessionCache";
 import { getLocalDb } from "@/services/localDB";
 import { storage } from "@/services/firebase";

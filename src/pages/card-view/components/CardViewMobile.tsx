@@ -32,8 +32,7 @@ export function CardViewMobile({
   const renderCenter = useCallback(
     (card: Card, idx: number) => (
       <MobileScalableCard cardDesignWidth={CANONICAL_CARD_WIDTH} safePadding={0}>
-        <Flashcard
-          card={card}
+        <Flashcard card={adaptCard(card)}
           isFlipped={isFlipped}
           onFlip={onFlip}
           onEdit={onEdit}
@@ -66,7 +65,7 @@ export function CardViewMobile({
   const renderPreview = useCallback(
     (card: Card) => (
       <MobileScalableCard cardDesignWidth={CANONICAL_CARD_WIDTH} safePadding={0}>
-        <Flashcard card={card} isFlipped={false} previewMode={true} />
+        <Flashcard card={adaptCard(card)} isFlipped={false} previewMode={true} />
       </MobileScalableCard>
     ),
     [],
@@ -82,3 +81,5 @@ export function CardViewMobile({
     />
   );
 }
+
+

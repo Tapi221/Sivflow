@@ -37,3 +37,4 @@ describe("resolveSideBlocks", () => {
     expect(result[0]?.id).toBe("question-image-1");
   });
 });
+
