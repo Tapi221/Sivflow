@@ -79,8 +79,8 @@ interface FolderTreeWithCardsProps {
   isFiltering?: boolean;
   createFolderRequestToken?: number;
   createCardSetRequestToken?: number;
-  addPdfRequestToken?: number;
-  addPptxRequestToken?: number;
+  onRegisterPdfTrigger?: (fn: () => void) => void;
+  onRegisterPptxTrigger?: (fn: () => void) => void;
   navigateToSectionListToken?: number;
   folderSelectionNonce?: number;
   className?: string;
@@ -114,8 +114,8 @@ export function FolderTreeWithCards({
   isFiltering = false,
   createFolderRequestToken = 0,
   createCardSetRequestToken = 0,
-  addPdfRequestToken = 0,
-  addPptxRequestToken = 0,
+  onRegisterPdfTrigger,
+  onRegisterPptxTrigger,
   navigateToSectionListToken = 0,
   folderSelectionNonce = 0,
   className,
@@ -148,8 +148,7 @@ export function FolderTreeWithCards({
   const editInputRef = useRef<HTMLInputElement>(null);
   const handledCreateFolderTokenRef = useRef(0);
   const handledCreateCardSetTokenRef = useRef(0);
-  const handledAddPdfTokenRef = useRef(0);
-  const handledAddPptxTokenRef = useRef(0);
+
 
   const findScrollableAncestorWithinTree = useCallback(
     (node: HTMLElement): HTMLElement | null => {
@@ -514,18 +513,12 @@ export function FolderTreeWithCards({
   }, [createCardSetRequestToken, handleCreateCardSetFromMenu, selectedFolderId]);
 
   useEffect(() => {
-    if (addPdfRequestToken <= 0) return;
-    if (handledAddPdfTokenRef.current === addPdfRequestToken) return;
-    handledAddPdfTokenRef.current = addPdfRequestToken;
-    handleToolbarAddPdf();
-  }, [addPdfRequestToken, handleToolbarAddPdf]);
+    onRegisterPdfTrigger?.(handleToolbarAddPdf);
+  }, [onRegisterPdfTrigger, handleToolbarAddPdf]);
 
   useEffect(() => {
-    if (addPptxRequestToken <= 0) return;
-    if (handledAddPptxTokenRef.current === addPptxRequestToken) return;
-    handledAddPptxTokenRef.current = addPptxRequestToken;
-    handleToolbarAddPptx();
-  }, [addPptxRequestToken, handleToolbarAddPptx]);
+    onRegisterPptxTrigger?.(handleToolbarAddPptx);
+  }, [onRegisterPptxTrigger, handleToolbarAddPptx]);
 
   const handleCreateCardSetFromRootPanel = useCallback(
     async (folderId: string | null) => {

@@ -29,8 +29,8 @@ interface TreeViewTabContentProps {
   isFiltering: boolean;
   createFolderRequestToken: number;
   createCardSetRequestToken: number;
-  addPdfRequestToken: number;
-  addPptxRequestToken: number;
+  onRegisterPdfTrigger: (fn: () => void) => void;
+  onRegisterPptxTrigger: (fn: () => void) => void;
   navigateToSectionListToken: number;
   folderSelectionNonce: number;
   getFolderPath: PinnedPanelProps["getFolderPath"];
@@ -75,8 +75,8 @@ export function TreeViewTabContent({
   isFiltering,
   createFolderRequestToken,
   createCardSetRequestToken,
-  addPdfRequestToken,
-  addPptxRequestToken,
+  onRegisterPdfTrigger,
+  onRegisterPptxTrigger,
   navigateToSectionListToken,
   folderSelectionNonce,
   getFolderPath,
@@ -176,8 +176,8 @@ export function TreeViewTabContent({
           isFiltering={isFiltering}
           createFolderRequestToken={createFolderRequestToken}
           createCardSetRequestToken={createCardSetRequestToken}
-          addPdfRequestToken={addPdfRequestToken}
-          addPptxRequestToken={addPptxRequestToken}
+          onRegisterPdfTrigger={onRegisterPdfTrigger}
+          onRegisterPptxTrigger={onRegisterPptxTrigger}
           navigateToSectionListToken={navigateToSectionListToken}
           folderSelectionNonce={folderSelectionNonce}
         />

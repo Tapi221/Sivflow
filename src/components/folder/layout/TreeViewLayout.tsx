@@ -8,7 +8,7 @@ import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { cn } from "@/lib/utils";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 import { createPageUrl } from "@/utils";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { TreeViewDialogs } from "@/components/folder/components/TreeViewDialogs";
@@ -250,19 +250,19 @@ function TreeViewLayout({
   }, []);
 
   const [createCardSetRequestToken, setCreateCardSetRequestToken] = useState(0);
-  const [addPdfRequestToken, setAddPdfRequestToken] = useState(0);
-  const [addPptxRequestToken, setAddPptxRequestToken] = useState(0);
+  const pdfTriggerRef = useRef<(() => void) | null>(null);
+  const pptxTriggerRef = useRef<(() => void) | null>(null);
 
   const handleCreateCardSetFromHeader = useCallback(() => {
     setCreateCardSetRequestToken((prev) => prev + 1);
   }, []);
 
   const handleAddPdfFromHeader = useCallback(() => {
-    setAddPdfRequestToken((prev) => prev + 1);
+    pdfTriggerRef.current?.();
   }, []);
 
   const handleAddPptxFromHeader = useCallback(() => {
-    setAddPptxRequestToken((prev) => prev + 1);
+    pptxTriggerRef.current?.();
   }, []);
 
   const {
@@ -426,8 +426,8 @@ function TreeViewLayout({
       isFiltering={isFiltering}
       createFolderRequestToken={createFolderRequestToken}
       createCardSetRequestToken={createCardSetRequestToken}
-      addPdfRequestToken={addPdfRequestToken}
-      addPptxRequestToken={addPptxRequestToken}
+      onRegisterPdfTrigger={(fn) => { pdfTriggerRef.current = fn; }}
+      onRegisterPptxTrigger={(fn) => { pptxTriggerRef.current = fn; }}
       navigateToSectionListToken={navigateToSectionListToken}
       folderSelectionNonce={folderSelectionNonce}
       getFolderPath={getFolderPath}
