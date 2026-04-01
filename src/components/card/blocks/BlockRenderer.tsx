@@ -6,6 +6,7 @@ import {
     isGridOffsetType,
     isRowPositionableType,
 } from "@/components/card/frame/rowOffset";
+import { hasRuledLine, shouldRenderInterBlockSeparator } from "./blockDisplayPolicy";
 import { AudioPlayer } from "@/components/card/media/CardMedia";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import type { CardBlock } from "@/types";
@@ -120,7 +121,7 @@ export function BlockRenderer({
 
   return (
     <div className="w-full max-w-full">
-      {renderableBlocks.map((block) => {
+      {renderableBlocks.map((block, index) => {
         const isGridOffsetBlock = isGridOffsetType(block.type);
         const isLinePositionable =
           isRowPositionableType(block.type) && !isGridOffsetBlock;
@@ -133,18 +134,40 @@ export function BlockRenderer({
           : 0;
         const gridOffsetPx = gridOffsetRows * CARD_ROW_PX;
 
-        const blockLayoutKind: "normal" | "special" =
-          block.type === "code" || block.type === "question" ? "special" : "normal";
+        const blockLayoutKind: "ruled" | "non-ruled" =
+          hasRuledLine(block.type) ? "ruled" : "non-ruled";
+
+        const showSeparator =
+          index > 0 &&
+          shouldRenderInterBlockSeparator(
+            renderableBlocks[index - 1].type,
+            block.type,
+          );
 
         return (
-          <div
-            key={block.id}
-            className="w-full min-w-0 max-w-full flow-root"
-            data-block-row="true"
-            data-block-layout-kind={blockLayoutKind}
-            data-row-offset-applied={rowOffsetPx ? "true" : undefined}
-            style={blockOutline ? { ...offsetStyle, boxShadow: blockOutline, borderRadius: "var(--block-frame-radius, 12px)" } : offsetStyle}
-          >
+          <div key={block.id}>
+            {showSeparator && (
+              <div
+                aria-hidden
+                className="pointer-events-none"
+                style={{ height: 9, display: "flex", alignItems: "center" }}
+              >
+                <div
+                  style={{
+                    width: "100%",
+                    height: 1,
+                    background: "var(--card-ruled-color, rgba(0,0,0,0.05))",
+                  }}
+                />
+              </div>
+            )}
+            <div
+              className="w-full min-w-0 max-w-full flow-root"
+              data-block-row="true"
+              data-block-layout-kind={blockLayoutKind}
+              data-row-offset-applied={rowOffsetPx ? "true" : undefined}
+              style={blockOutline ? { ...offsetStyle, boxShadow: blockOutline, borderRadius: "var(--block-frame-radius, 12px)" } : offsetStyle}
+            >
             {block.type === "question" && (
               <QuestionBlockView
                 block={block}
@@ -226,6 +249,7 @@ export function BlockRenderer({
                   bleedX={false}
                 />
               )}
+            </div>
           </div>
         );
       })}

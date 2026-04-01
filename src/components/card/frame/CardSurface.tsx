@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { RuledLayer } from "./RuledLayer";
 import { PositionalRuledLayer } from "./PositionalRuledLayer";
 
 // Context for children (e.g., SharedCardContent) to trigger positional ruled rendering
@@ -58,7 +57,7 @@ export function CardSurface({
   const bottomPx = Math.max(0, ruledBottomOffsetPx);
 
   const surfaceRef = useRef<HTMLDivElement | null>(null);
-  const [visibleRules, setVisibleRules] = useState<number[] | null>(null);
+  const [visibleRules, setVisibleRules] = useState<number[]>([]);
 
   const contextValue = useMemo<CardRuledContextValue>(
     () => ({ surfaceRef, setVisibleRules }),
@@ -112,18 +111,8 @@ export function CardSurface({
           }}
         />
 
-        {ruled && visibleRules === null && (
-          <RuledLayer
-            kind="repeat+bottom"
-            ruledOpacity={opacity}
-            ruledRowPx={rowPx}
-            ruledPhasePx={ruledPhasePx}
-            ruledInsetX="var(--card-padding-x)"
-            ruledOffsetPx={topPx}
-            ruledBottomOffsetPx={bottomPx}
-          />
-        )}
-        {ruled && visibleRules !== null && (
+        {/* positional ruled lines only */}
+        {ruled && visibleRules.length > 0 && (
           <PositionalRuledLayer
             visibleRules={visibleRules}
             insetX="var(--card-padding-x)"

@@ -5,12 +5,16 @@ import {
   CARD_RULED_OFFSET_TOP_PX,
   CARD_ROW_PX,
 } from "@/components/card/common/constants";
-import { buildCardFaceLayout, type MeasuredBlock } from "@/components/card/frame/cardFaceLayout";
+import {
+  buildCardFaceLayout,
+  type MeasuredBlock,
+} from "@/components/card/frame/cardFaceLayout";
 import { useCardRuledContext } from "@/components/card/frame/CardSurface";
 import { cn } from "@/lib/utils";
 import { CONTENT_TYPO } from "@/styles/tokens/typography";
 import type { CardBlock } from "@/types";
 import React, { useLayoutEffect, useRef } from "react";
+import { CARD_CONTENT_TOP_PX } from "./constants";
 
 /**
  * 要素の offsetTop を特定の祖先要素からの相対値で返す。
@@ -24,13 +28,14 @@ import React, { useLayoutEffect, useRef } from "react";
 function getOffsetTopRelativeTo(el: HTMLElement, ancestor: HTMLElement): number {
   let top = 0;
   let current: HTMLElement | null = el;
+
   while (current && current !== ancestor) {
     top += current.offsetTop;
     current = current.offsetParent as HTMLElement | null;
   }
+
   return top;
 }
-import { CARD_CONTENT_TOP_PX } from "./constants";
 
 type SharedCardContentBaseProps = {
   blocks: CardBlock[];
@@ -79,82 +84,54 @@ function SharedCardContentInner(props: SharedCardContentProps) {
   const contentRef = useRef<HTMLDivElement | null>(null);
 
   useLayoutEffect(() => {
-    if (props.mode !== "view") return;
     if (!ruledCtx) return;
 
-    const surface = ruledCtx.surfaceRef.current;
-    const content = contentRef.current;
-    if (!surface || !content) return;
-
-    function measure() {
-      const surface = ruledCtx!.surfaceRef.current;
-      const content = contentRef.current;
-      if (!surface || !content) return;
-
-      // ── 早期終了: special ブロック（code / question-table）がなければ
-      //    全ルール線が表示される → RuledLayer（CSS グラデーション）と同一結果。
-      //    getBoundingClientRect + setVisibleRules を省略して余分な再レンダーを防ぐ。
-      const specialEls = content.querySelectorAll<HTMLElement>(
-        "[data-block-layout-kind='special']",
-      );
-      if (specialEls.length === 0) return;
-
-      // ── ブロック位置計測: offsetTop / offsetHeight を使う。
-      //    getBoundingClientRect() は ScaleToFitFrame の CSS transform 後の
-      //    screen-space 座標を返すため、PositionalRuledLayer の CSS top（layout-space）
-      //    と座標系が食い違う。offsetTop はレイアウト空間の値でスケール不変。
-      const allBlockEls = content.querySelectorAll<HTMLElement>(
-        "[data-block-layout-kind]",
-      );
-      const measuredBlocks: MeasuredBlock[] = [];
-      allBlockEls.forEach((el) => {
-        measuredBlocks.push({
-          kind: (el.dataset.blockLayoutKind as "normal" | "special") ?? "normal",
-          top: getOffsetTopRelativeTo(el, surface),
-          height: el.offsetHeight,
-        });
-      });
-
-      const surfaceHeight = surface.offsetHeight;
-      if (surfaceHeight === 0) return;
-
-      const { visibleRules } = buildCardFaceLayout(
-        measuredBlocks,
-        CARD_RULED_OFFSET_TOP_PX,
-        surfaceHeight - CARD_RULED_OFFSET_BOTTOM_PX,
-        CARD_ROW_PX,
-      );
-
-      ruledCtx!.setVisibleRules(visibleRules);
+    const root = contentRef.current;
+    if (!root) {
+      ruledCtx.setVisibleRules([]);
+      return;
     }
 
-    // ── 初回: useLayoutEffect 内で同期実行（paint 前に確定）
-    measure();
+    const blockElements = Array.from(
+      root.querySelectorAll<HTMLElement>("[data-block-layout-kind]"),
+    );
 
-    // ── ResizeObserver: RAF でデバウンスして同フレームの forced reflow を防ぐ。
-    //    ResizeObserver callback は DOM 変更直後に呼ばれる可能性があり、
-    //    その場でレイアウト読み取りを行うと forced reflow になる。
-    let pendingRaf = 0;
-    const scheduleMeasure = () => {
-      cancelAnimationFrame(pendingRaf);
-      pendingRaf = requestAnimationFrame(measure);
-    };
+    const measuredBlocks: MeasuredBlock[] = blockElements.map((el) => {
+      const rawKind = el.getAttribute("data-block-layout-kind");
+      const kind = rawKind === "ruled" ? "ruled" : "non-ruled";
 
-    const ro = new ResizeObserver(scheduleMeasure);
-    ro.observe(surface);
-    content
-      .querySelectorAll("[data-block-layout-kind]")
-      .forEach((el) => ro.observe(el));
+      return {
+        kind,
+        top: getOffsetTopRelativeTo(el, root),
+        height: el.offsetHeight,
+      };
+    });
 
-    return () => {
-      ro.disconnect();
-      cancelAnimationFrame(pendingRaf);
-    };
+    if (import.meta.env.DEV) {
+      console.log(
+        "[SharedCardContent] measuredBlocks",
+        measuredBlocks,
+        blockElements.map((el) => el.getAttribute("data-block-layout-kind")),
+      );
+    }
+
+    const layout = buildCardFaceLayout(
+      measuredBlocks,
+      CARD_RULED_OFFSET_TOP_PX + CARD_ROW_PX,
+      CARD_RULED_OFFSET_BOTTOM_PX,
+      CARD_ROW_PX,
+    );
+
+    if (import.meta.env.DEV) {
+      console.log("[SharedCardContent] visibleRules", layout.visibleRules);
+    }
+
+    ruledCtx.setVisibleRules(layout.visibleRules);
   }, [props.blocks, props.mode, ruledCtx]);
 
   return (
     <div
-      ref={props.mode === "view" ? contentRef : undefined}
+      ref={contentRef}
       className={cn(rootClassName, CONTENT_TYPO, props.className)}
       style={{
         paddingTop: `var(--card-content-padding-top, ${CARD_CONTENT_TOP_PX}px)`,

@@ -302,10 +302,6 @@ export function CardEditorPane({
     panelCard,
   } = session;
 
-  console.log(
-    `CardEditorPane render: cardId=${normalizedSelectedCardId}, isPagerActiveCard=${isPagerActiveCard}, isPagerInteractionCard=${isPagerInteractionCard}, embeddedInPager=${embeddedInPager}`,
-  );
-
   const {
     manualResizeInProgressRef,
     scheduleLayoutRowsFromHeight,
@@ -355,13 +351,6 @@ export function CardEditorPane({
 
   const questionBlocks = draft?.questionBlocks ?? EMPTY_BLOCKS;
   const answerBlocks = draft?.answerBlocks ?? EMPTY_BLOCKS;
-
-  console.log("[CardEditorPane:draft]", {
-    questionImages: draft?.questionImages,
-    answerImages: draft?.answerImages,
-    questionBlocks: draft?.questionBlocks,
-    answerBlocks: draft?.answerBlocks,
-  });
 
   const editorCardHeightPx = useMemo(
     () => layoutRowsToCardHeightPx(normalizeLayoutRows(draft?.layoutRows)),

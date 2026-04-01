@@ -16,6 +16,7 @@ import { MediaBlock } from "./MediaBlock";
 import { QuestionBlock } from "./QuestionBlock";
 import { TextBlock } from "./TextBlock";
 import { BlockEditModeContext } from "./BlockWrapper";
+import { hasRuledLine, shouldRenderInterBlockSeparator } from "./blockDisplayPolicy";
 
 import { CARD_ROW_PX } from "@/components/card/common/constants";
 import {
@@ -133,13 +134,6 @@ export const BlockEditor = React.forwardRef<
         nonBodyBlocks: nextNonBodyBlocks,
       };
     }, [orderedBlocks]);
-    console.log("[BlockEditor]", {
-      prefix,
-      blocks,
-      orderedBlocks,
-      bodyBlocks,
-      nonBodyBlocks,
-    });
 
     const nonBodyBlocksRef = useRef<CardBlock[]>(nonBodyBlocks);
     useEffect(() => {
@@ -616,18 +610,41 @@ export const BlockEditor = React.forwardRef<
               ? ({ transform: `translateY(${rowOffsetPx}px)` } as React.CSSProperties)
               : undefined;
 
+            const showSeparator =
+              index > 0 &&
+              shouldRenderInterBlockSeparator(
+                bodyBlocks[index - 1].type,
+                block.type,
+              );
+
             return (
-              <div
-                key={block.id}
-                ref={(el) => {
-                  registerRowEl(block.id, el);
-                }}
-                data-block-id={block.id}
-                className="relative"
-                data-block-row="true"
-                data-row-offset-applied={rowOffsetPx ? "true" : undefined}
-                style={rowStyle}
-              >
+              <div key={block.id}>
+                {showSeparator && (
+                  <div
+                    aria-hidden
+                    className="pointer-events-none"
+                    style={{ height: 9, display: "flex", alignItems: "center" }}
+                  >
+                    <div
+                      style={{
+                        width: "100%",
+                        height: 1,
+                        background: "var(--card-ruled-color, rgba(0,0,0,0.05))",
+                      }}
+                    />
+                  </div>
+                )}
+                <div
+                  ref={(el) => {
+                    registerRowEl(block.id, el);
+                  }}
+                  data-block-id={block.id}
+                  className="relative"
+                  data-block-row="true"
+                  data-block-layout-kind={hasRuledLine(block.type) ? "ruled" : "non-ruled"}
+                  data-row-offset-applied={rowOffsetPx ? "true" : undefined}
+                  style={rowStyle}
+                >
                 {block.type === "text" && (
                   <TextBlock
                     content={block.content || ""}
@@ -828,6 +845,7 @@ export const BlockEditor = React.forwardRef<
                     }}
                   />
                 )}
+                </div>
               </div>
             );
           })}
@@ -838,10 +856,4 @@ export const BlockEditor = React.forwardRef<
 );
 
 BlockEditor.displayName = "BlockEditor";
-
-
-
-
-
-
 

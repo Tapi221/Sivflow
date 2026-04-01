@@ -489,7 +489,7 @@ export function ImageGallery({ urls, items }: ImageGalleryProps) {
                   }}
                   onError={() => handleImageError(index)}
                 />
-                <div className="absolute top-1 right-1 z-[999] pointer-events-auto flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 supports-[hover:none]:opacity-100">
+                <div className="absolute top-1 left-1 z-[999] pointer-events-auto flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 supports-[hover:none]:opacity-100">
                   <Button
                     type="button"
                     variant="secondary"
