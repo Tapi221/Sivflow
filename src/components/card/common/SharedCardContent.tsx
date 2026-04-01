@@ -1,9 +1,8 @@
 import { BlockEditor } from "@/components/card/blocks/BlockEditor";
 import { BlockRenderer } from "@/components/card/blocks/BlockRenderer";
 import {
-  CARD_RULED_OFFSET_BOTTOM_PX,
-  CARD_RULED_OFFSET_TOP_PX,
   CARD_ROW_PX,
+  CARD_RULED_OFFSET_BOTTOM_PX
 } from "@/components/card/common/constants";
 import {
   buildCardFaceLayout,
@@ -121,8 +120,8 @@ function SharedCardContentInner(props: SharedCardContentProps) {
       return;
     }
 
-    const ruledTop = CARD_RULED_OFFSET_TOP_PX + CARD_ROW_PX;
-    const ruledBottom = surfaceEl.offsetHeight - CARD_RULED_OFFSET_BOTTOM_PX;
+    const ruledTop = CARD_ROW_PX;
+    const ruledBottom = surfaceEl.offsetHeight - CARD_CONTENT_TOP_PX - CARD_RULED_OFFSET_BOTTOM_PX;
 
     const layout = buildCardFaceLayout(
       measuredBlocks,
