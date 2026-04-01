@@ -1,4 +1,4 @@
-import type { CardBlock } from "@/types";
+import type { CardBlock } from "@/types/domain/card
 
 type BlockType = CardBlock["type"];
 

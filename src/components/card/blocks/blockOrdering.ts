@@ -1,4 +1,4 @@
-import type { CardBlock } from "@/types";
+import type { CardBlock } from "@/types/domain/card
 
 export function sortBlocksByOrderIndex(blocks: CardBlock[] = []): CardBlock[] {
   if (blocks.length <= 1) return blocks;

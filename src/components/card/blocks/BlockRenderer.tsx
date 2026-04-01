@@ -8,7 +8,7 @@ import {
 } from "@/components/card/frame/rowOffset";
 import { AudioPlayer } from "@/components/card/media/CardMedia";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
-import type { CardBlock } from "@/types";
+import type { CardBlock } from "@/types/domain/card
 import { useCallback, useContext, useMemo, useState } from "react";
 import { shouldRenderInterBlockSeparator } from "./blockDisplayPolicy";
 import { BlockEditModeContext } from "./BlockWrapper";

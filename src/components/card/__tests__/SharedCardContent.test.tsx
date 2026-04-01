@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { SharedCardContent } from "@/components/card/common/SharedCardContent";
-import type { CardBlock } from "@/types";
+import type { CardBlock } from "@/types/domain/card
 import { DragDropContext } from "@hello-pangea/dnd";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";

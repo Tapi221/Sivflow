@@ -9,7 +9,7 @@ import {
 } from "@/components/card/common/constants";
 import { cn } from "@/lib/utils";
 
-import type { CardBlock, ReferenceBlockData, UploadedImage } from "@/types";
+import type { CardBlock, ReferenceBlockData, UploadedImage } from "@/types/domain/card
 
 type Side = "question" | "answer";
 type DraftShape = {

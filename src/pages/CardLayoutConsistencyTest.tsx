@@ -8,7 +8,7 @@ import {
   CARD_SAFE_PADDING_PX,
 } from "@/components/card/common/constants";
 import { MobileScalableCard } from "@/components/card/frame/MobileScalableCard";
-import type { CardBlock } from "@/types";
+import type { CardBlock } from "@/types/domain/card
 
 const FIXTURE_BLOCKS: CardBlock[] = [
   {

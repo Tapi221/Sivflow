@@ -9,7 +9,7 @@ import {
 import { AudioPlayer } from "@/components/card/media/CardMedia";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { cn } from "@/lib/utils";
-import type { CardBlock } from "@/types";
+import type { CardBlock } from "@/types/domain/card
 import { useCallback, useContext, useMemo, useState } from "react";
 import { hasRuledLine } from "./blockDisplayPolicy";
 import { BlockEditModeContext } from "./BlockWrapper";

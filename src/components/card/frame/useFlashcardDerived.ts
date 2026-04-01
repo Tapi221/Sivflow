@@ -27,7 +27,7 @@ import {
   resolveReferences,
 } from "./flashcardDerived";
 import { resolveSideBlocks } from "./flashcardBlocks";
-import type { CardBlock } from "@/types";
+import type { CardBlock } from "@/types/domain/card
 
 export interface FlashcardDerived {
   cardId: string | null;

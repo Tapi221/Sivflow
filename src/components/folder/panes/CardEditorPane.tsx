@@ -28,7 +28,7 @@ import {
 } from "@/components/folder/panes/useCardEditorPaneWidth";
 import { normalizeLayoutRows } from "@/domain/card/extraRows";
 import { cn } from "@/lib/utils";
-import type { Card, CardBlock, UserSettings } from "@/types";
+import type { Card, CardBlock, UserSettings } from "@/types/domain/card
 
 interface CardEditorPaneProps {
   selectedCardId: string | null;

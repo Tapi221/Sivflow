@@ -5,8 +5,8 @@
  * - legacy extra rows 吸収
  * - ink document resolve は含まない（副作用のある resolveInkDocument は呼び出し側）
  */
-import type { ReferenceBlockData } from "@/types";
-import type { CardBlock } from "@/types";
+import type { ReferenceBlockData } from "@/types/domain/card
+import type { CardBlock } from "@/types/domain/card
 import {
   DEFAULT_LAYOUT_ROWS,
   LEGACY_BASE_LAYOUT_ROWS,

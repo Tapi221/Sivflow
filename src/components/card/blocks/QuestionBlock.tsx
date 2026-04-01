@@ -2,7 +2,7 @@ import React, { useCallback, useRef } from "react";
 import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
 import { BlockWrapper } from "./BlockWrapper";
 import { HelpCircle } from "@/ui/icons";
-import type { CardBlock } from "@/types";
+import type { CardBlock } from "@/types/domain/card
 import { QuestionBlockLayout } from "./QuestionBlockLayout";
 import {
   QUESTION_BLOCK_ANSWER_TEXT_CLASS,

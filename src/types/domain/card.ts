@@ -1,5 +1,5 @@
 import type { InkDocument } from "@/components/ink/inkTypes";
-import type { CodeBlockData } from "@/types/core/code-block";
+import type { CodeBlockData } from "@/types/domain/card
 import { Timestamp } from "firebase/firestore";
 import type { UploadedImage } from "./assets";
 import type {

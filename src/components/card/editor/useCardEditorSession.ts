@@ -27,7 +27,7 @@ import { sanitizeUploadedImages } from "@/utils/uploaded-image/sanitizer";
 
 import { useCardEntity } from "@/hooks/card/useCardEntity";
 
-import type { CardBlock, Card, UploadedImage } from "@/types";
+import type { CardBlock, Card, UploadedImage } from "@/types/domain/card
 
 const NEW_SENTINEL = "__new__" as const;
 

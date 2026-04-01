@@ -2,7 +2,7 @@ import { useCardMediaDialogs } from "@/components/card/editor/useCardMediaDialog
 
 import { useCallback, useEffect, useMemo } from "react";
 import type { Dispatch, MutableRefObject, SetStateAction } from "react";
-import type { CardBlock, UploadedImage } from "@/types";
+import type { CardBlock, UploadedImage } from "@/types/domain/card
 
 type DraftShape = {
   questionImages: UploadedImage[];

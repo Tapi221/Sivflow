@@ -8,7 +8,7 @@ import { StratisFormulaIcon } from "@/ui/icons";
 import { StratisMarkdownIcon } from "@/ui/icons";
 import { HelpCircle } from "@/ui/icons";
 import { cn } from "@/lib/utils";
-import type { CardBlock } from "@/types";
+import type { CardBlock } from "@/types/domain/card
 
 import {
   DropdownMenu,

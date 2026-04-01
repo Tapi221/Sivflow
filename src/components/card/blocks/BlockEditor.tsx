@@ -26,7 +26,7 @@ import {
     isRowPositionableType,
 } from "@/components/card/frame/rowOffset";
 import { cn } from "@/lib/utils";
-import type { CardBlock } from "@/types";
+import type { CardBlock } from "@/types/domain/card
 import { sortBlocksByOrderIndex } from "./blockOrdering";
 
 type CssVars = React.CSSProperties & Record<`--${string}`, string>;
