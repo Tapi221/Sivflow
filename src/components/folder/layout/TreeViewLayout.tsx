@@ -1,3 +1,4 @@
+import { useBreadcrumbContext } from "@/contexts/BreadcrumbContext";
 import { useCards } from "@/hooks/card/useCards";
 import { useCardSets } from "@/hooks/cardSet/useCardSets";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
@@ -7,9 +8,9 @@ import { resolveCardTagNames, useTags } from "@/hooks/settings/useTags";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { cn } from "@/lib/utils";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
-import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { TreeViewDialogs } from "@/components/folder/components/TreeViewDialogs";
 import { TreeViewMainPane } from "@/components/folder/components/TreeViewMainPane";
@@ -74,6 +75,8 @@ function TreeViewLayout({
     setSelectedCardSetId(null);
   }, [selectedFolderId]);
 
+  const { setExtraCrumbs } = useBreadcrumbContext();
+
   // onItemSelect のラッパー: cardSet選択時にselectedCardSetIdもセット
   const handleItemSelect = useCallback(
     (item: SelectedExplorerItem) => {
@@ -113,11 +116,6 @@ function TreeViewLayout({
     scroller.scrollTop = 0;
   }, [contentScrollRef, selectedFolderId, navigateToSectionListToken]);
 
-  const deferredMainSelectedFolderId = useDeferredValue(selectedFolderId);
-  const deferredMainSelectedItem = useDeferredValue(selectedItem);
-  const deferredMainSelectedCardId = useDeferredValue(selectedCardId);
-  const deferredMainSelectedDocumentId = useDeferredValue(selectedDocumentId);
-
   const {
     getFolderPath,
     selectedFolder,
@@ -129,13 +127,22 @@ function TreeViewLayout({
     folders,
     cards,
     documents,
-    selectedFolderId: deferredMainSelectedFolderId,
-    selectedItem: deferredMainSelectedItem,
-    selectedCardId: deferredMainSelectedCardId,
-    selectedDocumentId: deferredMainSelectedDocumentId,
+    selectedFolderId, // 即時値
+    selectedItem,
+    selectedCardId,
+    selectedDocumentId,
     autoCarryOver: settings?.autoCarryOver ?? true,
     isMobile,
   });
+
+  // パンくずの更新
+  useEffect(() => {
+    if (selectedFolderId && selectedFolder?.folderName) {
+      setExtraCrumbs([{ label: selectedFolder.folderName }]);
+    } else {
+      setExtraCrumbs([]);
+    }
+  }, [selectedFolderId, selectedFolder?.folderName, setExtraCrumbs]);
 
   const explorerTab = useExplorerStore((s) => s.explorerTab);
   const setExplorerTab = useExplorerStore((s) => s.setExplorerTab);
@@ -487,10 +494,10 @@ function TreeViewLayout({
       <TreeViewMainPane
         isMobile={isMobile}
         showMobileDetail={showMobileDetail}
-        selectedItem={deferredMainSelectedItem}
-        selectedCardId={deferredMainSelectedCardId}
+        selectedItem={selectedItem}
+        selectedCardId={selectedCardId}
         selectedDocument={selectedDocument}
-        selectedFolderId={deferredMainSelectedFolderId}
+        selectedFolderId={selectedFolderId}
         selectedFolderName={selectedFolder?.folderName ?? "フォルダ"}
         folders={folders}
         cards={cards}
