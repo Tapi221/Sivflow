@@ -1,8 +1,8 @@
-import React from "react";
+import { BlockSurface } from "@/components/card/blocks/BlockSurface";
 import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
 import {
-  TEXT_BLOCK_CONTENT_CLASS,
-  TEXT_BLOCK_LINE_HEIGHT_PX,
+    TEXT_BLOCK_CONTENT_CLASS,
+    TEXT_BLOCK_LINE_HEIGHT_PX,
 } from "./textBlockStyles";
 
 const normalizeTextBlockContent = (content: string) =>
@@ -29,11 +29,11 @@ export function TextBlockContent(props: TextBlockContentProps) {
       normalizedContent.length === 0 ? "\u00A0" : normalizedContent;
 
     return (
-      <div className="w-full max-w-full overflow-hidden">
+      <BlockSurface ruled={true} className="flex-1">
         <div className={`${TEXT_BLOCK_CONTENT_CLASS} whitespace-pre-wrap`}>
           {displayText}
         </div>
-      </div>
+      </BlockSurface>
     );
   }
 

@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import React, { createContext, useContext, useMemo, useRef, useState } from "react";
 import { PositionalRuledLayer } from "./PositionalRuledLayer";
 
 // Context for children (e.g., SharedCardContent) to trigger positional ruled rendering
@@ -112,7 +112,7 @@ export function CardSurface({
         />
 
         {/* positional ruled lines only */}
-        {ruled && visibleRules.length > 0 && (
+        {false && visibleRules.length > 0 && (
           <PositionalRuledLayer
             visibleRules={visibleRules}
             insetX="var(--card-padding-x)"

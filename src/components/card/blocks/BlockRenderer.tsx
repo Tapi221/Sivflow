@@ -1,16 +1,16 @@
 import { CARD_ROW_PX } from "@/components/card/common/constants";
 import {
-    getNormalizedGridOffsetRows,
-    getRowOffsetPx,
-    getRowOffsetStyle,
-    isGridOffsetType,
-    isRowPositionableType,
+  getNormalizedGridOffsetRows,
+  getRowOffsetPx,
+  getRowOffsetStyle,
+  isGridOffsetType,
+  isRowPositionableType,
 } from "@/components/card/frame/rowOffset";
-import { hasRuledLine, shouldRenderInterBlockSeparator } from "./blockDisplayPolicy";
 import { AudioPlayer } from "@/components/card/media/CardMedia";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import type { CardBlock } from "@/types";
-import { useCallback, useContext, useMemo, useState } from "react";
+import { useCallback, useContext, useMemo } from "react";
+import { shouldRenderInterBlockSeparator } from "./blockDisplayPolicy";
 import { BlockEditModeContext } from "./BlockWrapper";
 import { CodeRenderer } from "./CodeRenderer";
 import { ImageBlockContent } from "./ImageBlockContent";
@@ -29,7 +29,7 @@ interface BlockRendererProps {
   onGalleryFullscreenChange?: (isFullscreen: boolean) => void;
 }
 
-/** 閲覧時の question ブロック。tap_to_reveal では答えをぼかして隠す。 */
+/** Question表示 */
 function QuestionBlockView({
   block,
   displayMode,
@@ -55,7 +55,11 @@ function QuestionBlockView({
           style={
             revealed
               ? undefined
-              : { filter: "blur(5px)", userSelect: "none", pointerEvents: "none" }
+              : {
+                  filter: "blur(5px)",
+                  userSelect: "none",
+                  pointerEvents: "none",
+                }
           }
         >
           {block.questionAnswer || "\u00a0"}
@@ -79,6 +83,133 @@ function QuestionBlockView({
   );
 }
 
+/** typeごとの描画 */
+function renderBlock(
+  block: CardBlock,
+  options: {
+    questionDisplayMode: "always" | "tap_to_reveal";
+    gridOffsetPx: number;
+    onGalleryFullscreenChange?: (isFullscreen: boolean) => void;
+    toMediaUrl: (item: unknown) => string | null;
+  },
+) {
+  const {
+    questionDisplayMode,
+    gridOffsetPx,
+    onGalleryFullscreenChange,
+    toMediaUrl,
+  } = options;
+
+  switch (block.type) {
+    case "question":
+      if (
+        (block.questionTitle ?? "").trim() === "" &&
+        (block.questionAnswer ?? "").trim() === ""
+      )
+        return null;
+
+      return (
+        <QuestionBlockView
+          block={block}
+          displayMode={questionDisplayMode}
+        />
+      );
+
+    case "text":
+      if ((block.content ?? "").trim() === "") return null;
+
+      return (
+        <div className="w-full max-w-full overflow-hidden">
+          <TextBlockContent
+            mode="view"
+            content={String(block.content ?? "")}
+          />
+        </div>
+      );
+
+    case "code":
+      if ((block.code?.code ?? "").trim() === "") return null;
+
+      return (
+        <div className="w-full max-w-full overflow-visible">
+          {gridOffsetPx > 0 && (
+            <div
+              aria-hidden
+              className="pointer-events-none"
+              style={{ height: `${gridOffsetPx}px` }}
+            />
+          )}
+          <CodeRenderer
+            code={block.code.code}
+            language={block.code.language}
+          />
+        </div>
+      );
+
+    case "image":
+      if ((block.images?.length ?? 0) === 0) return null;
+
+      return (
+        <ImageBlockShell>
+          <ImageBlockContent
+            mode="view"
+            urls={(block.images ?? [])
+              .map(toMediaUrl)
+              .filter((u): u is string => Boolean(u))}
+            items={block.images ?? []}
+            onFullscreenChange={onGalleryFullscreenChange}
+          />
+        </ImageBlockShell>
+      );
+
+    case "audio":
+      if ((block.audios?.length ?? 0) === 0) return null;
+
+      return (
+        <div className="flex justify-center">
+          <AudioPlayer
+            urls={(block.audios ?? [])
+              .map(toMediaUrl)
+              .filter((u): u is string => Boolean(u))}
+          />
+        </div>
+      );
+
+    case "math":
+      if ((block.math?.latex ?? "").trim() === "") return null;
+
+      return (
+        <div className="w-full max-w-full overflow-visible">
+          {gridOffsetPx > 0 && (
+            <div
+              aria-hidden
+              className="pointer-events-none"
+              style={{ height: `${gridOffsetPx}px` }}
+            />
+          )}
+          <MathBlockPreviewPane
+            latex={block.math.latex || ""}
+            displayMode={block.math.displayMode || "block"}
+          />
+        </div>
+      );
+
+    case "markdown":
+      if ((block.markdown ?? "").trim() === "") return null;
+
+      return (
+        <MarkdownBlockView
+          md={block.markdown}
+          className="markdownBlockCardView"
+          bleedX={false}
+        />
+      );
+
+    default:
+      return null;
+  }
+}
+
 export function BlockRenderer({
   blocks,
   onGalleryFullscreenChange,
@@ -87,8 +218,10 @@ export function BlockRenderer({
   const blockOutline = inEditMode
     ? "inset 0 0 0 1px rgba(59, 130, 246, 0.35)"
     : undefined;
+
   const { settings } = useUserSettings();
   const questionDisplayMode = settings?.questionDisplayMode ?? "tap_to_reveal";
+
   const toMediaUrl = useCallback((item: unknown) => {
     if (typeof item === "string") return item;
     if (!item || typeof item !== "object") return null;
@@ -103,7 +236,10 @@ export function BlockRenderer({
   const isRenderableBlock = useCallback((block: CardBlock) => {
     if (block.type === "text") return (block.content ?? "").trim() !== "";
     if (block.type === "question")
-      return (block.questionTitle ?? "").trim() !== "" || (block.questionAnswer ?? "").trim() !== "";
+      return (
+        (block.questionTitle ?? "").trim() !== "" ||
+        (block.questionAnswer ?? "").trim() !== ""
+      );
     if (block.type === "code") return (block.code?.code ?? "").trim() !== "";
     if (block.type === "image") return (block.images?.length ?? 0) > 0;
     if (block.type === "audio") return (block.audios?.length ?? 0) > 0;
@@ -117,7 +253,7 @@ export function BlockRenderer({
     return blocks.filter(isRenderableBlock);
   }, [blocks, isRenderableBlock]);
 
-  if (!renderableBlocks || renderableBlocks.length === 0) return null;
+  if (!renderableBlocks.length) return null;
 
   return (
     <div className="w-full max-w-full">
@@ -125,17 +261,16 @@ export function BlockRenderer({
         const isGridOffsetBlock = isGridOffsetType(block.type);
         const isLinePositionable =
           isRowPositionableType(block.type) && !isGridOffsetBlock;
+
         const rowOffsetPx = isLinePositionable ? getRowOffsetPx(block) : 0;
         const offsetStyle = isLinePositionable
           ? getRowOffsetStyle(block)
           : undefined;
+
         const gridOffsetRows = isGridOffsetBlock
           ? getNormalizedGridOffsetRows(block)
           : 0;
         const gridOffsetPx = gridOffsetRows * CARD_ROW_PX;
-
-        const blockLayoutKind: "ruled" | "non-ruled" =
-          hasRuledLine(block.type) ? "ruled" : "non-ruled";
 
         const showSeparator =
           index > 0 &&
@@ -144,111 +279,37 @@ export function BlockRenderer({
             block.type,
           );
 
+        const content = renderBlock(block, {
+          questionDisplayMode,
+          gridOffsetPx,
+          onGalleryFullscreenChange,
+          toMediaUrl,
+        });
+
+        if (!content) return null;
+
         return (
           <div key={block.id}>
             {showSeparator && (
-              <div
-                aria-hidden
-                className="pointer-events-none"
-                style={{ height: 9, display: "flex", alignItems: "center" }}
-              >
-                <div
-                  style={{
-                    width: "100%",
-                    height: 1,
-                    background: "var(--card-ruled-color, rgba(0,0,0,0.05))",
-                  }}
-                />
-              </div>
+              <div className="my-1 h-px w-full bg-slate-200" />
             )}
+
             <div
               className="w-full min-w-0 max-w-full flow-root"
               data-block-row="true"
-              data-block-layout-kind={blockLayoutKind}
               data-row-offset-applied={rowOffsetPx ? "true" : undefined}
-              style={blockOutline ? { ...offsetStyle, boxShadow: blockOutline, borderRadius: "var(--block-frame-radius, 12px)" } : offsetStyle}
+              style={
+                blockOutline
+                  ? {
+                      ...offsetStyle,
+                      boxShadow: blockOutline,
+                      borderRadius:
+                        "var(--block-frame-radius, 12px)",
+                    }
+                  : offsetStyle
+              }
             >
-            {block.type === "question" && (
-              <QuestionBlockView
-                block={block}
-                displayMode={questionDisplayMode}
-              />
-            )}
-
-            {block.type === "text" && (block.content ?? "").trim() !== "" && (
-              <div className="w-full max-w-full overflow-hidden">
-                <TextBlockContent
-                  mode="view"
-                  content={String(block.content ?? "")}
-                />
-              </div>
-            )}
-
-            {block.type === "code" &&
-              (block.code?.code ?? "").trim() !== "" && (
-                <div className="w-full max-w-full overflow-visible">
-                  {gridOffsetPx > 0 && (
-                    <div
-                      aria-hidden
-                      className="pointer-events-none"
-                      style={{ height: `${gridOffsetPx}px` }}
-                    />
-                  )}
-                  <CodeRenderer
-                    code={block.code!.code}
-                    language={block.code!.language}
-                  />
-                </div>
-            )}
-
-            {block.type === "image" && (block.images?.length ?? 0) > 0 && (
-              <ImageBlockShell>
-                <ImageBlockContent
-                  mode="view"
-                  urls={(block.images ?? [])
-                    .map(toMediaUrl)
-                    .filter((u): u is string => Boolean(u))}
-                  items={block.images ?? []}
-                  onFullscreenChange={onGalleryFullscreenChange}
-                />
-              </ImageBlockShell>
-            )}
-
-            {block.type === "audio" && (block.audios?.length ?? 0) > 0 && (
-              <div className="flex justify-center">
-                <AudioPlayer
-                  urls={(block.audios ?? [])
-                    .map(toMediaUrl)
-                    .filter((u): u is string => Boolean(u))}
-                />
-              </div>
-            )}
-
-            {block.type === "math" &&
-              (block.math?.latex ?? "").trim() !== "" && (
-                <div className="w-full max-w-full overflow-visible">
-                  {gridOffsetPx > 0 && (
-                    <div
-                      aria-hidden
-                      className="pointer-events-none"
-                      style={{ height: `${gridOffsetPx}px` }}
-                    />
-                  )}
-                  <MathBlockPreviewPane
-                    latex={block.math!.latex || ""}
-                    displayMode={block.math!.displayMode || "block"}
-                  />
-                </div>
-              )}
-
-            {block.type === "markdown" &&
-              (block.markdown ?? "").trim() !== "" && (
-                <MarkdownBlockView
-                  md={block.markdown!}
-                  className="markdownBlockCardView"
-                  bleedX={false}
-                />
-              )}
+              {content}
             </div>
           </div>
         );
@@ -256,8 +317,3 @@ export function BlockRenderer({
     </div>
   );
 }
-
-
-
-
-
