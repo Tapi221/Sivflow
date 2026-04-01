@@ -1,4 +1,3 @@
-import { useBreadcrumbContext } from "@/contexts/BreadcrumbContext";
 import { useCards } from "@/hooks/card/useCards";
 import { useCardSets } from "@/hooks/cardSet/useCardSets";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
@@ -75,8 +74,7 @@ function TreeViewLayout({
     setSelectedCardSetId(null);
   }, [selectedFolderId]);
 
-  const { setExtraCrumbs } = useBreadcrumbContext();
-
+  
   // onItemSelect のラッパー: cardSet選択時にselectedCardSetIdもセット
   const handleItemSelect = useCallback(
     (item: SelectedExplorerItem) => {
@@ -136,14 +134,7 @@ function TreeViewLayout({
   });
 
   // パンくずの更新
-  useEffect(() => {
-    if (selectedFolderId && selectedFolder?.folderName) {
-      setExtraCrumbs([{ label: selectedFolder.folderName }]);
-    } else {
-      setExtraCrumbs([]);
-    }
-  }, [selectedFolderId, selectedFolder?.folderName, setExtraCrumbs]);
-
+  
   const explorerTab = useExplorerStore((s) => s.explorerTab);
   const setExplorerTab = useExplorerStore((s) => s.setExplorerTab);
 
@@ -540,3 +531,4 @@ function TreeViewLayout({
 }
 
 export default TreeViewLayout;
+
