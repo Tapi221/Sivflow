@@ -135,7 +135,11 @@ export function BlockRenderer({
         const gridOffsetPx = gridOffsetRows * CARD_ROW_PX;
 
         const blockLayoutKind: "ruled" | "non-ruled" =
-          hasRuledLine(block.type) ? "ruled" : "non-ruled";
+          block.type === "text"
+            ? "non-ruled"
+            : hasRuledLine(block.type)
+            ? "ruled"
+            : "non-ruled";
 
         const showSeparator =
           index > 0 &&
@@ -256,6 +260,7 @@ export function BlockRenderer({
     </div>
   );
 }
+
 
 
 

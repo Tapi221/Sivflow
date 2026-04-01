@@ -115,15 +115,28 @@ function SharedCardContentInner(props: SharedCardContentProps) {
       );
     }
 
+    const surfaceEl = ruledCtx.surfaceRef.current;
+    if (!surfaceEl) {
+      ruledCtx.setVisibleRules([]);
+      return;
+    }
+
+    const ruledTop = CARD_RULED_OFFSET_TOP_PX + CARD_ROW_PX;
+    const ruledBottom = surfaceEl.offsetHeight - CARD_RULED_OFFSET_BOTTOM_PX;
+
     const layout = buildCardFaceLayout(
       measuredBlocks,
-      CARD_RULED_OFFSET_TOP_PX + CARD_ROW_PX,
-      CARD_RULED_OFFSET_BOTTOM_PX,
+      ruledTop,
+      ruledBottom,
       CARD_ROW_PX,
     );
 
     if (import.meta.env.DEV) {
-      console.log("[SharedCardContent] visibleRules", layout.visibleRules);
+      console.log("[SharedCardContent] visibleRules", layout.visibleRules, {
+        ruledTop,
+        ruledBottom,
+        surfaceHeight: surfaceEl.offsetHeight,
+      });
     }
 
     ruledCtx.setVisibleRules(layout.visibleRules);
