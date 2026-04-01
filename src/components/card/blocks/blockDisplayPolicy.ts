@@ -1,14 +1,19 @@
 import type { CardBlock } from "@/types";
 
-/** text / markdown は背景横罫線を持つ。それ以外は持たない。 */
-export const hasRuledLine = (type: CardBlock["type"]): boolean =>
-  type === "text" || type === "markdown";
+type BlockType = CardBlock["type"];
 
-/**
- * prev と next が両方とも非罫線ブロックのとき true。
- * BlockRenderer / BlockEditor の両方からこれを使い、判定ロジックの乖離を防ぐ。
- */
+const RULED_BLOCK_TYPES: ReadonlySet<BlockType> = new Set([
+  "text",
+  "markdown",
+]);
+
+export const hasRuledLine = (blockType: BlockType): boolean => {
+  return RULED_BLOCK_TYPES.has(blockType);
+};
+
 export const shouldRenderInterBlockSeparator = (
-  prevType: CardBlock["type"],
-  nextType: CardBlock["type"],
-): boolean => !hasRuledLine(prevType) && !hasRuledLine(nextType);
+  prevBlockType: BlockType,
+  nextBlockType: BlockType,
+): boolean => {
+  return !hasRuledLine(prevBlockType) && !hasRuledLine(nextBlockType);
+};

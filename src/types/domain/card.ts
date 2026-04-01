@@ -81,7 +81,3 @@ export type Card = BaseEntity & {
   completedDate?: Date | Timestamp;
   _rescueRaw?: unknown;
 };
-
-
-
-
