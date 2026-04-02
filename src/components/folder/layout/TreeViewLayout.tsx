@@ -66,6 +66,8 @@ function TreeViewLayout({
     useCards();
 
   const [selectedCardSetId, setSelectedCardSetId] = useState<string | null>(null);
+  const [createCardSetRequestToken, setCreateCardSetRequestToken] = useState(0);
+
   const {
     cardSets,
     createCardSet,
@@ -85,13 +87,16 @@ function TreeViewLayout({
         if (cs) {
           onFolderSelect(cs.folderId ?? null);
           setSelectedCardSetId(item.id);
+
           const query = new URLSearchParams();
           query.set("cardSetId", item.id);
           if (cs.folderId) query.set("folderId", cs.folderId);
+
           navigate(createPageUrl(`CardView?${query.toString()}`));
         }
         return;
       }
+
       onItemSelect(item);
     },
     [cardSets, navigate, onFolderSelect, onItemSelect],
@@ -184,9 +189,9 @@ function TreeViewLayout({
   const allTags = useMemo(() => {
     const tagNames = new Set<string>();
     cards.forEach((c) => {
-      resolveCardTagNames(c.tagIds, c.tags, tagById).forEach((t) =>
-        tagNames.add(t),
-      );
+      resolveCardTagNames(c.tagIds, c.tags, tagById).forEach((t) => {
+        tagNames.add(t);
+      });
     });
     return Array.from(tagNames).sort();
   }, [cards, tagById]);
@@ -195,12 +200,15 @@ function TreeViewLayout({
     const storedViews = Array.isArray(settings?.explorerViews)
       ? settings.explorerViews
       : [];
+
     const validStoredViews = storedViews.filter((view): view is ViewDef =>
       ACTIVE_VIEW_KINDS.includes(view.kind as ViewKind),
     );
+
     const folderView =
       validStoredViews.find((view) => view.kind === "folder") ??
       DEFAULT_FOLDER_VIEW;
+
     return [
       folderView,
       ...validStoredViews.filter((view) => view.kind !== "folder"),
@@ -249,24 +257,33 @@ function TreeViewLayout({
     setCreateFolderRequestToken((prev) => prev + 1);
   }, [setCreateFolderRequestToken]);
 
-  const [createCardSetRequestToken, setCreateCardSetRequestToken] = useState(0);
   const pdfTriggerRef = useRef<(() => void) | null>(null);
   const pptxTriggerRef = useRef<(() => void) | null>(null);
 
+  const currentHeaderFolderId = useMemo(() => {
+    if (selectedFolderId) return selectedFolderId;
+
+    if (selectedItem?.type === "cardSet") {
+      return cardSets.find((s) => s.id === selectedItem.id)?.folderId ?? null;
+    }
+
+    return null;
+  }, [selectedFolderId, selectedItem, cardSets]);
+
   const handleCreateCardSetFromHeader = useCallback(() => {
-    if (!selectedFolderId) return;
+    if (!currentHeaderFolderId) return;
     setCreateCardSetRequestToken((prev) => prev + 1);
-  }, [selectedFolderId]);
+  }, [currentHeaderFolderId]);
 
   const handleAddPdfFromHeader = useCallback(() => {
-    if (!selectedFolderId) return;
+    if (!currentHeaderFolderId) return;
     pdfTriggerRef.current?.();
-  }, [selectedFolderId]);
+  }, [currentHeaderFolderId]);
 
   const handleAddPptxFromHeader = useCallback(() => {
-    if (!selectedFolderId) return;
+    if (!currentHeaderFolderId) return;
     pptxTriggerRef.current?.();
-  }, [selectedFolderId]);
+  }, [currentHeaderFolderId]);
 
   const {
     isFilterActive,
@@ -462,8 +479,8 @@ function TreeViewLayout({
     />
   );
 
-  const canCreateCardSet = Boolean(selectedFolderId);
-  const canAddDocuments = Boolean(selectedFolderId);
+  const canCreateCardSet = Boolean(currentHeaderFolderId);
+  const canAddDocuments = Boolean(currentHeaderFolderId);
 
   return (
     <div
