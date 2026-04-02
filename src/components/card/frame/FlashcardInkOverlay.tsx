@@ -1,9 +1,8 @@
 /**
- * Flashcard の Ink overlay（InkLayer / InkToolbar / loading mask）と
+ * Flashcard の Ink overlay（InkLayer / InkToolbar）と
  * extraHeaderRight / extraFooter の overlay を担うコンポーネント。
  *
- * Flashcard.tsx の overlayNode useMemo をコンポーネント化し、
- * React が差分を判断できる単位に分割している。
+ * Flashcard.tsx から overlay 部分を分離している。
  */
 import type {
   InkHistoryState,
@@ -54,9 +53,12 @@ export function FlashcardInkOverlay({
   setPreviewInkTool,
   setPreviewInkHistory,
 }: FlashcardInkOverlayProps) {
+  const hasInkContent = (activeInkDocument.strokes?.length ?? 0) > 0;
   const hasHeaderOverlay = Boolean(extraHeaderRight && !previewMode);
   const hasFooterOverlay = Boolean(extraFooter);
-  const hasInkOverlay = Boolean(showInkLayer && cardId);
+  const hasInkOverlay = Boolean(
+    showInkLayer && cardId && (hasInkContent || inkEditingEnabled),
+  );
 
   if (!hasHeaderOverlay && !hasFooterOverlay && !hasInkOverlay) return null;
 
@@ -86,7 +88,7 @@ export function FlashcardInkOverlay({
 
       {hasInkOverlay && (
         <>
-          {shouldMountInkLayer && (
+          {shouldMountInkLayer && hasInkOverlay && (
             <InkLayer
               ref={previewInkRef}
               cardId={cardId}
@@ -97,12 +99,6 @@ export function FlashcardInkOverlay({
               onChange={(next) => onInkDocumentChange(activeInkSide, next)}
               onHistoryChange={setPreviewInkHistory}
             />
-          )}
-
-          {showInkLayer && !layoutStable && (
-            <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/25 text-slate-600 text-xs font-semibold">
-              レイアウト準備中...
-            </div>
           )}
 
           {inkEditingEnabled && layoutStable && (

@@ -94,7 +94,9 @@ interface FolderTreeWithCardsProps {
   onSelectCardSet?: (cardSetId: string, folderId: string, label: string) => void;
   isFiltering?: boolean;
   onRegisterCreateFolderTrigger?: (fn: (() => void) | null) => void;
-  onRegisterCreateCardSetTrigger?: (fn: (() => void) | null) => void;
+  onRegisterCreateCardSetTrigger?: (
+    fn: ((folderId?: string | null) => void) | null,
+  ) => void;
   onRegisterPdfTrigger?: (fn: () => void) => void;
   onRegisterPptxTrigger?: (fn: () => void) => void;
   navigateToSectionListToken?: number;
@@ -303,6 +305,16 @@ export function FolderTreeWithCards({
           .filter((id): id is string => Boolean(id)),
       ),
     [rootFolders],
+  );
+
+  const allFolderIdSet = useMemo(
+    () =>
+      new Set(
+        treeFolders
+          .map((folder) => getFolderId(folder))
+          .filter((id): id is string => Boolean(id)),
+      ),
+    [treeFolders],
   );
 
   const resolveRootFolderId = useCallback(
@@ -528,12 +540,10 @@ export function FolderTreeWithCards({
 
   useEffect(() => {
     if (!selectedFolderId) return;
-    const rootId = resolveRootFolderId(selectedFolderId);
-    if (!rootId) return;
-    if (activeRootFolderId !== rootId) {
-      setActiveRootFolderId(rootId);
+    if (activeRootFolderId !== selectedFolderId) {
+      setActiveRootFolderId(selectedFolderId);
     }
-  }, [selectedFolderId, resolveRootFolderId, activeRootFolderId]);
+  }, [selectedFolderId, activeRootFolderId]);
 
   const headerFolderId = useMemo(() => {
     if (selectedFolderId) return selectedFolderId;
@@ -609,8 +619,8 @@ export function FolderTreeWithCards({
   );
 
   useEffect(() => {
-    const trigger = () => {
-      handleCreateCardSetFromMenu(headerFolderId);
+    const trigger = (folderId?: string | null) => {
+      handleCreateCardSetFromMenu(folderId ?? headerFolderId);
     };
     onRegisterCreateCardSetTrigger?.(trigger);
     return () => onRegisterCreateCardSetTrigger?.(null);
@@ -696,7 +706,7 @@ export function FolderTreeWithCards({
   );
 
   const hasActiveRootScope =
-    activeRootFolderId !== null && rootFolderIdSet.has(activeRootFolderId);
+    activeRootFolderId !== null && allFolderIdSet.has(activeRootFolderId);
 
   const scopedTreeData = useMemo<ExplorerTreeNode[]>(() => {
     if (!activeRootFolderId || !hasActiveRootScope) return [];
@@ -730,11 +740,8 @@ export function FolderTreeWithCards({
       if (!parsed) return;
 
       if (parsed.type === "folder") {
-        const rootId = resolveRootFolderId(parsed.id);
-        if (rootId === parsed.id) {
+        if (activeRootFolderId !== parsed.id) {
           setActiveRootFolderId(parsed.id);
-        } else if (!activeRootFolderId && rootId) {
-          setActiveRootFolderId(rootId);
         }
         onFolderSelect(parsed.id);
         return;
@@ -754,7 +761,17 @@ export function FolderTreeWithCards({
         onItemSelect({ type: "document", id: parsed.id });
       }
     },
-    [activeRootFolderId, onFolderSelect, onItemSelect, resolveRootFolderId],
+    [activeRootFolderId, onFolderSelect, onItemSelect],
+  );
+
+  const handleFolderNodeSelect = useCallback(
+    (folderId: string | null) => {
+      if (folderId && activeRootFolderId !== folderId) {
+        setActiveRootFolderId(folderId);
+      }
+      onFolderSelect(folderId);
+    },
+    [activeRootFolderId, onFolderSelect],
   );
 
   const handleArboristMove = useCallback(
@@ -880,7 +897,7 @@ export function FolderTreeWithCards({
     handlePptxDropped,
     openRowMenuId: dialogs.openRowMenuId,
     setOpenRowMenuId: dialogs.setOpenRowMenuId,
-    onFolderSelect,
+    onFolderSelect: handleFolderNodeSelect,
     onItemSelect,
     handleCreateFolderAction: actions.handleCreateFolderAction,
     handleCreateCardSetAction: handleCreateCardSetFromMenu,
@@ -919,7 +936,7 @@ export function FolderTreeWithCards({
       setFileDragFolderId,
       handlePdfDropped,
       handlePptxDropped,
-      onFolderSelect,
+      handleFolderNodeSelect,
       onItemSelect,
       actions.handleCreateFolderAction,
       handleCreateCardSetFromMenu,

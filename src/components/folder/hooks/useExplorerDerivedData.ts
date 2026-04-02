@@ -14,6 +14,7 @@ type LegacyEntityFields = {
   isDeleted?: boolean;
   is_deleted?: boolean;
   folder_id?: string | null;
+  card_set_id?: string | null;
   orderIndex?: number;
 };
 
@@ -283,7 +284,7 @@ export function useExplorerDerivedData({
     if (cardSets.length === 0) return map;
     for (const card of treeCards) {
       if (isSoftDeleted(withLegacy(card))) continue;
-      const csId = card.cardSetId;
+      const csId = card.cardSetId ?? withLegacy(card).card_set_id;
       if (!csId) continue;
       const list = map.get(csId);
       const item: ExplorerItem = { type: "card", data: card };

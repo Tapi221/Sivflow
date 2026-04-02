@@ -181,6 +181,7 @@ export function useFolderActions({
   setOptimisticFolders,
   setOptimisticCardSets,
   setExpandedFolders,
+  setPendingScrollId,
   getUniqueFolderName,
 }: UseFolderActionsParams) {
   const pendingFolderCreatesRef = useRef(new Map<string, Promise<void>>());

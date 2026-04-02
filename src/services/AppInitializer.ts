@@ -267,8 +267,9 @@ export class AppInitializer {
 
   /**
    * 旧カード方式からの取りこぼし救済:
-   * cardSetId が未設定のカードを、所属フォルダ配下の CardSet へ割り当てる。
-   * 既存セットがなければフォルダごとに 1 セット作成する（冪等）。
+   * cardSetId が未設定、または参照先 CardSet が欠損しているカードを復元する。
+   * 未設定カードは所属フォルダ配下の CardSet へ割り当て、欠損参照は同じ ID の
+   * CardSet を再作成または復活させる（冪等）。
    */
   private static async backfillLegacyCardsToCardSets(
     userId: string,
@@ -276,14 +277,13 @@ export class AppInitializer {
     const db = await getLocalDb(userId);
     const now = new Date();
 
-    const legacyCards = await db.cards
+    const activeCards = await db.cards
       .where("userId")
       .equals(userId)
-      .and((c) => !c.isDeleted && !c.cardSetId)
+      .and((c) => !c.isDeleted)
       .toArray();
 
-    if (legacyCards.length === 0) return;
-
+    const legacyCards = activeCards.filter((card) => !card.cardSetId);
     const folders = await db.folders.where("userId").equals(userId).toArray();
     const folderNameById = new Map(
       folders.map((f) => [String(f.id ?? f.folderId ?? ""), String(f.folderName ?? "")]),
@@ -291,10 +291,29 @@ export class AppInitializer {
 
     const sets = await db.cardSets.where("userId").equals(userId).toArray();
     const activeSets = sets.filter((s) => !s.isDeleted);
+    const activeSetIds = new Set(activeSets.map((set) => set.id));
+    const deletedSetById = new Map(sets.filter((s) => s.isDeleted).map((s) => [s.id, s]));
+
+    const danglingCardsBySetId = new Map<string, typeof activeCards>();
+    for (const card of activeCards) {
+      const cardSetId = card.cardSetId?.trim();
+      if (!cardSetId || activeSetIds.has(cardSetId)) continue;
+      const list = danglingCardsBySetId.get(cardSetId);
+      if (list) list.push(card);
+      else danglingCardsBySetId.set(cardSetId, [card]);
+    }
+
+    if (legacyCards.length === 0 && danglingCardsBySetId.size === 0) return;
+
     const setByFolder = new Map<string, CardSet>();
+    const nextOrderIndexByFolder = new Map<string, number>();
     for (const set of activeSets) {
       const key = set.folderId ?? "__root__";
       if (!setByFolder.has(key)) setByFolder.set(key, set);
+      nextOrderIndexByFolder.set(
+        key,
+        Math.max(nextOrderIndexByFolder.get(key) ?? 0, (set.orderIndex ?? 0) + 1),
+      );
     }
 
     const groups = new Map<string, typeof legacyCards>();
@@ -305,6 +324,52 @@ export class AppInitializer {
     }
 
     await db.transaction("rw", db.cardSets, db.cards, async () => {
+      for (const [missingSetId, cards] of danglingCardsBySetId.entries()) {
+        const sample = cards[0];
+        const folderId = sample?.folderId ? String(sample.folderId) : null;
+        const folderKey = folderId ?? "__root__";
+        const folderName = folderId
+          ? folderNameById.get(folderId) || "インポート済みカード"
+          : "インポート済みカード";
+        const deletedSet = deletedSetById.get(missingSetId);
+        const restoredOrder = nextOrderIndexByFolder.get(folderKey) ?? 0;
+
+        if (deletedSet) {
+          await db.cardSets.update(missingSetId, {
+            isDeleted: false,
+            folderId,
+            updatedAt: now,
+          });
+        } else {
+          await db.cardSets.add({
+            id: missingSetId,
+            userId,
+            deviceId: sample?.deviceId || "web",
+            folderId,
+            name: `${folderName} セット`,
+            orderIndex: restoredOrder,
+            isDeleted: false,
+            createdAt: now,
+            updatedAt: now,
+          });
+        }
+
+        if (!setByFolder.has(folderKey)) {
+          setByFolder.set(folderKey, {
+            id: missingSetId,
+            userId,
+            deviceId: sample?.deviceId || "web",
+            folderId,
+            name: deletedSet?.name || `${folderName} セット`,
+            orderIndex: restoredOrder,
+            isDeleted: false,
+            createdAt: deletedSet?.createdAt ?? now,
+            updatedAt: now,
+          });
+        }
+        nextOrderIndexByFolder.set(folderKey, restoredOrder + 1);
+      }
+
       for (const [folderKey, cards] of groups.entries()) {
         let targetSet = setByFolder.get(folderKey);
         if (!targetSet) {
@@ -317,7 +382,7 @@ export class AppInitializer {
             userId,
             folderId,
             name: `${folderName} セット`,
-            orderIndex: 0,
+            orderIndex: nextOrderIndexByFolder.get(folderKey) ?? 0,
             isDeleted: false,
             createdAt: now,
             updatedAt: now,
@@ -325,6 +390,10 @@ export class AppInitializer {
           await db.cardSets.add(createdSet);
           targetSet = createdSet;
           setByFolder.set(folderKey, createdSet);
+          nextOrderIndexByFolder.set(
+            folderKey,
+            (nextOrderIndexByFolder.get(folderKey) ?? 0) + 1,
+          );
         }
 
         for (const card of cards) {
@@ -337,7 +406,7 @@ export class AppInitializer {
     });
 
     console.info(
-      `[AppInit:${userId}] CardSet backfill moved ${legacyCards.length} legacy cards.`,
+      `[AppInit:${userId}] CardSet backfill repaired ${legacyCards.length} legacy cards and ${danglingCardsBySetId.size} missing sets.`,
     );
   }
 }

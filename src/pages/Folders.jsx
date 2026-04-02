@@ -150,8 +150,9 @@ export default function Folders() {
       urlSyncTimerRef.current = 0;
     }
 
+    pendingUrlSyncRef.current = target;
+
     urlSyncTimerRef.current = window.setTimeout(() => {
-      pendingUrlSyncRef.current = target;
       startTransition(() => {
         setSearchParams(next, { replace: true });
       });

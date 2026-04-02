@@ -98,7 +98,7 @@ export function CardSurface({
       </div>
 
       {overlay ? (
-        <div className="pointer-events-none absolute inset-0 z-20">
+        <div className="pointer-events-none absolute inset-0 z-20 overflow-hidden">
           {overlay}
         </div>
       ) : null}

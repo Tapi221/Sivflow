@@ -121,6 +121,8 @@ export function CardViewDesktop({
   onToggleBookmark,
 }: CardViewDesktopProps) {
   const { currentUser } = useAuthSession();
+  const effectiveEditPaneWidthPx = editPaneWidthPx;
+  const effectiveCardWidthPx = activePaneWidthPx;
 
   const [renderRange, setRenderRange] = useState<{
     start: number;
@@ -174,7 +176,7 @@ export function CardViewDesktop({
           card={card}
           isActive={isActive}
           isGlobalEditing={isGlobalEditing}
-          editPaneWidthPx={editPaneWidthPx}
+          editPaneWidthPx={effectiveEditPaneWidthPx}
           settings={settings}
           isFlipped={flippedCardIds.has(card.id ?? "")}
           currentDisplayMode={currentDisplayMode}
@@ -201,7 +203,8 @@ export function CardViewDesktop({
       onToggleUncertainty,
       onToggleBookmark,
       settings,
-      editPaneWidthPx,
+      effectiveEditPaneWidthPx,
+      activePaneWidthPx,
       currentDisplayMode,
     ],
   );
@@ -231,7 +234,7 @@ export function CardViewDesktop({
           : CARDVIEW_NATURAL_INDEX_COMMIT_DELAY_VIEW_MS
       }
       disableItemChrome={isGlobalEditing}
-      getCardWidth={() => activePaneWidthPx}
+      getCardWidth={() => effectiveCardWidthPx}
       getKey={(card) => card.id ?? card.docId ?? card.uid}
       disableVirtualization={false}
       onRenderRangeChange={setRenderRange}

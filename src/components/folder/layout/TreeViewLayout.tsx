@@ -77,7 +77,9 @@ function TreeViewLayout({
     null,
   );
   const createFolderTriggerRef = useRef<(() => void) | null>(null);
-  const createCardSetTriggerRef = useRef<(() => void) | null>(null);
+  const createCardSetTriggerRef = useRef<
+    ((folderId?: string | null) => void) | null
+  >(null);
   const pdfTriggerRef = useRef<(() => void) | null>(null);
   const pptxTriggerRef = useRef<(() => void) | null>(null);
 
@@ -325,7 +327,7 @@ function TreeViewLayout({
 
   const handleCreateCardSetFromHeader = useCallback(() => {
     if (!currentHeaderFolderId) return;
-    createCardSetTriggerRef.current?.();
+    createCardSetTriggerRef.current?.(currentHeaderFolderId);
   }, [currentHeaderFolderId]);
 
   const handleAddPdfFromHeader = useCallback(() => {

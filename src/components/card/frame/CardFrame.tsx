@@ -46,6 +46,12 @@ export interface CardFrameProps
   /** 親から与える固定スケール。指定時は自動計算より優先 */
   fixedScale?: number;
 
+  /** ScaleToFitFrame の拡大縮小を無効化する */
+  disableScale?: boolean;
+
+  /** カード本体を親幅いっぱいに広げる */
+  stretchWidth?: boolean;
+
   /** CardShell に渡す追加クラス（標準クラスに合成される） */
   className?: string;
 
@@ -90,6 +96,8 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
       maxScale = 1.6,
       scaleMultiplier = CARD_DISPLAY_SCALE,
       fixedScale,
+      disableScale = false,
+      stretchWidth = false,
 
       // 追加のクラス（標準の見た目に合成）
       className,
@@ -128,9 +136,13 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
         maxScale={maxScale}
         scaleMultiplier={scaleMultiplier}
         fixedScale={fixedScale}
+        disableScale={disableScale}
       >
         {/* スケール後のカードを中央寄せしたいので mx-auto ラッパー */}
-        <div className="mx-auto" style={{ width: `${Math.max(1, baseWidth)}px` }}>
+        <div
+          className="mx-auto"
+          style={{ width: stretchWidth ? "100%" : `${Math.max(1, baseWidth)}px` }}
+        >
           {topAttachment ? (
             <div className="w-full overflow-visible">{topAttachment}</div>
           ) : null}
@@ -149,6 +161,12 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
             style={{
               // 外から渡された style を尊重しつつ
               ...(style as React.CSSProperties | undefined),
+              ...(stretchWidth
+                ? {
+                    width: "100%",
+                    maxWidth: "100%",
+                  }
+                : {}),
 
               /**
                * CSS 変数 --card-base-width:

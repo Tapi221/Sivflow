@@ -28,7 +28,9 @@ interface TreeViewTabContentProps {
   virtualTreeNodes: ViewsPanelProps["nodes"];
   isFiltering: boolean;
   onRegisterCreateFolderTrigger?: (fn: (() => void) | null) => void;
-  onRegisterCreateCardSetTrigger?: (fn: (() => void) | null) => void;
+  onRegisterCreateCardSetTrigger?: (
+    fn: ((folderId?: string | null) => void) | null,
+  ) => void;
   onRegisterPdfTrigger: (fn: () => void) => void;
   onRegisterPptxTrigger: (fn: () => void) => void;
   navigateToSectionListToken: number;

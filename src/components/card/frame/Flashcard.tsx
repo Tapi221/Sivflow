@@ -55,7 +55,6 @@ interface FlashcardProps {
 }
 
 const TAP_MOVE_CANCEL_THRESHOLD_PX = 8;
-const FLIP_SUPPRESS_AFTER_WHEEL_MS = 140;
 
 function shouldIgnoreFlipTarget(target: EventTarget | null): boolean {
   const element = target as HTMLElement | null;
@@ -113,12 +112,15 @@ function FlashcardInner({
   const [previewFlipped, setPreviewFlipped] = useState(false);
 
   const enableDrawMode = drawMode ?? false;
-  const isFluidDisplay = displayMode === "fluid";
+  const isFixedDisplay = displayMode !== "fluid";
+  const allowInkEditing = Boolean(inkEditingEnabled && enableDrawMode);
   const effectiveIsFlipped =
     isFlipped ?? (previewMode ? previewFlipped : false);
   const activeInkSide: "question" | "answer" = effectiveIsFlipped
     ? "answer"
     : "question";
+  const shouldShowInkLayer = Boolean(showInkLayer && isFixedDisplay);
+  const shouldEnableInkEditing = Boolean(allowInkEditing && isFixedDisplay);
 
   // previewMode 切り替え時に flip をリセット
   useEffect(() => {
@@ -138,7 +140,7 @@ function FlashcardInner({
     cardId: derived.cardId,
     effectiveIsFlipped,
     showInkLayer,
-    inkEditingEnabled,
+    inkEditingEnabled: allowInkEditing,
     previewMode: previewMode ?? false,
     contentRef,
     onInkDocumentChange,
@@ -152,7 +154,7 @@ function FlashcardInner({
   // ---------------------------------------------------------------------------
   // Flip handling
   // ---------------------------------------------------------------------------
-  const isInkEditingActive = Boolean(inkEditingEnabled && ink.previewInkTool);
+  const isInkEditingActive = Boolean(allowInkEditing && ink.previewInkTool);
 
   const handleFlip = React.useCallback(
     (e?: React.MouseEvent) => {
@@ -202,12 +204,6 @@ function FlashcardInner({
   // ---------------------------------------------------------------------------
   // Render
   // ---------------------------------------------------------------------------
-  const suppressFlipTemporarily = (
-    durationMs = FLIP_SUPPRESS_AFTER_WHEEL_MS,
-  ) => {
-    flipSuppressedUntilRef.current = Date.now() + durationMs;
-  };
-
   const resetPointerGesture = () => {
     pointerGestureRef.current = {
       pointerId: null,
@@ -243,6 +239,8 @@ function FlashcardInner({
           allowUpscale={allowUpscale}
           maxScale={maxScale}
           scaleMultiplier={scaleMultiplier}
+          disableScale={!isFixedDisplay}
+          stretchWidth={!isFixedDisplay}
           role={isCardClickable ? "button" : undefined}
           tabIndex={isCardClickable ? 0 : undefined}
           className={cn(
@@ -284,10 +282,6 @@ function FlashcardInner({
             if (!isCardClickable) return;
             finishPointerGesture(event.pointerId);
           }}
-          onWheelCapture={() => {
-            if (!isCardClickable) return;
-            suppressFlipTemporarily();
-          }}
           onClick={handleFlip}
           onKeyDown={(event) => {
             if (!isCardClickable) return;
@@ -299,26 +293,24 @@ function FlashcardInner({
           resizable={false}
           resizeStepPx={undefined}
           showResizeHandle={false}
-          heightPx={isFluidDisplay ? null : fixedHeightPx}
-          lockHeight={!isFluidDisplay}
+          heightPx={isFixedDisplay ? fixedHeightPx : null}
+          lockHeight={isFixedDisplay}
           actionsTopLeft={actionsTopLeft}
           actionsTopRight={actionsTopRight}
-          drawMode={isFluidDisplay ? false : enableDrawMode}
+          drawMode={isFixedDisplay ? enableDrawMode : false}
           ruledPhasePx={0}
           overlay={
             <FlashcardInkOverlay
               extraHeaderRight={extraHeaderRight}
               extraFooter={extraFooter}
               previewMode={previewMode ?? false}
-              showInkLayer={Boolean(showInkLayer && !isFluidDisplay)}
-              inkEditingEnabled={Boolean(inkEditingEnabled && !isFluidDisplay)}
+              showInkLayer={shouldShowInkLayer}
+              inkEditingEnabled={shouldEnableInkEditing}
               cardId={derived.cardId}
               activeInkSide={activeInkSide}
               activeInkDocument={derived.activeInkDocument}
               layoutStable={ink.layoutStable}
-              shouldMountInkLayer={Boolean(
-                ink.shouldMountInkLayer && !isFluidDisplay,
-              )}
+              shouldMountInkLayer={Boolean(ink.shouldMountInkLayer && isFixedDisplay)}
               previewInkRef={ink.previewInkRef}
               previewInkTool={ink.previewInkTool}
               previewInkHistory={ink.previewInkHistory}
@@ -332,7 +324,7 @@ function FlashcardInner({
             ref={contentRef}
             className={cn(
               "w-full max-w-full",
-              isFluidDisplay ? "min-h-0" : "flex min-h-0 flex-1",
+              isFixedDisplay ? "flex min-h-0 flex-1" : "min-h-0",
             )}
           >
             <SharedCardContent

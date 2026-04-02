@@ -72,6 +72,11 @@ export function useFlashcardInk({
     doc: InkDocument;
   } | null>(null);
   const inkSaveTimerRef = useRef<number | null>(null);
+  const inkEditingEnabledRef = useRef(inkEditingEnabled);
+
+  useEffect(() => {
+    inkEditingEnabledRef.current = inkEditingEnabled;
+  }, [inkEditingEnabled]);
 
   // tool の有無を inkEditingEnabled に連動
   useEffect(() => {
@@ -143,7 +148,7 @@ export function useFlashcardInk({
 
       scheduleStable();
 
-      if (typeof ResizeObserver !== "undefined") {
+      if (inkEditingEnabledRef.current && typeof ResizeObserver !== "undefined") {
         resizeObserver = new ResizeObserver(() => {
           setLayoutStable(false);
           scheduleStable();
@@ -158,7 +163,13 @@ export function useFlashcardInk({
       if (settleTimer != null) window.clearTimeout(settleTimer);
       if (resizeObserver) resizeObserver.disconnect();
     };
-  }, [cardId, effectiveIsFlipped, showInkLayer, previewMode, contentRef]);
+  }, [
+    cardId,
+    effectiveIsFlipped,
+    showInkLayer,
+    previewMode,
+    contentRef,
+  ]);
 
   const flushPendingInk = useCallback(() => {
     if (!cardId) return;

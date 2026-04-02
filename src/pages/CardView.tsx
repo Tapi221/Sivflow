@@ -61,6 +61,7 @@ export default function CardView() {
 
   const {
     contentViewportRef,
+    contentViewportWidth,
     activePaneMode,
     activePaneMinWidthPx,
     activePaneMaxWidthPx,

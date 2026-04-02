@@ -1,6 +1,7 @@
 import { Slider } from "@/components/ui/slider";
 import { Minus, Plus, RefreshCw } from "@/ui/icons";
 import { clampPaneWidthPx } from "@/pages/card-view/constants";
+import React from "react";
 
 export interface CardPaneWidthControlProps {
   modeLabel: string;
@@ -28,18 +29,14 @@ export function CardPaneWidthControl({
   onReset,
 }: CardPaneWidthControlProps) {
   const resetDisabled = value === defaultValue;
+  const [draftValue, setDraftValue] = React.useState(value);
+
+  React.useEffect(() => {
+    setDraftValue(value);
+  }, [value]);
 
   return (
     <div className="pointer-events-auto flex items-center gap-1.5 rounded-[20px] border border-slate-200/80 bg-white/82 px-2.5 py-1 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-md">
-      <div className="min-w-[72px] leading-none">
-        <div className="text-[10px] font-medium tracking-[0.06em] text-slate-500">
-          {modeLabel}
-        </div>
-        <div className="mt-0.5 text-[13px] font-semibold tabular-nums text-slate-700">
-          {value}px
-        </div>
-      </div>
-
       <button
         type="button"
         className="grid h-7 w-7 place-items-center rounded-full border border-slate-200/70 bg-white/55 text-slate-500 transition hover:bg-white hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-35"
@@ -55,14 +52,16 @@ export function CardPaneWidthControl({
           min={min}
           max={max}
           step={8}
-          value={[value]}
+          value={[draftValue]}
           onValueChange={(next) => {
             const [raw] = next;
-            onPreviewChange(clampPaneWidthPx(raw, min, max));
+            setDraftValue(clampPaneWidthPx(raw, min, max));
           }}
           onValueCommit={(next) => {
             const [raw] = next;
-            onCommit(clampPaneWidthPx(raw, min, max));
+            const nextValue = clampPaneWidthPx(raw, min, max);
+            setDraftValue(nextValue);
+            onCommit(nextValue);
           }}
           aria-label={`${modeLabel}スライダー`}
         />

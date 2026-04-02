@@ -27,6 +27,23 @@ type KeyedPaneWidthState = {
   width: number;
 };
 
+function getReservedScrollbarGutterWidthPx(): number {
+  if (typeof document === "undefined") return 0;
+
+  const probe = document.createElement("div");
+  probe.style.position = "absolute";
+  probe.style.top = "-9999px";
+  probe.style.width = "100px";
+  probe.style.height = "100px";
+  probe.style.overflow = "scroll";
+  probe.style.visibility = "hidden";
+  document.body.appendChild(probe);
+
+  const width = Math.max(0, probe.offsetWidth - probe.clientWidth);
+  document.body.removeChild(probe);
+  return width;
+}
+
 export function useCardViewPaneWidth({
   isGlobalEditing,
   isDesktop,
@@ -38,6 +55,10 @@ export function useCardViewPaneWidth({
   const contentViewportRef = useRef<HTMLDivElement | null>(null);
   const [contentViewportWidth, setContentViewportWidth] = useState<number>(
     () => (typeof window === "undefined" ? 1024 : window.innerWidth),
+  );
+  const reservedScrollbarGutterWidthPx = useMemo(
+    () => (isDesktop ? getReservedScrollbarGutterWidthPx() : 0),
+    [isDesktop],
   );
 
   const viewPreferenceKey = `${cardSetId ?? ""}:${settings?.cardViewPaneWidthPx ?? ""}`;
@@ -94,12 +115,7 @@ export function useCardViewPaneWidth({
     const updateWidth = () => {
       const next = Math.max(
         0,
-        Math.round(
-          Math.max(
-            element.clientWidth,
-            element.parentElement?.clientWidth ?? 0,
-          ),
-        ),
+        Math.round(element.clientWidth),
       );
 
       setContentViewportWidth((prev) => (prev === next ? prev : next));
@@ -124,20 +140,18 @@ export function useCardViewPaneWidth({
   const activePaneStoredWidthPx = isGlobalEditing
     ? editPaneWidthPx
     : viewPaneWidthPx;
-
-  const activePaneMaxWidthPx =
+  const availableViewportWidthPx =
     contentViewportWidth > 0
       ? Math.max(
           activePaneMinWidthPx,
-          contentViewportWidth,
-          activePaneStoredWidthPx,
-          activePaneDefaultWidthPx,
+          contentViewportWidth - reservedScrollbarGutterWidthPx,
         )
-      : Math.max(
-          activePaneMinWidthPx,
-          activePaneStoredWidthPx,
-          activePaneDefaultWidthPx,
-        );
+      : 0;
+
+  const activePaneMaxWidthPx =
+    availableViewportWidthPx > 0
+      ? Math.max(activePaneMinWidthPx, availableViewportWidthPx)
+      : Math.max(activePaneMinWidthPx, activePaneDefaultWidthPx);
 
   const activePaneWidthPx = clampPaneWidthPx(
     activePaneStoredWidthPx,
@@ -152,8 +166,8 @@ export function useCardViewPaneWidth({
   );
 
   const activePaneRenderWidthPx =
-    contentViewportWidth > 0
-      ? Math.max(1, Math.min(activePaneWidthPx, contentViewportWidth))
+    availableViewportWidthPx > 0
+      ? Math.max(1, Math.min(activePaneWidthPx, availableViewportWidthPx))
       : activePaneWidthPx;
 
   const persistPaneWidth = useCallback(
@@ -232,6 +246,7 @@ export function useCardViewPaneWidth({
 
   return {
     contentViewportRef,
+    contentViewportWidth,
     editPaneWidthPx,
     activePaneMode,
     activePaneMinWidthPx,
