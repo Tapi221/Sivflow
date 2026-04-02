@@ -10,7 +10,6 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 import React, { useEffect, useRef, useState } from "react";
 import { CardFrame } from "./CardFrame";
 import { CARD_SHELL_COMMON_CLASS_NAME } from "./cardShellClassNames";
-import { FluidCardSurface } from "./FluidCardSurface";
 import { useFlashcardCornerControls } from "./FlashcardCornerControls";
 import { FlashcardInkOverlay } from "./FlashcardInkOverlay";
 import { FlashcardMediaDialogs } from "./FlashcardMediaDialogs";
@@ -65,26 +64,6 @@ function shouldIgnoreFlipTarget(target: EventTarget | null): boolean {
     element.closest(
       'button, a, input, textarea, select, label, [data-card-no-flip="true"]',
     ),
-  );
-}
-
-function hasInkStrokes(document: unknown): boolean {
-  if (!document || typeof document !== "object") return false;
-  const strokes = (document as { strokes?: unknown }).strokes;
-  return Array.isArray(strokes) && strokes.length > 0;
-}
-
-function hasStoredInk(card: FlashcardCardLike | null | undefined): boolean {
-  if (!card) return false;
-  const frontInk =
-    card.front && typeof card.front === "object" ? card.front.ink : undefined;
-  const backInk =
-    card.back && typeof card.back === "object" ? card.back.ink : undefined;
-  return (
-    hasInkStrokes(frontInk) ||
-    hasInkStrokes(backInk) ||
-    hasInkStrokes(card.inkQuestion) ||
-    hasInkStrokes(card.inkAnswer)
   );
 }
 
@@ -252,145 +231,118 @@ function FlashcardInner({
 
   const fixedHeightPx = layoutRowsToCardHeightPx(derived.layoutRows);
   const isCardClickable = !previewMode;
-  const showFluidInkNotice =
-    isFluidDisplay && !previewMode && hasStoredInk(card);
 
   return (
     <div
-      className={cn(
-        "w-full flex flex-col overflow-visible",
-        !isFluidDisplay && "select-none",
-        className,
-      )}
+      className={cn("w-full flex flex-col select-none overflow-visible", className)}
     >
-      {isFluidDisplay ? (
-        <FluidCardSurface
-          blocks={derived.activeBlocks}
-          contentRef={contentRef}
-          isCardClickable={isCardClickable}
-          showInkNotice={showFluidInkNotice}
-          extraHeaderRight={extraHeaderRight}
-          extraFooter={extraFooter}
-          actionsTopLeft={actionsTopLeft}
-          actionsTopRight={actionsTopRight}
-          onCardClick={(event) => {
+      <div className="relative">
+        <CardFrame
+          baseWidth={CANONICAL_CARD_WIDTH}
+          contentPaddingPx={contentPaddingPx ?? 0}
+          allowUpscale={allowUpscale}
+          maxScale={maxScale}
+          scaleMultiplier={scaleMultiplier}
+          role={isCardClickable ? "button" : undefined}
+          tabIndex={isCardClickable ? 0 : undefined}
+          className={cn(
+            CARD_SHELL_COMMON_CLASS_NAME,
+            isCardClickable && "cursor-pointer",
+          )}
+          onPointerDownCapture={(event) => {
             if (!isCardClickable) return;
-            if (shouldIgnoreFlipTarget(event.target)) return;
-            handleFlip(event);
+            if (shouldIgnoreFlipTarget(event.target)) {
+              resetPointerGesture();
+              return;
+            }
+            pointerGestureRef.current = {
+              pointerId: event.pointerId,
+              startX: event.clientX,
+              startY: event.clientY,
+              moved: false,
+            };
           }}
-          onCardKeyDown={(event) => {
+          onPointerMoveCapture={(event) => {
+            if (!isCardClickable) return;
+            const state = pointerGestureRef.current;
+            if (state.pointerId !== event.pointerId) return;
+            if (state.moved) return;
+            const dx = Math.abs(event.clientX - state.startX);
+            const dy = Math.abs(event.clientY - state.startY);
+            if (
+              dx > TAP_MOVE_CANCEL_THRESHOLD_PX ||
+              dy > TAP_MOVE_CANCEL_THRESHOLD_PX
+            ) {
+              state.moved = true;
+            }
+          }}
+          onPointerUpCapture={(event) => {
+            if (!isCardClickable) return;
+            finishPointerGesture(event.pointerId);
+          }}
+          onPointerCancelCapture={(event) => {
+            if (!isCardClickable) return;
+            finishPointerGesture(event.pointerId);
+          }}
+          onWheelCapture={() => {
+            if (!isCardClickable) return;
+            suppressFlipTemporarily();
+          }}
+          onClick={handleFlip}
+          onKeyDown={(event) => {
             if (!isCardClickable) return;
             if (event.target !== event.currentTarget) return;
             if (event.key !== "Enter" && event.key !== " ") return;
             event.preventDefault();
             handleFlip();
           }}
-          onGalleryFullscreenChange={media.handleGalleryFullscreenChange}
-        />
-      ) : (
-        <div className="relative">
-          <CardFrame
-            baseWidth={CANONICAL_CARD_WIDTH}
-            contentPaddingPx={contentPaddingPx ?? 0}
-            allowUpscale={allowUpscale}
-            maxScale={maxScale}
-            scaleMultiplier={scaleMultiplier}
-            role={isCardClickable ? "button" : undefined}
-            tabIndex={isCardClickable ? 0 : undefined}
+          resizable={false}
+          resizeStepPx={undefined}
+          showResizeHandle={false}
+          heightPx={isFluidDisplay ? null : fixedHeightPx}
+          lockHeight={!isFluidDisplay}
+          actionsTopLeft={actionsTopLeft}
+          actionsTopRight={actionsTopRight}
+          drawMode={isFluidDisplay ? false : enableDrawMode}
+          ruledPhasePx={0}
+          overlay={
+            <FlashcardInkOverlay
+              extraHeaderRight={extraHeaderRight}
+              extraFooter={extraFooter}
+              previewMode={previewMode ?? false}
+              showInkLayer={Boolean(showInkLayer && !isFluidDisplay)}
+              inkEditingEnabled={Boolean(inkEditingEnabled && !isFluidDisplay)}
+              cardId={derived.cardId}
+              activeInkSide={activeInkSide}
+              activeInkDocument={derived.activeInkDocument}
+              layoutStable={ink.layoutStable}
+              shouldMountInkLayer={Boolean(
+                ink.shouldMountInkLayer && !isFluidDisplay,
+              )}
+              previewInkRef={ink.previewInkRef}
+              previewInkTool={ink.previewInkTool}
+              previewInkHistory={ink.previewInkHistory}
+              onInkDocumentChange={ink.handleInkDocumentChange}
+              setPreviewInkTool={ink.setPreviewInkTool}
+              setPreviewInkHistory={ink.setPreviewInkHistory}
+            />
+          }
+        >
+          <div
+            ref={contentRef}
             className={cn(
-              CARD_SHELL_COMMON_CLASS_NAME,
-              isCardClickable && "cursor-pointer",
+              "w-full max-w-full",
+              isFluidDisplay ? "min-h-0" : "flex min-h-0 flex-1",
             )}
-            onPointerDownCapture={(event) => {
-              if (!isCardClickable) return;
-              if (shouldIgnoreFlipTarget(event.target)) {
-                resetPointerGesture();
-                return;
-              }
-              pointerGestureRef.current = {
-                pointerId: event.pointerId,
-                startX: event.clientX,
-                startY: event.clientY,
-                moved: false,
-              };
-            }}
-            onPointerMoveCapture={(event) => {
-              if (!isCardClickable) return;
-              const state = pointerGestureRef.current;
-              if (state.pointerId !== event.pointerId) return;
-              if (state.moved) return;
-              const dx = Math.abs(event.clientX - state.startX);
-              const dy = Math.abs(event.clientY - state.startY);
-              if (
-                dx > TAP_MOVE_CANCEL_THRESHOLD_PX ||
-                dy > TAP_MOVE_CANCEL_THRESHOLD_PX
-              ) {
-                state.moved = true;
-              }
-            }}
-            onPointerUpCapture={(event) => {
-              if (!isCardClickable) return;
-              finishPointerGesture(event.pointerId);
-            }}
-            onPointerCancelCapture={(event) => {
-              if (!isCardClickable) return;
-              finishPointerGesture(event.pointerId);
-            }}
-            onWheelCapture={() => {
-              if (!isCardClickable) return;
-              suppressFlipTemporarily();
-            }}
-            onClick={handleFlip}
-            onKeyDown={(event) => {
-              if (!isCardClickable) return;
-              if (event.target !== event.currentTarget) return;
-              if (event.key !== "Enter" && event.key !== " ") return;
-              event.preventDefault();
-              handleFlip();
-            }}
-            resizable={false}
-            resizeStepPx={undefined}
-            showResizeHandle={false}
-            heightPx={fixedHeightPx}
-            lockHeight
-            actionsTopLeft={actionsTopLeft}
-            actionsTopRight={actionsTopRight}
-            drawMode={enableDrawMode}
-            ruledPhasePx={0}
-            overlay={
-              <FlashcardInkOverlay
-                extraHeaderRight={extraHeaderRight}
-                extraFooter={extraFooter}
-                previewMode={previewMode ?? false}
-                showInkLayer={showInkLayer}
-                inkEditingEnabled={inkEditingEnabled}
-                cardId={derived.cardId}
-                activeInkSide={activeInkSide}
-                activeInkDocument={derived.activeInkDocument}
-                layoutStable={ink.layoutStable}
-                shouldMountInkLayer={ink.shouldMountInkLayer}
-                previewInkRef={ink.previewInkRef}
-                previewInkTool={ink.previewInkTool}
-                previewInkHistory={ink.previewInkHistory}
-                onInkDocumentChange={ink.handleInkDocumentChange}
-                setPreviewInkTool={ink.setPreviewInkTool}
-                setPreviewInkHistory={ink.setPreviewInkHistory}
-              />
-            }
           >
-            <div
-              ref={contentRef}
-              className="w-full max-w-full flex min-h-0 flex-1"
-            >
-              <SharedCardContent
-                mode="view"
-                blocks={derived.activeBlocks}
-                onGalleryFullscreenChange={media.handleGalleryFullscreenChange}
-              />
-            </div>
-          </CardFrame>
-        </div>
-      )}
+            <SharedCardContent
+              mode="view"
+              blocks={derived.activeBlocks}
+              onGalleryFullscreenChange={media.handleGalleryFullscreenChange}
+            />
+          </div>
+        </CardFrame>
+      </div>
 
       <FlashcardMediaDialogs
         isImagePopupOpen={media.isImagePopupOpen}

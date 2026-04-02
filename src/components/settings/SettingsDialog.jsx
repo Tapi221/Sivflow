@@ -1453,7 +1453,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent surface="panel" className="w-full max-w-none h-[100dvh] md:max-w-[950px] md:w-full md:h-[80vh] md:max-h-[800px] p-0 gap-0 flex flex-col overflow-hidden data-[state=open]:duration-300 ring-0 outline-none rounded-none md:rounded-[10px]">
+      <DialogContent surface="panel" className="w-full max-w-none h-[100dvh] md:max-w-[1120px] md:w-full md:h-[80vh] md:max-h-[800px] p-0 gap-0 flex flex-col overflow-hidden data-[state=open]:duration-300 ring-0 outline-none rounded-none md:rounded-[10px]">
         <DialogDescription className="sr-only">
           アカウント、学習、同期、データ管理などの設定を行うダイアログです。
         </DialogDescription>
@@ -1461,7 +1461,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
           {/* Sidebar */}
           <div
             className={`
-              md:w-64 flex-shrink-0 flex flex-col border-r border-slate-200
+              md:w-56 flex-shrink-0 flex flex-col border-r border-slate-200/80/80
               ${isMobileMenuOpen ? "absolute inset-0 z-50 w-full bg-white/72 backdrop-blur-md" : "hidden md:flex bg-white/36 backdrop-blur-sm"}
               transition-all duration-300
             `}
@@ -1487,10 +1487,10 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                     setIsMobileMenuOpen(false);
                   }}
                   className={cn(
-                    "flex items-center gap-2 md:gap-3 px-3 py-3 md:px-4 md:py-3 rounded-xl transition-all text-sm md:text-sm font-bold text-left whitespace-nowrap snap-start relative group active:scale-95 min-h-11",
+                    "flex items-center gap-2 md:gap-3 px-3 py-3 md:px-4 md:py-3 rounded-lg transition-colors text-sm md:text-sm font-semibold text-left whitespace-nowrap snap-start relative group active:scale-95 min-h-11",
                     activeTab === item.id
-                      ? "bg-white/72 text-slate-800 shadow-sm border border-slate-200/80 backdrop-blur-sm"
-                      : "text-slate-500 hover:bg-slate-100 hover:text-slate-700",
+                      ? "bg-slate-100/80 text-slate-900"
+                      : "text-slate-500 hover:bg-slate-100/70 hover:text-slate-800",
                   )}
                 >
                   <item.icon
@@ -1575,8 +1575,8 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
 
             <div
               className={cn(
-                "mx-auto max-w-4xl space-y-8 p-4 pb-[var(--ui-safe-area-bottom-padding)] md:p-8 lg:p-10",
-                activeTab === "tags" && "max-w-5xl space-y-4 md:p-6 lg:p-6",
+                "w-full space-y-6 p-4 pb-[var(--ui-safe-area-bottom-padding)] md:px-8 md:py-6 lg:px-10 lg:py-8",
+                activeTab === "tags" && "space-y-4",
               )}
             >
               {renderContent()}
@@ -1587,17 +1587,6 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
     </Dialog>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 

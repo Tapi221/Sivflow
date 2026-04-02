@@ -5,7 +5,7 @@ import { CardCarousel3D } from "@/features/review/CardCarousel3D";
 import type { Card } from "@/types";
 import type { UserSettings } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
-import { useCallback, type ReactNode } from "react";
+import { useCallback } from "react";
 
 interface CardViewMobileProps {
   cardsForPager: Card[];
@@ -36,18 +36,12 @@ export function CardViewMobile({
 }: CardViewMobileProps) {
   void selectedCardId;
   const wrapCard = useCallback(
-    (node: ReactNode) =>
-      currentDisplayMode === "fixed" ? (
-        <MobileScalableCard
-          cardDesignWidth={CANONICAL_CARD_WIDTH}
-          safePadding={0}
-        >
-          {node}
-        </MobileScalableCard>
-      ) : (
-        <div className="w-full px-1">{node}</div>
-      ),
-    [currentDisplayMode],
+    (node: React.ReactNode) => (
+      <MobileScalableCard cardDesignWidth={CANONICAL_CARD_WIDTH} safePadding={0}>
+        {node}
+      </MobileScalableCard>
+    ),
+    [],
   );
 
   const renderCenter = useCallback(

@@ -295,6 +295,32 @@ export function FolderTreeWithCards({
     getUniqueFolderName,
   } = derived;
 
+  const rootFolderIdSet = useMemo(
+    () =>
+      new Set(
+        rootFolders
+          .map((folder) => getFolderId(folder))
+          .filter((id): id is string => Boolean(id)),
+      ),
+    [rootFolders],
+  );
+
+  const resolveRootFolderId = useCallback(
+    (folderId: string | null) => {
+      let currentId = folderId;
+
+      while (currentId) {
+        if (rootFolderIdSet.has(currentId)) return currentId;
+        const parentId = parentFolderIdById.get(currentId);
+        if (parentId === undefined || parentId === currentId) break;
+        currentId = parentId;
+      }
+
+      return null;
+    },
+    [parentFolderIdById, rootFolderIdSet],
+  );
+
   const actions = useFolderActions({
     treeFolders,
     treeCardSets,
@@ -502,27 +528,12 @@ export function FolderTreeWithCards({
 
   useEffect(() => {
     if (!selectedFolderId) return;
-    const rootFolderIds = new Set(
-      rootFolders.map((f) => getFolderId(f)).filter(Boolean),
-    );
-    let currentId: string | null = selectedFolderId;
-    let rootId: string | null = null;
-
-    while (currentId) {
-      if (rootFolderIds.has(currentId)) {
-        rootId = currentId;
-        break;
-      }
-      const parentId = parentFolderIdById.get(currentId);
-      if (parentId === undefined || parentId === currentId) break;
-      currentId = parentId;
+    const rootId = resolveRootFolderId(selectedFolderId);
+    if (!rootId) return;
+    if (activeRootFolderId !== rootId) {
+      setActiveRootFolderId(rootId);
     }
-
-    if (rootId === selectedFolderId) return;
-    if (activeRootFolderId !== selectedFolderId) {
-      setActiveRootFolderId(selectedFolderId);
-    }
-  }, [selectedFolderId, rootFolders, parentFolderIdById, activeRootFolderId]);
+  }, [selectedFolderId, resolveRootFolderId, activeRootFolderId]);
 
   const headerFolderId = useMemo(() => {
     if (selectedFolderId) return selectedFolderId;
@@ -684,8 +695,11 @@ export function FolderTreeWithCards({
     [rootFolders],
   );
 
+  const hasActiveRootScope =
+    activeRootFolderId !== null && rootFolderIdSet.has(activeRootFolderId);
+
   const scopedTreeData = useMemo<ExplorerTreeNode[]>(() => {
-    if (!activeRootFolderId) return [];
+    if (!activeRootFolderId || !hasActiveRootScope) return [];
 
     const stack: ExplorerTreeNode[] = [...explorerTreeData];
     let scopedRootNode: ExplorerTreeNode | null = null;
@@ -704,7 +718,7 @@ export function FolderTreeWithCards({
     return scopedRootNode.children.map((node) =>
       node.kind === "folder" ? { ...node, children: undefined } : node,
     );
-  }, [activeRootFolderId, explorerTreeData]);
+  }, [activeRootFolderId, explorerTreeData, hasActiveRootScope]);
 
   const selectedTreeId = useMemo(() => {
     return toSelectedTreeId(selectedFolderId, selectedItem, selectedCardSetId);
@@ -716,7 +730,12 @@ export function FolderTreeWithCards({
       if (!parsed) return;
 
       if (parsed.type === "folder") {
-        setActiveRootFolderId(parsed.id);
+        const rootId = resolveRootFolderId(parsed.id);
+        if (rootId === parsed.id) {
+          setActiveRootFolderId(parsed.id);
+        } else if (!activeRootFolderId && rootId) {
+          setActiveRootFolderId(rootId);
+        }
         onFolderSelect(parsed.id);
         return;
       }
@@ -735,7 +754,7 @@ export function FolderTreeWithCards({
         onItemSelect({ type: "document", id: parsed.id });
       }
     },
-    [onFolderSelect, onItemSelect],
+    [activeRootFolderId, onFolderSelect, onItemSelect, resolveRootFolderId],
   );
 
   const handleArboristMove = useCallback(
@@ -961,7 +980,7 @@ export function FolderTreeWithCards({
         <ExplorerNoResultsState />
       ) : (
         <div className="h-full min-h-0">
-          {rootFolderPanels.length === 0 || (rootItems.length > 0 && !activeRootFolderId) ? (
+          {rootFolderPanels.length === 0 || (rootItems.length > 0 && !hasActiveRootScope) ? (
             <FolderTreeArborist
               data={explorerTreeData}
               selectedId={selectedTreeId}
@@ -973,7 +992,7 @@ export function FolderTreeWithCards({
               disableDrag={arboristDisableDrag}
               disableDrop={arboristDisableDrop}
             />
-          ) : !activeRootFolderId ? (
+          ) : !hasActiveRootScope ? (
             <RootFolderPanelList
               rootFolderPanels={rootFolderPanels}
               selectedFolderId={selectedFolderId}

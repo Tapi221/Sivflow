@@ -300,6 +300,7 @@ export function useFolderActions({
           return next;
         });
       }
+      setPendingScrollId(folderId);
 
       setEditingId(folderId);
       setEditingName(nextName);
@@ -341,6 +342,7 @@ export function useFolderActions({
       renameCancelledRef,
       setEditingId,
       setEditingName,
+      setPendingScrollId,
       setExpandedFolders,
       setOptimisticFolders,
     ],
@@ -372,6 +374,12 @@ export function useFolderActions({
             : cardSet,
         ),
       ]);
+      setExpandedFolders((prev) => {
+        const next = new Set(prev);
+        next.add(normalizedFolderId);
+        return next;
+      });
+      setPendingScrollId(cardSetId);
       setEditingId(cardSetId);
       setEditingName(DEFAULT_NEW_CARDSET_NAME);
       editingIdRef.current = cardSetId;
@@ -410,6 +418,8 @@ export function useFolderActions({
       renameCancelledRef,
       setEditingId,
       setEditingName,
+      setExpandedFolders,
+      setPendingScrollId,
       setOptimisticCardSets,
     ],
   );
