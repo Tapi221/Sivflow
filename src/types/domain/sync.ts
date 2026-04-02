@@ -1,3 +1,7 @@
+import type { AssetRecord } from "./assets";
+import type { Card } from "./card";
+import type { Folder } from "./folder";
+
 /**
  * 同期システムの高度な型定義
  * 可観測性・回復性・主導権を備えた分散同期システム用
@@ -47,25 +51,64 @@ export interface SyncSettings {
  * SyncQueueItem - オフラインキュー（FIFO）
  * オフライン時の変更を順序を保持して保存
  */
-export interface SyncQueueItem {
+export type SyncEntity = "card" | "folder" | "asset";
+export type SyncOperationType = "create" | "update" | "delete";
+export type SyncDirection = "upload" | "download";
+export type SyncPriority = "critical" | "high" | "medium" | "low";
+export type SyncQueueStatus =
+  | "pending"
+  | "processing"
+  | "completed"
+  | "failed";
+
+export type AssetSyncPayload = Pick<AssetRecord, "id"> &
+  Partial<
+    Pick<
+      AssetRecord,
+      | "userId"
+      | "mime"
+      | "size"
+      | "localBlobId"
+      | "remoteKey"
+      | "remoteStatus"
+      | "remoteUrlCache"
+      | "retryCount"
+      | "updatedAt"
+      | "createdAt"
+    >
+  >;
+
+export type SyncPayloadByEntity = {
+  card: Card;
+  folder: Folder;
+  asset: AssetSyncPayload;
+};
+
+export type SyncDeletePayload = { id: string };
+
+interface SyncQueueItemBase<
+  TEntity extends SyncEntity,
+  TOperation extends SyncOperationType,
+  TPayload,
+> {
   id: string; // Queue ID
   idempotencyKey: string; // Idempotency Key for Cloud Functions
 
   targetId: string; // Entity ID (Card ID, etc.)
-  entity: "card" | "folder" | "asset";
-  operationType: "create" | "update" | "delete"; // Unified operation type
-  type: "upload" | "download"; // Added for compatibility with SyncTask
+  entity: TEntity;
+  operationType: TOperation; // Unified operation type
+  type: SyncDirection; // Added for compatibility with SyncTask
 
   // Legacy compatibility: action field is deprecated but kept if needed for migration
-  action?: "create" | "update" | "delete";
+  action?: TOperation;
 
-  payload: unknown;
-  priority: "critical" | "high" | "medium" | "low";
+  payload: TPayload;
+  priority: SyncPriority;
 
   createdAt: number;
   updatedAt: number;
 
-  status: "pending" | "processing" | "completed" | "failed";
+  status: SyncQueueStatus;
   retryCount: number;
   nextRetryAt?: number;
   lastRetryAt?: number; // Added
@@ -76,6 +119,26 @@ export interface SyncQueueItem {
   clientSeq?: number;
   migrationKey?: string;
 }
+
+type SyncUpsertQueueItem<TEntity extends SyncEntity> = SyncQueueItemBase<
+  TEntity,
+  "create" | "update",
+  SyncPayloadByEntity[TEntity]
+>;
+
+type SyncDeleteQueueItem<TEntity extends SyncEntity> = SyncQueueItemBase<
+  TEntity,
+  "delete",
+  SyncDeletePayload
+>;
+
+export type SyncQueueItem =
+  | SyncUpsertQueueItem<"card">
+  | SyncUpsertQueueItem<"folder">
+  | SyncUpsertQueueItem<"asset">
+  | SyncDeleteQueueItem<"card">
+  | SyncDeleteQueueItem<"folder">
+  | SyncDeleteQueueItem<"asset">;
 
 /**
  * SyncConflict - 競合情報

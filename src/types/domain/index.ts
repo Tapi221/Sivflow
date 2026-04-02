@@ -10,7 +10,7 @@ export * from "./sync";
 export * from "./telemetry";
 
 export type { ReviewLog } from "./base";
-export type { UserSettings } from "./user";
+export type { UserSettings, UserStats } from "./user";
 export { CURRENT_SCHEMA_VERSION } from "./storage";
 
 /**

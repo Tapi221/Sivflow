@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import { cn } from "@/lib/utils";
 import { NotebookPen } from "@/ui/icons";
+import React, { useState } from "react";
 import { BlockWrapper } from "./BlockWrapper";
 import { MarkdownBlockView } from "./MarkdownBlockPreview";
 import { MarkdownEditorDialog } from "./MarkdownEditorDialog";
 import { TEXT_BLOCK_CONTENT_CLASS } from "./textBlockStyles";
-import { cn } from "@/lib/utils";
 
 type EditorBlock =
   | { type: "markdown"; markdown: string }
@@ -489,7 +489,7 @@ const MarkdownBlockInner: React.FC<MarkdownBlockProps> = ({
       label="Markdown"
       icon={NotebookPen}
       accentColor={accentColor}
-      isActive={isActive}
+      isActive={Boolean(isActive || isEditorOpen)}
       showDelete={showDelete}
       // 1行移動
       canMoveUp={canMoveUp}

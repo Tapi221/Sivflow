@@ -1,11 +1,11 @@
 import React, { useCallback, useState } from "react";
 
+import { cn } from "@/lib/utils";
+import type { MathBlockData } from "@/types";
 import { Sigma } from "@/ui/icons";
 import { BlockWrapper } from "./BlockWrapper";
 import { MathBlockPreviewPane } from "./MathBlockPreviewPane";
 import { MathEditorDialog } from "./MathEditorDialog";
-import { cn } from "@/lib/utils";
-import type { MathBlockData } from "@/types";
 
 const MAX_LATEX_LENGTH = 10000;
 
@@ -82,7 +82,7 @@ const MathBlockInner: React.FC<MathBlockProps> = ({
       label="Math"
       icon={Sigma}
       accentColor={accentColor}
-      isActive={isActive}
+      isActive={Boolean(isActive || isEditorOpen)}
       showDelete={showDelete}
       canMoveUp={canMoveUp}
       canMoveDown={canMoveDown}
