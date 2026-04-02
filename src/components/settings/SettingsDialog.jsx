@@ -444,7 +444,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                   <Button
                     onClick={() => fileInputRef.current?.click()}
                     variant="outline"
-                    className="rounded-xl border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300 font-bold text-sm shadow-sm"
+                    className="rounded-xl border-slate-200/80 bg-white/60 text-slate-600 backdrop-blur-sm hover:bg-white/78 hover:text-slate-900 hover:border-slate-300 font-bold text-sm shadow-sm"
                     disabled={uploadingImage}
                   >
                     <Camera className="w-4 h-4 mr-2" />
@@ -516,7 +516,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                       onClick={handleNameCancel}
                       size="sm"
                       variant="outline"
-                      className="rounded-xl border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold"
+                      className="rounded-xl border-slate-200/80 bg-white/60 text-slate-500 backdrop-blur-sm hover:bg-white/78 hover:text-slate-700 font-bold"
                     >
                       <X className="w-4 h-4" />
                     </Button>
@@ -528,7 +528,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                   )}
                 </div>
               ) : (
-                <div className="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between group shadow-sm">
+                <div className="bg-white/62 border border-slate-200/80 rounded-xl backdrop-blur-sm p-4 flex items-center justify-between group shadow-sm">
                   <div className="min-w-0 flex-1 mr-4">
                     <div
                       className="font-bold text-lg text-slate-800 truncate"
@@ -594,7 +594,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
             </div>
 
             <div className="space-y-3">
-              <div className="bg-white border border-slate-100 p-4 rounded-xl flex items-center justify-between gap-4 shadow-sm hover:border-slate-200/60 transition-colors">
+              <div className="bg-white/58 border border-slate-200/70 p-4 rounded-xl flex items-center justify-between gap-4 shadow-sm backdrop-blur-sm hover:bg-white/66 hover:border-slate-200/80 transition-colors">
                 <div>
                   <div className="font-bold text-slate-700 text-sm tracking-tight">
                     自動音声再生 (問題)
@@ -611,7 +611,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                 />
               </div>
 
-              <div className="bg-white border border-slate-100 p-4 rounded-xl flex items-center justify-between gap-4 shadow-sm hover:border-slate-200/60 transition-colors">
+              <div className="bg-white/58 border border-slate-200/70 p-4 rounded-xl flex items-center justify-between gap-4 shadow-sm backdrop-blur-sm hover:bg-white/66 hover:border-slate-200/80 transition-colors">
                 <div>
                   <div className="font-bold text-slate-700 text-sm tracking-tight">
                     自動音声再生 (解答)
@@ -667,7 +667,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
               </div>
             </div>
 
-            <div className="bg-white border border-slate-100 p-5 rounded-2xl space-y-5 shadow-sm">
+            <div className="bg-white/58 border border-slate-200/70 p-5 rounded-2xl space-y-5 shadow-sm backdrop-blur-sm">
               <div className="space-y-4">
                 <div className="flex items-center justify-between pt-1">
                   <div>
@@ -769,7 +769,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                 </div>
                 <div className="space-y-4">
                   {/* 0: 忘れた (Forgot) - Always shown */}
-                  <div className="flex items-start gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
+                  <div className="flex items-start gap-4 p-4 rounded-xl bg-white/48 border border-slate-200/70 backdrop-blur-sm">
                     <div className="mt-1 opacity-80">
                       <div className="w-8 h-8 rounded-full bg-red-50 face-badge-convex flex items-center justify-center text-[#FF5A65]">
                         <svg
@@ -802,7 +802,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                   </div>
 
                   {/* 1: あいまい (Vague/Hard) - Toggleable */}
-                  <div className="flex items-start gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
+                  <div className="flex items-start gap-4 p-4 rounded-xl bg-white/48 border border-slate-200/70 backdrop-blur-sm">
                     <div className="mt-1 opacity-80">
                       <div className="w-8 h-8 rounded-full bg-amber-50 face-badge-convex flex items-center justify-center text-[#F9A825]">
                         <svg
@@ -840,7 +840,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                   </div>
 
                   {/* 2: 覚えた (Good) - Always shown */}
-                  <div className="flex items-start gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
+                  <div className="flex items-start gap-4 p-4 rounded-xl bg-white/48 border border-slate-200/70 backdrop-blur-sm">
                     <div className="mt-1 opacity-80">
                       <div className="w-8 h-8 rounded-full bg-blue-50 face-badge-convex flex items-center justify-center text-[#00A3FF]">
                         <svg
@@ -872,7 +872,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                   </div>
 
                   {/* 3: 余裕 (Easy) - Toggleable */}
-                  <div className="flex items-start gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
+                  <div className="flex items-start gap-4 p-4 rounded-xl bg-white/48 border border-slate-200/70 backdrop-blur-sm">
                     <div className="mt-1 opacity-80">
                       <div className="w-8 h-8 rounded-full bg-emerald-50 face-badge-convex flex items-center justify-center text-[#00B67A]">
                         <svg
@@ -1453,16 +1453,16 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent surface="panel" className="w-full max-w-none h-[100dvh] md:max-w-[950px] md:w-full md:h-[80vh] md:max-h-[800px] p-0 gap-0 flex flex-col overflow-hidden data-[state=open]:duration-300 ring-0 outline-none rounded-none md:rounded-2xl">
+      <DialogContent surface="panel" className="w-full max-w-none h-[100dvh] md:max-w-[950px] md:w-full md:h-[80vh] md:max-h-[800px] p-0 gap-0 flex flex-col overflow-hidden data-[state=open]:duration-300 ring-0 outline-none rounded-none md:rounded-[10px]">
         <DialogDescription className="sr-only">
           アカウント、学習、同期、データ管理などの設定を行うダイアログです。
         </DialogDescription>
-        <div className="flex flex-1 h-full overflow-hidden bg-[#F8FAFB]">
+        <div className="flex flex-1 h-full overflow-hidden bg-transparent">
           {/* Sidebar */}
           <div
             className={`
               md:w-64 flex-shrink-0 flex flex-col border-r border-slate-200
-              ${isMobileMenuOpen ? "absolute inset-0 z-50 w-full bg-[#F8FAFB]" : "hidden md:flex bg-slate-50/50"}
+              ${isMobileMenuOpen ? "absolute inset-0 z-50 w-full bg-white/72 backdrop-blur-md" : "hidden md:flex bg-white/36 backdrop-blur-sm"}
               transition-all duration-300
             `}
           >
@@ -1489,7 +1489,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                   className={cn(
                     "flex items-center gap-2 md:gap-3 px-3 py-3 md:px-4 md:py-3 rounded-xl transition-all text-sm md:text-sm font-bold text-left whitespace-nowrap snap-start relative group active:scale-95 min-h-11",
                     activeTab === item.id
-                      ? "bg-white text-slate-800 shadow-sm border border-slate-200"
+                      ? "bg-white/72 text-slate-800 shadow-sm border border-slate-200/80 backdrop-blur-sm"
                       : "text-slate-500 hover:bg-slate-100 hover:text-slate-700",
                   )}
                 >
@@ -1543,7 +1543,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
           {/* Content Content - Reverted from glass-content */}
           <div className="relative flex-1 overflow-x-hidden overflow-y-auto bg-transparent">
             {/* Mobile Header */}
-            <div className="md:hidden sticky top-0 z-20 flex items-center justify-between p-3 bg-[#F8FAFB]/95 border-b border-slate-200 backdrop-blur-md">
+            <div className="md:hidden sticky top-0 z-20 flex items-center justify-between p-3 bg-white/70 border-b border-slate-200/80 backdrop-blur-md">
               <div className="flex items-center gap-2">
                 <DialogTitle className="text-lg font-bold text-slate-800">
                   設定
@@ -1587,6 +1587,10 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
     </Dialog>
   );
 }
+
+
+
+
 
 
 
