@@ -23,6 +23,7 @@ interface TreeViewSidebarProps {
   onStartResizing: (e: React.PointerEvent) => void;
   children: React.ReactNode;
   canCreateCardSet?: boolean;
+  canAddDocuments?: boolean;
 }
 
 export function TreeViewSidebar({
@@ -44,6 +45,7 @@ export function TreeViewSidebar({
   onStartResizing,
   children,
   canCreateCardSet = false,
+  canAddDocuments = false,
 }: TreeViewSidebarProps) {
   return (
     <div
@@ -72,6 +74,7 @@ export function TreeViewSidebar({
             onAddPptx={onAddPptx}
             showExplorerActions={explorerTab === "explorer"}
             canCreateCardSet={canCreateCardSet}
+            canAddDocuments={canAddDocuments}
           />
         </div>
 

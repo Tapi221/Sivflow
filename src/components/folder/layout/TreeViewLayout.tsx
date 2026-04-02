@@ -259,12 +259,14 @@ function TreeViewLayout({
   }, [selectedFolderId]);
 
   const handleAddPdfFromHeader = useCallback(() => {
+    if (!selectedFolderId) return;
     pdfTriggerRef.current?.();
-  }, []);
+  }, [selectedFolderId]);
 
   const handleAddPptxFromHeader = useCallback(() => {
+    if (!selectedFolderId) return;
     pptxTriggerRef.current?.();
-  }, []);
+  }, [selectedFolderId]);
 
   const {
     isFilterActive,
@@ -460,6 +462,9 @@ function TreeViewLayout({
     />
   );
 
+  const canCreateCardSet = Boolean(selectedFolderId);
+  const canAddDocuments = Boolean(selectedFolderId);
+
   return (
     <div
       className={cn(
@@ -484,7 +489,8 @@ function TreeViewLayout({
         onAddPdf={handleAddPdfFromHeader}
         onAddPptx={handleAddPptxFromHeader}
         onStartResizing={startResizing}
-        canCreateCardSet={Boolean(selectedFolderId)}
+        canCreateCardSet={canCreateCardSet}
+        canAddDocuments={canAddDocuments}
       >
         {tabContent}
       </TreeViewSidebar>

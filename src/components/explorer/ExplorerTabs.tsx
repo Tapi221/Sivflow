@@ -24,6 +24,7 @@ interface ExplorerTabsProps {
   onAddPptx?: () => void | Promise<void>;
   showExplorerActions?: boolean;
   canCreateCardSet?: boolean;
+  canAddDocuments?: boolean;
 }
 
 const TABS: { id: ExplorerTab; label: string }[] = [
@@ -43,6 +44,7 @@ export function ExplorerTabs({
   onAddPptx,
   showExplorerActions = false,
   canCreateCardSet = false,
+  canAddDocuments = false,
 }: ExplorerTabsProps) {
   const shouldShowExplorerActions =
     showExplorerActions && activeTab === "explorer";
@@ -131,14 +133,24 @@ export function ExplorerTabs({
               </DropdownMenuItem>
             )}
 
-            <DropdownMenuItem onSelect={() => void onAddPdf?.()} className="gap-2">
-              <FileText className="h-4 w-4" />
-              PDF追加
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => void onAddPptx?.()} className="gap-2">
-              <FileText className="h-4 w-4" />
-              PPTX追加
-            </DropdownMenuItem>
+            {canAddDocuments && (
+              <>
+                <DropdownMenuItem
+                  onSelect={() => void onAddPdf?.()}
+                  className="gap-2"
+                >
+                  <FileText className="h-4 w-4" />
+                  PDF追加
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() => void onAddPptx?.()}
+                  className="gap-2"
+                >
+                  <FileText className="h-4 w-4" />
+                  PPTX追加
+                </DropdownMenuItem>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
         <TagFilterPopover allTags={allTags} />
