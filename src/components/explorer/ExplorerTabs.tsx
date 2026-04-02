@@ -5,6 +5,7 @@
 import React, { useRef, useState } from "react";
 import { FileText, Folder, Plus } from "@/ui/icons";
 import type { ExplorerTab } from "@/components/folder/explorer/model/types";
+import { cn } from "@/lib/utils";
 import { TagFilterPopover } from "./TagFilterPopover";
 import {
   DropdownMenu,

@@ -513,6 +513,13 @@ export class SyncService {
     return this.localDB.getSyncQueueCount();
   }
 
+  async getQueueStatus(): Promise<{ pending: number; isSyncing: boolean }> {
+    return {
+      pending: await this.getQueueCount(),
+      isSyncing: SyncService.isSyncing,
+    };
+  }
+
   /**
    * キューを順次処理
    * 各アイテムごとにtry-catch、成功したら削除、失敗したらエラー記録してキュー保持
