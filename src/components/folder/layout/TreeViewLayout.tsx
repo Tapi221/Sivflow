@@ -65,23 +65,24 @@ function TreeViewLayout({
   const { createCard, updateCard, deleteCard, moveCardToFolder, reorderCards } =
     useCards();
 
-  // CardSet 選択状態 + 全件取得（ツリー表示用）
   const [selectedCardSetId, setSelectedCardSetId] = useState<string | null>(null);
-  const { cardSets, createCardSet, updateCardSet, deleteCardSet, moveCardSetToFolder } = useCardSets();
+  const {
+    cardSets,
+    createCardSet,
+    updateCardSet,
+    deleteCardSet,
+    moveCardSetToFolder,
+  } = useCardSets();
 
-  // フォルダ変更時に CardSet 選択をリセット
   useEffect(() => {
     setSelectedCardSetId(null);
   }, [selectedFolderId]);
 
-  
-  // onItemSelect のラッパー: cardSet選択時にselectedCardSetIdもセット
   const handleItemSelect = useCallback(
     (item: SelectedExplorerItem) => {
       if (item?.type === "cardSet") {
         const cs = cardSets.find((s) => s.id === item.id);
         if (cs) {
-          // 対応フォルダも選択状態に
           onFolderSelect(cs.folderId ?? null);
           setSelectedCardSetId(item.id);
           const query = new URLSearchParams();
@@ -95,6 +96,7 @@ function TreeViewLayout({
     },
     [cardSets, navigate, onFolderSelect, onItemSelect],
   );
+
   const { updateDocument } = useDocuments();
   const { getTagColor, getCategoryName, listCategoryIdsInUse, tagById, tags } =
     useTags();
@@ -125,7 +127,7 @@ function TreeViewLayout({
     folders,
     cards,
     documents,
-    selectedFolderId, // 即時値
+    selectedFolderId,
     selectedItem,
     selectedCardId,
     selectedDocumentId,
@@ -133,8 +135,6 @@ function TreeViewLayout({
     isMobile,
   });
 
-  // パンくずの更新
-  
   const explorerTab = useExplorerStore((s) => s.explorerTab);
   const setExplorerTab = useExplorerStore((s) => s.setExplorerTab);
 
@@ -247,15 +247,16 @@ function TreeViewLayout({
 
   const handleCreateRootFolder = useCallback(async () => {
     setCreateFolderRequestToken((prev) => prev + 1);
-  }, []);
+  }, [setCreateFolderRequestToken]);
 
   const [createCardSetRequestToken, setCreateCardSetRequestToken] = useState(0);
   const pdfTriggerRef = useRef<(() => void) | null>(null);
   const pptxTriggerRef = useRef<(() => void) | null>(null);
 
   const handleCreateCardSetFromHeader = useCallback(() => {
+    if (!selectedFolderId) return;
     setCreateCardSetRequestToken((prev) => prev + 1);
-  }, []);
+  }, [selectedFolderId]);
 
   const handleAddPdfFromHeader = useCallback(() => {
     pdfTriggerRef.current?.();
@@ -426,8 +427,12 @@ function TreeViewLayout({
       isFiltering={isFiltering}
       createFolderRequestToken={createFolderRequestToken}
       createCardSetRequestToken={createCardSetRequestToken}
-      onRegisterPdfTrigger={(fn) => { pdfTriggerRef.current = fn; }}
-      onRegisterPptxTrigger={(fn) => { pptxTriggerRef.current = fn; }}
+      onRegisterPdfTrigger={(fn) => {
+        pdfTriggerRef.current = fn;
+      }}
+      onRegisterPptxTrigger={(fn) => {
+        pptxTriggerRef.current = fn;
+      }}
       navigateToSectionListToken={navigateToSectionListToken}
       folderSelectionNonce={folderSelectionNonce}
       getFolderPath={getFolderPath}
@@ -454,6 +459,7 @@ function TreeViewLayout({
       selectedCardSetId={selectedCardSetId}
     />
   );
+
   return (
     <div
       className={cn(
@@ -478,6 +484,7 @@ function TreeViewLayout({
         onAddPdf={handleAddPdfFromHeader}
         onAddPptx={handleAddPptxFromHeader}
         onStartResizing={startResizing}
+        canCreateCardSet={Boolean(selectedFolderId)}
       >
         {tabContent}
       </TreeViewSidebar>
@@ -526,9 +533,9 @@ function TreeViewLayout({
         onUpdateCategoryName={handleUpdateCategoryName}
         onUpdateUngroupedLabel={handleUpdateUngroupedLabel}
         onUpdateViewOptions={handleUpdateViewOptions}
-      />    </div>
+      />
+    </div>
   );
 }
 
 export default TreeViewLayout;
-

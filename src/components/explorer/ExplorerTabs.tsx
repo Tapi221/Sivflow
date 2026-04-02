@@ -23,6 +23,7 @@ interface ExplorerTabsProps {
   onAddPdf?: () => void | Promise<void>;
   onAddPptx?: () => void | Promise<void>;
   showExplorerActions?: boolean;
+  canCreateCardSet?: boolean;
 }
 
 const TABS: { id: ExplorerTab; label: string }[] = [
@@ -41,6 +42,7 @@ export function ExplorerTabs({
   onAddPdf,
   onAddPptx,
   showExplorerActions = false,
+  canCreateCardSet = false,
 }: ExplorerTabsProps) {
   const shouldShowExplorerActions =
     showExplorerActions && activeTab === "explorer";
@@ -54,7 +56,6 @@ export function ExplorerTabs({
         backgroundColor: "var(--sidebar-bg)",
       }}
     >
-      {/* Tab links */}
       <div className="flex items-center gap-0.5 overflow-x-auto no-scrollbar">
         {TABS.map((tab) => {
           const isActive = activeTab === tab.id;
@@ -91,7 +92,6 @@ export function ExplorerTabs({
         })}
       </div>
 
-      {/* Explorer actions: フォルダ作成 + フィルタ */}
       <div
         className={cn(
           "flex items-center gap-0.5 flex-shrink-0 transition-all duration-150",
@@ -113,14 +113,24 @@ export function ExplorerTabs({
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-44">
-            <DropdownMenuItem onSelect={() => void onCreateRootFolder?.()} className="gap-2">
+            <DropdownMenuItem
+              onSelect={() => void onCreateRootFolder?.()}
+              className="gap-2"
+            >
               <Folder className="h-4 w-4" />
               新規フォルダ
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => void onCreateCardSet?.()} className="gap-2">
-              <Plus className="h-4 w-4" />
-              新規カードセット
-            </DropdownMenuItem>
+
+            {canCreateCardSet && (
+              <DropdownMenuItem
+                onSelect={() => void onCreateCardSet?.()}
+                className="gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                新規カードセット
+              </DropdownMenuItem>
+            )}
+
             <DropdownMenuItem onSelect={() => void onAddPdf?.()} className="gap-2">
               <FileText className="h-4 w-4" />
               PDF追加
@@ -136,7 +146,3 @@ export function ExplorerTabs({
     </div>
   );
 }
-
-
-
-

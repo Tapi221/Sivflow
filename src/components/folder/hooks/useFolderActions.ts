@@ -1,12 +1,12 @@
 import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import {
-    createOptimisticId,
-    DEFAULT_NEW_CARD_SET_NAME,
-    DEFAULT_NEW_FOLDER_NAME,
-    getFolderId,
-    getParentFolderId,
-    isSameFolder,
-    normalizeFolderId,
+  createOptimisticId,
+  DEFAULT_NEW_CARD_SET_NAME,
+  DEFAULT_NEW_FOLDER_NAME,
+  getFolderId,
+  getParentFolderId,
+  isSameFolder,
+  normalizeFolderId,
 } from "@/components/folder/explorer/model/utils";
 import { useToast } from "@/contexts/ToastContext";
 import type { Card, CardSet, SelectedExplorerItem } from "@/types";
@@ -48,7 +48,6 @@ interface UseFolderActionsParams {
   onUpdateCard?: (cardId: string, data: unknown) => Promise<void>;
   onDeleteCard?: (cardId: string) => Promise<void>;
   selectedCardSetId?: string | null;
-  // dialog state
   editingIdRef: React.MutableRefObject<string | null>;
   editingNameRef: React.MutableRefObject<string>;
   renameCancelledRef: React.MutableRefObject<boolean>;
@@ -56,17 +55,14 @@ interface UseFolderActionsParams {
   setEditingName: React.Dispatch<React.SetStateAction<string>>;
   closeRename: () => void;
   openDeleteFolderDialog: (folderId: string) => void;
-  // optimistic state
   setOptimisticFolders: React.Dispatch<React.SetStateAction<FolderTreeNode[]>>;
   setOptimisticCards: React.Dispatch<React.SetStateAction<Card[]>>;
   setOptimisticCardSets: React.Dispatch<React.SetStateAction<CardSet[]>>;
   optimisticFolders: FolderTreeNode[];
   optimisticCards: Card[];
   optimisticCardSets: CardSet[];
-  // expand / scroll
   setExpandedFolders: React.Dispatch<React.SetStateAction<Set<string>>>;
   setPendingScrollId: React.Dispatch<React.SetStateAction<string | null>>;
-  // callbacks
   onFolderSelect: (folderId: string | null) => void;
   onItemSelect: (item: SelectedExplorerItem) => void;
   setNewlyCreatedCardId: React.Dispatch<React.SetStateAction<string | null>>;
@@ -117,9 +113,11 @@ export function useFolderActions({
   const handleCreateFolderAction = useCallback(
     async (parentId: string | null) => {
       if (!onCreateFolder) return;
+
       const name = getUniqueFolderName(parentId, DEFAULT_NEW_FOLDER_NAME);
       const tempId = createOptimisticId("folder");
       optimisticFolderNameRef.current.set(tempId, name);
+
       const siblingCount = treeFolders.filter((folder) => {
         if (isSoftDeleted(folder)) return false;
         return isSameFolder(getParentFolderId(folder), parentId);
@@ -170,10 +168,13 @@ export function useFolderActions({
           editingIdRef.current = createdFolderId;
           editingNameRef.current = carriedName;
         }
+
         onFolderSelect(createdFolderId);
+
         if (!isStillEditingTemp && finalName !== name) {
           void onUpdateFolder?.(createdFolderId, { folderName: finalName });
         }
+
         setPendingScrollId(createdFolderId);
       } catch (err: unknown) {
         setOptimisticFolders((prev) =>
@@ -185,7 +186,6 @@ export function useFolderActions({
         toastError?.(getErrorMessage(err, "フォルダの作成に失敗しました"));
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       onCreateFolder,
       onUpdateFolder,
@@ -198,12 +198,22 @@ export function useFolderActions({
       setPendingScrollId,
       onFolderSelect,
       closeRename,
+      editingIdRef,
+      editingNameRef,
+      renameCancelledRef,
+      toastError,
     ],
   );
 
   const handleCreateCardSetAction = useCallback(
     async (targetFolderId: string | null) => {
       if (!onCreateCardSet) return;
+
+      if (targetFolderId === null) {
+        toastError?.("カードセットはフォルダを選択してから作成してください");
+        return;
+      }
+
       const normalizedFolderId = normalizeFolderId(targetFolderId);
       const name = DEFAULT_NEW_CARD_SET_NAME;
       const tempId = createOptimisticId("folder");
@@ -212,7 +222,9 @@ export function useFolderActions({
       optimisticCardSetNameRef.current.set(tempId, name);
 
       const siblingCount = treeCardSets.filter(
-        (set) => !set.isDeleted && normalizeFolderId(set.folderId) === normalizedFolderId,
+        (set) =>
+          !set.isDeleted &&
+          normalizeFolderId(set.folderId) === normalizedFolderId,
       ).length;
 
       const optimisticCardSet: CardSet = {
@@ -229,9 +241,7 @@ export function useFolderActions({
       } as CardSet & { __optimistic: boolean };
 
       setOptimisticCardSets((prev) => [...prev, optimisticCardSet]);
-      if (targetFolderId) {
-        setExpandedFolders((prev) => new Set(prev).add(targetFolderId));
-      }
+      setExpandedFolders((prev) => new Set(prev).add(targetFolderId));
       onItemSelect({ type: "cardSet", id: tempId });
       setEditingId(tempId);
       setEditingName(name);
@@ -243,7 +253,9 @@ export function useFolderActions({
       try {
         const created = await onCreateCardSet(name, normalizedFolderId);
         const createdCardSetId = created?.id ?? null;
-        if (!createdCardSetId) throw new Error("カードセットIDの取得に失敗しました");
+        if (!createdCardSetId) {
+          throw new Error("カードセットIDの取得に失敗しました");
+        }
 
         const finalName =
           (editingIdRef.current === tempId
@@ -263,9 +275,11 @@ export function useFolderActions({
         }
 
         onItemSelect({ type: "cardSet", id: createdCardSetId });
+
         if (!isStillEditingTemp && finalName !== name) {
           void onUpdateCardSet?.(createdCardSetId, { name: finalName });
         }
+
         setPendingScrollId(createdCardSetId);
       } catch (err: unknown) {
         setOptimisticCardSets((prev) => prev.filter((cs) => cs.id !== tempId));
@@ -275,7 +289,6 @@ export function useFolderActions({
         toastError?.(getErrorMessage(err, "カードセットの作成に失敗しました"));
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       onCreateCardSet,
       onUpdateCardSet,
@@ -287,12 +300,17 @@ export function useFolderActions({
       setEditingId,
       setEditingName,
       closeRename,
+      editingIdRef,
+      editingNameRef,
+      renameCancelledRef,
+      toastError,
     ],
   );
 
   const handleCreateCardAction = useCallback(
     async (targetFolderId: string | null) => {
       if (!onCreateCard) return;
+
       const normalizedFolderId = normalizeFolderId(targetFolderId);
       const title = "";
       const tempId = createOptimisticId("card");
@@ -319,13 +337,17 @@ export function useFolderActions({
 
       try {
         if (!selectedCardSetId) return;
+
         const createdCardRaw = await onCreateCard({
           folderId: normalizedFolderId,
           cardSetId: selectedCardSetId,
           title,
           blocks: [],
         });
-        const createdCard = isCreateCardResult(createdCardRaw) ? createdCardRaw : null;
+
+        const createdCard = isCreateCardResult(createdCardRaw)
+          ? createdCardRaw
+          : null;
         const createdCardId = createdCard?.id ?? createdCard?.cardId ?? null;
 
         if (createdCardId) {
@@ -344,7 +366,10 @@ export function useFolderActions({
         if (!createdCardId) throw new Error("カードIDの取得に失敗しました");
 
         if (editingIdRef.current === tempId) closeRename();
-        if (finalName !== title) void onUpdateCard?.(createdCardId, { title: finalName });
+        if (finalName !== title) {
+          void onUpdateCard?.(createdCardId, { title: finalName });
+        }
+
         setPendingScrollId(createdCardId);
       } catch (err: unknown) {
         setOptimisticCards((prev) => prev.filter((c) => c.id !== tempId));
@@ -354,7 +379,6 @@ export function useFolderActions({
         toastError?.(getErrorMessage(err, "カードの作成に失敗しました"));
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       onCreateCard,
       onUpdateCard,
@@ -366,12 +390,16 @@ export function useFolderActions({
       onItemSelect,
       setNewlyCreatedCardId,
       closeRename,
+      editingIdRef,
+      editingNameRef,
+      toastError,
     ],
   );
 
   const handleRenameConfirm = useCallback(async () => {
     if (inFlightRef.current) return;
     inFlightRef.current = true;
+
     try {
       if (renameCancelledRef.current) {
         renameCancelledRef.current = false;
@@ -381,7 +409,11 @@ export function useFolderActions({
 
       const id = editingIdRef.current;
       const nextName = editingNameRef.current.trim();
-      if (!id || !nextName) { closeRename(); return; }
+
+      if (!id || !nextName) {
+        closeRename();
+        return;
+      }
 
       if (id.startsWith("tmp-")) {
         const isOptimisticFolder = optimisticFolders.some(
@@ -399,15 +431,19 @@ export function useFolderActions({
           closeRename();
           return;
         }
+
         const isOptimisticCard = optimisticCards.some((c) => c.id === id);
         if (isOptimisticCard) {
           optimisticCardNameRef.current.set(id, nextName);
           setOptimisticCards((prev) =>
-            prev.map((c) => (c.id === id ? ({ ...c, title: nextName } as Card) : c)),
+            prev.map((c) =>
+              c.id === id ? ({ ...c, title: nextName } as Card) : c,
+            ),
           );
           closeRename();
           return;
         }
+
         const isOptimisticCardSet = optimisticCardSets.some((cs) => cs.id === id);
         if (isOptimisticCardSet) {
           optimisticCardSetNameRef.current.set(id, nextName);
@@ -417,6 +453,7 @@ export function useFolderActions({
           closeRename();
           return;
         }
+
         closeRename();
         return;
       }
@@ -432,6 +469,7 @@ export function useFolderActions({
       } else {
         await onUpdateCard?.(id, { title: nextName });
       }
+
       closeRename();
     } catch (err: unknown) {
       toastError?.(getErrorMessage(err, "名前の変更に失敗しました"));
@@ -448,10 +486,10 @@ export function useFolderActions({
     onUpdateCardSet,
     onUpdateCard,
     closeRename,
-      setOptimisticFolders,
-      setOptimisticCards,
-      setOptimisticCardSets,
-      editingIdRef,
+    setOptimisticFolders,
+    setOptimisticCards,
+    setOptimisticCardSets,
+    editingIdRef,
     editingNameRef,
     renameCancelledRef,
     toastError,
@@ -463,6 +501,7 @@ export function useFolderActions({
         type === "folder"
           ? optimisticFolders.some((f) => getFolderId(f) === id)
           : optimisticCards.some((c) => c.id === id);
+
       if (isOptimistic) return;
 
       if (type === "folder") {
@@ -473,7 +512,9 @@ export function useFolderActions({
 
       const isCardSet = treeCardSets.some((cs) => cs.id === id);
       if (isCardSet) {
-        if (!confirm("このカードセットを削除しますか? 配下のカードも削除されます。")) return;
+        if (!confirm("このカードセットを削除しますか? 配下のカードも削除されます。")) {
+          return;
+        }
         await onDeleteCardSet?.(id);
         return;
       }
@@ -481,7 +522,15 @@ export function useFolderActions({
       if (!confirm("このカードを削除しますか?")) return;
       await onDeleteCard?.(id);
     },
-    [optimisticFolders, optimisticCards, onDeleteFolder, onDeleteCardSet, onDeleteCard, openDeleteFolderDialog, treeCardSets],
+    [
+      optimisticFolders,
+      optimisticCards,
+      onDeleteFolder,
+      onDeleteCardSet,
+      onDeleteCard,
+      openDeleteFolderDialog,
+      treeCardSets,
+    ],
   );
 
   const handleConfirmDeleteFolder = useCallback(
@@ -489,10 +538,15 @@ export function useFolderActions({
       if (!folder || typeof folder !== "object") {
         throw new Error("フォルダ情報の取得に失敗しました");
       }
+
       const typedFolder = folder as { id?: string; folderId?: string };
       const folderId = String(typedFolder.id ?? typedFolder.folderId ?? "");
+
       if (!folderId) throw new Error("フォルダIDの取得に失敗しました");
-      if (!onDeleteFolder) throw new Error("フォルダ削除ハンドラが未設定です");
+      if (!onDeleteFolder) {
+        throw new Error("フォルダ削除ハンドラが未設定です");
+      }
+
       await onDeleteFolder(folderId);
     },
     [onDeleteFolder],
