@@ -15,6 +15,10 @@ import {
   Trash2,
 } from "@/ui/icons";
 import { useRef, type ReactNode } from "react";
+import {
+  FROSTED_POPOVER_CLASS,
+  VIEW_WIDTH_FROSTED_POPOVER_STYLE,
+} from "@/components/explorer/frostedPopoverClass";
 
 interface ContextMenuProps {
   type: "folder" | "card";
@@ -53,7 +57,8 @@ export function ContextMenu({
 
       <DropdownMenuContent
         align="start"
-        className="w-48"
+        style={VIEW_WIDTH_FROSTED_POPOVER_STYLE}
+        className={`${FROSTED_POPOVER_CLASS} w-48`}
         onCloseAutoFocus={(e) => {
           if (!suppressCloseAutoFocusRef.current) return;
           suppressCloseAutoFocusRef.current = false;

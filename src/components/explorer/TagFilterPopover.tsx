@@ -91,13 +91,13 @@ export function TagFilterPopover({
       <PopoverContent
         align="center"
         className={cn(
-          "w-64 p-0 rounded-xl surface-dialog-convex",
+          "w-64 rounded-xl border border-slate-200/80 bg-white/82 p-0 text-slate-800 backdrop-blur-md",
           "overflow-hidden",
         )}
       >
         <div className="flex flex-col max-h-[400px]">
           {/* Header & Search */}
-          <div className="p-3 border-b border-[var(--surface-border)]">
+          <div className="border-b border-[var(--surface-border)] bg-white/28 p-3">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-semibold text-slate-800">
                 タグで絞り込み
@@ -121,9 +121,9 @@ export function TagFilterPopover({
                 type="text"
                 className={cn(
                   "w-full pl-8 pr-2 py-1.5 text-xs rounded",
-                  "border border-[var(--surface-border)] bg-white text-[#202123]",
+                  "border border-[var(--surface-border)] bg-white/58 text-[#202123]",
                   "surface-concave",
-                  "focus:bg-white focus:outline-none focus:ring-0 focus:border-[#cfcfcf]",
+                  "focus:bg-white/72 focus:outline-none focus:ring-0 focus:border-[#cfcfcf]",
                   "placeholder:text-[var(--surface-placeholder-text)]",
                   "transition-colors",
                 )}
@@ -135,9 +135,9 @@ export function TagFilterPopover({
           </div>
 
           {/* AND,ORトグル */}
-          <div className="px-3 py-2 border-b border-[var(--surface-border)] flex items-center gap-2 text-[11px] bg-white/70">
+          <div className="flex items-center gap-2 border-b border-[var(--surface-border)] bg-white/34 px-3 py-2 text-[11px]">
             <span className="text-slate-500">条件:</span>
-            <div className="flex bg-white rounded border border-[var(--surface-border)] p-0.5 shadow-sm">
+            <div className="flex rounded border border-[var(--surface-border)] bg-white/48 p-0.5 shadow-sm">
               <SurfaceButton
                 onClick={() => setTagMatchMode("any")}
                 surface={tagMatchMode === "any" ? "convexActive" : "concave"}
@@ -155,10 +155,10 @@ export function TagFilterPopover({
             </div>
           </div>
 
-          <div className="px-3 py-2 border-b border-[var(--surface-border)] bg-white/70 space-y-2">
+          <div className="space-y-2 border-b border-[var(--surface-border)] bg-white/34 px-3 py-2">
             <div className="flex items-center justify-between gap-2 text-[11px]">
               <span className="text-slate-600">表示:</span>
-              <div className="flex bg-white rounded border border-[var(--surface-border)] p-0.5 shadow-sm">
+              <div className="flex rounded border border-[var(--surface-border)] bg-white/48 p-0.5 shadow-sm">
                 {[
                   { label: "カード", value: "card" as const },
                   { label: "PDF", value: "pdf" as const },
@@ -201,7 +201,7 @@ export function TagFilterPopover({
                 className="flex items-center justify-between gap-2 text-[11px]"
               >
                 <span className="text-slate-600">{item.label}:</span>
-                <div className="flex bg-white rounded border border-[var(--surface-border)] p-0.5 shadow-sm">
+                <div className="flex rounded border border-[var(--surface-border)] bg-white/48 p-0.5 shadow-sm">
                   <SurfaceButton
                     onClick={() => item.onChange("any")}
                     surface={item.value === "any" ? "convexActive" : "concave"}
@@ -229,7 +229,7 @@ export function TagFilterPopover({
           </div>
 
           {/* タグリスト */}
-          <div className="flex-1 overflow-y-auto min-h-[150px] p-1 bg-white/60">
+          <div className="min-h-[150px] flex-1 overflow-y-auto bg-white/24 p-1">
             {filteredTags.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 text-slate-500 text-xs">
                 <Tag className="w-8 h-8 opacity-20 mb-2" />

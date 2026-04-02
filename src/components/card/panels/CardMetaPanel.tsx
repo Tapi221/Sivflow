@@ -57,6 +57,7 @@ type MetaReviewLog = {
 
 type CardMetaPanelProps = {
   card: Card | null;
+  isEditingCard?: boolean;
   reviewLogs?: ReviewLog[];
   onAddReviewLog: (input: {
     reviewedAt: string;
@@ -412,6 +413,7 @@ const areCardMetaPanelPropsEqual = (
   next: CardMetaPanelProps,
 ): boolean =>
   areCardMetaCardsEqual(prev.card, next.card) &&
+  prev.isEditingCard === next.isEditingCard &&
   prev.reviewLogs === next.reviewLogs &&
   prev.onAddReviewLog === next.onAddReviewLog &&
   prev.onUpdateLatestReviewLog === next.onUpdateLatestReviewLog &&
@@ -428,6 +430,7 @@ const areCardMetaPanelPropsEqual = (
 
 function CardMetaPanelInner({
   card,
+  isEditingCard = false,
   reviewLogs = [],
   onAddReviewLog,
   onUpdateLatestReviewLog,
@@ -894,11 +897,10 @@ function CardMetaPanelInner({
   const commitTitle = (rawValue?: string, options?: { flush?: boolean }) => {
     const source = rawValue ?? titleInput;
     const next = source.trim();
-    const current = (card?.title ?? "").trim();
     if (next !== source) {
       handleTitleInputChange(next);
     }
-    if (next !== current) {
+    if (!isEditingCard && (card?.title ?? "").trim() !== next) {
       void Promise.resolve(onUpdateTitle(next)).catch(() => {});
     }
     if (!options?.flush || !onFlushAutosave) return;

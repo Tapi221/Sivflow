@@ -667,11 +667,15 @@ export function CardEditorPane({
 
                   {!hideFooterActions && (
                     <div className="sticky bottom-4 flex w-full justify-end gap-2">
-                      {(isAutosaving || saveError) && (
-                        <div className="mr-auto flex items-center text-xs text-slate-500">
-                          {saveError ? "自動保存に失敗しました" : isDirty ? "保存中..." : "保存しています..."}
+                      {saveError ? (
+                        <div className="mr-auto flex items-center text-[11px] text-rose-600">
+                          自動保存に失敗しました
                         </div>
-                      )}
+                      ) : isAutosaving ? (
+                        <div className="mr-auto flex items-center text-[11px] text-slate-400">
+                          保存中...
+                        </div>
+                      ) : null}
                       <button
                         type="button"
                         className="h-9 rounded-full px-4 hover:bg-black/5 disabled:opacity-50"
@@ -725,6 +729,7 @@ export function CardEditorPane({
             {!hideMetaPanel && isMetaOpen && (
               <CardMetaPanel
                 card={panelCardEntity}
+                isEditingCard={isEditing}
                 reviewLogs={panelCardEntity?.reviewLogs ?? []}
                 onAddReviewLog={({ reviewedAt, rating, durationMinutes }) =>
                   metaPanel.onAddReviewLog({

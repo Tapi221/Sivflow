@@ -8,6 +8,10 @@ import { cn } from "@/lib/utils";
 import type { ExplorerTab } from "@/components/folder/explorer/model/types";
 import { TagFilterPopover } from "./TagFilterPopover";
 import {
+  FROSTED_POPOVER_CLASS,
+  VIEW_WIDTH_FROSTED_POPOVER_STYLE,
+} from "./frostedPopoverClass";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -127,7 +131,8 @@ export function ExplorerTabs({
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
-            className="w-44"
+            style={VIEW_WIDTH_FROSTED_POPOVER_STYLE}
+            className={cn(FROSTED_POPOVER_CLASS, "w-44")}
             onCloseAutoFocus={(event) => {
               if (!suppressCloseAutoFocusRef.current) return;
               suppressCloseAutoFocusRef.current = false;
