@@ -156,7 +156,8 @@ export function TagInput({
         </div>
       </div>
       <PopoverContent
-        className="w-[320px] p-0 rounded-xl surface-dialog-convex overflow-hidden"
+        surface="floating"
+        className="w-[320px] p-0 overflow-hidden"
         align="start"
       >
         <Command

@@ -70,6 +70,11 @@
       0 1px 0 rgba(255, 255, 255, 0.9) inset,
       0 -1px 0 rgba(86, 72, 74, 0.08) inset,
       0 1px 2px rgba(86, 72, 74, 0.16);
+    --floating-surface-bg: rgba(255, 255, 255, 0.82);
+    --floating-surface-border: rgba(226, 232, 240, 0.8);
+    --floating-surface-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    --floating-surface-radius: calc(12px * var(--ui-scale));
+    --floating-surface-backdrop-blur: 12px;
 
     --code-bg: #f7f8f9;
     --code-fg: #24292f;

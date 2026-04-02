@@ -3,6 +3,10 @@ import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { Check, ChevronRight, Circle } from "@/ui/icons";
 
 import { cn } from "@/lib/utils";
+import {
+  floatingSurfaceVariants,
+  type FloatingSurfaceVariantProps,
+} from "@/components/ui/floating-surface";
 
 const DropdownMenu = DropdownMenuPrimitive.Root;
 
@@ -39,8 +43,9 @@ DropdownMenuSubTrigger.displayName = DropdownMenuPrimitive.SubTrigger.displayNam
 
 const DropdownMenuSubContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.SubContent>,
-  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubContent>
->(({ className, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubContent> &
+    FloatingSurfaceVariantProps
+>(({ className, surface, ...props }, ref) => (
   <DropdownMenuPrimitive.SubContent
     ref={ref}
     className={cn(
@@ -52,6 +57,7 @@ const DropdownMenuSubContent = React.forwardRef<
       "data-[side=left]:slide-in-from-right-2",
       "data-[side=right]:slide-in-from-left-2",
       "data-[side=top]:slide-in-from-bottom-2",
+      floatingSurfaceVariants({ surface }),
       className,
     )}
     {...props}
@@ -61,8 +67,9 @@ DropdownMenuSubContent.displayName = DropdownMenuPrimitive.SubContent.displayNam
 
 const DropdownMenuContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
->(({ className, sideOffset = 4, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content> &
+    FloatingSurfaceVariantProps
+>(({ className, sideOffset = 4, surface, ...props }, ref) => (
   <DropdownMenuPrimitive.Portal>
     <DropdownMenuPrimitive.Content
       ref={ref}
@@ -76,6 +83,7 @@ const DropdownMenuContent = React.forwardRef<
         "data-[side=left]:slide-in-from-right-2",
         "data-[side=right]:slide-in-from-left-2",
         "data-[side=top]:slide-in-from-bottom-2",
+        floatingSurfaceVariants({ surface }),
         className,
       )}
       {...props}

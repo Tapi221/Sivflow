@@ -90,8 +90,9 @@ export function TagFilterPopover({
       {/* 透け対策：bg-white/95 + blur + shadow + ring */}
       <PopoverContent
         align="center"
+        surface="floating"
         className={cn(
-          "w-64 rounded-xl border border-slate-200/80 bg-white/82 p-0 text-slate-800 backdrop-blur-md",
+          "w-64 p-0",
           "overflow-hidden",
         )}
       >

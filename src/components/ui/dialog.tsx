@@ -5,6 +5,10 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "@/ui/icons";
 
 import { cn } from "@/lib/utils";
+import {
+  floatingSurfaceVariants,
+  type FloatingSurfaceVariantProps,
+} from "@/components/ui/floating-surface";
 
 const Dialog = DialogPrimitive.Root;
 
@@ -33,8 +37,8 @@ const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
     nonModal?: boolean;
-  }
->(({ className, children, nonModal, ...props }, ref) => (
+  } & FloatingSurfaceVariantProps
+>(({ className, children, nonModal, surface, ...props }, ref) => (
   <DialogPortal>
     {!nonModal && <DialogOverlay />}
     <div className="fixed inset-0 z-[100] flex items-center justify-center pointer-events-none">
@@ -42,6 +46,7 @@ const DialogContent = React.forwardRef<
         ref={ref}
         className={cn(
           "pointer-events-auto grid w-full max-w-lg gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 sm:rounded-lg",
+          floatingSurfaceVariants({ surface }),
           className,
         )}
         {...props}
