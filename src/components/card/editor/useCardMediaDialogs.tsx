@@ -11,10 +11,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { CardBlock, ReferenceBlockData, UploadedImage } from "@/types/domain/card";
 type Side = "question" | "answer";
-type DraftShape = {
-  questionImages: UploadedImage[];
-  answerImages: UploadedImage[];
-};
+type DraftShape = object;
 
 type UseCardMediaDialogsParams = {
   draft: DraftShape | null;
@@ -64,24 +61,21 @@ export function useCardMediaDialogs({
   }, [upsertSingleBlock]);
 
   const getDialogImages = useCallback((side: Side): UploadedImage[] => {
-    const currentDraft = draftRef.current;
-    return (
-      side === "question"
-        ? currentDraft?.questionImages
-        : currentDraft?.answerImages
-    ) ?? [];
+    const imageBlock = getSideBlocksRef.current(side).find(
+      (block) => block.type === "image",
+    );
+    return (imageBlock?.images ?? []) as UploadedImage[];
   }, []);
 
   const setDialogImages = useCallback(
     (side: Side, images: UploadedImage[]) => {
-      setDraft((prev) => {
-        if (!prev) return prev;
-        return side === "question"
-          ? { ...prev, questionImages: images }
-          : { ...prev, answerImages: images };
-      });
+      if (!images || images.length === 0) {
+        removeBlockByTypeIfExistsRef.current(side, "image");
+        return;
+      }
+      upsertSingleBlockRef.current(side, "image", { images });
     },
-    [setDraft],
+    [],
   );
 
   const getDialogAudios = useCallback((side: Side) => {

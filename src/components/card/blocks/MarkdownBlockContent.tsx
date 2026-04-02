@@ -30,7 +30,7 @@ const ALLOW_MARKDOWN_IMAGES = false;
  * - 例: 'cdn.yourapp.com'
  */
 const ALLOWED_IMAGE_HOSTS = new Set<string>([
-  // 'cdn.yourapp.com',
+  // "cdn.yourapp.com",
 ]);
 
 /**
@@ -228,10 +228,11 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
           ruled
           ruledRowPx={TYPE.h1.lineHeight}
           bleedX={bleedX}
+          padTopRows={1}
           padBottomRows={1}
         >
           <h1
-            className="m-0 font-serif font-medium"
+            className="m-0 font-serif font-medium text-left"
             style={{
               fontSize: TYPE.h1.fontSize,
               lineHeight: `var(--card-line-height, ${TYPE.h1.lineHeight}px)`,
@@ -246,10 +247,11 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
           ruled
           ruledRowPx={TYPE.h2.lineHeight}
           bleedX={bleedX}
+          padTopRows={1}
           padBottomRows={1}
         >
           <h2
-            className="m-0 font-serif font-medium"
+            className="m-0 font-serif font-medium text-left"
             style={{
               fontSize: TYPE.h2.fontSize,
               lineHeight: `var(--card-line-height, ${TYPE.h2.lineHeight}px)`,
@@ -264,10 +266,11 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
           ruled
           ruledRowPx={TYPE.h3.lineHeight}
           bleedX={bleedX}
+          padTopRows={1}
           padBottomRows={1}
         >
           <h3
-            className="m-0 font-serif font-medium"
+            className="m-0 font-serif font-medium text-left"
             style={{
               fontSize: TYPE.h3.fontSize,
               lineHeight: `var(--card-line-height, ${TYPE.h3.lineHeight}px)`,
@@ -278,9 +281,15 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
         </BlockSurface>
       ),
       h4: ({ children }) => (
-        <BlockSurface ruled ruledRowPx={TYPE.h4.lineHeight} bleedX={bleedX}>
+        <BlockSurface
+          ruled
+          ruledRowPx={TYPE.h4.lineHeight}
+          bleedX={bleedX}
+          padTopRows={1}
+          padBottomRows={1}
+        >
           <h4
-            className="m-0 font-serif font-medium"
+            className="m-0 font-serif font-medium text-left"
             style={{
               fontSize: TYPE.h4.fontSize,
               lineHeight: `var(--card-line-height, ${TYPE.h4.lineHeight}px)`,
@@ -297,7 +306,6 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
       del: ({ children }) => <del className="line-through">{children}</del>,
       hr: () => <HrRenderer />,
 
-      // ✅ node を受け取らない（unused-vars 回避）
       a: ({ href, children, ...props }) => {
         const safeHref = sanitizeLinkHref(
           typeof href === "string" ? href : undefined,
@@ -318,14 +326,13 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
                 ? "noopener noreferrer nofollow ugc"
                 : undefined
             }
-            className="underline text-primary-600 hover:text-primary-800 break-words"
+            className="break-words underline text-primary-600 hover:text-primary-800"
           >
             {children}
           </a>
         );
       },
 
-      // ✅ node を受け取らない（unused-vars 回避）
       img: ({ src = "", alt = "", title }) => {
         if (!ALLOW_MARKDOWN_IMAGES) {
           return (
@@ -336,12 +343,13 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
         }
 
         const safe = sanitizeImageSrc(src);
-        if (!safe)
+        if (!safe) {
           return (
             <span className="text-slate-500">
               [許可されていない画像URLです]
             </span>
           );
+        }
 
         return (
           <img
@@ -382,7 +390,7 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
       ),
       ol: ({ children }) => <ListRenderer ordered>{children}</ListRenderer>,
       li: ({ children }) => (
-        <li className="m-0" style={bodyStyle}>
+        <li className="m-0 text-left" style={bodyStyle}>
           {children}
         </li>
       ),
@@ -396,27 +404,27 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
         <tr className="border-b border-slate-200">{children}</tr>
       ),
       th: ({ children }) => (
-        <th className="border border-slate-200 px-2 py-1 text-left font-semibold whitespace-nowrap">
+        <th className="whitespace-nowrap border border-slate-200 px-2 py-1 text-left font-semibold">
           {children}
         </th>
       ),
       td: ({ children }) => (
-        <td className="border border-slate-200 px-2 py-1 align-top">
+        <td className="align-top border border-slate-200 px-2 py-1 text-left">
           {children}
         </td>
       ),
 
-      // ✅ node を受け取らない（unused-vars 回避）
       code: ({ className: codeClassName, children }) => {
         const classStr = typeof codeClassName === "string" ? codeClassName : "";
         const isBlockCode = classStr.includes("language-");
 
-        if (isBlockCode)
+        if (isBlockCode) {
           return <code className={codeClassName}>{children}</code>;
+        }
 
         return (
           <code
-            className="rounded px-1 py-0 font-mono align-baseline bg-red-50 text-red-600 ring-1 ring-inset ring-red-100"
+            className="inline rounded bg-red-50 px-1 py-0 align-baseline font-mono text-red-600 ring-1 ring-inset ring-red-100"
             style={{
               fontSize: `${TYPE.code.fontSize}px`,
               lineHeight: `var(--card-line-height, ${TYPE.body.lineHeight}px)`,
@@ -475,6 +483,8 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
       className={cn(
         `markdown-block-view markdownBlockPreview markdownBlockCardView max-w-none font-serif text-[16px] font-medium leading-[24px] ${BLOCK_BODY_TEXT_COLOR_CLASS} [font-variant-numeric:lining-nums_tabular-nums] [font-feature-settings:"lnum"_1]`,
         "text-left",
+        "[&_*]:text-left",
+        "[&>*+*]:mt-[var(--card-row-px)]",
         className,
       )}
     >
@@ -543,9 +553,13 @@ function ListRenderer({
   const Tag = ordered ? "ol" : "ul";
   const listClass = cn(
     ordered ? "list-decimal list-outside" : "list-disc list-outside",
-    "m-0 pl-6 space-y-0",
-    ordered ? "[&>li>ol]:pl-5 [&>li>ul]:pl-5" : "[&>li>ul]:pl-5 [&>li>ol]:pl-5",
-    ordered ? "[&>li>ol]:mt-0 [&>li>ul]:mt-0" : "[&>li>ul]:mt-0 [&>li>ol]:mt-0",
+    "m-0 pl-6 text-left space-y-0",
+    ordered
+      ? "[&>li>ol]:pl-5 [&>li>ul]:pl-5"
+      : "[&>li>ul]:pl-5 [&>li>ol]:pl-5",
+    ordered
+      ? "[&>li>ol]:mt-0 [&>li>ul]:mt-0"
+      : "[&>li>ul]:mt-0 [&>li>ol]:mt-0",
   );
 
   return <Tag className={listClass}>{children}</Tag>;
@@ -554,11 +568,9 @@ function ListRenderer({
 function TableRenderer({ children }: { children: React.ReactNode }) {
   return (
     <div className="m-0 overflow-x-auto">
-      <table className="w-full border-collapse text-sm">{children}</table>
+      <table className="w-full border-collapse text-left text-sm">
+        {children}
+      </table>
     </div>
   );
 }
-
-
-
-

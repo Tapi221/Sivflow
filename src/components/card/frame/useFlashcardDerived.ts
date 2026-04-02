@@ -94,18 +94,12 @@ export function useFlashcardDerived(
   const activeSourceBlocks = React.useMemo(
     () =>
       activeSide === "question"
-        ? ((cardData?.front?.blocks ??
-            cardData?.frontBlocks ??
-            []) as CardBlock[])
-        : ((cardData?.back?.blocks ??
-            cardData?.backBlocks ??
-            []) as CardBlock[]),
+        ? ((cardData?.front?.blocks ?? []) as CardBlock[])
+        : ((cardData?.back?.blocks ?? []) as CardBlock[]),
     [
       activeSide,
       cardData?.back?.blocks,
-      cardData?.backBlocks,
       cardData?.front?.blocks,
-      cardData?.frontBlocks,
     ],
   );
 
@@ -137,10 +131,10 @@ export function useFlashcardDerived(
         cardId,
         activeSide,
         activeSide === "question"
-          ? cardData?.inkQuestion ?? null
-          : cardData?.inkAnswer ?? null,
+          ? cardData?.front?.ink ?? null
+          : cardData?.back?.ink ?? null,
       ),
-    [activeSide, cardData?.inkAnswer, cardData?.inkQuestion, cardId],
+    [activeSide, cardData?.back?.ink, cardData?.front?.ink, cardId],
   );
 
   const activeBlocks = React.useMemo(

@@ -14,7 +14,7 @@ import {
   YAxis,
   Cell,
 } from "recharts";
-import { extractTextFromBlocks } from "@/utils";
+import { getCardText } from "@/domain/card/content";
 import { calculateResistanceScore } from "@/utils/reviewMetrics";
 import type { Card } from "@/types";
 import { ChevronLeft, ChevronRight } from "@/ui/icons";
@@ -68,12 +68,8 @@ const normalizeInlineText = (value: string): string =>
   value.replace(/\s+/g, " ").trim();
 
 const computeCardPreviewMeta = (card: Card): CardPreviewMeta => {
-  const questionText = normalizeInlineText(
-    extractTextFromBlocks(card.front?.blocks ?? []) || card.questionText || "",
-  );
-  const answerText = normalizeInlineText(
-    extractTextFromBlocks(card.back?.blocks ?? []) || card.answerText || "",
-  );
+  const questionText = normalizeInlineText(getCardText(card, "question"));
+  const answerText = normalizeInlineText(getCardText(card, "answer"));
 
   const titleCandidate = card.title?.trim();
   const title = titleCandidate || (questionText || answerText).slice(0, 28) || "無題のカード";
@@ -1528,7 +1524,6 @@ function ScrollArrow({
     </button>
   );
 }
-
 
 
 

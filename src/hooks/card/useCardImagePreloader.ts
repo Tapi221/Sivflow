@@ -16,8 +16,9 @@
  */
 
 import { useEffect, useRef, useState } from "react";
-import type { Card, CardBlock } from "@/types/domain/card";
+import type { Card } from "@/types/domain/card";
 import type { UploadedImage } from "@/types/domain/card";
+import { getCardImages } from "@/domain/card/content";
 import { getOrCreateImageBlobUrl } from "@/services/imageBlobUrlSessionCache";
 import { getLocalDb } from "@/services/localDB";
 import { storage } from "@/services/firebase";
@@ -59,15 +60,8 @@ const MAX_EAGER_CONCURRENT = 5;
 
 function extractImages(card: Card): UploadedImage[] {
   const imgs: UploadedImage[] = [];
-  imgs.push(...(card.questionImages ?? []));
-  imgs.push(...(card.answerImages ?? []));
-  const pushBlock = (blocks?: CardBlock[]) => {
-    for (const b of blocks ?? []) {
-      if (b.type === "image") imgs.push(...(b.images ?? []));
-    }
-  };
-  pushBlock(card.questionBlocks);
-  pushBlock(card.answerBlocks);
+  imgs.push(...getCardImages(card, "question"));
+  imgs.push(...getCardImages(card, "answer"));
   return imgs;
 }
 

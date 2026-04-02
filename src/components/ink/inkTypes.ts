@@ -32,7 +32,7 @@ export type InkDocument = {
   deletedStrokeIds?: string[];
 };
 
-export type CardInkFields = Pick<Card, "inkQuestion" | "inkAnswer">;
+export type CardInkFields = Pick<Card, "front" | "back">;
 
 const isFiniteNumber = (value: unknown): value is number =>
   typeof value === "number" && Number.isFinite(value);

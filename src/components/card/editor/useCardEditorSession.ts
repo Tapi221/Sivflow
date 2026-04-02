@@ -22,37 +22,15 @@ import {
     normalizeExtraRows,
     normalizeLayoutRows,
 } from "@/domain/card/extraRows";
+import { getCardBlocks } from "@/domain/card/content";
 import { resolveCardTagNames } from "@/hooks/settings/useTags";
 import { sanitizeUploadedImages } from "@/utils/uploaded-image/sanitizer";
 
 import { useCardEntity } from "@/hooks/card/useCardEntity";
 
-import type { Card, CardBlock, UploadedImage } from "@/types/domain/card";
+import type { Card, CardBlock } from "@/types/domain/card";
 
 const NEW_SENTINEL = "__new__" as const;
-
-const getBlocksForSide = (
-  card: Card,
-  side: "question" | "answer",
-): CardBlock[] => {
-  const legacyBlocks =
-    side === "question" ? card.questionBlocks : card.answerBlocks;
-  if (Array.isArray(legacyBlocks)) return legacyBlocks;
-
-  const aliasedBlocks =
-    side === "question"
-      ? ((card as unknown as { frontBlocks?: CardBlock[] }).frontBlocks ?? null)
-      : ((card as unknown as { backBlocks?: CardBlock[] }).backBlocks ?? null);
-  if (Array.isArray(aliasedBlocks)) return aliasedBlocks;
-
-  const face =
-    side === "question"
-      ? ((card as unknown as { front?: { blocks?: CardBlock[] | null } | null }).front ?? null)
-      : ((card as unknown as { back?: { blocks?: CardBlock[] | null } | null }).back ?? null);
-  if (Array.isArray(face?.blocks)) return face.blocks;
-
-  return [];
-};
 
 type UseCardEditorSessionParams = {
   selectedCardId: string | null;
@@ -178,10 +156,8 @@ export function useCardEditorSession({
           tagById as unknown,
         ),
         isDraft: card.isDraft ?? false,
-        questionImages: ((card as unknown).questionImages ?? []) as UploadedImage[],
-        answerImages: ((card as unknown).answerImages ?? []) as UploadedImage[],
-        frontBlocks: sortBlocksByOrderIndex(getBlocksForSide(card, "question")),
-        backBlocks: sortBlocksByOrderIndex(getBlocksForSide(card, "answer")),
+        frontBlocks: sortBlocksByOrderIndex(getCardBlocks(card, "question")),
+        backBlocks: sortBlocksByOrderIndex(getCardBlocks(card, "answer")),
         layoutRows: normalizeLayoutRows(
           (card as unknown).layoutRows ?? (card as unknown).layout_rows ?? migratedRows,
         ),
@@ -311,14 +287,12 @@ export function useCardEditorSession({
           title: currentDraft.title,
           tagIds,
           isDraft: currentDraft.isDraft,
-          questionImages: sanitizeUploadedImages(
-            currentDraft.questionImages,
-          ) as UploadedImage[],
-          answerImages: sanitizeUploadedImages(
-            currentDraft.answerImages,
-          ) as UploadedImage[],
-          questionBlocks: sanitizeBlocksForSave(currentDraft.frontBlocks),
-          answerBlocks: sanitizeBlocksForSave(currentDraft.backBlocks),
+          front: {
+            blocks: sanitizeBlocksForSave(currentDraft.frontBlocks),
+          },
+          back: {
+            blocks: sanitizeBlocksForSave(currentDraft.backBlocks),
+          },
           layoutRows: normalizeLayoutRows(currentDraft.layoutRows),
         };
 
@@ -402,14 +376,14 @@ export function useCardEditorSession({
         title: currentDraft.title,
         tagIds,
         isDraft: currentDraft.isDraft,
-        questionImages: sanitizeUploadedImages(
-          currentDraft.questionImages,
-        ) as UploadedImage[],
-        answerImages: sanitizeUploadedImages(
-          currentDraft.answerImages,
-        ) as UploadedImage[],
-        questionBlocks: sanitizeBlocksForSave(currentDraft.frontBlocks),
-        answerBlocks: sanitizeBlocksForSave(currentDraft.backBlocks),
+        front: {
+          ...(selectedCard?.front ?? { blocks: [] }),
+          blocks: sanitizeBlocksForSave(currentDraft.frontBlocks),
+        },
+        back: {
+          ...(selectedCard?.back ?? { blocks: [] }),
+          blocks: sanitizeBlocksForSave(currentDraft.backBlocks),
+        },
         layoutRows: normalizeLayoutRows(currentDraft.layoutRows),
       };
 
@@ -585,14 +559,8 @@ export function useCardEditorSession({
       isBookmarked: false,
       isCompleted: false,
       isSilent: false,
-      questionText: "",
-      questionImages: [],
-      questionAudios: [],
-      questionMarked: "",
-      answerText: "",
-      answerImages: [],
-      answerAudios: [],
-      answerMarked: "",
+      front: { blocks: [] },
+      back: { blocks: [] },
       memoryStability: 0,
       nextReviewDate: now,
       createdAt: now,

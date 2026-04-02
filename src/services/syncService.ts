@@ -624,48 +624,34 @@ export class SyncService {
         ? remote.updatedAt
         : remote.updatedAt?.toDate?.() || new Date(0);
 
-    // 基本的には「最新の更新日時」を持つ方を優先
-    if (remoteUpdated > localUpdated) {
-      // 画像フィールドの特別なマージ
-      const mergedImages: unknown = {};
-      let imageMergedDescription = "";
+      // 基本的には「最新の更新日時」を持つ方を優先
+      if (remoteUpdated > localUpdated) {
+        let imageMergedDescription = "";
+        const merged = { ...local, ...remote };
 
-      ["questionImages", "answerImages"].forEach((field) => {
-        if (local[field] && remote[field]) {
-          const combined = [...local[field], ...remote[field]];
-          const unique = Array.from(
-            new Map(combined.map((img) => [img.id, img])).values(),
-          );
-          if (unique.length > remote[field].length) {
-            imageMergedDescription =
-              "別の端末で画像が追加されました。両方の画像を保持します。";
-          }
-          mergedImages[field] = unique;
-        }
-      });
+        // テキストフィールドなどで競合があるかチェック
+        const isCard = entityType === "card";
+        const hasTextConflict = isCard
+          ? JSON.stringify(local.front?.blocks ?? []) !==
+              JSON.stringify(remote.front?.blocks ?? []) ||
+            JSON.stringify(local.back?.blocks ?? []) !==
+              JSON.stringify(remote.back?.blocks ?? [])
+          : local.name !== remote.name;
 
-      const merged = { ...local, ...remote, ...mergedImages };
-
-      // テキストフィールドなどで競合があるかチェック
-      const isCard = entityType === "card";
-      const hasTextConflict = isCard
-        ? local.question !== remote.question || local.answer !== remote.answer
-        : local.name !== remote.name;
-
-      if (hasTextConflict) {
+        if (hasTextConflict) {
         merged.hasSyncConflict = true;
         merged.conflictDescription = imageMergedDescription
           ? `${imageMergedDescription} また、${isCard ? "問題文や回答" : "フォルダ名"}の内容に競合があります。最新の編集内容を優先しましたが、確認をお勧めします。`
           : "別の端末でも編集が行われていました。最新の内容を優先しましたが、競合がある可能性があります。";
 
-        // 手動解決用に詳細を conflicts テーブルに保存
-        const conflictDetails: unknown = isCard
-          ? {
-              question: { local: local.question, remote: remote.question },
-              answer: { local: local.answer, remote: remote.answer },
-            }
-          : {
-              name: { local: local.name, remote: remote.name },
+          // 手動解決用に詳細を conflicts テーブルに保存
+          const conflictDetails: unknown = isCard
+            ? {
+                front: { local: local.front, remote: remote.front },
+                back: { local: local.back, remote: remote.back },
+              }
+            : {
+                name: { local: local.name, remote: remote.name },
             };
 
         this.saveConflict(remote.id, entityType, merged, conflictDetails).catch(

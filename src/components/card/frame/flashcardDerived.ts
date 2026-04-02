@@ -11,6 +11,7 @@ import {
   normalizeExtraRows,
   normalizeLayoutRows,
 } from "@/domain/card/extraRows";
+import { extractCardTextFromBlocks } from "@/domain/card/content";
 import type { CardBlock, ReferenceBlockData } from "@/types/domain/card";
 
 export type FlashcardMediaLike =
@@ -86,46 +87,80 @@ export function resolveIsBookmarked(card: FlashcardCardLike): boolean {
 }
 
 export function resolveQuestionText(card: FlashcardCardLike): string {
+  if (Array.isArray(card.front?.blocks)) {
+    return extractCardTextFromBlocks(card.front.blocks);
+  }
   return card.question_text ?? card.questionText ?? "";
 }
 
 export function resolveAnswerText(card: FlashcardCardLike): string {
+  if (Array.isArray(card.back?.blocks)) {
+    return extractCardTextFromBlocks(card.back.blocks);
+  }
   return card.answer_text ?? card.answerText ?? "";
 }
 
 export function resolveQuestionImages(
   card: FlashcardCardLike,
 ): FlashcardMediaLike[] {
+  if (Array.isArray(card.front?.blocks)) {
+    return card.front.blocks
+      .filter((block) => block.type === "image")
+      .flatMap((block) => block.images ?? []);
+  }
   return card.question_images ?? card.questionImages ?? [];
 }
 
 export function resolveAnswerImages(
   card: FlashcardCardLike,
 ): FlashcardMediaLike[] {
+  if (Array.isArray(card.back?.blocks)) {
+    return card.back.blocks
+      .filter((block) => block.type === "image")
+      .flatMap((block) => block.images ?? []);
+  }
   return card.answer_images ?? card.answerImages ?? [];
 }
 
 export function resolveQuestionAudios(
   card: FlashcardCardLike,
 ): FlashcardMediaLike[] {
+  if (Array.isArray(card.front?.blocks)) {
+    return card.front.blocks
+      .filter((block) => block.type === "audio")
+      .flatMap((block) => block.audios ?? []);
+  }
   return card.question_audios ?? card.questionAudios ?? [];
 }
 
 export function resolveAnswerAudios(
   card: FlashcardCardLike,
 ): FlashcardMediaLike[] {
+  if (Array.isArray(card.back?.blocks)) {
+    return card.back.blocks
+      .filter((block) => block.type === "audio")
+      .flatMap((block) => block.audios ?? []);
+  }
   return card.answer_audios ?? card.answerAudios ?? [];
 }
 
 export function resolveQuestionCode(
   card: FlashcardCardLike,
 ): { code?: string; language?: string } | null {
+  if (Array.isArray(card.front?.blocks)) {
+    const codeBlock = card.front.blocks.find((block) => block.type === "code");
+    if (codeBlock?.type === "code") return codeBlock.code ?? null;
+  }
   return card.questionCode ?? card.question_code ?? null;
 }
 
 export function resolveAnswerCode(
   card: FlashcardCardLike,
 ): { code?: string; language?: string } | null {
+  if (Array.isArray(card.back?.blocks)) {
+    const codeBlock = card.back.blocks.find((block) => block.type === "code");
+    if (codeBlock?.type === "code") return codeBlock.code ?? null;
+  }
   return card.answerCode ?? card.answer_code ?? null;
 }
 

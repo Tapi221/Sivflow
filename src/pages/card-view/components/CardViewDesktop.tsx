@@ -3,6 +3,7 @@ import {
   ACTIVE_INDEX_RENDER_RADIUS,
   VerticalCardPager,
 } from "@/features/review/VerticalCardPager";
+import { getCardText } from "@/domain/card/content";
 import type { Card, UserSettings } from "@/types";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -43,7 +44,7 @@ function CardLoadingPreview({ card }: { card: Card }) {
         ...CARD_LOADING_PREVIEW_RULED_STYLE,
       }}
     >
-      {card.questionText && (
+      {getCardText(card, "question") && (
         <div
           style={{
             position: "absolute",
@@ -60,7 +61,7 @@ function CardLoadingPreview({ card }: { card: Card }) {
             wordBreak: "break-word",
           }}
         >
-          {card.questionText}
+          {getCardText(card, "question")}
         </div>
       )}
     </div>
@@ -235,6 +236,5 @@ export function CardViewDesktop({
     />
   );
 }
-
 
 

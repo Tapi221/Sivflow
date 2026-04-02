@@ -26,8 +26,24 @@ const withStableBlockIds = (raw: unknown) => {
 
   return {
     ...raw,
-    questionBlocks: assignIds(raw.questionBlocks ?? raw.question_blocks, "q"),
-    answerBlocks: assignIds(raw.answerBlocks ?? raw.answer_blocks, "a"),
+    front: {
+      ...((raw.front as Record<string, unknown> | undefined) ?? {}),
+      blocks: assignIds(
+        ((raw.front as { blocks?: unknown[] } | undefined)?.blocks ??
+          raw.questionBlocks ??
+          raw.question_blocks) as unknown[],
+        "q",
+      ),
+    },
+    back: {
+      ...((raw.back as Record<string, unknown> | undefined) ?? {}),
+      blocks: assignIds(
+        ((raw.back as { blocks?: unknown[] } | undefined)?.blocks ??
+          raw.answerBlocks ??
+          raw.answer_blocks) as unknown[],
+        "a",
+      ),
+    },
   };
 };
 

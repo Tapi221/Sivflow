@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/popover";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { resolveCardTagNames, useTags } from "@/hooks/settings/useTags";
+import { getCardText } from "@/domain/card/content";
 import { cn } from "@/lib/utils";
 import type { Card, DocumentItem, Folder } from "@/types";
 import { HelpCircle, Settings2, Star, Tag as TagIcon } from "@/ui/icons";
@@ -44,7 +45,7 @@ const getCardLabel = (card: Card): string => {
     return card.title.trim();
   }
 
-  const source = typeof card.questionText === "string" ? card.questionText : "";
+  const source = getCardText(card, "question");
   const plain = source
     .replace(/<[^>]*>/g, "")
     .replace(/\s+/g, " ")

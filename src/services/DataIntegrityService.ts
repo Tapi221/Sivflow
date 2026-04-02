@@ -2,6 +2,7 @@ import { getLocalDb } from "./localDB";
 import { normalizeCard, normalizeFolder } from "@/utils";
 import type { IntegrityIssue, IntegrityReport } from "./dataIntegrityTypes";
 import { sanitizeForLog } from "@/utils/logSanitizer";
+import { getCardBlocks, getCardText } from "@/domain/card/content";
 
 const TIMESTAMP_KEYS = [
   "createdAt",
@@ -37,20 +38,6 @@ const normalizeTimestampValue = (value: unknown): Date | null => {
     }
   }
   return null;
-};
-
-const extractSideBlockText = (
-  blocks: unknown[],
-  side: "question" | "answer",
-): string | null => {
-  const target = blocks.find((block) => {
-    const role = String(block?.side ?? block?.role ?? "").toLowerCase();
-    const type = String(block?.type ?? "").toLowerCase();
-    return role === side || type === side || type === `${side}_text`;
-  });
-  if (!target) return null;
-  const txt = target?.text;
-  return typeof txt === "string" && txt.trim() ? txt.trim() : null;
 };
 
 class DataIntegrityService {
@@ -122,7 +109,9 @@ class DataIntegrityService {
           });
         }
 
-        const blocks = Array.isArray(card.blocks) ? card.blocks : [];
+        const frontBlocks = getCardBlocks(card, "question");
+        const backBlocks = getCardBlocks(card, "answer");
+        const blocks = [...frontBlocks, ...backBlocks];
         if (blocks.some((b) => typeof b?.orderIndex !== "number")) {
           issues.push({
             code: "BLOCK_ORDER_INDEX_MISSING",
@@ -134,33 +123,8 @@ class DataIntegrityService {
           });
         }
 
-        const qBlockText = extractSideBlockText(blocks, "question");
-        const aBlockText = extractSideBlockText(blocks, "answer");
-        const qText =
-          typeof card.questionText === "string" ? card.questionText.trim() : "";
-        const aText =
-          typeof card.answerText === "string" ? card.answerText.trim() : "";
-
-        if (
-          (qBlockText && qText && qBlockText !== qText) ||
-          (aBlockText && aText && aBlockText !== aText)
-        ) {
-          issues.push({
-            code: "TEXT_BLOCK_MISMATCH",
-            entityType: "card",
-            entityId: String(card.id ?? "unknown"),
-            severity: "warning",
-            fixed: false,
-            details: {
-              hasQuestionMismatch: Boolean(
-                qBlockText && qText && qBlockText !== qText,
-              ),
-              hasAnswerMismatch: Boolean(
-                aBlockText && aText && aBlockText !== aText,
-              ),
-            },
-          });
-        }
+        void getCardText(card, "question");
+        void getCardText(card, "answer");
       }
 
       for (const folder of folders as unknown[]) {

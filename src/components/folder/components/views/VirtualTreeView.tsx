@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { getCardText } from "@/domain/card/content";
 import type { Card, SelectedExplorerItem } from "@/types";
 import { BookOpen, ChevronDown, ChevronRight, FolderTree } from "@/ui/icons";
 import React, { useEffect, useMemo, useState } from "react";
@@ -13,10 +14,11 @@ interface VirtualTreeViewProps {
   onItemSelect: (item: SelectedExplorerItem) => void;
 }
 
-const getCardTitle = (card: Card): string => {
+  const getCardTitle = (card: Card): string => {
   if (typeof card.title === "string" && card.title.trim()) return card.title;
-  if (typeof card.questionText === "string" && card.questionText.trim()) {
-    const plain = card.questionText.replace(/<[^>]*>/g, "").trim();
+  const questionText = getCardText(card, "question");
+  if (questionText.trim()) {
+    const plain = questionText.replace(/<[^>]*>/g, "").trim();
     if (plain) return plain.length > 50 ? `${plain.slice(0, 50)}...` : plain;
   }
   return "無題のカード";

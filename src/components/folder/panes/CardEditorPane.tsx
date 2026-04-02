@@ -450,24 +450,19 @@ export function CardEditorPane({
   );
 
   const questionBlocksForToolbar = draft?.frontBlocks;
-  const questionImagesForToolbar = draft?.questionImages;
   const questionActionsTopRight = useMemo(() => {
     void questionBlocksForToolbar;
-    void questionImagesForToolbar;
     return renderMediaDialogButtons("question");
   }, [
     questionBlocksForToolbar,
-    questionImagesForToolbar,
     renderMediaDialogButtons,
   ]);
 
   const answerBlocksForToolbar = draft?.backBlocks;
-  const answerImagesForToolbar = draft?.answerImages;
   const answerActionsTopRight = useMemo(() => {
     void answerBlocksForToolbar;
-    void answerImagesForToolbar;
     return renderMediaDialogButtons("answer");
-  }, [answerBlocksForToolbar, answerImagesForToolbar, renderMediaDialogButtons]);
+  }, [answerBlocksForToolbar, renderMediaDialogButtons]);
 
   if (!normalizedSelectedCardId && !isEditing) {
     return <EmptySelectionState onStartNew={handleStartNew} />;

@@ -1,14 +1,12 @@
 import { DEFAULT_LAYOUT_ROWS } from "@/domain/card/extraRows";
 
-import type { CardBlock, ReferenceBlockData, UploadedImage } from "@/types/domain/card";
+import type { CardBlock, ReferenceBlockData } from "@/types/domain/card";
 const NEW_SENTINEL = "__new__" as const;
 
 export type EditorDraft = {
   title: string;
   tags: string[];
   isDraft: boolean;
-  questionImages: UploadedImage[];
-  answerImages: UploadedImage[];
   frontBlocks: CardBlock[];
   backBlocks: CardBlock[];
   layoutRows: number;
@@ -26,8 +24,6 @@ export function makeNewDraft(): EditorDraft {
     title: "",
     tags: [],
     isDraft: false,
-    questionImages: [],
-    answerImages: [],
     frontBlocks: [],
     backBlocks: [],
     layoutRows: DEFAULT_LAYOUT_ROWS,

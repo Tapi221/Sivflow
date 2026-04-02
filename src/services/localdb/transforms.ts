@@ -1,25 +1,16 @@
 import type { UploadedImage } from "@/types";
-import { extractTextFromBlocks, normalizeFolder } from "@/utils";
+import { normalizeFolder } from "@/utils";
 import { assertImageArrayInvariant } from "@/utils/imageAssertions";
 import {
-    denormalizeUploadedImages,
-    normalizeUploadedImages,
+  denormalizeUploadedImages,
+  normalizeUploadedImages,
 } from "@/utils/uploaded-image/normalizer";
 import { sanitizeUploadedImages } from "@/utils/uploaded-image/sanitizer";
+import { normalizeInkDocument } from "@/components/ink/inkTypes";
 
 export const denormalizeCardForStorage = (card: unknown) => {
   if (!card) return card;
   const result = { ...card };
-
-  // ブロックが存在する場合、レガシーテキストフィールドを同期更新する
-  if (card.questionBlocks !== undefined) {
-    const extractedQ = extractTextFromBlocks(card.questionBlocks);
-    result.questionText = extractedQ;
-  }
-
-  if (card.answerBlocks !== undefined) {
-    result.answerText = extractTextFromBlocks(card.answerBlocks);
-  }
 
   const sanitizeBlockImages = (blocks: unknown[] | undefined) => {
     if (!Array.isArray(blocks)) return blocks;
@@ -55,51 +46,94 @@ export const denormalizeCardForStorage = (card: unknown) => {
     });
   };
 
-  if (Array.isArray(card.questionBlocks)) {
-    result.questionBlocks = sanitizeBlockImages(card.questionBlocks);
-  }
-  if (Array.isArray(card.answerBlocks)) {
-    result.answerBlocks = sanitizeBlockImages(card.answerBlocks);
-  }
-
-  // 画像フィールドの変換（既存ロジック）
-  if (card.questionImages !== undefined || card.question_images !== undefined) {
-    const questionImages = normalizeUploadedImages(
-      card.questionImages ?? card.question_images ?? [],
-    );
-    try {
-      assertImageArrayInvariant(questionImages as UploadedImage[]);
-    } catch (e) {
-      console.warn(
-        "[LocalDB] questionImages validation failed, but proceeding with sanitization:",
-        e,
-      );
+  const resolveBlocks = (
+    value: Record<string, unknown>,
+    side: "question" | "answer",
+  ) => {
+    const legacyKey = side === "question" ? "questionBlocks" : "answerBlocks";
+    const aliasKey = side === "question" ? "frontBlocks" : "backBlocks";
+    const faceKey = side === "question" ? "front" : "back";
+    const face = value[faceKey];
+    if (
+      face &&
+      typeof face === "object" &&
+      Array.isArray((face as { blocks?: unknown[] }).blocks)
+    ) {
+      return (face as { blocks: unknown[] }).blocks;
     }
-    const cleanQuestionImages = sanitizeUploadedImages(questionImages);
-    result.questionImages = denormalizeUploadedImages(cleanQuestionImages, {
-      case: "camel",
-      stripUndefined: true,
-    });
-  }
+    if (Array.isArray(value[aliasKey])) return value[aliasKey] as unknown[];
+    if (Array.isArray(value[legacyKey])) return value[legacyKey] as unknown[];
+    return [];
+  };
 
-  if (card.answerImages !== undefined || card.answer_images !== undefined) {
-    const answerImages = normalizeUploadedImages(
-      card.answerImages ?? card.answer_images ?? [],
-    );
-    try {
-      assertImageArrayInvariant(answerImages as UploadedImage[]);
-    } catch (e) {
-      console.warn(
-        "[LocalDB] answerImages validation failed, but proceeding with sanitization:",
-        e,
-      );
-    }
-    const cleanAnswerImages = sanitizeUploadedImages(answerImages);
-    result.answerImages = denormalizeUploadedImages(cleanAnswerImages, {
-      case: "camel",
-      stripUndefined: true,
-    });
-  }
+  const resolveInk = (
+    value: Record<string, unknown>,
+    side: "question" | "answer",
+  ) => {
+    const legacyKey = side === "question" ? "inkQuestion" : "inkAnswer";
+    const faceKey = side === "question" ? "front" : "back";
+    const face = value[faceKey];
+    const faceInk =
+      face && typeof face === "object" ? (face as { ink?: unknown }).ink : undefined;
+    const doc = normalizeInkDocument(faceInk ?? value[legacyKey] ?? null);
+    return doc.strokes.length > 0 ? doc : null;
+  };
+
+  const resolveExtraRows = (
+    value: Record<string, unknown>,
+    side: "question" | "answer",
+  ) => {
+    const legacyKey = side === "question" ? "questionExtraRows" : "answerExtraRows";
+    const snakeKey =
+      side === "question" ? "question_extra_rows" : "answer_extra_rows";
+    const faceKey = side === "question" ? "front" : "back";
+    const face = value[faceKey];
+    const faceExtraRows =
+      face && typeof face === "object"
+        ? (face as { extraRows?: unknown }).extraRows
+        : undefined;
+    const parsed = Number(faceExtraRows ?? value[legacyKey] ?? value[snakeKey] ?? 0);
+    return Number.isFinite(parsed) ? Math.max(0, Math.round(parsed)) : 0;
+  };
+
+  const frontBlocks = sanitizeBlockImages(resolveBlocks(result, "question"));
+  const backBlocks = sanitizeBlockImages(resolveBlocks(result, "answer"));
+
+  result.front = {
+    ...(result.front && typeof result.front === "object" ? result.front : {}),
+    blocks: frontBlocks,
+    ink: resolveInk(result, "question"),
+    extraRows: resolveExtraRows(result, "question"),
+  };
+  result.back = {
+    ...(result.back && typeof result.back === "object" ? result.back : {}),
+    blocks: backBlocks,
+    ink: resolveInk(result, "answer"),
+    extraRows: resolveExtraRows(result, "answer"),
+  };
+
+  delete result.questionBlocks;
+  delete result.answerBlocks;
+  delete result.frontBlocks;
+  delete result.backBlocks;
+  delete result.questionText;
+  delete result.answerText;
+  delete result.questionImages;
+  delete result.answerImages;
+  delete result.questionAudios;
+  delete result.answerAudios;
+  delete result.questionCode;
+  delete result.answerCode;
+  delete result.questionMarked;
+  delete result.answerMarked;
+  delete result.questionTextHighlighted;
+  delete result.answerTextHighlighted;
+  delete result.inkQuestion;
+  delete result.inkAnswer;
+  delete result.questionExtraRows;
+  delete result.answerExtraRows;
+  delete result.question_extra_rows;
+  delete result.answer_extra_rows;
 
   return result;
 };

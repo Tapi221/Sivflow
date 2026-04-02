@@ -9,6 +9,7 @@ import { normalizeInkDocument } from "@/components/ink/inkTypes";
 import {
   DEFAULT_LAYOUT_ROWS,
   normalizeLayoutRows,
+  normalizeExtraRows,
 } from "@/domain/card/extraRows";
 
 // 空カード判定用のヘルパー関数（createCard と updateCard で共通利用）
@@ -34,15 +35,8 @@ const resolveBlocksFromCardData = (
   value: Partial<Card> & Record<string, unknown>,
   side: "question" | "answer",
 ) => {
-  const directKey = side === "question" ? "questionBlocks" : "answerBlocks";
   const aliasKey = side === "question" ? "frontBlocks" : "backBlocks";
   const faceKey = side === "question" ? "front" : "back";
-
-  const direct = value[directKey];
-  if (Array.isArray(direct)) return direct;
-
-  const aliased = value[aliasKey];
-  if (Array.isArray(aliased)) return aliased;
 
   const face = value[faceKey];
   if (
@@ -53,7 +47,34 @@ const resolveBlocksFromCardData = (
     return (face as { blocks: unknown[] }).blocks;
   }
 
+  const aliased = value[aliasKey];
+  if (Array.isArray(aliased)) return aliased;
+
   return [];
+};
+
+const resolveInkFromCardData = (
+  value: Partial<Card> & Record<string, unknown>,
+  side: "question" | "answer",
+) => {
+  const faceKey = side === "question" ? "front" : "back";
+  const face = value[faceKey];
+  const faceInk =
+    face && typeof face === "object" ? (face as { ink?: unknown }).ink : undefined;
+  return normalizeInkDocument(faceInk ?? null);
+};
+
+const resolveExtraRowsFromCardData = (
+  value: Partial<Card> & Record<string, unknown>,
+  side: "question" | "answer",
+) => {
+  const faceKey = side === "question" ? "front" : "back";
+  const face = value[faceKey];
+  const faceExtraRows =
+    face && typeof face === "object"
+      ? (face as { extraRows?: unknown }).extraRows
+      : undefined;
+  return normalizeExtraRows(faceExtraRows ?? 0);
 };
 
 export function useCards(
@@ -275,26 +296,33 @@ export function useCards(
       isBookmarked: cardData.isBookmarked ?? false,
       isCompleted: cardData.isCompleted ?? false,
       isSilent: cardData.isSilent ?? false,
-      questionText: cardData.questionText || "",
-      questionImages: cardData.questionImages || [],
-      questionAudios: cardData.questionAudios || [],
-      questionCode: cardData.questionCode || null,
-      questionMarked: cardData.questionMarked || "",
-      answerText: cardData.answerText || "",
-      answerImages: cardData.answerImages || [],
-      answerAudios: cardData.answerAudios || [],
-      answerCode: cardData.answerCode || null,
-      answerMarked: cardData.answerMarked || "",
-      // Ensure blocks are carried over from cardData
-      questionBlocks,
-      answerBlocks,
+      front: {
+        blocks: questionBlocks,
+        ink: resolveInkFromCardData(
+          cardData as Partial<Card> & Record<string, unknown>,
+          "question",
+        ),
+        extraRows: resolveExtraRowsFromCardData(
+          cardData as Partial<Card> & Record<string, unknown>,
+          "question",
+        ),
+      },
+      back: {
+        blocks: answerBlocks,
+        ink: resolveInkFromCardData(
+          cardData as Partial<Card> & Record<string, unknown>,
+          "answer",
+        ),
+        extraRows: resolveExtraRowsFromCardData(
+          cardData as Partial<Card> & Record<string, unknown>,
+          "answer",
+        ),
+      },
       layoutRows: normalizeLayoutRows(
         (cardData as unknown).layoutRows ??
           (cardData as unknown).layout_rows ??
           DEFAULT_LAYOUT_ROWS,
       ),
-      inkQuestion: normalizeInkDocument(cardData.inkQuestion),
-      inkAnswer: normalizeInkDocument(cardData.inkAnswer),
       memoryStability: 0,
       currentLevel: cardData.currentLevel ?? null,
       nextReviewDate,
@@ -337,25 +365,38 @@ export function useCards(
     }
 
     const patch = { ...data } as Partial<Card> & Record<string, unknown>;
-    if (
-      "questionBlocks" in patch ||
-      "frontBlocks" in patch ||
-      "front" in patch
-    ) {
-      patch.questionBlocks = resolveBlocksFromCardData(patch, "question");
+    const nextFront = {
+      ...currentCard.front,
+      ...((patch.front as Partial<Card["front"]> | undefined) ?? {}),
+    };
+    const nextBack = {
+      ...currentCard.back,
+      ...((patch.back as Partial<Card["back"]> | undefined) ?? {}),
+    };
+
+    if ("frontBlocks" in patch || "front" in patch) {
+      nextFront.blocks = resolveBlocksFromCardData(patch, "question");
     }
-    if ("answerBlocks" in patch || "backBlocks" in patch || "back" in patch) {
-      patch.answerBlocks = resolveBlocksFromCardData(patch, "answer");
+    if ("backBlocks" in patch || "back" in patch) {
+      nextBack.blocks = resolveBlocksFromCardData(patch, "answer");
     }
+    if ("front" in patch) {
+      nextFront.ink = resolveInkFromCardData(patch, "question");
+    }
+    if ("back" in patch) {
+      nextBack.ink = resolveInkFromCardData(patch, "answer");
+    }
+    if ("front" in patch) {
+      nextFront.extraRows = resolveExtraRowsFromCardData(patch, "question");
+    }
+    if ("back" in patch) {
+      nextBack.extraRows = resolveExtraRowsFromCardData(patch, "answer");
+    }
+
+    patch.front = nextFront;
+    patch.back = nextBack;
     delete patch.frontBlocks;
     delete patch.backBlocks;
-    delete patch.front;
-    delete patch.back;
-    // Legacy rows fields are read-only migration inputs. Never persist them again.
-    delete (patch as unknown).questionExtraRows;
-    delete (patch as unknown).answerExtraRows;
-    delete (patch as unknown).question_extra_rows;
-    delete (patch as unknown).answer_extra_rows;
     if (Array.isArray(patch.reviewLogs)) {
       patch.reviewLogs = [...patch.reviewLogs].sort(
         (a, b) =>

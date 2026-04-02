@@ -25,6 +25,7 @@ import { StudyReview } from "@/features/study/StudyReview";
 import { StudyComplete } from "@/features/study/StudyComplete";
 import { PracticeCards } from "@/features/study/PracticeCards";
 import { PracticeSummary } from "@/features/study/PracticeSummary";
+import { getCardText } from "@/domain/card/content";
 
 const RATING_LABELS = {
   forgot: "忘れた",
@@ -406,7 +407,7 @@ export default function StudyMode() {
                 <h1 className="reviewTitle text-lg md:text-xl font-bold text-slate-700 font-serif truncate">
                   {(() => {
                     const t = currentCard?.title || "";
-                    const q = currentCard?.questionText || "";
+                    const q = currentCard ? getCardText(currentCard, "question") : "";
                     if (t && q && t.trim() === q.trim()) return t;
                     return t || "Untitled Card";
                   })()}

@@ -161,12 +161,12 @@ export function ConflictResolutionDialog({
     return value.substring(0, maxLength) + "...";
   };
 
-  const getFieldLabel = (key: string): string => {
-    const labels: Record<string, string> = {
-      questionText: "問題文",
-      answerText: "解答",
-      title: "タイトル",
-      name: "名前",
+    const getFieldLabel = (key: string): string => {
+      const labels: Record<string, string> = {
+      front: "表面",
+      back: "裏面",
+        title: "タイトル",
+        name: "名前",
       description: "説明",
       level: "レベル",
       nextReviewDate: "次回復習日",

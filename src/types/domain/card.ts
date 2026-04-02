@@ -1,19 +1,27 @@
 import type { InkDocument } from "@/components/ink/inkTypes";
-import type { CodeBlockData } from "@/types/domain/card";
+import type { CodeBlockData } from "@/types/core/code-block";
 import { Timestamp } from "firebase/firestore";
 import type { UploadedImage } from "./assets";
 import type {
-    BaseEntity,
-    CardState,
-    MathBlockData,
-    ReferenceBlockData,
-    ReviewLog,
-    SubjectiveScoreValue,
+  BaseEntity,
+  CardState,
+  MathBlockData,
+  ReferenceBlockData,
+  ReviewLog,
+  SubjectiveScoreValue,
 } from "./base";
 
 export type CardBlock = {
   id: string;
-  type: "text" | "question" | "code" | "image" | "audio" | "reference" | "math" | "markdown";
+  type:
+    | "text"
+    | "question"
+    | "code"
+    | "image"
+    | "audio"
+    | "reference"
+    | "math"
+    | "markdown";
   orderIndex: number;
   rowOffset?: number;
   offsetRows?: number;
@@ -32,6 +40,12 @@ export type CardBlock = {
   markdown?: string;
 };
 
+export type CardFace = {
+  blocks: CardBlock[];
+  ink?: InkDocument | null;
+  extraRows?: number;
+};
+
 export type Card = BaseEntity & {
   /** CardSet への参照（必須）。移行前データは空文字で残る場合がある */
   cardSetId: string;
@@ -42,28 +56,15 @@ export type Card = BaseEntity & {
   title?: string;
   tags?: string[];
   tagIds?: string[];
+  front: CardFace;
+  back: CardFace;
+  layoutRows?: number;
   isDraft: boolean;
   hasUncertainty: boolean;
   isBookmarked?: boolean;
   isCompleted: boolean;
   isSilent: boolean;
-  questionText: string;
-  questionMarked: string;
-  questionImages: UploadedImage[];
-  questionAudios: Array<{ url: string; filename: string; order: number }>;
-  questionCode?: CodeBlockData | null;
-  answerText: string;
-  answerMarked: string;
-  answerImages: UploadedImage[];
-  answerAudios: Array<{ url: string; filename: string; order: number }>;
-  answerCode?: CodeBlockData | null;
-  questionBlocks?: CardBlock[];
-  answerBlocks?: CardBlock[];
-  layoutRows?: number;
-  questionExtraRows?: number;
-  answerExtraRows?: number;
-  inkQuestion?: InkDocument | null;
-  inkAnswer?: InkDocument | null;
+  deletedAt?: Date | Timestamp | null;
   memoryStability: number;
   difficulty?: number;
   nextReviewDate: Date | Timestamp;

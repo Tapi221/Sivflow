@@ -3,6 +3,7 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import type { LocalDBLike } from "./localDB";
 import type { UploadedImage } from "@/types";
 import { createStorageUrl } from "@/types/core/branded";
+import { getCardImages } from "@/domain/card/content";
 
 const MAX_QUOTA = 500 * 1024 * 1024; // 500MB
 const MAX_RETRIES = 5;
@@ -96,29 +97,42 @@ export class ImageSyncService {
     const cards = await this.localDB.cards.toArray();
 
     for (const card of cards) {
-      const updatedQuestionImages = await this.processImageArray(
+      const updatedFrontImages = await this.processImageArray(
         userId,
         card.id,
         "cards",
-        "questionImages",
-        card.questionImages,
+        "front",
+        getCardImages(card, "question"),
         onProgress,
       );
-      const updatedAnswerImages = await this.processImageArray(
+      const updatedBackImages = await this.processImageArray(
         userId,
         card.id,
         "cards",
-        "answerImages",
-        card.answerImages,
+        "back",
+        getCardImages(card, "answer"),
         onProgress,
       );
 
-      if (updatedQuestionImages || updatedAnswerImages) {
-        await this.localDB.cards.update(card.id, {
-          questionImages: updatedQuestionImages || card.questionImages,
-          answerImages: updatedAnswerImages || card.answerImages,
-          updatedAt: new Date(),
-        });
+      if (updatedFrontImages || updatedBackImages) {
+        const patch: Record<string, unknown> = { updatedAt: new Date() };
+        if (updatedFrontImages) {
+          patch.front = {
+            ...card.front,
+            blocks: card.front.blocks.map((block) =>
+              block.type === "image" ? { ...block, images: updatedFrontImages } : block,
+            ),
+          };
+        }
+        if (updatedBackImages) {
+          patch.back = {
+            ...card.back,
+            blocks: card.back.blocks.map((block) =>
+              block.type === "image" ? { ...block, images: updatedBackImages } : block,
+            ),
+          };
+        }
+        await this.localDB.cards.update(card.id, patch);
       }
     }
   }

@@ -50,9 +50,8 @@ type CardStorageRow = EnsureRecord<
   ReturnType<typeof denormalizeCardForStorage>
 > & {
   id?: string;
-  questionBlocks?: unknown[];
-  answerBlocks?: unknown[];
-  questionText?: string;
+  front?: { blocks?: unknown[] };
+  back?: { blocks?: unknown[] };
 };
 
 type FolderStorageRow = EnsureRecord<
@@ -193,18 +192,14 @@ export async function addItem(
   );
 
   if (table === "cards") {
-    const qBlocksLen = Array.isArray((payload as CardStorageRow).questionBlocks)
-      ? (payload as CardStorageRow).questionBlocks!.length
+    const qBlocksLen = Array.isArray((payload as CardStorageRow).front?.blocks)
+      ? (payload as CardStorageRow).front!.blocks!.length
       : 0;
-    const aBlocksLen = Array.isArray((payload as CardStorageRow).answerBlocks)
-      ? (payload as CardStorageRow).answerBlocks!.length
+    const aBlocksLen = Array.isArray((payload as CardStorageRow).back?.blocks)
+      ? (payload as CardStorageRow).back!.blocks!.length
       : 0;
-    const qText =
-      typeof (payload as CardStorageRow).questionText === "string"
-        ? (payload as CardStorageRow).questionText!.substring(0, 30)
-        : "";
     console.log(
-      `[LocalDB] addItem CARD_CONTENT -> Q_Blocks=${qBlocksLen}, A_Blocks=${aBlocksLen}, Q_Text="${qText}..."`,
+      `[LocalDB] addItem CARD_CONTENT -> Q_Blocks=${qBlocksLen}, A_Blocks=${aBlocksLen}`,
     );
   }
 
@@ -362,16 +357,14 @@ export async function updateItem(
   );
 
   if (table === "cards") {
-    const qBlocksLen = Array.isArray((payload as CardStorageRow).questionBlocks)
-      ? (payload as CardStorageRow).questionBlocks!.length
+    const qBlocksLen = Array.isArray((payload as CardStorageRow).front?.blocks)
+      ? (payload as CardStorageRow).front!.blocks!.length
       : undefined;
-    const aBlocksLen = Array.isArray((payload as CardStorageRow).answerBlocks)
-      ? (payload as CardStorageRow).answerBlocks!.length
+    const aBlocksLen = Array.isArray((payload as CardStorageRow).back?.blocks)
+      ? (payload as CardStorageRow).back!.blocks!.length
       : undefined;
-    const hasQText =
-      typeof (payload as CardStorageRow).questionText === "string";
     console.log(
-      `[LocalDB] updateItem CARD_CHANGES -> Q_Blocks=${qBlocksLen}, A_Blocks=${aBlocksLen}, hasQText=${hasQText}`,
+      `[LocalDB] updateItem CARD_CHANGES -> Q_Blocks=${qBlocksLen}, A_Blocks=${aBlocksLen}`,
     );
   }
 

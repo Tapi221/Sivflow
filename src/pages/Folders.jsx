@@ -17,6 +17,7 @@ import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
 import { cn } from "@/lib/utils";
 import { useSettingsQueryParam } from "@/hooks/settings/useSettingsQueryParam";
 import { useBreadcrumbContext } from "@/contexts/BreadcrumbContext";
+import { getCardText } from "@/domain/card/content";
 
 export default function Folders() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -422,7 +423,7 @@ export default function Folders() {
       if (card) {
         const label =
           card.title?.trim() ||
-          card.questionText?.trim().slice(0, 20) ||
+          getCardText(card, "question").trim().slice(0, 20) ||
           "カード";
         crumbs.push({ label });
       }

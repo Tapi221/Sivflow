@@ -1,8 +1,4 @@
 import type { Card, Folder } from "@/types";
-import {
-  denormalizeUploadedImages,
-  normalizeUploadedImages,
-} from "@/utils/uploaded-image/normalizer";
 import * as Firestore from "firebase/firestore";
 import {
   collection,
@@ -22,23 +18,7 @@ import {
 } from "./firestorePaths";
 
 const denormalizeCardForCloud = (card: Card) => {
-  const questionImages = normalizeUploadedImages(
-    (card as unknown).questionImages ?? (card as unknown).question_images ?? [],
-  );
-  const answerImages = normalizeUploadedImages(
-    (card as unknown).answerImages ?? (card as unknown).answer_images ?? [],
-  );
-  return {
-    ...card,
-    questionImages: denormalizeUploadedImages(questionImages, {
-      case: "camel",
-      stripUndefined: true,
-    }),
-    answerImages: denormalizeUploadedImages(answerImages, {
-      case: "camel",
-      stripUndefined: true,
-    }),
-  };
+  return { ...card };
 };
 
 /**

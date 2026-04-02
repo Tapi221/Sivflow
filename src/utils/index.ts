@@ -7,6 +7,7 @@ import {
   normalizeLayoutRows,
 } from "@/domain/card/extraRows";
 import { isGridOffsetType } from "@/components/card/frame/rowOffset";
+import type { Card, CardBlock } from "@/types/domain/card";
 
 type UnknownRecord = Record<string, unknown>;
 
@@ -307,7 +308,170 @@ const isGridBlockType = (v: unknown): v is GridBlockType => {
   );
 };
 
-export const normalizeCard = (raw: unknown) => {
+const CARD_BLOCK_TYPES = new Set<CardBlock["type"]>([
+  "text",
+  "question",
+  "code",
+  "image",
+  "audio",
+  "reference",
+  "math",
+  "markdown",
+]);
+
+const isCardBlockType = (value: unknown): value is CardBlock["type"] =>
+  typeof value === "string" &&
+  CARD_BLOCK_TYPES.has(value as CardBlock["type"]);
+
+const resolveFallbackTextContent = (block: UnknownRecord): string => {
+  if (typeof block.content === "string" && block.content.trim()) {
+    return block.content;
+  }
+  if (typeof block.markdown === "string" && block.markdown.trim()) {
+    return block.markdown;
+  }
+
+  const code = asRecord(block.code);
+  if (typeof code?.code === "string" && code.code.trim()) {
+    return code.code;
+  }
+
+  const questionTitle = toStringOr(block.questionTitle, "").trim();
+  const questionAnswer = toStringOr(block.questionAnswer, "").trim();
+  if (questionTitle || questionAnswer) {
+    return [questionTitle, questionAnswer].filter(Boolean).join("\n\n");
+  }
+
+  return "";
+};
+
+const normalizeBlockOffsets = (blockRaw: unknown) => {
+  const block = asRecord(blockRaw);
+  if (!block) return blockRaw;
+
+  const type = block.type;
+  if (!isGridBlockType(type)) return blockRaw;
+  if (!isGridOffsetType(type)) return blockRaw;
+
+  const fallbackRows = toFiniteNumber(pick(block.offsetRows, block.rowOffset), 0);
+  const normalizedOffsetRows = Number.isFinite(fallbackRows)
+    ? Math.max(0, Math.round(fallbackRows))
+    : 0;
+
+  return {
+    ...block,
+    offsetRows: normalizedOffsetRows,
+    rowOffset: undefined,
+  };
+};
+
+const normalizeCardBlock = (
+  blockRaw: unknown,
+  side: "question" | "answer",
+  cardId: string,
+  index: number,
+): CardBlock | null => {
+  const block = asRecord(blockRaw);
+  if (!block) return null;
+
+  const explicitType = isCardBlockType(block.type) ? block.type : null;
+  const type: CardBlock["type"] = explicitType ?? "text";
+  const id = toStringOr(block.id, "") || `${side}-${type}-${cardId}-${index}`;
+  const normalized: CardBlock = {
+    id,
+    type,
+    orderIndex: index,
+  };
+
+  const parentBlockId =
+    typeof block.parentBlockId === "string" ? block.parentBlockId : null;
+  if (parentBlockId !== null) normalized.parentBlockId = parentBlockId;
+  else if (block.parentBlockId === null) normalized.parentBlockId = null;
+
+  const rowOffset = toFiniteNumber(block.rowOffset, 0);
+  if (block.rowOffset !== undefined && Number.isFinite(rowOffset)) {
+    normalized.rowOffset = Math.round(rowOffset);
+  }
+
+  const offsetRows = toFiniteNumber(block.offsetRows, 0);
+  if (block.offsetRows !== undefined && Number.isFinite(offsetRows)) {
+    normalized.offsetRows = Math.round(offsetRows);
+  }
+
+  switch (type) {
+    case "text": {
+      const content =
+        explicitType === "text"
+          ? toStringOr(block.content, "")
+          : resolveFallbackTextContent(block);
+      if (!content.trim()) return null;
+      normalized.content = content;
+      break;
+    }
+    case "markdown": {
+      const markdown = toStringOr(block.markdown, "");
+      if (!markdown.trim()) return null;
+      normalized.markdown = markdown;
+      break;
+    }
+    case "code": {
+      const code = asRecord(block.code);
+      const codeText = toStringOr(code?.code, "");
+      if (!codeText.trim()) return null;
+      normalized.code = {
+        language: toStringOr(code?.language, "text").trim() || "text",
+        code: codeText,
+      };
+      break;
+    }
+    case "image": {
+      const images = normalizeUploadedImages(
+        block.images ?? [],
+      ) as NonNullable<CardBlock["images"]>;
+      if (images.length === 0) return null;
+      normalized.images = images;
+      break;
+    }
+    case "audio": {
+      const audios = toArrayOr(block.audios, []).filter(asRecord) as NonNullable<
+        CardBlock["audios"]
+      >;
+      if (audios.length === 0) return null;
+      normalized.audios = audios;
+      break;
+    }
+    case "reference": {
+      const references = toArrayOr(block.references, []).filter(asRecord) as NonNullable<
+        CardBlock["references"]
+      >;
+      if (references.length === 0) return null;
+      normalized.references = references;
+      break;
+    }
+    case "math": {
+      const math = asRecord(block.math);
+      const latex = toStringOr(math?.latex, "");
+      if (!latex.trim()) return null;
+      normalized.math = {
+        latex,
+        displayMode: math?.displayMode === "inline" ? "inline" : "block",
+      };
+      break;
+    }
+    case "question": {
+      const questionTitle = toStringOr(block.questionTitle, "");
+      const questionAnswer = toStringOr(block.questionAnswer, "");
+      if (!questionTitle.trim() && !questionAnswer.trim()) return null;
+      normalized.questionTitle = questionTitle;
+      normalized.questionAnswer = questionAnswer;
+      break;
+    }
+  }
+
+  return normalizeBlockOffsets(normalized) as CardBlock;
+};
+
+export const normalizeCard = (raw: unknown): Card => {
   const r = asRecord(raw) ?? {};
 
   // ★ 変更: id が無い raw が来た時に undefined をばら撒かない
@@ -338,30 +502,127 @@ export const normalizeCard = (raw: unknown) => {
   const msNumFinite =
     typeof msNum === "number" && Number.isFinite(msNum) ? msNum : undefined;
 
-  const normalizeBlockOffsets = (blockRaw: unknown) => {
-    const block = asRecord(blockRaw);
-    if (!block) return blockRaw;
+  const normalizeBlocksWithFallback = (
+    side: "question" | "answer",
+    blocks: unknown[],
+    text: string,
+    code: unknown,
+    images: unknown[],
+    audios: unknown[],
+    options?: { allowLegacyFallback?: boolean },
+  ): CardBlock[] => {
+    const normalizedBlocks = toArrayOr(blocks, [])
+      .map((block, index) => normalizeCardBlock(block, side, id, index))
+      .filter((block): block is CardBlock => block !== null);
 
-    const type = block.type;
-    if (!isGridBlockType(type)) return blockRaw;
-    if (!isGridOffsetType(type)) return blockRaw;
+    if (normalizedBlocks.length > 0) {
+      return normalizedBlocks;
+    }
 
-    const fallbackRows = toFiniteNumber(
-      pick(block.offsetRows, block.rowOffset),
-      0,
-    );
-    const normalizedOffsetRows = Number.isFinite(fallbackRows)
-      ? Math.max(0, Math.round(fallbackRows))
-      : 0;
+    if (options?.allowLegacyFallback === false) {
+      return [];
+    }
 
-    return {
-      ...block,
-      offsetRows: normalizedOffsetRows,
-      rowOffset: undefined,
-    };
+    const fallbackBlocks: CardBlock[] = [];
+    let idx = 0;
+
+    if (text) {
+      fallbackBlocks.push({
+        id: `${side === "question" ? "q" : "a"}-text-${id}`,
+        type: "text",
+        content: text,
+        orderIndex: idx++,
+      });
+    }
+
+    if (code) {
+      fallbackBlocks.push({
+        id: `${side === "question" ? "q" : "a"}-code-${id}`,
+        type: "code",
+        code: code as CardBlock["code"],
+        orderIndex: idx++,
+      });
+    }
+
+    if (Array.isArray(images) && images.length > 0) {
+      fallbackBlocks.push({
+        id: `${side === "question" ? "q" : "a"}-img-${id}`,
+        type: "image",
+        images: normalizeUploadedImages(images) as NonNullable<CardBlock["images"]>,
+        orderIndex: idx++,
+      });
+    }
+
+    if (Array.isArray(audios) && audios.length > 0) {
+      fallbackBlocks.push({
+        id: `${side === "question" ? "q" : "a"}-audio-${id}`,
+        type: "audio",
+        audios: audios as CardBlock["audios"],
+        orderIndex: idx++,
+      });
+    }
+
+    return fallbackBlocks;
   };
 
-  const normalized: UnknownRecord = {
+  const frontText = toStringOr(
+    pick(
+      r.questionText,
+      r.question_text,
+      r.front,
+      r.question,
+      r.q,
+      asRecord(r.fields)?.Front,
+      asRecord(r.fields)?.Question,
+    ),
+    "",
+  );
+  const backText = toStringOr(
+    pick(
+      r.answerText,
+      r.answer_text,
+      r.back,
+      r.answer,
+      r.a,
+      asRecord(r.fields)?.Back,
+      asRecord(r.fields)?.Answer,
+    ),
+    "",
+  );
+  const frontCode = pick(r.questionCode, r.question_code, null);
+  const backCode = pick(r.answerCode, r.answer_code, null);
+  const frontImages = toArrayOr(pick(r.questionImages, r.question_images), []);
+  const backImages = toArrayOr(pick(r.answerImages, r.answer_images), []);
+  const frontAudios = toArrayOr(pick(r.questionAudios, r.question_audios), []);
+  const backAudios = toArrayOr(pick(r.answerAudios, r.answer_audios), []);
+  const frontFace = asRecord(r.front);
+  const backFace = asRecord(r.back);
+  const hasFrontFaceBlocks = Array.isArray(frontFace?.blocks);
+  const hasBackFaceBlocks = Array.isArray(backFace?.blocks);
+  const frontBlocks = normalizeBlocksWithFallback(
+    "question",
+    hasFrontFaceBlocks
+      ? (frontFace?.blocks as unknown[])
+      : toArrayOr(pick(r.questionBlocks, r.question_blocks), []),
+    frontText,
+    frontCode,
+    frontImages,
+    frontAudios,
+    { allowLegacyFallback: !hasFrontFaceBlocks },
+  );
+  const backBlocks = normalizeBlocksWithFallback(
+    "answer",
+    hasBackFaceBlocks
+      ? (backFace?.blocks as unknown[])
+      : toArrayOr(pick(r.answerBlocks, r.answer_blocks), []),
+    backText,
+    backCode,
+    backImages,
+    backAudios,
+    { allowLegacyFallback: !hasBackFaceBlocks },
+  );
+
+  const normalized: Card = {
     id,
     userId: toStringOr(pick(r.userId, r.user_id), ""),
     deviceId: toStringOr(pick(r.deviceId, r.device_id), ""),
@@ -376,8 +637,6 @@ export const normalizeCard = (raw: unknown) => {
     isCompleted: toBoolOr(pick(r.isCompleted, r.is_completed), false),
     isSilent: toBoolOr(pick(r.isSilent, r.is_silent), false),
     isDeleted: toBoolOr(pick(r.isDeleted, r.is_deleted), false),
-
-    // deletedAt: isDeleted=true なのに deletedAt がない場合は updatedAt で補完
     deletedAt: (() => {
       const rawDeletedAt = pick(r.deletedAt, r.deleted_at);
       if (rawDeletedAt) return normalizeDate(rawDeletedAt);
@@ -392,46 +651,29 @@ export const normalizeCard = (raw: unknown) => {
       }
       return null;
     })(),
-
-    questionText: toStringOr(
-      pick(
-        r.questionText,
-        r.question_text,
-        r.front,
-        r.question,
-        r.q,
-        asRecord(r.fields)?.Front,
-        asRecord(r.fields)?.Question,
-      ),
-      "",
+    front: {
+      blocks: frontBlocks,
+      ink: (() => {
+        const doc = normalizeInkDocument(
+          pick(r.inkQuestion, r.ink_question, asRecord(r.front)?.ink, null),
+        );
+        return doc.strokes.length > 0 ? doc : null;
+      })(),
+      extraRows: legacyQuestionExtraRows,
+    },
+    back: {
+      blocks: backBlocks,
+      ink: (() => {
+        const doc = normalizeInkDocument(
+          pick(r.inkAnswer, r.ink_answer, asRecord(r.back)?.ink, null),
+        );
+        return doc.strokes.length > 0 ? doc : null;
+      })(),
+      extraRows: legacyAnswerExtraRows,
+    },
+    layoutRows: normalizeLayoutRows(
+      toFiniteNumber(pick(r.layoutRows, r.layout_rows), migratedLayoutRows),
     ),
-    questionImages: normalizeUploadedImages(
-      toArrayOr(pick(r.questionImages, r.question_images), []),
-    ),
-    questionAudios: toArrayOr(pick(r.questionAudios, r.question_audios), []),
-    questionCode: pick(r.questionCode, r.question_code, null),
-    questionTextHighlighted: toStringOr(r.questionTextHighlighted, ""),
-    questionMarked: toStringOr(pick(r.questionMarked, r.question_marked), ""),
-
-    answerText: toStringOr(
-      pick(
-        r.answerText,
-        r.answer_text,
-        r.back,
-        r.answer,
-        r.a,
-        asRecord(r.fields)?.Back,
-        asRecord(r.fields)?.Answer,
-      ),
-      "",
-    ),
-    answerImages: normalizeUploadedImages(
-      toArrayOr(pick(r.answerImages, r.answer_images), []),
-    ),
-    answerAudios: toArrayOr(pick(r.answerAudios, r.answer_audios), []),
-    answerCode: pick(r.answerCode, r.answer_code, null),
-    answerTextHighlighted: toStringOr(r.answerTextHighlighted, ""),
-    answerMarked: toStringOr(pick(r.answerMarked, r.answer_marked), ""),
 
     // ✅ ここが修正点：levelNum を渡す
     memoryStability: normalizeMemoryStability(msNumFinite, levelNum),
@@ -463,186 +705,7 @@ export const normalizeCard = (raw: unknown) => {
       : {}),
     reviewCount: toFiniteNumber(pick(r.reviewCount, r.review_count), 0),
     reviewLogs: normalizeReviewLogs(pick(r.reviewLogs, r.review_logs, [])),
-
-    questionBlocks: toArrayOr(
-      pick(r.questionBlocks, r.question_blocks, asRecord(r.front)?.blocks),
-      [],
-    )
-      .map(normalizeBlockOffsets)
-      .filter((b) => {
-        const br = asRecord(b);
-        if (!br) return false;
-
-        if (br.type === "math") {
-          const math = asRecord(br.math);
-          const latex = math ? toStringOr(math.latex, "") : "";
-          if (!latex.trim()) return false;
-        }
-        return true;
-      }),
-
-    answerBlocks: toArrayOr(
-      pick(r.answerBlocks, r.answer_blocks, asRecord(r.back)?.blocks),
-      [],
-    )
-      .map(normalizeBlockOffsets)
-      .filter((b) => {
-        const br = asRecord(b);
-        if (!br) return false;
-
-        if (br.type === "math") {
-          const math = asRecord(br.math);
-          const latex = math ? toStringOr(math.latex, "") : "";
-          if (!latex.trim()) return false;
-        }
-        return true;
-      }),
-
-    layoutRows: normalizeLayoutRows(
-      toFiniteNumber(pick(r.layoutRows, r.layout_rows), migratedLayoutRows),
-    ),
-
-    // Legacy互換の読み取り専用。高さロジックは layoutRows のみを参照する。
-    questionExtraRows: legacyQuestionExtraRows,
-    answerExtraRows: legacyAnswerExtraRows,
-
-    inkQuestion: (() => {
-      const doc = normalizeInkDocument(
-        pick(r.inkQuestion, r.ink_question, null),
-      );
-      return doc.strokes.length > 0 ? doc : null;
-    })(),
-    inkAnswer: (() => {
-      const doc = normalizeInkDocument(pick(r.inkAnswer, r.ink_answer, null));
-      return doc.strokes.length > 0 ? doc : null;
-    })(),
-
     _rescueRaw: pick(r._rescueRaw, undefined),
-  };
-
-  // ブロックが空で、レガシーフィールドにデータがある場合に自動変換を行う
-  if (
-    Array.isArray(normalized.questionBlocks) &&
-    normalized.questionBlocks.length === 0
-  ) {
-    const blocks: UnknownRecord[] = [];
-    let idx = 0;
-
-    const qText = normalized.questionText;
-    const qCode = normalized.questionCode;
-    const qImgs = normalized.questionImages;
-    const qAudios = normalized.questionAudios;
-
-    if (typeof qText === "string" && qText)
-      blocks.push({
-        id: `q-text-${id}`,
-        type: "text",
-        content: qText,
-        orderIndex: idx++,
-      });
-    if (qCode)
-      blocks.push({
-        id: `q-code-${id}`,
-        type: "code",
-        code: qCode,
-        orderIndex: idx++,
-      });
-    if (Array.isArray(qImgs) && qImgs.length > 0)
-      blocks.push({
-        id: `q-img-${id}`,
-        type: "image",
-        images: qImgs,
-        orderIndex: idx++,
-      });
-    if (Array.isArray(qAudios) && qAudios.length > 0)
-      blocks.push({
-        id: `q-audio-${id}`,
-        type: "audio",
-        audios: qAudios,
-        orderIndex: idx++,
-      });
-
-    normalized.questionBlocks = blocks;
-  }
-
-  if (
-    Array.isArray(normalized.answerBlocks) &&
-    normalized.answerBlocks.length === 0
-  ) {
-    const blocks: UnknownRecord[] = [];
-    let idx = 0;
-
-    const aText = normalized.answerText;
-    const aCode = normalized.answerCode;
-    const aImgs = normalized.answerImages;
-    const aAudios = normalized.answerAudios;
-
-    if (typeof aText === "string" && aText)
-      blocks.push({
-        id: `a-text-${id}`,
-        type: "text",
-        content: aText,
-        orderIndex: idx++,
-      });
-    if (aCode)
-      blocks.push({
-        id: `a-code-${id}`,
-        type: "code",
-        code: aCode,
-        orderIndex: idx++,
-      });
-    if (Array.isArray(aImgs) && aImgs.length > 0)
-      blocks.push({
-        id: `a-img-${id}`,
-        type: "image",
-        images: aImgs,
-        orderIndex: idx++,
-      });
-    if (Array.isArray(aAudios) && aAudios.length > 0)
-      blocks.push({
-        id: `a-audio-${id}`,
-        type: "audio",
-        audios: aAudios,
-        orderIndex: idx++,
-      });
-
-    normalized.answerBlocks = blocks;
-  }
-
-  // 逆にブロックはあるがレガシーフィールドが空の場合（ブロックエディタでの保存後など）
-  if (
-    !normalized.questionText &&
-    Array.isArray(normalized.questionBlocks) &&
-    normalized.questionBlocks.length > 0
-  ) {
-    normalized.questionText = extractTextFromBlocks(normalized.questionBlocks);
-  }
-  if (
-    !normalized.answerText &&
-    Array.isArray(normalized.answerBlocks) &&
-    normalized.answerBlocks.length > 0
-  ) {
-    normalized.answerText = extractTextFromBlocks(normalized.answerBlocks);
-  }
-
-  const normalizedQuestionBlocks = Array.isArray(normalized.questionBlocks)
-    ? normalized.questionBlocks
-    : [];
-  const normalizedAnswerBlocks = Array.isArray(normalized.answerBlocks)
-    ? normalized.answerBlocks
-    : [];
-
-  normalized.frontBlocks = normalizedQuestionBlocks;
-  normalized.backBlocks = normalizedAnswerBlocks;
-  normalized.front = {
-    blocks: normalizedQuestionBlocks,
-    ink: normalized.inkQuestion ?? null,
-    extraRows: normalized.questionExtraRows,
-  };
-  normalized.back = {
-    blocks: normalizedAnswerBlocks,
-    ink: normalized.inkAnswer ?? null,
-    extraRows: normalized.answerExtraRows,
   };
 
   return normalized;

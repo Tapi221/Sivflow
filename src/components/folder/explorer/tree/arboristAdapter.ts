@@ -1,5 +1,6 @@
 import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import type { FolderTreeArboristNode } from "@/components/sidebar/FolderTreeArborist";
+import { getCardText } from "@/domain/card/content";
 import type {
     Card,
     CardSet,
@@ -63,11 +64,7 @@ export const buildExplorerTreeData = ({
     if (item.type === "card") {
       const cardTitle =
         item.data.title ||
-        (
-          (item.data as unknown).questionText ||
-          (item.data as unknown).question_text ||
-          ""
-        )
+        getCardText(item.data, "question")
           .replace(/<[^>]*>/g, "")
           .trim()
           .slice(0, 50) ||

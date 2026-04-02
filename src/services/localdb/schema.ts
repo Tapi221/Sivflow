@@ -1582,4 +1582,223 @@ export const defineSchema = (db: LocalDB): void => {
         `[Migration v28] clearedMigrationTitles=${clearedMigrationTitles}, reorderedCards=${reorderedCards}`,
       );
     });
+
+  // Version 29: card content schema migration
+  // - question*/answer* flat fields を front/back に統合
+  // - legacy ブロック/インク/extraRows を face 配下へ移す
+  db.version(29)
+    .stores({
+      folders:
+        "id, userId, parentFolderId, updatedAt, cloudSyncEnabled, isDeleted, [userId+updatedAt], [userId+isDeleted]",
+      cardSets:
+        "id, userId, folderId, updatedAt, isDeleted, [userId+updatedAt], [userId+folderId]",
+      cards:
+        "id, userId, folderId, cardSetId, updatedAt, nextReviewDate, isDeleted, difficulty, reviewCount, [userId+updatedAt], [userId+isDeleted], [userId+nextReviewDate], [cardSetId+isDeleted], *tagIds",
+      documents:
+        "id, userId, folderId, updatedAt, isDeleted, [userId+updatedAt], [userId+folderId]",
+      users: "id, userId, updatedAt",
+      userSettings: "id, userId, updatedAt, isDeleted, [userId+updatedAt]",
+      userStats: "id, userId, updatedAt, isDeleted, [userId+updatedAt]",
+      syncMetadata: "userId, deviceId",
+      levelHistories: "id, userId, cardId, changedAt",
+      deviceMeta: "deviceId, userId",
+      syncErrors: "id, occurredAt, phase, retryable",
+      syncHistory: "id, finishedAt",
+      syncSettings: "id",
+      syncQueue:
+        "id, targetId, status, priority, [status+priority], [targetId+status], idempotencyKey, &migrationKey",
+      conflicts: "id, entityId",
+      tags: "[rootFolderId+name], rootFolderId, userId, updatedAt",
+      tags_v2: "[userId+name], userId, updatedAt",
+      tags_v3:
+        "id, userId, parentId, [userId+parentId], [userId+nameLower], updatedAt",
+      studyLogs: "id, userId, cardId, studiedAt",
+      metadata: "key",
+      images: "id, userId, status, [userId+status]",
+      cardRelations:
+        "id, userId, fromCardId, toCardId, updatedAt, [userId+updatedAt]",
+      projectMaps: "id, userId, folderId, updatedAt, [userId+updatedAt]",
+    })
+    .upgrade(async (tx) => {
+      type RawCardRow = Record<string, unknown> & { id: string };
+      const cardsTable = tx.table("cards");
+
+      const sanitizeImages = (images: unknown) =>
+        Array.isArray(images)
+          ? images.map((image) => {
+              if (!image || typeof image !== "object") return image;
+              const record = image as Record<string, unknown>;
+              const assetId = record.assetId ?? record.id ?? null;
+              const remoteUrl =
+                typeof record.remoteUrl === "string" &&
+                record.remoteUrl.startsWith("http")
+                  ? record.remoteUrl
+                  : null;
+              return {
+                id: record.id ?? assetId,
+                assetId,
+                localFileId: record.localFileId ?? assetId,
+                remoteUrl,
+                storagePath: record.storagePath ?? null,
+                status: record.status ?? (remoteUrl ? "ready" : "uploading"),
+                error: record.error ?? undefined,
+                scale: record.scale ?? 1,
+                x: record.x ?? 0,
+                naturalW: record.naturalW ?? null,
+                naturalH: record.naturalH ?? null,
+              };
+            })
+          : [];
+
+      const normalizeBlocks = (blocks: unknown) => {
+        if (!Array.isArray(blocks)) return [];
+        return blocks.map((block) => {
+          if (!block || typeof block !== "object") return block;
+          const record = block as Record<string, unknown>;
+          if (!Array.isArray(record.images)) return block;
+          return {
+            ...record,
+            images: sanitizeImages(record.images),
+          };
+        });
+      };
+
+      const normalizeExtraRows = (value: unknown) => {
+        const parsed = Number(value);
+        return Number.isFinite(parsed) ? Math.max(0, Math.round(parsed)) : 0;
+      };
+
+      const buildFallbackBlocks = (
+        side: "question" | "answer",
+        row: RawCardRow,
+      ) => {
+        const textKey = side === "question" ? "questionText" : "answerText";
+        const imagesKey =
+          side === "question" ? "questionImages" : "answerImages";
+        const audiosKey =
+          side === "question" ? "questionAudios" : "answerAudios";
+        const codeKey = side === "question" ? "questionCode" : "answerCode";
+        const text = typeof row[textKey] === "string" ? row[textKey].trim() : "";
+        const images = sanitizeImages(row[imagesKey]);
+        const audios = Array.isArray(row[audiosKey]) ? row[audiosKey] : [];
+        const code = row[codeKey];
+        const blocks: Record<string, unknown>[] = [];
+        let orderIndex = 0;
+
+        if (text) {
+          blocks.push({
+            id: `${side}-text-${row.id}`,
+            type: "text",
+            content: text,
+            orderIndex: orderIndex++,
+          });
+        }
+        if (code) {
+          blocks.push({
+            id: `${side}-code-${row.id}`,
+            type: "code",
+            code,
+            orderIndex: orderIndex++,
+          });
+        }
+        if (images.length > 0) {
+          blocks.push({
+            id: `${side}-image-${row.id}`,
+            type: "image",
+            images,
+            orderIndex: orderIndex++,
+          });
+        }
+        if (audios.length > 0) {
+          blocks.push({
+            id: `${side}-audio-${row.id}`,
+            type: "audio",
+            audios,
+            orderIndex: orderIndex++,
+          });
+        }
+        return blocks;
+      };
+
+      await cardsTable.toCollection().modify((card: RawCardRow) => {
+        const existingFront =
+          card.front && typeof card.front === "object"
+            ? (card.front as Record<string, unknown>)
+            : {};
+        const existingBack =
+          card.back && typeof card.back === "object"
+            ? (card.back as Record<string, unknown>)
+            : {};
+
+        const frontBlocks = normalizeBlocks(
+          existingFront.blocks ?? card.questionBlocks ?? card.question_blocks,
+        );
+        const backBlocks = normalizeBlocks(
+          existingBack.blocks ?? card.answerBlocks ?? card.answer_blocks,
+        );
+
+        card.front = {
+          ...existingFront,
+          blocks:
+            frontBlocks.length > 0
+              ? frontBlocks
+              : buildFallbackBlocks("question", card),
+          ink: existingFront.ink ?? card.inkQuestion ?? card.ink_question ?? null,
+          extraRows: normalizeExtraRows(
+            existingFront.extraRows ??
+              card.questionExtraRows ??
+              card.question_extra_rows,
+          ),
+        };
+
+        card.back = {
+          ...existingBack,
+          blocks:
+            backBlocks.length > 0 ? backBlocks : buildFallbackBlocks("answer", card),
+          ink: existingBack.ink ?? card.inkAnswer ?? card.ink_answer ?? null,
+          extraRows: normalizeExtraRows(
+            existingBack.extraRows ??
+              card.answerExtraRows ??
+              card.answer_extra_rows,
+          ),
+        };
+
+        delete card.questionBlocks;
+        delete card.answerBlocks;
+        delete card.question_blocks;
+        delete card.answer_blocks;
+        delete card.questionText;
+        delete card.answerText;
+        delete card.question_text;
+        delete card.answer_text;
+        delete card.questionImages;
+        delete card.answerImages;
+        delete card.question_images;
+        delete card.answer_images;
+        delete card.questionAudios;
+        delete card.answerAudios;
+        delete card.question_audios;
+        delete card.answer_audios;
+        delete card.questionCode;
+        delete card.answerCode;
+        delete card.question_code;
+        delete card.answer_code;
+        delete card.questionMarked;
+        delete card.answerMarked;
+        delete card.question_marked;
+        delete card.answer_marked;
+        delete card.questionTextHighlighted;
+        delete card.answerTextHighlighted;
+        delete card.frontBlocks;
+        delete card.backBlocks;
+        delete card.inkQuestion;
+        delete card.inkAnswer;
+        delete card.ink_question;
+        delete card.ink_answer;
+        delete card.questionExtraRows;
+        delete card.answerExtraRows;
+        delete card.question_extra_rows;
+        delete card.answer_extra_rows;
+      });
+    });
 };

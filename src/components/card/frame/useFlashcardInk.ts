@@ -166,8 +166,8 @@ export function useFlashcardInk({
     updateCard(
       cardId,
       pending.side === "question"
-        ? { inkQuestion: pending.doc }
-        : { inkAnswer: pending.doc },
+        ? { front: { ink: pending.doc } }
+        : { back: { ink: pending.doc } },
     ).catch((error) => {
       console.error("[Flashcard] Failed to persist ink document", error);
     });
