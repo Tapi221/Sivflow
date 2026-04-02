@@ -1,9 +1,21 @@
-import type { UserStats } from "@/types";
 import type {
+  AssetRecord,
+  Card,
+  Folder,
+  UserSettings,
+  UserStats,
+} from "@/types";
+import type {
+  AssetSyncPayload,
   DiffResult,
+  SyncDeletePayload,
   SyncConflict,
+  SyncEntity,
   SyncError,
   SyncHistory,
+  SyncOperationType,
+  SyncPayloadByEntity,
+  SyncQueueItem,
   SyncResult,
   SyncSettings,
 } from "@/types/domain/sync";
@@ -40,6 +52,76 @@ type SyncableCollection =
   | "folders"
   | "cards"
   | "userStats";
+
+type MergeableEntity = Card | Folder;
+type MergeableEntityType = "card" | "folder";
+type SyncUpsertTable = "cards" | "folders" | "userSettings" | "userStats";
+type SyncPayloadByTable = {
+  cards: Card;
+  folders: Folder;
+  userSettings: UserSettings;
+  userStats: UserStats;
+};
+
+const toDate = (value: unknown): Date => {
+  if (value instanceof Date) return value;
+  if (
+    value &&
+    typeof value === "object" &&
+    "toDate" in value &&
+    typeof value.toDate === "function"
+  ) {
+    const date = value.toDate();
+    return date instanceof Date ? date : new Date(0);
+  }
+  if (typeof value === "number" || typeof value === "string") {
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? new Date(0) : date;
+  }
+  return new Date(0);
+};
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
+
+const hasStringId = (value: unknown): value is { id: string } =>
+  isRecord(value) && typeof value.id === "string" && value.id.length > 0;
+
+const isCard = (value: unknown): value is Card =>
+  hasStringId(value) && isRecord(value.front) && isRecord(value.back);
+
+const isFolder = (value: unknown): value is Folder =>
+  hasStringId(value) &&
+  typeof value.folderId === "string" &&
+  typeof value.folderName === "string";
+
+const isAssetSyncPayload = (value: unknown): value is AssetSyncPayload =>
+  hasStringId(value);
+
+const getErrorDetails = (
+  error: unknown,
+): { message: string; stack?: string } => {
+  if (error instanceof Error) {
+    return { message: error.message, stack: error.stack };
+  }
+  if (isRecord(error)) {
+    const message =
+      typeof error.message === "string"
+        ? error.message
+        : "Unknown sync error";
+    const stack = typeof error.stack === "string" ? error.stack : undefined;
+    return { message, stack };
+  }
+  return { message: String(error) };
+};
+
+const hasTextConflict = (local: MergeableEntity, remote: MergeableEntity): boolean =>
+  isCard(local) && isCard(remote)
+    ? JSON.stringify(local.front.blocks) !== JSON.stringify(remote.front.blocks) ||
+      JSON.stringify(local.back.blocks) !== JSON.stringify(remote.back.blocks)
+    : isFolder(local) && isFolder(remote)
+      ? local.folderName !== remote.folderName
+      : false;
 
 /**
  * FirestoreとローカルDB (Dexie) 間の差分同期を管理するサービスクラス。
@@ -267,10 +349,10 @@ export class SyncService {
    * 同期設定を読み込み（なければデフォルト作成）
    */
   async loadSettings(): Promise<SyncSettings> {
-    let settings = await this.localDB.syncSettings.get("default");
+    let settings = await this.localDB.getSyncSettings("default");
     if (!settings) {
       settings = { ...DEFAULT_SYNC_SETTINGS };
-      await this.localDB.syncSettings.put(settings);
+      await this.localDB.putSyncSettings(settings);
     }
     return settings;
   }
@@ -279,7 +361,7 @@ export class SyncService {
    * 同期設定を保存
    */
   async saveSettings(settings: SyncSettings): Promise<void> {
-    await this.localDB.syncSettings.put(settings);
+    await this.localDB.putSyncSettings(settings);
   }
 
   /**
@@ -308,14 +390,14 @@ export class SyncService {
     existingErrorId?: string,
   ): Promise<string> {
     if (existingErrorId) {
-      const existing = await this.localDB.syncErrors.get(existingErrorId);
+      const existing = await this.localDB.getSyncError(existingErrorId);
       if (existing) {
         existing.retryCount += 1;
         existing.occurredAt = Date.now();
         if (existing.retryCount >= 3) {
           existing.retryable = false;
         }
-        await this.localDB.syncErrors.put(existing);
+        await this.localDB.putSyncError(existing);
         return existing.id;
       }
     }
@@ -329,7 +411,7 @@ export class SyncService {
       retryCount: 0,
       retryable: true,
     };
-    await this.localDB.syncErrors.put(error);
+    await this.localDB.putSyncError(error);
     return error.id;
   }
 
@@ -337,17 +419,14 @@ export class SyncService {
    * リトライ可能なエラーを取得
    */
   async getRetryableErrors(): Promise<SyncError[]> {
-    return this.localDB.syncErrors
-      .where("retryable")
-      .equals(1) // Dexieではbooleanは0/1として扱われる
-      .toArray();
+    return this.localDB.getRetryableSyncErrors();
   }
 
   /**
    * すべてのエラーをクリア
    */
   async clearAllErrors(): Promise<void> {
-    await this.localDB.syncErrors.clear();
+    await this.localDB.clearSyncErrors();
   }
 
   // ========================================
@@ -373,18 +452,14 @@ export class SyncService {
       downloaded,
       message,
     };
-    await this.localDB.syncHistory.put(history);
+    await this.localDB.putSyncHistory(history);
   }
 
   /**
    * 同期履歴を取得（直近n件）
    */
   async getRecentHistory(limit: number = 30): Promise<SyncHistory[]> {
-    return this.localDB.syncHistory
-      .orderBy("finishedAt")
-      .reverse()
-      .limit(limit)
-      .toArray();
+    return this.localDB.getRecentSyncHistory(limit);
   }
 
   // ========================================
@@ -396,37 +471,46 @@ export class SyncService {
    * オフライン時またはpush失敗時に使用
    */
   async enqueueChange(
-    entity: "card" | "folder" | "asset",
-    action: "create" | "update" | "delete",
-    payload: unknown,
+    entity: SyncEntity,
+    operationType: SyncOperationType,
+    payload: Card | Folder | AssetSyncPayload | SyncDeletePayload,
   ): Promise<void> {
-    // キューの上限（1000件）を確認
-    const count = await this.localDB.syncQueue.count();
-    if (count >= 1000) {
-      console.warn("[Sync] Queue limit reached. Removing oldest changes.");
-      const oldest = await this.localDB.syncQueue
-        .orderBy("createdAt")
-        .limit(count - 999)
-        .toArray();
-      await this.localDB.syncQueue.bulkDelete(oldest.map((i) => i.id));
+    const targetId = hasStringId(payload) ? payload.id : null;
+    if (!targetId) {
+      throw new Error("Sync queue payload must include a string id");
     }
 
-    const queueItem: unknown = {
+    await this.localDB.trimSyncQueueToLimit(999);
+
+    const queueItem: SyncQueueItem = {
       id: crypto.randomUUID(),
+      idempotencyKey: crypto.randomUUID(),
+      targetId,
       entity,
-      action,
-      payload,
+      operationType,
+      action: operationType,
+      type: "upload",
+      payload:
+        operationType === "delete"
+          ? { id: targetId }
+          : this.assertQueuePayload(entity, payload),
+      priority: "high",
       createdAt: Date.now(),
+      updatedAt: Date.now(),
+      status: "pending",
+      retryCount: 0,
     };
-    await this.localDB.syncQueue.put(queueItem);
-    console.log(`[Sync] Enqueued ${action} for ${entity}: ${payload.id}`);
+    await this.localDB.putSyncQueueItem(queueItem);
+    console.log(
+      `[Sync] Enqueued ${operationType} for ${entity}: ${queueItem.targetId}`,
+    );
   }
 
   /**
    * キューの件数を取得
    */
   async getQueueCount(): Promise<number> {
-    return this.localDB.syncQueue.count();
+    return this.localDB.getSyncQueueCount();
   }
 
   /**
@@ -434,7 +518,7 @@ export class SyncService {
    * 各アイテムごとにtry-catch、成功したら削除、失敗したらエラー記録してキュー保持
    */
   async processQueue(): Promise<{ processed: number; failed: number }> {
-    let queue = await this.localDB.syncQueue.orderBy("createdAt").toArray();
+    let queue = await this.localDB.getQueuedItemsOldestFirst();
     let processed = 0;
     let failed = 0;
 
@@ -458,25 +542,18 @@ export class SyncService {
     }
 
     if (queue.length > queueLimit) {
-      const toRemove = queue.length - queueLimit;
       console.warn(
-        `[Sync] Queue size ${queue.length} exceeds dynamic limit ${queueLimit}. Removing ${toRemove} oldest items.`,
+        `[Sync] Queue size ${queue.length} exceeds dynamic limit ${queueLimit}. Trimming oldest items.`,
       );
-      const itemsToRemove = queue.slice(0, toRemove);
-      for (const item of itemsToRemove) {
-        await this.localDB.syncQueue.delete(item.id);
-      }
-      queue = queue.slice(toRemove);
+      await this.localDB.trimSyncQueueToLimit(queueLimit);
+      queue = await this.localDB.getQueuedItemsOldestFirst();
     }
 
     for (const item of queue) {
       try {
-        // すでに3回以上失敗しているアイテムは一旦スキップ（またはエラーログを吐いて破棄）
-        const errors = await this.localDB.syncErrors
-          .where("message")
-          .startsWith(`Queue processing failed`)
-          .and((e) => e.message.includes(item.payload.id))
-          .toArray();
+        const errors = await this.localDB.findQueueProcessingErrorsByTargetId(
+          item.targetId,
+        );
         const totalAttempts = errors.reduce(
           (acc, e) => acc + e.retryCount + 1,
           0,
@@ -484,114 +561,29 @@ export class SyncService {
 
         if (totalAttempts >= 3) {
           console.error(
-            `[Sync] Skipping queue item ${item.payload.id} after ${totalAttempts} failed attempts.`,
+            `[Sync] Skipping queue item ${item.targetId} after ${totalAttempts} failed attempts.`,
           );
-          // 失敗が続くアイテムはキューから削除してエラーとして記録
-          await this.localDB.syncQueue.delete(item.id);
+          await this.localDB.removeSyncQueueItem(item.id);
           continue;
         }
 
-        if (item.action === "create" || item.action === "update") {
-          if (item.entity === "asset") {
-            const payload = item.payload ?? {};
-            const assetId =
-              payload.assetId ?? item.targetId ?? item.payload?.id;
-            const localBlobId = payload.localBlobId ?? assetId;
-            const remoteKey =
-              payload.remoteKey ?? `users/${this.userId}/assets/${assetId}`;
-            if (!assetId || !localBlobId) {
-              throw new Error(
-                "Asset queue payload is missing assetId/localBlobId",
-              );
-            }
-            const blob = await getImageBlob(localBlobId, {
-              userId: this.userId,
-            });
-            if (!blob) {
-              await this.localDB.images.put({
-                id: assetId,
-                userId: this.userId,
-                mime: payload.mime ?? "application/octet-stream",
-                size: payload.size ?? 0,
-                localBlobId,
-                localStatus: "missing",
-                remoteKey,
-                remoteStatus: "failed",
-                updatedAt: new Date(),
-                createdAt: new Date(),
-              } as unknown);
-              throw new Error(`Asset blob missing: ${assetId}`);
-            }
-            const task = uploadBytesResumable(
-              storageRef(storage, remoteKey),
-              blob,
-              {
-                contentType:
-                  blob.type || payload.mime || "application/octet-stream",
-              },
-            );
-            await new Promise<void>((resolve, reject) => {
-              task.on("state_changed", undefined, reject, () => resolve());
-            });
-            const remoteUrl = await getDownloadURL(task.snapshot.ref);
-            const existingAsset = await this.localDB.images.get(assetId);
-            await this.localDB.images.put({
-              ...((existingAsset as unknown) ?? {}),
-              id: assetId,
-              userId: this.userId,
-              mime:
-                blob.type ||
-                payload.mime ||
-                (existingAsset as unknown)?.mime ||
-                "application/octet-stream",
-              size:
-                blob.size || payload.size || (existingAsset as unknown)?.size || 0,
-              localBlobId,
-              localStatus: "present",
-              remoteKey,
-              remoteStatus: "ready",
-              remoteUrlCache: remoteUrl,
-              retryCount: 0,
-              updatedAt: new Date(),
-              createdAt: (existingAsset as unknown)?.createdAt ?? new Date(),
-            } as unknown);
-            if (import.meta.env.DEV) {
-              console.info("[AssetSync] syncQueue upload success", {
-                assetId,
-                remoteKey,
-              });
-            }
-          } else if (item.entity === "card") {
-            await this.cloudProvider.upsertCard(item.payload);
-          } else {
-            await this.cloudProvider.upsertFolder(item.payload);
-          }
-        } else if (item.action === "delete") {
-          if (item.entity === "asset") {
-            // 画像資産のdeleteは現状ローカルメタ更新のみ（Storage削除は将来対応）
-            await this.localDB.images.update(item.payload.id ?? item.targetId, {
-              remoteStatus: "none",
-              updatedAt: new Date(),
-            } as unknown);
-          } else if (item.entity === "card") {
-            await this.cloudProvider.deleteCard(item.payload.id, this.userId);
-          } else {
-            await this.cloudProvider.deleteFolder(item.payload.id, this.userId);
-          }
+        if (item.operationType === "delete") {
+          await this.processDeleteQueueItem(item);
+        } else {
+          await this.processUpsertQueueItem(item);
         }
 
-        // 成功したらキューから削除
-        await this.localDB.syncQueue.delete(item.id);
+        await this.localDB.removeSyncQueueItem(item.id);
         processed++;
         console.log(
-          `[Sync] Processed queue item: ${item.action} ${item.entity} ${item.payload.id}`,
+          `[Sync] Processed queue item: ${item.operationType} ${item.entity} ${item.targetId}`,
         );
       } catch (error: unknown) {
-        // 失敗したらエラー記録してキュー保持
+        const details = getErrorDetails(error);
         await this.recordError(
-          `Queue processing failed: ${error.message}`,
+          `Queue processing failed: ${details.message} [target=${item.targetId}]`,
           "upload",
-          error.stack,
+          details.stack,
         );
         failed++;
         console.error(`[Sync] Failed to process queue item:`, error);
@@ -601,6 +593,124 @@ export class SyncService {
     return { processed, failed };
   }
 
+  private assertQueuePayload<TEntity extends SyncEntity>(
+    entity: TEntity,
+    payload: Card | Folder | AssetSyncPayload | SyncDeletePayload,
+  ): SyncPayloadByEntity[TEntity] {
+    if (entity === "card" && isCard(payload)) return payload;
+    if (entity === "folder" && isFolder(payload)) return payload;
+    if (entity === "asset" && isAssetSyncPayload(payload)) return payload;
+    throw new Error(`Invalid payload for ${entity} queue item`);
+  }
+
+  private async processUpsertQueueItem(
+    item: Extract<SyncQueueItem, { operationType: "create" | "update" }>,
+  ): Promise<void> {
+    switch (item.entity) {
+      case "asset":
+        await this.processAssetUpload(item.payload);
+        return;
+      case "card":
+        await this.cloudProvider.upsertCard(item.payload);
+        return;
+      case "folder":
+        await this.cloudProvider.upsertFolder(item.payload);
+        return;
+    }
+  }
+
+  private async processDeleteQueueItem(
+    item: Extract<SyncQueueItem, { operationType: "delete" }>,
+  ): Promise<void> {
+    switch (item.entity) {
+      case "asset":
+        await this.localDB.updateImageRecord(item.targetId, {
+          remoteStatus: "none",
+          updatedAt: new Date(),
+        });
+        return;
+      case "card":
+        await this.cloudProvider.deleteCard(item.targetId, this.userId);
+        return;
+      case "folder":
+        await this.cloudProvider.deleteFolder(item.targetId, this.userId);
+        return;
+    }
+  }
+
+  private async processAssetUpload(payload: AssetSyncPayload): Promise<void> {
+    const assetId = payload.id;
+    const localBlobId = payload.localBlobId ?? assetId;
+    const remoteKey = payload.remoteKey ?? `users/${this.userId}/assets/${assetId}`;
+    if (!localBlobId) {
+      throw new Error("Asset queue payload is missing localBlobId");
+    }
+
+    const blob = await getImageBlob(localBlobId, { userId: this.userId });
+    if (!blob) {
+      await this.localDB.putImageRecord({
+        id: assetId,
+        userId: payload.userId ?? this.userId,
+        mime: payload.mime ?? "application/octet-stream",
+        size: payload.size ?? 0,
+        localBlobId,
+        localStatus: "missing",
+        remoteKey,
+        remoteStatus: "failed",
+        updatedAt: new Date(),
+        createdAt: payload.createdAt ?? new Date(),
+      });
+      throw new Error(`Asset blob missing: ${assetId}`);
+    }
+
+    const task = uploadBytesResumable(storageRef(storage, remoteKey), blob, {
+      contentType: blob.type || payload.mime || "application/octet-stream",
+    });
+    await new Promise<void>((resolve, reject) => {
+      task.on("state_changed", undefined, reject, () => resolve());
+    });
+    const remoteUrl = await getDownloadURL(task.snapshot.ref);
+    const existingAsset = await this.localDB.getImageRecord(assetId);
+    await this.localDB.putImageRecord({
+      ...(existingAsset ?? {}),
+      id: assetId,
+      userId:
+        payload.userId ??
+        (isRecord(existingAsset) && typeof existingAsset.userId === "string"
+          ? existingAsset.userId
+          : this.userId),
+      mime:
+        blob.type ||
+        payload.mime ||
+        (isRecord(existingAsset) && typeof existingAsset.mime === "string"
+          ? existingAsset.mime
+          : "application/octet-stream"),
+      size:
+        blob.size ||
+        payload.size ||
+        (isRecord(existingAsset) && typeof existingAsset.size === "number"
+          ? existingAsset.size
+          : 0),
+      localBlobId,
+      localStatus: "present",
+      remoteKey,
+      remoteStatus: "ready",
+      remoteUrlCache: remoteUrl,
+      retryCount: 0,
+      updatedAt: new Date(),
+      createdAt:
+        isRecord(existingAsset) && existingAsset.createdAt
+          ? existingAsset.createdAt
+          : payload.createdAt ?? new Date(),
+    } as AssetRecord);
+    if (import.meta.env.DEV) {
+      console.info("[AssetSync] syncQueue upload success", {
+        assetId,
+        remoteKey,
+      });
+    }
+  }
+
   // ========================================
   // 競合検出と解決
   // ========================================
@@ -608,77 +718,66 @@ export class SyncService {
   /**
    * クラウドのデータとローカルのデータをマージする（Field-level Merging）
    */
-  private mergeEntity(
-    local: unknown,
-    remote: unknown,
-    entityType: "card" | "folder",
-  ): unknown {
+  private mergeEntity<T extends MergeableEntity>(
+    local: T | undefined,
+    remote: T,
+    entityType: MergeableEntityType,
+  ): T {
     if (!local) return remote;
-    if (!remote) return local;
 
-    const localUpdated =
-      local.updatedAt instanceof Date
-        ? local.updatedAt
-        : local.updatedAt?.toDate?.() || new Date(0);
-    const remoteUpdated =
-      remote.updatedAt instanceof Date
-        ? remote.updatedAt
-        : remote.updatedAt?.toDate?.() || new Date(0);
+    const localUpdated = toDate(local.updatedAt);
+    const remoteUpdated = toDate(remote.updatedAt);
 
-      // 基本的には「最新の更新日時」を持つ方を優先
-      if (remoteUpdated > localUpdated) {
-        let imageMergedDescription = "";
-        const merged = { ...local, ...remote };
-
-        // テキストフィールドなどで競合があるかチェック
-        const isCard = entityType === "card";
-        const hasTextConflict = isCard
-          ? JSON.stringify(local.front?.blocks ?? []) !==
-              JSON.stringify(remote.front?.blocks ?? []) ||
-            JSON.stringify(local.back?.blocks ?? []) !==
-              JSON.stringify(remote.back?.blocks ?? [])
-          : local.name !== remote.name;
-
-        if (hasTextConflict) {
+    if (remoteUpdated > localUpdated) {
+      const merged: T = { ...local, ...remote };
+      if (hasTextConflict(local, remote)) {
         merged.hasSyncConflict = true;
-        merged.conflictDescription = imageMergedDescription
-          ? `${imageMergedDescription} また、${isCard ? "問題文や回答" : "フォルダ名"}の内容に競合があります。最新の編集内容を優先しましたが、確認をお勧めします。`
-          : "別の端末でも編集が行われていました。最新の内容を優先しましたが、競合がある可能性があります。";
+        merged.conflictDescription =
+          "別の端末でも編集が行われていました。最新の内容を優先しましたが、競合がある可能性があります。";
 
-          // 手動解決用に詳細を conflicts テーブルに保存
-          const conflictDetails: unknown = isCard
+        const conflictDetails =
+          entityType === "card" && isCard(local) && isCard(remote)
             ? {
                 front: { local: local.front, remote: remote.front },
                 back: { local: local.back, remote: remote.back },
               }
-            : {
-                name: { local: local.name, remote: remote.name },
-            };
+            : entityType === "folder" && isFolder(local) && isFolder(remote)
+              ? {
+                  folderName: {
+                    local: local.folderName,
+                    remote: remote.folderName,
+                  },
+                }
+              : {};
 
         this.saveConflict(remote.id, entityType, merged, conflictDetails).catch(
-          (err) =>
-            console.error("[Sync] Failed to save detailed conflict:", err),
+          (error) =>
+            console.error(
+              "[Sync] Failed to save detailed conflict:",
+              sanitizeForLog(error),
+            ),
         );
-      } else if (imageMergedDescription) {
-        merged.hasSyncConflict = true;
-        merged.conflictDescription = imageMergedDescription;
       }
-
       return merged;
-    } else if (localUpdated > remoteUpdated) {
+    }
+
+    if (localUpdated > remoteUpdated) {
       // ローカルが新しい場合はそのまま（次のpushで同期される）
       return local;
     }
 
     // 更新日時が同じ場合はマージ
-    return { ...local, ...remote };
+    return { ...local, ...remote } as T;
   }
 
   /**
    * 2-way差分検出とフィールド単位自動マージ
    * base=local（ユーザーが最後に見た状態）
    */
-  private diffFields(local: unknown, remote: unknown): DiffResult {
+  private diffFields(
+    local: MergeableEntity,
+    remote: MergeableEntity,
+  ): DiffResult {
     const base = local; // 2-way merge
     const autoMerged = { ...base };
     const conflicts: Record<string, { local: unknown; remote: unknown }> = {};
@@ -724,8 +823,8 @@ export class SyncService {
    */
   private async saveConflict(
     entityId: string,
-    entityType: "card" | "folder",
-    autoMerged: unknown,
+    entityType: MergeableEntityType,
+    autoMerged: MergeableEntity,
     conflicts: Record<string, { local: unknown; remote: unknown }>,
   ): Promise<void> {
     const conflict: SyncConflict = {
@@ -736,7 +835,7 @@ export class SyncService {
       conflicts,
       detectedAt: Date.now(),
     };
-    await this.localDB.conflicts.put(conflict);
+    await this.localDB.putConflict(conflict);
     console.log(`[Sync] Conflict detected for ${entityType} ${entityId}`);
   }
 
@@ -744,7 +843,7 @@ export class SyncService {
    * 未解決の競合を取得
    */
   async getUnresolvedConflicts(): Promise<SyncConflict[]> {
-    return this.localDB.conflicts.toArray();
+    return this.localDB.getConflicts();
   }
 
   /**
@@ -752,9 +851,9 @@ export class SyncService {
    */
   async resolveConflict(
     conflictId: string,
-    resolvedData: unknown,
+    resolvedData: Card | Folder,
   ): Promise<void> {
-    const conflict = await this.localDB.conflicts.get(conflictId);
+    const conflict = await this.localDB.getConflict(conflictId);
     if (!conflict) {
       throw new Error(`Conflict ${conflictId} not found`);
     }
@@ -764,7 +863,7 @@ export class SyncService {
     await this.localDB.upsert(table, resolvedData);
 
     // 競合レコードを削除
-    await this.localDB.conflicts.delete(conflictId);
+    await this.localDB.removeConflict(conflictId);
     console.log(`[Sync] Conflict ${conflictId} resolved`);
   }
 
@@ -799,10 +898,11 @@ export class SyncService {
       }
       console.log(`[Sync] Purged ${entityType} ${id} from Firestore`);
     } catch (error: unknown) {
+      const details = getErrorDetails(error);
       // Firestore 削除失敗時はキューに追加
       console.warn(
         `[Sync] Failed to purge ${entityType} ${id} from Firestore, queueing for later:`,
-        error.message,
+        details.message,
       );
       await this.enqueueChange(entityType, "delete", { id });
     }
@@ -871,25 +971,32 @@ export class SyncService {
       console.log("[Sync][Pull] Completed successfully.");
       return true;
     } catch (error: unknown) {
+      const details = getErrorDetails(error);
       console.error("[Sync][Pull] Failed:", sanitizeForLog(error));
-      await this.recordError(error.message, "download", error.stack);
+      await this.recordError(details.message, "download", details.stack);
       return false;
     }
   }
 
-  private async mergeAndUpsert(
-    table: string,
-    remoteItems: unknown[],
+  private async mergeAndUpsert<TTable extends SyncUpsertTable>(
+    table: TTable,
+    remoteItems: Array<SyncPayloadByTable[TTable]>,
   ): Promise<void> {
-    const entityType = table === "cards" ? "card" : "folder";
-    for (const item of remoteItems) {
-      // PULL SIDE SANITIZATION: DB保存前に汚染データ（Blob URL）を除去
-      if (table === "userSettings" && item.profileImage) {
-        item.profileImage = sanitizeProfileImage(
-          item.profileImage,
-        ).profileImage;
+    if (table === "userSettings" || table === "userStats") {
+      for (const item of remoteItems) {
+        if (
+          table === "userSettings" &&
+          item.profileImage
+        ) {
+          item.profileImage = sanitizeProfileImage(item.profileImage).profileImage;
+        }
+        await this.localDB.upsert(table, item);
       }
+      return;
+    }
 
+    const entityType: MergeableEntityType = table === "cards" ? "card" : "folder";
+    for (const item of remoteItems) {
       const localItem = await this.localDB.getItem(table, item.id);
       const merged = this.mergeEntity(localItem, item, entityType);
       await this.localDB.upsert(table, merged);
@@ -1135,8 +1242,9 @@ export class SyncService {
       );
       return true;
     } catch (error: unknown) {
+      const details = getErrorDetails(error);
       console.error("[Sync][Push] Failed:", sanitizeForLog(error));
-      await this.recordError(error.message, "upload", error.stack);
+      await this.recordError(details.message, "upload", details.stack);
       return false;
     }
   }
@@ -1190,8 +1298,9 @@ export class SyncService {
       await this.clearAllErrors();
       await this.recordHistory(startedAt, "success", 0, 0);
     } catch (error: unknown) {
+      const details = getErrorDetails(error);
       console.error("[Sync] Error during full sync:", error);
-      await this.recordError(error.message, "download", error.stack);
+      await this.recordError(details.message, "download", details.stack);
       await this.recordHistory(startedAt, "failed", 0, 0);
       throw error; // Re-throw to notify caller (AuthContext)
     }
@@ -1273,16 +1382,17 @@ export class SyncService {
       try {
         pullSuccess = await this.pullChanges(onProgress);
       } catch (pullError: unknown) {
+        const details = getErrorDetails(pullError);
         console.warn(
           "[Sync] Pull failed with fatal error. Checking for self-healing fallback...",
-          pullError.message,
+          details.message,
         );
         // 【正常遷移: Delta Sync 失敗 → Full Sync】
         // 差分同期が論理的に修復不能なエラー（409衝突や構造不整合など）の場合、フル同期を試みる
         if (
-          pullError.message?.includes("conflict") ||
-          pullError.message?.includes("version_mismatch") ||
-          pullError.message?.includes("failed to fetch")
+          details.message.includes("conflict") ||
+          details.message.includes("version_mismatch") ||
+          details.message.includes("failed to fetch")
         ) {
           console.log("[Sync] Triggering self-healing Full Sync fallback.");
           await this.performFullSync();
@@ -1307,12 +1417,13 @@ export class SyncService {
         try {
           pushSuccess = await this.pushChanges(previousSyncTime || undefined);
         } catch (pushError: unknown) {
+          const details = getErrorDetails(pushError);
           console.warn(
             "[Sync] Push failed with fatal error. Checking for fallback...",
-            pushError.message,
+            details.message,
           );
           // プッシュ失敗時も特定の条件下ではフル同期による整合性確保を試みる
-          if (pushError.message?.includes("conflict")) {
+          if (details.message.includes("conflict")) {
             console.log("[Sync] Triggering Full Sync due to push conflict.");
             await this.performFullSync();
             pushSuccess = true;
@@ -1347,7 +1458,7 @@ export class SyncService {
         const existingDoc = await getDoc(deviceMetaDoc);
         const existingData = existingDoc.exists() ? existingDoc.data() : null;
 
-        const metadata: unknown = {
+        const metadata: Record<string, unknown> = {
           userId: this.userId,
           deviceId: this.deviceId,
           lastSyncTime: Timestamp.now(),
@@ -1389,8 +1500,9 @@ export class SyncService {
         errors,
       };
     } catch (error: unknown) {
+      const details = getErrorDetails(error);
       console.error("[Sync] Synchronization failed:", error);
-      await this.recordError(error.message, "merge", error.stack);
+      await this.recordError(details.message, "merge", details.stack);
       await this.recordHistory(startedAt, "failed", uploaded, downloaded);
 
       return {
@@ -1398,7 +1510,7 @@ export class SyncService {
         uploaded,
         downloaded,
         conflicts: conflictCount,
-        errors: [...errors, error.message],
+        errors: [...errors, details.message],
       };
     } finally {
       await this.releaseSyncLock();
@@ -1417,15 +1529,8 @@ export class SyncService {
   }> {
     const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
 
-    const histories = await this.localDB.syncHistory
-      .where("finishedAt")
-      .above(sevenDaysAgo)
-      .toArray();
-
-    const errors = await this.localDB.syncErrors
-      .where("occurredAt")
-      .above(sevenDaysAgo)
-      .toArray();
+    const { histories, errors } =
+      await this.localDB.getSyncStatsSince(sevenDaysAgo);
 
     const totalSyncs = histories.length;
     const successCount = histories.filter((h) => h.result === "success").length;

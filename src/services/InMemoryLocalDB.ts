@@ -1,7 +1,21 @@
-import type { Card, Folder, SyncQueueItem } from "@/types";
+import type {
+  AssetRecord,
+  Card,
+  Folder,
+  SyncConflict,
+  SyncError,
+  SyncHistory,
+  SyncMetadata,
+  SyncQueueItem,
+  SyncSettings,
+  UploadedImage,
+  UserSettings,
+  UserStats,
+} from "@/types";
 import { normalizeCard, normalizeFolder } from "@/utils";
 import { getDeviceName, getOrCreateDeviceId } from "@/utils/device";
 import { nanoid } from "nanoid";
+import type { LocalDBTableMap, SyncableEntityTable } from "./localdb/types";
 
 type KeyPath = string | string[];
 type Predicate<T> = (value: T) => boolean;
@@ -495,15 +509,11 @@ const normalizeFolderWithSilent = (raw: unknown) => {
 const SYNCABLE_TABLES = new Set([
   "cards",
   "folders",
-  "cardRelations",
-  "projectMaps",
 ]);
 
 const ENTITY_MAP: Record<string, SyncQueueItem["entity"]> = {
   cards: "card",
   folders: "folder",
-  cardRelations: "cardRelation",
-  projectMaps: "projectMap",
 };
 
 export class InMemoryLocalDB {
@@ -512,22 +522,22 @@ export class InMemoryLocalDB {
   public readonly isInMemoryFallback = true;
   public userId?: string;
 
-  folders!: InMemoryTable<Record<string, unknown>>;
-  cards!: InMemoryTable<Record<string, unknown>>;
+  folders!: InMemoryTable<Folder>;
+  cards!: InMemoryTable<Card>;
   documents!: InMemoryTable<Record<string, unknown>>;
   users!: InMemoryTable<Record<string, unknown>>;
-  userSettings!: InMemoryTable<Record<string, unknown>>;
-  userStats!: InMemoryTable<Record<string, unknown>>;
-  syncMetadata!: InMemoryTable<Record<string, unknown>>;
+  userSettings!: InMemoryTable<UserSettings>;
+  userStats!: InMemoryTable<UserStats>;
+  syncMetadata!: InMemoryTable<SyncMetadata>;
   levelHistories!: InMemoryTable<Record<string, unknown>>;
   deviceMeta!: InMemoryTable<Record<string, unknown>>;
-  syncErrors!: InMemoryTable<Record<string, unknown>>;
-  syncHistory!: InMemoryTable<Record<string, unknown>>;
-  syncSettings!: InMemoryTable<Record<string, unknown>>;
-  syncQueue!: InMemoryTable<Record<string, unknown>>;
-  conflicts!: InMemoryTable<Record<string, unknown>>;
+  syncErrors!: InMemoryTable<SyncError>;
+  syncHistory!: InMemoryTable<SyncHistory>;
+  syncSettings!: InMemoryTable<SyncSettings>;
+  syncQueue!: InMemoryTable<SyncQueueItem>;
+  conflicts!: InMemoryTable<SyncConflict>;
   metadata!: InMemoryTable<Record<string, unknown>>;
-  images!: InMemoryTable<Record<string, unknown>>;
+  images!: InMemoryTable<AssetRecord | UploadedImage>;
   cardRelations!: InMemoryTable<Record<string, unknown>>;
   projectMaps!: InMemoryTable<Record<string, unknown>>;
   tags!: InMemoryTable<Record<string, unknown>>;
@@ -616,6 +626,10 @@ export class InMemoryLocalDB {
     return await scope();
   }
 
+  async getItem<TTable extends SyncableEntityTable>(
+    tableName: TTable,
+    id: string,
+  ): Promise<LocalDBTableMap[TTable] | undefined>;
   async getItem(tableName: string, id: string): Promise<unknown> {
     const item = await this.table(tableName).get(id);
     if (tableName === "cards") return item ? normalizeCard(item) : item;
@@ -624,6 +638,9 @@ export class InMemoryLocalDB {
     return item;
   }
 
+  async getAllItems<TTable extends SyncableEntityTable>(
+    tableName: TTable,
+  ): Promise<Array<LocalDBTableMap[TTable]>>;
   async getAllItems(tableName: string): Promise<unknown[]> {
     const items = await this.table(tableName).toArray();
     if (tableName === "cards") return items.map(normalizeCard);
@@ -633,9 +650,11 @@ export class InMemoryLocalDB {
 
   private async enqueueSync(
     tableName: string,
-    payload: unknown,
+    payload: Card | Folder,
   ): Promise<void> {
     if (!SYNCABLE_TABLES.has(tableName)) return;
+    const operationType: SyncQueueItem["operationType"] =
+      payload.isDeleted ? "delete" : "update";
     const now = Date.now();
     const task: SyncQueueItem = {
       id: nanoid(),
@@ -643,8 +662,9 @@ export class InMemoryLocalDB {
       targetId: payload.id,
       type: "upload",
       entity: ENTITY_MAP[tableName],
-      operationType: "update",
-      payload,
+      operationType,
+      action: operationType,
+      payload: operationType === "delete" ? { id: payload.id } : payload,
       priority: "high",
       createdAt: now,
       updatedAt: now,
@@ -652,7 +672,7 @@ export class InMemoryLocalDB {
       retryCount: 0,
     };
 
-    await this.syncQueue.put(task as unknown as Record<string, unknown>);
+    await this.syncQueue.put(task);
     if (this.syncTrigger) {
       setTimeout(() => this.syncTrigger?.(), 0);
     }
@@ -760,6 +780,11 @@ export class InMemoryLocalDB {
     });
   }
 
+  async getDirtyItems<TTable extends SyncableEntityTable>(
+    tableName: TTable,
+    userId: string,
+    lastSyncTime: Date,
+  ): Promise<Array<LocalDBTableMap[TTable]>>;
   async getDirtyItems(
     tableName: string,
     userId: string,
@@ -836,12 +861,128 @@ export class InMemoryLocalDB {
   }
 
   async upsert(
-    tableName: string,
-    data: unknown,
+    tableName: SyncableEntityTable,
+    data: LocalDBTableMap[SyncableEntityTable],
     skipSync = false,
   ): Promise<void> {
     await this.table(tableName).put(data);
     if (!skipSync) await this.enqueueSync(tableName, data);
+  }
+
+  async getSyncSettings(id: string): Promise<SyncSettings | undefined> {
+    return this.syncSettings.get(id);
+  }
+
+  async putSyncSettings(settings: SyncSettings): Promise<void> {
+    await this.syncSettings.put(settings);
+  }
+
+  async getSyncError(id: string): Promise<SyncError | undefined> {
+    return this.syncErrors.get(id);
+  }
+
+  async putSyncError(error: SyncError): Promise<void> {
+    await this.syncErrors.put(error);
+  }
+
+  async clearSyncErrors(): Promise<void> {
+    await this.syncErrors.clear();
+  }
+
+  async getRetryableSyncErrors(): Promise<SyncError[]> {
+    return this.syncErrors.where("retryable").equals(true).toArray();
+  }
+
+  async findQueueProcessingErrorsByTargetId(
+    targetId: string,
+  ): Promise<SyncError[]> {
+    const errors = await this.syncErrors
+      .where("message")
+      .startsWith("Queue processing failed")
+      .toArray();
+    return errors.filter((error) => error.message.includes(targetId));
+  }
+
+  async putSyncHistory(history: SyncHistory): Promise<void> {
+    await this.syncHistory.put(history);
+  }
+
+  async getRecentSyncHistory(limit: number = 30): Promise<SyncHistory[]> {
+    return this.syncHistory.orderBy("finishedAt").reverse().limit(limit).toArray();
+  }
+
+  async getSyncStatsSince(timestamp: number): Promise<{
+    histories: SyncHistory[];
+    errors: SyncError[];
+  }> {
+    const histories = await this.syncHistory
+      .where("finishedAt")
+      .above(timestamp)
+      .toArray();
+    const errors = await this.syncErrors
+      .where("occurredAt")
+      .above(timestamp)
+      .toArray();
+    return { histories, errors };
+  }
+
+  async getSyncQueueCount(): Promise<number> {
+    return this.syncQueue.count();
+  }
+
+  async getQueuedItemsOldestFirst(): Promise<SyncQueueItem[]> {
+    return this.syncQueue.orderBy("createdAt").toArray();
+  }
+
+  async trimSyncQueueToLimit(limit: number): Promise<void> {
+    const count = await this.syncQueue.count();
+    if (count <= limit) return;
+    const oldest = await this.syncQueue
+      .orderBy("createdAt")
+      .limit(count - limit)
+      .toArray();
+    await this.syncQueue.bulkDelete(oldest.map((item) => item.id));
+  }
+
+  async putSyncQueueItem(item: SyncQueueItem): Promise<void> {
+    await this.syncQueue.put(item);
+  }
+
+  async removeSyncQueueItem(id: string): Promise<void> {
+    await this.syncQueue.delete(id);
+  }
+
+  async putConflict(conflict: SyncConflict): Promise<void> {
+    await this.conflicts.put(conflict);
+  }
+
+  async getConflict(id: string): Promise<SyncConflict | undefined> {
+    return this.conflicts.get(id);
+  }
+
+  async getConflicts(): Promise<SyncConflict[]> {
+    return this.conflicts.toArray();
+  }
+
+  async removeConflict(id: string): Promise<void> {
+    await this.conflicts.delete(id);
+  }
+
+  async getImageRecord(
+    id: string,
+  ): Promise<AssetRecord | UploadedImage | undefined> {
+    return this.images.get(id);
+  }
+
+  async putImageRecord(record: AssetRecord | UploadedImage): Promise<void> {
+    await this.images.put(record);
+  }
+
+  async updateImageRecord(
+    id: string,
+    changes: Partial<AssetRecord & UploadedImage>,
+  ): Promise<number> {
+    return this.images.update(id, changes);
   }
 
   setSyncTrigger(callback: () => void): void {

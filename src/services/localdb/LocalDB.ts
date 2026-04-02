@@ -53,10 +53,13 @@ import {
 
 export type {
     CardRelation, LocalDBInstance, LocalDBLike, ProjectMap,
+    LocalDBTableMap,
+    SyncableEntityTable,
     TagLegacyRecord,
     TagV2Record,
     TagV3Record
 } from "./types";
+import type { LocalDBTableMap, SyncableEntityTable } from "./types";
 
 declare global {
   interface GlobalThis {
@@ -227,10 +230,17 @@ export class LocalDB extends Dexie {
     return queries.normalizeDocumentBlobUrlsForSession(this);
   }
 
+  async getItem<TTable extends SyncableEntityTable>(
+    table: TTable,
+    id: string,
+  ): Promise<LocalDBTableMap[TTable] | undefined>;
   async getItem(table: string, id: string): Promise<unknown> {
     return queries.getItem(this, table, id);
   }
 
+  async getAllItems<TTable extends SyncableEntityTable>(
+    table: TTable,
+  ): Promise<Array<LocalDBTableMap[TTable]>>;
   async getAllItems(table: string): Promise<unknown[]> {
     return queries.getAllItems(this, table);
   }
@@ -245,6 +255,11 @@ export class LocalDB extends Dexie {
     return asArray<Folder>(rows);
   }
 
+  async getDirtyItems<TTable extends SyncableEntityTable>(
+    table: TTable,
+    userId: string,
+    lastSyncTime: Date,
+  ): Promise<Array<LocalDBTableMap[TTable]>>;
   async getDirtyItems(
     table: string,
     userId: string,
@@ -347,6 +362,11 @@ export class LocalDB extends Dexie {
     );
   }
 
+  async upsert<TTable extends SyncableEntityTable>(
+    tableName: TTable,
+    data: LocalDBTableMap[TTable],
+    skipSync?: boolean,
+  ): Promise<void>;
   async upsert(
     tableName: string,
     data: unknown,
@@ -399,6 +419,118 @@ export class LocalDB extends Dexie {
 
   setSyncTrigger(callback: () => void): void {
     this.syncTrigger = callback;
+  }
+
+  async getSyncSettings(id: string): Promise<SyncSettings | undefined> {
+    return this.syncSettings.get(id);
+  }
+
+  async putSyncSettings(settings: SyncSettings): Promise<void> {
+    await this.syncSettings.put(settings);
+  }
+
+  async getSyncError(id: string): Promise<SyncError | undefined> {
+    return this.syncErrors.get(id);
+  }
+
+  async putSyncError(error: SyncError): Promise<void> {
+    await this.syncErrors.put(error);
+  }
+
+  async clearSyncErrors(): Promise<void> {
+    await this.syncErrors.clear();
+  }
+
+  async getRetryableSyncErrors(): Promise<SyncError[]> {
+    return this.syncErrors.where("retryable").equals(1).toArray();
+  }
+
+  async findQueueProcessingErrorsByTargetId(
+    targetId: string,
+  ): Promise<SyncError[]> {
+    const errors = await this.syncErrors
+      .where("message")
+      .startsWith("Queue processing failed")
+      .toArray();
+    return errors.filter((error) => error.message.includes(targetId));
+  }
+
+  async putSyncHistory(history: SyncHistory): Promise<void> {
+    await this.syncHistory.put(history);
+  }
+
+  async getRecentSyncHistory(limit: number = 30): Promise<SyncHistory[]> {
+    return this.syncHistory.orderBy("finishedAt").reverse().limit(limit).toArray();
+  }
+
+  async getSyncStatsSince(timestamp: number): Promise<{
+    histories: SyncHistory[];
+    errors: SyncError[];
+  }> {
+    const [histories, errors] = await Promise.all([
+      this.syncHistory.where("finishedAt").above(timestamp).toArray(),
+      this.syncErrors.where("occurredAt").above(timestamp).toArray(),
+    ]);
+    return { histories, errors };
+  }
+
+  async getSyncQueueCount(): Promise<number> {
+    return this.syncQueue.count();
+  }
+
+  async getQueuedItemsOldestFirst(): Promise<SyncQueueItem[]> {
+    return this.syncQueue.orderBy("createdAt").toArray();
+  }
+
+  async trimSyncQueueToLimit(limit: number): Promise<void> {
+    const count = await this.syncQueue.count();
+    if (count <= limit) return;
+    const oldest = await this.syncQueue
+      .orderBy("createdAt")
+      .limit(count - limit)
+      .toArray();
+    await this.syncQueue.bulkDelete(oldest.map((item) => item.id));
+  }
+
+  async putSyncQueueItem(item: SyncQueueItem): Promise<void> {
+    await this.syncQueue.put(item);
+  }
+
+  async removeSyncQueueItem(id: string): Promise<void> {
+    await this.syncQueue.delete(id);
+  }
+
+  async putConflict(conflict: SyncConflict): Promise<void> {
+    await this.conflicts.put(conflict);
+  }
+
+  async getConflict(id: string): Promise<SyncConflict | undefined> {
+    return this.conflicts.get(id);
+  }
+
+  async getConflicts(): Promise<SyncConflict[]> {
+    return this.conflicts.toArray();
+  }
+
+  async removeConflict(id: string): Promise<void> {
+    await this.conflicts.delete(id);
+  }
+
+  async getImageRecord(
+    id: string,
+  ): Promise<AssetRecord | UploadedImage | undefined> {
+    return this.images.get(id);
+  }
+
+  async putImageRecord(record: AssetRecord | UploadedImage): Promise<void> {
+    await this.images.put(record);
+  }
+
+  async updateImageRecord(
+    id: string,
+    changes: Partial<AssetRecord & UploadedImage>,
+  ): Promise<number> {
+    return this.images.update(id, changes);
   }
 
   private async enqueueSync(
