@@ -495,10 +495,10 @@ export function DirectoryDiagramPane({
                   className="mx-auto w-fit"
                   onClick={(event) => event.stopPropagation()}
                 >
-                  <Flashcard card={adaptCard(previewCard as unknown as import("@/components/card/frame/Flashcard").FlashcardCardLike | null)}
-                    previewMode
-                    className="mx-auto"
-                    allowUpscale
+                    <Flashcard card={previewCard as unknown as import("@/components/card/frame/Flashcard").FlashcardCardLike | null}
+                      previewMode
+                      className="mx-auto"
+                      allowUpscale
                     maxScale={1.75}
                     contentPaddingPx={0}
                   />

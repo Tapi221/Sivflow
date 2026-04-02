@@ -94,9 +94,19 @@ export function useFlashcardDerived(
   const activeSourceBlocks = React.useMemo(
     () =>
       activeSide === "question"
-        ? ((cardData?.frontBlocks?? []) as CardBlock[])
-        : ((cardData?.backBlocks ?? []) as CardBlock[]),
-    [activeSide, cardData?.backBlocks, cardData?.frontBlocks],
+        ? ((cardData?.front?.blocks ??
+            cardData?.frontBlocks ??
+            []) as CardBlock[])
+        : ((cardData?.back?.blocks ??
+            cardData?.backBlocks ??
+            []) as CardBlock[]),
+    [
+      activeSide,
+      cardData?.back?.blocks,
+      cardData?.backBlocks,
+      cardData?.front?.blocks,
+      cardData?.frontBlocks,
+    ],
   );
 
   const activeReferences = React.useMemo(

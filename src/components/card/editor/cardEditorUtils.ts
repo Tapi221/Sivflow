@@ -67,11 +67,21 @@ export function shouldAutoOpenEditorForCard(card: unknown): boolean {
     tags?: unknown[];
     frontBlocks?: CardBlock[];
     backBlocks?: CardBlock[];
+    front?: { blocks?: CardBlock[] | null } | null;
+    back?: { blocks?: CardBlock[] | null } | null;
   };
   if (String(safeCard.title ?? "").trim().length > 0) return false;
   if ((safeCard.tagIds ?? safeCard.tags ?? []).length > 0) return false;
-  const frontBlocks= (safe(card.front?.blocks ?? []) ?? []) as CardBlock[];
-  const backBlocks = (safe(card.back?.blocks ?? []) ?? []) as CardBlock[];
+  const frontBlocks = Array.isArray(safeCard.front?.blocks)
+    ? safeCard.front.blocks
+    : Array.isArray(safeCard.frontBlocks)
+      ? safeCard.frontBlocks
+      : [];
+  const backBlocks = Array.isArray(safeCard.back?.blocks)
+    ? safeCard.back.blocks
+    : Array.isArray(safeCard.backBlocks)
+      ? safeCard.backBlocks
+      : [];
   const hasQuestionContent = frontBlocks.some((b) => !isBlockEmpty(b));
   const hasAnswerContent = backBlocks.some((b) => !isBlockEmpty(b));
   return !hasQuestionContent && !hasAnswerContent;

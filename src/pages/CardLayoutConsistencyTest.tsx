@@ -51,7 +51,7 @@ export default function CardLayoutConsistencyTest() {
             cardDesignWidth={CANONICAL_CARD_WIDTH}
             safePadding={CARD_SAFE_PADDING_PX}
           >
-            <Flashcard card={adaptCard(FIXTURE_CARD)} />
+            <Flashcard card={FIXTURE_CARD} />
           </MobileScalableCard>
         </section>
 

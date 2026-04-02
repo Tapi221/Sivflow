@@ -1,4 +1,3 @@
-import { adaptCard } from "@/adapters/cardAdapter";
 import { Flashcard } from "@/components/card/frame/Flashcard";
 import { CardEditorPane } from "@/components/folder/panes/CardEditorPane";
 import { CARD_PANE_AUTO_MAX_SCALE } from "@/pages/card-view/constants";
@@ -100,7 +99,7 @@ function DesktopCardSurfaceInner({
   return (
     <div className="w-full overflow-visible">
       <Flashcard
-        card={adaptCard(card)}
+        card={card}
         isFlipped={isFlipped}
         previewMode={!isActive}
         onFlip={isActive ? onFlip : undefined}

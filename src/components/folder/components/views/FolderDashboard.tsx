@@ -784,7 +784,7 @@ export function FolderDashboard({
             <SectionHeader title="定着度分布" />
             <div style={{ marginTop: 12 }}>
               {canShowDistribution ? (
-                <div style={{ height: 180 }}>
+                <div style={{ height: 180, minWidth: 0, width: "100%" }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       data={resilienceBuckets}
@@ -1528,7 +1528,6 @@ function ScrollArrow({
     </button>
   );
 }
-
 
 
 

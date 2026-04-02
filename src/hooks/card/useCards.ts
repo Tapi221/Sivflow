@@ -30,6 +30,32 @@ type UseCardsOptions = {
   enabled?: boolean;
 };
 
+const resolveBlocksFromCardData = (
+  value: Partial<Card> & Record<string, unknown>,
+  side: "question" | "answer",
+) => {
+  const directKey = side === "question" ? "questionBlocks" : "answerBlocks";
+  const aliasKey = side === "question" ? "frontBlocks" : "backBlocks";
+  const faceKey = side === "question" ? "front" : "back";
+
+  const direct = value[directKey];
+  if (Array.isArray(direct)) return direct;
+
+  const aliased = value[aliasKey];
+  if (Array.isArray(aliased)) return aliased;
+
+  const face = value[faceKey];
+  if (
+    face &&
+    typeof face === "object" &&
+    Array.isArray((face as { blocks?: unknown[] }).blocks)
+  ) {
+    return (face as { blocks: unknown[] }).blocks;
+  }
+
+  return [];
+};
+
 export function useCards(
   folderId?: string,
   cardSetId?: string,
@@ -224,6 +250,15 @@ export function useCards(
         )
       : [];
 
+    const questionBlocks = resolveBlocksFromCardData(
+      cardData as Partial<Card> & Record<string, unknown>,
+      "question",
+    );
+    const answerBlocks = resolveBlocksFromCardData(
+      cardData as Partial<Card> & Record<string, unknown>,
+      "answer",
+    );
+
     const newCard: Card = {
       id,
       userId: currentUser.uid,
@@ -251,8 +286,8 @@ export function useCards(
       answerCode: cardData.answerCode || null,
       answerMarked: cardData.answerMarked || "",
       // Ensure blocks are carried over from cardData
-      questionBlocks: cardData.questionBlocks || [],
-      answerBlocks: cardData.answerBlocks || [],
+      questionBlocks,
+      answerBlocks,
       layoutRows: normalizeLayoutRows(
         (cardData as unknown).layoutRows ??
           (cardData as unknown).layout_rows ??
@@ -301,7 +336,21 @@ export function useCards(
       return;
     }
 
-    const patch: Partial<Card> = { ...data };
+    const patch = { ...data } as Partial<Card> & Record<string, unknown>;
+    if (
+      "questionBlocks" in patch ||
+      "frontBlocks" in patch ||
+      "front" in patch
+    ) {
+      patch.questionBlocks = resolveBlocksFromCardData(patch, "question");
+    }
+    if ("answerBlocks" in patch || "backBlocks" in patch || "back" in patch) {
+      patch.answerBlocks = resolveBlocksFromCardData(patch, "answer");
+    }
+    delete patch.frontBlocks;
+    delete patch.backBlocks;
+    delete patch.front;
+    delete patch.back;
     // Legacy rows fields are read-only migration inputs. Never persist them again.
     delete (patch as unknown).questionExtraRows;
     delete (patch as unknown).answerExtraRows;

@@ -1,6 +1,5 @@
 import { BlockEditor } from "@/components/card/blocks/BlockEditor";
-import { BlockRendererWithoutSeparators } from "@/components/card/blocks/BlockRendererWithoutSeparators";
-import { shouldRenderInterBlockSeparator } from "@/components/card/blocks/blockDisplayPolicy";
+import { BlockRenderer } from "@/components/card/blocks/BlockRenderer";
 import { cn } from "@/lib/utils";
 import { CONTENT_TYPO } from "@/styles/tokens/typography";
 import type { CardBlock } from "@/types/domain/card";
@@ -81,40 +80,10 @@ function SharedCardContentInner(props: SharedCardContentProps) {
           settings={props.settings}
         />
       ) : (
-        <div className="w-full max-w-full flex flex-col">
-          {props.blocks.map((block, index) => {
-            const showSeparator =
-              index > 0 &&
-              shouldRenderInterBlockSeparator(
-                props.blocks[index - 1].type,
-                block.type,
-              );
-
-            return (
-              <React.Fragment key={block.id}>
-                {showSeparator && (
-                  <div
-                    aria-hidden
-                    className="pointer-events-none"
-                    style={{ height: 9, display: "flex", alignItems: "center" }}
-                  >
-                    <div
-                      style={{
-                        width: "100%",
-                        height: 1,
-                        background: "var(--card-ruled-color, rgba(0,0,0,0.05))",
-                      }}
-                    />
-                  </div>
-                )}
-                <BlockRendererWithoutSeparators
-                  blocks={[block]}
-                  onGalleryFullscreenChange={props.onGalleryFullscreenChange}
-                />
-              </React.Fragment>
-            );
-          })}
-        </div>
+        <BlockRenderer
+          blocks={props.blocks}
+          onGalleryFullscreenChange={props.onGalleryFullscreenChange}
+        />
       )}
     </div>
   );

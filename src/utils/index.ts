@@ -464,7 +464,10 @@ export const normalizeCard = (raw: unknown) => {
     reviewCount: toFiniteNumber(pick(r.reviewCount, r.review_count), 0),
     reviewLogs: normalizeReviewLogs(pick(r.reviewLogs, r.review_logs, [])),
 
-    questionBlocks: toArrayOr(pick(r.questionBlocks, r.question_blocks), [])
+    questionBlocks: toArrayOr(
+      pick(r.questionBlocks, r.question_blocks, asRecord(r.front)?.blocks),
+      [],
+    )
       .map(normalizeBlockOffsets)
       .filter((b) => {
         const br = asRecord(b);
@@ -478,7 +481,10 @@ export const normalizeCard = (raw: unknown) => {
         return true;
       }),
 
-    answerBlocks: toArrayOr(pick(r.answerBlocks, r.answer_blocks), [])
+    answerBlocks: toArrayOr(
+      pick(r.answerBlocks, r.answer_blocks, asRecord(r.back)?.blocks),
+      [],
+    )
       .map(normalizeBlockOffsets)
       .filter((b) => {
         const br = asRecord(b);
@@ -618,6 +624,26 @@ export const normalizeCard = (raw: unknown) => {
   ) {
     normalized.answerText = extractTextFromBlocks(normalized.answerBlocks);
   }
+
+  const normalizedQuestionBlocks = Array.isArray(normalized.questionBlocks)
+    ? normalized.questionBlocks
+    : [];
+  const normalizedAnswerBlocks = Array.isArray(normalized.answerBlocks)
+    ? normalized.answerBlocks
+    : [];
+
+  normalized.frontBlocks = normalizedQuestionBlocks;
+  normalized.backBlocks = normalizedAnswerBlocks;
+  normalized.front = {
+    blocks: normalizedQuestionBlocks,
+    ink: normalized.inkQuestion ?? null,
+    extraRows: normalized.questionExtraRows,
+  };
+  normalized.back = {
+    blocks: normalizedAnswerBlocks,
+    ink: normalized.inkAnswer ?? null,
+    extraRows: normalized.answerExtraRows,
+  };
 
   return normalized;
 };

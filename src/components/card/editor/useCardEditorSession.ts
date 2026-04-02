@@ -31,6 +31,29 @@ import type { Card, CardBlock, UploadedImage } from "@/types/domain/card";
 
 const NEW_SENTINEL = "__new__" as const;
 
+const getBlocksForSide = (
+  card: Card,
+  side: "question" | "answer",
+): CardBlock[] => {
+  const legacyBlocks =
+    side === "question" ? card.questionBlocks : card.answerBlocks;
+  if (Array.isArray(legacyBlocks)) return legacyBlocks;
+
+  const aliasedBlocks =
+    side === "question"
+      ? ((card as unknown as { frontBlocks?: CardBlock[] }).frontBlocks ?? null)
+      : ((card as unknown as { backBlocks?: CardBlock[] }).backBlocks ?? null);
+  if (Array.isArray(aliasedBlocks)) return aliasedBlocks;
+
+  const face =
+    side === "question"
+      ? ((card as unknown as { front?: { blocks?: CardBlock[] | null } | null }).front ?? null)
+      : ((card as unknown as { back?: { blocks?: CardBlock[] | null } | null }).back ?? null);
+  if (Array.isArray(face?.blocks)) return face.blocks;
+
+  return [];
+};
+
 type UseCardEditorSessionParams = {
   selectedCardId: string | null;
   selectedCardSnapshot?: Card | null;
@@ -157,12 +180,8 @@ export function useCardEditorSession({
         isDraft: card.isDraft ?? false,
         questionImages: ((card as unknown).questionImages ?? []) as UploadedImage[],
         answerImages: ((card as unknown).answerImages ?? []) as UploadedImage[],
-        frontBlocks: sortBlocksByOrderIndex(
-          (card.front?.blocks ?? []) as CardBlock[],
-        ),
-        backBlocks: sortBlocksByOrderIndex(
-          (card.back?.blocks ?? []) as CardBlock[],
-        ),
+        frontBlocks: sortBlocksByOrderIndex(getBlocksForSide(card, "question")),
+        backBlocks: sortBlocksByOrderIndex(getBlocksForSide(card, "answer")),
         layoutRows: normalizeLayoutRows(
           (card as unknown).layoutRows ?? (card as unknown).layout_rows ?? migratedRows,
         ),
@@ -298,8 +317,8 @@ export function useCardEditorSession({
           answerImages: sanitizeUploadedImages(
             currentDraft.answerImages,
           ) as UploadedImage[],
-          frontBlocks: sanitizeBlocksForSave(currentDraft.frontBlocks),
-          backBlocks: sanitizeBlocksForSave(currentDraft.backBlocks),
+          questionBlocks: sanitizeBlocksForSave(currentDraft.frontBlocks),
+          answerBlocks: sanitizeBlocksForSave(currentDraft.backBlocks),
           layoutRows: normalizeLayoutRows(currentDraft.layoutRows),
         };
 
@@ -389,8 +408,8 @@ export function useCardEditorSession({
         answerImages: sanitizeUploadedImages(
           currentDraft.answerImages,
         ) as UploadedImage[],
-        frontBlocks: sanitizeBlocksForSave(currentDraft.frontBlocks),
-        backBlocks: sanitizeBlocksForSave(currentDraft.backBlocks),
+        questionBlocks: sanitizeBlocksForSave(currentDraft.frontBlocks),
+        answerBlocks: sanitizeBlocksForSave(currentDraft.backBlocks),
         layoutRows: normalizeLayoutRows(currentDraft.layoutRows),
       };
 

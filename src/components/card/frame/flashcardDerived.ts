@@ -48,6 +48,12 @@ export type FlashcardCardLike = {
   answer_code?: { code?: string; language?: string } | null;
   frontBlocks?: CardBlock[];
   backBlocks?: CardBlock[];
+  front?: {
+    blocks?: CardBlock[] | null;
+  } | null;
+  back?: {
+    blocks?: CardBlock[] | null;
+  } | null;
   layoutRows?: number;
   layout_rows?: number;
   /** @deprecated Read-only legacy field. Use layoutRows/layout_rows. */

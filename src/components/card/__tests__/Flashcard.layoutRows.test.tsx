@@ -45,12 +45,12 @@ describe("Flashcard layoutRows height behavior", () => {
       backBlocks: [],
     };
 
-    const { rerender } = render(<Flashcard card={adaptCard(card)} isFlipped={false} />);
+    const { rerender } = render(<Flashcard card={card} isFlipped={false} />);
     const before = screen
       .getByTestId("mock-card-frame")
       .getAttribute("data-height");
 
-    rerender(<Flashcard card={adaptCard(card)} isFlipped={true} />);
+    rerender(<Flashcard card={card} isFlipped={true} />);
     const after = screen
       .getByTestId("mock-card-frame")
       .getAttribute("data-height");
