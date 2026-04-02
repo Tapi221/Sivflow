@@ -143,7 +143,7 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
             ref={ref}
             className={cn(
               // 標準スタイル: 中央寄せ、ボーダー無し、角丸をデバイス幅で変える
-              "mx-auto border-none rounded-[32px] md:rounded-[40px]",
+              "mx-auto border-none rounded-[24px] md:rounded-[28px]",
               className,
             )}
             style={{

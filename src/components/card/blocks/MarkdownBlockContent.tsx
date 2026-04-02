@@ -207,11 +207,11 @@ interface MarkdownBlockContentProps {
 
 export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
   markdown,
-  align,
+  align: _align,
   className,
   bleedX = false,
 }) => {
-  const alignClass = align === "center" ? "text-center" : "text-left";
+  void _align;
 
   const bodyStyle = useMemo<React.CSSProperties>(
     () => ({
@@ -474,7 +474,7 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
     <div
       className={cn(
         `markdown-block-view markdownBlockPreview markdownBlockCardView max-w-none font-serif text-[16px] font-medium leading-[24px] ${BLOCK_BODY_TEXT_COLOR_CLASS} [font-variant-numeric:lining-nums_tabular-nums] [font-feature-settings:"lnum"_1]`,
-        alignClass,
+        "text-left",
         className,
       )}
     >
@@ -499,7 +499,7 @@ function ParagraphRenderer({
     <p
       className={cn(
         TEXT_BLOCK_CONTENT_CLASS,
-        "m-0 border-none bg-transparent p-0",
+        "m-0 border-none bg-transparent p-0 text-left",
       )}
       style={bodyStyle}
     >
