@@ -20,10 +20,13 @@ export function useCardSets(folderId?: string | null) {
 
   const cardSets = useMemo(() => {
     if (!rawSets) return [];
+
     let sets = rawSets.filter((s) => !s.isDeleted);
+
     if (folderId !== undefined) {
       sets = sets.filter((s) => s.folderId === (folderId ?? null));
     }
+
     return sets.sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0));
   }, [rawSets, folderId]);
 
@@ -31,30 +34,33 @@ export function useCardSets(folderId?: string | null) {
 
   const createCardSet = async (
     name: string,
-    folderId: string,
+    targetFolderId?: string | null,
     opts?: { description?: string },
   ): Promise<CardSet> => {
     if (!currentUser) throw new Error("認証が必要です");
-    if (!folderId) {
+
+    if (!targetFolderId) {
       throw new Error("カードセットはフォルダ配下にのみ作成できます");
     }
 
     const db = await getLocalDb(currentUser.uid);
 
     const siblingSets = (rawSets ?? []).filter(
-      (s) => !s.isDeleted && s.folderId === folderId,
+      (s) => !s.isDeleted && s.folderId === targetFolderId,
     );
+
     const maxOrder = siblingSets.reduce(
       (m, s) => Math.max(m, s.orderIndex ?? 0),
       -1,
     );
 
     const now = new Date();
+
     const cardSet: CardSet = {
       id: crypto.randomUUID(),
       userId: currentUser.uid,
       deviceId: "web",
-      folderId,
+      folderId: targetFolderId,
       name,
       description: opts?.description,
       orderIndex: maxOrder + 1,
@@ -72,30 +78,35 @@ export function useCardSets(folderId?: string | null) {
     data: Partial<Pick<CardSet, "name" | "description" | "orderIndex">>,
   ): Promise<void> => {
     if (!currentUser) throw new Error("認証が必要です");
+
     const db = await getLocalDb(currentUser.uid);
-    await db.cardSets.update(id, { ...data, updatedAt: new Date() });
+    await db.cardSets.update(id, {
+      ...data,
+      updatedAt: new Date(),
+    });
   };
 
-  /**
-   * CardSet を別フォルダへ移動
-   */
   const moveCardSetToFolder = async (
     cardSetId: string,
-    targetFolderId: string,
+    targetFolderId?: string | null,
   ): Promise<void> => {
     if (!currentUser) throw new Error("認証が必要です");
+
     if (!targetFolderId) {
       throw new Error("カードセットをルート直下へ移動することはできません");
     }
 
     const db = await getLocalDb(currentUser.uid);
+
     const siblingSets = (rawSets ?? []).filter(
       (s) => !s.isDeleted && s.folderId === targetFolderId,
     );
+
     const maxOrder = siblingSets.reduce(
       (m, s) => Math.max(m, s.orderIndex ?? 0),
       -1,
     );
+
     await db.cardSets.update(cardSetId, {
       folderId: targetFolderId,
       orderIndex: maxOrder + 1,
@@ -103,22 +114,27 @@ export function useCardSets(folderId?: string | null) {
     });
   };
 
-  /**
-   * CardSet を削除（配下 Card は cascade soft-delete）
-   */
   const deleteCardSet = async (id: string): Promise<void> => {
     if (!currentUser) throw new Error("認証が必要です");
+
     const db = await getLocalDb(currentUser.uid);
     const now = new Date();
 
     const cards = await db.cards.where("cardSetId").equals(id).toArray();
+
     await Promise.all(
-      cards.map((c) =>
-        db.cards.update(c.id, { isDeleted: true, updatedAt: now }),
+      cards.map((card) =>
+        db.cards.update(card.id, {
+          isDeleted: true,
+          updatedAt: now,
+        }),
       ),
     );
 
-    await db.cardSets.update(id, { isDeleted: true, updatedAt: now });
+    await db.cardSets.update(id, {
+      isDeleted: true,
+      updatedAt: now,
+    });
   };
 
   return {
