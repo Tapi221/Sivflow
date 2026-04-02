@@ -81,35 +81,31 @@ export function RootFolderPanelList({
 
   return (
     <div className="h-full overflow-y-auto px-1 py-1">
-      {rootFolderPanels.map((panel) => {
-        const isEditing = editingId === panel.id;
-        const menuId = `folder:${panel.id}:panel`;
-        const isMenuOpen = openRowMenuId === menuId;
-        const isPinned =
-          pinnedItems?.some(
-            (item) => item.type === "folder" && item.id === panel.id,
-          ) ?? false;
+      {rootFolderPanels.map((folder) => {
+        const isEditing = editingId === folder.id;
+        const isMenuOpen = openRowMenuId === `folder:${folder.id}:panel`;
 
         return (
           <div
-            key={panel.id}
+            key={folder.id}
             className={cn(
-              "group relative flex h-8 w-full cursor-pointer items-center rounded-[4px] px-2 text-left",
+              "group relative w-full h-8 rounded-[4px] px-2 text-left flex items-center cursor-pointer",
               "hover:bg-[var(--sidebar-active-bg,#e7ebef)]",
-              selectedFolderId === panel.id &&
-                "bg-[var(--sidebar-active-bg,#e7ebef)]",
+              selectedFolderId === folder.id && "bg-[var(--sidebar-active-bg,#e7ebef)]",
             )}
             role="button"
             tabIndex={0}
             onClick={() => {
-              if (isEditing || isMenuOpen) return;
-              onSelectFolder(panel.id);
+              if (isEditing) return;
+              if (isMenuOpen) return;
+              onSelectFolder(folder.id);
             }}
             onKeyDown={(e) => {
-              if (isEditing || isMenuOpen) return;
+              if (isEditing) return;
+              if (isMenuOpen) return;
               if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
-                onSelectFolder(panel.id);
+                onSelectFolder(folder.id);
               }
             }}
           >
@@ -118,12 +114,11 @@ export function RootFolderPanelList({
                 className={cn(
                   FOLDER_ROW_ICON_SIZE_CLASS,
                   "shrink-0",
-                  selectedFolderId === panel.id
+                  selectedFolderId === folder.id
                     ? FOLDER_ROW_ICON_ACTIVE_CLASS
                     : FOLDER_ROW_ICON_MUTED_CLASS,
                 )}
               />
-
               {isEditing ? (
                 <input
                   ref={inputRef}
@@ -145,19 +140,13 @@ export function RootFolderPanelList({
                   onPointerDown={(e) => e.stopPropagation()}
                   onKeyDown={(e) => {
                     e.stopPropagation();
-                    const isComposing =
-                      e.nativeEvent.isComposing || e.keyCode === 229;
-
+                    const isComposing = e.nativeEvent.isComposing || e.keyCode === 229;
                     if (e.key === "Enter" && isComposing) return;
-
                     if (e.key === "Enter") {
                       e.preventDefault();
                       editingNameRef.current = e.currentTarget.value;
                       void handleRenameConfirm();
-                      return;
-                    }
-
-                    if (e.key === "Escape") {
+                    } else if (e.key === "Escape") {
                       e.preventDefault();
                       setEditingId(null);
                       setEditingName("");
@@ -172,10 +161,10 @@ export function RootFolderPanelList({
                 <span
                   className={cn(
                     FOLDER_ROW_TITLE_CLASS,
-                    selectedFolderId === panel.id ? "font-medium" : "font-normal",
+                    selectedFolderId === folder.id ? "font-medium" : "font-normal",
                   )}
                 >
-                  {panel.name}
+                  {folder.name}
                 </span>
               )}
             </div>
@@ -183,18 +172,17 @@ export function RootFolderPanelList({
             <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2">
               <ContextMenu
                 open={isMenuOpen}
-                onOpenChange={(open) => {
-                  setOpenRowMenuId(open ? menuId : null);
-                }}
+                onOpenChange={(open) =>
+                  setOpenRowMenuId(
+                    open
+                      ? `folder:${folder.id}:panel`
+                      : (prev) => (prev === `folder:${folder.id}:panel` ? null : prev),
+                  )
+                }
                 type="folder"
-                onCreateSubfolder={() => void handleCreateFolderAction(panel.id)}
-                onCreateCardSet={() => void handleCreateCardSetAction(panel.id)}
+                onCreateSubfolder={() => void handleCreateFolderAction(folder.id)}
+                onCreateCardSet={() => void handleCreateCardSetAction(folder.id)}
                 onRename={() => {
-                  setOpenRowMenuId(null);
-                  setEditingId(panel.id);
-                  setEditingName(panel.name);
-                  editingNameRef.current = panel.name;
-
                   const forceSelectRenameInput = () => {
                     const input = inputRef.current;
                     if (!input) return;
@@ -204,25 +192,61 @@ export function RootFolderPanelList({
                       input.setSelectionRange(0, input.value.length);
                     } catch {
                       // no-op: setSelectionRange をサポートしない環境がある
-                    }
-                  };
+                    }'@
 
+Replace-Text "src/components/folder/explorer/rows/FolderRow.tsx" '} catch {}' @'
+} catch {
+        // no-op: setSelectionRange をサポートしない環境がある
+      }'@
+
+# 2個目の catch も同じ置換をもう一回通す
+$contentFolderRow = Get-NormalizedContent "src/components/folder/explorer/rows/FolderRow.tsx"
+if ($contentFolderRow.Contains('} catch {}')) {
+  Set-NormalizedContent "src/components/folder/explorer/rows/FolderRow.tsx" ($contentFolderRow.Replace('} catch {}', @'
+} catch {
+                      // no-op: setSelectionRange をサポートしない環境がある
+                    }'@))
+}
+
+# -------------------------------------------------------------------
+# 8) FolderDashboard: no-constant-binary-expression
+# -------------------------------------------------------------------
+Replace-Text "src/components/folder/components/views/FolderDashboard.tsx" '    extractTextFromBlocks((card.front?.blocks ?? []) ?? []) || card.questionText || "",' '    extractTextFromBlocks(card.front?.blocks ?? []) || card.questionText || "",'
+Replace-Text "src/components/folder/components/views/FolderDashboard.tsx" '    extractTextFromBlocks((card.back?.blocks ?? []) ?? []) || card.answerText || "",' '    extractTextFromBlocks(card.back?.blocks ?? []) || card.answerText || "",'
+
+# -------------------------------------------------------------------
+# 9) TreeViewLayout: set-state-in-effect
+# -------------------------------------------------------------------
+Replace-Text "src/components/folder/layout/TreeViewLayout.tsx" @'
+  useEffect(() => {
+    setSelectedCardSetId(null);
+  }, [selectedFolderId]);
+                  };
+                  setEditingId(folder.id);
+                  setEditingName(folder.name);
                   requestAnimationFrame(() => {
                     forceSelectRenameInput();
                     requestAnimationFrame(() => {
                       forceSelectRenameInput();
                     });
                   });
-
                   window.setTimeout(() => {
                     forceSelectRenameInput();
                   }, 40);
                 }}
-                onDelete={() => handleDelete(panel.id, "folder")}
-                isPinned={isPinned}
+                onDelete={() => handleDelete(folder.id, "folder")}
+                isPinned={
+                  pinnedItems?.some((item) => item.type === "folder" && item.id === folder.id) ??
+                  false
+                }
                 onTogglePin={() => {
-                  if (isPinned) onUnpinItem?.({ type: "folder", id: panel.id });
-                  else onPinItem?.({ type: "folder", id: panel.id });
+                  const isPinned =
+                    pinnedItems?.some(
+                      (item) => item.type === "folder" && item.id === folder.id,
+                    ) ?? false;
+
+                  if (isPinned) onUnpinItem?.({ type: "folder", id: folder.id });
+                  else onPinItem?.({ type: "folder", id: folder.id });
                 }}
               >
                 <button
@@ -246,3 +270,4 @@ export function RootFolderPanelList({
     </div>
   );
 }
+

@@ -137,10 +137,7 @@ export function CardViewDesktop({
   );
 
   const readySetRef = useRef(readySet);
-
-  useEffect(() => {
-    readySetRef.current = readySet;
-  }, [readySet]);
+  readySetRef.current = readySet;
 
   const editingCardsOverride = isGlobalEditing ? cardsForPager : undefined;
 

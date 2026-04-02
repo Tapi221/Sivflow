@@ -12,7 +12,7 @@
 import React, {
   useCallback,
   useEffect,
-
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -163,15 +163,10 @@ function VerticalCardPagerFn<T>({
   // activeIndex 変化のたびに scheduleVisibleRangeUpdate が再生成されず、
   // scroll listener effect の不要な再アタッチを防ぐ。
   const activeIndexRef = useRef(activeIndex);
-  const onRenderRangeChangeRef = useRef(onRenderRangeChange);
 
   useEffect(() => {
     activeIndexRef.current = activeIndex;
   }, [activeIndex]);
-
-  useEffect(() => {
-    onRenderRangeChangeRef.current = onRenderRangeChange;
-  }, [onRenderRangeChange]);
 
   const updateVisibleRange = useCallback(() => {
     const container = containerRef.current;
@@ -181,7 +176,7 @@ function VerticalCardPagerFn<T>({
       visibleRangeRef.current = null;
       effectiveRenderRangeRef.current = null;
       setVisibleRange(null);
-      onRenderRangeChangeRef.current?.(null);
+      onRenderRangeChange?.(null);
       return;
     }
 
@@ -189,7 +184,7 @@ function VerticalCardPagerFn<T>({
       visibleRangeRef.current = null;
       effectiveRenderRangeRef.current = null;
       setVisibleRange(null);
-      onRenderRangeChangeRef.current?.(null);
+      onRenderRangeChange?.(null);
       return;
     }
 
@@ -285,7 +280,7 @@ function VerticalCardPagerFn<T>({
     visibleRangeRef.current = nextRange;
     effectiveRenderRangeRef.current = nextEffective;
     setVisibleRange(nextRange);
-    onRenderRangeChangeRef.current?.(nextEffective);
+    onRenderRangeChange?.(nextEffective);
   // activeIndex は activeIndexRef 経由で参照するため deps 不要。
   // 含めると activeIndex 変化のたびに scheduleVisibleRangeUpdate が再生成され、
   // scroll listener effect が detach/attach を繰り返す。
@@ -299,27 +294,17 @@ function VerticalCardPagerFn<T>({
     });
   }, [updateVisibleRange]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (disableVirtualization) return;
-    scheduleVisibleRangeUpdate();
-  }, [disableVirtualization, scheduleVisibleRangeUpdate]);
+    updateVisibleRange();
+  }, [disableVirtualization, updateVisibleRange]);
 
   useEffect(() => {
     if (disableVirtualization) {
       visibleRangeRef.current = null;
-      effectiveRenderRangeRef.current = null;
-
-      if (visibleRangeRafRef.current != null) {
-        window.cancelAnimationFrame(visibleRangeRafRef.current);
-        visibleRangeRafRef.current = null;
-      }
-
-      window.requestAnimationFrame(() => {
-        onRenderRangeChangeRef.current?.(null);
-      });
+      setVisibleRange(null);
       return;
     }
-
     scheduleVisibleRangeUpdate();
 
     const container = containerRef.current;

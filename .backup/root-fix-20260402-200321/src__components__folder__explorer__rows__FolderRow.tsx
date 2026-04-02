@@ -136,9 +136,7 @@ export const FolderRow: React.FC<FolderRowProps> = ({
       input.select();
       try {
         input.setSelectionRange(0, input.value.length);
-      } catch {
-        // no-op: setSelectionRange をサポートしない環境がある
-      }
+      } catch {}
     };
 
     rafId1 = requestAnimationFrame(() => {
@@ -318,9 +316,7 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                       input.select();
                       try {
                         input.setSelectionRange(0, input.value.length);
-                      } catch {
-        // no-op: setSelectionRange をサポートしない環境がある
-      }
+                      } catch {}
                     };
                     window.setTimeout(() => {
                       setEditingId(folderId);

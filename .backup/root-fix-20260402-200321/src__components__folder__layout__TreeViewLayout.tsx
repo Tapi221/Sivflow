@@ -67,9 +67,6 @@ function TreeViewLayout({
 
   const [selectedCardSetId, setSelectedCardSetId] = useState<string | null>(null);
   const [createCardSetRequestToken, setCreateCardSetRequestToken] = useState(0);
-  const [explorerHeaderFolderId, setExplorerHeaderFolderId] = useState<string | null>(
-    null,
-  );
 
   const {
     cardSets,
@@ -78,6 +75,10 @@ function TreeViewLayout({
     deleteCardSet,
     moveCardSetToFolder,
   } = useCardSets();
+
+  useEffect(() => {
+    setSelectedCardSetId(null);
+  }, [selectedFolderId]);
 
   const handleItemSelect = useCallback(
     (item: SelectedExplorerItem) => {
@@ -96,7 +97,6 @@ function TreeViewLayout({
         return;
       }
 
-      setSelectedCardSetId(null);
       onItemSelect(item);
     },
     [cardSets, navigate, onFolderSelect, onItemSelect],
@@ -186,14 +186,6 @@ function TreeViewLayout({
     addRecent,
   });
 
-  const handleFolderSelect = useCallback(
-    (folderId: string | null) => {
-      setSelectedCardSetId(null);
-      handleFolderSelectWithRecent(folderId);
-    },
-    [handleFolderSelectWithRecent],
-  );
-
   const allTags = useMemo(() => {
     const tagNames = new Set<string>();
     cards.forEach((c) => {
@@ -270,14 +262,13 @@ function TreeViewLayout({
 
   const currentHeaderFolderId = useMemo(() => {
     if (selectedFolderId) return selectedFolderId;
-    if (explorerHeaderFolderId) return explorerHeaderFolderId;
 
     if (selectedItem?.type === "cardSet") {
       return cardSets.find((s) => s.id === selectedItem.id)?.folderId ?? null;
     }
 
     return null;
-  }, [cardSets, explorerHeaderFolderId, selectedFolderId, selectedItem]);
+  }, [selectedFolderId, selectedItem, cardSets]);
 
   const handleCreateCardSetFromHeader = useCallback(() => {
     if (!currentHeaderFolderId) return;
@@ -463,9 +454,8 @@ function TreeViewLayout({
       }}
       navigateToSectionListToken={navigateToSectionListToken}
       folderSelectionNonce={folderSelectionNonce}
-      onHeaderFolderIdChange={setExplorerHeaderFolderId}
       getFolderPath={getFolderPath}
-      onFolderSelect={handleFolderSelect}
+      onFolderSelect={handleFolderSelectWithRecent}
       onItemSelect={handleItemSelect}
       onClearRecent={clearRecent}
       onSelectView={handleViewChange}

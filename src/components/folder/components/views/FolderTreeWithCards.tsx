@@ -85,6 +85,7 @@ interface FolderTreeWithCardsProps {
   onRegisterPptxTrigger?: (fn: () => void) => void;
   navigateToSectionListToken?: number;
   folderSelectionNonce?: number;
+  onHeaderFolderIdChange?: (folderId: string | null) => void;
   className?: string;
 }
 
@@ -120,6 +121,7 @@ export function FolderTreeWithCards({
   onRegisterPptxTrigger,
   navigateToSectionListToken = 0,
   folderSelectionNonce = 0,
+  onHeaderFolderIdChange,
   className,
 }: FolderTreeWithCardsProps) {
   const { expandedFolders, setExpandedFolders, toggleFolder } =
@@ -626,6 +628,19 @@ export function FolderTreeWithCards({
         ),
     [rootFolders],
   );
+
+  const headerFolderId = useMemo(() => {
+    if (selectedFolderId) return selectedFolderId;
+    if (activeRootFolderId) return activeRootFolderId;
+    if (selectedItem?.type === "cardSet") {
+      return treeCardSets.find((cardSet) => cardSet.id === selectedItem.id)?.folderId ?? null;
+    }
+    return null;
+  }, [activeRootFolderId, selectedFolderId, selectedItem, treeCardSets]);
+
+  useEffect(() => {
+    onHeaderFolderIdChange?.(headerFolderId);
+  }, [headerFolderId, onHeaderFolderIdChange]);
 
   const scopedTreeData = useMemo<ExplorerTreeNode[]>(() => {
     if (!activeRootFolderId) return [];

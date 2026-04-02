@@ -33,6 +33,7 @@ interface TreeViewTabContentProps {
   onRegisterPptxTrigger: (fn: () => void) => void;
   navigateToSectionListToken: number;
   folderSelectionNonce: number;
+  onHeaderFolderIdChange?: (folderId: string | null) => void;
   getFolderPath: PinnedPanelProps["getFolderPath"];
   onFolderSelect: (folderId: string | null) => void;
   onItemSelect: (item: SelectedExplorerItem) => void;
@@ -79,6 +80,7 @@ export function TreeViewTabContent({
   onRegisterPptxTrigger,
   navigateToSectionListToken,
   folderSelectionNonce,
+  onHeaderFolderIdChange,
   getFolderPath,
   onFolderSelect,
   onItemSelect,
@@ -180,6 +182,7 @@ export function TreeViewTabContent({
           onRegisterPptxTrigger={onRegisterPptxTrigger}
           navigateToSectionListToken={navigateToSectionListToken}
           folderSelectionNonce={folderSelectionNonce}
+          onHeaderFolderIdChange={onHeaderFolderIdChange}
         />
       );
   }
