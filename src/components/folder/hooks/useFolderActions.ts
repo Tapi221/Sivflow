@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 import type { Dispatch, MutableRefObject, SetStateAction } from "react";
 import {
   getFolderId,
@@ -26,14 +26,27 @@ type UseFolderActionsParams = {
   treeFolders: FolderTreeNode[];
   treeCardSets: CardSet[];
 
-  onCreateFolder?: (name: string, parentId?: string) => Promise<string>;
+  onCreateFolder?: (
+    name: string,
+    parentId?: string,
+    options?: {
+      id?: string;
+      orderIndex?: number;
+      color?: string;
+      cloudSyncEnabled?: boolean;
+    },
+  ) => Promise<string>;
   onUpdateFolder?: (folderId: string, data: FolderUpdateInput) => Promise<void>;
   onDeleteFolder?: (folderId: string) => Promise<void>;
 
   onCreateCardSet?: (
     name: string,
     folderId: string,
-    opts?: { description?: string },
+    opts?: {
+      description?: string;
+      id?: string;
+      orderIndex?: number;
+    },
   ) => Promise<CardSet>;
   onUpdateCardSet?: (
     cardSetId: string,
@@ -72,8 +85,7 @@ type UseFolderActionsParams = {
   onSelectCardSet?: (cardSetId: string, folderId: string, label: string) => void;
   setNewlyCreatedCardId: (id: string | null) => void;
 
-  getNextOrderIndex?: (folderId: string | null) => number;
-  getUniqueFolderName?: (baseName: string, parentId: string | null) => string;
+  getUniqueFolderName?: (parentId: string | null, baseName: string) => string;
 };
 
 const DEFAULT_NEW_FOLDER_NAME = "新規フォルダ";
@@ -110,12 +122,14 @@ function makeTempFolder(
 
   return {
     id,
+    folderId: id,
     folderName: name,
     parentFolderId,
     orderIndex,
     isDeleted: false,
     createdAt: now,
     updatedAt: now,
+    __optimistic: true,
   } as FolderTreeNode;
 }
 
@@ -141,8 +155,14 @@ function makeTempCardSet(
   };
 }
 
+function createEntityId(prefix: "folder" | "cardSet"): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
 export function useFolderActions({
-  treeFolders,
   treeCardSets,
   onCreateFolder,
   onUpdateFolder,
@@ -161,33 +181,117 @@ export function useFolderActions({
   setOptimisticFolders,
   setOptimisticCardSets,
   setExpandedFolders,
-  setPendingScrollId,
-  onFolderSelect,
-  onItemSelect,
-  onSelectCardSet,
-  getNextOrderIndex,
   getUniqueFolderName,
 }: UseFolderActionsParams) {
+  const pendingFolderCreatesRef = useRef(new Map<string, Promise<void>>());
+  const pendingCardSetCreatesRef = useRef(new Map<string, Promise<void>>());
+
+  const resolveTargetKind = useCallback(
+    (id: string, type?: RenameTargetKind | null): RenameTargetKind => {
+      if (type) return type;
+      if (pendingCardSetCreatesRef.current.has(id) || isCardSetId(treeCardSets, id)) {
+        return "cardSet";
+      }
+      return "folder";
+    },
+    [treeCardSets],
+  );
+
+  const updateOptimisticFolderName = useCallback(
+    (id: string, nextName: string) => {
+      setOptimisticFolders((prev) =>
+        prev.map((folder) =>
+          getFolderId(folder) === id
+            ? {
+                ...folder,
+                folderName: nextName,
+                folder_name: nextName,
+                updatedAt: new Date(),
+              }
+            : folder,
+        ),
+      );
+    },
+    [setOptimisticFolders],
+  );
+
+  const updateOptimisticCardSetName = useCallback(
+    (id: string, nextName: string) => {
+      setOptimisticCardSets((prev) =>
+        prev.map((cardSet) =>
+          cardSet.id === id
+            ? {
+                ...cardSet,
+                name: nextName,
+                updatedAt: new Date(),
+              }
+            : cardSet,
+        ),
+      );
+    },
+    [setOptimisticCardSets],
+  );
+
   const handleCreateFolderAction = useCallback(
-    async (parentFolderId: string | null) => {
+    (parentFolderId: string | null) => {
       const normalizedParentId = normalizeFolderId(parentFolderId);
       const nextName = getUniqueFolderName
-        ? getUniqueFolderName(DEFAULT_NEW_FOLDER_NAME, normalizedParentId)
+        ? getUniqueFolderName(normalizedParentId, DEFAULT_NEW_FOLDER_NAME)
         : DEFAULT_NEW_FOLDER_NAME;
 
-      const tempId = `temp-folder-${crypto.randomUUID()}`;
-      const nextOrderIndex = getNextOrderIndex
-        ? getNextOrderIndex(normalizedParentId)
-        : 0;
+      const folderId = createEntityId("folder");
+      const nextOrderIndex = 0;
 
-      const tempFolder = makeTempFolder(
-        tempId,
+      const optimisticFolder = makeTempFolder(
+        folderId,
         nextName,
         normalizedParentId,
         nextOrderIndex,
       );
 
-      setOptimisticFolders((prev) => [...prev, tempFolder]);
+      setOptimisticFolders((prev) => {
+        const shifted = prev.map((folder) => {
+          const folderParentId = normalizeFolderId(
+            (
+              folder as {
+                parentFolderId?: string | null;
+                parent_folder_id?: string | null;
+              }
+            ).parentFolderId ??
+              (
+                folder as {
+                  parentFolderId?: string | null;
+                  parent_folder_id?: string | null;
+                }
+              ).parent_folder_id,
+          );
+
+          if (folderParentId !== normalizedParentId) return folder;
+
+          const currentOrderIndex =
+            (
+              folder as {
+                orderIndex?: number;
+                order_index?: number;
+              }
+            ).orderIndex ??
+            (
+              folder as {
+                orderIndex?: number;
+                order_index?: number;
+              }
+            ).order_index ??
+            0;
+
+          return {
+            ...folder,
+            orderIndex: currentOrderIndex + 1,
+            order_index: currentOrderIndex + 1,
+          };
+        });
+
+        return [optimisticFolder, ...shifted];
+      });
 
       if (normalizedParentId) {
         setExpandedFolders((prev) => {
@@ -197,126 +301,116 @@ export function useFolderActions({
         });
       }
 
-      setEditingId(tempId);
+      setEditingId(folderId);
       setEditingName(nextName);
-      editingIdRef.current = tempId;
+      editingIdRef.current = folderId;
       editingNameRef.current = nextName;
       renameCancelledRef.current = false;
-      setPendingScrollId(tempId);
 
-      try {
-        if (!onCreateFolder) return;
+      if (onCreateFolder) {
+        const persistTask = (async () => {
+          try {
+            await onCreateFolder(nextName, normalizedParentId || undefined, {
+              id: folderId,
+              orderIndex: nextOrderIndex,
+            });
+          } catch (error) {
+            console.error("[useFolderActions] create folder failed:", error);
+            setOptimisticFolders((prev) =>
+              prev.filter((folder) => getFolderId(folder) !== folderId),
+            );
+            if (editingIdRef.current === folderId) {
+              closeRename();
+            }
+          } finally {
+            pendingFolderCreatesRef.current.delete(folderId);
+          }
+        })();
 
-        const createdFolderId = await onCreateFolder(
-          nextName,
-          normalizedParentId ?? undefined,
-        );
-
-        setOptimisticFolders((prev) =>
-          prev.filter((folder) => getFolderId(folder) !== tempId),
-        );
-
-        setEditingId(createdFolderId);
-        editingIdRef.current = createdFolderId;
-        setPendingScrollId(createdFolderId);
-        onFolderSelect(createdFolderId);
-      } catch (error) {
-        console.error("[useFolderActions] create folder failed:", error);
-        setOptimisticFolders((prev) =>
-          prev.filter((folder) => getFolderId(folder) !== tempId),
-        );
-        closeRename();
+        pendingFolderCreatesRef.current.set(folderId, persistTask);
       }
+
+      return folderId;
     },
     [
       closeRename,
       editingIdRef,
       editingNameRef,
-      getNextOrderIndex,
       getUniqueFolderName,
       onCreateFolder,
-      onFolderSelect,
       renameCancelledRef,
       setEditingId,
       setEditingName,
       setExpandedFolders,
       setOptimisticFolders,
-      setPendingScrollId,
     ],
   );
 
   const handleCreateCardSetAction = useCallback(
-    async (folderId: string | null) => {
+    (folderId: string | null) => {
       const normalizedFolderId = normalizeFolderId(folderId);
-      if (!normalizedFolderId || !onCreateCardSet) return;
+      if (!normalizedFolderId) return null;
 
-      const tempId = `temp-cardset-${crypto.randomUUID()}`;
-      const siblingOrderIndex =
-        treeCardSets
-          .filter(
-            (cardSet) =>
-              !cardSet.isDeleted && cardSet.folderId === normalizedFolderId,
-          )
-          .reduce((max, cardSet) => Math.max(max, cardSet.orderIndex ?? 0), -1) +
-        1;
+      const cardSetId = createEntityId("cardSet");
+      const siblingOrderIndex = 0;
 
       const tempCardSet = makeTempCardSet(
-        tempId,
+        cardSetId,
         DEFAULT_NEW_CARDSET_NAME,
         normalizedFolderId,
         siblingOrderIndex,
       );
 
-      setOptimisticCardSets((prev) => [...prev, tempCardSet]);
-      setEditingId(tempId);
+      setOptimisticCardSets((prev) => [
+        tempCardSet,
+        ...prev.map((cardSet) =>
+          cardSet.folderId === normalizedFolderId
+            ? {
+                ...cardSet,
+                orderIndex: (cardSet.orderIndex ?? 0) + 1,
+              }
+            : cardSet,
+        ),
+      ]);
+      setEditingId(cardSetId);
       setEditingName(DEFAULT_NEW_CARDSET_NAME);
-      editingIdRef.current = tempId;
+      editingIdRef.current = cardSetId;
       editingNameRef.current = DEFAULT_NEW_CARDSET_NAME;
       renameCancelledRef.current = false;
-      setPendingScrollId(tempId);
-      onSelectCardSet?.(tempId, normalizedFolderId, DEFAULT_NEW_CARDSET_NAME);
+      if (onCreateCardSet) {
+        const persistTask = (async () => {
+          try {
+            await onCreateCardSet(DEFAULT_NEW_CARDSET_NAME, normalizedFolderId, {
+              id: cardSetId,
+              orderIndex: siblingOrderIndex,
+            });
+          } catch (error) {
+            console.error("[useFolderActions] create card set failed:", error);
+            setOptimisticCardSets((prev) =>
+              prev.filter((cardSet) => cardSet.id !== cardSetId),
+            );
+            if (editingIdRef.current === cardSetId) {
+              closeRename();
+            }
+          } finally {
+            pendingCardSetCreatesRef.current.delete(cardSetId);
+          }
+        })();
 
-      try {
-        const created = await onCreateCardSet(
-          DEFAULT_NEW_CARDSET_NAME,
-          normalizedFolderId,
-        );
-
-        setOptimisticCardSets((prev) =>
-          prev.map((cardSet) => (cardSet.id === tempId ? created : cardSet)),
-        );
-
-        setEditingId(created.id);
-        editingIdRef.current = created.id;
-        setPendingScrollId(created.id);
-        onSelectCardSet?.(
-          created.id,
-          normalizedFolderId,
-          created.name || DEFAULT_NEW_CARDSET_NAME,
-        );
-        onFolderSelect(normalizedFolderId);
-      } catch (error) {
-        console.error("[useFolderActions] create card set failed:", error);
-        setOptimisticCardSets((prev) =>
-          prev.filter((cardSet) => cardSet.id !== tempId),
-        );
-        closeRename();
+        pendingCardSetCreatesRef.current.set(cardSetId, persistTask);
       }
+
+      return cardSetId;
     },
     [
       closeRename,
       editingIdRef,
       editingNameRef,
       onCreateCardSet,
-      onFolderSelect,
-      onItemSelect,
-      onSelectCardSet,
       renameCancelledRef,
       setEditingId,
       setEditingName,
       setOptimisticCardSets,
-      setPendingScrollId,
-      treeCardSets,
     ],
   );
 
@@ -325,8 +419,7 @@ export function useFolderActions({
       const { id, type } = parseTarget(target, editingIdRef.current);
       if (!id) return;
 
-      const resolvedType: RenameTargetKind | null =
-        type ?? (isCardSetId(treeCardSets, id) ? "cardSet" : "folder");
+      const resolvedType = resolveTargetKind(id, type);
 
       if (resolvedType === "folder") {
         openDeleteFolderDialog(id);
@@ -342,11 +435,23 @@ export function useFolderActions({
         await onDeleteCard?.(id);
       }
     },
-    [editingIdRef, onDeleteCard, onDeleteCardSet, openDeleteFolderDialog, treeCardSets],
+    [
+      editingIdRef,
+      onDeleteCard,
+      onDeleteCardSet,
+      openDeleteFolderDialog,
+      resolveTargetKind,
+    ],
   );
 
   const handleRenameConfirm = useCallback(
     async (target?: DeleteLikeTarget) => {
+      if (renameCancelledRef.current) {
+        renameCancelledRef.current = false;
+        closeRename();
+        return;
+      }
+
       const fallbackId = editingIdRef.current;
       const { id, type } = parseTarget(target, fallbackId);
       const nextName = editingNameRef.current.trim();
@@ -356,17 +461,25 @@ export function useFolderActions({
         return;
       }
 
-      const resolvedType: RenameTargetKind | null =
-        type ?? (isCardSetId(treeCardSets, id) ? "cardSet" : "folder");
+      const resolvedType = resolveTargetKind(id, type);
+
+      if (resolvedType === "cardSet") {
+        updateOptimisticCardSetName(id, nextName);
+      } else if (resolvedType === "folder") {
+        updateOptimisticFolderName(id, nextName);
+      }
+
+      closeRename();
 
       try {
         if (resolvedType === "cardSet") {
+          await pendingCardSetCreatesRef.current.get(id);
           await onUpdateCardSet?.(id, { name: nextName });
-        } else if (resolvedType === "folder") {
-          await onUpdateFolder?.(id, { folderName: nextName, name: nextName });
+          return;
         }
 
-        closeRename();
+        await pendingFolderCreatesRef.current.get(id);
+        await onUpdateFolder?.(id, { folderName: nextName, name: nextName });
       } catch (error) {
         console.error("[useFolderActions] rename failed:", error);
       }
@@ -377,7 +490,10 @@ export function useFolderActions({
       editingNameRef,
       onUpdateCardSet,
       onUpdateFolder,
-      treeCardSets,
+      renameCancelledRef,
+      resolveTargetKind,
+      updateOptimisticCardSetName,
+      updateOptimisticFolderName,
     ],
   );
 

@@ -23,23 +23,29 @@ export function useFolders() {
   const createFolder = async (
     name: string,
     parentId?: string,
-    color?: string,
-    cloudSyncEnabled: boolean = true,
+    options?: {
+      color?: string;
+      cloudSyncEnabled?: boolean;
+      id?: string;
+      orderIndex?: number;
+    },
   ) => {
     if (!currentUser) throw new Error("認証が必要です");
 
     const db = await getLocalDb();
+    const color = options?.color;
+    const cloudSyncEnabled = options?.cloudSyncEnabled ?? true;
+    const normalizedParentId = parentId ?? null;
 
-    // orderIndexの設定
-    const currentFolders = folders || [];
+    const currentFolders = (await db.folders.toArray()).map(normalizeFolder);
     const siblings = currentFolders.filter(
-      (f) => f.parentFolderId === parentId,
+      (f) => (f.parentFolderId ?? null) === normalizedParentId,
     );
-    const orderIndex = siblings.length;
+    const orderIndex = options?.orderIndex ?? 0;
     const folderData = {
       userId: currentUser.uid,
       folderName: name,
-      parentFolderId: parentId,
+      parentFolderId: normalizedParentId,
       isDeleted: false,
       folderColor: color || null,
       cloudSyncEnabled,
@@ -50,9 +56,10 @@ export function useFolders() {
 
     // 1. ローカル側で一意IDを生成（Firestore オブジェクトを誤って渡すバグ回避）
     const folderId =
-      typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+      options?.id ??
+      (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
         ? crypto.randomUUID()
-        : nanoid();
+        : nanoid());
 
     // 2. LocalDBへ書き込み (Local First & Sync Queued)
     const localData = {
@@ -63,6 +70,17 @@ export function useFolders() {
       updatedAt: new Date(),
     };
     try {
+      if (orderIndex === 0 && siblings.length > 0) {
+        await Promise.all(
+          siblings.map((sibling) =>
+            db.updateItem("folders", sibling.id, {
+              orderIndex: (sibling.orderIndex ?? 0) + 1,
+              updatedAt: new Date(),
+            }),
+          ),
+        );
+      }
+
       await db.addItem("folders", localData as unknown);
       return folderId;
     } catch (err) {

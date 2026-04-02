@@ -65,7 +65,9 @@ export function ContextMenu({
             {onCreateSubfolder && (
               <DropdownMenuItem
                 onSelect={(e) => {
+                  e.preventDefault();
                   e.stopPropagation();
+                  suppressCloseAutoFocusRef.current = true;
                   onOpenChange?.(false);
                   onCreateSubfolder?.();
                 }}
@@ -79,7 +81,9 @@ export function ContextMenu({
             {onCreateCardSet && (
               <DropdownMenuItem
                 onSelect={(e) => {
+                  e.preventDefault();
                   e.stopPropagation();
+                  suppressCloseAutoFocusRef.current = true;
                   onOpenChange?.(false);
                   onCreateCardSet?.();
                 }}

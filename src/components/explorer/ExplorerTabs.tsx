@@ -2,7 +2,7 @@
  * ExplorerTabs - Explorerタブ切替UIコンポーネント
  * Linear/Notion 系のテキストリンクスタイル
  */
-import React from "react";
+import React, { useRef, useState } from "react";
 import { FileText, Folder, Plus } from "@/ui/icons";
 import { cn } from "@/lib/utils";
 import type { ExplorerTab } from "@/components/folder/explorer/model/types";
@@ -48,6 +48,8 @@ export function ExplorerTabs({
 }: ExplorerTabsProps) {
   const shouldShowExplorerActions =
     showExplorerActions && activeTab === "explorer";
+  const suppressCloseAutoFocusRef = useRef(false);
+  const [createMenuOpen, setCreateMenuOpen] = useState(false);
 
   return (
     <div
@@ -103,7 +105,16 @@ export function ExplorerTabs({
         )}
         aria-hidden={!shouldShowExplorerActions}
       >
-        <DropdownMenu modal={false}>
+        <DropdownMenu
+          modal={false}
+          open={createMenuOpen}
+          onOpenChange={(open) => {
+            setCreateMenuOpen(open);
+            if (!open && !suppressCloseAutoFocusRef.current) {
+              suppressCloseAutoFocusRef.current = false;
+            }
+          }}
+        >
           <DropdownMenuTrigger asChild>
             <button
               type="button"
@@ -114,9 +125,22 @@ export function ExplorerTabs({
               <Plus className="w-3.5 h-3.5" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-44">
+          <DropdownMenuContent
+            align="end"
+            className="w-44"
+            onCloseAutoFocus={(event) => {
+              if (!suppressCloseAutoFocusRef.current) return;
+              suppressCloseAutoFocusRef.current = false;
+              event.preventDefault();
+            }}
+          >
             <DropdownMenuItem
-              onSelect={() => void onCreateRootFolder?.()}
+              onSelect={(event) => {
+                event.preventDefault();
+                suppressCloseAutoFocusRef.current = true;
+                setCreateMenuOpen(false);
+                void onCreateRootFolder?.();
+              }}
               className="gap-2"
             >
               <Folder className="h-4 w-4" />
@@ -125,7 +149,12 @@ export function ExplorerTabs({
 
             {canCreateCardSet && (
               <DropdownMenuItem
-                onSelect={() => void onCreateCardSet?.()}
+                onSelect={(event) => {
+                  event.preventDefault();
+                  suppressCloseAutoFocusRef.current = true;
+                  setCreateMenuOpen(false);
+                  void onCreateCardSet?.();
+                }}
                 className="gap-2"
               >
                 <Plus className="h-4 w-4" />

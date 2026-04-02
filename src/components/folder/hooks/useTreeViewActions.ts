@@ -17,7 +17,6 @@ export function useTreeViewActions({
   const [isCreateSelectionOpen, setIsCreateSelectionOpen] = useState(false);
   const [isModeSelectionOpen, setIsModeSelectionOpen] = useState(false);
   const [isViewManagerOpen, setIsViewManagerOpen] = useState(false);
-  const [createFolderRequestToken, setCreateFolderRequestToken] = useState(0);
 
   const handleFolderSelectWithRecent = useCallback(
     (folderId: string | null) => {
@@ -91,10 +90,6 @@ export function useTreeViewActions({
     [navigate, selectedFolderId],
   );
 
-  const handleCreateRootFolder = useCallback(() => {
-    setCreateFolderRequestToken((prev) => prev + 1);
-  }, []);
-
   return {
     isCreateSelectionOpen,
     setIsCreateSelectionOpen,
@@ -102,15 +97,12 @@ export function useTreeViewActions({
     setIsModeSelectionOpen,
     isViewManagerOpen,
     setIsViewManagerOpen,
-    createFolderRequestToken,
-    setCreateFolderRequestToken,
     handleFolderSelectWithRecent,
     handleStartStudy,
     handleViewCards,
     handleOpenCreateCard,
     handleSelectCreateMode,
     handleSelectDetailedMode,
-    handleCreateRootFolder,
   };
 }
 

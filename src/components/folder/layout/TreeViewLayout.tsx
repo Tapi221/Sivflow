@@ -73,10 +73,13 @@ function TreeViewLayout({
 
   const [selectedCardSetId, setSelectedCardSetId] = useState<string | null>(null);
   const [selectedCardSetLabel, setSelectedCardSetLabel] = useState<string | null>(null);
-  const [createCardSetRequestToken, setCreateCardSetRequestToken] = useState(0);
   const [explorerHeaderFolderId, setExplorerHeaderFolderId] = useState<string | null>(
     null,
   );
+  const createFolderTriggerRef = useRef<(() => void) | null>(null);
+  const createCardSetTriggerRef = useRef<(() => void) | null>(null);
+  const pdfTriggerRef = useRef<(() => void) | null>(null);
+  const pptxTriggerRef = useRef<(() => void) | null>(null);
 
   const {
     cardSets,
@@ -180,8 +183,6 @@ function TreeViewLayout({
     setIsModeSelectionOpen,
     isViewManagerOpen,
     setIsViewManagerOpen,
-    createFolderRequestToken,
-    setCreateFolderRequestToken,
     handleFolderSelectWithRecent,
     handleStartStudy,
     handleViewCards,
@@ -280,13 +281,6 @@ function TreeViewLayout({
     return map;
   }, [categoryIdsInUse, getCategoryName]);
 
-  const handleCreateRootFolder = useCallback(async () => {
-    setCreateFolderRequestToken((prev) => prev + 1);
-  }, [setCreateFolderRequestToken]);
-
-  const pdfTriggerRef = useRef<(() => void) | null>(null);
-  const pptxTriggerRef = useRef<(() => void) | null>(null);
-
   const currentHeaderFolderId = useMemo(() => {
     if (selectedFolderId) return selectedFolderId;
     if (explorerHeaderFolderId) return explorerHeaderFolderId;
@@ -325,9 +319,13 @@ function TreeViewLayout({
     selectedCardSetId,
   ]);
 
+  const handleCreateRootFolder = useCallback(() => {
+    createFolderTriggerRef.current?.();
+  }, []);
+
   const handleCreateCardSetFromHeader = useCallback(() => {
     if (!currentHeaderFolderId) return;
-    setCreateCardSetRequestToken((prev) => prev + 1);
+    createCardSetTriggerRef.current?.();
   }, [currentHeaderFolderId]);
 
   const handleAddPdfFromHeader = useCallback(() => {
@@ -499,8 +497,12 @@ function TreeViewLayout({
       customViews={customViews}
       virtualTreeNodes={virtualTreeNodes}
       isFiltering={isFiltering}
-      createFolderRequestToken={createFolderRequestToken}
-      createCardSetRequestToken={createCardSetRequestToken}
+      onRegisterCreateFolderTrigger={(fn) => {
+        createFolderTriggerRef.current = fn;
+      }}
+      onRegisterCreateCardSetTrigger={(fn) => {
+        createCardSetTriggerRef.current = fn;
+      }}
       onRegisterPdfTrigger={(fn) => {
         pdfTriggerRef.current = fn;
       }}

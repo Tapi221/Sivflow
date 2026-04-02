@@ -1,6 +1,10 @@
 import { ContextMenu } from "@/components/folder/components/menus/ContextMenu";
 import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
+import { ExplorerRowContent } from "@/components/folder/explorer/rows/ExplorerRowContent";
 import {
+  EXPLORER_ROW_CONTENT_CLASS,
+  EXPLORER_ROW_ICON_SLOT_CLASS,
+  EXPLORER_ROW_INPUT_CLASS,
   FOLDER_ROW_ICON_ACTIVE_CLASS,
   FOLDER_ROW_ICON_MUTED_CLASS,
   FOLDER_ROW_ICON_SIZE_CLASS,
@@ -16,8 +20,8 @@ interface RootFolderPanelListProps {
   openRowMenuId: string | null;
   setOpenRowMenuId: React.Dispatch<React.SetStateAction<string | null>>;
   onSelectFolder: (folderId: string) => void;
-  handleCreateFolderAction: (parentId: string | null) => void;
-  handleCreateCardSetAction: (folderId: string | null) => void;
+  handleCreateFolderAction: (parentId: string | null) => string;
+  handleCreateCardSetAction: (folderId: string | null) => string | null;
   handleDelete: (id: string, type: "folder" | "card") => void;
   pinnedItems?: Array<{ type: "folder" | "card" | "document"; id: string }>;
   onPinItem?: (item: { type: "folder" | "card" | "document"; id: string }) => void;
@@ -50,34 +54,20 @@ export function RootFolderPanelList({
   handleRenameConfirm,
 }: RootFolderPanelListProps) {
   const inputRef = React.useRef<HTMLInputElement | null>(null);
-
-  React.useEffect(() => {
-    if (!editingId) return;
-
-    let raf1 = 0;
-    let raf2 = 0;
-
-    raf1 = requestAnimationFrame(() => {
-      const input = inputRef.current;
-      if (!input) return;
-
-      input.focus();
-
-      raf2 = requestAnimationFrame(() => {
-        const finalInput = inputRef.current;
-        if (!finalInput) return;
-
-        finalInput.focus();
-        finalInput.select();
-        finalInput.setSelectionRange(0, finalInput.value.length);
-      });
-    });
-
-    return () => {
-      cancelAnimationFrame(raf1);
-      cancelAnimationFrame(raf2);
-    };
-  }, [editingId]);
+  const attachInputRef = React.useCallback(
+    (node: HTMLInputElement | null) => {
+      inputRef.current = node;
+      if (!node || !editingId) return;
+      node.focus({ preventScroll: true });
+      node.select();
+      try {
+        node.setSelectionRange(0, node.value.length);
+      } catch {
+        // no-op: setSelectionRange をサポートしない環境がある
+      }
+    },
+    [editingId],
+  );
 
   return (
     <div className="h-full overflow-y-auto px-1 py-1">
@@ -94,7 +84,7 @@ export function RootFolderPanelList({
           <div
             key={panel.id}
             className={cn(
-              "group relative flex h-8 w-full cursor-pointer items-center rounded-[4px] px-2 text-left",
+              "sidebar-row group relative flex h-8 w-full cursor-pointer items-center rounded-[4px] px-2 text-left",
               "hover:bg-[var(--sidebar-active-bg,#e7ebef)]",
               selectedFolderId === panel.id &&
                 "bg-[var(--sidebar-active-bg,#e7ebef)]",
@@ -113,21 +103,23 @@ export function RootFolderPanelList({
               }
             }}
           >
-            <div className="flex min-w-0 flex-1 items-center gap-1.5 pr-8">
-              <FolderOutlineIcon
-                className={cn(
-                  FOLDER_ROW_ICON_SIZE_CLASS,
-                  "shrink-0",
-                  selectedFolderId === panel.id
-                    ? FOLDER_ROW_ICON_ACTIVE_CLASS
-                    : FOLDER_ROW_ICON_MUTED_CLASS,
-                )}
-              />
+            <div className={cn(EXPLORER_ROW_CONTENT_CLASS, "pr-8")}>
+              <span className={EXPLORER_ROW_ICON_SLOT_CLASS}>
+                <FolderOutlineIcon
+                  className={cn(
+                    "sidebar-icon",
+                    FOLDER_ROW_ICON_SIZE_CLASS,
+                    selectedFolderId === panel.id
+                      ? FOLDER_ROW_ICON_ACTIVE_CLASS
+                      : FOLDER_ROW_ICON_MUTED_CLASS,
+                  )}
+                />
+              </span>
 
               {isEditing ? (
                 <input
-                  ref={inputRef}
-                  className="h-6 w-full rounded border border-slate-300 bg-white px-1 text-[14px] text-[#1f2328] outline-none select-text"
+                  ref={attachInputRef}
+                  className={EXPLORER_ROW_INPUT_CLASS}
                   style={{ userSelect: "text", WebkitUserSelect: "text" }}
                   value={editingName}
                   onFocus={(e) => {
@@ -169,14 +161,15 @@ export function RootFolderPanelList({
                   }}
                 />
               ) : (
-                <span
-                  className={cn(
-                    FOLDER_ROW_TITLE_CLASS,
-                    selectedFolderId === panel.id ? "font-medium" : "font-normal",
-                  )}
-                >
-                  {panel.name}
-                </span>
+                <div className="pointer-events-none flex min-w-0 flex-1 items-center">
+                  <ExplorerRowContent
+                    title={panel.name}
+                    titleClassName={cn(
+                      FOLDER_ROW_TITLE_CLASS,
+                      selectedFolderId === panel.id ? "font-medium" : "font-normal",
+                    )}
+                  />
+                </div>
               )}
             </div>
 
@@ -194,29 +187,6 @@ export function RootFolderPanelList({
                   setEditingId(panel.id);
                   setEditingName(panel.name);
                   editingNameRef.current = panel.name;
-
-                  const forceSelectRenameInput = () => {
-                    const input = inputRef.current;
-                    if (!input) return;
-                    input.focus({ preventScroll: true });
-                    input.select();
-                    try {
-                      input.setSelectionRange(0, input.value.length);
-                    } catch {
-                      // no-op: setSelectionRange をサポートしない環境がある
-                    }
-                  };
-
-                  requestAnimationFrame(() => {
-                    forceSelectRenameInput();
-                    requestAnimationFrame(() => {
-                      forceSelectRenameInput();
-                    });
-                  });
-
-                  window.setTimeout(() => {
-                    forceSelectRenameInput();
-                  }, 40);
                 }}
                 onDelete={() => handleDelete(panel.id, "folder")}
                 isPinned={isPinned}

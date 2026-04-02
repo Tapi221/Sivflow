@@ -27,8 +27,8 @@ interface TreeViewTabContentProps {
   customViews: ViewDef[];
   virtualTreeNodes: ViewsPanelProps["nodes"];
   isFiltering: boolean;
-  createFolderRequestToken: number;
-  createCardSetRequestToken: number;
+  onRegisterCreateFolderTrigger?: (fn: (() => void) | null) => void;
+  onRegisterCreateCardSetTrigger?: (fn: (() => void) | null) => void;
   onRegisterPdfTrigger: (fn: () => void) => void;
   onRegisterPptxTrigger: (fn: () => void) => void;
   navigateToSectionListToken: number;
@@ -75,8 +75,8 @@ export function TreeViewTabContent({
   customViews,
   virtualTreeNodes,
   isFiltering,
-  createFolderRequestToken,
-  createCardSetRequestToken,
+  onRegisterCreateFolderTrigger,
+  onRegisterCreateCardSetTrigger,
   onRegisterPdfTrigger,
   onRegisterPptxTrigger,
   navigateToSectionListToken,
@@ -179,8 +179,8 @@ export function TreeViewTabContent({
           selectedCardSetId={selectedCardSetId}
           onSelectCardSet={onSelectCardSet}
           isFiltering={isFiltering}
-          createFolderRequestToken={createFolderRequestToken}
-          createCardSetRequestToken={createCardSetRequestToken}
+          onRegisterCreateFolderTrigger={onRegisterCreateFolderTrigger}
+          onRegisterCreateCardSetTrigger={onRegisterCreateCardSetTrigger}
           onRegisterPdfTrigger={onRegisterPdfTrigger}
           onRegisterPptxTrigger={onRegisterPptxTrigger}
           navigateToSectionListToken={navigateToSectionListToken}

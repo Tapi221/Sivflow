@@ -35,7 +35,11 @@ export function useCardSets(folderId?: string | null) {
   const createCardSet = async (
     name: string,
     targetFolderId?: string | null,
-    opts?: { description?: string },
+    opts?: {
+      description?: string;
+      id?: string;
+      orderIndex?: number;
+    },
   ): Promise<CardSet> => {
     if (!currentUser) throw new Error("認証が必要です");
 
@@ -45,29 +49,38 @@ export function useCardSets(folderId?: string | null) {
 
     const db = await getLocalDb(currentUser.uid);
 
-    const siblingSets = (rawSets ?? []).filter(
+    const existingSets = await db.cardSets.where("userId").equals(currentUser.uid).toArray();
+
+    const siblingSets = existingSets.filter(
       (s) => !s.isDeleted && s.folderId === targetFolderId,
     );
 
-    const maxOrder = siblingSets.reduce(
-      (m, s) => Math.max(m, s.orderIndex ?? 0),
-      -1,
-    );
-
     const now = new Date();
+    const orderIndex = opts?.orderIndex ?? 0;
 
     const cardSet: CardSet = {
-      id: crypto.randomUUID(),
+      id: opts?.id ?? crypto.randomUUID(),
       userId: currentUser.uid,
       deviceId: "web",
       folderId: targetFolderId,
       name,
       description: opts?.description,
-      orderIndex: maxOrder + 1,
+      orderIndex,
       isDeleted: false,
       createdAt: now,
       updatedAt: now,
     };
+
+    if (orderIndex === 0 && siblingSets.length > 0) {
+      await Promise.all(
+        siblingSets.map((sibling) =>
+          db.cardSets.update(sibling.id, {
+            orderIndex: (sibling.orderIndex ?? 0) + 1,
+            updatedAt: now,
+          }),
+        ),
+      );
+    }
 
     await db.cardSets.add(cardSet);
     return cardSet;
