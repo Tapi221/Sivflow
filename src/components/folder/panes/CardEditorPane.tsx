@@ -28,7 +28,14 @@ import {
 } from "@/components/folder/panes/useCardEditorPaneWidth";
 import { normalizeLayoutRows } from "@/domain/card/extraRows";
 import { cn } from "@/lib/utils";
-import type { Card, CardBlock, UserSettings } from "@/types/domain/card";
+import type { Card, CardBlock } from "@/types/domain/card";
+
+type CardEditorPaneSettings = {
+  accentColor?: string;
+  duplicateToOpposite?: boolean;
+  delayBonusEnabled?: boolean;
+  reviewStartNextDay?: boolean;
+};
 
 interface CardEditorPaneProps {
   selectedCardId: string | null;
@@ -44,7 +51,7 @@ interface CardEditorPaneProps {
   hideBlockToolbars?: boolean;
   externalToolbarMountQ?: HTMLDivElement | null;
   externalToolbarMountA?: HTMLDivElement | null;
-  settingsOverride?: Partial<UserSettings> | null;
+  settingsOverride?: Partial<CardEditorPaneSettings> | null;
   saveSignal?: number;
   saveSignalEnabled?: boolean;
   hideFooterActions?: boolean;
@@ -66,6 +73,15 @@ type FlashcardCardLike = Record<string, unknown> & {
 const CARD_PANE_AUTO_MAX_SCALE = 4;
 const CARD_EDITOR_PAIR_GAP_PX = 16;
 const EMPTY_BLOCKS: CardBlock[] = [];
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
+
+const isCardEntity = (value: unknown): value is Card =>
+  isRecord(value) && typeof value.id === "string";
+
+const toFlashcardCardLike = (card: unknown): FlashcardCardLike =>
+  (isRecord(card) ? card : {}) as FlashcardCardLike;
 
 type EditorSidePaneProps = {
   side: "question" | "answer";
@@ -115,7 +131,7 @@ function EditorSidePaneInner({
   settings,
   shouldShowInlineToolbarMount,
   setInlineToolbarMount,
-  hideCardShellHeader,
+  hideCardShellHeader: _hideCardShellHeader,
   shouldDockToolbarToCardTop,
   dockToolbarInsideCardEdge,
   setDockedToolbarMount,
@@ -132,6 +148,8 @@ function EditorSidePaneInner({
   actionsTopLeft,
   actionsTopRight,
 }: EditorSidePaneProps) {
+  void _hideCardShellHeader;
+
   return (
     <div
       className={cn(
@@ -241,9 +259,6 @@ const areEditorSidePanePropsEqual = (
 const EditorSidePane = memo(EditorSidePaneInner, areEditorSidePanePropsEqual);
 EditorSidePane.displayName = "EditorSidePane";
 
-const toFlashcardCardLike = (card: Card): FlashcardCardLike =>
-  card as unknown as FlashcardCardLike;
-
 export function CardEditorPane({
   selectedCardId,
   folderId,
@@ -282,8 +297,8 @@ export function CardEditorPane({
     saveSignal,
     saveSignalEnabled,
   });
-  const { settings, isMetaOpen, session, layout, content, actions } =
-    controller;
+
+  const { settings, isMetaOpen, session, layout, content, actions } = controller;
 
   const {
     draft,
@@ -308,6 +323,7 @@ export function CardEditorPane({
     handleQuestionMinHeightChange,
     handleAnswerMinHeightChange,
   } = layout;
+
   const {
     setSideBlocks,
     imageDialogSide,
@@ -324,12 +340,14 @@ export function CardEditorPane({
     getReferenceItems,
     setReferenceItems,
   } = content;
+
   const { handleCancelEditing, handleSaveEditing, metaPanel } = actions;
 
   const [toolbarMountQInternal, setToolbarMountQInternal] =
     useState<HTMLDivElement | null>(null);
   const [toolbarMountAInternal, setToolbarMountAInternal] =
     useState<HTMLDivElement | null>(null);
+
   const toolbarMountQ = externalToolbarMountQ ?? toolbarMountQInternal;
   const toolbarMountA = externalToolbarMountA ?? toolbarMountAInternal;
   const usesExternalToolbarMount =
@@ -349,7 +367,7 @@ export function CardEditorPane({
     [setSideBlocks],
   );
 
-  const frontBlocks= draft?.frontBlocks?? EMPTY_BLOCKS;
+  const frontBlocks = draft?.frontBlocks ?? EMPTY_BLOCKS;
   const backBlocks = draft?.backBlocks ?? EMPTY_BLOCKS;
 
   const editorCardHeightPx = useMemo(
@@ -403,56 +421,53 @@ export function CardEditorPane({
     isEditing,
     isMetaOpen,
     normalizedSelectedCardId,
-    selectedCardId,
+    selectedCardId: selectedCardId ?? undefined,
     canonicalCardWidth: CANONICAL_CARD_WIDTH,
     cardSetId,
   });
 
+  const activePaneModeValue: "edit" | "view" =
+    activePaneMode === "edit" ? "edit" : "view";
+
   const shouldKeepDockedToolbarInsideCard =
     shouldDockToolbarToCardTop && isMetaOpen && !embeddedInPager;
 
+  const selectedCardEntity = isCardEntity(selectedCard) ? selectedCard : null;
+  const panelCardEntity = isCardEntity(panelCard) ? panelCard : null;
+  const flashcardCard = selectedCard ? toFlashcardCardLike(selectedCard) : null;
+
   const editorActionsTopLeft = useMemo(
     () =>
-      selectedCard ? (
+      selectedCardEntity ? (
         <CardCornerActions
-          onHelp={() => handleToggleUncertainty(selectedCard)}
-          onStar={() => handleToggleBookmark(selectedCard)}
-          helpActive={selectedCard.hasUncertainty ?? false}
-          starActive={selectedCard.isBookmarked ?? false}
+          onHelp={() => handleToggleUncertainty(selectedCardEntity)}
+          onStar={() => handleToggleBookmark(selectedCardEntity)}
+          helpActive={selectedCardEntity.hasUncertainty ?? false}
+          starActive={selectedCardEntity.isBookmarked ?? false}
         />
       ) : undefined,
-    [handleToggleBookmark, handleToggleUncertainty, selectedCard],
+    [handleToggleBookmark, handleToggleUncertainty, selectedCardEntity],
   );
 
   const questionBlocksForToolbar = draft?.frontBlocks;
   const questionImagesForToolbar = draft?.questionImages;
-  const questionActionsTopRight = useMemo(
-    () => {
-      void questionBlocksForToolbar;
-      void questionImagesForToolbar;
-      return renderMediaDialogButtons("question");
-    },
-    [
-      questionBlocksForToolbar,
-      questionImagesForToolbar,
-      renderMediaDialogButtons,
-    ],
-  );
+  const questionActionsTopRight = useMemo(() => {
+    void questionBlocksForToolbar;
+    void questionImagesForToolbar;
+    return renderMediaDialogButtons("question");
+  }, [
+    questionBlocksForToolbar,
+    questionImagesForToolbar,
+    renderMediaDialogButtons,
+  ]);
 
   const answerBlocksForToolbar = draft?.backBlocks;
   const answerImagesForToolbar = draft?.answerImages;
-  const answerActionsTopRight = useMemo(
-    () => {
-      void answerBlocksForToolbar;
-      void answerImagesForToolbar;
-      return renderMediaDialogButtons("answer");
-    },
-    [
-      answerBlocksForToolbar,
-      answerImagesForToolbar,
-      renderMediaDialogButtons,
-    ],
-  );
+  const answerActionsTopRight = useMemo(() => {
+    void answerBlocksForToolbar;
+    void answerImagesForToolbar;
+    return renderMediaDialogButtons("answer");
+  }, [answerBlocksForToolbar, answerImagesForToolbar, renderMediaDialogButtons]);
 
   if (!normalizedSelectedCardId && !isEditing) {
     return <EmptySelectionState onStartNew={handleStartNew} />;
@@ -524,10 +539,10 @@ export function CardEditorPane({
                   max={activePaneMaxWidthPx}
                   defaultValue={activePaneDisplayedDefaultWidthPx}
                   onPreviewChange={(value) =>
-                    previewPaneWidth(activePaneMode, value)
+                    previewPaneWidth(activePaneModeValue, value)
                   }
                   onCommit={(value) => {
-                    void persistPaneWidth(activePaneMode, value);
+                    void persistPaneWidth(activePaneModeValue, value);
                   }}
                   onStepDown={() => stepPaneWidth(-CARD_PANE_WIDTH_STEP_PX)}
                   onStepUp={() => stepPaneWidth(CARD_PANE_WIDTH_STEP_PX)}
@@ -674,21 +689,22 @@ export function CardEditorPane({
                   )}
                 </div>
               ) : (
-                selectedCard && (
+                flashcardCard && (
                   <div className="flex w-full justify-center">
                     <div className="w-full" style={activePaneWidthStyle}>
-                      <Flashcard card={adaptCard(toFlashcardCardLike(selectedCard))}
+                      <Flashcard
+                        card={flashcardCard}
                         isFlipped={isFlipped}
                         onFlip={() => setIsFlipped((prev) => !prev)}
                         onToggleBookmark={(cardLike) => {
-                          if (!selectedCard) return;
                           void cardLike;
-                          void handleToggleBookmark(selectedCard);
+                          if (!selectedCardEntity) return;
+                          void handleToggleBookmark(selectedCardEntity);
                         }}
                         onToggleUncertainty={(cardLike) => {
-                          if (!selectedCard) return;
                           void cardLike;
-                          void handleToggleUncertainty(selectedCard);
+                          if (!selectedCardEntity) return;
+                          void handleToggleUncertainty(selectedCardEntity);
                         }}
                         onEdit={() => {
                           setIsFlipped(false);
@@ -706,10 +722,28 @@ export function CardEditorPane({
 
             {!hideMetaPanel && isMetaOpen && (
               <CardMetaPanel
-                card={panelCard}
-                reviewLogs={panelCard?.reviewLogs ?? []}
-                onAddReviewLog={metaPanel.onAddReviewLog}
-                onUpdateLatestReviewLog={metaPanel.onUpdateLatestReviewLog}
+                card={panelCardEntity}
+                reviewLogs={panelCardEntity?.reviewLogs ?? []}
+                onAddReviewLog={({ reviewedAt, rating, durationMinutes }) =>
+                  metaPanel.onAddReviewLog({
+                    reviewedAt,
+                    rating,
+                    durationMinutes,
+                  })
+                }
+                onUpdateLatestReviewLog={({
+                  reviewLogs,
+                  reviewedAt,
+                  rating,
+                  durationMinutes,
+                }) =>
+                  metaPanel.onUpdateLatestReviewLog({
+                    reviewLogs,
+                    reviewedAt,
+                    rating,
+                    durationMinutes,
+                  })
+                }
                 onDeleteLatestReviewLog={metaPanel.onDeleteLatestReviewLog}
                 onUpdateReviewLogDuration={metaPanel.onUpdateReviewLogDuration}
                 onTitleInputChange={metaPanel.onTitleInputChange}
