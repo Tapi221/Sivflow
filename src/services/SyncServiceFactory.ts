@@ -3,9 +3,9 @@
 import { flags } from "@/features/flags";
 import type { ISyncService } from "./interfaces/ISyncService";
 import {
-    getLocalDb,
-    getLocalDBTelemetrySnapshot,
-    telemetryOncePerSession,
+  getLocalDb,
+  getLocalDBTelemetrySnapshot,
+  telemetryOncePerSession,
 } from "./localDB";
 import { CloudSyncAdapter } from "./logic/CloudSyncAdapter";
 import { DiffEngine } from "./logic/DiffEngine";
@@ -42,14 +42,20 @@ export class SyncServiceFactory {
     const db = await getLocalDb(userId);
     const legacy = new SyncService(userId, db);
 
-    // ✅ ここが A 案の本体：Legacy が欠けてたら V2 にフォールバック
-    // NOTE: mustHave は "実際に呼ばれる可能性があるメソッド" を必須にする
+    // AuthContext / ISyncService が実際に前提としているメソッドを必須にする
     const mustHave = [
       "getQueueStatus",
-      // ↓ ここはあなたの ISyncService / AuthContext の実装に合わせて揃える
-      // 'synchronize',
-      // 'performStartupSync',
-      // 'forceFullResync',
+      "monitorSecurity",
+      "dismissSecurityAlert",
+      "synchronize",
+      "performFullSync",
+      "processQueue",
+      "loadSettings",
+      "getUnresolvedConflicts",
+      "updateDeviceName",
+      "removeDevice",
+      "cleanupInactiveDevices",
+      "getSyncStats",
     ] as const;
 
     const legacyObj = legacy as unknown as Record<string, unknown>;
@@ -60,14 +66,7 @@ export class SyncServiceFactory {
         `[SyncServiceFactory] Legacy SyncService is missing methods: ${missing.join(", ")}. ` +
         `Falling back to SyncService V2.`;
 
-      // DEV は早めに気付けるようにしておく（ただし “Aでいく” なら本番は死なせない）
-      if (import.meta.env.DEV) {
-        // throw したい派ならここを throw に変えてもいいが、今は「落ちない」を優先
-        console.error(msg);
-      } else {
-        console.error(msg);
-      }
-
+      console.error(msg);
       return await this.createV2(userId);
     }
 
@@ -116,7 +115,3 @@ export class SyncServiceFactory {
     SyncServiceFactory.instances.clear();
   }
 }
-
-
-
-
