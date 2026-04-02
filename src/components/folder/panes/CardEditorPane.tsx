@@ -310,6 +310,9 @@ export function CardEditorPane({
     isEditing,
     setIsEditing,
     isSaving,
+    isAutosaving,
+    isDirty,
+    saveError,
     handleStartNew,
     handleCancel,
     handleToggleBookmark,
@@ -664,11 +667,15 @@ export function CardEditorPane({
 
                   {!hideFooterActions && (
                     <div className="sticky bottom-4 flex w-full justify-end gap-2">
+                      {(isAutosaving || saveError) && (
+                        <div className="mr-auto flex items-center text-xs text-slate-500">
+                          {saveError ? "自動保存に失敗しました" : isDirty ? "保存中..." : "保存しています..."}
+                        </div>
+                      )}
                       <button
                         type="button"
                         className="h-9 rounded-full px-4 hover:bg-black/5 disabled:opacity-50"
                         onClick={handleCancelEditing}
-                        disabled={isSaving}
                       >
                         キャンセル
                       </button>
@@ -676,7 +683,7 @@ export function CardEditorPane({
                         type="button"
                         className="h-9 rounded-full bg-black px-6 text-white hover:opacity-90 disabled:opacity-50"
                         onClick={() => void handleSaveEditing()}
-                        disabled={isSaving}
+                        disabled={Boolean(isSaving && !isDirty)}
                       >
                         保存
                       </button>
@@ -741,6 +748,7 @@ export function CardEditorPane({
                 }
                 onDeleteLatestReviewLog={metaPanel.onDeleteLatestReviewLog}
                 onUpdateReviewLogDuration={metaPanel.onUpdateReviewLogDuration}
+                onFlushAutosave={metaPanel.onFlushAutosave}
                 onTitleInputChange={metaPanel.onTitleInputChange}
                 onUpdateTags={metaPanel.onUpdateTags}
                 onToggleDraft={metaPanel.onToggleDraft}

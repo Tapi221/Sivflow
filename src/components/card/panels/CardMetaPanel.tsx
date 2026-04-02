@@ -1,4 +1,11 @@
-import { memo, useEffect, useMemo, useState, type ReactElement } from "react";
+import {
+  memo,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactElement,
+} from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLiveQuery } from "dexie-react-hooks";
 import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
@@ -70,6 +77,7 @@ type CardMetaPanelProps = {
     logIndex: number;
     durationMinutes: number | null;
   }) => void | Promise<void> | Promise<unknown>;
+  onFlushAutosave?: () => void | Promise<void>;
   onTitleInputChange?: (nextTitle: string) => void | Promise<void>;
   onUpdateTags: (nextTags: string[]) => void;
   onToggleDraft: (isDraft: boolean) => void;
@@ -409,6 +417,7 @@ const areCardMetaPanelPropsEqual = (
   prev.onUpdateLatestReviewLog === next.onUpdateLatestReviewLog &&
   prev.onDeleteLatestReviewLog === next.onDeleteLatestReviewLog &&
   prev.onUpdateReviewLogDuration === next.onUpdateReviewLogDuration &&
+  prev.onFlushAutosave === next.onFlushAutosave &&
   prev.onTitleInputChange === next.onTitleInputChange &&
   prev.onUpdateTags === next.onUpdateTags &&
   prev.onToggleDraft === next.onToggleDraft &&
@@ -424,6 +433,7 @@ function CardMetaPanelInner({
   onUpdateLatestReviewLog,
   onDeleteLatestReviewLog,
   onUpdateReviewLogDuration,
+  onFlushAutosave,
   onTitleInputChange,
   onUpdateTags,
   onToggleDraft,
@@ -469,6 +479,8 @@ function CardMetaPanelInner({
   const [durationDrafts, setDurationDrafts] = useState<Record<number, string>>(
     {},
   );
+  const titleComposingRef = useRef(false);
+  const titleFlushAfterCompositionRef = useRef(false);
   const [durationSavingIndex, setDurationSavingIndex] = useState<number | null>(
     null,
   );
@@ -879,15 +891,18 @@ function CardMetaPanelInner({
   // tagIds 優先、fallback: card.tags（移行期間互換）
   const tags = resolveCardTagNames(card?.tagIds, card?.tags, tagById);
 
-  const commitTitle = (rawValue?: string) => {
+  const commitTitle = (rawValue?: string, options?: { flush?: boolean }) => {
     const source = rawValue ?? titleInput;
     const next = source.trim();
     const current = (card?.title ?? "").trim();
     if (next !== source) {
-      setTitleInput(next);
+      handleTitleInputChange(next);
     }
-    if (next === current) return;
-    void Promise.resolve(onUpdateTitle(next)).catch(() => {});
+    if (next !== current) {
+      void Promise.resolve(onUpdateTitle(next)).catch(() => {});
+    }
+    if (!options?.flush || !onFlushAutosave) return;
+    void Promise.resolve(onFlushAutosave()).catch(() => {});
   };
 
   const handleTitleInputChange = (next: string) => {
@@ -1153,15 +1168,34 @@ function CardMetaPanelInner({
               <input
                 value={titleInput}
                 onChange={(e) => handleTitleInputChange(e.target.value)}
-                onCompositionEnd={(e) =>
-                  handleTitleInputChange(e.currentTarget.value)
-                }
-                onBlur={(e) => commitTitle(e.currentTarget.value)}
+                onCompositionStart={() => {
+                  titleComposingRef.current = true;
+                  titleFlushAfterCompositionRef.current = false;
+                }}
+                onCompositionEnd={(e) => {
+                  titleComposingRef.current = false;
+                  handleTitleInputChange(e.currentTarget.value);
+                  if (titleFlushAfterCompositionRef.current) {
+                    titleFlushAfterCompositionRef.current = false;
+                    commitTitle(e.currentTarget.value, { flush: true });
+                  }
+                }}
+                onBlur={(e) => {
+                  if (titleComposingRef.current) {
+                    titleFlushAfterCompositionRef.current = true;
+                    return;
+                  }
+                  commitTitle(e.currentTarget.value, { flush: true });
+                }}
                 disabled={!card}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.nativeEvent.isComposing) {
+                  if (
+                    e.key === "Enter" &&
+                    !titleComposingRef.current &&
+                    !e.nativeEvent.isComposing
+                  ) {
                     e.preventDefault();
-                    commitTitle(e.currentTarget.value);
+                    commitTitle(e.currentTarget.value, { flush: true });
                   }
                 }}
                 className="h-[var(--meta-row-px)] w-full rounded-md border border-[var(--surface-border)] bg-white px-2 text-[length:var(--surface-placeholder-font-size)] leading-[var(--meta-row-px)] text-[#6e6466] surface-concave outline-none placeholder:text-[var(--surface-placeholder-text)] focus:border-[#cfcfcf] focus:bg-white"

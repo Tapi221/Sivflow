@@ -191,7 +191,11 @@ export function useCardEditorPaneController({
   }, [onRequestCloseEditing, session]);
 
   const handleSaveEditing = React.useCallback(async (): Promise<boolean> => {
-    const saved = await session.handleSave();
+    const saved = await session.flushDraft({
+      reason: "manual",
+      exitEditing: true,
+      showSuccessToast: true,
+    });
     if (saved) {
       onRequestCloseEditing?.();
     }
@@ -224,10 +228,12 @@ export function useCardEditorPaneController({
       dispatchCardViewSaveFinished(true, eventDetail);
       return;
     }
-    if (session.isSaving) return;
 
     void (async () => {
-      const saved = await session.handleSave();
+      const saved = await session.flushDraft({
+        reason: "manual",
+        showSuccessToast: false,
+      });
       dispatchCardViewSaveFinished(saved, eventDetail);
     })();
   }, [
@@ -338,6 +344,11 @@ export function useCardEditorPaneController({
       onUpdateLatestReviewLog,
       onDeleteLatestReviewLog,
       onUpdateReviewLogDuration,
+      onFlushAutosave: () =>
+        session.flushDraft({
+          reason: "autosave",
+          showSuccessToast: false,
+        }),
       onTitleInputChange: session.handleTitleInputChange,
       onUpdateTags: session.handleUpdateTags,
       onToggleDraft: session.handleToggleDraft,
@@ -348,6 +359,7 @@ export function useCardEditorPaneController({
       onDeleteLatestReviewLog,
       onUpdateLatestReviewLog,
       onUpdateReviewLogDuration,
+      session.flushDraft,
       session.handleTitleInputChange,
       session.handleToggleDraft,
       session.handleUpdateTags,
