@@ -158,10 +158,10 @@ export function useCardEditorSession({
         questionImages: ((card as unknown).questionImages ?? []) as UploadedImage[],
         answerImages: ((card as unknown).answerImages ?? []) as UploadedImage[],
         frontBlocks: sortBlocksByOrderIndex(
-          ((card.front?.blocks ?? []) ?? []) as CardBlock[],
+          (card.front?.blocks ?? []) as CardBlock[],
         ),
         backBlocks: sortBlocksByOrderIndex(
-          ((card.back?.blocks ?? []) ?? []) as CardBlock[],
+          (card.back?.blocks ?? []) as CardBlock[],
         ),
         layoutRows: normalizeLayoutRows(
           (card as unknown).layoutRows ?? (card as unknown).layout_rows ?? migratedRows,

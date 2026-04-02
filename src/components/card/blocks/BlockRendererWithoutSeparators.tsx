@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 import type { CardBlock } from "@/types/domain/card";
 import { useCallback, useContext, useMemo, useState } from "react";
 import { hasRuledLine } from "./blockDisplayPolicy";
-import { BlockEditModeContext } from "./BlockWrapper";
+import { BlockEditModeContext } from "./BlockEditModeContext";
 import { CodeRenderer } from "./CodeRenderer";
 import { ImageBlockContent } from "./ImageBlockContent";
 import { ImageBlockShell } from "./ImageBlockShell";

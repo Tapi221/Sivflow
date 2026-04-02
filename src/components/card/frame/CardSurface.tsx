@@ -1,18 +1,5 @@
 import { cn } from "@/lib/utils";
-import React, { createContext, useContext, useMemo, useRef, useState } from "react";
-import { PositionalRuledLayer } from "./PositionalRuledLayer";
-
-// Context for children (e.g., SharedCardContent) to trigger positional ruled rendering
-export type CardRuledContextValue = {
-  surfaceRef: React.RefObject<HTMLDivElement | null>;
-  setVisibleRules: (rules: number[]) => void;
-};
-
-const CardRuledContext = createContext<CardRuledContextValue | null>(null);
-
-export function useCardRuledContext(): CardRuledContextValue | null {
-  return useContext(CardRuledContext);
-}
+import React, { useMemo } from "react";
 
 type CSSVars = React.CSSProperties & Record<`--${string}`, string>;
 
@@ -45,24 +32,19 @@ export function CardSurface({
   className,
   style,
   overlay,
-  ruled = true,
+  ruled: _ruled = true,
   ruledOpacity = 1,
   ruledRowPx = 24,
   ruledOffsetPx = 0,
   ruledBottomOffsetPx = 0,
-  ruledPhasePx = 0,
+  ruledPhasePx: _ruledPhasePx = 0,
 }: CardSurfaceProps) {
+  void _ruled;
+  void _ruledPhasePx;
+
   const rowPx = Math.max(8, ruledRowPx);
   const topPx = Math.max(0, ruledOffsetPx);
   const bottomPx = Math.max(0, ruledBottomOffsetPx);
-
-  const surfaceRef = useRef<HTMLDivElement | null>(null);
-  const [visibleRules, setVisibleRules] = useState<number[]>([]);
-
-  const contextValue = useMemo<CardRuledContextValue>(
-    () => ({ surfaceRef, setVisibleRules }),
-    [],
-  );
 
   const surfaceStyle = useMemo(() => {
     const vars: CSSVars = {
@@ -85,54 +67,41 @@ export function CardSurface({
   const opacity = clamp01(ruledOpacity);
 
   return (
-    <CardRuledContext.Provider value={contextValue}>
+    <div
+      data-card-surface="true"
+      className={cn("relative flex min-h-0 flex-1 flex-col", className)}
+      style={{
+        ...surfaceStyle,
+        background: "var(--card-surface)",
+        paddingLeft: "var(--card-padding-x)",
+        paddingRight: "var(--card-padding-x)",
+      }}
+    >
       <div
-        ref={surfaceRef}
-        data-card-surface="true"
-        className={cn("relative flex min-h-0 flex-1 flex-col", className)}
+        aria-hidden
+        className="pointer-events-none absolute z-10"
         style={{
-          ...surfaceStyle,
-          background: "var(--card-surface)",
-          paddingLeft: "var(--card-padding-x)",
-          paddingRight: "var(--card-padding-x)",
+          top: "var(--ruled-offset-px, 44px)",
+          left: "var(--card-padding-x, 12px)",
+          right: "var(--card-padding-x, 12px)",
+          height: 1,
+          background: "var(--card-ruled-color, rgba(0,0,0,0.05))",
+          opacity,
         }}
+      />
+
+      <div
+        className="relative z-10 flex min-h-0 flex-1 flex-col"
+        style={{ paddingBottom: "var(--card-padding-bottom)" }}
       >
-        {/* ヘッダー下固定セパレーター（ruled prop 不問で常時描画） */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute z-10"
-          style={{
-            top: "var(--ruled-offset-px, 44px)",
-            left: "var(--card-padding-x, 12px)",
-            right: "var(--card-padding-x, 12px)",
-            height: 1,
-            background: "var(--card-ruled-color, rgba(0,0,0,0.05))",
-            opacity,
-          }}
-        />
-
-        {/* positional ruled lines only */}
-        {false && visibleRules.length > 0 && (
-          <PositionalRuledLayer
-            visibleRules={visibleRules}
-            insetX="var(--card-padding-x)"
-            opacity={opacity}
-          />
-        )}
-
-        <div
-          className="relative z-10 flex min-h-0 flex-1 flex-col"
-          style={{ paddingBottom: "var(--card-padding-bottom)" }}
-        >
-          {children}
-        </div>
-
-        {overlay ? (
-          <div className="pointer-events-none absolute inset-0 z-20">
-            {overlay}
-          </div>
-        ) : null}
+        {children}
       </div>
-    </CardRuledContext.Provider>
+
+      {overlay ? (
+        <div className="pointer-events-none absolute inset-0 z-20">
+          {overlay}
+        </div>
+      ) : null}
+    </div>
   );
 }

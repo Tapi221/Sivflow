@@ -66,11 +66,18 @@ export function AppLayout() {
   }, []);
 
   useEffect(() => {
-    if (!isFoldersRoute) {
-      setInstantFolderId(null);
-      return;
-    }
-    setInstantFolderId(selectedFolderId ?? null);
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
+      if (!isFoldersRoute) {
+        setInstantFolderId(null);
+        return;
+      }
+      setInstantFolderId(selectedFolderId ?? null);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [isFoldersRoute, selectedFolderId]);
 
   const effectiveFolderId = instantFolderId ?? selectedFolderId;
