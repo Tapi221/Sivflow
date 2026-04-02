@@ -2,6 +2,7 @@ import { Flashcard } from "@/components/card/frame/Flashcard";
 import { CardEditorPane } from "@/components/folder/panes/CardEditorPane";
 import { CARD_PANE_AUTO_MAX_SCALE } from "@/pages/card-view/constants";
 import type { Card, UserSettings } from "@/types";
+import type { CardDisplayMode } from "@/types/domain/cardSet";
 import React from "react";
 
 export interface DesktopCardSurfaceProps {
@@ -11,6 +12,7 @@ export interface DesktopCardSurfaceProps {
   editPaneWidthPx: number;
   settings?: Partial<UserSettings> | null;
   isFlipped: boolean;
+  currentDisplayMode: CardDisplayMode;
   folderId: string | null;
   cardSetId: string | null;
   cardsOverride?: Card[];
@@ -28,6 +30,7 @@ function DesktopCardSurfaceInner({
   editPaneWidthPx,
   settings = null,
   isFlipped,
+  currentDisplayMode,
   folderId,
   cardSetId,
   cardsOverride,
@@ -102,6 +105,9 @@ function DesktopCardSurfaceInner({
         card={card}
         isFlipped={isFlipped}
         previewMode={!isActive}
+        displayMode={currentDisplayMode}
+        showInkLayer={currentDisplayMode === "fixed"}
+        inkEditingEnabled={currentDisplayMode === "fixed" && isActive}
         onFlip={isActive ? onFlip : undefined}
         onEdit={isActive ? onEdit : undefined}
         onToggleUncertainty={isActive ? onToggleUncertainty : undefined}
@@ -123,6 +129,7 @@ const areDesktopCardSurfacePropsEqual = (
   if (prev.isGlobalEditing !== next.isGlobalEditing) return false;
   if (prev.editPaneWidthPx !== next.editPaneWidthPx) return false;
   if (prev.settings !== next.settings) return false;
+  if (prev.currentDisplayMode !== next.currentDisplayMode) return false;
   if (prev.folderId !== next.folderId) return false;
   if (prev.cardSetId !== next.cardSetId) return false;
   if (prev.onFlip !== next.onFlip) return false;

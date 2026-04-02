@@ -88,15 +88,13 @@ export function TagFilterPopover({
       </PopoverTrigger>
       <PopoverContent
         align="center"
-        surface="floating"
         className={cn(
-          "w-64 p-0",
-          "overflow-hidden",
+          "w-64 overflow-hidden p-0 rounded-[12px] border border-slate-200/80 bg-white/82 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-md",
         )}
       >
         <div className="flex flex-col max-h-[400px]">
           {/* Header & Search */}
-          <div className="border-b border-[var(--surface-border)] bg-white/28 p-3">
+          <div className="border-b border-[var(--surface-border)] bg-transparent p-3">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-semibold text-slate-800">
                 タグで絞り込み
@@ -120,9 +118,9 @@ export function TagFilterPopover({
                 type="text"
                 className={cn(
                   "w-full pl-8 pr-2 py-1.5 text-xs rounded",
-                  "border border-[var(--surface-border)] bg-white/58 text-[#202123]",
+                  "border border-slate-200/70 bg-white/55 text-[#202123]",
                   "surface-concave",
-                  "focus:bg-white/72 focus:outline-none focus:ring-0 focus:border-[#cfcfcf]",
+                  "focus:bg-white/70 focus:outline-none focus:ring-0 focus:border-slate-200",
                   "placeholder:text-[var(--surface-placeholder-text)]",
                   "transition-colors",
                 )}
@@ -134,7 +132,7 @@ export function TagFilterPopover({
           </div>
 
           {/* AND,ORトグル */}
-          <div className="flex items-center gap-2 border-b border-[var(--surface-border)] bg-white/34 px-3 py-2 text-[11px]">
+          <div className="flex items-center gap-2 border-b border-[var(--surface-border)] bg-transparent px-3 py-2 text-[11px]">
             <span className="text-slate-500">条件:</span>
             <div className="flex rounded border border-[var(--surface-border)] bg-white/48 p-0.5 shadow-sm">
               <SurfaceButton
@@ -154,7 +152,7 @@ export function TagFilterPopover({
             </div>
           </div>
 
-          <div className="space-y-2 border-b border-[var(--surface-border)] bg-white/34 px-3 py-2">
+          <div className="space-y-2 border-b border-[var(--surface-border)] bg-transparent px-3 py-2">
             <div className="flex items-center justify-between gap-2 text-[11px]">
               <span className="text-slate-600">表示:</span>
               <div className="flex rounded border border-[var(--surface-border)] bg-white/48 p-0.5 shadow-sm">
@@ -228,7 +226,7 @@ export function TagFilterPopover({
           </div>
 
           {/* タグリスト */}
-          <div className="min-h-[150px] flex-1 overflow-y-auto bg-white/24 p-1">
+          <div className="min-h-[150px] flex-1 overflow-y-auto bg-transparent p-1">
             {filteredTags.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 text-slate-500 text-xs">
                 <Tag className="w-8 h-8 opacity-20 mb-2" />
@@ -275,6 +273,9 @@ export function TagFilterPopover({
     </Popover>
   );
 }
+
+
+
 
 
 

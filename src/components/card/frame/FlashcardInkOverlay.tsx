@@ -16,6 +16,7 @@ interface FlashcardInkOverlayProps {
   extraFooter?: React.ReactNode;
   previewMode: boolean;
   // ink
+  showInkLayer: boolean;
   inkEditingEnabled: boolean;
   cardId: string | null;
   activeInkSide: "question" | "answer";
@@ -34,6 +35,7 @@ export function FlashcardInkOverlay({
   extraHeaderRight,
   extraFooter,
   previewMode,
+  showInkLayer,
   inkEditingEnabled,
   cardId,
   activeInkSide,
@@ -49,7 +51,7 @@ export function FlashcardInkOverlay({
 }: FlashcardInkOverlayProps) {
   const hasHeaderOverlay = Boolean(extraHeaderRight && !previewMode);
   const hasFooterOverlay = Boolean(extraFooter);
-  const hasInkOverlay = Boolean(previewMode && inkEditingEnabled && cardId);
+  const hasInkOverlay = Boolean(showInkLayer && cardId);
 
   if (!hasHeaderOverlay && !hasFooterOverlay && !hasInkOverlay) return null;
 
@@ -84,7 +86,7 @@ export function FlashcardInkOverlay({
               ref={previewInkRef}
               cardId={cardId}
               side={activeInkSide}
-              editable={Boolean(previewMode && inkEditingEnabled && layoutStable)}
+              editable={Boolean(inkEditingEnabled && layoutStable)}
               tool={previewInkTool ?? "pen"}
               value={activeInkDocument}
               onChange={(next) => onInkDocumentChange(activeInkSide, next)}
@@ -92,13 +94,13 @@ export function FlashcardInkOverlay({
             />
           )}
 
-          {previewMode && inkEditingEnabled && !layoutStable && (
+          {showInkLayer && !layoutStable && (
             <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/25 text-slate-600 text-xs font-semibold">
               レイアウト準備中...
             </div>
           )}
 
-          {previewMode && inkEditingEnabled && layoutStable && (
+          {inkEditingEnabled && layoutStable && (
             <div className="absolute bottom-2 left-2 z-30 pointer-events-auto">
               <InkToolbar
                 tool={previewInkTool}

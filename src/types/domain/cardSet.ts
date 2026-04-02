@@ -1,5 +1,13 @@
 import type { BaseEntity } from "./base";
 
+export type CardDisplayMode = "fixed" | "fluid";
+
+export const DEFAULT_CARD_DISPLAY_MODE: CardDisplayMode = "fixed";
+
+export function normalizeCardDisplayMode(value: unknown): CardDisplayMode {
+  return value === "fluid" ? "fluid" : "fixed";
+}
+
 /**
  * CardSet — Card のコレクション単位。
  * Folder 直下に複数存在し、Card は必ず CardSet に属する。
@@ -12,4 +20,5 @@ export type CardSet = BaseEntity & {
   name: string;
   description?: string;
   orderIndex: number;
+  defaultDisplayMode?: CardDisplayMode;
 };

@@ -7,8 +7,12 @@ import {
   type SetStateAction,
 } from "react";
 import { useCardEntity } from "@/hooks/card/useCardEntity";
+import {
+  resolveCardSetDisplayMode,
+  setCardSetSessionDisplayMode,
+} from "@/services/cardDisplayModeSession";
 import type { Card } from "@/types";
-import type { CardSet } from "@/types/domain/cardSet";
+import type { CardDisplayMode, CardSet } from "@/types/domain/cardSet";
 
 interface UseCardViewStateOptions {
   initialIndex: number;
@@ -74,6 +78,7 @@ export function useCardViewState({
   toastError,
 }: UseCardViewStateOptions) {
   const sourceKey = `${cardSetId ?? ""}::${folderId ?? ""}`;
+  const defaultDisplayMode = selectedCardSet?.defaultDisplayMode;
 
   const targetResolvedIndex = useMemo(() => {
     if (!targetCardId) return null;
@@ -111,6 +116,16 @@ export function useCardViewState({
   const saveSelectionCardIdRef = useRef<string | null>(null);
   const suppressPagerUnlockTimerRef = useRef<number | null>(null);
   const autoInitializedCardSetIdsRef = useRef<Set<string>>(new Set());
+  const [currentDisplayMode, setCurrentDisplayModeState] =
+    useState<CardDisplayMode>(() =>
+      resolveCardSetDisplayMode(cardSetId, defaultDisplayMode),
+    );
+
+  useEffect(() => {
+    setCurrentDisplayModeState(
+      resolveCardSetDisplayMode(cardSetId, defaultDisplayMode),
+    );
+  }, [cardSetId, defaultDisplayMode]);
 
   const clearSuppressPagerUnlockTimer = useCallback(() => {
     if (suppressPagerUnlockTimerRef.current != null) {
@@ -464,8 +479,18 @@ export function useCardViewState({
     [sourceKey],
   );
 
+  const setCurrentDisplayMode = useCallback(
+    (mode: CardDisplayMode) => {
+      setCardSetSessionDisplayMode(cardSetId, mode);
+      setCurrentDisplayModeState(mode);
+    },
+    [cardSetId],
+  );
+
   return {
     currentIndex: currentIndexBase,
+    currentDisplayMode,
+    setCurrentDisplayMode,
     setCurrentIndex,
     safeCurrentIndex,
     isFlipped,

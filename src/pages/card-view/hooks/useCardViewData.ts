@@ -15,7 +15,7 @@ export function useCardViewData({ folderId, cardSetId }: UseCardViewDataOptions)
     createCard,
     updateCard,
   } = useCards(folderId || undefined, cardSetId || undefined);
-  const { cardSets } = useCardSets();
+  const { cardSets, updateCardSet } = useCardSets();
   const { folders = [] } = useFolders();
 
   // useCards が orderIndex 順に正規化済み配列を返すため、ここでは再ソートしない。
@@ -37,6 +37,7 @@ export function useCardViewData({ folderId, cardSetId }: UseCardViewDataOptions)
     isLoading,
     createCard,
     updateCard,
+    updateCardSet,
     sortedCards,
     cardIndexById,
     cardSets,

@@ -51,9 +51,11 @@ export type FlashcardCardLike = {
   backBlocks?: CardBlock[];
   front?: {
     blocks?: CardBlock[] | null;
+    ink?: import("@/components/ink/inkTypes").InkDocument | null;
   } | null;
   back?: {
     blocks?: CardBlock[] | null;
+    ink?: import("@/components/ink/inkTypes").InkDocument | null;
   } | null;
   layoutRows?: number;
   layout_rows?: number;

@@ -6,6 +6,7 @@ import {
 } from "@/components/card/common/constants";
 import type { InkDocument } from "@/components/ink/inkTypes";
 import { cn } from "@/lib/utils";
+import type { CardDisplayMode } from "@/types/domain/cardSet";
 import React, { useEffect, useRef, useState } from "react";
 import { CardFrame } from "./CardFrame";
 import { CARD_SHELL_COMMON_CLASS_NAME } from "./cardShellClassNames";
@@ -41,6 +42,8 @@ interface FlashcardProps {
   extraHeaderLeft?: React.ReactNode;
   extraHeaderRight?: React.ReactNode;
   extraFooter?: React.ReactNode;
+  displayMode?: CardDisplayMode;
+  showInkLayer?: boolean;
   drawMode?: boolean;
   inkEditingEnabled?: boolean;
   onInkDocumentChange?: (
@@ -55,6 +58,9 @@ interface FlashcardProps {
 
 const TAP_MOVE_CANCEL_THRESHOLD_PX = 8;
 const FLIP_SUPPRESS_AFTER_WHEEL_MS = 140;
+const FLUID_CARD_CONTENT_STYLE = {
+  "--card-content-padding-top": "0px",
+} as React.CSSProperties & Record<"--card-content-padding-top", string>;
 
 function shouldIgnoreFlipTarget(target: EventTarget | null): boolean {
   const element = target as HTMLElement | null;
@@ -63,6 +69,26 @@ function shouldIgnoreFlipTarget(target: EventTarget | null): boolean {
     element.closest(
       'button, a, input, textarea, select, label, [data-card-no-flip="true"]',
     ),
+  );
+}
+
+function hasInkStrokes(document: unknown): boolean {
+  if (!document || typeof document !== "object") return false;
+  const strokes = (document as { strokes?: unknown }).strokes;
+  return Array.isArray(strokes) && strokes.length > 0;
+}
+
+function hasStoredInk(card: FlashcardCardLike | null | undefined): boolean {
+  if (!card) return false;
+  const frontInk =
+    card.front && typeof card.front === "object" ? card.front.ink : undefined;
+  const backInk =
+    card.back && typeof card.back === "object" ? card.back.ink : undefined;
+  return (
+    hasInkStrokes(frontInk) ||
+    hasInkStrokes(backInk) ||
+    hasInkStrokes(card.inkQuestion) ||
+    hasInkStrokes(card.inkAnswer)
   );
 }
 
@@ -84,6 +110,8 @@ function FlashcardInner({
   extraHeaderLeft,
   extraHeaderRight,
   extraFooter,
+  displayMode = "fixed",
+  showInkLayer = false,
   drawMode,
   inkEditingEnabled = false,
   onInkDocumentChange,
@@ -110,6 +138,7 @@ function FlashcardInner({
   const [previewFlipped, setPreviewFlipped] = useState(false);
 
   const enableDrawMode = drawMode ?? false;
+  const isFluidDisplay = displayMode === "fluid";
   const effectiveIsFlipped =
     isFlipped ?? (previewMode ? previewFlipped : false);
   const activeInkSide: "question" | "answer" = effectiveIsFlipped
@@ -133,6 +162,7 @@ function FlashcardInner({
   const ink = useFlashcardInk({
     cardId: derived.cardId,
     effectiveIsFlipped,
+    showInkLayer,
     inkEditingEnabled,
     previewMode: previewMode ?? false,
     contentRef,
@@ -147,9 +177,7 @@ function FlashcardInner({
   // ---------------------------------------------------------------------------
   // Flip handling
   // ---------------------------------------------------------------------------
-  const isInkEditingActive = Boolean(
-    previewMode && inkEditingEnabled && ink.previewInkTool,
-  );
+  const isInkEditingActive = Boolean(inkEditingEnabled && ink.previewInkTool);
 
   const handleFlip = React.useCallback(
     (e?: React.MouseEvent) => {
@@ -228,6 +256,121 @@ function FlashcardInner({
 
   const fixedHeightPx = layoutRowsToCardHeightPx(derived.layoutRows);
   const isCardClickable = !previewMode;
+  const showFluidInkNotice = isFluidDisplay && !previewMode && hasStoredInk(card);
+
+  if (isFluidDisplay) {
+    return (
+      <div className={cn("w-full flex flex-col overflow-visible", className)}>
+        <div
+          className={cn(
+            "premium-paper-depth card-shell--interactive relative w-full overflow-hidden rounded-[28px] px-4 py-4 md:px-6",
+            isCardClickable && "cursor-pointer",
+          )}
+          role={isCardClickable ? "button" : undefined}
+          tabIndex={isCardClickable ? 0 : undefined}
+          onClick={(event) => {
+            if (!isCardClickable) return;
+            if (shouldIgnoreFlipTarget(event.target)) return;
+            handleFlip(event);
+          }}
+          onKeyDown={(event) => {
+            if (!isCardClickable) return;
+            if (event.target !== event.currentTarget) return;
+            if (event.key !== "Enter" && event.key !== " ") return;
+            event.preventDefault();
+            handleFlip();
+          }}
+        >
+          {(showFluidInkNotice ||
+            extraHeaderRight ||
+            actionsTopLeft ||
+            actionsTopRight) && (
+            <div className="mb-4 flex items-start justify-between gap-3">
+              <div className="flex min-w-0 flex-1 flex-col gap-2">
+                {showFluidInkNotice && (
+                  <div className="rounded-2xl border border-amber-200/90 bg-amber-50/90 px-3 py-2 text-[12px] font-medium leading-5 text-amber-900">
+                    <div>このカードには手書きがあります</div>
+                    <div>固定表示で確認できます</div>
+                  </div>
+                )}
+                {actionsTopLeft && (
+                  <div className="flex flex-wrap items-center gap-2">
+                    {actionsTopLeft.map((action, index) => (
+                      <div key={`fluid-left-${index}`} className="flex">
+                        {action}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {(extraHeaderRight || actionsTopRight) && (
+                <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+                  {extraHeaderRight ? (
+                    <div
+                      className="flex"
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      {extraHeaderRight}
+                    </div>
+                  ) : null}
+                  {actionsTopRight?.map((action, index) => (
+                    <div key={`fluid-right-${index}`} className="flex">
+                      {action}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          <div
+            ref={contentRef}
+            className="w-full max-w-full"
+            style={FLUID_CARD_CONTENT_STYLE}
+          >
+            <SharedCardContent
+              mode="view"
+              blocks={derived.activeBlocks}
+              onGalleryFullscreenChange={media.handleGalleryFullscreenChange}
+            />
+          </div>
+
+          {extraFooter ? (
+            <div
+              className="mt-4"
+              onClick={(event) => event.stopPropagation()}
+            >
+              {extraFooter}
+            </div>
+          ) : null}
+        </div>
+
+        <FlashcardMediaDialogs
+          isImagePopupOpen={media.isImagePopupOpen}
+          setIsImagePopupOpen={media.setIsImagePopupOpen}
+          isAudioPopupOpen={media.isAudioPopupOpen}
+          setIsAudioPopupOpen={media.setIsAudioPopupOpen}
+          isReferencePopupOpen={media.isReferencePopupOpen}
+          setIsReferencePopupOpen={media.setIsReferencePopupOpen}
+          activeImageItems={derived.activeImageItems}
+          activeImages={derived.activeImages}
+          activeAudioUrls={derived.activeAudioUrls}
+          activeReferences={derived.activeReferences}
+        />
+
+        {!previewMode && (
+          <FlashcardNavigation
+            onNext={onNext}
+            onPrev={onPrev}
+            hasNext={hasNext}
+            hasPrev={hasPrev}
+            currentIndex={currentIndex}
+            totalCards={totalCards}
+          />
+        )}
+      </div>
+    );
+  }
 
   return (
     <div
@@ -307,6 +450,7 @@ function FlashcardInner({
               extraHeaderRight={extraHeaderRight}
               extraFooter={extraFooter}
               previewMode={previewMode ?? false}
+              showInkLayer={showInkLayer}
               inkEditingEnabled={inkEditingEnabled}
               cardId={derived.cardId}
               activeInkSide={activeInkSide}
@@ -374,6 +518,8 @@ const areFlashcardPropsEqual = (
     return (
       prev.isFlipped === next.isFlipped &&
       prev.className === next.className &&
+      prev.displayMode === next.displayMode &&
+      prev.showInkLayer === next.showInkLayer &&
       prev.drawMode === next.drawMode &&
       prev.inkEditingEnabled === next.inkEditingEnabled &&
       prev.allowUpscale === next.allowUpscale &&
@@ -399,6 +545,8 @@ const areFlashcardPropsEqual = (
     prev.extraHeaderLeft === next.extraHeaderLeft &&
     prev.extraHeaderRight === next.extraHeaderRight &&
     prev.extraFooter === next.extraFooter &&
+    prev.displayMode === next.displayMode &&
+    prev.showInkLayer === next.showInkLayer &&
     prev.drawMode === next.drawMode &&
     prev.inkEditingEnabled === next.inkEditingEnabled &&
     prev.onInkDocumentChange === next.onInkDocumentChange &&
@@ -411,7 +559,6 @@ const areFlashcardPropsEqual = (
 
 export const Flashcard = React.memo(FlashcardInner, areFlashcardPropsEqual);
 Flashcard.displayName = "Flashcard";
-
 
 
 

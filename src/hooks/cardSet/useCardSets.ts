@@ -3,6 +3,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { getLocalDb } from "@/services/localDB";
 import { useAuthSession } from "@/contexts/AuthContext";
 import type { CardSet } from "@/types";
+import { DEFAULT_CARD_DISPLAY_MODE } from "@/types/domain/cardSet";
 
 export function useCardSets(folderId?: string | null) {
   const { currentUser } = useAuthSession();
@@ -66,6 +67,7 @@ export function useCardSets(folderId?: string | null) {
       name,
       description: opts?.description,
       orderIndex,
+      defaultDisplayMode: DEFAULT_CARD_DISPLAY_MODE,
       isDeleted: false,
       createdAt: now,
       updatedAt: now,
@@ -88,7 +90,9 @@ export function useCardSets(folderId?: string | null) {
 
   const updateCardSet = async (
     id: string,
-    data: Partial<Pick<CardSet, "name" | "description" | "orderIndex">>,
+    data: Partial<
+      Pick<CardSet, "name" | "description" | "orderIndex" | "defaultDisplayMode">
+    >,
   ): Promise<void> => {
     if (!currentUser) throw new Error("認証が必要です");
 

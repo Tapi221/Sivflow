@@ -5,6 +5,7 @@ import {
 } from "@/features/review/VerticalCardPager";
 import { getCardText } from "@/domain/card/content";
 import type { Card, UserSettings } from "@/types";
+import type { CardDisplayMode } from "@/types/domain/cardSet";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 /**
@@ -88,6 +89,7 @@ interface CardViewDesktopProps {
   settings?: Partial<UserSettings> | null;
   editPaneWidthPx: number;
   activePaneWidthPx: number;
+  currentDisplayMode: CardDisplayMode;
   folderId: string | null;
   cardSetId: string | null;
   saveSignal: number;
@@ -108,6 +110,7 @@ export function CardViewDesktop({
   settings = null,
   editPaneWidthPx,
   activePaneWidthPx,
+  currentDisplayMode,
   folderId,
   cardSetId,
   saveSignal,
@@ -176,6 +179,7 @@ export function CardViewDesktop({
           editPaneWidthPx={editPaneWidthPx}
           settings={settings}
           isFlipped={flippedCardIds.has(card.id ?? "")}
+          currentDisplayMode={currentDisplayMode}
           folderId={folderId}
           cardSetId={cardSetId}
           cardsOverride={editingCardsOverride}
@@ -200,6 +204,7 @@ export function CardViewDesktop({
       onToggleBookmark,
       settings,
       editPaneWidthPx,
+      currentDisplayMode,
     ],
   );
 
@@ -236,5 +241,4 @@ export function CardViewDesktop({
     />
   );
 }
-
 

@@ -20,6 +20,7 @@ import { useCards } from "@/hooks/card/useCards";
 interface UseFlashcardInkOptions {
   cardId: string | null;
   effectiveIsFlipped: boolean;
+  showInkLayer: boolean;
   inkEditingEnabled: boolean;
   previewMode: boolean;
   contentRef: React.RefObject<HTMLDivElement | null>;
@@ -46,6 +47,7 @@ export interface FlashcardInkResult {
 export function useFlashcardInk({
   cardId,
   effectiveIsFlipped,
+  showInkLayer,
   inkEditingEnabled,
   previewMode,
   contentRef,
@@ -82,7 +84,7 @@ export function useFlashcardInk({
 
   // layoutStable 判定（fonts / image load / ResizeObserver）
   useEffect(() => {
-    if (!previewMode || !inkEditingEnabled) {
+    if (!showInkLayer) {
       queueMicrotask(() => setLayoutStable(false));
       return;
     }
@@ -156,7 +158,7 @@ export function useFlashcardInk({
       if (settleTimer != null) window.clearTimeout(settleTimer);
       if (resizeObserver) resizeObserver.disconnect();
     };
-  }, [cardId, effectiveIsFlipped, inkEditingEnabled, previewMode, contentRef]);
+  }, [cardId, effectiveIsFlipped, showInkLayer, previewMode, contentRef]);
 
   const flushPendingInk = useCallback(() => {
     if (!cardId) return;
@@ -207,7 +209,7 @@ export function useFlashcardInk({
 
   // ✅ stable になってからマウント（書けない/ズレないを優先）
   const shouldMountInkLayer = Boolean(
-    previewMode && inkEditingEnabled && cardId && layoutStable,
+    showInkLayer && cardId && layoutStable,
   );
 
   return {

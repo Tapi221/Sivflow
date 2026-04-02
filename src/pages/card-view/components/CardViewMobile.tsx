@@ -4,12 +4,14 @@ import { MobileScalableCard } from "@/components/card/frame/MobileScalableCard";
 import { CardCarousel3D } from "@/features/review/CardCarousel3D";
 import type { Card } from "@/types";
 import type { UserSettings } from "@/types";
+import type { CardDisplayMode } from "@/types/domain/cardSet";
 import { useCallback } from "react";
 
 interface CardViewMobileProps {
   cardsForPager: Card[];
   safeCurrentIndex: number;
   isFlipped: boolean;
+  currentDisplayMode: CardDisplayMode;
   settings: UserSettings | undefined;
   onIndexChange: (idx: number) => void;
   onFlip: () => void;
@@ -22,6 +24,7 @@ export function CardViewMobile({
   cardsForPager,
   safeCurrentIndex,
   isFlipped,
+  currentDisplayMode,
   settings,
   onIndexChange,
   onFlip,
@@ -29,11 +32,26 @@ export function CardViewMobile({
   onToggleUncertainty,
   onToggleBookmark,
 }: CardViewMobileProps) {
+  const wrapCard = useCallback(
+    (node: React.ReactNode) =>
+      currentDisplayMode === "fixed" ? (
+        <MobileScalableCard cardDesignWidth={CANONICAL_CARD_WIDTH} safePadding={0}>
+          {node}
+        </MobileScalableCard>
+      ) : (
+        <div className="w-full px-1">{node}</div>
+      ),
+    [currentDisplayMode],
+  );
+
   const renderCenter = useCallback(
-    (card: Card, idx: number) => (
-      <MobileScalableCard cardDesignWidth={CANONICAL_CARD_WIDTH} safePadding={0}>
+    (card: Card, idx: number) =>
+      wrapCard(
         <Flashcard card={card}
           isFlipped={isFlipped}
+          displayMode={currentDisplayMode}
+          showInkLayer={currentDisplayMode === "fixed"}
+          inkEditingEnabled={currentDisplayMode === "fixed"}
           onFlip={onFlip}
           onEdit={onEdit}
           onToggleUncertainty={onToggleUncertainty}
@@ -48,10 +66,10 @@ export function CardViewMobile({
           totalCards={cardsForPager.length}
           editorSharedHeightPx={settings?.cardEditorHeightPx ?? null}
         />
-      </MobileScalableCard>
-    ),
+      ),
     [
       cardsForPager.length,
+      currentDisplayMode,
       isFlipped,
       onEdit,
       onFlip,
@@ -59,16 +77,22 @@ export function CardViewMobile({
       onToggleBookmark,
       onToggleUncertainty,
       settings?.cardEditorHeightPx,
+      wrapCard,
     ],
   );
 
   const renderPreview = useCallback(
-    (card: Card) => (
-      <MobileScalableCard cardDesignWidth={CANONICAL_CARD_WIDTH} safePadding={0}>
-        <Flashcard card={card} isFlipped={false} previewMode={true} />
-      </MobileScalableCard>
-    ),
-    [],
+    (card: Card) =>
+      wrapCard(
+        <Flashcard
+          card={card}
+          isFlipped={false}
+          previewMode={true}
+          displayMode={currentDisplayMode}
+          showInkLayer={currentDisplayMode === "fixed"}
+        />,
+      ),
+    [currentDisplayMode, wrapCard],
   );
 
   return (
@@ -81,4 +105,3 @@ export function CardViewMobile({
     />
   );
 }
-
