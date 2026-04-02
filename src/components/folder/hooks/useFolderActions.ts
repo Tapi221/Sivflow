@@ -507,11 +507,3 @@ export function useFolderActions({
     handleConfirmDeleteFolder,
   };
 }
-
-
-
-
-
-
-
-

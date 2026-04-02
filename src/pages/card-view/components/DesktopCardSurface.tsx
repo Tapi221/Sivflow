@@ -1,8 +1,9 @@
-import React from "react";
+import { adaptCard } from "@/adapters/cardAdapter";
 import { Flashcard } from "@/components/card/frame/Flashcard";
 import { CardEditorPane } from "@/components/folder/panes/CardEditorPane";
-import type { Card, UserSettings } from "@/types";
 import { CARD_PANE_AUTO_MAX_SCALE } from "@/pages/card-view/constants";
+import type { Card, UserSettings } from "@/types";
+import React from "react";
 
 export interface DesktopCardSurfaceProps {
   card: Card;
@@ -98,7 +99,8 @@ function DesktopCardSurfaceInner({
 
   return (
     <div className="w-full overflow-visible">
-      <Flashcard card={adaptCard(card)}
+      <Flashcard
+        card={adaptCard(card)}
         isFlipped={isFlipped}
         previewMode={!isActive}
         onFlip={isActive ? onFlip : undefined}

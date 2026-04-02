@@ -1,4 +1,6 @@
-import type { CodeBlockData } from "@/types/domain/card";`r`nimport type { UploadedImage } from "@/types/domain/card";`r`nimport type { MathBlockData, ReferenceBlockData } from "@/types/domain/card";`r`n
+import type { CodeBlockData } from "@/types/domain/card";
+import type { UploadedImage } from "@/types/domain/card";
+import type { MathBlockData, ReferenceBlockData } from "@/types/domain/card";
 export type BlockBase = {
   id: string;
   orderIndex: number;
