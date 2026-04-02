@@ -1,9 +1,17 @@
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useBreadcrumbContext } from "@/contexts/BreadcrumbContext";
 import { useToast } from "@/contexts/ToastContext";
 import { useIsDesktopRuntime } from "@/hooks/platform/useIsDesktopRuntime";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { ChevronLeft, ChevronRight } from "@/ui/icons";
+import type { CardDisplayMode } from "@/types/domain/cardSet";
 import { CARD_PANE_WIDTH_STEP_PX } from "./card-view/constants";
 import { CardPaneWidthControl } from "./card-view/components/CardPaneWidthControl";
 import { CardViewDesktop } from "./card-view/components/CardViewDesktop";
@@ -16,13 +24,24 @@ import { useCardViewParams } from "./card-view/hooks/useCardViewParams";
 import { useCardViewState } from "./card-view/hooks/useCardViewState";
 import { useCardViewWindowEvents } from "./card-view/hooks/useCardViewWindowEvents";
 
+const DISPLAY_MODE_LABELS: Record<CardDisplayMode, string> = {
+  fixed: "固定表示（手書き対応）",
+  fluid: "読みやすい表示",
+};
+
+const DISPLAY_MODE_TRIGGER_LABELS: Record<CardDisplayMode, string> = {
+  fixed: "固定表示",
+  fluid: "読みやすい",
+};
+
 export default function CardView() {
   const { setExtraCrumbs } = useBreadcrumbContext();
   const { error: toastError } = useToast();
   const isDesktop = useIsDesktopRuntime();
   const { settings } = useUserSettings();
 
-  const { folderId, cardSetId, initialIndex, targetCardId } = useCardViewParams();
+  const { folderId, cardSetId, initialIndex, targetCardId } =
+    useCardViewParams();
 
   const data = useCardViewData({ folderId, cardSetId });
 
@@ -93,6 +112,11 @@ export default function CardView() {
   }
 
   const showWidthControl = isDesktop;
+  const displayModeButtonRight = isDesktop
+    ? state.isMetaOpen
+      ? "calc(var(--ui-panel-width) + 2.75rem)"
+      : "calc(var(--ui-space-1) + 2.75rem)"
+    : "0.75rem";
   return (
     <div className="h-full overflow-hidden bg-[#F5F7F8] pt-0 card-editor-right-pane-font">
       <div className="relative flex h-full min-h-0 overflow-hidden">
@@ -117,6 +141,60 @@ export default function CardView() {
           </div>
         )}
 
+        {cardSetId ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="pointer-events-auto absolute top-3 z-20 inline-flex h-8 items-center rounded-full bg-[var(--sidebar-bg)] px-3 text-xs font-medium text-[#334155] surface-control-convex hover:bg-[var(--sidebar-active-bg)]"
+                style={{
+                  right: displayModeButtonRight,
+                  transform: "none",
+                }}
+                aria-label="表示モード"
+              >
+                {DISPLAY_MODE_TRIGGER_LABELS[state.currentDisplayMode]}
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" sideOffset={8}>
+              <DropdownMenuItem
+                onSelect={() => {
+                  state.setCurrentDisplayMode("fixed");
+                }}
+              >
+                {state.currentDisplayMode === "fixed" ? "● " : "○ "}
+                {DISPLAY_MODE_LABELS.fixed}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onSelect={() => {
+                  state.setCurrentDisplayMode("fluid");
+                }}
+              >
+                {state.currentDisplayMode === "fluid" ? "● " : "○ "}
+                {DISPLAY_MODE_LABELS.fluid}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onSelect={() => {
+                  void data
+                    .updateCardSet(cardSetId, {
+                      defaultDisplayMode: state.currentDisplayMode,
+                    })
+                    .catch((error: unknown) => {
+                      console.error(
+                        "[CardView] Failed to save default display mode",
+                        error,
+                      );
+                      toastError("表示モードの保存に失敗しました");
+                    });
+                }}
+              >
+                現在の表示をデフォルトにする
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : null}
+
         <Button
           type="button"
           variant="ghost"
@@ -138,9 +216,7 @@ export default function CardView() {
           )}
         </Button>
 
-        <div
-          className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
-        >
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           <div
             ref={contentViewportRef}
             className={`min-h-0 min-w-0 flex-1 overflow-hidden py-0 ${
@@ -158,6 +234,7 @@ export default function CardView() {
                 settings={settings}
                 editPaneWidthPx={activePaneRenderWidthPx}
                 activePaneWidthPx={activePaneRenderWidthPx}
+                currentDisplayMode={state.currentDisplayMode}
                 folderId={folderId}
                 cardSetId={cardSetId}
                 saveSignal={state.saveSignal}
@@ -173,6 +250,7 @@ export default function CardView() {
                 selectedCardId={state.selectedCard?.id ?? null}
                 safeCurrentIndex={state.safeCurrentIndex}
                 isFlipped={state.isFlipped}
+                currentDisplayMode={state.currentDisplayMode}
                 settings={settings}
                 onIndexChange={state.setCurrentIndex}
                 onFlip={state.handleFlip}

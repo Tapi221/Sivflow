@@ -208,9 +208,7 @@ export function useFlashcardInk({
   }, [flushPendingInk]);
 
   // ✅ stable になってからマウント（書けない/ズレないを優先）
-  const shouldMountInkLayer = Boolean(
-    showInkLayer && cardId && layoutStable,
-  );
+  const shouldMountInkLayer = Boolean(showInkLayer && cardId && layoutStable);
 
   return {
     previewInkRef,
@@ -223,10 +221,3 @@ export function useFlashcardInk({
     handleInkDocumentChange,
   };
 }
-
-
-
-
-
-
-

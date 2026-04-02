@@ -1,8 +1,8 @@
 import { SharedCardContent } from "@/components/card/common/SharedCardContent";
 import {
-    CANONICAL_CARD_WIDTH,
-    CARD_DISPLAY_SCALE,
-    layoutRowsToCardHeightPx,
+  CANONICAL_CARD_WIDTH,
+  CARD_DISPLAY_SCALE,
+  layoutRowsToCardHeightPx,
 } from "@/components/card/common/constants";
 import type { InkDocument } from "@/components/ink/inkTypes";
 import { cn } from "@/lib/utils";
@@ -14,9 +14,7 @@ import { useFlashcardCornerControls } from "./FlashcardCornerControls";
 import { FlashcardInkOverlay } from "./FlashcardInkOverlay";
 import { FlashcardMediaDialogs } from "./FlashcardMediaDialogs";
 import { FlashcardNavigation } from "./FlashcardNavigation";
-import {
-    type FlashcardCardLike,
-} from "./flashcardDerived";
+import { type FlashcardCardLike } from "./flashcardDerived";
 import { useFlashcardDerived } from "./useFlashcardDerived";
 import { useFlashcardInk } from "./useFlashcardInk";
 import { useFlashcardMediaState } from "./useFlashcardMediaState";
@@ -256,7 +254,8 @@ function FlashcardInner({
 
   const fixedHeightPx = layoutRowsToCardHeightPx(derived.layoutRows);
   const isCardClickable = !previewMode;
-  const showFluidInkNotice = isFluidDisplay && !previewMode && hasStoredInk(card);
+  const showFluidInkNotice =
+    isFluidDisplay && !previewMode && hasStoredInk(card);
 
   if (isFluidDisplay) {
     return (
@@ -336,10 +335,7 @@ function FlashcardInner({
           </div>
 
           {extraFooter ? (
-            <div
-              className="mt-4"
-              onClick={(event) => event.stopPropagation()}
-            >
+            <div className="mt-4" onClick={(event) => event.stopPropagation()}>
               {extraFooter}
             </div>
           ) : null}
@@ -412,7 +408,10 @@ function FlashcardInner({
             if (state.moved) return;
             const dx = Math.abs(event.clientX - state.startX);
             const dy = Math.abs(event.clientY - state.startY);
-            if (dx > TAP_MOVE_CANCEL_THRESHOLD_PX || dy > TAP_MOVE_CANCEL_THRESHOLD_PX) {
+            if (
+              dx > TAP_MOVE_CANCEL_THRESHOLD_PX ||
+              dy > TAP_MOVE_CANCEL_THRESHOLD_PX
+            ) {
               state.moved = true;
             }
           }}
@@ -506,10 +505,7 @@ function FlashcardInner({
   );
 }
 
-const areFlashcardPropsEqual = (
-  prev: FlashcardProps,
-  next: FlashcardProps,
-) => {
+const areFlashcardPropsEqual = (prev: FlashcardProps, next: FlashcardProps) => {
   if (prev.card !== next.card) return false;
   if (prev.previewMode !== next.previewMode) return false;
 
@@ -559,8 +555,3 @@ const areFlashcardPropsEqual = (
 
 export const Flashcard = React.memo(FlashcardInner, areFlashcardPropsEqual);
 Flashcard.displayName = "Flashcard";
-
-
-
-
-

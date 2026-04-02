@@ -5,7 +5,10 @@
  * Flashcard.tsx の overlayNode useMemo をコンポーネント化し、
  * React が差分を判断できる単位に分割している。
  */
-import type { InkHistoryState, InkLayerHandle } from "@/components/ink/InkLayer";
+import type {
+  InkHistoryState,
+  InkLayerHandle,
+} from "@/components/ink/InkLayer";
 import { InkLayer, InkToolbar } from "@/components/ink/InkLayer";
 import type { InkDocument, InkEditTool } from "@/components/ink/inkTypes";
 import React from "react";
@@ -20,7 +23,9 @@ interface FlashcardInkOverlayProps {
   inkEditingEnabled: boolean;
   cardId: string | null;
   activeInkSide: "question" | "answer";
-  activeInkDocument: ReturnType<typeof import("@/components/ink/inkStorage").resolveInkDocument>;
+  activeInkDocument: ReturnType<
+    typeof import("@/components/ink/inkStorage").resolveInkDocument
+  >;
   layoutStable: boolean;
   shouldMountInkLayer: boolean;
   previewInkRef: React.RefObject<InkLayerHandle | null>;
@@ -118,9 +123,3 @@ export function FlashcardInkOverlay({
     </>
   );
 }
-
-
-
-
-
-

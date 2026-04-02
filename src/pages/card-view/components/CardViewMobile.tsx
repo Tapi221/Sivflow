@@ -5,10 +5,11 @@ import { CardCarousel3D } from "@/features/review/CardCarousel3D";
 import type { Card } from "@/types";
 import type { UserSettings } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
-import { useCallback } from "react";
+import { useCallback, type ReactNode } from "react";
 
 interface CardViewMobileProps {
   cardsForPager: Card[];
+  selectedCardId: string | null;
   safeCurrentIndex: number;
   isFlipped: boolean;
   currentDisplayMode: CardDisplayMode;
@@ -22,6 +23,7 @@ interface CardViewMobileProps {
 
 export function CardViewMobile({
   cardsForPager,
+  selectedCardId,
   safeCurrentIndex,
   isFlipped,
   currentDisplayMode,
@@ -32,10 +34,14 @@ export function CardViewMobile({
   onToggleUncertainty,
   onToggleBookmark,
 }: CardViewMobileProps) {
+  void selectedCardId;
   const wrapCard = useCallback(
-    (node: React.ReactNode) =>
+    (node: ReactNode) =>
       currentDisplayMode === "fixed" ? (
-        <MobileScalableCard cardDesignWidth={CANONICAL_CARD_WIDTH} safePadding={0}>
+        <MobileScalableCard
+          cardDesignWidth={CANONICAL_CARD_WIDTH}
+          safePadding={0}
+        >
           {node}
         </MobileScalableCard>
       ) : (
@@ -47,7 +53,8 @@ export function CardViewMobile({
   const renderCenter = useCallback(
     (card: Card, idx: number) =>
       wrapCard(
-        <Flashcard card={card}
+        <Flashcard
+          card={card}
           isFlipped={isFlipped}
           displayMode={currentDisplayMode}
           showInkLayer={currentDisplayMode === "fixed"}
@@ -65,7 +72,7 @@ export function CardViewMobile({
           currentIndex={idx}
           totalCards={cardsForPager.length}
           editorSharedHeightPx={settings?.cardEditorHeightPx ?? null}
-        />
+        />,
       ),
     [
       cardsForPager.length,

@@ -163,9 +163,7 @@ export function CardViewDesktop({
   const renderCard = useCallback(
     (card: Card, idx: number, isActive: boolean) => {
       const readyToDisplay =
-        isActive ||
-        isGlobalEditing ||
-        readySetRef.current.has(card.id ?? "");
+        isActive || isGlobalEditing || readySetRef.current.has(card.id ?? "");
 
       if (!readyToDisplay) {
         return <CardLoadingPreview card={card} />;
@@ -241,4 +239,3 @@ export function CardViewDesktop({
     />
   );
 }
-

@@ -36,6 +36,7 @@ describe("DesktopCardSurface flip state", () => {
       editPaneWidthPx: 900,
       settings: null,
       isFlipped: true,
+      currentDisplayMode: "fixed",
       folderId: null,
       cardSetId: null,
       cardsOverride: undefined,
@@ -52,24 +53,68 @@ describe("DesktopCardSurface flip state", () => {
     );
 
     const activeCall = flashcardPropsSpy.mock.calls.at(-1)?.[0] as
-      | { isFlipped?: boolean; previewMode?: boolean }
+      | {
+          isFlipped?: boolean;
+          previewMode?: boolean;
+          displayMode?: string;
+          showInkLayer?: boolean;
+          inkEditingEnabled?: boolean;
+        }
       | undefined;
     expect(activeCall?.isFlipped).toBe(true);
     expect(activeCall?.previewMode).toBe(false);
+    expect(activeCall?.displayMode).toBe("fixed");
+    expect(activeCall?.showInkLayer).toBe(true);
+    expect(activeCall?.inkEditingEnabled).toBe(true);
 
     rerender(<DesktopCardSurface {...props} isActive={false} />);
 
     const inactiveCall = flashcardPropsSpy.mock.calls.at(-1)?.[0] as
-      | { isFlipped?: boolean; previewMode?: boolean }
+      | {
+          isFlipped?: boolean;
+          previewMode?: boolean;
+          showInkLayer?: boolean;
+          inkEditingEnabled?: boolean;
+        }
       | undefined;
     expect(inactiveCall?.isFlipped).toBe(true);
     expect(inactiveCall?.previewMode).toBe(true);
+    expect(inactiveCall?.showInkLayer).toBe(true);
+    expect(inactiveCall?.inkEditingEnabled).toBe(false);
+  });
+
+  it("passes fluid mode through without ink controls", () => {
+    flashcardPropsSpy.mockClear();
+
+    render(
+      <DesktopCardSurface
+        card={makeCard()}
+        isActive={true}
+        isGlobalEditing={false}
+        editPaneWidthPx={900}
+        settings={null}
+        isFlipped={false}
+        currentDisplayMode="fluid"
+        folderId={null}
+        cardSetId={null}
+        saveSignal={0}
+        onFlip={vi.fn()}
+        onEdit={vi.fn()}
+        onToggleUncertainty={vi.fn()}
+        onToggleBookmark={vi.fn()}
+      />,
+    );
+
+    const call = flashcardPropsSpy.mock.calls.at(-1)?.[0] as
+      | {
+          displayMode?: string;
+          showInkLayer?: boolean;
+          inkEditingEnabled?: boolean;
+        }
+      | undefined;
+
+    expect(call?.displayMode).toBe("fluid");
+    expect(call?.showInkLayer).toBe(false);
+    expect(call?.inkEditingEnabled).toBe(false);
   });
 });
-
-
-
-
-
-
-

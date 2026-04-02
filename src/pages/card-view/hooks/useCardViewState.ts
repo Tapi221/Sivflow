@@ -21,7 +21,9 @@ interface UseCardViewStateOptions {
   cardSetId: string | null;
   sortedCards: Card[];
   cardIndexById: Map<string, number>;
-  createCard: (cardData: Partial<Card> & { cardSetId: string }) => Promise<unknown>;
+  createCard: (
+    cardData: Partial<Card> & { cardSetId: string },
+  ) => Promise<unknown>;
   updateCard: (id: string, data: Partial<Card>) => Promise<unknown>;
   selectedCardSet: CardSet | null;
   isLoading: boolean;
@@ -86,20 +88,24 @@ export function useCardViewState({
     return typeof found === "number" ? found : null;
   }, [targetCardId, cardIndexById]);
 
-  const [currentIndexState, setCurrentIndexState] = useState<KeyedNumberState>(() => ({
-    sourceKey,
-    value: null,
-  }));
+  const [currentIndexState, setCurrentIndexState] = useState<KeyedNumberState>(
+    () => ({
+      sourceKey,
+      value: null,
+    }),
+  );
 
   const [flippedState, setFlippedState] = useState<KeyedFlipState>(() => ({
     sourceKey,
     ids: new Set<string>(),
   }));
 
-  const [pendingFocusState, setPendingFocusState] = useState<KeyedStringState>(() => ({
-    sourceKey,
-    value: null,
-  }));
+  const [pendingFocusState, setPendingFocusState] = useState<KeyedStringState>(
+    () => ({
+      sourceKey,
+      value: null,
+    }),
+  );
 
   const currentCardIdRef = useRef<string | null>(null);
   const [isGlobalEditing, setIsGlobalEditing] = useState(false);
@@ -136,7 +142,10 @@ export function useCardViewState({
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    window.localStorage.setItem("card-view.meta-panel-open", String(isMetaOpen));
+    window.localStorage.setItem(
+      "card-view.meta-panel-open",
+      String(isMetaOpen),
+    );
   }, [isMetaOpen]);
 
   const currentIndex =
@@ -156,7 +165,9 @@ export function useCardViewState({
 
   const safeCurrentIndex = useMemo(() => {
     if (sortedCards.length === 0) return 0;
-    const numericIndex = Number.isFinite(currentIndexBase) ? currentIndexBase : 0;
+    const numericIndex = Number.isFinite(currentIndexBase)
+      ? currentIndexBase
+      : 0;
     const integerIndex = Math.trunc(numericIndex);
     return Math.min(Math.max(integerIndex, 0), sortedCards.length - 1);
   }, [currentIndexBase, sortedCards.length]);
@@ -172,7 +183,7 @@ export function useCardViewState({
         const prevValue =
           prev.sourceKey === sourceKey && typeof prev.value === "number"
             ? prev.value
-            : targetResolvedIndex ?? initialIndex;
+            : (targetResolvedIndex ?? initialIndex);
 
         const resolved =
           typeof next === "function"
@@ -242,7 +253,8 @@ export function useCardViewState({
 
   const selectedCard = useMemo(() => {
     if (!currentCard) return null;
-    if (effectiveCard && effectiveCard.id === currentCard.id) return effectiveCard;
+    if (effectiveCard && effectiveCard.id === currentCard.id)
+      return effectiveCard;
     return currentCard;
   }, [currentCard, effectiveCard]);
 
@@ -277,7 +289,10 @@ export function useCardViewState({
         setIsGlobalEditing(true);
 
         const targetFolderId = folderId ?? selectedCardSet?.folderId ?? "";
-        const created = await createCard({ cardSetId, folderId: targetFolderId });
+        const created = await createCard({
+          cardSetId,
+          folderId: targetFolderId,
+        });
         const createdId = extractCreatedId(created);
 
         if (createdId) {
@@ -343,7 +358,9 @@ export function useCardViewState({
     } catch (error) {
       console.error("[CardView] Failed to create new card:", error);
       toastError(
-        error instanceof Error ? error.message : "新規カードの作成に失敗しました",
+        error instanceof Error
+          ? error.message
+          : "新規カードの作成に失敗しました",
       );
       return false;
     }

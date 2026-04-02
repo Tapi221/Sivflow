@@ -89,7 +89,7 @@ export function TagFilterPopover({
       <PopoverContent
         align="center"
         className={cn(
-          "w-64 overflow-hidden p-0 rounded-[12px] border border-slate-200/80 bg-white/82 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-md",
+          "w-64 overflow-hidden p-0 rounded-[10px] border border-slate-200/80 bg-white/82 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-md",
         )}
       >
         <div className="flex flex-col max-h-[400px]">
@@ -117,7 +117,7 @@ export function TagFilterPopover({
                 ref={inputRef}
                 type="text"
                 className={cn(
-                  "w-full pl-8 pr-2 py-1.5 text-xs rounded",
+                  "w-full pl-8 pr-2 py-1.5 text-xs rounded-[8px]",
                   "border border-slate-200/70 bg-white/55 text-[#202123]",
                   "surface-concave",
                   "focus:bg-white/70 focus:outline-none focus:ring-0 focus:border-slate-200",
@@ -273,6 +273,9 @@ export function TagFilterPopover({
     </Popover>
   );
 }
+
+
+
 
 
 

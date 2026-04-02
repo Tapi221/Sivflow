@@ -8,7 +8,10 @@ interface UseCardViewDataOptions {
   cardSetId: string | null;
 }
 
-export function useCardViewData({ folderId, cardSetId }: UseCardViewDataOptions) {
+export function useCardViewData({
+  folderId,
+  cardSetId,
+}: UseCardViewDataOptions) {
   const {
     cards = [],
     loading: isLoading,
@@ -28,7 +31,8 @@ export function useCardViewData({ folderId, cardSetId }: UseCardViewDataOptions)
   }, [sortedCards]);
 
   const selectedCardSet = useMemo(
-    () => (cardSetId ? (cardSets.find((s) => s.id === cardSetId) ?? null) : null),
+    () =>
+      cardSetId ? (cardSets.find((s) => s.id === cardSetId) ?? null) : null,
     [cardSetId, cardSets],
   );
 

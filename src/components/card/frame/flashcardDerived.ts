@@ -203,9 +203,7 @@ export function resolveImageUrls(images: FlashcardMediaLike[]): string[] {
 }
 
 export function resolveAudioUrls(audios: FlashcardMediaLike[]): string[] {
-  return audios
-    .map(toMediaUrl)
-    .filter((u): u is string => Boolean(u));
+  return audios.map(toMediaUrl).filter((u): u is string => Boolean(u));
 }
 
 // ---------------------------------------------------------------------------
@@ -225,14 +223,3 @@ export function resolveReferences(blocks: CardBlock[]): ReferenceBlockData[] {
   });
   return refs.filter((r) => r.url);
 }
-
-
-
-
-
-
-
-
-
-
-

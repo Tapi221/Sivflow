@@ -50,7 +50,10 @@ export function useCardSets(folderId?: string | null) {
 
     const db = await getLocalDb(currentUser.uid);
 
-    const existingSets = await db.cardSets.where("userId").equals(currentUser.uid).toArray();
+    const existingSets = await db.cardSets
+      .where("userId")
+      .equals(currentUser.uid)
+      .toArray();
 
     const siblingSets = existingSets.filter(
       (s) => !s.isDeleted && s.folderId === targetFolderId,
@@ -91,7 +94,10 @@ export function useCardSets(folderId?: string | null) {
   const updateCardSet = async (
     id: string,
     data: Partial<
-      Pick<CardSet, "name" | "description" | "orderIndex" | "defaultDisplayMode">
+      Pick<
+        CardSet,
+        "name" | "description" | "orderIndex" | "defaultDisplayMode"
+      >
     >,
   ): Promise<void> => {
     if (!currentUser) throw new Error("認証が必要です");
