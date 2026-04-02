@@ -1,7 +1,7 @@
 import { ChevronLeft, ChevronRight } from "@/ui/icons";
 import React, { memo, useCallback, useMemo, useState } from "react";
 
-import { BlockEditModeContext } from "@/components/card/blocks/BlockWrapper";
+import { BlockEditModeContext } from "@/components/card/blocks/BlockEditModeContext";
 import { SharedCardContent } from "@/components/card/common/SharedCardContent";
 import {
   CANONICAL_CARD_WIDTH,

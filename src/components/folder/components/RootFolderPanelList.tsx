@@ -190,7 +190,37 @@ export function RootFolderPanelList({
                     input.select();
                     try {
                       input.setSelectionRange(0, input.value.length);
-                    } catch {}
+                    } catch {
+                      // no-op: setSelectionRange をサポートしない環境がある
+                    }'@
+
+Replace-Text "src/components/folder/explorer/rows/FolderRow.tsx" '} catch {}' @'
+} catch {
+        // no-op: setSelectionRange をサポートしない環境がある
+      }'@
+
+# 2個目の catch も同じ置換をもう一回通す
+$contentFolderRow = Get-NormalizedContent "src/components/folder/explorer/rows/FolderRow.tsx"
+if ($contentFolderRow.Contains('} catch {}')) {
+  Set-NormalizedContent "src/components/folder/explorer/rows/FolderRow.tsx" ($contentFolderRow.Replace('} catch {}', @'
+} catch {
+                      // no-op: setSelectionRange をサポートしない環境がある
+                    }'@))
+}
+
+# -------------------------------------------------------------------
+# 8) FolderDashboard: no-constant-binary-expression
+# -------------------------------------------------------------------
+Replace-Text "src/components/folder/components/views/FolderDashboard.tsx" '    extractTextFromBlocks((card.front?.blocks ?? []) ?? []) || card.questionText || "",' '    extractTextFromBlocks(card.front?.blocks ?? []) || card.questionText || "",'
+Replace-Text "src/components/folder/components/views/FolderDashboard.tsx" '    extractTextFromBlocks((card.back?.blocks ?? []) ?? []) || card.answerText || "",' '    extractTextFromBlocks(card.back?.blocks ?? []) || card.answerText || "",'
+
+# -------------------------------------------------------------------
+# 9) TreeViewLayout: set-state-in-effect
+# -------------------------------------------------------------------
+Replace-Text "src/components/folder/layout/TreeViewLayout.tsx" @'
+  useEffect(() => {
+    setSelectedCardSetId(null);
+  }, [selectedFolderId]);
                   };
                   setEditingId(folder.id);
                   setEditingName(folder.name);

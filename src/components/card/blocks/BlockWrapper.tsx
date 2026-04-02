@@ -1,8 +1,7 @@
 import { GripVertical, Trash2, Copy } from "@/ui/icons";
 import React from "react";
 import { cn } from "@/lib/utils";
-
-export const BlockEditModeContext = React.createContext(false);
+import { BlockEditModeContext } from "./BlockEditModeContext";
 interface BlockWrapperProps {
   children: React.ReactNode;
   onDelete: () => void;

@@ -494,9 +494,16 @@ function CardMetaPanelInner({
   }, [card?.id, draftFlag]);
 
   useEffect(() => {
-    setPendingReviewTimestamp(null);
-    setPendingReviewRatingInput(null);
-    setPendingReviewDurationInput("");
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
+      setPendingReviewTimestamp(null);
+      setPendingReviewRatingInput(null);
+      setPendingReviewDurationInput("");
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [card?.id]);
 
   const shouldLoadStudyLogs =
@@ -696,6 +703,7 @@ function CardMetaPanelInner({
     pendingReviewRatingInput,
     editableReviewLogs,
     delayBonusEnabled,
+    pendingReviewDurationInput,
   ]);
 
   const editingPreviewResistanceScore = useMemo(() => {
@@ -942,20 +950,27 @@ function CardMetaPanelInner({
   };
 
   useEffect(() => {
-    setIsEditingLatestReview(false);
-    setLatestReviewDateInput(
-      toDateTimeLocalValue(latestEditableReview?.reviewedAt),
-    );
-    setLatestReviewRatingInput(latestEditableReview?.rating ?? null);
-    setLatestReviewDurationInput(
-      latestEditableReview?.durationMinutes != null
-        ? String(latestEditableReview.durationMinutes)
-        : "",
-    );
-    setIsMutatingLatestReview(false);
-    setLatestReviewError(null);
-    setDurationDrafts({});
-    setDurationSavingIndex(null);
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
+      setIsEditingLatestReview(false);
+      setLatestReviewDateInput(
+        toDateTimeLocalValue(latestEditableReview?.reviewedAt),
+      );
+      setLatestReviewRatingInput(latestEditableReview?.rating ?? null);
+      setLatestReviewDurationInput(
+        latestEditableReview?.durationMinutes != null
+          ? String(latestEditableReview.durationMinutes)
+          : "",
+      );
+      setIsMutatingLatestReview(false);
+      setLatestReviewError(null);
+      setDurationDrafts({});
+      setDurationSavingIndex(null);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [
     card?.id,
     latestEditableReview?.durationMinutes,

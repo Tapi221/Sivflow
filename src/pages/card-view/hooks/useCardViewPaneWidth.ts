@@ -6,7 +6,7 @@ import {
   CARD_PANE_EDIT_MIN_WIDTH_PX,
   CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
   CARD_PANE_VIEW_MIN_WIDTH_PX,
-} from "../constants";
+} from "@/pages/card-view/constants";
 import {
   getCardSetWidthPreference,
   setCardSetWidthPreference,
@@ -54,7 +54,6 @@ export function useCardViewPaneWidth({
         CARD_PANE_VIEW_MIN_WIDTH_PX,
       ),
     );
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cardSetId, settings?.cardViewPaneWidthPx]);
 
   useEffect(() => {
@@ -68,7 +67,6 @@ export function useCardViewPaneWidth({
         CARD_PANE_EDIT_MIN_WIDTH_PX,
       ),
     );
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cardSetId, settings?.cardEditPaneWidthPx]);
 
   useEffect(() => {

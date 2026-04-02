@@ -40,7 +40,19 @@ export default function CardView() {
     toastError,
   });
 
-  const paneWidth = useCardViewPaneWidth({
+  const {
+    contentViewportRef,
+    activePaneMode,
+    activePaneMinWidthPx,
+    activePaneMaxWidthPx,
+    activePaneWidthPx,
+    activePaneRenderWidthPx,
+    activePaneDisplayedDefaultWidthPx,
+    previewPaneWidth,
+    persistPaneWidth,
+    stepPaneWidth,
+    resetActivePaneWidth,
+  } = useCardViewPaneWidth({
     isGlobalEditing: state.isGlobalEditing,
     isDesktop,
     isMetaOpen: state.isMetaOpen,
@@ -88,19 +100,19 @@ export default function CardView() {
           <div className="pointer-events-auto absolute left-3 top-2 z-30 hidden md:flex">
             <CardPaneWidthControl
               modeLabel={state.isGlobalEditing ? "編集幅" : "閲覧幅"}
-              value={paneWidth.activePaneWidthPx}
-              min={paneWidth.activePaneMinWidthPx}
-              max={paneWidth.activePaneMaxWidthPx}
-              defaultValue={paneWidth.activePaneDisplayedDefaultWidthPx}
+              value={activePaneWidthPx}
+              min={activePaneMinWidthPx}
+              max={activePaneMaxWidthPx}
+              defaultValue={activePaneDisplayedDefaultWidthPx}
               onPreviewChange={(value) =>
-                paneWidth.previewPaneWidth(paneWidth.activePaneMode, value)
+                previewPaneWidth(activePaneMode, value)
               }
               onCommit={(value) => {
-                void paneWidth.persistPaneWidth(paneWidth.activePaneMode, value);
+                void persistPaneWidth(activePaneMode, value);
               }}
-              onStepDown={() => paneWidth.stepPaneWidth(-CARD_PANE_WIDTH_STEP_PX)}
-              onStepUp={() => paneWidth.stepPaneWidth(CARD_PANE_WIDTH_STEP_PX)}
-              onReset={paneWidth.resetActivePaneWidth}
+              onStepDown={() => stepPaneWidth(-CARD_PANE_WIDTH_STEP_PX)}
+              onStepUp={() => stepPaneWidth(CARD_PANE_WIDTH_STEP_PX)}
+              onReset={resetActivePaneWidth}
             />
           </div>
         )}
@@ -130,7 +142,7 @@ export default function CardView() {
           className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
         >
           <div
-            ref={paneWidth.contentViewportRef}
+            ref={contentViewportRef}
             className={`min-h-0 min-w-0 flex-1 overflow-hidden py-0 ${
               state.isGlobalEditing || isDesktop ? "px-0" : "px-4"
             }`}
@@ -141,10 +153,11 @@ export default function CardView() {
                 isGlobalEditing={state.isGlobalEditing}
                 flippedCardIds={state.flippedCardIds}
                 cardsForPager={state.cardsForPager}
+                selectedCardId={state.selectedCard?.id ?? null}
                 safeCurrentIndex={state.safeCurrentIndex}
                 settings={settings}
-                editPaneWidthPx={paneWidth.activePaneRenderWidthPx}
-                activePaneWidthPx={paneWidth.activePaneRenderWidthPx}
+                editPaneWidthPx={activePaneRenderWidthPx}
+                activePaneWidthPx={activePaneRenderWidthPx}
                 folderId={folderId}
                 cardSetId={cardSetId}
                 saveSignal={state.saveSignal}
@@ -157,6 +170,7 @@ export default function CardView() {
             ) : (
               <CardViewMobile
                 cardsForPager={state.cardsForPager}
+                selectedCardId={state.selectedCard?.id ?? null}
                 safeCurrentIndex={state.safeCurrentIndex}
                 isFlipped={state.isFlipped}
                 settings={settings}

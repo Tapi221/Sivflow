@@ -163,10 +163,9 @@ function VerticalCardPagerFn<T>({
   // activeIndex 変化のたびに scheduleVisibleRangeUpdate が再生成されず、
   // scroll listener effect の不要な再アタッチを防ぐ。
   const activeIndexRef = useRef(activeIndex);
-  activeIndexRef.current = activeIndex;
 
-  React.useEffect(() => {
-    console.log(`VerticalCardPager: activeIndex changed to ${activeIndex}`);
+  useEffect(() => {
+    activeIndexRef.current = activeIndex;
   }, [activeIndex]);
 
   const updateVisibleRange = useCallback(() => {
