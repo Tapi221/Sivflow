@@ -56,7 +56,7 @@ export function useCardEditorPaneController({
   saveSignal,
   saveSignalEnabled = true,
 }: UseCardEditorPaneControllerParams) {
-  const { settings: settingsFromHook, updateSettings } = useUserSettings();
+  const { settings: settingsFromHook } = useUserSettings();
   const settings = settingsOverride ?? settingsFromHook;
   const { success: toastSuccess, error: toastError } = useToast();
   const { tagById, addTag } = useTags();
@@ -395,7 +395,6 @@ export function useCardEditorPaneController({
 
   return {
     settings,
-    updateSettings,
     isMetaOpen,
     session,
     layout,
