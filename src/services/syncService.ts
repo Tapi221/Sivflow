@@ -1,37 +1,38 @@
-import { firestoreDb } from "./firebase";
-import type { LocalDBLike } from "./localDB";
-import type { ICloudProvider } from "./cloudProvider";
-import { FirebaseCloudProvider } from "./cloudProvider";
-import { ImageSyncService } from "./imageSyncService";
-import { getOrCreateDeviceId, getDeviceName } from "@/utils/device";
-import {
-  collection,
-  getDocs,
-  query,
-  where,
-  writeBatch,
-  Timestamp,
-  doc,
-  getDoc,
-  setDoc,} from "firebase/firestore";
-import {
-  ref as storageRef,
-  uploadBytesResumable,
-  getDownloadURL,
-} from "firebase/storage";
 import type { UserStats } from "@/types";
 import type {
+  DiffResult,
+  SyncConflict,
   SyncError,
   SyncHistory,
-  SyncSettings,
-  SyncConflict,  DiffResult,
   SyncResult,
+  SyncSettings,
 } from "@/types/domain/sync";
 import { DEFAULT_SYNC_SETTINGS } from "@/types/domain/sync";
-import { sanitizeProfileImage } from "@/utils/profileImageSanitizer";
+import { getDeviceName, getOrCreateDeviceId } from "@/utils/device";
 import { sanitizeForLog } from "@/utils/logSanitizer";
-import { storage } from "./firebase";
+import { sanitizeProfileImage } from "@/utils/profileImageSanitizer";
+import {
+  Timestamp,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  setDoc,
+  where,
+  writeBatch,
+} from "firebase/firestore";
+import {
+  getDownloadURL,
+  ref as storageRef,
+  uploadBytesResumable,
+} from "firebase/storage";
+import type { ICloudProvider } from "./cloudProvider";
+import { FirebaseCloudProvider } from "./cloudProvider";
+import { firestoreDb, storage } from "./firebase";
 import { getImageBlob } from "./imageFileStore";
+import { ImageSyncService } from "./imageSyncService";
+import type { LocalDBLike } from "./localDB";
 
 type SyncableCollection =
   | "users"
@@ -1441,8 +1442,3 @@ export class SyncService {
     return { successRate, avgDuration, errorRate, totalSyncs };
   }
 }
-
-
-
-
-

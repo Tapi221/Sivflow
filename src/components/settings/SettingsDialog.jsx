@@ -1453,11 +1453,11 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent surface="panel" className="w-full max-w-none h-[100dvh] md:max-w-[950px] md:w-full md:h-[80vh] md:max-h-[800px] p-0 gap-0 flex flex-col overflow-hidden data-[state=open]:duration-300 bg-[#F8FAFB] ring-0 outline-none rounded-none md:rounded-2xl">
+      <DialogContent surface="panel" className="w-full max-w-none h-[100dvh] md:max-w-[950px] md:w-full md:h-[80vh] md:max-h-[800px] p-0 gap-0 flex flex-col overflow-hidden data-[state=open]:duration-300 ring-0 outline-none rounded-none md:rounded-2xl">
         <DialogDescription className="sr-only">
           アカウント、学習、同期、データ管理などの設定を行うダイアログです。
         </DialogDescription>
-        <div className="flex flex-1 h-full overflow-hidden">
+        <div className="flex flex-1 h-full overflow-hidden bg-[#F8FAFB]">
           {/* Sidebar */}
           <div
             className={`
