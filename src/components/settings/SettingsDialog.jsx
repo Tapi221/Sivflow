@@ -1453,7 +1453,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full max-w-none h-[100dvh] md:max-w-[950px] md:w-full md:h-[80vh] md:max-h-[800px] p-0 gap-0 border-0 shadow-none surface-dialog-convex-md flex flex-col overflow-hidden data-[state=open]:duration-300 bg-[#F8FAFB] ring-0 outline-none rounded-none md:rounded-2xl">
+      <DialogContent surface="panel" className="w-full max-w-none h-[100dvh] md:max-w-[950px] md:w-full md:h-[80vh] md:max-h-[800px] p-0 gap-0 flex flex-col overflow-hidden data-[state=open]:duration-300 bg-[#F8FAFB] ring-0 outline-none rounded-none md:rounded-2xl">
         <DialogDescription className="sr-only">
           アカウント、学習、同期、データ管理などの設定を行うダイアログです。
         </DialogDescription>

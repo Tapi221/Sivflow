@@ -1,10 +1,10 @@
+import { BlockSurface } from "@/components/card/blocks/BlockSurface";
+import { cn } from "@/lib/utils";
 import React, { useMemo } from "react";
 import ReactMarkdown, { type Components } from "react-markdown";
-import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
-import { cn } from "@/lib/utils";
+import remarkGfm from "remark-gfm";
 import { CodeRenderer } from "./CodeRenderer";
-import { BlockSurface } from "@/components/card/blocks/BlockSurface";
 import {
   BLOCK_BODY_TEXT_COLOR_CLASS,
   TEXT_BLOCK_CONTENT_CLASS,
@@ -19,25 +19,19 @@ const TYPE = {
   code: { fontSize: 14, lineHeight: 22 },
 } as const;
 
-/**
- * ✅ 今は Markdown 内の画像を「表示しない」運用にしておいて、
- * 将来 true にすれば “許可された画像だけ” 表示できます。
- */
 const ALLOW_MARKDOWN_IMAGES = false;
 
-/**
- * ✅ 許可する画像ホスト（自社CDNなど）だけ入れる
- * - 例: 'cdn.yourapp.com'
- */
 const ALLOWED_IMAGE_HOSTS = new Set<string>([
   // "cdn.yourapp.com",
 ]);
 
-/**
- * ✅ 相対パスで許可する画像プレフィックス（運用に合わせて追加/変更）
- * - 将来 ALLOW_MARKDOWN_IMAGES=true にした時、/api/... 等へ飛ばないように絞る
- */
 const ALLOWED_IMAGE_PATH_PREFIXES = ["/uploads/"] as const;
+
+/**
+ * 連続空行を表示用に保持するためのプレースホルダ。
+ * 不可視文字はコピペ事故の元なので、ASCII だけにしている。
+ */
+const BLANK_LINE_PLACEHOLDER = "__MD_BLANK_LINE_PLACEHOLDER__";
 
 const extractTextDeep = (node: React.ReactNode): string => {
   if (node == null || typeof node === "boolean") return "";
@@ -50,15 +44,69 @@ const extractTextDeep = (node: React.ReactNode): string => {
   return "";
 };
 
-// ✅ 制御文字は一律拒否（安全）
-// ✅ 空白は「リンク種別ごと」に扱いを変える（tel/mailto は救済）
+/**
+ * Markdown の連続空行を潰さずに見た目へ反映する。
+ * - 1個目の空行は通常の段落区切りとして残す
+ * - 2個目以降はプレースホルダ段落を差し込む
+ * - fenced code block 内は触らない
+ */
+const preserveExtraBlankLines = (input: string): string => {
+  const normalized = input.replace(/\r\n/g, "\n");
+  const lines = normalized.split("\n");
+
+  const out: string[] = [];
+  let blankRun = 0;
+  let inFence = false;
+  let fenceChar: "`" | "~" | "" = "";
+
+  const flushBlankRun = () => {
+    if (blankRun === 0) return;
+
+    out.push("");
+
+    for (let i = 1; i < blankRun; i += 1) {
+      out.push(BLANK_LINE_PLACEHOLDER);
+      out.push("");
+    }
+
+    blankRun = 0;
+  };
+
+  for (const line of lines) {
+    const fenceMatch = line.match(/^\s*(`{3,}|~{3,})/);
+
+    if (fenceMatch) {
+      flushBlankRun();
+
+      const currentFenceChar = fenceMatch[1][0] as "`" | "~";
+      if (!inFence) {
+        inFence = true;
+        fenceChar = currentFenceChar;
+      } else if (fenceChar === currentFenceChar) {
+        inFence = false;
+        fenceChar = "";
+      }
+
+      out.push(line);
+      continue;
+    }
+
+    if (!inFence && line.trim() === "") {
+      blankRun += 1;
+      continue;
+    }
+
+    flushBlankRun();
+    out.push(line);
+  }
+
+  flushBlankRun();
+  return out.join("\n");
+};
+
 const hasControlChars = (s: string) => /\p{Cc}/u.test(s);
 const hasWhitespace = (s: string) => /\s/.test(s);
 
-// mailto の ? 以降を “なるべく壊れにくく” 再構築
-// - 空白は %20
-// - # は %23（ブラウザのフラグメント扱い回避）
-// - 値に未エンコードの & / = が混ざるケースは原理的に救えない（入力自体が壊れている）
 const rebuildMailtoQuery = (rawQuery: string): string => {
   const safe = rawQuery.replace(/#/g, "%23");
 
@@ -98,24 +146,19 @@ const sanitizeLinkHref = (href: string | undefined): string | null => {
   const h0 = href.trim();
   if (!h0 || hasControlChars(h0)) return null;
 
-  // protocol-relative は拒否（//example.com）
   if (h0.startsWith("//")) return null;
 
-  // 相対URL / アンカーは許可（空白は拒否）
   if (h0.startsWith("/") || h0.startsWith("#")) {
     return hasWhitespace(h0) ? null : h0;
   }
 
   const lower = h0.toLowerCase();
 
-  // tel: は実用入力を救済（空白・()・.・- を除去）
   if (lower.startsWith("tel:")) {
     const after = h0.slice(4);
 
-    // tel: に ? や # は通常想定しない（挙動ブレの温床）ので拒否
     if (/[?#]/.test(after)) return null;
 
-    // パラメータ（;ext=... など）が付く可能性に備え、最初の ; で分割
     const semi = after.indexOf(";");
     const numPart = semi >= 0 ? after.slice(0, semi) : after;
     const paramPartRaw = semi >= 0 ? after.slice(semi) : "";
@@ -123,18 +166,14 @@ const sanitizeLinkHref = (href: string | undefined): string | null => {
     const normalizedNum = numPart.replace(/[\s().-]+/g, "");
     if (!normalizedNum) return null;
 
-    // ざっくり許可（+ / 数字 / * #）
     if (!/^\+?[0-9*#]+$/.test(normalizedNum)) return null;
 
-    // ✅ paramPart は許可するなら軽く制限（運用方針に合わせて調整OK）
-    // 例: ;ext=123 / ;phone-context=... などを想定し、記号は ; = . _ - のみに絞る
     const paramPart = paramPartRaw.replace(/\s+/g, "");
     if (paramPart && !/^([;][A-Za-z0-9=._-]+)*$/.test(paramPart)) return null;
 
     return `tel:${normalizedNum}${paramPart}`;
   }
 
-  // mailto: は ? 以降を再構築して壊れにくくする
   if (lower.startsWith("mailto:")) {
     const after = h0.slice(7);
 
@@ -142,10 +181,7 @@ const sanitizeLinkHref = (href: string | undefined): string | null => {
     const address = qIndex >= 0 ? after.slice(0, qIndex) : after;
     const rawQuery = qIndex >= 0 ? after.slice(qIndex + 1) : "";
 
-    // `mailto:?subject=...` は仕様上あり得るので address 空は許可（ただし空白/制御は拒否）
     if (hasControlChars(address) || hasWhitespace(address)) return null;
-
-    // ✅ address 部分に # / ? が混ざるのはブラウザ解釈がブレやすいので拒否（空ならOK）
     if (address && /[#?]/.test(address)) return null;
 
     if (rawQuery) {
@@ -156,7 +192,6 @@ const sanitizeLinkHref = (href: string | undefined): string | null => {
     return `mailto:${address}`;
   }
 
-  // http/https は空白があれば拒否（安全寄り）
   if (hasWhitespace(h0)) return null;
 
   try {
@@ -174,10 +209,8 @@ const sanitizeImageSrc = (src: string): string | null => {
   const s = src.trim();
   if (!s || hasControlChars(s) || hasWhitespace(s)) return null;
 
-  // protocol-relative は拒否（//example.com/a.png）
   if (s.startsWith("//")) return null;
 
-  // ✅ 相対URLは prefix を絞って許可（/uploads/ のみ等）
   if (s.startsWith("/")) {
     const ok = ALLOWED_IMAGE_PATH_PREFIXES.some((p) => s.startsWith(p));
     return ok ? s : null;
@@ -186,10 +219,7 @@ const sanitizeImageSrc = (src: string): string | null => {
   try {
     const u = new URL(s);
 
-    // https のみに寄せる
     if (u.protocol !== "https:") return null;
-
-    // 許可ホストのみ
     if (!ALLOWED_IMAGE_HOSTS.has(u.hostname)) return null;
 
     return u.toString();
@@ -219,6 +249,11 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
       lineHeight: `var(--card-line-height, ${TYPE.body.lineHeight}px)`,
     }),
     [],
+  );
+
+  const renderedMarkdown = useMemo(
+    () => preserveExtraBlankLines(markdown),
+    [markdown],
   );
 
   const components = useMemo<Components>(
@@ -492,7 +527,7 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
         remarkPlugins={[remarkGfm, remarkBreaks]}
         components={components}
       >
-        {markdown}
+        {renderedMarkdown}
       </ReactMarkdown>
     </div>
   );
@@ -505,15 +540,20 @@ function ParagraphRenderer({
   children: React.ReactNode;
   bodyStyle: React.CSSProperties;
 }) {
+  const text = extractTextDeep(children);
+  const isBlankSpacer = text === BLANK_LINE_PLACEHOLDER;
+
   return (
     <p
+      aria-hidden={isBlankSpacer ? true : undefined}
       className={cn(
         TEXT_BLOCK_CONTENT_CLASS,
         "m-0 border-none bg-transparent p-0 text-left",
+        isBlankSpacer && "select-none text-transparent",
       )}
       style={bodyStyle}
     >
-      {children}
+      {isBlankSpacer ? " " : children}
     </p>
   );
 }

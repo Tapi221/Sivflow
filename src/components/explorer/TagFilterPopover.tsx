@@ -86,8 +86,6 @@ export function TagFilterPopover({
           )}
         </button>
       </PopoverTrigger>
-
-      {/* 透け対策：bg-white/95 + blur + shadow + ring */}
       <PopoverContent
         align="center"
         surface="floating"
