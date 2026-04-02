@@ -5,16 +5,16 @@ import { ExplorerNoResultsState } from "@/components/folder/components/ExplorerN
 import { ExplorerTreeNodeRenderer } from "@/components/folder/components/ExplorerTreeNode";
 import { RootFolderPanelList } from "@/components/folder/components/RootFolderPanelList";
 import {
-    getFolderId,
-    normalizeFolderId,
-    type FolderTreeNode,
+  getFolderId,
+  normalizeFolderId,
+  type FolderTreeNode,
 } from "@/components/folder/explorer/model/utils";
 import {
-    buildExplorerTreeData,
-    parseSelectedTreeId,
-    toExpandedTreeIds,
-    toSelectedTreeId,
-    type ExplorerTreeNode,
+  buildExplorerTreeData,
+  parseSelectedTreeId,
+  toExpandedTreeIds,
+  toSelectedTreeId,
+  type ExplorerTreeNode,
 } from "@/components/folder/explorer/tree/arboristAdapter";
 import { useEnsureAncestorFoldersExpanded } from "@/components/folder/hooks/useEnsureAncestorFoldersExpanded";
 import { useExpandedFolders } from "@/components/folder/hooks/useExpandedFolders";
@@ -28,11 +28,11 @@ import BulkTagDialog from "@/components/tag/BulkTagDialog";
 import { cn } from "@/lib/utils";
 import type { Card, CardSet, DocumentItem, SelectedExplorerItem } from "@/types";
 import React, {
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
 } from "react";
 import type { NodeApi } from "react-arborist";
 
@@ -59,7 +59,10 @@ interface FolderTreeWithCardsProps {
   onUpdateCard?: (cardId: string, data: unknown) => Promise<void>;
   onDeleteCard?: (cardId: string) => Promise<void>;
   moveCardToFolder?: (cardId: string, targetFolderId: string) => Promise<void>;
-  moveCardSetToFolder?: (cardSetId: string, targetFolderId: string | null) => Promise<void>;
+  moveCardSetToFolder?: (
+    cardSetId: string,
+    targetFolderId: string | null,
+  ) => Promise<void>;
   moveDocumentToFolder?: (
     documentId: string,
     targetFolderId: string,
@@ -128,13 +131,19 @@ export function FolderTreeWithCards({
 
   const dialogs = useExplorerDialogs();
 
-  const [optimisticFolders, setOptimisticFolders] = useState<FolderTreeNode[]>([]);
+  const [optimisticFolders, setOptimisticFolders] = useState<FolderTreeNode[]>(
+    [],
+  );
   const [optimisticCards, setOptimisticCards] = useState<Card[]>([]);
   const [optimisticCardSets, setOptimisticCardSets] = useState<CardSet[]>([]);
-  const [newlyCreatedCardId, setNewlyCreatedCardId] = useState<string | null>(null);
+  const [newlyCreatedCardId, setNewlyCreatedCardId] = useState<string | null>(
+    null,
+  );
   const [fileDragFolderId, setFileDragFolderId] = useState<string | null>(null);
   const [pendingScrollId, setPendingScrollId] = useState<string | null>(null);
-  const [activeRootFolderId, setActiveRootFolderId] = useState<string | null>(null);
+  const [activeRootFolderId, setActiveRootFolderId] = useState<string | null>(
+    null,
+  );
 
   const [cardSetNameSelection, setCardSetNameSelection] = useState<{
     id: string;
@@ -147,7 +156,6 @@ export function FolderTreeWithCards({
   const editInputRef = useRef<HTMLInputElement>(null);
   const handledCreateFolderTokenRef = useRef(0);
   const handledCreateCardSetTokenRef = useRef(0);
-
 
   const findScrollableAncestorWithinTree = useCallback(
     (node: HTMLElement): HTMLElement | null => {
@@ -201,7 +209,6 @@ export function FolderTreeWithCards({
     if (isScrollable) node.scrollTop = 0;
   }, []);
 
-  // merge optimistic
   const treeFolders = useMemo(() => {
     const map = new Map<string, FolderTreeNode>();
     for (const f of folders) {
@@ -312,7 +319,6 @@ export function FolderTreeWithCards({
     setExpandedFolders,
   });
 
-  // sync refs with state changes
   useEffect(() => {
     if (editInputRef.current && dialogs.editingId) {
       editInputRef.current.focus();
@@ -328,7 +334,6 @@ export function FolderTreeWithCards({
     dialogs.editingNameRef.current = dialogs.editingName;
   }, [dialogs.editingName]);
 
-  // clear newlyCreatedCardId when selection changes
   useEffect(() => {
     if (
       selectedItem?.type === "card" &&
@@ -346,7 +351,6 @@ export function FolderTreeWithCards({
     }
   }, [dialogs.editingId]);
 
-  // scroll to pending row
   useEffect(() => {
     if (!pendingScrollId) return;
     const row = rowRefs.current.get(pendingScrollId);
@@ -364,7 +368,6 @@ export function FolderTreeWithCards({
     scrollRowWithinSidebar,
   ]);
 
-  // 選択中の行が常に可視範囲に入るようにする（編集時の選択遅延/見失い対策）
   useEffect(() => {
     const targetId = (() => {
       if (selectedItem?.type === "card") return selectedItem.id;
@@ -392,7 +395,6 @@ export function FolderTreeWithCards({
     scrollRowWithinSidebar,
   ]);
 
-  // navigate to section list on token change
   useEffect(() => {
     if (navigateToSectionListToken <= 0) return;
     setActiveRootFolderId(null);
@@ -421,7 +423,6 @@ export function FolderTreeWithCards({
     candidates.forEach(resetIfScrollable);
   }, [folderSelectionNonce, resetIfScrollable]);
 
-  // sync activeRootFolderId with selectedFolderId
   useEffect(() => {
     if (!selectedFolderId) return;
     const rootFolderIds = new Set(
@@ -430,16 +431,20 @@ export function FolderTreeWithCards({
     let currentId: string | null = selectedFolderId;
     let rootId: string | null = null;
     while (currentId) {
-      if (rootFolderIds.has(currentId)) { rootId = currentId; break; }
+      if (rootFolderIds.has(currentId)) {
+        rootId = currentId;
+        break;
+      }
       const parentId = parentFolderIdById.get(currentId);
       if (parentId === undefined || parentId === currentId) break;
       currentId = parentId;
     }
     if (rootId === selectedFolderId) return;
-    if (activeRootFolderId !== selectedFolderId) setActiveRootFolderId(selectedFolderId);
+    if (activeRootFolderId !== selectedFolderId) {
+      setActiveRootFolderId(selectedFolderId);
+    }
   }, [selectedFolderId, rootFolders, parentFolderIdById, activeRootFolderId]);
 
-  // trigger folder creation from external token
   useEffect(() => {
     if (createFolderRequestToken <= 0) return;
     if (handledCreateFolderTokenRef.current === createFolderRequestToken) return;
@@ -506,7 +511,11 @@ export function FolderTreeWithCards({
 
   useEffect(() => {
     if (createCardSetRequestToken <= 0) return;
-    if (handledCreateCardSetTokenRef.current === createCardSetRequestToken) return;
+    if (
+      handledCreateCardSetTokenRef.current === createCardSetRequestToken
+    ) {
+      return;
+    }
     handledCreateCardSetTokenRef.current = createCardSetRequestToken;
     void handleCreateCardSetFromMenu(selectedFolderId ?? null);
   }, [createCardSetRequestToken, handleCreateCardSetFromMenu, selectedFolderId]);
@@ -552,7 +561,16 @@ export function FolderTreeWithCards({
         matchCountMap,
         getFolderId,
       }),
-    [getChildFolders, getFolderItems, getCardSets, getCardSetItems, isFiltering, matchCountMap, rootFolders, rootItems],
+    [
+      getChildFolders,
+      getFolderItems,
+      getCardSets,
+      getCardSetItems,
+      isFiltering,
+      matchCountMap,
+      rootFolders,
+      rootItems,
+    ],
   );
 
   const rootFolderPanels = useMemo(
@@ -593,7 +611,6 @@ export function FolderTreeWithCards({
 
     if (!scopedRootNode?.children?.length) return [];
 
-    // フォルダは常に次画面遷移で開くため、この画面では子フォルダのネストは持たせない。
     return scopedRootNode.children.map((node) =>
       node.kind === "folder" ? { ...node, children: undefined } : node,
     );
@@ -612,10 +629,15 @@ export function FolderTreeWithCards({
         setActiveRootFolderId(parsed.id);
         onFolderSelect(parsed.id);
       }
-      if (parsed.type === "cardSet") onItemSelect({ type: "cardSet", id: parsed.id });
-      if (parsed.type === "card") onItemSelect({ type: "card", id: parsed.id });
-      if (parsed.type === "document")
+      if (parsed.type === "cardSet") {
+        onItemSelect({ type: "cardSet", id: parsed.id });
+      }
+      if (parsed.type === "card") {
+        onItemSelect({ type: "card", id: parsed.id });
+      }
+      if (parsed.type === "document") {
         onItemSelect({ type: "document", id: parsed.id });
+      }
     },
     [onFolderSelect, onItemSelect],
   );
@@ -629,24 +651,36 @@ export function FolderTreeWithCards({
       parentId: string | null;
       index: number;
     }) => {
-      const newFolderRawId =
-        parentId !== null
-          ? (parseSelectedTreeId(parentId)?.id ?? "root")
-          : "root";
+      const parsedParent = parentId !== null ? parseSelectedTreeId(parentId) : null;
+      const targetFolderId =
+        parsedParent?.type === "folder" ? parsedParent.id : null;
 
       for (const dragId of dragIds) {
         const parsed = parseSelectedTreeId(dragId);
         if (!parsed) continue;
+
         if (parsed.type === "folder") {
           await onUpdateFolder?.(parsed.id, {
-            parentFolderId: newFolderRawId || null,
+            parentFolderId: targetFolderId,
           });
-        } else if (parsed.type === "cardSet") {
-          await moveCardSetToFolder?.(parsed.id, newFolderRawId || null);
-        } else if (parsed.type === "card") {
-          await moveCardToFolder?.(parsed.id, newFolderRawId);
-        } else if (parsed.type === "document") {
-          await moveDocumentToFolder?.(parsed.id, newFolderRawId);
+          continue;
+        }
+
+        if (parsed.type === "cardSet") {
+          if (!targetFolderId) continue;
+          await moveCardSetToFolder?.(parsed.id, targetFolderId);
+          continue;
+        }
+
+        if (parsed.type === "card") {
+          if (!targetFolderId) continue;
+          await moveCardToFolder?.(parsed.id, targetFolderId);
+          continue;
+        }
+
+        if (parsed.type === "document") {
+          if (!targetFolderId) continue;
+          await moveDocumentToFolder?.(parsed.id, targetFolderId);
         }
       }
     },
@@ -668,15 +702,36 @@ export function FolderTreeWithCards({
       index: number;
     }) => {
       const parentKind = parentNode?.data?.kind;
-      if (parentKind === "card" || parentKind === "document" || parentKind === "cardSet") return true;
+      if (
+        parentKind === "card" ||
+        parentKind === "document" ||
+        parentKind === "cardSet"
+      ) {
+        return true;
+      }
+
+      const isDropToRoot = !parentNode?.data || parentNode.data.kind !== "folder";
+
       for (const dragNode of dragNodes) {
-        if (dragNode.data?.kind !== "folder") continue;
-        let check: NodeApi<ExplorerTreeNode> | null = parentNode;
-        while (check) {
-          if (check.id === dragNode.id) return true;
-          check = check.parent;
+        const dragKind = dragNode.data?.kind;
+
+        if (dragKind === "folder") {
+          let check: NodeApi<ExplorerTreeNode> | null = parentNode;
+          while (check) {
+            if (check.id === dragNode.id) return true;
+            check = check.parent;
+          }
+          continue;
+        }
+
+        if (
+          isDropToRoot &&
+          (dragKind === "cardSet" || dragKind === "card" || dragKind === "document")
+        ) {
+          return true;
         }
       }
+
       return false;
     },
     [],
@@ -685,9 +740,8 @@ export function FolderTreeWithCards({
   const deleteTargetFolder = useMemo(
     () =>
       dialogs.deleteTargetFolderId
-        ? (treeFolders.find(
-            (f) => getFolderId(f) === dialogs.deleteTargetFolderId,
-          ) ?? null)
+        ? treeFolders.find((f) => getFolderId(f) === dialogs.deleteTargetFolderId) ??
+          null
         : null,
     [dialogs.deleteTargetFolderId, treeFolders],
   );
@@ -697,7 +751,6 @@ export function FolderTreeWithCards({
     [deleteTargetCounts, dialogs.deleteTargetFolderId],
   );
 
-  // shared node renderer props (stable across renders via useCallback in renderTreeNode)
   const nodeRendererProps = {
     editingId: dialogs.editingId,
     editingName: dialogs.editingName,
@@ -798,10 +851,7 @@ export function FolderTreeWithCards({
     rootFolderPanels.length > 0 || explorerTreeData.length > 0;
 
   return (
-    <div
-      ref={treeRootRef}
-      className={cn("h-full w-full", className)}
-    >
+    <div ref={treeRootRef} className={cn("h-full w-full", className)}>
       <input
         ref={fileInputRef}
         type="file"
@@ -817,7 +867,7 @@ export function FolderTreeWithCards({
         <ExplorerNoResultsState />
       ) : (
         <div className="h-full min-h-0">
-          {(rootFolderPanels.length === 0 || (rootItems.length > 0 && !activeRootFolderId)) ? (
+          {rootFolderPanels.length === 0 || (rootItems.length > 0 && !activeRootFolderId) ? (
             <FolderTreeArborist
               data={explorerTreeData}
               selectedId={selectedTreeId}
@@ -893,4 +943,3 @@ export function FolderTreeWithCards({
     </div>
   );
 }
-

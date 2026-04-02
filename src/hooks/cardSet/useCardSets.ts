@@ -35,6 +35,10 @@ export function useCardSets(folderId?: string | null) {
     opts?: { description?: string },
   ): Promise<CardSet> => {
     if (!currentUser) throw new Error("認証が必要です");
+    if (!folderId) {
+      throw new Error("カードセットはフォルダ配下にのみ作成できます");
+    }
+
     const db = await getLocalDb(currentUser.uid);
 
     const siblingSets = (rawSets ?? []).filter(
@@ -80,6 +84,10 @@ export function useCardSets(folderId?: string | null) {
     targetFolderId: string | null,
   ): Promise<void> => {
     if (!currentUser) throw new Error("認証が必要です");
+    if (!targetFolderId) {
+      throw new Error("カードセットをルート直下へ移動することはできません");
+    }
+
     const db = await getLocalDb(currentUser.uid);
     const siblingSets = (rawSets ?? []).filter(
       (s) => !s.isDeleted && s.folderId === targetFolderId,
@@ -88,6 +96,7 @@ export function useCardSets(folderId?: string | null) {
       (m, s) => Math.max(m, s.orderIndex ?? 0),
       -1,
     );
+
     await db.cardSets.update(cardSetId, {
       folderId: targetFolderId,
       orderIndex: maxOrder + 1,
@@ -103,11 +112,7 @@ export function useCardSets(folderId?: string | null) {
     const db = await getLocalDb(currentUser.uid);
     const now = new Date();
 
-    // cascade: 配下 Card を soft-delete
-    const cards = await db.cards
-      .where("cardSetId")
-      .equals(id)
-      .toArray();
+    const cards = await db.cards.where("cardSetId").equals(id).toArray();
     await Promise.all(
       cards.map((c) =>
         db.cards.update(c.id, { isDeleted: true, updatedAt: now }),
@@ -126,4 +131,3 @@ export function useCardSets(folderId?: string | null) {
     deleteCardSet,
   };
 }
-
