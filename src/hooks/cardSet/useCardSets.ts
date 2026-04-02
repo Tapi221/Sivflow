@@ -31,7 +31,7 @@ export function useCardSets(folderId?: string | null) {
 
   const createCardSet = async (
     name: string,
-    folderId: string | null,
+    folderId: string,
     opts?: { description?: string },
   ): Promise<CardSet> => {
     if (!currentUser) throw new Error("認証が必要です");
@@ -81,7 +81,7 @@ export function useCardSets(folderId?: string | null) {
    */
   const moveCardSetToFolder = async (
     cardSetId: string,
-    targetFolderId: string | null,
+    targetFolderId: string,
   ): Promise<void> => {
     if (!currentUser) throw new Error("認証が必要です");
     if (!targetFolderId) {
@@ -96,7 +96,6 @@ export function useCardSets(folderId?: string | null) {
       (m, s) => Math.max(m, s.orderIndex ?? 0),
       -1,
     );
-
     await db.cardSets.update(cardSetId, {
       folderId: targetFolderId,
       orderIndex: maxOrder + 1,

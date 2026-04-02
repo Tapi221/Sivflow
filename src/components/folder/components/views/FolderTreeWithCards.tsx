@@ -50,7 +50,7 @@ interface FolderTreeWithCardsProps {
   onDeleteFolder?: (folderId: string) => Promise<void>;
   onCreateCardSet?: (
     name: string,
-    folderId: string | null,
+    folderId: string,
     opts?: { description?: string },
   ) => Promise<CardSet>;
   onUpdateCardSet?: (cardSetId: string, data: unknown) => Promise<void>;
@@ -59,10 +59,7 @@ interface FolderTreeWithCardsProps {
   onUpdateCard?: (cardId: string, data: unknown) => Promise<void>;
   onDeleteCard?: (cardId: string) => Promise<void>;
   moveCardToFolder?: (cardId: string, targetFolderId: string) => Promise<void>;
-  moveCardSetToFolder?: (
-    cardSetId: string,
-    targetFolderId: string | null,
-  ) => Promise<void>;
+  moveCardSetToFolder?: (cardSetId: string, targetFolderId: string) => Promise<void>;
   moveDocumentToFolder?: (
     documentId: string,
     targetFolderId: string,
