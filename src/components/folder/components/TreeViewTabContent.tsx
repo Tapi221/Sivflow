@@ -56,6 +56,7 @@ interface TreeViewTabContentProps {
   onPinItem: FolderTreeWithCardsProps["onPinItem"];
   onUnpinItem: FolderTreeWithCardsProps["onUnpinItem"];
   selectedCardSetId?: string | null;
+  onSelectCardSet?: FolderTreeWithCardsProps["onSelectCardSet"];
 }
 
 export function TreeViewTabContent({
@@ -103,6 +104,7 @@ export function TreeViewTabContent({
   onPinItem,
   onUnpinItem,
   selectedCardSetId,
+  onSelectCardSet,
 }: TreeViewTabContentProps) {
   switch (explorerTab) {
     case "pinned":
@@ -175,6 +177,7 @@ export function TreeViewTabContent({
           onPinItem={onPinItem}
           onUnpinItem={onUnpinItem}
           selectedCardSetId={selectedCardSetId}
+          onSelectCardSet={onSelectCardSet}
           isFiltering={isFiltering}
           createFolderRequestToken={createFolderRequestToken}
           createCardSetRequestToken={createCardSetRequestToken}

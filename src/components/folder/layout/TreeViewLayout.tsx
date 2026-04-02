@@ -41,6 +41,10 @@ interface TreeViewLayoutProps {
   onFolderSelect: (folderId: string | null) => void;
   onItemSelect: (item: SelectedExplorerItem) => void;
   onCardUpdated: () => void;
+  onFolderContextChange?: (folderId: string | null) => void;
+  onCardSetContextChange?: (
+    cardSet: { id: string; label: string } | null,
+  ) => void;
   navigateToSectionListToken?: number;
   folderSelectionNonce?: number;
 }
@@ -56,6 +60,8 @@ function TreeViewLayout({
   onFolderSelect,
   onItemSelect,
   onCardUpdated,
+  onFolderContextChange,
+  onCardSetContextChange,
   navigateToSectionListToken = 0,
   folderSelectionNonce = 0,
 }: TreeViewLayoutProps) {
@@ -66,6 +72,7 @@ function TreeViewLayout({
     useCards();
 
   const [selectedCardSetId, setSelectedCardSetId] = useState<string | null>(null);
+  const [selectedCardSetLabel, setSelectedCardSetLabel] = useState<string | null>(null);
   const [createCardSetRequestToken, setCreateCardSetRequestToken] = useState(0);
   const [explorerHeaderFolderId, setExplorerHeaderFolderId] = useState<string | null>(
     null,
@@ -86,6 +93,7 @@ function TreeViewLayout({
         if (cs) {
           onFolderSelect(cs.folderId ?? null);
           setSelectedCardSetId(item.id);
+          setSelectedCardSetLabel(cs.name || "無題のセット");
 
           const query = new URLSearchParams();
           query.set("cardSetId", item.id);
@@ -97,6 +105,7 @@ function TreeViewLayout({
       }
 
       setSelectedCardSetId(null);
+      setSelectedCardSetLabel(null);
       onItemSelect(item);
     },
     [cardSets, navigate, onFolderSelect, onItemSelect],
@@ -189,9 +198,19 @@ function TreeViewLayout({
   const handleFolderSelect = useCallback(
     (folderId: string | null) => {
       setSelectedCardSetId(null);
+      setSelectedCardSetLabel(null);
       handleFolderSelectWithRecent(folderId);
     },
     [handleFolderSelectWithRecent],
+  );
+
+  const handleCardSetSelectWithoutNavigation = useCallback(
+    (cardSetId: string, folderId: string, label: string) => {
+      onFolderSelect(folderId);
+      setSelectedCardSetId(cardSetId);
+      setSelectedCardSetLabel(label);
+    },
+    [onFolderSelect],
   );
 
   const allTags = useMemo(() => {
@@ -278,6 +297,33 @@ function TreeViewLayout({
 
     return null;
   }, [cardSets, explorerHeaderFolderId, selectedFolderId, selectedItem]);
+
+  useEffect(() => {
+    onFolderContextChange?.(currentHeaderFolderId);
+  }, [currentHeaderFolderId, onFolderContextChange]);
+
+  const currentCardSetLabel = useMemo(() => {
+    if (!selectedCardSetId) return null;
+    return (
+      cardSets.find((cardSet) => cardSet.id === selectedCardSetId)?.name ??
+      selectedCardSetLabel
+    );
+  }, [cardSets, selectedCardSetId, selectedCardSetLabel]);
+
+  useEffect(() => {
+    if (!selectedCardSetId || !currentCardSetLabel) {
+      onCardSetContextChange?.(null);
+      return;
+    }
+    onCardSetContextChange?.({
+      id: selectedCardSetId,
+      label: currentCardSetLabel,
+    });
+  }, [
+    currentCardSetLabel,
+    onCardSetContextChange,
+    selectedCardSetId,
+  ]);
 
   const handleCreateCardSetFromHeader = useCallback(() => {
     if (!currentHeaderFolderId) return;
@@ -486,6 +532,7 @@ function TreeViewLayout({
       onPinItem={pinItem}
       onUnpinItem={unpinItem}
       selectedCardSetId={selectedCardSetId}
+      onSelectCardSet={handleCardSetSelectWithoutNavigation}
     />
   );
 

@@ -16,6 +16,7 @@ import React, { useCallback, useRef } from "react";
 
 interface UseFolderDocumentUploadParams {
   selectedFolderId: string | null;
+  actionFolderId: string | null;
   getNextOrderIndex: (folderId: string | null) => number;
   setExpandedFolders: React.Dispatch<React.SetStateAction<Set<string>>>;
 }
@@ -50,6 +51,7 @@ const getErrorMessage = (error: unknown, fallback: string): string => {
 
 export function useFolderDocumentUpload({
   selectedFolderId,
+  actionFolderId,
   getNextOrderIndex,
   setExpandedFolders,
 }: UseFolderDocumentUploadParams): UseFolderDocumentUploadReturn {
@@ -326,7 +328,7 @@ export function useFolderDocumentUpload({
   );
 
   const handleToolbarAddFile = useCallback(() => {
-    const targetFolderId = selectedFolderId;
+    const targetFolderId = actionFolderId;
     if (!targetFolderId) {
       toastError?.("ファイル追加先のフォルダを選択してください");
       return;
@@ -337,10 +339,10 @@ export function useFolderDocumentUpload({
       ".pdf,.pptx,application/pdf,application/vnd.openxmlformats-officedocument.presentationml.presentation",
     );
     fileInputRef.current?.click();
-  }, [selectedFolderId, toastError]);
+  }, [actionFolderId, toastError]);
 
   const handleToolbarAddPdf = useCallback(() => {
-    const targetFolderId = selectedFolderId;
+    const targetFolderId = actionFolderId;
     if (!targetFolderId) {
       toastError?.("ファイル追加先のフォルダを選択してください");
       return;
@@ -349,10 +351,10 @@ export function useFolderDocumentUpload({
     uploadTypeRef.current = "pdf";
     setCurrentFileAccept(".pdf,application/pdf");
     fileInputRef.current?.click();
-  }, [selectedFolderId, toastError]);
+  }, [actionFolderId, toastError]);
 
   const handleToolbarAddPptx = useCallback(() => {
-    const targetFolderId = selectedFolderId;
+    const targetFolderId = actionFolderId;
     if (!targetFolderId) {
       toastError?.("ファイル追加先のフォルダを選択してください");
       return;
@@ -363,7 +365,7 @@ export function useFolderDocumentUpload({
       ".pptx,application/vnd.openxmlformats-officedocument.presentationml.presentation",
     );
     fileInputRef.current?.click();
-  }, [selectedFolderId, toastError]);
+  }, [actionFolderId, toastError]);
 
   const handleToolbarFileInputChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {

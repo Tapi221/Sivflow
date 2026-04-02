@@ -78,6 +78,7 @@ interface FolderTreeWithCardsProps {
     id: string;
   }) => void;
   selectedCardSetId?: string | null;
+  onSelectCardSet?: (cardSetId: string, folderId: string, label: string) => void;
   isFiltering?: boolean;
   createFolderRequestToken?: number;
   createCardSetRequestToken?: number;
@@ -114,6 +115,7 @@ export function FolderTreeWithCards({
   onPinItem,
   onUnpinItem,
   selectedCardSetId = null,
+  onSelectCardSet,
   isFiltering = false,
   createFolderRequestToken = 0,
   createCardSetRequestToken = 0,
@@ -316,6 +318,7 @@ export function FolderTreeWithCards({
     setPendingScrollId,
     onFolderSelect,
     onItemSelect,
+    onSelectCardSet,
     setNewlyCreatedCardId,
     getNextOrderIndex,
     getUniqueFolderName,
@@ -479,12 +482,28 @@ export function FolderTreeWithCards({
     }
   }, [selectedFolderId, rootFolders, parentFolderIdById, activeRootFolderId]);
 
+  const headerFolderId = useMemo(() => {
+    if (selectedFolderId) return selectedFolderId;
+    if (activeRootFolderId) return activeRootFolderId;
+    if (selectedItem?.type === "cardSet") {
+      return (
+        treeCardSets.find((cardSet) => cardSet.id === selectedItem.id)?.folderId ??
+        null
+      );
+    }
+    return null;
+  }, [activeRootFolderId, selectedFolderId, selectedItem, treeCardSets]);
+
+  useEffect(() => {
+    onHeaderFolderIdChange?.(headerFolderId);
+  }, [headerFolderId, onHeaderFolderIdChange]);
+
   useEffect(() => {
     if (createFolderRequestToken <= 0) return;
     if (handledCreateFolderTokenRef.current === createFolderRequestToken) return;
     handledCreateFolderTokenRef.current = createFolderRequestToken;
-    void actions.handleCreateFolderAction(selectedFolderId ?? null);
-  }, [createFolderRequestToken, actions.handleCreateFolderAction, selectedFolderId]);
+    void actions.handleCreateFolderAction(headerFolderId);
+  }, [createFolderRequestToken, actions.handleCreateFolderAction, headerFolderId]);
 
   const setRowRef = useCallback((id: string, node: HTMLElement | null) => {
     if (node) rowRefs.current.set(id, node);
@@ -502,6 +521,7 @@ export function FolderTreeWithCards({
     handleToolbarFileInputChange,
   } = useFolderDocumentUpload({
     selectedFolderId,
+    actionFolderId: headerFolderId,
     getNextOrderIndex,
     setExpandedFolders,
   });
@@ -551,8 +571,8 @@ export function FolderTreeWithCards({
       return;
     }
     handledCreateCardSetTokenRef.current = createCardSetRequestToken;
-    void handleCreateCardSetFromMenu(selectedFolderId ?? null);
-  }, [createCardSetRequestToken, handleCreateCardSetFromMenu, selectedFolderId]);
+    void handleCreateCardSetFromMenu(headerFolderId);
+  }, [createCardSetRequestToken, handleCreateCardSetFromMenu, headerFolderId]);
 
   useEffect(() => {
     onRegisterPdfTrigger?.(handleToolbarAddPdf);
@@ -629,19 +649,6 @@ export function FolderTreeWithCards({
     [rootFolders],
   );
 
-  const headerFolderId = useMemo(() => {
-    if (selectedFolderId) return selectedFolderId;
-    if (activeRootFolderId) return activeRootFolderId;
-    if (selectedItem?.type === "cardSet") {
-      return treeCardSets.find((cardSet) => cardSet.id === selectedItem.id)?.folderId ?? null;
-    }
-    return null;
-  }, [activeRootFolderId, selectedFolderId, selectedItem, treeCardSets]);
-
-  useEffect(() => {
-    onHeaderFolderIdChange?.(headerFolderId);
-  }, [headerFolderId, onHeaderFolderIdChange]);
-
   const scopedTreeData = useMemo<ExplorerTreeNode[]>(() => {
     if (!activeRootFolderId) return [];
 
@@ -665,9 +672,8 @@ export function FolderTreeWithCards({
   }, [activeRootFolderId, explorerTreeData]);
 
   const selectedTreeId = useMemo(() => {
-    if (selectedFolderId) return `folder:${selectedFolderId}`;
-    return toSelectedTreeId(selectedFolderId, selectedItem);
-  }, [selectedFolderId, selectedItem]);
+    return toSelectedTreeId(selectedFolderId, selectedItem, selectedCardSetId);
+  }, [selectedCardSetId, selectedFolderId, selectedItem]);
 
   const handleTreeSelect = useCallback(
     (id: string) => {

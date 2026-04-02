@@ -84,7 +84,7 @@ export const TitleBar: React.FC = () => {
 
     const baseCrumbs =
       pathname.toLowerCase().startsWith("/cardview") && crumbs.length > 1
-        ? [crumbs[0]]
+        ? [crumbs[0], { label: "セクション一覧", to: "/folders" }]
         : crumbs;
 
     const base = baseCrumbs.map((c, i) =>

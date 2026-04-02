@@ -33,6 +33,8 @@ export default function Folders() {
   const pendingUrlSyncRef = useRef(null);
   const urlSyncTimerRef = useRef(0);
   const [folderSelectionNonce, setFolderSelectionNonce] = useState(0);
+  const [explorerFolderContextId, setExplorerFolderContextId] = useState(null);
+  const [explorerCardSetContext, setExplorerCardSetContext] = useState(null);
 
   const forceResetWorkspaceScroll = useCallback(() => {
     const reset = () => {
@@ -238,6 +240,7 @@ export default function Folders() {
     notifyMainSidebarFolderSelection(folderId);
     setSelectedFolderId(folderId);
     setSelectedItem(null);
+    setExplorerCardSetContext(null);
     selectedFolderIdRef.current = folderId;
     selectedItemRef.current = null;
   }, [forceResetWorkspaceScroll, notifyMainSidebarFolderSelection]);
@@ -341,6 +344,7 @@ export default function Folders() {
       notifyMainSidebarFolderSelection(folderId ?? null);
       setSelectedFolderId(folderId ?? null);
       setSelectedItem(null);
+      setExplorerCardSetContext(null);
       selectedFolderIdRef.current = folderId ?? null;
       selectedItemRef.current = null;
 
@@ -391,11 +395,12 @@ export default function Folders() {
 
   useEffect(() => {
     const crumbs = [ ];
+    const breadcrumbFolderId = selectedFolderId || explorerFolderContextId;
 
     // フォルダ階層を構築（祖先 → 選択フォルダ）
-    if (selectedFolderId) {
+    if (breadcrumbFolderId) {
       const path = [];
-      let cur = folderById.get(selectedFolderId);
+      let cur = folderById.get(breadcrumbFolderId);
 
       while (cur) {
         path.unshift(cur);
@@ -428,6 +433,10 @@ export default function Folders() {
       }
     }
 
+    if (explorerCardSetContext?.label) {
+      crumbs.push({ label: explorerCardSetContext.label });
+    }
+
     setExtraCrumbs(crumbs);
 
     return () => {
@@ -435,6 +444,8 @@ export default function Folders() {
     };
   }, [
     selectedFolderId,
+    explorerFolderContextId,
+    explorerCardSetContext,
     selectedItem,
     folderById,
     cardById,
@@ -478,6 +489,8 @@ export default function Folders() {
             onCardUpdated={() => {
               // カード更新後の処理
             }}
+            onFolderContextChange={setExplorerFolderContextId}
+            onCardSetContextChange={setExplorerCardSetContext}
             navigateToSectionListToken={navigateToSectionListToken}
             folderSelectionNonce={folderSelectionNonce}
           />

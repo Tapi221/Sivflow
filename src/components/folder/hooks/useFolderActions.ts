@@ -69,6 +69,7 @@ type UseFolderActionsParams = {
 
   onFolderSelect: (folderId: string | null) => void;
   onItemSelect: (item: SelectedExplorerItem) => void;
+  onSelectCardSet?: (cardSetId: string, folderId: string, label: string) => void;
   setNewlyCreatedCardId: (id: string | null) => void;
 
   getNextOrderIndex?: (folderId: string | null) => number;
@@ -163,6 +164,7 @@ export function useFolderActions({
   setPendingScrollId,
   onFolderSelect,
   onItemSelect,
+  onSelectCardSet,
   getNextOrderIndex,
   getUniqueFolderName,
 }: UseFolderActionsParams) {
@@ -272,6 +274,7 @@ export function useFolderActions({
       editingNameRef.current = DEFAULT_NEW_CARDSET_NAME;
       renameCancelledRef.current = false;
       setPendingScrollId(tempId);
+      onSelectCardSet?.(tempId, normalizedFolderId, DEFAULT_NEW_CARDSET_NAME);
 
       try {
         const created = await onCreateCardSet(
@@ -280,14 +283,18 @@ export function useFolderActions({
         );
 
         setOptimisticCardSets((prev) =>
-          prev.filter((cardSet) => cardSet.id !== tempId),
+          prev.map((cardSet) => (cardSet.id === tempId ? created : cardSet)),
         );
 
         setEditingId(created.id);
         editingIdRef.current = created.id;
         setPendingScrollId(created.id);
+        onSelectCardSet?.(
+          created.id,
+          normalizedFolderId,
+          created.name || DEFAULT_NEW_CARDSET_NAME,
+        );
         onFolderSelect(normalizedFolderId);
-        onItemSelect({ type: "cardSet", id: created.id });
       } catch (error) {
         console.error("[useFolderActions] create card set failed:", error);
         setOptimisticCardSets((prev) =>
@@ -303,6 +310,7 @@ export function useFolderActions({
       onCreateCardSet,
       onFolderSelect,
       onItemSelect,
+      onSelectCardSet,
       renameCancelledRef,
       setEditingId,
       setEditingName,
