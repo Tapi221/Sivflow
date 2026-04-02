@@ -1,11 +1,4 @@
-import type { UploadedImage } from "@/types";
 import { normalizeFolder } from "@/utils";
-import { assertImageArrayInvariant } from "@/utils/imageAssertions";
-import {
-  denormalizeUploadedImages,
-  normalizeUploadedImages,
-} from "@/utils/uploaded-image/normalizer";
-import { sanitizeUploadedImages } from "@/utils/uploaded-image/sanitizer";
 import { normalizeInkDocument } from "@/components/ink/inkTypes";
 
 export const denormalizeCardForStorage = (card: unknown) => {
@@ -152,3 +145,4 @@ export const normalizeFolderWithSilent = (raw: unknown) => {
     !hasIsSilent && hasSilent ? { ...raw, isSilent: raw.silent } : raw;
   return normalizeFolder(normalizedInput);
 };
+

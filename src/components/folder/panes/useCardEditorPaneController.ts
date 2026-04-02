@@ -76,6 +76,7 @@ export function useCardEditorPaneController({
     }
     return map;
   }, [cards]);
+
   const selectedCardSnapshot = React.useMemo(() => {
     if (!selectedCardId) return null;
     return cardsById.get(selectedCardId) ?? null;
@@ -125,13 +126,25 @@ export function useCardEditorPaneController({
     resetDialogs: () => resetDialogsRef.current(),
   });
 
+  const {
+    selectedCard: sessionSelectedCard,
+    isEditing: sessionIsEditing,
+    setDraft: setSessionDraft,
+    flushDraft,
+    handleCancel,
+    handleTitleInputChange,
+    handleUpdateTags,
+    handleToggleDraft,
+    handleUpdateTitle,
+  } = session;
+
   React.useEffect(() => {
     if (typeof window === "undefined") return;
 
     const handler = (event: Event) => {
       const detail = (event as CustomEvent<EditingDraftPatchDetail>)?.detail;
-      if (!detail || !session.selectedCard || !session.isEditing) return;
-      if (detail.cardId !== session.selectedCard.id) return;
+      if (!detail || !sessionSelectedCard || !sessionIsEditing) return;
+      if (detail.cardId !== sessionSelectedCard.id) return;
 
       const nextTitle =
         typeof detail.patch.title === "string" ? detail.patch.title : undefined;
@@ -142,6 +155,7 @@ export function useCardEditorPaneController({
       const nextTags = Array.isArray(detail.patch.tags)
         ? detail.patch.tags
         : undefined;
+
       if (
         nextTitle === undefined &&
         nextIsDraft === undefined &&
@@ -150,7 +164,7 @@ export function useCardEditorPaneController({
         return;
       }
 
-      session.setDraft((prev) => {
+      setSessionDraft((prev) => {
         if (!prev) return prev;
         return {
           ...prev,
@@ -164,7 +178,7 @@ export function useCardEditorPaneController({
     window.addEventListener(CARDVIEW_EDITING_DRAFT_PATCH_EVENT, handler);
     return () =>
       window.removeEventListener(CARDVIEW_EDITING_DRAFT_PATCH_EVENT, handler);
-  }, [session.isEditing, session.selectedCard, session.setDraft]);
+  }, [sessionIsEditing, sessionSelectedCard, setSessionDraft]);
 
   const layout = useLayoutRowsController({
     draft: session.draft,
@@ -186,12 +200,12 @@ export function useCardEditorPaneController({
   }, []);
 
   const handleCancelEditing = React.useCallback(() => {
-    session.handleCancel();
+    handleCancel();
     onRequestCloseEditing?.();
-  }, [onRequestCloseEditing, session]);
+  }, [handleCancel, onRequestCloseEditing]);
 
   const handleSaveEditing = React.useCallback(async (): Promise<boolean> => {
-    const saved = await session.flushDraft({
+    const saved = await flushDraft({
       reason: "manual",
       exitEditing: true,
       showSuccessToast: true,
@@ -200,7 +214,7 @@ export function useCardEditorPaneController({
       onRequestCloseEditing?.();
     }
     return saved;
-  }, [onRequestCloseEditing, session]);
+  }, [flushDraft, onRequestCloseEditing]);
 
   const dispatchCardViewSaveFinished = React.useCallback(
     (saved: boolean, detail?: { signal?: number }) => {
@@ -220,17 +234,18 @@ export function useCardEditorPaneController({
     if (saveSignal == null) return;
     if (prevSaveSignalRef.current === saveSignal) return;
     prevSaveSignalRef.current = saveSignal;
+
     const eventDetail = {
       signal: saveSignal,
     };
 
-    if (!session.isEditing) {
+    if (!sessionIsEditing) {
       dispatchCardViewSaveFinished(true, eventDetail);
       return;
     }
 
     void (async () => {
-      const saved = await session.flushDraft({
+      const saved = await flushDraft({
         reason: "manual",
         showSuccessToast: false,
       });
@@ -238,14 +253,15 @@ export function useCardEditorPaneController({
     })();
   }, [
     dispatchCardViewSaveFinished,
+    flushDraft,
     saveSignal,
     saveSignalEnabled,
-    session,
+    sessionIsEditing,
   ]);
 
   const onAddReviewLog = React.useCallback(
     ({ reviewedAt, rating, durationMinutes }) => {
-      const selectedCard = session.selectedCard;
+      const selectedCard = sessionSelectedCard;
       if (!selectedCard?.id) return Promise.resolve();
 
       const { patch } = createReviewPatchFromRating({
@@ -260,12 +276,12 @@ export function useCardEditorPaneController({
         onCardUpdated?.();
       });
     },
-    [onCardUpdated, session.selectedCard, settings?.delayBonusEnabled, updateCard],
+    [onCardUpdated, sessionSelectedCard, settings?.delayBonusEnabled, updateCard],
   );
 
   const onUpdateLatestReviewLog = React.useCallback(
     ({ reviewLogs, reviewedAt, rating, durationMinutes }) => {
-      const selectedCard = session.selectedCard;
+      const selectedCard = sessionSelectedCard;
       if (!selectedCard?.id) return Promise.resolve();
 
       const { patch } = createLatestReviewLogPatch({
@@ -285,7 +301,7 @@ export function useCardEditorPaneController({
     },
     [
       onCardUpdated,
-      session.selectedCard,
+      sessionSelectedCard,
       settings?.delayBonusEnabled,
       settings?.reviewStartNextDay,
       updateCard,
@@ -294,7 +310,7 @@ export function useCardEditorPaneController({
 
   const onDeleteLatestReviewLog = React.useCallback(
     ({ reviewLogs }) => {
-      const selectedCard = session.selectedCard;
+      const selectedCard = sessionSelectedCard;
       if (!selectedCard?.id) return Promise.resolve();
 
       const { patch } = createLatestReviewLogPatch({
@@ -311,7 +327,7 @@ export function useCardEditorPaneController({
     },
     [
       onCardUpdated,
-      session.selectedCard,
+      sessionSelectedCard,
       settings?.delayBonusEnabled,
       settings?.reviewStartNextDay,
       updateCard,
@@ -320,7 +336,7 @@ export function useCardEditorPaneController({
 
   const onUpdateReviewLogDuration = React.useCallback(
     ({ reviewLogs, logIndex, durationMinutes }) => {
-      const selectedCard = session.selectedCard;
+      const selectedCard = sessionSelectedCard;
       if (!selectedCard?.id) return Promise.resolve();
 
       const nextReviewLogs = reviewLogs.map((log, index) =>
@@ -335,7 +351,7 @@ export function useCardEditorPaneController({
         onCardUpdated?.();
       });
     },
-    [onCardUpdated, session.selectedCard, updateCard],
+    [onCardUpdated, sessionSelectedCard, updateCard],
   );
 
   const metaPanelActions = React.useMemo(
@@ -345,25 +361,25 @@ export function useCardEditorPaneController({
       onDeleteLatestReviewLog,
       onUpdateReviewLogDuration,
       onFlushAutosave: () =>
-        session.flushDraft({
+        flushDraft({
           reason: "autosave",
           showSuccessToast: false,
         }),
-      onTitleInputChange: session.handleTitleInputChange,
-      onUpdateTags: session.handleUpdateTags,
-      onToggleDraft: session.handleToggleDraft,
-      onUpdateTitle: session.handleUpdateTitle,
+      onTitleInputChange: handleTitleInputChange,
+      onUpdateTags: handleUpdateTags,
+      onToggleDraft: handleToggleDraft,
+      onUpdateTitle: handleUpdateTitle,
     }),
     [
+      flushDraft,
+      handleTitleInputChange,
+      handleToggleDraft,
+      handleUpdateTags,
+      handleUpdateTitle,
       onAddReviewLog,
       onDeleteLatestReviewLog,
       onUpdateLatestReviewLog,
       onUpdateReviewLogDuration,
-      session.flushDraft,
-      session.handleTitleInputChange,
-      session.handleToggleDraft,
-      session.handleUpdateTags,
-      session.handleUpdateTitle,
     ],
   );
 

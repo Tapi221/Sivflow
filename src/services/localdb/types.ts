@@ -5,7 +5,6 @@ import type {
   SyncConflict,
   SyncError,
   SyncHistory,
-  SyncMetadata,
   SyncQueueItem,
   SyncSettings,
   UploadedImage,
@@ -139,6 +138,7 @@ export interface LocalDBSyncApi {
 
 export type LocalDBLike = (LocalDB | InMemoryLocalDB) & LocalDBSyncApi;
 export type LocalDBInstance = LocalDBLike;
+
 
 
 
