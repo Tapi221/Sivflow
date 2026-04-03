@@ -1461,7 +1461,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
           {/* Sidebar */}
           <div
             className={`
-              md:w-56 flex-shrink-0 flex flex-col border-r border-slate-200/80/80
+              md:w-56 flex-shrink-0 flex flex-col border-r border-slate-200/80
               ${isMobileMenuOpen ? "absolute inset-0 z-50 w-full bg-white/72 backdrop-blur-md" : "hidden md:flex bg-white/36 backdrop-blur-sm"}
               transition-all duration-300
             `}

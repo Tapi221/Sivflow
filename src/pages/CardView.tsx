@@ -61,7 +61,6 @@ export default function CardView() {
 
   const {
     contentViewportRef,
-    contentViewportWidth,
     activePaneMode,
     activePaneMinWidthPx,
     activePaneMaxWidthPx,
@@ -118,6 +117,7 @@ export default function CardView() {
       ? "calc(var(--ui-panel-width) + 2.75rem)"
       : "calc(var(--ui-space-1) + 2.75rem)"
     : "0.75rem";
+
   return (
     <div className="h-full overflow-hidden bg-[#F5F7F8] pt-0 card-editor-right-pane-font">
       <div className="relative flex h-full min-h-0 overflow-hidden">
@@ -235,6 +235,7 @@ export default function CardView() {
                 settings={settings}
                 editPaneWidthPx={activePaneRenderWidthPx}
                 activePaneWidthPx={activePaneRenderWidthPx}
+                activePaneMaxWidthPx={activePaneMaxWidthPx}
                 currentDisplayMode={state.currentDisplayMode}
                 folderId={folderId}
                 cardSetId={cardSetId}

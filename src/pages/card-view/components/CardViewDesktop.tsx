@@ -11,14 +11,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 /**
  * 急スクロール時（idle preload 範囲外へのジャンプ）で画像の decode が
  * 間に合わない場合に表示するカード形状プレースホルダー。
- *
- * Skeleton（真っ灰色の矩形）の代わりに:
- *   - カードと同じ border / background / shadow を維持
- *   - CSS gradient で罫線を再現（DOM ノード追加なし）
- *   - card.questionText を薄く表示してカードの内容を示す
- *
- * これにより急スクロール後も「カードの壁」ではなく
- * 「コンテンツが見え始めている状態」に見せられる。
  */
 const CARD_LOADING_PREVIEW_RULED_STYLE: React.CSSProperties = {
   backgroundImage:
@@ -89,6 +81,7 @@ interface CardViewDesktopProps {
   settings?: Partial<UserSettings> | null;
   editPaneWidthPx: number;
   activePaneWidthPx: number;
+  activePaneMaxWidthPx: number;
   currentDisplayMode: CardDisplayMode;
   folderId: string | null;
   cardSetId: string | null;
@@ -110,6 +103,7 @@ export function CardViewDesktop({
   settings = null,
   editPaneWidthPx,
   activePaneWidthPx,
+  activePaneMaxWidthPx,
   currentDisplayMode,
   folderId,
   cardSetId,
@@ -122,7 +116,10 @@ export function CardViewDesktop({
 }: CardViewDesktopProps) {
   const { currentUser } = useAuthSession();
   const effectiveEditPaneWidthPx = editPaneWidthPx;
-  const effectiveCardWidthPx = activePaneWidthPx;
+  const effectiveCardWidthPx =
+    currentDisplayMode === "fluid"
+      ? Math.max(1, activePaneMaxWidthPx)
+      : Math.max(1, activePaneWidthPx);
 
   const [renderRange, setRenderRange] = useState<{
     start: number;
@@ -204,7 +201,6 @@ export function CardViewDesktop({
       onToggleBookmark,
       settings,
       effectiveEditPaneWidthPx,
-      activePaneWidthPx,
       currentDisplayMode,
     ],
   );
