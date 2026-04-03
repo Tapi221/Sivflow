@@ -486,4 +486,3 @@ const HistoryIcon = (props: unknown) => {
 };
 
 export default DataRescuePanel;
-

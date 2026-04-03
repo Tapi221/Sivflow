@@ -52,4 +52,3 @@ const FourChoiceMode = () => {
 };
 
 export default FourChoiceMode;
-

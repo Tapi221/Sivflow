@@ -522,4 +522,3 @@ const StudyMode = () => {
 };
 
 export default StudyMode;
-

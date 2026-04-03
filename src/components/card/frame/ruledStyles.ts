@@ -1,4 +1,3 @@
-
 export type RuledStyleKind = "repeat+bottom" | "repeat-only" | "bottom-only";
 
 export interface RuledParams {

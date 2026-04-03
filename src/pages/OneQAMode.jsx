@@ -52,4 +52,3 @@ const OneQAMode = () => {
 };
 
 export default OneQAMode;
-

@@ -87,4 +87,3 @@ const CardLayoutConsistencyTest = () => {
 };
 
 export default CardLayoutConsistencyTest;
-

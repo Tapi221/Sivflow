@@ -30,12 +30,7 @@ interface ImportDialogProps {
 type ImportStep = "select" | "preview" | "confirm" | "processing" | "complete";
 type ImportAction = "replace" | "keep" | "cancel";
 
-const ImportDialog = (
-  {
-    open,
-    onOpenChange,
-  }: ImportDialogProps
-) => {
+const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
   const { currentUser } = useAuthSession();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -349,4 +344,3 @@ const ImportDialog = (
 };
 
 export default ImportDialog;
-

@@ -27,12 +27,7 @@ interface ExportDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const ExportDialog = (
-  {
-    open,
-    onOpenChange,
-  }: ExportDialogProps
-) => {
+const ExportDialog = ({ open, onOpenChange }: ExportDialogProps) => {
   const { currentUser } = useAuthSession();
   const [exportType, setExportType] = useState<"all" | "folder">("all");
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
@@ -230,4 +225,3 @@ const ExportDialog = (
 };
 
 export default ExportDialog;
-

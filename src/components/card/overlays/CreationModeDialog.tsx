@@ -22,14 +22,7 @@ import {
 /**
  * 作成モードを選択するダイアログ
  */
-const CreationModeDialog = (
-  {
-    open,
-    onOpenChange,
-    onSelectMode,
-    onBack,
-  }
-) => {
+const CreationModeDialog = ({ open, onOpenChange, onSelectMode, onBack }) => {
   const [selectedMainMode, setSelectedMainMode] = useState(null);
 
   const modes = [
@@ -186,4 +179,3 @@ const CreationModeDialog = (
 };
 
 export default CreationModeDialog;
-

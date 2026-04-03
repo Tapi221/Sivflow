@@ -14,21 +14,19 @@ interface AutoResizeTextareaProps extends React.TextareaHTMLAttributes<HTMLTextA
   readOnly?: boolean;
 }
 
-const AutoResizeTextarea = (
-  {
-    value,
-    onChange,
-    placeholder,
-    className,
-    textareaClassName,
-    minRows = 1,
-    lineHeight = 20,
-    maxHeight = 400,
-    allowInternalScroll = true,
-    readOnly = false,
-    ...props
-  }: AutoResizeTextareaProps
-) => {
+const AutoResizeTextarea = ({
+  value,
+  onChange,
+  placeholder,
+  className,
+  textareaClassName,
+  minRows = 1,
+  lineHeight = 20,
+  maxHeight = 400,
+  allowInternalScroll = true,
+  readOnly = false,
+  ...props
+}: AutoResizeTextareaProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const minHeight = minRows * lineHeight;
@@ -108,4 +106,3 @@ const AutoResizeTextarea = (
 };
 
 export default AutoResizeTextarea;
-

@@ -14,14 +14,12 @@ interface BulkTagDialogProps {
   folderName?: string;
 }
 
-const BulkTagDialog = (
-  {
-    open,
-    onOpenChange,
-    folderId,
-    folderName,
-  }: BulkTagDialogProps
-) => {
+const BulkTagDialog = ({
+  open,
+  onOpenChange,
+  folderId,
+  folderName,
+}: BulkTagDialogProps) => {
   const { tags, addTagToCardsInFolder } = useTags();
   const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
   const [includeSubfolders, setIncludeSubfolders] = useState(false);
@@ -136,4 +134,3 @@ const BulkTagDialog = (
 };
 
 export default BulkTagDialog;
-

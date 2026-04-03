@@ -89,19 +89,17 @@ const StudyCard = (props: StudyCardProps) => {
 
 type InnerProps = Omit<StudyCardProps, "card"> & { card: Card };
 
-const StudyCardInner = (
-  {
-    card,
-    onResult,
-    onToggleUncertainty,
-    onToggleBookmark,
-    onEdit,
-    mode = "review",
-    showHard = true,
-    showEasy = true,
-    flipTrigger,
-  }: InnerProps
-) => {
+const StudyCardInner = ({
+  card,
+  onResult,
+  onToggleUncertainty,
+  onToggleBookmark,
+  onEdit,
+  mode = "review",
+  showHard = true,
+  showEasy = true,
+  flipTrigger,
+}: InnerProps) => {
   const isPracticeMode = mode === "practice";
 
   const [studyPhase, setStudyPhase] = useState<StudyPhase>("timing");
@@ -428,4 +426,3 @@ const StudyCardInner = (
 };
 
 export default StudyCard;
-

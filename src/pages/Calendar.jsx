@@ -366,8 +366,11 @@ const Calendar = () => {
                   </div>
                 ) : (
                   /* Empty State Check (Today) */
-                  (isTodayDate && (<div className="mt-2 text-[9px] font-bold text-primary-300">TODAY
-                                        </div>))
+                  isTodayDate && (
+                    <div className="mt-2 text-[9px] font-bold text-primary-300">
+                      TODAY
+                    </div>
+                  )
                 )}
               </div>
             );
@@ -554,4 +557,3 @@ const Calendar = () => {
 };
 
 export default Calendar;
-

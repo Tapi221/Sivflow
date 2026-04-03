@@ -397,18 +397,16 @@ interface MediaUploaderProps {
   autoOpenPicker?: boolean;
 }
 
-const MediaUploader = (
-  {
-    type = "image",
-    urls = [],
-    onChange,
-    maxFiles = 10,
-    initialFile,
-    onConsumeInitialFile,
-    onFilesExcess,
-    autoOpenPicker = false,
-  }: MediaUploaderProps
-) => {
+const MediaUploader = ({
+  type = "image",
+  urls = [],
+  onChange,
+  maxFiles = 10,
+  initialFile,
+  onConsumeInitialFile,
+  onFilesExcess,
+  autoOpenPicker = false,
+}: MediaUploaderProps) => {
   const { currentUser } = useAuthSession();
   const [isUploading, setIsUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
@@ -1155,4 +1153,3 @@ const MediaUploader = (
 };
 
 export default MediaUploader;
-

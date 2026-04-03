@@ -44,4 +44,3 @@ const CodeBlockVisualTest = () => {
 };
 
 export default CodeBlockVisualTest;
-

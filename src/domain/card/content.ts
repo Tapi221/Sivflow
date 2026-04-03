@@ -1,9 +1,5 @@
 import type { CodeBlockData } from "@/types/core/code-block";
-import type {
-  Card,
-  CardBlock,
-  UploadedImage,
-} from "@/types/domain/card";
+import type { Card, CardBlock, UploadedImage } from "@/types/domain/card";
 
 export type CardSide = "question" | "answer";
 

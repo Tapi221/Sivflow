@@ -521,4 +521,3 @@ const Folders = () => {
 };
 
 export default Folders;
-

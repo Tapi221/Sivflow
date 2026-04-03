@@ -52,4 +52,3 @@ const PairMode = () => {
 };
 
 export default PairMode;
-

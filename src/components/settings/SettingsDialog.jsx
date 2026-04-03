@@ -1598,4 +1598,3 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
 };
 
 export default SettingsDialog;
-

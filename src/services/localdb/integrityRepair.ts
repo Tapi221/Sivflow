@@ -1,6 +1,4 @@
-import type {
-  IntegrityIssue,
-} from "@/services/dataIntegrityTypes";
+import type { IntegrityIssue } from "@/services/dataIntegrityTypes";
 import {
   denormalizeUploadedImages,
   normalizeUploadedImages,

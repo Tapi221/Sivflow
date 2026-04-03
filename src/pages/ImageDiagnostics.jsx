@@ -332,4 +332,3 @@ const ImageDiagnostics = () => {
 };
 
 export default ImageDiagnostics;
-
