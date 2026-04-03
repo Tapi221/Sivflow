@@ -478,7 +478,7 @@ export const importFromDatabase = async (
         userId: currentUserId,
         updatedAt: rescueTime,
       }));
-      await(db as LocalDBWithTags).tags.bulkPut(newTags);
+      await (db as LocalDBWithTags).tags.bulkPut(newTags);
     }
 
     // User Settings
