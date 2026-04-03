@@ -30,7 +30,10 @@ interface SyncHistoryDialogProps {
  * - result別カラーバッジ
  * - uploaded/downloaded件数と所要時間を表示
  */
-export const SyncHistoryDialog = ({ open, onClose }: SyncHistoryDialogProps) => {
+export const SyncHistoryDialog = ({
+  open,
+  onClose,
+}: SyncHistoryDialogProps) => {
   const [histories, setHistories] = useState<SyncHistory[]>([]);
 
   const loadHistories = useCallback(async () => {

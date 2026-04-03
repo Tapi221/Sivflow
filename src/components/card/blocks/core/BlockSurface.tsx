@@ -23,25 +23,23 @@ type BlockSurfaceProps = {
   children: React.ReactNode;
 };
 
-export const BlockSurface = (
-  {
-    className,
-    contentClassName,
-    style,
-    padTopRows = 0,
-    padBottomRows = 0,
-    padLeftRows = 0,
-    padRightRows = 0,
-    ruled = true,
-    ruledRowPx = 24,
-    ruledOpacity,
-    ruledOffsetPx = 0,
-    ruledBottomOffsetPx = 0,
-    background,
-    bleedX = false,
-    children,
-  }: BlockSurfaceProps
-) => {
+export const BlockSurface = ({
+  className,
+  contentClassName,
+  style,
+  padTopRows = 0,
+  padBottomRows = 0,
+  padLeftRows = 0,
+  padRightRows = 0,
+  ruled = true,
+  ruledRowPx = 24,
+  ruledOpacity,
+  ruledOffsetPx = 0,
+  ruledBottomOffsetPx = 0,
+  background,
+  bleedX = false,
+  children,
+}: BlockSurfaceProps) => {
   const topRows = padTopRows ?? 0;
   const bottomRows = padBottomRows ?? 0;
   const leftRows = padLeftRows ?? 0;

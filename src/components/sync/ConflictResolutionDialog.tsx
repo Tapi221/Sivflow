@@ -35,12 +35,10 @@ interface ConflictResolutionDialogProps {
  * - conflicts フィールドは2カラム差分表示
  * - 3つの解決ボタン: ローカル採用、クラウド採用、フィールド選択
  */
-export const ConflictResolutionDialog = (
-  {
-    open,
-    onClose,
-  }: ConflictResolutionDialogProps
-) => {
+export const ConflictResolutionDialog = ({
+  open,
+  onClose,
+}: ConflictResolutionDialogProps) => {
   const { getUnresolvedConflicts, resolveConflict, triggerSync } =
     useSyncContext();
   const [conflicts, setConflicts] = useState<SyncConflict[]>([]);

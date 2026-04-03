@@ -18,7 +18,7 @@ export const buildCardFaceLayout = (
   blocks: MeasuredBlock[],
   ruledTop: number,
   ruledBottom: number,
-  rowPx: number
+  rowPx: number,
 ) => {
   const usedHeight =
     blocks.length > 0

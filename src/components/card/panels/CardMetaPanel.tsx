@@ -428,25 +428,23 @@ const areCardMetaPanelPropsEqual = (
   prev.reviewStartNextDay === next.reviewStartNextDay &&
   prev.mode === next.mode;
 
-const CardMetaPanelInner = (
-  {
-    card,
-    isEditingCard = false,
-    reviewLogs = [],
-    onAddReviewLog,
-    onUpdateLatestReviewLog,
-    onDeleteLatestReviewLog,
-    onUpdateReviewLogDuration,
-    onFlushAutosave,
-    onTitleInputChange,
-    onUpdateTags,
-    onToggleDraft,
-    onUpdateTitle,
-    delayBonusEnabled = false,
-    reviewStartNextDay = true,
-    mode = "full",
-  }: CardMetaPanelProps
-) => {
+const CardMetaPanelInner = ({
+  card,
+  isEditingCard = false,
+  reviewLogs = [],
+  onAddReviewLog,
+  onUpdateLatestReviewLog,
+  onDeleteLatestReviewLog,
+  onUpdateReviewLogDuration,
+  onFlushAutosave,
+  onTitleInputChange,
+  onUpdateTags,
+  onToggleDraft,
+  onUpdateTitle,
+  delayBonusEnabled = false,
+  reviewStartNextDay = true,
+  mode = "full",
+}: CardMetaPanelProps) => {
   const isCalendarMode = mode === "calendar";
   const infoRowClass =
     "h-[var(--meta-row-px)] leading-[var(--meta-row-px)] text-[length:var(--meta-font-size)] text-[var(--sidebar-text)]";

@@ -14,18 +14,16 @@ type Props = {
   ratingLabels: Record<string, string>;
 };
 
-export const PracticeCards = (
-  {
-    practiceState,
-    practiceCurrentCard,
-    counterCurrent,
-    counterTotal,
-    handlePracticeAnswer,
-    handleToggleUncertainty,
-    handlePracticeExit,
-    ratingLabels,
-  }: Props
-) => {
+export const PracticeCards = ({
+  practiceState,
+  practiceCurrentCard,
+  counterCurrent,
+  counterTotal,
+  handlePracticeAnswer,
+  handleToggleUncertainty,
+  handlePracticeExit,
+  ratingLabels,
+}: Props) => {
   return (
     <div className="reviewMain grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8">
       <div className="w-full reviewCardColumn">

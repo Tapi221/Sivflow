@@ -36,14 +36,12 @@ interface SyncStatusIndicatorProps {
   compact?: boolean; // compactモード：アイコンのみ表示
 }
 
-export const SyncStatusIndicator = (
-  {
-    className,
-    dropdownAlign = "end",
-    dropdownSide = "bottom",
-    compact = false,
-  }: SyncStatusIndicatorProps
-) => {
+export const SyncStatusIndicator = ({
+  className,
+  dropdownAlign = "end",
+  dropdownSide = "bottom",
+  compact = false,
+}: SyncStatusIndicatorProps) => {
   const {
     syncStatus,
     syncNotice,

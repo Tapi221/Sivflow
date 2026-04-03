@@ -39,20 +39,18 @@ const TABS: {
   { id: "recent", label: "最近", icon: History },
 ];
 
-export const ExplorerTabs = (
-  {
-    activeTab,
-    onTabChange,
-    allTags,
-    onCreateRootFolder,
-    onCreateCardSet,
-    onAddPdf,
-    onAddPptx,
-    showExplorerActions = false,
-    canCreateCardSet = false,
-    canAddDocuments = false,
-  }: ExplorerTabsProps
-) => {
+export const ExplorerTabs = ({
+  activeTab,
+  onTabChange,
+  allTags,
+  onCreateRootFolder,
+  onCreateCardSet,
+  onAddPdf,
+  onAddPptx,
+  showExplorerActions = false,
+  canCreateCardSet = false,
+  canAddDocuments = false,
+}: ExplorerTabsProps) => {
   const shouldShowExplorerActions =
     showExplorerActions && activeTab === "explorer";
   const suppressCloseAutoFocusRef = useRef(false);

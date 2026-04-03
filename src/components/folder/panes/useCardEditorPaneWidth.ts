@@ -18,7 +18,11 @@ const CARD_EDITOR_TWO_COLUMN_MIN_WIDTH_PX = CARD_PANE_EDIT_MIN_WIDTH_PX;
 export const CARD_PANE_WIDTH_STEP_PX = 40;
 export const CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX = 72;
 
-const clampPaneWidthPx = (value: number | null | undefined, min: number, max?: number) => {
+const clampPaneWidthPx = (
+  value: number | null | undefined,
+  min: number,
+  max?: number,
+) => {
   const fallback = Math.max(1, min);
   const safeValue =
     typeof value === "number" && Number.isFinite(value) ? value : fallback;
@@ -47,23 +51,21 @@ interface UseCardEditorPaneWidthParams {
   cardSetId?: string | null;
 }
 
-export const useCardEditorPaneWidth = (
-  {
-    settings,
-    dockToolbarsToTop,
-    embeddedInPager,
-    hideBlockToolbars,
-    forcedPaneWidthPx,
-    usesExternalToolbarMount,
-    isPagerActiveCard,
-    isEditing,
-    isMetaOpen,
-    normalizedSelectedCardId,
-    selectedCardId,
-    canonicalCardWidth,
-    cardSetId,
-  }: UseCardEditorPaneWidthParams
-) => {
+export const useCardEditorPaneWidth = ({
+  settings,
+  dockToolbarsToTop,
+  embeddedInPager,
+  hideBlockToolbars,
+  forcedPaneWidthPx,
+  usesExternalToolbarMount,
+  isPagerActiveCard,
+  isEditing,
+  isMetaOpen,
+  normalizedSelectedCardId,
+  selectedCardId,
+  canonicalCardWidth,
+  cardSetId,
+}: UseCardEditorPaneWidthParams) => {
   const contentViewportRef = React.useRef<HTMLDivElement | null>(null);
   const [contentViewportWidth, setContentViewportWidth] =
     React.useState<number>(() =>
@@ -94,7 +96,6 @@ export const useCardEditorPaneWidth = (
         CARD_PANE_VIEW_MIN_WIDTH_PX,
       ),
     );
-     
   }, [cardSetId, settings?.cardViewPaneWidthPx]);
 
   React.useEffect(() => {
@@ -107,7 +108,6 @@ export const useCardEditorPaneWidth = (
         CARD_PANE_EDIT_MIN_WIDTH_PX,
       ),
     );
-     
   }, [cardSetId, defaultEditPaneWidthPx, settings?.cardEditPaneWidthPx]);
 
   React.useEffect(() => {

@@ -15,14 +15,12 @@ type UseCardEditorContentControllerParams<TDraft extends DraftShape | null> = {
   resetDialogsRef: MutableRefObject<() => void>;
 };
 
-export const useCardEditorContentController = (
-  {
-    draft,
-    setDraft,
-    allowAutoMinHeightSyncRef,
-    resetDialogsRef,
-  }: UseCardEditorContentControllerParams<TDraft>
-) => {
+export const useCardEditorContentController = ({
+  draft,
+  setDraft,
+  allowAutoMinHeightSyncRef,
+  resetDialogsRef,
+}: UseCardEditorContentControllerParams<TDraft>) => {
   const reindexBlocks = useCallback((blocks: CardBlock[]): CardBlock[] => {
     let changed = false;
     const reindexed = blocks.map((block, index) => {

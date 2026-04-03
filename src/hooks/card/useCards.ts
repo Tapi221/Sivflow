@@ -21,7 +21,7 @@ const isCardDeleted = (
     deleted?: boolean;
     deletedAt?: unknown;
     deleted_at?: unknown;
-  }
+  },
 ) => {
   const deletedAt = (card as unknown).deletedAt ?? (card as unknown).deleted_at;
   return Boolean(
@@ -81,7 +81,11 @@ const resolveExtraRowsFromCardData = (
   return normalizeExtraRows(faceExtraRows ?? 0);
 };
 
-export const useCards = (folderId?: string, cardSetId?: string, options?: UseCardsOptions) => {
+export const useCards = (
+  folderId?: string,
+  cardSetId?: string,
+  options?: UseCardsOptions,
+) => {
   const { currentUser } = useAuthSession();
   const [error] = useState<string | null>(null);
   const enabled = options?.enabled ?? true;

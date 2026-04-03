@@ -69,13 +69,17 @@ export const getLocalDBRuntimeStatus = () => {
   return { ...currentStatus };
 };
 
-export const subscribeLocalDBRuntimeStatus = (listener: (status: LocalDBRuntimeStatus) => void) => {
+export const subscribeLocalDBRuntimeStatus = (
+  listener: (status: LocalDBRuntimeStatus) => void,
+) => {
   listeners.add(listener);
   listener(getLocalDBRuntimeStatus());
   return () => listeners.delete(listener);
 };
 
-export const updateLocalDBRuntimeStatus = (next: Partial<LocalDBRuntimeStatus>) => {
+export const updateLocalDBRuntimeStatus = (
+  next: Partial<LocalDBRuntimeStatus>,
+) => {
   currentStatus = {
     ...currentStatus,
     ...next,
@@ -91,7 +95,11 @@ export const updateLocalDBRuntimeStatus = (next: Partial<LocalDBRuntimeStatus>) 
   return getLocalDBRuntimeStatus();
 };
 
-export const warnOncePerSession = (key: string, message: string, error?: unknown) => {
+export const warnOncePerSession = (
+  key: string,
+  message: string,
+  error?: unknown,
+) => {
   if (warnedKeys.has(key)) return;
   warnedKeys.add(key);
   if (error !== undefined) {

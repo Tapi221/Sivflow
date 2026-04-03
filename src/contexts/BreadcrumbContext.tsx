@@ -29,13 +29,11 @@ const BreadcrumbContext = createContext<BreadcrumbContextValue>({
   notifyFolderSelect: () => {},
 });
 
-export const BreadcrumbProvider = (
-  {
-    children,
-  }: {
-    children: React.ReactNode;
-  }
-) => {
+export const BreadcrumbProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
   const [extraCrumbs, setExtraCrumbsState] = useState<BreadcrumbCrumb[]>([]);
   const folderSelectHandlerRef = useRef<
     ((folderId: string | null) => void) | null

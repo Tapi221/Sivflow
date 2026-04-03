@@ -8,13 +8,11 @@ type ImageBlockShellProps = {
   showBorderOverlay?: boolean;
 };
 
-export const ImageBlockShell = (
-  {
-    children,
-    className,
-    showBorderOverlay = false,
-  }: ImageBlockShellProps
-) => {
+export const ImageBlockShell = ({
+  children,
+  className,
+  showBorderOverlay = false,
+}: ImageBlockShellProps) => {
   return (
     <BlockInset variant="image">
       <div className={cn("relative rounded-[11px] overflow-hidden", className)}>

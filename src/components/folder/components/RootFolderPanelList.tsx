@@ -31,24 +31,22 @@ interface RootFolderPanelListProps {
   handleRenameConfirm: () => Promise<void>;
 }
 
-export const RootFolderPanelList = (
-  {
-    rootFolderPanels,
-    selectedFolderId,
-    openRowMenuId,
-    setOpenRowMenuId,
-    onSelectFolder,
-    handleCreateFolderAction,
-    handleCreateCardSetAction,
-    handleDelete,
-    setEditingId,
-    setEditingName,
-    editingNameRef,
-    editingId,
-    editingName,
-    handleRenameConfirm,
-  }: RootFolderPanelListProps
-) => {
+export const RootFolderPanelList = ({
+  rootFolderPanels,
+  selectedFolderId,
+  openRowMenuId,
+  setOpenRowMenuId,
+  onSelectFolder,
+  handleCreateFolderAction,
+  handleCreateCardSetAction,
+  handleDelete,
+  setEditingId,
+  setEditingName,
+  editingNameRef,
+  editingId,
+  editingName,
+  handleRenameConfirm,
+}: RootFolderPanelListProps) => {
   const [menuAnchor, setMenuAnchor] = React.useState<{
     id: string;
     x: number;

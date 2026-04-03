@@ -73,7 +73,7 @@ type TagRepairSummary = {
 export const resolveCardTagNames = (
   tagIds: unknown,
   legacyTags: unknown,
-  tagById: ReadonlyMap<string, Pick<TagV3Record, "name">>
+  tagById: ReadonlyMap<string, Pick<TagV3Record, "name">>,
 ) => {
   const ids = asStringArray(tagIds);
   if (ids.length > 0) {

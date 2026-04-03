@@ -39,16 +39,14 @@ const createSessionId = () => {
   return `session-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 };
 
-export const useStudySession = (
-  {
-    studyCards,
-    updateCard,
-    currentUser,
-    settings,
-    createStudyLogMutation,
-    createLevelHistoryMutation,
-  }: Params
-) => {
+export const useStudySession = ({
+  studyCards,
+  updateCard,
+  currentUser,
+  settings,
+  createStudyLogMutation,
+  createLevelHistoryMutation,
+}: Params) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [studyComplete, setStudyComplete] = useState(false);
   const [results, setResults] = useState({ 0: 0, 1: 0, 2: 0, 3: 0, streak: 0 });

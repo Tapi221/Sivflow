@@ -37,28 +37,26 @@ interface TreeViewMainPaneProps {
   folderSelectionNonce: number;
 }
 
-export const TreeViewMainPane = (
-  {
-    isMobile,
-    showMobileDetail,
-    hideOnSectionList = false,
-    selectedItem,
-    selectedCardId,
-    selectedDocument,
-    selectedFolderId,
-    selectedFolderName,
-    folders,
-    cards,
-    documents,
-    folderCards,
-    folderStats,
-    onCardUpdated,
-    onDocumentUpdated,
-    onRenameFolder,
-    handlers,
-    folderSelectionNonce,
-  }: TreeViewMainPaneProps
-) => {
+export const TreeViewMainPane = ({
+  isMobile,
+  showMobileDetail,
+  hideOnSectionList = false,
+  selectedItem,
+  selectedCardId,
+  selectedDocument,
+  selectedFolderId,
+  selectedFolderName,
+  folders,
+  cards,
+  documents,
+  folderCards,
+  folderStats,
+  onCardUpdated,
+  onDocumentUpdated,
+  onRenameFolder,
+  handlers,
+  folderSelectionNonce,
+}: TreeViewMainPaneProps) => {
   return (
     <div
       className={cn(

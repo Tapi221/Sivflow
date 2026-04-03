@@ -20,15 +20,13 @@ interface MediaDialogProps {
   children: React.ReactNode;
 }
 
-const MediaDialog = (
-  {
-    title,
-    open,
-    onClose,
-    maxWidth = "max-w-2xl",
-    children,
-  }: MediaDialogProps
-) => {
+const MediaDialog = ({
+  title,
+  open,
+  onClose,
+  maxWidth = "max-w-2xl",
+  children,
+}: MediaDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className={maxWidth}>
@@ -56,22 +54,20 @@ interface CardEditorPaneMediaDialogsProps {
   setReferenceItems: (side: Side, next: unknown[]) => void;
 }
 
-const CardEditorPaneMediaDialogsInner = (
-  {
-    imageDialogSide,
-    setImageDialogSide,
-    audioDialogSide,
-    setAudioDialogSide,
-    linkDialogSide,
-    setLinkDialogSide,
-    getDialogImages,
-    setDialogImages,
-    getDialogAudios,
-    setDialogAudios,
-    getReferenceItems,
-    setReferenceItems,
-  }: CardEditorPaneMediaDialogsProps
-) => {
+const CardEditorPaneMediaDialogsInner = ({
+  imageDialogSide,
+  setImageDialogSide,
+  audioDialogSide,
+  setAudioDialogSide,
+  linkDialogSide,
+  setLinkDialogSide,
+  getDialogImages,
+  setDialogImages,
+  getDialogAudios,
+  setDialogAudios,
+  getReferenceItems,
+  setReferenceItems,
+}: CardEditorPaneMediaDialogsProps) => {
   return (
     <>
       <MediaDialog

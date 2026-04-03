@@ -85,19 +85,17 @@ interface PdfPageProps {
   onVisibilityChange?: (pageNumber: number, ratio: number) => void;
 }
 
-const PdfPage = (
-  {
-    pdf,
-    pageNumber,
-    scale,
-    opaqueCanvas,
-    baseSize,
-    rootEl,
-    pageRef,
-    onPageSize,
-    onVisibilityChange,
-  }: PdfPageProps
-) => {
+const PdfPage = ({
+  pdf,
+  pageNumber,
+  scale,
+  opaqueCanvas,
+  baseSize,
+  rootEl,
+  pageRef,
+  onPageSize,
+  onVisibilityChange,
+}: PdfPageProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [pageSize, setPageSize] = useState<PageSize | null>(baseSize ?? null);

@@ -10,15 +10,13 @@ type EmptyMetaPanelProps = {
   style?: CSSProperties;
 };
 
-export const EmptyMetaPanel = (
-  {
-    children,
-    className,
-    bodyClassName,
-    contentClassName,
-    style,
-  }: EmptyMetaPanelProps
-) => {
+export const EmptyMetaPanel = ({
+  children,
+  className,
+  bodyClassName,
+  contentClassName,
+  style,
+}: EmptyMetaPanelProps) => {
   return (
     <MetaPanelShell
       className={className}

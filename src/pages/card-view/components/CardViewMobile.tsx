@@ -21,21 +21,19 @@ interface CardViewMobileProps {
   onToggleBookmark: (card: Card) => void | Promise<void>;
 }
 
-export const CardViewMobile = (
-  {
-    cardsForPager,
-    selectedCardId,
-    safeCurrentIndex,
-    isFlipped,
-    currentDisplayMode,
-    settings,
-    onIndexChange,
-    onFlip,
-    onEdit,
-    onToggleUncertainty,
-    onToggleBookmark,
-  }: CardViewMobileProps
-) => {
+export const CardViewMobile = ({
+  cardsForPager,
+  selectedCardId,
+  safeCurrentIndex,
+  isFlipped,
+  currentDisplayMode,
+  settings,
+  onIndexChange,
+  onFlip,
+  onEdit,
+  onToggleUncertainty,
+  onToggleBookmark,
+}: CardViewMobileProps) => {
   void selectedCardId;
   const wrapCard = useCallback(
     (node: React.ReactNode) => (

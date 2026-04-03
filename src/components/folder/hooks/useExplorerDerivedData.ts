@@ -61,15 +61,13 @@ const compareFolders = (a: FolderTreeNode, b: FolderTreeNode) => {
   });
 };
 
-export const useExplorerDerivedData = (
-  {
-    treeFolders,
-    treeCards,
-    cardSets = [],
-    documents,
-    isFiltering,
-  }: Params
-) => {
+export const useExplorerDerivedData = ({
+  treeFolders,
+  treeCards,
+  cardSets = [],
+  documents,
+  isFiltering,
+}: Params) => {
   const childFoldersByParentId = useMemo(() => {
     const map = new Map<string, FolderTreeNode[]>();
     for (const folder of treeFolders) {

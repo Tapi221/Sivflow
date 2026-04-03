@@ -40,25 +40,23 @@ interface PowerPointPaneHeaderProps {
   onOpenSource: () => void;
 }
 
-export const PowerPointPaneHeader = (
-  {
-    displayName,
-    isOnline,
-    manifestStatus,
-    uploadStatus,
-    remoteSourceUrl,
-    localSourceStatus,
-    currentSlide,
-    effectiveSlideCount,
-    viewerReady,
-    onPrev,
-    onNext,
-    scale,
-    onScaleChange,
-    canOpenSource,
-    onOpenSource,
-  }: PowerPointPaneHeaderProps
-) => {
+export const PowerPointPaneHeader = ({
+  displayName,
+  isOnline,
+  manifestStatus,
+  uploadStatus,
+  remoteSourceUrl,
+  localSourceStatus,
+  currentSlide,
+  effectiveSlideCount,
+  viewerReady,
+  onPrev,
+  onNext,
+  scale,
+  onScaleChange,
+  canOpenSource,
+  onOpenSource,
+}: PowerPointPaneHeaderProps) => {
   return (
     <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-slate-200 bg-white">
       <div className="min-w-0">

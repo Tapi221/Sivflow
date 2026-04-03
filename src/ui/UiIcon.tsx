@@ -5,14 +5,12 @@ export type UiIconProps = SVGProps<SVGSVGElement> & {
   strokeWidth?: number;
 };
 
-export const UiIcon = (
-  {
-    size = 20,
-    strokeWidth = 1.8,
-    style,
-    ...props
-  }: UiIconProps
-) => {
+export const UiIcon = ({
+  size = 20,
+  strokeWidth = 1.8,
+  style,
+  ...props
+}: UiIconProps) => {
   return (
     <svg
       {...props}

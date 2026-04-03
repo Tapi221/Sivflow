@@ -12,7 +12,11 @@ type RowSnapProps = {
 const EPSILON = 0.5;
 const SNAP_TOLERANCE_PX = 1;
 
-export const RowSnap = ({ rowPx, children, afterGapRows = 0 }: RowSnapProps) => {
+export const RowSnap = ({
+  rowPx,
+  children,
+  afterGapRows = 0,
+}: RowSnapProps) => {
   const targetRef = React.useRef<HTMLElement | null>(null);
   const observerRef = React.useRef<ResizeObserver | null>(null);
   const rafRef = React.useRef<number | null>(null);

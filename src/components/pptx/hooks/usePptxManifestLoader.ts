@@ -52,21 +52,19 @@ const resolveStorageUrl = (pathOrUrl?: string | null) => {
   return getDownloadURL(ref(storage, pathOrUrl));
 };
 
-export const usePptxManifestLoader = (
-  {
-    docId,
-    manifestStatus,
-    manifestPath,
-    manifestToken,
-    fallbackPath,
-    requestedAtMs,
-    manifestPendingWindowMs,
-    sourceSignature,
-    isOnline,
-    applyLocalDocumentPatch,
-    logDiagnostics,
-  }: Options
-) => {
+export const usePptxManifestLoader = ({
+  docId,
+  manifestStatus,
+  manifestPath,
+  manifestToken,
+  fallbackPath,
+  requestedAtMs,
+  manifestPendingWindowMs,
+  sourceSignature,
+  isOnline,
+  applyLocalDocumentPatch,
+  logDiagnostics,
+}: Options) => {
   const [slides, setSlides] = useState<SlideData[]>([]);
   const [slideCount, setSlideCount] = useState(0);
   const [loadingManifest, setLoadingManifest] = useState(false);

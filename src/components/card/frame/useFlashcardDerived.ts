@@ -51,7 +51,7 @@ const EMPTY_BLOCKS: ReturnType<typeof resolveSideBlocks> = [];
 
 export const useFlashcardDerived = (
   cardData: FlashcardCardLike | null | undefined,
-  effectiveIsFlipped: boolean
+  effectiveIsFlipped: boolean,
 ) => {
   const cardId = cardData ? resolveCardId(cardData) : null;
 

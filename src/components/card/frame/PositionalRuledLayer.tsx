@@ -10,14 +10,12 @@ interface PositionalRuledLayerProps {
  * Must be inside a `position: relative` container.
  * y positions are relative to the container's top.
  */
-export const PositionalRuledLayer = (
-  {
-    visibleRules,
-    color = "rgba(0,0,0,0.05)",
-    insetX = 0,
-    opacity = 1,
-  }: PositionalRuledLayerProps
-) => {
+export const PositionalRuledLayer = ({
+  visibleRules,
+  color = "rgba(0,0,0,0.05)",
+  insetX = 0,
+  opacity = 1,
+}: PositionalRuledLayerProps) => {
   const left = typeof insetX === "number" ? `${insetX}px` : insetX;
   const right = typeof insetX === "number" ? `${insetX}px` : insetX;
 

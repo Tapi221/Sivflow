@@ -9,14 +9,12 @@ type Props = {
   ratingLabels: Record<string, string>;
 };
 
-export const PracticeSummary = (
-  {
-    practiceState,
-    handlePracticeContinueRound,
-    handlePracticeExit,
-    ratingLabels,
-  }: Props
-) => {
+export const PracticeSummary = ({
+  practiceState,
+  handlePracticeContinueRound,
+  handlePracticeExit,
+  ratingLabels,
+}: Props) => {
   return (
     <Card className="max-w-2xl mx-auto border-none shadow-xl rounded-3xl overflow-hidden animate-in fade-in zoom-in duration-500">
       <CardContent className="py-12 px-8 text-center relative overflow-hidden">

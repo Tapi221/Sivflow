@@ -44,15 +44,13 @@ const getFluidZoomStyle = (
   return { fontSize: `${safeZoom}em` };
 };
 
-const QuestionBlockView = (
-  {
-    block,
-    displayMode,
-  }: {
-    block: CardBlock;
-    displayMode: "always" | "tap_to_reveal";
-  }
-) => {
+const QuestionBlockView = ({
+  block,
+  displayMode,
+}: {
+  block: CardBlock;
+  displayMode: "always" | "tap_to_reveal";
+}) => {
   const [revealed, setRevealed] = useState(displayMode === "always");
 
   return (
@@ -108,7 +106,7 @@ const renderBlock = (
     toMediaUrl: (item: unknown) => string | null;
     displayMode: "fixed" | "fluid";
     zoom: number;
-  }
+  },
 ) => {
   const {
     questionDisplayMode,
@@ -233,14 +231,12 @@ const renderBlock = (
   }
 };
 
-export const BlockRenderer = (
-  {
-    blocks,
-    onGalleryFullscreenChange,
-    displayMode = "fixed",
-    zoom = 1,
-  }: BlockRendererProps
-) => {
+export const BlockRenderer = ({
+  blocks,
+  onGalleryFullscreenChange,
+  displayMode = "fixed",
+  zoom = 1,
+}: BlockRendererProps) => {
   const inEditMode = useContext(BlockEditModeContext);
   const blockOutline = inEditMode
     ? "inset 0 0 0 1px rgba(59, 130, 246, 0.35)"

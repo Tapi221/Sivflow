@@ -102,25 +102,23 @@ export type VerticalCardPagerProps<T> = {
   disableVirtualization?: boolean;
 };
 
-const VerticalCardPagerFn = (
-  {
-    cards,
-    activeIndex,
-    onActiveIndexChange,
-    renderCard,
-    onFlip,
-    cardWidth = DEFAULT_CARD_WIDTH,
-    getCardWidth,
-    paddingInlinePx = 16,
-    paddingBlock = SCROLL_PADDING,
-    getKey,
-    naturalIndexCommitDelayMs = 0,
-    freezeActiveIndex = false,
-    disableItemChrome = false,
-    disableVirtualization = false,
-    onRenderRangeChange,
-  }: VerticalCardPagerProps<T>
-) => {
+const VerticalCardPagerFn = ({
+  cards,
+  activeIndex,
+  onActiveIndexChange,
+  renderCard,
+  onFlip,
+  cardWidth = DEFAULT_CARD_WIDTH,
+  getCardWidth,
+  paddingInlinePx = 16,
+  paddingBlock = SCROLL_PADDING,
+  getKey,
+  naturalIndexCommitDelayMs = 0,
+  freezeActiveIndex = false,
+  disableItemChrome = false,
+  disableVirtualization = false,
+  onRenderRangeChange,
+}: VerticalCardPagerProps<T>) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const avgItemExtentRef = useRef(900);
   const visibleRangeRafRef = useRef<number | null>(null);

@@ -3,12 +3,10 @@ export type ImageNaturalSize = {
   naturalH: number;
 };
 
-const hasNaturalSize = (
-  image: {
-    naturalWidth: number;
-    naturalHeight: number;
-  }
-) => {
+const hasNaturalSize = (image: {
+  naturalWidth: number;
+  naturalHeight: number;
+}) => {
   return image.naturalWidth > 0 && image.naturalHeight > 0;
 };
 

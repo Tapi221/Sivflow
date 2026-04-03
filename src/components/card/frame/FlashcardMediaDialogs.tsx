@@ -26,20 +26,18 @@ interface FlashcardMediaDialogsProps {
   activeReferences: ReferenceBlockData[];
 }
 
-export const FlashcardMediaDialogs = (
-  {
-    isImagePopupOpen,
-    setIsImagePopupOpen,
-    isAudioPopupOpen,
-    setIsAudioPopupOpen,
-    isReferencePopupOpen,
-    setIsReferencePopupOpen,
-    activeImageItems,
-    activeImages,
-    activeAudioUrls,
-    activeReferences,
-  }: FlashcardMediaDialogsProps
-) => {
+export const FlashcardMediaDialogs = ({
+  isImagePopupOpen,
+  setIsImagePopupOpen,
+  isAudioPopupOpen,
+  setIsAudioPopupOpen,
+  isReferencePopupOpen,
+  setIsReferencePopupOpen,
+  activeImageItems,
+  activeImages,
+  activeAudioUrls,
+  activeReferences,
+}: FlashcardMediaDialogsProps) => {
   return (
     <>
       <ReferencePopup

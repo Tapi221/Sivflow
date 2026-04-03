@@ -26,21 +26,19 @@ interface ContextMenuProps {
 const CONTEXT_MENU_CURSOR_OFFSET_PX = 6;
 const CONTEXT_MENU_COLLISION_PADDING_PX = 8;
 
-export const ContextMenu = (
-  {
-    type,
-    children,
-    anchorPoint,
-    open,
-    onOpenChange,
-    onCreateSubfolder,
-    onCreateCardSet,
-    onRename,
-    onDelete,
-    onMove,
-    onBulkTag,
-  }: ContextMenuProps
-) => {
+export const ContextMenu = ({
+  type,
+  children,
+  anchorPoint,
+  open,
+  onOpenChange,
+  onCreateSubfolder,
+  onCreateCardSet,
+  onRename,
+  onDelete,
+  onMove,
+  onBulkTag,
+}: ContextMenuProps) => {
   const suppressCloseAutoFocusRef = useRef(false);
 
   const anchoredStyle = useMemo(() => {

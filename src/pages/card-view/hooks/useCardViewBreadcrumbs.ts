@@ -23,16 +23,14 @@ interface UseCardViewBreadcrumbsOptions {
   setExtraCrumbs: (crumbs: Crumb[]) => void;
 }
 
-export const useCardViewBreadcrumbs = (
-  {
-    folderId,
-    selectedCardSet,
-    selectedCard,
-    sortedCards,
-    folders,
-    setExtraCrumbs,
-  }: UseCardViewBreadcrumbsOptions
-) => {
+export const useCardViewBreadcrumbs = ({
+  folderId,
+  selectedCardSet,
+  selectedCard,
+  sortedCards,
+  folders,
+  setExtraCrumbs,
+}: UseCardViewBreadcrumbsOptions) => {
   const lastSignatureRef = useRef("");
 
   useEffect(() => {

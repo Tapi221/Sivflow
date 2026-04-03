@@ -81,15 +81,13 @@ const DefaultPreview = ({ card }: { card: Card }) => {
 };
 
 // ── メインコンポーネント ──────────────────────────────────────────────────
-export const CardCarousel3D = (
-  {
-    cards,
-    syncIndex,
-    onIndexChange,
-    renderCenter,
-    renderPreview,
-  }: CardCarousel3DProps
-) => {
+export const CardCarousel3D = ({
+  cards,
+  syncIndex,
+  onIndexChange,
+  renderCenter,
+  renderPreview,
+}: CardCarousel3DProps) => {
   const trackRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   // 各カードスロットへの ref (高さ計測用)
@@ -326,17 +324,15 @@ export const CardCarousel3D = (
   );
 };
 
-const NavButton = (
-  {
-    direction,
-    onClick,
-    disabled,
-  }: {
-    direction: "prev" | "next";
-    onClick: () => void;
-    disabled: boolean;
-  }
-) => {
+const NavButton = ({
+  direction,
+  onClick,
+  disabled,
+}: {
+  direction: "prev" | "next";
+  onClick: () => void;
+  disabled: boolean;
+}) => {
   const isPrev = direction === "prev";
   return (
     <button

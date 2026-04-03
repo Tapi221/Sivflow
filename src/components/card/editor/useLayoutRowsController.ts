@@ -22,15 +22,13 @@ type UseLayoutRowsControllerParams<
   isEditing: boolean;
 };
 
-export const useLayoutRowsController = (
-  {
-    draft,
-    setDraft,
-    defaultLayoutRows,
-    normalizedSelectedCardId,
-    isEditing,
-  }: UseLayoutRowsControllerParams<TDraft>
-) => {
+export const useLayoutRowsController = ({
+  draft,
+  setDraft,
+  defaultLayoutRows,
+  normalizedSelectedCardId,
+  isEditing,
+}: UseLayoutRowsControllerParams<TDraft>) => {
   const rowsRafRef = useRef<number | null>(null);
   const pendingRowsRef = useRef<number | null>(null);
   const layoutRowsRef = useRef<number>(defaultLayoutRows);

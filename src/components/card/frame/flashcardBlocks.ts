@@ -17,7 +17,10 @@ interface SideData {
   code: { code?: string; language?: string } | null;
 }
 
-export const resolveSideBlocks = (side: "question" | "answer", data: SideData) => {
+export const resolveSideBlocks = (
+  side: "question" | "answer",
+  data: SideData,
+) => {
   if (data.blocks.length > 0) {
     return sortBlocksByOrderIndex(data.blocks);
   }

@@ -50,10 +50,11 @@ export const StorageManager = () => {
       q,
       (snapshot) => {
         const docs = snapshot.docs.map(
-          (doc) => (({
-            id: doc.id,
-            ...doc.data()
-          }) as UploadMetadata),
+          (doc) =>
+            ({
+              id: doc.id,
+              ...doc.data(),
+            }) as UploadMetadata,
         );
         setUploads(docs);
         setLoading(false);

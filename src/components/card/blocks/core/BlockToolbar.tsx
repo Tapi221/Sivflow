@@ -87,15 +87,13 @@ const getIcon = (iconName: string | undefined, type: CardBlock["type"]) => {
   return typeMap[type] ?? Plus;
 };
 
-const Tooltip = (
-  {
-    label,
-    children,
-  }: {
-    label: string;
-    children: React.ReactNode;
-  }
-) => {
+const Tooltip = ({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) => {
   const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
   const anchorRef = useRef<HTMLDivElement>(null);
 
@@ -172,17 +170,15 @@ const Tooltip = (
   );
 };
 
-const ActionButton = (
-  {
-    onClick,
-    icon: Icon,
-    label,
-  }: {
-    onClick: () => void;
-    icon: React.ComponentType<{ className?: string }>;
-    label: string;
-  }
-) => {
+const ActionButton = ({
+  onClick,
+  icon: Icon,
+  label,
+}: {
+  onClick: () => void;
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+}) => {
   return (
     <Tooltip label={`${label}を追加`}>
       <button

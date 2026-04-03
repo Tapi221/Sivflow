@@ -7,7 +7,10 @@ type MathBlockFrameProps = {
   children: React.ReactNode;
 };
 
-export const MathBlockFrame = ({ className, children }: MathBlockFrameProps) => {
+export const MathBlockFrame = ({
+  className,
+  children,
+}: MathBlockFrameProps) => {
   return (
     <RowSnappedRoot
       rowPx={CARD_ROW_PX}

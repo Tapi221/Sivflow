@@ -18,16 +18,14 @@ interface CardCornerActionsProps {
   className?: string;
 }
 
-export const CardCornerActions = (
-  {
-    onHelp,
-    onStar,
-    helpActive = false,
-    starActive = false,
-    disabled = false,
-    className,
-  }: CardCornerActionsProps
-) => {
+export const CardCornerActions = ({
+  onHelp,
+  onStar,
+  helpActive = false,
+  starActive = false,
+  disabled = false,
+  className,
+}: CardCornerActionsProps) => {
   const stop = useCallback((e: React.SyntheticEvent) => {
     e.stopPropagation();
   }, []);

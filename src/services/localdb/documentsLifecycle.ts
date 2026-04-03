@@ -27,7 +27,11 @@ type DocumentsTable = {
 
 export type DocDbCtx = { documents: DocumentsTable; userId?: string };
 
-const canDeleteDocumentBlob = (documents: DocumentsTable, blobId: string, excludeDocumentId: string) => {
+const canDeleteDocumentBlob = (
+  documents: DocumentsTable,
+  blobId: string,
+  excludeDocumentId: string,
+) => {
   if (!blobId) return false;
   const sharedRef = await documents
     .filter((doc: unknown) => {
@@ -41,7 +45,11 @@ const canDeleteDocumentBlob = (documents: DocumentsTable, blobId: string, exclud
   return !sharedRef;
 };
 
-export const cleanupBeforeDocumentUpdate = (db: DocDbCtx, id: string, changes: unknown) => {
+export const cleanupBeforeDocumentUpdate = (
+  db: DocDbCtx,
+  id: string,
+  changes: unknown,
+) => {
   const docChanges = changes as DocumentUpdateChanges;
   const hasLocalFileIdChange = Object.prototype.hasOwnProperty.call(
     docChanges,

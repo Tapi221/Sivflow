@@ -21,7 +21,10 @@ type LocalImageBlobUrlState = {
   url: string | null;
 };
 
-export const useLocalImageBlobUrl = (localFileId: string | null | undefined, userId: string | null | undefined) => {
+export const useLocalImageBlobUrl = (
+  localFileId: string | null | undefined,
+  userId: string | null | undefined,
+) => {
   const [state, setState] = useState<LocalImageBlobUrlState>({
     fileId: null,
     url: null,

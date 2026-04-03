@@ -67,37 +67,35 @@ const shouldIgnoreFlipTarget = (target: EventTarget | null) => {
   );
 };
 
-const FlashcardInner = (
-  {
-    card,
-    isFlipped,
-    onFlip,
-    onEdit,
-    onToggleUncertainty,
-    onToggleBookmark,
-    className,
-    onNext,
-    onPrev,
-    hasNext,
-    hasPrev,
-    currentIndex,
-    totalCards,
-    previewMode,
-    extraHeaderLeft,
-    extraHeaderRight,
-    extraFooter,
-    displayMode = "fixed",
-    showInkLayer = false,
-    drawMode,
-    inkEditingEnabled = false,
-    onInkDocumentChange,
-    allowUpscale = false,
-    maxScale = 1.6,
-    scaleMultiplier = CARD_DISPLAY_SCALE,
-    fixedScale,
-    contentPaddingPx,
-  }: FlashcardProps
-) => {
+const FlashcardInner = ({
+  card,
+  isFlipped,
+  onFlip,
+  onEdit,
+  onToggleUncertainty,
+  onToggleBookmark,
+  className,
+  onNext,
+  onPrev,
+  hasNext,
+  hasPrev,
+  currentIndex,
+  totalCards,
+  previewMode,
+  extraHeaderLeft,
+  extraHeaderRight,
+  extraFooter,
+  displayMode = "fixed",
+  showInkLayer = false,
+  drawMode,
+  inkEditingEnabled = false,
+  onInkDocumentChange,
+  allowUpscale = false,
+  maxScale = 1.6,
+  scaleMultiplier = CARD_DISPLAY_SCALE,
+  fixedScale,
+  contentPaddingPx,
+}: FlashcardProps) => {
   const contentRef = useRef<HTMLDivElement | null>(null);
   const flipSuppressedUntilRef = useRef(0);
   const suppressNextFlipRef = useRef(false);

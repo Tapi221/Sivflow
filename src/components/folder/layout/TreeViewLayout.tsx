@@ -40,24 +40,22 @@ interface TreeViewLayoutProps {
   folderSelectionNonce?: number;
 }
 
-const TreeViewLayout = (
-  {
-    folders,
-    cards,
-    documents,
-    selectedFolderId,
-    selectedItem,
-    selectedCardId,
-    selectedDocumentId,
-    onFolderSelect,
-    onItemSelect,
-    onCardUpdated,
-    onFolderContextChange,
-    onCardSetContextChange,
-    navigateToSectionListToken = 0,
-    folderSelectionNonce = 0,
-  }: TreeViewLayoutProps
-) => {
+const TreeViewLayout = ({
+  folders,
+  cards,
+  documents,
+  selectedFolderId,
+  selectedItem,
+  selectedCardId,
+  selectedDocumentId,
+  onFolderSelect,
+  onItemSelect,
+  onCardUpdated,
+  onFolderContextChange,
+  onCardSetContextChange,
+  navigateToSectionListToken = 0,
+  folderSelectionNonce = 0,
+}: TreeViewLayoutProps) => {
   const navigate = useNavigate();
   const { settings } = useUserSettings();
   const { createFolder, updateFolder, deleteFolder } = useFolders();

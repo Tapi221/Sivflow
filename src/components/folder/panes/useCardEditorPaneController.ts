@@ -43,21 +43,19 @@ type UseCardEditorPaneControllerParams = {
   saveSignalEnabled?: boolean;
 };
 
-export const useCardEditorPaneController = (
-  {
-    selectedCardId,
-    folderId,
-    cardSetId,
-    cardsOverride,
-    autoEdit,
-    onCardUpdated,
-    onSelectCardId,
-    onRequestCloseEditing,
-    settingsOverride,
-    saveSignal,
-    saveSignalEnabled = true,
-  }: UseCardEditorPaneControllerParams
-) => {
+export const useCardEditorPaneController = ({
+  selectedCardId,
+  folderId,
+  cardSetId,
+  cardsOverride,
+  autoEdit,
+  onCardUpdated,
+  onSelectCardId,
+  onRequestCloseEditing,
+  settingsOverride,
+  saveSignal,
+  saveSignalEnabled = true,
+}: UseCardEditorPaneControllerParams) => {
   const { settings: settingsFromHook } = useUserSettings();
   const settings = settingsOverride ?? settingsFromHook;
   const { success: toastSuccess, error: toastError } = useToast();

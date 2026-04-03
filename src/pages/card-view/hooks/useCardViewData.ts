@@ -8,12 +8,10 @@ interface UseCardViewDataOptions {
   cardSetId: string | null;
 }
 
-export const useCardViewData = (
-  {
-    folderId,
-    cardSetId,
-  }: UseCardViewDataOptions
-) => {
+export const useCardViewData = ({
+  folderId,
+  cardSetId,
+}: UseCardViewDataOptions) => {
   const {
     cards = [],
     loading: isLoading,

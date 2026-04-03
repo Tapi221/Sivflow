@@ -21,7 +21,12 @@ const toDataUri = (svg: string) => {
   return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
 };
 
-const makeRepeatSvg = (rowPx: number, phasePx: number, color: string, linePx: number) => {
+const makeRepeatSvg = (
+  rowPx: number,
+  phasePx: number,
+  color: string,
+  linePx: number,
+) => {
   const y = phasePx % rowPx;
   // patternUnits="userSpaceOnUse" + patternTransform で位相をシフト
   const svg =
@@ -45,7 +50,11 @@ const makeLineSvg = (color: string, linePx: number) => {
  * ページ背景用の繰り返し罫線 backgroundImage 値を返す。
  * rowPx=24, linePx=1 をデフォルトとして使う。
  */
-export const getPageRuledBg = (color = "rgba(0,0,0,0.03)", rowPx = 24, linePx = 1) => {
+export const getPageRuledBg = (
+  color = "rgba(0,0,0,0.03)",
+  rowPx = 24,
+  linePx = 1,
+) => {
   return {
     backgroundImage: makeRepeatSvg(rowPx, 0, color, linePx),
     backgroundSize: `100% ${rowPx}px`,

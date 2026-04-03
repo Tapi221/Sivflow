@@ -31,13 +31,11 @@ interface RestoreAttemptState {
   attempted: boolean;
 }
 
-export const usePptxDocumentSync = (
-  {
-    userId,
-    localBlobId,
-    persistedBlobUrl,
-  }: Options
-) => {
+export const usePptxDocumentSync = ({
+  userId,
+  localBlobId,
+  persistedBlobUrl,
+}: Options) => {
   const [restoredState, setRestoredState] = useState<RestoredState>({
     key: null,
     url: null,

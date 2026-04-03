@@ -118,7 +118,7 @@ const makeTempFolder = (
   id: string,
   name: string,
   parentFolderId: string | null,
-  orderIndex: number
+  orderIndex: number,
 ) => {
   const now = new Date();
 
@@ -135,7 +135,12 @@ const makeTempFolder = (
   } as FolderTreeNode;
 };
 
-const makeTempCardSet = (id: string, name: string, folderId: string, orderIndex: number) => {
+const makeTempCardSet = (
+  id: string,
+  name: string,
+  folderId: string,
+  orderIndex: number,
+) => {
   const now = new Date();
 
   return {
@@ -214,31 +219,29 @@ const getFolderOrderIndex = (folder: FolderTreeNode) => {
   );
 };
 
-export const useFolderActions = (
-  {
-    treeFolders,
-    treeCardSets,
-    onCreateFolder,
-    onUpdateFolder,
-    onDeleteFolder,
-    onCreateCardSet,
-    onUpdateCardSet,
-    onDeleteCardSet,
-    onDeleteCard,
-    editingIdRef,
-    editingNameRef,
-    renameCancelledRef,
-    setEditingId,
-    setEditingName,
-    closeRename,
-    openDeleteFolderDialog,
-    setOptimisticFolders,
-    setOptimisticCardSets,
-    setExpandedFolders,
-    setPendingScrollId,
-    getUniqueFolderName,
-  }: UseFolderActionsParams
-) => {
+export const useFolderActions = ({
+  treeFolders,
+  treeCardSets,
+  onCreateFolder,
+  onUpdateFolder,
+  onDeleteFolder,
+  onCreateCardSet,
+  onUpdateCardSet,
+  onDeleteCardSet,
+  onDeleteCard,
+  editingIdRef,
+  editingNameRef,
+  renameCancelledRef,
+  setEditingId,
+  setEditingName,
+  closeRename,
+  openDeleteFolderDialog,
+  setOptimisticFolders,
+  setOptimisticCardSets,
+  setExpandedFolders,
+  setPendingScrollId,
+  getUniqueFolderName,
+}: UseFolderActionsParams) => {
   const pendingFolderCreatesRef = useRef(new Map<string, Promise<void>>());
   const pendingCardSetCreatesRef = useRef(new Map<string, Promise<void>>());
 

@@ -81,13 +81,11 @@ interface CodeBlockEditorProps {
   className?: string;
 }
 
-export const CodeBlockEditor = (
-  {
-    value,
-    onChange,
-    className,
-  }: CodeBlockEditorProps
-) => {
+export const CodeBlockEditor = ({
+  value,
+  onChange,
+  className,
+}: CodeBlockEditorProps) => {
   const [recentLangs, setRecentLangs] = useState<string[]>(() =>
     getRecentLangs(),
   );

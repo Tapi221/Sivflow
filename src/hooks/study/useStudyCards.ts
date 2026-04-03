@@ -10,15 +10,13 @@ type Params = {
   settings: Record<string, unknown> | null | undefined;
 };
 
-export const useStudyCards = (
-  {
-    folderId,
-    allCards,
-    folders,
-    foldersLoading,
-    settings,
-  }: Params
-) => {
+export const useStudyCards = ({
+  folderId,
+  allCards,
+  folders,
+  foldersLoading,
+  settings,
+}: Params) => {
   const studyCards = useMemo(() => {
     const toDate = (value: unknown): Date | null => {
       if (!value) return null;

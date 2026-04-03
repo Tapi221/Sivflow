@@ -26,13 +26,11 @@ interface LocalDocumentSource {
   localSourceStatus: LocalSourceStatus;
 }
 
-export const useLocalDocumentSource = (
-  {
-    userId,
-    localBlobId,
-    persistedBlobUrl,
-  }: Options
-) => {
+export const useLocalDocumentSource = ({
+  userId,
+  localBlobId,
+  persistedBlobUrl,
+}: Options) => {
   const [restoredLocalBlobUrl, setRestoredLocalBlobUrl] = useState<
     string | null
   >(null);

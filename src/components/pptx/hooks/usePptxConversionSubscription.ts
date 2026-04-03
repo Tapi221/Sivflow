@@ -29,16 +29,14 @@ interface Options {
   logDiagnostics: (message: string, payload?: Record<string, unknown>) => void;
 }
 
-export const usePptxConversionSubscription = (
-  {
-    docId,
-    userId,
-    sourceSignature,
-    manifestPendingWindowMs,
-    applyLocalDocumentPatch,
-    logDiagnostics,
-  }: Options
-) => {
+export const usePptxConversionSubscription = ({
+  docId,
+  userId,
+  sourceSignature,
+  manifestPendingWindowMs,
+  applyLocalDocumentPatch,
+  logDiagnostics,
+}: Options) => {
   const lastSignatureRef = useRef<string | null>(null);
 
   useEffect(() => {

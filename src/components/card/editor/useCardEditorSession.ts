@@ -194,25 +194,23 @@ const toDateOrNull = (value: unknown) => {
   return null;
 };
 
-export const useCardEditorSession = (
-  {
-    selectedCardId,
-    selectedCardSnapshot = null,
-    resolveCardFromEntity = true,
-    folderId,
-    cardSetId,
-    autoEdit,
-    updateCard,
-    createCard,
-    addTag,
-    tagById,
-    toastSuccess,
-    toastError,
-    onCardUpdated,
-    onSelectCardId,
-    resetDialogs,
-  }: UseCardEditorSessionParams
-) => {
+export const useCardEditorSession = ({
+  selectedCardId,
+  selectedCardSnapshot = null,
+  resolveCardFromEntity = true,
+  folderId,
+  cardSetId,
+  autoEdit,
+  updateCard,
+  createCard,
+  addTag,
+  tagById,
+  toastSuccess,
+  toastError,
+  onCardUpdated,
+  onSelectCardId,
+  resetDialogs,
+}: UseCardEditorSessionParams) => {
   const [localSelectedCardId, setLocalSelectedCardId] = useState<string | null>(
     null,
   );

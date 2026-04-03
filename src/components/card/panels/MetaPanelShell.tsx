@@ -10,15 +10,13 @@ type MetaPanelShellProps = {
   style?: CSSProperties;
 };
 
-export const MetaPanelShell = (
-  {
-    children,
-    className,
-    bodyClassName,
-    contentClassName,
-    style,
-  }: MetaPanelShellProps
-) => {
+export const MetaPanelShell = ({
+  children,
+  className,
+  bodyClassName,
+  contentClassName,
+  style,
+}: MetaPanelShellProps) => {
   return (
     <aside
       className={cn(
@@ -49,12 +47,10 @@ type MetaPanelLeadSectionProps = {
   className?: string;
 };
 
-export const MetaPanelLeadSection = (
-  {
-    children,
-    className,
-  }: MetaPanelLeadSectionProps
-) => {
+export const MetaPanelLeadSection = ({
+  children,
+  className,
+}: MetaPanelLeadSectionProps) => {
   return (
     <section className={className}>
       <div className="mt-2 space-y-2 text-[length:var(--meta-font-size)] text-[var(--sidebar-text)]">

@@ -540,7 +540,7 @@ export const usePowerPointPaneController = (doc: DocumentItem) => {
 const usePptxManifestLoaderWithReset = (
   options: Parameters<typeof usePptxManifestLoader>[0] & {
     docIdKey: string | undefined;
-  }
+  },
 ) => {
   const { ...rest } = options;
 

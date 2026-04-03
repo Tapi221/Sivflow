@@ -43,7 +43,7 @@ const finalizeRawImport = (
   folders: unknown[],
   cards: unknown[],
   userId: string,
-  onProgress?: (m: string) => void
+  onProgress?: (m: string) => void,
 ) => {
   console.log(
     `[Rescue] Raw Scan Results: ${folders.length} folders, ${cards.length} cards.`,
@@ -85,7 +85,7 @@ export const extractFromFirestoreSDK = (
   db: LocalDB,
   sourceDbName: string,
   currentUserId: string,
-  onProgress?: (progress: string) => void
+  onProgress?: (progress: string) => void,
 ) => {
   console.log(`[Rescue] Attempting Raw Native Extraction: ${sourceDbName}`);
   onProgress?.("ネイティブ接続を試行中...");
@@ -303,7 +303,7 @@ export const importFromDatabase = (
   db: LocalDB,
   sourceDbName: string,
   currentUserId: string,
-  onProgress?: (progress: string) => void
+  onProgress?: (progress: string) => void,
 ) => {
   console.log(`[Rescue] Starting import from ${sourceDbName} to current DB...`);
   onProgress?.("復旧を開始しています...");
@@ -478,7 +478,7 @@ export const importFromDatabase = (
         userId: currentUserId,
         updatedAt: rescueTime,
       }));
-      await (db as LocalDBWithTags).tags.bulkPut(newTags);
+      await(db as LocalDBWithTags).tags.bulkPut(newTags);
     }
 
     // User Settings

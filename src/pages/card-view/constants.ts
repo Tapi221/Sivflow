@@ -11,7 +11,11 @@ export const CARD_PANE_WIDTH_STEP_PX = 40;
 export const CARD_PANE_AUTO_MAX_SCALE = 4;
 const CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX = 72;
 
-export const clampPaneWidthPx = (value: number | null | undefined, min: number, max?: number) => {
+export const clampPaneWidthPx = (
+  value: number | null | undefined,
+  min: number,
+  max?: number,
+) => {
   const fallback = Math.max(1, min);
   const safeValue =
     typeof value === "number" && Number.isFinite(value) ? value : fallback;

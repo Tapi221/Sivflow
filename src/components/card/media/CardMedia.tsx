@@ -21,17 +21,15 @@ const IMAGE_BLOCK_INSET_PX = 4;
 const FIXED_IMAGE_REFERENCE_FRAME_WIDTH_PX =
   CANONICAL_CARD_WIDTH - IMAGE_BLOCK_INSET_PX * 2;
 
-const LocalBlobUrlResolverEffect = (
-  {
-    localFileId,
-    userId,
-    onResolved,
-  }: {
-    localFileId: string;
-    userId: string | undefined;
-    onResolved: (localFileId: string, url: string | null) => void;
-  }
-) => {
+const LocalBlobUrlResolverEffect = ({
+  localFileId,
+  userId,
+  onResolved,
+}: {
+  localFileId: string;
+  userId: string | undefined;
+  onResolved: (localFileId: string, url: string | null) => void;
+}) => {
   const { url, loading } = useLocalImageBlobUrl(localFileId, userId);
   useEffect(() => {
     if (!loading) {
@@ -122,14 +120,12 @@ interface ImageGalleryProps {
   zoom?: number;
 }
 
-export const ImageGallery = (
-  {
-    urls,
-    items,
-    displayMode = "fixed",
-    zoom = 1,
-  }: ImageGalleryProps
-) => {
+export const ImageGallery = ({
+  urls,
+  items,
+  displayMode = "fixed",
+  zoom = 1,
+}: ImageGalleryProps) => {
   const { currentUser } = useAuthSession();
   const [failedImages, setFailedImages] = useState(new Set<number>());
   const [naturalSizeMap, setNaturalSizeMap] = useState<

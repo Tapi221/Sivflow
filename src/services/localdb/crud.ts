@@ -152,7 +152,7 @@ export const addItem = (
   table: string,
   item: unknown,
   skipSync: boolean,
-  enqueueSync: EnqueueSync
+  enqueueSync: EnqueueSync,
 ) => {
   if (table === "cards") {
     assertNoBlobUrlInCardPayload(item, {
@@ -317,7 +317,7 @@ export const updateItem = (
   id: string,
   changes: unknown,
   skipSync: boolean,
-  enqueueSync: EnqueueSync
+  enqueueSync: EnqueueSync,
 ) => {
   if (table === "documents") {
     if (!isDocDbCtx(db)) {
@@ -423,7 +423,7 @@ export const softDelete = (
     table: string,
     id: string,
     changes: Record<string, unknown>,
-  ) => Promise<number>
+  ) => Promise<number>,
 ) => {
   const now = new Date();
   console.log(`[LocalDB] softDelete -> table=${table} id=${id}`);
@@ -480,7 +480,7 @@ export const bulkUpsert = (
   table: string,
   items: unknown[],
   skipSync: boolean,
-  enqueueSync: EnqueueSync
+  enqueueSync: EnqueueSync,
 ) => {
   if (items.length === 0) return;
 
@@ -550,7 +550,7 @@ export const upsert = (
   tableName: string,
   data: unknown,
   skipSync: boolean,
-  enqueueSync: EnqueueSync
+  enqueueSync: EnqueueSync,
 ) => {
   if (tableName === "cards") {
     assertNoBlobUrlInCardPayload(data, {

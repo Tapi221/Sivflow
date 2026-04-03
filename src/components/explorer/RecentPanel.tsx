@@ -40,17 +40,15 @@ const getRelativeTime = (ts: number) => {
   return new Date(ts).toLocaleDateString("ja-JP");
 };
 
-export const RecentPanel = (
-  {
-    recent,
-    folders,
-    cards,
-    documents = [],
-    onFolderSelect,
-    onItemSelect,
-    onClearRecent,
-  }: RecentPanelProps
-) => {
+export const RecentPanel = ({
+  recent,
+  folders,
+  cards,
+  documents = [],
+  onFolderSelect,
+  onItemSelect,
+  onClearRecent,
+}: RecentPanelProps) => {
   const validRecent = useMemo(() => {
     return recent.filter((rec) => {
       if (rec.type === "folder") {

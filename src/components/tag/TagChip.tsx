@@ -16,19 +16,17 @@ interface TagChipProps {
   removeAriaLabel?: string;
 }
 
-export const TagChip = (
-  {
-    label,
-    colorKey,
-    legacyColor,
-    colorClass,
-    className,
-    badgeClassName,
-    onClick,
-    onRemove,
-    removeAriaLabel,
-  }: TagChipProps
-) => {
+export const TagChip = ({
+  label,
+  colorKey,
+  legacyColor,
+  colorClass,
+  className,
+  badgeClassName,
+  onClick,
+  onRemove,
+  removeAriaLabel,
+}: TagChipProps) => {
   return (
     <TagBadge
       label={label}

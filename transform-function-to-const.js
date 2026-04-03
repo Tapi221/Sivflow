@@ -11,10 +11,7 @@ export default function transformer(file, api) {
       return j.variableDeclaration("const", [
         j.variableDeclarator(
           j.identifier(name),
-          j.arrowFunctionExpression(
-            path.node.params,
-            path.node.body
-          )
+          j.arrowFunctionExpression(path.node.params, path.node.body),
         ),
       ]);
     })

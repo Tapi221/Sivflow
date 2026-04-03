@@ -35,19 +35,17 @@ type Props<T extends FolderTreeArboristNode> = {
       }) => boolean);
 };
 
-export const FolderTreeArborist = (
-  {
-    data,
-    selectedId,
-    onSelect,
-    expandedIds,
-    onToggleExpand,
-    renderNode,
-    onMove,
-    disableDrag = true,
-    disableDrop = true,
-  }: Props<T>
-) => {
+export const FolderTreeArborist = ({
+  data,
+  selectedId,
+  onSelect,
+  expandedIds,
+  onToggleExpand,
+  renderNode,
+  onMove,
+  disableDrag = true,
+  disableDrop = true,
+}: Props<T>) => {
   const rowHeight = FOLDER_ROW_HEIGHT_PX;
   const indent = 12;
 

@@ -37,7 +37,12 @@ export const getAllFolders = (db: QueryDb) => {
   return folders.map(normalizeFolderWithSilent);
 };
 
-export const getDirtyItems = (db: QueryDb, table: string, userId: string, lastSyncTime: Date) => {
+export const getDirtyItems = (
+  db: QueryDb,
+  table: string,
+  userId: string,
+  lastSyncTime: Date,
+) => {
   return db
     .table(table)
     .where("[userId+updatedAt]")
@@ -45,7 +50,11 @@ export const getDirtyItems = (db: QueryDb, table: string, userId: string, lastSy
     .toArray();
 };
 
-export const getUpdatedCards = (db: QueryDb, folderId: string, lastSyncTime: Date) => {
+export const getUpdatedCards = (
+  db: QueryDb,
+  folderId: string,
+  lastSyncTime: Date,
+) => {
   return db.cards
     .where("folderId")
     .equals(folderId)
@@ -69,7 +78,11 @@ export const getLastSyncTime = (db: QueryDb, userId: string) => {
     : meta.lastSyncTime;
 };
 
-export const updateLastSyncTime = (db: QueryDb, userId: string, syncTime: Date) => {
+export const updateLastSyncTime = (
+  db: QueryDb,
+  userId: string,
+  syncTime: Date,
+) => {
   await db.syncMetadata.put({
     userId: userId,
     deviceId: getOrCreateDeviceId(),

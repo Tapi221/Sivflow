@@ -25,24 +25,22 @@ interface PowerPointPaneStateProps {
   onOpenSource: () => void;
 }
 
-export const PowerPointPaneState = (
-  {
-    offlineWithoutReadyManifest,
-    manifestPending,
-    manifestStatus,
-    manifestError,
-    conversionError,
-    conversionErrorLabel,
-    uploadStatus,
-    isOnline,
-    hasScheduledAutoRetry,
-    hasReachedAutoRetryLimit,
-    nextRetryLabel,
-    canOpenSource,
-    onRetry,
-    onOpenSource,
-  }: PowerPointPaneStateProps
-) => {
+export const PowerPointPaneState = ({
+  offlineWithoutReadyManifest,
+  manifestPending,
+  manifestStatus,
+  manifestError,
+  conversionError,
+  conversionErrorLabel,
+  uploadStatus,
+  isOnline,
+  hasScheduledAutoRetry,
+  hasReachedAutoRetryLimit,
+  nextRetryLabel,
+  canOpenSource,
+  onRetry,
+  onOpenSource,
+}: PowerPointPaneStateProps) => {
   if (offlineWithoutReadyManifest) {
     return (
       <div className="p-4 text-sm text-slate-600 space-y-3">

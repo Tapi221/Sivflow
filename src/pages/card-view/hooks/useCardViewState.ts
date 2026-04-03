@@ -66,21 +66,19 @@ const extractCreatedId = (created: unknown) => {
   return null;
 };
 
-export const useCardViewState = (
-  {
-    initialIndex,
-    targetCardId,
-    folderId,
-    cardSetId,
-    sortedCards,
-    cardIndexById,
-    createCard,
-    updateCard,
-    selectedCardSet,
-    isLoading,
-    toastError,
-  }: UseCardViewStateOptions
-) => {
+export const useCardViewState = ({
+  initialIndex,
+  targetCardId,
+  folderId,
+  cardSetId,
+  sortedCards,
+  cardIndexById,
+  createCard,
+  updateCard,
+  selectedCardSet,
+  isLoading,
+  toastError,
+}: UseCardViewStateOptions) => {
   const sourceKey = `${cardSetId ?? ""}::${folderId ?? ""}`;
   const defaultDisplayMode = selectedCardSet?.defaultDisplayMode;
 

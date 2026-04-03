@@ -16,11 +16,18 @@ const toTimestamp = (value: Date | string | number | null | undefined) => {
   return 0;
 };
 
-export const getOrderableOrderIndex = (entity: T, selectors: Pick<OrderableEntitySelectors<T>, "getOrderIndex">) => {
+export const getOrderableOrderIndex = (
+  entity: T,
+  selectors: Pick<OrderableEntitySelectors<T>, "getOrderIndex">,
+) => {
   return selectors.getOrderIndex(entity) ?? 0;
 };
 
-export const compareOrderableEntities = (a: T, b: T, selectors: OrderableEntitySelectors<T>) => {
+export const compareOrderableEntities = (
+  a: T,
+  b: T,
+  selectors: OrderableEntitySelectors<T>,
+) => {
   const orderCompare =
     getOrderableOrderIndex(a, selectors) - getOrderableOrderIndex(b, selectors);
   if (orderCompare !== 0) return orderCompare;

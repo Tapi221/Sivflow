@@ -132,7 +132,11 @@ const decodeUrl = (url: string) => {
   markUrlDecoded(url);
 };
 
-const preloadCard = (card: Card, userId: string | null, signal: AbortSignal) => {
+const preloadCard = (
+  card: Card,
+  userId: string | null,
+  signal: AbortSignal,
+) => {
   const images = extractImages(card);
   await Promise.all(
     images.map(async (img) => {
@@ -157,7 +161,7 @@ export const useCardImagePreloader = (
    * 提供されるとこの範囲 ±EAGER_BUFFER が eager プリロード対象になり、
    * 「描画済みだが未プリロード」によるスケルトン表示を防ぐ。
    */
-  renderRange?: { start: number; end: number } | null
+  renderRange?: { start: number; end: number } | null,
 ) => {
   // renderRange はスクロール中に高頻度で変化するため、main effect の deps に含めると
   // AbortController が毎回破棄・再生成されてプリロードが abort/restart を繰り返す。

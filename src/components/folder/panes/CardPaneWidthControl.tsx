@@ -3,7 +3,11 @@ import React from "react";
 import { Minus, Plus, RefreshCw } from "@/ui/icons";
 import { Slider } from "@/components/ui/slider";
 
-const clampPaneWidthPx = (value: number | null | undefined, min: number, max?: number) => {
+const clampPaneWidthPx = (
+  value: number | null | undefined,
+  min: number,
+  max?: number,
+) => {
   const fallback = Math.max(1, min);
   const safeValue =
     typeof value === "number" && Number.isFinite(value) ? value : fallback;
@@ -28,20 +32,18 @@ interface CardPaneWidthControlProps {
   onReset: () => void;
 }
 
-export const CardPaneWidthControl = (
-  {
-    modeLabel,
-    value,
-    min,
-    max,
-    defaultValue,
-    onPreviewChange,
-    onCommit,
-    onStepDown,
-    onStepUp,
-    onReset,
-  }: CardPaneWidthControlProps
-) => {
+export const CardPaneWidthControl = ({
+  modeLabel,
+  value,
+  min,
+  max,
+  defaultValue,
+  onPreviewChange,
+  onCommit,
+  onStepDown,
+  onStepUp,
+  onReset,
+}: CardPaneWidthControlProps) => {
   const resetDisabled = value === defaultValue;
   const controlRootRef = React.useRef<HTMLDivElement | null>(null);
   const suppressOutsideClickUntilRef = React.useRef(0);

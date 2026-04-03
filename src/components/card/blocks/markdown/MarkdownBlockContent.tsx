@@ -533,15 +533,13 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
   );
 };
 
-const ParagraphRenderer = (
-  {
-    children,
-    bodyStyle,
-  }: {
-    children: React.ReactNode;
-    bodyStyle: React.CSSProperties;
-  }
-) => {
+const ParagraphRenderer = ({
+  children,
+  bodyStyle,
+}: {
+  children: React.ReactNode;
+  bodyStyle: React.CSSProperties;
+}) => {
   const text = extractTextDeep(children);
   const isBlankSpacer = text === BLANK_LINE_PLACEHOLDER;
 
@@ -560,17 +558,15 @@ const ParagraphRenderer = (
   );
 };
 
-const MarkdownFencedCodeBlock = (
-  {
-    code,
-    language,
-    bleedX,
-  }: {
-    code: string;
-    language: string;
-    bleedX: boolean;
-  }
-) => {
+const MarkdownFencedCodeBlock = ({
+  code,
+  language,
+  bleedX,
+}: {
+  code: string;
+  language: string;
+  bleedX: boolean;
+}) => {
   return (
     <BlockSurface
       ruled={false}
@@ -587,15 +583,13 @@ const HrRenderer = () => {
   return <hr className="m-0 border-slate-200" />;
 };
 
-const ListRenderer = (
-  {
-    ordered,
-    children,
-  }: {
-    ordered: boolean;
-    children: React.ReactNode;
-  }
-) => {
+const ListRenderer = ({
+  ordered,
+  children,
+}: {
+  ordered: boolean;
+  children: React.ReactNode;
+}) => {
   const Tag = ordered ? "ol" : "ul";
   const listClass = cn(
     ordered ? "list-decimal list-outside" : "list-disc list-outside",

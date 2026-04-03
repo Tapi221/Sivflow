@@ -12,17 +12,15 @@ type QuestionBlockLayoutProps = {
   answerOverlay?: React.ReactNode;
 };
 
-export const QuestionBlockLayout = (
-  {
-    questionContent,
-    answerContent,
-    className,
-    containerRef,
-    containerProps,
-    answerContainerProps,
-    answerOverlay,
-  }: QuestionBlockLayoutProps
-) => {
+export const QuestionBlockLayout = ({
+  questionContent,
+  answerContent,
+  className,
+  containerRef,
+  containerProps,
+  answerContainerProps,
+  answerOverlay,
+}: QuestionBlockLayoutProps) => {
   return (
     <BlockInset variant="question">
       <div

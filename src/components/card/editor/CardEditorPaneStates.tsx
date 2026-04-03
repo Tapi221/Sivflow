@@ -7,12 +7,10 @@ type NewCardIdleStateProps = {
   onCancel: () => void;
 };
 
-export const NewCardIdleState = (
-  {
-    onStartEditing,
-    onCancel,
-  }: NewCardIdleStateProps
-) => {
+export const NewCardIdleState = ({
+  onStartEditing,
+  onCancel,
+}: NewCardIdleStateProps) => {
   return (
     <div className="flex h-full min-h-[400px] items-center justify-center text-slate-400">
       <div className="text-center">

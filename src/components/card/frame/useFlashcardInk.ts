@@ -44,17 +44,15 @@ export interface FlashcardInkResult {
   ) => void;
 }
 
-export const useFlashcardInk = (
-  {
-    cardId,
-    effectiveIsFlipped,
-    showInkLayer,
-    inkEditingEnabled,
-    previewMode,
-    contentRef,
-    onInkDocumentChange,
-  }: UseFlashcardInkOptions
-) => {
+export const useFlashcardInk = ({
+  cardId,
+  effectiveIsFlipped,
+  showInkLayer,
+  inkEditingEnabled,
+  previewMode,
+  contentRef,
+  onInkDocumentChange,
+}: UseFlashcardInkOptions) => {
   const { updateCard } = useCards();
 
   const previewInkRef = useRef<InkLayerHandle | null>(null);

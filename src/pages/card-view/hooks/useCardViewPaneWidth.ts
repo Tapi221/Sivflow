@@ -44,16 +44,14 @@ const getReservedScrollbarGutterWidthPx = () => {
   return width;
 };
 
-export const useCardViewPaneWidth = (
-  {
-    isGlobalEditing,
-    isDesktop,
-    isMetaOpen,
-    currentIndex,
-    settings,
-    cardSetId,
-  }: UseCardViewPaneWidthOptions
-) => {
+export const useCardViewPaneWidth = ({
+  isGlobalEditing,
+  isDesktop,
+  isMetaOpen,
+  currentIndex,
+  settings,
+  cardSetId,
+}: UseCardViewPaneWidthOptions) => {
   const contentViewportRef = useRef<HTMLDivElement | null>(null);
   const [contentViewportWidth, setContentViewportWidth] = useState<number>(
     () => (typeof window === "undefined" ? 1024 : window.innerWidth),

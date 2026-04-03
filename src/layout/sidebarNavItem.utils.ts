@@ -5,12 +5,10 @@ type SidebarNavItemClassNameOptions = {
   className?: string;
 };
 
-export const getSidebarNavItemClassName = (
-  {
-    isActive = false,
-    className,
-  }: SidebarNavItemClassNameOptions = {}
-) => {
+export const getSidebarNavItemClassName = ({
+  isActive = false,
+  className,
+}: SidebarNavItemClassNameOptions = {}) => {
   return cn(
     "sidebar__nav-item",
     isActive && "sidebar__nav-item--active",

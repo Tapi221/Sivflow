@@ -93,29 +93,27 @@ interface CardViewDesktopProps {
   onToggleBookmark: (card: Card) => void | Promise<void>;
 }
 
-export const CardViewDesktop = (
-  {
-    isLoading,
-    isGlobalEditing,
-    flippedCardIds,
-    cardsForPager,
-    selectedCardId,
-    safeCurrentIndex,
-    settings = null,
-    editPaneWidthPx,
-    activePaneWidthPx,
-    activePaneMaxWidthPx,
-    currentDisplayMode,
-    folderId,
-    cardSetId,
-    saveSignal,
-    onActiveIndexChange,
-    onFlip,
-    onEdit,
-    onToggleUncertainty,
-    onToggleBookmark,
-  }: CardViewDesktopProps
-) => {
+export const CardViewDesktop = ({
+  isLoading,
+  isGlobalEditing,
+  flippedCardIds,
+  cardsForPager,
+  selectedCardId,
+  safeCurrentIndex,
+  settings = null,
+  editPaneWidthPx,
+  activePaneWidthPx,
+  activePaneMaxWidthPx,
+  currentDisplayMode,
+  folderId,
+  cardSetId,
+  saveSignal,
+  onActiveIndexChange,
+  onFlip,
+  onEdit,
+  onToggleUncertainty,
+  onToggleBookmark,
+}: CardViewDesktopProps) => {
   const { currentUser } = useAuthSession();
   const effectiveEditPaneWidthPx = editPaneWidthPx;
   const effectiveCardWidthPx =
