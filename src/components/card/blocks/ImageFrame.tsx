@@ -48,6 +48,7 @@ export function ImageFrame({
     started: boolean;
   } | null>(null);
   const suppressClickRef = React.useRef(false);
+
   const [frameW, setFrameW] = React.useState(0);
   const [frameScaleX, setFrameScaleX] = React.useState(1);
   const frameMetricsRef = React.useRef({ width: 0, scaleX: 1 });
@@ -61,16 +62,30 @@ export function ImageFrame({
   const safeScale = clamp(Number(scale ?? 1), 0.2, 1);
   const safeX = clamp(Number(x ?? 0), -1, 1);
   const activeX = clamp(Number(dragX ?? safeX), -1, 1);
+
   const safeNaturalW = Number(loadedNaturalSize?.naturalW ?? naturalW ?? 0);
   const safeNaturalH = Number(loadedNaturalSize?.naturalH ?? naturalH ?? 0);
   const ratio =
     safeNaturalW > 0 && safeNaturalH > 0 ? safeNaturalH / safeNaturalW : 1;
-  const frameH = Math.max(1, frameW * ratio * safeScale);
+
+  const editFrameH = Math.max(1, frameW * ratio * safeScale);
   const imgW = frameW * safeScale;
   const empty = Math.max(0, frameW - imgW);
   const leftPx = clamp(((activeX + 1) / 2) * empty, 0, empty);
+
+  const viewTargetW =
+    safeNaturalW > 0 ? safeNaturalW * safeScale : frameW > 0 ? frameW * safeScale : 0;
+  const viewDisplayW =
+    frameW > 0
+      ? viewTargetW > 0
+        ? Math.min(frameW, Math.max(1, viewTargetW))
+        : frameW
+      : Math.max(1, viewTargetW || 1);
+  const viewFrameH = Math.max(1, viewDisplayW * ratio);
+
   const transformCallback =
     onTransformCommit ?? onTransformChange ?? undefined;
+
   const dragEnabled =
     editable &&
     safeScale < 0.999 &&
@@ -80,6 +95,7 @@ export function ImageFrame({
   React.useEffect(() => {
     const node = frameRef.current;
     if (!node || typeof ResizeObserver === "undefined") return;
+
     const update = () => {
       const rectW = node.getBoundingClientRect().width;
       const layoutW = node.offsetWidth || rectW;
@@ -87,6 +103,7 @@ export function ImageFrame({
         node.offsetWidth > 0 ? rectW / node.offsetWidth : 1;
       const safeNextScaleX =
         Number.isFinite(nextScaleX) && nextScaleX > 0 ? nextScaleX : 1;
+
       const prev = frameMetricsRef.current;
       if (
         Math.abs(prev.width - layoutW) < 0.5 &&
@@ -94,11 +111,14 @@ export function ImageFrame({
       ) {
         return;
       }
+
       frameMetricsRef.current = { width: layoutW, scaleX: safeNextScaleX };
       setFrameW(layoutW);
       setFrameScaleX(safeNextScaleX);
     };
+
     update();
+
     const observer = new ResizeObserver(update);
     observer.observe(node);
     return () => observer.disconnect();
@@ -111,8 +131,9 @@ export function ImageFrame({
   React.useEffect(() => {
     const img = imgRef.current;
     if (!img) return;
-    if (!img.complete || img.naturalWidth <= 0 || img.naturalHeight <= 0)
+    if (!img.complete || img.naturalWidth <= 0 || img.naturalHeight <= 0) {
       return;
+    }
     setLoadedNaturalSize((prev) => {
       if (
         prev?.naturalW === img.naturalWidth &&
@@ -129,7 +150,7 @@ export function ImageFrame({
       ref={frameRef}
       className={cn("relative w-full overflow-hidden", className)}
       style={{
-        height: `${frameH}px`,
+        height: `${editable ? editFrameH : viewFrameH}px`,
         touchAction: dragEnabled ? "none" : "auto",
         cursor: dragEnabled ? (isDragging ? "grabbing" : "grab") : undefined,
       }}
@@ -147,6 +168,7 @@ export function ImageFrame({
       onPointerMove={(event) => {
         if (!dragEnabled || !dragRef.current) return;
         if (event.pointerId !== dragRef.current.pointerId) return;
+
         const deltaX = event.clientX - dragRef.current.startX;
         if (!dragRef.current.started) {
           if (Math.abs(deltaX) <= DRAG_START_THRESHOLD_PX) return;
@@ -155,48 +177,59 @@ export function ImageFrame({
           suppressClickRef.current = true;
           event.currentTarget.setPointerCapture(event.pointerId);
         }
+
         event.preventDefault();
         event.stopPropagation();
+
         const visualEmpty = Math.max(1, empty * frameScaleX);
         const nextX = clamp(
           dragRef.current.startNormalizedX + (deltaX / visualEmpty) * 2,
           -1,
           1,
         );
+
         dragRef.current.currentNormalizedX = nextX;
         setDragX(nextX);
         onTransformChange?.({ scale: safeScale, x: nextX });
       }}
       onPointerUp={(event) => {
-        if (!dragRef.current || event.pointerId !== dragRef.current.pointerId)
+        if (!dragRef.current || event.pointerId !== dragRef.current.pointerId) {
           return;
+        }
+
         const started = dragRef.current.started;
         const finalX = dragRef.current.currentNormalizedX;
+
         if (started && event.currentTarget.hasPointerCapture(event.pointerId)) {
           event.currentTarget.releasePointerCapture(event.pointerId);
         }
+
         dragRef.current = null;
         setIsDragging(false);
         setDragX(null);
+
         if (started) {
           transformCallback?.({ scale: safeScale, x: finalX });
-        }
-        if (started) {
           window.setTimeout(() => {
             suppressClickRef.current = false;
           }, 0);
         }
       }}
       onPointerCancel={(event) => {
-        if (!dragRef.current || event.pointerId !== dragRef.current.pointerId)
+        if (!dragRef.current || event.pointerId !== dragRef.current.pointerId) {
           return;
+        }
+
         const started = dragRef.current.started;
+
         if (started && event.currentTarget.hasPointerCapture(event.pointerId)) {
           event.currentTarget.releasePointerCapture(event.pointerId);
         }
+
         dragRef.current = null;
         setIsDragging(false);
         setDragX(null);
+
         if (started) {
           window.setTimeout(() => {
             suppressClickRef.current = false;
@@ -204,46 +237,89 @@ export function ImageFrame({
         }
       }}
     >
-      <img
-        ref={imgRef}
-        src={src}
-        alt={alt}
-        className={cn("absolute top-0 h-auto max-w-none", imgClassName)}
-        style={{ width: `${safeScale * 100}%`, left: `${leftPx}px` }}
-        decoding="async"
-        draggable={false}
-        onClick={() => {
-          if (suppressClickRef.current) {
-            suppressClickRef.current = false;
-            return;
-          }
-          onImageClick?.();
-        }}
-        onLoad={(event) => {
-          const target = event.currentTarget;
-          setLoadedNaturalSize((prev) => {
-            if (
-              prev?.naturalW === target.naturalWidth &&
-              prev?.naturalH === target.naturalHeight
-            ) {
-              return prev;
+      {editable ? (
+        <img
+          ref={imgRef}
+          src={src}
+          alt={alt}
+          className={cn("absolute top-0 h-auto max-w-none", imgClassName)}
+          style={{ width: `${safeScale * 100}%`, left: `${leftPx}px` }}
+          decoding="async"
+          draggable={false}
+          onClick={() => {
+            if (suppressClickRef.current) {
+              suppressClickRef.current = false;
+              return;
             }
-            return {
+            onImageClick?.();
+          }}
+          onLoad={(event) => {
+            const target = event.currentTarget;
+            setLoadedNaturalSize((prev) => {
+              if (
+                prev?.naturalW === target.naturalWidth &&
+                prev?.naturalH === target.naturalHeight
+              ) {
+                return prev;
+              }
+              return {
+                naturalW: target.naturalWidth,
+                naturalH: target.naturalHeight,
+              };
+            });
+            onNaturalSize?.({
               naturalW: target.naturalWidth,
               naturalH: target.naturalHeight,
-            };
-          });
-          onNaturalSize?.({
-            naturalW: target.naturalWidth,
-            naturalH: target.naturalHeight,
-          });
-        }}
-        onError={() => onError?.()}
-      />
+            });
+          }}
+          onError={() => onError?.()}
+        />
+      ) : (
+        <div className="flex h-full w-full items-start justify-center overflow-hidden">
+          <img
+            ref={imgRef}
+            src={src}
+            alt={alt}
+            className={cn("block h-auto max-w-full", imgClassName)}
+            style={{
+              width:
+                safeNaturalW > 0
+                  ? `${Math.min(frameW || viewDisplayW, safeNaturalW * safeScale)}px`
+                  : "100%",
+              maxWidth: "100%",
+            }}
+            decoding="async"
+            draggable={false}
+            onClick={() => {
+              if (suppressClickRef.current) {
+                suppressClickRef.current = false;
+                return;
+              }
+              onImageClick?.();
+            }}
+            onLoad={(event) => {
+              const target = event.currentTarget;
+              setLoadedNaturalSize((prev) => {
+                if (
+                  prev?.naturalW === target.naturalWidth &&
+                  prev?.naturalH === target.naturalHeight
+                ) {
+                  return prev;
+                }
+                return {
+                  naturalW: target.naturalWidth,
+                  naturalH: target.naturalHeight,
+                };
+              });
+              onNaturalSize?.({
+                naturalW: target.naturalWidth,
+                naturalH: target.naturalHeight,
+              });
+            }}
+            onError={() => onError?.()}
+          />
+        </div>
+      )}
     </div>
   );
 }
-
-
-
-
