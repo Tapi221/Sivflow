@@ -16,7 +16,7 @@ import {
   ChevronUp,
 } from "@/ui/icons";
 import { getLocalDb } from "@/services/localDB";
-import { useAuth } from "@/contexts/AuthContext";
+import { useSyncContext } from "@/contexts/sync/SyncContext";
 import type { SyncError } from "@/types";
 
 interface SyncErrorDialogProps {
@@ -36,7 +36,7 @@ export function SyncErrorDialog({ open, onClose }: SyncErrorDialogProps) {
   const [errors, setErrors] = useState<SyncError[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [retrying, setRetrying] = useState<string | null>(null);
-  const { triggerSync, syncService } = useAuth();
+  const { clearSyncErrors, triggerSync } = useSyncContext();
 
   const loadErrors = useCallback(async () => {
     try {
@@ -68,10 +68,8 @@ export function SyncErrorDialog({ open, onClose }: SyncErrorDialogProps) {
   };
 
   const handleClearAll = async () => {
-    if (syncService) {
-      await syncService.clearAllErrors();
-      setErrors([]);
-    }
+    await clearSyncErrors();
+    setErrors([]);
   };
 
   const handleClearOne = async (errorId: string) => {

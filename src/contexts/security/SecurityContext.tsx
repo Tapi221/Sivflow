@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { useAuthSession } from "@/contexts/auth/AuthSessionContext";
-import { useSyncServiceCompat } from "@/contexts/sync/SyncContext";
+import { SyncServiceFactory } from "@/services/SyncServiceFactory";
 import type { SecurityState } from "@/services/logic/SecurityMonitor";
 
 interface SecurityContextType {
@@ -37,33 +37,45 @@ interface SecurityProviderProps {
 
 export function SecurityProvider({ children }: SecurityProviderProps) {
   const { currentUser } = useAuthSession();
-  const syncService = useSyncServiceCompat();
   const [securityState, setSecurityState] =
     useState<SecurityState>(defaultSecurityState);
 
   const dismissSecurityAlert = useCallback(
     async (alertId: string) => {
-      if (!syncService) return;
+      if (!currentUser) return;
+
+      const syncService = await SyncServiceFactory.getInstance(currentUser.uid);
       await syncService.dismissSecurityAlert(alertId);
     },
-    [syncService],
+    [currentUser],
   );
 
   useEffect(() => {
-    if (!currentUser || !syncService) {
+    if (!currentUser) {
       setSecurityState(defaultSecurityState);
       return;
     }
 
-    const stopMonitoring = syncService.monitorSecurity((newState) => {
-      console.log("[Security] Security state updated:", newState);
-      setSecurityState(newState);
-    });
+    let active = true;
+    let stopMonitoring: (() => void) | undefined;
+
+    const setupMonitoring = async () => {
+      const syncService = await SyncServiceFactory.getInstance(currentUser.uid);
+      if (!active) return;
+
+      stopMonitoring = syncService.monitorSecurity((newState) => {
+        console.log("[Security] Security state updated:", newState);
+        setSecurityState(newState);
+      });
+    };
+
+    void setupMonitoring();
 
     return () => {
-      stopMonitoring();
+      active = false;
+      stopMonitoring?.();
     };
-  }, [currentUser, syncService]);
+  }, [currentUser]);
 
   const value = useMemo<SecurityContextType>(
     () => ({

@@ -9,12 +9,9 @@ import {
 } from "react";
 import { type User as FirebaseUser, onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/services/firebase";
-import {
-  getLocalDb,
-  initializeDB,
-  resetLocalDBForLogout,
-} from "@/services/localDB";
+import { initializeDB, resetLocalDBForLogout } from "@/services/localDB";
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
+import { bootstrapUser } from "@/hooks/bootstrap/useUserBootstrap";
 
 interface AuthSessionContextType {
   currentUser: FirebaseUser | null;
@@ -28,27 +25,6 @@ const AuthSessionContext = createContext<AuthSessionContextType>({
 
 export function useAuthSession() {
   return useContext(AuthSessionContext);
-}
-
-async function bootstrapAuthenticatedUser(user: FirebaseUser) {
-  await initializeDB(user.uid);
-
-  const { AppInitializer } = await import("@/services/AppInitializer");
-  const initResult = await AppInitializer.initialize(user.uid);
-  if (initResult?.degraded) {
-    console.warn("[Auth] startup_degraded=true", {
-      userId: user.uid,
-      reason: initResult.reason,
-      skippedFailures: initResult.skippedFailures ?? 0,
-    });
-  }
-
-  const db = await getLocalDb();
-  await db.cleanupSyncHistory();
-  await db.cleanupSyncErrors();
-
-  console.log("[Auth] Running data integrity repair...");
-  await db.repairDataIntegrity(user.uid);
 }
 
 interface AuthSessionProviderProps {
@@ -74,7 +50,7 @@ export function AuthSessionProvider({
         lastKnownUserIdRef.current = user.uid;
 
         try {
-          await bootstrapAuthenticatedUser(user);
+          await bootstrapUser(user.uid);
         } catch (error) {
           console.error("[Auth] Fatal setup error:", error);
         } finally {

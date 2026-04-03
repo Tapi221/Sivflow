@@ -20,7 +20,7 @@ import {
   HardDrive,
   Merge,
 } from "@/ui/icons";
-import { useAuth } from "@/contexts/AuthContext";
+import { useSyncContext } from "@/contexts/sync/SyncContext";
 import type { SyncConflict } from "@/types";
 
 interface ConflictResolutionDialogProps {
@@ -39,7 +39,8 @@ export function ConflictResolutionDialog({
   open,
   onClose,
 }: ConflictResolutionDialogProps) {
-  const { syncService, triggerSync } = useAuth();
+  const { getUnresolvedConflicts, resolveConflict, triggerSync } =
+    useSyncContext();
   const [conflicts, setConflicts] = useState<SyncConflict[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [fieldSelections, setFieldSelections] = useState<
@@ -48,16 +49,15 @@ export function ConflictResolutionDialog({
   const [resolving, setResolving] = useState(false);
 
   const loadConflicts = useCallback(async () => {
-    if (!syncService) return;
     try {
-      const allConflicts = await syncService.getUnresolvedConflicts();
+      const allConflicts = await getUnresolvedConflicts();
       setConflicts(allConflicts);
       setCurrentIndex(0);
       setFieldSelections({});
     } catch (error) {
       console.error("Failed to load conflicts:", error);
     }
-  }, [syncService]);
+  }, [getUnresolvedConflicts]);
 
   useEffect(() => {
     if (open) {
@@ -68,7 +68,7 @@ export function ConflictResolutionDialog({
   const currentConflict = conflicts[currentIndex];
 
   const handleResolveLocal = async () => {
-    if (!currentConflict || !syncService) return;
+    if (!currentConflict) return;
 
     setResolving(true);
     try {
@@ -83,7 +83,7 @@ export function ConflictResolutionDialog({
         updatedAt: new Date(),
       };
 
-      await syncService.resolveConflict(currentConflict.id, resolved);
+      await resolveConflict(currentConflict.id, resolved);
       await moveToNextOrClose();
     } finally {
       setResolving(false);
@@ -91,7 +91,7 @@ export function ConflictResolutionDialog({
   };
 
   const handleResolveRemote = async () => {
-    if (!currentConflict || !syncService) return;
+    if (!currentConflict) return;
 
     setResolving(true);
     try {
@@ -106,7 +106,7 @@ export function ConflictResolutionDialog({
         updatedAt: new Date(),
       };
 
-      await syncService.resolveConflict(currentConflict.id, resolved);
+      await resolveConflict(currentConflict.id, resolved);
       await moveToNextOrClose();
     } finally {
       setResolving(false);
@@ -114,7 +114,7 @@ export function ConflictResolutionDialog({
   };
 
   const handleResolveFields = async () => {
-    if (!currentConflict || !syncService) return;
+    if (!currentConflict) return;
 
     setResolving(true);
     try {
@@ -129,7 +129,7 @@ export function ConflictResolutionDialog({
         updatedAt: new Date(),
       };
 
-      await syncService.resolveConflict(currentConflict.id, resolved);
+      await resolveConflict(currentConflict.id, resolved);
       await moveToNextOrClose();
     } finally {
       setResolving(false);

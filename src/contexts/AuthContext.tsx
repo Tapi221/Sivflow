@@ -4,22 +4,15 @@ import {
   AuthSessionProvider,
   useAuthSession,
 } from "@/contexts/auth/AuthSessionContext";
-import {
-  SyncProvider,
-  useSyncContext,
-  useSyncServiceCompat,
-} from "@/contexts/sync/SyncContext";
+import { SyncProvider, useSyncContext } from "@/contexts/sync/SyncContext";
 import {
   SecurityProvider,
   useSecurity,
 } from "@/contexts/security/SecurityContext";
-import type { ISyncService } from "@/services/interfaces/ISyncService";
 
 type AuthContextCompatValue = ReturnType<typeof useAuthSession> &
   ReturnType<typeof useSyncContext> &
-  ReturnType<typeof useSecurity> & {
-    syncService: ISyncService | null;
-  };
+  ReturnType<typeof useSecurity>;
 
 export { useAuthSession, useSyncContext, useSecurity };
 
@@ -37,19 +30,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
   );
 }
 
+// @deprecated
+// 新規実装では useAuth を使用しないこと
+// useAuthSession / useSyncContext / useSecurity を使用する
 export function useAuth(): AuthContextCompatValue {
   const session = useAuthSession();
   const sync = useSyncContext();
   const security = useSecurity();
-  const syncService = useSyncServiceCompat();
 
   return useMemo(
     () => ({
       ...session,
       ...sync,
       ...security,
-      syncService,
     }),
-    [security, session, sync, syncService],
+    [security, session, sync],
   );
 }

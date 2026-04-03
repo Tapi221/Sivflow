@@ -13,6 +13,7 @@ import { SyncServiceFactory } from "@/services/SyncServiceFactory";
 import { useAuthSession } from "@/contexts/auth/AuthSessionContext";
 import type { ISyncService } from "@/services/interfaces/ISyncService";
 import type { SyncSettings } from "@/types/domain/sync";
+import type { SyncConflict } from "@/types";
 
 type SyncStatus = "idle" | "syncing" | "success" | "error";
 type SyncNotice = "none" | "wifi_wait";
@@ -25,7 +26,16 @@ interface SyncContextType {
   conflictCount: number;
   triggerSync: () => Promise<void>;
   reloadSyncSettings: () => Promise<void>;
+  getUnresolvedConflicts: () => Promise<SyncConflict[]>;
+  resolveConflict: (conflictId: string, resolvedData: unknown) => Promise<void>;
+  clearSyncErrors: () => Promise<void>;
 }
+
+type LegacySyncService = ISyncService & {
+  getUnresolvedConflicts(): Promise<SyncConflict[]>;
+  resolveConflict(conflictId: string, resolvedData: unknown): Promise<void>;
+  clearAllErrors(): Promise<void>;
+};
 
 const defaultSyncContext: SyncContextType = {
   syncStatus: "idle",
@@ -35,17 +45,15 @@ const defaultSyncContext: SyncContextType = {
   conflictCount: 0,
   triggerSync: async () => {},
   reloadSyncSettings: async () => {},
+  getUnresolvedConflicts: async () => [],
+  resolveConflict: async () => {},
+  clearSyncErrors: async () => {},
 };
 
 const SyncContext = createContext<SyncContextType>(defaultSyncContext);
-const SyncServiceCompatContext = createContext<ISyncService | null>(null);
 
 export function useSyncContext() {
   return useContext(SyncContext);
-}
-
-export function useSyncServiceCompat() {
-  return useContext(SyncServiceCompatContext);
 }
 
 interface SyncProviderProps {
@@ -60,13 +68,10 @@ export function SyncProvider({ children }: SyncProviderProps) {
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
   const [queueCount, setQueueCount] = useState(0);
   const [conflictCount, setConflictCount] = useState(0);
-  const [compatSyncService, setCompatSyncService] = useState<ISyncService | null>(
-    null,
-  );
   const syncIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const syncSettingsRef = useRef<SyncSettings | null>(null);
   const syncStatusRef = useRef<SyncStatus>("idle");
-  const syncServiceRef = useRef<ISyncService | null>(null);
+  const syncServiceRef = useRef<LegacySyncService | null>(null);
 
   useEffect(() => {
     syncStatusRef.current = syncStatus;
@@ -79,7 +84,7 @@ export function SyncProvider({ children }: SyncProviderProps) {
     }
   }, []);
 
-  const updateCounts = useCallback(async (service?: ISyncService | null) => {
+  const updateCounts = useCallback(async (service?: LegacySyncService | null) => {
     const activeService = service ?? syncServiceRef.current;
     if (!activeService) return;
 
@@ -94,7 +99,7 @@ export function SyncProvider({ children }: SyncProviderProps) {
   }, []);
 
   const configureAutoSync = useCallback(
-    (service: ISyncService, settings: SyncSettings) => {
+    (service: LegacySyncService, settings: SyncSettings) => {
       clearSyncInterval();
 
       if (!settings.autoSync || !navigator.onLine) {
@@ -131,9 +136,9 @@ export function SyncProvider({ children }: SyncProviderProps) {
 
     try {
       const service =
-        syncServiceRef.current ?? (await SyncServiceFactory.getInstance(userId));
+        syncServiceRef.current ??
+        ((await SyncServiceFactory.getInstance(userId)) as LegacySyncService);
       syncServiceRef.current = service;
-      setCompatSyncService(service);
 
       const settings = await service.loadSettings();
       syncSettingsRef.current = settings;
@@ -187,12 +192,39 @@ export function SyncProvider({ children }: SyncProviderProps) {
     }
   }, [updateCounts, userId]);
 
+  const getUnresolvedConflicts = useCallback(async () => {
+    if (!syncServiceRef.current) {
+      return [];
+    }
+
+    return syncServiceRef.current.getUnresolvedConflicts();
+  }, []);
+
+  const resolveConflict = useCallback(
+    async (conflictId: string, resolvedData: unknown) => {
+      if (!syncServiceRef.current) {
+        return;
+      }
+
+      await syncServiceRef.current.resolveConflict(conflictId, resolvedData);
+      await updateCounts(syncServiceRef.current);
+    },
+    [updateCounts],
+  );
+
+  const clearSyncErrors = useCallback(async () => {
+    if (!syncServiceRef.current) {
+      return;
+    }
+
+    await syncServiceRef.current.clearAllErrors();
+  }, []);
+
   useEffect(() => {
     if (!userId) {
       clearSyncInterval();
       syncSettingsRef.current = null;
       syncServiceRef.current = null;
-      setCompatSyncService(null);
       setSyncStatus("idle");
       setSyncNotice("none");
       setLastSyncTime(null);
@@ -205,11 +237,12 @@ export function SyncProvider({ children }: SyncProviderProps) {
 
     const initializeSync = async () => {
       try {
-        const service = await SyncServiceFactory.getInstance(userId);
+        const service = (await SyncServiceFactory.getInstance(
+          userId,
+        )) as LegacySyncService;
         if (disposed) return;
 
         syncServiceRef.current = service;
-        setCompatSyncService(service);
 
         const settings = await service.loadSettings();
         if (disposed) return;
@@ -312,21 +345,23 @@ export function SyncProvider({ children }: SyncProviderProps) {
       conflictCount,
       triggerSync,
       reloadSyncSettings,
+      getUnresolvedConflicts,
+      resolveConflict,
+      clearSyncErrors,
     }),
     [
+      clearSyncErrors,
       conflictCount,
+      getUnresolvedConflicts,
       lastSyncTime,
       queueCount,
       reloadSyncSettings,
+      resolveConflict,
       syncNotice,
       syncStatus,
       triggerSync,
     ],
   );
 
-  return (
-    <SyncServiceCompatContext.Provider value={compatSyncService}>
-      <SyncContext.Provider value={value}>{children}</SyncContext.Provider>
-    </SyncServiceCompatContext.Provider>
-  );
+  return <SyncContext.Provider value={value}>{children}</SyncContext.Provider>;
 }
