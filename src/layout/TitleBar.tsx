@@ -19,9 +19,16 @@ const PAGE_LABELS: Record<string, string> = {
 };
 
 function useBreadcrumbs() {
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
 
   return useMemo(() => {
+    const searchParams = new URLSearchParams(search);
+    const isHomeOnlyMode =
+      pathname.toLowerCase() === "/folders" && searchParams.get("home") === "1";
+    if (isHomeOnlyMode) {
+      return [{ label: "ホーム", to: undefined }];
+    }
+
     const segments = pathname.split("/").filter(Boolean);
     const crumbs = [{ label: "ホーム", to: "/folders?home=1" as string | undefined }];
 
@@ -39,7 +46,7 @@ function useBreadcrumbs() {
     }
 
     return crumbs;
-  }, [pathname]);
+  }, [pathname, search]);
 }
 
 export const TitleBar: React.FC = () => {
@@ -404,6 +411,5 @@ export const TitleBar: React.FC = () => {
     </div>
   );
 };
-
 
 

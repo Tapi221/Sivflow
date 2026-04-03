@@ -65,6 +65,9 @@ const NAV_ITEMS: NavItem[] = [
 export function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const isHomeOnlyMode =
+    location.pathname.toLowerCase() === "/folders" &&
+    new URLSearchParams(location.search).get("home") === "1";
 
   const handleOpenSettings = () => {
     const next = new URLSearchParams(location.search);
@@ -80,7 +83,11 @@ export function Sidebar() {
           <NavLink
             key={to}
             to={to}
-            className={({ isActive }) => getSidebarNavItemClassName({ isActive })}
+            className={({ isActive }) =>
+              getSidebarNavItemClassName({
+                isActive: to === "/folders" ? isActive && !isHomeOnlyMode : isActive,
+              })
+            }
           >
             <SidebarNavIcon>{icon}</SidebarNavIcon>
             {label}

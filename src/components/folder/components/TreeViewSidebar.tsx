@@ -54,18 +54,17 @@ export function TreeViewSidebar({
       ref={sidebarRef}
       style={{ backgroundColor: "var(--sidebar-bg)" }}
       className={cn(
-        "flex-col border-r border-[var(--sidebar-border,#e3e6ea)] relative z-10 group/sidebar select-none",
-        fillAvailableWidth ? "min-w-0 flex-1" : "shrink-0",
+        "relative z-10 flex-col border-r border-[var(--sidebar-border,#e3e6ea)] group/sidebar select-none",
+        "shrink-0",
         showMobileDetail ? "hidden md:flex" : "flex",
         "transition-none",
         isResizing && "will-change-[width]",
         "w-[100dvw] max-w-[100dvw] md:w-auto md:max-w-none",
-        fillAvailableWidth && "md:w-full",
         !isSidebarOpen &&
           "md:w-0 md:border-0 md:overflow-hidden md:shadow-none",
       )}
     >
-      <div className="flex flex-col h-full min-h-0 w-full overflow-hidden">
+      <div className="flex h-full min-h-0 w-full flex-col overflow-hidden">
         <div className="shrink-0">
           <ExplorerTabs
             activeTab={explorerTab}
@@ -91,7 +90,7 @@ export function TreeViewSidebar({
 
         <div
           ref={contentScrollRef}
-          className="flex-1 min-h-0 min-w-0 outline-none overflow-hidden"
+          className="flex-1 min-h-0 min-w-0 overflow-hidden outline-none"
         >
           {children}
         </div>
@@ -100,7 +99,8 @@ export function TreeViewSidebar({
       {isSidebarOpen && (
         <div
           className={cn(
-            "hidden md:block absolute top-0 -right-[3px] w-1.5 h-full cursor-col-resize z-50 group/resize select-none outline-none hover:bg-[color-mix(in_srgb,var(--sidebar-text-muted,#6e6e80)_20%,transparent)] focus-visible:outline-none",
+            "absolute top-0 -right-[3px] z-50 hidden h-full w-1.5 cursor-col-resize select-none outline-none md:block group/resize",
+            "hover:bg-[color-mix(in_srgb,var(--sidebar-text-muted,#6e6e80)_20%,transparent)]",
             isResizing &&
               "bg-[color-mix(in_srgb,var(--sidebar-text-muted,#6e6e80)_30%,transparent)]",
           )}

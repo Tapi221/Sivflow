@@ -128,16 +128,16 @@ function TreeViewLayout({
 
   const { selectedFolder, selectedDocument, folderCards, folderStats, showMobileDetail } =
     useTreeViewDerivedState({
-    folders,
-    cards,
-    documents,
-    selectedFolderId,
-    selectedItem,
-    selectedCardId,
-    selectedDocumentId,
-    autoCarryOver: settings?.autoCarryOver ?? true,
-    isMobile,
-  });
+      folders,
+      cards,
+      documents,
+      selectedFolderId,
+      selectedItem,
+      selectedCardId,
+      selectedDocumentId,
+      autoCarryOver: settings?.autoCarryOver ?? true,
+      isMobile,
+    });
 
   const explorerTab = useExplorerStore((s) => s.explorerTab);
   const setExplorerTab = useExplorerStore((s) => s.setExplorerTab);
@@ -237,11 +237,7 @@ function TreeViewLayout({
       id: selectedCardSetId,
       label: currentCardSetLabel,
     });
-  }, [
-    currentCardSetLabel,
-    onCardSetContextChange,
-    selectedCardSetId,
-  ]);
+  }, [currentCardSetLabel, onCardSetContextChange, selectedCardSetId]);
 
   const handleCreateRootFolder = useCallback(() => {
     createFolderTriggerRef.current?.();
@@ -346,7 +342,7 @@ function TreeViewLayout({
         isSidebarOpen={isSidebarOpen}
         isResizing={isResizing}
         showMobileDetail={showMobileDetail}
-        fillAvailableWidth={isSectionListMode}
+        fillAvailableWidth={false}
         explorerTab={explorerTab}
         setExplorerTab={setExplorerTab}
         allTags={allTags}

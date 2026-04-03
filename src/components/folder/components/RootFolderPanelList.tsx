@@ -69,7 +69,7 @@ export function RootFolderPanelList({
   );
 
   return (
-    <div className="h-full overflow-y-auto px-1 py-1">
+    <div className="h-full overflow-y-auto py-1">
       {rootFolderPanels.map((panel) => {
         const isEditing = editingId === panel.id;
         const menuId = `folder:${panel.id}:panel`;
