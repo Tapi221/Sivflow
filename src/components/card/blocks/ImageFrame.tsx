@@ -32,8 +32,10 @@ type ImageFrameProps = {
   zoom?: number;
   scale?: number | null;
   x?: number | null;
+  /** fixed 本文座標系での画像論理幅。fixed / fluid 共通の正本。 */
   layoutBaseWidthPx?: number | null;
   cropX?: number | null;
+  /** legacy scale から fixed 本文座標系の基準幅を逆算するための参照幅。 */
   fixedReferenceFrameWidthPx?: number | null;
   fluidAvailableWidthPx?: number | null;
   naturalW?: number | null;
@@ -88,8 +90,8 @@ export function ImageFrame({
     naturalW: number;
     naturalH: number;
   } | null>(null);
-
-  void zoom;
+  const safeZoom =
+    typeof zoom === "number" && Number.isFinite(zoom) && zoom > 0 ? zoom : 1;
 
   const safeScale = clamp(Number(scale ?? 1), 0.2, 1);
   const safeX = clamp(Number(x ?? 0), -1, 1);
@@ -126,9 +128,13 @@ export function ImageFrame({
     fluidAvailableWidthPx > 0
       ? fluidAvailableWidthPx
       : frameW;
+  const fluidLogicalAvailableWidthPx =
+    displayMode === "fluid"
+      ? Math.max(1, resolvedFluidAvailableWidthPx / safeZoom)
+      : resolvedFluidAvailableWidthPx;
   const fluidRenderWidthPx = Math.min(
     resolvedBaseWidthPx,
-    Math.max(1, resolvedFluidAvailableWidthPx || resolvedBaseWidthPx),
+    Math.max(1, fluidLogicalAvailableWidthPx || resolvedBaseWidthPx),
   );
   const renderWidthPx =
     displayMode === "fluid" ? fluidRenderWidthPx : fixedRenderWidthPx;

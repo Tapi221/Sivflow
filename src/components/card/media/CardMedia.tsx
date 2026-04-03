@@ -1,3 +1,4 @@
+import { CANONICAL_CARD_WIDTH } from "@/components/card/common/constants";
 import { ImageFrame } from "@/components/card/blocks/ImageFrame";
 import { Button } from "@/components/ui/button";
 import { useAuthSession } from "@/contexts/AuthContext";
@@ -15,6 +16,10 @@ import {
 } from "@/ui/icons";
 import { getDownloadURL, ref as storageRef } from "firebase/storage";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+
+const IMAGE_BLOCK_INSET_PX = 4;
+const FIXED_IMAGE_REFERENCE_FRAME_WIDTH_PX =
+  CANONICAL_CARD_WIDTH - IMAGE_BLOCK_INSET_PX * 2;
 
 /**
  * render-null ヘルパー。
@@ -492,6 +497,9 @@ export function ImageGallery({
                   x={item.x}
                   layoutBaseWidthPx={item.layout?.baseWidthPx ?? null}
                   cropX={item.layout?.cropX ?? null}
+                  fixedReferenceFrameWidthPx={
+                    FIXED_IMAGE_REFERENCE_FRAME_WIDTH_PX
+                  }
                   naturalW={item.naturalW ?? naturalSizeMap[index]?.w ?? null}
                   naturalH={item.naturalH ?? naturalSizeMap[index]?.h ?? null}
                   className="bg-transparent"

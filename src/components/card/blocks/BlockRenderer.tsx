@@ -31,6 +31,17 @@ interface BlockRendererProps {
   zoom?: number;
 }
 
+const getFluidZoomStyle = (
+  displayMode: "fixed" | "fluid",
+  zoom: number,
+): React.CSSProperties | undefined => {
+  if (displayMode !== "fluid") return undefined;
+  const safeZoom =
+    typeof zoom === "number" && Number.isFinite(zoom) && zoom > 0 ? zoom : 1;
+  if (Math.abs(safeZoom - 1) < 0.001) return undefined;
+  return { fontSize: `${safeZoom}em` };
+};
+
 /** Question表示 */
 function QuestionBlockView({
   block,
@@ -126,7 +137,10 @@ function renderBlock(
       if ((block.content ?? "").trim() === "") return null;
 
       return (
-        <div className="w-full max-w-full overflow-hidden">
+        <div
+          className="w-full max-w-full overflow-hidden"
+          style={getFluidZoomStyle(displayMode, zoom)}
+        >
           <TextBlockContent
             mode="view"
             content={String(block.content ?? "")}
@@ -138,7 +152,10 @@ function renderBlock(
       if ((block.code?.code ?? "").trim() === "") return null;
 
       return (
-        <div className="w-full max-w-full overflow-visible">
+        <div
+          className="w-full max-w-full overflow-visible"
+          style={getFluidZoomStyle(displayMode, zoom)}
+        >
           {gridOffsetPx > 0 && (
             <div
               aria-hidden
@@ -188,7 +205,10 @@ function renderBlock(
       if ((block.math?.latex ?? "").trim() === "") return null;
 
       return (
-        <div className="w-full max-w-full overflow-visible">
+        <div
+          className="w-full max-w-full overflow-visible"
+          style={getFluidZoomStyle(displayMode, zoom)}
+        >
           {gridOffsetPx > 0 && (
             <div
               aria-hidden
@@ -211,6 +231,7 @@ function renderBlock(
           md={block.markdown}
           className="markdownBlockCardView"
           bleedX={false}
+          style={getFluidZoomStyle(displayMode, zoom)}
         />
       );
 

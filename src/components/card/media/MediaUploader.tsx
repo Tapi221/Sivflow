@@ -1,3 +1,4 @@
+import { CANONICAL_CARD_WIDTH } from "@/components/card/common/constants";
 import { ImageFrame } from "@/components/card/blocks/ImageFrame";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -21,6 +22,9 @@ import React, { useCallback, useEffect, useId, useRef, useState } from "react";
 
 const clamp = (v: number, min: number, max: number) =>
   Math.min(max, Math.max(min, v));
+const IMAGE_BLOCK_INSET_PX = 4;
+const FIXED_IMAGE_REFERENCE_FRAME_WIDTH_PX =
+  CANONICAL_CARD_WIDTH - IMAGE_BLOCK_INSET_PX * 2;
 
 function ImageItem({ item, index, onRetry, onUpdate }) {
   const [loadFailed, setLoadFailed] = useState(false);
@@ -169,6 +173,7 @@ function ImageItem({ item, index, onRetry, onUpdate }) {
               imgClassName="cursor-pointer"
               scale={safeScale}
               x={safeX}
+              fixedReferenceFrameWidthPx={FIXED_IMAGE_REFERENCE_FRAME_WIDTH_PX}
               layoutBaseWidthPx={item.layout?.baseWidthPx ?? null}
               cropX={item.layout?.cropX ?? null}
               naturalW={item.naturalW ?? null}

@@ -8,6 +8,7 @@ interface MarkdownBlockViewProps {
   align?: "left" | "center";
   className?: string;
   bleedX?: boolean;
+  style?: React.CSSProperties;
 }
 
 export type MarkdownBlockPreviewProps = {
@@ -15,6 +16,7 @@ export type MarkdownBlockPreviewProps = {
   align?: "left" | "center";
   className?: string;
   bleedX?: boolean;
+  style?: React.CSSProperties;
 };
 
 interface MarkdownBlockDisplayProps extends MarkdownBlockPreviewProps {
@@ -27,10 +29,14 @@ const MarkdownBlockDisplay: React.FC<MarkdownBlockDisplayProps> = ({
   className,
   contentClassName,
   bleedX,
+  style,
 }) => {
   return (
     <BlockSurface ruled={true} className="flex-1">
-      <div className="markdownBlockSurface w-full max-w-full bg-transparent overflow-visible">
+      <div
+        className="markdownBlockSurface w-full max-w-full bg-transparent overflow-visible"
+        style={style}
+      >
         <div className={cn("w-full max-w-full px-0 py-0", contentClassName)}>
           <MarkdownBlockContent
             markdown={markdown}

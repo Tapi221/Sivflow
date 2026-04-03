@@ -44,6 +44,7 @@ export interface ProfileImage {
 }
 
 export interface ImageBlockLayout {
+  /** fixed 本文座標系での画像論理幅。fixed / fluid 共通の正本。 */
   baseWidthPx?: number | null;
   cropX?: number | null;
 }
