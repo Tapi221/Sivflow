@@ -667,7 +667,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
               </div>
             </div>
 
-            <div className="bg-white/58 border border-slate-200/70 p-5 rounded-2xl space-y-5 shadow-sm backdrop-blur-sm">
+            <div className="space-y-5">
               <div className="space-y-4">
                 <div className="flex items-center justify-between pt-1">
                   <div>
@@ -700,7 +700,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-4 border-t border-slate-50">
+                <div className="flex items-center justify-between gap-4 border-t border-slate-200/60 pt-4">
                   <div>
                     <div className="font-bold text-slate-700 text-[13px] tracking-tight">
                       オートセーブ（自動下書き）
@@ -729,7 +729,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-4 border-t border-slate-50">
+                <div className="flex items-center justify-between gap-4 border-t border-slate-200/60 pt-4">
                   <div>
                     <div className="font-bold text-slate-700 text-[13px] tracking-tight">
                       ブロック複製を反対側に追加
@@ -769,7 +769,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                 </div>
                 <div className="space-y-4">
                   {/* 0: 忘れた (Forgot) - Always shown */}
-                  <div className="flex items-start gap-4 p-4 rounded-xl bg-white/48 border border-slate-200/70 backdrop-blur-sm">
+                  <div className="flex items-start gap-4 rounded-lg border border-slate-200/60 bg-white/28 p-3">
                     <div className="mt-1 opacity-80">
                       <div className="w-8 h-8 rounded-full bg-red-50 face-badge-convex flex items-center justify-center text-[#FF5A65]">
                         <svg
@@ -802,7 +802,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                   </div>
 
                   {/* 1: あいまい (Vague/Hard) - Toggleable */}
-                  <div className="flex items-start gap-4 p-4 rounded-xl bg-white/48 border border-slate-200/70 backdrop-blur-sm">
+                  <div className="flex items-start gap-4 rounded-lg border border-slate-200/60 bg-white/28 p-3">
                     <div className="mt-1 opacity-80">
                       <div className="w-8 h-8 rounded-full bg-amber-50 face-badge-convex flex items-center justify-center text-[#F9A825]">
                         <svg
@@ -840,7 +840,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                   </div>
 
                   {/* 2: 覚えた (Good) - Always shown */}
-                  <div className="flex items-start gap-4 p-4 rounded-xl bg-white/48 border border-slate-200/70 backdrop-blur-sm">
+                  <div className="flex items-start gap-4 rounded-lg border border-slate-200/60 bg-white/28 p-3">
                     <div className="mt-1 opacity-80">
                       <div className="w-8 h-8 rounded-full bg-blue-50 face-badge-convex flex items-center justify-center text-[#00A3FF]">
                         <svg
@@ -872,7 +872,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                   </div>
 
                   {/* 3: 余裕 (Easy) - Toggleable */}
-                  <div className="flex items-start gap-4 p-4 rounded-xl bg-white/48 border border-slate-200/70 backdrop-blur-sm">
+                  <div className="flex items-start gap-4 rounded-lg border border-slate-200/60 bg-white/28 p-3">
                     <div className="mt-1 opacity-80">
                       <div className="w-8 h-8 rounded-full bg-emerald-50 face-badge-convex flex items-center justify-center text-[#00B67A]">
                         <svg
@@ -1587,4 +1587,5 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
     </Dialog>
   );
 }
+
 
