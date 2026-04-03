@@ -11,20 +11,20 @@ import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import type { CardBlock } from "@/types/domain/card";
 import type { CSSProperties } from "react";
 import { useCallback, useContext, useMemo, useState } from "react";
-import { BlockEditModeContext } from "./BlockEditModeContext";
-import { BlockSeparator } from "./BlockSeparator";
-import { shouldRenderInterBlockSeparator } from "./blockDisplayPolicy";
-import { CodeRenderer } from "./CodeRenderer";
-import { ImageBlockContent } from "./ImageBlockContent";
-import { ImageBlockShell } from "./ImageBlockShell";
-import { MarkdownBlockView } from "./MarkdownBlockPreview";
-import { MathBlockPreviewPane } from "./MathBlockPreviewPane";
-import { QuestionBlockLayout } from "./QuestionBlockLayout";
+import { BlockEditModeContext } from "@/components/card/blocks/core/BlockEditModeContext";
+import { BlockSeparator } from "@/components/card/blocks/core/BlockSeparator";
+import { shouldRenderInterBlockSeparator } from "@/components/card/blocks/core/blockDisplayPolicy";
+import { CodeRenderer } from "@/components/card/blocks/code/CodeRenderer";
+import { ImageBlockContent } from "@/components/card/blocks/image/ImageBlockContent";
+import { ImageBlockShell } from "@/components/card/blocks/image/ImageBlockShell";
+import { MarkdownBlockView } from "@/components/card/blocks/markdown/MarkdownBlockPreview";
+import { MathBlockPreviewPane } from "@/components/card/blocks/math/MathBlockPreviewPane";
+import { QuestionBlockLayout } from "@/components/card/blocks/question/QuestionBlockLayout";
 import {
   QUESTION_BLOCK_ANSWER_TEXT_CLASS,
   QUESTION_BLOCK_TITLE_TEXT_CLASS,
-} from "./questionBlockTextStyles";
-import { TextBlockContent } from "./TextBlockContent";
+} from "@/components/card/blocks/question/questionBlockTextStyles";
+import { TextBlockContent } from "@/components/card/blocks/text/TextBlockContent";
 
 interface BlockRendererProps {
   blocks?: CardBlock[];
@@ -351,3 +351,4 @@ export function BlockRenderer({
     </div>
   );
 }
+

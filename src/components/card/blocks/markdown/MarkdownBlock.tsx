@@ -1,10 +1,10 @@
 import { cn } from "@/lib/utils";
 import { NotebookPen } from "@/ui/icons";
 import React, { useState } from "react";
-import { BlockWrapper } from "./BlockWrapper";
+import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
 import { MarkdownBlockView } from "./MarkdownBlockPreview";
 import { MarkdownEditorDialog } from "./MarkdownEditorDialog";
-import { TEXT_BLOCK_CONTENT_CLASS } from "./textBlockStyles";
+import { TEXT_BLOCK_CONTENT_CLASS } from "@/components/card/blocks/text/textBlockStyles";
 
 type EditorBlock =
   | { type: "markdown"; markdown: string }
@@ -718,8 +718,4 @@ function parseAndSplitFencesWithRanges(md: string): {
 
   return { blocks, ranges };
 }
-
-
-
-
 

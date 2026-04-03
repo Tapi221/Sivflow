@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { CodeRenderer } from "@/components/card/blocks/CodeRenderer";
-import { CodeBlockEditor } from "@/components/card/blocks/CodeBlockEditor";
+import { CodeRenderer } from "@/components/card/blocks/code/CodeRenderer";
+import { CodeBlockEditor } from "@/components/card/blocks/code/CodeBlockEditor";
 import type { CodeBlockData } from "@/types/code-block";
 
 const SAMPLE_CODE = `function fibonacci(n: number): number {
@@ -42,6 +42,8 @@ export default function CodeBlockVisualTest() {
     </main>
   );
 }
+
+
 
 
 

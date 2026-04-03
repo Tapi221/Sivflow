@@ -8,14 +8,14 @@ import React, {
 } from "react";
 import { createPortal } from "react-dom";
 
-import { BlockToolbar } from "./BlockToolbar";
-import { CodeBlockItem } from "./CodeBlockItem";
-import { MarkdownBlock } from "./MarkdownBlock";
-import { MathBlock } from "./MathBlock";
-import { MediaBlock } from "./MediaBlock";
-import { QuestionBlock } from "./QuestionBlock";
-import { TextBlock } from "./TextBlock";
-import { hasRuledLine, shouldRenderInterBlockSeparator } from "./blockDisplayPolicy";
+import { BlockToolbar } from "@/components/card/blocks/core/BlockToolbar";
+import { CodeBlockItem } from "@/components/card/blocks/code/CodeBlockItem";
+import { MarkdownBlock } from "@/components/card/blocks/markdown/MarkdownBlock";
+import { MathBlock } from "@/components/card/blocks/math/MathBlock";
+import { MediaBlock } from "@/components/card/blocks/image/MediaBlock";
+import { QuestionBlock } from "@/components/card/blocks/question/QuestionBlock";
+import { TextBlock } from "@/components/card/blocks/text/TextBlock";
+import { hasRuledLine, shouldRenderInterBlockSeparator } from "@/components/card/blocks/core/blockDisplayPolicy";
 
 import { CARD_ROW_PX } from "@/components/card/common/constants";
 import {
@@ -26,7 +26,7 @@ import {
 } from "@/components/card/frame/rowOffset";
 import { cn } from "@/lib/utils";
 import type { CardBlock } from "@/types/domain/card";
-import { sortBlocksByOrderIndex } from "./blockOrdering";
+import { sortBlocksByOrderIndex } from "@/components/card/blocks/core/blockOrdering";
 
 type CssVars = React.CSSProperties & Record<`--${string}`, string>;
 
@@ -855,5 +855,6 @@ export const BlockEditor = React.forwardRef<
 );
 
 BlockEditor.displayName = "BlockEditor";
+
 
 

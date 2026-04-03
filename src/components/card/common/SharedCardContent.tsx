@@ -1,5 +1,5 @@
-import { BlockEditor } from "@/components/card/blocks/BlockEditor";
-import { BlockRenderer } from "@/components/card/blocks/BlockRenderer";
+import { BlockEditor } from "@/components/card/blocks/editor/BlockEditor";
+import { BlockRenderer } from "@/components/card/blocks/render/BlockRenderer";
 import { cn } from "@/lib/utils";
 import { CONTENT_TYPO } from "@/styles/tokens/typography";
 import type { CardBlock } from "@/types/domain/card";
@@ -95,4 +95,6 @@ function SharedCardContentInner(props: SharedCardContentProps) {
 
 export const SharedCardContent = React.memo(SharedCardContentInner);
 SharedCardContent.displayName = "SharedCardContent";
+
+
 
