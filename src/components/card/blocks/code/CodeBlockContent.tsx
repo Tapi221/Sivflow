@@ -15,6 +15,7 @@ import {
 } from "react";
 import Editor from "react-simple-code-editor";
 import { CodeBlockFrame } from "./CodeBlockFrame";
+import { webClipboardAdapter } from "@/platform/clipboard/webClipboardAdapter";
 import {
   getViewerLanguageLabels,
   normalizeEditorLanguage,
@@ -109,18 +110,8 @@ export const CodeBlockContent = (props: CodeBlockContentProps) => {
   }, []);
 
   const handleCopy = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(normalizedCode);
-      showCopiedForAWhile();
-    } catch {
-      const el = document.createElement("textarea");
-      el.value = normalizedCode;
-      document.body.appendChild(el);
-      el.select();
-      const copiedByFallback = document.execCommand("copy");
-      document.body.removeChild(el);
-      if (copiedByFallback) showCopiedForAWhile();
-    }
+    await webClipboardAdapter.writeText(normalizedCode);
+    showCopiedForAWhile();
   }, [normalizedCode, showCopiedForAWhile]);
 
   const copyButton = (
