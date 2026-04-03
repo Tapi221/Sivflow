@@ -23,6 +23,7 @@ export const createUploadedImage = (file: File): UploadedImage => {
     storagePath: null,
     scale: 1,
     x: 0,
+    layout: { baseWidthPx: null, cropX: 0 },
     naturalW: null,
     naturalH: null,
   };
@@ -43,6 +44,7 @@ export const createFailedUploadedImage = (file: File): UploadedImage => {
     storagePath: null,
     scale: 1,
     x: 0,
+    layout: { baseWidthPx: null, cropX: 0 },
     naturalW: null,
     naturalH: null,
   };

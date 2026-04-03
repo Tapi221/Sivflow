@@ -30,6 +30,19 @@ export const denormalizeCardForStorage = (card: unknown) => {
             error: img.error ?? undefined,
             scale: img.scale ?? 1,
             x: img.x ?? 0,
+            layout:
+              img.layout && typeof img.layout === "object"
+                ? {
+                    baseWidthPx:
+                      typeof img.layout.baseWidthPx === "number"
+                        ? img.layout.baseWidthPx
+                        : null,
+                    cropX:
+                      typeof img.layout.cropX === "number"
+                        ? img.layout.cropX
+                        : null,
+                  }
+                : null,
             naturalW: img.naturalW ?? null,
             naturalH: img.naturalH ?? null,
           };

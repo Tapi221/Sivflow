@@ -43,6 +43,11 @@ export interface ProfileImage {
   updatedAt: number;
 }
 
+export interface ImageBlockLayout {
+  baseWidthPx?: number | null;
+  cropX?: number | null;
+}
+
 export interface UploadedImage {
   id: string;
   assetId?: string | null;
@@ -63,6 +68,7 @@ export interface UploadedImage {
   uploadOrder?: number;
   scale?: number | null;
   x?: number | null;
+  layout?: ImageBlockLayout | null;
   naturalW?: number | null;
   naturalH?: number | null;
   uploadState?: UploadState;

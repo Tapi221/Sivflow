@@ -112,14 +112,25 @@ interface ImageGalleryProps {
         url?: string | null;
         scale?: number | null;
         x?: number | null;
+        layout?: {
+          baseWidthPx?: number | null;
+          cropX?: number | null;
+        } | null;
         naturalW?: number | null;
         naturalH?: number | null;
       }
   >;
   onFullscreenChange?: (isFullscreen: boolean) => void;
+  displayMode?: "fixed" | "fluid";
+  zoom?: number;
 }
 
-export function ImageGallery({ urls, items }: ImageGalleryProps) {
+export function ImageGallery({
+  urls,
+  items,
+  displayMode = "fixed",
+  zoom = 1,
+}: ImageGalleryProps) {
   const { currentUser } = useAuthSession();
   const [failedImages, setFailedImages] = useState(new Set<number>());
   const [naturalSizeMap, setNaturalSizeMap] = useState<
@@ -150,6 +161,7 @@ export function ImageGallery({ urls, items }: ImageGalleryProps) {
             url: safeUrl,
             scale: 1,
             x: 0,
+            layout: null,
             naturalW: null,
             naturalH: null,
           };
@@ -210,6 +222,7 @@ export function ImageGallery({ urls, items }: ImageGalleryProps) {
           assetId,
           scale: entry.scale ?? 1,
           x: entry.x ?? 0,
+          layout: entry.layout ?? null,
           naturalW: entry.naturalW ?? null,
           naturalH: entry.naturalH ?? null,
         };
@@ -473,8 +486,12 @@ export function ImageGallery({ urls, items }: ImageGalleryProps) {
                 <ImageFrame
                   src={item.url}
                   alt={`Image ${index + 1}`}
+                  displayMode={displayMode}
+                  zoom={zoom}
                   scale={item.scale}
                   x={item.x}
+                  layoutBaseWidthPx={item.layout?.baseWidthPx ?? null}
+                  cropX={item.layout?.cropX ?? null}
                   naturalW={item.naturalW ?? naturalSizeMap[index]?.w ?? null}
                   naturalH={item.naturalH ?? naturalSizeMap[index]?.h ?? null}
                   className="bg-transparent"

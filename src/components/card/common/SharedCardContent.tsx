@@ -14,6 +14,8 @@ type SharedCardContentBaseProps = {
 type SharedCardContentViewProps = SharedCardContentBaseProps & {
   mode: "view";
   onGalleryFullscreenChange?: (isFullscreen: boolean) => void;
+  displayMode?: "fixed" | "fluid";
+  zoom?: number;
 };
 
 type SharedCardContentEditProps = SharedCardContentBaseProps & {
@@ -83,6 +85,8 @@ function SharedCardContentInner(props: SharedCardContentProps) {
         <BlockRenderer
           blocks={props.blocks}
           onGalleryFullscreenChange={props.onGalleryFullscreenChange}
+          displayMode={props.displayMode}
+          zoom={props.zoom}
         />
       )}
     </div>

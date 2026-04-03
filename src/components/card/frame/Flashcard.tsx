@@ -332,6 +332,14 @@ function FlashcardInner({
               mode="view"
               blocks={derived.activeBlocks}
               onGalleryFullscreenChange={media.handleGalleryFullscreenChange}
+              displayMode={displayMode}
+              zoom={
+                typeof fixedScale === "number" &&
+                Number.isFinite(fixedScale) &&
+                fixedScale > 0
+                  ? fixedScale
+                  : 1
+              }
             />
           </div>
         </CardFrame>

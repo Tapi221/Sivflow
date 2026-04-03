@@ -138,10 +138,18 @@ function ImageItem({ item, index, onRetry, onUpdate }) {
     }
   }, [displayUrl, index]);
   const commitTransform = useCallback(
-    (next: { scale: number; x: number }) => {
+    (next: {
+      scale: number;
+      x: number;
+      layout: { baseWidthPx: number; cropX: number };
+    }) => {
       const normalized = {
         scale: next.scale >= 0.98 ? 1 : clamp(next.scale, 0.2, 1),
         x: next.scale >= 0.98 ? 0 : clamp(next.x, -1, 1),
+        layout: {
+          baseWidthPx: Math.max(1, next.layout.baseWidthPx),
+          cropX: next.scale >= 0.98 ? 0 : clamp(next.layout.cropX, -1, 1),
+        },
       };
       setDraftTransform(normalized);
       onUpdate(index, normalized);
@@ -161,6 +169,8 @@ function ImageItem({ item, index, onRetry, onUpdate }) {
               imgClassName="cursor-pointer"
               scale={safeScale}
               x={safeX}
+              layoutBaseWidthPx={item.layout?.baseWidthPx ?? null}
+              cropX={item.layout?.cropX ?? null}
               naturalW={item.naturalW ?? null}
               naturalH={item.naturalH ?? null}
               editable
@@ -173,14 +183,20 @@ function ImageItem({ item, index, onRetry, onUpdate }) {
                   return;
                 onUpdate(index, { naturalW, naturalH });
               }}
-              onTransformChange={({ scale, x }) => {
+              onTransformChange={({ scale, x, layout }) => {
                 setDraftTransform({
                   scale: scale >= 0.98 ? 1 : clamp(scale, 0.2, 1),
                   x: scale >= 0.98 ? 0 : clamp(x, -1, 1),
                 });
+                onUpdate(index, {
+                  layout: {
+                    baseWidthPx: Math.max(1, layout.baseWidthPx),
+                    cropX: scale >= 0.98 ? 0 : clamp(layout.cropX, -1, 1),
+                  },
+                });
               }}
-              onTransformCommit={({ scale, x }) => {
-                commitTransform({ scale, x });
+              onTransformCommit={({ scale, x, layout }) => {
+                commitTransform({ scale, x, layout });
               }}
             />
           ) : (

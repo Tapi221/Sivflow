@@ -7,6 +7,8 @@ type ImageBlockContentProps =
       urls: string[];
       items?: unknown[];
       onFullscreenChange?: (isFullscreen: boolean) => void;
+      displayMode?: "fixed" | "fluid";
+      zoom?: number;
     }
   | {
       mode: "edit";
@@ -25,6 +27,8 @@ export function ImageBlockContent(props: ImageBlockContentProps) {
         urls={props.urls}
         items={props.items}
         onFullscreenChange={props.onFullscreenChange}
+        displayMode={props.displayMode}
+        zoom={props.zoom}
       />
     );
   }

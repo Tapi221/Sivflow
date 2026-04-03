@@ -92,6 +92,17 @@ const normalizeUploadedImage = (
     resolveString(pickFirst(record, ["id"]));
   const scale = resolveNumber(pickFirst(record, ["scale"]));
   const x = resolveNumber(pickFirst(record, ["x"]));
+  const layoutValue = pickFirst(record, ["layout"]);
+  const layoutRecord =
+    layoutValue && typeof layoutValue === "object"
+      ? (layoutValue as Record<string, unknown>)
+      : null;
+  const baseWidthPx = layoutRecord
+    ? resolveNumber(pickFirst(layoutRecord, ["baseWidthPx", "base_width_px"]))
+    : undefined;
+  const cropX = layoutRecord
+    ? resolveNumber(pickFirst(layoutRecord, ["cropX", "crop_x"]))
+    : undefined;
   const naturalW = resolveNumber(pickFirst(record, ["naturalW", "natural_w"]));
   const naturalH = resolveNumber(pickFirst(record, ["naturalH", "natural_h"]));
 
@@ -127,6 +138,13 @@ const normalizeUploadedImage = (
     fallbackReason: fallbackReason ?? null,
     scale: normalizedScale,
     x: normalizedX,
+    layout:
+      baseWidthPx != null || cropX != null
+        ? {
+            baseWidthPx: baseWidthPx ?? null,
+            cropX: cropX ?? null,
+          }
+        : null,
     naturalW: naturalW ?? null,
     naturalH: naturalH ?? null,
   };
@@ -154,6 +172,10 @@ const denormalizeUploadedImage = (
     contentType?: string | null;
     size?: number | null;
     storagePath?: string | null;
+    layout?: {
+      baseWidthPx?: number | null;
+      cropX?: number | null;
+    } | null;
   },
   options: DenormalizeUploadedImageOptions = {},
 ) => {
@@ -168,6 +190,13 @@ const denormalizeUploadedImage = (
           size: image.size ?? null,
           storage_path: image.storagePath ?? null,
           status: image.status,
+          layout:
+            image.layout != null
+              ? {
+                  base_width_px: image.layout.baseWidthPx ?? null,
+                  crop_x: image.layout.cropX ?? null,
+                }
+              : null,
         }
       : {
           id: image.id,
@@ -178,6 +207,13 @@ const denormalizeUploadedImage = (
           size: image.size ?? null,
           storagePath: image.storagePath ?? null,
           status: image.status,
+          layout:
+            image.layout != null
+              ? {
+                  baseWidthPx: image.layout.baseWidthPx ?? null,
+                  cropX: image.layout.cropX ?? null,
+                }
+              : null,
         };
 
   if (options.stripUndefined) {
@@ -202,6 +238,10 @@ export const denormalizeUploadedImages = (
     contentType?: string | null;
     size?: number | null;
     storagePath?: string | null;
+    layout?: {
+      baseWidthPx?: number | null;
+      cropX?: number | null;
+    } | null;
   }>,
   options: DenormalizeUploadedImageOptions = {},
 ) => {

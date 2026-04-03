@@ -27,6 +27,8 @@ import { TextBlockContent } from "./TextBlockContent";
 interface BlockRendererProps {
   blocks?: CardBlock[];
   onGalleryFullscreenChange?: (isFullscreen: boolean) => void;
+  displayMode?: "fixed" | "fluid";
+  zoom?: number;
 }
 
 /** Question表示 */
@@ -91,6 +93,8 @@ function renderBlock(
     gridOffsetPx: number;
     onGalleryFullscreenChange?: (isFullscreen: boolean) => void;
     toMediaUrl: (item: unknown) => string | null;
+    displayMode: "fixed" | "fluid";
+    zoom: number;
   },
 ) {
   const {
@@ -98,6 +102,8 @@ function renderBlock(
     gridOffsetPx,
     onGalleryFullscreenChange,
     toMediaUrl,
+    displayMode,
+    zoom,
   } = options;
 
   switch (block.type) {
@@ -159,6 +165,8 @@ function renderBlock(
               .filter((u): u is string => Boolean(u))}
             items={block.images ?? []}
             onFullscreenChange={onGalleryFullscreenChange}
+            displayMode={displayMode}
+            zoom={zoom}
           />
         </ImageBlockShell>
       );
@@ -214,6 +222,8 @@ function renderBlock(
 export function BlockRenderer({
   blocks,
   onGalleryFullscreenChange,
+  displayMode = "fixed",
+  zoom = 1,
 }: BlockRendererProps) {
   const inEditMode = useContext(BlockEditModeContext);
   const blockOutline = inEditMode
@@ -286,6 +296,8 @@ export function BlockRenderer({
           gridOffsetPx,
           onGalleryFullscreenChange,
           toMediaUrl,
+          displayMode,
+          zoom,
         });
 
         if (!content) return null;

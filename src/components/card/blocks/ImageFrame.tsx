@@ -5,19 +5,43 @@ const clamp = (v: number, min: number, max: number) =>
   Math.min(max, Math.max(min, v));
 const DRAG_START_THRESHOLD_PX = 6;
 
+const inferBaseWidthFromLegacyScale = (
+  referenceWidthPx: number,
+  legacyScale?: number | null,
+) => {
+  const safeReferenceWidth = Math.max(1, referenceWidthPx || 1);
+  const safeLegacyScale = clamp(Number(legacyScale ?? 1), 0.2, 1);
+  return safeReferenceWidth * safeLegacyScale;
+};
+
+type ImageTransform = {
+  scale: number;
+  x: number;
+  layout: {
+    baseWidthPx: number;
+    cropX: number;
+  };
+};
+
 type ImageFrameProps = {
   src: string;
   alt: string;
   className?: string;
   imgClassName?: string;
+  displayMode?: "fixed" | "fluid";
+  zoom?: number;
   scale?: number | null;
   x?: number | null;
+  layoutBaseWidthPx?: number | null;
+  cropX?: number | null;
+  fixedReferenceFrameWidthPx?: number | null;
+  fluidAvailableWidthPx?: number | null;
   naturalW?: number | null;
   naturalH?: number | null;
   editable?: boolean;
   onImageClick?: () => void;
-  onTransformChange?: (next: { scale: number; x: number }) => void;
-  onTransformCommit?: (next: { scale: number; x: number }) => void;
+  onTransformChange?: (next: ImageTransform) => void;
+  onTransformCommit?: (next: ImageTransform) => void;
   onNaturalSize?: (size: { naturalW: number; naturalH: number }) => void;
   onError?: () => void;
 };
@@ -27,8 +51,14 @@ export function ImageFrame({
   alt,
   className,
   imgClassName,
+  displayMode = "fixed",
+  zoom = 1,
   scale = 1,
   x = 0,
+  layoutBaseWidthPx,
+  cropX,
+  fixedReferenceFrameWidthPx,
+  fluidAvailableWidthPx,
   naturalW,
   naturalH,
   editable = false,
@@ -52,7 +82,6 @@ export function ImageFrame({
   const [frameW, setFrameW] = React.useState(0);
   const [frameScaleX, setFrameScaleX] = React.useState(1);
   const frameMetricsRef = React.useRef({ width: 0, scaleX: 1 });
-  const preferredViewWidthRef = React.useRef<number | null>(null);
   const [isDragging, setIsDragging] = React.useState(false);
   const [dragX, setDragX] = React.useState<number | null>(null);
   const [loadedNaturalSize, setLoadedNaturalSize] = React.useState<{
@@ -60,38 +89,65 @@ export function ImageFrame({
     naturalH: number;
   } | null>(null);
 
+  void zoom;
+
   const safeScale = clamp(Number(scale ?? 1), 0.2, 1);
   const safeX = clamp(Number(x ?? 0), -1, 1);
-  const activeX = clamp(Number(dragX ?? safeX), -1, 1);
+  const safeCropX = clamp(Number(cropX ?? x ?? 0), -1, 1);
+  const activeX = clamp(Number(dragX ?? safeCropX), -1, 1);
 
   const safeNaturalW = Number(loadedNaturalSize?.naturalW ?? naturalW ?? 0);
   const safeNaturalH = Number(loadedNaturalSize?.naturalH ?? naturalH ?? 0);
   const ratio =
     safeNaturalW > 0 && safeNaturalH > 0 ? safeNaturalH / safeNaturalW : 1;
 
+  const resolvedReferenceWidthPx =
+    typeof fixedReferenceFrameWidthPx === "number" &&
+    Number.isFinite(fixedReferenceFrameWidthPx) &&
+    fixedReferenceFrameWidthPx > 0
+      ? fixedReferenceFrameWidthPx
+      : frameW;
+  const resolvedBaseWidthPx =
+    typeof layoutBaseWidthPx === "number" &&
+    Number.isFinite(layoutBaseWidthPx) &&
+    layoutBaseWidthPx > 0
+      ? layoutBaseWidthPx
+      : inferBaseWidthFromLegacyScale(resolvedReferenceWidthPx, scale);
+
   const editFrameH = Math.max(1, frameW * ratio * safeScale);
   const imgW = frameW * safeScale;
   const empty = Math.max(0, frameW - imgW);
   const leftPx = clamp(((activeX + 1) / 2) * empty, 0, empty);
 
-  const viewTargetW =
-    safeNaturalW > 0 ? safeNaturalW * safeScale : frameW > 0 ? frameW * safeScale : 0;
-  const defaultViewDisplayW =
-    frameW > 0
-      ? viewTargetW > 0
-        ? Math.min(frameW, Math.max(1, viewTargetW))
-        : frameW
-      : Math.max(1, viewTargetW || 1);
-  const preservedViewWidth = preferredViewWidthRef.current;
-  const viewDisplayW =
-    !editable &&
-    typeof preservedViewWidth === "number" &&
-    Number.isFinite(preservedViewWidth) &&
-    preservedViewWidth > 0 &&
-    (frameW <= 0 || preservedViewWidth <= frameW)
-      ? preservedViewWidth
-      : defaultViewDisplayW;
-  const viewFrameH = Math.max(1, viewDisplayW * ratio);
+  const fixedRenderWidthPx = resolvedBaseWidthPx;
+  const resolvedFluidAvailableWidthPx =
+    typeof fluidAvailableWidthPx === "number" &&
+    Number.isFinite(fluidAvailableWidthPx) &&
+    fluidAvailableWidthPx > 0
+      ? fluidAvailableWidthPx
+      : frameW;
+  const fluidRenderWidthPx = Math.min(
+    resolvedBaseWidthPx,
+    Math.max(1, resolvedFluidAvailableWidthPx || resolvedBaseWidthPx),
+  );
+  const renderWidthPx =
+    displayMode === "fluid" ? fluidRenderWidthPx : fixedRenderWidthPx;
+  const renderHeightPx = Math.max(1, renderWidthPx * ratio);
+
+  const emitTransform = React.useCallback(
+    (nextX: number): ImageTransform => ({
+      scale: safeScale,
+      x: nextX,
+      layout: {
+        baseWidthPx: inferBaseWidthFromLegacyScale(
+          resolvedReferenceWidthPx,
+          safeScale,
+        ),
+        cropX: nextX,
+      },
+    }),
+    [resolvedReferenceWidthPx, safeScale],
+  );
 
   const transformCallback =
     onTransformCommit ?? onTransformChange ?? undefined;
@@ -136,17 +192,7 @@ export function ImageFrame({
 
   React.useEffect(() => {
     setLoadedNaturalSize(null);
-    preferredViewWidthRef.current = null;
   }, [src]);
-
-  React.useLayoutEffect(() => {
-    if (editable) return;
-    const img = imgRef.current;
-    if (!img) return;
-    const measuredWidth = img.getBoundingClientRect().width;
-    if (!Number.isFinite(measuredWidth) || measuredWidth <= 0) return;
-    preferredViewWidthRef.current = measuredWidth;
-  }, [editable, viewDisplayW, frameW]);
 
   React.useEffect(() => {
     const img = imgRef.current;
@@ -170,7 +216,7 @@ export function ImageFrame({
       ref={frameRef}
       className={cn("relative w-full overflow-hidden", className)}
       style={{
-        height: `${editable ? editFrameH : viewFrameH}px`,
+        height: `${editable ? editFrameH : renderHeightPx}px`,
         touchAction: dragEnabled ? "none" : "auto",
         cursor: dragEnabled ? (isDragging ? "grabbing" : "grab") : undefined,
       }}
@@ -210,7 +256,7 @@ export function ImageFrame({
 
         dragRef.current.currentNormalizedX = nextX;
         setDragX(nextX);
-        onTransformChange?.({ scale: safeScale, x: nextX });
+        onTransformChange?.(emitTransform(nextX));
       }}
       onPointerUp={(event) => {
         if (!dragRef.current || event.pointerId !== dragRef.current.pointerId) {
@@ -229,7 +275,7 @@ export function ImageFrame({
         setDragX(null);
 
         if (started) {
-          transformCallback?.({ scale: safeScale, x: finalX });
+          transformCallback?.(emitTransform(finalX));
           window.setTimeout(() => {
             suppressClickRef.current = false;
           }, 0);
@@ -300,13 +346,10 @@ export function ImageFrame({
             ref={imgRef}
             src={src}
             alt={alt}
-            className={cn("block h-auto max-w-full", imgClassName)}
+            className={cn("block h-auto", imgClassName)}
             style={{
-              width:
-                safeNaturalW > 0
-                  ? `${Math.min(frameW || viewDisplayW, safeNaturalW * safeScale)}px`
-                  : "100%",
-              maxWidth: "100%",
+              width: `${Math.max(1, renderWidthPx)}px`,
+              maxWidth: displayMode === "fluid" ? "100%" : "none",
             }}
             decoding="async"
             draggable={false}
