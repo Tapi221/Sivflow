@@ -1,5 +1,5 @@
-import React from "react";
 import { cn } from "@/lib/utils";
+import React from "react";
 
 const clamp = (v: number, min: number, max: number) =>
   Math.min(max, Math.max(min, v));
@@ -392,4 +392,3 @@ export function ImageFrame({
     </div>
   );
 }
-

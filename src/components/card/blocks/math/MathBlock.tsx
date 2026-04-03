@@ -3,8 +3,8 @@ import React, { useCallback, useState } from "react";
 import { cn } from "@/lib/utils";
 import type { MathBlockData } from "@/types";
 import { Sigma } from "@/ui/icons";
-import { BlockWrapper } from "./BlockWrapper";
-import { MathBlockPreviewPane } from "./MathBlockPreviewPane";
+import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
+import { MathBlockPreviewPane } from "@/components/card/blocks/math/MathBlockPreviewPane";
 import { MathEditorDialog } from "./MathEditorDialog";
 
 const MAX_LATEX_LENGTH = 10000;
@@ -126,3 +126,4 @@ const areMathBlockPropsEqual = (prev: MathBlockProps, next: MathBlockProps) =>
 
 export const MathBlock = React.memo(MathBlockInner, areMathBlockPropsEqual);
 MathBlock.displayName = "MathBlock";
+

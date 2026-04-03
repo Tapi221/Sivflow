@@ -1,7 +1,7 @@
 import React from "react";
 import { Type } from "@/ui/icons";
-import { BlockWrapper } from "./BlockWrapper";
-import { TextBlockContent } from "./TextBlockContent";
+import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
+import { TextBlockContent } from "@/components/card/blocks/text/TextBlockContent";
 import { cn } from "@/lib/utils";
 
 interface TextBlockProps {
@@ -94,6 +94,7 @@ const areTextBlockPropsEqual = (prev: TextBlockProps, next: TextBlockProps) =>
 
 export const TextBlock = React.memo(TextBlockInner, areTextBlockPropsEqual);
 TextBlock.displayName = "TextBlock";
+
 
 
 

@@ -18,3 +18,4 @@ export const shouldRenderInterBlockSeparator = (
   return !hasRuledLine(prevBlockType) && !hasRuledLine(nextBlockType);
 };
 
+

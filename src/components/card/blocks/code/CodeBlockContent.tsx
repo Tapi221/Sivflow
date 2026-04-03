@@ -13,7 +13,7 @@ import Editor from "react-simple-code-editor";
 import Prism from "prismjs";
 import { cn } from "@/lib/utils";
 import { codeTheme } from "@/theme/codeTheme";
-import { BlockInset } from "./BlockInset";
+import { BlockInset } from "@/components/card/blocks/editor/BlockInset";
 import { CodeBlockFrame } from "./CodeBlockFrame";
 import {
   getViewerLanguageLabels,
@@ -232,6 +232,8 @@ export function CodeBlockContent(props: CodeBlockContentProps) {
     </div>
   );
 }
+
+
 
 
 

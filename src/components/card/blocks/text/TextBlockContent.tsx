@@ -3,7 +3,7 @@ import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
 import {
     TEXT_BLOCK_CONTENT_CLASS,
     TEXT_BLOCK_LINE_HEIGHT_PX,
-} from "./textBlockStyles";
+} from "@/components/card/blocks/text/textBlockStyles";
 
 const normalizeTextBlockContent = (content: string) =>
   String(content ?? "").replace(/\r\n/g, "\n");
@@ -52,6 +52,7 @@ export function TextBlockContent(props: TextBlockContentProps) {
     />
   );
 }
+
 
 
 

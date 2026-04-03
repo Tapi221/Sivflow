@@ -1,6 +1,6 @@
 import React from "react";
 import { cn } from "@/lib/utils";
-import { BlockInset } from "./BlockInset";
+import { BlockInset } from "@/components/card/blocks/editor/BlockInset";
 
 type QuestionBlockLayoutProps = {
   questionContent: React.ReactNode;
@@ -54,5 +54,6 @@ export function QuestionBlockLayout({
     </BlockInset>
   );
 }
+
 
 

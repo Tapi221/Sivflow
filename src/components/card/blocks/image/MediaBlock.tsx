@@ -1,8 +1,8 @@
 import React from "react";
 import { Image as ImageIcon } from "@/ui/icons";
-import { BlockWrapper } from "./BlockWrapper";
-import { ImageBlockContent } from "./ImageBlockContent";
-import { ImageBlockShell } from "./ImageBlockShell";
+import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
+import { ImageBlockContent } from "@/components/card/blocks/image/ImageBlockContent";
+import { ImageBlockShell } from "@/components/card/blocks/image/ImageBlockShell";
 import { cn } from "@/lib/utils";
 
 interface MediaBlockProps {
@@ -103,6 +103,7 @@ const areMediaBlockPropsEqual = (
 
 export const MediaBlock = React.memo(MediaBlockInner, areMediaBlockPropsEqual);
 MediaBlock.displayName = "MediaBlock";
+
 
 
 

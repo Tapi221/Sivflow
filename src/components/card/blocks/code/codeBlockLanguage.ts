@@ -95,8 +95,3 @@ export function normalizeEditorLanguage(input?: string): string {
   if (lang === "html") return "markup";
   return lang || "javascript";
 }
-
-
-
-
-

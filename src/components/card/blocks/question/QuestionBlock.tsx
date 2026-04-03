@@ -2,13 +2,13 @@ import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
 import type { CardBlock } from "@/types/domain/card";
 import { HelpCircle } from "@/ui/icons";
 import React, { useCallback, useRef } from "react";
-import { BlockWrapper } from "./BlockWrapper";
-import { QuestionBlockLayout } from "./QuestionBlockLayout";
+import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
+import { QuestionBlockLayout } from "@/components/card/blocks/question/QuestionBlockLayout";
 import {
     QUESTION_BLOCK_ANSWER_TEXT_CLASS,
     QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX,
     QUESTION_BLOCK_TITLE_TEXT_CLASS,
-} from "./questionBlockTextStyles";
+} from "@/components/card/blocks/question/questionBlockTextStyles";
 
 interface QuestionBlockProps {
   block: CardBlock;
@@ -144,4 +144,5 @@ export const QuestionBlock = React.memo(
   areQuestionBlockPropsEqual,
 );
 QuestionBlock.displayName = "QuestionBlock";
+
 

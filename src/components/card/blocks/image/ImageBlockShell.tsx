@@ -1,6 +1,6 @@
 import React from "react";
 import { cn } from "@/lib/utils";
-import { BlockInset } from "./BlockInset";
+import { BlockInset } from "@/components/card/blocks/editor/BlockInset";
 
 type ImageBlockShellProps = {
   children: React.ReactNode;
@@ -27,5 +27,6 @@ export function ImageBlockShell({
     </BlockInset>
   );
 }
+
 
 
