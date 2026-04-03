@@ -9,9 +9,11 @@ import {
 import { AudioPlayer } from "@/components/card/media/CardMedia";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import type { CardBlock } from "@/types/domain/card";
+import type { CSSProperties } from "react";
 import { useCallback, useContext, useMemo, useState } from "react";
-import { shouldRenderInterBlockSeparator } from "./blockDisplayPolicy";
 import { BlockEditModeContext } from "./BlockEditModeContext";
+import { BlockSeparator } from "./BlockSeparator";
+import { shouldRenderInterBlockSeparator } from "./blockDisplayPolicy";
 import { CodeRenderer } from "./CodeRenderer";
 import { ImageBlockContent } from "./ImageBlockContent";
 import { ImageBlockShell } from "./ImageBlockShell";
@@ -34,7 +36,7 @@ interface BlockRendererProps {
 const getFluidZoomStyle = (
   displayMode: "fixed" | "fluid",
   zoom: number,
-): React.CSSProperties | undefined => {
+): CSSProperties | undefined => {
   if (displayMode !== "fluid") return undefined;
   const safeZoom =
     typeof zoom === "number" && Number.isFinite(zoom) && zoom > 0 ? zoom : 1;
@@ -325,9 +327,7 @@ export function BlockRenderer({
 
         return (
           <div key={block.id}>
-            {showSeparator && (
-              <div className="my-1 h-px w-full bg-slate-200" />
-            )}
+            {showSeparator && <BlockSeparator />}
 
             <div
               className="w-full min-w-0 max-w-full flow-root"
