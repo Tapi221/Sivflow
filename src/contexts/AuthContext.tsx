@@ -47,3 +47,4 @@ export function useAuth(): AuthContextCompatValue {
     [security, session, sync],
   );
 }
+

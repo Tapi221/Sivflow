@@ -6,7 +6,7 @@
  * - legacy 画像フィールドは右上メディアダイアログ表示専用として扱い、
  *   本文ブロックには自動挿入しない
  */
-import { sortBlocksByOrderIndex } from "@/components/card/blocks/blockOrdering";
+import { sortBlocksByOrderIndex } from "@/components/card/blocks/core/blockOrdering";
 import type { CardBlock } from "@/types/domain/card";
 import type { FlashcardMediaLike } from "./flashcardDerived";
 
@@ -57,6 +57,7 @@ export function resolveSideBlocks(
 
   return fallbackBlocks;
 }
+
 
 
 

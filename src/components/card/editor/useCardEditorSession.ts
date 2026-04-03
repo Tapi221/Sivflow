@@ -8,7 +8,7 @@ import {
   type SetStateAction,
 } from "react";
 
-import { sortBlocksByOrderIndex } from "@/components/card/blocks/blockOrdering";
+import { sortBlocksByOrderIndex } from "@/components/card/blocks/core/blockOrdering";
 import {
   makeNewDraft,
   normalizeOrderIndex,
@@ -944,3 +944,4 @@ export function useCardEditorSession({
     panelCard,
   };
 }
+

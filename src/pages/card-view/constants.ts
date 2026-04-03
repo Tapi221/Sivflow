@@ -26,3 +26,4 @@ export function clampPaneWidthPx(
       : Number.POSITIVE_INFINITY;
   return Math.min(clampedMax, Math.max(clampedMin, Math.round(safeValue)));
 }
+

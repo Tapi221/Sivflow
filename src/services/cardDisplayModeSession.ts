@@ -30,3 +30,4 @@ export function setCardSetSessionDisplayMode(
   if (!cardSetId) return;
   currentDisplayModeByCardSet.set(cardSetId, mode);
 }
+

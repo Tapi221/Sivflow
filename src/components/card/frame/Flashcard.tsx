@@ -424,3 +424,4 @@ const areFlashcardPropsEqual = (prev: FlashcardProps, next: FlashcardProps) => {
 
 export const Flashcard = React.memo(FlashcardInner, areFlashcardPropsEqual);
 Flashcard.displayName = "Flashcard";
+

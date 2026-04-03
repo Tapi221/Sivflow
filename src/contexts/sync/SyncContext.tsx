@@ -367,3 +367,4 @@ export function SyncProvider({ children }: SyncProviderProps) {
 
   return <SyncContext.Provider value={value}>{children}</SyncContext.Provider>;
 }
+

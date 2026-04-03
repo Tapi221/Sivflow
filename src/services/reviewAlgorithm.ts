@@ -713,3 +713,4 @@ export type MultipleChoiceReviewMeta = {
   /** 選択肢表示後から回答までの時間（ミリ秒） */
   choiceTimeMs?: number;
 };
+

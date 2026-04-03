@@ -1554,3 +1554,4 @@ export class SyncService {
     return { successRate, avgDuration, errorRate, totalSyncs };
   }
 }
+

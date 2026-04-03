@@ -74,3 +74,4 @@ export const calculateResistanceScore = (intervalDays: number): number => {
 
 
 
+

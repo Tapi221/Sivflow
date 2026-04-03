@@ -48,3 +48,4 @@ export function compareOrderableEntities<T>(
 
   return (selectors.getId(a) ?? "").localeCompare(selectors.getId(b) ?? "", "ja");
 }
+

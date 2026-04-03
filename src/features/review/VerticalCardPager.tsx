@@ -438,3 +438,4 @@ function VerticalCardPagerFn<T>({
 export const VerticalCardPager = React.memo(
   VerticalCardPagerFn,
 ) as typeof VerticalCardPagerFn;
+
