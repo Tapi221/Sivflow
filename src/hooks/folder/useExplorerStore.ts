@@ -1,18 +1,13 @@
 /**
  * useExplorerStore - Explorer状態管理フック
  *
- * Pinned, Recent, タブ状態をlocalStorageで永続化
+ * Recent, タブ状態をlocalStorageで永続化
  */
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 // 型定義
-export type ExplorerTab = "pinned" | "explorer" | "views" | "recent" | "inbox";
-
-export interface PinnedItem {
-  type: "folder" | "card" | "document";
-  id: string;
-}
+export type ExplorerTab = "explorer" | "recent" | "inbox";
 
 export interface RecentItem {
   type: "folder" | "card" | "document";
@@ -25,13 +20,6 @@ export interface ExplorerState {
   activeTab: ExplorerTab; // Deprecated but kept for compatibility
   explorerTab: ExplorerTab;
   setExplorerTab: (tab: ExplorerTab) => void;
-
-  // Pinned
-  pinnedItems: PinnedItem[];
-  pinItem: (item: PinnedItem) => void;
-  unpinItem: (item: PinnedItem) => void;
-  reorderPinnedItems: (newPinnedItems: PinnedItem[]) => void;
-  isPinned: (type: "folder" | "card" | "document", id: string) => boolean;
 
   // Recent
   recent: RecentItem[];
@@ -65,7 +53,6 @@ export interface ExplorerState {
 }
 
 // 定数
-const MAX_PINNED_ITEMS = 20;
 const MAX_RECENT = 30;
 
 /**
@@ -78,35 +65,6 @@ export const useExplorerStore = create<ExplorerState>()(
       activeTab: "explorer",
       explorerTab: "explorer",
       setExplorerTab: (tab) => set({ explorerTab: tab }),
-
-      // Pinned
-      pinnedItems: [],
-      pinItem: (item) =>
-        set((state) => {
-          const exists = state.pinnedItems.some(
-            (p) => p.type === item.type && p.id === item.id,
-          );
-          if (exists) return state;
-          // 先頭に追加、最大数制限
-          return {
-            pinnedItems: [item, ...state.pinnedItems].slice(
-              0,
-              MAX_PINNED_ITEMS,
-            ),
-          };
-        }),
-      unpinItem: (item) =>
-        set((state) => ({
-          pinnedItems: state.pinnedItems.filter(
-            (p) => !(p.type === item.type && p.id === item.id),
-          ),
-        })),
-      reorderPinnedItems: (newPinnedItems) =>
-        set({ pinnedItems: newPinnedItems }),
-      isPinned: () => {
-        // state helper
-        return false; // Not used directly, hook consumers check state.pinnedItems
-      },
 
       // Recent
       recent: [],
@@ -181,7 +139,6 @@ export const useExplorerStore = create<ExplorerState>()(
       name: "explorer-storage",
       partialize: (state) => ({
         explorerTab: state.explorerTab,
-        pinnedItems: state.pinnedItems,
         recent: state.recent,
         tagFilter: state.tagFilter,
         tagMatchMode: state.tagMatchMode,
@@ -197,13 +154,15 @@ export const useExplorerStore = create<ExplorerState>()(
         const next = { ...persistedState };
 
         if (next.explorerTab === "favorites") {
-          next.explorerTab = "pinned";
+          next.explorerTab = "explorer";
         }
 
-        if (!Array.isArray(next.pinnedItems) && Array.isArray(next.favorites)) {
-          next.pinnedItems = next.favorites;
+        if (next.explorerTab === "pinned" || next.explorerTab === "views") {
+          next.explorerTab = "explorer";
         }
+
         delete next.favorites;
+        delete next.pinnedItems;
 
         return next;
       },

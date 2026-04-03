@@ -55,8 +55,6 @@ interface FolderRowProps {
   handleDelete: (id: string, type: "folder") => void;
   handleRenameConfirm: () => Promise<void>;
   renameCancelledRef: React.MutableRefObject<boolean>;
-  isPinned: boolean;
-  handleTogglePin: () => void;
   isFiltering: boolean;
   matchCount: number;
   rowBaseClassName: string;
@@ -94,8 +92,6 @@ export const FolderRow: React.FC<FolderRowProps> = ({
   handleDelete,
   handleRenameConfirm,
   renameCancelledRef,
-  isPinned,
-  handleTogglePin,
   isFiltering,
   matchCount,
   rowBaseClassName,
@@ -304,8 +300,6 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                   }}
                   onDelete={() => handleDelete(folderId, "folder")}
                   onBulkTag={onBulkTag}
-                  isPinned={isPinned}
-                  onTogglePin={handleTogglePin}
                 >
                   <button
                     type="button"

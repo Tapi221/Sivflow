@@ -23,9 +23,6 @@ interface RootFolderPanelListProps {
   handleCreateFolderAction: (parentId: string | null) => string;
   handleCreateCardSetAction: (folderId: string | null) => string | null;
   handleDelete: (id: string, type: "folder" | "card") => void;
-  pinnedItems?: Array<{ type: "folder" | "card" | "document"; id: string }>;
-  onPinItem?: (item: { type: "folder" | "card" | "document"; id: string }) => void;
-  onUnpinItem?: (item: { type: "folder" | "card" | "document"; id: string }) => void;
   setEditingId: React.Dispatch<React.SetStateAction<string | null>>;
   setEditingName: React.Dispatch<React.SetStateAction<string>>;
   editingNameRef: React.MutableRefObject<string>;
@@ -43,9 +40,6 @@ export function RootFolderPanelList({
   handleCreateFolderAction,
   handleCreateCardSetAction,
   handleDelete,
-  pinnedItems,
-  onPinItem,
-  onUnpinItem,
   setEditingId,
   setEditingName,
   editingNameRef,
@@ -75,10 +69,6 @@ export function RootFolderPanelList({
         const isEditing = editingId === panel.id;
         const menuId = `folder:${panel.id}:panel`;
         const isMenuOpen = openRowMenuId === menuId;
-        const isPinned =
-          pinnedItems?.some(
-            (item) => item.type === "folder" && item.id === panel.id,
-          ) ?? false;
 
         return (
           <div
@@ -189,11 +179,6 @@ export function RootFolderPanelList({
                   editingNameRef.current = panel.name;
                 }}
                 onDelete={() => handleDelete(panel.id, "folder")}
-                isPinned={isPinned}
-                onTogglePin={() => {
-                  if (isPinned) onUnpinItem?.({ type: "folder", id: panel.id });
-                  else onPinItem?.({ type: "folder", id: panel.id });
-                }}
               >
                 <button
                   type="button"

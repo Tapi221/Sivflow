@@ -52,10 +52,6 @@ interface ExplorerTreeNodeProps {
   handleDelete: (id: string, type: "folder" | "card") => void;
   handleRenameConfirm: () => Promise<void>;
   setRowRef: (id: string, node: HTMLElement | null) => void;
-  // pin
-  pinnedItems?: Array<{ type: "folder" | "card" | "document"; id: string }>;
-  onPinItem?: (item: { type: "folder" | "card" | "document"; id: string }) => void;
-  onUnpinItem?: (item: { type: "folder" | "card" | "document"; id: string }) => void;
   // filter
   isFiltering: boolean;
   // delete/update capability
@@ -91,9 +87,6 @@ export const ExplorerTreeNodeRenderer = React.memo(
     handleDelete,
     handleRenameConfirm,
     setRowRef,
-    pinnedItems,
-    onPinItem,
-    onUnpinItem,
     isFiltering,
     hasUpdateOrDelete,
     setBulkTagFolderId,
@@ -103,9 +96,6 @@ export const ExplorerTreeNodeRenderer = React.memo(
 
     if (treeNode.kind === "folder" && treeNode.folder) {
       const folderId = treeNode.rawId;
-      const isPinned =
-        pinnedItems?.some((item) => item.type === "folder" && item.id === folderId) ??
-        false;
 
       return (
         <div style={style}>
@@ -129,11 +119,6 @@ export const ExplorerTreeNodeRenderer = React.memo(
             handleDelete={handleDelete}
             handleRenameConfirm={handleRenameConfirm}
             renameCancelledRef={renameCancelledRef}
-            isPinned={isPinned}
-            handleTogglePin={() => {
-              if (isPinned) onUnpinItem?.({ type: "folder", id: folderId });
-              else onPinItem?.({ type: "folder", id: folderId });
-            }}
             isFiltering={isFiltering}
             matchCount={treeNode.matchCount ?? -1}
             rowBaseClassName={ROW_BASE}

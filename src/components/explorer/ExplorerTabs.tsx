@@ -4,7 +4,7 @@
  */
 import React, { useRef, useState } from "react";
 import { FileText, Folder, Plus } from "@/ui/icons";
-import type { ExplorerTab } from "@/components/folder/explorer/model/types";
+import type { ExplorerTab } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
 import { TagFilterPopover } from "./TagFilterPopover";
 import {
@@ -30,8 +30,6 @@ interface ExplorerTabsProps {
 
 const TABS: { id: ExplorerTab; label: string }[] = [
   { id: "explorer", label: "フォルダ" },
-  { id: "pinned", label: "ピン" },
-  { id: "views", label: "ビュー" },
   { id: "recent", label: "最近" },
 ];
 

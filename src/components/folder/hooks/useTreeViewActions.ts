@@ -16,7 +16,6 @@ export function useTreeViewActions({
 }: UseTreeViewActionsParams) {
   const [isCreateSelectionOpen, setIsCreateSelectionOpen] = useState(false);
   const [isModeSelectionOpen, setIsModeSelectionOpen] = useState(false);
-  const [isViewManagerOpen, setIsViewManagerOpen] = useState(false);
 
   const handleFolderSelectWithRecent = useCallback(
     (folderId: string | null) => {
@@ -95,8 +94,6 @@ export function useTreeViewActions({
     setIsCreateSelectionOpen,
     isModeSelectionOpen,
     setIsModeSelectionOpen,
-    isViewManagerOpen,
-    setIsViewManagerOpen,
     handleFolderSelectWithRecent,
     handleStartStudy,
     handleViewCards,

@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -18,7 +17,6 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import {
-  ArrowLeft,
   Trash2,
   RotateCcw,
   Folder,
@@ -28,7 +26,7 @@ import {
   Filter,
   ChevronDown,
 } from "@/ui/icons";
-import { createPageUrl, normalizeCard, normalizeFolder } from "@/utils";
+import { normalizeCard, normalizeFolder } from "@/utils";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import { getLocalDb } from "@/services/localDB";
@@ -41,7 +39,6 @@ import {
 import { getCardImages, getCardText } from "@/domain/card/content";
 
 export default function Trash() {
-  const navigate = useNavigate();
   const { currentUser } = useAuthSession();
 
   // IndexedDBから削除されたアイテムを直接取得
@@ -396,30 +393,6 @@ export default function Trash() {
       <div className="max-w-[1400px] mx-auto p-6 md:p-14">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-12">
-          <div className="flex items-start gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate(createPageUrl("Dashboard"))}
-              className="mt-1 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors w-9 h-9"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-7 h-7 flex items-center justify-center text-primary-600">
-                  <Trash2 className="w-5.5 h-5.5" />
-                </div>
-                <h1 className="text-2xl font-extrabold text-[#334155] tracking-tight">
-                  ごみ箱
-                </h1>
-              </div>
-              <p className="text-sm text-slate-400 font-bold ml-10 tracking-tight">
-                削除されたアイテムは30日後に自動的に完全削除されます。
-              </p>
-            </div>
-          </div>
-
           {!isEmpty && (
             <div className="flex items-center gap-4">
               <Badge

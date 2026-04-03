@@ -23,6 +23,7 @@ const AuthSessionContext = createContext<AuthSessionContextType>({
   loading: true,
 });
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuthSession() {
   return useContext(AuthSessionContext);
 }

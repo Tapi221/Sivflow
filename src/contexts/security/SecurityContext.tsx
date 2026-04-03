@@ -27,6 +27,7 @@ const SecurityContext = createContext<SecurityContextType>({
   dismissSecurityAlert: async () => {},
 });
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useSecurity() {
   return useContext(SecurityContext);
 }
@@ -51,10 +52,7 @@ export function SecurityProvider({ children }: SecurityProviderProps) {
   );
 
   useEffect(() => {
-    if (!currentUser) {
-      setSecurityState(defaultSecurityState);
-      return;
-    }
+    if (!currentUser) return;
 
     let active = true;
     let stopMonitoring: (() => void) | undefined;
@@ -77,12 +75,16 @@ export function SecurityProvider({ children }: SecurityProviderProps) {
     };
   }, [currentUser]);
 
+  const resolvedSecurityState = currentUser
+    ? securityState
+    : defaultSecurityState;
+
   const value = useMemo<SecurityContextType>(
     () => ({
-      securityState,
+      securityState: resolvedSecurityState,
       dismissSecurityAlert,
     }),
-    [dismissSecurityAlert, securityState],
+    [dismissSecurityAlert, resolvedSecurityState],
   );
 
   return (

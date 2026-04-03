@@ -21,15 +21,6 @@ import { useTreeViewDerivedState } from "@/components/folder/hooks/useTreeViewDe
 import { useTreeViewFilters } from "@/components/folder/hooks/useTreeViewFilters";
 import { useTreeViewSidebar } from "@/components/folder/hooks/useTreeViewSidebar";
 
-import {
-  ACTIVE_VIEW_KINDS,
-  DEFAULT_FOLDER_VIEW,
-  buildVirtualTree,
-  createViewId,
-  type ViewDef,
-  type ViewKind,
-} from "@/components/folder/types/viewTypes";
-
 interface TreeViewLayoutProps {
   folders: Folder[];
   cards: Card[];
@@ -66,7 +57,7 @@ function TreeViewLayout({
   folderSelectionNonce = 0,
 }: TreeViewLayoutProps) {
   const navigate = useNavigate();
-  const { settings, updateSettings } = useUserSettings();
+  const { settings } = useUserSettings();
   const { createFolder, updateFolder, deleteFolder } = useFolders();
   const { createCard, updateCard, deleteCard, moveCardToFolder, reorderCards } =
     useCards();
@@ -117,8 +108,7 @@ function TreeViewLayout({
   );
 
   const { updateDocument } = useDocuments();
-  const { getTagColor, getCategoryName, listCategoryIdsInUse, tagById, tags } =
-    useTags();
+  const { getTagColor, tagById } = useTags();
 
   const {
     sidebarRef,
@@ -135,14 +125,8 @@ function TreeViewLayout({
     scroller.scrollTop = 0;
   }, [contentScrollRef, selectedFolderId, navigateToSectionListToken]);
 
-  const {
-    getFolderPath,
-    selectedFolder,
-    selectedDocument,
-    folderCards,
-    folderStats,
-    showMobileDetail,
-  } = useTreeViewDerivedState({
+  const { selectedFolder, selectedDocument, folderCards, folderStats, showMobileDetail } =
+    useTreeViewDerivedState({
     folders,
     cards,
     documents,
@@ -156,10 +140,6 @@ function TreeViewLayout({
 
   const explorerTab = useExplorerStore((s) => s.explorerTab);
   const setExplorerTab = useExplorerStore((s) => s.setExplorerTab);
-
-  const pinnedItems = useExplorerStore((s) => s.pinnedItems);
-  const pinItem = useExplorerStore((s) => s.pinItem);
-  const unpinItem = useExplorerStore((s) => s.unpinItem);
 
   const recent = useExplorerStore((s) => s.recent);
   const addRecent = useExplorerStore((s) => s.addRecent);
@@ -183,8 +163,6 @@ function TreeViewLayout({
     setIsCreateSelectionOpen,
     isModeSelectionOpen,
     setIsModeSelectionOpen,
-    isViewManagerOpen,
-    setIsViewManagerOpen,
     handleFolderSelectWithRecent,
     handleStartStudy,
     handleViewCards,
@@ -225,63 +203,6 @@ function TreeViewLayout({
     });
     return Array.from(tagNames).sort();
   }, [cards, tagById]);
-
-  const viewDefs = useMemo(() => {
-    const storedViews = Array.isArray(settings?.explorerViews)
-      ? settings.explorerViews
-      : [];
-
-    const validStoredViews = storedViews.filter((view): view is ViewDef =>
-      ACTIVE_VIEW_KINDS.includes(view.kind as ViewKind),
-    );
-
-    const folderView =
-      validStoredViews.find((view) => view.kind === "folder") ??
-      DEFAULT_FOLDER_VIEW;
-
-    return [
-      folderView,
-      ...validStoredViews.filter((view) => view.kind !== "folder"),
-    ];
-  }, [settings]);
-
-  const selectedViewId = useMemo(() => {
-    const savedViewId = settings?.selectedExplorerViewId;
-    if (savedViewId && viewDefs.some((view) => view.id === savedViewId)) {
-      return savedViewId;
-    }
-    return viewDefs[0]?.id ?? DEFAULT_FOLDER_VIEW.id;
-  }, [settings?.selectedExplorerViewId, viewDefs]);
-
-  const selectedView = useMemo(
-    () =>
-      viewDefs.find((view) => view.id === selectedViewId) ??
-      DEFAULT_FOLDER_VIEW,
-    [selectedViewId, viewDefs],
-  );
-
-  const customViews = useMemo(
-    () => viewDefs.filter((view) => view.kind !== "folder"),
-    [viewDefs],
-  );
-
-  const activeCustomView = useMemo(() => {
-    if (selectedView.kind !== "folder") return selectedView;
-    return customViews[0] ?? null;
-  }, [customViews, selectedView]);
-
-  const categoryIdsInUse = useMemo(
-    () => listCategoryIdsInUse(),
-    [listCategoryIdsInUse],
-  );
-
-  const categoryNameById = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const categoryId of categoryIdsInUse) {
-      map.set(categoryId, getCategoryName(categoryId));
-    }
-    return map;
-  }, [categoryIdsInUse, getCategoryName]);
 
   const currentHeaderFolderId = useMemo(() => {
     if (selectedFolderId) return selectedFolderId;
@@ -358,134 +279,9 @@ function TreeViewLayout({
     tagById,
   });
 
-  const virtualTreeNodes = useMemo(() => {
-    if (!activeCustomView) return [];
-    return buildVirtualTree(
-      activeCustomView,
-      filteredCards,
-      tags,
-      categoryNameById,
-    );
-  }, [activeCustomView, filteredCards, tags, categoryNameById]);
-
-  const persistSettings = useCallback(
-    async (patch: Partial<typeof settings>) => {
-      await updateSettings(patch);
-    },
-    [updateSettings],
-  );
-
-  const handleViewChange = useCallback(
-    async (viewId: string) => {
-      await persistSettings({ selectedExplorerViewId: viewId });
-      const nextView = viewDefs.find((view) => view.id === viewId);
-      if (nextView && nextView.kind !== "folder") {
-        onFolderSelect(null);
-      }
-    },
-    [onFolderSelect, persistSettings, viewDefs],
-  );
-
-  const handleAddView = useCallback(
-    async (kind: ViewKind) => {
-      if (kind === "folder") return;
-
-      const nextView: ViewDef = {
-        id: createViewId(),
-        name: kind === "tagCategory" ? "新しいタグビュー" : "新しいタグツリー",
-        kind,
-        options:
-          kind === "tagCategory"
-            ? { categoryMode: "user-defined", ungroupedLabel: "未分類" }
-            : {
-                scopeMode: "all",
-                hideZeroUsage: true,
-                ungroupedLabel: "未分類",
-              },
-      };
-
-      await persistSettings({
-        explorerViews: [...viewDefs, nextView],
-        selectedExplorerViewId: nextView.id,
-      });
-    },
-    [persistSettings, viewDefs],
-  );
-
-  const handleRenameView = useCallback(
-    async (viewId: string, name: string) => {
-      await persistSettings({
-        explorerViews: viewDefs.map((view) =>
-          view.id === viewId ? { ...view, name } : view,
-        ),
-      });
-    },
-    [persistSettings, viewDefs],
-  );
-
-  const handleDeleteView = useCallback(
-    async (viewId: string) => {
-      const nextViews = viewDefs.filter((view) => view.id !== viewId);
-      await persistSettings({
-        explorerViews: nextViews,
-        selectedExplorerViewId:
-          selectedViewId === viewId ? DEFAULT_FOLDER_VIEW.id : selectedViewId,
-      });
-    },
-    [persistSettings, selectedViewId, viewDefs],
-  );
-
-  const handleUpdateCategoryName = useCallback(
-    async (categoryId: string, displayName: string) => {
-      await updateSettings({
-        tagCategoryDisplayNames: {
-          ...(settings?.tagCategoryDisplayNames ?? {}),
-          [categoryId]: displayName,
-        },
-      });
-    },
-    [settings?.tagCategoryDisplayNames, updateSettings],
-  );
-
-  const handleUpdateUngroupedLabel = useCallback(
-    async (viewId: string, label: string) => {
-      await persistSettings({
-        explorerViews: viewDefs.map((view) =>
-          view.id === viewId
-            ? {
-                ...view,
-                options: {
-                  ...view.options,
-                  ungroupedLabel: label,
-                },
-              }
-            : view,
-        ),
-      });
-    },
-    [persistSettings, viewDefs],
-  );
-
-  const handleUpdateViewOptions = useCallback(
-    async (viewId: string, options: NonNullable<ViewDef["options"]>) => {
-      await persistSettings({
-        explorerViews: viewDefs.map((view) =>
-          view.id === viewId
-            ? {
-                ...view,
-                options,
-              }
-            : view,
-        ),
-      });
-    },
-    [persistSettings, viewDefs],
-  );
-
   const tabContent = (
     <TreeViewTabContent
       explorerTab={explorerTab}
-      pinnedItems={pinnedItems}
       recent={recent}
       folders={folders}
       cards={cards}
@@ -495,9 +291,6 @@ function TreeViewLayout({
       filteredDocuments={filteredDocuments}
       selectedFolderId={selectedFolderId}
       selectedItem={selectedItem}
-      activeCustomView={activeCustomView}
-      customViews={customViews}
-      virtualTreeNodes={virtualTreeNodes}
       isFiltering={isFiltering}
       onRegisterCreateFolderTrigger={(fn) => {
         createFolderTriggerRef.current = fn;
@@ -514,12 +307,9 @@ function TreeViewLayout({
       navigateToSectionListToken={navigateToSectionListToken}
       folderSelectionNonce={folderSelectionNonce}
       onHeaderFolderIdChange={setExplorerHeaderFolderId}
-      getFolderPath={getFolderPath}
       onFolderSelect={handleFolderSelect}
       onItemSelect={handleItemSelect}
       onClearRecent={clearRecent}
-      onSelectView={handleViewChange}
-      onOpenManager={() => setIsViewManagerOpen(true)}
       onCreateFolder={createFolder}
       onUpdateFolder={updateFolder}
       onDeleteFolder={deleteFolder}
@@ -533,8 +323,6 @@ function TreeViewLayout({
       moveCardSetToFolder={moveCardSetToFolder}
       moveDocumentToFolder={(id, folderId) => updateDocument(id, { folderId })}
       reorderCards={reorderCards}
-      onPinItem={pinItem}
-      onUnpinItem={unpinItem}
       selectedCardSetId={selectedCardSetId}
       onSelectCardSet={handleCardSetSelectWithoutNavigation}
     />
@@ -604,19 +392,8 @@ function TreeViewLayout({
         setIsCreateSelectionOpen={setIsCreateSelectionOpen}
         isModeSelectionOpen={isModeSelectionOpen}
         setIsModeSelectionOpen={setIsModeSelectionOpen}
-        isViewManagerOpen={isViewManagerOpen}
-        setIsViewManagerOpen={setIsViewManagerOpen}
         onSelectCreateMode={handleSelectCreateMode}
         onSelectDetailedMode={handleSelectDetailedMode}
-        views={viewDefs}
-        tags={tags}
-        categoryNameEntries={Array.from(categoryNameById.entries())}
-        onAddView={handleAddView}
-        onRenameView={handleRenameView}
-        onDeleteView={handleDeleteView}
-        onUpdateCategoryName={handleUpdateCategoryName}
-        onUpdateUngroupedLabel={handleUpdateUngroupedLabel}
-        onUpdateViewOptions={handleUpdateViewOptions}
       />
     </div>
   );

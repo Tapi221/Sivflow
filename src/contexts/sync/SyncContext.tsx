@@ -52,6 +52,7 @@ const defaultSyncContext: SyncContextType = {
 
 const SyncContext = createContext<SyncContextType>(defaultSyncContext);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useSyncContext() {
   return useContext(SyncContext);
 }
@@ -225,11 +226,6 @@ export function SyncProvider({ children }: SyncProviderProps) {
       clearSyncInterval();
       syncSettingsRef.current = null;
       syncServiceRef.current = null;
-      setSyncStatus("idle");
-      setSyncNotice("none");
-      setLastSyncTime(null);
-      setQueueCount(0);
-      setConflictCount(0);
       return;
     }
 
@@ -336,13 +332,19 @@ export function SyncProvider({ children }: SyncProviderProps) {
     return () => clearInterval(interval);
   }, [updateCounts, userId]);
 
+  const resolvedSyncStatus = userId ? syncStatus : "idle";
+  const resolvedSyncNotice = userId ? syncNotice : "none";
+  const resolvedLastSyncTime = userId ? lastSyncTime : null;
+  const resolvedQueueCount = userId ? queueCount : 0;
+  const resolvedConflictCount = userId ? conflictCount : 0;
+
   const value = useMemo<SyncContextType>(
     () => ({
-      syncStatus,
-      syncNotice,
-      lastSyncTime,
-      queueCount,
-      conflictCount,
+      syncStatus: resolvedSyncStatus,
+      syncNotice: resolvedSyncNotice,
+      lastSyncTime: resolvedLastSyncTime,
+      queueCount: resolvedQueueCount,
+      conflictCount: resolvedConflictCount,
       triggerSync,
       reloadSyncSettings,
       getUnresolvedConflicts,
@@ -351,14 +353,14 @@ export function SyncProvider({ children }: SyncProviderProps) {
     }),
     [
       clearSyncErrors,
-      conflictCount,
       getUnresolvedConflicts,
-      lastSyncTime,
-      queueCount,
       reloadSyncSettings,
+      resolvedConflictCount,
+      resolvedLastSyncTime,
+      resolvedQueueCount,
+      resolvedSyncNotice,
+      resolvedSyncStatus,
       resolveConflict,
-      syncNotice,
-      syncStatus,
       triggerSync,
     ],
   );

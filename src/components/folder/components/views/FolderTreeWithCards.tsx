@@ -80,15 +80,6 @@ interface FolderTreeWithCardsProps {
     targetFolderId: string,
   ) => Promise<void>;
   reorderCards?: (folderId: string, cardIds: string[]) => Promise<void>;
-  pinnedItems?: Array<{ type: "folder" | "card" | "document"; id: string }>;
-  onPinItem?: (item: {
-    type: "folder" | "card" | "document";
-    id: string;
-  }) => void;
-  onUnpinItem?: (item: {
-    type: "folder" | "card" | "document";
-    id: string;
-  }) => void;
   selectedCardSetId?: string | null;
   onSelectCardSet?: (cardSetId: string, folderId: string, label: string) => void;
   isFiltering?: boolean;
@@ -125,9 +116,6 @@ export function FolderTreeWithCards({
   moveCardToFolder,
   moveCardSetToFolder,
   moveDocumentToFolder,
-  pinnedItems,
-  onPinItem,
-  onUnpinItem,
   selectedCardSetId = null,
   onSelectCardSet,
   isFiltering = false,
@@ -892,9 +880,6 @@ export function FolderTreeWithCards({
     },
     handleRenameConfirm: actions.handleRenameConfirm,
     setRowRef,
-    pinnedItems,
-    onPinItem,
-    onUnpinItem,
     isFiltering,
     hasUpdateOrDelete: Boolean(onUpdateFolder || onDeleteFolder),
     setBulkTagFolderId: dialogs.setBulkTagFolderId,
@@ -928,9 +913,6 @@ export function FolderTreeWithCards({
       handleCreateCardSetFromMenu,
       actions.handleRenameConfirm,
       setRowRef,
-      pinnedItems,
-      onPinItem,
-      onUnpinItem,
       isFiltering,
       onUpdateFolder,
       onDeleteFolder,
@@ -1010,9 +992,6 @@ export function FolderTreeWithCards({
               handleDelete={(id, type) => {
                 void actions.handleDelete({ id, type });
               }}
-              pinnedItems={pinnedItems}
-              onPinItem={onPinItem}
-              onUnpinItem={onUnpinItem}
               setEditingId={dialogs.setEditingId}
               setEditingName={dialogs.setEditingName}
               editingNameRef={dialogs.editingNameRef}

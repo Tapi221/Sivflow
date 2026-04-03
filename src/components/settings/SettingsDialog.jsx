@@ -55,7 +55,7 @@ import { compressAndConvertToBase64 } from "@/utils/uploaded-image/imageCompress
 import { UploadProgress } from "@/components/ui/UploadProgress";
 import { getAvatarColors, getInitials } from "@/utils/avatarUtils";
 import {
-  EXPLORER_ROW_BASE_CLASS,
+  EXPLORER_ROW_BASE_CLASS_NAME,
   EXPLORER_ROW_CONTENT_CLASS,
   EXPLORER_ROW_ICON_SLOT_CLASS,
   FOLDER_ROW_ICON_ACTIVE_CLASS,
@@ -1494,7 +1494,7 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
                   }}
                   data-selected={activeTab === item.id ? "true" : undefined}
                   className={cn(
-                    EXPLORER_ROW_BASE_CLASS,
+                    EXPLORER_ROW_BASE_CLASS_NAME,
                     "sidebar-row--folder cursor-pointer rounded-[4px] px-2 snap-start",
                   )}
                 >

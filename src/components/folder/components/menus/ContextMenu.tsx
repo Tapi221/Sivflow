@@ -10,7 +10,6 @@ import {
   ChevronRight,
   Folder,
   Pencil,
-  Pin,
   Plus,
   Tag,
   Trash2,
@@ -28,8 +27,6 @@ interface ContextMenuProps {
   onDelete?: () => void;
   onMove?: () => void;
   onBulkTag?: () => void;
-  isPinned?: boolean;
-  onTogglePin?: () => void;
 }
 
 export function ContextMenu({
@@ -43,8 +40,6 @@ export function ContextMenu({
   onDelete,
   onMove,
   onBulkTag,
-  isPinned,
-  onTogglePin,
 }: ContextMenuProps) {
   const suppressCloseAutoFocusRef = useRef(false);
 
@@ -97,20 +92,6 @@ export function ContextMenu({
 
             {(onCreateSubfolder || onCreateCardSet) && <DropdownMenuSeparator />}
           </>
-        )}
-
-        {onTogglePin && (
-          <DropdownMenuItem
-            onSelect={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onTogglePin?.();
-            }}
-            className="gap-2"
-          >
-            <Pin className={`h-4 w-4 ${isPinned ? "text-amber-500" : ""}`} />
-            {isPinned ? "ピン留め解除" : "ピン留め"}
-          </DropdownMenuItem>
         )}
 
         {onRename && (

@@ -88,10 +88,7 @@ export function TreeViewSidebar({
 
         <div
           ref={contentScrollRef}
-          className={cn(
-            "flex-1 min-h-0 outline-none min-w-0",
-            explorerTab === "explorer" ? "overflow-hidden" : "overflow-y-auto",
-          )}
+          className="flex-1 min-h-0 min-w-0 outline-none overflow-hidden"
         >
           {children}
         </div>
