@@ -1,11 +1,11 @@
 import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import {
-    ROOT_FOLDER_ID,
-    getEntityTime,
-    getFolderId,
-    getParentFolderId,
-    isSameFolder,
-    normalizeFolderId,
+  ROOT_FOLDER_ID,
+  getEntityTime,
+  getFolderId,
+  getParentFolderId,
+  isSameFolder,
+  normalizeFolderId,
 } from "@/components/folder/explorer/model/utils";
 import type { Card, CardSet, DocumentItem, ExplorerItem } from "@/types";
 import { useCallback, useMemo } from "react";
@@ -33,6 +33,41 @@ interface Params {
   isFiltering: boolean;
 }
 
+function getFolderOrder(folder: FolderTreeNode): number {
+  return (
+    ((folder as { orderIndex?: number; order_index?: number }).orderIndex ??
+      (folder as { orderIndex?: number; order_index?: number }).order_index ??
+      0) as number
+  );
+}
+
+function getFolderName(folder: FolderTreeNode): string {
+  return String(
+    (folder as { folderName?: string; folder_name?: string }).folderName ??
+      (folder as { folderName?: string; folder_name?: string }).folder_name ??
+      "",
+  );
+}
+
+function compareFolders(a: FolderTreeNode, b: FolderTreeNode): number {
+  const orderA = getFolderOrder(a);
+  const orderB = getFolderOrder(b);
+  if (orderA !== orderB) return orderA - orderB;
+
+  const updatedA = getEntityTime((a as { updatedAt?: unknown }).updatedAt);
+  const updatedB = getEntityTime((b as { updatedAt?: unknown }).updatedAt);
+  if (updatedA !== updatedB) return updatedB - updatedA;
+
+  const createdA = getEntityTime((a as { createdAt?: unknown }).createdAt);
+  const createdB = getEntityTime((b as { createdAt?: unknown }).createdAt);
+  if (createdA !== createdB) return createdB - createdA;
+
+  const nameCompare = getFolderName(a).localeCompare(getFolderName(b), "ja");
+  if (nameCompare !== 0) return nameCompare;
+
+  return getFolderId(a).localeCompare(getFolderId(b), "ja");
+}
+
 export function useExplorerDerivedData({
   treeFolders,
   treeCards,
@@ -43,7 +78,8 @@ export function useExplorerDerivedData({
   const childFoldersByParentId = useMemo(() => {
     const map = new Map<string, FolderTreeNode[]>();
     for (const folder of treeFolders) {
-      const isHidden = (folder as { isHidden?: boolean; is_hidden?: boolean }).isHidden ??
+      const isHidden =
+        (folder as { isHidden?: boolean; is_hidden?: boolean }).isHidden ??
         (folder as { isHidden?: boolean; is_hidden?: boolean }).is_hidden;
       if (isSoftDeleted(folder) || isHidden) continue;
       const parentId = normalizeFolderId(getParentFolderId(folder));
@@ -52,13 +88,7 @@ export function useExplorerDerivedData({
       else map.set(parentId, [folder]);
     }
     for (const siblings of map.values()) {
-      siblings.sort((a, b) => {
-        const orderA = ((a as { orderIndex?: number; order_index?: number }).orderIndex ??
-          (a as { orderIndex?: number; order_index?: number }).order_index ?? 0) as number;
-        const orderB = ((b as { orderIndex?: number; order_index?: number }).orderIndex ??
-          (b as { orderIndex?: number; order_index?: number }).order_index ?? 0) as number;
-        return orderA - orderB;
-      });
+      siblings.sort(compareFolders);
     }
     return map;
   }, [treeFolders]);
@@ -76,7 +106,8 @@ export function useExplorerDerivedData({
   const visibleFolderIdSet = useMemo(() => {
     const set = new Set<string>();
     for (const folder of treeFolders) {
-      const isHidden = (folder as { isHidden?: boolean; is_hidden?: boolean }).isHidden ??
+      const isHidden =
+        (folder as { isHidden?: boolean; is_hidden?: boolean }).isHidden ??
         (folder as { isHidden?: boolean; is_hidden?: boolean }).is_hidden;
       if (isSoftDeleted(folder) || isHidden) continue;
       const id = getFolderId(folder);
@@ -145,12 +176,8 @@ export function useExplorerDerivedData({
         const orderA = withLegacy(a.data).orderIndex ?? Number.MAX_SAFE_INTEGER;
         const orderB = withLegacy(b.data).orderIndex ?? Number.MAX_SAFE_INTEGER;
         if (orderA !== orderB) return orderA - orderB;
-        const timeA = getEntityTime(
-          (a.data as { updatedAt?: unknown }).updatedAt,
-        );
-        const timeB = getEntityTime(
-          (b.data as { updatedAt?: unknown }).updatedAt,
-        );
+        const timeA = getEntityTime((a.data as { updatedAt?: unknown }).updatedAt);
+        const timeB = getEntityTime((b.data as { updatedAt?: unknown }).updatedAt);
         return timeB - timeA;
       });
     }
@@ -205,8 +232,7 @@ export function useExplorerDerivedData({
 
   const getNextOrderIndex = useCallback(
     (folderId: string | null, resolvedFolderId?: string) => {
-      const targetFolderId =
-        resolvedFolderId ?? resolveTreeFolderId(folderId);
+      const targetFolderId = resolvedFolderId ?? resolveTreeFolderId(folderId);
       let maxOrder = -1;
       for (const card of treeCards) {
         if (isSoftDeleted(withLegacy(card))) continue;
@@ -256,7 +282,6 @@ export function useExplorerDerivedData({
     [treeFolders],
   );
 
-  // CardSet: folderId 単位でグルーピング
   const cardSetsByFolderId = useMemo(() => {
     const map = new Map<string, CardSet[]>();
     for (const cs of cardSets) {
@@ -278,7 +303,6 @@ export function useExplorerDerivedData({
     [cardSetsByFolderId],
   );
 
-  // CardSet に属するカード (ExplorerItem形式)
   const itemsByCardSetId = useMemo(() => {
     const map = new Map<string, ExplorerItem[]>();
     if (cardSets.length === 0) return map;
@@ -324,7 +348,3 @@ export function useExplorerDerivedData({
     getUniqueFolderName,
   };
 }
-
-
-
-

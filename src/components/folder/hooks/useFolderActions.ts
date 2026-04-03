@@ -162,7 +162,43 @@ function createEntityId(prefix: "folder" | "cardSet"): string {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
+function getFolderParentId(folder: FolderTreeNode): string | null {
+  return normalizeFolderId(
+    (
+      folder as {
+        parentFolderId?: string | null;
+        parent_folder_id?: string | null;
+      }
+    ).parentFolderId ??
+      (
+        folder as {
+          parentFolderId?: string | null;
+          parent_folder_id?: string | null;
+        }
+      ).parent_folder_id,
+  );
+}
+
+function getFolderOrderIndex(folder: FolderTreeNode): number {
+  return (
+    (
+      folder as {
+        orderIndex?: number;
+        order_index?: number;
+      }
+    ).orderIndex ??
+    (
+      folder as {
+        orderIndex?: number;
+        order_index?: number;
+      }
+    ).order_index ??
+    0
+  );
+}
+
 export function useFolderActions({
+  treeFolders,
   treeCardSets,
   onCreateFolder,
   onUpdateFolder,
@@ -250,48 +286,55 @@ export function useFolderActions({
         nextOrderIndex,
       );
 
+      const siblingIdsToShift = treeFolders
+        .filter((folder) => {
+          const existingId = getFolderId(folder);
+          if (!existingId || existingId === folderId) return false;
+          return getFolderParentId(folder) === normalizedParentId;
+        })
+        .map((folder) => getFolderId(folder))
+        .filter((id): id is string => Boolean(id));
+
       setOptimisticFolders((prev) => {
-        const shifted = prev.map((folder) => {
-          const folderParentId = normalizeFolderId(
-            (
-              folder as {
-                parentFolderId?: string | null;
-                parent_folder_id?: string | null;
-              }
-            ).parentFolderId ??
+        const prevById = new Map(
+          prev
+            .map((folder) => {
+              const id = getFolderId(folder);
+              return id ? ([id, folder] as const) : null;
+            })
+            .filter(
               (
-                folder as {
-                  parentFolderId?: string | null;
-                  parent_folder_id?: string | null;
-                }
-              ).parent_folder_id,
-          );
+                entry,
+              ): entry is readonly [string, FolderTreeNode] => entry !== null,
+            ),
+        );
 
-          if (folderParentId !== normalizedParentId) return folder;
+        const nextById = new Map<string, FolderTreeNode>();
 
-          const currentOrderIndex =
-            (
-              folder as {
-                orderIndex?: number;
-                order_index?: number;
-              }
-            ).orderIndex ??
-            (
-              folder as {
-                orderIndex?: number;
-                order_index?: number;
-              }
-            ).order_index ??
-            0;
+        nextById.set(folderId, optimisticFolder);
 
-          return {
-            ...folder,
+        for (const sibling of treeFolders) {
+          const siblingId = getFolderId(sibling);
+          if (!siblingId || !siblingIdsToShift.includes(siblingId)) continue;
+
+          const source = prevById.get(siblingId) ?? sibling;
+          const currentOrderIndex = getFolderOrderIndex(source);
+
+          nextById.set(siblingId, {
+            ...source,
             orderIndex: currentOrderIndex + 1,
             order_index: currentOrderIndex + 1,
-          };
-        });
+            updatedAt: new Date(),
+          } as FolderTreeNode);
+        }
 
-        return [optimisticFolder, ...shifted];
+        for (const folder of prev) {
+          const id = getFolderId(folder);
+          if (!id || nextById.has(id)) continue;
+          nextById.set(id, folder);
+        }
+
+        return Array.from(nextById.values());
       });
 
       if (normalizedParentId) {
@@ -319,7 +362,13 @@ export function useFolderActions({
           } catch (error) {
             console.error("[useFolderActions] create folder failed:", error);
             setOptimisticFolders((prev) =>
-              prev.filter((folder) => getFolderId(folder) !== folderId),
+              prev.filter((folder) => {
+                const id = getFolderId(folder);
+                if (!id) return false;
+                if (id === folderId) return false;
+                if (siblingIdsToShift.includes(id)) return false;
+                return true;
+              }),
             );
             if (editingIdRef.current === folderId) {
               closeRename();
@@ -346,6 +395,7 @@ export function useFolderActions({
       setPendingScrollId,
       setExpandedFolders,
       setOptimisticFolders,
+      treeFolders,
     ],
   );
 
