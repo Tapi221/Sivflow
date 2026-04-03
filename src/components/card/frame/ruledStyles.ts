@@ -1,4 +1,3 @@
-import type { CSSProperties } from "react";
 
 export type RuledStyleKind = "repeat+bottom" | "repeat-only" | "bottom-only";
 

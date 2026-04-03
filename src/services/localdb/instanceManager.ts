@@ -22,7 +22,7 @@ import {
   deleteUserPersistentDatabases,
   getFallbackDatabaseNameForUser,
 } from "./generation";
-import type { LocalDBInstance, LocalDBLike } from "./types";
+import type { LocalDBInstance } from "./types";
 
 // --- シングルトン状態 ---
 let instance: LocalDBInstance | null = null;

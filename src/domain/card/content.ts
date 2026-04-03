@@ -1,9 +1,7 @@
-import type { InkDocument } from "@/components/ink/inkTypes";
 import type { CodeBlockData } from "@/types/core/code-block";
 import type {
   Card,
   CardBlock,
-  CardFace,
   UploadedImage,
 } from "@/types/domain/card";
 

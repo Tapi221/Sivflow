@@ -1,6 +1,5 @@
 import type {
   IntegrityIssue,
-  IntegrityRepairResult,
 } from "@/services/dataIntegrityTypes";
 import {
   denormalizeUploadedImages,
