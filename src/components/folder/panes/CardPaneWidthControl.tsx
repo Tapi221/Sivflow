@@ -3,11 +3,7 @@ import React from "react";
 import { Minus, Plus, RefreshCw } from "@/ui/icons";
 import { Slider } from "@/components/ui/slider";
 
-function clampPaneWidthPx(
-  value: number | null | undefined,
-  min: number,
-  max?: number,
-): number {
+const clampPaneWidthPx = (value: number | null | undefined, min: number, max?: number) => {
   const fallback = Math.max(1, min);
   const safeValue =
     typeof value === "number" && Number.isFinite(value) ? value : fallback;
@@ -17,7 +13,7 @@ function clampPaneWidthPx(
       ? Math.max(clampedMin, max)
       : Number.POSITIVE_INFINITY;
   return Math.min(clampedMax, Math.max(clampedMin, Math.round(safeValue)));
-}
+};
 
 interface CardPaneWidthControlProps {
   modeLabel: string;
@@ -32,18 +28,20 @@ interface CardPaneWidthControlProps {
   onReset: () => void;
 }
 
-export function CardPaneWidthControl({
-  modeLabel,
-  value,
-  min,
-  max,
-  defaultValue,
-  onPreviewChange,
-  onCommit,
-  onStepDown,
-  onStepUp,
-  onReset,
-}: CardPaneWidthControlProps) {
+export const CardPaneWidthControl = (
+  {
+    modeLabel,
+    value,
+    min,
+    max,
+    defaultValue,
+    onPreviewChange,
+    onCommit,
+    onStepDown,
+    onStepUp,
+    onReset,
+  }: CardPaneWidthControlProps
+) => {
   const resetDisabled = value === defaultValue;
   const controlRootRef = React.useRef<HTMLDivElement | null>(null);
   const suppressOutsideClickUntilRef = React.useRef(0);
@@ -138,4 +136,4 @@ export function CardPaneWidthControl({
       </button>
     </div>
   );
-}
+};

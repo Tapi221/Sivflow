@@ -27,28 +27,30 @@ interface TreeViewSidebarProps {
   canAddDocuments?: boolean;
 }
 
-export function TreeViewSidebar({
-  sidebarRef,
-  contentScrollRef,
-  isSidebarOpen,
-  isResizing,
-  showMobileDetail,
-  fillAvailableWidth = false,
-  explorerTab,
-  setExplorerTab,
-  allTags,
-  getTagColor,
-  isFilterActive,
-  resultCount,
-  onCreateRootFolder,
-  onCreateCardSet,
-  onAddPdf,
-  onAddPptx,
-  onStartResizing,
-  children,
-  canCreateCardSet = false,
-  canAddDocuments = false,
-}: TreeViewSidebarProps) {
+export const TreeViewSidebar = (
+  {
+    sidebarRef,
+    contentScrollRef,
+    isSidebarOpen,
+    isResizing,
+    showMobileDetail,
+    fillAvailableWidth = false,
+    explorerTab,
+    setExplorerTab,
+    allTags,
+    getTagColor,
+    isFilterActive,
+    resultCount,
+    onCreateRootFolder,
+    onCreateCardSet,
+    onAddPdf,
+    onAddPptx,
+    onStartResizing,
+    children,
+    canCreateCardSet = false,
+    canAddDocuments = false,
+  }: TreeViewSidebarProps
+) => {
   return (
     <div
       ref={sidebarRef}
@@ -113,4 +115,4 @@ export function TreeViewSidebar({
       )}
     </div>
   );
-}
+};

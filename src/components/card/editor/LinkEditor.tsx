@@ -11,7 +11,7 @@ type LinkEditorProps = {
   onChange: (items: ReferenceBlockData[]) => void;
 };
 
-export function LinkEditor({ items, onChange }: LinkEditorProps) {
+export const LinkEditor = ({ items, onChange }: LinkEditorProps) => {
   const refs = items ?? [];
 
   const add = () => onChange([...refs, { url: "", name: "" }]);
@@ -97,4 +97,4 @@ export function LinkEditor({ items, onChange }: LinkEditorProps) {
       </Button>
     </div>
   );
-}
+};

@@ -21,25 +21,17 @@ const IMAGE_BLOCK_INSET_PX = 4;
 const FIXED_IMAGE_REFERENCE_FRAME_WIDTH_PX =
   CANONICAL_CARD_WIDTH - IMAGE_BLOCK_INSET_PX * 2;
 
-/**
- * render-null ヘルパー。
- *
- * ImageGallery はカードリストを扱うため、hooks をループ内で呼べない。
- * このコンポーネントを 1 画像 1 インスタンスでレンダリングすることで、
- * useLocalImageBlobUrl の lifecycle（pin/unpin）を per-item で適用する。
- *
- * - url が解決されたら onResolved(localFileId, url) を呼ぶ。
- * - unmount 時は hook の cleanup が自動的に unpin する。
- */
-function LocalBlobUrlResolverEffect({
-  localFileId,
-  userId,
-  onResolved,
-}: {
-  localFileId: string;
-  userId: string | undefined;
-  onResolved: (localFileId: string, url: string | null) => void;
-}) {
+const LocalBlobUrlResolverEffect = (
+  {
+    localFileId,
+    userId,
+    onResolved,
+  }: {
+    localFileId: string;
+    userId: string | undefined;
+    onResolved: (localFileId: string, url: string | null) => void;
+  }
+) => {
   const { url, loading } = useLocalImageBlobUrl(localFileId, userId);
   useEffect(() => {
     if (!loading) {
@@ -47,13 +39,13 @@ function LocalBlobUrlResolverEffect({
     }
   }, [localFileId, url, loading, onResolved]);
   return null;
-}
+};
 
 interface AudioPlayerProps {
   urls: string[];
 }
 
-export function AudioPlayer({ urls }: AudioPlayerProps) {
+export const AudioPlayer = ({ urls }: AudioPlayerProps) => {
   const [playingIndex, setPlayingIndex] = useState<number | null>(null);
   const audioRefs = useRef<(HTMLAudioElement | null)[]>([]);
 
@@ -103,7 +95,7 @@ export function AudioPlayer({ urls }: AudioPlayerProps) {
       ))}
     </div>
   );
-}
+};
 
 interface ImageGalleryProps {
   urls: string[];
@@ -130,12 +122,14 @@ interface ImageGalleryProps {
   zoom?: number;
 }
 
-export function ImageGallery({
-  urls,
-  items,
-  displayMode = "fixed",
-  zoom = 1,
-}: ImageGalleryProps) {
+export const ImageGallery = (
+  {
+    urls,
+    items,
+    displayMode = "fixed",
+    zoom = 1,
+  }: ImageGalleryProps
+) => {
   const { currentUser } = useAuthSession();
   const [failedImages, setFailedImages] = useState(new Set<number>());
   const [naturalSizeMap, setNaturalSizeMap] = useState<
@@ -570,4 +564,4 @@ export function ImageGallery({
       </div>
     </>
   );
-}
+};

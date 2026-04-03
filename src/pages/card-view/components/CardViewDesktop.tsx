@@ -20,7 +20,7 @@ const CARD_LOADING_PREVIEW_RULED_STYLE: React.CSSProperties = {
   backgroundSize: "calc(100% - 24px) 24px",
 };
 
-function CardLoadingPreview({ card }: { card: Card }) {
+const CardLoadingPreview = ({ card }: { card: Card }) => {
   return (
     <div
       aria-hidden
@@ -59,7 +59,7 @@ function CardLoadingPreview({ card }: { card: Card }) {
       )}
     </div>
   );
-}
+};
 
 import { useAuthSession } from "@/contexts/AuthContext";
 import { useCardImagePreloader } from "@/hooks/card/useCardImagePreloader";
@@ -93,27 +93,29 @@ interface CardViewDesktopProps {
   onToggleBookmark: (card: Card) => void | Promise<void>;
 }
 
-export function CardViewDesktop({
-  isLoading,
-  isGlobalEditing,
-  flippedCardIds,
-  cardsForPager,
-  selectedCardId,
-  safeCurrentIndex,
-  settings = null,
-  editPaneWidthPx,
-  activePaneWidthPx,
-  activePaneMaxWidthPx,
-  currentDisplayMode,
-  folderId,
-  cardSetId,
-  saveSignal,
-  onActiveIndexChange,
-  onFlip,
-  onEdit,
-  onToggleUncertainty,
-  onToggleBookmark,
-}: CardViewDesktopProps) {
+export const CardViewDesktop = (
+  {
+    isLoading,
+    isGlobalEditing,
+    flippedCardIds,
+    cardsForPager,
+    selectedCardId,
+    safeCurrentIndex,
+    settings = null,
+    editPaneWidthPx,
+    activePaneWidthPx,
+    activePaneMaxWidthPx,
+    currentDisplayMode,
+    folderId,
+    cardSetId,
+    saveSignal,
+    onActiveIndexChange,
+    onFlip,
+    onEdit,
+    onToggleUncertainty,
+    onToggleBookmark,
+  }: CardViewDesktopProps
+) => {
   const { currentUser } = useAuthSession();
   const effectiveEditPaneWidthPx = editPaneWidthPx;
   const effectiveCardWidthPx =
@@ -239,4 +241,4 @@ export function CardViewDesktop({
       renderCard={renderCard}
     />
   );
-}
+};

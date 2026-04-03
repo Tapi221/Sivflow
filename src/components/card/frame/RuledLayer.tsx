@@ -21,18 +21,20 @@ type RuledLayerProps = {
 
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 
-export function RuledLayer({
-  className,
-  kind = "repeat+bottom",
-  ruledOpacity,
-  ruledRowPx = 24,
-  ruledPhasePx = 0,
-  ruledInsetX = 0,
-  ruledOffsetPx = 0,
-  ruledBottomOffsetPx = 0,
-  ruledColor = "rgba(0,0,0,0.05)",
-  ruledLinePx = 1,
-}: RuledLayerProps) {
+export const RuledLayer = (
+  {
+    className,
+    kind = "repeat+bottom",
+    ruledOpacity,
+    ruledRowPx = 24,
+    ruledPhasePx = 0,
+    ruledInsetX = 0,
+    ruledOffsetPx = 0,
+    ruledBottomOffsetPx = 0,
+    ruledColor = "rgba(0,0,0,0.05)",
+    ruledLinePx = 1,
+  }: RuledLayerProps
+) => {
   const rowPx = Math.max(8, ruledRowPx);
   const topPx = Math.max(0, ruledOffsetPx);
   const bottomPx = Math.max(0, ruledBottomOffsetPx);
@@ -127,4 +129,4 @@ export function RuledLayer({
       style={layerStyle}
     />
   );
-}
+};

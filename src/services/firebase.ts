@@ -88,10 +88,7 @@ if (typeof window !== "undefined") {
   }
 }
 
-/**
- * Firebase の初期化状態を診断するための関数
- */
-function debugFirebase(): void {
+const debugFirebase = () => {
   console.log("🔍 === Firebase Debug Info ===");
   try {
     console.log("App name:", app.name);
@@ -104,7 +101,7 @@ function debugFirebase(): void {
     console.error("❌ debugFirebase error:", error);
   }
   console.log("🔍 ==========================");
-}
+};
 
 // 開発環境では自動実行
 if (import.meta.env.DEV) {

@@ -32,23 +32,25 @@ interface PdfPaneToolbarProps {
   onOpenNewTab: () => void;
 }
 
-export function PdfPaneToolbar({
-  displayName,
-  isLocalOnly,
-  uploadStatus,
-  currentPage,
-  numPages,
-  scale,
-  fitMode,
-  sourceUnavailable,
-  canOpenExternal,
-  onPrev,
-  onNext,
-  onZoomOut,
-  onZoomIn,
-  onFitWidth,
-  onOpenNewTab,
-}: PdfPaneToolbarProps) {
+export const PdfPaneToolbar = (
+  {
+    displayName,
+    isLocalOnly,
+    uploadStatus,
+    currentPage,
+    numPages,
+    scale,
+    fitMode,
+    sourceUnavailable,
+    canOpenExternal,
+    onPrev,
+    onNext,
+    onZoomOut,
+    onZoomIn,
+    onFitWidth,
+    onOpenNewTab,
+  }: PdfPaneToolbarProps
+) => {
   return (
     <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-slate-200 bg-white">
       <div className="min-w-0">
@@ -134,4 +136,4 @@ export function PdfPaneToolbar({
       </div>
     </div>
   );
-}
+};

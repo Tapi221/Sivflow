@@ -49,12 +49,14 @@ interface UsePdfViewerPersistenceResult {
   handleViewerScaleChange: (nextScale: number) => void;
 }
 
-export function usePdfViewerPersistence({
-  docId,
-  viewerState,
-  fitScale,
-  onDocumentUpdate,
-}: UsePdfViewerPersistenceOptions): UsePdfViewerPersistenceResult {
+export const usePdfViewerPersistence = (
+  {
+    docId,
+    viewerState,
+    fitScale,
+    onDocumentUpdate,
+  }: UsePdfViewerPersistenceOptions
+) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [fitMode, setFitMode] = useState<"width" | "manual">("width");
   const [scale, setScale] = useState(1.0);
@@ -231,4 +233,4 @@ export function usePdfViewerPersistence({
     handleFitWidth,
     handleViewerScaleChange,
   };
-}
+};

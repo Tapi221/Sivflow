@@ -49,10 +49,10 @@ const EMPTY_AUDIO_URLS: string[] = [];
 const EMPTY_REFERENCES: ReturnType<typeof resolveReferences> = [];
 const EMPTY_BLOCKS: ReturnType<typeof resolveSideBlocks> = [];
 
-export function useFlashcardDerived(
+export const useFlashcardDerived = (
   cardData: FlashcardCardLike | null | undefined,
-  effectiveIsFlipped: boolean,
-): FlashcardDerived {
+  effectiveIsFlipped: boolean
+) => {
   const cardId = cardData ? resolveCardId(cardData) : null;
 
   const hasUncertainty = cardData ? resolveHasUncertainty(cardData) : false;
@@ -165,4 +165,4 @@ export function useFlashcardDerived(
     activeBlocks,
     activeInkDocument,
   };
-}
+};

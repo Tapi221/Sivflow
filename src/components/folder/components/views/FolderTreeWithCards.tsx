@@ -105,40 +105,42 @@ interface FolderTreeWithCardsProps {
   className?: string;
 }
 
-export function FolderTreeWithCards({
-  folders,
-  cards,
-  cardSets = [],
-  documents,
-  selectedFolderId,
-  selectedItem,
-  onFolderSelect,
-  onItemSelect,
-  onCreateFolder,
-  onUpdateFolder,
-  onDeleteFolder,
-  onCreateCardSet,
-  onUpdateCardSet,
-  onDeleteCardSet,
-  onCreateCard,
-  onUpdateCard,
-  onDeleteCard,
-  moveCardToFolder,
-  moveCardSetToFolder,
-  moveDocumentToFolder,
-  selectedCardSetId = null,
-  onSelectCardSet,
-  isFiltering = false,
-  onRegisterCreateFolderTrigger,
-  onRegisterCreateCardSetTrigger,
-  onRegisterPdfTrigger,
-  onRegisterPptxTrigger,
-  navigateToSectionListToken = 0,
-  folderSelectionNonce = 0,
-  onSectionListModeChange,
-  onHeaderFolderIdChange,
-  className,
-}: FolderTreeWithCardsProps) {
+export const FolderTreeWithCards = (
+  {
+    folders,
+    cards,
+    cardSets = [],
+    documents,
+    selectedFolderId,
+    selectedItem,
+    onFolderSelect,
+    onItemSelect,
+    onCreateFolder,
+    onUpdateFolder,
+    onDeleteFolder,
+    onCreateCardSet,
+    onUpdateCardSet,
+    onDeleteCardSet,
+    onCreateCard,
+    onUpdateCard,
+    onDeleteCard,
+    moveCardToFolder,
+    moveCardSetToFolder,
+    moveDocumentToFolder,
+    selectedCardSetId = null,
+    onSelectCardSet,
+    isFiltering = false,
+    onRegisterCreateFolderTrigger,
+    onRegisterCreateCardSetTrigger,
+    onRegisterPdfTrigger,
+    onRegisterPptxTrigger,
+    navigateToSectionListToken = 0,
+    folderSelectionNonce = 0,
+    onSectionListModeChange,
+    onHeaderFolderIdChange,
+    className,
+  }: FolderTreeWithCardsProps
+) => {
   const { expandedFolders, setExpandedFolders, toggleFolder } =
     useExpandedFolders();
   const {
@@ -1071,4 +1073,4 @@ export function FolderTreeWithCards({
       )}
     </div>
   );
-}
+};

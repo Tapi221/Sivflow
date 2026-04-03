@@ -13,55 +13,39 @@ type QueryDb = Dexie & {
   readonly syncMetadata: Table;
 };
 
-export async function getItem(
-  db: QueryDb,
-  table: string,
-  id: string,
-): Promise<unknown> {
+export const getItem = (db: QueryDb, table: string, id: string) => {
   const item = await db.table(table).get(id);
   if (table === "cards") return item ? normalizeCard(item) : item;
   if (table === "folders") return item ? normalizeFolderWithSilent(item) : item;
   return item;
-}
+};
 
-export async function getAllItems(
-  db: QueryDb,
-  table: string,
-): Promise<unknown[]> {
+export const getAllItems = (db: QueryDb, table: string) => {
   const items = await db.table(table).toArray();
   if (table === "cards") return items.map(normalizeCard);
   if (table === "folders") return items.map(normalizeFolderWithSilent);
   return items;
-}
+};
 
-export async function getAllCards(db: QueryDb): Promise<unknown[]> {
+export const getAllCards = (db: QueryDb) => {
   // Return raw objects to preserve _rescueRaw and other fields for integrity repair
   return await db.cards.toArray();
-}
+};
 
-export async function getAllFolders(db: QueryDb): Promise<unknown[]> {
+export const getAllFolders = (db: QueryDb) => {
   const folders = await db.folders.toArray();
   return folders.map(normalizeFolderWithSilent);
-}
+};
 
-export async function getDirtyItems(
-  db: QueryDb,
-  table: string,
-  userId: string,
-  lastSyncTime: Date,
-): Promise<unknown[]> {
+export const getDirtyItems = (db: QueryDb, table: string, userId: string, lastSyncTime: Date) => {
   return db
     .table(table)
     .where("[userId+updatedAt]")
     .between([userId, lastSyncTime], [userId, Dexie.maxKey])
     .toArray();
-}
+};
 
-export async function getUpdatedCards(
-  db: QueryDb,
-  folderId: string,
-  lastSyncTime: Date,
-): Promise<unknown[]> {
+export const getUpdatedCards = (db: QueryDb, folderId: string, lastSyncTime: Date) => {
   return db.cards
     .where("folderId")
     .equals(folderId)
@@ -75,24 +59,17 @@ export async function getUpdatedCards(
       return updated > lastSyncTime;
     })
     .toArray();
-}
+};
 
-export async function getLastSyncTime(
-  db: QueryDb,
-  userId: string,
-): Promise<Date | null> {
+export const getLastSyncTime = (db: QueryDb, userId: string) => {
   const meta = await db.syncMetadata.get(userId);
   if (!meta || !meta.lastSyncTime) return null;
   return meta.lastSyncTime instanceof Timestamp
     ? meta.lastSyncTime.toDate()
     : meta.lastSyncTime;
-}
+};
 
-export async function updateLastSyncTime(
-  db: QueryDb,
-  userId: string,
-  syncTime: Date,
-): Promise<void> {
+export const updateLastSyncTime = (db: QueryDb, userId: string, syncTime: Date) => {
   await db.syncMetadata.put({
     userId: userId,
     deviceId: getOrCreateDeviceId(),
@@ -101,11 +78,9 @@ export async function updateLastSyncTime(
     lastHighResSync: null,
     isActive: true,
   });
-}
+};
 
-export async function normalizeDocumentBlobUrlsForSession(
-  db: QueryDb,
-): Promise<void> {
+export const normalizeDocumentBlobUrlsForSession = (db: QueryDb) => {
   try {
     await db.documents.toCollection().modify((d: unknown) => {
       if (typeof d.localUrl === "string" && d.localUrl.startsWith("blob:")) {
@@ -122,4 +97,4 @@ export async function normalizeDocumentBlobUrlsForSession(
       error,
     );
   }
-}
+};

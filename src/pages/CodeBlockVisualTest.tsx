@@ -12,7 +12,7 @@ const values = Array.from({ length: 12 }, (_, i) => fibonacci(i));
 console.log(values.join(", "));
 `;
 
-export default function CodeBlockVisualTest() {
+export default const CodeBlockVisualTest = () => {
   const [editorValue, setEditorValue] = useState<CodeBlockData>({
     language: "typescript",
     code: SAMPLE_CODE,
@@ -41,4 +41,4 @@ export default function CodeBlockVisualTest() {
       </div>
     </main>
   );
-}
+};

@@ -3,16 +3,16 @@ export type ImageNaturalSize = {
   naturalH: number;
 };
 
-function hasNaturalSize(image: {
-  naturalWidth: number;
-  naturalHeight: number;
-}) {
+const hasNaturalSize = (
+  image: {
+    naturalWidth: number;
+    naturalHeight: number;
+  }
+) => {
   return image.naturalWidth > 0 && image.naturalHeight > 0;
-}
+};
 
-export async function loadImageNaturalSize(
-  src: string,
-): Promise<ImageNaturalSize | null> {
+export const loadImageNaturalSize = (src: string) => {
   if (typeof Image === "undefined") return null;
   if (typeof src !== "string" || src.trim().length === 0) return null;
 
@@ -50,4 +50,4 @@ export async function loadImageNaturalSize(
       });
     }
   });
-}
+};

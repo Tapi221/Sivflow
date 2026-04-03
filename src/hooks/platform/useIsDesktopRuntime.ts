@@ -1,5 +1,5 @@
 import { isDesktopRuntime } from "@/platform/runtime";
 
-export function useIsDesktopRuntime() {
+export const useIsDesktopRuntime = () => {
   return isDesktopRuntime();
-}
+};

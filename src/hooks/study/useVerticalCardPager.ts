@@ -34,16 +34,18 @@ export type UseVerticalCardPagerReturn = {
   goPrev: () => void;
 };
 
-export function useVerticalCardPager({
-  count,
-  activeIndex,
-  onActiveIndexChange,
-  scrollContainerRef,
-  onFlip,
-  naturalIndexCommitDelayMs = 0,
-  freezeActiveIndex = false,
-  onNearestIndexImmediate,
-}: UseVerticalCardPagerOptions): UseVerticalCardPagerReturn {
+export const useVerticalCardPager = (
+  {
+    count,
+    activeIndex,
+    onActiveIndexChange,
+    scrollContainerRef,
+    onFlip,
+    naturalIndexCommitDelayMs = 0,
+    freezeActiveIndex = false,
+    onNearestIndexImmediate,
+  }: UseVerticalCardPagerOptions
+) => {
   const itemRefs = useRef<(HTMLElement | null)[]>([]);
   const lastNearestIndexRef = useRef(Math.max(0, activeIndex));
 
@@ -346,4 +348,4 @@ export function useVerticalCardPager({
     goNext,
     goPrev,
   };
-}
+};

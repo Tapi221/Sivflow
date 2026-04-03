@@ -45,7 +45,7 @@ export type SharedCardContentProps =
   | SharedCardContentViewProps
   | SharedCardContentEditProps;
 
-function SharedCardContentInner(props: SharedCardContentProps) {
+const SharedCardContentInner = (props: SharedCardContentProps) => {
   const rootClassName =
     props.mode === "edit"
       ? "card-content-root flex min-h-0 flex-col w-full max-w-full overflow-x-clip overflow-y-visible"
@@ -91,7 +91,7 @@ function SharedCardContentInner(props: SharedCardContentProps) {
       )}
     </div>
   );
-}
+};
 
 export const SharedCardContent = React.memo(SharedCardContentInner);
 SharedCardContent.displayName = "SharedCardContent";

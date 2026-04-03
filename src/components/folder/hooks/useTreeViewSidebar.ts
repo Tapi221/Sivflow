@@ -7,7 +7,7 @@ const DEFAULT_SIDEBAR_W = 320;
 const clamp = (w: number) =>
   Math.min(Math.max(w, MIN_SIDEBAR_W), MAX_SIDEBAR_W);
 
-export function useTreeViewSidebar() {
+export const useTreeViewSidebar = () => {
   const [sidebarWidth, setSidebarWidth] = useState(() => {
     if (typeof window === "undefined") return DEFAULT_SIDEBAR_W;
     const saved = localStorage.getItem("ui.sidebarWidth");
@@ -167,4 +167,4 @@ export function useTreeViewSidebar() {
     isResizing,
     startResizing,
   };
-}
+};

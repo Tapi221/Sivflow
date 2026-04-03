@@ -1,7 +1,7 @@
 import { AppInitializer } from "@/services/AppInitializer";
 import { getLocalDb, initializeDB } from "@/services/localDB";
 
-export async function bootstrapUser(userId: string) {
+export const bootstrapUser = (userId: string) => {
   await initializeDB(userId);
 
   const initResult = await AppInitializer.initialize(userId);
@@ -19,4 +19,4 @@ export async function bootstrapUser(userId: string) {
 
   console.log("[Auth] Running data integrity repair...");
   await db.repairDataIntegrity(userId);
-}
+};

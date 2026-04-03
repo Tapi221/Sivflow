@@ -16,7 +16,7 @@ export type SanitizeResult<T> = {
 export const isBlobUrl = (v: unknown): v is string =>
   typeof v === "string" && v.startsWith("blob:");
 
-export function sanitizeBlobUrlsDeep<T>(input: T): SanitizeResult<T> {
+export const sanitizeBlobUrlsDeep = (input: T) => {
   const fixes: BlobUrlFix[] = [];
 
   const shouldPreserveObject = (value: unknown): boolean => {
@@ -55,8 +55,8 @@ export function sanitizeBlobUrlsDeep<T>(input: T): SanitizeResult<T> {
     changed: fixes.length > 0,
     fixes,
   };
-}
+};
 
-export function findBlobUrlFixesDeep(input: unknown): BlobUrlFix[] {
+export const findBlobUrlFixesDeep = (input: unknown) => {
   return sanitizeBlobUrlsDeep(input).fixes;
-}
+};

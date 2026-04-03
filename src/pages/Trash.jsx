@@ -38,7 +38,7 @@ import {
 } from "@/services/firestorePaths";
 import { getCardImages, getCardText } from "@/domain/card/content";
 
-export default function Trash() {
+export default const Trash = () => {
   const { currentUser } = useAuthSession();
 
   // IndexedDBから削除されたアイテムを直接取得
@@ -1055,4 +1055,4 @@ export default function Trash() {
       </div>
     </div>
   );
-}
+};

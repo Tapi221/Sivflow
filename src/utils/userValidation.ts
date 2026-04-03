@@ -22,15 +22,15 @@ const USERNAME_VALIDATION = {
  * 文字列をUnicode単位（サロゲートペア対応）でカウントする
  * 日本語、英語、絵文字すべてを1文字としてカウント
  */
-export function countUnicodeCharacters(str: string): number {
+export const countUnicodeCharacters = (str: string) => {
   // Array.from はサロゲートペアを適切に処理する
   return Array.from(str).length;
-}
+};
 
 /**
  * ユーザーネームのバリデーションを実行する
  */
-export function validateUsername(username: string): ValidationResult {
+export const validateUsername = (username: string) => {
   // 前後の空白をトリミング（要件：先頭と末尾のスペースは自動的にトリミングする）
   const trimmedName = username.trim();
 
@@ -72,12 +72,12 @@ export function validateUsername(username: string): ValidationResult {
   }
 
   return { isValid: true, message: "" };
-}
+};
 
 /**
  * 表示用に文字列を省略する（Unicode単位）
  */
-export function truncateUsername(name: string, maxLength: number = 20): string {
+export const truncateUsername = (name: string, maxLength: number = 20) => {
   if (!name) return "";
 
   const chars = Array.from(name);
@@ -86,4 +86,4 @@ export function truncateUsername(name: string, maxLength: number = 20): string {
   }
 
   return chars.slice(0, maxLength).join("") + "...";
-}
+};

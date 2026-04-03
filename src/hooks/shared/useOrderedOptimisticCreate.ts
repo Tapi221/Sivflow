@@ -25,20 +25,22 @@ type OrderedOptimisticCreateParams<T> = {
   onAfterOptimisticCreate?: (entity: T) => void;
 };
 
-export async function createOrderedOptimistically<T>({
-  entities,
-  setOptimisticEntities,
-  getEntityId,
-  getParentId,
-  getOrderIndex,
-  setOrderIndex,
-  createTempEntity,
-  persistCreate,
-  targetParentId,
-  newEntityName,
-  newEntityId,
-  onAfterOptimisticCreate,
-}: OrderedOptimisticCreateParams<T>): Promise<void> {
+export const createOrderedOptimistically = (
+  {
+    entities,
+    setOptimisticEntities,
+    getEntityId,
+    getParentId,
+    getOrderIndex,
+    setOrderIndex,
+    createTempEntity,
+    persistCreate,
+    targetParentId,
+    newEntityName,
+    newEntityId,
+    onAfterOptimisticCreate,
+  }: OrderedOptimisticCreateParams<T>
+) => {
   const siblingIds = new Set<string>();
   const originalOrderIndexes = new Map<string, number>();
 
@@ -89,4 +91,4 @@ export async function createOrderedOptimistically<T>({
     );
     throw error;
   }
-}
+};

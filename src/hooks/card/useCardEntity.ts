@@ -47,7 +47,7 @@ const withStableBlockIds = (raw: unknown) => {
   };
 };
 
-function readCardDraft(cardId: string) {
+const readCardDraft = (cardId: string) => {
   if (typeof window === "undefined") return null;
   const key = makeDraftKey(cardId);
   const raw = window.localStorage.getItem(key);
@@ -57,7 +57,7 @@ function readCardDraft(cardId: string) {
   } catch {
     return null;
   }
-}
+};
 
 /**
  * useCardEntity の責務:
@@ -65,7 +65,7 @@ function readCardDraft(cardId: string) {
  * - 画面描画用に draft 優先の effectiveCard を返す
  * - 画面遷移前に flushDraft() で未保存 draft を server へ確定させる
  */
-export function useCardEntity(cardId?: string | null) {
+export const useCardEntity = (cardId?: string | null) => {
   const { currentUser } = useAuthSession();
   const { updateCard } = useCards(undefined, undefined, { enabled: false });
 
@@ -116,4 +116,4 @@ export function useCardEntity(cardId?: string | null) {
     saveDraft,
     flushDraft,
   };
-}
+};

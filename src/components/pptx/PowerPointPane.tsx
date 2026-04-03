@@ -12,7 +12,7 @@ interface PowerPointPaneProps {
   className?: string;
 }
 
-export function PowerPointPane({ doc, className }: PowerPointPaneProps) {
+export const PowerPointPane = ({ doc, className }: PowerPointPaneProps) => {
   const {
     docState,
     displayName,
@@ -108,4 +108,4 @@ export function PowerPointPane({ doc, className }: PowerPointPaneProps) {
       </div>
     </div>
   );
-}
+};

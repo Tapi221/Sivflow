@@ -15,6 +15,6 @@ interface FolderDashboardProps {
   folderSelectionNonce?: number;
 }
 
-export function FolderDashboard(_: FolderDashboardProps) {
+export const FolderDashboard = (_: FolderDashboardProps) => {
   return <div style={{ height: "100%", background: "#ffffff" }} />;
-}
+};

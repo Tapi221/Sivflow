@@ -1,4 +1,4 @@
-export function getOrCreateDeviceId(): string {
+export const getOrCreateDeviceId = () => {
   if (typeof window === "undefined") return "server";
   let deviceId = localStorage.getItem("deviceId");
   if (!deviceId) {
@@ -6,9 +6,9 @@ export function getOrCreateDeviceId(): string {
     localStorage.setItem("deviceId", deviceId);
   }
   return deviceId;
-}
+};
 
-export function getDeviceName(): string {
+export const getDeviceName = () => {
   if (typeof window === "undefined") return "Server";
   const ua = navigator.userAgent;
 
@@ -38,4 +38,4 @@ export function getDeviceName(): string {
   }
 
   return `${client} (${os})`;
-}
+};

@@ -34,22 +34,22 @@ interface Params {
   isFiltering: boolean;
 }
 
-function getFolderOrder(folder: FolderTreeNode): number {
+const getFolderOrder = (folder: FolderTreeNode) => {
   return ((folder as { orderIndex?: number; order_index?: number })
     .orderIndex ??
     (folder as { orderIndex?: number; order_index?: number }).order_index ??
     0) as number;
-}
+};
 
-function getFolderName(folder: FolderTreeNode): string {
+const getFolderName = (folder: FolderTreeNode) => {
   return String(
     (folder as { folderName?: string; folder_name?: string }).folderName ??
       (folder as { folderName?: string; folder_name?: string }).folder_name ??
       "",
   );
-}
+};
 
-function compareFolders(a: FolderTreeNode, b: FolderTreeNode): number {
+const compareFolders = (a: FolderTreeNode, b: FolderTreeNode) => {
   return compareOrderableEntities(a, b, {
     getOrderIndex: getFolderOrder,
     getUpdatedAt: (folder) =>
@@ -59,15 +59,17 @@ function compareFolders(a: FolderTreeNode, b: FolderTreeNode): number {
     getName: getFolderName,
     getId: getFolderId,
   });
-}
+};
 
-export function useExplorerDerivedData({
-  treeFolders,
-  treeCards,
-  cardSets = [],
-  documents,
-  isFiltering,
-}: Params) {
+export const useExplorerDerivedData = (
+  {
+    treeFolders,
+    treeCards,
+    cardSets = [],
+    documents,
+    isFiltering,
+  }: Params
+) => {
   const childFoldersByParentId = useMemo(() => {
     const map = new Map<string, FolderTreeNode[]>();
     for (const folder of treeFolders) {
@@ -357,4 +359,4 @@ export function useExplorerDerivedData({
     getNextOrderIndex,
     getUniqueFolderName,
   };
-}
+};

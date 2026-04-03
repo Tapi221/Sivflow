@@ -1,10 +1,7 @@
 import { useCallback } from "react";
 import type { SetURLSearchParams } from "react-router-dom";
 
-export function useSettingsQueryParam(
-  searchParams: URLSearchParams,
-  setSearchParams: SetURLSearchParams,
-) {
+export const useSettingsQueryParam = (searchParams: URLSearchParams, setSearchParams: SetURLSearchParams) => {
   const isSettingsOpen = searchParams.get("settings") === "true";
   const settingsTab = searchParams.get("settingsTab");
 
@@ -30,4 +27,4 @@ export function useSettingsQueryParam(
   );
 
   return { isSettingsOpen, settingsTab, setIsSettingsOpen };
-}
+};

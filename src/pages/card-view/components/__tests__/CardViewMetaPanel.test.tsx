@@ -14,14 +14,14 @@ vi.mock("@/components/card/panels/CardMetaPanel", () => ({
   },
 }));
 
-function makeCard(overrides: Partial<Card> = {}): Card {
+const makeCard = (overrides: Partial<Card> = {}) => {
   return {
     id: "card-1",
     title: "old-title",
     reviewLogs: [],
     ...overrides,
   } as Card;
-}
+};
 
 describe("CardViewMetaPanel", () => {
   it("dispatches editing draft patch while typing title in global edit mode", async () => {

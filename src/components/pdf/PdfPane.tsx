@@ -56,12 +56,14 @@ interface PdfPaneProps {
   onDocumentUpdate?: (updates: Partial<PdfPaneDoc>) => Promise<void>; // 外部への状態保存
 }
 
-export function PdfPane({
-  doc,
-  className,
-  viewerOptions,
-  onDocumentUpdate,
-}: PdfPaneProps) {
+export const PdfPane = (
+  {
+    doc,
+    className,
+    viewerOptions,
+    onDocumentUpdate,
+  }: PdfPaneProps
+) => {
   const { currentUser } = useAuthSession();
   const viewerRef = useRef<PdfViewerHandle>(null);
   const [numPages, setNumPages] = useState(0);
@@ -216,4 +218,4 @@ export function PdfPane({
       </div>
     </div>
   );
-}
+};

@@ -8,7 +8,7 @@ type DBWithLegacyTables = {
   userId?: string;
 };
 
-export async function clearAllData(db: unknown): Promise<void> {
+export const clearAllData = (db: unknown) => {
   const dbExt = db as DBWithLegacyTables;
   await Promise.all([
     db.folders.clear(),
@@ -30,9 +30,9 @@ export async function clearAllData(db: unknown): Promise<void> {
     db.userId ? deleteDocumentBlobsByUser(db.userId) : Promise.resolve(),
     db.userId ? deleteImageBlobsByUser(db.userId) : Promise.resolve(),
   ]);
-}
+};
 
-export async function cleanupSyncHistory(db: unknown): Promise<void> {
+export const cleanupSyncHistory = (db: unknown) => {
   const now = Date.now();
   const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
   await db.syncHistory
@@ -44,9 +44,9 @@ export async function cleanupSyncHistory(db: unknown): Promise<void> {
     const toDelete = all.slice(0, all.length - 100);
     await db.syncHistory.bulkDelete(toDelete.map((h: unknown) => h.id));
   }
-}
+};
 
-export async function cleanupSyncErrors(db: unknown): Promise<void> {
+export const cleanupSyncErrors = (db: unknown) => {
   const now = Date.now();
   const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
   const oldErrors = await db.syncErrors
@@ -55,29 +55,20 @@ export async function cleanupSyncErrors(db: unknown): Promise<void> {
     .and((e: unknown) => !e.retryable)
     .toArray();
   await db.syncErrors.bulkDelete(oldErrors.map((e: unknown) => e.id));
-}
+};
 
-export async function getDeviceMeta(
-  db: unknown,
-  userId: string,
-): Promise<Record<string, unknown> | undefined> {
+export const getDeviceMeta = (db: unknown, userId: string) => {
   return db.deviceMeta.where("userId").equals(userId).first();
-}
+};
 
-export async function upsertDeviceMeta(
-  db: unknown,
-  meta: unknown,
-): Promise<void> {
+export const upsertDeviceMeta = (db: unknown, meta: unknown) => {
   await db.deviceMeta.put(meta);
-}
+};
 
-export async function getSyncEnabledFolders(
-  db: unknown,
-  userId: string,
-): Promise<Record<string, unknown>[]> {
+export const getSyncEnabledFolders = (db: unknown, userId: string) => {
   return db.folders
     .where("userId")
     .equals(userId)
     .and((f: unknown) => f.cloudSyncEnabled === true)
     .toArray();
-}
+};

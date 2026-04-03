@@ -1,7 +1,7 @@
 import React from "react";
 import { SearchX } from "@/ui/icons";
 
-export function ExplorerNoResultsState() {
+export const ExplorerNoResultsState = () => {
   return (
     <div className="flex min-h-full items-start justify-center px-4 py-10">
       <div className="text-center text-slate-500">
@@ -15,4 +15,4 @@ export function ExplorerNoResultsState() {
       </div>
     </div>
   );
-}
+};

@@ -6,7 +6,7 @@ type OrderableEntitySelectors<T> = {
   getId: (entity: T) => string | null | undefined;
 };
 
-function toTimestamp(value: Date | string | number | null | undefined): number {
+const toTimestamp = (value: Date | string | number | null | undefined) => {
   if (value instanceof Date) return value.getTime();
   if (typeof value === "number") return Number.isFinite(value) ? value : 0;
   if (typeof value === "string") {
@@ -14,20 +14,13 @@ function toTimestamp(value: Date | string | number | null | undefined): number {
     return Number.isNaN(parsed) ? 0 : parsed;
   }
   return 0;
-}
+};
 
-export function getOrderableOrderIndex<T>(
-  entity: T,
-  selectors: Pick<OrderableEntitySelectors<T>, "getOrderIndex">,
-): number {
+export const getOrderableOrderIndex = (entity: T, selectors: Pick<OrderableEntitySelectors<T>, "getOrderIndex">) => {
   return selectors.getOrderIndex(entity) ?? 0;
-}
+};
 
-export function compareOrderableEntities<T>(
-  a: T,
-  b: T,
-  selectors: OrderableEntitySelectors<T>,
-): number {
+export const compareOrderableEntities = (a: T, b: T, selectors: OrderableEntitySelectors<T>) => {
   const orderCompare =
     getOrderableOrderIndex(a, selectors) - getOrderableOrderIndex(b, selectors);
   if (orderCompare !== 0) return orderCompare;
@@ -52,4 +45,4 @@ export function compareOrderableEntities<T>(
     selectors.getId(b) ?? "",
     "ja",
   );
-}
+};

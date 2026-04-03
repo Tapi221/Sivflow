@@ -22,7 +22,7 @@ import {
 } from "@/ui/icons";
 import platform from "@/platform";
 
-export default function ImageDiagnostics() {
+export default const ImageDiagnostics = () => {
   const { currentUser } = useAuthSession();
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -329,4 +329,4 @@ export default function ImageDiagnostics() {
       </div>
     </div>
   );
-}
+};

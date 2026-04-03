@@ -35,7 +35,7 @@ const SUPPORTED_LANGUAGES = [
 ];
 const SUPPORTED_LANGUAGE_SET = new Set(SUPPORTED_LANGUAGES.map((l) => l.value));
 
-function canUseLocalStorage(): boolean {
+const canUseLocalStorage = () => {
   try {
     return (
       typeof window !== "undefined" &&
@@ -45,9 +45,9 @@ function canUseLocalStorage(): boolean {
   } catch {
     return false;
   }
-}
+};
 
-function getRecentLangs(): string[] {
+const getRecentLangs = () => {
   if (!canUseLocalStorage()) return [];
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
@@ -61,9 +61,9 @@ function getRecentLangs(): string[] {
   } catch {
     return [];
   }
-}
+};
 
-function pushRecentLang(lang: string): void {
+const pushRecentLang = (lang: string) => {
   if (!canUseLocalStorage()) return;
   try {
     const normalized = normalizeEditorLanguage(lang);
@@ -73,7 +73,7 @@ function pushRecentLang(lang: string): void {
   } catch {
     // noop
   }
-}
+};
 
 interface CodeBlockEditorProps {
   value?: CodeBlockData;
@@ -81,11 +81,13 @@ interface CodeBlockEditorProps {
   className?: string;
 }
 
-export function CodeBlockEditor({
-  value,
-  onChange,
-  className,
-}: CodeBlockEditorProps) {
+export const CodeBlockEditor = (
+  {
+    value,
+    onChange,
+    className,
+  }: CodeBlockEditorProps
+) => {
   const [recentLangs, setRecentLangs] = useState<string[]>(() =>
     getRecentLangs(),
   );
@@ -188,4 +190,4 @@ export function CodeBlockEditor({
       className={className}
     />
   );
-}
+};

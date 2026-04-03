@@ -40,7 +40,7 @@ turndown.addRule("fencedCode", {
  * @param html - クリップボードから取得したHTML文字列
  * @returns 安全なMarkdown文字列
  */
-export function sanitizeAndConvertToMarkdown(html: string): string {
+export const sanitizeAndConvertToMarkdown = (html: string) => {
   // 1. DOMPurify でサニタイズ（script/style/event handler等を除去）
   const clean = DOMPurify.sanitize(html, {
     ALLOWED_TAGS: [
@@ -88,4 +88,4 @@ export function sanitizeAndConvertToMarkdown(html: string): string {
   md = md.replace(/\n{3,}/g, "\n\n");
 
   return md.trim();
-}
+};

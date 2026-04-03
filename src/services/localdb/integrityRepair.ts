@@ -81,11 +81,7 @@ const pickString = (obj: UnknownRecord, keys: string[]): string | null => {
   return null;
 };
 
-export async function repairDataIntegrity(
-  db: LocalDB,
-  currentUserId: string,
-  onProgress?: (msg: string) => void,
-): Promise<IntegrityRepairResult> {
+export const repairDataIntegrity = (db: LocalDB, currentUserId: string, onProgress?: (msg: string) => void) => {
   const issues: IntegrityIssue[] = [];
 
   const normalizedTimestamp = (value: unknown): Date | null => {
@@ -663,4 +659,4 @@ export async function repairDataIntegrity(
     canonicalId: null,
     issues,
   };
-}
+};

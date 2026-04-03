@@ -26,7 +26,7 @@ const PLACEHOLDER_HEIGHT_PX = 900;
 const CARD_RADIUS_SM = 32;
 const CARD_RADIUS_MD = 40;
 
-function resolveCardBaseRadius(): number {
+const resolveCardBaseRadius = () => {
   if (
     typeof window === "undefined" ||
     typeof window.matchMedia !== "function"
@@ -36,7 +36,7 @@ function resolveCardBaseRadius(): number {
   return window.matchMedia("(min-width: 768px)").matches
     ? CARD_RADIUS_MD
     : CARD_RADIUS_SM;
-}
+};
 
 // cardWidth → borderRadius 文字列のモジュールレベルキャッシュ。
 // 全カードの毎フレームで window.matchMedia を呼ばないようにする。
@@ -51,7 +51,7 @@ if (typeof window !== "undefined" && typeof window.matchMedia === "function") {
   });
 }
 
-function cardBorderRadius(cardWidth: number): string {
+const cardBorderRadius = (cardWidth: number) => {
   const cached = borderRadiusCache.get(cardWidth);
   if (cached !== undefined) return cached;
   // CardFrame は scale で拡縮されるため、外側ラッパーも同じ比率で角丸を追従させる。
@@ -60,7 +60,7 @@ function cardBorderRadius(cardWidth: number): string {
   const result = `${Math.round(Math.max(0, scaled))}px`;
   borderRadiusCache.set(cardWidth, result);
   return result;
-}
+};
 
 // ── Props ───────────────────────────────────────────────────────────────────
 export type VerticalCardPagerProps<T> = {
@@ -102,30 +102,25 @@ export type VerticalCardPagerProps<T> = {
   disableVirtualization?: boolean;
 };
 
-// ── コンポーネント ───────────────────────────────────────────────────────────
-/**
- * React.memo でラップしてジェネリック型を維持するパターン。
- * CardViewDesktop が renderRange state 更新で再レンダーしても、
- * VerticalCardPager の props（renderCard, activeIndex 等）が変わっていなければ
- * VerticalCardPager は再レンダーされない。
- */
-function VerticalCardPagerFn<T>({
-  cards,
-  activeIndex,
-  onActiveIndexChange,
-  renderCard,
-  onFlip,
-  cardWidth = DEFAULT_CARD_WIDTH,
-  getCardWidth,
-  paddingInlinePx = 16,
-  paddingBlock = SCROLL_PADDING,
-  getKey,
-  naturalIndexCommitDelayMs = 0,
-  freezeActiveIndex = false,
-  disableItemChrome = false,
-  disableVirtualization = false,
-  onRenderRangeChange,
-}: VerticalCardPagerProps<T>) {
+const VerticalCardPagerFn = (
+  {
+    cards,
+    activeIndex,
+    onActiveIndexChange,
+    renderCard,
+    onFlip,
+    cardWidth = DEFAULT_CARD_WIDTH,
+    getCardWidth,
+    paddingInlinePx = 16,
+    paddingBlock = SCROLL_PADDING,
+    getKey,
+    naturalIndexCommitDelayMs = 0,
+    freezeActiveIndex = false,
+    disableItemChrome = false,
+    disableVirtualization = false,
+    onRenderRangeChange,
+  }: VerticalCardPagerProps<T>
+) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const avgItemExtentRef = useRef(900);
   const visibleRangeRafRef = useRef<number | null>(null);
@@ -432,7 +427,7 @@ function VerticalCardPagerFn<T>({
       </div>
     </div>
   );
-}
+};
 
 export const VerticalCardPager = React.memo(
   VerticalCardPagerFn,

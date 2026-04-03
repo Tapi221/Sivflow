@@ -38,7 +38,7 @@ const IMAGE_BLOCK_INSET_PX = 4;
 const FIXED_IMAGE_REFERENCE_FRAME_WIDTH_PX =
   CANONICAL_CARD_WIDTH - IMAGE_BLOCK_INSET_PX * 2;
 
-function ImageItem({ item, index, onRetry, onUpdate }) {
+const ImageItem = ({ item, index, onRetry, onUpdate }) => {
   const [loadFailed, setLoadFailed] = useState(false);
   const { currentUser } = useAuthSession();
   const [draftTransform, setDraftTransform] = useState<{
@@ -334,13 +334,14 @@ function ImageItem({ item, index, onRetry, onUpdate }) {
       </div>
     </>
   );
-}
+};
+
 const MemoizedImageItem = React.memo(
   ImageItem,
   (prev, next) => prev.item === next.item && prev.index === next.index,
 );
 
-function AudioItem({ url, index, onRemove }) {
+const AudioItem = ({ url, index, onRemove }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = React.useRef(null);
 
@@ -383,7 +384,7 @@ function AudioItem({ url, index, onRemove }) {
       </Button>
     </div>
   );
-}
+};
 
 interface MediaUploaderProps {
   type?: "image" | "audio";
@@ -396,16 +397,18 @@ interface MediaUploaderProps {
   autoOpenPicker?: boolean;
 }
 
-export default function MediaUploader({
-  type = "image",
-  urls = [],
-  onChange,
-  maxFiles = 10,
-  initialFile,
-  onConsumeInitialFile,
-  onFilesExcess,
-  autoOpenPicker = false,
-}: MediaUploaderProps) {
+export default const MediaUploader = (
+  {
+    type = "image",
+    urls = [],
+    onChange,
+    maxFiles = 10,
+    initialFile,
+    onConsumeInitialFile,
+    onFilesExcess,
+    autoOpenPicker = false,
+  }: MediaUploaderProps
+) => {
   const { currentUser } = useAuthSession();
   const [isUploading, setIsUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
@@ -1149,4 +1152,4 @@ export default function MediaUploader({
       )}
     </div>
   );
-}
+};

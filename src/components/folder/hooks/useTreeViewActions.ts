@@ -8,12 +8,14 @@ interface UseTreeViewActionsParams {
   addRecent: (item: { type: "folder"; id: string }) => void;
 }
 
-export function useTreeViewActions({
-  navigate,
-  selectedFolderId,
-  onFolderSelect,
-  addRecent,
-}: UseTreeViewActionsParams) {
+export const useTreeViewActions = (
+  {
+    navigate,
+    selectedFolderId,
+    onFolderSelect,
+    addRecent,
+  }: UseTreeViewActionsParams
+) => {
   const [isCreateSelectionOpen, setIsCreateSelectionOpen] = useState(false);
   const [isModeSelectionOpen, setIsModeSelectionOpen] = useState(false);
 
@@ -101,4 +103,4 @@ export function useTreeViewActions({
     handleSelectCreateMode,
     handleSelectDetailedMode,
   };
-}
+};

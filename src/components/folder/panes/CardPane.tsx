@@ -6,11 +6,11 @@ interface CardPaneProps {
   onCardUpdated: () => void;
 }
 
-export function CardPane({ selectedCardId, onCardUpdated }: CardPaneProps) {
+export const CardPane = ({ selectedCardId, onCardUpdated }: CardPaneProps) => {
   return (
     <CardEditorPane
       selectedCardId={selectedCardId}
       onCardUpdated={onCardUpdated}
     />
   );
-}
+};

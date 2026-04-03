@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-export function useKatexLoader() {
+export const useKatexLoader = () => {
   useEffect(() => {
     if ((window as unknown).katex) return;
 
@@ -22,4 +22,4 @@ export function useKatexLoader() {
       document.head.appendChild(autoRender);
     };
   }, []);
-}
+};

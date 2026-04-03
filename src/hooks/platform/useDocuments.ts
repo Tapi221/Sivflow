@@ -7,7 +7,7 @@ import type { DocumentItem } from "@/types";
 /**
  * PDFドキュメントを取得・管理するためのフック
  */
-export function useDocuments(folderId?: string) {
+export const useDocuments = (folderId?: string) => {
   const { currentUser } = useAuthSession();
   const [error, setError] = useState<string | null>(null);
 
@@ -80,4 +80,4 @@ export function useDocuments(folderId?: string) {
     error,
     updateDocument,
   };
-}
+};

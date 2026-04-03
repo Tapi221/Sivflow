@@ -1,7 +1,7 @@
 import { warnOncePerSession } from "@/services/localDBRuntimeState";
 import { isBackingStoreOpenError } from "./errors";
 
-export async function listDatabases(): Promise<IDBDatabaseInfo[]> {
+export const listDatabases = () => {
   if (!indexedDB.databases) return [];
   try {
     const dbs = await indexedDB.databases();
@@ -16,7 +16,7 @@ export async function listDatabases(): Promise<IDBDatabaseInfo[]> {
     }
     return [];
   }
-}
+};
 
 type ForensicDbDetail = { name: string; tables: number; records: number };
 type ForensicSummary = {
@@ -25,9 +25,7 @@ type ForensicSummary = {
   dbDetails: ForensicDbDetail[];
 };
 
-export async function fullOriginForensicAudit(
-  onProgress?: (msg: string) => void,
-): Promise<ForensicSummary> {
+export const fullOriginForensicAudit = (onProgress?: (msg: string) => void) => {
   console.log("[Forensic-Audit] Starting origin-wide scan...");
   onProgress?.("全オリジン調査を開始...");
 
@@ -109,4 +107,4 @@ export async function fullOriginForensicAudit(
     `調査完了: ${summary.totalRecordsFound} 件のレコード断片をコンソールに出力しました`,
   );
   return summary;
-}
+};

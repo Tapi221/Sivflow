@@ -36,20 +36,22 @@ export interface FlashcardCornerControlsResult {
   actionsTopRight: React.ReactNode[] | undefined;
 }
 
-export function useFlashcardCornerControls({
-  card,
-  hasUncertainty,
-  isBookmarked,
-  activeImageItems,
-  activeAudioUrls,
-  activeReferences,
-  extraHeaderLeft,
-  onToggleUncertainty,
-  onToggleBookmark,
-  onOpenImagePopup,
-  onOpenAudioPopup,
-  onOpenReferencePopup,
-}: FlashcardCornerControlsProps): FlashcardCornerControlsResult {
+export const useFlashcardCornerControls = (
+  {
+    card,
+    hasUncertainty,
+    isBookmarked,
+    activeImageItems,
+    activeAudioUrls,
+    activeReferences,
+    extraHeaderLeft,
+    onToggleUncertainty,
+    onToggleBookmark,
+    onOpenImagePopup,
+    onOpenAudioPopup,
+    onOpenReferencePopup,
+  }: FlashcardCornerControlsProps
+) => {
   return React.useMemo(() => {
     const actionsTopLeft: React.ReactNode[] = [];
     const actionsTopRight: React.ReactNode[] = [];
@@ -193,4 +195,4 @@ export function useFlashcardCornerControls({
     onToggleBookmark,
     onToggleUncertainty,
   ]);
-}
+};

@@ -14,12 +14,12 @@ export interface CardFaceLayout {
   bottomSlackPx: number;
 }
 
-export function buildCardFaceLayout(
+export const buildCardFaceLayout = (
   blocks: MeasuredBlock[],
   ruledTop: number,
   ruledBottom: number,
-  rowPx: number,
-): CardFaceLayout {
+  rowPx: number
+) => {
   const usedHeight =
     blocks.length > 0
       ? Math.max(...blocks.map((b) => b.top + b.height))
@@ -54,4 +54,4 @@ export function buildCardFaceLayout(
       ruledBottom - Math.max(usedHeight, lastVisibleRule),
     ),
   };
-}
+};

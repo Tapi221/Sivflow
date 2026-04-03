@@ -16,7 +16,7 @@ const SENSITIVE_KEYS = new Set([
 
 const REDACTED = "[REDACTED]";
 
-function sanitizeValue(value: unknown, depth: number): unknown {
+const sanitizeValue = (value: unknown, depth: number) => {
   if (depth > 4) return "[TRUNCATED]";
   if (typeof value === "string")
     return value.length > 120 ? `${value.slice(0, 120)}...` : value;
@@ -33,8 +33,8 @@ function sanitizeValue(value: unknown, depth: number): unknown {
     out[k] = sanitizeValue(v, depth + 1);
   }
   return out;
-}
+};
 
-export function sanitizeForLog<T>(value: T): T {
+export const sanitizeForLog = (value: T) => {
   return sanitizeValue(value, 0) as T;
-}
+};

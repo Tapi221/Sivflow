@@ -1,26 +1,26 @@
-import React, { useState, useMemo, useRef, useEffect } from "react";
-import { Filter, Search, Tag } from "@/ui/icons";
-import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
-import { useTags } from "@/hooks/settings/useTags";
-import { cn } from "@/lib/utils";
+import { TagBadge } from "@/components/tag/TagBadge";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { TagBadge } from "@/components/tag/TagBadge";
-import { Switch } from "@/components/ui/switch";
 import { SurfaceButton } from "@/components/ui/surface-button";
+import { Switch } from "@/components/ui/switch";
+import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
+import { useTags } from "@/hooks/settings/useTags";
+import { cn } from "@/lib/utils";
+import { Filter, Search, Tag } from "@/ui/icons";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 interface TagFilterPopoverProps {
-  allTags: string[]; // 全タグ一覧（呼び出し元から渡す）
+  allTags: string[];
   className?: string;
 }
 
-export function TagFilterPopover({
+export const TagFilterPopover = ({
   allTags,
   className,
-}: TagFilterPopoverProps) {
+}: TagFilterPopoverProps) => {
   const { getTagColor } = useTags();
   const {
     tagFilter,
@@ -42,18 +42,16 @@ export function TagFilterPopover({
   const [isOpen, setIsOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // ダイアログ開いた時に検索ボックスフォーカス
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => {
         inputRef.current?.focus();
       }, 100);
     } else {
-      queueMicrotask(() => setSearchQuery("")); // 閉じたら検索クリア
+      queueMicrotask(() => setSearchQuery(""));
     }
   }, [isOpen]);
 
-  // タグ検索フィルタリング
   const filteredTags = useMemo(() => {
     if (!searchQuery.trim()) return allTags;
     return allTags.filter((tag) =>
@@ -61,7 +59,6 @@ export function TagFilterPopover({
     );
   }, [allTags, searchQuery]);
 
-  // フィルタ有効状態
   const isFilterActive =
     tagFilter.length > 0 ||
     uncertaintyFilter !== "any" ||
@@ -93,7 +90,6 @@ export function TagFilterPopover({
         )}
       >
         <div className="flex flex-col max-h-[400px]">
-          {/* Header & Search */}
           <div className="border-b border-[var(--surface-border)] bg-transparent p-3">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-semibold text-slate-800">
@@ -131,7 +127,6 @@ export function TagFilterPopover({
             </div>
           </div>
 
-          {/* AND,ORトグル */}
           <div className="flex items-center gap-2 border-b border-[var(--surface-border)] bg-transparent px-3 py-2 text-[11px]">
             <span className="text-slate-500">条件:</span>
             <div className="flex rounded border border-[var(--surface-border)] bg-white/48 p-0.5 shadow-sm">
@@ -225,7 +220,6 @@ export function TagFilterPopover({
             ))}
           </div>
 
-          {/* タグリスト */}
           <div className="min-h-[150px] flex-1 overflow-y-auto bg-transparent p-1">
             {filteredTags.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 text-slate-500 text-xs">
@@ -272,4 +266,4 @@ export function TagFilterPopover({
       </PopoverContent>
     </Popover>
   );
-}
+};

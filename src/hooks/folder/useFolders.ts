@@ -5,7 +5,7 @@ import { useAuthSession } from "@/contexts/AuthContext";
 import type { Folder } from "@/types";
 import { normalizeFolder } from "@/utils";
 
-export function useFolders() {
+export const useFolders = () => {
   const { currentUser } = useAuthSession();
 
   const folders = useLiveQuery(async () => {
@@ -161,4 +161,4 @@ export function useFolders() {
     reorderFolders,
     getFolderTree,
   };
-}
+};

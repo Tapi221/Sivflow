@@ -29,7 +29,7 @@ interface CardWidthPreferencesStore {
   byCardSet: Record<string, CardWidthEntry>;
 }
 
-function readStore(): CardWidthPreferencesStore {
+const readStore = () => {
   try {
     if (typeof window === "undefined") return empty();
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -47,29 +47,26 @@ function readStore(): CardWidthPreferencesStore {
   } catch {
     return empty();
   }
-}
+};
 
-function empty(): CardWidthPreferencesStore {
+const empty = () => {
   return { version: 1, byCardSet: {} };
-}
+};
 
-function writeStore(store: CardWidthPreferencesStore): void {
+const writeStore = (store: CardWidthPreferencesStore) => {
   try {
     if (typeof window === "undefined") return;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   } catch {
     // Ignore write failures (e.g. private browsing quota exceeded).
   }
-}
+};
 
 /**
  * Returns the stored width for (cardSetId, mode), or undefined if not found.
  * The caller is responsible for clamping the returned value.
  */
-export function getCardSetWidthPreference(
-  cardSetId: string,
-  mode: CardWidthPaneMode,
-): number | undefined {
+export const getCardSetWidthPreference = (cardSetId: string, mode: CardWidthPaneMode) => {
   const store = readStore();
   const entry = store.byCardSet[cardSetId];
   if (!entry) return undefined;
@@ -78,17 +75,13 @@ export function getCardSetWidthPreference(
     return value;
   }
   return undefined;
-}
+};
 
 /**
  * Persists (cardSetId, mode, widthPx) to localStorage.
  * Should be called with an already-clamped value.
  */
-export function setCardSetWidthPreference(
-  cardSetId: string,
-  mode: CardWidthPaneMode,
-  widthPx: number,
-): void {
+export const setCardSetWidthPreference = (cardSetId: string, mode: CardWidthPaneMode, widthPx: number) => {
   if (!cardSetId) return;
   const store = readStore();
   if (!store.byCardSet[cardSetId]) {
@@ -96,4 +89,4 @@ export function setCardSetWidthPreference(
   }
   store.byCardSet[cardSetId][mode] = widthPx;
   writeStore(store);
-}
+};

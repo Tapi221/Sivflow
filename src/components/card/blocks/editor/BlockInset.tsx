@@ -9,10 +9,10 @@ interface BlockInsetProps {
   children: React.ReactNode;
 }
 
-export function BlockInset({ variant, className, children }: BlockInsetProps) {
+export const BlockInset = ({ variant, className, children }: BlockInsetProps) => {
   return (
     <div className={cn("block-inset", `block-inset--${variant}`, className)}>
       {children}
     </div>
   );
-}
+};

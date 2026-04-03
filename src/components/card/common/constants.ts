@@ -93,25 +93,25 @@ export const CARD_HEIGHT_PHASE_PX =
 /**
  * layoutRows を実際のカード高さ(px)へ変換。
  */
-export function layoutRowsToCardHeightPx(rows: number): number {
+export const layoutRowsToCardHeightPx = (rows: number) => {
   return rows * CARD_ROW_PX + CARD_HEIGHT_PHASE_PX;
-}
+};
 
 /**
  * カード高さ(px)を layoutRows へ逆変換。
  */
-export function cardHeightPxToLayoutRows(heightPx: number): number {
+export const cardHeightPxToLayoutRows = (heightPx: number) => {
   return Math.round((heightPx - CARD_HEIGHT_PHASE_PX) / CARD_ROW_PX);
-}
+};
 
 /**
  * 「この高さ以上が必要」という最小必要高さ(px)を rows へ変換。
  * 編集画面の min-height 判定では round ではなく ceil を使う。
  */
-export function minCardHeightPxToLayoutRows(heightPx: number): number {
+export const minCardHeightPxToLayoutRows = (heightPx: number) => {
   return Math.ceil((heightPx - CARD_HEIGHT_PHASE_PX) / CARD_ROW_PX);
-}
+};
 
-export function snapMinCardHeightPx(heightPx: number): number {
+export const snapMinCardHeightPx = (heightPx: number) => {
   return layoutRowsToCardHeightPx(minCardHeightPxToLayoutRows(heightPx));
-}
+};

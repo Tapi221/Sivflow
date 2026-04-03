@@ -54,25 +54,27 @@ const getCardLabel = (card: Card): string => {
   return plain.length > 10 ? `${plain.slice(0, 10)}...` : plain;
 };
 
-function DirectoryTreeNode({
-  node,
-  hasParent,
-  isLast,
-  getTagColor,
-  badgeVisibility,
-  onCardClick,
-}: {
-  node: TreeNode;
-  hasParent: boolean;
-  isLast: boolean;
-  getTagColor: (tagNameOrId: string) => string;
-  badgeVisibility: {
-    uncertainty: boolean;
-    bookmarked: boolean;
-    tags: boolean;
-  };
-  onCardClick: (cardId: string) => void;
-}) {
+const DirectoryTreeNode = (
+  {
+    node,
+    hasParent,
+    isLast,
+    getTagColor,
+    badgeVisibility,
+    onCardClick,
+  }: {
+    node: TreeNode;
+    hasParent: boolean;
+    isLast: boolean;
+    getTagColor: (tagNameOrId: string) => string;
+    badgeVisibility: {
+      uncertainty: boolean;
+      bookmarked: boolean;
+      tags: boolean;
+    };
+    onCardClick: (cardId: string) => void;
+  }
+) => {
   const isFolderNode = node.kind === "folder";
   const isCardNode =
     node.kind === "card" && typeof node.sourceCardId === "string";
@@ -178,13 +180,15 @@ function DirectoryTreeNode({
       ) : null}
     </div>
   );
-}
+};
 
-export function DirectoryDiagramPane({
-  folders,
-  cards,
-  documents,
-}: DirectoryDiagramPaneProps) {
+export const DirectoryDiagramPane = (
+  {
+    folders,
+    cards,
+    documents,
+  }: DirectoryDiagramPaneProps
+) => {
   const { tagById, getTagColor } = useTags();
   const [previewCardId, setPreviewCardId] = useState<string | null>(null);
   const {
@@ -516,4 +520,4 @@ export function DirectoryDiagramPane({
       </Dialog>
     </div>
   );
-}
+};

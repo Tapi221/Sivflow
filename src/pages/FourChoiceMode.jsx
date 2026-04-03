@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "@/ui/icons";
 import { CardEditorPane } from "@/components/folder/panes/CardEditorPane";
 
-export default function FourChoiceMode() {
+export default const FourChoiceMode = () => {
   const [searchParams] = useSearchParams();
   const folderId = searchParams.get("folderId");
   const navigate = useNavigate();
@@ -49,4 +49,4 @@ export default function FourChoiceMode() {
       </div>
     </div>
   );
-}
+};

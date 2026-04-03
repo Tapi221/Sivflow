@@ -29,7 +29,7 @@ import ExportDialog from "@/components/export/ExportDialog";
 import ImportDialog from "@/components/export/ImportDialog";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 
-export default function Dashboard() {
+export default const Dashboard = () => {
   const navigate = useNavigate();
   const { currentUser } = useAuthSession();
   const { settings } = useUserSettings();
@@ -471,4 +471,4 @@ export default function Dashboard() {
       />
     </div>
   );
-}
+};

@@ -34,9 +34,7 @@ let persistentOpenDisabled = false;
 const fallbackInstances = new Map<string, InMemoryLocalDB>();
 let cachedInstance: LocalDBInstance | null = null;
 
-// --- 内部ヘルパー ---
-
-function activateFallback(userId: string, error: unknown): LocalDBInstance {
+const activateFallback = (userId: string, error: unknown) => {
   let fallback = fallbackInstances.get(userId);
   if (!fallback) {
     fallback = new InMemoryLocalDB(
@@ -64,9 +62,9 @@ function activateFallback(userId: string, error: unknown): LocalDBInstance {
   );
 
   return fallback;
-}
+};
 
-async function openPersistentDbWithRetry(db: LocalDB): Promise<void> {
+const openPersistentDbWithRetry = (db: LocalDB) => {
   let attempt = 0;
   const maxAttempts = 2;
   let lastError: unknown = null;
@@ -85,15 +83,15 @@ async function openPersistentDbWithRetry(db: LocalDB): Promise<void> {
   }
 
   throw lastError;
-}
+};
 
 // --- 公開 API ---
 
-export function getInstanceUserId(): string | null {
+export const getInstanceUserId = () => {
   return currentUserId;
-}
+};
 
-export async function getInstance(userId?: string): Promise<LocalDBInstance> {
+export const getInstance = (userId?: string) => {
   const nextUserId = userId || "anonymous";
 
   if (resettingPromise) {
@@ -211,9 +209,9 @@ export async function getInstance(userId?: string): Promise<LocalDBInstance> {
       openingUserId = null;
     }
   }
-}
+};
 
-export async function resetForLogout(userId?: string): Promise<void> {
+export const resetForLogout = (userId?: string) => {
   if (resettingPromise) {
     return resettingPromise;
   }
@@ -297,9 +295,9 @@ export async function resetForLogout(userId?: string): Promise<void> {
   } finally {
     resettingPromise = null;
   }
-}
+};
 
-export function clearInstance(): void {
+export const clearInstance = () => {
   if (instance) {
     try {
       if (instance.isOpen()) {
@@ -319,28 +317,28 @@ export function clearInstance(): void {
       cachedInstance = null;
     }
   }
-}
+};
 
-export async function getLocalDb(userId?: string): Promise<LocalDBLike> {
+export const getLocalDb = (userId?: string) => {
   if (!cachedInstance || (userId && getInstanceUserId() !== userId)) {
     cachedInstance = await getInstance(userId);
   }
   return cachedInstance;
-}
+};
 
-export function getLocalDbSync(): LocalDBLike {
+export const getLocalDbSync = () => {
   if (!cachedInstance) {
     throw new Error(
       "[LocalDB] Database accessed before async initialization. Use await getLocalDb() first.",
     );
   }
   return cachedInstance;
-}
+};
 
-export async function initializeDB(userId: string): Promise<void> {
+export const initializeDB = (userId: string) => {
   await getLocalDb(userId);
-}
+};
 
-export async function resetLocalDBForLogout(userId?: string): Promise<void> {
+export const resetLocalDBForLogout = (userId?: string) => {
   await resetForLogout(userId);
-}
+};

@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from "react";
 
-export function useExplorerDialogs() {
+export const useExplorerDialogs = () => {
   // rename
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
@@ -52,4 +52,4 @@ export function useExplorerDialogs() {
     bulkTagFolderId,
     setBulkTagFolderId,
   };
-}
+};

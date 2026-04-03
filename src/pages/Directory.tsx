@@ -4,7 +4,7 @@ import { useFolders } from "@/hooks/folder/useFolders";
 import { useDocuments } from "@/hooks/platform/useDocuments";
 import { DirectoryDiagramPane } from "@/components/folder/panes/DirectoryDiagramPane";
 
-export default function Directory() {
+export default const Directory = () => {
   const { cards = [] } = useCards();
   const { folders = [] } = useFolders();
   const { documents = [] } = useDocuments();
@@ -18,4 +18,4 @@ export default function Directory() {
       />
     </div>
   );
-}
+};

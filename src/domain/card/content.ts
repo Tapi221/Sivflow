@@ -14,23 +14,23 @@ const EMPTY_IMAGES: UploadedImage[] = [];
 const EMPTY_AUDIOS: Array<{ url: string; filename: string; order: number }> =
   [];
 
-export function getCardFace(card: Card, side: CardSide): CardFace {
+export const getCardFace = (card: Card, side: CardSide) => {
   return side === "question" ? card.front : card.back;
-}
+};
 
-export function getCardBlocks(card: Card, side: CardSide): CardBlock[] {
+export const getCardBlocks = (card: Card, side: CardSide) => {
   return getCardFace(card, side)?.blocks ?? EMPTY_BLOCKS;
-}
+};
 
-export function getCardInk(card: Card, side: CardSide): InkDocument | null {
+export const getCardInk = (card: Card, side: CardSide) => {
   return getCardFace(card, side)?.ink ?? null;
-}
+};
 
-export function getCardExtraRows(card: Card, side: CardSide): number {
+export const getCardExtraRows = (card: Card, side: CardSide) => {
   return getCardFace(card, side)?.extraRows ?? 0;
-}
+};
 
-export function extractCardTextFromBlocks(blocks: CardBlock[]): string {
+export const extractCardTextFromBlocks = (blocks: CardBlock[]) => {
   for (const block of blocks) {
     if (block.type === "text" && typeof block.content === "string") {
       const content = block.content.trim();
@@ -46,13 +46,13 @@ export function extractCardTextFromBlocks(blocks: CardBlock[]): string {
     }
   }
   return "";
-}
+};
 
-export function getCardText(card: Card, side: CardSide): string {
+export const getCardText = (card: Card, side: CardSide) => {
   return extractCardTextFromBlocks(getCardBlocks(card, side));
-}
+};
 
-export function getCardImages(card: Card, side: CardSide): UploadedImage[] {
+export const getCardImages = (card: Card, side: CardSide) => {
   const images = getCardBlocks(card, side)
     .filter(
       (
@@ -62,12 +62,9 @@ export function getCardImages(card: Card, side: CardSide): UploadedImage[] {
     )
     .flatMap((block) => block.images);
   return images.length > 0 ? images : EMPTY_IMAGES;
-}
+};
 
-export function getCardAudios(
-  card: Card,
-  side: CardSide,
-): Array<{ url: string; filename: string; order: number }> {
+export const getCardAudios = (card: Card, side: CardSide) => {
   const audios = getCardBlocks(card, side)
     .filter(
       (
@@ -79,12 +76,12 @@ export function getCardAudios(
     )
     .flatMap((block) => block.audios);
   return audios.length > 0 ? audios : EMPTY_AUDIOS;
-}
+};
 
-export function getCardCode(card: Card, side: CardSide): CodeBlockData | null {
+export const getCardCode = (card: Card, side: CardSide) => {
   const codeBlock = getCardBlocks(card, side).find(
     (block): block is CardBlock & { type: "code"; code: CodeBlockData } =>
       block.type === "code" && !!block.code,
   );
   return codeBlock?.code ?? null;
-}
+};

@@ -191,7 +191,7 @@ export interface BlobCacheStats {
   revokeCount: number;
 }
 
-export function getBlobCacheStats(): BlobCacheStats {
+export const getBlobCacheStats = () => {
   let pinnedCount = 0;
   for (const entry of cache.values()) {
     if (entry.pinCount > 0) pinnedCount++;
@@ -203,4 +203,4 @@ export function getBlobCacheStats(): BlobCacheStats {
     evictCount: _evictCount,
     revokeCount: _revokeCount,
   };
-}
+};

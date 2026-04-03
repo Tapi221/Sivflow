@@ -28,13 +28,15 @@ interface TagInputProps {
   quietHover?: boolean;
 }
 
-export function TagInput({
-  tags = [],
-  onChange,
-  placeholder = "タグを選択...",
-  className,
-  quietHover = false,
-}: TagInputProps) {
+export const TagInput = (
+  {
+    tags = [],
+    onChange,
+    placeholder = "タグを選択...",
+    className,
+    quietHover = false,
+  }: TagInputProps
+) => {
   const [open, setOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState("");
   const [selectedColor, setSelectedColor] = React.useState<TagColorKey | null>(
@@ -276,4 +278,4 @@ export function TagInput({
       </PopoverContent>
     </Popover>
   );
-}
+};

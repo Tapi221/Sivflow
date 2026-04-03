@@ -66,7 +66,7 @@ const createE2EPdfData = (pageCount = 14): Uint8Array => {
   return bytes;
 };
 
-export default function PdfScrollTest() {
+export default const PdfScrollTest = () => {
   const viewerRef = useRef<PdfViewerHandle>(null);
   const [numPages, setNumPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -135,4 +135,4 @@ export default function PdfScrollTest() {
       </div>
     </div>
   );
-}
+};

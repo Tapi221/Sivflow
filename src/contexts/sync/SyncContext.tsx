@@ -53,15 +53,15 @@ const defaultSyncContext: SyncContextType = {
 const SyncContext = createContext<SyncContextType>(defaultSyncContext);
 
 // eslint-disable-next-line react-refresh/only-export-components
-export function useSyncContext() {
+export const useSyncContext = () => {
   return useContext(SyncContext);
-}
+};
 
 interface SyncProviderProps {
   children: ReactNode;
 }
 
-export function SyncProvider({ children }: SyncProviderProps) {
+export const SyncProvider = ({ children }: SyncProviderProps) => {
   const { currentUser } = useAuthSession();
   const userId = currentUser?.uid ?? null;
   const [syncStatus, setSyncStatus] = useState<SyncStatus>("idle");
@@ -383,4 +383,4 @@ export function SyncProvider({ children }: SyncProviderProps) {
   );
 
   return <SyncContext.Provider value={value}>{children}</SyncContext.Provider>;
-}
+};

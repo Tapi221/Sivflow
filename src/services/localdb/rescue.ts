@@ -10,9 +10,7 @@ type LocalDBWithTags = LocalDB & {
   tags: { bulkPut(items: unknown[]): Promise<unknown> };
 };
 
-// ─── Firestore document flattening (private helpers) ───────────────────────
-
-function parseFields(fields: unknown): unknown {
+const parseFields = (fields: unknown) => {
   const result: unknown = {};
   for (const [key, field] of Object.entries(fields)) {
     const f = field as Record<string, unknown>;
@@ -29,26 +27,24 @@ function parseFields(fields: unknown): unknown {
       result[key] = flattenFirestoreDocument({ value: f });
   }
   return result;
-}
+};
 
-function flattenFirestoreDocument(data: unknown): unknown {
+const flattenFirestoreDocument = (data: unknown) => {
   if (!data) return null;
   if (data.value?.mapValue?.fields)
     return parseFields(data.value.mapValue.fields);
   if (data.fields) return parseFields(data.fields);
   if (typeof data === "object" && !data.value && !data.fields) return data;
   return null;
-}
+};
 
-// ─── finalizeRawImport ──────────────────────────────────────────────────────
-
-async function finalizeRawImport(
+const finalizeRawImport = (
   db: LocalDB,
   folders: unknown[],
   cards: unknown[],
   userId: string,
-  onProgress?: (m: string) => void,
-): Promise<{ folders: number; cards: number; firstCardKeys: string[] }> {
+  onProgress?: (m: string) => void
+) => {
   console.log(
     `[Rescue] Raw Scan Results: ${folders.length} folders, ${cards.length} cards.`,
   );
@@ -81,16 +77,16 @@ async function finalizeRawImport(
 
   onProgress?.("復旧完了！");
   return { folders: folders.length, cards: cards.length, firstCardKeys: [] };
-}
+};
 
 // ─── extractFromFirestoreSDK ────────────────────────────────────────────────
 
-export async function extractFromFirestoreSDK(
+export const extractFromFirestoreSDK = (
   db: LocalDB,
   sourceDbName: string,
   currentUserId: string,
-  onProgress?: (progress: string) => void,
-): Promise<{ cards: number; folders: number; firstCardKeys: string[] }> {
+  onProgress?: (progress: string) => void
+) => {
   console.log(`[Rescue] Attempting Raw Native Extraction: ${sourceDbName}`);
   onProgress?.("ネイティブ接続を試行中...");
 
@@ -299,22 +295,16 @@ export async function extractFromFirestoreSDK(
       }
     };
   });
-}
+};
 
 // ─── importFromDatabase ─────────────────────────────────────────────────────
 
-export async function importFromDatabase(
+export const importFromDatabase = (
   db: LocalDB,
   sourceDbName: string,
   currentUserId: string,
-  onProgress?: (progress: string) => void,
-): Promise<{
-  cards: number;
-  folders: number;
-  stats: number;
-  studyLogs: number;
-  firstCardKeys: string[];
-}> {
+  onProgress?: (progress: string) => void
+) => {
   console.log(`[Rescue] Starting import from ${sourceDbName} to current DB...`);
   onProgress?.("復旧を開始しています...");
 
@@ -555,4 +545,4 @@ export async function importFromDatabase(
   } finally {
     sourceDb.close();
   }
-}
+};

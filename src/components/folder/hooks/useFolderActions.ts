@@ -96,10 +96,7 @@ type UseFolderActionsParams = {
 const DEFAULT_NEW_FOLDER_NAME = "新規フォルダ";
 const DEFAULT_NEW_CARDSET_NAME = "新規カードセット";
 
-function parseTarget(
-  target: DeleteLikeTarget,
-  fallbackId: string | null,
-): { type: RenameTargetKind | null; id: string | null } {
+const parseTarget = (target: DeleteLikeTarget, fallbackId: string | null) => {
   if (target?.id) {
     return {
       type: target.type ?? null,
@@ -111,18 +108,18 @@ function parseTarget(
     type: null,
     id: fallbackId,
   };
-}
+};
 
-function isCardSetId(cardSets: CardSet[], id: string): boolean {
+const isCardSetId = (cardSets: CardSet[], id: string) => {
   return cardSets.some((cardSet) => cardSet.id === id);
-}
+};
 
-function makeTempFolder(
+const makeTempFolder = (
   id: string,
   name: string,
   parentFolderId: string | null,
-  orderIndex: number,
-): FolderTreeNode {
+  orderIndex: number
+) => {
   const now = new Date();
 
   return {
@@ -136,14 +133,9 @@ function makeTempFolder(
     updatedAt: now,
     __optimistic: true,
   } as FolderTreeNode;
-}
+};
 
-function makeTempCardSet(
-  id: string,
-  name: string,
-  folderId: string,
-  orderIndex: number,
-): CardSet {
+const makeTempCardSet = (id: string, name: string, folderId: string, orderIndex: number) => {
   const now = new Date();
 
   return {
@@ -158,29 +150,26 @@ function makeTempCardSet(
     createdAt: now,
     updatedAt: now,
   };
-}
+};
 
-function setFolderOrderIndex(
-  folder: FolderTreeNode,
-  orderIndex: number,
-): FolderTreeNode {
+const setFolderOrderIndex = (folder: FolderTreeNode, orderIndex: number) => {
   return {
     ...folder,
     orderIndex,
     order_index: orderIndex,
     updatedAt: new Date(),
   } as FolderTreeNode;
-}
+};
 
-function setCardSetOrderIndex(cardSet: CardSet, orderIndex: number): CardSet {
+const setCardSetOrderIndex = (cardSet: CardSet, orderIndex: number) => {
   return {
     ...cardSet,
     orderIndex,
     updatedAt: new Date(),
   };
-}
+};
 
-function createEntityId(prefix: "folder" | "cardSet"): string {
+const createEntityId = (prefix: "folder" | "cardSet") => {
   if (
     typeof crypto !== "undefined" &&
     typeof crypto.randomUUID === "function"
@@ -188,9 +177,9 @@ function createEntityId(prefix: "folder" | "cardSet"): string {
     return crypto.randomUUID();
   }
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-}
+};
 
-function getFolderParentId(folder: FolderTreeNode): string | null {
+const getFolderParentId = (folder: FolderTreeNode) => {
   return normalizeFolderId(
     (
       folder as {
@@ -205,9 +194,9 @@ function getFolderParentId(folder: FolderTreeNode): string | null {
         }
       ).parent_folder_id,
   );
-}
+};
 
-function getFolderOrderIndex(folder: FolderTreeNode): number {
+const getFolderOrderIndex = (folder: FolderTreeNode) => {
   return (
     (
       folder as {
@@ -223,31 +212,33 @@ function getFolderOrderIndex(folder: FolderTreeNode): number {
     ).order_index ??
     0
   );
-}
+};
 
-export function useFolderActions({
-  treeFolders,
-  treeCardSets,
-  onCreateFolder,
-  onUpdateFolder,
-  onDeleteFolder,
-  onCreateCardSet,
-  onUpdateCardSet,
-  onDeleteCardSet,
-  onDeleteCard,
-  editingIdRef,
-  editingNameRef,
-  renameCancelledRef,
-  setEditingId,
-  setEditingName,
-  closeRename,
-  openDeleteFolderDialog,
-  setOptimisticFolders,
-  setOptimisticCardSets,
-  setExpandedFolders,
-  setPendingScrollId,
-  getUniqueFolderName,
-}: UseFolderActionsParams) {
+export const useFolderActions = (
+  {
+    treeFolders,
+    treeCardSets,
+    onCreateFolder,
+    onUpdateFolder,
+    onDeleteFolder,
+    onCreateCardSet,
+    onUpdateCardSet,
+    onDeleteCardSet,
+    onDeleteCard,
+    editingIdRef,
+    editingNameRef,
+    renameCancelledRef,
+    setEditingId,
+    setEditingName,
+    closeRename,
+    openDeleteFolderDialog,
+    setOptimisticFolders,
+    setOptimisticCardSets,
+    setExpandedFolders,
+    setPendingScrollId,
+    getUniqueFolderName,
+  }: UseFolderActionsParams
+) => {
   const pendingFolderCreatesRef = useRef(new Map<string, Promise<void>>());
   const pendingCardSetCreatesRef = useRef(new Map<string, Promise<void>>());
 
@@ -548,4 +539,4 @@ export function useFolderActions({
     handleRenameConfirm,
     handleConfirmDeleteFolder,
   };
-}
+};

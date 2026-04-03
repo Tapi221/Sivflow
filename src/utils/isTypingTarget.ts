@@ -7,7 +7,7 @@
  *  - role="textbox" / role="combobox"
  *  - data-prevent-hotkeys="true" を持つ祖先がある要素
  */
-export function isTypingTarget(target: EventTarget | null): boolean {
+export const isTypingTarget = (target: EventTarget | null) => {
   if (!target || !(target instanceof HTMLElement)) return false;
 
   const tag = target.tagName;
@@ -20,4 +20,4 @@ export function isTypingTarget(target: EventTarget | null): boolean {
   if (target.closest('[data-prevent-hotkeys="true"]')) return true;
 
   return false;
-}
+};

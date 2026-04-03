@@ -115,38 +115,40 @@ type EditorSidePaneProps = {
   actionsTopRight?: React.ReactNode;
 };
 
-function EditorSidePaneInner({
-  side,
-  blocks,
-  onBlocksChange,
-  selectionScopeKey,
-  label,
-  color,
-  droppableId,
-  accentColor,
-  duplicateToOpposite,
-  hideToolbar,
-  toolbarMount,
-  settings,
-  shouldShowInlineToolbarMount,
-  setInlineToolbarMount,
-  hideCardShellHeader: _hideCardShellHeader,
-  shouldDockToolbarToCardTop,
-  dockToolbarInsideCardEdge,
-  setDockedToolbarMount,
-  shouldShowEditingBadge,
-  isPagerActiveCard,
-  enableBlockActiveState,
-  showResizeHandle,
-  editorCardFixedScale,
-  editorCardHeightPx,
-  onHeightChange,
-  onMinHeightChange,
-  onResizeStart,
-  onResizeEnd,
-  actionsTopLeft,
-  actionsTopRight,
-}: EditorSidePaneProps) {
+const EditorSidePaneInner = (
+  {
+    side,
+    blocks,
+    onBlocksChange,
+    selectionScopeKey,
+    label,
+    color,
+    droppableId,
+    accentColor,
+    duplicateToOpposite,
+    hideToolbar,
+    toolbarMount,
+    settings,
+    shouldShowInlineToolbarMount,
+    setInlineToolbarMount,
+    hideCardShellHeader: _hideCardShellHeader,
+    shouldDockToolbarToCardTop,
+    dockToolbarInsideCardEdge,
+    setDockedToolbarMount,
+    shouldShowEditingBadge,
+    isPagerActiveCard,
+    enableBlockActiveState,
+    showResizeHandle,
+    editorCardFixedScale,
+    editorCardHeightPx,
+    onHeightChange,
+    onMinHeightChange,
+    onResizeStart,
+    onResizeEnd,
+    actionsTopLeft,
+    actionsTopRight,
+  }: EditorSidePaneProps
+) => {
   void _hideCardShellHeader;
 
   return (
@@ -226,7 +228,7 @@ function EditorSidePaneInner({
       </CardFrame>
     </div>
   );
-}
+};
 
 const areEditorSidePanePropsEqual = (
   prev: EditorSidePaneProps,
@@ -258,31 +260,33 @@ const areEditorSidePanePropsEqual = (
 const EditorSidePane = memo(EditorSidePaneInner, areEditorSidePanePropsEqual);
 EditorSidePane.displayName = "EditorSidePane";
 
-export function CardEditorPane({
-  selectedCardId,
-  folderId,
-  cardSetId,
-  forcedPaneWidthPx = null,
-  cardsOverride,
-  autoEdit,
-  onCardUpdated,
-  onSelectCardId,
-  hideMetaPanel = false,
-  dockToolbarsToTop = false,
-  hideBlockToolbars = false,
-  externalToolbarMountQ = null,
-  externalToolbarMountA = null,
-  settingsOverride = null,
-  saveSignal,
-  saveSignalEnabled = true,
-  hideFooterActions = false,
-  embeddedInPager = false,
-  pairGapClassName = "gap-6",
-  onRequestCloseEditing,
-  isPagerActiveCard = false,
-  isPagerInteractionCard = isPagerActiveCard,
-  showResizeHandle: showResizeHandleProp = true,
-}: CardEditorPaneProps) {
+export const CardEditorPane = (
+  {
+    selectedCardId,
+    folderId,
+    cardSetId,
+    forcedPaneWidthPx = null,
+    cardsOverride,
+    autoEdit,
+    onCardUpdated,
+    onSelectCardId,
+    hideMetaPanel = false,
+    dockToolbarsToTop = false,
+    hideBlockToolbars = false,
+    externalToolbarMountQ = null,
+    externalToolbarMountA = null,
+    settingsOverride = null,
+    saveSignal,
+    saveSignalEnabled = true,
+    hideFooterActions = false,
+    embeddedInPager = false,
+    pairGapClassName = "gap-6",
+    onRequestCloseEditing,
+    isPagerActiveCard = false,
+    isPagerInteractionCard = isPagerActiveCard,
+    showResizeHandle: showResizeHandleProp = true,
+  }: CardEditorPaneProps
+) => {
   const controller = useCardEditorPaneController({
     selectedCardId,
     folderId,
@@ -782,4 +786,4 @@ export function CardEditorPane({
       </>
     </BlockEditModeContext.Provider>
   );
-}
+};

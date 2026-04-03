@@ -6,7 +6,7 @@ import { useAuthSession } from "@/contexts/AuthContext";
 import type { CardSet } from "@/types";
 import { DEFAULT_CARD_DISPLAY_MODE } from "@/types/domain/cardSet";
 
-export function useCardSets(folderId?: string | null) {
+export const useCardSets = (folderId?: string | null) => {
   const { currentUser } = useAuthSession();
 
   const rawSets = useLiveQuery(async () => {
@@ -177,4 +177,4 @@ export function useCardSets(folderId?: string | null) {
     moveCardSetToFolder,
     deleteCardSet,
   };
-}
+};

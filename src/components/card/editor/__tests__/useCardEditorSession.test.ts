@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import { useCardEditorSession } from "@/components/card/editor/useCardEditorSession";
 import type { Card } from "@/types";
 
-function makeCard(overrides: Partial<Card> = {}): Card {
+const makeCard = (overrides: Partial<Card> = {}) => {
   return {
     id: "card-1",
     title: "old-title",
@@ -18,7 +18,7 @@ function makeCard(overrides: Partial<Card> = {}): Card {
     layoutRows: 16,
     ...overrides,
   } as Card;
-}
+};
 
 describe("useCardEditorSession", () => {
   it("saves latest title even when save is triggered immediately after input", async () => {

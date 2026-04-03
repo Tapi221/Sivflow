@@ -14,7 +14,7 @@ vi.mock("@/components/card/frame/Flashcard", () => ({
   },
 }));
 
-function makeCard(overrides: Partial<Card> = {}): Card {
+const makeCard = (overrides: Partial<Card> = {}) => {
   return {
     id: "card-1",
     title: "title",
@@ -24,7 +24,7 @@ function makeCard(overrides: Partial<Card> = {}): Card {
     backBlocks: [],
     ...overrides,
   } as Card;
-}
+};
 
 describe("DesktopCardSurface flip state", () => {
   it("keeps flipped state when card becomes inactive (preview mode)", () => {

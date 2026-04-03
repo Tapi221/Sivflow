@@ -46,7 +46,7 @@ const generatePalette = (baseHex: string) => {
   };
 };
 
-export function ThemeManager() {
+export const ThemeManager = () => {
   const { settings } = useUserSettings();
   const accentColor = settings?.accentColor || "#689A98"; // Default fallback
   const latestAccentRef = useRef(accentColor);
@@ -151,4 +151,4 @@ export function ThemeManager() {
   }, [accentColor]);
 
   return null;
-}
+};

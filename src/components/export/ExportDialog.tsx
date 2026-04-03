@@ -27,10 +27,12 @@ interface ExportDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export default function ExportDialog({
-  open,
-  onOpenChange,
-}: ExportDialogProps) {
+export default const ExportDialog = (
+  {
+    open,
+    onOpenChange,
+  }: ExportDialogProps
+) => {
   const { currentUser } = useAuthSession();
   const [exportType, setExportType] = useState<"all" | "folder">("all");
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
@@ -225,4 +227,4 @@ export default function ExportDialog({
       </DialogContent>
     </Dialog>
   );
-}
+};

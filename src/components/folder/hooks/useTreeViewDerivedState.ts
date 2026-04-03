@@ -42,17 +42,19 @@ interface UseTreeViewDerivedStateParams {
   isMobile: boolean;
 }
 
-export function useTreeViewDerivedState({
-  folders,
-  cards,
-  documents,
-  selectedFolderId,
-  selectedItem,
-  selectedCardId,
-  selectedDocumentId,
-  autoCarryOver = true,
-  isMobile,
-}: UseTreeViewDerivedStateParams) {
+export const useTreeViewDerivedState = (
+  {
+    folders,
+    cards,
+    documents,
+    selectedFolderId,
+    selectedItem,
+    selectedCardId,
+    selectedDocumentId,
+    autoCarryOver = true,
+    isMobile,
+  }: UseTreeViewDerivedStateParams
+) => {
   const getFolderPath = useCallback(
     (folderId: string | null): string => {
       if (!folderId) return "";
@@ -172,4 +174,4 @@ export function useTreeViewDerivedState({
     folderStats,
     showMobileDetail,
   };
-}
+};

@@ -16,16 +16,18 @@ type Props = {
   showEasy: boolean;
 };
 
-export function StudyReview({
-  cards,
-  sessionCurrentIndex,
-  onResult,
-  onToggleUncertainty,
-  onToggleBookmark,
-  onEdit,
-  showHard,
-  showEasy,
-}: Props) {
+export const StudyReview = (
+  {
+    cards,
+    sessionCurrentIndex,
+    onResult,
+    onToggleUncertainty,
+    onToggleBookmark,
+    onEdit,
+    showHard,
+    showEasy,
+  }: Props
+) => {
   const isDesktop = useIsDesktopRuntime();
 
   // Space/Enter でアクティブカードをめくるためのトリガーカウンタ
@@ -77,4 +79,4 @@ export function StudyReview({
       />
     </div>
   );
-}
+};

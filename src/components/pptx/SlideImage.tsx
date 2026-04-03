@@ -72,14 +72,16 @@ const resolveSlideUrl = async (pathOrUrl: string): Promise<string> => {
   }
 };
 
-export function SlideImage({
-  slide,
-  renderWidth,
-  rootEl,
-  onVisibilityChange,
-  onContainerRef,
-  className,
-}: SlideImageProps) {
+export const SlideImage = (
+  {
+    slide,
+    renderWidth,
+    rootEl,
+    onVisibilityChange,
+    onContainerRef,
+    className,
+  }: SlideImageProps
+) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [shouldLoad, setShouldLoad] = useState(false);
   const [src, setSrc] = useState<string | null>(slide.url ?? null);
@@ -196,4 +198,4 @@ export function SlideImage({
       </div>
     </div>
   );
-}
+};

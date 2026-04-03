@@ -17,16 +17,18 @@ type CardCarouselProps = {
   showEasy?: boolean;
 };
 
-export function CardCarousel({
-  cards,
-  sessionCurrentIndex,
-  onResult,
-  onToggleUncertainty,
-  onToggleBookmark,
-  onEdit,
-  showHard = true,
-  showEasy = true,
-}: CardCarouselProps) {
+export const CardCarousel = (
+  {
+    cards,
+    sessionCurrentIndex,
+    onResult,
+    onToggleUncertainty,
+    onToggleBookmark,
+    onEdit,
+    showHard = true,
+    showEasy = true,
+  }: CardCarouselProps
+) => {
   return (
     <CardCarousel3D
       cards={cards}
@@ -44,4 +46,4 @@ export function CardCarousel({
       )}
     />
   );
-}
+};

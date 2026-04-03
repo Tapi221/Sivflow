@@ -18,7 +18,7 @@ const PAGE_LABELS: Record<string, string> = {
   directory: "ディレクトリ",
 };
 
-function useBreadcrumbs() {
+const useBreadcrumbs = () => {
   const { pathname, search } = useLocation();
 
   return useMemo(() => {
@@ -49,7 +49,7 @@ function useBreadcrumbs() {
 
     return crumbs;
   }, [pathname, search]);
-}
+};
 
 export const TitleBar: React.FC = () => {
   const [isMaximized, setIsMaximized] = useState(false);

@@ -65,21 +65,17 @@ let currentStatus: LocalDBRuntimeStatus = {
   updatedAt: Date.now(),
 };
 
-export function getLocalDBRuntimeStatus(): LocalDBRuntimeStatus {
+export const getLocalDBRuntimeStatus = () => {
   return { ...currentStatus };
-}
+};
 
-export function subscribeLocalDBRuntimeStatus(
-  listener: (status: LocalDBRuntimeStatus) => void,
-): () => void {
+export const subscribeLocalDBRuntimeStatus = (listener: (status: LocalDBRuntimeStatus) => void) => {
   listeners.add(listener);
   listener(getLocalDBRuntimeStatus());
   return () => listeners.delete(listener);
-}
+};
 
-export function updateLocalDBRuntimeStatus(
-  next: Partial<LocalDBRuntimeStatus>,
-): LocalDBRuntimeStatus {
+export const updateLocalDBRuntimeStatus = (next: Partial<LocalDBRuntimeStatus>) => {
   currentStatus = {
     ...currentStatus,
     ...next,
@@ -93,13 +89,9 @@ export function updateLocalDBRuntimeStatus(
     }
   });
   return getLocalDBRuntimeStatus();
-}
+};
 
-export function warnOncePerSession(
-  key: string,
-  message: string,
-  error?: unknown,
-): void {
+export const warnOncePerSession = (key: string, message: string, error?: unknown) => {
   if (warnedKeys.has(key)) return;
   warnedKeys.add(key);
   if (error !== undefined) {
@@ -107,30 +99,30 @@ export function warnOncePerSession(
   } else {
     console.warn(message);
   }
-}
+};
 
-export function telemetryOncePerSession(key: string): boolean {
+export const telemetryOncePerSession = (key: string) => {
   if (telemetryKeys.has(key)) return false;
   telemetryKeys.add(key);
   return true;
-}
+};
 
-export function markLocalDBGenerationBumped(): void {
+export const markLocalDBGenerationBumped = () => {
   updateLocalDBRuntimeStatus({ generationBumped: true });
-}
+};
 
-export function saveLocalDBResetFailureReason(reason: string | null): void {
+export const saveLocalDBResetFailureReason = (reason: string | null) => {
   writeLocalStorage(RESET_FAILED_REASON_KEY, reason);
   updateLocalDBRuntimeStatus({ resetFailedReason: reason });
-}
+};
 
-export function clearLocalDBResetFailureReason(): void {
+export const clearLocalDBResetFailureReason = () => {
   saveLocalDBResetFailureReason(null);
-}
+};
 
-export function getStoredLocalDBResetFailureReason(): string | null {
+export const getStoredLocalDBResetFailureReason = () => {
   return readLocalStorage(RESET_FAILED_REASON_KEY);
-}
+};
 
 const toShortReason = (value: string | null): string => {
   if (!value) return "none";
@@ -138,7 +130,7 @@ const toShortReason = (value: string | null): string => {
   return compact.length > 120 ? `${compact.slice(0, 120)}...` : compact;
 };
 
-export function getLocalDBTelemetrySnapshot(): LocalDBTelemetrySnapshot {
+export const getLocalDBTelemetrySnapshot = () => {
   return {
     localdb_mode: currentStatus.mode,
     localdb_reason_code: currentStatus.fallbackReasonCode,
@@ -146,4 +138,4 @@ export function getLocalDBTelemetrySnapshot(): LocalDBTelemetrySnapshot {
     localdb_generation_bumped: currentStatus.generationBumped,
     localdb_reset_failed: !!currentStatus.resetFailedReason,
   };
-}
+};

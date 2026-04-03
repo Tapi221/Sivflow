@@ -16,12 +16,7 @@ import {
   writeBatch,
 } from "firebase/firestore";
 
-/**
- * undefined は Firestore に投げた瞬間に爆発するので、深い階層まで除去する。
- * ※ 配列内の undefined も消す（Firestore 的にアウト）
- * ※ Date / Timestamp はそのまま
- */
-function deepStripUndefined(input: unknown): unknown {
+const deepStripUndefined = (input: unknown) => {
   if (input === undefined) return undefined;
   if (input === null) return null;
 
@@ -42,17 +37,13 @@ function deepStripUndefined(input: unknown): unknown {
   }
 
   return input;
-}
+};
 
-/**
- * serverTimestamp が使える環境なら使う。無理ならクライアント時刻で妥協。
- * （大規模運用なら最終的には serverTimestamp に統一したいが、まず死なないのが最優先）
- */
-function cloudUpdatedAt(): unknown {
+const cloudUpdatedAt = () => {
   const fn = (Firestore as unknown).serverTimestamp;
   if (typeof fn === "function") return fn();
   return Timestamp.now();
-}
+};
 
 const COLLECTION_BY_TYPE: Record<string, string> = {
   card: "cards",
@@ -77,17 +68,16 @@ const PAGE_SIZE = 500;
 
 const _encoder = new TextEncoder();
 
-/** JSON stringify の byte 数で概算（正確じゃないが爆死回避には十分） */
-function estimateBytes(value: unknown): number {
+const estimateBytes = (value: unknown) => {
   try {
     return _encoder.encode(JSON.stringify(value)).length;
   } catch {
     // stringify 不能 = だいたい危険なので大きめに見積もる
     return 1024 * 1024;
   }
-}
+};
 
-function chunkChangesBySize(changes: unknown[]): unknown[][] {
+const chunkChangesBySize = (changes: unknown[]) => {
   const chunks: unknown[][] = [];
   let current: unknown[] = [];
   let bytes = 0;
@@ -114,7 +104,7 @@ function chunkChangesBySize(changes: unknown[]): unknown[][] {
 
   if (current.length > 0) chunks.push(current);
   return chunks;
-}
+};
 
 export class CloudSyncAdapter implements ICloudSyncAdapter {
   private userId: string;

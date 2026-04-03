@@ -27,11 +27,7 @@ type DocumentsTable = {
 
 export type DocDbCtx = { documents: DocumentsTable; userId?: string };
 
-async function canDeleteDocumentBlob(
-  documents: DocumentsTable,
-  blobId: string,
-  excludeDocumentId: string,
-): Promise<boolean> {
+const canDeleteDocumentBlob = (documents: DocumentsTable, blobId: string, excludeDocumentId: string) => {
   if (!blobId) return false;
   const sharedRef = await documents
     .filter((doc: unknown) => {
@@ -43,13 +39,9 @@ async function canDeleteDocumentBlob(
     })
     .first();
   return !sharedRef;
-}
+};
 
-export async function cleanupBeforeDocumentUpdate(
-  db: DocDbCtx,
-  id: string,
-  changes: unknown,
-): Promise<void> {
+export const cleanupBeforeDocumentUpdate = (db: DocDbCtx, id: string, changes: unknown) => {
   const docChanges = changes as DocumentUpdateChanges;
   const hasLocalFileIdChange = Object.prototype.hasOwnProperty.call(
     docChanges,
@@ -114,12 +106,9 @@ export async function cleanupBeforeDocumentUpdate(
       err,
     );
   }
-}
+};
 
-export async function cleanupBeforeDocumentDelete(
-  db: DocDbCtx,
-  id: string,
-): Promise<void> {
+export const cleanupBeforeDocumentDelete = (db: DocDbCtx, id: string) => {
   try {
     const existingDoc = await db.documents.get(id);
     safeRevokeBlobUrl(
@@ -146,12 +135,9 @@ export async function cleanupBeforeDocumentDelete(
   } catch (err) {
     console.warn("[LocalDB] deleteItem documents blob cleanup failed", err);
   }
-}
+};
 
-export async function cleanupBeforeDocumentSoftDelete(
-  db: DocDbCtx,
-  id: string,
-): Promise<void> {
+export const cleanupBeforeDocumentSoftDelete = (db: DocDbCtx, id: string) => {
   try {
     const existingDoc = await db.documents.get(id);
     safeRevokeBlobUrl(
@@ -178,4 +164,4 @@ export async function cleanupBeforeDocumentSoftDelete(
   } catch (err) {
     console.warn("[LocalDB] softDelete documents blob cleanup failed", err);
   }
-}
+};

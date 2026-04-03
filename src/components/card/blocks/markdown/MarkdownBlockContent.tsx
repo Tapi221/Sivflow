@@ -533,13 +533,15 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
   );
 };
 
-function ParagraphRenderer({
-  children,
-  bodyStyle,
-}: {
-  children: React.ReactNode;
-  bodyStyle: React.CSSProperties;
-}) {
+const ParagraphRenderer = (
+  {
+    children,
+    bodyStyle,
+  }: {
+    children: React.ReactNode;
+    bodyStyle: React.CSSProperties;
+  }
+) => {
   const text = extractTextDeep(children);
   const isBlankSpacer = text === BLANK_LINE_PLACEHOLDER;
 
@@ -556,17 +558,19 @@ function ParagraphRenderer({
       {isBlankSpacer ? " " : children}
     </p>
   );
-}
+};
 
-function MarkdownFencedCodeBlock({
-  code,
-  language,
-  bleedX,
-}: {
-  code: string;
-  language: string;
-  bleedX: boolean;
-}) {
+const MarkdownFencedCodeBlock = (
+  {
+    code,
+    language,
+    bleedX,
+  }: {
+    code: string;
+    language: string;
+    bleedX: boolean;
+  }
+) => {
   return (
     <BlockSurface
       ruled={false}
@@ -577,19 +581,21 @@ function MarkdownFencedCodeBlock({
       <CodeRenderer code={code} language={language} />
     </BlockSurface>
   );
-}
+};
 
-function HrRenderer() {
+const HrRenderer = () => {
   return <hr className="m-0 border-slate-200" />;
-}
+};
 
-function ListRenderer({
-  ordered,
-  children,
-}: {
-  ordered: boolean;
-  children: React.ReactNode;
-}) {
+const ListRenderer = (
+  {
+    ordered,
+    children,
+  }: {
+    ordered: boolean;
+    children: React.ReactNode;
+  }
+) => {
   const Tag = ordered ? "ol" : "ul";
   const listClass = cn(
     ordered ? "list-decimal list-outside" : "list-disc list-outside",
@@ -599,9 +605,9 @@ function ListRenderer({
   );
 
   return <Tag className={listClass}>{children}</Tag>;
-}
+};
 
-function TableRenderer({ children }: { children: React.ReactNode }) {
+const TableRenderer = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="m-0 overflow-x-auto">
       <table className="w-full border-collapse text-left text-sm">
@@ -609,4 +615,4 @@ function TableRenderer({ children }: { children: React.ReactNode }) {
       </table>
     </div>
   );
-}
+};

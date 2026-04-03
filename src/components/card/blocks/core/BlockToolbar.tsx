@@ -66,7 +66,7 @@ const DEFAULT_ORDER_INDEX_BY_TYPE = DEFAULT_CONFIGS.reduce<
   {} as Record<CardBlock["type"], number>,
 );
 
-function getIcon(iconName: string | undefined, type: CardBlock["type"]) {
+const getIcon = (iconName: string | undefined, type: CardBlock["type"]) => {
   const map: Record<string, React.ComponentType<{ className?: string }>> = {
     Type: Type,
     Image: ImageIcon,
@@ -85,16 +85,17 @@ function getIcon(iconName: string | undefined, type: CardBlock["type"]) {
     math: StratisFormulaIcon,
   };
   return typeMap[type] ?? Plus;
-}
+};
 
-// Tooltip コンポーネント — portal で body 直下に描画し overflow クリップを回避
-function Tooltip({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
+const Tooltip = (
+  {
+    label,
+    children,
+  }: {
+    label: string;
+    children: React.ReactNode;
+  }
+) => {
   const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
   const anchorRef = useRef<HTMLDivElement>(null);
 
@@ -169,18 +170,19 @@ function Tooltip({
         )}
     </>
   );
-}
+};
 
-// アイコン only ボタン（ツールチップ付き）
-function ActionButton({
-  onClick,
-  icon: Icon,
-  label,
-}: {
-  onClick: () => void;
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-}) {
+const ActionButton = (
+  {
+    onClick,
+    icon: Icon,
+    label,
+  }: {
+    onClick: () => void;
+    icon: React.ComponentType<{ className?: string }>;
+    label: string;
+  }
+) => {
   return (
     <Tooltip label={`${label}を追加`}>
       <button
@@ -202,7 +204,7 @@ function ActionButton({
       </button>
     </Tooltip>
   );
-}
+};
 
 const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
   label,

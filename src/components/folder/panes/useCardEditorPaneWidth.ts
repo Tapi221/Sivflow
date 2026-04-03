@@ -18,11 +18,7 @@ const CARD_EDITOR_TWO_COLUMN_MIN_WIDTH_PX = CARD_PANE_EDIT_MIN_WIDTH_PX;
 export const CARD_PANE_WIDTH_STEP_PX = 40;
 export const CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX = 72;
 
-function clampPaneWidthPx(
-  value: number | null | undefined,
-  min: number,
-  max?: number,
-): number {
+const clampPaneWidthPx = (value: number | null | undefined, min: number, max?: number) => {
   const fallback = Math.max(1, min);
   const safeValue =
     typeof value === "number" && Number.isFinite(value) ? value : fallback;
@@ -32,7 +28,7 @@ function clampPaneWidthPx(
       ? Math.max(clampedMin, max)
       : Number.POSITIVE_INFINITY;
   return Math.min(clampedMax, Math.max(clampedMin, Math.round(safeValue)));
-}
+};
 
 interface UseCardEditorPaneWidthParams {
   /** Read-only fallback. Width is persisted to localStorage only (device-local). */
@@ -51,21 +47,23 @@ interface UseCardEditorPaneWidthParams {
   cardSetId?: string | null;
 }
 
-export function useCardEditorPaneWidth({
-  settings,
-  dockToolbarsToTop,
-  embeddedInPager,
-  hideBlockToolbars,
-  forcedPaneWidthPx,
-  usesExternalToolbarMount,
-  isPagerActiveCard,
-  isEditing,
-  isMetaOpen,
-  normalizedSelectedCardId,
-  selectedCardId,
-  canonicalCardWidth,
-  cardSetId,
-}: UseCardEditorPaneWidthParams) {
+export const useCardEditorPaneWidth = (
+  {
+    settings,
+    dockToolbarsToTop,
+    embeddedInPager,
+    hideBlockToolbars,
+    forcedPaneWidthPx,
+    usesExternalToolbarMount,
+    isPagerActiveCard,
+    isEditing,
+    isMetaOpen,
+    normalizedSelectedCardId,
+    selectedCardId,
+    canonicalCardWidth,
+    cardSetId,
+  }: UseCardEditorPaneWidthParams
+) => {
   const contentViewportRef = React.useRef<HTMLDivElement | null>(null);
   const [contentViewportWidth, setContentViewportWidth] =
     React.useState<number>(() =>
@@ -96,7 +94,7 @@ export function useCardEditorPaneWidth({
         CARD_PANE_VIEW_MIN_WIDTH_PX,
       ),
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [cardSetId, settings?.cardViewPaneWidthPx]);
 
   React.useEffect(() => {
@@ -109,7 +107,7 @@ export function useCardEditorPaneWidth({
         CARD_PANE_EDIT_MIN_WIDTH_PX,
       ),
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [cardSetId, defaultEditPaneWidthPx, settings?.cardEditPaneWidthPx]);
 
   React.useEffect(() => {
@@ -300,4 +298,4 @@ export function useCardEditorPaneWidth({
     stepPaneWidth,
     resetActivePaneWidth,
   };
-}
+};

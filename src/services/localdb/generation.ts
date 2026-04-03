@@ -42,11 +42,11 @@ const makeGenerationDbPrefix = (userId: string): string =>
 // Module-level set replacing LocalDB.generationBumpedUsers
 const generationBumpedUsers = new Set<string>();
 
-function getGenerationForUser(userId: string): number {
+const getGenerationForUser = (userId: string) => {
   return readGenerationFromStorage(userId);
-}
+};
 
-export function bumpGenerationForUser(userId: string): number {
+export const bumpGenerationForUser = (userId: string) => {
   if (generationBumpedUsers.has(userId)) {
     return getGenerationForUser(userId);
   }
@@ -57,18 +57,18 @@ export function bumpGenerationForUser(userId: string): number {
     writeGenerationToStorage(userId, next);
   }
   return next;
-}
+};
 
-export function getDatabaseNameForUser(userId: string = "anonymous"): string {
+export const getDatabaseNameForUser = (userId: string = "anonymous") => {
   const generation = getGenerationForUser(userId);
   return `FlashcardMasterDB_${userId}_v${LOCALDB_SCHEMA_VERSION_FOR_NAME}_g${generation}`;
-}
+};
 
-export function getFallbackDatabaseNameForUser(userId: string): string {
+export const getFallbackDatabaseNameForUser = (userId: string) => {
   return `FlashcardMasterDB_mem_${userId}`;
-}
+};
 
-async function listUserPersistentDbNames(userId: string): Promise<string[]> {
+const listUserPersistentDbNames = (userId: string) => {
   const names = new Set<string>();
   const generationPrefix = makeGenerationDbPrefix(userId);
 
@@ -105,11 +105,9 @@ async function listUserPersistentDbNames(userId: string): Promise<string[]> {
   }
 
   return Array.from(names.values());
-}
+};
 
-export async function deleteUserPersistentDatabases(
-  userId: string,
-): Promise<string | null> {
+export const deleteUserPersistentDatabases = (userId: string) => {
   const names = await listUserPersistentDbNames(userId);
   let failureReason: string | null = null;
 
@@ -124,4 +122,4 @@ export async function deleteUserPersistentDatabases(
   }
 
   return failureReason;
-}
+};

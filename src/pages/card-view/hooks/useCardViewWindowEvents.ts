@@ -13,17 +13,19 @@ interface UseCardViewWindowEventsOptions {
   pendingCreateCardAfterSaveRef: React.MutableRefObject<boolean>;
 }
 
-export function useCardViewWindowEvents({
-  handleToggleViewMode,
-  createAndFocusCard,
-  isGlobalEditing,
-  setIsGlobalEditing,
-  requestSave,
-  requestSaveAndLockSelection,
-  finishSaveSelectionLock,
-  pendingExitAfterSaveRef,
-  pendingCreateCardAfterSaveRef,
-}: UseCardViewWindowEventsOptions) {
+export const useCardViewWindowEvents = (
+  {
+    handleToggleViewMode,
+    createAndFocusCard,
+    isGlobalEditing,
+    setIsGlobalEditing,
+    requestSave,
+    requestSaveAndLockSelection,
+    finishSaveSelectionLock,
+    pendingExitAfterSaveRef,
+    pendingCreateCardAfterSaveRef,
+  }: UseCardViewWindowEventsOptions
+) => {
   const handledSaveSignalRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -103,4 +105,4 @@ export function useCardViewWindowEvents({
     pendingExitAfterSaveRef,
     setIsGlobalEditing,
   ]);
-}
+};

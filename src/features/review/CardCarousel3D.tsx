@@ -65,8 +65,7 @@ export type CardCarousel3DProps = {
   renderPreview?: (card: Card) => React.ReactNode;
 };
 
-// ── デフォルトプレビュー ─────────────────────────────────────────────────
-function DefaultPreview({ card }: { card: Card }) {
+const DefaultPreview = ({ card }: { card: Card }) => {
   return (
     <MobileScalableCard
       cardDesignWidth={CARD_DISPLAY_WIDTH}
@@ -79,16 +78,18 @@ function DefaultPreview({ card }: { card: Card }) {
       />
     </MobileScalableCard>
   );
-}
+};
 
 // ── メインコンポーネント ──────────────────────────────────────────────────
-export function CardCarousel3D({
-  cards,
-  syncIndex,
-  onIndexChange,
-  renderCenter,
-  renderPreview,
-}: CardCarousel3DProps) {
+export const CardCarousel3D = (
+  {
+    cards,
+    syncIndex,
+    onIndexChange,
+    renderCenter,
+    renderPreview,
+  }: CardCarousel3DProps
+) => {
   const trackRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   // 各カードスロットへの ref (高さ計測用)
@@ -323,18 +324,19 @@ export function CardCarousel3D({
       />
     </div>
   );
-}
+};
 
-// ── Prev/Next ボタン ───────────────────────────────────────────────────────
-function NavButton({
-  direction,
-  onClick,
-  disabled,
-}: {
-  direction: "prev" | "next";
-  onClick: () => void;
-  disabled: boolean;
-}) {
+const NavButton = (
+  {
+    direction,
+    onClick,
+    disabled,
+  }: {
+    direction: "prev" | "next";
+    onClick: () => void;
+    disabled: boolean;
+  }
+) => {
   const isPrev = direction === "prev";
   return (
     <button
@@ -364,4 +366,4 @@ function NavButton({
       {isPrev ? "‹" : "›"}
     </button>
   );
-}
+};

@@ -44,14 +44,15 @@ const getFluidZoomStyle = (
   return { fontSize: `${safeZoom}em` };
 };
 
-/** Question表示 */
-function QuestionBlockView({
-  block,
-  displayMode,
-}: {
-  block: CardBlock;
-  displayMode: "always" | "tap_to_reveal";
-}) {
+const QuestionBlockView = (
+  {
+    block,
+    displayMode,
+  }: {
+    block: CardBlock;
+    displayMode: "always" | "tap_to_reveal";
+  }
+) => {
   const [revealed, setRevealed] = useState(displayMode === "always");
 
   return (
@@ -96,10 +97,9 @@ function QuestionBlockView({
       }
     />
   );
-}
+};
 
-/** typeごとの描画 */
-function renderBlock(
+const renderBlock = (
   block: CardBlock,
   options: {
     questionDisplayMode: "always" | "tap_to_reveal";
@@ -108,8 +108,8 @@ function renderBlock(
     toMediaUrl: (item: unknown) => string | null;
     displayMode: "fixed" | "fluid";
     zoom: number;
-  },
-) {
+  }
+) => {
   const {
     questionDisplayMode,
     gridOffsetPx,
@@ -231,14 +231,16 @@ function renderBlock(
     default:
       return null;
   }
-}
+};
 
-export function BlockRenderer({
-  blocks,
-  onGalleryFullscreenChange,
-  displayMode = "fixed",
-  zoom = 1,
-}: BlockRendererProps) {
+export const BlockRenderer = (
+  {
+    blocks,
+    onGalleryFullscreenChange,
+    displayMode = "fixed",
+    zoom = 1,
+  }: BlockRendererProps
+) => {
   const inEditMode = useContext(BlockEditModeContext);
   const blockOutline = inEditMode
     ? "inset 0 0 0 1px rgba(59, 130, 246, 0.35)"
@@ -341,4 +343,4 @@ export function BlockRenderer({
       })}
     </div>
   );
-}
+};

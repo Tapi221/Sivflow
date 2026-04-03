@@ -6,7 +6,7 @@ interface CodeRendererProps {
   className?: string;
 }
 
-export function CodeRenderer({ code, language, className }: CodeRendererProps) {
+export const CodeRenderer = ({ code, language, className }: CodeRendererProps) => {
   return (
     <CodeBlockContent
       mode="viewer"
@@ -15,4 +15,4 @@ export function CodeRenderer({ code, language, className }: CodeRendererProps) {
       className={className}
     />
   );
-}
+};

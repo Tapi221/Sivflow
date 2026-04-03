@@ -20,7 +20,7 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-export function AuthProvider({ children }: AuthProviderProps) {
+export const AuthProvider = ({ children }: AuthProviderProps) => {
   return (
     <AuthSessionProvider>
       <SyncProvider>
@@ -28,12 +28,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
       </SyncProvider>
     </AuthSessionProvider>
   );
-}
+};
 
 // @deprecated
 // 新規実装では useAuth を使用しないこと
 // useAuthSession / useSyncContext / useSecurity を使用する
-export function useAuth(): AuthContextCompatValue {
+export const useAuth = () => {
   const session = useAuthSession();
   const sync = useSyncContext();
   const security = useSecurity();
@@ -46,4 +46,4 @@ export function useAuth(): AuthContextCompatValue {
     }),
     [security, session, sync],
   );
-}
+};

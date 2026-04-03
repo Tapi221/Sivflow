@@ -68,7 +68,7 @@ const assertRepairTagsAllowed = (userId: string): void => {
   }
 };
 
-export function installLocalDbDevtools(): void {
+export const installLocalDbDevtools = () => {
   if (typeof window === "undefined") return;
 
   const w = window as WindowWithLocalDbDevtools;
@@ -204,4 +204,4 @@ export function installLocalDbDevtools(): void {
 
     rawDB: async () => getLocalDb(),
   };
-}
+};

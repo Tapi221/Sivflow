@@ -9,12 +9,14 @@ interface ExplorerFilterSummaryProps {
   className?: string;
 }
 
-export function ExplorerFilterSummary({
-  getTagColor,
-  isFilterActive,
-  resultCount,
-  className,
-}: ExplorerFilterSummaryProps) {
+export const ExplorerFilterSummary = (
+  {
+    getTagColor,
+    isFilterActive,
+    resultCount,
+    className,
+  }: ExplorerFilterSummaryProps
+) => {
   const {
     tagFilter,
     toggleTag,
@@ -116,4 +118,4 @@ export function ExplorerFilterSummary({
       </div>
     </div>
   );
-}
+};

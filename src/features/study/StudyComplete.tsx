@@ -19,17 +19,19 @@ type Props = {
   compact?: boolean;
 };
 
-export function StudyComplete({
-  stampRallyStreak,
-  ratingTiles,
-  ratingCounts,
-  isPracticeFeatureEnabled,
-  results,
-  ratingLabels,
-  handleStartPractice,
-  navigate,
-  compact = false,
-}: Props) {
+export const StudyComplete = (
+  {
+    stampRallyStreak,
+    ratingTiles,
+    ratingCounts,
+    isPracticeFeatureEnabled,
+    results,
+    ratingLabels,
+    handleStartPractice,
+    navigate,
+    compact = false,
+  }: Props
+) => {
   const faceDesign = {
     forgot: {
       iconWrap: "bg-red-50 text-[#FF5A65] face-badge-convex",
@@ -190,4 +192,4 @@ export function StudyComplete({
       </Card>
     </div>
   );
-}
+};

@@ -34,7 +34,7 @@ const DISPLAY_MODE_TRIGGER_LABELS: Record<CardDisplayMode, string> = {
   fluid: "読みやすい",
 };
 
-export default function CardView() {
+export default const CardView = () => {
   const { setExtraCrumbs } = useBreadcrumbContext();
   const { error: toastError } = useToast();
   const isDesktop = useIsDesktopRuntime();
@@ -277,4 +277,4 @@ export default function CardView() {
       </div>
     </div>
   );
-}
+};

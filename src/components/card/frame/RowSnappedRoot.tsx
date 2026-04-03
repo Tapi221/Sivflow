@@ -8,12 +8,14 @@ type RowSnappedRootProps = {
   children: React.ReactNode;
 };
 
-export function RowSnappedRoot({
-  rowPx,
-  className,
-  style,
-  children,
-}: RowSnappedRootProps) {
+export const RowSnappedRoot = (
+  {
+    rowPx,
+    className,
+    style,
+    children,
+  }: RowSnappedRootProps
+) => {
   return (
     <RowSnap rowPx={rowPx}>
       {({ snapPaddingBottomPx, snapRef }) => (
@@ -30,4 +32,4 @@ export function RowSnappedRoot({
       )}
     </RowSnap>
   );
-}
+};

@@ -31,12 +31,14 @@ type Params = {
   ) => void;
 };
 
-export function usePracticeMode({
-  finalRatingByCardId,
-  sourceSessionId,
-  isPracticeFeatureEnabled,
-  logPracticeEvent,
-}: Params) {
+export const usePracticeMode = (
+  {
+    finalRatingByCardId,
+    sourceSessionId,
+    isPracticeFeatureEnabled,
+    logPracticeEvent,
+  }: Params
+) => {
   const [practiceState, setPracticeState] = useState<PracticeState>(null);
 
   const isPracticeMode = useMemo(() => Boolean(practiceState), [practiceState]);
@@ -160,4 +162,4 @@ export function usePracticeMode({
     handlePracticeContinueRound,
     handlePracticeExit,
   };
-}
+};

@@ -25,7 +25,7 @@ interface RecentPanelProps {
   onClearRecent: () => void;
 }
 
-function getRelativeTime(ts: number): string {
+const getRelativeTime = (ts: number) => {
   const now = Date.now();
   const diff = now - ts;
 
@@ -38,17 +38,19 @@ function getRelativeTime(ts: number): string {
   if (hours < 24) return `${hours}時間前`;
   if (days < 7) return `${days}日前`;
   return new Date(ts).toLocaleDateString("ja-JP");
-}
+};
 
-export function RecentPanel({
-  recent,
-  folders,
-  cards,
-  documents = [],
-  onFolderSelect,
-  onItemSelect,
-  onClearRecent,
-}: RecentPanelProps) {
+export const RecentPanel = (
+  {
+    recent,
+    folders,
+    cards,
+    documents = [],
+    onFolderSelect,
+    onItemSelect,
+    onClearRecent,
+  }: RecentPanelProps
+) => {
   const validRecent = useMemo(() => {
     return recent.filter((rec) => {
       if (rec.type === "folder") {
@@ -173,4 +175,4 @@ export function RecentPanel({
       </div>
     </div>
   );
-}
+};

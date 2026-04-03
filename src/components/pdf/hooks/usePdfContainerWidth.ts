@@ -9,7 +9,7 @@ interface UsePdfContainerWidthResult {
   containerWidth: number;
 }
 
-export function usePdfContainerWidth(): UsePdfContainerWidthResult {
+export const usePdfContainerWidth = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
 
@@ -24,4 +24,4 @@ export function usePdfContainerWidth(): UsePdfContainerWidthResult {
   }, []);
 
   return { containerRef, containerWidth };
-}
+};

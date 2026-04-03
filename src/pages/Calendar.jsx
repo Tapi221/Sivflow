@@ -73,7 +73,7 @@ const toDate = (value) => {
   return isNaN(d.getTime()) ? null : d;
 };
 
-export default function Calendar() {
+export default const Calendar = () => {
   const navigate = useNavigate();
   const { currentUser } = useAuthSession();
   const [isMetaOpen, setIsMetaOpen] = useState(true);
@@ -301,7 +301,6 @@ export default function Calendar() {
             </div>
           ))}
         </div>
-
         {/* Grid */}
         <div className="grid grid-cols-7 gap-y-2 md:gap-y-4 gap-x-0">
           {calendarDays.map((dayItem) => {
@@ -338,7 +337,6 @@ export default function Calendar() {
                 >
                   {format(dayItem, "d")}
                 </span>
-
                 {/* Intensity Visual (Dots or Bar) */}
                 {hasCards ? (
                   <div className="flex flex-col items-center mt-0 gap-1 w-full">
@@ -368,11 +366,8 @@ export default function Calendar() {
                   </div>
                 ) : (
                   /* Empty State Check (Today) */
-                  isTodayDate && (
-                    <div className="mt-2 text-[9px] font-bold text-primary-300">
-                      TODAY
-                    </div>
-                  )
+                  (isTodayDate && (<div className="mt-2 text-[9px] font-bold text-primary-300">TODAY
+                                        </div>))
                 )}
               </div>
             );
@@ -556,4 +551,4 @@ export default function Calendar() {
       )}
     </div>
   );
-}
+};

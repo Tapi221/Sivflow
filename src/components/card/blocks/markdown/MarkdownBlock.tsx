@@ -566,22 +566,7 @@ export const MarkdownBlock = React.memo(
 );
 MarkdownBlock.displayName = "MarkdownBlock";
 
-/**
- * Markdown文字列をコードフェンスで分割し、
- * blocks に加えて「元文字列内での範囲（start/end）」も返す。
- *
- * 重要:
- * - インデント付きフェンス（リスト内の ```）に対応（CommonMark: 先頭0〜3スペース）
- * - ``` と ~~~ の両対応
- * - unclosed fence は分割しない（1つの markdown ブロックとして返す）
- *
- * 範囲の判定は end 排他（start <= pos < end）で、
- * “境界ちょうど” は次（後ろ）ブロックに属する。
- */
-function parseAndSplitFencesWithRanges(md: string): {
-  blocks: EditorBlock[];
-  ranges: BlockRange[];
-} {
+const parseAndSplitFencesWithRanges = (md: string) => {
   const normalizedMd = md.replace(/\r\n/g, "\n");
   const lines = normalizedMd.split("\n");
 
@@ -717,4 +702,4 @@ function parseAndSplitFencesWithRanges(md: string): {
   }
 
   return { blocks, ranges };
-}
+};

@@ -3,7 +3,7 @@ import { Outlet, useLocation, useSearchParams } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import "./AppLayout.css";
 
-function LoadingFallback() {
+const LoadingFallback = () => {
   return (
     <div className="fixed inset-0 z-[999] flex items-center justify-center bg-[#EEF3F6] animate-in fade-in duration-300">
       <div className="relative h-16 w-16">
@@ -12,9 +12,9 @@ function LoadingFallback() {
       </div>
     </div>
   );
-}
+};
 
-export function AppLayout() {
+export const AppLayout = () => {
   const { pathname } = useLocation();
   const [searchParams] = useSearchParams();
   const isFoldersRoute = /^\/folders(?:\/|$)/i.test(pathname);
@@ -137,4 +137,4 @@ export function AppLayout() {
       </div>
     </div>
   );
-}
+};

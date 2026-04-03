@@ -15,20 +15,19 @@ import {
   normalizeExtraRows,
 } from "@/domain/card/extraRows";
 
-// 空カード判定用のヘルパー関数（createCard と updateCard で共通利用）
-function isCardDeleted(
+const isCardDeleted = (
   card: Partial<Card> & {
     is_deleted?: boolean;
     deleted?: boolean;
     deletedAt?: unknown;
     deleted_at?: unknown;
-  },
-) {
+  }
+) => {
   const deletedAt = (card as unknown).deletedAt ?? (card as unknown).deleted_at;
   return Boolean(
     card.isDeleted ?? card.is_deleted ?? (card as unknown).deleted ?? deletedAt,
   );
-}
+};
 
 type UseCardsOptions = {
   enabled?: boolean;
@@ -82,11 +81,7 @@ const resolveExtraRowsFromCardData = (
   return normalizeExtraRows(faceExtraRows ?? 0);
 };
 
-export function useCards(
-  folderId?: string,
-  cardSetId?: string,
-  options?: UseCardsOptions,
-) {
+export const useCards = (folderId?: string, cardSetId?: string, options?: UseCardsOptions) => {
   const { currentUser } = useAuthSession();
   const [error] = useState<string | null>(null);
   const enabled = options?.enabled ?? true;
@@ -538,4 +533,4 @@ export function useCards(
     moveCardToFolder,
     reorderCards,
   };
-}
+};

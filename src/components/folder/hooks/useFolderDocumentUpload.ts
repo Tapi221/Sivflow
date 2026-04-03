@@ -51,12 +51,14 @@ const getErrorMessage = (error: unknown, fallback: string): string => {
   return fallback;
 };
 
-export function useFolderDocumentUpload({
-  selectedFolderId,
-  actionFolderId,
-  getNextOrderIndex,
-  setExpandedFolders,
-}: UseFolderDocumentUploadParams): UseFolderDocumentUploadReturn {
+export const useFolderDocumentUpload = (
+  {
+    selectedFolderId,
+    actionFolderId,
+    getNextOrderIndex,
+    setExpandedFolders,
+  }: UseFolderDocumentUploadParams
+) => {
   const { currentUser } = useAuthSession();
   const { error: toastError } = useToast();
   const { uploadFile } = useReliableFileUpload();
@@ -461,4 +463,4 @@ export function useFolderDocumentUpload({
     currentFileAccept,
     handleToolbarFileInputChange,
   };
-}
+};

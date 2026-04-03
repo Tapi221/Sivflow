@@ -52,7 +52,7 @@ type Keyable = {
   createdAt?: unknown;
 };
 
-function stableKeyPart(value: unknown): string {
+const stableKeyPart = (value: unknown) => {
   if (typeof value === "string") return value;
   if (typeof value === "number") return String(value);
   if (value instanceof Date) return value.toISOString();
@@ -63,16 +63,16 @@ function stableKeyPart(value: unknown): string {
     if (typeof obj.toDate === "function") return obj.toDate().toISOString();
   }
   return "";
-}
+};
 
-function getCardKey(card: Card): string {
+const getCardKey = (card: Card) => {
   const k = card as unknown as Keyable;
   const direct =
     k.id ?? k.cardId ?? k.docId ?? k.uid ?? stableKeyPart(k.createdAt);
   return direct && direct.length > 0 ? direct : "card";
-}
+};
 
-export default function StudyCard(props: StudyCardProps) {
+export default const StudyCard = (props: StudyCardProps) => {
   const { card } = props;
 
   if (!card) {
@@ -85,21 +85,23 @@ export default function StudyCard(props: StudyCardProps) {
 
   // card が切り替わるたびに remount して state を初期化（setState in effect を避ける）
   return <StudyCardInner key={getCardKey(card)} {...props} card={card} />;
-}
+};
 
 type InnerProps = Omit<StudyCardProps, "card"> & { card: Card };
 
-function StudyCardInner({
-  card,
-  onResult,
-  onToggleUncertainty,
-  onToggleBookmark,
-  onEdit,
-  mode = "review",
-  showHard = true,
-  showEasy = true,
-  flipTrigger,
-}: InnerProps) {
+const StudyCardInner = (
+  {
+    card,
+    onResult,
+    onToggleUncertainty,
+    onToggleBookmark,
+    onEdit,
+    mode = "review",
+    showHard = true,
+    showEasy = true,
+    flipTrigger,
+  }: InnerProps
+) => {
   const isPracticeMode = mode === "practice";
 
   const [studyPhase, setStudyPhase] = useState<StudyPhase>("timing");
@@ -423,4 +425,4 @@ function StudyCardInner({
         (isPracticeMode ? renderPracticeButtons() : renderReviewButtons())}
     </div>
   );
-}
+};

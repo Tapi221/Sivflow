@@ -24,15 +24,15 @@ const AuthSessionContext = createContext<AuthSessionContextType>({
 });
 
 // eslint-disable-next-line react-refresh/only-export-components
-export function useAuthSession() {
+export const useAuthSession = () => {
   return useContext(AuthSessionContext);
-}
+};
 
 interface AuthSessionProviderProps {
   children: ReactNode;
 }
 
-export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
+export const AuthSessionProvider = ({ children }: AuthSessionProviderProps) => {
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
   const lastKnownUserIdRef = useRef<string | null>(null);
@@ -89,4 +89,4 @@ export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
       {children}
     </AuthSessionContext.Provider>
   );
-}
+};

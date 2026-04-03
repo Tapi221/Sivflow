@@ -157,13 +157,13 @@ const RATING_FACE_DESIGN: Record<
   },
 };
 
-function asRecord(value: unknown): Record<string, unknown> | null {
+const asRecord = (value: unknown) => {
   return value !== null && typeof value === "object"
     ? (value as Record<string, unknown>)
     : null;
-}
+};
 
-function toFiniteNumber(value: unknown): number | null {
+const toFiniteNumber = (value: unknown) => {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value === "string") {
     if (value.trim() === "") return null;
@@ -171,9 +171,9 @@ function toFiniteNumber(value: unknown): number | null {
     if (Number.isFinite(numeric)) return numeric;
   }
   return null;
-}
+};
 
-function toValidDate(value: unknown): Date | null {
+const toValidDate = (value: unknown) => {
   if (value instanceof Date) {
     return Number.isNaN(value.getTime()) ? null : value;
   }
@@ -191,47 +191,47 @@ function toValidDate(value: unknown): Date | null {
     return Number.isNaN(date.getTime()) ? null : date;
   }
   return null;
-}
+};
 
-function formatDateLabel(value: unknown) {
+const formatDateLabel = (value: unknown) => {
   const date = toValidDate(value);
   if (!date) return "未設定";
   return META_DATE_FORMATTER.format(date);
-}
+};
 
-function toDateTimeLocalValue(value: unknown): string {
+const toDateTimeLocalValue = (value: unknown) => {
   const date = toValidDate(value);
   if (!date) return "";
   const localMs = date.getTime() - date.getTimezoneOffset() * 60 * 1000;
   return new Date(localMs).toISOString().slice(0, 16);
-}
+};
 
-function fromDateTimeLocalValue(value: string): Date | null {
+const fromDateTimeLocalValue = (value: string) => {
   if (!value) return null;
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? null : date;
-}
+};
 
-function toRatingValue(value: unknown): ReviewLog["rating"] | null {
+const toRatingValue = (value: unknown) => {
   const numeric = toFiniteNumber(value);
   if (numeric === null) return null;
   const rounded = Math.round(numeric);
   if (rounded < 1 || rounded > 4) return null;
   return rounded as ReviewLog["rating"];
-}
+};
 
-function normalizeDurationMinutes(value: unknown): number | null {
+const normalizeDurationMinutes = (value: unknown) => {
   const numeric = toFiniteNumber(value);
   if (numeric === null) return null;
   return Math.max(0, Math.round(numeric));
-}
+};
 
-function formatDurationMinutes(value: number | null): string {
+const formatDurationMinutes = (value: number | null) => {
   if (typeof value !== "number" || !Number.isFinite(value)) return "-";
   return `${Math.max(0, Math.round(value))} min.`;
-}
+};
 
-function normalizeMetaReviewLog(value: unknown): MetaReviewLog | null {
+const normalizeMetaReviewLog = (value: unknown) => {
   const log = asRecord(value);
   if (!log) return null;
 
@@ -279,9 +279,9 @@ function normalizeMetaReviewLog(value: unknown): MetaReviewLog | null {
         log.duration_min,
     ),
   };
-}
+};
 
-function dedupeMetaReviewLogs(logs: MetaReviewLog[]): MetaReviewLog[] {
+const dedupeMetaReviewLogs = (logs: MetaReviewLog[]) => {
   const unique = new Map<string, MetaReviewLog>();
   for (const log of logs) {
     const reviewedAt = toValidDate(log.reviewedAt);
@@ -306,31 +306,31 @@ function dedupeMetaReviewLogs(logs: MetaReviewLog[]): MetaReviewLog[] {
       toValidDate(b.reviewedAt)?.getTime() ?? Number.NEGATIVE_INFINITY;
     return aTs - bTs;
   });
-}
+};
 
-function getRatingLabel(rating: MetaRating): string {
+const getRatingLabel = (rating: MetaRating) => {
   if (rating === null) return "不明";
   return RATING_LABELS[rating] ?? String(rating);
-}
+};
 
-function getRatingToneClass(rating: MetaRating): string {
+const getRatingToneClass = (rating: MetaRating) => {
   if (rating === null) return "bg-slate-100 text-slate-500";
   return RATING_TONE_CLASS[rating];
-}
+};
 
-function getRatingFaceDesign(rating: MetaRating) {
+const getRatingFaceDesign = (rating: MetaRating) => {
   if (rating === null) return null;
   return RATING_FACE_DESIGN[rating];
-}
+};
 
-function isWithinSameMinute(a: unknown, b: unknown): boolean {
+const isWithinSameMinute = (a: unknown, b: unknown) => {
   const aDate = toValidDate(a);
   const bDate = toValidDate(b);
   if (!aDate || !bDate) return false;
   return Math.abs(aDate.getTime() - bDate.getTime()) < 60 * 1000;
-}
+};
 
-function toEditableReviewLogs(logs: MetaReviewLog[]): ReviewLog[] {
+const toEditableReviewLogs = (logs: MetaReviewLog[]) => {
   return logs
     .filter(
       (log): log is MetaReviewLog & { rating: ReviewLog["rating"] } =>
@@ -346,7 +346,7 @@ function toEditableReviewLogs(logs: MetaReviewLog[]): ReviewLog[] {
           : 0,
       durationMinutes: log.durationMinutes ?? null,
     }));
-}
+};
 
 const cardMetaDraftFlag = (card: Card | null): boolean =>
   Boolean(card?.isDraft ?? (card as Record<string, unknown> | null)?.is_draft);
@@ -428,23 +428,25 @@ const areCardMetaPanelPropsEqual = (
   prev.reviewStartNextDay === next.reviewStartNextDay &&
   prev.mode === next.mode;
 
-function CardMetaPanelInner({
-  card,
-  isEditingCard = false,
-  reviewLogs = [],
-  onAddReviewLog,
-  onUpdateLatestReviewLog,
-  onDeleteLatestReviewLog,
-  onUpdateReviewLogDuration,
-  onFlushAutosave,
-  onTitleInputChange,
-  onUpdateTags,
-  onToggleDraft,
-  onUpdateTitle,
-  delayBonusEnabled = false,
-  reviewStartNextDay = true,
-  mode = "full",
-}: CardMetaPanelProps) {
+const CardMetaPanelInner = (
+  {
+    card,
+    isEditingCard = false,
+    reviewLogs = [],
+    onAddReviewLog,
+    onUpdateLatestReviewLog,
+    onDeleteLatestReviewLog,
+    onUpdateReviewLogDuration,
+    onFlushAutosave,
+    onTitleInputChange,
+    onUpdateTags,
+    onToggleDraft,
+    onUpdateTitle,
+    delayBonusEnabled = false,
+    reviewStartNextDay = true,
+    mode = "full",
+  }: CardMetaPanelProps
+) => {
   const isCalendarMode = mode === "calendar";
   const infoRowClass =
     "h-[var(--meta-row-px)] leading-[var(--meta-row-px)] text-[length:var(--meta-font-size)] text-[var(--sidebar-text)]";
@@ -1804,7 +1806,7 @@ function CardMetaPanelInner({
       )}
     </EmptyMetaPanel>
   );
-}
+};
 
 export const CardMetaPanel = memo(
   CardMetaPanelInner,

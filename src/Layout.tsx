@@ -12,7 +12,7 @@ import { AppLayout } from "./layout/AppLayout";
 import { TitleBar } from "./layout/TitleBar";
 import { isDesktopRuntime } from "@/platform/runtime";
 
-export default function Layout() {
+export default const Layout = () => {
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const isFoldersRoute = /^\/folders(?:\/|$)/i.test(location.pathname);
@@ -67,4 +67,4 @@ export default function Layout() {
       <AppLayout />
     </div>
   );
-}
+};

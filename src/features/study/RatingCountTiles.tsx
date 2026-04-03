@@ -69,15 +69,17 @@ const FACE_DESIGN: Record<
 
 const ORDER: RatingKey[] = ["forgot", "vague", "remembered", "easy"];
 
-export function RatingCountTiles({
-  counts,
-  compact = false,
-  className = "",
-  disableHover = false,
-  singleColumn = false,
-  singleRow = false,
-  surface = "convex",
-}: Props) {
+export const RatingCountTiles = (
+  {
+    counts,
+    compact = false,
+    className = "",
+    disableHover = false,
+    singleColumn = false,
+    singleRow = false,
+    surface = "convex",
+  }: Props
+) => {
   const surfaceClass =
     surface === "concave" ? "surface-concave" : "surface-convex";
   const gridClass = singleRow
@@ -139,4 +141,4 @@ export function RatingCountTiles({
       })}
     </div>
   );
-}
+};

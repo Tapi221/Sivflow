@@ -7,10 +7,12 @@ type NewCardIdleStateProps = {
   onCancel: () => void;
 };
 
-export function NewCardIdleState({
-  onStartEditing,
-  onCancel,
-}: NewCardIdleStateProps) {
+export const NewCardIdleState = (
+  {
+    onStartEditing,
+    onCancel,
+  }: NewCardIdleStateProps
+) => {
   return (
     <div className="flex h-full min-h-[400px] items-center justify-center text-slate-400">
       <div className="text-center">
@@ -39,12 +41,12 @@ export function NewCardIdleState({
       </div>
     </div>
   );
-}
+};
 
-export function CardEditorLoadingState() {
+export const CardEditorLoadingState = () => {
   return (
     <div className="flex h-full min-h-[400px] items-center justify-center text-slate-400">
       <p className="text-xs font-medium">カードを読み込み中...</p>
     </div>
   );
-}
+};

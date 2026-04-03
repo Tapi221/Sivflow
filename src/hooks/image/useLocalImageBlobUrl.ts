@@ -21,10 +21,7 @@ type LocalImageBlobUrlState = {
   url: string | null;
 };
 
-export function useLocalImageBlobUrl(
-  localFileId: string | null | undefined,
-  userId: string | null | undefined,
-): LocalImageBlobUrlResult {
+export const useLocalImageBlobUrl = (localFileId: string | null | undefined, userId: string | null | undefined) => {
   const [state, setState] = useState<LocalImageBlobUrlState>({
     fileId: null,
     url: null,
@@ -71,4 +68,4 @@ export function useLocalImageBlobUrl(
     url: hasResolvedCurrent ? state.url : null,
     loading: !hasResolvedCurrent,
   };
-}
+};

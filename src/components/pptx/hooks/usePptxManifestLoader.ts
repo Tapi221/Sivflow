@@ -46,27 +46,27 @@ interface ManifestLoaderState {
   fallbackUrl: string | null;
 }
 
-async function resolveStorageUrl(
-  pathOrUrl?: string | null,
-): Promise<string | null> {
+const resolveStorageUrl = (pathOrUrl?: string | null) => {
   if (!pathOrUrl) return null;
   if (isHttpUrl(pathOrUrl)) return pathOrUrl;
   return getDownloadURL(ref(storage, pathOrUrl));
-}
+};
 
-export function usePptxManifestLoader({
-  docId,
-  manifestStatus,
-  manifestPath,
-  manifestToken,
-  fallbackPath,
-  requestedAtMs,
-  manifestPendingWindowMs,
-  sourceSignature,
-  isOnline,
-  applyLocalDocumentPatch,
-  logDiagnostics,
-}: Options): ManifestLoaderState {
+export const usePptxManifestLoader = (
+  {
+    docId,
+    manifestStatus,
+    manifestPath,
+    manifestToken,
+    fallbackPath,
+    requestedAtMs,
+    manifestPendingWindowMs,
+    sourceSignature,
+    isOnline,
+    applyLocalDocumentPatch,
+    logDiagnostics,
+  }: Options
+) => {
   const [slides, setSlides] = useState<SlideData[]>([]);
   const [slideCount, setSlideCount] = useState(0);
   const [loadingManifest, setLoadingManifest] = useState(false);
@@ -281,4 +281,4 @@ export function usePptxManifestLoader({
     manifestError,
     fallbackUrl,
   };
-}
+};

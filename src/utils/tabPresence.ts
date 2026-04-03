@@ -6,30 +6,30 @@ const STALE_MS = 15000;
 
 type PresenceMap = Record<string, number>;
 
-function readMap(): PresenceMap {
+const readMap = () => {
   try {
     const raw = localStorage.getItem(KEY);
     return raw ? (JSON.parse(raw) as PresenceMap) : {};
   } catch {
     return {};
   }
-}
+};
 
-function writeMap(map: PresenceMap) {
+const writeMap = (map: PresenceMap) => {
   try {
     localStorage.setItem(KEY, JSON.stringify(map));
   } catch {
     // ignore
   }
-}
+};
 
-function prune(map: PresenceMap, now: number) {
+const prune = (map: PresenceMap, now: number) => {
   for (const [id, ts] of Object.entries(map)) {
     if (typeof ts !== "number" || now - ts > STALE_MS) delete map[id];
   }
-}
+};
 
-export function startTabPresence() {
+export const startTabPresence = () => {
   if (typeof window === "undefined") return;
   const startedHost = window as typeof window & { [STARTED_KEY]?: boolean };
   if (startedHost[STARTED_KEY]) return;
@@ -70,9 +70,9 @@ export function startTabPresence() {
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) beat();
   });
-}
+};
 
-export function getActiveTabCountEstimate(): number | null {
+export const getActiveTabCountEstimate = () => {
   try {
     const now = Date.now();
     const map = readMap();
@@ -82,4 +82,4 @@ export function getActiveTabCountEstimate(): number | null {
   } catch {
     return null;
   }
-}
+};

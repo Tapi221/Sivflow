@@ -13,14 +13,16 @@ interface TreeViewDialogsProps {
   ) => void;
 }
 
-export function TreeViewDialogs({
-  isCreateSelectionOpen,
-  setIsCreateSelectionOpen,
-  isModeSelectionOpen,
-  setIsModeSelectionOpen,
-  onSelectCreateMode,
-  onSelectDetailedMode,
-}: TreeViewDialogsProps) {
+export const TreeViewDialogs = (
+  {
+    isCreateSelectionOpen,
+    setIsCreateSelectionOpen,
+    isModeSelectionOpen,
+    setIsModeSelectionOpen,
+    onSelectCreateMode,
+    onSelectDetailedMode,
+  }: TreeViewDialogsProps
+) => {
   return (
     <>
       <CreateCardSelectionDialog
@@ -40,4 +42,4 @@ export function TreeViewDialogs({
       />
     </>
   );
-}
+};

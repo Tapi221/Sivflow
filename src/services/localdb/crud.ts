@@ -64,44 +64,41 @@ type AnyRow = Record<string, unknown> & { id?: string };
 
 type DocumentUpdateChanges = Parameters<typeof cleanupBeforeDocumentUpdate>[2];
 
-function isRecord(v: unknown): v is Record<string, unknown> {
+const isRecord = (v: unknown) => {
   return typeof v === "object" && v !== null;
-}
+};
 
-function getStringProp(
-  obj: Record<string, unknown>,
-  key: string,
-): string | undefined {
+const getStringProp = (obj: Record<string, unknown>, key: string) => {
   const v = obj[key];
   return typeof v === "string" ? v : undefined;
-}
+};
 
-function getId(v: unknown): string | undefined {
+const getId = (v: unknown) => {
   if (!isRecord(v)) return undefined;
   const id = getStringProp(v, "id");
   if (!id) return undefined;
   const trimmed = id.trim();
   return trimmed.length > 0 ? trimmed : undefined;
-}
+};
 
-function getConstructorName(v: unknown): string {
+const getConstructorName = (v: unknown) => {
   if (!isRecord(v)) return "<unknown>";
   const ctor = v["constructor"];
   if (!isRecord(ctor)) return "<unknown>";
   const name = ctor["name"];
   return typeof name === "string" ? name : "<unknown>";
-}
+};
 
-function safeJsonPreview(v: unknown, max = 200): string {
+const safeJsonPreview = (v: unknown, max = 200) => {
   try {
     const s = JSON.stringify(v);
     return s.length > max ? s.substring(0, max) + "...(truncated)" : s;
   } catch {
     return "<unserializable-payload>";
   }
-}
+};
 
-function errorCode(error: unknown): string {
+const errorCode = (error: unknown) => {
   if (typeof error === "string") return error;
   if (!isRecord(error)) return "UNKNOWN_ERROR";
 
@@ -111,19 +108,19 @@ function errorCode(error: unknown): string {
     getStringProp(error, "message") ??
     "UNKNOWN_ERROR"
   );
-}
+};
 
-function recordKeys(v: unknown): string[] {
+const recordKeys = (v: unknown) => {
   if (!isRecord(v)) return [];
   return Object.keys(v);
-}
+};
 
 /** documentsLifecycle 用: db.documents を持つDBだけ通す */
 type DocAwareDb = DbLike & DocDbCtx;
 
-function isDocDbCtx(db: DbLike): db is DocAwareDb {
+const isDocDbCtx = (db: DbLike) => {
   return "documents" in db;
-}
+};
 
 /* -----------------------------
  * addItem
@@ -150,13 +147,13 @@ export async function addItem(
   skipSync: boolean,
   enqueueSync: EnqueueSync,
 ): Promise<string>;
-export async function addItem(
+export const addItem = (
   db: DbLike,
   table: string,
   item: unknown,
   skipSync: boolean,
-  enqueueSync: EnqueueSync,
-): Promise<string> {
+  enqueueSync: EnqueueSync
+) => {
   if (table === "cards") {
     assertNoBlobUrlInCardPayload(item, {
       entityType: table,
@@ -276,7 +273,7 @@ export async function addItem(
     );
     throw error;
   }
-}
+};
 
 /* -----------------------------
  * updateItem
@@ -314,14 +311,14 @@ export async function updateItem(
   skipSync: boolean,
   enqueueSync: EnqueueSync,
 ): Promise<number>;
-export async function updateItem(
+export const updateItem = (
   db: DbLike,
   table: string,
   id: string,
   changes: unknown,
   skipSync: boolean,
-  enqueueSync: EnqueueSync,
-): Promise<number> {
+  enqueueSync: EnqueueSync
+) => {
   if (table === "documents") {
     if (!isDocDbCtx(db)) {
       throw new Error(
@@ -385,7 +382,7 @@ export async function updateItem(
   }
 
   return result;
-}
+};
 
 /* -----------------------------
  * deleteItem
@@ -401,11 +398,7 @@ export async function deleteItem(
   table: string,
   id: string,
 ): Promise<void>;
-export async function deleteItem(
-  db: DbLike,
-  table: string,
-  id: string,
-): Promise<void> {
+export const deleteItem = (db: DbLike, table: string, id: string) => {
   if (table === "documents") {
     if (!isDocDbCtx(db)) {
       throw new Error(
@@ -416,13 +409,13 @@ export async function deleteItem(
   }
   const tableApi = db.table<AnyRow>(table);
   await tableApi.delete(id);
-}
+};
 
 /* -----------------------------
  * softDelete
  * ----------------------------- */
 
-export async function softDelete(
+export const softDelete = (
   db: DbLike,
   table: string,
   id: string,
@@ -430,8 +423,8 @@ export async function softDelete(
     table: string,
     id: string,
     changes: Record<string, unknown>,
-  ) => Promise<number>,
-): Promise<number> {
+  ) => Promise<number>
+) => {
   const now = new Date();
   console.log(`[LocalDB] softDelete -> table=${table} id=${id}`);
 
@@ -455,7 +448,7 @@ export async function softDelete(
     updatedAt: now,
     ...extraChanges,
   });
-}
+};
 
 /* -----------------------------
  * bulkUpsert
@@ -482,13 +475,13 @@ export async function bulkUpsert(
   skipSync: boolean,
   enqueueSync: EnqueueSync,
 ): Promise<void>;
-export async function bulkUpsert(
+export const bulkUpsert = (
   db: DbLike,
   table: string,
   items: unknown[],
   skipSync: boolean,
-  enqueueSync: EnqueueSync,
-): Promise<void> {
+  enqueueSync: EnqueueSync
+) => {
   if (items.length === 0) return;
 
   const payload: AnyRow[] =
@@ -525,7 +518,7 @@ export async function bulkUpsert(
       await enqueueSync(table, "upload", item);
     }
   }
-}
+};
 
 /* -----------------------------
  * upsert
@@ -552,13 +545,13 @@ export async function upsert(
   skipSync: boolean,
   enqueueSync: EnqueueSync,
 ): Promise<void>;
-export async function upsert(
+export const upsert = (
   db: DbLike,
   tableName: string,
   data: unknown,
   skipSync: boolean,
-  enqueueSync: EnqueueSync,
-): Promise<void> {
+  enqueueSync: EnqueueSync
+) => {
   if (tableName === "cards") {
     assertNoBlobUrlInCardPayload(data, {
       entityType: tableName,
@@ -594,4 +587,4 @@ export async function upsert(
   if (!skipSync) {
     await enqueueSync(tableName, "upload", payload);
   }
-}
+};

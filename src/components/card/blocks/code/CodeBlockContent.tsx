@@ -54,7 +54,7 @@ type CodeBlockContentProps =
       onCodeChange: (nextCode: string) => void;
     };
 
-export function CodeBlockContent(props: CodeBlockContentProps) {
+export const CodeBlockContent = (props: CodeBlockContentProps) => {
   const [copied, setCopied] = useState(false);
   const copiedTimerRef = useRef<number | null>(null);
   const editorHostRef = useRef<HTMLDivElement | null>(null);
@@ -231,4 +231,4 @@ export function CodeBlockContent(props: CodeBlockContentProps) {
       </BlockInset>
     </div>
   );
-}
+};

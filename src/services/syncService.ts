@@ -1044,7 +1044,10 @@ export class SyncService {
         : query(collRef, where("userId", "==", this.userId));
 
       const snapshot = await getDocs(q);
-      return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as T);
+      return snapshot.docs.map((doc) => (({
+        id: doc.id,
+        ...doc.data()
+      }) as T));
     } catch (error: unknown) {
       // 権限不足の場合はログに出力して空配列を返す
       if (error?.code === "permission-denied") {
@@ -1077,7 +1080,10 @@ export class SyncService {
       : query(collRef, where("userId", "==", this.userId));
 
     const snapshot = await getDocs(q);
-    return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as T);
+    return snapshot.docs.map((doc) => (({
+      id: doc.id,
+      ...doc.data()
+    }) as T));
   }
 
   /**

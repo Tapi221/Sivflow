@@ -24,24 +24,26 @@ export interface DesktopCardSurfaceProps {
   onToggleBookmark: (card: Card) => void | Promise<void>;
 }
 
-function DesktopCardSurfaceInner({
-  card,
-  isActive,
-  isGlobalEditing,
-  editPaneWidthPx,
-  activePaneWidthPx,
-  settings = null,
-  isFlipped,
-  currentDisplayMode,
-  folderId,
-  cardSetId,
-  cardsOverride,
-  saveSignal,
-  onFlip,
-  onEdit,
-  onToggleUncertainty,
-  onToggleBookmark,
-}: DesktopCardSurfaceProps) {
+const DesktopCardSurfaceInner = (
+  {
+    card,
+    isActive,
+    isGlobalEditing,
+    editPaneWidthPx,
+    activePaneWidthPx,
+    settings = null,
+    isFlipped,
+    currentDisplayMode,
+    folderId,
+    cardSetId,
+    cardsOverride,
+    saveSignal,
+    onFlip,
+    onEdit,
+    onToggleUncertainty,
+    onToggleBookmark,
+  }: DesktopCardSurfaceProps
+) => {
   const [hasFocusWithin, setHasFocusWithin] = React.useState(false);
 
   const handleEditorFocusCapture = React.useCallback(() => {
@@ -129,7 +131,7 @@ function DesktopCardSurfaceInner({
       />
     </div>
   );
-}
+};
 
 const areDesktopCardSurfacePropsEqual = (
   prev: DesktopCardSurfaceProps,

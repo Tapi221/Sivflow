@@ -28,7 +28,7 @@ const TEXT_COLORS = [
 /**
  * Generates a deterministic color pair (bg, text) from a string input (e.g. username)
  */
-export function getAvatarColors(name: string | undefined | null) {
+export const getAvatarColors = (name: string | undefined | null) => {
   if (!name) return { bg: "#F8FAFB", text: "#64748B" }; // Slate-400 equivalent default
 
   let hash = 0;
@@ -42,12 +42,12 @@ export function getAvatarColors(name: string | undefined | null) {
     bg: AVATAR_COLORS[index],
     text: TEXT_COLORS[index],
   };
-}
+};
 
 /**
  * Get initials from display name
  */
-export function getInitials(name: string | undefined | null): string {
+export const getInitials = (name: string | undefined | null) => {
   if (!name) return "U";
   return name.charAt(0).toUpperCase();
-}
+};

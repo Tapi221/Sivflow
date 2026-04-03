@@ -42,22 +42,24 @@ interface RightPaneProps {
   folderSelectionNonce: number;
 }
 
-export function RightPane({
-  selectedItem,
-  selectedCardId,
-  selectedDocument,
-  selectedFolderId,
-  selectedFolderName,
-  folders,
-  cards,
-  documents,
-  folderCards,
-  onCardUpdated,
-  onDocumentUpdated,
-  onRenameFolder,
-  handlers,
-  folderSelectionNonce,
-}: RightPaneProps) {
+export const RightPane = (
+  {
+    selectedItem,
+    selectedCardId,
+    selectedDocument,
+    selectedFolderId,
+    selectedFolderName,
+    folders,
+    cards,
+    documents,
+    folderCards,
+    onCardUpdated,
+    onDocumentUpdated,
+    onRenameFolder,
+    handlers,
+    folderSelectionNonce,
+  }: RightPaneProps
+) => {
   if (selectedItem?.type === "gallery") {
     return <Gallery />;
   }
@@ -126,4 +128,4 @@ export function RightPane({
   }
 
   return <CardPane selectedCardId={null} onCardUpdated={onCardUpdated} />;
-}
+};

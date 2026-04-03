@@ -28,15 +28,15 @@ const SecurityContext = createContext<SecurityContextType>({
 });
 
 // eslint-disable-next-line react-refresh/only-export-components
-export function useSecurity() {
+export const useSecurity = () => {
   return useContext(SecurityContext);
-}
+};
 
 interface SecurityProviderProps {
   children: ReactNode;
 }
 
-export function SecurityProvider({ children }: SecurityProviderProps) {
+export const SecurityProvider = ({ children }: SecurityProviderProps) => {
   const { currentUser } = useAuthSession();
   const [securityState, setSecurityState] =
     useState<SecurityState>(defaultSecurityState);
@@ -92,4 +92,4 @@ export function SecurityProvider({ children }: SecurityProviderProps) {
       {children}
     </SecurityContext.Provider>
   );
-}
+};

@@ -30,19 +30,21 @@ const sizeClassMap: Record<TagBadgeSize, string> = {
   md: "text-xs px-3 py-1.5 gap-1.5 leading-5",
 };
 
-export function TagBadge({
-  label,
-  colorKey,
-  legacyColor,
-  colorClass,
-  size = "sm",
-  selected = false,
-  className,
-  textClassName,
-  onClick,
-  onRemove,
-  removeAriaLabel,
-}: TagBadgeProps) {
+export const TagBadge = (
+  {
+    label,
+    colorKey,
+    legacyColor,
+    colorClass,
+    size = "sm",
+    selected = false,
+    className,
+    textClassName,
+    onClick,
+    onRemove,
+    removeAriaLabel,
+  }: TagBadgeProps
+) => {
   const resolvedColorStyle =
     colorKey !== undefined
       ? getTagColorStyle(colorKey)
@@ -96,4 +98,4 @@ export function TagBadge({
       {content}
     </span>
   );
-}
+};

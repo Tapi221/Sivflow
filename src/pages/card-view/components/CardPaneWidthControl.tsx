@@ -16,18 +16,20 @@ export interface CardPaneWidthControlProps {
   onReset: () => void;
 }
 
-export function CardPaneWidthControl({
-  modeLabel,
-  value,
-  min,
-  max,
-  defaultValue,
-  onPreviewChange,
-  onCommit,
-  onStepDown,
-  onStepUp,
-  onReset,
-}: CardPaneWidthControlProps) {
+export const CardPaneWidthControl = (
+  {
+    modeLabel,
+    value,
+    min,
+    max,
+    defaultValue,
+    onPreviewChange,
+    onCommit,
+    onStepDown,
+    onStepUp,
+    onReset,
+  }: CardPaneWidthControlProps
+) => {
   const resetDisabled = value === defaultValue;
   const [draftValue, setDraftValue] = React.useState(value);
 
@@ -89,4 +91,4 @@ export function CardPaneWidthControl({
       </button>
     </div>
   );
-}
+};

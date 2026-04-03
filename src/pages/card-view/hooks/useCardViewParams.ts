@@ -7,7 +7,7 @@ export type ParsedParams = {
   targetCardId: string | null;
 };
 
-function parseCardViewParams(): ParsedParams {
+const parseCardViewParams = () => {
   if (typeof window === "undefined") {
     return {
       folderId: null,
@@ -32,9 +32,9 @@ function parseCardViewParams(): ParsedParams {
         : 0,
     targetCardId,
   };
-}
+};
 
-export function useCardViewParams(): ParsedParams {
+export const useCardViewParams = () => {
   const [params] = useState<ParsedParams>(() => parseCardViewParams());
   return params;
-}
+};

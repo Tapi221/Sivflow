@@ -101,9 +101,7 @@ export interface PowerPointPaneController {
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
-export function usePowerPointPaneController(
-  doc: DocumentItem,
-): PowerPointPaneController {
+export const usePowerPointPaneController = (doc: DocumentItem) => {
   const { currentUser } = useAuthSession();
   const { isOnline } = useNetworkStatus();
   const diagnosticsEnabled = useMemo(() => isFirestoreDiagnosticsEnabled(), []);
@@ -537,15 +535,13 @@ export function usePowerPointPaneController(
     handleRetryConversion,
     viewerRef,
   };
-}
+};
 
-// ─── Thin wrapper to reset manifest loader on doc.id change ─────────────────
-
-function usePptxManifestLoaderWithReset(
+const usePptxManifestLoaderWithReset = (
   options: Parameters<typeof usePptxManifestLoader>[0] & {
     docIdKey: string | undefined;
-  },
-) {
+  }
+) => {
   const { ...rest } = options;
 
   // usePptxManifestLoader uses docIdKey only for logging; the reset
@@ -563,4 +559,4 @@ function usePptxManifestLoaderWithReset(
     manifestError: manifestErrorOverride ?? result.manifestError,
     setManifestError,
   };
-}
+};

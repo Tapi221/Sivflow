@@ -23,11 +23,11 @@ const remoteUrlCache = new Map<string, string>();
 /** Image.decode() 完了済み URL */
 const decodedUrlSet = new Set<string>();
 
-export function getCachedRemoteUrl(assetId: string): string | undefined {
+export const getCachedRemoteUrl = (assetId: string) => {
   return remoteUrlCache.get(assetId);
-}
+};
 
-export function setCachedRemoteUrl(assetId: string, url: string): void {
+export const setCachedRemoteUrl = (assetId: string, url: string) => {
   if (remoteUrlCache.has(assetId)) {
     // 既存キーの更新: 古い URL が変わった場合に decodedUrlSet の stale エントリを削除する。
     // Firebase signed URL はローテーションされることがあるため、
@@ -45,20 +45,20 @@ export function setCachedRemoteUrl(assetId: string, url: string): void {
     if (oldest !== undefined) remoteUrlCache.delete(oldest);
   }
   remoteUrlCache.set(assetId, url);
-}
+};
 
-export function isUrlDecoded(url: string): boolean {
+export const isUrlDecoded = (url: string) => {
   return decodedUrlSet.has(url);
-}
+};
 
-export function markUrlDecoded(url: string): void {
+export const markUrlDecoded = (url: string) => {
   if (decodedUrlSet.has(url)) return;
   if (decodedUrlSet.size >= MAX_DECODED_URL_SET) {
     const oldest = decodedUrlSet.values().next().value;
     if (oldest !== undefined) decodedUrlSet.delete(oldest);
   }
   decodedUrlSet.add(url);
-}
+};
 
 // ── Observability ─────────────────────────────────────────────────────────
 
@@ -69,11 +69,11 @@ export interface PreloadCacheStats {
   decodedUrlSetMax: number;
 }
 
-export function getPreloadCacheStats(): PreloadCacheStats {
+export const getPreloadCacheStats = () => {
   return {
     remoteUrlCacheSize: remoteUrlCache.size,
     decodedUrlSetSize: decodedUrlSet.size,
     remoteUrlCacheMax: MAX_REMOTE_URL_CACHE,
     decodedUrlSetMax: MAX_DECODED_URL_SET,
   };
-}
+};

@@ -20,7 +20,7 @@ type ImageBlockContentProps =
       maxFiles?: number;
     };
 
-export function ImageBlockContent(props: ImageBlockContentProps) {
+export const ImageBlockContent = (props: ImageBlockContentProps) => {
   if (props.mode === "view") {
     return (
       <ImageGallery
@@ -44,4 +44,4 @@ export function ImageBlockContent(props: ImageBlockContentProps) {
       onFilesExcess={props.onFilesExcess}
     />
   );
-}
+};

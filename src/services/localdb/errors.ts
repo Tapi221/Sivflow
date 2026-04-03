@@ -96,7 +96,7 @@ const extractErrorTexts = (
   extractErrorTexts(cause, collector, depth + 1);
 };
 
-export function isBackingStoreOpenError(error: unknown): boolean {
+export const isBackingStoreOpenError = (error: unknown) => {
   const texts: string[] = [];
   extractErrorTexts(error, texts);
   if (texts.length === 0) return false;
@@ -111,7 +111,7 @@ export function isBackingStoreOpenError(error: unknown): boolean {
     merged.includes("indexeddb.open");
 
   return hasUnknownError && hasBackingStoreToken;
-}
+};
 
 export const classifyFallbackReasonCode = (
   error: unknown,

@@ -85,16 +85,16 @@ const entityNameMap: Record<SyncableTableName, SyncQueueItem["entity"]> = {
   folders: "folder",
 };
 
-function getPayloadId(payload: unknown): string | null {
+const getPayloadId = (payload: unknown) => {
   if (!payload || typeof payload !== "object") return null;
   const p = payload as Record<string, unknown>;
   const id = p.id;
   return typeof id === "string" && id.length > 0 ? id : null;
-}
+};
 
-function asArray<T>(v: unknown): T[] {
+const asArray = (v: unknown) => {
   return Array.isArray(v) ? (v as T[]) : [];
-}
+};
 
 /**
  * Dexie.js を使用したローカルデータベースの実装。
@@ -624,7 +624,7 @@ export class LocalDB extends Dexie {
  * LocalDB インスタンスを生成する内部ファクトリ関数。
  * instanceManager.ts から使用される。constructor ガード (__ALLOW_LOCAL_DB_CONSTRUCTION) を経由。
  */
-export function createLocalDBInternal(userId?: string): LocalDB {
+export const createLocalDBInternal = (userId?: string) => {
   try {
     globalThis.__ALLOW_LOCAL_DB_CONSTRUCTION = true;
     return LocalDB.__createInternal(userId);
@@ -635,7 +635,7 @@ export function createLocalDBInternal(userId?: string): LocalDB {
       // ignore
     }
   }
-}
+};
 
 // devtools.ts が './LocalDB' から import するため、instanceManager の関数を re-export する
 export { getLocalDb, getLocalDbSync, initializeDB, resetLocalDBForLogout };

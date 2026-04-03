@@ -27,7 +27,7 @@ type KeyedPaneWidthState = {
   width: number;
 };
 
-function getReservedScrollbarGutterWidthPx(): number {
+const getReservedScrollbarGutterWidthPx = () => {
   if (typeof document === "undefined") return 0;
 
   const probe = document.createElement("div");
@@ -42,16 +42,18 @@ function getReservedScrollbarGutterWidthPx(): number {
   const width = Math.max(0, probe.offsetWidth - probe.clientWidth);
   document.body.removeChild(probe);
   return width;
-}
+};
 
-export function useCardViewPaneWidth({
-  isGlobalEditing,
-  isDesktop,
-  isMetaOpen,
-  currentIndex,
-  settings,
-  cardSetId,
-}: UseCardViewPaneWidthOptions) {
+export const useCardViewPaneWidth = (
+  {
+    isGlobalEditing,
+    isDesktop,
+    isMetaOpen,
+    currentIndex,
+    settings,
+    cardSetId,
+  }: UseCardViewPaneWidthOptions
+) => {
   const contentViewportRef = useRef<HTMLDivElement | null>(null);
   const [contentViewportWidth, setContentViewportWidth] = useState<number>(
     () => (typeof window === "undefined" ? 1024 : window.innerWidth),
@@ -262,4 +264,4 @@ export function useCardViewPaneWidth({
     stepPaneWidth,
     resetActivePaneWidth,
   };
-}
+};

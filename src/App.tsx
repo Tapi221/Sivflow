@@ -68,8 +68,7 @@ const isTestBypassEnabled = () => {
   return isLocalHost(window.location.hostname);
 };
 
-// ===== サスペンス用ローディング UI =====
-function LoadingFallback() {
+const LoadingFallback = () => {
   return (
     <div className="fixed inset-0 z-[999] flex items-center justify-center bg-[#EEF3F6] animate-in fade-in duration-300">
       <div className="relative h-16 w-16">
@@ -78,10 +77,9 @@ function LoadingFallback() {
       </div>
     </div>
   );
-}
+};
 
-// ===== 認証が必要なルートを守るコンポーネント =====
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   // 現在のユーザーと認証状態読み込み中かどうかを取得
   const { currentUser, loading } = useAuthSession();
 
@@ -103,10 +101,9 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   // 条件を満たしていれば子要素をそのまま表示（= 保護されたページに入れる）
   return <>{children}</>;
-}
+};
 
-// ===== ログインページ（トップで表示される画面） =====
-function LoginPage() {
+const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const isAuthPopupClosedByUserError = (error: unknown): boolean =>
     typeof error === "object" &&
@@ -232,18 +229,13 @@ function LoginPage() {
       </div>
     </div>
   );
-}
+};
 
-/**
- * "/" は常に folders へ。
- * リロード時の画面復帰はブラウザURLに任せる。
- */
-function DefaultRedirect() {
+const DefaultRedirect = () => {
   return <Navigate to="/folders" replace />;
-}
+};
 
-// ===== アプリ本体のルーティング・起動処理をまとめたコンポーネント =====
-function AppContent() {
+const AppContent = () => {
   const { currentUser, loading } = useAuthSession();
   // 差分同期の進捗（文字列など）を取得
   const { syncProgress } = useSync();
@@ -511,10 +503,9 @@ function AppContent() {
       )}
     </>
   );
-}
+};
 
-// ===== アプリ全体のルートコンポーネント =====
-function App() {
+const App = () => {
   return (
     // 各種コンテキストでアプリ全体をラップし、どの子コンポーネントからも利用できるようにする
     <AuthProvider>
@@ -534,6 +525,6 @@ function App() {
       </ToastProvider>
     </AuthProvider>
   );
-}
+};
 
 export default App;

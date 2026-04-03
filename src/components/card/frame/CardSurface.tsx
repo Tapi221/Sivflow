@@ -27,18 +27,20 @@ type CardSurfaceProps = {
 
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 
-export function CardSurface({
-  children,
-  className,
-  style,
-  overlay,
-  ruled: _ruled = true,
-  ruledOpacity = 1,
-  ruledRowPx = 24,
-  ruledOffsetPx = 0,
-  ruledBottomOffsetPx = 0,
-  ruledPhasePx: _ruledPhasePx = 0,
-}: CardSurfaceProps) {
+export const CardSurface = (
+  {
+    children,
+    className,
+    style,
+    overlay,
+    ruled: _ruled = true,
+    ruledOpacity = 1,
+    ruledRowPx = 24,
+    ruledOffsetPx = 0,
+    ruledBottomOffsetPx = 0,
+    ruledPhasePx: _ruledPhasePx = 0,
+  }: CardSurfaceProps
+) => {
   void _ruled;
   void _ruledPhasePx;
 
@@ -104,4 +106,4 @@ export function CardSurface({
       ) : null}
     </div>
   );
-}
+};

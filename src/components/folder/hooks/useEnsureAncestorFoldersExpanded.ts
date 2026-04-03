@@ -15,10 +15,7 @@ interface UseEnsureAncestorFoldersExpandedParams {
   setExpandedFolders: React.Dispatch<React.SetStateAction<Set<string>>>;
 }
 
-function getAncestorFolderIds(
-  folderId: string,
-  treeFolders: FolderTreeNode[],
-): string[] {
+const getAncestorFolderIds = (folderId: string, treeFolders: FolderTreeNode[]) => {
   const ancestors: string[] = [];
   let currentId: string | null = folderId;
   while (currentId) {
@@ -28,12 +25,12 @@ function getAncestorFolderIds(
     currentId = normalizeFolderId(getParentFolderId(folder));
   }
   return ancestors;
-}
+};
 
-function expandFolderIds(
+const expandFolderIds = (
   ancestorIds: string[],
-  setExpandedFolders: React.Dispatch<React.SetStateAction<Set<string>>>,
-) {
+  setExpandedFolders: React.Dispatch<React.SetStateAction<Set<string>>>
+) => {
   setExpandedFolders((prev) => {
     const next = new Set(prev);
     let changed = false;
@@ -45,15 +42,17 @@ function expandFolderIds(
     }
     return changed ? next : prev;
   });
-}
+};
 
-export function useEnsureAncestorFoldersExpanded({
-  selectedFolderId,
-  selectedItem,
-  treeFolders,
-  treeCards,
-  setExpandedFolders,
-}: UseEnsureAncestorFoldersExpandedParams) {
+export const useEnsureAncestorFoldersExpanded = (
+  {
+    selectedFolderId,
+    selectedItem,
+    treeFolders,
+    treeCards,
+    setExpandedFolders,
+  }: UseEnsureAncestorFoldersExpandedParams
+) => {
   useEffect(() => {
     if (!selectedFolderId) return;
     const ancestorIds = getAncestorFolderIds(selectedFolderId, treeFolders);
@@ -67,4 +66,4 @@ export function useEnsureAncestorFoldersExpanded({
     const ancestorIds = getAncestorFolderIds(card.folderId, treeFolders);
     expandFolderIds(ancestorIds, setExpandedFolders);
   }, [selectedItem, treeCards, treeFolders, setExpandedFolders]);
-}
+};

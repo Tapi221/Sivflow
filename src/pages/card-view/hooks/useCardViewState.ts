@@ -45,7 +45,7 @@ type KeyedFlipState = {
   ids: Set<string>;
 };
 
-function extractCreatedId(created: unknown): string | null {
+const extractCreatedId = (created: unknown) => {
   if (typeof created === "string") return created;
   if (
     typeof created === "object" &&
@@ -64,21 +64,23 @@ function extractCreatedId(created: unknown): string | null {
     return (created as { cardId: string }).cardId;
   }
   return null;
-}
+};
 
-export function useCardViewState({
-  initialIndex,
-  targetCardId,
-  folderId,
-  cardSetId,
-  sortedCards,
-  cardIndexById,
-  createCard,
-  updateCard,
-  selectedCardSet,
-  isLoading,
-  toastError,
-}: UseCardViewStateOptions) {
+export const useCardViewState = (
+  {
+    initialIndex,
+    targetCardId,
+    folderId,
+    cardSetId,
+    sortedCards,
+    cardIndexById,
+    createCard,
+    updateCard,
+    selectedCardSet,
+    isLoading,
+    toastError,
+  }: UseCardViewStateOptions
+) => {
   const sourceKey = `${cardSetId ?? ""}::${folderId ?? ""}`;
   const defaultDisplayMode = selectedCardSet?.defaultDisplayMode;
 
@@ -533,4 +535,4 @@ export function useCardViewState({
     handleToggleViewMode,
     handlePagerIndexChange,
   };
-}
+};

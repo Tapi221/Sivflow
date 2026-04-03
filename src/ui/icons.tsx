@@ -102,7 +102,7 @@ const glyphByIconName: Record<string, GlyphKind> = {
   XCircle: "x",
 };
 
-function makeIcon(name: string) {
+const makeIcon = (name: string) => {
   const glyph = glyphByIconName[name] ?? "default";
 
   const Icon = forwardRef<SVGSVGElement, IconProps>(function Icon(
@@ -144,7 +144,7 @@ function makeIcon(name: string) {
 
   Icon.displayName = name;
   return Icon;
-}
+};
 
 const MoreVerticalIcon = forwardRef<SVGSVGElement, IconProps>(
   function MoreVerticalIcon(

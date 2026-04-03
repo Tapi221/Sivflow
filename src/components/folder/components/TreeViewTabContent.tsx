@@ -54,45 +54,47 @@ interface TreeViewTabContentProps {
   onSelectCardSet?: FolderTreeWithCardsProps["onSelectCardSet"];
 }
 
-export function TreeViewTabContent({
-  explorerTab,
-  recent,
-  folders,
-  cards,
-  cardSets,
-  documents,
-  filteredCards,
-  filteredDocuments,
-  selectedFolderId,
-  selectedItem,
-  isFiltering,
-  onRegisterCreateFolderTrigger,
-  onRegisterCreateCardSetTrigger,
-  onRegisterPdfTrigger,
-  onRegisterPptxTrigger,
-  navigateToSectionListToken,
-  folderSelectionNonce,
-  onSectionListModeChange,
-  onHeaderFolderIdChange,
-  onFolderSelect,
-  onItemSelect,
-  onClearRecent,
-  onCreateFolder,
-  onUpdateFolder,
-  onDeleteFolder,
-  onCreateCardSet,
-  onUpdateCardSet,
-  onDeleteCardSet,
-  onCreateCard,
-  onUpdateCard,
-  onDeleteCard,
-  moveCardToFolder,
-  moveCardSetToFolder,
-  moveDocumentToFolder,
-  reorderCards,
-  selectedCardSetId,
-  onSelectCardSet,
-}: TreeViewTabContentProps) {
+export const TreeViewTabContent = (
+  {
+    explorerTab,
+    recent,
+    folders,
+    cards,
+    cardSets,
+    documents,
+    filteredCards,
+    filteredDocuments,
+    selectedFolderId,
+    selectedItem,
+    isFiltering,
+    onRegisterCreateFolderTrigger,
+    onRegisterCreateCardSetTrigger,
+    onRegisterPdfTrigger,
+    onRegisterPptxTrigger,
+    navigateToSectionListToken,
+    folderSelectionNonce,
+    onSectionListModeChange,
+    onHeaderFolderIdChange,
+    onFolderSelect,
+    onItemSelect,
+    onClearRecent,
+    onCreateFolder,
+    onUpdateFolder,
+    onDeleteFolder,
+    onCreateCardSet,
+    onUpdateCardSet,
+    onDeleteCardSet,
+    onCreateCard,
+    onUpdateCard,
+    onDeleteCard,
+    moveCardToFolder,
+    moveCardSetToFolder,
+    moveDocumentToFolder,
+    reorderCards,
+    selectedCardSetId,
+    onSelectCardSet,
+  }: TreeViewTabContentProps
+) => {
   switch (explorerTab) {
     case "recent":
       return (
@@ -146,4 +148,4 @@ export function TreeViewTabContent({
         />
       );
   }
-}
+};

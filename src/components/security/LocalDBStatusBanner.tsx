@@ -7,7 +7,7 @@ import {
   LOCALDB_RECOVERY_GUIDE_URL,
 } from "@/services/localDB";
 
-export function LocalDBStatusBanner() {
+export const LocalDBStatusBanner = () => {
   const [status, setStatus] = useState(getLocalDBRuntimeStatus());
 
   useEffect(() => {
@@ -63,4 +63,4 @@ export function LocalDBStatusBanner() {
       </div>
     </div>
   );
-}
+};

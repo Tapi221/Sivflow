@@ -64,7 +64,7 @@ export const DEFAULT_SETTINGS: Partial<UserSettings> = {
   ],
 };
 
-export function useUserSettings() {
+export const useUserSettings = () => {
   const { currentUser } = useAuthSession();
   const repairedBlobRef = useRef(false);
 
@@ -186,4 +186,4 @@ export function useUserSettings() {
     settings,
     updateSettings,
   };
-}
+};

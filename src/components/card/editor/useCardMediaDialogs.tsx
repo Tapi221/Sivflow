@@ -30,14 +30,16 @@ type UseCardMediaDialogsParams = {
   ) => void;
 };
 
-export function useCardMediaDialogs({
-  draft,
-  setDraft,
-  getSideBlocks,
-  setSideBlocks,
-  removeBlockByTypeIfExists,
-  upsertSingleBlock,
-}: UseCardMediaDialogsParams) {
+export const useCardMediaDialogs = (
+  {
+    draft,
+    setDraft,
+    getSideBlocks,
+    setSideBlocks,
+    removeBlockByTypeIfExists,
+    upsertSingleBlock,
+  }: UseCardMediaDialogsParams
+) => {
   void setSideBlocks;
   const [imageDialogSide, setImageDialogSide] = useState<Side | null>(null);
   const [audioDialogSide, setAudioDialogSide] = useState<Side | null>(null);
@@ -241,4 +243,4 @@ export function useCardMediaDialogs({
       setReferenceItems,
     ],
   );
-}
+};

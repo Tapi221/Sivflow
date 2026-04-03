@@ -26,13 +26,15 @@ interface MobileScalableCardProps {
   className?: string;
 }
 
-export function MobileScalableCard({
-  children,
-  cardDesignWidth = CARD_DISPLAY_WIDTH,
-  safePadding = 24,
-  enableEditMode = false,
-  className,
-}: MobileScalableCardProps) {
+export const MobileScalableCard = (
+  {
+    children,
+    cardDesignWidth = CARD_DISPLAY_WIDTH,
+    safePadding = 24,
+    enableEditMode = false,
+    className,
+  }: MobileScalableCardProps
+) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
@@ -192,4 +194,4 @@ export function MobileScalableCard({
       </div>
     </>
   );
-}
+};

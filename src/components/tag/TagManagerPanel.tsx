@@ -33,7 +33,7 @@ type TagManagerPanelProps = {
   className?: string;
 };
 
-export function TagManagerPanel({ className }: TagManagerPanelProps) {
+export const TagManagerPanel = ({ className }: TagManagerPanelProps) => {
   const {
     tags: allTags,
     updateTagColor,
@@ -647,4 +647,4 @@ export function TagManagerPanel({ className }: TagManagerPanelProps) {
       </AlertDialog>
     </div>
   );
-}
+};

@@ -15,12 +15,14 @@ interface CardViewMetaPanelProps {
   updateCard: (id: string, data: Partial<Card>) => Promise<unknown>;
 }
 
-export function CardViewMetaPanel({
-  selectedCard,
-  isGlobalEditing,
-  settings,
-  updateCard,
-}: CardViewMetaPanelProps) {
+export const CardViewMetaPanel = (
+  {
+    selectedCard,
+    isGlobalEditing,
+    settings,
+    updateCard,
+  }: CardViewMetaPanelProps
+) => {
   const patchEditingDraft = (
     patch: Partial<Pick<Card, "title" | "isDraft">> & { tags?: string[] },
   ) => {
@@ -129,4 +131,4 @@ export function CardViewMetaPanel({
       reviewStartNextDay={settings?.reviewStartNextDay ?? true}
     />
   );
-}
+};

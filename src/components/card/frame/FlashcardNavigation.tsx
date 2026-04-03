@@ -13,14 +13,16 @@ interface FlashcardNavigationProps {
   totalCards?: number;
 }
 
-export function FlashcardNavigation({
-  onNext,
-  onPrev,
-  hasNext,
-  hasPrev,
-  currentIndex,
-  totalCards,
-}: FlashcardNavigationProps) {
+export const FlashcardNavigation = (
+  {
+    onNext,
+    onPrev,
+    hasNext,
+    hasPrev,
+    currentIndex,
+    totalCards,
+  }: FlashcardNavigationProps
+) => {
   const showNav =
     onNext ||
     onPrev ||
@@ -65,4 +67,4 @@ export function FlashcardNavigation({
       </Button>
     </div>
   );
-}
+};

@@ -70,7 +70,7 @@ type PersistResult =
   | { ok: true; operation: "created" | "updated" | "noop"; saved: boolean }
   | { ok: false; message: string };
 
-function cloneBlock(block: CardBlock): CardBlock {
+const cloneBlock = (block: CardBlock) => {
   return {
     ...block,
     images: block.images?.map((image) => ({ ...image })),
@@ -79,9 +79,9 @@ function cloneBlock(block: CardBlock): CardBlock {
     code: block.code ? { ...block.code } : undefined,
     math: block.math ? { ...block.math } : undefined,
   };
-}
+};
 
-function snapshotDraft(draft: EditorDraft): EditorDraft {
+const snapshotDraft = (draft: EditorDraft) => {
   return {
     title: draft.title,
     tags: [...draft.tags],
@@ -90,9 +90,9 @@ function snapshotDraft(draft: EditorDraft): EditorDraft {
     backBlocks: draft.backBlocks.map(cloneBlock),
     layoutRows: draft.layoutRows,
   };
-}
+};
 
-function draftSignature(draft: EditorDraft | null): string | null {
+const draftSignature = (draft: EditorDraft | null) => {
   if (!draft) return null;
   return JSON.stringify({
     title: draft.title,
@@ -102,9 +102,9 @@ function draftSignature(draft: EditorDraft | null): string | null {
     backBlocks: draft.backBlocks,
     layoutRows: normalizeLayoutRows(draft.layoutRows),
   });
-}
+};
 
-function sanitizeBlocksForSave(blocks: CardBlock[]): CardBlock[] {
+const sanitizeBlocksForSave = (blocks: CardBlock[]) => {
   const next: CardBlock[] = [];
   for (const block of blocks ?? []) {
     if (block?.type === "image") {
@@ -123,9 +123,9 @@ function sanitizeBlocksForSave(blocks: CardBlock[]): CardBlock[] {
     next.push(block);
   }
   return normalizeOrderIndex(next);
-}
+};
 
-function hasMeaningfulBlock(block: CardBlock): boolean {
+const hasMeaningfulBlock = (block: CardBlock) => {
   if (block.type === "text")
     return String(block.content ?? "").trim().length > 0;
   if (block.type === "markdown")
@@ -145,18 +145,18 @@ function hasMeaningfulBlock(block: CardBlock): boolean {
     );
   }
   return false;
-}
+};
 
-function hasMeaningfulDraft(draft: EditorDraft): boolean {
+const hasMeaningfulDraft = (draft: EditorDraft) => {
   if (draft.title.trim().length > 0) return true;
   if (draft.tags.some((tag) => tag.trim().length > 0)) return true;
   if (draft.isDraft) return true;
   if (draft.frontBlocks.some(hasMeaningfulBlock)) return true;
   if (draft.backBlocks.some(hasMeaningfulBlock)) return true;
   return false;
-}
+};
 
-function extractCreatedCardId(created: unknown): string | null {
+const extractCreatedCardId = (created: unknown) => {
   if (typeof created === "string" && created.trim().length > 0) return created;
   if (!created || typeof created !== "object") return null;
   if (
@@ -174,9 +174,9 @@ function extractCreatedCardId(created: unknown): string | null {
     return (created as { cardId: string }).cardId;
   }
   return null;
-}
+};
 
-function toDateOrNull(value: unknown): Date | null {
+const toDateOrNull = (value: unknown) => {
   if (value instanceof Date && !Number.isNaN(value.getTime())) return value;
   if (
     typeof value === "object" &&
@@ -192,25 +192,27 @@ function toDateOrNull(value: unknown): Date | null {
     return Number.isNaN(date.getTime()) ? null : date;
   }
   return null;
-}
+};
 
-export function useCardEditorSession({
-  selectedCardId,
-  selectedCardSnapshot = null,
-  resolveCardFromEntity = true,
-  folderId,
-  cardSetId,
-  autoEdit,
-  updateCard,
-  createCard,
-  addTag,
-  tagById,
-  toastSuccess,
-  toastError,
-  onCardUpdated,
-  onSelectCardId,
-  resetDialogs,
-}: UseCardEditorSessionParams) {
+export const useCardEditorSession = (
+  {
+    selectedCardId,
+    selectedCardSnapshot = null,
+    resolveCardFromEntity = true,
+    folderId,
+    cardSetId,
+    autoEdit,
+    updateCard,
+    createCard,
+    addTag,
+    tagById,
+    toastSuccess,
+    toastError,
+    onCardUpdated,
+    onSelectCardId,
+    resetDialogs,
+  }: UseCardEditorSessionParams
+) => {
   const [localSelectedCardId, setLocalSelectedCardId] = useState<string | null>(
     null,
   );
@@ -971,4 +973,4 @@ export function useCardEditorSession({
     handleUpdateTitle,
     panelCard,
   };
-}
+};

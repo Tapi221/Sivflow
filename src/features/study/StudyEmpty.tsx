@@ -10,7 +10,7 @@ type Props = {
   handleBack: () => void;
 };
 
-export function StudyEmpty({ folderId, navigate, handleBack }: Props) {
+export const StudyEmpty = ({ folderId, navigate, handleBack }: Props) => {
   return (
     <Card className="max-w-xl mx-auto mt-16 border border-slate-200/80 bg-white rounded-2xl shadow-[0_12px_40px_-24px_rgba(15,23,42,0.35)] animate-in fade-in slide-in-from-bottom-2 duration-300">
       <CardContent className="py-12 px-8 text-center">
@@ -51,4 +51,4 @@ export function StudyEmpty({ folderId, navigate, handleBack }: Props) {
       </CardContent>
     </Card>
   );
-}
+};

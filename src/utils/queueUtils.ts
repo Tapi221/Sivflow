@@ -6,7 +6,7 @@ import { operationQueue } from "@/services/operationQueue";
 /**
  * アプリケーション初期化時に呼び出す
  */
-export async function initializeOperationQueue(): Promise<void> {
+export const initializeOperationQueue = () => {
   // 初期化ロジック:
   // 1. サービスの初期化が必要ならここで行う (現状はコンストラクタで十分なら不要だが、キックオフとしてprocessを呼ぶ)
   // 2. クラッシュ等のリカバリ (Stale Recovery) を走らせるため、一度processQueueを呼ぶのが適切
@@ -22,4 +22,4 @@ export async function initializeOperationQueue(): Promise<void> {
       await operationQueue.processQueue();
     });
   }
-}
+};

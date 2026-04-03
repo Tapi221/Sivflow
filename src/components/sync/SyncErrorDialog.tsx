@@ -32,7 +32,7 @@ interface SyncErrorDialogProps {
  * - リトライ失敗時は同じエラーIDで更新
  * - 全エラークリアボタン
  */
-export function SyncErrorDialog({ open, onClose }: SyncErrorDialogProps) {
+export const SyncErrorDialog = ({ open, onClose }: SyncErrorDialogProps) => {
   const [errors, setErrors] = useState<SyncError[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [retrying, setRetrying] = useState<string | null>(null);
@@ -235,4 +235,4 @@ export function SyncErrorDialog({ open, onClose }: SyncErrorDialogProps) {
       </DialogContent>
     </Dialog>
   );
-}
+};

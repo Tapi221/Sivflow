@@ -70,22 +70,20 @@ type TagRepairSummary = {
  * tagIds → タグ名に解決。tagIds が空なら legacy card.tags にフォールバック。
  * pure utility: フックの外でも呼べる。
  */
-export function resolveCardTagNames(
+export const resolveCardTagNames = (
   tagIds: unknown,
   legacyTags: unknown,
-  tagById: ReadonlyMap<string, Pick<TagV3Record, "name">>,
-): string[] {
+  tagById: ReadonlyMap<string, Pick<TagV3Record, "name">>
+) => {
   const ids = asStringArray(tagIds);
   if (ids.length > 0) {
     const names = ids.map((id) => tagById.get(id)?.name ?? "").filter((n) => n);
     if (names.length > 0) return names;
   }
   return asStringArray(legacyTags);
-}
+};
 
-export async function auditAndRepairTags(
-  userId: string,
-): Promise<TagRepairSummary> {
+export const auditAndRepairTags = (userId: string) => {
   const db = await getLocalDb(userId);
   const tagIdsByNameLower = new Map<string, string[]>();
   const knownTagIds = new Set<string>();
@@ -164,7 +162,7 @@ export async function auditAndRepairTags(
   }
 
   return { removedOrphanTagRefs, dedupedTagRefs, duplicateNameLowerPairs };
-}
+};
 
 /**
  * useTags: ユーザー単位で共通管理されるタグを操作するフック
@@ -173,7 +171,7 @@ export async function auditAndRepairTags(
  * ✅ 互換: card.tags(string[]) と card.tagIds(string[]) 両対応
  * ✅ tags_v2 が存在する環境でも migration 後は tags_v3 を使う
  */
-export function useTags() {
+export const useTags = () => {
   const { currentUser } = useAuthSession();
   const { settings, updateSettings } = useUserSettings();
 
@@ -914,4 +912,4 @@ export function useTags() {
     getTagIdByName,
     getTagNameById,
   };
-}
+};

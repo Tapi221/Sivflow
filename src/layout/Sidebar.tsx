@@ -170,7 +170,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: "/directory", label: "ディレクトリ", icon: <DirectoryIcon /> },
 ];
 
-export function Sidebar() {
+export const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const isHomeOnlyMode =
@@ -219,4 +219,4 @@ export function Sidebar() {
       </div>
     </aside>
   );
-}
+};

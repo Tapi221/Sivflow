@@ -51,24 +51,26 @@ const getSelectedEntityId = (
   return "id" in item && typeof item.id === "string" ? item.id : null;
 };
 
-export function useExplorerKeyboardNavigation({
-  selectedFolderId,
-  selectedItem,
-  treeFolders,
-  expandedFolders,
-  treeRootRef,
-  rootFolders,
-  getChildFolders,
-  getFolderItems,
-  toggleFolder,
-  onFolderSelect,
-  onItemSelect,
-  handleCreateFolderAction,
-  handleToolbarAddFile,
-  handleDelete,
-  setEditingId,
-  setEditingName,
-}: UseExplorerKeyboardNavigationParams) {
+export const useExplorerKeyboardNavigation = (
+  {
+    selectedFolderId,
+    selectedItem,
+    treeFolders,
+    expandedFolders,
+    treeRootRef,
+    rootFolders,
+    getChildFolders,
+    getFolderItems,
+    toggleFolder,
+    onFolderSelect,
+    onItemSelect,
+    handleCreateFolderAction,
+    handleToolbarAddFile,
+    handleDelete,
+    setEditingId,
+    setEditingName,
+  }: UseExplorerKeyboardNavigationParams
+) => {
   const keyHandlerRef = useRef<(e: KeyboardEvent) => void>(() => {});
 
   useEffect(() => {
@@ -256,4 +258,4 @@ export function useExplorerKeyboardNavigation({
     setEditingId,
     setEditingName,
   ]);
-}
+};

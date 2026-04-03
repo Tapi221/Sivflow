@@ -28,7 +28,7 @@ import {
   CollapsibleContent,
 } from "@/components/ui/collapsible";
 
-export default function DataRescuePanel() {
+export default const DataRescuePanel = () => {
   const { currentUser } = useAuthSession();
   const { success, error } = useToast();
 
@@ -462,9 +462,9 @@ export default function DataRescuePanel() {
       </Collapsible>
     </div>
   );
-}
+};
 
-function HistoryIcon(props: unknown) {
+const HistoryIcon = (props: unknown) => {
   return (
     <svg
       {...props}
@@ -483,4 +483,4 @@ function HistoryIcon(props: unknown) {
       <path d="M12 7v5l4 2" />
     </svg>
   );
-}
+};

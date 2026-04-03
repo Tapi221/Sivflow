@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Construction } from "@/ui/icons";
 
-export default function NotImplementedPlaceholder() {
+export default const NotImplementedPlaceholder = () => {
   const navigate = useNavigate();
 
   return (
@@ -30,4 +30,4 @@ export default function NotImplementedPlaceholder() {
       </div>
     </div>
   );
-}
+};

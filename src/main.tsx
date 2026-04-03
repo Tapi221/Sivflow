@@ -49,7 +49,7 @@ const CHUNK_ERROR_PATTERNS = [
   'MIME type of "text/html"',
 ];
 
-function toErrorText(input: unknown): string {
+const toErrorText = (input: unknown) => {
   if (typeof input === "string") return input;
   if (input instanceof Error) return `${input.name}: ${input.message}`;
   if (input && typeof input === "object") {
@@ -60,23 +60,20 @@ function toErrorText(input: unknown): string {
     }
   }
   return String(input ?? "");
-}
+};
 
-function isChunkLoadError(input: unknown): boolean {
+const isChunkLoadError = (input: unknown) => {
   const text = toErrorText(input);
   return CHUNK_ERROR_PATTERNS.some((pattern) => text.includes(pattern));
-}
+};
 
-function hardReloadOnce(key = CHUNK_RELOAD_KEY): void {
+const hardReloadOnce = (key = CHUNK_RELOAD_KEY) => {
   if (sessionStorage.getItem(key)) return;
   sessionStorage.setItem(key, "1");
   window.location.reload();
-}
+};
 
-function logBootstrapFault(
-  kind: string,
-  detail: Record<string, unknown>,
-): void {
+const logBootstrapFault = (kind: string, detail: Record<string, unknown>) => {
   const payload = {
     kind,
     detail,
@@ -99,7 +96,7 @@ function logBootstrapFault(
       });
     });
   }
-}
+};
 
 window.addEventListener(
   "error",

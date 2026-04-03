@@ -57,7 +57,7 @@ interface FlashcardProps {
 
 const TAP_MOVE_CANCEL_THRESHOLD_PX = 8;
 
-function shouldIgnoreFlipTarget(target: EventTarget | null): boolean {
+const shouldIgnoreFlipTarget = (target: EventTarget | null) => {
   const element = target as HTMLElement | null;
   if (!element) return false;
   return Boolean(
@@ -65,37 +65,39 @@ function shouldIgnoreFlipTarget(target: EventTarget | null): boolean {
       'button, a, input, textarea, select, label, [data-card-no-flip="true"]',
     ),
   );
-}
+};
 
-function FlashcardInner({
-  card,
-  isFlipped,
-  onFlip,
-  onEdit,
-  onToggleUncertainty,
-  onToggleBookmark,
-  className,
-  onNext,
-  onPrev,
-  hasNext,
-  hasPrev,
-  currentIndex,
-  totalCards,
-  previewMode,
-  extraHeaderLeft,
-  extraHeaderRight,
-  extraFooter,
-  displayMode = "fixed",
-  showInkLayer = false,
-  drawMode,
-  inkEditingEnabled = false,
-  onInkDocumentChange,
-  allowUpscale = false,
-  maxScale = 1.6,
-  scaleMultiplier = CARD_DISPLAY_SCALE,
-  fixedScale,
-  contentPaddingPx,
-}: FlashcardProps) {
+const FlashcardInner = (
+  {
+    card,
+    isFlipped,
+    onFlip,
+    onEdit,
+    onToggleUncertainty,
+    onToggleBookmark,
+    className,
+    onNext,
+    onPrev,
+    hasNext,
+    hasPrev,
+    currentIndex,
+    totalCards,
+    previewMode,
+    extraHeaderLeft,
+    extraHeaderRight,
+    extraFooter,
+    displayMode = "fixed",
+    showInkLayer = false,
+    drawMode,
+    inkEditingEnabled = false,
+    onInkDocumentChange,
+    allowUpscale = false,
+    maxScale = 1.6,
+    scaleMultiplier = CARD_DISPLAY_SCALE,
+    fixedScale,
+    contentPaddingPx,
+  }: FlashcardProps
+) => {
   const contentRef = useRef<HTMLDivElement | null>(null);
   const flipSuppressedUntilRef = useRef(0);
   const suppressNextFlipRef = useRef(false);
@@ -375,7 +377,7 @@ function FlashcardInner({
       )}
     </div>
   );
-}
+};
 
 const areFlashcardPropsEqual = (prev: FlashcardProps, next: FlashcardProps) => {
   if (prev.card !== next.card) return false;

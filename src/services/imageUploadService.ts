@@ -33,10 +33,12 @@ export interface UploadProfileImageOptions {
  * - 呼び出し元で blob: URL を作成してはいけません
  * - この関数が返す downloadURL のみを settings に保存してください
  */
-export async function uploadProfileImage({
-  uid,
-  file,
-}: UploadProfileImageOptions): Promise<string> {
+export const uploadProfileImage = (
+  {
+    uid,
+    file,
+  }: UploadProfileImageOptions
+) => {
   if (!uid) {
     throw new Error("ユーザーIDが必要です");
   }
@@ -96,4 +98,4 @@ export async function uploadProfileImage({
     console.error("[ImageUploadService] ❌ Upload failed:", errorMessage);
     throw new Error(`画像のアップロードに失敗しました: ${errorMessage}`);
   }
-}
+};

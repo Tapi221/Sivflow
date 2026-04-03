@@ -17,7 +17,7 @@ export interface FlashcardMediaState {
   isModalBlockingFlip: boolean;
 }
 
-export function useFlashcardMediaState(): FlashcardMediaState {
+export const useFlashcardMediaState = () => {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [isImagePopupOpen, setIsImagePopupOpen] = useState(false);
   const [isAudioPopupOpen, setIsAudioPopupOpen] = useState(false);
@@ -44,4 +44,4 @@ export function useFlashcardMediaState(): FlashcardMediaState {
     handleGalleryFullscreenChange,
     isModalBlockingFlip,
   };
-}
+};

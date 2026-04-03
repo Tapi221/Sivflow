@@ -11,15 +11,17 @@ type MathBlockPreviewPaneProps = {
   className?: string;
 };
 
-export function MathBlockPreviewPane({
-  latex,
-  displayMode = "block",
-  interactive = false,
-  onActivate,
-  showPlaceholder = false,
-  placeholder,
-  className,
-}: MathBlockPreviewPaneProps) {
+export const MathBlockPreviewPane = (
+  {
+    latex,
+    displayMode = "block",
+    interactive = false,
+    onActivate,
+    showPlaceholder = false,
+    placeholder,
+    className,
+  }: MathBlockPreviewPaneProps
+) => {
   return (
     <div
       className={cn(interactive && "cursor-text", className)}
@@ -45,4 +47,4 @@ export function MathBlockPreviewPane({
       />
     </div>
   );
-}
+};

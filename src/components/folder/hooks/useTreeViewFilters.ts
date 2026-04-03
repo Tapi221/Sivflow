@@ -17,18 +17,20 @@ interface UseTreeViewFiltersParams {
   tagById: TagMapLike;
 }
 
-export function useTreeViewFilters({
-  cards,
-  documents,
-  explorerTab,
-  tagFilter,
-  tagMatchMode,
-  uncertaintyFilter,
-  bookmarkedFilter,
-  draftFilter,
-  contentTypeFilter,
-  tagById,
-}: UseTreeViewFiltersParams) {
+export const useTreeViewFilters = (
+  {
+    cards,
+    documents,
+    explorerTab,
+    tagFilter,
+    tagMatchMode,
+    uncertaintyFilter,
+    bookmarkedFilter,
+    draftFilter,
+    contentTypeFilter,
+    tagById,
+  }: UseTreeViewFiltersParams
+) => {
   const isFilterTargetTab = explorerTab === "explorer";
 
   const isFilterActive =
@@ -127,4 +129,4 @@ export function useTreeViewFilters({
     filteredDocuments,
     isFiltering,
   };
-}
+};

@@ -65,10 +65,7 @@ const getUpdatedAtKey = (value: unknown): string => {
   return "";
 };
 
-export function usePdfSourceResolver(
-  doc: PdfSourceDoc,
-  userId: string | undefined,
-): UsePdfSourceResolverResult {
+export const usePdfSourceResolver = (doc: PdfSourceDoc, userId: string | undefined) => {
   const [restoredBlobUrl, setRestoredBlobUrl] = useState<string | null>(null);
   const [cachedBlobUrl, setCachedBlobUrl] = useState<string | null>(null);
   const [localDataStatus, setLocalDataStatus] = useState<
@@ -314,4 +311,4 @@ export function usePdfSourceResolver(
     localBlobUrl,
     handleSourceLoadError,
   };
-}
+};
