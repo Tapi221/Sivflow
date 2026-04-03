@@ -362,13 +362,22 @@ export function useFolderActions({
           } catch (error) {
             console.error("[useFolderActions] create folder failed:", error);
             setOptimisticFolders((prev) =>
-              prev.filter((folder) => {
-                const id = getFolderId(folder);
-                if (!id) return false;
-                if (id === folderId) return false;
-                if (siblingIdsToShift.includes(id)) return false;
-                return true;
-              }),
+              prev
+                .filter((folder) => getFolderId(folder) !== folderId)
+                .map((folder) => {
+                  const id = getFolderId(folder);
+                  if (!id || !siblingIdsToShift.includes(id)) return folder;
+
+                  const currentOrderIndex = getFolderOrderIndex(folder);
+                  const revertedOrderIndex = Math.max(0, currentOrderIndex - 1);
+
+                  return {
+                    ...folder,
+                    orderIndex: revertedOrderIndex,
+                    order_index: revertedOrderIndex,
+                    updatedAt: new Date(),
+                  } as FolderTreeNode;
+                }),
             );
             if (editingIdRef.current === folderId) {
               closeRename();
