@@ -6,7 +6,7 @@ import React, { useRef, useState } from "react";
 import { FileText, Folder, History, Plus } from "@/ui/icons";
 import type { ExplorerTab } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
-import { getSidebarNavItemClassName, SidebarNavIcon } from "@/layout/sidebarNavItem";
+import { getSidebarNavItemClassName, SidebarNavIcon } from "@/layout/sidebarNavItem.utils";
 import { TagFilterPopover } from "./TagFilterPopover";
 import {
   DropdownMenu,
@@ -178,6 +178,7 @@ export function ExplorerTabs({
     </div>
   );
 }
+
 
 
 

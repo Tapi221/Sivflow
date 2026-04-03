@@ -1,7 +1,8 @@
 import React from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import "./Sidebar.css";
-import { getSidebarNavItemClassName, SidebarNavIcon } from "./sidebarNavItem";
+import { SidebarNavIcon } from "./sidebarNavItem";
+import { getSidebarNavItemClassName } from "./sidebarNavItem.utils";
 
 type NavItem = {
   to: string;
@@ -111,3 +112,4 @@ export function Sidebar() {
     </aside>
   );
 }
+
