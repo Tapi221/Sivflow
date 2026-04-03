@@ -71,17 +71,10 @@ const isTestBypassEnabled = () => {
 // ===== サスペンス用ローディング UI =====
 function LoadingFallback() {
   return (
-    // 画面全体を覆うローディング画面（Tailwind で中央寄せ＆背景など指定）
-    <div className="h-[100dvh] flex items-center justify-center bg-[#EEF3F6] animate-in fade-in duration-500">
-      <div className="text-center">
-        {/* 二重の丸いボーダーでローディングスピナーを作っている */}
-        <div className="relative w-16 h-16 mx-auto mb-6">
-          <div className="absolute inset-0 border-4 border-primary-600/10 rounded-full"></div>
-          <div className="absolute inset-0 border-4 border-primary-600 rounded-full border-t-transparent animate-spin"></div>
-        </div>
-        <p className="text-primary-600 font-bold tracking-[0.3em] text-[10px] opacity-50">
-          INITIALIZING
-        </p>
+    <div className="fixed inset-0 z-[999] flex items-center justify-center bg-[#EEF3F6] animate-in fade-in duration-300">
+      <div className="relative h-16 w-16">
+        <div className="absolute inset-0 rounded-full border-4 border-emerald-600/15" />
+        <div className="absolute inset-0 animate-spin rounded-full border-4 border-emerald-600 border-t-transparent" />
       </div>
     </div>
   );

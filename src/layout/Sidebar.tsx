@@ -1,6 +1,7 @@
 import React from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import "./Sidebar.css";
+import { getSidebarNavItemClassName, SidebarNavIcon } from "./sidebarNavItem";
 
 type NavItem = {
   to: string;
@@ -79,13 +80,9 @@ export function Sidebar() {
           <NavLink
             key={to}
             to={to}
-            className={({ isActive }) =>
-              ["sidebar__nav-item", isActive ? "sidebar__nav-item--active" : ""]
-                .filter(Boolean)
-                .join(" ")
-            }
+            className={({ isActive }) => getSidebarNavItemClassName({ isActive })}
           >
-            <span className="sidebar__nav-icon">{icon}</span>
+            <SidebarNavIcon>{icon}</SidebarNavIcon>
             {label}
           </NavLink>
         ))}
@@ -93,10 +90,14 @@ export function Sidebar() {
 
       <div className="sidebar__footer">
         <button
-          className="sidebar__nav-item sidebar__settings-btn"
+          className={getSidebarNavItemClassName({
+            className: "sidebar__settings-btn",
+          })}
           onClick={handleOpenSettings}
         >
-          <span className="sidebar__nav-icon"><SettingsIcon /></span>
+          <SidebarNavIcon>
+            <SettingsIcon />
+          </SidebarNavIcon>
           設定
         </button>
       </div>

@@ -3,9 +3,10 @@
  * Linear/Notion 系のテキストリンクスタイル
  */
 import React, { useRef, useState } from "react";
-import { FileText, Folder, Plus } from "@/ui/icons";
+import { FileText, Folder, History, Plus } from "@/ui/icons";
 import type { ExplorerTab } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
+import { getSidebarNavItemClassName, SidebarNavIcon } from "@/layout/sidebarNavItem";
 import { TagFilterPopover } from "./TagFilterPopover";
 import {
   DropdownMenu,
@@ -28,9 +29,13 @@ interface ExplorerTabsProps {
   canAddDocuments?: boolean;
 }
 
-const TABS: { id: ExplorerTab; label: string }[] = [
-  { id: "explorer", label: "フォルダ" },
-  { id: "recent", label: "最近" },
+const TABS: {
+  id: ExplorerTab;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+}[] = [
+  { id: "explorer", label: "フォルダ", icon: Folder },
+  { id: "recent", label: "最近", icon: History },
 ];
 
 export function ExplorerTabs({
@@ -52,44 +57,31 @@ export function ExplorerTabs({
 
   return (
     <div
-      className="flex items-center justify-between pl-10 pr-2"
+      className="flex items-center justify-between px-2"
       style={{
         height: 36,
         borderBottom: "1px solid var(--pane-border, #e8e8e8)",
         backgroundColor: "var(--sidebar-bg)",
       }}
     >
-      <div className="flex items-center gap-0.5 overflow-x-auto no-scrollbar">
+      <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
         {TABS.map((tab) => {
           const isActive = activeTab === tab.id;
+          const Icon = tab.icon;
           return (
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
-              className={cn(
-                "relative px-2.5 h-full flex items-center whitespace-nowrap transition-colors duration-100",
-                "text-[12px] font-medium",
-                isActive
-                  ? "text-[var(--text-primary,#1a1a1a)]"
-                  : "text-[var(--text-muted,#8a8a8a)] hover:text-[var(--text-secondary,#4b4b4b)]",
-              )}
-              style={{ height: 36 }}
+              aria-label={tab.label}
+              className={getSidebarNavItemClassName({
+                isActive,
+                className:
+                  "relative h-8 min-w-8 justify-center gap-0 px-0 text-[var(--sidebar-text-muted,#6e6e80)]",
+              })}
             >
-              {tab.label}
-              {isActive && (
-                <span
-                  aria-hidden="true"
-                  style={{
-                    position: "absolute",
-                    bottom: 0,
-                    left: 6,
-                    right: 6,
-                    height: 1.5,
-                    borderRadius: 2,
-                    background: "var(--sidebar-active-accent, #7aa6a1)",
-                  }}
-                />
-              )}
+              <SidebarNavIcon className="opacity-100">
+                <Icon className="h-3.5 w-3.5" />
+              </SidebarNavIcon>
             </button>
           );
         })}
