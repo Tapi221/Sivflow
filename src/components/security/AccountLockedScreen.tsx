@@ -1,10 +1,12 @@
 import React from "react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthSession } from "@/contexts/auth/AuthSessionContext";
+import { useSecurity } from "@/contexts/security/SecurityContext";
 import { Shield } from "@/ui/icons"; // IDE Check: Shield icon
 // CSSはApp.tsx等でグローバル定義するか、インラインでシンプルに実装
 
 export const AccountLockedScreen: React.FC = () => {
-  const { securityState, currentUser } = useAuth();
+  const { securityState } = useSecurity();
+  const { currentUser } = useAuthSession();
 
   if (!securityState.isLocked) return null;
 

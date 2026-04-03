@@ -3,13 +3,15 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 // React 本体からサスペンス（遅延読み込み用）、lazy（動的 import）、状態管理・副作用フック
 import { Suspense, lazy, useState, useEffect } from "react";
 // 認証状態をアプリ全体に配るコンテキスト
-import { AuthProvider } from "./contexts/AuthContext";
+import { AuthSessionProvider } from "./contexts/auth/AuthSessionContext";
+import { SyncProvider } from "./contexts/sync/SyncContext";
+import { SecurityProvider } from "./contexts/security/SecurityContext";
 // トースト（画面右上などに出る通知）を配るコンテキスト
 import { ToastProvider } from "./contexts/ToastContext";
 // 通知用の Provider（多分リアルタイム通知など）
 import { NotificationProvider } from "./components/notifications/NotificationProvider";
 // 認証状態を取得するためのカスタムフック
-import { useAuthSession } from "./contexts/AuthContext";
+import { useAuthSession } from "./contexts/auth/AuthSessionContext";
 // 画面の共通レイアウトコンポーネント（ヘッダーやサイドバーなど）
 import Layout from "./Layout";
 // 自動バックアップ関連のサービス
@@ -524,22 +526,26 @@ function AppContent() {
 function App() {
   return (
     // 各種コンテキストでアプリ全体をラップし、どの子コンポーネントからも利用できるようにする
-    <AuthProvider>
-      <ThemeManager />
-      <ToastProvider>
-        <NotificationProvider>
-          {/* ブラウザの URL に応じて画面を切り替えるための Router */}
-          <BrowserRouter>
-            <BreadcrumbProvider>
-              {/* lazy で遅延読み込みしたページのローディング中に表示する UI の定義 */}
-              <Suspense fallback={<LoadingFallback />}>
-                <AppContent />
-              </Suspense>
-            </BreadcrumbProvider>
-          </BrowserRouter>
-        </NotificationProvider>
-      </ToastProvider>
-    </AuthProvider>
+    <AuthSessionProvider>
+      <SyncProvider>
+        <SecurityProvider>
+          <ThemeManager />
+          <ToastProvider>
+            <NotificationProvider>
+              {/* ブラウザの URL に応じて画面を切り替えるための Router */}
+              <BrowserRouter>
+                <BreadcrumbProvider>
+                  {/* lazy で遅延読み込みしたページのローディング中に表示する UI の定義 */}
+                  <Suspense fallback={<LoadingFallback />}>
+                    <AppContent />
+                  </Suspense>
+                </BreadcrumbProvider>
+              </BrowserRouter>
+            </NotificationProvider>
+          </ToastProvider>
+        </SecurityProvider>
+      </SyncProvider>
+    </AuthSessionProvider>
   );
 }
 
