@@ -1,5 +1,4 @@
 /* eslint-disable react-hooks/exhaustive-deps -- large legacy explorer handlers intentionally stabilized to avoid interaction regressions. */
-import DeleteFolderDialog from "@/components/folder/components/dialogs/DeleteFolderDialog";
 import { ExplorerEmptyState } from "@/components/folder/components/ExplorerEmptyState";
 import { ExplorerNoResultsState } from "@/components/folder/components/ExplorerNoResultsState";
 import { ExplorerTreeNodeRenderer } from "@/components/folder/components/ExplorerTreeNode";
@@ -292,7 +291,6 @@ export function FolderTreeWithCards({
     getCardSets,
     getCardSetItems,
     matchCountMap,
-    deleteTargetCounts,
     getNextOrderIndex,
     getUniqueFolderName,
   } = derived;
@@ -352,7 +350,7 @@ export function FolderTreeWithCards({
     setEditingId: dialogs.setEditingId,
     setEditingName: dialogs.setEditingName,
     closeRename: dialogs.closeRename,
-    openDeleteFolderDialog: dialogs.openDeleteFolderDialog,
+    
     setOptimisticFolders,
     setOptimisticCards,
     setOptimisticCardSets,
@@ -869,20 +867,8 @@ export function FolderTreeWithCards({
     [],
   );
 
-  const deleteTargetFolder = useMemo(
-    () =>
-      dialogs.deleteTargetFolderId
-        ? treeFolders.find((f) => getFolderId(f) === dialogs.deleteTargetFolderId) ??
-          null
-        : null,
-    [dialogs.deleteTargetFolderId, treeFolders],
-  );
-
-  const deleteTargetCountsValue = useMemo(
-    () => deleteTargetCounts(dialogs.deleteTargetFolderId),
-    [deleteTargetCounts, dialogs.deleteTargetFolderId],
-  );
-
+  
+  
   const nodeRendererProps = {
     editingId: dialogs.editingId,
     editingName: dialogs.editingName,
@@ -1054,14 +1040,7 @@ export function FolderTreeWithCards({
         </div>
       )}
 
-      <DeleteFolderDialog
-        open={dialogs.deleteFolderDialogOpen}
-        onOpenChange={dialogs.handleDeleteFolderDialogOpenChange}
-        folder={deleteTargetFolder}
-        cardCount={deleteTargetCountsValue.cardCount}
-        subfolderCount={deleteTargetCountsValue.subfolderCount}
-        onConfirm={actions.handleConfirmDeleteFolder}
-      />
+      
 
       {dialogs.bulkTagFolderId && (
         <BulkTagDialog
@@ -1075,3 +1054,4 @@ export function FolderTreeWithCards({
     </div>
   );
 }
+
