@@ -1,10 +1,10 @@
 import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
+import { MarkdownBlockView } from "@/components/card/blocks/markdown/MarkdownBlockPreview";
+import { MarkdownEditorDialog } from "@/components/card/blocks/markdown/MarkdownEditorDialog";
 import { TEXT_BLOCK_CONTENT_CLASS } from "@/components/card/blocks/text/textBlockStyles";
 import { cn } from "@/lib/utils";
 import { NotebookPen } from "@/ui/icons";
 import React, { useState } from "react";
-import { MarkdownBlockView } from "@/components/card/blocks/markdown/MarkdownBlockPreview";
-import { MarkdownEditorDialog } from "@/components/card/blocks/markdown/MarkdownEditorDialog";
 
 type EditorBlock =
   | { type: "markdown"; markdown: string }

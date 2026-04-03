@@ -1,14 +1,14 @@
+import { CodeRenderer } from "@/components/card/blocks/code/CodeRenderer";
 import { BlockSurface } from "@/components/card/blocks/core/BlockSurface";
+import {
+  BLOCK_BODY_TEXT_COLOR_CLASS,
+  TEXT_BLOCK_CONTENT_CLASS,
+} from "@/components/card/blocks/text/textBlockStyles";
 import { cn } from "@/lib/utils";
 import React, { useMemo } from "react";
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
-import { CodeRenderer } from "@/components/card/blocks/code/CodeRenderer";
-import {
-  BLOCK_BODY_TEXT_COLOR_CLASS,
-  TEXT_BLOCK_CONTENT_CLASS,
-} from "@/components/card/blocks/text/textBlockStyles";
 
 const TYPE = {
   body: { fontSize: 16, lineHeight: 24 },
