@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "@/ui/icons";
 import { CardEditorPane } from "@/components/folder/panes/CardEditorPane";
 
-export default const PairMode = () => {
+const PairMode = () => {
   const [searchParams] = useSearchParams();
   const folderId = searchParams.get("folderId");
   const navigate = useNavigate();
@@ -50,3 +50,6 @@ export default const PairMode = () => {
     </div>
   );
 };
+
+export default PairMode;
+

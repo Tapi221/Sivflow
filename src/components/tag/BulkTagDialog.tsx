@@ -14,7 +14,7 @@ interface BulkTagDialogProps {
   folderName?: string;
 }
 
-export default const BulkTagDialog = (
+const BulkTagDialog = (
   {
     open,
     onOpenChange,
@@ -134,3 +134,6 @@ export default const BulkTagDialog = (
     </Dialog>
   );
 };
+
+export default BulkTagDialog;
+

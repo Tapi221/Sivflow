@@ -22,7 +22,7 @@ import {
 /**
  * 作成モードを選択するダイアログ
  */
-export default const CreationModeDialog = (
+const CreationModeDialog = (
   {
     open,
     onOpenChange,
@@ -184,3 +184,6 @@ export default const CreationModeDialog = (
     </Dialog>
   );
 };
+
+export default CreationModeDialog;
+

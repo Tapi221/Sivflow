@@ -19,7 +19,7 @@ import { useSettingsQueryParam } from "@/hooks/settings/useSettingsQueryParam";
 import { useBreadcrumbContext } from "@/contexts/BreadcrumbContext";
 import { getCardText } from "@/domain/card/content";
 
-export default const Folders = () => {
+const Folders = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const queryString = searchParams.toString();
   const { setIsSettingsOpen } = useSettingsQueryParam(
@@ -519,3 +519,6 @@ export default const Folders = () => {
     </div>
   );
 };
+
+export default Folders;
+

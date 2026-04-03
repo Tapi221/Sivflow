@@ -30,7 +30,7 @@ interface ImportDialogProps {
 type ImportStep = "select" | "preview" | "confirm" | "processing" | "complete";
 type ImportAction = "replace" | "keep" | "cancel";
 
-export default const ImportDialog = (
+const ImportDialog = (
   {
     open,
     onOpenChange,
@@ -347,3 +347,6 @@ export default const ImportDialog = (
     </Dialog>
   );
 };
+
+export default ImportDialog;
+

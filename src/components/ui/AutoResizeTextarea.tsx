@@ -14,7 +14,7 @@ interface AutoResizeTextareaProps extends React.TextareaHTMLAttributes<HTMLTextA
   readOnly?: boolean;
 }
 
-export default const AutoResizeTextarea = (
+const AutoResizeTextarea = (
   {
     value,
     onChange,
@@ -106,3 +106,6 @@ export default const AutoResizeTextarea = (
     />
   );
 };
+
+export default AutoResizeTextarea;
+

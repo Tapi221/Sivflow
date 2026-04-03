@@ -159,7 +159,7 @@ const FALLBACK_ACCENT_COLORS = [
   },
 ];
 
-export default const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
+const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
   const [activeTab, setActiveTab] = useState("account");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -1596,3 +1596,6 @@ export default const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
     </Dialog>
   );
 };
+
+export default SettingsDialog;
+

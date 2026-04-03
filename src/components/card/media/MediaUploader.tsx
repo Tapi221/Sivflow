@@ -397,7 +397,7 @@ interface MediaUploaderProps {
   autoOpenPicker?: boolean;
 }
 
-export default const MediaUploader = (
+const MediaUploader = (
   {
     type = "image",
     urls = [],
@@ -1153,3 +1153,6 @@ export default const MediaUploader = (
     </div>
   );
 };
+
+export default MediaUploader;
+

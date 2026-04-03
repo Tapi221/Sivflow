@@ -27,7 +27,7 @@ interface ExportDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export default const ExportDialog = (
+const ExportDialog = (
   {
     open,
     onOpenChange,
@@ -228,3 +228,6 @@ export default const ExportDialog = (
     </Dialog>
   );
 };
+
+export default ExportDialog;
+

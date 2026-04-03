@@ -7,7 +7,7 @@ import { CardEditorPane } from "@/components/folder/panes/CardEditorPane";
 
 const CARD_EDIT_FOLDER_ID_KEY = "card-edit:folder-id";
 
-export default const CardEdit = () => {
+const CardEdit = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -94,3 +94,6 @@ export default const CardEdit = () => {
     </div>
   );
 };
+
+export default CardEdit;
+

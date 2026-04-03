@@ -73,7 +73,7 @@ const toDate = (value) => {
   return isNaN(d.getTime()) ? null : d;
 };
 
-export default const Calendar = () => {
+const Calendar = () => {
   const navigate = useNavigate();
   const { currentUser } = useAuthSession();
   const [isMetaOpen, setIsMetaOpen] = useState(true);
@@ -552,3 +552,6 @@ export default const Calendar = () => {
     </div>
   );
 };
+
+export default Calendar;
+

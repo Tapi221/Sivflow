@@ -41,7 +41,7 @@ const RATING_TILES = [
   { rating: "easy", score: 3, Icon: null },
 ];
 
-export default const StudyMode = () => {
+const StudyMode = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { currentUser } = useAuthSession();
@@ -520,3 +520,6 @@ export default const StudyMode = () => {
     </div>
   );
 };
+
+export default StudyMode;
+

@@ -72,7 +72,7 @@ const getCardKey = (card: Card) => {
   return direct && direct.length > 0 ? direct : "card";
 };
 
-export default const StudyCard = (props: StudyCardProps) => {
+const StudyCard = (props: StudyCardProps) => {
   const { card } = props;
 
   if (!card) {
@@ -426,3 +426,6 @@ const StudyCardInner = (
     </div>
   );
 };
+
+export default StudyCard;
+

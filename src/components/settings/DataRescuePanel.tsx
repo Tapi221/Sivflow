@@ -28,7 +28,7 @@ import {
   CollapsibleContent,
 } from "@/components/ui/collapsible";
 
-export default const DataRescuePanel = () => {
+const DataRescuePanel = () => {
   const { currentUser } = useAuthSession();
   const { success, error } = useToast();
 
@@ -484,3 +484,6 @@ const HistoryIcon = (props: unknown) => {
     </svg>
   );
 };
+
+export default DataRescuePanel;
+

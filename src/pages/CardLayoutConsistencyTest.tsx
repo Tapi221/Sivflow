@@ -35,7 +35,7 @@ const FIXTURE_CARD = {
   answerExtraRows: 2,
 };
 
-export default const CardLayoutConsistencyTest = () => {
+const CardLayoutConsistencyTest = () => {
   const [editBlocks, setEditBlocks] =
     React.useState<CardBlock[]>(FIXTURE_BLOCKS);
   const canRender =
@@ -85,3 +85,6 @@ export default const CardLayoutConsistencyTest = () => {
     </div>
   );
 };
+
+export default CardLayoutConsistencyTest;
+

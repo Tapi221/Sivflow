@@ -16,7 +16,7 @@ import { Layers, FileEdit } from "@/ui/icons";
  * @param {function} onOpenChange 表示状態変更時のコールバック
  * @param {function} onSelectMode モード選択時のコールバック ('single' | 'continuous')
  */
-export default const CreateCardSelectionDialog = (
+const CreateCardSelectionDialog = (
   {
     open,
     onOpenChange,
@@ -80,3 +80,6 @@ export default const CreateCardSelectionDialog = (
     </Dialog>
   );
 };
+
+export default CreateCardSelectionDialog;
+
