@@ -5,6 +5,7 @@ import {
   normalizeFolderId,
   type FolderTreeNode,
 } from "@/components/folder/explorer/model/utils";
+import { createOrderedOptimistically } from "@/hooks/shared/useOrderedOptimisticCreate";
 import type { Card, CardSet, SelectedExplorerItem } from "@/types";
 
 type RenameTargetKind = "folder" | "cardSet" | "card" | "document";
@@ -155,6 +156,26 @@ function makeTempCardSet(
   };
 }
 
+function setFolderOrderIndex(
+  folder: FolderTreeNode,
+  orderIndex: number,
+): FolderTreeNode {
+  return {
+    ...folder,
+    orderIndex,
+    order_index: orderIndex,
+    updatedAt: new Date(),
+  } as FolderTreeNode;
+}
+
+function setCardSetOrderIndex(cardSet: CardSet, orderIndex: number): CardSet {
+  return {
+    ...cardSet,
+    orderIndex,
+    updatedAt: new Date(),
+  };
+}
+
 function createEntityId(prefix: "folder" | "cardSet"): string {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
     return crypto.randomUUID();
@@ -277,66 +298,6 @@ export function useFolderActions({
         : DEFAULT_NEW_FOLDER_NAME;
 
       const folderId = createEntityId("folder");
-      const nextOrderIndex = 0;
-
-      const optimisticFolder = makeTempFolder(
-        folderId,
-        nextName,
-        normalizedParentId,
-        nextOrderIndex,
-      );
-
-      const siblingIdsToShift = treeFolders
-        .filter((folder) => {
-          const existingId = getFolderId(folder);
-          if (!existingId || existingId === folderId) return false;
-          return getFolderParentId(folder) === normalizedParentId;
-        })
-        .map((folder) => getFolderId(folder))
-        .filter((id): id is string => Boolean(id));
-
-      setOptimisticFolders((prev) => {
-        const prevById = new Map(
-          prev
-            .map((folder) => {
-              const id = getFolderId(folder);
-              return id ? ([id, folder] as const) : null;
-            })
-            .filter(
-              (
-                entry,
-              ): entry is readonly [string, FolderTreeNode] => entry !== null,
-            ),
-        );
-
-        const nextById = new Map<string, FolderTreeNode>();
-
-        nextById.set(folderId, optimisticFolder);
-
-        for (const sibling of treeFolders) {
-          const siblingId = getFolderId(sibling);
-          if (!siblingId || !siblingIdsToShift.includes(siblingId)) continue;
-
-          const source = prevById.get(siblingId) ?? sibling;
-          const currentOrderIndex = getFolderOrderIndex(source);
-
-          nextById.set(siblingId, {
-            ...source,
-            orderIndex: currentOrderIndex + 1,
-            order_index: currentOrderIndex + 1,
-            updatedAt: new Date(),
-          } as FolderTreeNode);
-        }
-
-        for (const folder of prev) {
-          const id = getFolderId(folder);
-          if (!id || nextById.has(id)) continue;
-          nextById.set(id, folder);
-        }
-
-        return Array.from(nextById.values());
-      });
-
       if (normalizedParentId) {
         setExpandedFolders((prev) => {
           const next = new Set(prev);
@@ -352,41 +313,39 @@ export function useFolderActions({
       editingNameRef.current = nextName;
       renameCancelledRef.current = false;
 
-      if (onCreateFolder) {
-        const persistTask = (async () => {
-          try {
-            await onCreateFolder(nextName, normalizedParentId || undefined, {
-              id: folderId,
-              orderIndex: nextOrderIndex,
-            });
-          } catch (error) {
-            console.error("[useFolderActions] create folder failed:", error);
-            setOptimisticFolders((prev) =>
-              prev
-                .filter((folder) => getFolderId(folder) !== folderId)
-                .map((folder) => {
-                  const id = getFolderId(folder);
-                  if (!id || !siblingIdsToShift.includes(id)) return folder;
-
-                  const currentOrderIndex = getFolderOrderIndex(folder);
-                  const revertedOrderIndex = Math.max(0, currentOrderIndex - 1);
-
-                  return {
-                    ...folder,
-                    orderIndex: revertedOrderIndex,
-                    order_index: revertedOrderIndex,
-                    updatedAt: new Date(),
-                  } as FolderTreeNode;
-                }),
-            );
-            if (editingIdRef.current === folderId) {
-              closeRename();
-            }
-          } finally {
-            pendingFolderCreatesRef.current.delete(folderId);
+      const persistTask = (async () => {
+        try {
+          await createOrderedOptimistically({
+            entities: treeFolders,
+            setOptimisticEntities: setOptimisticFolders,
+            getEntityId: getFolderId,
+            getParentId: getFolderParentId,
+            getOrderIndex: getFolderOrderIndex,
+            setOrderIndex: setFolderOrderIndex,
+            createTempEntity: ({ id, name, parentId, orderIndex }) =>
+              makeTempFolder(id, name, parentId, orderIndex),
+            persistCreate: async ({ id, name, parentId, orderIndex }) => {
+              if (!onCreateFolder) return;
+              await onCreateFolder(name, parentId || undefined, {
+                id,
+                orderIndex,
+              });
+            },
+            targetParentId: normalizedParentId,
+            newEntityName: nextName,
+            newEntityId: folderId,
+          });
+        } catch (error) {
+          console.error("[useFolderActions] create folder failed:", error);
+          if (editingIdRef.current === folderId) {
+            closeRename();
           }
-        })();
+        } finally {
+          pendingFolderCreatesRef.current.delete(folderId);
+        }
+      })();
 
+      if (onCreateFolder) {
         pendingFolderCreatesRef.current.set(folderId, persistTask);
       }
 
@@ -414,26 +373,6 @@ export function useFolderActions({
       if (!normalizedFolderId) return null;
 
       const cardSetId = createEntityId("cardSet");
-      const siblingOrderIndex = 0;
-
-      const tempCardSet = makeTempCardSet(
-        cardSetId,
-        DEFAULT_NEW_CARDSET_NAME,
-        normalizedFolderId,
-        siblingOrderIndex,
-      );
-
-      setOptimisticCardSets((prev) => [
-        tempCardSet,
-        ...prev.map((cardSet) =>
-          cardSet.folderId === normalizedFolderId
-            ? {
-                ...cardSet,
-                orderIndex: (cardSet.orderIndex ?? 0) + 1,
-              }
-            : cardSet,
-        ),
-      ]);
       setExpandedFolders((prev) => {
         const next = new Set(prev);
         next.add(normalizedFolderId);
@@ -445,26 +384,42 @@ export function useFolderActions({
       editingIdRef.current = cardSetId;
       editingNameRef.current = DEFAULT_NEW_CARDSET_NAME;
       renameCancelledRef.current = false;
-      if (onCreateCardSet) {
-        const persistTask = (async () => {
-          try {
-            await onCreateCardSet(DEFAULT_NEW_CARDSET_NAME, normalizedFolderId, {
-              id: cardSetId,
-              orderIndex: siblingOrderIndex,
-            });
-          } catch (error) {
-            console.error("[useFolderActions] create card set failed:", error);
-            setOptimisticCardSets((prev) =>
-              prev.filter((cardSet) => cardSet.id !== cardSetId),
-            );
-            if (editingIdRef.current === cardSetId) {
-              closeRename();
-            }
-          } finally {
-            pendingCardSetCreatesRef.current.delete(cardSetId);
+      const persistTask = (async () => {
+        try {
+          await createOrderedOptimistically({
+            entities: treeCardSets,
+            setOptimisticEntities: setOptimisticCardSets,
+            getEntityId: (cardSet) => cardSet.id,
+            getParentId: (cardSet) => cardSet.folderId,
+            getOrderIndex: (cardSet) => cardSet.orderIndex,
+            setOrderIndex: setCardSetOrderIndex,
+            createTempEntity: ({ id, name, parentId, orderIndex }) =>
+              makeTempCardSet(id, name, parentId ?? "", orderIndex),
+            persistCreate: async ({ id, name, parentId, orderIndex }) => {
+              if (!parentId) {
+                throw new Error("カードセットの親フォルダがありません");
+              }
+              if (!onCreateCardSet) return;
+              await onCreateCardSet(name, parentId, {
+                id,
+                orderIndex,
+              });
+            },
+            targetParentId: normalizedFolderId,
+            newEntityName: DEFAULT_NEW_CARDSET_NAME,
+            newEntityId: cardSetId,
+          });
+        } catch (error) {
+          console.error("[useFolderActions] create card set failed:", error);
+          if (editingIdRef.current === cardSetId) {
+            closeRename();
           }
-        })();
+        } finally {
+          pendingCardSetCreatesRef.current.delete(cardSetId);
+        }
+      })();
 
+      if (onCreateCardSet) {
         pendingCardSetCreatesRef.current.set(cardSetId, persistTask);
       }
 

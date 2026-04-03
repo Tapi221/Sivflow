@@ -7,6 +7,7 @@ import {
   isSameFolder,
   normalizeFolderId,
 } from "@/components/folder/explorer/model/utils";
+import { compareOrderableEntities } from "@/lib/orderableEntity";
 import type { Card, CardSet, DocumentItem, ExplorerItem } from "@/types";
 import { useCallback, useMemo } from "react";
 
@@ -50,22 +51,13 @@ function getFolderName(folder: FolderTreeNode): string {
 }
 
 function compareFolders(a: FolderTreeNode, b: FolderTreeNode): number {
-  const orderA = getFolderOrder(a);
-  const orderB = getFolderOrder(b);
-  if (orderA !== orderB) return orderA - orderB;
-
-  const updatedA = getEntityTime((a as { updatedAt?: unknown }).updatedAt);
-  const updatedB = getEntityTime((b as { updatedAt?: unknown }).updatedAt);
-  if (updatedA !== updatedB) return updatedB - updatedA;
-
-  const createdA = getEntityTime((a as { createdAt?: unknown }).createdAt);
-  const createdB = getEntityTime((b as { createdAt?: unknown }).createdAt);
-  if (createdA !== createdB) return createdB - createdA;
-
-  const nameCompare = getFolderName(a).localeCompare(getFolderName(b), "ja");
-  if (nameCompare !== 0) return nameCompare;
-
-  return getFolderId(a).localeCompare(getFolderId(b), "ja");
+  return compareOrderableEntities(a, b, {
+    getOrderIndex: getFolderOrder,
+    getUpdatedAt: (folder) => getEntityTime((folder as { updatedAt?: unknown }).updatedAt),
+    getCreatedAt: (folder) => getEntityTime((folder as { createdAt?: unknown }).createdAt),
+    getName: getFolderName,
+    getId: getFolderId,
+  });
 }
 
 export function useExplorerDerivedData({

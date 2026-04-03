@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
+import { compareOrderableEntities } from "@/lib/orderableEntity";
 import { getLocalDb } from "@/services/localDB";
 import { useAuthSession } from "@/contexts/AuthContext";
 import type { CardSet } from "@/types";
@@ -28,7 +29,15 @@ export function useCardSets(folderId?: string | null) {
       sets = sets.filter((s) => s.folderId === (folderId ?? null));
     }
 
-    return sets.sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0));
+    return sets.sort((a, b) =>
+      compareOrderableEntities(a, b, {
+        getOrderIndex: (cardSet) => cardSet.orderIndex,
+        getUpdatedAt: (cardSet) => cardSet.updatedAt,
+        getCreatedAt: (cardSet) => cardSet.createdAt,
+        getName: (cardSet) => cardSet.name,
+        getId: (cardSet) => cardSet.id,
+      }),
+    );
   }, [rawSets, folderId]);
 
   const loading = rawSets === undefined;
