@@ -68,7 +68,7 @@ export const getFallbackDatabaseNameForUser = (userId: string) => {
   return `FlashcardMasterDB_mem_${userId}`;
 };
 
-const listUserPersistentDbNames = (userId: string) => {
+const listUserPersistentDbNames = async (userId: string) => {
   const names = new Set<string>();
   const generationPrefix = makeGenerationDbPrefix(userId);
 
@@ -107,7 +107,7 @@ const listUserPersistentDbNames = (userId: string) => {
   return Array.from(names.values());
 };
 
-export const deleteUserPersistentDatabases = (userId: string) => {
+export const deleteUserPersistentDatabases = async (userId: string) => {
   const names = await listUserPersistentDbNames(userId);
   let failureReason: string | null = null;
 

@@ -64,7 +64,7 @@ const activateFallback = (userId: string, error: unknown) => {
   return fallback;
 };
 
-const openPersistentDbWithRetry = (db: LocalDB) => {
+const openPersistentDbWithRetry = async (db: LocalDB) => {
   let attempt = 0;
   const maxAttempts = 2;
   let lastError: unknown = null;
@@ -91,7 +91,7 @@ export const getInstanceUserId = () => {
   return currentUserId;
 };
 
-export const getInstance = (userId?: string) => {
+export const getInstance = async (userId?: string) => {
   const nextUserId = userId || "anonymous";
 
   if (resettingPromise) {
@@ -211,7 +211,7 @@ export const getInstance = (userId?: string) => {
   }
 };
 
-export const resetForLogout = (userId?: string) => {
+export const resetForLogout = async (userId?: string) => {
   if (resettingPromise) {
     return resettingPromise;
   }
@@ -319,7 +319,7 @@ export const clearInstance = () => {
   }
 };
 
-export const getLocalDb = (userId?: string) => {
+export const getLocalDb = async (userId?: string) => {
   if (!cachedInstance || (userId && getInstanceUserId() !== userId)) {
     cachedInstance = await getInstance(userId);
   }
@@ -335,10 +335,10 @@ export const getLocalDbSync = () => {
   return cachedInstance;
 };
 
-export const initializeDB = (userId: string) => {
+export const initializeDB = async (userId: string) => {
   await getLocalDb(userId);
 };
 
-export const resetLocalDBForLogout = (userId?: string) => {
+export const resetLocalDBForLogout = async (userId?: string) => {
   await resetForLogout(userId);
 };

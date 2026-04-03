@@ -1,7 +1,7 @@
 import { AppInitializer } from "@/services/AppInitializer";
 import { getLocalDb, initializeDB } from "@/services/localDB";
 
-export const bootstrapUser = (userId: string) => {
+export const bootstrapUser = async (userId: string) => {
   await initializeDB(userId);
 
   const initResult = await AppInitializer.initialize(userId);
