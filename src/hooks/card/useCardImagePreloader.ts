@@ -78,7 +78,7 @@ const cardImageSignature = (card: Card) => {
     .join(",");
 };
 
-const resolveImageUrl = (img: UploadedImage, userId: string | null) => {
+const resolveImageUrl = async (img: UploadedImage, userId: string | null) => {
   // 直接使える URL（blob 以外）があればそのまま使う
   for (const v of [img.remoteUrl, img.localUrl]) {
     if (typeof v === "string" && v.length > 0 && !v.startsWith("blob:")) {
@@ -120,7 +120,7 @@ const resolveImageUrl = (img: UploadedImage, userId: string | null) => {
   return null;
 };
 
-const decodeUrl = (url: string) => {
+const decodeUrl = async (url: string) => {
   if (isUrlDecoded(url)) return;
   try {
     const img = new Image();
@@ -132,7 +132,7 @@ const decodeUrl = (url: string) => {
   markUrlDecoded(url);
 };
 
-const preloadCard = (
+const preloadCard = async (
   card: Card,
   userId: string | null,
   signal: AbortSignal,

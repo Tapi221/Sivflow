@@ -1,7 +1,7 @@
 import { warnOncePerSession } from "@/services/localDBRuntimeState";
 import { isBackingStoreOpenError } from "./errors";
 
-export const listDatabases = () => {
+export const listDatabases = async () => {
   if (!indexedDB.databases) return [];
   try {
     const dbs = await indexedDB.databases();
@@ -25,7 +25,9 @@ type ForensicSummary = {
   dbDetails: ForensicDbDetail[];
 };
 
-export const fullOriginForensicAudit = (onProgress?: (msg: string) => void) => {
+export const fullOriginForensicAudit = async (
+  onProgress?: (msg: string) => void,
+) => {
   console.log("[Forensic-Audit] Starting origin-wide scan...");
   onProgress?.("全オリジン調査を開始...");
 

@@ -33,7 +33,7 @@ export interface UploadProfileImageOptions {
  * - 呼び出し元で blob: URL を作成してはいけません
  * - この関数が返す downloadURL のみを settings に保存してください
  */
-export const uploadProfileImage = ({
+export const uploadProfileImage = async ({
   uid,
   file,
 }: UploadProfileImageOptions) => {

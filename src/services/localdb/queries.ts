@@ -13,26 +13,26 @@ type QueryDb = Dexie & {
   readonly syncMetadata: Table;
 };
 
-export const getItem = (db: QueryDb, table: string, id: string) => {
+export const getItem = async (db: QueryDb, table: string, id: string) => {
   const item = await db.table(table).get(id);
   if (table === "cards") return item ? normalizeCard(item) : item;
   if (table === "folders") return item ? normalizeFolderWithSilent(item) : item;
   return item;
 };
 
-export const getAllItems = (db: QueryDb, table: string) => {
+export const getAllItems = async (db: QueryDb, table: string) => {
   const items = await db.table(table).toArray();
   if (table === "cards") return items.map(normalizeCard);
   if (table === "folders") return items.map(normalizeFolderWithSilent);
   return items;
 };
 
-export const getAllCards = (db: QueryDb) => {
+export const getAllCards = async (db: QueryDb) => {
   // Return raw objects to preserve _rescueRaw and other fields for integrity repair
   return await db.cards.toArray();
 };
 
-export const getAllFolders = (db: QueryDb) => {
+export const getAllFolders = async (db: QueryDb) => {
   const folders = await db.folders.toArray();
   return folders.map(normalizeFolderWithSilent);
 };
@@ -70,7 +70,7 @@ export const getUpdatedCards = (
     .toArray();
 };
 
-export const getLastSyncTime = (db: QueryDb, userId: string) => {
+export const getLastSyncTime = async (db: QueryDb, userId: string) => {
   const meta = await db.syncMetadata.get(userId);
   if (!meta || !meta.lastSyncTime) return null;
   return meta.lastSyncTime instanceof Timestamp
@@ -78,7 +78,7 @@ export const getLastSyncTime = (db: QueryDb, userId: string) => {
     : meta.lastSyncTime;
 };
 
-export const updateLastSyncTime = (
+export const updateLastSyncTime = async (
   db: QueryDb,
   userId: string,
   syncTime: Date,
@@ -93,7 +93,7 @@ export const updateLastSyncTime = (
   });
 };
 
-export const normalizeDocumentBlobUrlsForSession = (db: QueryDb) => {
+export const normalizeDocumentBlobUrlsForSession = async (db: QueryDb) => {
   try {
     await db.documents.toCollection().modify((d: unknown) => {
       if (typeof d.localUrl === "string" && d.localUrl.startsWith("blob:")) {

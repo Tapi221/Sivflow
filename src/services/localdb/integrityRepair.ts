@@ -78,7 +78,7 @@ const pickString = (obj: UnknownRecord, keys: string[]): string | null => {
   return null;
 };
 
-export const repairDataIntegrity = (
+export const repairDataIntegrity = async (
   db: LocalDB,
   currentUserId: string,
   onProgress?: (msg: string) => void,

@@ -27,7 +27,7 @@ type DocumentsTable = {
 
 export type DocDbCtx = { documents: DocumentsTable; userId?: string };
 
-const canDeleteDocumentBlob = (
+const canDeleteDocumentBlob = async (
   documents: DocumentsTable,
   blobId: string,
   excludeDocumentId: string,
@@ -45,7 +45,7 @@ const canDeleteDocumentBlob = (
   return !sharedRef;
 };
 
-export const cleanupBeforeDocumentUpdate = (
+export const cleanupBeforeDocumentUpdate = async (
   db: DocDbCtx,
   id: string,
   changes: unknown,
@@ -116,7 +116,7 @@ export const cleanupBeforeDocumentUpdate = (
   }
 };
 
-export const cleanupBeforeDocumentDelete = (db: DocDbCtx, id: string) => {
+export const cleanupBeforeDocumentDelete = async (db: DocDbCtx, id: string) => {
   try {
     const existingDoc = await db.documents.get(id);
     safeRevokeBlobUrl(
@@ -145,7 +145,10 @@ export const cleanupBeforeDocumentDelete = (db: DocDbCtx, id: string) => {
   }
 };
 
-export const cleanupBeforeDocumentSoftDelete = (db: DocDbCtx, id: string) => {
+export const cleanupBeforeDocumentSoftDelete = async (
+  db: DocDbCtx,
+  id: string,
+) => {
   try {
     const existingDoc = await db.documents.get(id);
     safeRevokeBlobUrl(

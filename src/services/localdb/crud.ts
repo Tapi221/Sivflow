@@ -147,7 +147,7 @@ export async function addItem(
   skipSync: boolean,
   enqueueSync: EnqueueSync,
 ): Promise<string>;
-export const addItem = (
+export const addItem = async (
   db: DbLike,
   table: string,
   item: unknown,
@@ -311,7 +311,7 @@ export async function updateItem(
   skipSync: boolean,
   enqueueSync: EnqueueSync,
 ): Promise<number>;
-export const updateItem = (
+export const updateItem = async (
   db: DbLike,
   table: string,
   id: string,
@@ -398,7 +398,7 @@ export async function deleteItem(
   table: string,
   id: string,
 ): Promise<void>;
-export const deleteItem = (db: DbLike, table: string, id: string) => {
+export const deleteItem = async (db: DbLike, table: string, id: string) => {
   if (table === "documents") {
     if (!isDocDbCtx(db)) {
       throw new Error(
@@ -415,7 +415,7 @@ export const deleteItem = (db: DbLike, table: string, id: string) => {
  * softDelete
  * ----------------------------- */
 
-export const softDelete = (
+export const softDelete = async (
   db: DbLike,
   table: string,
   id: string,
@@ -475,7 +475,7 @@ export async function bulkUpsert(
   skipSync: boolean,
   enqueueSync: EnqueueSync,
 ): Promise<void>;
-export const bulkUpsert = (
+export const bulkUpsert = async (
   db: DbLike,
   table: string,
   items: unknown[],
@@ -545,7 +545,7 @@ export async function upsert(
   skipSync: boolean,
   enqueueSync: EnqueueSync,
 ): Promise<void>;
-export const upsert = (
+export const upsert = async (
   db: DbLike,
   tableName: string,
   data: unknown,

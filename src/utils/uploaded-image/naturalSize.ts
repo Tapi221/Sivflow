@@ -10,7 +10,7 @@ const hasNaturalSize = (image: {
   return image.naturalWidth > 0 && image.naturalHeight > 0;
 };
 
-export const loadImageNaturalSize = (src: string) => {
+export const loadImageNaturalSize = async (src: string) => {
   if (typeof Image === "undefined") return null;
   if (typeof src !== "string" || src.trim().length === 0) return null;
 

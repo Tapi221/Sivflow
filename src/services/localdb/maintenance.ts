@@ -8,7 +8,7 @@ type DBWithLegacyTables = {
   userId?: string;
 };
 
-export const clearAllData = (db: unknown) => {
+export const clearAllData = async (db: unknown) => {
   const dbExt = db as DBWithLegacyTables;
   await Promise.all([
     db.folders.clear(),
@@ -32,7 +32,7 @@ export const clearAllData = (db: unknown) => {
   ]);
 };
 
-export const cleanupSyncHistory = (db: unknown) => {
+export const cleanupSyncHistory = async (db: unknown) => {
   const now = Date.now();
   const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
   await db.syncHistory
@@ -46,7 +46,7 @@ export const cleanupSyncHistory = (db: unknown) => {
   }
 };
 
-export const cleanupSyncErrors = (db: unknown) => {
+export const cleanupSyncErrors = async (db: unknown) => {
   const now = Date.now();
   const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
   const oldErrors = await db.syncErrors
@@ -61,7 +61,7 @@ export const getDeviceMeta = (db: unknown, userId: string) => {
   return db.deviceMeta.where("userId").equals(userId).first();
 };
 
-export const upsertDeviceMeta = (db: unknown, meta: unknown) => {
+export const upsertDeviceMeta = async (db: unknown, meta: unknown) => {
   await db.deviceMeta.put(meta);
 };
 

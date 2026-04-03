@@ -38,7 +38,7 @@ const flattenFirestoreDocument = (data: unknown) => {
   return null;
 };
 
-const finalizeRawImport = (
+const finalizeRawImport = async (
   db: LocalDB,
   folders: unknown[],
   cards: unknown[],
@@ -299,7 +299,7 @@ export const extractFromFirestoreSDK = (
 
 // ─── importFromDatabase ─────────────────────────────────────────────────────
 
-export const importFromDatabase = (
+export const importFromDatabase = async (
   db: LocalDB,
   sourceDbName: string,
   currentUserId: string,

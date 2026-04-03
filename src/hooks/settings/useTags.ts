@@ -83,7 +83,7 @@ export const resolveCardTagNames = (
   return asStringArray(legacyTags);
 };
 
-export const auditAndRepairTags = (userId: string) => {
+export const auditAndRepairTags = async (userId: string) => {
   const db = await getLocalDb(userId);
   const tagIdsByNameLower = new Map<string, string[]>();
   const knownTagIds = new Set<string>();
