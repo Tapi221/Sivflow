@@ -54,6 +54,15 @@ import { isHeicFile, convertHeicToJpeg } from "@/utils/uploaded-image/heic";
 import { compressAndConvertToBase64 } from "@/utils/uploaded-image/imageCompression";
 import { UploadProgress } from "@/components/ui/UploadProgress";
 import { getAvatarColors, getInitials } from "@/utils/avatarUtils";
+import {
+  EXPLORER_ROW_BASE_CLASS,
+  EXPLORER_ROW_CONTENT_CLASS,
+  EXPLORER_ROW_ICON_SLOT_CLASS,
+  FOLDER_ROW_ICON_ACTIVE_CLASS,
+  FOLDER_ROW_ICON_MUTED_CLASS,
+  FOLDER_ROW_ICON_SIZE_CLASS,
+  FOLDER_ROW_TITLE_CLASS,
+} from "@/components/folder/explorer/rows/shared";
 import DataRescuePanel from "@/components/settings/DataRescuePanel";
 import { DeviceSyncSettings } from "@/components/settings/DeviceSyncSettings";
 import { BlockOrdering } from "@/components/settings/BlockOrdering";
@@ -1461,73 +1470,70 @@ export default function SettingsDialog({ open, onOpenChange, initialTab }) {
           {/* Sidebar */}
           <div
             className={`
-              md:w-56 flex-shrink-0 flex flex-col border-r border-slate-200/80
-              ${isMobileMenuOpen ? "absolute inset-0 z-50 w-full bg-white/72 backdrop-blur-md" : "hidden md:flex bg-white/36 backdrop-blur-sm"}
+              md:w-[248px] flex-shrink-0 flex flex-col border-r border-slate-200/80
+              ${isMobileMenuOpen ? "absolute inset-0 z-50 w-full bg-white" : "hidden md:flex bg-white"}
               transition-all duration-300
             `}
           >
-            <div className="p-6 pb-2">
-              <DialogTitle className="text-2xl font-bold text-slate-800 flex items-center gap-3">
-                <div className="p-2 bg-primary-100/50 rounded-xl">
-                  <User className="w-6 h-6 text-primary-600" />
-                </div>
-                設定
-              </DialogTitle>
-              <p className="text-xs text-slate-500 mt-2 ml-1">
-                アプリの全般的な設定を管理します
-              </p>
-            </div>
-
-            <div className="flex-1 overflow-y-auto py-4 px-3 space-y-1 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto px-4 pt-4 pb-4 custom-scrollbar">
               {sidebarItems.map((item) => (
-                <button
+                <div
                   key={item.id}
+                  role="button"
+                  tabIndex={0}
                   onClick={() => {
                     setActiveTab(item.id);
                     setIsMobileMenuOpen(false);
                   }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setActiveTab(item.id);
+                      setIsMobileMenuOpen(false);
+                    }
+                  }}
+                  data-selected={activeTab === item.id ? "true" : undefined}
                   className={cn(
-                    "flex items-center gap-2 md:gap-3 px-3 py-3 md:px-4 md:py-3 rounded-lg transition-colors text-sm md:text-sm font-semibold text-left whitespace-nowrap snap-start relative group active:scale-95 min-h-11",
-                    activeTab === item.id
-                      ? "bg-slate-100/80 text-slate-900"
-                      : "text-slate-500 hover:bg-slate-100/70 hover:text-slate-800",
+                    EXPLORER_ROW_BASE_CLASS,
+                    "sidebar-row--folder cursor-pointer rounded-[4px] px-2 snap-start",
                   )}
                 >
-                  <item.icon
-                    className={cn(
-                      "w-4 h-4 md:w-5 md:h-5",
-                      activeTab === item.id
-                        ? "text-primary-700"
-                        : "text-slate-400 group-hover:text-primary-500",
-                    )}
-                    strokeWidth={2.5}
-                  />
-                  <span className="block">{item.label}</span>
-                  {activeTab === item.id && (
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary-600 rounded-r-full shadow-sm" />
-                  )}
-                </button>
+                  <div className={EXPLORER_ROW_ICON_SLOT_CLASS}>
+                    <item.icon
+                      className={cn(
+                        FOLDER_ROW_ICON_SIZE_CLASS,
+                        activeTab === item.id
+                          ? FOLDER_ROW_ICON_ACTIVE_CLASS
+                          : FOLDER_ROW_ICON_MUTED_CLASS,
+                      )}
+                      strokeWidth={2.2}
+                    />
+                  </div>
+                  <div className={EXPLORER_ROW_CONTENT_CLASS}>
+                    <span className={FOLDER_ROW_TITLE_CLASS}>{item.label}</span>
+                  </div>
+                </div>
               ))}
             </div>
 
             {/* User Info / Logout */}
-            <div className="p-4 border-t border-slate-200 bg-slate-50/50">
-              <div className="flex items-center gap-3 mb-4 px-2">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold text-xs ring-2 ring-white shadow-md">
+            <div className="border-t border-slate-200 px-4 py-4">
+              <div className="mb-3 flex items-center gap-3 px-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary-400 to-primary-600 text-xs font-bold text-white shadow-sm">
                   {getInitials(settings?.displayName)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-xs font-bold text-slate-800 truncate">
+                  <div className="truncate text-xs font-semibold text-slate-800">
                     {settings?.displayName || "User"}
                   </div>
-                  <div className="text-[10px] text-slate-500 truncate">
+                  <div className="truncate text-[10px] text-slate-500">
                     {currentUser?.email}
                   </div>
                 </div>
               </div>
               <Button
                 variant="ghost"
-                className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50 gap-2 text-xs font-bold"
+                className="h-9 w-full justify-start gap-2 px-2 text-xs font-semibold text-red-500 hover:bg-red-50 hover:text-red-600"
                 onClick={() => {
                   if (confirm("ログアウトしてもよろしいですか？")) {
                     handleLogout();

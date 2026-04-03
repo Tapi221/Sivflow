@@ -13,6 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { glassMenuContentClass } from "@/components/ui/menu-styles";
 
 interface ExplorerTabsProps {
   activeTab: ExplorerTab;
@@ -127,7 +128,7 @@ export function ExplorerTabs({
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
-            className="w-44 rounded-[12px] border border-slate-200/80 bg-white/82 p-1 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-md"
+            className={`w-44 ${glassMenuContentClass}`}
             onCloseAutoFocus={(event) => {
               if (!suppressCloseAutoFocusRef.current) return;
               suppressCloseAutoFocusRef.current = false;

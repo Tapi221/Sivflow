@@ -5,6 +5,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { glassMenuContentClass } from "@/components/ui/menu-styles";
 import {
   ChevronRight,
   Folder,
@@ -53,8 +54,7 @@ export function ContextMenu({
 
       <DropdownMenuContent
         align="start"
-        surface="floating"
-        className="w-48"
+        className={`w-48 ${glassMenuContentClass}`}
         onCloseAutoFocus={(e) => {
           if (!suppressCloseAutoFocusRef.current) return;
           suppressCloseAutoFocusRef.current = false;

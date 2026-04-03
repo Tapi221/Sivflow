@@ -10,7 +10,6 @@ import {
 } from "@/components/card/common/constants";
 import {
   CardEditorLoadingState,
-  EmptySelectionState,
   NewCardIdleState,
 } from "@/components/card/editor/CardEditorPaneStates";
 import { CardCornerActions } from "@/components/card/frame/CardCornerActions";
@@ -313,7 +312,6 @@ export function CardEditorPane({
     isAutosaving,
     isDirty,
     saveError,
-    handleStartNew,
     handleCancel,
     handleToggleBookmark,
     handleToggleUncertainty,
@@ -468,7 +466,7 @@ export function CardEditorPane({
   }, [answerBlocksForToolbar, renderMediaDialogButtons]);
 
   if (!normalizedSelectedCardId && !isEditing) {
-    return <EmptySelectionState onStartNew={handleStartNew} />;
+    return null;
   }
 
   if (isNew && !isEditing) {
