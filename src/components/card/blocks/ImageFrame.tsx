@@ -52,6 +52,7 @@ export function ImageFrame({
   const [frameW, setFrameW] = React.useState(0);
   const [frameScaleX, setFrameScaleX] = React.useState(1);
   const frameMetricsRef = React.useRef({ width: 0, scaleX: 1 });
+  const preferredViewWidthRef = React.useRef<number | null>(null);
   const [isDragging, setIsDragging] = React.useState(false);
   const [dragX, setDragX] = React.useState<number | null>(null);
   const [loadedNaturalSize, setLoadedNaturalSize] = React.useState<{
@@ -75,12 +76,21 @@ export function ImageFrame({
 
   const viewTargetW =
     safeNaturalW > 0 ? safeNaturalW * safeScale : frameW > 0 ? frameW * safeScale : 0;
-  const viewDisplayW =
+  const defaultViewDisplayW =
     frameW > 0
       ? viewTargetW > 0
         ? Math.min(frameW, Math.max(1, viewTargetW))
         : frameW
       : Math.max(1, viewTargetW || 1);
+  const preservedViewWidth = preferredViewWidthRef.current;
+  const viewDisplayW =
+    !editable &&
+    typeof preservedViewWidth === "number" &&
+    Number.isFinite(preservedViewWidth) &&
+    preservedViewWidth > 0 &&
+    (frameW <= 0 || preservedViewWidth <= frameW)
+      ? preservedViewWidth
+      : defaultViewDisplayW;
   const viewFrameH = Math.max(1, viewDisplayW * ratio);
 
   const transformCallback =
@@ -126,7 +136,17 @@ export function ImageFrame({
 
   React.useEffect(() => {
     setLoadedNaturalSize(null);
+    preferredViewWidthRef.current = null;
   }, [src]);
+
+  React.useLayoutEffect(() => {
+    if (editable) return;
+    const img = imgRef.current;
+    if (!img) return;
+    const measuredWidth = img.getBoundingClientRect().width;
+    if (!Number.isFinite(measuredWidth) || measuredWidth <= 0) return;
+    preferredViewWidthRef.current = measuredWidth;
+  }, [editable, viewDisplayW, frameW]);
 
   React.useEffect(() => {
     const img = imgRef.current;

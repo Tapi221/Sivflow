@@ -9,24 +9,21 @@ import {
   CARD_ACTION_COLOR_IDLE_CLASS,
   CARD_ACTION_ICON_CLASS,
 } from "@/components/card/common/constants";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { ReferenceBlockData } from "@/types";
-import { Edit, Image as ImageIcon, Link, Volume2 } from "@/ui/icons";
+import { Image as ImageIcon, Link, Volume2 } from "@/ui/icons";
 import React from "react";
 import { CardCornerActions } from "./CardCornerActions";
 import type { FlashcardCardLike, FlashcardMediaLike } from "./flashcardDerived";
 
 interface FlashcardCornerControlsProps {
   card: FlashcardCardLike;
-  previewMode: boolean | undefined;
   hasUncertainty: boolean;
   isBookmarked: boolean;
   activeImageItems: FlashcardMediaLike[];
   activeAudioUrls: string[];
   activeReferences: ReferenceBlockData[];
   extraHeaderLeft?: React.ReactNode;
-  onEdit?: (card: FlashcardCardLike) => void;
   onToggleUncertainty?: (card: FlashcardCardLike) => void;
   onToggleBookmark?: (card: FlashcardCardLike) => void;
   onOpenImagePopup: () => void;
@@ -41,14 +38,12 @@ export interface FlashcardCornerControlsResult {
 
 export function useFlashcardCornerControls({
   card,
-  previewMode,
   hasUncertainty,
   isBookmarked,
   activeImageItems,
   activeAudioUrls,
   activeReferences,
   extraHeaderLeft,
-  onEdit,
   onToggleUncertainty,
   onToggleBookmark,
   onOpenImagePopup,
@@ -162,27 +157,6 @@ export function useFlashcardCornerControls({
       );
     }
 
-    if (onEdit && !previewMode) {
-      actionsTopRight.push(
-        <Button
-          key="edit"
-          variant="ghost"
-          size="icon"
-          onClick={(e: React.MouseEvent) => {
-            e.stopPropagation();
-            onEdit(card);
-          }}
-          className={cn(
-            "rounded-none w-8 h-8 md:w-9 md:h-9 transition-colors",
-            CARD_ACTION_BG_CLASS,
-            CARD_ACTION_COLOR_IDLE_CLASS,
-          )}
-        >
-          <Edit className={CARD_ACTION_ICON_CLASS} />
-        </Button>,
-      );
-    }
-
     return {
       actionsTopLeft: actionsTopLeft.length > 0 ? actionsTopLeft : undefined,
       actionsTopRight: actionsTopRight.length > 0 ? actionsTopRight : undefined,
@@ -195,18 +169,13 @@ export function useFlashcardCornerControls({
     extraHeaderLeft,
     hasUncertainty,
     isBookmarked,
-    onEdit,
     onOpenAudioPopup,
     onOpenImagePopup,
     onOpenReferencePopup,
     onToggleBookmark,
     onToggleUncertainty,
-    previewMode,
   ]);
 }
-
-
-
 
 
 

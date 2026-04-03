@@ -174,6 +174,7 @@ export function CardViewDesktop({
           isActive={isActive}
           isGlobalEditing={isGlobalEditing}
           editPaneWidthPx={effectiveEditPaneWidthPx}
+          activePaneWidthPx={effectiveCardWidthPx}
           settings={settings}
           isFlipped={flippedCardIds.has(card.id ?? "")}
           currentDisplayMode={currentDisplayMode}
@@ -201,6 +202,7 @@ export function CardViewDesktop({
       onToggleBookmark,
       settings,
       effectiveEditPaneWidthPx,
+      effectiveCardWidthPx,
       currentDisplayMode,
     ],
   );

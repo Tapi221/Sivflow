@@ -51,6 +51,7 @@ interface FlashcardProps {
   allowUpscale?: boolean;
   maxScale?: number;
   scaleMultiplier?: number;
+  fixedScale?: number;
   contentPaddingPx?: number;
 }
 
@@ -92,6 +93,7 @@ function FlashcardInner({
   allowUpscale = false,
   maxScale = 1.6,
   scaleMultiplier = CARD_DISPLAY_SCALE,
+  fixedScale,
   contentPaddingPx,
 }: FlashcardProps) {
   const contentRef = useRef<HTMLDivElement | null>(null);
@@ -186,14 +188,12 @@ function FlashcardInner({
   // ---------------------------------------------------------------------------
   const { actionsTopLeft, actionsTopRight } = useFlashcardCornerControls({
     card: card ?? ({} as FlashcardCardLike),
-    previewMode,
     hasUncertainty: derived.hasUncertainty,
     isBookmarked: derived.isBookmarked,
     activeImageItems: derived.activeImageItems,
     activeAudioUrls: derived.activeAudioUrls,
     activeReferences: derived.activeReferences,
     extraHeaderLeft,
-    onEdit: card ? onEdit : undefined,
     onToggleUncertainty: card ? onToggleUncertainty : undefined,
     onToggleBookmark: card ? onToggleBookmark : undefined,
     onOpenImagePopup: () => media.setIsImagePopupOpen(true),
@@ -239,6 +239,7 @@ function FlashcardInner({
           allowUpscale={allowUpscale}
           maxScale={maxScale}
           scaleMultiplier={scaleMultiplier}
+          fixedScale={fixedScale}
           disableScale={!isFixedDisplay}
           stretchWidth={!isFixedDisplay}
           role={isCardClickable ? "button" : undefined}
@@ -379,6 +380,7 @@ const areFlashcardPropsEqual = (prev: FlashcardProps, next: FlashcardProps) => {
       prev.allowUpscale === next.allowUpscale &&
       prev.maxScale === next.maxScale &&
       prev.scaleMultiplier === next.scaleMultiplier &&
+      prev.fixedScale === next.fixedScale &&
       prev.contentPaddingPx === next.contentPaddingPx
     );
   }
@@ -407,6 +409,7 @@ const areFlashcardPropsEqual = (prev: FlashcardProps, next: FlashcardProps) => {
     prev.allowUpscale === next.allowUpscale &&
     prev.maxScale === next.maxScale &&
     prev.scaleMultiplier === next.scaleMultiplier &&
+    prev.fixedScale === next.fixedScale &&
     prev.contentPaddingPx === next.contentPaddingPx
   );
 };

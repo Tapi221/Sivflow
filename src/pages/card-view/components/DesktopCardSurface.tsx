@@ -1,3 +1,4 @@
+import { CANONICAL_CARD_WIDTH } from "@/components/card/common/constants";
 import { Flashcard } from "@/components/card/frame/Flashcard";
 import { CardEditorPane } from "@/components/folder/panes/CardEditorPane";
 import type { Card, UserSettings } from "@/types";
@@ -9,6 +10,7 @@ export interface DesktopCardSurfaceProps {
   isActive: boolean;
   isGlobalEditing: boolean;
   editPaneWidthPx: number;
+  activePaneWidthPx?: number;
   settings?: Partial<UserSettings> | null;
   isFlipped: boolean;
   currentDisplayMode: CardDisplayMode;
@@ -27,6 +29,7 @@ function DesktopCardSurfaceInner({
   isActive,
   isGlobalEditing,
   editPaneWidthPx,
+  activePaneWidthPx,
   settings = null,
   isFlipped,
   currentDisplayMode,
@@ -59,6 +62,15 @@ function DesktopCardSurfaceInner({
     if (isGlobalEditing) return;
     setHasFocusWithin(false);
   }, [isGlobalEditing]);
+
+  const fixedScale =
+    currentDisplayMode === "fixed"
+      ? Math.max(
+          0.1,
+          (activePaneWidthPx ?? editPaneWidthPx) /
+            Math.max(1, CANONICAL_CARD_WIDTH),
+        )
+      : undefined;
 
   if (isGlobalEditing) {
     const canInteractWithEditor = isActive || hasFocusWithin;
@@ -113,6 +125,7 @@ function DesktopCardSurfaceInner({
         onToggleBookmark={isActive ? onToggleBookmark : undefined}
         allowUpscale={false}
         scaleMultiplier={1}
+        fixedScale={fixedScale}
       />
     </div>
   );
@@ -126,6 +139,7 @@ const areDesktopCardSurfacePropsEqual = (
   if (prev.isActive !== next.isActive) return false;
   if (prev.isGlobalEditing !== next.isGlobalEditing) return false;
   if (prev.editPaneWidthPx !== next.editPaneWidthPx) return false;
+  if (prev.activePaneWidthPx !== next.activePaneWidthPx) return false;
   if (prev.settings !== next.settings) return false;
   if (prev.currentDisplayMode !== next.currentDisplayMode) return false;
   if (prev.folderId !== next.folderId) return false;

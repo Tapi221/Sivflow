@@ -131,7 +131,7 @@ export function ScaleToFitFrame({
   const safeBaseWidth = Math.max(1, baseWidth);
   const shouldUseZoomScale =
     !disableScale && Math.abs(effectiveScale - 1) > 0.0001;
-  const shouldUseTransformScale = false;
+  const shouldUseTransformScale = hasFixedScale && shouldUseZoomScale;
   const visualWidthPx = disableScale ? null : safeBaseWidth * effectiveScale;
 
   return (
@@ -182,7 +182,10 @@ export function ScaleToFitFrame({
                   ? "center center"
                   : "top left",
               willChange: shouldUseTransformScale ? "transform" : undefined,
-              zoom: shouldUseZoomScale ? effectiveScale : undefined,
+              zoom:
+                shouldUseZoomScale && !shouldUseTransformScale
+                  ? effectiveScale
+                  : undefined,
             }}
           >
             <div
