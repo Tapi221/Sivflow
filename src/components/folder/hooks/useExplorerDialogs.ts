@@ -17,13 +17,10 @@ export function useExplorerDialogs() {
   }, []);
 
   // sync refs with state
-  const setEditingIdSynced = useCallback(
-    (id: string | null) => {
-      setEditingId(id);
-      editingIdRef.current = id;
-    },
-    [],
-  );
+  const setEditingIdSynced = useCallback((id: string | null) => {
+    setEditingId(id);
+    editingIdRef.current = id;
+  }, []);
 
   const setEditingNameSynced = useCallback((name: string) => {
     setEditingName(name);
@@ -33,13 +30,26 @@ export function useExplorerDialogs() {
   // row menu
   const [openRowMenuId, setOpenRowMenuId] = useState<string | null>(null);
 
-      // bulk tag
+  // bulk tag
+  const [bulkTagFolderId, setBulkTagFolderId] = useState<string | null>(null);
+
+  return {
+    // rename
+    editingId,
+    setEditingId,
+    editingName,
+    setEditingName,
+    editingIdRef,
+    editingNameRef,
+    renameCancelledRef,
+    closeRename,
+    setEditingIdSynced,
+    setEditingNameSynced,
+    // row menu
+    openRowMenuId,
+    setOpenRowMenuId,
+    // bulk tag
     bulkTagFolderId,
     setBulkTagFolderId,
   };
 }
-
-
-
-
-
