@@ -18,7 +18,8 @@ import { useRef, type ReactNode } from "react";
 
 interface ContextMenuProps {
   type: "folder" | "card";
-  children: ReactNode;
+  children?: ReactNode;
+  anchorPoint?: { x: number; y: number } | null;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   onCreateSubfolder?: () => void;
@@ -32,6 +33,7 @@ interface ContextMenuProps {
 export function ContextMenu({
   type,
   children,
+  anchorPoint,
   open,
   onOpenChange,
   onCreateSubfolder,
@@ -45,7 +47,25 @@ export function ContextMenu({
 
   return (
     <DropdownMenu open={open} onOpenChange={onOpenChange} modal={false}>
-      <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
+      <DropdownMenuTrigger asChild>
+        {children ?? (
+          <button
+            type="button"
+            aria-hidden="true"
+            tabIndex={-1}
+            className="pointer-events-none absolute h-0 w-0 overflow-hidden opacity-0"
+            style={
+              anchorPoint
+                ? {
+                    position: "fixed",
+                    left: anchorPoint.x,
+                    top: anchorPoint.y,
+                  }
+                : undefined
+            }
+          />
+        )}
+      </DropdownMenuTrigger>
 
       <DropdownMenuContent
         align="start"

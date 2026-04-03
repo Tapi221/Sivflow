@@ -15,7 +15,6 @@ import {
   StratisClockBackwardIcon,
   StratisCode01Icon,
   StratisCopyLeftIcon,
-  StratisDotVerticalIcon,
   StratisEditContainedIcon,
   StratisFileEdit02Icon,
   StratisFilterIcon,
@@ -147,6 +146,38 @@ function makeIcon(name: string) {
   return Icon;
 }
 
+const MoreVerticalIcon = forwardRef<SVGSVGElement, IconProps>(function MoreVerticalIcon(
+  { size = 16, className, label, title, style, ...rest },
+  ref,
+) {
+  const resolvedLabel = label ?? rest["aria-label"];
+  const decorative = resolvedLabel == null;
+  const pixelSize = typeof size === "number" ? `${size}px` : size;
+
+  return (
+    <svg
+      ref={ref}
+      xmlns="http://www.w3.org/2000/svg"
+      width={pixelSize}
+      height={pixelSize}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="none"
+      className={className}
+      style={style}
+      aria-hidden={decorative ? true : undefined}
+      aria-label={decorative ? undefined : resolvedLabel}
+      role={decorative ? undefined : "img"}
+      {...rest}
+    >
+      {title ? <title>{title}</title> : null}
+      <circle cx="7" cy="12" r="1.35" fill="currentColor" />
+      <circle cx="12" cy="12" r="1.35" fill="currentColor" />
+      <circle cx="17" cy="12" r="1.35" fill="currentColor" />
+    </svg>
+  );
+});
+
 const ExplorerChevronDownIcon = forwardRef<SVGSVGElement, IconProps>(
   function ExplorerChevronDownIcon({ size = 16, ...props }, ref) {
     return (
@@ -257,7 +288,7 @@ export const LogOut = StratisLogout01Icon;
 export const Merge = makeIcon("Merge");
 export const MessageSquare = makeIcon("MessageSquare");
 export const Minus = makeIcon("Minus");
-export const MoreVertical = StratisDotVerticalIcon;
+export const MoreVertical = MoreVerticalIcon;
 export const Move = makeIcon("Move");
 export const Palette = makeIcon("Palette");
 export const Pause = makeIcon("Pause");

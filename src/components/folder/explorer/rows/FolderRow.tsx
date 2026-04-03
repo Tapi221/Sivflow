@@ -11,7 +11,6 @@ import {
   ChevronRight,
   FolderIcon,
   FolderOutlineIcon,
-  MoreVertical,
 } from "@/ui/icons";
 import React from "react";
 import { ExplorerRow } from "./ExplorerRow";
@@ -118,6 +117,10 @@ export const FolderRow: React.FC<FolderRowProps> = ({
   const parentFolderId = normalizeFolderId(getParentFolderId(folder));
   const isTopLevelFolder = parentFolderId === ROOT_FOLDER_ID;
   const FolderGlyph = isTopLevelFolder ? FolderIcon : FolderOutlineIcon;
+  const [menuAnchor, setMenuAnchor] = React.useState<{
+    x: number;
+    y: number;
+  } | null>(null);
 
   const nestedToggleOffsetStyle = !isTopLevelFolder
     ? ({ marginLeft: "calc(var(--tree-indent-px) * -0.5)" } as const)
@@ -144,6 +147,16 @@ export const FolderRow: React.FC<FolderRowProps> = ({
           "relative",
           isFileDraggingOver && "bg-blue-50/50 ring-1 ring-blue-200/50 rounded-sm",
         )}
+        onContextMenu={
+          hasContextMenu && !isEditing
+            ? (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setMenuAnchor({ x: e.clientX, y: e.clientY });
+                onMenuOpenChange(true);
+              }
+            : undefined
+        }
       >
         <ExplorerRow
           rowRef={(node) => setRowRef(folderId, node)}
@@ -269,7 +282,7 @@ export const FolderRow: React.FC<FolderRowProps> = ({
           </div>
 
           {!isEditing && (
-            <div className="absolute right-1 top-0 h-full flex items-center gap-1 pointer-events-none">
+            <div className="absolute right-1 top-0 h-full flex items-center pointer-events-none">
               <button
                 type="button"
                 aria-label="このフォルダを開く"
@@ -281,44 +294,31 @@ export const FolderRow: React.FC<FolderRowProps> = ({
               >
                 <ChevronRight className="sidebar-icon h-4 w-4" />
               </button>
-
-              {hasContextMenu && (
-                <ContextMenu
-                  open={menuOpen}
-                  onOpenChange={onMenuOpenChange}
-                  type="folder"
-                  onCreateSubfolder={() =>
-                    void handleCreateFolderAction(folderId)
-                  }
-                  onCreateCardSet={() => void handleCreateCardSetAction(folderId)}
-                  onRename={() => {
-                    onSelect();
-                    onMenuOpenChange(false);
-                    setEditingId(folderId);
-                    setEditingName(folderName);
-                    editingNameRef.current = folderName;
-                  }}
-                  onDelete={() => handleDelete(folderId, "folder")}
-                  onBulkTag={onBulkTag}
-                >
-                  <button
-                    type="button"
-                    aria-label="フォルダメニューを開く"
-                    className={cn(
-                      "sidebar-action h-6 w-6 p-0 grid place-items-center rounded-md hover:bg-[var(--sidebar-active-bg,#e7ebef)] text-[var(--sidebar-text-muted,#6e6e80)] hover:text-[var(--sidebar-text,#202123)] outline-none pointer-events-auto shrink-0",
-                      "opacity-0 group-hover:opacity-100",
-                      (isSelected || menuOpen) && "opacity-100",
-                    )}
-                    onClick={(e) => e.stopPropagation()}
-                    onPointerDown={(e) => e.stopPropagation()}
-                  >
-                    <MoreVertical className="sidebar-icon h-4 w-4" />
-                  </button>
-                </ContextMenu>
-              )}
             </div>
           )}
         </ExplorerRow>
+        {hasContextMenu && (
+          <ContextMenu
+            open={menuOpen}
+            anchorPoint={menuAnchor}
+            onOpenChange={(open) => {
+              if (!open) setMenuAnchor(null);
+              onMenuOpenChange(open);
+            }}
+            type="folder"
+            onCreateSubfolder={() => void handleCreateFolderAction(folderId)}
+            onCreateCardSet={() => void handleCreateCardSetAction(folderId)}
+            onRename={() => {
+              onSelect();
+              onMenuOpenChange(false);
+              setEditingId(folderId);
+              setEditingName(folderName);
+              editingNameRef.current = folderName;
+            }}
+            onDelete={() => handleDelete(folderId, "folder")}
+            onBulkTag={onBulkTag}
+          />
+        )}
       </div>
 
       {isExpanded && children}

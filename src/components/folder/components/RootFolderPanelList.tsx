@@ -11,7 +11,7 @@ import {
   FOLDER_ROW_TITLE_CLASS,
 } from "@/components/folder/explorer/rows/shared";
 import { cn } from "@/lib/utils";
-import { FolderOutlineIcon, MoreVertical } from "@/ui/icons";
+import { FolderOutlineIcon } from "@/ui/icons";
 import React from "react";
 
 interface RootFolderPanelListProps {
@@ -47,6 +47,11 @@ export function RootFolderPanelList({
   editingName,
   handleRenameConfirm,
 }: RootFolderPanelListProps) {
+  const [menuAnchor, setMenuAnchor] = React.useState<{
+    id: string;
+    x: number;
+    y: number;
+  } | null>(null);
   const inputRef = React.useRef<HTMLInputElement | null>(null);
   const attachInputRef = React.useCallback(
     (node: HTMLInputElement | null) => {
@@ -91,6 +96,13 @@ export function RootFolderPanelList({
                 e.preventDefault();
                 onSelectFolder(panel.id);
               }
+            }}
+            onContextMenu={(e) => {
+              if (isEditing) return;
+              e.preventDefault();
+              e.stopPropagation();
+              setMenuAnchor({ id: menuId, x: e.clientX, y: e.clientY });
+              setOpenRowMenuId(menuId);
             }}
           >
             <div className={cn(EXPLORER_ROW_CONTENT_CLASS, "pr-8")}>
@@ -162,39 +174,28 @@ export function RootFolderPanelList({
                 </div>
               )}
             </div>
-
-            <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2">
-              <ContextMenu
-                open={isMenuOpen}
-                onOpenChange={(open) => {
-                  setOpenRowMenuId(open ? menuId : null);
-                }}
-                type="folder"
-                onCreateSubfolder={() => void handleCreateFolderAction(panel.id)}
-                onCreateCardSet={() => void handleCreateCardSetAction(panel.id)}
-                onRename={() => {
-                  setOpenRowMenuId(null);
-                  setEditingId(panel.id);
-                  setEditingName(panel.name);
-                  editingNameRef.current = panel.name;
-                }}
-                onDelete={() => handleDelete(panel.id, "folder")}
-              >
-                <button
-                  type="button"
-                  aria-label="フォルダメニューを開く"
-                  className={cn(
-                    "pointer-events-auto grid h-7 w-7 place-items-center rounded-md text-[var(--sidebar-text-muted,#6e6e80)] hover:bg-[var(--sidebar-active-bg,#e7ebef)] hover:text-[var(--sidebar-text,#202123)]",
-                    "opacity-0 group-hover:opacity-100",
-                    isMenuOpen && "opacity-100",
-                  )}
-                  onClick={(e) => e.stopPropagation()}
-                  onPointerDown={(e) => e.stopPropagation()}
-                >
-                  <MoreVertical className="h-4 w-4" />
-                </button>
-              </ContextMenu>
-            </div>
+            <ContextMenu
+              open={isMenuOpen}
+              anchorPoint={
+                menuAnchor?.id === menuId
+                  ? { x: menuAnchor.x, y: menuAnchor.y }
+                  : null
+              }
+              onOpenChange={(open) => {
+                if (!open && menuAnchor?.id === menuId) setMenuAnchor(null);
+                setOpenRowMenuId(open ? menuId : null);
+              }}
+              type="folder"
+              onCreateSubfolder={() => void handleCreateFolderAction(panel.id)}
+              onCreateCardSet={() => void handleCreateCardSetAction(panel.id)}
+              onRename={() => {
+                setOpenRowMenuId(null);
+                setEditingId(panel.id);
+                setEditingName(panel.name);
+                editingNameRef.current = panel.name;
+              }}
+              onDelete={() => handleDelete(panel.id, "folder")}
+            />
           </div>
         );
       })}
