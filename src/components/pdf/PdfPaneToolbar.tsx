@@ -135,8 +135,3 @@ export function PdfPaneToolbar({
     </div>
   );
 }
-
-
-
-
-

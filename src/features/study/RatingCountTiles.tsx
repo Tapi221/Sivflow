@@ -140,8 +140,3 @@ export function RatingCountTiles({
     </div>
   );
 }
-
-
-
-
-

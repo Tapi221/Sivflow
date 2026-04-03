@@ -15,7 +15,8 @@ export const FOLDER_ROW_TITLE_CLASS =
   "truncate text-[14px] text-[var(--sidebar-text,#202123)]";
 export const FOLDER_ROW_ICON_MUTED_CLASS =
   "text-[var(--sidebar-text-muted,#6e6e80)]";
-export const FOLDER_ROW_ICON_ACTIVE_CLASS = "text-[var(--sidebar-text,#202123)]";
+export const FOLDER_ROW_ICON_ACTIVE_CLASS =
+  "text-[var(--sidebar-text,#202123)]";
 
 export const getExplorerRowStyle = (depth: number) => ({
   paddingLeft: `calc(4px + ${depth} * var(--tree-indent-px))`,
@@ -24,8 +25,3 @@ export const getExplorerRowStyle = (depth: number) => ({
   lineHeight: "var(--row-height-normal)",
   boxSizing: "border-box" as const,
 });
-
-
-
-
-

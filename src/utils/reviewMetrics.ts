@@ -70,8 +70,3 @@ export const calculateResistanceScore = (intervalDays: number): number => {
 
   return Math.min(100, Math.round(score));
 };
-
-
-
-
-

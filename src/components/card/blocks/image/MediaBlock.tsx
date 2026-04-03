@@ -103,9 +103,3 @@ const areMediaBlockPropsEqual = (
 
 export const MediaBlock = React.memo(MediaBlockInner, areMediaBlockPropsEqual);
 MediaBlock.displayName = "MediaBlock";
-
-
-
-
-
-

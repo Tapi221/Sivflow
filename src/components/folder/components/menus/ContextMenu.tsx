@@ -6,14 +6,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { glassMenuContentClass } from "@/components/ui/menu-styles";
-import {
-  ChevronRight,
-  Folder,
-  Pencil,
-  Plus,
-  Tag,
-  Trash2,
-} from "@/ui/icons";
+import { ChevronRight, Folder, Pencil, Plus, Tag, Trash2 } from "@/ui/icons";
 import { useMemo, useRef, type ReactNode } from "react";
 
 interface ContextMenuProps {
@@ -120,7 +113,9 @@ export function ContextMenu({
               </DropdownMenuItem>
             )}
 
-            {(onCreateSubfolder || onCreateCardSet) && <DropdownMenuSeparator />}
+            {(onCreateSubfolder || onCreateCardSet) && (
+              <DropdownMenuSeparator />
+            )}
           </>
         )}
 

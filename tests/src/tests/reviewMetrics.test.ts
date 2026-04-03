@@ -2,9 +2,7 @@ import {
   calculateRetentionProbability,
   calculateResistanceScore,
 } from "../utils/reviewMetrics";
-import {
-  getStabilityPhase,
-} from "../utils/reviewUtils";
+import { getStabilityPhase } from "../utils/reviewUtils";
 
 describe("Review Metrics", () => {
   // Test Case: Retention behavior

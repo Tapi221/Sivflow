@@ -168,7 +168,9 @@ export function RootFolderPanelList({
                     title={panel.name}
                     titleClassName={cn(
                       FOLDER_ROW_TITLE_CLASS,
-                      selectedFolderId === panel.id ? "font-medium" : "font-normal",
+                      selectedFolderId === panel.id
+                        ? "font-medium"
+                        : "font-normal",
                     )}
                   />
                 </div>

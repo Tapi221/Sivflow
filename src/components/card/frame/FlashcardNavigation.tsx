@@ -22,7 +22,9 @@ export function FlashcardNavigation({
   totalCards,
 }: FlashcardNavigationProps) {
   const showNav =
-    onNext || onPrev || (currentIndex !== undefined && totalCards !== undefined);
+    onNext ||
+    onPrev ||
+    (currentIndex !== undefined && totalCards !== undefined);
   if (!showNav) return null;
 
   return (
@@ -64,10 +66,3 @@ export function FlashcardNavigation({
     </div>
   );
 }
-
-
-
-
-
-
-

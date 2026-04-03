@@ -83,7 +83,11 @@ type UseFolderActionsParams = {
 
   onFolderSelect: (folderId: string | null) => void;
   onItemSelect: (item: SelectedExplorerItem) => void;
-  onSelectCardSet?: (cardSetId: string, folderId: string, label: string) => void;
+  onSelectCardSet?: (
+    cardSetId: string,
+    folderId: string,
+    label: string,
+  ) => void;
   setNewlyCreatedCardId: (id: string | null) => void;
 
   getUniqueFolderName?: (parentId: string | null, baseName: string) => string;
@@ -177,7 +181,10 @@ function setCardSetOrderIndex(cardSet: CardSet, orderIndex: number): CardSet {
 }
 
 function createEntityId(prefix: "folder" | "cardSet"): string {
-  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+  if (
+    typeof crypto !== "undefined" &&
+    typeof crypto.randomUUID === "function"
+  ) {
     return crypto.randomUUID();
   }
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
@@ -247,7 +254,10 @@ export function useFolderActions({
   const resolveTargetKind = useCallback(
     (id: string, type?: RenameTargetKind | null): RenameTargetKind => {
       if (type) return type;
-      if (pendingCardSetCreatesRef.current.has(id) || isCardSetId(treeCardSets, id)) {
+      if (
+        pendingCardSetCreatesRef.current.has(id) ||
+        isCardSetId(treeCardSets, id)
+      ) {
         return "cardSet";
       }
       return "folder";

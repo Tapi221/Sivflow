@@ -33,11 +33,13 @@ export function compareOrderableEntities<T>(
   if (orderCompare !== 0) return orderCompare;
 
   const updatedCompare =
-    toTimestamp(selectors.getUpdatedAt(b)) - toTimestamp(selectors.getUpdatedAt(a));
+    toTimestamp(selectors.getUpdatedAt(b)) -
+    toTimestamp(selectors.getUpdatedAt(a));
   if (updatedCompare !== 0) return updatedCompare;
 
   const createdCompare =
-    toTimestamp(selectors.getCreatedAt(b)) - toTimestamp(selectors.getCreatedAt(a));
+    toTimestamp(selectors.getCreatedAt(b)) -
+    toTimestamp(selectors.getCreatedAt(a));
   if (createdCompare !== 0) return createdCompare;
 
   const nameCompare = (selectors.getName(a) ?? "").localeCompare(
@@ -46,6 +48,8 @@ export function compareOrderableEntities<T>(
   );
   if (nameCompare !== 0) return nameCompare;
 
-  return (selectors.getId(a) ?? "").localeCompare(selectors.getId(b) ?? "", "ja");
+  return (selectors.getId(a) ?? "").localeCompare(
+    selectors.getId(b) ?? "",
+    "ja",
+  );
 }
-

@@ -251,7 +251,9 @@ const normalizeReviewLogs = (rawLogs: unknown): NormalizedReviewLog[] => {
         rating,
         resistanceScore: Math.max(0, Math.min(100, scoreNum)),
         durationMinutes:
-          durationMinutesRaw === null ? null : Math.max(0, Math.round(durationMinutesRaw)),
+          durationMinutesRaw === null
+            ? null
+            : Math.max(0, Math.round(durationMinutesRaw)),
       } satisfies NormalizedReviewLog;
     })
     .filter((v): v is NormalizedReviewLog => v !== null);
@@ -320,8 +322,7 @@ const CARD_BLOCK_TYPES = new Set<CardBlock["type"]>([
 ]);
 
 const isCardBlockType = (value: unknown): value is CardBlock["type"] =>
-  typeof value === "string" &&
-  CARD_BLOCK_TYPES.has(value as CardBlock["type"]);
+  typeof value === "string" && CARD_BLOCK_TYPES.has(value as CardBlock["type"]);
 
 const resolveFallbackTextContent = (block: UnknownRecord): string => {
   if (typeof block.content === "string" && block.content.trim()) {
@@ -353,7 +354,10 @@ const normalizeBlockOffsets = (blockRaw: unknown) => {
   if (!isGridBlockType(type)) return blockRaw;
   if (!isGridOffsetType(type)) return blockRaw;
 
-  const fallbackRows = toFiniteNumber(pick(block.offsetRows, block.rowOffset), 0);
+  const fallbackRows = toFiniteNumber(
+    pick(block.offsetRows, block.rowOffset),
+    0,
+  );
   const normalizedOffsetRows = Number.isFinite(fallbackRows)
     ? Math.max(0, Math.round(fallbackRows))
     : 0;
@@ -425,25 +429,25 @@ const normalizeCardBlock = (
       break;
     }
     case "image": {
-      const images = normalizeUploadedImages(
-        block.images ?? [],
-      ) as NonNullable<CardBlock["images"]>;
+      const images = normalizeUploadedImages(block.images ?? []) as NonNullable<
+        CardBlock["images"]
+      >;
       if (images.length === 0) return null;
       normalized.images = images;
       break;
     }
     case "audio": {
-      const audios = toArrayOr(block.audios, []).filter(asRecord) as NonNullable<
-        CardBlock["audios"]
-      >;
+      const audios = toArrayOr(block.audios, []).filter(
+        asRecord,
+      ) as NonNullable<CardBlock["audios"]>;
       if (audios.length === 0) return null;
       normalized.audios = audios;
       break;
     }
     case "reference": {
-      const references = toArrayOr(block.references, []).filter(asRecord) as NonNullable<
-        CardBlock["references"]
-      >;
+      const references = toArrayOr(block.references, []).filter(
+        asRecord,
+      ) as NonNullable<CardBlock["references"]>;
       if (references.length === 0) return null;
       normalized.references = references;
       break;
@@ -548,7 +552,9 @@ export const normalizeCard = (raw: unknown): Card => {
       fallbackBlocks.push({
         id: `${side === "question" ? "q" : "a"}-img-${id}`,
         type: "image",
-        images: normalizeUploadedImages(images) as NonNullable<CardBlock["images"]>,
+        images: normalizeUploadedImages(images) as NonNullable<
+          CardBlock["images"]
+        >,
         orderIndex: idx++,
       });
     }
@@ -760,9 +766,3 @@ export const normalizeFolder = (raw: unknown) => {
     updatedAt: normalizeDate(pick(r.updatedAt, r.updated_at)) ?? new Date(),
   };
 };
-
-
-
-
-
-

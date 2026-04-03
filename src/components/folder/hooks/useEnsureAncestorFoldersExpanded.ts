@@ -1,5 +1,9 @@
 import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
-import { getFolderId, getParentFolderId, normalizeFolderId } from "@/components/folder/explorer/model/utils";
+import {
+  getFolderId,
+  getParentFolderId,
+  normalizeFolderId,
+} from "@/components/folder/explorer/model/utils";
 import type { Card, SelectedExplorerItem } from "@/types";
 import React, { useEffect } from "react";
 
@@ -11,7 +15,10 @@ interface UseEnsureAncestorFoldersExpandedParams {
   setExpandedFolders: React.Dispatch<React.SetStateAction<Set<string>>>;
 }
 
-function getAncestorFolderIds(folderId: string, treeFolders: FolderTreeNode[]): string[] {
+function getAncestorFolderIds(
+  folderId: string,
+  treeFolders: FolderTreeNode[],
+): string[] {
   const ancestors: string[] = [];
   let currentId: string | null = folderId;
   while (currentId) {
@@ -61,8 +68,3 @@ export function useEnsureAncestorFoldersExpanded({
     expandFolderIds(ancestorIds, setExpandedFolders);
   }, [selectedItem, treeCards, treeFolders, setExpandedFolders]);
 }
-
-
-
-
-

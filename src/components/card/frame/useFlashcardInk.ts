@@ -148,7 +148,10 @@ export function useFlashcardInk({
 
       scheduleStable();
 
-      if (inkEditingEnabledRef.current && typeof ResizeObserver !== "undefined") {
+      if (
+        inkEditingEnabledRef.current &&
+        typeof ResizeObserver !== "undefined"
+      ) {
         resizeObserver = new ResizeObserver(() => {
           setLayoutStable(false);
           scheduleStable();
@@ -163,13 +166,7 @@ export function useFlashcardInk({
       if (settleTimer != null) window.clearTimeout(settleTimer);
       if (resizeObserver) resizeObserver.disconnect();
     };
-  }, [
-    cardId,
-    effectiveIsFlipped,
-    showInkLayer,
-    previewMode,
-    contentRef,
-  ]);
+  }, [cardId, effectiveIsFlipped, showInkLayer, previewMode, contentRef]);
 
   const flushPendingInk = useCallback(() => {
     if (!cardId) return;
@@ -232,4 +229,3 @@ export function useFlashcardInk({
     handleInkDocumentChange,
   };
 }
-

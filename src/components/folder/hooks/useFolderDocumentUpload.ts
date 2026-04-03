@@ -1,9 +1,9 @@
 import {
-    buildStoragePath,
-    createDocumentId,
-    extractPdfFiles,
-    extractPptxFiles,
-    PPTX_MIME,
+  buildStoragePath,
+  createDocumentId,
+  extractPdfFiles,
+  extractPptxFiles,
+  PPTX_MIME,
 } from "@/components/folder/explorer/model/utils";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { useToast } from "@/contexts/ToastContext";
@@ -29,7 +29,9 @@ interface UseFolderDocumentUploadReturn {
   handleToolbarAddPdf: () => void;
   handleToolbarAddPptx: () => void;
   currentFileAccept: string;
-  handleToolbarFileInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  handleToolbarFileInputChange: (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => void;
 }
 
 type LegacyEntityFields = { blobUrl?: string | null };
@@ -114,15 +116,22 @@ export function useFolderDocumentUpload({
 
         try {
           await saveDocumentBlob(docId, file, { userId: currentUser.uid });
-          await db.documents.put(baseDoc as DocumentItem & Record<string, unknown>);
+          await db.documents.put(
+            baseDoc as DocumentItem & Record<string, unknown>,
+          );
           nextOrderIndex += 1;
         } catch (localErr: unknown) {
-          console.error("[useFolderDocumentUpload] Failed to prepare local PDF source", {
-            error: localErr,
-            docId,
-            fileName: file.name,
-          });
-          toastError?.(getErrorMessage(localErr, "PDFのローカル保存に失敗しました"));
+          console.error(
+            "[useFolderDocumentUpload] Failed to prepare local PDF source",
+            {
+              error: localErr,
+              docId,
+              fileName: file.name,
+            },
+          );
+          toastError?.(
+            getErrorMessage(localErr, "PDFのローカル保存に失敗しました"),
+          );
           continue;
         }
 
@@ -144,14 +153,19 @@ export function useFolderDocumentUpload({
 
           if (!remoteDownloadUrl) {
             const latestDoc = await db.documents.get(docId);
-            console.info("[useFolderDocumentUpload] PDF upload queued in local-only mode", {
-              docId,
-              uploadSource: result.source,
-              uploadStatus: latestDoc?.uploadStatus ?? null,
-              localFileId: latestDoc?.localFileId ?? null,
-              blobUrl:
-                withLegacyFields(latestDoc ?? {}).blobUrl ?? latestDoc?.localUrl ?? null,
-            });
+            console.info(
+              "[useFolderDocumentUpload] PDF upload queued in local-only mode",
+              {
+                docId,
+                uploadSource: result.source,
+                uploadStatus: latestDoc?.uploadStatus ?? null,
+                localFileId: latestDoc?.localFileId ?? null,
+                blobUrl:
+                  withLegacyFields(latestDoc ?? {}).blobUrl ??
+                  latestDoc?.localUrl ??
+                  null,
+              },
+            );
           }
         } catch (err: unknown) {
           console.error("[useFolderDocumentUpload] PDF upload failed", err);
@@ -161,12 +175,17 @@ export function useFolderDocumentUpload({
               updatedAt: new Date(),
             });
             const failedDoc = await db.documents.get(docId);
-            console.error("[useFolderDocumentUpload] PDF upload failed but local source kept", {
-              docId,
-              localFileId: failedDoc?.localFileId ?? null,
-              blobUrl:
-                withLegacyFields(failedDoc ?? {}).blobUrl ?? failedDoc?.localUrl ?? null,
-            });
+            console.error(
+              "[useFolderDocumentUpload] PDF upload failed but local source kept",
+              {
+                docId,
+                localFileId: failedDoc?.localFileId ?? null,
+                blobUrl:
+                  withLegacyFields(failedDoc ?? {}).blobUrl ??
+                  failedDoc?.localUrl ??
+                  null,
+              },
+            );
           } catch (markErr) {
             console.error(
               "[useFolderDocumentUpload] Failed to mark PDF upload failure",
@@ -181,7 +200,13 @@ export function useFolderDocumentUpload({
         setExpandedFolders((prev) => new Set(prev).add(folderId));
       }
     },
-    [currentUser, getNextOrderIndex, toastError, uploadFile, setExpandedFolders],
+    [
+      currentUser,
+      getNextOrderIndex,
+      toastError,
+      uploadFile,
+      setExpandedFolders,
+    ],
   );
 
   const handlePptxDropped = useCallback(
@@ -246,15 +271,22 @@ export function useFolderDocumentUpload({
 
         try {
           await saveDocumentBlob(docId, file, { userId: currentUser.uid });
-          await db.documents.put(baseDoc as DocumentItem & Record<string, unknown>);
+          await db.documents.put(
+            baseDoc as DocumentItem & Record<string, unknown>,
+          );
           nextOrderIndex += 1;
         } catch (localErr: unknown) {
-          console.error("[useFolderDocumentUpload] Failed to prepare local PPTX source", {
-            error: localErr,
-            docId,
-            fileName: file.name,
-          });
-          toastError?.(getErrorMessage(localErr, "PPTXのローカル保存に失敗しました"));
+          console.error(
+            "[useFolderDocumentUpload] Failed to prepare local PPTX source",
+            {
+              error: localErr,
+              docId,
+              fileName: file.name,
+            },
+          );
+          toastError?.(
+            getErrorMessage(localErr, "PPTXのローカル保存に失敗しました"),
+          );
           continue;
         }
 
@@ -276,14 +308,19 @@ export function useFolderDocumentUpload({
 
           if (!remoteDownloadUrl) {
             const latestDoc = await db.documents.get(docId);
-            console.info("[useFolderDocumentUpload] PPTX upload queued in local-only mode", {
-              docId,
-              uploadSource: result.source,
-              uploadStatus: latestDoc?.uploadStatus ?? null,
-              localFileId: latestDoc?.localFileId ?? null,
-              blobUrl:
-                withLegacyFields(latestDoc ?? {}).blobUrl ?? latestDoc?.localUrl ?? null,
-            });
+            console.info(
+              "[useFolderDocumentUpload] PPTX upload queued in local-only mode",
+              {
+                docId,
+                uploadSource: result.source,
+                uploadStatus: latestDoc?.uploadStatus ?? null,
+                localFileId: latestDoc?.localFileId ?? null,
+                blobUrl:
+                  withLegacyFields(latestDoc ?? {}).blobUrl ??
+                  latestDoc?.localUrl ??
+                  null,
+              },
+            );
           }
         } catch (err: unknown) {
           console.error("[useFolderDocumentUpload] PPTX upload failed", err);
@@ -309,7 +346,9 @@ export function useFolderDocumentUpload({
                 docId,
                 localFileId: failedDoc?.localFileId ?? null,
                 blobUrl:
-                  withLegacyFields(failedDoc ?? {}).blobUrl ?? failedDoc?.localUrl ?? null,
+                  withLegacyFields(failedDoc ?? {}).blobUrl ??
+                  failedDoc?.localUrl ??
+                  null,
               },
             );
           } catch (markErr) {
@@ -324,7 +363,13 @@ export function useFolderDocumentUpload({
 
       setExpandedFolders((prev) => new Set(prev).add(folderId));
     },
-    [currentUser, getNextOrderIndex, toastError, uploadFile, setExpandedFolders],
+    [
+      currentUser,
+      getNextOrderIndex,
+      toastError,
+      uploadFile,
+      setExpandedFolders,
+    ],
   );
 
   const handleToolbarAddFile = useCallback(() => {
@@ -390,7 +435,11 @@ export function useFolderDocumentUpload({
         toastError?.("PDFファイルを選択してください");
       } else if (uploadType === "pptx" && pptxFiles.length === 0) {
         toastError?.("PPTXファイルを選択してください");
-      } else if (uploadType === "all" && pdfFiles.length === 0 && pptxFiles.length === 0) {
+      } else if (
+        uploadType === "all" &&
+        pdfFiles.length === 0 &&
+        pptxFiles.length === 0
+      ) {
         toastError?.("PDFまたはPPTXファイルを選択してください");
       }
 
@@ -413,10 +462,3 @@ export function useFolderDocumentUpload({
     handleToolbarFileInputChange,
   };
 }
-
-
-
-
-
-
-

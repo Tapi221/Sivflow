@@ -718,4 +718,3 @@ function parseAndSplitFencesWithRanges(md: string): {
 
   return { blocks, ranges };
 }
-

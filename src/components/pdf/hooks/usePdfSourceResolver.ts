@@ -166,7 +166,11 @@ export function usePdfSourceResolver(
       return;
     }
 
-    if (usableCachedBlobUrl || usableRestoredBlobUrl || usablePersistedBlobUrl) {
+    if (
+      usableCachedBlobUrl ||
+      usableRestoredBlobUrl ||
+      usablePersistedBlobUrl
+    ) {
       queueMicrotask(() => setLocalDataStatus("ready"));
       return;
     }
@@ -311,8 +315,3 @@ export function usePdfSourceResolver(
     handleSourceLoadError,
   };
 }
-
-
-
-
-

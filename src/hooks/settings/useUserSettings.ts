@@ -187,9 +187,3 @@ export function useUserSettings() {
     updateSettings,
   };
 }
-
-
-
-
-
-

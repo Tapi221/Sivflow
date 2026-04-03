@@ -126,4 +126,3 @@ const areMathBlockPropsEqual = (prev: MathBlockProps, next: MathBlockProps) =>
 
 export const MathBlock = React.memo(MathBlockInner, areMathBlockPropsEqual);
 MathBlock.displayName = "MathBlock";
-

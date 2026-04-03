@@ -154,8 +154,3 @@ export function PowerPointPaneState({
 
   return <div className="p-4 text-sm text-slate-500">変換準備中です...</div>;
 }
-
-
-
-
-

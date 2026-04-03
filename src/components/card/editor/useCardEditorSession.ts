@@ -126,7 +126,8 @@ function sanitizeBlocksForSave(blocks: CardBlock[]): CardBlock[] {
 }
 
 function hasMeaningfulBlock(block: CardBlock): boolean {
-  if (block.type === "text") return String(block.content ?? "").trim().length > 0;
+  if (block.type === "text")
+    return String(block.content ?? "").trim().length > 0;
   if (block.type === "markdown")
     return String(block.markdown ?? "").trim().length > 0;
   if (block.type === "code")
@@ -250,12 +251,18 @@ export function useCardEditorSession({
   const applyDraft = useCallback(
     (
       next: SetStateAction<EditorDraft | null>,
-      options?: { markDirty?: boolean; resetPersisted?: boolean; lastSavedAt?: Date | null },
+      options?: {
+        markDirty?: boolean;
+        resetPersisted?: boolean;
+        lastSavedAt?: Date | null;
+      },
     ) => {
       const previous = draftRef.current;
       const resolved =
         typeof next === "function"
-          ? (next as (prevState: EditorDraft | null) => EditorDraft | null)(previous)
+          ? (next as (prevState: EditorDraft | null) => EditorDraft | null)(
+              previous,
+            )
           : next;
       draftRef.current = resolved;
       setDraftState(resolved);
@@ -331,17 +338,33 @@ export function useCardEditorSession({
   const buildDraftFromCard = useCallback(
     (card: Card): EditorDraft => {
       const legacyQuestionRows = normalizeExtraRows(
-        (card as unknown as { questionExtraRows?: unknown; question_extra_rows?: unknown })
-          .questionExtraRows ??
-          (card as unknown as { questionExtraRows?: unknown; question_extra_rows?: unknown })
-            .question_extra_rows ??
+        (
+          card as unknown as {
+            questionExtraRows?: unknown;
+            question_extra_rows?: unknown;
+          }
+        ).questionExtraRows ??
+          (
+            card as unknown as {
+              questionExtraRows?: unknown;
+              question_extra_rows?: unknown;
+            }
+          ).question_extra_rows ??
           0,
       );
       const legacyAnswerRows = normalizeExtraRows(
-        (card as unknown as { answerExtraRows?: unknown; answer_extra_rows?: unknown })
-          .answerExtraRows ??
-          (card as unknown as { answerExtraRows?: unknown; answer_extra_rows?: unknown })
-            .answer_extra_rows ??
+        (
+          card as unknown as {
+            answerExtraRows?: unknown;
+            answer_extra_rows?: unknown;
+          }
+        ).answerExtraRows ??
+          (
+            card as unknown as {
+              answerExtraRows?: unknown;
+              answer_extra_rows?: unknown;
+            }
+          ).answer_extra_rows ??
           0,
       );
       const migratedRows =
@@ -382,7 +405,9 @@ export function useCardEditorSession({
         .map((tag) => tag.trim())
         .filter((tag) => tag.length > 0);
       const uniqueTags = [...new Set(normalizedTags)];
-      const resolvedTags = await Promise.all(uniqueTags.map((name) => addTag(name)));
+      const resolvedTags = await Promise.all(
+        uniqueTags.map((name) => addTag(name)),
+      );
       return {
         title: currentDraft.title,
         tagIds: resolvedTags.map((tag) => tag.id),
@@ -399,96 +424,94 @@ export function useCardEditorSession({
     [addTag],
   );
 
-  const persistCurrentDraft = useCallback(
-    async (): Promise<PersistResult> => {
-      const currentDraft = draftRef.current;
-      if (!currentDraft) {
-        return { ok: true, operation: "noop", saved: false };
-      }
+  const persistCurrentDraft = useCallback(async (): Promise<PersistResult> => {
+    const currentDraft = draftRef.current;
+    if (!currentDraft) {
+      return { ok: true, operation: "noop", saved: false };
+    }
 
-      const currentSignature = draftSignature(currentDraft);
-      if (currentSignature === persistedSignatureRef.current) {
-        return { ok: true, operation: "noop", saved: false };
-      }
+    const currentSignature = draftSignature(currentDraft);
+    if (currentSignature === persistedSignatureRef.current) {
+      return { ok: true, operation: "noop", saved: false };
+    }
 
-      const draftSnapshotValue = snapshotDraft(currentDraft);
-      const snapshotSignature = draftSignature(draftSnapshotValue);
-      const cardId = persistentCardIdRef.current ?? selectedCardRef.current?.id ?? null;
+    const draftSnapshotValue = snapshotDraft(currentDraft);
+    const snapshotSignature = draftSignature(draftSnapshotValue);
+    const cardId =
+      persistentCardIdRef.current ?? selectedCardRef.current?.id ?? null;
 
-      if (!cardId && !hasMeaningfulDraft(draftSnapshotValue)) {
-        persistedSignatureRef.current = snapshotSignature;
-        updateDirtyFromDraft(draftRef.current);
-        return { ok: true, operation: "noop", saved: false };
-      }
+    if (!cardId && !hasMeaningfulDraft(draftSnapshotValue)) {
+      persistedSignatureRef.current = snapshotSignature;
+      updateDirtyFromDraft(draftRef.current);
+      return { ok: true, operation: "noop", saved: false };
+    }
 
-      try {
-        setIsAutosaving(true);
-        setSaveError(null);
+    try {
+      setIsAutosaving(true);
+      setSaveError(null);
 
-        const payload = await buildSavePayload(draftSnapshotValue);
+      const payload = await buildSavePayload(draftSnapshotValue);
 
-        if (!cardId) {
-          if (typeof createCard !== "function") {
-            throw new Error("カードの作成関数が見つかりません");
-          }
-
-          selectionBeforeCreateRef.current = normalizedSelectedCardIdRef.current;
-          const created = await createCard({
-            ...payload,
-            folderId: folderId ?? "",
-            cardSetId,
-          });
-          const newId = extractCreatedCardId(created);
-          if (!newId) {
-            throw new Error("作成したカードの ID を取得できませんでした");
-          }
-
-          persistentCardIdRef.current = newId;
-          editingCardIdRef.current = newId;
-          hydratedFromIdRef.current = newId;
-          onCardUpdated?.();
-
-          if (
-            selectionBeforeCreateRef.current === NEW_SENTINEL &&
-            normalizedSelectedCardIdRef.current === NEW_SENTINEL &&
-            isEditingRef.current
-          ) {
-            if (typeof onSelectCardId === "function") onSelectCardId(newId);
-            else setLocalSelectedCardId(newId);
-          }
-
-          persistedSignatureRef.current = snapshotSignature;
-          updateDirtyFromDraft(draftRef.current);
-          setLastSavedAt(new Date());
-          return { ok: true, operation: "created", saved: true };
+      if (!cardId) {
+        if (typeof createCard !== "function") {
+          throw new Error("カードの作成関数が見つかりません");
         }
 
-        await updateCard(cardId, payload);
+        selectionBeforeCreateRef.current = normalizedSelectedCardIdRef.current;
+        const created = await createCard({
+          ...payload,
+          folderId: folderId ?? "",
+          cardSetId,
+        });
+        const newId = extractCreatedCardId(created);
+        if (!newId) {
+          throw new Error("作成したカードの ID を取得できませんでした");
+        }
+
+        persistentCardIdRef.current = newId;
+        editingCardIdRef.current = newId;
+        hydratedFromIdRef.current = newId;
         onCardUpdated?.();
+
+        if (
+          selectionBeforeCreateRef.current === NEW_SENTINEL &&
+          normalizedSelectedCardIdRef.current === NEW_SENTINEL &&
+          isEditingRef.current
+        ) {
+          if (typeof onSelectCardId === "function") onSelectCardId(newId);
+          else setLocalSelectedCardId(newId);
+        }
+
         persistedSignatureRef.current = snapshotSignature;
         updateDirtyFromDraft(draftRef.current);
         setLastSavedAt(new Date());
-        return { ok: true, operation: "updated", saved: true };
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "カード保存に失敗しました";
-        setSaveError(message);
-        return { ok: false, message };
-      } finally {
-        setIsAutosaving(false);
+        return { ok: true, operation: "created", saved: true };
       }
-    },
-    [
-      buildSavePayload,
-      cardSetId,
-      createCard,
-      folderId,
-      onCardUpdated,
-      onSelectCardId,
-      updateCard,
-      updateDirtyFromDraft,
-    ],
-  );
+
+      await updateCard(cardId, payload);
+      onCardUpdated?.();
+      persistedSignatureRef.current = snapshotSignature;
+      updateDirtyFromDraft(draftRef.current);
+      setLastSavedAt(new Date());
+      return { ok: true, operation: "updated", saved: true };
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "カード保存に失敗しました";
+      setSaveError(message);
+      return { ok: false, message };
+    } finally {
+      setIsAutosaving(false);
+    }
+  }, [
+    buildSavePayload,
+    cardSetId,
+    createCard,
+    folderId,
+    onCardUpdated,
+    onSelectCardId,
+    updateCard,
+    updateDirtyFromDraft,
+  ]);
 
   const flushDraft = useCallback(
     async ({
@@ -621,7 +644,7 @@ export function useCardEditorSession({
     if (isEditing) {
       editingCardIdRef.current = isNew
         ? NEW_SENTINEL
-        : persistentCardIdRef.current ?? normalizedSelectedCardId;
+        : (persistentCardIdRef.current ?? normalizedSelectedCardId);
       return;
     }
     editingCardIdRef.current = null;
@@ -640,8 +663,8 @@ export function useCardEditorSession({
     if (!isEditing) return;
 
     const targetId = isNew
-      ? persistentCardIdRef.current ?? NEW_SENTINEL
-      : persistentCardIdRef.current ?? normalizedSelectedCardId;
+      ? (persistentCardIdRef.current ?? NEW_SENTINEL)
+      : (persistentCardIdRef.current ?? normalizedSelectedCardId);
     if (!targetId) return;
 
     if (targetId === NEW_SENTINEL) {
@@ -706,7 +729,8 @@ export function useCardEditorSession({
   }, [clearAutosaveTimer, flushDraft]);
 
   useEffect(() => {
-    if (typeof document === "undefined" || typeof window === "undefined") return;
+    if (typeof document === "undefined" || typeof window === "undefined")
+      return;
 
     const handleVisibilityFlush = () => {
       if (document.visibilityState !== "hidden") return;
@@ -738,12 +762,14 @@ export function useCardEditorSession({
       });
       return;
     }
-    void flushDraft({ reason: "edit-end", showSuccessToast: false }).finally(() => {
-      applyDraft(null, {
-        resetPersisted: true,
-        lastSavedAt: lastSavedAtRef.current,
-      });
-    });
+    void flushDraft({ reason: "edit-end", showSuccessToast: false }).finally(
+      () => {
+        applyDraft(null, {
+          resetPersisted: true,
+          lastSavedAt: lastSavedAtRef.current,
+        });
+      },
+    );
   }, [applyDraft, flushDraft, isEditing]);
 
   const handleStartNew = useCallback(() => {
@@ -817,7 +843,9 @@ export function useCardEditorSession({
       const normalizedTags = nextTags
         .map((tag) => tag.trim())
         .filter((tag) => tag.length > 0);
-      const resolved = await Promise.all(normalizedTags.map((name) => addTag(name)));
+      const resolved = await Promise.all(
+        normalizedTags.map((name) => addTag(name)),
+      );
       await updateCard(selectedCard.id, {
         tagIds: resolved.map((tag) => tag.id),
       });
@@ -944,5 +972,3 @@ export function useCardEditorSession({
     panelCard,
   };
 }
-
-

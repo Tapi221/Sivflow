@@ -26,8 +26,3 @@ export const StratisInfoSquare01ContainedIcon = forwardRef<
     </svg>
   );
 });
-
-
-
-
-

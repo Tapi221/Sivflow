@@ -54,10 +54,7 @@ export function CardPaneWidthControl({
     const handleClickCapture = (event: MouseEvent) => {
       if (Date.now() > suppressOutsideClickUntilRef.current) return;
       const target = event.target;
-      if (
-        target instanceof Node &&
-        controlRootRef.current?.contains(target)
-      ) {
+      if (target instanceof Node && controlRootRef.current?.contains(target)) {
         return;
       }
       event.preventDefault();
@@ -142,4 +139,3 @@ export function CardPaneWidthControl({
     </div>
   );
 }
-

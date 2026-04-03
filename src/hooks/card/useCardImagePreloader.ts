@@ -47,8 +47,8 @@ const isDebug = (): boolean =>
  * 「描画対象だが未プリロード」というケースをなくすため。
  */
 const EAGER_RADIUS_FALLBACK = 8; // renderRange 未提供時のフォールバック
-const EAGER_BUFFER = 2;          // renderRange の前後に積む先読みバッファ
-const IDLE_EXTRA = 12;           // eager 範囲からさらに ±IDLE_EXTRA → idle プリロード
+const EAGER_BUFFER = 2; // renderRange の前後に積む先読みバッファ
+const IDLE_EXTRA = 12; // eager 範囲からさらに ±IDLE_EXTRA → idle プリロード
 /**
  * eager プリロードのカード単位同時実行上限。
  * Firebase Storage の download URL 取得 + decode が並走しすぎると
@@ -214,7 +214,9 @@ export function useCardImagePreloader(
     prevCardsRef.current = cards;
 
     const sigMap = signatureMapRef.current;
-    const currentIds = new Set(cards.map((c) => c.id).filter(Boolean) as string[]);
+    const currentIds = new Set(
+      cards.map((c) => c.id).filter(Boolean) as string[],
+    );
 
     setReadySet((prev) => {
       let changed = false;
@@ -396,4 +398,3 @@ export function useCardImagePreloader(
 
   return readySet;
 }
-

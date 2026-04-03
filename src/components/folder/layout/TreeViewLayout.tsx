@@ -62,12 +62,16 @@ function TreeViewLayout({
   const { createCard, updateCard, deleteCard, moveCardToFolder, reorderCards } =
     useCards();
 
-  const [selectedCardSetId, setSelectedCardSetId] = useState<string | null>(null);
-  const [selectedCardSetLabel, setSelectedCardSetLabel] = useState<string | null>(null);
-  const [isSectionListMode, setIsSectionListMode] = useState(false);
-  const [explorerHeaderFolderId, setExplorerHeaderFolderId] = useState<string | null>(
+  const [selectedCardSetId, setSelectedCardSetId] = useState<string | null>(
     null,
   );
+  const [selectedCardSetLabel, setSelectedCardSetLabel] = useState<
+    string | null
+  >(null);
+  const [isSectionListMode, setIsSectionListMode] = useState(false);
+  const [explorerHeaderFolderId, setExplorerHeaderFolderId] = useState<
+    string | null
+  >(null);
   const createFolderTriggerRef = useRef<(() => void) | null>(null);
   const createCardSetTriggerRef = useRef<
     ((folderId?: string | null) => void) | null
@@ -126,18 +130,23 @@ function TreeViewLayout({
     scroller.scrollTop = 0;
   }, [contentScrollRef, selectedFolderId, navigateToSectionListToken]);
 
-  const { selectedFolder, selectedDocument, folderCards, folderStats, showMobileDetail } =
-    useTreeViewDerivedState({
-      folders,
-      cards,
-      documents,
-      selectedFolderId,
-      selectedItem,
-      selectedCardId,
-      selectedDocumentId,
-      autoCarryOver: settings?.autoCarryOver ?? true,
-      isMobile,
-    });
+  const {
+    selectedFolder,
+    selectedDocument,
+    folderCards,
+    folderStats,
+    showMobileDetail,
+  } = useTreeViewDerivedState({
+    folders,
+    cards,
+    documents,
+    selectedFolderId,
+    selectedItem,
+    selectedCardId,
+    selectedDocumentId,
+    autoCarryOver: settings?.autoCarryOver ?? true,
+    isMobile,
+  });
 
   const explorerTab = useExplorerStore((s) => s.explorerTab);
   const setExplorerTab = useExplorerStore((s) => s.setExplorerTab);
@@ -258,23 +267,19 @@ function TreeViewLayout({
     pptxTriggerRef.current?.();
   }, [currentHeaderFolderId]);
 
-  const {
-    isFilterActive,
-    filteredCards,
-    filteredDocuments,
-    isFiltering,
-  } = useTreeViewFilters({
-    cards,
-    documents,
-    explorerTab,
-    tagFilter,
-    tagMatchMode,
-    uncertaintyFilter,
-    bookmarkedFilter,
-    draftFilter,
-    contentTypeFilter,
-    tagById,
-  });
+  const { isFilterActive, filteredCards, filteredDocuments, isFiltering } =
+    useTreeViewFilters({
+      cards,
+      documents,
+      explorerTab,
+      tagFilter,
+      tagMatchMode,
+      uncertaintyFilter,
+      bookmarkedFilter,
+      draftFilter,
+      contentTypeFilter,
+      tagById,
+    });
 
   const tabContent = (
     <TreeViewTabContent

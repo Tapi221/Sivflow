@@ -85,8 +85,3 @@ export const CURRENT_SCHEMA_VERSION = 1;
 
 /** アプリバージョン（package.jsonから取得すべきだが、ここでは固定） */
 export const APP_VERSION = "1.0.0";
-
-
-
-
-

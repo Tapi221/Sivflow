@@ -26,8 +26,3 @@ export const StratisFilterIcon = forwardRef<
     </svg>
   );
 });
-
-
-
-
-

@@ -142,8 +142,3 @@ export class HistoryCompressionService {
     return compressed;
   }
 }
-
-
-
-
-

@@ -30,7 +30,9 @@ for (const filePath of files) {
 
     if (!resolved.startsWith(srcRoot)) continue;
 
-    const relativeFromSrc = path.relative(srcRoot, resolved).replace(/\\/g, "/");
+    const relativeFromSrc = path
+      .relative(srcRoot, resolved)
+      .replace(/\\/g, "/");
     decl.setModuleSpecifier(`@/${relativeFromSrc}`);
     changed = true;
   }
@@ -44,7 +46,9 @@ for (const filePath of files) {
 
     if (!resolved.startsWith(srcRoot)) continue;
 
-    const relativeFromSrc = path.relative(srcRoot, resolved).replace(/\\/g, "/");
+    const relativeFromSrc = path
+      .relative(srcRoot, resolved)
+      .replace(/\\/g, "/");
     decl.setModuleSpecifier(`@/${relativeFromSrc}`);
     changed = true;
   }

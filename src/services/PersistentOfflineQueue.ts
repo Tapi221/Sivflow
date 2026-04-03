@@ -302,13 +302,17 @@ class PersistentOfflineQueue {
               ...((existingAsset as unknown) ?? {}),
               id: updatedImage.id,
               userId:
-                auth.currentUser?.uid ?? (existingAsset as unknown)?.userId ?? "",
+                auth.currentUser?.uid ??
+                (existingAsset as unknown)?.userId ??
+                "",
               mime:
                 item.fileType ||
                 (existingAsset as unknown)?.mime ||
                 "application/octet-stream",
               size:
-                item.fileData.byteLength ?? (existingAsset as unknown)?.size ?? 0,
+                item.fileData.byteLength ??
+                (existingAsset as unknown)?.size ??
+                0,
               localBlobId:
                 (existingAsset as unknown)?.localBlobId ??
                 updatedImage.localFileId ??
@@ -429,8 +433,10 @@ class PersistentOfflineQueue {
                     item.fileData.byteLength ??
                     (existingAsset as unknown)?.size ??
                     0,
-                  localBlobId: (existingAsset as unknown)?.localBlobId ?? item.id,
-                  localStatus: (existingAsset as unknown)?.localStatus ?? "present",
+                  localBlobId:
+                    (existingAsset as unknown)?.localBlobId ?? item.id,
+                  localStatus:
+                    (existingAsset as unknown)?.localStatus ?? "present",
                   remoteKey: (existingAsset as unknown)?.remoteKey ?? null,
                   remoteStatus: "failed",
                   updatedAt: now,
@@ -590,8 +596,3 @@ if (typeof window !== "undefined") {
     console.log("[PersistentQueue] Network online, ready to process queue");
   });
 }
-
-
-
-
-

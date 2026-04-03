@@ -83,7 +83,11 @@ export function CardViewMetaPanel({
           () => undefined,
         );
       }}
-      onUpdateReviewLogDuration={({ reviewLogs, logIndex, durationMinutes }) => {
+      onUpdateReviewLogDuration={({
+        reviewLogs,
+        logIndex,
+        durationMinutes,
+      }) => {
         if (!selectedCard?.id) return Promise.resolve();
         const nextReviewLogs = reviewLogs.map((log, index) =>
           index === logIndex ? { ...log, durationMinutes } : log,
@@ -126,4 +130,3 @@ export function CardViewMetaPanel({
     />
   );
 }
-

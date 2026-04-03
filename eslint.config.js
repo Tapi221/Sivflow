@@ -36,7 +36,13 @@ export default defineConfig([
           ],
           patterns: [
             {
-              group: ["../*", "../../*", "../../../*", "../../../../*", "../../../../../*"],
+              group: [
+                "../*",
+                "../../*",
+                "../../../*",
+                "../../../../*",
+                "../../../../../*",
+              ],
               message:
                 "Cross-folder imports inside src must use @/ alias. Use relative paths only for same-folder imports like './x'.",
             },

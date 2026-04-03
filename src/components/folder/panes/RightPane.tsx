@@ -9,8 +9,9 @@ import Gallery from "@/pages/Gallery";
 import Trash from "@/pages/Trash";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 
-
-type PdfPaneUpdateHandler = NonNullable<React.ComponentProps<typeof PdfPane>["onDocumentUpdate"]>;
+type PdfPaneUpdateHandler = NonNullable<
+  React.ComponentProps<typeof PdfPane>["onDocumentUpdate"]
+>;
 type PdfPaneUpdates = Parameters<PdfPaneUpdateHandler>[0];
 interface RightPaneProps {
   selectedItem: SelectedExplorerItem;
@@ -94,7 +95,10 @@ export function RightPane({
         onDocumentUpdate={
           onDocumentUpdated
             ? async (updates: PdfPaneUpdates) => {
-                await onDocumentUpdated(selectedDocument.id, updates as Partial<DocumentItem>);
+                await onDocumentUpdated(
+                  selectedDocument.id,
+                  updates as Partial<DocumentItem>,
+                );
               }
             : undefined
         }
@@ -104,10 +108,7 @@ export function RightPane({
 
   if (selectedCardId) {
     return (
-      <CardPane
-        selectedCardId={selectedCardId}
-        onCardUpdated={onCardUpdated}
-      />
+      <CardPane selectedCardId={selectedCardId} onCardUpdated={onCardUpdated} />
     );
   }
 
@@ -126,6 +127,3 @@ export function RightPane({
 
   return <CardPane selectedCardId={null} onCardUpdated={onCardUpdated} />;
 }
-
-
-

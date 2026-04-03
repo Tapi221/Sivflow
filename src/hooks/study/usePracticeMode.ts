@@ -25,7 +25,10 @@ type Params = {
   finalRatingByCardId: Map<string, string>;
   sourceSessionId: string;
   isPracticeFeatureEnabled: boolean;
-  logPracticeEvent: (eventName: string, context?: Record<string, unknown>) => void;
+  logPracticeEvent: (
+    eventName: string,
+    context?: Record<string, unknown>,
+  ) => void;
 };
 
 export function usePracticeMode({
@@ -158,8 +161,3 @@ export function usePracticeMode({
     handlePracticeExit,
   };
 }
-
-
-
-
-

@@ -17,8 +17,5 @@
     "scripts/**/*.{ts,js,mjs,cjs}",
     "tests/**/*.{ts,tsx,js,jsx}"
   ],
-  "ignore": [
-    "dist/**/*",
-    "coverage/**/*"
-  ]
+  "ignore": ["dist/**/*", "coverage/**/*"]
 }

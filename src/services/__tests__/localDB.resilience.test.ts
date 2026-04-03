@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
 import {
-    LocalDB,
-    getLocalDBRuntimeStatus,
-    getLocalDBTelemetrySnapshot,
-    getLocalDb,
-    resetLocalDBForLogout,
-    telemetryOncePerSession,
+  LocalDB,
+  getLocalDBRuntimeStatus,
+  getLocalDBTelemetrySnapshot,
+  getLocalDb,
+  resetLocalDBForLogout,
+  telemetryOncePerSession,
 } from "@/services/localDB";
 import Dexie from "dexie";
 import "fake-indexeddb/auto";
@@ -151,8 +151,3 @@ describe("LocalDB resilience", () => {
     expect(telemetryOncePerSession("localdb_runtime")).toBe(false);
   });
 });
-
-
-
-
-

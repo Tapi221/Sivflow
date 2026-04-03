@@ -22,10 +22,7 @@ const readGenerationFromStorage = (userId: string): number => {
   }
 };
 
-const writeGenerationToStorage = (
-  userId: string,
-  generation: number,
-): void => {
+const writeGenerationToStorage = (userId: string, generation: number): void => {
   if (typeof window === "undefined") return;
   try {
     window.localStorage.setItem(
@@ -71,9 +68,7 @@ export function getFallbackDatabaseNameForUser(userId: string): string {
   return `FlashcardMasterDB_mem_${userId}`;
 }
 
-async function listUserPersistentDbNames(
-  userId: string,
-): Promise<string[]> {
+async function listUserPersistentDbNames(userId: string): Promise<string[]> {
   const names = new Set<string>();
   const generationPrefix = makeGenerationDbPrefix(userId);
 
@@ -130,8 +125,3 @@ export async function deleteUserPersistentDatabases(
 
   return failureReason;
 }
-
-
-
-
-

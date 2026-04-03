@@ -61,8 +61,3 @@ export function PracticeSummary({
     </Card>
   );
 }
-
-
-
-
-

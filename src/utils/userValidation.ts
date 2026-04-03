@@ -87,8 +87,3 @@ export function truncateUsername(name: string, maxLength: number = 20): string {
 
   return chars.slice(0, maxLength).join("") + "...";
 }
-
-
-
-
-

@@ -22,11 +22,13 @@ export const convertHeicToJpeg = async (file: File): Promise<File> => {
     throw new Error("heic2any の読み込みに失敗しました");
   }
 
-  const result = await (heic2any as (options: {
-    blob: File;
-    toType: string;
-    quality: number;
-  }) => Promise<unknown>)({
+  const result = await (
+    heic2any as (options: {
+      blob: File;
+      toType: string;
+      quality: number;
+    }) => Promise<unknown>
+  )({
     blob: file,
     toType: "image/jpeg",
     quality: 0.9,
@@ -43,8 +45,3 @@ export const convertHeicToJpeg = async (file: File): Promise<File> => {
 
   return new File([blob], name, { type: blob.type || "image/jpeg" });
 };
-
-
-
-
-

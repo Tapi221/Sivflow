@@ -1,10 +1,10 @@
 import type {
-    IntegrityIssue,
-    IntegrityRepairResult,
+  IntegrityIssue,
+  IntegrityRepairResult,
 } from "@/services/dataIntegrityTypes";
 import {
-    denormalizeUploadedImages,
-    normalizeUploadedImages,
+  denormalizeUploadedImages,
+  normalizeUploadedImages,
 } from "@/utils/uploaded-image/normalizer";
 import type { LocalDB } from "./LocalDB";
 
@@ -664,9 +664,3 @@ export async function repairDataIntegrity(
     issues,
   };
 }
-
-
-
-
-
-

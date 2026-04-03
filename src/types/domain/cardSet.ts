@@ -22,4 +22,3 @@ export type CardSet = BaseEntity & {
   orderIndex: number;
   defaultDisplayMode?: CardDisplayMode;
 };
-

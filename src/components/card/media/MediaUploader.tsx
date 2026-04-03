@@ -5,16 +5,28 @@ import { Slider } from "@/components/ui/slider";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { useReliableFileUpload } from "@/hooks/platform/useReliableFileUpload";
 import { cn } from "@/lib/utils";
-import { removeImageBlobUrl, getOrCreateImageBlobUrl } from "@/services/imageBlobUrlSessionCache";
+import {
+  removeImageBlobUrl,
+  getOrCreateImageBlobUrl,
+} from "@/services/imageBlobUrlSessionCache";
 import { useLocalImageBlobUrl } from "@/hooks/image/useLocalImageBlobUrl";
 import { deleteImageBlob, putImageBlob } from "@/services/imageFileStore";
 import { getLocalDb } from "@/services/localDB";
 import type { AssetRecord, UploadedImage, UploadedImageStatus } from "@/types";
 import type { StorageUrl } from "@/types/core/branded";
-import { Check, Copy, Download, Pause, Play, RotateCcw, Upload, X } from "@/ui/icons";
 import {
-    createFailedUploadedImage,
-    createUploadedImage,
+  Check,
+  Copy,
+  Download,
+  Pause,
+  Play,
+  RotateCcw,
+  Upload,
+  X,
+} from "@/ui/icons";
+import {
+  createFailedUploadedImage,
+  createUploadedImage,
 } from "@/utils/uploaded-image/factory";
 import { convertHeicToJpeg, isHeicFile } from "@/utils/uploaded-image/heic";
 import { loadImageNaturalSize } from "@/utils/uploaded-image/naturalSize";
@@ -293,13 +305,21 @@ function ImageItem({ item, index, onRetry, onUpdate }) {
                   step={1}
                   value={[Math.round(safeScale * 100)]}
                   onValueChange={(values) => {
-                    const nextScaleRaw = clamp((values[0] ?? 100) / 100, 0.2, 1);
+                    const nextScaleRaw = clamp(
+                      (values[0] ?? 100) / 100,
+                      0.2,
+                      1,
+                    );
                     const nextScale = nextScaleRaw >= 0.98 ? 1 : nextScaleRaw;
                     const baseX = nextScale >= 0.999 ? 0 : safeX;
                     setDraftTransform({ scale: nextScale, x: baseX });
                   }}
                   onValueCommit={(values) => {
-                    const nextScaleRaw = clamp((values[0] ?? 100) / 100, 0.2, 1);
+                    const nextScaleRaw = clamp(
+                      (values[0] ?? 100) / 100,
+                      0.2,
+                      1,
+                    );
                     const nextScale = nextScaleRaw >= 0.98 ? 1 : nextScaleRaw;
                     const baseX = nextScale >= 0.999 ? 0 : safeX;
                     commitTransform({ scale: nextScale, x: baseX });
@@ -946,7 +966,8 @@ export default function MediaUploader({
       // ダイアログが開いているとき、ダイアログ外の MediaUploader はペーストを無視する
       // （[role="dialog"] は Radix UI Dialog が必ず付与する標準属性）
       const openDialog = document.querySelector("[role='dialog']");
-      if (openDialog && !containerRef.current?.closest("[role='dialog']")) return;
+      if (openDialog && !containerRef.current?.closest("[role='dialog']"))
+        return;
 
       const items = e.clipboardData?.items;
       if (!items) return;
@@ -1096,9 +1117,7 @@ export default function MediaUploader({
             />
           ))}
 
-          {urls.length < maxFiles && (
-            renderUploadDropzone(false)
-          )}
+          {urls.length < maxFiles && renderUploadDropzone(false)}
         </div>
       )}
 
@@ -1131,6 +1150,3 @@ export default function MediaUploader({
     </div>
   );
 }
-
-
-

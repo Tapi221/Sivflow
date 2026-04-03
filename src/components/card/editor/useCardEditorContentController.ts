@@ -39,7 +39,7 @@ export function useCardEditorContentController<
   const getSideBlocks = useCallback(
     (side: "question" | "answer") =>
       side === "question"
-        ? (draft?.frontBlocks?? [])
+        ? (draft?.frontBlocks ?? [])
         : (draft?.backBlocks ?? []),
     [draft?.backBlocks, draft?.frontBlocks],
   );
@@ -51,7 +51,7 @@ export function useCardEditorContentController<
         if (!prev) return prev;
         const reindexed = reindexBlocks(nextBlocks);
         const currentBlocks =
-          side === "question" ? prev.frontBlocks: prev.backBlocks;
+          side === "question" ? prev.frontBlocks : prev.backBlocks;
         if (currentBlocks === reindexed) return prev;
         return side === "question"
           ? { ...prev, frontBlocks: reindexed }
@@ -61,46 +61,49 @@ export function useCardEditorContentController<
     [allowAutoMinHeightSyncRef, reindexBlocks, setDraft],
   );
 
-  const upsertSingleBlock = useCallback((
-    side: "question" | "answer",
-    type: CardBlock["type"],
-    payload: Partial<CardBlock>,
-  ) => {
-    const uniqueId =
-      typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
-        ? crypto.randomUUID()
-        : `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const upsertSingleBlock = useCallback(
+    (
+      side: "question" | "answer",
+      type: CardBlock["type"],
+      payload: Partial<CardBlock>,
+    ) => {
+      const uniqueId =
+        typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+          ? crypto.randomUUID()
+          : `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
-    const blocks = getSideBlocks(side);
-    const index = blocks.findIndex((block) => block.type === type);
+      const blocks = getSideBlocks(side);
+      const index = blocks.findIndex((block) => block.type === type);
 
-    if (index >= 0) {
-      const next = [...blocks];
-      next[index] = { ...next[index], ...payload };
-      setSideBlocks(side, next);
-      return;
-    }
+      if (index >= 0) {
+        const next = [...blocks];
+        next[index] = { ...next[index], ...payload };
+        setSideBlocks(side, next);
+        return;
+      }
 
-    const nextBlock: CardBlock = {
-      id: `${side}-${type}-${uniqueId}`,
-      type,
-      orderIndex: blocks.length,
-      content: "",
-      ...payload,
-    } as CardBlock;
+      const nextBlock: CardBlock = {
+        id: `${side}-${type}-${uniqueId}`,
+        type,
+        orderIndex: blocks.length,
+        content: "",
+        ...payload,
+      } as CardBlock;
 
-    setSideBlocks(side, [...blocks, nextBlock]);
-  }, [getSideBlocks, setSideBlocks]);
+      setSideBlocks(side, [...blocks, nextBlock]);
+    },
+    [getSideBlocks, setSideBlocks],
+  );
 
-  const removeBlockByTypeIfExists = useCallback((
-    side: "question" | "answer",
-    type: CardBlock["type"],
-  ) => {
-    const blocks = getSideBlocks(side);
-    const filtered = blocks.filter((block) => block.type !== type);
-    if (filtered.length === blocks.length) return;
-    setSideBlocks(side, filtered);
-  }, [getSideBlocks, setSideBlocks]);
+  const removeBlockByTypeIfExists = useCallback(
+    (side: "question" | "answer", type: CardBlock["type"]) => {
+      const blocks = getSideBlocks(side);
+      const filtered = blocks.filter((block) => block.type !== type);
+      if (filtered.length === blocks.length) return;
+      setSideBlocks(side, filtered);
+    },
+    [getSideBlocks, setSideBlocks],
+  );
 
   const mediaDialogs = useCardMediaDialogs({
     draft,
@@ -119,7 +122,12 @@ export function useCardEditorContentController<
       setAudioDialogSide(null);
       setLinkDialogSide(null);
     };
-  }, [resetDialogsRef, setAudioDialogSide, setImageDialogSide, setLinkDialogSide]);
+  }, [
+    resetDialogsRef,
+    setAudioDialogSide,
+    setImageDialogSide,
+    setLinkDialogSide,
+  ]);
 
   return useMemo(
     () => ({
@@ -129,13 +137,3 @@ export function useCardEditorContentController<
     [mediaDialogs, setSideBlocks],
   );
 }
-
-
-
-
-
-
-
-
-
-

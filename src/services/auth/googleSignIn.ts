@@ -15,13 +15,17 @@ const GOOGLE_OAUTH_AUTHORIZE_ENDPOINT =
 const CALLBACK_TIMEOUT_MS = 3 * 60 * 1000;
 
 const isElectronRendererRuntime = (): boolean =>
-  typeof navigator !== "undefined" && /Electron\/\d+/i.test(navigator.userAgent);
+  typeof navigator !== "undefined" &&
+  /Electron\/\d+/i.test(navigator.userAgent);
 
 const toBase64Url = (bytes: Uint8Array): string => {
-  const binary = Array.from(bytes, (value) =>
-    String.fromCharCode(value),
-  ).join("");
-  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  const binary = Array.from(bytes, (value) => String.fromCharCode(value)).join(
+    "",
+  );
+  return btoa(binary)
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
 };
 
 const randomBase64Url = (byteLength: number): string => {
@@ -48,7 +52,8 @@ const getDesktopOauthScope = (): string =>
   import.meta.env.VITE_DESKTOP_GOOGLE_OAUTH_SCOPE || "openid email profile";
 
 const getDesktopRedirectUri = (): string => {
-  const configuredUri = import.meta.env.VITE_DESKTOP_GOOGLE_OAUTH_REDIRECT_URI?.trim();
+  const configuredUri =
+    import.meta.env.VITE_DESKTOP_GOOGLE_OAUTH_REDIRECT_URI?.trim();
   if (configuredUri) {
     return configuredUri;
   }
@@ -95,7 +100,9 @@ const logDesktopAuthorizeRequest = (authorizeUrl: string): void => {
   }
 };
 
-const toRedirectTarget = (rawUri: string): { protocol: string; host: string; pathname: string } => {
+const toRedirectTarget = (
+  rawUri: string,
+): { protocol: string; host: string; pathname: string } => {
   const parsed = new URL(rawUri);
   return {
     protocol: parsed.protocol,
@@ -126,8 +133,7 @@ const parseLoopbackCallback = (
     code: payload.code ?? getParam("code"),
     state: payload.state ?? getParam("state"),
     error: payload.error ?? getParam("error"),
-    errorDescription:
-      payload.errorDescription ?? getParam("error_description"),
+    errorDescription: payload.errorDescription ?? getParam("error_description"),
   };
 };
 
@@ -188,8 +194,10 @@ const exchangeCodeForIdToken = async ({
   codeVerifier: string;
   redirectUri: string;
 }): Promise<string> => {
-  const envClientId = import.meta.env.VITE_DESKTOP_GOOGLE_OAUTH_CLIENT_ID?.trim();
-  const expectedLoopbackRedirectUri = "http://127.0.0.1:42813/auth/google/callback";
+  const envClientId =
+    import.meta.env.VITE_DESKTOP_GOOGLE_OAUTH_CLIENT_ID?.trim();
+  const expectedLoopbackRedirectUri =
+    "http://127.0.0.1:42813/auth/google/callback";
   console.info("[auth][desktop-oauth] token exchange request", {
     client_id: clientId,
     redirect_uri: redirectUri,
@@ -265,8 +273,3 @@ export const signInWithGoogle = async (): Promise<void> => {
   }
   await signInWithGoogleWeb();
 };
-
-
-
-
-

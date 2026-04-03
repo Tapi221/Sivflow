@@ -162,7 +162,8 @@ export const FolderRow: React.FC<FolderRowProps> = ({
       <div
         className={cn(
           "relative",
-          isFileDraggingOver && "bg-blue-50/50 ring-1 ring-blue-200/50 rounded-sm",
+          isFileDraggingOver &&
+            "bg-blue-50/50 ring-1 ring-blue-200/50 rounded-sm",
         )}
       >
         <ExplorerRow
@@ -241,7 +242,8 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                   editingNameRef.current = e.target.value;
                 }}
                 onKeyDown={(e) => {
-                  const isComposing = e.nativeEvent.isComposing || e.keyCode === 229;
+                  const isComposing =
+                    e.nativeEvent.isComposing || e.keyCode === 229;
                   if (e.key === "Enter" && isComposing) return;
                   if (e.key === "Enter") {
                     e.preventDefault();
@@ -269,13 +271,13 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                   titleClassName={cn(
                     "lining-nums tabular-nums",
                     FOLDER_ROW_TITLE_CLASS,
-                    isSelected
-                      ? "font-medium"
-                      : "font-normal",
+                    isSelected ? "font-medium" : "font-normal",
                   )}
                   right={
                     isFiltering && matchCount === 0 ? (
-                      <span className="text-xs text-[var(--sidebar-text-muted,#6e6e80)]">(0)</span>
+                      <span className="text-xs text-[var(--sidebar-text-muted,#6e6e80)]">
+                        (0)
+                      </span>
                     ) : null
                   }
                 />
@@ -305,7 +307,9 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                   onCreateSubfolder={() =>
                     void handleCreateFolderAction(folderId)
                   }
-                  onCreateCardSet={() => void handleCreateCardSetAction(folderId)}
+                  onCreateCardSet={() =>
+                    void handleCreateCardSetAction(folderId)
+                  }
                   onRename={() => {
                     onSelect();
                     onMenuOpenChange(false);

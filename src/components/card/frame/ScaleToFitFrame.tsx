@@ -123,9 +123,7 @@ export function ScaleToFitFrame({
   }, []);
 
   const scaledHeight =
-    contentHeight != null
-      ? Math.ceil(contentHeight * effectiveScale)
-      : null;
+    contentHeight != null ? Math.ceil(contentHeight * effectiveScale) : null;
 
   const safePaddingPx = Math.max(0, contentPaddingPx);
   const safeBaseWidth = Math.max(1, baseWidth);
@@ -201,4 +199,3 @@ export function ScaleToFitFrame({
     </div>
   );
 }
-

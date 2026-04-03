@@ -110,4 +110,3 @@ function debugFirebase(): void {
 if (import.meta.env.DEV) {
   debugFirebase();
 }
-

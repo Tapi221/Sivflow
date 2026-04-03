@@ -80,7 +80,9 @@ export const denormalizeCardForStorage = (card: unknown) => {
     const faceKey = side === "question" ? "front" : "back";
     const face = value[faceKey];
     const faceInk =
-      face && typeof face === "object" ? (face as { ink?: unknown }).ink : undefined;
+      face && typeof face === "object"
+        ? (face as { ink?: unknown }).ink
+        : undefined;
     const doc = normalizeInkDocument(faceInk ?? value[legacyKey] ?? null);
     return doc.strokes.length > 0 ? doc : null;
   };
@@ -89,7 +91,8 @@ export const denormalizeCardForStorage = (card: unknown) => {
     value: Record<string, unknown>,
     side: "question" | "answer",
   ) => {
-    const legacyKey = side === "question" ? "questionExtraRows" : "answerExtraRows";
+    const legacyKey =
+      side === "question" ? "questionExtraRows" : "answerExtraRows";
     const snakeKey =
       side === "question" ? "question_extra_rows" : "answer_extra_rows";
     const faceKey = side === "question" ? "front" : "back";
@@ -98,7 +101,9 @@ export const denormalizeCardForStorage = (card: unknown) => {
       face && typeof face === "object"
         ? (face as { extraRows?: unknown }).extraRows
         : undefined;
-    const parsed = Number(faceExtraRows ?? value[legacyKey] ?? value[snakeKey] ?? 0);
+    const parsed = Number(
+      faceExtraRows ?? value[legacyKey] ?? value[snakeKey] ?? 0,
+    );
     return Number.isFinite(parsed) ? Math.max(0, Math.round(parsed)) : 0;
   };
 
@@ -158,5 +163,3 @@ export const normalizeFolderWithSilent = (raw: unknown) => {
     !hasIsSilent && hasSilent ? { ...raw, isSilent: raw.silent } : raw;
   return normalizeFolder(normalizedInput);
 };
-
-

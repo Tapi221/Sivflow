@@ -55,11 +55,7 @@ export const BlockWrapper = ({
   const [isEditingWithin, setIsEditingWithin] = React.useState(false);
   const isEditableFocusTarget = (target: EventTarget | null) => {
     if (!(target instanceof HTMLElement)) return false;
-    return Boolean(
-      target.closest(
-        "input, textarea, [contenteditable]",
-      ),
-    );
+    return Boolean(target.closest("input, textarea, [contenteditable]"));
   };
 
   const inEditMode = React.useContext(BlockEditModeContext);
@@ -236,9 +232,3 @@ export const BlockWrapper = ({
     </div>
   );
 };
-
-
-
-
-
-

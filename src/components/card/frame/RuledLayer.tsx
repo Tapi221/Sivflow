@@ -97,7 +97,10 @@ export function RuledLayer({
           )}
           style={repeatStyle}
         />
-        <div className="ruledLayer pointer-events-none absolute z-0" style={bottomStyle} />
+        <div
+          className="ruledLayer pointer-events-none absolute z-0"
+          style={bottomStyle}
+        />
       </>
     );
   }
@@ -125,4 +128,3 @@ export function RuledLayer({
     />
   );
 }
-

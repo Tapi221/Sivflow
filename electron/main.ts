@@ -36,10 +36,7 @@ let oauthLoopbackServer: http.Server | null = null;
 app.commandLine.appendSwitch("disable-backgrounding-occluded-windows");
 app.commandLine.appendSwitch("disable-renderer-backgrounding");
 app.commandLine.appendSwitch("disable-background-timer-throttling");
-app.commandLine.appendSwitch(
-  "disable-features",
-  "CalculateNativeWinOcclusion",
-);
+app.commandLine.appendSwitch("disable-features", "CalculateNativeWinOcclusion");
 
 function toOauthCallbackPayload(url: string): {
   url: string;
@@ -59,9 +56,7 @@ function toOauthCallbackPayload(url: string): {
 }
 
 function getRendererUrlFromArgv(): string | null {
-  const arg = process.argv.find((value) =>
-    value.startsWith("--renderer-url="),
-  );
+  const arg = process.argv.find((value) => value.startsWith("--renderer-url="));
   if (!arg) return null;
   const [, rawUrl] = arg.split("=");
   return rawUrl || null;
@@ -376,8 +371,11 @@ function registerIpcHandlers(): void {
         body: responseText,
       });
 
-      let payload: { error?: string; error_description?: string; id_token?: string } =
-        {};
+      let payload: {
+        error?: string;
+        error_description?: string;
+        id_token?: string;
+      } = {};
       try {
         payload = JSON.parse(responseText) as {
           error?: string;

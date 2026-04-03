@@ -90,8 +90,3 @@ export class SafeIndexedDBWriter {
     return results;
   }
 }
-
-
-
-
-

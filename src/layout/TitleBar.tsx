@@ -30,7 +30,9 @@ function useBreadcrumbs() {
     }
 
     const segments = pathname.split("/").filter(Boolean);
-    const crumbs = [{ label: "ホーム", to: "/folders?home=1" as string | undefined }];
+    const crumbs = [
+      { label: "ホーム", to: "/folders?home=1" as string | undefined },
+    ];
 
     segments.forEach((seg, i) => {
       const label = PAGE_LABELS[seg.toLowerCase()] ?? seg;
@@ -411,6 +413,3 @@ export const TitleBar: React.FC = () => {
     </div>
   );
 };
-
-
-

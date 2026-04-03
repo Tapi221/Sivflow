@@ -169,10 +169,10 @@ export function usePptxConversionSubscription({
         });
       },
       (error: unknown) => {
-        console.error(
-          "[usePptxConversionSubscription] failed to subscribe",
-          { docId, error },
-        );
+        console.error("[usePptxConversionSubscription] failed to subscribe", {
+          docId,
+          error,
+        });
       },
     );
     return () => unsubscribe();

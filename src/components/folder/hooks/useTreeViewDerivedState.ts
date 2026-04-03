@@ -1,4 +1,9 @@
-import { type Card, type DocumentItem, type Folder, type SelectedExplorerItem } from "@/types";
+import {
+  type Card,
+  type DocumentItem,
+  type Folder,
+  type SelectedExplorerItem,
+} from "@/types";
 import { useCallback, useMemo } from "react";
 
 const toDate = (value: unknown): Date | null => {
@@ -48,24 +53,24 @@ export function useTreeViewDerivedState({
   autoCarryOver = true,
   isMobile,
 }: UseTreeViewDerivedStateParams) {
- const getFolderPath = useCallback(
-  (folderId: string | null): string => {
-    if (!folderId) return "";
+  const getFolderPath = useCallback(
+    (folderId: string | null): string => {
+      if (!folderId) return "";
 
-    const path: string[] = [];
-    let currentFolder = folders.find((folder) => folder.id === folderId);
+      const path: string[] = [];
+      let currentFolder = folders.find((folder) => folder.id === folderId);
 
-    while (currentFolder) {
-      path.unshift(currentFolder.folderName);
+      while (currentFolder) {
+        path.unshift(currentFolder.folderName);
 
-      const parentFolderId = currentFolder.parentFolderId;
-      currentFolder = folders.find((folder) => folder.id === parentFolderId);
-    }
+        const parentFolderId = currentFolder.parentFolderId;
+        currentFolder = folders.find((folder) => folder.id === parentFolderId);
+      }
 
-    return path.join(" / ");
-  },
-  [folders],
-);
+      return path.join(" / ");
+    },
+    [folders],
+  );
 
   const selectedFolder = useMemo(() => {
     if (!selectedFolderId) return null;
@@ -76,7 +81,8 @@ export function useTreeViewDerivedState({
     if (!selectedDocumentId) return null;
     return (
       documents.find(
-        (document) => (document.id || document.documentId) === selectedDocumentId,
+        (document) =>
+          (document.id || document.documentId) === selectedDocumentId,
       ) ?? null
     );
   }, [documents, selectedDocumentId]);
@@ -167,5 +173,3 @@ export function useTreeViewDerivedState({
     showMobileDetail,
   };
 }
-
-

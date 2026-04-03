@@ -52,8 +52,3 @@ export function StudyEmpty({ folderId, navigate, handleBack }: Props) {
     </Card>
   );
 }
-
-
-
-
-

@@ -97,4 +97,3 @@ export async function uploadProfileImage({
     throw new Error(`画像のアップロードに失敗しました: ${errorMessage}`);
   }
 }
-

@@ -75,8 +75,3 @@ export const ReferencePopup = ({
     </Dialog>
   );
 };
-
-
-
-
-

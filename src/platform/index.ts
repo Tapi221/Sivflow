@@ -9,8 +9,3 @@ export const platform: PlatformApi = hasDesktopBridge()
 
 export default platform;
 export type { PlatformApi } from "@/types/desktop-api";
-
-
-
-
-

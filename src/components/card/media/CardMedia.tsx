@@ -206,7 +206,9 @@ export function ImageGallery({
         const fallbackLocal = localFileId
           ? (resolvedLocalUrlMap[localFileId] ?? "")
           : "";
-        const cachedRemoteUrl = assetId ? (getCachedRemoteUrl(assetId) ?? "") : "";
+        const cachedRemoteUrl = assetId
+          ? (getCachedRemoteUrl(assetId) ?? "")
+          : "";
         const fallbackRemote = assetId
           ? (resolvedRemoteUrlMap[assetId] ?? "")
           : "";
@@ -261,7 +263,9 @@ export function ImageGallery({
       };
       const hasNonBlob = [media.remoteUrl, media.localUrl, media.url].some(
         (v) =>
-          typeof v === "string" && !v.startsWith("blob:") && v.trim().length > 0,
+          typeof v === "string" &&
+          !v.startsWith("blob:") &&
+          v.trim().length > 0,
       );
       if (hasNonBlob) continue;
       const localFileId = media.localFileId ?? media.assetId ?? null;
@@ -461,7 +465,10 @@ export function ImageGallery({
   const pendingLocalFileIds = React.useMemo(() => {
     const s = new Set<string>();
     for (const { localFileId } of unresolvedLocalItems) {
-      if (!resolvedLocalUrlMap[localFileId] && !failedLocalFileIds.has(localFileId)) {
+      if (
+        !resolvedLocalUrlMap[localFileId] &&
+        !failedLocalFileIds.has(localFileId)
+      ) {
         s.add(localFileId);
       }
     }
@@ -543,7 +550,8 @@ export function ImageGallery({
                   </Button>
                 </div>
               </>
-            ) : item.localFileId && pendingLocalFileIds.has(item.localFileId) ? (
+            ) : item.localFileId &&
+              pendingLocalFileIds.has(item.localFileId) ? (
               <div className="w-full h-48 bg-slate-100 flex items-center justify-center text-slate-400">
                 <div className="w-6 h-6 border-2 border-slate-300 border-t-slate-400 rounded-full animate-spin" />
               </div>
@@ -563,6 +571,3 @@ export function ImageGallery({
     </>
   );
 }
-
-
-

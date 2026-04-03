@@ -2,7 +2,9 @@ import type { DocumentItem } from "@/types";
 
 // ─── Manifest / Conversion types ────────────────────────────────────────────
 
-export type PptxManifestStatus = NonNullable<DocumentItem["pptxManifestStatus"]>;
+export type PptxManifestStatus = NonNullable<
+  DocumentItem["pptxManifestStatus"]
+>;
 
 export interface PptxManifest {
   docId?: string;
@@ -48,8 +50,3 @@ export const AUTO_RETRY_DELAYS_MS = [
   30 * 60 * 1000,
   60 * 60 * 1000,
 ];
-
-
-
-
-

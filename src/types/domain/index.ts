@@ -22,7 +22,4 @@ export type {
   UserSettings as SnapshotUserSettings,
 } from "./snapshot";
 
-export {
-  CURRENT_SCHEMA_VERSION as SNAPSHOT_SCHEMA_VERSION,
-} from "./snapshot";
-
+export { CURRENT_SCHEMA_VERSION as SNAPSHOT_SCHEMA_VERSION } from "./snapshot";

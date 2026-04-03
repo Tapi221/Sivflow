@@ -35,4 +35,3 @@ export { StratisType03Icon } from "./StratisType03Icon";
 export { StratisWrenchIcon } from "./StratisWrenchIcon";
 export { StratisX01Icon } from "./StratisX01Icon";
 export { StratisXCircleContainedIcon } from "./StratisXCircleContainedIcon";
-

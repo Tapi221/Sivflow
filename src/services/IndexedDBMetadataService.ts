@@ -239,9 +239,3 @@ export class IndexedDBMetadataService {
     return meta?.rebuildCount || 0;
   }
 }
-
-
-
-
-
-

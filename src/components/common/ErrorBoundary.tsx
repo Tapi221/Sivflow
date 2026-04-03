@@ -236,8 +236,3 @@ export class ErrorBoundary extends Component<Props, State> {
     return (this as unknown).props.children;
   }
 }
-
-
-
-
-

@@ -5,10 +5,7 @@
  */
 
 import type { DocumentItem } from "@/types";
-import type {
-  ConversionStatus,
-  PptxManifestStatus,
-} from "./pptxTypes";
+import type { ConversionStatus, PptxManifestStatus } from "./pptxTypes";
 import {
   AUTO_RETRY_DELAYS_MS,
   MANIFEST_PENDING_WINDOW_BASE_MS,
@@ -237,8 +234,3 @@ export const waitFor = (ms: number, signal: AbortSignal): Promise<void> =>
 // ─── MAX_AUTO_RETRY_ATTEMPTS re-export ───────────────────────────────────────
 
 export { MAX_AUTO_RETRY_ATTEMPTS };
-
-
-
-
-

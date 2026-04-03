@@ -38,8 +38,3 @@ function sanitizeValue(value: unknown, depth: number): unknown {
 export function sanitizeForLog<T>(value: T): T {
   return sanitizeValue(value, 0) as T;
 }
-
-
-
-
-

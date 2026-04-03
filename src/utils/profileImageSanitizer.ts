@@ -52,8 +52,3 @@ export const sanitizeProfileImage = (
     wasBlobRemoteUrl,
   };
 };
-
-
-
-
-

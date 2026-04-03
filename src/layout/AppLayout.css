@@ -10,7 +10,7 @@
 }
 
 .app-layout--sidebar-hidden {
- grid-template-columns: 0 minmax(0, 1fr) !important;
+  grid-template-columns: 0 minmax(0, 1fr) !important;
 }
 
 .app-layout__sidebar {

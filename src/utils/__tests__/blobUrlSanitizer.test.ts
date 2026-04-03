@@ -73,8 +73,3 @@ describe("blobUrlSanitizer", () => {
     expect(value.nested.url).toBeNull();
   });
 });
-
-
-
-
-

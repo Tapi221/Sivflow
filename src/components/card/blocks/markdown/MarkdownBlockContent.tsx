@@ -594,12 +594,8 @@ function ListRenderer({
   const listClass = cn(
     ordered ? "list-decimal list-outside" : "list-disc list-outside",
     "m-0 pl-6 text-left space-y-0",
-    ordered
-      ? "[&>li>ol]:pl-5 [&>li>ul]:pl-5"
-      : "[&>li>ul]:pl-5 [&>li>ol]:pl-5",
-    ordered
-      ? "[&>li>ol]:mt-0 [&>li>ul]:mt-0"
-      : "[&>li>ul]:mt-0 [&>li>ol]:mt-0",
+    ordered ? "[&>li>ol]:pl-5 [&>li>ul]:pl-5" : "[&>li>ul]:pl-5 [&>li>ol]:pl-5",
+    ordered ? "[&>li>ol]:mt-0 [&>li>ul]:mt-0" : "[&>li>ul]:mt-0 [&>li>ol]:mt-0",
   );
 
   return <Tag className={listClass}>{children}</Tag>;

@@ -6,18 +6,18 @@
 
 import type { SlideData } from "@/components/pptx/SlideImage";
 import {
-    autoRetryDelayMs,
-    buildSourceSignature,
-    formatConversionError,
-    getManifestPendingWindowMs,
-    getUpdatedAtMs,
-    isAutoRetryableConversionRequestFailure,
-    isConversionRequestFailure,
-    isFirestoreDiagnosticsEnabled,
-    MAX_AUTO_RETRY_ATTEMPTS,
-    normalizeManifestStatus,
-    normalizeRetryCount,
-    normalizeString
+  autoRetryDelayMs,
+  buildSourceSignature,
+  formatConversionError,
+  getManifestPendingWindowMs,
+  getUpdatedAtMs,
+  isAutoRetryableConversionRequestFailure,
+  isConversionRequestFailure,
+  isFirestoreDiagnosticsEnabled,
+  MAX_AUTO_RETRY_ATTEMPTS,
+  normalizeManifestStatus,
+  normalizeRetryCount,
+  normalizeString,
 } from "@/components/pptx/domain/pptxConversion";
 import { classifyConversionRequestError } from "@/components/pptx/domain/pptxErrors";
 import { ENQUEUE_DEDUPE_WINDOW_MS } from "@/components/pptx/domain/pptxTypes";
@@ -27,9 +27,9 @@ import { firestoreDb } from "@/services/firebase";
 import { pptxConversionDocPathSegments } from "@/services/firestorePaths";
 import type { DocumentItem } from "@/types";
 import {
-    doc as firestoreDoc,
-    serverTimestamp,
-    setDoc,
+  doc as firestoreDoc,
+  serverTimestamp,
+  setDoc,
 } from "firebase/firestore";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocalDocumentSource } from "./useLocalDocumentSource";
@@ -81,7 +81,9 @@ export interface PowerPointPaneController {
   handleOpenSource: () => void;
 
   // Local source
-  localSourceStatus: ReturnType<typeof useLocalDocumentSource>["localSourceStatus"];
+  localSourceStatus: ReturnType<
+    typeof useLocalDocumentSource
+  >["localSourceStatus"];
 
   // Fallback
   fallbackUrl: string | null;
@@ -92,7 +94,9 @@ export interface PowerPointPaneController {
   handleRetryConversion: () => void;
 
   // Ref for viewer
-  viewerRef: React.RefObject<import("../PowerPointViewer").PowerPointViewerHandle | null>;
+  viewerRef: React.RefObject<
+    import("../PowerPointViewer").PowerPointViewerHandle | null
+  >;
 }
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
@@ -437,8 +441,9 @@ export function usePowerPointPaneController(
 
   // ── Viewer reference ──────────────────────────────────────────────────────
   // Imported lazily to avoid circular reference at module level
-  const viewerRef =
-    useRef<import("../PowerPointViewer").PowerPointViewerHandle | null>(null);
+  const viewerRef = useRef<
+    import("../PowerPointViewer").PowerPointViewerHandle | null
+  >(null);
 
   // ── Derived UI state ──────────────────────────────────────────────────────
   const viewerReady =
@@ -537,11 +542,11 @@ export function usePowerPointPaneController(
 // ─── Thin wrapper to reset manifest loader on doc.id change ─────────────────
 
 function usePptxManifestLoaderWithReset(
-  options: Parameters<typeof usePptxManifestLoader>[0] & { docIdKey: string | undefined },
+  options: Parameters<typeof usePptxManifestLoader>[0] & {
+    docIdKey: string | undefined;
+  },
 ) {
-  const {
-    ...rest
-  } = options;
+  const { ...rest } = options;
 
   // usePptxManifestLoader uses docIdKey only for logging; the reset
   // on doc.id change is handled via the generationRef inside the hook itself
@@ -559,11 +564,3 @@ function usePptxManifestLoaderWithReset(
     setManifestError,
   };
 }
-
-
-
-
-
-
-
-

@@ -9,7 +9,11 @@ import { Image as ImageIcon, Link as LinkIcon } from "@/ui/icons";
 import type { Dispatch, SetStateAction } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import type { CardBlock, ReferenceBlockData, UploadedImage } from "@/types/domain/card";
+import type {
+  CardBlock,
+  ReferenceBlockData,
+  UploadedImage,
+} from "@/types/domain/card";
 type Side = "question" | "answer";
 type DraftShape = object;
 
@@ -61,25 +65,24 @@ export function useCardMediaDialogs({
   }, [upsertSingleBlock]);
 
   const getDialogImages = useCallback((side: Side): UploadedImage[] => {
-    const imageBlock = getSideBlocksRef.current(side).find(
-      (block) => block.type === "image",
-    );
+    const imageBlock = getSideBlocksRef
+      .current(side)
+      .find((block) => block.type === "image");
     return (imageBlock?.images ?? []) as UploadedImage[];
   }, []);
 
-  const setDialogImages = useCallback(
-    (side: Side, images: UploadedImage[]) => {
-      if (!images || images.length === 0) {
-        removeBlockByTypeIfExistsRef.current(side, "image");
-        return;
-      }
-      upsertSingleBlockRef.current(side, "image", { images });
-    },
-    [],
-  );
+  const setDialogImages = useCallback((side: Side, images: UploadedImage[]) => {
+    if (!images || images.length === 0) {
+      removeBlockByTypeIfExistsRef.current(side, "image");
+      return;
+    }
+    upsertSingleBlockRef.current(side, "image", { images });
+  }, []);
 
   const getDialogAudios = useCallback((side: Side) => {
-    const block = getSideBlocksRef.current(side).find((b) => b.type === "audio");
+    const block = getSideBlocksRef
+      .current(side)
+      .find((b) => b.type === "audio");
     return (block?.audios ?? []) as unknown as (string | UploadedImage)[];
   }, []);
 
@@ -92,9 +95,9 @@ export function useCardMediaDialogs({
   }, []);
 
   const getReferenceItems = useCallback((side: Side): ReferenceBlockData[] => {
-    const block = getSideBlocksRef.current(side).find(
-      (candidate) => candidate.type === "reference",
-    );
+    const block = getSideBlocksRef
+      .current(side)
+      .find((candidate) => candidate.type === "reference");
     return (block?.references ?? []) as ReferenceBlockData[];
   }, []);
 
@@ -140,71 +143,74 @@ export function useCardMediaDialogs({
     [],
   );
 
-  const renderMediaDialogButtons = useCallback((side: Side) => {
-    const imageCount = getImageCount(side);
-    const audioCount = getAudioCount(side);
-    const linkCount = getLinkCount(side);
-    const base = cn(
-      "inline-flex shrink-0 items-center justify-center gap-0.5 rounded-full h-7 min-h-0 min-w-0 px-1.5 text-[10px] font-semibold leading-none whitespace-nowrap",
-      CARD_ACTION_BG_CLASS,
-      CARD_ACTION_COLOR_IDLE_CLASS,
-    );
+  const renderMediaDialogButtons = useCallback(
+    (side: Side) => {
+      const imageCount = getImageCount(side);
+      const audioCount = getAudioCount(side);
+      const linkCount = getLinkCount(side);
+      const base = cn(
+        "inline-flex shrink-0 items-center justify-center gap-0.5 rounded-full h-7 min-h-0 min-w-0 px-1.5 text-[10px] font-semibold leading-none whitespace-nowrap",
+        CARD_ACTION_BG_CLASS,
+        CARD_ACTION_COLOR_IDLE_CLASS,
+      );
 
-    const openLinkDialog = () => {
-      if (getReferenceItems(side).length === 0) {
-        setReferenceItems(side, [{ url: "", name: "" }]);
-      }
-      setLinkDialogSide(side);
-    };
+      const openLinkDialog = () => {
+        if (getReferenceItems(side).length === 0) {
+          setReferenceItems(side, [{ url: "", name: "" }]);
+        }
+        setLinkDialogSide(side);
+      };
 
-    return (
-      <div
-        className="flex flex-nowrap items-center gap-1.5 whitespace-nowrap"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <button
-          type="button"
-          className={base}
-          onClick={() => setImageDialogSide(side)}
-          aria-label="画像を追加"
+      return (
+        <div
+          className="flex flex-nowrap items-center gap-1.5 whitespace-nowrap"
+          onClick={(e) => e.stopPropagation()}
         >
-          <ImageIcon className={cn(CARD_ACTION_ICON_CLASS, "shrink-0")} />
-          {imageCount > 0 ? <span>x{imageCount}</span> : null}
-        </button>
-
-        <button
-          type="button"
-          className={base}
-          onClick={() => setAudioDialogSide(side)}
-          aria-label="音声を追加"
-        >
-          <span
-            aria-hidden="true"
-            className="shrink-0 text-[13px] leading-none"
+          <button
+            type="button"
+            className={base}
+            onClick={() => setImageDialogSide(side)}
+            aria-label="画像を追加"
           >
-            ♪
-          </span>
-          {audioCount > 0 ? <span>x{audioCount}</span> : null}
-        </button>
+            <ImageIcon className={cn(CARD_ACTION_ICON_CLASS, "shrink-0")} />
+            {imageCount > 0 ? <span>x{imageCount}</span> : null}
+          </button>
 
-        <button
-          type="button"
-          className={base}
-          onClick={openLinkDialog}
-          aria-label="リンクを追加"
-        >
-          <LinkIcon className={cn(CARD_ACTION_ICON_CLASS, "shrink-0")} />
-          {linkCount > 0 ? <span>x{linkCount}</span> : null}
-        </button>
-      </div>
-    );
-  }, [
-    getAudioCount,
-    getImageCount,
-    getLinkCount,
-    getReferenceItems,
-    setReferenceItems,
-  ]);
+          <button
+            type="button"
+            className={base}
+            onClick={() => setAudioDialogSide(side)}
+            aria-label="音声を追加"
+          >
+            <span
+              aria-hidden="true"
+              className="shrink-0 text-[13px] leading-none"
+            >
+              ♪
+            </span>
+            {audioCount > 0 ? <span>x{audioCount}</span> : null}
+          </button>
+
+          <button
+            type="button"
+            className={base}
+            onClick={openLinkDialog}
+            aria-label="リンクを追加"
+          >
+            <LinkIcon className={cn(CARD_ACTION_ICON_CLASS, "shrink-0")} />
+            {linkCount > 0 ? <span>x{linkCount}</span> : null}
+          </button>
+        </div>
+      );
+    },
+    [
+      getAudioCount,
+      getImageCount,
+      getLinkCount,
+      getReferenceItems,
+      setReferenceItems,
+    ],
+  );
 
   return useMemo(
     () => ({
@@ -236,9 +242,3 @@ export function useCardMediaDialogs({
     ],
   );
 }
-
-
-
-
-
-

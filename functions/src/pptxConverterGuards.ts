@@ -16,10 +16,8 @@ export const asNonEmptyString = (value: unknown): string | null => {
   return trimmed.length > 0 ? trimmed : null;
 };
 
-const buildDocumentPathPrefix = (
-  userId: string,
-  docId: string,
-): string => `users/${userId}/documents/${docId}/`;
+const buildDocumentPathPrefix = (userId: string, docId: string): string =>
+  `users/${userId}/documents/${docId}/`;
 
 export const isScopedStoragePath = (
   path: string,

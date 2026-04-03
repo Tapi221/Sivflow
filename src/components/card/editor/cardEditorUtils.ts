@@ -82,13 +82,3 @@ export function shouldAutoOpenEditorForCard(card: unknown): boolean {
   const hasAnswerContent = backBlocks.some((b) => !isBlockEmpty(b));
   return !hasQuestionContent && !hasAnswerContent;
 }
-
-
-
-
-
-
-
-
-
-

@@ -138,9 +138,3 @@ export interface LocalDBSyncApi {
 
 export type LocalDBLike = (LocalDB | InMemoryLocalDB) & LocalDBSyncApi;
 export type LocalDBInstance = LocalDBLike;
-
-
-
-
-
-

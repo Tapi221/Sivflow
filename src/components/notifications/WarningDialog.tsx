@@ -98,8 +98,3 @@ export const WarningDialog: React.FC<WarningDialogProps> = ({
     </div>
   );
 };
-
-
-
-
-

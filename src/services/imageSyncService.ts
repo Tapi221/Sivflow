@@ -120,7 +120,9 @@ export class ImageSyncService {
           patch.front = {
             ...card.front,
             blocks: card.front.blocks.map((block) =>
-              block.type === "image" ? { ...block, images: updatedFrontImages } : block,
+              block.type === "image"
+                ? { ...block, images: updatedFrontImages }
+                : block,
             ),
           };
         }
@@ -128,7 +130,9 @@ export class ImageSyncService {
           patch.back = {
             ...card.back,
             blocks: card.back.blocks.map((block) =>
-              block.type === "image" ? { ...block, images: updatedBackImages } : block,
+              block.type === "image"
+                ? { ...block, images: updatedBackImages }
+                : block,
             ),
           };
         }
@@ -301,17 +305,11 @@ export class ImageSyncService {
   /**
    * [DEPRECATED/REMOVED]
    * Previously used to download images to creating local blobs.
-  * Removed to prevent "Not allowed to load local resource" errors and blob leaks.
-  * We now rely on standard browser caching for remote URLs.
-  */
+   * Removed to prevent "Not allowed to load local resource" errors and blob leaks.
+   * We now rely on standard browser caching for remote URLs.
+   */
   async downloadHighResImage(image: UploadedImage): Promise<string | null> {
     void image;
     return null;
   }
 }
-
-
-
-
-
-

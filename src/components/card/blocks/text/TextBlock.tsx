@@ -94,9 +94,3 @@ const areTextBlockPropsEqual = (prev: TextBlockProps, next: TextBlockProps) =>
 
 export const TextBlock = React.memo(TextBlockInner, areTextBlockPropsEqual);
 TextBlock.displayName = "TextBlock";
-
-
-
-
-
-

@@ -134,15 +134,4 @@ const CommandShortcut = ({ className, ...props }) => {
 };
 CommandShortcut.displayName = "CommandShortcut";
 
-export {
-  Command,
-  CommandInput,
-  CommandList,
-  CommandGroup,
-  CommandItem,
-};
-
-
-
-
-
+export { Command, CommandInput, CommandList, CommandGroup, CommandItem };

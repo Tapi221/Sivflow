@@ -174,8 +174,3 @@ export function RecentPanel({
     </div>
   );
 }
-
-
-
-
-

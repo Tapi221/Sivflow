@@ -63,10 +63,7 @@ const isFirestoreUnavailable = (error: unknown): boolean => {
   );
 };
 
-const isLikelyClientBlock = (
-  error: unknown,
-  isOnline: boolean,
-): boolean => {
+const isLikelyClientBlock = (error: unknown, isOnline: boolean): boolean => {
   if (!isOnline) return false;
   if (isFirestoreBlockedByClient(error)) return true;
   const text = getErrorText(error);
@@ -98,8 +95,3 @@ export const classifyConversionRequestError = (
   if (isFirestoreUnavailable(error)) return "conversion_request_unavailable";
   return "conversion_request_failed";
 };
-
-
-
-
-

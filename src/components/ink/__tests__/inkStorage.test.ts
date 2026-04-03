@@ -72,8 +72,3 @@ describe("inkStorage", () => {
     ).toBeNull();
   });
 });
-
-
-
-
-

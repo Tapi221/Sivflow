@@ -49,6 +49,9 @@ export function buildCardFaceLayout(
   return {
     visibleRules: deduped,
     usedHeight,
-    bottomSlackPx: Math.max(0, ruledBottom - Math.max(usedHeight, lastVisibleRule)),
+    bottomSlackPx: Math.max(
+      0,
+      ruledBottom - Math.max(usedHeight, lastVisibleRule),
+    ),
   };
 }

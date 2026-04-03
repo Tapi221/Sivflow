@@ -1,6 +1,12 @@
 import type { ComponentProps } from "react";
 import { RecentPanel } from "@/components/explorer/RecentPanel";
-import type { Card, CardSet, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
+import type {
+  Card,
+  CardSet,
+  DocumentItem,
+  Folder,
+  SelectedExplorerItem,
+} from "@/types";
 import { FolderTreeWithCards } from "@/components/folder/components/views/FolderTreeWithCards";
 
 type FolderTreeWithCardsProps = ComponentProps<typeof FolderTreeWithCards>;
@@ -141,4 +147,3 @@ export function TreeViewTabContent({
       );
   }
 }
-

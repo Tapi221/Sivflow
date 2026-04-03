@@ -55,11 +55,7 @@ export type SyncEntity = "card" | "folder" | "asset";
 export type SyncOperationType = "create" | "update" | "delete";
 export type SyncDirection = "upload" | "download";
 export type SyncPriority = "critical" | "high" | "medium" | "low";
-export type SyncQueueStatus =
-  | "pending"
-  | "processing"
-  | "completed"
-  | "failed";
+export type SyncQueueStatus = "pending" | "processing" | "completed" | "failed";
 
 export type AssetSyncPayload = Pick<AssetRecord, "id"> &
   Partial<
@@ -183,8 +179,3 @@ export const DEFAULT_SYNC_SETTINGS: SyncSettings = {
   wifiOnly: false,
   autoCleanupDevices: true,
 };
-
-
-
-
-

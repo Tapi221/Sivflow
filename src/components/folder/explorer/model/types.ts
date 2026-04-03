@@ -4,8 +4,3 @@ export interface PinnedItem {
   type: PinnedItemType;
   id: string;
 }
-
-
-
-
-

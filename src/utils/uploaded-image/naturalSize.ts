@@ -3,7 +3,10 @@ export type ImageNaturalSize = {
   naturalH: number;
 };
 
-function hasNaturalSize(image: { naturalWidth: number; naturalHeight: number }) {
+function hasNaturalSize(image: {
+  naturalWidth: number;
+  naturalHeight: number;
+}) {
   return image.naturalWidth > 0 && image.naturalHeight > 0;
 }
 
@@ -48,4 +51,3 @@ export async function loadImageNaturalSize(
     }
   });
 }
-

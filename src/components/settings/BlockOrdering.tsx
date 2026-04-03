@@ -234,9 +234,3 @@ export const BlockOrdering = () => {
     </div>
   );
 };
-
-
-
-
-
-

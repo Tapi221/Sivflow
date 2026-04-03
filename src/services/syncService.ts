@@ -106,18 +106,20 @@ const getErrorDetails = (
   }
   if (isRecord(error)) {
     const message =
-      typeof error.message === "string"
-        ? error.message
-        : "Unknown sync error";
+      typeof error.message === "string" ? error.message : "Unknown sync error";
     const stack = typeof error.stack === "string" ? error.stack : undefined;
     return { message, stack };
   }
   return { message: String(error) };
 };
 
-const hasTextConflict = (local: MergeableEntity, remote: MergeableEntity): boolean =>
+const hasTextConflict = (
+  local: MergeableEntity,
+  remote: MergeableEntity,
+): boolean =>
   isCard(local) && isCard(remote)
-    ? JSON.stringify(local.front.blocks) !== JSON.stringify(remote.front.blocks) ||
+    ? JSON.stringify(local.front.blocks) !==
+        JSON.stringify(remote.front.blocks) ||
       JSON.stringify(local.back.blocks) !== JSON.stringify(remote.back.blocks)
     : isFolder(local) && isFolder(remote)
       ? local.folderName !== remote.folderName
@@ -648,7 +650,8 @@ export class SyncService {
   private async processAssetUpload(payload: AssetSyncPayload): Promise<void> {
     const assetId = payload.id;
     const localBlobId = payload.localBlobId ?? assetId;
-    const remoteKey = payload.remoteKey ?? `users/${this.userId}/assets/${assetId}`;
+    const remoteKey =
+      payload.remoteKey ?? `users/${this.userId}/assets/${assetId}`;
     if (!localBlobId) {
       throw new Error("Asset queue payload is missing localBlobId");
     }
@@ -708,7 +711,7 @@ export class SyncService {
       createdAt:
         isRecord(existingAsset) && existingAsset.createdAt
           ? existingAsset.createdAt
-          : payload.createdAt ?? new Date(),
+          : (payload.createdAt ?? new Date()),
     } as AssetRecord);
     if (import.meta.env.DEV) {
       console.info("[AssetSync] syncQueue upload success", {
@@ -991,18 +994,18 @@ export class SyncService {
   ): Promise<void> {
     if (table === "userSettings" || table === "userStats") {
       for (const item of remoteItems) {
-        if (
-          table === "userSettings" &&
-          item.profileImage
-        ) {
-          item.profileImage = sanitizeProfileImage(item.profileImage).profileImage;
+        if (table === "userSettings" && item.profileImage) {
+          item.profileImage = sanitizeProfileImage(
+            item.profileImage,
+          ).profileImage;
         }
         await this.localDB.upsert(table, item);
       }
       return;
     }
 
-    const entityType: MergeableEntityType = table === "cards" ? "card" : "folder";
+    const entityType: MergeableEntityType =
+      table === "cards" ? "card" : "folder";
     for (const item of remoteItems) {
       const localItem = await this.localDB.getItem(table, item.id);
       const merged = this.mergeEntity(localItem, item, entityType);
@@ -1554,4 +1557,3 @@ export class SyncService {
     return { successRate, avgDuration, errorRate, totalSyncs };
   }
 }
-

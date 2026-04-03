@@ -108,11 +108,7 @@ export default function Folders() {
     resetMainScroll();
     const raf = window.requestAnimationFrame(resetMainScroll);
     return () => window.cancelAnimationFrame(raf);
-  }, [
-    selectedFolderId,
-    selectedItem?.type,
-    selectedItem?.id,
-  ]);
+  }, [selectedFolderId, selectedItem?.type, selectedItem?.id]);
 
   useEffect(() => {
     const next = new URLSearchParams(queryString);
@@ -246,23 +242,26 @@ export default function Folders() {
   }, [isDesktop]);
 
   // --- 選択ハンドラ ---
-  const handleSelectFolderInWork = useCallback((folderId) => {
-    if (
-      selectedFolderIdRef.current === folderId &&
-      selectedItemRef.current === null
-    ) {
-      return;
-    }
+  const handleSelectFolderInWork = useCallback(
+    (folderId) => {
+      if (
+        selectedFolderIdRef.current === folderId &&
+        selectedItemRef.current === null
+      ) {
+        return;
+      }
 
-    forceResetWorkspaceScroll();
-    setFolderSelectionNonce((n) => n + 1);
-    notifyMainSidebarFolderSelection(folderId);
-    setSelectedFolderId(folderId);
-    setSelectedItem(null);
-    setExplorerCardSetContext(null);
-    selectedFolderIdRef.current = folderId;
-    selectedItemRef.current = null;
-  }, [forceResetWorkspaceScroll, notifyMainSidebarFolderSelection]);
+      forceResetWorkspaceScroll();
+      setFolderSelectionNonce((n) => n + 1);
+      notifyMainSidebarFolderSelection(folderId);
+      setSelectedFolderId(folderId);
+      setSelectedItem(null);
+      setExplorerCardSetContext(null);
+      selectedFolderIdRef.current = folderId;
+      selectedItemRef.current = null;
+    },
+    [forceResetWorkspaceScroll, notifyMainSidebarFolderSelection],
+  );
 
   const handleSelectCardInWork = useCallback((cardId) => {
     const current = selectedItemRef.current;
@@ -282,69 +281,72 @@ export default function Folders() {
     selectedItemRef.current = nextItem;
   }, []);
 
-  const handleSelectItemInWork = useCallback((item) => {
-    if (!item) {
-      if (selectedItemRef.current === null) return;
-      setSelectedItem(null);
-      selectedItemRef.current = null;
-      return;
-    }
+  const handleSelectItemInWork = useCallback(
+    (item) => {
+      if (!item) {
+        if (selectedItemRef.current === null) return;
+        setSelectedItem(null);
+        selectedItemRef.current = null;
+        return;
+      }
 
-    if (item.type === "card") {
-      handleSelectCardInWork(item.id);
-      return;
-    }
+      if (item.type === "card") {
+        handleSelectCardInWork(item.id);
+        return;
+      }
 
-    if (item.type === "document") {
-      handleSelectDocumentInWork(item.id);
-      return;
-    }
+      if (item.type === "document") {
+        handleSelectDocumentInWork(item.id);
+        return;
+      }
 
-    if (item.type === "directory") {
-      notifyMainSidebarFolderSelection(null);
-      setSelectedItem({ type: "directory" });
-      setSelectedFolderId(null);
-      selectedFolderIdRef.current = null;
-      selectedItemRef.current = { type: "directory" };
-      return;
-    }
+      if (item.type === "directory") {
+        notifyMainSidebarFolderSelection(null);
+        setSelectedItem({ type: "directory" });
+        setSelectedFolderId(null);
+        selectedFolderIdRef.current = null;
+        selectedItemRef.current = { type: "directory" };
+        return;
+      }
 
-    if (item.type === "gallery") {
-      notifyMainSidebarFolderSelection(null);
-      setSelectedItem({ type: "gallery" });
-      setSelectedFolderId(null);
-      selectedFolderIdRef.current = null;
-      selectedItemRef.current = { type: "gallery" };
-      return;
-    }
+      if (item.type === "gallery") {
+        notifyMainSidebarFolderSelection(null);
+        setSelectedItem({ type: "gallery" });
+        setSelectedFolderId(null);
+        selectedFolderIdRef.current = null;
+        selectedItemRef.current = { type: "gallery" };
+        return;
+      }
 
-    if (item.type === "calendar") {
-      notifyMainSidebarFolderSelection(null);
-      setSelectedItem({ type: "calendar" });
-      setSelectedFolderId(null);
-      selectedFolderIdRef.current = null;
-      selectedItemRef.current = { type: "calendar" };
-      return;
-    }
+      if (item.type === "calendar") {
+        notifyMainSidebarFolderSelection(null);
+        setSelectedItem({ type: "calendar" });
+        setSelectedFolderId(null);
+        selectedFolderIdRef.current = null;
+        selectedItemRef.current = { type: "calendar" };
+        return;
+      }
 
-    if (item.type === "settings") {
-      setIsSettingsOpen(true);
-      return;
-    }
+      if (item.type === "settings") {
+        setIsSettingsOpen(true);
+        return;
+      }
 
-    if (item.type === "trash") {
-      notifyMainSidebarFolderSelection(null);
-      setSelectedItem({ type: "trash" });
-      setSelectedFolderId(null);
-      selectedFolderIdRef.current = null;
-      selectedItemRef.current = { type: "trash" };
-    }
-  }, [
-    handleSelectCardInWork,
-    handleSelectDocumentInWork,
-    notifyMainSidebarFolderSelection,
-    setIsSettingsOpen,
-  ]);
+      if (item.type === "trash") {
+        notifyMainSidebarFolderSelection(null);
+        setSelectedItem({ type: "trash" });
+        setSelectedFolderId(null);
+        selectedFolderIdRef.current = null;
+        selectedItemRef.current = { type: "trash" };
+      }
+    },
+    [
+      handleSelectCardInWork,
+      handleSelectDocumentInWork,
+      notifyMainSidebarFolderSelection,
+      setIsSettingsOpen,
+    ],
+  );
 
   const isLoading = foldersLoading || cardsLoading;
 
@@ -379,10 +381,7 @@ export default function Folders() {
         setNavigateToSectionListToken((n) => n + 1);
       }
     });
-  }, [
-    registerFolderSelectHandler,
-    notifyMainSidebarFolderSelection,
-  ]);
+  }, [registerFolderSelectHandler, notifyMainSidebarFolderSelection]);
 
   useEffect(() => {
     return () => {
@@ -413,7 +412,7 @@ export default function Folders() {
   }, [documents]);
 
   useEffect(() => {
-    const crumbs = [ ];
+    const crumbs = [];
     const breadcrumbFolderId = selectedFolderId || explorerFolderContextId;
 
     // フォルダ階層を構築（祖先 → 選択フォルダ）
@@ -480,9 +479,7 @@ export default function Folders() {
     <div
       className={cn(
         "bg-[#F8FAFB] relative flex min-h-0 h-full flex-col",
-        isDesktop
-          ? "overflow-hidden"
-          : "overflow-x-hidden overflow-y-auto",
+        isDesktop ? "overflow-hidden" : "overflow-x-hidden overflow-y-auto",
       )}
     >
       <div
@@ -522,10 +519,3 @@ export default function Folders() {
     </div>
   );
 }
-
-
-
-
-
-
-

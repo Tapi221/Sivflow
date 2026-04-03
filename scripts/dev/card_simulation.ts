@@ -40,9 +40,9 @@ function simulateCardScenario(
     const nextReviewStr =
       nextReviewDate instanceof Date
         ? nextReviewDate.toISOString()
-        : (
-            nextReviewDate as { toDate?: () => Date }
-          ).toDate?.().toISOString() ?? new Date(nextReviewDate).toISOString();
+        : ((nextReviewDate as { toDate?: () => Date })
+            .toDate?.()
+            .toISOString() ?? new Date(nextReviewDate).toISOString());
     console.log(
       `Event: ${event}, S: ${S.toFixed(2)}, state: ${state}, I: ${I.toFixed(2)}, nextReviewDate: ${nextReviewStr}`,
     );

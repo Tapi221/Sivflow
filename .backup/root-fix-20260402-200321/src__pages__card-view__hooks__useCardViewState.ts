@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCardEntity } from "@/hooks/card/useCardEntity";
 import type { Card } from "@/types";
 import type { CardSet } from "@/types/domain/cardSet";
@@ -16,7 +10,9 @@ interface UseCardViewStateOptions {
   cardSetId: string | null;
   sortedCards: Card[];
   cardIndexById: Map<string, number>;
-  createCard: (cardData: Partial<Card> & { cardSetId: string }) => Promise<unknown>;
+  createCard: (
+    cardData: Partial<Card> & { cardSetId: string },
+  ) => Promise<unknown>;
   updateCard: (id: string, data: Partial<Card>) => Promise<unknown>;
   selectedCardSet: CardSet | null;
   isLoading: boolean;
@@ -88,7 +84,10 @@ export function useCardViewState({
   // Persist meta panel open state
   useEffect(() => {
     if (typeof window === "undefined") return;
-    window.localStorage.setItem("card-view.meta-panel-open", String(isMetaOpen));
+    window.localStorage.setItem(
+      "card-view.meta-panel-open",
+      String(isMetaOpen),
+    );
   }, [isMetaOpen]);
 
   // Resolve targetCardId → index on load
@@ -168,7 +167,8 @@ export function useCardViewState({
 
   const selectedCard = useMemo(() => {
     if (!currentCard) return null;
-    if (effectiveCard && effectiveCard.id === currentCard.id) return effectiveCard;
+    if (effectiveCard && effectiveCard.id === currentCard.id)
+      return effectiveCard;
     return currentCard;
   }, [currentCard, effectiveCard]);
 
@@ -201,14 +201,24 @@ export function useCardViewState({
     const targetFolderId = folderId ?? selectedCardSet?.folderId ?? "";
     void (async () => {
       try {
-        const created = await createCard({ cardSetId, folderId: targetFolderId });
+        const created = await createCard({
+          cardSetId,
+          folderId: targetFolderId,
+        });
         const createdId = extractCreatedId(created);
         if (createdId) setPendingFocusCardId(createdId);
       } catch (error) {
         console.error("[CardView] Failed to bootstrap empty card set:", error);
       }
     })();
-  }, [cardSetId, createCard, folderId, isLoading, selectedCardSet?.folderId, sortedCards.length]);
+  }, [
+    cardSetId,
+    createCard,
+    folderId,
+    isLoading,
+    selectedCardSet?.folderId,
+    sortedCards.length,
+  ]);
 
   const createAndFocusCard = useCallback(async (): Promise<boolean> => {
     const targetCardSetId =
@@ -240,7 +250,9 @@ export function useCardViewState({
     } catch (error) {
       console.error("[CardView] Failed to create new card:", error);
       toastError(
-        error instanceof Error ? error.message : "新規カードの作成に失敗しました",
+        error instanceof Error
+          ? error.message
+          : "新規カードの作成に失敗しました",
       );
       return false;
     }

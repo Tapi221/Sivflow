@@ -78,9 +78,3 @@ export function StudyReview({
     </div>
   );
 }
-
-
-
-
-
-

@@ -3,7 +3,10 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { getLocalDb } from "@/services/localDB";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { normalizeCard } from "@/utils";
-import { useUserSettings, DEFAULT_SETTINGS } from "@/hooks/settings/useUserSettings";
+import {
+  useUserSettings,
+  DEFAULT_SETTINGS,
+} from "@/hooks/settings/useUserSettings";
 import type { Card } from "@/types";
 import { normalizeInkDocument } from "@/components/ink/inkTypes";
 import {
@@ -60,7 +63,9 @@ const resolveInkFromCardData = (
   const faceKey = side === "question" ? "front" : "back";
   const face = value[faceKey];
   const faceInk =
-    face && typeof face === "object" ? (face as { ink?: unknown }).ink : undefined;
+    face && typeof face === "object"
+      ? (face as { ink?: unknown }).ink
+      : undefined;
   return normalizeInkDocument(faceInk ?? null);
 };
 
@@ -99,7 +104,10 @@ export function useCards(
 
         if (cardSetId) {
           try {
-            return await db.cards.where("cardSetId").equals(cardSetId).toArray();
+            return await db.cards
+              .where("cardSetId")
+              .equals(cardSetId)
+              .toArray();
           } catch (indexError) {
             console.warn(
               "[useCards] cardSetId index query failed. Falling back to full scan.",
@@ -156,7 +164,9 @@ export function useCards(
   // useLiveQueryはundefinedを返すことがあるのでloadingを判定
   const loading = enabled && rawCards === undefined;
 
-  const createCard = async (cardData: Partial<Card> & { cardSetId?: string }) => {
+  const createCard = async (
+    cardData: Partial<Card> & { cardSetId?: string },
+  ) => {
     if (!currentUser) throw new Error("認証が必要です");
 
     // 新規作成時はタイトルが空であることを許容する（あとで編集するため）
@@ -195,31 +205,43 @@ export function useCards(
         }
       }
 
-      const targetFolderId = normalizeFolderForCard(cardData.folderId ?? folderId ?? "");
+      const targetFolderId = normalizeFolderForCard(
+        cardData.folderId ?? folderId ?? "",
+      );
       const targetFolderOrNull = toNullableFolderId(targetFolderId);
 
-      const siblingSets = (await db.cardSets.where("userId").equals(currentUser.uid).toArray())
+      const siblingSets = (
+        await db.cardSets.where("userId").equals(currentUser.uid).toArray()
+      )
         .filter(
           (set) =>
-            !set.isDeleted &&
-            (set.folderId ?? null) === targetFolderOrNull,
+            !set.isDeleted && (set.folderId ?? null) === targetFolderOrNull,
         )
         .sort((a, b) => {
           const orderA = a.orderIndex ?? 0;
           const orderB = b.orderIndex ?? 0;
           if (orderA !== orderB) return orderA - orderB;
-          return new Date(a.createdAt ?? 0).getTime() - new Date(b.createdAt ?? 0).getTime();
+          return (
+            new Date(a.createdAt ?? 0).getTime() -
+            new Date(b.createdAt ?? 0).getTime()
+          );
         });
 
       const reusableSet = siblingSets[0];
       if (reusableSet) {
-        return { cardSetId: reusableSet.id, folderId: reusableSet.folderId ?? null };
+        return {
+          cardSetId: reusableSet.id,
+          folderId: reusableSet.folderId ?? null,
+        };
       }
 
       const fallbackSetId = crypto.randomUUID();
       const fallbackSetName = "新規カードセット";
       const fallbackSetOrder =
-        siblingSets.reduce((max, set) => Math.max(max, set.orderIndex ?? 0), -1) + 1;
+        siblingSets.reduce(
+          (max, set) => Math.max(max, set.orderIndex ?? 0),
+          -1,
+        ) + 1;
 
       await db.cardSets.add({
         id: fallbackSetId,
@@ -517,11 +539,3 @@ export function useCards(
     reorderCards,
   };
 }
-
-
-
-
-
-
-
-

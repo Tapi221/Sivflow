@@ -204,4 +204,3 @@ export const getTagColorSwatchStyle = (input?: string): CSSProperties => {
     color: palette.fg,
   };
 };
-

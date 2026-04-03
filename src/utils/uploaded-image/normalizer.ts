@@ -121,8 +121,7 @@ const normalizeUploadedImage = (
   }
 
   const normalizedScale = clampNumber(scale ?? 1, 0.2, 1);
-  const normalizedX =
-    normalizedScale >= 0.999 ? 0 : clampNumber(x ?? 0, -1, 1);
+  const normalizedX = normalizedScale >= 0.999 ? 0 : clampNumber(x ?? 0, -1, 1);
 
   return {
     id: resolveString(pickFirst(record, ["id"])) ?? generateUploadedImageId(),
@@ -247,9 +246,3 @@ export const denormalizeUploadedImages = (
 ) => {
   return images.map((image) => denormalizeUploadedImage(image, options));
 };
-
-
-
-
-
-

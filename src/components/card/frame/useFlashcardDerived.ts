@@ -87,7 +87,9 @@ export function useFlashcardDerived(
 
   const activeAudioUrls = React.useMemo(
     () =>
-      activeAudios.length > 0 ? resolveAudioUrls(activeAudios) : EMPTY_AUDIO_URLS,
+      activeAudios.length > 0
+        ? resolveAudioUrls(activeAudios)
+        : EMPTY_AUDIO_URLS,
     [activeAudios],
   );
 
@@ -96,11 +98,7 @@ export function useFlashcardDerived(
       activeSide === "question"
         ? ((cardData?.front?.blocks ?? []) as CardBlock[])
         : ((cardData?.back?.blocks ?? []) as CardBlock[]),
-    [
-      activeSide,
-      cardData?.back?.blocks,
-      cardData?.front?.blocks,
-    ],
+    [activeSide, cardData?.back?.blocks, cardData?.front?.blocks],
   );
 
   const activeReferences = React.useMemo(
@@ -131,31 +129,28 @@ export function useFlashcardDerived(
         cardId,
         activeSide,
         activeSide === "question"
-          ? cardData?.front?.ink ?? null
-          : cardData?.back?.ink ?? null,
+          ? (cardData?.front?.ink ?? null)
+          : (cardData?.back?.ink ?? null),
       ),
     [activeSide, cardData?.back?.ink, cardData?.front?.ink, cardId],
   );
 
-  const activeBlocks = React.useMemo(
-    () => {
-      if (!cardData) return EMPTY_BLOCKS;
-      return resolveSideBlocks(activeSide, {
-        blocks: activeSourceBlocks,
-        text: activeText,
-        audios: activeAudios,
-        code: activeCode,
-      });
-    },
-    [
-      activeSide,
-      activeAudios,
-      activeCode,
-      activeSourceBlocks,
-      activeText,
-      cardData,
-    ],
-  );
+  const activeBlocks = React.useMemo(() => {
+    if (!cardData) return EMPTY_BLOCKS;
+    return resolveSideBlocks(activeSide, {
+      blocks: activeSourceBlocks,
+      text: activeText,
+      audios: activeAudios,
+      code: activeCode,
+    });
+  }, [
+    activeSide,
+    activeAudios,
+    activeCode,
+    activeSourceBlocks,
+    activeText,
+    cardData,
+  ]);
 
   return {
     cardId,
@@ -171,14 +166,3 @@ export function useFlashcardDerived(
     activeInkDocument,
   };
 }
-
-
-
-
-
-
-
-
-
-
-

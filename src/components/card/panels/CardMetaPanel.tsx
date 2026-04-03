@@ -353,7 +353,9 @@ const cardMetaDraftFlag = (card: Card | null): boolean =>
 
 const cardMetaReviewCount = (card: Card | null): number =>
   Number(
-    card?.reviewCount ?? (card as Record<string, unknown> | null)?.review_count ?? 0,
+    card?.reviewCount ??
+      (card as Record<string, unknown> | null)?.review_count ??
+      0,
   );
 
 const cardMetaLastSubjectiveScore = (card: Card | null): number | null => {
@@ -363,9 +365,7 @@ const cardMetaLastSubjectiveScore = (card: Card | null): number | null => {
   return toFiniteNumber(value);
 };
 
-const cardMetaDateTimeMs = (
-  value: unknown,
-): number | null => {
+const cardMetaDateTimeMs = (value: unknown): number | null => {
   const date = toValidDate(value);
   return date ? date.getTime() : null;
 };
@@ -1334,7 +1334,13 @@ function CardMetaPanelInner({
                 データなし
               </div>
             ) : (
-              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0} debounce={1}>
+              <ResponsiveContainer
+                width="100%"
+                height="100%"
+                minWidth={0}
+                minHeight={0}
+                debounce={1}
+              >
                 <LineChart
                   data={chartData}
                   margin={{ top: 8, right: 10, left: 2, bottom: 4 }}
@@ -1377,7 +1383,10 @@ function CardMetaPanelInner({
                     stroke="#0f766e"
                     strokeWidth={2.5}
                     isAnimationActive={false}
-                    dot={{ r: chartData.length === 1 ? 5 : 2.5, fill: "#0f766e" }}
+                    dot={{
+                      r: chartData.length === 1 ? 5 : 2.5,
+                      fill: "#0f766e",
+                    }}
                     activeDot={{ r: 6, strokeWidth: 0 }}
                     connectNulls
                   />
@@ -1522,7 +1531,8 @@ function CardMetaPanelInner({
                             {row.isLatestEditable && isEditingLatestReview ? (
                               <div className="inline-grid grid-cols-2 gap-1 place-items-center">
                                 {([1, 2, 3, 4] as const).map((rating) => {
-                                  const faceDesign = getRatingFaceDesign(rating);
+                                  const faceDesign =
+                                    getRatingFaceDesign(rating);
                                   const isSelected =
                                     latestReviewRatingInput === rating;
                                   return (
@@ -1715,7 +1725,9 @@ function CardMetaPanelInner({
                             </span>
                           </div>
                         ) : (
-                          <span className="tabular-nums">{row.durationLabel}</span>
+                          <span className="tabular-nums">
+                            {row.durationLabel}
+                          </span>
                         )}
                       </TableCell>
                     </TableRow>
@@ -1799,5 +1811,3 @@ export const CardMetaPanel = memo(
   areCardMetaPanelPropsEqual,
 );
 CardMetaPanel.displayName = "CardMetaPanel";
-
-

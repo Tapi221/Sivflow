@@ -105,10 +105,7 @@ export function useFolders() {
     await db.updateItem("folders", folderId, payload);
   };
 
-  const reorderFolders = async (
-    folderIds: string[],
-    
-  ) => {
+  const reorderFolders = async (folderIds: string[]) => {
     if (!currentUser) throw new Error("認証が必要です");
 
     // 1. LocalDB Updates (Sync Queued for each)
@@ -165,10 +162,3 @@ export function useFolders() {
     getFolderTree,
   };
 }
-
-
-
-
-
-
-

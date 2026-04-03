@@ -4,23 +4,23 @@ import { Dexie } from "dexie";
 // This is safe in ESM because both modules only use each other inside function bodies,
 // never at module initialization time.
 import {
-    getStoredLocalDBResetFailureReason,
-    markLocalDBGenerationBumped,
-    saveLocalDBResetFailureReason,
-    updateLocalDBRuntimeStatus,
-    warnOncePerSession,
+  getStoredLocalDBResetFailureReason,
+  markLocalDBGenerationBumped,
+  saveLocalDBResetFailureReason,
+  updateLocalDBRuntimeStatus,
+  warnOncePerSession,
 } from "@/services/localDBRuntimeState";
 import type { LocalDB } from "./LocalDB";
 import { createLocalDBInternal } from "./LocalDB";
 import {
-    classifyFallbackReasonCode,
-    isBackingStoreOpenError,
-    safeStringifyError,
+  classifyFallbackReasonCode,
+  isBackingStoreOpenError,
+  safeStringifyError,
 } from "./errors";
 import {
-    bumpGenerationForUser as _bumpGenerationForUser,
-    deleteUserPersistentDatabases,
-    getFallbackDatabaseNameForUser,
+  bumpGenerationForUser as _bumpGenerationForUser,
+  deleteUserPersistentDatabases,
+  getFallbackDatabaseNameForUser,
 } from "./generation";
 import type { LocalDBInstance, LocalDBLike } from "./types";
 
@@ -344,8 +344,3 @@ export async function initializeDB(userId: string): Promise<void> {
 export async function resetLocalDBForLogout(userId?: string): Promise<void> {
   await resetForLogout(userId);
 }
-
-
-
-
-

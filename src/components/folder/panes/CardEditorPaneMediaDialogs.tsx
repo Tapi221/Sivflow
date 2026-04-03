@@ -20,7 +20,13 @@ interface MediaDialogProps {
   children: React.ReactNode;
 }
 
-function MediaDialog({ title, open, onClose, maxWidth = "max-w-2xl", children }: MediaDialogProps) {
+function MediaDialog({
+  title,
+  open,
+  onClose,
+  maxWidth = "max-w-2xl",
+  children,
+}: MediaDialogProps) {
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className={maxWidth}>
@@ -74,7 +80,9 @@ function CardEditorPaneMediaDialogsInner({
           <MediaUploader
             type="image"
             urls={getDialogImages(imageDialogSide)}
-            onChange={(next) => setDialogImages(imageDialogSide, next as UploadedImage[])}
+            onChange={(next) =>
+              setDialogImages(imageDialogSide, next as UploadedImage[])
+            }
             maxFiles={10}
           />
         )}
@@ -89,7 +97,9 @@ function CardEditorPaneMediaDialogsInner({
           <MediaUploader
             type="audio"
             urls={getDialogAudios(audioDialogSide)}
-            onChange={(next) => setDialogAudios(audioDialogSide, next as unknown[])}
+            onChange={(next) =>
+              setDialogAudios(audioDialogSide, next as unknown[])
+            }
             maxFiles={10}
           />
         )}
@@ -133,4 +143,3 @@ export const CardEditorPaneMediaDialogs = memo(
   areMediaDialogsPropsEqual,
 );
 CardEditorPaneMediaDialogs.displayName = "CardEditorPaneMediaDialogs";
-

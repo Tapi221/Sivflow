@@ -85,15 +85,3 @@ export default function CardLayoutConsistencyTest() {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1,10 +1,4 @@
-import {
-  useMemo,
-  useRef,
-  useState,
-  useEffect,
-  useCallback,
-} from "react";
+import { useMemo, useRef, useState, useEffect, useCallback } from "react";
 import type { CSSProperties, KeyboardEvent, ReactNode } from "react";
 import {
   Bar,
@@ -69,14 +63,21 @@ const normalizeInlineText = (value: string): string =>
 
 const computeCardPreviewMeta = (card: Card): CardPreviewMeta => {
   const questionText = normalizeInlineText(
-    extractTextFromBlocks((card.front?.blocks ?? []) ?? []) || card.questionText || "",
+    extractTextFromBlocks(card.front?.blocks ?? [] ?? []) ||
+      card.questionText ||
+      "",
   );
   const answerText = normalizeInlineText(
-    extractTextFromBlocks((card.back?.blocks ?? []) ?? []) || card.answerText || "",
+    extractTextFromBlocks(card.back?.blocks ?? [] ?? []) ||
+      card.answerText ||
+      "",
   );
 
   const titleCandidate = card.title?.trim();
-  const title = titleCandidate || (questionText || answerText).slice(0, 28) || "無題のカード";
+  const title =
+    titleCandidate ||
+    (questionText || answerText).slice(0, 28) ||
+    "無題のカード";
   const heading = normalizeInlineText(title);
 
   let text = questionText || answerText;
@@ -195,7 +196,10 @@ function ToolbarBtn({
             "var(--toolbar-btn-hover,rgba(0,0,0,0.06))";
       }}
       onMouseLeave={(e) => {
-        if (!active) (e.currentTarget as HTMLElement).style.background = active ? T.activeBg : "none";
+        if (!active)
+          (e.currentTarget as HTMLElement).style.background = active
+            ? T.activeBg
+            : "none";
       }}
     >
       {children}
@@ -215,7 +219,14 @@ function InlineEmpty({
   onAction?: () => void;
 }) {
   return (
-    <div style={{ padding: "14px 0", display: "flex", alignItems: "center", gap: 10 }}>
+    <div
+      style={{
+        padding: "14px 0",
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+      }}
+    >
       <span style={{ fontSize: T.fsBody, color: T.textMuted }}>{text}</span>
       {action && onAction ? (
         <button
@@ -396,13 +407,9 @@ export function FolderDashboard({
 
     // draft filter
     if (filterDraftState === "draft") {
-      list = list.filter(
-        (c) => c.isDraft ?? (c as unknown).is_draft,
-      );
+      list = list.filter((c) => c.isDraft ?? (c as unknown).is_draft);
     } else if (filterDraftState === "published") {
-      list = list.filter(
-        (c) => !(c.isDraft ?? (c as unknown).is_draft),
-      );
+      list = list.filter((c) => !(c.isDraft ?? (c as unknown).is_draft));
     }
 
     // reviewed filter
@@ -428,12 +435,8 @@ export function FolderDashboard({
         const titleB = cardPreviewById.get(b.id)?.title ?? "無題のカード";
         cmp = titleA.localeCompare(titleB, "ja");
       } else if (sortKey === "nextReview") {
-        const da = toDate(
-          a.nextReviewDate ?? (a as unknown).next_review_date,
-        );
-        const db = toDate(
-          b.nextReviewDate ?? (b as unknown).next_review_date,
-        );
+        const da = toDate(a.nextReviewDate ?? (a as unknown).next_review_date);
+        const db = toDate(b.nextReviewDate ?? (b as unknown).next_review_date);
         if (!da && !db) cmp = 0;
         else if (!da) cmp = 1;
         else if (!db) cmp = -1;
@@ -478,8 +481,7 @@ export function FolderDashboard({
       let intervalDays = 0;
       if (lastReview && nextReview && nextReview > lastReview) {
         intervalDays =
-          (nextReview.getTime() - lastReview.getTime()) /
-          (1000 * 60 * 60 * 24);
+          (nextReview.getTime() - lastReview.getTime()) / (1000 * 60 * 60 * 24);
       }
       const score = Math.max(
         0,
@@ -496,8 +498,7 @@ export function FolderDashboard({
   }, [resilienceBuckets]);
 
   const canShowDistribution =
-    reviewedCards.length >= 1 &&
-    resilienceBuckets.some((b) => b.count > 0);
+    reviewedCards.length >= 1 && resilienceBuckets.some((b) => b.count > 0);
 
   const getDistributionOpacity = (min: number) => {
     if (min >= 80) return 0.9;
@@ -518,8 +519,7 @@ export function FolderDashboard({
   };
 
   // ── Filter active ────────────────────────────────────────────────────────────
-  const isFilterActive =
-    filterDraftState !== "all" || filterReviewed !== "all";
+  const isFilterActive = filterDraftState !== "all" || filterReviewed !== "all";
 
   useEffect(() => {
     const container = scrollContainerRef.current;
@@ -532,7 +532,6 @@ export function FolderDashboard({
       ref={scrollContainerRef}
       style={{ height: "100%", overflowY: "auto", background: "#ffffff" }}
     >
-
       {/* ── Page header ──────────────────────────────────────────────────────── */}
       <div
         style={{
@@ -552,9 +551,13 @@ export function FolderDashboard({
             ref={nameInputRef}
             value={editedName}
             onChange={(e) => setEditedName(e.target.value)}
-            onBlur={() => { void commitRename(); }}
+            onBlur={() => {
+              void commitRename();
+            }}
             onKeyDown={(e) => {
-              if (e.key === "Enter") { void commitRename(); }
+              if (e.key === "Enter") {
+                void commitRename();
+              }
               if (e.key === "Escape") {
                 setEditedName(folderName);
                 setIsEditingName(false);
@@ -598,7 +601,14 @@ export function FolderDashboard({
         )}
 
         {/* Toolbar */}
-        <div style={{ display: "flex", alignItems: "center", gap: 1, flexShrink: 0 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            flexShrink: 0,
+          }}
+        >
           <ToolbarBtn onClick={handlers.onStartStudy} primary>
             学習する
           </ToolbarBtn>
@@ -650,7 +660,9 @@ export function FolderDashboard({
             {(["all", "published", "draft"] as const).map((v) => (
               <FilterChip
                 key={v}
-                label={v === "all" ? "すべて" : v === "published" ? "完成" : "下書き"}
+                label={
+                  v === "all" ? "すべて" : v === "published" ? "完成" : "下書き"
+                }
                 active={filterDraftState === v}
                 onClick={() => setFilterDraftState(v)}
               />
@@ -661,7 +673,11 @@ export function FolderDashboard({
               <FilterChip
                 key={v}
                 label={
-                  v === "all" ? "すべて" : v === "unlearned" ? "未学習" : "学習済み"
+                  v === "all"
+                    ? "すべて"
+                    : v === "unlearned"
+                      ? "未学習"
+                      : "学習済み"
                 }
                 active={filterReviewed === v}
                 onClick={() => setFilterReviewed(v)}
@@ -717,7 +733,9 @@ export function FolderDashboard({
       <div
         style={{
           display: "flex",
-          height: showFilterBar ? "calc(100% - 48px - 36px)" : "calc(100% - 48px)",
+          height: showFilterBar
+            ? "calc(100% - 48px - 36px)"
+            : "calc(100% - 48px)",
           overflow: "hidden",
         }}
       >
@@ -863,7 +881,14 @@ export function FolderDashboard({
               marginBottom: 0,
             }}
           >
-            <span style={{ fontSize: T.fsMeta, color: T.textMuted, display: "block", marginBottom: 2 }}>
+            <span
+              style={{
+                fontSize: T.fsMeta,
+                color: T.textMuted,
+                display: "block",
+                marginBottom: 2,
+              }}
+            >
               フォルダ名
             </span>
             <EditablePropertyValue
@@ -1000,7 +1025,12 @@ function EditablePropertyValue({
 
   if (!onCommit) {
     return (
-      <span style={{ fontSize: "var(--font-size-body,13px)", color: "var(--text-primary,#1a1a1a)" }}>
+      <span
+        style={{
+          fontSize: "var(--font-size-body,13px)",
+          color: "var(--text-primary,#1a1a1a)",
+        }}
+      >
         {value || placeholder}
       </span>
     );
@@ -1012,10 +1042,17 @@ function EditablePropertyValue({
         ref={inputRef}
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
-        onBlur={() => { void commit(); }}
+        onBlur={() => {
+          void commit();
+        }}
         onKeyDown={(e) => {
-          if (e.key === "Enter") { void commit(); }
-          if (e.key === "Escape") { setDraft(value); setEditing(false); }
+          if (e.key === "Enter") {
+            void commit();
+          }
+          if (e.key === "Escape") {
+            setDraft(value);
+            setEditing(false);
+          }
         }}
         style={{
           fontSize: "var(--font-size-body,13px)",
@@ -1053,7 +1090,8 @@ function EditablePropertyValue({
           "var(--section-divider,#ebebeb)";
       }}
       onMouseLeave={(e) => {
-        (e.currentTarget as HTMLElement).style.borderBottomColor = "transparent";
+        (e.currentTarget as HTMLElement).style.borderBottomColor =
+          "transparent";
       }}
     >
       {value || (
@@ -1116,10 +1154,16 @@ function CardTableSection({
             <th style={thStyle("title")} onClick={() => onSort("title")}>
               タイトル{sortKey === "title" && <SortIcon dir={sortDir} />}
             </th>
-            <th style={thStyle("reviewCount")} onClick={() => onSort("reviewCount")}>
+            <th
+              style={thStyle("reviewCount")}
+              onClick={() => onSort("reviewCount")}
+            >
               復習回数{sortKey === "reviewCount" && <SortIcon dir={sortDir} />}
             </th>
-            <th style={thStyle("nextReview")} onClick={() => onSort("nextReview")}>
+            <th
+              style={thStyle("nextReview")}
+              onClick={() => onSort("nextReview")}
+            >
               次回復習{sortKey === "nextReview" && <SortIcon dir={sortDir} />}
             </th>
             <th
@@ -1528,11 +1572,3 @@ function ScrollArrow({
     </button>
   );
 }
-
-
-
-
-
-
-
-

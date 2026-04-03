@@ -50,7 +50,8 @@ export function useCardViewWindowEvents({
       void createAndFocusCard();
     };
     window.addEventListener("cardview:create-card-request", handler);
-    return () => window.removeEventListener("cardview:create-card-request", handler);
+    return () =>
+      window.removeEventListener("cardview:create-card-request", handler);
   }, [
     createAndFocusCard,
     requestSave,
@@ -66,16 +67,13 @@ export function useCardViewWindowEvents({
     };
     window.addEventListener("cardview:save-request", handler);
     return () => window.removeEventListener("cardview:save-request", handler);
-  }, [
-    isGlobalEditing,
-    pendingExitAfterSaveRef,
-    requestSaveAndLockSelection,
-  ]);
+  }, [isGlobalEditing, pendingExitAfterSaveRef, requestSaveAndLockSelection]);
 
   useEffect(() => {
     const handler = (event: Event) => {
-      const detail = (event as CustomEvent<{ saved?: boolean; signal?: number }>)
-        ?.detail;
+      const detail = (
+        event as CustomEvent<{ saved?: boolean; signal?: number }>
+      )?.detail;
       const signal =
         typeof detail?.signal === "number" && Number.isFinite(detail.signal)
           ? detail.signal
@@ -106,4 +104,3 @@ export function useCardViewWindowEvents({
     setIsGlobalEditing,
   ]);
 }
-

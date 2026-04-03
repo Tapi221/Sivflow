@@ -82,8 +82,3 @@ export const ErrorDialog: React.FC<ErrorDialogProps> = ({ notification }) => {
     </div>
   );
 };
-
-
-
-
-

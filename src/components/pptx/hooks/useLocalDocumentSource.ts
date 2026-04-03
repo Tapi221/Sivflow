@@ -31,7 +31,9 @@ export function useLocalDocumentSource({
   localBlobId,
   persistedBlobUrl,
 }: Options): LocalDocumentSource {
-  const [restoredLocalBlobUrl, setRestoredLocalBlobUrl] = useState<string | null>(null);
+  const [restoredLocalBlobUrl, setRestoredLocalBlobUrl] = useState<
+    string | null
+  >(null);
   const [isRestoring, setIsRestoring] = useState(false);
 
   const triedKeysRef = useRef<Set<string>>(new Set());
@@ -43,58 +45,58 @@ export function useLocalDocumentSource({
 
   // Reset when localBlobId changes (doc switched)
   useEffect(() => {
-  triedKeysRef.current.clear();
+    triedKeysRef.current.clear();
 
-  const rafId = requestAnimationFrame(() => {
-    setRestoredLocalBlobUrl(null);
-    setIsRestoring(false);
-  });
+    const rafId = requestAnimationFrame(() => {
+      setRestoredLocalBlobUrl(null);
+      setIsRestoring(false);
+    });
 
-  return () => cancelAnimationFrame(rafId);
-}, [localBlobId]);
+    return () => cancelAnimationFrame(rafId);
+  }, [localBlobId]);
 
   // IndexedDB restore
   useEffect(() => {
     let cancelled = false;
 
     if (!localBlobId) {
-  const rafId = requestAnimationFrame(() => {
-    setIsRestoring(false);
-  });
+      const rafId = requestAnimationFrame(() => {
+        setIsRestoring(false);
+      });
 
-  return () => {
-    cancelled = true;
-    cancelAnimationFrame(rafId);
-  };
-}
+      return () => {
+        cancelled = true;
+        cancelAnimationFrame(rafId);
+      };
+    }
 
     if (cachedBlobUrl || restoredLocalBlobUrl) {
-  const rafId = requestAnimationFrame(() => {
-    setIsRestoring(false);
-  });
+      const rafId = requestAnimationFrame(() => {
+        setIsRestoring(false);
+      });
 
-  return () => {
-    cancelled = true;
-    cancelAnimationFrame(rafId);
-  };
-}
+      return () => {
+        cancelled = true;
+        cancelAnimationFrame(rafId);
+      };
+    }
 
     if (triedKeysRef.current.has(localBlobId)) {
-  const rafId = requestAnimationFrame(() => {
-    setIsRestoring(false);
-  });
+      const rafId = requestAnimationFrame(() => {
+        setIsRestoring(false);
+      });
 
-  return () => {
-    cancelled = true;
-    cancelAnimationFrame(rafId);
-  };
-}
+      return () => {
+        cancelled = true;
+        cancelAnimationFrame(rafId);
+      };
+    }
 
     triedKeysRef.current.add(localBlobId);
 
-const startRestoreRafId = requestAnimationFrame(() => {
-  setIsRestoring(true);
-});
+    const startRestoreRafId = requestAnimationFrame(() => {
+      setIsRestoring(true);
+    });
 
     getDocumentBlob(localBlobId, { userId })
       .then((blob) => {
@@ -120,9 +122,9 @@ const startRestoreRafId = requestAnimationFrame(() => {
       });
 
     return () => {
-  cancelled = true;
-  cancelAnimationFrame(startRestoreRafId);
-};
+      cancelled = true;
+      cancelAnimationFrame(startRestoreRafId);
+    };
   }, [cachedBlobUrl, userId, localBlobId, restoredLocalBlobUrl]);
 
   const localBlobUrl =
@@ -147,11 +149,3 @@ const startRestoreRafId = requestAnimationFrame(() => {
 
   return { localBlobUrl, localSourceStatus };
 }
-
-
-
-
-
-
-
-

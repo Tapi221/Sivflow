@@ -88,4 +88,3 @@ export const assertImageInvariant = (image: UploadedImage): void => {
 export const assertImageArrayInvariant = (images: UploadedImage[]): void => {
   images.forEach(assertImageInvariant);
 };
-

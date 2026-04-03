@@ -365,8 +365,3 @@ function NavButton({
     </button>
   );
 }
-
-
-
-
-

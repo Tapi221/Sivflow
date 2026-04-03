@@ -47,9 +47,3 @@ export const useSyncSettings = () => {
 
   return { settings, updateSettings, loading, refresh: loadSettings };
 };
-
-
-
-
-
-

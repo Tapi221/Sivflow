@@ -12,8 +12,3 @@ export type Folder = BaseEntity & {
   isHidden?: boolean;
   notePdfs?: UploadedFile[];
 };
-
-
-
-
-

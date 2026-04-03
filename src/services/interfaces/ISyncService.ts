@@ -1,4 +1,7 @@
-import type { SyncContextSource, NetworkStatus } from "@/types/domain/telemetry";
+import type {
+  SyncContextSource,
+  NetworkStatus,
+} from "@/types/domain/telemetry";
 import type { SyncResult } from "@/types/domain/sync";
 
 /**
@@ -257,8 +260,3 @@ export interface ISyncService {
    */
   dismissSecurityAlert(alertId: string): Promise<void>;
 }
-
-
-
-
-

@@ -81,9 +81,3 @@ export function useDocuments(folderId?: string) {
     updateDocument,
   };
 }
-
-
-
-
-
-

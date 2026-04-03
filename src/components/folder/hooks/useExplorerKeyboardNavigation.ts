@@ -1,8 +1,8 @@
 import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import {
-    getFolderId,
-    hasOpenModalDialog,
-    isTextInputTarget,
+  getFolderId,
+  hasOpenModalDialog,
+  isTextInputTarget,
 } from "@/components/folder/explorer/model/utils";
 import type { ExplorerItem, SelectedExplorerItem } from "@/types";
 import React, { useEffect, useRef } from "react";
@@ -86,7 +86,8 @@ export function useExplorerKeyboardNavigation({
       }> = [];
 
       const addFolderAndChildren = (folderId: string | null) => {
-        const folderList = folderId === null ? rootFolders : getChildFolders(folderId);
+        const folderList =
+          folderId === null ? rootFolders : getChildFolders(folderId);
 
         folderList.forEach((folder) => {
           const id = getFolderId(folder);
@@ -169,19 +170,28 @@ export function useExplorerKeyboardNavigation({
 
       const activeEl = document.activeElement as HTMLElement | null;
       const isTreeFocused =
-        treeRoot.contains(target) || (activeEl ? treeRoot.contains(activeEl) : false);
+        treeRoot.contains(target) ||
+        (activeEl ? treeRoot.contains(activeEl) : false);
 
       if (!isTreeFocused) return;
       if (isTextInputTarget(target)) return;
       if (hasOpenModalDialog()) return;
 
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "n") {
+      if (
+        (e.ctrlKey || e.metaKey) &&
+        e.shiftKey &&
+        e.key.toLowerCase() === "n"
+      ) {
         e.preventDefault();
         void handleCreateFolderAction(selectedFolderId ?? null);
         return;
       }
 
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "o") {
+      if (
+        (e.ctrlKey || e.metaKey) &&
+        e.shiftKey &&
+        e.key.toLowerCase() === "o"
+      ) {
         e.preventDefault();
         handleToolbarAddFile();
         return;
@@ -198,7 +208,9 @@ export function useExplorerKeyboardNavigation({
         e.preventDefault();
         if (!selectedFolderId || isCard || isDoc) return;
 
-        const folder = treeFolders.find((f) => getFolderId(f) === selectedFolderId);
+        const folder = treeFolders.find(
+          (f) => getFolderId(f) === selectedFolderId,
+        );
         const name = folder?.folderName || folder?.folder_name || "";
         setEditingId(currentId);
         setEditingName(name);
@@ -245,8 +257,3 @@ export function useExplorerKeyboardNavigation({
     setEditingName,
   ]);
 }
-
-
-
-
-

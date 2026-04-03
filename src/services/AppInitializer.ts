@@ -220,21 +220,21 @@ export class AppInitializer {
       ReturnType<typeof IndexedDBRebuildOrchestrator.rebuild>
     >;
     try {
-  rebuildResult = await IndexedDBRebuildOrchestrator.rebuild(
-    userId,
-    reason,
-  );
-} catch (error: unknown) {
-  const errorMessage =
-    error instanceof Error ? error.message : String(error);
+      rebuildResult = await IndexedDBRebuildOrchestrator.rebuild(
+        userId,
+        reason,
+      );
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
 
-  console.error(
-    `[AppInit:${userId}] Rebuild FAILED: ${errorMessage}`,
-    error,
-  );
+      console.error(
+        `[AppInit:${userId}] Rebuild FAILED: ${errorMessage}`,
+        error,
+      );
 
-  throw error;
-}
+      throw error;
+    }
 
     // 🔥 再構築 + 同期完了後に CLEAN をマーク
     // 新しい DB インスタンスを作成（削除後のため）
@@ -286,13 +286,18 @@ export class AppInitializer {
     const legacyCards = activeCards.filter((card) => !card.cardSetId);
     const folders = await db.folders.where("userId").equals(userId).toArray();
     const folderNameById = new Map(
-      folders.map((f) => [String(f.id ?? f.folderId ?? ""), String(f.folderName ?? "")]),
+      folders.map((f) => [
+        String(f.id ?? f.folderId ?? ""),
+        String(f.folderName ?? ""),
+      ]),
     );
 
     const sets = await db.cardSets.where("userId").equals(userId).toArray();
     const activeSets = sets.filter((s) => !s.isDeleted);
     const activeSetIds = new Set(activeSets.map((set) => set.id));
-    const deletedSetById = new Map(sets.filter((s) => s.isDeleted).map((s) => [s.id, s]));
+    const deletedSetById = new Map(
+      sets.filter((s) => s.isDeleted).map((s) => [s.id, s]),
+    );
 
     const danglingCardsBySetId = new Map<string, typeof activeCards>();
     for (const card of activeCards) {
@@ -312,7 +317,10 @@ export class AppInitializer {
       if (!setByFolder.has(key)) setByFolder.set(key, set);
       nextOrderIndexByFolder.set(
         key,
-        Math.max(nextOrderIndexByFolder.get(key) ?? 0, (set.orderIndex ?? 0) + 1),
+        Math.max(
+          nextOrderIndexByFolder.get(key) ?? 0,
+          (set.orderIndex ?? 0) + 1,
+        ),
       );
     }
 
@@ -410,4 +418,3 @@ export class AppInitializer {
     );
   }
 }
-

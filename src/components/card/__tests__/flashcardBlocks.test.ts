@@ -11,7 +11,11 @@ describe("resolveSideBlocks", () => {
       audios: [{ url: "https://example.com/audio.mp3" }],
     });
 
-    expect(result.map((block) => block.type)).toEqual(["text", "code", "audio"]);
+    expect(result.map((block) => block.type)).toEqual([
+      "text",
+      "code",
+      "audio",
+    ]);
     expect(result.map((block) => block.orderIndex)).toEqual([0, 1, 2]);
   });
 
@@ -37,5 +41,3 @@ describe("resolveSideBlocks", () => {
     expect(result[0]?.id).toBe("question-image-1");
   });
 });
-
-

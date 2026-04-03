@@ -12,12 +12,15 @@ function loadFromStorage(storageKey: string): Set<string> {
 }
 
 export function useExpandedFolders(storageKey = STORAGE_KEY) {
-  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
-    () => loadFromStorage(storageKey),
+  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(() =>
+    loadFromStorage(storageKey),
   );
 
   useEffect(() => {
-    localStorage.setItem(storageKey, JSON.stringify(Array.from(expandedFolders)));
+    localStorage.setItem(
+      storageKey,
+      JSON.stringify(Array.from(expandedFolders)),
+    );
   }, [expandedFolders, storageKey]);
 
   const toggleFolder = useCallback((folderId: string) => {
@@ -35,8 +38,3 @@ export function useExpandedFolders(storageKey = STORAGE_KEY) {
 
   return { expandedFolders, setExpandedFolders, toggleFolder, expandFolder };
 }
-
-
-
-
-

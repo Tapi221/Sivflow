@@ -420,7 +420,9 @@ export default function Calendar() {
                   <span className="text-lg font-bold leading-none text-slate-500">
                     {streak}
                   </span>
-                  <span className="text-sm font-semibold text-slate-500">days</span>
+                  <span className="text-sm font-semibold text-slate-500">
+                    days
+                  </span>
                 </div>
               </div>
             </div>
@@ -518,9 +520,9 @@ export default function Calendar() {
 
                 <div className="mt-3 flex items-end justify-between gap-2">
                   <div className="min-w-0">
-                  <div className="text-convex text-4xl font-bold italic leading-none tracking-tight text-primary-600">
-                    {todayDueCount}
-                  </div>
+                    <div className="text-convex text-4xl font-bold italic leading-none tracking-tight text-primary-600">
+                      {todayDueCount}
+                    </div>
                     <div className="mt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">
                       Cards Due
                     </div>
@@ -555,10 +557,3 @@ export default function Calendar() {
     </div>
   );
 }
-
-
-
-
-
-
-

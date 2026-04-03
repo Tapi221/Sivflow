@@ -152,8 +152,3 @@ export function PowerPointPaneHeader({
     </div>
   );
 }
-
-
-
-
-

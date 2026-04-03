@@ -9,13 +9,7 @@
  *   - ヘッダーUI:                   PdfPaneToolbar
  *   - sessionStorage util + 定数:   pdfViewerStateStorage
  */
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { PdfViewer } from "./PdfViewer";
 import type { PdfViewerHandle } from "./PdfViewer";
@@ -78,9 +72,7 @@ export function PdfPane({
   const fitScale = useMemo(() => {
     if (!containerWidth || !basePageWidth) return 1;
     const usableWidth = Math.max(1, containerWidth - FIT_PADDING_X);
-    return clampScale(
-      Number((usableWidth / basePageWidth).toFixed(3)),
-    );
+    return clampScale(Number((usableWidth / basePageWidth).toFixed(3)));
   }, [containerWidth, basePageWidth]);
 
   const {
@@ -225,9 +217,3 @@ export function PdfPane({
     </div>
   );
 }
-
-
-
-
-
-

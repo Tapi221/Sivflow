@@ -1,4 +1,10 @@
+import { BlockInset } from "@/components/card/blocks/editor/BlockInset";
+import { cn } from "@/lib/utils";
+import { codeTheme } from "@/theme/codeTheme";
 import { Check, Copy } from "@/ui/icons";
+import type { RenderProps } from "prism-react-renderer";
+import { Highlight } from "prism-react-renderer";
+import Prism from "prismjs";
 import {
   useCallback,
   useEffect,
@@ -7,13 +13,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { Highlight } from "prism-react-renderer";
-import type { RenderProps } from "prism-react-renderer";
 import Editor from "react-simple-code-editor";
-import Prism from "prismjs";
-import { cn } from "@/lib/utils";
-import { codeTheme } from "@/theme/codeTheme";
-import { BlockInset } from "@/components/card/blocks/editor/BlockInset";
 import { CodeBlockFrame } from "./CodeBlockFrame";
 import {
   getViewerLanguageLabels,
@@ -21,22 +21,22 @@ import {
   normalizeViewerLanguage,
 } from "./codeBlockLanguage";
 
-import "prismjs/components/prism-clike";
-import "prismjs/components/prism-javascript";
-import "prismjs/components/prism-typescript";
-import "prismjs/components/prism-python";
-import "prismjs/components/prism-java";
+import "prismjs/components/prism-bash";
 import "prismjs/components/prism-c";
+import "prismjs/components/prism-clike";
 import "prismjs/components/prism-cpp";
 import "prismjs/components/prism-csharp";
+import "prismjs/components/prism-css";
 import "prismjs/components/prism-go";
+import "prismjs/components/prism-java";
+import "prismjs/components/prism-javascript";
+import "prismjs/components/prism-json";
+import "prismjs/components/prism-markdown";
+import "prismjs/components/prism-markup";
+import "prismjs/components/prism-python";
 import "prismjs/components/prism-rust";
 import "prismjs/components/prism-sql";
-import "prismjs/components/prism-markup";
-import "prismjs/components/prism-css";
-import "prismjs/components/prism-json";
-import "prismjs/components/prism-bash";
-import "prismjs/components/prism-markdown";
+import "prismjs/components/prism-typescript";
 
 type CodeBlockContentProps =
   | {
@@ -232,10 +232,3 @@ export function CodeBlockContent(props: CodeBlockContentProps) {
     </div>
   );
 }
-
-
-
-
-
-
-

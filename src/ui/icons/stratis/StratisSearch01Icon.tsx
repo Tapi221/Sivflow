@@ -25,8 +25,3 @@ export const StratisSearch01Icon = forwardRef<
     </svg>
   );
 });
-
-
-
-
-

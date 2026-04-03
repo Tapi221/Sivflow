@@ -26,8 +26,3 @@ export const StratisHelpCircleContainedIcon = forwardRef<
     </svg>
   );
 });
-
-
-
-
-

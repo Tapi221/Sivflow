@@ -39,8 +39,3 @@ export const saveViewerStateToSession = (
 
 export const clampScale = (v: number): number =>
   Math.min(Math.max(v, FIT_MIN_SCALE), FIT_MAX_SCALE);
-
-
-
-
-

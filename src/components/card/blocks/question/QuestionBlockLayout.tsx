@@ -54,6 +54,3 @@ export function QuestionBlockLayout({
     </BlockInset>
   );
 }
-
-
-

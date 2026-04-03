@@ -118,8 +118,3 @@ export interface SecurityLog {
 
   occurredAt: unknown; // Timestamp or Date
 }
-
-
-
-
-

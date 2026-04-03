@@ -25,15 +25,13 @@ const isDesktopOauthApi = (api: unknown): api is DesktopOauthApi => {
 };
 
 export const getDesktopOauthApi = (): DesktopOauthApi => {
-  if (typeof window === "undefined" || !isDesktopOauthApi(window.desktop?.oauth)) {
+  if (
+    typeof window === "undefined" ||
+    !isDesktopOauthApi(window.desktop?.oauth)
+  ) {
     throw new Error(
       "Desktop OAuth callback API is not available. Please fully restart the Electron app to load the updated desktop bridge.",
     );
   }
   return window.desktop.oauth;
 };
-
-
-
-
-

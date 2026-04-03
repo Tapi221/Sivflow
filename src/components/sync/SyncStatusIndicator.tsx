@@ -314,8 +314,3 @@ export function SyncStatusIndicator({
     </>
   );
 }
-
-
-
-
-

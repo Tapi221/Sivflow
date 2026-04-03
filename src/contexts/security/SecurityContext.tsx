@@ -88,7 +88,8 @@ export function SecurityProvider({ children }: SecurityProviderProps) {
   );
 
   return (
-    <SecurityContext.Provider value={value}>{children}</SecurityContext.Provider>
+    <SecurityContext.Provider value={value}>
+      {children}
+    </SecurityContext.Provider>
   );
 }
-

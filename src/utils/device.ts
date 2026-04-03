@@ -25,8 +25,7 @@ export function getDeviceName(): string {
   // PWA standalone mode check
   const nav = navigator as Navigator & { standalone?: boolean };
   const isStandalone =
-    window.matchMedia("(display-mode: standalone)").matches ||
-    nav.standalone;
+    window.matchMedia("(display-mode: standalone)").matches || nav.standalone;
 
   if (isStandalone) {
     client = "App";

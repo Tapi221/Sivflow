@@ -177,8 +177,8 @@
       var(
         --card-shadow-default,
         0 0 2px rgba(15, 23, 42, 0.04),
-          0 0 24px rgba(15, 23, 42, 0.08),
-          0 0 72px rgba(15, 23, 42, 0.08)
+        0 0 24px rgba(15, 23, 42, 0.08),
+        0 0 72px rgba(15, 23, 42, 0.08)
       ),
       inset 0 1px 0 rgba(255, 255, 255, 0.9);
     transition:
@@ -193,8 +193,8 @@
       var(
         --card-shadow-hover,
         0 0 3px rgba(15, 23, 42, 0.05),
-          0 0 30px rgba(15, 23, 42, 0.1),
-          0 0 90px rgba(15, 23, 42, 0.1)
+        0 0 30px rgba(15, 23, 42, 0.1),
+        0 0 90px rgba(15, 23, 42, 0.1)
       ),
       inset 0 1px 0 rgba(255, 255, 255, 0.95);
   }
@@ -211,7 +211,7 @@
       var(
         --card-shadow-rest,
         0 1px 2px rgba(15, 23, 42, 0.05),
-          0 8px 18px rgba(15, 23, 42, 0.06)
+        0 8px 18px rgba(15, 23, 42, 0.06)
       ),
       inset 0 1px 0 rgba(255, 255, 255, 0.9);
   }
@@ -222,8 +222,8 @@
       var(
         --card-shadow-hover,
         0 0 3px rgba(15, 23, 42, 0.05),
-          0 0 30px rgba(15, 23, 42, 0.1),
-          0 0 90px rgba(15, 23, 42, 0.1)
+        0 0 30px rgba(15, 23, 42, 0.1),
+        0 0 90px rgba(15, 23, 42, 0.1)
       ),
       inset 0 1px 0 rgba(255, 255, 255, 0.95);
   }
@@ -236,8 +236,8 @@
       var(
         --card-shadow-selected,
         0 0 4px rgba(15, 23, 42, 0.06),
-          0 0 36px rgba(15, 23, 42, 0.12),
-          0 0 96px rgba(15, 23, 42, 0.12)
+        0 0 36px rgba(15, 23, 42, 0.12),
+        0 0 96px rgba(15, 23, 42, 0.12)
       ),
       inset 0 0 0 var(--card-selected-outline-width, 1.6px)
         var(--card-selected-outline-neutral, rgba(84, 95, 105, 0.42)),
@@ -287,8 +287,8 @@
       var(
         --card-shadow-selected,
         0 0 4px rgba(15, 23, 42, 0.06),
-          0 0 36px rgba(15, 23, 42, 0.12),
-          0 0 96px rgba(15, 23, 42, 0.12)
+        0 0 36px rgba(15, 23, 42, 0.12),
+        0 0 96px rgba(15, 23, 42, 0.12)
       ),
       inset 0 1px 0 rgba(255, 255, 255, 0.95);
   }
@@ -302,8 +302,8 @@
       var(
         --card-shadow-selected,
         0 0 4px rgba(15, 23, 42, 0.06),
-          0 0 36px rgba(15, 23, 42, 0.12),
-          0 0 96px rgba(15, 23, 42, 0.12)
+        0 0 36px rgba(15, 23, 42, 0.12),
+        0 0 96px rgba(15, 23, 42, 0.12)
       ),
       inset 0 1px 0 rgba(255, 255, 255, 0.95);
   }
@@ -335,8 +335,8 @@
     box-shadow: var(
       --card-shadow-selected,
       0 0 4px rgba(15, 23, 42, 0.06),
-        0 0 36px rgba(15, 23, 42, 0.12),
-        0 0 96px rgba(15, 23, 42, 0.12)
+      0 0 36px rgba(15, 23, 42, 0.12),
+      0 0 96px rgba(15, 23, 42, 0.12)
     );
     opacity: 0;
     transition: opacity 110ms ease;
@@ -366,8 +366,8 @@
       var(
         --card-shadow-selected,
         0 0 4px rgba(15, 23, 42, 0.06),
-          0 0 36px rgba(15, 23, 42, 0.12),
-          0 0 96px rgba(15, 23, 42, 0.12)
+        0 0 36px rgba(15, 23, 42, 0.12),
+        0 0 96px rgba(15, 23, 42, 0.12)
       ),
       inset 0 0 0 var(--card-selected-outline-width, 1.6px)
         var(--card-selected-outline-neutral, rgba(84, 95, 105, 0.42)),
@@ -382,8 +382,8 @@
       var(
         --card-shadow-selected,
         0 0 4px rgba(15, 23, 42, 0.06),
-          0 0 36px rgba(15, 23, 42, 0.12),
-          0 0 96px rgba(15, 23, 42, 0.12)
+        0 0 36px rgba(15, 23, 42, 0.12),
+        0 0 96px rgba(15, 23, 42, 0.12)
       ),
       inset 0 1px 0 rgba(255, 255, 255, 0.95);
   }
@@ -397,7 +397,10 @@
 
   .card-pager-item:has(:focus-visible) {
     /* focus ring だけ直接持ち、active 影は ::before に委譲 */
-    box-shadow: var(--card-focus-ring-shadow, 0 0 0 2px rgba(122, 166, 161, 0.25));
+    box-shadow: var(
+      --card-focus-ring-shadow,
+      0 0 0 2px rgba(122, 166, 161, 0.25)
+    );
     opacity: 1;
   }
 

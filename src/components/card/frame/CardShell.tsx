@@ -595,9 +595,7 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
                     ? shellRect.height / element.offsetHeight
                     : 1;
                 const safeScaleY =
-                  Number.isFinite(rawScaleY) && rawScaleY > 0
-                    ? rawScaleY
-                    : 1;
+                  Number.isFinite(rawScaleY) && rawScaleY > 0 ? rawScaleY : 1;
                 const deltaY =
                   (moveEvent.clientY - resizeRef.current.startY) / safeScaleY;
                 const snappedSteps =
@@ -695,8 +693,3 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
 );
 
 CardShell.displayName = "CardShell";
-
-
-
-
-

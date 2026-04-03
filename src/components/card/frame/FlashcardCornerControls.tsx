@@ -61,7 +61,8 @@ export function useFlashcardCornerControls({
       CARD_ACTION_COLOR_IDLE_CLASS,
     );
 
-    const mediaCountLabel = (count: number) => (count > 9 ? "9+" : String(count));
+    const mediaCountLabel = (count: number) =>
+      count > 9 ? "9+" : String(count);
 
     if (extraHeaderLeft) {
       actionsTopLeft.push(
@@ -75,12 +76,29 @@ export function useFlashcardCornerControls({
       );
     }
 
-    if (onToggleUncertainty || onToggleBookmark || hasUncertainty || isBookmarked) {
+    if (
+      onToggleUncertainty ||
+      onToggleBookmark ||
+      hasUncertainty ||
+      isBookmarked
+    ) {
       actionsTopLeft.push(
         <CardCornerActions
           key="corner-actions"
-          onHelp={onToggleUncertainty ? () => onToggleUncertainty(card) : hasUncertainty ? () => {} : undefined}
-          onStar={onToggleBookmark ? () => onToggleBookmark(card) : isBookmarked ? () => {} : undefined}
+          onHelp={
+            onToggleUncertainty
+              ? () => onToggleUncertainty(card)
+              : hasUncertainty
+                ? () => {}
+                : undefined
+          }
+          onStar={
+            onToggleBookmark
+              ? () => onToggleBookmark(card)
+              : isBookmarked
+                ? () => {}
+                : undefined
+          }
           helpActive={hasUncertainty}
           starActive={isBookmarked}
           disabled={!onToggleUncertainty && !onToggleBookmark}
@@ -176,7 +194,3 @@ export function useFlashcardCornerControls({
     onToggleUncertainty,
   ]);
 }
-
-
-
-

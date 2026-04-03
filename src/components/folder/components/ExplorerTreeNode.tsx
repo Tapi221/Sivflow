@@ -46,7 +46,10 @@ interface ExplorerTreeNodeProps {
   setOpenRowMenuId: React.Dispatch<React.SetStateAction<string | null>>;
   // actions
   onFolderSelect: (folderId: string | null) => void;
-  onItemSelect: (item: { type: "card" | "cardSet" | "document"; id: string }) => void;
+  onItemSelect: (item: {
+    type: "card" | "cardSet" | "document";
+    id: string;
+  }) => void;
   handleCreateFolderAction: (parentId: string | null) => string;
   handleCreateCardSetAction: (folderId: string | null) => string | null;
   handleDelete: (id: string, type: "folder" | "card") => void;
@@ -132,7 +135,9 @@ export const ExplorerTreeNodeRenderer = React.memo(
               )
             }
             onBulkTag={() => setBulkTagFolderId(folderId)}
-            setRowRef={setRowRef as (id: string, node: HTMLElement | null) => void}
+            setRowRef={
+              setRowRef as (id: string, node: HTMLElement | null) => void
+            }
             isDimmed={Boolean(treeNode.isDimmed)}
             isFileDraggingOver={fileDragFolderId === folderId}
             onDragEnterCapture={(e) => {
@@ -162,8 +167,10 @@ export const ExplorerTreeNodeRenderer = React.memo(
               const files = e.dataTransfer?.files ?? null;
               const pdfFiles = extractPdfFiles(files);
               const pptxFiles = extractPptxFiles(files);
-              if (pdfFiles.length > 0) void handlePdfDropped(folderId, pdfFiles);
-              if (pptxFiles.length > 0) void handlePptxDropped(folderId, pptxFiles);
+              if (pdfFiles.length > 0)
+                void handlePdfDropped(folderId, pdfFiles);
+              if (pptxFiles.length > 0)
+                void handlePptxDropped(folderId, pptxFiles);
             }}
             hasExpandableContent={Boolean(treeNode.children?.length)}
           />
@@ -213,7 +220,11 @@ export const ExplorerTreeNodeRenderer = React.memo(
                       event.stopPropagation();
                       toggle();
                     }}
-                    aria-label={isOpen ? "カードセットを折りたたむ" : "カードセットを展開する"}
+                    aria-label={
+                      isOpen
+                        ? "カードセットを折りたたむ"
+                        : "カードセットを展開する"
+                    }
                   >
                     <Chevron
                       className={cn(
@@ -255,7 +266,8 @@ export const ExplorerTreeNodeRenderer = React.memo(
                   }}
                   onClick={(e) => e.stopPropagation()}
                   onKeyDown={(e) => {
-                    const isComposing = e.nativeEvent.isComposing || e.keyCode === 229;
+                    const isComposing =
+                      e.nativeEvent.isComposing || e.keyCode === 229;
                     if (e.key === "Enter" && isComposing) return;
                     if (e.key === "Enter") {
                       e.preventDefault();
@@ -343,9 +355,3 @@ export const ExplorerTreeNodeRenderer = React.memo(
     );
   },
 );
-
-
-
-
-
-

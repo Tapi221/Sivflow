@@ -97,4 +97,3 @@ export function setCardSetWidthPreference(
   store.byCardSet[cardSetId][mode] = widthPx;
   writeStore(store);
 }
-

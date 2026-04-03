@@ -89,6 +89,3 @@ export function TreeViewMainPane({
     </div>
   );
 }
-
-
-

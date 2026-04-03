@@ -436,10 +436,3 @@ export const DeviceSyncSettings: React.FC = () => {
     </div>
   );
 };
-
-
-
-
-
-
-

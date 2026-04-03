@@ -13,7 +13,8 @@ import { firestoreDb } from "./firebase";
 import {
   collection,
   addDoc,
-  query,  orderBy,
+  query,
+  orderBy,
   limit,
   getDocs,
   deleteDoc,
@@ -165,7 +166,9 @@ class SnapshotService {
     };
 
     const folderName =
-      (folder as unknown).folderName || (folder as unknown).folder_name || "unknown";
+      (folder as unknown).folderName ||
+      (folder as unknown).folder_name ||
+      "unknown";
     const date = new Date().toISOString().split("T")[0];
     const gen = partialSnapshot.metadata.generationCounter;
     const filename = `flashcard_${folderName}_${date}_gen${gen}.json`;
@@ -366,4 +369,3 @@ class SnapshotService {
 }
 
 export const snapshotService = new SnapshotService();
-

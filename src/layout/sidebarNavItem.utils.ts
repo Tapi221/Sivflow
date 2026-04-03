@@ -12,7 +12,6 @@ export function getSidebarNavItemClassName({
   return cn(
     "sidebar__nav-item",
     isActive && "sidebar__nav-item--active",
-    className
+    className,
   );
 }
-

@@ -801,7 +801,9 @@ export const defineSchema = (db: LocalDB): void => {
       const now = new Date();
 
       // 既存 CardSet を確認（idempotent: _migratedFromV24 フラグで二重実行防止）
-      const existingSets: Record<string, unknown>[] = await tx.table("cardSets").toArray();
+      const existingSets: Record<string, unknown>[] = await tx
+        .table("cardSets")
+        .toArray();
       const migratedFolderIds = new Set<string>(
         existingSets
           .filter((s) => s._migratedFromV24 === true)
@@ -957,8 +959,13 @@ export const defineSchema = (db: LocalDB): void => {
       for (const set of existingSets) {
         if (set.isDeleted ?? set.is_deleted) continue;
         const key = toNormalizedFolderId(set.folderId) ?? "__root__";
-        const order = Number.isFinite(set.orderIndex) ? Number(set.orderIndex) : 0;
-        maxOrderByFolder.set(key, Math.max(maxOrderByFolder.get(key) ?? -1, order));
+        const order = Number.isFinite(set.orderIndex)
+          ? Number(set.orderIndex)
+          : 0;
+        maxOrderByFolder.set(
+          key,
+          Math.max(maxOrderByFolder.get(key) ?? -1, order),
+        );
       }
 
       const allCards = (await cardsTable.toArray()) as RawCard[];
@@ -973,9 +980,12 @@ export const defineSchema = (db: LocalDB): void => {
         if (card.isDeleted ?? card.is_deleted) continue;
 
         const cardFolderId = toNormalizedFolderId(card.folderId);
-        const cardSetId = typeof card.cardSetId === "string" ? card.cardSetId.trim() : "";
+        const cardSetId =
+          typeof card.cardSetId === "string" ? card.cardSetId.trim() : "";
         const targetSet = cardSetId ? cardSetById.get(cardSetId) : undefined;
-        const setIsUsable = Boolean(targetSet && !(targetSet.isDeleted ?? targetSet.is_deleted));
+        const setIsUsable = Boolean(
+          targetSet && !(targetSet.isDeleted ?? targetSet.is_deleted),
+        );
 
         if (setIsUsable && targetSet) {
           const setFolderId = toNormalizedFolderId(targetSet.folderId);
@@ -1088,7 +1098,8 @@ export const defineSchema = (db: LocalDB): void => {
         if (typeof rawName !== "string") return null;
         const name = rawName.trim();
         if (!name) return null;
-        if (name === "移行カードセット" || name === "新規カードセット") return null;
+        if (name === "移行カードセット" || name === "新規カードセット")
+          return null;
         const stripped = name.replace(/\s*セット$/, "").trim();
         if (!stripped) return null;
         if (stripped === "移行カード" || stripped === "新規カード") return null;
@@ -1121,9 +1132,13 @@ export const defineSchema = (db: LocalDB): void => {
       const cardsTable = tx.table("cards");
 
       const allSets = (await cardSetsTable.toArray()) as RawCardSet[];
-      const activeSets = allSets.filter((set) => !(set.isDeleted ?? set.is_deleted));
+      const activeSets = allSets.filter(
+        (set) => !(set.isDeleted ?? set.is_deleted),
+      );
       const allCards = (await cardsTable.toArray()) as RawCard[];
-      const activeCards = allCards.filter((card) => !(card.isDeleted ?? card.is_deleted));
+      const activeCards = allCards.filter(
+        (card) => !(card.isDeleted ?? card.is_deleted),
+      );
 
       const cardsBySetId = new Map<string, RawCard[]>();
       for (const card of activeCards) {
@@ -1159,8 +1174,12 @@ export const defineSchema = (db: LocalDB): void => {
           sameFolderNonMigrated.length === 1
             ? sameFolderNonMigrated[0]
             : [...migratedSets].sort((a, b) => {
-                const orderA = Number.isFinite(a.orderIndex) ? Number(a.orderIndex) : 0;
-                const orderB = Number.isFinite(b.orderIndex) ? Number(b.orderIndex) : 0;
+                const orderA = Number.isFinite(a.orderIndex)
+                  ? Number(a.orderIndex)
+                  : 0;
+                const orderB = Number.isFinite(b.orderIndex)
+                  ? Number(b.orderIndex)
+                  : 0;
                 return orderA - orderB;
               })[0];
 
@@ -1172,7 +1191,10 @@ export const defineSchema = (db: LocalDB): void => {
         let maxOrder =
           targetCards.reduce(
             (max, card) =>
-              Math.max(max, Number.isFinite(card.orderIndex) ? Number(card.orderIndex) : -1),
+              Math.max(
+                max,
+                Number.isFinite(card.orderIndex) ? Number(card.orderIndex) : -1,
+              ),
             -1,
           ) ?? -1;
         for (const card of targetCards) {
@@ -1279,7 +1301,8 @@ export const defineSchema = (db: LocalDB): void => {
         if (typeof rawName !== "string") return null;
         const name = rawName.trim();
         if (!name) return null;
-        if (name === "移行カードセット" || name === "新規カードセット") return null;
+        if (name === "移行カードセット" || name === "新規カードセット")
+          return null;
         const stripped = name.replace(/\s*セット$/, "").trim();
         if (!stripped) return null;
         if (stripped === "移行カード" || stripped === "新規カード") return null;
@@ -1325,8 +1348,12 @@ export const defineSchema = (db: LocalDB): void => {
 
       const allSets = (await cardSetsTable.toArray()) as RawCardSet[];
       const allCards = (await cardsTable.toArray()) as RawCard[];
-      const activeSets = allSets.filter((set) => !(set.isDeleted ?? set.is_deleted));
-      const activeCards = allCards.filter((card) => !(card.isDeleted ?? card.is_deleted));
+      const activeSets = allSets.filter(
+        (set) => !(set.isDeleted ?? set.is_deleted),
+      );
+      const activeCards = allCards.filter(
+        (card) => !(card.isDeleted ?? card.is_deleted),
+      );
 
       const activeSetsByFolder = new Map<string, RawCardSet[]>();
       const migratedSetsByFolder = new Map<string, RawCardSet[]>();
@@ -1371,7 +1398,8 @@ export const defineSchema = (db: LocalDB): void => {
             ? activeNonMigrated[0]
             : activeNonMigrated.length > 1
               ? [...activeNonMigrated].sort(
-                  (a, b) => getOrderValue(a.orderIndex) - getOrderValue(b.orderIndex),
+                  (a, b) =>
+                    getOrderValue(a.orderIndex) - getOrderValue(b.orderIndex),
                 )[0]
               : sortedByOrder[0];
 
@@ -1383,7 +1411,9 @@ export const defineSchema = (db: LocalDB): void => {
         if (targetCards.length === 0) continue;
 
         const nameCandidates = [...migratedSets]
-          .sort((a, b) => getOrderValue(a.orderIndex) - getOrderValue(b.orderIndex))
+          .sort(
+            (a, b) => getOrderValue(a.orderIndex) - getOrderValue(b.orderIndex),
+          )
           .map((set) => normalizeFallbackTitleFromSetName(set.name))
           .filter((name): name is string => Boolean(name));
 
@@ -1392,18 +1422,26 @@ export const defineSchema = (db: LocalDB): void => {
             (card) => getTitleValue(card.title).length === 0,
           );
           const usedTitles = new Set(
-            targetCards.map((card) => getTitleValue(card.title)).filter(Boolean),
+            targetCards
+              .map((card) => getTitleValue(card.title))
+              .filter(Boolean),
           );
           let cursor = 0;
           for (const card of emptyTitleCards) {
-            while (cursor < nameCandidates.length && usedTitles.has(nameCandidates[cursor])) {
+            while (
+              cursor < nameCandidates.length &&
+              usedTitles.has(nameCandidates[cursor])
+            ) {
               cursor += 1;
             }
             if (cursor >= nameCandidates.length) break;
             const nextTitle = nameCandidates[cursor];
             cursor += 1;
             usedTitles.add(nextTitle);
-            await cardsTable.update(card.id, { title: nextTitle, updatedAt: now });
+            await cardsTable.update(card.id, {
+              title: nextTitle,
+              updatedAt: now,
+            });
             patchedTitles += 1;
           }
         }
@@ -1519,7 +1557,9 @@ export const defineSchema = (db: LocalDB): void => {
 
       const cardsTable = tx.table("cards");
       const allCards = (await cardsTable.toArray()) as RawCard[];
-      const activeCards = allCards.filter((c) => !(c.isDeleted ?? c.is_deleted));
+      const activeCards = allCards.filter(
+        (c) => !(c.isDeleted ?? c.is_deleted),
+      );
 
       // 1) 移行由来タイトルを除去
       let clearedMigrationTitles = 0;
@@ -1549,7 +1589,8 @@ export const defineSchema = (db: LocalDB): void => {
             card,
             idx,
             hint: parseHintOrder(card),
-            currentOrder: toNumberOrNull(card.orderIndex) ?? Number.MAX_SAFE_INTEGER,
+            currentOrder:
+              toNumberOrNull(card.orderIndex) ?? Number.MAX_SAFE_INTEGER,
           }))
           .filter((x) => x.hint != null);
 
@@ -1678,7 +1719,8 @@ export const defineSchema = (db: LocalDB): void => {
         const audiosKey =
           side === "question" ? "questionAudios" : "answerAudios";
         const codeKey = side === "question" ? "questionCode" : "answerCode";
-        const text = typeof row[textKey] === "string" ? row[textKey].trim() : "";
+        const text =
+          typeof row[textKey] === "string" ? row[textKey].trim() : "";
         const images = sanitizeImages(row[imagesKey]);
         const audios = Array.isArray(row[audiosKey]) ? row[audiosKey] : [];
         const code = row[codeKey];
@@ -1743,7 +1785,8 @@ export const defineSchema = (db: LocalDB): void => {
             frontBlocks.length > 0
               ? frontBlocks
               : buildFallbackBlocks("question", card),
-          ink: existingFront.ink ?? card.inkQuestion ?? card.ink_question ?? null,
+          ink:
+            existingFront.ink ?? card.inkQuestion ?? card.ink_question ?? null,
           extraRows: normalizeExtraRows(
             existingFront.extraRows ??
               card.questionExtraRows ??
@@ -1754,7 +1797,9 @@ export const defineSchema = (db: LocalDB): void => {
         card.back = {
           ...existingBack,
           blocks:
-            backBlocks.length > 0 ? backBlocks : buildFallbackBlocks("answer", card),
+            backBlocks.length > 0
+              ? backBlocks
+              : buildFallbackBlocks("answer", card),
           ink: existingBack.ink ?? card.inkAnswer ?? card.ink_answer ?? null,
           extraRows: normalizeExtraRows(
             existingBack.extraRows ??
@@ -1802,4 +1847,3 @@ export const defineSchema = (db: LocalDB): void => {
       });
     });
 };
-

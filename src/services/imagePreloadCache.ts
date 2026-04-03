@@ -15,7 +15,7 @@
  */
 
 const MAX_REMOTE_URL_CACHE = 600;
-const MAX_DECODED_URL_SET  = 800;
+const MAX_DECODED_URL_SET = 800;
 
 /** assetId → Firebase Storage URL */
 const remoteUrlCache = new Map<string, string>();
@@ -77,4 +77,3 @@ export function getPreloadCacheStats(): PreloadCacheStats {
     decodedUrlSetMax: MAX_DECODED_URL_SET,
   };
 }
-

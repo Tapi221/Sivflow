@@ -35,11 +35,10 @@ interface Params {
 }
 
 function getFolderOrder(folder: FolderTreeNode): number {
-  return (
-    ((folder as { orderIndex?: number; order_index?: number }).orderIndex ??
-      (folder as { orderIndex?: number; order_index?: number }).order_index ??
-      0) as number
-  );
+  return ((folder as { orderIndex?: number; order_index?: number })
+    .orderIndex ??
+    (folder as { orderIndex?: number; order_index?: number }).order_index ??
+    0) as number;
 }
 
 function getFolderName(folder: FolderTreeNode): string {
@@ -53,8 +52,10 @@ function getFolderName(folder: FolderTreeNode): string {
 function compareFolders(a: FolderTreeNode, b: FolderTreeNode): number {
   return compareOrderableEntities(a, b, {
     getOrderIndex: getFolderOrder,
-    getUpdatedAt: (folder) => getEntityTime((folder as { updatedAt?: unknown }).updatedAt),
-    getCreatedAt: (folder) => getEntityTime((folder as { createdAt?: unknown }).createdAt),
+    getUpdatedAt: (folder) =>
+      getEntityTime((folder as { updatedAt?: unknown }).updatedAt),
+    getCreatedAt: (folder) =>
+      getEntityTime((folder as { createdAt?: unknown }).createdAt),
     getName: getFolderName,
     getId: getFolderId,
   });
@@ -130,8 +131,11 @@ export function useExplorerDerivedData({
     const map = new Map<string, number>();
     for (const card of treeCards) {
       if (isSoftDeleted(withLegacy(card))) continue;
-      if (!hasValidFolderBinding(card.folderId ?? withLegacy(card).folder_id)) continue;
-      const folderId = resolveTreeFolderId(card.folderId ?? withLegacy(card).folder_id);
+      if (!hasValidFolderBinding(card.folderId ?? withLegacy(card).folder_id))
+        continue;
+      const folderId = resolveTreeFolderId(
+        card.folderId ?? withLegacy(card).folder_id,
+      );
       map.set(folderId, (map.get(folderId) ?? 0) + 1);
     }
     return map;
@@ -139,7 +143,10 @@ export function useExplorerDerivedData({
 
   const itemsByFolderId = useMemo(() => {
     const map = new Map<string, ExplorerItem[]>();
-    const pushItem = (folderId: string | null | undefined, item: ExplorerItem) => {
+    const pushItem = (
+      folderId: string | null | undefined,
+      item: ExplorerItem,
+    ) => {
       const key = normalizeFolderId(folderId);
       const list = map.get(key);
       if (list) list.push(item);
@@ -148,15 +155,20 @@ export function useExplorerDerivedData({
 
     for (const card of treeCards) {
       if (isSoftDeleted(withLegacy(card))) continue;
-      if (!hasValidFolderBinding(card.folderId ?? withLegacy(card).folder_id)) continue;
-      pushItem(resolveTreeFolderId(card.folderId ?? withLegacy(card).folder_id), {
-        type: "card",
-        data: card,
-      });
+      if (!hasValidFolderBinding(card.folderId ?? withLegacy(card).folder_id))
+        continue;
+      pushItem(
+        resolveTreeFolderId(card.folderId ?? withLegacy(card).folder_id),
+        {
+          type: "card",
+          data: card,
+        },
+      );
     }
     for (const doc of documents) {
       if (isSoftDeleted(withLegacy(doc))) continue;
-      if (!hasValidFolderBinding(doc.folderId ?? withLegacy(doc).folder_id)) continue;
+      if (!hasValidFolderBinding(doc.folderId ?? withLegacy(doc).folder_id))
+        continue;
       pushItem(resolveTreeFolderId(doc.folderId ?? withLegacy(doc).folder_id), {
         type: "document",
         data: doc,
@@ -168,8 +180,12 @@ export function useExplorerDerivedData({
         const orderA = withLegacy(a.data).orderIndex ?? Number.MAX_SAFE_INTEGER;
         const orderB = withLegacy(b.data).orderIndex ?? Number.MAX_SAFE_INTEGER;
         if (orderA !== orderB) return orderA - orderB;
-        const timeA = getEntityTime((a.data as { updatedAt?: unknown }).updatedAt);
-        const timeB = getEntityTime((b.data as { updatedAt?: unknown }).updatedAt);
+        const timeA = getEntityTime(
+          (a.data as { updatedAt?: unknown }).updatedAt,
+        );
+        const timeB = getEntityTime(
+          (b.data as { updatedAt?: unknown }).updatedAt,
+        );
         return timeB - timeA;
       });
     }
@@ -260,7 +276,8 @@ export function useExplorerDerivedData({
           .map((f) =>
             String(
               (f as { folderName?: string; folder_name?: string }).folderName ??
-                (f as { folderName?: string; folder_name?: string }).folder_name ??
+                (f as { folderName?: string; folder_name?: string })
+                  .folder_name ??
                 "",
             ).trim(),
           )
@@ -318,7 +335,8 @@ export function useExplorerDerivedData({
   }, [cardSets, treeCards]);
 
   const getCardSetItems = useCallback(
-    (cardSetId: string): ExplorerItem[] => itemsByCardSetId.get(cardSetId) ?? [],
+    (cardSetId: string): ExplorerItem[] =>
+      itemsByCardSetId.get(cardSetId) ?? [],
     [itemsByCardSetId],
   );
 
@@ -340,4 +358,3 @@ export function useExplorerDerivedData({
     getUniqueFolderName,
   };
 }
-

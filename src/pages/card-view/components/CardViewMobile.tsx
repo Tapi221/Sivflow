@@ -37,7 +37,10 @@ export function CardViewMobile({
   void selectedCardId;
   const wrapCard = useCallback(
     (node: React.ReactNode) => (
-      <MobileScalableCard cardDesignWidth={CANONICAL_CARD_WIDTH} safePadding={0}>
+      <MobileScalableCard
+        cardDesignWidth={CANONICAL_CARD_WIDTH}
+        safePadding={0}
+      >
         {node}
       </MobileScalableCard>
     ),
@@ -106,4 +109,3 @@ export function CardViewMobile({
     />
   );
 }
-

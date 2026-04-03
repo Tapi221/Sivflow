@@ -1,9 +1,9 @@
 import { BlockSurface } from "@/components/card/blocks/core/BlockSurface";
-import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
 import {
-    TEXT_BLOCK_CONTENT_CLASS,
-    TEXT_BLOCK_LINE_HEIGHT_PX,
+  TEXT_BLOCK_CONTENT_CLASS,
+  TEXT_BLOCK_LINE_HEIGHT_PX,
 } from "@/components/card/blocks/text/textBlockStyles";
+import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
 
 const normalizeTextBlockContent = (content: string) =>
   String(content ?? "").replace(/\r\n/g, "\n");
@@ -21,7 +21,7 @@ type TextBlockContentProps =
       autoFocus?: boolean;
     };
 
-export function TextBlockContent(props: TextBlockContentProps) {
+export const TextBlockContent = (props: TextBlockContentProps) => {
   const normalizedContent = normalizeTextBlockContent(props.content);
 
   if (props.mode === "view") {
@@ -51,11 +51,4 @@ export function TextBlockContent(props: TextBlockContentProps) {
       className={`${TEXT_BLOCK_CONTENT_CLASS} placeholder:text-slate-300 focus-visible:ring-0 focus-visible:ring-offset-0`}
     />
   );
-}
-
-
-
-
-
-
-
+};

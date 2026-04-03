@@ -658,8 +658,3 @@ export class SyncServiceV2 implements ISyncService {
     await this.securityMonitor.dismissAlert(alertId);
   }
 }
-
-
-
-
-

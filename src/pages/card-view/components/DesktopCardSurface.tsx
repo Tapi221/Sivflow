@@ -167,4 +167,3 @@ export const DesktopCardSurface = React.memo(
   areDesktopCardSurfacePropsEqual,
 );
 DesktopCardSurface.displayName = "DesktopCardSurface";
-

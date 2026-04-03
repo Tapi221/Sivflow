@@ -91,8 +91,8 @@
   .surface-convex {
     box-shadow: var(--surface-shadow-convex);
   }
-  
-  /* 顔アイコンの凸感、同期ボタンとかペイン開閉のやつとかのボタン */ 
+
+  /* 顔アイコンの凸感、同期ボタンとかペイン開閉のやつとかのボタン */
   .surface-control-convex {
     border: 1px solid #d7d9de;
     color: #334155;
@@ -125,7 +125,9 @@
     color: var(--floating-surface-foreground, #1e293b);
     border-radius: var(--floating-surface-radius);
     backdrop-filter: blur(calc(var(--floating-surface-backdrop-blur) + 2px));
-    -webkit-backdrop-filter: blur(calc(var(--floating-surface-backdrop-blur) + 2px));
+    -webkit-backdrop-filter: blur(
+      calc(var(--floating-surface-backdrop-blur) + 2px)
+    );
     box-shadow:
       var(--floating-surface-shadow),
       inset 0 1px 0 rgba(255, 255, 255, 0.95),
@@ -148,7 +150,9 @@
     border-radius: var(--floating-surface-radius);
     color: var(--floating-surface-foreground, #1e293b);
     backdrop-filter: blur(calc(var(--floating-surface-backdrop-blur) + 2px));
-    -webkit-backdrop-filter: blur(calc(var(--floating-surface-backdrop-blur) + 2px));
+    -webkit-backdrop-filter: blur(
+      calc(var(--floating-surface-backdrop-blur) + 2px)
+    );
     box-shadow:
       var(--floating-surface-shadow),
       inset 0 1px 0 rgba(255, 255, 255, 0.95),
@@ -161,7 +165,9 @@
     border-radius: max(var(--floating-surface-radius), 1rem);
     color: var(--floating-surface-foreground, #1e293b);
     backdrop-filter: blur(calc(var(--floating-surface-backdrop-blur) + 2px));
-    -webkit-backdrop-filter: blur(calc(var(--floating-surface-backdrop-blur) + 2px));
+    -webkit-backdrop-filter: blur(
+      calc(var(--floating-surface-backdrop-blur) + 2px)
+    );
     box-shadow:
       0 12px 28px rgba(15, 23, 42, 0.12),
       0 2px 6px rgba(15, 23, 42, 0.08),
@@ -172,10 +178,16 @@
   @media (min-width: 768px) {
     .surface-dialog-convex-md {
       border: 1px solid var(--floating-surface-border) !important;
-      background: color-mix(in srgb, var(--floating-surface-bg) 92%, white 8%) !important;
+      background: color-mix(
+        in srgb,
+        var(--floating-surface-bg) 92%,
+        white 8%
+      ) !important;
       color: var(--floating-surface-foreground, #1e293b);
       backdrop-filter: blur(calc(var(--floating-surface-backdrop-blur) + 2px));
-      -webkit-backdrop-filter: blur(calc(var(--floating-surface-backdrop-blur) + 2px));
+      -webkit-backdrop-filter: blur(
+        calc(var(--floating-surface-backdrop-blur) + 2px)
+      );
       box-shadow:
         var(--floating-surface-shadow),
         inset 0 1px 0 rgba(255, 255, 255, 0.95),

@@ -103,7 +103,10 @@ export function useCardEditorPaneController({
 
   React.useEffect(() => {
     if (typeof window === "undefined") return;
-    window.localStorage.setItem(META_PANEL_OPEN_STORAGE_KEY, String(isMetaOpen));
+    window.localStorage.setItem(
+      META_PANEL_OPEN_STORAGE_KEY,
+      String(isMetaOpen),
+    );
   }, [isMetaOpen]);
 
   const resetDialogsRef = React.useRef<() => void>(() => {});
@@ -276,7 +279,12 @@ export function useCardEditorPaneController({
         onCardUpdated?.();
       });
     },
-    [onCardUpdated, sessionSelectedCard, settings?.delayBonusEnabled, updateCard],
+    [
+      onCardUpdated,
+      sessionSelectedCard,
+      settings?.delayBonusEnabled,
+      updateCard,
+    ],
   );
 
   const onUpdateLatestReviewLog = React.useCallback(

@@ -67,10 +67,14 @@ export function useCardViewBreadcrumbs({
 
     if (selectedCard) {
       const title = selectedCard.title?.trim() ?? "";
-      const cardIndex = sortedCards.findIndex((card) => card.id === selectedCard.id);
+      const cardIndex = sortedCards.findIndex(
+        (card) => card.id === selectedCard.id,
+      );
       const current = cardIndex >= 0 ? cardIndex + 1 : 1;
       const total = Math.max(1, sortedCards.length);
-      const label = title ? `${current}/${total} : ${title}` : `${current}/${total}`;
+      const label = title
+        ? `${current}/${total} : ${title}`
+        : `${current}/${total}`;
       crumbs.push({ label });
     }
 
@@ -79,7 +83,14 @@ export function useCardViewBreadcrumbs({
       lastSignatureRef.current = signature;
       setExtraCrumbs(crumbs);
     }
-  }, [selectedCardSet, selectedCard, sortedCards, folderId, folders, setExtraCrumbs]);
+  }, [
+    selectedCardSet,
+    selectedCard,
+    sortedCards,
+    folderId,
+    folders,
+    setExtraCrumbs,
+  ]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -89,4 +100,3 @@ export function useCardViewBreadcrumbs({
     };
   }, [setExtraCrumbs]);
 }
-

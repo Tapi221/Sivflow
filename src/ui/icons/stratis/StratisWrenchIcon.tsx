@@ -25,8 +25,3 @@ export const StratisWrenchIcon = forwardRef<
     </svg>
   );
 });
-
-
-
-
-

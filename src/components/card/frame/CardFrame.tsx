@@ -141,7 +141,9 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
         {/* スケール後のカードを中央寄せしたいので mx-auto ラッパー */}
         <div
           className="mx-auto"
-          style={{ width: stretchWidth ? "100%" : `${Math.max(1, baseWidth)}px` }}
+          style={{
+            width: stretchWidth ? "100%" : `${Math.max(1, baseWidth)}px`,
+          }}
         >
           {topAttachment ? (
             <div className="w-full overflow-visible">{topAttachment}</div>
@@ -202,8 +204,3 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
 );
 
 CardFrame.displayName = "CardFrame";
-
-
-
-
-

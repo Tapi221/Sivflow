@@ -146,9 +146,9 @@ export default function Trash() {
     const name = (
       item.folderName ||
       item.folder_name ||
-        (item.front ? getCardText(item, "question") : "") ||
-        item.question_text ||
-        item.title ||
+      (item.front ? getCardText(item, "question") : "") ||
+      item.question_text ||
+      item.title ||
       ""
     ).toLowerCase();
     return name.includes(query);
@@ -652,9 +652,12 @@ export default function Trash() {
                             <div className="flex-1">
                               <p className="font-medium text-sm">
                                 Q{index + 1}:{" "}
-                                  {card.title ||
-                                  getCardText(card, "question").substring(0, 30) ||
-                                    "(無題)"}
+                                {card.title ||
+                                  getCardText(card, "question").substring(
+                                    0,
+                                    30,
+                                  ) ||
+                                  "(無題)"}
                               </p>
                               <p className="text-xs text-gray-500">
                                 削除日:{" "}
@@ -800,9 +803,12 @@ export default function Trash() {
                               <div className="flex-1">
                                 <p className="font-medium text-sm">
                                   Q{index + 1}:{" "}
-                                    {card.title ||
-                                    getCardText(card, "question").substring(0, 30) ||
-                                      "(無題)"}
+                                  {card.title ||
+                                    getCardText(card, "question").substring(
+                                      0,
+                                      30,
+                                    ) ||
+                                    "(無題)"}
                                 </p>
                                 <p className="text-xs text-gray-500">
                                   {/* normalize済みなのでdeletedAtは常にDateまたはnull */}
@@ -857,9 +863,12 @@ export default function Trash() {
                           <FileText className="w-4 h-4 text-red-400" />
                           <div className="flex-1">
                             <p className="font-medium">
-                                {card.title ||
-                                getCardText(card, "question").substring(0, 30) ||
-                                  "(無題)"}
+                              {card.title ||
+                                getCardText(card, "question").substring(
+                                  0,
+                                  30,
+                                ) ||
+                                "(無題)"}
                             </p>
                             <p className="text-xs text-gray-500">
                               削除日:{" "}
@@ -959,19 +968,24 @@ export default function Trash() {
                   <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
                     <p className="whitespace-pre-wrap">
                       {getCardText(previewCard, "question") || "(問題なし)"}
-                      </p>
+                    </p>
                     {getCardImages(previewCard, "question").length > 0 && (
-                       <div className="mt-3 space-y-2">
-                        {getCardImages(previewCard, "question").map((img, idx) => (
-                          <img
-                            key={idx}
-                            src={
-                              img?.remoteUrl ?? img?.localUrl ?? img?.url ?? img
-                            }
-                            alt={`Question ${idx + 1}`}
-                            className="max-w-full rounded"
-                          />
-                        ))}
+                      <div className="mt-3 space-y-2">
+                        {getCardImages(previewCard, "question").map(
+                          (img, idx) => (
+                            <img
+                              key={idx}
+                              src={
+                                img?.remoteUrl ??
+                                img?.localUrl ??
+                                img?.url ??
+                                img
+                              }
+                              alt={`Question ${idx + 1}`}
+                              className="max-w-full rounded"
+                            />
+                          ),
+                        )}
                       </div>
                     )}
                   </div>
@@ -983,19 +997,24 @@ export default function Trash() {
                   <div className="p-4 bg-green-50 rounded-lg border border-green-200">
                     <p className="whitespace-pre-wrap">
                       {getCardText(previewCard, "answer") || "(解答なし)"}
-                      </p>
+                    </p>
                     {getCardImages(previewCard, "answer").length > 0 && (
-                       <div className="mt-3 space-y-2">
-                        {getCardImages(previewCard, "answer").map((img, idx) => (
-                          <img
-                            key={idx}
-                            src={
-                              img?.remoteUrl ?? img?.localUrl ?? img?.url ?? img
-                            }
-                            alt={`Answer ${idx + 1}`}
-                            className="max-w-full rounded"
-                          />
-                        ))}
+                      <div className="mt-3 space-y-2">
+                        {getCardImages(previewCard, "answer").map(
+                          (img, idx) => (
+                            <img
+                              key={idx}
+                              src={
+                                img?.remoteUrl ??
+                                img?.localUrl ??
+                                img?.url ??
+                                img
+                              }
+                              alt={`Answer ${idx + 1}`}
+                              className="max-w-full rounded"
+                            />
+                          ),
+                        )}
                       </div>
                     )}
                   </div>
@@ -1037,7 +1056,3 @@ export default function Trash() {
     </div>
   );
 }
-
-
-
-

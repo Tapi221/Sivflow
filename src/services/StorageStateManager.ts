@@ -94,8 +94,3 @@ export class StorageStateManager {
     // - カスタムログ収集
   }
 }
-
-
-
-
-

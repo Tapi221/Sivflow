@@ -506,10 +506,7 @@ const normalizeFolderWithSilent = (raw: unknown) => {
   return normalizeFolder(normalizedInput);
 };
 
-const SYNCABLE_TABLES = new Set([
-  "cards",
-  "folders",
-]);
+const SYNCABLE_TABLES = new Set(["cards", "folders"]);
 
 const ENTITY_MAP: Record<string, SyncQueueItem["entity"]> = {
   cards: "card",
@@ -653,8 +650,9 @@ export class InMemoryLocalDB {
     payload: Card | Folder,
   ): Promise<void> {
     if (!SYNCABLE_TABLES.has(tableName)) return;
-    const operationType: SyncQueueItem["operationType"] =
-      payload.isDeleted ? "delete" : "update";
+    const operationType: SyncQueueItem["operationType"] = payload.isDeleted
+      ? "delete"
+      : "update";
     const now = Date.now();
     const task: SyncQueueItem = {
       id: nanoid(),
@@ -908,7 +906,11 @@ export class InMemoryLocalDB {
   }
 
   async getRecentSyncHistory(limit: number = 30): Promise<SyncHistory[]> {
-    return this.syncHistory.orderBy("finishedAt").reverse().limit(limit).toArray();
+    return this.syncHistory
+      .orderBy("finishedAt")
+      .reverse()
+      .limit(limit)
+      .toArray();
   }
 
   async getSyncStatsSince(timestamp: number): Promise<{
@@ -1018,8 +1020,3 @@ export class InMemoryLocalDB {
     return { folders: 0, cards: 0, canonicalId: null, issues: [] };
   }
 }
-
-
-
-
-

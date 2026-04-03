@@ -64,8 +64,3 @@ export function LocalDBStatusBanner() {
     </div>
   );
 }
-
-
-
-
-

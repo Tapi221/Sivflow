@@ -39,9 +39,19 @@ export default function Layout() {
   const isDesktop = isDesktopRuntime();
 
   return (
-    <div className={cn("flex flex-col relative h-[100dvh] w-full overflow-hidden", UI_TYPO)}>
+    <div
+      className={cn(
+        "flex flex-col relative h-[100dvh] w-full overflow-hidden",
+        UI_TYPO,
+      )}
+    >
       <TitleBar />
-      <div className={cn("hidden md:flex fixed right-2 z-50", isDesktop ? "top-10" : "top-1")}>
+      <div
+        className={cn(
+          "hidden md:flex fixed right-2 z-50",
+          isDesktop ? "top-10" : "top-1",
+        )}
+      >
         {!isStudyModePage && <SyncStatusIndicator />}
       </div>
 
@@ -58,12 +68,3 @@ export default function Layout() {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-

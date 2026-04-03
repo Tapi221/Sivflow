@@ -14,34 +14,34 @@ interface PowerPointPaneProps {
 
 export function PowerPointPane({ doc, className }: PowerPointPaneProps) {
   const {
-  docState,
-  displayName,
-  currentSlide,
-  setCurrentSlide,
-  effectiveSlideCount,
-  slides,
-  scale,
-  setScale,
-  loadingManifest,
-  manifestPending,
-  manifestError,
-  manifestStatus,
-  conversionError,
-  conversionErrorLabel,
-  hasReachedAutoRetryLimit,
-  hasScheduledAutoRetry,
-  nextRetryLabel,
-  isOnline,
-  offlineWithoutReadyManifest,
-  viewerReady,
-  canOpenSource,
-  handleOpenSource,
-  localSourceStatus,
-  handlePrev,
-  handleNext,
-  handleRetryConversion,
-  viewerRef,
-} = usePowerPointPaneController(doc);
+    docState,
+    displayName,
+    currentSlide,
+    setCurrentSlide,
+    effectiveSlideCount,
+    slides,
+    scale,
+    setScale,
+    loadingManifest,
+    manifestPending,
+    manifestError,
+    manifestStatus,
+    conversionError,
+    conversionErrorLabel,
+    hasReachedAutoRetryLimit,
+    hasScheduledAutoRetry,
+    nextRetryLabel,
+    isOnline,
+    offlineWithoutReadyManifest,
+    viewerReady,
+    canOpenSource,
+    handleOpenSource,
+    localSourceStatus,
+    handlePrev,
+    handleNext,
+    handleRetryConversion,
+    viewerRef,
+  } = usePowerPointPaneController(doc);
 
   const remoteSourceUrl = normalizeString(
     docState.remoteUrl ?? docState.downloadUrl ?? null,
@@ -109,11 +109,3 @@ export function PowerPointPane({ doc, className }: PowerPointPaneProps) {
     </div>
   );
 }
-
-
-
-
-
-
-
-

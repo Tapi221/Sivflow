@@ -42,8 +42,3 @@ describe("inkCoords", () => {
     expect(squaredDistance({ x: 0, y: 0 }, { x: 3, y: 4 })).toBe(25);
   });
 });
-
-
-
-
-

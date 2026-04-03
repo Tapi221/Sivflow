@@ -197,8 +197,3 @@ export function SlideImage({
     </div>
   );
 }
-
-
-
-
-

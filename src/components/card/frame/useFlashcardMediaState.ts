@@ -45,10 +45,3 @@ export function useFlashcardMediaState(): FlashcardMediaState {
     isModalBlockingFlip,
   };
 }
-
-
-
-
-
-
-

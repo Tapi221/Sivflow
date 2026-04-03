@@ -6,15 +6,18 @@
 
 import type { SlideData } from "@/components/pptx/SlideImage";
 import {
-    appendCacheBust,
-    isHttpUrl,
-    isWithinPendingWindow,
-    manifestRetryDelayMs,
-    normalizeString,
-    waitFor,
+  appendCacheBust,
+  isHttpUrl,
+  isWithinPendingWindow,
+  manifestRetryDelayMs,
+  normalizeString,
+  waitFor,
 } from "@/components/pptx/domain/pptxConversion";
 import { isStorageObjectNotFound } from "@/components/pptx/domain/pptxErrors";
-import type { PptxManifest, PptxManifestStatus } from "@/components/pptx/domain/pptxTypes";
+import type {
+  PptxManifest,
+  PptxManifestStatus,
+} from "@/components/pptx/domain/pptxTypes";
 import { storage } from "@/services/firebase";
 import type { DocumentItem } from "@/types";
 import { getDownloadURL, ref } from "firebase/storage";
@@ -88,10 +91,11 @@ export function usePptxManifestLoader({
       })
       .catch((error) => {
         if (cancelled) return;
-        console.warn(
-          "[usePptxManifestLoader] failed to resolve fallback PDF",
-          { docId, fallbackPath, error },
-        );
+        console.warn("[usePptxManifestLoader] failed to resolve fallback PDF", {
+          docId,
+          fallbackPath,
+          error,
+        });
         setFallbackUrl(null);
       });
 
@@ -278,8 +282,3 @@ export function usePptxManifestLoader({
     fallbackUrl,
   };
 }
-
-
-
-
-

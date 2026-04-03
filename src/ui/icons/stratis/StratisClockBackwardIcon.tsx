@@ -26,8 +26,3 @@ export const StratisClockBackwardIcon = forwardRef<
     </svg>
   );
 });
-
-
-
-
-

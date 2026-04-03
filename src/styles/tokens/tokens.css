@@ -32,8 +32,13 @@
     --ui-font-size-2xl: calc(32px * var(--ui-scale));
     --ui-radius-sm: calc(8px * var(--ui-scale));
     --ui-radius-md: calc(10px * var(--ui-scale));
-    --ui-safe-area-top-offset: calc(env(safe-area-inset-top, 0px) + var(--ui-space-2));
-    --ui-safe-area-bottom-padding: max(var(--ui-space-20), env(safe-area-inset-bottom));
+    --ui-safe-area-top-offset: calc(
+      env(safe-area-inset-top, 0px) + var(--ui-space-2)
+    );
+    --ui-safe-area-bottom-padding: max(
+      var(--ui-space-20),
+      env(safe-area-inset-bottom)
+    );
 
     --app-row-px: calc(var(--card-row-px, 24px) * var(--ui-scale));
     --tree-indent-px: calc(12px * var(--ui-scale));
@@ -68,8 +73,7 @@
     --surface-shadow-concave: inset 0 1px 2px rgba(86, 72, 74, 0.16);
     --surface-shadow-convex:
       0 1px 0 rgba(255, 255, 255, 0.9) inset,
-      0 -1px 0 rgba(86, 72, 74, 0.08) inset,
-      0 1px 2px rgba(86, 72, 74, 0.16);
+      0 -1px 0 rgba(86, 72, 74, 0.08) inset, 0 1px 2px rgba(86, 72, 74, 0.16);
     --floating-surface-bg: rgba(255, 255, 255, 0.82);
     --floating-surface-border: rgba(226, 232, 240, 0.8);
     --floating-surface-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
@@ -143,19 +147,15 @@
     );
     --card-border-selected: var(--card-selected-outline-neutral);
     --card-shadow-default:
-      0 0 2px rgba(15, 23, 42, 0.04),
-      0 0 24px rgba(15, 23, 42, 0.08),
+      0 0 2px rgba(15, 23, 42, 0.04), 0 0 24px rgba(15, 23, 42, 0.08),
       0 0 72px rgba(15, 23, 42, 0.08);
     --card-shadow-rest:
-      0 1px 2px rgba(15, 23, 42, 0.05),
-      0 8px 18px rgba(15, 23, 42, 0.06);
+      0 1px 2px rgba(15, 23, 42, 0.05), 0 8px 18px rgba(15, 23, 42, 0.06);
     --card-shadow-hover:
-      0 0 3px rgba(15, 23, 42, 0.05),
-      0 0 30px rgba(15, 23, 42, 0.1),
+      0 0 3px rgba(15, 23, 42, 0.05), 0 0 30px rgba(15, 23, 42, 0.1),
       0 0 90px rgba(15, 23, 42, 0.1);
     --card-shadow-selected:
-      0 0 4px rgba(15, 23, 42, 0.06),
-      0 0 36px rgba(15, 23, 42, 0.12),
+      0 0 4px rgba(15, 23, 42, 0.06), 0 0 36px rgba(15, 23, 42, 0.12),
       0 0 96px rgba(15, 23, 42, 0.12);
     --card-focus-ring: color-mix(
       in srgb,

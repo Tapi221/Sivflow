@@ -34,8 +34,3 @@ export const StratisDotVerticalIcon = forwardRef<
     </svg>
   );
 });
-
-
-
-
-

@@ -107,8 +107,3 @@ export interface UploadMetadata {
   downloadUrl?: string;
   uploadedAt?: Date | Timestamp;
 }
-
-
-
-
-

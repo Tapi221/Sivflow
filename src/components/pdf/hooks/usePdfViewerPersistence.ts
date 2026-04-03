@@ -17,12 +17,12 @@
  *    - PDF A の viewerState が PDF B に適用されない
  */
 import {
-    clampScale,
-    EPSILON,
-    getViewerStateFromSession,
-    saveViewerStateToSession,
-    VIEWER_STATE_DEBOUNCE_MS,
-    ZOOM_STEP,
+  clampScale,
+  EPSILON,
+  getViewerStateFromSession,
+  saveViewerStateToSession,
+  VIEWER_STATE_DEBOUNCE_MS,
+  ZOOM_STEP,
 } from "@/components/pdf/pdfViewerStateStorage";
 import type { PdfViewerState } from "@/types";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -31,7 +31,9 @@ interface UsePdfViewerPersistenceOptions {
   docId: string;
   viewerState?: PdfViewerState | null;
   fitScale: number;
-  onDocumentUpdate?: (updates: { viewerState: PdfViewerState }) => Promise<void>;
+  onDocumentUpdate?: (updates: {
+    viewerState: PdfViewerState;
+  }) => Promise<void>;
 }
 
 interface UsePdfViewerPersistenceResult {
@@ -68,10 +70,13 @@ export function usePdfViewerPersistence({
   // ✅ PDF ドキュメントが変わった場合のリセット
   useEffect(() => {
     if (lastDocIdRef.current !== docId && lastDocIdRef.current !== null) {
-      console.warn("[usePdfViewerPersistence] Document changed, clearing debounce:", {
-        from: lastDocIdRef.current,
-        to: docId,
-      });
+      console.warn(
+        "[usePdfViewerPersistence] Document changed, clearing debounce:",
+        {
+          from: lastDocIdRef.current,
+          to: docId,
+        },
+      );
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
         debounceTimerRef.current = null;
@@ -110,9 +115,7 @@ export function usePdfViewerPersistence({
         );
       }
       if (typeof restoredState.scale === "number") {
-        queueMicrotask(() =>
-          setScale(clampScale(restoredState!.scale!)),
-        );
+        queueMicrotask(() => setScale(clampScale(restoredState!.scale!)));
       }
       if (
         restoredState.fitMode === "width" ||
@@ -126,7 +129,10 @@ export function usePdfViewerPersistence({
     // microtask を使って、state 更新が確定するのを待つ
     Promise.resolve().then(() => {
       isHydratingRef.current = false;
-      console.debug("[usePdfViewerPersistence] Hydration complete for doc:", docId);
+      console.debug(
+        "[usePdfViewerPersistence] Hydration complete for doc:",
+        docId,
+      );
     });
   }, [docId, viewerState]);
 
@@ -157,9 +163,13 @@ export function usePdfViewerPersistence({
       // ✅ 条件付きで実行（ドキュメント切替による不正な更新を防止）
       if (onDocumentUpdate) {
         onDocumentUpdate({ viewerState: newViewerState }).catch((err) => {
-          console.warn("[usePdfViewerPersistence] Failed to save viewer state:", err, {
-            docId,
-          });
+          console.warn(
+            "[usePdfViewerPersistence] Failed to save viewer state:",
+            err,
+            {
+              docId,
+            },
+          );
           // 失敗しても無視（UXを止めない）
         });
       }
@@ -188,16 +198,12 @@ export function usePdfViewerPersistence({
 
   const handleZoomOut = useCallback(() => {
     setFitMode("manual");
-    setScale((s) =>
-      clampScale(parseFloat((s - ZOOM_STEP).toFixed(2))),
-    );
+    setScale((s) => clampScale(parseFloat((s - ZOOM_STEP).toFixed(2))));
   }, []);
 
   const handleZoomIn = useCallback(() => {
     setFitMode("manual");
-    setScale((s) =>
-      clampScale(parseFloat((s + ZOOM_STEP).toFixed(2))),
-    );
+    setScale((s) => clampScale(parseFloat((s + ZOOM_STEP).toFixed(2))));
   }, []);
 
   const handleFitWidth = useCallback(() => {
@@ -226,8 +232,3 @@ export function usePdfViewerPersistence({
     handleViewerScaleChange,
   };
 }
-
-
-
-
-

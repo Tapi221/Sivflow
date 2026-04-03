@@ -92,9 +92,3 @@ export const CodeBlockItem = React.memo(
   areCodeBlockItemPropsEqual,
 );
 CodeBlockItem.displayName = "CodeBlockItem";
-
-
-
-
-
-

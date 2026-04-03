@@ -102,9 +102,3 @@ export function useTreeViewActions({
     handleSelectDetailedMode,
   };
 }
-
-
-
-
-
-

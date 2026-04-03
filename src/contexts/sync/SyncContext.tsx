@@ -85,19 +85,22 @@ export function SyncProvider({ children }: SyncProviderProps) {
     }
   }, []);
 
-  const updateCounts = useCallback(async (service?: LegacySyncService | null) => {
-    const activeService = service ?? syncServiceRef.current;
-    if (!activeService) return;
+  const updateCounts = useCallback(
+    async (service?: LegacySyncService | null) => {
+      const activeService = service ?? syncServiceRef.current;
+      if (!activeService) return;
 
-    try {
-      const { pending: queue } = await activeService.getQueueStatus();
-      const conflicts = await activeService.getUnresolvedConflicts();
-      setQueueCount(queue);
-      setConflictCount(conflicts.length);
-    } catch (error) {
-      console.error("[Sync] Failed to update counts:", error);
-    }
-  }, []);
+      try {
+        const { pending: queue } = await activeService.getQueueStatus();
+        const conflicts = await activeService.getUnresolvedConflicts();
+        setQueueCount(queue);
+        setConflictCount(conflicts.length);
+      } catch (error) {
+        console.error("[Sync] Failed to update counts:", error);
+      }
+    },
+    [],
+  );
 
   const configureAutoSync = useCallback(
     (service: LegacySyncService, settings: SyncSettings) => {
@@ -113,7 +116,11 @@ export function SyncProvider({ children }: SyncProviderProps) {
       );
 
       syncIntervalRef.current = setInterval(async () => {
-        if (!navigator.onLine || syncStatusRef.current === "syncing" || !userId) {
+        if (
+          !navigator.onLine ||
+          syncStatusRef.current === "syncing" ||
+          !userId
+        ) {
           return;
         }
 
@@ -253,7 +260,9 @@ export function SyncProvider({ children }: SyncProviderProps) {
         try {
           let skippedByPolicy = false;
           if (lastSync) {
-            console.log("[Sync] Existing user detected. Performing delta sync.");
+            console.log(
+              "[Sync] Existing user detected. Performing delta sync.",
+            );
             const result = await service.synchronize();
             skippedByPolicy = result.errors.some((message) =>
               message.includes("WiFi限定モードのためスキップ"),
@@ -263,7 +272,9 @@ export function SyncProvider({ children }: SyncProviderProps) {
               setSyncNotice("wifi_wait");
             }
           } else {
-            console.log("[Sync] New user or device detected. Performing full sync.");
+            console.log(
+              "[Sync] New user or device detected. Performing full sync.",
+            );
             await service.performFullSync();
           }
 
@@ -308,11 +319,17 @@ export function SyncProvider({ children }: SyncProviderProps) {
 
   useEffect(() => {
     const handleOnline = async () => {
-      if (!userId || syncStatusRef.current === "syncing" || !syncServiceRef.current) {
+      if (
+        !userId ||
+        syncStatusRef.current === "syncing" ||
+        !syncServiceRef.current
+      ) {
         return;
       }
 
-      console.log("[Sync] Network reconnected. Processing queue and syncing...");
+      console.log(
+        "[Sync] Network reconnected. Processing queue and syncing...",
+      );
 
       const queueResult = await syncServiceRef.current.processQueue();
       console.log(`[Sync] Queue processed: ${queueResult.processed} items`);
@@ -367,4 +384,3 @@ export function SyncProvider({ children }: SyncProviderProps) {
 
   return <SyncContext.Provider value={value}>{children}</SyncContext.Provider>;
 }
-

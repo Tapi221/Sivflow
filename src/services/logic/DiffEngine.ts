@@ -1,4 +1,7 @@
-import type { FolderLike, IDiffEngine } from "@/services/interfaces/ISyncService";
+import type {
+  FolderLike,
+  IDiffEngine,
+} from "@/services/interfaces/ISyncService";
 
 type TimestampLike = {
   toMillis?: () => number;

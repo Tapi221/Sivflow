@@ -87,25 +87,25 @@ export function ExplorerFilterSummary({
           />
         ))}
         {uncertaintyFilter !== "any" ? (
-            <TagBadge
-              label={`はてな: ${uncertaintyFilter === "on" ? "あり" : "なし"}`}
-              size="sm"
-              colorClass={DEFAULT_TAG_COLOR_CLASS_NAME}
-            />
+          <TagBadge
+            label={`はてな: ${uncertaintyFilter === "on" ? "あり" : "なし"}`}
+            size="sm"
+            colorClass={DEFAULT_TAG_COLOR_CLASS_NAME}
+          />
         ) : null}
         {bookmarkedFilter !== "any" ? (
-            <TagBadge
-              label={`星: ${bookmarkedFilter === "on" ? "あり" : "なし"}`}
-              size="sm"
-              colorClass={DEFAULT_TAG_COLOR_CLASS_NAME}
-            />
+          <TagBadge
+            label={`星: ${bookmarkedFilter === "on" ? "あり" : "なし"}`}
+            size="sm"
+            colorClass={DEFAULT_TAG_COLOR_CLASS_NAME}
+          />
         ) : null}
         {draftFilter !== "any" ? (
-            <TagBadge
-              label={`下書き: ${draftFilter === "on" ? "あり" : "なし"}`}
-              size="sm"
-              colorClass={DEFAULT_TAG_COLOR_CLASS_NAME}
-            />
+          <TagBadge
+            label={`下書き: ${draftFilter === "on" ? "あり" : "なし"}`}
+            size="sm"
+            colorClass={DEFAULT_TAG_COLOR_CLASS_NAME}
+          />
         ) : null}
       </div>
 
@@ -117,9 +117,3 @@ export function ExplorerFilterSummary({
     </div>
   );
 }
-
-
-
-
-
-

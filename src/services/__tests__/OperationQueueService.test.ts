@@ -139,9 +139,10 @@ describe("OperationQueueService", () => {
       await operationQueue.enqueueChange("card", targetId, "create", { v: 1 });
 
       // Mock performSyncOperation to always fail
-      vi.spyOn(operationQueue as unknown, "performSyncOperation").mockRejectedValue(
-        new Error("Network Error"),
-      );
+      vi.spyOn(
+        operationQueue as unknown,
+        "performSyncOperation",
+      ).mockRejectedValue(new Error("Network Error"));
 
       // Mock trigger to do nothing automatically, we drive manually
       vi.spyOn(operationQueue as unknown, "triggerProcess").mockImplementation(
@@ -232,8 +233,3 @@ describe("OperationQueueService", () => {
     });
   });
 });
-
-
-
-
-

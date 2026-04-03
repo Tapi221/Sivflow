@@ -177,7 +177,11 @@ export function useVerticalCardPager({
         flushQueuedNaturalIndex();
       }, naturalIndexCommitDelayMs);
     },
-    [clearNaturalIndexTimer, flushQueuedNaturalIndex, naturalIndexCommitDelayMs],
+    [
+      clearNaturalIndexTimer,
+      flushQueuedNaturalIndex,
+      naturalIndexCommitDelayMs,
+    ],
   );
 
   // idx のカードをコンテナ中央へ寄せる
@@ -193,7 +197,10 @@ export function useVerticalCardPager({
       const targetTop =
         el.offsetTop - container.clientHeight / 2 + el.offsetHeight / 2;
 
-      const maxScrollTop = Math.max(0, container.scrollHeight - container.clientHeight);
+      const maxScrollTop = Math.max(
+        0,
+        container.scrollHeight - container.clientHeight,
+      );
       const nextTop = Math.min(Math.max(0, targetTop), maxScrollTop);
 
       container.scrollTo({
@@ -274,7 +281,10 @@ export function useVerticalCardPager({
 
     container.addEventListener("scroll", schedule, { passive: true });
     container.addEventListener("wheel", handleWheel, { passive: true });
-    window.addEventListener("scroll", schedule, { passive: true, capture: true });
+    window.addEventListener("scroll", schedule, {
+      passive: true,
+      capture: true,
+    });
     window.addEventListener("resize", schedule, { passive: true });
 
     schedule();
@@ -337,4 +347,3 @@ export function useVerticalCardPager({
     goPrev,
   };
 }
-

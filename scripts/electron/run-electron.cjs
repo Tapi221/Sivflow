@@ -26,7 +26,10 @@ const loadEnvFile = (filePath) => {
     const separatorIndex = line.indexOf("=");
     if (separatorIndex <= 0) continue;
     const key = line.slice(0, separatorIndex).trim();
-    const value = line.slice(separatorIndex + 1).trim().replace(/^['"]|['"]$/g, "");
+    const value = line
+      .slice(separatorIndex + 1)
+      .trim()
+      .replace(/^['"]|['"]$/g, "");
     if (!(key in env) || FORCE_OVERRIDE_KEYS.has(key)) {
       env[key] = value;
     }

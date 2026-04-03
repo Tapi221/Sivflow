@@ -1,14 +1,22 @@
 import { cn } from "@/lib/utils";
 import type { CardBlock } from "@/types/domain/card";
-import { Code, HelpCircle, ImageIcon, Plus, StratisFormulaIcon, StratisMarkdownIcon, Type } from "@/ui/icons";
+import {
+  Code,
+  HelpCircle,
+  ImageIcon,
+  Plus,
+  StratisFormulaIcon,
+  StratisMarkdownIcon,
+  Type,
+} from "@/ui/icons";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
 interface BlockToolbarProps {
@@ -40,20 +48,23 @@ const ALLOWED_TYPES: readonly CardBlock["type"][] = [
 ] as const;
 
 const DEFAULT_CONFIGS: BlockConfig[] = [
-  { type: "text",     label: "テキスト",  icon: "Type",        isVisible: true },
-  { type: "question", label: "疑問",      icon: "HelpCircle",  isVisible: true },
-  { type: "code",     label: "コード",    icon: "Code",        isVisible: true },
-  { type: "image",    label: "画像",      icon: "Image",       isVisible: true },
-  { type: "math",     label: "数式",      icon: "Sigma",       isVisible: true },
-  { type: "markdown", label: "Markdown",  icon: "NotebookPen", isVisible: true },
+  { type: "text", label: "テキスト", icon: "Type", isVisible: true },
+  { type: "question", label: "疑問", icon: "HelpCircle", isVisible: true },
+  { type: "code", label: "コード", icon: "Code", isVisible: true },
+  { type: "image", label: "画像", icon: "Image", isVisible: true },
+  { type: "math", label: "数式", icon: "Sigma", isVisible: true },
+  { type: "markdown", label: "Markdown", icon: "NotebookPen", isVisible: true },
 ];
 
 const DEFAULT_ORDER_INDEX_BY_TYPE = DEFAULT_CONFIGS.reduce<
   Record<CardBlock["type"], number>
->((acc, config, index) => {
-  acc[config.type] = index;
-  return acc;
-}, {} as Record<CardBlock["type"], number>);
+>(
+  (acc, config, index) => {
+    acc[config.type] = index;
+    return acc;
+  },
+  {} as Record<CardBlock["type"], number>,
+);
 
 function getIcon(iconName: string | undefined, type: CardBlock["type"]) {
   const map: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -77,7 +88,13 @@ function getIcon(iconName: string | undefined, type: CardBlock["type"]) {
 }
 
 // Tooltip コンポーネント — portal で body 直下に描画し overflow クリップを回避
-function Tooltip({ label, children }: { label: string; children: React.ReactNode }) {
+function Tooltip({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
   const anchorRef = useRef<HTMLDivElement>(null);
 
@@ -107,48 +124,49 @@ function Tooltip({ label, children }: { label: string; children: React.ReactNode
       >
         {children}
       </div>
-      {pos && createPortal(
-        <>
-          <style>{`
+      {pos &&
+        createPortal(
+          <>
+            <style>{`
             @keyframes bt-tooltip-in {
               from { opacity: 0; transform: translate(-50%, -4px); }
               to   { opacity: 1; transform: translate(-50%, 0); }
             }
           `}</style>
-          <div
-            role="tooltip"
-            style={{
-              position: "fixed",
-              left: pos.x,
-              top: pos.y,
-              transform: "translate(-50%, -100%)",
-              zIndex: 9999,
-              pointerEvents: "none",
-              animation: "bt-tooltip-in 0.15s ease forwards",
-            }}
-          >
-            <span
+            <div
+              role="tooltip"
               style={{
-                display: "inline-block",
-                whiteSpace: "nowrap",
-                background: "rgba(22,27,34,0.92)",
-                color: "#e6edf3",
-                fontSize: "11px",
-                fontWeight: 500,
-                lineHeight: 1,
-                padding: "4px 8px",
-                borderRadius: "6px",
-                backdropFilter: "blur(4px)",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.28)",
-                letterSpacing: "0.01em",
+                position: "fixed",
+                left: pos.x,
+                top: pos.y,
+                transform: "translate(-50%, -100%)",
+                zIndex: 9999,
+                pointerEvents: "none",
+                animation: "bt-tooltip-in 0.15s ease forwards",
               }}
             >
-              {label}
-            </span>
-          </div>
-        </>,
-        document.body,
-      )}
+              <span
+                style={{
+                  display: "inline-block",
+                  whiteSpace: "nowrap",
+                  background: "rgba(22,27,34,0.92)",
+                  color: "#e6edf3",
+                  fontSize: "11px",
+                  fontWeight: 500,
+                  lineHeight: 1,
+                  padding: "4px 8px",
+                  borderRadius: "6px",
+                  backdropFilter: "blur(4px)",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.28)",
+                  letterSpacing: "0.01em",
+                }}
+              >
+                {label}
+              </span>
+            </div>
+          </>,
+          document.body,
+        )}
     </>
   );
 }
@@ -200,7 +218,8 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
   );
 
   type RawSettings = { editorBlockSettings?: Record<string, unknown>[] };
-  const rawSettings = (settings as RawSettings | undefined)?.editorBlockSettings;
+  const rawSettings = (settings as RawSettings | undefined)
+    ?.editorBlockSettings;
 
   const blockSettings: BlockConfig[] = useMemo(() => {
     if (!rawSettings || rawSettings.length === 0) return DEFAULT_CONFIGS;
@@ -352,7 +371,9 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
                     <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-slate-100 border border-slate-200/70">
                       <Icon className="w-3.5 h-3.5" />
                     </span>
-                    <span className="text-[12px] font-medium">{config.label}</span>
+                    <span className="text-[12px] font-medium">
+                      {config.label}
+                    </span>
                   </DropdownMenuItem>
                 );
               })
@@ -388,7 +409,11 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
   if (desktopLayout === "vertical") {
     return (
       <>
-        <div ref={verticalAnchorRef} className="hidden md:block h-0 w-0" aria-hidden />
+        <div
+          ref={verticalAnchorRef}
+          className="hidden md:block h-0 w-0"
+          aria-hidden
+        />
         <div className="md:hidden">{renderToolbarShell()}</div>
         {typeof document !== "undefined" &&
           createPortal(
@@ -410,9 +435,7 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
     );
   }
 
-  return (
-    renderToolbarShell()
-  );
+  return renderToolbarShell();
 };
 
 const areBlockToolbarPropsEqual = (
@@ -431,5 +454,3 @@ export const BlockToolbar = React.memo(
   areBlockToolbarPropsEqual,
 );
 BlockToolbar.displayName = "BlockToolbar";
-
-

@@ -47,8 +47,3 @@ export const getRowOffsetStyle = (
   if (rowOffsetPx === 0) return undefined;
   return { transform: `translateY(${rowOffsetPx}px)` };
 };
-
-
-
-
-

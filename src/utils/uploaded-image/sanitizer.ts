@@ -20,8 +20,3 @@ export const sanitizeUploadedImages = (images: unknown[]) => {
     return img;
   });
 };
-
-
-
-
-

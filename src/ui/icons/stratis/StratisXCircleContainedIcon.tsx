@@ -22,8 +22,3 @@ export const StratisXCircleContainedIcon = forwardRef<
     </svg>
   );
 });
-
-
-
-
-

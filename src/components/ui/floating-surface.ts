@@ -10,8 +10,7 @@ export const floatingSurfaceVariants = cva("", {
         "surface-floating-strong text-[var(--floating-surface-foreground,var(--text-primary,#1e293b))]",
       panel:
         "surface-panel-floating text-[var(--floating-surface-foreground,var(--text-primary,#1e293b))]",
-      plain:
-        "border-transparent bg-transparent shadow-none backdrop-blur-0",
+      plain: "border-transparent bg-transparent shadow-none backdrop-blur-0",
     },
   },
   defaultVariants: {
@@ -22,4 +21,3 @@ export const floatingSurfaceVariants = cva("", {
 export type FloatingSurfaceVariantProps = VariantProps<
   typeof floatingSurfaceVariants
 >;
-

@@ -65,8 +65,9 @@ export function useCardViewPaneWidth({
   const editPreferenceKey = `${cardSetId ?? ""}:${settings?.cardEditPaneWidthPx ?? ""}`;
 
   const preferredViewPaneWidthPx = useMemo(() => {
-    const localStored =
-      cardSetId ? getCardSetWidthPreference(cardSetId, "view") : undefined;
+    const localStored = cardSetId
+      ? getCardSetWidthPreference(cardSetId, "view")
+      : undefined;
 
     return clampPaneWidthPx(
       localStored ??
@@ -77,8 +78,9 @@ export function useCardViewPaneWidth({
   }, [cardSetId, settings?.cardViewPaneWidthPx]);
 
   const preferredEditPaneWidthPx = useMemo(() => {
-    const localStored =
-      cardSetId ? getCardSetWidthPreference(cardSetId, "edit") : undefined;
+    const localStored = cardSetId
+      ? getCardSetWidthPreference(cardSetId, "edit")
+      : undefined;
 
     return clampPaneWidthPx(
       localStored ??
@@ -88,15 +90,19 @@ export function useCardViewPaneWidth({
     );
   }, [cardSetId, settings?.cardEditPaneWidthPx]);
 
-  const [viewPaneState, setViewPaneState] = useState<KeyedPaneWidthState>(() => ({
-    key: viewPreferenceKey,
-    width: preferredViewPaneWidthPx,
-  }));
+  const [viewPaneState, setViewPaneState] = useState<KeyedPaneWidthState>(
+    () => ({
+      key: viewPreferenceKey,
+      width: preferredViewPaneWidthPx,
+    }),
+  );
 
-  const [editPaneState, setEditPaneState] = useState<KeyedPaneWidthState>(() => ({
-    key: editPreferenceKey,
-    width: preferredEditPaneWidthPx,
-  }));
+  const [editPaneState, setEditPaneState] = useState<KeyedPaneWidthState>(
+    () => ({
+      key: editPreferenceKey,
+      width: preferredEditPaneWidthPx,
+    }),
+  );
 
   const viewPaneWidthPx =
     viewPaneState.key === viewPreferenceKey
@@ -113,10 +119,7 @@ export function useCardViewPaneWidth({
     if (!element || typeof ResizeObserver === "undefined") return;
 
     const updateWidth = () => {
-      const next = Math.max(
-        0,
-        Math.round(element.clientWidth),
-      );
+      const next = Math.max(0, Math.round(element.clientWidth));
 
       setContentViewportWidth((prev) => (prev === next ? prev : next));
     };
@@ -260,4 +263,3 @@ export function useCardViewPaneWidth({
     resetActivePaneWidth,
   };
 }
-

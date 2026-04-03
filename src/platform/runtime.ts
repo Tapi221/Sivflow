@@ -8,8 +8,3 @@ export const hasDesktopBridge = (): boolean =>
   hasWindowDesktopBridge() && isElectronUserAgent();
 
 export const isDesktopRuntime = (): boolean => hasDesktopBridge();
-
-
-
-
-

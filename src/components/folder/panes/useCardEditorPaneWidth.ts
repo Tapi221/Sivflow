@@ -67,9 +67,10 @@ export function useCardEditorPaneWidth({
   cardSetId,
 }: UseCardEditorPaneWidthParams) {
   const contentViewportRef = React.useRef<HTMLDivElement | null>(null);
-  const [contentViewportWidth, setContentViewportWidth] = React.useState<number>(
-    () => (typeof window === "undefined" ? 1024 : window.innerWidth),
-  );
+  const [contentViewportWidth, setContentViewportWidth] =
+    React.useState<number>(() =>
+      typeof window === "undefined" ? 1024 : window.innerWidth,
+    );
   const [viewPaneWidthPx, setViewPaneWidthPx] = React.useState<number>(
     CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
   );
@@ -84,8 +85,9 @@ export function useCardEditorPaneWidth({
     : CARD_PANE_EDIT_DEFAULT_WIDTH_PX;
 
   React.useEffect(() => {
-    const localStored =
-      cardSetId ? getCardSetWidthPreference(cardSetId, "view") : undefined;
+    const localStored = cardSetId
+      ? getCardSetWidthPreference(cardSetId, "view")
+      : undefined;
     setViewPaneWidthPx(
       clampPaneWidthPx(
         localStored ??
@@ -94,21 +96,20 @@ export function useCardEditorPaneWidth({
         CARD_PANE_VIEW_MIN_WIDTH_PX,
       ),
     );
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cardSetId, settings?.cardViewPaneWidthPx]);
 
   React.useEffect(() => {
-    const localStored =
-      cardSetId ? getCardSetWidthPreference(cardSetId, "edit") : undefined;
+    const localStored = cardSetId
+      ? getCardSetWidthPreference(cardSetId, "edit")
+      : undefined;
     setEditPaneWidthPx(
       clampPaneWidthPx(
-        localStored ??
-          settings?.cardEditPaneWidthPx ??
-          defaultEditPaneWidthPx,
+        localStored ?? settings?.cardEditPaneWidthPx ?? defaultEditPaneWidthPx,
         CARD_PANE_EDIT_MIN_WIDTH_PX,
       ),
     );
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cardSetId, defaultEditPaneWidthPx, settings?.cardEditPaneWidthPx]);
 
   React.useEffect(() => {
@@ -172,12 +173,11 @@ export function useCardEditorPaneWidth({
   const hasForcedPaneWidth =
     typeof forcedPaneWidthPx === "number" && Number.isFinite(forcedPaneWidthPx);
   const shouldUseEdgeToEdgePaneWidth = isMetaOpen && !embeddedInPager;
-  const resolvedPaneWidthPx =
-    hasForcedPaneWidth
-      ? clampPaneWidthPx(forcedPaneWidthPx, activePaneMinWidthPx)
-      : shouldUseEdgeToEdgePaneWidth
-        ? activePaneMaxWidthPx
-        : activePaneWidthPx;
+  const resolvedPaneWidthPx = hasForcedPaneWidth
+    ? clampPaneWidthPx(forcedPaneWidthPx, activePaneMinWidthPx)
+    : shouldUseEdgeToEdgePaneWidth
+      ? activePaneMaxWidthPx
+      : activePaneWidthPx;
   const activePaneDisplayedDefaultWidthPx = clampPaneWidthPx(
     activePaneDefaultWidthPx,
     activePaneMinWidthPx,
@@ -188,13 +188,9 @@ export function useCardEditorPaneWidth({
     showWidthControl && dockToolbarsToTop && !usesExternalToolbarMount;
   const hideCardShellHeader = embeddedInPager && dockToolbarsToTop;
   const shouldDockToolbarToCardTop =
-    dockToolbarsToTop &&
-    !hideBlockToolbars &&
-    !usesExternalToolbarMount;
+    dockToolbarsToTop && !hideBlockToolbars && !usesExternalToolbarMount;
   const shouldShowInlineToolbarMount =
-    !dockToolbarsToTop &&
-    !hideBlockToolbars &&
-    !usesExternalToolbarMount;
+    !dockToolbarsToTop && !hideBlockToolbars && !usesExternalToolbarMount;
   const shouldShowEditingBadge = !embeddedInPager || isPagerActiveCard;
 
   const shouldApplyPaneWidth =
@@ -204,8 +200,8 @@ export function useCardEditorPaneWidth({
   const effectivePaneWidthPx = hasForcedPaneWidth
     ? resolvedPaneWidthPx
     : shouldApplyPaneWidth
-    ? Math.max(1, Math.min(resolvedPaneWidthPx, availablePaneWidthPx))
-    : Math.max(1, availablePaneWidthPx || activePaneMinWidthPx);
+      ? Math.max(1, Math.min(resolvedPaneWidthPx, availablePaneWidthPx))
+      : Math.max(1, availablePaneWidthPx || activePaneMinWidthPx);
 
   const useTwoColumnEditorLayout =
     (embeddedInPager && isEditing) ||
@@ -305,4 +301,3 @@ export function useCardEditorPaneWidth({
     resetActivePaneWidth,
   };
 }
-

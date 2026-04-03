@@ -91,8 +91,3 @@ export function PracticeCards({
     </div>
   );
 }
-
-
-
-
-

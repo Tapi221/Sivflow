@@ -22,8 +22,3 @@ export const desktopPlatform: PlatformApi = {
     },
   },
 };
-
-
-
-
-

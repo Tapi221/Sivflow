@@ -5,5 +5,3 @@ export const QUESTION_BLOCK_TITLE_TEXT_CLASS =
 
 export const QUESTION_BLOCK_ANSWER_TEXT_CLASS =
   "text-xs text-slate-600 leading-[17px] whitespace-pre-wrap";
-
-

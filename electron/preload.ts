@@ -49,8 +49,10 @@ const desktopApi: DesktopBridgeApi = {
     close: () => ipcRenderer.invoke(IPC_CHANNELS.windowClose),
     isMaximized: () => ipcRenderer.invoke(IPC_CHANNELS.windowIsMaximized),
     onMaximizedStateChange: (handler: (isMaximized: boolean) => void) => {
-      const listener = (_event: Electron.IpcRendererEvent, isMaximized: boolean) =>
-        handler(isMaximized);
+      const listener = (
+        _event: Electron.IpcRendererEvent,
+        isMaximized: boolean,
+      ) => handler(isMaximized);
       ipcRenderer.on(IPC_CHANNELS.windowMaximizedState, listener);
       return () => {
         ipcRenderer.removeListener(IPC_CHANNELS.windowMaximizedState, listener);
@@ -60,4 +62,3 @@ const desktopApi: DesktopBridgeApi = {
 };
 
 contextBridge.exposeInMainWorld("desktop", desktopApi);
-

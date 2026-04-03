@@ -65,7 +65,9 @@ function TreeViewLayout({
   const { createCard, updateCard, deleteCard, moveCardToFolder, reorderCards } =
     useCards();
 
-  const [selectedCardSetId, setSelectedCardSetId] = useState<string | null>(null);
+  const [selectedCardSetId, setSelectedCardSetId] = useState<string | null>(
+    null,
+  );
   const [createCardSetRequestToken, setCreateCardSetRequestToken] = useState(0);
 
   const {
@@ -285,23 +287,19 @@ function TreeViewLayout({
     pptxTriggerRef.current?.();
   }, [currentHeaderFolderId]);
 
-  const {
-    isFilterActive,
-    filteredCards,
-    filteredDocuments,
-    isFiltering,
-  } = useTreeViewFilters({
-    cards,
-    documents,
-    explorerTab,
-    tagFilter,
-    tagMatchMode,
-    uncertaintyFilter,
-    bookmarkedFilter,
-    draftFilter,
-    contentTypeFilter,
-    tagById,
-  });
+  const { isFilterActive, filteredCards, filteredDocuments, isFiltering } =
+    useTreeViewFilters({
+      cards,
+      documents,
+      explorerTab,
+      tagFilter,
+      tagMatchMode,
+      uncertaintyFilter,
+      bookmarkedFilter,
+      draftFilter,
+      contentTypeFilter,
+      tagById,
+    });
 
   const virtualTreeNodes = useMemo(() => {
     if (!activeCustomView) return [];

@@ -155,8 +155,7 @@ export function ImageFrame({
     [resolvedReferenceWidthPx, safeScale],
   );
 
-  const transformCallback =
-    onTransformCommit ?? onTransformChange ?? undefined;
+  const transformCallback = onTransformCommit ?? onTransformChange ?? undefined;
 
   const dragEnabled =
     editable &&
@@ -171,8 +170,7 @@ export function ImageFrame({
     const update = () => {
       const rectW = node.getBoundingClientRect().width;
       const layoutW = node.offsetWidth || rectW;
-      const nextScaleX =
-        node.offsetWidth > 0 ? rectW / node.offsetWidth : 1;
+      const nextScaleX = node.offsetWidth > 0 ? rectW / node.offsetWidth : 1;
       const safeNextScaleX =
         Number.isFinite(nextScaleX) && nextScaleX > 0 ? nextScaleX : 1;
 

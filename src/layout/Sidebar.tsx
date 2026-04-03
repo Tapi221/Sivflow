@@ -11,47 +11,154 @@ type NavItem = {
 };
 
 const FolderIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-    <path d="M1.5 3.5A1 1 0 0 1 2.5 2.5H6l1.5 1.5H13.5A1 1 0 0 1 14.5 5V12.5A1 1 0 0 1 13.5 13.5H2.5A1 1 0 0 1 1.5 12.5V3.5Z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
+    aria-hidden="true"
+  >
+    <path
+      d="M1.5 3.5A1 1 0 0 1 2.5 2.5H6l1.5 1.5H13.5A1 1 0 0 1 14.5 5V12.5A1 1 0 0 1 13.5 13.5H2.5A1 1 0 0 1 1.5 12.5V3.5Z"
+      stroke="currentColor"
+      strokeWidth="1.2"
+      strokeLinejoin="round"
+    />
   </svg>
 );
 
 const CalendarIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-    <rect x="1.5" y="3" width="13" height="11.5" rx="1" stroke="currentColor" strokeWidth="1.2" />
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
+    aria-hidden="true"
+  >
+    <rect
+      x="1.5"
+      y="3"
+      width="13"
+      height="11.5"
+      rx="1"
+      stroke="currentColor"
+      strokeWidth="1.2"
+    />
     <path d="M1.5 6.5H14.5" stroke="currentColor" strokeWidth="1.2" />
-    <path d="M5 1.5V4.5M11 1.5V4.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+    <path
+      d="M5 1.5V4.5M11 1.5V4.5"
+      stroke="currentColor"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+    />
   </svg>
 );
 
 const GalleryIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-    <rect x="1.5" y="1.5" width="5.5" height="5.5" rx="0.75" stroke="currentColor" strokeWidth="1.2" />
-    <rect x="9" y="1.5" width="5.5" height="5.5" rx="0.75" stroke="currentColor" strokeWidth="1.2" />
-    <rect x="1.5" y="9" width="5.5" height="5.5" rx="0.75" stroke="currentColor" strokeWidth="1.2" />
-    <rect x="9" y="9" width="5.5" height="5.5" rx="0.75" stroke="currentColor" strokeWidth="1.2" />
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
+    aria-hidden="true"
+  >
+    <rect
+      x="1.5"
+      y="1.5"
+      width="5.5"
+      height="5.5"
+      rx="0.75"
+      stroke="currentColor"
+      strokeWidth="1.2"
+    />
+    <rect
+      x="9"
+      y="1.5"
+      width="5.5"
+      height="5.5"
+      rx="0.75"
+      stroke="currentColor"
+      strokeWidth="1.2"
+    />
+    <rect
+      x="1.5"
+      y="9"
+      width="5.5"
+      height="5.5"
+      rx="0.75"
+      stroke="currentColor"
+      strokeWidth="1.2"
+    />
+    <rect
+      x="9"
+      y="9"
+      width="5.5"
+      height="5.5"
+      rx="0.75"
+      stroke="currentColor"
+      strokeWidth="1.2"
+    />
   </svg>
 );
 
 const DirectoryIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-    <path d="M2 3.5H6M2 8H10M2 12.5H14" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
+    aria-hidden="true"
+  >
+    <path
+      d="M2 3.5H6M2 8H10M2 12.5H14"
+      stroke="currentColor"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+    />
     <circle cx="8" cy="3.5" r="1.5" stroke="currentColor" strokeWidth="1.2" />
     <circle cx="12" cy="8" r="1.5" stroke="currentColor" strokeWidth="1.2" />
   </svg>
 );
 
 const TrashIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-    <path d="M2.5 4.5H13.5L12.5 13.5H3.5L2.5 4.5Z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
-    <path d="M1 4.5H15M6 4.5V2.5H10V4.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
+    aria-hidden="true"
+  >
+    <path
+      d="M2.5 4.5H13.5L12.5 13.5H3.5L2.5 4.5Z"
+      stroke="currentColor"
+      strokeWidth="1.2"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M1 4.5H15M6 4.5V2.5H10V4.5"
+      stroke="currentColor"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
   </svg>
 );
 
 const SettingsIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
+    aria-hidden="true"
+  >
     <circle cx="8" cy="8" r="2.5" stroke="currentColor" strokeWidth="1.2" />
-    <path d="M8 1.5V3M8 13V14.5M14.5 8H13M3 8H1.5M12.364 3.636L11.3 4.7M4.7 11.3L3.636 12.364M12.364 12.364L11.3 11.3M4.7 4.7L3.636 3.636" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+    <path
+      d="M8 1.5V3M8 13V14.5M14.5 8H13M3 8H1.5M12.364 3.636L11.3 4.7M4.7 11.3L3.636 12.364M12.364 12.364L11.3 11.3M4.7 4.7L3.636 3.636"
+      stroke="currentColor"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+    />
   </svg>
 );
 
@@ -86,7 +193,8 @@ export function Sidebar() {
             to={to}
             className={({ isActive }) =>
               getSidebarNavItemClassName({
-                isActive: to === "/folders" ? isActive && !isHomeOnlyMode : isActive,
+                isActive:
+                  to === "/folders" ? isActive && !isHomeOnlyMode : isActive,
               })
             }
           >
@@ -112,5 +220,3 @@ export function Sidebar() {
     </aside>
   );
 }
-
-

@@ -101,8 +101,3 @@ export const createBase64DataUrl = (url: string): Base64DataUrl => {
 const revokeBlobUrl = (url: BlobUrl): void => {
   URL.revokeObjectURL(url);
 };
-
-
-
-
-

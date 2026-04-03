@@ -33,7 +33,10 @@ const CARD_RADIUS_SM = 32;
 const CARD_RADIUS_MD = 40;
 
 function resolveCardBaseRadius(): number {
-  if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+  if (
+    typeof window === "undefined" ||
+    typeof window.matchMedia !== "function"
+  ) {
     return CARD_RADIUS_MD;
   }
   return window.matchMedia("(min-width: 768px)").matches
@@ -77,9 +80,7 @@ export type VerticalCardPagerProps<T> = {
    * プリローダーがこの範囲を eager 対象として使うことで、
    * 「描画済みだが未プリロード」のカードが出なくなる。
    */
-  onRenderRangeChange?: (
-    range: { start: number; end: number } | null,
-  ) => void;
+  onRenderRangeChange?: (range: { start: number; end: number } | null) => void;
   /**
    * 各カードのレンダラー。
    * isActive=true のカードのみ完全インタラクティブにすること。
@@ -246,18 +247,26 @@ function VerticalCardPagerFn<T>({
     }
 
     if (nextRange != null) {
-      const sampleEl = itemRefs.current[Math.min(nextRange.end, activeIndexRef.current)];
+      const sampleEl =
+        itemRefs.current[Math.min(nextRange.end, activeIndexRef.current)];
       if (sampleEl) {
         const extent = Math.max(1, sampleEl.offsetHeight + CARD_GAP);
-        avgItemExtentRef.current = avgItemExtentRef.current * 0.8 + extent * 0.2;
+        avgItemExtentRef.current =
+          avgItemExtentRef.current * 0.8 + extent * 0.2;
       }
     }
 
     // shouldRenderCard と同じ union:
     //   visibleRange ∪ [activeIndex ± ACTIVE_INDEX_RENDER_RADIUS]
     const currentActiveIndex = activeIndexRef.current;
-    const radiusStart = Math.max(0, currentActiveIndex - ACTIVE_INDEX_RENDER_RADIUS);
-    const radiusEnd = Math.min(cards.length - 1, currentActiveIndex + ACTIVE_INDEX_RENDER_RADIUS);
+    const radiusStart = Math.max(
+      0,
+      currentActiveIndex - ACTIVE_INDEX_RENDER_RADIUS,
+    );
+    const radiusEnd = Math.min(
+      cards.length - 1,
+      currentActiveIndex + ACTIVE_INDEX_RENDER_RADIUS,
+    );
     const effectiveStart = nextRange
       ? Math.min(nextRange.start, radiusStart)
       : radiusStart;
@@ -281,9 +290,9 @@ function VerticalCardPagerFn<T>({
     effectiveRenderRangeRef.current = nextEffective;
     setVisibleRange(nextRange);
     onRenderRangeChange?.(nextEffective);
-  // activeIndex は activeIndexRef 経由で参照するため deps 不要。
-  // 含めると activeIndex 変化のたびに scheduleVisibleRangeUpdate が再生成され、
-  // scroll listener effect が detach/attach を繰り返す。
+    // activeIndex は activeIndexRef 経由で参照するため deps 不要。
+    // 含めると activeIndex 変化のたびに scheduleVisibleRangeUpdate が再生成され、
+    // scroll listener effect が detach/attach を繰り返す。
   }, [cards.length, disableVirtualization, itemRefs]);
 
   const scheduleVisibleRangeUpdate = useCallback(() => {
@@ -331,11 +340,7 @@ function VerticalCardPagerFn<T>({
         visibleRangeRafRef.current = null;
       }
     };
-  }, [
-    cards.length,
-    disableVirtualization,
-    scheduleVisibleRangeUpdate,
-  ]);
+  }, [cards.length, disableVirtualization, scheduleVisibleRangeUpdate]);
 
   return (
     // スクロールコンテナ: 親から height: 100% を受け取る前提

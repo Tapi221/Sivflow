@@ -46,8 +46,3 @@ export type CardState =
   | "DECAYING"
   | "FAILED"
   | "RELEARN";
-
-
-
-
-

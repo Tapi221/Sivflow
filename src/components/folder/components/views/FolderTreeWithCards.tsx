@@ -25,7 +25,12 @@ import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocu
 import { FolderTreeArborist } from "@/components/sidebar/FolderTreeArborist";
 import BulkTagDialog from "@/components/tag/BulkTagDialog";
 import { cn } from "@/lib/utils";
-import type { Card, CardSet, DocumentItem, SelectedExplorerItem } from "@/types";
+import type {
+  Card,
+  CardSet,
+  DocumentItem,
+  SelectedExplorerItem,
+} from "@/types";
 import React, {
   useCallback,
   useEffect,
@@ -81,7 +86,11 @@ interface FolderTreeWithCardsProps {
   ) => Promise<void>;
   reorderCards?: (folderId: string, cardIds: string[]) => Promise<void>;
   selectedCardSetId?: string | null;
-  onSelectCardSet?: (cardSetId: string, folderId: string, label: string) => void;
+  onSelectCardSet?: (
+    cardSetId: string,
+    folderId: string,
+    label: string,
+  ) => void;
   isFiltering?: boolean;
   onRegisterCreateFolderTrigger?: (fn: (() => void) | null) => void;
   onRegisterCreateCardSetTrigger?: (
@@ -340,7 +349,7 @@ export function FolderTreeWithCards({
     setEditingId: dialogs.setEditingId,
     setEditingName: dialogs.setEditingName,
     closeRename: dialogs.closeRename,
-    
+
     setOptimisticFolders,
     setOptimisticCards,
     setOptimisticCardSets,
@@ -538,8 +547,8 @@ export function FolderTreeWithCards({
     if (activeRootFolderId) return activeRootFolderId;
     if (selectedItem?.type === "cardSet") {
       return (
-        treeCardSets.find((cardSet) => cardSet.id === selectedItem.id)?.folderId ??
-        null
+        treeCardSets.find((cardSet) => cardSet.id === selectedItem.id)
+          ?.folderId ?? null
       );
     }
     return null;
@@ -555,7 +564,11 @@ export function FolderTreeWithCards({
     };
     onRegisterCreateFolderTrigger?.(trigger);
     return () => onRegisterCreateFolderTrigger?.(null);
-  }, [actions.handleCreateFolderAction, headerFolderId, onRegisterCreateFolderTrigger]);
+  }, [
+    actions.handleCreateFolderAction,
+    headerFolderId,
+    onRegisterCreateFolderTrigger,
+  ]);
 
   const setRowRef = useCallback((id: string, node: HTMLElement | null) => {
     if (node) rowRefs.current.set(id, node);
@@ -683,14 +696,18 @@ export function FolderTreeWithCards({
           return {
             id,
             name:
-              (folder as { folderName?: string; folder_name?: string }).folderName ??
-              (folder as { folderName?: string; folder_name?: string }).folder_name ??
+              (folder as { folderName?: string; folder_name?: string })
+                .folderName ??
+              (folder as { folderName?: string; folder_name?: string })
+                .folder_name ??
               "無題のフォルダ",
             folder,
           };
         })
         .filter(
-          (item): item is { id: string; name: string; folder: FolderTreeNode } =>
+          (
+            item,
+          ): item is { id: string; name: string; folder: FolderTreeNode } =>
             item !== null,
         ),
     [rootFolders],
@@ -780,7 +797,8 @@ export function FolderTreeWithCards({
       parentId: string | null;
       index: number;
     }) => {
-      const parsedParent = parentId !== null ? parseSelectedTreeId(parentId) : null;
+      const parsedParent =
+        parentId !== null ? parseSelectedTreeId(parentId) : null;
       const targetFolderId =
         parsedParent?.type === "folder" ? parsedParent.id : null;
 
@@ -813,7 +831,12 @@ export function FolderTreeWithCards({
         }
       }
     },
-    [onUpdateFolder, moveCardSetToFolder, moveCardToFolder, moveDocumentToFolder],
+    [
+      onUpdateFolder,
+      moveCardSetToFolder,
+      moveCardToFolder,
+      moveDocumentToFolder,
+    ],
   );
 
   const arboristDisableDrag = useCallback(
@@ -839,7 +862,8 @@ export function FolderTreeWithCards({
         return true;
       }
 
-      const isDropToRoot = !parentNode?.data || parentNode.data.kind !== "folder";
+      const isDropToRoot =
+        !parentNode?.data || parentNode.data.kind !== "folder";
 
       for (const dragNode of dragNodes) {
         const dragKind = dragNode.data?.kind;
@@ -855,7 +879,9 @@ export function FolderTreeWithCards({
 
         if (
           isDropToRoot &&
-          (dragKind === "cardSet" || dragKind === "card" || dragKind === "document")
+          (dragKind === "cardSet" ||
+            dragKind === "card" ||
+            dragKind === "document")
         ) {
           return true;
         }
@@ -866,8 +892,6 @@ export function FolderTreeWithCards({
     [],
   );
 
-  
-  
   const nodeRendererProps = {
     editingId: dialogs.editingId,
     editingName: dialogs.editingName,
@@ -957,7 +981,9 @@ export function FolderTreeWithCards({
   );
 
   const hasRootContent =
-    rootFolderPanels.length > 0 || rootItems.length > 0 || explorerTreeData.length > 0;
+    rootFolderPanels.length > 0 ||
+    rootItems.length > 0 ||
+    explorerTreeData.length > 0;
 
   return (
     <div ref={treeRootRef} className={cn("h-full w-full", className)}>
@@ -976,7 +1002,8 @@ export function FolderTreeWithCards({
         <ExplorerNoResultsState />
       ) : (
         <div className="h-full min-h-0">
-          {rootFolderPanels.length === 0 || (rootItems.length > 0 && !hasActiveRootScope) ? (
+          {rootFolderPanels.length === 0 ||
+          (rootItems.length > 0 && !hasActiveRootScope) ? (
             <FolderTreeArborist
               data={explorerTreeData}
               selectedId={selectedTreeId}
@@ -1016,7 +1043,10 @@ export function FolderTreeWithCards({
                 <FolderTreeArborist
                   data={scopedTreeData}
                   selectedId={selectedTreeId}
-                  expandedIds={toExpandedTreeIds(expandedFolders, expandedCardSets)}
+                  expandedIds={toExpandedTreeIds(
+                    expandedFolders,
+                    expandedCardSets,
+                  )}
                   onSelect={handleTreeSelect}
                   onToggleExpand={onToggleExpand}
                   renderNode={renderTreeNode}
@@ -1030,8 +1060,6 @@ export function FolderTreeWithCards({
         </div>
       )}
 
-      
-
       {dialogs.bulkTagFolderId && (
         <BulkTagDialog
           open={Boolean(dialogs.bulkTagFolderId)}
@@ -1044,5 +1072,3 @@ export function FolderTreeWithCards({
     </div>
   );
 }
-
-

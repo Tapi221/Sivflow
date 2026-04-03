@@ -26,8 +26,3 @@ export const StratisArrowSwitchHorizontalIcon = forwardRef<
     </svg>
   );
 });
-
-
-
-
-

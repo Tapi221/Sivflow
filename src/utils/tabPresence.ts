@@ -83,8 +83,3 @@ export function getActiveTabCountEstimate(): number | null {
     return null;
   }
 }
-
-
-
-
-

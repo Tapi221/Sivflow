@@ -270,9 +270,3 @@ const getFileIcon = (mimeType) => {
   if (mimeType === "application/pdf") return <FileText className="w-4 h-4" />;
   return <FileText className="w-4 h-4" />;
 };
-
-
-
-
-
-

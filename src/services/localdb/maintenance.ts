@@ -81,8 +81,3 @@ export async function getSyncEnabledFolders(
     .and((f: unknown) => f.cloudSyncEnabled === true)
     .toArray();
 }
-
-
-
-
-

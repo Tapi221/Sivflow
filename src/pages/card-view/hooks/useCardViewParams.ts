@@ -9,7 +9,12 @@ export type ParsedParams = {
 
 function parseCardViewParams(): ParsedParams {
   if (typeof window === "undefined") {
-    return { folderId: null, cardSetId: null, initialIndex: 0, targetCardId: null };
+    return {
+      folderId: null,
+      cardSetId: null,
+      initialIndex: 0,
+      targetCardId: null,
+    };
   }
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -22,7 +27,9 @@ function parseCardViewParams(): ParsedParams {
     folderId,
     cardSetId,
     initialIndex:
-      Number.isFinite(initialIndexRaw) && initialIndexRaw >= 0 ? initialIndexRaw : 0,
+      Number.isFinite(initialIndexRaw) && initialIndexRaw >= 0
+        ? initialIndexRaw
+        : 0,
     targetCardId,
   };
 }

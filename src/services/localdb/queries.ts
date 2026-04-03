@@ -123,8 +123,3 @@ export async function normalizeDocumentBlobUrlsForSession(
     );
   }
 }
-
-
-
-
-

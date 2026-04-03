@@ -32,9 +32,7 @@ interface AuthSessionProviderProps {
   children: ReactNode;
 }
 
-export function AuthSessionProvider({
-  children,
-}: AuthSessionProviderProps) {
+export function AuthSessionProvider({ children }: AuthSessionProviderProps) {
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
   const lastKnownUserIdRef = useRef<string | null>(null);
@@ -92,4 +90,3 @@ export function AuthSessionProvider({
     </AuthSessionContext.Provider>
   );
 }
-

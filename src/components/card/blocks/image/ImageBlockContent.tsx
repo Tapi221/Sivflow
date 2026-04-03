@@ -45,9 +45,3 @@ export function ImageBlockContent(props: ImageBlockContentProps) {
     />
   );
 }
-
-
-
-
-
-

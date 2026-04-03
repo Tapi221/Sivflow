@@ -27,6 +27,3 @@ export function ImageBlockShell({
     </BlockInset>
   );
 }
-
-
-

@@ -44,8 +44,9 @@ export function useCardViewPaneWidth({
   // Restore from localStorage (per-cardSet, device-local) first;
   // fall back to global UserSettings, then to hardcoded default.
   useEffect(() => {
-    const localStored =
-      cardSetId ? getCardSetWidthPreference(cardSetId, "view") : undefined;
+    const localStored = cardSetId
+      ? getCardSetWidthPreference(cardSetId, "view")
+      : undefined;
     setViewPaneWidthPx(
       clampPaneWidthPx(
         localStored ??
@@ -57,8 +58,9 @@ export function useCardViewPaneWidth({
   }, [cardSetId, settings?.cardViewPaneWidthPx]);
 
   useEffect(() => {
-    const localStored =
-      cardSetId ? getCardSetWidthPreference(cardSetId, "edit") : undefined;
+    const localStored = cardSetId
+      ? getCardSetWidthPreference(cardSetId, "edit")
+      : undefined;
     setEditPaneWidthPx(
       clampPaneWidthPx(
         localStored ??
@@ -97,7 +99,9 @@ export function useCardViewPaneWidth({
   const activePaneDefaultWidthPx = isGlobalEditing
     ? CARD_PANE_EDIT_DEFAULT_WIDTH_PX
     : CARD_PANE_VIEW_DEFAULT_WIDTH_PX;
-  const activePaneStoredWidthPx = isGlobalEditing ? editPaneWidthPx : viewPaneWidthPx;
+  const activePaneStoredWidthPx = isGlobalEditing
+    ? editPaneWidthPx
+    : viewPaneWidthPx;
   const activePaneMaxWidthPx =
     contentViewportWidth > 0
       ? Math.max(
@@ -129,7 +133,9 @@ export function useCardViewPaneWidth({
   const persistPaneWidth = useCallback(
     (mode: "view" | "edit", widthPx: number) => {
       const minWidth =
-        mode === "edit" ? CARD_PANE_EDIT_MIN_WIDTH_PX : CARD_PANE_VIEW_MIN_WIDTH_PX;
+        mode === "edit"
+          ? CARD_PANE_EDIT_MIN_WIDTH_PX
+          : CARD_PANE_VIEW_MIN_WIDTH_PX;
       const next = clampPaneWidthPx(widthPx, minWidth);
       if (mode === "edit") {
         setEditPaneWidthPx(next);
@@ -144,7 +150,9 @@ export function useCardViewPaneWidth({
   const previewPaneWidth = useCallback(
     (mode: "view" | "edit", widthPx: number) => {
       const minWidth =
-        mode === "edit" ? CARD_PANE_EDIT_MIN_WIDTH_PX : CARD_PANE_VIEW_MIN_WIDTH_PX;
+        mode === "edit"
+          ? CARD_PANE_EDIT_MIN_WIDTH_PX
+          : CARD_PANE_VIEW_MIN_WIDTH_PX;
       const next = clampPaneWidthPx(widthPx, minWidth);
       if (mode === "edit") setEditPaneWidthPx(next);
       else setViewPaneWidthPx(next);

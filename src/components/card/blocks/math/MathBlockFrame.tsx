@@ -17,9 +17,3 @@ export function MathBlockFrame({ className, children }: MathBlockFrameProps) {
     </RowSnappedRoot>
   );
 }
-
-
-
-
-
-

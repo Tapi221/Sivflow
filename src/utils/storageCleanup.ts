@@ -1,10 +1,5 @@
 import { firestoreDb, storage } from "@/services/firebase";
-import {
-  collection,
-  getDocs,
-  deleteDoc,
-  doc,
-} from "firebase/firestore";
+import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { ref, deleteObject } from "firebase/storage";
 import type { UploadMetadata } from "@/types";
 
@@ -82,8 +77,3 @@ export const cleanupFailedUploads = async (userId: string) => {
     throw error;
   }
 };
-
-
-
-
-

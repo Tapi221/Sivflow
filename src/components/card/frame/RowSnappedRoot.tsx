@@ -31,8 +31,3 @@ export function RowSnappedRoot({
     </RowSnap>
   );
 }
-
-
-
-
-

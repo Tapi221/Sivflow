@@ -297,7 +297,8 @@ export function CardEditorPane({
     saveSignalEnabled,
   });
 
-  const { settings, isMetaOpen, session, layout, content, actions } = controller;
+  const { settings, isMetaOpen, session, layout, content, actions } =
+    controller;
 
   const {
     draft,
@@ -454,10 +455,7 @@ export function CardEditorPane({
   const questionActionsTopRight = useMemo(() => {
     void questionBlocksForToolbar;
     return renderMediaDialogButtons("question");
-  }, [
-    questionBlocksForToolbar,
-    renderMediaDialogButtons,
-  ]);
+  }, [questionBlocksForToolbar, renderMediaDialogButtons]);
 
   const answerBlocksForToolbar = draft?.backBlocks;
   const answerActionsTopRight = useMemo(() => {
@@ -601,7 +599,9 @@ export function CardEditorPane({
                       hideToolbar={hideBlockToolbars}
                       toolbarMount={toolbarMountQ}
                       settings={settings}
-                      shouldShowInlineToolbarMount={shouldShowInlineToolbarMount}
+                      shouldShowInlineToolbarMount={
+                        shouldShowInlineToolbarMount
+                      }
                       setInlineToolbarMount={setToolbarMountQInternal}
                       hideCardShellHeader={hideCardShellHeader}
                       shouldDockToolbarToCardTop={shouldDockToolbarToCardTop}
@@ -638,7 +638,9 @@ export function CardEditorPane({
                       hideToolbar={hideBlockToolbars}
                       toolbarMount={toolbarMountA}
                       settings={settings}
-                      shouldShowInlineToolbarMount={shouldShowInlineToolbarMount}
+                      shouldShowInlineToolbarMount={
+                        shouldShowInlineToolbarMount
+                      }
                       setInlineToolbarMount={setToolbarMountAInternal}
                       hideCardShellHeader={hideCardShellHeader}
                       shouldDockToolbarToCardTop={shouldDockToolbarToCardTop}
@@ -781,5 +783,3 @@ export function CardEditorPane({
     </BlockEditModeContext.Provider>
   );
 }
-
-

@@ -129,10 +129,7 @@ function renderBlock(
       }
 
       return (
-        <QuestionBlockView
-          block={block}
-          displayMode={questionDisplayMode}
-        />
+        <QuestionBlockView block={block} displayMode={questionDisplayMode} />
       );
 
     case "text":
@@ -143,10 +140,7 @@ function renderBlock(
           className="w-full max-w-full overflow-hidden"
           style={getFluidZoomStyle(displayMode, zoom)}
         >
-          <TextBlockContent
-            mode="view"
-            content={String(block.content ?? "")}
-          />
+          <TextBlockContent mode="view" content={String(block.content ?? "")} />
         </div>
       );
 
@@ -165,10 +159,7 @@ function renderBlock(
               style={{ height: `${gridOffsetPx}px` }}
             />
           )}
-          <CodeRenderer
-            code={block.code.code}
-            language={block.code.language}
-          />
+          <CodeRenderer code={block.code.code} language={block.code.language} />
         </div>
       );
 
@@ -351,5 +342,3 @@ export function BlockRenderer({
     </div>
   );
 }
-
-

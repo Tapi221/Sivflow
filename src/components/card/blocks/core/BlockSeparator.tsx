@@ -5,4 +5,3 @@ export const BlockSeparator = () => (
     <RuledLayer kind="bottom-only" ruledBottomOffsetPx={4} />
   </div>
 );
-

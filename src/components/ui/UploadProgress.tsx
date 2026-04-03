@@ -119,8 +119,3 @@ export const UploadProgress = ({
     </div>
   );
 };
-
-
-
-
-

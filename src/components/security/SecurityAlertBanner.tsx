@@ -52,7 +52,11 @@ export const SecurityAlertBanner: React.FC = () => {
           }}
         >
           <div
-            style={{ display: "flex", alignItems: "center", gap: "var(--ui-space-2)" }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "var(--ui-space-2)",
+            }}
           >
             <AlertTriangle size={18} />
             <span>
@@ -71,8 +75,3 @@ export const SecurityAlertBanner: React.FC = () => {
     </div>
   );
 };
-
-
-
-
-

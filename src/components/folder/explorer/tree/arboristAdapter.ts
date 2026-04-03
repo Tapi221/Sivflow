@@ -2,11 +2,11 @@ import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import type { FolderTreeArboristNode } from "@/components/sidebar/FolderTreeArborist";
 import { getCardText } from "@/domain/card/content";
 import type {
-    Card,
-    CardSet,
-    DocumentItem,
-    ExplorerItem,
-    SelectedExplorerItem,
+  Card,
+  CardSet,
+  DocumentItem,
+  ExplorerItem,
+  SelectedExplorerItem,
 } from "@/types";
 
 export type ExplorerTreeNode = FolderTreeArboristNode & {
@@ -150,7 +150,8 @@ export const toSelectedTreeId = (
   selectedCardSetId?: string | null,
 ): string | null => {
   if (selectedItem?.type === "card") return `${CARD_PREFIX}${selectedItem.id}`;
-  if (selectedItem?.type === "cardSet") return `${CARD_SET_PREFIX}${selectedItem.id}`;
+  if (selectedItem?.type === "cardSet")
+    return `${CARD_SET_PREFIX}${selectedItem.id}`;
   if (selectedItem?.type === "document")
     return `${DOCUMENT_PREFIX}${selectedItem.id}`;
   if (selectedCardSetId) return `${CARD_SET_PREFIX}${selectedCardSetId}`;
@@ -171,8 +172,3 @@ export const parseSelectedTreeId = (
     return { type: "document", id: treeId.slice(DOCUMENT_PREFIX.length) };
   return null;
 };
-
-
-
-
-

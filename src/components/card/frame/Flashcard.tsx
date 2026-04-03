@@ -230,7 +230,10 @@ function FlashcardInner({
 
   return (
     <div
-      className={cn("w-full flex flex-col select-none overflow-visible", className)}
+      className={cn(
+        "w-full flex flex-col select-none overflow-visible",
+        className,
+      )}
     >
       <div className="relative">
         <CardFrame
@@ -311,7 +314,9 @@ function FlashcardInner({
               activeInkSide={activeInkSide}
               activeInkDocument={derived.activeInkDocument}
               layoutStable={ink.layoutStable}
-              shouldMountInkLayer={Boolean(ink.shouldMountInkLayer && isFixedDisplay)}
+              shouldMountInkLayer={Boolean(
+                ink.shouldMountInkLayer && isFixedDisplay,
+              )}
               previewInkRef={ink.previewInkRef}
               previewInkTool={ink.previewInkTool}
               previewInkHistory={ink.previewInkHistory}
@@ -424,4 +429,3 @@ const areFlashcardPropsEqual = (prev: FlashcardProps, next: FlashcardProps) => {
 
 export const Flashcard = React.memo(FlashcardInner, areFlashcardPropsEqual);
 Flashcard.displayName = "Flashcard";
-

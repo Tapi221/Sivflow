@@ -337,7 +337,8 @@ export const computeNextReview = ({
 
   // Score-based minimum interval so that different poor scores are distinguishable.
   // score=0 (忘れた) → min 1 day, score=1 (あいまい) → min 2 days
-  const scoreMinInterval = subjectiveScore <= 0 ? 1 : subjectiveScore === 1 ? 2 : 1;
+  const scoreMinInterval =
+    subjectiveScore <= 0 ? 1 : subjectiveScore === 1 ? 2 : 1;
   const intervalDays = Math.max(scoreMinInterval, brakedInterval);
 
   // Calculate next review date
@@ -673,9 +674,7 @@ export const createLatestReviewLogPatch = (
     rating: params.rating,
     intervalDays: reviewUpdate.intervalDays,
     durationMinutes:
-      params.durationMinutes ??
-      reviewLogs.at(-1)?.durationMinutes ??
-      null,
+      params.durationMinutes ?? reviewLogs.at(-1)?.durationMinutes ?? null,
   });
 
   return {
@@ -713,4 +712,3 @@ export type MultipleChoiceReviewMeta = {
   /** 選択肢表示後から回答までの時間（ミリ秒） */
   choiceTimeMs?: number;
 };
-

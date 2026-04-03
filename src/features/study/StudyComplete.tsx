@@ -191,8 +191,3 @@ export function StudyComplete({
     </div>
   );
 }
-
-
-
-
-

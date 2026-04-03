@@ -11,16 +11,11 @@ export default function Directory() {
 
   return (
     <div className="h-full overflow-y-auto">
-      <DirectoryDiagramPane folders={folders} cards={cards} documents={documents} />
+      <DirectoryDiagramPane
+        folders={folders}
+        cards={cards}
+        documents={documents}
+      />
     </div>
   );
 }
-
-
-
-
-
-
-
-
-

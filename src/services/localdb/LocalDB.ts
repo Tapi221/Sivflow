@@ -7,21 +7,21 @@ if (import.meta.env.DEV && typeof window !== "undefined") {
 
 import type { IntegrityRepairResult } from "@/services/dataIntegrityTypes";
 import type {
-    AssetRecord,
-    Card,
-    CardSet,
-    Document,
-    Folder,
-    SyncConflict,
-    SyncError,
-    SyncHistory,
-    SyncMetadata,
-    SyncQueueItem,
-    SyncSettings,
-    UploadedImage,
-    User,
-    UserSettings,
-    UserStats,
+  AssetRecord,
+  Card,
+  CardSet,
+  Document,
+  Folder,
+  SyncConflict,
+  SyncError,
+  SyncHistory,
+  SyncMetadata,
+  SyncQueueItem,
+  SyncSettings,
+  UploadedImage,
+  User,
+  UserSettings,
+  UserStats,
 } from "@/types";
 import { Dexie } from "dexie";
 import { nanoid } from "nanoid";
@@ -34,30 +34,33 @@ import { repairDataIntegrity as repairDataIntegrityImpl } from "./integrityRepai
 import * as maintenance from "./maintenance";
 import * as queries from "./queries";
 import {
-    extractFromFirestoreSDK as rescueExtractFromFirestoreSDK,
-    importFromDatabase as rescueImportFromDatabase,
+  extractFromFirestoreSDK as rescueExtractFromFirestoreSDK,
+  importFromDatabase as rescueImportFromDatabase,
 } from "./rescue";
 import { defineSchema } from "./schema";
 
 // NOTE: creates a circular dependency with instanceManager.ts; safe in ESM (all usages inside function bodies)
 import {
-    clearInstance as clearInstanceImpl,
-    getInstance as getInstanceImpl,
-    getInstanceUserId as getInstanceUserIdImpl,
-    getLocalDb,
-    getLocalDbSync,
-    initializeDB,
-    resetForLogout as resetForLogoutImpl,
-    resetLocalDBForLogout,
+  clearInstance as clearInstanceImpl,
+  getInstance as getInstanceImpl,
+  getInstanceUserId as getInstanceUserIdImpl,
+  getLocalDb,
+  getLocalDbSync,
+  initializeDB,
+  resetForLogout as resetForLogoutImpl,
+  resetLocalDBForLogout,
 } from "./instanceManager";
 
 export type {
-    CardRelation, LocalDBInstance, LocalDBLike, ProjectMap,
-    LocalDBTableMap,
-    SyncableEntityTable,
-    TagLegacyRecord,
-    TagV2Record,
-    TagV3Record
+  CardRelation,
+  LocalDBInstance,
+  LocalDBLike,
+  ProjectMap,
+  LocalDBTableMap,
+  SyncableEntityTable,
+  TagLegacyRecord,
+  TagV2Record,
+  TagV3Record,
 } from "./types";
 import type { LocalDBTableMap, SyncableEntityTable } from "./types";
 
@@ -460,7 +463,11 @@ export class LocalDB extends Dexie {
   }
 
   async getRecentSyncHistory(limit: number = 30): Promise<SyncHistory[]> {
-    return this.syncHistory.orderBy("finishedAt").reverse().limit(limit).toArray();
+    return this.syncHistory
+      .orderBy("finishedAt")
+      .reverse()
+      .limit(limit)
+      .toArray();
   }
 
   async getSyncStatsSince(timestamp: number): Promise<{
@@ -632,8 +639,3 @@ export function createLocalDBInternal(userId?: string): LocalDB {
 
 // devtools.ts が './LocalDB' から import するため、instanceManager の関数を re-export する
 export { getLocalDb, getLocalDbSync, initializeDB, resetLocalDBForLogout };
-
-
-
-
-

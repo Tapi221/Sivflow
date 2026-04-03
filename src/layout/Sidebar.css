@@ -32,7 +32,9 @@
   font-size: 14px;
   color: var(--sidebar-text-muted, #6e6e80);
   text-decoration: none;
-  transition: background 0.12s, color 0.12s;
+  transition:
+    background 0.12s,
+    color 0.12s;
   width: 100%;
   box-sizing: border-box;
 }

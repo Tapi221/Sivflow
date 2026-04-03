@@ -94,8 +94,3 @@ export default function CardEdit() {
     </div>
   );
 }
-
-
-
-
-

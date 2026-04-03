@@ -28,8 +28,3 @@ export function EmptyMetaPanel({
     </MetaPanelShell>
   );
 }
-
-
-
-
-
