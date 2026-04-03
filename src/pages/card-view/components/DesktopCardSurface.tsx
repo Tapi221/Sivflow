@@ -1,6 +1,5 @@
 import { Flashcard } from "@/components/card/frame/Flashcard";
 import { CardEditorPane } from "@/components/folder/panes/CardEditorPane";
-import { CARD_PANE_AUTO_MAX_SCALE } from "@/pages/card-view/constants";
 import type { Card, UserSettings } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 import React from "react";
@@ -112,8 +111,7 @@ function DesktopCardSurfaceInner({
         onEdit={isActive ? onEdit : undefined}
         onToggleUncertainty={isActive ? onToggleUncertainty : undefined}
         onToggleBookmark={isActive ? onToggleBookmark : undefined}
-        allowUpscale
-        maxScale={CARD_PANE_AUTO_MAX_SCALE}
+        allowUpscale={false}
         scaleMultiplier={1}
       />
     </div>
