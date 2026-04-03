@@ -14,7 +14,7 @@ import {
   Tag,
   Trash2,
 } from "@/ui/icons";
-import { useRef, type ReactNode } from "react";
+import { useMemo, useRef, type ReactNode } from "react";
 
 interface ContextMenuProps {
   type: "folder" | "card";
@@ -29,6 +29,9 @@ interface ContextMenuProps {
   onMove?: () => void;
   onBulkTag?: () => void;
 }
+
+const CONTEXT_MENU_CURSOR_OFFSET_PX = 6;
+const CONTEXT_MENU_COLLISION_PADDING_PX = 8;
 
 export function ContextMenu({
   type,
@@ -45,6 +48,18 @@ export function ContextMenu({
 }: ContextMenuProps) {
   const suppressCloseAutoFocusRef = useRef(false);
 
+  const anchoredStyle = useMemo(() => {
+    if (!anchorPoint) return undefined;
+
+    return {
+      position: "fixed" as const,
+      left: anchorPoint.x + CONTEXT_MENU_CURSOR_OFFSET_PX,
+      top: anchorPoint.y + CONTEXT_MENU_CURSOR_OFFSET_PX,
+      width: 1,
+      height: 1,
+    };
+  }, [anchorPoint]);
+
   return (
     <DropdownMenu open={open} onOpenChange={onOpenChange} modal={false}>
       <DropdownMenuTrigger asChild>
@@ -53,22 +68,17 @@ export function ContextMenu({
             type="button"
             aria-hidden="true"
             tabIndex={-1}
-            className="pointer-events-none absolute h-0 w-0 overflow-hidden opacity-0"
-            style={
-              anchorPoint
-                ? {
-                    position: "fixed",
-                    left: anchorPoint.x,
-                    top: anchorPoint.y,
-                  }
-                : undefined
-            }
+            className="pointer-events-none absolute overflow-hidden opacity-0"
+            style={anchoredStyle}
           />
         )}
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
+        side="right"
         align="start"
+        sideOffset={CONTEXT_MENU_CURSOR_OFFSET_PX}
+        collisionPadding={CONTEXT_MENU_COLLISION_PADDING_PX}
         className={`w-48 ${glassMenuContentClass}`}
         onCloseAutoFocus={(e) => {
           if (!suppressCloseAutoFocusRef.current) return;

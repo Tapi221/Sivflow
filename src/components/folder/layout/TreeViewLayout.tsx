@@ -64,6 +64,7 @@ function TreeViewLayout({
 
   const [selectedCardSetId, setSelectedCardSetId] = useState<string | null>(null);
   const [selectedCardSetLabel, setSelectedCardSetLabel] = useState<string | null>(null);
+  const [isSectionListMode, setIsSectionListMode] = useState(false);
   const [explorerHeaderFolderId, setExplorerHeaderFolderId] = useState<string | null>(
     null,
   );
@@ -306,6 +307,7 @@ function TreeViewLayout({
       }}
       navigateToSectionListToken={navigateToSectionListToken}
       folderSelectionNonce={folderSelectionNonce}
+      onSectionListModeChange={setIsSectionListMode}
       onHeaderFolderIdChange={setExplorerHeaderFolderId}
       onFolderSelect={handleFolderSelect}
       onItemSelect={handleItemSelect}
@@ -344,6 +346,7 @@ function TreeViewLayout({
         isSidebarOpen={isSidebarOpen}
         isResizing={isResizing}
         showMobileDetail={showMobileDetail}
+        fillAvailableWidth={isSectionListMode}
         explorerTab={explorerTab}
         setExplorerTab={setExplorerTab}
         allTags={allTags}
@@ -364,6 +367,7 @@ function TreeViewLayout({
       <TreeViewMainPane
         isMobile={isMobile}
         showMobileDetail={showMobileDetail}
+        hideOnSectionList={isSectionListMode}
         selectedItem={selectedItem}
         selectedCardId={selectedCardId}
         selectedDocument={selectedDocument}

@@ -23,7 +23,7 @@ function useBreadcrumbs() {
 
   return useMemo(() => {
     const segments = pathname.split("/").filter(Boolean);
-    const crumbs = [{ label: "ホーム", to: "/folders" as string | undefined }];
+    const crumbs = [{ label: "ホーム", to: "/folders?home=1" as string | undefined }];
 
     segments.forEach((seg, i) => {
       const label = PAGE_LABELS[seg.toLowerCase()] ?? seg;
@@ -112,13 +112,14 @@ export const TitleBar: React.FC = () => {
         style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
       >
         <span className="mr-3 text-xs font-semibold tracking-wide text-gray-500">
-          Manifolia.
+          Manifolia
         </span>
 
         <nav className="flex items-center gap-1 overflow-hidden text-xs text-gray-400">
           {allCrumbs.map((crumb, i) => {
             const hasFolderId = "folderId" in crumb;
             const isSectionListCrumb = crumb.to === "/folders" && !hasFolderId;
+            const isHomeCrumb = i === 0;
             const isClickable = Boolean(crumb.to);
 
             return (
@@ -132,6 +133,10 @@ export const TitleBar: React.FC = () => {
                     onClick={() => {
                       if (hasFolderId) {
                         notifyFolderSelect(crumb.folderId ?? null);
+                        return;
+                      }
+                      if (isHomeCrumb) {
+                        notifyFolderSelect(null);
                         return;
                       }
                       if (isSectionListCrumb) {
@@ -399,7 +404,6 @@ export const TitleBar: React.FC = () => {
     </div>
   );
 };
-
 
 
 

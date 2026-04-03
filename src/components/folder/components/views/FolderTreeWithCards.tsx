@@ -91,6 +91,7 @@ interface FolderTreeWithCardsProps {
   onRegisterPptxTrigger?: (fn: () => void) => void;
   navigateToSectionListToken?: number;
   folderSelectionNonce?: number;
+  onSectionListModeChange?: (isSectionListMode: boolean) => void;
   onHeaderFolderIdChange?: (folderId: string | null) => void;
   className?: string;
 }
@@ -125,6 +126,7 @@ export function FolderTreeWithCards({
   onRegisterPptxTrigger,
   navigateToSectionListToken = 0,
   folderSelectionNonce = 0,
+  onSectionListModeChange,
   onHeaderFolderIdChange,
   className,
 }: FolderTreeWithCardsProps) {
@@ -669,6 +671,9 @@ export function FolderTreeWithCards({
     ],
   );
 
+  const hasActiveRootScope =
+    activeRootFolderId !== null && allFolderIdSet.has(activeRootFolderId);
+
   const rootFolderPanels = useMemo(
     () =>
       rootFolders
@@ -691,8 +696,14 @@ export function FolderTreeWithCards({
     [rootFolders],
   );
 
-  const hasActiveRootScope =
-    activeRootFolderId !== null && allFolderIdSet.has(activeRootFolderId);
+  const isSectionListMode =
+    rootFolderPanels.length > 0 &&
+    rootItems.length === 0 &&
+    !hasActiveRootScope;
+
+  useEffect(() => {
+    onSectionListModeChange?.(isSectionListMode);
+  }, [isSectionListMode, onSectionListModeChange]);
 
   const scopedTreeData = useMemo<ExplorerTreeNode[]>(() => {
     if (!activeRootFolderId || !hasActiveRootScope) return [];
@@ -977,7 +988,7 @@ export function FolderTreeWithCards({
               disableDrag={arboristDisableDrag}
               disableDrop={arboristDisableDrop}
             />
-          ) : !hasActiveRootScope ? (
+          ) : isSectionListMode ? (
             <RootFolderPanelList
               rootFolderPanels={rootFolderPanels}
               selectedFolderId={selectedFolderId}

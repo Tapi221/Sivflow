@@ -6,6 +6,7 @@ import { RightPane } from "@/components/folder/panes/RightPane";
 interface TreeViewMainPaneProps {
   isMobile: boolean;
   showMobileDetail: boolean;
+  hideOnSectionList?: boolean;
   selectedItem: SelectedExplorerItem;
   selectedCardId: string | null;
   selectedDocument: DocumentItem | null;
@@ -39,7 +40,7 @@ interface TreeViewMainPaneProps {
 export function TreeViewMainPane({
   isMobile,
   showMobileDetail,
-  mobileDetailTitle,
+  hideOnSectionList = false,
   selectedItem,
   selectedCardId,
   selectedDocument,
@@ -60,6 +61,7 @@ export function TreeViewMainPane({
     <div
       className={cn(
         "flex-1 min-h-0 min-w-0 bg-white flex-col",
+        hideOnSectionList && "hidden",
         showMobileDetail ? "flex" : "hidden md:flex",
       )}
     >

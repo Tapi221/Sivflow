@@ -20,6 +20,7 @@ export function AppLayout() {
   const isFoldersRoute = /^\/folders(?:\/|$)/i.test(pathname);
   const isCardViewRoute = /^\/cardview(?:\/|$)/i.test(pathname);
   const isCardEditRoute = /^\/cardedit(?:\/|$)/i.test(pathname);
+  const isHomeOnlyMode = searchParams.get("home") === "1";
   const selectedFolderId = searchParams.get("folderId");
   const selectedCardSetId = searchParams.get("cardSetId");
   const [instantFolderId, setInstantFolderId] = useState<string | null>(null);
@@ -80,9 +81,8 @@ export function AppLayout() {
     };
   }, [isFoldersRoute, selectedFolderId]);
 
-  const effectiveFolderId = instantFolderId ?? selectedFolderId;
   const shouldHideMainSidebar =
-    (isFoldersRoute && Boolean(effectiveFolderId)) ||
+    (isFoldersRoute && !isHomeOnlyMode) ||
     ((isCardViewRoute || isCardEditRoute) && Boolean(selectedCardSetId));
   const isScrollLocked =
     isFoldersRoute ||

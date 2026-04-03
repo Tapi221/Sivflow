@@ -27,6 +27,7 @@ export default function Folders() {
     setSearchParams,
   );
   const isDesktop = useIsDesktopRuntime();
+  const isHomeOnlyMode = searchParams.get("home") === "1";
   const queryFolderId = searchParams.get("folderId");
   const queryCardId = searchParams.get("cardId");
   const queryDocId = searchParams.get("docId");
@@ -64,6 +65,7 @@ export default function Folders() {
 
   // 選択状態
   const [selectedFolderId, setSelectedFolderId] = useState(() => {
+    if (isHomeOnlyMode) return null;
     if (queryFolderId) return queryFolderId;
     return localStorage.getItem("folder_selectedFolderId_work") || null;
   });
@@ -78,6 +80,7 @@ export default function Folders() {
   }, [selectedFolderId]);
 
   const [selectedItem, setSelectedItem] = useState(() => {
+    if (isHomeOnlyMode) return null;
     if (queryCardId) return { type: "card", id: queryCardId };
     if (queryDocId) return { type: "document", id: queryDocId };
     return null;
@@ -113,6 +116,10 @@ export default function Folders() {
 
   useEffect(() => {
     const next = new URLSearchParams(queryString);
+
+    if (selectedFolderId || selectedItem) {
+      next.delete("home");
+    }
 
     if (selectedFolderId) {
       next.set("folderId", selectedFolderId);
@@ -210,6 +217,16 @@ export default function Folders() {
     selectedFolderId,
     selectedItem,
   ]);
+
+  useEffect(() => {
+    if (!isHomeOnlyMode) return;
+    notifyMainSidebarFolderSelection(null);
+    setSelectedFolderId(null);
+    setSelectedItem(null);
+    setExplorerCardSetContext(null);
+    selectedFolderIdRef.current = null;
+    selectedItemRef.current = null;
+  }, [isHomeOnlyMode, notifyMainSidebarFolderSelection]);
 
   const { folders = [], loading: foldersLoading } = useFolders();
   const { cards = [], loading: cardsLoading } = useCards();
@@ -455,10 +472,14 @@ export default function Folders() {
     setExtraCrumbs,
   ]);
 
+  if (isHomeOnlyMode) {
+    return <div className="flex min-h-0 h-full w-full bg-[#F8FAFB]" />;
+  }
+
   return (
     <div
       className={cn(
-        "bg-[#F8FAFB] transition-colors duration-500 relative flex min-h-0 h-full flex-col",
+        "bg-[#F8FAFB] relative flex min-h-0 h-full flex-col",
         isDesktop
           ? "overflow-hidden"
           : "overflow-x-hidden overflow-y-auto",

@@ -26,6 +26,7 @@ interface TreeViewTabContentProps {
   onRegisterPptxTrigger: (fn: () => void) => void;
   navigateToSectionListToken: number;
   folderSelectionNonce: number;
+  onSectionListModeChange?: (isSectionListMode: boolean) => void;
   onHeaderFolderIdChange?: (folderId: string | null) => void;
   onFolderSelect: (folderId: string | null) => void;
   onItemSelect: (item: SelectedExplorerItem) => void;
@@ -65,6 +66,7 @@ export function TreeViewTabContent({
   onRegisterPptxTrigger,
   navigateToSectionListToken,
   folderSelectionNonce,
+  onSectionListModeChange,
   onHeaderFolderIdChange,
   onFolderSelect,
   onItemSelect,
@@ -133,6 +135,7 @@ export function TreeViewTabContent({
           onRegisterPptxTrigger={onRegisterPptxTrigger}
           navigateToSectionListToken={navigateToSectionListToken}
           folderSelectionNonce={folderSelectionNonce}
+          onSectionListModeChange={onSectionListModeChange}
           onHeaderFolderIdChange={onHeaderFolderIdChange}
         />
       );

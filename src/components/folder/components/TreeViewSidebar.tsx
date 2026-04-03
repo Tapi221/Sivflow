@@ -10,6 +10,7 @@ interface TreeViewSidebarProps {
   isSidebarOpen: boolean;
   isResizing: boolean;
   showMobileDetail: boolean;
+  fillAvailableWidth?: boolean;
   explorerTab: ExplorerTab;
   setExplorerTab: (tab: ExplorerTab) => void;
   allTags: string[];
@@ -32,6 +33,7 @@ export function TreeViewSidebar({
   isSidebarOpen,
   isResizing,
   showMobileDetail,
+  fillAvailableWidth = false,
   explorerTab,
   setExplorerTab,
   allTags,
@@ -52,12 +54,13 @@ export function TreeViewSidebar({
       ref={sidebarRef}
       style={{ backgroundColor: "var(--sidebar-bg)" }}
       className={cn(
-        "shrink-0 flex-col border-r border-[var(--sidebar-border,#e3e6ea)] relative z-10 group/sidebar select-none",
+        "flex-col border-r border-[var(--sidebar-border,#e3e6ea)] relative z-10 group/sidebar select-none",
+        fillAvailableWidth ? "min-w-0 flex-1" : "shrink-0",
         showMobileDetail ? "hidden md:flex" : "flex",
-        isResizing
-          ? "transition-none will-change-[width]"
-          : "transition-[width,border-color,box-shadow] duration-150 ease-out",
+        "transition-none",
+        isResizing && "will-change-[width]",
         "w-[100dvw] max-w-[100dvw] md:w-auto md:max-w-none",
+        fillAvailableWidth && "md:w-full",
         !isSidebarOpen &&
           "md:w-0 md:border-0 md:overflow-hidden md:shadow-none",
       )}
@@ -97,7 +100,7 @@ export function TreeViewSidebar({
       {isSidebarOpen && (
         <div
           className={cn(
-            "hidden md:block absolute top-0 -right-[3px] w-1.5 h-full cursor-col-resize z-50 group/resize select-none outline-none transition-colors hover:bg-[color-mix(in_srgb,var(--sidebar-text-muted,#6e6e80)_20%,transparent)] focus-visible:outline-none",
+            "hidden md:block absolute top-0 -right-[3px] w-1.5 h-full cursor-col-resize z-50 group/resize select-none outline-none hover:bg-[color-mix(in_srgb,var(--sidebar-text-muted,#6e6e80)_20%,transparent)] focus-visible:outline-none",
             isResizing &&
               "bg-[color-mix(in_srgb,var(--sidebar-text-muted,#6e6e80)_30%,transparent)]",
           )}
