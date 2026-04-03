@@ -33,15 +33,18 @@ export function ScaleToFitFrame({
 
   const [scale, setScale] = React.useState(1);
   const [contentHeight, setContentHeight] = React.useState<number | null>(null);
+
   const hasFixedScale =
     typeof fixedScale === "number" &&
     Number.isFinite(fixedScale) &&
     fixedScale > 0;
+
   const effectiveScale = disableScale
     ? 1
     : hasFixedScale
       ? Math.max(0.1, fixedScale)
       : scale;
+
   React.useLayoutEffect(() => {
     if (disableScale) {
       setScale(1);
@@ -60,6 +63,7 @@ export function ScaleToFitFrame({
         Number.isFinite(measuredWidth) && measuredWidth > 0
           ? measuredWidth
           : frame.clientWidth;
+
       if (!availableWidth) return;
 
       const safeBase = Math.max(1, baseWidth);
@@ -68,6 +72,7 @@ export function ScaleToFitFrame({
         fitHeight && contentHeight && frame.clientHeight
           ? frame.clientHeight / Math.max(1, contentHeight)
           : Number.POSITIVE_INFINITY;
+
       const fitScale = Math.min(fitByWidth, fitByHeight);
       const upperBound = allowUpscale ? Math.max(1, maxScale) : 1;
       const nextScale = Math.max(
@@ -121,13 +126,13 @@ export function ScaleToFitFrame({
     contentHeight != null
       ? Math.ceil(contentHeight * effectiveScale)
       : null;
+
   const safePaddingPx = Math.max(0, contentPaddingPx);
   const safeBaseWidth = Math.max(1, baseWidth);
-  const shouldUseZoomScale = !disableScale && Math.abs(effectiveScale - 1) > 0.0001;
+  const shouldUseZoomScale =
+    !disableScale && Math.abs(effectiveScale - 1) > 0.0001;
   const shouldUseTransformScale = false;
-  const visualWidthPx = disableScale
-    ? null
-    : safeBaseWidth * effectiveScale;
+  const visualWidthPx = disableScale ? null : safeBaseWidth * effectiveScale;
 
   return (
     <div
@@ -152,26 +157,34 @@ export function ScaleToFitFrame({
       >
         <div
           style={
-            visualWidthPx != null
-              ? { width: `${visualWidthPx.toFixed(3)}px` }
-              : undefined
+            disableScale
+              ? {
+                  width: "100%",
+                  maxWidth: "100%",
+                  minWidth: 0,
+                }
+              : visualWidthPx != null
+                ? { width: `${visualWidthPx.toFixed(3)}px` }
+                : undefined
           }
         >
-            <div
-              style={{
-                width: disableScale ? "100%" : `${safeBaseWidth}px`,
-                transform: shouldUseTransformScale
-                  ? `scale(${effectiveScale})`
-                  : "none",
-                transformOrigin: disableScale
-                  ? "initial"
-                  : fitHeight && centerContent
-                    ? "center center"
-                    : "top left",
-                willChange: shouldUseTransformScale ? "transform" : undefined,
-                zoom: shouldUseZoomScale ? effectiveScale : undefined,
-              }}
-            >
+          <div
+            style={{
+              width: disableScale ? "100%" : `${safeBaseWidth}px`,
+              maxWidth: disableScale ? "100%" : undefined,
+              minWidth: disableScale ? 0 : undefined,
+              transform: shouldUseTransformScale
+                ? `scale(${effectiveScale})`
+                : "none",
+              transformOrigin: disableScale
+                ? "initial"
+                : fitHeight && centerContent
+                  ? "center center"
+                  : "top left",
+              willChange: shouldUseTransformScale ? "transform" : undefined,
+              zoom: shouldUseZoomScale ? effectiveScale : undefined,
+            }}
+          >
             <div
               ref={contentRef}
               className="flow-root"
@@ -185,7 +198,3 @@ export function ScaleToFitFrame({
     </div>
   );
 }
-
-
-
-
