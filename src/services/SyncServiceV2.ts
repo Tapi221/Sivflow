@@ -25,6 +25,50 @@ import { TelemetryService } from "./logic/TelemetryService";
 import { SecurityMonitor } from "./logic/SecurityMonitor";
 import type { LocalDBLike } from "./localDB";
 
+const SYNC_TABLE_BY_TYPE = {
+  card: "cards",
+  folder: "folders",
+  cardSet: "cardSets",
+  document: "documents",
+  tag: "tags_v3",
+  asset: "images",
+  userSetting: "userSettings",
+} as const;
+
+const FULL_RESYNC_TABLES = [
+  "folders",
+  "cardSets",
+  "cards",
+  "documents",
+  "tags_v3",
+  "userSettings",
+  "images",
+] as const;
+
+const toSyncTableName = (type: string) => {
+  return (
+    SYNC_TABLE_BY_TYPE[type as keyof typeof SYNC_TABLE_BY_TYPE] ?? `${type}s`
+  );
+};
+
+const normalizeFullResyncRecord = (
+  userId: string,
+  change: { type?: string; id?: string; data?: unknown },
+) => {
+  const data = {
+    ...((change.data as Record<string, unknown> | undefined) ?? {}),
+  };
+
+  if (!data.id && change.id) data.id = change.id;
+
+  if (change.type === "userSetting") {
+    data.id = userId;
+    data.userId = userId;
+  }
+
+  return data;
+};
+
 /**
  * SyncServiceV2: オーケストレーターとしての同期サービス
  * 各コンポーネントを統括し、ビジネスロジックの流れを制御する
@@ -301,24 +345,12 @@ export class SyncServiceV2 implements ISyncService {
     const allFolders = await this.localDB.folders.toArray();
 
     for (const change of changes) {
-      const tableByType: Record<string, string> = {
-        card: "cards",
-        folder: "folders",
-        cardSet: "cardSets",
-        document: "documents",
-        tag: "tags_v3",
-        asset: "images",
-        userSetting: "userSettings",
-      };
-      const table = tableByType[change.type] ?? `${change.type}s`;
-      const remoteData = { ...((change.data as any) ?? {}) };
-      if (!remoteData.id && change.id) {
-        remoteData.id = change.id;
-      }
-      if (change.type === "userSetting") {
-        remoteData.id = this.userId;
-        remoteData.userId = this.userId;
-      }
+      const table = toSyncTableName(change.type);
+      const remoteData = normalizeFullResyncRecord(this.userId, {
+        type: change.type,
+        id: change.id,
+        data: change.data,
+      }) as any;
 
       // documents.localFileId / blob localUrl は端末ローカル専用のため、受信時に除外かつ保護する。
       // (ここでは remoteData から削除するだけで、後のマージで localData 側が残るようにする)
@@ -444,31 +476,23 @@ export class SyncServiceV2 implements ISyncService {
         changesCount: diff.changes.length,
       });
 
-      // 2. ローカルDBをトランザクション内で更新
-      // 主なエンティティをリセットしてクラウドデータで埋める
-      const tables = [
-        "folders",
-        "cards",
-        "cardSets",
-        "documents",
-        "tags_v3",
-        "userSettings",
-        "images",
-      ];
-
-      await this.localDB.transaction("rw", tables, async () => {
+      await this.localDB.transaction("rw", [...FULL_RESYNC_TABLES], async () => {
         // すべてのデータを一旦削除（ソフトデリートではなく物理削除して再構築）
-        for (const table of tables) {
+        for (const table of FULL_RESYNC_TABLES) {
           await (this.localDB as unknown)[table].clear();
         }
 
         // 取得したデータを投入
         for (const change of diff.changes) {
-          const tableName = `${change.type}s`;
-          if (tables.includes(tableName)) {
-            const data = { ...(change.data ?? {}) };
-            // Dexie put は key が無いと insert できずに死ぬので補正
-            if (!data.id && change.id) data.id = change.id;
+          const tableName = toSyncTableName(change.type);
+          if (
+            (FULL_RESYNC_TABLES as readonly string[]).includes(tableName)
+          ) {
+            const data = normalizeFullResyncRecord(this.userId, {
+              type: change.type,
+              id: change.id,
+              data: change.data,
+            });
             await (this.localDB as unknown)[tableName].put(data);
           }
         }

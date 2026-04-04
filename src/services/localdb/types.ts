@@ -1,6 +1,8 @@
 import type {
   AssetRecord,
   Card,
+  CardSet,
+  DocumentItem as Document,
   Folder,
   SyncConflict,
   SyncError,
@@ -53,6 +55,10 @@ export type TagV3Record = {
 export type LocalDBTableMap = {
   cards: Card;
   folders: Folder;
+  cardSets: CardSet;
+  documents: Document;
+  tags_v3: TagV3Record;
+  images: AssetRecord | UploadedImage;
   userSettings: UserSettings;
   userStats: UserStats;
 };

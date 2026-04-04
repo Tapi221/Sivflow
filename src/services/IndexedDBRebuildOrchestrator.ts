@@ -7,6 +7,37 @@ import {
   type BlobUrlFix,
 } from "@/utils/blobUrlSanitizer";
 
+const REBUILD_TABLE_BY_TYPE = {
+  card: "cards",
+  folder: "folders",
+  cardSet: "cardSets",
+  document: "documents",
+  tag: "tags_v3",
+  asset: "images",
+  userSetting: "userSettings",
+} as const;
+
+type RebuildSupportedType = keyof typeof REBUILD_TABLE_BY_TYPE;
+
+const isRebuildSupportedType = (type: string): type is RebuildSupportedType => {
+  return Object.prototype.hasOwnProperty.call(REBUILD_TABLE_BY_TYPE, type);
+};
+
+const normalizeRebuildRecord = (
+  userId: string,
+  change: { type?: string; id?: string; data?: unknown },
+) => {
+  const data = {
+    ...((change.data as Record<string, unknown> | undefined) ?? {}),
+  };
+  if (!data.id && change.id) data.id = change.id;
+  if (change.type === "userSetting") {
+    data.id = userId;
+    data.userId = userId;
+  }
+  return data;
+};
+
 /**
  * IndexedDB 再構築オーケストレーター
  *
@@ -18,23 +49,11 @@ export class IndexedDBRebuildOrchestrator {
   private static isRebuilding = false;
 
   static isSupportedType(type: string): boolean {
-    return (
-      type === "card" ||
-      type === "folder" ||
-      type === "cardSet" ||
-      type === "document" ||
-      type === "tag" ||
-      type === "asset" ||
-      type === "userSetting" ||
-      type === "cardRelation" ||
-      type === "projectMap"
-    );
+    return isRebuildSupportedType(type);
   }
 
-  private static tableFromType(type: string): string {
-    if (type === "tag") return "tags_v3";
-    if (type === "asset") return "images";
-    return `${type}s`;
+  private static tableFromType(type: RebuildSupportedType): string {
+    return REBUILD_TABLE_BY_TYPE[type];
   }
 
   /**
@@ -138,16 +157,9 @@ export class IndexedDBRebuildOrchestrator {
           newDb.cards,
           newDb.cardSets,
           newDb.documents,
-          newDb.users,
           newDb.userSettings,
-          newDb.userStats,
-          newDb.syncMetadata,
-          newDb.levelHistories,
-          newDb.deviceMeta,
           newDb.images,
           newDb.tags_v3,
-          (newDb as any).cardRelations,
-          (newDb as any).projectMaps,
         ],
         async () => {
           console.log(
@@ -155,7 +167,7 @@ export class IndexedDBRebuildOrchestrator {
           );
           for (const change of changes) {
             if (!this.isSupportedType(change.type)) continue;
-            const table = this.tableFromType(change.type);
+            const table = this.tableFromType(change.type as RebuildSupportedType);
             const sanitizeResult = sanitizeBlobUrlsDeep(change.data);
             if (sanitizeResult.changed) {
               console.warn(
@@ -169,7 +181,14 @@ export class IndexedDBRebuildOrchestrator {
             }
 
             try {
-              await newDb.upsert(table as unknown, sanitizeResult.value, true);
+              await newDb.upsert(
+                table as unknown,
+                normalizeRebuildRecord(userId, {
+                  ...change,
+                  data: sanitizeResult.value,
+                }),
+                true,
+              );
               insertedCount += 1;
             } catch (error) {
               const itemFailure = {
