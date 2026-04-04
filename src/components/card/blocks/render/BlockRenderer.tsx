@@ -1,19 +1,11 @@
-import { CARD_ROW_PX } from "@/components/card/common/constants";
-import {
-  getNormalizedGridOffsetRows,
-  getRowOffsetPx,
-  getRowOffsetStyle,
-  isGridOffsetType,
-  isRowPositionableType,
-} from "@/components/card/frame/rowOffset";
 import { AudioPlayer } from "@/components/card/media/CardMedia";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import type { CardBlock } from "@/types/domain/card";
 import type { CSSProperties } from "react";
 import { useCallback, useMemo, useState } from "react";
-import { BlockSeparator } from "@/components/card/blocks/core/BlockSeparator";
-import { shouldRenderInterBlockSeparator } from "@/components/card/blocks/core/blockDisplayPolicy";
+
 import { CodeRenderer } from "@/components/card/blocks/code/CodeRenderer";
+import { BlockList } from "@/components/card/blocks/core/BlockList";
 import { ImageBlockContent } from "@/components/card/blocks/image/ImageBlockContent";
 import { ImageBlockShell } from "@/components/card/blocks/image/ImageBlockShell";
 import { MarkdownBlockView } from "@/components/card/blocks/markdown/MarkdownBlockPreview";
@@ -286,55 +278,18 @@ export const BlockRenderer = ({
   if (!renderableBlocks.length) return null;
 
   return (
-    <div className="w-full max-w-full">
-      {renderableBlocks.map((block, index) => {
-        const isGridOffsetBlock = isGridOffsetType(block.type);
-        const isLinePositionable =
-          isRowPositionableType(block.type) && !isGridOffsetBlock;
-
-        const rowOffsetPx = isLinePositionable ? getRowOffsetPx(block) : 0;
-        const offsetStyle = isLinePositionable
-          ? getRowOffsetStyle(block)
-          : undefined;
-
-        const gridOffsetRows = isGridOffsetBlock
-          ? getNormalizedGridOffsetRows(block)
-          : 0;
-        const gridOffsetPx = gridOffsetRows * CARD_ROW_PX;
-
-        const showSeparator =
-          index > 0 &&
-          shouldRenderInterBlockSeparator(
-            renderableBlocks[index - 1].type,
-            block.type,
-          );
-
-        const content = renderBlock(block, {
+    <BlockList
+      blocks={renderableBlocks}
+      renderBlock={(block, meta) =>
+        renderBlock(block, {
           questionDisplayMode,
-          gridOffsetPx,
+          gridOffsetPx: meta.gridOffsetPx,
           onGalleryFullscreenChange,
           toMediaUrl,
           displayMode,
           zoom,
-        });
-
-        if (!content) return null;
-
-        return (
-          <div key={block.id}>
-            {showSeparator && <BlockSeparator />}
-
-            <div
-              className="w-full min-w-0 max-w-full flow-root"
-              data-block-row="true"
-              data-row-offset-applied={rowOffsetPx ? "true" : undefined}
-              style={offsetStyle}
-            >
-              {content}
-            </div>
-          </div>
-        );
-      })}
-    </div>
+        })
+      }
+    />
   );
 };

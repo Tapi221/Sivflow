@@ -8,18 +8,16 @@ import React, {
 } from "react";
 import { createPortal } from "react-dom";
 
-import { BlockToolbar } from "@/components/card/blocks/core/BlockToolbar";
 import { CodeBlockItem } from "@/components/card/blocks/code/CodeBlockItem";
+import { BlockList } from "@/components/card/blocks/core/BlockList";
+import { BlockToolbar } from "@/components/card/blocks/core/BlockToolbar";
+import { hasRuledLine } from "@/components/card/blocks/core/blockDisplayPolicy";
+import { sortBlocksByOrderIndex } from "@/components/card/blocks/core/blockOrdering";
+import { MediaBlock } from "@/components/card/blocks/image/MediaBlock";
 import { MarkdownBlock } from "@/components/card/blocks/markdown/MarkdownBlock";
 import { MathBlock } from "@/components/card/blocks/math/MathBlock";
-import { MediaBlock } from "@/components/card/blocks/image/MediaBlock";
 import { QuestionBlock } from "@/components/card/blocks/question/QuestionBlock";
 import { TextBlock } from "@/components/card/blocks/text/TextBlock";
-import {
-  hasRuledLine,
-  shouldRenderInterBlockSeparator,
-} from "@/components/card/blocks/core/blockDisplayPolicy";
-
 import { CARD_ROW_PX } from "@/components/card/common/constants";
 import {
   getNormalizedGridOffsetRows,
@@ -29,7 +27,6 @@ import {
 } from "@/components/card/frame/rowOffset";
 import { cn } from "@/lib/utils";
 import type { CardBlock } from "@/types/domain/card";
-import { sortBlocksByOrderIndex } from "@/components/card/blocks/core/blockOrdering";
 
 type CssVars = React.CSSProperties & Record<`--${string}`, string>;
 
@@ -56,12 +53,10 @@ interface BlockEditorProps {
   autoFocus?: boolean;
   customPlaceholders?: Record<number, string>;
   hideToolbar?: boolean;
-
   onDelete?: (index: number) => void;
   minDeletableIndex?: number;
   hiddenBlockTypes?: CardBlock["type"][];
   settings?: unknown;
-
   toolbarMount?: HTMLDivElement | null;
   toolbarDesktopLayout?: "horizontal" | "vertical";
   enableBlockActiveState?: boolean;
@@ -114,11 +109,11 @@ export const BlockEditor = React.forwardRef<
       };
     }, [enableBlockActiveState]);
 
-    // reference/audio は本文ブロックじゃない扱い（ここでは編集しない）
     const orderedBlocks = useMemo(
       () => sortBlocksByOrderIndex(blocks),
       [blocks],
     );
+
     const { bodyBlocks, nonBodyBlocks } = useMemo(() => {
       const nextBodyBlocks: CardBlock[] = [];
       const nextNonBodyBlocks: CardBlock[] = [];
@@ -143,6 +138,7 @@ export const BlockEditor = React.forwardRef<
     useEffect(() => {
       nonBodyBlocksRef.current = nonBodyBlocks;
     }, [nonBodyBlocks]);
+
     const resolvedActiveBlockId = useMemo(() => {
       if (!enableBlockActiveState) return null;
       if (!activeBlockId) return null;
@@ -150,6 +146,7 @@ export const BlockEditor = React.forwardRef<
         ? activeBlockId
         : null;
     }, [activeBlockId, bodyBlocks, enableBlockActiveState]);
+
     const resolvedActiveContainerBlockId = useMemo(() => {
       if (!enableBlockActiveState) return null;
       if (!activeContainerBlockId) return null;
@@ -166,7 +163,6 @@ export const BlockEditor = React.forwardRef<
       [],
     );
 
-    // このエディタが責任を持つのは bodyBlocks のみ。emit 時に nonBody を末尾へ保持する。
     const emitChange = useCallback(
       (nextBodyBlocks: CardBlock[], opts?: { reindex?: boolean }) => {
         const merged = [...nextBodyBlocks, ...nonBodyBlocksRef.current];
@@ -183,13 +179,11 @@ export const BlockEditor = React.forwardRef<
       pendingUploadsRef.current = pendingUploads;
     }, [pendingUploads]);
 
-    // stale 回避用のスナップショット（唯一の真実は props と emitChange）
     const blocksRef = useRef<CardBlock[]>(bodyBlocks);
     useEffect(() => {
       blocksRef.current = bodyBlocks;
     }, [bodyBlocks]);
 
-    // row DOM 参照（querySelector地獄を回避）
     const rowElMapRef = useRef<Map<string, HTMLElement>>(new Map());
     const registerRowEl = useCallback(
       (blockId: string, el: HTMLElement | null) => {
@@ -203,7 +197,6 @@ export const BlockEditor = React.forwardRef<
       [],
     );
 
-    // 1行移動ドラッグ用セッション（候補要素もキャッシュ）
     const moveSessionRef = useRef<{
       blockId: string;
       originOffsetRows: number;
@@ -211,8 +204,9 @@ export const BlockEditor = React.forwardRef<
     } | null>(null);
 
     const getBlockOffsetRows = (block: CardBlock) => {
-      if (isGridOffsetType(block.type))
+      if (isGridOffsetType(block.type)) {
         return getNormalizedGridOffsetRows(block);
+      }
       return getNormalizedRowOffset(block);
     };
 
@@ -226,14 +220,16 @@ export const BlockEditor = React.forwardRef<
       }
 
       const rowEl = rowElMapRef.current.get(blockId) ?? null;
-      if (!rowEl)
+      if (!rowEl) {
         return { min: Number.NEGATIVE_INFINITY, max: Number.POSITIVE_INFINITY };
+      }
 
       const surfaceEl = rowEl.closest(
         '[data-card-surface="true"]',
       ) as HTMLElement | null;
-      if (!surfaceEl)
+      if (!surfaceEl) {
         return { min: Number.NEGATIVE_INFINITY, max: Number.POSITIVE_INFINITY };
+      }
 
       const rowRect = rowEl.getBoundingClientRect();
       const surfaceRect = surfaceEl.getBoundingClientRect();
@@ -302,7 +298,7 @@ export const BlockEditor = React.forwardRef<
 
         newBlocks.splice(insertIndex, 0, newBlock);
         pendingEntries.push({ id: newBlockId, file });
-        insertIndex++;
+        insertIndex += 1;
       }
 
       const nextPending = { ...pendingUploadsRef.current };
@@ -326,12 +322,10 @@ export const BlockEditor = React.forwardRef<
 
     const handleAddBlock = useCallback(
       (type: CardBlock["type"], overrideContainerId?: string | null) => {
-        // reference/audio は右上ポップアップ専用。本文ブロック追加経路では扱わない。
         if (type === "reference" || type === "audio") return;
 
         const source = blocksRef.current;
 
-        // question は常にトップレベル。それ以外は activeContainerBlockId に従う。
         const resolvedContainerId =
           type === "question"
             ? null
@@ -342,10 +336,12 @@ export const BlockEditor = React.forwardRef<
         const tailRowOffset = (() => {
           for (let i = source.length - 1; i >= 0; i -= 1) {
             const b = source[i];
-            if (!isRowPositionableType(b.type) || isGridOffsetType(b.type))
+            if (!isRowPositionableType(b.type) || isGridOffsetType(b.type)) {
               continue;
-            if (b.rowOffset !== undefined)
+            }
+            if (b.rowOffset !== undefined) {
               return Math.round(Number(b.rowOffset ?? 0));
+            }
           }
           return 0;
         })();
@@ -389,6 +385,7 @@ export const BlockEditor = React.forwardRef<
       },
       [emitChange, prefix, resolvedActiveContainerBlockId],
     );
+
     useImperativeHandle(ref, () => ({
       addBlock: (type: CardBlock["type"]) => {
         handleAddBlock(type, null);
@@ -410,7 +407,6 @@ export const BlockEditor = React.forwardRef<
       }
 
       const source = blocksRef.current;
-      // question ブロックを削除する場合、その子ブロックも一緒に削除する
       const next = source.filter((b) => b.id !== id && b.parentBlockId !== id);
       blocksRef.current = next;
       emitChange(next, { reindex: true });
@@ -480,7 +476,6 @@ export const BlockEditor = React.forwardRef<
       if (!currentBlock) return;
       if (!isRowPositionableType(currentBlock.type)) return;
 
-      // 候補要素を開始時にキャッシュ（毎回 querySelectorAll しない）
       const candidates = Array.from(rowElMapRef.current.values());
 
       moveSessionRef.current = {
@@ -579,7 +574,6 @@ export const BlockEditor = React.forwardRef<
         }}
         onClick={(e) => {
           if (!enableBlockActiveState) return;
-          // question コンテナ内のクリックでなければ activeContainerBlockId をリセット
           const target = e.target as HTMLElement;
           if (!target.closest("[data-block-type='question']")) {
             setActiveContainerBlockId((prev) => (prev === null ? prev : null));
@@ -591,146 +585,148 @@ export const BlockEditor = React.forwardRef<
           : inlineToolbar}
 
         <div className="space-y-0 overflow-x-visible overflow-y-visible">
-          {bodyBlocks.map((block, index) => {
-            const rowMovable = isRowPositionableType(block.type);
-            const isGridOffsetBlock = isGridOffsetType(block.type);
-            const isBlockActive = resolvedActiveBlockId === block.id;
+          <BlockList
+            blocks={bodyBlocks}
+            getRowRef={(block) => (el) => {
+              registerRowEl(block.id, el);
+            }}
+            getRowContainerProps={(block, meta) => ({
+              className: "relative",
+              "data-block-id": block.id,
+              "data-block-layout-kind": hasRuledLine(block.type)
+                ? "ruled"
+                : "non-ruled",
+              "data-row-offset-applied": meta.rowOffsetPx ? "true" : undefined,
+            })}
+            renderBlock={(block, meta) => {
+              const isBlockActive = resolvedActiveBlockId === block.id;
+              const canMoveUp = meta.isLinePositionable;
+              const canMoveDown = meta.isLinePositionable;
 
-            const rowOffsetRows = rowMovable ? getBlockOffsetRows(block) : 0;
-            const rowOffsetPx =
-              rowMovable && !isGridOffsetBlock
-                ? rowOffsetRows * ROW_STEP_PX
-                : 0;
-            const gridOffsetPx = isGridOffsetBlock
-              ? rowOffsetRows * ROW_STEP_PX
-              : 0;
+              if (block.type === "text") {
+                return (
+                  <TextBlock
+                    content={block.content || ""}
+                    onChange={(content) =>
+                      handleUpdateBlock(block.id, { content })
+                    }
+                    onDelete={() => handleDeleteBlock(block.id, meta.index)}
+                    onDuplicate={() => handleDuplicateBlock(block.id)}
+                    onMoveUp={() => handleShiftBlockRow(block.id, "up")}
+                    onMoveDown={() => handleShiftBlockRow(block.id, "down")}
+                    onMoveDragStart={() => handleMoveDragStart(block.id)}
+                    onMoveDragEnd={() => handleMoveDragEnd(block.id)}
+                    canMoveUp={canMoveUp}
+                    canMoveDown={canMoveDown}
+                    dragHandleProps={undefined}
+                    dragEnabled={true}
+                    dragHandleClassName="js-block-drag-handle"
+                    accentColor={accentColor}
+                    isActive={isBlockActive}
+                    placeholder={
+                      customPlaceholders?.[meta.index] || "文章を入力..."
+                    }
+                    autoFocus={
+                      autoFocus && meta.index === bodyBlocks.length - 1
+                    }
+                  />
+                );
+              }
 
-            const canMoveUp = rowMovable;
-            const canMoveDown = rowMovable;
-            const rowStyle = rowOffsetPx
-              ? ({
-                  transform: `translateY(${rowOffsetPx}px)`,
-                } as React.CSSProperties)
-              : undefined;
-
-            const showSeparator =
-              index > 0 &&
-              shouldRenderInterBlockSeparator(
-                bodyBlocks[index - 1].type,
-                block.type,
-              );
-
-            return (
-              <div key={block.id}>
-                {showSeparator && (
-                  <div
-                    aria-hidden
-                    className="pointer-events-none"
-                    style={{ height: 9, display: "flex", alignItems: "center" }}
-                  >
-                    <div
-                      style={{
-                        width: "100%",
-                        height: 1,
-                        background: "var(--card-ruled-color, rgba(0,0,0,0.05))",
-                      }}
+              if (block.type === "code") {
+                return (
+                  <div className="w-full max-w-full overflow-visible">
+                    {meta.gridOffsetPx > 0 && (
+                      <div
+                        aria-hidden
+                        className="pointer-events-none"
+                        style={{ height: `${meta.gridOffsetPx}px` }}
+                      />
+                    )}
+                    <CodeBlockItem
+                      data={
+                        block.code || {
+                          language: "javascript",
+                          code: "",
+                        }
+                      }
+                      onChange={(data) =>
+                        handleUpdateBlock(block.id, { code: data })
+                      }
+                      onDelete={() => handleDeleteBlock(block.id, meta.index)}
+                      onDuplicate={() => handleDuplicateBlock(block.id)}
+                      onMoveUp={() => handleShiftBlockRow(block.id, "up")}
+                      onMoveDown={() => handleShiftBlockRow(block.id, "down")}
+                      onMoveDragStart={() => handleMoveDragStart(block.id)}
+                      onMoveDragEnd={() => handleMoveDragEnd(block.id)}
+                      canMoveUp={canMoveUp}
+                      canMoveDown={canMoveDown}
+                      dragHandleProps={undefined}
+                      dragEnabled={true}
+                      dragHandleClassName="js-block-drag-handle"
+                      accentColor={accentColor}
+                      isActive={isBlockActive}
                     />
                   </div>
-                )}
-                <div
-                  ref={(el) => {
-                    registerRowEl(block.id, el);
-                  }}
-                  data-block-id={block.id}
-                  className="relative"
-                  data-block-row="true"
-                  data-block-layout-kind={
-                    hasRuledLine(block.type) ? "ruled" : "non-ruled"
-                  }
-                  data-row-offset-applied={rowOffsetPx ? "true" : undefined}
-                  style={rowStyle}
-                >
-                  {block.type === "text" && (
-                    <TextBlock
-                      content={block.content || ""}
-                      onChange={(content) =>
-                        handleUpdateBlock(block.id, { content })
-                      }
-                      onDelete={() => handleDeleteBlock(block.id, index)}
-                      onDuplicate={() => handleDuplicateBlock(block.id)}
-                      onMoveUp={() => handleShiftBlockRow(block.id, "up")}
-                      onMoveDown={() => handleShiftBlockRow(block.id, "down")}
-                      onMoveDragStart={() => handleMoveDragStart(block.id)}
-                      onMoveDragEnd={() => handleMoveDragEnd(block.id)}
-                      canMoveUp={canMoveUp}
-                      canMoveDown={canMoveDown}
-                      dragHandleProps={undefined}
-                      dragEnabled={true}
-                      dragHandleClassName="js-block-drag-handle"
-                      accentColor={accentColor}
-                      isActive={isBlockActive}
-                      placeholder={
-                        customPlaceholders?.[index] || "文章を入力..."
-                      }
-                      autoFocus={autoFocus && index === bodyBlocks.length - 1}
-                    />
-                  )}
+                );
+              }
 
-                  {block.type === "code" && (
-                    <div className="w-full max-w-full overflow-visible">
-                      {gridOffsetPx > 0 && (
-                        <div
-                          aria-hidden
-                          className="pointer-events-none"
-                          style={{ height: `${gridOffsetPx}px` }}
-                        />
-                      )}
-                      <CodeBlockItem
-                        data={
-                          block.code || {
-                            language: "javascript",
-                            code: "",
-                          }
-                        }
-                        onChange={(data) =>
-                          handleUpdateBlock(block.id, { code: data })
-                        }
-                        onDelete={() => handleDeleteBlock(block.id, index)}
-                        onDuplicate={() => handleDuplicateBlock(block.id)}
-                        onMoveUp={() => handleShiftBlockRow(block.id, "up")}
-                        onMoveDown={() => handleShiftBlockRow(block.id, "down")}
-                        onMoveDragStart={() => handleMoveDragStart(block.id)}
-                        onMoveDragEnd={() => handleMoveDragEnd(block.id)}
-                        canMoveUp={canMoveUp}
-                        canMoveDown={canMoveDown}
-                        dragHandleProps={undefined}
-                        dragEnabled={true}
-                        dragHandleClassName="js-block-drag-handle"
-                        accentColor={accentColor}
-                        isActive={isBlockActive}
+              if (block.type === "image") {
+                return (
+                  <MediaBlock
+                    data={block.images || []}
+                    onChange={(data) =>
+                      handleUpdateBlock(block.id, { images: data })
+                    }
+                    onDelete={() => handleDeleteBlock(block.id, meta.index)}
+                    onDuplicate={() => handleDuplicateBlock(block.id)}
+                    dragHandleProps={undefined}
+                    dragHandleClassName="js-block-drag-handle"
+                    accentColor={accentColor}
+                    isActive={isBlockActive}
+                    initialFile={pendingUploads[block.id]}
+                    onConsumeInitialFile={() =>
+                      handleConsumeInitialFile(block.id)
+                    }
+                    onFilesExcess={(files) =>
+                      handleBlockOverflow(block.id, files)
+                    }
+                    onMoveUp={() => handleShiftBlockRow(block.id, "up")}
+                    onMoveDown={() => handleShiftBlockRow(block.id, "down")}
+                    onMoveDragStart={() => handleMoveDragStart(block.id)}
+                    onMoveDragEnd={() => handleMoveDragEnd(block.id)}
+                    canMoveUp={canMoveUp}
+                    canMoveDown={canMoveDown}
+                  />
+                );
+              }
+
+              if (block.type === "math") {
+                return (
+                  <div className="w-full max-w-full overflow-visible">
+                    {meta.gridOffsetPx > 0 && (
+                      <div
+                        aria-hidden
+                        className="pointer-events-none"
+                        style={{ height: `${meta.gridOffsetPx}px` }}
                       />
-                    </div>
-                  )}
-
-                  {block.type === "image" && (
-                    <MediaBlock
-                      data={block.images || []}
+                    )}
+                    <MathBlock
+                      data={
+                        block.math || {
+                          latex: "",
+                          displayMode: "block",
+                        }
+                      }
                       onChange={(data) =>
-                        handleUpdateBlock(block.id, { images: data })
+                        handleUpdateBlock(block.id, { math: data })
                       }
-                      onDelete={() => handleDeleteBlock(block.id, index)}
+                      onDelete={() => handleDeleteBlock(block.id, meta.index)}
                       onDuplicate={() => handleDuplicateBlock(block.id)}
                       dragHandleProps={undefined}
                       dragHandleClassName="js-block-drag-handle"
                       accentColor={accentColor}
                       isActive={isBlockActive}
-                      initialFile={pendingUploads[block.id]}
-                      onConsumeInitialFile={() =>
-                        handleConsumeInitialFile(block.id)
-                      }
-                      onFilesExcess={(files) =>
-                        handleBlockOverflow(block.id, files)
-                      }
                       onMoveUp={() => handleShiftBlockRow(block.id, "up")}
                       onMoveDown={() => handleShiftBlockRow(block.id, "down")}
                       onMoveDragStart={() => handleMoveDragStart(block.id)}
@@ -738,126 +734,97 @@ export const BlockEditor = React.forwardRef<
                       canMoveUp={canMoveUp}
                       canMoveDown={canMoveDown}
                     />
-                  )}
+                  </div>
+                );
+              }
 
-                  {block.type === "math" && (
-                    <div className="w-full max-w-full overflow-visible">
-                      {gridOffsetPx > 0 && (
-                        <div
-                          aria-hidden
-                          className="pointer-events-none"
-                          style={{ height: `${gridOffsetPx}px` }}
-                        />
-                      )}
-                      <MathBlock
-                        data={
-                          block.math || {
-                            latex: "",
-                            displayMode: "block",
-                          }
-                        }
-                        onChange={(data) =>
-                          handleUpdateBlock(block.id, { math: data })
-                        }
-                        onDelete={() => handleDeleteBlock(block.id, index)}
-                        onDuplicate={() => handleDuplicateBlock(block.id)}
-                        dragHandleProps={undefined}
-                        dragHandleClassName="js-block-drag-handle"
-                        accentColor={accentColor}
-                        isActive={isBlockActive}
-                        onMoveUp={() => handleShiftBlockRow(block.id, "up")}
-                        onMoveDown={() => handleShiftBlockRow(block.id, "down")}
-                        onMoveDragStart={() => handleMoveDragStart(block.id)}
-                        onMoveDragEnd={() => handleMoveDragEnd(block.id)}
-                        canMoveUp={canMoveUp}
-                        canMoveDown={canMoveDown}
-                      />
-                    </div>
-                  )}
+              if (block.type === "question") {
+                return (
+                  <QuestionBlock
+                    block={block}
+                    onUpdateBlock={handleUpdateBlock}
+                    onDelete={() => handleDeleteBlock(block.id, meta.index)}
+                    onDuplicate={() => handleDuplicateBlock(block.id)}
+                    onMoveUp={() => handleShiftBlockRow(block.id, "up")}
+                    onMoveDown={() => handleShiftBlockRow(block.id, "down")}
+                    onMoveDragStart={() => handleMoveDragStart(block.id)}
+                    onMoveDragEnd={() => handleMoveDragEnd(block.id)}
+                    canMoveUp={canMoveUp}
+                    canMoveDown={canMoveDown}
+                    dragHandleProps={undefined}
+                    dragEnabled={true}
+                    dragHandleClassName="js-block-drag-handle"
+                    accentColor={accentColor}
+                    isActive={isBlockActive}
+                  />
+                );
+              }
 
-                  {block.type === "question" && (
-                    <QuestionBlock
-                      block={block}
-                      onUpdateBlock={handleUpdateBlock}
-                      onDelete={() => handleDeleteBlock(block.id, index)}
-                      onDuplicate={() => handleDuplicateBlock(block.id)}
-                      onMoveUp={() => handleShiftBlockRow(block.id, "up")}
-                      onMoveDown={() => handleShiftBlockRow(block.id, "down")}
-                      onMoveDragStart={() => handleMoveDragStart(block.id)}
-                      onMoveDragEnd={() => handleMoveDragEnd(block.id)}
-                      canMoveUp={canMoveUp}
-                      canMoveDown={canMoveDown}
-                      dragHandleProps={undefined}
-                      dragEnabled={true}
-                      dragHandleClassName="js-block-drag-handle"
-                      accentColor={accentColor}
-                      isActive={isBlockActive}
-                    />
-                  )}
+              if (block.type === "markdown") {
+                return (
+                  <MarkdownBlock
+                    markdown={block.markdown || ""}
+                    onChange={(md) =>
+                      handleUpdateBlock(block.id, { markdown: md })
+                    }
+                    onDelete={() => handleDeleteBlock(block.id, meta.index)}
+                    onDuplicate={() => handleDuplicateBlock(block.id)}
+                    dragHandleProps={undefined}
+                    dragHandleClassName="js-block-drag-handle"
+                    accentColor={accentColor}
+                    isActive={isBlockActive}
+                    onMoveUp={() => handleShiftBlockRow(block.id, "up")}
+                    onMoveDown={() => handleShiftBlockRow(block.id, "down")}
+                    onMoveDragStart={() => handleMoveDragStart(block.id)}
+                    onMoveDragEnd={() => handleMoveDragEnd(block.id)}
+                    canMoveUp={canMoveUp}
+                    canMoveDown={canMoveDown}
+                    onReplaceWithBlocks={(parsed) => {
+                      const baseOffset = getBlockOffsetRows(block);
 
-                  {block.type === "markdown" && (
-                    <MarkdownBlock
-                      markdown={block.markdown || ""}
-                      onChange={(md) =>
-                        handleUpdateBlock(block.id, { markdown: md })
-                      }
-                      onDelete={() => handleDeleteBlock(block.id, index)}
-                      onDuplicate={() => handleDuplicateBlock(block.id)}
-                      dragHandleProps={undefined}
-                      dragHandleClassName="js-block-drag-handle"
-                      accentColor={accentColor}
-                      isActive={isBlockActive}
-                      onMoveUp={() => handleShiftBlockRow(block.id, "up")}
-                      onMoveDown={() => handleShiftBlockRow(block.id, "down")}
-                      onMoveDragStart={() => handleMoveDragStart(block.id)}
-                      onMoveDragEnd={() => handleMoveDragEnd(block.id)}
-                      canMoveUp={canMoveUp}
-                      canMoveDown={canMoveDown}
-                      onReplaceWithBlocks={(parsed) => {
-                        const baseOffset = getBlockOffsetRows(block);
+                      const newBlocks = parsed.map((p) => {
+                        const newId = `${prefix}-${p.type}-${uid()}`;
 
-                        const newBlocks = parsed.map((p) => {
-                          const newId = `${prefix}-${p.type}-${uid()}`;
-
-                          if (isGridOffsetType(p.type)) {
-                            return {
-                              id: newId,
-                              type: p.type,
-                              ...(p.type === "code" ? { code: p.code } : {}),
-                              content: "",
-                              images: [],
-                              audios: [],
-                              offsetRows: Math.max(0, baseOffset),
-                              rowOffset: undefined,
-                              orderIndex: 0,
-                            };
-                          }
-
+                        if (isGridOffsetType(p.type)) {
                           return {
                             id: newId,
-                            type: "markdown" as const,
-                            markdown: p.markdown,
+                            type: p.type,
+                            ...(p.type === "code" ? { code: p.code } : {}),
                             content: "",
                             images: [],
                             audios: [],
-                            rowOffset: baseOffset,
+                            offsetRows: Math.max(0, baseOffset),
+                            rowOffset: undefined,
                             orderIndex: 0,
-                          };
-                        });
+                          } as CardBlock;
+                        }
 
-                        const source = blocksRef.current;
-                        const updated = [...source];
-                        updated.splice(index, 1, ...newBlocks);
+                        return {
+                          id: newId,
+                          type: "markdown" as const,
+                          markdown: p.markdown,
+                          content: "",
+                          images: [],
+                          audios: [],
+                          rowOffset: baseOffset,
+                          orderIndex: 0,
+                        } as CardBlock;
+                      });
 
-                        blocksRef.current = updated;
-                        emitChange(updated, { reindex: true });
-                      }}
-                    />
-                  )}
-                </div>
-              </div>
-            );
-          })}
+                      const source = blocksRef.current;
+                      const updated = [...source];
+                      updated.splice(meta.index, 1, ...newBlocks);
+
+                      blocksRef.current = updated;
+                      emitChange(updated, { reindex: true });
+                    }}
+                  />
+                );
+              }
+
+              return null;
+            }}
+          />
         </div>
       </div>
     );
