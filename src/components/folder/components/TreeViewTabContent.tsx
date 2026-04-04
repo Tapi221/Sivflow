@@ -28,8 +28,7 @@ interface TreeViewTabContentProps {
   onRegisterCreateCardSetTrigger?: (
     fn: ((folderId?: string | null) => void) | null,
   ) => void;
-  onRegisterPdfTrigger: (fn: () => void) => void;
-  onRegisterPptxTrigger: (fn: () => void) => void;
+  onRegisterDocumentTrigger?: (fn: () => void) => void;
   navigateToSectionListToken: number;
   folderSelectionNonce: number;
   onSectionListModeChange?: (isSectionListMode: boolean) => void;
@@ -68,8 +67,7 @@ export const TreeViewTabContent = ({
   isFiltering,
   onRegisterCreateFolderTrigger,
   onRegisterCreateCardSetTrigger,
-  onRegisterPdfTrigger,
-  onRegisterPptxTrigger,
+  onRegisterDocumentTrigger,
   navigateToSectionListToken,
   folderSelectionNonce,
   onSectionListModeChange,
@@ -137,8 +135,7 @@ export const TreeViewTabContent = ({
           isFiltering={isFiltering}
           onRegisterCreateFolderTrigger={onRegisterCreateFolderTrigger}
           onRegisterCreateCardSetTrigger={onRegisterCreateCardSetTrigger}
-          onRegisterPdfTrigger={onRegisterPdfTrigger}
-          onRegisterPptxTrigger={onRegisterPptxTrigger}
+          onRegisterDocumentTrigger={onRegisterDocumentTrigger}
           navigateToSectionListToken={navigateToSectionListToken}
           folderSelectionNonce={folderSelectionNonce}
           onSectionListModeChange={onSectionListModeChange}

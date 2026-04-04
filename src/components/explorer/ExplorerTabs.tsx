@@ -25,8 +25,7 @@ interface ExplorerTabsProps {
   allTags: string[];
   onCreateRootFolder?: () => void | Promise<void>;
   onCreateCardSet?: () => void | Promise<void>;
-  onAddPdf?: () => void | Promise<void>;
-  onAddPptx?: () => void | Promise<void>;
+  onAddDocument?: () => void | Promise<void>;
   showExplorerActions?: boolean;
   canCreateCardSet?: boolean;
   canAddDocuments?: boolean;
@@ -47,8 +46,7 @@ export const ExplorerTabs = ({
   allTags,
   onCreateRootFolder,
   onCreateCardSet,
-  onAddPdf,
-  onAddPptx,
+  onAddDocument,
   showExplorerActions = false,
   canCreateCardSet = false,
   canAddDocuments = false,
@@ -161,20 +159,19 @@ export const ExplorerTabs = ({
             )}
 
             {canAddDocuments && (
-              <>
-                <DropdownMenuItem onSelect={() => void onAddPdf?.()}>
-                  <DropdownMenuItemIcon>
-                    <FileText className="h-4 w-4" />
-                  </DropdownMenuItemIcon>
-                  <DropdownMenuItemLabel>PDF追加</DropdownMenuItemLabel>
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => void onAddPptx?.()}>
-                  <DropdownMenuItemIcon>
-                    <FileText className="h-4 w-4" />
-                  </DropdownMenuItemIcon>
-                  <DropdownMenuItemLabel>PPTX追加</DropdownMenuItemLabel>
-                </DropdownMenuItem>
-              </>
+              <DropdownMenuItem
+                onSelect={(event) => {
+                  event.preventDefault();
+                  suppressCloseAutoFocusRef.current = true;
+                  setCreateMenuOpen(false);
+                  void onAddDocument?.();
+                }}
+              >
+                <DropdownMenuItemIcon>
+                  <FileText className="h-4 w-4" />
+                </DropdownMenuItemIcon>
+                <DropdownMenuItemLabel>文書追加</DropdownMenuItemLabel>
+              </DropdownMenuItem>
             )}
           </DropdownMenuContent>
         </DropdownMenu>

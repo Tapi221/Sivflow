@@ -19,8 +19,7 @@ interface TreeViewSidebarProps {
   resultCount: number;
   onCreateRootFolder: () => void;
   onCreateCardSet: () => void;
-  onAddPdf: () => void;
-  onAddPptx: () => void;
+  onAddDocument: () => void;
   onStartResizing: (e: React.PointerEvent) => void;
   children: React.ReactNode;
   canCreateCardSet?: boolean;
@@ -42,8 +41,7 @@ export const TreeViewSidebar = ({
   resultCount,
   onCreateRootFolder,
   onCreateCardSet,
-  onAddPdf,
-  onAddPptx,
+  onAddDocument,
   onStartResizing,
   children,
   canCreateCardSet = false,
@@ -72,8 +70,7 @@ export const TreeViewSidebar = ({
             allTags={allTags}
             onCreateRootFolder={onCreateRootFolder}
             onCreateCardSet={onCreateCardSet}
-            onAddPdf={onAddPdf}
-            onAddPptx={onAddPptx}
+            onAddDocument={onAddDocument}
             showExplorerActions={explorerTab === "explorer"}
             canCreateCardSet={canCreateCardSet}
             canAddDocuments={canAddDocuments}

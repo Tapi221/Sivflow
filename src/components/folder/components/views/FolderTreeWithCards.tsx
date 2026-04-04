@@ -106,8 +106,7 @@ interface FolderTreeWithCardsProps {
   onRegisterCreateCardSetTrigger?: (
     fn: ((folderId?: string | null) => void) | null,
   ) => void;
-  onRegisterPdfTrigger?: (fn: () => void) => void;
-  onRegisterPptxTrigger?: (fn: () => void) => void;
+  onRegisterDocumentTrigger?: (fn: () => void) => void;
   navigateToSectionListToken?: number;
   folderSelectionNonce?: number;
   onSectionListModeChange?: (isSectionListMode: boolean) => void;
@@ -141,8 +140,7 @@ export const FolderTreeWithCards = ({
   isFiltering = false,
   onRegisterCreateFolderTrigger,
   onRegisterCreateCardSetTrigger,
-  onRegisterPdfTrigger,
-  onRegisterPptxTrigger,
+  onRegisterDocumentTrigger,
   navigateToSectionListToken = 0,
   folderSelectionNonce = 0,
   onSectionListModeChange,
@@ -590,9 +588,7 @@ export const FolderTreeWithCards = ({
     fileInputRef,
     handlePdfDropped,
     handlePptxDropped,
-    handleToolbarAddFile,
-    handleToolbarAddPdf,
-    handleToolbarAddPptx,
+    handleToolbarAddDocument,
     currentFileAccept,
     handleToolbarFileInputChange,
   } = useFolderDocumentUpload({
@@ -615,7 +611,7 @@ export const FolderTreeWithCards = ({
     onFolderSelect,
     onItemSelect,
     handleCreateFolderAction: actions.handleCreateFolderAction,
-    handleToolbarAddFile,
+    handleToolbarAddDocument,
     handleDelete: (id, type) => {
       void actions.handleDelete({ id, type });
     },
@@ -643,12 +639,8 @@ export const FolderTreeWithCards = ({
   ]);
 
   useEffect(() => {
-    onRegisterPdfTrigger?.(handleToolbarAddPdf);
-  }, [onRegisterPdfTrigger, handleToolbarAddPdf]);
-
-  useEffect(() => {
-    onRegisterPptxTrigger?.(handleToolbarAddPptx);
-  }, [onRegisterPptxTrigger, handleToolbarAddPptx]);
+    onRegisterDocumentTrigger?.(handleToolbarAddDocument);
+  }, [onRegisterDocumentTrigger, handleToolbarAddDocument]);
 
   const handleCreateCardSetFromRootPanel = useCallback(
     (folderId: string | null) => {

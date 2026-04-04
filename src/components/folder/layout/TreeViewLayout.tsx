@@ -75,8 +75,7 @@ const TreeViewLayout = ({
   const createCardSetTriggerRef = useRef<
     ((folderId?: string | null) => void) | null
   >(null);
-  const pdfTriggerRef = useRef<(() => void) | null>(null);
-  const pptxTriggerRef = useRef<(() => void) | null>(null);
+  const documentTriggerRef = useRef<(() => void) | null>(null);
 
   const {
     cardSets,
@@ -250,14 +249,9 @@ const TreeViewLayout = ({
     createCardSetTriggerRef.current?.(currentHeaderFolderId);
   }, [currentHeaderFolderId]);
 
-  const handleAddPdfFromHeader = useCallback(() => {
+  const handleAddDocumentFromHeader = useCallback(() => {
     if (!currentHeaderFolderId) return;
-    pdfTriggerRef.current?.();
-  }, [currentHeaderFolderId]);
-
-  const handleAddPptxFromHeader = useCallback(() => {
-    if (!currentHeaderFolderId) return;
-    pptxTriggerRef.current?.();
+    documentTriggerRef.current?.();
   }, [currentHeaderFolderId]);
 
   const { isFilterActive, filteredCards, filteredDocuments, isFiltering } =
@@ -293,11 +287,8 @@ const TreeViewLayout = ({
       onRegisterCreateCardSetTrigger={(fn) => {
         createCardSetTriggerRef.current = fn;
       }}
-      onRegisterPdfTrigger={(fn) => {
-        pdfTriggerRef.current = fn;
-      }}
-      onRegisterPptxTrigger={(fn) => {
-        pptxTriggerRef.current = fn;
+      onRegisterDocumentTrigger={(fn) => {
+        documentTriggerRef.current = fn;
       }}
       navigateToSectionListToken={navigateToSectionListToken}
       folderSelectionNonce={folderSelectionNonce}
@@ -349,8 +340,7 @@ const TreeViewLayout = ({
         resultCount={filteredCards.length + filteredDocuments.length}
         onCreateRootFolder={handleCreateRootFolder}
         onCreateCardSet={handleCreateCardSetFromHeader}
-        onAddPdf={handleAddPdfFromHeader}
-        onAddPptx={handleAddPptxFromHeader}
+        onAddDocument={handleAddDocumentFromHeader}
         onStartResizing={startResizing}
         canCreateCardSet={canCreateCardSet}
         canAddDocuments={canAddDocuments}

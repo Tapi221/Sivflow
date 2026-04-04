@@ -25,9 +25,7 @@ interface UseFolderDocumentUploadReturn {
   fileInputRef: React.RefObject<HTMLInputElement | null>;
   handlePdfDropped: (folderId: string, files: File[]) => Promise<void>;
   handlePptxDropped: (folderId: string, files: File[]) => Promise<void>;
-  handleToolbarAddFile: () => void;
-  handleToolbarAddPdf: () => void;
-  handleToolbarAddPptx: () => void;
+  handleToolbarAddDocument: () => void;
   currentFileAccept: string;
   handleToolbarFileInputChange: (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -372,7 +370,7 @@ export const useFolderDocumentUpload = ({
     ],
   );
 
-  const handleToolbarAddFile = useCallback(() => {
+  const handleToolbarAddDocument = useCallback(() => {
     const targetFolderId = actionFolderId;
     if (!targetFolderId) {
       toastError?.("ファイル追加先のフォルダを選択してください");
@@ -382,32 +380,6 @@ export const useFolderDocumentUpload = ({
     uploadTypeRef.current = "all";
     setCurrentFileAccept(
       ".pdf,.pptx,application/pdf,application/vnd.openxmlformats-officedocument.presentationml.presentation",
-    );
-    fileInputRef.current?.click();
-  }, [actionFolderId, toastError]);
-
-  const handleToolbarAddPdf = useCallback(() => {
-    const targetFolderId = actionFolderId;
-    if (!targetFolderId) {
-      toastError?.("ファイル追加先のフォルダを選択してください");
-      return;
-    }
-    uploadTargetFolderIdRef.current = targetFolderId;
-    uploadTypeRef.current = "pdf";
-    setCurrentFileAccept(".pdf,application/pdf");
-    fileInputRef.current?.click();
-  }, [actionFolderId, toastError]);
-
-  const handleToolbarAddPptx = useCallback(() => {
-    const targetFolderId = actionFolderId;
-    if (!targetFolderId) {
-      toastError?.("ファイル追加先のフォルダを選択してください");
-      return;
-    }
-    uploadTargetFolderIdRef.current = targetFolderId;
-    uploadTypeRef.current = "pptx";
-    setCurrentFileAccept(
-      ".pptx,application/vnd.openxmlformats-officedocument.presentationml.presentation",
     );
     fileInputRef.current?.click();
   }, [actionFolderId, toastError]);
@@ -455,9 +427,7 @@ export const useFolderDocumentUpload = ({
     fileInputRef,
     handlePdfDropped,
     handlePptxDropped,
-    handleToolbarAddFile,
-    handleToolbarAddPdf,
-    handleToolbarAddPptx,
+    handleToolbarAddDocument,
     currentFileAccept,
     handleToolbarFileInputChange,
   };

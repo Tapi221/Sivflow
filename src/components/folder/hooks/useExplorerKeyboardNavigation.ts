@@ -20,7 +20,7 @@ interface UseExplorerKeyboardNavigationParams {
   onFolderSelect: (folderId: string | null) => void;
   onItemSelect: (item: SelectedExplorerItem) => void;
   handleCreateFolderAction: (parentId: string | null) => void;
-  handleToolbarAddFile: () => void;
+  handleToolbarAddDocument: () => void;
   handleDelete: (id: string, type: "folder" | "card") => void;
   setEditingId: React.Dispatch<React.SetStateAction<string | null>>;
   setEditingName: React.Dispatch<React.SetStateAction<string>>;
@@ -64,7 +64,7 @@ export const useExplorerKeyboardNavigation = ({
   onFolderSelect,
   onItemSelect,
   handleCreateFolderAction,
-  handleToolbarAddFile,
+  handleToolbarAddDocument,
   handleDelete,
   setEditingId,
   setEditingName,
@@ -193,7 +193,7 @@ export const useExplorerKeyboardNavigation = ({
         e.key.toLowerCase() === "o"
       ) {
         e.preventDefault();
-        handleToolbarAddFile();
+        handleToolbarAddDocument();
         return;
       }
 
@@ -252,7 +252,7 @@ export const useExplorerKeyboardNavigation = ({
     onFolderSelect,
     handleCreateFolderAction,
     handleDelete,
-    handleToolbarAddFile,
+    handleToolbarAddDocument,
     setEditingId,
     setEditingName,
   ]);
