@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { useToast } from "@/contexts/ToastContext";
 import { importCardsFromPayload } from "@/features/import/importCardsFromPayload";
@@ -19,6 +19,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { Card, CardSet } from "@/types";
 
 type CreateCardSet = (
@@ -47,6 +54,7 @@ type XlsxImportDialogProps = {
   onOpenChange: (open: boolean) => void;
   folderId: string | null;
   folderName?: string | null;
+  cardSets: CardSet[];
   onImported?: (payload: XlsxImportCompletedPayload) => void;
   createCardSet: CreateCardSet;
   createCard: CreateCard;
@@ -62,11 +70,14 @@ export const XlsxImportDialog = ({
   onOpenChange,
   folderId,
   folderName,
+  cardSets,
   onImported,
   createCardSet,
   createCard,
 }: XlsxImportDialogProps) => {
   const toast = useToast();
+  const [destinationMode, setDestinationMode] = useState<"new" | "existing">("new");
+  const [selectedCardSetId, setSelectedCardSetId] = useState("");
   const [state, setState] = useState(emptyState);
   const [isParsing, setIsParsing] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
@@ -79,11 +90,31 @@ export const XlsxImportDialog = ({
     };
   }, [state.result]);
 
+  const selectedExistingCardSet = useMemo(() => {
+    return cardSets.find((cardSet) => cardSet.id === selectedCardSetId) ?? null;
+  }, [cardSets, selectedCardSetId]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    if (cardSets.length === 0) {
+      setDestinationMode("new");
+      setSelectedCardSetId("");
+      return;
+    }
+
+    if (!selectedCardSetId || !cardSets.some((cardSet) => cardSet.id === selectedCardSetId)) {
+      setSelectedCardSetId(cardSets[0].id);
+    }
+  }, [cardSets, open, selectedCardSetId]);
+
   const handleClose = (nextOpen: boolean) => {
     if (!nextOpen) {
       setState(emptyState);
       setIsParsing(false);
       setIsImporting(false);
+      setDestinationMode("new");
+      setSelectedCardSetId(cardSets[0]?.id ?? "");
     }
 
     onOpenChange(nextOpen);
@@ -142,6 +173,20 @@ export const XlsxImportDialog = ({
       return;
     }
 
+    if (destinationMode === "existing" && !selectedExistingCardSet) {
+      toast.error("追加先のカードセットを選択してください。");
+      return;
+    }
+
+    const destination =
+      destinationMode === "existing" && selectedExistingCardSet
+        ? {
+            kind: "existing-card-set" as const,
+            cardSetId: selectedExistingCardSet.id,
+            cardSetName: selectedExistingCardSet.name,
+          }
+        : { kind: "new-card-set" as const };
+
     setIsImporting(true);
 
     try {
@@ -151,6 +196,7 @@ export const XlsxImportDialog = ({
         fileName: state.file.name,
         createCardSet,
         createCard,
+        destination,
       });
 
       toast.success(
@@ -201,6 +247,54 @@ export const XlsxImportDialog = ({
                   テンプレートをダウンロード
                 </Button>
               </div>
+
+              <div className="grid gap-2">
+                <p className="text-sm font-medium text-slate-800">
+                  取り込み先
+                </p>
+                <Select
+                  value={destinationMode}
+                  onValueChange={(value) => {
+                    if (value === "existing" && cardSets.length === 0) {
+                      return;
+                    }
+                    setDestinationMode(value as "new" | "existing");
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="取り込み先を選択" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="new">新規カードセットを作成</SelectItem>
+                    <SelectItem value="existing" disabled={cardSets.length === 0}>
+                      既存カードセットへ追加
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {destinationMode === "existing" ? (
+                  <Select
+                    value={selectedCardSetId}
+                    onValueChange={setSelectedCardSetId}
+                    disabled={cardSets.length === 0}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="追加先カードセットを選択" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {cardSets.map((cardSet) => (
+                        <SelectItem key={cardSet.id} value={cardSet.id}>
+                          {cardSet.name?.trim() || "無題のカードセット"}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : null}
+                {destinationMode === "existing" && cardSets.length === 0 ? (
+                  <p className="text-xs text-slate-500">このフォルダには既存カードセットがありません。</p>
+                ) : null}
+              </div>
+
               <Input
                 type="file"
                 accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -231,6 +325,14 @@ export const XlsxImportDialog = ({
               <p className="text-xs text-slate-500">カード数</p>
               <p className="mt-1 text-sm font-medium text-slate-800">
                 {state.result?.payload?.cards.length ?? 0}
+              </p>
+            </div>
+            <div className="rounded-xl border border-slate-200 p-3">
+              <p className="text-xs text-slate-500">取り込み先</p>
+              <p className="mt-1 text-sm font-medium text-slate-800">
+                {destinationMode === "existing"
+                  ? selectedExistingCardSet?.name?.trim() || "未選択"
+                  : "新規カードセット"}
               </p>
             </div>
             <div className="rounded-xl border border-slate-200 p-3">
@@ -321,7 +423,11 @@ export const XlsxImportDialog = ({
               hasImportBlockingError(state.result)
             }
           >
-            {isImporting ? "インポート中..." : "インポートする"}
+            {isImporting
+              ? "インポート中..."
+              : destinationMode === "existing"
+                ? "既存セットへ追加する"
+                : "インポートする"}
           </Button>
         </DialogFooter>
       </DialogContent>

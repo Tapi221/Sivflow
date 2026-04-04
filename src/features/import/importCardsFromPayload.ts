@@ -15,12 +15,26 @@ type CreateCard = (
   cardData: Partial<Card> & { cardSetId?: string },
 ) => Promise<Card>;
 
+/**
+ * 取り込み先の指定。新規作成か既存セットへの追加
+ */
+export type ImportDestination =
+  | {
+      kind: "new-card-set";
+    }
+  | {
+      kind: "existing-card-set";
+      cardSetId: string;
+      cardSetName: string;
+    };
+
 type ImportCardsFromPayloadParams = {
   payload: ImportPayload;
   folderId: string;
   fileName: string;
   createCardSet: CreateCardSet;
   createCard: CreateCard;
+  destination: ImportDestination;
 };
 
 const buildImportCardSetName = (fileName: string) => {
@@ -93,20 +107,29 @@ export const importCardsFromPayload = async ({
   fileName,
   createCardSet,
   createCard,
+  destination,
 }: ImportCardsFromPayloadParams) => {
-  const createdCardSet = await createCardSet(
-    buildImportCardSetName(fileName),
-    folderId,
-  );
+  // 転送先カードセットの特定（新規作成 または 既存）
+  const resolvedDestination =
+    destination.kind === "existing-card-set"
+      ? {
+          id: destination.cardSetId,
+          name: destination.cardSetName,
+        }
+      : await createCardSet(buildImportCardSetName(fileName), folderId);
 
   let createdCount = 0;
 
-  for (const importCard of payload.cards) {
+  // 既存のカードの後ろに追加されるよう、ベースの orderIndex を作成する
+  const baseOrderIndex = Date.now() * 10000;
+
+  for (const [index, importCard] of payload.cards.entries()) {
     const frontBlocks = importCard.blocks.map(mapImportBlockToCardBlock);
 
     await createCard({
       folderId,
-      cardSetId: createdCardSet.id,
+      cardSetId: resolvedDestination.id,
+      orderIndex: baseOrderIndex + index,
       title: importCard.title?.trim() || "",
       front: {
         blocks: frontBlocks,
@@ -114,6 +137,15 @@ export const importCardsFromPayload = async ({
       back: {
         blocks: [],
       },
+      layoutRows: {
+        top: 4,
+        bottom: 4,
+        left: 0,
+        right: 0,
+      },
+      frontRows: 0,
+      backRows: 0,
+      tags: [],
       isDraft: false,
       isCompleted: false,
       isSilent: false,
@@ -124,8 +156,8 @@ export const importCardsFromPayload = async ({
   }
 
   return {
-    createdCardSetId: createdCardSet.id,
-    createdCardSetName: createdCardSet.name,
+    createdCardSetId: resolvedDestination.id,
+    createdCardSetName: resolvedDestination.name || "",
     folderId,
     createdCount,
   };

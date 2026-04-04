@@ -300,6 +300,17 @@ const TreeViewLayout = ({
     [addRecent, navigate, onFolderSelect, setExplorerTab],
   );
 
+  // インポート先の候補となる、現在選択中のフォルダ内のカードセット一覧
+  const importTargetCardSets = useMemo(() => {
+    if (!currentHeaderFolderId) {
+      return [];
+    }
+
+    return cardSets.filter(
+      (cardSet) => cardSet.folderId === currentHeaderFolderId,
+    );
+  }, [cardSets, currentHeaderFolderId]);
+
   const { isFilterActive, filteredCards, filteredDocuments, isFiltering } =
     useTreeViewFilters({
       cards,
@@ -435,6 +446,7 @@ const TreeViewLayout = ({
                 ?.folderName ?? null
             : null
         }
+        cardSets={importTargetCardSets}
         onImported={handleImportCompleted}
         createCardSet={createCardSet}
         createCard={createCard}
