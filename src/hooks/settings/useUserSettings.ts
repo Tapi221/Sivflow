@@ -24,6 +24,7 @@ export const DEFAULT_SETTINGS: Partial<UserSettings> = {
   accentColor: "#689A98", // Default system accent color
   cardEditorHeightPx: null, // カードの高さ設定（nullの場合はデフォルトの4:3比率）
   questionDisplayMode: "tap_to_reveal" as const,
+  folderSidebarDisplayMode: "auto" as const,
   editorBlockSettings: [
     {
       id: "text",

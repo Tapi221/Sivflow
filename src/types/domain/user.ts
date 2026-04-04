@@ -54,6 +54,7 @@ export interface UserSettings extends BaseEntity {
   cardEditPaneWidthPx?: number | null;
   editorBlockSettings?: BlockConfig[];
   questionDisplayMode?: "always" | "tap_to_reveal";
+  folderSidebarDisplayMode?: "auto" | "tree" | "navigation";
   blockButtonShowLabel?: boolean;
   tagCategoryDisplayNames?: Record<string, string>;
 }

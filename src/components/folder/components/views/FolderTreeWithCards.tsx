@@ -41,6 +41,7 @@ import React, {
 import type { NodeApi } from "react-arborist";
 
 interface FolderTreeWithCardsProps {
+  sidebarDisplayMode?: "auto" | "tree" | "navigation";
   folders: FolderTreeNode[];
   cards: Card[];
   cardSets?: CardSet[];
@@ -105,6 +106,7 @@ interface FolderTreeWithCardsProps {
 }
 
 export const FolderTreeWithCards = ({
+  sidebarDisplayMode = "auto",
   folders,
   cards,
   cardSets = [],
@@ -328,6 +330,11 @@ export const FolderTreeWithCards = ({
     [parentFolderIdById, rootFolderIdSet],
   );
 
+  const selectedScopedRootId = useMemo(() => {
+    if (!selectedFolderId) return null;
+    return resolveRootFolderId(selectedFolderId) ?? selectedFolderId;
+  }, [resolveRootFolderId, selectedFolderId]);
+
   const actions = useFolderActions({
     treeFolders,
     treeCardSets,
@@ -534,11 +541,11 @@ export const FolderTreeWithCards = ({
   }, [folderSelectionNonce, resetIfScrollable]);
 
   useEffect(() => {
-    if (!selectedFolderId) return;
-    if (activeRootFolderId !== selectedFolderId) {
-      setActiveRootFolderId(selectedFolderId);
+    if (!selectedScopedRootId) return;
+    if (activeRootFolderId !== selectedScopedRootId) {
+      setActiveRootFolderId(selectedScopedRootId);
     }
-  }, [selectedFolderId, activeRootFolderId]);
+  }, [selectedScopedRootId, activeRootFolderId]);
 
   const headerFolderId = useMemo(() => {
     if (selectedFolderId) return selectedFolderId;
@@ -705,14 +712,26 @@ export const FolderTreeWithCards = ({
     [rootFolders],
   );
 
-  const isSectionListMode =
-    rootFolderPanels.length > 0 &&
-    rootItems.length === 0 &&
-    !hasActiveRootScope;
+  const canUseNavigationMode =
+    rootFolderPanels.length > 0 && rootItems.length === 0;
+
+  const effectiveSidebarDisplayMode = useMemo(() => {
+    if (sidebarDisplayMode === "tree") return "tree";
+    if (sidebarDisplayMode === "navigation") {
+      return canUseNavigationMode ? "navigation" : "tree";
+    }
+    return canUseNavigationMode ? "navigation" : "tree";
+  }, [canUseNavigationMode, sidebarDisplayMode]);
+
+  const isSectionListVisible =
+    effectiveSidebarDisplayMode === "navigation" && !hasActiveRootScope;
+
+  const isScopedNavigationVisible =
+    effectiveSidebarDisplayMode === "navigation" && hasActiveRootScope;
 
   useEffect(() => {
-    onSectionListModeChange?.(isSectionListMode);
-  }, [isSectionListMode, onSectionListModeChange]);
+    onSectionListModeChange?.(isSectionListVisible);
+  }, [isSectionListVisible, onSectionListModeChange]);
 
   const scopedTreeData = useMemo<ExplorerTreeNode[]>(() => {
     if (!activeRootFolderId || !hasActiveRootScope) return [];
@@ -744,8 +763,9 @@ export const FolderTreeWithCards = ({
       if (!parsed) return;
 
       if (parsed.type === "folder") {
-        if (activeRootFolderId !== parsed.id) {
-          setActiveRootFolderId(parsed.id);
+        const nextScopedRootId = resolveRootFolderId(parsed.id) ?? parsed.id;
+        if (activeRootFolderId !== nextScopedRootId) {
+          setActiveRootFolderId(nextScopedRootId);
         }
         onFolderSelect(parsed.id);
         return;
@@ -765,17 +785,20 @@ export const FolderTreeWithCards = ({
         onItemSelect({ type: "document", id: parsed.id });
       }
     },
-    [activeRootFolderId, onFolderSelect, onItemSelect],
+    [activeRootFolderId, onFolderSelect, onItemSelect, resolveRootFolderId],
   );
 
   const handleFolderNodeSelect = useCallback(
     (folderId: string | null) => {
-      if (folderId && activeRootFolderId !== folderId) {
-        setActiveRootFolderId(folderId);
+      if (folderId) {
+        const nextScopedRootId = resolveRootFolderId(folderId) ?? folderId;
+        if (activeRootFolderId !== nextScopedRootId) {
+          setActiveRootFolderId(nextScopedRootId);
+        }
       }
       onFolderSelect(folderId);
     },
-    [activeRootFolderId, onFolderSelect],
+    [activeRootFolderId, onFolderSelect, resolveRootFolderId],
   );
 
   const handleArboristMove = useCallback(
@@ -992,8 +1015,7 @@ export const FolderTreeWithCards = ({
         <ExplorerNoResultsState />
       ) : (
         <div className="h-full min-h-0">
-          {rootFolderPanels.length === 0 ||
-          (rootItems.length > 0 && !hasActiveRootScope) ? (
+          {effectiveSidebarDisplayMode === "tree" ? (
             <FolderTreeArborist
               data={explorerTreeData}
               selectedId={selectedTreeId}
@@ -1005,29 +1027,17 @@ export const FolderTreeWithCards = ({
               disableDrag={arboristDisableDrag}
               disableDrop={arboristDisableDrop}
             />
-          ) : isSectionListMode ? (
+          ) : isSectionListVisible ? (
             <RootFolderPanelList
               rootFolderPanels={rootFolderPanels}
               selectedFolderId={selectedFolderId}
-              openRowMenuId={dialogs.openRowMenuId}
-              setOpenRowMenuId={dialogs.setOpenRowMenuId}
-              onSelectFolder={(id) => {
-                setActiveRootFolderId(id);
-                onFolderSelect(id);
-              }}
-              handleCreateFolderAction={actions.handleCreateFolderAction}
-              handleCreateCardSetAction={handleCreateCardSetFromRootPanel}
-              handleDelete={(id, type) => {
-                void actions.handleDelete({ id, type });
-              }}
-              setEditingId={dialogs.setEditingId}
-              setEditingName={dialogs.setEditingName}
-              editingNameRef={dialogs.editingNameRef}
-              editingId={dialogs.editingId}
-              editingName={dialogs.editingName}
+              onSelect={handleFolderNodeSelect}
+              onCreateCardSet={handleCreateCardSetFromRootPanel}
+              onDelete={actions.handleDelete}
+              onUpdate={onUpdateFolder}
               handleRenameConfirm={actions.handleRenameConfirm}
             />
-          ) : (
+          ) : isScopedNavigationVisible ? (
             <div className="flex h-full min-h-0 flex-col">
               <div className="min-h-0 flex-1">
                 <FolderTreeArborist
@@ -1046,6 +1056,18 @@ export const FolderTreeWithCards = ({
                 />
               </div>
             </div>
+          ) : (
+            <FolderTreeArborist
+              data={explorerTreeData}
+              selectedId={selectedTreeId}
+              expandedIds={toExpandedTreeIds(expandedFolders, expandedCardSets)}
+              onSelect={handleTreeSelect}
+              onToggleExpand={onToggleExpand}
+              renderNode={renderTreeNode}
+              onMove={handleArboristMove}
+              disableDrag={arboristDisableDrag}
+              disableDrop={arboristDisableDrop}
+            />
           )}
         </div>
       )}

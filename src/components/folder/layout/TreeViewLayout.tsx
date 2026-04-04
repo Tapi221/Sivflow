@@ -271,6 +271,7 @@ const TreeViewLayout = ({
   const tabContent = (
     <TreeViewTabContent
       explorerTab={explorerTab}
+      sidebarDisplayMode={settings?.folderSidebarDisplayMode ?? "auto"}
       recent={recent}
       folders={folders}
       cards={cards}

@@ -159,6 +159,24 @@ const FALLBACK_ACCENT_COLORS = [
   },
 ];
 
+const folderSidebarDisplayModeOptions = [
+  {
+    id: "auto",
+    label: "自動",
+    description: "現在の構成に合わせてツリー表示と遷移表示を自動で切り替えます",
+  },
+  {
+    id: "tree",
+    label: "ツリー表示",
+    description: "フォルダ全体を常に1本のツリーとして表示します",
+  },
+  {
+    id: "navigation",
+    label: "遷移表示",
+    description: "最上位フォルダ一覧から入り、選択後はその配下だけを表示します",
+  },
+];
+
 const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
   const [activeTab, setActiveTab] = useState("account");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -1027,6 +1045,58 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
             </div>
 
             <div className="space-y-6">
+              <div className="space-y-4">
+                <div className="text-sm font-bold text-slate-600">
+                  フォルダサイドバー表示
+                </div>
+                <div className="grid gap-3">
+                  {folderSidebarDisplayModeOptions.map((option) => {
+                    const isSelected =
+                      (settings?.folderSidebarDisplayMode ?? "auto") ===
+                      option.id;
+
+                    return (
+                      <button
+                        key={option.id}
+                        type="button"
+                        onClick={() =>
+                          updateSettings({
+                            folderSidebarDisplayMode: option.id,
+                          })
+                        }
+                        className={cn(
+                          "rounded-2xl border px-4 py-3 text-left transition-all",
+                          isSelected
+                            ? "border-primary-400 bg-primary-50 shadow-sm"
+                            : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50",
+                        )}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <div
+                              className={cn(
+                                "text-sm font-bold",
+                                isSelected
+                                  ? "text-primary-700"
+                                  : "text-slate-700",
+                              )}
+                            >
+                              {option.label}
+                            </div>
+                            <div className="mt-1 text-xs text-slate-500">
+                              {option.description}
+                            </div>
+                          </div>
+                          {isSelected ? (
+                            <Check className="mt-0.5 h-4 w-4 text-primary-600" />
+                          ) : null}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               {/* Accent Color Settings */}
               <div className="space-y-4">
                 <div className="text-sm font-bold text-slate-600">
