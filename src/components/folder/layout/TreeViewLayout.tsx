@@ -1,515 +1,407 @@
-import { Flashcard } from "@/components/card/frame/Flashcard";
-import { TagFilterPopover } from "@/components/explorer/TagFilterPopover";
-import { TagBadge } from "@/components/tag/TagBadge";
-import {
-  Dialog,
-  DialogContent,
-  DialogOverlay,
-  DialogPortal,
-} from "@/components/ui/dialog";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { getCardText } from "@/domain/card/content";
+import { useCards } from "@/hooks/card/useCards";
+import { useCardSets } from "@/hooks/cardSet/useCardSets";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
+import { useFolders } from "@/hooks/folder/useFolders";
+import { useDocuments } from "@/hooks/platform/useDocuments";
 import { resolveCardTagNames, useTags } from "@/hooks/settings/useTags";
+import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { cn } from "@/lib/utils";
-import type { Card, DocumentItem, Folder } from "@/types";
-import { HelpCircle, Settings2, Star, Tag as TagIcon } from "@/ui/icons";
-import { useMemo, useState } from "react";
+import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
+import { createPageUrl } from "@/utils";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-interface DirectoryDiagramPaneProps {
+import { TreeViewDialogs } from "@/components/folder/components/TreeViewDialogs";
+import { TreeViewMainPane } from "@/components/folder/components/TreeViewMainPane";
+import { TreeViewSidebar } from "@/components/folder/components/TreeViewSidebar";
+import { TreeViewTabContent } from "@/components/folder/components/TreeViewTabContent";
+
+import { useTreeViewActions } from "@/components/folder/hooks/useTreeViewActions";
+import { useTreeViewDerivedState } from "@/components/folder/hooks/useTreeViewDerivedState";
+import { useTreeViewFilters } from "@/components/folder/hooks/useTreeViewFilters";
+import { useTreeViewSidebar } from "@/components/folder/hooks/useTreeViewSidebar";
+
+interface TreeViewLayoutProps {
   folders: Folder[];
   cards: Card[];
   documents: DocumentItem[];
+  selectedFolderId: string | null;
+  selectedItem: SelectedExplorerItem;
+  selectedCardId: string | null;
+  selectedDocumentId: string | null;
+  onFolderSelect: (folderId: string | null) => void;
+  onItemSelect: (item: SelectedExplorerItem) => void;
+  onCardUpdated: () => void;
+  onFolderContextChange?: (folderId: string | null) => void;
+  onCardSetContextChange?: (
+    cardSet: { id: string; label: string } | null,
+  ) => void;
+  navigateToSectionListToken?: number;
+  folderSelectionNonce?: number;
 }
 
-type TreeNode = {
-  id: string;
-  kind: "folder" | "card" | "pdf" | "pptx";
-  name: string;
-  sourceCardId?: string;
-  tags: string[];
-  hasUncertainty: boolean;
-  isBookmarked: boolean;
-  showTags: boolean;
-  children: TreeNode[];
-};
-
-const ROOT_KEY = "__root__";
-
-const getCardLabel = (card: Card): string => {
-  if (typeof card.title === "string" && card.title.trim()) {
-    return card.title.trim();
-  }
-
-  const source = getCardText(card, "question");
-  const plain = source
-    .replace(/<[^>]*>/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-  if (!plain) return "無題のカード";
-  return plain.length > 10 ? `${plain.slice(0, 10)}...` : plain;
-};
-
-const DirectoryTreeNode = ({
-  node,
-  hasParent,
-  isLast,
-  getTagColor,
-  badgeVisibility,
-  onCardClick,
-}: {
-  node: TreeNode;
-  hasParent: boolean;
-  isLast: boolean;
-  getTagColor: (tagNameOrId: string) => string;
-  badgeVisibility: {
-    uncertainty: boolean;
-    bookmarked: boolean;
-    tags: boolean;
-  };
-  onCardClick: (cardId: string) => void;
-}) => {
-  const isFolderNode = node.kind === "folder";
-  const isCardNode =
-    node.kind === "card" && typeof node.sourceCardId === "string";
-  const labelClassName = cn(
-    "relative z-10 inline-flex min-h-7 items-center gap-2 font-serif text-base font-medium leading-[24px] text-[#222222]",
-    isFolderNode
-      ? "min-h-0 border-b border-slate-400 px-0 pb-[1px] pt-0 leading-[20px]"
-      : "rounded-md bg-white px-1.5 py-0",
-    isCardNode &&
-      "cursor-pointer transition-colors duration-150 hover:bg-slate-100 focus-visible:bg-slate-100",
-  );
-  const labelContent = (
-    <>
-      <span className="shrink-0">{node.name}</span>
-      {node.showTags ? (
-        <div className="flex flex-wrap items-center gap-1">
-          {badgeVisibility.uncertainty && node.hasUncertainty ? (
-            <HelpCircle className="h-4 w-4 shrink-0 text-slate-500" />
-          ) : null}
-          {badgeVisibility.bookmarked && node.isBookmarked ? (
-            <Star className="h-4 w-4 shrink-0 fill-current text-amber-500" />
-          ) : null}
-          {badgeVisibility.tags
-            ? node.tags.map((tag) => (
-                <TagBadge
-                  key={`${node.id}:${tag}`}
-                  label={tag}
-                  size="xs"
-                  colorClass={getTagColor(tag)}
-                  className="shrink-0 align-middle"
-                />
-              ))
-            : null}
-        </div>
-      ) : null}
-    </>
-  );
-
-  return (
-    <div className="relative">
-      {hasParent && !isLast ? (
-        <div
-          className="absolute left-0 border-slate-300"
-          style={{
-            top: 0,
-            bottom: 0,
-            borderLeftWidth: "1px",
-          }}
-        />
-      ) : null}
-      <div className={cn("relative min-h-7", hasParent ? "pl-3" : "pl-0")}>
-        {hasParent ? (
-          <>
-            {isLast ? (
-              <div
-                className="absolute left-0 top-0 border-slate-300"
-                style={{
-                  height: "50%",
-                  borderLeftWidth: "1px",
-                }}
-              />
-            ) : null}
-            <div
-              className="absolute left-0 top-1/2 border-slate-300"
-              style={{
-                width: "var(--ui-space-3)",
-                borderTopWidth: "1px",
-                transform: "translateY(-0.5px)",
-              }}
-            />
-          </>
-        ) : null}
-        {isCardNode ? (
-          <button
-            type="button"
-            onClick={() => onCardClick(node.sourceCardId!)}
-            className={cn(
-              labelClassName,
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/60",
-            )}
-            aria-label={`${node.name} をプレビュー`}
-          >
-            {labelContent}
-          </button>
-        ) : (
-          <div className={labelClassName}>{labelContent}</div>
-        )}
-      </div>
-      {node.children.length > 0 ? (
-        <div className="ml-4">
-          {node.children.map((child, index) => (
-            <DirectoryTreeNode
-              key={child.id}
-              node={child}
-              hasParent
-              isLast={index === node.children.length - 1}
-              getTagColor={getTagColor}
-              badgeVisibility={badgeVisibility}
-              onCardClick={onCardClick}
-            />
-          ))}
-        </div>
-      ) : null}
-    </div>
-  );
-};
-
-export const DirectoryDiagramPane = ({
+const TreeViewLayout = ({
   folders,
   cards,
   documents,
-}: DirectoryDiagramPaneProps) => {
-  const { tagById, getTagColor } = useTags();
-  const [previewCardId, setPreviewCardId] = useState<string | null>(null);
-  const {
-    tagFilter,
-    tagMatchMode,
-    uncertaintyFilter,
-    bookmarkedFilter,
-    draftFilter,
-    contentTypeFilter,
-    directoryBadgeVisibility,
-    toggleDirectoryBadgeVisibility,
-  } = useExplorerStore();
+  selectedFolderId,
+  selectedItem,
+  selectedCardId,
+  selectedDocumentId,
+  onFolderSelect,
+  onItemSelect,
+  onCardUpdated,
+  onFolderContextChange,
+  onCardSetContextChange,
+  navigateToSectionListToken = 0,
+  folderSelectionNonce = 0,
+}: TreeViewLayoutProps) => {
+  const navigate = useNavigate();
+  const { settings } = useUserSettings();
+  const { createFolder, updateFolder, deleteFolder } = useFolders();
+  const { createCard, updateCard, deleteCard, moveCardToFolder, reorderCards } =
+    useCards();
 
-  const isFilterActive =
-    tagFilter.length > 0 ||
-    uncertaintyFilter !== "any" ||
-    bookmarkedFilter !== "any" ||
-    draftFilter !== "any" ||
-    contentTypeFilter.length < 3;
+  const [selectedCardSetId, setSelectedCardSetId] = useState<string | null>(
+    null,
+  );
+  const [selectedCardSetLabel, setSelectedCardSetLabel] = useState<
+    string | null
+  >(null);
+  const [isSectionListMode, setIsSectionListMode] = useState(false);
+  const [explorerHeaderFolderId, setExplorerHeaderFolderId] = useState<
+    string | null
+  >(null);
+  const createFolderTriggerRef = useRef<(() => void) | null>(null);
+  const createCardSetTriggerRef = useRef<
+    ((folderId?: string | null) => void) | null
+  >(null);
+  const pdfTriggerRef = useRef<(() => void) | null>(null);
+  const pptxTriggerRef = useRef<(() => void) | null>(null);
+
+  const {
+    cardSets,
+    createCardSet,
+    updateCardSet,
+    deleteCardSet,
+    moveCardSetToFolder,
+  } = useCardSets();
+
+  const handleItemSelect = useCallback(
+    (item: SelectedExplorerItem) => {
+      if (item?.type === "cardSet") {
+        const cs = cardSets.find((s) => s.id === item.id);
+        if (cs) {
+          onFolderSelect(cs.folderId ?? null);
+          setSelectedCardSetId(item.id);
+          setSelectedCardSetLabel(cs.name || "無題のセット");
+
+          const query = new URLSearchParams();
+          query.set("cardSetId", item.id);
+          if (cs.folderId) query.set("folderId", cs.folderId);
+
+          navigate(createPageUrl(`CardView?${query.toString()}`));
+        }
+        return;
+      }
+
+      setSelectedCardSetId(null);
+      setSelectedCardSetLabel(null);
+      onItemSelect(item);
+    },
+    [cardSets, navigate, onFolderSelect, onItemSelect],
+  );
+
+  const { updateDocument } = useDocuments();
+  const { getTagColor, tagById } = useTags();
+
+  const {
+    sidebarRef,
+    contentScrollRef,
+    isSidebarOpen,
+    isMobile,
+    isResizing,
+    startResizing,
+  } = useTreeViewSidebar();
+
+  useEffect(() => {
+    const scroller = contentScrollRef.current;
+    if (!scroller) return;
+    scroller.scrollTop = 0;
+  }, [contentScrollRef, selectedFolderId, navigateToSectionListToken]);
+
+  const {
+    selectedFolder,
+    selectedDocument,
+    folderCards,
+    folderStats,
+    showMobileDetail,
+  } = useTreeViewDerivedState({
+    folders,
+    cards,
+    documents,
+    selectedFolderId,
+    selectedItem,
+    selectedCardId,
+    selectedDocumentId,
+    autoCarryOver: settings?.autoCarryOver ?? true,
+    isMobile,
+  });
+
+  const explorerTab = useExplorerStore((s) => s.explorerTab);
+  const setExplorerTab = useExplorerStore((s) => s.setExplorerTab);
+
+  const recent = useExplorerStore((s) => s.recent);
+  const addRecent = useExplorerStore((s) => s.addRecent);
+  const clearRecent = useExplorerStore((s) => s.clearRecent);
+
+  const tagFilter = useExplorerStore((s) => s.tagFilter);
+  const tagMatchMode = useExplorerStore((s) => s.tagMatchMode);
+  const uncertaintyFilter = useExplorerStore((s) => s.uncertaintyFilter);
+  const bookmarkedFilter = useExplorerStore((s) => s.bookmarkedFilter);
+  const draftFilter = useExplorerStore((s) => s.draftFilter);
+  const contentTypeFilter = useExplorerStore((s) => s.contentTypeFilter);
+
+  useEffect(() => {
+    if (explorerTab === "inbox") {
+      setExplorerTab("explorer");
+    }
+  }, [explorerTab, setExplorerTab]);
+
+  const {
+    isCreateSelectionOpen,
+    setIsCreateSelectionOpen,
+    isModeSelectionOpen,
+    setIsModeSelectionOpen,
+    handleFolderSelectWithRecent,
+    handleStartStudy,
+    handleViewCards,
+    handleOpenCreateCard,
+    handleSelectCreateMode,
+    handleSelectDetailedMode,
+  } = useTreeViewActions({
+    navigate,
+    selectedFolderId,
+    onFolderSelect,
+    addRecent,
+  });
+
+  const handleFolderSelect = useCallback(
+    (folderId: string | null) => {
+      setSelectedCardSetId(null);
+      setSelectedCardSetLabel(null);
+      handleFolderSelectWithRecent(folderId);
+    },
+    [handleFolderSelectWithRecent],
+  );
+
+  const handleCardSetSelectWithoutNavigation = useCallback(
+    (cardSetId: string, folderId: string, label: string) => {
+      onFolderSelect(folderId);
+      setSelectedCardSetId(cardSetId);
+      setSelectedCardSetLabel(label);
+    },
+    [onFolderSelect],
+  );
 
   const allTags = useMemo(() => {
     const tagNames = new Set<string>();
     cards.forEach((card) => {
-      resolveCardTagNames(card.tagIds, tagById).forEach((tag) =>
-        tagNames.add(tag),
-      );
+      resolveCardTagNames(card.tagIds, tagById).forEach((tag) => {
+        tagNames.add(tag);
+      });
     });
-    return Array.from(tagNames).sort((a, b) => a.localeCompare(b, "ja"));
+    return Array.from(tagNames).sort();
   }, [cards, tagById]);
 
-  const { filteredCards, filteredDocuments } = useMemo(() => {
-    if (!isFilterActive)
-      return { filteredCards: cards, filteredDocuments: documents };
+  const currentHeaderFolderId = useMemo(() => {
+    if (selectedFolderId) return selectedFolderId;
+    if (explorerHeaderFolderId) return explorerHeaderFolderId;
 
-    const allowCards = contentTypeFilter.includes("card");
-    const allowPdf = contentTypeFilter.includes("pdf");
-    const allowPptx = contentTypeFilter.includes("pptx");
+    if (selectedItem?.type === "cardSet") {
+      return cardSets.find((s) => s.id === selectedItem.id)?.folderId ?? null;
+    }
 
-    const nextCards = cards.filter((card) => {
-      if (!allowCards) return false;
-      if (tagFilter.length > 0) {
-        const resolvedNames = resolveCardTagNames(card.tagIds, tagById);
-        if (resolvedNames.length === 0) return false;
-        const cardTagSet = new Set(resolvedNames);
-        const tagMatched =
-          tagMatchMode === "any"
-            ? tagFilter.some((tag) => cardTagSet.has(tag))
-            : tagFilter.every((tag) => cardTagSet.has(tag));
-        if (!tagMatched) return false;
-      }
+    return null;
+  }, [cardSets, explorerHeaderFolderId, selectedFolderId, selectedItem]);
 
-      const hasUncertainty = Boolean(card.hasUncertainty);
-      const isBookmarked = Boolean(card.isBookmarked);
-      const isDraft = Boolean(card.isDraft);
+  useEffect(() => {
+    onFolderContextChange?.(currentHeaderFolderId);
+  }, [currentHeaderFolderId, onFolderContextChange]);
 
-      if (uncertaintyFilter === "on" && !hasUncertainty) return false;
-      if (uncertaintyFilter === "off" && hasUncertainty) return false;
-      if (bookmarkedFilter === "on" && !isBookmarked) return false;
-      if (bookmarkedFilter === "off" && isBookmarked) return false;
-      if (draftFilter === "on" && !isDraft) return false;
-      if (draftFilter === "off" && isDraft) return false;
-
-      return true;
-    });
-
-    const nextDocuments = documents.filter((document) => {
-      if (document.isDeleted) return false;
-      if (document.kind === "pdf") return allowPdf;
-      if (document.kind === "pptx") return allowPptx;
-      return false;
-    });
-
-    return { filteredCards: nextCards, filteredDocuments: nextDocuments };
-  }, [
-    bookmarkedFilter,
-    cards,
-    contentTypeFilter,
-    draftFilter,
-    documents,
-    isFilterActive,
-    tagById,
-    tagFilter,
-    tagMatchMode,
-    uncertaintyFilter,
-  ]);
-
-  const rootNodes = useMemo(() => {
-    const visibleFolders = folders.filter(
-      (folder) => !folder.isDeleted && !folder.isHidden,
+  const currentCardSetLabel = useMemo(() => {
+    if (!selectedCardSetId) return null;
+    return (
+      cardSets.find((cardSet) => cardSet.id === selectedCardSetId)?.name ??
+      selectedCardSetLabel
     );
-    const childFolderMap = new Map<string, Folder[]>();
-    const itemMap = new Map<string, TreeNode[]>();
+  }, [cardSets, selectedCardSetId, selectedCardSetLabel]);
 
-    for (const folder of visibleFolders) {
-      const folderId = String(folder.id || folder.folderId || "");
-      if (!folderId) continue;
-      const parentId = String(folder.parentFolderId || ROOT_KEY);
-      const siblings = childFolderMap.get(parentId) ?? [];
-      siblings.push(folder);
-      childFolderMap.set(parentId, siblings);
+  useEffect(() => {
+    if (!selectedCardSetId || !currentCardSetLabel) {
+      onCardSetContextChange?.(null);
+      return;
     }
+    onCardSetContextChange?.({
+      id: selectedCardSetId,
+      label: currentCardSetLabel,
+    });
+  }, [currentCardSetLabel, onCardSetContextChange, selectedCardSetId]);
 
-    for (const card of filteredCards) {
-      if (card.isDeleted) continue;
-      const folderId = String(card.folderId || "");
-      if (!folderId) continue;
-      const items = itemMap.get(folderId) ?? [];
-      const cardTags = resolveCardTagNames(card.tagIds, tagById);
-      items.push({
-        id: `card:${card.id}`,
-        kind: "card",
-        name: getCardLabel(card),
-        sourceCardId: card.id,
-        tags: cardTags,
-        hasUncertainty: Boolean(card.hasUncertainty),
-        isBookmarked: Boolean(card.isBookmarked),
-        showTags: true,
-        children: [],
-      });
-      itemMap.set(folderId, items);
-    }
+  const handleCreateRootFolder = useCallback(() => {
+    createFolderTriggerRef.current?.();
+  }, []);
 
-    for (const document of filteredDocuments) {
-      const folderId = String(document.folderId || "");
-      if (!folderId) continue;
-      const items = itemMap.get(folderId) ?? [];
-      items.push({
-        id: `${document.kind}:${document.id}`,
-        kind: document.kind,
-        name:
-          document.title?.trim() || document.fileName || "無題のドキュメント",
-        tags: [],
-        hasUncertainty: false,
-        isBookmarked: false,
-        showTags: false,
-        children: [],
-      });
-      itemMap.set(folderId, items);
-    }
+  const handleCreateCardSetFromHeader = useCallback(() => {
+    if (!currentHeaderFolderId) return;
+    createCardSetTriggerRef.current?.(currentHeaderFolderId);
+  }, [currentHeaderFolderId]);
 
-    for (const siblings of childFolderMap.values()) {
-      siblings.sort((a, b) => {
-        const orderDiff = Number(a.orderIndex ?? 0) - Number(b.orderIndex ?? 0);
-        if (orderDiff !== 0) return orderDiff;
-        return (a.folderName || "").localeCompare(b.folderName || "", "ja");
-      });
-    }
+  const handleAddPdfFromHeader = useCallback(() => {
+    if (!currentHeaderFolderId) return;
+    pdfTriggerRef.current?.();
+  }, [currentHeaderFolderId]);
 
-    for (const items of itemMap.values()) {
-      items.sort((a, b) => a.name.localeCompare(b.name, "ja"));
-    }
+  const handleAddPptxFromHeader = useCallback(() => {
+    if (!currentHeaderFolderId) return;
+    pptxTriggerRef.current?.();
+  }, [currentHeaderFolderId]);
 
-    const buildNode = (folder: Folder): TreeNode | null => {
-      const id = String(folder.id || folder.folderId || "");
-      const folderChildren = (childFolderMap.get(id) ?? [])
-        .map(buildNode)
-        .filter((child): child is TreeNode => child !== null);
-      const itemChildren = itemMap.get(id) ?? [];
-      if (
-        isFilterActive &&
-        folderChildren.length === 0 &&
-        itemChildren.length === 0
-      ) {
-        return null;
-      }
-      return {
-        id,
-        kind: "folder",
-        name: folder.folderName || "無題のフォルダ",
-        tags: [],
-        hasUncertainty: false,
-        isBookmarked: false,
-        showTags: false,
-        children: [...folderChildren, ...itemChildren],
-      };
-    };
+  const { isFilterActive, filteredCards, filteredDocuments, isFiltering } =
+    useTreeViewFilters({
+      cards,
+      documents,
+      explorerTab,
+      tagFilter,
+      tagMatchMode,
+      uncertaintyFilter,
+      bookmarkedFilter,
+      draftFilter,
+      contentTypeFilter,
+      tagById,
+    });
 
-    return (childFolderMap.get(ROOT_KEY) ?? [])
-      .map(buildNode)
-      .filter((node): node is TreeNode => node !== null);
-  }, [filteredDocuments, filteredCards, folders, isFilterActive, tagById]);
-
-  const previewCard = useMemo(
-    () =>
-      previewCardId
-        ? (cards.find((card) => card.id === previewCardId) ?? null)
-        : null,
-    [cards, previewCardId],
+  const tabContent = (
+    <TreeViewTabContent
+      explorerTab={explorerTab}
+      recent={recent}
+      folders={folders}
+      cards={cards}
+      cardSets={cardSets}
+      documents={documents}
+      filteredCards={filteredCards}
+      filteredDocuments={filteredDocuments}
+      selectedFolderId={selectedFolderId}
+      selectedItem={selectedItem}
+      isFiltering={isFiltering}
+      onRegisterCreateFolderTrigger={(fn) => {
+        createFolderTriggerRef.current = fn;
+      }}
+      onRegisterCreateCardSetTrigger={(fn) => {
+        createCardSetTriggerRef.current = fn;
+      }}
+      onRegisterPdfTrigger={(fn) => {
+        pdfTriggerRef.current = fn;
+      }}
+      onRegisterPptxTrigger={(fn) => {
+        pptxTriggerRef.current = fn;
+      }}
+      navigateToSectionListToken={navigateToSectionListToken}
+      folderSelectionNonce={folderSelectionNonce}
+      onSectionListModeChange={setIsSectionListMode}
+      onHeaderFolderIdChange={setExplorerHeaderFolderId}
+      onFolderSelect={handleFolderSelect}
+      onItemSelect={handleItemSelect}
+      onClearRecent={clearRecent}
+      onCreateFolder={createFolder}
+      onUpdateFolder={updateFolder}
+      onDeleteFolder={deleteFolder}
+      onCreateCardSet={createCardSet}
+      onUpdateCardSet={updateCardSet}
+      onDeleteCardSet={deleteCardSet}
+      onCreateCard={createCard}
+      onUpdateCard={updateCard}
+      onDeleteCard={deleteCard}
+      moveCardToFolder={moveCardToFolder}
+      moveCardSetToFolder={moveCardSetToFolder}
+      moveDocumentToFolder={(id, folderId) => updateDocument(id, { folderId })}
+      reorderCards={reorderCards}
+      selectedCardSetId={selectedCardSetId}
+      onSelectCardSet={handleCardSetSelectWithoutNavigation}
+    />
   );
 
-  return (
-    <div className="h-full overflow-auto bg-background">
-      <div className="border-b border-slate-200 px-5 py-4">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h2 className="text-sm font-semibold text-slate-800">
-              ディレクトリ
-            </h2>
-          </div>
-          <div className="flex items-center gap-2">
-            <Popover>
-              <PopoverTrigger asChild>
-                <button
-                  type="button"
-                  className="shrink-0 rounded-md border border-slate-200 bg-white p-2 text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700"
-                  aria-label="ディレクトリバッジ表示設定"
-                >
-                  <Settings2 className="h-4 w-4" />
-                </button>
-              </PopoverTrigger>
-              <PopoverContent align="end" className="w-52 p-2">
-                <div className="space-y-1">
-                  {[
-                    {
-                      key: "uncertainty" as const,
-                      label: "はてなマーク",
-                      icon: HelpCircle,
-                    },
-                    {
-                      key: "bookmarked" as const,
-                      label: "星マーク",
-                      icon: Star,
-                    },
-                    { key: "tags" as const, label: "タグ", icon: TagIcon },
-                  ].map((item) => {
-                    const Icon = item.icon;
-                    const checked = directoryBadgeVisibility[item.key];
-                    return (
-                      <button
-                        key={item.key}
-                        type="button"
-                        onClick={() => toggleDirectoryBadgeVisibility(item.key)}
-                        className={cn(
-                          "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors",
-                          checked
-                            ? "bg-slate-100 text-slate-900"
-                            : "text-slate-600 hover:bg-slate-50",
-                        )}
-                      >
-                        <Icon
-                          className={cn(
-                            "h-4 w-4 shrink-0",
-                            item.key === "bookmarked" &&
-                              checked &&
-                              "fill-current text-amber-500",
-                          )}
-                        />
-                        <span className="flex-1 text-left">{item.label}</span>
-                        <span
-                          className={cn(
-                            "text-xs",
-                            checked ? "text-primary-700" : "text-slate-400",
-                          )}
-                        >
-                          {checked ? "表示" : "非表示"}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </PopoverContent>
-            </Popover>
-            <TagFilterPopover
-              allTags={allTags}
-              className="shrink-0 rounded-md border border-slate-200 bg-white hover:bg-slate-50"
-            />
-          </div>
-        </div>
-      </div>
-      <div className="p-3">
-        {rootNodes.length > 0 ? (
-          <div className="relative">
-            {rootNodes.map((node, index) => (
-              <DirectoryTreeNode
-                key={node.id}
-                node={node}
-                hasParent={false}
-                isLast={index === rootNodes.length - 1}
-                getTagColor={getTagColor}
-                badgeVisibility={directoryBadgeVisibility}
-                onCardClick={setPreviewCardId}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="mt-3 rounded-lg border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">
-            表示できるフォルダがありません。
-          </div>
-        )}
-      </div>
+  const canCreateCardSet = Boolean(currentHeaderFolderId);
+  const canAddDocuments = Boolean(currentHeaderFolderId);
 
-      <Dialog
-        open={Boolean(previewCard)}
-        onOpenChange={(open) => !open && setPreviewCardId(null)}
+  return (
+    <div
+      className={cn(
+        "relative flex h-full min-h-0 w-full items-stretch overflow-hidden border-0 bg-transparent",
+        isResizing && "select-none cursor-col-resize",
+      )}
+    >
+      <TreeViewSidebar
+        sidebarRef={sidebarRef}
+        contentScrollRef={contentScrollRef}
+        isSidebarOpen={isSidebarOpen}
+        isResizing={isResizing}
+        showMobileDetail={showMobileDetail}
+        fillAvailableWidth={false}
+        explorerTab={explorerTab}
+        setExplorerTab={setExplorerTab}
+        allTags={allTags}
+        getTagColor={getTagColor}
+        isFilterActive={isFilterActive}
+        resultCount={filteredCards.length + filteredDocuments.length}
+        onCreateRootFolder={handleCreateRootFolder}
+        onCreateCardSet={handleCreateCardSetFromHeader}
+        onAddPdf={handleAddPdfFromHeader}
+        onAddPptx={handleAddPptxFromHeader}
+        onStartResizing={startResizing}
+        canCreateCardSet={canCreateCardSet}
+        canAddDocuments={canAddDocuments}
       >
-        <DialogPortal>
-          <DialogOverlay className="bg-transparent" />
-          <DialogContent className="w-screen max-w-none border-none bg-transparent p-0 shadow-none [&>button]:hidden">
-            <div
-              className="max-h-[92vh] overflow-auto px-2 py-8 sm:px-6"
-              onClick={() => setPreviewCardId(null)}
-            >
-              {previewCard ? (
-                <div
-                  className="mx-auto w-fit"
-                  onClick={(event) => event.stopPropagation()}
-                >
-                  <Flashcard
-                    card={
-                      previewCard as unknown as
-                        | import("@/components/card/frame/Flashcard").FlashcardCardLike
-                        | null
-                    }
-                    previewMode
-                    className="mx-auto"
-                    allowUpscale
-                    maxScale={1.75}
-                    contentPaddingPx={0}
-                  />
-                </div>
-              ) : null}
-            </div>
-          </DialogContent>
-        </DialogPortal>
-      </Dialog>
+        {tabContent}
+      </TreeViewSidebar>
+
+      <TreeViewMainPane
+        isMobile={isMobile}
+        showMobileDetail={showMobileDetail}
+        hideOnSectionList={isSectionListMode}
+        selectedItem={selectedItem}
+        selectedCardId={selectedCardId}
+        selectedDocument={selectedDocument}
+        selectedFolderId={selectedFolderId}
+        selectedFolderName={selectedFolder?.folderName ?? "フォルダ"}
+        folders={folders}
+        cards={cards}
+        documents={documents}
+        folderCards={folderCards}
+        folderStats={folderStats}
+        onCardUpdated={onCardUpdated}
+        onDocumentUpdated={updateDocument}
+        onRenameFolder={async (folderId, newName) => {
+          await updateFolder(folderId, { folderName: newName });
+        }}
+        handlers={{
+          onStartStudy: handleStartStudy,
+          onViewCards: handleViewCards,
+          onCreateCard: handleOpenCreateCard,
+        }}
+        folderSelectionNonce={folderSelectionNonce}
+      />
+
+      <TreeViewDialogs
+        isCreateSelectionOpen={isCreateSelectionOpen}
+        setIsCreateSelectionOpen={setIsCreateSelectionOpen}
+        isModeSelectionOpen={isModeSelectionOpen}
+        setIsModeSelectionOpen={setIsModeSelectionOpen}
+        onSelectCreateMode={handleSelectCreateMode}
+        onSelectDetailedMode={handleSelectDetailedMode}
+      />
     </div>
   );
 };
+
+export default TreeViewLayout;

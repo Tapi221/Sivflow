@@ -1,407 +1,126 @@
-import { useCards } from "@/hooks/card/useCards";
-import { useCardSets } from "@/hooks/cardSet/useCardSets";
-import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
-import { useFolders } from "@/hooks/folder/useFolders";
-import { useDocuments } from "@/hooks/platform/useDocuments";
-import { resolveCardTagNames, useTags } from "@/hooks/settings/useTags";
-import { useUserSettings } from "@/hooks/settings/useUserSettings";
-import { cn } from "@/lib/utils";
-import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
-import { createPageUrl } from "@/utils";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { resolveCardTagNames } from "@/hooks/settings/useTags";
+import type { Card, DocumentItem } from "@/types";
+import { useMemo } from "react";
 
-import { TreeViewDialogs } from "@/components/folder/components/TreeViewDialogs";
-import { TreeViewMainPane } from "@/components/folder/components/TreeViewMainPane";
-import { TreeViewSidebar } from "@/components/folder/components/TreeViewSidebar";
-import { TreeViewTabContent } from "@/components/folder/components/TreeViewTabContent";
+type TagMapLike = Parameters<typeof resolveCardTagNames>[1];
 
-import { useTreeViewActions } from "@/components/folder/hooks/useTreeViewActions";
-import { useTreeViewDerivedState } from "@/components/folder/hooks/useTreeViewDerivedState";
-import { useTreeViewFilters } from "@/components/folder/hooks/useTreeViewFilters";
-import { useTreeViewSidebar } from "@/components/folder/hooks/useTreeViewSidebar";
-
-interface TreeViewLayoutProps {
-  folders: Folder[];
+interface UseTreeViewFiltersParams {
   cards: Card[];
   documents: DocumentItem[];
-  selectedFolderId: string | null;
-  selectedItem: SelectedExplorerItem;
-  selectedCardId: string | null;
-  selectedDocumentId: string | null;
-  onFolderSelect: (folderId: string | null) => void;
-  onItemSelect: (item: SelectedExplorerItem) => void;
-  onCardUpdated: () => void;
-  onFolderContextChange?: (folderId: string | null) => void;
-  onCardSetContextChange?: (
-    cardSet: { id: string; label: string } | null,
-  ) => void;
-  navigateToSectionListToken?: number;
-  folderSelectionNonce?: number;
+  explorerTab: string;
+  tagFilter: string[];
+  tagMatchMode: "any" | "all";
+  uncertaintyFilter: "any" | "on" | "off";
+  bookmarkedFilter: "any" | "on" | "off";
+  draftFilter: "any" | "on" | "off";
+  contentTypeFilter: string[];
+  tagById: TagMapLike;
 }
 
-const TreeViewLayout = ({
-  folders,
+export const useTreeViewFilters = ({
   cards,
   documents,
-  selectedFolderId,
-  selectedItem,
-  selectedCardId,
-  selectedDocumentId,
-  onFolderSelect,
-  onItemSelect,
-  onCardUpdated,
-  onFolderContextChange,
-  onCardSetContextChange,
-  navigateToSectionListToken = 0,
-  folderSelectionNonce = 0,
-}: TreeViewLayoutProps) => {
-  const navigate = useNavigate();
-  const { settings } = useUserSettings();
-  const { createFolder, updateFolder, deleteFolder } = useFolders();
-  const { createCard, updateCard, deleteCard, moveCardToFolder, reorderCards } =
-    useCards();
+  explorerTab,
+  tagFilter,
+  tagMatchMode,
+  uncertaintyFilter,
+  bookmarkedFilter,
+  draftFilter,
+  contentTypeFilter,
+  tagById,
+}: UseTreeViewFiltersParams) => {
+  const isFilterTargetTab = explorerTab === "explorer";
 
-  const [selectedCardSetId, setSelectedCardSetId] = useState<string | null>(
-    null,
-  );
-  const [selectedCardSetLabel, setSelectedCardSetLabel] = useState<
-    string | null
-  >(null);
-  const [isSectionListMode, setIsSectionListMode] = useState(false);
-  const [explorerHeaderFolderId, setExplorerHeaderFolderId] = useState<
-    string | null
-  >(null);
-  const createFolderTriggerRef = useRef<(() => void) | null>(null);
-  const createCardSetTriggerRef = useRef<
-    ((folderId?: string | null) => void) | null
-  >(null);
-  const pdfTriggerRef = useRef<(() => void) | null>(null);
-  const pptxTriggerRef = useRef<(() => void) | null>(null);
+  const isFilterActive =
+    isFilterTargetTab &&
+    (tagFilter.length > 0 ||
+      uncertaintyFilter !== "any" ||
+      bookmarkedFilter !== "any" ||
+      draftFilter !== "any" ||
+      contentTypeFilter.length < 3);
 
-  const {
-    cardSets,
-    createCardSet,
-    updateCardSet,
-    deleteCardSet,
-    moveCardSetToFolder,
-  } = useCardSets();
+  const { filteredCards, filteredDocuments, isFiltering } = useMemo(() => {
+    const active =
+      isFilterTargetTab &&
+      (tagFilter.length > 0 ||
+        uncertaintyFilter !== "any" ||
+        bookmarkedFilter !== "any" ||
+        draftFilter !== "any" ||
+        contentTypeFilter.length < 3);
 
-  const handleItemSelect = useCallback(
-    (item: SelectedExplorerItem) => {
-      if (item?.type === "cardSet") {
-        const cs = cardSets.find((s) => s.id === item.id);
-        if (cs) {
-          onFolderSelect(cs.folderId ?? null);
-          setSelectedCardSetId(item.id);
-          setSelectedCardSetLabel(cs.name || "無題のセット");
+    if (!active) {
+      return {
+        filteredCards: cards,
+        filteredDocuments: documents,
+        isFiltering: false,
+      };
+    }
 
-          const query = new URLSearchParams();
-          query.set("cardSetId", item.id);
-          if (cs.folderId) query.set("folderId", cs.folderId);
+    const allowCards = contentTypeFilter.includes("card");
+    const allowPdf = contentTypeFilter.includes("pdf");
+    const allowPptx = contentTypeFilter.includes("pptx");
 
-          navigate(createPageUrl(`CardView?${query.toString()}`));
-        }
-        return;
+    const filtered = cards.filter((card) => {
+      if (!allowCards) return false;
+
+      if (tagFilter.length > 0) {
+        const resolvedNames = resolveCardTagNames(card.tagIds, tagById);
+
+        if (resolvedNames.length === 0) return false;
+
+        const cardTagSet = new Set(resolvedNames);
+        const tagMatched =
+          tagMatchMode === "any"
+            ? tagFilter.some((tag) => cardTagSet.has(tag))
+            : tagFilter.every((tag) => cardTagSet.has(tag));
+
+        if (!tagMatched) return false;
       }
 
-      setSelectedCardSetId(null);
-      setSelectedCardSetLabel(null);
-      onItemSelect(item);
-    },
-    [cardSets, navigate, onFolderSelect, onItemSelect],
-  );
+      const hasUncertainty = Boolean(card.hasUncertainty);
+      const isBookmarked = Boolean(card.isBookmarked);
+      const isDraft = Boolean(card.isDraft);
 
-  const { updateDocument } = useDocuments();
-  const { getTagColor, tagById } = useTags();
+      if (uncertaintyFilter === "on" && !hasUncertainty) return false;
+      if (uncertaintyFilter === "off" && hasUncertainty) return false;
+      if (bookmarkedFilter === "on" && !isBookmarked) return false;
+      if (bookmarkedFilter === "off" && isBookmarked) return false;
+      if (draftFilter === "on" && !isDraft) return false;
+      if (draftFilter === "off" && isDraft) return false;
 
-  const {
-    sidebarRef,
-    contentScrollRef,
-    isSidebarOpen,
-    isMobile,
-    isResizing,
-    startResizing,
-  } = useTreeViewSidebar();
+      return true;
+    });
 
-  useEffect(() => {
-    const scroller = contentScrollRef.current;
-    if (!scroller) return;
-    scroller.scrollTop = 0;
-  }, [contentScrollRef, selectedFolderId, navigateToSectionListToken]);
+    const nextDocuments = documents.filter((document) => {
+      if (document.isDeleted) return false;
+      if (document.kind === "pdf") return allowPdf;
+      if (document.kind === "pptx") return allowPptx;
+      return false;
+    });
 
-  const {
-    selectedFolder,
-    selectedDocument,
-    folderCards,
-    folderStats,
-    showMobileDetail,
-  } = useTreeViewDerivedState({
-    folders,
+    return {
+      filteredCards: filtered,
+      filteredDocuments: nextDocuments,
+      isFiltering: true,
+    };
+  }, [
     cards,
     documents,
-    selectedFolderId,
-    selectedItem,
-    selectedCardId,
-    selectedDocumentId,
-    autoCarryOver: settings?.autoCarryOver ?? true,
-    isMobile,
-  });
+    tagFilter,
+    tagMatchMode,
+    isFilterTargetTab,
+    uncertaintyFilter,
+    bookmarkedFilter,
+    draftFilter,
+    contentTypeFilter,
+    tagById,
+  ]);
 
-  const explorerTab = useExplorerStore((s) => s.explorerTab);
-  const setExplorerTab = useExplorerStore((s) => s.setExplorerTab);
-
-  const recent = useExplorerStore((s) => s.recent);
-  const addRecent = useExplorerStore((s) => s.addRecent);
-  const clearRecent = useExplorerStore((s) => s.clearRecent);
-
-  const tagFilter = useExplorerStore((s) => s.tagFilter);
-  const tagMatchMode = useExplorerStore((s) => s.tagMatchMode);
-  const uncertaintyFilter = useExplorerStore((s) => s.uncertaintyFilter);
-  const bookmarkedFilter = useExplorerStore((s) => s.bookmarkedFilter);
-  const draftFilter = useExplorerStore((s) => s.draftFilter);
-  const contentTypeFilter = useExplorerStore((s) => s.contentTypeFilter);
-
-  useEffect(() => {
-    if (explorerTab === "inbox") {
-      setExplorerTab("explorer");
-    }
-  }, [explorerTab, setExplorerTab]);
-
-  const {
-    isCreateSelectionOpen,
-    setIsCreateSelectionOpen,
-    isModeSelectionOpen,
-    setIsModeSelectionOpen,
-    handleFolderSelectWithRecent,
-    handleStartStudy,
-    handleViewCards,
-    handleOpenCreateCard,
-    handleSelectCreateMode,
-    handleSelectDetailedMode,
-  } = useTreeViewActions({
-    navigate,
-    selectedFolderId,
-    onFolderSelect,
-    addRecent,
-  });
-
-  const handleFolderSelect = useCallback(
-    (folderId: string | null) => {
-      setSelectedCardSetId(null);
-      setSelectedCardSetLabel(null);
-      handleFolderSelectWithRecent(folderId);
-    },
-    [handleFolderSelectWithRecent],
-  );
-
-  const handleCardSetSelectWithoutNavigation = useCallback(
-    (cardSetId: string, folderId: string, label: string) => {
-      onFolderSelect(folderId);
-      setSelectedCardSetId(cardSetId);
-      setSelectedCardSetLabel(label);
-    },
-    [onFolderSelect],
-  );
-
-  const allTags = useMemo(() => {
-    const tagNames = new Set<string>();
-    cards.forEach((card) => {
-      resolveCardTagNames(card.tagIds, tagById).forEach((tag) => {
-        tagNames.add(tag);
-      });
-    });
-    return Array.from(tagNames).sort();
-  }, [cards, tagById]);
-
-  const currentHeaderFolderId = useMemo(() => {
-    if (selectedFolderId) return selectedFolderId;
-    if (explorerHeaderFolderId) return explorerHeaderFolderId;
-
-    if (selectedItem?.type === "cardSet") {
-      return cardSets.find((s) => s.id === selectedItem.id)?.folderId ?? null;
-    }
-
-    return null;
-  }, [cardSets, explorerHeaderFolderId, selectedFolderId, selectedItem]);
-
-  useEffect(() => {
-    onFolderContextChange?.(currentHeaderFolderId);
-  }, [currentHeaderFolderId, onFolderContextChange]);
-
-  const currentCardSetLabel = useMemo(() => {
-    if (!selectedCardSetId) return null;
-    return (
-      cardSets.find((cardSet) => cardSet.id === selectedCardSetId)?.name ??
-      selectedCardSetLabel
-    );
-  }, [cardSets, selectedCardSetId, selectedCardSetLabel]);
-
-  useEffect(() => {
-    if (!selectedCardSetId || !currentCardSetLabel) {
-      onCardSetContextChange?.(null);
-      return;
-    }
-    onCardSetContextChange?.({
-      id: selectedCardSetId,
-      label: currentCardSetLabel,
-    });
-  }, [currentCardSetLabel, onCardSetContextChange, selectedCardSetId]);
-
-  const handleCreateRootFolder = useCallback(() => {
-    createFolderTriggerRef.current?.();
-  }, []);
-
-  const handleCreateCardSetFromHeader = useCallback(() => {
-    if (!currentHeaderFolderId) return;
-    createCardSetTriggerRef.current?.(currentHeaderFolderId);
-  }, [currentHeaderFolderId]);
-
-  const handleAddPdfFromHeader = useCallback(() => {
-    if (!currentHeaderFolderId) return;
-    pdfTriggerRef.current?.();
-  }, [currentHeaderFolderId]);
-
-  const handleAddPptxFromHeader = useCallback(() => {
-    if (!currentHeaderFolderId) return;
-    pptxTriggerRef.current?.();
-  }, [currentHeaderFolderId]);
-
-  const { isFilterActive, filteredCards, filteredDocuments, isFiltering } =
-    useTreeViewFilters({
-      cards,
-      documents,
-      explorerTab,
-      tagFilter,
-      tagMatchMode,
-      uncertaintyFilter,
-      bookmarkedFilter,
-      draftFilter,
-      contentTypeFilter,
-      tagById,
-    });
-
-  const tabContent = (
-    <TreeViewTabContent
-      explorerTab={explorerTab}
-      recent={recent}
-      folders={folders}
-      cards={cards}
-      cardSets={cardSets}
-      documents={documents}
-      filteredCards={filteredCards}
-      filteredDocuments={filteredDocuments}
-      selectedFolderId={selectedFolderId}
-      selectedItem={selectedItem}
-      isFiltering={isFiltering}
-      onRegisterCreateFolderTrigger={(fn) => {
-        createFolderTriggerRef.current = fn;
-      }}
-      onRegisterCreateCardSetTrigger={(fn) => {
-        createCardSetTriggerRef.current = fn;
-      }}
-      onRegisterPdfTrigger={(fn) => {
-        pdfTriggerRef.current = fn;
-      }}
-      onRegisterPptxTrigger={(fn) => {
-        pptxTriggerRef.current = fn;
-      }}
-      navigateToSectionListToken={navigateToSectionListToken}
-      folderSelectionNonce={folderSelectionNonce}
-      onSectionListModeChange={setIsSectionListMode}
-      onHeaderFolderIdChange={setExplorerHeaderFolderId}
-      onFolderSelect={handleFolderSelect}
-      onItemSelect={handleItemSelect}
-      onClearRecent={clearRecent}
-      onCreateFolder={createFolder}
-      onUpdateFolder={updateFolder}
-      onDeleteFolder={deleteFolder}
-      onCreateCardSet={createCardSet}
-      onUpdateCardSet={updateCardSet}
-      onDeleteCardSet={deleteCardSet}
-      onCreateCard={createCard}
-      onUpdateCard={updateCard}
-      onDeleteCard={deleteCard}
-      moveCardToFolder={moveCardToFolder}
-      moveCardSetToFolder={moveCardSetToFolder}
-      moveDocumentToFolder={(id, folderId) => updateDocument(id, { folderId })}
-      reorderCards={reorderCards}
-      selectedCardSetId={selectedCardSetId}
-      onSelectCardSet={handleCardSetSelectWithoutNavigation}
-    />
-  );
-
-  const canCreateCardSet = Boolean(currentHeaderFolderId);
-  const canAddDocuments = Boolean(currentHeaderFolderId);
-
-  return (
-    <div
-      className={cn(
-        "relative flex h-full min-h-0 w-full items-stretch overflow-hidden border-0 bg-transparent",
-        isResizing && "select-none cursor-col-resize",
-      )}
-    >
-      <TreeViewSidebar
-        sidebarRef={sidebarRef}
-        contentScrollRef={contentScrollRef}
-        isSidebarOpen={isSidebarOpen}
-        isResizing={isResizing}
-        showMobileDetail={showMobileDetail}
-        fillAvailableWidth={false}
-        explorerTab={explorerTab}
-        setExplorerTab={setExplorerTab}
-        allTags={allTags}
-        getTagColor={getTagColor}
-        isFilterActive={isFilterActive}
-        resultCount={filteredCards.length + filteredDocuments.length}
-        onCreateRootFolder={handleCreateRootFolder}
-        onCreateCardSet={handleCreateCardSetFromHeader}
-        onAddPdf={handleAddPdfFromHeader}
-        onAddPptx={handleAddPptxFromHeader}
-        onStartResizing={startResizing}
-        canCreateCardSet={canCreateCardSet}
-        canAddDocuments={canAddDocuments}
-      >
-        {tabContent}
-      </TreeViewSidebar>
-
-      <TreeViewMainPane
-        isMobile={isMobile}
-        showMobileDetail={showMobileDetail}
-        hideOnSectionList={isSectionListMode}
-        selectedItem={selectedItem}
-        selectedCardId={selectedCardId}
-        selectedDocument={selectedDocument}
-        selectedFolderId={selectedFolderId}
-        selectedFolderName={selectedFolder?.folderName ?? "フォルダ"}
-        folders={folders}
-        cards={cards}
-        documents={documents}
-        folderCards={folderCards}
-        folderStats={folderStats}
-        onCardUpdated={onCardUpdated}
-        onDocumentUpdated={updateDocument}
-        onRenameFolder={async (folderId, newName) => {
-          await updateFolder(folderId, { folderName: newName });
-        }}
-        handlers={{
-          onStartStudy: handleStartStudy,
-          onViewCards: handleViewCards,
-          onCreateCard: handleOpenCreateCard,
-        }}
-        folderSelectionNonce={folderSelectionNonce}
-      />
-
-      <TreeViewDialogs
-        isCreateSelectionOpen={isCreateSelectionOpen}
-        setIsCreateSelectionOpen={setIsCreateSelectionOpen}
-        isModeSelectionOpen={isModeSelectionOpen}
-        setIsModeSelectionOpen={setIsModeSelectionOpen}
-        onSelectCreateMode={handleSelectCreateMode}
-        onSelectDetailedMode={handleSelectDetailedMode}
-      />
-    </div>
-  );
+  return {
+    isFilterTargetTab,
+    isFilterActive,
+    filteredCards,
+    filteredDocuments,
+    isFiltering,
+  };
 };
-
-export default TreeViewLayout;

@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode, Ref } from "react";
 
-import { CardPaneWidthControl } from "@/components/folder/panes/CardPaneWidthControl";
+import { CardPaneWidthControl } from "@/pages/card-view/components/CardPaneWidthControl";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "@/ui/icons";
 

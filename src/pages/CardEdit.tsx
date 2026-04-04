@@ -18,7 +18,6 @@ const CardEdit = () => {
   const shouldReturnToCardView = returnTo === "card-view";
   const shouldReturnToStudy = returnTo === "study";
 
-  // folderId の永続化（リロード時復元用）
   const targetFolderId = (() => {
     if (folderId) {
       sessionStorage.setItem(CARD_EDIT_FOLDER_ID_KEY, folderId);
@@ -42,7 +41,7 @@ const CardEdit = () => {
   }, []);
 
   const safeNavigate = useCallback(
-    (to) => {
+    (to: string) => {
       if (isUnloadingRef.current) return;
       navigate(to);
     },
@@ -66,6 +65,7 @@ const CardEdit = () => {
     safeNavigate,
     shouldReturnToCalendar,
     shouldReturnToCardView,
+    shouldReturnToStudy,
     targetFolderId,
     cardId,
   ]);

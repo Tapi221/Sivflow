@@ -2,13 +2,20 @@ import { BlockInset } from "@/components/card/blocks/editor/BlockInset";
 import { cn } from "@/lib/utils";
 import React from "react";
 
+type DivDataAttributes = {
+  [key: `data-${string}`]: string | number | boolean | undefined;
+};
+
+type DivContainerProps = React.HTMLAttributes<HTMLDivElement> &
+  DivDataAttributes;
+
 type QuestionBlockLayoutProps = {
   questionContent: React.ReactNode;
   answerContent: React.ReactNode;
   className?: string;
   containerRef?: React.Ref<HTMLDivElement>;
-  containerProps?: React.HTMLAttributes<HTMLDivElement>;
-  answerContainerProps?: React.HTMLAttributes<HTMLDivElement>;
+  containerProps?: DivContainerProps;
+  answerContainerProps?: DivContainerProps;
   answerOverlay?: React.ReactNode;
 };
 

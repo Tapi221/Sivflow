@@ -33,6 +33,8 @@ import type { Card, CardBlock } from "@/types/domain/card";
 const NEW_SENTINEL = "__new__" as const;
 const AUTOSAVE_DELAY_MS = 700;
 
+type TagNameLookup = Parameters<typeof resolveCardTagNames>[1];
+
 type UseCardEditorSessionParams = {
   selectedCardId: string | null;
   selectedCardSnapshot?: Card | null;
@@ -44,7 +46,7 @@ type UseCardEditorSessionParams = {
   updateCard: (id: string, data: Partial<Card>) => Promise<unknown>;
   createCard?: (data: Partial<Card>) => Promise<unknown>;
   addTag: (name: string) => Promise<{ id: string }>;
-  tagById: Map<string, unknown> | Record<string, unknown>;
+  tagById: TagNameLookup;
   toastSuccess?: (message: string) => void;
   toastError?: (message: string) => void;
   onCardUpdated?: () => void;
@@ -69,6 +71,8 @@ type FlushDraftOptions = {
 type PersistResult =
   | { ok: true; operation: "created" | "updated" | "noop"; saved: boolean }
   | { ok: false; message: string };
+
+type PersistOperation = Extract<PersistResult, { ok: true }>["operation"];
 
 const cloneBlock = (block: CardBlock) => {
   return {
@@ -373,7 +377,7 @@ export const useCardEditorSession = ({
 
       return {
         title: card.title ?? "",
-        tags: resolveCardTagNames(card.tagIds, tagById as unknown),
+        tags: resolveCardTagNames(card.tagIds, tagById),
         isDraft: card.isDraft ?? false,
         frontBlocks: sortBlocksByOrderIndex(getCardBlocks(card, "question")),
         backBlocks: sortBlocksByOrderIndex(getCardBlocks(card, "answer")),
@@ -518,7 +522,7 @@ export const useCardEditorSession = ({
       clearAutosaveTimer();
 
       let flushSucceeded = true;
-      let savedOperation: PersistResult["operation"] = "noop";
+      let savedOperation: PersistOperation = "noop";
       let savedAny = false;
 
       const queued = saveQueueRef.current.then(async () => {
@@ -887,7 +891,7 @@ export const useCardEditorSession = ({
 
   const hasDraft = draft != null;
   const draftTitle = draft?.title ?? "";
-  const draftTags = draft?.tags ?? [];
+  const draftTags = useMemo(() => draft?.tags ?? [], [draft?.tags]);
   const draftIsDraft = draft?.isDraft ?? false;
   const draftLayoutRows = draft?.layoutRows;
 

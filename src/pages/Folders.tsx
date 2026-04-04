@@ -170,13 +170,18 @@ const Folders = () => {
   }, [selectedFolderId, selectedItem, queryString, setSearchParams]);
 
   useEffect(() => {
-    const pendingTarget = pendingUrlSyncRef.current;
-    if (pendingTarget !== null) {
-      // state から URL へ反映中は、古い query で state を巻き戻さない
-      if (queryString !== pendingTarget) return;
-      pendingUrlSyncRef.current = null;
-      return;
-    }
+    let cancelled = false;
+
+    queueMicrotask(() => {
+      if (cancelled) return;
+
+      const pendingTarget = pendingUrlSyncRef.current;
+      if (pendingTarget !== null) {
+        // state から URL へ反映中は、古い query で state を巻き戻さない
+        if (queryString !== pendingTarget) return;
+        pendingUrlSyncRef.current = null;
+        return;
+      }
 
     if (queryFolderId !== selectedFolderId) {
       setSelectedFolderId(queryFolderId || null);
@@ -205,6 +210,11 @@ const Folders = () => {
     ) {
       setSelectedItem(null);
     }
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [
     queryString,
     queryFolderId,
@@ -215,13 +225,20 @@ const Folders = () => {
   ]);
 
   useEffect(() => {
-    if (!isHomeOnlyMode) return;
-    notifyMainSidebarFolderSelection(null);
-    setSelectedFolderId(null);
-    setSelectedItem(null);
-    setExplorerCardSetContext(null);
-    selectedFolderIdRef.current = null;
-    selectedItemRef.current = null;
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
+      if (!isHomeOnlyMode) return;
+      notifyMainSidebarFolderSelection(null);
+      setSelectedFolderId(null);
+      setSelectedItem(null);
+      setExplorerCardSetContext(null);
+      selectedFolderIdRef.current = null;
+      selectedItemRef.current = null;
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [isHomeOnlyMode, notifyMainSidebarFolderSelection]);
 
   const { folders = [], loading: foldersLoading } = useFolders();

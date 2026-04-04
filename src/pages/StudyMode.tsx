@@ -120,16 +120,26 @@ const StudyMode = () => {
   const [sessionSeedCards, setSessionSeedCards] = useState([]);
 
   useEffect(() => {
-    setSessionSeedCards([]);
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
+      setSessionSeedCards([]);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [folderId]);
 
   useEffect(() => {
-    if (sessionSeedCards.length > 0) return;
-    if (dueStudyCards.length === 0) return;
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
+      if (sessionSeedCards.length > 0) return;
+      if (dueStudyCards.length === 0) return;
 
-    if (SESSION_KEY) {
-      try {
-        const raw = localStorage.getItem(SESSION_KEY);
+      if (SESSION_KEY) {
+        try {
+          const raw = localStorage.getItem(SESSION_KEY);
         if (raw) {
           const data = JSON.parse(raw);
           const isRecent = Date.now() - data.savedAt < 24 * 60 * 60 * 1000;
@@ -149,12 +159,17 @@ const StudyMode = () => {
           }
           localStorage.removeItem(SESSION_KEY);
         }
-      } catch {
-        if (SESSION_KEY) localStorage.removeItem(SESSION_KEY);
+        } catch {
+          if (SESSION_KEY) localStorage.removeItem(SESSION_KEY);
+        }
       }
-    }
 
-    setSessionSeedCards(dueStudyCards);
+      setSessionSeedCards(dueStudyCards);
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [dueStudyCards, sessionSeedCards.length, SESSION_KEY]);
 
   const allCardsById = useMemo(() => {
@@ -197,7 +212,6 @@ const StudyMode = () => {
   const {
     currentIndex,
     studyComplete,
-    setStudyComplete,
     results,
     safeSessionResults,
     sourceSessionId,

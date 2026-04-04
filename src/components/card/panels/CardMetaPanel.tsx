@@ -751,6 +751,7 @@ const CardMetaPanelInner = ({
     editableReviewLogs,
     delayBonusEnabled,
     reviewStartNextDay,
+    latestReviewDurationInput,
   ]);
 
   const currentResistanceScore = useMemo(() => {
