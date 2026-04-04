@@ -66,7 +66,7 @@ const COLLECTION_BY_TYPE: Record<CloudEntityType, string> = {
   cardSet: "cardSets",
   document: "documents",
   tag: "tags_v3",
-  asset: "assets",
+  asset: "images",
   userSetting: "userSettings",
 };
 
@@ -232,44 +232,53 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
         | ((snapshot: unknown) => unknown);
 
       const pullCollectionDiff = async (type: PullableEntityType) => {
-        const ref = collection(
-          firestore,
-          `users/${this.userId}/${COLLECTION_BY_TYPE[type]}`,
-        );
+        try {
+          const ref = collection(
+            firestore,
+            `users/${this.userId}/${COLLECTION_BY_TYPE[type]}`,
+          );
 
-        let lastDoc: unknown = null;
-        let total = 0;
+          let lastDoc: unknown = null;
+          let total = 0;
 
-        while (true) {
-          const constraints: any[] = [
-            where("updatedAt", ">", sinceTimestamp),
-            orderBy("updatedAt", "asc"),
-            limit(PAGE_SIZE),
-          ];
+          while (true) {
+            const constraints: any[] = [
+              where("updatedAt", ">", sinceTimestamp),
+              orderBy("updatedAt", "asc"),
+              limit(PAGE_SIZE),
+            ];
 
-          if (startAfterFn && lastDoc) {
-            constraints.splice(2, 0, startAfterFn(lastDoc));
+            if (startAfterFn && lastDoc) {
+              constraints.splice(2, 0, startAfterFn(lastDoc));
+            }
+
+            const qy = query(ref, ...constraints);
+            const snap = await getDocs(qy);
+            total += snap.size;
+
+            snap.forEach((d) => {
+              changes.push({
+                type,
+                id: d.id,
+                data: this.sanitizeFromCloud(type, d.data()),
+              });
+            });
+
+            if (!startAfterFn || snap.empty || snap.size < PAGE_SIZE) break;
+            lastDoc = snap.docs[snap.docs.length - 1] ?? null;
           }
 
-          const qy = query(ref, ...constraints);
-          const snap = await getDocs(qy);
-          total += snap.size;
-
-          snap.forEach((d) => {
-            changes.push({
-              type,
-              id: d.id,
-              data: this.sanitizeFromCloud(type, d.data()),
-            });
-          });
-
-          if (!startAfterFn || snap.empty || snap.size < PAGE_SIZE) break;
-          lastDoc = snap.docs[snap.docs.length - 1] ?? null;
+          console.log(
+            `[CloudSyncAdapter] Remote ${COLLECTION_BY_TYPE[type]} found: ${total}`,
+          );
+        } catch (error) {
+          console.error(
+            `[CloudSyncAdapter] pullCollectionDiff failed for ${type}`,
+            error,
+          );
+          // 一部コレクションの失敗で cards / folders まで巻き添えにしない
+          // ルール未反映・移行途中でも既存データの同期は継続する
         }
-
-        console.log(
-          `[CloudSyncAdapter] Remote ${COLLECTION_BY_TYPE[type]} found: ${total}`,
-        );
       };
 
       for (const type of PULLABLE_ENTITY_TYPES) {
@@ -480,7 +489,7 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
       {
         const snap = await getDocs(
           query(
-            collection(firestore, `users/${this.userId}/assets`),
+            collection(firestore, `users/${this.userId}/images`),
             where("id", "==", id),
           ),
         );
