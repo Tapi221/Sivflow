@@ -35,37 +35,156 @@ interface UseReliableFileUploadReturn {
   reset: () => void;
 }
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+type UploadKind =
+  | "card_image"
+  | "card_audio"
+  | "profile"
+  | "pdf"
+  | "pptx"
+  | string;
 
-const ALLOWED_MIME_TYPES: Record<string, string[]> = {
-  card_image: [
-    "image/jpeg",
-    "image/png",
-    "image/gif",
-    "image/webp",
-    "image/heic",
-    "image/heif",
-    "image/avif",
-  ],
-  card_audio: [
-    "audio/mpeg",
-    "audio/wav",
-    "audio/ogg",
-    "audio/m4a",
-    "audio/mp4",
-    "audio/x-m4a",
-  ],
-  profile: [
-    "image/jpeg",
-    "image/png",
-    "image/webp",
-    "image/heic",
-    "image/heif",
-  ],
-  pdf: ["application/pdf"],
-  pptx: [
-    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-  ],
+type UploadValidationRule = {
+  label: string;
+  allowedMimeTypes: string[];
+  allowedExtensions: string[];
+  maxFileSize: number;
+  defaultMimeType?: string;
+};
+
+const DEFAULT_MAX_FILE_SIZE = 10 * 1024 * 1024;
+const DOCUMENT_MAX_FILE_SIZE = 50 * 1024 * 1024;
+
+const UPLOAD_VALIDATION_RULES: Record<string, UploadValidationRule> = {
+  card_image: {
+    label: "画像",
+    allowedMimeTypes: [
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+      "image/heic",
+      "image/heif",
+      "image/avif",
+    ],
+    allowedExtensions: [
+      ".jpg",
+      ".jpeg",
+      ".png",
+      ".gif",
+      ".webp",
+      ".heic",
+      ".heif",
+      ".avif",
+    ],
+    maxFileSize: DEFAULT_MAX_FILE_SIZE,
+  },
+  card_audio: {
+    label: "音声",
+    allowedMimeTypes: [
+      "audio/mpeg",
+      "audio/wav",
+      "audio/ogg",
+      "audio/m4a",
+      "audio/mp4",
+      "audio/x-m4a",
+    ],
+    allowedExtensions: [".mp3", ".wav", ".ogg", ".m4a", ".mp4"],
+    maxFileSize: DEFAULT_MAX_FILE_SIZE,
+  },
+  profile: {
+    label: "プロフィール画像",
+    allowedMimeTypes: [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "image/heic",
+      "image/heif",
+    ],
+    allowedExtensions: [".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif"],
+    maxFileSize: DEFAULT_MAX_FILE_SIZE,
+  },
+  pdf: {
+    label: "PDF",
+    allowedMimeTypes: ["application/pdf"],
+    allowedExtensions: [".pdf"],
+    maxFileSize: DOCUMENT_MAX_FILE_SIZE,
+    defaultMimeType: "application/pdf",
+  },
+  pptx: {
+    label: "PPTX",
+    allowedMimeTypes: [
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    ],
+    allowedExtensions: [".pptx"],
+    maxFileSize: DOCUMENT_MAX_FILE_SIZE,
+    defaultMimeType:
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  },
+};
+
+const isContextObject = (
+  value: UploadMetadata["context"] | undefined,
+): value is Extract<UploadMetadata["context"], { type: string }> =>
+  typeof value === "object" && value !== null && "type" in value;
+
+const resolveUploadType = (
+  context?: UploadMetadata["context"],
+): UploadKind => {
+  if (!context) return "card_image";
+  if (typeof context === "string") return context;
+  if (isContextObject(context)) return context.type;
+  return "card_image";
+};
+
+const getForcedIdFromContext = (
+  context?: UploadMetadata["context"],
+): string => {
+  if (!isContextObject(context)) return "";
+  return typeof context.docId === "string" ? context.docId.trim() : "";
+};
+
+const getFileExtension = (fileName: string): string => {
+  const normalized = fileName.trim().toLowerCase();
+  const dotIndex = normalized.lastIndexOf(".");
+  if (dotIndex < 0) return "";
+  return normalized.slice(dotIndex);
+};
+
+const matchesMimeType = (
+  fileType: string,
+  allowedMimeType: string,
+): boolean => {
+  if (!fileType) return false;
+  if (allowedMimeType.endsWith("/*")) {
+    const prefix = allowedMimeType.slice(0, allowedMimeType.length - 1);
+    return fileType.startsWith(prefix);
+  }
+  return fileType === allowedMimeType;
+};
+
+const getValidationRule = (type: UploadKind): UploadValidationRule | null =>
+  UPLOAD_VALIDATION_RULES[type] ?? null;
+
+const getSafeErrorMessage = (
+  error: unknown,
+  fallback: string,
+): string => {
+  if (error instanceof Error && error.message) return error.message;
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof (error as { message?: unknown }).message === "string"
+  ) {
+    return (error as { message: string }).message;
+  }
+  return fallback;
+};
+
+const normalizeMimeType = (file: File, type: UploadKind): string => {
+  const trimmed = file.type.trim();
+  if (trimmed) return trimmed;
+  return getValidationRule(type)?.defaultMimeType ?? "application/octet-stream";
 };
 
 /**
@@ -79,11 +198,7 @@ const performFirebaseUpload = async (
   const user = auth.currentUser;
   if (!user) throw new Error("Unauthenticated during background upload");
 
-  // storagePathの再構築またはimageオブジェクトからの取得
-  // image.storagePath は初期保存時に生成されているはず
   const storageRef = ref(storage, image.storagePath);
-
-  // Upload
   const uploadTask = uploadBytesResumable(storageRef, file);
 
   return new Promise<UploadedImage>((resolve, reject) => {
@@ -100,11 +215,11 @@ const performFirebaseUpload = async (
           const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
           resolve({
             ...image,
-            remoteUrl: downloadUrl as unknown, // Branded type cast
+            remoteUrl: downloadUrl as unknown,
             status: "ready",
           });
-        } catch (e) {
-          reject(e);
+        } catch (error) {
+          reject(error);
         }
       },
     );
@@ -125,42 +240,40 @@ export const useReliableFileUpload = (): UseReliableFileUploadReturn => {
     setIsUploading(false);
   }, []);
 
-  const validateFile = (file: File, context?: UploadMetadata["context"]) => {
-    // Context processing
-    let type = "card_image"; // Default type
-    if (context) {
-      if (typeof context === "string") {
-        type = context;
-      } else if (typeof context === "object" && "type" in context) {
-        type = context.type;
+  const validateFile = useCallback(
+    (file: File, context?: UploadMetadata["context"]) => {
+      const type = resolveUploadType(context);
+      const rule = getValidationRule(type);
+
+      if (!rule) return;
+
+      if (file.size > rule.maxFileSize) {
+        const maxMb = Math.floor(rule.maxFileSize / 1024 / 1024);
+        throw new Error(
+          `${rule.label}のファイルサイズが大きすぎます (最大${maxMb}MB)`,
+        );
       }
-    }
 
-    if (file.size > MAX_FILE_SIZE) {
-      throw new Error(`ファイルサイズが大きすぎます (最大10MB)`);
-    }
+      const extension = getFileExtension(file.name);
+      const mimeType = file.type.trim();
 
-    if (type && ALLOWED_MIME_TYPES[type]) {
-      const allowed = ALLOWED_MIME_TYPES[type];
-      if (
-        !allowed.some(
-          (t) =>
-            file.type === t ||
-            (t.includes("*") && file.type.startsWith(t.replace("*", ""))),
-        )
-      ) {
-        const isGenericMatch = allowed.some((t) => {
-          if (t === "image/*") return file.type.startsWith("image/");
-          if (t === "audio/*") return file.type.startsWith("audio/");
-          return false;
-        });
+      const mimeMatches =
+        mimeType.length > 0 &&
+        rule.allowedMimeTypes.some((allowedMimeType) =>
+          matchesMimeType(mimeType, allowedMimeType),
+        );
 
-        if (!isGenericMatch && !allowed.includes(file.type)) {
-          throw new Error(`サポートされていないファイル形式です: ${file.type}`);
-        }
+      const extensionMatches =
+        extension.length > 0 && rule.allowedExtensions.includes(extension);
+
+      if (!mimeMatches && !extensionMatches) {
+        throw new Error(
+          `サポートされていない${rule.label}ファイルです: ${file.name}`,
+        );
       }
-    }
-  };
+    },
+    [],
+  );
 
   const uploadFile = useCallback(
     async (
@@ -171,45 +284,41 @@ export const useReliableFileUpload = (): UseReliableFileUploadReturn => {
       reset();
 
       if (!currentUser) {
-        const e = "アップロードにはログインが必要です";
-        setError(e);
+        const message = "アップロードにはログインが必要です";
+        setError(message);
         setUploadStatus("failed");
-        throw new Error(e);
+        throw new Error(message);
       }
 
       try {
         validateFile(file, context);
       } catch (validationError: unknown) {
-        setError(validationError.message);
+        const message = getSafeErrorMessage(
+          validationError,
+          "ファイル検証に失敗しました",
+        );
+        setError(message);
         setUploadStatus("failed");
-        throw validationError;
+        throw validationError instanceof Error
+          ? validationError
+          : new Error(message);
       }
 
       setIsUploading(true);
       setUploadStatus("uploading");
-      setUploadProgress(10); // Initial progress
+      setUploadProgress(10);
 
       try {
-        // 1. Generate Safe Path and ID
-        const contextType =
-          (context as unknown)?.type ||
-          (typeof context === "string" ? context : "card_image");
-        const forcedId =
-          typeof context === "object" &&
-          context !== null &&
-          typeof (context as unknown).docId === "string"
-            ? (context as unknown).docId.trim()
-            : "";
+        const contextType = resolveUploadType(context);
+        const forcedId = getForcedIdFromContext(context);
         const { safeName, id: generatedId } = generateSafeStoragePath(
           file.name,
           contextType === "card_audio" ? "audio" : undefined,
         );
         const id = forcedId || generatedId;
         const storagePath = pathGenerator(safeName);
+        const normalizedMimeType = normalizeMimeType(file, contextType);
 
-        // 2. Save to ImageDB (Optimistic Local Save)
-        // returns { id, localUrl, ... }
-        // Note: saveToIndexedDB returns void, so we construct savedImage first
         const storableImage: UploadedImage = {
           id,
           localUrl: URL.createObjectURL(file) as unknown,
@@ -217,8 +326,7 @@ export const useReliableFileUpload = (): UseReliableFileUploadReturn => {
           status: "uploading",
           source: "local_fallback",
           storagePath,
-          // Add other required fields
-          contentType: file.type,
+          contentType: normalizedMimeType,
           size: file.size,
           sizeBytes: file.size,
           retryCount: 0,
@@ -227,46 +335,46 @@ export const useReliableFileUpload = (): UseReliableFileUploadReturn => {
         await imageDB.saveToIndexedDB(storableImage);
         const savedImage = storableImage;
 
-        // 3. Enqueue for Background Upload
         await persistentQueue.enqueue(savedImage, file);
 
-        // 4. Trigger Queue Processing (Non-blocking)
-        // We catch errors here to ensure the UI flow isn't interrupted by background sync failures
-        persistentQueue.processQueue(performFirebaseUpload).catch((e) => {
-          console.error("[ReliableUpload] Background sync trigger failed", e);
+        persistentQueue.processQueue(performFirebaseUpload).catch((queueError) => {
+          console.error("[ReliableUpload] Background sync trigger failed", queueError);
         });
 
         setUploadProgress(100);
-        setUploadStatus("completed"); // UI status
+        setUploadStatus("completed");
         setIsUploading(false);
 
-        // 5. Return Optimistic Result
         return {
-          url: savedImage.localUrl || "", // Blob URL for immediate display
+          url: savedImage.localUrl || "",
           storagePath: savedImage.storagePath || "",
-          source: "local_fallback", // "Local" until synced
+          source: "local_fallback",
           metadata: {
             id: savedImage.id,
             storagePath: savedImage.storagePath || "",
             downloadUrl: savedImage.remoteUrl || undefined,
-            uploadedAt: new Date(), // approximate
-            status: "ready", // "Ready" from data perspective
+            uploadedAt: new Date(),
+            status: "ready",
             originalFilename: file.name,
-            mimeType: file.type,
+            mimeType: normalizedMimeType,
             sizeBytes: file.size,
-            context: context as unknown, // Cast to avoid complex union checks
+            context: context ?? contextType,
             userId: currentUser.uid,
           },
         };
-      } catch (error: unknown) {
-        console.error("[ReliableUpload] Error:", error);
-        setError(error.message);
+      } catch (uploadError: unknown) {
+        const message = getSafeErrorMessage(
+          uploadError,
+          "アップロードに失敗しました",
+        );
+        console.error("[ReliableUpload] Error:", uploadError);
+        setError(message);
         setUploadStatus("failed");
         setIsUploading(false);
-        throw error;
+        throw uploadError instanceof Error ? uploadError : new Error(message);
       }
     },
-    [currentUser, reset],
+    [currentUser, reset, validateFile],
   );
 
   return {
