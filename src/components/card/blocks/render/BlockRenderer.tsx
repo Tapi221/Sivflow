@@ -4,17 +4,13 @@ import { ImageBlockContent } from "@/components/card/blocks/image/ImageBlockCont
 import { ImageBlockShell } from "@/components/card/blocks/image/ImageBlockShell";
 import { MarkdownBlockDisplay } from "@/components/card/blocks/markdown/MarkdownBlockDisplay";
 import { MathBlockPreviewPane } from "@/components/card/blocks/math/MathBlockPreviewPane";
-import { QuestionBlockLayout } from "@/components/card/blocks/question/QuestionBlockLayout";
-import {
-  QUESTION_BLOCK_ANSWER_TEXT_CLASS,
-  QUESTION_BLOCK_TITLE_TEXT_CLASS,
-} from "@/components/card/blocks/question/questionBlockTextStyles";
+import { QuestionBlockContent } from "@/components/card/blocks/question/QuestionBlockContent";
 import { TextBlockContent } from "@/components/card/blocks/text/TextBlockContent";
 import { AudioPlayer } from "@/components/card/media/CardMedia";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import type { CardBlock } from "@/types/domain/card";
 import type { CSSProperties } from "react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 
 interface BlockRendererProps {
   blocks?: CardBlock[];
@@ -35,59 +31,6 @@ const getFluidZoomStyle = (
   if (Math.abs(safeZoom - 1) < 0.001) return undefined;
 
   return { fontSize: `${safeZoom}em` };
-};
-
-const QuestionBlockView = ({
-  block,
-  displayMode,
-}: {
-  block: CardBlock;
-  displayMode: "always" | "tap_to_reveal";
-}) => {
-  const [revealed, setRevealed] = useState(displayMode === "always");
-
-  return (
-    <QuestionBlockLayout
-      containerProps={{
-        onClick: (e) => e.stopPropagation(),
-      }}
-      questionContent={
-        <p className={`flex-1 ${QUESTION_BLOCK_TITLE_TEXT_CLASS}`}>
-          {block.questionTitle || ""}
-        </p>
-      }
-      answerContent={
-        <p
-          className={`${QUESTION_BLOCK_ANSWER_TEXT_CLASS} transition-all duration-200`}
-          style={
-            revealed
-              ? undefined
-              : {
-                  filter: "blur(5px)",
-                  userSelect: "none",
-                  pointerEvents: "none",
-                }
-          }
-        >
-          {block.questionAnswer || "\u00a0"}
-        </p>
-      }
-      answerContainerProps={{
-        onClick: (e) => {
-          e.stopPropagation();
-          if (!revealed) setRevealed(true);
-        },
-        style: { cursor: revealed ? "default" : "pointer" },
-      }}
-      answerOverlay={
-        !revealed ? (
-          <span className="absolute inset-0 flex items-center justify-center text-[10px] text-slate-400">
-            タップして表示
-          </span>
-        ) : undefined
-      }
-    />
-  );
 };
 
 const renderBlock = (
@@ -120,7 +63,12 @@ const renderBlock = (
       }
 
       return (
-        <QuestionBlockView block={block} displayMode={questionDisplayMode} />
+        <QuestionBlockContent
+          mode="view"
+          questionTitle={block.questionTitle}
+          questionAnswer={block.questionAnswer}
+          answerDisplayMode={questionDisplayMode}
+        />
       );
 
     case "text":

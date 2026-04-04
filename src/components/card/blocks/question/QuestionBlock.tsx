@@ -1,14 +1,8 @@
-import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
+import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
+import { QuestionBlockContent } from "@/components/card/blocks/question/QuestionBlockContent";
 import type { CardBlock } from "@/types/domain/card";
 import { HelpCircle } from "@/ui/icons";
 import React, { useCallback, useRef } from "react";
-import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
-import { QuestionBlockLayout } from "@/components/card/blocks/question/QuestionBlockLayout";
-import {
-  QUESTION_BLOCK_ANSWER_TEXT_CLASS,
-  QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX,
-  QUESTION_BLOCK_TITLE_TEXT_CLASS,
-} from "@/components/card/blocks/question/questionBlockTextStyles";
 
 interface QuestionBlockProps {
   block: CardBlock;
@@ -86,42 +80,20 @@ const QuestionBlockInner: React.FC<QuestionBlockProps> = ({
       className="bg-transparent px-0 py-0"
       contentClassName="px-0"
     >
-      <QuestionBlockLayout
+      <QuestionBlockContent
+        mode="edit"
+        blockId={block.id}
+        questionTitle={block.questionTitle}
+        questionAnswer={block.questionAnswer}
+        onChangeQuestionTitle={(value) =>
+          onUpdateBlock(block.id, { questionTitle: value })
+        }
+        onChangeQuestionAnswer={(value) =>
+          onUpdateBlock(block.id, { questionAnswer: value })
+        }
         containerRef={containerRef}
-        containerProps={{
-          onFocus: handleContainerFocus,
-          onBlur: handleContainerBlur,
-          "data-block-type": "question",
-          "data-block-id": block.id,
-        }}
-        questionContent={
-          <AutoResizeTextarea
-            value={block.questionTitle ?? ""}
-            onChange={(e) =>
-              onUpdateBlock(block.id, { questionTitle: e.target.value })
-            }
-            placeholder="疑問・質問を入力..."
-            minRows={1}
-            lineHeight={QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX}
-            allowInternalScroll={false}
-            className="flex-1"
-            textareaClassName={`${QUESTION_BLOCK_TITLE_TEXT_CLASS} placeholder:text-slate-400 bg-transparent border-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0 w-full resize-none p-0`}
-          />
-        }
-        answerContent={
-          <AutoResizeTextarea
-            value={block.questionAnswer ?? ""}
-            onChange={(e) =>
-              onUpdateBlock(block.id, { questionAnswer: e.target.value })
-            }
-            placeholder="答え・メモを入力..."
-            minRows={1}
-            lineHeight={QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX}
-            allowInternalScroll={false}
-            className="flex-1"
-            textareaClassName={`${QUESTION_BLOCK_ANSWER_TEXT_CLASS} placeholder:text-slate-400 bg-transparent border-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0 w-full resize-none p-0`}
-          />
-        }
+        onContainerFocus={handleContainerFocus}
+        onContainerBlur={handleContainerBlur}
       />
     </BlockWrapper>
   );
@@ -143,4 +115,5 @@ export const QuestionBlock = React.memo(
   QuestionBlockInner,
   areQuestionBlockPropsEqual,
 );
+
 QuestionBlock.displayName = "QuestionBlock";
