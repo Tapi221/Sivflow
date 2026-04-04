@@ -7,7 +7,7 @@ interface RootFolderPanelListProps {
   selectedFolderId: string | null;
   openRowMenuId: string | null;
   setOpenRowMenuId: React.Dispatch<React.SetStateAction<string | null>>;
-  onSelectFolder: (folderId: string) => void;
+  onSelectFolder: (folderId: string | null) => void;
   handleCreateFolderAction: (parentId: string | null) => string;
   handleCreateCardSetAction: (folderId: string | null) => string | null;
   handleDelete: (id: string, type: "folder" | "card") => void;

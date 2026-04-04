@@ -20,7 +20,7 @@ interface RootFolderPanelRowProps {
   selectedFolderId: string | null;
   openRowMenuId: string | null;
   setOpenRowMenuId: React.Dispatch<React.SetStateAction<string | null>>;
-  onSelectFolder?: (folderId: string) => void;
+  onSelectFolder: (folderId: string | null) => void;
   handleCreateFolderAction: (parentId: string | null) => string;
   handleCreateCardSetAction: (folderId: string | null) => string | null;
   handleDelete: (id: string, type: "folder" | "card") => void;
@@ -94,7 +94,6 @@ export const RootFolderPanelRow = ({
 
   const handleSelectFolder = React.useCallback(() => {
     if (isEditing || isMenuOpen) return;
-    if (typeof onSelectFolder !== "function") return;
     onSelectFolder(panel.id);
   }, [isEditing, isMenuOpen, onSelectFolder, panel.id]);
 
