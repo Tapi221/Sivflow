@@ -68,7 +68,6 @@ type UseFolderActionsParams = {
   setEditingId: (id: string | null) => void;
   setEditingName: (name: string) => void;
   closeRename: () => void;
-  openDeleteFolderDialog: (folderId: string) => void;
 
   setOptimisticFolders: Dispatch<SetStateAction<FolderTreeNode[]>>;
   setOptimisticCards: Dispatch<SetStateAction<Card[]>>;
@@ -235,7 +234,6 @@ export const useFolderActions = ({
   setEditingId,
   setEditingName,
   closeRename,
-  openDeleteFolderDialog,
   setOptimisticFolders,
   setOptimisticCardSets,
   setExpandedFolders,
@@ -451,7 +449,7 @@ export const useFolderActions = ({
       const resolvedType = resolveTargetKind(id, type);
 
       if (resolvedType === "folder") {
-        openDeleteFolderDialog(id);
+        await onDeleteFolder?.(id);
         return;
       }
 
@@ -468,7 +466,7 @@ export const useFolderActions = ({
       editingIdRef,
       onDeleteCard,
       onDeleteCardSet,
-      openDeleteFolderDialog,
+      onDeleteFolder,
       resolveTargetKind,
     ],
   );
@@ -526,20 +524,10 @@ export const useFolderActions = ({
     ],
   );
 
-  const handleConfirmDeleteFolder = useCallback(
-    async (folderId?: string) => {
-      const targetId = folderId ?? editingIdRef.current;
-      if (!targetId) return;
-      await onDeleteFolder?.(targetId);
-    },
-    [editingIdRef, onDeleteFolder],
-  );
-
   return {
     handleCreateFolderAction,
     handleCreateCardSetAction,
     handleDelete,
     handleRenameConfirm,
-    handleConfirmDeleteFolder,
   };
 };
