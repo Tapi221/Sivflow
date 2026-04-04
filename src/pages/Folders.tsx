@@ -10,12 +10,12 @@ import { useIsDesktopRuntime } from "@/hooks/platform/useIsDesktopRuntime";
 import { useSettingsQueryParam } from "@/hooks/settings/useSettingsQueryParam";
 import { cn } from "@/lib/utils";
 import {
-  startTransition,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
+    startTransition,
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
 } from "react";
 import { useSearchParams } from "react-router-dom";
 
@@ -392,7 +392,7 @@ const Folders = () => {
         return;
       }
 
-      // ルート直下フォルダを選んだときもセクション一覧側を同期
+      // ルート直下フォルダを選んだときもフォルダ一覧側を同期
       const folder = foldersRef.current.find((f) => f.id === folderId);
       if (folder && !folder.parentFolderId) {
         setNavigateToSectionListToken((n) => n + 1);

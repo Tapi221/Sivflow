@@ -1,8 +1,8 @@
-import React, { useEffect, useState, useMemo } from "react";
-import { useLocation, Link } from "react-router-dom";
-import { isDesktopRuntime } from "@/platform/runtime";
-import { cn } from "@/lib/utils";
 import { useBreadcrumbContext } from "@/contexts/BreadcrumbContext";
+import { cn } from "@/lib/utils";
+import { isDesktopRuntime } from "@/platform/runtime";
+import React, { useEffect, useMemo, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 
 const PAGE_LABELS: Record<string, string> = {
   folders: "フォルダ一覧",
@@ -93,7 +93,7 @@ export const TitleBar: React.FC = () => {
 
     const baseCrumbs =
       pathname.toLowerCase().startsWith("/cardview") && crumbs.length > 1
-        ? [crumbs[0], { label: "セクション一覧", to: "/folders" }]
+        ? [crumbs[0], { label: "フォルダ一覧", to: "/folders" }]
         : crumbs;
 
     const base = baseCrumbs.map((c, i) =>
