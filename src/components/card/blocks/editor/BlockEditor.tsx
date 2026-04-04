@@ -662,11 +662,12 @@ export const BlockEditor = React.forwardRef<
                     canMoveDown,
                     accentColor,
                     isActive: isBlockActive,
-                    autoFocus: autoFocus && meta.index === bodyBlocks.length - 1,
+                    autoFocus:
+                      autoFocus && meta.index === bodyBlocks.length - 1,
                     customPlaceholder: customPlaceholders?.[meta.index],
                     pendingUploadFile: pendingUploads[block.id],
                     onConsumePendingUpload: () =>
-                      handleConsumeInitialFile(block.id) ,
+                      handleConsumeInitialFile(block.id),
                     onFilesExcess: (files) =>
                       handleBlockOverflow(block.id, files),
                     onReplaceMarkdownWithBlocks:

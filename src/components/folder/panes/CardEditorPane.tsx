@@ -555,7 +555,9 @@ export const CardEditorPane = ({
             embeddedInPager ? "h-auto" : "h-full",
           )}
           shellClassName={cn(
-            embeddedInPager ? "h-auto overflow-visible" : "h-full overflow-hidden",
+            embeddedInPager
+              ? "h-auto overflow-visible"
+              : "h-full overflow-hidden",
           )}
           widthControl={widthControlProps}
           isMetaOpen={isMetaOpen}
@@ -576,7 +578,9 @@ export const CardEditorPane = ({
                   : "px-0 pt-0 pb-4"
               : "px-0 py-4",
           )}
-          viewportStyle={embeddedInPager ? undefined : { background: "#fafafa" }}
+          viewportStyle={
+            embeddedInPager ? undefined : { background: "#fafafa" }
+          }
           metaPanel={metaPanelNode}
         >
           {isEditing ? (

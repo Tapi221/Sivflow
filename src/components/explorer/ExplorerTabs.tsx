@@ -36,7 +36,13 @@ const TABS: {
   label: string;
   icon: React.ComponentType<{ className?: string }>;
 }[] = [
-  { id: "explorer", label: "フォルダ", icon: () => <Plus className="hidden" /> /* Dummy, will be overwritten by History or Folder icons from @/ui/icons if needed, but TABS use actual icons */ },
+  {
+    id: "explorer",
+    label: "フォルダ",
+    icon: () => (
+      <Plus className="hidden" />
+    ) /* Dummy, will be overwritten by History or Folder icons from @/ui/icons if needed, but TABS use actual icons */,
+  },
 ];
 // Re-importing icons correctly for TABS
 import { Folder } from "@/ui/icons";

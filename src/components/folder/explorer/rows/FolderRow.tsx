@@ -119,8 +119,11 @@ export const FolderRow: React.FC<FolderRowProps> = ({
   const parentFolderId = normalizeFolderId(getParentFolderId(folder));
   const isTopLevelFolder = parentFolderId === ROOT_FOLDER_ID;
   const FolderGlyph = isTopLevelFolder ? FolderIcon : FolderOutlineIcon;
-  const { anchorPoint: menuAnchor, handleContextMenu, resetAnchor } =
-    useContextMenuAnchor();
+  const {
+    anchorPoint: menuAnchor,
+    handleContextMenu,
+    resetAnchor,
+  } = useContextMenuAnchor();
 
   const menuActions = React.useMemo(
     () =>

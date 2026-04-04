@@ -11,13 +11,13 @@ import { useSettingsQueryParam } from "@/hooks/settings/useSettingsQueryParam";
 import { cn } from "@/lib/utils";
 import type { DocumentItem } from "@/types";
 import {
-    startTransition,
-    useCallback,
-    useEffect,
-    useLayoutEffect,
-    useMemo,
-    useRef,
-    useState,
+  startTransition,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
 } from "react";
 import { useSearchParams } from "react-router-dom";
 
@@ -81,13 +81,16 @@ const Folders = () => {
     window.requestAnimationFrame(reset);
   }, [isDesktop]);
 
-  const notifyMainSidebarFolderSelection = useCallback((folderId: string | null) => {
-    window.dispatchEvent(
-      new CustomEvent("folders:selected-folder-changed", {
-        detail: { folderId: folderId ?? null },
-      }),
-    );
-  }, []);
+  const notifyMainSidebarFolderSelection = useCallback(
+    (folderId: string | null) => {
+      window.dispatchEvent(
+        new CustomEvent("folders:selected-folder-changed", {
+          detail: { folderId: folderId ?? null },
+        }),
+      );
+    },
+    [],
+  );
 
   // 選択状態
   const [selectedFolderId, setSelectedFolderId] = useState(() => {
@@ -209,33 +212,33 @@ const Folders = () => {
         return;
       }
 
-    if (queryFolderId !== selectedFolderId) {
-      setSelectedFolderId(queryFolderId || null);
-    }
+      if (queryFolderId !== selectedFolderId) {
+        setSelectedFolderId(queryFolderId || null);
+      }
 
-    if (
-      queryCardId &&
-      (selectedItem?.type !== "card" || selectedItem.id !== queryCardId)
-    ) {
-      setSelectedItem({ type: "card", id: queryCardId });
-      return;
-    }
+      if (
+        queryCardId &&
+        (selectedItem?.type !== "card" || selectedItem.id !== queryCardId)
+      ) {
+        setSelectedItem({ type: "card", id: queryCardId });
+        return;
+      }
 
-    if (
-      queryDocId &&
-      (selectedItem?.type !== "document" || selectedItem.id !== queryDocId)
-    ) {
-      setSelectedItem({ type: "document", id: queryDocId });
-      return;
-    }
+      if (
+        queryDocId &&
+        (selectedItem?.type !== "document" || selectedItem.id !== queryDocId)
+      ) {
+        setSelectedItem({ type: "document", id: queryDocId });
+        return;
+      }
 
-    if (
-      !queryCardId &&
-      !queryDocId &&
-      (selectedItem?.type === "card" || selectedItem?.type === "document")
-    ) {
-      setSelectedItem(null);
-    }
+      if (
+        !queryCardId &&
+        !queryDocId &&
+        (selectedItem?.type === "card" || selectedItem?.type === "document")
+      ) {
+        setSelectedItem(null);
+      }
     });
 
     return () => {

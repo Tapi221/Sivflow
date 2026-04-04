@@ -79,7 +79,9 @@ export const XlsxImportDialog = ({
   createCard,
 }: XlsxImportDialogProps) => {
   const toast = useToast();
-  const [destinationMode, setDestinationMode] = useState<"new" | "existing">("new");
+  const [destinationMode, setDestinationMode] = useState<"new" | "existing">(
+    "new",
+  );
   const [newCardSetName, setNewCardSetName] = useState("");
   const [selectedCardSetId, setSelectedCardSetId] = useState("");
   const [state, setState] = useState(emptyState);
@@ -107,7 +109,10 @@ export const XlsxImportDialog = ({
       return;
     }
 
-    if (!selectedCardSetId || !cardSets.some((cardSet) => cardSet.id === selectedCardSetId)) {
+    if (
+      !selectedCardSetId ||
+      !cardSets.some((cardSet) => cardSet.id === selectedCardSetId)
+    ) {
       setSelectedCardSetId(cardSets[0].id);
     }
   }, [cardSets, open, selectedCardSetId]);
@@ -154,7 +159,9 @@ export const XlsxImportDialog = ({
       );
     } catch (error) {
       console.error("[XlsxImportDialog] parse failed", error);
-      toast.error("XLSX の解析に失敗しました。ファイル形式を確認してください。");
+      toast.error(
+        "XLSX の解析に失敗しました。ファイル形式を確認してください。",
+      );
       setState({
         file,
         result: null,
@@ -262,9 +269,7 @@ export const XlsxImportDialog = ({
               </div>
 
               <div className="grid gap-2">
-                <p className="text-sm font-medium text-slate-800">
-                  取り込み先
-                </p>
+                <p className="text-sm font-medium text-slate-800">取り込み先</p>
                 <Select
                   value={destinationMode}
                   onValueChange={(value) => {
@@ -279,7 +284,10 @@ export const XlsxImportDialog = ({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="new">新規カードセットを作成</SelectItem>
-                    <SelectItem value="existing" disabled={cardSets.length === 0}>
+                    <SelectItem
+                      value="existing"
+                      disabled={cardSets.length === 0}
+                    >
                       既存カードセットへ追加
                     </SelectItem>
                   </SelectContent>
@@ -313,7 +321,9 @@ export const XlsxImportDialog = ({
                   </Select>
                 ) : null}
                 {destinationMode === "existing" && cardSets.length === 0 ? (
-                  <p className="text-xs text-slate-500">このフォルダには既存カードセットがありません。</p>
+                  <p className="text-xs text-slate-500">
+                    このフォルダには既存カードセットがありません。
+                  </p>
                 ) : null}
               </div>
 
@@ -329,8 +339,9 @@ export const XlsxImportDialog = ({
                   image 行はエラーとして止めます。
                 </p>
                 <p>
-                  blocks シートで cardId が同じ行は 1 枚のカードとしてまとめられ、
-                  blockOrder 順で front 側に並びます。
+                  blocks シートで cardId が同じ行は 1
+                  枚のカードとしてまとめられ、 blockOrder 順で front
+                  側に並びます。
                 </p>
               </div>
             </div>
@@ -360,7 +371,8 @@ export const XlsxImportDialog = ({
             <div className="rounded-xl border border-slate-200 p-3">
               <p className="text-xs text-slate-500">Issues</p>
               <p className="mt-1 text-sm font-medium text-slate-800">
-                error {issueSummary.errorCount} / warning {issueSummary.warningCount}
+                error {issueSummary.errorCount} / warning{" "}
+                {issueSummary.warningCount}
               </p>
             </div>
           </div>
@@ -422,7 +434,9 @@ export const XlsxImportDialog = ({
                         <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                           {issue.level} · {formatImportCellLabel(issue)}
                         </p>
-                        <p className="mt-1 text-sm text-slate-800">{issue.message}</p>
+                        <p className="mt-1 text-sm text-slate-800">
+                          {issue.message}
+                        </p>
                       </div>
                     ))}
                   </div>

@@ -72,10 +72,7 @@ export const useCardEditorContentController = <
   );
 
   const setSideAttachments = useCallback(
-    (
-      side: "question" | "answer",
-      nextAttachments: CardFaceAttachments,
-    ) => {
+    (side: "question" | "answer", nextAttachments: CardFaceAttachments) => {
       setDraft((prev) => {
         if (!prev) return prev;
         return side === "question"

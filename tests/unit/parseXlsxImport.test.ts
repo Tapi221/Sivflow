@@ -201,6 +201,8 @@ describe("parseXlsxImport", () => {
         }),
       ]),
     );
-    expect(result.issues.some((issue: ImportIssue) => issue.level === "error")).toBe(false);
+    expect(
+      result.issues.some((issue: ImportIssue) => issue.level === "error"),
+    ).toBe(false);
   });
 });

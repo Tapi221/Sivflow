@@ -127,9 +127,7 @@ const isContextObject = (
 ): value is Extract<UploadMetadata["context"], { type: string }> =>
   typeof value === "object" && value !== null && "type" in value;
 
-const resolveUploadType = (
-  context?: UploadMetadata["context"],
-): UploadKind => {
+const resolveUploadType = (context?: UploadMetadata["context"]): UploadKind => {
   if (!context) return "card_image";
   if (typeof context === "string") return context;
   if (isContextObject(context)) return context.type;
@@ -165,10 +163,7 @@ const matchesMimeType = (
 const getValidationRule = (type: UploadKind): UploadValidationRule | null =>
   UPLOAD_VALIDATION_RULES[type] ?? null;
 
-const getSafeErrorMessage = (
-  error: unknown,
-  fallback: string,
-): string => {
+const getSafeErrorMessage = (error: unknown, fallback: string): string => {
   if (error instanceof Error && error.message) return error.message;
   if (
     typeof error === "object" &&
@@ -337,9 +332,14 @@ export const useReliableFileUpload = (): UseReliableFileUploadReturn => {
 
         await persistentQueue.enqueue(savedImage, file);
 
-        persistentQueue.processQueue(performFirebaseUpload).catch((queueError) => {
-          console.error("[ReliableUpload] Background sync trigger failed", queueError);
-        });
+        persistentQueue
+          .processQueue(performFirebaseUpload)
+          .catch((queueError) => {
+            console.error(
+              "[ReliableUpload] Background sync trigger failed",
+              queueError,
+            );
+          });
 
         setUploadProgress(100);
         setUploadStatus("completed");

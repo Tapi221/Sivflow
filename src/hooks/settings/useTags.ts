@@ -733,7 +733,9 @@ export const useTags = () => {
 
       const collectChildren = (parentId: string) => {
         for (const folder of allFolders) {
-          if ((folder as { parentFolderId?: string }).parentFolderId === parentId) {
+          if (
+            (folder as { parentFolderId?: string }).parentFolderId === parentId
+          ) {
             targetFolderIds.add(folder.id);
             collectChildren(folder.id);
           }
@@ -799,7 +801,9 @@ export const useTags = () => {
 
       const collectChildren = (parentId: string) => {
         for (const folder of allFolders) {
-          if ((folder as { parentFolderId?: string }).parentFolderId === parentId) {
+          if (
+            (folder as { parentFolderId?: string }).parentFolderId === parentId
+          ) {
             targetFolderIds.add(folder.id);
             collectChildren(folder.id);
           }

@@ -350,9 +350,8 @@ const MarkdownBlockInner: React.FC<MarkdownBlockProps> = ({
       }
 
       try {
-        const { sanitizeAndConvertToMarkdown } = await import(
-          "@/utils/markdownPaste"
-        );
+        const { sanitizeAndConvertToMarkdown } =
+          await import("@/utils/markdownPaste");
         const mdRaw = await sanitizeAndConvertToMarkdown(html);
 
         const overEscaped =

@@ -705,7 +705,6 @@ export const FolderTreeWithCards = ({
     setEditingName: dialogs.setEditingName,
   });
 
-
   const handleCreateCardSetFromMenu = useCallback(
     (folderId: string | null) => actions.handleCreateCardSetAction(folderId),
     [actions.handleCreateCardSetAction],
@@ -770,8 +769,6 @@ export const FolderTreeWithCards = ({
       rootItems,
     ],
   );
-
-
 
   useEffect(() => {
     onSectionListModeChange?.(isSectionListVisible);
@@ -1017,7 +1014,6 @@ export const FolderTreeWithCards = ({
     navigationEntries.length === 0
       ? "この階層には表示できるコンテンツがありません"
       : null;
-
 
   return (
     <div ref={treeRootRef} className={cn("h-full w-full", className)}>

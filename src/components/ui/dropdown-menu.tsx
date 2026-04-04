@@ -235,10 +235,7 @@ const DropdownMenuItemLabel = ({
   ...props
 }: React.HTMLAttributes<HTMLSpanElement>) => {
   return (
-    <span
-      className={cn("min-w-0 flex-1 leading-none", className)}
-      {...props}
-    />
+    <span className={cn("min-w-0 flex-1 leading-none", className)} {...props} />
   );
 };
 DropdownMenuItemLabel.displayName = "DropdownMenuItemLabel";

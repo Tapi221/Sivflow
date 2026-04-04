@@ -5,7 +5,16 @@ import { IMPORT_SHEET_NAME } from "@/features/import/types";
 const TEMPLATE_FILE_NAME = "manifolia-bulk-import-template.xlsx";
 
 const BLOCKS_ROWS = [
-  ["cardId", "blockOrder", "type", "content", "language", "image", "title", "note"],
+  [
+    "cardId",
+    "blockOrder",
+    "type",
+    "content",
+    "language",
+    "image",
+    "title",
+    "note",
+  ],
   [
     "sample-001",
     "1",
@@ -61,11 +70,17 @@ const BLOCKS_ROWS = [
 const README_ROWS = [
   ["項目", "説明"],
   ["必須ヘッダー", "cardId / blockOrder / type"],
-  ["type", "text / markdown / math / code を使用可能。image は phase 1 では未対応。"],
+  [
+    "type",
+    "text / markdown / math / code を使用可能。image は phase 1 では未対応。",
+  ],
   ["cardId", "同じ値の行を 1 枚のカードにグルーピングします。"],
   ["blockOrder", "1 以上の整数。front 側の表示順になります。"],
   ["content", "text / markdown / math / code では必須です。"],
-  ["language", "type=code のときだけ指定します。未指定なら plaintext 扱いです。"],
+  [
+    "language",
+    "type=code のときだけ指定します。未指定なら plaintext 扱いです。",
+  ],
   ["image", "将来の画像インポート用の予約列です。phase 1 では使いません。"],
   ["title", "同じ cardId 内で最初に見つかった title を採用します。"],
 ];

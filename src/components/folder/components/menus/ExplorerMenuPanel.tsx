@@ -10,14 +10,14 @@ import { cn } from "@/lib/utils";
 import React from "react";
 import type { MenuAction } from "./menuActions";
 
-interface ExplorerMenuPanelProps
-  extends React.ComponentPropsWithoutRef<typeof DropdownMenuContent> {
+interface ExplorerMenuPanelProps extends React.ComponentPropsWithoutRef<
+  typeof DropdownMenuContent
+> {
   actions: MenuAction[];
   closeMenu?: () => void;
 }
 
-const DANGER_ITEM_CLASS =
-  "text-red-600 focus:bg-red-50 focus:text-red-700";
+const DANGER_ITEM_CLASS = "text-red-600 focus:bg-red-50 focus:text-red-700";
 
 /**
  * エクスプローラーの各種メニュー（追加ボタン、コンテキストメニュー）で共有されるパネルコンポーネント

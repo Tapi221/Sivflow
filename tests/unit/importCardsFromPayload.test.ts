@@ -54,7 +54,7 @@ describe("importCardsFromPayload", () => {
         }) as CardSet,
     );
     const createCard = vi.fn(
-      async (cardData) => ({ id: crypto.randomUUID(), ...cardData } as any),
+      async (cardData) => ({ id: crypto.randomUUID(), ...cardData }) as any,
     );
 
     const result = await importCardsFromPayload({
@@ -86,7 +86,7 @@ describe("importCardsFromPayload", () => {
         }) as CardSet,
     );
     const createCard = vi.fn(
-      async (cardData) => ({ id: crypto.randomUUID(), ...cardData } as any),
+      async (cardData) => ({ id: crypto.randomUUID(), ...cardData }) as any,
     );
 
     const result = await importCardsFromPayload({
@@ -128,7 +128,7 @@ describe("importCardsFromPayload", () => {
         ({ id: "set-new", name, folderId: "folder-001" }) as CardSet,
     );
     const createCard = vi.fn(
-      async (cardData) => ({ id: crypto.randomUUID(), ...cardData } as any),
+      async (cardData) => ({ id: crypto.randomUUID(), ...cardData }) as any,
     );
 
     await importCardsFromPayload({

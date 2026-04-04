@@ -637,4 +637,3 @@ export const createLocalDBInternal = (userId?: string) => {
 
 // devtools.ts が './LocalDB' から import するため、instanceManager の関数を re-export する
 export { getLocalDb, getLocalDbSync, initializeDB, resetLocalDBForLogout };
-

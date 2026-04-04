@@ -50,9 +50,7 @@ type EditorProps = {
   pendingUploadFile?: File;
   onConsumePendingUpload?: () => void;
   onFilesExcess?: (files: File[]) => void;
-  onReplaceMarkdownWithBlocks?: (
-    blocks: CardBlockLayoutReplaceBlock[],
-  ) => void;
+  onReplaceMarkdownWithBlocks?: (blocks: CardBlockLayoutReplaceBlock[]) => void;
 };
 
 type CardBlockLayoutRendererProps =
@@ -195,7 +193,9 @@ export const CardBlockLayoutRenderer = (
         return (
           <MediaBlock
             data={(block.images || []) as any[]}
-            onChange={(data) => onUpdateBlock(block.id, { images: data as UploadedImage[] })}
+            onChange={(data) =>
+              onUpdateBlock(block.id, { images: data as UploadedImage[] })
+            }
             onDelete={onDelete}
             onDuplicate={onDuplicate}
             dragHandleProps={undefined}
@@ -323,7 +323,10 @@ export const CardBlockLayoutRenderer = (
           contentClassName="px-0"
         >
           <div style={fluidZoomStyle}>
-            <TextBlockContent mode="view" content={String(block.content ?? "")} />
+            <TextBlockContent
+              mode="view"
+              content={String(block.content ?? "")}
+            />
           </div>
         </BlockWrapper>
       );
@@ -338,7 +341,10 @@ export const CardBlockLayoutRenderer = (
           )}
           contentClassName="relative px-0"
         >
-          <div className="w-full max-w-full overflow-visible" style={fluidZoomStyle}>
+          <div
+            className="w-full max-w-full overflow-visible"
+            style={fluidZoomStyle}
+          >
             {renderGridOffsetSpacer(meta.gridOffsetPx)}
             <CodeRenderer
               code={block.code?.code ?? ""}

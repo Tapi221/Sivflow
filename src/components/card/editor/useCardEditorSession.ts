@@ -29,11 +29,7 @@ import { resolveCardTagNames } from "@/hooks/settings/useTags";
 import { sanitizeUploadedImages } from "@/utils/uploaded-image/sanitizer";
 
 import type { UploadedImage } from "@/types/domain/assets";
-import type {
-  Card,
-  CardBlock,
-  CardFaceAttachments,
-} from "@/types/domain/card";
+import type { Card, CardBlock, CardFaceAttachments } from "@/types/domain/card";
 
 const NEW_SENTINEL = "__new__" as const;
 const AUTOSAVE_DELAY_MS = 700;
@@ -458,7 +454,9 @@ export const useCardEditorSession = ({
         isDraft: currentDraft.isDraft,
         front: {
           blocks: sanitizeBlocksForSave(currentDraft.frontBlocks),
-          attachments: sanitizeAttachmentsForSave(currentDraft.frontAttachments),
+          attachments: sanitizeAttachmentsForSave(
+            currentDraft.frontAttachments,
+          ),
         },
         back: {
           blocks: sanitizeBlocksForSave(currentDraft.backBlocks),
@@ -1018,4 +1016,3 @@ export const useCardEditorSession = ({
     panelCard,
   };
 };
-

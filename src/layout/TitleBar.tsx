@@ -134,7 +134,9 @@ export const TitleBar: React.FC = () => {
             return (
               <React.Fragment
                 key={`${crumb.label}:${crumb.to ?? "no-to"}:${
-                  "folderId" in crumb ? crumb.folderId ?? "no-folder" : "no-folder"
+                  "folderId" in crumb
+                    ? (crumb.folderId ?? "no-folder")
+                    : "no-folder"
                 }:${i}`}
               >
                 {i > 0 && <span className="select-none text-gray-300">/</span>}

@@ -8,9 +8,22 @@ import { useDocuments } from "@/hooks/platform/useDocuments";
 import { resolveCardTagNames, useTags } from "@/hooks/settings/useTags";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { cn } from "@/lib/utils";
-import type { Card, CardSet, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
+import type {
+  Card,
+  CardSet,
+  DocumentItem,
+  Folder,
+  SelectedExplorerItem,
+} from "@/types";
 import { createPageUrl } from "@/utils";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useNavigate } from "react-router-dom";
 
 import { TreeViewMainPane } from "@/components/folder/components/TreeViewMainPane";
@@ -219,7 +232,10 @@ const TreeViewLayout = ({
     if (explorerHeaderFolderId) return explorerHeaderFolderId;
 
     if (selectedItem?.type === "cardSet") {
-      return cardSets.find((s: CardSet) => s.id === selectedItem.id)?.folderId ?? null;
+      return (
+        cardSets.find((s: CardSet) => s.id === selectedItem.id)?.folderId ??
+        null
+      );
     }
 
     return null;
@@ -228,8 +244,8 @@ const TreeViewLayout = ({
   const currentCardSetLabel = useMemo(() => {
     if (!selectedCardSetId) return null;
     return (
-      cardSets.find((cardSet: CardSet) => cardSet.id === selectedCardSetId)?.name ??
-      selectedCardSetLabel
+      cardSets.find((cardSet: CardSet) => cardSet.id === selectedCardSetId)
+        ?.name ?? selectedCardSetLabel
     );
   }, [cardSets, selectedCardSetId, selectedCardSetLabel]);
 
@@ -444,8 +460,8 @@ const TreeViewLayout = ({
         folderId={currentHeaderFolderId}
         folderName={
           currentHeaderFolderId
-            ? folders.find((folder) => folder.id === currentHeaderFolderId)
-                ?.folderName ?? null
+            ? (folders.find((folder) => folder.id === currentHeaderFolderId)
+                ?.folderName ?? null)
             : null
         }
         cardSets={importTargetCardSets}

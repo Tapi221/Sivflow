@@ -394,7 +394,6 @@ const AppContent = () => {
             }
           />
 
-
           {PdfScrollTest ? (
             <Route
               path="pdf-scroll-test"

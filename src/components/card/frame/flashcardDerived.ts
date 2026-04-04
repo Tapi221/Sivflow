@@ -244,8 +244,6 @@ export const resolveQuestionAttachmentReferences = (
   return (card.front?.attachments?.references ?? []).filter((r) => r.url);
 };
 
-export const resolveAnswerAttachmentReferences = (
-  card: FlashcardCardLike,
-) => {
+export const resolveAnswerAttachmentReferences = (card: FlashcardCardLike) => {
   return (card.back?.attachments?.references ?? []).filter((r) => r.url);
 };

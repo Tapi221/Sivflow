@@ -17,7 +17,10 @@ import type {
 type Side = "question" | "answer";
 type UseCardMediaDialogsParams = {
   getSideAttachments: (side: Side) => CardFaceAttachments;
-  setSideAttachments: (side: Side, nextAttachments: CardFaceAttachments) => void;
+  setSideAttachments: (
+    side: Side,
+    nextAttachments: CardFaceAttachments,
+  ) => void;
 };
 
 const normalizeAttachments = (
@@ -48,7 +51,9 @@ export const useCardMediaDialogs = ({
   }, [setSideAttachments]);
 
   const getDialogImages = useCallback((side: Side): UploadedImage[] => {
-    return normalizeAttachments(getSideAttachmentsRef.current(side)).images ?? [];
+    return (
+      normalizeAttachments(getSideAttachmentsRef.current(side)).images ?? []
+    );
   }, []);
 
   const setDialogImages = useCallback((side: Side, images: UploadedImage[]) => {
@@ -60,7 +65,9 @@ export const useCardMediaDialogs = ({
   }, []);
 
   const getDialogAudios = useCallback((side: Side) => {
-    return normalizeAttachments(getSideAttachmentsRef.current(side)).audios ?? [];
+    return (
+      normalizeAttachments(getSideAttachmentsRef.current(side)).audios ?? []
+    );
   }, []);
 
   const setDialogAudios = useCallback((side: Side, items: unknown[]) => {
@@ -99,8 +106,7 @@ export const useCardMediaDialogs = ({
   );
 
   const getLinkCount = useCallback(
-    (side: Side) =>
-      sanitizeReferences(getReferenceItems(side) ?? []).length,
+    (side: Side) => sanitizeReferences(getReferenceItems(side) ?? []).length,
     [],
   );
 

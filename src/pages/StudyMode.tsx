@@ -140,25 +140,25 @@ const StudyMode = () => {
       if (SESSION_KEY) {
         try {
           const raw = localStorage.getItem(SESSION_KEY);
-        if (raw) {
-          const data = JSON.parse(raw);
-          const isRecent = Date.now() - data.savedAt < 24 * 60 * 60 * 1000;
-          if (isRecent && Array.isArray(data.cardIds)) {
-            const dueById = new Map(dueStudyCards.map((c) => [c.id, c]));
-            const remaining = data.cardIds
-              .map((id) => dueById.get(id))
-              .filter(Boolean);
-            // 一部のカードが既にレビュー済み（残りが元より少ない）場合のみ復元
-            if (
-              remaining.length > 0 &&
-              remaining.length < data.cardIds.length
-            ) {
-              setSessionSeedCards(remaining);
-              return;
+          if (raw) {
+            const data = JSON.parse(raw);
+            const isRecent = Date.now() - data.savedAt < 24 * 60 * 60 * 1000;
+            if (isRecent && Array.isArray(data.cardIds)) {
+              const dueById = new Map(dueStudyCards.map((c) => [c.id, c]));
+              const remaining = data.cardIds
+                .map((id) => dueById.get(id))
+                .filter(Boolean);
+              // 一部のカードが既にレビュー済み（残りが元より少ない）場合のみ復元
+              if (
+                remaining.length > 0 &&
+                remaining.length < data.cardIds.length
+              ) {
+                setSessionSeedCards(remaining);
+                return;
+              }
             }
+            localStorage.removeItem(SESSION_KEY);
           }
-          localStorage.removeItem(SESSION_KEY);
-        }
         } catch {
           if (SESSION_KEY) localStorage.removeItem(SESSION_KEY);
         }

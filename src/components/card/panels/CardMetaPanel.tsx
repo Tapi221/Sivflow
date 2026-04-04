@@ -404,7 +404,7 @@ const areCardMetaCardsEqual = (
   if (prevLastReviewAt !== nextLastReviewAt) return false;
 
   if (prev.tagIds !== next.tagIds) return false;
-  
+
   return true;
 };
 
@@ -1813,4 +1813,3 @@ export const CardMetaPanel = memo(
   areCardMetaPanelPropsEqual,
 );
 CardMetaPanel.displayName = "CardMetaPanel";
-

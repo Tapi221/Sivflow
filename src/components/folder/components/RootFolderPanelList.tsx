@@ -26,7 +26,10 @@ interface RootFolderPanelListProps {
   setRowRef: (id: string, node: HTMLElement | null) => void;
   setOpenRowMenuId: React.Dispatch<React.SetStateAction<string | null>>;
   onSelectFolder: (folderId: string | null) => void;
-  onItemSelect: (item: { type: "card" | "cardSet" | "document"; id: string }) => void;
+  onItemSelect: (item: {
+    type: "card" | "cardSet" | "document";
+    id: string;
+  }) => void;
   handleCreateFolderAction: (parentId: string | null) => string;
   handleCreateCardSetAction: (folderId: string | null) => string | null;
   handleDelete: (id: string, type: "folder" | "card") => void;

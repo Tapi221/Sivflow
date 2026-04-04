@@ -35,7 +35,10 @@ const buildIssue = ({
 };
 
 const normalizeHeaderName = (value: string): ImportColumnKey | null => {
-  const normalized = value.trim().toLowerCase().replace(/[\s_-]+/g, "");
+  const normalized = value
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_-]+/g, "");
 
   if (normalized === "cardid") return "cardId";
   if (normalized === "blockorder" || normalized === "order") {
@@ -276,7 +279,8 @@ const buildRowBlock = ({
         sheetName,
         rowNumber,
         columnKey: "language",
-        message: "language は type=code のときだけ使用されます。今回は無視します。",
+        message:
+          "language は type=code のときだけ使用されます。今回は無視します。",
       }),
     );
   }
@@ -316,7 +320,11 @@ const groupRowsToCards = (rows: ParsedImportRow[]) => {
       return;
     }
 
-    if (parsedRow.title && existing.title && parsedRow.title !== existing.title) {
+    if (
+      parsedRow.title &&
+      existing.title &&
+      parsedRow.title !== existing.title
+    ) {
       issues.push(
         buildIssue({
           level: "warning",

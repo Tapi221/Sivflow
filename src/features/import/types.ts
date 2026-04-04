@@ -10,12 +10,7 @@ export type ImportColumnKey =
   | "title"
   | "note";
 
-export type ImportBlockType =
-  | "text"
-  | "markdown"
-  | "math"
-  | "code"
-  | "image";
+export type ImportBlockType = "text" | "markdown" | "math" | "code" | "image";
 
 export type ImportBlock = {
   type: ImportBlockType;
