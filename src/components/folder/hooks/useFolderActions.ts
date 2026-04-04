@@ -260,8 +260,7 @@ export const useFolderActions = ({
       ) {
         return "cardSet";
       }
-      // IDが 'doc-' で始まる場合は document と判定
-      if (id.startsWith("doc-")) {
+      if (id.startsWith("doc-") || type === "document") {
         return "document";
       }
       return "folder";
