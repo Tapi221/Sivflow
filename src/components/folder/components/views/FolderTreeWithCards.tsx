@@ -731,9 +731,7 @@ export const FolderTreeWithCards = ({
 
     if (!scopedRootNode?.children?.length) return [];
 
-    return scopedRootNode.children.map((node) =>
-      node.kind === "folder" ? { ...node, children: undefined } : node,
-    );
+    return scopedRootNode.children;
   }, [activeRootFolderId, explorerTreeData, hasActiveRootScope]);
 
   const selectedTreeId = useMemo(() => {

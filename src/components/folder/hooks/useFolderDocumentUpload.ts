@@ -389,12 +389,14 @@ export const useFolderDocumentUpload = ({
       const targetFolderId = uploadTargetFolderIdRef.current;
       const uploadType = uploadTypeRef.current;
       const files = event.target.files;
-      event.target.value = "";
-
-      if (!targetFolderId || !files) return;
+      if (!targetFolderId || !files) {
+        event.target.value = "";
+        return;
+      }
 
       const pdfFiles = extractPdfFiles(files);
       const pptxFiles = extractPptxFiles(files);
+      event.target.value = "";
 
       if (uploadType !== "pptx" && pdfFiles.length > 0) {
         void handlePdfDropped(targetFolderId, pdfFiles);
