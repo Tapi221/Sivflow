@@ -14,6 +14,7 @@ import {
     startTransition,
     useCallback,
     useEffect,
+    useLayoutEffect,
     useMemo,
     useRef,
     useState,
@@ -510,7 +511,7 @@ const Folders = () => {
   ]);
 
   // 計算されたパンくずをコンテキストに反映
-  useEffect(() => {
+  useLayoutEffect(() => {
     setExtraCrumbs(extraCrumbs);
   }, [extraCrumbs, setExtraCrumbs]);
 
