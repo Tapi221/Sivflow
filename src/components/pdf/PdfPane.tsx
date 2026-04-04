@@ -161,12 +161,10 @@ export const PdfPane = ({
     };
   }, []);
 
-  const displayName = doc.title || doc.name || "PDF";
 
   return (
     <div className={cn("flex flex-col h-full min-h-0 min-w-0", className)}>
       <PdfPaneToolbar
-        displayName={displayName}
         isLocalOnly={isLocalOnly}
         uploadStatus={doc.uploadStatus}
         currentPage={currentPage}
