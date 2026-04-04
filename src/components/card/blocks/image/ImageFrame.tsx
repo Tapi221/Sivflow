@@ -3,6 +3,7 @@ import React from "react";
 
 const clamp = (v: number, min: number, max: number) =>
   Math.min(max, Math.max(min, v));
+
 const DRAG_START_THRESHOLD_PX = 6;
 
 const inferBaseWidthFromLegacyScale = (
@@ -32,10 +33,8 @@ type ImageFrameProps = {
   zoom?: number;
   scale?: number | null;
   x?: number | null;
-  /** fixed 本文座標系での画像論理幅。fixed / fluid 共通の正本。 */
   layoutBaseWidthPx?: number | null;
   cropX?: number | null;
-  /** legacy scale から fixed 本文座標系の基準幅を逆算するための参照幅。 */
   fixedReferenceFrameWidthPx?: number | null;
   fluidAvailableWidthPx?: number | null;
   naturalW?: number | null;
@@ -90,6 +89,7 @@ export const ImageFrame = ({
     naturalW: number;
     naturalH: number;
   } | null>(null);
+
   const safeZoom =
     typeof zoom === "number" && Number.isFinite(zoom) && zoom > 0 ? zoom : 1;
 
@@ -109,6 +109,7 @@ export const ImageFrame = ({
     fixedReferenceFrameWidthPx > 0
       ? fixedReferenceFrameWidthPx
       : frameW;
+
   const resolvedBaseWidthPx =
     typeof layoutBaseWidthPx === "number" &&
     Number.isFinite(layoutBaseWidthPx) &&
@@ -121,23 +122,28 @@ export const ImageFrame = ({
   const empty = Math.max(0, frameW - imgW);
   const leftPx = clamp(((activeX + 1) / 2) * empty, 0, empty);
 
-  const fixedRenderWidthPx = resolvedBaseWidthPx;
-  const resolvedFluidAvailableWidthPx =
+  const measuredFrameWidthPx = Math.max(
+    1,
+    frameW || resolvedReferenceWidthPx || resolvedBaseWidthPx || 1,
+  );
+
+  const resolvedAvailableWidthPx =
     typeof fluidAvailableWidthPx === "number" &&
     Number.isFinite(fluidAvailableWidthPx) &&
     fluidAvailableWidthPx > 0
       ? fluidAvailableWidthPx
-      : frameW;
-  const fluidLogicalAvailableWidthPx =
+      : measuredFrameWidthPx;
+
+  const logicalAvailableWidthPx =
     displayMode === "fluid"
-      ? Math.max(1, resolvedFluidAvailableWidthPx / safeZoom)
-      : resolvedFluidAvailableWidthPx;
-  const fluidRenderWidthPx = Math.min(
-    resolvedBaseWidthPx,
-    Math.max(1, fluidLogicalAvailableWidthPx || resolvedBaseWidthPx),
+      ? Math.max(1, resolvedAvailableWidthPx / safeZoom)
+      : Math.max(1, resolvedAvailableWidthPx);
+
+  const renderWidthPx = Math.min(
+    Math.max(1, resolvedBaseWidthPx),
+    logicalAvailableWidthPx,
   );
-  const renderWidthPx =
-    displayMode === "fluid" ? fluidRenderWidthPx : fixedRenderWidthPx;
+
   const renderHeightPx = Math.max(1, renderWidthPx * ratio);
 
   const emitTransform = React.useCallback(
@@ -204,6 +210,7 @@ export const ImageFrame = ({
     if (!img.complete || img.naturalWidth <= 0 || img.naturalHeight <= 0) {
       return;
     }
+
     setLoadedNaturalSize((prev) => {
       if (
         prev?.naturalW === img.naturalWidth &&
@@ -211,6 +218,7 @@ export const ImageFrame = ({
       ) {
         return prev;
       }
+
       return { naturalW: img.naturalWidth, naturalH: img.naturalHeight };
     });
   }, [src]);
@@ -332,6 +340,7 @@ export const ImageFrame = ({
               ) {
                 return prev;
               }
+
               return {
                 naturalW: target.naturalWidth,
                 naturalH: target.naturalHeight,
@@ -353,7 +362,7 @@ export const ImageFrame = ({
             className={cn("block h-auto", imgClassName)}
             style={{
               width: `${Math.max(1, renderWidthPx)}px`,
-              maxWidth: displayMode === "fluid" ? "100%" : "none",
+              maxWidth: "100%",
             }}
             decoding="async"
             draggable={false}
@@ -373,6 +382,7 @@ export const ImageFrame = ({
                 ) {
                   return prev;
                 }
+
                 return {
                   naturalW: target.naturalWidth,
                   naturalH: target.naturalHeight,
