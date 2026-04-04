@@ -29,6 +29,7 @@ const Trash = lazy(() => import("./pages/Trash"));
 const ImageDiagnostics = lazy(() => import("./pages/ImageDiagnostics"));
 const Gallery = lazy(() => import("./pages/Gallery"));
 const Directory = lazy(() => import("./pages/Directory"));
+const Dictionary = lazy(() => import("./pages/Dictionary"));
 const NotImplementedPlaceholder = lazy(
   () => import("./pages/NotImplementedPlaceholder"),
 );
@@ -72,8 +73,8 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { currentUser, loading } = useAuthSession();
 
   // 認証状態をまだ取得中ならローディング画面を表示
-  // ⚠ AuthProvider は children を常にレンダリングするようになったため、
-  //   ProtectedRoute が loading ガードの唯一の砦となる。
+  // AuthProvider は children を常にレンダリングするようになったため、
+  // ProtectedRoute が loading ガードの唯一の砦となる。
   if (loading) {
     return <LoadingFallback />;
   }
@@ -295,7 +296,7 @@ const AppContent = () => {
   const isTestBypass = isTestBypassEnabled();
 
   // 認証状態がまだ解決していない場合はローディング画面を表示
-  // ⚠ BrowserRouter を破棄せずにローディング表示することでルーティング状態を保護
+  // BrowserRouter を破棄せずにローディング表示することでルーティング状態を保護
   if (loading) {
     return <LoadingFallback />;
   }
@@ -333,12 +334,9 @@ const AppContent = () => {
   // 通常時のアプリ本体
   return (
     <>
-      {/* アカウントロックされている場合のブロック UI（内部で条件判定している想定） */}
       <AccountLockedScreen />
 
-      {/* ルーティング定義 */}
       <Routes>
-        {/* ルートパス "/" のレイアウト（ProtectedRoute でログインを強制） */}
         <Route
           path="/"
           element={
@@ -347,9 +345,8 @@ const AppContent = () => {
             </ProtectedRoute>
           }
         >
-          {/* "/" にアクセスされたら "/folders" にリダイレクト */}
           <Route index element={<DefaultRedirect />} />
-          {/* フォルダ一覧 */}
+
           <Route
             path="folders"
             element={
@@ -358,14 +355,22 @@ const AppContent = () => {
               </Suspense>
             }
           />
-          {/* 以降はページごとのルート */}
+
+          <Route
+            path="dictionary"
+            element={
+              <Suspense fallback={<LoadingFallback />}>
+                <Dictionary />
+              </Suspense>
+            }
+          />
+
           <Route path="CardEdit" element={<CardEdit />} />
           <Route path="CardView" element={<CardView />} />
           <Route path="study" element={<StudyMode />} />
           <Route path="calendar" element={<Calendar />} />
-          `r`n{" "}
           <Route path="sandbox/blocknote" element={<BlockNoteSandboxPage />} />
-          {/* ギャラリーなど、重そうなページは Suspense でラップ */}
+
           <Route
             path="gallery"
             element={
@@ -423,6 +428,7 @@ const AppContent = () => {
               </Suspense>
             }
           />
+
           {PdfScrollTest ? (
             <Route
               path="pdf-scroll-test"
@@ -433,6 +439,7 @@ const AppContent = () => {
               }
             />
           ) : null}
+
           {CodeBlockVisualTest ? (
             <Route
               path="codeblock-visual-test"
@@ -443,6 +450,7 @@ const AppContent = () => {
               }
             />
           ) : null}
+
           {CardLayoutConsistencyTest ? (
             <Route
               path="card-layout-test"
@@ -455,11 +463,9 @@ const AppContent = () => {
           ) : null}
         </Route>
 
-        {/* どのルートにもマッチしない場合はフォルダ画面にリダイレクト */}
         <Route path="*" element={<Navigate to="/folders" replace />} />
       </Routes>
 
-      {/* 同期中であれば、右下に小さなステータスバナーを表示 */}
       {syncProgress && (
         <div className="fixed bottom-8 right-8 z-[9999] animate-in fade-in slide-in-from-bottom-6 duration-500">
           <div className="bg-white/80 backdrop-blur-xl border border-white rounded-[24px] p-4 shadow-[0_20px_50px_rgba(0,0,0,0.1)] flex items-center gap-4 min-w-[240px]">
@@ -471,7 +477,6 @@ const AppContent = () => {
               <p className="text-[10px] text-primary-600 font-bold uppercase tracking-[0.2em] mb-0.5">
                 Cloud Sync
               </p>
-              {/* syncProgress に同期内容のテキストが入っている */}
               <p className="text-slate-600 text-xs font-bold truncate max-w-[160px]">
                 {syncProgress}
               </p>
@@ -485,15 +490,12 @@ const AppContent = () => {
 
 const App = () => {
   return (
-    // 各種コンテキストでアプリ全体をラップし、どの子コンポーネントからも利用できるようにする
     <AuthProvider>
       <ThemeManager />
       <ToastProvider>
         <NotificationProvider>
-          {/* ブラウザの URL に応じて画面を切り替えるための Router */}
           <BrowserRouter>
             <BreadcrumbProvider>
-              {/* lazy で遅延読み込みしたページのローディング中に表示する UI の定義 */}
               <Suspense fallback={<LoadingFallback />}>
                 <AppContent />
               </Suspense>
