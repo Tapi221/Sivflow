@@ -31,7 +31,22 @@ export const useExplorerDialogs = () => {
   const [openRowMenuId, setOpenRowMenuId] = useState<string | null>(null);
 
   // bulk tag
+  // bulk tag
   const [bulkTagFolderId, setBulkTagFolderId] = useState<string | null>(null);
+
+  // delete folder
+  const [deleteFolderTargetId, setDeleteFolderTargetId] = useState<string | null>(null);
+  const [isDeleteFolderDialogOpen, setIsDeleteFolderDialogOpen] = useState(false);
+
+  const openDeleteFolderDialog = useCallback((folderId: string) => {
+    setDeleteFolderTargetId(folderId);
+    setIsDeleteFolderDialogOpen(true);
+  }, []);
+
+  const closeDeleteFolderDialog = useCallback(() => {
+    setDeleteFolderTargetId(null);
+    setIsDeleteFolderDialogOpen(false);
+  }, []);
 
   return {
     // rename
@@ -51,5 +66,10 @@ export const useExplorerDialogs = () => {
     // bulk tag
     bulkTagFolderId,
     setBulkTagFolderId,
+    // delete
+    deleteFolderTargetId,
+    isDeleteFolderDialogOpen,
+    openDeleteFolderDialog,
+    closeDeleteFolderDialog,
   };
 };

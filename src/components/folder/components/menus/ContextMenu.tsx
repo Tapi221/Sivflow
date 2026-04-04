@@ -166,7 +166,11 @@ export const ContextMenu = ({
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={onDelete}
+              onSelect={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onDelete?.();
+              }}
               className="gap-2 text-red-600 focus:bg-red-50 focus:text-red-700"
             >
               <Trash2 className="h-4 w-4" />

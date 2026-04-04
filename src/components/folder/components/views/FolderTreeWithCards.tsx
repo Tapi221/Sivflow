@@ -24,6 +24,16 @@ import { useFolderActions } from "@/components/folder/hooks/useFolderActions";
 import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
 import { FolderTreeArborist } from "@/components/sidebar/FolderTreeArborist";
 import BulkTagDialog from "@/components/tag/BulkTagDialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import type {
   Card,
@@ -349,6 +359,7 @@ export const FolderTreeWithCards = ({
     setEditingId: dialogs.setEditingId,
     setEditingName: dialogs.setEditingName,
     closeRename: dialogs.closeRename,
+    openDeleteFolderDialog: dialogs.openDeleteFolderDialog,
 
     setOptimisticFolders,
     setOptimisticCards,
@@ -1069,6 +1080,36 @@ export const FolderTreeWithCards = ({
           folderId={dialogs.bulkTagFolderId}
         />
       )}
+      
+      <AlertDialog
+        open={dialogs.isDeleteFolderDialogOpen}
+        onOpenChange={(open) => {
+          if (!open) dialogs.closeDeleteFolderDialog();
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>フォルダの削除</AlertDialogTitle>
+            <AlertDialogDescription>
+              このフォルダを本当に削除しますか？この操作は取り消せません。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>キャンセル</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 text-white hover:bg-red-700"
+              onClick={async () => {
+                if (dialogs.deleteFolderTargetId) {
+                  await actions.handleConfirmDeleteFolder?.(dialogs.deleteFolderTargetId);
+                }
+                dialogs.closeDeleteFolderDialog();
+              }}
+            >
+              削除
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
