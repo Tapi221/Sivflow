@@ -58,7 +58,7 @@ const Layout = () => {
       <SettingsDialog
         open={isSettingsOpen}
         onOpenChange={setIsSettingsOpen}
-        initialTab={settingsTab ?? "account"}
+        initialTab={settingsTab ?? "study"}
       />
 
       <LocalDBStatusBanner />

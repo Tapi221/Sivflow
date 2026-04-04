@@ -1,6 +1,5 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import {
-  User,
   Tag,
   Volume2,
   Database,
@@ -9,11 +8,8 @@ import {
   Check,
   Folder,
   Layers,
-  Camera,
   Loader2,
   RefreshCw,
-  Calendar,
-  ChevronRight,
   Keyboard,
   Cloud,
 } from "@/ui/icons";
@@ -26,7 +22,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -40,20 +35,13 @@ import { cn } from "@/lib/utils";
 import { signOut } from "firebase/auth";
 import { auth } from "@/services/firebase";
 import { useNavigate } from "react-router-dom";
-import { uploadProfileImage } from "@/services/imageUploadService";
-import { useReliableFileUpload } from "@/hooks/platform/useReliableFileUpload";
-import { Slider } from "@/components/ui/slider";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { BookOpen } from "@/ui/icons";
-import { StorageManager } from "./StorageManager";
-import {
-  createUploadedImage,
-  createFailedUploadedImage,
-} from "@/utils/uploaded-image/factory";
-import { isHeicFile, convertHeicToJpeg } from "@/utils/uploaded-image/heic";
-import { compressAndConvertToBase64 } from "@/utils/uploaded-image/imageCompression";
 import { UploadProgress } from "@/components/ui/UploadProgress";
 import { getAvatarColors, getInitials } from "@/utils/avatarUtils";
+import DataRescuePanel from "@/components/settings/DataRescuePanel";
+import { DeviceSyncSettings } from "@/components/settings/DeviceSyncSettings";
+import { BlockOrdering } from "@/components/settings/BlockOrdering";
 import {
   EXPLORER_ROW_BASE_CLASS_NAME,
   EXPLORER_ROW_CONTENT_CLASS,
@@ -63,19 +51,10 @@ import {
   FOLDER_ROW_ICON_SIZE_CLASS,
   FOLDER_ROW_TITLE_CLASS,
 } from "@/components/folder/explorer/rows/shared";
-import DataRescuePanel from "@/components/settings/DataRescuePanel";
-import { DeviceSyncSettings } from "@/components/settings/DeviceSyncSettings";
-import { BlockOrdering } from "@/components/settings/BlockOrdering";
 import { useSyncSettings } from "@/hooks/sync/useSyncSettings";
-import {
-  validateUsername,
-  truncateUsername,
-  countUnicodeCharacters,
-} from "@/utils/userValidation";
 import { TagManagerPanel } from "@/components/tag/TagManagerPanel";
 
 const sidebarItems = [
-  { id: "account", label: "アカウント", icon: User },
   { id: "study", label: "学習設定", icon: BookOpen },
   { id: "theme", label: "テーマカラー", icon: Layers },
   { id: "tags", label: "タグ管理", icon: Tag },
@@ -84,6 +63,10 @@ const sidebarItems = [
   { id: "sync", label: "同期設定", icon: RefreshCw },
   { id: "data", label: "データ", icon: Database },
 ];
+
+const DEFAULT_SETTINGS_TAB = "study";
+const resolveSettingsTab = (tab) =>
+  sidebarItems.some((item) => item.id === tab) ? tab : DEFAULT_SETTINGS_TAB;
 
 const voiceOptions = [
   { id: "kore", label: "Kore" },
@@ -178,22 +161,17 @@ const folderSidebarDisplayModeOptions = [
 ];
 
 const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
-  const [activeTab, setActiveTab] = useState("account");
+  const [activeTab, setActiveTab] = useState(DEFAULT_SETTINGS_TAB);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // タブの初期化と同期
   useEffect(() => {
-    if (open && initialTab) {
-      setActiveTab(initialTab);
+    if (open) {
+      setActiveTab(resolveSettingsTab(initialTab));
     }
   }, [open, initialTab]);
 
-  const [uploadingImage, setUploadingImage] = useState(false);
   const [imgError, setImgError] = useState(false);
-  const [editingName, setEditingName] = useState(false);
-  const [tempDisplayName, setTempDisplayName] = useState("");
-  const [nameError, setNameError] = useState("");
-  const fileInputRef = useRef(null);
   const { currentUser, syncStatus, lastSyncTime, triggerSync } = useAuth();
   const navigate = useNavigate();
   const { folders = [], updateFolder } = useFolders();
@@ -214,137 +192,12 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
     : googleProfileImageUrl;
   const hasResolvedProfileImage = !!resolvedProfileImageUrl && !imgError;
 
-  // Reset imgError when profileImage remoteUrl changes
-  useEffect(() => {
-    setImgError(false);
-  }, [settings?.profileImage?.remoteUrl, currentUser?.photoURL]);
-
-  // Debug: Log profileImage changes (検証用)
-  useEffect(() => {
-    if (import.meta.env.DEV) {
-      console.log("[Settings] loaded profileImage", settings?.profileImage);
-      const remoteUrl = settings?.profileImage?.remoteUrl;
-      if (typeof remoteUrl === "string" && remoteUrl.startsWith("blob:")) {
-        console.warn(
-          "[Settings] blob remoteUrl detected on render:",
-          remoteUrl,
-        );
-      }
-    }
-  }, [settings?.profileImage?.remoteUrl, settings?.profileImage?.updatedAt]);
-
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      navigate("/login");
-    } catch (error) {
-      console.error("ログアウトエラー:", error);
-    }
-  };
-
-  /**
-   * プロフィール画像アップロード処理
-   *
-   * 新仕様:
-   * - Firebase Storage の downloadURL のみを settings に保存
-   * - スキーマ: { remoteUrl: string | null; updatedAt: number }
-   */
-  const handleImageUpload = async (event) => {
-    // Prevent multiple concurrent uploads
-    if (uploadingImage) return;
-
-    // Avoid React event pooling issues - preserve input element reference
-    const inputEl = event.currentTarget;
-    const file = inputEl.files?.[0];
-    if (!file) return;
-
-    if (import.meta.env.DEV) {
-      console.log(
-        "[ProfileImage] Upload started:",
-        file.name,
-        file.type,
-        file.size,
-      );
-    }
-    setUploadingImage(true);
-
-    try {
-      let processedFile = file;
-
-      // HEIC形式を JPEG に変換
-      if (isHeicFile(file)) {
-        if (import.meta.env.DEV) {
-          console.log("[ProfileImage] Converting HEIC to JPEG...");
-        }
-        processedFile = await convertHeicToJpeg(file);
-        if (import.meta.env.DEV) {
-          console.log("[ProfileImage] Conversion complete");
-        }
-      }
-
-      if (!currentUser?.uid) {
-        throw new Error("ユーザーIDが見つかりません");
-      }
-
-      // Firebase Storage にアップロード
-      if (import.meta.env.DEV) {
-        console.log("[ProfileImage] Uploading to Firebase Storage...");
-      }
-      const downloadUrl = await uploadProfileImage({
-        uid: currentUser.uid,
-        file: processedFile,
-      });
-
-      if (import.meta.env.DEV) {
-        console.log("[ProfileImage] ✅ Upload successful");
-      }
-
-      // settings に保存: シンプルなスキーマ
-      const profileImageData = {
-        remoteUrl: downloadUrl,
-        updatedAt: Date.now(),
-      };
-      await updateSettings({
-        profileImage: profileImageData,
-      });
-      if (import.meta.env.DEV) {
-        console.log("[Settings] saved profileImage", profileImageData);
-        console.log("[ProfileImage] Settings saved successfully");
-      }
-    } catch (error) {
-      console.error("[ProfileImage] ❌ Upload failed:", error);
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-      console.error("[ProfileImage] Error:", errorMessage);
-    } finally {
-      setUploadingImage(false);
-      // ファイル入力をリセット（event pooling対策）
-      inputEl.value = "";
-    }
-  };
-
-  const handleNameEdit = () => {
-    setTempDisplayName(settings?.displayName || "UserName");
-    setEditingName(true);
-  };
-
-  const handleNameSave = async () => {
-    const result = validateUsername(tempDisplayName);
-    if (!result.isValid) {
-      setNameError(result.message);
-      return;
-    }
-
-    await updateSettings({ displayName: tempDisplayName.trim() });
-    setEditingName(false);
-    setNameError("");
-  };
-
-  const handleNameCancel = () => {
-    setEditingName(false);
-    setTempDisplayName("");
-    setNameError("");
-  };
+  const footerDisplayName =
+    currentUser?.displayName?.trim() ||
+    settings?.displayName ||
+    "User";
+  const { bg: footerAvatarBg, text: footerAvatarText } =
+    getAvatarColors(footerDisplayName);
 
   const { settings: syncPrefs, updateSettings: updateSyncPrefs } =
     useSyncSettings();
@@ -406,188 +259,6 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
 
   const renderContent = () => {
     switch (activeTab) {
-      case "account":
-        const displayName = settings?.displayName || "UserName";
-        const { bg: avatarBg, text: avatarText } = getAvatarColors(
-          settings?.displayName,
-        );
-
-        return (
-          <div className="space-y-8 animate-in fade-in duration-300">
-            {/* Profile Image Section */}
-            <div className="space-y-4">
-              <div className="text-sm font-bold text-slate-600">
-                プロフィール画像
-              </div>
-              <div className="flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-6">
-                <div className="relative group">
-                  <div
-                    style={{
-                      backgroundColor: hasResolvedProfileImage ? "transparent" : avatarBg,
-                    }}
-                    className="w-24 h-24 rounded-full flex items-center justify-center text-3xl font-bold overflow-hidden border-4 border-white shadow-lg relative ring-2 ring-slate-100"
-                  >
-                    {hasResolvedProfileImage ? (
-                      <img
-                        src={resolvedProfileImageUrl}
-                        alt="Profile"
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          console.error(
-                            "[Settings] Profile image load failed:",
-                            e.currentTarget.src,
-                          );
-                          setImgError(true);
-                        }}
-                      />
-                    ) : (
-                      <span style={{ color: avatarText }}>
-                        {getInitials(displayName)}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Upload overlay */}
-                  <button
-                    onClick={() => {
-                      if (uploadingImage) return;
-                      fileInputRef.current?.click();
-                    }}
-                    className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/20 flex items-center justify-center transition-all cursor-pointer"
-                    disabled={uploadingImage}
-                  >
-                    <Camera className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-md" />
-                  </button>
-
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*,.heic"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                  />
-                </div>
-
-                <div className="flex-1 space-y-4">
-                  <Button
-                    onClick={() => fileInputRef.current?.click()}
-                    variant="outline"
-                    className="rounded-xl border-slate-200/80 bg-white/60 text-slate-600 backdrop-blur-sm hover:bg-white/78 hover:text-slate-900 hover:border-slate-300 font-bold text-sm shadow-sm"
-                    disabled={uploadingImage}
-                  >
-                    <Camera className="w-4 h-4 mr-2" />
-                    {uploadingImage ? "アップロード中..." : "画像を変更"}
-                  </Button>
-
-                  {/* Upload Status */}
-                  {uploadingImage && (
-                    <div className="text-xs text-slate-500">
-                      アップロード中...
-                    </div>
-                  )}
-
-                  <p className="text-xs text-slate-500">
-                    JPG、PNG、HEIC形式に対応しています (最大10MB)
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Username Section */}
-            <div className="space-y-4">
-              <div className="text-sm font-bold text-slate-600 flex justify-between items-center">
-                <span>ユーザー名</span>
-                {editingName && (
-                  <span
-                    className={cn(
-                      "text-[10px] font-serif font-bold",
-                      countUnicodeCharacters(tempDisplayName.trim()) > 20
-                        ? "text-red-500"
-                        : "text-slate-400",
-                    )}
-                  >
-                    {countUnicodeCharacters(tempDisplayName.trim())} / 20
-                  </span>
-                )}
-              </div>
-              {editingName ? (
-                <div className="space-y-2">
-                  <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
-                    <Input
-                      value={tempDisplayName}
-                      onChange={(e) => {
-                        setTempDisplayName(e.target.value);
-                        if (nameError) setNameError("");
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && tempDisplayName.trim())
-                          handleNameSave();
-                        if (e.key === "Escape") handleNameCancel();
-                      }}
-                      placeholder="ユーザー名を入力"
-                      className={cn(
-                        "flex-1 rounded-xl border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus:border-primary-500 focus:ring-primary-100",
-                        nameError &&
-                          "border-red-500 focus-visible:ring-red-100",
-                      )}
-                      autoFocus
-                    />
-                    <Button
-                      onClick={handleNameSave}
-                      size="sm"
-                      disabled={!tempDisplayName.trim()}
-                      className="bg-primary-600 hover:bg-primary-500 disabled:opacity-50 disabled:bg-primary-600/50 text-white rounded-xl font-bold shadow-md shadow-primary-200"
-                    >
-                      <Check className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      onClick={handleNameCancel}
-                      size="sm"
-                      variant="outline"
-                      className="rounded-xl border-slate-200/80 bg-white/60 text-slate-500 backdrop-blur-sm hover:bg-white/78 hover:text-slate-700 font-bold"
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  </div>
-                  {nameError && (
-                    <p className="text-[11px] font-bold text-red-500 animate-in fade-in slide-in-from-top-1 duration-200 px-1">
-                      {nameError}
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <div className="bg-white/62 border border-slate-200/80 rounded-xl backdrop-blur-sm p-4 flex items-center justify-between group shadow-sm">
-                  <div className="min-w-0 flex-1 mr-4">
-                    <div
-                      className="font-bold text-lg text-slate-800 truncate"
-                      title={displayName}
-                    >
-                      {truncateUsername(displayName)}
-                    </div>
-                    <div className="text-slate-500 text-sm truncate">
-                      {currentUser?.email || "email@example.com"}
-                    </div>
-                  </div>
-                  <Button
-                    onClick={handleNameEdit}
-                    variant="ghost"
-                    size="sm"
-                    className="opacity-0 group-hover:opacity-100 transition-opacity text-primary-600 hover:text-primary-700 hover:bg-primary-50 rounded-xl font-bold shrink-0"
-                  >
-                    編集
-                  </Button>
-                </div>
-              )}
-            </div>
-
-            <div className="pt-6 border-t border-slate-200">
-              <h3 className="font-bold text-slate-800 mb-4 px-1 tracking-wide">
-                ストレージ管理
-              </h3>
-              <StorageManager />
-            </div>
-          </div>
-        );
 
       case "tags":
         return (
@@ -1451,7 +1122,7 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
         className="w-full max-w-none h-[100dvh] md:max-w-[1120px] md:w-full md:h-[80vh] md:max-h-[800px] p-0 gap-0 flex flex-col overflow-hidden data-[state=open]:duration-300 ring-0 outline-none rounded-none md:rounded-[10px]"
       >
         <DialogDescription className="sr-only">
-          アカウント、学習、同期、データ管理などの設定を行うダイアログです。
+          学習、同期、データ管理などの設定を行うダイアログです。
         </DialogDescription>
         <div className="flex flex-1 h-full overflow-hidden bg-transparent">
           {/* Sidebar */}
@@ -1512,9 +1183,8 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
                     hasResolvedProfileImage
                       ? undefined
                       : {
-                          backgroundColor: getAvatarColors(settings?.displayName)
-                            .bg,
-                          color: getAvatarColors(settings?.displayName).text,
+                          backgroundColor: footerAvatarBg,
+                          color: footerAvatarText,
                         }
                   }
                 >
@@ -1526,12 +1196,12 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
                       onError={() => setImgError(true)}
                     />
                   ) : (
-                    getInitials(settings?.displayName)
+                    getInitials(footerDisplayName)
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="truncate text-xs font-semibold text-slate-800">
-                    {settings?.displayName || "User"}
+                    {footerDisplayName}
                   </div>
                   <div className="truncate text-[10px] text-slate-500">
                     {currentUser?.email}

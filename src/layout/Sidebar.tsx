@@ -210,7 +210,7 @@ export const Sidebar = () => {
   const handleOpenSettings = () => {
     const next = new URLSearchParams(location.search);
     next.set("settings", "true");
-    next.set("settingsTab", "account");
+    next.set("settingsTab", "study");
     navigate({ search: `?${next.toString()}` });
   };
 

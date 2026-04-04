@@ -1,4 +1,40 @@
-# 実装プラン: SettingsDialog のプロフィール画像表示の改善
+# 実装プラン: 設定ダイアログの整理とアカウントタブの削除
+
+## 概要
+設定ダイアログから「アカウント」タブを削除し、ユーザー情報の編集（名前、プロフィール画像）機能を廃止します。代わりに Firebase (Google) のプロフィール情報を優先的に表示するようにし、ダイアログのデフォルトタブを「学習設定」に変更します。
+
+## 変更内容
+
+### 1. SettingsDialog.jsx の大幅な整理
+- 「アカウント」タブに関連する以下の要素を削除します：
+  - `User`, `Camera`, `Calendar`, `ChevronRight` などの不要なアイコンインポート。
+  - `Input` コンポーネント。
+  - 画像アップロード関連のサービス (`uploadProfileImage`) およびユーティリティ (`isHeicFile`, `convertHeicToJpeg` 等)。
+  - ユーザー名バリデーション関連のユーティリティ (`validateUsername` 等)。
+  - `sidebarItems` から「アカウント」を削除。
+  - プロフィール編集用の状態変数 (`uploadingImage`, `editingName` 等) と関数 (`handleImageUpload`, `handleNameSave` 等)。
+  - `renderContent` 内の `case "account"` ブロック全体。
+- デフォルトタブを `account` から `study` (学習設定) に変更します。
+- `initialTab` が無効な場合に備え、`resolveSettingsTab` ヘルプ関数を追加します。
+
+### 2. フッター（ユーザー情報）の表示ロジック改善
+- 表示名を決定する優先順位を `currentUser.displayName` > `settings.displayName` > `"User"` とします。
+- アバターの背景色やテキスト色を決定する際、この優先順位に基づいた名前を使用するように統合します。
+
+### 3. アプリ全体でのデフォルトタブの統一
+- `src/Layout.tsx` および `src/layout/Sidebar.tsx` において、設定を開く際の初期タブを `account` から `study` へ変更します。
+
+## 影響範囲
+- `src/components/settings/SettingsDialog.jsx`
+- `src/Layout.tsx`
+- `src/layout/Sidebar.tsx`
+
+## 確認事項
+- [ ] 設定ダイアログを開いた際、最初に「学習設定」が表示されるか。
+- [ ] 「アカウント」タブがサイドバーから消えているか。
+- [ ] 設定サイドバー下部のユーザー表示に Google の名前が正しく反映されているか。
+- [ ] 不要なコードやインポートが綺麗に削除されているか。
+
 
 ## 概要
 
