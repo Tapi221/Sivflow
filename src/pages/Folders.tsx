@@ -1,23 +1,23 @@
-import React, {
-  startTransition,
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  useMemo,
-} from "react";
 import { getPageRuledBg } from "@/components/card/frame/ruledStyles";
-import { useSearchParams } from "react-router-dom";
+import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useBreadcrumbContext } from "@/contexts/BreadcrumbContext";
+import { getCardText } from "@/domain/card/content";
 import { useCards } from "@/hooks/card/useCards";
 import { useFolders } from "@/hooks/folder/useFolders";
 import { useDocuments } from "@/hooks/platform/useDocuments";
 import { useIsDesktopRuntime } from "@/hooks/platform/useIsDesktopRuntime";
-import { Skeleton } from "@/components/ui/skeleton";
-import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
-import { cn } from "@/lib/utils";
 import { useSettingsQueryParam } from "@/hooks/settings/useSettingsQueryParam";
-import { useBreadcrumbContext } from "@/contexts/BreadcrumbContext";
-import { getCardText } from "@/domain/card/content";
+import { cn } from "@/lib/utils";
+import {
+  startTransition,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { useSearchParams } from "react-router-dom";
 
 const Folders = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -386,7 +386,7 @@ const Folders = () => {
       selectedFolderIdRef.current = folderId ?? null;
       selectedItemRef.current = null;
 
-      // パンくずの「セクション一覧」クリック時に、大元のフォルダ一覧へ戻す
+      // パンくずの「フォルダ一覧」クリック時に、大元のフォルダ一覧へ戻す
       if (!folderId) {
         setNavigateToSectionListToken((n) => n + 1);
         return;

@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { useBreadcrumbContext } from "@/contexts/BreadcrumbContext";
 
 const PAGE_LABELS: Record<string, string> = {
-  folders: "セクション一覧",
+  folders: "フォルダ一覧",
   calendar: "カレンダー",
   gallery: "ギャラリー",
   trash: "ゴミ箱",
