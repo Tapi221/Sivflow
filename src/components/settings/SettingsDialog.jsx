@@ -199,10 +199,25 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
   const { folders = [], updateFolder } = useFolders();
   const { settings, updateSettings } = useUserSettings();
 
+  const storedProfileImageUrl = settings?.profileImage?.remoteUrl;
+  const googleProfileImageUrl =
+    typeof currentUser?.photoURL === "string" &&
+    currentUser.photoURL.trim().length > 0
+      ? currentUser.photoURL
+      : null;
+  const hasStoredProfileImage =
+    typeof storedProfileImageUrl === "string" &&
+    storedProfileImageUrl.length > 0 &&
+    !storedProfileImageUrl.startsWith("blob:");
+  const resolvedProfileImageUrl = hasStoredProfileImage
+    ? storedProfileImageUrl
+    : googleProfileImageUrl;
+  const hasResolvedProfileImage = !!resolvedProfileImageUrl && !imgError;
+
   // Reset imgError when profileImage remoteUrl changes
   useEffect(() => {
     setImgError(false);
-  }, [settings?.profileImage?.remoteUrl]);
+  }, [settings?.profileImage?.remoteUrl, currentUser?.photoURL]);
 
   // Debug: Log profileImage changes (検証用)
   useEffect(() => {
@@ -392,14 +407,7 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
   const renderContent = () => {
     switch (activeTab) {
       case "account":
-        const remoteUrl = settings?.profileImage?.remoteUrl;
-        const isBlob =
-          typeof remoteUrl === "string" && remoteUrl.startsWith("blob:");
-        const profileImageUrl =
-          !isBlob && remoteUrl ? remoteUrl : "/default-avatar.png";
         const displayName = settings?.displayName || "UserName";
-        const hasValidImage = !!remoteUrl && !isBlob && !imgError;
-
         const { bg: avatarBg, text: avatarText } = getAvatarColors(
           settings?.displayName,
         );
@@ -422,13 +430,13 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
                 <div className="relative group">
                   <div
                     style={{
-                      backgroundColor: hasValidImage ? "transparent" : avatarBg,
+                      backgroundColor: hasResolvedProfileImage ? "transparent" : avatarBg,
                     }}
                     className="w-24 h-24 rounded-full flex items-center justify-center text-3xl font-bold overflow-hidden border-4 border-white shadow-lg relative ring-2 ring-slate-100"
                   >
-                    {hasValidImage ? (
+                    {hasResolvedProfileImage ? (
                       <img
-                        src={profileImageUrl}
+                        src={resolvedProfileImageUrl}
                         alt="Profile"
                         className="w-full h-full object-cover"
                         onError={(e) => {
@@ -1592,8 +1600,28 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
             {/* User Info / Logout */}
             <div className="border-t border-slate-200 px-4 py-4">
               <div className="mb-3 flex items-center gap-3 px-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary-400 to-primary-600 text-xs font-bold text-white shadow-sm">
-                  {getInitials(settings?.displayName)}
+                <div
+                  className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full text-xs font-bold text-white shadow-sm"
+                  style={
+                    hasResolvedProfileImage
+                      ? undefined
+                      : {
+                          backgroundColor: getAvatarColors(settings?.displayName)
+                            .bg,
+                          color: getAvatarColors(settings?.displayName).text,
+                        }
+                  }
+                >
+                  {hasResolvedProfileImage ? (
+                    <img
+                      src={resolvedProfileImageUrl}
+                      alt="User avatar"
+                      className="h-full w-full object-cover"
+                      onError={() => setImgError(true)}
+                    />
+                  ) : (
+                    getInitials(settings?.displayName)
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="truncate text-xs font-semibold text-slate-800">
