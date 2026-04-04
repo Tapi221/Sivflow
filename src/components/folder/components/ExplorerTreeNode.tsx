@@ -436,6 +436,7 @@ export const ExplorerTreeNodeRenderer = React.memo(
               onItemSelect({ type: "document", id: treeNode.rawId });
           }}
         >
+        <div className={EXPLORER_ROW_CONTENT_CLASS}>
           <span className="mr-1 size-4 shrink-0" />
           <FileText
             className={cn("mr-2 h-4 w-4 shrink-0", iconClassName)}
@@ -492,17 +493,22 @@ export const ExplorerTreeNodeRenderer = React.memo(
               }}
             />
           ) : (
-            <span
+            <div
               className={cn(
-                "truncate text-sm",
-                isSelected
-                  ? "font-medium text-[var(--sidebar-text,#202123)]"
-                  : "text-[var(--sidebar-text,#202123)]",
+                EXPLORER_ROW_TITLE_SLOT_CLASS,
+                "overflow-hidden",
               )}
             >
-              {treeNode.name}
-            </span>
+              <ExplorerRowContent
+                title={treeNode.name}
+                titleClassName={cn(
+                  FOLDER_ROW_TITLE_CLASS,
+                  isSelected ? "font-medium" : "font-normal",
+                )}
+              />
+            </div>
           )}
+        </div>
         </div>
         {isDocumentNode ? (
           <ContextMenu
