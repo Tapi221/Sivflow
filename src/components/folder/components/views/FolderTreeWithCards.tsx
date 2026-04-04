@@ -231,30 +231,6 @@ export const FolderTreeWithCards = ({
     return Array.from(map.values());
   }, [folders, optimisticFolders]);
 
-  const parentFolderIdById = useMemo(() => {
-    const map = new Map<string, string | null>();
-    for (const folder of treeFolders) {
-      const folderId = getFolderId(folder);
-      if (!folderId) continue;
-      const parentId = normalizeFolderId(
-        (
-          folder as {
-            parentFolderId?: string | null;
-            parent_folder_id?: string | null;
-          }
-        ).parentFolderId ??
-          (
-            folder as {
-              parentFolderId?: string | null;
-              parent_folder_id?: string | null;
-            }
-          ).parent_folder_id,
-      );
-      map.set(folderId, parentId);
-    }
-    return map;
-  }, [treeFolders]);
-
   const treeCards = useMemo(() => {
     const map = new Map<string, Card>();
     for (const c of cards) map.set(c.id, c);
@@ -755,13 +731,6 @@ export const FolderTreeWithCards = ({
     return toSelectedTreeId(selectedFolderId, selectedItem, selectedCardSetId);
   }, [selectedCardSetId, selectedFolderId, selectedItem]);
 
-  const handleNavigationBack = useCallback(() => {
-    if (!navigationParentFolderId) return;
-    const parentId = parentFolderIdById.get(navigationParentFolderId) ?? null;
-    setNavigationParentFolderId(parentId);
-    onFolderSelect(parentId);
-  }, [navigationParentFolderId, onFolderSelect, parentFolderIdById]);
-
   const handleTreeSelect = useCallback(
     (id: string) => {
       const parsed = parseSelectedTreeId(id);
@@ -992,6 +961,14 @@ export const FolderTreeWithCards = ({
     rootItems.length > 0 ||
     explorerTreeData.length > 0;
 
+  const navigationEmptyMessage =
+    effectiveSidebarDisplayMode === "navigation" &&
+    navigationParentFolderId !== null &&
+    navigationFolderPanels.length === 0
+      ? "サブフォルダはありません"
+      : null;
+
+
   return (
     <div ref={treeRootRef} className={cn("h-full w-full", className)}>
       <input
@@ -1027,6 +1004,7 @@ export const FolderTreeWithCards = ({
               selectedFolderId={selectedFolderId}
               openRowMenuId={dialogs.openRowMenuId}
               setOpenRowMenuId={dialogs.setOpenRowMenuId}
+              emptyMessage={navigationEmptyMessage}
               onSelectFolder={(id) => {
                 setNavigationParentFolderId(id);
                 onFolderSelect(id);
@@ -1044,25 +1022,6 @@ export const FolderTreeWithCards = ({
               handleRenameConfirm={actions.handleRenameConfirm}
             />
           )}
-
-          {effectiveSidebarDisplayMode === "navigation" &&
-            navigationParentFolderId !== null && (
-              <button
-                type="button"
-                className="mb-1 flex h-8 w-full items-center rounded-[4px] px-2 text-left text-sm text-muted-foreground hover:bg-[var(--sidebar-active-bg,#e7ebef)]"
-                onClick={handleNavigationBack}
-              >
-                ← 戻る
-              </button>
-            )}
-
-          {effectiveSidebarDisplayMode === "navigation" &&
-            navigationParentFolderId !== null &&
-            navigationFolderPanels.length === 0 && (
-              <div className="px-2 py-2 text-sm text-muted-foreground">
-                サブフォルダはありません
-              </div>
-            )}
         </div>
       )}
 

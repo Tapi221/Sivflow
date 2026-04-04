@@ -28,7 +28,7 @@ export type ReferenceBlockData = {
 
 export interface BlockConfig {
   id: string;
-  type: "text" | "code" | "image" | "audio" | "reference" | "math" | "markdown";
+  type: "text" | "code" | "image" | "audio" | "reference" | "math" | "markdown" | "question";
   label: string;
   isVisible: boolean;
   orderIndex: number;

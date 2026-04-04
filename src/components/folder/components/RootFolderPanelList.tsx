@@ -6,6 +6,7 @@ interface RootFolderPanelListProps {
   rootFolderPanels: Array<{ id: string; name: string; folder: FolderTreeNode }>;
   selectedFolderId: string | null;
   openRowMenuId: string | null;
+  emptyMessage?: string | null;
   setOpenRowMenuId: React.Dispatch<React.SetStateAction<string | null>>;
   onSelectFolder: (folderId: string | null) => void;
   handleCreateFolderAction: (parentId: string | null) => string;
@@ -26,6 +27,7 @@ export const RootFolderPanelList = ({
   rootFolderPanels,
   selectedFolderId,
   openRowMenuId,
+  emptyMessage = null,
   setOpenRowMenuId,
   onSelectFolder,
   handleCreateFolderAction,
@@ -76,6 +78,12 @@ export const RootFolderPanelList = ({
           attachInputRef={attachInputRef}
         />
       ))}
+
+      {rootFolderPanels.length === 0 && emptyMessage ? (
+        <div className="px-2 py-2 text-sm text-muted-foreground font-normal">
+          {emptyMessage}
+        </div>
+      ) : null}
     </div>
   );
 };

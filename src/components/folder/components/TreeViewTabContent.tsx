@@ -8,6 +8,7 @@ import type {
   SelectedExplorerItem,
 } from "@/types";
 import { FolderTreeWithCards } from "@/components/folder/components/views/FolderTreeWithCards";
+import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
 
 type FolderTreeWithCardsProps = ComponentProps<typeof FolderTreeWithCards>;
 type RecentPanelProps = ComponentProps<typeof RecentPanel>;
@@ -112,7 +113,7 @@ export const TreeViewTabContent = ({
       return (
         <FolderTreeWithCards
           sidebarDisplayMode={sidebarDisplayMode}
-          folders={folders}
+          folders={folders as unknown as FolderTreeNode[]}
           cards={filteredCards}
           cardSets={cardSets}
           documents={filteredDocuments}
