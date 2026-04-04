@@ -1,5 +1,8 @@
 import { firestoreDb } from "@/services/firebase";
-import type { ICloudSyncAdapter } from "@/services/interfaces/ISyncService";
+import type {
+  ICloudSyncAdapter,
+  SyncChange,
+} from "@/services/interfaces/ISyncService";
 import { sanitizeBlobUrlsDeep } from "@/utils/blobUrlSanitizer";
 import { sanitizeForLog } from "@/utils/logSanitizer";
 import * as Firestore from "firebase/firestore";
@@ -16,7 +19,7 @@ import {
   writeBatch,
 } from "firebase/firestore";
 
-const deepStripUndefined = (input: unknown) => {
+const deepStripUndefined = (input: unknown): any => {
   if (input === undefined) return undefined;
   if (input === null) return null;
 
@@ -28,8 +31,8 @@ const deepStripUndefined = (input: unknown) => {
   }
 
   if (typeof input === "object") {
-    const out: unknown = {};
-    for (const [k, v] of Object.entries(input)) {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(input as Record<string, unknown>)) {
       const cleaned = deepStripUndefined(v);
       if (cleaned !== undefined) out[k] = cleaned;
     }
@@ -40,16 +43,41 @@ const deepStripUndefined = (input: unknown) => {
 };
 
 const cloudUpdatedAt = () => {
-  const fn = (Firestore as unknown).serverTimestamp;
+  const firestoreObj = Firestore as any;
+  const fn = firestoreObj.serverTimestamp;
   if (typeof fn === "function") return fn();
   return Timestamp.now();
 };
 
-const COLLECTION_BY_TYPE: Record<string, string> = {
+type CloudEntityType =
+  | "card"
+  | "folder"
+  | "cardSet"
+  | "document"
+  | "tag"
+  | "asset"
+  | "userSetting";
+
+type PullableEntityType = Exclude<CloudEntityType, "userSetting">;
+
+const COLLECTION_BY_TYPE: Record<CloudEntityType, string> = {
   card: "cards",
   folder: "folders",
+  cardSet: "cardSets",
+  document: "documents",
+  tag: "tags_v3",
+  asset: "assets",
   userSetting: "userSettings",
 };
+
+const PULLABLE_ENTITY_TYPES: ReadonlyArray<PullableEntityType> = [
+  "card",
+  "folder",
+  "cardSet",
+  "document",
+  "tag",
+  "asset",
+];
 
 /**
  * Firestore writeBatch は「1リクエストあたり 10MiB」制限がある。
@@ -82,7 +110,7 @@ const chunkChangesBySize = (changes: unknown[]) => {
   let current: unknown[] = [];
   let bytes = 0;
 
-  for (const ch of changes) {
+  for (const ch of changes as any[]) {
     // data だけじゃなく type/id も少し上乗せ
     const docBytes = estimateBytes(ch?.data ?? {});
     const extra = docBytes + 512;
@@ -116,24 +144,62 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
   private sanitizeForCloud(type: string, data: unknown): unknown {
     if (!data) return data;
 
-    // ✅ 全エンティティ共通: undefined を深く除去
     const cleaned = deepStripUndefined(data);
+    if (!cleaned || typeof cleaned !== "object") return cleaned;
+    const record = { ...(cleaned as Record<string, unknown>) };
 
-    // ここでローカル専用フィールドを落としたいなら type ごとに増やす
-    // （今の 'document' 判定は多分使われてないので、必要になったら追加でOK）
-    return cleaned;
+    if (type === "document") {
+      delete record.localFileId;
+      delete record.blobUrl;
+      if (
+        typeof record.localUrl === "string" &&
+        record.localUrl.startsWith("blob:")
+      ) {
+        record.localUrl = null;
+      }
+      return record;
+    }
+
+    if (type === "asset") {
+      delete record.localBlobId;
+      delete record.localStatus;
+      return record;
+    }
+
+    return record;
   }
 
   private sanitizeFromCloud(type: string, data: unknown): unknown {
     if (!data) return data;
     const stripped = deepStripUndefined(data);
-    const sanitized = sanitizeBlobUrlsDeep(stripped);
+    const record =
+      stripped && typeof stripped === "object"
+        ? { ...(stripped as Record<string, unknown>) }
+        : stripped;
+
+    if (type === "document" && record && typeof record === "object") {
+      delete (record as Record<string, unknown>).localFileId;
+      delete (record as Record<string, unknown>).blobUrl;
+      if (
+        typeof (record as Record<string, unknown>).localUrl === "string" &&
+        (record as Record<string, unknown>).localUrl.startsWith("blob:")
+      ) {
+        (record as Record<string, unknown>).localUrl = null;
+      }
+    }
+
+    if (type === "asset" && record && typeof record === "object") {
+      delete (record as Record<string, unknown>).localBlobId;
+      delete (record as Record<string, unknown>).localStatus;
+    }
+
+    const sanitized = sanitizeBlobUrlsDeep(record);
     if (sanitized.changed) {
       console.warn(
         "[CloudSyncAdapter] sanitize_blob_url_from_cloud",
         sanitizeForLog({
           type,
-          id: data?.id,
+          id: (data as any)?.id,
           fixes: sanitized.fixes,
         }),
       );
@@ -143,12 +209,12 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
 
   async pullDiff(
     since: number,
-  ): Promise<{ changes: unknown[]; serverTime: number }> {
+  ): Promise<{ changes: SyncChange[]; serverTime: number }> {
     console.log("🔄 [CloudSyncAdapter] pullDiff START", {
       since,
       userId: this.userId,
     });
-    const changes: unknown[] = [];
+    const changes: SyncChange[] = [];
 
     if (!firestoreDb) {
       console.warn(
@@ -157,29 +223,33 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
       return { changes: [], serverTime: Date.now() };
     }
 
+    const firestore = firestoreDb;
+
     try {
       const sinceTimestamp = Timestamp.fromMillis(since);
-      const startAfterFn = (Firestore as unknown).startAfter as
+      const startAfterFn = (Firestore as unknown as any).startAfter as
         | undefined
         | ((snapshot: unknown) => unknown);
 
-      // cards
-      {
-        const ref = collection(firestoreDb, `users/${this.userId}/cards`);
+      const pullCollectionDiff = async (type: PullableEntityType) => {
+        const ref = collection(
+          firestore,
+          `users/${this.userId}/${COLLECTION_BY_TYPE[type]}`,
+        );
 
         let lastDoc: unknown = null;
         let total = 0;
 
         while (true) {
-          const constraints: unknown[] = [
+          const constraints: any[] = [
             where("updatedAt", ">", sinceTimestamp),
             orderBy("updatedAt", "asc"),
             limit(PAGE_SIZE),
           ];
 
-          // typings に startAfter が無い環境でも動くよう unknown 経由で呼ぶ
-          if (startAfterFn && lastDoc)
+          if (startAfterFn && lastDoc) {
             constraints.splice(2, 0, startAfterFn(lastDoc));
+          }
 
           const qy = query(ref, ...constraints);
           const snap = await getDocs(qy);
@@ -187,46 +257,9 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
 
           snap.forEach((d) => {
             changes.push({
-              type: "card",
+              type,
               id: d.id,
-              data: this.sanitizeFromCloud("card", d.data()),
-            });
-          });
-
-          // startAfter が無い環境では1ページで止める（現状より悪化させない）
-          if (!startAfterFn || snap.empty || snap.size < PAGE_SIZE) break;
-          lastDoc = snap.docs[snap.docs.length - 1] ?? null;
-        }
-
-        console.log(`[CloudSyncAdapter] Remote cards found: ${total}`);
-      }
-
-      // folders
-      {
-        const ref = collection(firestoreDb, `users/${this.userId}/folders`);
-
-        let lastDoc: unknown = null;
-        let total = 0;
-
-        while (true) {
-          const constraints: unknown[] = [
-            where("updatedAt", ">", sinceTimestamp),
-            orderBy("updatedAt", "asc"),
-            limit(PAGE_SIZE),
-          ];
-
-          if (startAfterFn && lastDoc)
-            constraints.splice(2, 0, startAfterFn(lastDoc));
-
-          const qy = query(ref, ...constraints);
-          const snap = await getDocs(qy);
-          total += snap.size;
-
-          snap.forEach((d) => {
-            changes.push({
-              type: "folder",
-              id: d.id,
-              data: this.sanitizeFromCloud("folder", d.data()),
+              data: this.sanitizeFromCloud(type, d.data()),
             });
           });
 
@@ -234,15 +267,21 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
           lastDoc = snap.docs[snap.docs.length - 1] ?? null;
         }
 
-        console.log(`[CloudSyncAdapter] Remote folders found: ${total}`);
+        console.log(
+          `[CloudSyncAdapter] Remote ${COLLECTION_BY_TYPE[type]} found: ${total}`,
+        );
+      };
+
+      for (const type of PULLABLE_ENTITY_TYPES) {
+        await pullCollectionDiff(type);
       }
 
       // userSettings (top-level document)
       {
-        const settingsRef = doc(firestoreDb, "userSettings", this.userId);
+        const settingsRef = doc(firestore, "userSettings", this.userId);
         const snap = await getDoc(settingsRef);
         if (snap.exists()) {
-          const data: unknown = this.sanitizeFromCloud(
+          const data: any = this.sanitizeFromCloud(
             "userSetting",
             snap.data(),
           );
@@ -267,7 +306,7 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
   }
 
   async pushBatch(
-    changes: unknown[],
+    changes: SyncChange[],
   ): Promise<{ successIds: string[]; failedIds: string[]; error?: unknown }> {
     console.log(
       `📤 [CloudSyncAdapter] pushBatch START. Count: ${changes.length}`,
@@ -276,13 +315,14 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
     const failedIds: string[] = [];
 
     try {
-      if (!firestoreDb) {
+      const firestore = firestoreDb;
+      if (!firestore) {
         console.error(
           "❌ [CloudSyncAdapter] firestoreDb is null during pushBatch",
         );
         return {
           successIds: [],
-          failedIds: changes.map((c) => c.id),
+          failedIds: changes.map((c: any) => c.id),
           error: new Error("Firestore not initialized"),
         };
       }
@@ -291,18 +331,18 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
       let firstError: unknown = undefined;
 
       for (const chunk of chunks) {
-        const batch = writeBatch(firestoreDb);
+        const batch = writeBatch(firestore);
         const chunkIds: string[] = [];
 
-        for (const change of chunk) {
+        for (const change of chunk as any[]) {
           const { type, id, data } = change;
-          const col = COLLECTION_BY_TYPE[type] ?? `${type}s`; // 保険
+          const col = (COLLECTION_BY_TYPE as any)[type] ?? `${type}s`;
           console.log(`   - Adding to batch: ${col}/${id}`);
 
           const docRef =
             type === "userSetting"
-              ? doc(firestoreDb, "userSettings", id || this.userId)
-              : doc(firestoreDb, `users/${this.userId}/${col}`, id);
+              ? doc(firestore, "userSettings", id || this.userId)
+              : doc(firestore, `users/${this.userId}/${col}`, id);
 
           const sanitized = this.sanitizeForCloud(type, data);
 
@@ -350,24 +390,25 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
       console.error("❌ [CloudSyncAdapter] pushBatch ERROR:", error);
       return {
         successIds: [],
-        failedIds: changes.map((c) => c.id),
+        failedIds: changes.map((c: any) => c.id),
         error,
       };
     }
   }
 
-  async pullFull(entityIds: string[]): Promise<unknown[]> {
-    const results: unknown[] = [];
+  async pullFull(entityIds: string[]): Promise<SyncChange[]> {
+    const results: SyncChange[] = [];
 
     for (const id of entityIds) {
-      if (!firestoreDb)
+      const firestore = firestoreDb;
+      if (!firestore)
         throw new Error("Firebase Firestore is not initialized.");
 
       // card
       {
         const snap = await getDocs(
           query(
-            collection(firestoreDb, `users/${this.userId}/cards`),
+            collection(firestore, `users/${this.userId}/cards`),
             where("id", "==", id),
           ),
         );
@@ -381,11 +422,83 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
         }
       }
 
+      // cardSet
+      {
+        const snap = await getDocs(
+          query(
+            collection(firestore, `users/${this.userId}/cardSets`),
+            where("id", "==", id),
+          ),
+        );
+        if (!snap.empty) {
+          results.push({
+            type: "cardSet",
+            id,
+            data: this.sanitizeFromCloud("cardSet", snap.docs[0].data()),
+          });
+          continue;
+        }
+      }
+
+      // document
+      {
+        const snap = await getDocs(
+          query(
+            collection(firestore, `users/${this.userId}/documents`),
+            where("id", "==", id),
+          ),
+        );
+        if (!snap.empty) {
+          results.push({
+            type: "document",
+            id,
+            data: this.sanitizeFromCloud("document", snap.docs[0].data()),
+          });
+          continue;
+        }
+      }
+
+      // tag
+      {
+        const snap = await getDocs(
+          query(
+            collection(firestore, `users/${this.userId}/tags_v3`),
+            where("id", "==", id),
+          ),
+        );
+        if (!snap.empty) {
+          results.push({
+            type: "tag",
+            id,
+            data: this.sanitizeFromCloud("tag", snap.docs[0].data()),
+          });
+          continue;
+        }
+      }
+
+      // asset
+      {
+        const snap = await getDocs(
+          query(
+            collection(firestore, `users/${this.userId}/assets`),
+            where("id", "==", id),
+          ),
+        );
+        if (!snap.empty) {
+          results.push({
+            type: "asset",
+            id,
+            data: this.sanitizeFromCloud("asset", snap.docs[0].data()),
+          });
+          continue;
+        }
+      }
+
       // folder
       {
         const snap = await getDocs(
           query(
-            collection(firestoreDb, `users/${this.userId}/folders`),
+            collection(firestore, `users/${this.userId}/folders`),
             where("id", "==", id),
           ),
         );
@@ -402,7 +515,7 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
       // userSetting
       {
         const snap = await getDoc(
-          doc(firestoreDb, "userSettings", this.userId),
+          doc(firestore, "userSettings", this.userId),
         );
         if (snap.exists()) {
           results.push({

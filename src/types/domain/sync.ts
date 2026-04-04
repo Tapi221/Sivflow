@@ -1,6 +1,9 @@
 import type { AssetRecord } from "./assets";
 import type { Card } from "./card";
+import type { CardSet } from "./cardSet";
+import type { Document } from "./document";
 import type { Folder } from "./folder";
+import type { UserSettings } from "./user";
 
 /**
  * 同期システムの高度な型定義
@@ -51,7 +54,14 @@ export interface SyncSettings {
  * SyncQueueItem - オフラインキュー（FIFO）
  * オフライン時の変更を順序を保持して保存
  */
-export type SyncEntity = "card" | "folder" | "asset";
+export type SyncEntity =
+  | "card"
+  | "folder"
+  | "cardSet"
+  | "document"
+  | "tag"
+  | "userSetting"
+  | "asset";
 export type SyncOperationType = "create" | "update" | "delete";
 export type SyncDirection = "upload" | "download";
 export type SyncPriority = "critical" | "high" | "medium" | "low";
@@ -64,7 +74,6 @@ export type AssetSyncPayload = Pick<AssetRecord, "id"> &
       | "userId"
       | "mime"
       | "size"
-      | "localBlobId"
       | "remoteKey"
       | "remoteStatus"
       | "remoteUrlCache"
@@ -74,9 +83,24 @@ export type AssetSyncPayload = Pick<AssetRecord, "id"> &
     >
   >;
 
+export type TagSyncPayload = {
+  id: string;
+  userId: string;
+  name: string;
+  nameLower: string;
+  color: string;
+  updatedAt: Date;
+  categoryId?: string;
+  parentId?: string;
+};
+
 export type SyncPayloadByEntity = {
   card: Card;
   folder: Folder;
+  cardSet: CardSet;
+  document: Document;
+  tag: TagSyncPayload;
+  userSetting: UserSettings;
   asset: AssetSyncPayload;
 };
 
@@ -131,9 +155,16 @@ type SyncDeleteQueueItem<TEntity extends SyncEntity> = SyncQueueItemBase<
 export type SyncQueueItem =
   | SyncUpsertQueueItem<"card">
   | SyncUpsertQueueItem<"folder">
+  | SyncUpsertQueueItem<"cardSet">
+  | SyncUpsertQueueItem<"document">
+  | SyncUpsertQueueItem<"tag">
+  | SyncUpsertQueueItem<"userSetting">
   | SyncUpsertQueueItem<"asset">
   | SyncDeleteQueueItem<"card">
   | SyncDeleteQueueItem<"folder">
+  | SyncDeleteQueueItem<"cardSet">
+  | SyncDeleteQueueItem<"document">
+  | SyncDeleteQueueItem<"tag">
   | SyncDeleteQueueItem<"asset">;
 
 /**
@@ -143,7 +174,7 @@ export type SyncQueueItem =
 export interface SyncConflict {
   id: string;
   entityId: string;
-  entityType: "card" | "folder";
+  entityType: SyncEntity;
   autoMerged: unknown;
   conflicts: Record<string, { local: unknown; remote: unknown }>;
   detectedAt: number;

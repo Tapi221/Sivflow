@@ -13,7 +13,14 @@ export type JsonObject = { [key: string]: JsonValue };
 export type JsonArray = JsonValue[];
 
 export type SyncTaskType = "upload" | "download";
-export type SyncEntity = "card" | "folder" | "userSetting" | "asset";
+export type SyncEntity =
+  | "card"
+  | "folder"
+  | "cardSet"
+  | "document"
+  | "tag"
+  | "userSetting"
+  | "asset";
 export type SyncPriority = "critical" | "high" | "medium" | "low";
 export type SyncOperationType = "create" | "update" | "delete";
 

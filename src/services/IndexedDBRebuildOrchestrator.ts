@@ -21,12 +21,19 @@ export class IndexedDBRebuildOrchestrator {
     return (
       type === "card" ||
       type === "folder" ||
+      type === "cardSet" ||
+      type === "document" ||
+      type === "tag" ||
+      type === "asset" ||
+      type === "userSetting" ||
       type === "cardRelation" ||
       type === "projectMap"
     );
   }
 
   private static tableFromType(type: string): string {
+    if (type === "tag") return "tags_v3";
+    if (type === "asset") return "images";
     return `${type}s`;
   }
 
@@ -129,15 +136,18 @@ export class IndexedDBRebuildOrchestrator {
         [
           newDb.folders,
           newDb.cards,
+          newDb.cardSets,
+          newDb.documents,
           newDb.users,
           newDb.userSettings,
           newDb.userStats,
           newDb.syncMetadata,
           newDb.levelHistories,
           newDb.deviceMeta,
-          (newDb as unknown).tags,
-          (newDb as unknown).cardRelations,
-          (newDb as unknown).projectMaps,
+          newDb.images,
+          newDb.tags_v3,
+          (newDb as any).cardRelations,
+          (newDb as any).projectMaps,
         ],
         async () => {
           console.log(

@@ -71,8 +71,15 @@ declare global {
 type SyncDirection = "upload" | "download";
 type SyncQueuePayload = SyncQueueItem["payload"];
 
-// ✅ SyncQueueItem.entity が "card" | "folder" | "asset" しか許してない前提に合わせる
-const syncableTables = ["cards", "folders"] as const;
+const syncableTables = [
+  "cards",
+  "folders",
+  "cardSets",
+  "documents",
+  "tags_v3",
+  "userSettings",
+  "images",
+] as const;
 type SyncableTableName = (typeof syncableTables)[number];
 
 const isSyncableTableName = (t: string): t is SyncableTableName =>
@@ -81,6 +88,11 @@ const isSyncableTableName = (t: string): t is SyncableTableName =>
 const entityNameMap: Record<SyncableTableName, SyncQueueItem["entity"]> = {
   cards: "card",
   folders: "folder",
+  cardSets: "cardSet",
+  documents: "document",
+  tags_v3: "tag",
+  userSettings: "userSetting",
+  images: "asset",
 };
 
 const getPayloadId = (payload: unknown) => {
@@ -543,9 +555,6 @@ export class LocalDB extends Dexie {
     type: SyncDirection,
     payload: SyncQueuePayload,
   ): Promise<void> {
-    // documents.localFileId は端末ローカル専用のため同期対象にしない。
-    if (tableName === "documents") return;
-
     if (!isSyncableTableName(tableName)) return;
 
     const payloadId = getPayloadId(payload);
@@ -572,7 +581,7 @@ export class LocalDB extends Dexie {
       updatedAt: now,
       status: "pending",
       retryCount: 0,
-    };
+    } as any;
 
     console.log(
       `[Diagnostic] enqueueSync -> pushing to syncQueue table. targetId=${task.targetId}, action=${task.type}, entity=${task.entity}`,

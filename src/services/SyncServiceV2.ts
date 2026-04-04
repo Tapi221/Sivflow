@@ -304,10 +304,14 @@ export class SyncServiceV2 implements ISyncService {
       const tableByType: Record<string, string> = {
         card: "cards",
         folder: "folders",
+        cardSet: "cardSets",
+        document: "documents",
+        tag: "tags_v3",
+        asset: "images",
         userSetting: "userSettings",
       };
-      const table = tableByType[change.type] ?? `${change.type}s`; // e.g., 'card' -> 'cards'
-      const remoteData = { ...(change.data ?? {}) };
+      const table = tableByType[change.type] ?? `${change.type}s`;
+      const remoteData = { ...((change.data as any) ?? {}) };
       if (!remoteData.id && change.id) {
         remoteData.id = change.id;
       }
@@ -316,16 +320,22 @@ export class SyncServiceV2 implements ISyncService {
         remoteData.userId = this.userId;
       }
 
-      // documents.localFileId / blob localUrl は端末ローカル専用のため、受信時に除外する。
+      // documents.localFileId / blob localUrl は端末ローカル専用のため、受信時に除外かつ保護する。
+      // (ここでは remoteData から削除するだけで、後のマージで localData 側が残るようにする)
       if (change.type === "document") {
-        delete (remoteData as unknown).localFileId;
-        delete (remoteData as unknown).blobUrl;
+        delete (remoteData as any).localFileId;
+        delete (remoteData as any).blobUrl;
         if (
-          typeof (remoteData as unknown).localUrl === "string" &&
-          (remoteData as unknown).localUrl.startsWith("blob:")
+          typeof (remoteData as any).localUrl === "string" &&
+          (remoteData as any).localUrl.startsWith("blob:")
         ) {
-          (remoteData as unknown).localUrl = null;
+          (remoteData as any).localUrl = null;
         }
+      }
+
+      if (change.type === "asset") {
+        delete (remoteData as any).localBlobId;
+        delete (remoteData as any).localStatus;
       }
 
       // フォルダの場合、循環参照をチェックして防止
@@ -360,6 +370,22 @@ export class SyncServiceV2 implements ISyncService {
           "server_wins",
         );
 
+        // ✅ マージ後のデータにローカル専用フィールドを書き戻す（サーバーからの Pull で上書きされないように保護）
+        if (change.type === "document") {
+          const l = localData as any;
+          const m = merged as any;
+          if (l.localFileId) m.localFileId = l.localFileId;
+          if (l.blobUrl) m.blobUrl = l.blobUrl;
+          if (l.localUrl?.startsWith("blob:")) m.localUrl = l.localUrl;
+        }
+
+        if (change.type === "asset") {
+          const l = localData as any;
+          const m = merged as any;
+          if (l.localBlobId) m.localBlobId = l.localBlobId;
+          if (l.localStatus) m.localStatus = l.localStatus;
+        }
+
         if (conflict) {
           this.telemetry.log(
             "warn",
@@ -370,7 +396,7 @@ export class SyncServiceV2 implements ISyncService {
             },
           );
           // 競合情報を記録（将来的なUI解決用）
-          await this.localDB.upsert("conflicts", {
+          await (this.localDB as any).conflicts.put({
             id: nanoid(),
             entityId: change.id,
             entityType: change.type,
@@ -420,7 +446,15 @@ export class SyncServiceV2 implements ISyncService {
 
       // 2. ローカルDBをトランザクション内で更新
       // 主なエンティティをリセットしてクラウドデータで埋める
-      const tables = ["folders", "cards"];
+      const tables = [
+        "folders",
+        "cards",
+        "cardSets",
+        "documents",
+        "tags_v3",
+        "userSettings",
+        "images",
+      ];
 
       await this.localDB.transaction("rw", tables, async () => {
         // すべてのデータを一旦削除（ソフトデリートではなく物理削除して再構築）
