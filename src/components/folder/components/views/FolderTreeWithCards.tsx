@@ -1031,10 +1031,22 @@ export const FolderTreeWithCards = ({
             <RootFolderPanelList
               rootFolderPanels={rootFolderPanels}
               selectedFolderId={selectedFolderId}
-              onSelect={handleFolderNodeSelect}
-              onCreateCardSet={handleCreateCardSetFromRootPanel}
-              onDelete={actions.handleDelete}
-              onUpdate={onUpdateFolder}
+              openRowMenuId={dialogs.openRowMenuId}
+              setOpenRowMenuId={dialogs.setOpenRowMenuId}
+              onSelectFolder={(id) => {
+                setActiveRootFolderId(id);
+                onFolderSelect(id);
+              }}
+              handleCreateFolderAction={actions.handleCreateFolderAction}
+              handleCreateCardSetAction={handleCreateCardSetFromRootPanel}
+              handleDelete={(id, type) => {
+                void actions.handleDelete({ id, type });
+              }}
+              setEditingId={dialogs.setEditingId}
+              setEditingName={dialogs.setEditingName}
+              editingNameRef={dialogs.editingNameRef}
+              editingId={dialogs.editingId}
+              editingName={dialogs.editingName}
               handleRenameConfirm={actions.handleRenameConfirm}
             />
           ) : isScopedNavigationVisible ? (
