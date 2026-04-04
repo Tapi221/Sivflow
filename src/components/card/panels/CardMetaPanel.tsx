@@ -1,3 +1,6 @@
+import { useQuery } from "@tanstack/react-query";
+import { useLiveQuery } from "dexie-react-hooks";
+import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
 import {
   memo,
   useEffect,
@@ -6,9 +9,6 @@ import {
   useState,
   type ReactElement,
 } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { useLiveQuery } from "dexie-react-hooks";
-import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
 import { useSearchParams } from "react-router-dom";
 import {
   CartesianGrid,
@@ -20,11 +20,10 @@ import {
   YAxis,
 } from "recharts";
 
-import { useAuthSession } from "@/contexts/AuthContext";
-import { RatingCountTiles } from "@/features/study/RatingCountTiles";
+import { EmptyMetaPanel } from "@/components/card/panels/EmptyMetaPanel";
+import { MetaPanelLeadSection } from "@/components/card/panels/MetaPanelShell";
 import { SurfaceButton } from "@/components/ui/surface-button";
 import { Switch } from "@/components/ui/switch";
-import { TagInput } from "@/components/ui/tag-input";
 import {
   Table,
   TableBody,
@@ -33,8 +32,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { EmptyMetaPanel } from "@/components/card/panels/EmptyMetaPanel";
-import { MetaPanelLeadSection } from "@/components/card/panels/MetaPanelShell";
+import { TagInput } from "@/components/ui/tag-input";
+import { useAuthSession } from "@/contexts/AuthContext";
+import { RatingCountTiles } from "@/features/study/RatingCountTiles";
+import { resolveCardTagNames, useTags } from "@/hooks/settings/useTags";
 import { firestoreDb } from "@/services/firebase";
 import { getLocalDb } from "@/services/localDB";
 import {
@@ -43,7 +44,6 @@ import {
 } from "@/services/reviewAlgorithm";
 import type { Card, ReviewLog } from "@/types";
 import { calculateResistanceScore } from "@/utils/reviewMetrics";
-import { useTags, resolveCardTagNames } from "@/hooks/settings/useTags";
 
 type Period = "7d" | "30d" | "all";
 type MetaRating = ReviewLog["rating"] | null;
@@ -890,8 +890,7 @@ const CardMetaPanelInner = ({
     pendingReviewDurationInput,
   ]);
 
-  // tagIds 優先、fallback: card.tags（移行期間互換）
-  const tags = resolveCardTagNames(card?.tagIds, card?.tags, tagById);
+  const tags = resolveCardTagNames(card?.tagIds, tagById);
 
   const commitTitle = (rawValue?: string, options?: { flush?: boolean }) => {
     const source = rawValue ?? titleInput;

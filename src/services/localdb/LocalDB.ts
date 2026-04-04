@@ -57,7 +57,8 @@ export type {
   LocalDBLike,
   ProjectMap,
   LocalDBTableMap,
-  SyncableEntityTable,  TagV3Record,
+  SyncableEntityTable,
+  TagV3Record,
 } from "./types";
 import type { LocalDBTableMap, SyncableEntityTable } from "./types";
 

@@ -236,9 +236,7 @@ export const DirectoryDiagramPane = ({
         if (!tagMatched) return false;
       }
 
-      const hasUncertainty = Boolean(
-        card.hasUncertainty ?? card.hasUncertainty,
-      );
+      const hasUncertainty = Boolean(card.hasUncertainty);
       const isBookmarked = Boolean(card.isBookmarked);
       const isDraft = Boolean(card.isDraft);
 
@@ -251,12 +249,14 @@ export const DirectoryDiagramPane = ({
 
       return true;
     });
+
     const nextDocuments = documents.filter((document) => {
       if (document.isDeleted) return false;
       if (document.kind === "pdf") return allowPdf;
       if (document.kind === "pptx") return allowPptx;
       return false;
     });
+
     return { filteredCards: nextCards, filteredDocuments: nextDocuments };
   }, [
     bookmarkedFilter,
@@ -513,4 +513,3 @@ export const DirectoryDiagramPane = ({
     </div>
   );
 };
-
