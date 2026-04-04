@@ -1,31 +1,27 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { UserSettings } from "@/types";
+import { useMemo } from "react";
+
 import {
-  clampPaneWidthPx,
   CARD_PANE_EDIT_DEFAULT_WIDTH_PX,
   CARD_PANE_EDIT_MIN_WIDTH_PX,
   CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
   CARD_PANE_VIEW_MIN_WIDTH_PX,
+  clampPaneWidthPx,
 } from "@/pages/card-view/constants";
+import { useCardPaneWidthState } from "@/components/card/shell/useCardPaneWidthState";
 import {
   getCardSetWidthPreference,
   setCardSetWidthPreference,
 } from "@/services/cardWidthPreferences";
+import type { UserSettings } from "@/types";
 
 interface UseCardViewPaneWidthOptions {
   isGlobalEditing: boolean;
   isDesktop: boolean;
   isMetaOpen: boolean;
   currentIndex: number;
-  /** Read-only fallback. Width is persisted to localStorage only (device-local). */
   settings: UserSettings | undefined;
   cardSetId?: string | null;
 }
-
-type KeyedPaneWidthState = {
-  key: string;
-  width: number;
-};
 
 const getReservedScrollbarGutterWidthPx = () => {
   if (typeof document === "undefined") return 0;
@@ -41,8 +37,12 @@ const getReservedScrollbarGutterWidthPx = () => {
 
   const width = Math.max(0, probe.offsetWidth - probe.clientWidth);
   document.body.removeChild(probe);
+
   return width;
 };
+
+const measureViewportWidth = (element: HTMLDivElement) =>
+  Math.max(0, Math.round(element.clientWidth));
 
 export const useCardViewPaneWidth = ({
   isGlobalEditing,
@@ -52,10 +52,6 @@ export const useCardViewPaneWidth = ({
   settings,
   cardSetId,
 }: UseCardViewPaneWidthOptions) => {
-  const contentViewportRef = useRef<HTMLDivElement | null>(null);
-  const [contentViewportWidth, setContentViewportWidth] = useState<number>(
-    () => (typeof window === "undefined" ? 1024 : window.innerWidth),
-  );
   const reservedScrollbarGutterWidthPx = useMemo(
     () => (isDesktop ? getReservedScrollbarGutterWidthPx() : 0),
     [isDesktop],
@@ -90,176 +86,39 @@ export const useCardViewPaneWidth = ({
     );
   }, [cardSetId, settings?.cardEditPaneWidthPx]);
 
-  const [viewPaneState, setViewPaneState] = useState<KeyedPaneWidthState>(
-    () => ({
-      key: viewPreferenceKey,
-      width: preferredViewPaneWidthPx,
-    }),
-  );
-
-  const [editPaneState, setEditPaneState] = useState<KeyedPaneWidthState>(
-    () => ({
-      key: editPreferenceKey,
-      width: preferredEditPaneWidthPx,
-    }),
-  );
-
-  const viewPaneWidthPx =
-    viewPaneState.key === viewPreferenceKey
-      ? viewPaneState.width
-      : preferredViewPaneWidthPx;
-
-  const editPaneWidthPx =
-    editPaneState.key === editPreferenceKey
-      ? editPaneState.width
-      : preferredEditPaneWidthPx;
-
-  useEffect(() => {
-    const element = contentViewportRef.current;
-    if (!element || typeof ResizeObserver === "undefined") return;
-
-    const updateWidth = () => {
-      const next = Math.max(0, Math.round(element.clientWidth));
-
-      setContentViewportWidth((prev) => (prev === next ? prev : next));
-    };
-
-    updateWidth();
-
-    const observer = new ResizeObserver(updateWidth);
-    observer.observe(element);
-
-    return () => observer.disconnect();
-  }, [isDesktop, isGlobalEditing, isMetaOpen, currentIndex]);
-
-  const activePaneMode = isGlobalEditing ? "edit" : "view";
-  const activePaneMinWidthPx = isGlobalEditing
-    ? CARD_PANE_EDIT_MIN_WIDTH_PX
-    : CARD_PANE_VIEW_MIN_WIDTH_PX;
-  const activePaneDefaultWidthPx = isGlobalEditing
-    ? CARD_PANE_EDIT_DEFAULT_WIDTH_PX
-    : CARD_PANE_VIEW_DEFAULT_WIDTH_PX;
-
-  const activePaneStoredWidthPx = isGlobalEditing
-    ? editPaneWidthPx
-    : viewPaneWidthPx;
-  const availableViewportWidthPx =
-    contentViewportWidth > 0
-      ? Math.max(
-          activePaneMinWidthPx,
-          contentViewportWidth - reservedScrollbarGutterWidthPx,
-        )
-      : 0;
-
-  const activePaneMaxWidthPx =
-    availableViewportWidthPx > 0
-      ? Math.max(activePaneMinWidthPx, availableViewportWidthPx)
-      : Math.max(activePaneMinWidthPx, activePaneDefaultWidthPx);
-
-  const activePaneWidthPx = clampPaneWidthPx(
-    activePaneStoredWidthPx,
-    activePaneMinWidthPx,
-    activePaneMaxWidthPx,
-  );
-
-  const activePaneDisplayedDefaultWidthPx = clampPaneWidthPx(
-    activePaneDefaultWidthPx,
-    activePaneMinWidthPx,
-    activePaneMaxWidthPx,
-  );
-
-  const activePaneRenderWidthPx =
-    availableViewportWidthPx > 0
-      ? Math.max(1, Math.min(activePaneWidthPx, availableViewportWidthPx))
-      : activePaneWidthPx;
-
-  const persistPaneWidth = useCallback(
-    (mode: "view" | "edit", widthPx: number) => {
-      const minWidth =
-        mode === "edit"
-          ? CARD_PANE_EDIT_MIN_WIDTH_PX
-          : CARD_PANE_VIEW_MIN_WIDTH_PX;
-
-      const next = clampPaneWidthPx(widthPx, minWidth);
-
-      if (mode === "edit") {
-        setEditPaneState({
-          key: editPreferenceKey,
-          width: next,
-        });
-      } else {
-        setViewPaneState({
-          key: viewPreferenceKey,
-          width: next,
-        });
-      }
-
-      if (cardSetId) {
-        setCardSetWidthPreference(cardSetId, mode, next);
-      }
+  const paneWidth = useCardPaneWidthState({
+    isEditMode: isGlobalEditing,
+    preferredWidths: {
+      view: {
+        key: viewPreferenceKey,
+        width: preferredViewPaneWidthPx,
+      },
+      edit: {
+        key: editPreferenceKey,
+        width: preferredEditPaneWidthPx,
+      },
     },
-    [cardSetId, editPreferenceKey, viewPreferenceKey],
-  );
-
-  const previewPaneWidth = useCallback(
-    (mode: "view" | "edit", widthPx: number) => {
-      const minWidth =
-        mode === "edit"
-          ? CARD_PANE_EDIT_MIN_WIDTH_PX
-          : CARD_PANE_VIEW_MIN_WIDTH_PX;
-
-      const next = clampPaneWidthPx(widthPx, minWidth);
-
-      if (mode === "edit") {
-        setEditPaneState({
-          key: editPreferenceKey,
-          width: next,
-        });
-      } else {
-        setViewPaneState({
-          key: viewPreferenceKey,
-          width: next,
-        });
-      }
+    defaultWidths: {
+      view: CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
+      edit: CARD_PANE_EDIT_DEFAULT_WIDTH_PX,
     },
-    [editPreferenceKey, viewPreferenceKey],
-  );
-
-  const stepPaneWidth = useCallback(
-    (deltaPx: number) => {
-      const next = clampPaneWidthPx(
-        activePaneWidthPx + deltaPx,
-        activePaneMinWidthPx,
-        activePaneMaxWidthPx,
-      );
-      void persistPaneWidth(activePaneMode, next);
+    minWidths: {
+      view: CARD_PANE_VIEW_MIN_WIDTH_PX,
+      edit: CARD_PANE_EDIT_MIN_WIDTH_PX,
     },
-    [
-      activePaneMaxWidthPx,
-      activePaneMinWidthPx,
-      activePaneMode,
-      activePaneWidthPx,
-      persistPaneWidth,
-    ],
-  );
-
-  const resetActivePaneWidth = useCallback(() => {
-    void persistPaneWidth(activePaneMode, activePaneDefaultWidthPx);
-  }, [activePaneDefaultWidthPx, activePaneMode, persistPaneWidth]);
+    measureViewportWidth,
+    viewportObserverDeps: [isDesktop, isGlobalEditing, isMetaOpen, currentIndex],
+    reservedViewportInsetPx: reservedScrollbarGutterWidthPx,
+    allowStoredWidthBeyondViewport: false,
+    previewBehavior: "active-only",
+    persistBehavior: "active-only",
+    onPersist: (mode, widthPx) => {
+      if (!cardSetId) return;
+      setCardSetWidthPreference(cardSetId, mode, widthPx);
+    },
+  });
 
   return {
-    contentViewportRef,
-    contentViewportWidth,
-    editPaneWidthPx,
-    activePaneMode,
-    activePaneMinWidthPx,
-    activePaneMaxWidthPx,
-    activePaneWidthPx,
-    activePaneRenderWidthPx,
-    activePaneDisplayedDefaultWidthPx,
-    previewPaneWidth,
-    persistPaneWidth,
-    stepPaneWidth,
-    resetActivePaneWidth,
+    ...paneWidth,
   };
 };
