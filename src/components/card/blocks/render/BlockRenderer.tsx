@@ -12,7 +12,6 @@ import type { CardBlock } from "@/types/domain/card";
 import type { CSSProperties } from "react";
 import { useCallback, useMemo, useState } from "react";
 import { BlockSeparator } from "@/components/card/blocks/core/BlockSeparator";
-import { BlockFrame } from "@/components/card/blocks/core/BlockFrame";
 import { shouldRenderInterBlockSeparator } from "@/components/card/blocks/core/blockDisplayPolicy";
 import { CodeRenderer } from "@/components/card/blocks/code/CodeRenderer";
 import { ImageBlockContent } from "@/components/card/blocks/image/ImageBlockContent";
@@ -33,45 +32,18 @@ interface BlockRendererProps {
   zoom?: number;
 }
 
-type BlockFrameConfig = {
-  className?: string;
-  contentClassName?: string;
-};
-
 const getFluidZoomStyle = (
   displayMode: "fixed" | "fluid",
   zoom: number,
 ): CSSProperties | undefined => {
   if (displayMode !== "fluid") return undefined;
+
   const safeZoom =
     typeof zoom === "number" && Number.isFinite(zoom) && zoom > 0 ? zoom : 1;
+
   if (Math.abs(safeZoom - 1) < 0.001) return undefined;
+
   return { fontSize: `${safeZoom}em` };
-};
-
-const getBlockFrameConfig = (blockType: CardBlock["type"]): BlockFrameConfig => {
-  if (blockType === "text" || blockType === "markdown" || blockType === "question") {
-    return {
-      className: "bg-transparent px-0 py-0",
-      contentClassName: "px-0",
-    };
-  }
-
-  if (blockType === "code") {
-    return {
-      className: "bg-transparent px-0 py-0",
-      contentClassName: "relative px-0",
-    };
-  }
-
-  if (blockType === "image") {
-    return {
-      className: "py-0 px-0",
-      contentClassName: "px-0",
-    };
-  }
-
-  return {};
 };
 
 const QuestionBlockView = ({
@@ -195,7 +167,7 @@ const renderBlock = (
       if ((block.images?.length ?? 0) === 0) return null;
 
       return (
-        <ImageBlockShell showBorderOverlay>
+        <ImageBlockShell>
           <ImageBlockContent
             mode="view"
             urls={(block.images ?? [])
@@ -280,11 +252,13 @@ export const BlockRenderer = ({
   const toMediaUrl = useCallback((item: unknown) => {
     if (typeof item === "string") return item;
     if (!item || typeof item !== "object") return null;
+
     const candidate = item as {
       remoteUrl?: string;
       localUrl?: string;
       url?: string;
     };
+
     return candidate.remoteUrl ?? candidate.localUrl ?? candidate.url ?? null;
   }, []);
 
@@ -346,8 +320,6 @@ export const BlockRenderer = ({
 
         if (!content) return null;
 
-        const frameConfig = getBlockFrameConfig(block.type);
-
         return (
           <div key={block.id}>
             {showSeparator && <BlockSeparator />}
@@ -358,17 +330,7 @@ export const BlockRenderer = ({
               data-row-offset-applied={rowOffsetPx ? "true" : undefined}
               style={offsetStyle}
             >
-              {block.type === "audio" ? (
-                content
-              ) : (
-                <BlockFrame
-                  variant="editor"
-                  className={frameConfig.className}
-                  contentClassName={frameConfig.contentClassName}
-                >
-                  {content}
-                </BlockFrame>
-              )}
+              {content}
             </div>
           </div>
         );
