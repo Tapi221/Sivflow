@@ -9,6 +9,7 @@ import { useDocuments } from "@/hooks/platform/useDocuments";
 import { useIsDesktopRuntime } from "@/hooks/platform/useIsDesktopRuntime";
 import { useSettingsQueryParam } from "@/hooks/settings/useSettingsQueryParam";
 import { cn } from "@/lib/utils";
+import type { DocumentItem } from "@/types";
 import {
     startTransition,
     useCallback,
@@ -18,6 +19,30 @@ import {
     useState,
 } from "react";
 import { useSearchParams } from "react-router-dom";
+
+/**
+ * Explorer から通知されるパンくず用コンテキスト
+ */
+type ExplorerBreadcrumbContext = {
+  folderId: string | null;
+  cardSet: { id: string; label: string } | null;
+};
+
+const EMPTY_BREADCRUMB_CONTEXT: ExplorerBreadcrumbContext = {
+  folderId: null,
+  cardSet: null,
+};
+
+/**
+ * パンくず用コンテキストが等しいかどうかを判定する
+ */
+const isSameBreadcrumbContext = (
+  a: ExplorerBreadcrumbContext,
+  b: ExplorerBreadcrumbContext,
+): boolean =>
+  a.folderId === b.folderId &&
+  a.cardSet?.id === b.cardSet?.id &&
+  a.cardSet?.label === b.cardSet?.label;
 
 const Folders = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -32,11 +57,11 @@ const Folders = () => {
   const queryCardId = searchParams.get("cardId");
   const queryDocId = searchParams.get("docId");
 
-  const pendingUrlSyncRef = useRef(null);
+  const pendingUrlSyncRef = useRef<string | null>(null);
   const urlSyncTimerRef = useRef(0);
   const [folderSelectionNonce, setFolderSelectionNonce] = useState(0);
-  const [explorerFolderContextId, setExplorerFolderContextId] = useState(null);
-  const [explorerCardSetContext, setExplorerCardSetContext] = useState(null);
+  const [explorerBreadcrumbContext, setExplorerBreadcrumbContext] =
+    useState<ExplorerBreadcrumbContext>(EMPTY_BREADCRUMB_CONTEXT);
 
   const forceResetWorkspaceScroll = useCallback(() => {
     const reset = () => {
@@ -55,7 +80,7 @@ const Folders = () => {
     window.requestAnimationFrame(reset);
   }, [isDesktop]);
 
-  const notifyMainSidebarFolderSelection = useCallback((folderId) => {
+  const notifyMainSidebarFolderSelection = useCallback((folderId: string | null) => {
     window.dispatchEvent(
       new CustomEvent("folders:selected-folder-changed", {
         detail: { folderId: folderId ?? null },
@@ -232,7 +257,7 @@ const Folders = () => {
       notifyMainSidebarFolderSelection(null);
       setSelectedFolderId(null);
       setSelectedItem(null);
-      setExplorerCardSetContext(null);
+      setExplorerBreadcrumbContext(EMPTY_BREADCRUMB_CONTEXT);
       selectedFolderIdRef.current = null;
       selectedItemRef.current = null;
     });
@@ -260,7 +285,7 @@ const Folders = () => {
 
   // --- 選択ハンドラ ---
   const handleSelectFolderInWork = useCallback(
-    (folderId) => {
+    (folderId: string | null) => {
       if (
         selectedFolderIdRef.current === folderId &&
         selectedItemRef.current === null
@@ -273,7 +298,7 @@ const Folders = () => {
       notifyMainSidebarFolderSelection(folderId);
       setSelectedFolderId(folderId);
       setSelectedItem(null);
-      setExplorerCardSetContext(null);
+      setExplorerBreadcrumbContext(EMPTY_BREADCRUMB_CONTEXT);
       selectedFolderIdRef.current = folderId;
       selectedItemRef.current = null;
     },
@@ -299,7 +324,7 @@ const Folders = () => {
   }, []);
 
   const handleSelectItemInWork = useCallback(
-    (item) => {
+    (item: { type: string; id?: string } | null) => {
       if (!item) {
         if (selectedItemRef.current === null) return;
         setSelectedItem(null);
@@ -382,7 +407,7 @@ const Folders = () => {
       notifyMainSidebarFolderSelection(folderId ?? null);
       setSelectedFolderId(folderId ?? null);
       setSelectedItem(null);
-      setExplorerCardSetContext(null);
+      setExplorerBreadcrumbContext(EMPTY_BREADCRUMB_CONTEXT);
       selectedFolderIdRef.current = folderId ?? null;
       selectedItemRef.current = null;
 
@@ -399,15 +424,6 @@ const Folders = () => {
       }
     });
   }, [registerFolderSelectHandler, notifyMainSidebarFolderSelection]);
-
-  useEffect(() => {
-    return () => {
-      if (urlSyncTimerRef.current) {
-        window.clearTimeout(urlSyncTimerRef.current);
-        urlSyncTimerRef.current = 0;
-      }
-    };
-  }, []);
 
   const folderById = useMemo(
     () => new Map(folders.map((folder) => [folder.id, folder])),
@@ -428,9 +444,20 @@ const Folders = () => {
     return map;
   }, [documents]);
 
-  useEffect(() => {
+  const handleExplorerBreadcrumbContextChange = useCallback(
+    (next: ExplorerBreadcrumbContext) => {
+      setExplorerBreadcrumbContext((prev) =>
+        isSameBreadcrumbContext(prev, next) ? prev : next,
+      );
+    },
+    [],
+  );
+
+  // パンくずの追加項目（フォルダ階層、カード/ドキュメント名。カードセット名）を計算
+  const extraCrumbs = useMemo(() => {
     const crumbs = [];
-    const breadcrumbFolderId = selectedFolderId || explorerFolderContextId;
+    const breadcrumbFolderId =
+      selectedFolderId ?? explorerBreadcrumbContext.folderId;
 
     // フォルダ階層を構築（祖先 → 選択フォルダ）
     if (breadcrumbFolderId) {
@@ -468,25 +495,24 @@ const Folders = () => {
       }
     }
 
-    if (explorerCardSetContext?.label) {
-      crumbs.push({ label: explorerCardSetContext.label });
+    if (explorerBreadcrumbContext.cardSet?.label) {
+      crumbs.push({ label: explorerBreadcrumbContext.cardSet.label });
     }
 
-    setExtraCrumbs(crumbs);
-
-    return () => {
-      setExtraCrumbs([]);
-    };
+    return crumbs;
   }, [
     selectedFolderId,
-    explorerFolderContextId,
-    explorerCardSetContext,
+    explorerBreadcrumbContext,
     selectedItem,
     folderById,
     cardById,
     documentById,
-    setExtraCrumbs,
   ]);
+
+  // 計算されたパンくずをコンテキストに反映
+  useEffect(() => {
+    setExtraCrumbs(extraCrumbs);
+  }, [extraCrumbs, setExtraCrumbs]);
 
   if (isHomeOnlyMode) {
     return <div className="flex min-h-0 h-full w-full bg-[#F8FAFB]" />;
@@ -516,7 +542,7 @@ const Folders = () => {
           <TreeViewLayout
             folders={folders}
             cards={cards}
-            documents={documents}
+            documents={documents as DocumentItem[]}
             selectedFolderId={selectedFolderId}
             selectedItem={selectedItem}
             selectedCardId={selectedCardId}
@@ -526,8 +552,7 @@ const Folders = () => {
             onCardUpdated={() => {
               // カード更新後の処理
             }}
-            onFolderContextChange={setExplorerFolderContextId}
-            onCardSetContextChange={setExplorerCardSetContext}
+            onBreadcrumbContextChange={handleExplorerBreadcrumbContextChange}
             navigateToSectionListToken={navigateToSectionListToken}
             folderSelectionNonce={folderSelectionNonce}
           />

@@ -10,7 +10,7 @@ import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { cn } from "@/lib/utils";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 import { createPageUrl } from "@/utils";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { TreeViewMainPane } from "@/components/folder/components/TreeViewMainPane";
@@ -21,6 +21,14 @@ import { useTreeViewActions } from "@/components/folder/hooks/useTreeViewActions
 import { useTreeViewDerivedState } from "@/components/folder/hooks/useTreeViewDerivedState";
 import { useTreeViewFilters } from "@/components/folder/hooks/useTreeViewFilters";
 import { useTreeViewSidebar } from "@/components/folder/hooks/useTreeViewSidebar";
+
+/**
+ * パンくず表示用のコンテキスト（フォルダとカードセット）
+ */
+type ExplorerBreadcrumbContext = {
+  folderId: string | null;
+  cardSet: { id: string; label: string } | null;
+};
 
 interface TreeViewLayoutProps {
   folders: Folder[];
@@ -33,10 +41,7 @@ interface TreeViewLayoutProps {
   onFolderSelect: (folderId: string | null) => void;
   onItemSelect: (item: SelectedExplorerItem) => void;
   onCardUpdated: () => void;
-  onFolderContextChange?: (folderId: string | null) => void;
-  onCardSetContextChange?: (
-    cardSet: { id: string; label: string } | null,
-  ) => void;
+  onBreadcrumbContextChange?: (context: ExplorerBreadcrumbContext) => void;
   navigateToSectionListToken?: number;
   folderSelectionNonce?: number;
 }
@@ -52,8 +57,7 @@ const TreeViewLayout = ({
   onFolderSelect,
   onItemSelect,
   onCardUpdated,
-  onFolderContextChange,
-  onCardSetContextChange,
+  onBreadcrumbContextChange,
   navigateToSectionListToken = 0,
   folderSelectionNonce = 0,
 }: TreeViewLayoutProps) => {
@@ -221,10 +225,6 @@ const TreeViewLayout = ({
     return null;
   }, [cardSets, explorerHeaderFolderId, selectedFolderId, selectedItem]);
 
-  useEffect(() => {
-    onFolderContextChange?.(currentHeaderFolderId);
-  }, [currentHeaderFolderId, onFolderContextChange]);
-
   const currentCardSetLabel = useMemo(() => {
     if (!selectedCardSetId) return null;
     return (
@@ -233,16 +233,24 @@ const TreeViewLayout = ({
     );
   }, [cardSets, selectedCardSetId, selectedCardSetLabel]);
 
-  useEffect(() => {
-    if (!selectedCardSetId || !currentCardSetLabel) {
-      onCardSetContextChange?.(null);
-      return;
-    }
-    onCardSetContextChange?.({
-      id: selectedCardSetId,
-      label: currentCardSetLabel,
+  // パンくずの変更を親コンポーネントに通知する
+  useLayoutEffect(() => {
+    onBreadcrumbContextChange?.({
+      folderId: currentHeaderFolderId,
+      cardSet:
+        selectedCardSetId && currentCardSetLabel
+          ? {
+              id: selectedCardSetId,
+              label: currentCardSetLabel,
+            }
+          : null,
     });
-  }, [currentCardSetLabel, onCardSetContextChange, selectedCardSetId]);
+  }, [
+    currentCardSetLabel,
+    currentHeaderFolderId,
+    onBreadcrumbContextChange,
+    selectedCardSetId,
+  ]);
 
   const handleCreateRootFolder = useCallback(() => {
     createFolderTriggerRef.current?.();
