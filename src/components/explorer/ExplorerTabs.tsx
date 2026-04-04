@@ -13,6 +13,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuItemIcon,
+  DropdownMenuItemLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { glassMenuContentClass } from "@/components/ui/menu-styles";
@@ -133,10 +135,11 @@ export const ExplorerTabs = ({
                 setCreateMenuOpen(false);
                 void onCreateRootFolder?.();
               }}
-              className="gap-2"
             >
-              <Folder className="h-4 w-4" />
-              新規フォルダ
+              <DropdownMenuItemIcon>
+                <Folder className="h-4 w-4" />
+              </DropdownMenuItemIcon>
+              <DropdownMenuItemLabel>新規フォルダ</DropdownMenuItemLabel>
             </DropdownMenuItem>
 
             {canCreateCardSet && (
@@ -147,28 +150,29 @@ export const ExplorerTabs = ({
                   setCreateMenuOpen(false);
                   void onCreateCardSet?.();
                 }}
-                className="gap-2"
               >
-                <Plus className="h-4 w-4" />
-                新規カードセット
+                <DropdownMenuItemIcon>
+                  <Plus className="h-4 w-4" />
+                </DropdownMenuItemIcon>
+                <DropdownMenuItemLabel>
+                  新規カードセット
+                </DropdownMenuItemLabel>
               </DropdownMenuItem>
             )}
 
             {canAddDocuments && (
               <>
-                <DropdownMenuItem
-                  onSelect={() => void onAddPdf?.()}
-                  className="gap-2"
-                >
-                  <FileText className="h-4 w-4" />
-                  PDF追加
+                <DropdownMenuItem onSelect={() => void onAddPdf?.()}>
+                  <DropdownMenuItemIcon>
+                    <FileText className="h-4 w-4" />
+                  </DropdownMenuItemIcon>
+                  <DropdownMenuItemLabel>PDF追加</DropdownMenuItemLabel>
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  onSelect={() => void onAddPptx?.()}
-                  className="gap-2"
-                >
-                  <FileText className="h-4 w-4" />
-                  PPTX追加
+                <DropdownMenuItem onSelect={() => void onAddPptx?.()}>
+                  <DropdownMenuItemIcon>
+                    <FileText className="h-4 w-4" />
+                  </DropdownMenuItemIcon>
+                  <DropdownMenuItemLabel>PPTX追加</DropdownMenuItemLabel>
                 </DropdownMenuItem>
               </>
             )}

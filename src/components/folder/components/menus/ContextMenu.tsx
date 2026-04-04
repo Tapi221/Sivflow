@@ -2,6 +2,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuItemIcon,
+  DropdownMenuItemLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -90,10 +92,11 @@ export const ContextMenu = ({
                   onOpenChange?.(false);
                   onCreateSubfolder?.();
                 }}
-                className="gap-2"
               >
-                <Folder className="h-4 w-4" />
-                新規フォルダ
+                <DropdownMenuItemIcon>
+                  <Folder className="h-4 w-4" />
+                </DropdownMenuItemIcon>
+                <DropdownMenuItemLabel>新規フォルダ</DropdownMenuItemLabel>
               </DropdownMenuItem>
             )}
 
@@ -106,10 +109,11 @@ export const ContextMenu = ({
                   onOpenChange?.(false);
                   onCreateCardSet?.();
                 }}
-                className="gap-2"
               >
-                <Plus className="h-4 w-4 text-blue-500" />
-                新規カードセット
+                <DropdownMenuItemIcon>
+                  <Plus className="h-4 w-4 text-blue-500" />
+                </DropdownMenuItemIcon>
+                <DropdownMenuItemLabel>新規カードセット</DropdownMenuItemLabel>
               </DropdownMenuItem>
             )}
 
@@ -127,10 +131,11 @@ export const ContextMenu = ({
               suppressCloseAutoFocusRef.current = true;
               onRename?.();
             }}
-            className="gap-2"
           >
-            <Pencil className="h-4 w-4" />
-            名前を変更
+            <DropdownMenuItemIcon>
+              <Pencil className="h-4 w-4" />
+            </DropdownMenuItemIcon>
+            <DropdownMenuItemLabel>名前を変更</DropdownMenuItemLabel>
           </DropdownMenuItem>
         )}
 
@@ -141,10 +146,11 @@ export const ContextMenu = ({
               e.stopPropagation();
               onMove?.();
             }}
-            className="gap-2"
           >
-            <ChevronRight className="h-4 w-4" />
-            移動
+            <DropdownMenuItemIcon>
+              <ChevronRight className="h-4 w-4" />
+            </DropdownMenuItemIcon>
+            <DropdownMenuItemLabel>移動</DropdownMenuItemLabel>
           </DropdownMenuItem>
         )}
 
@@ -155,10 +161,11 @@ export const ContextMenu = ({
               e.stopPropagation();
               onBulkTag?.();
             }}
-            className="gap-2"
           >
-            <Tag className="h-4 w-4 text-violet-500" />
-            タグを一括付与
+            <DropdownMenuItemIcon>
+              <Tag className="h-4 w-4 text-violet-500" />
+            </DropdownMenuItemIcon>
+            <DropdownMenuItemLabel>タグを一括付与</DropdownMenuItemLabel>
           </DropdownMenuItem>
         )}
 
@@ -166,15 +173,13 @@ export const ContextMenu = ({
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onSelect={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onDelete?.();
-              }}
-              className="gap-2 text-red-600 focus:bg-red-50 focus:text-red-700"
+              onClick={onDelete}
+              className="text-red-600 focus:bg-red-50 focus:text-red-700"
             >
-              <Trash2 className="h-4 w-4" />
-              削除
+              <DropdownMenuItemIcon>
+                <Trash2 className="h-4 w-4" />
+              </DropdownMenuItemIcon>
+              <DropdownMenuItemLabel>削除</DropdownMenuItemLabel>
             </DropdownMenuItem>
           </>
         )}

@@ -22,7 +22,12 @@ export const UiIcon = ({
       strokeWidth={strokeWidth}
       strokeLinecap="round"
       strokeLinejoin="round"
-      style={{ vectorEffect: "non-scaling-stroke", ...style }}
+      style={{
+        display: "block",
+        flexShrink: 0,
+        vectorEffect: "non-scaling-stroke",
+        ...style,
+      }}
     />
   );
 };
