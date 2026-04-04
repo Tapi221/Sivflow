@@ -98,9 +98,7 @@ export const useCardEditorPaneWidth = ({
       settings?.cardViewPaneWidthPx ??
       defaultSharedPaneWidthPx;
 
-    setViewPaneWidthPx(
-      clampPaneWidthPx(fallback, CARD_PANE_VIEW_MIN_WIDTH_PX),
-    );
+    setViewPaneWidthPx(clampPaneWidthPx(fallback, CARD_PANE_VIEW_MIN_WIDTH_PX));
   }, [
     cardSetId,
     defaultSharedPaneWidthPx,
@@ -123,9 +121,7 @@ export const useCardEditorPaneWidth = ({
       settings?.cardViewPaneWidthPx ??
       defaultSharedPaneWidthPx;
 
-    setEditPaneWidthPx(
-      clampPaneWidthPx(fallback, CARD_PANE_EDIT_MIN_WIDTH_PX),
-    );
+    setEditPaneWidthPx(clampPaneWidthPx(fallback, CARD_PANE_EDIT_MIN_WIDTH_PX));
   }, [
     cardSetId,
     defaultSharedPaneWidthPx,

@@ -347,7 +347,8 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.95);
   }
 
-  .card-pager-item[data-card-active="true"] .card-shell.card-shell--editor-visual {
+  .card-pager-item[data-card-active="true"]
+    .card-shell.card-shell--editor-visual {
     border-color: var(--card-editing-outline, #1f4c3d);
     box-shadow:
       var(

@@ -73,7 +73,8 @@ const CARD_PANE_AUTO_MAX_SCALE = 4;
 const CARD_EDITOR_PAIR_GAP_PX = 16;
 const EMPTY_BLOCKS: CardBlock[] = [];
 const EDITOR_CARD_SHELL_VISUAL_CLASS_NAME = "card-shell--editor-visual";
-const EDITOR_CARD_SHELL_AFFORDANCE_CLASS_NAME = "card-shell--editing-affordance";
+const EDITOR_CARD_SHELL_AFFORDANCE_CLASS_NAME =
+  "card-shell--editing-affordance";
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
