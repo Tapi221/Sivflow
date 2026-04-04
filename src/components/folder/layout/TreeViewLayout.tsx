@@ -345,6 +345,7 @@ const TreeViewLayout = ({
         onStartResizing={startResizing}
         canCreateCardSet={canCreateCardSet}
         canAddDocuments={canAddDocuments}
+        preferDirectRootFolderCreate={isSectionListMode}
       >
         {tabContent}
       </TreeViewSidebar>

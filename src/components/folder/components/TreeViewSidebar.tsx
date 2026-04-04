@@ -25,6 +25,7 @@ interface TreeViewSidebarProps {
   children: React.ReactNode;
   canCreateCardSet?: boolean;
   canAddDocuments?: boolean;
+  preferDirectRootFolderCreate?: boolean;
 }
 
 export const TreeViewSidebar = ({
@@ -48,6 +49,7 @@ export const TreeViewSidebar = ({
   children,
   canCreateCardSet = false,
   canAddDocuments = false,
+  preferDirectRootFolderCreate = false,
 }: TreeViewSidebarProps) => {
   return (
     <div
@@ -77,6 +79,7 @@ export const TreeViewSidebar = ({
             showExplorerActions={explorerTab === "explorer"}
             canCreateCardSet={canCreateCardSet}
             canAddDocuments={canAddDocuments}
+            preferDirectRootFolderCreate={preferDirectRootFolderCreate}
           />
         </div>
 

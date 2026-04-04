@@ -27,6 +27,7 @@ interface ExplorerTabsProps {
   showExplorerActions?: boolean;
   canCreateCardSet?: boolean;
   canAddDocuments?: boolean;
+  preferDirectRootFolderCreate?: boolean;
 }
 
 const TABS: {
@@ -52,6 +53,7 @@ export const ExplorerTabs = ({
   showExplorerActions = false,
   canCreateCardSet = false,
   canAddDocuments = false,
+  preferDirectRootFolderCreate = false,
 }: ExplorerTabsProps) => {
   const shouldShowExplorerActions =
     showExplorerActions && activeTab === "explorer";
@@ -119,41 +121,59 @@ export const ExplorerTabs = ({
         )}
         aria-hidden={!shouldShowExplorerActions}
       >
-        <DropdownMenu
-          modal={false}
-          open={createMenuOpen}
-          onOpenChange={(open) => {
-            setCreateMenuOpen(open);
-            if (!open && !suppressCloseAutoFocusRef.current) {
-              suppressCloseAutoFocusRef.current = false;
-            }
-          }}
-        >
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              title="追加"
-              aria-label="追加メニューを開く"
-              className="flex items-center justify-center w-6 h-6 rounded text-[var(--text-muted,#8a8a8a)] hover:text-[var(--text-secondary,#4b4b4b)] hover:bg-[var(--hover-bg,rgba(0,0,0,0.04))] transition-colors"
-            >
-              <Plus className="w-3.5 h-3.5" />
-            </button>
-          </DropdownMenuTrigger>
-          <ExplorerMenuPanel
-            actions={createMenuActions}
-            align="end"
-            className="w-44"
-            closeMenu={() => {
-              suppressCloseAutoFocusRef.current = true;
-              setCreateMenuOpen(false);
+        {shouldShowExplorerActions &&
+        preferDirectRootFolderCreate &&
+        Boolean(onCreateRootFolder) &&
+        !canCreateCardSet &&
+        !canAddDocuments ? (
+          <button
+            type="button"
+            title="新規フォルダを追加"
+            aria-label="新規フォルダを追加"
+            className="flex items-center justify-center w-6 h-6 rounded text-[var(--text-muted,#8a8a8a)] hover:text-[var(--text-secondary,#4b4b4b)] hover:bg-[var(--hover-bg,rgba(0,0,0,0.04))] transition-colors"
+            onClick={() => {
+              void onCreateRootFolder?.();
             }}
-            onCloseAutoFocus={(event) => {
-              if (!suppressCloseAutoFocusRef.current) return;
-              suppressCloseAutoFocusRef.current = false;
-              event.preventDefault();
+          >
+            <Plus className="w-3.5 h-3.5" />
+          </button>
+        ) : (
+          <DropdownMenu
+            modal={false}
+            open={createMenuOpen}
+            onOpenChange={(open) => {
+              setCreateMenuOpen(open);
+              if (!open && !suppressCloseAutoFocusRef.current) {
+                suppressCloseAutoFocusRef.current = false;
+              }
             }}
-          />
-        </DropdownMenu>
+          >
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                title="追加"
+                aria-label="追加メニューを開く"
+                className="flex items-center justify-center w-6 h-6 rounded text-[var(--text-muted,#8a8a8a)] hover:text-[var(--text-secondary,#4b4b4b)] hover:bg-[var(--hover-bg,rgba(0,0,0,0.04))] transition-colors"
+              >
+                <Plus className="w-3.5 h-3.5" />
+              </button>
+            </DropdownMenuTrigger>
+            <ExplorerMenuPanel
+              actions={createMenuActions}
+              align="end"
+              className="w-44"
+              closeMenu={() => {
+                suppressCloseAutoFocusRef.current = true;
+                setCreateMenuOpen(false);
+              }}
+              onCloseAutoFocus={(event) => {
+                if (!suppressCloseAutoFocusRef.current) return;
+                suppressCloseAutoFocusRef.current = false;
+                event.preventDefault();
+              }}
+            />
+          </DropdownMenu>
+        )}
         <TagFilterPopover allTags={allTags} />
       </div>
     </div>
