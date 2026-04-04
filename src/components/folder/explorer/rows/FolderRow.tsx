@@ -26,6 +26,8 @@ import {
   FOLDER_ROW_ICON_MUTED_CLASS,
   FOLDER_ROW_ICON_SIZE_CLASS,
   FOLDER_ROW_TITLE_CLASS,
+  EXPLORER_ROW_TITLE_SLOT_CLASS,
+  EXPLORER_ROW_MOBILE_NAV_TRAILING_PADDING_CLASS,
 } from "./shared";
 
 type FolderRowFolder = FolderTreeNode & {
@@ -203,7 +205,8 @@ export const FolderRow: React.FC<FolderRowProps> = ({
           className={cn(
             rowBaseClassName,
             isFileDraggingOver && "bg-blue-100 ring-1 ring-blue-300",
-            "group pr-8 sidebar-row--folder",
+            "group sidebar-row--folder",
+            EXPLORER_ROW_MOBILE_NAV_TRAILING_PADDING_CLASS,
           )}
           onClick={onSelect}
           onDragEnterCapture={onDragEnterCapture}
@@ -299,7 +302,9 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                 onClick={(e) => e.stopPropagation()}
               />
             ) : (
-              <div className="flex-1 overflow-hidden pointer-events-none">
+              <div
+                className={cn(EXPLORER_ROW_TITLE_SLOT_CLASS, "overflow-hidden")}
+              >
                 <ExplorerRowContent
                   left={null}
                   title={folderName}

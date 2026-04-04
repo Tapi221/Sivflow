@@ -13,6 +13,7 @@ import {
   FOLDER_ROW_ICON_ACTIVE_CLASS,
   FOLDER_ROW_ICON_MUTED_CLASS,
   FOLDER_ROW_ICON_SIZE_CLASS,
+  EXPLORER_ROW_TITLE_SLOT_CLASS,
   FOLDER_ROW_TITLE_CLASS,
 } from "@/components/folder/explorer/rows/shared";
 import type { SelectedExplorerItem } from "@/types";
@@ -214,7 +215,7 @@ export const RootFolderPanelRow = ({
         setOpenRowMenuId(menuId);
       }}
     >
-      <div className={cn(EXPLORER_ROW_CONTENT_CLASS, "pr-8")}>
+      <div className={EXPLORER_ROW_CONTENT_CLASS}>
         <span className={EXPLORER_ROW_ICON_SLOT_CLASS}>
           <Icon
             className={cn(
@@ -278,7 +279,7 @@ export const RootFolderPanelRow = ({
             }}
           />
         ) : (
-          <div className="pointer-events-none flex min-w-0 flex-1 items-center">
+          <div className={EXPLORER_ROW_TITLE_SLOT_CLASS}>
             <ExplorerRowContent
               title={entry.name}
               titleClassName={cn(

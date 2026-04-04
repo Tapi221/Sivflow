@@ -18,6 +18,7 @@ import {
   FOLDER_ROW_ICON_ACTIVE_CLASS,
   FOLDER_ROW_ICON_MUTED_CLASS,
   FOLDER_ROW_ICON_SIZE_CLASS,
+  EXPLORER_ROW_TITLE_SLOT_CLASS,
   FOLDER_ROW_TITLE_CLASS,
 } from "@/components/folder/explorer/rows/shared";
 import type { ExplorerTreeNode as TreeNode } from "@/components/folder/explorer/tree/arboristAdapter";
@@ -274,7 +275,7 @@ export const ExplorerTreeNodeRenderer = React.memo(
             depth={0}
             selected={isSelected}
             className={cn(
-              "cursor-pointer pr-2 sidebar-row--folder",
+              "cursor-pointer sidebar-row--folder",
               isSelected
                 ? "bg-[var(--sidebar-active-bg,#e7ebef)] text-[var(--sidebar-text,#202123)]"
                 : "hover:bg-[var(--sidebar-active-bg,#e7ebef)] text-[var(--sidebar-text,#202123)]",
@@ -363,7 +364,7 @@ export const ExplorerTreeNodeRenderer = React.memo(
                   }}
                 />
               ) : (
-                <div className="pointer-events-none flex min-w-0 flex-1 items-center">
+                <div className={EXPLORER_ROW_TITLE_SLOT_CLASS}>
                   <ExplorerRowContent
                     title={treeNode.name}
                     titleClassName={cn(
