@@ -1,14 +1,8 @@
-import { AudioPlayer } from "@/components/card/media/CardMedia";
-import { useUserSettings } from "@/hooks/settings/useUserSettings";
-import type { CardBlock } from "@/types/domain/card";
-import type { CSSProperties } from "react";
-import { useCallback, useMemo, useState } from "react";
-
 import { CodeRenderer } from "@/components/card/blocks/code/CodeRenderer";
 import { BlockList } from "@/components/card/blocks/core/BlockList";
 import { ImageBlockContent } from "@/components/card/blocks/image/ImageBlockContent";
 import { ImageBlockShell } from "@/components/card/blocks/image/ImageBlockShell";
-import { MarkdownBlockView } from "@/components/card/blocks/markdown/MarkdownBlockPreview";
+import { MarkdownBlockDisplay } from "@/components/card/blocks/markdown/MarkdownBlockDisplay";
 import { MathBlockPreviewPane } from "@/components/card/blocks/math/MathBlockPreviewPane";
 import { QuestionBlockLayout } from "@/components/card/blocks/question/QuestionBlockLayout";
 import {
@@ -16,6 +10,11 @@ import {
   QUESTION_BLOCK_TITLE_TEXT_CLASS,
 } from "@/components/card/blocks/question/questionBlockTextStyles";
 import { TextBlockContent } from "@/components/card/blocks/text/TextBlockContent";
+import { AudioPlayer } from "@/components/card/media/CardMedia";
+import { useUserSettings } from "@/hooks/settings/useUserSettings";
+import type { CardBlock } from "@/types/domain/card";
+import type { CSSProperties } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 interface BlockRendererProps {
   blocks?: CardBlock[];
@@ -215,16 +214,10 @@ const renderBlock = (
       if ((block.markdown ?? "").trim() === "") return null;
 
       return (
-        <div className="px-0 py-0">
-          <div className="markdownBlockPreview bg-transparent border-0 rounded-lg overflow-visible p-0">
-            <MarkdownBlockView
-              md={block.markdown}
-              className="markdownBlockCardView"
-              bleedX={false}
-              style={getFluidZoomStyle(displayMode, zoom)}
-            />
-          </div>
-        </div>
+        <MarkdownBlockDisplay
+          markdown={block.markdown}
+          style={getFluidZoomStyle(displayMode, zoom)}
+        />
       );
 
     default:

@@ -1,0 +1,82 @@
+import { MarkdownBlockView } from "@/components/card/blocks/markdown/MarkdownBlockPreview";
+import { TEXT_BLOCK_CONTENT_CLASS } from "@/components/card/blocks/text/textBlockStyles";
+import { cn } from "@/lib/utils";
+import type { CSSProperties, KeyboardEventHandler, MouseEventHandler } from "react";
+
+type MarkdownBlockDisplayProps = {
+  markdown: string;
+  emptyPlaceholder?: string;
+  className?: string;
+  previewClassName?: string;
+  bleedX?: boolean;
+  style?: CSSProperties;
+  interactive?: boolean;
+  tabIndex?: number;
+  role?: string;
+  ariaLabel?: string;
+  onClick?: MouseEventHandler<HTMLDivElement>;
+  onKeyDown?: KeyboardEventHandler<HTMLDivElement>;
+  "data-testid"?: string;
+};
+
+const normalizeMarkdownBlockValue = (input: string) =>
+  String(input ?? "")
+    .replace(/\r\n/g, "\n")
+    .replace(/\n{3,}$/g, "\n\n")
+    .replace(/\n+$/g, "");
+
+export const MarkdownBlockDisplay = ({
+  markdown,
+  emptyPlaceholder = "Markdownを入力...",
+  className,
+  previewClassName,
+  bleedX = false,
+  style,
+  interactive = false,
+  tabIndex,
+  role,
+  ariaLabel,
+  onClick,
+  onKeyDown,
+  "data-testid": dataTestId,
+}: MarkdownBlockDisplayProps) => {
+  const normalizedMarkdown = normalizeMarkdownBlockValue(markdown);
+  const isEmpty = normalizedMarkdown.trim().length === 0;
+
+  return (
+    <div className={cn("px-0 py-0", className)}>
+      <div
+        className={cn(
+          "markdownBlockPreview bg-transparent border-0 rounded-lg overflow-visible p-0",
+          interactive && "cursor-text",
+          previewClassName,
+        )}
+        data-testid={dataTestId}
+        tabIndex={tabIndex}
+        role={role}
+        aria-label={ariaLabel}
+        onClick={onClick}
+        onKeyDown={onKeyDown}
+      >
+        {isEmpty ? (
+          <div
+            className={cn(
+              TEXT_BLOCK_CONTENT_CLASS,
+              "min-h-[24px] text-slate-300",
+            )}
+            style={style}
+          >
+            {emptyPlaceholder}
+          </div>
+        ) : (
+          <MarkdownBlockView
+            md={normalizedMarkdown}
+            className="markdownBlockCardView"
+            bleedX={bleedX}
+            style={style}
+          />
+        )}
+      </div>
+    </div>
+  );
+};
