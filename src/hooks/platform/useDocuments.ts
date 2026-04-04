@@ -20,8 +20,9 @@ export const useDocuments = (folderId?: string) => {
       const all = await db.documents.toArray();
       return all;
     } catch (err: unknown) {
-      console.error(`[useDocuments] Error: ${err.message}`);
-      setError(err.message);
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(`[useDocuments] Error: ${message}`);
+      setError(message);
       return [];
     }
   }, [currentUser]);
@@ -31,7 +32,7 @@ export const useDocuments = (folderId?: string) => {
     if (!rawDocuments) return [];
 
     let filtered = rawDocuments.filter(
-      (d) => !(d.isDeleted ?? (d as unknown).is_deleted),
+      (d) => !(d.isDeleted ?? (d as any).is_deleted),
     );
 
     if (folderId) {
@@ -39,7 +40,9 @@ export const useDocuments = (folderId?: string) => {
     }
 
     // orderIndexでソート
-    return filtered.sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
+    return filtered.sort(
+      (a, b) => (Number(a.orderIndex) || 0) - (Number(b.orderIndex) || 0),
+    );
   }, [rawDocuments, folderId]);
 
   const loading = rawDocuments === undefined;
@@ -64,7 +67,8 @@ export const useDocuments = (folderId?: string) => {
           deviceId: currentUser.uid, // 簡略版（実装に応じて調整）
         });
       } catch (err: unknown) {
-        console.error(`[useDocuments] Update error: ${err.message}`, {
+        const message = err instanceof Error ? err.message : String(err);
+        console.error(`[useDocuments] Update error: ${message}`, {
           documentId,
           updates,
         });
@@ -74,10 +78,18 @@ export const useDocuments = (folderId?: string) => {
     [currentUser],
   );
 
+  const deleteDocument = useCallback(
+    async (documentId: string): Promise<void> => {
+      await updateDocument(documentId, { isDeleted: true });
+    },
+    [updateDocument],
+  );
+
   return {
     documents,
     loading,
     error,
     updateDocument,
+    deleteDocument,
   };
 };

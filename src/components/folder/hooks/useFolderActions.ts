@@ -22,6 +22,7 @@ type FolderUpdateInput = Record<string, unknown>;
 type CardSetUpdateInput = Record<string, unknown>;
 type CardCreateInput = Record<string, unknown>;
 type CardUpdateInput = Record<string, unknown>;
+type DocumentUpdateInput = Record<string, unknown>;
 
 type UseFolderActionsParams = {
   treeFolders: FolderTreeNode[];
@@ -58,6 +59,11 @@ type UseFolderActionsParams = {
   onCreateCard?: (data: CardCreateInput) => Promise<unknown>;
   onUpdateCard?: (cardId: string, data: CardUpdateInput) => Promise<void>;
   onDeleteCard?: (cardId: string) => Promise<void>;
+  onUpdateDocument?: (
+    documentId: string,
+    data: DocumentUpdateInput,
+  ) => Promise<void>;
+  onDeleteDocument?: (documentId: string) => Promise<void>;
 
   selectedCardSetId?: string | null;
 
@@ -227,6 +233,8 @@ export const useFolderActions = ({
   onCreateCardSet,
   onUpdateCardSet,
   onDeleteCardSet,
+  onUpdateDocument,
+  onDeleteDocument,
   onDeleteCard,
   editingIdRef,
   editingNameRef,
@@ -251,6 +259,10 @@ export const useFolderActions = ({
         isCardSetId(treeCardSets, id)
       ) {
         return "cardSet";
+      }
+      // IDが 'doc-' で始まるか、type が明示的に document の場合は document
+      if (id.startsWith("doc-") || type === "document") {
+        return "document";
       }
       return "folder";
     },
@@ -458,6 +470,11 @@ export const useFolderActions = ({
         return;
       }
 
+      if (resolvedType === "document") {
+        await onDeleteDocument?.(id);
+        return;
+      }
+
       if (resolvedType === "card") {
         await onDeleteCard?.(id);
       }
@@ -505,6 +522,11 @@ export const useFolderActions = ({
           return;
         }
 
+        if (resolvedType === "document") {
+          await onUpdateDocument?.(id, { title: nextName });
+          return;
+        }
+
         await pendingFolderCreatesRef.current.get(id);
         await onUpdateFolder?.(id, { folderName: nextName, name: nextName });
       } catch (error) {
@@ -516,6 +538,7 @@ export const useFolderActions = ({
       editingIdRef,
       editingNameRef,
       onUpdateCardSet,
+      onUpdateDocument,
       onUpdateFolder,
       renameCancelledRef,
       resolveTargetKind,

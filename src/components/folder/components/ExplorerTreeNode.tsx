@@ -1,3 +1,6 @@
+import { ContextMenu } from "@/components/folder/components/menus/ContextMenu";
+import { buildRenameDeleteMenuActions } from "@/components/folder/components/menus/explorerMenuActionBuilders";
+import { useContextMenuAnchor } from "@/components/folder/components/menus/useContextMenuAnchor";
 import {
   extractPdfFiles,
   extractPptxFiles,
@@ -52,8 +55,11 @@ interface ExplorerTreeNodeProps {
   }) => void;
   handleCreateFolderAction: (parentId: string | null) => string;
   handleCreateCardSetAction: (folderId: string | null) => string | null;
-  handleDelete: (id: string, type: "folder" | "card") => void;
-  handleRenameConfirm: () => Promise<void>;
+  handleDelete: (
+    id: string,
+    type: "folder" | "cardSet" | "card" | "document",
+  ) => void;
+  handleRenameConfirm: (target?: any) => Promise<void>;
   setRowRef: (id: string, node: HTMLElement | null) => void;
   // filter
   isFiltering: boolean;
@@ -96,6 +102,61 @@ export const ExplorerTreeNodeRenderer = React.memo(
   }: ExplorerTreeNodeProps) {
     const ROW_BASE = EXPLORER_ROW_BASE_CLASS_NAME;
     const treeNode = node.data;
+    const supportsContextMenu =
+      treeNode.kind === "cardSet" || treeNode.kind === "document";
+    const rowMenuId = supportsContextMenu
+      ? `${treeNode.kind}:${treeNode.rawId}`
+      : null;
+    const isRowMenuOpen = rowMenuId !== null && openRowMenuId === rowMenuId;
+    const {
+      anchorPoint: rowMenuAnchor,
+      handleContextMenu,
+      resetAnchor,
+    } = useContextMenuAnchor();
+
+    const rowMenuActions = React.useMemo(() => {
+      if (treeNode.kind === "cardSet") {
+        return buildRenameDeleteMenuActions({
+          onRename: () => {
+            onItemSelect({ type: "cardSet", id: treeNode.rawId });
+            setOpenRowMenuId(null);
+            setEditingId(treeNode.rawId);
+            setEditingName(treeNode.name);
+            editingNameRef.current = treeNode.name;
+          },
+          onDelete: () => {
+            handleDelete(treeNode.rawId, "cardSet");
+          },
+        });
+      }
+
+      if (treeNode.kind === "document") {
+        return buildRenameDeleteMenuActions({
+          onRename: () => {
+            onItemSelect({ type: "document", id: treeNode.rawId });
+            setOpenRowMenuId(null);
+            setEditingId(treeNode.rawId);
+            setEditingName(treeNode.name);
+            editingNameRef.current = treeNode.name;
+          },
+          onDelete: () => {
+            handleDelete(treeNode.rawId, "document");
+          },
+        });
+      }
+
+      return [];
+    }, [
+      treeNode.kind,
+      treeNode.rawId,
+      treeNode.name,
+      onItemSelect,
+      setOpenRowMenuId,
+      setEditingId,
+      setEditingName,
+      editingNameRef,
+      handleDelete,
+    ]);
 
     if (treeNode.kind === "folder" && treeNode.folder) {
       const folderId = treeNode.rawId;
@@ -195,7 +256,19 @@ export const ExplorerTreeNodeRenderer = React.memo(
         }
       };
       return (
-        <div style={style}>
+        <div
+          style={style}
+          className="relative"
+          onContextMenu={
+            !isEditing
+              ? (e) => {
+                  if (!rowMenuId) return;
+                  handleContextMenu(e);
+                  setOpenRowMenuId(rowMenuId);
+                }
+              : undefined
+          }
+        >
           <ExplorerRow
             rowRef={(el) => setRowRef(treeNode.rawId, el)}
             depth={0}
@@ -283,7 +356,10 @@ export const ExplorerTreeNodeRenderer = React.memo(
                   }}
                   onBlur={(e) => {
                     editingNameRef.current = e.currentTarget.value;
-                    void handleRenameConfirm();
+                    void handleRenameConfirm({
+                      id: treeNode.rawId,
+                      type: "cardSet",
+                    });
                   }}
                 />
               ) : (
@@ -307,6 +383,15 @@ export const ExplorerTreeNodeRenderer = React.memo(
               )}
             </div>
           </ExplorerRow>
+          <ContextMenu
+            open={isRowMenuOpen}
+            anchorPoint={isRowMenuOpen ? rowMenuAnchor : null}
+            onOpenChange={(open) => {
+              if (!open) resetAnchor();
+              setOpenRowMenuId(open ? rowMenuId : null);
+            }}
+            actions={rowMenuActions}
+          />
         </div>
       );
     }
@@ -316,8 +401,23 @@ export const ExplorerTreeNodeRenderer = React.memo(
         ? "text-[var(--sidebar-text-muted,#6e6e80)]"
         : "text-[var(--sidebar-text-muted,#6e6e80)]";
 
+    const isDocumentNode = treeNode.kind === "document";
+    const isDocumentEditing = isDocumentNode && editingId === treeNode.rawId;
+
     return (
-      <div style={style}>
+      <div
+        style={style}
+        className="relative"
+        onContextMenu={
+          isDocumentNode && !isDocumentEditing
+            ? (e) => {
+                if (!rowMenuId) return;
+                handleContextMenu(e);
+                setOpenRowMenuId(rowMenuId);
+              }
+            : undefined
+        }
+      >
         <div
           ref={(el) => setRowRef(treeNode.rawId, el)}
           className={cn(
@@ -340,17 +440,80 @@ export const ExplorerTreeNodeRenderer = React.memo(
             className={cn("mr-2 h-4 w-4 shrink-0", iconClassName)}
             style={{ transform: "translateY(-1px)" }}
           />
-          <span
-            className={cn(
-              "truncate text-sm",
-              isSelected
-                ? "font-medium text-[var(--sidebar-text,#202123)]"
-                : "text-[var(--sidebar-text,#202123)]",
-            )}
-          >
-            {treeNode.name}
-          </span>
+          {isDocumentEditing ? (
+            <input
+              ref={(node) => {
+                editInputRef.current = node;
+                if (!node) return;
+                node.focus({ preventScroll: true });
+                node.select();
+                try {
+                  node.setSelectionRange(0, node.value.length);
+                } catch {
+                  // no-op
+                }
+              }}
+              aria-label="文書名の編集"
+              className={EXPLORER_ROW_INPUT_CLASS}
+              defaultValue={editingName}
+              onFocus={(e) => {
+                e.currentTarget.select();
+              }}
+              onMouseUp={(e) => {
+                e.preventDefault();
+              }}
+              onChange={(e) => {
+                editingNameRef.current = e.target.value;
+              }}
+              onClick={(e) => e.stopPropagation()}
+              onKeyDown={(e) => {
+                const isComposing =
+                  e.nativeEvent.isComposing || e.keyCode === 229;
+                if (e.key === "Enter" && isComposing) return;
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  editingNameRef.current = e.currentTarget.value;
+                  e.currentTarget.blur();
+                }
+                if (e.key === "Escape") {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  renameCancelledRef.current = true;
+                  e.currentTarget.blur();
+                }
+              }}
+              onBlur={(e) => {
+                editingNameRef.current = e.currentTarget.value;
+                void handleRenameConfirm({
+                  id: treeNode.rawId,
+                  type: "document",
+                });
+              }}
+            />
+          ) : (
+            <span
+              className={cn(
+                "truncate text-sm",
+                isSelected
+                  ? "font-medium text-[var(--sidebar-text,#202123)]"
+                  : "text-[var(--sidebar-text,#202123)]",
+              )}
+            >
+              {treeNode.name}
+            </span>
+          )}
         </div>
+        {isDocumentNode ? (
+          <ContextMenu
+            open={isRowMenuOpen}
+            anchorPoint={isRowMenuOpen ? rowMenuAnchor : null}
+            onOpenChange={(open) => {
+              if (!open) resetAnchor();
+              setOpenRowMenuId(open ? rowMenuId : null);
+            }}
+            actions={rowMenuActions}
+          />
+        ) : null}
       </div>
     );
   },

@@ -131,7 +131,7 @@ const TreeViewLayout = ({
     [cardSets, navigate, onFolderSelect, onItemSelect],
   );
 
-  const { updateDocument } = useDocuments();
+  const { updateDocument, deleteDocument } = useDocuments();
   const { getTagColor, tagById } = useTags();
 
   const {
@@ -380,9 +380,13 @@ const TreeViewLayout = ({
       onCreateCard={createCard as any}
       onUpdateCard={updateCard as any}
       onDeleteCard={deleteCard}
+      onUpdateDocument={updateDocument as any}
+      onDeleteDocument={deleteDocument}
       moveCardToFolder={moveCardToFolder}
       moveCardSetToFolder={moveCardSetToFolder}
-      moveDocumentToFolder={(id, folderId) => updateDocument(id, { folderId })}
+      moveDocumentToFolder={(id, folderId) =>
+        (updateDocument as any)(id, { folderId })
+      }
       reorderCards={reorderCards}
       selectedCardSetId={selectedCardSetId}
       onSelectCardSet={handleCardSetSelectWithoutNavigation}

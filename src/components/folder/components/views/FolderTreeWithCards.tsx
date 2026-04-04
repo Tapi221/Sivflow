@@ -76,6 +76,8 @@ interface FolderTreeWithCardsProps {
   onCreateCard?: (data: unknown) => Promise<unknown>;
   onUpdateCard?: (cardId: string, data: unknown) => Promise<void>;
   onDeleteCard?: (cardId: string) => Promise<void>;
+  onUpdateDocument?: (documentId: string, data: unknown) => Promise<void>;
+  onDeleteDocument?: (documentId: string) => Promise<void>;
   moveCardToFolder?: (cardId: string, targetFolderId: string) => Promise<void>;
   moveCardSetToFolder?: (
     cardSetId: string,
@@ -124,6 +126,8 @@ export const FolderTreeWithCards = ({
   onCreateCard,
   onUpdateCard,
   onDeleteCard,
+  onUpdateDocument,
+  onDeleteDocument,
   moveCardToFolder,
   moveCardSetToFolder,
   moveDocumentToFolder,
@@ -424,6 +428,8 @@ export const FolderTreeWithCards = ({
     onCreateCard,
     onUpdateCard,
     onDeleteCard,
+    onUpdateDocument,
+    onDeleteDocument,
     selectedCardSetId,
     editingIdRef: dialogs.editingIdRef,
     editingNameRef: dialogs.editingNameRef,
@@ -932,7 +938,10 @@ export const FolderTreeWithCards = ({
     onItemSelect,
     handleCreateFolderAction: actions.handleCreateFolderAction,
     handleCreateCardSetAction: handleCreateCardSetFromMenu,
-    handleDelete: (id: string, type: "folder" | "card") => {
+    handleDelete: (
+      id: string,
+      type: "folder" | "cardSet" | "card" | "document",
+    ) => {
       void actions.handleDelete({ id, type });
     },
     handleRenameConfirm: actions.handleRenameConfirm,
@@ -973,6 +982,8 @@ export const FolderTreeWithCards = ({
       isFiltering,
       onUpdateFolder,
       onDeleteFolder,
+      onUpdateDocument,
+      onDeleteDocument,
     ],
   );
 

@@ -9,6 +9,13 @@ interface BuildFolderMenuActionsParams {
   onBulkTag?: () => void;
 }
 
+interface BuildRenameDeleteMenuActionsParams {
+  renameLabel?: string;
+  deleteLabel?: string;
+  onRename?: () => void;
+  onDelete?: () => void;
+}
+
 interface BuildExplorerCreateMenuActionsParams {
   canCreateCardSet?: boolean;
   canAddDocuments?: boolean;
@@ -71,6 +78,36 @@ export const buildFolderMenuActions = ({
     actions.push({
       id: "delete",
       label: "削除",
+      icon: <Trash2 className="h-4 w-4" />,
+      danger: true,
+      onSelect: onDelete,
+    });
+  }
+
+  return actions;
+};
+
+export const buildRenameDeleteMenuActions = ({
+  renameLabel = "名前を変更",
+  deleteLabel = "削除",
+  onRename,
+  onDelete,
+}: BuildRenameDeleteMenuActionsParams): MenuAction[] => {
+  const actions: MenuAction[] = [];
+
+  if (onRename) {
+    actions.push({
+      id: "rename",
+      label: renameLabel,
+      icon: <Pencil className="h-4 w-4" />,
+      onSelect: onRename,
+    });
+  }
+
+  if (onDelete) {
+    actions.push({
+      id: "delete",
+      label: deleteLabel,
       icon: <Trash2 className="h-4 w-4" />,
       danger: true,
       onSelect: onDelete,

@@ -1,5 +1,8 @@
 import { ContextMenu } from "@/components/folder/components/menus/ContextMenu";
-import { buildFolderMenuActions } from "@/components/folder/components/menus/explorerMenuActionBuilders";
+import {
+  buildFolderMenuActions,
+  buildRenameDeleteMenuActions,
+} from "@/components/folder/components/menus/explorerMenuActionBuilders";
 import { useContextMenuAnchor } from "@/components/folder/components/menus/useContextMenuAnchor";
 import { ExplorerRowContent } from "@/components/folder/explorer/rows/ExplorerRowContent";
 import {
@@ -33,13 +36,16 @@ interface RootFolderPanelRowProps {
   }) => void;
   handleCreateFolderAction: (parentId: string | null) => string;
   handleCreateCardSetAction: (folderId: string | null) => string | null;
-  handleDelete: (id: string, type: "folder" | "card") => void;
+  handleDelete: (
+    id: string,
+    type: "folder" | "cardSet" | "card" | "document",
+  ) => void;
   setEditingId: React.Dispatch<React.SetStateAction<string | null>>;
   setEditingName: React.Dispatch<React.SetStateAction<string>>;
   editingNameRef: React.MutableRefObject<string>;
   editingId: string | null;
   editingName: string;
-  handleRenameConfirm: () => Promise<void>;
+  handleRenameConfirm: (target?: any) => Promise<void>;
   attachInputRef: (node: HTMLInputElement | null) => void;
 }
 
@@ -69,8 +75,12 @@ export const RootFolderPanelRow = ({
   attachInputRef,
 }: RootFolderPanelRowProps) => {
   const isFolderEntry = entry.kind === "folder";
-  const menuId = isFolderEntry ? `folder:${entry.id}:panel` : null;
-  const isEditing = isFolderEntry && editingId === entry.id;
+  const supportsContextMenu =
+    entry.kind === "folder" ||
+    entry.kind === "cardSet" ||
+    entry.kind === "document";
+  const menuId = supportsContextMenu ? `${entry.kind}:${entry.id}:panel` : null;
+  const isEditing = supportsContextMenu && editingId === entry.id;
   const isMenuOpen = menuId !== null && openRowMenuId === menuId;
   const { anchorPoint, handleContextMenu, resetAnchor } =
     useContextMenuAnchor();
@@ -103,9 +113,8 @@ export const RootFolderPanelRow = ({
 
   const menuActions = React.useMemo(
     () =>
-      entry.kind !== "folder"
-        ? []
-        : buildFolderMenuActions({
+      entry.kind === "folder"
+        ? buildFolderMenuActions({
             onCreateSubfolder: () => {
               void handleCreateFolderAction(entry.id);
             },
@@ -121,7 +130,8 @@ export const RootFolderPanelRow = ({
             onDelete: () => {
               handleDelete(entry.id, "folder");
             },
-          }),
+          })
+        : [],
     [
       entry,
       editingNameRef,
@@ -133,6 +143,51 @@ export const RootFolderPanelRow = ({
       setOpenRowMenuId,
     ],
   );
+
+  const resolvedMenuActions = React.useMemo(() => {
+    if (entry.kind === "folder") return menuActions;
+
+    if (entry.kind === "cardSet") {
+      return buildRenameDeleteMenuActions({
+        onRename: () => {
+          onItemSelect({ type: "cardSet", id: entry.id });
+          setOpenRowMenuId(null);
+          setEditingId(entry.id);
+          setEditingName(entry.name);
+          editingNameRef.current = entry.name;
+        },
+        onDelete: () => {
+          handleDelete(entry.id, "cardSet");
+        },
+      });
+    }
+
+    if (entry.kind === "document") {
+      return buildRenameDeleteMenuActions({
+        onRename: () => {
+          onItemSelect({ type: "document", id: entry.id });
+          setOpenRowMenuId(null);
+          setEditingId(entry.id);
+          setEditingName(entry.name);
+          editingNameRef.current = entry.name;
+        },
+        onDelete: () => {
+          handleDelete(entry.id, "document");
+        },
+      });
+    }
+
+    return [];
+  }, [
+    entry,
+    handleDelete,
+    menuActions,
+    onItemSelect,
+    setEditingId,
+    setEditingName,
+    setOpenRowMenuId,
+    editingNameRef,
+  ]);
 
   return (
     <div
@@ -154,7 +209,7 @@ export const RootFolderPanelRow = ({
         }
       }}
       onContextMenu={(e) => {
-        if (!isFolderEntry || isEditing) return;
+        if (!supportsContextMenu || isEditing || !menuId) return;
         handleContextMenu(e);
         setOpenRowMenuId(menuId);
       }}
@@ -201,7 +256,10 @@ export const RootFolderPanelRow = ({
               if (e.key === "Enter") {
                 e.preventDefault();
                 editingNameRef.current = e.currentTarget.value;
-                void handleRenameConfirm();
+                void handleRenameConfirm({
+                  id: entry.id,
+                  type: entry.kind,
+                });
                 return;
               }
 
@@ -213,7 +271,10 @@ export const RootFolderPanelRow = ({
             }}
             onBlur={(e) => {
               editingNameRef.current = e.currentTarget.value;
-              void handleRenameConfirm();
+              void handleRenameConfirm({
+                id: entry.id,
+                type: entry.kind,
+              });
             }}
           />
         ) : (
@@ -229,7 +290,7 @@ export const RootFolderPanelRow = ({
         )}
       </div>
 
-      {isFolderEntry ? (
+      {supportsContextMenu ? (
         <ContextMenu
           open={isMenuOpen}
           anchorPoint={isMenuOpen ? anchorPoint : null}
@@ -237,7 +298,7 @@ export const RootFolderPanelRow = ({
             if (!open) resetAnchor();
             setOpenRowMenuId(open ? menuId : null);
           }}
-          actions={menuActions}
+          actions={resolvedMenuActions}
         />
       ) : null}
     </div>

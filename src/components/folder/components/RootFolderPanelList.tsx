@@ -32,13 +32,16 @@ interface RootFolderPanelListProps {
   }) => void;
   handleCreateFolderAction: (parentId: string | null) => string;
   handleCreateCardSetAction: (folderId: string | null) => string | null;
-  handleDelete: (id: string, type: "folder" | "card") => void;
+  handleDelete: (
+    id: string,
+    type: "folder" | "cardSet" | "card" | "document",
+  ) => void;
   setEditingId: React.Dispatch<React.SetStateAction<string | null>>;
   setEditingName: React.Dispatch<React.SetStateAction<string>>;
   editingNameRef: React.MutableRefObject<string>;
   editingId: string | null;
   editingName: string;
-  handleRenameConfirm: () => Promise<void>;
+  handleRenameConfirm: (target?: any) => Promise<void>;
 }
 
 /**
