@@ -29,6 +29,7 @@ import type {
   Card,
   CardSet,
   DocumentItem,
+  ExplorerItem,
   SelectedExplorerItem,
 } from "@/types";
 import React, {
@@ -282,6 +283,18 @@ export const FolderTreeWithCards = ({
 
   const rootItems = useMemo(() => getFolderItems(null), [getFolderItems]);
 
+  const navigationFolderId = navigationParentFolderId ?? null;
+
+  const navigationCardSets = useMemo(
+    () => getCardSets(navigationFolderId),
+    [getCardSets, navigationFolderId],
+  );
+
+  const navigationItems = useMemo(
+    () => getFolderItems(navigationFolderId),
+    [getFolderItems, navigationFolderId],
+  );
+
   const navigationFolderPanels = useMemo(
     () =>
       (navigationParentFolderId
@@ -309,6 +322,44 @@ export const FolderTreeWithCards = ({
             item !== null,
         ),
     [getChildFolders, navigationParentFolderId, rootFolders],
+  );
+
+  const navigationEntries = useMemo(
+    () => [
+      ...navigationFolderPanels.map((panel) => ({
+        kind: "folder" as const,
+        id: panel.id,
+        name: panel.name,
+        folder: panel.folder,
+      })),
+      ...navigationCardSets.map((cardSet) => ({
+        kind: "cardSet" as const,
+        id: cardSet.id,
+        name: cardSet.name?.trim() || "無題のセット",
+      })),
+      ...navigationItems.map((item: ExplorerItem) => {
+        if (item.type === "document") {
+          return {
+            kind: "document" as const,
+            id: item.data.id,
+            name:
+              item.data.title?.trim() ||
+              item.data.fileName?.trim() ||
+              "無題の文書",
+          };
+        }
+
+        return {
+          kind: "card" as const,
+          id: item.data.id,
+          name:
+            item.data.title?.trim() ||
+            item.data.questionNumber?.trim() ||
+            "無題のカード",
+        };
+      }),
+    ],
+    [navigationFolderPanels, navigationCardSets, navigationItems],
   );
 
   const rootFolderPanels = useMemo(
@@ -956,7 +1007,7 @@ export const FolderTreeWithCards = ({
   );
 
   const hasRootContent =
-    navigationFolderPanels.length > 0 ||
+    navigationEntries.length > 0 ||
     rootFolderPanels.length > 0 ||
     rootItems.length > 0 ||
     explorerTreeData.length > 0;
@@ -964,8 +1015,8 @@ export const FolderTreeWithCards = ({
   const navigationEmptyMessage =
     effectiveSidebarDisplayMode === "navigation" &&
     navigationParentFolderId !== null &&
-    navigationFolderPanels.length === 0
-      ? "サブフォルダはありません"
+    navigationEntries.length === 0
+      ? "この階層には表示できるコンテンツがありません"
       : null;
 
 
@@ -1000,15 +1051,20 @@ export const FolderTreeWithCards = ({
             />
           ) : (
             <RootFolderPanelList
-              rootFolderPanels={navigationFolderPanels}
+              entries={navigationEntries}
               selectedFolderId={selectedFolderId}
+              selectedItem={selectedItem}
+              selectedCardSetId={selectedCardSetId}
               openRowMenuId={dialogs.openRowMenuId}
               setOpenRowMenuId={dialogs.setOpenRowMenuId}
               emptyMessage={navigationEmptyMessage}
+              setRowRef={setRowRef}
               onSelectFolder={(id) => {
+                if (!id) return;
                 setNavigationParentFolderId(id);
                 onFolderSelect(id);
               }}
+              onItemSelect={onItemSelect}
               handleCreateFolderAction={actions.handleCreateFolderAction}
               handleCreateCardSetAction={handleCreateCardSetFromRootPanel}
               handleDelete={(id, type) => {

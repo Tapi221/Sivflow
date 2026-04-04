@@ -1,14 +1,32 @@
 import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
+import type { SelectedExplorerItem } from "@/types";
 import React from "react";
 import { RootFolderPanelRow } from "./RootFolderPanelRow";
 
+export type NavigationListEntry =
+  | {
+      kind: "folder";
+      id: string;
+      name: string;
+      folder: FolderTreeNode;
+    }
+  | {
+      kind: "cardSet" | "card" | "document";
+      id: string;
+      name: string;
+    };
+
 interface RootFolderPanelListProps {
-  rootFolderPanels: Array<{ id: string; name: string; folder: FolderTreeNode }>;
+  entries: NavigationListEntry[];
   selectedFolderId: string | null;
+  selectedItem: SelectedExplorerItem;
+  selectedCardSetId?: string | null;
   openRowMenuId: string | null;
   emptyMessage?: string | null;
+  setRowRef: (id: string, node: HTMLElement | null) => void;
   setOpenRowMenuId: React.Dispatch<React.SetStateAction<string | null>>;
   onSelectFolder: (folderId: string | null) => void;
+  onItemSelect: (item: { type: "card" | "cardSet" | "document"; id: string }) => void;
   handleCreateFolderAction: (parentId: string | null) => string;
   handleCreateCardSetAction: (folderId: string | null) => string | null;
   handleDelete: (id: string, type: "folder" | "card") => void;
@@ -24,12 +42,16 @@ interface RootFolderPanelListProps {
  * ルートフォルダ（セクションリスト）を表示するパネルリスト
  */
 export const RootFolderPanelList = ({
-  rootFolderPanels,
+  entries,
   selectedFolderId,
+  selectedItem,
+  selectedCardSetId = null,
   openRowMenuId,
   emptyMessage = null,
+  setRowRef,
   setOpenRowMenuId,
   onSelectFolder,
+  onItemSelect,
   handleCreateFolderAction,
   handleCreateCardSetAction,
   handleDelete,
@@ -58,14 +80,18 @@ export const RootFolderPanelList = ({
 
   return (
     <div className="h-full overflow-y-auto py-1">
-      {rootFolderPanels.map((panel) => (
+      {entries.map((entry) => (
         <RootFolderPanelRow
-          key={panel.id}
-          panel={panel}
+          key={`${entry.kind}:${entry.id}`}
+          entry={entry}
           selectedFolderId={selectedFolderId}
+          selectedItem={selectedItem}
+          selectedCardSetId={selectedCardSetId}
           openRowMenuId={openRowMenuId}
+          setRowRef={setRowRef}
           setOpenRowMenuId={setOpenRowMenuId}
           onSelectFolder={onSelectFolder}
+          onItemSelect={onItemSelect}
           handleCreateFolderAction={handleCreateFolderAction}
           handleCreateCardSetAction={handleCreateCardSetAction}
           handleDelete={handleDelete}
@@ -79,7 +105,7 @@ export const RootFolderPanelList = ({
         />
       ))}
 
-      {rootFolderPanels.length === 0 && emptyMessage ? (
+      {entries.length === 0 && emptyMessage ? (
         <div className="px-2 py-2 text-sm text-muted-foreground font-normal">
           {emptyMessage}
         </div>

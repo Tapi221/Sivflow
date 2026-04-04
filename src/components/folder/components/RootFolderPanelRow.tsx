@@ -3,6 +3,7 @@ import { buildFolderMenuActions } from "@/components/folder/components/menus/exp
 import { useContextMenuAnchor } from "@/components/folder/components/menus/useContextMenuAnchor";
 import { ExplorerRowContent } from "@/components/folder/explorer/rows/ExplorerRowContent";
 import {
+  EXPLORER_ROW_BASE_CLASS_NAME,
   EXPLORER_ROW_CONTENT_CLASS,
   EXPLORER_ROW_ICON_SLOT_CLASS,
   EXPLORER_ROW_INPUT_CLASS,
@@ -11,16 +12,25 @@ import {
   FOLDER_ROW_ICON_SIZE_CLASS,
   FOLDER_ROW_TITLE_CLASS,
 } from "@/components/folder/explorer/rows/shared";
+import type { SelectedExplorerItem } from "@/types";
 import { cn } from "@/lib/utils";
-import { FolderOutlineIcon } from "@/ui/icons";
+import { FileText, FolderOutlineIcon, Layers } from "@/ui/icons";
 import React from "react";
+import type { NavigationListEntry } from "./RootFolderPanelList";
 
 interface RootFolderPanelRowProps {
-  panel: { id: string; name: string };
+  entry: NavigationListEntry;
   selectedFolderId: string | null;
+  selectedItem: SelectedExplorerItem;
+  selectedCardSetId?: string | null;
   openRowMenuId: string | null;
+  setRowRef: (id: string, node: HTMLElement | null) => void;
   setOpenRowMenuId: React.Dispatch<React.SetStateAction<string | null>>;
   onSelectFolder: (folderId: string | null) => void;
+  onItemSelect: (item: {
+    type: "card" | "cardSet" | "document";
+    id: string;
+  }) => void;
   handleCreateFolderAction: (parentId: string | null) => string;
   handleCreateCardSetAction: (folderId: string | null) => string | null;
   handleDelete: (id: string, type: "folder" | "card") => void;
@@ -38,11 +48,15 @@ interface RootFolderPanelRowProps {
  * フックを使用するため、map 内から子コンポーネントとして分離
  */
 export const RootFolderPanelRow = ({
-  panel,
+  entry,
   selectedFolderId,
+  selectedItem,
+  selectedCardSetId = null,
   openRowMenuId,
+  setRowRef,
   setOpenRowMenuId,
   onSelectFolder,
+  onItemSelect,
   handleCreateFolderAction,
   handleCreateCardSetAction,
   handleDelete,
@@ -54,79 +68,104 @@ export const RootFolderPanelRow = ({
   handleRenameConfirm,
   attachInputRef,
 }: RootFolderPanelRowProps) => {
-  const menuId = `folder:${panel.id}:panel`;
-  const isEditing = editingId === panel.id;
-  const isMenuOpen = openRowMenuId === menuId;
+  const isFolderEntry = entry.kind === "folder";
+  const menuId = isFolderEntry ? `folder:${entry.id}:panel` : null;
+  const isEditing = isFolderEntry && editingId === entry.id;
+  const isMenuOpen = menuId !== null && openRowMenuId === menuId;
   const { anchorPoint, handleContextMenu, resetAnchor } =
     useContextMenuAnchor();
 
+  const isSelected =
+    entry.kind === "folder"
+      ? selectedFolderId === entry.id
+      : entry.kind === "cardSet"
+        ? selectedCardSetId === entry.id ||
+          (selectedItem?.type === "cardSet" && selectedItem.id === entry.id)
+        : selectedItem?.type === entry.kind && selectedItem.id === entry.id;
+
+  const Icon =
+    entry.kind === "folder"
+      ? FolderOutlineIcon
+      : entry.kind === "cardSet"
+        ? Layers
+        : FileText;
+
+  const handleSelect = React.useCallback(() => {
+    if (isEditing || isMenuOpen) return;
+
+    if (entry.kind === "folder") {
+      onSelectFolder(entry.id);
+      return;
+    }
+
+    onItemSelect({ type: entry.kind, id: entry.id });
+  }, [entry, isEditing, isMenuOpen, onItemSelect, onSelectFolder]);
+
   const menuActions = React.useMemo(
     () =>
-      buildFolderMenuActions({
-        onCreateSubfolder: () => {
-          void handleCreateFolderAction(panel.id);
-        },
-        onCreateCardSet: () => {
-          void handleCreateCardSetAction(panel.id);
-        },
-        onRename: () => {
-          setOpenRowMenuId(null);
-          setEditingId(panel.id);
-          setEditingName(panel.name);
-          editingNameRef.current = panel.name;
-        },
-        onDelete: () => {
-          handleDelete(panel.id, "folder");
-        },
-      }),
+      entry.kind !== "folder"
+        ? []
+        : buildFolderMenuActions({
+            onCreateSubfolder: () => {
+              void handleCreateFolderAction(entry.id);
+            },
+            onCreateCardSet: () => {
+              void handleCreateCardSetAction(entry.id);
+            },
+            onRename: () => {
+              setOpenRowMenuId(null);
+              setEditingId(entry.id);
+              setEditingName(entry.name);
+              editingNameRef.current = entry.name;
+            },
+            onDelete: () => {
+              handleDelete(entry.id, "folder");
+            },
+          }),
     [
+      entry,
       editingNameRef,
       handleCreateCardSetAction,
       handleCreateFolderAction,
       handleDelete,
-      panel.id,
-      panel.name,
       setEditingId,
       setEditingName,
       setOpenRowMenuId,
     ],
   );
 
-  const handleSelectFolder = React.useCallback(() => {
-    if (isEditing || isMenuOpen) return;
-    onSelectFolder(panel.id);
-  }, [isEditing, isMenuOpen, onSelectFolder, panel.id]);
-
   return (
     <div
+      ref={(node) => setRowRef(entry.id, node)}
       className={cn(
-        "sidebar-row group relative flex h-8 w-full cursor-pointer items-center rounded-[4px] px-2 text-left",
+        EXPLORER_ROW_BASE_CLASS_NAME,
+        "group relative flex h-8 w-full cursor-pointer items-center rounded-[4px] px-2 text-left",
         "hover:bg-[var(--sidebar-active-bg,#e7ebef)]",
-        selectedFolderId === panel.id && "bg-[var(--sidebar-active-bg,#e7ebef)]",
+        isSelected && "bg-[var(--sidebar-active-bg,#e7ebef)]",
       )}
       role="button"
       tabIndex={0}
-      onClick={handleSelectFolder}
+      onClick={handleSelect}
       onKeyDown={(e) => {
         if (isEditing || isMenuOpen) return;
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          handleSelectFolder();
+          handleSelect();
         }
       }}
       onContextMenu={(e) => {
-        if (isEditing) return;
+        if (!isFolderEntry || isEditing) return;
         handleContextMenu(e);
         setOpenRowMenuId(menuId);
       }}
     >
       <div className={cn(EXPLORER_ROW_CONTENT_CLASS, "pr-8")}>
         <span className={EXPLORER_ROW_ICON_SLOT_CLASS}>
-          <FolderOutlineIcon
+          <Icon
             className={cn(
               "sidebar-icon",
               FOLDER_ROW_ICON_SIZE_CLASS,
-              selectedFolderId === panel.id
+              isSelected
                 ? FOLDER_ROW_ICON_ACTIVE_CLASS
                 : FOLDER_ROW_ICON_MUTED_CLASS,
             )}
@@ -180,25 +219,27 @@ export const RootFolderPanelRow = ({
         ) : (
           <div className="pointer-events-none flex min-w-0 flex-1 items-center">
             <ExplorerRowContent
-              title={panel.name}
+              title={entry.name}
               titleClassName={cn(
                 FOLDER_ROW_TITLE_CLASS,
-                selectedFolderId === panel.id ? "font-medium" : "font-normal",
+                isSelected ? "font-medium" : "font-normal",
               )}
             />
           </div>
         )}
       </div>
 
-      <ContextMenu
-        open={isMenuOpen}
-        anchorPoint={isMenuOpen ? anchorPoint : null}
-        onOpenChange={(open) => {
-          if (!open) resetAnchor();
-          setOpenRowMenuId(open ? menuId : null);
-        }}
-        actions={menuActions}
-      />
+      {isFolderEntry ? (
+        <ContextMenu
+          open={isMenuOpen}
+          anchorPoint={isMenuOpen ? anchorPoint : null}
+          onOpenChange={(open) => {
+            if (!open) resetAnchor();
+            setOpenRowMenuId(open ? menuId : null);
+          }}
+          actions={menuActions}
+        />
+      ) : null}
     </div>
   );
 };
