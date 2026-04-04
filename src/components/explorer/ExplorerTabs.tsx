@@ -22,8 +22,7 @@ interface ExplorerTabsProps {
   allTags: string[];
   onCreateRootFolder?: () => void | Promise<void>;
   onCreateCardSet?: () => void | Promise<void>;
-  onAddPdf?: () => void | Promise<void>;
-  onAddPptx?: () => void | Promise<void>;
+  onAddDocument?: () => void | Promise<void>;
   showExplorerActions?: boolean;
   canCreateCardSet?: boolean;
   canAddDocuments?: boolean;
@@ -48,8 +47,7 @@ export const ExplorerTabs = ({
   allTags,
   onCreateRootFolder,
   onCreateCardSet,
-  onAddPdf,
-  onAddPptx,
+  onAddDocument,
   showExplorerActions = false,
   canCreateCardSet = false,
   canAddDocuments = false,
@@ -67,14 +65,12 @@ export const ExplorerTabs = ({
         canAddDocuments,
         onCreateRootFolder,
         onCreateCardSet,
-        onAddPdf,
-        onAddPptx,
+        onAddDocument,
       }),
     [
       canAddDocuments,
       canCreateCardSet,
-      onAddPdf,
-      onAddPptx,
+      onAddDocument,
       onCreateCardSet,
       onCreateRootFolder,
     ],

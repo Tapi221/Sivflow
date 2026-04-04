@@ -14,8 +14,7 @@ interface BuildExplorerCreateMenuActionsParams {
   canAddDocuments?: boolean;
   onCreateRootFolder?: () => void | Promise<void>;
   onCreateCardSet?: () => void | Promise<void>;
-  onAddPdf?: () => void | Promise<void>;
-  onAddPptx?: () => void | Promise<void>;
+  onAddDocument?: () => void | Promise<void>;
 }
 
 /**
@@ -89,8 +88,7 @@ export const buildExplorerCreateMenuActions = ({
   canAddDocuments = false,
   onCreateRootFolder,
   onCreateCardSet,
-  onAddPdf,
-  onAddPptx,
+  onAddDocument,
 }: BuildExplorerCreateMenuActionsParams): MenuAction[] => {
   const actions: MenuAction[] = [
     {
@@ -115,24 +113,14 @@ export const buildExplorerCreateMenuActions = ({
   }
 
   if (canAddDocuments) {
-    actions.push(
-      {
-        id: "add-pdf",
-        label: "PDF追加",
-        icon: <FileText className="h-4 w-4" />,
-        onSelect: () => {
-          void onAddPdf?.();
-        },
+    actions.push({
+      id: "add-document",
+      label: "文書追加",
+      icon: <FileText className="h-4 w-4" />,
+      onSelect: () => {
+        void onAddDocument?.();
       },
-      {
-        id: "add-pptx",
-        label: "PPTX追加",
-        icon: <FileText className="h-4 w-4" />,
-        onSelect: () => {
-          void onAddPptx?.();
-        },
-      },
-    );
+    });
   }
 
   return actions;
