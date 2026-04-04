@@ -304,6 +304,78 @@ export const FolderTreeWithCards = ({
     [rootFolders],
   );
 
+  const rootItems = useMemo(() => getFolderItems(null), [getFolderItems]);
+
+  const navigationFolderPanels = useMemo(
+    () =>
+      (navigationParentFolderId
+        ? getChildFolders(navigationParentFolderId)
+        : rootFolders
+      )
+        .map((folder) => {
+          const id = getFolderId(folder);
+          if (!id) return null;
+          return {
+            id,
+            name:
+              (folder as { folderName?: string; folder_name?: string })
+                .folderName ??
+              (folder as { folderName?: string; folder_name?: string })
+                .folder_name ??
+              "無題のフォルダ",
+            folder,
+          };
+        })
+        .filter(
+          (
+            item,
+          ): item is { id: string; name: string; folder: FolderTreeNode } =>
+            item !== null,
+        ),
+    [getChildFolders, navigationParentFolderId, rootFolders],
+  );
+
+  const rootFolderPanels = useMemo(
+    () =>
+      rootFolders
+        .map((folder) => {
+          const id = getFolderId(folder);
+          if (!id) return null;
+          return {
+            id,
+            name:
+              (folder as { folderName?: string; folder_name?: string })
+                .folderName ??
+              (folder as { folderName?: string; folder_name?: string })
+                .folder_name ??
+              "無題のフォルダ",
+            folder,
+          };
+        })
+        .filter(
+          (
+            item,
+          ): item is { id: string; name: string; folder: FolderTreeNode } =>
+            item !== null,
+        ),
+    [rootFolders],
+  );
+
+  const canUseNavigationMode =
+    rootFolderPanels.length > 0 && rootItems.length === 0;
+
+  const effectiveSidebarDisplayMode = useMemo(() => {
+    if (sidebarDisplayMode === "tree") return "tree";
+    if (sidebarDisplayMode === "navigation") {
+      return canUseNavigationMode ? "navigation" : "tree";
+    }
+    return canUseNavigationMode ? "navigation" : "tree";
+  }, [canUseNavigationMode, sidebarDisplayMode]);
+
+  const isSectionListVisible =
+    effectiveSidebarDisplayMode === "navigation" &&
+    navigationParentFolderId === null;
+
   const allFolderIdSet = useMemo(
     () =>
       new Set(
@@ -607,7 +679,6 @@ export const FolderTreeWithCards = ({
     setEditingName: dialogs.setEditingName,
   });
 
-  const rootItems = useMemo(() => getFolderItems(null), [getFolderItems]);
 
   const handleCreateCardSetFromMenu = useCallback(
     (folderId: string | null) => actions.handleCreateCardSetAction(folderId),
@@ -674,78 +745,7 @@ export const FolderTreeWithCards = ({
     ],
   );
 
-  const hasActiveRootScope =
-    activeRootFolderId !== null && allFolderIdSet.has(activeRootFolderId);
 
-  const navigationFolderPanels = useMemo(
-    () =>
-      (navigationParentFolderId
-        ? getChildFolders(navigationParentFolderId)
-        : rootFolders
-      )
-        .map((folder) => {
-          const id = getFolderId(folder);
-          if (!id) return null;
-          return {
-            id,
-            name:
-              (folder as { folderName?: string; folder_name?: string })
-                .folderName ??
-              (folder as { folderName?: string; folder_name?: string })
-                .folder_name ??
-              "無題のフォルダ",
-            folder,
-          };
-        })
-        .filter(
-          (
-            item,
-          ): item is { id: string; name: string; folder: FolderTreeNode } =>
-            item !== null,
-        ),
-    [getChildFolders, navigationParentFolderId, rootFolders],
-  );
-
-  const rootFolderPanels = useMemo(
-    () =>
-      rootFolders
-        .map((folder) => {
-          const id = getFolderId(folder);
-          if (!id) return null;
-          return {
-            id,
-            name:
-              (folder as { folderName?: string; folder_name?: string })
-                .folderName ??
-              (folder as { folderName?: string; folder_name?: string })
-                .folder_name ??
-              "無題のフォルダ",
-            folder,
-          };
-        })
-        .filter(
-          (
-            item,
-          ): item is { id: string; name: string; folder: FolderTreeNode } =>
-            item !== null,
-        ),
-    [rootFolders],
-  );
-
-  const canUseNavigationMode =
-    rootFolderPanels.length > 0 && rootItems.length === 0;
-
-  const effectiveSidebarDisplayMode = useMemo(() => {
-    if (sidebarDisplayMode === "tree") return "tree";
-    if (sidebarDisplayMode === "navigation") {
-      return canUseNavigationMode ? "navigation" : "tree";
-    }
-    return canUseNavigationMode ? "navigation" : "tree";
-  }, [canUseNavigationMode, sidebarDisplayMode]);
-
-  const isSectionListVisible =
-    effectiveSidebarDisplayMode === "navigation" &&
-    navigationParentFolderId === null;
 
   useEffect(() => {
     onSectionListModeChange?.(isSectionListVisible);

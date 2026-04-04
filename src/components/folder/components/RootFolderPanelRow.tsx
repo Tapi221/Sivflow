@@ -20,7 +20,7 @@ interface RootFolderPanelRowProps {
   selectedFolderId: string | null;
   openRowMenuId: string | null;
   setOpenRowMenuId: React.Dispatch<React.SetStateAction<string | null>>;
-  onSelectFolder: (folderId: string) => void;
+  onSelectFolder?: (folderId: string) => void;
   handleCreateFolderAction: (parentId: string | null) => string;
   handleCreateCardSetAction: (folderId: string | null) => string | null;
   handleDelete: (id: string, type: "folder" | "card") => void;
@@ -92,6 +92,12 @@ export const RootFolderPanelRow = ({
     ],
   );
 
+  const handleSelectFolder = React.useCallback(() => {
+    if (isEditing || isMenuOpen) return;
+    if (typeof onSelectFolder !== "function") return;
+    onSelectFolder(panel.id);
+  }, [isEditing, isMenuOpen, onSelectFolder, panel.id]);
+
   return (
     <div
       className={cn(
@@ -101,15 +107,12 @@ export const RootFolderPanelRow = ({
       )}
       role="button"
       tabIndex={0}
-      onClick={() => {
-        if (isEditing || isMenuOpen) return;
-        onSelectFolder(panel.id);
-      }}
+      onClick={handleSelectFolder}
       onKeyDown={(e) => {
         if (isEditing || isMenuOpen) return;
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          onSelectFolder(panel.id);
+          handleSelectFolder();
         }
       }}
       onContextMenu={(e) => {
