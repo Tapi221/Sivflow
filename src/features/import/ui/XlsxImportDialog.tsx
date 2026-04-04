@@ -8,6 +8,7 @@ import {
   type ImportParseResult,
 } from "@/features/import/types";
 import { parseXlsxImport } from "@/features/import/xlsx/parseXlsxImport";
+import { downloadXlsxImportTemplate } from "@/features/import/xlsx/downloadXlsxImportTemplate";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -77,6 +78,10 @@ export const XlsxImportDialog = ({
     }
 
     onOpenChange(nextOpen);
+  };
+
+  const handleDownloadTemplate = () => {
+    downloadXlsxImportTemplate();
   };
 
   const handleFileChange = async (
@@ -168,19 +173,35 @@ export const XlsxImportDialog = ({
         <div className="grid gap-4">
           <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
             <div className="grid gap-2">
-              <p className="text-sm font-medium text-slate-800">
-                XLSX テンプレートを選択
-              </p>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-sm font-medium text-slate-800">
+                  XLSX テンプレートを選択
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleDownloadTemplate}
+                  disabled={isParsing || isImporting}
+                >
+                  テンプレートをダウンロード
+                </Button>
+              </div>
               <Input
                 type="file"
                 accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 onChange={handleFileChange}
                 disabled={isParsing || isImporting}
               />
-              <p className="text-xs text-slate-500">
-                phase 1 では text / markdown / math / code のみ取り込みます。
-                image 行はエラーとして止めます。
-              </p>
+              <div className="grid gap-1 text-xs text-slate-500">
+                <p>
+                  phase 1 では text / markdown / math / code のみ取り込みます。
+                  image 行はエラーとして止めます。
+                </p>
+                <p>
+                  blocks シートで cardId が同じ行は 1 枚のカードとしてまとめられ、
+                  blockOrder 順で front 側に並びます。
+                </p>
+              </div>
             </div>
           </div>
 
