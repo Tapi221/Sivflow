@@ -28,6 +28,8 @@ interface BlockWrapperProps {
   onMoveDragEnd?: () => void;
 
   contentClassName?: string;
+  mode?: "viewer" | "editor";
+  showOverlay?: boolean;
 }
 
 const STEP_PX = 24;
@@ -52,6 +54,8 @@ export const BlockWrapper = ({
   onMoveDragStart,
   onMoveDragEnd,
   contentClassName,
+  mode = "editor",
+  showOverlay = mode === "editor",
 }: BlockWrapperProps) => {
   const [isEditingWithin, setIsEditingWithin] = React.useState(false);
 
@@ -150,7 +154,7 @@ export const BlockWrapper = ({
     window.addEventListener("pointercancel", onPointerEnd);
   };
 
-  const overlay = (
+  const overlay = showOverlay ? (
     <div
       data-active={isActive ? "true" : "false"}
       className="absolute -right-1 top-1/2 -translate-y-1/2 flex flex-col items-center gap-0 -space-y-px opacity-0 pointer-events-none
@@ -193,10 +197,12 @@ export const BlockWrapper = ({
         </button>
       )}
     </div>
-  );
+  ) : null;
 
-  const variant =
-    inEditMode || Boolean(isActive || isEditingWithin) ? "editor" : "neutral";
+  const frameVariant =
+    mode === "editor" && (inEditMode || Boolean(isActive || isEditingWithin))
+      ? "editor"
+      : "neutral";
 
   return (
     <BlockFrame
@@ -204,7 +210,7 @@ export const BlockWrapper = ({
       contentClassName={contentClassName}
       accentColor={accentColor}
       overlay={overlay}
-      variant={variant}
+      variant={frameVariant}
       raiseZIndex={isEditingWithin}
       onFocusCapture={(event) => {
         setIsEditingWithin(isEditableFocusTarget(event.target));

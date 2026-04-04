@@ -64,7 +64,7 @@ export const useCardEditorPaneWidth = ({
 
   const preferenceScopeKey = `${cardSetId ?? ""}:${defaultSharedPaneWidthPx}:${settings?.cardEditPaneWidthPx ?? ""}:${settings?.cardViewPaneWidthPx ?? ""}`;
 
-  const preferredViewPaneWidthPx = useMemo(() => {
+  const preferredSharedPaneWidthPx = useMemo(() => {
     const localStoredView = cardSetId
       ? getCardSetWidthPreference(cardSetId, "view")
       : undefined;
@@ -87,28 +87,7 @@ export const useCardEditorPaneWidth = ({
     settings?.cardViewPaneWidthPx,
   ]);
 
-  const preferredEditPaneWidthPx = useMemo(() => {
-    const localStoredEdit = cardSetId
-      ? getCardSetWidthPreference(cardSetId, "edit")
-      : undefined;
-    const localStoredView = cardSetId
-      ? getCardSetWidthPreference(cardSetId, "view")
-      : undefined;
-
-    return clampPaneWidthPx(
-      localStoredEdit ??
-        localStoredView ??
-        settings?.cardEditPaneWidthPx ??
-        settings?.cardViewPaneWidthPx ??
-        defaultSharedPaneWidthPx,
-      CARD_PANE_EDIT_MIN_WIDTH_PX,
-    );
-  }, [
-    cardSetId,
-    defaultSharedPaneWidthPx,
-    settings?.cardEditPaneWidthPx,
-    settings?.cardViewPaneWidthPx,
-  ]);
+  const sharedPreferenceKey = `${preferenceScopeKey}:shared`;
 
   const {
     contentViewportRef,
@@ -126,12 +105,12 @@ export const useCardEditorPaneWidth = ({
     isEditMode: isEditing,
     preferredWidths: {
       view: {
-        key: `${preferenceScopeKey}:view`,
-        width: preferredViewPaneWidthPx,
+        key: sharedPreferenceKey,
+        width: preferredSharedPaneWidthPx,
       },
       edit: {
-        key: `${preferenceScopeKey}:edit`,
-        width: preferredEditPaneWidthPx,
+        key: sharedPreferenceKey,
+        width: preferredSharedPaneWidthPx,
       },
     },
     defaultWidths: {
@@ -155,7 +134,8 @@ export const useCardEditorPaneWidth = ({
     persistBehavior: "both",
     onPersist: (mode, widthPx) => {
       if (!cardSetId) return;
-      setCardSetWidthPreference(cardSetId, mode, widthPx);
+      setCardSetWidthPreference(cardSetId, "view", widthPx);
+      setCardSetWidthPreference(cardSetId, "edit", widthPx);
     },
   });
 
