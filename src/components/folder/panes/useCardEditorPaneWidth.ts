@@ -6,6 +6,7 @@ import {
   CARD_PANE_EDITOR_DEFAULT_WIDTH_PX,
   CARD_PANE_EDITOR_DOCKED_DEFAULT_WIDTH_PX,
   CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX,
+  CARD_PANE_WIDTH_STEP_PX,
   clampPaneWidthPx,
 } from "@/components/card/shell/cardPaneWidthConstants";
 import { useCardPaneWidthState } from "@/components/card/shell/useCardPaneWidthState";
@@ -241,3 +242,5 @@ export const useCardEditorPaneWidth = ({
     resetActivePaneWidth,
   };
 };
+
+export { CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX, CARD_PANE_WIDTH_STEP_PX };

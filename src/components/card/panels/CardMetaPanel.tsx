@@ -86,6 +86,7 @@ type CardMetaPanelProps = {
   delayBonusEnabled?: boolean;
   reviewStartNextDay?: boolean;
   mode?: "full" | "calendar";
+  tagNamesOverride?: string[];
 };
 
 const META_DATE_FORMATTER = new Intl.DateTimeFormat("ja-JP", {
@@ -425,7 +426,8 @@ const areCardMetaPanelPropsEqual = (
   prev.onUpdateTitle === next.onUpdateTitle &&
   prev.delayBonusEnabled === next.delayBonusEnabled &&
   prev.reviewStartNextDay === next.reviewStartNextDay &&
-  prev.mode === next.mode;
+  prev.mode === next.mode &&
+  prev.tagNamesOverride === next.tagNamesOverride;
 
 const CardMetaPanelInner = ({
   card,
@@ -443,6 +445,7 @@ const CardMetaPanelInner = ({
   delayBonusEnabled = false,
   reviewStartNextDay = true,
   mode = "full",
+  tagNamesOverride,
 }: CardMetaPanelProps) => {
   const isCalendarMode = mode === "calendar";
   const infoRowClass =
@@ -891,7 +894,7 @@ const CardMetaPanelInner = ({
     pendingReviewDurationInput,
   ]);
 
-  const tags = resolveCardTagNames(card?.tagIds, tagById);
+  const tags = tagNamesOverride ?? resolveCardTagNames(card?.tagIds, tagById);
 
   const commitTitle = (rawValue?: string, options?: { flush?: boolean }) => {
     const source = rawValue ?? titleInput;
