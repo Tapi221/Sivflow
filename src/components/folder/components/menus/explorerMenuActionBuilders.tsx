@@ -54,7 +54,6 @@ export const buildFolderMenuActions = ({
       id: "rename",
       label: "名前を変更",
       icon: <Pencil className="h-4 w-4" />,
-      separatorBefore: actions.length > 0,
       onSelect: onRename,
     });
   }
@@ -74,7 +73,6 @@ export const buildFolderMenuActions = ({
       label: "削除",
       icon: <Trash2 className="h-4 w-4" />,
       danger: true,
-      separatorBefore: true,
       onSelect: onDelete,
     });
   }

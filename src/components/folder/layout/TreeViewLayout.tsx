@@ -8,7 +8,7 @@ import { useDocuments } from "@/hooks/platform/useDocuments";
 import { resolveCardTagNames, useTags } from "@/hooks/settings/useTags";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { cn } from "@/lib/utils";
-import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
+import type { Card, CardSet, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 import { createPageUrl } from "@/utils";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -96,7 +96,7 @@ const TreeViewLayout = ({
   const handleItemSelect = useCallback(
     (item: SelectedExplorerItem) => {
       if (item?.type === "cardSet") {
-        const cs = cardSets.find((s) => s.id === item.id);
+        const cs = cardSets.find((s: CardSet) => s.id === item.id);
         if (cs) {
           onFolderSelect(cs.folderId ?? null);
           setSelectedCardSetId(item.id);
@@ -219,7 +219,7 @@ const TreeViewLayout = ({
     if (explorerHeaderFolderId) return explorerHeaderFolderId;
 
     if (selectedItem?.type === "cardSet") {
-      return cardSets.find((s) => s.id === selectedItem.id)?.folderId ?? null;
+      return cardSets.find((s: CardSet) => s.id === selectedItem.id)?.folderId ?? null;
     }
 
     return null;
@@ -228,7 +228,7 @@ const TreeViewLayout = ({
   const currentCardSetLabel = useMemo(() => {
     if (!selectedCardSetId) return null;
     return (
-      cardSets.find((cardSet) => cardSet.id === selectedCardSetId)?.name ??
+      cardSets.find((cardSet: CardSet) => cardSet.id === selectedCardSetId)?.name ??
       selectedCardSetLabel
     );
   }, [cardSets, selectedCardSetId, selectedCardSetLabel]);
@@ -307,7 +307,7 @@ const TreeViewLayout = ({
     }
 
     return cardSets.filter(
-      (cardSet) => cardSet.folderId === currentHeaderFolderId,
+      (cardSet: CardSet) => cardSet.folderId === currentHeaderFolderId,
     );
   }, [cardSets, currentHeaderFolderId]);
 
@@ -356,13 +356,13 @@ const TreeViewLayout = ({
       onItemSelect={handleItemSelect}
       onClearRecent={clearRecent}
       onCreateFolder={createFolder}
-      onUpdateFolder={updateFolder}
+      onUpdateFolder={updateFolder as any}
       onDeleteFolder={deleteFolder}
       onCreateCardSet={createCardSet}
-      onUpdateCardSet={updateCardSet}
+      onUpdateCardSet={updateCardSet as any}
       onDeleteCardSet={deleteCardSet}
-      onCreateCard={createCard}
-      onUpdateCard={updateCard}
+      onCreateCard={createCard as any}
+      onUpdateCard={updateCard as any}
       onDeleteCard={deleteCard}
       moveCardToFolder={moveCardToFolder}
       moveCardSetToFolder={moveCardSetToFolder}
@@ -428,6 +428,8 @@ const TreeViewLayout = ({
         onRenameFolder={async (folderId, newName) => {
           await updateFolder(folderId, { folderName: newName });
         }}
+        onItemSelect={onItemSelect}
+        onFolderSelect={onFolderSelect}
         handlers={{
           onStartStudy: handleStartStudy,
           onViewCards: handleViewCards,
