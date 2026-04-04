@@ -265,32 +265,6 @@ export const useExplorerDerivedData = ({
     [treeCards, documents, resolveTreeFolderId],
   );
 
-  const getUniqueFolderName = useCallback(
-    (parentId: string | null, defaultName: string) => {
-      const siblings = treeFolders.filter((folder) => {
-        if (isSoftDeleted(folder)) return false;
-        return isSameFolder(getParentFolderId(folder), parentId);
-      });
-      const names = new Set(
-        siblings
-          .map((f) =>
-            String(
-              (f as { folderName?: string; folder_name?: string }).folderName ??
-                (f as { folderName?: string; folder_name?: string })
-                  .folder_name ??
-                "",
-            ).trim(),
-          )
-          .filter(Boolean),
-      );
-      if (!names.has(defaultName)) return defaultName;
-      let next = 2;
-      while (names.has(`${defaultName} (${next})`)) next += 1;
-      return `${defaultName} (${next})`;
-    },
-    [treeFolders],
-  );
-
   const cardSetsByFolderId = useMemo(() => {
     const map = new Map<string, CardSet[]>();
     for (const cs of cardSets) {
@@ -355,6 +329,5 @@ export const useExplorerDerivedData = ({
     matchCountMap,
     deleteTargetCounts,
     getNextOrderIndex,
-    getUniqueFolderName,
   };
 };

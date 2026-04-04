@@ -271,7 +271,6 @@ export const FolderTreeWithCards = ({
     getCardSetItems,
     matchCountMap,
     getNextOrderIndex,
-    getUniqueFolderName,
   } = derived;
 
   const rootFolderIdSet = useMemo(
@@ -450,7 +449,6 @@ export const FolderTreeWithCards = ({
     onItemSelect,
     onSelectCardSet,
     setNewlyCreatedCardId,
-    getUniqueFolderName,
   });
 
   useEnsureAncestorFoldersExpanded({
@@ -1079,7 +1077,6 @@ export const FolderTreeWithCards = ({
               setEditingId={dialogs.setEditingId}
               setEditingName={dialogs.setEditingName}
               editingNameRef={dialogs.editingNameRef}
-              renameCancelledRef={dialogs.renameCancelledRef}
               editingId={dialogs.editingId}
               editingName={dialogs.editingName}
               handleRenameConfirm={actions.handleRenameConfirm}
