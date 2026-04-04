@@ -191,13 +191,7 @@ export const useCardPaneWidthState = ({
         width: nextWidth,
       });
     },
-    [
-      minWidths.edit,
-      minWidths.view,
-      preferredWidths.edit.key,
-      preferredWidths.view.key,
-      previewBehavior,
-    ],
+    [minWidths, preferredWidths.edit.key, preferredWidths.view.key, previewBehavior],
   );
 
   const previewPaneWidth = useCallback(
@@ -243,14 +237,7 @@ export const useCardPaneWidthState = ({
 
       onPersist?.(mode, nextWidth);
     },
-    [
-      minWidths.edit,
-      minWidths.view,
-      onPersist,
-      persistBehavior,
-      preferredWidths.edit.key,
-      preferredWidths.view.key,
-    ],
+    [minWidths, onPersist, persistBehavior, preferredWidths.edit.key, preferredWidths.view.key],
   );
 
   const stepPaneWidth = useCallback(
