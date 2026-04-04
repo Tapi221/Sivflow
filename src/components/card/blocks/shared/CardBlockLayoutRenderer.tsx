@@ -364,7 +364,7 @@ export const CardBlockLayoutRenderer = (
           )}
           contentClassName="px-0"
         >
-          <ImageBlockShell showBorderOverlay>
+          <ImageBlockShell>
             <ImageBlockContent
               mode="view"
               urls={(block.images ?? [])

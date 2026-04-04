@@ -1,7 +1,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 
-type BlockFrameVariant = "neutral" | "editor";
+type BlockFrameVariant = "none" | "neutral" | "editor";
 
 type BlockFrameProps = React.HTMLAttributes<HTMLDivElement> & {
   children: React.ReactNode;
@@ -32,6 +32,13 @@ export const BlockFrame = ({
     "inset 0 0 0 var(--card-ruled-line-px, 1px) var(--card-ruled-color, rgba(0,0,0,0.05))";
   const editorOutline = `inset 0 0 0 var(--card-ruled-line-px, 1px) ${outlineColor}`;
 
+  const boxShadow =
+    variant === "none"
+      ? undefined
+      : variant === "editor"
+        ? editorOutline
+        : neutralOutline;
+
   return (
     <div
       {...props}
@@ -42,7 +49,7 @@ export const BlockFrame = ({
       )}
       style={{
         ...(style ?? {}),
-        boxShadow: variant === "editor" ? editorOutline : neutralOutline,
+        boxShadow,
         borderRadius: "var(--block-frame-radius, 12px)",
       }}
     >

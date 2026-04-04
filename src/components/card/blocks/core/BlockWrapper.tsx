@@ -1,8 +1,8 @@
-import { GripVertical, Trash2, Copy } from "@/ui/icons";
-import React from "react";
-import { cn } from "@/lib/utils";
 import { BlockEditModeContext } from "@/components/card/blocks/core/BlockEditModeContext";
 import { BlockFrame } from "@/components/card/blocks/core/BlockFrame";
+import { cn } from "@/lib/utils";
+import { Copy, GripVertical, Trash2 } from "@/ui/icons";
+import React from "react";
 
 interface BlockWrapperProps {
   children: React.ReactNode;
@@ -200,9 +200,11 @@ export const BlockWrapper = ({
   ) : null;
 
   const frameVariant =
-    mode === "editor" && (inEditMode || Boolean(isActive || isEditingWithin))
-      ? "editor"
-      : "neutral";
+    mode === "viewer"
+      ? "none"
+      : mode === "editor" && (inEditMode || Boolean(isActive || isEditingWithin))
+        ? "editor"
+        : "neutral";
 
   return (
     <BlockFrame
