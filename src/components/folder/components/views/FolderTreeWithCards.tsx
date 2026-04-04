@@ -5,7 +5,6 @@ import { ExplorerTreeNodeRenderer } from "@/components/folder/components/Explore
 import { RootFolderPanelList } from "@/components/folder/components/RootFolderPanelList";
 import {
   getFolderId,
-  normalizeFolderId,
   type FolderTreeNode,
 } from "@/components/folder/explorer/model/utils";
 import {
