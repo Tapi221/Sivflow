@@ -94,6 +94,8 @@ type UseFolderActionsParams = {
     label: string,
   ) => void;
   setNewlyCreatedCardId: (id: string | null) => void;
+
+  getUniqueFolderName?: (parentId: string | null, baseName: string) => string;
 };
 
 const DEFAULT_NEW_FOLDER_NAME = "新規フォルダ";
@@ -255,6 +257,7 @@ export const useFolderActions = ({
   onItemSelect,
   onSelectCardSet,
   setNewlyCreatedCardId,
+  getUniqueFolderName,
 }: UseFolderActionsParams) => {
   const pendingFolderCreatesRef = useRef(new Map<string, Promise<void>>());
   const pendingCardSetCreatesRef = useRef(new Map<string, Promise<void>>());
@@ -311,7 +314,9 @@ export const useFolderActions = ({
   const handleCreateFolderAction = useCallback(
     (parentFolderId: string | null) => {
       const normalizedParentId = normalizeFolderId(parentFolderId);
-      const nextName = DEFAULT_NEW_FOLDER_NAME;
+      const nextName = getUniqueFolderName
+        ? getUniqueFolderName(normalizedParentId, DEFAULT_NEW_FOLDER_NAME)
+        : DEFAULT_NEW_FOLDER_NAME;
 
       const folderId = createEntityId("folder");
       if (normalizedParentId) {
@@ -371,6 +376,7 @@ export const useFolderActions = ({
       closeRename,
       editingIdRef,
       editingNameRef,
+      getUniqueFolderName,
       onCreateFolder,
       renameCancelledRef,
       setEditingId,
@@ -484,6 +490,7 @@ export const useFolderActions = ({
       editingIdRef,
       onDeleteCard,
       onDeleteCardSet,
+      onDeleteDocument,
       onDeleteFolder,
       resolveTargetKind,
     ],
