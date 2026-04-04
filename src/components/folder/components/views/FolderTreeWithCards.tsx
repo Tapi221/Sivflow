@@ -158,9 +158,9 @@ export const FolderTreeWithCards = ({
   );
   const [fileDragFolderId, setFileDragFolderId] = useState<string | null>(null);
   const [pendingScrollId, setPendingScrollId] = useState<string | null>(null);
-  const [activeRootFolderId, setActiveRootFolderId] = useState<string | null>(
-    null,
-  );
+  const [navigationParentFolderId, setNavigationParentFolderId] = useState<
+    string | null
+  >(null);
 
   const rowRefs = useRef<Map<string, HTMLElement>>(new Map());
   const treeRootRef = useRef<HTMLDivElement | null>(null);
@@ -313,27 +313,6 @@ export const FolderTreeWithCards = ({
       ),
     [treeFolders],
   );
-
-  const resolveRootFolderId = useCallback(
-    (folderId: string | null) => {
-      let currentId = folderId;
-
-      while (currentId) {
-        if (rootFolderIdSet.has(currentId)) return currentId;
-        const parentId = parentFolderIdById.get(currentId);
-        if (parentId === undefined || parentId === currentId) break;
-        currentId = parentId;
-      }
-
-      return null;
-    },
-    [parentFolderIdById, rootFolderIdSet],
-  );
-
-  const selectedScopedRootId = useMemo(() => {
-    if (!selectedFolderId) return null;
-    return resolveRootFolderId(selectedFolderId) ?? selectedFolderId;
-  }, [resolveRootFolderId, selectedFolderId]);
 
   const actions = useFolderActions({
     treeFolders,
@@ -492,7 +471,7 @@ export const FolderTreeWithCards = ({
 
   useEffect(() => {
     if (navigateToSectionListToken <= 0) return;
-    setActiveRootFolderId(null);
+    setNavigationParentFolderId(null);
 
     const root = treeRootRef.current;
     if (!root) return;
@@ -541,15 +520,28 @@ export const FolderTreeWithCards = ({
   }, [folderSelectionNonce, resetIfScrollable]);
 
   useEffect(() => {
-    if (!selectedScopedRootId) return;
-    if (activeRootFolderId !== selectedScopedRootId) {
-      setActiveRootFolderId(selectedScopedRootId);
+    if (effectiveSidebarDisplayMode !== "navigation") return;
+
+    if (!selectedFolderId || !allFolderIdSet.has(selectedFolderId)) {
+      if (selectedFolderId === null && navigationParentFolderId !== null) {
+        setNavigationParentFolderId(null);
+      }
+      return;
     }
-  }, [selectedScopedRootId, activeRootFolderId]);
+
+    if (navigationParentFolderId !== selectedFolderId) {
+      setNavigationParentFolderId(selectedFolderId);
+    }
+  }, [
+    allFolderIdSet,
+    effectiveSidebarDisplayMode,
+    navigationParentFolderId,
+    selectedFolderId,
+  ]);
 
   const headerFolderId = useMemo(() => {
     if (selectedFolderId) return selectedFolderId;
-    if (activeRootFolderId) return activeRootFolderId;
+    if (navigationParentFolderId) return navigationParentFolderId;
     if (selectedItem?.type === "cardSet") {
       return (
         treeCardSets.find((cardSet) => cardSet.id === selectedItem.id)
@@ -557,7 +549,7 @@ export const FolderTreeWithCards = ({
       );
     }
     return null;
-  }, [activeRootFolderId, selectedFolderId, selectedItem, treeCardSets]);
+  }, [navigationParentFolderId, selectedFolderId, selectedItem, treeCardSets]);
 
   useEffect(() => {
     onHeaderFolderIdChange?.(headerFolderId);
@@ -641,7 +633,6 @@ export const FolderTreeWithCards = ({
   const handleCreateCardSetFromRootPanel = useCallback(
     (folderId: string | null) => {
       if (folderId) {
-        setActiveRootFolderId(folderId);
         onFolderSelect(folderId);
       }
       return handleCreateCardSetFromMenu(folderId);
@@ -686,6 +677,35 @@ export const FolderTreeWithCards = ({
   const hasActiveRootScope =
     activeRootFolderId !== null && allFolderIdSet.has(activeRootFolderId);
 
+  const navigationFolderPanels = useMemo(
+    () =>
+      (navigationParentFolderId
+        ? getChildFolders(navigationParentFolderId)
+        : rootFolders
+      )
+        .map((folder) => {
+          const id = getFolderId(folder);
+          if (!id) return null;
+          return {
+            id,
+            name:
+              (folder as { folderName?: string; folder_name?: string })
+                .folderName ??
+              (folder as { folderName?: string; folder_name?: string })
+                .folder_name ??
+              "無題のフォルダ",
+            folder,
+          };
+        })
+        .filter(
+          (
+            item,
+          ): item is { id: string; name: string; folder: FolderTreeNode } =>
+            item !== null,
+        ),
+    [getChildFolders, navigationParentFolderId, rootFolders],
+  );
+
   const rootFolderPanels = useMemo(
     () =>
       rootFolders
@@ -724,38 +744,23 @@ export const FolderTreeWithCards = ({
   }, [canUseNavigationMode, sidebarDisplayMode]);
 
   const isSectionListVisible =
-    effectiveSidebarDisplayMode === "navigation" && !hasActiveRootScope;
-
-  const isScopedNavigationVisible =
-    effectiveSidebarDisplayMode === "navigation" && hasActiveRootScope;
+    effectiveSidebarDisplayMode === "navigation" &&
+    navigationParentFolderId === null;
 
   useEffect(() => {
     onSectionListModeChange?.(isSectionListVisible);
   }, [isSectionListVisible, onSectionListModeChange]);
 
-  const scopedTreeData = useMemo<ExplorerTreeNode[]>(() => {
-    if (!activeRootFolderId || !hasActiveRootScope) return [];
-
-    const stack: ExplorerTreeNode[] = [...explorerTreeData];
-    let scopedRootNode: ExplorerTreeNode | null = null;
-
-    while (stack.length > 0) {
-      const node = stack.pop()!;
-      if (node.kind === "folder" && node.rawId === activeRootFolderId) {
-        scopedRootNode = node;
-        break;
-      }
-      if (node.children?.length) stack.push(...node.children);
-    }
-
-    if (!scopedRootNode?.children?.length) return [];
-
-    return scopedRootNode.children;
-  }, [activeRootFolderId, explorerTreeData, hasActiveRootScope]);
-
   const selectedTreeId = useMemo(() => {
     return toSelectedTreeId(selectedFolderId, selectedItem, selectedCardSetId);
   }, [selectedCardSetId, selectedFolderId, selectedItem]);
+
+  const handleNavigationBack = useCallback(() => {
+    if (!navigationParentFolderId) return;
+    const parentId = parentFolderIdById.get(navigationParentFolderId) ?? null;
+    setNavigationParentFolderId(parentId);
+    onFolderSelect(parentId);
+  }, [navigationParentFolderId, onFolderSelect, parentFolderIdById]);
 
   const handleTreeSelect = useCallback(
     (id: string) => {
@@ -763,10 +768,6 @@ export const FolderTreeWithCards = ({
       if (!parsed) return;
 
       if (parsed.type === "folder") {
-        const nextScopedRootId = resolveRootFolderId(parsed.id) ?? parsed.id;
-        if (activeRootFolderId !== nextScopedRootId) {
-          setActiveRootFolderId(nextScopedRootId);
-        }
         onFolderSelect(parsed.id);
         return;
       }
@@ -785,20 +786,12 @@ export const FolderTreeWithCards = ({
         onItemSelect({ type: "document", id: parsed.id });
       }
     },
-    [activeRootFolderId, onFolderSelect, onItemSelect, resolveRootFolderId],
+    [onFolderSelect, onItemSelect],
   );
 
   const handleFolderNodeSelect = useCallback(
-    (folderId: string | null) => {
-      if (folderId) {
-        const nextScopedRootId = resolveRootFolderId(folderId) ?? folderId;
-        if (activeRootFolderId !== nextScopedRootId) {
-          setActiveRootFolderId(nextScopedRootId);
-        }
-      }
-      onFolderSelect(folderId);
-    },
-    [activeRootFolderId, onFolderSelect, resolveRootFolderId],
+    (folderId: string | null) => onFolderSelect(folderId),
+    [onFolderSelect],
   );
 
   const handleArboristMove = useCallback(
@@ -994,6 +987,7 @@ export const FolderTreeWithCards = ({
   );
 
   const hasRootContent =
+    navigationFolderPanels.length > 0 ||
     rootFolderPanels.length > 0 ||
     rootItems.length > 0 ||
     explorerTreeData.length > 0;
@@ -1027,14 +1021,14 @@ export const FolderTreeWithCards = ({
               disableDrag={arboristDisableDrag}
               disableDrop={arboristDisableDrop}
             />
-          ) : isSectionListVisible ? (
+          ) : (
             <RootFolderPanelList
-              rootFolderPanels={rootFolderPanels}
+              rootFolderPanels={navigationFolderPanels}
               selectedFolderId={selectedFolderId}
               openRowMenuId={dialogs.openRowMenuId}
               setOpenRowMenuId={dialogs.setOpenRowMenuId}
               onSelectFolder={(id) => {
-                setActiveRootFolderId(id);
+                setNavigationParentFolderId(id);
                 onFolderSelect(id);
               }}
               handleCreateFolderAction={actions.handleCreateFolderAction}
@@ -1049,38 +1043,26 @@ export const FolderTreeWithCards = ({
               editingName={dialogs.editingName}
               handleRenameConfirm={actions.handleRenameConfirm}
             />
-          ) : isScopedNavigationVisible ? (
-            <div className="flex h-full min-h-0 flex-col">
-              <div className="min-h-0 flex-1">
-                <FolderTreeArborist
-                  data={scopedTreeData}
-                  selectedId={selectedTreeId}
-                  expandedIds={toExpandedTreeIds(
-                    expandedFolders,
-                    expandedCardSets,
-                  )}
-                  onSelect={handleTreeSelect}
-                  onToggleExpand={onToggleExpand}
-                  renderNode={renderTreeNode}
-                  onMove={handleArboristMove}
-                  disableDrag={arboristDisableDrag}
-                  disableDrop={arboristDisableDrop}
-                />
-              </div>
-            </div>
-          ) : (
-            <FolderTreeArborist
-              data={explorerTreeData}
-              selectedId={selectedTreeId}
-              expandedIds={toExpandedTreeIds(expandedFolders, expandedCardSets)}
-              onSelect={handleTreeSelect}
-              onToggleExpand={onToggleExpand}
-              renderNode={renderTreeNode}
-              onMove={handleArboristMove}
-              disableDrag={arboristDisableDrag}
-              disableDrop={arboristDisableDrop}
-            />
           )}
+
+          {effectiveSidebarDisplayMode === "navigation" &&
+            navigationParentFolderId !== null && (
+              <button
+                type="button"
+                className="mb-1 flex h-8 w-full items-center rounded-[4px] px-2 text-left text-sm text-muted-foreground hover:bg-[var(--sidebar-active-bg,#e7ebef)]"
+                onClick={handleNavigationBack}
+              >
+                ← 戻る
+              </button>
+            )}
+
+          {effectiveSidebarDisplayMode === "navigation" &&
+            navigationParentFolderId !== null &&
+            navigationFolderPanels.length === 0 && (
+              <div className="px-2 py-2 text-sm text-muted-foreground">
+                サブフォルダはありません
+              </div>
+            )}
         </div>
       )}
 
