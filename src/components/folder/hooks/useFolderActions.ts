@@ -268,9 +268,6 @@ export const useFolderActions = ({
       ) {
         return "cardSet";
       }
-      if (id.startsWith("doc-") || type === "document") {
-        return "document";
-      }
       return "folder";
     },
     [treeCardSets],
