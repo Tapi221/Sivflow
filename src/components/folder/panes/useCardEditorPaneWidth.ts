@@ -6,11 +6,11 @@ import {
   setCardSetWidthPreference,
 } from "@/services/cardWidthPreferences";
 
-const CARD_PANE_VIEW_DEFAULT_WIDTH_PX = 576;
 const CARD_PANE_EDIT_DEFAULT_WIDTH_PX = 820;
 const CARD_PANE_DOCKED_EDIT_DEFAULT_WIDTH_PX = 1000;
-const CARD_PANE_VIEW_MIN_WIDTH_PX = 360;
 const CARD_PANE_EDIT_MIN_WIDTH_PX = 640;
+const CARD_PANE_VIEW_DEFAULT_WIDTH_PX = CARD_PANE_EDIT_DEFAULT_WIDTH_PX;
+const CARD_PANE_VIEW_MIN_WIDTH_PX = CARD_PANE_EDIT_MIN_WIDTH_PX;
 const CARD_PANE_AUTO_MAX_SCALE = 4;
 const CARD_EDITOR_PAIR_GAP_PX = 16;
 const CARD_EDITOR_TWO_COLUMN_MIN_WIDTH_PX = CARD_PANE_EDIT_MIN_WIDTH_PX;
@@ -35,7 +35,6 @@ const clampPaneWidthPx = (
 };
 
 interface UseCardEditorPaneWidthParams {
-  /** Read-only fallback. Width is persisted to localStorage only (device-local). */
   settings?: Partial<UserSettings> | null;
   dockToolbarsToTop: boolean;
   embeddedInPager: boolean;
@@ -80,35 +79,59 @@ export const useCardEditorPaneWidth = ({
       : CARD_PANE_EDIT_DEFAULT_WIDTH_PX,
   );
 
-  const defaultEditPaneWidthPx = dockToolbarsToTop
+  const defaultSharedPaneWidthPx = dockToolbarsToTop
     ? CARD_PANE_DOCKED_EDIT_DEFAULT_WIDTH_PX
     : CARD_PANE_EDIT_DEFAULT_WIDTH_PX;
 
   React.useEffect(() => {
-    const localStored = cardSetId
+    const localStoredView = cardSetId
       ? getCardSetWidthPreference(cardSetId, "view")
       : undefined;
-    setViewPaneWidthPx(
-      clampPaneWidthPx(
-        localStored ??
-          settings?.cardViewPaneWidthPx ??
-          CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
-        CARD_PANE_VIEW_MIN_WIDTH_PX,
-      ),
-    );
-  }, [cardSetId, settings?.cardViewPaneWidthPx]);
-
-  React.useEffect(() => {
-    const localStored = cardSetId
+    const localStoredEdit = cardSetId
       ? getCardSetWidthPreference(cardSetId, "edit")
       : undefined;
-    setEditPaneWidthPx(
-      clampPaneWidthPx(
-        localStored ?? settings?.cardEditPaneWidthPx ?? defaultEditPaneWidthPx,
-        CARD_PANE_EDIT_MIN_WIDTH_PX,
-      ),
+
+    const fallback =
+      localStoredView ??
+      localStoredEdit ??
+      settings?.cardEditPaneWidthPx ??
+      settings?.cardViewPaneWidthPx ??
+      defaultSharedPaneWidthPx;
+
+    setViewPaneWidthPx(
+      clampPaneWidthPx(fallback, CARD_PANE_VIEW_MIN_WIDTH_PX),
     );
-  }, [cardSetId, defaultEditPaneWidthPx, settings?.cardEditPaneWidthPx]);
+  }, [
+    cardSetId,
+    defaultSharedPaneWidthPx,
+    settings?.cardEditPaneWidthPx,
+    settings?.cardViewPaneWidthPx,
+  ]);
+
+  React.useEffect(() => {
+    const localStoredEdit = cardSetId
+      ? getCardSetWidthPreference(cardSetId, "edit")
+      : undefined;
+    const localStoredView = cardSetId
+      ? getCardSetWidthPreference(cardSetId, "view")
+      : undefined;
+
+    const fallback =
+      localStoredEdit ??
+      localStoredView ??
+      settings?.cardEditPaneWidthPx ??
+      settings?.cardViewPaneWidthPx ??
+      defaultSharedPaneWidthPx;
+
+    setEditPaneWidthPx(
+      clampPaneWidthPx(fallback, CARD_PANE_EDIT_MIN_WIDTH_PX),
+    );
+  }, [
+    cardSetId,
+    defaultSharedPaneWidthPx,
+    settings?.cardEditPaneWidthPx,
+    settings?.cardViewPaneWidthPx,
+  ]);
 
   React.useEffect(() => {
     const element = contentViewportRef.current;
@@ -146,9 +169,7 @@ export const useCardEditorPaneWidth = ({
   const activePaneMinWidthPx = isEditing
     ? CARD_PANE_EDIT_MIN_WIDTH_PX
     : CARD_PANE_VIEW_MIN_WIDTH_PX;
-  const activePaneDefaultWidthPx = isEditing
-    ? defaultEditPaneWidthPx
-    : CARD_PANE_VIEW_DEFAULT_WIDTH_PX;
+  const activePaneDefaultWidthPx = defaultSharedPaneWidthPx;
   const activeStoredPaneWidthPx = isEditing ? editPaneWidthPx : viewPaneWidthPx;
   const activePaneMaxWidthPx =
     contentViewportWidth > 0
@@ -163,19 +184,23 @@ export const useCardEditorPaneWidth = ({
           activeStoredPaneWidthPx,
           activePaneDefaultWidthPx,
         );
+
   const activePaneWidthPx = clampPaneWidthPx(
     activeStoredPaneWidthPx,
     activePaneMinWidthPx,
     activePaneMaxWidthPx,
   );
+
   const hasForcedPaneWidth =
     typeof forcedPaneWidthPx === "number" && Number.isFinite(forcedPaneWidthPx);
+
   const shouldUseEdgeToEdgePaneWidth = isMetaOpen && !embeddedInPager;
   const resolvedPaneWidthPx = hasForcedPaneWidth
     ? clampPaneWidthPx(forcedPaneWidthPx, activePaneMinWidthPx)
     : shouldUseEdgeToEdgePaneWidth
       ? activePaneMaxWidthPx
       : activePaneWidthPx;
+
   const activePaneDisplayedDefaultWidthPx = clampPaneWidthPx(
     activePaneDefaultWidthPx,
     activePaneMinWidthPx,
@@ -204,9 +229,11 @@ export const useCardEditorPaneWidth = ({
   const useTwoColumnEditorLayout =
     (embeddedInPager && isEditing) ||
     effectivePaneWidthPx >= CARD_EDITOR_TWO_COLUMN_MIN_WIDTH_PX;
+
   const editorCardTargetWidthPx = useTwoColumnEditorLayout
     ? Math.max(1, (effectivePaneWidthPx - CARD_EDITOR_PAIR_GAP_PX) / 2)
     : Math.max(1, effectivePaneWidthPx);
+
   const editorCardFixedScale = Math.max(
     0.1,
     Math.min(
@@ -223,34 +250,25 @@ export const useCardEditorPaneWidth = ({
     : undefined;
 
   const persistPaneWidth = React.useCallback(
-    (mode: "view" | "edit", widthPx: number) => {
-      const minWidth =
-        mode === "edit"
-          ? CARD_PANE_EDIT_MIN_WIDTH_PX
-          : CARD_PANE_VIEW_MIN_WIDTH_PX;
-      const nextWidth = clampPaneWidthPx(widthPx, minWidth);
-      if (mode === "edit") {
-        setEditPaneWidthPx(nextWidth);
-      } else {
-        setViewPaneWidthPx(nextWidth);
+    (_mode: "view" | "edit", widthPx: number) => {
+      const nextWidth = clampPaneWidthPx(widthPx, CARD_PANE_EDIT_MIN_WIDTH_PX);
+
+      setViewPaneWidthPx(nextWidth);
+      setEditPaneWidthPx(nextWidth);
+
+      if (cardSetId) {
+        setCardSetWidthPreference(cardSetId, "view", nextWidth);
+        setCardSetWidthPreference(cardSetId, "edit", nextWidth);
       }
-      if (cardSetId) setCardSetWidthPreference(cardSetId, mode, nextWidth);
     },
     [cardSetId],
   );
 
   const previewPaneWidth = React.useCallback(
-    (mode: "view" | "edit", widthPx: number) => {
-      const minWidth =
-        mode === "edit"
-          ? CARD_PANE_EDIT_MIN_WIDTH_PX
-          : CARD_PANE_VIEW_MIN_WIDTH_PX;
-      const nextWidth = clampPaneWidthPx(widthPx, minWidth);
-      if (mode === "edit") {
-        setEditPaneWidthPx(nextWidth);
-        return;
-      }
+    (_mode: "view" | "edit", widthPx: number) => {
+      const nextWidth = clampPaneWidthPx(widthPx, CARD_PANE_EDIT_MIN_WIDTH_PX);
       setViewPaneWidthPx(nextWidth);
+      setEditPaneWidthPx(nextWidth);
     },
     [],
   );

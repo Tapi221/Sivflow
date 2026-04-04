@@ -47,9 +47,7 @@ export type SharedCardContentProps =
 
 const SharedCardContentInner = (props: SharedCardContentProps) => {
   const rootClassName =
-    props.mode === "edit"
-      ? "card-content-root flex min-h-0 flex-col w-full max-w-full overflow-x-clip overflow-y-visible"
-      : "card-content-root flex min-h-0 flex-1 flex-col w-full max-w-full overflow-x-clip overflow-y-visible";
+    "card-content-root flex min-h-0 flex-1 flex-col w-full max-w-full overflow-x-clip overflow-y-visible";
 
   return (
     <div

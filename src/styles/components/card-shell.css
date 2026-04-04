@@ -4,7 +4,6 @@
 
     --card-w: var(--card-base-width);
 
-    /* 1行のピッチ = 罫線ピッチ */
     --card-row-px: 24px;
     --ruled-line-pitch: var(--card-row-px);
 
@@ -14,18 +13,15 @@
     --card-padding-x: 12px;
     --card-padding-bottom: 16px;
 
-    /* 仕様固定：ヘッダー44 / 本文24(1行) / フッター44 */
     --card-header-h: 44px;
     --card-footer-h: 44px;
 
-    /* 罫線開始位置（カード上端→最初の罫線）= 44px */
     --ruled-offset-px: var(--card-header-h);
 
     width: var(--card-base-width);
     max-width: 100%;
     max-height: var(--card-display-max-height);
 
-    /* 最小高さ = 44 + 24 + 44 = 112px */
     min-height: calc(
       var(--card-header-h) + var(--card-row-px) + var(--card-footer-h)
     );
@@ -45,13 +41,8 @@
   .card-shell-body {
     @apply relative flex flex-col flex-1 min-h-0;
     border-radius: inherit;
-
-    /* 上下44pxの余白は CardSurface 側で管理する。
-       ここで重ねると「端から最初/最後の罫線まで44px」が 88px に崩れる。 */
     padding-top: 0;
     padding-bottom: 0;
-
-    /* 通常時：スクロールバーは出さず、内容のはみ出しを確実に防ぐ */
     overflow-y: hidden;
     overflow-x: visible;
   }
@@ -68,12 +59,6 @@
     border-radius: inherit;
   }
 
-  /* =========================
-     編集＝ノートモード
-     - max-height撤去（伸びる）
-     - カード内スクロール完全禁止
-     - resizable固定heightを無効化
-     ========================= */
   .card-shell--note {
     max-height: none;
     height: auto;
@@ -93,12 +78,10 @@
     overflow: hidden;
   }
 
-  /* ProseMirror / TipTap */
   .card-shell--note .ProseMirror {
     overflow: hidden !important;
   }
 
-  /* textarea系 */
   .card-shell--note textarea {
     overflow: hidden !important;
     resize: none;
@@ -246,7 +229,22 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.95);
   }
 
-  .card-shell--editing::before {
+  .card-shell--editor-visual {
+    border-color: var(--card-editing-outline, #1f4c3d);
+  }
+
+  .card-shell--editor-visual::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    box-sizing: border-box;
+    border-radius: inherit;
+    border: 1px solid var(--card-editing-outline, #1f4c3d);
+    pointer-events: none;
+    z-index: 30;
+  }
+
+  .card-shell--editing-affordance::before {
     content: "編集中";
     position: absolute;
     left: 50%;
@@ -266,23 +264,8 @@
     z-index: 31;
   }
 
-  .card-shell--editing {
-    border-color: var(--card-editing-outline, #1f4c3d);
-  }
-
-  .card-shell--editing::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    box-sizing: border-box;
-    border-radius: inherit;
-    border: 1px solid var(--card-editing-outline, #1f4c3d);
-    pointer-events: none;
-    z-index: 30;
-  }
-
-  .card-shell--editing.card-shell--selected,
-  .card-shell--editing.card-shell--active {
+  .card-shell--editor-visual.card-shell--selected,
+  .card-shell--editor-visual.card-shell--active {
     box-shadow:
       var(
         --card-shadow-selected,
@@ -308,24 +291,14 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.95);
   }
 
-  /*
-   * card-pager-item のアクティブ影を ::before 擬似要素に分離し、
-   * opacity だけを遷移させる（GPU composited → repaint なし）。
-   *
-   * 旧: box-shadow 遷移 → 96px blur を毎フレーム repaint（110ms × 60fps = 6–7 フレーム）
-   * 新: ::before に box-shadow を常時レンダリングし、opacity 0→1 で fade in
-   *     opacity transition はブラウザが compositor スレッドで処理するため main thread 不使用
-   */
   .card-pager-item {
     position: relative;
     overflow: visible;
     opacity: 0.82;
     box-shadow: 0 1px 6px rgba(15, 23, 42, 0.04);
-    /* box-shadow は transition から除去。active 状態は ::before 経由で表現 */
     transition: opacity 110ms ease;
   }
 
-  /* アクティブ影レイヤ: 常に存在し opacity だけを切り替える */
   .card-pager-item::before {
     content: "";
     position: absolute;
@@ -340,7 +313,6 @@
     );
     opacity: 0;
     transition: opacity 110ms ease;
-    /* 擬似要素をカードの裏側に配置（z-index:-1 は親の stacking context に依存） */
     z-index: -1;
   }
 
@@ -351,7 +323,6 @@
 
   .card-pager-item[data-card-active="true"] {
     opacity: 1;
-    /* box-shadow を直接持たず ::before に委譲 */
     box-shadow: none;
   }
 
@@ -376,7 +347,7 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.95);
   }
 
-  .card-pager-item[data-card-active="true"] .card-shell.card-shell--editing {
+  .card-pager-item[data-card-active="true"] .card-shell.card-shell--editor-visual {
     border-color: var(--card-editing-outline, #1f4c3d);
     box-shadow:
       var(
@@ -388,15 +359,13 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.95);
   }
 
-  /* Pager上では、非アクティブ項目に編集バッジを出さない（誤選択表示の再発防止） */
   .card-pager-item:not([data-card-active="true"])
-    .card-shell.card-shell--editing::before {
+    .card-shell.card-shell--editing-affordance::before {
     content: none;
     display: none;
   }
 
   .card-pager-item:has(:focus-visible) {
-    /* focus ring だけ直接持ち、active 影は ::before に委譲 */
     box-shadow: var(
       --card-focus-ring-shadow,
       0 0 0 2px rgba(122, 166, 161, 0.25)
@@ -490,7 +459,6 @@
     @apply flex items-center justify-between gap-2 px-3;
   }
 
-  /* ヘッダー：44px固定、absoluteで上に貼る */
   .card-shell-header {
     @apply absolute left-0 right-0 top-0;
     z-index: 30;
@@ -503,7 +471,6 @@
     padding-bottom: 0;
   }
 
-  /* フッター：44px固定（見た目領域） */
   .card-shell-footer {
     height: var(--card-footer-h);
     min-height: var(--card-footer-h);
@@ -531,7 +498,6 @@
     @apply h-9 w-9 rounded-full bg-white/90 backdrop-blur border border-slate-100 text-slate-500 text-sm font-bold leading-none shadow-sm hover:bg-slate-50;
   }
 
-  /* rowOffset 付き行は独立した整形コンテキストにして、隣接要素のマージン干渉を防ぐ */
   .card-shell [data-block-row="true"][data-row-offset-applied="true"] {
     display: flow-root;
   }

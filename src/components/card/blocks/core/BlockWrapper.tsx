@@ -2,6 +2,8 @@ import { GripVertical, Trash2, Copy } from "@/ui/icons";
 import React from "react";
 import { cn } from "@/lib/utils";
 import { BlockEditModeContext } from "@/components/card/blocks/core/BlockEditModeContext";
+import { BlockFrame } from "@/components/card/blocks/core/BlockFrame";
+
 interface BlockWrapperProps {
   children: React.ReactNode;
   onDelete: () => void;
@@ -18,7 +20,6 @@ interface BlockWrapperProps {
   showDragHandle?: boolean;
   dragEnabled?: boolean;
 
-  // 1行移動（rowOffset）用
   canMoveUp?: boolean;
   canMoveDown?: boolean;
   onMoveUp?: () => void;
@@ -53,21 +54,13 @@ export const BlockWrapper = ({
   contentClassName,
 }: BlockWrapperProps) => {
   const [isEditingWithin, setIsEditingWithin] = React.useState(false);
+
   const isEditableFocusTarget = (target: EventTarget | null) => {
     if (!(target instanceof HTMLElement)) return false;
     return Boolean(target.closest("input, textarea, [contenteditable]"));
   };
 
   const inEditMode = React.useContext(BlockEditModeContext);
-  // 実ボーダーは高さを+2pxして24pxグリッドを崩すため、常に inset box-shadow で描画する。
-  const isOutlineVisible = inEditMode || Boolean(isActive || isEditingWithin);
-  const outlineColor = accentColor
-    ? `${accentColor}40`
-    : "rgba(59, 130, 246, 0.35)";
-  const baseOutline = inEditMode
-    ? `inset 0 0 0 var(--card-ruled-line-px, 1px) ${outlineColor}`
-    : `inset 0 0 0 var(--card-ruled-line-px, 1px) var(--card-ruled-color, rgba(0,0,0,0.05))`;
-  const activeOutline = `inset 0 0 0 var(--card-ruled-line-px, 1px) ${outlineColor}`;
 
   const stepDragRef = React.useRef<{
     pointerId: number;
@@ -122,8 +115,9 @@ export const BlockWrapper = ({
       if (
         !stepDragRef.current ||
         moveEvent.pointerId !== stepDragRef.current.pointerId
-      )
+      ) {
         return;
+      }
 
       const deltaY = moveEvent.clientY - stepDragRef.current.startY;
       const nextSteps = Math.round(deltaY / STEP_PX);
@@ -139,11 +133,11 @@ export const BlockWrapper = ({
       if (
         !stepDragRef.current ||
         endEvent.pointerId !== stepDragRef.current.pointerId
-      )
+      ) {
         return;
+      }
 
       stepDragRef.current = null;
-
       onMoveDragEnd?.();
 
       window.removeEventListener("pointermove", onPointerMove);
@@ -156,8 +150,62 @@ export const BlockWrapper = ({
     window.addEventListener("pointercancel", onPointerEnd);
   };
 
-  return (
+  const overlay = (
     <div
+      data-active={isActive ? "true" : "false"}
+      className="absolute -right-1 top-1/2 -translate-y-1/2 flex flex-col items-center gap-0 -space-y-px opacity-0 pointer-events-none
+        group-hover:opacity-100 group-hover:pointer-events-auto
+        group-focus-within:opacity-100 group-focus-within:pointer-events-auto
+        data-[active=true]:opacity-100 data-[active=true]:pointer-events-auto
+        transition-opacity duration-150 z-[80]"
+    >
+      {showDragHandle && (
+        <div
+          {...dragHandleProps}
+          onPointerDown={startStepDrag}
+          className={cn(
+            "w-5 h-5 min-w-0 min-h-0 p-0 bg-white border border-slate-100 rounded-full text-slate-400 shadow-sm flex items-center justify-center flex-none transition-colors",
+            "cursor-grab active:cursor-grabbing",
+            dragHandleClassName,
+          )}
+        >
+          <GripVertical className="w-2.5 h-2.5" />
+        </div>
+      )}
+
+      {showDuplicate && (
+        <button
+          onClick={onDuplicate}
+          className="w-5 h-5 min-w-0 min-h-0 p-0 bg-white border border-slate-100 rounded-full text-slate-400 hover:text-indigo-600 hover:border-indigo-100 shadow-sm flex items-center justify-center flex-none"
+          type="button"
+        >
+          <Copy className="w-2.5 h-2.5" />
+        </button>
+      )}
+
+      {showDelete && (
+        <button
+          onClick={onDelete}
+          className="w-5 h-5 min-w-0 min-h-0 p-0 bg-white border border-slate-100 rounded-full text-slate-400 hover:text-red-600 hover:border-red-100 shadow-sm flex items-center justify-center flex-none"
+          type="button"
+        >
+          <Trash2 className="w-2.5 h-2.5" />
+        </button>
+      )}
+    </div>
+  );
+
+  const variant =
+    inEditMode || Boolean(isActive || isEditingWithin) ? "editor" : "neutral";
+
+  return (
+    <BlockFrame
+      className={className}
+      contentClassName={contentClassName}
+      accentColor={accentColor}
+      overlay={overlay}
+      variant={variant}
+      raiseZIndex={isEditingWithin}
       onFocusCapture={(event) => {
         setIsEditingWithin(isEditableFocusTarget(event.target));
       }}
@@ -169,66 +217,8 @@ export const BlockWrapper = ({
         }
         setIsEditingWithin(isEditableFocusTarget(nextFocused));
       }}
-      className={cn(
-        "group relative overflow-visible bg-transparent py-0 px-1.5",
-        isEditingWithin && "z-40",
-        className,
-      )}
-      style={{
-        boxShadow: isOutlineVisible ? activeOutline : baseOutline,
-        borderRadius: "var(--block-frame-radius, 12px)",
-      }}
     >
-      {/* 操作メニュー (アクティブ時に表示) */}
-      <div
-        data-active={isActive ? "true" : "false"}
-        className="absolute -right-1 top-1/2 -translate-y-1/2 flex flex-col items-center gap-0 -space-y-px opacity-0 pointer-events-none
-        group-hover:opacity-100 group-hover:pointer-events-auto
-        group-focus-within:opacity-100 group-focus-within:pointer-events-auto
-        data-[active=true]:opacity-100 data-[active=true]:pointer-events-auto
-        transition-opacity duration-150 z-[80]"
-      >
-        {showDragHandle && (
-          <div
-            {...dragHandleProps}
-            onPointerDown={startStepDrag}
-            className={cn(
-              "w-5 h-5 min-w-0 min-h-0 p-0 bg-white border border-slate-100 rounded-full text-slate-400 shadow-sm flex items-center justify-center flex-none transition-colors",
-              "cursor-grab active:cursor-grabbing",
-              dragHandleClassName,
-            )}
-          >
-            <GripVertical className="w-2.5 h-2.5" />
-          </div>
-        )}
-
-        {showDuplicate && (
-          <button
-            onClick={onDuplicate}
-            className="w-5 h-5 min-w-0 min-h-0 p-0 bg-white border border-slate-100 rounded-full text-slate-400 hover:text-indigo-600 hover:border-indigo-100 shadow-sm flex items-center justify-center flex-none"
-            type="button"
-          >
-            <Copy className="w-2.5 h-2.5" />
-          </button>
-        )}
-
-        {showDelete && (
-          <button
-            onClick={onDelete}
-            className="w-5 h-5 min-w-0 min-h-0 p-0 bg-white border border-slate-100 rounded-full text-slate-400 hover:text-red-600 hover:border-red-100 shadow-sm flex items-center justify-center flex-none"
-            type="button"
-          >
-            <Trash2 className="w-2.5 h-2.5" />
-          </button>
-        )}
-      </div>
-
-      <div
-        data-block-measure-root="true"
-        className={cn("relative px-1", contentClassName)}
-      >
-        {children}
-      </div>
-    </div>
+      {children}
+    </BlockFrame>
   );
 };

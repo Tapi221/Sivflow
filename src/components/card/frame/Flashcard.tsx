@@ -19,7 +19,6 @@ import { useFlashcardDerived } from "./useFlashcardDerived";
 import { useFlashcardInk } from "./useFlashcardInk";
 import { useFlashcardMediaState } from "./useFlashcardMediaState";
 
-// Re-export for consumers who import the type from this file
 export type { FlashcardCardLike };
 
 interface FlashcardProps {
@@ -53,6 +52,7 @@ interface FlashcardProps {
   scaleMultiplier?: number;
   fixedScale?: number;
   contentPaddingPx?: number;
+  cardShellClassName?: string;
 }
 
 const TAP_MOVE_CANCEL_THRESHOLD_PX = 8;
@@ -95,6 +95,7 @@ const FlashcardInner = ({
   scaleMultiplier = CARD_DISPLAY_SCALE,
   fixedScale,
   contentPaddingPx,
+  cardShellClassName,
 }: FlashcardProps) => {
   const contentRef = useRef<HTMLDivElement | null>(null);
   const flipSuppressedUntilRef = useRef(0);
@@ -124,20 +125,13 @@ const FlashcardInner = ({
   const shouldShowInkLayer = Boolean(showInkLayer && isFixedDisplay);
   const shouldEnableInkEditing = Boolean(allowInkEditing && isFixedDisplay);
 
-  // previewMode 切り替え時に flip をリセット
   useEffect(() => {
     if (!previewMode) return;
     queueMicrotask(() => setPreviewFlipped(false));
   }, [previewMode, card?.id]);
 
-  // ---------------------------------------------------------------------------
-  // Derived data（active-side 含む）
-  // ---------------------------------------------------------------------------
   const derived = useFlashcardDerived(card, effectiveIsFlipped);
 
-  // ---------------------------------------------------------------------------
-  // Ink hook
-  // ---------------------------------------------------------------------------
   const ink = useFlashcardInk({
     cardId: derived.cardId,
     effectiveIsFlipped,
@@ -148,14 +142,8 @@ const FlashcardInner = ({
     onInkDocumentChange,
   });
 
-  // ---------------------------------------------------------------------------
-  // Modal state
-  // ---------------------------------------------------------------------------
   const media = useFlashcardMediaState();
 
-  // ---------------------------------------------------------------------------
-  // Flip handling
-  // ---------------------------------------------------------------------------
   const isInkEditingActive = Boolean(allowInkEditing && ink.previewInkTool);
 
   const handleFlip = React.useCallback(
@@ -183,9 +171,6 @@ const FlashcardInner = ({
     [media.isModalBlockingFlip, isInkEditingActive, previewMode, onFlip],
   );
 
-  // ---------------------------------------------------------------------------
-  // Corner actions
-  // ---------------------------------------------------------------------------
   const { actionsTopLeft, actionsTopRight } = useFlashcardCornerControls({
     card: card ?? ({} as FlashcardCardLike),
     hasUncertainty: derived.hasUncertainty,
@@ -201,9 +186,6 @@ const FlashcardInner = ({
     onOpenReferencePopup: () => media.setIsReferencePopupOpen(true),
   });
 
-  // ---------------------------------------------------------------------------
-  // Render
-  // ---------------------------------------------------------------------------
   const resetPointerGesture = () => {
     pointerGestureRef.current = {
       pointerId: null,
@@ -249,6 +231,7 @@ const FlashcardInner = ({
           tabIndex={isCardClickable ? 0 : undefined}
           className={cn(
             CARD_SHELL_COMMON_CLASS_NAME,
+            cardShellClassName,
             isCardClickable && "cursor-pointer",
           )}
           onPointerDownCapture={(event) => {
@@ -394,7 +377,8 @@ const areFlashcardPropsEqual = (prev: FlashcardProps, next: FlashcardProps) => {
       prev.maxScale === next.maxScale &&
       prev.scaleMultiplier === next.scaleMultiplier &&
       prev.fixedScale === next.fixedScale &&
-      prev.contentPaddingPx === next.contentPaddingPx
+      prev.contentPaddingPx === next.contentPaddingPx &&
+      prev.cardShellClassName === next.cardShellClassName
     );
   }
 
@@ -423,7 +407,8 @@ const areFlashcardPropsEqual = (prev: FlashcardProps, next: FlashcardProps) => {
     prev.maxScale === next.maxScale &&
     prev.scaleMultiplier === next.scaleMultiplier &&
     prev.fixedScale === next.fixedScale &&
-    prev.contentPaddingPx === next.contentPaddingPx
+    prev.contentPaddingPx === next.contentPaddingPx &&
+    prev.cardShellClassName === next.cardShellClassName
   );
 };
 

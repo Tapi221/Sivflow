@@ -72,6 +72,8 @@ type FlashcardCardLike = Record<string, unknown> & {
 const CARD_PANE_AUTO_MAX_SCALE = 4;
 const CARD_EDITOR_PAIR_GAP_PX = 16;
 const EMPTY_BLOCKS: CardBlock[] = [];
+const EDITOR_CARD_SHELL_VISUAL_CLASS_NAME = "card-shell--editor-visual";
+const EDITOR_CARD_SHELL_AFFORDANCE_CLASS_NAME = "card-shell--editing-affordance";
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
@@ -159,6 +161,7 @@ const EditorSidePaneInner = ({
       {shouldShowInlineToolbarMount && (
         <div ref={setInlineToolbarMount} className="w-full" />
       )}
+
       <CardFrame
         baseWidth={CANONICAL_CARD_WIDTH}
         contentPaddingPx={0}
@@ -191,7 +194,8 @@ const EditorSidePaneInner = ({
         }
         className={cn(
           CARD_SHELL_COMMON_CLASS_NAME,
-          shouldShowEditingBadge && "card-shell--editing",
+          EDITOR_CARD_SHELL_VISUAL_CLASS_NAME,
+          shouldShowEditingBadge && EDITOR_CARD_SHELL_AFFORDANCE_CLASS_NAME,
           isPagerActiveCard && "card-shell--active",
         )}
         resizable
@@ -719,6 +723,11 @@ export const CardEditorPane = ({
                         allowUpscale
                         maxScale={CARD_PANE_AUTO_MAX_SCALE}
                         scaleMultiplier={1}
+                        fixedScale={editorCardFixedScale}
+                        cardShellClassName={cn(
+                          EDITOR_CARD_SHELL_VISUAL_CLASS_NAME,
+                          isPagerActiveCard && "card-shell--active",
+                        )}
                       />
                     </div>
                   </div>

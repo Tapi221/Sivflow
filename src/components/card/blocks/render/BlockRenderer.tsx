@@ -10,9 +10,9 @@ import { AudioPlayer } from "@/components/card/media/CardMedia";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import type { CardBlock } from "@/types/domain/card";
 import type { CSSProperties } from "react";
-import { useCallback, useContext, useMemo, useState } from "react";
-import { BlockEditModeContext } from "@/components/card/blocks/core/BlockEditModeContext";
+import { useCallback, useMemo, useState } from "react";
 import { BlockSeparator } from "@/components/card/blocks/core/BlockSeparator";
+import { BlockFrame } from "@/components/card/blocks/core/BlockFrame";
 import { shouldRenderInterBlockSeparator } from "@/components/card/blocks/core/blockDisplayPolicy";
 import { CodeRenderer } from "@/components/card/blocks/code/CodeRenderer";
 import { ImageBlockContent } from "@/components/card/blocks/image/ImageBlockContent";
@@ -33,6 +33,11 @@ interface BlockRendererProps {
   zoom?: number;
 }
 
+type BlockFrameConfig = {
+  className?: string;
+  contentClassName?: string;
+};
+
 const getFluidZoomStyle = (
   displayMode: "fixed" | "fluid",
   zoom: number,
@@ -42,6 +47,31 @@ const getFluidZoomStyle = (
     typeof zoom === "number" && Number.isFinite(zoom) && zoom > 0 ? zoom : 1;
   if (Math.abs(safeZoom - 1) < 0.001) return undefined;
   return { fontSize: `${safeZoom}em` };
+};
+
+const getBlockFrameConfig = (blockType: CardBlock["type"]): BlockFrameConfig => {
+  if (blockType === "text" || blockType === "markdown" || blockType === "question") {
+    return {
+      className: "bg-transparent px-0 py-0",
+      contentClassName: "px-0",
+    };
+  }
+
+  if (blockType === "code") {
+    return {
+      className: "bg-transparent px-0 py-0",
+      contentClassName: "relative px-0",
+    };
+  }
+
+  if (blockType === "image") {
+    return {
+      className: "py-0 px-0",
+      contentClassName: "px-0",
+    };
+  }
+
+  return {};
 };
 
 const QuestionBlockView = ({
@@ -165,7 +195,7 @@ const renderBlock = (
       if ((block.images?.length ?? 0) === 0) return null;
 
       return (
-        <ImageBlockShell>
+        <ImageBlockShell showBorderOverlay>
           <ImageBlockContent
             mode="view"
             urls={(block.images ?? [])
@@ -207,10 +237,13 @@ const renderBlock = (
               style={{ height: `${gridOffsetPx}px` }}
             />
           )}
-          <MathBlockPreviewPane
-            latex={block.math.latex || ""}
-            displayMode={block.math.displayMode || "block"}
-          />
+          <div className="space-y-1.5 px-2 py-0.5">
+            <MathBlockPreviewPane
+              latex={block.math.latex || ""}
+              displayMode={block.math.displayMode || "block"}
+              className="rounded-lg"
+            />
+          </div>
         </div>
       );
 
@@ -218,12 +251,16 @@ const renderBlock = (
       if ((block.markdown ?? "").trim() === "") return null;
 
       return (
-        <MarkdownBlockView
-          md={block.markdown}
-          className="markdownBlockCardView"
-          bleedX={false}
-          style={getFluidZoomStyle(displayMode, zoom)}
-        />
+        <div className="px-0 py-0">
+          <div className="markdownBlockPreview bg-transparent border-0 rounded-lg overflow-visible p-0">
+            <MarkdownBlockView
+              md={block.markdown}
+              className="markdownBlockCardView"
+              bleedX={false}
+              style={getFluidZoomStyle(displayMode, zoom)}
+            />
+          </div>
+        </div>
       );
 
     default:
@@ -237,11 +274,6 @@ export const BlockRenderer = ({
   displayMode = "fixed",
   zoom = 1,
 }: BlockRendererProps) => {
-  const inEditMode = useContext(BlockEditModeContext);
-  const blockOutline = inEditMode
-    ? "inset 0 0 0 1px rgba(59, 130, 246, 0.35)"
-    : undefined;
-
   const { settings } = useUserSettings();
   const questionDisplayMode = settings?.questionDisplayMode ?? "tap_to_reveal";
 
@@ -314,6 +346,8 @@ export const BlockRenderer = ({
 
         if (!content) return null;
 
+        const frameConfig = getBlockFrameConfig(block.type);
+
         return (
           <div key={block.id}>
             {showSeparator && <BlockSeparator />}
@@ -322,17 +356,19 @@ export const BlockRenderer = ({
               className="w-full min-w-0 max-w-full flow-root"
               data-block-row="true"
               data-row-offset-applied={rowOffsetPx ? "true" : undefined}
-              style={
-                blockOutline
-                  ? {
-                      ...offsetStyle,
-                      boxShadow: blockOutline,
-                      borderRadius: "var(--block-frame-radius, 12px)",
-                    }
-                  : offsetStyle
-              }
+              style={offsetStyle}
             >
-              {content}
+              {block.type === "audio" ? (
+                content
+              ) : (
+                <BlockFrame
+                  variant="editor"
+                  className={frameConfig.className}
+                  contentClassName={frameConfig.contentClassName}
+                >
+                  {content}
+                </BlockFrame>
+              )}
             </div>
           </div>
         );
