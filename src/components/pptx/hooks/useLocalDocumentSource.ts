@@ -43,6 +43,12 @@ export const useLocalDocumentSource = ({
     return getCachedDocumentBlobUrl(localBlobId, { userId }) ?? null;
   }, [userId, localBlobId]);
 
+  const localRestoreAttemptKey = useMemo(() => {
+    if (!localBlobId) return null;
+    const scope = userId?.trim() || "__anonymous__";
+    return `${scope}:${localBlobId}`;
+  }, [localBlobId, userId]);
+
   // Reset when localBlobId changes (doc switched)
   useEffect(() => {
     triedKeysRef.current.clear();
@@ -53,7 +59,7 @@ export const useLocalDocumentSource = ({
     });
 
     return () => cancelAnimationFrame(rafId);
-  }, [localBlobId]);
+  }, [localBlobId, userId]);
 
   // IndexedDB restore
   useEffect(() => {
@@ -81,7 +87,10 @@ export const useLocalDocumentSource = ({
       };
     }
 
-    if (triedKeysRef.current.has(localBlobId)) {
+    if (
+      localRestoreAttemptKey &&
+      triedKeysRef.current.has(localRestoreAttemptKey)
+    ) {
       const rafId = requestAnimationFrame(() => {
         setIsRestoring(false);
       });
@@ -92,7 +101,7 @@ export const useLocalDocumentSource = ({
       };
     }
 
-    triedKeysRef.current.add(localBlobId);
+    if (localRestoreAttemptKey) triedKeysRef.current.add(localRestoreAttemptKey);
 
     const startRestoreRafId = requestAnimationFrame(() => {
       setIsRestoring(true);
@@ -125,7 +134,13 @@ export const useLocalDocumentSource = ({
       cancelled = true;
       cancelAnimationFrame(startRestoreRafId);
     };
-  }, [cachedBlobUrl, userId, localBlobId, restoredLocalBlobUrl]);
+  }, [
+    cachedBlobUrl,
+    userId,
+    localBlobId,
+    localRestoreAttemptKey,
+    restoredLocalBlobUrl,
+  ]);
 
   const localBlobUrl =
     cachedBlobUrl ?? restoredLocalBlobUrl ?? persistedBlobUrl ?? null;

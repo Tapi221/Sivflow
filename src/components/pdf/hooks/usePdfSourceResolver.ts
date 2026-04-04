@@ -107,6 +107,12 @@ export const usePdfSourceResolver = (
     [doc.id, doc.localFileId],
   );
 
+  const localRestoreAttemptKey = useMemo(() => {
+    if (!localBlobId) return null;
+    const scope = userId?.trim() || "__anonymous__";
+    return `${scope}:${localBlobId}`;
+  }, [localBlobId, userId]);
+
   const effectiveRemoteUrl = useMemo(() => {
     if (!remoteUrl) return null;
     if (failedRemoteSourceKey && remoteSourceKey === failedRemoteSourceKey)
@@ -142,7 +148,7 @@ export const usePdfSourceResolver = (
     triedRemoteSourceKeysRef.current.clear();
     triedBlobUrlsRef.current.clear();
     triedLocalRestoreKeysRef.current.clear();
-  }, [doc.id]);
+  }, [doc.id, userId]);
 
   useEffect(() => {
     queueMicrotask(() => setFailedRemoteSourceKey(null));
@@ -180,11 +186,16 @@ export const usePdfSourceResolver = (
       return;
     }
 
-    if (triedLocalRestoreKeysRef.current.has(localBlobId)) {
+    if (
+      localRestoreAttemptKey &&
+      triedLocalRestoreKeysRef.current.has(localRestoreAttemptKey)
+    ) {
       queueMicrotask(() => setLocalDataStatus("failed"));
       return;
     }
-    triedLocalRestoreKeysRef.current.add(localBlobId);
+    if (localRestoreAttemptKey) {
+      triedLocalRestoreKeysRef.current.add(localRestoreAttemptKey);
+    }
     queueMicrotask(() => setLocalDataStatus("loading"));
     getDocumentBlob(localBlobId, { userId })
       .then(async (blob) => {
@@ -223,6 +234,7 @@ export const usePdfSourceResolver = (
     doc.id,
     doc.remoteUrl,
     localBlobId,
+    localRestoreAttemptKey,
     usableCachedBlobUrl,
     effectiveRemoteUrl,
     usablePersistedBlobUrl,
