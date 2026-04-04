@@ -39,6 +39,7 @@ interface RootFolderPanelListProps {
   setEditingId: React.Dispatch<React.SetStateAction<string | null>>;
   setEditingName: React.Dispatch<React.SetStateAction<string>>;
   editingNameRef: React.MutableRefObject<string>;
+  renameCancelledRef: React.MutableRefObject<boolean>;
   editingId: string | null;
   editingName: string;
   handleRenameConfirm: (target?: any) => Promise<void>;
@@ -64,6 +65,7 @@ export const RootFolderPanelList = ({
   setEditingId,
   setEditingName,
   editingNameRef,
+  renameCancelledRef,
   editingId,
   editingName,
   handleRenameConfirm,
@@ -104,6 +106,7 @@ export const RootFolderPanelList = ({
           setEditingId={setEditingId}
           setEditingName={setEditingName}
           editingNameRef={editingNameRef}
+          renameCancelledRef={renameCancelledRef}
           editingId={editingId}
           editingName={editingName}
           handleRenameConfirm={handleRenameConfirm}

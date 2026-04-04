@@ -2,6 +2,9 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 import path from "path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -72,60 +75,7 @@ export default defineConfig({
 
     rollupOptions: {
       output: {
-        // 関数型での定義：将来のライブラリ追加に自動追従可能にする
-        manualChunks: (id) => {
-          // node_modules のみを対象にする
-          if (id.includes("node_modules")) {
-            // 1. Core Framework (React Ecosystem) & Charts
-            // recharts等もReactに密結合しているため、分割せず同じチャンクに含めることで
-            // forwardRef などの初期化順序エラーを防止する。
-            if (
-              id.includes("react") ||
-              id.includes("react-dom") ||
-              id.includes("react-router-dom") ||
-              id.includes("recharts") ||
-              id.includes("chart.js") ||
-              id.includes("d3")
-            ) {
-              return "vendor-react";
-            }
-
-            // 2. Firebase (Infrastructure)
-            if (id.includes("firebase") || id.includes("@firebase")) {
-              return "vendor-firebase";
-            }
-
-            // 3. Editor & Math (Heavy Weight)
-            if (
-              id.includes("katex") ||
-              id.includes("prism") ||
-              id.includes("html-to-image") ||
-              id.includes("heic2any")
-            ) {
-              return "vendor-editor";
-            }
-
-            // 5. Animations
-            // UI全体のインタラクションで使うならMainでも良いが、サイズが大きい場合は分離
-            if (id.includes("framer-motion") || id.includes("react-spring")) {
-              return "vendor-motion";
-            }
-
-            // 6. UI Components (Headless UI / Radix)
-            // 複数のコンポーネントで散見されるため、キャッシュ効率のためにまとめる
-            if (
-              id.includes("@radix-ui") ||
-              id.includes("lucide-react") ||
-              id.includes("vaul") ||
-              id.includes("sonner")
-            ) {
-              return "vendor-ui";
-            }
-
-            // その他（utilsなど）は自動的にエントリーポイントごとのChunk、
-            // またはViteのデフォルト戦略（vendor）に振り分けられるため、明示指定しない。
-          }
-        },
+        // Vite のデフォルトのチャンク分割戦略を使用する（ビルドエラー回避のため）
       },
     },
   },

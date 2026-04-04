@@ -260,8 +260,8 @@ export const useFolderActions = ({
       ) {
         return "cardSet";
       }
-      // IDが 'doc-' で始まるか、type が明示的に document の場合は document
-      if (id.startsWith("doc-") || type === "document") {
+      // IDが 'doc-' で始まる場合は document と判定
+      if (id.startsWith("doc-")) {
         return "document";
       }
       return "folder";
@@ -483,6 +483,7 @@ export const useFolderActions = ({
       editingIdRef,
       onDeleteCard,
       onDeleteCardSet,
+      onDeleteDocument,
       onDeleteFolder,
       resolveTargetKind,
     ],
