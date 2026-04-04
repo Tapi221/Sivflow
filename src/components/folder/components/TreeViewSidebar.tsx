@@ -20,10 +20,12 @@ interface TreeViewSidebarProps {
   onCreateRootFolder: () => void;
   onCreateCardSet: () => void;
   onAddDocument: () => void;
+  onBulkImport: () => void;
   onStartResizing: (e: React.PointerEvent) => void;
   children: React.ReactNode;
   canCreateCardSet?: boolean;
   canAddDocuments?: boolean;
+  canBulkImport?: boolean;
   preferDirectRootFolderCreate?: boolean;
 }
 
@@ -43,10 +45,12 @@ export const TreeViewSidebar = ({
   onCreateRootFolder,
   onCreateCardSet,
   onAddDocument,
+  onBulkImport,
   onStartResizing,
   children,
   canCreateCardSet = false,
   canAddDocuments = false,
+  canBulkImport = false,
   preferDirectRootFolderCreate = false,
 }: TreeViewSidebarProps) => {
   return (
@@ -73,9 +77,11 @@ export const TreeViewSidebar = ({
             onCreateRootFolder={onCreateRootFolder}
             onCreateCardSet={onCreateCardSet}
             onAddDocument={onAddDocument}
+            onBulkImport={onBulkImport}
             showExplorerActions={explorerTab === "explorer"}
             canCreateCardSet={canCreateCardSet}
             canAddDocuments={canAddDocuments}
+            canBulkImport={canBulkImport}
             preferDirectRootFolderCreate={preferDirectRootFolderCreate}
           />
         </div>

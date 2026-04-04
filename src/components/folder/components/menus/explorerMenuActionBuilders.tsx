@@ -12,9 +12,11 @@ interface BuildFolderMenuActionsParams {
 interface BuildExplorerCreateMenuActionsParams {
   canCreateCardSet?: boolean;
   canAddDocuments?: boolean;
+  canBulkImport?: boolean;
   onCreateRootFolder?: () => void | Promise<void>;
   onCreateCardSet?: () => void | Promise<void>;
   onAddDocument?: () => void | Promise<void>;
+  onBulkImport?: () => void | Promise<void>;
 }
 
 /**
@@ -86,9 +88,11 @@ export const buildFolderMenuActions = ({
 export const buildExplorerCreateMenuActions = ({
   canCreateCardSet = false,
   canAddDocuments = false,
+  canBulkImport = false,
   onCreateRootFolder,
   onCreateCardSet,
   onAddDocument,
+  onBulkImport,
 }: BuildExplorerCreateMenuActionsParams): MenuAction[] => {
   const actions: MenuAction[] = [
     {
@@ -119,6 +123,17 @@ export const buildExplorerCreateMenuActions = ({
       icon: <FileText className="h-4 w-4" />,
       onSelect: () => {
         void onAddDocument?.();
+      },
+    });
+  }
+
+  if (canBulkImport) {
+    actions.push({
+      id: "bulk-import",
+      label: "一括インポート",
+      icon: <FileText className="h-4 w-4" />,
+      onSelect: () => {
+        void onBulkImport?.();
       },
     });
   }

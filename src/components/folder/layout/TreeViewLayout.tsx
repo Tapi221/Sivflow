@@ -1,5 +1,7 @@
 import { useCards } from "@/hooks/card/useCards";
 import { useCardSets } from "@/hooks/cardSet/useCardSets";
+import { useToast } from "@/contexts/ToastContext";
+import { XlsxImportDialog } from "@/features/import/ui/XlsxImportDialog";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { useFolders } from "@/hooks/folder/useFolders";
 import { useDocuments } from "@/hooks/platform/useDocuments";
@@ -56,6 +58,7 @@ const TreeViewLayout = ({
   folderSelectionNonce = 0,
 }: TreeViewLayoutProps) => {
   const navigate = useNavigate();
+  const toast = useToast();
   const { settings } = useUserSettings();
   const { createFolder, updateFolder, deleteFolder } = useFolders();
   const { createCard, updateCard, deleteCard, moveCardToFolder, reorderCards } =
@@ -71,6 +74,7 @@ const TreeViewLayout = ({
   const [explorerHeaderFolderId, setExplorerHeaderFolderId] = useState<
     string | null
   >(null);
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const createFolderTriggerRef = useRef<(() => void) | null>(null);
   const createCardSetTriggerRef = useRef<
     ((folderId?: string | null) => void) | null
@@ -254,6 +258,15 @@ const TreeViewLayout = ({
     documentTriggerRef.current?.();
   }, [currentHeaderFolderId]);
 
+  const handleOpenBulkImport = useCallback(() => {
+    if (!currentHeaderFolderId) {
+      toast.error("一括インポート先のフォルダを先に選択してください。");
+      return;
+    }
+
+    setIsImportDialogOpen(true);
+  }, [currentHeaderFolderId, toast]);
+
   const { isFilterActive, filteredCards, filteredDocuments, isFiltering } =
     useTreeViewFilters({
       cards,
@@ -342,9 +355,11 @@ const TreeViewLayout = ({
         onCreateRootFolder={handleCreateRootFolder}
         onCreateCardSet={handleCreateCardSetFromHeader}
         onAddDocument={handleAddDocumentFromHeader}
+        onBulkImport={handleOpenBulkImport}
         onStartResizing={startResizing}
         canCreateCardSet={canCreateCardSet}
         canAddDocuments={canAddDocuments}
+        canBulkImport={Boolean(currentHeaderFolderId)}
         preferDirectRootFolderCreate={isSectionListMode}
       >
         {tabContent}
@@ -375,6 +390,20 @@ const TreeViewLayout = ({
           onCreateCard: handleOpenCreateCard,
         }}
         folderSelectionNonce={folderSelectionNonce}
+      />
+
+      <XlsxImportDialog
+        open={isImportDialogOpen}
+        onOpenChange={setIsImportDialogOpen}
+        folderId={currentHeaderFolderId}
+        folderName={
+          currentHeaderFolderId
+            ? folders.find((folder) => folder.id === currentHeaderFolderId)
+                ?.folderName ?? null
+            : null
+        }
+        createCardSet={createCardSet}
+        createCard={createCard}
       />
     </div>
   );

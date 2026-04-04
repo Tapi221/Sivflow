@@ -23,9 +23,11 @@ interface ExplorerTabsProps {
   onCreateRootFolder?: () => void | Promise<void>;
   onCreateCardSet?: () => void | Promise<void>;
   onAddDocument?: () => void | Promise<void>;
+  onBulkImport?: () => void | Promise<void>;
   showExplorerActions?: boolean;
   canCreateCardSet?: boolean;
   canAddDocuments?: boolean;
+  canBulkImport?: boolean;
   preferDirectRootFolderCreate?: boolean;
 }
 
@@ -48,9 +50,11 @@ export const ExplorerTabs = ({
   onCreateRootFolder,
   onCreateCardSet,
   onAddDocument,
+  onBulkImport,
   showExplorerActions = false,
   canCreateCardSet = false,
   canAddDocuments = false,
+  canBulkImport = false,
   preferDirectRootFolderCreate = false,
 }: ExplorerTabsProps) => {
   const shouldShowExplorerActions =
@@ -63,14 +67,18 @@ export const ExplorerTabs = ({
       buildExplorerCreateMenuActions({
         canCreateCardSet,
         canAddDocuments,
+        canBulkImport,
         onCreateRootFolder,
         onCreateCardSet,
         onAddDocument,
+        onBulkImport,
       }),
     [
       canAddDocuments,
+      canBulkImport,
       canCreateCardSet,
       onAddDocument,
+      onBulkImport,
       onCreateCardSet,
       onCreateRootFolder,
     ],
