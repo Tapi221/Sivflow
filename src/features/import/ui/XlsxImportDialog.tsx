@@ -35,11 +35,19 @@ type CreateCard = (
   cardData: Partial<Card> & { cardSetId?: string },
 ) => Promise<Card>;
 
+export type XlsxImportCompletedPayload = {
+  cardSetId: string;
+  cardSetName: string;
+  folderId: string;
+  createdCount: number;
+};
+
 type XlsxImportDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   folderId: string | null;
   folderName?: string | null;
+  onImported?: (payload: XlsxImportCompletedPayload) => void;
   createCardSet: CreateCardSet;
   createCard: CreateCard;
 };
@@ -54,6 +62,7 @@ export const XlsxImportDialog = ({
   onOpenChange,
   folderId,
   folderName,
+  onImported,
   createCardSet,
   createCard,
 }: XlsxImportDialogProps) => {
@@ -148,6 +157,12 @@ export const XlsxImportDialog = ({
         `${imported.createdCount} 件のカードをインポートしました。`,
       );
       handleClose(false);
+      onImported?.({
+        cardSetId: imported.createdCardSetId,
+        cardSetName: imported.createdCardSetName,
+        folderId: imported.folderId,
+        createdCount: imported.createdCount,
+      });
     } catch (error) {
       console.error("[XlsxImportDialog] import failed", error);
       toast.error("インポート中にエラーが発生しました。");

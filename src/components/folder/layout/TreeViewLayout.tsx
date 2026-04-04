@@ -267,6 +267,31 @@ const TreeViewLayout = ({
     setIsImportDialogOpen(true);
   }, [currentHeaderFolderId, toast]);
 
+  const handleImportCompleted = useCallback(
+    ({
+      cardSetId,
+      cardSetName,
+      folderId,
+    }: {
+      cardSetId: string;
+      cardSetName: string;
+      folderId: string;
+      createdCount: number;
+    }) => {
+      addRecent({ type: "folder", id: folderId });
+      onFolderSelect(folderId);
+      setSelectedCardSetId(cardSetId);
+      setSelectedCardSetLabel(cardSetName || "無題のセット");
+      setExplorerTab("explorer");
+
+      const query = new URLSearchParams();
+      query.set("cardSetId", cardSetId);
+      query.set("folderId", folderId);
+      navigate(createPageUrl(`CardView?${query.toString()}`));
+    },
+    [addRecent, navigate, onFolderSelect, setExplorerTab],
+  );
+
   const { isFilterActive, filteredCards, filteredDocuments, isFiltering } =
     useTreeViewFilters({
       cards,
@@ -402,6 +427,7 @@ const TreeViewLayout = ({
                 ?.folderName ?? null
             : null
         }
+        onImported={handleImportCompleted}
         createCardSet={createCardSet}
         createCard={createCard}
       />

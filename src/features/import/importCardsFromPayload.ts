@@ -125,6 +125,8 @@ export const importCardsFromPayload = async ({
 
   return {
     createdCardSetId: createdCardSet.id,
+    createdCardSetName: createdCardSet.name,
+    folderId,
     createdCount,
   };
 };
