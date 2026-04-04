@@ -207,7 +207,7 @@ const TreeViewLayout = ({
   const allTags = useMemo(() => {
     const tagNames = new Set<string>();
     cards.forEach((c) => {
-      resolveCardTagNames(c.tagIds, c.tags, tagById).forEach((t) => {
+      resolveCardTagNames(c.tagIds, tagById).forEach((t) => {
         tagNames.add(t);
       });
     });
@@ -405,3 +405,4 @@ const TreeViewLayout = ({
 };
 
 export default TreeViewLayout;
+

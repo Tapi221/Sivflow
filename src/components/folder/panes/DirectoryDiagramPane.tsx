@@ -208,7 +208,7 @@ export const DirectoryDiagramPane = ({
   const allTags = useMemo(() => {
     const tagNames = new Set<string>();
     cards.forEach((card) => {
-      resolveCardTagNames(card.tagIds, card.tags, tagById).forEach((tag) =>
+      resolveCardTagNames(card.tagIds, tagById).forEach((tag) =>
         tagNames.add(tag),
       );
     });
@@ -226,11 +226,7 @@ export const DirectoryDiagramPane = ({
     const nextCards = cards.filter((card) => {
       if (!allowCards) return false;
       if (tagFilter.length > 0) {
-        const resolvedNames = resolveCardTagNames(
-          card.tagIds,
-          card.tags,
-          tagById,
-        );
+        const resolvedNames = resolveCardTagNames(card.tagIds, tagById);
         if (resolvedNames.length === 0) return false;
         const cardTagSet = new Set(resolvedNames);
         const tagMatched =
@@ -296,7 +292,7 @@ export const DirectoryDiagramPane = ({
       const folderId = String(card.folderId || "");
       if (!folderId) continue;
       const items = itemMap.get(folderId) ?? [];
-      const cardTags = resolveCardTagNames(card.tagIds, card.tags, tagById);
+      const cardTags = resolveCardTagNames(card.tagIds, tagById);
       items.push({
         id: `card:${card.id}`,
         kind: "card",
@@ -517,3 +513,4 @@ export const DirectoryDiagramPane = ({
     </div>
   );
 };
+

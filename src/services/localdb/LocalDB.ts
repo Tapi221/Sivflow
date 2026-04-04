@@ -57,10 +57,7 @@ export type {
   LocalDBLike,
   ProjectMap,
   LocalDBTableMap,
-  SyncableEntityTable,
-  TagLegacyRecord,
-  TagV2Record,
-  TagV3Record,
+  SyncableEntityTable,  TagV3Record,
 } from "./types";
 import type { LocalDBTableMap, SyncableEntityTable } from "./types";
 
@@ -639,3 +636,4 @@ export const createLocalDBInternal = (userId?: string) => {
 
 // devtools.ts が './LocalDB' から import するため、instanceManager の関数を re-export する
 export { getLocalDb, getLocalDbSync, initializeDB, resetLocalDBForLogout };
+

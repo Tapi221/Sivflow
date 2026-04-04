@@ -373,11 +373,7 @@ export const useCardEditorSession = ({
 
       return {
         title: card.title ?? "",
-        tags: resolveCardTagNames(
-          card.tagIds,
-          (card as unknown as { tags?: unknown }).tags,
-          tagById as unknown,
-        ),
+        tags: resolveCardTagNames(card.tagIds, tagById as unknown),
         isDraft: card.isDraft ?? false,
         frontBlocks: sortBlocksByOrderIndex(getCardBlocks(card, "question")),
         backBlocks: sortBlocksByOrderIndex(getCardBlocks(card, "answer")),
@@ -972,3 +968,4 @@ export const useCardEditorSession = ({
     panelCard,
   };
 };
+

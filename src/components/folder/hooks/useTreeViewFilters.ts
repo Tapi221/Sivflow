@@ -2,7 +2,7 @@ import { resolveCardTagNames } from "@/hooks/settings/useTags";
 import type { Card, DocumentItem } from "@/types";
 import { useMemo } from "react";
 
-type TagMapLike = Parameters<typeof resolveCardTagNames>[2];
+type TagMapLike = Parameters<typeof resolveCardTagNames>[1];
 
 interface UseTreeViewFiltersParams {
   cards: Card[];
@@ -64,11 +64,7 @@ export const useTreeViewFilters = ({
       if (!allowCards) return false;
 
       if (tagFilter.length > 0) {
-        const resolvedNames = resolveCardTagNames(
-          card.tagIds,
-          card.tags,
-          tagById,
-        );
+        const resolvedNames = resolveCardTagNames(card.tagIds, tagById);
 
         if (resolvedNames.length === 0) return false;
 
@@ -128,3 +124,4 @@ export const useTreeViewFilters = ({
     isFiltering,
   };
 };
+

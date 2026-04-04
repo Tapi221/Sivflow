@@ -4,10 +4,7 @@ export type {
   CardRelation,
   LocalDBInstance,
   LocalDBLike,
-  ProjectMap,
-  TagLegacyRecord,
-  TagV2Record,
-} from "./types";
+  ProjectMap,} from "./types";
 
 export {
   getLocalDb,
@@ -31,3 +28,4 @@ export {
 
 // 本番でも読み込む。実際の機能露出は devtools 側の UID allowlist で制限する。
 import("./devtools").then((m) => m.installLocalDbDevtools());
+
