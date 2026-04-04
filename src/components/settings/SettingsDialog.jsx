@@ -414,13 +414,6 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
 
         return (
           <div className="space-y-8 animate-in fade-in duration-300">
-            <div className="flex items-center gap-3">
-              <div className="w-1.5 h-6 bg-primary-500 rounded-full shadow-sm" />
-              <h2 className="text-xl font-bold text-slate-800 tracking-wide">
-                プロフィール
-              </h2>
-            </div>
-
             {/* Profile Image Section */}
             <div className="space-y-4">
               <div className="text-sm font-bold text-slate-600">
@@ -599,35 +592,12 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
       case "tags":
         return (
           <div className="space-y-4 animate-in fade-in duration-300">
-            <div className="flex items-center gap-3">
-              <div className="h-6 w-1.5 rounded-full bg-primary-500 shadow-sm" />
-              <div>
-                <h2 className="text-xl font-bold tracking-wide text-slate-800">
-                  タグ管理
-                </h2>
-                <p className="mt-1 text-xs text-slate-500">
-                  タグの色、カテゴリ、リネーム、マージ、削除をここで一元管理します。
-                </p>
-              </div>
-            </div>
             <TagManagerPanel />
           </div>
         );
       case "voice":
         return (
           <div className="space-y-8 animate-in fade-in duration-300">
-            <div className="flex items-center gap-3">
-              <div className="w-1.5 h-6 bg-primary-500 rounded-full shadow-sm" />
-              <div className="space-y-1">
-                <h2 className="text-xl font-bold text-slate-800 tracking-wide">
-                  音声設定
-                </h2>
-                <p className="text-sm text-slate-500">
-                  学習時の自動音声再生を管理します
-                </p>
-              </div>
-            </div>
-
             <div className="space-y-3">
               <div className="bg-white/58 border border-slate-200/70 p-4 rounded-xl flex items-center justify-between gap-4 shadow-sm backdrop-blur-sm hover:bg-white/66 hover:border-slate-200/80 transition-colors">
                 <div>
@@ -690,18 +660,6 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
       case "study":
         return (
           <div className="space-y-8 animate-in fade-in duration-300">
-            <div className="flex items-center gap-3">
-              <div className="w-1.5 h-6 bg-primary-500 rounded-full shadow-sm" />
-              <div className="space-y-1">
-                <h2 className="text-xl font-bold text-slate-800 tracking-wide">
-                  学習設定
-                </h2>
-                <p className="text-sm text-slate-500">
-                  学習カードの表示や挙動を管理します
-                </p>
-              </div>
-            </div>
-
             <div className="space-y-5">
               <div className="space-y-4">
                 <div className="flex items-center justify-between pt-1">
@@ -1042,16 +1000,6 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
       case "theme":
         return (
           <div className="space-y-8 animate-in fade-in duration-300">
-            <div className="flex items-center gap-3">
-              <div className="w-1.5 h-6 bg-primary-500 rounded-full shadow-sm" />
-              <div className="space-y-1">
-                <h2 className="text-xl font-bold text-slate-800 tracking-wide">
-                  表示設定
-                </h2>
-                <p className="text-sm text-slate-500">ライトモード固定です</p>
-              </div>
-            </div>
-
             <div className="space-y-6">
               <div className="space-y-4">
                 <div className="text-sm font-bold text-slate-600">
@@ -1144,13 +1092,6 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
       case "sync":
         return (
           <div className="space-y-6 animate-in fade-in duration-300">
-            <div className="flex items-center gap-3">
-              <div className="w-1.5 h-6 bg-primary-400 rounded-full shadow-[0_0_10px_rgba(123,172,170,0.5)]" />
-              <h2 className="text-xl font-bold text-white tracking-wide">
-                同期設定
-              </h2>
-            </div>
-
             {/* Status Card */}
             <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
               <div className="flex items-center justify-between mb-4">
@@ -1324,18 +1265,6 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
 
             {/* Device & Storage Management */}
             <div className="space-y-8 animate-in fade-in duration-300">
-              <div className="flex items-center gap-3">
-                <div className="w-1.5 h-6 bg-primary-500 rounded-full shadow-sm" />
-                <div className="space-y-1">
-                  <h2 className="text-xl font-bold text-slate-800 tracking-wide">
-                    同期・データ管理
-                  </h2>
-                  <p className="text-sm text-slate-500">
-                    外部サービスとの連携やバックアップを管理します
-                  </p>
-                </div>
-              </div>
-
               <div className="space-y-6">
                 {/* Cloud Sync Status */}
                 <div
@@ -1398,35 +1327,12 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
       case "data":
         return (
           <div className="space-y-8 animate-in fade-in duration-300">
-            <div className="flex items-center gap-3">
-              <div className="w-1.5 h-6 bg-primary-400 rounded-full shadow-[0_0_10px_rgba(123,172,170,0.5)]" />
-              <div className="space-y-1">
-                <h2 className="text-xl font-bold text-white tracking-wide">
-                  データ管理
-                </h2>
-                <p className="text-sm text-slate-400">
-                  データのバックアップや修復を行います
-                </p>
-              </div>
-            </div>
             <DataRescuePanel />
           </div>
         );
       case "shortcut":
         return (
           <div className="space-y-8 animate-in fade-in duration-300">
-            <div className="flex items-center gap-3">
-              <div className="w-1.5 h-6 bg-primary-400 rounded-full shadow-[0_0_10px_rgba(123,172,170,0.5)]" />
-              <div className="space-y-1">
-                <h2 className="text-xl font-bold text-slate-800 tracking-wide">
-                  ショートカット
-                </h2>
-                <p className="text-sm text-slate-500">
-                  アプリ内で利用可能なキーボードショートカット一覧です
-                </p>
-              </div>
-            </div>
-
             <div className="space-y-6">
               {[
                 {
