@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { useToast } from "@/contexts/ToastContext";
-import { importCardsFromPayload } from "@/features/import/importCardsFromPayload";
+import {
+  buildImportCardSetName,
+  importCardsFromPayload,
+} from "@/features/import/importCardsFromPayload";
 import {
   formatImportCellLabel,
   hasImportBlockingError,
@@ -77,6 +80,7 @@ export const XlsxImportDialog = ({
 }: XlsxImportDialogProps) => {
   const toast = useToast();
   const [destinationMode, setDestinationMode] = useState<"new" | "existing">("new");
+  const [newCardSetName, setNewCardSetName] = useState("");
   const [selectedCardSetId, setSelectedCardSetId] = useState("");
   const [state, setState] = useState(emptyState);
   const [isParsing, setIsParsing] = useState(false);
@@ -114,6 +118,7 @@ export const XlsxImportDialog = ({
       setIsParsing(false);
       setIsImporting(false);
       setDestinationMode("new");
+      setNewCardSetName("");
       setSelectedCardSetId(cardSets[0]?.id ?? "");
     }
 
@@ -144,6 +149,9 @@ export const XlsxImportDialog = ({
         file,
         result,
       });
+      setNewCardSetName(
+        (current) => current.trim() || buildImportCardSetName(file.name),
+      );
     } catch (error) {
       console.error("[XlsxImportDialog] parse failed", error);
       toast.error("XLSX の解析に失敗しました。ファイル形式を確認してください。");
@@ -173,6 +181,11 @@ export const XlsxImportDialog = ({
       return;
     }
 
+    if (destinationMode === "new" && newCardSetName.trim() === "") {
+      toast.error("新規カードセット名を入力してください。");
+      return;
+    }
+
     if (destinationMode === "existing" && !selectedExistingCardSet) {
       toast.error("追加先のカードセットを選択してください。");
       return;
@@ -185,7 +198,7 @@ export const XlsxImportDialog = ({
             cardSetId: selectedExistingCardSet.id,
             cardSetName: selectedExistingCardSet.name,
           }
-        : { kind: "new-card-set" as const };
+        : { kind: "new-card-set" as const, cardSetName: newCardSetName.trim() };
 
     setIsImporting(true);
 
@@ -272,6 +285,15 @@ export const XlsxImportDialog = ({
                   </SelectContent>
                 </Select>
 
+                {destinationMode === "new" ? (
+                  <Input
+                    value={newCardSetName}
+                    onChange={(event) => setNewCardSetName(event.target.value)}
+                    placeholder="新規カードセット名"
+                    disabled={isParsing || isImporting}
+                  />
+                ) : null}
+
                 {destinationMode === "existing" ? (
                   <Select
                     value={selectedCardSetId}
@@ -314,7 +336,7 @@ export const XlsxImportDialog = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
             <div className="rounded-xl border border-slate-200 p-3">
               <p className="text-xs text-slate-500">ファイル</p>
               <p className="mt-1 text-sm font-medium text-slate-800">
@@ -332,7 +354,7 @@ export const XlsxImportDialog = ({
               <p className="mt-1 text-sm font-medium text-slate-800">
                 {destinationMode === "existing"
                   ? selectedExistingCardSet?.name?.trim() || "未選択"
-                  : "新規カードセット"}
+                  : newCardSetName.trim() || "未入力"}
               </p>
             </div>
             <div className="rounded-xl border border-slate-200 p-3">
@@ -420,6 +442,7 @@ export const XlsxImportDialog = ({
               isParsing ||
               isImporting ||
               !state.result?.payload ||
+              (destinationMode === "new" && newCardSetName.trim() === "") ||
               hasImportBlockingError(state.result)
             }
           >

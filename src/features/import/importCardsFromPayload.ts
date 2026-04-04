@@ -21,6 +21,7 @@ type CreateCard = (
 export type ImportDestination =
   | {
       kind: "new-card-set";
+      cardSetName?: string;
     }
   | {
       kind: "existing-card-set";
@@ -37,7 +38,7 @@ type ImportCardsFromPayloadParams = {
   destination: ImportDestination;
 };
 
-const buildImportCardSetName = (fileName: string) => {
+export const buildImportCardSetName = (fileName: string) => {
   const baseName = fileName.replace(/\.xlsx$/i, "").trim();
   const dateLabel = new Intl.DateTimeFormat("ja-JP", {
     year: "numeric",
@@ -116,7 +117,10 @@ export const importCardsFromPayload = async ({
           id: destination.cardSetId,
           name: destination.cardSetName,
         }
-      : await createCardSet(buildImportCardSetName(fileName), folderId);
+      : await createCardSet(
+          destination.cardSetName?.trim() || buildImportCardSetName(fileName),
+          folderId,
+        );
 
   let createdCount = 0;
 
