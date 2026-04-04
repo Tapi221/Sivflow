@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { useLocalImageBlobUrl } from "@/hooks/image/useLocalImageBlobUrl";
 import { webClipboardAdapter } from "@/platform/clipboard/webClipboardAdapter";
+import { webFileExportAdapter } from "@/platform/file-export/webFileExportAdapter";
 import { storage } from "@/services/firebase";
 import { getCachedRemoteUrl } from "@/services/imagePreloadCache";
 import { getLocalDb } from "@/services/localDB";
@@ -366,7 +367,10 @@ export const ImageGallery = ({
 
   const handleImageError = (index: number) => {
     setFailedImages((prev) => new Set(prev).add(index));
-    console.error(`Image load failed at index ${index}:`, resolvedItems[index]?.url);
+    console.error(
+      `Image load failed at index ${index}:`,
+      resolvedItems[index]?.url,
+    );
   };
 
   const copyImage = React.useCallback(async (imageUrl: string) => {
@@ -538,7 +542,8 @@ export const ImageGallery = ({
                   </Button>
                 </div>
               </>
-            ) : item.localFileId && pendingLocalFileIds.has(item.localFileId) ? (
+            ) : item.localFileId &&
+              pendingLocalFileIds.has(item.localFileId) ? (
               <div className="w-full h-48 bg-slate-100 flex items-center justify-center text-slate-400">
                 <div className="w-6 h-6 border-2 border-slate-300 border-t-slate-400 rounded-full animate-spin" />
               </div>

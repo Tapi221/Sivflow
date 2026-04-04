@@ -1,34 +1,22 @@
-// ルーティングに必要なコンポーネント・フックを react-router-dom から読み込み
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-// React 本体からサスペンス（遅延読み込み用）、lazy（動的 import）、状態管理・副作用フック
-import { Suspense, lazy, useState, useEffect } from "react";
-// 認証状態をアプリ全体に配るコンテキスト
-import { AuthProvider } from "./contexts/AuthContext";
-// トースト（画面右上などに出る通知）を配るコンテキスト
-import { ToastProvider } from "./contexts/ToastContext";
-// 通知用の Provider（多分リアルタイム通知など）
-import { NotificationProvider } from "./components/notifications/NotificationProvider";
-// 認証状態を取得するためのカスタムフック
-import { useAuthSession } from "./contexts/auth/AuthSessionContext";
-// 画面の共通レイアウトコンポーネント（ヘッダーやサイドバーなど）
-import Layout from "./Layout";
-// 自動バックアップ関連のサービス
-import { autoBackupService } from "./services/AutoBackupService";
-// データ整合性チェックのサービス
-import { dataIntegrityService } from "./services/DataIntegrityService";
-import { sanitizeForLog } from "@/utils/logSanitizer";
-// 同期の進捗などを扱うカスタムフック
-import { useSync } from "./hooks/sync/useSync";
-// アカウントロック時に表示する画面
-import { AccountLockedScreen } from "./components/security/AccountLockedScreen";
-// 同期サービスを生成するファクトリ
-import { SyncServiceFactory } from "./services/SyncServiceFactory";
-// 機能フラグ（Feature Flag）管理
-import { flags } from "./features/flags";
-import { DEV_MODE, isLocalHost } from "./utils/envGuards";
-import { signInWithGoogle } from "./services/auth/googleSignIn";
 import { ThemeManager } from "@/components/common/ThemeManager";
 import { BreadcrumbProvider } from "@/contexts/BreadcrumbContext";
+import { BlockNoteSandboxPage } from "@/sandbox/blocknote";
+import { sanitizeForLog } from "@/utils/logSanitizer";
+import { Suspense, lazy, useEffect, useState } from "react";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { NotificationProvider } from "./components/notifications/NotificationProvider";
+import { AccountLockedScreen } from "./components/security/AccountLockedScreen";
+import { useAuthSession } from "./contexts/auth/AuthSessionContext";
+import { AuthProvider } from "./contexts/AuthContext";
+import { ToastProvider } from "./contexts/ToastContext";
+import { flags } from "./features/flags";
+import { useSync } from "./hooks/sync/useSync";
+import Layout from "./Layout";
+import { signInWithGoogle } from "./services/auth/googleSignIn";
+import { autoBackupService } from "./services/AutoBackupService";
+import { dataIntegrityService } from "./services/DataIntegrityService";
+import { SyncServiceFactory } from "./services/SyncServiceFactory";
+import { DEV_MODE, isLocalHost } from "./utils/envGuards";
 
 // ===== ページコンポーネントを遅延読み込み（コード分割） =====
 // 初回ロードを軽くするために、各ページを lazy で動的 import する
@@ -361,7 +349,6 @@ const AppContent = () => {
         >
           {/* "/" にアクセスされたら "/folders" にリダイレクト */}
           <Route index element={<DefaultRedirect />} />
-
           {/* フォルダ一覧 */}
           <Route
             path="folders"
@@ -371,13 +358,13 @@ const AppContent = () => {
               </Suspense>
             }
           />
-
           {/* 以降はページごとのルート */}
           <Route path="CardEdit" element={<CardEdit />} />
           <Route path="CardView" element={<CardView />} />
           <Route path="study" element={<StudyMode />} />
           <Route path="calendar" element={<Calendar />} />
-
+          `r`n{" "}
+          <Route path="sandbox/blocknote" element={<BlockNoteSandboxPage />} />
           {/* ギャラリーなど、重そうなページは Suspense でラップ */}
           <Route
             path="gallery"
@@ -387,7 +374,6 @@ const AppContent = () => {
               </Suspense>
             }
           />
-
           <Route path="trash" element={<Trash />} />
           <Route
             path="directory"
@@ -397,7 +383,6 @@ const AppContent = () => {
               </Suspense>
             }
           />
-
           <Route
             path="diagnostics"
             element={
@@ -406,7 +391,6 @@ const AppContent = () => {
               </Suspense>
             }
           />
-
           <Route
             path="create-mode/placeholder"
             element={
@@ -415,7 +399,6 @@ const AppContent = () => {
               </Suspense>
             }
           />
-
           <Route
             path="one-qa-mode"
             element={
@@ -424,7 +407,6 @@ const AppContent = () => {
               </Suspense>
             }
           />
-
           <Route
             path="pair-mode"
             element={
@@ -433,7 +415,6 @@ const AppContent = () => {
               </Suspense>
             }
           />
-
           <Route
             path="four-choice-mode"
             element={
@@ -442,7 +423,6 @@ const AppContent = () => {
               </Suspense>
             }
           />
-
           {PdfScrollTest ? (
             <Route
               path="pdf-scroll-test"
@@ -453,7 +433,6 @@ const AppContent = () => {
               }
             />
           ) : null}
-
           {CodeBlockVisualTest ? (
             <Route
               path="codeblock-visual-test"
@@ -464,7 +443,6 @@ const AppContent = () => {
               }
             />
           ) : null}
-
           {CardLayoutConsistencyTest ? (
             <Route
               path="card-layout-test"
