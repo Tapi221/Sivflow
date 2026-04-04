@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { useLocalImageBlobUrl } from "@/hooks/image/useLocalImageBlobUrl";
 import { webClipboardAdapter } from "@/platform/clipboard/webClipboardAdapter";
-import { webFileExportAdapter } from "@/platform/file-export/webFileExportAdapter";
 import { storage } from "@/services/firebase";
 import { getCachedRemoteUrl } from "@/services/imagePreloadCache";
 import { getLocalDb } from "@/services/localDB";

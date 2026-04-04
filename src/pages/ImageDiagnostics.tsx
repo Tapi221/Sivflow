@@ -5,7 +5,6 @@ import {
   getDocs,
   limit,
   query,
-  where,
   doc,
   getDoc,
 } from "firebase/firestore";
