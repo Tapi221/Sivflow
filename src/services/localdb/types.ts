@@ -38,26 +38,11 @@ export type ProjectMap = {
   [key: string]: unknown;
 };
 
-export type TagLegacyRecord = {
-  name: string;
-  color: string;
-  userId: string;
-  rootFolderId: string;
-  updatedAt: Date;
-};
-
-export type TagV2Record = TagLegacyRecord & {
-  id?: string;
-  categoryId?: string;
-  parentId?: string;
-};
-
 /** tags_v3 のレコード型（id が主体） */
 export type TagV3Record = {
   id: string;
   name: string;
   nameLower: string;
-  // legacy互換で string のまま。保存値は colorKey を想定。
   color: string;
   userId: string;
   updatedAt: Date;

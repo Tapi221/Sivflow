@@ -12,23 +12,20 @@ import {
 } from "@/lib/tags/tagColor";
 
 export type TagCategory = string;
-
-/** useTags が外部に公開する Tag 型（TagV3Record と同じ形、nullable なし） */
 export type Tag = TagV3Record;
 
-// cards テーブルの型がここでは分からないので、必要最小限だけ扱う
 type CardTagFields = {
   userId?: string;
-  tags?: unknown;
   tagIds?: unknown;
   updatedAt?: Date;
 };
 
 export const DEFAULT_TAG_COLOR_KEYS: TagColorKey[] = [...TAG_COLOR_KEYS];
-// 互換用。将来削除予定。
+
 const genId = (): string => {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto)
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return crypto.randomUUID();
+  }
   return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
 };
 
@@ -36,21 +33,23 @@ const genCategoryId = (): string => `cat_${genId()}`;
 
 const MAX_PATH_DEPTH = 12;
 
-/** "/" 区切りのパス文字列をセグメント配列に変換する純関数 */
 const parseTagPath = (pathStr: string): string[] | { error: string } => {
   const segments = pathStr
     .split("/")
     .map((s) => s.trim())
     .filter((s) => s.length > 0);
+
   if (segments.length === 0) return { error: "パスを入力してください。" };
-  if (segments.length > MAX_PATH_DEPTH)
+  if (segments.length > MAX_PATH_DEPTH) {
     return { error: `パスの深さは最大 ${MAX_PATH_DEPTH} です。` };
+  }
+
   return segments;
 };
 
-const asStringArray = (v: unknown): string[] => {
-  if (!Array.isArray(v)) return [];
-  return v.filter((x): x is string => typeof x === "string");
+const asStringArray = (value: unknown): string[] => {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item): item is string => typeof item === "string");
 };
 
 const getCardTagIds = (card: Pick<CardTagFields, "tagIds">): string[] =>
@@ -66,24 +65,18 @@ type TagRepairSummary = {
   }>;
 };
 
-/**
- * tagIds → タグ名に解決。tagIds が空なら legacy card.tags にフォールバック。
- * pure utility: フックの外でも呼べる。
- */
 export const resolveCardTagNames = (
   tagIds: unknown,
-  legacyTags: unknown,
   tagById: ReadonlyMap<string, Pick<TagV3Record, "name">>,
-) => {
+): string[] => {
   const ids = asStringArray(tagIds);
-  if (ids.length > 0) {
-    const names = ids.map((id) => tagById.get(id)?.name ?? "").filter((n) => n);
-    if (names.length > 0) return names;
-  }
-  return asStringArray(legacyTags);
+  if (ids.length === 0) return [];
+  return ids.map((id) => tagById.get(id)?.name ?? "").filter((name) => name);
 };
 
-export const auditAndRepairTags = async (userId: string) => {
+export const auditAndRepairTags = async (
+  userId: string,
+): Promise<TagRepairSummary> => {
   const db = await getLocalDb(userId);
   const tagIdsByNameLower = new Map<string, string[]>();
   const knownTagIds = new Set<string>();
@@ -100,13 +93,17 @@ export const auditAndRepairTags = async (userId: string) => {
           userId?: unknown;
           nameLower?: unknown;
         };
+
         if (
           typeof tag.id !== "string" ||
           typeof tag.userId !== "string" ||
           typeof tag.nameLower !== "string"
-        )
+        ) {
           return;
+        }
+
         knownTagIds.add(tag.id);
+
         const key = `${tag.userId}__${tag.nameLower}`;
         const existing = tagIdsByNameLower.get(key);
         if (existing) existing.push(tag.id);
@@ -131,16 +128,19 @@ export const auditAndRepairTags = async (userId: string) => {
             changed = true;
             continue;
           }
+
           if (seen.has(tagId)) {
             dedupedTagRefs += 1;
             changed = true;
             continue;
           }
+
           seen.add(tagId);
           nextTagIds.push(tagId);
         }
 
         if (!changed) return;
+
         card.tagIds = nextTagIds;
         card.updatedAt = new Date();
       });
@@ -151,6 +151,7 @@ export const auditAndRepairTags = async (userId: string) => {
     nameLower: string;
     tagIds: string[];
   }> = [];
+
   for (const [key, tagIds] of tagIdsByNameLower.entries()) {
     if (tagIds.length < 2) continue;
     const separatorIndex = key.indexOf("__");
@@ -164,13 +165,6 @@ export const auditAndRepairTags = async (userId: string) => {
   return { removedOrphanTagRefs, dedupedTagRefs, duplicateNameLowerPairs };
 };
 
-/**
- * useTags: ユーザー単位で共通管理されるタグを操作するフック
- *
- * ✅ tags_v3 (id 主体) を読み書きする。
- * ✅ 互換: card.tags(string[]) と card.tagIds(string[]) 両対応
- * ✅ tags_v2 が存在する環境でも migration 後は tags_v3 を使う
- */
 export const useTags = () => {
   const { currentUser } = useAuthSession();
   const { settings, updateSettings } = useUserSettings();
@@ -184,41 +178,44 @@ export const useTags = () => {
     [currentUser],
     [] as Tag[],
   );
+
   const tags = (rawTags ?? []).map((tag) => ({
     ...tag,
-    // legacy互換: 読み取り時は常に colorKey として扱う
     color: normalizeTagColorKey(tag.color),
   }));
 
   const tagByName = useMemo(() => {
     const map = new Map<string, Tag>();
-    for (const t of tags) map.set(t.name, t);
+    for (const tag of tags) map.set(tag.name, tag);
     return map;
   }, [tags]);
 
   const tagByNameLower = useMemo(() => {
     const map = new Map<string, Tag>();
-    for (const t of tags) map.set(t.nameLower, t);
+    for (const tag of tags) map.set(tag.nameLower, tag);
     return map;
   }, [tags]);
 
   const tagById = useMemo(() => {
     const map = new Map<string, Tag>();
-    for (const t of tags) map.set(t.id, t);
+    for (const tag of tags) map.set(tag.id, tag);
     return map;
   }, [tags]);
 
   const getTagChildrenMap = (): Map<string | null, Tag[]> => {
     const childrenMap = new Map<string | null, Tag[]>();
+
     for (const tag of tags) {
       const parentId =
         typeof tag.parentId === "string" && tagById.has(tag.parentId)
           ? tag.parentId
           : null;
+
       const siblings = childrenMap.get(parentId) ?? [];
       siblings.push(tag);
       childrenMap.set(parentId, siblings);
     }
+
     return childrenMap;
   };
 
@@ -229,11 +226,13 @@ export const useTags = () => {
 
   const categoryIdsInUse = useMemo(() => {
     const ids = new Set<string>();
+
     for (const tag of tags) {
       if (typeof tag.categoryId === "string" && tag.categoryId.trim()) {
         ids.add(tag.categoryId);
       }
     }
+
     return Array.from(ids).sort((left, right) => {
       const leftName = (categoryNameMap[left] ?? left).trim();
       const rightName = (categoryNameMap[right] ?? right).trim();
@@ -241,38 +240,28 @@ export const useTags = () => {
     });
   }, [categoryNameMap, tags]);
 
-  const resolveTagByNameOrId = (tagNameOrId: string): Tag | undefined => {
-    return (
-      tagByName.get(tagNameOrId) ??
-      tagByNameLower.get(tagNameOrId.toLowerCase()) ??
-      tagById.get(tagNameOrId)
-    );
-  };
+  const resolveTagByNameOrId = (tagNameOrId: string): Tag | undefined =>
+    tagByName.get(tagNameOrId) ??
+    tagByNameLower.get(tagNameOrId.toLowerCase()) ??
+    tagById.get(tagNameOrId);
 
   const getTagColorKey = (tagNameOrId: string): TagColorKey => {
     const storedColor = resolveTagByNameOrId(tagNameOrId)?.color;
     return normalizeTagColorKey(storedColor);
   };
 
-  const getTagColorClassName = (tagNameOrId: string): string => {
-    return resolveTagColorClassName(getTagColorKey(tagNameOrId));
-  };
+  const getTagColorClassName = (tagNameOrId: string): string =>
+    resolveTagColorClassName(getTagColorKey(tagNameOrId));
 
-  /** name または id で色クラスを返す（UI互換） */
-  const getTagColor = (tagNameOrId: string): string => {
-    return getTagColorClassName(tagNameOrId);
-  };
+  const getTagColor = (tagNameOrId: string): string =>
+    getTagColorClassName(tagNameOrId);
 
-  const getTagIdByName = (tagName: string): string | null => {
-    return (
-      (tagByName.get(tagName) ?? tagByNameLower.get(tagName.toLowerCase()))
-        ?.id ?? null
-    );
-  };
+  const getTagIdByName = (tagName: string): string | null =>
+    (tagByName.get(tagName) ?? tagByNameLower.get(tagName.toLowerCase()))?.id ??
+    null;
 
-  const getTagNameById = (tagId: string): string | null => {
-    return tagById.get(tagId)?.name ?? null;
-  };
+  const getTagNameById = (tagId: string): string | null =>
+    tagById.get(tagId)?.name ?? null;
 
   const getCategoryName = (categoryId: string): string => {
     const displayName = categoryNameMap[categoryId];
@@ -286,6 +275,7 @@ export const useTags = () => {
     name: string,
   ): Promise<void> => {
     if (!currentUser) return;
+
     await updateSettings({
       tagCategoryDisplayNames: {
         ...categoryNameMap,
@@ -296,9 +286,12 @@ export const useTags = () => {
 
   const ensureCategory = async (displayName?: string): Promise<string> => {
     if (!currentUser) throw new Error("not authenticated");
+
     const categoryId = genCategoryId();
     const resolvedName = displayName?.trim() || "新しいカテゴリ";
+
     await setCategoryName(categoryId, resolvedName);
+
     return categoryId;
   };
 
@@ -307,11 +300,13 @@ export const useTags = () => {
     categoryId: string | null,
   ): Promise<void> => {
     if (!currentUser) return;
+
     const db = await getLocalDb(currentUser.uid);
     const nextCategoryId =
       typeof categoryId === "string" && categoryId.trim()
         ? categoryId
         : undefined;
+
     await db.transaction("rw", db.tags_v3, async () => {
       await db.tags_v3.update(tagId, {
         categoryId: nextCategoryId,
@@ -325,14 +320,17 @@ export const useTags = () => {
     parentId: string | null,
   ): Promise<void | { error: string }> => {
     if (!currentUser) return { error: "ログイン状態を確認してください。" };
+
     const tag = tagById.get(tagId);
     if (!tag) return { error: "対象のタグが見つかりません。" };
 
     const normalizedParentId =
       typeof parentId === "string" && parentId.trim() ? parentId : undefined;
+
     if (normalizedParentId === tagId) {
       return { error: "自分自身を親にはできません。" };
     }
+
     if (normalizedParentId && !tagById.has(normalizedParentId)) {
       return { error: "親タグが見つかりません。" };
     }
@@ -356,93 +354,68 @@ export const useTags = () => {
 
   const getTagUsageCount = async (nameOrId: string): Promise<number> => {
     if (!currentUser) return 0;
-    const db = await getLocalDb(currentUser.uid);
 
-    // nameOrId が id なら直接、そうでなければ名前解決
+    const db = await getLocalDb(currentUser.uid);
     const tagId = tagById.has(nameOrId)
       ? nameOrId
       : (getTagIdByName(nameOrId) ?? null);
-    const tagName = tagId ? (tagById.get(tagId)?.name ?? nameOrId) : nameOrId;
-    let indexedCount = 0;
 
-    if (tagId) {
-      // multiEntry index (*tagIds) を使った高速カウント（userId でフィルタ）
-      try {
-        indexedCount = await db.cards
-          .where("tagIds")
-          .equals(tagId)
-          .and((card) => card.userId === currentUser.uid)
-          .count();
-      } catch {
-        indexedCount = -1;
-      }
-    }
+    if (!tagId) return 0;
 
-    if (indexedCount >= 0) {
-      let legacyOnlyCount = 0;
+    try {
+      return await db.cards
+        .where("tagIds")
+        .equals(tagId)
+        .and((card) => card.userId === currentUser.uid)
+        .count();
+    } catch {
+      let count = 0;
       await db.cards
         .where("userId")
         .equals(currentUser.uid)
         .each((raw: unknown) => {
           const card = raw as CardTagFields;
           const idTags = asStringArray(card.tagIds);
-          if (idTags.length > 0) return;
-          const nameTags = asStringArray(card.tags);
-          if (nameTags.includes(tagName)) legacyOnlyCount += 1;
+          if (idTags.includes(tagId)) count += 1;
         });
-      return indexedCount + legacyOnlyCount;
+      return count;
     }
-
-    // フォールバック: 全件走査（legacy card.tags も考慮）
-    let count = 0;
-    await db.cards
-      .where("userId")
-      .equals(currentUser.uid)
-      .each((raw: unknown) => {
-        const card = raw as CardTagFields;
-        const nameTags = asStringArray(card.tags);
-        const idTags = asStringArray(card.tagIds);
-        const hitByName = nameTags.includes(tagName);
-        const hitById = tagId ? idTags.includes(tagId) : false;
-        if (hitByName || hitById) count += 1;
-      });
-    return count;
   };
 
-  /**
-   * タグを追加または取得。
-   * nameLower が既存なら color だけ更新（重複作成しない）
-   */
   const addTag = async (
     name: string,
     color: string = DEFAULT_TAG_COLOR_KEYS[0],
     categoryId?: TagCategory,
     parentId?: string,
   ): Promise<Tag> => {
-    const db = await getLocalDb(currentUser.uid);
     if (!currentUser) throw new Error("not authenticated");
 
+    const db = await getLocalDb(currentUser.uid);
     const nameLower = name.toLowerCase();
     const normalizedColor = normalizeTagColorKey(color);
 
-    // 既存チェック（idempotent）
     const existing = await db.tags_v3
       .where("[userId+nameLower]")
       .equals([currentUser.uid, nameLower])
       .first();
 
     if (existing) {
-      // color/categoryId に差分があれば更新
       const patch: Partial<Tag> = {};
+
       if (existing.color !== normalizedColor) patch.color = normalizedColor;
-      if (categoryId && existing.categoryId !== categoryId)
+      if (categoryId && existing.categoryId !== categoryId) {
         patch.categoryId = categoryId;
-      if (parentId && existing.parentId !== parentId) patch.parentId = parentId;
+      }
+      if (parentId && existing.parentId !== parentId) {
+        patch.parentId = parentId;
+      }
+
       if (Object.keys(patch).length > 0) {
         patch.updatedAt = new Date();
         await db.tags_v3.update(existing.id, patch);
         return { ...existing, ...patch };
       }
+
       return existing;
     }
 
@@ -450,25 +423,22 @@ export const useTags = () => {
       id: genId(),
       name,
       nameLower,
-      // color は colorKey を保存する
       color: normalizedColor,
       userId: currentUser.uid,
       updatedAt: new Date(),
       ...(categoryId ? { categoryId } : {}),
       ...(parentId ? { parentId } : {}),
     };
+
     await db.tags_v3.add(newTag);
     return newTag;
   };
 
-  /**
-   * パス文字列で指定された階層を辿り、必要な中間タグを自動生成して末端 tagId を返す。
-   * 同じ親の下に同名タグが存在する場合は再利用（重複作成しない）。
-   */
   const ensurePathExists = async (
     fullPath: string,
   ): Promise<{ leafTagId: string } | { error: string }> => {
     if (!currentUser) return { error: "ログイン状態を確認してください。" };
+
     const parsed = parseTagPath(fullPath);
     if ("error" in parsed) return parsed;
 
@@ -483,8 +453,8 @@ export const useTags = () => {
         .equals([currentUser.uid, nameLower])
         .toArray();
 
-      const existing = candidates.find((t) =>
-        parentId === undefined ? !t.parentId : t.parentId === parentId,
+      const existing = candidates.find((tag) =>
+        parentId === undefined ? !tag.parentId : tag.parentId === parentId,
       );
 
       if (existing) {
@@ -500,6 +470,7 @@ export const useTags = () => {
           updatedAt: new Date(),
           ...(parentId ? { parentId } : {}),
         };
+
         await db.tags_v3.add(newTag);
         lastTagId = newTag.id;
         parentId = newTag.id;
@@ -510,18 +481,13 @@ export const useTags = () => {
     return { leafTagId: lastTagId };
   };
 
-  /**
-   * 選択中タグを parentPath で指定した親の下に移動する。
-   * parentPath が空ならルートに戻す。中間タグは自動生成。
-   * 循環チェックはローカルマップ（tagById + 新規生成分）で行う。
-   */
   const moveSelectedTagToPath = async (
     tagId: string,
     parentPath: string,
   ): Promise<void | { error: string }> => {
     if (!currentUser) return { error: "ログイン状態を確認してください。" };
-    const trimmed = parentPath.trim();
 
+    const trimmed = parentPath.trim();
     if (!trimmed) {
       return setTagParent(tagId, null);
     }
@@ -530,7 +496,6 @@ export const useTags = () => {
     if ("error" in parsed) return parsed;
 
     const db = await getLocalDb(currentUser.uid);
-    // tagById は live query 由来なので新規作成分を手動で追跡する
     const localMap = new Map<string, Pick<Tag, "parentId">>(tagById);
     let parentId: string | undefined = undefined;
 
@@ -541,8 +506,8 @@ export const useTags = () => {
         .equals([currentUser.uid, nameLower])
         .toArray();
 
-      const existing = candidates.find((t) =>
-        parentId === undefined ? !t.parentId : t.parentId === parentId,
+      const existing = candidates.find((tag) =>
+        parentId === undefined ? !tag.parentId : tag.parentId === parentId,
       );
 
       if (existing) {
@@ -558,6 +523,7 @@ export const useTags = () => {
           updatedAt: new Date(),
           ...(parentId ? { parentId } : {}),
         };
+
         await db.tags_v3.add(newTag);
         localMap.set(newTag.id, newTag);
         parentId = newTag.id;
@@ -566,17 +532,18 @@ export const useTags = () => {
 
     const finalParentId = parentId;
     if (!finalParentId) return { error: "親パスが解決できませんでした。" };
-    if (finalParentId === tagId)
+    if (finalParentId === tagId) {
       return { error: "自分自身を親にはできません。" };
+    }
 
-    // 循環チェック（localMap を使って ancestor chain を辿る）
     const visited = new Set<string>();
-    let cur: string | undefined = finalParentId;
-    while (cur) {
-      if (visited.has(cur)) break;
-      if (cur === tagId) return { error: "循環は禁止です。" };
-      visited.add(cur);
-      cur = localMap.get(cur)?.parentId;
+    let current: string | undefined = finalParentId;
+
+    while (current) {
+      if (visited.has(current)) break;
+      if (current === tagId) return { error: "循環は禁止です。" };
+      visited.add(current);
+      current = localMap.get(current)?.parentId;
     }
 
     await db.tags_v3.update(tagId, {
@@ -585,14 +552,11 @@ export const useTags = () => {
     });
   };
 
-  /**
-   * tagId のルートから葉までのパス文字列を返す（例: "JavaScript/DOM/innerHTML"）。
-   * 循環混入時は visited で打ち切り。
-   */
   const getTagPathString = (tagId: string): string => {
     const segments: string[] = [];
     const visited = new Set<string>();
     let currentId: string | undefined = tagId;
+
     while (currentId && !visited.has(currentId)) {
       visited.add(currentId);
       const tag = tagById.get(currentId);
@@ -600,23 +564,22 @@ export const useTags = () => {
       segments.unshift(tag.name);
       currentId = tag.parentId;
     }
+
     return segments.join("/");
   };
 
-  /**
-   * タグ名変更。nameLower が既存の別タグと重複する場合はエラーを返す（マージは行わない）。
-   * カード更新は不要（tagIds参照のため）。
-   */
   const renameTag = async (
     tagId: string,
     newName: string,
   ): Promise<void | { error: string }> => {
     if (!currentUser) return { error: "ログイン状態を確認してください。" };
+
     const tag = tagById.get(tagId);
     if (!tag) return { error: "対象のタグが見つかりません。" };
 
     const trimmedName = newName.trim();
     if (!trimmedName) return { error: "タグ名を入力してください。" };
+
     const newNameLower = trimmedName.toLowerCase();
     const db = await getLocalDb(currentUser.uid);
 
@@ -625,8 +588,10 @@ export const useTags = () => {
         .where("[userId+nameLower]")
         .equals([currentUser.uid, newNameLower])
         .first();
-      if (existing && existing.id !== tagId)
+
+      if (existing && existing.id !== tagId) {
         return { error: `「${trimmedName}」はすでに存在します。` };
+      }
     }
 
     await db.tags_v3.update(tagId, {
@@ -636,22 +601,22 @@ export const useTags = () => {
     });
   };
 
-  /**
-   * タグマージ: fromTagId を intoTagId に統合。
-   * cards.tagIds を走査し fromTagId → intoTagId に置換（modify で全件ロード回避）。
-   * fromTagId を tags_v3 から削除。重複 tagIds は Set で排除。
-   */
   const mergeTags = async (
     fromTagId: string,
     intoTagId: string,
   ): Promise<{ updatedCards: number } | { error: string }> => {
     if (!currentUser) return { error: "ログイン状態を確認してください。" };
-    if (fromTagId === intoTagId) return { error: "統合元と統合先が同じです。" };
+    if (fromTagId === intoTagId) {
+      return { error: "統合元と統合先が同じです。" };
+    }
+
     const db = await getLocalDb(currentUser.uid);
     const fromTag = tagById.get(fromTagId);
     const intoTag = tagById.get(intoTagId);
-    if (!fromTag || !intoTag)
+
+    if (!fromTag || !intoTag) {
       return { error: "統合対象のタグが見つかりません。" };
+    }
 
     let updatedCards = 0;
 
@@ -663,12 +628,14 @@ export const useTags = () => {
           const card = raw as Record<string, unknown> & CardTagFields;
           const ids = asStringArray(card.tagIds);
           if (!ids.includes(fromTagId)) return;
+
           card.tagIds = Array.from(
             new Set(ids.map((id) => (id === fromTagId ? intoTagId : id))),
           );
           card.updatedAt = new Date();
           updatedCards += 1;
         });
+
       await db.tags_v3
         .where("[userId+parentId]")
         .equals([currentUser.uid, fromTagId])
@@ -677,6 +644,7 @@ export const useTags = () => {
           childTag.parentId = intoTagId;
           childTag.updatedAt = new Date();
         });
+
       await db.tags_v3.delete(fromTagId);
     });
 
@@ -688,23 +656,21 @@ export const useTags = () => {
     color: string,
   ): Promise<void> => {
     if (!currentUser) return;
+
     const db = await getLocalDb(currentUser.uid);
     const tag =
       tagById.get(nameOrId) ??
       tagByName.get(nameOrId) ??
       tagByNameLower.get(nameOrId.toLowerCase());
+
     if (!tag) return;
+
     await db.tags_v3.update(tag.id, {
       color: normalizeTagColorKey(color),
       updatedAt: new Date(),
     });
   };
 
-  /**
-   * タグ削除: tags_v3 から削除し、カードからも除去
-   * - card.tags(string[]) からも除去（互換）
-   * - card.tagIds(string[]) からも除去
-   */
   const deleteTag = async (nameOrId: string): Promise<number> => {
     if (!currentUser) return 0;
 
@@ -712,9 +678,10 @@ export const useTags = () => {
       tagById.get(nameOrId) ??
       tagByName.get(nameOrId) ??
       tagByNameLower.get(nameOrId.toLowerCase());
+
     if (!tag) return 0;
 
-    const { id: tagId, name: tagName } = tag;
+    const { id: tagId } = tag;
     const db = await getLocalDb(currentUser.uid);
     let removedFromCards = 0;
 
@@ -727,6 +694,7 @@ export const useTags = () => {
           childTag.parentId = undefined;
           childTag.updatedAt = new Date();
         });
+
       await db.tags_v3.delete(tagId);
 
       await db.cards
@@ -734,18 +702,11 @@ export const useTags = () => {
         .equals(currentUser.uid)
         .modify((raw: unknown) => {
           const card = raw as Record<string, unknown> & CardTagFields;
-
-          const nameTags = asStringArray(card.tags);
           const idTags = asStringArray(card.tagIds);
 
-          const hadName = nameTags.includes(tagName);
-          const hadId = idTags.includes(tagId);
+          if (!idTags.includes(tagId)) return;
 
-          if (!hadName && !hadId) return;
-
-          if (hadName) card.tags = nameTags.filter((t) => t !== tagName);
-          if (hadId) card.tagIds = idTags.filter((id) => id !== tagId);
-
+          card.tagIds = idTags.filter((id) => id !== tagId);
           card.updatedAt = new Date();
           removedFromCards += 1;
         });
@@ -754,128 +715,135 @@ export const useTags = () => {
     return removedFromCards;
   };
 
-  /**
-   * フォルダ配下カードに一括タグ付与。
-   * @returns 実際に変更したカード枚数
-   */
   const addTagToCardsInFolder = async (
     folderId: string,
     tagId: string,
     includeSubfolders: boolean,
   ): Promise<number> => {
     if (!currentUser) return 0;
-    const db = await getLocalDb(currentUser.uid);
 
-    // 対象 folderId 収集
+    const db = await getLocalDb(currentUser.uid);
     const targetFolderIds = new Set<string>([folderId]);
+
     if (includeSubfolders) {
       const allFolders = await db.folders
         .where("userId")
         .equals(currentUser.uid)
         .toArray();
+
       const collectChildren = (parentId: string) => {
-        for (const f of allFolders) {
-          if ((f as { parentFolderId?: string }).parentFolderId === parentId) {
-            targetFolderIds.add(f.id);
-            collectChildren(f.id);
+        for (const folder of allFolders) {
+          if ((folder as { parentFolderId?: string }).parentFolderId === parentId) {
+            targetFolderIds.add(folder.id);
+            collectChildren(folder.id);
           }
         }
       };
+
       collectChildren(folderId);
     }
 
     const CHUNK = 100;
     let modified = 0;
 
-    for (const tid of targetFolderIds) {
+    for (const targetId of targetFolderIds) {
       const ids = (await db.cards
         .where("[userId+folderId]" as Parameters<typeof db.cards.where>[0])
-        .equals([currentUser.uid, tid] as Parameters<
+        .equals([currentUser.uid, targetId] as Parameters<
           typeof db.cards.where.equals
         >[0])
         .primaryKeys()) as string[];
 
       for (let i = 0; i < ids.length; i += CHUNK) {
         const chunk = ids.slice(i, i + CHUNK);
+
         await db.transaction("rw", db.cards, async () => {
           await Promise.all(
             chunk.map(async (cardId) => {
               const card = await db.cards.get(cardId);
               if (!card) return;
+
               const existing = getCardTagIds(card);
               if (existing.includes(tagId)) return;
+
               await db.cards.update(cardId, {
                 tagIds: [...existing, tagId],
                 updatedAt: new Date(),
               });
+
               modified += 1;
             }),
           );
         });
       }
     }
+
     return modified;
   };
 
-  /**
-   * フォルダ配下カードから一括タグ除去。
-   * @returns 実際に変更したカード枚数
-   */
   const removeTagFromCardsInFolder = async (
     folderId: string,
     tagId: string,
     includeSubfolders: boolean,
   ): Promise<number> => {
     if (!currentUser) return 0;
-    const db = await getLocalDb(currentUser.uid);
 
+    const db = await getLocalDb(currentUser.uid);
     const targetFolderIds = new Set<string>([folderId]);
+
     if (includeSubfolders) {
       const allFolders = await db.folders
         .where("userId")
         .equals(currentUser.uid)
         .toArray();
+
       const collectChildren = (parentId: string) => {
-        for (const f of allFolders) {
-          if ((f as { parentFolderId?: string }).parentFolderId === parentId) {
-            targetFolderIds.add(f.id);
-            collectChildren(f.id);
+        for (const folder of allFolders) {
+          if ((folder as { parentFolderId?: string }).parentFolderId === parentId) {
+            targetFolderIds.add(folder.id);
+            collectChildren(folder.id);
           }
         }
       };
+
       collectChildren(folderId);
     }
 
     const CHUNK = 100;
     let modified = 0;
 
-    for (const tid of targetFolderIds) {
+    for (const targetId of targetFolderIds) {
       const ids = (await db.cards
         .where("[userId+folderId]" as Parameters<typeof db.cards.where>[0])
-        .equals([currentUser.uid, tid] as Parameters<
+        .equals([currentUser.uid, targetId] as Parameters<
           typeof db.cards.where.equals
         >[0])
         .primaryKeys()) as string[];
 
       for (let i = 0; i < ids.length; i += CHUNK) {
         const chunk = ids.slice(i, i + CHUNK);
+
         await db.transaction("rw", db.cards, async () => {
           await Promise.all(
             chunk.map(async (cardId) => {
               const card = await db.cards.get(cardId);
               if (!card) return;
+
               const existing = getCardTagIds(card);
               if (!existing.includes(tagId)) return;
+
               await db.cards.update(cardId, {
                 tagIds: existing.filter((id) => id !== tagId),
                 updatedAt: new Date(),
               });
+
               modified += 1;
             }),
           );
         });
       }
     }
+
     return modified;
   };
 
@@ -902,13 +870,9 @@ export const useTags = () => {
     getTagUsageCount,
     addTagToCardsInFolder,
     removeTagFromCardsInFolder,
-
-    // パス操作
     ensurePathExists,
     moveSelectedTagToPath,
     getTagPathString,
-
-    // 移行/互換用
     getTagIdByName,
     getTagNameById,
   };
