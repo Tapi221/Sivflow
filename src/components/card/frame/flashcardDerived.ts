@@ -12,7 +12,11 @@ import {
   normalizeLayoutRows,
 } from "@/domain/card/extraRows";
 import { extractCardTextFromBlocks } from "@/domain/card/content";
-import type { CardBlock, ReferenceBlockData } from "@/types/domain/card";
+import type {
+  CardBlock,
+  CardFaceAttachments,
+  ReferenceBlockData,
+} from "@/types/domain/card";
 
 export type FlashcardMediaLike =
   | string
@@ -51,10 +55,12 @@ export type FlashcardCardLike = {
   backBlocks?: CardBlock[];
   front?: {
     blocks?: CardBlock[] | null;
+    attachments?: CardFaceAttachments | null;
     ink?: import("@/components/ink/inkTypes").InkDocument | null;
   } | null;
   back?: {
     blocks?: CardBlock[] | null;
+    attachments?: CardFaceAttachments | null;
     ink?: import("@/components/ink/inkTypes").InkDocument | null;
   } | null;
   layoutRows?: number;
@@ -120,6 +126,20 @@ export const resolveAnswerImages = (card: FlashcardCardLike) => {
   return card.answer_images ?? card.answerImages ?? [];
 };
 
+export const resolveQuestionAttachmentImages = (card: FlashcardCardLike) => {
+  if (Array.isArray(card.front?.attachments?.images)) {
+    return card.front.attachments.images;
+  }
+  return card.question_images ?? card.questionImages ?? [];
+};
+
+export const resolveAnswerAttachmentImages = (card: FlashcardCardLike) => {
+  if (Array.isArray(card.back?.attachments?.images)) {
+    return card.back.attachments.images;
+  }
+  return card.answer_images ?? card.answerImages ?? [];
+};
+
 export const resolveQuestionAudios = (card: FlashcardCardLike) => {
   if (Array.isArray(card.front?.blocks)) {
     return card.front.blocks
@@ -134,6 +154,20 @@ export const resolveAnswerAudios = (card: FlashcardCardLike) => {
     return card.back.blocks
       .filter((block) => block.type === "audio")
       .flatMap((block) => block.audios ?? []);
+  }
+  return card.answer_audios ?? card.answerAudios ?? [];
+};
+
+export const resolveQuestionAttachmentAudios = (card: FlashcardCardLike) => {
+  if (Array.isArray(card.front?.attachments?.audios)) {
+    return card.front.attachments.audios;
+  }
+  return card.question_audios ?? card.questionAudios ?? [];
+};
+
+export const resolveAnswerAttachmentAudios = (card: FlashcardCardLike) => {
+  if (Array.isArray(card.back?.attachments?.audios)) {
+    return card.back.attachments.audios;
   }
   return card.answer_audios ?? card.answerAudios ?? [];
 };
@@ -202,4 +236,16 @@ export const resolveReferences = (blocks: CardBlock[]) => {
     if (block.type === "reference") refs.push(...extractReferences(block));
   });
   return refs.filter((r) => r.url);
+};
+
+export const resolveQuestionAttachmentReferences = (
+  card: FlashcardCardLike,
+) => {
+  return (card.front?.attachments?.references ?? []).filter((r) => r.url);
+};
+
+export const resolveAnswerAttachmentReferences = (
+  card: FlashcardCardLike,
+) => {
+  return (card.back?.attachments?.references ?? []).filter((r) => r.url);
 };

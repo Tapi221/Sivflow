@@ -40,10 +40,23 @@ export type CardBlock = {
   markdown?: string;
 };
 
+export type CardFaceAttachmentAudio = {
+  url: string;
+  filename: string;
+  order: number;
+};
+
+export type CardFaceAttachments = {
+  images?: UploadedImage[];
+  audios?: CardFaceAttachmentAudio[];
+  references?: ReferenceBlockData[];
+};
+
 export type CardFace = {
   blocks: CardBlock[];
   ink?: InkDocument | null;
   extraRows?: number;
+  attachments?: CardFaceAttachments;
 };
 
 export type Card = BaseEntity & {

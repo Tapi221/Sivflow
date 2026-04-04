@@ -1,11 +1,13 @@
 import { useCardMediaDialogs } from "@/components/card/editor/useCardMediaDialogs";
 
-import type { CardBlock } from "@/types/domain/card";
+import type { CardBlock, CardFaceAttachments } from "@/types/domain/card";
 import type { Dispatch, MutableRefObject, SetStateAction } from "react";
 import { useCallback, useEffect, useMemo } from "react";
 type DraftShape = {
   frontBlocks: CardBlock[];
   backBlocks: CardBlock[];
+  frontAttachments: CardFaceAttachments;
+  backAttachments: CardFaceAttachments;
 };
 
 type UseCardEditorContentControllerParams<TDraft extends DraftShape | null> = {
@@ -15,7 +17,9 @@ type UseCardEditorContentControllerParams<TDraft extends DraftShape | null> = {
   resetDialogsRef: MutableRefObject<() => void>;
 };
 
-export const useCardEditorContentController = ({
+export const useCardEditorContentController = <
+  TDraft extends DraftShape | null,
+>({
   draft,
   setDraft,
   allowAutoMinHeightSyncRef,
@@ -59,57 +63,32 @@ export const useCardEditorContentController = ({
     [allowAutoMinHeightSyncRef, reindexBlocks, setDraft],
   );
 
-  const upsertSingleBlock = useCallback(
-    (
-      side: "question" | "answer",
-      type: CardBlock["type"],
-      payload: Partial<CardBlock>,
-    ) => {
-      const uniqueId =
-        typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
-          ? crypto.randomUUID()
-          : `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-
-      const blocks = getSideBlocks(side);
-      const index = blocks.findIndex((block) => block.type === type);
-
-      if (index >= 0) {
-        const next = [...blocks];
-        next[index] = { ...next[index], ...payload };
-        setSideBlocks(side, next);
-        return;
-      }
-
-      const nextBlock: CardBlock = {
-        id: `${side}-${type}-${uniqueId}`,
-        type,
-        orderIndex: blocks.length,
-        content: "",
-        ...payload,
-      } as CardBlock;
-
-      setSideBlocks(side, [...blocks, nextBlock]);
-    },
-    [getSideBlocks, setSideBlocks],
+  const getSideAttachments = useCallback(
+    (side: "question" | "answer") =>
+      side === "question"
+        ? (draft?.frontAttachments ?? {})
+        : (draft?.backAttachments ?? {}),
+    [draft?.backAttachments, draft?.frontAttachments],
   );
 
-  const removeBlockByTypeIfExists = useCallback(
-    (side: "question" | "answer", type: CardBlock["type"]) => {
-      const blocks = getSideBlocks(side);
-      const filtered = blocks.filter((block) => block.type !== type);
-      if (filtered.length === blocks.length) return;
-      setSideBlocks(side, filtered);
+  const setSideAttachments = useCallback(
+    (
+      side: "question" | "answer",
+      nextAttachments: CardFaceAttachments,
+    ) => {
+      setDraft((prev) => {
+        if (!prev) return prev;
+        return side === "question"
+          ? { ...prev, frontAttachments: nextAttachments }
+          : { ...prev, backAttachments: nextAttachments };
+      });
     },
-    [getSideBlocks, setSideBlocks],
+    [setDraft],
   );
 
   const mediaDialogs = useCardMediaDialogs({
-    draft,
-    setDraft,
-    getSideBlocks,
-    setSideBlocks,
-    removeBlockByTypeIfExists,
-    upsertSingleBlock,
+    getSideAttachments,
+    setSideAttachments,
   });
   const { setImageDialogSide, setAudioDialogSide, setLinkDialogSide } =
     mediaDialogs;

@@ -11,6 +11,7 @@ import {
 import { sortBlocksByOrderIndex } from "@/components/card/blocks/core/blockOrdering";
 import {
   makeNewDraft,
+  makeEmptyCardFaceAttachments,
   normalizeOrderIndex,
   normalizeSelectedCardId,
   sanitizeReferences,
@@ -28,7 +29,11 @@ import { resolveCardTagNames } from "@/hooks/settings/useTags";
 import { sanitizeUploadedImages } from "@/utils/uploaded-image/sanitizer";
 
 import type { UploadedImage } from "@/types/domain/assets";
-import type { Card, CardBlock } from "@/types/domain/card";
+import type {
+  Card,
+  CardBlock,
+  CardFaceAttachments,
+} from "@/types/domain/card";
 
 const NEW_SENTINEL = "__new__" as const;
 const AUTOSAVE_DELAY_MS = 700;
@@ -85,6 +90,15 @@ const cloneBlock = (block: CardBlock) => {
   };
 };
 
+const cloneAttachments = (
+  attachments: CardFaceAttachments | null | undefined,
+): CardFaceAttachments => ({
+  images: attachments?.images?.map((image) => ({ ...image })) ?? [],
+  audios: attachments?.audios?.map((audio) => ({ ...audio })) ?? [],
+  references:
+    attachments?.references?.map((reference) => ({ ...reference })) ?? [],
+});
+
 const snapshotDraft = (draft: EditorDraft) => {
   return {
     title: draft.title,
@@ -92,6 +106,8 @@ const snapshotDraft = (draft: EditorDraft) => {
     isDraft: draft.isDraft,
     frontBlocks: draft.frontBlocks.map(cloneBlock),
     backBlocks: draft.backBlocks.map(cloneBlock),
+    frontAttachments: cloneAttachments(draft.frontAttachments),
+    backAttachments: cloneAttachments(draft.backAttachments),
     layoutRows: draft.layoutRows,
   };
 };
@@ -104,6 +120,8 @@ const draftSignature = (draft: EditorDraft | null) => {
     isDraft: draft.isDraft,
     frontBlocks: draft.frontBlocks,
     backBlocks: draft.backBlocks,
+    frontAttachments: draft.frontAttachments,
+    backAttachments: draft.backAttachments,
     layoutRows: normalizeLayoutRows(draft.layoutRows),
   });
 };
@@ -129,6 +147,14 @@ const sanitizeBlocksForSave = (blocks: CardBlock[]) => {
   return normalizeOrderIndex(next);
 };
 
+const sanitizeAttachmentsForSave = (
+  attachments: CardFaceAttachments | null | undefined,
+): CardFaceAttachments => ({
+  images: sanitizeUploadedImages(attachments?.images ?? []) as UploadedImage[],
+  audios: (attachments?.audios ?? []).map((audio) => ({ ...audio })),
+  references: sanitizeReferences(attachments?.references ?? []),
+});
+
 const hasMeaningfulBlock = (block: CardBlock) => {
   if (block.type === "text")
     return String(block.content ?? "").trim().length > 0;
@@ -151,12 +177,24 @@ const hasMeaningfulBlock = (block: CardBlock) => {
   return false;
 };
 
+const hasMeaningfulAttachments = (
+  attachments: CardFaceAttachments | null | undefined,
+) => {
+  return (
+    (attachments?.images?.length ?? 0) > 0 ||
+    (attachments?.audios?.length ?? 0) > 0 ||
+    sanitizeReferences(attachments?.references ?? []).length > 0
+  );
+};
+
 const hasMeaningfulDraft = (draft: EditorDraft) => {
   if (draft.title.trim().length > 0) return true;
   if (draft.tags.some((tag) => tag.trim().length > 0)) return true;
   if (draft.isDraft) return true;
   if (draft.frontBlocks.some(hasMeaningfulBlock)) return true;
   if (draft.backBlocks.some(hasMeaningfulBlock)) return true;
+  if (hasMeaningfulAttachments(draft.frontAttachments)) return true;
+  if (hasMeaningfulAttachments(draft.backAttachments)) return true;
   return false;
 };
 
@@ -381,6 +419,12 @@ export const useCardEditorSession = ({
         isDraft: card.isDraft ?? false,
         frontBlocks: sortBlocksByOrderIndex(getCardBlocks(card, "question")),
         backBlocks: sortBlocksByOrderIndex(getCardBlocks(card, "answer")),
+        frontAttachments: cloneAttachments(
+          card.front?.attachments ?? makeEmptyCardFaceAttachments(),
+        ),
+        backAttachments: cloneAttachments(
+          card.back?.attachments ?? makeEmptyCardFaceAttachments(),
+        ),
         layoutRows: normalizeLayoutRows(
           (card as unknown as { layoutRows?: unknown; layout_rows?: unknown })
             .layoutRows ??
@@ -414,9 +458,11 @@ export const useCardEditorSession = ({
         isDraft: currentDraft.isDraft,
         front: {
           blocks: sanitizeBlocksForSave(currentDraft.frontBlocks),
+          attachments: sanitizeAttachmentsForSave(currentDraft.frontAttachments),
         },
         back: {
           blocks: sanitizeBlocksForSave(currentDraft.backBlocks),
+          attachments: sanitizeAttachmentsForSave(currentDraft.backAttachments),
         },
         layoutRows: normalizeLayoutRows(currentDraft.layoutRows),
       };

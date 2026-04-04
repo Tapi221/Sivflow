@@ -6,109 +6,84 @@ import {
 import { sanitizeReferences } from "@/components/card/editor/cardEditorUtils";
 import { cn } from "@/lib/utils";
 import { Image as ImageIcon, Link as LinkIcon } from "@/ui/icons";
-import type { Dispatch, SetStateAction } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type {
-  CardBlock,
+  CardFaceAttachmentAudio,
+  CardFaceAttachments,
   ReferenceBlockData,
   UploadedImage,
 } from "@/types/domain/card";
 type Side = "question" | "answer";
-type DraftShape = object;
-
 type UseCardMediaDialogsParams = {
-  draft: DraftShape | null;
-  setDraft: Dispatch<SetStateAction<DraftShape | null>>;
-  getSideBlocks: (side: Side) => CardBlock[];
-  setSideBlocks: (side: Side, nextBlocks: CardBlock[]) => void;
-  removeBlockByTypeIfExists: (side: Side, type: CardBlock["type"]) => void;
-  upsertSingleBlock: (
-    side: Side,
-    type: CardBlock["type"],
-    payload: Partial<CardBlock>,
-  ) => void;
+  getSideAttachments: (side: Side) => CardFaceAttachments;
+  setSideAttachments: (side: Side, nextAttachments: CardFaceAttachments) => void;
 };
 
+const normalizeAttachments = (
+  attachments: CardFaceAttachments | null | undefined,
+): CardFaceAttachments => ({
+  images: attachments?.images ?? [],
+  audios: attachments?.audios ?? [],
+  references: attachments?.references ?? [],
+});
+
 export const useCardMediaDialogs = ({
-  draft,
-  setDraft,
-  getSideBlocks,
-  setSideBlocks,
-  removeBlockByTypeIfExists,
-  upsertSingleBlock,
+  getSideAttachments,
+  setSideAttachments,
 }: UseCardMediaDialogsParams) => {
-  void setSideBlocks;
   const [imageDialogSide, setImageDialogSide] = useState<Side | null>(null);
   const [audioDialogSide, setAudioDialogSide] = useState<Side | null>(null);
   const [linkDialogSide, setLinkDialogSide] = useState<Side | null>(null);
 
-  const draftRef = useRef(draft);
-  const getSideBlocksRef = useRef(getSideBlocks);
-  const removeBlockByTypeIfExistsRef = useRef(removeBlockByTypeIfExists);
-  const upsertSingleBlockRef = useRef(upsertSingleBlock);
+  const getSideAttachmentsRef = useRef(getSideAttachments);
+  const setSideAttachmentsRef = useRef(setSideAttachments);
 
   useEffect(() => {
-    draftRef.current = draft;
-  }, [draft]);
+    getSideAttachmentsRef.current = getSideAttachments;
+  }, [getSideAttachments]);
 
   useEffect(() => {
-    getSideBlocksRef.current = getSideBlocks;
-  }, [getSideBlocks]);
-
-  useEffect(() => {
-    removeBlockByTypeIfExistsRef.current = removeBlockByTypeIfExists;
-  }, [removeBlockByTypeIfExists]);
-
-  useEffect(() => {
-    upsertSingleBlockRef.current = upsertSingleBlock;
-  }, [upsertSingleBlock]);
+    setSideAttachmentsRef.current = setSideAttachments;
+  }, [setSideAttachments]);
 
   const getDialogImages = useCallback((side: Side): UploadedImage[] => {
-    const imageBlock = getSideBlocksRef
-      .current(side)
-      .find((block) => block.type === "image");
-    return (imageBlock?.images ?? []) as UploadedImage[];
+    return normalizeAttachments(getSideAttachmentsRef.current(side)).images ?? [];
   }, []);
 
   const setDialogImages = useCallback((side: Side, images: UploadedImage[]) => {
-    if (!images || images.length === 0) {
-      removeBlockByTypeIfExistsRef.current(side, "image");
-      return;
-    }
-    upsertSingleBlockRef.current(side, "image", { images });
+    const current = normalizeAttachments(getSideAttachmentsRef.current(side));
+    setSideAttachmentsRef.current(side, {
+      ...current,
+      images,
+    });
   }, []);
 
   const getDialogAudios = useCallback((side: Side) => {
-    const block = getSideBlocksRef
-      .current(side)
-      .find((b) => b.type === "audio");
-    return (block?.audios ?? []) as unknown as (string | UploadedImage)[];
+    return normalizeAttachments(getSideAttachmentsRef.current(side)).audios ?? [];
   }, []);
 
   const setDialogAudios = useCallback((side: Side, items: unknown[]) => {
-    if (!items || items.length === 0) {
-      removeBlockByTypeIfExistsRef.current(side, "audio");
-      return;
-    }
-    upsertSingleBlockRef.current(side, "audio", { audios: items });
+    const current = normalizeAttachments(getSideAttachmentsRef.current(side));
+    setSideAttachmentsRef.current(side, {
+      ...current,
+      audios: items as CardFaceAttachmentAudio[],
+    });
   }, []);
 
   const getReferenceItems = useCallback((side: Side): ReferenceBlockData[] => {
-    const block = getSideBlocksRef
-      .current(side)
-      .find((candidate) => candidate.type === "reference");
-    return (block?.references ?? []) as ReferenceBlockData[];
+    return (
+      normalizeAttachments(getSideAttachmentsRef.current(side)).references ?? []
+    );
   }, []);
 
   const setReferenceItems = useCallback(
     (side: Side, refs: ReferenceBlockData[]) => {
-      const nextRefs = refs ?? [];
-      if (nextRefs.length === 0) {
-        removeBlockByTypeIfExistsRef.current(side, "reference");
-        return;
-      }
-      upsertSingleBlockRef.current(side, "reference", { references: nextRefs });
+      const current = normalizeAttachments(getSideAttachmentsRef.current(side));
+      setSideAttachmentsRef.current(side, {
+        ...current,
+        references: refs ?? [],
+      });
     },
     [],
   );
@@ -119,27 +94,13 @@ export const useCardMediaDialogs = ({
   );
 
   const getAudioCount = useCallback(
-    (side: Side) =>
-      getSideBlocksRef
-        .current(side)
-        .filter((block) => block.type === "audio")
-        .reduce((sum, block) => sum + (block.audios?.length ?? 0), 0),
+    (side: Side) => getDialogAudios(side).length,
     [],
   );
 
   const getLinkCount = useCallback(
     (side: Side) =>
-      getSideBlocksRef
-        .current(side)
-        .filter((block) => block.type === "reference")
-        .reduce(
-          (sum, block) =>
-            sum +
-            (sanitizeReferences(
-              ("references" in block ? block.references : []) ?? [],
-            ).length ?? 0),
-          0,
-        ),
+      sanitizeReferences(getReferenceItems(side) ?? []).length,
     [],
   );
 

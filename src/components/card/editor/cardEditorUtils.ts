@@ -1,6 +1,10 @@
 import { DEFAULT_LAYOUT_ROWS } from "@/domain/card/extraRows";
 
-import type { CardBlock, ReferenceBlockData } from "@/types/domain/card";
+import type {
+  CardBlock,
+  CardFaceAttachments,
+  ReferenceBlockData,
+} from "@/types/domain/card";
 const NEW_SENTINEL = "__new__" as const;
 
 export type EditorDraft = {
@@ -9,8 +13,16 @@ export type EditorDraft = {
   isDraft: boolean;
   frontBlocks: CardBlock[];
   backBlocks: CardBlock[];
+  frontAttachments: CardFaceAttachments;
+  backAttachments: CardFaceAttachments;
   layoutRows: number;
 };
+
+export const makeEmptyCardFaceAttachments = (): CardFaceAttachments => ({
+  images: [],
+  audios: [],
+  references: [],
+});
 
 export const normalizeSelectedCardId = (raw: string | null) => {
   if (!raw) return null;
@@ -26,6 +38,8 @@ export const makeNewDraft = () => {
     isDraft: false,
     frontBlocks: [],
     backBlocks: [],
+    frontAttachments: makeEmptyCardFaceAttachments(),
+    backAttachments: makeEmptyCardFaceAttachments(),
     layoutRows: DEFAULT_LAYOUT_ROWS,
   };
 };
@@ -53,6 +67,16 @@ const isBlockEmpty = (block: CardBlock) => {
   return true;
 };
 
+const hasAttachmentContent = (
+  attachments: CardFaceAttachments | null | undefined,
+) => {
+  return (
+    (attachments?.images?.length ?? 0) > 0 ||
+    (attachments?.audios?.length ?? 0) > 0 ||
+    sanitizeReferences(attachments?.references ?? []).length > 0
+  );
+};
+
 export const shouldAutoOpenEditorForCard = (card: unknown) => {
   if (!card) return false;
   const safeCard = card as {
@@ -61,8 +85,14 @@ export const shouldAutoOpenEditorForCard = (card: unknown) => {
     tags?: unknown[];
     frontBlocks?: CardBlock[];
     backBlocks?: CardBlock[];
-    front?: { blocks?: CardBlock[] | null } | null;
-    back?: { blocks?: CardBlock[] | null } | null;
+    front?: {
+      blocks?: CardBlock[] | null;
+      attachments?: CardFaceAttachments | null;
+    } | null;
+    back?: {
+      blocks?: CardBlock[] | null;
+      attachments?: CardFaceAttachments | null;
+    } | null;
   };
   if (String(safeCard.title ?? "").trim().length > 0) return false;
   if ((safeCard.tagIds ?? safeCard.tags ?? []).length > 0) return false;
@@ -78,5 +108,16 @@ export const shouldAutoOpenEditorForCard = (card: unknown) => {
       : [];
   const hasQuestionContent = frontBlocks.some((b) => !isBlockEmpty(b));
   const hasAnswerContent = backBlocks.some((b) => !isBlockEmpty(b));
-  return !hasQuestionContent && !hasAnswerContent;
+  const hasQuestionAttachments = hasAttachmentContent(
+    safeCard.front?.attachments ?? null,
+  );
+  const hasAnswerAttachments = hasAttachmentContent(
+    safeCard.back?.attachments ?? null,
+  );
+  return (
+    !hasQuestionContent &&
+    !hasAnswerContent &&
+    !hasQuestionAttachments &&
+    !hasAnswerAttachments
+  );
 };

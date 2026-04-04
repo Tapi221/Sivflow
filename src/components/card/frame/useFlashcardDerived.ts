@@ -12,9 +12,11 @@ import { resolveSideBlocks } from "./flashcardBlocks";
 import {
   type FlashcardCardLike,
   type FlashcardMediaLike,
+  resolveAnswerAttachmentAudios,
+  resolveAnswerAttachmentImages,
+  resolveAnswerAttachmentReferences,
   resolveAnswerAudios,
   resolveAnswerCode,
-  resolveAnswerImages,
   resolveAnswerText,
   resolveAudioUrls,
   resolveCardId,
@@ -22,11 +24,12 @@ import {
   resolveImageUrls,
   resolveIsBookmarked,
   resolveLayoutRows,
+  resolveQuestionAttachmentAudios,
+  resolveQuestionAttachmentImages,
+  resolveQuestionAttachmentReferences,
   resolveQuestionAudios,
   resolveQuestionCode,
-  resolveQuestionImages,
   resolveQuestionText,
-  resolveReferences,
 } from "./flashcardDerived";
 
 export interface FlashcardDerived {
@@ -38,7 +41,7 @@ export interface FlashcardDerived {
   activeImageItems: FlashcardMediaLike[];
   activeImages: string[];
   activeAudioUrls: string[];
-  activeReferences: ReturnType<typeof resolveReferences>;
+  activeReferences: ReturnType<typeof resolveQuestionAttachmentReferences>;
   activeBlocks: ReturnType<typeof resolveSideBlocks>;
   activeInkDocument: ReturnType<typeof resolveInkDocument>;
 }
@@ -46,7 +49,8 @@ export interface FlashcardDerived {
 const EMPTY_MEDIA_ITEMS: FlashcardMediaLike[] = [];
 const EMPTY_IMAGE_URLS: string[] = [];
 const EMPTY_AUDIO_URLS: string[] = [];
-const EMPTY_REFERENCES: ReturnType<typeof resolveReferences> = [];
+const EMPTY_REFERENCES: ReturnType<typeof resolveQuestionAttachmentReferences> =
+  [];
 const EMPTY_BLOCKS: ReturnType<typeof resolveSideBlocks> = [];
 
 export const useFlashcardDerived = (
@@ -66,8 +70,8 @@ export const useFlashcardDerived = (
   const activeImageItems = React.useMemo(() => {
     if (!cardData) return EMPTY_MEDIA_ITEMS;
     return activeSide === "question"
-      ? resolveQuestionImages(cardData)
-      : resolveAnswerImages(cardData);
+      ? resolveQuestionAttachmentImages(cardData)
+      : resolveAnswerAttachmentImages(cardData);
   }, [activeSide, cardData]);
 
   const activeImages = React.useMemo(
@@ -78,19 +82,19 @@ export const useFlashcardDerived = (
     [activeImageItems],
   );
 
-  const activeAudios = React.useMemo(() => {
+  const activeAttachmentAudios = React.useMemo(() => {
     if (!cardData) return EMPTY_MEDIA_ITEMS;
     return activeSide === "question"
-      ? resolveQuestionAudios(cardData)
-      : resolveAnswerAudios(cardData);
+      ? resolveQuestionAttachmentAudios(cardData)
+      : resolveAnswerAttachmentAudios(cardData);
   }, [activeSide, cardData]);
 
   const activeAudioUrls = React.useMemo(
     () =>
-      activeAudios.length > 0
-        ? resolveAudioUrls(activeAudios)
+      activeAttachmentAudios.length > 0
+        ? resolveAudioUrls(activeAttachmentAudios)
         : EMPTY_AUDIO_URLS,
-    [activeAudios],
+    [activeAttachmentAudios],
   );
 
   const activeSourceBlocks = React.useMemo(
@@ -101,13 +105,19 @@ export const useFlashcardDerived = (
     [activeSide, cardData?.back?.blocks, cardData?.front?.blocks],
   );
 
-  const activeReferences = React.useMemo(
-    () =>
-      activeSourceBlocks.length > 0
-        ? resolveReferences(activeSourceBlocks)
-        : EMPTY_REFERENCES,
-    [activeSourceBlocks],
-  );
+  const activeReferences = React.useMemo(() => {
+    if (!cardData) return EMPTY_REFERENCES;
+    return activeSide === "question"
+      ? resolveQuestionAttachmentReferences(cardData)
+      : resolveAnswerAttachmentReferences(cardData);
+  }, [activeSide, cardData]);
+
+  const activeBlockAudios = React.useMemo(() => {
+    if (!cardData) return EMPTY_MEDIA_ITEMS;
+    return activeSide === "question"
+      ? resolveQuestionAudios(cardData)
+      : resolveAnswerAudios(cardData);
+  }, [activeSide, cardData]);
 
   const activeText = React.useMemo(() => {
     if (!cardData) return "";
@@ -140,12 +150,12 @@ export const useFlashcardDerived = (
     return resolveSideBlocks(activeSide, {
       blocks: activeSourceBlocks,
       text: activeText,
-      audios: activeAudios,
+      audios: activeBlockAudios,
       code: activeCode,
     });
   }, [
     activeSide,
-    activeAudios,
+    activeBlockAudios,
     activeCode,
     activeSourceBlocks,
     activeText,
