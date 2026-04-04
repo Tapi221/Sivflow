@@ -15,9 +15,6 @@ type CreateCard = (
   cardData: Partial<Card> & { cardSetId?: string },
 ) => Promise<Card>;
 
-/**
- * 取り込み先の指定。新規作成か既存セットへの追加
- */
 export type ImportDestination =
   | {
       kind: "new-card-set";
@@ -110,7 +107,6 @@ export const importCardsFromPayload = async ({
   createCard,
   destination,
 }: ImportCardsFromPayloadParams) => {
-  // 転送先カードセットの特定（新規作成 または 既存）
   const resolvedDestination =
     destination.kind === "existing-card-set"
       ? {
@@ -123,12 +119,11 @@ export const importCardsFromPayload = async ({
         );
 
   let createdCount = 0;
-
-  // 既存のカードの後ろに追加されるよう、ベースの orderIndex を作成する
   const baseOrderIndex = Date.now() * 10000;
 
   for (const [index, importCard] of payload.cards.entries()) {
-    const frontBlocks = importCard.blocks.map(mapImportBlockToCardBlock);
+    const frontBlocks = importCard.frontBlocks.map(mapImportBlockToCardBlock);
+    const backBlocks = importCard.backBlocks.map(mapImportBlockToCardBlock);
 
     await createCard({
       folderId,
@@ -139,7 +134,7 @@ export const importCardsFromPayload = async ({
         blocks: frontBlocks,
       },
       back: {
-        blocks: [],
+        blocks: backBlocks,
       },
       layoutRows: {
         top: 4,

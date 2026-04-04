@@ -3,16 +3,24 @@ import * as XLSX from "xlsx";
 import {
   IMPORT_SHEET_NAME,
   isImportBlockType,
+  isImportSide,
   type ImportBlock,
   type ImportColumnKey,
   type ImportIssue,
   type ImportParseResult,
   type ImportSheetName,
+  type ImportSide,
   type ParsedImportRow,
 } from "@/features/import/types";
 
 type HeaderMap = Partial<Record<ImportColumnKey, number>>;
 type RowCellMap = Partial<Record<ImportColumnKey, string>>;
+
+type BuildRowBlockResult = {
+  side: ImportSide | null;
+  block: ImportBlock | null;
+  issues: ImportIssue[];
+};
 
 const REQUIRED_HEADERS: ImportColumnKey[] = ["cardId", "blockOrder", "type"];
 
@@ -35,12 +43,10 @@ const buildIssue = ({
 };
 
 const normalizeHeaderName = (value: string): ImportColumnKey | null => {
-  const normalized = value
-    .trim()
-    .toLowerCase()
-    .replace(/[\s_-]+/g, "");
+  const normalized = value.trim().toLowerCase().replace(/[\s_-]+/g, "");
 
   if (normalized === "cardid") return "cardId";
+  if (normalized === "side" || normalized === "face") return "side";
   if (normalized === "blockorder" || normalized === "order") {
     return "blockOrder";
   }
@@ -93,6 +99,7 @@ const getCellValue = (
 const getRowCellMap = (row: unknown[], headerMap: HeaderMap): RowCellMap => {
   return {
     cardId: getCellValue(row, headerMap, "cardId"),
+    side: getCellValue(row, headerMap, "side"),
     blockOrder: getCellValue(row, headerMap, "blockOrder"),
     type: getCellValue(row, headerMap, "type"),
     content: getCellValue(row, headerMap, "content"),
@@ -119,6 +126,15 @@ const parseBlockOrder = (rawValue: string) => {
   }
 
   return parsed;
+};
+
+const parseImportSide = (rawValue: string): ImportSide | null => {
+  const normalized = rawValue.trim().toLowerCase();
+
+  if (normalized === "") return "front";
+  if (isImportSide(normalized)) return normalized;
+
+  return null;
 };
 
 const validateRequiredHeaders = (
@@ -199,12 +215,32 @@ const buildRowBlock = ({
   rowNumber: number;
   sheetName: ImportSheetName;
   rowCellMap: RowCellMap;
-}) => {
+}): BuildRowBlockResult => {
   const issues: ImportIssue[] = [];
+  const parsedSide = parseImportSide(rowCellMap.side ?? "");
   const parsedOrder = parseBlockOrder(rowCellMap.blockOrder ?? "");
+
+  if (parsedSide == null) {
+    return {
+      side: null,
+      block: null,
+      issues: [
+        buildIssue({
+          level: "error",
+          code: "invalid_side",
+          sheetName,
+          rowNumber,
+          columnKey: "side",
+          message:
+            'side は "front" | "back" のいずれかで指定してください。未指定なら front 扱いです。',
+        }),
+      ],
+    };
+  }
 
   if (parsedOrder == null) {
     return {
+      side: parsedSide,
       block: null,
       issues: [
         buildIssue({
@@ -223,6 +259,7 @@ const buildRowBlock = ({
 
   if (!isImportBlockType(normalizedType)) {
     return {
+      side: parsedSide,
       block: null,
       issues: [
         buildIssue({
@@ -240,6 +277,7 @@ const buildRowBlock = ({
 
   if (normalizedType === "image") {
     return {
+      side: parsedSide,
       block: null,
       issues: [
         buildIssue({
@@ -257,6 +295,7 @@ const buildRowBlock = ({
 
   if (!rowCellMap.content) {
     return {
+      side: parsedSide,
       block: null,
       issues: [
         buildIssue({
@@ -294,6 +333,7 @@ const buildRowBlock = ({
   };
 
   return {
+    side: parsedSide,
     block,
     issues,
   };
@@ -305,7 +345,8 @@ const groupRowsToCards = (rows: ParsedImportRow[]) => {
     string,
     {
       title?: string;
-      blocks: ParsedImportRow[];
+      frontRows: ParsedImportRow[];
+      backRows: ParsedImportRow[];
     }
   >();
 
@@ -315,7 +356,8 @@ const groupRowsToCards = (rows: ParsedImportRow[]) => {
     if (existing == null) {
       cardMap.set(parsedRow.cardId, {
         title: parsedRow.title,
-        blocks: [parsedRow],
+        frontRows: parsedRow.side === "front" ? [parsedRow] : [],
+        backRows: parsedRow.side === "back" ? [parsedRow] : [],
       });
       return;
     }
@@ -341,34 +383,45 @@ const groupRowsToCards = (rows: ParsedImportRow[]) => {
       existing.title = parsedRow.title;
     }
 
-    existing.blocks.push(parsedRow);
+    if (parsedRow.side === "front") {
+      existing.frontRows.push(parsedRow);
+      return;
+    }
+
+    existing.backRows.push(parsedRow);
   });
 
   const cards = Array.from(cardMap.entries()).map(([cardId, value]) => {
-    const seenOrders = new Set<number>();
+    (["front", "back"] as const).forEach((side) => {
+      const seenOrders = new Set<number>();
+      const sideRows = side === "front" ? value.frontRows : value.backRows;
 
-    value.blocks.forEach((parsedRow) => {
-      if (seenOrders.has(parsedRow.block.order)) {
-        issues.push(
-          buildIssue({
-            level: "error",
-            code: "duplicate_block_order",
-            sheetName: parsedRow.sheetName,
-            rowNumber: parsedRow.rowNumber,
-            columnKey: "blockOrder",
-            message: `cardId="${cardId}" 内で blockOrder=${parsedRow.block.order} が重複しています。`,
-          }),
-        );
-        return;
-      }
+      sideRows.forEach((parsedRow) => {
+        if (seenOrders.has(parsedRow.block.order)) {
+          issues.push(
+            buildIssue({
+              level: "error",
+              code: "duplicate_block_order",
+              sheetName: parsedRow.sheetName,
+              rowNumber: parsedRow.rowNumber,
+              columnKey: "blockOrder",
+              message: `cardId="${cardId}" の ${side} 側で blockOrder=${parsedRow.block.order} が重複しています。`,
+            }),
+          );
+          return;
+        }
 
-      seenOrders.add(parsedRow.block.order);
+        seenOrders.add(parsedRow.block.order);
+      });
     });
 
     return {
       cardId,
       title: value.title,
-      blocks: [...value.blocks]
+      frontBlocks: [...value.frontRows]
+        .sort((left, right) => left.block.order - right.block.order)
+        .map((parsedRow) => parsedRow.block),
+      backBlocks: [...value.backRows]
         .sort((left, right) => left.block.order - right.block.order)
         .map((parsedRow) => parsedRow.block),
     };
@@ -447,7 +500,7 @@ export const parseXlsxImport = async (
       continue;
     }
 
-    const { block, issues: rowIssues } = buildRowBlock({
+    const { side, block, issues: rowIssues } = buildRowBlock({
       rowNumber,
       sheetName,
       rowCellMap,
@@ -455,7 +508,7 @@ export const parseXlsxImport = async (
 
     issues.push(...rowIssues);
 
-    if (block == null) {
+    if (side == null || block == null) {
       continue;
     }
 
@@ -463,6 +516,7 @@ export const parseXlsxImport = async (
       sheetName,
       rowNumber,
       cardId: rowCellMap.cardId!,
+      side,
       title: rowCellMap.title || undefined,
       block,
     });

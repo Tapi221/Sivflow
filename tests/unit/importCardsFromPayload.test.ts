@@ -22,24 +22,32 @@ describe("importCardsFromPayload", () => {
       {
         cardId: "card-001",
         title: "カードA",
-        blocks: [
+        frontBlocks: [
           {
             type: "text",
             order: 1,
             content: "本文A",
           },
         ],
+        backBlocks: [
+          {
+            type: "markdown",
+            order: 1,
+            content: "## 回答A",
+          },
+        ],
       },
       {
         cardId: "card-002",
         title: "カードB",
-        blocks: [
+        frontBlocks: [
           {
             type: "markdown",
             order: 1,
             content: "# 見出し",
           },
         ],
+        backBlocks: [],
       },
     ],
   };
@@ -109,6 +117,16 @@ describe("importCardsFromPayload", () => {
         folderId: "folder-001",
         cardSetId: "set-existing",
         title: "カードA",
+        front: expect.objectContaining({
+          blocks: expect.arrayContaining([
+            expect.objectContaining({ type: "text" }),
+          ]),
+        }),
+        back: expect.objectContaining({
+          blocks: expect.arrayContaining([
+            expect.objectContaining({ type: "markdown" }),
+          ]),
+        }),
       }),
     );
     expect(createCard.mock.calls[1]?.[0]).toEqual(

@@ -1,17 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { useToast } from "@/contexts/ToastContext";
-import {
-  buildImportCardSetName,
-  importCardsFromPayload,
-} from "@/features/import/importCardsFromPayload";
-import {
-  formatImportCellLabel,
-  hasImportBlockingError,
-  type ImportParseResult,
-} from "@/features/import/types";
-import { parseXlsxImport } from "@/features/import/xlsx/parseXlsxImport";
-import { downloadXlsxImportTemplate } from "@/features/import/xlsx/downloadXlsxImportTemplate";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -29,6 +17,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useToast } from "@/contexts/ToastContext";
+import {
+  buildImportCardSetName,
+  importCardsFromPayload,
+} from "@/features/import/importCardsFromPayload";
+import {
+  formatImportCellLabel,
+  hasImportBlockingError,
+  type ImportParseResult,
+} from "@/features/import/types";
+import { downloadXlsxImportTemplate } from "@/features/import/xlsx/downloadXlsxImportTemplate";
+import { parseXlsxImport } from "@/features/import/xlsx/parseXlsxImport";
 import type { Card, CardSet } from "@/types";
 
 type CreateCardSet = (
@@ -62,7 +62,6 @@ type XlsxImportDialogProps = {
   createCardSet: CreateCardSet;
   createCard: CreateCard;
 };
-
 const emptyState = {
   file: null as File | null,
   result: null as ImportParseResult | null,
@@ -154,14 +153,12 @@ export const XlsxImportDialog = ({
         file,
         result,
       });
-      setNewCardSetName(
-        (current) => current.trim() || buildImportCardSetName(file.name),
-      );
+      setNewCardSetName((current) => {
+        return current.trim() || buildImportCardSetName(file.name);
+      });
     } catch (error) {
       console.error("[XlsxImportDialog] parse failed", error);
-      toast.error(
-        "XLSX の解析に失敗しました。ファイル形式を確認してください。",
-      );
+      toast.error("XLSX の解析に失敗しました。ファイル形式を確認してください。");
       setState({
         file,
         result: null,
@@ -205,7 +202,10 @@ export const XlsxImportDialog = ({
             cardSetId: selectedExistingCardSet.id,
             cardSetName: selectedExistingCardSet.name,
           }
-        : { kind: "new-card-set" as const, cardSetName: newCardSetName.trim() };
+        : {
+            kind: "new-card-set" as const,
+            cardSetName: newCardSetName.trim(),
+          };
 
     setIsImporting(true);
 
@@ -219,9 +219,7 @@ export const XlsxImportDialog = ({
         destination,
       });
 
-      toast.success(
-        `${imported.createdCount} 件のカードをインポートしました。`,
-      );
+      toast.success(`${imported.createdCount} 件のカードをインポートしました。`);
       handleClose(false);
       onImported?.({
         cardSetId: imported.createdCardSetId,
@@ -320,6 +318,7 @@ export const XlsxImportDialog = ({
                     </SelectContent>
                   </Select>
                 ) : null}
+
                 {destinationMode === "existing" && cardSets.length === 0 ? (
                   <p className="text-xs text-slate-500">
                     このフォルダには既存カードセットがありません。
@@ -333,15 +332,16 @@ export const XlsxImportDialog = ({
                 onChange={handleFileChange}
                 disabled={isParsing || isImporting}
               />
+
               <div className="grid gap-1 text-xs text-slate-500">
                 <p>
                   phase 1 では text / markdown / math / code のみ取り込みます。
                   image 行はエラーとして止めます。
                 </p>
                 <p>
-                  blocks シートで cardId が同じ行は 1
-                  枚のカードとしてまとめられ、 blockOrder 順で front
-                  側に並びます。
+                  blocks シートで cardId が同じ行は 1 枚のカードとしてまとめられ、
+                  side ごとに front / back へ振り分けられます。side 未指定なら
+                  front 扱いです。
                 </p>
               </div>
             </div>
@@ -398,15 +398,24 @@ export const XlsxImportDialog = ({
                           {card.title?.trim() || card.cardId}
                         </p>
                         <p className="mt-1 text-xs text-slate-500">
-                          {card.blocks.length} blocks
+                          front {card.frontBlocks.length} blocks / back{" "}
+                          {card.backBlocks.length} blocks
                         </p>
                         <div className="mt-2 flex flex-wrap gap-1">
-                          {card.blocks.map((block) => (
+                          {card.frontBlocks.map((block) => (
                             <span
-                              key={`${card.cardId}-${block.order}-${block.type}`}
+                              key={`${card.cardId}-front-${block.order}-${block.type}`}
                               className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] text-slate-700"
                             >
-                              {block.order}. {block.type}
+                              F{block.order}. {block.type}
+                            </span>
+                          ))}
+                          {card.backBlocks.map((block) => (
+                            <span
+                              key={`${card.cardId}-back-${block.order}-${block.type}`}
+                              className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] text-slate-700"
+                            >
+                              B{block.order}. {block.type}
                             </span>
                           ))}
                         </div>

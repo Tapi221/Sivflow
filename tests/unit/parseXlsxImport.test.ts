@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import * as XLSX from "xlsx";
 
-import { parseXlsxImport } from "@/features/import/xlsx/parseXlsxImport";
 import type { ImportIssue } from "@/features/import/types";
+import { parseXlsxImport } from "@/features/import/xlsx/parseXlsxImport";
 
 /**
  * テスト用の XLSX ファイル (ArrayBuffer) を生成するユーティリティ
@@ -22,20 +22,21 @@ const createWorkbookBuffer = (sheets: Record<string, unknown[][]>) => {
 };
 
 describe("parseXlsxImport", () => {
-  it("blocks シートの有効な行を cardId ごとにまとめて payload を返す", async () => {
+  it("blocks シートの有効な行を cardId ごとにまとめ、side ごとに front/back へ振り分ける", async () => {
     const fileBuffer = createWorkbookBuffer({
       blocks: [
-        ["cardId", "blockOrder", "type", "content", "language", "title"],
-        ["card-001", "1", "text", "最初のテキスト", "", "カードA"],
+        ["cardId", "side", "blockOrder", "type", "content", "language", "title"],
+        ["card-001", "front", "1", "text", "最初のテキスト", "", "カードA"],
         [
           "card-001",
-          "2",
+          "back",
+          "1",
           "code",
           "const sum = (a: number, b: number) => a + b;",
           "typescript",
           "カードA",
         ],
-        ["card-002", "1", "markdown", "# 見出し", "", "カードB"],
+        ["card-002", "", "1", "markdown", "# 見出し", "", "カードB"],
       ],
     });
 
@@ -49,16 +50,18 @@ describe("parseXlsxImport", () => {
         {
           cardId: "card-001",
           title: "カードA",
-          blocks: [
+          frontBlocks: [
             {
               type: "text",
               order: 1,
               content: "最初のテキスト",
               language: undefined,
             },
+          ],
+          backBlocks: [
             {
               type: "code",
-              order: 2,
+              order: 1,
               content: "const sum = (a: number, b: number) => a + b;",
               language: "typescript",
             },
@@ -67,7 +70,7 @@ describe("parseXlsxImport", () => {
         {
           cardId: "card-002",
           title: "カードB",
-          blocks: [
+          frontBlocks: [
             {
               type: "markdown",
               order: 1,
@@ -75,6 +78,7 @@ describe("parseXlsxImport", () => {
               language: undefined,
             },
           ],
+          backBlocks: [],
         },
       ],
     });
@@ -119,6 +123,28 @@ describe("parseXlsxImport", () => {
     );
   });
 
+  it("side が不正な値なら invalid_side error を返す", async () => {
+    const fileBuffer = createWorkbookBuffer({
+      blocks: [
+        ["cardId", "side", "blockOrder", "type", "content", "title"],
+        ["card-001", "reverse", "1", "text", "本文", "カードA"],
+      ],
+    });
+
+    const result = await parseXlsxImport(fileBuffer);
+
+    expect(result.payload).toBeNull();
+    expect(result.issues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          level: "error",
+          code: "invalid_side",
+          columnKey: "side",
+        }),
+      ]),
+    );
+  });
+
   it("type=image は unsupported_image_cell error として止める", async () => {
     const fileBuffer = createWorkbookBuffer({
       blocks: [
@@ -142,12 +168,12 @@ describe("parseXlsxImport", () => {
     );
   });
 
-  it("同じ cardId 内で blockOrder が重複すると duplicate_block_order error を返す", async () => {
+  it("同じ cardId と side 内で blockOrder が重複すると duplicate_block_order error を返す", async () => {
     const fileBuffer = createWorkbookBuffer({
       blocks: [
-        ["cardId", "blockOrder", "type", "content", "title"],
-        ["card-001", "1", "text", "1つ目", "カードA"],
-        ["card-001", "1", "markdown", "2つ目", "カードA"],
+        ["cardId", "side", "blockOrder", "type", "content", "title"],
+        ["card-001", "front", "1", "text", "1つ目", "カードA"],
+        ["card-001", "front", "1", "markdown", "2つ目", "カードA"],
       ],
     });
 
@@ -166,12 +192,29 @@ describe("parseXlsxImport", () => {
     );
   });
 
+  it("front と back で同じ blockOrder でも別面なら許可する", async () => {
+    const fileBuffer = createWorkbookBuffer({
+      blocks: [
+        ["cardId", "side", "blockOrder", "type", "content", "title"],
+        ["card-001", "front", "1", "text", "表", "カードA"],
+        ["card-001", "back", "1", "markdown", "裏", "カードA"],
+      ],
+    });
+
+    const result = await parseXlsxImport(fileBuffer);
+
+    expect(result.payload).not.toBeNull();
+    expect(
+      result.issues.some((issue: ImportIssue) => issue.level === "error"),
+    ).toBe(false);
+  });
+
   it("warning だけなら payload を返しつつ issues に warning を残す", async () => {
     const fileBuffer = createWorkbookBuffer({
       blocks: [
-        ["cardId", "blockOrder", "type", "content", "language", "title"],
-        ["card-001", "1", "text", "本文", "typescript", "カードA"],
-        ["card-001", "2", "markdown", "## md", "", "カードA 別名"],
+        ["cardId", "side", "blockOrder", "type", "content", "language", "title"],
+        ["card-001", "front", "1", "text", "本文", "typescript", "カードA"],
+        ["card-001", "back", "1", "markdown", "## md", "", "カードA 別名"],
       ],
     });
 
@@ -183,6 +226,8 @@ describe("parseXlsxImport", () => {
       expect.objectContaining({
         cardId: "card-001",
         title: "カードA",
+        frontBlocks: expect.any(Array),
+        backBlocks: expect.any(Array),
       }),
     );
     expect(result.issues).toEqual(

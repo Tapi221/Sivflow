@@ -7,6 +7,7 @@ const TEMPLATE_FILE_NAME = "manifolia-bulk-import-template.xlsx";
 const BLOCKS_ROWS = [
   [
     "cardId",
+    "side",
     "blockOrder",
     "type",
     "content",
@@ -17,9 +18,10 @@ const BLOCKS_ROWS = [
   ],
   [
     "sample-001",
+    "front",
     "1",
     "text",
-    "これは text ブロックです。",
+    "これは front 側の text ブロックです。",
     "",
     "",
     "サンプルカードA",
@@ -27,9 +29,10 @@ const BLOCKS_ROWS = [
   ],
   [
     "sample-001",
+    "front",
     "2",
     "markdown",
-    "# 見出し\n- 箇条書き\n- 箇条書き",
+    "# 問題\n- 箇条書き\n- 箇条書き",
     "",
     "",
     "サンプルカードA",
@@ -37,33 +40,36 @@ const BLOCKS_ROWS = [
   ],
   [
     "sample-001",
-    "3",
-    "math",
-    "\\\\int_0^1 x^2 dx",
+    "back",
+    "1",
+    "markdown",
+    "## 裏面の補足\n- 解説\n- メモ",
     "",
     "",
     "サンプルカードA",
-    "",
+    "side=back で裏面ブロックとして取り込みます。",
   ],
   [
     "sample-001",
-    "4",
+    "back",
+    "2",
     "code",
     "const sum = (a: number, b: number) => a + b;",
     "typescript",
     "",
     "サンプルカードA",
-    "language は code のときだけ使います。",
+    "language は code のときだけ使います。front/back どちらでも使えます。",
   ],
   [
     "sample-002",
+    "",
     "1",
-    "text",
-    "cardId が変わると別カードです。",
+    "math",
+    "\\\\int_0^1 x^2 dx",
     "",
     "",
     "サンプルカードB",
-    "",
+    "side 未指定なら front 扱いです。",
   ],
 ];
 
@@ -71,11 +77,18 @@ const README_ROWS = [
   ["項目", "説明"],
   ["必須ヘッダー", "cardId / blockOrder / type"],
   [
+    "side",
+    '任意。front / back を指定します。未指定なら front 扱いです。',
+  ],
+  [
     "type",
     "text / markdown / math / code を使用可能。image は phase 1 では未対応。",
   ],
   ["cardId", "同じ値の行を 1 枚のカードにグルーピングします。"],
-  ["blockOrder", "1 以上の整数。front 側の表示順になります。"],
+  [
+    "blockOrder",
+    "1 以上の整数。cardId + side ごとの表示順になります。",
+  ],
   ["content", "text / markdown / math / code では必須です。"],
   [
     "language",
@@ -91,10 +104,10 @@ const README_ROWS = [
 export const downloadXlsxImportTemplate = () => {
   const workbook = XLSX.utils.book_new();
 
-  // blocks シートを作成 (aoa: array of arrays)
   const blocksSheet = XLSX.utils.aoa_to_sheet(BLOCKS_ROWS);
   blocksSheet["!cols"] = [
     { wch: 16 },
+    { wch: 12 },
     { wch: 12 },
     { wch: 12 },
     { wch: 48 },
@@ -105,11 +118,9 @@ export const downloadXlsxImportTemplate = () => {
   ];
   XLSX.utils.book_append_sheet(workbook, blocksSheet, IMPORT_SHEET_NAME);
 
-  // readme シートを作成
   const readmeSheet = XLSX.utils.aoa_to_sheet(README_ROWS);
   readmeSheet["!cols"] = [{ wch: 18 }, { wch: 84 }];
   XLSX.utils.book_append_sheet(workbook, readmeSheet, "readme");
 
-  // ブラウザでファイルダウンロードを実行
   XLSX.writeFileXLSX(workbook, TEMPLATE_FILE_NAME, { compression: true });
 };
