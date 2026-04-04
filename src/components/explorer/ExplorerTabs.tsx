@@ -2,8 +2,8 @@
  * ExplorerTabs - Explorerタブ切替UIコンポーネント
  * Linear/Notion 系のテキストリンクスタイル
  */
-import React, { useRef, useState } from "react";
-import { FileText, Folder, History, Plus } from "@/ui/icons";
+import React, { useMemo, useRef, useState } from "react";
+import { History, Plus } from "@/ui/icons";
 import type { ExplorerTab } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
 import { SidebarNavIcon } from "@/layout/sidebarNavItem";
@@ -11,13 +11,10 @@ import { getSidebarNavItemClassName } from "@/layout/sidebarNavItem.utils";
 import { TagFilterPopover } from "./TagFilterPopover";
 import {
   DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuItemIcon,
-  DropdownMenuItemLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { glassMenuContentClass } from "@/components/ui/menu-styles";
+import { ExplorerMenuPanel } from "@/components/folder/components/menus/ExplorerMenuPanel";
+import { buildExplorerCreateMenuActions } from "@/components/folder/components/menus/explorerMenuActionBuilders";
 
 interface ExplorerTabsProps {
   activeTab: ExplorerTab;
@@ -25,7 +22,8 @@ interface ExplorerTabsProps {
   allTags: string[];
   onCreateRootFolder?: () => void | Promise<void>;
   onCreateCardSet?: () => void | Promise<void>;
-  onAddDocument?: () => void | Promise<void>;
+  onAddPdf?: () => void | Promise<void>;
+  onAddPptx?: () => void | Promise<void>;
   showExplorerActions?: boolean;
   canCreateCardSet?: boolean;
   canAddDocuments?: boolean;
@@ -36,9 +34,12 @@ const TABS: {
   label: string;
   icon: React.ComponentType<{ className?: string }>;
 }[] = [
-  { id: "explorer", label: "フォルダ", icon: Folder },
-  { id: "recent", label: "最近", icon: History },
+  { id: "explorer", label: "フォルダ", icon: () => <Plus className="hidden" /> /* Dummy, will be overwritten by History or Folder icons from @/ui/icons if needed, but TABS use actual icons */ },
 ];
+// Re-importing icons correctly for TABS
+import { Folder } from "@/ui/icons";
+TABS[0] = { id: "explorer", label: "フォルダ", icon: Folder };
+TABS[1] = { id: "recent", label: "最近", icon: History };
 
 export const ExplorerTabs = ({
   activeTab,
@@ -46,7 +47,8 @@ export const ExplorerTabs = ({
   allTags,
   onCreateRootFolder,
   onCreateCardSet,
-  onAddDocument,
+  onAddPdf,
+  onAddPptx,
   showExplorerActions = false,
   canCreateCardSet = false,
   canAddDocuments = false,
@@ -55,6 +57,26 @@ export const ExplorerTabs = ({
     showExplorerActions && activeTab === "explorer";
   const suppressCloseAutoFocusRef = useRef(false);
   const [createMenuOpen, setCreateMenuOpen] = useState(false);
+
+  const createMenuActions = useMemo(
+    () =>
+      buildExplorerCreateMenuActions({
+        canCreateCardSet,
+        canAddDocuments,
+        onCreateRootFolder,
+        onCreateCardSet,
+        onAddPdf,
+        onAddPptx,
+      }),
+    [
+      canAddDocuments,
+      canCreateCardSet,
+      onAddPdf,
+      onAddPptx,
+      onCreateCardSet,
+      onCreateRootFolder,
+    ],
+  );
 
   return (
     <div
@@ -117,63 +139,20 @@ export const ExplorerTabs = ({
               <Plus className="w-3.5 h-3.5" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent
+          <ExplorerMenuPanel
+            actions={createMenuActions}
             align="end"
-            className={`w-44 ${glassMenuContentClass}`}
+            className="w-44"
+            closeMenu={() => {
+              suppressCloseAutoFocusRef.current = true;
+              setCreateMenuOpen(false);
+            }}
             onCloseAutoFocus={(event) => {
               if (!suppressCloseAutoFocusRef.current) return;
               suppressCloseAutoFocusRef.current = false;
               event.preventDefault();
             }}
-          >
-            <DropdownMenuItem
-              onSelect={(event) => {
-                event.preventDefault();
-                suppressCloseAutoFocusRef.current = true;
-                setCreateMenuOpen(false);
-                void onCreateRootFolder?.();
-              }}
-            >
-              <DropdownMenuItemIcon>
-                <Folder className="h-4 w-4" />
-              </DropdownMenuItemIcon>
-              <DropdownMenuItemLabel>新規フォルダ</DropdownMenuItemLabel>
-            </DropdownMenuItem>
-
-            {canCreateCardSet && (
-              <DropdownMenuItem
-                onSelect={(event) => {
-                  event.preventDefault();
-                  suppressCloseAutoFocusRef.current = true;
-                  setCreateMenuOpen(false);
-                  void onCreateCardSet?.();
-                }}
-              >
-                <DropdownMenuItemIcon>
-                  <Plus className="h-4 w-4" />
-                </DropdownMenuItemIcon>
-                <DropdownMenuItemLabel>
-                  新規カードセット
-                </DropdownMenuItemLabel>
-              </DropdownMenuItem>
-            )}
-
-            {canAddDocuments && (
-              <DropdownMenuItem
-                onSelect={(event) => {
-                  event.preventDefault();
-                  suppressCloseAutoFocusRef.current = true;
-                  setCreateMenuOpen(false);
-                  void onAddDocument?.();
-                }}
-              >
-                <DropdownMenuItemIcon>
-                  <FileText className="h-4 w-4" />
-                </DropdownMenuItemIcon>
-                <DropdownMenuItemLabel>文書追加</DropdownMenuItemLabel>
-              </DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
+          />
         </DropdownMenu>
         <TagFilterPopover allTags={allTags} />
       </div>

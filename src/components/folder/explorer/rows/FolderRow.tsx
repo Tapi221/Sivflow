@@ -1,4 +1,6 @@
 import { ContextMenu } from "@/components/folder/components/menus/ContextMenu";
+import { buildFolderMenuActions } from "@/components/folder/components/menus/explorerMenuActionBuilders";
+import { useContextMenuAnchor } from "@/components/folder/components/menus/useContextMenuAnchor";
 import {
   getParentFolderId,
   normalizeFolderId,
@@ -117,10 +119,44 @@ export const FolderRow: React.FC<FolderRowProps> = ({
   const parentFolderId = normalizeFolderId(getParentFolderId(folder));
   const isTopLevelFolder = parentFolderId === ROOT_FOLDER_ID;
   const FolderGlyph = isTopLevelFolder ? FolderIcon : FolderOutlineIcon;
-  const [menuAnchor, setMenuAnchor] = React.useState<{
-    x: number;
-    y: number;
-  } | null>(null);
+  const { anchorPoint: menuAnchor, handleContextMenu, resetAnchor } =
+    useContextMenuAnchor();
+
+  const menuActions = React.useMemo(
+    () =>
+      buildFolderMenuActions({
+        onCreateSubfolder: () => {
+          void handleCreateFolderAction(folderId);
+        },
+        onCreateCardSet: () => {
+          void handleCreateCardSetAction(folderId);
+        },
+        onRename: () => {
+          onSelect();
+          onMenuOpenChange(false);
+          setEditingId(folderId);
+          setEditingName(folderName);
+          editingNameRef.current = folderName;
+        },
+        onDelete: () => {
+          handleDelete(folderId, "folder");
+        },
+        onBulkTag,
+      }),
+    [
+      editingNameRef,
+      folderId,
+      folderName,
+      handleCreateCardSetAction,
+      handleCreateFolderAction,
+      handleDelete,
+      onBulkTag,
+      onMenuOpenChange,
+      onSelect,
+      setEditingId,
+      setEditingName,
+    ],
+  );
 
   const nestedToggleOffsetStyle = !isTopLevelFolder
     ? ({ marginLeft: "calc(var(--tree-indent-px) * -0.5)" } as const)
@@ -151,9 +187,7 @@ export const FolderRow: React.FC<FolderRowProps> = ({
         onContextMenu={
           hasContextMenu && !isEditing
             ? (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setMenuAnchor({ x: e.clientX, y: e.clientY });
+                handleContextMenu(e);
                 onMenuOpenChange(true);
               }
             : undefined
@@ -302,23 +336,12 @@ export const FolderRow: React.FC<FolderRowProps> = ({
         {hasContextMenu && (
           <ContextMenu
             open={menuOpen}
-            anchorPoint={menuAnchor}
+            anchorPoint={menuOpen ? menuAnchor : null}
             onOpenChange={(open) => {
-              if (!open) setMenuAnchor(null);
+              if (!open) resetAnchor();
               onMenuOpenChange(open);
             }}
-            type="folder"
-            onCreateSubfolder={() => void handleCreateFolderAction(folderId)}
-            onCreateCardSet={() => void handleCreateCardSetAction(folderId)}
-            onRename={() => {
-              onSelect();
-              onMenuOpenChange(false);
-              setEditingId(folderId);
-              setEditingName(folderName);
-              editingNameRef.current = folderName;
-            }}
-            onDelete={() => handleDelete(folderId, "folder")}
-            onBulkTag={onBulkTag}
+            actions={menuActions}
           />
         )}
       </div>
