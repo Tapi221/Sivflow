@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, useState, type DependencyList } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type DependencyList,
+} from "react";
 
 import {
   clampPaneWidthPx,
