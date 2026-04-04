@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { createPageUrl } from "@/utils";
 
 interface UseTreeViewActionsParams {
@@ -14,9 +14,6 @@ export const useTreeViewActions = ({
   onFolderSelect,
   addRecent,
 }: UseTreeViewActionsParams) => {
-  const [isCreateSelectionOpen, setIsCreateSelectionOpen] = useState(false);
-  const [isModeSelectionOpen, setIsModeSelectionOpen] = useState(false);
-
   const handleFolderSelectWithRecent = useCallback(
     (folderId: string | null) => {
       onFolderSelect(folderId);
@@ -39,66 +36,13 @@ export const useTreeViewActions = ({
 
   const handleOpenCreateCard = useCallback(() => {
     if (!selectedFolderId) return;
-    setIsCreateSelectionOpen(true);
-  }, [selectedFolderId]);
-
-  const handleSelectCreateMode = useCallback(
-    (mode: "single" | "continuous") => {
-      if (!selectedFolderId) return;
-      setIsCreateSelectionOpen(false);
-
-      if (mode === "single") {
-        navigate(createPageUrl(`CardEdit?folderId=${selectedFolderId}`));
-        return;
-      }
-
-      setIsModeSelectionOpen(true);
-    },
-    [navigate, selectedFolderId],
-  );
-
-  const handleSelectDetailedMode = useCallback(
-    (mode: string, options?: { hideTitle?: boolean }) => {
-      if (!selectedFolderId) return;
-      setIsModeSelectionOpen(false);
-
-      if (mode === "qa") {
-        const hideTitle = options?.hideTitle ? "&hideTitle=true" : "";
-        navigate(
-          createPageUrl(`one-qa-mode?folderId=${selectedFolderId}${hideTitle}`),
-        );
-        return;
-      }
-
-      if (mode === "pair") {
-        navigate(createPageUrl(`pair-mode?folderId=${selectedFolderId}`));
-        return;
-      }
-
-      if (mode === "choice") {
-        navigate(
-          createPageUrl(`four-choice-mode?folderId=${selectedFolderId}`),
-        );
-        return;
-      }
-
-      navigate(
-        createPageUrl(`create-mode/placeholder?folderId=${selectedFolderId}`),
-      );
-    },
-    [navigate, selectedFolderId],
-  );
+    navigate(createPageUrl(`CardEdit?folderId=${selectedFolderId}`));
+  }, [navigate, selectedFolderId]);
 
   return {
-    isCreateSelectionOpen,
-    setIsCreateSelectionOpen,
-    isModeSelectionOpen,
-    setIsModeSelectionOpen,
     handleFolderSelectWithRecent,
     handleStartStudy,
     handleViewCards,
     handleOpenCreateCard,
-    handleSelectCreateMode,
-    handleSelectDetailedMode,
   };
 };

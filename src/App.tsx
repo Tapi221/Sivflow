@@ -33,9 +33,6 @@ const Dictionary = lazy(() => import("./pages/Dictionary"));
 const NotImplementedPlaceholder = lazy(
   () => import("./pages/NotImplementedPlaceholder"),
 );
-const OneQAMode = lazy(() => import("./pages/OneQAMode"));
-const PairMode = lazy(() => import("./pages/PairMode"));
-const FourChoiceMode = lazy(() => import("./pages/FourChoiceMode"));
 const PdfScrollTest = DEV_MODE
   ? lazy(() => import("./pages/PdfScrollTest"))
   : null;
@@ -396,38 +393,7 @@ const AppContent = () => {
               </Suspense>
             }
           />
-          <Route
-            path="create-mode/placeholder"
-            element={
-              <Suspense fallback={<LoadingFallback />}>
-                <NotImplementedPlaceholder />
-              </Suspense>
-            }
-          />
-          <Route
-            path="one-qa-mode"
-            element={
-              <Suspense fallback={<LoadingFallback />}>
-                <OneQAMode />
-              </Suspense>
-            }
-          />
-          <Route
-            path="pair-mode"
-            element={
-              <Suspense fallback={<LoadingFallback />}>
-                <PairMode />
-              </Suspense>
-            }
-          />
-          <Route
-            path="four-choice-mode"
-            element={
-              <Suspense fallback={<LoadingFallback />}>
-                <FourChoiceMode />
-              </Suspense>
-            }
-          />
+
 
           {PdfScrollTest ? (
             <Route

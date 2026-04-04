@@ -11,7 +11,6 @@ import { createPageUrl } from "@/utils";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { TreeViewDialogs } from "@/components/folder/components/TreeViewDialogs";
 import { TreeViewMainPane } from "@/components/folder/components/TreeViewMainPane";
 import { TreeViewSidebar } from "@/components/folder/components/TreeViewSidebar";
 import { TreeViewTabContent } from "@/components/folder/components/TreeViewTabContent";
@@ -169,16 +168,10 @@ const TreeViewLayout = ({
   }, [explorerTab, setExplorerTab]);
 
   const {
-    isCreateSelectionOpen,
-    setIsCreateSelectionOpen,
-    isModeSelectionOpen,
-    setIsModeSelectionOpen,
     handleFolderSelectWithRecent,
     handleStartStudy,
     handleViewCards,
     handleOpenCreateCard,
-    handleSelectCreateMode,
-    handleSelectDetailedMode,
   } = useTreeViewActions({
     navigate,
     selectedFolderId,
@@ -390,15 +383,6 @@ const TreeViewLayout = ({
           onCreateCard: handleOpenCreateCard,
         }}
         folderSelectionNonce={folderSelectionNonce}
-      />
-
-      <TreeViewDialogs
-        isCreateSelectionOpen={isCreateSelectionOpen}
-        setIsCreateSelectionOpen={setIsCreateSelectionOpen}
-        isModeSelectionOpen={isModeSelectionOpen}
-        setIsModeSelectionOpen={setIsModeSelectionOpen}
-        onSelectCreateMode={handleSelectCreateMode}
-        onSelectDetailedMode={handleSelectDetailedMode}
       />
     </div>
   );
