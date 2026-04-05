@@ -1,6 +1,6 @@
 import { buildEntityRenameDeleteMenuActions } from "@/components/folder/components/menus/explorerMenuActionBuilders";
 import { cn } from "@/lib/utils";
-import { FileText } from "@/ui/icons";
+import { ChevronDown, ChevronRight, Layers } from "@/ui/icons";
 import React from "react";
 import type { ExplorerTreeNode as TreeNode } from "../tree/arboristAdapter";
 import { ExplorerRow } from "./ExplorerRow";
@@ -8,16 +8,23 @@ import { ExplorerRowContent } from "./ExplorerRowContent";
 import { SidebarTreeRow } from "./SidebarTreeRow";
 import {
   EXPLORER_ROW_CONTENT_CLASS,
+  EXPLORER_ROW_ICON_SLOT_CLASS,
   EXPLORER_ROW_INPUT_CLASS,
+  EXPLORER_ROW_LEADING_SLOT_CLASS,
   EXPLORER_ROW_TITLE_SLOT_CLASS,
+  FOLDER_ROW_ICON_ACTIVE_CLASS,
+  FOLDER_ROW_ICON_MUTED_CLASS,
+  FOLDER_ROW_ICON_SIZE_CLASS,
   FOLDER_ROW_TITLE_CLASS,
 } from "./shared";
 
-interface DocumentRowProps {
-  treeNode: TreeNode & { kind: "document" };
+interface CardSetRowProps {
+  treeNode: TreeNode & { kind: "cardSet" };
   style: React.CSSProperties;
   depth: number;
+  isOpen: boolean;
   isSelected: boolean;
+  toggle: () => void;
   editingId: string | null;
   editingName: string;
   editingNameRef: React.MutableRefObject<string>;
@@ -39,11 +46,13 @@ interface DocumentRowProps {
   setRowRef: (id: string, node: HTMLElement | null) => void;
 }
 
-export const DocumentRow = ({
+export const CardSetRow = ({
   treeNode,
   style,
   depth,
+  isOpen,
   isSelected,
+  toggle,
   editingId,
   editingName,
   editingNameRef,
@@ -57,19 +66,21 @@ export const DocumentRow = ({
   handleDelete,
   handleRenameConfirm,
   setRowRef,
-}: DocumentRowProps) => {
-  const rowMenuId = `document:${treeNode.rawId}`;
+}: CardSetRowProps) => {
+  const rowMenuId = `cardSet:${treeNode.rawId}`;
   const isRowMenuOpen = openRowMenuId === rowMenuId;
   const isEditing = editingId === treeNode.rawId;
+  const hasChildren = (treeNode.children?.length ?? 0) > 0;
+  const Chevron = isOpen ? ChevronDown : ChevronRight;
 
   const rowMenuActions = React.useMemo(
     () =>
       buildEntityRenameDeleteMenuActions({
         id: treeNode.rawId,
         name: treeNode.name,
-        type: "document",
+        type: "cardSet",
         beforeRename: () => {
-          onItemSelect({ type: "document", id: treeNode.rawId });
+          onItemSelect({ type: "cardSet", id: treeNode.rawId });
         },
         closeMenu: () => {
           setOpenRowMenuId(null);
@@ -117,29 +128,64 @@ export const DocumentRow = ({
       hasContextMenu
       isEditing={isEditing}
       onContextMenuSelect={() => {
-        onItemSelect({ type: "document", id: treeNode.rawId });
+        onItemSelect({ type: "cardSet", id: treeNode.rawId });
       }}
     >
       <ExplorerRow
         rowRef={(el) => setRowRef(treeNode.rawId, el)}
         depth={depth}
         selected={isSelected}
-        className="sidebar-row--document"
-        onClick={(event) => {
-          if (event.defaultPrevented) return;
-          onItemSelect({ type: "document", id: treeNode.rawId });
+        className={cn(
+          "cursor-pointer sidebar-row--folder",
+          isSelected
+            ? "bg-[var(--sidebar-active-bg,#e7ebef)] text-[var(--sidebar-text,#202123)]"
+            : "hover:bg-[var(--sidebar-active-bg,#e7ebef)] text-[var(--sidebar-text,#202123)]",
+        )}
+        onClick={() => {
+          onItemSelect({ type: "cardSet", id: treeNode.rawId });
         }}
       >
-        <div className={EXPLORER_ROW_CONTENT_CLASS}>
-          <span className="mr-1 size-4 shrink-0" />
-          <FileText
-            className="mr-2 h-4 w-4 shrink-0 text-[var(--sidebar-text-muted,#6e6e80)]"
-            style={{ transform: "translateY(-1px)" }}
-          />
+        <div className={cn(EXPLORER_ROW_CONTENT_CLASS, "cursor-pointer")}>
+          <div className={EXPLORER_ROW_LEADING_SLOT_CLASS}>
+            {hasChildren ? (
+              <button
+                type="button"
+                className="grid h-4 w-4 place-items-center"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  toggle();
+                }}
+                aria-label={
+                  isOpen ? "カードセットを折りたたむ" : "カードセットを展開する"
+                }
+              >
+                <Chevron
+                  className={cn(
+                    "sidebar-icon",
+                    FOLDER_ROW_ICON_SIZE_CLASS,
+                    FOLDER_ROW_ICON_MUTED_CLASS,
+                    isSelected && FOLDER_ROW_ICON_ACTIVE_CLASS,
+                  )}
+                />
+              </button>
+            ) : null}
+          </div>
+
+          <span className={EXPLORER_ROW_ICON_SLOT_CLASS}>
+            <Layers
+              className={cn(
+                "sidebar-icon",
+                FOLDER_ROW_ICON_SIZE_CLASS,
+                FOLDER_ROW_ICON_MUTED_CLASS,
+                isSelected && FOLDER_ROW_ICON_ACTIVE_CLASS,
+              )}
+            />
+          </span>
+
           {isEditing ? (
             <input
               ref={attachEditInputRef}
-              aria-label="文書名の編集"
+              aria-label="カードセット名の編集"
               className={EXPLORER_ROW_INPUT_CLASS}
               defaultValue={editingName}
               onFocus={(e) => {
@@ -172,20 +218,26 @@ export const DocumentRow = ({
                 editingNameRef.current = e.currentTarget.value;
                 void handleRenameConfirm({
                   id: treeNode.rawId,
-                  type: "document",
+                  type: "cardSet",
                 });
               }}
             />
           ) : (
-            <div
-              className={cn(EXPLORER_ROW_TITLE_SLOT_CLASS, "overflow-hidden")}
-            >
+            <div className={EXPLORER_ROW_TITLE_SLOT_CLASS}>
               <ExplorerRowContent
                 title={treeNode.name}
                 titleClassName={cn(
+                  "lining-nums tabular-nums",
                   FOLDER_ROW_TITLE_CLASS,
                   isSelected ? "font-medium" : "font-normal",
                 )}
+                right={
+                  hasChildren ? (
+                    <span className="ml-auto text-[10px] text-[var(--sidebar-text-muted,#6e6e80)] tabular-nums">
+                      {treeNode.children!.length}
+                    </span>
+                  ) : null
+                }
               />
             </div>
           )}
