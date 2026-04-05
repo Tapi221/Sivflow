@@ -158,7 +158,9 @@ export const XlsxImportDialog = ({
       });
     } catch (error) {
       console.error("[XlsxImportDialog] parse failed", error);
-      toast.error("XLSX の解析に失敗しました。ファイル形式を確認してください。");
+      toast.error(
+        "XLSX の解析に失敗しました。ファイル形式を確認してください。",
+      );
       setState({
         file,
         result: null,
@@ -219,7 +221,9 @@ export const XlsxImportDialog = ({
         destination,
       });
 
-      toast.success(`${imported.createdCount} 件のカードをインポートしました。`);
+      toast.success(
+        `${imported.createdCount} 件のカードをインポートしました。`,
+      );
       handleClose(false);
       onImported?.({
         cardSetId: imported.createdCardSetId,
@@ -339,9 +343,9 @@ export const XlsxImportDialog = ({
                   image 行はエラーとして止めます。
                 </p>
                 <p>
-                  blocks シートで cardId が同じ行は 1 枚のカードとしてまとめられ、
-                  side ごとに front / back へ振り分けられます。side 未指定なら
-                  front 扱いです。
+                  blocks シートで cardId が同じ行は 1
+                  枚のカードとしてまとめられ、 side ごとに front / back
+                  へ振り分けられます。side 未指定なら front 扱いです。
                 </p>
               </div>
             </div>

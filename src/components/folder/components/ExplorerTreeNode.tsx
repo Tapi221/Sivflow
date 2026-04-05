@@ -436,79 +436,76 @@ export const ExplorerTreeNodeRenderer = React.memo(
               onItemSelect({ type: "document", id: treeNode.rawId });
           }}
         >
-        <div className={EXPLORER_ROW_CONTENT_CLASS}>
-          <span className="mr-1 size-4 shrink-0" />
-          <FileText
-            className={cn("mr-2 h-4 w-4 shrink-0", iconClassName)}
-            style={{ transform: "translateY(-1px)" }}
-          />
-          {isDocumentEditing ? (
-            <input
-              ref={(node) => {
-                editInputRef.current = node;
-                if (!node) return;
-                node.focus({ preventScroll: true });
-                node.select();
-                try {
-                  node.setSelectionRange(0, node.value.length);
-                } catch {
-                  // no-op
-                }
-              }}
-              aria-label="文書名の編集"
-              className={EXPLORER_ROW_INPUT_CLASS}
-              defaultValue={editingName}
-              onFocus={(e) => {
-                e.currentTarget.select();
-              }}
-              onMouseUp={(e) => {
-                e.preventDefault();
-              }}
-              onChange={(e) => {
-                editingNameRef.current = e.target.value;
-              }}
-              onClick={(e) => e.stopPropagation()}
-              onKeyDown={(e) => {
-                const isComposing =
-                  e.nativeEvent.isComposing || e.keyCode === 229;
-                if (e.key === "Enter" && isComposing) return;
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  editingNameRef.current = e.currentTarget.value;
-                  e.currentTarget.blur();
-                }
-                if (e.key === "Escape") {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  renameCancelledRef.current = true;
-                  e.currentTarget.blur();
-                }
-              }}
-              onBlur={(e) => {
-                editingNameRef.current = e.currentTarget.value;
-                void handleRenameConfirm({
-                  id: treeNode.rawId,
-                  type: "document",
-                });
-              }}
+          <div className={EXPLORER_ROW_CONTENT_CLASS}>
+            <span className="mr-1 size-4 shrink-0" />
+            <FileText
+              className={cn("mr-2 h-4 w-4 shrink-0", iconClassName)}
+              style={{ transform: "translateY(-1px)" }}
             />
-          ) : (
-            <div
-              className={cn(
-                EXPLORER_ROW_TITLE_SLOT_CLASS,
-                "overflow-hidden",
-              )}
-            >
-              <ExplorerRowContent
-                title={treeNode.name}
-                titleClassName={cn(
-                  FOLDER_ROW_TITLE_CLASS,
-                  isSelected ? "font-medium" : "font-normal",
-                )}
+            {isDocumentEditing ? (
+              <input
+                ref={(node) => {
+                  editInputRef.current = node;
+                  if (!node) return;
+                  node.focus({ preventScroll: true });
+                  node.select();
+                  try {
+                    node.setSelectionRange(0, node.value.length);
+                  } catch {
+                    // no-op
+                  }
+                }}
+                aria-label="文書名の編集"
+                className={EXPLORER_ROW_INPUT_CLASS}
+                defaultValue={editingName}
+                onFocus={(e) => {
+                  e.currentTarget.select();
+                }}
+                onMouseUp={(e) => {
+                  e.preventDefault();
+                }}
+                onChange={(e) => {
+                  editingNameRef.current = e.target.value;
+                }}
+                onClick={(e) => e.stopPropagation()}
+                onKeyDown={(e) => {
+                  const isComposing =
+                    e.nativeEvent.isComposing || e.keyCode === 229;
+                  if (e.key === "Enter" && isComposing) return;
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    editingNameRef.current = e.currentTarget.value;
+                    e.currentTarget.blur();
+                  }
+                  if (e.key === "Escape") {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    renameCancelledRef.current = true;
+                    e.currentTarget.blur();
+                  }
+                }}
+                onBlur={(e) => {
+                  editingNameRef.current = e.currentTarget.value;
+                  void handleRenameConfirm({
+                    id: treeNode.rawId,
+                    type: "document",
+                  });
+                }}
               />
-            </div>
-          )}
-        </div>
+            ) : (
+              <div
+                className={cn(EXPLORER_ROW_TITLE_SLOT_CLASS, "overflow-hidden")}
+              >
+                <ExplorerRowContent
+                  title={treeNode.name}
+                  titleClassName={cn(
+                    FOLDER_ROW_TITLE_CLASS,
+                    isSelected ? "font-medium" : "font-normal",
+                  )}
+                />
+              </div>
+            )}
+          </div>
         </div>
         {isDocumentNode ? (
           <ContextMenu

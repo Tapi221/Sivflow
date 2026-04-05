@@ -12,9 +12,7 @@ test.describe("Settings footer profile", () => {
     await page.getByRole("dialog").waitFor({ state: "visible" });
   });
 
-  test("Should display footer avatar and email area", async ({
-    page,
-  }) => {
+  test("Should display footer avatar and email area", async ({ page }) => {
     const footer = page.locator("text=ログアウト").locator("..");
     const avatar = footer.locator("img, div.rounded-full").first();
     await expect(avatar).toBeVisible();
@@ -22,9 +20,7 @@ test.describe("Settings footer profile", () => {
     await expect(footer).toContainText("ログアウト");
   });
 
-  test("Should keep email visible in footer", async ({
-    page,
-  }) => {
+  test("Should keep email visible in footer", async ({ page }) => {
     const footer = page.locator("text=ログアウト").locator("..");
     await expect(footer.locator("text=@")).toBeVisible();
   });

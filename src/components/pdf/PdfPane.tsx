@@ -161,7 +161,6 @@ export const PdfPane = ({
     };
   }, []);
 
-
   return (
     <div className={cn("flex flex-col h-full min-h-0 min-w-0", className)}>
       <PdfPaneToolbar

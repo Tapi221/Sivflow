@@ -202,7 +202,8 @@ export const BlockWrapper = ({
   const frameVariant =
     mode === "viewer"
       ? "none"
-      : mode === "editor" && (inEditMode || Boolean(isActive || isEditingWithin))
+      : mode === "editor" &&
+          (inEditMode || Boolean(isActive || isEditingWithin))
         ? "editor"
         : "neutral";
 

@@ -10,8 +10,7 @@ export const EXPLORER_ROW_INPUT_CLASS =
   "h-6 w-full rounded border border-slate-300 bg-white px-1 text-[14px] leading-5 text-[#1f2328] outline-none select-text";
 export const EXPLORER_ROW_TITLE_SLOT_CLASS =
   "pointer-events-none flex min-w-0 flex-1 items-center";
-export const EXPLORER_ROW_MOBILE_NAV_TRAILING_PADDING_CLASS =
-  "pr-8 md:pr-0";
+export const EXPLORER_ROW_MOBILE_NAV_TRAILING_PADDING_CLASS = "pr-8 md:pr-0";
 
 export const FOLDER_ROW_HEIGHT_PX = 32;
 export const FOLDER_ROW_ICON_SIZE_CLASS = "h-4 w-4";

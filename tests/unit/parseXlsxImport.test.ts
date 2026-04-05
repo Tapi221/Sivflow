@@ -25,7 +25,15 @@ describe("parseXlsxImport", () => {
   it("blocks シートの有効な行を cardId ごとにまとめ、side ごとに front/back へ振り分ける", async () => {
     const fileBuffer = createWorkbookBuffer({
       blocks: [
-        ["cardId", "side", "blockOrder", "type", "content", "language", "title"],
+        [
+          "cardId",
+          "side",
+          "blockOrder",
+          "type",
+          "content",
+          "language",
+          "title",
+        ],
         ["card-001", "front", "1", "text", "最初のテキスト", "", "カードA"],
         [
           "card-001",
@@ -212,7 +220,15 @@ describe("parseXlsxImport", () => {
   it("warning だけなら payload を返しつつ issues に warning を残す", async () => {
     const fileBuffer = createWorkbookBuffer({
       blocks: [
-        ["cardId", "side", "blockOrder", "type", "content", "language", "title"],
+        [
+          "cardId",
+          "side",
+          "blockOrder",
+          "type",
+          "content",
+          "language",
+          "title",
+        ],
         ["card-001", "front", "1", "text", "本文", "typescript", "カードA"],
         ["card-001", "back", "1", "markdown", "## md", "", "カードA 別名"],
       ],

@@ -193,9 +193,7 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
   const hasResolvedProfileImage = !!resolvedProfileImageUrl && !imgError;
 
   const footerDisplayName =
-    currentUser?.displayName?.trim() ||
-    settings?.displayName ||
-    "User";
+    currentUser?.displayName?.trim() || settings?.displayName || "User";
   const { bg: footerAvatarBg, text: footerAvatarText } =
     getAvatarColors(footerDisplayName);
 
@@ -259,7 +257,6 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
 
   const renderContent = () => {
     switch (activeTab) {
-
       case "tags":
         return (
           <div className="space-y-4 animate-in fade-in duration-300">

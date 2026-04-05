@@ -43,7 +43,10 @@ const buildIssue = ({
 };
 
 const normalizeHeaderName = (value: string): ImportColumnKey | null => {
-  const normalized = value.trim().toLowerCase().replace(/[\s_-]+/g, "");
+  const normalized = value
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_-]+/g, "");
 
   if (normalized === "cardid") return "cardId";
   if (normalized === "side" || normalized === "face") return "side";
@@ -500,7 +503,11 @@ export const parseXlsxImport = async (
       continue;
     }
 
-    const { side, block, issues: rowIssues } = buildRowBlock({
+    const {
+      side,
+      block,
+      issues: rowIssues,
+    } = buildRowBlock({
       rowNumber,
       sheetName,
       rowCellMap,

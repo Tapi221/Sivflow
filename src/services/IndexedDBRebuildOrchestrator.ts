@@ -167,7 +167,9 @@ export class IndexedDBRebuildOrchestrator {
           );
           for (const change of changes) {
             if (!this.isSupportedType(change.type)) continue;
-            const table = this.tableFromType(change.type as RebuildSupportedType);
+            const table = this.tableFromType(
+              change.type as RebuildSupportedType,
+            );
             const sanitizeResult = sanitizeBlobUrlsDeep(change.data);
             if (sanitizeResult.changed) {
               console.warn(

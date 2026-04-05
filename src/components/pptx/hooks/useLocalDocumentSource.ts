@@ -101,7 +101,8 @@ export const useLocalDocumentSource = ({
       };
     }
 
-    if (localRestoreAttemptKey) triedKeysRef.current.add(localRestoreAttemptKey);
+    if (localRestoreAttemptKey)
+      triedKeysRef.current.add(localRestoreAttemptKey);
 
     const startRestoreRafId = requestAnimationFrame(() => {
       setIsRestoring(true);

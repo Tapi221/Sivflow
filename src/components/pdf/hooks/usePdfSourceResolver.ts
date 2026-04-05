@@ -178,7 +178,11 @@ export const usePdfSourceResolver = (
       return;
     }
 
-    if (usableCachedBlobUrl || usableRestoredBlobUrl || usablePersistedBlobUrl) {
+    if (
+      usableCachedBlobUrl ||
+      usableRestoredBlobUrl ||
+      usablePersistedBlobUrl
+    ) {
       queueMicrotask(() => setLocalDataStatus("ready"));
       return;
     }
@@ -325,7 +329,14 @@ export const usePdfSourceResolver = (
         setLocalDataStatus("idle");
       }
     },
-    [userId, doc.id, localBlobId, remoteSourceKey, remoteUrl, resetLocalRestoreAttempt],
+    [
+      userId,
+      doc.id,
+      localBlobId,
+      remoteSourceKey,
+      remoteUrl,
+      resetLocalRestoreAttempt,
+    ],
   );
 
   return {

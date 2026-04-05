@@ -76,19 +76,13 @@ const BLOCKS_ROWS = [
 const README_ROWS = [
   ["項目", "説明"],
   ["必須ヘッダー", "cardId / blockOrder / type"],
-  [
-    "side",
-    '任意。front / back を指定します。未指定なら front 扱いです。',
-  ],
+  ["side", "任意。front / back を指定します。未指定なら front 扱いです。"],
   [
     "type",
     "text / markdown / math / code を使用可能。image は phase 1 では未対応。",
   ],
   ["cardId", "同じ値の行を 1 枚のカードにグルーピングします。"],
-  [
-    "blockOrder",
-    "1 以上の整数。cardId + side ごとの表示順になります。",
-  ],
+  ["blockOrder", "1 以上の整数。cardId + side ごとの表示順になります。"],
   ["content", "text / markdown / math / code では必須です。"],
   [
     "language",

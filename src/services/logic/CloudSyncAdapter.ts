@@ -290,10 +290,7 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
         const settingsRef = doc(firestore, "userSettings", this.userId);
         const snap = await getDoc(settingsRef);
         if (snap.exists()) {
-          const data: any = this.sanitizeFromCloud(
-            "userSetting",
-            snap.data(),
-          );
+          const data: any = this.sanitizeFromCloud("userSetting", snap.data());
           const updatedAt =
             data?.updatedAt?.toMillis?.() ??
             data?.updatedAt?.getTime?.() ??
@@ -410,8 +407,7 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
 
     for (const id of entityIds) {
       const firestore = firestoreDb;
-      if (!firestore)
-        throw new Error("Firebase Firestore is not initialized.");
+      if (!firestore) throw new Error("Firebase Firestore is not initialized.");
 
       // card
       {
@@ -523,9 +519,7 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
 
       // userSetting
       {
-        const snap = await getDoc(
-          doc(firestore, "userSettings", this.userId),
-        );
+        const snap = await getDoc(doc(firestore, "userSettings", this.userId));
         if (snap.exists()) {
           results.push({
             type: "userSetting",
