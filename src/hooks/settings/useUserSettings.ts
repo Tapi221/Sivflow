@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useRef } from "react";
-import { useLiveQuery } from "dexie-react-hooks";
-import { getLocalDb } from "@/services/localDB";
 import { useAuthSession } from "@/contexts/AuthContext";
+import { getLocalDb } from "@/services/localDB";
 import type { UserSettings } from "@/types";
 import { sanitizeProfileImage } from "@/utils/profileImageSanitizer";
+import { useLiveQuery } from "dexie-react-hooks";
+import { useCallback, useEffect, useRef } from "react";
 
 export const DEFAULT_SETTINGS: Partial<UserSettings> = {
   displayName: "UserName",
@@ -21,8 +21,7 @@ export const DEFAULT_SETTINGS: Partial<UserSettings> = {
   defaultPreviewEnabled: false,
   autoDraftEnabled: true,
   autoSaveEnabled: true,
-  accentColor: "#689A98", // Default system accent color
-  cardEditorHeightPx: null, // カードの高さ設定（nullの場合はデフォルトの4:3比率）
+  cardEditorHeightPx: null,
   questionDisplayMode: "tap_to_reveal" as const,
   folderSidebarDisplayMode: "auto" as const,
   editorBlockSettings: [
@@ -54,7 +53,13 @@ export const DEFAULT_SETTINGS: Partial<UserSettings> = {
       isVisible: true,
       orderIndex: 3,
     },
-    { id: "math", type: "math", label: "数式", isVisible: true, orderIndex: 4 },
+    {
+      id: "math",
+      type: "math",
+      label: "数式",
+      isVisible: true,
+      orderIndex: 4,
+    },
     {
       id: "markdown",
       type: "markdown",
@@ -88,14 +93,7 @@ export const useUserSettings = () => {
       };
     },
     [currentUser],
-    {
-      ...DEFAULT_SETTINGS,
-      accentColor:
-        typeof window !== "undefined"
-          ? localStorage.getItem("flashcard-accent-color") ||
-            DEFAULT_SETTINGS.accentColor
-          : DEFAULT_SETTINGS.accentColor,
-    },
+    DEFAULT_SETTINGS,
   );
 
   useEffect(() => {
@@ -148,6 +146,7 @@ export const useUserSettings = () => {
       const current =
         (await db.userSettings.get(currentUser.uid)) ||
         (await db.userSettings.where("userId").equals(currentUser.uid).first());
+
       const hasProfileImageUpdate = Object.prototype.hasOwnProperty.call(
         newSettings,
         "profileImage",
@@ -175,7 +174,6 @@ export const useUserSettings = () => {
         id: currentUser.uid,
       };
 
-      // 安全策：ロジックに関わる値が実際に変更された場合のみ更新（パフォーマンスのための浅い比較）
       if (JSON.stringify(current) === JSON.stringify(updated)) return;
 
       await db.userSettings.put(updated as UserSettings);

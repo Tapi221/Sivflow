@@ -17,6 +17,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useFolders } from "@/hooks/folder/useFolders";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { cn } from "@/lib/utils";
+import { auth } from "@/services/firebase";
 import { getLocalDb } from "@/services/localDB";
 import {
   BookOpen,
@@ -30,15 +31,16 @@ import {
   RefreshCw,
   Tag,
   Volume2,
-  X
+  X,
 } from "@/ui/icons";
 import { getAvatarColors, getInitials } from "@/utils/avatarUtils";
-import { useEffect, useState } from "react";
+import { signOut } from "firebase/auth";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
   EXPLORER_ROW_BASE_CLASS_NAME,
-
+  EXPLORER_ROW_CONTENT_CLASS,
   EXPLORER_ROW_ICON_SLOT_CLASS,
   FOLDER_ROW_ICON_ACTIVE_CLASS,
   FOLDER_ROW_ICON_MUTED_CLASS,
@@ -52,17 +54,26 @@ import { useSyncSettings } from "@/hooks/sync/useSyncSettings";
 
 const sidebarItems = [
   { id: "study", label: "学習設定", icon: BookOpen },
-  { id: "theme", label: "テーマカラー", icon: Layers },
+  { id: "display", label: "表示設定", icon: Layers },
   { id: "tags", label: "タグ管理", icon: Tag },
   { id: "voice", label: "音声設定", icon: Volume2 },
   { id: "shortcut", label: "ショートカット", icon: Keyboard },
   { id: "sync", label: "同期設定", icon: RefreshCw },
-  
 ];
 
 const DEFAULT_SETTINGS_TAB = "study";
-const resolveSettingsTab = (tab) =>
-  sidebarItems.some((item) => item.id === tab) ? tab : DEFAULT_SETTINGS_TAB;
+
+const normalizeSettingsTab = (tab) => {
+  if (tab === "theme") return "display";
+  return tab;
+};
+
+const resolveSettingsTab = (tab) => {
+  const normalizedTab = normalizeSettingsTab(tab);
+  return sidebarItems.some((item) => item.id === normalizedTab)
+    ? normalizedTab
+    : DEFAULT_SETTINGS_TAB;
+};
 
 const voiceOptions = [
   { id: "kore", label: "Kore" },
@@ -72,77 +83,12 @@ const voiceOptions = [
   { id: "zephyr", label: "Zephyr" },
 ];
 
-const ACCENT_COLORS = [
-  {
-    id: "#689A98",
-    label: "Teal",
-    gradient: "linear-gradient(135deg, #689A98 0%, #90B8B6 100%)",
-  },
-  {
-    id: "#3B82F6",
-    label: "Blue",
-    gradient: "linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%)",
-  },
-  {
-    id: "#10B981",
-    label: "Green",
-    gradient: "linear-gradient(135deg, #10B981 0%, #34D399 100%)",
-  },
-  {
-    id: "#F59E0B",
-    label: "Amber",
-    gradient: "linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%)",
-  },
-  {
-    id: "#EF4444",
-    label: "Red",
-    gradient: "linear-gradient(135deg, #EF4444 0%, #F87171 100%)",
-  },
-  {
-    id: "#8B5CF6",
-    label: "Violet",
-    gradient: "linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)",
-  },
-];
-
-const FALLBACK_ACCENT_COLORS = [
-  {
-    id: "#689A98",
-    label: "Teal",
-    gradient: "linear-gradient(135deg, #689A98 0%, #90B8B6 100%)",
-  },
-  {
-    id: "#3B82F6",
-    label: "Blue",
-    gradient: "linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%)",
-  },
-  {
-    id: "#10B981",
-    label: "Green",
-    gradient: "linear-gradient(135deg, #10B981 0%, #34D399 100%)",
-  },
-  {
-    id: "#F59E0B",
-    label: "Amber",
-    gradient: "linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%)",
-  },
-  {
-    id: "#EF4444",
-    label: "Red",
-    gradient: "linear-gradient(135deg, #EF4444 0%, #F87171 100%)",
-  },
-  {
-    id: "#8B5CF6",
-    label: "Violet",
-    gradient: "linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)",
-  },
-];
-
 const folderSidebarDisplayModeOptions = [
   {
     id: "auto",
     label: "自動",
-    description: "現在の構成に合わせてツリー表示と遷移表示を自動で切り替えます",
+    description:
+      "現在の構成に合わせてツリー表示と遷移表示を自動で切り替えます",
   },
   {
     id: "tree",
@@ -152,26 +98,28 @@ const folderSidebarDisplayModeOptions = [
   {
     id: "navigation",
     label: "遷移表示",
-    description: "最上位フォルダ一覧から入り、選択後はその配下だけを表示します",
+    description:
+      "最上位フォルダ一覧から入り、選択後はその配下だけを表示します",
   },
 ];
 
 const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
   const [activeTab, setActiveTab] = useState(DEFAULT_SETTINGS_TAB);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
-  // タブの初期化と同期
   useEffect(() => {
     if (open) {
       setActiveTab(resolveSettingsTab(initialTab));
     }
   }, [open, initialTab]);
 
-  const [imgError, setImgError] = useState(false);
   const { currentUser, syncStatus, lastSyncTime, triggerSync } = useAuth();
   const navigate = useNavigate();
   const { folders = [], updateFolder } = useFolders();
   const { settings, updateSettings } = useUserSettings();
+  const { settings: syncPrefs, updateSettings: updateSyncPrefs } =
+    useSyncSettings();
 
   const storedProfileImageUrl = settings?.profileImage?.remoteUrl;
   const googleProfileImageUrl =
@@ -193,33 +141,53 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
   const { bg: footerAvatarBg, text: footerAvatarText } =
     getAvatarColors(footerDisplayName);
 
-  const { settings: syncPrefs, updateSettings: updateSyncPrefs } =
-    useSyncSettings();
-  const accentColorsForRender =
-    typeof ACCENT_COLORS !== "undefined" &&
-    Array.isArray(ACCENT_COLORS) &&
-    ACCENT_COLORS.length > 0
-      ? ACCENT_COLORS
-      : FALLBACK_ACCENT_COLORS;
+  const rootFolders = useMemo(() => {
+    return [...folders]
+      .filter((folder) => {
+        if (folder.isDeleted) return false;
+        const parentFolderId =
+          folder.parentFolderId ?? folder.parent_folder_id ?? null;
+        return parentFolderId === null || parentFolderId === "";
+      })
+      .sort((a, b) => {
+        const orderDiff = (a.orderIndex ?? 0) - (b.orderIndex ?? 0);
+        if (orderDiff !== 0) return orderDiff;
+        return String(a.folderName ?? "").localeCompare(
+          String(b.folderName ?? ""),
+          "ja",
+        );
+      });
+  }, [folders]);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      onOpenChange(false);
+      navigate("/", { replace: true });
+    } catch (error) {
+      console.error("ログアウトに失敗しました", error);
+    }
+  };
+
+  const onGoogleLogin = () => {
+    onOpenChange(false);
+    navigate("/", { replace: true });
+  };
 
   const handleReviewStartDayChange = async (checked) => {
-    // 1. Update setting
     await updateSettings({ reviewStartNextDay: checked });
 
-    // 2. Retroactively update TODAY's new cards (0 reviews)
     try {
       const localDb = await getLocalDb(currentUser?.uid);
       const todayStart = new Date();
       todayStart.setHours(0, 0, 0, 0);
 
-      // Fetch cards created today
       const cards = await localDb.cards
         .where("createdAt")
         .aboveOrEqual(todayStart)
         .toArray();
 
       const cardsToUpdate = cards.filter((c) => {
-        // Only fresh cards
         const reviews = c.reviewCount ?? c.review_count ?? 0;
         if (reviews > 0) return false;
         return true;
@@ -227,9 +195,8 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
 
       if (cardsToUpdate.length > 0) {
         const updates = cardsToUpdate.map((c) => {
-          const newDate = new Date(); // Today
+          const newDate = new Date();
           if (checked) {
-            // Switch to Tomorrow
             newDate.setDate(newDate.getDate() + 1);
           }
           newDate.setHours(0, 0, 0, 0);
@@ -259,6 +226,7 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
             <TagManagerPanel />
           </div>
         );
+
       case "voice":
         return (
           <div className="space-y-8 animate-in fade-in duration-300">
@@ -321,6 +289,7 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
             </div>
           </div>
         );
+
       case "study":
         return (
           <div className="space-y-8 animate-in fade-in duration-300">
@@ -425,7 +394,6 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
                   レビューボタン表示設定
                 </div>
                 <div className="space-y-4">
-                  {/* 0: 忘れた (Forgot) - Always shown */}
                   <div className="flex items-start gap-4 rounded-lg border border-slate-200/60 bg-white/28 p-3">
                     <div className="mt-1 opacity-80">
                       <div className="w-8 h-8 rounded-full bg-red-50 face-badge-convex flex items-center justify-center text-[#FF5A65]">
@@ -458,7 +426,6 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
                     </div>
                   </div>
 
-                  {/* 1: あいまい (Vague/Hard) - Toggleable */}
                   <div className="flex items-start gap-4 rounded-lg border border-slate-200/60 bg-white/28 p-3">
                     <div className="mt-1 opacity-80">
                       <div className="w-8 h-8 rounded-full bg-amber-50 face-badge-convex flex items-center justify-center text-[#F9A825]">
@@ -496,7 +463,6 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
                     </div>
                   </div>
 
-                  {/* 2: 覚えた (Good) - Always shown */}
                   <div className="flex items-start gap-4 rounded-lg border border-slate-200/60 bg-white/28 p-3">
                     <div className="mt-1 opacity-80">
                       <div className="w-8 h-8 rounded-full bg-blue-50 face-badge-convex flex items-center justify-center text-[#00A3FF]">
@@ -528,7 +494,6 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
                     </div>
                   </div>
 
-                  {/* 3: 余裕 (Easy) - Toggleable */}
                   <div className="flex items-start gap-4 rounded-lg border border-slate-200/60 bg-white/28 p-3">
                     <div className="mt-1 opacity-80">
                       <div className="w-8 h-8 rounded-full bg-emerald-50 face-badge-convex flex items-center justify-center text-[#00B67A]">
@@ -661,7 +626,8 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
             </div>
           </div>
         );
-      case "theme":
+
+      case "display":
         return (
           <div className="space-y-8 animate-in fade-in duration-300">
             <div className="space-y-6">
@@ -716,47 +682,13 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
                   })}
                 </div>
               </div>
-
-              {/* Accent Color Settings */}
-              <div className="space-y-4">
-                <div className="text-sm font-bold text-slate-600">
-                  アクセントカラー
-                </div>
-                <div className="grid grid-cols-4 sm:grid-cols-6 gap-3">
-                  {accentColorsForRender.map((color) => (
-                    <button
-                      key={color.id}
-                      onClick={() => updateSettings({ accentColor: color.id })}
-                      className={cn(
-                        "aspect-square rounded-xl flex items-center justify-center transition-all relative group overflow-hidden",
-                        settings?.accentColor === color.id
-                          ? "ring-2 ring-primary-500 ring-offset-2 ring-offset-white shadow-md scale-105"
-                          : "hover:scale-105 hover:shadow-sm ring-1 ring-slate-100",
-                      )}
-                      style={{ background: color.gradient }}
-                    >
-                      {settings?.accentColor === color.id && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/10 backdrop-blur-[1px]">
-                          <Check
-                            className="w-5 h-5 text-white drop-shadow-md"
-                            strokeWidth={3}
-                          />
-                        </div>
-                      )}
-                      <div className="absolute inset-x-0 bottom-0 p-1 text-[9px] font-bold text-white text-center bg-black/30 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity truncate">
-                        {color.label}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
             </div>
           </div>
         );
+
       case "sync":
         return (
           <div className="space-y-6 animate-in fade-in duration-300">
-            {/* Status Card */}
             <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
@@ -803,9 +735,7 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
               )}
             </div>
 
-            {/* Primary Sync Settings */}
             <div className="bg-white/5 border border-white/10 rounded-2xl p-6 shadow-sm space-y-6">
-              {/* Sync Interval */}
               <div className="space-y-3">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 md:gap-0">
                   <div>
@@ -857,7 +787,6 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
 
               <div className="h-px bg-white/10 w-full" />
 
-              {/* WiFi Only Toggle */}
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-sm font-bold text-slate-200">
@@ -876,7 +805,6 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
               </div>
             </div>
 
-            {/* Folder Sync Settings */}
             <div className="pt-6 border-t border-white/10">
               <h3 className="text-xs font-bold text-slate-400 mb-4 px-1 uppercase tracking-widest">
                 フォルダごとの同期設定
@@ -927,10 +855,8 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
               </div>
             </div>
 
-            {/* Device & Storage Management */}
             <div className="space-y-8 animate-in fade-in duration-300">
               <div className="space-y-6">
-                {/* Cloud Sync Status */}
                 <div
                   className={cn(
                     "p-6 rounded-2xl border flex items-center justify-between relative overflow-hidden",
@@ -975,8 +901,6 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
                   </div>
                 </div>
 
-
-                {/* Device Management */}
                 <div className="pt-6 border-t border-slate-200">
                   <DeviceSyncSettings />
                 </div>
@@ -1096,6 +1020,9 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
             </div>
           </div>
         );
+
+      default:
+        return null;
     }
   };
 
@@ -1109,7 +1036,6 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
           学習、同期、データ管理などの設定を行うダイアログです。
         </DialogDescription>
         <div className="flex flex-1 h-full overflow-hidden bg-transparent">
-          {/* Sidebar */}
           <div
             className={`
               md:w-[248px] flex-shrink-0 flex flex-col border-r border-slate-200/80
@@ -1158,7 +1084,6 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
               ))}
             </div>
 
-            {/* User Info / Logout */}
             <div className="border-t border-slate-200 px-4 py-4">
               <div className="mb-3 flex items-center gap-3 px-2">
                 <div
@@ -1207,9 +1132,7 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
             </div>
           </div>
 
-          {/* Content Content - Reverted from glass-content */}
           <div className="relative flex-1 overflow-x-hidden overflow-y-auto bg-transparent">
-            {/* Mobile Header */}
             <div className="md:hidden sticky top-0 z-20 flex items-center justify-between p-3 bg-white/70 border-b border-slate-200/80 backdrop-blur-md">
               <div className="flex items-center gap-2">
                 <DialogTitle className="text-lg font-bold text-slate-800">

@@ -1,6 +1,6 @@
 import { Timestamp } from "firebase/firestore";
-import type { BaseEntity, BlockConfig } from "./base";
 import type { ProfileImage } from "./assets";
+import type { BaseEntity, BlockConfig } from "./base";
 
 export interface User {
   id: string;
@@ -25,7 +25,6 @@ export interface UserSettings extends BaseEntity {
   profileImage?: ProfileImage | null;
   weekStartDay: "sunday" | "monday";
   language: "ja" | "en" | "zh";
-  accentColor: string;
   levelColors: { [level: number]: string };
   notificationsEnabled: boolean;
   notificationMethods: ("browser" | "email" | "line")[];

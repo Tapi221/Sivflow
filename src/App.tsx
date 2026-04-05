@@ -1,4 +1,3 @@
-import { ThemeManager } from "@/components/common/ThemeManager";
 import { BreadcrumbProvider } from "@/contexts/BreadcrumbContext";
 import { BlockNoteSandboxPage } from "@/sandbox/blocknote";
 import { sanitizeForLog } from "@/utils/logSanitizer";
@@ -18,8 +17,6 @@ import { dataIntegrityService } from "./services/DataIntegrityService";
 import { SyncServiceFactory } from "./services/SyncServiceFactory";
 import { DEV_MODE, isLocalHost } from "./utils/envGuards";
 
-// ===== ページコンポーネントを遅延読み込み（コード分割） =====
-// 初回ロードを軽くするために、各ページを lazy で動的 import する
 const Calendar = lazy(() => import("./pages/Calendar"));
 const Folders = lazy(() => import("./pages/Folders"));
 const CardEdit = lazy(() => import("./pages/CardEdit"));
@@ -47,10 +44,7 @@ const isTestBypassEnabled = () => {
   const hasBypassParam =
     new URLSearchParams(window.location.search).get("test_bypass") === "true";
   if (!hasBypassParam) return false;
-  // Guard 1: development mode 以外（production build 含む）では絶対に有効化しない
-  // NOTE: 一部環境で NODE_ENV=production が常時セットされるため、DEV ではなく MODE を使う。
   if (!DEV_MODE) return false;
-  // Guard 2: 開発中でも localhost 系ホストのみ許可
   return isLocalHost(window.location.hostname);
 };
 
@@ -66,38 +60,30 @@ const LoadingFallback = () => {
 };
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  // 現在のユーザーと認証状態読み込み中かどうかを取得
   const { currentUser, loading } = useAuthSession();
 
-  // 認証状態をまだ取得中ならローディング画面を表示
-  // AuthProvider は children を常にレンダリングするようになったため、
-  // ProtectedRoute が loading ガードの唯一の砦となる。
   if (loading) {
     return <LoadingFallback />;
   }
 
-  // 開発環境かどうか
-  // 開発中、または localhost 上の E2E 実行時のみ認証バイパスを許可
   const isTestBypass = isTestBypassEnabled();
 
-  // ログインしていない & バイパスも無効 → ルート("/") にリダイレクト
   if (!currentUser && !isTestBypass) {
     return <Navigate to="/" replace />;
   }
 
-  // 条件を満たしていれば子要素をそのまま表示（= 保護されたページに入れる）
   return <>{children}</>;
 };
 
 const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
+
   const isAuthPopupClosedByUserError = (error: unknown): boolean =>
     typeof error === "object" &&
     error !== null &&
     "code" in error &&
     error.code === "auth/popup-closed-by-user";
 
-  // Google ログインボタンが押されたときの処理
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     try {
@@ -105,7 +91,7 @@ const LoginPage = () => {
     } catch (error: unknown) {
       console.error("ログインエラー:", error);
       if (isAuthPopupClosedByUserError(error)) {
-        // ユーザーがポップアップを閉じた場合は無視
+        // no-op
       } else {
         const message = error instanceof Error ? error.message : "不明なエラー";
         alert("ログインに失敗しました: " + message);
@@ -223,21 +209,17 @@ const DefaultRedirect = () => {
 
 const AppContent = () => {
   const { currentUser, loading } = useAuthSession();
-  // 差分同期の進捗（文字列など）を取得
   const { syncProgress } = useSync();
 
-  // ユーザーがログインしている場合にだけ、起動時タスクを走らせる
   useEffect(() => {
     if (!currentUser) return;
 
     const runStartupTasks = async () => {
       try {
-        // 1. Operation Queue 初期化（オフライン操作のキューなど？）
         const { initializeOperationQueue } = await import("./utils/queueUtils");
         await initializeOperationQueue();
         console.log("[Queue] Operation Queue initialized");
 
-        // 2. 自動バックアップ（1日1回だけ実行される想定）
         const didBackup = await autoBackupService.performAutoBackup(
           currentUser.uid,
         );
@@ -245,7 +227,6 @@ const AppContent = () => {
           console.log("Auto backup completed on startup");
         }
 
-        // 3. データ整合性チェック（DB 健全性チェック）
         const report = await dataIntegrityService.checkIntegrity();
         if (!report.isHealthy) {
           const issueSummary = report.issues.reduce<Record<string, number>>(
@@ -270,7 +251,6 @@ const AppContent = () => {
           );
         }
 
-        // 4. V2 同期（Feature Flag が ON のときのみ起動時同期を実行）
         if (flags.isEnabled("USE_SYNC_V2")) {
           console.log("[Sync] Startup sync initiated");
           const syncService = await SyncServiceFactory.getInstance(
@@ -289,21 +269,16 @@ const AppContent = () => {
     runStartupTasks();
   }, [currentUser]);
 
-  // 開発・テスト用の認証バイパス
   const isTestBypass = isTestBypassEnabled();
 
-  // 認証状態がまだ解決していない場合はローディング画面を表示
-  // BrowserRouter を破棄せずにローディング表示することでルーティング状態を保護
   if (loading) {
     return <LoadingFallback />;
   }
 
-  // ログインしていない & バイパスもない → ログイン画面に飛ばす
   if (!currentUser && !isTestBypass) {
     return <LoginPage />;
   }
 
-  // test-only page for PDF wheel/trackpad scroll E2E checks
   if (
     PdfScrollTest &&
     isTestBypass &&
@@ -328,7 +303,6 @@ const AppContent = () => {
     );
   }
 
-  // 通常時のアプリ本体
   return (
     <>
       <AccountLockedScreen />
@@ -456,7 +430,6 @@ const AppContent = () => {
 const App = () => {
   return (
     <AuthProvider>
-      <ThemeManager />
       <ToastProvider>
         <NotificationProvider>
           <BrowserRouter>
