@@ -214,7 +214,12 @@ export const RootFolderPanelRow = ({
         )}
         role="button"
         tabIndex={0}
-        onClick={handleSelect}
+        onClick={(e) => {
+          // 右クリック由来の click を無視（SidebarTreeRow と契約を揃える）
+          if (e.defaultPrevented) return;
+
+          handleSelect();
+        }}
         onKeyDown={(e) => {
           if (isEditing || isMenuOpen) return;
           if (e.key === "Enter" || e.key === " ") {
