@@ -1,4 +1,4 @@
-import { buildRenameDeleteMenuActions } from "@/components/folder/components/menus/explorerMenuActionBuilders";
+import { buildEntityRenameDeleteMenuActions } from "@/components/folder/components/menus/explorerMenuActionBuilders";
 import { cn } from "@/lib/utils";
 import { ChevronDown, ChevronRight, Layers } from "@/ui/icons";
 import React from "react";
@@ -73,17 +73,20 @@ export const CardSetRow = ({
 
   const rowMenuActions = React.useMemo(
     () =>
-      buildRenameDeleteMenuActions({
-        onRename: () => {
+      buildEntityRenameDeleteMenuActions({
+        id: treeNode.rawId,
+        name: treeNode.name,
+        type: "cardSet",
+        beforeRename: () => {
           onItemSelect({ type: "cardSet", id: treeNode.rawId });
+        },
+        closeMenu: () => {
           setOpenRowMenuId(null);
-          setEditingId(treeNode.rawId);
-          setEditingName(treeNode.name);
-          editingNameRef.current = treeNode.name;
         },
-        onDelete: () => {
-          handleDelete(treeNode.rawId, "cardSet");
-        },
+        setEditingId,
+        setEditingName,
+        editingNameRef,
+        handleDelete,
       }),
     [
       editingNameRef,

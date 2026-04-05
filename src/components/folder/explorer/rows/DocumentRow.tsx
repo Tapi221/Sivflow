@@ -1,4 +1,4 @@
-import { buildRenameDeleteMenuActions } from "@/components/folder/components/menus/explorerMenuActionBuilders";
+import { buildEntityRenameDeleteMenuActions } from "@/components/folder/components/menus/explorerMenuActionBuilders";
 import { cn } from "@/lib/utils";
 import { FileText } from "@/ui/icons";
 import React from "react";
@@ -62,17 +62,20 @@ export const DocumentRow = ({
 
   const rowMenuActions = React.useMemo(
     () =>
-      buildRenameDeleteMenuActions({
-        onRename: () => {
+      buildEntityRenameDeleteMenuActions({
+        id: treeNode.rawId,
+        name: treeNode.name,
+        type: "document",
+        beforeRename: () => {
           onItemSelect({ type: "document", id: treeNode.rawId });
+        },
+        closeMenu: () => {
           setOpenRowMenuId(null);
-          setEditingId(treeNode.rawId);
-          setEditingName(treeNode.name);
-          editingNameRef.current = treeNode.name;
         },
-        onDelete: () => {
-          handleDelete(treeNode.rawId, "document");
-        },
+        setEditingId,
+        setEditingName,
+        editingNameRef,
+        handleDelete,
       }),
     [
       editingNameRef,
@@ -95,7 +98,7 @@ export const DocumentRow = ({
       try {
         node.setSelectionRange(0, node.value.length);
       } catch {
-        // no-op
+        // no-op: setSelectionRange をサポートしない環境がある
       }
     },
     [editInputRef, isEditing],

@@ -1,4 +1,5 @@
 import { buildFolderMenuActions } from "@/components/folder/components/menus/explorerMenuActionBuilders";
+import { beginInlineRename } from "@/components/folder/components/menus/explorerMenuStateHelpers";
 import {
   getParentFolderId,
   normalizeFolderId,
@@ -131,11 +132,17 @@ export const FolderRow: React.FC<FolderRowProps> = ({
           void handleCreateCardSetAction(folderId);
         },
         onRename: () => {
-          onSelect();
-          onMenuOpenChange(false);
-          setEditingId(folderId);
-          setEditingName(folderName);
-          editingNameRef.current = folderName;
+          beginInlineRename({
+            id: folderId,
+            name: folderName,
+            closeMenu: () => {
+              onMenuOpenChange(false);
+            },
+            setEditingId,
+            setEditingName,
+            editingNameRef,
+            beforeStart: onSelect,
+          });
         },
         onDelete: () => {
           handleDelete(folderId, "folder");

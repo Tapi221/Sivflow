@@ -1,7 +1,8 @@
 import {
+  buildEntityRenameDeleteMenuActions,
   buildFolderMenuActions,
-  buildRenameDeleteMenuActions,
 } from "@/components/folder/components/menus/explorerMenuActionBuilders";
+import { beginInlineRename } from "@/components/folder/components/menus/explorerMenuStateHelpers";
 import { ExplorerRowContent } from "@/components/folder/explorer/rows/ExplorerRowContent";
 import { SidebarTreeRow } from "@/components/folder/explorer/rows/SidebarTreeRow";
 import {
@@ -96,6 +97,10 @@ export const RootFolderPanelRow = ({
         ? Layers
         : FileText;
 
+  const closeMenu = React.useCallback(() => {
+    setOpenRowMenuId(null);
+  }, [setOpenRowMenuId]);
+
   const handleSelect = React.useCallback(() => {
     if (isEditing || isMenuOpen) return;
 
@@ -118,10 +123,14 @@ export const RootFolderPanelRow = ({
               void handleCreateCardSetAction(entry.id);
             },
             onRename: () => {
-              setOpenRowMenuId(null);
-              setEditingId(entry.id);
-              setEditingName(entry.name);
-              editingNameRef.current = entry.name;
+              beginInlineRename({
+                id: entry.id,
+                name: entry.name,
+                closeMenu,
+                setEditingId,
+                setEditingName,
+                editingNameRef,
+              });
             },
             onDelete: () => {
               handleDelete(entry.id, "folder");
@@ -129,6 +138,7 @@ export const RootFolderPanelRow = ({
           })
         : [],
     [
+      closeMenu,
       editingNameRef,
       entry,
       handleCreateCardSetAction,
@@ -136,7 +146,6 @@ export const RootFolderPanelRow = ({
       handleDelete,
       setEditingId,
       setEditingName,
-      setOpenRowMenuId,
     ],
   );
 
@@ -144,37 +153,40 @@ export const RootFolderPanelRow = ({
     if (entry.kind === "folder") return menuActions;
 
     if (entry.kind === "cardSet") {
-      return buildRenameDeleteMenuActions({
-        onRename: () => {
+      return buildEntityRenameDeleteMenuActions({
+        id: entry.id,
+        name: entry.name,
+        type: "cardSet",
+        beforeRename: () => {
           onItemSelect({ type: "cardSet", id: entry.id });
-          setOpenRowMenuId(null);
-          setEditingId(entry.id);
-          setEditingName(entry.name);
-          editingNameRef.current = entry.name;
         },
-        onDelete: () => {
-          handleDelete(entry.id, "cardSet");
-        },
+        closeMenu,
+        setEditingId,
+        setEditingName,
+        editingNameRef,
+        handleDelete,
       });
     }
 
     if (entry.kind === "document") {
-      return buildRenameDeleteMenuActions({
-        onRename: () => {
+      return buildEntityRenameDeleteMenuActions({
+        id: entry.id,
+        name: entry.name,
+        type: "document",
+        beforeRename: () => {
           onItemSelect({ type: "document", id: entry.id });
-          setOpenRowMenuId(null);
-          setEditingId(entry.id);
-          setEditingName(entry.name);
-          editingNameRef.current = entry.name;
         },
-        onDelete: () => {
-          handleDelete(entry.id, "document");
-        },
+        closeMenu,
+        setEditingId,
+        setEditingName,
+        editingNameRef,
+        handleDelete,
       });
     }
 
     return [];
   }, [
+    closeMenu,
     editingNameRef,
     entry,
     handleDelete,
@@ -182,14 +194,13 @@ export const RootFolderPanelRow = ({
     onItemSelect,
     setEditingId,
     setEditingName,
-    setOpenRowMenuId,
   ]);
 
   return (
     <SidebarTreeRow
       menuOpen={isMenuOpen}
       onMenuOpenChange={(open) => {
-        setOpenRowMenuId(open ? menuId : null);
+        setOpenRowMenuId(open && menuId ? menuId : null);
       }}
       menuActions={resolvedMenuActions}
       hasContextMenu={supportsContextMenu}
