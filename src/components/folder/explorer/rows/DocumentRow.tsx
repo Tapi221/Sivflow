@@ -41,7 +41,10 @@ interface CardSetRowProps {
     id: string,
     type: "folder" | "cardSet" | "card" | "document",
   ) => void;
-  handleRenameConfirm: (target?: { id: string; type: "cardSet" }) => Promise<void>;
+  handleRenameConfirm: (target?: {
+    id: string;
+    type: "cardSet";
+  }) => Promise<void>;
   setRowRef: (id: string, node: HTMLElement | null) => void;
 }
 

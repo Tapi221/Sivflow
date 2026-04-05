@@ -35,12 +35,10 @@ export const useDocuments = (folderId?: string) => {
   const documents = useMemo(() => {
     if (!rawDocuments) return [];
 
-    let filtered = rawDocuments.filter(
-      (d) => {
-        const document = d as DocumentWithLegacyDelete;
-        return !(document.isDeleted ?? document.is_deleted ?? false);
-      },
-    );
+    let filtered = rawDocuments.filter((d) => {
+      const document = d as DocumentWithLegacyDelete;
+      return !(document.isDeleted ?? document.is_deleted ?? false);
+    });
 
     if (folderId) {
       filtered = filtered.filter((d) => d.folderId === folderId);

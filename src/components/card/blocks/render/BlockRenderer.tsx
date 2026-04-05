@@ -29,11 +29,14 @@ export const BlockRenderer = ({
   const { settings } = useUserSettings();
   const questionDisplayMode = settings?.questionDisplayMode ?? "tap_to_reveal";
 
-  const toMediaUrl = useCallback((item: string | MediaLike | null | undefined) => {
-    if (typeof item === "string") return item;
-    if (!item) return null;
-    return item.remoteUrl ?? item.localUrl ?? item.url ?? null;
-  }, []);
+  const toMediaUrl = useCallback(
+    (item: string | MediaLike | null | undefined) => {
+      if (typeof item === "string") return item;
+      if (!item) return null;
+      return item.remoteUrl ?? item.localUrl ?? item.url ?? null;
+    },
+    [],
+  );
 
   const isRenderableBlock = useCallback((block: CardBlock) => {
     if (block.type === "text") return (block.content ?? "").trim() !== "";

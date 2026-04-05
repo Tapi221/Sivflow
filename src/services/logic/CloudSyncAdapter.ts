@@ -1,28 +1,28 @@
 import { firestoreDb } from "@/services/firebase";
 import type {
-    ICloudSyncAdapter,
-    SyncChange,
+  ICloudSyncAdapter,
+  SyncChange,
 } from "@/services/interfaces/ISyncService";
 import { sanitizeBlobUrlsDeep } from "@/utils/blobUrlSanitizer";
 import { sanitizeForLog } from "@/utils/logSanitizer";
 import type {
-    DocumentData,
-    FieldValue,
-    QueryConstraint,
-    QueryDocumentSnapshot,
+  DocumentData,
+  FieldValue,
+  QueryConstraint,
+  QueryDocumentSnapshot,
 } from "firebase/firestore";
 import * as Firestore from "firebase/firestore";
 import {
-    collection,
-    doc,
-    getDoc,
-    getDocs,
-    limit,
-    orderBy,
-    query,
-    Timestamp,
-    where,
-    writeBatch,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  limit,
+  orderBy,
+  query,
+  Timestamp,
+  where,
+  writeBatch,
 } from "firebase/firestore";
 
 type FirestoreRecord = Record<string, unknown>;

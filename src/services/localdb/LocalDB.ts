@@ -51,7 +51,7 @@ export type {
   LocalDBTableMap,
   ProjectMap,
   SyncableEntityTable,
-  TagV3Record
+  TagV3Record,
 } from "./types";
 
 declare global {
