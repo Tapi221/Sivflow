@@ -5,10 +5,10 @@ import {
 } from "@/components/folder/explorer/model/utils";
 import { CardSetRow } from "@/components/folder/explorer/rows/CardSetRow";
 import { DocumentRow } from "@/components/folder/explorer/rows/DocumentRow";
+import { ExplorerRow } from "@/components/folder/explorer/rows/ExplorerRow";
 import { ExplorerRowContent } from "@/components/folder/explorer/rows/ExplorerRowContent";
 import { FolderRow } from "@/components/folder/explorer/rows/FolderRow";
 import {
-  EXPLORER_ROW_BASE_CLASS_NAME,
   EXPLORER_ROW_CONTENT_CLASS,
   EXPLORER_ROW_TITLE_SLOT_CLASS,
   FOLDER_ROW_TITLE_CLASS,
@@ -24,7 +24,6 @@ interface ExplorerTreeNodeProps {
   isOpen: boolean;
   isSelected: boolean;
   toggle: () => void;
-  // editing
   editingId: string | null;
   editingName: string;
   editingNameRef: React.MutableRefObject<string>;
@@ -32,15 +31,12 @@ interface ExplorerTreeNodeProps {
   editInputRef: React.MutableRefObject<HTMLInputElement | null>;
   setEditingId: React.Dispatch<React.SetStateAction<string | null>>;
   setEditingName: React.Dispatch<React.SetStateAction<string>>;
-  // drag/drop
   fileDragFolderId: string | null;
   setFileDragFolderId: React.Dispatch<React.SetStateAction<string | null>>;
   handlePdfDropped: (folderId: string, files: File[]) => Promise<void>;
   handlePptxDropped: (folderId: string, files: File[]) => Promise<void>;
-  // row menu
   openRowMenuId: string | null;
   setOpenRowMenuId: React.Dispatch<React.SetStateAction<string | null>>;
-  // actions
   onFolderSelect: (folderId: string | null) => void;
   onItemSelect: (item: {
     type: "card" | "cardSet" | "document";
@@ -54,11 +50,8 @@ interface ExplorerTreeNodeProps {
   ) => void;
   handleRenameConfirm: (target?: any) => Promise<void>;
   setRowRef: (id: string, node: HTMLElement | null) => void;
-  // filter
   isFiltering: boolean;
-  // delete/update capability
   hasUpdateOrDelete: boolean;
-  // bulk tag
   setBulkTagFolderId: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
@@ -93,8 +86,8 @@ export const ExplorerTreeNodeRenderer = React.memo(
     hasUpdateOrDelete,
     setBulkTagFolderId,
   }: ExplorerTreeNodeProps) => {
-    const ROW_BASE = EXPLORER_ROW_BASE_CLASS_NAME;
     const treeNode = node.data;
+    const depth = node.level;
 
     if (treeNode.kind === "folder" && treeNode.folder) {
       const folderId = treeNode.rawId;
@@ -103,7 +96,7 @@ export const ExplorerTreeNodeRenderer = React.memo(
         <div style={style}>
           <FolderRow
             folder={treeNode.folder}
-            depth={0}
+            depth={depth}
             isExpanded={isOpen}
             isSelected={isSelected}
             isEditing={editingId === folderId}
@@ -123,16 +116,14 @@ export const ExplorerTreeNodeRenderer = React.memo(
             renameCancelledRef={renameCancelledRef}
             isFiltering={isFiltering}
             matchCount={treeNode.matchCount ?? -1}
-            rowBaseClassName={ROW_BASE}
+            rowBaseClassName=""
             hasUpdateOrDelete={hasUpdateOrDelete}
             menuOpen={openRowMenuId === `folder:${folderId}`}
             onMenuOpenChange={(open) =>
               setOpenRowMenuId(open ? `folder:${folderId}` : null)
             }
             onBulkTag={() => setBulkTagFolderId(folderId)}
-            setRowRef={
-              setRowRef as (id: string, node: HTMLElement | null) => void
-            }
+            setRowRef={setRowRef}
             isDimmed={Boolean(treeNode.isDimmed)}
             isFileDraggingOver={fileDragFolderId === folderId}
             onDragEnterCapture={(e) => {
@@ -180,6 +171,7 @@ export const ExplorerTreeNodeRenderer = React.memo(
         <CardSetRow
           treeNode={treeNode}
           style={style}
+          depth={depth}
           isOpen={isOpen}
           isSelected={isSelected}
           toggle={toggle}
@@ -205,6 +197,7 @@ export const ExplorerTreeNodeRenderer = React.memo(
         <DocumentRow
           treeNode={treeNode}
           style={style}
+          depth={depth}
           isSelected={isSelected}
           editingId={editingId}
           editingName={editingName}
@@ -225,15 +218,11 @@ export const ExplorerTreeNodeRenderer = React.memo(
 
     return (
       <div style={style}>
-        <div
-          ref={(el) => setRowRef(treeNode.rawId, el)}
-          className={cn(
-            ROW_BASE,
-            "flex h-6 min-h-6 items-center pr-2 pl-0 leading-6 select-none",
-            treeNode.kind === "card" && "sidebar-row--card",
-          )}
-          data-selected={isSelected || undefined}
-          style={{ paddingLeft: "4px" }}
+        <ExplorerRow
+          rowRef={(el) => setRowRef(treeNode.rawId, el)}
+          depth={depth}
+          selected={isSelected}
+          className="sidebar-row--card"
           onClick={() => {
             if (treeNode.kind === "card") {
               onItemSelect({ type: "card", id: treeNode.rawId });
@@ -258,7 +247,7 @@ export const ExplorerTreeNodeRenderer = React.memo(
               />
             </div>
           </div>
-        </div>
+        </ExplorerRow>
       </div>
     );
   },

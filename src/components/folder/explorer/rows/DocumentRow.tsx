@@ -3,10 +3,10 @@ import { cn } from "@/lib/utils";
 import { FileText } from "@/ui/icons";
 import React from "react";
 import type { ExplorerTreeNode as TreeNode } from "../tree/arboristAdapter";
+import { ExplorerRow } from "./ExplorerRow";
 import { ExplorerRowContent } from "./ExplorerRowContent";
 import { SidebarTreeRow } from "./SidebarTreeRow";
 import {
-  EXPLORER_ROW_BASE_CLASS_NAME,
   EXPLORER_ROW_CONTENT_CLASS,
   EXPLORER_ROW_INPUT_CLASS,
   EXPLORER_ROW_TITLE_SLOT_CLASS,
@@ -16,6 +16,7 @@ import {
 interface DocumentRowProps {
   treeNode: TreeNode & { kind: "document" };
   style: React.CSSProperties;
+  depth: number;
   isSelected: boolean;
   editingId: string | null;
   editingName: string;
@@ -41,6 +42,7 @@ interface DocumentRowProps {
 export const DocumentRow = ({
   treeNode,
   style,
+  depth,
   isSelected,
   editingId,
   editingName,
@@ -118,14 +120,11 @@ export const DocumentRow = ({
         onItemSelect({ type: "document", id: treeNode.rawId });
       }}
     >
-      <div
-        ref={(el) => setRowRef(treeNode.rawId, el)}
-        className={cn(
-          EXPLORER_ROW_BASE_CLASS_NAME,
-          "flex h-6 min-h-6 items-center pr-2 pl-0 leading-6 select-none sidebar-row--document",
-        )}
-        data-selected={isSelected || undefined}
-        style={{ paddingLeft: "4px" }}
+      <ExplorerRow
+        rowRef={(el) => setRowRef(treeNode.rawId, el)}
+        depth={depth}
+        selected={isSelected}
+        className="sidebar-row--document"
         onClick={() => {
           onItemSelect({ type: "document", id: treeNode.rawId });
         }}
@@ -190,7 +189,7 @@ export const DocumentRow = ({
             </div>
           )}
         </div>
-      </div>
+      </ExplorerRow>
     </SidebarTreeRow>
   );
 };

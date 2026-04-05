@@ -73,7 +73,6 @@ export const RootFolderPanelRow = ({
   handleRenameConfirm,
   attachInputRef,
 }: RootFolderPanelRowProps) => {
-  const isFolderEntry = entry.kind === "folder";
   const supportsContextMenu =
     entry.kind === "folder" ||
     entry.kind === "cardSet" ||

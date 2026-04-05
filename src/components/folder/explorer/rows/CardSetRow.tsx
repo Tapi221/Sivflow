@@ -21,6 +21,7 @@ import {
 interface CardSetRowProps {
   treeNode: TreeNode & { kind: "cardSet" };
   style: React.CSSProperties;
+  depth: number;
   isOpen: boolean;
   isSelected: boolean;
   toggle: () => void;
@@ -48,6 +49,7 @@ interface CardSetRowProps {
 export const CardSetRow = ({
   treeNode,
   style,
+  depth,
   isOpen,
   isSelected,
   toggle,
@@ -131,7 +133,7 @@ export const CardSetRow = ({
     >
       <ExplorerRow
         rowRef={(el) => setRowRef(treeNode.rawId, el)}
-        depth={0}
+        depth={depth}
         selected={isSelected}
         className={cn(
           "cursor-pointer sidebar-row--folder",
