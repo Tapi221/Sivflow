@@ -18,8 +18,8 @@ import { TextBlockContent } from "@/components/card/blocks/text/TextBlockContent
 import { AudioPlayer } from "@/components/card/media/CardMedia";
 import { cn } from "@/lib/utils";
 import type { CodeBlockData } from "@/types/core/code-block";
-import type { CardBlock } from "@/types/domain/card";
 import type { UploadedImage } from "@/types/domain/assets";
+import type { CardBlock } from "@/types/domain/card";
 
 export type CardBlockLayoutReplaceBlock =
   | { type: "markdown"; markdown: string }
