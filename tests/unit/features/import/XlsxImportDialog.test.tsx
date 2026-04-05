@@ -275,9 +275,9 @@ describe("XlsxImportDialog", () => {
 
     const importButton = screen.getByRole("button", {
       name: "インポートする",
-    });
+    }) as HTMLButtonElement;
 
-    expect(importButton).toBeEnabled();
+    expect(importButton.disabled).toBe(false);
 
     const user = userEvent.setup();
     await user.click(importButton);
@@ -322,9 +322,9 @@ describe("XlsxImportDialog", () => {
 
     const importButton = screen.getByRole("button", {
       name: "インポートする",
-    });
+    }) as HTMLButtonElement;
 
-    expect(importButton).toBeDisabled();
+    expect(importButton.disabled).toBe(true);
     expect(importCardsFromPayloadMock).not.toHaveBeenCalled();
   });
 
@@ -353,23 +353,9 @@ describe("XlsxImportDialog", () => {
     const user = userEvent.setup();
 
     const allComboboxes = screen.getAllByRole("combobox");
-expect(allComboboxes.length).toBeGreaterThanOrEqual(1);
+    expect(allComboboxes.length).toBeGreaterThanOrEqual(1);
 
-const destinationModeTrigger = allComboboxes[0];
-await user.click(destinationModeTrigger);
-
-const existingModeOption = await screen.findByRole("option", {
-  name: "既存カードセットへ追加",
-});
-await user.click(existingModeOption);
-
-const updatedComboboxes = screen.getAllByRole("combobox");
-expect(updatedComboboxes.length).toBeGreaterThanOrEqual(2);
-
-const targetCardSetTrigger = updatedComboboxes[1];
-await user.click(targetCardSetTrigger);
-      name: "",
-    });
+    const destinationModeTrigger = allComboboxes[0];
     await user.click(destinationModeTrigger);
 
     const existingModeOption = await screen.findByRole("option", {
@@ -377,10 +363,10 @@ await user.click(targetCardSetTrigger);
     });
     await user.click(existingModeOption);
 
-    const allComboboxes = screen.getAllByRole("combobox");
-    expect(allComboboxes.length).toBeGreaterThanOrEqual(2);
+    const updatedComboboxes = screen.getAllByRole("combobox");
+    expect(updatedComboboxes.length).toBeGreaterThanOrEqual(2);
 
-    const targetCardSetTrigger = allComboboxes[1];
+    const targetCardSetTrigger = updatedComboboxes[1];
     await user.click(targetCardSetTrigger);
 
     const existingCardSetOption = await screen.findByRole("option", {
@@ -392,7 +378,7 @@ await user.click(targetCardSetTrigger);
       name: "既存セットへ追加する",
     });
 
-    expect(importButton).toBeEnabled();
+    expect((importButton as HTMLButtonElement).disabled).toBe(false);
 
     await user.click(importButton);
 
@@ -469,10 +455,12 @@ await user.click(targetCardSetTrigger);
 
     expect(
       screen.getByText('必須ヘッダー "blockOrder" が見つかりません。'),
-    ).toBeInTheDocument();
+    ).toBeTruthy();
 
     if (issuesCard) {
-      expect(within(document.body).getByText(/blocks:blockOrder/i)).toBeInTheDocument();
+      expect(
+        within(document.body).getByText(/blocks:blockOrder/i),
+      ).toBeTruthy();
     }
   });
 });
