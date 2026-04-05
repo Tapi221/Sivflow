@@ -1,5 +1,8 @@
 import type { Card, CardSet, Folder } from "@/types";
-import type { SyncConflict as StoredSyncConflict, SyncResult } from "@/types/domain/sync";
+import type {
+  SyncConflict as StoredSyncConflict,
+  SyncResult,
+} from "@/types/domain/sync";
 import type { SyncContextSource } from "@/types/domain/telemetry";
 import {
   collection,
@@ -192,8 +195,12 @@ const repairMissingCardSetsAfterSync = async (
 
   const [cards, cardSets, folders] = await Promise.all([
     localDB.cards.where("userId").equals(userId).toArray() as Promise<Card[]>,
-    localDB.cardSets.where("userId").equals(userId).toArray() as Promise<CardSet[]>,
-    localDB.folders.where("userId").equals(userId).toArray() as Promise<Folder[]>,
+    localDB.cardSets.where("userId").equals(userId).toArray() as Promise<
+      CardSet[]
+    >,
+    localDB.folders.where("userId").equals(userId).toArray() as Promise<
+      Folder[]
+    >,
   ]);
 
   const activeCardSets = cardSets.filter((cardSet) => !cardSet.isDeleted);
@@ -224,7 +231,8 @@ const repairMissingCardSetsAfterSync = async (
       if (!targetCardSet) {
         const folderId = toFolderId(folderKey);
         const folderName =
-          (folderId ? folderNameById.get(folderId) : null) || DEFAULT_FOLDER_NAME;
+          (folderId ? folderNameById.get(folderId) : null) ||
+          DEFAULT_FOLDER_NAME;
 
         targetCardSet = {
           id: crypto.randomUUID(),
@@ -539,7 +547,11 @@ export class SyncServiceV2 implements ISyncService {
 
         if (
           folderId &&
-          this.diffEngine.detectCycle(folderId, parentId as string | null, allFolders)
+          this.diffEngine.detectCycle(
+            folderId,
+            parentId as string | null,
+            allFolders,
+          )
         ) {
           this.telemetry.log(
             "error",
@@ -625,35 +637,46 @@ export class SyncServiceV2 implements ISyncService {
         changesCount: diff.changes.length,
       });
 
-      await this.localDB.transaction("rw", [...FULL_RESYNC_TABLES], async () => {
-        for (const table of FULL_RESYNC_TABLES) {
-          await (this.localDB as unknown as Record<
-            string,
-            { clear: () => Promise<void> }
-          >)[table].clear();
-        }
-
-        for (const change of diff.changes) {
-          const changeType = typeof change.type === "string" ? change.type : "";
-          if (!changeType) continue;
-
-          const tableName = toSyncTableName(changeType);
-          if (!(FULL_RESYNC_TABLES as readonly string[]).includes(tableName)) {
-            continue;
+      await this.localDB.transaction(
+        "rw",
+        [...FULL_RESYNC_TABLES],
+        async () => {
+          for (const table of FULL_RESYNC_TABLES) {
+            await (
+              this.localDB as unknown as Record<
+                string,
+                { clear: () => Promise<void> }
+              >
+            )[table].clear();
           }
 
-          const data = normalizeFullResyncRecord(this.userId, {
-            type: changeType,
-            id: typeof change.id === "string" ? change.id : undefined,
-            data: change.data,
-          });
+          for (const change of diff.changes) {
+            const changeType =
+              typeof change.type === "string" ? change.type : "";
+            if (!changeType) continue;
 
-          await (this.localDB as unknown as Record<
-            string,
-            { put: (value: unknown) => Promise<void> }
-          >)[tableName].put(data);
-        }
-      });
+            const tableName = toSyncTableName(changeType);
+            if (
+              !(FULL_RESYNC_TABLES as readonly string[]).includes(tableName)
+            ) {
+              continue;
+            }
+
+            const data = normalizeFullResyncRecord(this.userId, {
+              type: changeType,
+              id: typeof change.id === "string" ? change.id : undefined,
+              data: change.data,
+            });
+
+            await (
+              this.localDB as unknown as Record<
+                string,
+                { put: (value: unknown) => Promise<void> }
+              >
+            )[tableName].put(data);
+          }
+        },
+      );
 
       await repairMissingCardSetsAfterSync(this.localDB, this.userId);
 

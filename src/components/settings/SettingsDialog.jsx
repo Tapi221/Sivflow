@@ -87,8 +87,7 @@ const folderSidebarDisplayModeOptions = [
   {
     id: "auto",
     label: "自動",
-    description:
-      "現在の構成に合わせてツリー表示と遷移表示を自動で切り替えます",
+    description: "現在の構成に合わせてツリー表示と遷移表示を自動で切り替えます",
   },
   {
     id: "tree",
@@ -98,8 +97,7 @@ const folderSidebarDisplayModeOptions = [
   {
     id: "navigation",
     label: "遷移表示",
-    description:
-      "最上位フォルダ一覧から入り、選択後はその配下だけを表示します",
+    description: "最上位フォルダ一覧から入り、選択後はその配下だけを表示します",
   },
 ];
 

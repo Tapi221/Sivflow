@@ -1,29 +1,21 @@
-import { ContextMenu } from "@/components/folder/components/menus/ContextMenu";
-import { buildRenameDeleteMenuActions } from "@/components/folder/components/menus/explorerMenuActionBuilders";
-import { useContextMenuAnchor } from "@/components/folder/components/menus/useContextMenuAnchor";
 import {
   extractPdfFiles,
   extractPptxFiles,
   isFileDragEvent,
 } from "@/components/folder/explorer/model/utils";
-import { ExplorerRow } from "@/components/folder/explorer/rows/ExplorerRow";
+import { CardSetRow } from "@/components/folder/explorer/rows/CardSetRow";
+import { DocumentRow } from "@/components/folder/explorer/rows/DocumentRow";
 import { ExplorerRowContent } from "@/components/folder/explorer/rows/ExplorerRowContent";
 import { FolderRow } from "@/components/folder/explorer/rows/FolderRow";
 import {
   EXPLORER_ROW_BASE_CLASS_NAME,
   EXPLORER_ROW_CONTENT_CLASS,
-  EXPLORER_ROW_ICON_SLOT_CLASS,
-  EXPLORER_ROW_INPUT_CLASS,
-  EXPLORER_ROW_LEADING_SLOT_CLASS,
-  FOLDER_ROW_ICON_ACTIVE_CLASS,
-  FOLDER_ROW_ICON_MUTED_CLASS,
-  FOLDER_ROW_ICON_SIZE_CLASS,
   EXPLORER_ROW_TITLE_SLOT_CLASS,
   FOLDER_ROW_TITLE_CLASS,
 } from "@/components/folder/explorer/rows/shared";
 import type { ExplorerTreeNode as TreeNode } from "@/components/folder/explorer/tree/arboristAdapter";
 import { cn } from "@/lib/utils";
-import { FileText, Layers, ChevronRight, ChevronDown } from "@/ui/icons";
+import { FileText } from "@/ui/icons";
 import React from "react";
 
 interface ExplorerTreeNodeProps {
@@ -71,7 +63,7 @@ interface ExplorerTreeNodeProps {
 }
 
 export const ExplorerTreeNodeRenderer = React.memo(
-  function ExplorerTreeNodeRenderer({
+  ({
     node,
     style,
     isOpen,
@@ -100,64 +92,9 @@ export const ExplorerTreeNodeRenderer = React.memo(
     isFiltering,
     hasUpdateOrDelete,
     setBulkTagFolderId,
-  }: ExplorerTreeNodeProps) {
+  }: ExplorerTreeNodeProps) => {
     const ROW_BASE = EXPLORER_ROW_BASE_CLASS_NAME;
     const treeNode = node.data;
-    const supportsContextMenu =
-      treeNode.kind === "cardSet" || treeNode.kind === "document";
-    const rowMenuId = supportsContextMenu
-      ? `${treeNode.kind}:${treeNode.rawId}`
-      : null;
-    const isRowMenuOpen = rowMenuId !== null && openRowMenuId === rowMenuId;
-    const {
-      anchorPoint: rowMenuAnchor,
-      handleContextMenu,
-      resetAnchor,
-    } = useContextMenuAnchor();
-
-    const rowMenuActions = React.useMemo(() => {
-      if (treeNode.kind === "cardSet") {
-        return buildRenameDeleteMenuActions({
-          onRename: () => {
-            onItemSelect({ type: "cardSet", id: treeNode.rawId });
-            setOpenRowMenuId(null);
-            setEditingId(treeNode.rawId);
-            setEditingName(treeNode.name);
-            editingNameRef.current = treeNode.name;
-          },
-          onDelete: () => {
-            handleDelete(treeNode.rawId, "cardSet");
-          },
-        });
-      }
-
-      if (treeNode.kind === "document") {
-        return buildRenameDeleteMenuActions({
-          onRename: () => {
-            onItemSelect({ type: "document", id: treeNode.rawId });
-            setOpenRowMenuId(null);
-            setEditingId(treeNode.rawId);
-            setEditingName(treeNode.name);
-            editingNameRef.current = treeNode.name;
-          },
-          onDelete: () => {
-            handleDelete(treeNode.rawId, "document");
-          },
-        });
-      }
-
-      return [];
-    }, [
-      treeNode.kind,
-      treeNode.rawId,
-      treeNode.name,
-      onItemSelect,
-      setOpenRowMenuId,
-      setEditingId,
-      setEditingName,
-      editingNameRef,
-      handleDelete,
-    ]);
 
     if (treeNode.kind === "folder" && treeNode.folder) {
       const folderId = treeNode.rawId;
@@ -190,11 +127,7 @@ export const ExplorerTreeNodeRenderer = React.memo(
             hasUpdateOrDelete={hasUpdateOrDelete}
             menuOpen={openRowMenuId === `folder:${folderId}`}
             onMenuOpenChange={(open) =>
-              setOpenRowMenuId(
-                open
-                  ? `folder:${folderId}`
-                  : (prev) => (prev === `folder:${folderId}` ? null : prev),
-              )
+              setOpenRowMenuId(open ? `folder:${folderId}` : null)
             }
             onBulkTag={() => setBulkTagFolderId(folderId)}
             setRowRef={
@@ -229,10 +162,12 @@ export const ExplorerTreeNodeRenderer = React.memo(
               const files = e.dataTransfer?.files ?? null;
               const pdfFiles = extractPdfFiles(files);
               const pptxFiles = extractPptxFiles(files);
-              if (pdfFiles.length > 0)
+              if (pdfFiles.length > 0) {
                 void handlePdfDropped(folderId, pdfFiles);
-              if (pptxFiles.length > 0)
+              }
+              if (pptxFiles.length > 0) {
                 void handlePptxDropped(folderId, pptxFiles);
+              }
             }}
             hasExpandableContent={Boolean(treeNode.children?.length)}
           />
@@ -240,284 +175,90 @@ export const ExplorerTreeNodeRenderer = React.memo(
       );
     }
 
-    // CardSet ノード
     if (treeNode.kind === "cardSet") {
-      const Chevron = isOpen ? ChevronDown : ChevronRight;
-      const hasChildren = (treeNode.children?.length ?? 0) > 0;
-      const isEditing = editingId === treeNode.rawId;
-      const attachEditInputRef = (node: HTMLInputElement | null) => {
-        editInputRef.current = node;
-        if (!node || !isEditing) return;
-        node.focus({ preventScroll: true });
-        node.select();
-        try {
-          node.setSelectionRange(0, node.value.length);
-        } catch {
-          // no-op: setSelectionRange をサポートしない環境がある
-        }
-      };
       return (
-        <div
+        <CardSetRow
+          treeNode={treeNode}
           style={style}
-          className="relative"
-          onContextMenu={
-            !isEditing
-              ? (e) => {
-                  if (!rowMenuId) return;
-                  handleContextMenu(e);
-                  setOpenRowMenuId(rowMenuId);
-                }
-              : undefined
-          }
-        >
-          <ExplorerRow
-            rowRef={(el) => setRowRef(treeNode.rawId, el)}
-            depth={0}
-            selected={isSelected}
-            className={cn(
-              "cursor-pointer sidebar-row--folder",
-              isSelected
-                ? "bg-[var(--sidebar-active-bg,#e7ebef)] text-[var(--sidebar-text,#202123)]"
-                : "hover:bg-[var(--sidebar-active-bg,#e7ebef)] text-[var(--sidebar-text,#202123)]",
-            )}
-            onClick={() => {
-              onItemSelect({ type: "cardSet", id: treeNode.rawId });
-            }}
-          >
-            <div className={cn(EXPLORER_ROW_CONTENT_CLASS, "cursor-pointer")}>
-              <div className={EXPLORER_ROW_LEADING_SLOT_CLASS}>
-                {hasChildren ? (
-                  <button
-                    type="button"
-                    className="grid h-4 w-4 place-items-center"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      toggle();
-                    }}
-                    aria-label={
-                      isOpen
-                        ? "カードセットを折りたたむ"
-                        : "カードセットを展開する"
-                    }
-                  >
-                    <Chevron
-                      className={cn(
-                        "sidebar-icon",
-                        FOLDER_ROW_ICON_SIZE_CLASS,
-                        FOLDER_ROW_ICON_MUTED_CLASS,
-                        isSelected && FOLDER_ROW_ICON_ACTIVE_CLASS,
-                      )}
-                    />
-                  </button>
-                ) : null}
-              </div>
-
-              <span className={EXPLORER_ROW_ICON_SLOT_CLASS}>
-                <Layers
-                  className={cn(
-                    "sidebar-icon",
-                    FOLDER_ROW_ICON_SIZE_CLASS,
-                    FOLDER_ROW_ICON_MUTED_CLASS,
-                    isSelected && FOLDER_ROW_ICON_ACTIVE_CLASS,
-                  )}
-                />
-              </span>
-
-              {isEditing ? (
-                <input
-                  ref={attachEditInputRef}
-                  aria-label="カードセット名の編集"
-                  className={EXPLORER_ROW_INPUT_CLASS}
-                  defaultValue={editingName}
-                  onFocus={(e) => {
-                    e.currentTarget.select();
-                  }}
-                  onMouseUp={(e) => {
-                    e.preventDefault();
-                  }}
-                  onChange={(e) => {
-                    editingNameRef.current = e.target.value;
-                  }}
-                  onClick={(e) => e.stopPropagation()}
-                  onKeyDown={(e) => {
-                    const isComposing =
-                      e.nativeEvent.isComposing || e.keyCode === 229;
-                    if (e.key === "Enter" && isComposing) return;
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      editingNameRef.current = e.currentTarget.value;
-                      e.currentTarget.blur();
-                    }
-                    if (e.key === "Escape") {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      renameCancelledRef.current = true;
-                      e.currentTarget.blur();
-                    }
-                  }}
-                  onBlur={(e) => {
-                    editingNameRef.current = e.currentTarget.value;
-                    void handleRenameConfirm({
-                      id: treeNode.rawId,
-                      type: "cardSet",
-                    });
-                  }}
-                />
-              ) : (
-                <div className={EXPLORER_ROW_TITLE_SLOT_CLASS}>
-                  <ExplorerRowContent
-                    title={treeNode.name}
-                    titleClassName={cn(
-                      "lining-nums tabular-nums",
-                      FOLDER_ROW_TITLE_CLASS,
-                      isSelected ? "font-medium" : "font-normal",
-                    )}
-                    right={
-                      hasChildren ? (
-                        <span className="ml-auto text-[10px] text-[var(--sidebar-text-muted,#6e6e80)] tabular-nums">
-                          {treeNode.children!.length}
-                        </span>
-                      ) : null
-                    }
-                  />
-                </div>
-              )}
-            </div>
-          </ExplorerRow>
-          <ContextMenu
-            open={isRowMenuOpen}
-            anchorPoint={isRowMenuOpen ? rowMenuAnchor : null}
-            onOpenChange={(open) => {
-              if (!open) resetAnchor();
-              setOpenRowMenuId(open ? rowMenuId : null);
-            }}
-            actions={rowMenuActions}
-          />
-        </div>
+          isOpen={isOpen}
+          isSelected={isSelected}
+          toggle={toggle}
+          editingId={editingId}
+          editingName={editingName}
+          editingNameRef={editingNameRef}
+          renameCancelledRef={renameCancelledRef}
+          editInputRef={editInputRef}
+          setEditingId={setEditingId}
+          setEditingName={setEditingName}
+          openRowMenuId={openRowMenuId}
+          setOpenRowMenuId={setOpenRowMenuId}
+          onItemSelect={onItemSelect}
+          handleDelete={handleDelete}
+          handleRenameConfirm={handleRenameConfirm}
+          setRowRef={setRowRef}
+        />
       );
     }
 
-    const iconClassName =
-      treeNode.kind === "document"
-        ? "text-[var(--sidebar-text-muted,#6e6e80)]"
-        : "text-[var(--sidebar-text-muted,#6e6e80)]";
-
-    const isDocumentNode = treeNode.kind === "document";
-    const isDocumentEditing = isDocumentNode && editingId === treeNode.rawId;
+    if (treeNode.kind === "document") {
+      return (
+        <DocumentRow
+          treeNode={treeNode}
+          style={style}
+          isSelected={isSelected}
+          editingId={editingId}
+          editingName={editingName}
+          editingNameRef={editingNameRef}
+          renameCancelledRef={renameCancelledRef}
+          editInputRef={editInputRef}
+          setEditingId={setEditingId}
+          setEditingName={setEditingName}
+          openRowMenuId={openRowMenuId}
+          setOpenRowMenuId={setOpenRowMenuId}
+          onItemSelect={onItemSelect}
+          handleDelete={handleDelete}
+          handleRenameConfirm={handleRenameConfirm}
+          setRowRef={setRowRef}
+        />
+      );
+    }
 
     return (
-      <div
-        style={style}
-        className="relative"
-        onContextMenu={
-          isDocumentNode && !isDocumentEditing
-            ? (e) => {
-                if (!rowMenuId) return;
-                handleContextMenu(e);
-                setOpenRowMenuId(rowMenuId);
-              }
-            : undefined
-        }
-      >
+      <div style={style}>
         <div
           ref={(el) => setRowRef(treeNode.rawId, el)}
           className={cn(
             ROW_BASE,
             "flex h-6 min-h-6 items-center pr-2 pl-0 leading-6 select-none",
             treeNode.kind === "card" && "sidebar-row--card",
-            treeNode.kind === "document" && "sidebar-row--document",
           )}
           data-selected={isSelected || undefined}
           style={{ paddingLeft: "4px" }}
           onClick={() => {
-            if (treeNode.kind === "card")
+            if (treeNode.kind === "card") {
               onItemSelect({ type: "card", id: treeNode.rawId });
-            if (treeNode.kind === "document")
-              onItemSelect({ type: "document", id: treeNode.rawId });
+            }
           }}
         >
           <div className={EXPLORER_ROW_CONTENT_CLASS}>
             <span className="mr-1 size-4 shrink-0" />
             <FileText
-              className={cn("mr-2 h-4 w-4 shrink-0", iconClassName)}
+              className="mr-2 h-4 w-4 shrink-0 text-[var(--sidebar-text-muted,#6e6e80)]"
               style={{ transform: "translateY(-1px)" }}
             />
-            {isDocumentEditing ? (
-              <input
-                ref={(node) => {
-                  editInputRef.current = node;
-                  if (!node) return;
-                  node.focus({ preventScroll: true });
-                  node.select();
-                  try {
-                    node.setSelectionRange(0, node.value.length);
-                  } catch {
-                    // no-op
-                  }
-                }}
-                aria-label="文書名の編集"
-                className={EXPLORER_ROW_INPUT_CLASS}
-                defaultValue={editingName}
-                onFocus={(e) => {
-                  e.currentTarget.select();
-                }}
-                onMouseUp={(e) => {
-                  e.preventDefault();
-                }}
-                onChange={(e) => {
-                  editingNameRef.current = e.target.value;
-                }}
-                onClick={(e) => e.stopPropagation()}
-                onKeyDown={(e) => {
-                  const isComposing =
-                    e.nativeEvent.isComposing || e.keyCode === 229;
-                  if (e.key === "Enter" && isComposing) return;
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    editingNameRef.current = e.currentTarget.value;
-                    e.currentTarget.blur();
-                  }
-                  if (e.key === "Escape") {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    renameCancelledRef.current = true;
-                    e.currentTarget.blur();
-                  }
-                }}
-                onBlur={(e) => {
-                  editingNameRef.current = e.currentTarget.value;
-                  void handleRenameConfirm({
-                    id: treeNode.rawId,
-                    type: "document",
-                  });
-                }}
+            <div
+              className={cn(EXPLORER_ROW_TITLE_SLOT_CLASS, "overflow-hidden")}
+            >
+              <ExplorerRowContent
+                title={treeNode.name}
+                titleClassName={cn(
+                  FOLDER_ROW_TITLE_CLASS,
+                  isSelected ? "font-medium" : "font-normal",
+                )}
               />
-            ) : (
-              <div
-                className={cn(EXPLORER_ROW_TITLE_SLOT_CLASS, "overflow-hidden")}
-              >
-                <ExplorerRowContent
-                  title={treeNode.name}
-                  titleClassName={cn(
-                    FOLDER_ROW_TITLE_CLASS,
-                    isSelected ? "font-medium" : "font-normal",
-                  )}
-                />
-              </div>
-            )}
+            </div>
           </div>
         </div>
-        {isDocumentNode ? (
-          <ContextMenu
-            open={isRowMenuOpen}
-            anchorPoint={isRowMenuOpen ? rowMenuAnchor : null}
-            onOpenChange={(open) => {
-              if (!open) resetAnchor();
-              setOpenRowMenuId(open ? rowMenuId : null);
-            }}
-            actions={rowMenuActions}
-          />
-        ) : null}
       </div>
     );
   },

@@ -51,7 +51,7 @@ export type {
   LocalDBTableMap,
   ProjectMap,
   SyncableEntityTable,
-  TagV3Record
+  TagV3Record,
 } from "./types";
 
 declare global {
@@ -95,7 +95,7 @@ const getPayloadId = (payload: unknown) => {
   return typeof id === "string" && id.length > 0 ? id : null;
 };
 
-const asArray = <T,>(v: unknown): T[] => {
+const asArray = <T>(v: unknown): T[] => {
   return Array.isArray(v) ? (v as T[]) : [];
 };
 

@@ -1,23 +1,22 @@
-import { ContextMenu } from "@/components/folder/components/menus/ContextMenu";
 import {
   buildFolderMenuActions,
   buildRenameDeleteMenuActions,
 } from "@/components/folder/components/menus/explorerMenuActionBuilders";
-import { useContextMenuAnchor } from "@/components/folder/components/menus/useContextMenuAnchor";
 import { ExplorerRowContent } from "@/components/folder/explorer/rows/ExplorerRowContent";
+import { SidebarTreeRow } from "@/components/folder/explorer/rows/SidebarTreeRow";
 import {
   EXPLORER_ROW_BASE_CLASS_NAME,
   EXPLORER_ROW_CONTENT_CLASS,
   EXPLORER_ROW_ICON_SLOT_CLASS,
   EXPLORER_ROW_INPUT_CLASS,
+  EXPLORER_ROW_TITLE_SLOT_CLASS,
   FOLDER_ROW_ICON_ACTIVE_CLASS,
   FOLDER_ROW_ICON_MUTED_CLASS,
   FOLDER_ROW_ICON_SIZE_CLASS,
-  EXPLORER_ROW_TITLE_SLOT_CLASS,
   FOLDER_ROW_TITLE_CLASS,
 } from "@/components/folder/explorer/rows/shared";
-import type { SelectedExplorerItem } from "@/types";
 import { cn } from "@/lib/utils";
+import type { SelectedExplorerItem } from "@/types";
 import { FileText, FolderOutlineIcon, Layers } from "@/ui/icons";
 import React from "react";
 import type { NavigationListEntry } from "./RootFolderPanelList";
@@ -51,10 +50,6 @@ interface RootFolderPanelRowProps {
   attachInputRef: (node: HTMLInputElement | null) => void;
 }
 
-/**
- * RootFolderPanelList 内の各フォルダ行を管理するコンポーネント
- * フックを使用するため、map 内から子コンポーネントとして分離
- */
 export const RootFolderPanelRow = ({
   entry,
   selectedFolderId,
@@ -85,8 +80,6 @@ export const RootFolderPanelRow = ({
   const menuId = supportsContextMenu ? `${entry.kind}:${entry.id}:panel` : null;
   const isEditing = supportsContextMenu && editingId === entry.id;
   const isMenuOpen = menuId !== null && openRowMenuId === menuId;
-  const { anchorPoint, handleContextMenu, resetAnchor } =
-    useContextMenuAnchor();
 
   const isSelected =
     entry.kind === "folder"
@@ -136,8 +129,8 @@ export const RootFolderPanelRow = ({
           })
         : [],
     [
-      entry,
       editingNameRef,
+      entry,
       handleCreateCardSetAction,
       handleCreateFolderAction,
       handleDelete,
@@ -182,6 +175,7 @@ export const RootFolderPanelRow = ({
 
     return [];
   }, [
+    editingNameRef,
     entry,
     handleDelete,
     menuActions,
@@ -189,122 +183,115 @@ export const RootFolderPanelRow = ({
     setEditingId,
     setEditingName,
     setOpenRowMenuId,
-    editingNameRef,
   ]);
 
   return (
-    <div
-      ref={(node) => setRowRef(entry.id, node)}
-      className={cn(
-        EXPLORER_ROW_BASE_CLASS_NAME,
-        "group relative flex h-8 w-full cursor-pointer items-center rounded-[4px] px-2 text-left",
-        "hover:bg-[var(--sidebar-active-bg,#e7ebef)]",
-        isSelected && "bg-[var(--sidebar-active-bg,#e7ebef)]",
-      )}
-      role="button"
-      tabIndex={0}
-      onClick={handleSelect}
-      onKeyDown={(e) => {
-        if (isEditing || isMenuOpen) return;
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          handleSelect();
-        }
+    <SidebarTreeRow
+      menuOpen={isMenuOpen}
+      onMenuOpenChange={(open) => {
+        setOpenRowMenuId(open ? menuId : null);
       }}
-      onContextMenu={(e) => {
-        if (!supportsContextMenu || isEditing || !menuId) return;
-        handleContextMenu(e);
-        setOpenRowMenuId(menuId);
-      }}
+      menuActions={resolvedMenuActions}
+      hasContextMenu={supportsContextMenu}
+      isEditing={isEditing}
+      onContextMenuSelect={handleSelect}
     >
-      <div className={EXPLORER_ROW_CONTENT_CLASS}>
-        <span className={EXPLORER_ROW_ICON_SLOT_CLASS}>
-          <Icon
-            className={cn(
-              "sidebar-icon",
-              FOLDER_ROW_ICON_SIZE_CLASS,
-              isSelected
-                ? FOLDER_ROW_ICON_ACTIVE_CLASS
-                : FOLDER_ROW_ICON_MUTED_CLASS,
-            )}
-          />
-        </span>
+      <div
+        ref={(node) => setRowRef(entry.id, node)}
+        className={cn(
+          EXPLORER_ROW_BASE_CLASS_NAME,
+          "group relative flex h-8 w-full cursor-pointer items-center rounded-[4px] px-2 text-left",
+          "hover:bg-[var(--sidebar-active-bg,#e7ebef)]",
+          isSelected && "bg-[var(--sidebar-active-bg,#e7ebef)]",
+        )}
+        role="button"
+        tabIndex={0}
+        onClick={handleSelect}
+        onKeyDown={(e) => {
+          if (isEditing || isMenuOpen) return;
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleSelect();
+          }
+        }}
+      >
+        <div className={EXPLORER_ROW_CONTENT_CLASS}>
+          <span className={EXPLORER_ROW_ICON_SLOT_CLASS}>
+            <Icon
+              className={cn(
+                "sidebar-icon",
+                FOLDER_ROW_ICON_SIZE_CLASS,
+                isSelected
+                  ? FOLDER_ROW_ICON_ACTIVE_CLASS
+                  : FOLDER_ROW_ICON_MUTED_CLASS,
+              )}
+            />
+          </span>
 
-        {isEditing ? (
-          <input
-            ref={attachInputRef}
-            className={EXPLORER_ROW_INPUT_CLASS}
-            style={{ userSelect: "text", WebkitUserSelect: "text" }}
-            value={editingName}
-            onFocus={(e) => {
-              e.currentTarget.select();
-            }}
-            onMouseUp={(e) => {
-              e.preventDefault();
-            }}
-            onChange={(e) => {
-              const nextName = e.target.value;
-              editingNameRef.current = nextName;
-              setEditingName(nextName);
-            }}
-            onClick={(e) => e.stopPropagation()}
-            onPointerDown={(e) => e.stopPropagation()}
-            onKeyDown={(e) => {
-              e.stopPropagation();
-              const isComposing =
-                e.nativeEvent.isComposing || e.keyCode === 229;
-
-              if (e.key === "Enter" && isComposing) return;
-
-              if (e.key === "Enter") {
+          {isEditing ? (
+            <input
+              ref={attachInputRef}
+              className={EXPLORER_ROW_INPUT_CLASS}
+              style={{ userSelect: "text", WebkitUserSelect: "text" }}
+              value={editingName}
+              onFocus={(e) => {
+                e.currentTarget.select();
+              }}
+              onMouseUp={(e) => {
                 e.preventDefault();
+              }}
+              onChange={(e) => {
+                const nextName = e.target.value;
+                editingNameRef.current = nextName;
+                setEditingName(nextName);
+              }}
+              onClick={(e) => e.stopPropagation()}
+              onPointerDown={(e) => e.stopPropagation()}
+              onKeyDown={(e) => {
+                e.stopPropagation();
+                const isComposing =
+                  e.nativeEvent.isComposing || e.keyCode === 229;
+
+                if (e.key === "Enter" && isComposing) return;
+
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  editingNameRef.current = e.currentTarget.value;
+                  void handleRenameConfirm({
+                    id: entry.id,
+                    type: entry.kind,
+                  });
+                  return;
+                }
+
+                if (e.key === "Escape") {
+                  e.preventDefault();
+                  renameCancelledRef.current = true;
+                  setEditingId(null);
+                  setEditingName("");
+                }
+              }}
+              onBlur={(e) => {
                 editingNameRef.current = e.currentTarget.value;
                 void handleRenameConfirm({
                   id: entry.id,
                   type: entry.kind,
                 });
-                return;
-              }
-
-              if (e.key === "Escape") {
-                e.preventDefault();
-                renameCancelledRef.current = true;
-                setEditingId(null);
-                setEditingName("");
-              }
-            }}
-            onBlur={(e) => {
-              editingNameRef.current = e.currentTarget.value;
-              void handleRenameConfirm({
-                id: entry.id,
-                type: entry.kind,
-              });
-            }}
-          />
-        ) : (
-          <div className={EXPLORER_ROW_TITLE_SLOT_CLASS}>
-            <ExplorerRowContent
-              title={entry.name}
-              titleClassName={cn(
-                FOLDER_ROW_TITLE_CLASS,
-                isSelected ? "font-medium" : "font-normal",
-              )}
+              }}
             />
-          </div>
-        )}
+          ) : (
+            <div className={EXPLORER_ROW_TITLE_SLOT_CLASS}>
+              <ExplorerRowContent
+                title={entry.name}
+                titleClassName={cn(
+                  FOLDER_ROW_TITLE_CLASS,
+                  isSelected ? "font-medium" : "font-normal",
+                )}
+              />
+            </div>
+          )}
+        </div>
       </div>
-
-      {supportsContextMenu ? (
-        <ContextMenu
-          open={isMenuOpen}
-          anchorPoint={isMenuOpen ? anchorPoint : null}
-          onOpenChange={(open) => {
-            if (!open) resetAnchor();
-            setOpenRowMenuId(open ? menuId : null);
-          }}
-          actions={resolvedMenuActions}
-        />
-      ) : null}
-    </div>
+    </SidebarTreeRow>
   );
 };

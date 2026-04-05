@@ -38,13 +38,7 @@ interface PdfPaneDoc {
   localUrl?: import("@/types").BlobUrl | null;
   localFileId?: string | null;
   downloadUrl?: string | null;
-  uploadStatus?:
-    | "pending"
-    | "queued"
-    | "uploading"
-    | "ready"
-    | "failed"
-    | null;
+  uploadStatus?: "pending" | "queued" | "uploading" | "ready" | "failed" | null;
   updatedAt?: unknown;
   mimeType?: string;
   viewerState?: PdfViewerState | null;

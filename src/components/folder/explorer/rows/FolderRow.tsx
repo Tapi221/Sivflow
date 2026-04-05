@@ -1,6 +1,4 @@
-import { ContextMenu } from "@/components/folder/components/menus/ContextMenu";
 import { buildFolderMenuActions } from "@/components/folder/components/menus/explorerMenuActionBuilders";
-import { useContextMenuAnchor } from "@/components/folder/components/menus/useContextMenuAnchor";
 import {
   getParentFolderId,
   normalizeFolderId,
@@ -17,17 +15,18 @@ import {
 import React from "react";
 import { ExplorerRow } from "./ExplorerRow";
 import { ExplorerRowContent } from "./ExplorerRowContent";
+import { SidebarTreeRow } from "./SidebarTreeRow";
 import {
   EXPLORER_ROW_CONTENT_CLASS,
   EXPLORER_ROW_ICON_SLOT_CLASS,
   EXPLORER_ROW_INPUT_CLASS,
   EXPLORER_ROW_LEADING_SLOT_CLASS,
+  EXPLORER_ROW_MOBILE_NAV_TRAILING_PADDING_CLASS,
+  EXPLORER_ROW_TITLE_SLOT_CLASS,
   FOLDER_ROW_ICON_ACTIVE_CLASS,
   FOLDER_ROW_ICON_MUTED_CLASS,
   FOLDER_ROW_ICON_SIZE_CLASS,
   FOLDER_ROW_TITLE_CLASS,
-  EXPLORER_ROW_TITLE_SLOT_CLASS,
-  EXPLORER_ROW_MOBILE_NAV_TRAILING_PADDING_CLASS,
 } from "./shared";
 
 type FolderRowFolder = FolderTreeNode & {
@@ -121,11 +120,6 @@ export const FolderRow: React.FC<FolderRowProps> = ({
   const parentFolderId = normalizeFolderId(getParentFolderId(folder));
   const isTopLevelFolder = parentFolderId === ROOT_FOLDER_ID;
   const FolderGlyph = isTopLevelFolder ? FolderIcon : FolderOutlineIcon;
-  const {
-    anchorPoint: menuAnchor,
-    handleContextMenu,
-    resetAnchor,
-  } = useContextMenuAnchor();
 
   const menuActions = React.useMemo(
     () =>
@@ -166,6 +160,7 @@ export const FolderRow: React.FC<FolderRowProps> = ({
   const nestedToggleOffsetStyle = !isTopLevelFolder
     ? ({ marginLeft: "calc(var(--tree-indent-px) * -0.5)" } as const)
     : undefined;
+
   const attachEditInputRef = React.useCallback(
     (node: HTMLInputElement | null) => {
       editInputRef.current = node;
@@ -182,21 +177,16 @@ export const FolderRow: React.FC<FolderRowProps> = ({
   );
 
   return (
-    <div key={folderId} className={cn(isDimmed && "opacity-50")}>
-      <div
-        className={cn(
-          "relative",
-          isFileDraggingOver &&
-            "bg-blue-50/50 ring-1 ring-blue-200/50 rounded-sm",
-        )}
-        onContextMenu={
-          hasContextMenu && !isEditing
-            ? (e) => {
-                handleContextMenu(e);
-                onMenuOpenChange(true);
-              }
-            : undefined
-        }
+    <div>
+      <SidebarTreeRow
+        menuOpen={menuOpen}
+        onMenuOpenChange={onMenuOpenChange}
+        menuActions={menuActions}
+        hasContextMenu={hasContextMenu}
+        isEditing={isEditing}
+        isDimmed={isDimmed}
+        isDraggingOver={isFileDraggingOver}
+        onContextMenuSelect={onSelect}
       >
         <ExplorerRow
           rowRef={(node) => setRowRef(folderId, node)}
@@ -341,18 +331,7 @@ export const FolderRow: React.FC<FolderRowProps> = ({
             </div>
           )}
         </ExplorerRow>
-        {hasContextMenu && (
-          <ContextMenu
-            open={menuOpen}
-            anchorPoint={menuOpen ? menuAnchor : null}
-            onOpenChange={(open) => {
-              if (!open) resetAnchor();
-              onMenuOpenChange(open);
-            }}
-            actions={menuActions}
-          />
-        )}
-      </div>
+      </SidebarTreeRow>
 
       {isExpanded && children}
     </div>

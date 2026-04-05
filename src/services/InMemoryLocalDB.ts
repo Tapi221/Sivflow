@@ -990,5 +990,4 @@ export class InMemoryLocalDB {
   setSyncTrigger(callback: () => void): void {
     this.syncTrigger = callback;
   }
-
 }
