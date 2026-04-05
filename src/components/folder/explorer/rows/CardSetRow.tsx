@@ -1,8 +1,9 @@
-import { buildEntityRenameDeleteMenuActions } from "@/components/folder/components/menus/explorerMenuActionBuilders";
+import { beginInlineRename } from "@/components/folder/components/menus/explorerMenuStateHelpers";
+import type { MenuAction } from "@/components/folder/components/menus/menuActions";
+import type { ExplorerTreeNode as TreeNode } from "@/components/folder/explorer/tree/arboristAdapter";
 import { cn } from "@/lib/utils";
 import { ChevronDown, ChevronRight, Layers } from "@/ui/icons";
 import React from "react";
-import type { ExplorerTreeNode as TreeNode } from "../tree/arboristAdapter";
 import { ExplorerRow } from "./ExplorerRow";
 import { ExplorerRowContent } from "./ExplorerRowContent";
 import { SidebarTreeRow } from "./SidebarTreeRow";
@@ -17,6 +18,13 @@ import {
   FOLDER_ROW_ICON_SIZE_CLASS,
   FOLDER_ROW_TITLE_CLASS,
 } from "./shared";
+
+type ExplorerItemType = "folder" | "cardSet" | "card" | "document";
+
+interface RenameTarget {
+  id: string;
+  type: ExplorerItemType;
+}
 
 interface CardSetRowProps {
   treeNode: TreeNode & { kind: "cardSet" };
@@ -38,11 +46,8 @@ interface CardSetRowProps {
     type: "card" | "cardSet" | "document";
     id: string;
   }) => void;
-  handleDelete: (
-    id: string,
-    type: "folder" | "cardSet" | "card" | "document",
-  ) => void;
-  handleRenameConfirm: (target?: any) => Promise<void>;
+  handleDelete: (id: string, type: ExplorerItemType) => void;
+  handleRenameConfirm: (target?: RenameTarget) => Promise<void>;
   setRowRef: (id: string, node: HTMLElement | null) => void;
 }
 
@@ -73,23 +78,37 @@ export const CardSetRow = ({
   const hasChildren = (treeNode.children?.length ?? 0) > 0;
   const Chevron = isOpen ? ChevronDown : ChevronRight;
 
-  const rowMenuActions = React.useMemo(
-    () =>
-      buildEntityRenameDeleteMenuActions({
-        id: treeNode.rawId,
-        name: treeNode.name,
-        type: "cardSet",
-        beforeRename: () => {
-          onItemSelect({ type: "cardSet", id: treeNode.rawId });
+  const rowMenuActions = React.useMemo<MenuAction[]>(
+    () => [
+      {
+        id: "rename",
+        label: "名前を変更",
+        onSelect: () => {
+          beginInlineRename({
+            id: treeNode.rawId,
+            name: treeNode.name,
+            closeMenu: () => {
+              setOpenRowMenuId(null);
+            },
+            setEditingId,
+            setEditingName,
+            editingNameRef,
+            beforeStart: () => {
+              onItemSelect({ type: "cardSet", id: treeNode.rawId });
+            },
+          });
         },
-        closeMenu: () => {
+      },
+      {
+        id: "delete",
+        label: "削除",
+        danger: true,
+        onSelect: () => {
+          handleDelete(treeNode.rawId, "cardSet");
           setOpenRowMenuId(null);
         },
-        setEditingId,
-        setEditingName,
-        editingNameRef,
-        handleDelete,
-      }),
+      },
+    ],
     [
       editingNameRef,
       handleDelete,
