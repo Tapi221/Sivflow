@@ -1,4 +1,6 @@
 import { FileText, Folder, Pencil, Plus, Tag, Trash2 } from "@/ui/icons";
+import type { MutableRefObject } from "react";
+import { beginInlineRename } from "./explorerMenuStateHelpers";
 import type { MenuAction } from "./menuActions";
 
 interface BuildFolderMenuActionsParams {
@@ -14,6 +16,23 @@ interface BuildRenameDeleteMenuActionsParams {
   deleteLabel?: string;
   onRename?: () => void;
   onDelete?: () => void;
+}
+
+interface BuildEntityRenameDeleteMenuActionsParams {
+  id: string;
+  name: string;
+  type: "cardSet" | "document";
+  beforeRename?: () => void;
+  closeMenu?: () => void;
+  setEditingId: (id: string | null) => void;
+  setEditingName: (name: string) => void;
+  editingNameRef: MutableRefObject<string>;
+  handleDelete: (
+    id: string,
+    type: "folder" | "cardSet" | "card" | "document",
+  ) => void;
+  renameLabel?: string;
+  deleteLabel?: string;
 }
 
 interface BuildExplorerCreateMenuActionsParams {
@@ -55,6 +74,38 @@ export const buildRenameDeleteMenuActions = ({
 
   return actions;
 };
+
+export const buildEntityRenameDeleteMenuActions = ({
+  id,
+  name,
+  type,
+  beforeRename,
+  closeMenu,
+  setEditingId,
+  setEditingName,
+  editingNameRef,
+  handleDelete,
+  renameLabel = "名前を変更",
+  deleteLabel = "削除",
+}: BuildEntityRenameDeleteMenuActionsParams): MenuAction[] =>
+  buildRenameDeleteMenuActions({
+    renameLabel,
+    deleteLabel,
+    onRename: () => {
+      beginInlineRename({
+        id,
+        name,
+        closeMenu,
+        setEditingId,
+        setEditingName,
+        editingNameRef,
+        beforeStart: beforeRename,
+      });
+    },
+    onDelete: () => {
+      handleDelete(id, type);
+    },
+  });
 
 /**
  * フォルダ用コンテキストメニューのアクション定義をビルド
