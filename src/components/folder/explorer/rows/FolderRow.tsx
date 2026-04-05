@@ -48,7 +48,6 @@ interface FolderRowProps {
   setEditingId: (id: string | null) => void;
   editingName: string;
   setEditingName: (name: string) => void;
-  editingNameRef: React.MutableRefObject<string>;
   editInputRef: React.MutableRefObject<HTMLInputElement | null>;
   onToggle: () => void;
   onSelect: () => void;
@@ -85,7 +84,6 @@ export const FolderRow: React.FC<FolderRowProps> = ({
   setEditingId,
   editingName,
   setEditingName,
-  editingNameRef,
   editInputRef,
   onToggle,
   onSelect,
@@ -140,7 +138,6 @@ export const FolderRow: React.FC<FolderRowProps> = ({
             },
             setEditingId,
             setEditingName,
-            editingNameRef,
             beforeStart: onSelect,
           });
         },
@@ -150,7 +147,6 @@ export const FolderRow: React.FC<FolderRowProps> = ({
         onBulkTag,
       }),
     [
-      editingNameRef,
       folderId,
       folderName,
       handleCreateCardSetAction,

@@ -22,6 +22,11 @@ import { FileText, FolderOutlineIcon, Layers } from "@/ui/icons";
 import React from "react";
 import type { NavigationListEntry } from "./RootFolderPanelList";
 
+type RenameTarget = {
+  id: string;
+  type: "folder" | "cardSet" | "card" | "document";
+};
+
 interface RootFolderPanelRowProps {
   entry: NavigationListEntry;
   selectedFolderId: string | null;
@@ -43,11 +48,10 @@ interface RootFolderPanelRowProps {
   ) => void;
   setEditingId: React.Dispatch<React.SetStateAction<string | null>>;
   setEditingName: React.Dispatch<React.SetStateAction<string>>;
-  editingNameRef: React.MutableRefObject<string>;
   renameCancelledRef: React.MutableRefObject<boolean>;
   editingId: string | null;
   editingName: string;
-  handleRenameConfirm: (target?: any) => Promise<void>;
+  handleRenameConfirm: (target?: RenameTarget) => Promise<void>;
   attachInputRef: (node: HTMLInputElement | null) => void;
 }
 
@@ -66,7 +70,6 @@ export const RootFolderPanelRow = ({
   handleDelete,
   setEditingId,
   setEditingName,
-  editingNameRef,
   renameCancelledRef,
   editingId,
   editingName,
@@ -128,7 +131,6 @@ export const RootFolderPanelRow = ({
                 closeMenu,
                 setEditingId,
                 setEditingName,
-                editingNameRef,
               });
             },
             onDelete: () => {
@@ -138,7 +140,6 @@ export const RootFolderPanelRow = ({
         : [],
     [
       closeMenu,
-      editingNameRef,
       entry,
       handleCreateCardSetAction,
       handleCreateFolderAction,
@@ -162,7 +163,6 @@ export const RootFolderPanelRow = ({
         closeMenu,
         setEditingId,
         setEditingName,
-        editingNameRef,
         handleDelete,
       });
     }
@@ -178,7 +178,6 @@ export const RootFolderPanelRow = ({
         closeMenu,
         setEditingId,
         setEditingName,
-        editingNameRef,
         handleDelete,
       });
     }
@@ -186,7 +185,6 @@ export const RootFolderPanelRow = ({
     return [];
   }, [
     closeMenu,
-    editingNameRef,
     entry,
     handleDelete,
     menuActions,

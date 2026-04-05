@@ -1,8 +1,8 @@
+import { useToast } from "@/contexts/ToastContext";
+import type { ExplorerBreadcrumbContext } from "@/features/breadcrumbs/types";
+import { XlsxImportDialog } from "@/features/import/ui/XlsxImportDialog";
 import { useCards } from "@/hooks/card/useCards";
 import { useCardSets } from "@/hooks/cardSet/useCardSets";
-import { useToast } from "@/contexts/ToastContext";
-import { XlsxImportDialog } from "@/features/import/ui/XlsxImportDialog";
-import type { ExplorerBreadcrumbContext } from "@/features/breadcrumbs/types";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { useFolders } from "@/hooks/folder/useFolders";
 import { useDocuments } from "@/hooks/platform/useDocuments";
@@ -17,6 +17,7 @@ import type {
   SelectedExplorerItem,
 } from "@/types";
 import { createPageUrl } from "@/utils";
+import type { ComponentProps } from "react";
 import {
   useCallback,
   useEffect,
@@ -51,6 +52,8 @@ interface TreeViewLayoutProps {
   navigateToSectionListToken?: number;
   folderSelectionNonce?: number;
 }
+
+type TreeViewTabContentProps = ComponentProps<typeof TreeViewTabContent>;
 
 const TreeViewLayout = ({
   folders,
@@ -336,6 +339,58 @@ const TreeViewLayout = ({
       tagById,
     });
 
+  const handleUpdateFolderForTree: NonNullable<
+    TreeViewTabContentProps["onUpdateFolder"]
+  > = useCallback(
+    async (folderId, data) => {
+      await updateFolder(folderId, data as Record<string, unknown>);
+    },
+    [updateFolder],
+  );
+
+  const handleUpdateCardSetForTree: NonNullable<
+    TreeViewTabContentProps["onUpdateCardSet"]
+  > = useCallback(
+    async (cardSetId, data) => {
+      await updateCardSet(cardSetId, data as Record<string, unknown>);
+    },
+    [updateCardSet],
+  );
+
+  const handleCreateCardForTree: NonNullable<
+    TreeViewTabContentProps["onCreateCard"]
+  > = useCallback(
+    async (data) => createCard(data as Record<string, unknown>),
+    [createCard],
+  );
+
+  const handleUpdateCardForTree: NonNullable<
+    TreeViewTabContentProps["onUpdateCard"]
+  > = useCallback(
+    async (cardId, data) => {
+      await updateCard(cardId, data as Record<string, unknown>);
+    },
+    [updateCard],
+  );
+
+  const handleUpdateDocumentForTree: NonNullable<
+    TreeViewTabContentProps["onUpdateDocument"]
+  > = useCallback(
+    async (documentId, data) => {
+      await updateDocument(documentId, data as Partial<DocumentItem>);
+    },
+    [updateDocument],
+  );
+
+  const handleMoveDocumentToFolder: NonNullable<
+    TreeViewTabContentProps["moveDocumentToFolder"]
+  > = useCallback(
+    async (id, folderId) => {
+      await updateDocument(id, { folderId });
+    },
+    [updateDocument],
+  );
+
   const tabContent = (
     <TreeViewTabContent
       explorerTab={explorerTab}
@@ -367,21 +422,19 @@ const TreeViewLayout = ({
       onItemSelect={handleItemSelect}
       onClearRecent={clearRecent}
       onCreateFolder={createFolder}
-      onUpdateFolder={updateFolder as any}
+      onUpdateFolder={handleUpdateFolderForTree}
       onDeleteFolder={deleteFolder}
       onCreateCardSet={createCardSet}
-      onUpdateCardSet={updateCardSet as any}
+      onUpdateCardSet={handleUpdateCardSetForTree}
       onDeleteCardSet={deleteCardSet}
-      onCreateCard={createCard as any}
-      onUpdateCard={updateCard as any}
+      onCreateCard={handleCreateCardForTree}
+      onUpdateCard={handleUpdateCardForTree}
       onDeleteCard={deleteCard}
-      onUpdateDocument={updateDocument as any}
+      onUpdateDocument={handleUpdateDocumentForTree}
       onDeleteDocument={deleteDocument}
       moveCardToFolder={moveCardToFolder}
       moveCardSetToFolder={moveCardSetToFolder}
-      moveDocumentToFolder={(id, folderId) =>
-        (updateDocument as any)(id, { folderId })
-      }
+      moveDocumentToFolder={handleMoveDocumentToFolder}
       reorderCards={reorderCards}
       selectedCardSetId={selectedCardSetId}
       onSelectCardSet={handleCardSetSelectWithoutNavigation}

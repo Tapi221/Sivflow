@@ -4,15 +4,15 @@ import { ExplorerNoResultsState } from "@/components/folder/components/ExplorerN
 import { ExplorerTreeNodeRenderer } from "@/components/folder/components/ExplorerTreeNode";
 import { RootFolderPanelList } from "@/components/folder/components/RootFolderPanelList";
 import {
-  getFolderId,
-  type FolderTreeNode,
+    getFolderId,
+    type FolderTreeNode,
 } from "@/components/folder/explorer/model/utils";
 import {
-  buildExplorerTreeData,
-  parseSelectedTreeId,
-  toExpandedTreeIds,
-  toSelectedTreeId,
-  type ExplorerTreeNode,
+    buildExplorerTreeData,
+    parseSelectedTreeId,
+    toExpandedTreeIds,
+    toSelectedTreeId,
+    type ExplorerTreeNode,
 } from "@/components/folder/explorer/tree/arboristAdapter";
 import { useEnsureAncestorFoldersExpanded } from "@/components/folder/hooks/useEnsureAncestorFoldersExpanded";
 import { useExpandedFolders } from "@/components/folder/hooks/useExpandedFolders";
@@ -25,18 +25,18 @@ import { FolderTreeArborist } from "@/components/sidebar/FolderTreeArborist";
 import BulkTagDialog from "@/components/tag/BulkTagDialog";
 import { cn } from "@/lib/utils";
 import type {
-  Card,
-  CardSet,
-  DocumentItem,
-  ExplorerItem,
-  SelectedExplorerItem,
+    Card,
+    CardSet,
+    DocumentItem,
+    ExplorerItem,
+    SelectedExplorerItem,
 } from "@/types";
 import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
 } from "react";
 import type { NodeApi } from "react-arborist";
 
@@ -1077,6 +1077,7 @@ export const FolderTreeWithCards = ({
               setEditingId={dialogs.setEditingId}
               setEditingName={dialogs.setEditingName}
               editingNameRef={dialogs.editingNameRef}
+              renameCancelledRef={dialogs.renameCancelledRef}
               editingId={dialogs.editingId}
               editingName={dialogs.editingName}
               handleRenameConfirm={actions.handleRenameConfirm}

@@ -1,8 +1,12 @@
-import { useState, useMemo, useCallback } from "react";
-import { useLiveQuery } from "dexie-react-hooks";
-import { getLocalDb } from "@/services/localDB";
 import { useAuthSession } from "@/contexts/AuthContext";
+import { getLocalDb } from "@/services/localDB";
 import type { DocumentItem } from "@/types";
+import { useLiveQuery } from "dexie-react-hooks";
+import { useCallback, useMemo, useState } from "react";
+
+type DocumentWithLegacyDelete = DocumentItem & {
+  is_deleted?: boolean;
+};
 
 /**
  * PDFドキュメントを取得・管理するためのフック
@@ -32,7 +36,10 @@ export const useDocuments = (folderId?: string) => {
     if (!rawDocuments) return [];
 
     let filtered = rawDocuments.filter(
-      (d) => !(d.isDeleted ?? (d as any).is_deleted),
+      (d) => {
+        const document = d as DocumentWithLegacyDelete;
+        return !(document.isDeleted ?? document.is_deleted ?? false);
+      },
     );
 
     if (folderId) {

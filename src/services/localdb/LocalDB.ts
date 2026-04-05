@@ -51,7 +51,7 @@ export type {
   LocalDBTableMap,
   ProjectMap,
   SyncableEntityTable,
-  TagV3Record,
+  TagV3Record
 } from "./types";
 
 declare global {
@@ -528,7 +528,7 @@ export class LocalDB extends Dexie {
       updatedAt: now,
       status: "pending",
       retryCount: 0,
-    } as any;
+    } as SyncQueueItem;
 
     console.log(
       `[Diagnostic] enqueueSync -> pushing to syncQueue table. targetId=${task.targetId}, action=${task.type}, entity=${task.entity}`,

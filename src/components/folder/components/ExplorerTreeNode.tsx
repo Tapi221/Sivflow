@@ -3,8 +3,8 @@ import {
   extractPptxFiles,
   isFileDragEvent,
 } from "@/components/folder/explorer/model/utils";
-import { CardSetRow } from "@/components/folder/explorer/rows/CardSetRow";
-import { DocumentRow } from "@/components/folder/explorer/rows/DocumentRow";
+import { DocumentRow } from "@/components/folder/explorer/rows/CardSetRow";
+import { CardSetRow } from "@/components/folder/explorer/rows/DocumentRow";
 import { ExplorerRow } from "@/components/folder/explorer/rows/ExplorerRow";
 import { ExplorerRowContent } from "@/components/folder/explorer/rows/ExplorerRowContent";
 import { FolderRow } from "@/components/folder/explorer/rows/FolderRow";
@@ -18,6 +18,11 @@ import { cn } from "@/lib/utils";
 import { FileText } from "@/ui/icons";
 import React from "react";
 
+type RenameTarget = {
+  id: string;
+  type: "folder" | "cardSet" | "card" | "document";
+};
+
 interface ExplorerTreeNodeProps {
   node: { data: TreeNode; level: number };
   style: React.CSSProperties;
@@ -26,7 +31,6 @@ interface ExplorerTreeNodeProps {
   toggle: () => void;
   editingId: string | null;
   editingName: string;
-  editingNameRef: React.MutableRefObject<string>;
   renameCancelledRef: React.MutableRefObject<boolean>;
   editInputRef: React.MutableRefObject<HTMLInputElement | null>;
   setEditingId: React.Dispatch<React.SetStateAction<string | null>>;
@@ -48,7 +52,7 @@ interface ExplorerTreeNodeProps {
     id: string,
     type: "folder" | "cardSet" | "card" | "document",
   ) => void;
-  handleRenameConfirm: (target?: any) => Promise<void>;
+  handleRenameConfirm: (target?: RenameTarget) => Promise<void>;
   setRowRef: (id: string, node: HTMLElement | null) => void;
   isFiltering: boolean;
   hasUpdateOrDelete: boolean;
@@ -64,7 +68,6 @@ export const ExplorerTreeNodeRenderer = React.memo(
     toggle,
     editingId,
     editingName,
-    editingNameRef,
     renameCancelledRef,
     editInputRef,
     setEditingId,
@@ -104,7 +107,6 @@ export const ExplorerTreeNodeRenderer = React.memo(
             setEditingId={setEditingId}
             editingName={editingName}
             setEditingName={setEditingName}
-            editingNameRef={editingNameRef}
             editInputRef={editInputRef}
             onToggle={toggle}
             onSelect={() => onFolderSelect(folderId)}
@@ -177,7 +179,6 @@ export const ExplorerTreeNodeRenderer = React.memo(
           toggle={toggle}
           editingId={editingId}
           editingName={editingName}
-          editingNameRef={editingNameRef}
           renameCancelledRef={renameCancelledRef}
           editInputRef={editInputRef}
           setEditingId={setEditingId}
@@ -201,7 +202,6 @@ export const ExplorerTreeNodeRenderer = React.memo(
           isSelected={isSelected}
           editingId={editingId}
           editingName={editingName}
-          editingNameRef={editingNameRef}
           renameCancelledRef={renameCancelledRef}
           editInputRef={editInputRef}
           setEditingId={setEditingId}

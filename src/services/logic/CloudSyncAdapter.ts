@@ -1,25 +1,86 @@
 import { firestoreDb } from "@/services/firebase";
 import type {
-  ICloudSyncAdapter,
-  SyncChange,
+    ICloudSyncAdapter,
+    SyncChange,
 } from "@/services/interfaces/ISyncService";
 import { sanitizeBlobUrlsDeep } from "@/utils/blobUrlSanitizer";
 import { sanitizeForLog } from "@/utils/logSanitizer";
+import type {
+    DocumentData,
+    FieldValue,
+    QueryConstraint,
+    QueryDocumentSnapshot,
+} from "firebase/firestore";
 import * as Firestore from "firebase/firestore";
 import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  limit,
-  orderBy,
-  query,
-  Timestamp,
-  where,
-  writeBatch,
+    collection,
+    doc,
+    getDoc,
+    getDocs,
+    limit,
+    orderBy,
+    query,
+    Timestamp,
+    where,
+    writeBatch,
 } from "firebase/firestore";
 
-const deepStripUndefined = (input: unknown): any => {
+type FirestoreRecord = Record<string, unknown>;
+
+const isRecord = (value: unknown): value is FirestoreRecord =>
+  typeof value === "object" && value !== null;
+
+const isCloudEntityType = (value: unknown): value is CloudEntityType =>
+  typeof value === "string" && value in COLLECTION_BY_TYPE;
+
+const getRecordId = (value: unknown): string | null => {
+  if (!isRecord(value)) return null;
+  const id = value.id;
+  return typeof id === "string" && id.length > 0 ? id : null;
+};
+
+const getUpdatedAtMillis = (value: unknown): number => {
+  if (value instanceof Timestamp) return value.toMillis();
+  if (value instanceof Date) return value.getTime();
+  if (!isRecord(value)) return 0;
+
+  const maybeToMillis = value.toMillis;
+  if (typeof maybeToMillis === "function") {
+    const result = maybeToMillis.call(value);
+    if (typeof result === "number") return result;
+  }
+
+  const maybeGetTime = value.getTime;
+  if (typeof maybeGetTime === "function") {
+    const result = maybeGetTime.call(value);
+    if (typeof result === "number") return result;
+  }
+
+  return 0;
+};
+
+const getChangeParts = (
+  change: SyncChange,
+): { type: CloudEntityType; id: string; data: unknown } | null => {
+  const type = change.type;
+  const id = change.id;
+
+  if (!isCloudEntityType(type)) return null;
+  if (typeof id !== "string" || id.length === 0) return null;
+
+  return {
+    type,
+    id,
+    data: change.data,
+  };
+};
+
+const getChangeId = (change: SyncChange): string | null => {
+  const parts = getChangeParts(change);
+  return parts?.id ?? null;
+};
+
+const deepStripUndefined = (input: unknown): unknown => {
   if (input === undefined) return undefined;
   if (input === null) return null;
 
@@ -42,10 +103,11 @@ const deepStripUndefined = (input: unknown): any => {
   return input;
 };
 
-const cloudUpdatedAt = () => {
-  const firestoreObj = Firestore as any;
-  const fn = firestoreObj.serverTimestamp;
-  if (typeof fn === "function") return fn();
+const cloudUpdatedAt = (): FieldValue | Timestamp => {
+  const fn = (Firestore as Record<string, unknown>).serverTimestamp;
+  if (typeof fn === "function") {
+    return (fn as () => FieldValue)();
+  }
   return Timestamp.now();
 };
 
@@ -105,14 +167,13 @@ const estimateBytes = (value: unknown) => {
   }
 };
 
-const chunkChangesBySize = (changes: unknown[]) => {
-  const chunks: unknown[][] = [];
-  let current: unknown[] = [];
+const chunkChangesBySize = (changes: SyncChange[]) => {
+  const chunks: SyncChange[][] = [];
+  let current: SyncChange[] = [];
   let bytes = 0;
 
-  for (const ch of changes as any[]) {
-    // data だけじゃなく type/id も少し上乗せ
-    const docBytes = estimateBytes(ch?.data ?? {});
+  for (const change of changes) {
+    const docBytes = estimateBytes(change.data ?? {});
     const extra = docBytes + 512;
 
     const wouldExceedBytes =
@@ -199,7 +260,7 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
         "[CloudSyncAdapter] sanitize_blob_url_from_cloud",
         sanitizeForLog({
           type,
-          id: (data as any)?.id,
+          id: getRecordId(data),
           fixes: sanitized.fixes,
         }),
       );
@@ -227,9 +288,13 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
 
     try {
       const sinceTimestamp = Timestamp.fromMillis(since);
-      const startAfterFn = (Firestore as unknown as any).startAfter as
-        | undefined
-        | ((snapshot: unknown) => unknown);
+      const startAfterValue = (Firestore as Record<string, unknown>).startAfter;
+      const startAfterFn =
+        typeof startAfterValue === "function"
+          ? (startAfterValue as (
+              snapshot: QueryDocumentSnapshot<DocumentData>,
+            ) => QueryConstraint)
+          : null;
 
       const pullCollectionDiff = async (type: PullableEntityType) => {
         try {
@@ -238,11 +303,11 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
             `users/${this.userId}/${COLLECTION_BY_TYPE[type]}`,
           );
 
-          let lastDoc: unknown = null;
+          let lastDoc: QueryDocumentSnapshot<DocumentData> | null = null;
           let total = 0;
 
           while (true) {
-            const constraints: any[] = [
+            const constraints: QueryConstraint[] = [
               where("updatedAt", ">", sinceTimestamp),
               orderBy("updatedAt", "asc"),
               limit(PAGE_SIZE),
@@ -290,11 +355,10 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
         const settingsRef = doc(firestore, "userSettings", this.userId);
         const snap = await getDoc(settingsRef);
         if (snap.exists()) {
-          const data: any = this.sanitizeFromCloud("userSetting", snap.data());
-          const updatedAt =
-            data?.updatedAt?.toMillis?.() ??
-            data?.updatedAt?.getTime?.() ??
-            (data?.updatedAt instanceof Date ? data.updatedAt.getTime() : 0);
+          const data = this.sanitizeFromCloud("userSetting", snap.data());
+          const updatedAt = isRecord(data)
+            ? getUpdatedAtMillis(data.updatedAt)
+            : 0;
           if (!since || updatedAt > since) {
             changes.push({ type: "userSetting", id: snap.id, data });
           }
@@ -328,7 +392,9 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
         );
         return {
           successIds: [],
-          failedIds: changes.map((c: any) => c.id),
+          failedIds: changes
+            .map(getChangeId)
+            .filter((id): id is string => Boolean(id)),
           error: new Error("Firestore not initialized"),
         };
       }
@@ -340,9 +406,14 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
         const batch = writeBatch(firestore);
         const chunkIds: string[] = [];
 
-        for (const change of chunk as any[]) {
-          const { type, id, data } = change;
-          const col = (COLLECTION_BY_TYPE as any)[type] ?? `${type}s`;
+        for (const change of chunk) {
+          const parts = getChangeParts(change);
+          if (!parts) {
+            throw new Error("Invalid sync change payload");
+          }
+
+          const { type, id, data } = parts;
+          const col = COLLECTION_BY_TYPE[type];
           console.log(`   - Adding to batch: ${col}/${id}`);
 
           const docRef =
@@ -396,7 +467,9 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
       console.error("❌ [CloudSyncAdapter] pushBatch ERROR:", error);
       return {
         successIds: [],
-        failedIds: changes.map((c: any) => c.id),
+        failedIds: changes
+          .map(getChangeId)
+          .filter((id): id is string => Boolean(id)),
         error,
       };
     }

@@ -1,8 +1,8 @@
 import { buildEntityRenameDeleteMenuActions } from "@/components/folder/components/menus/explorerMenuActionBuilders";
+import type { ExplorerTreeNode as TreeNode } from "@/components/folder/explorer/tree/arboristAdapter";
 import { cn } from "@/lib/utils";
 import { ChevronDown, ChevronRight, Layers } from "@/ui/icons";
 import React from "react";
-import type { ExplorerTreeNode as TreeNode } from "../tree/arboristAdapter";
 import { ExplorerRow } from "./ExplorerRow";
 import { ExplorerRowContent } from "./ExplorerRowContent";
 import { SidebarTreeRow } from "./SidebarTreeRow";
@@ -27,7 +27,6 @@ interface CardSetRowProps {
   toggle: () => void;
   editingId: string | null;
   editingName: string;
-  editingNameRef: React.MutableRefObject<string>;
   renameCancelledRef: React.MutableRefObject<boolean>;
   editInputRef: React.MutableRefObject<HTMLInputElement | null>;
   setEditingId: React.Dispatch<React.SetStateAction<string | null>>;
@@ -42,7 +41,7 @@ interface CardSetRowProps {
     id: string,
     type: "folder" | "cardSet" | "card" | "document",
   ) => void;
-  handleRenameConfirm: (target?: any) => Promise<void>;
+  handleRenameConfirm: (target?: { id: string; type: "cardSet" }) => Promise<void>;
   setRowRef: (id: string, node: HTMLElement | null) => void;
 }
 
@@ -55,7 +54,6 @@ export const CardSetRow = ({
   toggle,
   editingId,
   editingName,
-  editingNameRef,
   renameCancelledRef,
   editInputRef,
   setEditingId,
@@ -87,11 +85,9 @@ export const CardSetRow = ({
         },
         setEditingId,
         setEditingName,
-        editingNameRef,
         handleDelete,
       }),
     [
-      editingNameRef,
       handleDelete,
       onItemSelect,
       setEditingId,

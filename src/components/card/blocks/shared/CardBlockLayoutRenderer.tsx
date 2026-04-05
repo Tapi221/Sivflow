@@ -28,7 +28,18 @@ export type CardBlockLayoutReplaceBlock =
 type ViewerProps = {
   questionDisplayMode: "always" | "tap_to_reveal";
   onGalleryFullscreenChange?: (isFullscreen: boolean) => void;
-  toMediaUrl: (item: any) => string | null;
+  toMediaUrl: (
+    item:
+      | string
+      | UploadedImage
+      | {
+          url?: string | null;
+          remoteUrl?: string | null;
+          localUrl?: string | null;
+        }
+      | null
+      | undefined,
+  ) => string | null;
   displayMode: "fixed" | "fluid";
   zoom: number;
 };
@@ -192,7 +203,7 @@ export const CardBlockLayoutRenderer = (
       case "image":
         return (
           <MediaBlock
-            data={(block.images || []) as any[]}
+            data={block.images ?? []}
             onChange={(data) =>
               onUpdateBlock(block.id, { images: data as UploadedImage[] })
             }

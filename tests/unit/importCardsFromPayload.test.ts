@@ -1,11 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
 
 import {
-  buildImportCardSetName,
-  importCardsFromPayload,
+    buildImportCardSetName,
+    importCardsFromPayload,
 } from "@/features/import/importCardsFromPayload";
 import type { ImportPayload } from "@/features/import/types";
-import type { CardSet } from "@/types";
+import type { Card, CardSet } from "@/types";
+
+type CreateCardInput = Partial<Card> & { cardSetId?: string };
 
 describe("buildImportCardSetName", () => {
   it("xlsx 拡張子を除いた名前をベースにする", () => {
@@ -62,7 +64,8 @@ describe("importCardsFromPayload", () => {
         }) as CardSet,
     );
     const createCard = vi.fn(
-      async (cardData) => ({ id: crypto.randomUUID(), ...cardData }) as any,
+      async (cardData: CreateCardInput) =>
+        ({ id: crypto.randomUUID(), ...cardData }) as Card,
     );
 
     const result = await importCardsFromPayload({
@@ -94,7 +97,8 @@ describe("importCardsFromPayload", () => {
         }) as CardSet,
     );
     const createCard = vi.fn(
-      async (cardData) => ({ id: crypto.randomUUID(), ...cardData }) as any,
+      async (cardData: CreateCardInput) =>
+        ({ id: crypto.randomUUID(), ...cardData }) as Card,
     );
 
     const result = await importCardsFromPayload({
@@ -146,7 +150,8 @@ describe("importCardsFromPayload", () => {
         ({ id: "set-new", name, folderId: "folder-001" }) as CardSet,
     );
     const createCard = vi.fn(
-      async (cardData) => ({ id: crypto.randomUUID(), ...cardData }) as any,
+      async (cardData: CreateCardInput) =>
+        ({ id: crypto.randomUUID(), ...cardData }) as Card,
     );
 
     await importCardsFromPayload({

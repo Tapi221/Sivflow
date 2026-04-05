@@ -1,5 +1,4 @@
 import { FileText, Folder, Pencil, Plus, Tag, Trash2 } from "@/ui/icons";
-import type { MutableRefObject } from "react";
 import { beginInlineRename } from "./explorerMenuStateHelpers";
 import type { MenuAction } from "./menuActions";
 
@@ -26,7 +25,6 @@ interface BuildEntityRenameDeleteMenuActionsParams {
   closeMenu?: () => void;
   setEditingId: (id: string | null) => void;
   setEditingName: (name: string) => void;
-  editingNameRef: MutableRefObject<string>;
   handleDelete: (
     id: string,
     type: "folder" | "cardSet" | "card" | "document",
@@ -83,7 +81,6 @@ export const buildEntityRenameDeleteMenuActions = ({
   closeMenu,
   setEditingId,
   setEditingName,
-  editingNameRef,
   handleDelete,
   renameLabel = "名前を変更",
   deleteLabel = "削除",
@@ -98,7 +95,6 @@ export const buildEntityRenameDeleteMenuActions = ({
         closeMenu,
         setEditingId,
         setEditingName,
-        editingNameRef,
         beforeStart: beforeRename,
       });
     },

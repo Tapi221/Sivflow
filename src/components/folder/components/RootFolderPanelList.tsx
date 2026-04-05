@@ -3,6 +3,11 @@ import type { SelectedExplorerItem } from "@/types";
 import React from "react";
 import { RootFolderPanelRow } from "./RootFolderPanelRow";
 
+type RenameTarget = {
+  id: string;
+  type: "folder" | "cardSet" | "card" | "document";
+};
+
 export type NavigationListEntry =
   | {
       kind: "folder";
@@ -38,11 +43,10 @@ interface RootFolderPanelListProps {
   ) => void;
   setEditingId: React.Dispatch<React.SetStateAction<string | null>>;
   setEditingName: React.Dispatch<React.SetStateAction<string>>;
-  editingNameRef: React.MutableRefObject<string>;
   renameCancelledRef: React.MutableRefObject<boolean>;
   editingId: string | null;
   editingName: string;
-  handleRenameConfirm: (target?: any) => Promise<void>;
+  handleRenameConfirm: (target?: RenameTarget) => Promise<void>;
 }
 
 /**
@@ -64,7 +68,6 @@ export const RootFolderPanelList = ({
   handleDelete,
   setEditingId,
   setEditingName,
-  editingNameRef,
   renameCancelledRef,
   editingId,
   editingName,
@@ -105,7 +108,6 @@ export const RootFolderPanelList = ({
           handleDelete={handleDelete}
           setEditingId={setEditingId}
           setEditingName={setEditingName}
-          editingNameRef={editingNameRef}
           renameCancelledRef={renameCancelledRef}
           editingId={editingId}
           editingName={editingName}

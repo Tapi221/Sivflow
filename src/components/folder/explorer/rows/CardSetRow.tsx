@@ -33,7 +33,6 @@ interface DocumentRowProps {
   isSelected: boolean;
   editingId: string | null;
   editingName: string;
-  editingNameRef: React.MutableRefObject<string>;
   renameCancelledRef: React.MutableRefObject<boolean>;
   editInputRef: React.MutableRefObject<HTMLInputElement | null>;
   setEditingId: React.Dispatch<React.SetStateAction<string | null>>;
@@ -56,7 +55,6 @@ export const DocumentRow = ({
   isSelected,
   editingId,
   editingName,
-  editingNameRef,
   renameCancelledRef,
   editInputRef,
   setEditingId,
@@ -86,7 +84,6 @@ export const DocumentRow = ({
             },
             setEditingId,
             setEditingName,
-            editingNameRef,
             beforeStart: () => {
               onItemSelect({ type: "document", id: treeNode.rawId });
             },
@@ -104,7 +101,6 @@ export const DocumentRow = ({
       },
     ],
     [
-      editingNameRef,
       handleDelete,
       onItemSelect,
       setEditingId,
