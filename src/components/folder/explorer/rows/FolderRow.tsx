@@ -205,7 +205,10 @@ export const FolderRow: React.FC<FolderRowProps> = ({
             "group sidebar-row--folder",
             EXPLORER_ROW_MOBILE_NAV_TRAILING_PADDING_CLASS,
           )}
-          onClick={onSelect}
+          onClick={(event) => {
+            if (event.defaultPrevented) return;
+            onSelect();
+          }}
           onDragEnterCapture={onDragEnterCapture}
           onDragOverCapture={onDragOverCapture}
           onDragLeaveCapture={onDragLeaveCapture}

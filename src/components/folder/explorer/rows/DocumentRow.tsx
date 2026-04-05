@@ -125,7 +125,8 @@ export const DocumentRow = ({
         depth={depth}
         selected={isSelected}
         className="sidebar-row--document"
-        onClick={() => {
+        onClick={(event) => {
+          if (event.defaultPrevented) return;
           onItemSelect({ type: "document", id: treeNode.rawId });
         }}
       >

@@ -141,7 +141,8 @@ export const CardSetRow = ({
             ? "bg-[var(--sidebar-active-bg,#e7ebef)] text-[var(--sidebar-text,#202123)]"
             : "hover:bg-[var(--sidebar-active-bg,#e7ebef)] text-[var(--sidebar-text,#202123)]",
         )}
-        onClick={() => {
+        onClick={(event) => {
+          if (event.defaultPrevented) return;
           onItemSelect({ type: "cardSet", id: treeNode.rawId });
         }}
       >

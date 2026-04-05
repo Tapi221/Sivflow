@@ -34,6 +34,45 @@ export const SidebarTreeRow = ({
   const { anchorPoint, handleContextMenu, resetAnchor } =
     useContextMenuAnchor();
 
+  const suppressNextClickRef = React.useRef(false);
+  const suppressNextClickTimeoutRef = React.useRef<number | null>(null);
+
+  const clearSuppressedClick = React.useCallback(() => {
+    suppressNextClickRef.current = false;
+
+    if (
+      typeof window !== "undefined" &&
+      suppressNextClickTimeoutRef.current !== null
+    ) {
+      window.clearTimeout(suppressNextClickTimeoutRef.current);
+      suppressNextClickTimeoutRef.current = null;
+    }
+  }, []);
+
+  const scheduleSuppressedClickClear = React.useCallback(() => {
+    if (typeof window === "undefined") return;
+
+    if (suppressNextClickTimeoutRef.current !== null) {
+      window.clearTimeout(suppressNextClickTimeoutRef.current);
+    }
+
+    suppressNextClickTimeoutRef.current = window.setTimeout(() => {
+      suppressNextClickRef.current = false;
+      suppressNextClickTimeoutRef.current = null;
+    }, 0);
+  }, []);
+
+  React.useEffect(() => {
+    return () => {
+      if (
+        typeof window !== "undefined" &&
+        suppressNextClickTimeoutRef.current !== null
+      ) {
+        window.clearTimeout(suppressNextClickTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const canOpenContextMenu =
     hasContextMenu && !isEditing && menuActions.length > 0;
 
@@ -46,12 +85,32 @@ export const SidebarTreeRow = ({
         isDraggingOver && "rounded-sm bg-blue-50/50 ring-1 ring-blue-200/50",
         className,
       )}
+      onMouseDownCapture={
+        canOpenContextMenu
+          ? (event) => {
+              if (event.button !== 2) return;
+              suppressNextClickRef.current = true;
+            }
+          : undefined
+      }
+      onClickCapture={
+        canOpenContextMenu
+          ? (event) => {
+              if (!suppressNextClickRef.current) return;
+              event.preventDefault();
+              event.stopPropagation();
+              clearSuppressedClick();
+            }
+          : undefined
+      }
       onContextMenu={
         canOpenContextMenu
           ? (event) => {
+              suppressNextClickRef.current = true;
               handleContextMenu(event);
               onContextMenuSelect?.();
               onMenuOpenChange(true);
+              scheduleSuppressedClickClear();
             }
           : undefined
       }
@@ -63,7 +122,10 @@ export const SidebarTreeRow = ({
           open={menuOpen}
           anchorPoint={menuOpen ? anchorPoint : null}
           onOpenChange={(open) => {
-            if (!open) resetAnchor();
+            if (!open) {
+              clearSuppressedClick();
+              resetAnchor();
+            }
             onMenuOpenChange(open);
           }}
           actions={menuActions}
