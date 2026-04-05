@@ -5,7 +5,6 @@ if (import.meta.env.DEV && typeof window !== "undefined") {
     .catch(() => {});
 }
 
-import type { IntegrityRepairResult } from "@/services/dataIntegrityTypes";
 import type {
   AssetRecord,
   Card,
@@ -25,18 +24,11 @@ import type {
 } from "@/types";
 import { Dexie } from "dexie";
 import { nanoid } from "nanoid";
-
 import * as crud from "./crud";
-import * as forensics from "./forensics";
 import { getDatabaseNameForUser as _getDatabaseNameForUser } from "./generation";
 import { attachHooks } from "./hooks";
-import { repairDataIntegrity as repairDataIntegrityImpl } from "./integrityRepair";
 import * as maintenance from "./maintenance";
 import * as queries from "./queries";
-import {
-  extractFromFirestoreSDK as rescueExtractFromFirestoreSDK,
-  importFromDatabase as rescueImportFromDatabase,
-} from "./rescue";
 import { defineSchema } from "./schema";
 
 // NOTE: creates a circular dependency with instanceManager.ts; safe in ESM (all usages inside function bodies)
@@ -50,17 +42,17 @@ import {
   resetForLogout as resetForLogoutImpl,
   resetLocalDBForLogout,
 } from "./instanceManager";
+import type { LocalDBTableMap, SyncableEntityTable } from "./types";
 
 export type {
   CardRelation,
   LocalDBInstance,
   LocalDBLike,
-  ProjectMap,
   LocalDBTableMap,
+  ProjectMap,
   SyncableEntityTable,
-  TagV3Record,
+  TagV3Record
 } from "./types";
-import type { LocalDBTableMap, SyncableEntityTable } from "./types";
 
 declare global {
   interface GlobalThis {
@@ -80,6 +72,7 @@ const syncableTables = [
   "userSettings",
   "images",
 ] as const;
+
 type SyncableTableName = (typeof syncableTables)[number];
 
 const isSyncableTableName = (t: string): t is SyncableTableName =>
@@ -102,7 +95,7 @@ const getPayloadId = (payload: unknown) => {
   return typeof id === "string" && id.length > 0 ? id : null;
 };
 
-const asArray = (v: unknown) => {
+const asArray = <T,>(v: unknown): T[] => {
   return Array.isArray(v) ? (v as T[]) : [];
 };
 
@@ -141,55 +134,6 @@ export class LocalDB extends Dexie {
   tags_v3!: Dexie.Table<import("./types").TagV3Record, string>;
 
   public userId?: string;
-
-  static async listDatabases(): Promise<IDBDatabaseInfo[]> {
-    return forensics.listDatabases();
-  }
-
-  static async fullOriginForensicAudit(
-    onProgress?: (msg: string) => void,
-  ): Promise<unknown> {
-    return forensics.fullOriginForensicAudit(onProgress);
-  }
-
-  async importFromDatabase(
-    sourceDbName: string,
-    currentUserId: string,
-    onProgress?: (progress: string) => void,
-  ): Promise<{
-    cards: number;
-    folders: number;
-    stats: number;
-    studyLogs: number;
-    firstCardKeys: string[];
-  }> {
-    return rescueImportFromDatabase(
-      this,
-      sourceDbName,
-      currentUserId,
-      onProgress,
-    );
-  }
-
-  async extractFromFirestoreSDK(
-    sourceDbName: string,
-    currentUserId: string,
-    onProgress?: (progress: string) => void,
-  ): Promise<{ cards: number; folders: number; firstCardKeys: string[] }> {
-    return rescueExtractFromFirestoreSDK(
-      this,
-      sourceDbName,
-      currentUserId,
-      onProgress,
-    );
-  }
-
-  async repairDataIntegrity(
-    currentUserId: string,
-    onProgress?: (msg: string) => void,
-  ): Promise<IntegrityRepairResult> {
-    return repairDataIntegrityImpl(this, currentUserId, onProgress);
-  }
 
   private constructor(userId?: string) {
     // Prevent direct construction from browser code; enforce using LocalDB.getInstance()
@@ -307,6 +251,7 @@ export class LocalDB extends Dexie {
         this,
       );
     }
+
     return crud.addItem(
       this,
       table,
@@ -502,10 +447,12 @@ export class LocalDB extends Dexie {
   async trimSyncQueueToLimit(limit: number): Promise<void> {
     const count = await this.syncQueue.count();
     if (count <= limit) return;
+
     const oldest = await this.syncQueue
       .orderBy("createdAt")
       .limit(count - limit)
       .toArray();
+
     await this.syncQueue.bulkDelete(oldest.map((item) => item.id));
   }
 

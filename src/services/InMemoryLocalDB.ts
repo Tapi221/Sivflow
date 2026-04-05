@@ -991,32 +991,4 @@ export class InMemoryLocalDB {
     this.syncTrigger = callback;
   }
 
-  async importFromDatabase(): Promise<{
-    cards: number;
-    folders: number;
-    stats: number;
-    studyLogs: number;
-    firstCardKeys: string[];
-  }> {
-    throw new Error("Local fallback mode: database import is unavailable.");
-  }
-
-  async extractFromFirestoreSDK(): Promise<{
-    cards: number;
-    folders: number;
-    firstCardKeys: string[];
-  }> {
-    throw new Error(
-      "Local fallback mode: Firestore cache extraction is unavailable.",
-    );
-  }
-
-  async repairDataIntegrity(): Promise<{
-    folders: number;
-    cards: number;
-    canonicalId: string | null;
-    issues: unknown[];
-  }> {
-    return { folders: 0, cards: 0, canonicalId: null, issues: [] };
-  }
 }

@@ -1,27 +1,10 @@
-import React, { useState, useEffect } from "react";
-import {
-  Tag,
-  Volume2,
-  Database,
-  LogOut,
-  X,
-  Check,
-  Folder,
-  Layers,
-  Loader2,
-  RefreshCw,
-  Keyboard,
-  Cloud,
-} from "@/ui/icons";
-import { getLocalDb } from "@/services/localDB";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -29,30 +12,43 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/contexts/AuthContext";
 import { useFolders } from "@/hooks/folder/useFolders";
-import { cn } from "@/lib/utils";
-import { signOut } from "firebase/auth";
-import { auth } from "@/services/firebase";
-import { useNavigate } from "react-router-dom";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
-import { BookOpen } from "@/ui/icons";
-import { UploadProgress } from "@/components/ui/UploadProgress";
+import { cn } from "@/lib/utils";
+import { getLocalDb } from "@/services/localDB";
+import {
+  BookOpen,
+  Check,
+  Cloud,
+  Folder,
+  Keyboard,
+  Layers,
+  Loader2,
+  LogOut,
+  RefreshCw,
+  Tag,
+  Volume2,
+  X
+} from "@/ui/icons";
 import { getAvatarColors, getInitials } from "@/utils/avatarUtils";
-import DataRescuePanel from "@/components/settings/DataRescuePanel";
-import { DeviceSyncSettings } from "@/components/settings/DeviceSyncSettings";
-import { BlockOrdering } from "@/components/settings/BlockOrdering";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import {
   EXPLORER_ROW_BASE_CLASS_NAME,
-  EXPLORER_ROW_CONTENT_CLASS,
+
   EXPLORER_ROW_ICON_SLOT_CLASS,
   FOLDER_ROW_ICON_ACTIVE_CLASS,
   FOLDER_ROW_ICON_MUTED_CLASS,
   FOLDER_ROW_ICON_SIZE_CLASS,
   FOLDER_ROW_TITLE_CLASS,
 } from "@/components/folder/explorer/rows/shared";
-import { useSyncSettings } from "@/hooks/sync/useSyncSettings";
+import { BlockOrdering } from "@/components/settings/BlockOrdering";
+import { DeviceSyncSettings } from "@/components/settings/DeviceSyncSettings";
 import { TagManagerPanel } from "@/components/tag/TagManagerPanel";
+import { useSyncSettings } from "@/hooks/sync/useSyncSettings";
 
 const sidebarItems = [
   { id: "study", label: "学習設定", icon: BookOpen },
@@ -61,7 +57,7 @@ const sidebarItems = [
   { id: "voice", label: "音声設定", icon: Volume2 },
   { id: "shortcut", label: "ショートカット", icon: Keyboard },
   { id: "sync", label: "同期設定", icon: RefreshCw },
-  { id: "data", label: "データ", icon: Database },
+  
 ];
 
 const DEFAULT_SETTINGS_TAB = "study";
@@ -979,10 +975,6 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
                   </div>
                 </div>
 
-                {/* Data Rescue Panel */}
-                <div className="pt-6 border-t border-slate-200">
-                  <DataRescuePanel />
-                </div>
 
                 {/* Device Management */}
                 <div className="pt-6 border-t border-slate-200">
@@ -992,12 +984,7 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
             </div>
           </div>
         );
-      case "data":
-        return (
-          <div className="space-y-8 animate-in fade-in duration-300">
-            <DataRescuePanel />
-          </div>
-        );
+
       case "shortcut":
         return (
           <div className="space-y-8 animate-in fade-in duration-300">

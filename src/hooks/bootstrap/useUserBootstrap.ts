@@ -16,7 +16,4 @@ export const bootstrapUser = async (userId: string) => {
   const db = await getLocalDb();
   await db.cleanupSyncHistory();
   await db.cleanupSyncErrors();
-
-  console.log("[Auth] Running data integrity repair...");
-  await db.repairDataIntegrity(userId);
 };
