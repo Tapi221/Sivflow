@@ -229,22 +229,7 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.95);
   }
 
-  .card-shell--editor-visual {
-    border-color: var(--card-editing-outline, #1f4c3d);
-  }
-
-  .card-shell--editor-visual::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    box-sizing: border-box;
-    border-radius: inherit;
-    border: 1px solid var(--card-editing-outline, #1f4c3d);
-    pointer-events: none;
-    z-index: 30;
-  }
-
-  .card-shell--editing-affordance::before {
+  .card-shell--editing::before {
     content: "編集中";
     position: absolute;
     left: 50%;
@@ -264,8 +249,23 @@
     z-index: 31;
   }
 
-  .card-shell--editor-visual.card-shell--selected,
-  .card-shell--editor-visual.card-shell--active {
+  .card-shell--editing {
+    border-color: var(--card-editing-outline, #1f4c3d);
+  }
+
+  .card-shell--editing::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    box-sizing: border-box;
+    border-radius: inherit;
+    border: 1px solid var(--card-editing-outline, #1f4c3d);
+    pointer-events: none;
+    z-index: 30;
+  }
+
+  .card-shell--editing.card-shell--selected,
+  .card-shell--editing.card-shell--active {
     box-shadow:
       var(
         --card-shadow-selected,
@@ -347,8 +347,7 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.95);
   }
 
-  .card-pager-item[data-card-active="true"]
-    .card-shell.card-shell--editor-visual {
+  .card-pager-item[data-card-active="true"] .card-shell.card-shell--editing {
     border-color: var(--card-editing-outline, #1f4c3d);
     box-shadow:
       var(
@@ -361,7 +360,7 @@
   }
 
   .card-pager-item:not([data-card-active="true"])
-    .card-shell.card-shell--editing-affordance::before {
+    .card-shell.card-shell--editing::before {
     content: none;
     display: none;
   }
