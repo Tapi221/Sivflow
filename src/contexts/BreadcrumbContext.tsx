@@ -6,14 +6,8 @@ import React, {
   useCallback,
   useRef,
 } from "react";
-
-export type BreadcrumbCrumb = {
-  label: string;
-  /** react-router-dom の to 文字列。省略時はクリック不可。 */
-  to?: string;
-  /** クリック時にサイドバー選択を同期するフォルダ ID。null はルートへ戻す。 */
-  folderId?: string | null;
-};
+import { areBreadcrumbCrumbsEqual } from "@/features/breadcrumbs/builders";
+import type { BreadcrumbCrumb } from "@/features/breadcrumbs/types";
 
 type BreadcrumbContextValue = {
   extraCrumbs: BreadcrumbCrumb[];
@@ -29,26 +23,6 @@ const BreadcrumbContext = createContext<BreadcrumbContextValue>({
   notifyFolderSelect: () => {},
 });
 
-/**
- * パンくずの配列が実質的に等しいかどうかを判定する
- */
-const areCrumbsEqual = (
-  a: BreadcrumbCrumb[],
-  b: BreadcrumbCrumb[],
-): boolean => {
-  if (a === b) return true;
-  if (a.length !== b.length) return false;
-
-  return a.every((crumb, index) => {
-    const other = b[index];
-    return (
-      crumb.label === other.label &&
-      crumb.to === other.to &&
-      crumb.folderId === other.folderId
-    );
-  });
-};
-
 export const BreadcrumbProvider = ({
   children,
 }: {
@@ -60,9 +34,8 @@ export const BreadcrumbProvider = ({
   >(null);
 
   const setExtraCrumbs = useCallback((crumbs: BreadcrumbCrumb[]) => {
-    // コンテンツが変更されている場合のみ状態を更新し、不要な再レンダリングを抑制する
     setExtraCrumbsState((prev) =>
-      areCrumbsEqual(prev, crumbs) ? prev : crumbs,
+      areBreadcrumbCrumbsEqual(prev, crumbs) ? prev : crumbs,
     );
   }, []);
 

@@ -1,6 +1,7 @@
-import { useEffect, useRef } from "react";
+import { buildCardViewBreadcrumbs } from "@/features/breadcrumbs/builders";
 import type { Card } from "@/types";
 import type { CardSet } from "@/types/domain/cardSet";
+import { useEffect, useMemo } from "react";
 
 interface Folder {
   id: string;
@@ -31,71 +32,32 @@ export const useCardViewBreadcrumbs = ({
   folders,
   setExtraCrumbs,
 }: UseCardViewBreadcrumbsOptions) => {
-  const lastSignatureRef = useRef("");
+  const folderById = useMemo(
+    () => new Map(folders.map((folder) => [folder.id, folder])),
+    [folders],
+  );
 
   useEffect(() => {
-    const crumbs: Crumb[] = [];
-    const crumbFolderId = folderId ?? selectedCardSet?.folderId ?? null;
-
-    if (crumbFolderId) {
-      const path: Folder[] = [];
-      let cur = folders.find((f) => f.id === crumbFolderId);
-      while (cur) {
-        path.unshift(cur);
-        cur = folders.find((f) => f.id === cur!.parentFolderId);
-      }
-      path.forEach((folder) => {
-        crumbs.push({
-          label: folder.folderName,
-          to: `/folders?folderId=${folder.id}`,
-          folderId: folder.id,
-        });
-      });
-    }
-
-    if (selectedCardSet) {
-      const qs = new URLSearchParams();
-      const crumbFolderId2 = folderId ?? selectedCardSet.folderId ?? null;
-      if (crumbFolderId2) qs.set("folderId", crumbFolderId2);
-      qs.set("cardSetId", selectedCardSet.id);
-      crumbs.push({
-        label: selectedCardSet.name || "カードセット",
-        to: `/folders?${qs.toString()}`,
-        folderId: crumbFolderId2,
-      });
-    }
-
-    if (selectedCard) {
-      const title = selectedCard.title?.trim() ?? "";
-      const cardIndex = sortedCards.findIndex(
-        (card) => card.id === selectedCard.id,
-      );
-      const current = cardIndex >= 0 ? cardIndex + 1 : 1;
-      const total = Math.max(1, sortedCards.length);
-      const label = title
-        ? `${current}/${total} : ${title}`
-        : `${current}/${total}`;
-      crumbs.push({ label });
-    }
-
-    const signature = JSON.stringify(crumbs);
-    if (lastSignatureRef.current !== signature) {
-      lastSignatureRef.current = signature;
-      setExtraCrumbs(crumbs);
-    }
+    setExtraCrumbs(
+      buildCardViewBreadcrumbs({
+        folderId,
+        selectedCardSet,
+        selectedCard,
+        sortedCards,
+        folderById,
+      }),
+    );
   }, [
+    folderId,
     selectedCardSet,
     selectedCard,
     sortedCards,
-    folderId,
-    folders,
+    folderById,
     setExtraCrumbs,
   ]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
-      lastSignatureRef.current = "";
       setExtraCrumbs([]);
     };
   }, [setExtraCrumbs]);

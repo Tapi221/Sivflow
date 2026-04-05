@@ -2,7 +2,12 @@ import { getPageRuledBg } from "@/components/card/frame/ruledStyles";
 import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBreadcrumbContext } from "@/contexts/BreadcrumbContext";
-import { getCardText } from "@/domain/card/content";
+import { buildExplorerBreadcrumbs } from "@/features/breadcrumbs/builders";
+import {
+  areExplorerBreadcrumbContextsEqual,
+  EMPTY_EXPLORER_BREADCRUMB_CONTEXT,
+  type ExplorerBreadcrumbContext,
+} from "@/features/breadcrumbs/types";
 import { useCards } from "@/hooks/card/useCards";
 import { useFolders } from "@/hooks/folder/useFolders";
 import { useDocuments } from "@/hooks/platform/useDocuments";
@@ -21,30 +26,6 @@ import {
 } from "react";
 import { useSearchParams } from "react-router-dom";
 
-/**
- * Explorer から通知されるパンくず用コンテキスト
- */
-type ExplorerBreadcrumbContext = {
-  folderId: string | null;
-  cardSet: { id: string; label: string } | null;
-};
-
-const EMPTY_BREADCRUMB_CONTEXT: ExplorerBreadcrumbContext = {
-  folderId: null,
-  cardSet: null,
-};
-
-/**
- * パンくず用コンテキストが等しいかどうかを判定する
- */
-const isSameBreadcrumbContext = (
-  a: ExplorerBreadcrumbContext,
-  b: ExplorerBreadcrumbContext,
-): boolean =>
-  a.folderId === b.folderId &&
-  a.cardSet?.id === b.cardSet?.id &&
-  a.cardSet?.label === b.cardSet?.label;
-
 const Folders = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const queryString = searchParams.toString();
@@ -62,7 +43,7 @@ const Folders = () => {
   const urlSyncTimerRef = useRef(0);
   const [folderSelectionNonce, setFolderSelectionNonce] = useState(0);
   const [explorerBreadcrumbContext, setExplorerBreadcrumbContext] =
-    useState<ExplorerBreadcrumbContext>(EMPTY_BREADCRUMB_CONTEXT);
+    useState<ExplorerBreadcrumbContext>(EMPTY_EXPLORER_BREADCRUMB_CONTEXT);
 
   const forceResetWorkspaceScroll = useCallback(() => {
     const reset = () => {
@@ -92,14 +73,12 @@ const Folders = () => {
     [],
   );
 
-  // 選択状態
   const [selectedFolderId, setSelectedFolderId] = useState(() => {
     if (isHomeOnlyMode) return null;
     if (queryFolderId) return queryFolderId;
     return localStorage.getItem("folder_selectedFolderId_work") || null;
   });
 
-  // 選択状態の永続化
   useEffect(() => {
     if (selectedFolderId) {
       localStorage.setItem("folder_selectedFolderId_work", selectedFolderId);
@@ -206,7 +185,6 @@ const Folders = () => {
 
       const pendingTarget = pendingUrlSyncRef.current;
       if (pendingTarget !== null) {
-        // state から URL へ反映中は、古い query で state を巻き戻さない
         if (queryString !== pendingTarget) return;
         pendingUrlSyncRef.current = null;
         return;
@@ -261,7 +239,7 @@ const Folders = () => {
       notifyMainSidebarFolderSelection(null);
       setSelectedFolderId(null);
       setSelectedItem(null);
-      setExplorerBreadcrumbContext(EMPTY_BREADCRUMB_CONTEXT);
+      setExplorerBreadcrumbContext(EMPTY_EXPLORER_BREADCRUMB_CONTEXT);
       selectedFolderIdRef.current = null;
       selectedItemRef.current = null;
     });
@@ -274,7 +252,6 @@ const Folders = () => {
   const { cards = [], loading: cardsLoading } = useCards();
   const { documents = [] } = useDocuments();
 
-  // 作業モード（固定）はデスクトップのみ。モバイルは通常スクロールを維持する。
   useEffect(() => {
     window.scrollTo(0, 0);
     if (isDesktop) {
@@ -287,7 +264,6 @@ const Folders = () => {
     };
   }, [isDesktop]);
 
-  // --- 選択ハンドラ ---
   const handleSelectFolderInWork = useCallback(
     (folderId: string | null) => {
       if (
@@ -298,11 +274,11 @@ const Folders = () => {
       }
 
       forceResetWorkspaceScroll();
-      setFolderSelectionNonce((n) => n + 1);
+      setFolderSelectionNonce((nonce) => nonce + 1);
       notifyMainSidebarFolderSelection(folderId);
       setSelectedFolderId(folderId);
       setSelectedItem(null);
-      setExplorerBreadcrumbContext(EMPTY_BREADCRUMB_CONTEXT);
+      setExplorerBreadcrumbContext(EMPTY_EXPLORER_BREADCRUMB_CONTEXT);
       selectedFolderIdRef.current = folderId;
       selectedItemRef.current = null;
     },
@@ -411,20 +387,18 @@ const Folders = () => {
       notifyMainSidebarFolderSelection(folderId ?? null);
       setSelectedFolderId(folderId ?? null);
       setSelectedItem(null);
-      setExplorerBreadcrumbContext(EMPTY_BREADCRUMB_CONTEXT);
+      setExplorerBreadcrumbContext(EMPTY_EXPLORER_BREADCRUMB_CONTEXT);
       selectedFolderIdRef.current = folderId ?? null;
       selectedItemRef.current = null;
 
-      // パンくずの「フォルダ一覧」クリック時に、大元のフォルダ一覧へ戻す
       if (!folderId) {
-        setNavigateToSectionListToken((n) => n + 1);
+        setNavigateToSectionListToken((nonce) => nonce + 1);
         return;
       }
 
-      // ルート直下フォルダを選んだときもフォルダ一覧側を同期
-      const folder = foldersRef.current.find((f) => f.id === folderId);
+      const folder = foldersRef.current.find((entry) => entry.id === folderId);
       if (folder && !folder.parentFolderId) {
-        setNavigateToSectionListToken((n) => n + 1);
+        setNavigateToSectionListToken((nonce) => nonce + 1);
       }
     });
   }, [registerFolderSelectHandler, notifyMainSidebarFolderSelection]);
@@ -440,10 +414,10 @@ const Folders = () => {
   );
 
   const documentById = useMemo(() => {
-    const map = new Map();
-    for (const doc of documents) {
-      const key = doc.id || doc.documentId;
-      if (key) map.set(key, doc);
+    const map = new Map<string, DocumentItem>();
+    for (const documentItem of documents) {
+      const key = documentItem.id || documentItem.documentId;
+      if (key) map.set(key, documentItem);
     }
     return map;
   }, [documents]);
@@ -451,69 +425,32 @@ const Folders = () => {
   const handleExplorerBreadcrumbContextChange = useCallback(
     (next: ExplorerBreadcrumbContext) => {
       setExplorerBreadcrumbContext((prev) =>
-        isSameBreadcrumbContext(prev, next) ? prev : next,
+        areExplorerBreadcrumbContextsEqual(prev, next) ? prev : next,
       );
     },
     [],
   );
 
-  // パンくずの追加項目（フォルダ階層、カード/ドキュメント名。カードセット名）を計算
-  const extraCrumbs = useMemo(() => {
-    const crumbs = [];
-    const breadcrumbFolderId =
-      selectedFolderId ?? explorerBreadcrumbContext.folderId;
+  const extraCrumbs = useMemo(
+    () =>
+      buildExplorerBreadcrumbs({
+        selectedFolderId,
+        explorerBreadcrumbContext,
+        selectedItem,
+        folderById,
+        cardById,
+        documentById,
+      }),
+    [
+      selectedFolderId,
+      explorerBreadcrumbContext,
+      selectedItem,
+      folderById,
+      cardById,
+      documentById,
+    ],
+  );
 
-    // フォルダ階層を構築（祖先 → 選択フォルダ）
-    if (breadcrumbFolderId) {
-      const path = [];
-      let cur = folderById.get(breadcrumbFolderId);
-
-      while (cur) {
-        path.unshift(cur);
-        cur = cur.parentFolderId ? folderById.get(cur.parentFolderId) : null;
-      }
-
-      path.forEach((folder) => {
-        crumbs.push({
-          label: folder.folderName,
-          to: `/folders?folderId=${folder.id}`,
-          folderId: folder.id,
-        });
-      });
-    }
-
-    // カードまたはドキュメントのクラム
-    if (selectedItem?.type === "card") {
-      const card = cardById.get(selectedItem.id);
-      if (card) {
-        const label =
-          card.title?.trim() ||
-          getCardText(card, "question").trim().slice(0, 20) ||
-          "カード";
-        crumbs.push({ label });
-      }
-    } else if (selectedItem?.type === "document") {
-      const doc = documentById.get(selectedItem.id);
-      if (doc) {
-        crumbs.push({ label: doc.title || doc.fileName || "ドキュメント" });
-      }
-    }
-
-    if (explorerBreadcrumbContext.cardSet?.label) {
-      crumbs.push({ label: explorerBreadcrumbContext.cardSet.label });
-    }
-
-    return crumbs;
-  }, [
-    selectedFolderId,
-    explorerBreadcrumbContext,
-    selectedItem,
-    folderById,
-    cardById,
-    documentById,
-  ]);
-
-  // 計算されたパンくずをコンテキストに反映
   useLayoutEffect(() => {
     setExtraCrumbs(extraCrumbs);
   }, [extraCrumbs, setExtraCrumbs]);
@@ -538,8 +475,8 @@ const Folders = () => {
       <div className="relative z-10 w-full mx-auto h-full min-h-0 flex">
         {isLoading ? (
           <div className="space-y-3 p-4">
-            {[...Array(3)].map((_, i) => (
-              <Skeleton key={i} className="h-16 w-full rounded-2xl" />
+            {[...Array(3)].map((_, index) => (
+              <Skeleton key={index} className="h-16 w-full rounded-2xl" />
             ))}
           </div>
         ) : (

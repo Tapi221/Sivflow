@@ -2,6 +2,7 @@ import { useCards } from "@/hooks/card/useCards";
 import { useCardSets } from "@/hooks/cardSet/useCardSets";
 import { useToast } from "@/contexts/ToastContext";
 import { XlsxImportDialog } from "@/features/import/ui/XlsxImportDialog";
+import type { ExplorerBreadcrumbContext } from "@/features/breadcrumbs/types";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { useFolders } from "@/hooks/folder/useFolders";
 import { useDocuments } from "@/hooks/platform/useDocuments";
@@ -34,14 +35,6 @@ import { useTreeViewActions } from "@/components/folder/hooks/useTreeViewActions
 import { useTreeViewDerivedState } from "@/components/folder/hooks/useTreeViewDerivedState";
 import { useTreeViewFilters } from "@/components/folder/hooks/useTreeViewFilters";
 import { useTreeViewSidebar } from "@/components/folder/hooks/useTreeViewSidebar";
-
-/**
- * パンくず表示用のコンテキスト（フォルダとカードセット）
- */
-type ExplorerBreadcrumbContext = {
-  folderId: string | null;
-  cardSet: { id: string; label: string } | null;
-};
 
 interface TreeViewLayoutProps {
   folders: Folder[];
@@ -109,15 +102,15 @@ const TreeViewLayout = ({
   const handleItemSelect = useCallback(
     (item: SelectedExplorerItem) => {
       if (item?.type === "cardSet") {
-        const cs = cardSets.find((s: CardSet) => s.id === item.id);
-        if (cs) {
-          onFolderSelect(cs.folderId ?? null);
+        const cardSet = cardSets.find((set: CardSet) => set.id === item.id);
+        if (cardSet) {
+          onFolderSelect(cardSet.folderId ?? null);
           setSelectedCardSetId(item.id);
-          setSelectedCardSetLabel(cs.name || "無題のセット");
+          setSelectedCardSetLabel(cardSet.name || "無題のセット");
 
           const query = new URLSearchParams();
           query.set("cardSetId", item.id);
-          if (cs.folderId) query.set("folderId", cs.folderId);
+          if (cardSet.folderId) query.set("folderId", cardSet.folderId);
 
           navigate(createPageUrl(`CardView?${query.toString()}`));
         }
@@ -167,19 +160,19 @@ const TreeViewLayout = ({
     isMobile,
   });
 
-  const explorerTab = useExplorerStore((s) => s.explorerTab);
-  const setExplorerTab = useExplorerStore((s) => s.setExplorerTab);
+  const explorerTab = useExplorerStore((state) => state.explorerTab);
+  const setExplorerTab = useExplorerStore((state) => state.setExplorerTab);
 
-  const recent = useExplorerStore((s) => s.recent);
-  const addRecent = useExplorerStore((s) => s.addRecent);
-  const clearRecent = useExplorerStore((s) => s.clearRecent);
+  const recent = useExplorerStore((state) => state.recent);
+  const addRecent = useExplorerStore((state) => state.addRecent);
+  const clearRecent = useExplorerStore((state) => state.clearRecent);
 
-  const tagFilter = useExplorerStore((s) => s.tagFilter);
-  const tagMatchMode = useExplorerStore((s) => s.tagMatchMode);
-  const uncertaintyFilter = useExplorerStore((s) => s.uncertaintyFilter);
-  const bookmarkedFilter = useExplorerStore((s) => s.bookmarkedFilter);
-  const draftFilter = useExplorerStore((s) => s.draftFilter);
-  const contentTypeFilter = useExplorerStore((s) => s.contentTypeFilter);
+  const tagFilter = useExplorerStore((state) => state.tagFilter);
+  const tagMatchMode = useExplorerStore((state) => state.tagMatchMode);
+  const uncertaintyFilter = useExplorerStore((state) => state.uncertaintyFilter);
+  const bookmarkedFilter = useExplorerStore((state) => state.bookmarkedFilter);
+  const draftFilter = useExplorerStore((state) => state.draftFilter);
+  const contentTypeFilter = useExplorerStore((state) => state.contentTypeFilter);
 
   useEffect(() => {
     if (explorerTab === "inbox") {
@@ -233,7 +226,7 @@ const TreeViewLayout = ({
 
     if (selectedItem?.type === "cardSet") {
       return (
-        cardSets.find((s: CardSet) => s.id === selectedItem.id)?.folderId ??
+        cardSets.find((set: CardSet) => set.id === selectedItem.id)?.folderId ??
         null
       );
     }
@@ -249,7 +242,6 @@ const TreeViewLayout = ({
     );
   }, [cardSets, selectedCardSetId, selectedCardSetLabel]);
 
-  // パンくずの変更を親コンポーネントに通知する
   useLayoutEffect(() => {
     onBreadcrumbContextChange?.({
       folderId: currentHeaderFolderId,
@@ -316,7 +308,6 @@ const TreeViewLayout = ({
     [addRecent, navigate, onFolderSelect, setExplorerTab],
   );
 
-  // インポート先の候補となる、現在選択中のフォルダ内のカードセット一覧
   const importTargetCardSets = useMemo(() => {
     if (!currentHeaderFolderId) {
       return [];

@@ -1,54 +1,20 @@
 import { useBreadcrumbContext } from "@/contexts/BreadcrumbContext";
+import {
+  buildRouteBreadcrumbs,
+  mergeTitleBarBreadcrumbs,
+} from "@/features/breadcrumbs/builders";
 import { cn } from "@/lib/utils";
 import { isDesktopRuntime } from "@/platform/runtime";
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
-const PAGE_LABELS: Record<string, string> = {
-  folders: "フォルダ一覧",
-  calendar: "カレンダー",
-  gallery: "ギャラリー",
-  trash: "ゴミ箱",
-  study: "学習モード",
-  cardedit: "カード編集",
-  cardview: "カード閲覧",
-  "one-qa-mode": "一問一答",
-  "pair-mode": "ペアモード",
-  "four-choice-mode": "四択モード",
-  directory: "ディレクトリ",
-};
-
 const useBreadcrumbs = () => {
   const { pathname, search } = useLocation();
 
-  return useMemo(() => {
-    const searchParams = new URLSearchParams(search);
-    const isHomeOnlyMode =
-      pathname.toLowerCase() === "/folders" && searchParams.get("home") === "1";
-    if (isHomeOnlyMode) {
-      return [{ label: "ホーム", to: undefined }];
-    }
-
-    const segments = pathname.split("/").filter(Boolean);
-    const crumbs = [
-      { label: "ホーム", to: "/folders?home=1" as string | undefined },
-    ];
-
-    segments.forEach((seg, i) => {
-      const label = PAGE_LABELS[seg.toLowerCase()] ?? seg;
-      const to = "/" + segments.slice(0, i + 1).join("/");
-      crumbs.push({ label, to });
-    });
-
-    if (crumbs.length > 1) {
-      crumbs[crumbs.length - 1] = {
-        label: crumbs[crumbs.length - 1].label,
-        to: undefined,
-      };
-    }
-
-    return crumbs;
-  }, [pathname, search]);
+  return useMemo(
+    () => buildRouteBreadcrumbs({ pathname, search }),
+    [pathname, search],
+  );
 };
 
 export const TitleBar: React.FC = () => {
@@ -86,26 +52,15 @@ export const TitleBar: React.FC = () => {
       window.removeEventListener("cardview:editing-change", onEditingChange);
   }, []);
 
-  // URL ベースのクラムにフォルダ/カード/ドキュメントのクラムを結合する。
-  // extraCrumbs がある場合は末尾クラムに to を復元して続きを表示する。
-  const allCrumbs = useMemo(() => {
-    if (extraCrumbs.length === 0) return crumbs;
-
-    const baseCrumbs =
-      pathname.toLowerCase().startsWith("/cardview") && crumbs.length > 1
-        ? [crumbs[0], { label: "フォルダ一覧", to: "/folders" }]
-        : crumbs;
-
-    const base = baseCrumbs.map((c, i) =>
-      i === baseCrumbs.length - 1 ? { ...c, to: "/folders" } : c,
-    );
-
-    const extra = extraCrumbs.map((c, i) =>
-      i === extraCrumbs.length - 1 ? { ...c, to: undefined } : c,
-    );
-
-    return [...base, ...extra];
-  }, [crumbs, extraCrumbs, pathname]);
+  const allCrumbs = useMemo(
+    () =>
+      mergeTitleBarBreadcrumbs({
+        pathname,
+        baseCrumbs: crumbs,
+        extraCrumbs,
+      }),
+    [crumbs, extraCrumbs, pathname],
+  );
 
   if (!isDesktop) return null;
 
@@ -125,10 +80,10 @@ export const TitleBar: React.FC = () => {
         </span>
 
         <nav className="flex items-center gap-1 overflow-hidden text-xs text-gray-400">
-          {allCrumbs.map((crumb, i) => {
+          {allCrumbs.map((crumb, index) => {
             const hasFolderId = "folderId" in crumb;
             const isSectionListCrumb = crumb.to === "/folders" && !hasFolderId;
-            const isHomeCrumb = i === 0;
+            const isHomeCrumb = index === 0;
             const isClickable = Boolean(crumb.to);
 
             return (
@@ -137,9 +92,9 @@ export const TitleBar: React.FC = () => {
                   "folderId" in crumb
                     ? (crumb.folderId ?? "no-folder")
                     : "no-folder"
-                }:${i}`}
+                }:${index}`}
               >
-                {i > 0 && <span className="select-none text-gray-300">/</span>}
+                {index > 0 && <span className="select-none text-gray-300">/</span>}
 
                 {isClickable ? (
                   <Link
