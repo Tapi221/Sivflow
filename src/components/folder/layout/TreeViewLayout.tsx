@@ -169,10 +169,14 @@ const TreeViewLayout = ({
 
   const tagFilter = useExplorerStore((state) => state.tagFilter);
   const tagMatchMode = useExplorerStore((state) => state.tagMatchMode);
-  const uncertaintyFilter = useExplorerStore((state) => state.uncertaintyFilter);
+  const uncertaintyFilter = useExplorerStore(
+    (state) => state.uncertaintyFilter,
+  );
   const bookmarkedFilter = useExplorerStore((state) => state.bookmarkedFilter);
   const draftFilter = useExplorerStore((state) => state.draftFilter);
-  const contentTypeFilter = useExplorerStore((state) => state.contentTypeFilter);
+  const contentTypeFilter = useExplorerStore(
+    (state) => state.contentTypeFilter,
+  );
 
   useEffect(() => {
     if (explorerTab === "inbox") {

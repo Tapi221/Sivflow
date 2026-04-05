@@ -101,7 +101,9 @@ export const mergeTitleBarBreadcrumbs = ({
       : baseCrumbs;
 
   const clickableBaseCrumbs = baseCrumbsForMerge.map((crumb, index) =>
-    index === baseCrumbsForMerge.length - 1 ? { ...crumb, to: "/folders" } : crumb,
+    index === baseCrumbsForMerge.length - 1
+      ? { ...crumb, to: "/folders" }
+      : crumb,
   );
 
   const normalizedExtraCrumbs = extraCrumbs.map((crumb, index) =>
@@ -222,14 +224,16 @@ export const buildCardViewBreadcrumbs = ({
 
   if (selectedCard) {
     const title = selectedCard.title?.trim() ?? "";
-    const cardIndex = sortedCards.findIndex((card) => card.id === selectedCard.id);
+    const cardIndex = sortedCards.findIndex(
+      (card) => card.id === selectedCard.id,
+    );
     const current = cardIndex >= 0 ? cardIndex + 1 : 1;
     const total = Math.max(1, sortedCards.length);
-    const label = title ? `${current}/${total} : ${title}` : `${current}/${total}`;
+    const label = title
+      ? `${current}/${total} : ${title}`
+      : `${current}/${total}`;
     crumbs.push({ label });
   }
 
   return crumbs;
 };
-
-`

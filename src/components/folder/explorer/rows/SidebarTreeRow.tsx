@@ -103,6 +103,16 @@ export const SidebarTreeRow = ({
             }
           : undefined
       }
+      onAuxClickCapture={
+        canOpenContextMenu
+          ? (event) => {
+              if (!suppressNextClickRef.current) return;
+              event.preventDefault();
+              event.stopPropagation();
+              clearSuppressedClick();
+            }
+          : undefined
+      }
       onContextMenu={
         canOpenContextMenu
           ? (event) => {

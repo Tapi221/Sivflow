@@ -1,19 +1,18 @@
 import { getCardText } from "@/domain/card/content";
-import type { Card, DocumentItem } from "@/types";
-import type { CardSet } from "@/types/domain/cardSet";
 import type {
   BreadcrumbCrumb,
-  BreadcrumbFolderLike,
   ExplorerBreadcrumbContext,
 } from "@/features/breadcrumbs/types";
+import type { Card, DocumentItem, Folder } from "@/types";
+import type { CardSet } from "@/types/domain/cardSet";
 
 const buildFolderPathCrumbs = (
   folderId: string | null | undefined,
-  folderById: Map<string, BreadcrumbFolderLike>,
+  folderById: Map<string, Folder>,
 ): BreadcrumbCrumb[] => {
   if (!folderId) return [];
 
-  const path: BreadcrumbFolderLike[] = [];
+  const path: Folder[] = [];
   let current = folderById.get(folderId) ?? null;
 
   while (current) {
@@ -40,11 +39,8 @@ export const buildExplorerExtraCrumbs = ({
 }: {
   selectedFolderId: string | null;
   explorerBreadcrumbContext: ExplorerBreadcrumbContext;
-  selectedItem:
-    | { type: string; id?: string | undefined }
-    | null
-    | undefined;
-  folderById: Map<string, BreadcrumbFolderLike>;
+  selectedItem: { type: string; id?: string | undefined } | null | undefined;
+  folderById: Map<string, Folder>;
   cardById: Map<string, Card>;
   documentById: Map<string, DocumentItem>;
 }): BreadcrumbCrumb[] => {
@@ -88,7 +84,7 @@ export const buildCardViewExtraCrumbs = ({
   selectedCardSet: CardSet | null;
   selectedCard: Card | null;
   sortedCards: Card[];
-  folderById: Map<string, BreadcrumbFolderLike>;
+  folderById: Map<string, Folder>;
 }): BreadcrumbCrumb[] => {
   const crumbs: BreadcrumbCrumb[] = [];
   const crumbFolderId = folderId ?? selectedCardSet?.folderId ?? null;
@@ -109,10 +105,14 @@ export const buildCardViewExtraCrumbs = ({
 
   if (selectedCard) {
     const title = selectedCard.title?.trim() ?? "";
-    const cardIndex = sortedCards.findIndex((card) => card.id === selectedCard.id);
+    const cardIndex = sortedCards.findIndex(
+      (card) => card.id === selectedCard.id,
+    );
     const current = cardIndex >= 0 ? cardIndex + 1 : 1;
     const total = Math.max(1, sortedCards.length);
-    const label = title ? `${current}/${total} : ${title}` : `${current}/${total}`;
+    const label = title
+      ? `${current}/${total} : ${title}`
+      : `${current}/${total}`;
     crumbs.push({ label });
   }
 

@@ -94,7 +94,9 @@ export const TitleBar: React.FC = () => {
                     : "no-folder"
                 }:${index}`}
               >
-                {index > 0 && <span className="select-none text-gray-300">/</span>}
+                {index > 0 && (
+                  <span className="select-none text-gray-300">/</span>
+                )}
 
                 {isClickable ? (
                   <Link
