@@ -1,29 +1,31 @@
-import type {
-  ISyncService,
-  IQueueManager,
-  INetworkMonitor,
-  IDiffEngine,
-  ICloudSyncAdapter,
-  SyncTask,
-} from "./interfaces/ISyncService";
-import { nanoid } from "nanoid";
+import type { Card, CardSet, Folder } from "@/types";
+import type { SyncConflict as StoredSyncConflict, SyncResult } from "@/types/domain/sync";
 import type { SyncContextSource } from "@/types/domain/telemetry";
-import type { SyncResult } from "@/types/domain/sync";
 import {
+  collection,
+  deleteDoc,
   doc,
   getDoc,
-  updateDoc,
-  collection,
-  query,
   getDocs,
-  deleteDoc,
+  query,
   Timestamp,
+  updateDoc,
   where,
 } from "firebase/firestore";
+import { nanoid } from "nanoid";
 import { firestoreDb } from "./firebase";
-import { TelemetryService } from "./logic/TelemetryService";
-import { SecurityMonitor } from "./logic/SecurityMonitor";
+import type {
+  ICloudSyncAdapter,
+  IDiffEngine,
+  INetworkMonitor,
+  IQueueManager,
+  ISyncService,
+  SyncChange,
+  SyncTask,
+} from "./interfaces/ISyncService";
 import type { LocalDBLike } from "./localDB";
+import { SecurityMonitor } from "./logic/SecurityMonitor";
+import { TelemetryService } from "./logic/TelemetryService";
 
 const SYNC_TABLE_BY_TYPE = {
   card: "cards",
@@ -45,10 +47,24 @@ const FULL_RESYNC_TABLES = [
   "images",
 ] as const;
 
+const ROOT_FOLDER_KEY = "__root__";
+const DEFAULT_FOLDER_NAME = "インポート済みカード";
+
+const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return value !== null && typeof value === "object";
+};
+
 const toSyncTableName = (type: string) => {
   return (
     SYNC_TABLE_BY_TYPE[type as keyof typeof SYNC_TABLE_BY_TYPE] ?? `${type}s`
   );
+};
+
+const getPayloadId = (payload: unknown) => {
+  if (!isRecord(payload)) return null;
+  return typeof payload.id === "string" && payload.id.length > 0
+    ? payload.id
+    : null;
 };
 
 const normalizeFullResyncRecord = (
@@ -56,10 +72,12 @@ const normalizeFullResyncRecord = (
   change: { type?: string; id?: string; data?: unknown },
 ) => {
   const data = {
-    ...((change.data as Record<string, unknown> | undefined) ?? {}),
+    ...((isRecord(change.data) ? change.data : {}) as Record<string, unknown>),
   };
 
-  if (!data.id && change.id) data.id = change.id;
+  if (!data.id && change.id) {
+    data.id = change.id;
+  }
 
   if (change.type === "userSetting") {
     data.id = userId;
@@ -67,6 +85,175 @@ const normalizeFullResyncRecord = (
   }
 
   return data;
+};
+
+const normalizeFolderKey = (value: unknown) => {
+  if (typeof value !== "string") return ROOT_FOLDER_KEY;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : ROOT_FOLDER_KEY;
+};
+
+const toFolderId = (folderKey: string) => {
+  return folderKey === ROOT_FOLDER_KEY ? null : folderKey;
+};
+
+const buildFolderNameById = (folders: Folder[]) => {
+  return new Map(
+    folders.map((folder) => [
+      String(folder.id ?? folder.folderId ?? ""),
+      String(folder.folderName ?? ""),
+    ]),
+  );
+};
+
+const buildNextOrderIndexByFolder = (cardSets: CardSet[]) => {
+  const nextOrderIndexByFolder = new Map<string, number>();
+
+  for (const cardSet of cardSets) {
+    if (cardSet.isDeleted) continue;
+    const folderKey = normalizeFolderKey(cardSet.folderId);
+    const currentMax = nextOrderIndexByFolder.get(folderKey) ?? 0;
+    nextOrderIndexByFolder.set(
+      folderKey,
+      Math.max(currentMax, (cardSet.orderIndex ?? 0) + 1),
+    );
+  }
+
+  return nextOrderIndexByFolder;
+};
+
+const buildActiveCardSetByFolder = (cardSets: CardSet[]) => {
+  const activeCardSetByFolder = new Map<string, CardSet>();
+
+  for (const cardSet of cardSets) {
+    if (cardSet.isDeleted) continue;
+    const folderKey = normalizeFolderKey(cardSet.folderId);
+    if (!activeCardSetByFolder.has(folderKey)) {
+      activeCardSetByFolder.set(folderKey, cardSet);
+    }
+  }
+
+  return activeCardSetByFolder;
+};
+
+const collectCardsNeedingRepair = (
+  cards: Card[],
+  activeCardSetIds: Set<string>,
+) => {
+  return cards.filter((card) => {
+    if (card.isDeleted) return false;
+    const cardSetId =
+      typeof card.cardSetId === "string" ? card.cardSetId.trim() : "";
+    return cardSetId.length === 0 || !activeCardSetIds.has(cardSetId);
+  });
+};
+
+const shouldRepairCardSets = (changes: Array<{ type?: unknown }>) => {
+  return changes.some((change) => {
+    return (
+      change.type === "card" ||
+      change.type === "cardSet" ||
+      change.type === "folder"
+    );
+  });
+};
+
+const preserveLocalOnlyFields = (
+  type: string,
+  localData: unknown,
+  merged: unknown,
+) => {
+  if (!isRecord(merged)) return merged;
+
+  if (type === "document" && isRecord(localData)) {
+    if (localData.localFileId) merged.localFileId = localData.localFileId;
+    if (localData.blobUrl) merged.blobUrl = localData.blobUrl;
+    if (
+      typeof localData.localUrl === "string" &&
+      localData.localUrl.startsWith("blob:")
+    ) {
+      merged.localUrl = localData.localUrl;
+    }
+  }
+
+  if (type === "asset" && isRecord(localData)) {
+    if (localData.localBlobId) merged.localBlobId = localData.localBlobId;
+    if (localData.localStatus) merged.localStatus = localData.localStatus;
+  }
+
+  return merged;
+};
+
+const repairMissingCardSetsAfterSync = async (
+  localDB: LocalDBLike,
+  userId: string,
+) => {
+  const now = new Date();
+
+  const [cards, cardSets, folders] = await Promise.all([
+    localDB.cards.where("userId").equals(userId).toArray() as Promise<Card[]>,
+    localDB.cardSets.where("userId").equals(userId).toArray() as Promise<CardSet[]>,
+    localDB.folders.where("userId").equals(userId).toArray() as Promise<Folder[]>,
+  ]);
+
+  const activeCardSets = cardSets.filter((cardSet) => !cardSet.isDeleted);
+  const activeCardSetIds = new Set(activeCardSets.map((cardSet) => cardSet.id));
+  const cardsNeedingRepair = collectCardsNeedingRepair(cards, activeCardSetIds);
+
+  if (cardsNeedingRepair.length === 0) return;
+
+  const folderNameById = buildFolderNameById(folders);
+  const nextOrderIndexByFolder = buildNextOrderIndexByFolder(activeCardSets);
+  const activeCardSetByFolder = buildActiveCardSetByFolder(activeCardSets);
+
+  const cardsByFolder = new Map<string, Card[]>();
+  for (const card of cardsNeedingRepair) {
+    const folderKey = normalizeFolderKey(card.folderId);
+    const group = cardsByFolder.get(folderKey);
+    if (group) {
+      group.push(card);
+    } else {
+      cardsByFolder.set(folderKey, [card]);
+    }
+  }
+
+  await localDB.transaction("rw", localDB.cardSets, localDB.cards, async () => {
+    for (const [folderKey, groupedCards] of cardsByFolder.entries()) {
+      let targetCardSet = activeCardSetByFolder.get(folderKey);
+
+      if (!targetCardSet) {
+        const folderId = toFolderId(folderKey);
+        const folderName =
+          (folderId ? folderNameById.get(folderId) : null) || DEFAULT_FOLDER_NAME;
+
+        targetCardSet = {
+          id: crypto.randomUUID(),
+          userId,
+          deviceId: groupedCards[0]?.deviceId || "web",
+          folderId,
+          name: `${folderName} セット`,
+          orderIndex: nextOrderIndexByFolder.get(folderKey) ?? 0,
+          isDeleted: false,
+          createdAt: now,
+          updatedAt: now,
+        };
+
+        await localDB.cardSets.add(targetCardSet);
+        activeCardSetByFolder.set(folderKey, targetCardSet);
+        nextOrderIndexByFolder.set(
+          folderKey,
+          (nextOrderIndexByFolder.get(folderKey) ?? 0) + 1,
+        );
+      }
+
+      for (const card of groupedCards) {
+        await localDB.cards.update(card.id, {
+          cardSetId: targetCardSet.id,
+          updatedAt: now,
+        });
+      }
+    }
+  });
 };
 
 /**
@@ -106,7 +293,6 @@ export class SyncServiceV2 implements ISyncService {
       localStorage.getItem("deviceId") || "unknown",
     );
 
-    // LocalDB の更新を監視してバックグラウンド同期をトリガー
     this.localDB.setSyncTrigger(() => {
       this.sync("background").catch((err) => {
         console.error("[SyncServiceV2] Background sync failed:", err);
@@ -114,39 +300,30 @@ export class SyncServiceV2 implements ISyncService {
     });
   }
 
-  /**
-   * レガシー互換の同期エントリーポイント
-   */
   async synchronize(onProgress?: (msg: string) => void): Promise<SyncResult> {
     onProgress?.("同期を開始しています...");
     try {
       await this.sync("user_initiated");
       return {
         success: true,
-        uploaded: 0, // 詳細数は将来的に telemetry から取得
+        uploaded: 0,
         downloaded: 0,
         conflicts: 0,
         errors: [],
       };
     } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
       return {
         success: false,
         uploaded: 0,
         downloaded: 0,
         conflicts: 0,
-        errors: [error.message],
+        errors: [message],
       };
     }
   }
 
-  /**
-   * 同期を実行
-   */
-  /**
-   * 同期を実行
-   */
   async sync(source: SyncContextSource): Promise<void> {
-    // 同期中の重複実行を防ぐ
     if (this.isSyncing) {
       this.telemetry.log("warn", "Sync already in progress, skipping", {
         source,
@@ -163,10 +340,8 @@ export class SyncServiceV2 implements ISyncService {
         networkStatus: this.networkMonitor.status,
       });
 
-      // 0. デバイスステータスをチェック (Security Guard)
       await this.checkDeviceStatus();
 
-      // 1. ネットワーク状態をチェック
       if (this.networkMonitor.status === "offline") {
         this.telemetry.log("warn", "Offline, sync deferred");
         return;
@@ -177,19 +352,18 @@ export class SyncServiceV2 implements ISyncService {
         return;
       }
 
-      // 2. クラウドからの差分取得 (Pull)
       this.telemetry.log("info", "Checking for remote changes (Pull)");
       const lastSyncTime = await this.localDB.getLastSyncTime(this.userId);
       const lastSyncTimestamp = lastSyncTime ? lastSyncTime.getTime() : 0;
 
       const { changes, serverTime } =
         await this.cloudAdapter.pullDiff(lastSyncTimestamp);
+
       if (changes.length > 0) {
         this.telemetry.log("info", `Applying ${changes.length} remote changes`);
         await this.applyRemoteChanges(changes);
       }
 
-      // 3. ローカルの変更を送信 (Push)
       const constraint = this.networkMonitor.getBatchConstraint(source);
       const tasks = await this.queueManager.peekBatch(constraint);
 
@@ -198,9 +372,7 @@ export class SyncServiceV2 implements ISyncService {
         await this.processBatch(tasks);
       }
 
-      // 4. 同期時刻を更新 (成功時のみ)
       await this.localDB.updateLastSyncTime(this.userId, new Date(serverTime));
-
       transaction.end("success");
     } catch (error) {
       this.telemetry.log("error", "Sync failed", { source }, error as Error);
@@ -211,9 +383,6 @@ export class SyncServiceV2 implements ISyncService {
     }
   }
 
-  /**
-   * バッチ処理
-   */
   private async processBatch(tasks: SyncTask[]): Promise<void> {
     const startTime = performance.now();
     const successIds: string[] = [];
@@ -222,11 +391,15 @@ export class SyncServiceV2 implements ISyncService {
     for (const task of tasks) {
       try {
         if (task.type === "upload") {
-          // アップロード処理
+          const payloadId = getPayloadId(task.payload);
+          if (!payloadId) {
+            throw new Error(`Missing payload.id for sync task: ${task.id}`);
+          }
+
           const result = await this.cloudAdapter.pushBatch([
             {
               type: task.entity,
-              id: task.payload.id,
+              id: payloadId,
               data: task.payload,
             },
           ]);
@@ -237,7 +410,6 @@ export class SyncServiceV2 implements ISyncService {
             failedIds.push(task.id);
           }
         } else if (task.type === "download") {
-          // ダウンロード処理
           const { changes } = await this.cloudAdapter.pullDiff(0);
           if (changes.length > 0) {
             await this.applyRemoteChanges(changes);
@@ -251,18 +423,18 @@ export class SyncServiceV2 implements ISyncService {
           error as Error,
         );
 
-        // 【正常遷移: Delta Sync 失敗 → Full Sync】
-        // 特定の致命的エラー（バージョン競合等）が発生した場合、フル同期による修復を試みる
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+
         if (
-          error.message?.includes("conflict") ||
-          error.message?.includes("version_mismatch")
+          errorMessage.includes("conflict") ||
+          errorMessage.includes("version_mismatch")
         ) {
           this.telemetry.log(
             "warn",
             "Fatal sync conflict detected. Triggering self-healing full resync.",
           );
           await this.forceFullResync();
-          // フル同期が成功すれば、個別のタスク失敗は無視して良い（全体が最新になるため）
           return;
         }
 
@@ -270,13 +442,11 @@ export class SyncServiceV2 implements ISyncService {
       }
     }
 
-    // 5. 結果を報告
     const duration = performance.now() - startTime;
     const success = failedIds.length === 0;
 
     this.networkMonitor.reportResult(success, duration);
 
-    // 6. キューを更新
     if (successIds.length > 0) {
       await this.queueManager.complete(successIds);
     }
@@ -285,15 +455,11 @@ export class SyncServiceV2 implements ISyncService {
       await this.queueManager.fail(failedIds, "Batch processing failed", true);
     }
 
-    // メトリクス記録
     this.telemetry.recordMetric("sync_batch_size", tasks.length);
     this.telemetry.recordMetric("sync_success_count", successIds.length);
     this.telemetry.recordMetric("sync_failure_count", failedIds.length);
   }
 
-  /**
-   * 起動時同期: Pull (Cloud -> Local) を優先し、その後 Push (Local -> Cloud) を実行
-   */
   async performStartupSync(): Promise<void> {
     if (this.isSyncing) return;
 
@@ -303,19 +469,17 @@ export class SyncServiceV2 implements ISyncService {
     try {
       this.telemetry.log("info", "Starting startup sync (Pull priorities)");
 
-      // 1. 前回の同期時刻を取得
       const lastSyncTime = await this.localDB.getLastSyncTime(this.userId);
       const lastSyncTimestamp = lastSyncTime ? lastSyncTime.getTime() : 0;
 
-      // 2. クラウドから差分を取得して適用 (Pull & Apply)
       const { changes, serverTime } =
         await this.cloudAdapter.pullDiff(lastSyncTimestamp);
+
       if (changes.length > 0) {
         this.telemetry.log("info", `Applying ${changes.length} remote changes`);
         await this.applyRemoteChanges(changes);
       }
 
-      // 3. ローカルの待機中タスクを処理 (Push)
       const constraint = this.networkMonitor.getBatchConstraint("system");
       const tasks = await this.queueManager.peekBatch(constraint);
       if (tasks.length > 0) {
@@ -323,7 +487,6 @@ export class SyncServiceV2 implements ISyncService {
         await this.processBatch(tasks);
       }
 
-      // 4. 同期時刻を更新
       await this.localDB.updateLastSyncTime(this.userId, new Date(serverTime));
 
       this.telemetry.log("info", "Startup sync completed successfully");
@@ -337,49 +500,52 @@ export class SyncServiceV2 implements ISyncService {
     }
   }
 
-  /**
-   * リモートの変更をローカルDBに適用
-   */
-  private async applyRemoteChanges(changes: unknown[]): Promise<void> {
-    // フォルダの循環参照チェック用に全フォルダを一度取得
+  private async applyRemoteChanges(changes: SyncChange[]): Promise<void> {
     const allFolders = await this.localDB.folders.toArray();
 
     for (const change of changes) {
-      const table = toSyncTableName(change.type);
-      const remoteData = normalizeFullResyncRecord(this.userId, {
-        type: change.type,
-        id: change.id,
-        data: change.data,
-      }) as any;
+      const changeType = typeof change.type === "string" ? change.type : "";
+      if (!changeType) continue;
 
-      // documents.localFileId / blob localUrl は端末ローカル専用のため、受信時に除外かつ保護する。
-      // (ここでは remoteData から削除するだけで、後のマージで localData 側が残るようにする)
-      if (change.type === "document") {
-        delete (remoteData as any).localFileId;
-        delete (remoteData as any).blobUrl;
+      const changeId = typeof change.id === "string" ? change.id : "";
+      const table = toSyncTableName(changeType);
+      const remoteData = normalizeFullResyncRecord(this.userId, {
+        type: changeType,
+        id: changeId,
+        data: change.data,
+      });
+
+      if (changeType === "document") {
+        delete remoteData.localFileId;
+        delete remoteData.blobUrl;
         if (
-          typeof (remoteData as any).localUrl === "string" &&
-          (remoteData as any).localUrl.startsWith("blob:")
+          typeof remoteData.localUrl === "string" &&
+          remoteData.localUrl.startsWith("blob:")
         ) {
-          (remoteData as any).localUrl = null;
+          remoteData.localUrl = null;
         }
       }
 
-      if (change.type === "asset") {
-        delete (remoteData as any).localBlobId;
-        delete (remoteData as any).localStatus;
+      if (changeType === "asset") {
+        delete remoteData.localBlobId;
+        delete remoteData.localStatus;
       }
 
-      // フォルダの場合、循環参照をチェックして防止
-      if (change.type === "folder") {
+      if (changeType === "folder") {
         const parentId =
           remoteData.parentFolderId ?? remoteData.parent_folder_id ?? null;
-        if (this.diffEngine.detectCycle(change.id, parentId, allFolders)) {
+        const folderId =
+          changeId || (typeof remoteData.id === "string" ? remoteData.id : "");
+
+        if (
+          folderId &&
+          this.diffEngine.detectCycle(folderId, parentId as string | null, allFolders)
+        ) {
           this.telemetry.log(
             "error",
             "Circular reference detected during applyRemoteChanges, healing by setting parent to null",
             {
-              folderId: change.id,
+              folderId,
               parentId,
             },
           );
@@ -388,88 +554,71 @@ export class SyncServiceV2 implements ISyncService {
         }
       }
 
-      // IDが一致する既存データを取得
-      const localData = await this.localDB.getItem(table, change.id);
+      const localLookupId =
+        changeType === "userSetting" ? this.userId : changeId || this.userId;
+      const localData = await this.localDB.getItem(table, localLookupId);
 
       if (!localData) {
-        // 新規追加
-        await this.localDB.upsert(table, remoteData, true); // skipSync=true でループ防止
-      } else {
-        // マージロジック
-        const { merged, conflict } = this.diffEngine.merge(
-          localData,
-          remoteData,
-          "server_wins",
+        await this.localDB.upsert(table, remoteData as never, true);
+        continue;
+      }
+
+      const { merged, conflict } = this.diffEngine.merge(
+        localData,
+        remoteData,
+        "server_wins",
+      );
+
+      const mergedWithLocalFields = preserveLocalOnlyFields(
+        changeType,
+        localData,
+        merged,
+      );
+
+      if (conflict) {
+        this.telemetry.log(
+          "warn",
+          "Conflict detected during applyRemoteChanges",
+          {
+            entity: changeType,
+            id: changeId,
+          },
         );
 
-        // ✅ マージ後のデータにローカル専用フィールドを書き戻す（サーバーからの Pull で上書きされないように保護）
-        if (change.type === "document") {
-          const l = localData as any;
-          const m = merged as any;
-          if (l.localFileId) m.localFileId = l.localFileId;
-          if (l.blobUrl) m.blobUrl = l.blobUrl;
-          if (l.localUrl?.startsWith("blob:")) m.localUrl = l.localUrl;
-        }
+        const storedConflict: StoredSyncConflict = {
+          id: nanoid(),
+          entityId: changeId || localLookupId,
+          entityType: changeType as StoredSyncConflict["entityType"],
+          autoMerged: mergedWithLocalFields,
+          conflicts: {},
+          detectedAt: Date.now(),
+        };
 
-        if (change.type === "asset") {
-          const l = localData as any;
-          const m = merged as any;
-          if (l.localBlobId) m.localBlobId = l.localBlobId;
-          if (l.localStatus) m.localStatus = l.localStatus;
-        }
-
-        if (conflict) {
-          this.telemetry.log(
-            "warn",
-            "Conflict detected during applyRemoteChanges",
-            {
-              entity: change.type,
-              id: change.id,
-            },
-          );
-          // 競合情報を記録（将来的なUI解決用）
-          await (this.localDB as any).conflicts.put({
-            id: nanoid(),
-            entityId: change.id,
-            entityType: change.type,
-            localData,
-            remoteData,
-            resolved: false,
-            occurredAt: new Date(),
-          });
-        }
-
-        // ローカルDBを更新
-        await this.localDB.upsert(table, merged, true); // skipSync=true でループ防止
+        await this.localDB.putConflict(storedConflict);
       }
+
+      await this.localDB.upsert(table, mergedWithLocalFields as never, true);
+    }
+
+    if (shouldRepairCardSets(changes)) {
+      await repairMissingCardSetsAfterSync(this.localDB, this.userId);
     }
   }
 
-  /**
-   * キュー状態を取得
-   */
   async getQueueStatus(): Promise<{ pending: number; isSyncing: boolean }> {
     const pending = await this.queueManager.getQueueDepth();
     return { pending, isSyncing: this.isSyncing };
   }
 
-  /**
-   * 強制フル同期（トラブルシューティング用）
-   * クラウド上のデータをマスターとして、ローカルDBの全データを再構築します。
-   * ※ ローカルにのみ存在する変更は失われる可能性があります。
-   */
   async forceFullResync(): Promise<void> {
     this.telemetry.log("warn", "Force full resync initiated");
 
-    // セキュリティイベント: 競合過多として記録
     await this.securityMonitor.logEvent("SYNC_CONFLICT_EXCESS");
 
-    // フォールバックカウントを記録
-    this.fallbackCount++;
+    this.fallbackCount += 1;
     this.telemetry.recordMetric("sync_fallback_count", this.fallbackCount);
 
     try {
-      // 1. クラウドから全データを取得 (since=0)
       const diff = await this.cloudAdapter.pullDiff(0);
 
       this.telemetry.log("info", "Pulling all data for resync", {
@@ -477,29 +626,37 @@ export class SyncServiceV2 implements ISyncService {
       });
 
       await this.localDB.transaction("rw", [...FULL_RESYNC_TABLES], async () => {
-        // すべてのデータを一旦削除（ソフトデリートではなく物理削除して再構築）
         for (const table of FULL_RESYNC_TABLES) {
-          await (this.localDB as unknown)[table].clear();
+          await (this.localDB as unknown as Record<
+            string,
+            { clear: () => Promise<void> }
+          >)[table].clear();
         }
 
-        // 取得したデータを投入
         for (const change of diff.changes) {
-          const tableName = toSyncTableName(change.type);
-          if (
-            (FULL_RESYNC_TABLES as readonly string[]).includes(tableName)
-          ) {
-            const data = normalizeFullResyncRecord(this.userId, {
-              type: change.type,
-              id: change.id,
-              data: change.data,
-            });
-            await (this.localDB as unknown)[tableName].put(data);
+          const changeType = typeof change.type === "string" ? change.type : "";
+          if (!changeType) continue;
+
+          const tableName = toSyncTableName(changeType);
+          if (!(FULL_RESYNC_TABLES as readonly string[]).includes(tableName)) {
+            continue;
           }
+
+          const data = normalizeFullResyncRecord(this.userId, {
+            type: changeType,
+            id: typeof change.id === "string" ? change.id : undefined,
+            data: change.data,
+          });
+
+          await (this.localDB as unknown as Record<
+            string,
+            { put: (value: unknown) => Promise<void> }
+          >)[tableName].put(data);
         }
       });
 
-      // 3. 同期時刻を更新 (次回の差分同期はここから始まる)
-      // ✅ syncMetadata を直に触ると起点がズレて差分同期が壊れやすいので、既存ルートに統一する
+      await repairMissingCardSetsAfterSync(this.localDB, this.userId);
+
       if (diff.serverTime) {
         await this.localDB.updateLastSyncTime(
           this.userId,
@@ -516,10 +673,6 @@ export class SyncServiceV2 implements ISyncService {
     }
   }
 
-  /**
-   * デバイス一覧からデバイスを登録解除（論理削除）
-   * @spec 誤操作防止・監査ログのため、物理削除ではなく revoked ステータスに変更する
-   */
   async removeDevice(deviceId: string): Promise<void> {
     this.telemetry.log("info", "Revoking device access", { deviceId });
     if (!firestoreDb) {
@@ -527,41 +680,33 @@ export class SyncServiceV2 implements ISyncService {
         "error",
         "Security Alert: firestoreDb is undefined during removeDevice",
       );
-      return; // サイレントに失敗させるか、上位でハンドリング
+      return;
     }
     const deviceRef = doc(
       firestoreDb,
       `sync_metadata/${this.userId}/devices/${deviceId}`,
     );
 
-    // 論理削除 (Revoked)
     await updateDoc(deviceRef, {
       status: "revoked",
       revokedAt: Timestamp.now(),
       isActive: false,
     });
 
-    // セキュリティイベント: デバイス解除
     await this.securityMonitor.logEvent("DEVICE_REVOKED", {
       revokedDeviceId: deviceId,
     });
   }
 
-  /**
-   * 現在のデバイスステータスを確認
-   * Revoked状態であればエラーをスローしてアクセスを拒否する
-   */
   private async checkDeviceStatus(): Promise<void> {
-    // クライアント側で自分のdeviceIdを取得 (localStorage)
     const currentDeviceId = localStorage.getItem("deviceId");
-    if (!currentDeviceId) return; // 初回起動時などはスキップ
+    if (!currentDeviceId) return;
 
     if (!firestoreDb) {
       this.telemetry.log(
         "error",
         "Security Alert: firestoreDb is undefined during checkDeviceStatus",
       );
-      // 初期化待ちの可能性もあるが、ここでは明確にエラーとして報告
       throw new Error(
         "Firebase Firestore is not initialized during security check.",
       );
@@ -583,7 +728,6 @@ export class SyncServiceV2 implements ISyncService {
             { deviceId: currentDeviceId },
           );
 
-          // セキュリティイベント: アクセス拒否
           await this.securityMonitor.logEvent("ACCESS_DENIED_REVOKED");
 
           throw new Error(
@@ -592,18 +736,13 @@ export class SyncServiceV2 implements ISyncService {
         }
       }
     } catch (error: unknown) {
-      // ネットワークやパーミッション起因のエラーもACCESS_DENIED扱いすべきか検討が必要だが、
-      // ここでは明示的なRevokeエラーのみを扱う。
-      if (error.message?.includes("DEVICE_REVOKED")) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (message.includes("DEVICE_REVOKED")) {
         throw error;
       }
-      // ネットワークエラー等はここでは無視（Syncそのものの失敗として扱う）
     }
   }
 
-  /**
-   * デバイス名を更新
-   */
   async updateDeviceName(deviceId: string, newName: string): Promise<void> {
     this.telemetry.log("info", "Updating device name", { deviceId, newName });
     if (!firestoreDb) {
@@ -619,10 +758,6 @@ export class SyncServiceV2 implements ISyncService {
     await updateDoc(deviceRef, { deviceName: newName });
   }
 
-  /**
-   * 非アクティブなデバイスをクリーンアップ
-   * ※ ここでは「ゴミ掃除」の意味合いが強いため、古いセッションは物理削除する
-   */
   async cleanupInactiveDevices(): Promise<number> {
     this.telemetry.log("info", "Cleaning up inactive devices");
     if (!firestoreDb) {
@@ -639,20 +774,16 @@ export class SyncServiceV2 implements ISyncService {
 
     const snapshot = await getDocs(q);
     let count = 0;
-    for (const doc of snapshot.docs) {
-      // Revokedデバイスは証跡として残すため、ここでは削除しない（statusチェックを入れる）
-      const data = doc.data();
+    for (const deviceDoc of snapshot.docs) {
+      const data = deviceDoc.data();
       if (data.status === "revoked") continue;
 
-      await deleteDoc(doc.ref);
-      count++;
+      await deleteDoc(deviceDoc.ref);
+      count += 1;
     }
     return count;
   }
 
-  /**
-   * 統計情報を取得 (Legacy互換ダミー)
-   */
   async getSyncStats(): Promise<unknown> {
     return {
       successRate: 100,
@@ -662,16 +793,10 @@ export class SyncServiceV2 implements ISyncService {
     };
   }
 
-  /**
-   * 未解決の競合を取得 (Legacy互換ダミー)
-   */
   async getUnresolvedConflicts(): Promise<unknown[]> {
     return [];
   }
 
-  /**
-   * 設定読み込み (Legacy互換ダミー)
-   */
   async loadSettings(): Promise<unknown> {
     return {
       autoSync: true,
@@ -680,24 +805,15 @@ export class SyncServiceV2 implements ISyncService {
     };
   }
 
-  /**
-   * フル同期実行 (Syncを呼び出す)
-   */
   async performFullSync(): Promise<void> {
     return this.sync("force_resync");
   }
 
-  /**
-   * キュー処理実行 (Syncを呼び出す)
-   */
   async processQueue(): Promise<{ processed: number; errors: unknown[] }> {
     await this.sync("background");
     return { processed: 0, errors: [] };
   }
 
-  /**
-   * セキュリティ状態の監視開始 for AuthContext
-   */
   monitorSecurity(
     callback: (state: {
       isLocked: boolean;
@@ -709,9 +825,6 @@ export class SyncServiceV2 implements ISyncService {
     return () => this.securityMonitor.stopMonitoring();
   }
 
-  /**
-   * セキュリティアラートを既読にする
-   */
   async dismissSecurityAlert(alertId: string): Promise<void> {
     await this.securityMonitor.dismissAlert(alertId);
   }
