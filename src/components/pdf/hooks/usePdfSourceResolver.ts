@@ -1,27 +1,19 @@
 /**
  * PDF ソースの解決を担当するフック。
  *
- * 以下の優先順位で有効なソースを決定する:
- *   1. effectiveRemoteUrl（remoteUrl が失敗していない場合）
- *   2. cachedBlobUrl（sessionStorage キャッシュ）
- *   3. restoredBlobUrl（IndexedDB から restore した blob）
- *   4. persistedBlobUrl（doc.blobUrl / doc.localUrl）
+ * 方針:
+ * - remote URL が使えるときは remote URL を優先
+ * - remote URL が使えないときは IndexedDB から Blob を復元し、
+ *   Uint8Array に変換して PdfViewer へ直接渡す
+ * - 通常表示経路では blob: URL を使わない
  *
  * === フォールバック挙動 ===
- * - remote URL がロードエラー → failedRemoteSourceKey に記録 → local に降格
- * - blob URL がロードエラー → failedBlobUrl に記録 → キャッシュ無効化 → local restore を再試行
- * - local restore が一時失敗/空振り → 複数回リトライ
- * - local blob も最終的に失敗 → localDataStatus: "failed"
+ * - remote URL がロードエラー → failedRemoteSourceKey に記録 → local bytes に降格
+ * - local bytes の復元が一時失敗/空振り → 複数回リトライ
+ * - local bytes も最終的に失敗 → localDataStatus: "failed"
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  cacheDocumentBlobUrl,
-  getCachedDocumentBlobUrl,
-  invalidateDocumentBlobUrl,
-  pinDocumentBlobUrl,
-  unpinDocumentBlobUrl,
-} from "@/services/documentBlobUrlSessionCache";
 import { getDocumentBlob } from "@/services/documentFileStore";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 interface PdfSourceDoc {
   id: string;
@@ -40,7 +32,10 @@ type SourceLoadErrorDetails = {
 };
 
 interface UsePdfSourceResolverResult {
-  source: { url: string | null; data: null };
+  source: {
+    url: string | null;
+    data: Uint8Array | null;
+  };
   sourceMeta: {
     remoteUrl: string | null;
     blobUrl: string | null;
@@ -52,7 +47,7 @@ interface UsePdfSourceResolverResult {
   isLocalOnly: boolean;
   localDataStatus: "idle" | "loading" | "ready" | "failed";
   effectiveRemoteUrl: string | null;
-  localBlobUrl: string | null;
+  localSourceBytes: Uint8Array | null;
   handleSourceLoadError: (details: SourceLoadErrorDetails) => void;
 }
 
@@ -79,18 +74,17 @@ export const usePdfSourceResolver = (
   doc: PdfSourceDoc,
   userId: string | undefined,
 ): UsePdfSourceResolverResult => {
-  const [restoredBlobUrl, setRestoredBlobUrl] = useState<string | null>(null);
-  const [cachedBlobUrl, setCachedBlobUrl] = useState<string | null>(null);
+  const [localSourceBytes, setLocalSourceBytes] = useState<Uint8Array | null>(
+    null,
+  );
   const [localDataStatus, setLocalDataStatus] = useState<
     "idle" | "loading" | "ready" | "failed"
   >("idle");
   const [failedRemoteSourceKey, setFailedRemoteSourceKey] = useState<
     string | null
   >(null);
-  const [failedBlobUrl, setFailedBlobUrl] = useState<string | null>(null);
 
   const triedRemoteSourceKeysRef = useRef<Set<string>>(new Set());
-  const triedBlobUrlsRef = useRef<Set<string>>(new Set());
   const localRestoreAttemptCountsRef = useRef<Map<string, number>>(new Map());
 
   const remoteUrl = useMemo(() => {
@@ -100,13 +94,6 @@ export const usePdfSourceResolver = (
     }
     return candidate;
   }, [doc.remoteUrl, doc.downloadUrl]);
-
-  const persistedBlobUrl = useMemo(() => {
-    const candidate = doc.blobUrl ?? doc.localUrl ?? null;
-    if (typeof candidate !== "string") return null;
-    const trimmed = candidate.trim();
-    return trimmed.startsWith("blob:") ? trimmed : null;
-  }, [doc.blobUrl, doc.localUrl]);
 
   const remoteSourceKey = useMemo(
     () => (remoteUrl ? remoteUrl : null),
@@ -123,6 +110,16 @@ export const usePdfSourceResolver = (
     const scope = userId?.trim() || "__anonymous__";
     return `${scope}:${localBlobId}`;
   }, [localBlobId, userId]);
+
+  const docIdentityKey = useMemo(() => {
+    return [
+      doc.id,
+      userId?.trim() || "__anonymous__",
+      localBlobId ?? "__no_local_blob__",
+      getUpdatedAtKey(doc.updatedAt),
+      remoteUrl ?? "__no_remote__",
+    ].join("|");
+  }, [doc.id, userId, localBlobId, doc.updatedAt, remoteUrl]);
 
   const resetLocalRestoreAttempt = useCallback(() => {
     if (!localRestoreAttemptKey) return;
@@ -145,34 +142,13 @@ export const usePdfSourceResolver = (
     return remoteUrl;
   }, [failedRemoteSourceKey, remoteSourceKey, remoteUrl]);
 
-  const usablePersistedBlobUrl = useMemo(() => {
-    if (!persistedBlobUrl) return null;
-    if (failedBlobUrl && failedBlobUrl === persistedBlobUrl) return null;
-    return persistedBlobUrl;
-  }, [failedBlobUrl, persistedBlobUrl]);
-
-  const usableRestoredBlobUrl = useMemo(() => {
-    if (!restoredBlobUrl) return null;
-    if (failedBlobUrl && failedBlobUrl === restoredBlobUrl) return null;
-    return restoredBlobUrl;
-  }, [failedBlobUrl, restoredBlobUrl]);
-
-  const usableCachedBlobUrl = useMemo(() => {
-    if (!cachedBlobUrl) return null;
-    if (failedBlobUrl && failedBlobUrl === cachedBlobUrl) return null;
-    return cachedBlobUrl;
-  }, [cachedBlobUrl, failedBlobUrl]);
-
   useEffect(() => {
-    queueMicrotask(() => setRestoredBlobUrl(null));
-    queueMicrotask(() => setCachedBlobUrl(null));
+    queueMicrotask(() => setLocalSourceBytes(null));
     queueMicrotask(() => setLocalDataStatus("idle"));
     queueMicrotask(() => setFailedRemoteSourceKey(null));
-    queueMicrotask(() => setFailedBlobUrl(null));
     triedRemoteSourceKeysRef.current.clear();
-    triedBlobUrlsRef.current.clear();
     localRestoreAttemptCountsRef.current.clear();
-  }, [doc.id, userId]);
+  }, [docIdentityKey]);
 
   useEffect(() => {
     queueMicrotask(() => setFailedRemoteSourceKey(null));
@@ -195,15 +171,6 @@ export const usePdfSourceResolver = (
   }, [failedRemoteSourceKey, resetRemoteSourceAttempt]);
 
   useEffect(() => {
-    if (!localBlobId) {
-      queueMicrotask(() => setCachedBlobUrl(null));
-      return;
-    }
-    const nextCached = getCachedDocumentBlobUrl(localBlobId, { userId });
-    queueMicrotask(() => setCachedBlobUrl(nextCached));
-  }, [userId, localBlobId]);
-
-  useEffect(() => {
     let cancelled = false;
 
     if (effectiveRemoteUrl) {
@@ -211,11 +178,7 @@ export const usePdfSourceResolver = (
       return;
     }
 
-    if (
-      usableCachedBlobUrl ||
-      usableRestoredBlobUrl ||
-      usablePersistedBlobUrl
-    ) {
+    if (localSourceBytes) {
       queueMicrotask(() => setLocalDataStatus("ready"));
       return;
     }
@@ -231,6 +194,7 @@ export const usePdfSourceResolver = (
           localRestoreAttemptCountsRef.current.get(localRestoreAttemptKey) ?? 0;
 
         if (attemptCount >= LOCAL_RESTORE_MAX_ATTEMPTS) {
+          setLocalSourceBytes(null);
           setLocalDataStatus("failed");
           return;
         }
@@ -246,22 +210,17 @@ export const usePdfSourceResolver = (
           if (cancelled) return;
 
           if (blob) {
-            const nextBlobUrl = URL.createObjectURL(blob);
-            if (cancelled) {
-              URL.revokeObjectURL(nextBlobUrl);
-              return;
-            }
+            const buffer = await blob.arrayBuffer();
+            if (cancelled) return;
 
-            setFailedBlobUrl((prev) => (prev === nextBlobUrl ? null : prev));
-            cacheDocumentBlobUrl(localBlobId, nextBlobUrl, { userId });
-            setCachedBlobUrl(nextBlobUrl);
-            setRestoredBlobUrl(nextBlobUrl);
+            const nextBytes = new Uint8Array(buffer);
+            setLocalSourceBytes(nextBytes);
             setLocalDataStatus("ready");
             return;
           }
         } catch (error: unknown) {
           if (cancelled) return;
-          console.error("[usePdfSourceResolver] local blob restore failed", {
+          console.error("[usePdfSourceResolver] local bytes restore failed", {
             error,
             docId: doc.id,
             localFileId: localBlobId,
@@ -274,7 +233,7 @@ export const usePdfSourceResolver = (
           localRestoreAttemptCountsRef.current.get(localRestoreAttemptKey) ?? 0;
 
         if (nextAttemptCount >= LOCAL_RESTORE_MAX_ATTEMPTS) {
-          setRestoredBlobUrl(null);
+          setLocalSourceBytes(null);
           setLocalDataStatus("failed");
           return;
         }
@@ -294,52 +253,42 @@ export const usePdfSourceResolver = (
     doc.remoteUrl,
     localBlobId,
     localRestoreAttemptKey,
-    usableCachedBlobUrl,
     effectiveRemoteUrl,
-    usablePersistedBlobUrl,
-    usableRestoredBlobUrl,
+    localSourceBytes,
   ]);
 
-  const localBlobUrl =
-    usableCachedBlobUrl ?? usableRestoredBlobUrl ?? usablePersistedBlobUrl;
-
-  useEffect(() => {
-    if (!localBlobId || !localBlobUrl || !localBlobUrl.startsWith("blob:")) {
-      return;
-    }
-    pinDocumentBlobUrl(localBlobId, { userId });
-    return () => {
-      unpinDocumentBlobUrl(localBlobId, { userId });
-    };
-  }, [userId, localBlobId, localBlobUrl]);
-
   const source = useMemo(() => {
-    if (effectiveRemoteUrl) return { url: effectiveRemoteUrl, data: null };
-    if (localBlobUrl) return { url: localBlobUrl, data: null };
+    if (effectiveRemoteUrl) {
+      return { url: effectiveRemoteUrl, data: null };
+    }
+    if (localSourceBytes) {
+      return { url: null, data: localSourceBytes };
+    }
     return { url: null, data: null };
-  }, [effectiveRemoteUrl, localBlobUrl]);
+  }, [effectiveRemoteUrl, localSourceBytes]);
 
   const sourceMeta = useMemo(
     () => ({
       remoteUrl: remoteUrl ?? null,
-      blobUrl: localBlobUrl ?? null,
+      blobUrl: null,
       localFileId: localBlobId,
       url: source.url ?? null,
       updatedAt: getUpdatedAtKey(doc.updatedAt),
     }),
-    [doc.updatedAt, localBlobId, localBlobUrl, remoteUrl, source.url],
+    [doc.updatedAt, localBlobId, remoteUrl, source.url],
   );
 
-  const sourceUnavailable = !source.url;
-  const isLocalOnly = !effectiveRemoteUrl && !!localBlobUrl;
+  const sourceUnavailable = !source.url && !source.data;
+  const isLocalOnly = !effectiveRemoteUrl && !!localSourceBytes;
 
   const handleSourceLoadError = useCallback(
     (details: SourceLoadErrorDetails) => {
       if (details.kind === "remote-url" && remoteSourceKey) {
         if (triedRemoteSourceKeysRef.current.has(remoteSourceKey)) return;
         triedRemoteSourceKeysRef.current.add(remoteSourceKey);
+
         console.warn(
-          "[usePdfSourceResolver] Remote source failed, fallback to local source",
+          "[usePdfSourceResolver] Remote source failed, fallback to local bytes",
           {
             docId: doc.id,
             remoteUrl,
@@ -348,40 +297,41 @@ export const usePdfSourceResolver = (
             message: details.message,
           },
         );
+
         resetLocalRestoreAttempt();
+        setLocalSourceBytes(null);
         setFailedRemoteSourceKey(remoteSourceKey);
         setLocalDataStatus("idle");
         return;
       }
 
-      if (details.kind === "blob-url" && details.url) {
-        if (triedBlobUrlsRef.current.has(details.url)) return;
-        triedBlobUrlsRef.current.add(details.url);
-        console.warn(
-          "[usePdfSourceResolver] blob source failed, retrying from localFileId restore",
+      if (details.kind === "data") {
+        console.error(
+          "[usePdfSourceResolver] Local PDF bytes failed to load or parse",
           {
             docId: doc.id,
-            blobUrl: details.url,
             localFileId: localBlobId,
             message: details.message,
           },
         );
-        setFailedBlobUrl(details.url);
-        invalidateDocumentBlobUrl(localBlobId, details.url, { userId });
-        setCachedBlobUrl((prev) => (prev === details.url ? null : prev));
-        setRestoredBlobUrl((prev) => (prev === details.url ? null : prev));
-        resetLocalRestoreAttempt();
-        setLocalDataStatus("idle");
+        setLocalSourceBytes(null);
+        setLocalDataStatus("failed");
+        return;
+      }
+
+      if (details.kind === "blob-url") {
+        console.warn(
+          "[usePdfSourceResolver] Unexpected blob-url error in bytes-based PDF path",
+          {
+            docId: doc.id,
+            localFileId: localBlobId,
+            url: details.url,
+            message: details.message,
+          },
+        );
       }
     },
-    [
-      userId,
-      doc.id,
-      localBlobId,
-      remoteSourceKey,
-      remoteUrl,
-      resetLocalRestoreAttempt,
-    ],
+    [doc.id, localBlobId, remoteSourceKey, remoteUrl, resetLocalRestoreAttempt],
   );
 
   return {
@@ -391,7 +341,7 @@ export const usePdfSourceResolver = (
     isLocalOnly,
     localDataStatus,
     effectiveRemoteUrl,
-    localBlobUrl,
+    localSourceBytes,
     handleSourceLoadError,
   };
 };

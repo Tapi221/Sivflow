@@ -9,23 +9,23 @@
  *   - ヘッダーUI:                   PdfPaneToolbar
  *   - sessionStorage util + 定数:   pdfViewerStateStorage
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { cn } from "@/lib/utils";
-import { PdfViewer } from "./PdfViewer";
-import type { PdfViewerHandle } from "./PdfViewer";
-import { PdfPaneToolbar } from "./PdfPaneToolbar";
-import { usePdfViewerPersistence } from "./hooks/usePdfViewerPersistence";
-import { usePdfSourceResolver } from "./hooks/usePdfSourceResolver";
-import { usePdfContainerWidth } from "./hooks/usePdfContainerWidth";
 import { useAuthSession } from "@/contexts/AuthContext";
+import { cn } from "@/lib/utils";
 import platform from "@/platform";
 import type { PdfViewerState } from "@/types";
 import { DEV_MODE, isLocalHost } from "@/utils/envGuards";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { PdfPaneToolbar } from "./PdfPaneToolbar";
+import type { PdfViewerHandle } from "./PdfViewer";
+import { PdfViewer } from "./PdfViewer";
+import { usePdfContainerWidth } from "./hooks/usePdfContainerWidth";
+import { usePdfSourceResolver } from "./hooks/usePdfSourceResolver";
+import { usePdfViewerPersistence } from "./hooks/usePdfViewerPersistence";
 import {
-  FIT_MIN_SCALE,
   FIT_MAX_SCALE,
-  ZOOM_STEP,
+  FIT_MIN_SCALE,
   FIT_PADDING_X,
+  ZOOM_STEP,
   clampScale,
 } from "./pdfViewerStateStorage";
 
@@ -38,9 +38,16 @@ interface PdfPaneDoc {
   localUrl?: import("@/types").BlobUrl | null;
   localFileId?: string | null;
   downloadUrl?: string | null;
-  uploadStatus?: "pending" | "queued" | "uploading" | "ready" | "failed" | null;
+  uploadStatus?:
+    | "pending"
+    | "queued"
+    | "uploading"
+    | "ready"
+    | "failed"
+    | null;
   updatedAt?: unknown;
-  viewerState?: PdfViewerState | null; // 復元用
+  mimeType?: string;
+  viewerState?: PdfViewerState | null;
 }
 
 interface PdfPaneProps {
@@ -53,7 +60,7 @@ interface PdfPaneProps {
     standardFontDataUrl?: string;
     opaqueCanvas?: boolean;
   };
-  onDocumentUpdate?: (updates: Partial<PdfPaneDoc>) => Promise<void>; // 外部への状態保存
+  onDocumentUpdate?: (updates: Partial<PdfPaneDoc>) => Promise<void>;
 }
 
 export const PdfPane = ({
@@ -100,17 +107,15 @@ export const PdfPane = ({
     isLocalOnly,
     localDataStatus,
     effectiveRemoteUrl,
-    localBlobUrl,
+    localSourceBytes,
     handleSourceLoadError,
   } = usePdfSourceResolver(doc, currentUser?.uid);
 
-  // numPages 超過時にページを補正
   useEffect(() => {
     if (!numPages) return;
     if (currentPage > numPages) queueMicrotask(() => setCurrentPage(numPages));
   }, [numPages, currentPage, setCurrentPage]);
 
-  // 自動スクロールは行わず、ページ移動はユーザー操作時のみ実行する。
   const handlePrev = useCallback(() => {
     const nextPage = Math.max(1, currentPage - 1);
     viewerRef.current?.scrollToPage(nextPage);
@@ -121,11 +126,33 @@ export const PdfPane = ({
     viewerRef.current?.scrollToPage(nextPage);
   }, [currentPage, numPages]);
 
-  const handleOpenNewTab = useCallback(() => {
-    const openUrl = effectiveRemoteUrl ?? localBlobUrl ?? null;
-    if (!openUrl) return;
-    void platform.shell.openExternal(openUrl);
-  }, [effectiveRemoteUrl, localBlobUrl]);
+  const handleOpenNewTab = useCallback(async () => {
+    if (effectiveRemoteUrl) {
+      await Promise.resolve(platform.shell.openExternal(effectiveRemoteUrl));
+      return;
+    }
+
+    if (!localSourceBytes || localSourceBytes.byteLength === 0) {
+      return;
+    }
+
+    const blob = new Blob([localSourceBytes], {
+      type: doc.mimeType || "application/pdf",
+    });
+    const tempUrl = URL.createObjectURL(blob);
+
+    try {
+      await Promise.resolve(platform.shell.openExternal(tempUrl));
+    } finally {
+      window.setTimeout(() => {
+        try {
+          URL.revokeObjectURL(tempUrl);
+        } catch {
+          // noop
+        }
+      }, 60_000);
+    }
+  }, [doc.mimeType, effectiveRemoteUrl, localSourceBytes]);
 
   const handleFirstPageSize = useCallback(
     (size: { width: number; height: number } | null) => {
@@ -135,12 +162,10 @@ export const PdfPane = ({
     [],
   );
 
-  // 開発時のみ: DevTools から PDF スクロール診断を即時取得できるようにする。
   useEffect(() => {
-    // Guard 1: production build では診断フックに到達しない
     if (!DEV_MODE) return;
-    // Guard 2: 開発中でも localhost 系ホストのみ許可
     if (!isLocalHost(window.location.hostname)) return;
+
     const debugWindow = window as Window & {
       __logPdfScrollDiagnostics?: () => void;
       __getPdfScrollDiagnostics?: () => ReturnType<
@@ -171,18 +196,19 @@ export const PdfPane = ({
         scale={scale}
         fitMode={fitMode}
         sourceUnavailable={sourceUnavailable}
-        canOpenExternal={!!effectiveRemoteUrl || !!localBlobUrl}
+        canOpenExternal={!!effectiveRemoteUrl || !!localSourceBytes}
         onPrev={handlePrev}
         onNext={handleNext}
         onZoomOut={handleZoomOut}
         onZoomIn={handleZoomIn}
         onFitWidth={handleFitWidth}
-        onOpenNewTab={handleOpenNewTab}
+        onOpenNewTab={() => {
+          void handleOpenNewTab();
+        }}
       />
 
       <div
         ref={containerRef}
-        // このラッパーは高さ確定のみ。スクロール責務は PdfViewer 内の ScrollContainer に限定する。
         className="flex-1 min-h-0 min-w-0 w-full bg-slate-50 overflow-hidden"
       >
         {sourceUnavailable ? (
