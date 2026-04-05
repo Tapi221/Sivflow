@@ -1,5 +1,4 @@
-import { beginInlineRename } from "@/components/folder/components/menus/explorerMenuStateHelpers";
-import type { MenuAction } from "@/components/folder/components/menus/menuActions";
+import { buildEntityRenameDeleteMenuActions } from "@/components/folder/components/menus/explorerMenuActionBuilders";
 import type { ExplorerTreeNode as TreeNode } from "@/components/folder/explorer/tree/arboristAdapter";
 import { cn } from "@/lib/utils";
 import { FileText } from "@/ui/icons";
@@ -70,36 +69,22 @@ export const DocumentRow = ({
   const isRowMenuOpen = openRowMenuId === rowMenuId;
   const isEditing = editingId === treeNode.rawId;
 
-  const rowMenuActions = React.useMemo<MenuAction[]>(
-    () => [
-      {
-        id: "rename",
-        label: "名前を変更",
-        onSelect: () => {
-          beginInlineRename({
-            id: treeNode.rawId,
-            name: treeNode.name,
-            closeMenu: () => {
-              setOpenRowMenuId(null);
-            },
-            setEditingId,
-            setEditingName,
-            beforeStart: () => {
-              onItemSelect({ type: "document", id: treeNode.rawId });
-            },
-          });
+  const rowMenuActions = React.useMemo(
+    () =>
+      buildEntityRenameDeleteMenuActions({
+        id: treeNode.rawId,
+        name: treeNode.name,
+        type: "document",
+        beforeRename: () => {
+          onItemSelect({ type: "document", id: treeNode.rawId });
         },
-      },
-      {
-        id: "delete",
-        label: "削除",
-        danger: true,
-        onSelect: () => {
-          handleDelete(treeNode.rawId, "document");
+        closeMenu: () => {
           setOpenRowMenuId(null);
         },
-      },
-    ],
+        setEditingId,
+        setEditingName,
+        handleDelete,
+      }),
     [
       handleDelete,
       onItemSelect,
