@@ -26,6 +26,36 @@ interface BuildExplorerCreateMenuActionsParams {
   onBulkImport?: () => void | Promise<void>;
 }
 
+export const buildRenameDeleteMenuActions = ({
+  renameLabel = "名前を変更",
+  deleteLabel = "削除",
+  onRename,
+  onDelete,
+}: BuildRenameDeleteMenuActionsParams): MenuAction[] => {
+  const actions: MenuAction[] = [];
+
+  if (onRename) {
+    actions.push({
+      id: "rename",
+      label: renameLabel,
+      icon: <Pencil className="h-4 w-4" />,
+      onSelect: onRename,
+    });
+  }
+
+  if (onDelete) {
+    actions.push({
+      id: "delete",
+      label: deleteLabel,
+      icon: <Trash2 className="h-4 w-4" />,
+      danger: true,
+      onSelect: onDelete,
+    });
+  }
+
+  return actions;
+};
+
 /**
  * フォルダ用コンテキストメニューのアクション定義をビルド
  */
@@ -56,15 +86,6 @@ export const buildFolderMenuActions = ({
     });
   }
 
-  if (onRename) {
-    actions.push({
-      id: "rename",
-      label: "名前を変更",
-      icon: <Pencil className="h-4 w-4" />,
-      onSelect: onRename,
-    });
-  }
-
   if (onBulkTag) {
     actions.push({
       id: "bulk-tag",
@@ -74,47 +95,13 @@ export const buildFolderMenuActions = ({
     });
   }
 
-  if (onDelete) {
-    actions.push({
-      id: "delete",
-      label: "削除",
-      icon: <Trash2 className="h-4 w-4" />,
-      danger: true,
-      onSelect: onDelete,
-    });
-  }
-
-  return actions;
-};
-
-export const buildRenameDeleteMenuActions = ({
-  renameLabel = "名前を変更",
-  deleteLabel = "削除",
-  onRename,
-  onDelete,
-}: BuildRenameDeleteMenuActionsParams): MenuAction[] => {
-  const actions: MenuAction[] = [];
-
-  if (onRename) {
-    actions.push({
-      id: "rename",
-      label: renameLabel,
-      icon: <Pencil className="h-4 w-4" />,
-      onSelect: onRename,
-    });
-  }
-
-  if (onDelete) {
-    actions.push({
-      id: "delete",
-      label: deleteLabel,
-      icon: <Trash2 className="h-4 w-4" />,
-      danger: true,
-      onSelect: onDelete,
-    });
-  }
-
-  return actions;
+  return [
+    ...actions,
+    ...buildRenameDeleteMenuActions({
+      onRename,
+      onDelete,
+    }),
+  ];
 };
 
 /**
