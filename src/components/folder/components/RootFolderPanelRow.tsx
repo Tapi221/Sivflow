@@ -117,16 +117,11 @@ export const RootFolderPanelRow = ({
   const handleContextMenuSelect = React.useCallback(() => {
     if (isEditing || isMenuOpen) return;
 
-    // ルート一覧の folder は右クリック時に handleSelect すると
-    // 「選択」ではなく「そのフォルダへ遷移」になってしまい、
-    // 行がアンマウントされてメニューが即閉じる。
-    // そのため folder では右クリック時選択を行わない。
+    // ルート一覧の folder は onSelectFolder が「選択」ではなく
+    // ナビゲーション遷移を伴うため、右クリック時には呼ばない。
     if (entry.kind === "folder") return;
 
-    onItemSelect({
-      type: entry.kind,
-      id: entry.id,
-    });
+    onItemSelect({ type: entry.kind, id: entry.id });
   }, [entry, isEditing, isMenuOpen, onItemSelect]);
 
   const menuActions = React.useMemo(
