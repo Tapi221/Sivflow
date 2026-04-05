@@ -352,7 +352,22 @@ describe("XlsxImportDialog", () => {
 
     const user = userEvent.setup();
 
-    const destinationModeTrigger = screen.getByRole("combobox", {
+    const allComboboxes = screen.getAllByRole("combobox");
+expect(allComboboxes.length).toBeGreaterThanOrEqual(1);
+
+const destinationModeTrigger = allComboboxes[0];
+await user.click(destinationModeTrigger);
+
+const existingModeOption = await screen.findByRole("option", {
+  name: "既存カードセットへ追加",
+});
+await user.click(existingModeOption);
+
+const updatedComboboxes = screen.getAllByRole("combobox");
+expect(updatedComboboxes.length).toBeGreaterThanOrEqual(2);
+
+const targetCardSetTrigger = updatedComboboxes[1];
+await user.click(targetCardSetTrigger);
       name: "",
     });
     await user.click(destinationModeTrigger);
