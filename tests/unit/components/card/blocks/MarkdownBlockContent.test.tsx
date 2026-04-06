@@ -97,9 +97,11 @@ describe("MarkdownBlockContent", () => {
     expect(paragraph).toBeTruthy();
   });
 
-  it("blockquote 内のリスト項目段落は direct child paragraph selector に含まれない", () => {
+  it("blockquote 内の nested paragraph は whitespace selector の対象外にできる DOM 形になる", () => {
     const { container } = render(
-      <MarkdownBlockContent markdown={"> intro\n>\n> - item"} />,
+      <MarkdownBlockContent
+        markdown={"> intro\n>\n> - first paragraph\n>\n>   second paragraph"}
+      />,
     );
 
     const directParagraphs = container.querySelectorAll(
@@ -111,5 +113,12 @@ describe("MarkdownBlockContent", () => {
 
     expect(directParagraphs).toHaveLength(1);
     expect(nestedListParagraph).toBeTruthy();
+
+    const selectorMatchesNested = nestedListParagraph?.matches(
+      '.markdownBlockCardView > blockquote > p[data-markdown-paragraph="true"]',
+    );
+
+    expect(selectorMatchesNested).toBe(false);
   });
 });
+

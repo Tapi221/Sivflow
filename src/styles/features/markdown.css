@@ -22,7 +22,7 @@
   }
 
   .markdownBlockCardView > p[data-markdown-paragraph="true"],
-  .markdownBlockCardView blockquote > p[data-markdown-paragraph="true"] {
+  .markdownBlockCardView > blockquote > p[data-markdown-paragraph="true"] {
     white-space: break-spaces;
   }
 
