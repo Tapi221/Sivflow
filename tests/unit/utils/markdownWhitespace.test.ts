@@ -16,6 +16,15 @@ describe("markdownWhitespace", () => {
     expect(actual).toBe("> a    b");
   });
 
+  it("インラインコード内のタブは保持し、同一段落の通常テキストだけ展開する", () => {
+    const actual = expandTabsInEligibleMarkdownLines(
+      "before `code\there` after\tend",
+      2,
+    );
+
+    expect(actual).toBe("before `code\there` after  end");
+  });
+
   it("コードフェンス内のタブは保持する", () => {
     const actual = expandTabsInEligibleMarkdownLines(
       "```ts\nconst\tvalue = 1;\n```",
@@ -25,14 +34,24 @@ describe("markdownWhitespace", () => {
     expect(actual).toBe("```ts\nconst\tvalue = 1;\n```");
   });
 
-  it("見出し行のタブは保持する", () => {
+  it("ATX 見出し行のタブは保持する", () => {
     const actual = expandTabsInEligibleMarkdownLines("#\tHeading", 2);
     expect(actual).toBe("#\tHeading");
+  });
+
+  it("Setext 見出し本文のタブは保持する", () => {
+    const actual = expandTabsInEligibleMarkdownLines("Heading\tText\n====", 2);
+    expect(actual).toBe("Heading\tText\n====");
   });
 
   it("リスト行のタブは保持する", () => {
     const actual = expandTabsInEligibleMarkdownLines("-\titem", 2);
     expect(actual).toBe("-\titem");
+  });
+
+  it("引用内リスト行のタブは保持する", () => {
+    const actual = expandTabsInEligibleMarkdownLines("> -\titem", 2);
+    expect(actual).toBe("> -\titem");
   });
 
   it("表行のタブは保持する", () => {
@@ -48,6 +67,11 @@ describe("markdownWhitespace", () => {
   it("本文段落では Tab キー入力がスペースへ変わる", () => {
     const actual = resolveMarkdownTabKeyText("hello", 2, 4);
     expect(actual).toBe("    ");
+  });
+
+  it("インラインコード内では Tab キー入力が literal tab になる", () => {
+    const actual = resolveMarkdownTabKeyText("before `code` after", 9, 2);
+    expect(actual).toBe("\t");
   });
 
   it("コードフェンス内では Tab キー入力が literal tab になる", () => {

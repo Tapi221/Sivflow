@@ -1,8 +1,3 @@
-import { useUserSettings } from "@/hooks/settings/useUserSettings";
-import {
-  clampMarkdownTabSize,
-  type MarkdownTabSize,
-} from "@/utils/markdownWhitespace";
 import {
   Select,
   SelectContent,
@@ -10,6 +5,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useUserSettings } from "@/hooks/settings/useUserSettings";
+import {
+  clampMarkdownTabSize,
+  type MarkdownTabSize,
+} from "@/utils/markdownWhitespace";
 
 const TAB_SIZE_OPTIONS: Array<{
   value: MarkdownTabSize;
@@ -114,10 +114,11 @@ export const MarkdownWhitespaceSettings = () => {
           適用対象外
         </div>
         <ul className="list-disc pl-5 text-[11px] leading-5 text-slate-500">
-          <li>見出し</li>
+          <li>見出し（ATX 見出し / Setext 見出し）</li>
           <li>リスト / タスクリスト</li>
           <li>表</li>
           <li>インラインコード / コードブロック</li>
+          <li>引用内であっても、リスト / 表 / コードに属する部分</li>
         </ul>
       </div>
     </div>

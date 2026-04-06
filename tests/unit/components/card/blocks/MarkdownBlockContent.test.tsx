@@ -91,9 +91,25 @@ describe("MarkdownBlockContent", () => {
     );
 
     const paragraph = container.querySelector(
-      'blockquote p[data-markdown-paragraph="true"]',
+      'blockquote > p[data-markdown-paragraph="true"]',
     ) as HTMLElement | null;
 
     expect(paragraph).toBeTruthy();
+  });
+
+  it("blockquote 内のリスト項目段落は direct child paragraph selector に含まれない", () => {
+    const { container } = render(
+      <MarkdownBlockContent markdown={"> intro\n>\n> - item"} />,
+    );
+
+    const directParagraphs = container.querySelectorAll(
+      'blockquote > p[data-markdown-paragraph="true"]',
+    );
+    const nestedListParagraph = container.querySelector(
+      'blockquote li p[data-markdown-paragraph="true"]',
+    );
+
+    expect(directParagraphs).toHaveLength(1);
+    expect(nestedListParagraph).toBeTruthy();
   });
 });
