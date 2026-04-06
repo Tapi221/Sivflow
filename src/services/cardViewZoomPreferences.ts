@@ -21,7 +21,9 @@ const readStore = (): CardViewZoomPreferencesStore => {
       return emptyStore();
     }
 
-    const parsed = JSON.parse(raw) as Partial<CardViewZoomPreferencesStore> | null;
+    const parsed = JSON.parse(
+      raw,
+    ) as Partial<CardViewZoomPreferencesStore> | null;
     if (
       parsed &&
       parsed.version === 1 &&

@@ -312,10 +312,7 @@ export const CardBlockLayoutRenderer = (
           )}
           contentClassName="px-0"
         >
-          <TextBlockContent
-            mode="view"
-            content={String(block.content ?? "")}
-          />
+          <TextBlockContent mode="view" content={String(block.content ?? "")} />
         </BlockWrapper>
       );
 

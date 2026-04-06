@@ -293,7 +293,9 @@ const FlashcardInner = ({
   const fixedHeightPx = layoutRowsToCardHeightPx(derived.layoutRows);
   const isCardClickable = !previewMode;
   const safeContentZoom =
-    typeof contentZoom === "number" && Number.isFinite(contentZoom) && contentZoom > 0
+    typeof contentZoom === "number" &&
+    Number.isFinite(contentZoom) &&
+    contentZoom > 0
       ? contentZoom
       : 1;
 
@@ -339,7 +341,8 @@ const FlashcardInner = ({
             CARD_SHELL_COMMON_CLASS_NAME,
             cardShellClassName,
             isCardClickable && "cursor-pointer",
-            !isFixedDisplay && "rounded-none border-none bg-transparent shadow-none",
+            !isFixedDisplay &&
+              "rounded-none border-none bg-transparent shadow-none",
           )}
           onPointerDownCapture={(event) => {
             if (!isCardClickable) return;

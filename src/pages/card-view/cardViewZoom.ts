@@ -26,7 +26,9 @@ const roundDownToStep = (value: number, step: number) => {
 };
 
 export const zoomPercentToFactor = (zoomPercent: number) => {
-  return sanitizePositiveNumber(zoomPercent, CARD_VIEW_DEFAULT_ZOOM_PERCENT) / 100;
+  return (
+    sanitizePositiveNumber(zoomPercent, CARD_VIEW_DEFAULT_ZOOM_PERCENT) / 100
+  );
 };
 
 export const zoomPercentToFixedCardWidthPx = (zoomPercent: number) => {
@@ -76,7 +78,10 @@ export const clampZoomPercent = ({
     safeMin,
     sanitizePositiveNumber(maxZoomPercent, CARD_VIEW_DEFAULT_ZOOM_PERCENT),
   );
-  const safeValue = sanitizePositiveNumber(value, CARD_VIEW_DEFAULT_ZOOM_PERCENT);
+  const safeValue = sanitizePositiveNumber(
+    value,
+    CARD_VIEW_DEFAULT_ZOOM_PERCENT,
+  );
 
   return Math.min(safeMax, Math.max(safeMin, safeValue));
 };
@@ -88,8 +93,14 @@ export const snapZoomPercent = ({
   value: number;
   stepPercent?: number;
 }) => {
-  const safeStep = sanitizePositiveNumber(stepPercent, CARD_VIEW_ZOOM_STEP_PERCENT);
-  const safeValue = sanitizePositiveNumber(value, CARD_VIEW_DEFAULT_ZOOM_PERCENT);
+  const safeStep = sanitizePositiveNumber(
+    stepPercent,
+    CARD_VIEW_ZOOM_STEP_PERCENT,
+  );
+  const safeValue = sanitizePositiveNumber(
+    value,
+    CARD_VIEW_DEFAULT_ZOOM_PERCENT,
+  );
 
   return Math.round(safeValue / safeStep) * safeStep;
 };

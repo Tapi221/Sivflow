@@ -43,7 +43,9 @@ export class SyncServiceFactory {
     return nextPromise;
   };
 
-  private static createInstance = async (userId: string): Promise<ISyncService> => {
+  private static createInstance = async (
+    userId: string,
+  ): Promise<ISyncService> => {
     if (flags.isEnabled("USE_SYNC_V2")) {
       return this.createV2(userId);
     }
@@ -69,7 +71,9 @@ export class SyncServiceFactory {
     ] as const;
 
     const legacyObj = legacy as unknown as Record<string, unknown>;
-    const missing = mustHave.filter((key) => typeof legacyObj[key] !== "function");
+    const missing = mustHave.filter(
+      (key) => typeof legacyObj[key] !== "function",
+    );
 
     if (missing.length > 0) {
       if (!SyncServiceFactory.warnedLegacyFallbackUsers.has(userId)) {
