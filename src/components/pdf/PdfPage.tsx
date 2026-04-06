@@ -3,7 +3,11 @@ import {
   PDF_PAGE_OBSERVER_ROOT_MARGIN,
   PDF_PAGE_OBSERVER_THRESHOLDS,
 } from "./pdfViewerConstants";
-import type { PageSize, PdfJsDocument, PdfJsRenderTask } from "./pdfViewerTypes";
+import type {
+  PageSize,
+  PdfJsDocument,
+  PdfJsRenderTask,
+} from "./pdfViewerTypes";
 import { getErrorMessage } from "./pdfViewerTypes";
 
 interface PdfPageProps {

@@ -83,7 +83,8 @@ export const usePdfCurrentPage = ({
 
     while (lo < hi) {
       const mid = Math.floor((lo + hi) / 2);
-      const midTop = pageRefs.current[mid]?.offsetTop ?? Number.MAX_SAFE_INTEGER;
+      const midTop =
+        pageRefs.current[mid]?.offsetTop ?? Number.MAX_SAFE_INTEGER;
 
       if (midTop < targetTop) {
         lo = mid + 1;

@@ -28,10 +28,7 @@ interface PdfViewerProps {
   minScale?: number;
   maxScale?: number;
   zoomStep?: number;
-  onScaleChange?: (
-    nextScale: number,
-    source: PdfScaleChangeSource,
-  ) => void;
+  onScaleChange?: (nextScale: number, source: PdfScaleChangeSource) => void;
   onNumPages: (n: number) => void;
   onFirstPageSize?: (size: PageSize | null) => void;
   onPageChange?: (page: number) => void;

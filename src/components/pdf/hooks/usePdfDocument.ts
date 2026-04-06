@@ -148,37 +148,38 @@ export const usePdfDocument = ({
       }
     };
 
-    const buildGetDocumentParams = async (): Promise<PdfJsGetDocumentParams> => {
-      const params: PdfJsGetDocumentParams = {
-        enableXfa,
-        useSystemFonts,
-        cMapUrl,
-        standardFontDataUrl,
-      };
+    const buildGetDocumentParams =
+      async (): Promise<PdfJsGetDocumentParams> => {
+        const params: PdfJsGetDocumentParams = {
+          enableXfa,
+          useSystemFonts,
+          cMapUrl,
+          standardFontDataUrl,
+        };
 
-      if (hasData && sourceData) {
-        params.data = sourceData;
-        return params;
-      }
-
-      if (!hasUrl) {
-        throw new Error("missing pdf source");
-      }
-
-      if (sourceUrl.startsWith("blob:")) {
-        const response = await fetch(sourceUrl);
-        if (!response.ok) {
-          throw new Error(`blob fetch failed: ${response.status}`);
+        if (hasData && sourceData) {
+          params.data = sourceData;
+          return params;
         }
 
-        const buffer = await response.arrayBuffer();
-        params.data = new Uint8Array(buffer);
-        return params;
-      }
+        if (!hasUrl) {
+          throw new Error("missing pdf source");
+        }
 
-      params.url = sourceUrl;
-      return params;
-    };
+        if (sourceUrl.startsWith("blob:")) {
+          const response = await fetch(sourceUrl);
+          if (!response.ok) {
+            throw new Error(`blob fetch failed: ${response.status}`);
+          }
+
+          const buffer = await response.arrayBuffer();
+          params.data = new Uint8Array(buffer);
+          return params;
+        }
+
+        params.url = sourceUrl;
+        return params;
+      };
 
     const run = async () => {
       setLoading(true);
