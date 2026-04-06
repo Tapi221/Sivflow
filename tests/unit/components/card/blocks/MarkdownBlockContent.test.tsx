@@ -121,4 +121,3 @@ describe("MarkdownBlockContent", () => {
     expect(selectorMatchesNested).toBe(false);
   });
 });
-
