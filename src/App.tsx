@@ -1,7 +1,7 @@
 import { BreadcrumbProvider } from "@/contexts/BreadcrumbContext";
 import { BlockNoteSandboxPage } from "@/sandbox/blocknote";
 import { sanitizeForLog } from "@/utils/logSanitizer";
-import { Suspense, lazy, useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { NotificationProvider } from "./components/notifications/NotificationProvider";
 import { AccountLockedScreen } from "./components/security/AccountLockedScreen";
@@ -44,8 +44,15 @@ const CardLayoutConsistencyTest = DEV_MODE
 const isTestBypassEnabled = () => {
   const hasBypassParam =
     new URLSearchParams(window.location.search).get("test_bypass") === "true";
-  if (!hasBypassParam) return false;
-  if (!DEV_MODE) return false;
+
+  if (!hasBypassParam) {
+    return false;
+  }
+
+  if (!DEV_MODE) {
+    return false;
+  }
+
   return isLocalHost(window.location.hostname);
 };
 
@@ -87,16 +94,18 @@ const LoginPage = () => {
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
+
     try {
       await signInWithGoogle();
     } catch (error: unknown) {
       console.error("ログインエラー:", error);
+
       if (isAuthPopupClosedByUserError(error)) {
-        // no-op
-      } else {
-        const message = error instanceof Error ? error.message : "不明なエラー";
-        alert("ログインに失敗しました: " + message);
+        return;
       }
+
+      const message = error instanceof Error ? error.message : "不明なエラー";
+      alert("ログインに失敗しました: " + message);
     } finally {
       setIsLoading(false);
     }
@@ -211,24 +220,61 @@ const DefaultRedirect = () => {
 const AppContent = () => {
   const { currentUser, loading } = useAuthSession();
   const { syncProgress } = useSync();
+  const startedUserIdRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!currentUser) return;
+    let disposed = false;
+
+    const resetQueue = async () => {
+      const { resetOperationQueue } = await import("./utils/queueUtils");
+      resetOperationQueue();
+    };
+
+    if (!currentUser?.uid) {
+      startedUserIdRef.current = null;
+      void resetQueue();
+      return () => {
+        disposed = true;
+      };
+    }
+
+    const userId = currentUser.uid;
+
+    if (startedUserIdRef.current === userId) {
+      return () => {
+        disposed = true;
+      };
+    }
+
+    startedUserIdRef.current = userId;
 
     const runStartupTasks = async () => {
       try {
         const { initializeOperationQueue } = await import("./utils/queueUtils");
-        await initializeOperationQueue();
-        console.log("[Queue] Operation Queue initialized");
+        await initializeOperationQueue(userId);
 
-        const didBackup = await autoBackupService.performAutoBackup(
-          currentUser.uid,
-        );
+        if (disposed) {
+          return;
+        }
+
+        console.log("[Queue] Operation Queue initialized", { userId });
+
+        const didBackup = await autoBackupService.performAutoBackup(userId);
+
+        if (disposed) {
+          return;
+        }
+
         if (didBackup) {
           console.log("Auto backup completed on startup");
         }
 
         const report = await dataIntegrityService.checkIntegrity();
+
+        if (disposed) {
+          return;
+        }
+
         if (!report.isHealthy) {
           const issueSummary = report.issues.reduce<Record<string, number>>(
             (acc, issue) => {
@@ -237,6 +283,7 @@ const AppContent = () => {
             },
             {},
           );
+
           console.error(
             "[Critical] Data integrity issues found:",
             report.issues.length,
@@ -254,9 +301,12 @@ const AppContent = () => {
 
         if (flags.isEnabled("USE_SYNC_V2")) {
           console.log("[Sync] Startup sync initiated");
-          const syncService = await SyncServiceFactory.getInstance(
-            currentUser.uid,
-          );
+          const syncService = await SyncServiceFactory.getInstance(userId);
+
+          if (disposed) {
+            return;
+          }
+
           await syncService.performStartupSync();
         }
       } catch (error) {
@@ -267,8 +317,12 @@ const AppContent = () => {
       }
     };
 
-    runStartupTasks();
-  }, [currentUser]);
+    void runStartupTasks();
+
+    return () => {
+      disposed = true;
+    };
+  }, [currentUser?.uid]);
 
   const isTestBypass = isTestBypassEnabled();
 
@@ -415,24 +469,24 @@ const AppContent = () => {
         <Route path="*" element={<Navigate to="/folders" replace />} />
       </Routes>
 
-      {syncProgress && (
+      {syncProgress ? (
         <div className="fixed bottom-8 right-8 z-[9999] animate-in fade-in slide-in-from-bottom-6 duration-500">
-          <div className="bg-white/80 backdrop-blur-xl border border-white rounded-[24px] p-4 shadow-[0_20px_50px_rgba(0,0,0,0.1)] flex items-center gap-4 min-w-[240px]">
+          <div className="flex min-w-[240px] items-center gap-4 rounded-[24px] border border-white bg-white/80 p-4 shadow-[0_20px_50px_rgba(0,0,0,0.1)] backdrop-blur-xl">
             <div className="relative">
-              <div className="w-10 h-10 border-4 border-primary-600/10 rounded-full"></div>
-              <div className="absolute top-0 left-0 w-10 h-10 border-4 border-primary-600 rounded-full border-t-transparent animate-spin"></div>
+              <div className="h-10 w-10 rounded-full border-4 border-primary-600/10" />
+              <div className="absolute left-0 top-0 h-10 w-10 animate-spin rounded-full border-4 border-primary-600 border-t-transparent" />
             </div>
             <div className="flex-1">
-              <p className="text-[10px] text-primary-600 font-bold uppercase tracking-[0.2em] mb-0.5">
+              <p className="mb-0.5 text-[10px] font-bold uppercase tracking-[0.2em] text-primary-600">
                 Cloud Sync
               </p>
-              <p className="text-slate-600 text-xs font-bold truncate max-w-[160px]">
+              <p className="max-w-[160px] truncate text-xs font-bold text-slate-600">
                 {syncProgress}
               </p>
             </div>
           </div>
         </div>
-      )}
+      ) : null}
     </>
   );
 };

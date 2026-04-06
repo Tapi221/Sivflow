@@ -28,6 +28,16 @@ export const CardZoomControl = ({
   const sliderValue = React.useMemo(() => [value], [value]);
   const resetDisabled = value === defaultValue;
 
+  const handleSliderChange = React.useCallback(
+    (next: number[]) => {
+      const nextValue = next[0];
+      if (typeof nextValue === "number" && Number.isFinite(nextValue)) {
+        onChange(nextValue);
+      }
+    },
+    [onChange],
+  );
+
   return (
     <div className="pointer-events-auto flex items-center gap-2 rounded-[20px] border border-slate-200/80 bg-white/82 px-2.5 py-1 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-md">
       <button
@@ -46,12 +56,8 @@ export const CardZoomControl = ({
           max={max}
           step={step}
           value={sliderValue}
-          onValueChange={(next) => {
-            const nextValue = next[0];
-            if (typeof nextValue === "number" && Number.isFinite(nextValue)) {
-              onChange(nextValue);
-            }
-          }}
+          onValueChange={handleSliderChange}
+          onValueCommit={handleSliderChange}
           aria-label="閲覧ズーム"
         />
       </div>
