@@ -381,7 +381,7 @@ export const CardEditorPane = ({
     setReferenceItems,
   } = content;
 
-  const { handleCancelEditing, handleSaveEditing, metaPanel } = actions;
+  const { handleSaveEditing, metaPanel } = actions;
 
   const [toolbarMountQInternal, setToolbarMountQInternal] =
     useState<HTMLDivElement | null>(null);
@@ -704,30 +704,23 @@ export const CardEditorPane = ({
               </div>
 
               {!hideFooterActions && (
-                <div className="sticky bottom-4 flex w-full justify-end gap-2">
+                <div className="sticky bottom-4 flex w-full items-center justify-end gap-2">
                   {saveError ? (
                     <div className="mr-auto flex items-center text-[11px] text-rose-600">
                       自動保存に失敗しました
                     </div>
                   ) : isAutosaving ? (
                     <div className="mr-auto flex items-center text-[11px] text-slate-400">
-                      保存中...
+                      自動保存中...
                     </div>
                   ) : null}
-                  <button
-                    type="button"
-                    className="h-9 rounded-full px-4 hover:bg-black/5 disabled:opacity-50"
-                    onClick={handleCancelEditing}
-                  >
-                    キャンセル
-                  </button>
                   <button
                     type="button"
                     className="h-9 rounded-full bg-black px-6 text-white hover:opacity-90 disabled:opacity-50"
                     onClick={() => void handleSaveEditing()}
                     disabled={Boolean(isSaving && !isDirty)}
                   >
-                    保存
+                    完了
                   </button>
                 </div>
               )}
