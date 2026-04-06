@@ -370,7 +370,8 @@ export const CardEditorPane = ({
   }, [isRetryingSync, saveError]);
 
   const cardPresentationContext = useMemo<CardPresentationContext>(() => {
-    const isCurrentCard = presentationContext?.isCurrentCard ?? !embeddedInPager;
+    const isCurrentCard =
+      presentationContext?.isCurrentCard ?? !embeddedInPager;
 
     return {
       inPager: embeddedInPager,
@@ -564,7 +565,9 @@ export const CardEditorPane = ({
     };
   }, [onSyncStatusChange, syncStatus]);
 
-  const previousIsCurrentCardRef = useRef(cardPresentationContext.isCurrentCard);
+  const previousIsCurrentCardRef = useRef(
+    cardPresentationContext.isCurrentCard,
+  );
   useEffect(() => {
     const wasCurrentCard = previousIsCurrentCardRef.current;
     const isCurrentCard = cardPresentationContext.isCurrentCard;
@@ -795,7 +798,9 @@ export const CardEditorPane = ({
                   dockToolbarInsideCardEdge={shouldKeepDockedToolbarInsideCard}
                   setDockedToolbarMount={setToolbarMountQInternal}
                   presentationState={cardPresentationState}
-                  enableBlockActiveState={cardPresentationState.isInteractiveCard}
+                  enableBlockActiveState={
+                    cardPresentationState.isInteractiveCard
+                  }
                   showResizeHandle={showResizeHandleProp}
                   editorCardFixedScale={editorCardFixedScale}
                   editorCardHeightPx={editorCardHeightPx}
@@ -827,7 +832,9 @@ export const CardEditorPane = ({
                   dockToolbarInsideCardEdge={shouldKeepDockedToolbarInsideCard}
                   setDockedToolbarMount={setToolbarMountAInternal}
                   presentationState={cardPresentationState}
-                  enableBlockActiveState={cardPresentationState.isInteractiveCard}
+                  enableBlockActiveState={
+                    cardPresentationState.isInteractiveCard
+                  }
                   showResizeHandle={showResizeHandleProp}
                   editorCardFixedScale={editorCardFixedScale}
                   editorCardHeightPx={editorCardHeightPx}

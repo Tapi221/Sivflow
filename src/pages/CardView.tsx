@@ -153,8 +153,12 @@ const CardView = () => {
 
   const resolvedLastSyncedAtMs =
     state.activeSyncStatus?.lastSyncedAtMs ??
-    toTimeMs((state.selectedCard as { updatedAt?: unknown } | null)?.updatedAt) ??
-    toTimeMs((state.selectedCard as { createdAt?: unknown } | null)?.createdAt) ??
+    toTimeMs(
+      (state.selectedCard as { updatedAt?: unknown } | null)?.updatedAt,
+    ) ??
+    toTimeMs(
+      (state.selectedCard as { createdAt?: unknown } | null)?.createdAt,
+    ) ??
     null;
 
   const displayModeControl = cardSetId ? (
