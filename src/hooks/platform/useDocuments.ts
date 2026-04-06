@@ -8,6 +8,15 @@ type DocumentWithLegacyDelete = DocumentItem & {
   is_deleted?: boolean;
 };
 
+type UpdateDocumentOptions = {
+  /**
+   * true のときは updatedAt を明示的に更新する。
+   * false のときは updatedAt を変更しない。
+   * 未指定時は viewerState 以外のフィールド更新でのみ updatedAt を更新する。
+   */
+  touchUpdatedAt?: boolean;
+};
+
 /**
  * PDFドキュメントを取得・管理するためのフック
  */
@@ -15,12 +24,10 @@ export const useDocuments = (folderId?: string) => {
   const { currentUser } = useAuthSession();
   const [error, setError] = useState<string | null>(null);
 
-  // useLiveQueryでドキュメントを取得
   const rawDocuments = useLiveQuery(async () => {
     try {
       if (!currentUser) return [];
       const db = await getLocalDb(currentUser.uid);
-      // documentsテーブルから全件取得
       const all = await db.documents.toArray();
       return all;
     } catch (err: unknown) {
@@ -31,7 +38,6 @@ export const useDocuments = (folderId?: string) => {
     }
   }, [currentUser]);
 
-  // フィルタリングとソート
   const documents = useMemo(() => {
     if (!rawDocuments) return [];
 
@@ -44,7 +50,6 @@ export const useDocuments = (folderId?: string) => {
       filtered = filtered.filter((d) => d.folderId === folderId);
     }
 
-    // orderIndexでソート
     return filtered.sort(
       (a, b) => (Number(a.orderIndex) || 0) - (Number(b.orderIndex) || 0),
     );
@@ -52,30 +57,40 @@ export const useDocuments = (folderId?: string) => {
 
   const loading = rawDocuments === undefined;
 
-  // ドキュメント更新
-  // ✅ スパース更新（必要なフィールドのみ更新）
-  // viewerState など表示状態の更新時に、他のフィールドを上書きしない
   const updateDocument = useCallback(
     async (
       documentId: string,
       updates: Partial<DocumentItem>,
+      options: UpdateDocumentOptions = {},
     ): Promise<void> => {
       if (!currentUser) throw new Error("User not authenticated");
+
       try {
         const db = await getLocalDb(currentUser.uid);
-        const now = new Date();
-        // ✅ db.documents.update() は Dexie のマージ更新
-        // 指定されたフィールドのみ更新され、他のフィールドは保持される
-        await db.documents.update(documentId, {
+
+        const shouldTouchUpdatedAt =
+          options.touchUpdatedAt ??
+          Object.keys(updates).some((key) => key !== "viewerState");
+
+        const payload: Partial<DocumentItem> & {
+          deviceId: string;
+          updatedAt?: Date;
+        } = {
           ...updates,
-          updatedAt: now,
-          deviceId: currentUser.uid, // 簡略版（実装に応じて調整）
-        });
+          deviceId: currentUser.uid,
+        };
+
+        if (shouldTouchUpdatedAt) {
+          payload.updatedAt = new Date();
+        }
+
+        await db.documents.update(documentId, payload);
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
         console.error(`[useDocuments] Update error: ${message}`, {
           documentId,
           updates,
+          options,
         });
         throw err;
       }
@@ -85,7 +100,11 @@ export const useDocuments = (folderId?: string) => {
 
   const deleteDocument = useCallback(
     async (documentId: string): Promise<void> => {
-      await updateDocument(documentId, { isDeleted: true });
+      await updateDocument(
+        documentId,
+        { isDeleted: true },
+        { touchUpdatedAt: true },
+      );
     },
     [updateDocument],
   );

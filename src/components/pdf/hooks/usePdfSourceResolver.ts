@@ -22,7 +22,6 @@ interface PdfSourceDoc {
   localUrl?: string | null;
   localFileId?: string | null;
   downloadUrl?: string | null;
-  updatedAt?: unknown;
 }
 
 type SourceLoadErrorDetails = {
@@ -41,7 +40,6 @@ interface UsePdfSourceResolverResult {
     blobUrl: string | null;
     localFileId: string | null;
     url: string | null;
-    updatedAt: string;
   };
   sourceUnavailable: boolean;
   isLocalOnly: boolean;
@@ -53,17 +51,6 @@ interface UsePdfSourceResolverResult {
 
 const LOCAL_RESTORE_MAX_ATTEMPTS = 3;
 const LOCAL_RESTORE_RETRY_DELAY_MS = 250;
-
-const getUpdatedAtKey = (value: unknown): string => {
-  if (value == null) return "";
-  if (value instanceof Date) return String(value.getTime());
-  if (typeof value === "number" || typeof value === "string") {
-    return String(value);
-  }
-  const maybeDate = (value as { toDate?: () => Date } | null)?.toDate?.();
-  if (maybeDate instanceof Date) return String(maybeDate.getTime());
-  return "";
-};
 
 const wait = (ms: number) =>
   new Promise<void>((resolve) => {
@@ -111,15 +98,19 @@ export const usePdfSourceResolver = (
     return `${scope}:${localBlobId}`;
   }, [localBlobId, userId]);
 
+  /**
+   * PDF の表示ソース identity は「実際のソース」にのみ依存させる。
+   * viewerState の保存で updatedAt が動いても、表示ソースは変わっていないため
+   * 再初期化してはいけない。
+   */
   const docIdentityKey = useMemo(() => {
     return [
       doc.id,
       userId?.trim() || "__anonymous__",
       localBlobId ?? "__no_local_blob__",
-      getUpdatedAtKey(doc.updatedAt),
       remoteUrl ?? "__no_remote__",
     ].join("|");
-  }, [doc.id, userId, localBlobId, doc.updatedAt, remoteUrl]);
+  }, [doc.id, userId, localBlobId, remoteUrl]);
 
   const resetLocalRestoreAttempt = useCallback(() => {
     if (!localRestoreAttemptKey) return;
@@ -273,9 +264,8 @@ export const usePdfSourceResolver = (
       blobUrl: null,
       localFileId: localBlobId,
       url: source.url ?? null,
-      updatedAt: getUpdatedAtKey(doc.updatedAt),
     }),
-    [doc.updatedAt, localBlobId, remoteUrl, source.url],
+    [localBlobId, remoteUrl, source.url],
   );
 
   const sourceUnavailable = !source.url && !source.data;

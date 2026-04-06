@@ -62,7 +62,6 @@ interface PdfViewerProps {
     blobUrl?: string | null;
     localFileId?: string | null;
     remoteUrl?: string | null;
-    updatedAt?: string | number | null;
   };
   viewerOptions?: {
     enableXfa?: boolean;
@@ -206,8 +205,9 @@ const PdfPage = ({
       } catch (err: unknown) {
         if (cancelled) return;
         const msg = String(err?.message ?? "");
-        if (msg.includes("cancelled") || msg.includes("Rendering cancelled"))
+        if (msg.includes("cancelled") || msg.includes("Rendering cancelled")) {
           return;
+        }
 
         console.error("[PdfViewer] render error", err);
         setError("PDFの描画に失敗しました");
@@ -252,7 +252,7 @@ const PdfPage = ({
 };
 
 export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
-  function PdfViewer(
+  (
     {
       source,
       scale,
@@ -270,7 +270,7 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       sourceMeta,
     }: PdfViewerProps,
     ref,
-  ) {
+  ) => {
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const [scrollContainerEl, setScrollContainerEl] =
       useState<HTMLDivElement | null>(null);
@@ -297,7 +297,6 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
     const sourceMetaBlobUrl = sourceMeta?.blobUrl ?? null;
     const sourceMetaLocalFileId = sourceMeta?.localFileId ?? null;
     const sourceMetaRemoteUrl = sourceMeta?.remoteUrl ?? null;
-    const sourceMetaUpdatedAt = sourceMeta?.updatedAt ?? null;
     const scaleRef = useRef(scale);
     const minScaleRef = useRef(minScale);
     const maxScaleRef = useRef(maxScale);
@@ -400,8 +399,12 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       const handleGestureChange = (event: Event) => {
         stopNativeEvent(event);
         const gestureScale = (event as Event & { scale?: number }).scale;
-        if (typeof gestureScale !== "number" || !Number.isFinite(gestureScale))
+        if (
+          typeof gestureScale !== "number" ||
+          !Number.isFinite(gestureScale)
+        ) {
           return;
+        }
         const baseScale = gestureStartScaleRef.current ?? scaleRef.current;
         const normalizedNextScale = computeNextScaleFromGesture({
           currentScale: scaleRef.current,
@@ -455,15 +458,15 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
         gestureStartScaleRef.current = null;
       };
     }, [requestScaleChange, scrollContainerEl]);
+
     const sourceKey = [
       sourceUrl ? `url:${sourceUrl}` : null,
       sourceDataLength > 0 ? `data:${sourceDataLength}` : null,
-      sourceMetaRemoteUrl ? `remote:${sourceMetaRemoteUrl}` : null,
-      sourceMetaBlobUrl ? `blob:${sourceMetaBlobUrl}` : null,
       sourceMetaLocalFileId ? `localFileId:${sourceMetaLocalFileId}` : null,
     ]
       .filter(Boolean)
       .join("|");
+
     const enableXfa = viewerOptions?.enableXfa ?? false;
     const useSystemFonts = viewerOptions?.useSystemFonts ?? false;
     const cMapUrl = viewerOptions?.cMapUrl;
@@ -538,7 +541,6 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       let cancelled = false;
       let loadingTask: unknown | null = null;
 
-      // 既存 doc の破棄
       if (docRef.current?.destroy) {
         try {
           docRef.current.destroy();
@@ -548,7 +550,6 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       }
       docRef.current = null;
 
-      // state reset
       setDoc(null);
       setNumPages(0);
       setPageSizes({});
@@ -562,7 +563,6 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       const hasUrl = sourceUrl.length > 0;
       const hasData = sourceDataLength > 0;
 
-      // ✅ 空ソースは沈黙させない
       if (!hasUrl && !hasData) {
         setLoading(false);
         setError("PDFソースが見つかりません（URL/データが空）");
@@ -583,7 +583,6 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
           blobUrl: sourceMetaBlobUrl,
           localFileId: sourceMetaLocalFileId,
           remoteUrl: sourceMetaRemoteUrl,
-          updatedAt: sourceMetaUpdatedAt,
         },
       });
 
@@ -656,7 +655,6 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
             blobUrl: sourceMetaBlobUrl,
             localFileId: sourceMetaLocalFileId,
             remoteUrl: sourceMetaRemoteUrl,
-            sourceUpdatedAt: sourceMetaUpdatedAt,
           });
 
           setDoc(null);
@@ -720,7 +718,6 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       sourceMetaBlobUrl,
       sourceMetaLocalFileId,
       sourceMetaRemoteUrl,
-      sourceMetaUpdatedAt,
     ]);
 
     useEffect(() => {
@@ -883,7 +880,6 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
 
     return (
       <div
-        // スクロール担当はこの ScrollContainer のみ（body/祖先スクロールには依存しない）
         ref={(el) => {
           scrollContainerRef.current = el;
           setScrollContainerEl((prev) => (prev === el ? prev : el));
@@ -944,15 +940,18 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
                               existing &&
                               existing.width === size.width &&
                               existing.height === size.height
-                            )
+                            ) {
                               return prev;
+                            }
                             return { ...prev, [pn]: size };
                           });
                         }}
                         onVisibilityChange={(pn, ratio) => {
-                          if (ratio < 0.05)
+                          if (ratio < 0.05) {
                             delete visibilityRatiosRef.current[pn];
-                          else visibilityRatiosRef.current[pn] = ratio;
+                          } else {
+                            visibilityRatiosRef.current[pn] = ratio;
+                          }
                           schedulePageUpdate();
                         }}
                       />
