@@ -367,7 +367,7 @@ const MarkdownBlockInner: React.FC<MarkdownBlockProps> = ({
         const preText = normalizeMarkdownInsertionText(raw, markdownTabSize);
         const lang = detectLang(preText, html);
 
-        let insertText = isFenceStart(preText)
+        const insertText = isFenceStart(preText)
           ? preText
           : wrapFence(preText, lang);
 
@@ -468,7 +468,7 @@ const MarkdownBlockInner: React.FC<MarkdownBlockProps> = ({
     if (plain) {
       event.preventDefault();
 
-      let insertText = normalizeMarkdownInsertionText(plain, markdownTabSize);
+      const insertText = normalizeMarkdownInsertionText(plain, markdownTabSize);
 
       if (/```|~~~/.test(insertText) && onReplaceWithBlocks) {
         const normalizedFence = normalizeFenceBoundaries(insertText, {
