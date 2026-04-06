@@ -84,7 +84,6 @@ interface CardViewDesktopProps {
   fluidAvailableWidthPx: number;
   onActiveIndexChange: (idx: number) => void;
   onFlip: () => void;
-  onEdit: () => void;
   onToggleUncertainty: (card: Card) => void | Promise<void>;
   onToggleBookmark: (card: Card) => void | Promise<void>;
   onSyncStatusChange: (status: CardSyncStatus | null) => void;
@@ -107,7 +106,6 @@ export const CardViewDesktop = ({
   fluidAvailableWidthPx,
   onActiveIndexChange,
   onFlip,
-  onEdit,
   onToggleUncertainty,
   onToggleBookmark,
   onSyncStatusChange,
@@ -181,7 +179,6 @@ export const CardViewDesktop = ({
           cardSetId={cardSetId}
           cardsOverride={editingCardsOverride}
           onFlip={onFlip}
-          onEdit={onEdit}
           onToggleUncertainty={onToggleUncertainty}
           onToggleBookmark={onToggleBookmark}
           onSyncStatusChange={onSyncStatusChange}
@@ -196,7 +193,6 @@ export const CardViewDesktop = ({
       flippedCardIds,
       folderId,
       isGlobalEditing,
-      onEdit,
       onFlip,
       onSyncStatusChange,
       onToggleBookmark,

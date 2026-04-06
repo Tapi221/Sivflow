@@ -18,7 +18,6 @@ export interface DesktopCardSurfaceProps {
   cardSetId: string | null;
   cardsOverride?: Card[];
   onFlip: () => void;
-  onEdit: () => void;
   onToggleUncertainty: (card: Card) => void | Promise<void>;
   onToggleBookmark: (card: Card) => void | Promise<void>;
   onSyncStatusChange: (status: CardSyncStatus | null) => void;
@@ -37,7 +36,6 @@ const DesktopCardSurfaceInner = ({
   cardSetId,
   cardsOverride,
   onFlip,
-  onEdit,
   onToggleUncertainty,
   onToggleBookmark,
   onSyncStatusChange,
@@ -125,7 +123,6 @@ const DesktopCardSurfaceInner = ({
         showInkLayer={currentDisplayMode === "fixed"}
         inkEditingEnabled={currentDisplayMode === "fixed" && isActive}
         onFlip={isActive ? onFlip : undefined}
-        onEdit={isActive ? onEdit : undefined}
         onToggleUncertainty={isActive ? onToggleUncertainty : undefined}
         onToggleBookmark={isActive ? onToggleBookmark : undefined}
         allowUpscale={false}
@@ -156,7 +153,6 @@ const areDesktopCardSurfacePropsEqual = (
   if (prev.folderId !== next.folderId) return false;
   if (prev.cardSetId !== next.cardSetId) return false;
   if (prev.onFlip !== next.onFlip) return false;
-  if (prev.onEdit !== next.onEdit) return false;
   if (prev.onToggleUncertainty !== next.onToggleUncertainty) return false;
   if (prev.onToggleBookmark !== next.onToggleBookmark) return false;
   if (prev.onSyncStatusChange !== next.onSyncStatusChange) return false;
