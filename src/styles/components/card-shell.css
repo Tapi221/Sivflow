@@ -304,6 +304,12 @@
     transition: opacity 110ms ease;
   }
 
+  .card-pager-item,
+  .card-pager-item::before,
+  .card-pager-item .card-shell {
+    transition: none;
+  }
+
   .card-active-chrome::before,
   .card-pager-item::before {
     content: "";
