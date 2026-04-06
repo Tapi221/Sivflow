@@ -1,11 +1,11 @@
 import type { CardSyncStatus } from "@/components/card/shell/cardSyncStatus";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuthSession } from "@/contexts/AuthContext";
 import { getCardText } from "@/domain/card/content";
 import {
   ACTIVE_INDEX_RENDER_RADIUS,
   VerticalCardPager,
 } from "@/features/review/VerticalCardPager";
-import { useAuthSession } from "@/contexts/AuthContext";
 import { useCardImagePreloader } from "@/hooks/card/useCardImagePreloader";
 import { DesktopCardSurface } from "@/pages/card-view/components/DesktopCardSurface";
 import {
@@ -113,6 +113,7 @@ export const CardViewDesktop = ({
   onSyncStatusChange,
 }: CardViewDesktopProps) => {
   const { currentUser } = useAuthSession();
+
   const effectiveEditPaneWidthPx = editPaneWidthPx;
   const effectiveCardWidthPx =
     currentDisplayMode === "fluid"
@@ -153,12 +154,12 @@ export const CardViewDesktop = ({
   useEffect(() => {
     if (selectedIndex < 0) return;
     if (selectedIndex === safeCurrentIndex) return;
-
     onActiveIndexChange(selectedIndex);
   }, [onActiveIndexChange, safeCurrentIndex, selectedIndex]);
 
   const renderCard = useCallback(
-    (card: Card, idx: number, isActive: boolean) => {
+    (_card: Card, _idx: number, isActive: boolean) => {
+      const card = _card;
       const readyToDisplay =
         isActive || isGlobalEditing || readySetRef.current.has(card.id ?? "");
 
@@ -172,8 +173,6 @@ export const CardViewDesktop = ({
           isActive={isActive}
           isGlobalEditing={isGlobalEditing}
           editPaneWidthPx={effectiveEditPaneWidthPx}
-          fixedCardWidthPx={fixedCardWidthPx}
-          fluidAvailableWidthPx={fluidAvailableWidthPx}
           settings={settings}
           isFlipped={flippedCardIds.has(card.id ?? "")}
           currentDisplayMode={currentDisplayMode}
@@ -194,9 +193,7 @@ export const CardViewDesktop = ({
       currentDisplayMode,
       editingCardsOverride,
       effectiveEditPaneWidthPx,
-      fixedCardWidthPx,
       flippedCardIds,
-      fluidAvailableWidthPx,
       folderId,
       isGlobalEditing,
       onEdit,
@@ -211,8 +208,8 @@ export const CardViewDesktop = ({
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="space-y-4 w-full max-w-md px-4">
+      <div className="flex h-full items-center justify-center">
+        <div className="w-full max-w-md space-y-4 px-4">
           <Skeleton className="h-12 w-full" />
           <Skeleton className="h-[400px] w-full" />
         </div>

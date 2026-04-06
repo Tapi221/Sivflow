@@ -10,8 +10,6 @@ export interface DesktopCardSurfaceProps {
   isActive: boolean;
   isGlobalEditing: boolean;
   editPaneWidthPx: number;
-  fixedCardWidthPx: number;
-  fluidAvailableWidthPx: number;
   settings?: Partial<UserSettings> | null;
   isFlipped: boolean;
   currentDisplayMode: CardDisplayMode;
@@ -31,8 +29,6 @@ const DesktopCardSurfaceInner = ({
   isActive,
   isGlobalEditing,
   editPaneWidthPx,
-  fixedCardWidthPx,
-  fluidAvailableWidthPx,
   settings = null,
   isFlipped,
   currentDisplayMode,
@@ -136,7 +132,6 @@ const DesktopCardSurfaceInner = ({
         scaleMultiplier={1}
         fixedScale={currentDisplayMode === "fixed" ? viewZoomScale : undefined}
         contentZoom={currentDisplayMode === "fluid" ? viewZoomScale : 1}
-        fluidAvailableWidthPx={fluidAvailableWidthPx}
         cardShellClassName={
           currentDisplayMode === "fluid"
             ? "border-none bg-transparent shadow-none"
@@ -155,8 +150,6 @@ const areDesktopCardSurfacePropsEqual = (
   if (prev.isActive !== next.isActive) return false;
   if (prev.isGlobalEditing !== next.isGlobalEditing) return false;
   if (prev.editPaneWidthPx !== next.editPaneWidthPx) return false;
-  if (prev.fixedCardWidthPx !== next.fixedCardWidthPx) return false;
-  if (prev.fluidAvailableWidthPx !== next.fluidAvailableWidthPx) return false;
   if (prev.settings !== next.settings) return false;
   if (prev.currentDisplayMode !== next.currentDisplayMode) return false;
   if (prev.viewZoomScale !== next.viewZoomScale) return false;
@@ -168,12 +161,13 @@ const areDesktopCardSurfacePropsEqual = (
   if (prev.onToggleBookmark !== next.onToggleBookmark) return false;
   if (prev.onSyncStatusChange !== next.onSyncStatusChange) return false;
 
-  if (next.isGlobalEditing) {
-    if (prev.cardsOverride !== next.cardsOverride) return false;
+  if (next.isGlobalEditing && prev.cardsOverride !== next.cardsOverride) {
+    return false;
   }
 
   const prevNeedsFlip = !prev.isGlobalEditing && prev.isActive;
   const nextNeedsFlip = !next.isGlobalEditing && next.isActive;
+
   if (prevNeedsFlip !== nextNeedsFlip) return false;
   if (nextNeedsFlip && prev.isFlipped !== next.isFlipped) return false;
 
@@ -184,4 +178,5 @@ export const DesktopCardSurface = React.memo(
   DesktopCardSurfaceInner,
   areDesktopCardSurfacePropsEqual,
 );
+
 DesktopCardSurface.displayName = "DesktopCardSurface";

@@ -1,3 +1,8 @@
+import {
+  buildTypographyStyle,
+  mergeStyles,
+  normalizeCardViewZoom,
+} from "@/components/card/common/cardViewZoom";
 import { BlockInset } from "@/components/card/blocks/editor/BlockInset";
 import { cn } from "@/lib/utils";
 import React from "react";
@@ -17,6 +22,12 @@ type QuestionBlockLayoutProps = {
   containerProps?: DivContainerProps;
   answerContainerProps?: DivContainerProps;
   answerOverlay?: React.ReactNode;
+  zoom?: number;
+};
+
+const scaleSpacePx = (basePx: number, zoom?: number) => {
+  const resolvedZoom = normalizeCardViewZoom(zoom);
+  return `${Number((basePx * resolvedZoom).toFixed(3))}px`;
 };
 
 export const QuestionBlockLayout = ({
@@ -27,32 +38,99 @@ export const QuestionBlockLayout = ({
   containerProps,
   answerContainerProps,
   answerOverlay,
+  zoom,
 }: QuestionBlockLayoutProps) => {
+  const labelStyle = React.useMemo(
+    () =>
+      mergeStyles(
+        buildTypographyStyle({
+          fontSizePx: 10,
+          lineHeightPx: 10,
+          zoom,
+        }),
+        {
+          marginTop: scaleSpacePx(2, zoom),
+        },
+      ),
+    [zoom],
+  );
+
+  const containerStyle = React.useMemo(
+    () =>
+      mergeStyles(containerProps?.style, {
+        paddingLeft: scaleSpacePx(6, zoom),
+        paddingRight: scaleSpacePx(4, zoom),
+        paddingTop: scaleSpacePx(4, zoom),
+        paddingBottom: scaleSpacePx(4, zoom),
+      }),
+    [containerProps?.style, zoom],
+  );
+
+  const questionRowStyle = React.useMemo(
+    () =>
+      mergeStyles({
+        columnGap: scaleSpacePx(4, zoom),
+        marginBottom: scaleSpacePx(4, zoom),
+      }),
+    [zoom],
+  );
+
+  const answerRowStyle = React.useMemo(
+    () =>
+      mergeStyles(answerContainerProps?.style, {
+        columnGap: scaleSpacePx(4, zoom),
+        paddingTop: scaleSpacePx(4, zoom),
+      }),
+    [answerContainerProps?.style, zoom],
+  );
+
+  const mergedContainerProps = React.useMemo<DivContainerProps>(
+    () => ({
+      ...containerProps,
+      style: containerStyle,
+    }),
+    [containerProps, containerStyle],
+  );
+
+  const mergedAnswerContainerProps = React.useMemo<DivContainerProps>(
+    () => ({
+      ...answerContainerProps,
+      style: answerRowStyle,
+    }),
+    [answerContainerProps, answerRowStyle],
+  );
+
   return (
     <BlockInset variant="question">
       <div
         ref={containerRef}
         className={cn(
-          "rounded-r-md border-l-2 border-amber-400 bg-amber-50 pl-1.5 pr-1 py-1",
+          "rounded-r-md border-l-2 border-amber-400 bg-amber-50",
           className,
         )}
-        {...containerProps}
+        {...mergedContainerProps}
       >
-        <div className="flex items-start gap-1 mb-1">
-          <span className="shrink-0 text-[10px] font-bold text-amber-500 leading-none mt-[2px]">
+        <div className="flex items-start" style={questionRowStyle}>
+          <span
+            className="shrink-0 font-bold text-amber-500"
+            style={labelStyle}
+          >
             Q.
           </span>
           {questionContent}
         </div>
 
         <div
-          className="flex items-start gap-1 border-t border-amber-200/60 pt-1"
-          {...answerContainerProps}
+          className="flex items-start border-t border-amber-200/60"
+          {...mergedAnswerContainerProps}
         >
-          <span className="shrink-0 text-[10px] font-bold text-slate-400 leading-none mt-[2px]">
+          <span
+            className="shrink-0 font-bold text-slate-400"
+            style={labelStyle}
+          >
             A.
           </span>
-          <div className="flex-1 relative">
+          <div className="relative flex-1">
             {answerContent}
             {answerOverlay}
           </div>

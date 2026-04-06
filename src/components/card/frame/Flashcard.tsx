@@ -54,7 +54,6 @@ interface FlashcardProps {
   contentPaddingPx?: number;
   cardShellClassName?: string;
   contentZoom?: number;
-  fluidAvailableWidthPx?: number | null;
 }
 
 const TAP_MOVE_CANCEL_THRESHOLD_PX = 8;
@@ -62,6 +61,7 @@ const TAP_MOVE_CANCEL_THRESHOLD_PX = 8;
 const shouldIgnoreFlipTarget = (target: EventTarget | null) => {
   const element = target as HTMLElement | null;
   if (!element) return false;
+
   return Boolean(
     element.closest(
       'button, a, input, textarea, select, label, [data-card-no-flip="true"]',
@@ -99,7 +99,6 @@ const FlashcardInner = ({
   contentPaddingPx,
   cardShellClassName,
   contentZoom = 1,
-  fluidAvailableWidthPx: _fluidAvailableWidthPx,
 }: FlashcardProps) => {
   const contentRef = useRef<HTMLDivElement | null>(null);
   const flipSuppressedUntilRef = useRef(0);
@@ -156,6 +155,7 @@ const FlashcardInner = ({
         suppressNextFlipRef.current = false;
         return;
       }
+
       if (Date.now() < flipSuppressedUntilRef.current) return;
       if (e && shouldIgnoreFlipTarget(e.target)) return;
       if (media.isModalBlockingFlip) return;
@@ -172,7 +172,7 @@ const FlashcardInner = ({
         onFlip();
       }
     },
-    [media.isModalBlockingFlip, isInkEditingActive, onFlip, previewMode],
+    [isInkEditingActive, media.isModalBlockingFlip, onFlip, previewMode],
   );
 
   const { actionsTopLeft, actionsTopRight } = useFlashcardCornerControls({
@@ -208,12 +208,12 @@ const FlashcardInner = ({
   };
 
   if (!card) {
-    return <div className="text-center py-12 text-gray-500">No Card Data</div>;
+    return <div className="py-12 text-center text-gray-500">No Card Data</div>;
   }
 
   const fixedHeightPx = layoutRowsToCardHeightPx(derived.layoutRows);
   const isCardClickable = !previewMode;
-  const safeContentZoom =
+  const resolvedContentZoom =
     typeof contentZoom === "number" &&
     Number.isFinite(contentZoom) &&
     contentZoom > 0
@@ -233,7 +233,7 @@ const FlashcardInner = ({
         blocks={derived.activeBlocks}
         onGalleryFullscreenChange={media.handleGalleryFullscreenChange}
         displayMode={displayMode}
-        zoom={isFixedDisplay ? 1 : safeContentZoom}
+        zoom={isFixedDisplay ? 1 : resolvedContentZoom}
       />
     </div>
   );
@@ -241,7 +241,7 @@ const FlashcardInner = ({
   return (
     <div
       className={cn(
-        "w-full flex flex-col select-none overflow-visible",
+        "flex w-full flex-col select-none overflow-visible",
         className,
       )}
     >
@@ -267,10 +267,12 @@ const FlashcardInner = ({
           )}
           onPointerDownCapture={(event) => {
             if (!isCardClickable) return;
+
             if (shouldIgnoreFlipTarget(event.target)) {
               resetPointerGesture();
               return;
             }
+
             pointerGestureRef.current = {
               pointerId: event.pointerId,
               startX: event.clientX,
@@ -280,11 +282,14 @@ const FlashcardInner = ({
           }}
           onPointerMoveCapture={(event) => {
             if (!isCardClickable) return;
+
             const state = pointerGestureRef.current;
             if (state.pointerId !== event.pointerId) return;
             if (state.moved) return;
+
             const dx = Math.abs(event.clientX - state.startX);
             const dy = Math.abs(event.clientY - state.startY);
+
             if (
               dx > TAP_MOVE_CANCEL_THRESHOLD_PX ||
               dy > TAP_MOVE_CANCEL_THRESHOLD_PX
@@ -305,6 +310,7 @@ const FlashcardInner = ({
             if (!isCardClickable) return;
             if (event.target !== event.currentTarget) return;
             if (event.key !== "Enter" && event.key !== " ") return;
+
             event.preventDefault();
             handleFlip();
           }}
@@ -371,11 +377,15 @@ const FlashcardInner = ({
   );
 };
 
-const areFlashcardPropsEqual = (prev: FlashcardProps, next: FlashcardProps) => {
+const areFlashcardPropsEqual = (
+  prev: FlashcardProps,
+  next: FlashcardProps,
+) => {
   if (prev.card !== next.card) return false;
   if (prev.previewMode !== next.previewMode) return false;
 
   const previewOnly = Boolean(prev.previewMode && next.previewMode);
+
   if (previewOnly) {
     return (
       prev.isFlipped === next.isFlipped &&

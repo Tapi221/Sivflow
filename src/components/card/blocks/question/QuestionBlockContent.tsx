@@ -145,6 +145,7 @@ const QuestionBlockViewContent = ({
 
   return (
     <QuestionBlockLayout
+      zoom={zoom}
       containerProps={{
         ...containerProps,
         onClick: (e) => {
