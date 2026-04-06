@@ -42,7 +42,10 @@ export const TextBlockContent = (props: TextBlockContentProps) => {
     return (
       <BlockSurface
         ruled={true}
-        ruledRowPx={scaleTypographyNumberPx(TEXT_BLOCK_LINE_HEIGHT_PX, props.zoom)}
+        ruledRowPx={scaleTypographyNumberPx(
+          TEXT_BLOCK_LINE_HEIGHT_PX,
+          props.zoom,
+        )}
         className="flex-1"
       >
         <div

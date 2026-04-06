@@ -318,10 +318,7 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
           padTopRows={1}
           padBottomRows={1}
         >
-          <h1
-            className="m-0 font-serif font-medium text-left"
-            style={h1Style}
-          >
+          <h1 className="m-0 font-serif font-medium text-left" style={h1Style}>
             {children}
           </h1>
         </BlockSurface>
@@ -334,10 +331,7 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
           padTopRows={1}
           padBottomRows={1}
         >
-          <h2
-            className="m-0 font-serif font-medium text-left"
-            style={h2Style}
-          >
+          <h2 className="m-0 font-serif font-medium text-left" style={h2Style}>
             {children}
           </h2>
         </BlockSurface>
@@ -350,10 +344,7 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
           padTopRows={1}
           padBottomRows={1}
         >
-          <h3
-            className="m-0 font-serif font-medium text-left"
-            style={h3Style}
-          >
+          <h3 className="m-0 font-serif font-medium text-left" style={h3Style}>
             {children}
           </h3>
         </BlockSurface>
@@ -366,10 +357,7 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
           padTopRows={1}
           padBottomRows={1}
         >
-          <h4
-            className="m-0 font-serif font-medium text-left"
-            style={h4Style}
-          >
+          <h4 className="m-0 font-serif font-medium text-left" style={h4Style}>
             {children}
           </h4>
         </BlockSurface>
@@ -482,7 +470,9 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
         </li>
       ),
 
-      table: ({ children }) => <TableRenderer style={bodyStyle}>{children}</TableRenderer>,
+      table: ({ children }) => (
+        <TableRenderer style={bodyStyle}>{children}</TableRenderer>
+      ),
       thead: ({ children }) => (
         <thead className="bg-slate-50">{children}</thead>
       ),
@@ -690,10 +680,7 @@ const TableRenderer = ({
 }) => {
   return (
     <div className="m-0 overflow-x-auto">
-      <table
-        className="w-full border-collapse text-left"
-        style={style}
-      >
+      <table className="w-full border-collapse text-left" style={style}>
         {children}
       </table>
     </div>

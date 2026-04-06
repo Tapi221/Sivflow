@@ -12,8 +12,7 @@ const toPx = (value: number) => {
 };
 
 export const normalizeCardViewZoom = (zoom?: number) => {
-  const safeZoom =
-    typeof zoom === "number" && Number.isFinite(zoom) ? zoom : 1;
+  const safeZoom = typeof zoom === "number" && Number.isFinite(zoom) ? zoom : 1;
 
   return clampNumber(safeZoom, MIN_CARD_VIEW_ZOOM, MAX_CARD_VIEW_ZOOM);
 };
@@ -23,10 +22,7 @@ export const scaleTypographyValuePx = (basePx: number, zoom?: number) => {
 };
 
 export const scaleTypographyNumberPx = (basePx: number, zoom?: number) => {
-  return Math.max(
-    8,
-    Number((basePx * normalizeCardViewZoom(zoom)).toFixed(3)),
-  );
+  return Math.max(8, Number((basePx * normalizeCardViewZoom(zoom)).toFixed(3)));
 };
 
 export const buildTypographyStyle = ({
