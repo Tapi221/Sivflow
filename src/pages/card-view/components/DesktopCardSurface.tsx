@@ -73,22 +73,22 @@ const DesktopCardSurfaceInner = ({
         )
       : undefined;
 
+  const canInteractWithEditor = isGlobalEditing && (isActive || hasFocusWithin);
+
+  const handleSyncStatusForward = React.useCallback(
+    (status: CardSyncStatus | null) => {
+      if (!canInteractWithEditor) return;
+      onSyncStatusChange(status);
+    },
+    [canInteractWithEditor, onSyncStatusChange],
+  );
+
+  React.useEffect(() => {
+    if (canInteractWithEditor) return;
+    onSyncStatusChange(null);
+  }, [canInteractWithEditor, onSyncStatusChange]);
+
   if (isGlobalEditing) {
-    const canInteractWithEditor = isActive || hasFocusWithin;
-
-    const handleSyncStatusForward = React.useCallback(
-      (status: CardSyncStatus | null) => {
-        if (!canInteractWithEditor) return;
-        onSyncStatusChange(status);
-      },
-      [canInteractWithEditor, onSyncStatusChange],
-    );
-
-    React.useEffect(() => {
-      if (canInteractWithEditor) return;
-      onSyncStatusChange(null);
-    }, [canInteractWithEditor, onSyncStatusChange]);
-
     return (
       <div
         className="w-full overflow-visible"
