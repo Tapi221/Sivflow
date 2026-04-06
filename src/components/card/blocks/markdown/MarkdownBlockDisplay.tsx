@@ -1,5 +1,6 @@
 import { MarkdownBlockView } from "@/components/card/blocks/markdown/MarkdownBlockPreview";
 import { TEXT_BLOCK_CONTENT_CLASS } from "@/components/card/blocks/text/textBlockStyles";
+import { buildTypographyStyle, mergeStyles } from "@/components/card/common/cardViewZoom";
 import { cn } from "@/lib/utils";
 import type {
   CSSProperties,
@@ -20,6 +21,7 @@ type MarkdownBlockDisplayProps = {
   ariaLabel?: string;
   onClick?: MouseEventHandler<HTMLDivElement>;
   onKeyDown?: KeyboardEventHandler<HTMLDivElement>;
+  zoom?: number;
   "data-testid"?: string;
 };
 
@@ -42,10 +44,20 @@ export const MarkdownBlockDisplay = ({
   ariaLabel,
   onClick,
   onKeyDown,
+  zoom,
   "data-testid": dataTestId,
 }: MarkdownBlockDisplayProps) => {
   const normalizedMarkdown = normalizeMarkdownBlockValue(markdown);
   const isEmpty = normalizedMarkdown.trim().length === 0;
+
+  const emptyStyle = mergeStyles(
+    buildTypographyStyle({
+      fontSizePx: 16,
+      lineHeightPx: 24,
+      zoom,
+    }),
+    style,
+  );
 
   return (
     <div className={cn("px-0 py-0", className)}>
@@ -68,7 +80,7 @@ export const MarkdownBlockDisplay = ({
               TEXT_BLOCK_CONTENT_CLASS,
               "min-h-[24px] text-slate-300",
             )}
-            style={style}
+            style={emptyStyle}
           >
             {emptyPlaceholder}
           </div>
@@ -78,6 +90,7 @@ export const MarkdownBlockDisplay = ({
             className="markdownBlockCardView"
             bleedX={bleedX}
             style={style}
+            zoom={zoom}
           />
         )}
       </div>

@@ -1,6 +1,11 @@
 import { CodeRenderer } from "@/components/card/blocks/code/CodeRenderer";
 import { BlockSurface } from "@/components/card/blocks/core/BlockSurface";
 import { BLOCK_BODY_TEXT_COLOR_CLASS } from "@/components/card/blocks/text/textBlockStyles";
+import {
+  buildTypographyStyle,
+  mergeStyles,
+  scaleTypographyNumberPx,
+} from "@/components/card/common/cardViewZoom";
 import { cn } from "@/lib/utils";
 import React, { useMemo } from "react";
 import ReactMarkdown, { type Components } from "react-markdown";
@@ -24,10 +29,6 @@ const ALLOWED_IMAGE_HOSTS = new Set<string>([
 
 const ALLOWED_IMAGE_PATH_PREFIXES = ["/uploads/"] as const;
 
-/**
- * 連続空行を表示用に保持するためのプレースホルダ。
- * 不可視文字はコピペ事故の元なので、ASCII だけにしている。
- */
 const BLANK_LINE_PLACEHOLDER = "__MD_BLANK_LINE_PLACEHOLDER__";
 
 const extractTextDeep = (node: React.ReactNode): string => {
@@ -41,12 +42,6 @@ const extractTextDeep = (node: React.ReactNode): string => {
   return "";
 };
 
-/**
- * Markdown の連続空行を潰さずに見た目へ反映する。
- * - 1個目の空行は通常の段落区切りとして残す
- * - 2個目以降はプレースホルダ段落を差し込む
- * - fenced code block 内は触らない
- */
 const preserveExtraBlankLines = (input: string): string => {
   const normalized = input.replace(/\r\n/g, "\n");
   const lines = normalized.split("\n");
@@ -231,6 +226,7 @@ interface MarkdownBlockContentProps {
   align?: "left" | "center";
   className?: string;
   bleedX?: boolean;
+  zoom?: number;
 }
 
 export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
@@ -238,15 +234,73 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
   align: _align,
   className,
   bleedX = false,
+  zoom,
 }) => {
   void _align;
 
   const bodyStyle = useMemo<React.CSSProperties>(
-    () => ({
-      fontSize: TYPE.body.fontSize,
-      lineHeight: `var(--card-line-height, ${TYPE.body.lineHeight}px)`,
-    }),
-    [],
+    () =>
+      buildTypographyStyle({
+        fontSizePx: TYPE.body.fontSize,
+        lineHeightPx: TYPE.body.lineHeight,
+        zoom,
+      }),
+    [zoom],
+  );
+
+  const h1Style = useMemo<React.CSSProperties>(
+    () =>
+      buildTypographyStyle({
+        fontSizePx: TYPE.h1.fontSize,
+        lineHeightPx: TYPE.h1.lineHeight,
+        zoom,
+      }),
+    [zoom],
+  );
+
+  const h2Style = useMemo<React.CSSProperties>(
+    () =>
+      buildTypographyStyle({
+        fontSizePx: TYPE.h2.fontSize,
+        lineHeightPx: TYPE.h2.lineHeight,
+        zoom,
+      }),
+    [zoom],
+  );
+
+  const h3Style = useMemo<React.CSSProperties>(
+    () =>
+      buildTypographyStyle({
+        fontSizePx: TYPE.h3.fontSize,
+        lineHeightPx: TYPE.h3.lineHeight,
+        zoom,
+      }),
+    [zoom],
+  );
+
+  const h4Style = useMemo<React.CSSProperties>(
+    () =>
+      buildTypographyStyle({
+        fontSizePx: TYPE.h4.fontSize,
+        lineHeightPx: TYPE.h4.lineHeight,
+        zoom,
+      }),
+    [zoom],
+  );
+
+  const inlineCodeStyle = useMemo<React.CSSProperties>(
+    () =>
+      mergeStyles(
+        buildTypographyStyle({
+          fontSizePx: TYPE.code.fontSize,
+          lineHeightPx: TYPE.body.lineHeight,
+          zoom,
+        }),
+        {
+          whiteSpace: "normal",
+        },
+      ),
+    [zoom],
   );
 
   const renderedMarkdown = useMemo(
@@ -259,17 +313,14 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
       h1: ({ children }) => (
         <BlockSurface
           ruled
-          ruledRowPx={TYPE.h1.lineHeight}
+          ruledRowPx={scaleTypographyNumberPx(TYPE.h1.lineHeight, zoom)}
           bleedX={bleedX}
           padTopRows={1}
           padBottomRows={1}
         >
           <h1
             className="m-0 font-serif font-medium text-left"
-            style={{
-              fontSize: TYPE.h1.fontSize,
-              lineHeight: `var(--card-line-height, ${TYPE.h1.lineHeight}px)`,
-            }}
+            style={h1Style}
           >
             {children}
           </h1>
@@ -278,17 +329,14 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
       h2: ({ children }) => (
         <BlockSurface
           ruled
-          ruledRowPx={TYPE.h2.lineHeight}
+          ruledRowPx={scaleTypographyNumberPx(TYPE.h2.lineHeight, zoom)}
           bleedX={bleedX}
           padTopRows={1}
           padBottomRows={1}
         >
           <h2
             className="m-0 font-serif font-medium text-left"
-            style={{
-              fontSize: TYPE.h2.fontSize,
-              lineHeight: `var(--card-line-height, ${TYPE.h2.lineHeight}px)`,
-            }}
+            style={h2Style}
           >
             {children}
           </h2>
@@ -297,17 +345,14 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
       h3: ({ children }) => (
         <BlockSurface
           ruled
-          ruledRowPx={TYPE.h3.lineHeight}
+          ruledRowPx={scaleTypographyNumberPx(TYPE.h3.lineHeight, zoom)}
           bleedX={bleedX}
           padTopRows={1}
           padBottomRows={1}
         >
           <h3
             className="m-0 font-serif font-medium text-left"
-            style={{
-              fontSize: TYPE.h3.fontSize,
-              lineHeight: `var(--card-line-height, ${TYPE.h3.lineHeight}px)`,
-            }}
+            style={h3Style}
           >
             {children}
           </h3>
@@ -316,17 +361,14 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
       h4: ({ children }) => (
         <BlockSurface
           ruled
-          ruledRowPx={TYPE.h4.lineHeight}
+          ruledRowPx={scaleTypographyNumberPx(TYPE.h4.lineHeight, zoom)}
           bleedX={bleedX}
           padTopRows={1}
           padBottomRows={1}
         >
           <h4
             className="m-0 font-serif font-medium text-left"
-            style={{
-              fontSize: TYPE.h4.fontSize,
-              lineHeight: `var(--card-line-height, ${TYPE.h4.lineHeight}px)`,
-            }}
+            style={h4Style}
           >
             {children}
           </h4>
@@ -334,7 +376,13 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
       ),
 
       p: ({ children }) => {
-        return <ParagraphRenderer children={children} bodyStyle={bodyStyle} />;
+        return (
+          <ParagraphRenderer
+            children={children}
+            bodyStyle={bodyStyle}
+            zoom={zoom}
+          />
+        );
       },
 
       del: ({ children }) => <del className="line-through">{children}</del>,
@@ -415,7 +463,9 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
         >
           <blockquote
             className="markdownBlockquote m-0 border-l-4 border-slate-300 text-left italic"
-            style={{ ...bodyStyle, paddingLeft: "var(--card-row-px)" }}
+            style={mergeStyles(bodyStyle, {
+              paddingLeft: "var(--card-row-px)",
+            })}
           >
             {children}
           </blockquote>
@@ -432,7 +482,7 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
         </li>
       ),
 
-      table: ({ children }) => <TableRenderer>{children}</TableRenderer>,
+      table: ({ children }) => <TableRenderer style={bodyStyle}>{children}</TableRenderer>,
       thead: ({ children }) => (
         <thead className="bg-slate-50">{children}</thead>
       ),
@@ -441,12 +491,18 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
         <tr className="border-b border-slate-200">{children}</tr>
       ),
       th: ({ children }) => (
-        <th className="whitespace-nowrap border border-slate-200 px-2 py-1 text-left font-semibold">
+        <th
+          className="whitespace-nowrap border border-slate-200 px-2 py-1 text-left font-semibold"
+          style={bodyStyle}
+        >
           {children}
         </th>
       ),
       td: ({ children }) => (
-        <td className="align-top border border-slate-200 px-2 py-1 text-left">
+        <td
+          className="align-top border border-slate-200 px-2 py-1 text-left"
+          style={bodyStyle}
+        >
           {children}
         </td>
       ),
@@ -462,11 +518,7 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
         return (
           <code
             className="inline rounded bg-red-50 px-1 py-0 align-baseline font-mono text-red-600 ring-1 ring-inset ring-red-100"
-            style={{
-              fontSize: `${TYPE.code.fontSize}px`,
-              lineHeight: `var(--card-line-height, ${TYPE.body.lineHeight}px)`,
-              whiteSpace: "normal",
-            }}
+            style={inlineCodeStyle}
           >
             {children}
           </code>
@@ -489,6 +541,7 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
               code={raw}
               language="clike"
               bleedX={bleedX}
+              zoom={zoom}
             />
           );
         }
@@ -512,22 +565,33 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
             code={rawCode}
             language={language}
             bleedX={bleedX}
+            zoom={zoom}
           />
         );
       },
     }),
-    [bleedX, bodyStyle],
+    [
+      bleedX,
+      bodyStyle,
+      h1Style,
+      h2Style,
+      h3Style,
+      h4Style,
+      inlineCodeStyle,
+      zoom,
+    ],
   );
 
   return (
     <div
       className={cn(
-        `markdown-block-view markdownBlockPreview markdownBlockCardView max-w-none font-serif text-[16px] font-medium leading-[24px] ${BLOCK_BODY_TEXT_COLOR_CLASS} [font-variant-numeric:lining-nums_tabular-nums] [font-feature-settings:"lnum"_1]`,
+        `markdown-block-view markdownBlockPreview markdownBlockCardView max-w-none font-serif font-medium ${BLOCK_BODY_TEXT_COLOR_CLASS} [font-variant-numeric:lining-nums_tabular-nums] [font-feature-settings:"lnum"_1]`,
         "text-left",
         "[&_*]:text-left",
         "[&>*+*]:mt-[var(--card-row-px)]",
         className,
       )}
+      style={bodyStyle}
     >
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkBreaks]}
@@ -542,26 +606,33 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
 const ParagraphRenderer = ({
   children,
   bodyStyle,
+  zoom,
 }: {
   children: React.ReactNode;
   bodyStyle: React.CSSProperties;
+  zoom?: number;
 }) => {
   const text = extractTextDeep(children);
   const isBlankSpacer = text === BLANK_LINE_PLACEHOLDER;
 
   return (
-    <p
-      data-markdown-paragraph="true"
-      aria-hidden={isBlankSpacer ? true : undefined}
-      className={cn(
-        "markdownParagraph m-0 border-none bg-transparent p-0 font-serif text-base font-medium text-left break-words [overflow-wrap:anywhere]",
-        BLOCK_BODY_TEXT_COLOR_CLASS,
-        isBlankSpacer && "select-none text-transparent",
-      )}
-      style={bodyStyle}
+    <BlockSurface
+      ruled
+      ruledRowPx={scaleTypographyNumberPx(TYPE.body.lineHeight, zoom)}
     >
-      {isBlankSpacer ? " " : children}
-    </p>
+      <p
+        data-markdown-paragraph="true"
+        aria-hidden={isBlankSpacer ? true : undefined}
+        className={cn(
+          "markdownParagraph m-0 border-none bg-transparent p-0 font-serif font-medium text-left break-words [overflow-wrap:anywhere]",
+          BLOCK_BODY_TEXT_COLOR_CLASS,
+          isBlankSpacer && "select-none text-transparent",
+        )}
+        style={bodyStyle}
+      >
+        {isBlankSpacer ? " " : children}
+      </p>
+    </BlockSurface>
   );
 };
 
@@ -569,10 +640,12 @@ const MarkdownFencedCodeBlock = ({
   code,
   language,
   bleedX,
+  zoom,
 }: {
   code: string;
   language: string;
   bleedX: boolean;
+  zoom?: number;
 }) => {
   return (
     <BlockSurface
@@ -581,7 +654,7 @@ const MarkdownFencedCodeBlock = ({
       background="var(--card-surface)"
       className="m-0"
     >
-      <CodeRenderer code={code} language={language} />
+      <CodeRenderer code={code} language={language} zoom={zoom} />
     </BlockSurface>
   );
 };
@@ -608,10 +681,19 @@ const ListRenderer = ({
   return <Tag className={listClass}>{children}</Tag>;
 };
 
-const TableRenderer = ({ children }: { children: React.ReactNode }) => {
+const TableRenderer = ({
+  children,
+  style,
+}: {
+  children: React.ReactNode;
+  style: React.CSSProperties;
+}) => {
   return (
     <div className="m-0 overflow-x-auto">
-      <table className="w-full border-collapse text-left text-sm">
+      <table
+        className="w-full border-collapse text-left"
+        style={style}
+      >
         {children}
       </table>
     </div>

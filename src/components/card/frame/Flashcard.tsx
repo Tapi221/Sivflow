@@ -7,7 +7,7 @@ import {
 import type { InkDocument } from "@/components/ink/inkTypes";
 import { cn } from "@/lib/utils";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { CardFrame } from "./CardFrame";
 import { CARD_SHELL_COMMON_CLASS_NAME } from "./cardShellClassNames";
 import { useFlashcardCornerControls } from "./FlashcardCornerControls";
@@ -69,86 +69,6 @@ const shouldIgnoreFlipTarget = (target: EventTarget | null) => {
   );
 };
 
-const ScaledFluidContent = ({
-  zoom,
-  children,
-}: {
-  zoom: number;
-  children: React.ReactNode;
-}) => {
-  const measureRef = useRef<HTMLDivElement | null>(null);
-  const [measuredHeightPx, setMeasuredHeightPx] = useState(0);
-
-  const safeZoom =
-    typeof zoom === "number" && Number.isFinite(zoom) && zoom > 0 ? zoom : 1;
-
-  useLayoutEffect(() => {
-    const node = measureRef.current;
-    if (!node) return;
-
-    const update = () => {
-      const nextHeight = Math.max(
-        node.offsetHeight,
-        node.scrollHeight,
-        node.getBoundingClientRect().height,
-      );
-      const rounded = Math.ceil(nextHeight);
-      setMeasuredHeightPx((prev) => (prev === rounded ? prev : rounded));
-    };
-
-    update();
-
-    if (typeof ResizeObserver === "undefined") {
-      window.addEventListener("resize", update, { passive: true });
-      return () => {
-        window.removeEventListener("resize", update);
-      };
-    }
-
-    const observer = new ResizeObserver(update);
-    observer.observe(node);
-    window.addEventListener("resize", update, { passive: true });
-
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", update);
-    };
-  }, [children, safeZoom]);
-
-  if (Math.abs(safeZoom - 1) < 0.001) {
-    return (
-      <div ref={measureRef} className="w-full">
-        {children}
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className="w-full overflow-visible"
-      style={{
-        height:
-          measuredHeightPx > 0
-            ? `${Math.ceil(measuredHeightPx * safeZoom)}px`
-            : undefined,
-      }}
-    >
-      <div
-        style={{
-          width: `${(100 / safeZoom).toFixed(5)}%`,
-          transform: `scale(${safeZoom})`,
-          transformOrigin: "top left",
-          willChange: "transform",
-        }}
-      >
-        <div ref={measureRef} className="w-full">
-          {children}
-        </div>
-      </div>
-    </div>
-  );
-};
-
 const FlashcardInner = ({
   card,
   isFlipped,
@@ -179,6 +99,7 @@ const FlashcardInner = ({
   contentPaddingPx,
   cardShellClassName,
   contentZoom = 1,
+  fluidAvailableWidthPx: _fluidAvailableWidthPx,
 }: FlashcardProps) => {
   const contentRef = useRef<HTMLDivElement | null>(null);
   const flipSuppressedUntilRef = useRef(0);
@@ -293,9 +214,7 @@ const FlashcardInner = ({
   const fixedHeightPx = layoutRowsToCardHeightPx(derived.layoutRows);
   const isCardClickable = !previewMode;
   const safeContentZoom =
-    typeof contentZoom === "number" &&
-    Number.isFinite(contentZoom) &&
-    contentZoom > 0
+    typeof contentZoom === "number" && Number.isFinite(contentZoom) && contentZoom > 0
       ? contentZoom
       : 1;
 
@@ -312,7 +231,7 @@ const FlashcardInner = ({
         blocks={derived.activeBlocks}
         onGalleryFullscreenChange={media.handleGalleryFullscreenChange}
         displayMode={displayMode}
-        zoom={1}
+        zoom={isFixedDisplay ? 1 : safeContentZoom}
       />
     </div>
   );
@@ -341,8 +260,7 @@ const FlashcardInner = ({
             CARD_SHELL_COMMON_CLASS_NAME,
             cardShellClassName,
             isCardClickable && "cursor-pointer",
-            !isFixedDisplay &&
-              "rounded-none border-none bg-transparent shadow-none",
+            !isFixedDisplay && "rounded-none border-none bg-transparent shadow-none",
           )}
           onPointerDownCapture={(event) => {
             if (!isCardClickable) return;
@@ -419,13 +337,7 @@ const FlashcardInner = ({
             />
           }
         >
-          {isFixedDisplay ? (
-            contentNode
-          ) : (
-            <ScaledFluidContent zoom={safeContentZoom}>
-              {contentNode}
-            </ScaledFluidContent>
-          )}
+          {contentNode}
         </CardFrame>
       </div>
 

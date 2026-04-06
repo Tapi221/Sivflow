@@ -4,12 +4,14 @@ interface CodeRendererProps {
   code: string;
   language?: string;
   className?: string;
+  zoom?: number;
 }
 
 export const CodeRenderer = ({
   code,
   language,
   className,
+  zoom,
 }: CodeRendererProps) => {
   return (
     <CodeBlockContent
@@ -17,6 +19,7 @@ export const CodeRenderer = ({
       code={code}
       language={language}
       className={className}
+      zoom={zoom}
     />
   );
 };

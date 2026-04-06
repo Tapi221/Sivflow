@@ -298,6 +298,7 @@ export const CardBlockLayoutRenderer = (
             questionTitle={block.questionTitle}
             questionAnswer={block.questionAnswer}
             answerDisplayMode={viewerProps.questionDisplayMode}
+            zoom={viewerProps.zoom}
           />
         </BlockWrapper>
       );
@@ -312,7 +313,11 @@ export const CardBlockLayoutRenderer = (
           )}
           contentClassName="px-0"
         >
-          <TextBlockContent mode="view" content={String(block.content ?? "")} />
+          <TextBlockContent
+            mode="view"
+            content={String(block.content ?? "")}
+            zoom={viewerProps.zoom}
+          />
         </BlockWrapper>
       );
 
@@ -331,6 +336,7 @@ export const CardBlockLayoutRenderer = (
             <CodeRenderer
               code={block.code?.code ?? ""}
               language={block.code?.language}
+              zoom={viewerProps.zoom}
             />
           </div>
         </BlockWrapper>
@@ -386,6 +392,7 @@ export const CardBlockLayoutRenderer = (
               latex={block.math?.latex || ""}
               displayMode={block.math?.displayMode || "block"}
               className="rounded-lg"
+              zoom={viewerProps.zoom}
             />
           </div>
         </BlockWrapper>
@@ -401,7 +408,10 @@ export const CardBlockLayoutRenderer = (
           )}
           contentClassName="px-0"
         >
-          <MarkdownBlockDisplay markdown={block.markdown ?? ""} />
+          <MarkdownBlockDisplay
+            markdown={block.markdown ?? ""}
+            zoom={viewerProps.zoom}
+          />
         </BlockWrapper>
       );
 

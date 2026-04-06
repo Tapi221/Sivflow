@@ -1,5 +1,10 @@
 import { BlockInset } from "@/components/card/blocks/editor/BlockInset";
+import {
+  buildTypographyStyle,
+  mergeStyles,
+} from "@/components/card/common/cardViewZoom";
 import { cn } from "@/lib/utils";
+import { webClipboardAdapter } from "@/platform/clipboard/webClipboardAdapter";
 import { codeTheme } from "@/theme/codeTheme";
 import { Check, Copy } from "@/ui/icons";
 import type { RenderProps } from "prism-react-renderer";
@@ -15,7 +20,6 @@ import {
 } from "react";
 import Editor from "react-simple-code-editor";
 import { CodeBlockFrame } from "./CodeBlockFrame";
-import { webClipboardAdapter } from "@/platform/clipboard/webClipboardAdapter";
 import {
   getViewerLanguageLabels,
   normalizeEditorLanguage,
@@ -45,6 +49,7 @@ type CodeBlockContentProps =
       code: string;
       language?: string;
       className?: string;
+      zoom?: number;
     }
   | {
       mode: "editor";
@@ -143,6 +148,12 @@ export const CodeBlockContent = (props: CodeBlockContentProps) => {
   );
 
   if (props.mode === "viewer") {
+    const viewerTypographyStyle = buildTypographyStyle({
+      fontSizePx: 13,
+      lineHeightPx: 20,
+      zoom: props.zoom,
+    });
+
     return (
       <div className={props.className}>
         <BlockInset variant="code">
@@ -174,10 +185,13 @@ export const CodeBlockContent = (props: CodeBlockContentProps) => {
                 return (
                   <pre
                     className={cn(preClassName, "codeBlockPre code-no-wrap")}
-                    style={{
-                      color: style.color,
-                      backgroundColor: style.backgroundColor,
-                    }}
+                    style={mergeStyles(
+                      {
+                        color: style.color,
+                        backgroundColor: style.backgroundColor,
+                      },
+                      viewerTypographyStyle,
+                    )}
                   >
                     <code className="code-no-wrap">
                       {visibleTokens.map((line, i) => (

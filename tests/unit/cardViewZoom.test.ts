@@ -1,54 +1,44 @@
-import { describe, expect, it } from "vitest";
 import {
-  clampZoomPercent,
-  computeDynamicMaxZoomPercent,
-} from "@/pages/card-view/hooks/useCardViewZoom";
+  buildTypographyStyle,
+  normalizeCardViewZoom,
+  scaleTypographyNumberPx,
+  scaleTypographyValuePx,
+} from "@/components/card/common/cardViewZoom";
+import { describe, expect, it } from "vitest";
 
-describe("card view zoom", () => {
-  describe("computeDynamicMaxZoomPercent", () => {
-    it("snaps down to 5% steps based on content area width", () => {
-      expect(computeDynamicMaxZoomPercent(576)).toBe(120);
-      expect(computeDynamicMaxZoomPercent(600)).toBe(125);
-      expect(computeDynamicMaxZoomPercent(479)).toBe(95);
-    });
-
-    it("never drops below one step", () => {
-      expect(computeDynamicMaxZoomPercent(1)).toBe(5);
-      expect(computeDynamicMaxZoomPercent(0)).toBe(120);
-    });
+describe("cardViewZoom", () => {
+  it("normalizes invalid values to 1", () => {
+    expect(normalizeCardViewZoom()).toBe(1);
+    expect(normalizeCardViewZoom(Number.NaN)).toBe(1);
   });
 
-  describe("clampZoomPercent", () => {
-    it("clamps to min/max and snaps to 5% steps", () => {
-      expect(
-        clampZoomPercent(123, {
-          minPercent: 75,
-          maxPercent: 140,
-        }),
-      ).toBe(125);
+  it("clamps zoom to safe bounds", () => {
+    expect(normalizeCardViewZoom(0.01)).toBe(0.5);
+    expect(normalizeCardViewZoom(10)).toBe(4);
+  });
 
-      expect(
-        clampZoomPercent(72, {
-          minPercent: 75,
-          maxPercent: 140,
-        }),
-      ).toBe(75);
+  it("scales typography values as px strings", () => {
+    expect(scaleTypographyValuePx(16, 1)).toBe("16px");
+    expect(scaleTypographyValuePx(16, 1.25)).toBe("20px");
+    expect(scaleTypographyValuePx(24, 0.75)).toBe("18px");
+  });
 
-      expect(
-        clampZoomPercent(999, {
-          minPercent: 75,
-          maxPercent: 140,
-        }),
-      ).toBe(140);
-    });
+  it("scales ruled row sizes as numbers", () => {
+    expect(scaleTypographyNumberPx(24, 1)).toBe(24);
+    expect(scaleTypographyNumberPx(24, 1.25)).toBe(30);
+    expect(scaleTypographyNumberPx(24, 0.5)).toBe(12);
+  });
 
-    it("supports cases where dynamic max is below the normal minimum", () => {
-      expect(
-        clampZoomPercent(75, {
-          minPercent: 60,
-          maxPercent: 60,
-        }),
-      ).toBe(60);
+  it("builds typography style with scaled font size and line height", () => {
+    expect(
+      buildTypographyStyle({
+        fontSizePx: 12,
+        lineHeightPx: 18,
+        zoom: 1.5,
+      }),
+    ).toEqual({
+      fontSize: "18px",
+      lineHeight: "27px",
     });
   });
 });

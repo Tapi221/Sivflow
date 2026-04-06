@@ -9,6 +9,7 @@ interface MarkdownBlockViewProps {
   className?: string;
   bleedX?: boolean;
   style?: React.CSSProperties;
+  zoom?: number;
 }
 
 export type MarkdownBlockPreviewProps = {
@@ -17,6 +18,7 @@ export type MarkdownBlockPreviewProps = {
   className?: string;
   bleedX?: boolean;
   style?: React.CSSProperties;
+  zoom?: number;
 };
 
 interface MarkdownBlockDisplayProps extends MarkdownBlockPreviewProps {
@@ -30,6 +32,7 @@ const MarkdownBlockDisplay: React.FC<MarkdownBlockDisplayProps> = ({
   contentClassName,
   bleedX,
   style,
+  zoom,
 }) => {
   return (
     <BlockSurface ruled={true} className="flex-1">
@@ -43,6 +46,7 @@ const MarkdownBlockDisplay: React.FC<MarkdownBlockDisplayProps> = ({
             align={align}
             className={className}
             bleedX={bleedX}
+            zoom={zoom}
           />
         </div>
       </div>

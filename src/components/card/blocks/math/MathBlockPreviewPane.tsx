@@ -1,3 +1,7 @@
+import {
+  buildTypographyStyle,
+  mergeStyles,
+} from "@/components/card/common/cardViewZoom";
 import { cn } from "@/lib/utils";
 import { MathRenderer } from "./MathBlockContent";
 
@@ -9,6 +13,7 @@ type MathBlockPreviewPaneProps = {
   showPlaceholder?: boolean;
   placeholder?: string;
   className?: string;
+  zoom?: number;
 };
 
 export const MathBlockPreviewPane = ({
@@ -19,10 +24,18 @@ export const MathBlockPreviewPane = ({
   showPlaceholder = false,
   placeholder,
   className,
+  zoom,
 }: MathBlockPreviewPaneProps) => {
+  const typographyStyle = buildTypographyStyle({
+    fontSizePx: 16,
+    lineHeightPx: 24,
+    zoom,
+  });
+
   return (
     <div
       className={cn(interactive && "cursor-text", className)}
+      style={mergeStyles(typographyStyle)}
       role={interactive ? "button" : undefined}
       tabIndex={interactive ? 0 : undefined}
       aria-label={interactive ? "数式を編集" : undefined}

@@ -1,11 +1,15 @@
-import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
+import {
+  buildTypographyStyle,
+  mergeStyles,
+} from "@/components/card/common/cardViewZoom";
 import { QuestionBlockLayout } from "@/components/card/blocks/question/QuestionBlockLayout";
 import {
   QUESTION_BLOCK_ANSWER_TEXT_CLASS,
   QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX,
   QUESTION_BLOCK_TITLE_TEXT_CLASS,
 } from "@/components/card/blocks/question/questionBlockTextStyles";
-import React, { useState } from "react";
+import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
+import React, { useEffect, useMemo, useState } from "react";
 
 type QuestionBlockContentProps =
   | {
@@ -14,6 +18,7 @@ type QuestionBlockContentProps =
       questionAnswer?: string;
       answerDisplayMode?: "always" | "tap_to_reveal";
       containerProps?: React.HTMLAttributes<HTMLDivElement>;
+      zoom?: number;
     }
   | {
       mode: "edit";
@@ -36,6 +41,7 @@ export const QuestionBlockContent = (props: QuestionBlockContentProps) => {
         questionAnswer={props.questionAnswer}
         answerDisplayMode={props.answerDisplayMode ?? "tap_to_reveal"}
         containerProps={props.containerProps}
+        zoom={props.zoom}
       />
     );
   }
@@ -83,6 +89,7 @@ type QuestionBlockViewContentProps = {
   questionAnswer?: string;
   answerDisplayMode: "always" | "tap_to_reveal";
   containerProps?: React.HTMLAttributes<HTMLDivElement>;
+  zoom?: number;
 };
 
 const QuestionBlockViewContent = ({
@@ -90,8 +97,51 @@ const QuestionBlockViewContent = ({
   questionAnswer,
   answerDisplayMode,
   containerProps,
+  zoom,
 }: QuestionBlockViewContentProps) => {
   const [revealed, setRevealed] = useState(answerDisplayMode === "always");
+
+  useEffect(() => {
+    setRevealed(answerDisplayMode === "always");
+  }, [answerDisplayMode, questionAnswer, questionTitle]);
+
+  const titleStyle = useMemo(
+    () =>
+      buildTypographyStyle({
+        fontSizePx: 12,
+        lineHeightPx: QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX,
+        zoom,
+      }),
+    [zoom],
+  );
+
+  const answerBaseStyle = useMemo(
+    () =>
+      buildTypographyStyle({
+        fontSizePx: 12,
+        lineHeightPx: QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX,
+        zoom,
+      }),
+    [zoom],
+  );
+
+  const answerStyle = revealed
+    ? answerBaseStyle
+    : mergeStyles(answerBaseStyle, {
+        filter: "blur(5px)",
+        userSelect: "none",
+        pointerEvents: "none",
+      });
+
+  const overlayStyle = useMemo(
+    () =>
+      buildTypographyStyle({
+        fontSizePx: 10,
+        lineHeightPx: 14,
+        zoom,
+      }),
+    [zoom],
+  );
 
   return (
     <QuestionBlockLayout
@@ -103,22 +153,17 @@ const QuestionBlockViewContent = ({
         },
       }}
       questionContent={
-        <p className={`flex-1 ${QUESTION_BLOCK_TITLE_TEXT_CLASS}`}>
+        <p
+          className={`flex-1 ${QUESTION_BLOCK_TITLE_TEXT_CLASS}`}
+          style={titleStyle}
+        >
           {questionTitle || ""}
         </p>
       }
       answerContent={
         <p
           className={`${QUESTION_BLOCK_ANSWER_TEXT_CLASS} transition-all duration-200`}
-          style={
-            revealed
-              ? undefined
-              : {
-                  filter: "blur(5px)",
-                  userSelect: "none",
-                  pointerEvents: "none",
-                }
-          }
+          style={answerStyle}
         >
           {questionAnswer || "\u00a0"}
         </p>
@@ -132,7 +177,10 @@ const QuestionBlockViewContent = ({
       }}
       answerOverlay={
         !revealed ? (
-          <span className="absolute inset-0 flex items-center justify-center text-[10px] text-slate-400">
+          <span
+            className="absolute inset-0 flex items-center justify-center text-slate-400"
+            style={overlayStyle}
+          >
             タップして表示
           </span>
         ) : undefined

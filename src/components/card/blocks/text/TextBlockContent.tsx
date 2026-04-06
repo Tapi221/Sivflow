@@ -4,6 +4,10 @@ import {
   TEXT_BLOCK_LINE_HEIGHT_PX,
 } from "@/components/card/blocks/text/textBlockStyles";
 import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
+import {
+  buildTypographyStyle,
+  scaleTypographyNumberPx,
+} from "@/components/card/common/cardViewZoom";
 
 const normalizeTextBlockContent = (content: string) =>
   String(content ?? "").replace(/\r\n/g, "\n");
@@ -12,6 +16,7 @@ type TextBlockContentProps =
   | {
       mode: "view";
       content: string;
+      zoom?: number;
     }
   | {
       mode: "edit";
@@ -28,9 +33,22 @@ export const TextBlockContent = (props: TextBlockContentProps) => {
     const displayText =
       normalizedContent.length === 0 ? "\u00A0" : normalizedContent;
 
+    const textStyle = buildTypographyStyle({
+      fontSizePx: 16,
+      lineHeightPx: TEXT_BLOCK_LINE_HEIGHT_PX,
+      zoom: props.zoom,
+    });
+
     return (
-      <BlockSurface ruled={true} className="flex-1">
-        <div className={`${TEXT_BLOCK_CONTENT_CLASS} whitespace-pre-wrap`}>
+      <BlockSurface
+        ruled={true}
+        ruledRowPx={scaleTypographyNumberPx(TEXT_BLOCK_LINE_HEIGHT_PX, props.zoom)}
+        className="flex-1"
+      >
+        <div
+          className={`${TEXT_BLOCK_CONTENT_CLASS} whitespace-pre-wrap`}
+          style={textStyle}
+        >
           {displayText}
         </div>
       </BlockSurface>
