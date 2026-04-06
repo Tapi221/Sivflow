@@ -377,10 +377,7 @@ const FlashcardInner = ({
   );
 };
 
-const areFlashcardPropsEqual = (
-  prev: FlashcardProps,
-  next: FlashcardProps,
-) => {
+const areFlashcardPropsEqual = (prev: FlashcardProps, next: FlashcardProps) => {
   if (prev.card !== next.card) return false;
   if (prev.previewMode !== next.previewMode) return false;
 
