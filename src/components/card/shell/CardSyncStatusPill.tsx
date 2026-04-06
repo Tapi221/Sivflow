@@ -57,7 +57,7 @@ export const CardSyncStatusPill = ({
     ? "同期失敗"
     : `最終同期: ${formatLastSyncedAt(lastSyncedAtMs)}`;
 
-  const retryDisabled = (!canRetry && !isRetrying) || onRetry == null;
+  const retryDisabled = isRetrying || !canRetry || onRetry == null;
 
   return (
     <div
@@ -73,9 +73,7 @@ export const CardSyncStatusPill = ({
         type="button"
         className={cn(
           "grid h-5 w-5 place-items-center rounded-full transition",
-          retryDisabled && !isRetrying
-            ? "cursor-default opacity-40"
-            : "hover:bg-black/5",
+          retryDisabled ? "cursor-default opacity-40" : "hover:bg-black/5",
         )}
         onClick={() => {
           if (retryDisabled) return;
