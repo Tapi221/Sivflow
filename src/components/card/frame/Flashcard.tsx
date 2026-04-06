@@ -53,6 +53,8 @@ interface FlashcardProps {
   fixedScale?: number;
   contentPaddingPx?: number;
   cardShellClassName?: string;
+  cardBaseWidthPx?: number;
+  contentZoom?: number;
 }
 
 const TAP_MOVE_CANCEL_THRESHOLD_PX = 8;
@@ -96,6 +98,8 @@ const FlashcardInner = ({
   fixedScale,
   contentPaddingPx,
   cardShellClassName,
+  cardBaseWidthPx,
+  contentZoom = 1,
 }: FlashcardProps) => {
   const contentRef = useRef<HTMLDivElement | null>(null);
   const flipSuppressedUntilRef = useRef(0);
@@ -124,6 +128,13 @@ const FlashcardInner = ({
     : "question";
   const shouldShowInkLayer = Boolean(showInkLayer && isFixedDisplay);
   const shouldEnableInkEditing = Boolean(allowInkEditing && isFixedDisplay);
+
+  const safeContentZoom =
+    typeof contentZoom === "number" &&
+    Number.isFinite(contentZoom) &&
+    contentZoom > 0
+      ? contentZoom
+      : 1;
 
   useEffect(() => {
     if (!previewMode) return;
@@ -208,6 +219,17 @@ const FlashcardInner = ({
   }
 
   const fixedHeightPx = layoutRowsToCardHeightPx(derived.layoutRows);
+  const resolvedFixedHeightPx = isFixedDisplay
+    ? Math.max(1, Math.round(fixedHeightPx * safeContentZoom))
+    : null;
+
+  const resolvedCardBaseWidthPx =
+    typeof cardBaseWidthPx === "number" &&
+    Number.isFinite(cardBaseWidthPx) &&
+    cardBaseWidthPx > 0
+      ? cardBaseWidthPx
+      : CANONICAL_CARD_WIDTH;
+
   const isCardClickable = !previewMode;
 
   return (
@@ -219,12 +241,12 @@ const FlashcardInner = ({
     >
       <div className="relative">
         <CardFrame
-          baseWidth={CANONICAL_CARD_WIDTH}
+          baseWidth={isFixedDisplay ? resolvedCardBaseWidthPx : CANONICAL_CARD_WIDTH}
           contentPaddingPx={contentPaddingPx ?? 0}
           allowUpscale={allowUpscale}
           maxScale={maxScale}
           scaleMultiplier={scaleMultiplier}
-          fixedScale={fixedScale}
+          fixedScale={isFixedDisplay ? 1 : fixedScale}
           disableScale={!isFixedDisplay}
           stretchWidth={!isFixedDisplay}
           role={isCardClickable ? "button" : undefined}
@@ -280,7 +302,7 @@ const FlashcardInner = ({
           resizable={false}
           resizeStepPx={undefined}
           showResizeHandle={false}
-          heightPx={isFixedDisplay ? fixedHeightPx : null}
+          heightPx={resolvedFixedHeightPx}
           lockHeight={isFixedDisplay}
           actionsTopLeft={actionsTopLeft}
           actionsTopRight={actionsTopRight}
@@ -321,13 +343,7 @@ const FlashcardInner = ({
               blocks={derived.activeBlocks}
               onGalleryFullscreenChange={media.handleGalleryFullscreenChange}
               displayMode={displayMode}
-              zoom={
-                typeof fixedScale === "number" &&
-                Number.isFinite(fixedScale) &&
-                fixedScale > 0
-                  ? fixedScale
-                  : 1
-              }
+              zoom={safeContentZoom}
             />
           </div>
         </CardFrame>
@@ -378,7 +394,9 @@ const areFlashcardPropsEqual = (prev: FlashcardProps, next: FlashcardProps) => {
       prev.scaleMultiplier === next.scaleMultiplier &&
       prev.fixedScale === next.fixedScale &&
       prev.contentPaddingPx === next.contentPaddingPx &&
-      prev.cardShellClassName === next.cardShellClassName
+      prev.cardShellClassName === next.cardShellClassName &&
+      prev.cardBaseWidthPx === next.cardBaseWidthPx &&
+      prev.contentZoom === next.contentZoom
     );
   }
 
@@ -408,7 +426,9 @@ const areFlashcardPropsEqual = (prev: FlashcardProps, next: FlashcardProps) => {
     prev.scaleMultiplier === next.scaleMultiplier &&
     prev.fixedScale === next.fixedScale &&
     prev.contentPaddingPx === next.contentPaddingPx &&
-    prev.cardShellClassName === next.cardShellClassName
+    prev.cardShellClassName === next.cardShellClassName &&
+    prev.cardBaseWidthPx === next.cardBaseWidthPx &&
+    prev.contentZoom === next.contentZoom
   );
 };
 

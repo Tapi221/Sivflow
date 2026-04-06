@@ -134,15 +134,16 @@ export const ImageFrame = ({
       ? fluidAvailableWidthPx
       : measuredFrameWidthPx;
 
-  const logicalAvailableWidthPx =
+  const renderWidthPx =
     displayMode === "fluid"
-      ? Math.max(1, resolvedAvailableWidthPx / safeZoom)
-      : Math.max(1, resolvedAvailableWidthPx);
-
-  const renderWidthPx = Math.min(
-    Math.max(1, resolvedBaseWidthPx),
-    logicalAvailableWidthPx,
-  );
+      ? Math.min(
+          Math.max(1, resolvedBaseWidthPx * safeZoom),
+          Math.max(1, resolvedAvailableWidthPx),
+        )
+      : Math.min(
+          Math.max(1, resolvedBaseWidthPx),
+          Math.max(1, resolvedAvailableWidthPx),
+        );
 
   const renderHeightPx = Math.max(1, renderWidthPx * ratio);
 

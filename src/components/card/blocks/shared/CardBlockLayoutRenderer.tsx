@@ -80,12 +80,7 @@ type CardBlockLayoutRendererProps =
 
 const NOOP = () => {};
 
-const getFluidZoomStyle = (
-  displayMode: "fixed" | "fluid",
-  zoom: number,
-): React.CSSProperties | undefined => {
-  if (displayMode !== "fluid") return undefined;
-
+const getViewerZoomStyle = (zoom: number): React.CSSProperties | undefined => {
   const safeZoom =
     typeof zoom === "number" && Number.isFinite(zoom) && zoom > 0 ? zoom : 1;
 
@@ -114,9 +109,6 @@ const VIEWER_WRAPPER_PROPS = {
   onDuplicate: NOOP,
 };
 
-/**
- * 編集モードと閲覧モードで共通のブロックレンダリングロジックを提供するコンポーネント。
- */
 export const CardBlockLayoutRenderer = (
   props: CardBlockLayoutRendererProps,
 ) => {
@@ -301,10 +293,7 @@ export const CardBlockLayoutRenderer = (
   }
 
   const { viewerProps } = props;
-  const fluidZoomStyle = getFluidZoomStyle(
-    viewerProps.displayMode,
-    viewerProps.zoom,
-  );
+  const viewerZoomStyle = getViewerZoomStyle(viewerProps.zoom);
 
   switch (block.type) {
     case "question":
@@ -314,12 +303,14 @@ export const CardBlockLayoutRenderer = (
           className="bg-transparent px-0 py-0"
           contentClassName="px-0"
         >
-          <QuestionBlockContent
-            mode="view"
-            questionTitle={block.questionTitle}
-            questionAnswer={block.questionAnswer}
-            answerDisplayMode={viewerProps.questionDisplayMode}
-          />
+          <div style={viewerZoomStyle}>
+            <QuestionBlockContent
+              mode="view"
+              questionTitle={block.questionTitle}
+              questionAnswer={block.questionAnswer}
+              answerDisplayMode={viewerProps.questionDisplayMode}
+            />
+          </div>
         </BlockWrapper>
       );
 
@@ -333,7 +324,7 @@ export const CardBlockLayoutRenderer = (
           )}
           contentClassName="px-0"
         >
-          <div style={fluidZoomStyle}>
+          <div style={viewerZoomStyle}>
             <TextBlockContent
               mode="view"
               content={String(block.content ?? "")}
@@ -354,7 +345,7 @@ export const CardBlockLayoutRenderer = (
         >
           <div
             className="w-full max-w-full overflow-visible"
-            style={fluidZoomStyle}
+            style={viewerZoomStyle}
           >
             {renderGridOffsetSpacer(meta.gridOffsetPx)}
             <CodeRenderer
@@ -411,7 +402,7 @@ export const CardBlockLayoutRenderer = (
         >
           <div
             className="w-full max-w-full overflow-visible space-y-1.5 px-2 py-0.5"
-            style={fluidZoomStyle}
+            style={viewerZoomStyle}
           >
             {renderGridOffsetSpacer(meta.gridOffsetPx)}
             <MathBlockPreviewPane
@@ -435,7 +426,7 @@ export const CardBlockLayoutRenderer = (
         >
           <MarkdownBlockDisplay
             markdown={block.markdown ?? ""}
-            style={fluidZoomStyle}
+            style={viewerZoomStyle}
           />
         </BlockWrapper>
       );

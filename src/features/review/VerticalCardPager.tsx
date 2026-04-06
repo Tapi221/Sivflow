@@ -1,26 +1,19 @@
-/**
- * VerticalCardPager
- *
- * PC 向け縦スクロール式カードページャ。
- * - 固定幅カラムを画面中央に配置、左右は余白
- * - アクティブカード: 控えめな陰影 + 局所アクセント
- * - 非アクティブ: opacity を少し落として主従を分離
- * - transform による 3D / scale は使わない（物理カード挙動）
- * - キーボード: Space/Enter=flip, ↑/↓=prev/next
- */
-
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { CANONICAL_CARD_WIDTH } from "@/components/card/common/constants";
 import { useVerticalCardPager } from "@/hooks/study/useVerticalCardPager";
 import { cn } from "@/lib/utils";
 
-// ── レイアウト定数 ──────────────────────────────────────────────────────────
 const DEFAULT_CARD_WIDTH = CANONICAL_CARD_WIDTH;
-const CARD_GAP = 16; // カード間の縦方向ギャップ (px)
-const SCROLL_PADDING = "50vh"; // 先頭・末尾カードを中央に寄せるための余白
-const VISIBLE_RANGE_OVERSCAN_PX = 2800; // 画面外を先描画して高速スクロール時の遅延を防ぐ
-const ACTIVE_INDEX_RENDER_RADIUS = 6; // 可視範囲更新前でも近傍は実描画して取りこぼしを減らす
-/** プリローダーが shouldRenderCard と同じ判定範囲を知るためにエクスポートする */
+const CARD_GAP = 16;
+const SCROLL_PADDING = "50vh";
+const VISIBLE_RANGE_OVERSCAN_PX = 2800;
+const ACTIVE_INDEX_RENDER_RADIUS = 6;
 export { ACTIVE_INDEX_RENDER_RADIUS };
 const PLACEHOLDER_HEIGHT_PX = 900;
 const CARD_RADIUS_SM = 32;
@@ -38,71 +31,43 @@ const resolveCardBaseRadius = () => {
     : CARD_RADIUS_SM;
 };
 
-// cardWidth → borderRadius 文字列のモジュールレベルキャッシュ。
-// 全カードの毎フレームで window.matchMedia を呼ばないようにする。
-// width は少数パターン（activePaneWidthPx 固定値）しか取らないため
-// キャッシュサイズは実質 1–3 エントリに収まる。
-const borderRadiusCache = new Map<number, string>();
-// ブレークポイントが変わったらキャッシュを破棄する。
-// matchMedia はブラウザ環境にのみ存在するため遅延登録。
+const borderRadiusCache = new Map<string, string>();
 if (typeof window !== "undefined" && typeof window.matchMedia === "function") {
   window.matchMedia("(min-width: 768px)").addEventListener("change", () => {
     borderRadiusCache.clear();
   });
 }
 
-const cardBorderRadius = (cardWidth: number) => {
-  const cached = borderRadiusCache.get(cardWidth);
+const cardBorderRadius = () => {
+  const cacheKey = "base-radius";
+  const cached = borderRadiusCache.get(cacheKey);
   if (cached !== undefined) return cached;
-  // CardFrame は scale で拡縮されるため、外側ラッパーも同じ比率で角丸を追従させる。
-  const baseRadius = resolveCardBaseRadius();
-  const scaled = (baseRadius * cardWidth) / CANONICAL_CARD_WIDTH;
-  const result = `${Math.round(Math.max(0, scaled))}px`;
-  borderRadiusCache.set(cardWidth, result);
+
+  const result = `${Math.round(Math.max(0, resolveCardBaseRadius()))}px`;
+  borderRadiusCache.set(cacheKey, result);
   return result;
 };
 
-// ── Props ───────────────────────────────────────────────────────────────────
 export type VerticalCardPagerProps<T> = {
   cards: T[];
-  /** 外部管理のアクティブインデックス */
   activeIndex: number;
-  /** スクロールでアクティブが変わったとき呼ばれる */
   onActiveIndexChange: (idx: number) => void;
-  /**
-   * 実際にDOMレンダリングされているインデックス範囲が変化したとき呼ばれる。
-   * プリローダーがこの範囲を eager 対象として使うことで、
-   * 「描画済みだが未プリロード」のカードが出なくなる。
-   */
   onRenderRangeChange?: (range: { start: number; end: number } | null) => void;
-  /**
-   * 各カードのレンダラー。
-   * isActive=true のカードのみ完全インタラクティブにすること。
-   */
   renderCard: (card: T, idx: number, isActive: boolean) => React.ReactNode;
-  /** Space / Enter キーで呼ばれる flip コールバック */
   onFlip?: () => void;
-  /** カード列の幅 (px)。デフォルト 560 */
   cardWidth?: number;
-  /** カードごとの幅を動的に決める（指定時は cardWidth より優先） */
   getCardWidth?: (card: T, idx: number, isActive: boolean) => number;
-  /** カード列全体の左右余白(px) */
   paddingInlinePx?: number;
-  /** カード列全体の上下余白 */
   paddingBlock?: string | number;
-  /** カードの key を取り出す関数。省略時は idx を使う */
   getKey?: (card: T, idx: number) => string | number;
-  /** 自然スクロール時の activeIndex 反映遅延(ms)。0 なら即時反映 */
   naturalIndexCommitDelayMs?: number;
-  /** true の間はスクロールで activeIndex を切り替えない */
   freezeActiveIndex?: boolean;
-  /** 行ラッパーの見た目装飾（shadow/opacity）を無効化するか */
   disableItemChrome?: boolean;
-  /** true の場合、全カードを常時実描画して仮想化を無効化 */
   disableVirtualization?: boolean;
+  preserveScrollAnchorKey?: string | number | null;
 };
 
-const VerticalCardPagerFn = ({
+const VerticalCardPagerFn = <T,>({
   cards,
   activeIndex,
   onActiveIndexChange,
@@ -118,16 +83,12 @@ const VerticalCardPagerFn = ({
   disableItemChrome = false,
   disableVirtualization = false,
   onRenderRangeChange,
+  preserveScrollAnchorKey = null,
 }: VerticalCardPagerProps<T>) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const avgItemExtentRef = useRef(900);
   const visibleRangeRafRef = useRef<number | null>(null);
   const visibleRangeRef = useRef<{ start: number; end: number } | null>(null);
-  /**
-   * shouldRenderCard と同じロジック
-   *   = visibleRange ∪ [activeIndex ± ACTIVE_INDEX_RENDER_RADIUS]
-   * の union をキャッシュして onRenderRangeChange に渡す。
-   */
   const effectiveRenderRangeRef = useRef<{
     start: number;
     end: number;
@@ -147,11 +108,16 @@ const VerticalCardPagerFn = ({
     freezeActiveIndex,
   });
 
-  // activeIndex を ref で保持。updateVisibleRange の deps から外すことで、
-  // activeIndex 変化のたびに scheduleVisibleRangeUpdate が再生成されず、
-  // scroll listener effect の不要な再アタッチを防ぐ。
   const activeIndexRef = useRef(activeIndex);
   const onRenderRangeChangeRef = useRef(onRenderRangeChange);
+  const preserveKey =
+    preserveScrollAnchorKey == null ? null : String(preserveScrollAnchorKey);
+
+  const scrollAnchorSnapshotRef = useRef<{
+    activeIndex: number;
+    offsetWithinCardPx: number;
+  } | null>(null);
+  const previousPreserveKeyRef = useRef<string | null>(preserveKey);
 
   useEffect(() => {
     activeIndexRef.current = activeIndex;
@@ -160,6 +126,22 @@ const VerticalCardPagerFn = ({
   useEffect(() => {
     onRenderRangeChangeRef.current = onRenderRangeChange;
   }, [onRenderRangeChange]);
+
+  const captureScrollAnchor = useCallback(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const activeElement = itemRefs.current[activeIndex];
+    if (!activeElement) return;
+
+    scrollAnchorSnapshotRef.current = {
+      activeIndex,
+      offsetWithinCardPx: Math.max(
+        0,
+        container.scrollTop - activeElement.offsetTop,
+      ),
+    };
+  }, [activeIndex, itemRefs]);
 
   const updateVisibleRange = useCallback(() => {
     const container = containerRef.current;
@@ -248,8 +230,6 @@ const VerticalCardPagerFn = ({
       }
     }
 
-    // shouldRenderCard と同じ union:
-    //   visibleRange ∪ [activeIndex ± ACTIVE_INDEX_RENDER_RADIUS]
     const currentActiveIndex = activeIndexRef.current;
     const radiusStart = Math.max(
       0,
@@ -282,9 +262,6 @@ const VerticalCardPagerFn = ({
     effectiveRenderRangeRef.current = nextEffective;
     setVisibleRange(nextRange);
     onRenderRangeChangeRef.current?.(nextEffective);
-    // activeIndex は activeIndexRef 経由で参照するため deps 不要。
-    // 含めると activeIndex 変化のたびに scheduleVisibleRangeUpdate が再生成され、
-    // scroll listener effect が detach/attach を繰り返す。
   }, [cards.length, disableVirtualization, itemRefs]);
 
   const scheduleVisibleRangeUpdate = useCallback(() => {
@@ -321,7 +298,11 @@ const VerticalCardPagerFn = ({
     const container = containerRef.current;
     if (!container) return;
 
-    const handleScroll = () => scheduleVisibleRangeUpdate();
+    const handleScroll = () => {
+      captureScrollAnchor();
+      scheduleVisibleRangeUpdate();
+    };
+
     container.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("resize", scheduleVisibleRangeUpdate, {
       passive: true,
@@ -329,7 +310,10 @@ const VerticalCardPagerFn = ({
 
     const observer =
       typeof ResizeObserver !== "undefined"
-        ? new ResizeObserver(() => scheduleVisibleRangeUpdate())
+        ? new ResizeObserver(() => {
+            captureScrollAnchor();
+            scheduleVisibleRangeUpdate();
+          })
         : null;
     observer?.observe(container);
 
@@ -342,10 +326,58 @@ const VerticalCardPagerFn = ({
         visibleRangeRafRef.current = null;
       }
     };
-  }, [cards.length, disableVirtualization, scheduleVisibleRangeUpdate]);
+  }, [
+    cards.length,
+    captureScrollAnchor,
+    disableVirtualization,
+    scheduleVisibleRangeUpdate,
+  ]);
+
+  useLayoutEffect(() => {
+    captureScrollAnchor();
+  }, [captureScrollAnchor, activeIndex]);
+
+  useLayoutEffect(() => {
+    const previousKey = previousPreserveKeyRef.current;
+    previousPreserveKeyRef.current = preserveKey;
+
+    if (previousKey == null || preserveKey == null) return;
+    if (previousKey === preserveKey) return;
+
+    const container = containerRef.current;
+    if (!container) return;
+
+    const activeElement = itemRefs.current[activeIndex];
+    if (!activeElement) return;
+
+    const previousSnapshot = scrollAnchorSnapshotRef.current;
+    const offsetWithinCardPx =
+      previousSnapshot?.activeIndex === activeIndex
+        ? previousSnapshot.offsetWithinCardPx
+        : Math.max(0, container.scrollTop - activeElement.offsetTop);
+
+    const nextScrollTop = Math.max(
+      0,
+      activeElement.offsetTop + offsetWithinCardPx,
+    );
+
+    if (Math.abs(container.scrollTop - nextScrollTop) > 1) {
+      container.scrollTop = nextScrollTop;
+    }
+
+    window.requestAnimationFrame(() => {
+      captureScrollAnchor();
+      scheduleVisibleRangeUpdate();
+    });
+  }, [
+    activeIndex,
+    captureScrollAnchor,
+    itemRefs,
+    preserveKey,
+    scheduleVisibleRangeUpdate,
+  ]);
 
   return (
-    // スクロールコンテナ: 親から height: 100% を受け取る前提
     <div
       ref={containerRef}
       style={{
@@ -355,14 +387,12 @@ const VerticalCardPagerFn = ({
         position: "relative",
       }}
     >
-      {/* カード列 */}
       <div
         style={{
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           gap: CARD_GAP,
-          // 先頭・末尾カードが中央に来られるよう上下に余白を確保
           paddingBlock,
           paddingInline: paddingInlinePx,
         }}
@@ -382,6 +412,7 @@ const VerticalCardPagerFn = ({
             1,
             getCardWidth ? getCardWidth(card, idx, isActive) : cardWidth,
           );
+
           return (
             <div
               key={key}
@@ -402,7 +433,7 @@ const VerticalCardPagerFn = ({
               style={{
                 width,
                 maxWidth: "100%",
-                borderRadius: cardBorderRadius(width),
+                borderRadius: cardBorderRadius(),
               }}
             >
               {shouldRenderCard ? (
@@ -417,8 +448,6 @@ const VerticalCardPagerFn = ({
                       Math.round(PLACEHOLDER_HEIGHT_PX),
                     )}px`,
                     contentVisibility: "auto",
-                    // inline は wrapper の width が固定なので auto、
-                    // block は実際の placeholder 高さと一致させてレイアウトジャンプを防ぐ。
                     containIntrinsicSize: `auto ${PLACEHOLDER_HEIGHT_PX}px`,
                   }}
                 />

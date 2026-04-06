@@ -1,7 +1,14 @@
 import { Slider } from "@/components/ui/slider";
-import { clampPaneWidthPx } from "@/pages/card-view/constants";
 import { Minus, Plus, RefreshCw } from "@/ui/icons";
 import React from "react";
+
+const clampValue = (value: number, min: number, max: number) => {
+  const safeMin = Math.min(min, max);
+  const safeMax = Math.max(min, max);
+
+  if (!Number.isFinite(value)) return safeMin;
+  return Math.min(safeMax, Math.max(safeMin, value));
+};
 
 export interface CardPaneWidthControlProps {
   modeLabel: string;
@@ -9,6 +16,8 @@ export interface CardPaneWidthControlProps {
   min: number;
   max: number;
   defaultValue: number;
+  step?: number;
+  valueFormatter?: (value: number) => string;
   onPreviewChange: (value: number) => void;
   onCommit: (value: number) => void;
   onStepDown: () => void;
@@ -22,6 +31,8 @@ export const CardPaneWidthControl = ({
   min,
   max,
   defaultValue,
+  step = 8,
+  valueFormatter,
   onPreviewChange,
   onCommit,
   onStepDown,
@@ -34,6 +45,8 @@ export const CardPaneWidthControl = ({
   React.useEffect(() => {
     setDraftValue(value);
   }, [value]);
+
+  const formattedValue = valueFormatter ? valueFormatter(draftValue) : null;
 
   return (
     <div className="pointer-events-auto flex items-center gap-1.5 rounded-[20px] border border-slate-200/80 bg-white/82 px-2.5 py-1 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-md">
@@ -51,21 +64,29 @@ export const CardPaneWidthControl = ({
         <Slider
           min={min}
           max={max}
-          step={8}
+          step={step}
           value={[draftValue]}
           onValueChange={(next) => {
             const [raw] = next;
-            setDraftValue(clampPaneWidthPx(raw, min, max));
+            const nextValue = clampValue(raw, min, max);
+            setDraftValue(nextValue);
+            onPreviewChange(nextValue);
           }}
           onValueCommit={(next) => {
             const [raw] = next;
-            const nextValue = clampPaneWidthPx(raw, min, max);
+            const nextValue = clampValue(raw, min, max);
             setDraftValue(nextValue);
             onCommit(nextValue);
           }}
           aria-label={`${modeLabel}スライダー`}
         />
       </div>
+
+      {formattedValue ? (
+        <div className="min-w-[3.1rem] text-center text-[11px] font-semibold tabular-nums text-slate-500">
+          {formattedValue}
+        </div>
+      ) : null}
 
       <button
         type="button"

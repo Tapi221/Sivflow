@@ -10,6 +10,8 @@ export type CardWorkspaceWidthControlProps = {
   min: number;
   max: number;
   defaultValue: number;
+  step?: number;
+  valueFormatter?: (value: number) => string;
   onPreviewChange: (value: number) => void;
   onCommit: (value: number) => void;
   onStepDown: () => void;
@@ -95,6 +97,8 @@ export const CardWorkspaceShell = ({
               min={widthControl.min}
               max={widthControl.max}
               defaultValue={widthControl.defaultValue}
+              step={widthControl.step}
+              valueFormatter={widthControl.valueFormatter}
               onPreviewChange={widthControl.onPreviewChange}
               onCommit={widthControl.onCommit}
               onStepDown={widthControl.onStepDown}

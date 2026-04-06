@@ -18,10 +18,6 @@ import type { Card, UserSettings } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-/**
- * 急スクロール時（idle preload 範囲外へのジャンプ）で画像の decode が
- * 間に合わない場合に表示するカード形状プレースホルダー。
- */
 const CARD_LOADING_PREVIEW_RULED_STYLE: React.CSSProperties = {
   backgroundImage:
     "repeating-linear-gradient(to bottom, rgba(0,0,0,0.05) 0, rgba(0,0,0,0.05) 1px, transparent 1px, transparent 24px)",
@@ -80,8 +76,10 @@ interface CardViewDesktopProps {
   safeCurrentIndex: number;
   settings?: Partial<UserSettings> | null;
   editPaneWidthPx: number;
-  activePaneWidthPx: number;
   activePaneMaxWidthPx: number;
+  fixedCardWidthPx: number;
+  contentZoomFactor: number;
+  layoutAnchorKey: string;
   currentDisplayMode: CardDisplayMode;
   folderId: string | null;
   cardSetId: string | null;
@@ -102,8 +100,10 @@ export const CardViewDesktop = ({
   safeCurrentIndex,
   settings = null,
   editPaneWidthPx,
-  activePaneWidthPx,
   activePaneMaxWidthPx,
+  fixedCardWidthPx,
+  contentZoomFactor,
+  layoutAnchorKey,
   currentDisplayMode,
   folderId,
   cardSetId,
@@ -119,7 +119,7 @@ export const CardViewDesktop = ({
   const effectiveCardWidthPx =
     currentDisplayMode === "fluid"
       ? Math.max(1, activePaneMaxWidthPx)
-      : Math.max(1, activePaneWidthPx);
+      : Math.max(1, fixedCardWidthPx);
 
   const [renderRange, setRenderRange] = useState<{
     start: number;
@@ -174,7 +174,8 @@ export const CardViewDesktop = ({
           isActive={isActive}
           isGlobalEditing={isGlobalEditing}
           editPaneWidthPx={effectiveEditPaneWidthPx}
-          activePaneWidthPx={effectiveCardWidthPx}
+          fixedCardWidthPx={fixedCardWidthPx}
+          contentZoomFactor={contentZoomFactor}
           settings={settings}
           isFlipped={flippedCardIds.has(card.id ?? "")}
           currentDisplayMode={currentDisplayMode}
@@ -202,7 +203,8 @@ export const CardViewDesktop = ({
       onSyncStatusChange,
       settings,
       effectiveEditPaneWidthPx,
-      effectiveCardWidthPx,
+      fixedCardWidthPx,
+      contentZoomFactor,
       currentDisplayMode,
     ],
   );
@@ -236,6 +238,7 @@ export const CardViewDesktop = ({
       getKey={(card) => card.id ?? card.docId ?? card.uid}
       disableVirtualization={false}
       onRenderRangeChange={setRenderRange}
+      preserveScrollAnchorKey={layoutAnchorKey}
       renderCard={renderCard}
     />
   );

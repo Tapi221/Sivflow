@@ -11,7 +11,8 @@ export interface DesktopCardSurfaceProps {
   isActive: boolean;
   isGlobalEditing: boolean;
   editPaneWidthPx: number;
-  activePaneWidthPx?: number;
+  fixedCardWidthPx?: number;
+  contentZoomFactor: number;
   settings?: Partial<UserSettings> | null;
   isFlipped: boolean;
   currentDisplayMode: CardDisplayMode;
@@ -30,7 +31,8 @@ const DesktopCardSurfaceInner = ({
   isActive,
   isGlobalEditing,
   editPaneWidthPx,
-  activePaneWidthPx,
+  fixedCardWidthPx,
+  contentZoomFactor,
   settings = null,
   isFlipped,
   currentDisplayMode,
@@ -64,14 +66,20 @@ const DesktopCardSurfaceInner = ({
     setHasFocusWithin(false);
   }, [isGlobalEditing]);
 
-  const fixedScale =
+  const safeContentZoomFactor =
+    typeof contentZoomFactor === "number" &&
+    Number.isFinite(contentZoomFactor) &&
+    contentZoomFactor > 0
+      ? contentZoomFactor
+      : 1;
+
+  const fixedCardBaseWidthPx =
     currentDisplayMode === "fixed"
       ? Math.max(
-          0.1,
-          (activePaneWidthPx ?? editPaneWidthPx) /
-            Math.max(1, CANONICAL_CARD_WIDTH),
+          1,
+          fixedCardWidthPx ?? Math.round(CANONICAL_CARD_WIDTH * safeContentZoomFactor),
         )
-      : undefined;
+      : CANONICAL_CARD_WIDTH;
 
   const canInteractWithEditor = isGlobalEditing && (isActive || hasFocusWithin);
 
@@ -140,7 +148,8 @@ const DesktopCardSurfaceInner = ({
         onToggleBookmark={isActive ? onToggleBookmark : undefined}
         allowUpscale={false}
         scaleMultiplier={1}
-        fixedScale={fixedScale}
+        cardBaseWidthPx={fixedCardBaseWidthPx}
+        contentZoom={safeContentZoomFactor}
       />
     </div>
   );
@@ -154,7 +163,8 @@ const areDesktopCardSurfacePropsEqual = (
   if (prev.isActive !== next.isActive) return false;
   if (prev.isGlobalEditing !== next.isGlobalEditing) return false;
   if (prev.editPaneWidthPx !== next.editPaneWidthPx) return false;
-  if (prev.activePaneWidthPx !== next.activePaneWidthPx) return false;
+  if (prev.fixedCardWidthPx !== next.fixedCardWidthPx) return false;
+  if (prev.contentZoomFactor !== next.contentZoomFactor) return false;
   if (prev.settings !== next.settings) return false;
   if (prev.currentDisplayMode !== next.currentDisplayMode) return false;
   if (prev.folderId !== next.folderId) return false;
