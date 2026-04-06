@@ -17,6 +17,32 @@ type UpdateDocumentOptions = {
   touchUpdatedAt?: boolean;
 };
 
+type TimestampLike = {
+  toDate: () => Date;
+};
+
+const isTimestampLike = (value: unknown): value is TimestampLike =>
+  typeof value === "object" &&
+  value !== null &&
+  "toDate" in value &&
+  typeof (value as { toDate?: unknown }).toDate === "function";
+
+const normalizeUpdatedAt = (
+  value: DocumentItem["updatedAt"] | undefined,
+): Date | undefined => {
+  if (!value) return undefined;
+  if (value instanceof Date) return value;
+  if (isTimestampLike(value)) {
+    const nextDate = value.toDate();
+    return nextDate instanceof Date ? nextDate : undefined;
+  }
+  if (typeof value === "string" || typeof value === "number") {
+    const nextDate = new Date(value);
+    return Number.isNaN(nextDate.getTime()) ? undefined : nextDate;
+  }
+  return undefined;
+};
+
 /**
  * PDFドキュメントを取得・管理するためのフック
  */
@@ -72,16 +98,24 @@ export const useDocuments = (folderId?: string) => {
           options.touchUpdatedAt ??
           Object.keys(updates).some((key) => key !== "viewerState");
 
-        const payload: Partial<DocumentItem> & {
+        const { updatedAt: requestedUpdatedAt, ...restUpdates } = updates;
+
+        const payload: Partial<Omit<DocumentItem, "updatedAt">> & {
           deviceId: string;
           updatedAt?: Date;
         } = {
-          ...updates,
+          ...restUpdates,
           deviceId: currentUser.uid,
         };
 
         if (shouldTouchUpdatedAt) {
           payload.updatedAt = new Date();
+        } else {
+          const normalizedRequestedUpdatedAt =
+            normalizeUpdatedAt(requestedUpdatedAt);
+          if (normalizedRequestedUpdatedAt) {
+            payload.updatedAt = normalizedRequestedUpdatedAt;
+          }
         }
 
         await db.documents.update(documentId, payload);

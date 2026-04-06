@@ -37,6 +37,63 @@ export interface PdfViewerHandle {
 
 type PageSize = { width: number; height: number };
 
+type SourceLoadErrorKind = "remote-url" | "blob-url" | "data" | "unknown";
+
+interface PdfJsViewport {
+  width: number;
+  height: number;
+}
+
+interface PdfJsRenderTask {
+  promise: Promise<void>;
+  cancel?: () => void;
+}
+
+interface PdfJsPage {
+  getViewport: (params: { scale: number }) => PdfJsViewport;
+  render: (params: {
+    canvasContext: CanvasRenderingContext2D;
+    viewport: PdfJsViewport;
+    intent: "display";
+  }) => PdfJsRenderTask;
+}
+
+interface PdfJsDocument {
+  numPages: number;
+  getPage: (pageNumber: number) => Promise<PdfJsPage>;
+  destroy?: () => void | Promise<void>;
+}
+
+interface PdfJsLoadingTask {
+  promise: Promise<PdfJsDocument>;
+  destroy?: () => void;
+}
+
+interface PdfJsGetDocumentParams {
+  data?: Uint8Array;
+  url?: string;
+  enableXfa?: boolean;
+  useSystemFonts?: boolean;
+  cMapUrl?: string;
+  standardFontDataUrl?: string;
+}
+
+const getPdfDocument = (params: PdfJsGetDocumentParams): PdfJsLoadingTask =>
+  pdfjsLib.getDocument(params) as PdfJsLoadingTask;
+
+const getErrorMessage = (error: unknown): string => {
+  if (error instanceof Error && error.message) return error.message;
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof (error as { message?: unknown }).message === "string"
+  ) {
+    return (error as { message: string }).message;
+  }
+  return String(error ?? "");
+};
+
 interface PdfViewerProps {
   source: {
     url?: string | null;
@@ -51,7 +108,7 @@ interface PdfViewerProps {
   onFirstPageSize?: (size: PageSize | null) => void;
   onPageChange?: (page: number) => void;
   onSourceLoadError?: (details: {
-    kind: "remote-url" | "blob-url" | "data" | "unknown";
+    kind: SourceLoadErrorKind;
     url: string | null;
     message: string;
   }) => void;
@@ -73,7 +130,7 @@ interface PdfViewerProps {
 }
 
 interface PdfPageProps {
-  pdf: unknown;
+  pdf: PdfJsDocument;
   pageNumber: number;
   scale: number;
   opaqueCanvas: boolean;
@@ -122,7 +179,7 @@ const PdfPage = ({
     let cancelled = false;
     pdf
       .getPage(pageNumber)
-      .then((page: unknown) => {
+      .then((page: PdfJsPage) => {
         if (cancelled) return;
         const viewport = page.getViewport({ scale: 1 });
         const nextSize = { width: viewport.width, height: viewport.height };
@@ -168,7 +225,7 @@ const PdfPage = ({
   useEffect(() => {
     if (!pdf || !shouldRender || scale <= 0) return;
     let cancelled = false;
-    let renderTask: unknown | null = null;
+    let renderTask: PdfJsRenderTask | null = null;
 
     (async () => {
       try {
@@ -204,7 +261,7 @@ const PdfPage = ({
         }
       } catch (err: unknown) {
         if (cancelled) return;
-        const msg = String(err?.message ?? "");
+        const msg = getErrorMessage(err);
         if (msg.includes("cancelled") || msg.includes("Rendering cancelled")) {
           return;
         }
@@ -279,12 +336,12 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
     const scrollRafRef = useRef<number | null>(null);
     const pageChangeRafRef = useRef<number | null>(null);
     const pendingPageForCallbackRef = useRef<number | null>(null);
-    const docRef = useRef<unknown | null>(null);
+    const docRef = useRef<PdfJsDocument | null>(null);
     const visibilityRatiosRef = useRef<Record<number, number>>({});
     const currentPageRef = useRef(1);
     const onPageChangeRef = useRef(onPageChange);
 
-    const [doc, setDoc] = useState<unknown | null>(null);
+    const [doc, setDoc] = useState<PdfJsDocument | null>(null);
     const [numPages, setNumPages] = useState(0);
     const [pageSizes, setPageSizes] = useState<Record<number, PageSize>>({});
     const [loading, setLoading] = useState(false);
@@ -399,10 +456,7 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       const handleGestureChange = (event: Event) => {
         stopNativeEvent(event);
         const gestureScale = (event as Event & { scale?: number }).scale;
-        if (
-          typeof gestureScale !== "number" ||
-          !Number.isFinite(gestureScale)
-        ) {
+        if (typeof gestureScale !== "number" || !Number.isFinite(gestureScale)) {
           return;
         }
         const baseScale = gestureStartScaleRef.current ?? scaleRef.current;
@@ -539,7 +593,7 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
 
     useEffect(() => {
       let cancelled = false;
-      let loadingTask: unknown | null = null;
+      let loadingTask: PdfJsLoadingTask | null = null;
 
       if (docRef.current?.destroy) {
         try {
@@ -586,8 +640,8 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
         },
       });
 
-      const buildGetDocumentParams = async () => {
-        const params: unknown = {
+      const buildGetDocumentParams = async (): Promise<PdfJsGetDocumentParams | null> => {
+        const params: PdfJsGetDocumentParams = {
           enableXfa,
           useSystemFonts,
           cMapUrl,
@@ -619,7 +673,7 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
           const params = await buildGetDocumentParams();
           if (!params) throw new Error("missing pdf source");
 
-          loadingTask = pdfjsLib.getDocument(params);
+          loadingTask = getPdfDocument(params);
           const pdf = await loadingTask.promise;
 
           if (cancelled) {
@@ -645,7 +699,7 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
         } catch (err: unknown) {
           if (cancelled) return;
 
-          const msg = String(err?.message ?? err ?? "");
+          const msg = getErrorMessage(err);
           console.error("[PdfViewer] load error", {
             error: err,
             hasUrl,
