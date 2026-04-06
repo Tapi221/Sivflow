@@ -215,8 +215,7 @@ class OperationQueueService {
 
     const baseDelay = this.BASE_DELAY_MS * Math.pow(2, newRetryCount - 1);
     const cappedDelay = Math.min(baseDelay, this.MAX_DELAY_MS);
-    const jitter =
-      cappedDelay * (this.JITTER_FACTOR * (Math.random() * 2 - 1));
+    const jitter = cappedDelay * (this.JITTER_FACTOR * (Math.random() * 2 - 1));
     const nextDelay = Math.max(0, cappedDelay + jitter);
 
     await db.syncQueue.update(item.id, {
@@ -298,7 +297,10 @@ class OperationQueueService {
       const fetchLimit = Math.min(capacity, this.BATCH_LIMIT);
       const now = Date.now();
 
-      const fetchByPriority = async (priority: QueuePriority, limit: number) => {
+      const fetchByPriority = async (
+        priority: QueuePriority,
+        limit: number,
+      ) => {
         if (limit <= 0) {
           return [] as SyncQueueItem[];
         }
@@ -368,7 +370,10 @@ class OperationQueueService {
       }
     } catch (error) {
       if (isDatabaseClosedError(error)) {
-        console.warn("[Queue] DatabaseClosedError detected. Queue will retry.", error);
+        console.warn(
+          "[Queue] DatabaseClosedError detected. Queue will retry.",
+          error,
+        );
         this.triggerProcess(300);
         return;
       }

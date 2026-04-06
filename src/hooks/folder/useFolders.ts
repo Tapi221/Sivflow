@@ -35,18 +35,23 @@ export const useFolders = () => {
 
       const filtered = rawFolders.filter(
         (folder) =>
-          !((folder as unknown as { isDeleted?: boolean; is_deleted?: boolean })
-            .isDeleted ??
+          !(
             (folder as unknown as { isDeleted?: boolean; is_deleted?: boolean })
-              .is_deleted),
+              .isDeleted ??
+            (folder as unknown as { isDeleted?: boolean; is_deleted?: boolean })
+              .is_deleted
+          ),
       );
 
       return filtered.map(normalizeFolder);
     } catch (error) {
       if (isDatabaseClosedError(error)) {
-        console.warn("[useFolders] Closed DB detected. Returning empty result.", {
-          userId,
-        });
+        console.warn(
+          "[useFolders] Closed DB detected. Returning empty result.",
+          {
+            userId,
+          },
+        );
         return [];
       }
 
