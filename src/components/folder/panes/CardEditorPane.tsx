@@ -64,10 +64,6 @@ interface CardEditorPaneProps {
   pairGapClassName?: string;
   presentationContext?: CardPresentationContextInput;
   onRequestCloseEditing?: () => void;
-  /** @deprecated presentationContext.isCurrentCard を使うこと */
-  isPagerActiveCard?: boolean;
-  /** @deprecated presentationContext.hasFocusWithin を使うこと */
-  isPagerInteractionCard?: boolean;
   showResizeHandle?: boolean;
 }
 
@@ -299,8 +295,6 @@ export const CardEditorPane = ({
   pairGapClassName = "gap-6",
   presentationContext,
   onRequestCloseEditing,
-  isPagerActiveCard,
-  isPagerInteractionCard,
   showResizeHandle: showResizeHandleProp = true,
 }: CardEditorPaneProps) => {
   const controller = useCardEditorPaneController({
@@ -340,8 +334,7 @@ export const CardEditorPane = ({
   } = session;
 
   const cardPresentationContext = useMemo<CardPresentationContext>(() => {
-    const isCurrentCard =
-      presentationContext?.isCurrentCard ?? isPagerActiveCard ?? !embeddedInPager;
+    const isCurrentCard = presentationContext?.isCurrentCard ?? !embeddedInPager;
 
     return {
       inPager: embeddedInPager,
@@ -349,15 +342,11 @@ export const CardEditorPane = ({
       isEditing,
       isStandaloneEditor: presentationContext?.isStandaloneEditor ?? false,
       hasFocusWithin:
-        presentationContext?.hasFocusWithin ??
-        isPagerInteractionCard ??
-        isCurrentCard,
+        presentationContext?.hasFocusWithin ?? isCurrentCard,
     };
   }, [
     embeddedInPager,
     isEditing,
-    isPagerActiveCard,
-    isPagerInteractionCard,
     presentationContext?.hasFocusWithin,
     presentationContext?.isCurrentCard,
     presentationContext?.isStandaloneEditor,
@@ -467,7 +456,6 @@ export const CardEditorPane = ({
     hideBlockToolbars,
     forcedPaneWidthPx,
     usesExternalToolbarMount,
-    isActiveCard: cardPresentationState.isActiveCard,
     isEditing,
     isMetaOpen,
     normalizedSelectedCardId,

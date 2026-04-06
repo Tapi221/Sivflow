@@ -26,7 +26,6 @@ interface UseCardEditorPaneWidthParams {
   hideBlockToolbars: boolean;
   forcedPaneWidthPx: number | null;
   usesExternalToolbarMount: boolean;
-  isActiveCard: boolean;
   isEditing: boolean;
   isMetaOpen: boolean;
   normalizedSelectedCardId: string | null;
@@ -50,7 +49,6 @@ export const useCardEditorPaneWidth = ({
   hideBlockToolbars,
   forcedPaneWidthPx,
   usesExternalToolbarMount,
-  isActiveCard,
   isEditing,
   isMetaOpen,
   normalizedSelectedCardId,
@@ -198,8 +196,6 @@ export const useCardEditorPaneWidth = ({
         maxWidth: "100%",
       }
     : undefined;
-
-  void isActiveCard;
 
   return {
     contentViewportRef,
