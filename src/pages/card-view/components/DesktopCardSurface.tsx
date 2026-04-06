@@ -1,4 +1,3 @@
-import { CANONICAL_CARD_WIDTH } from "@/components/card/common/constants";
 import type { CardSyncStatus } from "@/components/card/shell/cardSyncStatus";
 import { Flashcard } from "@/components/card/frame/Flashcard";
 import { CardEditorPane } from "@/components/folder/panes/CardEditorPane";
@@ -11,11 +10,12 @@ export interface DesktopCardSurfaceProps {
   isActive: boolean;
   isGlobalEditing: boolean;
   editPaneWidthPx: number;
-  fixedCardWidthPx?: number;
-  contentZoomFactor: number;
+  fixedCardWidthPx: number;
+  fluidAvailableWidthPx: number;
   settings?: Partial<UserSettings> | null;
   isFlipped: boolean;
   currentDisplayMode: CardDisplayMode;
+  viewZoomScale: number;
   folderId: string | null;
   cardSetId: string | null;
   cardsOverride?: Card[];
@@ -32,10 +32,11 @@ const DesktopCardSurfaceInner = ({
   isGlobalEditing,
   editPaneWidthPx,
   fixedCardWidthPx,
-  contentZoomFactor,
+  fluidAvailableWidthPx,
   settings = null,
   isFlipped,
   currentDisplayMode,
+  viewZoomScale,
   folderId,
   cardSetId,
   cardsOverride,
@@ -65,21 +66,6 @@ const DesktopCardSurfaceInner = ({
     if (isGlobalEditing) return;
     setHasFocusWithin(false);
   }, [isGlobalEditing]);
-
-  const safeContentZoomFactor =
-    typeof contentZoomFactor === "number" &&
-    Number.isFinite(contentZoomFactor) &&
-    contentZoomFactor > 0
-      ? contentZoomFactor
-      : 1;
-
-  const fixedCardBaseWidthPx =
-    currentDisplayMode === "fixed"
-      ? Math.max(
-          1,
-          fixedCardWidthPx ?? Math.round(CANONICAL_CARD_WIDTH * safeContentZoomFactor),
-        )
-      : CANONICAL_CARD_WIDTH;
 
   const canInteractWithEditor = isGlobalEditing && (isActive || hasFocusWithin);
 
@@ -148,8 +134,14 @@ const DesktopCardSurfaceInner = ({
         onToggleBookmark={isActive ? onToggleBookmark : undefined}
         allowUpscale={false}
         scaleMultiplier={1}
-        cardBaseWidthPx={fixedCardBaseWidthPx}
-        contentZoom={safeContentZoomFactor}
+        fixedScale={currentDisplayMode === "fixed" ? viewZoomScale : undefined}
+        contentZoom={currentDisplayMode === "fluid" ? viewZoomScale : 1}
+        fluidAvailableWidthPx={fluidAvailableWidthPx}
+        cardShellClassName={
+          currentDisplayMode === "fluid"
+            ? "border-none bg-transparent shadow-none"
+            : undefined
+        }
       />
     </div>
   );
@@ -164,9 +156,10 @@ const areDesktopCardSurfacePropsEqual = (
   if (prev.isGlobalEditing !== next.isGlobalEditing) return false;
   if (prev.editPaneWidthPx !== next.editPaneWidthPx) return false;
   if (prev.fixedCardWidthPx !== next.fixedCardWidthPx) return false;
-  if (prev.contentZoomFactor !== next.contentZoomFactor) return false;
+  if (prev.fluidAvailableWidthPx !== next.fluidAvailableWidthPx) return false;
   if (prev.settings !== next.settings) return false;
   if (prev.currentDisplayMode !== next.currentDisplayMode) return false;
+  if (prev.viewZoomScale !== next.viewZoomScale) return false;
   if (prev.folderId !== next.folderId) return false;
   if (prev.cardSetId !== next.cardSetId) return false;
   if (prev.onFlip !== next.onFlip) return false;

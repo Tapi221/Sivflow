@@ -80,15 +80,6 @@ type CardBlockLayoutRendererProps =
 
 const NOOP = () => {};
 
-const getViewerZoomStyle = (zoom: number): React.CSSProperties | undefined => {
-  const safeZoom =
-    typeof zoom === "number" && Number.isFinite(zoom) && zoom > 0 ? zoom : 1;
-
-  if (Math.abs(safeZoom - 1) < 0.001) return undefined;
-
-  return { fontSize: `${safeZoom}em` };
-};
-
 const renderGridOffsetSpacer = (gridOffsetPx: number) =>
   gridOffsetPx > 0 ? (
     <div
@@ -293,7 +284,6 @@ export const CardBlockLayoutRenderer = (
   }
 
   const { viewerProps } = props;
-  const viewerZoomStyle = getViewerZoomStyle(viewerProps.zoom);
 
   switch (block.type) {
     case "question":
@@ -303,14 +293,12 @@ export const CardBlockLayoutRenderer = (
           className="bg-transparent px-0 py-0"
           contentClassName="px-0"
         >
-          <div style={viewerZoomStyle}>
-            <QuestionBlockContent
-              mode="view"
-              questionTitle={block.questionTitle}
-              questionAnswer={block.questionAnswer}
-              answerDisplayMode={viewerProps.questionDisplayMode}
-            />
-          </div>
+          <QuestionBlockContent
+            mode="view"
+            questionTitle={block.questionTitle}
+            questionAnswer={block.questionAnswer}
+            answerDisplayMode={viewerProps.questionDisplayMode}
+          />
         </BlockWrapper>
       );
 
@@ -324,12 +312,10 @@ export const CardBlockLayoutRenderer = (
           )}
           contentClassName="px-0"
         >
-          <div style={viewerZoomStyle}>
-            <TextBlockContent
-              mode="view"
-              content={String(block.content ?? "")}
-            />
-          </div>
+          <TextBlockContent
+            mode="view"
+            content={String(block.content ?? "")}
+          />
         </BlockWrapper>
       );
 
@@ -343,10 +329,7 @@ export const CardBlockLayoutRenderer = (
           )}
           contentClassName="relative px-0"
         >
-          <div
-            className="w-full max-w-full overflow-visible"
-            style={viewerZoomStyle}
-          >
+          <div className="w-full max-w-full overflow-visible">
             {renderGridOffsetSpacer(meta.gridOffsetPx)}
             <CodeRenderer
               code={block.code?.code ?? ""}
@@ -400,10 +383,7 @@ export const CardBlockLayoutRenderer = (
             (block.math?.latex ?? "").trim().length > 0 && "border-transparent",
           )}
         >
-          <div
-            className="w-full max-w-full overflow-visible space-y-1.5 px-2 py-0.5"
-            style={viewerZoomStyle}
-          >
+          <div className="w-full max-w-full overflow-visible space-y-1.5 px-2 py-0.5">
             {renderGridOffsetSpacer(meta.gridOffsetPx)}
             <MathBlockPreviewPane
               latex={block.math?.latex || ""}
@@ -424,10 +404,7 @@ export const CardBlockLayoutRenderer = (
           )}
           contentClassName="px-0"
         >
-          <MarkdownBlockDisplay
-            markdown={block.markdown ?? ""}
-            style={viewerZoomStyle}
-          />
+          <MarkdownBlockDisplay markdown={block.markdown ?? ""} />
         </BlockWrapper>
       );
 

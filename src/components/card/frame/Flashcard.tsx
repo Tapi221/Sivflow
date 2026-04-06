@@ -7,7 +7,7 @@ import {
 import type { InkDocument } from "@/components/ink/inkTypes";
 import { cn } from "@/lib/utils";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { CardFrame } from "./CardFrame";
 import { CARD_SHELL_COMMON_CLASS_NAME } from "./cardShellClassNames";
 import { useFlashcardCornerControls } from "./FlashcardCornerControls";
@@ -53,8 +53,8 @@ interface FlashcardProps {
   fixedScale?: number;
   contentPaddingPx?: number;
   cardShellClassName?: string;
-  cardBaseWidthPx?: number;
   contentZoom?: number;
+  fluidAvailableWidthPx?: number | null;
 }
 
 const TAP_MOVE_CANCEL_THRESHOLD_PX = 8;
@@ -66,6 +66,86 @@ const shouldIgnoreFlipTarget = (target: EventTarget | null) => {
     element.closest(
       'button, a, input, textarea, select, label, [data-card-no-flip="true"]',
     ),
+  );
+};
+
+const ScaledFluidContent = ({
+  zoom,
+  children,
+}: {
+  zoom: number;
+  children: React.ReactNode;
+}) => {
+  const measureRef = useRef<HTMLDivElement | null>(null);
+  const [measuredHeightPx, setMeasuredHeightPx] = useState(0);
+
+  const safeZoom =
+    typeof zoom === "number" && Number.isFinite(zoom) && zoom > 0 ? zoom : 1;
+
+  useLayoutEffect(() => {
+    const node = measureRef.current;
+    if (!node) return;
+
+    const update = () => {
+      const nextHeight = Math.max(
+        node.offsetHeight,
+        node.scrollHeight,
+        node.getBoundingClientRect().height,
+      );
+      const rounded = Math.ceil(nextHeight);
+      setMeasuredHeightPx((prev) => (prev === rounded ? prev : rounded));
+    };
+
+    update();
+
+    if (typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", update, { passive: true });
+      return () => {
+        window.removeEventListener("resize", update);
+      };
+    }
+
+    const observer = new ResizeObserver(update);
+    observer.observe(node);
+    window.addEventListener("resize", update, { passive: true });
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", update);
+    };
+  }, [children, safeZoom]);
+
+  if (Math.abs(safeZoom - 1) < 0.001) {
+    return (
+      <div ref={measureRef} className="w-full">
+        {children}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="w-full overflow-visible"
+      style={{
+        height:
+          measuredHeightPx > 0
+            ? `${Math.ceil(measuredHeightPx * safeZoom)}px`
+            : undefined,
+      }}
+    >
+      <div
+        style={{
+          width: `${(100 / safeZoom).toFixed(5)}%`,
+          transform: `scale(${safeZoom})`,
+          transformOrigin: "top left",
+          willChange: "transform",
+        }}
+      >
+        <div ref={measureRef} className="w-full">
+          {children}
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -98,7 +178,6 @@ const FlashcardInner = ({
   fixedScale,
   contentPaddingPx,
   cardShellClassName,
-  cardBaseWidthPx,
   contentZoom = 1,
 }: FlashcardProps) => {
   const contentRef = useRef<HTMLDivElement | null>(null);
@@ -128,13 +207,6 @@ const FlashcardInner = ({
     : "question";
   const shouldShowInkLayer = Boolean(showInkLayer && isFixedDisplay);
   const shouldEnableInkEditing = Boolean(allowInkEditing && isFixedDisplay);
-
-  const safeContentZoom =
-    typeof contentZoom === "number" &&
-    Number.isFinite(contentZoom) &&
-    contentZoom > 0
-      ? contentZoom
-      : 1;
 
   useEffect(() => {
     if (!previewMode) return;
@@ -179,7 +251,7 @@ const FlashcardInner = ({
         onFlip();
       }
     },
-    [media.isModalBlockingFlip, isInkEditingActive, previewMode, onFlip],
+    [media.isModalBlockingFlip, isInkEditingActive, onFlip, previewMode],
   );
 
   const { actionsTopLeft, actionsTopRight } = useFlashcardCornerControls({
@@ -219,18 +291,29 @@ const FlashcardInner = ({
   }
 
   const fixedHeightPx = layoutRowsToCardHeightPx(derived.layoutRows);
-  const resolvedFixedHeightPx = isFixedDisplay
-    ? Math.max(1, Math.round(fixedHeightPx * safeContentZoom))
-    : null;
-
-  const resolvedCardBaseWidthPx =
-    typeof cardBaseWidthPx === "number" &&
-    Number.isFinite(cardBaseWidthPx) &&
-    cardBaseWidthPx > 0
-      ? cardBaseWidthPx
-      : CANONICAL_CARD_WIDTH;
-
   const isCardClickable = !previewMode;
+  const safeContentZoom =
+    typeof contentZoom === "number" && Number.isFinite(contentZoom) && contentZoom > 0
+      ? contentZoom
+      : 1;
+
+  const contentNode = (
+    <div
+      ref={contentRef}
+      className={cn(
+        "w-full max-w-full",
+        isFixedDisplay ? "flex min-h-0 flex-1" : "min-h-0",
+      )}
+    >
+      <SharedCardContent
+        mode="view"
+        blocks={derived.activeBlocks}
+        onGalleryFullscreenChange={media.handleGalleryFullscreenChange}
+        displayMode={displayMode}
+        zoom={1}
+      />
+    </div>
+  );
 
   return (
     <div
@@ -241,20 +324,22 @@ const FlashcardInner = ({
     >
       <div className="relative">
         <CardFrame
-          baseWidth={isFixedDisplay ? resolvedCardBaseWidthPx : CANONICAL_CARD_WIDTH}
+          baseWidth={CANONICAL_CARD_WIDTH}
           contentPaddingPx={contentPaddingPx ?? 0}
           allowUpscale={allowUpscale}
           maxScale={maxScale}
           scaleMultiplier={scaleMultiplier}
-          fixedScale={isFixedDisplay ? 1 : fixedScale}
+          fixedScale={fixedScale}
           disableScale={!isFixedDisplay}
           stretchWidth={!isFixedDisplay}
+          ruled={isFixedDisplay}
           role={isCardClickable ? "button" : undefined}
           tabIndex={isCardClickable ? 0 : undefined}
           className={cn(
             CARD_SHELL_COMMON_CLASS_NAME,
             cardShellClassName,
             isCardClickable && "cursor-pointer",
+            !isFixedDisplay && "rounded-none border-none bg-transparent shadow-none",
           )}
           onPointerDownCapture={(event) => {
             if (!isCardClickable) return;
@@ -302,7 +387,7 @@ const FlashcardInner = ({
           resizable={false}
           resizeStepPx={undefined}
           showResizeHandle={false}
-          heightPx={resolvedFixedHeightPx}
+          heightPx={isFixedDisplay ? fixedHeightPx : null}
           lockHeight={isFixedDisplay}
           actionsTopLeft={actionsTopLeft}
           actionsTopRight={actionsTopRight}
@@ -331,21 +416,13 @@ const FlashcardInner = ({
             />
           }
         >
-          <div
-            ref={contentRef}
-            className={cn(
-              "w-full max-w-full",
-              isFixedDisplay ? "flex min-h-0 flex-1" : "min-h-0",
-            )}
-          >
-            <SharedCardContent
-              mode="view"
-              blocks={derived.activeBlocks}
-              onGalleryFullscreenChange={media.handleGalleryFullscreenChange}
-              displayMode={displayMode}
-              zoom={safeContentZoom}
-            />
-          </div>
+          {isFixedDisplay ? (
+            contentNode
+          ) : (
+            <ScaledFluidContent zoom={safeContentZoom}>
+              {contentNode}
+            </ScaledFluidContent>
+          )}
         </CardFrame>
       </div>
 
@@ -395,7 +472,6 @@ const areFlashcardPropsEqual = (prev: FlashcardProps, next: FlashcardProps) => {
       prev.fixedScale === next.fixedScale &&
       prev.contentPaddingPx === next.contentPaddingPx &&
       prev.cardShellClassName === next.cardShellClassName &&
-      prev.cardBaseWidthPx === next.cardBaseWidthPx &&
       prev.contentZoom === next.contentZoom
     );
   }
@@ -427,7 +503,6 @@ const areFlashcardPropsEqual = (prev: FlashcardProps, next: FlashcardProps) => {
     prev.fixedScale === next.fixedScale &&
     prev.contentPaddingPx === next.contentPaddingPx &&
     prev.cardShellClassName === next.cardShellClassName &&
-    prev.cardBaseWidthPx === next.cardBaseWidthPx &&
     prev.contentZoom === next.contentZoom
   );
 };

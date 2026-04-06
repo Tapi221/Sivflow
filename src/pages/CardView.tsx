@@ -15,8 +15,8 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 import { CardViewDesktop } from "./card-view/components/CardViewDesktop";
 import { CardViewMetaPanel } from "./card-view/components/CardViewMetaPanel";
 import { CardViewMobile } from "./card-view/components/CardViewMobile";
+import { CardZoomControl } from "./card-view/components/CardZoomControl";
 import { CARD_PANE_WIDTH_STEP_PX } from "./card-view/constants";
-import { CARD_VIEW_ZOOM_STEP_PERCENT } from "./card-view/cardViewZoom";
 import { useCardViewBreadcrumbs } from "./card-view/hooks/useCardViewBreadcrumbs";
 import { useCardViewData } from "./card-view/hooks/useCardViewData";
 import { useCardViewPaneWidth } from "./card-view/hooks/useCardViewPaneWidth";
@@ -26,7 +26,7 @@ import { useCardViewWindowEvents } from "./card-view/hooks/useCardViewWindowEven
 import { useCardViewZoom } from "./card-view/hooks/useCardViewZoom";
 
 const DISPLAY_MODE_LABELS: Record<CardDisplayMode, string> = {
-  fixed: "カード表示",
+  fixed: "カード表示（手書き対応）",
   fluid: "最大表示",
 };
 
@@ -106,7 +106,8 @@ const CardView = () => {
 
   const zoom = useCardViewZoom({
     cardSetId,
-    availableWidthPx: activePaneMaxWidthPx,
+    viewportRef: contentViewportRef,
+    activeCardKey: `${state.selectedCard?.id ?? ""}:${state.currentDisplayMode}`,
   });
 
   useCardViewBreadcrumbs({
@@ -133,47 +134,30 @@ const CardView = () => {
     );
   }
 
-  const showWidthControl = isDesktop;
+  const showEditWidthControl = isDesktop && state.isGlobalEditing;
   const overlayRight = isDesktop
     ? state.isMetaOpen
       ? "calc(var(--ui-panel-width) + 2.75rem)"
       : "calc(var(--ui-space-1) + 2.75rem)"
     : "0.75rem";
 
-  const widthControl = !showWidthControl
-    ? null
-    : state.isGlobalEditing
-      ? {
-          modeLabel: "編集幅",
-          value: activePaneWidthPx,
-          min: activePaneMinWidthPx,
-          max: activePaneMaxWidthPx,
-          defaultValue: activePaneDisplayedDefaultWidthPx,
-          step: 8,
-          valueFormatter: (value: number) => `${value}px`,
-          onPreviewChange: (value: number) =>
-            previewPaneWidth(activePaneMode, value),
-          onCommit: (value: number) => {
-            void persistPaneWidth(activePaneMode, value);
-          },
-          onStepDown: () => stepPaneWidth(-CARD_PANE_WIDTH_STEP_PX),
-          onStepUp: () => stepPaneWidth(CARD_PANE_WIDTH_STEP_PX),
-          onReset: resetActivePaneWidth,
-        }
-      : {
-          modeLabel: "表示倍率",
-          value: zoom.zoomPercent,
-          min: zoom.minZoomPercent,
-          max: zoom.maxZoomPercent,
-          defaultValue: zoom.defaultZoomPercent,
-          step: CARD_VIEW_ZOOM_STEP_PERCENT,
-          valueFormatter: (value: number) => `${value}%`,
-          onPreviewChange: zoom.previewZoomPercent,
-          onCommit: zoom.commitZoomPercent,
-          onStepDown: zoom.stepDown,
-          onStepUp: zoom.stepUp,
-          onReset: zoom.resetZoom,
-        };
+  const widthControl = showEditWidthControl
+    ? {
+        modeLabel: "編集幅",
+        value: activePaneWidthPx,
+        min: activePaneMinWidthPx,
+        max: activePaneMaxWidthPx,
+        defaultValue: activePaneDisplayedDefaultWidthPx,
+        onPreviewChange: (value: number) =>
+          previewPaneWidth(activePaneMode, value),
+        onCommit: (value: number) => {
+          void persistPaneWidth(activePaneMode, value);
+        },
+        onStepDown: () => stepPaneWidth(-CARD_PANE_WIDTH_STEP_PX),
+        onStepUp: () => stepPaneWidth(CARD_PANE_WIDTH_STEP_PX),
+        onReset: resetActivePaneWidth,
+      }
+    : null;
 
   const resolvedLastSyncedAtMs =
     state.activeSyncStatus?.lastSyncedAtMs ??
@@ -229,7 +213,7 @@ const CardView = () => {
               });
           }}
         >
-          現在のモードを既定値にする
+          現在の表示をデフォルトにする
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -254,12 +238,20 @@ const CardView = () => {
     </div>
   ) : null;
 
-  const desktopLayoutAnchorKey = [
-    state.currentDisplayMode,
-    zoom.zoomPercent,
-    activePaneMaxWidthPx,
-    state.isMetaOpen ? "meta-open" : "meta-closed",
-  ].join(":");
+  const topLeftControl =
+    isDesktop && !state.isGlobalEditing ? (
+      <CardZoomControl
+        value={zoom.zoomPercent}
+        min={zoom.minZoomPercent}
+        max={zoom.maxZoomPercent}
+        step={5}
+        defaultValue={zoom.defaultZoomPercent}
+        onChange={zoom.setZoomPercent}
+        onStepDown={zoom.stepDown}
+        onStepUp={zoom.stepUp}
+        onReset={zoom.reset}
+      />
+    ) : null;
 
   return (
     <CardWorkspaceShell
@@ -267,6 +259,7 @@ const CardView = () => {
       shellClassName="h-full"
       widthControl={widthControl}
       widthControlClassName="hidden md:flex"
+      topLeftControl={topLeftControl}
       overlayChildren={overlayChildren}
       isMetaOpen={state.isMetaOpen}
       onToggleMetaOpen={() => state.setIsMetaOpen((prev) => !prev)}
@@ -294,13 +287,12 @@ const CardView = () => {
           safeCurrentIndex={state.safeCurrentIndex}
           settings={settings}
           editPaneWidthPx={activePaneRenderWidthPx}
-          activePaneMaxWidthPx={activePaneMaxWidthPx}
-          fixedCardWidthPx={zoom.fixedCardWidthPx}
-          contentZoomFactor={zoom.zoomFactor}
-          layoutAnchorKey={desktopLayoutAnchorKey}
           currentDisplayMode={state.currentDisplayMode}
           folderId={folderId}
           cardSetId={cardSetId}
+          viewZoomScale={zoom.zoomScale}
+          fixedCardWidthPx={zoom.fixedCardWidthPx}
+          fluidAvailableWidthPx={zoom.availableWidthPx}
           onActiveIndexChange={state.handlePagerIndexChange}
           onFlip={state.handleFlip}
           onEdit={state.handleEdit}

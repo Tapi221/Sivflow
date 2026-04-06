@@ -1,5 +1,3 @@
-// src/services/SyncServiceFactory.ts
-
 import { flags } from "@/features/flags";
 import type { ISyncService } from "./interfaces/ISyncService";
 import {
@@ -12,29 +10,42 @@ import { DiffEngine } from "./logic/DiffEngine";
 import { NetworkMonitor } from "./logic/NetworkMonitor";
 import { QueueManager } from "./logic/QueueManager";
 import { TelemetryService } from "./logic/TelemetryService";
-import { SyncService } from "./syncService"; // Legacy
+import { SyncService } from "./syncService";
 import { SyncServiceV2 } from "./SyncServiceV2";
 
-/**
- * SyncServiceFactory
- * Feature Flagに基づいて、適切なSyncServiceのインスタンスを生成・返却する
- */
 export class SyncServiceFactory {
   private static instances = new Map<string, ISyncService>();
+  private static pendingInstances = new Map<string, Promise<ISyncService>>();
+  private static warnedLegacyFallbackUsers = new Set<string>();
 
-  public static async getInstance(userId: string): Promise<ISyncService> {
+  public static getInstance = async (userId: string): Promise<ISyncService> => {
     const existing = SyncServiceFactory.instances.get(userId);
-    if (existing) return existing;
+    if (existing) {
+      return existing;
+    }
 
-    const instance = await this.createInstance(userId);
+    const pending = SyncServiceFactory.pendingInstances.get(userId);
+    if (pending) {
+      return pending;
+    }
 
-    SyncServiceFactory.instances.set(userId, instance);
-    return instance;
-  }
+    const nextPromise = this.createInstance(userId)
+      .then((instance) => {
+        SyncServiceFactory.instances.set(userId, instance);
+        return instance;
+      })
+      .finally(() => {
+        SyncServiceFactory.pendingInstances.delete(userId);
+      });
 
-  private static async createInstance(userId: string): Promise<ISyncService> {
+    SyncServiceFactory.pendingInstances.set(userId, nextPromise);
+
+    return nextPromise;
+  };
+
+  private static createInstance = async (userId: string): Promise<ISyncService> => {
     if (flags.isEnabled("USE_SYNC_V2")) {
-      return await this.createV2(userId);
+      return this.createV2(userId);
     }
 
     console.log("[SyncServiceFactory] Initializing Legacy SyncService");
@@ -42,7 +53,6 @@ export class SyncServiceFactory {
     const db = await getLocalDb(userId);
     const legacy = new SyncService(userId, db);
 
-    // AuthContext / ISyncService が実際に前提としているメソッドを必須にする
     const mustHave = [
       "getQueueStatus",
       "monitorSecurity",
@@ -59,21 +69,23 @@ export class SyncServiceFactory {
     ] as const;
 
     const legacyObj = legacy as unknown as Record<string, unknown>;
-    const missing = mustHave.filter((k) => typeof legacyObj[k] !== "function");
+    const missing = mustHave.filter((key) => typeof legacyObj[key] !== "function");
 
     if (missing.length > 0) {
-      const msg =
-        `[SyncServiceFactory] Legacy SyncService is missing methods: ${missing.join(", ")}. ` +
-        `Falling back to SyncService V2.`;
+      if (!SyncServiceFactory.warnedLegacyFallbackUsers.has(userId)) {
+        SyncServiceFactory.warnedLegacyFallbackUsers.add(userId);
+        console.error(
+          `[SyncServiceFactory] Legacy SyncService is missing methods: ${missing.join(", ")}. Falling back to SyncService V2.`,
+        );
+      }
 
-      console.error(msg);
-      return await this.createV2(userId);
+      return this.createV2(userId);
     }
 
     return legacy as unknown as ISyncService;
-  }
+  };
 
-  private static async createV2(userId: string): Promise<ISyncService> {
+  private static createV2 = async (userId: string): Promise<ISyncService> => {
     console.log("[SyncServiceFactory] Initializing SyncService V2");
 
     const db = await getLocalDb(userId);
@@ -105,13 +117,18 @@ export class SyncServiceFactory {
       cloudAdapter,
       telemetry,
     );
-  }
+  };
 
-  public static resetInstance(userId?: string): void {
+  public static resetInstance = (userId?: string): void => {
     if (userId) {
       SyncServiceFactory.instances.delete(userId);
+      SyncServiceFactory.pendingInstances.delete(userId);
+      SyncServiceFactory.warnedLegacyFallbackUsers.delete(userId);
       return;
     }
+
     SyncServiceFactory.instances.clear();
-  }
+    SyncServiceFactory.pendingInstances.clear();
+    SyncServiceFactory.warnedLegacyFallbackUsers.clear();
+  };
 }

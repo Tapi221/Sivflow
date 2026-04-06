@@ -76,13 +76,12 @@ interface CardViewDesktopProps {
   safeCurrentIndex: number;
   settings?: Partial<UserSettings> | null;
   editPaneWidthPx: number;
-  activePaneMaxWidthPx: number;
-  fixedCardWidthPx: number;
-  contentZoomFactor: number;
-  layoutAnchorKey: string;
   currentDisplayMode: CardDisplayMode;
   folderId: string | null;
   cardSetId: string | null;
+  viewZoomScale: number;
+  fixedCardWidthPx: number;
+  fluidAvailableWidthPx: number;
   onActiveIndexChange: (idx: number) => void;
   onFlip: () => void;
   onEdit: () => void;
@@ -100,13 +99,12 @@ export const CardViewDesktop = ({
   safeCurrentIndex,
   settings = null,
   editPaneWidthPx,
-  activePaneMaxWidthPx,
-  fixedCardWidthPx,
-  contentZoomFactor,
-  layoutAnchorKey,
   currentDisplayMode,
   folderId,
   cardSetId,
+  viewZoomScale,
+  fixedCardWidthPx,
+  fluidAvailableWidthPx,
   onActiveIndexChange,
   onFlip,
   onEdit,
@@ -118,7 +116,7 @@ export const CardViewDesktop = ({
   const effectiveEditPaneWidthPx = editPaneWidthPx;
   const effectiveCardWidthPx =
     currentDisplayMode === "fluid"
-      ? Math.max(1, activePaneMaxWidthPx)
+      ? Math.max(1, Math.floor(fluidAvailableWidthPx))
       : Math.max(1, fixedCardWidthPx);
 
   const [renderRange, setRenderRange] = useState<{
@@ -175,10 +173,11 @@ export const CardViewDesktop = ({
           isGlobalEditing={isGlobalEditing}
           editPaneWidthPx={effectiveEditPaneWidthPx}
           fixedCardWidthPx={fixedCardWidthPx}
-          contentZoomFactor={contentZoomFactor}
+          fluidAvailableWidthPx={fluidAvailableWidthPx}
           settings={settings}
           isFlipped={flippedCardIds.has(card.id ?? "")}
           currentDisplayMode={currentDisplayMode}
+          viewZoomScale={viewZoomScale}
           folderId={folderId}
           cardSetId={cardSetId}
           cardsOverride={editingCardsOverride}
@@ -191,21 +190,22 @@ export const CardViewDesktop = ({
       );
     },
     [
-      isGlobalEditing,
-      flippedCardIds,
-      folderId,
       cardSetId,
+      currentDisplayMode,
       editingCardsOverride,
-      onFlip,
-      onEdit,
-      onToggleUncertainty,
-      onToggleBookmark,
-      onSyncStatusChange,
-      settings,
       effectiveEditPaneWidthPx,
       fixedCardWidthPx,
-      contentZoomFactor,
-      currentDisplayMode,
+      flippedCardIds,
+      fluidAvailableWidthPx,
+      folderId,
+      isGlobalEditing,
+      onEdit,
+      onFlip,
+      onSyncStatusChange,
+      onToggleBookmark,
+      onToggleUncertainty,
+      settings,
+      viewZoomScale,
     ],
   );
 
@@ -238,7 +238,6 @@ export const CardViewDesktop = ({
       getKey={(card) => card.id ?? card.docId ?? card.uid}
       disableVirtualization={false}
       onRenderRangeChange={setRenderRange}
-      preserveScrollAnchorKey={layoutAnchorKey}
       renderCard={renderCard}
     />
   );

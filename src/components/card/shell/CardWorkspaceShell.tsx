@@ -10,8 +10,6 @@ export type CardWorkspaceWidthControlProps = {
   min: number;
   max: number;
   defaultValue: number;
-  step?: number;
-  valueFormatter?: (value: number) => string;
   onPreviewChange: (value: number) => void;
   onCommit: (value: number) => void;
   onStepDown: () => void;
@@ -39,6 +37,7 @@ export type CardWorkspaceShellProps = {
   viewportRef?: Ref<HTMLDivElement>;
   widthControl?: CardWorkspaceWidthControlProps | null;
   widthControlClassName?: string;
+  topLeftControl?: ReactNode;
   overlayChildren?: ReactNode;
   isMetaOpen: boolean;
   onToggleMetaOpen?: () => void;
@@ -59,6 +58,7 @@ export const CardWorkspaceShell = ({
   viewportRef,
   widthControl = null,
   widthControlClassName,
+  topLeftControl,
   overlayChildren,
   isMetaOpen,
   onToggleMetaOpen,
@@ -84,6 +84,12 @@ export const CardWorkspaceShell = ({
           shellClassName,
         )}
       >
+        {topLeftControl ? (
+          <div className="pointer-events-auto absolute left-3 top-2 z-30 flex">
+            {topLeftControl}
+          </div>
+        ) : null}
+
         {widthControl ? (
           <div
             className={cn(
@@ -97,8 +103,6 @@ export const CardWorkspaceShell = ({
               min={widthControl.min}
               max={widthControl.max}
               defaultValue={widthControl.defaultValue}
-              step={widthControl.step}
-              valueFormatter={widthControl.valueFormatter}
               onPreviewChange={widthControl.onPreviewChange}
               onCommit={widthControl.onCommit}
               onStepDown={widthControl.onStepDown}
