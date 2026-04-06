@@ -56,6 +56,7 @@ export interface UserSettings extends BaseEntity {
   folderSidebarDisplayMode?: "auto" | "tree" | "navigation";
   blockButtonShowLabel?: boolean;
   tagCategoryDisplayNames?: Record<string, string>;
+  markdownTabSize?: 2 | 4 | 8;
 }
 
 export interface UserStats extends BaseEntity {

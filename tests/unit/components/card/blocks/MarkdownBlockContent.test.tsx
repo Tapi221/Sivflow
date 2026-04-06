@@ -2,7 +2,7 @@
 import React from "react";
 import { afterEach, describe, expect, it } from "vitest";
 import { cleanup, render } from "@testing-library/react";
-import { MarkdownBlockContent } from "@/components/card/blocks/MarkdownBlockContent";
+import { MarkdownBlockContent } from "@/components/card/blocks/markdown/MarkdownBlockContent";
 
 afterEach(() => {
   cleanup();
@@ -55,5 +55,45 @@ describe("MarkdownBlockContent", () => {
     expect(root).toBeTruthy();
     expect(paragraph).toBeTruthy();
     expect(list).toBeTruthy();
+  });
+
+  it("2行空行を空白段落として保持する", () => {
+    const { container } = render(
+      <MarkdownBlockContent markdown={"first\n\n\nsecond"} />,
+    );
+
+    const root = container.querySelector(
+      ".markdownBlockCardView",
+    ) as HTMLElement | null;
+
+    const paragraphs =
+      root?.querySelectorAll('p[data-markdown-paragraph="true"]') ?? [];
+
+    expect(paragraphs).toHaveLength(3);
+    expect(paragraphs[1]?.getAttribute("aria-hidden")).toBe("true");
+  });
+
+  it("本文段落に whitespace 保持用の識別属性を付与する", () => {
+    const { container } = render(
+      <MarkdownBlockContent markdown={"  lead  text"} />,
+    );
+
+    const paragraph = container.querySelector(
+      'p[data-markdown-paragraph="true"]',
+    ) as HTMLElement | null;
+
+    expect(paragraph).toBeTruthy();
+  });
+
+  it("blockquote 内本文にも whitespace 保持用の識別属性を付与する", () => {
+    const { container } = render(
+      <MarkdownBlockContent markdown={">   quote  text"} />,
+    );
+
+    const paragraph = container.querySelector(
+      'blockquote p[data-markdown-paragraph="true"]',
+    ) as HTMLElement | null;
+
+    expect(paragraph).toBeTruthy();
   });
 });

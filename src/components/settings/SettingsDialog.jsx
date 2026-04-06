@@ -19,6 +19,7 @@ import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { cn } from "@/lib/utils";
 import { auth } from "@/services/firebase";
 import { getLocalDb } from "@/services/localDB";
+import { MarkdownWhitespaceSettings } from "@/components/settings/MarkdownWhitespaceSettings";
 import {
   BookOpen,
   Check,
@@ -385,6 +386,10 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
 
               <div className="pt-6 border-t border-slate-200">
                 <BlockOrdering />
+              </div>
+
+              <div className="pt-6 border-t border-slate-200">
+                <MarkdownWhitespaceSettings />
               </div>
 
               <div className="pt-6 border-t border-slate-200">

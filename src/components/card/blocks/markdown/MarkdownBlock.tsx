@@ -1,8 +1,15 @@
 import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
 import { MarkdownBlockDisplay } from "@/components/card/blocks/markdown/MarkdownBlockDisplay";
 import { MarkdownEditorDialog } from "@/components/card/blocks/markdown/MarkdownEditorDialog";
+import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { cn } from "@/lib/utils";
 import { NotebookPen } from "@/ui/icons";
+import {
+  clampMarkdownTabSize,
+  normalizeMarkdownEditorValue,
+  normalizeMarkdownInsertionText,
+  resolveMarkdownTabKeyText,
+} from "@/utils/markdownWhitespace";
 import React, { useState } from "react";
 
 type EditorBlock =
@@ -40,17 +47,12 @@ interface MarkdownBlockProps {
 
 const MAX_LENGTH = 50000;
 
-const normalizeMarkdownForEditor = (input: string) =>
-  String(input ?? "")
-    .replace(/\r\n/g, "\n")
-    .replace(/\n{3,}$/g, "\n\n");
-
-const normalizeMarkdownBlockValue = (input: string) =>
-  normalizeMarkdownForEditor(input).replace(/\n+$/g, "");
-
 const validateBlocksLength = (blocks: EditorBlock[]) => {
-  for (const b of blocks) {
-    const len = b.type === "markdown" ? b.markdown.length : b.code.code.length;
+  for (const block of blocks) {
+    const len =
+      block.type === "markdown"
+        ? block.markdown.length
+        : block.code.code.length;
     if (len > MAX_LENGTH) return false;
   }
   return true;
@@ -78,26 +80,29 @@ const restoreCaret = (textarea: HTMLTextAreaElement, pos: number) => {
   });
 };
 
-const isProbablyCode = (t: string) => {
-  const s = (t ?? "").trim();
-  if (!s) return false;
+const isProbablyCode = (value: string) => {
+  const source = (value ?? "").trim();
+  if (!source) return false;
 
-  if (/```|~~~/.test(s)) return true;
-  if (/^\s*<\w+[\s>]/m.test(s)) return true;
-  if (/\b(className|function|const|let|var|import|export|return)\b/.test(s)) {
+  if (/```|~~~/.test(source)) return true;
+  if (/^\s*<\w+[\s>]/m.test(source)) return true;
+  if (
+    /\b(className|function|const|let|var|import|export|return)\b/.test(source)
+  ) {
     return true;
   }
-  if (/[{}();]|=>/.test(s)) return true;
+  if (/[{}();]|=>/.test(source)) return true;
 
   return false;
 };
 
-const looksLikeHtmlBlockCandidate = (t: string) =>
-  /^\s*<\w+[\s>]/.test(t ?? "");
+const looksLikeHtmlBlockCandidate = (value: string) => {
+  return /^\s*<\w+[\s>]/.test(value ?? "");
+};
 
 const detectLang = (plain: string, html: string) => {
-  const m = html?.match(/language-([a-z0-9_+-]+)/i);
-  if (m?.[1]) return m[1];
+  const match = html?.match(/language-([a-z0-9_+-]+)/i);
+  if (match?.[1]) return match[1];
 
   if (/\bclassName=/.test(plain) || /^\s*</m.test(plain)) return "tsx";
   if (/\binterface\b|\btype\b|\bimplements\b/.test(plain)) return "ts";
@@ -105,35 +110,36 @@ const detectLang = (plain: string, html: string) => {
 };
 
 const isFenceStart = (text: string) => {
-  const normalized = normalizeMarkdownForEditor(text).replace(/\r\n/g, "\n");
+  const normalized = String(text ?? "").replace(/\r\n/g, "\n");
   const lines = normalized.split("\n");
-  let i = 0;
-  while (i < lines.length && lines[i].trim().length === 0) i += 1;
-  if (i >= lines.length) return false;
-  return /^( {0,3})(`{3,}|~{3,})/.test(lines[i]);
+  let index = 0;
+
+  while (index < lines.length && lines[index]?.trim().length === 0) {
+    index += 1;
+  }
+
+  if (index >= lines.length) return false;
+  return /^( {0,3})(`{3,}|~{3,})/.test(lines[index] ?? "");
 };
 
 const computeFocusOffsetInInsertText = (insertText: string) => {
-  const normalized = normalizeMarkdownForEditor(insertText).replace(
-    /\r\n/g,
-    "\n",
-  );
+  const normalized = String(insertText ?? "").replace(/\r\n/g, "\n");
   const lines = normalized.split("\n");
 
   let offset = 0;
 
-  for (let i = 0; i < lines.length; i += 1) {
-    const line = lines[i] ?? "";
-    const isLast = i === lines.length - 1;
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index] ?? "";
+    const isLast = index === lines.length - 1;
 
     if (line.trim().length === 0) {
       offset += line.length + (isLast ? 0 : 1);
       continue;
     }
 
-    const m = line.match(/^( {0,3})(`{3,}|~{3,})/);
-    if (m) {
-      return offset + (m[1]?.length ?? 0);
+    const match = line.match(/^( {0,3})(`{3,}|~{3,})/);
+    if (match) {
+      return offset + (match[1]?.length ?? 0);
     }
 
     return offset;
@@ -160,14 +166,17 @@ const normalizeFenceBoundaries = (
     out = `${out}\n`;
   }
 
-  const focusOffset = computeFocusOffsetInInsertText(out);
-
-  return { text: out, focusOffset };
+  return {
+    text: out,
+    focusOffset: computeFocusOffsetInInsertText(out),
+  };
 };
 
 const wrapFence = (code: string, lang: string) => {
-  const c = (code ?? "").replace(/\r\n/g, "\n").replace(/\n+$/g, "");
-  return `\`\`\`${lang}\n${c}\n\`\`\`\n`;
+  const normalized = String(code ?? "")
+    .replace(/\r\n/g, "\n")
+    .replace(/\n+$/g, "");
+  return `\`\`\`${lang}\n${normalized}\n\`\`\`\n`;
 };
 
 const extractPreTextFromHtml = (html: string) => {
@@ -178,6 +187,7 @@ const extractPreTextFromHtml = (html: string) => {
 
     const pre = div.querySelector("pre");
     const code = pre?.querySelector("code");
+
     if (code?.textContent) return code.textContent;
     if (pre?.textContent) return pre.textContent;
 
@@ -190,9 +200,10 @@ const extractPreTextFromHtml = (html: string) => {
 type BlockRange = { start: number; end: number; type: EditorBlock["type"] };
 
 const pickBlockIndexByPos = (ranges: BlockRange[], pos: number) => {
-  for (let i = 0; i < ranges.length; i += 1) {
-    const r = ranges[i];
-    if (pos >= r.start && pos < r.end) return i;
+  for (let index = 0; index < ranges.length; index += 1) {
+    const range = ranges[index];
+    if (!range) continue;
+    if (pos >= range.start && pos < range.end) return index;
   }
   return Math.max(0, ranges.length - 1);
 };
@@ -217,16 +228,26 @@ const MarkdownBlockInner: React.FC<MarkdownBlockProps> = ({
 }) => {
   const [error, setError] = useState<string | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
-  const normalizedMarkdown = normalizeMarkdownBlockValue(markdown);
+  const { settings } = useUserSettings();
+
+  const markdownTabSize = clampMarkdownTabSize(settings?.markdownTabSize);
+  const normalizedMarkdown = normalizeMarkdownEditorValue(
+    markdown,
+    markdownTabSize,
+  );
   const isMarkdownEmpty = normalizedMarkdown.trim().length === 0;
 
   const handleChange = (value: string) => {
-    const normalizedValue = normalizeMarkdownBlockValue(value);
+    const normalizedValue = normalizeMarkdownEditorValue(
+      value,
+      markdownTabSize,
+    );
 
     if (normalizedValue.length > MAX_LENGTH) {
       setError("Markdown文字列が長すぎます（最大50,000文字）");
       return;
     }
+
     setError(null);
     onChange(normalizedValue);
   };
@@ -244,21 +265,21 @@ const MarkdownBlockInner: React.FC<MarkdownBlockProps> = ({
       focusPos?: number;
     },
   ) => {
-    const normalized = normalizeMarkdownForEditor(insertText);
     const merged =
       markdown.slice(0, selectionStart) +
-      normalized +
+      insertText +
       markdown.slice(selectionEnd);
 
     if (attemptSplitFences && onReplaceWithBlocks) {
       const { blocks, ranges } = parseAndSplitFencesWithRanges(merged);
-      const hasCode = blocks.some((b) => b.type === "code");
+      const hasCode = blocks.some((block) => block.type === "code");
 
       if (hasCode) {
         if (!validateBlocksLength(blocks)) {
           setError("貼り付け内容が長すぎます（各ブロック最大50,000文字）");
           return;
         }
+
         setError(null);
 
         const pos = focusPos ?? selectionStart;
@@ -268,32 +289,39 @@ const MarkdownBlockInner: React.FC<MarkdownBlockProps> = ({
       }
     }
 
-    if (merged.length > MAX_LENGTH) {
+    const normalizedMerged = normalizeMarkdownEditorValue(
+      merged,
+      markdownTabSize,
+    );
+    if (normalizedMerged.length > MAX_LENGTH) {
       setError("貼り付け内容が長すぎます（1ブロック最大50,000文字）");
       return;
     }
 
     handleChange(merged);
-    const nextCaret = selectionStart + normalized.length;
+    const nextCaret = selectionStart + insertText.length;
     restoreCaret(textarea, nextCaret);
   };
 
-  const handlePaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
-    const clipboardData = e.clipboardData;
+  const handlePaste = async (
+    event: React.ClipboardEvent<HTMLTextAreaElement>,
+  ) => {
+    const clipboardData = event.clipboardData;
     const html = clipboardData.getData("text/html");
     const plain = clipboardData.getData("text/plain");
 
-    const textarea = e.currentTarget;
-
+    const textarea = event.currentTarget;
     const baseLen = markdown.length;
-    const a = Math.min(textarea.selectionStart ?? 0, baseLen);
-    const b = Math.min(textarea.selectionEnd ?? 0, baseLen);
-    const selectionStart = Math.min(a, b);
-    const selectionEnd = Math.max(a, b);
+
+    const rawStart = Math.min(textarea.selectionStart ?? 0, baseLen);
+    const rawEnd = Math.min(textarea.selectionEnd ?? 0, baseLen);
+    const selectionStart = Math.min(rawStart, rawEnd);
+    const selectionEnd = Math.max(rawStart, rawEnd);
 
     const prevChar = selectionStart > 0 ? markdown[selectionStart - 1] : "";
     const nextChar =
       selectionEnd < markdown.length ? markdown[selectionEnd] : "";
+
     const atLineStart =
       selectionStart === 0 || prevChar === "\n" || prevChar === "\r";
     const atLineEnd =
@@ -302,7 +330,7 @@ const MarkdownBlockInner: React.FC<MarkdownBlockProps> = ({
       nextChar === "\r";
 
     if (plain && isProbablyCode(plain)) {
-      e.preventDefault();
+      event.preventDefault();
 
       const lang = detectLang(plain, html);
 
@@ -311,27 +339,34 @@ const MarkdownBlockInner: React.FC<MarkdownBlockProps> = ({
           ? wrapFence(plain, lang)
           : plain;
 
+      insertText = normalizeMarkdownInsertionText(insertText, markdownTabSize);
+
       const normalizedFence = normalizeFenceBoundaries(insertText, {
         atLineStart,
         atLineEnd,
       });
-      insertText = normalizedFence.text;
 
-      applyInsert(textarea, insertText, selectionStart, selectionEnd, {
-        attemptSplitFences: true,
-        focusPos: selectionStart + normalizedFence.focusOffset,
-      });
+      applyInsert(
+        textarea,
+        normalizedFence.text,
+        selectionStart,
+        selectionEnd,
+        {
+          attemptSplitFences: true,
+          focusPos: selectionStart + normalizedFence.focusOffset,
+        },
+      );
       return;
     }
 
     if (html && html.trim()) {
-      e.preventDefault();
+      event.preventDefault();
 
       if (/<pre[\s>]/i.test(html)) {
         const raw = plain || extractPreTextFromHtml(html);
-        const preText = normalizeMarkdownForEditor(raw);
-
+        const preText = normalizeMarkdownInsertionText(raw, markdownTabSize);
         const lang = detectLang(preText, html);
+
         let insertText = isFenceStart(preText)
           ? preText
           : wrapFence(preText, lang);
@@ -340,20 +375,25 @@ const MarkdownBlockInner: React.FC<MarkdownBlockProps> = ({
           atLineStart,
           atLineEnd,
         });
-        insertText = normalizedFence.text;
 
-        applyInsert(textarea, insertText, selectionStart, selectionEnd, {
-          attemptSplitFences: true,
-          focusPos: selectionStart + normalizedFence.focusOffset,
-        });
+        applyInsert(
+          textarea,
+          normalizedFence.text,
+          selectionStart,
+          selectionEnd,
+          {
+            attemptSplitFences: true,
+            focusPos: selectionStart + normalizedFence.focusOffset,
+          },
+        );
         return;
       }
 
       try {
         const { sanitizeAndConvertToMarkdown } =
           await import("@/utils/markdownPaste");
-        const mdRaw = await sanitizeAndConvertToMarkdown(html);
 
+        const mdRaw = await sanitizeAndConvertToMarkdown(html);
         const overEscaped =
           /className=\\"/.test(mdRaw) || /\\_/.test(mdRaw) || /\\</.test(mdRaw);
 
@@ -361,7 +401,9 @@ const MarkdownBlockInner: React.FC<MarkdownBlockProps> = ({
         let insertText =
           mdRaw && mdRaw.trim().length > 0 ? mdRaw : fallbackText;
 
-        if (plain && overEscaped) insertText = fallbackText;
+        if (plain && overEscaped) {
+          insertText = fallbackText;
+        }
 
         if (
           looksLikeHtmlBlockCandidate(insertText) &&
@@ -370,54 +412,111 @@ const MarkdownBlockInner: React.FC<MarkdownBlockProps> = ({
           insertText = wrapFence(insertText, detectLang(insertText, html));
         }
 
+        insertText = normalizeMarkdownInsertionText(
+          insertText,
+          markdownTabSize,
+        );
+
         const normalizedFence = normalizeFenceBoundaries(insertText, {
           atLineStart,
           atLineEnd,
         });
-        insertText = normalizedFence.text;
 
-        applyInsert(textarea, insertText, selectionStart, selectionEnd, {
-          attemptSplitFences: true,
-          focusPos: selectionStart + normalizedFence.focusOffset,
-        });
+        applyInsert(
+          textarea,
+          normalizedFence.text,
+          selectionStart,
+          selectionEnd,
+          {
+            attemptSplitFences: true,
+            focusPos: selectionStart + normalizedFence.focusOffset,
+          },
+        );
       } catch {
         const fallbackText = plain || htmlToPlainText(html);
+
         let insertText =
           looksLikeHtmlBlockCandidate(fallbackText) &&
           !/```|~~~/.test(fallbackText)
             ? wrapFence(fallbackText, detectLang(fallbackText, html))
             : fallbackText;
 
+        insertText = normalizeMarkdownInsertionText(
+          insertText,
+          markdownTabSize,
+        );
+
         const normalizedFence = normalizeFenceBoundaries(insertText, {
           atLineStart,
           atLineEnd,
         });
-        insertText = normalizedFence.text;
 
-        applyInsert(textarea, insertText, selectionStart, selectionEnd, {
-          attemptSplitFences: true,
-          focusPos: selectionStart + normalizedFence.focusOffset,
-        });
+        applyInsert(
+          textarea,
+          normalizedFence.text,
+          selectionStart,
+          selectionEnd,
+          {
+            attemptSplitFences: true,
+            focusPos: selectionStart + normalizedFence.focusOffset,
+          },
+        );
       }
       return;
     }
 
-    if (plain && /```|~~~/.test(plain) && onReplaceWithBlocks) {
-      e.preventDefault();
+    if (plain) {
+      event.preventDefault();
 
-      let insertText = plain;
+      let insertText = normalizeMarkdownInsertionText(plain, markdownTabSize);
 
-      const normalizedFence = normalizeFenceBoundaries(insertText, {
-        atLineStart,
-        atLineEnd,
-      });
-      insertText = normalizedFence.text;
+      if (/```|~~~/.test(insertText) && onReplaceWithBlocks) {
+        const normalizedFence = normalizeFenceBoundaries(insertText, {
+          atLineStart,
+          atLineEnd,
+        });
+
+        applyInsert(
+          textarea,
+          normalizedFence.text,
+          selectionStart,
+          selectionEnd,
+          {
+            attemptSplitFences: true,
+            focusPos: selectionStart + normalizedFence.focusOffset,
+          },
+        );
+        return;
+      }
 
       applyInsert(textarea, insertText, selectionStart, selectionEnd, {
-        attemptSplitFences: true,
-        focusPos: selectionStart + normalizedFence.focusOffset,
+        attemptSplitFences: false,
       });
     }
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key !== "Tab") return;
+
+    event.preventDefault();
+
+    const textarea = event.currentTarget;
+    const baseLen = markdown.length;
+
+    const rawStart = Math.min(textarea.selectionStart ?? 0, baseLen);
+    const rawEnd = Math.min(textarea.selectionEnd ?? 0, baseLen);
+    const selectionStart = Math.min(rawStart, rawEnd);
+    const selectionEnd = Math.max(rawStart, rawEnd);
+
+    const insertText = resolveMarkdownTabKeyText(
+      markdown,
+      selectionStart,
+      markdownTabSize,
+    );
+
+    applyInsert(textarea, insertText, selectionStart, selectionEnd, {
+      attemptSplitFences: false,
+    });
   };
 
   return (
@@ -461,6 +560,7 @@ const MarkdownBlockInner: React.FC<MarkdownBlockProps> = ({
         value={normalizedMarkdown}
         onChange={handleChange}
         onPasteCapture={handlePaste}
+        onKeyDown={handleKeyDown}
         accentColor={accentColor}
         error={error}
       />
@@ -503,7 +603,6 @@ const parseAndSplitFencesWithRanges = (md: string) => {
   let markerLen = 0;
   let lang = "";
   let codeBuf: string[] = [];
-
   let fenceStart: number | null = null;
 
   const openRe = /^( {0,3})(`{3,}|~{3,})([^\n]*)$/;
@@ -517,30 +616,33 @@ const parseAndSplitFencesWithRanges = (md: string) => {
       blocks.push({ type: "markdown", markdown: text });
       ranges.push({ start: markdownStart, end, type: "markdown" });
     }
+
     markdownBuf = [];
     markdownStart = null;
   };
 
   let pos = 0;
-  for (let idx = 0; idx < lines.length; idx += 1) {
-    const line = lines[idx];
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index] ?? "";
     const lineStart = pos;
     const lineEnd = pos + line.length;
-    const hasNewline = idx < lines.length - 1;
+    const hasNewline = index < lines.length - 1;
     const lineEndWithNewline = lineEnd + (hasNewline ? 1 : 0);
 
     if (!insideFence) {
-      const m = line.match(openRe);
-      if (!m) {
+      const match = line.match(openRe);
+
+      if (!match) {
         if (markdownStart === null) markdownStart = lineStart;
         markdownBuf.push(line);
         pos = lineEndWithNewline;
         continue;
       }
 
-      const indent = m[1] ?? "";
-      const marker = m[2] ?? "";
-      const infoRaw = (m[3] ?? "").trim();
+      const indent = match[1] ?? "";
+      const marker = match[2] ?? "";
+      const infoRaw = (match[3] ?? "").trim();
       const ch = marker[0] as "`" | "~";
 
       if (ch === "`" && infoRaw.includes("`")) {
@@ -564,22 +666,27 @@ const parseAndSplitFencesWithRanges = (md: string) => {
       continue;
     }
 
-    const closeRe = new RegExp(`^ {0,3}${markerChar}{${markerLen},}[ \\t]*$`);
+    const closeRe = new RegExp(`^ {0,3}${markerChar}{${markerLen},}[ \t]*$`);
     if (markerChar && closeRe.test(line)) {
       const raw = codeBuf.join("\n");
       const dedented =
         fenceIndent.length > 0
           ? raw
               .split("\n")
-              .map((l) =>
-                l.startsWith(fenceIndent) ? l.slice(fenceIndent.length) : l,
+              .map((value) =>
+                value.startsWith(fenceIndent)
+                  ? value.slice(fenceIndent.length)
+                  : value,
               )
               .join("\n")
           : raw;
 
       blocks.push({
         type: "code",
-        code: { language: lang || "text", code: dedented.replace(/\n+$/, "") },
+        code: {
+          language: lang || "text",
+          code: dedented.replace(/\n+$/, ""),
+        },
       });
 
       const start = fenceStart ?? lineStart;
@@ -605,7 +712,9 @@ const parseAndSplitFencesWithRanges = (md: string) => {
   if (insideFence) {
     return {
       blocks: [{ type: "markdown", markdown: normalizedMd }],
-      ranges: [{ start: 0, end: normalizedMd.length, type: "markdown" }],
+      ranges: [
+        { start: 0, end: normalizedMd.length, type: "markdown" as const },
+      ],
     };
   }
 

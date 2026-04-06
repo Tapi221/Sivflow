@@ -17,16 +17,13 @@ const EDITOR_MAX_HEIGHT = 520;
 
 const isHexColor = (color: string) => /^#[0-9a-fA-F]{3,8}$/.test(color);
 
-/**
- * accentColor は hex カラーコード推奨（例: "#3b82f6"）。
- * それ以外の形式はデフォルト色にフォールバックします。
- */
 interface MarkdownEditorDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   value: string;
   onChange: (next: string) => void;
   onPasteCapture?: (e: React.ClipboardEvent<HTMLTextAreaElement>) => void;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
   accentColor?: string;
   error?: string | null;
 }
@@ -37,6 +34,7 @@ export const MarkdownEditorDialog: React.FC<MarkdownEditorDialogProps> = ({
   value,
   onChange,
   onPasteCapture,
+  onKeyDown,
   accentColor,
   error,
 }) => {
@@ -62,6 +60,7 @@ export const MarkdownEditorDialog: React.FC<MarkdownEditorDialogProps> = ({
             value={value}
             onChange={(event) => onChange(event.target.value)}
             onPasteCapture={onPasteCapture}
+            onKeyDown={onKeyDown}
             placeholder="Markdownを入力..."
             aria-label="Markdown入力"
             minRows={EDITOR_MIN_ROWS}
@@ -79,14 +78,14 @@ export const MarkdownEditorDialog: React.FC<MarkdownEditorDialogProps> = ({
             style={{ "--tw-ring-color": ringColor } as CSSCustomProperties}
           />
 
-          {error && (
+          {error ? (
             <p
               className="text-[10px] text-red-600 mt-1 font-medium"
               role="alert"
             >
-              ⚠️ {error}
+              {error}
             </p>
-          )}
+          ) : null}
         </div>
       </DialogContent>
     </Dialog>

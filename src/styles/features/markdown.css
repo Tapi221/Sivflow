@@ -21,6 +21,11 @@
     margin-top: var(--markdown-blank-line-height);
   }
 
+  .markdownBlockCardView > p[data-markdown-paragraph="true"],
+  .markdownBlockCardView > blockquote p[data-markdown-paragraph="true"] {
+    white-space: break-spaces;
+  }
+
   .blockSurface {
     position: relative;
     background: var(--card-surface, #ffffff);
@@ -38,7 +43,6 @@
     padding-right: var(--card-padding-x, 12px);
   }
 
-  /* Ensure quote blocks never show nested ruled layers */
   .blockSurface.blockquoteNoRuled .ruledLayer,
   .markdownBlockCardView blockquote .ruledLayer {
     display: none;
@@ -74,7 +78,6 @@
     list-style-position: outside;
   }
 
-  /* Remove list indent only for task-list containers so wrapped lines align naturally. */
   .markdownBlockCardView ul.contains-task-list,
   .markdownBlockCardView ul:has(> li.task-list-item),
   .markdownBlockCardView ul:has(> li:has(> input[type="checkbox"])) {

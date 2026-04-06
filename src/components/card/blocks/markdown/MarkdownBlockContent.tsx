@@ -1,9 +1,6 @@
 import { CodeRenderer } from "@/components/card/blocks/code/CodeRenderer";
 import { BlockSurface } from "@/components/card/blocks/core/BlockSurface";
-import {
-  BLOCK_BODY_TEXT_COLOR_CLASS,
-  TEXT_BLOCK_CONTENT_CLASS,
-} from "@/components/card/blocks/text/textBlockStyles";
+import { BLOCK_BODY_TEXT_COLOR_CLASS } from "@/components/card/blocks/text/textBlockStyles";
 import { cn } from "@/lib/utils";
 import React, { useMemo } from "react";
 import ReactMarkdown, { type Components } from "react-markdown";
@@ -64,7 +61,7 @@ const preserveExtraBlankLines = (input: string): string => {
 
     out.push("");
 
-    for (let i = 1; i < blankRun; i += 1) {
+    for (let index = 1; index < blankRun; index += 1) {
       out.push(BLANK_LINE_PLACEHOLDER);
       out.push("");
     }
@@ -78,7 +75,7 @@ const preserveExtraBlankLines = (input: string): string => {
     if (fenceMatch) {
       flushBlankRun();
 
-      const currentFenceChar = fenceMatch[1][0] as "`" | "~";
+      const currentFenceChar = fenceMatch[1]?.[0] as "`" | "~";
       if (!inFence) {
         inFence = true;
         fenceChar = currentFenceChar;
@@ -109,32 +106,33 @@ const hasWhitespace = (s: string) => /\s/.test(s);
 
 const rebuildMailtoQuery = (rawQuery: string): string => {
   const safe = rawQuery.replace(/#/g, "%23");
-
   const pairs = safe.split("&");
   const out: string[] = [];
 
-  for (const p of pairs) {
-    if (!p) continue;
+  for (const pair of pairs) {
+    if (!pair) continue;
 
-    const eq = p.indexOf("=");
-    const kRaw = eq >= 0 ? p.slice(0, eq) : p;
-    const vRaw = eq >= 0 ? p.slice(eq + 1) : "";
+    const eq = pair.indexOf("=");
+    const keyRaw = eq >= 0 ? pair.slice(0, eq) : pair;
+    const valueRaw = eq >= 0 ? pair.slice(eq + 1) : "";
 
-    const safeDecode = (x: string) => {
+    const safeDecode = (value: string) => {
       try {
-        return decodeURIComponent(x);
+        return decodeURIComponent(value);
       } catch {
-        return x;
+        return value;
       }
     };
 
-    const k = safeDecode(kRaw);
-    const v = safeDecode(vRaw);
+    const key = safeDecode(keyRaw);
+    const value = safeDecode(valueRaw);
+    const encode = (source: string) => encodeURIComponent(source);
 
-    const enc = (x: string) => encodeURIComponent(x);
-
-    if (eq >= 0) out.push(`${enc(k)}=${enc(v)}`);
-    else out.push(enc(k));
+    if (eq >= 0) {
+      out.push(`${encode(key)}=${encode(value)}`);
+    } else {
+      out.push(encode(key));
+    }
   }
 
   return out.join("&");
@@ -143,20 +141,18 @@ const rebuildMailtoQuery = (rawQuery: string): string => {
 const sanitizeLinkHref = (href: string | undefined): string | null => {
   if (!href) return null;
 
-  const h0 = href.trim();
-  if (!h0 || hasControlChars(h0)) return null;
+  const raw = href.trim();
+  if (!raw || hasControlChars(raw)) return null;
+  if (raw.startsWith("//")) return null;
 
-  if (h0.startsWith("//")) return null;
-
-  if (h0.startsWith("/") || h0.startsWith("#")) {
-    return hasWhitespace(h0) ? null : h0;
+  if (raw.startsWith("/") || raw.startsWith("#")) {
+    return hasWhitespace(raw) ? null : raw;
   }
 
-  const lower = h0.toLowerCase();
+  const lower = raw.toLowerCase();
 
   if (lower.startsWith("tel:")) {
-    const after = h0.slice(4);
-
+    const after = raw.slice(4);
     if (/[?#]/.test(after)) return null;
 
     const semi = after.indexOf(";");
@@ -165,7 +161,6 @@ const sanitizeLinkHref = (href: string | undefined): string | null => {
 
     const normalizedNum = numPart.replace(/[\s().-]+/g, "");
     if (!normalizedNum) return null;
-
     if (!/^\+?[0-9*#]+$/.test(normalizedNum)) return null;
 
     const paramPart = paramPartRaw.replace(/\s+/g, "");
@@ -175,8 +170,7 @@ const sanitizeLinkHref = (href: string | undefined): string | null => {
   }
 
   if (lower.startsWith("mailto:")) {
-    const after = h0.slice(7);
-
+    const after = raw.slice(7);
     const qIndex = after.indexOf("?");
     const address = qIndex >= 0 ? after.slice(0, qIndex) : after;
     const rawQuery = qIndex >= 0 ? after.slice(qIndex + 1) : "";
@@ -192,12 +186,12 @@ const sanitizeLinkHref = (href: string | undefined): string | null => {
     return `mailto:${address}`;
   }
 
-  if (hasWhitespace(h0)) return null;
+  if (hasWhitespace(raw)) return null;
 
   try {
-    const u = new URL(h0);
-    const ok = ["http:", "https:"].includes(u.protocol);
-    return ok ? u.toString() : null;
+    const url = new URL(raw);
+    const isAllowedProtocol = ["http:", "https:"].includes(url.protocol);
+    return isAllowedProtocol ? url.toString() : null;
   } catch {
     return null;
   }
@@ -206,23 +200,27 @@ const sanitizeLinkHref = (href: string | undefined): string | null => {
 const sanitizeImageSrc = (src: string): string | null => {
   if (!src) return null;
 
-  const s = src.trim();
-  if (!s || hasControlChars(s) || hasWhitespace(s)) return null;
+  const normalized = src.trim();
+  if (!normalized || hasControlChars(normalized) || hasWhitespace(normalized)) {
+    return null;
+  }
 
-  if (s.startsWith("//")) return null;
+  if (normalized.startsWith("//")) return null;
 
-  if (s.startsWith("/")) {
-    const ok = ALLOWED_IMAGE_PATH_PREFIXES.some((p) => s.startsWith(p));
-    return ok ? s : null;
+  if (normalized.startsWith("/")) {
+    const isAllowedPath = ALLOWED_IMAGE_PATH_PREFIXES.some((prefix) =>
+      normalized.startsWith(prefix),
+    );
+    return isAllowedPath ? normalized : null;
   }
 
   try {
-    const u = new URL(s);
+    const url = new URL(normalized);
 
-    if (u.protocol !== "https:") return null;
-    if (!ALLOWED_IMAGE_HOSTS.has(u.hostname)) return null;
+    if (url.protocol !== "https:") return null;
+    if (!ALLOWED_IMAGE_HOSTS.has(url.hostname)) return null;
 
-    return u.toString();
+    return url.toString();
   } catch {
     return null;
   }
@@ -335,9 +333,10 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
         </BlockSurface>
       ),
 
-      p: ({ children }) => (
-        <ParagraphRenderer children={children} bodyStyle={bodyStyle} />
-      ),
+      p: ({ children }) => {
+        return <ParagraphRenderer children={children} bodyStyle={bodyStyle} />;
+      },
+
       del: ({ children }) => <del className="line-through">{children}</del>,
       hr: () => <HrRenderer />,
 
@@ -345,7 +344,10 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
         const safeHref = sanitizeLinkHref(
           typeof href === "string" ? href : undefined,
         );
-        if (!safeHref) return <span className="break-words">{children}</span>;
+
+        if (!safeHref) {
+          return <span className="break-words">{children}</span>;
+        }
 
         const isInternal = safeHref.startsWith("/") || safeHref.startsWith("#");
         const isHttp =
@@ -377,8 +379,8 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
           );
         }
 
-        const safe = sanitizeImageSrc(src);
-        if (!safe) {
+        const safeSrc = sanitizeImageSrc(src);
+        if (!safeSrc) {
           return (
             <span className="text-slate-500">
               [許可されていない画像URLです]
@@ -388,7 +390,7 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
 
         return (
           <img
-            src={safe}
+            src={safeSrc}
             alt={alt}
             title={title}
             loading="lazy"
@@ -463,6 +465,7 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
             style={{
               fontSize: `${TYPE.code.fontSize}px`,
               lineHeight: `var(--card-line-height, ${TYPE.body.lineHeight}px)`,
+              whiteSpace: "normal",
             }}
           >
             {children}
@@ -472,14 +475,15 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
 
       pre: ({ children }) => {
         const nodes = React.Children.toArray(children);
-        const firstEl = nodes.find((n): n is React.ReactElement =>
-          React.isValidElement(n),
+        const firstElement = nodes.find((node): node is React.ReactElement =>
+          React.isValidElement(node),
         );
 
-        if (!firstEl) {
+        if (!firstElement) {
           const raw = extractTextDeep(children)
             .replace(/\r\n/g, "\n")
             .replace(/(?:\n)+$/, "");
+
           return (
             <MarkdownFencedCodeBlock
               code={raw}
@@ -489,14 +493,16 @@ export const MarkdownBlockContent: React.FC<MarkdownBlockContentProps> = ({
           );
         }
 
-        const childProps = firstEl.props as {
+        const childProps = firstElement.props as {
           className?: string;
           children?: React.ReactNode;
         };
+
         const classStr =
           typeof childProps.className === "string" ? childProps.className : "";
         const langMatch = /language-([^\s]+)/.exec(classStr);
         const language = langMatch?.[1] ?? "clike";
+
         const rawCode = extractTextDeep(childProps.children)
           .replace(/\r\n/g, "\n")
           .replace(/(?:\n)+$/, "");
@@ -545,10 +551,11 @@ const ParagraphRenderer = ({
 
   return (
     <p
+      data-markdown-paragraph="true"
       aria-hidden={isBlankSpacer ? true : undefined}
       className={cn(
-        TEXT_BLOCK_CONTENT_CLASS,
-        "m-0 border-none bg-transparent p-0 text-left",
+        "markdownParagraph m-0 border-none bg-transparent p-0 font-serif text-base font-medium text-left break-words [overflow-wrap:anywhere]",
+        BLOCK_BODY_TEXT_COLOR_CLASS,
         isBlankSpacer && "select-none text-transparent",
       )}
       style={bodyStyle}

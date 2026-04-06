@@ -24,6 +24,7 @@ export const DEFAULT_SETTINGS: Partial<UserSettings> = {
   cardEditorHeightPx: null,
   questionDisplayMode: "tap_to_reveal" as const,
   folderSidebarDisplayMode: "auto" as const,
+  markdownTabSize: 2,
   editorBlockSettings: [
     {
       id: "text",
@@ -85,8 +86,10 @@ export const useUserSettings = () => {
       const userSettings =
         (await db.userSettings.get(currentUser.uid)) ||
         (await db.userSettings.where("userId").equals(currentUser.uid).first());
+
       const merged = { ...DEFAULT_SETTINGS, ...(userSettings || {}) };
       const sanitizedProfile = sanitizeProfileImage(merged.profileImage);
+
       return {
         ...merged,
         profileImage: sanitizedProfile.profileImage,
@@ -115,6 +118,7 @@ export const useUserSettings = () => {
       const current =
         (await db.userSettings.get(currentUser.uid)) ||
         (await db.userSettings.where("userId").equals(currentUser.uid).first());
+
       const currentSanitized = sanitizeProfileImage(current?.profileImage);
       if (!currentSanitized.wasBlobRemoteUrl) return;
 
@@ -151,6 +155,7 @@ export const useUserSettings = () => {
         newSettings,
         "profileImage",
       );
+
       let sanitizedProfile = current?.profileImage ?? null;
 
       if (hasProfileImageUpdate) {
@@ -158,6 +163,7 @@ export const useUserSettings = () => {
           newSettings.profileImage,
         );
         sanitizedProfile = profileSanitizeResult.profileImage;
+
         if (import.meta.env.DEV && profileSanitizeResult.wasBlobRemoteUrl) {
           console.warn(
             "[Settings] blocked blob remoteUrl on save; forcing profileImage.remoteUrl=null",
