@@ -1,4 +1,4 @@
-import React, { useEffect, useImperativeHandle } from "react";
+import React, { useEffect, useImperativeHandle, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { PdfPage } from "./PdfPage";
 import {
@@ -81,6 +81,7 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       handleVisibilityChange,
       registerPageRef,
       notifyLayoutChanged,
+      resetNavigation,
       scrollToPage,
       getScrollDiagnostics,
       logScrollDiagnostics,
@@ -97,6 +98,49 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       zoomStep,
       onScaleChange,
     });
+
+    const normalizedSourceUrl =
+      typeof source?.url === "string" ? source.url.trim() : "";
+    const normalizedSourceData =
+      source?.data instanceof Uint8Array ? source.data : null;
+    const normalizedLocalFileId = sourceMeta?.localFileId ?? null;
+
+    const previousSourceIdentityRef = useRef<{
+      url: string;
+      data: Uint8Array | null;
+      localFileId: string | null;
+    } | null>(null);
+
+    useEffect(() => {
+      const nextIdentity = {
+        url: normalizedSourceUrl,
+        data: normalizedSourceData,
+        localFileId: normalizedLocalFileId,
+      };
+
+      const previousIdentity = previousSourceIdentityRef.current;
+      previousSourceIdentityRef.current = nextIdentity;
+
+      if (!previousIdentity) {
+        return;
+      }
+
+      const sourceChanged =
+        previousIdentity.url !== nextIdentity.url ||
+        previousIdentity.data !== nextIdentity.data ||
+        previousIdentity.localFileId !== nextIdentity.localFileId;
+
+      if (!sourceChanged) {
+        return;
+      }
+
+      resetNavigation();
+    }, [
+      normalizedLocalFileId,
+      normalizedSourceData,
+      normalizedSourceUrl,
+      resetNavigation,
+    ]);
 
     useEffect(() => {
       if (!doc) return;

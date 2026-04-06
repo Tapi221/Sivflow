@@ -15,6 +15,7 @@ interface UsePdfCurrentPageResult {
   handleVisibilityChange: (pageNumber: number, ratio: number) => void;
   registerPageRef: (pageNumber: number, el: HTMLDivElement | null) => void;
   notifyLayoutChanged: () => void;
+  resetNavigation: () => void;
   scrollToPage: (page: number) => void;
   getScrollDiagnostics: () => PdfScrollDiagnostics | null;
   logScrollDiagnostics: () => void;
@@ -43,6 +44,23 @@ export const usePdfCurrentPage = ({
   useEffect(() => {
     onPageChangeRef.current = onPageChange;
   }, [onPageChange]);
+
+  const cancelPendingRafs = useCallback(() => {
+    if (scrollRafRef.current !== null) {
+      cancelAnimationFrame(scrollRafRef.current);
+      scrollRafRef.current = null;
+    }
+
+    if (pageChangeRafRef.current !== null) {
+      cancelAnimationFrame(pageChangeRafRef.current);
+      pageChangeRafRef.current = null;
+    }
+
+    if (pageUpdateRafRef.current !== null) {
+      cancelAnimationFrame(pageUpdateRafRef.current);
+      pageUpdateRafRef.current = null;
+    }
+  }, []);
 
   const scheduleOnPageChange = useCallback((page: number) => {
     pendingPageForCallbackRef.current = page;
@@ -170,6 +188,26 @@ export const usePdfCurrentPage = ({
     schedulePageUpdate();
   }, [schedulePageUpdate]);
 
+  const resetNavigation = useCallback(() => {
+    cancelPendingRafs();
+    pendingPageForCallbackRef.current = null;
+    visibilityRatiosRef.current = {};
+    pageRefs.current = [];
+
+    const needsPageReset = currentPageRef.current !== 1;
+    currentPageRef.current = 1;
+    setCurrentPage(1);
+
+    if (needsPageReset) {
+      scheduleOnPageChange(1);
+    }
+
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.scrollTo({ top: 0, behavior: "auto" });
+    }
+  }, [cancelPendingRafs, scheduleOnPageChange]);
+
   const scrollToPage = useCallback(
     (page: number) => {
       const container = scrollContainerRef.current;
@@ -263,24 +301,10 @@ export const usePdfCurrentPage = ({
 
   useEffect(() => {
     return () => {
-      if (scrollRafRef.current !== null) {
-        cancelAnimationFrame(scrollRafRef.current);
-        scrollRafRef.current = null;
-      }
-
-      if (pageChangeRafRef.current !== null) {
-        cancelAnimationFrame(pageChangeRafRef.current);
-        pageChangeRafRef.current = null;
-      }
-
-      if (pageUpdateRafRef.current !== null) {
-        cancelAnimationFrame(pageUpdateRafRef.current);
-        pageUpdateRafRef.current = null;
-      }
-
+      cancelPendingRafs();
       pendingPageForCallbackRef.current = null;
     };
-  }, []);
+  }, [cancelPendingRafs]);
 
   return {
     containerRef,
@@ -290,6 +314,7 @@ export const usePdfCurrentPage = ({
     handleVisibilityChange,
     registerPageRef,
     notifyLayoutChanged,
+    resetNavigation,
     scrollToPage,
     getScrollDiagnostics,
     logScrollDiagnostics,
