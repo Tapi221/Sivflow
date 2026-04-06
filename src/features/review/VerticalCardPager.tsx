@@ -26,12 +26,14 @@ const resolveCardBaseRadius = () => {
   ) {
     return CARD_RADIUS_MD;
   }
+
   return window.matchMedia("(min-width: 768px)").matches
     ? CARD_RADIUS_MD
     : CARD_RADIUS_SM;
 };
 
 const borderRadiusCache = new Map<string, string>();
+
 if (typeof window !== "undefined" && typeof window.matchMedia === "function") {
   window.matchMedia("(min-width: 768px)").addEventListener("change", () => {
     borderRadiusCache.clear();
@@ -48,6 +50,78 @@ const cardBorderRadius = () => {
   return result;
 };
 
+export type VerticalCardPagerItemWidthSpec =
+  | { mode: "fixed"; widthPx: number }
+  | { mode: "stretch" };
+
+type ResolveVerticalCardPagerItemWidthSpecOptions<T> = {
+  card: T;
+  idx: number;
+  isActive: boolean;
+  cardWidth: number;
+  getCardWidth?: (card: T, idx: number, isActive: boolean) => number;
+  getCardWidthSpec?: (
+    card: T,
+    idx: number,
+    isActive: boolean,
+  ) => VerticalCardPagerItemWidthSpec;
+};
+
+const sanitizeVerticalCardPagerItemWidthSpec = (
+  widthSpec: VerticalCardPagerItemWidthSpec,
+): VerticalCardPagerItemWidthSpec => {
+  if (widthSpec.mode === "stretch") {
+    return { mode: "stretch" };
+  }
+
+  return {
+    mode: "fixed",
+    widthPx: Math.max(1, Math.round(widthSpec.widthPx)),
+  };
+};
+
+export const resolveVerticalCardPagerItemWidthSpec = <T,>({
+  card,
+  idx,
+  isActive,
+  cardWidth,
+  getCardWidth,
+  getCardWidthSpec,
+}: ResolveVerticalCardPagerItemWidthSpecOptions<T>): VerticalCardPagerItemWidthSpec => {
+  if (getCardWidthSpec) {
+    return sanitizeVerticalCardPagerItemWidthSpec(
+      getCardWidthSpec(card, idx, isActive),
+    );
+  }
+
+  const resolvedWidthPx = getCardWidth
+    ? getCardWidth(card, idx, isActive)
+    : cardWidth;
+
+  return sanitizeVerticalCardPagerItemWidthSpec({
+    mode: "fixed",
+    widthPx: resolvedWidthPx,
+  });
+};
+
+export const buildVerticalCardPagerItemStyle = (
+  widthSpec: VerticalCardPagerItemWidthSpec,
+): React.CSSProperties => {
+  if (widthSpec.mode === "stretch") {
+    return {
+      width: "100%",
+      maxWidth: "100%",
+      alignSelf: "stretch",
+    };
+  }
+
+  return {
+    width: widthSpec.widthPx,
+    maxWidth: "100%",
+    alignSelf: "center",
+  };
+};
+
 export type VerticalCardPagerProps<T> = {
   cards: T[];
   activeIndex: number;
@@ -57,6 +131,11 @@ export type VerticalCardPagerProps<T> = {
   onFlip?: () => void;
   cardWidth?: number;
   getCardWidth?: (card: T, idx: number, isActive: boolean) => number;
+  getCardWidthSpec?: (
+    card: T,
+    idx: number,
+    isActive: boolean,
+  ) => VerticalCardPagerItemWidthSpec;
   paddingInlinePx?: number;
   paddingBlock?: string | number;
   getKey?: (card: T, idx: number) => string | number;
@@ -75,6 +154,7 @@ const VerticalCardPagerFn = <T,>({
   onFlip,
   cardWidth = DEFAULT_CARD_WIDTH,
   getCardWidth,
+  getCardWidthSpec,
   paddingInlinePx = 16,
   paddingBlock = SCROLL_PADDING,
   getKey,
@@ -93,6 +173,7 @@ const VerticalCardPagerFn = <T,>({
     start: number;
     end: number;
   } | null>(null);
+
   const [visibleRange, setVisibleRange] = useState<{
     start: number;
     end: number;
@@ -117,6 +198,7 @@ const VerticalCardPagerFn = <T,>({
     activeIndex: number;
     offsetWithinCardPx: number;
   } | null>(null);
+
   const previousPreserveKeyRef = useRef<string | null>(preserveKey);
 
   useEffect(() => {
@@ -166,6 +248,7 @@ const VerticalCardPagerFn = <T,>({
     const top = container.scrollTop - VISIBLE_RANGE_OVERSCAN_PX;
     const bottom =
       container.scrollTop + container.clientHeight + VISIBLE_RANGE_OVERSCAN_PX;
+
     const estimatedIndex = Math.max(
       0,
       Math.min(
@@ -175,14 +258,15 @@ const VerticalCardPagerFn = <T,>({
     );
 
     const getItemTop = (idx: number): number | null => {
-      const el = itemRefs.current[idx];
-      if (!el) return null;
-      return el.offsetTop;
+      const element = itemRefs.current[idx];
+      if (!element) return null;
+      return element.offsetTop;
     };
+
     const getItemBottom = (idx: number): number | null => {
-      const el = itemRefs.current[idx];
-      if (!el) return null;
-      return el.offsetTop + el.offsetHeight;
+      const element = itemRefs.current[idx];
+      if (!element) return null;
+      return element.offsetTop + element.offsetHeight;
     };
 
     let start = Math.max(0, estimatedIndex - ACTIVE_INDEX_RENDER_RADIUS);
@@ -192,17 +276,20 @@ const VerticalCardPagerFn = <T,>({
       if (prevBottom == null || prevBottom < top) break;
       start -= 1;
     }
+
     while (start < cards.length) {
       const currentBottom = getItemBottom(start);
       if (currentBottom == null) {
         start += 1;
         continue;
       }
+
       if (currentBottom >= top) break;
       start += 1;
     }
 
     let nextRange: { start: number; end: number } | null = null;
+
     if (start < cards.length) {
       let end = Math.max(start, estimatedIndex + ACTIVE_INDEX_RENDER_RADIUS);
       if (end >= cards.length) end = cards.length - 1;
@@ -212,21 +299,25 @@ const VerticalCardPagerFn = <T,>({
         if (nextTop == null || nextTop > bottom) break;
         end += 1;
       }
+
       while (end >= start) {
         const endTop = getItemTop(end);
         if (endTop != null && endTop <= bottom) break;
         end -= 1;
       }
-      if (end >= start) nextRange = { start, end };
+
+      if (end >= start) {
+        nextRange = { start, end };
+      }
     }
 
     if (nextRange != null) {
-      const sampleEl =
+      const sampleElement =
         itemRefs.current[Math.min(nextRange.end, activeIndexRef.current)];
-      if (sampleEl) {
-        const extent = Math.max(1, sampleEl.offsetHeight + CARD_GAP);
-        avgItemExtentRef.current =
-          avgItemExtentRef.current * 0.8 + extent * 0.2;
+
+      if (sampleElement) {
+        const extent = Math.max(1, sampleElement.offsetHeight + CARD_GAP);
+        avgItemExtentRef.current = avgItemExtentRef.current * 0.8 + extent * 0.2;
       }
     }
 
@@ -239,16 +330,20 @@ const VerticalCardPagerFn = <T,>({
       cards.length - 1,
       currentActiveIndex + ACTIVE_INDEX_RENDER_RADIUS,
     );
+
     const effectiveStart = nextRange
       ? Math.min(nextRange.start, radiusStart)
       : radiusStart;
+
     const effectiveEnd = nextRange
       ? Math.max(nextRange.end, radiusEnd)
       : radiusEnd;
+
     const nextEffective = { start: effectiveStart, end: effectiveEnd };
 
     const prevRange = visibleRangeRef.current;
     const prevEffective = effectiveRenderRangeRef.current;
+
     if (
       prevRange?.start === nextRange?.start &&
       prevRange?.end === nextRange?.end &&
@@ -266,6 +361,7 @@ const VerticalCardPagerFn = <T,>({
 
   const scheduleVisibleRangeUpdate = useCallback(() => {
     if (visibleRangeRafRef.current != null) return;
+
     visibleRangeRafRef.current = window.requestAnimationFrame(() => {
       visibleRangeRafRef.current = null;
       updateVisibleRange();
@@ -290,6 +386,7 @@ const VerticalCardPagerFn = <T,>({
       window.requestAnimationFrame(() => {
         onRenderRangeChangeRef.current?.(null);
       });
+
       return;
     }
 
@@ -315,12 +412,14 @@ const VerticalCardPagerFn = <T,>({
             scheduleVisibleRangeUpdate();
           })
         : null;
+
     observer?.observe(container);
 
     return () => {
       container.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", scheduleVisibleRangeUpdate);
       observer?.disconnect();
+
       if (visibleRangeRafRef.current != null) {
         window.cancelAnimationFrame(visibleRangeRafRef.current);
         visibleRangeRafRef.current = null;
@@ -351,6 +450,7 @@ const VerticalCardPagerFn = <T,>({
     if (!activeElement) return;
 
     const previousSnapshot = scrollAnchorSnapshotRef.current;
+
     const offsetWithinCardPx =
       previousSnapshot?.activeIndex === activeIndex
         ? previousSnapshot.offsetWithinCardPx
@@ -403,21 +503,30 @@ const VerticalCardPagerFn = <T,>({
             visibleRange != null &&
             idx >= visibleRange.start &&
             idx <= visibleRange.end;
+
           const shouldRenderCard =
             disableVirtualization ||
             isVisibleInViewport ||
             Math.abs(idx - activeIndex) <= ACTIVE_INDEX_RENDER_RADIUS;
+
           const key = getKey ? getKey(card, idx) : idx;
-          const width = Math.max(
-            1,
-            getCardWidth ? getCardWidth(card, idx, isActive) : cardWidth,
-          );
+
+          const widthSpec = resolveVerticalCardPagerItemWidthSpec({
+            card,
+            idx,
+            isActive,
+            cardWidth,
+            getCardWidth,
+            getCardWidthSpec,
+          });
+
+          const itemLayoutStyle = buildVerticalCardPagerItemStyle(widthSpec);
 
           return (
             <div
               key={key}
-              ref={(el) => {
-                itemRefs.current[idx] = el;
+              ref={(element) => {
+                itemRefs.current[idx] = element;
               }}
               aria-current={isActive ? "true" : undefined}
               data-card-active={isActive ? "true" : undefined}
@@ -431,8 +540,7 @@ const VerticalCardPagerFn = <T,>({
                   "card-active-chrome--plain card-pager-item--plain",
               )}
               style={{
-                width,
-                maxWidth: "100%",
+                ...itemLayoutStyle,
                 borderRadius: cardBorderRadius(),
               }}
             >

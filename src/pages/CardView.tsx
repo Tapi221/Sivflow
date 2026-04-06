@@ -135,6 +135,7 @@ const CardView = () => {
   }
 
   const showEditWidthControl = isDesktop && state.isGlobalEditing;
+
   const overlayRight = isDesktop
     ? state.isMetaOpen
       ? "calc(var(--ui-panel-width) + 2.75rem)"
@@ -180,6 +181,7 @@ const CardView = () => {
           {DISPLAY_MODE_TRIGGER_LABELS[state.currentDisplayMode]}
         </button>
       </DropdownMenuTrigger>
+
       <DropdownMenuContent align="end" sideOffset={8}>
         <DropdownMenuItem
           onSelect={() => {
@@ -189,6 +191,7 @@ const CardView = () => {
           {state.currentDisplayMode === "fixed" ? "● " : "○ "}
           {DISPLAY_MODE_LABELS.fixed}
         </DropdownMenuItem>
+
         <DropdownMenuItem
           onSelect={() => {
             state.setCurrentDisplayMode("fluid");
@@ -197,7 +200,9 @@ const CardView = () => {
           {state.currentDisplayMode === "fluid" ? "● " : "○ "}
           {DISPLAY_MODE_LABELS.fluid}
         </DropdownMenuItem>
+
         <DropdownMenuSeparator />
+
         <DropdownMenuItem
           onSelect={() => {
             void data
@@ -292,9 +297,9 @@ const CardView = () => {
           cardSetId={cardSetId}
           viewZoomScale={zoom.zoomScale}
           fixedCardWidthPx={zoom.fixedCardWidthPx}
-          fluidAvailableWidthPx={zoom.availableWidthPx}
           onActiveIndexChange={state.handlePagerIndexChange}
           onFlip={state.handleFlip}
+          onEdit={state.handleEdit}
           onToggleUncertainty={state.handleToggleUncertainty}
           onToggleBookmark={state.handleToggleBookmark}
           onSyncStatusChange={state.handleActiveSyncStatusChange}
