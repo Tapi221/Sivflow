@@ -27,6 +27,7 @@ const ImageDiagnostics = lazy(() => import("./pages/ImageDiagnostics"));
 const Gallery = lazy(() => import("./pages/Gallery"));
 const Directory = lazy(() => import("./pages/Directory"));
 const Dictionary = lazy(() => import("./pages/Dictionary"));
+const Questions = lazy(() => import("./pages/Questions"));
 const NotImplementedPlaceholder = lazy(
   () => import("./pages/NotImplementedPlaceholder"),
 );
@@ -332,6 +333,15 @@ const AppContent = () => {
             element={
               <Suspense fallback={<LoadingFallback />}>
                 <Dictionary />
+              </Suspense>
+            }
+          />
+
+          <Route
+            path="questions"
+            element={
+              <Suspense fallback={<LoadingFallback />}>
+                <Questions />
               </Suspense>
             }
           />

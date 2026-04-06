@@ -56,6 +56,30 @@ const DictionaryIcon = () => (
   </svg>
 );
 
+const QuestionIcon = () => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
+    aria-hidden="true"
+  >
+    <path
+      d="M8 11.5V10.8C8 9.9 8.45 9.45 9.05 9.05C9.7 8.62 10.5 8.05 10.5 6.95C10.5 5.43 9.28 4.25 7.75 4.25C6.38 4.25 5.25 5.18 5.02 6.45"
+      stroke="currentColor"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <circle cx="8" cy="13" r="0.7" fill="currentColor" />
+    <path
+      d="M8 1.5C4.41 1.5 1.5 4.41 1.5 8C1.5 11.59 4.41 14.5 8 14.5C11.59 14.5 14.5 11.59 14.5 8C14.5 4.41 11.59 1.5 8 1.5Z"
+      stroke="currentColor"
+      strokeWidth="1.2"
+    />
+  </svg>
+);
+
 const CalendarIcon = () => (
   <svg
     width="16"
@@ -194,6 +218,7 @@ const SettingsIcon = () => (
 const NAV_ITEMS: NavItem[] = [
   { to: "/folders", label: "フォルダ", icon: <FolderIcon /> },
   { to: "/dictionary", label: "辞書", icon: <DictionaryIcon /> },
+  { to: "/questions", label: "疑問集", icon: <QuestionIcon /> },
   { to: "/calendar", label: "カレンダー", icon: <CalendarIcon /> },
   { to: "/gallery", label: "ギャラリー", icon: <GalleryIcon /> },
   { to: "/trash", label: "ゴミ箱", icon: <TrashIcon /> },

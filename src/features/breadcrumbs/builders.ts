@@ -26,6 +26,8 @@ const PAGE_LABELS: Record<string, string> = {
   "pair-mode": "ペアモード",
   "four-choice-mode": "四択モード",
   directory: "ディレクトリ",
+  dictionary: "辞書",
+  questions: "疑問集",
 };
 
 export const areBreadcrumbCrumbsEqual = (
