@@ -6,6 +6,8 @@ import {
   useState,
   type SetStateAction,
 } from "react";
+
+import type { CardSyncStatus } from "@/components/card/shell/cardSyncStatus";
 import { useCardEntity } from "@/hooks/card/useCardEntity";
 import {
   resolveCardSetDisplayMode,
@@ -109,36 +111,23 @@ export const useCardViewState = ({
 
   const currentCardIdRef = useRef<string | null>(null);
   const [isGlobalEditing, setIsGlobalEditing] = useState(false);
-  const [saveSignal, setSaveSignal] = useState(0);
   const [isMetaOpen, setIsMetaOpen] = useState(() => {
     if (typeof window === "undefined") return true;
     return window.localStorage.getItem("card-view.meta-panel-open") !== "false";
   });
-
-  const pendingExitAfterSaveRef = useRef(false);
-  const pendingCreateCardAfterSaveRef = useRef(false);
-  const suppressPagerSyncRef = useRef(false);
-  const lockedIndexRef = useRef<number | null>(null);
-  const saveSelectionCardIdRef = useRef<string | null>(null);
-  const suppressPagerUnlockTimerRef = useRef<number | null>(null);
   const autoInitializedCardSetIdsRef = useRef<Set<string>>(new Set());
   const [currentDisplayMode, setCurrentDisplayModeState] =
     useState<CardDisplayMode>(() =>
       resolveCardSetDisplayMode(cardSetId, defaultDisplayMode),
     );
+  const [activeSyncStatus, setActiveSyncStatus] =
+    useState<CardSyncStatus | null>(null);
 
   useEffect(() => {
     setCurrentDisplayModeState(
       resolveCardSetDisplayMode(cardSetId, defaultDisplayMode),
     );
   }, [cardSetId, defaultDisplayMode]);
-
-  const clearSuppressPagerUnlockTimer = useCallback(() => {
-    if (suppressPagerUnlockTimerRef.current != null) {
-      window.clearTimeout(suppressPagerUnlockTimerRef.current);
-      suppressPagerUnlockTimerRef.current = null;
-    }
-  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -199,42 +188,6 @@ export const useCardViewState = ({
     [initialIndex, sourceKey, targetResolvedIndex],
   );
 
-  const lockSelectionToCard = useCallback(
-    (cardId: string | null) => {
-      if (!cardId) return;
-
-      const nextIndex = cardIndexById.get(cardId);
-      suppressPagerSyncRef.current = true;
-      if (typeof nextIndex !== "number") return;
-
-      setPendingFocusState({
-        sourceKey,
-        value: null,
-      });
-
-      setCurrentIndexState({
-        sourceKey,
-        value: nextIndex,
-      });
-
-      lockedIndexRef.current = nextIndex;
-    },
-    [cardIndexById, sourceKey],
-  );
-
-  const releaseSelectionLock = useCallback(() => {
-    clearSuppressPagerUnlockTimer();
-    suppressPagerSyncRef.current = false;
-    lockedIndexRef.current = null;
-  }, [clearSuppressPagerUnlockTimer]);
-
-  useEffect(
-    () => () => {
-      clearSuppressPagerUnlockTimer();
-    },
-    [clearSuppressPagerUnlockTimer],
-  );
-
   useEffect(() => {
     window.dispatchEvent(
       new CustomEvent("cardview:editing-change", { detail: isGlobalEditing }),
@@ -263,6 +216,10 @@ export const useCardViewState = ({
   useEffect(() => {
     currentCardIdRef.current = currentCardId;
   }, [currentCardId]);
+
+  useEffect(() => {
+    setActiveSyncStatus(null);
+  }, [currentCardId, isGlobalEditing, sourceKey]);
 
   const isFlipped = flippedCardIds.has(currentCardId ?? "");
 
@@ -414,30 +371,6 @@ export const useCardViewState = ({
     [updateCard],
   );
 
-  const requestSave = useCallback(() => {
-    setSaveSignal((prev) => prev + 1);
-  }, []);
-
-  const requestSaveAndLockSelection = useCallback(() => {
-    const selectedId = currentCardIdRef.current;
-    if (selectedId) {
-      saveSelectionCardIdRef.current = selectedId;
-      lockSelectionToCard(selectedId);
-    }
-    requestSave();
-  }, [lockSelectionToCard, requestSave]);
-
-  const finishSaveSelectionLock = useCallback(() => {
-    saveSelectionCardIdRef.current = null;
-    releaseSelectionLock();
-  }, [releaseSelectionLock]);
-
-  useEffect(() => {
-    const lockedCardId = saveSelectionCardIdRef.current;
-    if (!lockedCardId) return;
-    lockSelectionToCard(lockedCardId);
-  }, [cardIndexById, lockSelectionToCard]);
-
   const handleToggleViewMode = useCallback(() => {
     const targetId = selectedCard?.id ?? null;
 
@@ -446,43 +379,16 @@ export const useCardViewState = ({
       value: targetId,
     });
 
-    suppressPagerSyncRef.current = true;
-    lockedIndexRef.current =
-      targetId != null ? (cardIndexById.get(targetId) ?? null) : null;
-
     setFlippedState({
       sourceKey,
       ids: new Set<string>(),
     });
 
-    if (isGlobalEditing) {
-      pendingExitAfterSaveRef.current = true;
-      requestSaveAndLockSelection();
-      return;
-    }
-
-    setIsGlobalEditing(true);
-  }, [
-    selectedCard?.id,
-    sourceKey,
-    cardIndexById,
-    isGlobalEditing,
-    requestSaveAndLockSelection,
-  ]);
+    setIsGlobalEditing((prev) => !prev);
+  }, [selectedCard?.id, sourceKey]);
 
   const handlePagerIndexChange = useCallback(
     (idx: number) => {
-      const isSaveSelectionLockActive = saveSelectionCardIdRef.current != null;
-
-      if (
-        isSaveSelectionLockActive &&
-        suppressPagerSyncRef.current &&
-        lockedIndexRef.current != null &&
-        idx !== lockedIndexRef.current
-      ) {
-        return;
-      }
-
       setPendingFocusState({
         sourceKey,
         value: null,
@@ -504,6 +410,17 @@ export const useCardViewState = ({
     [cardSetId],
   );
 
+  const handleActiveSyncStatusChange = useCallback(
+    (status: CardSyncStatus | null) => {
+      setActiveSyncStatus(status);
+    },
+    [],
+  );
+
+  const handleRetryActiveSync = useCallback(async () => {
+    await activeSyncStatus?.retry?.();
+  }, [activeSyncStatus]);
+
   return {
     currentIndex: currentIndexBase,
     currentDisplayMode,
@@ -514,15 +431,11 @@ export const useCardViewState = ({
     flippedCardIds,
     isGlobalEditing,
     setIsGlobalEditing,
-    saveSignal,
-    setSaveSignal,
     isMetaOpen,
     setIsMetaOpen,
-    pendingExitAfterSaveRef,
-    pendingCreateCardAfterSaveRef,
-    requestSave,
-    requestSaveAndLockSelection,
-    finishSaveSelectionLock,
+    activeSyncStatus,
+    handleActiveSyncStatusChange,
+    handleRetryActiveSync,
     selectedCard,
     cardsForPager,
     createAndFocusCard,

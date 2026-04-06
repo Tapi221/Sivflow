@@ -1,4 +1,11 @@
-import React, { memo, useCallback, useMemo, useState } from "react";
+import React, {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import { BlockEditModeContext } from "@/components/card/blocks/core/BlockEditModeContext";
 import { SharedCardContent } from "@/components/card/common/SharedCardContent";
@@ -23,6 +30,8 @@ import {
   type CardPresentationContextInput,
   type CardPresentationState,
 } from "@/components/card/presentation/cardPresentation";
+import { CardSyncStatusPill } from "@/components/card/shell/CardSyncStatusPill";
+import type { CardSyncStatus } from "@/components/card/shell/cardSyncStatus";
 import { CardWorkspaceShell } from "@/components/card/shell/CardWorkspaceShell";
 import { CardEditorPaneMediaDialogs } from "@/components/folder/panes/CardEditorPaneMediaDialogs";
 import { useCardEditorPaneController } from "@/components/folder/panes/useCardEditorPaneController";
@@ -57,14 +66,11 @@ interface CardEditorPaneProps {
   externalToolbarMountQ?: HTMLDivElement | null;
   externalToolbarMountA?: HTMLDivElement | null;
   settingsOverride?: Partial<CardEditorPaneSettings> | null;
-  saveSignal?: number;
-  saveSignalEnabled?: boolean;
-  hideFooterActions?: boolean;
   embeddedInPager?: boolean;
   pairGapClassName?: string;
   presentationContext?: CardPresentationContextInput;
-  onRequestCloseEditing?: () => void;
   showResizeHandle?: boolean;
+  onSyncStatusChange?: (status: CardSyncStatus | null) => void;
 }
 
 type FlashcardCardLike = Record<string, unknown> & {
@@ -86,6 +92,29 @@ const isCardEntity = (value: unknown): value is Card =>
 
 const toFlashcardCardLike = (card: unknown): FlashcardCardLike =>
   (isRecord(card) ? card : {}) as FlashcardCardLike;
+
+const toTimeMs = (value: unknown) => {
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value.getTime();
+  }
+
+  if (
+    typeof value === "object" &&
+    value !== null &&
+    "toDate" in value &&
+    typeof (value as { toDate?: unknown }).toDate === "function"
+  ) {
+    const nextDate = (value as { toDate: () => Date }).toDate();
+    return Number.isNaN(nextDate.getTime()) ? null : nextDate.getTime();
+  }
+
+  if (typeof value === "string" || typeof value === "number") {
+    const nextDate = new Date(value);
+    return Number.isNaN(nextDate.getTime()) ? null : nextDate.getTime();
+  }
+
+  return null;
+};
 
 type EditorSidePaneProps = {
   side: "question" | "answer";
@@ -288,14 +317,11 @@ export const CardEditorPane = ({
   externalToolbarMountQ = null,
   externalToolbarMountA = null,
   settingsOverride = null,
-  saveSignal,
-  saveSignalEnabled = true,
-  hideFooterActions = false,
   embeddedInPager = false,
   pairGapClassName = "gap-6",
   presentationContext,
-  onRequestCloseEditing,
   showResizeHandle: showResizeHandleProp = true,
+  onSyncStatusChange,
 }: CardEditorPaneProps) => {
   const controller = useCardEditorPaneController({
     selectedCardId,
@@ -305,10 +331,7 @@ export const CardEditorPane = ({
     autoEdit,
     onCardUpdated,
     onSelectCardId,
-    onRequestCloseEditing,
     settingsOverride,
-    saveSignal,
-    saveSignalEnabled,
   });
 
   const { settings, isMetaOpen, session, layout, content, actions } =
@@ -323,15 +346,28 @@ export const CardEditorPane = ({
     setIsFlipped,
     isEditing,
     setIsEditing,
-    isSaving,
-    isAutosaving,
-    isDirty,
+    lastSavedAt,
     saveError,
+    flushDraft,
     handleCancel,
     handleToggleBookmark,
     handleToggleUncertainty,
     panelCard,
   } = session;
+
+  const [isRetryingSync, setIsRetryingSync] = useState(false);
+  const [showRetryErrorState, setShowRetryErrorState] = useState(false);
+
+  useEffect(() => {
+    if (saveError) {
+      setShowRetryErrorState(true);
+      return;
+    }
+
+    if (!isRetryingSync) {
+      setShowRetryErrorState(false);
+    }
+  }, [isRetryingSync, saveError]);
 
   const cardPresentationContext = useMemo<CardPresentationContext>(() => {
     const isCurrentCard = presentationContext?.isCurrentCard ?? !embeddedInPager;
@@ -341,8 +377,7 @@ export const CardEditorPane = ({
       isCurrentCard,
       isEditing,
       isStandaloneEditor: presentationContext?.isStandaloneEditor ?? false,
-      hasFocusWithin:
-        presentationContext?.hasFocusWithin ?? isCurrentCard,
+      hasFocusWithin: presentationContext?.hasFocusWithin ?? isCurrentCard,
     };
   }, [
     embeddedInPager,
@@ -381,7 +416,7 @@ export const CardEditorPane = ({
     setReferenceItems,
   } = content;
 
-  const { handleSaveEditing, metaPanel } = actions;
+  const { metaPanel } = actions;
 
   const [toolbarMountQInternal, setToolbarMountQInternal] =
     useState<HTMLDivElement | null>(null);
@@ -473,6 +508,83 @@ export const CardEditorPane = ({
   const selectedCardEntity = isCardEntity(selectedCard) ? selectedCard : null;
   const panelCardEntity = isCardEntity(panelCard) ? panelCard : null;
   const flashcardCard = selectedCard ? toFlashcardCardLike(selectedCard) : null;
+
+  const fallbackLastSyncedAtMs = useMemo(() => {
+    return (
+      lastSavedAt?.getTime() ??
+      toTimeMs(
+        (selectedCardEntity as { updatedAt?: unknown } | null)?.updatedAt,
+      ) ??
+      toTimeMs(
+        (selectedCardEntity as { createdAt?: unknown } | null)?.createdAt,
+      ) ??
+      null
+    );
+  }, [lastSavedAt, selectedCardEntity]);
+
+  const handleRetrySync = useCallback(async () => {
+    if (!showRetryErrorState) return;
+
+    setIsRetryingSync(true);
+    try {
+      const saved = await flushDraft({
+        reason: "autosave",
+        showSuccessToast: false,
+      });
+
+      if (saved) {
+        setShowRetryErrorState(false);
+      }
+    } finally {
+      setIsRetryingSync(false);
+    }
+  }, [flushDraft, showRetryErrorState]);
+
+  const syncStatus = useMemo<CardSyncStatus>(
+    () => ({
+      lastSyncedAtMs: fallbackLastSyncedAtMs,
+      hasError: showRetryErrorState,
+      isRetrying: isRetryingSync,
+      retry: showRetryErrorState ? handleRetrySync : null,
+    }),
+    [
+      fallbackLastSyncedAtMs,
+      handleRetrySync,
+      isRetryingSync,
+      showRetryErrorState,
+    ],
+  );
+
+  useEffect(() => {
+    if (!onSyncStatusChange) return;
+    onSyncStatusChange(syncStatus);
+
+    return () => {
+      onSyncStatusChange(null);
+    };
+  }, [onSyncStatusChange, syncStatus]);
+
+  const previousIsCurrentCardRef = useRef(cardPresentationContext.isCurrentCard);
+  useEffect(() => {
+    const wasCurrentCard = previousIsCurrentCardRef.current;
+    const isCurrentCard = cardPresentationContext.isCurrentCard;
+    previousIsCurrentCardRef.current = isCurrentCard;
+
+    if (!embeddedInPager) return;
+    if (!wasCurrentCard || isCurrentCard) return;
+    if (!isEditing || !draft) return;
+
+    void flushDraft({
+      reason: "switch",
+      showSuccessToast: false,
+    });
+  }, [
+    cardPresentationContext.isCurrentCard,
+    draft,
+    embeddedInPager,
+    flushDraft,
+    isEditing,
+  ]);
 
   const editorActionsTopLeft = useMemo(
     () =>
@@ -576,6 +688,30 @@ export const CardEditorPane = ({
       />
     ) : null;
 
+  const syncStatusRight = hideMetaPanel
+    ? "calc(var(--ui-space-1) + 2.75rem)"
+    : isMetaOpen
+      ? "calc(var(--ui-panel-width) + 2.75rem)"
+      : "calc(var(--ui-space-1) + 2.75rem)";
+
+  const syncStatusOverlay = !embeddedInPager ? (
+    <div
+      className="pointer-events-none absolute top-3 z-20 flex"
+      style={{
+        right: syncStatusRight,
+        transform: "none",
+      }}
+    >
+      <CardSyncStatusPill
+        lastSyncedAtMs={syncStatus.lastSyncedAtMs}
+        hasError={syncStatus.hasError}
+        isRetrying={syncStatus.isRetrying}
+        canRetry={syncStatus.retry != null}
+        onRetry={syncStatus.retry ?? undefined}
+      />
+    </div>
+  ) : null;
+
   return (
     <BlockEditModeContext.Provider value={true}>
       <>
@@ -592,6 +728,7 @@ export const CardEditorPane = ({
               : "h-full overflow-hidden",
           )}
           widthControl={widthControlProps}
+          overlayChildren={syncStatusOverlay}
           isMetaOpen={isMetaOpen}
           onToggleMetaOpen={hideMetaPanel ? undefined : actions.toggleMetaOpen}
           hideMetaToggle={hideMetaPanel}
@@ -702,28 +839,6 @@ export const CardEditorPane = ({
                   actionsTopRight={answerActionsTopRight}
                 />
               </div>
-
-              {!hideFooterActions && (
-                <div className="sticky bottom-4 flex w-full items-center justify-end gap-2">
-                  {saveError ? (
-                    <div className="mr-auto flex items-center text-[11px] text-rose-600">
-                      自動保存に失敗しました
-                    </div>
-                  ) : isAutosaving ? (
-                    <div className="mr-auto flex items-center text-[11px] text-slate-400">
-                      自動保存中...
-                    </div>
-                  ) : null}
-                  <button
-                    type="button"
-                    className="h-9 rounded-full bg-black px-6 text-white hover:opacity-90 disabled:opacity-50"
-                    onClick={() => void handleSaveEditing()}
-                    disabled={Boolean(isSaving && !isDirty)}
-                  >
-                    完了
-                  </button>
-                </div>
-              )}
             </div>
           ) : (
             flashcardCard && (

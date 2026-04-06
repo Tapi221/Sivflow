@@ -1,9 +1,19 @@
+import type { CardSyncStatus } from "@/components/card/shell/cardSyncStatus";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getCardText } from "@/domain/card/content";
 import {
   ACTIVE_INDEX_RENDER_RADIUS,
   VerticalCardPager,
 } from "@/features/review/VerticalCardPager";
-import { getCardText } from "@/domain/card/content";
+import { useAuthSession } from "@/contexts/AuthContext";
+import { useCardImagePreloader } from "@/hooks/card/useCardImagePreloader";
+import { DesktopCardSurface } from "@/pages/card-view/components/DesktopCardSurface";
+import {
+  CARDVIEW_NATURAL_INDEX_COMMIT_DELAY_EDIT_MS,
+  CARDVIEW_NATURAL_INDEX_COMMIT_DELAY_VIEW_MS,
+  CARDVIEW_PAGER_PADDING_BLOCK,
+  CARDVIEW_PAGER_PADDING_INLINE,
+} from "@/pages/card-view/constants";
 import type { Card, UserSettings } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -61,16 +71,6 @@ const CardLoadingPreview = ({ card }: { card: Card }) => {
   );
 };
 
-import { useAuthSession } from "@/contexts/AuthContext";
-import { useCardImagePreloader } from "@/hooks/card/useCardImagePreloader";
-import { DesktopCardSurface } from "@/pages/card-view/components/DesktopCardSurface";
-import {
-  CARDVIEW_NATURAL_INDEX_COMMIT_DELAY_EDIT_MS,
-  CARDVIEW_NATURAL_INDEX_COMMIT_DELAY_VIEW_MS,
-  CARDVIEW_PAGER_PADDING_BLOCK,
-  CARDVIEW_PAGER_PADDING_INLINE,
-} from "@/pages/card-view/constants";
-
 interface CardViewDesktopProps {
   isLoading: boolean;
   isGlobalEditing: boolean;
@@ -85,12 +85,12 @@ interface CardViewDesktopProps {
   currentDisplayMode: CardDisplayMode;
   folderId: string | null;
   cardSetId: string | null;
-  saveSignal: number;
   onActiveIndexChange: (idx: number) => void;
   onFlip: () => void;
   onEdit: () => void;
   onToggleUncertainty: (card: Card) => void | Promise<void>;
   onToggleBookmark: (card: Card) => void | Promise<void>;
+  onSyncStatusChange: (status: CardSyncStatus | null) => void;
 }
 
 export const CardViewDesktop = ({
@@ -107,12 +107,12 @@ export const CardViewDesktop = ({
   currentDisplayMode,
   folderId,
   cardSetId,
-  saveSignal,
   onActiveIndexChange,
   onFlip,
   onEdit,
   onToggleUncertainty,
   onToggleBookmark,
+  onSyncStatusChange,
 }: CardViewDesktopProps) => {
   const { currentUser } = useAuthSession();
   const effectiveEditPaneWidthPx = editPaneWidthPx;
@@ -181,11 +181,11 @@ export const CardViewDesktop = ({
           folderId={folderId}
           cardSetId={cardSetId}
           cardsOverride={editingCardsOverride}
-          saveSignal={saveSignal}
           onFlip={onFlip}
           onEdit={onEdit}
           onToggleUncertainty={onToggleUncertainty}
           onToggleBookmark={onToggleBookmark}
+          onSyncStatusChange={onSyncStatusChange}
         />
       );
     },
@@ -195,11 +195,11 @@ export const CardViewDesktop = ({
       folderId,
       cardSetId,
       editingCardsOverride,
-      saveSignal,
       onFlip,
       onEdit,
       onToggleUncertainty,
       onToggleBookmark,
+      onSyncStatusChange,
       settings,
       effectiveEditPaneWidthPx,
       effectiveCardWidthPx,

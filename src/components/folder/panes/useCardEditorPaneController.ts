@@ -3,11 +3,11 @@ import React from "react";
 import { useCardEditorContentController } from "@/components/card/editor/useCardEditorContentController";
 import { useCardEditorSession } from "@/components/card/editor/useCardEditorSession";
 import { useLayoutRowsController } from "@/components/card/editor/useLayoutRowsController";
+import { useToast } from "@/contexts/ToastContext";
 import { DEFAULT_LAYOUT_ROWS } from "@/domain/card/extraRows";
 import { useCards } from "@/hooks/card/useCards";
 import { useTags } from "@/hooks/settings/useTags";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
-import { useToast } from "@/contexts/ToastContext";
 import {
   createLatestReviewLogPatch,
   createReviewPatchFromRating,
@@ -25,7 +25,6 @@ type EditingDraftPatchDetail = {
   patch: Partial<Pick<Card, "title" | "isDraft">> & { tags?: string[] };
 };
 
-const CARDVIEW_SAVE_FINISHED_EVENT = "cardview:save-finished";
 const CARDVIEW_EDITING_DRAFT_PATCH_EVENT = "cardview:editing-draft-patch";
 const META_PANEL_OPEN_STORAGE_KEY = "card-editor.meta-panel-open";
 
@@ -37,10 +36,7 @@ type UseCardEditorPaneControllerParams = {
   autoEdit?: boolean;
   onCardUpdated?: () => void;
   onSelectCardId?: (cardId: string) => void;
-  onRequestCloseEditing?: () => void;
   settingsOverride?: Partial<UserSettings> | null;
-  saveSignal?: number;
-  saveSignalEnabled?: boolean;
 };
 
 export const useCardEditorPaneController = ({
@@ -51,10 +47,7 @@ export const useCardEditorPaneController = ({
   autoEdit,
   onCardUpdated,
   onSelectCardId,
-  onRequestCloseEditing,
   settingsOverride,
-  saveSignal,
-  saveSignalEnabled = true,
 }: UseCardEditorPaneControllerParams) => {
   const { settings: settingsFromHook } = useUserSettings();
   const settings = settingsOverride ?? settingsFromHook;
@@ -134,7 +127,6 @@ export const useCardEditorPaneController = ({
     isEditing: sessionIsEditing,
     setDraft: setSessionDraft,
     flushDraft,
-    handleCancel,
     handleTitleInputChange,
     handleUpdateTags,
     handleToggleDraft,
@@ -201,66 +193,6 @@ export const useCardEditorPaneController = ({
   const toggleMetaOpen = React.useCallback(() => {
     setIsMetaOpen((prev) => !prev);
   }, []);
-
-  const handleCancelEditing = React.useCallback(() => {
-    handleCancel();
-    onRequestCloseEditing?.();
-  }, [handleCancel, onRequestCloseEditing]);
-
-  const handleSaveEditing = React.useCallback(async (): Promise<boolean> => {
-    const saved = await flushDraft({
-      reason: "manual",
-      exitEditing: true,
-      showSuccessToast: true,
-    });
-    if (saved) {
-      onRequestCloseEditing?.();
-    }
-    return saved;
-  }, [flushDraft, onRequestCloseEditing]);
-
-  const dispatchCardViewSaveFinished = React.useCallback(
-    (saved: boolean, detail?: { signal?: number }) => {
-      if (typeof window === "undefined") return;
-      window.dispatchEvent(
-        new CustomEvent(CARDVIEW_SAVE_FINISHED_EVENT, {
-          detail: { saved, signal: detail?.signal },
-        }),
-      );
-    },
-    [],
-  );
-
-  const prevSaveSignalRef = React.useRef<number | undefined>(saveSignal);
-  React.useEffect(() => {
-    if (!saveSignalEnabled) return;
-    if (saveSignal == null) return;
-    if (prevSaveSignalRef.current === saveSignal) return;
-    prevSaveSignalRef.current = saveSignal;
-
-    const eventDetail = {
-      signal: saveSignal,
-    };
-
-    if (!sessionIsEditing) {
-      dispatchCardViewSaveFinished(true, eventDetail);
-      return;
-    }
-
-    void (async () => {
-      const saved = await flushDraft({
-        reason: "manual",
-        showSuccessToast: false,
-      });
-      dispatchCardViewSaveFinished(saved, eventDetail);
-    })();
-  }, [
-    dispatchCardViewSaveFinished,
-    flushDraft,
-    saveSignal,
-    saveSignalEnabled,
-    sessionIsEditing,
-  ]);
 
   const onAddReviewLog = React.useCallback(
     ({ reviewedAt, rating, durationMinutes }) => {
@@ -394,11 +326,9 @@ export const useCardEditorPaneController = ({
   const actions = React.useMemo(
     () => ({
       toggleMetaOpen,
-      handleCancelEditing,
-      handleSaveEditing,
       metaPanel: metaPanelActions,
     }),
-    [handleCancelEditing, handleSaveEditing, metaPanelActions, toggleMetaOpen],
+    [metaPanelActions, toggleMetaOpen],
   );
 
   return {

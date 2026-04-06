@@ -1,3 +1,5 @@
+import { CardSyncStatusPill } from "@/components/card/shell/CardSyncStatusPill";
+import { CardWorkspaceShell } from "@/components/card/shell/CardWorkspaceShell";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -5,16 +7,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { CardWorkspaceShell } from "@/components/card/shell/CardWorkspaceShell";
 import { useBreadcrumbContext } from "@/contexts/BreadcrumbContext";
 import { useToast } from "@/contexts/ToastContext";
 import { useIsDesktopRuntime } from "@/hooks/platform/useIsDesktopRuntime";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
-import { CARD_PANE_WIDTH_STEP_PX } from "./card-view/constants";
 import { CardViewDesktop } from "./card-view/components/CardViewDesktop";
 import { CardViewMetaPanel } from "./card-view/components/CardViewMetaPanel";
 import { CardViewMobile } from "./card-view/components/CardViewMobile";
+import { CARD_PANE_WIDTH_STEP_PX } from "./card-view/constants";
 import { useCardViewBreadcrumbs } from "./card-view/hooks/useCardViewBreadcrumbs";
 import { useCardViewData } from "./card-view/hooks/useCardViewData";
 import { useCardViewPaneWidth } from "./card-view/hooks/useCardViewPaneWidth";
@@ -30,6 +31,29 @@ const DISPLAY_MODE_LABELS: Record<CardDisplayMode, string> = {
 const DISPLAY_MODE_TRIGGER_LABELS: Record<CardDisplayMode, string> = {
   fixed: "固定表示",
   fluid: "読みやすい",
+};
+
+const toTimeMs = (value: unknown) => {
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value.getTime();
+  }
+
+  if (
+    typeof value === "object" &&
+    value !== null &&
+    "toDate" in value &&
+    typeof (value as { toDate?: unknown }).toDate === "function"
+  ) {
+    const nextDate = (value as { toDate: () => Date }).toDate();
+    return Number.isNaN(nextDate.getTime()) ? null : nextDate.getTime();
+  }
+
+  if (typeof value === "string" || typeof value === "number") {
+    const nextDate = new Date(value);
+    return Number.isNaN(nextDate.getTime()) ? null : nextDate.getTime();
+  }
+
+  return null;
 };
 
 const CardView = () => {
@@ -90,13 +114,6 @@ const CardView = () => {
   useCardViewWindowEvents({
     handleToggleViewMode: state.handleToggleViewMode,
     createAndFocusCard: state.createAndFocusCard,
-    isGlobalEditing: state.isGlobalEditing,
-    setIsGlobalEditing: state.setIsGlobalEditing,
-    requestSave: state.requestSave,
-    requestSaveAndLockSelection: state.requestSaveAndLockSelection,
-    finishSaveSelectionLock: state.finishSaveSelectionLock,
-    pendingExitAfterSaveRef: state.pendingExitAfterSaveRef,
-    pendingCreateCardAfterSaveRef: state.pendingCreateCardAfterSaveRef,
   });
 
   if (!folderId && !cardSetId) {
@@ -110,7 +127,7 @@ const CardView = () => {
   }
 
   const showWidthControl = isDesktop;
-  const displayModeButtonRight = isDesktop
+  const overlayRight = isDesktop
     ? state.isMetaOpen
       ? "calc(var(--ui-panel-width) + 2.75rem)"
       : "calc(var(--ui-space-1) + 2.75rem)"
@@ -134,16 +151,18 @@ const CardView = () => {
       }
     : null;
 
-  const displayModeOverlay = cardSetId ? (
+  const resolvedLastSyncedAtMs =
+    state.activeSyncStatus?.lastSyncedAtMs ??
+    toTimeMs((state.selectedCard as { updatedAt?: unknown } | null)?.updatedAt) ??
+    toTimeMs((state.selectedCard as { createdAt?: unknown } | null)?.createdAt) ??
+    null;
+
+  const displayModeControl = cardSetId ? (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="pointer-events-auto absolute top-3 z-20 inline-flex h-8 items-center rounded-full bg-[var(--sidebar-bg)] px-3 text-xs font-medium text-[#334155] surface-control-convex hover:bg-[var(--sidebar-active-bg)]"
-          style={{
-            right: displayModeButtonRight,
-            transform: "none",
-          }}
+          className="pointer-events-auto inline-flex h-8 items-center rounded-full bg-[var(--sidebar-bg)] px-3 text-xs font-medium text-[#334155] surface-control-convex hover:bg-[var(--sidebar-active-bg)]"
           aria-label="表示モード"
         >
           {DISPLAY_MODE_TRIGGER_LABELS[state.currentDisplayMode]}
@@ -188,13 +207,32 @@ const CardView = () => {
     </DropdownMenu>
   ) : null;
 
+  const overlayChildren = isDesktop ? (
+    <div
+      className="pointer-events-none absolute top-3 z-20 flex items-center gap-2"
+      style={{
+        right: overlayRight,
+        transform: "none",
+      }}
+    >
+      <CardSyncStatusPill
+        lastSyncedAtMs={resolvedLastSyncedAtMs}
+        hasError={state.activeSyncStatus?.hasError ?? false}
+        isRetrying={state.activeSyncStatus?.isRetrying ?? false}
+        canRetry={state.activeSyncStatus?.retry != null}
+        onRetry={state.handleRetryActiveSync}
+      />
+      {displayModeControl}
+    </div>
+  ) : null;
+
   return (
     <CardWorkspaceShell
       containerClassName="h-full overflow-hidden bg-[#F5F7F8] pt-0 card-editor-right-pane-font"
       shellClassName="h-full"
       widthControl={widthControl}
       widthControlClassName="hidden md:flex"
-      overlayChildren={displayModeOverlay}
+      overlayChildren={overlayChildren}
       isMetaOpen={state.isMetaOpen}
       onToggleMetaOpen={() => state.setIsMetaOpen((prev) => !prev)}
       metaToggleClassName="hidden md:grid"
@@ -226,12 +264,12 @@ const CardView = () => {
           currentDisplayMode={state.currentDisplayMode}
           folderId={folderId}
           cardSetId={cardSetId}
-          saveSignal={state.saveSignal}
           onActiveIndexChange={state.handlePagerIndexChange}
           onFlip={state.handleFlip}
           onEdit={state.handleEdit}
           onToggleUncertainty={state.handleToggleUncertainty}
           onToggleBookmark={state.handleToggleBookmark}
+          onSyncStatusChange={state.handleActiveSyncStatusChange}
         />
       ) : (
         <CardViewMobile

@@ -1,4 +1,5 @@
 import { CANONICAL_CARD_WIDTH } from "@/components/card/common/constants";
+import type { CardSyncStatus } from "@/components/card/shell/cardSyncStatus";
 import { Flashcard } from "@/components/card/frame/Flashcard";
 import { CardEditorPane } from "@/components/folder/panes/CardEditorPane";
 import type { Card, UserSettings } from "@/types";
@@ -17,11 +18,11 @@ export interface DesktopCardSurfaceProps {
   folderId: string | null;
   cardSetId: string | null;
   cardsOverride?: Card[];
-  saveSignal: number;
   onFlip: () => void;
   onEdit: () => void;
   onToggleUncertainty: (card: Card) => void | Promise<void>;
   onToggleBookmark: (card: Card) => void | Promise<void>;
+  onSyncStatusChange: (status: CardSyncStatus | null) => void;
 }
 
 const DesktopCardSurfaceInner = ({
@@ -36,11 +37,11 @@ const DesktopCardSurfaceInner = ({
   folderId,
   cardSetId,
   cardsOverride,
-  saveSignal,
   onFlip,
   onEdit,
   onToggleUncertainty,
   onToggleBookmark,
+  onSyncStatusChange,
 }: DesktopCardSurfaceProps) => {
   const [hasFocusWithin, setHasFocusWithin] = React.useState(false);
 
@@ -75,6 +76,19 @@ const DesktopCardSurfaceInner = ({
   if (isGlobalEditing) {
     const canInteractWithEditor = isActive || hasFocusWithin;
 
+    const handleSyncStatusForward = React.useCallback(
+      (status: CardSyncStatus | null) => {
+        if (!canInteractWithEditor) return;
+        onSyncStatusChange(status);
+      },
+      [canInteractWithEditor, onSyncStatusChange],
+    );
+
+    React.useEffect(() => {
+      if (canInteractWithEditor) return;
+      onSyncStatusChange(null);
+    }, [canInteractWithEditor, onSyncStatusChange]);
+
     return (
       <div
         className="w-full overflow-visible"
@@ -96,9 +110,6 @@ const DesktopCardSurfaceInner = ({
           hideMetaPanel
           dockToolbarsToTop
           hideBlockToolbars={!canInteractWithEditor}
-          saveSignal={saveSignal}
-          saveSignalEnabled={isActive}
-          hideFooterActions
           embeddedInPager
           presentationContext={{
             isCurrentCard: isActive,
@@ -108,6 +119,7 @@ const DesktopCardSurfaceInner = ({
           settingsOverride={settings}
           pairGapClassName="gap-4"
           showResizeHandle={canInteractWithEditor}
+          onSyncStatusChange={handleSyncStatusForward}
         />
       </div>
     );
@@ -151,10 +163,10 @@ const areDesktopCardSurfacePropsEqual = (
   if (prev.onEdit !== next.onEdit) return false;
   if (prev.onToggleUncertainty !== next.onToggleUncertainty) return false;
   if (prev.onToggleBookmark !== next.onToggleBookmark) return false;
+  if (prev.onSyncStatusChange !== next.onSyncStatusChange) return false;
 
   if (next.isGlobalEditing) {
     if (prev.cardsOverride !== next.cardsOverride) return false;
-    if (next.isActive && prev.saveSignal !== next.saveSignal) return false;
   }
 
   const prevNeedsFlip = !prev.isGlobalEditing && prev.isActive;
