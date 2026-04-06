@@ -456,7 +456,10 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       const handleGestureChange = (event: Event) => {
         stopNativeEvent(event);
         const gestureScale = (event as Event & { scale?: number }).scale;
-        if (typeof gestureScale !== "number" || !Number.isFinite(gestureScale)) {
+        if (
+          typeof gestureScale !== "number" ||
+          !Number.isFinite(gestureScale)
+        ) {
           return;
         }
         const baseScale = gestureStartScaleRef.current ?? scaleRef.current;
@@ -640,33 +643,34 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
         },
       });
 
-      const buildGetDocumentParams = async (): Promise<PdfJsGetDocumentParams | null> => {
-        const params: PdfJsGetDocumentParams = {
-          enableXfa,
-          useSystemFonts,
-          cMapUrl,
-          standardFontDataUrl,
-        };
+      const buildGetDocumentParams =
+        async (): Promise<PdfJsGetDocumentParams | null> => {
+          const params: PdfJsGetDocumentParams = {
+            enableXfa,
+            useSystemFonts,
+            cMapUrl,
+            standardFontDataUrl,
+          };
 
-        if (hasData && sourceData) {
-          params.data = sourceData;
-          return params;
-        }
-
-        if (hasUrl) {
-          if (sourceUrl.startsWith("blob:")) {
-            const res = await fetch(sourceUrl);
-            if (!res.ok) throw new Error(`blob fetch failed: ${res.status}`);
-            const buf = await res.arrayBuffer();
-            params.data = new Uint8Array(buf);
+          if (hasData && sourceData) {
+            params.data = sourceData;
             return params;
           }
-          params.url = sourceUrl;
-          return params;
-        }
 
-        return null;
-      };
+          if (hasUrl) {
+            if (sourceUrl.startsWith("blob:")) {
+              const res = await fetch(sourceUrl);
+              if (!res.ok) throw new Error(`blob fetch failed: ${res.status}`);
+              const buf = await res.arrayBuffer();
+              params.data = new Uint8Array(buf);
+              return params;
+            }
+            params.url = sourceUrl;
+            return params;
+          }
+
+          return null;
+        };
 
       (async () => {
         try {
