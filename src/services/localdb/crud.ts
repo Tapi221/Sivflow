@@ -115,9 +115,6 @@ const recordKeys = (v: unknown) => {
   return Object.keys(v);
 };
 
-/** documentsLifecycle 用: db.documents を持つDBだけ通す */
-type DocAwareDb = DbLike & DocDbCtx;
-
 const isDocDbCtx = (db: DbLike) => {
   return "documents" in db;
 };

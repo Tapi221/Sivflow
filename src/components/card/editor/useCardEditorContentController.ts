@@ -38,14 +38,6 @@ export const useCardEditorContentController = <
     return changed ? reindexed : blocks;
   }, []);
 
-  const getSideBlocks = useCallback(
-    (side: "question" | "answer") =>
-      side === "question"
-        ? (draft?.frontBlocks ?? [])
-        : (draft?.backBlocks ?? []),
-    [draft?.backBlocks, draft?.frontBlocks],
-  );
-
   const setSideBlocks = useCallback(
     (side: "question" | "answer", nextBlocks: CardBlock[]) => {
       allowAutoMinHeightSyncRef.current = true;

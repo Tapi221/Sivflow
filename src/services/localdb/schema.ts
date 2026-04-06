@@ -331,7 +331,12 @@ export const defineSchema = (db: LocalDB): void => {
       // 既存カードに difficulty / reviewCount が無い場合は補完する（破壊的変更なし）
       const cards = tx.table("cards");
 
-      await cards.toCollection().modify((c: unknown) => {
+      await cards.toCollection().modify((raw: unknown) => {
+        const c = raw as {
+          difficulty?: number;
+          reviewCount?: number;
+          review_count?: number;
+        };
         if (
           typeof c.difficulty !== "number" ||
           !Number.isFinite(c.difficulty)
@@ -339,7 +344,7 @@ export const defineSchema = (db: LocalDB): void => {
           c.difficulty = 0.35; // 初期値（安全寄り）
         } else {
           // clamp 0..1
-          c.difficulty = Math.max(0, Math.min(1, c.difficulty));
+          c.difficulty = Math.max(0, Math.min(1, Number(c.difficulty)));
         }
 
         if (
@@ -383,10 +388,15 @@ export const defineSchema = (db: LocalDB): void => {
     })
     .upgrade(async (tx) => {
       const cards = tx.table("cards");
-      await cards.toCollection().modify((c: unknown) => {
+      await cards.toCollection().modify((raw: unknown) => {
+        const c = raw as {
+          difficulty?: number;
+          reviewCount?: number;
+          review_count?: number;
+        };
         if (typeof c.difficulty !== "number" || !Number.isFinite(c.difficulty))
           c.difficulty = 0.35;
-        c.difficulty = Math.max(0, Math.min(1, c.difficulty));
+        c.difficulty = Math.max(0, Math.min(1, Number(c.difficulty)));
         if (
           typeof c.reviewCount !== "number" ||
           !Number.isFinite(c.reviewCount)
@@ -428,7 +438,8 @@ export const defineSchema = (db: LocalDB): void => {
     })
     .upgrade(async (tx) => {
       const documents = tx.table("documents");
-      await documents.toCollection().modify((d: unknown) => {
+      await documents.toCollection().modify((raw: unknown) => {
+        const d = raw as { localUrl?: string | null; blobUrl?: string | null };
         if (typeof d.localUrl === "string" && d.localUrl.startsWith("blob:")) {
           d.localUrl = null;
         }
@@ -1348,9 +1359,7 @@ export const defineSchema = (db: LocalDB): void => {
 
       const allSets = (await cardSetsTable.toArray()) as RawCardSet[];
       const allCards = (await cardsTable.toArray()) as RawCard[];
-      const activeSets = allSets.filter(
-        (set) => !(set.isDeleted ?? set.is_deleted),
-      );
+
       const activeCards = allCards.filter(
         (card) => !(card.isDeleted ?? card.is_deleted),
       );

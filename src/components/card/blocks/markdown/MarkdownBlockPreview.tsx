@@ -54,13 +54,6 @@ const MarkdownBlockDisplay: React.FC<MarkdownBlockDisplayProps> = ({
   );
 };
 
-const MarkdownBlockPreview: React.FC<MarkdownBlockPreviewProps> = ({
-  markdown,
-  ...rest
-}) => {
-  return <MarkdownBlockDisplay markdown={markdown} {...rest} />;
-};
-
 export const MarkdownBlockView: React.FC<MarkdownBlockViewProps> = ({
   md,
   ...rest

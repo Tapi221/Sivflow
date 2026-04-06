@@ -94,7 +94,6 @@ export const ImageFrame = ({
     typeof zoom === "number" && Number.isFinite(zoom) && zoom > 0 ? zoom : 1;
 
   const safeScale = clamp(Number(scale ?? 1), 0.2, 1);
-  const safeX = clamp(Number(x ?? 0), -1, 1);
   const safeCropX = clamp(Number(cropX ?? x ?? 0), -1, 1);
   const activeX = clamp(Number(dragX ?? safeCropX), -1, 1);
 

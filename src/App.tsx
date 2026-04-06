@@ -28,9 +28,7 @@ const Gallery = lazy(() => import("./pages/Gallery"));
 const Directory = lazy(() => import("./pages/Directory"));
 const Dictionary = lazy(() => import("./pages/Dictionary"));
 const Questions = lazy(() => import("./pages/Questions"));
-const NotImplementedPlaceholder = lazy(
-  () => import("./pages/NotImplementedPlaceholder"),
-);
+
 const PdfScrollTest = DEV_MODE
   ? lazy(() => import("./pages/PdfScrollTest"))
   : null;

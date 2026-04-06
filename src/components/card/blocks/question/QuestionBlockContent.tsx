@@ -9,7 +9,7 @@ import {
   QUESTION_BLOCK_TITLE_TEXT_CLASS,
 } from "@/components/card/blocks/question/questionBlockTextStyles";
 import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 
 type QuestionBlockContentProps =
   | {
@@ -33,13 +33,31 @@ type QuestionBlockContentProps =
       onContainerBlur?: (e: React.FocusEvent<HTMLDivElement>) => void;
     };
 
+const buildViewResetKey = ({
+  questionTitle,
+  questionAnswer,
+  answerDisplayMode,
+}: {
+  questionTitle?: string;
+  questionAnswer?: string;
+  answerDisplayMode: "always" | "tap_to_reveal";
+}) => [answerDisplayMode, questionTitle ?? "", questionAnswer ?? ""].join("::");
+
 export const QuestionBlockContent = (props: QuestionBlockContentProps) => {
   if (props.mode === "view") {
+    const answerDisplayMode = props.answerDisplayMode ?? "tap_to_reveal";
+    const viewResetKey = buildViewResetKey({
+      questionTitle: props.questionTitle,
+      questionAnswer: props.questionAnswer,
+      answerDisplayMode,
+    });
+
     return (
       <QuestionBlockViewContent
+        key={viewResetKey}
         questionTitle={props.questionTitle}
         questionAnswer={props.questionAnswer}
-        answerDisplayMode={props.answerDisplayMode ?? "tap_to_reveal"}
+        answerDisplayMode={answerDisplayMode}
         containerProps={props.containerProps}
         zoom={props.zoom}
       />
@@ -101,10 +119,6 @@ const QuestionBlockViewContent = ({
 }: QuestionBlockViewContentProps) => {
   const [revealed, setRevealed] = useState(answerDisplayMode === "always");
 
-  useEffect(() => {
-    setRevealed(answerDisplayMode === "always");
-  }, [answerDisplayMode, questionAnswer, questionTitle]);
-
   const titleStyle = useMemo(
     () =>
       buildTypographyStyle({
@@ -125,13 +139,17 @@ const QuestionBlockViewContent = ({
     [zoom],
   );
 
-  const answerStyle = revealed
-    ? answerBaseStyle
-    : mergeStyles(answerBaseStyle, {
-        filter: "blur(5px)",
-        userSelect: "none",
-        pointerEvents: "none",
-      });
+  const answerStyle = useMemo(() => {
+    if (revealed) {
+      return answerBaseStyle;
+    }
+
+    return mergeStyles(answerBaseStyle, {
+      filter: "blur(5px)",
+      userSelect: "none",
+      pointerEvents: "none",
+    });
+  }, [answerBaseStyle, revealed]);
 
   const overlayStyle = useMemo(
     () =>
@@ -145,7 +163,6 @@ const QuestionBlockViewContent = ({
 
   return (
     <QuestionBlockLayout
-      zoom={zoom}
       containerProps={{
         ...containerProps,
         onClick: (e) => {
@@ -172,7 +189,9 @@ const QuestionBlockViewContent = ({
       answerContainerProps={{
         onClick: (e) => {
           e.stopPropagation();
-          if (!revealed) setRevealed(true);
+          if (!revealed) {
+            setRevealed(true);
+          }
         },
         style: { cursor: revealed ? "default" : "pointer" },
       }}

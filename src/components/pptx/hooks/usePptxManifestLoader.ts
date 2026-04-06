@@ -37,15 +37,6 @@ interface Options {
   logDiagnostics: (message: string, payload?: Record<string, unknown>) => void;
 }
 
-interface ManifestLoaderState {
-  slides: SlideData[];
-  slideCount: number;
-  loadingManifest: boolean;
-  manifestPending: boolean;
-  manifestError: string | null;
-  fallbackUrl: string | null;
-}
-
 const resolveStorageUrl = (pathOrUrl?: string | null) => {
   if (!pathOrUrl) return null;
   if (isHttpUrl(pathOrUrl)) return pathOrUrl;

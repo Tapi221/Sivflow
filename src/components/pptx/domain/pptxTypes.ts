@@ -33,7 +33,6 @@ export interface PptxConversionRecord {
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
-const FIRESTORE_DIAGNOSTIC_FLAG = "flashcard.firestore.diagnostics";
 export const MANIFEST_PENDING_WINDOW_BASE_MS = 5 * 60 * 1000;
 export const MANIFEST_PENDING_WINDOW_LARGE_FILE_MS = 10 * 60 * 1000;
 export const MANIFEST_PENDING_WINDOW_LARGE_FILE_THRESHOLD_BYTES =

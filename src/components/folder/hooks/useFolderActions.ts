@@ -6,7 +6,7 @@ import {
   type FolderTreeNode,
 } from "@/components/folder/explorer/model/utils";
 import { createOrderedOptimistically } from "@/hooks/shared/useOrderedOptimisticCreate";
-import type { Card, CardSet, SelectedExplorerItem } from "@/types";
+import type { CardSet, SelectedExplorerItem } from "@/types";
 
 type RenameTargetKind = "folder" | "cardSet" | "card" | "document";
 
@@ -20,8 +20,6 @@ type DeleteLikeTarget =
 
 type FolderUpdateInput = Record<string, unknown>;
 type CardSetUpdateInput = Record<string, unknown>;
-type CardCreateInput = Record<string, unknown>;
-type CardUpdateInput = Record<string, unknown>;
 type DocumentUpdateInput = Record<string, unknown>;
 
 type UseFolderActionsParams = {
@@ -56,16 +54,12 @@ type UseFolderActionsParams = {
   ) => Promise<void>;
   onDeleteCardSet?: (cardSetId: string) => Promise<void>;
 
-  onCreateCard?: (data: CardCreateInput) => Promise<unknown>;
-  onUpdateCard?: (cardId: string, data: CardUpdateInput) => Promise<void>;
   onDeleteCard?: (cardId: string) => Promise<void>;
   onUpdateDocument?: (
     documentId: string,
     data: DocumentUpdateInput,
   ) => Promise<void>;
   onDeleteDocument?: (documentId: string) => Promise<void>;
-
-  selectedCardSetId?: string | null;
 
   editingIdRef: MutableRefObject<string | null>;
   editingNameRef: MutableRefObject<string>;
@@ -76,11 +70,9 @@ type UseFolderActionsParams = {
   closeRename: () => void;
 
   setOptimisticFolders: Dispatch<SetStateAction<FolderTreeNode[]>>;
-  setOptimisticCards: Dispatch<SetStateAction<Card[]>>;
   setOptimisticCardSets: Dispatch<SetStateAction<CardSet[]>>;
 
   optimisticFolders: FolderTreeNode[];
-  optimisticCards: Card[];
   optimisticCardSets: CardSet[];
 
   setExpandedFolders: Dispatch<SetStateAction<Set<string>>>;
@@ -233,12 +225,9 @@ export const useFolderActions = ({
   onCreateCardSet,
   onUpdateCardSet,
   onDeleteCardSet,
-  onCreateCard,
-  onUpdateCard,
   onDeleteCard,
   onUpdateDocument,
   onDeleteDocument,
-  selectedCardSetId,
   editingIdRef,
   editingNameRef,
   renameCancelledRef,
@@ -246,10 +235,8 @@ export const useFolderActions = ({
   setEditingName,
   closeRename,
   setOptimisticFolders,
-  setOptimisticCards,
   setOptimisticCardSets,
   optimisticFolders,
-  optimisticCards,
   optimisticCardSets,
   setExpandedFolders,
   setPendingScrollId,

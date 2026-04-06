@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useRef } from "react";
-import type { PdfScaleChangeSource } from "../pdfViewerTypes";
+import { useCallback, useEffect, useRef } from "react";
+import type { PdfScaleChangeSource } from "@/components/pdf/pdfViewerTypes";
 import {
   clampScale,
   computeNextScaleFromGesture,
   computeNextScaleFromWheel,
   normalizeScale,
-} from "../pdfZoomUtils";
-
+} from "@/components/pdf/pdfZoomUtils";
 interface UsePdfZoomOptions {
   container: HTMLDivElement | null;
   scale: number;

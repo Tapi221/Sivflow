@@ -16,11 +16,6 @@ interface Options {
   persistedBlobUrl: string | null;
 }
 
-interface LocalDocumentSource {
-  localBlobUrl: string | null;
-  localSourceStatus: LocalSourceStatus;
-}
-
 interface RestoredState {
   key: string | null;
   url: string | null;

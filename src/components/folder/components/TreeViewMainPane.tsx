@@ -4,7 +4,6 @@ import React from "react";
 import { RightPane } from "@/components/folder/panes/RightPane";
 
 interface TreeViewMainPaneProps {
-  isMobile: boolean;
   showMobileDetail: boolean;
   hideOnSectionList?: boolean;
   selectedItem: SelectedExplorerItem;
@@ -38,7 +37,6 @@ interface TreeViewMainPaneProps {
 }
 
 export const TreeViewMainPane = ({
-  isMobile,
   showMobileDetail,
   hideOnSectionList = false,
   selectedItem,

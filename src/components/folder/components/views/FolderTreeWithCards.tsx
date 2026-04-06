@@ -273,16 +273,6 @@ export const FolderTreeWithCards = ({
     getNextOrderIndex,
   } = derived;
 
-  const rootFolderIdSet = useMemo(
-    () =>
-      new Set(
-        rootFolders
-          .map((folder) => getFolderId(folder))
-          .filter((id): id is string => Boolean(id)),
-      ),
-    [rootFolders],
-  );
-
   const rootItems = useMemo(() => getFolderItems(null), [getFolderItems]);
 
   const navigationFolderId = navigationParentFolderId ?? null;
@@ -424,12 +414,9 @@ export const FolderTreeWithCards = ({
     onCreateCardSet,
     onUpdateCardSet,
     onDeleteCardSet,
-    onCreateCard,
-    onUpdateCard,
     onDeleteCard,
     onUpdateDocument,
     onDeleteDocument,
-    selectedCardSetId,
     editingIdRef: dialogs.editingIdRef,
     editingNameRef: dialogs.editingNameRef,
     renameCancelledRef: dialogs.renameCancelledRef,
@@ -438,10 +425,8 @@ export const FolderTreeWithCards = ({
     closeRename: dialogs.closeRename,
 
     setOptimisticFolders,
-    setOptimisticCards,
     setOptimisticCardSets,
     optimisticFolders,
-    optimisticCards,
     optimisticCardSets,
     setExpandedFolders,
     setPendingScrollId,

@@ -187,7 +187,7 @@ const chunkChangesBySize = (changes: SyncChange[]) => {
       bytes = 0;
     }
 
-    current.push(ch);
+    current.push(change);
     bytes += extra;
   }
 

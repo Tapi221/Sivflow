@@ -23,7 +23,7 @@ export const AppLayout = () => {
   const isHomeOnlyMode = searchParams.get("home") === "1";
   const selectedFolderId = searchParams.get("folderId");
   const selectedCardSetId = searchParams.get("cardSetId");
-  const [instantFolderId, setInstantFolderId] = useState<string | null>(null);
+
   const mainRef = useRef<HTMLElement | null>(null);
 
   const resetWorkspaceScroll = () => {
@@ -46,40 +46,6 @@ export const AppLayout = () => {
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
   };
-
-  useEffect(() => {
-    const onFolderSelectionChanged = (event: Event) => {
-      const customEvent = event as CustomEvent<{ folderId?: string | null }>;
-      setInstantFolderId(customEvent.detail?.folderId ?? null);
-    };
-
-    window.addEventListener(
-      "folders:selected-folder-changed",
-      onFolderSelectionChanged as EventListener,
-    );
-
-    return () => {
-      window.removeEventListener(
-        "folders:selected-folder-changed",
-        onFolderSelectionChanged as EventListener,
-      );
-    };
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    queueMicrotask(() => {
-      if (cancelled) return;
-      if (!isFoldersRoute) {
-        setInstantFolderId(null);
-        return;
-      }
-      setInstantFolderId(selectedFolderId ?? null);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [isFoldersRoute, selectedFolderId]);
 
   const shouldHideMainSidebar =
     (isFoldersRoute && !isHomeOnlyMode) ||

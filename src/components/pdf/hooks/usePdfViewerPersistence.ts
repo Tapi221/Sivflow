@@ -36,19 +36,6 @@ interface UsePdfViewerPersistenceOptions {
   }) => Promise<void>;
 }
 
-interface UsePdfViewerPersistenceResult {
-  currentPage: number;
-  scale: number;
-  fitMode: "width" | "manual";
-  setCurrentPage: (page: number) => void;
-  setScale: React.Dispatch<React.SetStateAction<number>>;
-  setFitMode: React.Dispatch<React.SetStateAction<"width" | "manual">>;
-  handleZoomIn: () => void;
-  handleZoomOut: () => void;
-  handleFitWidth: () => void;
-  handleViewerScaleChange: (nextScale: number) => void;
-}
-
 export const usePdfViewerPersistence = ({
   docId,
   viewerState,

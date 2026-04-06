@@ -7,12 +7,12 @@ import type {
   PdfViewerOptions,
   PdfViewerSourceMeta,
   SourceLoadErrorKind,
-} from "../pdfViewerTypes";
+} from "@/components/pdf/pdfViewerTypes";
 import {
   destroyPdfResource,
   getErrorMessage,
   getPdfDocument,
-} from "../pdfViewerTypes";
+} from "@/components/pdf/pdfViewerTypes";
 
 interface UsePdfDocumentOptions {
   source: {

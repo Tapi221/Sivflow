@@ -9,7 +9,7 @@ import {
   CARD_VIEW_ZOOM_DEFAULT_PERCENT,
   CARD_VIEW_ZOOM_MIN_PERCENT,
   CARD_VIEW_ZOOM_STEP_PERCENT,
-} from "../constants";
+} from "@/pages/card-view/constants";
 
 interface UseCardViewZoomOptions {
   cardSetId: string | null;
@@ -22,6 +22,11 @@ interface ClampZoomPercentOptions {
   maxPercent: number;
   stepPercent?: number;
 }
+
+type ZoomDraftState = {
+  cardSetId: string | null;
+  value: number | null;
+};
 
 const roundToStep = (value: number, stepPercent: number) => {
   return Math.round(value / stepPercent) * stepPercent;
@@ -65,9 +70,11 @@ export const useCardViewZoom = ({
   const [availableWidthPx, setAvailableWidthPx] = useState(
     CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
   );
-  const [zoomPercent, setZoomPercentState] = useState(
-    CARD_VIEW_ZOOM_DEFAULT_PERCENT,
-  );
+
+  const [zoomDraft, setZoomDraft] = useState<ZoomDraftState>({
+    cardSetId,
+    value: null,
+  });
 
   useEffect(() => {
     const node = viewportRef.current;
@@ -118,27 +125,35 @@ export const useCardViewZoom = ({
     [dynamicMaxZoomPercent, effectiveMinZoomPercent],
   );
 
-  useEffect(() => {
+  const storedZoomPercent = useMemo(() => {
     const stored = cardSetId
       ? getCardSetViewZoomPreference(cardSetId)
       : undefined;
 
-    setZoomPercentState(
-      clampZoomPercent(stored ?? CARD_VIEW_ZOOM_DEFAULT_PERCENT, {
-        minPercent: effectiveMinZoomPercent,
-        maxPercent: dynamicMaxZoomPercent,
-      }),
-    );
+    return clampZoomPercent(stored ?? CARD_VIEW_ZOOM_DEFAULT_PERCENT, {
+      minPercent: effectiveMinZoomPercent,
+      maxPercent: dynamicMaxZoomPercent,
+    });
   }, [cardSetId, dynamicMaxZoomPercent, effectiveMinZoomPercent]);
 
-  useEffect(() => {
-    setZoomPercentState((prev) =>
-      clampZoomPercent(prev, {
-        minPercent: effectiveMinZoomPercent,
-        maxPercent: dynamicMaxZoomPercent,
-      }),
-    );
-  }, [dynamicMaxZoomPercent, effectiveMinZoomPercent]);
+  const draftZoomPercent = useMemo(() => {
+    if (zoomDraft.cardSetId !== cardSetId || zoomDraft.value === null) {
+      return null;
+    }
+
+    return clampZoomPercent(zoomDraft.value, {
+      minPercent: effectiveMinZoomPercent,
+      maxPercent: dynamicMaxZoomPercent,
+    });
+  }, [
+    cardSetId,
+    dynamicMaxZoomPercent,
+    effectiveMinZoomPercent,
+    zoomDraft.cardSetId,
+    zoomDraft.value,
+  ]);
+
+  const zoomPercent = draftZoomPercent ?? storedZoomPercent;
 
   useEffect(() => {
     if (!cardSetId) {
@@ -150,14 +165,17 @@ export const useCardViewZoom = ({
 
   const setZoomPercent = useCallback(
     (next: number) => {
-      setZoomPercentState(
-        clampZoomPercent(next, {
-          minPercent: effectiveMinZoomPercent,
-          maxPercent: dynamicMaxZoomPercent,
-        }),
-      );
+      const clamped = clampZoomPercent(next, {
+        minPercent: effectiveMinZoomPercent,
+        maxPercent: dynamicMaxZoomPercent,
+      });
+
+      setZoomDraft({
+        cardSetId,
+        value: clamped,
+      });
     },
-    [dynamicMaxZoomPercent, effectiveMinZoomPercent],
+    [cardSetId, dynamicMaxZoomPercent, effectiveMinZoomPercent],
   );
 
   const stepUp = useCallback(() => {

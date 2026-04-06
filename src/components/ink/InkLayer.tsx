@@ -40,12 +40,6 @@ const TOOL_STYLE: Record<
   },
 };
 
-const HISTORY_EMPTY = {
-  canUndo: false,
-  canRedo: false,
-  strokeCount: 0,
-};
-
 const copyStrokes = (strokes: InkStroke[]): InkStroke[] =>
   strokes.map((stroke) => ({
     ...stroke,

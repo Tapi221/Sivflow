@@ -3,8 +3,8 @@ import {
   extractPptxFiles,
   isFileDragEvent,
 } from "@/components/folder/explorer/model/utils";
-import { DocumentRow } from "@/components/folder/explorer/rows/CardSetRow";
-import { CardSetRow } from "@/components/folder/explorer/rows/DocumentRow";
+import { DocumentRow } from "@/components/folder/explorer/rows/DocumentRow";
+import { CardSetRow } from "@/components/folder/explorer/rows/CardSetRow";
 import { ExplorerRow } from "@/components/folder/explorer/rows/ExplorerRow";
 import { ExplorerRowContent } from "@/components/folder/explorer/rows/ExplorerRowContent";
 import { FolderRow } from "@/components/folder/explorer/rows/FolderRow";
@@ -169,9 +169,10 @@ export const ExplorerTreeNodeRenderer = React.memo(
     }
 
     if (treeNode.kind === "cardSet") {
+      const cardSetNode = treeNode as typeof treeNode & { kind: "cardSet" };
       return (
         <CardSetRow
-          treeNode={treeNode}
+          treeNode={cardSetNode}
           style={style}
           depth={depth}
           isOpen={isOpen}
@@ -194,9 +195,10 @@ export const ExplorerTreeNodeRenderer = React.memo(
     }
 
     if (treeNode.kind === "document") {
+      const documentNode = treeNode as typeof treeNode & { kind: "document" };
       return (
         <DocumentRow
-          treeNode={treeNode}
+          treeNode={documentNode}
           style={style}
           depth={depth}
           isSelected={isSelected}

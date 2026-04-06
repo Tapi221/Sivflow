@@ -108,7 +108,7 @@ const Trash = () => {
 
   const [selectedIds, setSelectedIds] = useState({ folders: [], cards: [] });
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [confirmationText, setConfirmationText] = useState("");
+
   const [isProcessing, setIsProcessing] = useState(false);
   const [previewCard, setPreviewCard] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");

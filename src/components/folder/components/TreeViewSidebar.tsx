@@ -10,7 +10,6 @@ interface TreeViewSidebarProps {
   isSidebarOpen: boolean;
   isResizing: boolean;
   showMobileDetail: boolean;
-  fillAvailableWidth?: boolean;
   explorerTab: ExplorerTab;
   setExplorerTab: (tab: ExplorerTab) => void;
   allTags: string[];
@@ -35,7 +34,6 @@ export const TreeViewSidebar = ({
   isSidebarOpen,
   isResizing,
   showMobileDetail,
-  fillAvailableWidth = false,
   explorerTab,
   setExplorerTab,
   allTags,

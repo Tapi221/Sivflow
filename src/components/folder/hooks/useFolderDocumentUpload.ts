@@ -15,21 +15,9 @@ import { getOrCreateDeviceId } from "@/utils/device";
 import React, { useCallback, useRef } from "react";
 
 interface UseFolderDocumentUploadParams {
-  selectedFolderId: string | null;
   actionFolderId: string | null;
   getNextOrderIndex: (folderId: string | null) => number;
   setExpandedFolders: React.Dispatch<React.SetStateAction<Set<string>>>;
-}
-
-interface UseFolderDocumentUploadReturn {
-  fileInputRef: React.RefObject<HTMLInputElement | null>;
-  handlePdfDropped: (folderId: string, files: File[]) => Promise<void>;
-  handlePptxDropped: (folderId: string, files: File[]) => Promise<void>;
-  handleToolbarAddDocument: () => void;
-  currentFileAccept: string;
-  handleToolbarFileInputChange: (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => void;
 }
 
 type LegacyEntityFields = { blobUrl?: string | null };
@@ -50,7 +38,6 @@ const getErrorMessage = (error: unknown, fallback: string): string => {
 };
 
 export const useFolderDocumentUpload = ({
-  selectedFolderId,
   actionFolderId,
   getNextOrderIndex,
   setExpandedFolders,

@@ -10,10 +10,6 @@ import {
   useSecurity,
 } from "@/contexts/security/SecurityContext";
 
-type AuthContextCompatValue = ReturnType<typeof useAuthSession> &
-  ReturnType<typeof useSyncContext> &
-  ReturnType<typeof useSecurity>;
-
 export { useAuthSession, useSyncContext, useSecurity };
 
 interface AuthProviderProps {

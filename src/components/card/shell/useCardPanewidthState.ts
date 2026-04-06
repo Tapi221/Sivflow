@@ -1,6 +1,7 @@
 import {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type DependencyList,
@@ -96,6 +97,14 @@ export const useCardPaneWidthState = ({
       ? editPaneState.width
       : preferredWidths.edit.width;
 
+  // viewportObserverDeps の変化を安定したキーとして扱う
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const viewportDepsKey = useMemo(
+    () => JSON.stringify(viewportObserverDeps),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    viewportObserverDeps,
+  );
+
   useEffect(() => {
     const element = contentViewportRef.current;
     if (!element || typeof ResizeObserver === "undefined") return;
@@ -114,7 +123,7 @@ export const useCardPaneWidthState = ({
     observer.observe(element);
 
     return () => observer.disconnect();
-  }, [measureViewportWidth, ...viewportObserverDeps]);
+  }, [measureViewportWidth, viewportDepsKey]);
 
   const activePaneMode = getActiveMode(isEditMode);
   const activePaneMinWidthPx = minWidths[activePaneMode];
