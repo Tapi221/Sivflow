@@ -212,7 +212,9 @@
   }
 
   .card-shell--selected,
-  .card-shell--active {
+  .card-shell--active,
+  .card-active-chrome--active .card-shell,
+  .card-pager-item[data-card-active="true"] .card-shell {
     border-color: var(--card-border-selected, rgba(15, 23, 42, 0.2));
     background: var(--card-selected-surface, #f4f5f6);
     box-shadow:
@@ -265,7 +267,9 @@
   }
 
   .card-shell--editing.card-shell--selected,
-  .card-shell--editing.card-shell--active {
+  .card-shell--editing.card-shell--active,
+  .card-active-chrome--active .card-shell.card-shell--editing,
+  .card-pager-item[data-card-active="true"] .card-shell.card-shell--editing {
     box-shadow:
       var(
         --card-shadow-selected,
@@ -291,6 +295,7 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.95);
   }
 
+  .card-active-chrome,
   .card-pager-item {
     position: relative;
     overflow: visible;
@@ -299,6 +304,7 @@
     transition: opacity 110ms ease;
   }
 
+  .card-active-chrome::before,
   .card-pager-item::before {
     content: "";
     position: absolute;
@@ -316,47 +322,21 @@
     z-index: -1;
   }
 
+  .card-active-chrome--hoverable:hover,
   .card-pager-item[data-card-hoverable="true"]:hover {
     opacity: 0.9;
     box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
   }
 
+  .card-active-chrome--active,
   .card-pager-item[data-card-active="true"] {
     opacity: 1;
     box-shadow: none;
   }
 
+  .card-active-chrome--active::before,
   .card-pager-item[data-card-active="true"]::before {
     opacity: 1;
-  }
-
-  .card-pager-item[data-card-active="true"] .card-shell {
-    border-color: var(--card-border-selected, rgba(15, 23, 42, 0.2));
-    background: var(--card-selected-surface, #f4f5f6);
-    box-shadow:
-      var(
-        --card-shadow-selected,
-        0 0 4px rgba(15, 23, 42, 0.06),
-        0 0 36px rgba(15, 23, 42, 0.12),
-        0 0 96px rgba(15, 23, 42, 0.12)
-      ),
-      inset 0 0 0 var(--card-selected-outline-width, 1.6px)
-        var(--card-selected-outline-neutral, rgba(84, 95, 105, 0.42)),
-      inset 0 0 0 calc(var(--card-selected-outline-width, 1.6px) + 0.75px)
-        var(--card-selected-outline-accent, rgba(122, 166, 161, 0.32)),
-      inset 0 1px 0 rgba(255, 255, 255, 0.95);
-  }
-
-  .card-pager-item[data-card-active="true"] .card-shell.card-shell--editing {
-    border-color: var(--card-editing-outline, #1f4c3d);
-    box-shadow:
-      var(
-        --card-shadow-selected,
-        0 0 4px rgba(15, 23, 42, 0.06),
-        0 0 36px rgba(15, 23, 42, 0.12),
-        0 0 96px rgba(15, 23, 42, 0.12)
-      ),
-      inset 0 1px 0 rgba(255, 255, 255, 0.95);
   }
 
   .card-pager-item:not([data-card-active="true"])
@@ -365,6 +345,7 @@
     display: none;
   }
 
+  .card-active-chrome:has(:focus-visible),
   .card-pager-item:has(:focus-visible) {
     box-shadow: var(
       --card-focus-ring-shadow,
@@ -373,23 +354,28 @@
     opacity: 1;
   }
 
+  .card-active-chrome:has(:focus-visible)::before,
   .card-pager-item:has(:focus-visible)::before {
     opacity: 1;
   }
 
+  .card-active-chrome--plain,
   .card-pager-item--plain {
     opacity: 1;
     box-shadow: none;
   }
 
+  .card-active-chrome--plain::before,
   .card-pager-item--plain::before {
     display: none;
   }
 
+  .card-active-chrome--plain.card-active-chrome--active,
   .card-pager-item--plain[data-card-active="true"] {
     box-shadow: none;
   }
 
+  .card-active-chrome--plain:has(:focus-visible),
   .card-pager-item--plain:has(:focus-visible) {
     box-shadow: none;
   }

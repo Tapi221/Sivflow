@@ -100,8 +100,11 @@ const DesktopCardSurfaceInner = ({
           saveSignalEnabled={isActive}
           hideFooterActions
           embeddedInPager
-          isPagerActiveCard={isActive}
-          isPagerInteractionCard={canInteractWithEditor}
+          presentationContext={{
+            isCurrentCard: isActive,
+            isStandaloneEditor: false,
+            hasFocusWithin,
+          }}
           settingsOverride={settings}
           pairGapClassName="gap-4"
           showResizeHandle={canInteractWithEditor}

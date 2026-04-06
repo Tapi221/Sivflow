@@ -10,8 +10,8 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useVerticalCardPager } from "@/hooks/study/useVerticalCardPager";
 import { CANONICAL_CARD_WIDTH } from "@/components/card/common/constants";
+import { useVerticalCardPager } from "@/hooks/study/useVerticalCardPager";
 import { cn } from "@/lib/utils";
 
 // ── レイアウト定数 ──────────────────────────────────────────────────────────
@@ -392,8 +392,12 @@ const VerticalCardPagerFn = ({
               data-card-active={isActive ? "true" : undefined}
               data-card-hoverable={disableItemChrome ? undefined : "true"}
               className={cn(
+                "card-active-chrome",
                 "card-pager-item",
-                disableItemChrome && "card-pager-item--plain",
+                isActive && "card-active-chrome--active",
+                !disableItemChrome && "card-active-chrome--hoverable",
+                disableItemChrome &&
+                  "card-active-chrome--plain card-pager-item--plain",
               )}
               style={{
                 width,

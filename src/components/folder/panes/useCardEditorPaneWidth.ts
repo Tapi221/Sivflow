@@ -26,7 +26,7 @@ interface UseCardEditorPaneWidthParams {
   hideBlockToolbars: boolean;
   forcedPaneWidthPx: number | null;
   usesExternalToolbarMount: boolean;
-  isPagerActiveCard: boolean;
+  isActiveCard: boolean;
   isEditing: boolean;
   isMetaOpen: boolean;
   normalizedSelectedCardId: string | null;
@@ -50,7 +50,7 @@ export const useCardEditorPaneWidth = ({
   hideBlockToolbars,
   forcedPaneWidthPx,
   usesExternalToolbarMount,
-  isPagerActiveCard,
+  isActiveCard,
   isEditing,
   isMetaOpen,
   normalizedSelectedCardId,
@@ -133,6 +133,7 @@ export const useCardEditorPaneWidth = ({
     previewBehavior: "both",
     persistBehavior: "both",
     onPersist: (mode, widthPx) => {
+      void mode;
       if (!cardSetId) return;
       setCardSetWidthPreference(cardSetId, "view", widthPx);
       setCardSetWidthPreference(cardSetId, "edit", widthPx);
@@ -162,8 +163,6 @@ export const useCardEditorPaneWidth = ({
 
   const shouldShowInlineToolbarMount =
     !dockToolbarsToTop && !hideBlockToolbars && !usesExternalToolbarMount;
-
-  const shouldShowEditingBadge = !embeddedInPager || isPagerActiveCard;
 
   const shouldApplyPaneWidth =
     (showWidthControl && contentViewportWidth > 0) || forcedPaneWidthPx != null;
@@ -200,6 +199,8 @@ export const useCardEditorPaneWidth = ({
       }
     : undefined;
 
+  void isActiveCard;
+
   return {
     contentViewportRef,
     showWidthControl,
@@ -212,7 +213,6 @@ export const useCardEditorPaneWidth = ({
     hideCardShellHeader,
     shouldDockToolbarToCardTop,
     shouldShowInlineToolbarMount,
-    shouldShowEditingBadge,
     useTwoColumnEditorLayout,
     editorCardFixedScale,
     activePaneWidthStyle,

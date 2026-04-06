@@ -14,8 +14,15 @@ import {
 import { CardCornerActions } from "@/components/card/frame/CardCornerActions";
 import { CardFrame } from "@/components/card/frame/CardFrame";
 import { Flashcard } from "@/components/card/frame/Flashcard";
-import { CARD_SHELL_COMMON_CLASS_NAME } from "@/components/card/frame/cardShellClassNames";
 import { CardMetaPanel } from "@/components/card/panels/CardMetaPanel";
+import {
+  buildCardChromeClassName,
+  buildCardShellClassName,
+  resolveCardPresentationState,
+  type CardPresentationContext,
+  type CardPresentationContextInput,
+  type CardPresentationState,
+} from "@/components/card/presentation/cardPresentation";
 import { CardWorkspaceShell } from "@/components/card/shell/CardWorkspaceShell";
 import { CardEditorPaneMediaDialogs } from "@/components/folder/panes/CardEditorPaneMediaDialogs";
 import { useCardEditorPaneController } from "@/components/folder/panes/useCardEditorPaneController";
@@ -55,8 +62,11 @@ interface CardEditorPaneProps {
   hideFooterActions?: boolean;
   embeddedInPager?: boolean;
   pairGapClassName?: string;
+  presentationContext?: CardPresentationContextInput;
   onRequestCloseEditing?: () => void;
+  /** @deprecated presentationContext.isCurrentCard を使うこと */
   isPagerActiveCard?: boolean;
+  /** @deprecated presentationContext.hasFocusWithin を使うこと */
   isPagerInteractionCard?: boolean;
   showResizeHandle?: boolean;
 }
@@ -100,8 +110,7 @@ type EditorSidePaneProps = {
   shouldDockToolbarToCardTop: boolean;
   dockToolbarInsideCardEdge: boolean;
   setDockedToolbarMount: (value: HTMLDivElement | null) => void;
-  shouldShowEditingBadge: boolean;
-  isPagerActiveCard: boolean;
+  presentationState: CardPresentationState;
   enableBlockActiveState: boolean;
   showResizeHandle: boolean;
   editorCardFixedScale?: number;
@@ -133,8 +142,7 @@ const EditorSidePaneInner = ({
   shouldDockToolbarToCardTop,
   dockToolbarInsideCardEdge,
   setDockedToolbarMount,
-  shouldShowEditingBadge,
-  isPagerActiveCard,
+  presentationState,
   enableBlockActiveState,
   showResizeHandle,
   editorCardFixedScale,
@@ -159,71 +167,76 @@ const EditorSidePaneInner = ({
         <div ref={setInlineToolbarMount} className="w-full" />
       )}
 
-      <CardFrame
-        baseWidth={CANONICAL_CARD_WIDTH}
-        contentPaddingPx={0}
-        allowUpscale
-        maxScale={CARD_PANE_AUTO_MAX_SCALE}
-        scaleMultiplier={1}
-        fixedScale={editorCardFixedScale}
-        topAttachment={
-          shouldDockToolbarToCardTop ? (
-            <div className="relative h-0 w-full overflow-visible pointer-events-none">
-              <div
-                ref={setDockedToolbarMount}
-                className={cn(
-                  "absolute top-0 z-20 pointer-events-auto",
-                  side === "question" ? "left-0" : "right-0",
-                )}
-                style={{
-                  transform:
-                    side === "question"
-                      ? dockToolbarInsideCardEdge
-                        ? "translate(12px, 16px)"
-                        : "translate(calc(-100% - 12px), 16px)"
-                      : dockToolbarInsideCardEdge
-                        ? "translate(calc(-100% - 12px), 16px)"
-                        : "translate(calc(100% + 12px), 16px)",
-                }}
-              />
-            </div>
-          ) : undefined
-        }
-        className={cn(
-          CARD_SHELL_COMMON_CLASS_NAME,
-          shouldShowEditingBadge && "card-shell--editing",
-          isPagerActiveCard && "card-shell--active",
-        )}
-        resizable
-        showResizeHandle={showResizeHandle}
-        resizeStepPx={CARD_ROW_PX}
-        heightPx={editorCardHeightPx}
-        lockHeight
-        onHeightChange={onHeightChange}
-        onMinHeightChange={onMinHeightChange}
-        onResizeStart={onResizeStart}
-        onResizeEnd={onResizeEnd}
-        actionsTopLeft={actionsTopLeft}
-        actionsTopRight={actionsTopRight}
-      >
-        <SharedCardContent
-          mode="edit"
-          blocks={blocks}
-          onChange={onBlocksChange}
-          selectionScopeKey={selectionScopeKey}
-          prefix={side}
-          label={label}
-          color={color}
-          droppableId={droppableId}
-          accentColor={accentColor}
-          duplicateToOpposite={duplicateToOpposite}
-          hideToolbar={hideToolbar}
-          toolbarMount={toolbarMount}
-          toolbarDesktopLayout="vertical"
-          enableBlockActiveState={enableBlockActiveState}
-          settings={settings}
-        />
-      </CardFrame>
+      <div className="w-full text-center">
+        <div
+          className={cn(
+            buildCardChromeClassName(presentationState),
+            "inline-block max-w-full align-top text-left",
+          )}
+        >
+          <CardFrame
+            baseWidth={CANONICAL_CARD_WIDTH}
+            contentPaddingPx={0}
+            allowUpscale
+            maxScale={CARD_PANE_AUTO_MAX_SCALE}
+            scaleMultiplier={1}
+            fixedScale={editorCardFixedScale}
+            topAttachment={
+              shouldDockToolbarToCardTop ? (
+                <div className="relative h-0 w-full overflow-visible pointer-events-none">
+                  <div
+                    ref={setDockedToolbarMount}
+                    className={cn(
+                      "absolute top-0 z-20 pointer-events-auto",
+                      side === "question" ? "left-0" : "right-0",
+                    )}
+                    style={{
+                      transform:
+                        side === "question"
+                          ? dockToolbarInsideCardEdge
+                            ? "translate(12px, 16px)"
+                            : "translate(calc(-100% - 12px), 16px)"
+                          : dockToolbarInsideCardEdge
+                            ? "translate(calc(-100% - 12px), 16px)"
+                            : "translate(calc(100% + 12px), 16px)",
+                    }}
+                  />
+                </div>
+              ) : undefined
+            }
+            className={buildCardShellClassName(presentationState)}
+            resizable
+            showResizeHandle={showResizeHandle}
+            resizeStepPx={CARD_ROW_PX}
+            heightPx={editorCardHeightPx}
+            lockHeight
+            onHeightChange={onHeightChange}
+            onMinHeightChange={onMinHeightChange}
+            onResizeStart={onResizeStart}
+            onResizeEnd={onResizeEnd}
+            actionsTopLeft={actionsTopLeft}
+            actionsTopRight={actionsTopRight}
+          >
+            <SharedCardContent
+              mode="edit"
+              blocks={blocks}
+              onChange={onBlocksChange}
+              selectionScopeKey={selectionScopeKey}
+              prefix={side}
+              label={label}
+              color={color}
+              droppableId={droppableId}
+              accentColor={accentColor}
+              duplicateToOpposite={duplicateToOpposite}
+              hideToolbar={hideToolbar}
+              toolbarMount={toolbarMount}
+              toolbarDesktopLayout="vertical"
+              enableBlockActiveState={enableBlockActiveState}
+              settings={settings}
+            />
+          </CardFrame>
+        </div>
+      </div>
     </div>
   );
 };
@@ -247,9 +260,15 @@ const areEditorSidePanePropsEqual = (
   prev.hideCardShellHeader === next.hideCardShellHeader &&
   prev.shouldDockToolbarToCardTop === next.shouldDockToolbarToCardTop &&
   prev.dockToolbarInsideCardEdge === next.dockToolbarInsideCardEdge &&
-  prev.shouldShowEditingBadge === next.shouldShowEditingBadge &&
-  prev.isPagerActiveCard === next.isPagerActiveCard &&
+  prev.presentationState.isActiveCard === next.presentationState.isActiveCard &&
+  prev.presentationState.isInteractiveCard ===
+    next.presentationState.isInteractiveCard &&
+  prev.presentationState.showEditingOutline ===
+    next.presentationState.showEditingOutline &&
+  prev.presentationState.showActiveChrome ===
+    next.presentationState.showActiveChrome &&
   prev.enableBlockActiveState === next.enableBlockActiveState &&
+  prev.showResizeHandle === next.showResizeHandle &&
   prev.editorCardFixedScale === next.editorCardFixedScale &&
   prev.editorCardHeightPx === next.editorCardHeightPx &&
   prev.actionsTopLeft === next.actionsTopLeft &&
@@ -278,9 +297,10 @@ export const CardEditorPane = ({
   hideFooterActions = false,
   embeddedInPager = false,
   pairGapClassName = "gap-6",
+  presentationContext,
   onRequestCloseEditing,
-  isPagerActiveCard = false,
-  isPagerInteractionCard = isPagerActiveCard,
+  isPagerActiveCard,
+  isPagerInteractionCard,
   showResizeHandle: showResizeHandleProp = true,
 }: CardEditorPaneProps) => {
   const controller = useCardEditorPaneController({
@@ -318,6 +338,35 @@ export const CardEditorPane = ({
     handleToggleUncertainty,
     panelCard,
   } = session;
+
+  const cardPresentationContext = useMemo<CardPresentationContext>(() => {
+    const isCurrentCard =
+      presentationContext?.isCurrentCard ?? isPagerActiveCard ?? !embeddedInPager;
+
+    return {
+      inPager: embeddedInPager,
+      isCurrentCard,
+      isEditing,
+      isStandaloneEditor: presentationContext?.isStandaloneEditor ?? false,
+      hasFocusWithin:
+        presentationContext?.hasFocusWithin ??
+        isPagerInteractionCard ??
+        isCurrentCard,
+    };
+  }, [
+    embeddedInPager,
+    isEditing,
+    isPagerActiveCard,
+    isPagerInteractionCard,
+    presentationContext?.hasFocusWithin,
+    presentationContext?.isCurrentCard,
+    presentationContext?.isStandaloneEditor,
+  ]);
+
+  const cardPresentationState = useMemo(
+    () => resolveCardPresentationState(cardPresentationContext),
+    [cardPresentationContext],
+  );
 
   const {
     manualResizeInProgressRef,
@@ -404,7 +453,6 @@ export const CardEditorPane = ({
     hideCardShellHeader,
     shouldDockToolbarToCardTop,
     shouldShowInlineToolbarMount,
-    shouldShowEditingBadge,
     useTwoColumnEditorLayout,
     editorCardFixedScale,
     activePaneWidthStyle,
@@ -419,7 +467,7 @@ export const CardEditorPane = ({
     hideBlockToolbars,
     forcedPaneWidthPx,
     usesExternalToolbarMount,
-    isPagerActiveCard,
+    isActiveCard: cardPresentationState.isActiveCard,
     isEditing,
     isMetaOpen,
     normalizedSelectedCardId,
@@ -621,11 +669,8 @@ export const CardEditorPane = ({
                   shouldDockToolbarToCardTop={shouldDockToolbarToCardTop}
                   dockToolbarInsideCardEdge={shouldKeepDockedToolbarInsideCard}
                   setDockedToolbarMount={setToolbarMountQInternal}
-                  shouldShowEditingBadge={shouldShowEditingBadge}
-                  isPagerActiveCard={isPagerActiveCard}
-                  enableBlockActiveState={
-                    !embeddedInPager || isPagerInteractionCard
-                  }
+                  presentationState={cardPresentationState}
+                  enableBlockActiveState={cardPresentationState.isInteractiveCard}
                   showResizeHandle={showResizeHandleProp}
                   editorCardFixedScale={editorCardFixedScale}
                   editorCardHeightPx={editorCardHeightPx}
@@ -656,11 +701,8 @@ export const CardEditorPane = ({
                   shouldDockToolbarToCardTop={shouldDockToolbarToCardTop}
                   dockToolbarInsideCardEdge={shouldKeepDockedToolbarInsideCard}
                   setDockedToolbarMount={setToolbarMountAInternal}
-                  shouldShowEditingBadge={shouldShowEditingBadge}
-                  isPagerActiveCard={isPagerActiveCard}
-                  enableBlockActiveState={
-                    !embeddedInPager || isPagerInteractionCard
-                  }
+                  presentationState={cardPresentationState}
+                  enableBlockActiveState={cardPresentationState.isInteractiveCard}
                   showResizeHandle={showResizeHandleProp}
                   editorCardFixedScale={editorCardFixedScale}
                   editorCardHeightPx={editorCardHeightPx}

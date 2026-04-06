@@ -1,6 +1,6 @@
 import { Slider } from "@/components/ui/slider";
-import { Minus, Plus, RefreshCw } from "@/ui/icons";
 import { clampPaneWidthPx } from "@/pages/card-view/constants";
+import { Minus, Plus, RefreshCw } from "@/ui/icons";
 import React from "react";
 
 export interface CardPaneWidthControlProps {
