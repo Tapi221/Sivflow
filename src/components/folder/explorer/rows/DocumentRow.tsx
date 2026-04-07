@@ -1,7 +1,7 @@
 import { buildEntityRenameDeleteMenuActions } from "@/components/folder/components/menus/explorerMenuActionBuilders";
 import type { ExplorerTreeNode as TreeNode } from "@/components/folder/explorer/tree/arboristAdapter";
 import { cn } from "@/lib/utils";
-import { ChevronDown, ChevronRight, Layers } from "@/ui/icons";
+import { FileText } from "@/ui/icons";
 import React from "react";
 import { ExplorerRow } from "./ExplorerRow";
 import { ExplorerRowContent } from "./ExplorerRowContent";
@@ -18,13 +18,18 @@ import {
   FOLDER_ROW_TITLE_CLASS,
 } from "./shared";
 
-interface CardSetRowProps {
-  treeNode: TreeNode & { kind: "cardSet" };
+type ExplorerItemType = "folder" | "cardSet" | "card" | "document";
+
+interface RenameTarget {
+  id: string;
+  type: ExplorerItemType;
+}
+
+interface DocumentRowProps {
+  treeNode: TreeNode & { kind: "document" };
   style: React.CSSProperties;
   depth: number;
-  isOpen: boolean;
   isSelected: boolean;
-  toggle: () => void;
   editingId: string | null;
   editingName: string;
   renameCancelledRef: React.MutableRefObject<boolean>;
@@ -37,24 +42,16 @@ interface CardSetRowProps {
     type: "card" | "cardSet" | "document";
     id: string;
   }) => void;
-  handleDelete: (
-    id: string,
-    type: "folder" | "cardSet" | "card" | "document",
-  ) => void;
-  handleRenameConfirm: (target?: {
-    id: string;
-    type: "cardSet";
-  }) => Promise<void>;
+  handleDelete: (id: string, type: ExplorerItemType) => void;
+  handleRenameConfirm: (target?: RenameTarget) => Promise<void>;
   setRowRef: (id: string, node: HTMLElement | null) => void;
 }
 
-export const CardSetRow = ({
+export const DocumentRow = ({
   treeNode,
   style,
   depth,
-  isOpen,
   isSelected,
-  toggle,
   editingId,
   editingName,
   renameCancelledRef,
@@ -67,21 +64,19 @@ export const CardSetRow = ({
   handleDelete,
   handleRenameConfirm,
   setRowRef,
-}: CardSetRowProps) => {
-  const rowMenuId = `cardSet:${treeNode.rawId}`;
+}: DocumentRowProps) => {
+  const rowMenuId = `document:${treeNode.rawId}`;
   const isRowMenuOpen = openRowMenuId === rowMenuId;
   const isEditing = editingId === treeNode.rawId;
-  const hasChildren = (treeNode.children?.length ?? 0) > 0;
-  const Chevron = isOpen ? ChevronDown : ChevronRight;
 
   const rowMenuActions = React.useMemo(
     () =>
       buildEntityRenameDeleteMenuActions({
         id: treeNode.rawId,
         name: treeNode.name,
-        type: "cardSet",
+        type: "document",
         beforeRename: () => {
-          onItemSelect({ type: "cardSet", id: treeNode.rawId });
+          onItemSelect({ type: "document", id: treeNode.rawId });
         },
         closeMenu: () => {
           setOpenRowMenuId(null);
@@ -110,7 +105,7 @@ export const CardSetRow = ({
       try {
         node.setSelectionRange(0, node.value.length);
       } catch {
-        // no-op: setSelectionRange をサポートしない環境がある
+        // no-op
       }
     },
     [editInputRef, isEditing],
@@ -127,7 +122,7 @@ export const CardSetRow = ({
       hasContextMenu
       isEditing={isEditing}
       onContextMenuSelect={() => {
-        onItemSelect({ type: "cardSet", id: treeNode.rawId });
+        onItemSelect({ type: "document", id: treeNode.rawId });
       }}
     >
       <ExplorerRow
@@ -140,38 +135,16 @@ export const CardSetRow = ({
             ? "bg-[var(--sidebar-active-bg,#e7ebef)] text-[var(--sidebar-text,#202123)]"
             : "hover:bg-[var(--sidebar-active-bg,#e7ebef)] text-[var(--sidebar-text,#202123)]",
         )}
-        onClick={() => {
-          onItemSelect({ type: "cardSet", id: treeNode.rawId });
+        onClick={(event) => {
+          if (event.defaultPrevented) return;
+          onItemSelect({ type: "document", id: treeNode.rawId });
         }}
       >
         <div className={cn(EXPLORER_ROW_CONTENT_CLASS, "cursor-pointer")}>
-          <div className={EXPLORER_ROW_LEADING_SLOT_CLASS}>
-            {hasChildren ? (
-              <button
-                type="button"
-                className="grid h-4 w-4 place-items-center"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  toggle();
-                }}
-                aria-label={
-                  isOpen ? "カードセットを折りたたむ" : "カードセットを展開する"
-                }
-              >
-                <Chevron
-                  className={cn(
-                    "sidebar-icon",
-                    FOLDER_ROW_ICON_SIZE_CLASS,
-                    FOLDER_ROW_ICON_MUTED_CLASS,
-                    isSelected && FOLDER_ROW_ICON_ACTIVE_CLASS,
-                  )}
-                />
-              </button>
-            ) : null}
-          </div>
+          <div className={EXPLORER_ROW_LEADING_SLOT_CLASS} />
 
           <span className={EXPLORER_ROW_ICON_SLOT_CLASS}>
-            <Layers
+            <FileText
               className={cn(
                 "sidebar-icon",
                 FOLDER_ROW_ICON_SIZE_CLASS,
@@ -184,7 +157,7 @@ export const CardSetRow = ({
           {isEditing ? (
             <input
               ref={attachEditInputRef}
-              aria-label="カードセット名の編集"
+              aria-label="文書名の編集"
               className={EXPLORER_ROW_INPUT_CLASS}
               defaultValue={editingName}
               onFocus={(e) => {
@@ -194,18 +167,21 @@ export const CardSetRow = ({
                 e.preventDefault();
               }}
               onChange={(e) => {
-                editingNameRef.current = e.target.value;
+                setEditingName(e.target.value);
               }}
               onClick={(e) => e.stopPropagation()}
               onKeyDown={(e) => {
                 const isComposing =
                   e.nativeEvent.isComposing || e.keyCode === 229;
+
                 if (e.key === "Enter" && isComposing) return;
+
                 if (e.key === "Enter") {
                   e.preventDefault();
-                  editingNameRef.current = e.currentTarget.value;
+                  setEditingName(e.currentTarget.value);
                   e.currentTarget.blur();
                 }
+
                 if (e.key === "Escape") {
                   e.preventDefault();
                   e.stopPropagation();
@@ -214,10 +190,10 @@ export const CardSetRow = ({
                 }
               }}
               onBlur={(e) => {
-                editingNameRef.current = e.currentTarget.value;
+                setEditingName(e.currentTarget.value);
                 void handleRenameConfirm({
                   id: treeNode.rawId,
-                  type: "cardSet",
+                  type: "document",
                 });
               }}
             />
@@ -230,13 +206,6 @@ export const CardSetRow = ({
                   FOLDER_ROW_TITLE_CLASS,
                   isSelected ? "font-medium" : "font-normal",
                 )}
-                right={
-                  hasChildren ? (
-                    <span className="ml-auto text-[10px] text-[var(--sidebar-text-muted,#6e6e80)] tabular-nums">
-                      {treeNode.children!.length}
-                    </span>
-                  ) : null
-                }
               />
             </div>
           )}

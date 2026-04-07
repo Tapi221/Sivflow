@@ -297,9 +297,9 @@ const CardView = () => {
           cardSetId={cardSetId}
           viewZoomScale={zoom.zoomScale}
           fixedCardWidthPx={zoom.fixedCardWidthPx}
+          fluidAvailableWidthPx={zoom.availableWidthPx}
           onActiveIndexChange={state.handlePagerIndexChange}
           onFlip={state.handleFlip}
-          onEdit={state.handleEdit}
           onToggleUncertainty={state.handleToggleUncertainty}
           onToggleBookmark={state.handleToggleBookmark}
           onSyncStatusChange={state.handleActiveSyncStatusChange}
