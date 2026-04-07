@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect, useRef, useState } from "react";
+import React, { Suspense, useEffect, useRef } from "react";
 import { Outlet, useLocation, useSearchParams } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import "./AppLayout.css";
@@ -17,6 +17,7 @@ const LoadingFallback = () => {
 export const AppLayout = () => {
   const { pathname } = useLocation();
   const [searchParams] = useSearchParams();
+
   const isFoldersRoute = /^\/folders(?:\/|$)/i.test(pathname);
   const isCardSetViewRoute = /^\/(?:cardsetview|cardview)(?:\/|$)/i.test(
     pathname,
@@ -52,6 +53,7 @@ export const AppLayout = () => {
   const shouldHideMainSidebar =
     (isFoldersRoute && !isHomeOnlyMode) ||
     ((isCardSetViewRoute || isCardEditRoute) && Boolean(selectedCardSetId));
+
   const isScrollLocked =
     isFoldersRoute ||
     isCardEditRoute ||
@@ -60,10 +62,12 @@ export const AppLayout = () => {
 
   useEffect(() => {
     resetWorkspaceScroll();
+
     const raf1 = window.requestAnimationFrame(() => {
       resetWorkspaceScroll();
       window.requestAnimationFrame(resetWorkspaceScroll);
     });
+
     return () => window.cancelAnimationFrame(raf1);
   }, [pathname, isScrollLocked, selectedFolderId, selectedCardSetId]);
 
@@ -86,6 +90,7 @@ export const AppLayout = () => {
       >
         <Sidebar />
       </div>
+
       <div className="app-layout__content">
         <main
           ref={mainRef}
