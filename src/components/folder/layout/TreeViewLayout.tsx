@@ -115,7 +115,7 @@ const TreeViewLayout = ({
           query.set("cardSetId", item.id);
           if (cardSet.folderId) query.set("folderId", cardSet.folderId);
 
-          navigate(createPageUrl(`CardView?${query.toString()}`));
+          navigate(createPageUrl(`CardSetView?${query.toString()}`));
         }
         return;
       }
@@ -310,7 +310,7 @@ const TreeViewLayout = ({
       const query = new URLSearchParams();
       query.set("cardSetId", cardSetId);
       query.set("folderId", folderId);
-      navigate(createPageUrl(`CardView?${query.toString()}`));
+      navigate(createPageUrl(`CardSetView?${query.toString()}`));
     },
     [addRecent, navigate, onFolderSelect, setExplorerTab],
   );

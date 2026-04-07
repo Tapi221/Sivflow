@@ -15,7 +15,8 @@ const CardEdit = () => {
   const folderId = searchParams.get("folderId");
   const returnTo = searchParams.get("returnTo");
   const shouldReturnToCalendar = returnTo === "calendar";
-  const shouldReturnToCardView = returnTo === "card-view";
+  const shouldReturnToCardSetView =
+    returnTo === "card-set-view" || returnTo === "card-view";
   const shouldReturnToStudy = returnTo === "study";
 
   const targetFolderId = (() => {
@@ -52,9 +53,9 @@ const CardEdit = () => {
     sessionStorage.removeItem(CARD_EDIT_FOLDER_ID_KEY);
     if (shouldReturnToCalendar) {
       safeNavigate(createPageUrl("Calendar"));
-    } else if (shouldReturnToCardView) {
+    } else if (shouldReturnToCardSetView) {
       safeNavigate(
-        `/CardView?folderId=${targetFolderId}${cardId ? `&cardId=${cardId}` : ""}`,
+        `/CardSetView?folderId=${targetFolderId}${cardId ? `&cardId=${cardId}` : ""}`,
       );
     } else if (shouldReturnToStudy) {
       safeNavigate(`/study?folderId=${targetFolderId}`);
@@ -64,7 +65,7 @@ const CardEdit = () => {
   }, [
     safeNavigate,
     shouldReturnToCalendar,
-    shouldReturnToCardView,
+    shouldReturnToCardSetView,
     shouldReturnToStudy,
     targetFolderId,
     cardId,

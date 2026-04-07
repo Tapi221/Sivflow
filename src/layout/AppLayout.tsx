@@ -18,7 +18,9 @@ export const AppLayout = () => {
   const { pathname } = useLocation();
   const [searchParams] = useSearchParams();
   const isFoldersRoute = /^\/folders(?:\/|$)/i.test(pathname);
-  const isCardViewRoute = /^\/cardview(?:\/|$)/i.test(pathname);
+  const isCardSetViewRoute = /^\/(?:cardsetview|cardview)(?:\/|$)/i.test(
+    pathname,
+  );
   const isCardEditRoute = /^\/cardedit(?:\/|$)/i.test(pathname);
   const isHomeOnlyMode = searchParams.get("home") === "1";
   const selectedFolderId = searchParams.get("folderId");
@@ -49,16 +51,14 @@ export const AppLayout = () => {
 
   const shouldHideMainSidebar =
     (isFoldersRoute && !isHomeOnlyMode) ||
-    ((isCardViewRoute || isCardEditRoute) && Boolean(selectedCardSetId));
+    ((isCardSetViewRoute || isCardEditRoute) && Boolean(selectedCardSetId));
   const isScrollLocked =
     isFoldersRoute ||
     isCardEditRoute ||
-    isCardViewRoute ||
+    isCardSetViewRoute ||
     /^\/study(?:\/|$)/i.test(pathname);
 
   useEffect(() => {
-    // overflow: hidden/clip 状態でも scrollTop が保持される場合があるため、
-    // フォルダ/カードセット選択のクエリ更新時も含めて、関連コンテナを明示的に初期化する。
     resetWorkspaceScroll();
     const raf1 = window.requestAnimationFrame(() => {
       resetWorkspaceScroll();
