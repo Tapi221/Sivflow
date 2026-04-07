@@ -44,32 +44,32 @@ const toArrayOr = (v: unknown, fallback: unknown[] = []): unknown[] => {
 // ページ名から URL パスを作成
 // クエリパラメータ付きの場合も対応（例: 'CardEdit?folderId=xxx'）
 export const createPageUrl = (pageName: string): string => {
-const mapping: Record<string, string> = {
-  Dashboard: "/folders",
-  dashboard: "/folders",
-  Folders: "/folders",
-  folders: "/folders",
-  CardEdit: "/CardEdit",
-  CardSetView: "/CardSetView",
-  cardsetview: "/CardSetView",
-  CardView: "/CardSetView",
-  cardview: "/CardSetView",
-  StudyMode: "/study",
-  study: "/study",
-  UncertainMode: "/uncertain",
-  uncertain: "/uncertain",
-  BookmarkMode: "/bookmark",
-  bookmark: "/bookmark",
-  Calendar: "/calendar",
-  calendar: "/calendar",
-  Gallery: "/gallery",
-  gallery: "/gallery",
-  OneQAMode: "/one-qa-mode",
-  PairMode: "/pair-mode",
-  FourChoiceMode: "/four-choice-mode",
-  Statistics: "/statistics",
-  Trash: "/trash",
-};
+  const mapping: Record<string, string> = {
+    Dashboard: "/folders",
+    dashboard: "/folders",
+    Folders: "/folders",
+    folders: "/folders",
+    CardEdit: "/CardEdit",
+    CardSetView: "/CardSetView",
+    cardsetview: "/CardSetView",
+    CardView: "/CardSetView",
+    cardview: "/CardSetView",
+    StudyMode: "/study",
+    study: "/study",
+    UncertainMode: "/uncertain",
+    uncertain: "/uncertain",
+    BookmarkMode: "/bookmark",
+    bookmark: "/bookmark",
+    Calendar: "/calendar",
+    calendar: "/calendar",
+    Gallery: "/gallery",
+    gallery: "/gallery",
+    OneQAMode: "/one-qa-mode",
+    PairMode: "/pair-mode",
+    FourChoiceMode: "/four-choice-mode",
+    Statistics: "/statistics",
+    Trash: "/trash",
+  };
 
   // クエリパラメータを分離
   const [baseName, queryString] = pageName.split("?");

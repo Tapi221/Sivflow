@@ -14,6 +14,7 @@ const CardEdit = () => {
   const cardId = searchParams.get("id");
   const folderId = searchParams.get("folderId");
   const returnTo = searchParams.get("returnTo");
+
   const shouldReturnToCalendar = returnTo === "calendar";
   const shouldReturnToCardSetView =
     returnTo === "card-set-view" || returnTo === "card-view";
@@ -33,8 +34,10 @@ const CardEdit = () => {
     const mark = () => {
       isUnloadingRef.current = true;
     };
+
     window.addEventListener("pagehide", mark);
     window.addEventListener("beforeunload", mark);
+
     return () => {
       window.removeEventListener("pagehide", mark);
       window.removeEventListener("beforeunload", mark);
@@ -51,6 +54,7 @@ const CardEdit = () => {
 
   const handleCardUpdated = useCallback(() => {
     sessionStorage.removeItem(CARD_EDIT_FOLDER_ID_KEY);
+
     if (shouldReturnToCalendar) {
       safeNavigate(createPageUrl("Calendar"));
     } else if (shouldReturnToCardSetView) {
