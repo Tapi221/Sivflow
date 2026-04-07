@@ -31,7 +31,7 @@ export const useTreeViewActions = ({
 
   const handleViewCards = useCallback(() => {
     if (!selectedFolderId) return;
-    navigate(createPageUrl(`CardView?folderId=${selectedFolderId}`));
+    navigate(createPageUrl(`CardSetView?folderId=${selectedFolderId}`));
   }, [navigate, selectedFolderId]);
 
   const handleOpenCreateCard = useCallback(() => {

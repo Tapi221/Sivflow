@@ -3,7 +3,7 @@ import { TEXT_BLOCK_CONTENT_CLASS } from "@/components/card/blocks/text/textBloc
 import {
   buildTypographyStyle,
   mergeStyles,
-} from "@/components/card/common/cardViewZoom";
+} from "@/components/card/common/cardSetViewZoom";
 import { cn } from "@/lib/utils";
 import type {
   CSSProperties,

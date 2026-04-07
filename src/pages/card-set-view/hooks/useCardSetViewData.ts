@@ -3,15 +3,15 @@ import { useCards } from "@/hooks/card/useCards";
 import { useCardSets } from "@/hooks/cardSet/useCardSets";
 import { useFolders } from "@/hooks/folder/useFolders";
 
-interface UseCardViewDataOptions {
+interface UseCardSetViewDataOptions {
   folderId: string | null;
   cardSetId: string | null;
 }
 
-export const useCardViewData = ({
+export const useCardSetViewData = ({
   folderId,
   cardSetId,
-}: UseCardViewDataOptions) => {
+}: UseCardSetViewDataOptions) => {
   const {
     cards = [],
     loading: isLoading,

@@ -2,7 +2,7 @@
 import { act, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { CardViewMetaPanel } from "@/pages/card-view/components/CardViewMetaPanel";
+import { CardSetViewMetaPanel } from "@/pages/card-set-view/components/CardSetViewMetaPanel";
 import type { Card } from "@/types";
 
 const cardMetaPanelPropsSpy = vi.hoisted(() => vi.fn());
@@ -23,11 +23,11 @@ const makeCard = (overrides: Partial<Card> = {}) => {
   } as Card;
 };
 
-describe("CardViewMetaPanel", () => {
+describe("CardSetViewMetaPanel", () => {
   it("dispatches editing draft patch while typing title in global edit mode", async () => {
     cardMetaPanelPropsSpy.mockClear();
     render(
-      <CardViewMetaPanel
+      <CardSetViewMetaPanel
         selectedCard={makeCard()}
         isGlobalEditing
         settings={undefined}
@@ -44,7 +44,7 @@ describe("CardViewMetaPanel", () => {
 
     const listener = vi.fn();
     window.addEventListener(
-      "cardview:editing-draft-patch",
+      "cardsetview:editing-draft-patch",
       listener as EventListener,
     );
 
@@ -63,7 +63,7 @@ describe("CardViewMetaPanel", () => {
     });
 
     window.removeEventListener(
-      "cardview:editing-draft-patch",
+      "cardsetview:editing-draft-patch",
       listener as EventListener,
     );
   });
@@ -71,7 +71,7 @@ describe("CardViewMetaPanel", () => {
   it("does not dispatch draft patch on typing when not in global edit mode", async () => {
     cardMetaPanelPropsSpy.mockClear();
     render(
-      <CardViewMetaPanel
+      <CardSetViewMetaPanel
         selectedCard={makeCard()}
         isGlobalEditing={false}
         settings={undefined}
@@ -87,7 +87,7 @@ describe("CardViewMetaPanel", () => {
 
     const listener = vi.fn();
     window.addEventListener(
-      "cardview:editing-draft-patch",
+      "cardsetview:editing-draft-patch",
       listener as EventListener,
     );
 
@@ -98,7 +98,7 @@ describe("CardViewMetaPanel", () => {
     expect(listener).not.toHaveBeenCalled();
 
     window.removeEventListener(
-      "cardview:editing-draft-patch",
+      "cardsetview:editing-draft-patch",
       listener as EventListener,
     );
   });

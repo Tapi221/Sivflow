@@ -6,27 +6,28 @@ import {
 import type { Card } from "@/types";
 import type { UserSettings } from "@/types";
 
-const CARDVIEW_EDITING_DRAFT_PATCH_EVENT = "cardview:editing-draft-patch";
+const CARD_SET_VIEW_EDITING_DRAFT_PATCH_EVENT =
+  "cardsetview:editing-draft-patch";
 
-interface CardViewMetaPanelProps {
+interface CardSetViewMetaPanelProps {
   selectedCard: Card | null;
   isGlobalEditing: boolean;
   settings: UserSettings | undefined;
   updateCard: (id: string, data: Partial<Card>) => Promise<unknown>;
 }
 
-export const CardViewMetaPanel = ({
+export const CardSetViewMetaPanel = ({
   selectedCard,
   isGlobalEditing,
   settings,
   updateCard,
-}: CardViewMetaPanelProps) => {
+}: CardSetViewMetaPanelProps) => {
   const patchEditingDraft = (
     patch: Partial<Pick<Card, "title" | "isDraft">> & { tags?: string[] },
   ) => {
     if (typeof window === "undefined" || !selectedCard?.id) return;
     window.dispatchEvent(
-      new CustomEvent(CARDVIEW_EDITING_DRAFT_PATCH_EVENT, {
+      new CustomEvent(CARD_SET_VIEW_EDITING_DRAFT_PATCH_EVENT, {
         detail: { cardId: selectedCard.id, patch },
       }),
     );

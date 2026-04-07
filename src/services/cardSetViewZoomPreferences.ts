@@ -1,36 +1,51 @@
-const STORAGE_KEY = "card-view-zoom-preferences";
+const STORAGE_KEY = "card-set-view-zoom-preferences";
+const LEGACY_STORAGE_KEY = "card-view-zoom-preferences";
 
-interface CardViewZoomPreferencesStore {
+interface CardSetViewZoomPreferencesStore {
   version: 1;
   byCardSet: Record<string, number>;
 }
 
-const emptyStore = (): CardViewZoomPreferencesStore => ({
+const emptyStore = (): CardSetViewZoomPreferencesStore => ({
   version: 1,
   byCardSet: {},
 });
 
-const readStore = (): CardViewZoomPreferencesStore => {
+const parseStore = (raw: string | null) => {
+  if (!raw) {
+    return null;
+  }
+
+  const parsed = JSON.parse(
+    raw,
+  ) as Partial<CardSetViewZoomPreferencesStore> | null;
+
+  if (
+    parsed &&
+    parsed.version === 1 &&
+    parsed.byCardSet &&
+    typeof parsed.byCardSet === "object"
+  ) {
+    return parsed as CardSetViewZoomPreferencesStore;
+  }
+
+  return null;
+};
+
+const readStore = (): CardSetViewZoomPreferencesStore => {
   try {
     if (typeof window === "undefined") {
       return emptyStore();
     }
 
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      return emptyStore();
+    const current = parseStore(window.localStorage.getItem(STORAGE_KEY));
+    if (current) {
+      return current;
     }
 
-    const parsed = JSON.parse(
-      raw,
-    ) as Partial<CardViewZoomPreferencesStore> | null;
-    if (
-      parsed &&
-      parsed.version === 1 &&
-      parsed.byCardSet &&
-      typeof parsed.byCardSet === "object"
-    ) {
-      return parsed as CardViewZoomPreferencesStore;
+    const legacy = parseStore(window.localStorage.getItem(LEGACY_STORAGE_KEY));
+    if (legacy) {
+      return legacy;
     }
 
     return emptyStore();
@@ -39,7 +54,7 @@ const readStore = (): CardViewZoomPreferencesStore => {
   }
 };
 
-const writeStore = (store: CardViewZoomPreferencesStore) => {
+const writeStore = (store: CardSetViewZoomPreferencesStore) => {
   try {
     if (typeof window === "undefined") {
       return;

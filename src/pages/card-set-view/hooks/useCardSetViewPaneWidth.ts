@@ -6,7 +6,7 @@ import {
   CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
   CARD_PANE_VIEW_MIN_WIDTH_PX,
   clampPaneWidthPx,
-} from "@/pages/card-view/constants";
+} from "@/pages/card-set-view/constants";
 import { useCardPaneWidthState } from "@/components/card/shell/useCardPaneWidthState";
 import {
   getCardSetWidthPreference,
@@ -14,7 +14,7 @@ import {
 } from "@/services/cardWidthPreferences";
 import type { UserSettings } from "@/types";
 
-interface UseCardViewPaneWidthOptions {
+interface UseCardSetViewPaneWidthOptions {
   isGlobalEditing: boolean;
   isDesktop: boolean;
   isMetaOpen: boolean;
@@ -44,14 +44,14 @@ const getReservedScrollbarGutterWidthPx = () => {
 const measureViewportWidth = (element: HTMLDivElement) =>
   Math.max(0, Math.round(element.clientWidth));
 
-export const useCardViewPaneWidth = ({
+export const useCardSetViewPaneWidth = ({
   isGlobalEditing,
   isDesktop,
   isMetaOpen,
   currentIndex,
   settings,
   cardSetId,
-}: UseCardViewPaneWidthOptions) => {
+}: UseCardSetViewPaneWidthOptions) => {
   const reservedScrollbarGutterWidthPx = useMemo(
     () => (isDesktop ? getReservedScrollbarGutterWidthPx() : 0),
     [isDesktop],

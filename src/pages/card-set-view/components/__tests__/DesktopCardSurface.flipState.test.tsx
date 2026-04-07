@@ -2,7 +2,7 @@
 import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DesktopCardSurface } from "@/pages/card-view/components/DesktopCardSurface";
+import { DesktopCardSurface } from "@/pages/card-set-view/components/DesktopCardSurface";
 import type { Card } from "@/types";
 
 const flashcardPropsSpy = vi.hoisted(() => vi.fn());
@@ -37,15 +37,14 @@ describe("DesktopCardSurface flip state", () => {
       settings: null,
       isFlipped: true,
       currentDisplayMode: "fixed",
+      viewZoomScale: 1,
       folderId: null,
       cardSetId: null,
       cardsOverride: undefined,
-      mountEditor: false,
-      saveSignal: 0,
       onFlip: vi.fn(),
-      onEdit: vi.fn(),
       onToggleUncertainty: vi.fn(),
       onToggleBookmark: vi.fn(),
+      onSyncStatusChange: vi.fn(),
     } as const;
 
     const { rerender } = render(
@@ -95,13 +94,13 @@ describe("DesktopCardSurface flip state", () => {
         settings={null}
         isFlipped={false}
         currentDisplayMode="fluid"
+        viewZoomScale={1}
         folderId={null}
         cardSetId={null}
-        saveSignal={0}
         onFlip={vi.fn()}
-        onEdit={vi.fn()}
         onToggleUncertainty={vi.fn()}
         onToggleBookmark={vi.fn()}
+        onSyncStatusChange={vi.fn()}
       />,
     );
 

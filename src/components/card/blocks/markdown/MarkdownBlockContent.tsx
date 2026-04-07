@@ -5,7 +5,7 @@ import {
   buildTypographyStyle,
   mergeStyles,
   scaleTypographyNumberPx,
-} from "@/components/card/common/cardViewZoom";
+} from "@/components/card/common/cardSetViewZoom";
 import { cn } from "@/lib/utils";
 import React, { useMemo } from "react";
 import ReactMarkdown, { type Components } from "react-markdown";

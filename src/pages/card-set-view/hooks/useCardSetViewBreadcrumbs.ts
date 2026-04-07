@@ -1,4 +1,4 @@
-import { buildCardViewBreadcrumbs } from "@/features/breadcrumbs/builders";
+import { buildCardSetViewBreadcrumbs } from "@/features/breadcrumbs/builders";
 import type { Card } from "@/types";
 import type { CardSet } from "@/types/domain/cardSet";
 import { useEffect, useMemo } from "react";
@@ -15,7 +15,7 @@ interface Crumb {
   folderId?: string | null;
 }
 
-interface UseCardViewBreadcrumbsOptions {
+interface UseCardSetViewBreadcrumbsOptions {
   folderId: string | null;
   selectedCardSet: CardSet | null;
   selectedCard: Card | null;
@@ -24,14 +24,14 @@ interface UseCardViewBreadcrumbsOptions {
   setExtraCrumbs: (crumbs: Crumb[]) => void;
 }
 
-export const useCardViewBreadcrumbs = ({
+export const useCardSetViewBreadcrumbs = ({
   folderId,
   selectedCardSet,
   selectedCard,
   sortedCards,
   folders,
   setExtraCrumbs,
-}: UseCardViewBreadcrumbsOptions) => {
+}: UseCardSetViewBreadcrumbsOptions) => {
   const folderById = useMemo(
     () => new Map(folders.map((folder) => [folder.id, folder])),
     [folders],
@@ -39,7 +39,7 @@ export const useCardViewBreadcrumbs = ({
 
   useEffect(() => {
     setExtraCrumbs(
-      buildCardViewBreadcrumbs({
+      buildCardSetViewBreadcrumbs({
         folderId,
         selectedCardSet,
         selectedCard,

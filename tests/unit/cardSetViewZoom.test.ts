@@ -1,20 +1,20 @@
 import {
   buildTypographyStyle,
-  normalizeCardViewZoom,
+  normalizeCardSetViewZoom,
   scaleTypographyNumberPx,
   scaleTypographyValuePx,
-} from "@/components/card/common/cardViewZoom";
+} from "@/components/card/common/cardSetViewZoom";
 import { describe, expect, it } from "vitest";
 
-describe("cardViewZoom", () => {
+describe("cardSetViewZoom", () => {
   it("normalizes invalid values to 1", () => {
-    expect(normalizeCardViewZoom()).toBe(1);
-    expect(normalizeCardViewZoom(Number.NaN)).toBe(1);
+    expect(normalizeCardSetViewZoom()).toBe(1);
+    expect(normalizeCardSetViewZoom(Number.NaN)).toBe(1);
   });
 
   it("clamps zoom to safe bounds", () => {
-    expect(normalizeCardViewZoom(0.01)).toBe(0.5);
-    expect(normalizeCardViewZoom(10)).toBe(4);
+    expect(normalizeCardSetViewZoom(0.01)).toBe(0.5);
+    expect(normalizeCardSetViewZoom(10)).toBe(4);
   });
 
   it("scales typography values as px strings", () => {

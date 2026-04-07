@@ -1,13 +1,13 @@
 import { useState } from "react";
 
-export type ParsedParams = {
+export type ParsedCardSetViewParams = {
   folderId: string | null;
   cardSetId: string | null;
   initialIndex: number;
   targetCardId: string | null;
 };
 
-const parseCardViewParams = () => {
+const parseCardSetViewParams = (): ParsedCardSetViewParams => {
   if (typeof window === "undefined") {
     return {
       folderId: null,
@@ -34,7 +34,9 @@ const parseCardViewParams = () => {
   };
 };
 
-export const useCardViewParams = () => {
-  const [params] = useState<ParsedParams>(() => parseCardViewParams());
+export const useCardSetViewParams = () => {
+  const [params] = useState<ParsedCardSetViewParams>(() =>
+    parseCardSetViewParams(),
+  );
   return params;
 };

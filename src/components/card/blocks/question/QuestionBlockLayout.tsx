@@ -1,8 +1,8 @@
 import {
   buildTypographyStyle,
   mergeStyles,
-  normalizeCardViewZoom,
-} from "@/components/card/common/cardViewZoom";
+  normalizeCardSetViewZoom,
+} from "@/components/card/common/cardSetViewZoom";
 import { BlockInset } from "@/components/card/blocks/editor/BlockInset";
 import { cn } from "@/lib/utils";
 import React from "react";
@@ -26,7 +26,7 @@ type QuestionBlockLayoutProps = {
 };
 
 const scaleSpacePx = (basePx: number, zoom?: number) => {
-  const resolvedZoom = normalizeCardViewZoom(zoom);
+  const resolvedZoom = normalizeCardSetViewZoom(zoom);
   return `${Number((basePx * resolvedZoom).toFixed(3))}px`;
 };
 

@@ -19,12 +19,12 @@ const useBreadcrumbs = () => {
 
 export const TitleBar: React.FC = () => {
   const [isMaximized, setIsMaximized] = useState(false);
-  const [isCardViewEditing, setIsCardViewEditing] = useState(false);
+  const [isCardSetViewEditing, setIsCardSetViewEditing] = useState(false);
   const isDesktop = isDesktopRuntime();
   const { pathname } = useLocation();
   const crumbs = useBreadcrumbs();
   const { extraCrumbs, notifyFolderSelect } = useBreadcrumbContext();
-  const isCardViewPage = pathname.toLowerCase().startsWith("/cardview");
+  const isCardSetViewPage = pathname.toLowerCase().startsWith("/cardsetview");
 
   useEffect(() => {
     if (!isDesktop) return;
@@ -45,11 +45,11 @@ export const TitleBar: React.FC = () => {
   useEffect(() => {
     const onEditingChange = (event: Event) => {
       const next = (event as CustomEvent<boolean>).detail;
-      setIsCardViewEditing(Boolean(next));
+      setIsCardSetViewEditing(Boolean(next));
     };
-    window.addEventListener("cardview:editing-change", onEditingChange);
+    window.addEventListener("cardsetview:editing-change", onEditingChange);
     return () =>
-      window.removeEventListener("cardview:editing-change", onEditingChange);
+      window.removeEventListener("cardsetview:editing-change", onEditingChange);
   }, []);
 
   const allCrumbs = useMemo(
@@ -133,13 +133,13 @@ export const TitleBar: React.FC = () => {
         className="flex h-full items-center text-gray-500"
         style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
       >
-        {isCardViewPage && (
+        {isCardSetViewPage && (
           <>
-            {isCardViewEditing && (
+            {isCardSetViewEditing && (
               <button
                 onClick={() =>
                   window.dispatchEvent(
-                    new CustomEvent("cardview:create-card-request"),
+                    new CustomEvent("cardsetview:create-card-request"),
                   )
                 }
                 className="flex h-full w-[46px] items-center justify-center transition-colors hover:bg-black/5"
@@ -188,10 +188,12 @@ export const TitleBar: React.FC = () => {
                 </svg>
               </button>
             )}
-            {isCardViewEditing && (
+            {isCardSetViewEditing && (
               <button
                 onClick={() =>
-                  window.dispatchEvent(new CustomEvent("cardview:save-request"))
+                  window.dispatchEvent(
+                    new CustomEvent("cardsetview:save-request"),
+                  )
                 }
                 className="flex h-full w-[46px] items-center justify-center transition-colors hover:bg-black/5"
                 title="保存"
@@ -232,18 +234,18 @@ export const TitleBar: React.FC = () => {
             <button
               onClick={() =>
                 window.dispatchEvent(
-                  new CustomEvent("cardview:toggle-editing-request"),
+                  new CustomEvent("cardsetview:toggle-editing-request"),
                 )
               }
               className="flex h-full w-[46px] items-center justify-center transition-colors hover:bg-black/5"
               title={
-                isCardViewEditing
+                isCardSetViewEditing
                   ? "閲覧モードに切り替え"
                   : "編集モードに切り替え"
               }
               tabIndex={-1}
             >
-              {isCardViewEditing ? (
+              {isCardSetViewEditing ? (
                 <svg
                   width="14"
                   height="14"

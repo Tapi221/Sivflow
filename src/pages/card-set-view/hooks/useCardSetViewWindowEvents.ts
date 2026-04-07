@@ -1,22 +1,22 @@
 import { useEffect } from "react";
 
-interface UseCardViewWindowEventsOptions {
+interface UseCardSetViewWindowEventsOptions {
   handleToggleViewMode: () => void;
   createAndFocusCard: () => Promise<boolean>;
 }
 
-export const useCardViewWindowEvents = ({
+export const useCardSetViewWindowEvents = ({
   handleToggleViewMode,
   createAndFocusCard,
-}: UseCardViewWindowEventsOptions) => {
+}: UseCardSetViewWindowEventsOptions) => {
   useEffect(() => {
     window.addEventListener(
-      "cardview:toggle-editing-request",
+      "cardsetview:toggle-editing-request",
       handleToggleViewMode,
     );
     return () =>
       window.removeEventListener(
-        "cardview:toggle-editing-request",
+        "cardsetview:toggle-editing-request",
         handleToggleViewMode,
       );
   }, [handleToggleViewMode]);
@@ -26,8 +26,8 @@ export const useCardViewWindowEvents = ({
       void createAndFocusCard();
     };
 
-    window.addEventListener("cardview:create-card-request", handler);
+    window.addEventListener("cardsetview:create-card-request", handler);
     return () =>
-      window.removeEventListener("cardview:create-card-request", handler);
+      window.removeEventListener("cardsetview:create-card-request", handler);
   }, [createAndFocusCard]);
 };

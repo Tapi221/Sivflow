@@ -3,11 +3,11 @@ import {
   TEXT_BLOCK_CONTENT_CLASS,
   TEXT_BLOCK_LINE_HEIGHT_PX,
 } from "@/components/card/blocks/text/textBlockStyles";
-import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
 import {
   buildTypographyStyle,
   scaleTypographyNumberPx,
-} from "@/components/card/common/cardViewZoom";
+} from "@/components/card/common/cardSetViewZoom";
+import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
 
 const normalizeTextBlockContent = (content: string) =>
   String(content ?? "").replace(/\r\n/g, "\n");

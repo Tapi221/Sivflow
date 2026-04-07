@@ -2,7 +2,7 @@ import { CANONICAL_CARD_WIDTH } from "@/components/card/common/constants";
 import {
   getCardSetViewZoomPreference,
   setCardSetViewZoomPreference,
-} from "@/services/cardViewZoomPreferences";
+} from "@/services/cardSetViewZoomPreferences";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
@@ -11,7 +11,7 @@ import {
   CARD_VIEW_ZOOM_STEP_PERCENT,
 } from "../constants";
 
-interface UseCardViewZoomOptions {
+interface UseCardSetViewZoomOptions {
   cardSetId: string | null;
   viewportRef: React.RefObject<HTMLDivElement | null>;
   activeCardKey: string;
@@ -57,11 +57,11 @@ export const clampZoomPercent = (
   return Math.min(resolvedMax, Math.max(resolvedMin, snapped));
 };
 
-export const useCardViewZoom = ({
+export const useCardSetViewZoom = ({
   cardSetId,
   viewportRef,
   activeCardKey,
-}: UseCardViewZoomOptions) => {
+}: UseCardSetViewZoomOptions) => {
   const [viewportWidthPx, setViewportWidthPx] = useState(
     CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
   );
@@ -180,10 +180,13 @@ export const useCardViewZoom = ({
     Math.round(CANONICAL_CARD_WIDTH * zoomScale),
   );
 
+  const availableWidthPx = Math.max(1, Math.floor(viewportWidthPx));
+
   return {
     zoomPercent,
     zoomScale,
     viewportWidthPx,
+    availableWidthPx,
     fixedCardWidthPx,
     minZoomPercent: effectiveMinZoomPercent,
     maxZoomPercent: dynamicMaxZoomPercent,

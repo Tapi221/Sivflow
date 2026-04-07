@@ -25,7 +25,8 @@ type EditingDraftPatchDetail = {
   patch: Partial<Pick<Card, "title" | "isDraft">> & { tags?: string[] };
 };
 
-const CARDVIEW_EDITING_DRAFT_PATCH_EVENT = "cardview:editing-draft-patch";
+const CARD_SET_VIEW_EDITING_DRAFT_PATCH_EVENT =
+  "cardsetview:editing-draft-patch";
 const META_PANEL_OPEN_STORAGE_KEY = "card-editor.meta-panel-open";
 
 type UseCardEditorPaneControllerParams = {
@@ -170,9 +171,12 @@ export const useCardEditorPaneController = ({
       });
     };
 
-    window.addEventListener(CARDVIEW_EDITING_DRAFT_PATCH_EVENT, handler);
+    window.addEventListener(CARD_SET_VIEW_EDITING_DRAFT_PATCH_EVENT, handler);
     return () =>
-      window.removeEventListener(CARDVIEW_EDITING_DRAFT_PATCH_EVENT, handler);
+      window.removeEventListener(
+        CARD_SET_VIEW_EDITING_DRAFT_PATCH_EVENT,
+        handler,
+      );
   }, [sessionIsEditing, sessionSelectedCard, setSessionDraft]);
 
   const layout = useLayoutRowsController({

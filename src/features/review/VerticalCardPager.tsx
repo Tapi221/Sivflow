@@ -317,7 +317,8 @@ const VerticalCardPagerFn = <T,>({
 
       if (sampleElement) {
         const extent = Math.max(1, sampleElement.offsetHeight + CARD_GAP);
-        avgItemExtentRef.current = avgItemExtentRef.current * 0.8 + extent * 0.2;
+        avgItemExtentRef.current =
+          avgItemExtentRef.current * 0.8 + extent * 0.2;
       }
     }
 

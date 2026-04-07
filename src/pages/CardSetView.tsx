@@ -12,18 +12,18 @@ import { useToast } from "@/contexts/ToastContext";
 import { useIsDesktopRuntime } from "@/hooks/platform/useIsDesktopRuntime";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
-import { CardViewDesktop } from "./card-view/components/CardViewDesktop";
-import { CardViewMetaPanel } from "./card-view/components/CardViewMetaPanel";
-import { CardViewMobile } from "./card-view/components/CardViewMobile";
-import { CardZoomControl } from "./card-view/components/CardZoomControl";
-import { CARD_PANE_WIDTH_STEP_PX } from "./card-view/constants";
-import { useCardViewBreadcrumbs } from "./card-view/hooks/useCardViewBreadcrumbs";
-import { useCardViewData } from "./card-view/hooks/useCardViewData";
-import { useCardViewPaneWidth } from "./card-view/hooks/useCardViewPaneWidth";
-import { useCardViewParams } from "./card-view/hooks/useCardViewParams";
-import { useCardViewState } from "./card-view/hooks/useCardViewState";
-import { useCardViewWindowEvents } from "./card-view/hooks/useCardViewWindowEvents";
-import { useCardViewZoom } from "./card-view/hooks/useCardViewZoom";
+import { CardSetViewDesktop } from "./card-set-view/components/CardSetViewDesktop";
+import { CardSetViewMetaPanel } from "./card-set-view/components/CardSetViewMetaPanel";
+import { CardSetViewMobile } from "./card-set-view/components/CardSetViewMobile";
+import { CardZoomControl } from "./card-set-view/components/CardZoomControl";
+import { CARD_PANE_WIDTH_STEP_PX } from "./card-set-view/constants";
+import { useCardSetViewBreadcrumbs } from "./card-set-view/hooks/useCardSetViewBreadcrumbs";
+import { useCardSetViewData } from "./card-set-view/hooks/useCardSetViewData";
+import { useCardSetViewPaneWidth } from "./card-set-view/hooks/useCardSetViewPaneWidth";
+import { useCardSetViewParams } from "./card-set-view/hooks/useCardSetViewParams";
+import { useCardSetViewState } from "./card-set-view/hooks/useCardSetViewState";
+import { useCardSetViewWindowEvents } from "./card-set-view/hooks/useCardSetViewWindowEvents";
+import { useCardSetViewZoom } from "./card-set-view/hooks/useCardSetViewZoom";
 
 const DISPLAY_MODE_LABELS: Record<CardDisplayMode, string> = {
   fixed: "カード表示（手書き対応）",
@@ -58,18 +58,18 @@ const toTimeMs = (value: unknown) => {
   return null;
 };
 
-const CardView = () => {
+const CardSetView = () => {
   const { setExtraCrumbs } = useBreadcrumbContext();
   const { error: toastError } = useToast();
   const isDesktop = useIsDesktopRuntime();
   const { settings } = useUserSettings();
 
   const { folderId, cardSetId, initialIndex, targetCardId } =
-    useCardViewParams();
+    useCardSetViewParams();
 
-  const data = useCardViewData({ folderId, cardSetId });
+  const data = useCardSetViewData({ folderId, cardSetId });
 
-  const state = useCardViewState({
+  const state = useCardSetViewState({
     initialIndex,
     targetCardId,
     folderId,
@@ -95,7 +95,7 @@ const CardView = () => {
     persistPaneWidth,
     stepPaneWidth,
     resetActivePaneWidth,
-  } = useCardViewPaneWidth({
+  } = useCardSetViewPaneWidth({
     isGlobalEditing: state.isGlobalEditing,
     isDesktop,
     isMetaOpen: state.isMetaOpen,
@@ -104,13 +104,13 @@ const CardView = () => {
     cardSetId,
   });
 
-  const zoom = useCardViewZoom({
+  const zoom = useCardSetViewZoom({
     cardSetId,
     viewportRef: contentViewportRef,
     activeCardKey: `${state.selectedCard?.id ?? ""}:${state.currentDisplayMode}`,
   });
 
-  useCardViewBreadcrumbs({
+  useCardSetViewBreadcrumbs({
     folderId,
     selectedCardSet: data.selectedCardSet,
     selectedCard: state.selectedCard,
@@ -119,7 +119,7 @@ const CardView = () => {
     setExtraCrumbs,
   });
 
-  useCardViewWindowEvents({
+  useCardSetViewWindowEvents({
     handleToggleViewMode: state.handleToggleViewMode,
     createAndFocusCard: state.createAndFocusCard,
   });
@@ -211,7 +211,7 @@ const CardView = () => {
               })
               .catch((error: unknown) => {
                 console.error(
-                  "[CardView] Failed to save default display mode",
+                  "[CardSetView] Failed to save default display mode",
                   error,
                 );
                 toastError("表示モードの保存に失敗しました");
@@ -274,7 +274,7 @@ const CardView = () => {
         state.isGlobalEditing || isDesktop ? "px-0 py-0" : "px-4 py-0"
       }
       metaPanel={
-        <CardViewMetaPanel
+        <CardSetViewMetaPanel
           selectedCard={state.selectedCard}
           isGlobalEditing={state.isGlobalEditing}
           settings={settings}
@@ -283,7 +283,7 @@ const CardView = () => {
       }
     >
       {isDesktop ? (
-        <CardViewDesktop
+        <CardSetViewDesktop
           isLoading={data.isLoading}
           isGlobalEditing={state.isGlobalEditing}
           flippedCardIds={state.flippedCardIds}
@@ -305,7 +305,7 @@ const CardView = () => {
           onSyncStatusChange={state.handleActiveSyncStatusChange}
         />
       ) : (
-        <CardViewMobile
+        <CardSetViewMobile
           cardsForPager={state.cardsForPager}
           selectedCardId={state.selectedCard?.id ?? null}
           safeCurrentIndex={state.safeCurrentIndex}
@@ -323,4 +323,4 @@ const CardView = () => {
   );
 };
 
-export default CardView;
+export default CardSetView;

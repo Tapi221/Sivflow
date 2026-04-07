@@ -21,7 +21,7 @@ const PAGE_LABELS: Record<string, string> = {
   trash: "ゴミ箱",
   study: "学習モード",
   cardedit: "カード編集",
-  cardview: "カード閲覧",
+  cardsetview: "カード閲覧",
   "one-qa-mode": "一問一答",
   "pair-mode": "ペアモード",
   "four-choice-mode": "四択モード",
@@ -98,7 +98,7 @@ export const mergeTitleBarBreadcrumbs = ({
 
   const normalizedPathname = pathname.toLowerCase();
   const baseCrumbsForMerge =
-    normalizedPathname.startsWith("/cardview") && baseCrumbs.length > 1
+    normalizedPathname.startsWith("/cardsetview") && baseCrumbs.length > 1
       ? [baseCrumbs[0], { label: "フォルダ一覧", to: "/folders" }]
       : baseCrumbs;
 
@@ -191,7 +191,7 @@ export const buildExplorerBreadcrumbs = ({
   return crumbs;
 };
 
-export const buildCardViewBreadcrumbs = ({
+export const buildCardSetViewBreadcrumbs = ({
   folderId,
   selectedCardSet,
   selectedCard,

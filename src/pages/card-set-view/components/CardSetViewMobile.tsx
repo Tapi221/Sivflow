@@ -7,7 +7,7 @@ import type { UserSettings } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 import { useCallback } from "react";
 
-interface CardViewMobileProps {
+interface CardSetViewMobileProps {
   cardsForPager: Card[];
   selectedCardId: string | null;
   safeCurrentIndex: number;
@@ -21,7 +21,7 @@ interface CardViewMobileProps {
   onToggleBookmark: (card: Card) => void | Promise<void>;
 }
 
-export const CardViewMobile = ({
+export const CardSetViewMobile = ({
   cardsForPager,
   selectedCardId,
   safeCurrentIndex,
@@ -33,7 +33,7 @@ export const CardViewMobile = ({
   onEdit,
   onToggleUncertainty,
   onToggleBookmark,
-}: CardViewMobileProps) => {
+}: CardSetViewMobileProps) => {
   void selectedCardId;
   const wrapCard = useCallback(
     (node: React.ReactNode) => (

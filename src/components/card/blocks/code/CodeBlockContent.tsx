@@ -2,7 +2,7 @@ import { BlockInset } from "@/components/card/blocks/editor/BlockInset";
 import {
   buildTypographyStyle,
   mergeStyles,
-} from "@/components/card/common/cardViewZoom";
+} from "@/components/card/common/cardSetViewZoom";
 import { cn } from "@/lib/utils";
 import { webClipboardAdapter } from "@/platform/clipboard/webClipboardAdapter";
 import { codeTheme } from "@/theme/codeTheme";

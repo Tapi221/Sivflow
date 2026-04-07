@@ -2,7 +2,7 @@ import { CANONICAL_CARD_WIDTH } from "@/components/card/common/constants";
 import {
   CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
   CARD_PANE_VIEW_MIN_WIDTH_PX,
-} from "@/pages/card-view/constants";
+} from "@/pages/card-set-view/constants";
 
 export const CARD_VIEW_ZOOM_STEP_PERCENT = 5;
 

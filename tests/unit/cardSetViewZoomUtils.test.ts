@@ -10,9 +10,9 @@ import {
   normalizeZoomPercent,
   zoomPercentToFactor,
   zoomPercentToFixedCardWidthPx,
-} from "@/pages/card-view/cardViewZoom";
+} from "@/pages/card-set-view/cardSetViewZoom";
 
-describe("cardViewZoom", () => {
+describe("cardSetViewZoom", () => {
   describe("default/min constants", () => {
     it("keeps the current visual defaults by mapping existing width defaults to percent", () => {
       expect(CARD_VIEW_DEFAULT_ZOOM_PERCENT).toBeGreaterThan(100);

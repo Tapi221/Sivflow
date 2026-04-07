@@ -20,7 +20,7 @@ import { DEV_MODE, isLocalHost } from "./utils/envGuards";
 const Calendar = lazy(() => import("./pages/Calendar"));
 const Folders = lazy(() => import("./pages/Folders"));
 const CardEdit = lazy(() => import("./pages/CardEdit"));
-const CardView = lazy(() => import("./pages/CardView"));
+const CardSetView = lazy(() => import("./pages/CardSetView"));
 const StudyMode = lazy(() => import("./pages/StudyMode"));
 const Trash = lazy(() => import("./pages/Trash"));
 const ImageDiagnostics = lazy(() => import("./pages/ImageDiagnostics"));
@@ -399,7 +399,11 @@ const AppContent = () => {
           />
 
           <Route path="CardEdit" element={<CardEdit />} />
-          <Route path="CardView" element={<CardView />} />
+          <Route path="CardSetView" element={<CardSetView />} />
+          <Route
+            path="CardView"
+            element={<Navigate to="/CardSetView" replace />}
+          />
           <Route path="study" element={<StudyMode />} />
           <Route path="calendar" element={<Calendar />} />
           <Route path="sandbox/blocknote" element={<BlockNoteSandboxPage />} />

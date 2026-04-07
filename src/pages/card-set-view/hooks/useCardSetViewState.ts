@@ -16,7 +16,7 @@ import {
 import type { Card } from "@/types";
 import type { CardDisplayMode, CardSet } from "@/types/domain/cardSet";
 
-interface UseCardViewStateOptions {
+interface UseCardSetViewStateOptions {
   initialIndex: number;
   targetCardId: string | null;
   folderId: string | null;
@@ -47,6 +47,11 @@ type KeyedFlipState = {
   ids: Set<string>;
 };
 
+const CARD_SET_VIEW_META_PANEL_OPEN_STORAGE_KEY =
+  "card-set-view.meta-panel-open";
+const LEGACY_CARD_VIEW_META_PANEL_OPEN_STORAGE_KEY =
+  "card-view.meta-panel-open";
+
 const extractCreatedId = (created: unknown) => {
   if (typeof created === "string") return created;
   if (
@@ -68,7 +73,27 @@ const extractCreatedId = (created: unknown) => {
   return null;
 };
 
-export const useCardViewState = ({
+const resolveInitialMetaOpen = () => {
+  if (typeof window === "undefined") return true;
+
+  const nextValue = window.localStorage.getItem(
+    CARD_SET_VIEW_META_PANEL_OPEN_STORAGE_KEY,
+  );
+  if (nextValue != null) {
+    return nextValue !== "false";
+  }
+
+  const legacyValue = window.localStorage.getItem(
+    LEGACY_CARD_VIEW_META_PANEL_OPEN_STORAGE_KEY,
+  );
+  if (legacyValue != null) {
+    return legacyValue !== "false";
+  }
+
+  return true;
+};
+
+export const useCardSetViewState = ({
   initialIndex,
   targetCardId,
   folderId,
@@ -80,7 +105,7 @@ export const useCardViewState = ({
   selectedCardSet,
   isLoading,
   toastError,
-}: UseCardViewStateOptions) => {
+}: UseCardSetViewStateOptions) => {
   const sourceKey = `${cardSetId ?? ""}::${folderId ?? ""}`;
   const defaultDisplayMode = selectedCardSet?.defaultDisplayMode;
 
@@ -111,10 +136,7 @@ export const useCardViewState = ({
 
   const currentCardIdRef = useRef<string | null>(null);
   const [isGlobalEditing, setIsGlobalEditing] = useState(false);
-  const [isMetaOpen, setIsMetaOpen] = useState(() => {
-    if (typeof window === "undefined") return true;
-    return window.localStorage.getItem("card-view.meta-panel-open") !== "false";
-  });
+  const [isMetaOpen, setIsMetaOpen] = useState(resolveInitialMetaOpen);
   const autoInitializedCardSetIdsRef = useRef<Set<string>>(new Set());
   const [currentDisplayMode, setCurrentDisplayModeState] =
     useState<CardDisplayMode>(() =>
@@ -132,7 +154,7 @@ export const useCardViewState = ({
   useEffect(() => {
     if (typeof window === "undefined") return;
     window.localStorage.setItem(
-      "card-view.meta-panel-open",
+      CARD_SET_VIEW_META_PANEL_OPEN_STORAGE_KEY,
       String(isMetaOpen),
     );
   }, [isMetaOpen]);
@@ -190,7 +212,9 @@ export const useCardViewState = ({
 
   useEffect(() => {
     window.dispatchEvent(
-      new CustomEvent("cardview:editing-change", { detail: isGlobalEditing }),
+      new CustomEvent("cardsetview:editing-change", {
+        detail: isGlobalEditing,
+      }),
     );
   }, [isGlobalEditing]);
 
@@ -259,7 +283,10 @@ export const useCardViewState = ({
           });
         }
       } catch (error) {
-        console.error("[CardView] Failed to bootstrap empty card set:", error);
+        console.error(
+          "[CardSetView] Failed to bootstrap empty card set:",
+          error,
+        );
       }
     })();
   }, [
@@ -313,7 +340,7 @@ export const useCardViewState = ({
 
       return true;
     } catch (error) {
-      console.error("[CardView] Failed to create new card:", error);
+      console.error("[CardSetView] Failed to create new card:", error);
       toastError(
         error instanceof Error
           ? error.message

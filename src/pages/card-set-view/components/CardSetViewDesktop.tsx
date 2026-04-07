@@ -7,13 +7,13 @@ import {
   VerticalCardPager,
 } from "@/features/review/VerticalCardPager";
 import { useCardImagePreloader } from "@/hooks/card/useCardImagePreloader";
-import { DesktopCardSurface } from "@/pages/card-view/components/DesktopCardSurface";
+import { DesktopCardSurface } from "@/pages/card-set-view/components/DesktopCardSurface";
 import {
-  CARDVIEW_NATURAL_INDEX_COMMIT_DELAY_EDIT_MS,
-  CARDVIEW_NATURAL_INDEX_COMMIT_DELAY_VIEW_MS,
-  CARDVIEW_PAGER_PADDING_BLOCK,
-  CARDVIEW_PAGER_PADDING_INLINE,
-} from "@/pages/card-view/constants";
+  CARD_SET_VIEW_NATURAL_INDEX_COMMIT_DELAY_EDIT_MS,
+  CARD_SET_VIEW_NATURAL_INDEX_COMMIT_DELAY_VIEW_MS,
+  CARD_SET_VIEW_PAGER_PADDING_BLOCK,
+  CARD_SET_VIEW_PAGER_PADDING_INLINE,
+} from "@/pages/card-set-view/constants";
 import type { Card, UserSettings } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -67,7 +67,7 @@ const CardLoadingPreview = ({ card }: { card: Card }) => {
   );
 };
 
-interface CardViewDesktopProps {
+interface CardSetViewDesktopProps {
   isLoading: boolean;
   isGlobalEditing: boolean;
   flippedCardIds: Set<string>;
@@ -89,7 +89,7 @@ interface CardViewDesktopProps {
   onSyncStatusChange: (status: CardSyncStatus | null) => void;
 }
 
-export const CardViewDesktop = ({
+export const CardSetViewDesktop = ({
   isLoading,
   isGlobalEditing,
   flippedCardIds,
@@ -109,7 +109,7 @@ export const CardViewDesktop = ({
   onToggleUncertainty,
   onToggleBookmark,
   onSyncStatusChange,
-}: CardViewDesktopProps) => {
+}: CardSetViewDesktopProps) => {
   const { currentUser } = useAuthSession();
 
   const effectiveEditPaneWidthPx = editPaneWidthPx;
@@ -219,12 +219,12 @@ export const CardViewDesktop = ({
       activeIndex={safeCurrentIndex}
       onActiveIndexChange={onActiveIndexChange}
       onFlip={onFlip}
-      paddingInlinePx={CARDVIEW_PAGER_PADDING_INLINE}
-      paddingBlock={CARDVIEW_PAGER_PADDING_BLOCK}
+      paddingInlinePx={CARD_SET_VIEW_PAGER_PADDING_INLINE}
+      paddingBlock={CARD_SET_VIEW_PAGER_PADDING_BLOCK}
       naturalIndexCommitDelayMs={
         isGlobalEditing
-          ? CARDVIEW_NATURAL_INDEX_COMMIT_DELAY_EDIT_MS
-          : CARDVIEW_NATURAL_INDEX_COMMIT_DELAY_VIEW_MS
+          ? CARD_SET_VIEW_NATURAL_INDEX_COMMIT_DELAY_EDIT_MS
+          : CARD_SET_VIEW_NATURAL_INDEX_COMMIT_DELAY_VIEW_MS
       }
       disableItemChrome={isGlobalEditing}
       getCardWidth={() => effectiveCardWidthPx}
