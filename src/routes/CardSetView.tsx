@@ -1,4 +1,4 @@
-import { CardSetViewScreen } from "@/features/cardsetview/presentation/web/ui/CardSetViewScreen";
+import { CardSetViewScreen } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewScreen";
 
 const CardSetViewRoute = () => {
   return <CardSetViewScreen />;
