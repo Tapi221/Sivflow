@@ -1,9 +1,8 @@
 // @vitest-environment jsdom
+import { DesktopCardSurface } from "@/features/cardsetview/presentation/web/ui/components/DesktopCardSurface";
+import type { Card } from "@/types";
 import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-
-import { DesktopCardSurface } from "@/features/cardsetview/components/DesktopCardSurface";
-import type { Card } from "@/types";
 
 const flashcardPropsSpy = vi.hoisted(() => vi.fn());
 

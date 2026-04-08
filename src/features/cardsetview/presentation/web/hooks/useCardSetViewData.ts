@@ -1,7 +1,10 @@
 import { useMemo } from "react";
+
 import { useCards } from "@/hooks/card/useCards";
 import { useCardSets } from "@/hooks/cardSet/useCardSets";
 import { useFolders } from "@/hooks/folder/useFolders";
+import type { Card } from "@/types";
+import type { CardSet } from "@/types/domain/cardSet";
 
 interface UseCardSetViewDataOptions {
   folderId: string | null;
@@ -18,33 +21,36 @@ export const useCardSetViewData = ({
     createCard,
     updateCard,
   } = useCards(folderId || undefined, cardSetId || undefined);
-  const { cardSets, updateCardSet } = useCardSets();
+
+  const { cardSets = [], updateCardSet } = useCardSets();
   const { folders = [] } = useFolders();
 
-  // useCards が orderIndex 順に正規化済み配列を返すため、ここでは再ソートしない。
-  const sortedCards = cards;
+  const sortedCards: Card[] = cards as Card[];
+  const typedCardSets: CardSet[] = cardSets as CardSet[];
 
   const cardIndexById = useMemo(() => {
     const map = new Map<string, number>();
-    sortedCards.forEach((card, index) => map.set(card.id, index));
+    sortedCards.forEach((card: Card, index: number) => map.set(card.id, index));
     return map;
   }, [sortedCards]);
 
-  const selectedCardSet = useMemo(
+  const selectedCardSet = useMemo<CardSet | null>(
     () =>
-      cardSetId ? (cardSets.find((s) => s.id === cardSetId) ?? null) : null,
-    [cardSetId, cardSets],
+      cardSetId
+        ? (typedCardSets.find((s: CardSet) => s.id === cardSetId) ?? null)
+        : null,
+    [cardSetId, typedCardSets],
   );
 
   return {
-    cards,
+    cards: sortedCards,
     isLoading,
     createCard,
     updateCard,
     updateCardSet,
     sortedCards,
     cardIndexById,
-    cardSets,
+    cardSets: typedCardSets,
     selectedCardSet,
     folders,
   };

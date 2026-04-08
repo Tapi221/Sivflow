@@ -1,10 +1,10 @@
-import type { CardDisplayMode } from "@/types/domain/cardSet";
-
+import type { CardPaneMode } from "@/components/card/shell/cardPaneWidthConstants";
 import {
   DISPLAY_MODE_LABELS,
   DISPLAY_MODE_TRIGGER_LABELS,
 } from "@/features/cardsetview/domain/cardSetViewConstants";
 import { toTimeMs } from "@/features/cardsetview/domain/cardSetViewUtils";
+import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 type ActiveSyncStatusLike = {
   lastSyncedAtMs?: number | null;
@@ -92,11 +92,14 @@ export const buildWidthControl = ({
   activePaneMinWidthPx: number;
   activePaneMaxWidthPx: number;
   activePaneDisplayedDefaultWidthPx: number;
-  previewPaneWidth: (mode: string, value: number) => void;
-  persistPaneWidth: (mode: string, value: number) => Promise<void>;
+  previewPaneWidth: (mode: CardPaneMode, value: number) => void;
+  persistPaneWidth: (
+    mode: CardPaneMode,
+    value: number,
+  ) => void | Promise<void>;
   stepPaneWidth: (delta: number) => void;
   resetActivePaneWidth: () => void;
-  activePaneMode: string;
+  activePaneMode: CardPaneMode;
   widthStepPx: number;
 }): WidthControlViewModel | null => {
   if (!isDesktop || !isGlobalEditing) {

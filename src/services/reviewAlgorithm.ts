@@ -378,7 +378,7 @@ export const createReviewLogEntry = ({
   reviewedAt: Date;
   rating: ReviewLog["rating"];
   intervalDays: number;
-  durationMinutes?: number | null;
+  durationMinutes?: number | null; | null;
 }): ReviewLog => {
   return {
     reviewedAt: reviewedAt.toISOString(),
@@ -404,7 +404,7 @@ export const createReviewPatchFromRating = ({
   rating: ReviewLog["rating"];
   now?: Date;
   delayBonusEnabled?: boolean;
-  durationMinutes?: number | null;
+  durationMinutes?: number | null; | null;
 }) => {
   const subjectiveScore = ratingToSubjectiveScore(rating);
   const reviewUpdate = computeNextReview({
@@ -615,7 +615,7 @@ type LatestReviewLogPatchParams =
       reviewStartNextDay?: boolean;
       reviewedAt: Date;
       rating: ReviewLog["rating"];
-      durationMinutes?: number | null;
+      durationMinutes?: number | null; | null;
     }
   | {
       action: "delete";

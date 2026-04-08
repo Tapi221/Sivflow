@@ -18,7 +18,7 @@ export type ReviewLog = {
   reviewedAt: string;
   rating: 1 | 2 | 3 | 4;
   resistanceScore: number;
-  durationMinutes?: number | null;
+  durationMinutes?: number | null; | null;
 };
 
 export type ReferenceBlockData = {

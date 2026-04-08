@@ -24,7 +24,7 @@ import {
   CARD_VIEW_ZOOM_DEFAULT_PERCENT,
   CARD_VIEW_ZOOM_MIN_PERCENT,
   CARD_VIEW_ZOOM_STEP_PERCENT,
-} from "../constants";
+} from "@/features/cardsetview/constants";
 
 interface UseCardSetViewZoomOptions {
   cardSetId: string | null;
@@ -39,11 +39,11 @@ export const useCardSetViewZoom = ({
   viewportRef,
   activeCardKey,
 }: UseCardSetViewZoomOptions) => {
-  const [viewportWidthPx, setViewportWidthPx] = useState(
+  const [viewportWidthPx, setViewportWidthPx] = useState<number>(
     CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
   );
 
-  const [zoomPercent, setZoomPercentState] = useState(
+  const [zoomPercent, setZoomPercentState] = useState<number>(
     CARD_VIEW_ZOOM_DEFAULT_PERCENT,
   );
 
@@ -55,7 +55,9 @@ export const useCardSetViewZoom = ({
 
     const update = () => {
       const nextWidth = Math.max(1, Math.floor(node.clientWidth));
-      setViewportWidthPx((prev) => (prev === nextWidth ? prev : nextWidth));
+      setViewportWidthPx((prev: number) =>
+        prev === nextWidth ? prev : nextWidth,
+      );
     };
 
     update();
@@ -102,7 +104,7 @@ export const useCardSetViewZoom = ({
   }, [cardSetId, zoomBounds.maxZoomPercent, zoomBounds.minZoomPercent]);
 
   useEffect(() => {
-    setZoomPercentState((prev) =>
+    setZoomPercentState((prev: number) =>
       clampZoomPercent(prev, {
         minPercent: zoomBounds.minZoomPercent,
         maxPercent: zoomBounds.maxZoomPercent,

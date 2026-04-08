@@ -228,7 +228,7 @@ export const CardSetViewDesktop = ({
       }
       disableItemChrome={isGlobalEditing}
       getCardWidth={() => effectiveCardWidthPx}
-      getKey={(card) => card.id ?? card.docId ?? card.uid}
+      getKey={(card) => card.id}
       disableVirtualization={false}
       onRenderRangeChange={setRenderRange}
       renderCard={renderCard}

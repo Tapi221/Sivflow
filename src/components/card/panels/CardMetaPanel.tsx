@@ -62,13 +62,13 @@ type CardMetaPanelProps = {
   onAddReviewLog: (input: {
     reviewedAt: string;
     rating: ReviewLog["rating"];
-    durationMinutes?: number | null;
+    durationMinutes?: number | null; | null;
   }) => void | Promise<void> | Promise<unknown>;
   onUpdateLatestReviewLog?: (input: {
     reviewLogs: ReviewLog[];
     reviewedAt: string;
     rating: ReviewLog["rating"];
-    durationMinutes?: number | null;
+    durationMinutes?: number | null; | null;
   }) => void | Promise<void> | Promise<unknown>;
   onDeleteLatestReviewLog?: (input: {
     reviewLogs: ReviewLog[];
