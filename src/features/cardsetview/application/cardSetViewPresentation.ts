@@ -4,4 +4,4 @@ export {
   resolveLastSyncedAtMs,
   resolveOverlayRight,
   type WidthControlViewModel,
-} from "@/features/cardsetview/presentation/ui/cardSetViewViewModels";
+} from "@/features/cardsetview/presentation/web/ui/cardSetViewViewModels";

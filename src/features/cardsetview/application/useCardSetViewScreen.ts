@@ -1,1 +1,1 @@
-export { useCardSetViewScreenController as useCardSetViewScreen } from "@/features/cardsetview/hooks/useCardSetViewScreenController";
+export { useCardSetViewScreenController as useCardSetViewScreen } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewScreenController";

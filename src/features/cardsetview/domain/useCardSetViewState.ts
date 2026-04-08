@@ -54,9 +54,7 @@ export const resolveCurrentIndexBase = ({
   targetResolvedIndex,
   initialIndex,
 }: ResolveCurrentIndexBaseArgs) => {
-  return (
-    pendingFocusIndex ?? currentIndex ?? targetResolvedIndex ?? initialIndex
-  );
+  return pendingFocusIndex ?? currentIndex ?? targetResolvedIndex ?? initialIndex;
 };
 
 export const clampCardIndex = (index: number, cardCount: number) => {
