@@ -13,4 +13,4 @@ export {
   CARD_VIEW_ZOOM_MIN_PERCENT,
   CARD_VIEW_ZOOM_STEP_PERCENT,
   clampPaneWidthPx,
-} from "@/routes/constants";
+} from "@/features/cardsetview/constants";
