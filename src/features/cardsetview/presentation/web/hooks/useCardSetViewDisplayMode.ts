@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import {
   resolveCardSetDisplayMode,
@@ -11,27 +11,49 @@ interface UseCardSetViewDisplayModeOptions {
   defaultDisplayMode?: CardDisplayMode | null;
 }
 
+type DisplayModeOverrideState = {
+  scopeKey: string;
+  mode: CardDisplayMode;
+} | null;
+
+const buildDisplayModeScopeKey = (
+  cardSetId: string | null,
+  defaultDisplayMode?: CardDisplayMode | null,
+) => {
+  return `${cardSetId ?? "__null__"}::${defaultDisplayMode ?? "__unset__"}`;
+};
+
 export const useCardSetViewDisplayMode = ({
   cardSetId,
   defaultDisplayMode,
 }: UseCardSetViewDisplayModeOptions) => {
-  const [currentDisplayMode, setCurrentDisplayModeState] =
-    useState<CardDisplayMode>(() =>
-      resolveCardSetDisplayMode(cardSetId, defaultDisplayMode ?? undefined),
-    );
+  const scopeKey = useMemo(
+    () => buildDisplayModeScopeKey(cardSetId, defaultDisplayMode),
+    [cardSetId, defaultDisplayMode],
+  );
 
-  useEffect(() => {
-    setCurrentDisplayModeState(
-      resolveCardSetDisplayMode(cardSetId, defaultDisplayMode ?? undefined),
-    );
-  }, [cardSetId, defaultDisplayMode]);
+  const resolvedDisplayMode = useMemo(
+    () => resolveCardSetDisplayMode(cardSetId, defaultDisplayMode ?? undefined),
+    [cardSetId, defaultDisplayMode],
+  );
+
+  const [overrideState, setOverrideState] =
+    useState<DisplayModeOverrideState>(null);
+
+  const currentDisplayMode =
+    overrideState?.scopeKey === scopeKey
+      ? overrideState.mode
+      : resolvedDisplayMode;
 
   const setCurrentDisplayMode = useCallback(
     (mode: CardDisplayMode) => {
       setCardSetSessionDisplayMode(cardSetId, mode);
-      setCurrentDisplayModeState(mode);
+      setOverrideState({
+        scopeKey,
+        mode,
+      });
     },
-    [cardSetId],
+    [cardSetId, scopeKey],
   );
 
   return {

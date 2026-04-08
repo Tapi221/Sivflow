@@ -14,7 +14,6 @@ const CARD_GAP = 16;
 const SCROLL_PADDING = "50vh";
 const VISIBLE_RANGE_OVERSCAN_PX = 2800;
 const ACTIVE_INDEX_RENDER_RADIUS = 6;
-export { ACTIVE_INDEX_RENDER_RADIUS };
 const PLACEHOLDER_HEIGHT_PX = 900;
 const CARD_RADIUS_SM = 32;
 const CARD_RADIUS_MD = 40;
@@ -80,7 +79,7 @@ const sanitizeVerticalCardPagerItemWidthSpec = (
   };
 };
 
-export const resolveVerticalCardPagerItemWidthSpec = <T,>({
+const resolveVerticalCardPagerItemWidthSpec = <T,>({
   card,
   idx,
   isActive,
@@ -104,7 +103,7 @@ export const resolveVerticalCardPagerItemWidthSpec = <T,>({
   });
 };
 
-export const buildVerticalCardPagerItemStyle = (
+const buildVerticalCardPagerItemStyle = (
   widthSpec: VerticalCardPagerItemWidthSpec,
 ): React.CSSProperties => {
   if (widthSpec.mode === "stretch") {

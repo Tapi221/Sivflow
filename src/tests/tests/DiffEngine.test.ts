@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { DiffEngine } from "../services/logic/DiffEngine";
+import { DiffEngine } from "@/services/logic/DiffEngine";
 
 describe("DiffEngine", () => {
   const diffEngine = new DiffEngine();
@@ -39,7 +39,6 @@ describe("DiffEngine", () => {
         _metadata: { version: 2 },
       };
 
-      // All differences are in ignored fields
       const diff = diffEngine.calculateDiff(local, remote);
       expect(diff).toBeNull();
     });
@@ -84,10 +83,9 @@ describe("DiffEngine", () => {
       const remote = {
         id: "1",
         title: "remote update",
-        updatedAt: 200, // newer than local.lastSyncedAt (100)
+        updatedAt: 200,
       };
 
-      // Local hasn't changed since last sync (localUpdatedAt === lastSyncedAt)
       const result = diffEngine.merge(baseLocal, remote);
 
       expect(result.merged).toMatchObject({ title: "remote update" });
@@ -104,7 +102,7 @@ describe("DiffEngine", () => {
       const remote = {
         id: "1",
         title: "old remote",
-        updatedAt: 100, // same as lastSyncedAt
+        updatedAt: 100,
       };
 
       const result = diffEngine.merge(local, remote);
@@ -118,13 +116,12 @@ describe("DiffEngine", () => {
         ...baseLocal,
         title: "local changes",
         localUpdatedAt: 150,
-      }; // Changed since 100
-      const remote = { ...baseLocal, title: "remote changes", updatedAt: 200 }; // Changed since 100
+      };
+      const remote = { ...baseLocal, title: "remote changes", updatedAt: 200 };
 
       const result = diffEngine.merge(local, remote, "server_wins");
 
       expect(result.conflict).toBe(true);
-      // server_wins strategy
       expect(result.merged).toMatchObject({ title: "remote changes" });
     });
 
@@ -140,7 +137,6 @@ describe("DiffEngine", () => {
 
       expect(result.conflict).toBe(true);
       expect(result.merged).toMatchObject({ title: "local changes" });
-      // Metadata should still be updated to reflect server state
       expect(result.merged.updatedAt).toBe(200);
     });
   });

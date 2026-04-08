@@ -1,15 +1,14 @@
 import { renderHook } from "@testing-library/react-hooks";
-import { useReliableFileUpload } from "../hooks/useReliableFileUpload";
 import { vi, describe, it, expect, beforeEach } from "vitest";
+import { useReliableFileUpload } from "@/hooks/useReliableFileUpload";
 
-// Mock Firebase
 vi.mock("@/services/firebase", () => ({
   auth: { currentUser: { uid: "test-user-id" } },
   storage: {},
   db: {},
 }));
 
-vi.mock("../contexts/AuthContext", () => ({
+vi.mock("@/contexts/AuthContext", () => ({
   useAuth: () => ({ currentUser: { uid: "test-user-id" } }),
 }));
 
@@ -34,8 +33,9 @@ describe("useReliableFileUpload", () => {
 
     try {
       await result.current.uploadFile(largeFile, pathGen);
-    } catch (e: unknown) {
-      expect(e.message).toContain("ファイルサイズが大きすぎます");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      expect(message).toContain("ファイルサイズが大きすぎます");
     }
 
     expect(result.current.uploadStatus).toBe("failed");
@@ -44,7 +44,6 @@ describe("useReliableFileUpload", () => {
   it("should validate mime type", async () => {
     const { result } = renderHook(() => useReliableFileUpload());
 
-    // Invalid type for card_image
     const textFile = new File(["test"], "test.txt", { type: "text/plain" });
     const pathGen = (name: string) => `path/${name}`;
 
@@ -52,8 +51,9 @@ describe("useReliableFileUpload", () => {
       await result.current.uploadFile(textFile, pathGen, {
         type: "card_image",
       });
-    } catch (e: unknown) {
-      expect(e.message).toContain("サポートされていないファイル形式です");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      expect(message).toContain("サポートされていないファイル形式です");
     }
 
     expect(result.current.uploadStatus).toBe("failed");

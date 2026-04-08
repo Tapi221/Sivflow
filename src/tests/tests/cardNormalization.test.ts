@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { normalizeCard } from "../utils";
+import { normalizeCard } from "@/utils";
 import {
   LEGACY_BASE_LAYOUT_ROWS,
   MAX_LAYOUT_ROWS,
@@ -11,15 +11,15 @@ describe("normalizeCard", () => {
       id: "test-card",
       questionBlocks: [
         { id: "q1", type: "text", content: "What is 1+1?" },
-        { id: "q2", type: "math", math: { latex: "", displayMode: "block" } }, // Empty
+        { id: "q2", type: "math", math: { latex: "", displayMode: "block" } },
         {
           id: "q3",
           type: "math",
           math: { latex: "2+2=4", displayMode: "inline" },
-        }, // Not empty
+        },
       ],
       answerBlocks: [
-        { id: "a1", type: "math", math: { latex: " ", displayMode: "block" } }, // Whitespace only
+        { id: "a1", type: "math", math: { latex: " ", displayMode: "block" } },
       ],
     };
 
@@ -35,14 +35,9 @@ describe("normalizeCard", () => {
   it("should provide default values for math blocks", () => {
     const rawCard = {
       id: "test-card",
-      questionBlocks: [
-        { id: "q1", type: "math", math: { latex: "x^2" } }, // Missing displayMode
-      ],
+      questionBlocks: [{ id: "q1", type: "math", math: { latex: "x^2" } }],
     };
 
-    // The current normalization doesn't fill defaults INSIDE math object yet,
-    // but Flashcard.tsx handles it with || 'block'.
-    // If we want to move it to normalization, we can do it here.
     const normalized = normalizeCard(rawCard);
     expect(normalized.questionBlocks[0].math.latex).toBe("x^2");
   });

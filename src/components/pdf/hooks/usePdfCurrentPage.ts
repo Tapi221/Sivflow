@@ -44,14 +44,11 @@ export const usePdfCurrentPage = ({
   const pageUpdateRafRef = useRef<number | null>(null);
   const pendingPageForCallbackRef = useRef<number | null>(null);
 
-  const [, setCurrentPageVersion] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     onPageChangeRef.current = onPageChange;
   }, [onPageChange]);
-
-  const currentPage =
-    numPages <= 0 ? 1 : clampPage(currentPageRef.current, numPages);
 
   const cancelPendingRafs = useCallback(() => {
     if (scrollRafRef.current !== null) {
@@ -93,7 +90,7 @@ export const usePdfCurrentPage = ({
       if (currentPageRef.current === clamped) return;
 
       currentPageRef.current = clamped;
-      setCurrentPageVersion((prev) => prev + 1);
+      setCurrentPage(clamped);
       scheduleOnPageChange(clamped);
     },
     [numPages, scheduleOnPageChange],
@@ -202,7 +199,7 @@ export const usePdfCurrentPage = ({
     visibilityRatiosRef.current = {};
     pageRefs.current = [];
     currentPageRef.current = 1;
-    setCurrentPageVersion((prev) => prev + 1);
+    setCurrentPage(1);
     scheduleOnPageChange(1);
 
     const container = scrollContainerRef.current;
@@ -284,6 +281,7 @@ export const usePdfCurrentPage = ({
       visibilityRatiosRef.current = {};
       if (currentPageRef.current !== 1) {
         currentPageRef.current = 1;
+        setCurrentPage(1);
         scheduleOnPageChange(1);
       }
       return;
@@ -302,8 +300,12 @@ export const usePdfCurrentPage = ({
     const clamped = clampPage(currentPageRef.current, numPages);
     if (clamped !== currentPageRef.current) {
       currentPageRef.current = clamped;
+      setCurrentPage(clamped);
       scheduleOnPageChange(clamped);
+      return;
     }
+
+    setCurrentPage(clamped);
   }, [numPages, scheduleOnPageChange]);
 
   useEffect(() => {

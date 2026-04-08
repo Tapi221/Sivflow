@@ -33,23 +33,24 @@ export const useCardSetViewMetaPanelActions = ({
   const delayBonusEnabled = settings?.delayBonusEnabled ?? false;
   const reviewStartNextDay = settings?.reviewStartNextDay ?? true;
   const reviewLogs = selectedCard?.reviewLogs ?? [];
+  const selectedCardId = selectedCard?.id ?? null;
 
   const patchEditingDraft = useCallback(
     (patch: EditingDraftPatch) => {
-      if (typeof window === "undefined" || !selectedCard?.id) {
+      if (typeof window === "undefined" || !selectedCardId) {
         return;
       }
 
       window.dispatchEvent(
         new CustomEvent(CARD_SET_VIEW_EDITING_DRAFT_PATCH_EVENT, {
           detail: {
-            cardId: selectedCard.id,
+            cardId: selectedCardId,
             patch,
           },
         }),
       );
     },
-    [selectedCard?.id],
+    [selectedCardId],
   );
 
   const onAddReviewLog = useCallback(
@@ -62,7 +63,7 @@ export const useCardSetViewMetaPanelActions = ({
       rating: ReviewLog["rating"];
       durationMinutes?: number | null;
     }) => {
-      if (!selectedCard?.id) {
+      if (!selectedCard || !selectedCardId) {
         return;
       }
 
@@ -74,9 +75,9 @@ export const useCardSetViewMetaPanelActions = ({
         durationMinutes,
       });
 
-      await updateCard(selectedCard.id, patch);
+      await updateCard(selectedCardId, patch);
     },
-    [delayBonusEnabled, selectedCard, updateCard],
+    [delayBonusEnabled, selectedCard, selectedCardId, updateCard],
   );
 
   const onUpdateLatestReviewLog = useCallback(
@@ -91,7 +92,7 @@ export const useCardSetViewMetaPanelActions = ({
       rating: ReviewLog["rating"];
       durationMinutes?: number | null;
     }) => {
-      if (!selectedCard?.id) {
+      if (!selectedCard || !selectedCardId) {
         return;
       }
 
@@ -108,9 +109,15 @@ export const useCardSetViewMetaPanelActions = ({
         durationMinutes,
       });
 
-      await updateCard(selectedCard.id, patch);
+      await updateCard(selectedCardId, patch);
     },
-    [delayBonusEnabled, reviewStartNextDay, selectedCard, updateCard],
+    [
+      delayBonusEnabled,
+      reviewStartNextDay,
+      selectedCard,
+      selectedCardId,
+      updateCard,
+    ],
   );
 
   const onDeleteLatestReviewLog = useCallback(
@@ -119,7 +126,7 @@ export const useCardSetViewMetaPanelActions = ({
     }: {
       reviewLogs: Card["reviewLogs"];
     }) => {
-      if (!selectedCard?.id) {
+      if (!selectedCard || !selectedCardId) {
         return;
       }
 
@@ -133,9 +140,15 @@ export const useCardSetViewMetaPanelActions = ({
         reviewStartNextDay,
       });
 
-      await updateCard(selectedCard.id, patch);
+      await updateCard(selectedCardId, patch);
     },
-    [delayBonusEnabled, reviewStartNextDay, selectedCard, updateCard],
+    [
+      delayBonusEnabled,
+      reviewStartNextDay,
+      selectedCard,
+      selectedCardId,
+      updateCard,
+    ],
   );
 
   const onUpdateReviewLogDuration = useCallback(
@@ -148,7 +161,7 @@ export const useCardSetViewMetaPanelActions = ({
       logIndex: number;
       durationMinutes?: number | null;
     }) => {
-      if (!selectedCard?.id) {
+      if (!selectedCardId) {
         return;
       }
 
@@ -158,16 +171,16 @@ export const useCardSetViewMetaPanelActions = ({
         index === logIndex ? { ...log, durationMinutes } : log,
       );
 
-      await updateCard(selectedCard.id, {
+      await updateCard(selectedCardId, {
         reviewLogs: patchedReviewLogs,
       });
     },
-    [selectedCard?.id, updateCard],
+    [selectedCardId, updateCard],
   );
 
   const onUpdateTags = useCallback(
     (nextTags: string[]) => {
-      if (!selectedCard?.id) {
+      if (!selectedCardId) {
         return;
       }
 
@@ -176,14 +189,14 @@ export const useCardSetViewMetaPanelActions = ({
         return;
       }
 
-      void updateCard(selectedCard.id, { tags: nextTags });
+      void updateCard(selectedCardId, { tags: nextTags });
     },
-    [isGlobalEditing, patchEditingDraft, selectedCard?.id, updateCard],
+    [isGlobalEditing, patchEditingDraft, selectedCardId, updateCard],
   );
 
   const onToggleDraft = useCallback(
     (nextDraft: boolean) => {
-      if (!selectedCard?.id) {
+      if (!selectedCardId) {
         return;
       }
 
@@ -192,25 +205,25 @@ export const useCardSetViewMetaPanelActions = ({
         return;
       }
 
-      void updateCard(selectedCard.id, { isDraft: nextDraft });
+      void updateCard(selectedCardId, { isDraft: nextDraft });
     },
-    [isGlobalEditing, patchEditingDraft, selectedCard?.id, updateCard],
+    [isGlobalEditing, patchEditingDraft, selectedCardId, updateCard],
   );
 
   const onTitleInputChange = useCallback(
     (nextTitle: string) => {
-      if (!selectedCard?.id || !isGlobalEditing) {
+      if (!selectedCardId || !isGlobalEditing) {
         return;
       }
 
       patchEditingDraft({ title: nextTitle });
     },
-    [isGlobalEditing, patchEditingDraft, selectedCard?.id],
+    [isGlobalEditing, patchEditingDraft, selectedCardId],
   );
 
   const onUpdateTitle = useCallback(
     (nextTitle: string) => {
-      if (!selectedCard?.id) {
+      if (!selectedCardId) {
         return;
       }
 
@@ -219,9 +232,9 @@ export const useCardSetViewMetaPanelActions = ({
         return;
       }
 
-      void updateCard(selectedCard.id, { title: nextTitle });
+      void updateCard(selectedCardId, { title: nextTitle });
     },
-    [isGlobalEditing, patchEditingDraft, selectedCard?.id, updateCard],
+    [isGlobalEditing, patchEditingDraft, selectedCardId, updateCard],
   );
 
   return {
