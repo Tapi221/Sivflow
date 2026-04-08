@@ -24,13 +24,20 @@ import {
   CARD_VIEW_ZOOM_DEFAULT_PERCENT,
   CARD_VIEW_ZOOM_MIN_PERCENT,
   CARD_VIEW_ZOOM_STEP_PERCENT,
-} from "@/features/cardsetview/constants";
+} from "@/routes/constants";
 
 interface UseCardSetViewZoomOptions {
   cardSetId: string | null;
   viewportRef: RefObject<HTMLDivElement | null>;
   activeCardKey: string;
 }
+
+type ZoomPreferenceState = {
+  sourceKey: string;
+  preferredPercent: number | null;
+};
+
+const DEFAULT_SOURCE_KEY = "__cardsetview_default__";
 
 export { clampZoomPercent, computeDynamicMaxZoomPercent };
 
@@ -43,9 +50,11 @@ export const useCardSetViewZoom = ({
     CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
   );
 
-  const [zoomPercent, setZoomPercentState] = useState<number>(
-    CARD_VIEW_ZOOM_DEFAULT_PERCENT,
-  );
+  const [zoomPreferenceState, setZoomPreferenceState] =
+    useState<ZoomPreferenceState>({
+      sourceKey: DEFAULT_SOURCE_KEY,
+      preferredPercent: null,
+    });
 
   useEffect(() => {
     const node = viewportRef.current;
@@ -89,49 +98,52 @@ export const useCardSetViewZoom = ({
     });
   }, [viewportWidthPx]);
 
-  useEffect(() => {
-    const stored = cardSetId
-      ? getCardSetViewZoomPreference(cardSetId)
-      : undefined;
+  const zoomSourceKey = cardSetId ?? DEFAULT_SOURCE_KEY;
 
-    setZoomPercentState(
-      clampZoomPercent(stored ?? CARD_VIEW_ZOOM_DEFAULT_PERCENT, {
-        minPercent: zoomBounds.minZoomPercent,
-        maxPercent: zoomBounds.maxZoomPercent,
-        stepPercent: CARD_VIEW_ZOOM_STEP_PERCENT,
-      }),
-    );
-  }, [cardSetId, zoomBounds.maxZoomPercent, zoomBounds.minZoomPercent]);
+  const storedPreferredPercent = useMemo(() => {
+    if (!cardSetId) {
+      return CARD_VIEW_ZOOM_DEFAULT_PERCENT;
+    }
 
-  useEffect(() => {
-    setZoomPercentState((prev: number) =>
-      clampZoomPercent(prev, {
-        minPercent: zoomBounds.minZoomPercent,
-        maxPercent: zoomBounds.maxZoomPercent,
-        stepPercent: CARD_VIEW_ZOOM_STEP_PERCENT,
-      }),
+    return (
+      getCardSetViewZoomPreference(cardSetId) ?? CARD_VIEW_ZOOM_DEFAULT_PERCENT
     );
-  }, [zoomBounds.maxZoomPercent, zoomBounds.minZoomPercent]);
+  }, [cardSetId]);
+
+  const preferredZoomPercent =
+    zoomPreferenceState.sourceKey === zoomSourceKey &&
+    zoomPreferenceState.preferredPercent != null
+      ? zoomPreferenceState.preferredPercent
+      : storedPreferredPercent;
+
+  const zoomPercent = useMemo(() => {
+    return clampZoomPercent(preferredZoomPercent, {
+      minPercent: zoomBounds.minZoomPercent,
+      maxPercent: zoomBounds.maxZoomPercent,
+      stepPercent: CARD_VIEW_ZOOM_STEP_PERCENT,
+    });
+  }, [
+    preferredZoomPercent,
+    zoomBounds.minZoomPercent,
+    zoomBounds.maxZoomPercent,
+  ]);
 
   useEffect(() => {
     if (!cardSetId) {
       return;
     }
 
-    setCardSetViewZoomPreference(cardSetId, zoomPercent);
-  }, [cardSetId, zoomPercent]);
+    setCardSetViewZoomPreference(cardSetId, preferredZoomPercent);
+  }, [cardSetId, preferredZoomPercent]);
 
   const setZoomPercent = useCallback(
     (next: number) => {
-      setZoomPercentState(
-        clampZoomPercent(next, {
-          minPercent: zoomBounds.minZoomPercent,
-          maxPercent: zoomBounds.maxZoomPercent,
-          stepPercent: CARD_VIEW_ZOOM_STEP_PERCENT,
-        }),
-      );
+      setZoomPreferenceState({
+        sourceKey: zoomSourceKey,
+        preferredPercent: next,
+      });
     },
-    [zoomBounds.maxZoomPercent, zoomBounds.minZoomPercent],
+    [zoomSourceKey],
   );
 
   const stepUp = useCallback(() => {

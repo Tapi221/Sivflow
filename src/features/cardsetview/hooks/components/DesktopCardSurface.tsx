@@ -1,2 +1,0 @@
-export { DesktopCardSurface } from "@/features/cardsetview/hooks/components/DesktopCardSurface";
-export type { DesktopCardSurfaceProps } from "@/features/cardsetview/hooks/components/DesktopCardSurface";
