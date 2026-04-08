@@ -1,22 +1,23 @@
+import { useCallback } from "react";
+
 import { useBreadcrumbContext } from "@/contexts/BreadcrumbContext";
 import { useToast } from "@/contexts/ToastContext";
 import { saveDefaultDisplayMode } from "@/features/cardsetview/application/cardSetViewUseCases";
-import { useCardSetViewBreadcrumbs } from "@/features/cardsetview/application/presentation/web/infra/useCardSetViewBreadcrumbs";
-import { useCardSetViewParams } from "@/features/cardsetview/application/presentation/web/infra/useCardSetViewParams";
-import { useCardSetViewZoom } from "@/features/cardsetview/hooks/useCardSetViewZoom";
 import { useCardSetViewData } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewData";
 import { useCardSetViewPaneWidth } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewPaneWidth";
 import { useCardSetViewState } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewState";
 import { useCardSetViewWindowEvents } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewWindowEvents";
+import { useCardSetViewBreadcrumbs } from "@/features/cardsetview/presentation/web/infra/useCardSetViewBreadcrumbs";
+import { useCardSetViewParams } from "@/features/cardsetview/presentation/web/infra/useCardSetViewParams";
 import {
   buildWidthControl,
   resolveLastSyncedAtMs,
   resolveOverlayRight,
 } from "@/features/cardsetview/presentation/web/ui/cardSetViewViewModels";
+import { useCardSetViewZoom } from "@/features/cardsetview/hooks/useCardSetViewZoom";
 import { useIsDesktopRuntime } from "@/hooks/platform/useIsDesktopRuntime";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { CARD_PANE_WIDTH_STEP_PX } from "@/routes/constants";
-import { useCallback } from "react";
 
 export const useCardSetViewScreenController = () => {
   const { setExtraCrumbs } = useBreadcrumbContext();

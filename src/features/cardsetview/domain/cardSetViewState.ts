@@ -1,9 +1,6 @@
 import type { Card } from "@/types";
-import type { CardSet } from "@/types/domain/cardSet";
 
 type CardIndexMap = Map<string, number>;
-
-type CardLike = Pick<Card, "id" | "cardSetId" | "folderId">;
 
 type ResolveCurrentIndexBaseArgs = {
   pendingFocusIndex: number | null;
@@ -16,14 +13,6 @@ type ResolveCardsForPagerArgs = {
   sortedCards: Card[];
   selectedCard: Card | null;
   cardIndexById: CardIndexMap;
-};
-
-type ResolveCardMutationTargetArgs = {
-  cardSetId: string | null;
-  folderId: string | null;
-  selectedCardSet: Pick<CardSet, "folderId"> | null;
-  selectedCard: CardLike | null;
-  currentCard: CardLike | null;
 };
 
 export const createCardSetViewSourceKey = (
@@ -80,6 +69,7 @@ export const resolveCardsForPager = ({
   }
 
   const idx = cardIndexById.get(selectedCard.id);
+
   if (typeof idx !== "number" || idx < 0) {
     return sortedCards;
   }
@@ -90,6 +80,7 @@ export const resolveCardsForPager = ({
 
   const next = sortedCards.slice();
   next[idx] = selectedCard;
+
   return next;
 };
 
@@ -113,53 +104,4 @@ export const toggleFlippedCardId = ({
   }
 
   return next;
-};
-
-export const extractCreatedCardId = (created: unknown) => {
-  if (typeof created === "string") {
-    return created;
-  }
-
-  if (
-    typeof created === "object" &&
-    created !== null &&
-    "id" in created &&
-    typeof (created as { id?: unknown }).id === "string"
-  ) {
-    return (created as { id: string }).id;
-  }
-
-  if (
-    typeof created === "object" &&
-    created !== null &&
-    "cardId" in created &&
-    typeof (created as { cardId?: unknown }).cardId === "string"
-  ) {
-    return (created as { cardId: string }).cardId;
-  }
-
-  return null;
-};
-
-export const resolveCardMutationTarget = ({
-  cardSetId,
-  folderId,
-  selectedCardSet,
-  selectedCard,
-  currentCard,
-}: ResolveCardMutationTargetArgs) => {
-  const targetCardSetId =
-    cardSetId ?? selectedCard?.cardSetId ?? currentCard?.cardSetId ?? null;
-
-  const targetFolderId =
-    folderId ??
-    selectedCardSet?.folderId ??
-    selectedCard?.folderId ??
-    currentCard?.folderId ??
-    "";
-
-  return {
-    targetCardSetId,
-    targetFolderId,
-  };
 };
