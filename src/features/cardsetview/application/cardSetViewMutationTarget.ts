@@ -1,25 +1,42 @@
-export const extractCreatedCardId = (created: unknown): string | null => {
-  if (typeof created === "string") {
-    return created;
-  }
+import type { Card } from "@/types";
+import type { CardSet } from "@/types/domain/cardSet";
 
-  if (
-    typeof created === "object" &&
-    created !== null &&
-    "id" in created &&
-    typeof (created as { id?: unknown }).id === "string"
-  ) {
-    return (created as { id: string }).id;
-  }
+interface ResolveCardMutationTargetOptions {
+  cardSetId: string | null;
+  folderId: string | null;
+  selectedCardSet: CardSet | null;
+  selectedCard: Card | null;
+  currentCard: Card | null;
+}
 
-  if (
-    typeof created === "object" &&
-    created !== null &&
-    "cardId" in created &&
-    typeof (created as { cardId?: unknown }).cardId === "string"
-  ) {
-    return (created as { cardId: string }).cardId;
-  }
+interface CardMutationTarget {
+  targetCardSetId: string | null;
+  targetFolderId: string | null;
+}
 
-  return null;
+export const resolveCardMutationTarget = ({
+  cardSetId,
+  folderId,
+  selectedCardSet,
+  selectedCard,
+  currentCard,
+}: ResolveCardMutationTargetOptions): CardMutationTarget => {
+  const targetCardSetId =
+    selectedCard?.cardSetId ??
+    currentCard?.cardSetId ??
+    selectedCardSet?.id ??
+    cardSetId ??
+    null;
+
+  const targetFolderId =
+    selectedCard?.folderId ??
+    currentCard?.folderId ??
+    selectedCardSet?.folderId ??
+    folderId ??
+    null;
+
+  return {
+    targetCardSetId,
+    targetFolderId,
+  };
 };
