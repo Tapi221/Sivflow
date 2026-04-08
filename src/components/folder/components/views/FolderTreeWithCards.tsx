@@ -123,8 +123,8 @@ export const FolderTreeWithCards = ({
   onCreateCardSet,
   onUpdateCardSet,
   onDeleteCardSet,
-  onCreateCard,
-  onUpdateCard,
+  onCreateCard: _onCreateCard,
+  onUpdateCard: _onUpdateCard,
   onDeleteCard,
   onUpdateDocument,
   onDeleteDocument,
@@ -155,7 +155,7 @@ export const FolderTreeWithCards = ({
   const [optimisticFolders, setOptimisticFolders] = useState<FolderTreeNode[]>(
     [],
   );
-  const [optimisticCards, setOptimisticCards] = useState<Card[]>([]);
+  const [optimisticCards] = useState<Card[]>([]);
   const [optimisticCardSets, setOptimisticCardSets] = useState<CardSet[]>([]);
   const [newlyCreatedCardId, setNewlyCreatedCardId] = useState<string | null>(
     null,
@@ -667,7 +667,6 @@ export const FolderTreeWithCards = ({
     currentFileAccept,
     handleToolbarFileInputChange,
   } = useFolderDocumentUpload({
-    selectedFolderId,
     actionFolderId: headerFolderId,
     getNextOrderIndex,
     setExpandedFolders,
@@ -1061,7 +1060,6 @@ export const FolderTreeWithCards = ({
               }}
               setEditingId={dialogs.setEditingId}
               setEditingName={dialogs.setEditingName}
-              editingNameRef={dialogs.editingNameRef}
               renameCancelledRef={dialogs.renameCancelledRef}
               editingId={dialogs.editingId}
               editingName={dialogs.editingName}
