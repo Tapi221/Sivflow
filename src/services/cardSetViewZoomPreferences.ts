@@ -1,4 +1,4 @@
-const STORAGE_KEY = "card-set-view-zoom-preferences";
+const STORAGE_KEY = "cardsetview-zoom-preferences";
 const LEGACY_STORAGE_KEY = "card-view-zoom-preferences";
 
 interface CardSetViewZoomPreferencesStore {

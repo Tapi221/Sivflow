@@ -47,8 +47,7 @@ type KeyedFlipState = {
   ids: Set<string>;
 };
 
-const CARD_SET_VIEW_META_PANEL_OPEN_STORAGE_KEY =
-  "card-set-view.meta-panel-open";
+const CARD_SET_VIEW_META_PANEL_OPEN_STORAGE_KEY = "cardsetview.meta-panel-open";
 const LEGACY_CARD_VIEW_META_PANEL_OPEN_STORAGE_KEY =
   "card-view.meta-panel-open";
 

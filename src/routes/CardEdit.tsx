@@ -17,7 +17,7 @@ const CardEdit = () => {
 
   const shouldReturnToCalendar = returnTo === "calendar";
   const shouldReturnToCardSetView =
-    returnTo === "card-set-view" || returnTo === "card-view";
+    returnTo === "cardsetview" || returnTo === "card-view";
   const shouldReturnToStudy = returnTo === "study";
 
   const targetFolderId = (() => {

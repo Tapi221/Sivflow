@@ -2,7 +2,7 @@
 import { act, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { CardSetViewMetaPanel } from "@/pages/card-set-view/components/CardSetViewMetaPanel";
+import { CardSetViewMetaPanel } from "@/features/cardsetview/components/CardSetViewMetaPanel";
 import type { Card } from "@/types";
 
 const cardMetaPanelPropsSpy = vi.hoisted(() => vi.fn());

@@ -2,7 +2,7 @@
 import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { DesktopCardSurface } from "@/pages/card-set-view/components/DesktopCardSurface";
+import { DesktopCardSurface } from "@/features/cardsetview/components/DesktopCardSurface";
 import type { Card } from "@/types";
 
 const flashcardPropsSpy = vi.hoisted(() => vi.fn());
