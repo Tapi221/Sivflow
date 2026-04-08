@@ -23,7 +23,10 @@ interface UseCardSetViewQueryResult {
   updateCardSet: (
     id: string,
     data: Partial<
-      Pick<CardSet, "name" | "description" | "orderIndex" | "defaultDisplayMode">
+      Pick<
+        CardSet,
+        "name" | "description" | "orderIndex" | "defaultDisplayMode"
+      >
     >,
   ) => Promise<void>;
   isLoading: boolean;
@@ -118,9 +121,10 @@ export const useCardSetViewQuery = ({
 
   const cardIndexById = useMemo<Map<string, number>>(() => {
     return new Map(
-      sortedCards.map(
-        (card: Card, index: number): [string, number] => [card.id, index],
-      ),
+      sortedCards.map((card: Card, index: number): [string, number] => [
+        card.id,
+        index,
+      ]),
     );
   }, [sortedCards]);
 

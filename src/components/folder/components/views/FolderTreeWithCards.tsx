@@ -277,9 +277,28 @@ export const FolderTreeWithCards = ({
 
   const navigationFolderId = navigationParentFolderId ?? null;
 
+  const hasFolderMatches = useCallback(
+    (folderId: string) => {
+      if (!isFiltering) return true;
+      return (matchCountMap.get(folderId) ?? 0) > 0;
+    },
+    [isFiltering, matchCountMap],
+  );
+
+  const hasCardSetMatches = useCallback(
+    (cardSetId: string) => {
+      if (!isFiltering) return true;
+      return getCardSetItems(cardSetId).length > 0;
+    },
+    [getCardSetItems, isFiltering],
+  );
+
   const navigationCardSets = useMemo(
-    () => getCardSets(navigationFolderId),
-    [getCardSets, navigationFolderId],
+    () =>
+      getCardSets(navigationFolderId).filter((cardSet) =>
+        hasCardSetMatches(cardSet.id),
+      ),
+    [getCardSets, navigationFolderId, hasCardSetMatches],
   );
 
   const navigationItems = useMemo(
@@ -293,6 +312,10 @@ export const FolderTreeWithCards = ({
         ? getChildFolders(navigationParentFolderId)
         : rootFolders
       )
+        .filter((folder) => {
+          const id = getFolderId(folder);
+          return id ? hasFolderMatches(id) : false;
+        })
         .map((folder) => {
           const id = getFolderId(folder);
           if (!id) return null;
@@ -313,7 +336,12 @@ export const FolderTreeWithCards = ({
           ): item is { id: string; name: string; folder: FolderTreeNode } =>
             item !== null,
         ),
-    [getChildFolders, navigationParentFolderId, rootFolders],
+    [
+      getChildFolders,
+      navigationParentFolderId,
+      rootFolders,
+      hasFolderMatches,
+    ],
   );
 
   const navigationEntries = useMemo(
@@ -357,6 +385,10 @@ export const FolderTreeWithCards = ({
   const rootFolderPanels = useMemo(
     () =>
       rootFolders
+        .filter((folder) => {
+          const id = getFolderId(folder);
+          return id ? hasFolderMatches(id) : false;
+        })
         .map((folder) => {
           const id = getFolderId(folder);
           if (!id) return null;
@@ -377,7 +409,7 @@ export const FolderTreeWithCards = ({
           ): item is { id: string; name: string; folder: FolderTreeNode } =>
             item !== null,
         ),
-    [rootFolders],
+    [rootFolders, hasFolderMatches],
   );
 
   const canUseNavigationMode =
@@ -385,9 +417,11 @@ export const FolderTreeWithCards = ({
 
   const effectiveSidebarDisplayMode = useMemo(() => {
     if (sidebarDisplayMode === "tree") return "tree";
+
     if (sidebarDisplayMode === "navigation") {
       return canUseNavigationMode ? "navigation" : "tree";
     }
+
     return canUseNavigationMode ? "navigation" : "tree";
   }, [canUseNavigationMode, sidebarDisplayMode]);
 
