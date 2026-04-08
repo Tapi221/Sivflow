@@ -1,11 +1,12 @@
 import { CardWorkspaceShell } from "@/components/card/shell/CardWorkspaceShell";
 import { useToast } from "@/contexts/ToastContext";
-import { CardZoomControl } from "@/features/cardsetview/hooks/components/CardZoomControl";
-import { CardSetViewDesktop } from "@/features/cardsetview/hooks/components/CardSetViewDesktop";
-import { CardSetViewMetaPanel } from "@/features/cardsetview/hooks/components/CardSetViewMetaPanel";
-import { CardSetViewMobile } from "@/features/cardsetview/hooks/components/CardSetViewMobile";
-import { CardSetViewOverlayControls } from "@/features/cardsetview/ui/CardSetViewOverlayControls";
-import { useCardSetViewScreen } from "@/features/cardsetview/application/useCardSetViewScreen";
+import { saveDefaultDisplayMode } from "@/features/cardsetview/application/cardSetViewUseCases";
+import { CardZoomControl } from "@/features/cardsetview/presentation/web/ui/components/CardZoomControl";
+import { CardSetViewDesktop } from "@/features/cardsetview/presentation/web/ui/CardSetViewDesktop";
+import { CardSetViewMetaPanel } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewMetaPanel";
+import { CardSetViewMobile } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewMobile";
+import { useCardSetViewScreenController } from "@/features/cardsetview/hooks/useCardSetViewScreenController";
+import { CardSetViewOverlayControls } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewOverlayControls";
 
 export const CardSetViewScreen = () => {
   const { error: toastError } = useToast();
@@ -23,7 +24,7 @@ export const CardSetViewScreen = () => {
     overlayRight,
     resolvedLastSyncedAtMs,
     topLeftZoomControl,
-  } = useCardSetViewScreen();
+  } = useCardSetViewScreenController();
 
   if (!folderId && !cardSetId) {
     return (
@@ -50,17 +51,17 @@ export const CardSetViewScreen = () => {
           return;
         }
 
-        void data
-          .updateCardSet(cardSetId, {
-            defaultDisplayMode: state.currentDisplayMode,
-          })
-          .catch((error: unknown) => {
-            console.error(
-              "[CardSetView] Failed to save default display mode",
-              error,
-            );
-            toastError("表示モードの保存に失敗しました");
-          });
+        void saveDefaultDisplayMode({
+          cardSetId,
+          currentDisplayMode: state.currentDisplayMode,
+          updateCardSet: data.updateCardSet,
+        }).catch((error: unknown) => {
+          console.error(
+            "[CardSetView] Failed to save default display mode",
+            error,
+          );
+          toastError("表示モードの保存に失敗しました");
+        });
       }}
     />
   );

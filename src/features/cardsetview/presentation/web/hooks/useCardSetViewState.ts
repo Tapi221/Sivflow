@@ -8,6 +8,21 @@ import {
 } from "react";
 
 import type { CardSyncStatus } from "@/components/card/shell/cardSyncStatus";
+import {
+  bootstrapEmptyCardSet,
+  createAndFocusCard as createAndFocusCardUseCase,
+  toggleCardBookmark,
+  toggleCardUncertainty,
+} from "@/features/cardsetview/application/cardSetViewUseCases";
+import {
+  clampCardIndex,
+  createCardSetViewSourceKey,
+  resolveCardIndexById,
+  resolveCardMutationTarget,
+  resolveCardsForPager,
+  resolveCurrentIndexBase,
+  toggleFlippedCardId,
+} from "@/features/cardsetview/domain/cardSetViewState";
 import { useCardEntity } from "@/hooks/card/useCardEntity";
 import {
   resolveCardSetDisplayMode,
@@ -51,29 +66,10 @@ const CARD_SET_VIEW_META_PANEL_OPEN_STORAGE_KEY = "cardsetview.meta-panel-open";
 const LEGACY_CARD_VIEW_META_PANEL_OPEN_STORAGE_KEY =
   "card-view.meta-panel-open";
 
-const extractCreatedId = (created: unknown) => {
-  if (typeof created === "string") return created;
-  if (
-    typeof created === "object" &&
-    created !== null &&
-    "id" in created &&
-    typeof (created as { id?: unknown }).id === "string"
-  ) {
-    return (created as { id: string }).id;
-  }
-  if (
-    typeof created === "object" &&
-    created !== null &&
-    "cardId" in created &&
-    typeof (created as { cardId?: unknown }).cardId === "string"
-  ) {
-    return (created as { cardId: string }).cardId;
-  }
-  return null;
-};
-
 const resolveInitialMetaOpen = () => {
-  if (typeof window === "undefined") return true;
+  if (typeof window === "undefined") {
+    return true;
+  }
 
   const nextValue = window.localStorage.getItem(
     CARD_SET_VIEW_META_PANEL_OPEN_STORAGE_KEY,
@@ -105,13 +101,14 @@ export const useCardSetViewState = ({
   isLoading,
   toastError,
 }: UseCardSetViewStateOptions) => {
-  const sourceKey = `${cardSetId ?? ""}::${folderId ?? ""}`;
+  const sourceKey = createCardSetViewSourceKey(cardSetId, folderId);
   const defaultDisplayMode = selectedCardSet?.defaultDisplayMode;
 
   const targetResolvedIndex = useMemo(() => {
-    if (!targetCardId) return null;
-    const found = cardIndexById.get(targetCardId);
-    return typeof found === "number" ? found : null;
+    return resolveCardIndexById({
+      cardId: targetCardId,
+      cardIndexById,
+    });
   }, [targetCardId, cardIndexById]);
 
   const [currentIndexState, setCurrentIndexState] = useState<KeyedNumberState>(
@@ -151,7 +148,10 @@ export const useCardSetViewState = ({
   }, [cardSetId, defaultDisplayMode]);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined") {
+      return;
+    }
+
     window.localStorage.setItem(
       CARD_SET_VIEW_META_PANEL_OPEN_STORAGE_KEY,
       String(isMetaOpen),
@@ -165,21 +165,21 @@ export const useCardSetViewState = ({
     pendingFocusState.sourceKey === sourceKey ? pendingFocusState.value : null;
 
   const pendingFocusIndex = useMemo(() => {
-    if (!pendingFocusCardId) return null;
-    const found = cardIndexById.get(pendingFocusCardId);
-    return typeof found === "number" ? found : null;
-  }, [cardIndexById, pendingFocusCardId]);
+    return resolveCardIndexById({
+      cardId: pendingFocusCardId,
+      cardIndexById,
+    });
+  }, [pendingFocusCardId, cardIndexById]);
 
-  const currentIndexBase =
-    pendingFocusIndex ?? currentIndex ?? targetResolvedIndex ?? initialIndex;
+  const currentIndexBase = resolveCurrentIndexBase({
+    pendingFocusIndex,
+    currentIndex,
+    targetResolvedIndex,
+    initialIndex,
+  });
 
   const safeCurrentIndex = useMemo(() => {
-    if (sortedCards.length === 0) return 0;
-    const numericIndex = Number.isFinite(currentIndexBase)
-      ? currentIndexBase
-      : 0;
-    const integerIndex = Math.trunc(numericIndex);
-    return Math.min(Math.max(integerIndex, 0), sortedCards.length - 1);
+    return clampCardIndex(currentIndexBase, sortedCards.length);
   }, [currentIndexBase, sortedCards.length]);
 
   const setCurrentIndex = useCallback(
@@ -218,7 +218,10 @@ export const useCardSetViewState = ({
   }, [isGlobalEditing]);
 
   const flippedCardIds = useMemo(() => {
-    if (flippedState.sourceKey === sourceKey) return flippedState.ids;
+    if (flippedState.sourceKey === sourceKey) {
+      return flippedState.ids;
+    }
+
     return new Set<string>();
   }, [flippedState, sourceKey]);
 
@@ -228,9 +231,14 @@ export const useCardSetViewState = ({
   );
 
   const selectedCard = useMemo(() => {
-    if (!currentCard) return null;
-    if (effectiveCard && effectiveCard.id === currentCard.id)
+    if (!currentCard) {
+      return null;
+    }
+
+    if (effectiveCard && effectiveCard.id === currentCard.id) {
       return effectiveCard;
+    }
+
     return currentCard;
   }, [currentCard, effectiveCard]);
 
@@ -247,20 +255,21 @@ export const useCardSetViewState = ({
   const isFlipped = flippedCardIds.has(currentCardId ?? "");
 
   const cardsForPager = useMemo(() => {
-    if (!selectedCard) return sortedCards;
-    const idx = cardIndexById.get(selectedCard.id);
-    if (typeof idx !== "number") return sortedCards;
-    if (idx < 0) return sortedCards;
-    if (sortedCards[idx] === selectedCard) return sortedCards;
-
-    const next = sortedCards.slice();
-    next[idx] = selectedCard;
-    return next;
+    return resolveCardsForPager({
+      sortedCards,
+      selectedCard,
+      cardIndexById,
+    });
   }, [cardIndexById, sortedCards, selectedCard]);
 
   useEffect(() => {
-    if (!cardSetId || isLoading || sortedCards.length > 0) return;
-    if (autoInitializedCardSetIdsRef.current.has(cardSetId)) return;
+    if (!cardSetId || isLoading || sortedCards.length > 0) {
+      return;
+    }
+
+    if (autoInitializedCardSetIdsRef.current.has(cardSetId)) {
+      return;
+    }
 
     autoInitializedCardSetIdsRef.current.add(cardSetId);
 
@@ -268,12 +277,11 @@ export const useCardSetViewState = ({
       try {
         setIsGlobalEditing(true);
 
-        const targetFolderId = folderId ?? selectedCardSet?.folderId ?? "";
-        const created = await createCard({
+        const createdId = await bootstrapEmptyCardSet({
           cardSetId,
-          folderId: targetFolderId,
+          folderId: folderId ?? selectedCardSet?.folderId ?? "",
+          createCard,
         });
-        const createdId = extractCreatedId(created);
 
         if (createdId) {
           setPendingFocusState({
@@ -299,14 +307,13 @@ export const useCardSetViewState = ({
   ]);
 
   const createAndFocusCard = useCallback(async (): Promise<boolean> => {
-    const targetCardSetId =
-      cardSetId ?? selectedCard?.cardSetId ?? currentCard?.cardSetId ?? null;
-    const targetFolderId =
-      folderId ??
-      selectedCardSet?.folderId ??
-      selectedCard?.folderId ??
-      currentCard?.folderId ??
-      "";
+    const { targetCardSetId, targetFolderId } = resolveCardMutationTarget({
+      cardSetId,
+      folderId,
+      selectedCardSet,
+      selectedCard,
+      currentCard,
+    });
 
     if (!targetCardSetId) {
       toastError("新規カードの追加先カードセットが見つかりません");
@@ -321,12 +328,12 @@ export const useCardSetViewState = ({
 
       setIsGlobalEditing(true);
 
-      const created = await createCard({
-        cardSetId: targetCardSetId,
-        folderId: targetFolderId,
+      const createdId = await createAndFocusCardUseCase({
+        targetCardSetId,
+        targetFolderId,
+        createCard,
       });
 
-      const createdId = extractCreatedId(created);
       if (!createdId) {
         toastError("新規カードの作成結果を取得できませんでした");
         return false;
@@ -350,49 +357,54 @@ export const useCardSetViewState = ({
   }, [
     cardSetId,
     createCard,
-    currentCard?.cardSetId,
-    currentCard?.folderId,
+    currentCard,
     folderId,
-    selectedCard?.cardSetId,
-    selectedCard?.folderId,
-    selectedCardSet?.folderId,
+    selectedCard,
+    selectedCardSet,
     sourceKey,
     toastError,
   ]);
 
-  const handleEdit = useCallback(() => setIsGlobalEditing(true), []);
+  const handleEdit = useCallback(() => {
+    setIsGlobalEditing(true);
+  }, []);
 
   const handleFlip = useCallback(() => {
     const id = currentCardIdRef.current;
-    if (!id) return;
+    if (!id) {
+      return;
+    }
 
     setFlippedState((prev) => {
       const baseIds =
         prev.sourceKey === sourceKey ? prev.ids : new Set<string>();
-      const next = new Set(baseIds);
-
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
 
       return {
         sourceKey,
-        ids: next,
+        ids: toggleFlippedCardId({
+          ids: baseIds,
+          cardId: id,
+        }),
       };
     });
   }, [sourceKey]);
 
   const handleToggleUncertainty = useCallback(
     async (card: Card) => {
-      const current = card.hasUncertainty ?? card.has_uncertainty ?? false;
-      await updateCard(card.id, { hasUncertainty: !current });
+      await toggleCardUncertainty({
+        card,
+        updateCard,
+      });
     },
     [updateCard],
   );
 
   const handleToggleBookmark = useCallback(
     async (card: Card) => {
-      const current = card.isBookmarked ?? card.is_bookmarked ?? false;
-      await updateCard(card.id, { isBookmarked: !current });
+      await toggleCardBookmark({
+        card,
+        updateCard,
+      });
     },
     [updateCard],
   );

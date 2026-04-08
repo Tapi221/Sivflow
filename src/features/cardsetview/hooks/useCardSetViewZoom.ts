@@ -9,7 +9,7 @@ import {
   CARD_VIEW_ZOOM_DEFAULT_PERCENT,
   CARD_VIEW_ZOOM_MIN_PERCENT,
   CARD_VIEW_ZOOM_STEP_PERCENT,
-} from "../constants";
+} from "@/routes/constants";
 
 interface UseCardSetViewZoomOptions {
   cardSetId: string | null;
