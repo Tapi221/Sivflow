@@ -119,7 +119,7 @@ export const importCardsFromPayload = async ({
         );
 
   let createdCount = 0;
-  const baseOrderIndex = Date.now() * 10000;
+  const baseOrderIndex = Date.now() * 1000;
 
   for (const [index, importCard] of payload.cards.entries()) {
     const frontBlocks = importCard.frontBlocks.map(mapImportBlockToCardBlock);

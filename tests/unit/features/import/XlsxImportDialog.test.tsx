@@ -204,8 +204,8 @@ const createSpreadsheetFile = (name = "bulk-import.xlsx") => {
   return file;
 };
 
-const uploadFile = async (container: HTMLElement, file: File) => {
-  const input = container.querySelector(
+const uploadFile = async (_container: HTMLElement, file: File) => {
+  const input = document.querySelector(
     'input[type="file"]',
   ) as HTMLInputElement | null;
 
@@ -236,7 +236,11 @@ const renderDialog = (overrides?: {
       <XlsxImportDialog
         open={true}
         onOpenChange={onOpenChange}
-        folderId={overrides?.folderId ?? "folder-001"}
+        folderId={
+          overrides && "folderId" in overrides
+            ? (overrides.folderId ?? null)
+            : "folder-001"
+        }
         folderName="サンプルフォルダ"
         cardSets={overrides?.cardSets ?? []}
         onImported={overrides?.onImported}
@@ -456,7 +460,7 @@ describe("XlsxImportDialog", () => {
 
     await uploadFile(container, createSpreadsheetFile("missing-header.xlsx"));
 
-    const issuesPanel = await screen.findByText("Issues");
+    const issuesPanel = (await screen.findAllByText("Issues"))[1];
     const issuesCard = issuesPanel.closest("div");
 
     expect(

@@ -17,7 +17,7 @@ export const onSecurityLogCreated = functions.firestore
       snap: functions.firestore.QueryDocumentSnapshot,
       context: functions.EventContext,
     ) => {
-      const logData = snap.data();
+      const logData = parseSecurityLogData(snap.data());
       const userId = context.params.userId;
       // const logId = context.params.logId;
 
@@ -48,6 +48,27 @@ interface DetectionRule {
   countThreshold?: number;
   alwaysTrigger?: boolean;
 }
+
+type SecurityLogData = {
+  eventType: string;
+  deviceId?: string;
+};
+
+const parseSecurityLogData = (value: unknown): SecurityLogData | null => {
+  if (typeof value !== "object" || value === null) return null;
+
+  const { eventType, deviceId } = value as {
+    eventType?: unknown;
+    deviceId?: unknown;
+  };
+
+  if (typeof eventType !== "string" || eventType.length === 0) return null;
+
+  return {
+    eventType,
+    deviceId: typeof deviceId === "string" ? deviceId : undefined,
+  };
+};
 
 const DETECTION_RULES: DetectionRule[] = [
   // 認証異常
@@ -86,7 +107,7 @@ const DETECTION_RULES: DetectionRule[] = [
 
 async function detectAbnormalPatterns(
   userId: string,
-  logData: unknown,
+  logData: SecurityLogData,
 ): Promise<boolean> {
   const db = admin.firestore();
   const now = Date.now();
@@ -126,7 +147,7 @@ async function detectAbnormalPatterns(
 
 async function calculateRiskScore(
   userId: string,
-  logData: unknown,
+  logData: SecurityLogData,
 ): Promise<number> {
   const db = admin.firestore();
   const statusRef = db.doc(`users/${userId}/security/status`);

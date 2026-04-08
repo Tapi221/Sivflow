@@ -120,7 +120,7 @@ export const toggleCardBookmark = async ({
   updateCard,
 }: ToggleCardFlagOptions): Promise<void> => {
   await updateCard(card.id, {
-    isBookmarked: !Boolean(card.isBookmarked),
+    isBookmarked: !card.isBookmarked,
   });
 };
 

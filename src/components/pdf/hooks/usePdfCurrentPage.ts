@@ -38,6 +38,7 @@ export const usePdfCurrentPage = ({
   const visibilityRatiosRef = useRef<Record<number, number>>({});
   const currentPageRef = useRef(1);
   const onPageChangeRef = useRef(onPageChange);
+  const currentPageStateRafRef = useRef<number | null>(null);
 
   const scrollRafRef = useRef<number | null>(null);
   const pageChangeRafRef = useRef<number | null>(null);
@@ -65,6 +66,22 @@ export const usePdfCurrentPage = ({
       cancelAnimationFrame(pageUpdateRafRef.current);
       pageUpdateRafRef.current = null;
     }
+
+    if (currentPageStateRafRef.current !== null) {
+      cancelAnimationFrame(currentPageStateRafRef.current);
+      currentPageStateRafRef.current = null;
+    }
+  }, []);
+
+  const scheduleCurrentPageState = useCallback((page: number) => {
+    if (currentPageStateRafRef.current !== null) {
+      cancelAnimationFrame(currentPageStateRafRef.current);
+    }
+
+    currentPageStateRafRef.current = requestAnimationFrame(() => {
+      currentPageStateRafRef.current = null;
+      setCurrentPage(page);
+    });
   }, []);
 
   const scheduleOnPageChange = useCallback((page: number) => {
@@ -281,7 +298,7 @@ export const usePdfCurrentPage = ({
       visibilityRatiosRef.current = {};
       if (currentPageRef.current !== 1) {
         currentPageRef.current = 1;
-        setCurrentPage(1);
+        scheduleCurrentPageState(1);
         scheduleOnPageChange(1);
       }
       return;
@@ -300,13 +317,13 @@ export const usePdfCurrentPage = ({
     const clamped = clampPage(currentPageRef.current, numPages);
     if (clamped !== currentPageRef.current) {
       currentPageRef.current = clamped;
-      setCurrentPage(clamped);
+      scheduleCurrentPageState(clamped);
       scheduleOnPageChange(clamped);
       return;
     }
 
-    setCurrentPage(clamped);
-  }, [numPages, scheduleOnPageChange]);
+    scheduleCurrentPageState(clamped);
+  }, [numPages, scheduleCurrentPageState, scheduleOnPageChange]);
 
   useEffect(() => {
     return () => {
