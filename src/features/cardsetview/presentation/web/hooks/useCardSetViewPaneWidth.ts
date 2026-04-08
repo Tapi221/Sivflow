@@ -7,7 +7,7 @@ import {
   CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
   CARD_PANE_VIEW_MIN_WIDTH_PX,
   clampPaneWidthPx,
-} from "@/routes/constants";
+} from "@/features/cardsetview/constants";
 import {
   getCardSetWidthPreference,
   setCardSetWidthPreference,

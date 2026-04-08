@@ -20,6 +20,10 @@ export const CARD_VIEW_ZOOM_MIN_PERCENT = Math.round(
   (CARD_PANE_VIEW_MIN_WIDTH_PX / CANONICAL_CARD_WIDTH) * 100,
 );
 
+// backward compatibility aliases
+export const CARD_VIEW_DEFAULT_ZOOM_PERCENT = CARD_VIEW_ZOOM_DEFAULT_PERCENT;
+export const CARD_VIEW_MIN_ZOOM_PERCENT = CARD_VIEW_ZOOM_MIN_PERCENT;
+
 export const clampPaneWidthPx = (
   value: number | null | undefined,
   min: number,

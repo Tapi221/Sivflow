@@ -2,18 +2,18 @@ import type { CardSyncStatus } from "@/components/card/shell/cardSyncStatus";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { getCardText } from "@/domain/card/content";
-import { DesktopCardSurface } from "@/features/cardsetview/presentation/web/ui/components/DesktopCardSurface";
-import {
-  ACTIVE_INDEX_RENDER_RADIUS,
-  VerticalCardPager,
-} from "@/features/review/VerticalCardPager";
-import { useCardImagePreloader } from "@/hooks/card/useCardImagePreloader";
 import {
   CARD_SET_VIEW_NATURAL_INDEX_COMMIT_DELAY_EDIT_MS,
   CARD_SET_VIEW_NATURAL_INDEX_COMMIT_DELAY_VIEW_MS,
   CARD_SET_VIEW_PAGER_PADDING_BLOCK,
   CARD_SET_VIEW_PAGER_PADDING_INLINE,
-} from "@/routes/constants";
+} from "@/features/cardsetview/constants";
+import { DesktopCardSurface } from "@/features/cardsetview/hooks/components/DesktopCardSurface";
+import {
+  ACTIVE_INDEX_RENDER_RADIUS,
+  VerticalCardPager,
+} from "@/features/review/VerticalCardPager";
+import { useCardImagePreloader } from "@/hooks/card/useCardImagePreloader";
 import type { Card, UserSettings } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";

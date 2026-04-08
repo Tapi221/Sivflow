@@ -1,2 +1,2 @@
-export { DesktopCardSurface } from "@/features/cardsetview/presentation/web/ui/components/DesktopCardSurface";
-export type { DesktopCardSurfaceProps } from "@/features/cardsetview/presentation/web/ui/components/DesktopCardSurface";
+export { DesktopCardSurface } from "@/features/cardsetview/hooks/components/DesktopCardSurface";
+export type { DesktopCardSurfaceProps } from "@/features/cardsetview/hooks/components/DesktopCardSurface";

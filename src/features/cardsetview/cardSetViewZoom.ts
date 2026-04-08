@@ -2,17 +2,10 @@ import { CANONICAL_CARD_WIDTH } from "@/components/card/common/constants";
 import {
   CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
   CARD_PANE_VIEW_MIN_WIDTH_PX,
-} from "@/routes/constants";
-
-export const CARD_VIEW_ZOOM_STEP_PERCENT = 5;
-
-export const CARD_VIEW_DEFAULT_ZOOM_PERCENT = Math.round(
-  (CARD_PANE_VIEW_DEFAULT_WIDTH_PX / CANONICAL_CARD_WIDTH) * 100,
-);
-
-export const CARD_VIEW_MIN_ZOOM_PERCENT = Math.round(
-  (CARD_PANE_VIEW_MIN_WIDTH_PX / CANONICAL_CARD_WIDTH) * 100,
-);
+  CARD_VIEW_DEFAULT_ZOOM_PERCENT,
+  CARD_VIEW_MIN_ZOOM_PERCENT,
+  CARD_VIEW_ZOOM_STEP_PERCENT,
+} from "@/features/cardsetview/constants";
 
 const sanitizePositiveNumber = (value: number, fallback: number) => {
   return typeof value === "number" && Number.isFinite(value) && value > 0
@@ -124,3 +117,10 @@ export const normalizeZoomPercent = ({
     maxZoomPercent,
   });
 };
+
+// backward compatibility exports
+export { CARD_VIEW_DEFAULT_ZOOM_PERCENT, CARD_VIEW_MIN_ZOOM_PERCENT };
+export { CARD_VIEW_ZOOM_STEP_PERCENT };
+
+export const CARD_VIEW_DEFAULT_WIDTH_PX = CARD_PANE_VIEW_DEFAULT_WIDTH_PX;
+export const CARD_VIEW_MIN_WIDTH_PX = CARD_PANE_VIEW_MIN_WIDTH_PX;
