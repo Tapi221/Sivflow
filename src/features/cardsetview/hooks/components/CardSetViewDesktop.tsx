@@ -2,12 +2,12 @@ import type { CardSyncStatus } from "@/components/card/shell/cardSyncStatus";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { getCardText } from "@/domain/card/content";
+import { DesktopCardSurface } from "@/features/cardsetview/hooks/components/DesktopCardSurface";
 import {
   ACTIVE_INDEX_RENDER_RADIUS,
   VerticalCardPager,
 } from "@/features/review/VerticalCardPager";
 import { useCardImagePreloader } from "@/hooks/card/useCardImagePreloader";
-import { DesktopCardSurface } from "@/pages/card-set-view/components/DesktopCardSurface";
 import {
   CARD_SET_VIEW_NATURAL_INDEX_COMMIT_DELAY_EDIT_MS,
   CARD_SET_VIEW_NATURAL_INDEX_COMMIT_DELAY_VIEW_MS,

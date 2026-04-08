@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 
-import { useCardPaneWidthState } from "@/components/card/shell/useCardPaneWidthState";
+import { useCardPaneWidthState } from "@/components/card/shell/useCardPanewidthState";
 import {
   CARD_PANE_EDIT_DEFAULT_WIDTH_PX,
   CARD_PANE_EDIT_MIN_WIDTH_PX,

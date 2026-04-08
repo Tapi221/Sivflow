@@ -1,6 +1,5 @@
 import type { CSSProperties, ReactNode, Ref } from "react";
-
-import { CardPaneWidthControl } from "@/pages/card-set-view/components/CardPaneWidthControl";
+import { CardPaneWidthControl } from "@/features/cardsetview/hooks/components/CardPaneWidthControl";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "@/ui/icons";
 
