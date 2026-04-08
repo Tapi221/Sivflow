@@ -127,7 +127,7 @@ export const useCalendarScreen = () => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [currentDate, selectedDate]);
+  }, [currentDate, selectedDate, setCurrentDate]);
 
   const selectedDateKey = viewModel.grid.days.find(
     (day) => day.isSelected,
