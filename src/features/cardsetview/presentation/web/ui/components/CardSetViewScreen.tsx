@@ -1,6 +1,4 @@
 import { CardWorkspaceShell } from "@/components/card/shell/CardWorkspaceShell";
-import { useToast } from "@/contexts/ToastContext";
-import { saveDefaultDisplayMode } from "@/features/cardsetview/application/cardSetViewUseCases";
 import { useCardSetViewScreenController } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewScreenController";
 import { CardSetViewDesktop } from "@/features/cardsetview/presentation/web/ui/CardSetViewDesktop";
 import { CardZoomControl } from "@/features/cardsetview/presentation/web/ui/components/CardZoomControl";
@@ -9,8 +7,6 @@ import { CardSetViewMobile } from "@/features/cardsetview/presentation/web/ui/co
 import { CardSetViewOverlayControls } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewOverlayControls";
 
 export const CardSetViewScreen = () => {
-  const { error: toastError } = useToast();
-
   const {
     folderId,
     cardSetId,
@@ -24,6 +20,7 @@ export const CardSetViewScreen = () => {
     overlayRight,
     resolvedLastSyncedAtMs,
     topLeftZoomControl,
+    handleSaveCurrentDisplayMode,
   } = useCardSetViewScreenController();
 
   if (!folderId && !cardSetId) {
@@ -46,23 +43,7 @@ export const CardSetViewScreen = () => {
       activeSyncStatus={state.activeSyncStatus}
       onRetryActiveSync={state.handleRetryActiveSync}
       onChangeDisplayMode={state.setCurrentDisplayMode}
-      onSaveCurrentDisplayMode={() => {
-        if (!cardSetId) {
-          return;
-        }
-
-        void saveDefaultDisplayMode({
-          cardSetId,
-          currentDisplayMode: state.currentDisplayMode,
-          updateCardSet: data.updateCardSet,
-        }).catch((error: unknown) => {
-          console.error(
-            "[CardSetView] Failed to save default display mode",
-            error,
-          );
-          toastError("表示モードの保存に失敗しました");
-        });
-      }}
+      onSaveCurrentDisplayMode={handleSaveCurrentDisplayMode}
     />
   );
 

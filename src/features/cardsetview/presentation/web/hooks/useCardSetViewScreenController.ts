@@ -1,12 +1,11 @@
+import { useCallback } from "react";
+
 import { useBreadcrumbContext } from "@/contexts/BreadcrumbContext";
 import { useToast } from "@/contexts/ToastContext";
-import { useIsDesktopRuntime } from "@/hooks/platform/useIsDesktopRuntime";
-import { useUserSettings } from "@/hooks/settings/useUserSettings";
-
-import { CARD_PANE_WIDTH_STEP_PX } from "@/routes/constants";
-
+import { saveDefaultDisplayMode } from "@/features/cardsetview/application/cardSetViewUseCases";
 import { useCardSetViewBreadcrumbs } from "@/features/cardsetview/hooks/useCardSetViewBreadcrumbs";
 import { useCardSetViewParams } from "@/features/cardsetview/hooks/useCardSetViewParams";
+import { useCardSetViewZoom } from "@/features/cardsetview/hooks/useCardSetViewZoom";
 import { useCardSetViewData } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewData";
 import { useCardSetViewPaneWidth } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewPaneWidth";
 import { useCardSetViewState } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewState";
@@ -16,7 +15,9 @@ import {
   resolveLastSyncedAtMs,
   resolveOverlayRight,
 } from "@/features/cardsetview/presentation/web/ui/cardSetViewViewModels";
-import { useCardSetViewZoom } from "@/features/cardsetview/hooks/useCardSetViewZoom";
+import { useIsDesktopRuntime } from "@/hooks/platform/useIsDesktopRuntime";
+import { useUserSettings } from "@/hooks/settings/useUserSettings";
+import { CARD_PANE_WIDTH_STEP_PX } from "@/routes/constants";
 
 export const useCardSetViewScreenController = () => {
   const { setExtraCrumbs } = useBreadcrumbContext();
@@ -117,6 +118,26 @@ export const useCardSetViewScreenController = () => {
         }
       : null;
 
+  const handleSaveCurrentDisplayMode = useCallback(async () => {
+    if (!cardSetId) {
+      return;
+    }
+
+    try {
+      await saveDefaultDisplayMode({
+        cardSetId,
+        currentDisplayMode: state.currentDisplayMode,
+        updateCardSet: data.updateCardSet,
+      });
+    } catch (error) {
+      console.error(
+        "[CardSetView] Failed to save default display mode",
+        error,
+      );
+      toastError("表示モードの保存に失敗しました");
+    }
+  }, [cardSetId, data.updateCardSet, state.currentDisplayMode, toastError]);
+
   return {
     folderId,
     cardSetId,
@@ -130,5 +151,6 @@ export const useCardSetViewScreenController = () => {
     overlayRight,
     resolvedLastSyncedAtMs,
     topLeftZoomControl,
+    handleSaveCurrentDisplayMode,
   };
 };
