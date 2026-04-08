@@ -1,61 +1,38 @@
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type RefObject,
+} from "react";
+
 import { CANONICAL_CARD_WIDTH } from "@/components/card/common/constants";
+import {
+  clampZoomPercent,
+  computeDynamicMaxZoomPercent,
+  resolveAvailableWidthPx,
+  resolveFixedCardWidthPx,
+  resolveZoomBounds,
+  resolveZoomScale,
+} from "@/features/cardsetview/domain/cardSetViewZoom";
 import {
   getCardSetViewZoomPreference,
   setCardSetViewZoomPreference,
 } from "@/services/cardSetViewZoomPreferences";
-import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
   CARD_VIEW_ZOOM_DEFAULT_PERCENT,
   CARD_VIEW_ZOOM_MIN_PERCENT,
   CARD_VIEW_ZOOM_STEP_PERCENT,
-} from "@/routes/constants";
+} from "../constants";
 
 interface UseCardSetViewZoomOptions {
   cardSetId: string | null;
-  viewportRef: React.RefObject<HTMLDivElement | null>;
+  viewportRef: RefObject<HTMLDivElement | null>;
   activeCardKey: string;
 }
 
-interface ClampZoomPercentOptions {
-  minPercent: number;
-  maxPercent: number;
-  stepPercent?: number;
-}
-
-const roundToStep = (value: number, stepPercent: number) => {
-  return Math.round(value / stepPercent) * stepPercent;
-};
-
-export const computeDynamicMaxZoomPercent = (
-  viewportWidthPx: number,
-  stepPercent = CARD_VIEW_ZOOM_STEP_PERCENT,
-) => {
-  if (!Number.isFinite(viewportWidthPx) || viewportWidthPx <= 0) {
-    return CARD_VIEW_ZOOM_DEFAULT_PERCENT;
-  }
-
-  const rawPercent = (viewportWidthPx / CANONICAL_CARD_WIDTH) * 100;
-  const snapped = Math.floor(rawPercent / stepPercent) * stepPercent;
-
-  return Math.max(stepPercent, snapped);
-};
-
-export const clampZoomPercent = (
-  value: number,
-  {
-    minPercent,
-    maxPercent,
-    stepPercent = CARD_VIEW_ZOOM_STEP_PERCENT,
-  }: ClampZoomPercentOptions,
-) => {
-  const resolvedMax = Math.max(stepPercent, maxPercent);
-  const resolvedMin = Math.min(minPercent, resolvedMax);
-  const safeValue = Number.isFinite(value) ? value : resolvedMin;
-  const snapped = roundToStep(safeValue, stepPercent);
-
-  return Math.min(resolvedMax, Math.max(resolvedMin, snapped));
-};
+export { clampZoomPercent, computeDynamicMaxZoomPercent };
 
 export const useCardSetViewZoom = ({
   cardSetId,
@@ -100,24 +77,15 @@ export const useCardSetViewZoom = ({
     };
   }, [activeCardKey, viewportRef]);
 
-  const dynamicMaxZoomPercent = useMemo(
-    () => computeDynamicMaxZoomPercent(viewportWidthPx),
-    [viewportWidthPx],
-  );
-
-  const effectiveMinZoomPercent = useMemo(
-    () => Math.min(CARD_VIEW_ZOOM_MIN_PERCENT, dynamicMaxZoomPercent),
-    [dynamicMaxZoomPercent],
-  );
-
-  const defaultZoomPercent = useMemo(
-    () =>
-      clampZoomPercent(CARD_VIEW_ZOOM_DEFAULT_PERCENT, {
-        minPercent: effectiveMinZoomPercent,
-        maxPercent: dynamicMaxZoomPercent,
-      }),
-    [dynamicMaxZoomPercent, effectiveMinZoomPercent],
-  );
+  const zoomBounds = useMemo(() => {
+    return resolveZoomBounds({
+      viewportWidthPx,
+      canonicalCardWidthPx: CANONICAL_CARD_WIDTH,
+      minPercent: CARD_VIEW_ZOOM_MIN_PERCENT,
+      defaultPercent: CARD_VIEW_ZOOM_DEFAULT_PERCENT,
+      stepPercent: CARD_VIEW_ZOOM_STEP_PERCENT,
+    });
+  }, [viewportWidthPx]);
 
   useEffect(() => {
     const stored = cardSetId
@@ -126,20 +94,22 @@ export const useCardSetViewZoom = ({
 
     setZoomPercentState(
       clampZoomPercent(stored ?? CARD_VIEW_ZOOM_DEFAULT_PERCENT, {
-        minPercent: effectiveMinZoomPercent,
-        maxPercent: dynamicMaxZoomPercent,
+        minPercent: zoomBounds.minZoomPercent,
+        maxPercent: zoomBounds.maxZoomPercent,
+        stepPercent: CARD_VIEW_ZOOM_STEP_PERCENT,
       }),
     );
-  }, [cardSetId, dynamicMaxZoomPercent, effectiveMinZoomPercent]);
+  }, [cardSetId, zoomBounds.maxZoomPercent, zoomBounds.minZoomPercent]);
 
   useEffect(() => {
     setZoomPercentState((prev) =>
       clampZoomPercent(prev, {
-        minPercent: effectiveMinZoomPercent,
-        maxPercent: dynamicMaxZoomPercent,
+        minPercent: zoomBounds.minZoomPercent,
+        maxPercent: zoomBounds.maxZoomPercent,
+        stepPercent: CARD_VIEW_ZOOM_STEP_PERCENT,
       }),
     );
-  }, [dynamicMaxZoomPercent, effectiveMinZoomPercent]);
+  }, [zoomBounds.maxZoomPercent, zoomBounds.minZoomPercent]);
 
   useEffect(() => {
     if (!cardSetId) {
@@ -153,12 +123,13 @@ export const useCardSetViewZoom = ({
     (next: number) => {
       setZoomPercentState(
         clampZoomPercent(next, {
-          minPercent: effectiveMinZoomPercent,
-          maxPercent: dynamicMaxZoomPercent,
+          minPercent: zoomBounds.minZoomPercent,
+          maxPercent: zoomBounds.maxZoomPercent,
+          stepPercent: CARD_VIEW_ZOOM_STEP_PERCENT,
         }),
       );
     },
-    [dynamicMaxZoomPercent, effectiveMinZoomPercent],
+    [zoomBounds.maxZoomPercent, zoomBounds.minZoomPercent],
   );
 
   const stepUp = useCallback(() => {
@@ -170,17 +141,15 @@ export const useCardSetViewZoom = ({
   }, [setZoomPercent, zoomPercent]);
 
   const reset = useCallback(() => {
-    setZoomPercent(defaultZoomPercent);
-  }, [defaultZoomPercent, setZoomPercent]);
+    setZoomPercent(zoomBounds.defaultZoomPercent);
+  }, [setZoomPercent, zoomBounds.defaultZoomPercent]);
 
-  const zoomScale = zoomPercent / 100;
-
-  const fixedCardWidthPx = Math.max(
-    1,
-    Math.round(CANONICAL_CARD_WIDTH * zoomScale),
-  );
-
-  const availableWidthPx = Math.max(1, Math.floor(viewportWidthPx));
+  const zoomScale = resolveZoomScale(zoomPercent);
+  const fixedCardWidthPx = resolveFixedCardWidthPx({
+    canonicalCardWidthPx: CANONICAL_CARD_WIDTH,
+    zoomPercent,
+  });
+  const availableWidthPx = resolveAvailableWidthPx(viewportWidthPx);
 
   return {
     zoomPercent,
@@ -188,9 +157,9 @@ export const useCardSetViewZoom = ({
     viewportWidthPx,
     availableWidthPx,
     fixedCardWidthPx,
-    minZoomPercent: effectiveMinZoomPercent,
-    maxZoomPercent: dynamicMaxZoomPercent,
-    defaultZoomPercent,
+    minZoomPercent: zoomBounds.minZoomPercent,
+    maxZoomPercent: zoomBounds.maxZoomPercent,
+    defaultZoomPercent: zoomBounds.defaultZoomPercent,
     setZoomPercent,
     stepUp,
     stepDown,
