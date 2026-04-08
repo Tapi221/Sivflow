@@ -85,7 +85,9 @@ export const CardSetViewMobile = ({
             void onToggleBookmark(card);
           }}
           onPrev={() => idx > 0 && onIndexChange(idx - 1)}
-          onNext={() => idx < cardsForPager.length - 1 && onIndexChange(idx + 1)}
+          onNext={() =>
+            idx < cardsForPager.length - 1 && onIndexChange(idx + 1)
+          }
           hasNext={idx < cardsForPager.length - 1}
           hasPrev={idx > 0}
           currentIndex={idx}

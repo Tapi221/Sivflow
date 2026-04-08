@@ -93,10 +93,7 @@ export const buildWidthControl = ({
   activePaneMaxWidthPx: number;
   activePaneDisplayedDefaultWidthPx: number;
   previewPaneWidth: (mode: CardPaneMode, value: number) => void;
-  persistPaneWidth: (
-    mode: CardPaneMode,
-    value: number,
-  ) => void | Promise<void>;
+  persistPaneWidth: (mode: CardPaneMode, value: number) => void | Promise<void>;
   stepPaneWidth: (delta: number) => void;
   resetActivePaneWidth: () => void;
   activePaneMode: CardPaneMode;
