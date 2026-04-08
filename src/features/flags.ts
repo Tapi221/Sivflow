@@ -5,7 +5,7 @@ export type FeatureFlags = {
   enableMarkdownImages: boolean;
   experimentalPasteSplit: boolean;
 
-  // ✅ SyncV2 切り替え用（SyncServiceFactory が USE_SYNC_V2 を参照するため）
+  // SyncV2 切り替え用（SyncServiceFactory が USE_SYNC_V2 を参照するため）
   useSyncV2: boolean;
 };
 

@@ -7,6 +7,7 @@ import { useCardSetViewData } from "@/features/cardsetview/presentation/web/hook
 import { useCardSetViewPaneWidth } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewPaneWidth";
 import { useCardSetViewState } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewState";
 import { useCardSetViewWindowEvents } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewWindowEvents";
+import { useCardSetViewZoom } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewZoom";
 import { useCardSetViewBreadcrumbs } from "@/features/cardsetview/presentation/web/infra/useCardSetViewBreadcrumbs";
 import { useCardSetViewParams } from "@/features/cardsetview/presentation/web/infra/useCardSetViewParams";
 import {
@@ -14,7 +15,6 @@ import {
   resolveLastSyncedAtMs,
   resolveOverlayRight,
 } from "@/features/cardsetview/presentation/web/ui/cardSetViewViewModels";
-import { useCardSetViewZoom } from "@/features/cardsetview/hooks/useCardSetViewZoom";
 import { useIsDesktopRuntime } from "@/hooks/platform/useIsDesktopRuntime";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { CARD_PANE_WIDTH_STEP_PX } from "@/routes/constants";
