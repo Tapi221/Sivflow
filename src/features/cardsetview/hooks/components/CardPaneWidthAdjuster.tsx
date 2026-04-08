@@ -10,7 +10,7 @@ const clampValue = (value: number, min: number, max: number) => {
   return Math.min(safeMax, Math.max(safeMin, value));
 };
 
-export interface CardPaneWidthControlProps {
+export interface CardPaneWidthAdjusterProps {
   modeLabel: string;
   value: number;
   min: number;
@@ -25,7 +25,7 @@ export interface CardPaneWidthControlProps {
   onReset: () => void;
 }
 
-export const CardPaneWidthControl = ({
+export const CardPaneWidthAdjuster = ({
   modeLabel,
   value,
   min,
@@ -38,7 +38,7 @@ export const CardPaneWidthControl = ({
   onStepDown,
   onStepUp,
   onReset,
-}: CardPaneWidthControlProps) => {
+}: CardPaneWidthAdjusterProps) => {
   const resetDisabled = value === defaultValue;
   const [draftValue, setDraftValue] = React.useState(value);
 

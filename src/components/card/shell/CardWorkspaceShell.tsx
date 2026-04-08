@@ -1,7 +1,7 @@
-import type { CSSProperties, ReactNode, Ref } from "react";
-import { CardPaneWidthControl } from "@/features/cardsetview/hooks/components/CardPaneWidthControl";
+import { CardPaneWidthAdjuster } from "@/features/cardsetview/hooks/components/CardPaneWidthAdjuster";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "@/ui/icons";
+import type { CSSProperties, ReactNode, Ref } from "react";
 
 export type CardWorkspaceWidthControlProps = {
   modeLabel: string;
@@ -96,7 +96,7 @@ export const CardWorkspaceShell = ({
               widthControlClassName,
             )}
           >
-            <CardPaneWidthControl
+            <CardPaneWidthAdjuster
               modeLabel={widthControl.modeLabel}
               value={widthControl.value}
               min={widthControl.min}
