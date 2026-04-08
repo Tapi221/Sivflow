@@ -2,7 +2,7 @@ import type { CardSyncStatus } from "@/components/card/shell/cardSyncStatus";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { getCardText } from "@/domain/card/content";
-import { DesktopCardSurface } from "@/features/cardsetview/hooks/components/DesktopCardSurface";
+import { DesktopCardSurface } from "@/features/cardsetview/presentation/web/ui/components/DesktopCardSurface";
 import {
   ACTIVE_INDEX_RENDER_RADIUS,
   VerticalCardPager,

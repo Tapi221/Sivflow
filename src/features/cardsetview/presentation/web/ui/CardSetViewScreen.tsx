@@ -1,11 +1,11 @@
 import { CardWorkspaceShell } from "@/components/card/shell/CardWorkspaceShell";
 import { useToast } from "@/contexts/ToastContext";
 import { saveDefaultDisplayMode } from "@/features/cardsetview/application/cardSetViewUseCases";
-import { CardZoomControl } from "@/features/cardsetview/presentation/web/ui/components/CardZoomControl";
+import { useCardSetViewScreenController } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewScreenController";
 import { CardSetViewDesktop } from "@/features/cardsetview/presentation/web/ui/CardSetViewDesktop";
+import { CardZoomControl } from "@/features/cardsetview/presentation/web/ui/components/CardZoomControl";
 import { CardSetViewMetaPanel } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewMetaPanel";
 import { CardSetViewMobile } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewMobile";
-import { useCardSetViewScreenController } from "@/features/cardsetview/hooks/useCardSetViewScreenController";
 import { CardSetViewOverlayControls } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewOverlayControls";
 
 export const CardSetViewScreen = () => {
