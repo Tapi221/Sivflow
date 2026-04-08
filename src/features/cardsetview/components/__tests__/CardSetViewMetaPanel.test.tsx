@@ -2,7 +2,7 @@
 import { act, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { CardSetViewMetaPanel } from "@/features/cardsetview/components/CardSetViewMetaPanel";
+import { CardSetViewMetaPanel } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewMetaPanel";
 import type { Card } from "@/types";
 
 const cardMetaPanelPropsSpy = vi.hoisted(() => vi.fn());
@@ -26,6 +26,7 @@ const makeCard = (overrides: Partial<Card> = {}) => {
 describe("CardSetViewMetaPanel", () => {
   it("dispatches editing draft patch while typing title in global edit mode", async () => {
     cardMetaPanelPropsSpy.mockClear();
+
     render(
       <CardSetViewMetaPanel
         selectedCard={makeCard()}
@@ -40,9 +41,11 @@ describe("CardSetViewMetaPanel", () => {
           onTitleInputChange?: (nextTitle: string) => void;
         }
       | undefined;
+
     expect(props?.onTitleInputChange).toBeTypeOf("function");
 
     const listener = vi.fn();
+
     window.addEventListener(
       "cardsetview:editing-draft-patch",
       listener as EventListener,
@@ -53,10 +56,12 @@ describe("CardSetViewMetaPanel", () => {
     });
 
     expect(listener).toHaveBeenCalledTimes(1);
+
     const event = listener.mock.calls[0][0] as CustomEvent<{
       cardId: string;
       patch: { title: string };
     }>;
+
     expect(event.detail).toEqual({
       cardId: "card-1",
       patch: { title: "new-title" },
@@ -70,6 +75,7 @@ describe("CardSetViewMetaPanel", () => {
 
   it("does not dispatch draft patch on typing when not in global edit mode", async () => {
     cardMetaPanelPropsSpy.mockClear();
+
     render(
       <CardSetViewMetaPanel
         selectedCard={makeCard()}
@@ -86,6 +92,7 @@ describe("CardSetViewMetaPanel", () => {
       | undefined;
 
     const listener = vi.fn();
+
     window.addEventListener(
       "cardsetview:editing-draft-patch",
       listener as EventListener,
