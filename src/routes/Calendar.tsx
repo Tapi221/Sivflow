@@ -1,34 +1,34 @@
-import React, { useState, useMemo, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { useLiveQuery } from "dexie-react-hooks";
+import { EmptyMetaPanel } from "@/components/card/panels/EmptyMetaPanel";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { useAuthSession } from "@/contexts/AuthContext";
+import { RatingCountTiles } from "@/features/study/RatingCountTiles";
 import { useCards } from "@/hooks/card/useCards";
 import { useFolders } from "@/hooks/folder/useFolders";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
-import { useAuthSession } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { EmptyMetaPanel } from "@/components/card/panels/EmptyMetaPanel";
-import { RatingCountTiles } from "@/features/study/RatingCountTiles";
+import { cn } from "@/lib/utils";
+import { firestoreDb } from "@/services/firebase";
+import { getLocalDb } from "@/services/localDB";
+import { useTodayStudyStore } from "@/stores/useTodayStudyStore";
 import { ChevronLeft, ChevronRight } from "@/ui/icons";
+import { createPageUrl } from "@/utils";
+import { useQuery } from "@tanstack/react-query";
 import {
-  format,
-  startOfMonth,
-  endOfMonth,
-  startOfWeek,
-  endOfWeek,
   addDays,
   addMonths,
-  isSameMonth,
+  endOfMonth,
+  endOfWeek,
+  format,
   isSameDay,
+  isSameMonth,
   isToday,
+  startOfMonth,
+  startOfWeek,
 } from "date-fns";
-import { cn } from "@/lib/utils";
-import { createPageUrl } from "@/utils";
-import { useTodayStudyStore } from "@/stores/useTodayStudyStore";
-import { getLocalDb } from "@/services/localDB";
-import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
-import { firestoreDb } from "@/services/firebase";
+import { useLiveQuery } from "dexie-react-hooks";
+import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 // ---------------------------------------------------------------------------
 // RESISTANCE LEGEND (Static Definition for Maturity/Resistance)

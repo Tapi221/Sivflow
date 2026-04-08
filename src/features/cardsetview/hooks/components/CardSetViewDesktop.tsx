@@ -13,7 +13,7 @@ import {
   CARD_SET_VIEW_NATURAL_INDEX_COMMIT_DELAY_VIEW_MS,
   CARD_SET_VIEW_PAGER_PADDING_BLOCK,
   CARD_SET_VIEW_PAGER_PADDING_INLINE,
-} from "@/pages/card-set-view/constants";
+} from "@/routes/constants";
 import type { Card, UserSettings } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";

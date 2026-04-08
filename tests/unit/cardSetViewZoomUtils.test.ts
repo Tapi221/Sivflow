@@ -10,7 +10,7 @@ import {
   normalizeZoomPercent,
   zoomPercentToFactor,
   zoomPercentToFixedCardWidthPx,
-} from "@/pages/card-set-view/cardSetViewZoom";
+} from "@/features/cardsetview/cardSetViewZoom";
 
 describe("cardSetViewZoom", () => {
   describe("default/min constants", () => {

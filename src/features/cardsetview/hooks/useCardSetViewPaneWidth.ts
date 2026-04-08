@@ -1,13 +1,13 @@
 import { useMemo } from "react";
 
+import { useCardPaneWidthState } from "@/components/card/shell/useCardPaneWidthState";
 import {
   CARD_PANE_EDIT_DEFAULT_WIDTH_PX,
   CARD_PANE_EDIT_MIN_WIDTH_PX,
   CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
   CARD_PANE_VIEW_MIN_WIDTH_PX,
   clampPaneWidthPx,
-} from "@/pages/card-set-view/constants";
-import { useCardPaneWidthState } from "@/components/card/shell/useCardPaneWidthState";
+} from "@/routes/constants";
 import {
   getCardSetWidthPreference,
   setCardSetWidthPreference,

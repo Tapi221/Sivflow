@@ -17,26 +17,26 @@ import { dataIntegrityService } from "./services/DataIntegrityService";
 import { SyncServiceFactory } from "./services/SyncServiceFactory";
 import { DEV_MODE, isLocalHost } from "./utils/envGuards";
 
-const Calendar = lazy(() => import("./pages/Calendar"));
-const Folders = lazy(() => import("./pages/Folders"));
-const CardEdit = lazy(() => import("./pages/CardEdit"));
-const CardSetView = lazy(() => import("./pages/CardSetView"));
-const StudyMode = lazy(() => import("./pages/StudyMode"));
-const Trash = lazy(() => import("./pages/Trash"));
-const ImageDiagnostics = lazy(() => import("./pages/ImageDiagnostics"));
-const Gallery = lazy(() => import("./pages/Gallery"));
-const Directory = lazy(() => import("./pages/Directory"));
-const Dictionary = lazy(() => import("./pages/Dictionary"));
-const Questions = lazy(() => import("./pages/Questions"));
+const Calendar = lazy(() => import("./routes/Calendar"));
+const Folders = lazy(() => import("./routes/Folders"));
+const CardEdit = lazy(() => import("./routes/CardEdit"));
+const CardSetView = lazy(() => import("./routes/CardSetView"));
+const StudyMode = lazy(() => import("./routes/StudyMode"));
+const Trash = lazy(() => import("./routes/Trash"));
+const ImageDiagnostics = lazy(() => import("./routes/ImageDiagnostics"));
+const Gallery = lazy(() => import("./routes/Gallery"));
+const Directory = lazy(() => import("./routes/Directory"));
+const Dictionary = lazy(() => import("./routes/Dictionary"));
+const Questions = lazy(() => import("./routes/Questions"));
 
 const PdfScrollTest = DEV_MODE
-  ? lazy(() => import("./pages/PdfScrollTest"))
+  ? lazy(() => import("./routes/PdfScrollTest"))
   : null;
 const CodeBlockVisualTest = DEV_MODE
-  ? lazy(() => import("./pages/CodeBlockVisualTest"))
+  ? lazy(() => import("./routes/CodeBlockVisualTest"))
   : null;
 const CardLayoutConsistencyTest = DEV_MODE
-  ? lazy(() => import("./pages/CardLayoutConsistencyTest"))
+  ? lazy(() => import("./routes/CardLayoutConsistencyTest"))
   : null;
 
 const isTestBypassEnabled = () => {

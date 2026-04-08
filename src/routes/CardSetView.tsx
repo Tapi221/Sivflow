@@ -12,18 +12,18 @@ import { useToast } from "@/contexts/ToastContext";
 import { useIsDesktopRuntime } from "@/hooks/platform/useIsDesktopRuntime";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
-import { CardSetViewDesktop } from "./card-set-view/components/CardSetViewDesktop";
-import { CardSetViewMetaPanel } from "./card-set-view/components/CardSetViewMetaPanel";
-import { CardSetViewMobile } from "./card-set-view/components/CardSetViewMobile";
-import { CardZoomControl } from "./card-set-view/components/CardZoomControl";
-import { CARD_PANE_WIDTH_STEP_PX } from "./card-set-view/constants";
-import { useCardSetViewBreadcrumbs } from "./card-set-view/hooks/useCardSetViewBreadcrumbs";
-import { useCardSetViewData } from "./card-set-view/hooks/useCardSetViewData";
-import { useCardSetViewPaneWidth } from "./card-set-view/hooks/useCardSetViewPaneWidth";
-import { useCardSetViewParams } from "./card-set-view/hooks/useCardSetViewParams";
-import { useCardSetViewState } from "./card-set-view/hooks/useCardSetViewState";
-import { useCardSetViewWindowEvents } from "./card-set-view/hooks/useCardSetViewWindowEvents";
-import { useCardSetViewZoom } from "./card-set-view/hooks/useCardSetViewZoom";
+import { CardSetViewDesktop } from "../pages/card-set-view/components/CardSetViewDesktop";
+import { CardSetViewMetaPanel } from "../pages/card-set-view/components/CardSetViewMetaPanel";
+import { CardSetViewMobile } from "../pages/card-set-view/components/CardSetViewMobile";
+import { CardZoomControl } from "../pages/card-set-view/components/CardZoomControl";
+import { useCardSetViewBreadcrumbs } from "../pages/card-set-view/hooks/useCardSetViewBreadcrumbs";
+import { useCardSetViewData } from "../pages/card-set-view/hooks/useCardSetViewData";
+import { useCardSetViewPaneWidth } from "../pages/card-set-view/hooks/useCardSetViewPaneWidth";
+import { useCardSetViewParams } from "../pages/card-set-view/hooks/useCardSetViewParams";
+import { useCardSetViewState } from "../pages/card-set-view/hooks/useCardSetViewState";
+import { useCardSetViewWindowEvents } from "../pages/card-set-view/hooks/useCardSetViewWindowEvents";
+import { useCardSetViewZoom } from "../pages/card-set-view/hooks/useCardSetViewZoom";
+import { CARD_PANE_WIDTH_STEP_PX } from "./constants";
 
 const DISPLAY_MODE_LABELS: Record<CardDisplayMode, string> = {
   fixed: "カード表示（手書き対応）",

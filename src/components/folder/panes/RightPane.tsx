@@ -3,10 +3,10 @@ import { CardPane } from "@/components/folder/panes/CardPane";
 import { DirectoryDiagramPane } from "@/components/folder/panes/DirectoryDiagramPane";
 import { PdfPane } from "@/components/pdf/PdfPane";
 import { PowerPointPane } from "@/components/pptx/PowerPointPane";
-import Calendar from "@/pages/Calendar";
-import Dashboard from "@/pages/Dashboard";
-import Gallery from "@/pages/Gallery";
-import Trash from "@/pages/Trash";
+import Calendar from "@/routes/Calendar";
+import Dashboard from "@/routes/Dashboard";
+import Gallery from "@/routes/Gallery";
+import Trash from "@/routes/Trash";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 
 type PdfPaneUpdateHandler = NonNullable<

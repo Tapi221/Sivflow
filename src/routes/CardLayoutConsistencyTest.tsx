@@ -1,14 +1,14 @@
-import React from "react";
-import { DragDropContext } from "@hello-pangea/dnd";
-import { Flashcard } from "@/components/card/frame/Flashcard";
-import { CardFrame } from "@/components/card/frame/CardFrame";
 import { SharedCardContent } from "@/components/card/common/SharedCardContent";
 import {
   CANONICAL_CARD_WIDTH,
   CARD_SAFE_PADDING_PX,
 } from "@/components/card/common/constants";
+import { CardFrame } from "@/components/card/frame/CardFrame";
+import { Flashcard } from "@/components/card/frame/Flashcard";
 import { MobileScalableCard } from "@/components/card/frame/MobileScalableCard";
 import type { CardBlock } from "@/types/domain/card";
+import { DragDropContext } from "@hello-pangea/dnd";
+import React from "react";
 
 const FIXTURE_BLOCKS: CardBlock[] = [
   {
