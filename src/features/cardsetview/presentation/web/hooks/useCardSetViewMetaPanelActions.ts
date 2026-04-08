@@ -56,7 +56,7 @@ export const useCardSetViewMetaPanelActions = ({
     }: {
       reviewedAt: string | number | Date;
       rating: number;
-      durationMinutes?: number | null;;
+      durationMinutes?: number | null;
     }) => {
       if (!selectedCard?.id) {
         return;
@@ -85,7 +85,7 @@ export const useCardSetViewMetaPanelActions = ({
       reviewLogs: Card["reviewLogs"];
       reviewedAt: string | number | Date;
       rating: number;
-      durationMinutes?: number | null;;
+      durationMinutes?: number | null;
     }) => {
       if (!selectedCard?.id) {
         return;
@@ -138,7 +138,7 @@ export const useCardSetViewMetaPanelActions = ({
     }: {
       reviewLogs: Card["reviewLogs"];
       logIndex: number;
-      durationMinutes?: number | null;;
+      durationMinutes?: number | null;
     }) => {
       if (!selectedCard?.id) {
         return;

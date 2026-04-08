@@ -1,7 +1,7 @@
-import { Timestamp } from "firebase/firestore";
 import type { ReviewLog } from "@/types/domain/base";
 import { calculateResistanceScore } from "@/utils/reviewMetrics";
 import type { SubjectiveScore } from "@/utils/reviewUtils";
+import { Timestamp } from "firebase/firestore";
 
 export type ReviewAlgorithmInput = {
   card: {
@@ -378,7 +378,7 @@ export const createReviewLogEntry = ({
   reviewedAt: Date;
   rating: ReviewLog["rating"];
   intervalDays: number;
-  durationMinutes?: number | null; | null;
+  durationMinutes?: number | null;
 }): ReviewLog => {
   return {
     reviewedAt: reviewedAt.toISOString(),
@@ -404,7 +404,7 @@ export const createReviewPatchFromRating = ({
   rating: ReviewLog["rating"];
   now?: Date;
   delayBonusEnabled?: boolean;
-  durationMinutes?: number | null; | null;
+  durationMinutes?: number | null;
 }) => {
   const subjectiveScore = ratingToSubjectiveScore(rating);
   const reviewUpdate = computeNextReview({
@@ -615,7 +615,7 @@ type LatestReviewLogPatchParams =
       reviewStartNextDay?: boolean;
       reviewedAt: Date;
       rating: ReviewLog["rating"];
-      durationMinutes?: number | null; | null;
+      durationMinutes?: number | null;
     }
   | {
       action: "delete";
