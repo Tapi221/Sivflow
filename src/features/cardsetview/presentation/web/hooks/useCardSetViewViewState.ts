@@ -189,7 +189,7 @@ export const useCardSetViewViewState = ({
 
   const currentCard = sortedCards[safeCurrentIndex] ?? null;
   const { effectiveCard } = useCardEntity(
-    isGlobalEditing ? currentCard?.id ?? null : null,
+    isGlobalEditing ? (currentCard?.id ?? null) : null,
   );
 
   const selectedCard = useMemo(() => {

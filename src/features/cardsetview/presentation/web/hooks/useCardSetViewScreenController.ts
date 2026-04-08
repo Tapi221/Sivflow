@@ -130,10 +130,7 @@ export const useCardSetViewScreenController = () => {
         updateCardSet: data.updateCardSet,
       });
     } catch (error) {
-      console.error(
-        "[CardSetView] Failed to save default display mode",
-        error,
-      );
+      console.error("[CardSetView] Failed to save default display mode", error);
       toastError("表示モードの保存に失敗しました");
     }
   }, [cardSetId, data.updateCardSet, state.currentDisplayMode, toastError]);
