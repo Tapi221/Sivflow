@@ -15,7 +15,7 @@ import {
   resolveCardsForPager,
   resolveCurrentIndexBase,
   toggleFlippedCardId,
-} from "@/features/cardsetview/domain/useCardSetViewState";
+} from "@/features/cardsetview/domain/cardSetViewState";
 import { useCardEntity } from "@/hooks/card/useCardEntity";
 import {
   resolveCardSetDisplayMode,

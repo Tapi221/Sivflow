@@ -1,87 +1,165 @@
 import type { Card } from "@/types";
 import type { CardSet } from "@/types/domain/cardSet";
 
-import { useCardSetViewActions } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewActions";
-import { useCardSetViewViewState } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewViewState";
+type CardIndexMap = Map<string, number>;
 
-interface UseCardSetViewStateOptions {
+type CardLike = Pick<Card, "id" | "cardSetId" | "folderId">;
+
+type ResolveCurrentIndexBaseArgs = {
+  pendingFocusIndex: number | null;
+  currentIndex: number | null;
+  targetResolvedIndex: number | null;
   initialIndex: number;
-  targetCardId: string | null;
-  folderId: string | null;
-  cardSetId: string | null;
+};
+
+type ResolveCardsForPagerArgs = {
   sortedCards: Card[];
-  cardIndexById: Map<string, number>;
-  createCard: (
-    cardData: Partial<Card> & { cardSetId: string },
-  ) => Promise<unknown>;
-  updateCard: (id: string, data: Partial<Card>) => Promise<unknown>;
-  selectedCardSet: CardSet | null;
-  isLoading: boolean;
-  toastError: (msg: string) => void;
-}
+  selectedCard: Card | null;
+  cardIndexById: CardIndexMap;
+};
 
-export const useCardSetViewState = ({
-  initialIndex,
-  targetCardId,
-  folderId,
-  cardSetId,
-  sortedCards,
+type ResolveCardMutationTargetArgs = {
+  cardSetId: string | null;
+  folderId: string | null;
+  selectedCardSet: Pick<CardSet, "folderId"> | null;
+  selectedCard: CardLike | null;
+  currentCard: CardLike | null;
+};
+
+export const createCardSetViewSourceKey = (
+  cardSetId: string | null,
+  folderId: string | null,
+) => {
+  return `${cardSetId ?? ""}::${folderId ?? ""}`;
+};
+
+export const resolveCardIndexById = ({
+  cardId,
   cardIndexById,
-  createCard,
-  updateCard,
-  selectedCardSet,
-  isLoading,
-  toastError,
-}: UseCardSetViewStateOptions) => {
-  const viewState = useCardSetViewViewState({
-    initialIndex,
-    targetCardId,
-    folderId,
-    cardSetId,
-    sortedCards,
-    cardIndexById,
-    selectedCardSet,
-  });
+}: {
+  cardId: string | null;
+  cardIndexById: CardIndexMap;
+}) => {
+  if (!cardId) {
+    return null;
+  }
 
-  const actions = useCardSetViewActions({
-    cardSetId,
-    folderId,
-    selectedCardSet,
-    selectedCard: viewState.selectedCard,
-    currentCard: viewState.currentCard,
-    isLoading,
-    sortedCardsLength: sortedCards.length,
-    createCard,
-    updateCard,
-    toastError,
-    beginGlobalEditing: viewState.beginGlobalEditing,
-    setPendingFocusCardId: viewState.setPendingFocusCardId,
-    clearFlippedCards: viewState.clearFlippedCards,
-  });
+  const found = cardIndexById.get(cardId);
+  return typeof found === "number" ? found : null;
+};
+
+export const resolveCurrentIndexBase = ({
+  pendingFocusIndex,
+  currentIndex,
+  targetResolvedIndex,
+  initialIndex,
+}: ResolveCurrentIndexBaseArgs) => {
+  return (
+    pendingFocusIndex ?? currentIndex ?? targetResolvedIndex ?? initialIndex
+  );
+};
+
+export const clampCardIndex = (index: number, cardCount: number) => {
+  if (cardCount <= 0) {
+    return 0;
+  }
+
+  const numericIndex = Number.isFinite(index) ? index : 0;
+  const integerIndex = Math.trunc(numericIndex);
+
+  return Math.min(Math.max(integerIndex, 0), cardCount - 1);
+};
+
+export const resolveCardsForPager = ({
+  sortedCards,
+  selectedCard,
+  cardIndexById,
+}: ResolveCardsForPagerArgs) => {
+  if (!selectedCard) {
+    return sortedCards;
+  }
+
+  const idx = cardIndexById.get(selectedCard.id);
+  if (typeof idx !== "number" || idx < 0) {
+    return sortedCards;
+  }
+
+  if (sortedCards[idx] === selectedCard) {
+    return sortedCards;
+  }
+
+  const next = sortedCards.slice();
+  next[idx] = selectedCard;
+  return next;
+};
+
+export const toggleFlippedCardId = ({
+  ids,
+  cardId,
+}: {
+  ids: Set<string>;
+  cardId: string | null;
+}) => {
+  const next = new Set(ids);
+
+  if (!cardId) {
+    return next;
+  }
+
+  if (next.has(cardId)) {
+    next.delete(cardId);
+  } else {
+    next.add(cardId);
+  }
+
+  return next;
+};
+
+export const extractCreatedCardId = (created: unknown) => {
+  if (typeof created === "string") {
+    return created;
+  }
+
+  if (
+    typeof created === "object" &&
+    created !== null &&
+    "id" in created &&
+    typeof (created as { id?: unknown }).id === "string"
+  ) {
+    return (created as { id: string }).id;
+  }
+
+  if (
+    typeof created === "object" &&
+    created !== null &&
+    "cardId" in created &&
+    typeof (created as { cardId?: unknown }).cardId === "string"
+  ) {
+    return (created as { cardId: string }).cardId;
+  }
+
+  return null;
+};
+
+export const resolveCardMutationTarget = ({
+  cardSetId,
+  folderId,
+  selectedCardSet,
+  selectedCard,
+  currentCard,
+}: ResolveCardMutationTargetArgs) => {
+  const targetCardSetId =
+    cardSetId ?? selectedCard?.cardSetId ?? currentCard?.cardSetId ?? null;
+
+  const targetFolderId =
+    folderId ??
+    selectedCardSet?.folderId ??
+    selectedCard?.folderId ??
+    currentCard?.folderId ??
+    "";
 
   return {
-    currentIndex: viewState.currentIndex,
-    currentDisplayMode: viewState.currentDisplayMode,
-    setCurrentDisplayMode: viewState.setCurrentDisplayMode,
-    setCurrentIndex: viewState.setCurrentIndex,
-    safeCurrentIndex: viewState.safeCurrentIndex,
-    isFlipped: viewState.isFlipped,
-    flippedCardIds: viewState.flippedCardIds,
-    isGlobalEditing: viewState.isGlobalEditing,
-    setIsGlobalEditing: viewState.setIsGlobalEditing,
-    isMetaOpen: viewState.isMetaOpen,
-    setIsMetaOpen: viewState.setIsMetaOpen,
-    activeSyncStatus: viewState.activeSyncStatus,
-    handleActiveSyncStatusChange: viewState.handleActiveSyncStatusChange,
-    handleRetryActiveSync: viewState.handleRetryActiveSync,
-    selectedCard: viewState.selectedCard,
-    cardsForPager: viewState.cardsForPager,
-    createAndFocusCard: actions.createAndFocusCard,
-    handleEdit: actions.handleEdit,
-    handleFlip: viewState.handleFlip,
-    handleToggleUncertainty: actions.handleToggleUncertainty,
-    handleToggleBookmark: actions.handleToggleBookmark,
-    handleToggleViewMode: viewState.handleToggleViewMode,
-    handlePagerIndexChange: viewState.handlePagerIndexChange,
+    targetCardSetId,
+    targetFolderId,
   };
 };

@@ -1,5 +1,8 @@
 import type { CardSyncStatus } from "@/components/card/shell/cardSyncStatus";
-import { Flashcard } from "@/components/card/frame/Flashcard";
+import {
+  Flashcard,
+  type FlashcardCardLike,
+} from "@/components/card/frame/Flashcard";
 import { CardEditorPane } from "@/components/folder/panes/CardEditorPane";
 import type { Card, UserSettings } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
@@ -23,6 +26,20 @@ export interface DesktopCardSurfaceProps {
   onSyncStatusChange: (status: CardSyncStatus | null) => void;
 }
 
+const toFlashcardCardLike = (card: Card): FlashcardCardLike => ({
+  id: card.id,
+  cardId: card.cardId,
+  hasUncertainty: card.hasUncertainty,
+  has_uncertainty: card.hasUncertainty,
+  isBookmarked: card.isBookmarked ?? false,
+  is_bookmarked: card.isBookmarked ?? false,
+  front: card.front,
+  back: card.back,
+  layoutRows: card.layoutRows,
+  inkQuestion: card.front.ink ?? null,
+  inkAnswer: card.back.ink ?? null,
+});
+
 const DesktopCardSurfaceInner = ({
   card,
   isActive,
@@ -41,6 +58,10 @@ const DesktopCardSurfaceInner = ({
   onSyncStatusChange,
 }: DesktopCardSurfaceProps) => {
   const [hasFocusWithin, setHasFocusWithin] = React.useState(false);
+
+  const flashcardCard = React.useMemo(() => {
+    return toFlashcardCardLike(card);
+  }, [card]);
 
   const handleEditorFocusCapture = React.useCallback(() => {
     setHasFocusWithin(true);
@@ -116,15 +137,27 @@ const DesktopCardSurfaceInner = ({
   return (
     <div className="w-full overflow-visible">
       <Flashcard
-        card={card}
+        card={flashcardCard}
         isFlipped={isFlipped}
         previewMode={!isActive}
         displayMode={currentDisplayMode}
         showInkLayer={currentDisplayMode === "fixed"}
         inkEditingEnabled={currentDisplayMode === "fixed" && isActive}
         onFlip={isActive ? onFlip : undefined}
-        onToggleUncertainty={isActive ? onToggleUncertainty : undefined}
-        onToggleBookmark={isActive ? onToggleBookmark : undefined}
+        onToggleUncertainty={
+          isActive
+            ? () => {
+                void onToggleUncertainty(card);
+              }
+            : undefined
+        }
+        onToggleBookmark={
+          isActive
+            ? () => {
+                void onToggleBookmark(card);
+              }
+            : undefined
+        }
         allowUpscale={false}
         scaleMultiplier={1}
         fixedScale={currentDisplayMode === "fixed" ? viewZoomScale : undefined}

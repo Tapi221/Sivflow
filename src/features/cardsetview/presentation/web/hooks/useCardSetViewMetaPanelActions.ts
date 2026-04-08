@@ -4,7 +4,7 @@ import {
   createLatestReviewLogPatch,
   createReviewPatchFromRating,
 } from "@/services/reviewAlgorithm";
-import type { Card, UserSettings } from "@/types";
+import type { Card, ReviewLog, UserSettings } from "@/types";
 
 const CARD_SET_VIEW_EDITING_DRAFT_PATCH_EVENT =
   "cardsetview:editing-draft-patch";
@@ -19,6 +19,10 @@ interface UseCardSetViewMetaPanelActionsOptions {
   settings: UserSettings | undefined;
   updateCard: (id: string, data: Partial<Card>) => Promise<unknown>;
 }
+
+const normalizeReviewLogs = (reviewLogs: Card["reviewLogs"]): ReviewLog[] => {
+  return reviewLogs ?? [];
+};
 
 export const useCardSetViewMetaPanelActions = ({
   selectedCard,
@@ -55,7 +59,7 @@ export const useCardSetViewMetaPanelActions = ({
       durationMinutes,
     }: {
       reviewedAt: string | number | Date;
-      rating: number;
+      rating: ReviewLog["rating"];
       durationMinutes?: number | null;
     }) => {
       if (!selectedCard?.id) {
@@ -84,12 +88,14 @@ export const useCardSetViewMetaPanelActions = ({
     }: {
       reviewLogs: Card["reviewLogs"];
       reviewedAt: string | number | Date;
-      rating: number;
+      rating: ReviewLog["rating"];
       durationMinutes?: number | null;
     }) => {
       if (!selectedCard?.id) {
         return;
       }
+
+      const normalizedReviewLogs = normalizeReviewLogs(nextReviewLogs);
 
       const { patch } = createLatestReviewLogPatch({
         action: "update",
@@ -97,7 +103,7 @@ export const useCardSetViewMetaPanelActions = ({
         delayBonusEnabled,
         rating,
         reviewedAt: new Date(reviewedAt),
-        reviewLogs: nextReviewLogs,
+        reviewLogs: normalizedReviewLogs,
         reviewStartNextDay,
         durationMinutes,
       });
@@ -117,11 +123,13 @@ export const useCardSetViewMetaPanelActions = ({
         return;
       }
 
+      const normalizedReviewLogs = normalizeReviewLogs(nextReviewLogs);
+
       const { patch } = createLatestReviewLogPatch({
         action: "delete",
         card: selectedCard,
         delayBonusEnabled,
-        reviewLogs: nextReviewLogs,
+        reviewLogs: normalizedReviewLogs,
         reviewStartNextDay,
       });
 
@@ -144,7 +152,9 @@ export const useCardSetViewMetaPanelActions = ({
         return;
       }
 
-      const patchedReviewLogs = nextReviewLogs.map((log, index) =>
+      const normalizedReviewLogs = normalizeReviewLogs(nextReviewLogs);
+
+      const patchedReviewLogs = normalizedReviewLogs.map((log, index) =>
         index === logIndex ? { ...log, durationMinutes } : log,
       );
 

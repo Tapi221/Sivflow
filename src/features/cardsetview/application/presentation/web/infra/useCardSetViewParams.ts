@@ -38,6 +38,5 @@ export const useCardSetViewParams = () => {
   const [params] = useState<ParsedCardSetViewParams>(() =>
     parseCardSetViewParams(),
   );
-
   return params;
 };

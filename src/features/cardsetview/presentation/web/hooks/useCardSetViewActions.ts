@@ -6,7 +6,7 @@ import {
   toggleCardBookmark,
   toggleCardUncertainty,
 } from "@/features/cardsetview/application/cardSetViewUseCases";
-import { resolveCardMutationTarget } from "@/features/cardsetview/domain/useCardSetViewState";
+import { resolveCardMutationTarget } from "@/features/cardsetview/domain/cardSetViewState";
 import type { Card } from "@/types";
 import type { CardSet } from "@/types/domain/cardSet";
 
