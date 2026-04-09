@@ -70,7 +70,7 @@ export const TitleBar: React.FC = () => {
   return (
     <div
       className={cn(
-        "surface-card-pane-glass",
+        "surface-glass-base surface-glass-titlebar",
         "fixed inset-x-0 top-0 z-[9999] flex h-[36px] w-full select-none items-center justify-between",
         "border-x-0 border-t-0 rounded-none text-sm text-slate-700",
       )}

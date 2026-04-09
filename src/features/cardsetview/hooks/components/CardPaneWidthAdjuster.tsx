@@ -49,7 +49,7 @@ export const CardPaneWidthAdjuster = ({
   const formattedValue = valueFormatter ? valueFormatter(draftValue) : null;
 
   return (
-    <div className="surface-card-pane-glass-elevated pointer-events-auto flex items-center gap-1.5 rounded-[20px] px-2.5 py-1">
+    <div className="surface-glass-base surface-glass-card-pane pointer-events-auto flex items-center gap-1.5 rounded-[20px] px-2.5 py-1">
       <button
         type="button"
         className="grid h-7 w-7 place-items-center rounded-full border border-slate-200/70 bg-white/55 text-slate-500 transition hover:bg-white hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-35"
