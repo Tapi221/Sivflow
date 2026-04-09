@@ -1,10 +1,12 @@
 import { isGridOffsetType } from "@/domain/card/blockOffset";
+import { normalizeUploadedImages } from "@/domain/assets/uploadedImageNormalizer";
 import {
   LEGACY_BASE_LAYOUT_ROWS,
   normalizeExtraRows,
   normalizeLayoutRows,
 } from "@/domain/card/extraRows";
 import { normalizeInkDocument } from "@/domain/card/inkDocument";
+import { normalizeMemoryStability } from "@/domain/card/review/stability";
 import { normalizeDate } from "@/shared/codec/date";
 import {
   toArrayOr,
@@ -15,8 +17,6 @@ import {
 import { makeFallbackId } from "@/shared/lib/fallbackId";
 import { asRecord, pick, type UnknownRecord } from "@/shared/lib/records";
 import type { Card, CardBlock } from "@/types/domain/card";
-import { normalizeMemoryStability } from "@/utils/reviewUtils";
-import { normalizeUploadedImages } from "@/utils/uploaded-image/normalizer";
 import { normalizeReviewLogs } from "./reviewLogs";
 
 type GridBlockType = Parameters<typeof isGridOffsetType>[0];

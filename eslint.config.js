@@ -33,6 +33,11 @@ export default defineConfig([
               name: "@/types/branded",
               message: "Use '@/types/core/branded' instead.",
             },
+            {
+              name: "@/utils",
+              message:
+                "Do not add new imports from '@/utils'. Import from the owned domain/shared/platform module instead. '@/utils' is temporary compatibility only.",
+            },
           ],
           patterns: [
             {
@@ -91,6 +96,11 @@ export default defineConfig([
             {
               name: "@/types/branded",
               message: "Use '@/types/core/branded' instead.",
+            },
+            {
+              name: "@/utils",
+              message:
+                "Do not add new imports from '@/utils'. Import from the owned domain/shared/platform module instead. '@/utils' is temporary compatibility only.",
             },
           ],
         },
