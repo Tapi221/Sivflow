@@ -102,12 +102,12 @@ export const useCardMediaDialogs = ({
 
   const getAudioCount = useCallback(
     (side: Side) => getDialogAudios(side).length,
-    [],
+    [getDialogAudios],
   );
 
   const getLinkCount = useCallback(
     (side: Side) => sanitizeReferences(getReferenceItems(side) ?? []).length,
-    [],
+    [getReferenceItems],
   );
 
   const renderMediaDialogButtons = useCallback(

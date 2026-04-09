@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { normalizeCard } from "@/utils";
+import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 
 describe("normalizeCard block typing", () => {
   it("prefers canonical face blocks over stale legacy block arrays", () => {

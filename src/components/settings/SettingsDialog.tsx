@@ -36,7 +36,7 @@ import {
 } from "@/ui/icons";
 import { getAvatarColors, getInitials } from "@/utils/avatarUtils";
 import { signOut } from "firebase/auth";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -103,15 +103,14 @@ const folderSidebarDisplayModeOptions = [
 ];
 
 const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
-  const [activeTab, setActiveTab] = useState(DEFAULT_SETTINGS_TAB);
+  const [selectedTab, setSelectedTab] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [imgError, setImgError] = useState(false);
-
-  useEffect(() => {
-    if (open) {
-      setActiveTab(resolveSettingsTab(initialTab));
-    }
-  }, [open, initialTab]);
+  const resolvedInitialTab = useMemo(
+    () => resolveSettingsTab(initialTab),
+    [initialTab],
+  );
+  const activeTab = selectedTab ?? resolvedInitialTab;
 
   const { currentUser, syncStatus, lastSyncTime, triggerSync } = useAuth();
   const navigate = useNavigate();
@@ -158,10 +157,29 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
       });
   }, [folders]);
 
+  const handleDialogOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      setSelectedTab(null);
+      setIsMobileMenuOpen(false);
+    }
+    onOpenChange(nextOpen);
+  };
+
+  const closeDialog = () => {
+    setSelectedTab(null);
+    setIsMobileMenuOpen(false);
+    onOpenChange(false);
+  };
+
+  const handleSelectTab = (tabId: string) => {
+    setSelectedTab(tabId);
+    setIsMobileMenuOpen(false);
+  };
+
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      onOpenChange(false);
+      closeDialog();
       navigate("/", { replace: true });
     } catch (error) {
       console.error("ログアウトに失敗しました", error);
@@ -169,7 +187,7 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
   };
 
   const onGoogleLogin = () => {
-    onOpenChange(false);
+    closeDialog();
     navigate("/", { replace: true });
   };
 
@@ -1030,7 +1048,7 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleDialogOpenChange}>
       <DialogContent
         surface="panel"
         className="w-full max-w-none h-[100dvh] md:max-w-[1120px] md:w-full md:h-[80vh] md:max-h-[800px] p-0 gap-0 flex flex-col overflow-hidden data-[state=open]:duration-300 ring-0 outline-none rounded-none md:rounded-[10px]"
@@ -1053,14 +1071,12 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
                   role="button"
                   tabIndex={0}
                   onClick={() => {
-                    setActiveTab(item.id);
-                    setIsMobileMenuOpen(false);
+                    handleSelectTab(item.id);
                   }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
-                      setActiveTab(item.id);
-                      setIsMobileMenuOpen(false);
+                      handleSelectTab(item.id);
                     }
                   }}
                   data-selected={activeTab === item.id ? "true" : undefined}
@@ -1158,7 +1174,7 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => onOpenChange(false)}
+                  onClick={closeDialog}
                   className="text-slate-600 h-10 w-10"
                 >
                   <X className="w-5 h-5" />

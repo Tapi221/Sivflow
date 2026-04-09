@@ -1,7 +1,6 @@
 import {
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
   type DependencyList,
@@ -97,13 +96,7 @@ export const useCardPaneWidthState = ({
       ? editPaneState.width
       : preferredWidths.edit.width;
 
-  // viewportObserverDeps の変化を安定したキーとして扱う
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const viewportDepsKey = useMemo(
-    () => JSON.stringify(viewportObserverDeps),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    viewportObserverDeps,
-  );
+  const viewportDepsKey = JSON.stringify(viewportObserverDeps);
 
   useEffect(() => {
     const element = contentViewportRef.current;

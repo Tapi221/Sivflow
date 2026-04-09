@@ -84,8 +84,8 @@ const Trash = () => {
   );
 
   // すべてのフォルダ（削除済み・未削除を含む）
-  const folders = allFolders || [];
-  const allCardsData = allCards || [];
+  const folders = useMemo(() => allFolders ?? [], [allFolders]);
+  const allCardsData = useMemo(() => allCards ?? [], [allCards]);
 
   // 削除されたカード、または削除されたフォルダに属するカード
   // normalize済みなので isDeleted のみチェック

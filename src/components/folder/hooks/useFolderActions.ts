@@ -236,14 +236,14 @@ export const useFolderActions = ({
   closeRename,
   setOptimisticFolders,
   setOptimisticCardSets,
-  optimisticFolders,
-  optimisticCardSets,
+  optimisticFolders: _optimisticFolders,
+  optimisticCardSets: _optimisticCardSets,
   setExpandedFolders,
   setPendingScrollId,
-  onFolderSelect,
-  onItemSelect,
-  onSelectCardSet,
-  setNewlyCreatedCardId,
+  onFolderSelect: _onFolderSelect,
+  onItemSelect: _onItemSelect,
+  onSelectCardSet: _onSelectCardSet,
+  setNewlyCreatedCardId: _setNewlyCreatedCardId,
   getUniqueFolderName,
 }: UseFolderActionsParams) => {
   const pendingFolderCreatesRef = useRef(new Map<string, Promise<void>>());
@@ -444,6 +444,7 @@ export const useFolderActions = ({
       setExpandedFolders,
       setPendingScrollId,
       setOptimisticCardSets,
+      treeCardSets,
     ],
   );
 
