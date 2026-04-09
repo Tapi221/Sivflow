@@ -41,11 +41,13 @@ const Layout = () => {
   return (
     <div
       className={cn(
-        "flex flex-col relative h-[100dvh] w-full overflow-hidden",
+        "desktop-shell relative flex h-[100dvh] w-full overflow-hidden",
         UI_TYPO,
+        isDesktop && "desktop-shell--with-titlebar",
       )}
     >
       <TitleBar />
+
       <div
         className={cn(
           "hidden md:flex fixed right-2 z-50",

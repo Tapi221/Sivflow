@@ -47,3 +47,9 @@
 .app-layout__main--locked {
   overflow: clip;
 }
+
+.desktop-shell--with-titlebar .app-layout__sidebar,
+.desktop-shell--with-titlebar .app-layout__content {
+  padding-top: 36px;
+  box-sizing: border-box;
+}

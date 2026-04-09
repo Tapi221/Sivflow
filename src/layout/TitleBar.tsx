@@ -72,8 +72,12 @@ export const TitleBar: React.FC = () => {
   if (!isDesktop) return null;
 
   return (
- <div
-  className="flex h-[36px] w-full shrink-0 select-none items-center justify-between border-b border-white/20 bg-white/30 text-sm text-gray-700 backdrop-blur-xl supports-[backdrop-filter]:bg-white/20"
+<div
+  className={cn(
+    "fixed inset-x-0 top-0 flex h-[36px] w-full shrink-0 select-none items-center justify-between text-sm text-gray-700",
+    "border-b border-white/30 bg-white/80 shadow-[0_8px_24px_rgba(15,23,42,0.08)]",
+    "supports-[backdrop-filter]:bg-white/34 backdrop-blur-xl backdrop-saturate-150",
+  )}
   style={{ WebkitAppRegion: "drag", zIndex: 9999 } as React.CSSProperties}
 >
       <div
