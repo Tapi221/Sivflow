@@ -1,23 +1,26 @@
 // @vitest-environment jsdom
 import {
-    cleanup,
-    render,
-    screen,
-    waitFor,
-    within,
+  cleanup,
+  render,
+  screen,
+  waitFor,
+  within,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
-    afterEach,
-    beforeAll,
-    beforeEach,
-    describe,
-    expect,
-    it,
-    vi,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
 } from "vitest";
 
-import type { ImportParseResult, ImportPayload } from "@/features/import/domain/importTypes";
+import type {
+  ImportParseResult,
+  ImportPayload,
+} from "@/features/import/domain/importTypes";
 import { XlsxImportDialog } from "@/features/import/presentation/web/XlsxImportDialog";
 import type { CardSet } from "@/types";
 

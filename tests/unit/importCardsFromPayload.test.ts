@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 
 import {
-    buildImportCardSetName,
-    importCardsFromPayload,
+  buildImportCardSetName,
+  importCardsFromPayload,
 } from "@/features/import/application/importCards";
 import type { ImportPayload } from "@/features/import/domain/importTypes";
 import type { Card, CardSet } from "@/types";
