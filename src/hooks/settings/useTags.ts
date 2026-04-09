@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { getLocalDb } from "@/services/localDB";
 import { useAuthSession } from "@/contexts/AuthContext";
-import type { TagV3Record } from "@/services/localdb/types";
+import type { TagRecord } from "@/services/localdb/types";
 import { useUserSettings } from "./useUserSettings";
 import {
   getTagColorClassName as resolveTagColorClassName,
@@ -12,7 +12,7 @@ import {
 } from "@/lib/tags/tagColor";
 
 export type TagCategory = string;
-export type Tag = TagV3Record;
+export type Tag = TagRecord;
 
 type CardTagFields = {
   userId?: string;
@@ -67,7 +67,7 @@ type TagRepairSummary = {
 
 export const resolveCardTagNames = (
   tagIds: unknown,
-  tagById: ReadonlyMap<string, Pick<TagV3Record, "name">>,
+  tagById: ReadonlyMap<string, Pick<TagRecord, "name">>,
 ): string[] => {
   const ids = asStringArray(tagIds);
   if (ids.length === 0) return [];
@@ -83,8 +83,8 @@ export const auditAndRepairTags = async (
   let removedOrphanTagRefs = 0;
   let dedupedTagRefs = 0;
 
-  await db.transaction("rw", db.tags_v3, db.cards, async () => {
-    await db.tags_v3
+  await db.transaction("rw", db.tagRecords, db.cards, async () => {
+    await db.tagRecords
       .where("userId")
       .equals(userId)
       .each((raw: unknown) => {
@@ -173,7 +173,7 @@ export const useTags = () => {
     async () => {
       if (!currentUser) return [] as Tag[];
       const db = await getLocalDb(currentUser.uid);
-      return db.tags_v3.where("userId").equals(currentUser.uid).toArray();
+      return db.tagRecords.where("userId").equals(currentUser.uid).toArray();
     },
     [currentUser],
     [] as Tag[],
@@ -307,8 +307,8 @@ export const useTags = () => {
         ? categoryId
         : undefined;
 
-    await db.transaction("rw", db.tags_v3, async () => {
-      await db.tags_v3.update(tagId, {
+    await db.transaction("rw", db.tagRecords, async () => {
+      await db.tagRecords.update(tagId, {
         categoryId: nextCategoryId,
         updatedAt: new Date(),
       });
@@ -344,7 +344,7 @@ export const useTags = () => {
     }
 
     const db = await getLocalDb(currentUser.uid);
-    await db.tags_v3.update(tagId, {
+    await db.tagRecords.update(tagId, {
       parentId: normalizedParentId,
       updatedAt: new Date(),
     });
@@ -394,7 +394,7 @@ export const useTags = () => {
     const nameLower = name.toLowerCase();
     const normalizedColor = normalizeTagColorKey(color);
 
-    const existing = await db.tags_v3
+    const existing = await db.tagRecords
       .where("[userId+nameLower]")
       .equals([currentUser.uid, nameLower])
       .first();
@@ -412,7 +412,7 @@ export const useTags = () => {
 
       if (Object.keys(patch).length > 0) {
         patch.updatedAt = new Date();
-        await db.tags_v3.update(existing.id, patch);
+        await db.tagRecords.update(existing.id, patch);
         return { ...existing, ...patch };
       }
 
@@ -430,7 +430,7 @@ export const useTags = () => {
       ...(parentId ? { parentId } : {}),
     };
 
-    await db.tags_v3.add(newTag);
+    await db.tagRecords.add(newTag);
     return newTag;
   };
 
@@ -448,7 +448,7 @@ export const useTags = () => {
 
     for (const segment of parsed) {
       const nameLower = segment.toLowerCase();
-      const candidates = await db.tags_v3
+      const candidates = await db.tagRecords
         .where("[userId+nameLower]")
         .equals([currentUser.uid, nameLower])
         .toArray();
@@ -471,7 +471,7 @@ export const useTags = () => {
           ...(parentId ? { parentId } : {}),
         };
 
-        await db.tags_v3.add(newTag);
+        await db.tagRecords.add(newTag);
         lastTagId = newTag.id;
         parentId = newTag.id;
       }
@@ -501,7 +501,7 @@ export const useTags = () => {
 
     for (const segment of parsed) {
       const nameLower = segment.toLowerCase();
-      const candidates = await db.tags_v3
+      const candidates = await db.tagRecords
         .where("[userId+nameLower]")
         .equals([currentUser.uid, nameLower])
         .toArray();
@@ -524,7 +524,7 @@ export const useTags = () => {
           ...(parentId ? { parentId } : {}),
         };
 
-        await db.tags_v3.add(newTag);
+        await db.tagRecords.add(newTag);
         localMap.set(newTag.id, newTag);
         parentId = newTag.id;
       }
@@ -546,7 +546,7 @@ export const useTags = () => {
       current = localMap.get(current)?.parentId;
     }
 
-    await db.tags_v3.update(tagId, {
+    await db.tagRecords.update(tagId, {
       parentId: finalParentId,
       updatedAt: new Date(),
     });
@@ -584,7 +584,7 @@ export const useTags = () => {
     const db = await getLocalDb(currentUser.uid);
 
     if (newNameLower !== tag.nameLower) {
-      const existing = await db.tags_v3
+      const existing = await db.tagRecords
         .where("[userId+nameLower]")
         .equals([currentUser.uid, newNameLower])
         .first();
@@ -594,7 +594,7 @@ export const useTags = () => {
       }
     }
 
-    await db.tags_v3.update(tagId, {
+    await db.tagRecords.update(tagId, {
       name: trimmedName,
       nameLower: newNameLower,
       updatedAt: new Date(),
@@ -620,7 +620,7 @@ export const useTags = () => {
 
     let updatedCards = 0;
 
-    await db.transaction("rw", db.tags_v3, db.cards, async () => {
+    await db.transaction("rw", db.tagRecords, db.cards, async () => {
       await db.cards
         .where("userId")
         .equals(currentUser.uid)
@@ -636,7 +636,7 @@ export const useTags = () => {
           updatedCards += 1;
         });
 
-      await db.tags_v3
+      await db.tagRecords
         .where("[userId+parentId]")
         .equals([currentUser.uid, fromTagId])
         .modify((raw: unknown) => {
@@ -645,7 +645,7 @@ export const useTags = () => {
           childTag.updatedAt = new Date();
         });
 
-      await db.tags_v3.delete(fromTagId);
+      await db.tagRecords.delete(fromTagId);
     });
 
     return { updatedCards };
@@ -665,7 +665,7 @@ export const useTags = () => {
 
     if (!tag) return;
 
-    await db.tags_v3.update(tag.id, {
+    await db.tagRecords.update(tag.id, {
       color: normalizeTagColorKey(color),
       updatedAt: new Date(),
     });
@@ -685,8 +685,8 @@ export const useTags = () => {
     const db = await getLocalDb(currentUser.uid);
     let removedFromCards = 0;
 
-    await db.transaction("rw", db.tags_v3, db.cards, async () => {
-      await db.tags_v3
+    await db.transaction("rw", db.tagRecords, db.cards, async () => {
+      await db.tagRecords
         .where("[userId+parentId]")
         .equals([currentUser.uid, tagId])
         .modify((raw: unknown) => {
@@ -695,7 +695,7 @@ export const useTags = () => {
           childTag.updatedAt = new Date();
         });
 
-      await db.tags_v3.delete(tagId);
+      await db.tagRecords.delete(tagId);
 
       await db.cards
         .where("userId")

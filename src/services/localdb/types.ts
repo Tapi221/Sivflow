@@ -40,8 +40,8 @@ export type ProjectMap = {
   [key: string]: unknown;
 };
 
-/** tags_v3 のレコード型（id が主体） */
-export type TagV3Record = {
+/** 現行タグレコード型（id が主体） */
+export type TagRecord = {
   id: string;
   name: string;
   nameLower: string;
@@ -57,7 +57,7 @@ export type LocalDBTableMap = {
   folders: Folder;
   cardSets: CardSet;
   documents: Document;
-  tags_v3: TagV3Record;
+  tags_v3: TagRecord;
   images: AssetRecord | UploadedImage;
   userSettings: UserSettings;
   userStats: UserStats;

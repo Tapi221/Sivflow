@@ -30,6 +30,11 @@ import { attachHooks } from "./hooks";
 import * as maintenance from "./maintenance";
 import * as queries from "./queries";
 import { defineSchema } from "./schema";
+import {
+  CURRENT_TAG_STORE,
+  LEGACY_TAG_STORE_V1,
+  LEGACY_TAG_STORE_V2,
+} from "./tagStoreNames";
 
 // NOTE: creates a circular dependency with instanceManager.ts; safe in ESM (all usages inside function bodies)
 import {
@@ -42,7 +47,7 @@ import {
   resetForLogout as resetForLogoutImpl,
   resetLocalDBForLogout,
 } from "./instanceManager";
-import type { LocalDBTableMap, SyncableEntityTable } from "./types";
+import type { LocalDBTableMap, SyncableEntityTable, TagRecord } from "./types";
 
 export type {
   CardRelation,
@@ -51,7 +56,7 @@ export type {
   LocalDBTableMap,
   ProjectMap,
   SyncableEntityTable,
-  TagV3Record,
+  TagRecord,
 } from "./types";
 
 declare global {
@@ -68,7 +73,7 @@ const syncableTables = [
   "folders",
   "cardSets",
   "documents",
-  "tags_v3",
+  CURRENT_TAG_STORE,
   "userSettings",
   "images",
 ] as const;
@@ -83,7 +88,7 @@ const entityNameMap: Record<SyncableTableName, SyncQueueItem["entity"]> = {
   folders: "folder",
   cardSets: "cardSet",
   documents: "document",
-  tags_v3: "tag",
+  [CURRENT_TAG_STORE]: "tag",
   userSettings: "userSetting",
   images: "asset",
 };
@@ -129,11 +134,26 @@ export class LocalDB extends Dexie {
   // Phase 3: Map Feature（削除済みだが旧DB互換のため残す）
   cardRelations!: Dexie.Table<Record<string, unknown>, string>;
   projectMaps!: Dexie.Table<Record<string, unknown>, string>;
-  tags!: Dexie.Table<Record<string, unknown>, [string, string]>;
-  tags_v2!: Dexie.Table<Record<string, unknown>, [string, string]>;
-  tags_v3!: Dexie.Table<import("./types").TagV3Record, string>;
 
   public userId?: string;
+
+  get tagRecords(): Dexie.Table<TagRecord, string> {
+    return this.table(CURRENT_TAG_STORE) as Dexie.Table<TagRecord, string>;
+  }
+
+  get legacyTagsV1(): Dexie.Table<Record<string, unknown>, [string, string]> {
+    return this.table(LEGACY_TAG_STORE_V1) as Dexie.Table<
+      Record<string, unknown>,
+      [string, string]
+    >;
+  }
+
+  get legacyTagsV2(): Dexie.Table<Record<string, unknown>, [string, string]> {
+    return this.table(LEGACY_TAG_STORE_V2) as Dexie.Table<
+      Record<string, unknown>,
+      [string, string]
+    >;
+  }
 
   private constructor(userId?: string) {
     // Prevent direct construction from browser code; enforce using LocalDB.getInstance()

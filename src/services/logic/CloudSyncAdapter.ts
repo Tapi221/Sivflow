@@ -122,12 +122,14 @@ type CloudEntityType =
 
 type PullableEntityType = Exclude<CloudEntityType, "userSetting">;
 
+const CURRENT_TAG_COLLECTION = "tags_v3" as const;
+
 const COLLECTION_BY_TYPE: Record<CloudEntityType, string> = {
   card: "cards",
   folder: "folders",
   cardSet: "cardSets",
   document: "documents",
-  tag: "tags_v3",
+  tag: CURRENT_TAG_COLLECTION,
   asset: "images",
   userSetting: "userSettings",
 };
@@ -540,7 +542,7 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
       {
         const snap = await getDocs(
           query(
-            collection(firestore, `users/${this.userId}/tags_v3`),
+            collection(firestore, `users/${this.userId}/${CURRENT_TAG_COLLECTION}`),
             where("id", "==", id),
           ),
         );
