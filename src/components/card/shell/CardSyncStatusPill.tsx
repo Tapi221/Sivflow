@@ -1,6 +1,9 @@
 import React from "react";
 
 import { cn } from "@/lib/utils";
+import {
+  overlayGlassPillClassName,
+} from "@/components/card/shell/overlaySurfaceClassNames";
 import { RefreshCw } from "@/ui/icons";
 
 interface CardSyncStatusPillProps {
@@ -62,7 +65,7 @@ export const CardSyncStatusPill = ({
   return (
     <div
       className={cn(
-        "pointer-events-auto inline-flex h-8 items-center gap-1.5 rounded-full bg-[var(--sidebar-bg)] px-3 text-xs font-medium surface-control-convex",
+        overlayGlassPillClassName,
         hasError ? "text-rose-500" : "text-[#334155]",
         className,
       )}

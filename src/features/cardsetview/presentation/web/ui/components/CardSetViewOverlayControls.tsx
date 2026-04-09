@@ -6,6 +6,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { CardSyncStatusPill } from "@/components/card/shell/CardSyncStatusPill";
+import { overlayGlassPillClassName } from "@/components/card/shell/overlaySurfaceClassNames";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 import {
@@ -49,7 +50,7 @@ export const CardSetViewOverlayControls = ({
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="pointer-events-auto inline-flex h-8 items-center rounded-full bg-[var(--sidebar-bg)] px-3 text-xs font-medium text-[#334155] surface-control-convex hover:bg-[var(--sidebar-active-bg)]"
+          className={`${overlayGlassPillClassName} hover:bg-white/90`}
           aria-label="表示モード"
         >
           {DISPLAY_MODE_TRIGGER_LABELS[currentDisplayMode]}
