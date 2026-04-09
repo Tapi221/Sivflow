@@ -2,33 +2,33 @@ import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/contexts/ToastContext";
 import {
-  buildImportCardSetName,
-  importCardsFromPayload,
-} from "@/features/import/importCardsFromPayload";
+    buildImportCardSetName,
+    importCardsFromPayload,
+} from "@/features/import/application/importCards";
 import {
-  formatImportCellLabel,
-  hasImportBlockingError,
-  type ImportParseResult,
-} from "@/features/import/types";
+    formatImportCellLabel,
+    hasImportBlockingError,
+    type ImportParseResult,
+} from "@/features/import/domain/importTypes";
+import { parseXlsxImport } from "@/features/import/infra/web/parseXlsxImport";
 import { downloadXlsxImportTemplate } from "@/features/import/xlsx/downloadXlsxImportTemplate";
-import { parseXlsxImport } from "@/features/import/xlsx/parseXlsxImport";
 import type { Card, CardSet } from "@/types";
 
 type CreateCardSet = (

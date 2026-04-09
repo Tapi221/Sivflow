@@ -1,23 +1,23 @@
 // @vitest-environment jsdom
 import {
-  cleanup,
-  render,
-  screen,
-  waitFor,
-  within,
+    cleanup,
+    render,
+    screen,
+    waitFor,
+    within,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
-  afterEach,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
+    afterEach,
+    beforeAll,
+    beforeEach,
+    describe,
+    expect,
+    it,
+    vi,
 } from "vitest";
 
-import type { ImportParseResult, ImportPayload } from "@/features/import/types";
+import type { ImportParseResult, ImportPayload } from "@/features/import/domain/importTypes";
 import { XlsxImportDialog } from "@/features/import/ui/XlsxImportDialog";
 import type { CardSet } from "@/types";
 
@@ -119,7 +119,7 @@ vi.mock("@/contexts/ToastContext", () => ({
   useToast: () => toastMock,
 }));
 
-vi.mock("@/features/import/xlsx/parseXlsxImport", () => ({
+vi.mock("@/features/import/infra/web/parseXlsxImport", () => ({
   parseXlsxImport: parseXlsxImportMock,
 }));
 
@@ -127,7 +127,7 @@ vi.mock("@/features/import/xlsx/downloadXlsxImportTemplate", () => ({
   downloadXlsxImportTemplate: downloadXlsxImportTemplateMock,
 }));
 
-vi.mock("@/features/import/importCardsFromPayload", () => ({
+vi.mock("@/features/import/application/importCards", () => ({
   buildImportCardSetName: buildImportCardSetNameMock,
   importCardsFromPayload: importCardsFromPayloadMock,
 }));

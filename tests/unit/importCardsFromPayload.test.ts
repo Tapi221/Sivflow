@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 
 import {
-  buildImportCardSetName,
-  importCardsFromPayload,
-} from "@/features/import/importCardsFromPayload";
-import type { ImportPayload } from "@/features/import/types";
+    buildImportCardSetName,
+    importCardsFromPayload,
+} from "@/features/import/application/importCards";
+import type { ImportPayload } from "@/features/import/domain/importTypes";
 import type { Card, CardSet } from "@/types";
 
 type CreateCardInput = Partial<Card> & { cardSetId?: string };

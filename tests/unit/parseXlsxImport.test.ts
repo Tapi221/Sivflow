@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import * as XLSX from "xlsx";
 
-import type { ImportIssue } from "@/features/import/types";
-import { parseXlsxImport } from "@/features/import/xlsx/parseXlsxImport";
+import type { ImportIssue } from "@/features/import/domain/importTypes";
+import { parseXlsxImport } from "@/features/import/infra/web/parseXlsxImport";
 
 /**
  * テスト用の XLSX ファイル (ArrayBuffer) を生成するユーティリティ

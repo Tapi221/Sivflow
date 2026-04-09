@@ -1,17 +1,17 @@
 import * as XLSX from "xlsx";
 
 import {
-  IMPORT_SHEET_NAME,
-  isImportBlockType,
-  isImportSide,
-  type ImportBlock,
-  type ImportColumnKey,
-  type ImportIssue,
-  type ImportParseResult,
-  type ImportSheetName,
-  type ImportSide,
-  type ParsedImportRow,
-} from "@/features/import/types";
+    IMPORT_SHEET_NAME,
+    isImportBlockType,
+    isImportSide,
+    type ImportBlock,
+    type ImportColumnKey,
+    type ImportIssue,
+    type ImportParseResult,
+    type ImportSheetName,
+    type ImportSide,
+    type ParsedImportRow,
+} from "@/features/import/domain/importTypes";
 
 type HeaderMap = Partial<Record<ImportColumnKey, number>>;
 type RowCellMap = Partial<Record<ImportColumnKey, string>>;
