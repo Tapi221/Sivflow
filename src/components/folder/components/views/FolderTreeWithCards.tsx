@@ -336,12 +336,7 @@ export const FolderTreeWithCards = ({
           ): item is { id: string; name: string; folder: FolderTreeNode } =>
             item !== null,
         ),
-    [
-      getChildFolders,
-      navigationParentFolderId,
-      rootFolders,
-      hasFolderMatches,
-    ],
+    [getChildFolders, navigationParentFolderId, rootFolders, hasFolderMatches],
   );
 
   const navigationEntries = useMemo(

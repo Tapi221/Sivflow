@@ -1,7 +1,11 @@
 /**
  * RecentPanel - 最近開いた履歴表示コンポーネント
  */
-import React, { useMemo } from "react";
+import { ExplorerRow } from "@/components/folder/explorer/rows/ExplorerRow";
+import { ExplorerRowContent } from "@/components/folder/explorer/rows/ExplorerRowContent";
+import type { RecentItem } from "@/hooks/folder/useExplorerStore";
+import { cn } from "@/lib/utils";
+import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 import {
   BookOpen,
   Clock,
@@ -9,11 +13,7 @@ import {
   Folder as FolderIcon,
   Trash2,
 } from "@/ui/icons";
-import { cn } from "@/lib/utils";
-import { ExplorerRow } from "@/components/folder/explorer/rows/ExplorerRow";
-import { ExplorerRowContent } from "@/components/folder/explorer/rows/ExplorerRowContent";
-import type { RecentItem } from "@/hooks/folder/explorer/useExplorerStore";
-import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
+import { useMemo } from "react";
 
 interface RecentPanelProps {
   recent: RecentItem[];

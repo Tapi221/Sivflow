@@ -109,7 +109,9 @@ export const TitleBar: React.FC = () => {
                   <span
                     className={cn(
                       "select-none",
-                      shouldUseGlassBreadcrumb ? "text-gray-300/90" : "text-gray-300",
+                      shouldUseGlassBreadcrumb
+                        ? "text-gray-300/90"
+                        : "text-gray-300",
                     )}
                   >
                     /
@@ -145,7 +147,9 @@ export const TitleBar: React.FC = () => {
                   <span
                     className={cn(
                       "truncate font-medium",
-                      shouldUseGlassBreadcrumb ? "text-gray-700" : "text-gray-600",
+                      shouldUseGlassBreadcrumb
+                        ? "text-gray-700"
+                        : "text-gray-600",
                     )}
                   >
                     {crumb.label}
