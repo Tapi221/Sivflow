@@ -1,38 +1,33 @@
-import {
-  buildEntityRenameDeleteMenuActions,
-  buildFolderMenuActions,
-} from "@/components/folder/components/menus/explorerMenuActionBuilders";
-import { beginInlineRename } from "@/components/folder/components/menus/explorerMenuStateHelpers";
-import { ExplorerRowContent } from "@/components/folder/explorer/rows/ExplorerRowContent";
-import { SidebarTreeRow } from "@/components/folder/explorer/rows/SidebarTreeRow";
-import {
-  EXPLORER_ROW_BASE_CLASS_NAME,
-  EXPLORER_ROW_CONTENT_CLASS,
-  EXPLORER_ROW_ICON_SLOT_CLASS,
-  EXPLORER_ROW_INPUT_CLASS,
-  EXPLORER_ROW_TITLE_SLOT_CLASS,
-  FOLDER_ROW_ICON_ACTIVE_CLASS,
-  FOLDER_ROW_ICON_MUTED_CLASS,
-  FOLDER_ROW_ICON_SIZE_CLASS,
-  FOLDER_ROW_TITLE_CLASS,
-} from "@/components/folder/explorer/rows/shared";
-import { cn } from "@/lib/utils";
+import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import type { SelectedExplorerItem } from "@/types";
-import { FileText, FolderOutlineIcon, Layers } from "@/ui/icons";
 import React from "react";
-import type { NavigationListEntry } from "./RootFolderPanelList";
+import { RootFolderPanelRow } from "./RootFolderPanelRow";
 
 type RenameTarget = {
   id: string;
   type: "folder" | "cardSet" | "card" | "document";
 };
 
-interface RootFolderPanelRowProps {
-  entry: NavigationListEntry;
+export type NavigationListEntry =
+  | {
+      kind: "folder";
+      id: string;
+      name: string;
+      folder: FolderTreeNode;
+    }
+  | {
+      kind: "cardSet" | "card" | "document";
+      id: string;
+      name: string;
+    };
+
+interface RootFolderPanelListProps {
+  entries: NavigationListEntry[];
   selectedFolderId: string | null;
   selectedItem: SelectedExplorerItem;
   selectedCardSetId?: string | null;
   openRowMenuId: string | null;
+  emptyMessage?: string | null;
   setRowRef: (id: string, node: HTMLElement | null) => void;
   setOpenRowMenuId: React.Dispatch<React.SetStateAction<string | null>>;
   onSelectFolder: (folderId: string | null) => void;
@@ -53,15 +48,18 @@ interface RootFolderPanelRowProps {
   editingName: string;
   editingNameRef: React.MutableRefObject<string>;
   handleRenameConfirm: (target?: RenameTarget) => Promise<void>;
-  attachInputRef: (node: HTMLInputElement | null) => void;
 }
 
-export const RootFolderPanelRow = ({
-  entry,
+/**
+ * ルートフォルダ（セクションリスト）を表示するパネルリスト
+ */
+export const RootFolderPanelList = ({
+  entries,
   selectedFolderId,
   selectedItem,
   selectedCardSetId = null,
   openRowMenuId,
+  emptyMessage = null,
   setRowRef,
   setOpenRowMenuId,
   onSelectFolder,
@@ -76,247 +74,59 @@ export const RootFolderPanelRow = ({
   editingName,
   editingNameRef,
   handleRenameConfirm,
-  attachInputRef,
-}: RootFolderPanelRowProps) => {
-  const supportsContextMenu =
-    entry.kind === "folder" ||
-    entry.kind === "cardSet" ||
-    entry.kind === "document";
-  const menuId = supportsContextMenu ? `${entry.kind}:${entry.id}:panel` : null;
-  const isEditing = supportsContextMenu && editingId === entry.id;
-  const isMenuOpen = menuId !== null && openRowMenuId === menuId;
+}: RootFolderPanelListProps) => {
+  const inputRef = React.useRef<HTMLInputElement | null>(null);
 
-  const isSelected =
-    entry.kind === "folder"
-      ? selectedFolderId === entry.id
-      : entry.kind === "cardSet"
-        ? selectedCardSetId === entry.id ||
-          (selectedItem?.type === "cardSet" && selectedItem.id === entry.id)
-        : selectedItem?.type === entry.kind && selectedItem.id === entry.id;
+  const attachInputRef = React.useCallback(
+    (node: HTMLInputElement | null) => {
+      inputRef.current = node;
+      if (!node || !editingId) return;
 
-  const Icon =
-    entry.kind === "folder"
-      ? FolderOutlineIcon
-      : entry.kind === "cardSet"
-        ? Layers
-        : FileText;
+      node.focus({ preventScroll: true });
+      node.select();
 
-  const closeMenu = React.useCallback(() => {
-    setOpenRowMenuId(null);
-  }, [setOpenRowMenuId]);
-
-  const handleSelect = React.useCallback(() => {
-    if (isEditing || isMenuOpen) return;
-
-    if (entry.kind === "folder") {
-      onSelectFolder(entry.id);
-      return;
-    }
-
-    onItemSelect({ type: entry.kind, id: entry.id });
-  }, [entry, isEditing, isMenuOpen, onItemSelect, onSelectFolder]);
-
-  const handleContextMenuSelect = React.useCallback(() => {
-    if (isEditing || isMenuOpen) return;
-
-    // ルート一覧の folder は onSelectFolder が「選択」ではなく
-    // ナビゲーション遷移を伴うため、右クリック時には呼ばない。
-    if (entry.kind === "folder") return;
-
-    onItemSelect({ type: entry.kind, id: entry.id });
-  }, [entry, isEditing, isMenuOpen, onItemSelect]);
-
-  const menuActions = React.useMemo(
-    () =>
-      entry.kind === "folder"
-        ? buildFolderMenuActions({
-            onCreateSubfolder: () => {
-              void handleCreateFolderAction(entry.id);
-            },
-            onCreateCardSet: () => {
-              void handleCreateCardSetAction(entry.id);
-            },
-            onRename: () => {
-              beginInlineRename({
-                id: entry.id,
-                name: entry.name,
-                closeMenu,
-                setEditingId,
-                setEditingName,
-              });
-            },
-            onDelete: () => {
-              handleDelete(entry.id, "folder");
-            },
-          })
-        : [],
-    [
-      closeMenu,
-      entry,
-      handleCreateCardSetAction,
-      handleCreateFolderAction,
-      handleDelete,
-      setEditingId,
-      setEditingName,
-    ],
+      try {
+        node.setSelectionRange(0, node.value.length);
+      } catch {
+        // no-op
+      }
+    },
+    [editingId],
   );
 
-  const resolvedMenuActions = React.useMemo(() => {
-    if (entry.kind === "folder") return menuActions;
-
-    if (entry.kind === "cardSet") {
-      return buildEntityRenameDeleteMenuActions({
-        id: entry.id,
-        name: entry.name,
-        type: "cardSet",
-        beforeRename: () => {
-          onItemSelect({ type: "cardSet", id: entry.id });
-        },
-        closeMenu,
-        setEditingId,
-        setEditingName,
-        handleDelete,
-      });
-    }
-
-    if (entry.kind === "document") {
-      return buildEntityRenameDeleteMenuActions({
-        id: entry.id,
-        name: entry.name,
-        type: "document",
-        beforeRename: () => {
-          onItemSelect({ type: "document", id: entry.id });
-        },
-        closeMenu,
-        setEditingId,
-        setEditingName,
-        handleDelete,
-      });
-    }
-
-    return [];
-  }, [
-    closeMenu,
-    entry,
-    handleDelete,
-    menuActions,
-    onItemSelect,
-    setEditingId,
-    setEditingName,
-  ]);
-
   return (
-    <SidebarTreeRow
-      menuOpen={isMenuOpen}
-      onMenuOpenChange={(open) => {
-        setOpenRowMenuId(open && menuId ? menuId : null);
-      }}
-      menuActions={resolvedMenuActions}
-      hasContextMenu={supportsContextMenu}
-      isEditing={isEditing}
-      onContextMenuSelect={handleContextMenuSelect}
-    >
-      <div
-        ref={(node) => setRowRef(entry.id, node)}
-        className={cn(
-          EXPLORER_ROW_BASE_CLASS_NAME,
-          "group relative flex h-8 w-full cursor-pointer items-center rounded-[4px] px-2 text-left",
-          "hover:bg-[var(--sidebar-active-bg,#e7ebef)]",
-          isSelected && "bg-[var(--sidebar-active-bg,#e7ebef)]",
-        )}
-        role="button"
-        tabIndex={0}
-        onClick={(e) => {
-          // 右クリック由来の click を無視（SidebarTreeRow と契約を揃える）
-          if (e.defaultPrevented) return;
+    <div className="h-full overflow-y-auto py-1">
+      {entries.map((entry) => (
+        <RootFolderPanelRow
+          key={`${entry.kind}:${entry.id}`}
+          entry={entry}
+          selectedFolderId={selectedFolderId}
+          selectedItem={selectedItem}
+          selectedCardSetId={selectedCardSetId}
+          openRowMenuId={openRowMenuId}
+          setRowRef={setRowRef}
+          setOpenRowMenuId={setOpenRowMenuId}
+          onSelectFolder={onSelectFolder}
+          onItemSelect={onItemSelect}
+          handleCreateFolderAction={handleCreateFolderAction}
+          handleCreateCardSetAction={handleCreateCardSetAction}
+          handleDelete={handleDelete}
+          setEditingId={setEditingId}
+          setEditingName={setEditingName}
+          renameCancelledRef={renameCancelledRef}
+          editingId={editingId}
+          editingName={editingName}
+          editingNameRef={editingNameRef}
+          handleRenameConfirm={handleRenameConfirm}
+          attachInputRef={attachInputRef}
+        />
+      ))}
 
-          handleSelect();
-        }}
-        onKeyDown={(e) => {
-          if (isEditing || isMenuOpen) return;
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            handleSelect();
-          }
-        }}
-      >
-        <div className={EXPLORER_ROW_CONTENT_CLASS}>
-          <span className={EXPLORER_ROW_ICON_SLOT_CLASS}>
-            <Icon
-              className={cn(
-                "sidebar-icon",
-                FOLDER_ROW_ICON_SIZE_CLASS,
-                isSelected
-                  ? FOLDER_ROW_ICON_ACTIVE_CLASS
-                  : FOLDER_ROW_ICON_MUTED_CLASS,
-              )}
-            />
-          </span>
-
-          {isEditing ? (
-            <input
-              ref={attachInputRef}
-              className={EXPLORER_ROW_INPUT_CLASS}
-              style={{ userSelect: "text", WebkitUserSelect: "text" }}
-              value={editingName}
-              onFocus={(e) => {
-                e.currentTarget.select();
-              }}
-              onMouseUp={(e) => {
-                e.preventDefault();
-              }}
-              onChange={(e) => {
-                const nextName = e.target.value;
-                editingNameRef.current = nextName;
-                setEditingName(nextName);
-              }}
-              onClick={(e) => e.stopPropagation()}
-              onPointerDown={(e) => e.stopPropagation()}
-              onKeyDown={(e) => {
-                e.stopPropagation();
-                const isComposing =
-                  e.nativeEvent.isComposing || e.keyCode === 229;
-
-                if (e.key === "Enter" && isComposing) return;
-
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  editingNameRef.current = e.currentTarget.value;
-                  void handleRenameConfirm({
-                    id: entry.id,
-                    type: entry.kind,
-                  });
-                  return;
-                }
-
-                if (e.key === "Escape") {
-                  e.preventDefault();
-                  renameCancelledRef.current = true;
-                  setEditingId(null);
-                  setEditingName("");
-                }
-              }}
-              onBlur={(e) => {
-                editingNameRef.current = e.currentTarget.value;
-                void handleRenameConfirm({
-                  id: entry.id,
-                  type: entry.kind,
-                });
-              }}
-            />
-          ) : (
-            <div className={EXPLORER_ROW_TITLE_SLOT_CLASS}>
-              <ExplorerRowContent
-                title={entry.name}
-                titleClassName={cn(
-                  FOLDER_ROW_TITLE_CLASS,
-                  isSelected ? "font-medium" : "font-normal",
-                )}
-              />
-            </div>
-          )}
+      {entries.length === 0 && emptyMessage ? (
+        <div className="px-2 py-2 font-normal text-sm text-muted-foreground">
+          {emptyMessage}
         </div>
-      </div>
-    </SidebarTreeRow>
+      ) : null}
+    </div>
   );
 };

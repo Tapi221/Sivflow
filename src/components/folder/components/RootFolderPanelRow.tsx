@@ -56,6 +56,12 @@ interface RootFolderPanelRowProps {
   attachInputRef: (node: HTMLInputElement | null) => void;
 }
 
+const hasSelectedItemId = (
+  item: SelectedExplorerItem,
+): item is Extract<SelectedExplorerItem, { id: string }> => {
+  return item !== null && "id" in item;
+};
+
 export const RootFolderPanelRow = ({
   entry,
   selectedFolderId,
@@ -82,6 +88,7 @@ export const RootFolderPanelRow = ({
     entry.kind === "folder" ||
     entry.kind === "cardSet" ||
     entry.kind === "document";
+
   const menuId = supportsContextMenu ? `${entry.kind}:${entry.id}:panel` : null;
   const isEditing = supportsContextMenu && editingId === entry.id;
   const isMenuOpen = menuId !== null && openRowMenuId === menuId;
@@ -91,8 +98,12 @@ export const RootFolderPanelRow = ({
       ? selectedFolderId === entry.id
       : entry.kind === "cardSet"
         ? selectedCardSetId === entry.id ||
-          (selectedItem?.type === "cardSet" && selectedItem.id === entry.id)
-        : selectedItem?.type === entry.kind && selectedItem.id === entry.id;
+          (hasSelectedItemId(selectedItem) &&
+            selectedItem.type === "cardSet" &&
+            selectedItem.id === entry.id)
+        : hasSelectedItemId(selectedItem) &&
+          selectedItem.type === entry.kind &&
+          selectedItem.id === entry.id;
 
   const Icon =
     entry.kind === "folder"
@@ -227,9 +238,7 @@ export const RootFolderPanelRow = ({
         role="button"
         tabIndex={0}
         onClick={(e) => {
-          // 右クリック由来の click を無視（SidebarTreeRow と契約を揃える）
           if (e.defaultPrevented) return;
-
           handleSelect();
         }}
         onKeyDown={(e) => {
