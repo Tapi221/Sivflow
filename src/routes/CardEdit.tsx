@@ -1,6 +1,9 @@
 import { CardEditorPane } from "@/components/folder/panes/CardEditorPane";
 import { Button } from "@/components/ui/button";
-import { createPageUrl } from "@/platform/web/navigation/toWebPath";
+import {
+  createAppDestination,
+  createPageUrl,
+} from "@/platform/web/navigation/toWebPath";
 import { ArrowLeft } from "@/ui/icons";
 import { useCallback, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -60,12 +63,25 @@ const CardEdit = () => {
       safeNavigate(createPageUrl("Calendar"));
     } else if (shouldReturnToCardSetView) {
       safeNavigate(
-        `/CardSetView?folderId=${targetFolderId}${cardId ? `&cardId=${cardId}` : ""}`,
+        createPageUrl(
+          createAppDestination("cardSetView", {
+            folderId: targetFolderId,
+            ...(cardId ? { cardId } : {}),
+          }),
+        ),
       );
     } else if (shouldReturnToStudy) {
-      safeNavigate(`/study?folderId=${targetFolderId}`);
+      safeNavigate(
+        createPageUrl(
+          createAppDestination("studyMode", { folderId: targetFolderId }),
+        ),
+      );
     } else {
-      safeNavigate(`/Folders?folderId=${targetFolderId}`);
+      safeNavigate(
+        createPageUrl(
+          createAppDestination("folders", { folderId: targetFolderId }),
+        ),
+      );
     }
   }, [
     safeNavigate,

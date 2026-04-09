@@ -1,5 +1,15 @@
 import { asRecord } from "@/shared/lib/records";
 
+const normalizeEpochNumber = (value: number): Date | null => {
+  if (!Number.isFinite(value)) return null;
+
+  const absolute = Math.abs(value);
+  const epochMillis = absolute < 1e12 ? value * 1000 : value;
+  const date = new Date(epochMillis);
+
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
 export const normalizeDate = (value: unknown): Date | null => {
   if (value === null || value === undefined) return null;
 
@@ -35,22 +45,20 @@ export const normalizeDate = (value: unknown): Date | null => {
   }
 
   if (typeof value === "number") {
-    const date = new Date(value);
-    return Number.isNaN(date.getTime()) ? null : date;
+    return normalizeEpochNumber(value);
   }
 
   if (typeof value === "string") {
     const trimmed = value.trim();
     if (!trimmed) return null;
 
+    if (/^-?\d{10,13}$/.test(trimmed)) {
+      const numeric = Number(trimmed);
+      return normalizeEpochNumber(numeric);
+    }
+
     const direct = new Date(trimmed);
     if (!Number.isNaN(direct.getTime())) return direct;
-
-    const numeric = Number(trimmed);
-    if (Number.isFinite(numeric)) {
-      const date = new Date(numeric);
-      return Number.isNaN(date.getTime()) ? null : date;
-    }
   }
 
   return null;

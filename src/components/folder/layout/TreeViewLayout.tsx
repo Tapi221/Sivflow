@@ -9,7 +9,10 @@ import { useDocuments } from "@/hooks/platform/useDocuments";
 import { resolveCardTagNames, useTags } from "@/hooks/settings/useTags";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { cn } from "@/lib/utils";
-import { createPageUrl } from "@/platform/web/navigation/toWebPath";
+import {
+  createAppDestination,
+  createPageUrl,
+} from "@/platform/web/navigation/toWebPath";
 import type {
   Card,
   CardSet,
@@ -111,11 +114,14 @@ const TreeViewLayout = ({
           setSelectedCardSetId(item.id);
           setSelectedCardSetLabel(cardSet.name || "無題のセット");
 
-          const query = new URLSearchParams();
-          query.set("cardSetId", item.id);
-          if (cardSet.folderId) query.set("folderId", cardSet.folderId);
-
-          navigate(createPageUrl(`CardSetView?${query.toString()}`));
+          navigate(
+            createPageUrl(
+              createAppDestination("cardSetView", {
+                cardSetId: item.id,
+                ...(cardSet.folderId ? { folderId: cardSet.folderId } : {}),
+              }),
+            ),
+          );
         }
         return;
       }
@@ -307,10 +313,14 @@ const TreeViewLayout = ({
       setSelectedCardSetLabel(cardSetName || "無題のセット");
       setExplorerTab("explorer");
 
-      const query = new URLSearchParams();
-      query.set("cardSetId", cardSetId);
-      query.set("folderId", folderId);
-      navigate(createPageUrl(`CardSetView?${query.toString()}`));
+      navigate(
+        createPageUrl(
+          createAppDestination("cardSetView", {
+            cardSetId,
+            folderId,
+          }),
+        ),
+      );
     },
     [addRecent, navigate, onFolderSelect, setExplorerTab],
   );

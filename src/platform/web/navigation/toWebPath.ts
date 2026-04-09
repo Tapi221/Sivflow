@@ -21,16 +21,24 @@ const WEB_SCREEN_PATHS: Record<AppScreen, string> = {
 };
 
 export const toWebPath = (destination: AppDestination): string => {
+  const query = destination.params
+    ? new URLSearchParams(destination.params).toString()
+    : "";
+
   if (destination.kind === "screen") {
     const basePath = WEB_SCREEN_PATHS[destination.screen];
-    return destination.query ? `${basePath}?${destination.query}` : basePath;
+    return query ? `${basePath}?${query}` : basePath;
   }
 
-  return destination.query
-    ? `/${destination.sourceName}?${destination.query}`
+  return query
+    ? `/${destination.sourceName}?${query}`
     : `/${destination.sourceName.toLowerCase()}`;
 };
 
-export const createPageUrl = (pageName: string): string => {
-  return toWebPath(resolveAppDestination(pageName));
+export const createPageUrl = (page: string | AppDestination): string => {
+  return toWebPath(
+    typeof page === "string" ? resolveAppDestination(page) : page,
+  );
 };
+
+export { createAppDestination } from "@/navigation/core/destination";

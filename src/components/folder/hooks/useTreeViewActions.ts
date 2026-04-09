@@ -1,5 +1,8 @@
 import { useCallback } from "react";
-import { createPageUrl } from "@/platform/web/navigation/toWebPath";
+import {
+  createAppDestination,
+  createPageUrl,
+} from "@/platform/web/navigation/toWebPath";
 
 interface UseTreeViewActionsParams {
   navigate: (to: string) => void;
@@ -26,17 +29,29 @@ export const useTreeViewActions = ({
 
   const handleStartStudy = useCallback(() => {
     if (!selectedFolderId) return;
-    navigate(createPageUrl(`StudyMode?folderId=${selectedFolderId}`));
+    navigate(
+      createPageUrl(
+        createAppDestination("studyMode", { folderId: selectedFolderId }),
+      ),
+    );
   }, [navigate, selectedFolderId]);
 
   const handleViewCards = useCallback(() => {
     if (!selectedFolderId) return;
-    navigate(createPageUrl(`CardSetView?folderId=${selectedFolderId}`));
+    navigate(
+      createPageUrl(
+        createAppDestination("cardSetView", { folderId: selectedFolderId }),
+      ),
+    );
   }, [navigate, selectedFolderId]);
 
   const handleOpenCreateCard = useCallback(() => {
     if (!selectedFolderId) return;
-    navigate(createPageUrl(`CardEdit?folderId=${selectedFolderId}`));
+    navigate(
+      createPageUrl(
+        createAppDestination("cardEdit", { folderId: selectedFolderId }),
+      ),
+    );
   }, [navigate, selectedFolderId]);
 
   return {

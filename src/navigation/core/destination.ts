@@ -17,14 +17,29 @@ export type AppDestination =
   | {
       kind: "screen";
       screen: AppScreen;
-      query?: string;
+      params?: Record<string, string>;
       sourceName: string;
     }
   | {
       kind: "unknown";
       sourceName: string;
-      query?: string;
+      params?: Record<string, string>;
     };
+
+const parseQueryParams = (query: string | undefined) => {
+  if (!query) return undefined;
+
+  const params = Object.fromEntries(new URLSearchParams(query).entries());
+  return Object.keys(params).length > 0 ? params : undefined;
+};
+
+const splitPageName = (pageName: string) => {
+  const [sourceName, ...queryParts] = pageName.split("?");
+  return {
+    sourceName,
+    query: queryParts.length > 0 ? queryParts.join("?") : undefined,
+  };
+};
 
 const PAGE_NAME_ALIASES: Record<string, AppScreen> = {
   Dashboard: "folders",
@@ -54,15 +69,15 @@ const PAGE_NAME_ALIASES: Record<string, AppScreen> = {
 };
 
 export const resolveAppDestination = (pageName: string): AppDestination => {
-  const [sourceName, ...queryParts] = pageName.split("?");
-  const query = queryParts.length > 0 ? queryParts.join("?") : undefined;
+  const { sourceName, query } = splitPageName(pageName);
   const screen = PAGE_NAME_ALIASES[sourceName];
+  const params = parseQueryParams(query);
 
   if (screen) {
     return {
       kind: "screen",
       screen,
-      query,
+      params,
       sourceName,
     };
   }
@@ -70,6 +85,29 @@ export const resolveAppDestination = (pageName: string): AppDestination => {
   return {
     kind: "unknown",
     sourceName,
-    query,
+    params,
+  };
+};
+
+export const createAppDestination = (
+  screen: AppScreen,
+  params?: Record<string, string | number | boolean | null | undefined>,
+): AppDestination => {
+  const normalizedParams = params
+    ? Object.fromEntries(
+        Object.entries(params)
+          .filter(([, value]) => value !== undefined && value !== null)
+          .map(([key, value]) => [key, String(value)]),
+      )
+    : undefined;
+
+  return {
+    kind: "screen",
+    screen,
+    sourceName: screen,
+    params:
+      normalizedParams && Object.keys(normalizedParams).length > 0
+        ? normalizedParams
+        : undefined,
   };
 };

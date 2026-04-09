@@ -1,5 +1,9 @@
 import { normalizeFolderWithSilent } from "@/domain/folder/normalizers/normalizeFolder";
-import { normalizeInkDocument } from "@/components/ink/inkTypes";
+import {
+  resolveBlocksFromCardData,
+  resolveExtraRowsFromCardData,
+  resolveInkFromCardData,
+} from "@/domain/card/normalizers/cardShape";
 
 export { normalizeFolderWithSilent };
 
@@ -54,75 +58,24 @@ export const denormalizeCardForStorage = (card: unknown) => {
     });
   };
 
-  const resolveBlocks = (
-    value: Record<string, unknown>,
-    side: "question" | "answer",
-  ) => {
-    const legacyKey = side === "question" ? "questionBlocks" : "answerBlocks";
-    const aliasKey = side === "question" ? "frontBlocks" : "backBlocks";
-    const faceKey = side === "question" ? "front" : "back";
-    const face = value[faceKey];
-    if (
-      face &&
-      typeof face === "object" &&
-      Array.isArray((face as { blocks?: unknown[] }).blocks)
-    ) {
-      return (face as { blocks: unknown[] }).blocks;
-    }
-    if (Array.isArray(value[aliasKey])) return value[aliasKey] as unknown[];
-    if (Array.isArray(value[legacyKey])) return value[legacyKey] as unknown[];
-    return [];
-  };
-
-  const resolveInk = (
-    value: Record<string, unknown>,
-    side: "question" | "answer",
-  ) => {
-    const legacyKey = side === "question" ? "inkQuestion" : "inkAnswer";
-    const faceKey = side === "question" ? "front" : "back";
-    const face = value[faceKey];
-    const faceInk =
-      face && typeof face === "object"
-        ? (face as { ink?: unknown }).ink
-        : undefined;
-    const doc = normalizeInkDocument(faceInk ?? value[legacyKey] ?? null);
-    return doc.strokes.length > 0 ? doc : null;
-  };
-
-  const resolveExtraRows = (
-    value: Record<string, unknown>,
-    side: "question" | "answer",
-  ) => {
-    const legacyKey =
-      side === "question" ? "questionExtraRows" : "answerExtraRows";
-    const snakeKey =
-      side === "question" ? "question_extra_rows" : "answer_extra_rows";
-    const faceKey = side === "question" ? "front" : "back";
-    const face = value[faceKey];
-    const faceExtraRows =
-      face && typeof face === "object"
-        ? (face as { extraRows?: unknown }).extraRows
-        : undefined;
-    const parsed = Number(
-      faceExtraRows ?? value[legacyKey] ?? value[snakeKey] ?? 0,
-    );
-    return Number.isFinite(parsed) ? Math.max(0, Math.round(parsed)) : 0;
-  };
-
-  const frontBlocks = sanitizeBlockImages(resolveBlocks(result, "question"));
-  const backBlocks = sanitizeBlockImages(resolveBlocks(result, "answer"));
+  const frontBlocks = sanitizeBlockImages(
+    resolveBlocksFromCardData(result, "question"),
+  );
+  const backBlocks = sanitizeBlockImages(
+    resolveBlocksFromCardData(result, "answer"),
+  );
 
   result.front = {
     ...(result.front && typeof result.front === "object" ? result.front : {}),
     blocks: frontBlocks,
-    ink: resolveInk(result, "question"),
-    extraRows: resolveExtraRows(result, "question"),
+    ink: resolveInkFromCardData(result, "question", { emptyInkAsNull: true }),
+    extraRows: resolveExtraRowsFromCardData(result, "question"),
   };
   result.back = {
     ...(result.back && typeof result.back === "object" ? result.back : {}),
     blocks: backBlocks,
-    ink: resolveInk(result, "answer"),
-    extraRows: resolveExtraRows(result, "answer"),
+    ink: resolveInkFromCardData(result, "answer", { emptyInkAsNull: true }),
+    extraRows: resolveExtraRowsFromCardData(result, "answer"),
   };
 
   delete result.questionBlocks;

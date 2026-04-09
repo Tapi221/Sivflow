@@ -1,10 +1,10 @@
-import { isGridOffsetType } from "@/components/card/frame/rowOffset";
-import { normalizeInkDocument } from "@/components/ink/inkTypes";
+import { isGridOffsetType } from "@/domain/card/blockOffset";
 import {
   LEGACY_BASE_LAYOUT_ROWS,
   normalizeExtraRows,
   normalizeLayoutRows,
 } from "@/domain/card/extraRows";
+import { normalizeInkDocument } from "@/domain/card/inkDocument";
 import { normalizeDate } from "@/shared/codec/date";
 import {
   toArrayOr,
