@@ -14,7 +14,12 @@ import { useDocuments } from "@/hooks/platform/useDocuments";
 import { useIsDesktopRuntime } from "@/hooks/platform/useIsDesktopRuntime";
 import { useSettingsQueryParam } from "@/hooks/settings/useSettingsQueryParam";
 import { cn } from "@/lib/utils";
-import type { DocumentItem } from "@/types";
+import type {
+  Card,
+  DocumentItem,
+  Folder,
+  SelectedExplorerItem,
+} from "@/types";
 import {
   startTransition,
   useCallback,
@@ -25,6 +30,26 @@ import {
   useState,
 } from "react";
 import { useSearchParams } from "react-router-dom";
+
+type CardSelectedItem = Extract<SelectedExplorerItem, { type: "card" }>;
+type DocumentSelectedItem = Extract<
+  SelectedExplorerItem,
+  { type: "document" }
+>;
+type RootSelectedItem = Extract<
+  SelectedExplorerItem,
+  { type: "directory" | "gallery" | "calendar" | "trash" }
+>;
+
+const createCardSelectedItem = (cardId: string): CardSelectedItem => ({
+  type: "card",
+  id: cardId,
+});
+
+const createDocumentSelectedItem = (docId: string): DocumentSelectedItem => ({
+  type: "document",
+  id: docId,
+});
 
 const Folders = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -73,7 +98,7 @@ const Folders = () => {
     [],
   );
 
-  const [selectedFolderId, setSelectedFolderId] = useState(() => {
+  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(() => {
     if (isHomeOnlyMode) return null;
     if (queryFolderId) return queryFolderId;
     return localStorage.getItem("folder_selectedFolderId_work") || null;
@@ -87,14 +112,15 @@ const Folders = () => {
     }
   }, [selectedFolderId]);
 
-  const [selectedItem, setSelectedItem] = useState(() => {
+  const [selectedItem, setSelectedItem] = useState<SelectedExplorerItem>(() => {
     if (isHomeOnlyMode) return null;
-    if (queryCardId) return { type: "card", id: queryCardId };
-    if (queryDocId) return { type: "document", id: queryDocId };
+    if (queryCardId) return createCardSelectedItem(queryCardId);
+    if (queryDocId) return createDocumentSelectedItem(queryDocId);
     return null;
   });
-  const selectedFolderIdRef = useRef(selectedFolderId);
-  const selectedItemRef = useRef(selectedItem);
+
+  const selectedFolderIdRef = useRef<string | null>(selectedFolderId);
+  const selectedItemRef = useRef<SelectedExplorerItem>(selectedItem);
 
   useEffect(() => {
     selectedFolderIdRef.current = selectedFolderId;
@@ -198,7 +224,7 @@ const Folders = () => {
         queryCardId &&
         (selectedItem?.type !== "card" || selectedItem.id !== queryCardId)
       ) {
-        setSelectedItem({ type: "card", id: queryCardId });
+        setSelectedItem(createCardSelectedItem(queryCardId));
         return;
       }
 
@@ -206,7 +232,7 @@ const Folders = () => {
         queryDocId &&
         (selectedItem?.type !== "document" || selectedItem.id !== queryDocId)
       ) {
-        setSelectedItem({ type: "document", id: queryDocId });
+        setSelectedItem(createDocumentSelectedItem(queryDocId));
         return;
       }
 
@@ -252,6 +278,21 @@ const Folders = () => {
   const { cards = [], loading: cardsLoading } = useCards();
   const { documents = [] } = useDocuments();
 
+  const normalizedFolders = useMemo<Folder[]>(
+    () =>
+      folders.map((folder) => ({
+        ...folder,
+        parentFolderId:
+          typeof folder.parentFolderId === "string" ||
+          folder.parentFolderId === null
+            ? folder.parentFolderId
+            : null,
+        folderColor:
+          typeof folder.folderColor === "string" ? folder.folderColor : undefined,
+      })),
+    [folders],
+  );
+
   useEffect(() => {
     window.scrollTo(0, 0);
     if (isDesktop) {
@@ -285,26 +326,38 @@ const Folders = () => {
     [forceResetWorkspaceScroll, notifyMainSidebarFolderSelection],
   );
 
-  const handleSelectCardInWork = useCallback((cardId) => {
+  const handleSelectCardInWork = useCallback((cardId: string) => {
     const current = selectedItemRef.current;
     if (current?.type === "card" && current.id === cardId) return;
 
-    const nextItem = { type: "card", id: cardId };
+    const nextItem = createCardSelectedItem(cardId);
     setSelectedItem(nextItem);
     selectedItemRef.current = nextItem;
   }, []);
 
-  const handleSelectDocumentInWork = useCallback((docId) => {
+  const handleSelectDocumentInWork = useCallback((docId: string) => {
     const current = selectedItemRef.current;
     if (current?.type === "document" && current.id === docId) return;
 
-    const nextItem = { type: "document", id: docId };
+    const nextItem = createDocumentSelectedItem(docId);
     setSelectedItem(nextItem);
     selectedItemRef.current = nextItem;
   }, []);
 
+  const handleSelectRootItemInWork = useCallback(
+    (item: RootSelectedItem) => {
+      notifyMainSidebarFolderSelection(null);
+      setSelectedItem(item);
+      setSelectedFolderId(null);
+      setExplorerBreadcrumbContext(EMPTY_EXPLORER_BREADCRUMB_CONTEXT);
+      selectedFolderIdRef.current = null;
+      selectedItemRef.current = item;
+    },
+    [notifyMainSidebarFolderSelection],
+  );
+
   const handleSelectItemInWork = useCallback(
-    (item: { type: string; id?: string } | null) => {
+    (item: SelectedExplorerItem) => {
       if (!item) {
         if (selectedItemRef.current === null) return;
         setSelectedItem(null);
@@ -312,60 +365,42 @@ const Folders = () => {
         return;
       }
 
-      if (item.type === "card") {
-        handleSelectCardInWork(item.id);
-        return;
-      }
+      switch (item.type) {
+        case "card":
+          handleSelectCardInWork(item.id);
+          return;
 
-      if (item.type === "document") {
-        handleSelectDocumentInWork(item.id);
-        return;
-      }
+        case "document":
+          handleSelectDocumentInWork(item.id);
+          return;
 
-      if (item.type === "directory") {
-        notifyMainSidebarFolderSelection(null);
-        setSelectedItem({ type: "directory" });
-        setSelectedFolderId(null);
-        selectedFolderIdRef.current = null;
-        selectedItemRef.current = { type: "directory" };
-        return;
-      }
+        case "directory":
+        case "gallery":
+        case "calendar":
+        case "trash":
+          handleSelectRootItemInWork(item);
+          return;
 
-      if (item.type === "gallery") {
-        notifyMainSidebarFolderSelection(null);
-        setSelectedItem({ type: "gallery" });
-        setSelectedFolderId(null);
-        selectedFolderIdRef.current = null;
-        selectedItemRef.current = { type: "gallery" };
-        return;
-      }
+        case "settings":
+          setIsSettingsOpen(true);
+          return;
 
-      if (item.type === "calendar") {
-        notifyMainSidebarFolderSelection(null);
-        setSelectedItem({ type: "calendar" });
-        setSelectedFolderId(null);
-        selectedFolderIdRef.current = null;
-        selectedItemRef.current = { type: "calendar" };
-        return;
-      }
-
-      if (item.type === "settings") {
-        setIsSettingsOpen(true);
-        return;
-      }
-
-      if (item.type === "trash") {
-        notifyMainSidebarFolderSelection(null);
-        setSelectedItem({ type: "trash" });
-        setSelectedFolderId(null);
-        selectedFolderIdRef.current = null;
-        selectedItemRef.current = { type: "trash" };
+        case "cardSet":
+          if (
+            selectedItemRef.current?.type === "cardSet" &&
+            selectedItemRef.current.id === item.id
+          ) {
+            return;
+          }
+          setSelectedItem(item);
+          selectedItemRef.current = item;
+          return;
       }
     },
     [
       handleSelectCardInWork,
       handleSelectDocumentInWork,
-      notifyMainSidebarFolderSelection,
+      handleSelectRootItemInWork,
       setIsSettingsOpen,
     ],
   );
@@ -376,11 +411,11 @@ const Folders = () => {
     useBreadcrumbContext();
   const [navigateToSectionListToken, setNavigateToSectionListToken] =
     useState(0);
-  const foldersRef = useRef(folders);
+  const foldersRef = useRef<Folder[]>(normalizedFolders);
 
   useEffect(() => {
-    foldersRef.current = folders;
-  }, [folders]);
+    foldersRef.current = normalizedFolders;
+  }, [normalizedFolders]);
 
   useEffect(() => {
     registerFolderSelectHandler((folderId) => {
@@ -404,12 +439,18 @@ const Folders = () => {
   }, [registerFolderSelectHandler, notifyMainSidebarFolderSelection]);
 
   const folderById = useMemo(
-    () => new Map(folders.map((folder) => [folder.id, folder])),
-    [folders],
+    () =>
+      new Map<string, Folder>(
+        normalizedFolders.map((folder): [string, Folder] => [folder.id, folder]),
+      ),
+    [normalizedFolders],
   );
 
   const cardById = useMemo(
-    () => new Map(cards.map((card) => [card.id, card])),
+    () =>
+      new Map<string, Card>(
+        cards.map((card): [string, Card] => [card.id, card]),
+      ),
     [cards],
   );
 
@@ -417,7 +458,9 @@ const Folders = () => {
     const map = new Map<string, DocumentItem>();
     for (const documentItem of documents) {
       const key = documentItem.id || documentItem.documentId;
-      if (key) map.set(key, documentItem);
+      if (key) {
+        map.set(key, documentItem);
+      }
     }
     return map;
   }, [documents]);
@@ -481,9 +524,9 @@ const Folders = () => {
           </div>
         ) : (
           <TreeViewLayout
-            folders={folders}
+            folders={normalizedFolders}
             cards={cards}
-            documents={documents as DocumentItem[]}
+            documents={documents}
             selectedFolderId={selectedFolderId}
             selectedItem={selectedItem}
             selectedCardId={selectedCardId}

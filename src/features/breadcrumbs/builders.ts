@@ -1,18 +1,14 @@
 import { getCardText } from "@/domain/card/content";
-import type { Card, DocumentItem } from "@/types";
+import type {
+  Card,
+  DocumentItem,
+  Folder,
+  SelectedExplorerItem,
+} from "@/types";
 import type { CardSet } from "@/types/domain/cardSet";
 import type { BreadcrumbCrumb, ExplorerBreadcrumbContext } from "./types";
 
-type FolderLike = {
-  id: string;
-  folderName: string;
-  parentFolderId?: string | null;
-};
-
-type SelectedItemLike = {
-  type: string;
-  id?: string;
-} | null;
+type FolderLike = Pick<Folder, "id" | "folderName" | "parentFolderId">;
 
 const PAGE_LABELS: Record<string, string> = {
   folders: "フォルダ一覧",
@@ -153,7 +149,7 @@ export const buildExplorerBreadcrumbs = ({
 }: {
   selectedFolderId: string | null;
   explorerBreadcrumbContext: ExplorerBreadcrumbContext;
-  selectedItem: SelectedItemLike;
+  selectedItem: SelectedExplorerItem;
   folderById: Map<string, FolderLike>;
   cardById: Map<string, Card>;
   documentById: Map<string, DocumentItem>;
@@ -166,7 +162,7 @@ export const buildExplorerBreadcrumbs = ({
     folderById,
   });
 
-  if (selectedItem?.type === "card" && selectedItem.id) {
+  if (selectedItem?.type === "card") {
     const card = cardById.get(selectedItem.id);
     if (card) {
       const label =
@@ -175,7 +171,7 @@ export const buildExplorerBreadcrumbs = ({
         "カード";
       crumbs.push({ label });
     }
-  } else if (selectedItem?.type === "document" && selectedItem.id) {
+  } else if (selectedItem?.type === "document") {
     const documentItem = documentById.get(selectedItem.id);
     if (documentItem) {
       crumbs.push({

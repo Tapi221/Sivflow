@@ -8,6 +8,7 @@ import {
 } from "@/domain/card/extraRows";
 import { isGridOffsetType } from "@/components/card/frame/rowOffset";
 import type { Card, CardBlock } from "@/types/domain/card";
+import type { Folder } from "@/types/domain/folder";
 
 type UnknownRecord = Record<string, unknown>;
 
@@ -16,12 +17,18 @@ const asRecord = (v: unknown): UnknownRecord | null => {
 };
 
 const pick = (...vals: unknown[]): unknown => {
-  for (const v of vals) if (v !== undefined && v !== null) return v;
+  for (const v of vals) {
+    if (v !== undefined && v !== null) return v;
+  }
   return undefined;
 };
 
 const toStringOr = (v: unknown, fallback = ""): string => {
   return typeof v === "string" ? v : fallback;
+};
+
+const toOptionalString = (v: unknown): string | undefined => {
+  return typeof v === "string" ? v : undefined;
 };
 
 const toBoolOr = (v: unknown, fallback = false): boolean => {
@@ -105,11 +112,13 @@ const normalizeDate = (value: unknown): Date | null => {
   const rec = asRecord(value);
   if (rec && typeof rec.toDate === "function") {
     const d = (rec.toDate as () => unknown)();
-    return d instanceof Date && !isNaN(d.getTime()) ? d : null;
+    return d instanceof Date && !Number.isNaN(d.getTime()) ? d : null;
   }
 
   // Already a Date
-  if (value instanceof Date) return isNaN(value.getTime()) ? null : value;
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : value;
+  }
 
   // Firestore-like plain object timestamp
   if (rec) {
@@ -129,7 +138,7 @@ const normalizeDate = (value: unknown): Date | null => {
     if (seconds !== null) {
       const ms = seconds * 1000 + Math.floor(nanoseconds / 1e6);
       const d = new Date(ms);
-      return isNaN(d.getTime()) ? null : d;
+      return Number.isNaN(d.getTime()) ? null : d;
     }
   }
 
@@ -138,7 +147,7 @@ const normalizeDate = (value: unknown): Date | null => {
     // 10桁前後は "秒" の可能性が高い → ms に補正
     const ms = value < 1e12 ? value * 1000 : value;
     const d = new Date(ms);
-    return isNaN(d.getTime()) ? null : d;
+    return Number.isNaN(d.getTime()) ? null : d;
   }
 
   // ISO/date string（数値文字列も吸収）
@@ -151,11 +160,11 @@ const normalizeDate = (value: unknown): Date | null => {
       const n = Number(trimmed);
       const ms = n < 1e12 ? n * 1000 : n;
       const d = new Date(ms);
-      return isNaN(d.getTime()) ? null : d;
+      return Number.isNaN(d.getTime()) ? null : d;
     }
 
     const d = new Date(trimmed);
-    return isNaN(d.getTime()) ? null : d;
+    return Number.isNaN(d.getTime()) ? null : d;
   }
 
   // Fallback: unknown type → null（無効な時間値回避）
@@ -188,7 +197,9 @@ const normalizeReviewLogs = (rawLogs: unknown): NormalizedReviewLog[] => {
     return r as 1 | 2 | 3 | 4;
   };
 
-  const subjectiveScoreToRating = (n: number): 1 | 2 | 3 | 4 | null => {
+  const subjectiveScoreToRating = (
+    n: number,
+  ): 1 | 2 | 3 | 4 | null => {
     const rounded = Math.round(n);
     // Canonical subjectiveScore scale: 0..3 -> rating: 1..4
     if (rounded >= 0 && rounded <= 3) {
@@ -205,7 +216,7 @@ const normalizeReviewLogs = (rawLogs: unknown): NormalizedReviewLog[] => {
 
       const reviewed = normalizeDate(pick(log.reviewedAt, log.reviewed_at));
 
-      // ✅ rating が無いログを捨てない（subjectiveScore 系も拾う）
+      // rating が無いログを捨てない（subjectiveScore 系も拾う）
       const directRatingRaw = pickNumber(
         pick(log.rating, log.ratingNum, log.rating_num),
       );
@@ -292,8 +303,9 @@ export const extractTextFromBlocks = (blocks: unknown[]): string => {
     if (block.type === "code") {
       const codeObj = asRecord(block.code);
       const code = codeObj ? codeObj.code : undefined;
-      if (typeof code === "string" && code.trim())
+      if (typeof code === "string" && code.trim()) {
         return code.split("\n")[0].trim();
+      }
     }
   }
   return "";
@@ -325,7 +337,8 @@ const CARD_BLOCK_TYPES = new Set<CardBlock["type"]>([
 ]);
 
 const isCardBlockType = (value: unknown): value is CardBlock["type"] =>
-  typeof value === "string" && CARD_BLOCK_TYPES.has(value as CardBlock["type"]);
+  typeof value === "string" &&
+  CARD_BLOCK_TYPES.has(value as CardBlock["type"]);
 
 const resolveFallbackTextContent = (block: UnknownRecord): string => {
   if (typeof block.content === "string" && block.content.trim()) {
@@ -481,7 +494,7 @@ const normalizeCardBlock = (
 export const normalizeCard = (raw: unknown): Card => {
   const r = asRecord(raw) ?? {};
 
-  // ★ 変更: id が無い raw が来た時に undefined をばら撒かない
+  // id が無い raw が来た時に undefined をばら撒かない
   const id =
     toStringOr(pick(r.id, r.cardId, r.card_id), "") || makeFallbackId();
 
@@ -495,7 +508,6 @@ export const normalizeCard = (raw: unknown): Card => {
     LEGACY_BASE_LAYOUT_ROWS +
     Math.max(legacyQuestionExtraRows, legacyAnswerExtraRows);
 
-  // ✅ TS2345 対策：currentLevel を number に正規化してから使う
   const rawLevel = pick(r.currentLevel, r.current_level, r.level);
   const levelNum = toFiniteNumber(rawLevel, 0);
 
@@ -683,27 +695,20 @@ export const normalizeCard = (raw: unknown): Card => {
     layoutRows: normalizeLayoutRows(
       toFiniteNumber(pick(r.layoutRows, r.layout_rows), migratedLayoutRows),
     ),
-
-    // ✅ ここが修正点：levelNum を渡す
     memoryStability: normalizeMemoryStability(msNumFinite, levelNum),
     currentLevel: levelNum,
-
     nextReviewDate: normalizeDate(pick(r.nextReviewDate, r.next_review_date)),
     lastReviewAt: normalizeDate(pick(r.lastReviewAt, r.last_review_at)),
-
     lastSubjectiveScore: pick(r.lastSubjectiveScore, r.last_subjective_score),
     recoveryRemaining: pick(r.recoveryRemaining, r.recovery_remaining),
     lastReviewDelayDays: pick(r.lastReviewDelayDays, r.last_review_delay_days),
-
     createdAt: normalizeDate(pick(r.createdAt, r.created_at)) ?? new Date(),
     updatedAt: normalizeDate(pick(r.updatedAt, r.updated_at)) ?? new Date(),
-
     responseTimeMs: pick(r.responseTimeMs, r.response_time_ms),
     uncertaintyMarkedDate: normalizeDate(
       pick(r.uncertaintyMarkedDate, r.uncertainty_marked_date),
     ),
     completedDate: normalizeDate(pick(r.completedDate, r.completed_date)),
-
     tags: toArrayOr(r.tags, []),
     ...(Array.isArray(r.tagIds)
       ? {
@@ -724,36 +729,41 @@ export const normalizeCard = (raw: unknown): Card => {
  * フォルダデータを正規化する関数
  * snake_case / camelCase の差異を吸収し、削除状態を一貫して処理する
  */
-export const normalizeFolder = (raw: unknown) => {
+export const normalizeFolder = (raw: unknown): Folder => {
   const r = asRecord(raw) ?? {};
   const id =
     toStringOr(pick(r.id, r.folderId, r.folder_id), "") || makeFallbackId();
 
   const isDeleted = toBoolOr(pick(r.isDeleted, r.is_deleted), false);
 
-  // deletedAt: isDeleted=true なのに deletedAt がない場合は updatedAt で補完
   const rawDeletedAt = pick(r.deletedAt, r.deleted_at);
   let deletedAt: Date | null = null;
+
   if (rawDeletedAt) {
     deletedAt = normalizeDate(rawDeletedAt);
   } else if (isDeleted) {
-    // isDeleted=true だが deletedAt がない → updatedAt で推定補完
     deletedAt =
       normalizeDate(
         pick(r.updatedAt, r.updated_at, r.createdAt, r.created_at),
       ) ?? new Date(0);
   }
 
+  const rawParentFolderId = pick(r.parentFolderId, r.parent_folder_id, null);
+  const parentFolderId =
+    rawParentFolderId === null || typeof rawParentFolderId === "string"
+      ? rawParentFolderId
+      : null;
+
+  const rawFolderColor = pick(r.folderColor, r.folder_color);
+
   return {
     id,
     folderId: id,
     userId: toStringOr(pick(r.userId, r.user_id), ""),
     deviceId: toStringOr(pick(r.deviceId, r.device_id), ""),
-    parentFolderId: pick(r.parentFolderId, r.parent_folder_id, null) as
-      | string
-      | null,
+    parentFolderId,
     folderName: toStringOr(pick(r.folderName, r.folder_name), ""),
-    folderColor: pick(r.folderColor, r.folder_color, null),
+    folderColor: toOptionalString(rawFolderColor),
     orderIndex: toFiniteNumber(pick(r.orderIndex, r.order_index), 0),
     cloudSyncEnabled: toBoolOr(
       pick(r.cloudSyncEnabled, r.cloud_sync_enabled),
