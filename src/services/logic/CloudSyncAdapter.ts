@@ -542,7 +542,10 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
       {
         const snap = await getDocs(
           query(
-            collection(firestore, `users/${this.userId}/${CURRENT_TAG_COLLECTION}`),
+            collection(
+              firestore,
+              `users/${this.userId}/${CURRENT_TAG_COLLECTION}`,
+            ),
             where("id", "==", id),
           ),
         );
