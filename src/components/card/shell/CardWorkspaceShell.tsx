@@ -1,6 +1,7 @@
 import { CardPaneWidthAdjuster } from "@/features/cardsetview/hooks/components/CardPaneWidthAdjuster";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "@/ui/icons";
+import { overlayGlassIconButtonClassName } from "@/components/card/shell/overlaySurfaceClassNames";
 import type { CSSProperties, ReactNode, Ref } from "react";
 
 export type CardWorkspaceWidthControlProps = {
@@ -38,6 +39,7 @@ export type CardWorkspaceShellProps = {
   widthControlClassName?: string;
   topLeftControl?: ReactNode;
   overlayChildren?: ReactNode;
+  overlayTopInsetPx?: number;
   isMetaOpen: boolean;
   onToggleMetaOpen?: () => void;
   hideMetaToggle?: boolean;
@@ -59,6 +61,7 @@ export const CardWorkspaceShell = ({
   widthControlClassName,
   topLeftControl,
   overlayChildren,
+  overlayTopInsetPx = 0,
   isMetaOpen,
   onToggleMetaOpen,
   hideMetaToggle = false,
@@ -75,6 +78,9 @@ export const CardWorkspaceShell = ({
   const showMetaToggle =
     !hideMetaToggle && typeof onToggleMetaOpen === "function";
 
+  const topLeftOffsetPx = overlayTopInsetPx + 8;
+  const topRightOffsetPx = overlayTopInsetPx + 12;
+
   return (
     <div className={cn(containerClassName)}>
       <div
@@ -84,7 +90,10 @@ export const CardWorkspaceShell = ({
         )}
       >
         {topLeftControl ? (
-          <div className="pointer-events-auto absolute left-3 top-2 z-30 flex">
+          <div
+            className="pointer-events-auto absolute left-3 z-30 flex"
+            style={{ top: `${topLeftOffsetPx}px` }}
+          >
             {topLeftControl}
           </div>
         ) : null}
@@ -92,9 +101,10 @@ export const CardWorkspaceShell = ({
         {widthControl ? (
           <div
             className={cn(
-              "pointer-events-auto absolute left-3 top-2 z-30 flex",
+              "pointer-events-auto absolute left-3 z-30 flex",
               widthControlClassName,
             )}
+            style={{ top: `${topLeftOffsetPx}px` }}
           >
             <CardPaneWidthAdjuster
               modeLabel={widthControl.modeLabel}
@@ -117,10 +127,12 @@ export const CardWorkspaceShell = ({
           <button
             type="button"
             className={cn(
-              "absolute top-3 z-20 grid h-8 w-8 place-items-center rounded-full bg-[var(--sidebar-bg)] text-[#334155] surface-control-convex hover:bg-[var(--sidebar-active-bg)]",
+              "absolute z-20",
+              overlayGlassIconButtonClassName,
               metaToggleClassName,
             )}
             style={{
+              top: `${topRightOffsetPx}px`,
               right: isMetaOpen
                 ? "calc(var(--ui-panel-width) - var(--ui-space-3))"
                 : "var(--ui-space-1)",

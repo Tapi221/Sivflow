@@ -28,6 +28,7 @@ type CardSetViewOverlayControlsProps = {
   onRetryActiveSync: () => void;
   onChangeDisplayMode: (mode: CardDisplayMode) => void;
   onSaveCurrentDisplayMode: () => void;
+  topInsetPx?: number;
 };
 
 export const CardSetViewOverlayControls = ({
@@ -40,6 +41,7 @@ export const CardSetViewOverlayControls = ({
   onRetryActiveSync,
   onChangeDisplayMode,
   onSaveCurrentDisplayMode,
+  topInsetPx = 0,
 }: CardSetViewOverlayControlsProps) => {
   if (!isDesktop) {
     return null;
@@ -91,8 +93,9 @@ export const CardSetViewOverlayControls = ({
 
   return (
     <div
-      className="pointer-events-none absolute top-3 z-20 flex items-center gap-2"
+      className="pointer-events-none absolute z-20 flex items-center gap-2"
       style={{
+        top: `${topInsetPx + 12}px`,
         right: overlayRight,
         transform: "none",
       }}

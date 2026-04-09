@@ -6,6 +6,8 @@ import { CardSetViewMetaPanel } from "@/features/cardsetview/presentation/web/ui
 import { CardSetViewMobile } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewMobile";
 import { CardSetViewOverlayControls } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewOverlayControls";
 
+const TITLEBAR_HEIGHT_PX = 36;
+
 export const CardSetViewScreen = () => {
   const {
     folderId,
@@ -33,6 +35,8 @@ export const CardSetViewScreen = () => {
     );
   }
 
+  const desktopOverlayTopInsetPx = isDesktop ? TITLEBAR_HEIGHT_PX : 0;
+
   const overlayChildren = (
     <CardSetViewOverlayControls
       isDesktop={isDesktop}
@@ -44,6 +48,7 @@ export const CardSetViewScreen = () => {
       onRetryActiveSync={state.handleRetryActiveSync}
       onChangeDisplayMode={state.setCurrentDisplayMode}
       onSaveCurrentDisplayMode={handleSaveCurrentDisplayMode}
+      topInsetPx={desktopOverlayTopInsetPx}
     />
   );
 
@@ -69,6 +74,7 @@ export const CardSetViewScreen = () => {
       widthControlClassName="hidden md:flex"
       topLeftControl={topLeftControl}
       overlayChildren={overlayChildren}
+      overlayTopInsetPx={desktopOverlayTopInsetPx}
       isMetaOpen={state.isMetaOpen}
       onToggleMetaOpen={() => state.setIsMetaOpen((prev) => !prev)}
       metaToggleClassName="hidden md:grid"
