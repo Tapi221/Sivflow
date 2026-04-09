@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 const CARD_EDIT_FOLDER_ID_KEY = "card-edit:folder-id";
+const TITLEBAR_HEIGHT_PX = 36;
 
 const CardEdit = () => {
   const navigate = useNavigate();
@@ -76,24 +77,27 @@ const CardEdit = () => {
   ]);
 
   return (
-    <div className="h-screen flex flex-col bg-[#F5F7F8] text-slate-800">
-      <div className="flex-shrink-0 max-w-[1400px] w-full mx-auto px-0 md:pt-8 md:px-4">
-        <div
-          className="flex items-center mb-1 px-4 md:px-0"
-          style={{ paddingTop: "var(--ui-safe-area-top-offset)" }}
-        >
-          <Button variant="ghost" size="icon" onClick={handleCardUpdated}>
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
+    <div className="relative h-full min-h-0 bg-[#F5F7F8] text-slate-800">
+      <div
+        className="pointer-events-none absolute inset-x-0 z-30 hidden md:block"
+        style={{ top: `${TITLEBAR_HEIGHT_PX + 12}px` }}
+      >
+        <div className="mx-auto flex max-w-[1400px] px-4">
+          <div className="pointer-events-auto">
+            <Button variant="ghost" size="icon" onClick={handleCardUpdated}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 max-w-[1400px] w-full mx-auto px-0 md:px-4">
+      <div className="h-full min-h-0 max-w-[1400px] w-full mx-auto px-0 md:px-4">
         <CardEditorPane
           selectedCardId={cardId ?? "__new__"}
           folderId={targetFolderId}
           autoEdit={!!cardId}
           onCardUpdated={handleCardUpdated}
+          overlayTopInsetPx={TITLEBAR_HEIGHT_PX}
           presentationContext={{
             isCurrentCard: true,
             isStandaloneEditor: true,

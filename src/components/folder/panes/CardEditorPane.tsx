@@ -71,6 +71,7 @@ interface CardEditorPaneProps {
   presentationContext?: CardPresentationContextInput;
   showResizeHandle?: boolean;
   onSyncStatusChange?: (status: CardSyncStatus | null) => void;
+  overlayTopInsetPx?: number;
 }
 
 type FlashcardCardLike = Record<string, unknown> & {
@@ -322,6 +323,7 @@ export const CardEditorPane = ({
   presentationContext,
   showResizeHandle: showResizeHandleProp = true,
   onSyncStatusChange,
+  overlayTopInsetPx = 0,
 }: CardEditorPaneProps) => {
   const controller = useCardEditorPaneController({
     selectedCardId,
@@ -699,8 +701,9 @@ export const CardEditorPane = ({
 
   const syncStatusOverlay = !embeddedInPager ? (
     <div
-      className="pointer-events-none absolute top-3 z-20 flex"
+      className="pointer-events-none absolute z-20 flex"
       style={{
+        top: `${overlayTopInsetPx + 12}px`,
         right: syncStatusRight,
         transform: "none",
       }}
@@ -732,6 +735,7 @@ export const CardEditorPane = ({
           )}
           widthControl={widthControlProps}
           overlayChildren={syncStatusOverlay}
+          overlayTopInsetPx={overlayTopInsetPx}
           isMetaOpen={isMetaOpen}
           onToggleMetaOpen={hideMetaPanel ? undefined : actions.toggleMetaOpen}
           hideMetaToggle={hideMetaPanel}
