@@ -25,7 +25,12 @@ describe("parseImportRows", () => {
             { type: "text", order: 1, content: "表面", language: undefined },
           ],
           backBlocks: [
-            { type: "markdown", order: 1, content: "裏面", language: undefined },
+            {
+              type: "markdown",
+              order: 1,
+              content: "裏面",
+              language: undefined,
+            },
           ],
         },
       ],

@@ -4,7 +4,7 @@ import {
   type FlashcardCardLike,
 } from "@/components/card/frame/Flashcard";
 import { MobileScalableCard } from "@/components/card/frame/MobileScalableCard";
-import { CardCarousel3D } from "@/features/review/CardCarousel3D";
+import { CardCarousel3D } from "@/features/review/presentation/web/ui/components/CardCarousel3D";
 import type { Card, UserSettings } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 import { useCallback, type ReactNode } from "react";

@@ -328,7 +328,9 @@ const buildRowBlock = ({
       order: parsedOrder,
       content: rowCellMap.content,
       language:
-        normalizedType === "code" ? rowCellMap.language || undefined : undefined,
+        normalizedType === "code"
+          ? rowCellMap.language || undefined
+          : undefined,
     },
     issues,
   };
@@ -375,7 +377,11 @@ export const parseImportRows = ({
       continue;
     }
 
-    const { side, block, issues: rowIssues } = buildRowBlock({
+    const {
+      side,
+      block,
+      issues: rowIssues,
+    } = buildRowBlock({
       rowNumber,
       sheetName,
       rowCellMap,

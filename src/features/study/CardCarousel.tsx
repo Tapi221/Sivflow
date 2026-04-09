@@ -1,9 +1,21 @@
 import type { ComponentProps } from "react";
-import { CardCarousel3D } from "@/features/review/CardCarousel3D";
+import {
+  CARD_BASE_WIDTH,
+  CARD_DISPLAY_SCALE,
+  CARD_SAFE_PADDING_PX,
+} from "@/components/card/common/constants";
+import {
+  Flashcard,
+  type FlashcardCardLike,
+} from "@/components/card/frame/Flashcard";
+import { MobileScalableCard } from "@/components/card/frame/MobileScalableCard";
+import { CardCarousel3D } from "@/features/review/presentation/web/ui/components/CardCarousel3D";
 import StudyCard from "./StudyCard";
 import type { Card } from "@/types";
 
 type StudyCardProps = ComponentProps<typeof StudyCard>;
+
+const CARD_DISPLAY_WIDTH = Math.round(CARD_BASE_WIDTH * CARD_DISPLAY_SCALE);
 
 type CardCarouselProps = {
   cards: Card[];
@@ -41,6 +53,18 @@ export const CardCarousel = ({
           showHard={showHard}
           showEasy={showEasy}
         />
+      )}
+      renderPreview={(card) => (
+        <MobileScalableCard
+          cardDesignWidth={CARD_DISPLAY_WIDTH}
+          safePadding={CARD_SAFE_PADDING_PX}
+        >
+          <Flashcard
+            card={card as unknown as FlashcardCardLike}
+            isFlipped={false}
+            previewMode={true}
+          />
+        </MobileScalableCard>
       )}
     />
   );
