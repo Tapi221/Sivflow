@@ -40,12 +40,13 @@ const Layout = () => {
 
   return (
     <div
-      className={cn(
-        "relative flex flex-col h-[100dvh] w-full overflow-hidden",
-        UI_TYPO,
-      )}
+      className={cn("relative flex h-[100dvh] w-full overflow-hidden", UI_TYPO)}
     >
-      <TitleBar />
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-[9999]">
+        <div className="pointer-events-auto">
+          <TitleBar />
+        </div>
+      </div>
 
       <div
         className={cn(
@@ -65,7 +66,9 @@ const Layout = () => {
       <LocalDBStatusBanner />
       <SecurityAlertBanner />
 
-      <AppLayout />
+      <div className="min-h-0 flex-1">
+        <AppLayout />
+      </div>
     </div>
   );
 };

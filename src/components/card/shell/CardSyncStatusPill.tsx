@@ -1,9 +1,7 @@
 import React from "react";
 
 import { cn } from "@/lib/utils";
-import {
-  overlayGlassPillClassName,
-} from "@/components/card/shell/overlaySurfaceClassNames";
+import { overlayGlassPillClassName } from "@/components/card/shell/overlaySurfaceClassNames";
 import { RefreshCw } from "@/ui/icons";
 
 interface CardSyncStatusPillProps {
