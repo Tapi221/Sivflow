@@ -21,10 +21,17 @@ export const TitleBar: React.FC = () => {
   const [isMaximized, setIsMaximized] = useState(false);
   const [isCardSetViewEditing, setIsCardSetViewEditing] = useState(false);
   const isDesktop = isDesktopRuntime();
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   const crumbs = useBreadcrumbs();
   const { extraCrumbs, notifyFolderSelect } = useBreadcrumbContext();
   const isCardSetViewPage = pathname.toLowerCase().startsWith("/cardsetview");
+
+  const shouldUseGlassBreadcrumb = useMemo(() => {
+    if (!isCardSetViewPage) return false;
+
+    const searchParams = new URLSearchParams(search);
+    return Boolean(searchParams.get("cardSetId"));
+  }, [isCardSetViewPage, search]);
 
   useEffect(() => {
     if (!isDesktop) return;
@@ -66,20 +73,24 @@ export const TitleBar: React.FC = () => {
 
   return (
     <div
-      className={cn(
-        "flex h-[36px] w-full shrink-0 select-none items-center justify-between border-b border-gray-200/60 bg-[#F8FAFB] text-sm text-gray-700",
-      )}
+      className="flex h-[36px] w-full shrink-0 select-none items-center justify-between border-b border-gray-200/60 bg-[#F8FAFB] text-sm text-gray-700"
       style={{ WebkitAppRegion: "drag", zIndex: 9999 } as React.CSSProperties}
     >
       <div
-        className="flex h-full items-center gap-1 px-4"
+        className="flex h-full min-w-0 items-center gap-2 px-4"
         style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
       >
-        <span className="mr-3 text-xs font-semibold tracking-wide text-gray-500">
+        <span className="mr-2 shrink-0 text-xs font-semibold tracking-wide text-gray-500">
           Manifolia
         </span>
 
-        <nav className="flex items-center gap-1 overflow-hidden text-xs text-gray-400">
+        <nav
+          className={cn(
+            "flex min-w-0 items-center gap-1 overflow-hidden text-xs text-gray-400 transition-all",
+            shouldUseGlassBreadcrumb &&
+              "surface-floating-strong h-[28px] rounded-full px-3 text-gray-500",
+          )}
+        >
           {allCrumbs.map((crumb, index) => {
             const hasFolderId = "folderId" in crumb;
             const isSectionListCrumb = crumb.to === "/folders" && !hasFolderId;
@@ -95,13 +106,25 @@ export const TitleBar: React.FC = () => {
                 }:${index}`}
               >
                 {index > 0 && (
-                  <span className="select-none text-gray-300">/</span>
+                  <span
+                    className={cn(
+                      "select-none",
+                      shouldUseGlassBreadcrumb ? "text-gray-300/90" : "text-gray-300",
+                    )}
+                  >
+                    /
+                  </span>
                 )}
 
                 {isClickable ? (
                   <Link
                     to={crumb.to!}
-                    className="transition-colors hover:text-gray-600"
+                    className={cn(
+                      "truncate transition-colors",
+                      shouldUseGlassBreadcrumb
+                        ? "hover:text-gray-700"
+                        : "hover:text-gray-600",
+                    )}
                     onClick={() => {
                       if (hasFolderId) {
                         notifyFolderSelect(crumb.folderId ?? null);
@@ -119,7 +142,12 @@ export const TitleBar: React.FC = () => {
                     {crumb.label}
                   </Link>
                 ) : (
-                  <span className="font-medium text-gray-600">
+                  <span
+                    className={cn(
+                      "truncate font-medium",
+                      shouldUseGlassBreadcrumb ? "text-gray-700" : "text-gray-600",
+                    )}
+                  >
                     {crumb.label}
                   </span>
                 )}

@@ -108,12 +108,6 @@ export const ExplorerFilterSummary = ({
           />
         ) : null}
       </div>
-
-      <div className="mt-1 text-[11px] text-slate-400 leading-4">
-        {tagMatchMode === "any"
-          ? "選んだタグのどれかが付いているカードを表示します。"
-          : "選んだタグがすべて付いているカードだけ表示します。"}
-      </div>
     </div>
   );
 };
