@@ -8,4 +8,4 @@ export * from "./domain/folder";
 export * from "./domain/sync";
 export * from "./domain/user";
 
-export type { TagV3Record } from "@/services/localdb/types";
+export type { TagRecord } from "@/services/localdb/types";
