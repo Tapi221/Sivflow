@@ -70,11 +70,9 @@ export const TitleBar: React.FC = () => {
   return (
     <div
       className={cn(
+        "surface-card-pane-glass",
         "fixed inset-x-0 top-0 z-[9999] flex h-[36px] w-full select-none items-center justify-between",
-        "border-b border-white/30",
-        "bg-white/22 supports-[backdrop-filter]:bg-white/16",
-        "backdrop-blur-xl backdrop-saturate-150",
-        "text-sm text-slate-700",
+        "border-x-0 border-t-0 rounded-none text-sm text-slate-700",
       )}
       style={{ WebkitAppRegion: "drag" } as React.CSSProperties}
     >
