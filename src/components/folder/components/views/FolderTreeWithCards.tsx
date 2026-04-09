@@ -1097,6 +1097,7 @@ export const FolderTreeWithCards = ({
               renameCancelledRef={dialogs.renameCancelledRef}
               editingId={dialogs.editingId}
               editingName={dialogs.editingName}
+              editingNameRef={dialogs.editingNameRef}
               handleRenameConfirm={actions.handleRenameConfirm}
             />
           )}

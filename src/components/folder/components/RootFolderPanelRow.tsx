@@ -51,6 +51,7 @@ interface RootFolderPanelRowProps {
   renameCancelledRef: React.MutableRefObject<boolean>;
   editingId: string | null;
   editingName: string;
+  editingNameRef: React.MutableRefObject<string>;
   handleRenameConfirm: (target?: RenameTarget) => Promise<void>;
   attachInputRef: (node: HTMLInputElement | null) => void;
 }
@@ -73,6 +74,7 @@ export const RootFolderPanelRow = ({
   renameCancelledRef,
   editingId,
   editingName,
+  editingNameRef,
   handleRenameConfirm,
   attachInputRef,
 }: RootFolderPanelRowProps) => {
