@@ -21,7 +21,7 @@ import {
   Brain,
   Zap,
 } from "@/ui/icons";
-import { createPageUrl } from "@/utils";
+import { createPageUrl } from "@/platform/web/navigation/toWebPath";
 import { RatingCountTiles } from "@/features/study/RatingCountTiles";
 import { useTodayStudyStore } from "@/stores/useTodayStudyStore";
 

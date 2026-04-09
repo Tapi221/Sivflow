@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { createPageUrl } from "@/utils";
+import { createPageUrl } from "@/platform/web/navigation/toWebPath";
 import { StampRally } from "@/features/study/StampRally";
 import { RatingCountTiles } from "@/features/study/RatingCountTiles";
 

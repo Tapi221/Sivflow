@@ -1,7 +1,7 @@
 import { CardEditorPane } from "@/components/folder/panes/CardEditorPane";
 import { Button } from "@/components/ui/button";
+import { createPageUrl } from "@/platform/web/navigation/toWebPath";
 import { ArrowLeft } from "@/ui/icons";
-import { createPageUrl } from "@/utils";
 import { useCallback, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 

@@ -4,7 +4,7 @@ import { nanoid } from "nanoid";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { getLocalDb } from "@/services/localDB";
 import type { Folder } from "@/types";
-import { normalizeFolder } from "@/utils";
+import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
 
 const isDatabaseClosedError = (error: unknown) => {
   if (!error || typeof error !== "object") {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { normalizeCard } from "@/utils";
+import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import {
   LEGACY_BASE_LAYOUT_ROWS,
   MAX_LAYOUT_ROWS,

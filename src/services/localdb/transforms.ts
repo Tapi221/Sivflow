@@ -1,5 +1,7 @@
-import { normalizeFolder } from "@/utils";
+import { normalizeFolderWithSilent } from "@/domain/folder/normalizers/normalizeFolder";
 import { normalizeInkDocument } from "@/components/ink/inkTypes";
+
+export { normalizeFolderWithSilent };
 
 export const denormalizeCardForStorage = (card: unknown) => {
   if (!card) return card;
@@ -152,14 +154,4 @@ export const denormalizeCardForStorage = (card: unknown) => {
 export const denormalizeFolderForStorage = (folder: unknown) => {
   if (!folder) return folder;
   return { ...folder };
-};
-
-export const normalizeFolderWithSilent = (raw: unknown) => {
-  if (!raw) return raw;
-  const hasSilent = raw?.silent !== undefined;
-  const hasIsSilent =
-    raw?.isSilent !== undefined || raw?.is_silent !== undefined;
-  const normalizedInput =
-    !hasIsSilent && hasSilent ? { ...raw, isSilent: raw.silent } : raw;
-  return normalizeFolder(normalizedInput);
 };

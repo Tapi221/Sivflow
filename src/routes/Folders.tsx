@@ -14,12 +14,7 @@ import { useDocuments } from "@/hooks/platform/useDocuments";
 import { useIsDesktopRuntime } from "@/hooks/platform/useIsDesktopRuntime";
 import { useSettingsQueryParam } from "@/hooks/settings/useSettingsQueryParam";
 import { cn } from "@/lib/utils";
-import type {
-  Card,
-  DocumentItem,
-  Folder,
-  SelectedExplorerItem,
-} from "@/types";
+import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 import {
   startTransition,
   useCallback,
@@ -32,10 +27,7 @@ import {
 import { useSearchParams } from "react-router-dom";
 
 type CardSelectedItem = Extract<SelectedExplorerItem, { type: "card" }>;
-type DocumentSelectedItem = Extract<
-  SelectedExplorerItem,
-  { type: "document" }
->;
+type DocumentSelectedItem = Extract<SelectedExplorerItem, { type: "document" }>;
 type RootSelectedItem = Extract<
   SelectedExplorerItem,
   { type: "directory" | "gallery" | "calendar" | "trash" }
@@ -98,11 +90,13 @@ const Folders = () => {
     [],
   );
 
-  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(() => {
-    if (isHomeOnlyMode) return null;
-    if (queryFolderId) return queryFolderId;
-    return localStorage.getItem("folder_selectedFolderId_work") || null;
-  });
+  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(
+    () => {
+      if (isHomeOnlyMode) return null;
+      if (queryFolderId) return queryFolderId;
+      return localStorage.getItem("folder_selectedFolderId_work") || null;
+    },
+  );
 
   useEffect(() => {
     if (selectedFolderId) {
@@ -288,7 +282,9 @@ const Folders = () => {
             ? folder.parentFolderId
             : null,
         folderColor:
-          typeof folder.folderColor === "string" ? folder.folderColor : undefined,
+          typeof folder.folderColor === "string"
+            ? folder.folderColor
+            : undefined,
       })),
     [folders],
   );
@@ -441,7 +437,10 @@ const Folders = () => {
   const folderById = useMemo(
     () =>
       new Map<string, Folder>(
-        normalizedFolders.map((folder): [string, Folder] => [folder.id, folder]),
+        normalizedFolders.map((folder): [string, Folder] => [
+          folder.id,
+          folder,
+        ]),
       ),
     [normalizedFolders],
   );

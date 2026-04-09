@@ -1,5 +1,5 @@
 import { warnOncePerSession } from "@/services/localDBRuntimeState";
-import { normalizeCard } from "@/utils";
+import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import { getDeviceName, getOrCreateDeviceId } from "@/utils/device";
 import { Dexie, type Table } from "dexie";
 import { Timestamp } from "firebase/firestore";

@@ -12,7 +12,8 @@ import type {
   UserSettings,
   UserStats,
 } from "@/types";
-import { normalizeCard, normalizeFolder } from "@/utils";
+import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
+import { normalizeFolderWithSilent } from "@/domain/folder/normalizers/normalizeFolder";
 import { getDeviceName, getOrCreateDeviceId } from "@/utils/device";
 import { nanoid } from "nanoid";
 import type { LocalDBTableMap, SyncableEntityTable } from "./localdb/types";
@@ -495,16 +496,6 @@ class InMemoryTable<T extends Record<string, unknown>> {
     return new InMemoryCollection<T>(this);
   }
 }
-
-const normalizeFolderWithSilent = (raw: unknown) => {
-  if (!raw) return raw;
-  const hasSilent = raw?.silent !== undefined;
-  const hasIsSilent =
-    raw?.isSilent !== undefined || raw?.is_silent !== undefined;
-  const normalizedInput =
-    !hasIsSilent && hasSilent ? { ...raw, isSilent: raw.silent } : raw;
-  return normalizeFolder(normalizedInput);
-};
 
 const SYNCABLE_TABLES = new Set(["cards", "folders"]);
 

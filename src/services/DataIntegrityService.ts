@@ -1,5 +1,6 @@
 import { getLocalDb } from "./localDB";
-import { normalizeCard, normalizeFolder } from "@/utils";
+import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
+import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
 import type { IntegrityIssue, IntegrityReport } from "./dataIntegrityTypes";
 import { sanitizeForLog } from "@/utils/logSanitizer";
 import { getCardBlocks, getCardText } from "@/domain/card/content";

@@ -26,7 +26,8 @@ import type {
   SnapshotComparison,
 } from "@/types/domain/snapshot";
 import { CURRENT_SCHEMA_VERSION, APP_VERSION } from "@/types/domain/snapshot";
-import { normalizeCard, normalizeFolder } from "@/utils";
+import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
+import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
 
 /** ローカルストレージのキー */
 const GENERATION_COUNTER_KEY = "flashcard_generation_counter";

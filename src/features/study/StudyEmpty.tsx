@@ -2,7 +2,7 @@ import React from "react";
 import { Trophy } from "@/ui/icons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { createPageUrl } from "@/utils";
+import { createPageUrl } from "@/platform/web/navigation/toWebPath";
 
 type Props = {
   folderId: string | null;

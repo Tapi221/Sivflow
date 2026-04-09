@@ -26,7 +26,8 @@ import {
   Filter,
   ChevronDown,
 } from "@/ui/icons";
-import { normalizeCard, normalizeFolder } from "@/utils";
+import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
+import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import { getLocalDb } from "@/services/localDB";

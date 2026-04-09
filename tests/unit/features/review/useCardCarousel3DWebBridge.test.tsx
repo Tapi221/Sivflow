@@ -144,6 +144,8 @@ describe("useCardCarousel3DWebBridge", () => {
     rerender(<HookHarness activeIndex={1} />);
 
     expect(observeMock).toHaveBeenCalledTimes(2);
-    expect(disconnectMock.mock.calls.length).toBeGreaterThan(initialDisconnectCount);
+    expect(disconnectMock.mock.calls.length).toBeGreaterThan(
+      initialDisconnectCount,
+    );
   });
 });

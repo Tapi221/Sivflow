@@ -1,6 +1,6 @@
 import { EmptyMetaPanel } from "@/components/card/panels/EmptyMetaPanel";
 import { RatingCountTiles } from "@/features/study/RatingCountTiles";
-import { createPageUrl } from "@/utils";
+import { createPageUrl } from "@/platform/web/navigation/toWebPath";
 import { ChevronRight } from "@/ui/icons";
 
 type CalendarMetaPanelProps = {

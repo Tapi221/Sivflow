@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { createPageUrl } from "@/utils";
+import { createPageUrl } from "@/platform/web/navigation/toWebPath";
 
 interface UseTreeViewActionsParams {
   navigate: (to: string) => void;

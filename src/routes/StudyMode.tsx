@@ -10,7 +10,7 @@ import { firestoreDb } from "@/services/firebase";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft } from "@/ui/icons";
-import { createPageUrl } from "@/utils";
+import { createPageUrl } from "@/platform/web/navigation/toWebPath";
 import { getDebugStreak } from "@/utils/debugStreak";
 import { sanitizeStreak } from "@/utils/streak";
 import { flags } from "@/features/flags";

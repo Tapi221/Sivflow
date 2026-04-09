@@ -9,6 +9,7 @@ import { useDocuments } from "@/hooks/platform/useDocuments";
 import { resolveCardTagNames, useTags } from "@/hooks/settings/useTags";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { cn } from "@/lib/utils";
+import { createPageUrl } from "@/platform/web/navigation/toWebPath";
 import type {
   Card,
   CardSet,
@@ -16,7 +17,6 @@ import type {
   Folder,
   SelectedExplorerItem,
 } from "@/types";
-import { createPageUrl } from "@/utils";
 import type { ComponentProps } from "react";
 import {
   useCallback,

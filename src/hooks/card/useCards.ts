@@ -1,18 +1,22 @@
 import { useState, useMemo } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
+import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
+import {
+  normalizeCardFolderId,
+  resolveBlocksFromCardData,
+  resolveExtraRowsFromCardData,
+  resolveInkFromCardData,
+} from "@/domain/card/normalizers/cardShape";
 import { getLocalDb } from "@/services/localDB";
 import { useAuthSession } from "@/contexts/AuthContext";
-import { normalizeCard } from "@/utils";
 import {
   useUserSettings,
   DEFAULT_SETTINGS,
 } from "@/hooks/settings/useUserSettings";
 import type { Card } from "@/types";
-import { normalizeInkDocument } from "@/components/ink/inkTypes";
 import {
   DEFAULT_LAYOUT_ROWS,
   normalizeLayoutRows,
-  normalizeExtraRows,
 } from "@/domain/card/extraRows";
 
 const isCardDeleted = (
@@ -31,54 +35,6 @@ const isCardDeleted = (
 
 type UseCardsOptions = {
   enabled?: boolean;
-};
-
-const resolveBlocksFromCardData = (
-  value: Partial<Card> & Record<string, unknown>,
-  side: "question" | "answer",
-) => {
-  const aliasKey = side === "question" ? "frontBlocks" : "backBlocks";
-  const faceKey = side === "question" ? "front" : "back";
-
-  const face = value[faceKey];
-  if (
-    face &&
-    typeof face === "object" &&
-    Array.isArray((face as { blocks?: unknown[] }).blocks)
-  ) {
-    return (face as { blocks: unknown[] }).blocks;
-  }
-
-  const aliased = value[aliasKey];
-  if (Array.isArray(aliased)) return aliased;
-
-  return [];
-};
-
-const resolveInkFromCardData = (
-  value: Partial<Card> & Record<string, unknown>,
-  side: "question" | "answer",
-) => {
-  const faceKey = side === "question" ? "front" : "back";
-  const face = value[faceKey];
-  const faceInk =
-    face && typeof face === "object"
-      ? (face as { ink?: unknown }).ink
-      : undefined;
-  return normalizeInkDocument(faceInk ?? null);
-};
-
-const resolveExtraRowsFromCardData = (
-  value: Partial<Card> & Record<string, unknown>,
-  side: "question" | "answer",
-) => {
-  const faceKey = side === "question" ? "front" : "back";
-  const face = value[faceKey];
-  const faceExtraRows =
-    face && typeof face === "object"
-      ? (face as { extraRows?: unknown }).extraRows
-      : undefined;
-  return normalizeExtraRows(faceExtraRows ?? 0);
 };
 
 export const useCards = (
@@ -183,11 +139,6 @@ export const useCards = (
 
     const now = new Date();
 
-    const normalizeFolderForCard = (value: unknown): string => {
-      if (typeof value !== "string") return "";
-      return value.trim();
-    };
-
     const toNullableFolderId = (value: string): string | null =>
       value.trim() === "" ? null : value;
 
@@ -204,7 +155,7 @@ export const useCards = (
         }
       }
 
-      const targetFolderId = normalizeFolderForCard(
+      const targetFolderId = normalizeCardFolderId(
         cardData.folderId ?? folderId ?? "",
       );
       const targetFolderOrNull = toNullableFolderId(targetFolderId);
