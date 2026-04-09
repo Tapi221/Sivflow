@@ -88,13 +88,14 @@ export const TitleBar: React.FC = () => {
           Manifolia
         </span>
 
-        <nav
-          className={cn(
-            "flex min-w-0 items-center gap-1 overflow-hidden text-xs text-gray-400 transition-all",
-            shouldUseGlassBreadcrumb &&
-              "surface-floating-strong h-[28px] rounded-full px-3 text-gray-500",
-          )}
-        >
+<nav
+  className={cn(
+    "flex min-w-0 items-center gap-1 overflow-hidden text-xs text-gray-400 transition-all",
+    shouldUseGlassBreadcrumb &&
+      "h-[28px] rounded-full px-3 text-gray-500 border border-white/30 bg-white/35 shadow-none backdrop-blur-lg backdrop-saturate-150 supports-[backdrop-filter]:bg-white/22",
+  )}
+>
+      
           {allCrumbs.map((crumb, index) => {
             const hasFolderId = "folderId" in crumb;
             const isSectionListCrumb = crumb.to === "/folders" && !hasFolderId;
