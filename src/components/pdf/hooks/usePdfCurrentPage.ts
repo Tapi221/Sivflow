@@ -38,11 +38,11 @@ export const usePdfCurrentPage = ({
   const visibilityRatiosRef = useRef<Record<number, number>>({});
   const currentPageRef = useRef(1);
   const onPageChangeRef = useRef(onPageChange);
-  const currentPageStateRafRef = useRef<number | null>(null);
 
   const scrollRafRef = useRef<number | null>(null);
   const pageChangeRafRef = useRef<number | null>(null);
   const pageUpdateRafRef = useRef<number | null>(null);
+  const stateSyncRafRef = useRef<number | null>(null);
   const pendingPageForCallbackRef = useRef<number | null>(null);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -67,21 +67,10 @@ export const usePdfCurrentPage = ({
       pageUpdateRafRef.current = null;
     }
 
-    if (currentPageStateRafRef.current !== null) {
-      cancelAnimationFrame(currentPageStateRafRef.current);
-      currentPageStateRafRef.current = null;
+    if (stateSyncRafRef.current !== null) {
+      cancelAnimationFrame(stateSyncRafRef.current);
+      stateSyncRafRef.current = null;
     }
-  }, []);
-
-  const scheduleCurrentPageState = useCallback((page: number) => {
-    if (currentPageStateRafRef.current !== null) {
-      cancelAnimationFrame(currentPageStateRafRef.current);
-    }
-
-    currentPageStateRafRef.current = requestAnimationFrame(() => {
-      currentPageStateRafRef.current = null;
-      setCurrentPage(page);
-    });
   }, []);
 
   const scheduleOnPageChange = useCallback((page: number) => {
@@ -101,16 +90,27 @@ export const usePdfCurrentPage = ({
     });
   }, []);
 
+  const scheduleCurrentPageStateSync = useCallback((page: number) => {
+    if (stateSyncRafRef.current !== null) {
+      cancelAnimationFrame(stateSyncRafRef.current);
+    }
+
+    stateSyncRafRef.current = requestAnimationFrame(() => {
+      stateSyncRafRef.current = null;
+      setCurrentPage(page);
+    });
+  }, []);
+
   const commitCurrentPage = useCallback(
     (nextPage: number) => {
       const clamped = clampPage(nextPage, numPages);
       if (currentPageRef.current === clamped) return;
 
       currentPageRef.current = clamped;
-      setCurrentPage(clamped);
+      scheduleCurrentPageStateSync(clamped);
       scheduleOnPageChange(clamped);
     },
-    [numPages, scheduleOnPageChange],
+    [numPages, scheduleCurrentPageStateSync, scheduleOnPageChange],
   );
 
   const estimateCurrentPageFromScroll = useCallback(() => {
@@ -216,14 +216,14 @@ export const usePdfCurrentPage = ({
     visibilityRatiosRef.current = {};
     pageRefs.current = [];
     currentPageRef.current = 1;
-    setCurrentPage(1);
+    scheduleCurrentPageStateSync(1);
     scheduleOnPageChange(1);
 
     const container = scrollContainerRef.current;
     if (container) {
       container.scrollTo({ top: 0, behavior: "auto" });
     }
-  }, [cancelPendingRafs, scheduleOnPageChange]);
+  }, [cancelPendingRafs, scheduleCurrentPageStateSync, scheduleOnPageChange]);
 
   const scrollToPage = useCallback(
     (page: number) => {
@@ -296,11 +296,13 @@ export const usePdfCurrentPage = ({
 
     if (numPages <= 0) {
       visibilityRatiosRef.current = {};
+
       if (currentPageRef.current !== 1) {
         currentPageRef.current = 1;
-        scheduleCurrentPageState(1);
+        scheduleCurrentPageStateSync(1);
         scheduleOnPageChange(1);
       }
+
       return;
     }
 
@@ -315,15 +317,23 @@ export const usePdfCurrentPage = ({
     visibilityRatiosRef.current = nextRatios;
 
     const clamped = clampPage(currentPageRef.current, numPages);
+
     if (clamped !== currentPageRef.current) {
       currentPageRef.current = clamped;
-      scheduleCurrentPageState(clamped);
+      scheduleCurrentPageStateSync(clamped);
       scheduleOnPageChange(clamped);
       return;
     }
 
-    scheduleCurrentPageState(clamped);
-  }, [numPages, scheduleCurrentPageState, scheduleOnPageChange]);
+    if (currentPage !== clamped) {
+      scheduleCurrentPageStateSync(clamped);
+    }
+  }, [
+    currentPage,
+    numPages,
+    scheduleCurrentPageStateSync,
+    scheduleOnPageChange,
+  ]);
 
   useEffect(() => {
     return () => {
