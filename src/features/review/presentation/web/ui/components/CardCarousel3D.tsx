@@ -7,7 +7,7 @@ import {
   clampCardCarouselIndex,
   isNearCardCarouselItem,
   shouldNotifyCardCarouselIndexChange,
-} from "@/features/review/domain/cardCarousel3D";
+} from "@/features/review/domain/cardCarouselIndexRules";
 import { useCardCarousel3DWebBridge } from "@/features/review/infra/web/useCardCarousel3DWebBridge";
 
 const CARD_WIDTH = 560;
@@ -37,6 +37,9 @@ export const CardCarousel3D = ({
 
   return (
     <CardCarousel3DInner
+      // syncIndex は外部の authoritative state として扱う。
+      // 変更時は inner を remount して local state と DOM scroll 位置をまとめて同期する。
+      // 内側に一時 UI state を増やす場合は、この remount で失われてよいかを先に確認すること。
       key={`${cards.length}:${initialIndex}`}
       cards={cards}
       initialIndex={initialIndex}
