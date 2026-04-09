@@ -1,7 +1,6 @@
+import { RightPane } from "@/components/folder/panes/RightPane";
 import { cn } from "@/lib/utils";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
-import React from "react";
-import { RightPane } from "@/components/folder/panes/RightPane";
 
 interface TreeViewMainPaneProps {
   showMobileDetail: boolean;
@@ -27,7 +26,7 @@ interface TreeViewMainPaneProps {
     documentId: string,
     updates: Partial<DocumentItem>,
   ) => Promise<void> | void;
-  onRenameFolder: (folderId: string, newName: string) => Promise<void> | void;
+  onRenameFolder: (folderId: string, newName: string) => Promise<void>;
   handlers: {
     onStartStudy: () => void;
     onViewCards: () => void;
@@ -58,7 +57,7 @@ export const TreeViewMainPane = ({
   return (
     <div
       className={cn(
-        "flex-1 min-h-0 min-w-0 bg-white flex-col",
+        "flex min-h-0 min-w-0 flex-1 flex-col bg-white",
         hideOnSectionList && "hidden",
         showMobileDetail ? "flex" : "hidden md:flex",
       )}
@@ -77,8 +76,10 @@ export const TreeViewMainPane = ({
         onCardUpdated={onCardUpdated}
         onDocumentUpdated={onDocumentUpdated}
         onRenameFolder={
-          onRenameFolder && selectedFolderId
-            ? (newName: string) => onRenameFolder(selectedFolderId, newName)
+          selectedFolderId
+            ? async (newName: string) => {
+                await onRenameFolder(selectedFolderId, newName);
+              }
             : undefined
         }
         handlers={handlers}
