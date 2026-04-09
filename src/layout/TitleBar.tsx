@@ -21,17 +21,10 @@ export const TitleBar: React.FC = () => {
   const [isMaximized, setIsMaximized] = useState(false);
   const [isCardSetViewEditing, setIsCardSetViewEditing] = useState(false);
   const isDesktop = isDesktopRuntime();
-  const { pathname, search } = useLocation();
+  const { pathname } = useLocation();
   const crumbs = useBreadcrumbs();
   const { extraCrumbs, notifyFolderSelect } = useBreadcrumbContext();
   const isCardSetViewPage = pathname.toLowerCase().startsWith("/cardsetview");
-
-  const shouldUseGlassBreadcrumb = useMemo(() => {
-    if (!isCardSetViewPage) return false;
-
-    const searchParams = new URLSearchParams(search);
-    return Boolean(searchParams.get("cardSetId"));
-  }, [isCardSetViewPage, search]);
 
   useEffect(() => {
     if (!isDesktop) return;
@@ -54,9 +47,12 @@ export const TitleBar: React.FC = () => {
       const next = (event as CustomEvent<boolean>).detail;
       setIsCardSetViewEditing(Boolean(next));
     };
+
     window.addEventListener("cardsetview:editing-change", onEditingChange);
-    return () =>
+
+    return () => {
       window.removeEventListener("cardsetview:editing-change", onEditingChange);
+    };
   }, []);
 
   const allCrumbs = useMemo(
@@ -72,30 +68,25 @@ export const TitleBar: React.FC = () => {
   if (!isDesktop) return null;
 
   return (
-<div
-  className={cn(
-    "fixed inset-x-0 top-0 flex h-[36px] w-full shrink-0 select-none items-center justify-between text-sm text-gray-700",
-    "border-b border-white/30 bg-white/80 shadow-[0_8px_24px_rgba(15,23,42,0.08)]",
-    "supports-[backdrop-filter]:bg-white/34 backdrop-blur-xl backdrop-saturate-150",
-  )}
-  style={{ WebkitAppRegion: "drag", zIndex: 9999 } as React.CSSProperties}
->
+    <div
+      className={cn(
+        "fixed inset-x-0 top-0 z-[9999] flex h-[36px] w-full select-none items-center justify-between",
+        "border-b border-white/30",
+        "bg-white/22 supports-[backdrop-filter]:bg-white/16",
+        "backdrop-blur-xl backdrop-saturate-150",
+        "text-sm text-slate-700",
+      )}
+      style={{ WebkitAppRegion: "drag" } as React.CSSProperties}
+    >
       <div
         className="flex h-full min-w-0 items-center gap-2 px-4"
         style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
       >
-        <span className="mr-2 shrink-0 text-xs font-semibold tracking-wide text-gray-500">
+        <span className="mr-2 shrink-0 text-xs font-semibold tracking-wide text-slate-600">
           Manifolia
         </span>
 
-<nav
-  className={cn(
-    "flex min-w-0 items-center gap-1 overflow-hidden text-xs text-gray-400 transition-all",
-    shouldUseGlassBreadcrumb &&
-      "h-[28px] rounded-full px-3 text-gray-500 border border-white/30 bg-white/35 shadow-none backdrop-blur-lg backdrop-saturate-150 supports-[backdrop-filter]:bg-white/22",
-  )}
->
-      
+        <nav className="flex min-w-0 items-center gap-1 overflow-hidden text-xs text-slate-500">
           {allCrumbs.map((crumb, index) => {
             const hasFolderId = "folderId" in crumb;
             const isSectionListCrumb = crumb.to === "/folders" && !hasFolderId;
@@ -111,36 +102,24 @@ export const TitleBar: React.FC = () => {
                 }:${index}`}
               >
                 {index > 0 && (
-                  <span
-                    className={cn(
-                      "select-none",
-                      shouldUseGlassBreadcrumb
-                        ? "text-gray-300/90"
-                        : "text-gray-300",
-                    )}
-                  >
-                    /
-                  </span>
+                  <span className="select-none text-slate-300">/</span>
                 )}
 
                 {isClickable ? (
                   <Link
                     to={crumb.to!}
-                    className={cn(
-                      "truncate transition-colors",
-                      shouldUseGlassBreadcrumb
-                        ? "hover:text-gray-700"
-                        : "hover:text-gray-600",
-                    )}
+                    className="truncate transition-colors hover:text-slate-700"
                     onClick={() => {
                       if (hasFolderId) {
                         notifyFolderSelect(crumb.folderId ?? null);
                         return;
                       }
+
                       if (isHomeCrumb) {
                         notifyFolderSelect(null);
                         return;
                       }
+
                       if (isSectionListCrumb) {
                         notifyFolderSelect(null);
                       }
@@ -149,14 +128,7 @@ export const TitleBar: React.FC = () => {
                     {crumb.label}
                   </Link>
                 ) : (
-                  <span
-                    className={cn(
-                      "truncate font-medium",
-                      shouldUseGlassBreadcrumb
-                        ? "text-gray-700"
-                        : "text-gray-600",
-                    )}
-                  >
+                  <span className="truncate font-medium text-slate-700">
                     {crumb.label}
                   </span>
                 )}
@@ -167,7 +139,7 @@ export const TitleBar: React.FC = () => {
       </div>
 
       <div
-        className="flex h-full items-center text-gray-500"
+        className="flex h-full items-center text-slate-500"
         style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
       >
         {isCardSetViewPage && (
@@ -225,6 +197,7 @@ export const TitleBar: React.FC = () => {
                 </svg>
               </button>
             )}
+
             {isCardSetViewEditing && (
               <button
                 onClick={() =>
@@ -268,6 +241,7 @@ export const TitleBar: React.FC = () => {
                 </svg>
               </button>
             )}
+
             <button
               onClick={() =>
                 window.dispatchEvent(
@@ -331,6 +305,7 @@ export const TitleBar: React.FC = () => {
             </button>
           </>
         )}
+
         <button
           onClick={() => window.desktop?.window.minimize()}
           className="flex h-full w-[46px] items-center justify-center transition-colors hover:bg-black/5"
