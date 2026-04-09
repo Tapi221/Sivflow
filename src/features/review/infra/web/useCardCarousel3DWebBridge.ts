@@ -6,7 +6,7 @@ import {
   useState,
 } from "react";
 
-import { clampCardCarouselIndex } from "@/features/review/application/cardCarousel3D";
+import { clampCardCarouselIndex } from "@/features/review/domain/cardCarousel3D";
 
 type CardCarouselScrollBehavior = ScrollBehavior | "instant";
 

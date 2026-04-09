@@ -5,9 +5,8 @@ import {
   canGoToPreviousCardCarouselItem,
   clampCardCarouselIndex,
   isNearCardCarouselItem,
-  resolveSyncedCardCarouselIndex,
   shouldNotifyCardCarouselIndexChange,
-} from "@/features/review/application/cardCarousel3D";
+} from "@/features/review/domain/cardCarousel3D";
 
 describe("cardCarousel3D shared logic", () => {
   it("index を 0..count-1 に clamp する", () => {
@@ -40,21 +39,7 @@ describe("cardCarousel3D shared logic", () => {
     ).toBe(false);
   });
 
-  it("external sync と通知要否のルールを返す", () => {
-    expect(
-      resolveSyncedCardCarouselIndex({
-        activeIndex: 1,
-        itemCount: 4,
-        syncIndex: 1,
-      }),
-    ).toBeNull();
-    expect(
-      resolveSyncedCardCarouselIndex({
-        activeIndex: 1,
-        itemCount: 4,
-        syncIndex: 9,
-      }),
-    ).toBe(3);
+  it("通知要否のルールを返す", () => {
     expect(
       shouldNotifyCardCarouselIndexChange({
         previousIndex: 1,

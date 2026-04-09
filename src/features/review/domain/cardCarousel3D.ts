@@ -34,23 +34,6 @@ export const isNearCardCarouselItem = ({
   return Math.abs(targetIndex - activeIndex) <= radius;
 };
 
-export const resolveSyncedCardCarouselIndex = ({
-  activeIndex,
-  itemCount,
-  syncIndex,
-}: {
-  activeIndex: number;
-  itemCount: number;
-  syncIndex: number;
-}) => {
-  if (itemCount <= 0) {
-    return null;
-  }
-
-  const clampedSyncIndex = clampCardCarouselIndex(syncIndex, itemCount);
-  return clampedSyncIndex === activeIndex ? null : clampedSyncIndex;
-};
-
 export const shouldNotifyCardCarouselIndexChange = ({
   nextIndex,
   previousIndex,

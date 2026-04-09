@@ -7,8 +7,8 @@ import {
   clampCardCarouselIndex,
   isNearCardCarouselItem,
   shouldNotifyCardCarouselIndexChange,
-} from "@/features/review/application/cardCarousel3D";
-import { useCardCarousel3DWebBridge } from "@/features/review/presentation/web/hooks/useCardCarousel3DWebBridge";
+} from "@/features/review/domain/cardCarousel3D";
+import { useCardCarousel3DWebBridge } from "@/features/review/infra/web/useCardCarousel3DWebBridge";
 
 const CARD_WIDTH = 560;
 const PEEK = 60;
