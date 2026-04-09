@@ -5,7 +5,11 @@ import type { ExplorerBreadcrumbContext } from "../contracts/explorerBreadcrumbC
 import type { SelectedExplorerItem } from "../contracts/explorerSelection";
 
 export const useExplorerController = () => {
-  const [state, dispatch] = useReducer(explorerReducer, undefined, createInitialExplorerState);
+  const [state, dispatch] = useReducer(
+    explorerReducer,
+    undefined,
+    createInitialExplorerState,
+  );
 
   const actions = useMemo(
     () => ({

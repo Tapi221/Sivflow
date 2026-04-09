@@ -9,6 +9,7 @@ export const createInitialExplorerState = (): ExplorerControllerState => {
     selectedItem: null,
     folderSelectionNonce: 0,
     navigateToSectionListToken: 0,
-    explorerBreadcrumbContext: EMPTY_EXPLORER_BREADCRUMB_CONTEXT as ExplorerBreadcrumbContext,
+    explorerBreadcrumbContext:
+      EMPTY_EXPLORER_BREADCRUMB_CONTEXT as ExplorerBreadcrumbContext,
   };
 };

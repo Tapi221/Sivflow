@@ -4,7 +4,8 @@ export const normalizeFolders = (folders: Folder[]) => {
   return folders.map((folder) => ({
     ...folder,
     parentFolderId:
-      typeof folder.parentFolderId === "string" || folder.parentFolderId === null
+      typeof folder.parentFolderId === "string" ||
+      folder.parentFolderId === null
         ? folder.parentFolderId
         : null,
     folderColor:

@@ -1,4 +1,7 @@
-import type { CardSelectedItem, DocumentSelectedItem } from "../contracts/explorerSelection";
+import type {
+  CardSelectedItem,
+  DocumentSelectedItem,
+} from "../contracts/explorerSelection";
 
 export const createCardSelectedItem = (cardId: string): CardSelectedItem => {
   return {

@@ -1,5 +1,8 @@
 import type { ExplorerRouteState } from "../contracts/explorerRouteState";
-import { createCardSelectedItem, createDocumentSelectedItem } from "../utils/createSelectedExplorerItem";
+import {
+  createCardSelectedItem,
+  createDocumentSelectedItem,
+} from "../utils/createSelectedExplorerItem";
 
 export const mapSearchParamsToExplorerRouteState = (
   searchParams: URLSearchParams,
