@@ -4,7 +4,7 @@
 @import "./base/base.css";
 @import "./components/index.css";
 @import "./base/utilities.css";
-@import "./pages/dashboard.css";
+
 @import "./tokens/code-theme.css";
 @import "./options/options.css";
 

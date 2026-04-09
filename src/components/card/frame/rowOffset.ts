@@ -1,10 +1,7 @@
-import { CARD_ROW_PX } from "@/components/card/common/constants";
 import {
   getNormalizedGridOffsetRows,
   isGridOffsetType,
 } from "@/domain/card/blockOffset";
-import type { CardBlock } from "@/types/domain/card";
-import type { CSSProperties } from "react";
 
 const ROW_OFFSET_MIN = -999;
 const ROW_OFFSET_MAX = 999;
