@@ -1,4 +1,4 @@
-export * from "./domain/assets";
+export * fromInMemoryLocalDB.ts "./domain/assets";
 export * from "./domain/base";
 export * from "./domain/card";
 export * from "./domain/cardSet";
