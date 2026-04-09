@@ -34,6 +34,12 @@ const setup = (element: React.ReactElement) => {
   });
 };
 
+const rerender = (element: React.ReactElement) => {
+  flushSync(() => {
+    root.render(element);
+  });
+};
+
 const HookHarness = ({
   activeIndex = 0,
   itemCount = 3,
@@ -108,7 +114,7 @@ describe("useCardCarousel3DWebBridge", () => {
     expect(disconnectMock).toHaveBeenCalled();
   });
 
-  it("unmount 後に保留中の scroll settle 通知を発火しない", () => {
+  it("unmount 時に保留中の debounce timer を破棄し、後続通知を発火しない", () => {
     const onSettledIndexChange = vi.fn();
     setup(
       <HookHarness
@@ -117,12 +123,27 @@ describe("useCardCarousel3DWebBridge", () => {
       />,
     );
 
+    expect(vi.getTimerCount()).toBeGreaterThan(0);
+
     flushSync(() => {
       root.unmount();
     });
 
+    expect(vi.getTimerCount()).toBe(0);
+
     vi.runAllTimers();
 
     expect(onSettledIndexChange).not.toHaveBeenCalled();
+  });
+
+  it("activeIndex 変更時に observer を差し替える前の disconnect を呼ぶ", () => {
+    setup(<HookHarness activeIndex={0} />);
+
+    const initialDisconnectCount = disconnectMock.mock.calls.length;
+
+    rerender(<HookHarness activeIndex={1} />);
+
+    expect(observeMock).toHaveBeenCalledTimes(2);
+    expect(disconnectMock.mock.calls.length).toBeGreaterThan(initialDisconnectCount);
   });
 });
