@@ -6,7 +6,7 @@
   flex: 1;
   width: 100%;
   overflow: hidden;
-  background: #fff;
+  background: transparent;
 }
 
 .app-layout--sidebar-hidden {
@@ -42,14 +42,9 @@
   height: 100%;
   min-height: 0;
   overflow-y: auto;
+  background: transparent;
 }
 
 .app-layout__main--locked {
   overflow: clip;
-}
-
-.desktop-shell--with-titlebar .app-layout__sidebar,
-.desktop-shell--with-titlebar .app-layout__content {
-  padding-top: 36px;
-  box-sizing: border-box;
 }

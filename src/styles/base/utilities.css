@@ -175,19 +175,20 @@
       inset 0 -1px 0 rgba(148, 163, 184, 0.28);
   }
 
-  .surface-card-pane-glass {
+  .surface-glass-base {
     border: 1px solid rgb(226 232 240 / 0.8);
-    background: rgb(255 255 255 / 0.82);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
   }
 
-  .surface-card-pane-glass-elevated {
-    border: 1px solid rgb(226 232 240 / 0.8);
+  .surface-glass-card-pane {
     background: rgb(255 255 255 / 0.82);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
     box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  }
+
+  .surface-glass-titlebar {
+    background: rgb(255 255 255 / 0.72);
+    box-shadow: none;
   }
 
   @media (min-width: 768px) {

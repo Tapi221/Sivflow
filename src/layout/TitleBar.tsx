@@ -71,10 +71,10 @@ export const TitleBar: React.FC = () => {
     <div
       className={cn(
         "surface-glass-base surface-glass-titlebar",
-        "fixed inset-x-0 top-0 z-[9999] flex h-[36px] w-full select-none items-center justify-between",
+        "flex h-[36px] w-full shrink-0 select-none items-center justify-between",
         "border-x-0 border-t-0 rounded-none text-sm text-slate-700",
       )}
-      style={{ WebkitAppRegion: "drag" } as React.CSSProperties}
+      style={{ WebkitAppRegion: "drag", zIndex: 9999 } as React.CSSProperties}
     >
       <div
         className="flex h-full min-w-0 items-center gap-2 px-4"
