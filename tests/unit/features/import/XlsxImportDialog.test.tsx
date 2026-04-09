@@ -18,7 +18,7 @@ import {
 } from "vitest";
 
 import type { ImportParseResult, ImportPayload } from "@/features/import/domain/importTypes";
-import { XlsxImportDialog } from "@/features/import/ui/XlsxImportDialog";
+import { XlsxImportDialog } from "@/features/import/presentation/web/XlsxImportDialog";
 import type { CardSet } from "@/types";
 
 const {
