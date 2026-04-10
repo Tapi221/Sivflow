@@ -6,7 +6,7 @@ import {
 import { cn } from "@/lib/utils";
 import { isDesktopRuntime } from "@/platform/runtime";
 import React, { useEffect, useMemo, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const useBreadcrumbs = () => {
   const { pathname, search } = useLocation();
@@ -20,6 +20,7 @@ const useBreadcrumbs = () => {
 export const TitleBar: React.FC = () => {
   const [isMaximized, setIsMaximized] = useState(false);
   const [isCardSetViewEditing, setIsCardSetViewEditing] = useState(false);
+  const navigate = useNavigate();
   const isDesktop = isDesktopRuntime();
   const { pathname } = useLocation();
   const crumbs = useBreadcrumbs();
@@ -91,6 +92,30 @@ export const TitleBar: React.FC = () => {
             const isHomeCrumb = index === 0;
             const isClickable = Boolean(crumb.to);
 
+            const handleBreadcrumbClick = (
+              event: React.MouseEvent<HTMLButtonElement>,
+            ) => {
+              event.preventDefault();
+              event.stopPropagation();
+
+              if (!crumb.to) {
+                return;
+              }
+
+              if (isHomeCrumb) {
+                navigate(crumb.to);
+                return;
+              }
+
+              if (hasFolderId) {
+                notifyFolderSelect(crumb.folderId ?? null);
+              } else if (isSectionListCrumb) {
+                notifyFolderSelect(null);
+              }
+
+              navigate(crumb.to);
+            };
+
             return (
               <React.Fragment
                 key={`${crumb.label}:${crumb.to ?? "no-to"}:${
@@ -104,26 +129,17 @@ export const TitleBar: React.FC = () => {
                 )}
 
                 {isClickable ? (
-                     <Link
-                    to={crumb.to!}
+                  <button
+                    type="button"
                     className="truncate transition-colors hover:text-slate-700"
-                    onClick={() => {
-                      if (isHomeCrumb) {
-                        return;
-                      }
-
-                      if (hasFolderId) {
-                        notifyFolderSelect(crumb.folderId ?? null);
-                        return;
-                      }
-
-                      if (isSectionListCrumb) {
-                        notifyFolderSelect(null);
-                      }
-                    }}
+                    style={
+                      { WebkitAppRegion: "no-drag" } as React.CSSProperties
+                    }
+                    onMouseDown={(event) => event.stopPropagation()}
+                    onClick={handleBreadcrumbClick}
                   >
                     {crumb.label}
-                  </Link>
+                  </button>
                 ) : (
                   <span className="truncate font-medium text-slate-700">
                     {crumb.label}

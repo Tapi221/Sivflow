@@ -9,6 +9,7 @@
  *   - ヘッダーUI:                   PdfPaneToolbar
  *   - sessionStorage util + 定数:   pdfViewerStateStorage
  */
+import type { BlobUrl } from "@/types/core/branded";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import platform from "@/platform";
@@ -35,8 +36,8 @@ interface PdfPaneDoc {
   name?: string;
   title?: string;
   remoteUrl?: string | null;
-  blobUrl?: import("@/types").BlobUrl | null;
-  localUrl?: import("@/types").BlobUrl | null;
+  blobUrl?: BlobUrl | null;
+  localUrl?: BlobUrl | null;
   localFileId?: string | null;
   downloadUrl?: string | null;
   uploadStatus?: "pending" | "queued" | "uploading" | "ready" | "failed" | null;
@@ -138,7 +139,10 @@ export const PdfPane = ({
       return;
     }
 
-    const blob = new Blob([localSourceBytes], {
+    const blobBytes = new Uint8Array(localSourceBytes.byteLength);
+    blobBytes.set(localSourceBytes);
+
+    const blob = new Blob([blobBytes], {
       type: doc.mimeType || "application/pdf",
     });
     const tempUrl = URL.createObjectURL(blob);
