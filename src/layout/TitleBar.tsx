@@ -104,17 +104,16 @@ export const TitleBar: React.FC = () => {
                 )}
 
                 {isClickable ? (
-                  <Link
+                     <Link
                     to={crumb.to!}
                     className="truncate transition-colors hover:text-slate-700"
                     onClick={() => {
-                      if (hasFolderId) {
-                        notifyFolderSelect(crumb.folderId ?? null);
+                      if (isHomeCrumb) {
                         return;
                       }
 
-                      if (isHomeCrumb) {
-                        notifyFolderSelect(null);
+                      if (hasFolderId) {
+                        notifyFolderSelect(crumb.folderId ?? null);
                         return;
                       }
 
