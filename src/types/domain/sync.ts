@@ -1,3 +1,4 @@
+import type { Timestamp } from "firebase/firestore";
 import type { AssetRecord } from "./assets";
 import type { Card } from "./card";
 import type { CardSet } from "./cardSet";
@@ -9,6 +10,15 @@ import type { UserSettings } from "./user";
  * 同期システムの高度な型定義
  * 可観測性・回復性・主導権を備えた分散同期システム用
  */
+
+export interface SyncMetadata {
+  userId: string;
+  deviceId: string;
+  deviceName: string;
+  lastSyncTime: Date | Timestamp | null;
+  lastHighResSync: Date | Timestamp | null;
+  isActive: boolean;
+}
 
 /**
  * SyncError - エラーライフサイクル管理

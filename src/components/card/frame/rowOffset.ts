@@ -1,4 +1,8 @@
-import {
+import { CARD_ROW_PX } from "@/components/card/common/constants";
+import type { CardBlock } from "@/types/domain/card";
+import type { CSSProperties } from "react";
+
+export {
   getNormalizedGridOffsetRows,
   isGridOffsetType,
 } from "@/domain/card/blockOffset";

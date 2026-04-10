@@ -43,6 +43,14 @@ const createDocumentSelectedItem = (docId: string): DocumentSelectedItem => ({
   id: docId,
 });
 
+const isDocumentItem = (value: unknown): value is DocumentItem =>
+  typeof value === "object" &&
+  value !== null &&
+  "kind" in value &&
+  "folderId" in value &&
+  "orderIndex" in value &&
+  "title" in value;
+
 const Folders = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const queryString = searchParams.toString();
@@ -136,7 +144,7 @@ const Folders = () => {
     resetMainScroll();
     const raf = window.requestAnimationFrame(resetMainScroll);
     return () => window.cancelAnimationFrame(raf);
-  }, [selectedFolderId, selectedItem?.type, selectedItem?.id]);
+  }, [selectedFolderId, selectedCardId, selectedDocumentId]);
 
   useEffect(() => {
     const next = new URLSearchParams(queryString);
@@ -271,6 +279,11 @@ const Folders = () => {
   const { folders = [], loading: foldersLoading } = useFolders();
   const { cards = [], loading: cardsLoading } = useCards();
   const { documents = [] } = useDocuments();
+
+  const typedDocuments = useMemo<DocumentItem[]>(
+    () => documents.filter(isDocumentItem),
+    [documents],
+  );
 
   const normalizedFolders = useMemo<Folder[]>(
     () =>
@@ -455,14 +468,20 @@ const Folders = () => {
 
   const documentById = useMemo(() => {
     const map = new Map<string, DocumentItem>();
-    for (const documentItem of documents) {
-      const key = documentItem.id || documentItem.documentId;
+    for (const documentItem of typedDocuments) {
+      const key =
+        typeof documentItem.id === "string" && documentItem.id.length > 0
+          ? documentItem.id
+          : typeof documentItem.documentId === "string" &&
+              documentItem.documentId.length > 0
+            ? documentItem.documentId
+            : null;
       if (key) {
         map.set(key, documentItem);
       }
     }
     return map;
-  }, [documents]);
+  }, [typedDocuments]);
 
   const handleExplorerBreadcrumbContextChange = useCallback(
     (next: ExplorerBreadcrumbContext) => {
@@ -525,7 +544,7 @@ const Folders = () => {
           <TreeViewLayout
             folders={normalizedFolders}
             cards={cards}
-            documents={documents}
+            documents={typedDocuments}
             selectedFolderId={selectedFolderId}
             selectedItem={selectedItem}
             selectedCardId={selectedCardId}

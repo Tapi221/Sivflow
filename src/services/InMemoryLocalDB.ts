@@ -27,9 +27,24 @@ import {
 type KeyPath = string | string[];
 type Predicate<T> = (value: T) => boolean;
 
+type TimestampLike = {
+  toDate: () => Date;
+};
+
+const isTimestampLike = (value: unknown): value is TimestampLike =>
+  typeof value === "object" &&
+  value !== null &&
+  "toDate" in value &&
+  typeof (value as { toDate?: unknown }).toDate === "function";
+
+const asRecord = (value: object): Record<string, unknown> =>
+  value as Record<string, unknown>;
+
+const getField = (value: object, key: string): unknown => asRecord(value)[key];
+
 const toTimestamp = (value: unknown): number => {
   if (value instanceof Date) return value.getTime();
-  if (value && typeof value?.toDate === "function") {
+  if (isTimestampLike(value)) {
     const date = value.toDate();
     return date instanceof Date ? date.getTime() : Number(date) || 0;
   }
@@ -42,7 +57,7 @@ const toTimestamp = (value: unknown): number => {
 };
 
 const normalizeComparable = (value: unknown): unknown => {
-  if (value instanceof Date || (value && typeof value?.toDate === "function")) {
+  if (value instanceof Date || isTimestampLike(value)) {
     return toTimestamp(value);
   }
   if (Array.isArray(value)) return value.map((v) => normalizeComparable(v));
@@ -92,11 +107,11 @@ const serializeKey = (key: unknown): string => {
   return String(key);
 };
 
-const ensureObject = <T extends Record<string, unknown>>(value: T): T => ({
+const ensureObject = <T extends object>(value: T): T => ({
   ...value,
 });
 
-class InMemoryCollection<T extends Record<string, unknown>> {
+class InMemoryCollection<T extends object> {
   constructor(
     private readonly table: InMemoryTable<T>,
     private readonly predicates: Predicate<T>[] = [],
@@ -127,8 +142,8 @@ class InMemoryCollection<T extends Record<string, unknown>> {
 
   private getIndexedValue(item: T): unknown {
     if (!this.indexKeys || this.indexKeys.length === 0) return undefined;
-    if (this.indexKeys.length === 1) return item[this.indexKeys[0]];
-    return this.indexKeys.map((key) => item[key]);
+    if (this.indexKeys.length === 1) return getField(item, this.indexKeys[0]);
+    return this.indexKeys.map((key) => getField(item, key));
   }
 
   private withIndexPredicate(
@@ -155,12 +170,12 @@ class InMemoryCollection<T extends Record<string, unknown>> {
       entries.sort((a, b) => {
         const left =
           this.orderByKeys!.length === 1
-            ? a.value[this.orderByKeys![0]]
-            : this.orderByKeys!.map((key) => a.value[key]);
+            ? getField(a.value, this.orderByKeys![0])
+            : this.orderByKeys!.map((key) => getField(a.value, key));
         const right =
           this.orderByKeys!.length === 1
-            ? b.value[this.orderByKeys![0]]
-            : this.orderByKeys!.map((key) => b.value[key]);
+            ? getField(b.value, this.orderByKeys![0])
+            : this.orderByKeys!.map((key) => getField(b.value, key));
         return compareValues(left, right);
       });
     }
@@ -339,7 +354,7 @@ class InMemoryCollection<T extends Record<string, unknown>> {
   }
 }
 
-class InMemoryTable<T extends Record<string, unknown>> {
+class InMemoryTable<T extends object> {
   private readonly rows = new Map<string, T>();
 
   constructor(
@@ -349,9 +364,9 @@ class InMemoryTable<T extends Record<string, unknown>> {
 
   private deriveKeyFromRecord(record: T): unknown {
     if (Array.isArray(this.keyPath)) {
-      return this.keyPath.map((path) => record[path]);
+      return this.keyPath.map((path) => getField(record, path));
     }
-    return record[this.keyPath];
+    return getField(record, this.keyPath);
   }
 
   private ensureRecordKey(record: T): unknown {
@@ -364,7 +379,7 @@ class InMemoryTable<T extends Record<string, unknown>> {
         typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
           ? crypto.randomUUID()
           : nanoid();
-      (record as Record<string, unknown>)[this.keyPath] = key;
+      asRecord(record)[this.keyPath] = key;
     }
     return key;
   }
@@ -476,7 +491,7 @@ class InMemoryTable<T extends Record<string, unknown>> {
 
     const query = Object.entries(index).reduce(
       (collection, [key, value]) =>
-        collection.and((item) => isEqual(item[key], value)),
+        collection.and((item) => isEqual(getField(item, key), value)),
       new InMemoryCollection<T>(this),
     );
     return query;
@@ -534,11 +549,8 @@ export class InMemoryLocalDB {
   cardRelations!: InMemoryTable<Record<string, unknown>>;
   projectMaps!: InMemoryTable<Record<string, unknown>>;
 
-  tables: InMemoryTable<Record<string, unknown>>[] = [];
-  private readonly tableMap = new Map<
-    string,
-    InMemoryTable<Record<string, unknown>>
-  >();
+  tables: InMemoryTable<object>[] = [];
+  private readonly tableMap = new Map<string, InMemoryTable<object>>();
   private opened = true;
   private syncTrigger: (() => void) | null = null;
 
@@ -587,17 +599,14 @@ export class InMemoryLocalDB {
     this.registerTable("studyLogs", "id");
   }
 
-  private registerTable(
-    name: string,
-    keyPath: KeyPath,
-  ): InMemoryTable<Record<string, unknown>> {
-    const table = new InMemoryTable(name, keyPath);
-    this.tableMap.set(name, table);
-    this.tables.push(table);
+  private registerTable(name: string, keyPath: KeyPath): InMemoryTable<object> {
+    const table = new InMemoryTable<object>(name, keyPath);
+    this.tableMap.set(name, table as InMemoryTable<object>);
+    this.tables.push(table as InMemoryTable<object>);
     return table;
   }
 
-  table(name: string): InMemoryTable<Record<string, unknown>> {
+  table(name: string): InMemoryTable<object> {
     const table = this.tableMap.get(name);
     if (!table) {
       throw new Error(`[InMemoryLocalDB] Unknown table requested: ${name}`);
@@ -661,21 +670,51 @@ export class InMemoryLocalDB {
       ? "delete"
       : "update";
     const now = Date.now();
-    const task: SyncQueueItem = {
+    const entity = ENTITY_MAP[tableName];
+    const base = {
       id: nanoid(),
       idempotencyKey: nanoid(),
       targetId: payload.id,
-      type: "upload",
-      entity: ENTITY_MAP[tableName],
-      operationType,
-      action: operationType,
-      payload: operationType === "delete" ? { id: payload.id } : payload,
-      priority: "high",
+      type: "upload" as const,
+      priority: "high" as const,
       createdAt: now,
       updatedAt: now,
-      status: "pending",
+      status: "pending" as const,
       retryCount: 0,
     };
+
+    const task: SyncQueueItem =
+      entity === "card"
+        ? operationType === "delete"
+          ? {
+              ...base,
+              entity: "card",
+              operationType: "delete",
+              action: "delete",
+              payload: { id: payload.id },
+            }
+          : {
+              ...base,
+              entity: "card",
+              operationType: "update",
+              action: "update",
+              payload: payload as Card,
+            }
+        : operationType === "delete"
+          ? {
+              ...base,
+              entity: "folder",
+              operationType: "delete",
+              action: "delete",
+              payload: { id: payload.id },
+            }
+          : {
+              ...base,
+              entity: "folder",
+              operationType: "update",
+              action: "update",
+              payload: payload as Folder,
+            };
 
     await this.syncQueue.put(task);
     if (this.syncTrigger) {
@@ -771,7 +810,7 @@ export class InMemoryLocalDB {
     if (!meta?.lastSyncTime) return null;
     const value = meta.lastSyncTime;
     if (value instanceof Date) return value;
-    if (value && typeof value?.toDate === "function") return value.toDate();
+    if (isTimestampLike(value)) return value.toDate();
     return new Date(value);
   }
 
