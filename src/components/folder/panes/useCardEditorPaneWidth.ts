@@ -9,7 +9,7 @@ import {
   CARD_PANE_WIDTH_STEP_PX,
   clampPaneWidthPx,
 } from "@/components/card/shell/cardPaneWidthConstants";
-import { useCardPaneWidthState } from "@/components/card/shell/useCardPaneWidthState";
+import { useCardPaneWidthState } from "@/components/card/shell/useCardPanewidthState";
 import {
   getCardSetWidthPreference,
   setCardSetWidthPreference,
