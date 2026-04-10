@@ -8,7 +8,7 @@ import {
 import type { DocDbCtx } from "./documentsLifecycle";
 
 /**
- * 外部境界（Syncキュー）なので payload は unknown に落とす。
+ * 外部境界（Sync キュー）なので payload は unknown に落とす。
  */
 export type EnqueueSync = (
   table: string,
@@ -18,7 +18,7 @@ export type EnqueueSync = (
 
 /**
  * Dexie を直接 import しない最小インターフェース。
- * add/put/bulkPut の戻り値は Dexie の PromiseExtended<IndexableType> と揃えるため
+ * add / put / bulkPut の戻り値は Dexie の PromiseExtended<IndexableType> と揃えるため
  * PromiseLike<unknown> にしてある。
  */
 export interface TableLike<T extends Record<string, unknown>> {
@@ -103,7 +103,9 @@ const recordKeys = (value: unknown): string[] => {
 };
 
 const isDocDbCtx = (db: DbLike): db is DbLike & DocDbCtx => {
-  const documents = (db as DbLike & Partial<DocDbCtx>).documents;
+  const maybeDb = db as DbLike & Partial<DocDbCtx>;
+  const documents = maybeDb.documents;
+
   return (
     typeof documents === "object" &&
     documents !== null &&
@@ -114,7 +116,7 @@ const isDocDbCtx = (db: DbLike): db is DbLike & DocDbCtx => {
 
 const toStorageRow = (value: unknown): AnyRow => {
   if (!isRecord(value)) return {};
-  return value as AnyRow;
+  return { ...value } as AnyRow;
 };
 
 /* -----------------------------
@@ -146,12 +148,12 @@ type AddItem = {
 };
 
 export const addItem: AddItem = async (
-  db,
-  table,
-  item,
-  skipSync,
-  enqueueSync,
-) => {
+  db: DbLike,
+  table: string,
+  item: unknown,
+  skipSync: boolean,
+  enqueueSync: EnqueueSync,
+): Promise<string> => {
   if (table === "cards") {
     assertNoBlobUrlInCardPayload(item, {
       entityType: table,
@@ -211,9 +213,9 @@ export const addItem: AddItem = async (
         }
 
         if (saved) break;
-        await new Promise<void>((resolve) =>
-          setTimeout(resolve, 35 * attempt),
-        );
+        await new Promise<void>((resolve) => {
+          setTimeout(resolve, 35 * attempt);
+        });
       }
 
       if (!saved) {
@@ -303,13 +305,13 @@ type UpdateItem = {
 };
 
 export const updateItem: UpdateItem = async (
-  db,
-  table,
-  id,
-  changes,
-  skipSync,
-  enqueueSync,
-) => {
+  db: DbLike,
+  table: string,
+  id: string,
+  changes: unknown,
+  skipSync: boolean,
+  enqueueSync: EnqueueSync,
+): Promise<number> => {
   if (table === "documents") {
     if (!isDocDbCtx(db)) {
       throw new Error(
@@ -372,7 +374,11 @@ type DeleteItem = {
   (db: DbLike, table: string, id: string): Promise<void>;
 };
 
-export const deleteItem: DeleteItem = async (db, table, id) => {
+export const deleteItem: DeleteItem = async (
+  db: DbLike,
+  table: string,
+  id: string,
+): Promise<void> => {
   if (table === "documents") {
     if (!isDocDbCtx(db)) {
       throw new Error(
@@ -457,12 +463,12 @@ type BulkUpsert = {
 };
 
 export const bulkUpsert: BulkUpsert = async (
-  db,
-  table,
-  items,
-  skipSync,
-  enqueueSync,
-) => {
+  db: DbLike,
+  table: string,
+  items: unknown[],
+  skipSync: boolean,
+  enqueueSync: EnqueueSync,
+): Promise<void> => {
   if (items.length === 0) return;
 
   if (table === "cards") {
@@ -474,7 +480,7 @@ export const bulkUpsert: BulkUpsert = async (
     }
   }
 
-  const payload = items.filter(isRecord).map((item) => item as AnyRow);
+  const payload = items.filter(isRecord).map((item) => ({ ...item }) as AnyRow);
 
   if (table === "cards") {
     for (const entry of payload) {
@@ -524,12 +530,12 @@ type Upsert = {
 };
 
 export const upsert: Upsert = async (
-  db,
-  tableName,
-  data,
-  skipSync,
-  enqueueSync,
-) => {
+  db: DbLike,
+  tableName: string,
+  data: unknown,
+  skipSync: boolean,
+  enqueueSync: EnqueueSync,
+): Promise<void> => {
   if (tableName === "cards") {
     assertNoBlobUrlInCardPayload(data, {
       entityType: tableName,
