@@ -20,6 +20,7 @@ import type { PdfViewerHandle } from "./PdfViewer";
 import { PdfViewer } from "./PdfViewer";
 import { usePdfContainerWidth } from "./hooks/usePdfContainerWidth";
 import { usePdfSourceResolver } from "./hooks/usePdfSourceResolver";
+import { defaultPdfViewerOptions } from "./defaultPdfViewerOptions";
 import { usePdfViewerPersistence } from "./hooks/usePdfViewerPersistence";
 import {
   FIT_MAX_SCALE,
@@ -75,6 +76,13 @@ export const PdfPane = ({
     const usableWidth = Math.max(1, containerWidth - FIT_PADDING_X);
     return clampScale(Number((usableWidth / basePageWidth).toFixed(3)));
   }, [containerWidth, basePageWidth]);
+
+  const resolvedViewerOptions = useMemo(() => {
+    return {
+      ...defaultPdfViewerOptions,
+      ...viewerOptions,
+    };
+  }, [viewerOptions]);
 
   const {
     currentPage,
