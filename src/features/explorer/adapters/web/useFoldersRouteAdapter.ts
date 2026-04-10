@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useIsDesktopRuntime } from "@/hooks/platform/useIsDesktopRuntime";
-import type { ExplorerRouteState } from "../../contracts/explorerRouteState";
+export type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 import { mapSearchParamsToExplorerRouteState } from "../../mappers/mapSearchParamsToExplorerRouteState";
 import {
   getLastSelectedFolderId,

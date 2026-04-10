@@ -1,6 +1,6 @@
 import type { SelectedExplorerItem } from "@/types";
-import type { ExplorerBreadcrumbContext } from "../contracts/explorerBreadcrumbContext";
-import type { ExplorerRouteState } from "../contracts/explorerRouteState";
+import type { ExplorerBreadcrumbContext } from "@/features/breadcrumbs/types";
+import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 
 export type ExplorerAction =
   | { type: "APPLY_ROUTE_STATE"; payload: ExplorerRouteState }

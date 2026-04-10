@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import type { Notification } from "@/types/notification";
+import type { Notification } from "@/types/domain/notification";
 import { notificationService } from "@/services/NotificationService";
 import { InfoToast } from "./InfoToast";
 import { WarningDialog } from "./WarningDialog";

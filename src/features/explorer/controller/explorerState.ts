@@ -3,7 +3,7 @@ import {
   type ExplorerBreadcrumbContext,
 } from "../contracts/explorerBreadcrumbContext";
 import type { ExplorerControllerState } from "../contracts/explorerControllerState";
-import type { ExplorerRouteState } from "../contracts/explorerRouteState";
+import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 
 export const createInitialExplorerState = (
   routeState: ExplorerRouteState,

@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef } from "react";
-import { useCallback, useEffect, useRef } from "react";
 import type { PdfScaleChangeSource } from "@/components/pdf/pdfViewerTypes";
 import {
   clampScale,

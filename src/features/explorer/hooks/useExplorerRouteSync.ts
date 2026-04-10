@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { SelectedExplorerItem } from "@/types";
-import type { ExplorerRouteState } from "../contracts/explorerRouteState";
+import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 import type { FoldersRouteAdapter } from "../adapters/web/useFoldersRouteAdapter";
 import { mapExplorerSelectionToSearchParams } from "../mappers/mapExplorerSelectionToSearchParams";
 import { isSameSelectedExplorerItem } from "../utils/isSameSelectedExplorerItem";
