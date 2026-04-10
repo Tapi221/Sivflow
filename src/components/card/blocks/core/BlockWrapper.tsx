@@ -154,6 +154,11 @@ export const BlockWrapper = ({
     window.addEventListener("pointercancel", onPointerEnd);
   };
 
+  const resolvedDragHandleProps =
+    dragHandleProps && typeof dragHandleProps === "object"
+      ? (dragHandleProps as React.HTMLAttributes<HTMLDivElement>)
+      : undefined;
+
   const overlay = showOverlay ? (
     <div
       data-active={isActive ? "true" : "false"}
@@ -165,7 +170,7 @@ export const BlockWrapper = ({
     >
       {showDragHandle && (
         <div
-          {...dragHandleProps}
+          {...resolvedDragHandleProps}
           onPointerDown={startStepDrag}
           className={cn(
             "w-5 h-5 min-w-0 min-h-0 p-0 bg-white border border-slate-100 rounded-full text-slate-400 shadow-sm flex items-center justify-center flex-none transition-colors",

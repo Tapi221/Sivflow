@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { CodeBlockData } from "@/types/code-block";
+import type { CodeBlockData } from "@/types/core/code-block";
 import { CodeBlockContent } from "./CodeBlockContent";
 import { normalizeEditorLanguage } from "./codeBlockLanguage";
 

@@ -610,19 +610,18 @@ export const BlockEditor = React.forwardRef<
 
                 const newBlocks = parsed.map((p) => {
                   const newId = `${prefix}-${p.type}-${uid()}`;
-
-                  if (isGridOffsetType(p.type)) {
+                  if (p.type === "code") {
                     return {
                       id: newId,
-                      type: p.type,
-                      ...(p.type === "code" ? { code: p.code } : {}),
+                      type: "code" as const,
+                      code: p.code,
                       content: "",
                       images: [],
                       audios: [],
                       offsetRows: Math.max(0, baseOffset),
                       rowOffset: undefined,
                       orderIndex: 0,
-                    } as CardBlock;
+                    } satisfies CardBlock;
                   }
 
                   return {
@@ -634,7 +633,7 @@ export const BlockEditor = React.forwardRef<
                     audios: [],
                     rowOffset: baseOffset,
                     orderIndex: 0,
-                  } as CardBlock;
+                  } satisfies CardBlock;
                 });
 
                 const source = blocksRef.current;

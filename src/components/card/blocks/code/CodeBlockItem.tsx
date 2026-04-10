@@ -2,7 +2,7 @@ import React from "react";
 import { Code } from "@/ui/icons";
 import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
 import { CodeBlockEditor } from "./CodeBlockEditor";
-import type { CodeBlockData } from "@/types/code-block";
+import type { CodeBlockData } from "@/types/core/code-block";
 import { cn } from "@/lib/utils";
 
 interface CodeBlockItemProps {

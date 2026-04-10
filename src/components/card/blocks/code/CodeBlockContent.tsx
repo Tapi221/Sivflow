@@ -139,9 +139,9 @@ export const CodeBlockContent = (props: CodeBlockContentProps) => {
       type="button"
     >
       {copied ? (
-        <Check size={11} strokeWidth={2.5} />
+        <Check className="h-[11px] w-[11px]" />
       ) : (
-        <Copy size={11} strokeWidth={2} />
+        <Copy className="h-[11px] w-[11px]" />
       )}
       <span>{copied ? "Copied" : "Copy"}</span>
     </button>
