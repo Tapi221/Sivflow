@@ -1,14 +1,17 @@
+import { useEffect, useRef } from "react";
 import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getPageRuledBg } from "@/components/card/frame/ruledStyles";
 import { useCards } from "@/hooks/card/useCards";
 import { useFolders } from "@/hooks/folder/useFolders";
 import { useDocuments } from "@/hooks/platform/useDocuments";
 import { cn } from "@/lib/utils";
-import { getPageRuledBg } from "@/components/card/frame/ruledStyles";
-import { useExplorerController } from "../controller/useExplorerController";
+import type { SelectedExplorerItem } from "@/types";
 import { notifySelectedFolderChanged } from "../adapters/web/explorerSelectionNotifier";
 import type { FoldersRouteAdapter } from "../adapters/web/useFoldersRouteAdapter";
 import { useWorkspaceScrollController } from "../adapters/web/useWorkspaceScrollController";
+import type { ExplorerRouteState } from "../contracts/explorerRouteState";
+import { useExplorerController } from "../controller/useExplorerController";
 import { useExplorerBreadcrumbSync } from "../hooks/useExplorerBreadcrumbSync";
 import { useExplorerFolderSelectionBridge } from "../hooks/useExplorerFolderSelectionBridge";
 import { useExplorerLookups } from "../hooks/useExplorerLookups";
@@ -19,14 +22,19 @@ type FoldersScreenProps = {
 };
 
 export const FoldersScreen = ({ route }: FoldersScreenProps) => {
-  const initialRouteState = route.readRouteState();
-  const { resetExplorerPaneScroll } = useWorkspaceScrollController({
-    isDesktop: route.isDesktop,
-  });
+  const initialRouteStateRef = useRef<ExplorerRouteState | null>(null);
+
+  if (initialRouteStateRef.current === null) {
+    initialRouteStateRef.current = route.readRouteState();
+  }
 
   const controller = useExplorerController({
-    initialRouteState,
+    initialRouteState: initialRouteStateRef.current,
     onOpenSettings: route.openSettings,
+  });
+
+  const { resetExplorerPaneScroll } = useWorkspaceScrollController({
+    isDesktop: route.isDesktop,
   });
 
   const { folders = [], loading: foldersLoading } = useFolders();
@@ -42,6 +50,7 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
 
   useExplorerRouteSync({
     route,
+    isHomeOnlyMode: controller.state.isHomeOnlyMode,
     selectedFolderId: controller.state.selectedFolderId,
     selectedItem: controller.state.selectedItem,
     applyRouteState: controller.actions.applyRouteState,
@@ -53,7 +62,7 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
     onNavigateToSectionList: controller.actions.navigateToSectionList,
   });
 
-  const { onBreadcrumbContextChange } = useExplorerBreadcrumbSync({
+  useExplorerBreadcrumbSync({
     selectedFolderId: controller.state.selectedFolderId,
     selectedItem: controller.state.selectedItem,
     explorerBreadcrumbContext: controller.state.explorerBreadcrumbContext,
@@ -62,14 +71,17 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
     documentById: lookups.documentById,
   });
 
+  useEffect(() => {
+    route.persistLastSelectedFolderId(controller.state.selectedFolderId);
+    notifySelectedFolderChanged(controller.state.selectedFolderId);
+  }, [route, controller.state.selectedFolderId]);
+
   const handleFolderSelect = (folderId: string | null) => {
     resetExplorerPaneScroll();
-    route.persistLastSelectedFolderId(folderId);
-    notifySelectedFolderChanged(folderId);
     controller.actions.selectFolder(folderId);
   };
 
-  const handleItemSelect = (item: import("@/types").SelectedExplorerItem) => {
+  const handleItemSelect = (item: SelectedExplorerItem) => {
     controller.actions.selectItem(item);
   };
 
@@ -112,12 +124,10 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
             selectedDocumentId={lookups.selectedDocumentId}
             onFolderSelect={handleFolderSelect}
             onItemSelect={handleItemSelect}
-            onCardUpdated={() => {}}
-            onBreadcrumbContextChange={(next) => {
-              controller.actions.setBreadcrumbContext(
-                onBreadcrumbContextChange(next),
-              );
+            onCardUpdated={() => {
+              // カード更新後の処理は既存実装へ委譲
             }}
+            onBreadcrumbContextChange={controller.actions.setBreadcrumbContext}
             navigateToSectionListToken={
               controller.state.navigateToSectionListToken
             }

@@ -2,20 +2,28 @@ import type { SelectedExplorerItem } from "@/types";
 
 type Params = {
   baseSearchParams: URLSearchParams;
+  isHomeOnlyMode: boolean;
   selectedFolderId: string | null;
   selectedItem: SelectedExplorerItem;
 };
 
 export const mapExplorerSelectionToSearchParams = ({
   baseSearchParams,
+  isHomeOnlyMode,
   selectedFolderId,
   selectedItem,
 }: Params): URLSearchParams => {
   const next = new URLSearchParams(baseSearchParams.toString());
 
-  if (selectedFolderId || selectedItem) {
-    next.delete("home");
+  if (isHomeOnlyMode) {
+    next.set("home", "1");
+    next.delete("folderId");
+    next.delete("cardId");
+    next.delete("docId");
+    return next;
   }
+
+  next.delete("home");
 
   if (selectedFolderId) {
     next.set("folderId", selectedFolderId);

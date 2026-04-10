@@ -1,15 +1,16 @@
-import { useCallback, useLayoutEffect, useMemo } from "react";
+import { useLayoutEffect, useMemo } from "react";
 import { useBreadcrumbContext } from "@/contexts/BreadcrumbContext";
 import { buildExplorerBreadcrumbs } from "@/features/breadcrumbs/builders";
+import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 import type { ExplorerBreadcrumbContext } from "../contracts/explorerBreadcrumbContext";
 
 type Params = {
   selectedFolderId: string | null;
-  selectedItem: import("@/types").SelectedExplorerItem;
+  selectedItem: SelectedExplorerItem;
   explorerBreadcrumbContext: ExplorerBreadcrumbContext;
-  folderById: Map<string, import("@/types").Folder>;
-  cardById: Map<string, import("@/types").Card>;
-  documentById: Map<string, import("@/types").DocumentItem>;
+  folderById: Map<string, Folder>;
+  cardById: Map<string, Card>;
+  documentById: Map<string, DocumentItem>;
 };
 
 export const useExplorerBreadcrumbSync = ({
@@ -45,13 +46,4 @@ export const useExplorerBreadcrumbSync = ({
   useLayoutEffect(() => {
     setExtraCrumbs(extraCrumbs);
   }, [extraCrumbs, setExtraCrumbs]);
-
-  const onBreadcrumbContextChange = useCallback(
-    (next: ExplorerBreadcrumbContext) => next,
-    [],
-  );
-
-  return {
-    onBreadcrumbContextChange,
-  };
 };
