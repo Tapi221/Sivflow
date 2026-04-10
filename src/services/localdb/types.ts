@@ -16,7 +16,6 @@ import type {
 import type { InMemoryLocalDB } from "@/services/InMemoryLocalDB";
 import type { LocalDB } from "./LocalDB";
 
-// Map機能は削除済みだが、旧DB互換（読み取り/救出）とDexie型のために最小定義だけ残す
 export type CardRelation = {
   id: string;
   userId: string;
@@ -40,7 +39,6 @@ export type ProjectMap = {
   [key: string]: unknown;
 };
 
-/** 現行タグレコード型（id が主体） */
 export type TagRecord = {
   id: string;
   name: string;
@@ -127,5 +125,19 @@ export interface LocalDBSyncApi {
   ): Promise<number>;
 }
 
-export type LocalDBLike = (LocalDB | InMemoryLocalDB) & LocalDBSyncApi;
+export interface LocalDBSyncStore extends LocalDBSyncApi {
+  listCardsByUser(userId: string): Promise<Card[]>;
+  listFoldersByUser(userId: string): Promise<Folder[]>;
+  listCardSetsByUser(userId: string): Promise<CardSet[]>;
+  addCardSet(cardSet: CardSet): Promise<void>;
+  updateCardById(id: string, changes: Partial<Card>): Promise<number>;
+  runSyncTransaction<T>(scope: () => Promise<T>): Promise<T>;
+  clearSyncTables(tables: readonly SyncableEntityTable[]): Promise<void>;
+  putSyncRecord<TTable extends SyncableEntityTable>(
+    table: TTable,
+    data: LocalDBTableMap[TTable],
+  ): Promise<void>;
+}
+
+export type LocalDBLike = (LocalDB | InMemoryLocalDB) & LocalDBSyncStore;
 export type LocalDBInstance = LocalDBLike;

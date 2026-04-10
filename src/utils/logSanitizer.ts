@@ -16,12 +16,14 @@ const SENSITIVE_KEYS = new Set([
 
 const REDACTED = "[REDACTED]";
 
-const sanitizeValue = (value: unknown, depth: number) => {
+const sanitizeValue = (value: unknown, depth: number): unknown => {
   if (depth > 4) return "[TRUNCATED]";
-  if (typeof value === "string")
+  if (typeof value === "string") {
     return value.length > 120 ? `${value.slice(0, 120)}...` : value;
-  if (Array.isArray(value))
+  }
+  if (Array.isArray(value)) {
     return value.map((item) => sanitizeValue(item, depth + 1));
+  }
   if (!value || typeof value !== "object") return value;
 
   const out: Record<string, unknown> = {};
@@ -35,6 +37,6 @@ const sanitizeValue = (value: unknown, depth: number) => {
   return out;
 };
 
-export const sanitizeForLog = (value: T) => {
+export const sanitizeForLog = <T>(value: T): T => {
   return sanitizeValue(value, 0) as T;
 };

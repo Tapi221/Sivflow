@@ -1,14 +1,26 @@
 import { firestoreDb, storage } from "@/services/firebase";
-import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
-import { ref, deleteObject } from "firebase/storage";
 import type { UploadMetadata } from "@/types";
+import { collection, deleteDoc, doc, getDocs } from "firebase/firestore";
+import { deleteObject, ref } from "firebase/storage";
 
-/**
- * 24時間以上経過した、完了していないアップロード（failed, uploading, pending）をクリーンアップします。
- *
- * @param userId ユーザーID
- * @returns 削除結果（件数とエラーリスト）
- */
+const toDate = (value: unknown): Date | null => {
+  if (value instanceof Date) return value;
+  if (
+    value &&
+    typeof value === "object" &&
+    "toDate" in value &&
+    typeof (value as { toDate?: unknown }).toDate === "function"
+  ) {
+    const converted = (value as { toDate: () => unknown }).toDate();
+    return converted instanceof Date ? converted : null;
+  }
+  if (typeof value === "number" || typeof value === "string") {
+    const converted = new Date(value);
+    return Number.isNaN(converted.getTime()) ? null : converted;
+  }
+  return null;
+};
+
 export const cleanupFailedUploads = async (userId: string) => {
   const result = {
     deleted: 0,
@@ -16,30 +28,15 @@ export const cleanupFailedUploads = async (userId: string) => {
   };
 
   try {
-    // 24時間前の閾値
     const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    // アップロードメタデータのコレクション
     const uploadsRef = collection(firestoreDb, `users/${userId}/uploads`);
-
-    // クエリ: 24時間より古く、かつステータスが ready 以外
-    // Firestore では != 演算子が使えるが、インデックスの都合上、個別にチェックするか
-    // あるいは simple get してクライアント側でフィルタリングする手法をとる
     const snapshot = await getDocs(uploadsRef);
 
-    const staleUploads = snapshot.docs.filter((doc) => {
-      const data = doc.data() as UploadMetadata;
-      const uploadedAt = data.uploadedAt;
-
-      // Timestamp か Date かを判定して比較
-      const date =
-        uploadedAt &&
-        typeof (uploadedAt as { toDate?: () => Date }).toDate === "function"
-          ? (uploadedAt as { toDate: () => Date }).toDate()
-          : uploadedAt;
-
-      const isOld = date && new Date(date) < yesterday;
+    const staleUploads = snapshot.docs.filter((uploadDoc) => {
+      const data = uploadDoc.data() as UploadMetadata;
+      const date = toDate(data.uploadedAt);
+      const isOld = date !== null && date < yesterday;
       const isNotReady = data.status !== "ready";
-
       return isOld && isNotReady;
     });
 
@@ -48,23 +45,27 @@ export const cleanupFailedUploads = async (userId: string) => {
       const docId = uploadDoc.id;
 
       try {
-        // 1. Storage からファイルを削除（パスが存在する場合）
         if (data.storagePath) {
           const fileRef = ref(storage, data.storagePath);
           try {
             await deleteObject(fileRef);
           } catch (e: unknown) {
-            // ファイルが既に存在しない場合は無視してメタデータ削除に進む
-            if (e.code !== "storage/object-not-found") {
+            const storageErrorCode =
+              typeof e === "object" &&
+              e !== null &&
+              "code" in e &&
+              typeof (e as { code?: unknown }).code === "string"
+                ? (e as { code: string }).code
+                : null;
+
+            if (storageErrorCode !== "storage/object-not-found") {
               throw e;
             }
           }
         }
 
-        // 2. Firestore からメタデータを削除
         await deleteDoc(doc(firestoreDb, `users/${userId}/uploads`, docId));
-
-        result.deleted++;
+        result.deleted += 1;
       } catch (err) {
         console.error(`Failed to cleanup upload ${docId}:`, err);
         result.errors.push({ id: docId, error: err });

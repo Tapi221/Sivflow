@@ -1,7 +1,10 @@
-export {
+import {
   normalizeMemoryStability,
   type SubjectiveScore,
 } from "@/domain/card/review/stability";
+import { calculateRetentionProbability } from "./reviewMetrics";
+
+export { normalizeMemoryStability, type SubjectiveScore };
 
 export type StabilityPhase = {
   key: "unstable" | "fragile" | "growing" | "stable" | "solid";
@@ -11,9 +14,6 @@ export type StabilityPhase = {
   calendarClass: string;
 };
 
-import { calculateRetentionProbability } from "./reviewMetrics";
-
-// Phase thresholds for Retention Probability (0-100 range)
 const PHASES: Array<{ min: number; phase: StabilityPhase }> = [
   {
     min: 0,
@@ -67,23 +67,12 @@ const PHASES: Array<{ min: number; phase: StabilityPhase }> = [
   },
 ];
 
-/**
- * Get stability phase based on Retention Probability.
- *
- * @param stabilityInternal - Internal Memory Stability (0-1)
- * @param intervalDays - Days until next review (or current interval)
- */
 export const getStabilityPhase = (
   stabilityInternal: number,
   intervalDays: number = 1,
 ): StabilityPhase => {
-  // Normalize S first
   const s = normalizeMemoryStability(stabilityInternal);
-
-  // Calculate P (Retention %)
   const retention = calculateRetentionProbability(s, intervalDays);
-
-  // Find phase
   const matched = [...PHASES].reverse().find((entry) => retention >= entry.min);
   return matched?.phase ?? PHASES[0].phase;
 };

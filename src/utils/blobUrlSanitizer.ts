@@ -16,7 +16,7 @@ export type SanitizeResult<T> = {
 export const isBlobUrl = (v: unknown): v is string =>
   typeof v === "string" && v.startsWith("blob:");
 
-export const sanitizeBlobUrlsDeep = (input: T) => {
+export const sanitizeBlobUrlsDeep = <T>(input: T): SanitizeResult<T> => {
   const fixes: BlobUrlFix[] = [];
 
   const shouldPreserveObject = (value: unknown): boolean => {

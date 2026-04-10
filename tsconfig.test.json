@@ -11,15 +11,17 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "baseUrl": ".",
+    "types": ["vitest/globals", "node"],
     "paths": {
       "@/*": ["src/*"]
     }
   },
-  "include": ["src"],
-  "exclude": [
+  "include": [
     "src/**/*.test.ts",
     "src/**/*.test.tsx",
-    "src/tests/**",
-    "tests/**"
+    "src/tests/**/*.ts",
+    "src/tests/**/*.tsx",
+    "tests/**/*.ts",
+    "tests/**/*.tsx"
   ]
 }
