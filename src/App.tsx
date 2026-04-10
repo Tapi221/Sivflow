@@ -1,6 +1,5 @@
 import { BreadcrumbProvider } from "@/contexts/BreadcrumbContext";
 import { BlockNoteSandboxPage } from "@/sandbox/blocknote";
-import { sanitizeForLog } from "@/utils/logSanitizer";
 import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { NotificationProvider } from "./components/notifications/NotificationProvider";
@@ -8,13 +7,13 @@ import { AccountLockedScreen } from "./components/security/AccountLockedScreen";
 import { useAuthSession } from "./contexts/auth/AuthSessionContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ToastProvider } from "./contexts/ToastContext";
-import { flags } from "./features/flags";
 import { useSync } from "./hooks/sync/useSync";
 import Layout from "./Layout";
+import {
+  resetStartupTasks,
+  runStartupTasks,
+} from "./application/startup/RunStartupTasks";
 import { signInWithGoogle } from "./services/auth/googleSignIn";
-import { autoBackupService } from "./services/AutoBackupService";
-import { dataIntegrityService } from "./services/DataIntegrityService";
-import { SyncServiceFactory } from "./services/SyncServiceFactory";
 import { DEV_MODE, isLocalHost } from "./utils/envGuards";
 
 const Calendar = lazy(() => import("./routes/Calendar"));
@@ -223,14 +222,10 @@ const AppContent = () => {
   useEffect(() => {
     let disposed = false;
 
-    const resetQueue = async () => {
-      const { resetOperationQueue } = await import("./utils/queueUtils");
-      resetOperationQueue();
-    };
-
     if (!currentUser?.uid) {
       startedUserIdRef.current = null;
-      void resetQueue();
+      void resetStartupTasks();
+
       return () => {
         disposed = true;
       };
@@ -246,76 +241,10 @@ const AppContent = () => {
 
     startedUserIdRef.current = userId;
 
-    const runStartupTasks = async () => {
-      try {
-        const { initializeOperationQueue } = await import("./utils/queueUtils");
-        await initializeOperationQueue(userId);
-
-        if (disposed) {
-          return;
-        }
-
-        console.log("[Queue] Operation Queue initialized", { userId });
-
-        const didBackup = await autoBackupService.performAutoBackup(userId);
-
-        if (disposed) {
-          return;
-        }
-
-        if (didBackup) {
-          console.log("Auto backup completed on startup");
-        }
-
-        const report = await dataIntegrityService.checkIntegrity();
-
-        if (disposed) {
-          return;
-        }
-
-        if (!report.isHealthy) {
-          const issueSummary = report.issues.reduce<Record<string, number>>(
-            (acc, issue) => {
-              acc[issue.code] = (acc[issue.code] || 0) + 1;
-              return acc;
-            },
-            {},
-          );
-
-          console.error(
-            "[Critical] Data integrity issues found:",
-            report.issues.length,
-            sanitizeForLog(issueSummary),
-          );
-        } else {
-          console.log(
-            "[Safe] Data integrity check passed (0 errors). Healthy items:",
-            report.totalCards,
-            "cards,",
-            report.totalFolders,
-            "folders.",
-          );
-        }
-
-        if (flags.isEnabled("USE_SYNC_V2")) {
-          console.log("[Sync] Startup sync initiated");
-          const syncService = await SyncServiceFactory.getInstance(userId);
-
-          if (disposed) {
-            return;
-          }
-
-          await syncService.performStartupSync();
-        }
-      } catch (error) {
-        console.error(
-          "[Critical] Startup tasks failed:",
-          sanitizeForLog(error),
-        );
-      }
-    };
-
-    void runStartupTasks();
+    void runStartupTasks({
+      userId,
+      isDisposed: () => disposed,
+    });
 
     return () => {
       disposed = true;
