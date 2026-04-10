@@ -27,6 +27,7 @@ import type {
   SyncTask,
 } from "./interfaces/ISyncService";
 import type { LocalDBLike } from "./localDB";
+import { CURRENT_TAG_STORE } from "./localdb/tagStoreNames";
 import { SecurityMonitor } from "./logic/SecurityMonitor";
 import { TelemetryService } from "./logic/TelemetryService";
 
@@ -35,7 +36,7 @@ const SYNC_TABLE_BY_TYPE = {
   folder: "folders",
   cardSet: "cardSets",
   document: "documents",
-  tag: "tags_v3",
+  tag: CURRENT_TAG_STORE,
   asset: "images",
   userSetting: "userSettings",
 } as const;
@@ -45,7 +46,7 @@ const FULL_RESYNC_TABLES = [
   "cardSets",
   "cards",
   "documents",
-  "tags_v3",
+  CURRENT_TAG_STORE,
   "userSettings",
   "images",
 ] as const;

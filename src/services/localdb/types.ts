@@ -57,7 +57,7 @@ export type LocalDBTableMap = {
   folders: Folder;
   cardSets: CardSet;
   documents: Document;
-  tags_v3: TagRecord;
+  tagRecords: TagRecord;
   images: AssetRecord | UploadedImage;
   userSettings: UserSettings;
   userStats: UserStats;
