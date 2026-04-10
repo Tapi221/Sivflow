@@ -10,24 +10,24 @@ import { resolveCardTagNames, useTags } from "@/hooks/settings/useTags";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { cn } from "@/lib/utils";
 import {
-    createAppDestination,
-    createPageUrl,
+  createAppDestination,
+  createPageUrl,
 } from "@/platform/web/navigation/toWebPath";
 import type {
-    Card,
-    CardSet,
-    DocumentItem,
-    Folder,
-    SelectedExplorerItem,
+  Card,
+  CardSet,
+  DocumentItem,
+  Folder,
+  SelectedExplorerItem,
 } from "@/types";
 import type { ComponentProps } from "react";
 import {
-    useCallback,
-    useEffect,
-    useLayoutEffect,
-    useMemo,
-    useRef,
-    useState,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
 } from "react";
 import { useNavigate } from "react-router-dom";
 

@@ -1855,4 +1855,73 @@ export const defineSchema = (db: LocalDB): void => {
         delete card.answer_extra_rows;
       });
     });
+
+  // Version 30: 現行タグストアを tags_v3 -> tagRecords へ移行
+  // - local IndexedDB 上の current store 名を tagRecords に変更
+  // - 既存ユーザーの tags_v3 データを tagRecords へ idempotent にコピー
+  // - tags_v3 は legacy として残す（この段階では削除しない）
+  db.version(30)
+    .stores({
+      folders:
+        "id, userId, parentFolderId, updatedAt, cloudSyncEnabled, isDeleted, [userId+updatedAt], [userId+isDeleted]",
+      cardSets:
+        "id, userId, folderId, updatedAt, isDeleted, [userId+updatedAt], [userId+folderId]",
+      cards:
+        "id, userId, folderId, cardSetId, updatedAt, nextReviewDate, isDeleted, difficulty, reviewCount, [userId+updatedAt], [userId+isDeleted], [userId+nextReviewDate], [cardSetId+isDeleted], *tagIds",
+      documents:
+        "id, userId, folderId, updatedAt, isDeleted, [userId+updatedAt], [userId+folderId]",
+      users: "id, userId, updatedAt",
+      userSettings: "id, userId, updatedAt, isDeleted, [userId+updatedAt]",
+      userStats: "id, userId, updatedAt, isDeleted, [userId+updatedAt]",
+      syncMetadata: "userId, deviceId",
+      levelHistories: "id, userId, cardId, changedAt",
+      deviceMeta: "deviceId, userId",
+      syncErrors: "id, occurredAt, phase, retryable",
+      syncHistory: "id, finishedAt",
+      syncSettings: "id",
+      syncQueue:
+        "id, targetId, status, priority, [status+priority], [targetId+status], idempotencyKey, &migrationKey",
+      conflicts: "id, entityId",
+      tags: "[rootFolderId+name], rootFolderId, userId, updatedAt",
+      tags_v2: "[userId+name], userId, updatedAt",
+      tags_v3:
+        "id, userId, parentId, [userId+parentId], [userId+nameLower], updatedAt",
+      tagRecords:
+        "id, userId, parentId, [userId+parentId], [userId+nameLower], updatedAt",
+      studyLogs: "id, userId, cardId, studiedAt",
+      metadata: "key",
+      images: "id, userId, status, [userId+status]",
+      cardRelations:
+        "id, userId, fromCardId, toCardId, updatedAt, [userId+updatedAt]",
+      projectMaps: "id, userId, folderId, updatedAt, [userId+updatedAt]",
+    })
+    .upgrade(async (tx) => {
+      type LocalTagRow = {
+        id: string;
+        name: string;
+        nameLower: string;
+        color: string;
+        userId: string;
+        updatedAt: Date;
+        categoryId?: string;
+        parentId?: string;
+      };
+
+      const legacyTable = tx.table("tags_v3");
+      const currentTable = tx.table("tagRecords");
+
+      const existingRows = (await currentTable.toArray()) as LocalTagRow[];
+      const existingIds = new Set(existingRows.map((row) => row.id));
+
+      const legacyRows = (await legacyTable.toArray()) as LocalTagRow[];
+      const toAdd = legacyRows.filter((row) => !existingIds.has(row.id));
+
+      if (toAdd.length > 0) {
+        await currentTable.bulkAdd(toAdd);
+      }
+
+      console.log(
+        `[Migration v30] tagRecords copied=${toAdd.length}, legacy=${legacyRows.length}`,
+      );
+    });
 };
