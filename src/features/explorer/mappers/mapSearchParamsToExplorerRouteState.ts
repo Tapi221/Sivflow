@@ -22,7 +22,7 @@ export const mapSearchParamsToExplorerRouteState = ({
     isHomeOnlyMode,
     selectedFolderId: isHomeOnlyMode
       ? null
-      : queryFolderId ?? fallbackFolderId ?? null,
+      : (queryFolderId ?? fallbackFolderId ?? null),
     selectedItem: isHomeOnlyMode
       ? null
       : queryCardId

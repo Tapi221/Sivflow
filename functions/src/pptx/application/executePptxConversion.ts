@@ -8,7 +8,6 @@ import {
   buildDefaultManifestPath,
   readManifestMetadata,
 } from "../infrastructure/storage/manifestRepository";
-import { resolveConverterEndpointFromEnv } from "../security/guards";
 
 export const executePptxConversion = async ({
   userId,
@@ -20,15 +19,6 @@ export const executePptxConversion = async ({
   sourceStoragePath: string;
 }): Promise<ResolvedManifestMetadata> => {
   const defaultManifestPath = buildDefaultManifestPath({ userId, docId });
-  const endpoint = resolveConverterEndpointFromEnv();
-
-  if (!endpoint) {
-    return readManifestMetadata({
-      manifestPath: defaultManifestPath,
-      userId,
-      docId,
-    });
-  }
 
   try {
     const external = await requestExternalConversion({

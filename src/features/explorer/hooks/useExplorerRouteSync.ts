@@ -7,7 +7,9 @@ type Params = {
   route: FoldersRouteAdapter;
   selectedFolderId: string | null;
   selectedItem: import("@/types").SelectedExplorerItem;
-  applyRouteState: (next: import("../contracts/explorerRouteState").ExplorerRouteState) => void;
+  applyRouteState: (
+    next: import("../contracts/explorerRouteState").ExplorerRouteState,
+  ) => void;
 };
 
 export const useExplorerRouteSync = ({

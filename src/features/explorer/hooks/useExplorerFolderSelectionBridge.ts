@@ -30,5 +30,10 @@ export const useExplorerFolderSelectionBridge = ({
         onNavigateToSectionList();
       }
     });
-  }, [folders, onNavigateToSectionList, onSelectFolder, registerFolderSelectHandler]);
+  }, [
+    folders,
+    onNavigateToSectionList,
+    onSelectFolder,
+    registerFolderSelectHandler,
+  ]);
 };

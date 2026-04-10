@@ -30,10 +30,7 @@ export const useExplorerLookups = ({
 
   const cardById = useMemo(() => buildCardById(cards), [cards]);
 
-  const documentById = useMemo(
-    () => buildDocumentById(documents),
-    [documents],
-  );
+  const documentById = useMemo(() => buildDocumentById(documents), [documents]);
 
   const selectedState = useMemo(
     () => buildExplorerSelectedState(selectedItem),

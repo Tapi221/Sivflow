@@ -65,6 +65,13 @@ export const useExplorerController = ({
         navigateToSectionList,
       },
     }),
-    [applyRouteState, navigateToSectionList, selectFolder, selectItem, setBreadcrumbContext, state],
+    [
+      applyRouteState,
+      navigateToSectionList,
+      selectFolder,
+      selectItem,
+      setBreadcrumbContext,
+      state,
+    ],
   );
 };

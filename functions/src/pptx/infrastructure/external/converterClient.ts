@@ -62,7 +62,10 @@ const parseConverterErrorPayload = async (
 export const isEndpointUnavailableError = (error: unknown): boolean => {
   const code = getErrorCode(error);
 
-  if (code === "converter_token_not_configured") {
+  if (
+    code === "converter_token_not_configured" ||
+    code === "converter_endpoint_not_configured"
+  ) {
     return true;
   }
 

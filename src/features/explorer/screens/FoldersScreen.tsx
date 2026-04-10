@@ -83,7 +83,9 @@ export const FoldersScreen = ({ route }: FoldersScreenProps) => {
     <div
       className={cn(
         "bg-[#F8FAFB] relative flex min-h-0 h-full flex-col",
-        route.isDesktop ? "overflow-hidden" : "overflow-x-hidden overflow-y-auto",
+        route.isDesktop
+          ? "overflow-hidden"
+          : "overflow-x-hidden overflow-y-auto",
       )}
     >
       <div
