@@ -11,7 +11,10 @@ const REAL_IMPLEMENTATION = "real";
 export type ConverterTokenValidation = "ok" | "misconfigured" | "unauthorized";
 
 export const asNonEmptyString = (value: unknown): string | null => {
-  if (typeof value !== "string") return null;
+  if (typeof value !== "string") {
+    return null;
+  }
+
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
 };
@@ -25,8 +28,14 @@ export const isScopedStoragePath = (
   docId: string,
 ): boolean => path.startsWith(buildDocumentPathPrefix(userId, docId));
 
+export const hasUnsafePathFragments = (value: string): boolean =>
+  value.includes("..") || value.includes("\\") || value.includes("//");
+
 const normalizeEnabledFlag = (value: string | null): boolean => {
-  if (!value) return false;
+  if (!value) {
+    return false;
+  }
+
   const normalized = value.trim().toLowerCase();
   return (
     normalized === "1" ||
@@ -43,8 +52,13 @@ export const isPlaceholderImplementationEnabled = (
     env[CONVERTER_IMPLEMENTATION_ENV],
   )?.toLowerCase();
 
-  if (implementation === PLACEHOLDER_IMPLEMENTATION) return true;
-  if (implementation === REAL_IMPLEMENTATION) return false;
+  if (implementation === PLACEHOLDER_IMPLEMENTATION) {
+    return true;
+  }
+
+  if (implementation === REAL_IMPLEMENTATION) {
+    return false;
+  }
 
   return normalizeEnabledFlag(
     asNonEmptyString(env[CONVERTER_PLACEHOLDER_ENABLED_ENV]),
@@ -56,11 +70,14 @@ export const validateConverterToken = (
   providedTokenRaw: unknown,
 ): ConverterTokenValidation => {
   const configuredToken = asNonEmptyString(configuredTokenRaw);
-  if (!configuredToken) return "misconfigured";
+  if (!configuredToken) {
+    return "misconfigured";
+  }
 
   const providedToken = asNonEmptyString(providedTokenRaw);
-  if (!providedToken || providedToken !== configuredToken)
+  if (!providedToken || providedToken !== configuredToken) {
     return "unauthorized";
+  }
 
   return "ok";
 };
