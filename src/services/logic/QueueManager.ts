@@ -179,7 +179,9 @@ export class QueueManager implements IQueueManager {
     await this.localDB.syncQueue.add(queueItem);
   };
 
-  public peekBatch = async (constraint: BatchConstraint): Promise<SyncTask[]> => {
+  public peekBatch = async (
+    constraint: BatchConstraint,
+  ): Promise<SyncTask[]> => {
     const allPending = await this.localDB.syncQueue
       .where("status")
       .equals("pending")
@@ -193,7 +195,8 @@ export class QueueManager implements IQueueManager {
     };
 
     allPending.sort((a, b) => {
-      const priorityDiff = priorityOrder[a.priority] - priorityOrder[b.priority];
+      const priorityDiff =
+        priorityOrder[a.priority] - priorityOrder[b.priority];
       if (priorityDiff !== 0) return priorityDiff;
       return a.createdAt - b.createdAt;
     });
@@ -247,6 +250,9 @@ export class QueueManager implements IQueueManager {
   };
 
   public getQueueDepth = async (): Promise<number> => {
-    return await this.localDB.syncQueue.where("status").equals("pending").count();
+    return await this.localDB.syncQueue
+      .where("status")
+      .equals("pending")
+      .count();
   };
 }

@@ -136,7 +136,8 @@ const assertUpsertPayload = <TEntity extends UpsertEntity>(
 ): SyncPayloadByEntity[TEntity] => {
   switch (entity) {
     case "card":
-      if (isCardPayload(payload)) return payload as SyncPayloadByEntity[TEntity];
+      if (isCardPayload(payload))
+        return payload as SyncPayloadByEntity[TEntity];
       break;
     case "folder":
       if (isFolderPayload(payload))

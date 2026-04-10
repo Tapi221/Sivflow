@@ -26,4 +26,3 @@ export interface NotificationOptions {
   duration?: number;
   actions?: NotificationAction[];
 }
-

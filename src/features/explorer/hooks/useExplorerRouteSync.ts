@@ -30,8 +30,24 @@ export const useExplorerRouteSync = ({
 }: Params) => {
   const pendingQueryRef = useRef<string | null>(null);
   const timerRef = useRef(0);
+  const previousRouteKeyRef = useRef(route.routeKey);
 
   useEffect(() => {
+    const currentQuery = route.getBaseSearchParams().toString();
+    const didRouteChangeExternally =
+      previousRouteKeyRef.current !== route.routeKey &&
+      pendingQueryRef.current !== currentQuery;
+
+    if (didRouteChangeExternally) {
+      if (timerRef.current) {
+        window.clearTimeout(timerRef.current);
+        timerRef.current = 0;
+      }
+
+      pendingQueryRef.current = null;
+      return;
+    }
+
     const currentRouteState = route.readRouteState();
     const nextRouteState: ExplorerRouteState = {
       isHomeOnlyMode,
@@ -40,8 +56,6 @@ export const useExplorerRouteSync = ({
     };
 
     if (areRouteStatesEqual(currentRouteState, nextRouteState)) {
-      const currentQuery = route.getBaseSearchParams().toString();
-
       if (pendingQueryRef.current === currentQuery) {
         pendingQueryRef.current = null;
       }
@@ -61,7 +75,6 @@ export const useExplorerRouteSync = ({
     });
 
     const targetQuery = nextSearchParams.toString();
-    const currentQuery = route.getBaseSearchParams().toString();
 
     if (targetQuery === currentQuery) {
       if (pendingQueryRef.current === currentQuery) {
@@ -88,6 +101,10 @@ export const useExplorerRouteSync = ({
       }
     };
   }, [isHomeOnlyMode, route, selectedFolderId, selectedItem]);
+
+  useEffect(() => {
+    previousRouteKeyRef.current = route.routeKey;
+  }, [route.routeKey]);
 
   useEffect(() => {
     let cancelled = false;
