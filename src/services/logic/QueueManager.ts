@@ -1,3 +1,10 @@
+import type {
+  BatchConstraint,
+  IQueueManager,
+  SyncTask,
+} from "../interfaces/ISyncService";
+import type { LocalDBLike } from "@/services/localDB";
+import type { SyncQueueItem } from "@/types/domain/sync";
 import { normalizeFolderWithSilent } from "@/domain/folder/normalizers/normalizeFolder";
 import {
   resolveBlocksFromCardData,
@@ -137,3 +144,109 @@ export const denormalizeFolderForStorage = <T>(folder: T): T => {
   if (!isRecord(folder)) return folder;
   return { ...folder } as T;
 };
+
+const getTaskPayloadId = (payload: unknown): string | null => {
+  if (!isRecord(payload)) return null;
+  return typeof payload.id === "string" && payload.id.length > 0
+    ? payload.id
+    : null;
+};
+
+export class QueueManager implements IQueueManager {
+  private readonly MAX_RETRY_COUNT = 3;
+
+  constructor(private readonly localDB: LocalDBLike) {}
+
+  public enqueue = async (task: SyncTask): Promise<void> => {
+    const queueItem: SyncQueueItem = {
+      id: task.id || `${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
+      idempotencyKey:
+        task.idempotencyKey ||
+        `ik_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
+      targetId: task.targetId || getTaskPayloadId(task.payload) || "unknown",
+      operationType:
+        task.operationType || (task.type === "upload" ? "update" : "create"),
+      type: task.type,
+      entity: task.entity,
+      payload: task.payload,
+      priority: task.priority,
+      createdAt: task.createdAt || Date.now(),
+      updatedAt: Date.now(),
+      retryCount: 0,
+      status: "pending",
+    } as SyncQueueItem;
+
+    await this.localDB.syncQueue.add(queueItem);
+  };
+
+  public peekBatch = async (constraint: BatchConstraint): Promise<SyncTask[]> => {
+    const allPending = await this.localDB.syncQueue
+      .where("status")
+      .equals("pending")
+      .toArray();
+
+    const priorityOrder: Record<SyncTask["priority"], number> = {
+      critical: 0,
+      high: 1,
+      medium: 2,
+      low: 3,
+    };
+
+    allPending.sort((a, b) => {
+      const priorityDiff = priorityOrder[a.priority] - priorityOrder[b.priority];
+      if (priorityDiff !== 0) return priorityDiff;
+      return a.createdAt - b.createdAt;
+    });
+
+    return allPending.slice(0, constraint.maxSize).map((item) => ({
+      id: item.id,
+      idempotencyKey: item.idempotencyKey,
+      targetId: item.targetId,
+      operationType: item.operationType,
+      type: item.type,
+      entity: item.entity,
+      payload: item.payload,
+      priority: item.priority,
+      createdAt: item.createdAt,
+    }));
+  };
+
+  public complete = async (taskIds: string[]): Promise<void> => {
+    await this.localDB.syncQueue.bulkDelete(taskIds);
+  };
+
+  public fail = async (
+    taskIds: string[],
+    reason: string,
+    retryable: boolean,
+  ): Promise<void> => {
+    if (!retryable) {
+      await this.localDB.syncQueue.bulkDelete(taskIds);
+      console.error("[QueueManager] Non-retryable failure:", reason, taskIds);
+      return;
+    }
+
+    for (const id of taskIds) {
+      const item = await this.localDB.syncQueue.get(id);
+      if (!item) continue;
+
+      const newRetryCount = (item.retryCount || 0) + 1;
+
+      if (newRetryCount >= this.MAX_RETRY_COUNT) {
+        await this.localDB.syncQueue.delete(id);
+        console.error("[QueueManager] Max retry exceeded:", id);
+        continue;
+      }
+
+      await this.localDB.syncQueue.update(id, {
+        retryCount: newRetryCount,
+        lastError: reason,
+        lastRetryAt: Date.now(),
+      });
+    }
+  };
+
+  public getQueueDepth = async (): Promise<number> => {
+    return await this.localDB.syncQueue.where("status").equals("pending").count();
+  };
+}

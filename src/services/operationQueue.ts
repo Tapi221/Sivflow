@@ -141,7 +141,7 @@ class OperationQueueService {
   ): Promise<void> => {
     const db = await this.getBoundDb();
 
-    await db.transaction("rw", [db.syncQueue], async () => {
+    await db.runSyncTransaction(async () => {
       const pendingItems = await db.syncQueue
         .toCollection()
         .filter(
@@ -291,7 +291,7 @@ class OperationQueueService {
       `[Queue] Found ${staleItems.length} stale processing items. Recovering...`,
     );
 
-    await db.transaction("rw", [db.syncQueue], async () => {
+    await db.runSyncTransaction(async () => {
       for (const item of staleItems) {
         const recovered: SyncQueueItem = {
           ...item,
@@ -383,9 +383,7 @@ class OperationQueueService {
 
       await Promise.all(
         candidates.map(async (item) => {
-          const lockedItem = await db.transaction<SyncQueueItem | null>(
-            "rw",
-            [db.syncQueue],
+          const lockedItem = await db.runSyncTransaction<SyncQueueItem | null>(
             async () => {
               const current = await db.syncQueue.get(item.id);
 

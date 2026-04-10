@@ -339,6 +339,6 @@ export const getSyncEnabledFolders = async (
   return db.folders
     .where("userId")
     .equals(userId)
-    .and((folder) => folder.cloudSyncEnabled === true)
+    .and((folder: Record<string, unknown>) => folder.cloudSyncEnabled === true)
     .toArray();
 };

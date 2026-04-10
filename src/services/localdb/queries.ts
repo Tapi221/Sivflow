@@ -13,6 +13,11 @@ type QueryDb = Dexie & {
   readonly syncMetadata: Table;
 };
 
+type MutableDocumentBlobFields = {
+  localUrl?: string | null;
+  blobUrl?: string | null;
+};
+
 export const getItem = async (db: QueryDb, table: string, id: string) => {
   const item = await db.table(table).get(id);
   if (table === "cards") return item ? normalizeCard(item) : item;
@@ -96,11 +101,19 @@ export const updateLastSyncTime = async (
 export const normalizeDocumentBlobUrlsForSession = async (db: QueryDb) => {
   try {
     await db.documents.toCollection().modify((d: unknown) => {
-      if (typeof d.localUrl === "string" && d.localUrl.startsWith("blob:")) {
-        d.localUrl = null;
+      const record = d as MutableDocumentBlobFields;
+
+      if (
+        typeof record.localUrl === "string" &&
+        record.localUrl.startsWith("blob:")
+      ) {
+        record.localUrl = null;
       }
-      if (typeof d.blobUrl === "string" && d.blobUrl.startsWith("blob:")) {
-        d.blobUrl = null;
+      if (
+        typeof record.blobUrl === "string" &&
+        record.blobUrl.startsWith("blob:")
+      ) {
+        record.blobUrl = null;
       }
     });
   } catch (error) {

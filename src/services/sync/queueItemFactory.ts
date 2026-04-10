@@ -21,6 +21,11 @@ type DeleteEntity = Extract<
   "card" | "folder" | "cardSet" | "document" | "tag" | "asset"
 >;
 
+type UpsertQueueItem<TEntity extends UpsertEntity> = Extract<
+  SyncQueueItem,
+  { entity: TEntity; operationType: "create" | "update" }
+>;
+
 type DateLike = Date | { toDate?: () => Date } | null | undefined;
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
@@ -125,31 +130,36 @@ const isAssetPayload = (value: unknown): value is AssetSyncPayload => {
   return isRecord(value) && hasString(value, "id");
 };
 
-const assertUpsertPayload = (
-  entity: UpsertEntity,
+const assertUpsertPayload = <TEntity extends UpsertEntity>(
+  entity: TEntity,
   payload: unknown,
-): SyncPayloadByEntity[UpsertEntity] => {
+): SyncPayloadByEntity[TEntity] => {
   switch (entity) {
     case "card":
-      if (isCardPayload(payload)) return payload;
+      if (isCardPayload(payload)) return payload as SyncPayloadByEntity[TEntity];
       break;
     case "folder":
-      if (isFolderPayload(payload)) return payload;
+      if (isFolderPayload(payload))
+        return payload as SyncPayloadByEntity[TEntity];
       break;
     case "cardSet":
-      if (isCardSetPayload(payload)) return payload;
+      if (isCardSetPayload(payload))
+        return payload as SyncPayloadByEntity[TEntity];
       break;
     case "document":
-      if (isDocumentPayload(payload)) return payload;
+      if (isDocumentPayload(payload))
+        return payload as SyncPayloadByEntity[TEntity];
       break;
     case "tag":
-      if (isTagPayload(payload)) return payload;
+      if (isTagPayload(payload)) return payload as SyncPayloadByEntity[TEntity];
       break;
     case "userSetting":
-      if (isUserSettingPayload(payload)) return payload;
+      if (isUserSettingPayload(payload))
+        return payload as SyncPayloadByEntity[TEntity];
       break;
     case "asset":
-      if (isAssetPayload(payload)) return payload;
+      if (isAssetPayload(payload))
+        return payload as SyncPayloadByEntity[TEntity];
       break;
   }
 
@@ -188,19 +198,19 @@ const createBaseQueueFields = ({
   };
 };
 
-export const createUpsertQueueItem = ({
+export const createUpsertQueueItem = <TEntity extends UpsertEntity>({
   entity,
   operationType,
   payload,
   priority = "high",
   type = "upload",
 }: {
-  entity: UpsertEntity;
+  entity: TEntity;
   operationType: Extract<SyncOperationType, "create" | "update">;
   payload: unknown;
   priority?: SyncPriority;
   type?: SyncDirection;
-}): SyncQueueItem => {
+}): UpsertQueueItem<TEntity> => {
   const checkedPayload = assertUpsertPayload(entity, payload);
 
   return {
@@ -213,7 +223,7 @@ export const createUpsertQueueItem = ({
     operationType,
     action: operationType,
     payload: checkedPayload,
-  };
+  } as UpsertQueueItem<TEntity>;
 };
 
 export const createDeleteQueueItem = ({

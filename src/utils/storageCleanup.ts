@@ -28,6 +28,13 @@ export const cleanupFailedUploads = async (userId: string) => {
   };
 
   try {
+    if (!firestoreDb) {
+      console.warn(
+        "[storageCleanup] firestoreDb is not initialized. Skipping cleanup.",
+      );
+      return result;
+    }
+
     const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const uploadsRef = collection(firestoreDb, `users/${userId}/uploads`);
     const snapshot = await getDocs(uploadsRef);
