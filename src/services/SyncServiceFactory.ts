@@ -1,4 +1,3 @@
-import { flags } from "@/features/flags";
 import type { ISyncService } from "./interfaces/ISyncService";
 import {
   getLocalDb,
@@ -10,13 +9,11 @@ import { DiffEngine } from "./logic/DiffEngine";
 import { NetworkMonitor } from "./logic/NetworkMonitor";
 import { QueueManager } from "./logic/QueueManager";
 import { TelemetryService } from "./logic/TelemetryService";
-import { SyncService } from "./syncService";
 import { SyncServiceV2 } from "./SyncServiceV2";
 
 export class SyncServiceFactory {
   private static instances = new Map<string, ISyncService>();
   private static pendingInstances = new Map<string, Promise<ISyncService>>();
-  private static warnedLegacyFallbackUsers = new Set<string>();
 
   public static getInstance = async (userId: string): Promise<ISyncService> => {
     const existing = SyncServiceFactory.instances.get(userId);
@@ -46,52 +43,10 @@ export class SyncServiceFactory {
   private static createInstance = async (
     userId: string,
   ): Promise<ISyncService> => {
-    if (flags.isEnabled("USE_SYNC_V2")) {
-      return this.createV2(userId);
-    }
-
-    console.log("[SyncServiceFactory] Initializing Legacy SyncService");
-
-    const db = await getLocalDb(userId);
-    const legacy = new SyncService(userId, db);
-
-    const mustHave = [
-      "getQueueStatus",
-      "monitorSecurity",
-      "dismissSecurityAlert",
-      "synchronize",
-      "performFullSync",
-      "processQueue",
-      "loadSettings",
-      "getUnresolvedConflicts",
-      "updateDeviceName",
-      "removeDevice",
-      "cleanupInactiveDevices",
-      "getSyncStats",
-    ] as const;
-
-    const legacyObj = legacy as unknown as Record<string, unknown>;
-    const missing = mustHave.filter(
-      (key) => typeof legacyObj[key] !== "function",
-    );
-
-    if (missing.length > 0) {
-      if (!SyncServiceFactory.warnedLegacyFallbackUsers.has(userId)) {
-        SyncServiceFactory.warnedLegacyFallbackUsers.add(userId);
-        console.error(
-          `[SyncServiceFactory] Legacy SyncService is missing methods: ${missing.join(", ")}. Falling back to SyncService V2.`,
-        );
-      }
-
-      return this.createV2(userId);
-    }
-
-    return legacy as unknown as ISyncService;
+    return this.createV2(userId);
   };
 
   private static createV2 = async (userId: string): Promise<ISyncService> => {
-    console.log("[SyncServiceFactory] Initializing SyncService V2");
-
     const db = await getLocalDb(userId);
     const queueManager = new QueueManager(db);
     const networkMonitor = new NetworkMonitor();
@@ -127,12 +82,10 @@ export class SyncServiceFactory {
     if (userId) {
       SyncServiceFactory.instances.delete(userId);
       SyncServiceFactory.pendingInstances.delete(userId);
-      SyncServiceFactory.warnedLegacyFallbackUsers.delete(userId);
       return;
     }
 
     SyncServiceFactory.instances.clear();
     SyncServiceFactory.pendingInstances.clear();
-    SyncServiceFactory.warnedLegacyFallbackUsers.clear();
   };
 }

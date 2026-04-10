@@ -2,7 +2,6 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { createPageUrl } from "@/platform/web/navigation/toWebPath";
-import { StampRally } from "@/features/study/StampRally";
 import { RatingCountTiles } from "@/features/study/RatingCountTiles";
 
 type Tile = { rating: string; score: number; Icon: unknown };
@@ -82,10 +81,6 @@ export const StudyComplete = ({
     <div
       className={`animate-in fade-in duration-700 ${compact ? "h-full min-h-0 flex flex-col" : ""}`}
     >
-      <div className={compact ? "mb-4 md:mb-5 shrink-0" : "mb-8"}>
-        <StampRally currentStreak={stampRallyStreak} compact={compact} />
-      </div>
-
       <Card
         className={`max-w-3xl mx-auto border-none shadow-xl rounded-3xl overflow-hidden animate-in fade-in zoom-in duration-700 delay-300 ${compact ? "w-full" : ""}`}
       >

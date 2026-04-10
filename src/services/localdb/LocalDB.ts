@@ -66,6 +66,14 @@ declare global {
   }
 }
 
+type LocalDbGlobal = typeof globalThis & {
+  __ALLOW_LOCAL_DB_CONSTRUCTION?: boolean;
+};
+
+const getLocalDbGlobal = (): LocalDbGlobal => {
+  return globalThis as LocalDbGlobal;
+};
+
 type SyncDirection = "upload" | "download";
 type SyncQueuePayload = SyncQueueItem["payload"];
 
@@ -167,7 +175,8 @@ export class LocalDB extends Dexie {
     // Prevent direct construction from browser code; enforce using LocalDB.getInstance()
     if (typeof window !== "undefined") {
       try {
-        const allow = globalThis.__ALLOW_LOCAL_DB_CONSTRUCTION === true;
+        const globalRef = getLocalDbGlobal();
+        const allow = globalRef.__ALLOW_LOCAL_DB_CONSTRUCTION === true;
         if (!allow) {
           console.error(
             "[LocalDB] Direct construction forbidden in browser. Use LocalDB.getInstance() instead.",
@@ -178,7 +187,8 @@ export class LocalDB extends Dexie {
         }
       } finally {
         try {
-          delete globalThis.__ALLOW_LOCAL_DB_CONSTRUCTION;
+          const globalRef = getLocalDbGlobal();
+          delete globalRef.__ALLOW_LOCAL_DB_CONSTRUCTION;
         } catch {
           // ignore
         }
@@ -655,11 +665,13 @@ export class LocalDB extends Dexie {
  */
 export const createLocalDBInternal = (userId?: string) => {
   try {
-    globalThis.__ALLOW_LOCAL_DB_CONSTRUCTION = true;
+    const globalRef = getLocalDbGlobal();
+    globalRef.__ALLOW_LOCAL_DB_CONSTRUCTION = true;
     return LocalDB.__createInternal(userId);
   } finally {
     try {
-      delete globalThis.__ALLOW_LOCAL_DB_CONSTRUCTION;
+      const globalRef = getLocalDbGlobal();
+      delete globalRef.__ALLOW_LOCAL_DB_CONSTRUCTION;
     } catch {
       // ignore
     }

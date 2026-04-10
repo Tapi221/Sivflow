@@ -15,11 +15,11 @@ export type EnqueueSync = (
 
 export interface TableLike<T extends Record<string, unknown>> {
   add: (item: T) => PromiseLike<unknown>;
-  get: (id: string) => Promise<T | undefined>;
-  update: (id: string, changes: Partial<T>) => Promise<number>;
+  get: (id: unknown) => Promise<T | undefined>;
+  update: (id: unknown, changes: unknown) => PromiseLike<number>;
   put: (item: T) => PromiseLike<unknown>;
   bulkPut: (items: ReadonlyArray<T>) => PromiseLike<unknown>;
-  delete: (id: string) => Promise<void>;
+  delete: (id: unknown) => PromiseLike<void>;
 }
 
 export interface DbLike {

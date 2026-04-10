@@ -4,7 +4,6 @@ import { DirectoryDiagramPane } from "@/components/folder/panes/DirectoryDiagram
 import { PdfPane } from "@/components/pdf/PdfPane";
 import { PowerPointPane } from "@/components/pptx/PowerPointPane";
 import Calendar from "@/routes/Calendar";
-import Dashboard from "@/routes/Dashboard";
 import Gallery from "@/routes/Gallery";
 import Trash from "@/routes/Trash";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
@@ -74,10 +73,6 @@ export const RightPane = ({
 
   if (selectedItem?.type === "calendar") {
     return <Calendar />;
-  }
-
-  if (selectedItem?.type === "settings") {
-    return <Dashboard />;
   }
 
   if (selectedItem?.type === "trash") {

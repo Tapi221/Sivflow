@@ -70,31 +70,53 @@ const readArray = (value: Record<string, unknown>, key: string): unknown[] => {
 const toDate = (
   value?: Date | Timestamp | string | number | null,
 ): Date | null => {
-  if (!value) return null;
+  if (value == null) return null;
   if (value instanceof Date) return value;
 
-  if (isRecord(value) && typeof value.toDate === "function") {
-    const date = value.toDate();
-    return date instanceof Date ? date : null;
+  if (typeof value === "string" || typeof value === "number") {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
   }
 
-  if (isRecord(value)) {
+  if (typeof value === "object") {
+    const timestampLike = value as {
+      toDate?: () => Date;
+      seconds?: number;
+      _seconds?: number;
+      nanoseconds?: number;
+      _nanoseconds?: number;
+    };
+
+    if (typeof timestampLike.toDate === "function") {
+      const date = timestampLike.toDate();
+      return date instanceof Date && !Number.isNaN(date.getTime())
+        ? date
+        : null;
+    }
+
     const seconds =
-      readNumber(value, "seconds") ?? readNumber(value, "_seconds");
+      typeof timestampLike.seconds === "number"
+        ? timestampLike.seconds
+        : typeof timestampLike._seconds === "number"
+          ? timestampLike._seconds
+          : null;
+
     const nanoseconds =
-      readNumber(value, "nanoseconds") ??
-      readNumber(value, "_nanoseconds") ??
-      0;
+      typeof timestampLike.nanoseconds === "number"
+        ? timestampLike.nanoseconds
+        : typeof timestampLike._nanoseconds === "number"
+          ? timestampLike._nanoseconds
+          : 0;
 
     if (seconds !== null) {
-      const ms = seconds * 1000 + Math.floor(nanoseconds / 1e6);
-      const date = new Date(ms);
-      return Number.isNaN(date.getTime()) ? null : date;
+      const parsed = new Date(
+        seconds * 1000 + Math.floor(nanoseconds / 1_000_000),
+      );
+      return Number.isNaN(parsed.getTime()) ? null : parsed;
     }
   }
 
-  const parsed = new Date(value);
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
+  return null;
 };
 
 const diffDays = (a: Date, b: Date): number => {
@@ -285,7 +307,7 @@ export const computeNextReview = ({
 
   const plannedDate = toDate(
     card.nextReviewDate ??
-      (record.next_review_date as Date | Timestamp | string | number | null),
+      (record["next_review_date"] as Date | Timestamp | string | number | null),
   );
 
   const delayDays = Math.max(0, plannedDate ? diffDays(now, plannedDate) : 0);
@@ -476,7 +498,7 @@ const estimateInitialNextReviewDate = ({
   const createdAt =
     toDate(
       card.createdAt ??
-        (record.created_at as Date | Timestamp | string | number | null),
+        (record["created_at"] as Date | Timestamp | string | number | null),
     ) ?? new Date();
 
   const nextReviewDate = new Date(createdAt);
