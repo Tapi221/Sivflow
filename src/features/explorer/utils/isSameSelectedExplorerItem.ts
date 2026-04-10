@@ -1,11 +1,12 @@
-import type { SelectedExplorerItem } from "../contracts/explorerSelection";
+import type { SelectedExplorerItem } from "@/types";
 
 export const isSameSelectedExplorerItem = (
-  left: SelectedExplorerItem,
-  right: SelectedExplorerItem,
-) => {
-  if (left === right) return true;
-  if (!left || !right) return left === right;
-  if (left.type !== right.type) return false;
-  return "id" in left && "id" in right ? left.id === right.id : true;
+  a: SelectedExplorerItem,
+  b: SelectedExplorerItem,
+): boolean => {
+  if (a === b) return true;
+  if (!a || !b) return a === b;
+  if (a.type !== b.type) return false;
+
+  return "id" in a && "id" in b ? a.id === b.id : true;
 };

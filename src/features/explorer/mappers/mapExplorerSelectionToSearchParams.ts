@@ -1,20 +1,19 @@
-import type { SelectedExplorerItem } from "../contracts/explorerSelection";
+import type { SelectedExplorerItem } from "@/types";
 
 type Params = {
-  base: URLSearchParams;
+  baseSearchParams: URLSearchParams;
   selectedFolderId: string | null;
-  selectedItem: unknown;
+  selectedItem: SelectedExplorerItem;
 };
 
 export const mapExplorerSelectionToSearchParams = ({
-  base,
+  baseSearchParams,
   selectedFolderId,
   selectedItem,
-}: Params) => {
-  const next = new URLSearchParams(base.toString());
-  const typedSelectedItem = selectedItem as SelectedExplorerItem;
+}: Params): URLSearchParams => {
+  const next = new URLSearchParams(baseSearchParams.toString());
 
-  if (selectedFolderId || typedSelectedItem) {
+  if (selectedFolderId || selectedItem) {
     next.delete("home");
   }
 
@@ -24,11 +23,11 @@ export const mapExplorerSelectionToSearchParams = ({
     next.delete("folderId");
   }
 
-  if (typedSelectedItem?.type === "card") {
-    next.set("cardId", typedSelectedItem.id);
+  if (selectedItem?.type === "card") {
+    next.set("cardId", selectedItem.id);
     next.delete("docId");
-  } else if (typedSelectedItem?.type === "document") {
-    next.set("docId", typedSelectedItem.id);
+  } else if (selectedItem?.type === "document") {
+    next.set("docId", selectedItem.id);
     next.delete("cardId");
   } else {
     next.delete("cardId");

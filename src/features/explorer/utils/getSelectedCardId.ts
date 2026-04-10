@@ -1,5 +1,6 @@
-import type { SelectedExplorerItem } from "../contracts/explorerSelection";
+import type { SelectedExplorerItem } from "@/types";
 
-export const getSelectedCardId = (selectedItem: SelectedExplorerItem) => {
-  return selectedItem?.type === "card" ? selectedItem.id : null;
-};
+export const getSelectedCardId = (
+  selectedItem: SelectedExplorerItem,
+): string | null =>
+  selectedItem?.type === "card" ? selectedItem.id : null;

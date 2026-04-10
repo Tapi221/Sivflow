@@ -5,6 +5,7 @@ export const mapDocumentsToDocumentLookup = (documents: DocumentItem[]) => {
 
   for (const documentItem of documents) {
     const key = documentItem.id || documentItem.documentId;
+
     if (key) {
       map.set(key, documentItem);
     }

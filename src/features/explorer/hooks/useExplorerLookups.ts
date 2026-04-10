@@ -1,10 +1,14 @@
-import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 import { useMemo } from "react";
-import { buildExplorerLookups } from "../services/buildExplorerLookups";
+import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 import { buildExplorerSelectedState } from "../services/buildExplorerSelectedState";
+import {
+  buildCardById,
+  buildDocumentById,
+  buildFolderById,
+} from "../services/buildExplorerLookups";
 import { normalizeFolders } from "../services/normalizeFolders";
 
-type UseExplorerLookupsParams = {
+type Params = {
   folders: Folder[];
   cards: Card[];
   documents: DocumentItem[];
@@ -16,20 +20,22 @@ export const useExplorerLookups = ({
   cards,
   documents,
   selectedItem,
-}: UseExplorerLookupsParams) => {
+}: Params) => {
   const normalizedFolders = useMemo(() => normalizeFolders(folders), [folders]);
 
-  const { folderById, cardById, documentById } = useMemo(
-    () =>
-      buildExplorerLookups({
-        folders: normalizedFolders,
-        cards,
-        documents,
-      }),
-    [cards, documents, normalizedFolders],
+  const folderById = useMemo(
+    () => buildFolderById(normalizedFolders),
+    [normalizedFolders],
   );
 
-  const { selectedCardId, selectedDocumentId } = useMemo(
+  const cardById = useMemo(() => buildCardById(cards), [cards]);
+
+  const documentById = useMemo(
+    () => buildDocumentById(documents),
+    [documents],
+  );
+
+  const selectedState = useMemo(
     () => buildExplorerSelectedState(selectedItem),
     [selectedItem],
   );
@@ -39,7 +45,6 @@ export const useExplorerLookups = ({
     folderById,
     cardById,
     documentById,
-    selectedCardId,
-    selectedDocumentId,
+    ...selectedState,
   };
 };

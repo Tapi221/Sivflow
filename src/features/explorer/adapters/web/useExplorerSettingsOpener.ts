@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useSettingsQueryParam } from "@/hooks/settings/useSettingsQueryParam";
 
@@ -8,9 +9,7 @@ export const useExplorerSettingsOpener = () => {
     setSearchParams,
   );
 
-  return {
-    openSettings: () => {
-      setIsSettingsOpen(true);
-    },
-  };
+  return useCallback(() => {
+    setIsSettingsOpen(true);
+  }, [setIsSettingsOpen]);
 };

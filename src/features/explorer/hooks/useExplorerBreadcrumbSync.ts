@@ -1,34 +1,57 @@
+import { useCallback, useLayoutEffect, useMemo } from "react";
+import { useBreadcrumbContext } from "@/contexts/BreadcrumbContext";
 import { buildExplorerBreadcrumbs } from "@/features/breadcrumbs/builders";
-import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 import type { ExplorerBreadcrumbContext } from "../contracts/explorerBreadcrumbContext";
 
-type UseExplorerBreadcrumbSyncParams = {
-  setExtraCrumbs: (crumbs: unknown[]) => void;
+type Params = {
   selectedFolderId: string | null;
-  selectedItem: SelectedExplorerItem;
+  selectedItem: import("@/types").SelectedExplorerItem;
   explorerBreadcrumbContext: ExplorerBreadcrumbContext;
-  folderById: Map<string, Folder>;
-  cardById: Map<string, Card>;
-  documentById: Map<string, DocumentItem>;
+  folderById: Map<string, import("@/types").Folder>;
+  cardById: Map<string, import("@/types").Card>;
+  documentById: Map<string, import("@/types").DocumentItem>;
 };
 
 export const useExplorerBreadcrumbSync = ({
-  setExtraCrumbs,
   selectedFolderId,
   selectedItem,
   explorerBreadcrumbContext,
   folderById,
   cardById,
   documentById,
-}: UseExplorerBreadcrumbSyncParams) => {
-  const extraCrumbs = buildExplorerBreadcrumbs({
-    selectedFolderId,
-    explorerBreadcrumbContext,
-    selectedItem,
-    folderById,
-    cardById,
-    documentById,
-  });
+}: Params) => {
+  const { setExtraCrumbs } = useBreadcrumbContext();
 
-  setExtraCrumbs(extraCrumbs);
+  const extraCrumbs = useMemo(
+    () =>
+      buildExplorerBreadcrumbs({
+        selectedFolderId,
+        explorerBreadcrumbContext,
+        selectedItem,
+        folderById,
+        cardById,
+        documentById,
+      }),
+    [
+      cardById,
+      documentById,
+      explorerBreadcrumbContext,
+      folderById,
+      selectedFolderId,
+      selectedItem,
+    ],
+  );
+
+  useLayoutEffect(() => {
+    setExtraCrumbs(extraCrumbs);
+  }, [extraCrumbs, setExtraCrumbs]);
+
+  const onBreadcrumbContextChange = useCallback(
+    (next: ExplorerBreadcrumbContext) => next,
+    [],
+  );
+
+  return {
+    onBreadcrumbContextChange,
+  };
 };

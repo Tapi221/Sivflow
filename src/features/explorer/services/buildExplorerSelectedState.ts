@@ -1,11 +1,10 @@
-import type { SelectedExplorerItem } from "../contracts/explorerSelection";
+import type { SelectedExplorerItem } from "@/types";
+import { getSelectedCardId } from "../utils/getSelectedCardId";
+import { getSelectedDocumentId } from "../utils/getSelectedDocumentId";
 
 export const buildExplorerSelectedState = (
   selectedItem: SelectedExplorerItem,
-) => {
-  return {
-    selectedCardId: selectedItem?.type === "card" ? selectedItem.id : null,
-    selectedDocumentId:
-      selectedItem?.type === "document" ? selectedItem.id : null,
-  };
-};
+) => ({
+  selectedCardId: getSelectedCardId(selectedItem),
+  selectedDocumentId: getSelectedDocumentId(selectedItem),
+});

@@ -1,13 +1,18 @@
-const STORAGE_KEY = "folder_selectedFolderId_work";
+const LAST_SELECTED_FOLDER_KEY = "folder_selectedFolderId_work";
 
-export const getLastSelectedFolderId = () => {
-  return localStorage.getItem(STORAGE_KEY);
+export const getLastSelectedFolderId = (): string | null => {
+  if (typeof window === "undefined") return null;
+
+  return window.localStorage.getItem(LAST_SELECTED_FOLDER_KEY);
 };
 
 export const setLastSelectedFolderId = (folderId: string | null) => {
+  if (typeof window === "undefined") return;
+
   if (folderId) {
-    localStorage.setItem(STORAGE_KEY, folderId);
+    window.localStorage.setItem(LAST_SELECTED_FOLDER_KEY, folderId);
     return;
   }
-  localStorage.removeItem(STORAGE_KEY);
+
+  window.localStorage.removeItem(LAST_SELECTED_FOLDER_KEY);
 };

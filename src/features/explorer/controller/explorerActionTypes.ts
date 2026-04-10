@@ -1,12 +1,13 @@
-export const EXPLORER_ACTION_TYPES = {
-  APPLY_ROUTE_STATE: "APPLY_ROUTE_STATE",
-  SELECT_FOLDER: "SELECT_FOLDER",
-  SELECT_ITEM: "SELECT_ITEM",
-  SELECT_ROOT_ITEM: "SELECT_ROOT_ITEM",
-  RESET_FOR_HOME_MODE: "RESET_FOR_HOME_MODE",
-  SET_BREADCRUMB_CONTEXT: "SET_BREADCRUMB_CONTEXT",
-  NAVIGATE_TO_SECTION_LIST: "NAVIGATE_TO_SECTION_LIST",
-} as const;
+import type { SelectedExplorerItem } from "@/types";
+import type { ExplorerBreadcrumbContext } from "../contracts/explorerBreadcrumbContext";
+import type { ExplorerRouteState } from "../contracts/explorerRouteState";
 
-export type ExplorerActionType =
-  (typeof EXPLORER_ACTION_TYPES)[keyof typeof EXPLORER_ACTION_TYPES];
+export type ExplorerAction =
+  | { type: "APPLY_ROUTE_STATE"; payload: ExplorerRouteState }
+  | { type: "SELECT_FOLDER"; payload: { folderId: string | null } }
+  | { type: "SELECT_ITEM"; payload: { item: SelectedExplorerItem } }
+  | {
+      type: "SET_BREADCRUMB_CONTEXT";
+      payload: { context: ExplorerBreadcrumbContext };
+    }
+  | { type: "INCREMENT_SECTION_LIST_TOKEN" };

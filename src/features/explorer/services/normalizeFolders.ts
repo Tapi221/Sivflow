@@ -1,7 +1,7 @@
 import type { Folder } from "@/types";
 
-export const normalizeFolders = (folders: Folder[]) => {
-  return folders.map((folder) => ({
+export const normalizeFolders = (folders: Folder[]): Folder[] =>
+  folders.map((folder) => ({
     ...folder,
     parentFolderId:
       typeof folder.parentFolderId === "string" ||
@@ -11,4 +11,3 @@ export const normalizeFolders = (folders: Folder[]) => {
     folderColor:
       typeof folder.folderColor === "string" ? folder.folderColor : undefined,
   }));
-};

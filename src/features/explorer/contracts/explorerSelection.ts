@@ -1,16 +1,16 @@
-export type CardSelectedItem = { type: "card"; id: string };
-export type CardSetSelectedItem = { type: "cardSet"; id: string };
-export type DocumentSelectedItem = { type: "document"; id: string };
-export type RootSelectedItem =
-  | { type: "directory" }
-  | { type: "gallery" }
-  | { type: "calendar" }
-  | { type: "settings" }
-  | { type: "trash" };
+export type { SelectedExplorerItem } from "@/types";
 
-export type SelectedExplorerItem =
-  | CardSelectedItem
-  | CardSetSelectedItem
-  | DocumentSelectedItem
-  | RootSelectedItem
-  | null;
+export type CardSelectedItem = Extract<
+  import("@/types").SelectedExplorerItem,
+  { type: "card" }
+>;
+
+export type DocumentSelectedItem = Extract<
+  import("@/types").SelectedExplorerItem,
+  { type: "document" }
+>;
+
+export type RootSelectedItem = Extract<
+  import("@/types").SelectedExplorerItem,
+  { type: "directory" | "gallery" | "calendar" | "trash" }
+>;

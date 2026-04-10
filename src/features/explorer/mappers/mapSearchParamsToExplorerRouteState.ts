@@ -4,26 +4,31 @@ import {
   createDocumentSelectedItem,
 } from "../utils/createSelectedExplorerItem";
 
-export const mapSearchParamsToExplorerRouteState = (
-  searchParams: URLSearchParams,
-): ExplorerRouteState => {
+type Params = {
+  searchParams: URLSearchParams;
+  fallbackFolderId: string | null;
+};
+
+export const mapSearchParamsToExplorerRouteState = ({
+  searchParams,
+  fallbackFolderId,
+}: Params): ExplorerRouteState => {
   const isHomeOnlyMode = searchParams.get("home") === "1";
-  const folderId = isHomeOnlyMode ? null : searchParams.get("folderId");
-
-  const cardId = searchParams.get("cardId");
-  const docId = searchParams.get("docId");
-
-  const selectedItem = isHomeOnlyMode
-    ? null
-    : cardId
-      ? createCardSelectedItem(cardId)
-      : docId
-        ? createDocumentSelectedItem(docId)
-        : null;
+  const queryFolderId = searchParams.get("folderId");
+  const queryCardId = searchParams.get("cardId");
+  const queryDocId = searchParams.get("docId");
 
   return {
     isHomeOnlyMode,
-    folderId,
-    selectedItem,
+    selectedFolderId: isHomeOnlyMode
+      ? null
+      : queryFolderId ?? fallbackFolderId ?? null,
+    selectedItem: isHomeOnlyMode
+      ? null
+      : queryCardId
+        ? createCardSelectedItem(queryCardId)
+        : queryDocId
+          ? createDocumentSelectedItem(queryDocId)
+          : null,
   };
 };

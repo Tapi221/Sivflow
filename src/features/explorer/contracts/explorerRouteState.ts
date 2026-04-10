@@ -1,7 +1,7 @@
-import type { SelectedExplorerItem } from "./explorerSelection";
+import type { SelectedExplorerItem } from "@/types";
 
 export type ExplorerRouteState = {
   isHomeOnlyMode: boolean;
-  folderId: string | null;
+  selectedFolderId: string | null;
   selectedItem: SelectedExplorerItem;
 };
