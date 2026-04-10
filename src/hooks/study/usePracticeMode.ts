@@ -1,16 +1,20 @@
 import { useCallback, useMemo, useState } from "react";
 import { useTodayStudyStore } from "@/stores/useTodayStudyStore";
 
-type PracticeState = {
+export type PracticeFilterRating = "forgot" | "vague" | "remembered" | "easy";
+
+export type PracticeSessionState = {
   sourceSessionId: string;
-  filterRating: string;
+  filterRating: PracticeFilterRating;
   roundNumber: number;
   roundQueue: string[];
   roundTotal: number;
   remaining: string[];
   doneCount: number;
   phase: "cards" | "summary";
-} | null;
+};
+
+export type PracticeState = PracticeSessionState | null;
 
 const shuffle = (items: string[]) => {
   const next = [...items];
@@ -22,7 +26,7 @@ const shuffle = (items: string[]) => {
 };
 
 type Params = {
-  finalRatingByCardId: Map<string, string>;
+  finalRatingByCardId: Map<string, PracticeFilterRating>;
   sourceSessionId: string;
   isPracticeFeatureEnabled: boolean;
   logPracticeEvent: (
@@ -42,7 +46,7 @@ export const usePracticeMode = ({
   const isPracticeMode = useMemo(() => Boolean(practiceState), [practiceState]);
 
   const handleStartPractice = useCallback(
-    (rating: string) => {
+    (rating: PracticeFilterRating) => {
       if (!isPracticeFeatureEnabled) return;
 
       const cardIds = Array.from(finalRatingByCardId.entries())

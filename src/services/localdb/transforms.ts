@@ -12,46 +12,26 @@ const cloneRecord = (value: unknown): StorageLike => {
   return isRecord(value) ? { ...value } : {};
 };
 
-/**
- * 現在の LocalDB / InMemoryLocalDB は Card をそのまま保持しているので、
- * storage 向け denormalize は実質 identity。
- * 旧 import 互換のために export を残す。
- */
 export const denormalizeCardForStorage = (
   value: Partial<Card> | StorageLike,
 ): StorageLike => {
   return cloneRecord(value);
 };
 
-/**
- * 現在の LocalDB / InMemoryLocalDB は Folder をそのまま保持しているので、
- * storage 向け denormalize は実質 identity。
- * 旧 import 互換のために export を残す。
- */
 export const denormalizeFolderForStorage = (
   value: Partial<Folder> | StorageLike,
 ): StorageLike => {
   return cloneRecord(value);
 };
 
-/**
- * storage -> domain 正規化
- */
 export const normalizeCardFromStorage = (value: unknown): Card => {
   return normalizeCard(value);
 };
 
-/**
- * storage -> domain 正規化
- */
 export const normalizeFolderFromStorage = (value: unknown): Folder => {
   return normalizeFolder(value);
 };
 
-/**
- * silent / isSilent / is_silent の差異を吸収した Folder 正規化。
- * queries.ts 互換 export。
- */
 export const normalizeFolderWithSilent = (value: unknown): Folder => {
   if (!isRecord(value)) {
     return normalizeFolder(value);

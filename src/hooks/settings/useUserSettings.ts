@@ -21,6 +21,8 @@ export const DEFAULT_SETTINGS: Partial<UserSettings> = {
   defaultPreviewEnabled: false,
   autoDraftEnabled: true,
   autoSaveEnabled: true,
+  autoVoiceQuestion: false,
+  autoVoiceAnswer: false,
   cardEditorHeightPx: null,
   questionDisplayMode: "tap_to_reveal" as const,
   folderSidebarDisplayMode: "auto" as const,

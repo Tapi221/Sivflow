@@ -1,4 +1,5 @@
 import React, { useMemo, useEffect, useCallback, useState } from "react";
+import type { Card, Folder } from "@/types";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { useCards } from "@/hooks/card/useCards";
@@ -26,8 +27,23 @@ import { StudyComplete } from "@/features/study/StudyComplete";
 import { PracticeCards } from "@/features/study/PracticeCards";
 import { PracticeSummary } from "@/features/study/PracticeSummary";
 import { getCardText } from "@/domain/card/content";
+import type { PracticeFilterRating } from "@/hooks/study/usePracticeMode";
 
-const RATING_LABELS = {
+type StudyLogPayload = {
+  userId: string;
+  cardId: string;
+  folderId?: string;
+  subjectiveScore: number;
+  responseTime: number;
+  createdAt: unknown;
+};
+
+type PersistedStudySession = {
+  cardIds: string[];
+  savedAt: number;
+};
+
+const RATING_LABELS: Record<PracticeFilterRating, string> = {
   forgot: "忘れた",
   vague: "あいまい",
   remembered: "覚えた",
@@ -35,10 +51,10 @@ const RATING_LABELS = {
 };
 
 const RATING_TILES = [
-  { rating: "forgot", score: 0, Icon: null },
-  { rating: "vague", score: 1, Icon: null },
-  { rating: "remembered", score: 2, Icon: null },
-  { rating: "easy", score: 3, Icon: null },
+  { rating: "forgot" as const, score: 0, Icon: null },
+  { rating: "vague" as const, score: 1, Icon: null },
+  { rating: "remembered" as const, score: 2, Icon: null },
+  { rating: "easy" as const, score: 3, Icon: null },
 ];
 
 const StudyMode = () => {
@@ -117,7 +133,7 @@ const StudyMode = () => {
     foldersLoading,
     settings,
   });
-  const [sessionSeedCards, setSessionSeedCards] = useState([]);
+  const [sessionSeedCards, setSessionSeedCards] = useState<Card[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -141,13 +157,15 @@ const StudyMode = () => {
         try {
           const raw = localStorage.getItem(SESSION_KEY);
           if (raw) {
-            const data = JSON.parse(raw);
+            const data = JSON.parse(raw) as PersistedStudySession;
             const isRecent = Date.now() - data.savedAt < 24 * 60 * 60 * 1000;
             if (isRecent && Array.isArray(data.cardIds)) {
-              const dueById = new Map(dueStudyCards.map((c) => [c.id, c]));
+              const dueById = new Map<string, Card>(
+                dueStudyCards.map((card) => [card.id, card]),
+              );
               const remaining = data.cardIds
-                .map((id) => dueById.get(id))
-                .filter(Boolean);
+                .map((id: string) => dueById.get(id))
+                .filter((card): card is Card => Boolean(card));
               // 一部のカードが既にレビュー済み（残りが元より少ない）場合のみ復元
               if (
                 remaining.length > 0 &&
@@ -173,7 +191,7 @@ const StudyMode = () => {
   }, [dueStudyCards, sessionSeedCards.length, SESSION_KEY]);
 
   const allCardsById = useMemo(() => {
-    const map = new Map();
+    const map = new Map<string, Card>();
     for (const card of allCards) {
       if (card?.id) map.set(card.id, card);
     }
@@ -188,22 +206,22 @@ const StudyMode = () => {
   }, [allCardsById, dueStudyCards, sessionSeedCards]);
 
   const studyCardById = useMemo(() => {
-    const map = new Map();
+    const map = new Map<string, Card>();
     for (const card of studyCards) {
       if (card?.id) map.set(card.id, card);
     }
     return map;
   }, [studyCards]);
 
-  const createStudyLogMutation = useMutation({
-    mutationFn: (data) => {
+  const createStudyLogMutation = useMutation<unknown, Error, StudyLogPayload>({
+    mutationFn: (data: StudyLogPayload) => {
       if (!firestoreDb) return Promise.resolve(null);
       return addDoc(collection(firestoreDb, "studyLogs"), data);
     },
   });
 
   const createLevelHistoryMutation = useMutation({
-    mutationFn: async (data) => {
+    mutationFn: async (data: Record<string, unknown>) => {
       const localDb = await getLocalDb(currentUser?.uid);
       return localDb.addItem("levelHistories", data);
     },
@@ -257,7 +275,7 @@ const StudyMode = () => {
       : effectiveStreak;
 
   const finalRatingByCardId = useMemo(() => {
-    const finalByCardId = new Map();
+    const finalByCardId = new Map<string, PracticeFilterRating>();
     for (const result of safeSessionResults) {
       if (result?.cardId) finalByCardId.set(result.cardId, result.rating);
     }
@@ -265,10 +283,14 @@ const StudyMode = () => {
   }, [safeSessionResults]);
 
   const ratingCounts = useMemo(() => {
-    const counts = { forgot: 0, vague: 0, remembered: 0, easy: 0 };
+    const counts: Record<PracticeFilterRating, number> = {
+      forgot: 0,
+      vague: 0,
+      remembered: 0,
+      easy: 0,
+    };
     for (const rating of finalRatingByCardId.values()) {
-      if (Object.prototype.hasOwnProperty.call(counts, rating))
-        counts[rating] += 1;
+      counts[rating] += 1;
     }
     return counts;
   }, [finalRatingByCardId]);
@@ -316,7 +338,7 @@ const StudyMode = () => {
     return () => window.clearTimeout(timeoutId);
   }, [studyComplete]);
 
-  const handleToggleUncertainty = async (card) => {
+  const handleToggleUncertainty = async (card: Card) => {
     if (!updateCard || !card?.id) return;
     await updateCard(card.id, { hasUncertainty: !card.hasUncertainty });
   };
@@ -392,11 +414,15 @@ const StudyMode = () => {
   const isCompletionView =
     !isPracticeMode && studyComplete && studyCards.length > 0;
 
+  const reviewPageStyle = {
+    "--card-display-max-height": "100%",
+  } as React.CSSProperties & Record<"--card-display-max-height", string>;
+
   return (
     <div
       data-page="review"
       className="reviewPage bg-[#F5F7F8] text-slate-800 h-[100dvh] overflow-hidden flex flex-col"
-      style={{ "--card-display-max-height": "100%" }}
+      style={reviewPageStyle}
     >
       <div className="reviewShell max-w-[1600px] mx-auto w-full p-3 md:py-4 md:px-8 h-full flex flex-col min-h-0">
         {!isCompletionView && (

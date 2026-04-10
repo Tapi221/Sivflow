@@ -47,6 +47,8 @@ export interface UserSettings extends BaseEntity {
   defaultPreviewEnabled?: boolean;
   autoDraftEnabled?: boolean;
   autoSaveEnabled?: boolean;
+  autoVoiceQuestion?: boolean;
+  autoVoiceAnswer?: boolean;
   duplicateToOpposite?: boolean;
   cardEditorHeightPx?: number | null;
   cardViewPaneWidthPx?: number | null;

@@ -2,16 +2,21 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import StudyCard from "@/features/study/StudyCard";
+import type { Card as StudyEntityCard } from "@/types";
+import type {
+  PracticeFilterRating,
+  PracticeSessionState,
+} from "@/hooks/study/usePracticeMode";
 
 type Props = {
-  practiceState: unknown;
-  practiceCurrentCard: unknown;
+  practiceState: PracticeSessionState;
+  practiceCurrentCard: StudyEntityCard | null;
   counterCurrent: number;
   counterTotal: number;
   handlePracticeAnswer: (answer: "ok" | "anxious") => void;
-  handleToggleUncertainty: (card: unknown) => void;
+  handleToggleUncertainty: (card: StudyEntityCard) => void;
   handlePracticeExit: (reason?: string) => void;
-  ratingLabels: Record<string, string>;
+  ratingLabels: Record<PracticeFilterRating, string>;
 };
 
 export const PracticeCards = ({

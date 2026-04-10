@@ -1,13 +1,14 @@
 import { useMemo } from "react";
+import type { Card, Folder, UserSettings } from "@/types";
 
-type StudyCard = Record<string, unknown>;
+type StudyCard = Card;
 
 type Params = {
   folderId: string | null;
   allCards: StudyCard[];
-  folders: Record<string, unknown>[];
+  folders: Folder[];
   foldersLoading: boolean;
-  settings: Record<string, unknown> | null | undefined;
+  settings: Partial<UserSettings> | null | undefined;
 };
 
 export const useStudyCards = ({
@@ -49,24 +50,23 @@ export const useStudyCards = ({
     };
 
     let cards = (allCards ?? []).filter(
-      (c) => !c?.isDraft && !c?.isDeleted && !c?.is_deleted,
+      (card) => !card.isDraft && !card.isDeleted,
     );
 
     if (!foldersLoading) {
       const activeFolderIds = new Set(
         (folders ?? [])
-          .filter((f) => !f?.isDeleted && !f?.is_deleted)
-          .map((f) => f.id ?? f.folderId)
+          .filter((folder) => !folder.isDeleted)
+          .map((folder) => folder.id)
           .filter(Boolean),
       );
-      cards = cards.filter((c) => {
-        const fid = c?.folderId ?? c?.folder_id;
-        return !fid || activeFolderIds.has(fid);
+      cards = cards.filter((card) => {
+        return !card.folderId || activeFolderIds.has(card.folderId);
       });
     }
 
     if (folderId) {
-      cards = cards.filter((c) => (c?.folderId ?? c?.folder_id) === folderId);
+      cards = cards.filter((card) => card.folderId === folderId);
     } else {
       const today = new Date();
       const tDate = new Date(
@@ -75,10 +75,8 @@ export const useStudyCards = ({
         today.getDate(),
       );
       const autoCarryOver = settings?.autoCarryOver ?? true;
-      cards = cards.filter((c) => {
-        const reviewDateRaw = c?.nextReviewDate ?? c?.next_review_date;
-        if (!reviewDateRaw) return false;
-        const reviewDate = toDate(reviewDateRaw);
+      cards = cards.filter((card) => {
+        const reviewDate = toDate(card.nextReviewDate);
         if (!reviewDate) return false;
         const rDate = new Date(
           reviewDate.getFullYear(),
@@ -91,13 +89,13 @@ export const useStudyCards = ({
       });
     }
 
-    return cards.sort((a, b) => (a?.orderIndex || 0) - (b?.orderIndex || 0));
+    return cards.sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
   }, [allCards, folderId, folders, foldersLoading, settings]);
 
   const cardById = useMemo(() => {
     const map = new Map<string, StudyCard>();
     for (const card of studyCards) {
-      if (card?.id) map.set(card.id, card);
+      map.set(card.id, card);
     }
     return map;
   }, [studyCards]);

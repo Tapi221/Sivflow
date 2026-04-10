@@ -7,6 +7,8 @@ export type FeatureFlags = {
 
   // SyncV2 切り替え用（SyncServiceFactory が USE_SYNC_V2 を参照するため）
   useSyncV2: boolean;
+  postReviewPractice: boolean;
+  enableAdvancedTelemetry: boolean;
 };
 
 const DEFAULT_FLAGS: FeatureFlags = {
@@ -14,6 +16,8 @@ const DEFAULT_FLAGS: FeatureFlags = {
   enableMarkdownImages: false,
   experimentalPasteSplit: false,
   useSyncV2: false,
+  postReviewPractice: false,
+  enableAdvancedTelemetry: false,
 };
 
 class FeatureFlagService {
@@ -102,10 +106,15 @@ const featureFlags = new FeatureFlagService();
  * 既存コードの flags.isEnabled('USE_SYNC_V2') を壊さないためのアダプタ。
  * 早めに featureFlags.getFlag('useSyncV2') へ移行して、最終的に削除する。
  */
-export type LegacyFlagName = "USE_SYNC_V2";
+export type LegacyFlagName =
+  | "USE_SYNC_V2"
+  | "postReviewPractice"
+  | "ENABLE_ADVANCED_TELEMETRY";
 
 const legacyToKey: Record<LegacyFlagName, keyof FeatureFlags> = {
   USE_SYNC_V2: "useSyncV2",
+  postReviewPractice: "postReviewPractice",
+  ENABLE_ADVANCED_TELEMETRY: "enableAdvancedTelemetry",
 };
 
 export const flags = {

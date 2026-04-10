@@ -9,11 +9,39 @@ import { getDebugStreak } from "@/utils/debugStreak";
 import { sanitizeStreak } from "@/utils/streak";
 import { getLocalDb } from "@/services/localDB";
 import { useTodayStudyStore } from "@/stores/useTodayStudyStore";
+import type { Card, CardPatch, UserSettings } from "@/types";
+import type { PracticeFilterRating } from "./usePracticeMode";
 
-const SCORE_TO_RATING: Record<
-  number,
-  "forgot" | "vague" | "remembered" | "easy"
-> = {
+export type StudySessionRating = PracticeFilterRating;
+
+export type StudySessionResult = {
+  cardId: string;
+  rating: StudySessionRating;
+  subjectiveScore: number;
+  responseTimeMs: number;
+  studiedAt: Date;
+};
+
+type ResultsState = {
+  0: number;
+  1: number;
+  2: number;
+  3: number;
+  streak: number;
+};
+
+type AuthUserLike =
+  | {
+      uid: string;
+    }
+  | null
+  | undefined;
+
+type MutationLike<T> = {
+  mutate: (payload: T) => void;
+};
+
+const SCORE_TO_RATING: Record<number, StudySessionRating> = {
   0: "forgot",
   1: "vague",
   2: "remembered",
@@ -21,12 +49,19 @@ const SCORE_TO_RATING: Record<
 };
 
 type Params = {
-  studyCards: unknown[];
-  updateCard?: ((id: string, patch: unknown) => Promise<unknown>) | null;
-  currentUser: unknown;
-  settings: unknown;
-  createStudyLogMutation: unknown;
-  createLevelHistoryMutation: unknown;
+  studyCards: Card[];
+  updateCard?: ((id: string, patch: CardPatch) => Promise<unknown>) | null;
+  currentUser: AuthUserLike;
+  settings: Pick<UserSettings, "delayBonusEnabled"> | null | undefined;
+  createStudyLogMutation: MutationLike<{
+    userId: string;
+    cardId: string;
+    folderId?: string;
+    subjectiveScore: number;
+    responseTime: number;
+    createdAt: Timestamp;
+  }>;
+  createLevelHistoryMutation: MutationLike<Record<string, unknown>>;
 };
 
 const createSessionId = () => {
@@ -49,13 +84,19 @@ export const useStudySession = ({
 }: Params) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [studyComplete, setStudyComplete] = useState(false);
-  const [results, setResults] = useState({ 0: 0, 1: 0, 2: 0, 3: 0, streak: 0 });
-  const [sessionResults, setSessionResults] = useState<unknown[]>([]);
+  const [results, setResults] = useState<ResultsState>({
+    0: 0,
+    1: 0,
+    2: 0,
+    3: 0,
+    streak: 0,
+  });
+  const [sessionResults, setSessionResults] = useState<StudySessionResult[]>(
+    [],
+  );
   const [sourceSessionId] = useState(createSessionId);
 
-  const safeSessionResults = Array.isArray(sessionResults)
-    ? sessionResults
-    : [];
+  const safeSessionResults = sessionResults;
   const debugStreak = getDebugStreak();
   const effectiveStreak = debugStreak ?? sanitizeStreak(results?.streak);
   const stampRallyStreak =
@@ -100,7 +141,7 @@ export const useStudySession = ({
           ...reviewUpdate,
           reviewLogs: [...(card.reviewLogs ?? []), newLog],
           updatedAt: reviewedAt,
-        });
+        } satisfies CardPatch);
       }
 
       if (currentUser) {
@@ -145,7 +186,7 @@ export const useStudySession = ({
       }
 
       setSessionResults((prev) => {
-        const base = Array.isArray(prev) ? prev : [];
+        const base = prev;
         return [
           ...base,
           {
@@ -168,7 +209,7 @@ export const useStudySession = ({
 
       setResults((prev) => ({
         ...prev,
-        [subjectiveScore]: prev[subjectiveScore as keyof typeof prev] + 1,
+        [subjectiveScore]: prev[subjectiveScore as 0 | 1 | 2 | 3] + 1,
       }));
 
       if (currentIndex < studyCards.length - 1) {

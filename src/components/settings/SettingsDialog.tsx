@@ -38,6 +38,7 @@ import { getAvatarColors, getInitials } from "@/utils/avatarUtils";
 import { signOut } from "firebase/auth";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import type { SyncSettings, UserSettings } from "@/types";
 
 import {
   EXPLORER_ROW_BASE_CLASS_NAME,
@@ -60,16 +61,33 @@ const sidebarItems = [
   { id: "voice", label: "音声設定", icon: Volume2 },
   { id: "shortcut", label: "ショートカット", icon: Keyboard },
   { id: "sync", label: "同期設定", icon: RefreshCw },
-];
+] as const;
 
 const DEFAULT_SETTINGS_TAB = "study";
 
-const normalizeSettingsTab = (tab) => {
-  if (tab === "theme") return "display";
-  return tab;
+type SettingsTab = (typeof sidebarItems)[number]["id"];
+type FolderSidebarDisplayMode = NonNullable<
+  UserSettings["folderSidebarDisplayMode"]
+>;
+
+type SettingsDialogProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  initialTab?: SettingsTab | "theme";
 };
 
-const resolveSettingsTab = (tab) => {
+const normalizeSettingsTab = (
+  tab?: SettingsDialogProps["initialTab"],
+): SettingsTab => {
+  if (tab === "theme") return "display";
+  return sidebarItems.some((item) => item.id === tab)
+    ? (tab as SettingsTab)
+    : DEFAULT_SETTINGS_TAB;
+};
+
+const resolveSettingsTab = (
+  tab?: SettingsDialogProps["initialTab"],
+): SettingsTab => {
   const normalizedTab = normalizeSettingsTab(tab);
   return sidebarItems.some((item) => item.id === normalizedTab)
     ? normalizedTab
@@ -100,9 +118,17 @@ const folderSidebarDisplayModeOptions = [
     label: "遷移表示",
     description: "最上位フォルダ一覧から入り、選択後はその配下だけを表示します",
   },
-];
+] satisfies Array<{
+  id: FolderSidebarDisplayMode;
+  label: string;
+  description: string;
+}>;
 
-const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
+const SettingsDialog = ({
+  open,
+  onOpenChange,
+  initialTab,
+}: SettingsDialogProps) => {
   const [selectedTab, setSelectedTab] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [imgError, setImgError] = useState(false);
@@ -143,9 +169,7 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
     return [...folders]
       .filter((folder) => {
         if (folder.isDeleted) return false;
-        const parentFolderId =
-          folder.parentFolderId ?? folder.parent_folder_id ?? null;
-        return parentFolderId === null || parentFolderId === "";
+        return folder.parentFolderId === null || folder.parentFolderId === "";
       })
       .sort((a, b) => {
         const orderDiff = (a.orderIndex ?? 0) - (b.orderIndex ?? 0);
@@ -191,7 +215,7 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
     navigate("/", { replace: true });
   };
 
-  const handleReviewStartDayChange = async (checked) => {
+  const handleReviewStartDayChange = async (checked: boolean) => {
     await updateSettings({ reviewStartNextDay: checked });
 
     try {
@@ -668,7 +692,8 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
                         type="button"
                         onClick={() =>
                           updateSettings({
-                            folderSidebarDisplayMode: option.id,
+                            folderSidebarDisplayMode:
+                              option.id as FolderSidebarDisplayMode,
                           })
                         }
                         className={cn(
@@ -770,7 +795,11 @@ const SettingsDialog = ({ open, onOpenChange, initialTab }) => {
                   <Select
                     value={String(syncPrefs.intervalMinutes)}
                     onValueChange={(val) =>
-                      updateSyncPrefs({ intervalMinutes: Number(val) })
+                      updateSyncPrefs({
+                        intervalMinutes: Number(
+                          val,
+                        ) as SyncSettings["intervalMinutes"],
+                      })
                     }
                   >
                     <SelectTrigger className="w-full md:w-[180px] bg-white/5 border-white/10 rounded-xl font-bold text-sm text-slate-200">

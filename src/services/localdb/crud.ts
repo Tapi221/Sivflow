@@ -7,20 +7,12 @@ import {
 } from "./documentsLifecycle";
 import type { DocDbCtx } from "./documentsLifecycle";
 
-/**
- * 外部境界（Sync キュー）なので payload は unknown に落とす。
- */
 export type EnqueueSync = (
   table: string,
   type: "upload" | "download",
   payload: unknown,
 ) => Promise<void>;
 
-/**
- * Dexie を直接 import しない最小インターフェース。
- * add / put / bulkPut の戻り値は Dexie の PromiseExtended<IndexableType> と揃えるため
- * PromiseLike<unknown> にしてある。
- */
 export interface TableLike<T extends Record<string, unknown>> {
   add: (item: T) => PromiseLike<unknown>;
   get: (id: string) => Promise<T | undefined>;
@@ -118,10 +110,6 @@ const toStorageRow = (value: unknown): AnyRow => {
   if (!isRecord(value)) return {};
   return { ...value } as AnyRow;
 };
-
-/* -----------------------------
- * addItem
- * ----------------------------- */
 
 type AddItem = {
   (
@@ -223,7 +211,9 @@ export const addItem: AddItem = async (
           "[LocalDB] addItem verification failed after retries: write succeeded but read returned null",
           { table, id: resolvedId, instanceName: db.name },
         );
-        throw new Error("DB instance mismatch: write succeeded but read failed");
+        throw new Error(
+          "DB instance mismatch: write succeeded but read failed",
+        );
       }
     } catch (verifyError: unknown) {
       console.error("[LocalDB] addItem verification ERROR", verifyError);
@@ -264,10 +254,6 @@ export const addItem: AddItem = async (
     throw error;
   }
 };
-
-/* -----------------------------
- * updateItem
- * ----------------------------- */
 
 type UpdateItem = {
   (
@@ -365,10 +351,6 @@ export const updateItem: UpdateItem = async (
   return result;
 };
 
-/* -----------------------------
- * deleteItem
- * ----------------------------- */
-
 type DeleteItem = {
   (db: DbLike, table: "documents", id: string): Promise<void>;
   (db: DbLike, table: string, id: string): Promise<void>;
@@ -392,10 +374,6 @@ export const deleteItem: DeleteItem = async (
   const tableApi = db.table<AnyRow>(table);
   await tableApi.delete(id);
 };
-
-/* -----------------------------
- * softDelete
- * ----------------------------- */
 
 export const softDelete = async (
   db: DbLike,
@@ -433,10 +411,6 @@ export const softDelete = async (
     ...extraChanges,
   });
 };
-
-/* -----------------------------
- * bulkUpsert
- * ----------------------------- */
 
 type BulkUpsert = {
   (
@@ -500,10 +474,6 @@ export const bulkUpsert: BulkUpsert = async (
     }
   }
 };
-
-/* -----------------------------
- * upsert
- * ----------------------------- */
 
 type Upsert = {
   (
