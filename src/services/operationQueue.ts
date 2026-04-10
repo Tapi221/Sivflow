@@ -1,5 +1,9 @@
-import { getLocalDb } from "./localDB";
 import type { SyncQueueItem } from "@/types/domain/sync";
+import { getLocalDb } from "./localDB";
+import {
+  createDeleteQueueItem,
+  createUpsertQueueItem,
+} from "@/services/sync/queueItemFactory";
 
 export type QueuePriority = "critical" | "high" | "medium" | "low";
 export type OperationType = "create" | "update" | "delete";
@@ -83,8 +87,37 @@ class OperationQueueService {
     p1: QueuePriority,
     p2: QueuePriority,
   ): QueuePriority => {
-    const scores = { critical: 4, high: 3, medium: 2, low: 1 };
+    const scores: Record<QueuePriority, number> = {
+      critical: 4,
+      high: 3,
+      medium: 2,
+      low: 1,
+    };
+
     return scores[p1] >= scores[p2] ? p1 : p2;
+  };
+
+  private buildQueueItem = (
+    entity: QueueEntity,
+    targetId: string,
+    op: OperationType,
+    data: unknown,
+    priority: QueuePriority,
+  ): SyncQueueItem => {
+    if (op === "delete") {
+      return createDeleteQueueItem({
+        entity,
+        targetId,
+        priority,
+      });
+    }
+
+    return createUpsertQueueItem({
+      entity,
+      operationType: op,
+      payload: data,
+      priority,
+    });
   };
 
   private addItem = async (
@@ -95,23 +128,7 @@ class OperationQueueService {
     priority: QueuePriority,
   ) => {
     const db = await this.getBoundDb();
-
-    const newItem: SyncQueueItem = {
-      id: crypto.randomUUID(),
-      idempotencyKey: crypto.randomUUID(),
-      targetId,
-      entity,
-      operationType: op,
-      action: op,
-      type: "upload",
-      payload: data,
-      priority,
-      status: "pending",
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-      retryCount: 0,
-    };
-
+    const newItem = this.buildQueueItem(entity, targetId, op, data, priority);
     await db.syncQueue.add(newItem);
   };
 
@@ -124,11 +141,15 @@ class OperationQueueService {
   ): Promise<void> => {
     const db = await this.getBoundDb();
 
-    await db.transaction("rw", ["syncQueue"], async () => {
-      const existingItem = await db.syncQueue
-        .where({ targetId })
-        .filter((item) => item.status === "pending")
-        .first();
+    await db.transaction("rw", [db.syncQueue], async () => {
+      const pendingItems = await db.syncQueue
+        .toCollection()
+        .filter(
+          (item) => item.targetId === targetId && item.status === "pending",
+        )
+        .sortBy("createdAt");
+
+      const existingItem = pendingItems.at(-1);
 
       if (!existingItem) {
         await this.addItem(entity, targetId, operationType, data, priority);
@@ -154,16 +175,25 @@ class OperationQueueService {
         return;
       }
 
-      await db.syncQueue.update(existingItem.id, {
-        operationType: resultOp,
-        payload: data,
-        priority: this.resolvePriority(existingItem.priority, priority),
+      const compressedItem = this.buildQueueItem(
         entity,
+        targetId,
+        resultOp,
+        data,
+        this.resolvePriority(existingItem.priority, priority),
+      );
+
+      const updatedItem: SyncQueueItem = {
+        ...compressedItem,
+        id: existingItem.id,
+        idempotencyKey: existingItem.idempotencyKey,
+        createdAt: existingItem.createdAt,
         updatedAt: Date.now(),
         retryCount: 0,
-        lastError: undefined,
-        nextRetryAt: undefined,
-      });
+        status: "pending",
+      };
+
+      await db.syncQueue.put(updatedItem);
 
       console.log(
         `[Queue] Compressed: ${existingOp} + ${operationType} -> ${resultOp}`,
@@ -218,12 +248,17 @@ class OperationQueueService {
     const jitter = cappedDelay * (this.JITTER_FACTOR * (Math.random() * 2 - 1));
     const nextDelay = Math.max(0, cappedDelay + jitter);
 
-    await db.syncQueue.update(item.id, {
+    const updatedItem: SyncQueueItem = {
+      ...item,
       status: "pending",
       retryCount: newRetryCount,
       lastError: String(error),
       nextRetryAt: Date.now() + nextDelay,
-    });
+      updatedAt: Date.now(),
+      processingStartedAt: undefined,
+    };
+
+    await db.syncQueue.put(updatedItem);
   };
 
   private performSyncOperation = async (item: SyncQueueItem) => {
@@ -241,11 +276,10 @@ class OperationQueueService {
     const staleThreshold = now - this.STALE_TIMEOUT_MS;
 
     const staleItems = await db.syncQueue
-      .where("status")
-      .equals("processing")
+      .toCollection()
       .filter((item) => {
         const startedAt = item.processingStartedAt || 0;
-        return startedAt < staleThreshold;
+        return item.status === "processing" && startedAt < staleThreshold;
       })
       .toArray();
 
@@ -257,14 +291,19 @@ class OperationQueueService {
       `[Queue] Found ${staleItems.length} stale processing items. Recovering...`,
     );
 
-    await db.transaction("rw", ["syncQueue"], async () => {
+    await db.transaction("rw", [db.syncQueue], async () => {
       for (const item of staleItems) {
-        await db.syncQueue.update(item.id, {
+        const recovered: SyncQueueItem = {
+          ...item,
           status: "pending",
           retryCount: (item.retryCount || 0) + 1,
           lastError: "Stale Processing Recovery",
           nextRetryAt: now,
-        });
+          processingStartedAt: undefined,
+          updatedAt: now,
+        };
+
+        await db.syncQueue.put(recovered);
       }
     });
   };
@@ -285,8 +324,8 @@ class OperationQueueService {
       await this.cleanupStaleProcessing();
 
       const processingCount = await db.syncQueue
-        .where("status")
-        .equals("processing")
+        .toCollection()
+        .filter((item) => item.status === "processing")
         .count();
 
       if (processingCount >= this.MAX_CONCURRENCY) {
@@ -300,22 +339,33 @@ class OperationQueueService {
       const fetchByPriority = async (
         priority: QueuePriority,
         limit: number,
-      ) => {
+      ): Promise<SyncQueueItem[]> => {
         if (limit <= 0) {
-          return [] as SyncQueueItem[];
+          return [];
         }
 
-        return await db.syncQueue
-          .where("[status+priority]")
-          .equals(["pending", priority])
-          .filter((item) => !item.nextRetryAt || item.nextRetryAt <= now)
-          .limit(limit)
+        const items = await db.syncQueue
+          .toCollection()
+          .filter(
+            (item) =>
+              item.status === "pending" &&
+              item.priority === priority &&
+              (!item.nextRetryAt || item.nextRetryAt <= now),
+          )
           .sortBy("createdAt");
+
+        return items.slice(0, limit);
       };
 
       let candidates: SyncQueueItem[] = [];
 
-      const highs = await fetchByPriority("high", fetchLimit);
+      const criticals = await fetchByPriority("critical", fetchLimit);
+      candidates = [...candidates, ...criticals];
+
+      const highs = await fetchByPriority(
+        "high",
+        fetchLimit - candidates.length,
+      );
       candidates = [...candidates, ...highs];
 
       const mediums = await fetchByPriority(
@@ -335,7 +385,7 @@ class OperationQueueService {
         candidates.map(async (item) => {
           const lockedItem = await db.transaction<SyncQueueItem | null>(
             "rw",
-            ["syncQueue"],
+            [db.syncQueue],
             async () => {
               const current = await db.syncQueue.get(item.id);
 
@@ -343,12 +393,16 @@ class OperationQueueService {
                 return null;
               }
 
-              await db.syncQueue.update(item.id, {
+              const processingItem: SyncQueueItem = {
+                ...current,
                 status: "processing",
                 processingStartedAt: Date.now(),
-              });
+                updatedAt: Date.now(),
+              };
 
-              return current;
+              await db.syncQueue.put(processingItem);
+
+              return processingItem;
             },
           );
 

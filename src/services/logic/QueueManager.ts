@@ -1,131 +1,139 @@
-import type {
-  BatchConstraint,
-  IQueueManager,
-  SyncTask,
-} from "@/services/interfaces/ISyncService";
-import type { LocalDBLike } from "@/services/localDB";
+import { normalizeFolderWithSilent } from "@/domain/folder/normalizers/normalizeFolder";
+import {
+  resolveBlocksFromCardData,
+  resolveExtraRowsFromCardData,
+  resolveInkFromCardData,
+} from "@/domain/card/normalizers/cardShape";
 
-/**
- * QueueManager: オフライン時の同期タスクを永続化し、順序保証とリトライ制御を行う
- * LocalDBに依存するが、それ以外の副作用はない
- */
-export class QueueManager implements IQueueManager {
-  private localDB: LocalDBLike;
-  private readonly MAX_RETRY_COUNT = 3;
+export { normalizeFolderWithSilent };
 
-  constructor(localDB: LocalDBLike) {
-    this.localDB = localDB;
-  }
+const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === "object" && value !== null;
+};
 
-  /**
-   * タスクをキューに追加
-   */
-  async enqueue(task: SyncTask): Promise<void> {
-    const queueItem = {
-      id: task.id || `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      idempotencyKey:
-        task.idempotencyKey ||
-        `ik_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      targetId: task.targetId || task.payload?.id || "unknown",
-      operationType:
-        task.operationType || (task.type === "upload" ? "update" : "create"),
-      type: task.type,
-      entity: task.entity,
-      payload: task.payload,
-      priority: task.priority,
-      createdAt: task.createdAt || Date.now(),
-      updatedAt: Date.now(),
-      retryCount: 0,
-      status: "pending" as const,
+const readString = (
+  value: Record<string, unknown>,
+  key: string,
+): string | null => {
+  const candidate = value[key];
+  return typeof candidate === "string" ? candidate : null;
+};
+
+const readNumber = (
+  value: Record<string, unknown>,
+  key: string,
+): number | null => {
+  const candidate = value[key];
+  return typeof candidate === "number" && Number.isFinite(candidate)
+    ? candidate
+    : null;
+};
+
+const sanitizeLayout = (value: unknown) => {
+  if (!isRecord(value)) return null;
+
+  return {
+    baseWidthPx: readNumber(value, "baseWidthPx"),
+    cropX: readNumber(value, "cropX"),
+  };
+};
+
+const sanitizeImageRef = (value: unknown) => {
+  if (!isRecord(value)) return value;
+
+  const assetId = readString(value, "assetId") ?? readString(value, "id");
+  const remoteUrl = readString(value, "remoteUrl");
+  const normalizedRemoteUrl =
+    remoteUrl && remoteUrl.startsWith("http") ? remoteUrl : null;
+
+  return {
+    id: readString(value, "id") ?? assetId,
+    assetId,
+    localFileId: readString(value, "localFileId") ?? assetId,
+    remoteUrl: normalizedRemoteUrl,
+    storagePath: readString(value, "storagePath"),
+    status:
+      readString(value, "status") ??
+      (normalizedRemoteUrl ? "ready" : "uploading"),
+    error: readString(value, "error") ?? undefined,
+    scale: readNumber(value, "scale") ?? 1,
+    x: readNumber(value, "x") ?? 0,
+    layout: sanitizeLayout(value.layout),
+    naturalW: readNumber(value, "naturalW"),
+    naturalH: readNumber(value, "naturalH"),
+  };
+};
+
+const sanitizeBlockImages = (blocks: unknown[] | undefined) => {
+  if (!Array.isArray(blocks)) return blocks;
+
+  return blocks.map((block) => {
+    if (!isRecord(block)) return block;
+    if (!Array.isArray(block.images)) return block;
+
+    return {
+      ...block,
+      images: block.images.map((image) => sanitizeImageRef(image)),
     };
+  });
+};
 
-    await this.localDB.syncQueue.add(queueItem);
-  }
+export const denormalizeCardForStorage = <T>(card: T): T => {
+  if (!isRecord(card)) return card;
 
-  /**
-   * バッチ制約に基づいてタスクを取得
-   * 優先度順にソートし、制約に収まる数だけ返す
-   */
-  async peekBatch(constraint: BatchConstraint): Promise<SyncTask[]> {
-    const allPending = await this.localDB.syncQueue
-      .where("status")
-      .equals("pending")
-      .toArray();
+  const result: Record<string, unknown> = { ...card };
 
-    // 優先度でソート（critical > high > medium > low）
-    const priorityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
-    allPending.sort((a, b) => {
-      const priorityDiff =
-        priorityOrder[a.priority] - priorityOrder[b.priority];
-      if (priorityDiff !== 0) return priorityDiff;
-      return a.createdAt - b.createdAt; // 同じ優先度ならFIFO
-    });
+  const frontBlocks = sanitizeBlockImages(
+    resolveBlocksFromCardData(result, "question"),
+  );
+  const backBlocks = sanitizeBlockImages(
+    resolveBlocksFromCardData(result, "answer"),
+  );
 
-    // 制約に収まる数だけ取得
-    return allPending.slice(0, constraint.maxSize).map((item) => ({
-      id: item.id,
-      idempotencyKey: item.idempotencyKey,
-      targetId: item.targetId,
-      operationType: item.operationType,
-      type: item.type,
-      entity: item.entity,
-      payload: item.payload,
-      priority: item.priority,
-      createdAt: item.createdAt,
-    }));
-  }
+  const frontBase = isRecord(result.front) ? result.front : {};
+  const backBase = isRecord(result.back) ? result.back : {};
 
-  /**
-   * タスク完了（キューから削除）
-   */
-  async complete(taskIds: string[]): Promise<void> {
-    await this.localDB.syncQueue.bulkDelete(taskIds);
-  }
+  result.front = {
+    ...frontBase,
+    blocks: frontBlocks,
+    ink: resolveInkFromCardData(result, "question", { emptyInkAsNull: true }),
+    extraRows: resolveExtraRowsFromCardData(result, "question"),
+  };
 
-  /**
-   * タスク失敗（リトライ可能ならretryCount++、不可能なら削除）
-   */
-  async fail(
-    taskIds: string[],
-    reason: string,
-    retryable: boolean,
-  ): Promise<void> {
-    if (!retryable) {
-      // リトライ不可能なら削除
-      await this.localDB.syncQueue.bulkDelete(taskIds);
-      console.error(`[QueueManager] Non-retryable failure:`, reason, taskIds);
-      return;
-    }
+  result.back = {
+    ...backBase,
+    blocks: backBlocks,
+    ink: resolveInkFromCardData(result, "answer", { emptyInkAsNull: true }),
+    extraRows: resolveExtraRowsFromCardData(result, "answer"),
+  };
 
-    // リトライ可能な場合、retryCountをインクリメント
-    for (const id of taskIds) {
-      const item = await this.localDB.syncQueue.get(id);
-      if (!item) continue;
+  delete result.questionBlocks;
+  delete result.answerBlocks;
+  delete result.frontBlocks;
+  delete result.backBlocks;
+  delete result.questionText;
+  delete result.answerText;
+  delete result.questionImages;
+  delete result.answerImages;
+  delete result.questionAudios;
+  delete result.answerAudios;
+  delete result.questionCode;
+  delete result.answerCode;
+  delete result.questionMarked;
+  delete result.answerMarked;
+  delete result.questionTextHighlighted;
+  delete result.answerTextHighlighted;
+  delete result.inkQuestion;
+  delete result.inkAnswer;
+  delete result.questionExtraRows;
+  delete result.answerExtraRows;
+  delete result.question_extra_rows;
+  delete result.answer_extra_rows;
 
-      const newRetryCount = (item.retryCount || 0) + 1;
+  return result as T;
+};
 
-      if (newRetryCount >= this.MAX_RETRY_COUNT) {
-        // 最大リトライ回数を超えたら削除
-        await this.localDB.syncQueue.delete(id);
-        console.error(`[QueueManager] Max retry exceeded:`, id);
-      } else {
-        // リトライ回数を更新
-        await this.localDB.syncQueue.update(id, {
-          retryCount: newRetryCount,
-          lastError: reason,
-          lastRetryAt: Date.now(),
-        });
-      }
-    }
-  }
-
-  /**
-   * キューの深さ（未処理タスク数）を取得
-   */
-  async getQueueDepth(): Promise<number> {
-    return await this.localDB.syncQueue
-      .where("status")
-      .equals("pending")
-      .count();
-  }
-}
+export const denormalizeFolderForStorage = <T>(folder: T): T => {
+  if (!isRecord(folder)) return folder;
+  return { ...folder } as T;
+};
