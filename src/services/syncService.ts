@@ -992,14 +992,24 @@ export class SyncService {
     table: TTable,
     remoteItems: Array<SyncPayloadByTable[TTable]>,
   ): Promise<void> {
-    if (table === "userSettings" || table === "userStats") {
-      for (const item of remoteItems) {
-        if (table === "userSettings" && item.profileImage) {
-          item.profileImage = sanitizeProfileImage(
-            item.profileImage,
-          ).profileImage;
-        }
-        await this.localDB.upsert(table, item);
+    if (table === "userSettings") {
+      for (const item of remoteItems as UserSettings[]) {
+        const sanitized = item.profileImage
+          ? {
+              ...item,
+              profileImage: sanitizeProfileImage(item.profileImage)
+                .profileImage,
+            }
+          : item;
+
+        await this.localDB.upsert("userSettings", sanitized);
+      }
+      return;
+    }
+
+    if (table === "userStats") {
+      for (const item of remoteItems as UserStats[]) {
+        await this.localDB.upsert("userStats", item);
       }
       return;
     }

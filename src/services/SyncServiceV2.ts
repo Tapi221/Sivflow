@@ -23,11 +23,16 @@ import type {
   INetworkMonitor,
   IQueueManager,
   ISyncService,
+  SecurityAlert,
+  SecurityState,
   SyncChange,
+  SyncConflict,
+  SyncProcessingError,
+  SyncStats,
   SyncTask,
+  UserSettingsSnapshot,
 } from "./interfaces/ISyncService";
 import type { LocalDBLike } from "./localDB";
-import { CURRENT_TAG_STORE } from "./localdb/tagStoreNames";
 import { SecurityMonitor } from "./logic/SecurityMonitor";
 import { TelemetryService } from "./logic/TelemetryService";
 
@@ -36,7 +41,7 @@ const SYNC_TABLE_BY_TYPE = {
   folder: "folders",
   cardSet: "cardSets",
   document: "documents",
-  tag: CURRENT_TAG_STORE,
+  tag: "tagRecords",
   asset: "images",
   userSetting: "userSettings",
 } as const;
@@ -46,7 +51,7 @@ const FULL_RESYNC_TABLES = [
   "cardSets",
   "cards",
   "documents",
-  CURRENT_TAG_STORE,
+  "tagRecords",
   "userSettings",
   "images",
 ] as const;
@@ -195,13 +200,9 @@ const repairMissingCardSetsAfterSync = async (
   const now = new Date();
 
   const [cards, cardSets, folders] = await Promise.all([
-    localDB.cards.where("userId").equals(userId).toArray() as Promise<Card[]>,
-    localDB.cardSets.where("userId").equals(userId).toArray() as Promise<
-      CardSet[]
-    >,
-    localDB.folders.where("userId").equals(userId).toArray() as Promise<
-      Folder[]
-    >,
+    localDB.listCardsByUser(userId),
+    localDB.listCardSetsByUser(userId),
+    localDB.listFoldersByUser(userId),
   ]);
 
   const activeCardSets = cardSets.filter((cardSet) => !cardSet.isDeleted);
@@ -225,7 +226,7 @@ const repairMissingCardSetsAfterSync = async (
     }
   }
 
-  await localDB.transaction("rw", localDB.cardSets, localDB.cards, async () => {
+  await localDB.runSyncTransaction(async () => {
     for (const [folderKey, groupedCards] of cardsByFolder.entries()) {
       let targetCardSet = activeCardSetByFolder.get(folderKey);
 
@@ -247,7 +248,7 @@ const repairMissingCardSetsAfterSync = async (
           updatedAt: now,
         };
 
-        await localDB.cardSets.add(targetCardSet);
+        await localDB.addCardSet(targetCardSet);
         activeCardSetByFolder.set(folderKey, targetCardSet);
         nextOrderIndexByFolder.set(
           folderKey,
@@ -256,7 +257,7 @@ const repairMissingCardSetsAfterSync = async (
       }
 
       for (const card of groupedCards) {
-        await localDB.cards.update(card.id, {
+        await localDB.updateCardById(card.id, {
           cardSetId: targetCardSet.id,
           updatedAt: now,
         });
@@ -638,46 +639,30 @@ export class SyncServiceV2 implements ISyncService {
         changesCount: diff.changes.length,
       });
 
-      await this.localDB.transaction(
-        "rw",
-        [...FULL_RESYNC_TABLES],
-        async () => {
-          for (const table of FULL_RESYNC_TABLES) {
-            await (
-              this.localDB as unknown as Record<
-                string,
-                { clear: () => Promise<void> }
-              >
-            )[table].clear();
+      await this.localDB.runSyncTransaction(async () => {
+        await this.localDB.clearSyncTables(FULL_RESYNC_TABLES);
+
+        for (const change of diff.changes) {
+          const changeType = typeof change.type === "string" ? change.type : "";
+          if (!changeType) continue;
+
+          const tableName = toSyncTableName(changeType);
+          if (!(FULL_RESYNC_TABLES as readonly string[]).includes(tableName)) {
+            continue;
           }
 
-          for (const change of diff.changes) {
-            const changeType =
-              typeof change.type === "string" ? change.type : "";
-            if (!changeType) continue;
+          const data = normalizeFullResyncRecord(this.userId, {
+            type: changeType,
+            id: typeof change.id === "string" ? change.id : undefined,
+            data: change.data,
+          });
 
-            const tableName = toSyncTableName(changeType);
-            if (
-              !(FULL_RESYNC_TABLES as readonly string[]).includes(tableName)
-            ) {
-              continue;
-            }
-
-            const data = normalizeFullResyncRecord(this.userId, {
-              type: changeType,
-              id: typeof change.id === "string" ? change.id : undefined,
-              data: change.data,
-            });
-
-            await (
-              this.localDB as unknown as Record<
-                string,
-                { put: (value: unknown) => Promise<void> }
-              >
-            )[tableName].put(data);
-          }
-        },
-      );
+          await this.localDB.putSyncRecord(
+            tableName as (typeof FULL_RESYNC_TABLES)[number],
+            data as never,
+          );
+        }
+      });
 
       await repairMissingCardSetsAfterSync(this.localDB, this.userId);
 
@@ -808,24 +793,92 @@ export class SyncServiceV2 implements ISyncService {
     return count;
   }
 
-  async getSyncStats(): Promise<unknown> {
+  async getSyncStats(): Promise<SyncStats> {
+    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const [{ histories, errors }, queueDepth] = await Promise.all([
+      this.localDB.getSyncStatsSince(sevenDaysAgo),
+      this.queueManager.getQueueDepth(),
+    ]);
+
+    const lastHistory = [...histories].sort(
+      (a, b) => b.finishedAt - a.finishedAt,
+    )[0];
+    const lastSuccess = [...histories]
+      .filter((history) => history.result === "success")
+      .sort((a, b) => b.finishedAt - a.finishedAt)[0];
+    const lastError = [...errors].sort(
+      (a, b) => b.occurredAt - a.occurredAt,
+    )[0];
+    const durations = histories.map(
+      (history) => history.finishedAt - history.startedAt,
+    );
+    const avgDurationMs =
+      durations.length > 0
+        ? durations.reduce((total, duration) => total + duration, 0) /
+          durations.length
+        : 0;
+    const recentSuccessRate =
+      histories.length > 0
+        ? histories.filter((history) => history.result === "success").length /
+          histories.length
+        : 1;
+
     return {
-      successRate: 100,
-      avgDuration: 0,
-      errorRate: 0,
-      totalSyncs: 0,
+      lastAttemptAt: lastHistory?.finishedAt,
+      lastSuccessAt: lastSuccess?.finishedAt,
+      lastErrorMessage: lastError?.message,
+      avgDurationMs,
+      recentSuccessRate,
+      queueDepth,
     };
   }
 
-  async getUnresolvedConflicts(): Promise<unknown[]> {
-    return [];
+  async getUnresolvedConflicts(): Promise<SyncConflict[]> {
+    const conflicts = await this.localDB.getConflicts();
+    return conflicts.map((conflict) => {
+      const local = Object.fromEntries(
+        Object.entries(conflict.conflicts).map(([key, value]) => [
+          key,
+          value.local,
+        ]),
+      );
+      const remote = Object.fromEntries(
+        Object.entries(conflict.conflicts).map(([key, value]) => [
+          key,
+          value.remote,
+        ]),
+      );
+
+      return {
+        id: conflict.id,
+        entity: conflict.entityType,
+        targetId: conflict.entityId,
+        local,
+        remote,
+        createdAt: conflict.detectedAt,
+      };
+    });
   }
 
-  async loadSettings(): Promise<unknown> {
+  async loadSettings(): Promise<UserSettingsSnapshot> {
+    const settings = await this.localDB.getSyncSettings("default");
     return {
-      autoSync: true,
-      intervalMinutes: 30,
-      wifiOnly: false,
+      version: 1,
+      updatedAt: Date.now(),
+      data: settings
+        ? {
+            id: settings.id,
+            autoSync: settings.autoSync,
+            intervalMinutes: settings.intervalMinutes,
+            wifiOnly: settings.wifiOnly,
+            autoCleanupDevices: settings.autoCleanupDevices,
+          }
+        : {
+            autoSync: true,
+            intervalMinutes: 30,
+            wifiOnly: false,
+            autoCleanupDevices: true,
+          },
     };
   }
 
@@ -833,19 +886,57 @@ export class SyncServiceV2 implements ISyncService {
     return this.sync("force_resync");
   }
 
-  async processQueue(): Promise<{ processed: number; errors: unknown[] }> {
-    await this.sync("background");
-    return { processed: 0, errors: [] };
+  async processQueue(): Promise<{
+    processed: number;
+    errors: SyncProcessingError[];
+  }> {
+    const before = await this.queueManager.getQueueDepth();
+
+    try {
+      await this.sync("background");
+      const after = await this.queueManager.getQueueDepth();
+      return {
+        processed: Math.max(before - after, 0),
+        errors: [],
+      };
+    } catch (error: unknown) {
+      return {
+        processed: 0,
+        errors: [
+          {
+            message: error instanceof Error ? error.message : String(error),
+            retryable: true,
+            cause: error,
+          },
+        ],
+      };
+    }
   }
 
-  monitorSecurity(
-    callback: (state: {
-      isLocked: boolean;
-      requires2FA: boolean;
-      alerts: unknown[];
-    }) => void,
-  ): () => void {
-    this.securityMonitor.startMonitoring(callback);
+  monitorSecurity(callback: (state: SecurityState) => void): () => void {
+    this.securityMonitor.startMonitoring((state) => {
+      const alerts: SecurityAlert[] = state.alerts.map((alert) => {
+        const record = alert as Record<string, unknown>;
+        return {
+          id: String(record.id ?? crypto.randomUUID()),
+          type:
+            typeof record.type === "string" ? record.type : "SECURITY_ALERT",
+          createdAt:
+            typeof record.createdAt === "number"
+              ? record.createdAt
+              : Date.now(),
+          message:
+            typeof record.message === "string" ? record.message : undefined,
+          data: record,
+        };
+      });
+
+      callback({
+        isLocked: state.isLocked,
+        requires2FA: state.requires2FA,
+        alerts,
+      });
+    });
     return () => this.securityMonitor.stopMonitoring();
   }
 

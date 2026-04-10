@@ -92,11 +92,9 @@ const debugFirebase = () => {
   console.log("🔍 === Firebase Debug Info ===");
   try {
     console.log("App name:", app.name);
-    console.log("DB instance:", firestoreDb ? "exists" : "MISSING");
-    if (firestoreDb) {
-      const testRef = collection(firestoreDb, "test_connection");
-      console.log("✅ collection() basic check passed:", testRef.path);
-    }
+    console.log("DB instance:", _firestoreDb ? "exists" : "MISSING");
+    const testRef = collection(firestoreDb, "test_connection");
+    console.log("✅ collection() basic check passed:", testRef.path);
   } catch (error) {
     console.error("❌ debugFirebase error:", error);
   }

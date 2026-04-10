@@ -1,6 +1,7 @@
 import type {
   AssetRecord,
   Card,
+  CardSet,
   Folder,
   SyncConflict,
   SyncError,
@@ -517,11 +518,12 @@ class InMemoryTable<T extends object> {
   }
 }
 
-const SYNCABLE_TABLES = new Set(["cards", "folders"]);
+const SYNCABLE_TABLES = new Set(["cards", "folders", "cardSets"]);
 
 const ENTITY_MAP: Record<string, SyncQueueItem["entity"]> = {
   cards: "card",
   folders: "folder",
+  cardSets: "cardSet",
 };
 
 export class InMemoryLocalDB {
@@ -531,6 +533,7 @@ export class InMemoryLocalDB {
   public userId?: string;
 
   folders!: InMemoryTable<Folder>;
+  cardSets!: InMemoryTable<CardSet>;
   cards!: InMemoryTable<Card>;
   documents!: InMemoryTable<Record<string, unknown>>;
   users!: InMemoryTable<Record<string, unknown>>;
@@ -575,6 +578,7 @@ export class InMemoryLocalDB {
     this.name = name ?? `FlashcardMasterDB_mem_${userId ?? "anonymous"}`;
 
     this.folders = this.registerTable("folders", "id");
+    this.cardSets = this.registerTable("cardSets", "id");
     this.cards = this.registerTable("cards", "id");
     this.documents = this.registerTable("documents", "id");
     this.users = this.registerTable("users", "id");
@@ -663,7 +667,7 @@ export class InMemoryLocalDB {
 
   private async enqueueSync(
     tableName: string,
-    payload: Card | Folder,
+    payload: Card | Folder | CardSet,
   ): Promise<void> {
     if (!SYNCABLE_TABLES.has(tableName)) return;
     const operationType: SyncQueueItem["operationType"] = payload.isDeleted
@@ -729,7 +733,8 @@ export class InMemoryLocalDB {
   ): Promise<string> {
     const payload = ensureObject(item as Record<string, unknown>);
     const id = await this.table(tableName).add(payload);
-    if (!skipSync) await this.enqueueSync(tableName, payload as Card | Folder);
+    if (!skipSync)
+      await this.enqueueSync(tableName, payload as Card | Folder | CardSet);
     return String(id ?? payload.id);
   }
 
@@ -746,7 +751,7 @@ export class InMemoryLocalDB {
     if (!skipSync && result > 0) {
       const fullItem = await this.table(tableName).get(id);
       if (fullItem)
-        await this.enqueueSync(tableName, fullItem as Card | Folder);
+        await this.enqueueSync(tableName, fullItem as Card | Folder | CardSet);
     }
     return result;
   }
@@ -786,7 +791,7 @@ export class InMemoryLocalDB {
     );
     if (!skipSync) {
       for (const item of items) {
-        await this.enqueueSync(tableName, item as Card | Folder);
+        await this.enqueueSync(tableName, item as Card | Folder | CardSet);
       }
     }
   }
@@ -922,7 +927,10 @@ export class InMemoryLocalDB {
   ): Promise<void> {
     await this.table(tableName).put(data as Record<string, unknown>);
     if (!skipSync)
-      await this.enqueueSync(tableName, data as unknown as Card | Folder);
+      await this.enqueueSync(
+        tableName,
+        data as unknown as Card | Folder | CardSet,
+      );
   }
 
   async getSyncSettings(id: string): Promise<SyncSettings | undefined> {
@@ -1043,6 +1051,41 @@ export class InMemoryLocalDB {
     changes: Partial<AssetRecord & UploadedImage>,
   ): Promise<number> {
     return this.images.update(id, changes);
+  }
+
+  async listCardsByUser(userId: string): Promise<Card[]> {
+    return this.cards.where("userId").equals(userId).toArray();
+  }
+
+  async listFoldersByUser(userId: string): Promise<Folder[]> {
+    return this.folders.where("userId").equals(userId).toArray();
+  }
+
+  async listCardSetsByUser(userId: string): Promise<CardSet[]> {
+    return this.cardSets.where("userId").equals(userId).toArray();
+  }
+
+  async addCardSet(cardSet: CardSet): Promise<void> {
+    await this.cardSets.add(cardSet);
+  }
+
+  async updateCardById(id: string, changes: Partial<Card>): Promise<number> {
+    return this.cards.update(id, changes);
+  }
+
+  async runSyncTransaction<T>(scope: () => Promise<T>): Promise<T> {
+    return scope();
+  }
+
+  async clearSyncTables(tables: readonly SyncableEntityTable[]): Promise<void> {
+    await Promise.all(tables.map((table) => this.table(table).clear()));
+  }
+
+  async putSyncRecord<TTable extends SyncableEntityTable>(
+    table: TTable,
+    data: LocalDBTableMap[TTable],
+  ): Promise<void> {
+    await this.table(table).put(data as Record<string, unknown>);
   }
 
   setSyncTrigger(callback: () => void): void {

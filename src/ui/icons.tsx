@@ -43,6 +43,7 @@ import {
 export type IconProps = SVGProps<SVGSVGElement> & {
   size?: number;
   label?: string;
+  title?: string;
 };
 
 type StratisIconComponent = ForwardRefExoticComponent<

@@ -525,6 +525,53 @@ export class LocalDB extends Dexie {
     return this.images.update(id, changes);
   }
 
+  async listCardsByUser(userId: string): Promise<Card[]> {
+    return this.cards.where("userId").equals(userId).toArray();
+  }
+
+  async listFoldersByUser(userId: string): Promise<Folder[]> {
+    return this.folders.where("userId").equals(userId).toArray();
+  }
+
+  async listCardSetsByUser(userId: string): Promise<CardSet[]> {
+    return this.cardSets.where("userId").equals(userId).toArray();
+  }
+
+  async addCardSet(cardSet: CardSet): Promise<void> {
+    await this.cardSets.add(cardSet);
+  }
+
+  async updateCardById(id: string, changes: Partial<Card>): Promise<number> {
+    return this.cards.update(id, changes);
+  }
+
+  async runSyncTransaction<T>(scope: () => Promise<T>): Promise<T> {
+    return this.transaction(
+      "rw",
+      [
+        this.folders,
+        this.cardSets,
+        this.cards,
+        this.documents,
+        this.tagRecords,
+        this.userSettings,
+        this.images,
+      ],
+      async () => scope(),
+    ) as Promise<T>;
+  }
+
+  async clearSyncTables(tables: readonly SyncableEntityTable[]): Promise<void> {
+    await Promise.all(tables.map((table) => this.table(table).clear()));
+  }
+
+  async putSyncRecord<TTable extends SyncableEntityTable>(
+    table: TTable,
+    data: LocalDBTableMap[TTable],
+  ): Promise<void> {
+    await this.table(table).put(data as never);
+  }
+
   private async enqueueSync(
     tableName: string,
     type: SyncDirection,
