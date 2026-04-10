@@ -27,6 +27,7 @@ interface UseReliableFileUploadReturn {
     file: File,
     pathGenerator: (fileName: string) => string,
     context?: UploadMetadata["context"],
+    onProgress?: (progress: number) => void,
   ) => Promise<UploadResult>;
   isUploading: boolean;
   uploadProgress: number;
@@ -275,6 +276,7 @@ export const useReliableFileUpload = (): UseReliableFileUploadReturn => {
       file: File,
       pathGenerator: (fileName: string) => string,
       context?: UploadMetadata["context"],
+      onProgress?: (progress: number) => void,
     ): Promise<UploadResult> => {
       reset();
 
@@ -302,6 +304,7 @@ export const useReliableFileUpload = (): UseReliableFileUploadReturn => {
       setIsUploading(true);
       setUploadStatus("uploading");
       setUploadProgress(10);
+      onProgress?.(10);
 
       try {
         const contextType = resolveUploadType(context);
@@ -344,6 +347,7 @@ export const useReliableFileUpload = (): UseReliableFileUploadReturn => {
         setUploadProgress(100);
         setUploadStatus("completed");
         setIsUploading(false);
+        onProgress?.(100);
 
         return {
           url: savedImage.localUrl || "",

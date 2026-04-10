@@ -1,17 +1,9 @@
 import { BlockList } from "@/components/card/blocks/core/BlockList";
 import { CardBlockLayoutRenderer } from "@/components/card/blocks/shared/CardBlockLayoutRenderer";
+import type { ImageGalleryItem } from "@/components/card/media/types";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
-import type { UploadedImage } from "@/types/domain/assets";
 import type { CardBlock } from "@/types/domain/card";
 import { useCallback, useMemo } from "react";
-
-type MediaLike =
-  | UploadedImage
-  | {
-      url?: string | null;
-      remoteUrl?: string | null;
-      localUrl?: string | null;
-    };
 
 interface BlockRendererProps {
   blocks?: CardBlock[];
@@ -30,10 +22,14 @@ export const BlockRenderer = ({
   const questionDisplayMode = settings?.questionDisplayMode ?? "tap_to_reveal";
 
   const toMediaUrl = useCallback(
-    (item: string | MediaLike | null | undefined) => {
+    (item: ImageGalleryItem | null | undefined) => {
       if (typeof item === "string") return item;
       if (!item) return null;
-      return item.remoteUrl ?? item.localUrl ?? item.url ?? null;
+      return (
+        item.remoteUrl ??
+        item.localUrl ??
+        ("url" in item ? (item.url ?? null) : null)
+      );
     },
     [],
   );

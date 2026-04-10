@@ -12,8 +12,17 @@ import {
 import { useLocalImageBlobUrl } from "@/hooks/image/useLocalImageBlobUrl";
 import { deleteImageBlob, putImageBlob } from "@/services/imageFileStore";
 import { getLocalDb } from "@/services/localDB";
-import type { AssetRecord, UploadedImage, UploadedImageStatus } from "@/types";
-import type { StorageUrl } from "@/types/core/branded";
+import type {
+  AssetRecord,
+  SyncQueueItem,
+  UploadedImage,
+  UploadedImageStatus,
+} from "@/types";
+import {
+  createBlobUrl,
+  type BlobUrl,
+  type StorageUrl,
+} from "@/types/core/branded";
 import {
   Check,
   Copy,
@@ -38,7 +47,22 @@ const IMAGE_BLOCK_INSET_PX = 4;
 const FIXED_IMAGE_REFERENCE_FRAME_WIDTH_PX =
   CANONICAL_CARD_WIDTH - IMAGE_BLOCK_INSET_PX * 2;
 
-const ImageItem = ({ item, index, onRetry, onUpdate }) => {
+const toErrorMessage = (error: unknown, fallback = "不明なエラー") =>
+  error instanceof Error ? error.message : fallback;
+
+const toBlobUrlOrNull = (value: string | null | undefined): BlobUrl | null => {
+  if (!value || !value.startsWith("blob:")) return null;
+  return createBlobUrl(value);
+};
+
+type ImageItemProps = {
+  item: UploadedImage;
+  index: number;
+  onRetry: (index: number) => void;
+  onUpdate: (index: number, patch: Partial<UploadedImage>) => void;
+};
+
+const ImageItem = ({ item, index, onRetry, onUpdate }: ImageItemProps) => {
   const [loadFailed, setLoadFailed] = useState(false);
   const { currentUser } = useAuthSession();
   const [draftTransform, setDraftTransform] = useState<{
@@ -322,7 +346,18 @@ const ImageItem = ({ item, index, onRetry, onUpdate }) => {
                     );
                     const nextScale = nextScaleRaw >= 0.98 ? 1 : nextScaleRaw;
                     const baseX = nextScale >= 0.999 ? 0 : safeX;
-                    commitTransform({ scale: nextScale, x: baseX });
+                    commitTransform({
+                      scale: nextScale,
+                      x: baseX,
+                      layout: {
+                        baseWidthPx: Math.max(
+                          1,
+                          item.layout?.baseWidthPx ??
+                            FIXED_IMAGE_REFERENCE_FRAME_WIDTH_PX,
+                        ),
+                        cropX: item.layout?.cropX ?? 0,
+                      },
+                    });
                   }}
                   className="w-full"
                   aria-label="画像サイズ"
@@ -341,19 +376,26 @@ const MemoizedImageItem = React.memo(
   (prev, next) => prev.item === next.item && prev.index === next.index,
 );
 
-const AudioItem = ({ url, index, onRemove }) => {
+type AudioItemProps = {
+  url: string;
+  index: number;
+  onRemove: (index: number) => void;
+};
+
+const AudioItem = ({ url, index, onRemove }: AudioItemProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = React.useRef(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const togglePlay = () => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (isPlaying) {
+      audio.pause();
+    } else {
+      void audio.play();
     }
+    setIsPlaying((prev) => !prev);
   };
 
   return (
@@ -386,16 +428,29 @@ const AudioItem = ({ url, index, onRemove }) => {
   );
 };
 
-interface MediaUploaderProps {
-  type?: "image" | "audio";
-  urls?: (string | UploadedImage)[];
-  onChange: (urls: (string | UploadedImage)[]) => void;
+type ImageMediaUploaderProps = {
+  type?: "image";
+  urls?: UploadedImage[];
+  onChange: (urls: UploadedImage[]) => void;
   maxFiles?: number;
   initialFile?: File;
   onConsumeInitialFile?: () => void;
   onFilesExcess?: (files: File[]) => void;
   autoOpenPicker?: boolean;
-}
+};
+
+type AudioMediaUploaderProps = {
+  type: "audio";
+  urls?: string[];
+  onChange: (urls: string[]) => void;
+  maxFiles?: number;
+  initialFile?: File;
+  onConsumeInitialFile?: () => void;
+  onFilesExcess?: (files: File[]) => void;
+  autoOpenPicker?: boolean;
+};
+
+type MediaUploaderProps = ImageMediaUploaderProps | AudioMediaUploaderProps;
 
 const MediaUploader = ({
   type = "image",
@@ -411,10 +466,26 @@ const MediaUploader = ({
   const [isUploading, setIsUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [retryIndex, setRetryIndex] = useState<number | null>(null);
-  const latestItemsRef = useRef(urls);
+  const latestItemsRef = useRef<(UploadedImage | string)[]>(urls);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const autoOpenedRef = useRef(false);
+  const imageUrls = type === "image" ? (urls as UploadedImage[]) : [];
+  const audioUrls = type === "audio" ? (urls as string[]) : [];
+  const emitImageChange = useCallback(
+    (next: UploadedImage[]) => {
+      latestItemsRef.current = next;
+      (onChange as (urls: UploadedImage[]) => void)(next);
+    },
+    [onChange],
+  );
+  const emitAudioChange = useCallback(
+    (next: string[]) => {
+      latestItemsRef.current = next;
+      (onChange as (urls: string[]) => void)(next);
+    },
+    [onChange],
+  );
 
   const uniqueId = useId();
   const inputId = `file-${type}-${uniqueId}`;
@@ -460,7 +531,7 @@ const MediaUploader = ({
   const upsertAssetRecord = useCallback(
     async (asset: AssetRecord) => {
       const db = await getLocalDb(currentUser?.uid);
-      await db.images.put(asset as unknown);
+      await db.images.put(asset);
     },
     [currentUser?.uid],
   );
@@ -472,18 +543,19 @@ const MediaUploader = ({
       mime: string;
       size: number;
     }) => {
+      if (!currentUser?.uid) return;
       const db = await getLocalDb(currentUser?.uid);
       const now = Date.now();
       const existing = await db.syncQueue
-        .where("targetId")
-        .equals(payload.assetId)
         .filter(
-          (item: unknown) =>
-            item.entity === "asset" && item.status === "pending",
+          (queueItem: SyncQueueItem) =>
+            queueItem.targetId === payload.assetId &&
+            queueItem.entity === "asset" &&
+            queueItem.status === "pending",
         )
         .first();
       if (existing) return;
-      await db.syncQueue.add({
+      const queueItem: SyncQueueItem = {
         id: crypto.randomUUID(),
         idempotencyKey: crypto.randomUUID(),
         targetId: payload.assetId,
@@ -491,13 +563,25 @@ const MediaUploader = ({
         operationType: "update",
         type: "upload",
         action: "update",
-        payload,
+        payload: {
+          id: payload.assetId,
+          userId: currentUser.uid,
+          mime: payload.mime,
+          size: payload.size,
+          localBlobId: payload.localBlobId,
+          localStatus: "present",
+          remoteKey: payload.remoteKey,
+          remoteStatus: "none",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
         priority: "high",
         createdAt: now,
         updatedAt: now,
         status: "pending",
         retryCount: 0,
-      } as unknown);
+      };
+      await db.syncQueue.add(queueItem);
       if (import.meta.env.DEV) {
         console.info("[Asset] Enqueued upload", payload);
       }
@@ -552,27 +636,30 @@ const MediaUploader = ({
         const results = await Promise.allSettled(
           filesToUpload.map(uploadAudioWrapper),
         );
-        const uploadedUrls = results
-          .filter((result) => result.status === "fulfilled")
-          .map((result: unknown) => result.value.url);
+        const uploadedUrls = results.flatMap((result) =>
+          result.status === "fulfilled" ? [result.value.url] : [],
+        );
 
         if (uploadedUrls.length > 0) {
           if (maxFiles === 1) {
             // 単一ファイル制限の場合は置き換え
-            onChange([uploadedUrls[0]]);
+            emitAudioChange([uploadedUrls[0]]);
           } else {
-            onChange([...(urls as string[]), ...uploadedUrls]);
+            emitAudioChange([...audioUrls, ...uploadedUrls]);
           }
         }
 
-        const failures = results.filter((r) => r.status === "rejected");
+        const failures = results.filter(
+          (result): result is PromiseRejectedResult =>
+            result.status === "rejected",
+        );
         if (failures.length > 0) {
           console.error("Audio upload failures:", failures);
           alert(`${failures.length}件のファイルのアップロードに失敗しました。`);
         }
       } catch (error: unknown) {
         console.error("[MediaUploader] Audio upload error:", error);
-        alert(`ファイルのアップロードに失敗しました: ${error.message}`);
+        alert(`ファイルのアップロードに失敗しました: ${toErrorMessage(error)}`);
       } finally {
         setIsUploading(false);
       }
@@ -581,127 +668,126 @@ const MediaUploader = ({
 
     // Image Upload Logic using Hook
     try {
-      const prepared = await Promise.all(
-        filesArray.map(async (file) => {
-          if (isHeicFile(file)) {
-            try {
-              const converted = await convertHeicToJpeg(file);
-              const image = createUploadedImage(converted);
-              const assetId = image.assetId ?? image.id;
-              const blobRecord = await putImageBlob(converted, {
-                userId: currentUser.uid,
-                assetId,
-              });
-              const previewUrl = await getOrCreateImageBlobUrl(
-                blobRecord.localBlobId,
-                { userId: currentUser.uid },
-              );
-              const naturalSize = await loadImageNaturalSize(
-                String(previewUrl ?? image.localUrl ?? ""),
-              );
-              const remoteKey = buildAssetRemoteKey(currentUser.uid, assetId);
-              await upsertAssetRecord({
-                id: assetId,
-                userId: currentUser.uid,
-                mime: blobRecord.mime,
-                size: blobRecord.size,
-                localBlobId: blobRecord.localBlobId,
-                localStatus: "present",
-                remoteKey,
-                remoteStatus: "none",
-                createdAt: new Date(),
-                updatedAt: new Date(),
-              });
-              if (import.meta.env.DEV) {
-                console.info("[MediaUploader] image asset created", {
+      const prepared: Array<{ file: File | null; image: UploadedImage }> =
+        await Promise.all(
+          filesArray.map(async (file) => {
+            if (isHeicFile(file)) {
+              try {
+                const converted = await convertHeicToJpeg(file);
+                const image = createUploadedImage(converted);
+                const assetId = image.assetId ?? image.id;
+                const blobRecord = await putImageBlob(converted, {
+                  userId: currentUser.uid,
+                  assetId,
+                });
+                const previewUrl = await getOrCreateImageBlobUrl(
+                  blobRecord.localBlobId,
+                  { userId: currentUser.uid },
+                );
+                const naturalSize = await loadImageNaturalSize(
+                  String(previewUrl ?? image.localUrl ?? ""),
+                );
+                const remoteKey = buildAssetRemoteKey(currentUser.uid, assetId);
+                await upsertAssetRecord({
+                  id: assetId,
+                  userId: currentUser.uid,
+                  mime: blobRecord.mime,
+                  size: blobRecord.size,
+                  localBlobId: blobRecord.localBlobId,
+                  localStatus: "present",
+                  remoteKey,
+                  remoteStatus: "none",
+                  createdAt: new Date(),
+                  updatedAt: new Date(),
+                });
+                if (import.meta.env.DEV) {
+                  console.info("[MediaUploader] image asset created", {
+                    assetId,
+                    localBlobId: blobRecord.localBlobId,
+                  });
+                }
+                await enqueueAssetUpload({
                   assetId,
                   localBlobId: blobRecord.localBlobId,
+                  remoteKey,
+                  mime: blobRecord.mime,
+                  size: blobRecord.size,
                 });
+                return {
+                  file: converted,
+                  image: {
+                    ...image,
+                    assetId,
+                    localFileId: blobRecord.localBlobId,
+                    storagePath: remoteKey,
+                    localUrl: toBlobUrlOrNull(
+                      previewUrl ?? image.localUrl ?? null,
+                    ),
+                    naturalW: naturalSize?.naturalW ?? image.naturalW,
+                    naturalH: naturalSize?.naturalH ?? image.naturalH,
+                  },
+                };
+              } catch (error) {
+                console.warn("HEIC conversion failed", error);
+                return { file: null, image: createFailedUploadedImage(file) };
               }
-              await enqueueAssetUpload({
+            }
+            const image = createUploadedImage(file);
+            const assetId = image.assetId ?? image.id;
+            const blobRecord = await putImageBlob(file, {
+              userId: currentUser.uid,
+              assetId,
+            });
+            const previewUrl = await getOrCreateImageBlobUrl(
+              blobRecord.localBlobId,
+              { userId: currentUser.uid },
+            );
+            const naturalSize = await loadImageNaturalSize(
+              String(previewUrl ?? image.localUrl ?? ""),
+            );
+            const remoteKey = buildAssetRemoteKey(currentUser.uid, assetId);
+            await upsertAssetRecord({
+              id: assetId,
+              userId: currentUser.uid,
+              mime: blobRecord.mime,
+              size: blobRecord.size,
+              localBlobId: blobRecord.localBlobId,
+              localStatus: "present",
+              remoteKey,
+              remoteStatus: "none",
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            });
+            if (import.meta.env.DEV) {
+              console.info("[MediaUploader] image asset created", {
                 assetId,
                 localBlobId: blobRecord.localBlobId,
-                remoteKey,
-                mime: blobRecord.mime,
-                size: blobRecord.size,
               });
-              return {
-                file: converted,
-                image: {
-                  ...image,
-                  assetId,
-                  localFileId: blobRecord.localBlobId,
-                  storagePath: remoteKey,
-                  localUrl: (previewUrl ?? image.localUrl) as unknown,
-                  naturalW: naturalSize?.naturalW ?? image.naturalW,
-                  naturalH: naturalSize?.naturalH ?? image.naturalH,
-                },
-              };
-            } catch (error) {
-              console.warn("HEIC conversion failed", error);
-              return { file: null, image: createFailedUploadedImage(file) };
             }
-          }
-          const image = createUploadedImage(file);
-          const assetId = image.assetId ?? image.id;
-          const blobRecord = await putImageBlob(file, {
-            userId: currentUser.uid,
-            assetId,
-          });
-          const previewUrl = await getOrCreateImageBlobUrl(
-            blobRecord.localBlobId,
-            { userId: currentUser.uid },
-          );
-          const naturalSize = await loadImageNaturalSize(
-            String(previewUrl ?? image.localUrl ?? ""),
-          );
-          const remoteKey = buildAssetRemoteKey(currentUser.uid, assetId);
-          await upsertAssetRecord({
-            id: assetId,
-            userId: currentUser.uid,
-            mime: blobRecord.mime,
-            size: blobRecord.size,
-            localBlobId: blobRecord.localBlobId,
-            localStatus: "present",
-            remoteKey,
-            remoteStatus: "none",
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          });
-          if (import.meta.env.DEV) {
-            console.info("[MediaUploader] image asset created", {
+            await enqueueAssetUpload({
               assetId,
               localBlobId: blobRecord.localBlobId,
+              remoteKey,
+              mime: blobRecord.mime,
+              size: blobRecord.size,
             });
-          }
-          await enqueueAssetUpload({
-            assetId,
-            localBlobId: blobRecord.localBlobId,
-            remoteKey,
-            mime: blobRecord.mime,
-            size: blobRecord.size,
-          });
-          return {
-            file,
-            image: {
-              ...image,
-              assetId,
-              localFileId: blobRecord.localBlobId,
-              storagePath: remoteKey,
-              localUrl: (previewUrl ?? image.localUrl) as unknown,
-              naturalW: naturalSize?.naturalW ?? image.naturalW,
-              naturalH: naturalSize?.naturalH ?? image.naturalH,
-            },
-          };
-        }),
-      );
+            return {
+              file,
+              image: {
+                ...image,
+                assetId,
+                localFileId: blobRecord.localBlobId,
+                storagePath: remoteKey,
+                localUrl: toBlobUrlOrNull(previewUrl ?? image.localUrl ?? null),
+                naturalW: naturalSize?.naturalW ?? image.naturalW,
+                naturalH: naturalSize?.naturalH ?? image.naturalH,
+              },
+            };
+          }),
+        );
 
-      const newImages = [
-        ...(urls as UploadedImage[]),
-        ...prepared.map((item) => item.image),
-      ];
-      latestItemsRef.current = newImages;
-      onChange(newImages);
+      const newImages = [...imageUrls, ...prepared.map((item) => item.image)];
+      emitImageChange(newImages);
 
       // Process uploads
       await Promise.all(
@@ -722,7 +808,7 @@ const MediaUploader = ({
                 const updated = current.map((item) =>
                   item.id === image.id ? { ...item, progress: progress } : item,
                 );
-                onChange(updated);
+                emitImageChange(updated);
               },
             );
 
@@ -732,7 +818,7 @@ const MediaUploader = ({
             const updatedMid = currentMid.map((item) =>
               item.id === image.id ? { ...item, progress: 100 } : item,
             );
-            onChange(updatedMid);
+            emitImageChange(updatedMid);
 
             await new Promise((resolve) => setTimeout(resolve, 800));
 
@@ -754,12 +840,11 @@ const MediaUploader = ({
                   ? ("ready" as UploadedImageStatus)
                   : ("uploading" as UploadedImageStatus),
                 source: result.source || null,
-                fallbackReason: result.fallbackReason || null,
+                fallbackReason: result.fallbackReason ?? undefined,
                 progress: 100, // completed
               };
             });
-            latestItemsRef.current = updated; // 最新の状態を保存
-            onChange(updated);
+            emitImageChange(updated);
           } catch (error: unknown) {
             console.error(
               "[MediaUploader] Image upload error for:",
@@ -772,18 +857,17 @@ const MediaUploader = ({
                 ? {
                     ...item,
                     status: "failed" as UploadedImageStatus,
-                    error: error.message,
+                    error: toErrorMessage(error),
                   }
                 : item,
             );
-            latestItemsRef.current = updated; // 最新の状態を保存
-            onChange(updated);
+            emitImageChange(updated);
           }
         }),
       );
     } catch (error: unknown) {
       console.error("[MediaUploader] Image preparation/upload error:", error);
-      alert(`画像のアップロードに失敗しました: ${error.message}`);
+      alert(`画像のアップロードに失敗しました: ${toErrorMessage(error)}`);
     }
   };
 
@@ -791,7 +875,7 @@ const MediaUploader = ({
   useEffect(() => {
     if (initialFile && onConsumeInitialFile) {
       // Automatically start uploading the file
-      handleUpload([initialFile]);
+      void handleUpload([initialFile]);
       // Notify parent that the file has been consumed so it can be cleared from state
       onConsumeInitialFile();
     }
@@ -869,14 +953,14 @@ const MediaUploader = ({
         assetId,
         localFileId: blobRecord.localBlobId,
         storagePath: remoteKey,
-        localUrl: (previewUrl ?? created.localUrl) as unknown,
+        localUrl: toBlobUrlOrNull(previewUrl ?? created.localUrl ?? null),
         naturalW: naturalSize?.naturalW ?? created.naturalW,
         naturalH: naturalSize?.naturalH ?? created.naturalH,
       };
       const replaced = current.map((item, i) =>
         i === index ? newImage : item,
       );
-      onChange(replaced);
+      emitImageChange(replaced);
 
       const result = await uploadFile(targetFile, () => remoteKey, {
         type: "card_image",
@@ -901,10 +985,10 @@ const MediaUploader = ({
             ? ("ready" as UploadedImageStatus)
             : ("uploading" as UploadedImageStatus),
           source: result.source || null,
-          fallbackReason: result.fallbackReason || null,
+          fallbackReason: result.fallbackReason ?? undefined,
         };
       });
-      onChange(updated);
+      emitImageChange(updated);
     } catch (error: unknown) {
       console.warn("Retry failed", error);
       // Fallback failed or hook threw
@@ -912,7 +996,7 @@ const MediaUploader = ({
       const replaced = current.map((item, i) =>
         i === index ? failedImage : item,
       );
-      onChange(replaced);
+      emitImageChange(replaced);
     }
   };
 
@@ -930,20 +1014,20 @@ const MediaUploader = ({
       return;
     }
 
-    handleUpload(files);
+    void handleUpload(files);
     event.target.value = "";
   };
 
   const handleDrop = useCallback(
-    (e) => {
+    (e: React.DragEvent<HTMLDivElement>) => {
       e.preventDefault();
       setDragOver(false);
-      handleUpload(e.dataTransfer.files);
+      void handleUpload(e.dataTransfer.files);
     },
     [handleUpload],
   );
 
-  const handleDragOver = (e) => {
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setDragOver(true);
   };
@@ -954,7 +1038,7 @@ const MediaUploader = ({
 
   // Handle paste for images and audio
   const handlePaste = useCallback(
-    async (e) => {
+    async (e: ClipboardEvent) => {
       const target = e.target as HTMLElement | null;
       const isEditableTarget = !!target?.closest(
         'input, textarea, select, [contenteditable="true"]',
@@ -1009,12 +1093,12 @@ const MediaUploader = ({
         void deleteImageBlob(localBlobId, { userId: currentUser?.uid });
       }
       const next = items.filter((_, i) => i !== index);
-      onChange(next);
+      emitImageChange(next);
       return;
     }
 
-    const newUrls = (urls as string[]).filter((_, i) => i !== index);
-    onChange(newUrls);
+    const next = audioUrls.filter((_, i) => i !== index);
+    emitAudioChange(next);
   };
 
   const handleUpdateImage = (index: number, patch: Partial<UploadedImage>) => {
@@ -1028,8 +1112,7 @@ const MediaUploader = ({
     const next = current.map((image, i) =>
       i === index ? { ...image, ...patch } : image,
     );
-    latestItemsRef.current = next;
-    onChange(next);
+    emitImageChange(next);
   };
 
   const renderUploadDropzone = (withInput: boolean) => (
@@ -1108,10 +1191,10 @@ const MediaUploader = ({
 
       {urls.length > 0 && type === "image" && (
         <div className="grid grid-cols-1 gap-2">
-          {urls.map((item, index) => (
+          {imageUrls.map((item, index) => (
             <MemoizedImageItem
-              key={`img-${(item as UploadedImage).id ?? index}-${index}`}
-              item={item as UploadedImage}
+              key={`img-${item.id ?? index}-${index}`}
+              item={item}
               index={index}
               onRetry={handleRetry}
               onUpdate={handleUpdateImage}
@@ -1124,10 +1207,10 @@ const MediaUploader = ({
 
       {urls.length > 0 && type === "audio" && (
         <div className="space-y-2">
-          {urls.map((item, index) => (
+          {audioUrls.map((item, index) => (
             <AudioItem
               key={`audio-${index}`}
-              url={item as string}
+              url={item}
               index={index}
               onRemove={handleRemove}
             />

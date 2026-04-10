@@ -587,7 +587,9 @@ export const MarkdownBlock = React.memo(
 
 MarkdownBlock.displayName = "MarkdownBlock";
 
-const parseAndSplitFencesWithRanges = (md: string) => {
+const parseAndSplitFencesWithRanges = (
+  md: string,
+): { blocks: EditorBlock[]; ranges: BlockRange[] } => {
   const normalizedMd = md.replace(/\r\n/g, "\n");
   const lines = normalizedMd.split("\n");
 

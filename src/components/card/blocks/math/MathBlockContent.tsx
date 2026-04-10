@@ -6,6 +6,8 @@ interface MathRendererProps {
   latex: string;
   displayMode?: "block" | "inline";
   className?: string;
+  showPlaceholder?: boolean;
+  placeholder?: string;
 }
 
 const normalizeSingleLatex = (input: string): string => {
@@ -23,7 +25,13 @@ const normalizeSingleLatex = (input: string): string => {
  * 単一数式のみを受け付ける
  */
 export const MathRenderer: React.FC<MathRendererProps> = React.memo(
-  ({ latex, displayMode = "block", className = "" }) => {
+  ({
+    latex,
+    displayMode = "block",
+    className = "",
+    showPlaceholder = false,
+    placeholder = "",
+  }) => {
     const normalizedLatex = useMemo(() => normalizeSingleLatex(latex), [latex]);
 
     const { html, error } = useMemo(() => {
@@ -55,7 +63,18 @@ export const MathRenderer: React.FC<MathRendererProps> = React.memo(
     }, [normalizedLatex, displayMode]);
 
     if (!normalizedLatex) {
-      return null;
+      if (!showPlaceholder) return null;
+      return (
+        <div
+          className={cn(
+            "px-3 py-2 rounded border border-dashed border-slate-200 text-slate-400 text-sm",
+            displayMode === "block" ? "w-full my-2" : "inline-block mx-1",
+            className,
+          )}
+        >
+          {placeholder}
+        </div>
+      );
     }
 
     if (error || html === null) {

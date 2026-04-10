@@ -1,19 +1,21 @@
 import { ImageGallery } from "@/components/card/media/CardMedia";
 import MediaUploader from "@/components/card/media/MediaUploader";
+import type { ImageGalleryItem } from "@/components/card/media/types";
+import type { UploadedImage } from "@/types";
 
 type ImageBlockContentProps =
   | {
       mode: "view";
       urls: string[];
-      items?: unknown[];
+      items?: ImageGalleryItem[];
       onFullscreenChange?: (isFullscreen: boolean) => void;
       displayMode?: "fixed" | "fluid";
       zoom?: number;
     }
   | {
       mode: "edit";
-      urls: unknown[];
-      onChange: (data: unknown[]) => void;
+      urls: UploadedImage[];
+      onChange: (data: UploadedImage[]) => void;
       initialFile?: File;
       onConsumeInitialFile?: () => void;
       onFilesExcess?: (files: File[]) => void;

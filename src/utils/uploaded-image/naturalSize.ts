@@ -10,11 +10,13 @@ const hasNaturalSize = (image: {
   return image.naturalWidth > 0 && image.naturalHeight > 0;
 };
 
-export const loadImageNaturalSize = async (src: string) => {
+export const loadImageNaturalSize = async (
+  src: string,
+): Promise<ImageNaturalSize | null> => {
   if (typeof Image === "undefined") return null;
   if (typeof src !== "string" || src.trim().length === 0) return null;
 
-  return await new Promise((resolve) => {
+  return await new Promise<ImageNaturalSize | null>((resolve) => {
     const image = new Image();
     let settled = false;
 

@@ -570,23 +570,29 @@ export const useCardEditorSession = ({
     }: FlushDraftOptions = {}): Promise<boolean> => {
       clearAutosaveTimer();
 
-      let flushSucceeded = true;
-      let savedOperation: PersistOperation = "noop";
-      let savedAny = false;
+      const flushState: {
+        flushSucceeded: boolean;
+        savedOperation: PersistOperation;
+        savedAny: boolean;
+      } = {
+        flushSucceeded: true,
+        savedOperation: "noop",
+        savedAny: false,
+      };
 
       const queued = saveQueueRef.current.then(async () => {
         while (true) {
           const result = await persistCurrentDraft();
           if (!result.ok) {
-            flushSucceeded = false;
+            flushState.flushSucceeded = false;
             if (reason === "manual") {
               toastError?.(result.message);
             }
             return;
           }
 
-          savedOperation = result.operation;
-          savedAny = savedAny || result.saved;
+          flushState.savedOperation = result.operation;
+          flushState.savedAny = flushState.savedAny || result.saved;
 
           if (
             !draftRef.current ||
@@ -600,20 +606,26 @@ export const useCardEditorSession = ({
       saveQueueRef.current = queued.catch(() => undefined);
       await queued;
 
-      if (flushSucceeded && showSuccessToast && savedAny) {
-        toastSuccess?.(
-          savedOperation === "created"
-            ? "カードを作成しました"
-            : "カードを更新しました",
-        );
+      const successMessageByOperation: Record<PersistOperation, string> = {
+        created: "カードを作成しました",
+        updated: "カードを更新しました",
+        noop: "カードを更新しました",
+      };
+
+      if (
+        flushState.flushSucceeded &&
+        showSuccessToast &&
+        flushState.savedAny
+      ) {
+        toastSuccess?.(successMessageByOperation[flushState.savedOperation]);
       }
 
-      if (flushSucceeded && exitEditing && !autoEdit) {
+      if (flushState.flushSucceeded && exitEditing && !autoEdit) {
         skipNextEditEndFlushRef.current = true;
         setIsEditing(false);
       }
 
-      return flushSucceeded;
+      return flushState.flushSucceeded;
     },
     [
       autoEdit,

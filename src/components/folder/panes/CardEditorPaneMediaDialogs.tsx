@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { memo } from "react";
 import type { UploadedImage } from "@/types";
+import type { ReferenceBlockData } from "@/types/domain/base";
 
 type Side = "question" | "answer";
 
@@ -48,10 +49,10 @@ interface CardEditorPaneMediaDialogsProps {
   setLinkDialogSide: (side: Side | null) => void;
   getDialogImages: (side: Side) => UploadedImage[];
   setDialogImages: (side: Side, next: UploadedImage[]) => void;
-  getDialogAudios: (side: Side) => unknown[];
-  setDialogAudios: (side: Side, next: unknown[]) => void;
-  getReferenceItems: (side: Side) => unknown[];
-  setReferenceItems: (side: Side, next: unknown[]) => void;
+  getDialogAudios: (side: Side) => string[];
+  setDialogAudios: (side: Side, next: string[]) => void;
+  getReferenceItems: (side: Side) => ReferenceBlockData[];
+  setReferenceItems: (side: Side, next: ReferenceBlockData[]) => void;
 }
 
 const CardEditorPaneMediaDialogsInner = ({
@@ -80,9 +81,7 @@ const CardEditorPaneMediaDialogsInner = ({
           <MediaUploader
             type="image"
             urls={getDialogImages(imageDialogSide)}
-            onChange={(next) =>
-              setDialogImages(imageDialogSide, next as UploadedImage[])
-            }
+            onChange={(next) => setDialogImages(imageDialogSide, next)}
             maxFiles={10}
           />
         )}
@@ -97,9 +96,7 @@ const CardEditorPaneMediaDialogsInner = ({
           <MediaUploader
             type="audio"
             urls={getDialogAudios(audioDialogSide)}
-            onChange={(next) =>
-              setDialogAudios(audioDialogSide, next as unknown[])
-            }
+            onChange={(next) => setDialogAudios(audioDialogSide, next)}
             maxFiles={10}
           />
         )}

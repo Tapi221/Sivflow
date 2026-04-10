@@ -1,5 +1,6 @@
 import { ImageFrame } from "@/components/card/blocks/image/ImageFrame";
 import { CANONICAL_CARD_WIDTH } from "@/components/card/common/constants";
+import type { ImageGalleryItem } from "@/components/card/media/types";
 import { Button } from "@/components/ui/button";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { useLocalImageBlobUrl } from "@/hooks/image/useLocalImageBlobUrl";
@@ -17,6 +18,7 @@ import {
 } from "@/ui/icons";
 import { getDownloadURL, ref as storageRef } from "firebase/storage";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import type { UploadedImage } from "@/types/domain/assets";
 
 const IMAGE_BLOCK_INSET_PX = 4;
 const FIXED_IMAGE_REFERENCE_FRAME_WIDTH_PX =
@@ -100,24 +102,7 @@ export const AudioPlayer = ({ urls }: AudioPlayerProps) => {
 
 interface ImageGalleryProps {
   urls: string[];
-  items?: Array<
-    | string
-    | {
-        remoteUrl?: string | null;
-        localUrl?: string | null;
-        localFileId?: string | null;
-        assetId?: string | null;
-        url?: string | null;
-        scale?: number | null;
-        x?: number | null;
-        layout?: {
-          baseWidthPx?: number | null;
-          cropX?: number | null;
-        } | null;
-        naturalW?: number | null;
-        naturalH?: number | null;
-      }
-  >;
+  items?: ImageGalleryItem[];
   onFullscreenChange?: (isFullscreen: boolean) => void;
   displayMode?: "fixed" | "fluid";
   zoom?: number;
@@ -167,8 +152,11 @@ export const ImageGallery = ({
           };
         }
 
-        const assetId = entry.assetId ?? null;
-        const localFileId = entry.localFileId ?? assetId;
+        const typedEntry = entry as Partial<UploadedImage> & {
+          url?: string | null;
+        };
+        const assetId = typedEntry.assetId ?? null;
+        const localFileId = typedEntry.localFileId ?? assetId;
 
         const fallbackLocal = localFileId
           ? (resolvedLocalUrlMap[localFileId] ?? "")
@@ -179,13 +167,17 @@ export const ImageGallery = ({
         const fallbackRemote = assetId
           ? (resolvedRemoteUrlMap[assetId] ?? "")
           : "";
-        const legacyRemoteUrl = sanitizeLegacyUrl(entry.remoteUrl);
-        const legacyLocalUrl = sanitizeLegacyUrl(entry.localUrl);
-        const legacyUrl = sanitizeLegacyUrl(entry.url);
+        const legacyRemoteUrl = sanitizeLegacyUrl(typedEntry.remoteUrl);
+        const legacyLocalUrl = sanitizeLegacyUrl(typedEntry.localUrl);
+        const legacyUrl = sanitizeLegacyUrl(typedEntry.url);
 
         return {
           key:
-            entry.remoteUrl ?? entry.localUrl ?? entry.url ?? localFileId ?? "",
+            typedEntry.remoteUrl ??
+            typedEntry.localUrl ??
+            typedEntry.url ??
+            localFileId ??
+            "",
           localFileId,
           url:
             fallbackLocal ||
@@ -195,11 +187,11 @@ export const ImageGallery = ({
             legacyRemoteUrl ||
             legacyUrl,
           assetId,
-          scale: entry.scale ?? 1,
-          x: entry.x ?? 0,
-          layout: entry.layout ?? null,
-          naturalW: entry.naturalW ?? null,
-          naturalH: entry.naturalH ?? null,
+          scale: typedEntry.scale ?? 1,
+          x: typedEntry.x ?? 0,
+          layout: typedEntry.layout ?? null,
+          naturalW: typedEntry.naturalW ?? null,
+          naturalH: typedEntry.naturalH ?? null,
         };
       }),
     [items, urls, resolvedLocalUrlMap, resolvedRemoteUrlMap, sanitizeLegacyUrl],
@@ -222,12 +214,10 @@ export const ImageGallery = ({
     for (const entry of source) {
       if (typeof entry !== "object" || !entry) continue;
 
-      const media = entry as {
+      const media = entry as Partial<UploadedImage> & {
+        url?: unknown;
         remoteUrl?: unknown;
         localUrl?: unknown;
-        url?: unknown;
-        localFileId?: string | null;
-        assetId?: string | null;
       };
 
       const hasNonBlob = [media.remoteUrl, media.localUrl, media.url].some(

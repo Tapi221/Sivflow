@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import type { CardBlock } from "@/types/domain/card";
+import type { IconProps } from "@/ui/icons";
 import {
   Code,
   HelpCircle,
@@ -67,7 +68,7 @@ const DEFAULT_ORDER_INDEX_BY_TYPE = DEFAULT_CONFIGS.reduce<
 );
 
 const getIcon = (iconName: string | undefined, type: CardBlock["type"]) => {
-  const map: Record<string, React.ComponentType<{ className?: string }>> = {
+  const map: Record<string, React.ComponentType<IconProps>> = {
     Type: Type,
     Image: ImageIcon,
     Sigma: StratisFormulaIcon,
@@ -76,7 +77,7 @@ const getIcon = (iconName: string | undefined, type: CardBlock["type"]) => {
     HelpCircle: HelpCircle,
   };
   if (iconName && map[iconName]) return map[iconName];
-  const typeMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  const typeMap: Record<string, React.ComponentType<IconProps>> = {
     text: Type,
     question: HelpCircle,
     code: Code,
@@ -176,7 +177,7 @@ const ActionButton = ({
   label,
 }: {
   onClick: () => void;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<IconProps>;
   label: string;
 }) => {
   return (
