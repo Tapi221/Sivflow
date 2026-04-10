@@ -68,6 +68,7 @@ export const StudyReview = ({
     <div className="reviewMain h-full w-full">
       <CardCarousel
         cards={cards}
+        mode="review"
         sessionCurrentIndex={sessionCurrentIndex}
         onResult={onResult}
         onToggleUncertainty={onToggleUncertainty}

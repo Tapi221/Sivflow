@@ -3,22 +3,24 @@ import {
   CARD_DISPLAY_SCALE,
   CARD_SAFE_PADDING_PX,
 } from "@/components/card/common/constants";
+import type { ComponentProps } from "react";
 import {
   Flashcard,
   type FlashcardCardLike,
 } from "@/components/card/frame/Flashcard";
 import { MobileScalableCard } from "@/components/card/frame/MobileScalableCard";
 import { CardCarousel3D } from "@/features/review/presentation/web/ui/components/CardCarousel3D";
-import StudyCard, { type StudyCardProps } from "./StudyCard";
+import StudyCard from "./StudyCard";
 import type { Card } from "@/types";
+
+type StudyCardProps = ComponentProps<typeof StudyCard>;
 
 const CARD_DISPLAY_WIDTH = Math.round(CARD_BASE_WIDTH * CARD_DISPLAY_SCALE);
 
-type CardCarouselProps = {
+type BaseCardCarouselProps = {
   cards: Card[];
   /** Study session's authoritative index — syncs carousel when a rating is submitted */
   sessionCurrentIndex: number;
-  onResult: StudyCardProps["onResult"];
   onToggleUncertainty?: (card: Card) => void;
   onToggleBookmark?: (card: Card) => void;
   onEdit?: (card: Card) => void;
@@ -26,9 +28,22 @@ type CardCarouselProps = {
   showEasy?: boolean;
 };
 
+type ReviewCardCarouselProps = BaseCardCarouselProps & {
+  mode?: "review";
+  onResult: Extract<StudyCardProps, { mode?: "review" }>["onResult"];
+};
+
+type PracticeCardCarouselProps = BaseCardCarouselProps & {
+  mode: "practice";
+  onResult: Extract<StudyCardProps, { mode: "practice" }>["onResult"];
+};
+
+type CardCarouselProps = ReviewCardCarouselProps | PracticeCardCarouselProps;
+
 export const CardCarousel = ({
   cards,
   sessionCurrentIndex,
+  mode = "review",
   onResult,
   onToggleUncertainty,
   onToggleBookmark,
@@ -42,7 +57,7 @@ export const CardCarousel = ({
       syncIndex={sessionCurrentIndex}
       renderCenter={(card) => (
         <StudyCard
-          mode="review"
+          mode={mode}
           card={card}
           onResult={onResult}
           onToggleUncertainty={onToggleUncertainty}
