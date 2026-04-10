@@ -29,7 +29,12 @@ import { resolveCardTagNames } from "@/hooks/settings/useTags";
 import { sanitizeUploadedImages } from "@/utils/uploaded-image/sanitizer";
 
 import type { UploadedImage } from "@/types/domain/assets";
-import type { Card, CardBlock, CardFaceAttachments } from "@/types/domain/card";
+import type {
+  Card,
+  CardBlock,
+  CardFaceAttachments,
+  CardPatch,
+} from "@/types/domain/card";
 
 const NEW_SENTINEL = "__new__" as const;
 const AUTOSAVE_DELAY_MS = 700;
@@ -44,7 +49,7 @@ type UseCardEditorSessionParams = {
   cardSetId?: string;
   autoEdit?: boolean;
 
-  updateCard: (id: string, data: Partial<Card>) => Promise<unknown>;
+  updateCard: (id: string, data: CardPatch) => Promise<unknown>;
   createCard?: (data: Partial<Card>) => Promise<unknown>;
   addTag: (name: string) => Promise<{ id: string }>;
   tagById: TagNameLookup;
@@ -73,7 +78,7 @@ type PersistResult =
   | { ok: true; operation: "created" | "updated" | "noop"; saved: boolean }
   | { ok: false; message: string };
 
-type PersistOperation = Extract<PersistResult, { ok: true }>["operation"];
+type PersistOperation = "created" | "updated" | "noop";
 
 const cloneBlock = (block: CardBlock) => {
   return {

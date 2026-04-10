@@ -13,7 +13,7 @@ import {
   useUserSettings,
   DEFAULT_SETTINGS,
 } from "@/hooks/settings/useUserSettings";
-import type { Card } from "@/types";
+import type { Card, CardPatch } from "@/types";
 import {
   DEFAULT_LAYOUT_ROWS,
   normalizeLayoutRows,
@@ -322,7 +322,7 @@ export const useCards = (
     }
   };
 
-  const updateCard = async (id: string, data: Partial<Card>) => {
+  const updateCard = async (id: string, data: CardPatch) => {
     if (!currentUser) throw new Error("認証が必要です");
 
     const db = await getLocalDb(currentUser.uid);

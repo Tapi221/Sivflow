@@ -22,7 +22,9 @@ type UseLayoutRowsControllerParams<
   isEditing: boolean;
 };
 
-export const useLayoutRowsController = ({
+export const useLayoutRowsController = <
+  TDraft extends { layoutRows: number } | null,
+>({
   draft,
   setDraft,
   defaultLayoutRows,

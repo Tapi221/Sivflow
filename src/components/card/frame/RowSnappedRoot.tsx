@@ -1,5 +1,6 @@
 import React from "react";
 import { RowSnap } from "./RowSnap";
+import type { CssVars } from "@/types/style";
 
 type RowSnappedRootProps = {
   rowPx: number;
@@ -16,18 +17,22 @@ export const RowSnappedRoot = ({
 }: RowSnappedRootProps) => {
   return (
     <RowSnap rowPx={rowPx}>
-      {({ snapPaddingBottomPx, snapRef }) => (
-        <div
-          ref={snapRef as React.Ref<HTMLDivElement>}
-          className={className}
-          style={{
-            ...(style ?? {}),
-            ["--snap-pad-b" as const]: `${snapPaddingBottomPx}px`,
-          }}
-        >
-          {children}
-        </div>
-      )}
+      {({ snapPaddingBottomPx, snapRef }) => {
+        const snappedStyle: CssVars = {
+          ...(style ?? {}),
+          "--snap-pad-b": `${snapPaddingBottomPx}px`,
+        };
+
+        return (
+          <div
+            ref={snapRef as React.Ref<HTMLDivElement>}
+            className={className}
+            style={snappedStyle}
+          >
+            {children}
+          </div>
+        );
+      }}
     </RowSnap>
   );
 };

@@ -1,5 +1,6 @@
 import React from "react";
 import { cn } from "@/lib/utils";
+import type { CssVars } from "@/types/style";
 import {
   cardHeightPxToLayoutRows,
   layoutRowsToCardHeightPx,
@@ -459,6 +460,25 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
       overflow: "hidden",
     };
 
+    const resolvedShellStyle: CssVars =
+      resolvedHeightPx != null
+        ? {
+            ...(style ?? {}),
+            ...enforcedShellOverflowStyle,
+            "--card-resize-height": `${resolvedHeightPx}px`,
+            minHeight: `${resolvedHeightPx}px`,
+            ...(lockHeight
+              ? {
+                  height: `${resolvedHeightPx}px`,
+                  maxHeight: `${resolvedHeightPx}px`,
+                }
+              : {}),
+          }
+        : {
+            ...(style ?? {}),
+            ...enforcedShellOverflowStyle,
+          };
+
     const shell = (
       <div
         ref={setRefs}
@@ -468,25 +488,7 @@ export const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
           resizable && !drawMode && "card-shell--resizable",
           className,
         )}
-        style={
-          resolvedHeightPx != null
-            ? ({
-                ...(style ?? {}),
-                ...enforcedShellOverflowStyle,
-                ["--card-resize-height" as unknown]: `${resolvedHeightPx}px`,
-                minHeight: `${resolvedHeightPx}px`,
-                ...(lockHeight
-                  ? {
-                      height: `${resolvedHeightPx}px`,
-                      maxHeight: `${resolvedHeightPx}px`,
-                    }
-                  : {}),
-              } as React.CSSProperties)
-            : ({
-                ...(style ?? {}),
-                ...enforcedShellOverflowStyle,
-              } as React.CSSProperties)
-        }
+        style={resolvedShellStyle}
         {...props}
         onClick={(e) => {
           // ★ card-shell-actions 内のボタン等からのバブリングは無視する

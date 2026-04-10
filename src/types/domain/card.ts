@@ -95,3 +95,8 @@ export type Card = BaseEntity & {
   completedDate?: Date | Timestamp;
   _rescueRaw?: unknown;
 };
+
+export type CardPatch = Omit<Partial<Card>, "front" | "back"> & {
+  front?: Partial<CardFace>;
+  back?: Partial<CardFace>;
+};

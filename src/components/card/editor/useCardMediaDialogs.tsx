@@ -11,9 +11,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
   CardFaceAttachmentAudio,
   CardFaceAttachments,
-  ReferenceBlockData,
-  UploadedImage,
 } from "@/types/domain/card";
+import type { UploadedImage } from "@/types/domain/assets";
+import type { ReferenceBlockData } from "@/types/domain/base";
+
 type Side = "question" | "answer";
 type UseCardMediaDialogsParams = {
   getSideAttachments: (side: Side) => CardFaceAttachments;

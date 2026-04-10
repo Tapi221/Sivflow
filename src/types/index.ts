@@ -7,5 +7,6 @@ export * from "./domain/explorer";
 export * from "./domain/folder";
 export * from "./domain/sync";
 export * from "./domain/user";
+export * from "./style";
 
 export type { TagRecord } from "@/services/localdb/types";

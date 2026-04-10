@@ -1,5 +1,5 @@
 import { forwardRef } from "react";
-import type { SVGProps } from "react";
+import type { ForwardRefExoticComponent, RefAttributes, SVGProps } from "react";
 import { UiIcon } from "./UiIcon";
 import {
   StratisAlertCircleIcon,
@@ -44,6 +44,10 @@ export type IconProps = SVGProps<SVGSVGElement> & {
   size?: number;
   label?: string;
 };
+
+type StratisIconComponent = ForwardRefExoticComponent<
+  SVGProps<SVGSVGElement> & RefAttributes<SVGSVGElement>
+>;
 
 type GlyphKind =
   | "arrow-left"
@@ -100,6 +104,36 @@ const glyphByIconName: Record<string, GlyphKind> = {
   SearchX: "search",
   X: "x",
   XCircle: "x",
+};
+
+const wrapStratisIcon = (BaseIcon: StratisIconComponent, name: string) => {
+  const Icon = forwardRef<SVGSVGElement, IconProps>(function WrappedStratisIcon(
+    { size = 16, className, label, title, style, strokeWidth, ...rest },
+    ref,
+  ) {
+    const resolvedLabel = label ?? rest["aria-label"];
+    const decorative = resolvedLabel == null;
+    const pixelSize = typeof size === "number" ? `${size}px` : size;
+
+    return (
+      <BaseIcon
+        ref={ref}
+        width={pixelSize}
+        height={pixelSize}
+        className={className}
+        style={{ display: "block", flexShrink: 0, ...style }}
+        role={decorative ? "presentation" : "img"}
+        aria-label={resolvedLabel}
+        aria-hidden={decorative ? true : undefined}
+        {...(title ? { title } : {})}
+        {...(strokeWidth != null ? { strokeWidth } : {})}
+        {...rest}
+      />
+    );
+  });
+
+  Icon.displayName = name;
+  return Icon;
 };
 
 const makeIcon = (name: string) => {
@@ -234,59 +268,83 @@ const ExplorerFolderOutlineIcon = forwardRef<SVGSVGElement, IconProps>(
   },
 );
 
-export const AlertCircle = StratisAlertCircleIcon;
-export const AlertTriangle = StratisAlertTriangleIcon;
-export const ArrowLeft = StratisArrowLeftSquareContainedIcon;
-export const ArrowRight = StratisArrowRightSquareContainedIcon;
-export const ArrowUpDown = StratisArrowSwitchHorizontalIcon;
+export const AlertCircle = wrapStratisIcon(
+  StratisAlertCircleIcon,
+  "AlertCircle",
+);
+export const AlertTriangle = wrapStratisIcon(
+  StratisAlertTriangleIcon,
+  "AlertTriangle",
+);
+export const ArrowLeft = wrapStratisIcon(
+  StratisArrowLeftSquareContainedIcon,
+  "ArrowLeft",
+);
+export const ArrowRight = wrapStratisIcon(
+  StratisArrowRightSquareContainedIcon,
+  "ArrowRight",
+);
+export const ArrowUpDown = wrapStratisIcon(
+  StratisArrowSwitchHorizontalIcon,
+  "ArrowUpDown",
+);
 export const BookOpen = makeIcon("BookOpen");
 export const Brain = makeIcon("Brain");
-export const Calendar = StratisCalendarNumberIcon;
+export const Calendar = wrapStratisIcon(StratisCalendarNumberIcon, "Calendar");
 export const Camera = makeIcon("Camera");
 export const Check = makeIcon("Check");
 export const CheckCheck = makeIcon("CheckCheck");
 export const CheckCircle = makeIcon("CheckCircle");
 export const CheckCircle2 = makeIcon("CheckCircle2");
 export const ChevronDown = ExplorerChevronDownIcon;
-export const ChevronLeft = StratisChevronLeftIcon;
+export const ChevronLeft = wrapStratisIcon(
+  StratisChevronLeftIcon,
+  "ChevronLeft",
+);
 export const ChevronRight = ExplorerChevronRightIcon;
-export const ChevronUp = StratisChevronUpIcon;
+export const ChevronUp = wrapStratisIcon(StratisChevronUpIcon, "ChevronUp");
 export const Circle = makeIcon("Circle");
-export const Clock = StratisClock01Icon;
+export const Clock = wrapStratisIcon(StratisClock01Icon, "Clock");
 export const Cloud = makeIcon("Cloud");
 export const CloudOff = makeIcon("CloudOff");
-export const Construction = StratisWrenchIcon;
-export const Copy = StratisCopyLeftIcon;
+export const Construction = wrapStratisIcon(StratisWrenchIcon, "Construction");
+export const Copy = wrapStratisIcon(StratisCopyLeftIcon, "Copy");
 export const Database = makeIcon("Database");
 export const Download = makeIcon("Download");
-export const Edit = StratisEditContainedIcon;
+export const Edit = wrapStratisIcon(StratisEditContainedIcon, "Edit");
 export const Eraser = makeIcon("Eraser");
-export const ExternalLink = StratisLinkExternalIcon;
+export const ExternalLink = wrapStratisIcon(
+  StratisLinkExternalIcon,
+  "ExternalLink",
+);
 export const FileAudio = makeIcon("FileAudio");
-export const FileEdit = StratisFileEdit02Icon;
+export const FileEdit = wrapStratisIcon(StratisFileEdit02Icon, "FileEdit");
 export const FileJson = makeIcon("FileJson");
 export const FileText = ExplorerFileTextIcon;
 export const FileWarning = makeIcon("FileWarning");
 export const FileX = makeIcon("FileX");
-export const Filter = StratisFilterIcon;
+export const Filter = wrapStratisIcon(StratisFilterIcon, "Filter");
 export const Flame = makeIcon("Flame");
 export const Folder = ExplorerFolderOpenIcon;
 export const FolderInput = makeIcon("FolderInput");
 export const FolderTree = makeIcon("FolderTree");
 export const GitMerge = makeIcon("GitMerge");
-export const Globe = StratisGlobe02Icon;
+export const Globe = wrapStratisIcon(StratisGlobe02Icon, "Globe");
 export const GripVertical = makeIcon("GripVertical");
 export const HardDrive = makeIcon("HardDrive");
-export const HelpCircle = StratisHelpCircleContainedIcon;
-export const History = StratisClockBackwardIcon;
-export const Image = StratisImageIcon;
-export const Info = StratisInfoSquare01ContainedIcon;
+export const HelpCircle = wrapStratisIcon(
+  StratisHelpCircleContainedIcon,
+  "HelpCircle",
+);
+export const History = wrapStratisIcon(StratisClockBackwardIcon, "History");
+export const Image = wrapStratisIcon(StratisImageIcon, "Image");
+export const Info = wrapStratisIcon(StratisInfoSquare01ContainedIcon, "Info");
 export const Keyboard = makeIcon("Keyboard");
 export const Layers = makeIcon("Layers");
-export const Link = StratisLinkAngledIcon;
+export const Link = wrapStratisIcon(StratisLinkAngledIcon, "Link");
 export const List = makeIcon("List");
 export const Loader2 = makeIcon("Loader2");
-export const LogOut = StratisLogout01Icon;
+export const LogOut = wrapStratisIcon(StratisLogout01Icon, "LogOut");
 export const Merge = makeIcon("Merge");
 export const MessageSquare = makeIcon("MessageSquare");
 export const Minus = makeIcon("Minus");
@@ -298,31 +356,34 @@ export const PenLine = makeIcon("PenLine");
 export const Pencil = makeIcon("Pencil");
 export const Pin = makeIcon("Pin");
 export const Play = makeIcon("Play");
-export const Plus = StratisPlus01Icon;
+export const Plus = wrapStratisIcon(StratisPlus01Icon, "Plus");
 export const Redo2 = makeIcon("Redo2");
-export const RefreshCw = StratisArrowRefresh01Icon;
+export const RefreshCw = wrapStratisIcon(
+  StratisArrowRefresh01Icon,
+  "RefreshCw",
+);
 export const RotateCcw = makeIcon("RotateCcw");
-export const Search = StratisSearch01Icon;
-export const SearchX = StratisFolderSearch01Icon;
+export const Search = wrapStratisIcon(StratisSearch01Icon, "Search");
+export const SearchX = wrapStratisIcon(StratisFolderSearch01Icon, "SearchX");
 export const Settings2 = makeIcon("Settings2");
 export const Shield = makeIcon("Shield");
 export const Smartphone = makeIcon("Smartphone");
 export const Sparkles = makeIcon("Sparkles");
 const SigmaIcon = makeIcon("SigmaIcon");
-export const Star = StratisStar02Icon;
-export const Tag = StratisTagIcon;
+export const Star = wrapStratisIcon(StratisStar02Icon, "Star");
+export const Tag = wrapStratisIcon(StratisTagIcon, "Tag");
 const NotebookPenIcon = makeIcon("NotebookPenIcon");
-export const Trash2 = StratisTrash03Icon;
+export const Trash2 = wrapStratisIcon(StratisTrash03Icon, "Trash2");
 export const Trophy = makeIcon("Trophy");
-export const Type = StratisType03Icon;
+export const Type = wrapStratisIcon(StratisType03Icon, "Type");
 export const Undo2 = makeIcon("Undo2");
 export const Upload = makeIcon("Upload");
 export const User = makeIcon("User");
-export const Volume2 = StratisAudioSettings01Icon;
-export const X = StratisX01Icon;
-export const XCircle = StratisXCircleContainedIcon;
+export const Volume2 = wrapStratisIcon(StratisAudioSettings01Icon, "Volume2");
+export const X = wrapStratisIcon(StratisX01Icon, "X");
+export const XCircle = wrapStratisIcon(StratisXCircleContainedIcon, "XCircle");
 export const Zap = makeIcon("Zap");
-export const Code = StratisCode01Icon;
+export const Code = wrapStratisIcon(StratisCode01Icon, "Code");
 export const FolderIcon = Folder;
 export const FolderOutlineIcon = ExplorerFolderOutlineIcon;
 export const ImageIcon = Image;

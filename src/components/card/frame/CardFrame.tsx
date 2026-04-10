@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { ScaleToFitFrame } from "@/components/card/frame/ScaleToFitFrame";
 import { CardShell } from "@/components/card/frame/CardShell";
 import { CardSurface } from "@/components/card/frame/CardSurface";
+import type { CssVars } from "@/types/style";
 import {
   CARD_BASE_WIDTH,
   CARD_DISPLAY_SCALE,
@@ -153,15 +154,8 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
            * - カード外枠（角丸/影/背景/ボーダーなど）を担う“器”
            * - ここが「カードの物理感」を作る中核
            */}
-          <CardShell
-            ref={ref}
-            className={cn(
-              // 標準スタイル: 中央寄せ、ボーダー無し、角丸をデバイス幅で変える
-              "mx-auto border-none rounded-[24px] md:rounded-[28px]",
-              className,
-            )}
-            style={{
-              // 外から渡された style を尊重しつつ
+          {(() => {
+            const shellStyle: CssVars = {
               ...(style as React.CSSProperties | undefined),
               ...(stretchWidth
                 ? {
@@ -169,34 +163,40 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
                     maxWidth: "100%",
                   }
                 : {}),
+              "--card-base-width": `${Math.max(1, baseWidth)}px`,
+            };
 
-              /**
-               * CSS 変数 --card-base-width:
-               * - カード内の別コンポーネント（例えば横幅計算やレイアウト）で参照するための共有値
-               * - baseWidth が 0/負にならないよう最低 1px に丸める
-               */
-              ["--card-base-width" as unknown]: `${Math.max(1, baseWidth)}px`,
-            }}
-            {...shellProps}
-          >
-            {/**
-             * CardSurface:
-             * - カードの“紙面”部分（罫線背景、内側padding、overlayレイヤなど）を担当
-             * - CardShell が「外側」なら CardSurface は「中身の紙」
-             */}
-            <CardSurface
-              ruled={ruled}
-              ruledRowPx={ruledRowPx}
-              ruledOffsetPx={ruledOffsetPx}
-              ruledBottomOffsetPx={ruledBottomOffsetPx}
-              ruledPhasePx={ruledPhasePx}
-              ruledOpacity={ruledOpacity}
-              overlay={overlay}
-            >
-              {/* 実際のカード内容（ブロック群、テキスト、メディアなど） */}
-              {children}
-            </CardSurface>
-          </CardShell>
+            return (
+              <CardShell
+                ref={ref}
+                className={cn(
+                  // 標準スタイル: 中央寄せ、ボーダー無し、角丸をデバイス幅で変える
+                  "mx-auto border-none rounded-[24px] md:rounded-[28px]",
+                  className,
+                )}
+                style={shellStyle}
+                {...shellProps}
+              >
+                {/**
+                 * CardSurface:
+                 * - カードの“紙面”部分（罫線背景、内側padding、overlayレイヤなど）を担当
+                 * - CardShell が「外側」なら CardSurface は「中身の紙」
+                 */}
+                <CardSurface
+                  ruled={ruled}
+                  ruledRowPx={ruledRowPx}
+                  ruledOffsetPx={ruledOffsetPx}
+                  ruledBottomOffsetPx={ruledBottomOffsetPx}
+                  ruledPhasePx={ruledPhasePx}
+                  ruledOpacity={ruledOpacity}
+                  overlay={overlay}
+                >
+                  {/* 実際のカード内容（ブロック群、テキスト、メディアなど） */}
+                  {children}
+                </CardSurface>
+              </CardShell>
+            );
+          })()}
         </div>
       </ScaleToFitFrame>
     );
