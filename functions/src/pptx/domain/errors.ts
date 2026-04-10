@@ -66,7 +66,9 @@ export const toSafeErrorMessage = (
     (error as { message?: unknown } | null)?.message ?? JSON.stringify(error);
 
   const namePrefix =
-    typeof maybeName === "string" && maybeName.length > 0 ? `${maybeName}: ` : "";
+    typeof maybeName === "string" && maybeName.length > 0
+      ? `${maybeName}: `
+      : "";
 
   return `${codePrefix}${namePrefix}${String(maybeMessage)}`.slice(0, limit);
 };

@@ -1,9 +1,6 @@
 import { GoogleAuth, IdTokenClient } from "google-auth-library";
 import { ExternalConversionResult } from "../../domain/conversionTypes";
-import {
-  createPptxConversionError,
-  getErrorCode,
-} from "../../domain/errors";
+import { createPptxConversionError, getErrorCode } from "../../domain/errors";
 import {
   CONVERTER_TOKEN_SECRET_ENV,
   asNonEmptyString,
@@ -164,7 +161,8 @@ export const requestExternalConversion = async ({
   return {
     manifestPath,
     slideCount:
-      typeof payload.slideCount === "number" && Number.isFinite(payload.slideCount)
+      typeof payload.slideCount === "number" &&
+      Number.isFinite(payload.slideCount)
         ? payload.slideCount
         : null,
     fallbackPdfPath: asNonEmptyString(payload.fallbackPdfPath),

@@ -1,9 +1,6 @@
 import * as functions from "firebase-functions/v1";
 import { executePlaceholderPptxConversion } from "../application/executePlaceholderPptxConversion";
-import {
-  getErrorCode,
-  isPptxConversionError,
-} from "../domain/errors";
+import { getErrorCode, isPptxConversionError } from "../domain/errors";
 import {
   CONVERTER_TOKEN_SECRET_ENV,
   asNonEmptyString,
@@ -32,9 +29,8 @@ const parseBody = (req: functions.https.Request): ConverterRequestBody => {
   return {};
 };
 
-const extractProvidedToken = (
-  req: functions.https.Request,
-): string | null => asNonEmptyString(req.header("x-pptx-converter-token"));
+const extractProvidedToken = (req: functions.https.Request): string | null =>
+  asNonEmptyString(req.header("x-pptx-converter-token"));
 
 const validateRequestToken = (
   req: functions.https.Request,

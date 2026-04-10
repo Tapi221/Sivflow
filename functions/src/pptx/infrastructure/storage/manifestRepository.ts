@@ -42,9 +42,7 @@ export const readManifestMetadata = async ({
   docId: string;
 }): Promise<ResolvedManifestMetadata> => {
   if (!isScopedStoragePath(manifestPath, userId, docId)) {
-    throw createPptxConversionError(
-      `manifest_scope_violation:${manifestPath}`,
-    );
+    throw createPptxConversionError(`manifest_scope_violation:${manifestPath}`);
   }
 
   const file = bucket.file(manifestPath);

@@ -1,7 +1,4 @@
-import {
-  asNonEmptyString,
-  isScopedStoragePath,
-} from "../security/guards";
+import { asNonEmptyString, isScopedStoragePath } from "../security/guards";
 import {
   asFiniteNumber,
   ManifestPayload,
@@ -73,7 +70,8 @@ export const parseManifestContents = (
     throw createPptxConversionError("manifest_invalid_shape");
   }
 
-  const parsed = parsedRaw as Record<string, unknown> & Partial<ManifestPayload>;
+  const parsed = parsedRaw as Record<string, unknown> &
+    Partial<ManifestPayload>;
 
   const manifestDocId = asNonEmptyString(parsed.docId);
   if (manifestDocId && manifestDocId !== docId) {
