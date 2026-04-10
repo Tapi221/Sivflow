@@ -1,7 +1,6 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // ユーザー認証状態チェック
     function isAuthenticated() {
       return request.auth != null;
     }
@@ -67,15 +66,13 @@ service cloud.firestore {
         ]);
     }
     
-    // ユーザー
     match /users/{userId} {
       allow read, write: if isAuthenticated() && isOwner(userId);
       
-      // サブコレクション形式 (SyncServiceV2 用)
       match /folders/{id} { allow read, write: if isAuthenticated() && isOwner(userId); }
       match /cards/{id} { allow read, write: if isAuthenticated() && isOwner(userId); }
       match /cardSets/{id} { allow read, write: if isAuthenticated() && isOwner(userId); }
-      match /tags_v3/{id} { allow read, write: if isAuthenticated() && isOwner(userId); }
+      match /tags/{id} { allow read, write: if isAuthenticated() && isOwner(userId); }
       match /cardRelations/{id} { allow read, write: if isAuthenticated() && isOwner(userId); }
       match /projectMaps/{id} { allow read, write: if isAuthenticated() && isOwner(userId); }
       match /uploads/{id} { allow read, write: if isAuthenticated() && isOwner(userId); }
@@ -91,13 +88,11 @@ service cloud.firestore {
       match /securityLogs/{id} { allow read, write: if isAuthenticated() && isOwner(userId); }
     }
 
-    // 旧グローバル images コレクション互換（移行期間用）
     match /images/{imageId} {
       allow read: if isAuthenticated() && legacyImageOwnedByAuthUid(resource.data);
       allow create, update, delete: if false;
     }
     
-    // ユーザー設定
     match /userSettings/{settingId} {
       allow read: if isAuthenticated() && 
         (resource == null || resource.data.userId == request.auth.uid);
@@ -107,14 +102,11 @@ service cloud.firestore {
         resource.data.userId == request.auth.uid;
     }
     
-    // ユーザー統計
     match /userStats/{statId} {
       allow read: if isAuthenticated() && 
         (resource == null || resource.data.userId == request.auth.uid);
-      // 書き込みはシステム（Cloud Functions）または管理プロセスのみを想定し、クライアントからは読み取り専用に
     }
     
-    // フォルダ
     match /folders/{folderId} {
       allow read: if isAuthenticated() && 
         (resource == null || resource.data.userId == request.auth.uid);
@@ -124,7 +116,6 @@ service cloud.firestore {
         resource.data.userId == request.auth.uid;
     }
     
-    // カード
     match /cards/{cardId} {
       allow read: if isAuthenticated() && 
         (resource == null || resource.data.userId == request.auth.uid);
@@ -134,7 +125,6 @@ service cloud.firestore {
         resource.data.userId == request.auth.uid;
     }
     
-    // 学習ログ
     match /studyLogs/{logId} {
       allow read: if isAuthenticated() && 
         resource.data.userId == request.auth.uid;
@@ -142,7 +132,6 @@ service cloud.firestore {
         request.resource.data.userId == request.auth.uid;
     }
     
-    // 訓練ログ
     match /trainingLogs/{logId} {
       allow read: if isAuthenticated() && 
         resource.data.userId == request.auth.uid;
@@ -150,7 +139,6 @@ service cloud.firestore {
         request.resource.data.userId == request.auth.uid;
     }
     
-    // 削除アイテム（ごみ箱）
     match /deletedItems/{itemId} {
       allow read: if isAuthenticated() && 
         resource.data.userId == request.auth.uid;
@@ -160,7 +148,6 @@ service cloud.firestore {
         resource.data.userId == request.auth.uid;
     }
     
-    // 共有リンク
     match /shareLinks/{shareLinkId} {
       allow read: if isAuthenticated() && 
         resource.data.ownerUserId == request.auth.uid;
@@ -168,11 +155,9 @@ service cloud.firestore {
         request.resource.data.ownerUserId == request.auth.uid;
       allow update, delete: if isAuthenticated() && 
         resource.data.ownerUserId == request.auth.uid;
-      // 公開共有リンクの読み取り（共有用）
       allow read: if resource.data.isActive == true;
     }
     
-    // 共有フォルダ
     match /sharedFolders/{sharedFolderId} {
       allow read: if isAuthenticated() && 
         (resource.data.originalOwnerUserId == request.auth.uid ||
@@ -183,19 +168,15 @@ service cloud.firestore {
         resource.data.importedByUserId == request.auth.uid;
     }
     
-    // ログイン履歴
     match /loginHistory/{historyId} {
       allow read: if isAuthenticated() && 
         resource.data.userId == request.auth.uid;
-      // 書き込みは Cloud Functions のみ
     }
 
-    // 同期ロック（高度な同期システム）
     match /sync_locks/{userId} {
       allow read, write: if isAuthenticated() && isOwner(userId);
     }
 
-    // 同期メタデータ（デバイス情報など）
     match /sync_metadata/{userId} {
       allow read: if isAuthenticated() && isOwner(userId);
       

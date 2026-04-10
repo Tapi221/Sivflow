@@ -23,12 +23,6 @@ const Layout = () => {
     document.body.scrollTop = 0;
   }, [location.pathname]);
 
-  useEffect(() => {
-    if (!isFoldersRoute) {
-      document.documentElement.classList.remove("no-page-scroll");
-    }
-  }, [isFoldersRoute, location.pathname]);
-
   const { isSettingsOpen, settingsTab, setIsSettingsOpen } =
     useSettingsQueryParam(searchParams, setSearchParams);
 
@@ -37,6 +31,22 @@ const Layout = () => {
   useKatexLoader();
 
   const isDesktop = isDesktopRuntime();
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+
+    const shouldLockPageScroll = isDesktop && isFoldersRoute;
+
+    document.documentElement.classList.toggle(
+      "no-page-scroll",
+      shouldLockPageScroll,
+    );
+
+    return () => {
+      if (!shouldLockPageScroll) return;
+      document.documentElement.classList.remove("no-page-scroll");
+    };
+  }, [isDesktop, isFoldersRoute]);
 
   return (
     <div

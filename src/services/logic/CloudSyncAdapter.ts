@@ -122,7 +122,7 @@ type CloudEntityType =
 
 type PullableEntityType = Exclude<CloudEntityType, "userSetting">;
 
-const CURRENT_TAG_COLLECTION = "tags_v3" as const;
+const CURRENT_TAG_COLLECTION = "tags" as const;
 
 const COLLECTION_BY_TYPE: Record<CloudEntityType, string> = {
   card: "cards",
@@ -164,7 +164,6 @@ const estimateBytes = (value: unknown) => {
   try {
     return _encoder.encode(JSON.stringify(value)).length;
   } catch {
-    // stringify 不能 = だいたい危険なので大きめに見積もる
     return 1024 * 1024;
   }
 };
@@ -343,8 +342,6 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
             `[CloudSyncAdapter] pullCollectionDiff failed for ${type}`,
             error,
           );
-          // 一部コレクションの失敗で cards / folders まで巻き添えにしない
-          // ルール未反映・移行途中でも既存データの同期は継続する
         }
       };
 
@@ -352,7 +349,6 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
         await pullCollectionDiff(type);
       }
 
-      // userSettings (top-level document)
       {
         const settingsRef = doc(firestore, "userSettings", this.userId);
         const snap = await getDoc(settingsRef);
@@ -425,7 +421,6 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
 
           const sanitized = this.sanitizeForCloud(type, data);
 
-          // sanitized が null とか来たら普通に事故るので最低限の防御
           if (!sanitized || typeof sanitized !== "object") {
             throw new Error(
               `Invalid payload for ${type}/${id}: expected object`,
@@ -455,7 +450,6 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
           );
           failedIds.push(...chunkIds);
           if (!firstError) firstError = error;
-          // 次のチャンクへ（成功分は残す）
         }
       }
 
@@ -484,7 +478,6 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
       const firestore = firestoreDb;
       if (!firestore) throw new Error("Firebase Firestore is not initialized.");
 
-      // card
       {
         const snap = await getDocs(
           query(
@@ -502,7 +495,6 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
         }
       }
 
-      // cardSet
       {
         const snap = await getDocs(
           query(
@@ -520,7 +512,6 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
         }
       }
 
-      // document
       {
         const snap = await getDocs(
           query(
@@ -538,7 +529,6 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
         }
       }
 
-      // tag
       {
         const snap = await getDocs(
           query(
@@ -559,7 +549,6 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
         }
       }
 
-      // asset
       {
         const snap = await getDocs(
           query(
@@ -577,7 +566,6 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
         }
       }
 
-      // folder
       {
         const snap = await getDocs(
           query(
@@ -595,7 +583,6 @@ export class CloudSyncAdapter implements ICloudSyncAdapter {
         }
       }
 
-      // userSetting
       {
         const snap = await getDoc(doc(firestore, "userSettings", this.userId));
         if (snap.exists()) {
