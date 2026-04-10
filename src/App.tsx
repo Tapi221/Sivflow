@@ -12,7 +12,7 @@ import Layout from "./Layout";
 import {
   resetStartupTasks,
   runStartupTasks,
-} from "./application/startup/RunStartupTasks";
+} from "@/application/startup/RunStartupTasks";
 import { signInWithGoogle } from "./services/auth/googleSignIn";
 import { DEV_MODE, isLocalHost } from "./utils/envGuards";
 

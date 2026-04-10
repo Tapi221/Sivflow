@@ -86,7 +86,7 @@ if (typeof window !== "undefined") {
 }
 
 const debugFirebase = (): void => {
-  console.log("🔍 === Firebase Debug Info ===");
+  console.log("=== Firebase Debug Info ===");
 
   try {
     console.log("App name:", app.name);
@@ -94,13 +94,13 @@ const debugFirebase = (): void => {
 
     if (firestoreDb) {
       const testRef = collection(firestoreDb, "test_connection");
-      console.log("✅ collection() basic check passed:", testRef.path);
+      console.log("collection() basic check passed:", testRef.path);
     }
   } catch (error) {
-    console.error("❌ debugFirebase error:", error);
+    console.error("debugFirebase error:", error);
   }
 
-  console.log("🔍 ==========================");
+  console.log("==========================");
 };
 
 if (import.meta.env.DEV) {

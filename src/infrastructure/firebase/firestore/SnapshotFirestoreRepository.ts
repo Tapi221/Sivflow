@@ -1,6 +1,6 @@
 import type { SnapshotRepositoryPort } from "@/application/ports/SnapshotRepositoryPort";
-import { firestoreDb } from "@/infrastructure/firebase/client";
 import type { AppSnapshot } from "@/types/domain/snapshot";
+import { firestoreDb } from "@/infrastructure/firebase/client";
 import {
   addDoc,
   collection,
@@ -41,13 +41,13 @@ const save: SnapshotRepositoryPort["save"] = async (snapshot) => {
     orderBy("metadata.createdAt", "desc"),
     limit(100),
   );
+
   const querySnapshot = await getDocs(snapshotsQuery);
   const docs = querySnapshot.docs;
 
   if (docs.length > MAX_STORED_SNAPSHOTS) {
     const toDelete = docs.slice(MAX_STORED_SNAPSHOTS);
     await Promise.all(toDelete.map((doc) => deleteDoc(doc.ref)));
-    console.log(`[Snapshot] Deleted ${toDelete.length} old snapshots`);
   }
 };
 
@@ -63,6 +63,7 @@ const list: SnapshotRepositoryPort["list"] = async (userId) => {
 
   return querySnapshot.docs.map((doc) => {
     const data = doc.data();
+
     return {
       metadata: data.metadata,
       data: data.data,

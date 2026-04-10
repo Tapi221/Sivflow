@@ -9,7 +9,6 @@ const get = (): number => {
 
   const stored = localStorage.getItem(GENERATION_COUNTER_KEY);
   const parsed = stored ? parseInt(stored, 10) : 0;
-
   return Number.isFinite(parsed) ? parsed : 0;
 };
 

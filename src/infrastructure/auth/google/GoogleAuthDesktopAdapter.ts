@@ -79,23 +79,6 @@ const buildAuthorizeUrl = ({
   return `${GOOGLE_OAUTH_AUTHORIZE_ENDPOINT}?${params.toString()}`;
 };
 
-const logDesktopAuthorizeRequest = (authorizeUrl: string): void => {
-  try {
-    const parsed = new URL(authorizeUrl);
-    const params = parsed.searchParams;
-
-    console.info("[auth][desktop-oauth] authorize request", {
-      client_id: params.get("client_id"),
-      redirect_uri: params.get("redirect_uri"),
-      response_type: params.get("response_type"),
-      scope: params.get("scope"),
-      code_challenge_method: params.get("code_challenge_method"),
-    });
-  } catch (error) {
-    console.warn("[auth][desktop-oauth] failed to parse authorize URL", error);
-  }
-};
-
 const toRedirectTarget = (rawUri: string) => {
   const parsed = new URL(rawUri);
 
@@ -149,12 +132,6 @@ const waitForDesktopOAuthCode = (
       const parsed = parseLoopbackCallback(payload, redirectUri);
       const isStateMatched = parsed.state === expectedState;
 
-      console.info("[auth][desktop-oauth] callback state check", {
-        expectedState,
-        receivedState: parsed.state,
-        matched: isStateMatched,
-      });
-
       if (!isStateMatched) {
         return;
       }
@@ -192,29 +169,6 @@ const exchangeCodeForIdToken = async ({
   codeVerifier: string;
   redirectUri: string;
 }): Promise<string> => {
-  const envClientId =
-    import.meta.env.VITE_DESKTOP_GOOGLE_OAUTH_CLIENT_ID?.trim();
-  const expectedLoopbackRedirectUri =
-    "http://127.0.0.1:42813/auth/google/callback";
-
-  console.info("[auth][desktop-oauth] token exchange request", {
-    client_id: clientId,
-    redirect_uri: redirectUri,
-    grant_type: "authorization_code",
-    code_verifier_length: codeVerifier.length,
-    body_keys: [
-      "client_id",
-      "client_secret",
-      "code",
-      "code_verifier",
-      "grant_type",
-      "redirect_uri",
-    ],
-    client_id_matches_env:
-      typeof envClientId === "string" && clientId === envClientId,
-    redirect_uri_matches_expected: redirectUri === expectedLoopbackRedirectUri,
-  });
-
   const desktopOauth = getDesktopOauthApi();
 
   return await desktopOauth.exchangeIdToken({
@@ -238,8 +192,6 @@ const signIn: GoogleAuthPort["signIn"] = async () => {
     codeChallenge,
     redirectUri,
   });
-
-  logDesktopAuthorizeRequest(authorizeUrl);
 
   const codePromise = waitForDesktopOAuthCode(state, redirectUri);
 

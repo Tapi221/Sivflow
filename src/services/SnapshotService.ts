@@ -78,10 +78,6 @@ export const snapshotService = {
       return;
     }
 
-    console.log(
-      `[Snapshot] Migrating ${localSnapshots.length} snapshots to Firestore...`,
-    );
-
     for (const snapshot of localSnapshots) {
       snapshot.metadata.userId = userId;
       await snapshotStoreUseCase.save(snapshot);
