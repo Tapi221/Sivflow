@@ -1,13 +1,11 @@
+import type { Card, Folder } from "@/types";
 import { assertNoBlobUrlInCardPayload } from "./blobUrl";
 import {
   cleanupBeforeDocumentDelete,
   cleanupBeforeDocumentSoftDelete,
   cleanupBeforeDocumentUpdate,
 } from "./documentsLifecycle";
-import {
-  denormalizeCardForStorage,
-  denormalizeFolderForStorage,
-} from "./transforms";
+import type { DocDbCtx } from "./documentsLifecycle";
 
 /**
  * 外部境界（Syncキュー）なので payload は unknown に落とす。
@@ -18,86 +16,77 @@ export type EnqueueSync = (
   payload: unknown,
 ) => Promise<void>;
 
-/** Dexie を直接 import しない最小インターフェース。
- *  add/put/bulkPut の戻り値は Dexie の PromiseExtended<IndexableType> と合わせるため
- *  PromiseLike<unknown> にしてある（実運用上は常に string が返る）。 */
+/**
+ * Dexie を直接 import しない最小インターフェース。
+ * add/put/bulkPut の戻り値は Dexie の PromiseExtended<IndexableType> と揃えるため
+ * PromiseLike<unknown> にしてある。
+ */
 export interface TableLike<T extends Record<string, unknown>> {
-  add(item: T): PromiseLike<unknown>;
-  get(id: string): Promise<T | undefined>;
-  update(id: string, changes: Partial<T>): Promise<number>;
-  put(item: T): PromiseLike<unknown>;
-  bulkPut(items: ReadonlyArray<T>): PromiseLike<unknown>;
-  delete(id: string): Promise<void>;
+  add: (item: T) => PromiseLike<unknown>;
+  get: (id: string) => Promise<T | undefined>;
+  update: (id: string, changes: Partial<T>) => Promise<number>;
+  put: (item: T) => PromiseLike<unknown>;
+  bulkPut: (items: ReadonlyArray<T>) => PromiseLike<unknown>;
+  delete: (id: string) => Promise<void>;
 }
 
 export interface DbLike {
-  table<T extends Record<string, unknown>>(name: string): TableLike<T>;
+  table: <T extends Record<string, unknown>>(name: string) => TableLike<T>;
   name?: string;
 }
 
-/** transforms の入出力を自動追従 */
-type CardInput = Parameters<typeof denormalizeCardForStorage>[0];
-type FolderInput = Parameters<typeof denormalizeFolderForStorage>[0];
+type CardInput = Card;
+type FolderInput = Folder;
+type AnyRow = Record<string, unknown> & { id?: string };
 
-type EnsureRecord<T> =
-  T extends Record<string, unknown> ? T : Record<string, unknown>;
-
-/**
- * Storage 形（denormalize 後）をベースにして、ログ用に参照しているプロパティだけ補助的に載せる。
- */
-type CardStorageRow = EnsureRecord<
-  ReturnType<typeof denormalizeCardForStorage>
-> & {
-  id?: string;
+type CardStorageRow = AnyRow & {
   front?: { blocks?: unknown[] };
   back?: { blocks?: unknown[] };
 };
 
-type FolderStorageRow = EnsureRecord<
-  ReturnType<typeof denormalizeFolderForStorage>
-> & {
-  id?: string;
-};
-
-type AnyRow = Record<string, unknown> & { id?: string };
-
 type DocumentUpdateChanges = Parameters<typeof cleanupBeforeDocumentUpdate>[2];
 
-const isRecord = (v: unknown) => {
-  return typeof v === "object" && v !== null;
+const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === "object" && value !== null;
 };
 
-const getStringProp = (obj: Record<string, unknown>, key: string) => {
-  const v = obj[key];
-  return typeof v === "string" ? v : undefined;
+const getStringProp = (
+  obj: Record<string, unknown>,
+  key: string,
+): string | undefined => {
+  const value = obj[key];
+  return typeof value === "string" ? value : undefined;
 };
 
-const getId = (v: unknown) => {
-  if (!isRecord(v)) return undefined;
-  const id = getStringProp(v, "id");
+const getId = (value: unknown): string | undefined => {
+  if (!isRecord(value)) return undefined;
+  const id = getStringProp(value, "id");
   if (!id) return undefined;
   const trimmed = id.trim();
   return trimmed.length > 0 ? trimmed : undefined;
 };
 
-const getConstructorName = (v: unknown) => {
-  if (!isRecord(v)) return "<unknown>";
-  const ctor = v["constructor"];
-  if (!isRecord(ctor)) return "<unknown>";
-  const name = ctor["name"];
-  return typeof name === "string" ? name : "<unknown>";
+const getConstructorName = (value: unknown): string => {
+  if (!value || (typeof value !== "object" && typeof value !== "function")) {
+    return "<unknown>";
+  }
+
+  const ctor = (value as { constructor?: { name?: unknown } }).constructor;
+  return typeof ctor?.name === "string" ? ctor.name : "<unknown>";
 };
 
-const safeJsonPreview = (v: unknown, max = 200) => {
+const safeJsonPreview = (value: unknown, max = 200): string => {
   try {
-    const s = JSON.stringify(v);
-    return s.length > max ? s.substring(0, max) + "...(truncated)" : s;
+    const serialized = JSON.stringify(value);
+    return serialized.length > max
+      ? `${serialized.substring(0, max)}...(truncated)`
+      : serialized;
   } catch {
     return "<unserializable-payload>";
   }
 };
 
-const errorCode = (error: unknown) => {
+const errorCode = (error: unknown): string => {
   if (typeof error === "string") return error;
   if (!isRecord(error)) return "UNKNOWN_ERROR";
 
@@ -109,46 +98,59 @@ const errorCode = (error: unknown) => {
   );
 };
 
-const recordKeys = (v: unknown) => {
-  if (!isRecord(v)) return [];
-  return Object.keys(v);
+const recordKeys = (value: unknown): string[] => {
+  return isRecord(value) ? Object.keys(value) : [];
 };
 
-const isDocDbCtx = (db: DbLike) => {
-  return "documents" in db;
+const isDocDbCtx = (db: DbLike): db is DbLike & DocDbCtx => {
+  const documents = (db as DbLike & Partial<DocDbCtx>).documents;
+  return (
+    typeof documents === "object" &&
+    documents !== null &&
+    typeof documents.get === "function" &&
+    typeof documents.filter === "function"
+  );
+};
+
+const toStorageRow = (value: unknown): AnyRow => {
+  if (!isRecord(value)) return {};
+  return value as AnyRow;
 };
 
 /* -----------------------------
  * addItem
  * ----------------------------- */
 
-export async function addItem(
-  db: DbLike,
-  table: "cards",
-  item: CardInput,
-  skipSync: boolean,
-  enqueueSync: EnqueueSync,
-): Promise<string>;
-export async function addItem(
-  db: DbLike,
-  table: "folders",
-  item: FolderInput,
-  skipSync: boolean,
-  enqueueSync: EnqueueSync,
-): Promise<string>;
-export async function addItem(
-  db: DbLike,
-  table: string,
-  item: Record<string, unknown>,
-  skipSync: boolean,
-  enqueueSync: EnqueueSync,
-): Promise<string>;
-export const addItem = async (
-  db: DbLike,
-  table: string,
-  item: unknown,
-  skipSync: boolean,
-  enqueueSync: EnqueueSync,
+type AddItem = {
+  (
+    db: DbLike,
+    table: "cards",
+    item: CardInput,
+    skipSync: boolean,
+    enqueueSync: EnqueueSync,
+  ): Promise<string>;
+  (
+    db: DbLike,
+    table: "folders",
+    item: FolderInput,
+    skipSync: boolean,
+    enqueueSync: EnqueueSync,
+  ): Promise<string>;
+  (
+    db: DbLike,
+    table: string,
+    item: Record<string, unknown>,
+    skipSync: boolean,
+    enqueueSync: EnqueueSync,
+  ): Promise<string>;
+};
+
+export const addItem: AddItem = async (
+  db,
+  table,
+  item,
+  skipSync,
+  enqueueSync,
 ) => {
   if (table === "cards") {
     assertNoBlobUrlInCardPayload(item, {
@@ -157,14 +159,8 @@ export const addItem = async (
     });
   }
 
-  const payload: AnyRow =
-    table === "cards"
-      ? (denormalizeCardForStorage(item as CardInput) as CardStorageRow)
-      : table === "folders"
-        ? (denormalizeFolderForStorage(item as FolderInput) as FolderStorageRow)
-        : isRecord(item)
-          ? item
-          : {};
+  const payload = toStorageRow(item);
+  const preview = safeJsonPreview(payload);
 
   if (table === "cards") {
     assertNoBlobUrlInCardPayload(payload, {
@@ -173,53 +169,51 @@ export const addItem = async (
     });
   }
 
-  const preview = safeJsonPreview(payload);
-
   console.log(
     `[Diagnostic] localDb.addItem START. Table=${table}, ItemID=${
       getId(payload) ?? "<generated>"
     }, localDb instance type=${getConstructorName(db)}`,
   );
   console.log(
-    `[LocalDB] addItem START -> table=${table} id=${getId(payload) ?? "<generated>"} skipSync=${skipSync}`,
+    `[LocalDB] addItem START -> table=${table} id=${
+      getId(payload) ?? "<generated>"
+    } skipSync=${skipSync}`,
   );
 
   if (table === "cards") {
-    const qBlocksLen = Array.isArray((payload as CardStorageRow).front?.blocks)
-      ? (payload as CardStorageRow).front!.blocks!.length
+    const cardPayload = payload as CardStorageRow;
+    const questionBlocksLen = Array.isArray(cardPayload.front?.blocks)
+      ? cardPayload.front.blocks.length
       : 0;
-    const aBlocksLen = Array.isArray((payload as CardStorageRow).back?.blocks)
-      ? (payload as CardStorageRow).back!.blocks!.length
+    const answerBlocksLen = Array.isArray(cardPayload.back?.blocks)
+      ? cardPayload.back.blocks.length
       : 0;
+
     console.log(
-      `[LocalDB] addItem CARD_CONTENT -> Q_Blocks=${qBlocksLen}, A_Blocks=${aBlocksLen}`,
+      `[LocalDB] addItem CARD_CONTENT -> Q_Blocks=${questionBlocksLen}, A_Blocks=${answerBlocksLen}`,
     );
   }
 
   try {
-    const tableApi =
-      table === "cards"
-        ? db.table<CardStorageRow>(table)
-        : table === "folders"
-          ? db.table<FolderStorageRow>(table)
-          : db.table<AnyRow>(table);
-
+    const tableApi = db.table<AnyRow>(table);
     const returnedId = String(await tableApi.add(payload));
-    const resolvedId = getId(payload) ?? returnedId;
+    const resolvedId = payload.id ?? returnedId;
 
-    // 書き込み後の読み取り検証
     try {
       const maxVerifyAttempts = 4;
       let saved: AnyRow | undefined;
 
-      for (let attempt = 1; attempt <= maxVerifyAttempts; attempt++) {
+      for (let attempt = 1; attempt <= maxVerifyAttempts; attempt += 1) {
         try {
           saved = await tableApi.get(resolvedId);
         } catch {
           saved = undefined;
         }
+
         if (saved) break;
-        await new Promise<void>((res) => setTimeout(res, 35 * attempt));
+        await new Promise<void>((resolve) =>
+          setTimeout(resolve, 35 * attempt),
+        );
       }
 
       if (!saved) {
@@ -227,13 +221,11 @@ export const addItem = async (
           "[LocalDB] addItem verification failed after retries: write succeeded but read returned null",
           { table, id: resolvedId, instanceName: db.name },
         );
-        throw new Error(
-          "DB instance mismatch: write succeeded but read failed",
-        );
+        throw new Error("DB instance mismatch: write succeeded but read failed");
       }
-    } catch (verifyErr: unknown) {
-      console.error("[LocalDB] addItem verification ERROR", verifyErr);
-      throw verifyErr;
+    } catch (verifyError: unknown) {
+      console.error("[LocalDB] addItem verification ERROR", verifyError);
+      throw verifyError;
     }
 
     const savedItem: AnyRow = { ...payload, id: resolvedId };
@@ -248,11 +240,11 @@ export const addItem = async (
         console.log(
           `[LocalDB] addItem ENQUEUED_SYNC -> table=${table} id=${resolvedId}`,
         );
-      } catch (enqueueErr: unknown) {
+      } catch (enqueueError: unknown) {
         console.error("[LocalDB] addItem enqueueSync ERROR", {
           table,
           id: resolvedId,
-          error: enqueueErr,
+          error: enqueueError,
         });
       }
     }
@@ -275,45 +267,48 @@ export const addItem = async (
  * updateItem
  * ----------------------------- */
 
-export async function updateItem(
-  db: DbLike,
-  table: "cards",
-  id: string,
-  changes: CardInput,
-  skipSync: boolean,
-  enqueueSync: EnqueueSync,
-): Promise<number>;
-export async function updateItem(
-  db: DbLike,
-  table: "folders",
-  id: string,
-  changes: FolderInput,
-  skipSync: boolean,
-  enqueueSync: EnqueueSync,
-): Promise<number>;
-export async function updateItem(
-  db: DbLike,
-  table: "documents",
-  id: string,
-  changes: DocumentUpdateChanges,
-  skipSync: boolean,
-  enqueueSync: EnqueueSync,
-): Promise<number>;
-export async function updateItem(
-  db: DbLike,
-  table: string,
-  id: string,
-  changes: Record<string, unknown>,
-  skipSync: boolean,
-  enqueueSync: EnqueueSync,
-): Promise<number>;
-export const updateItem = async (
-  db: DbLike,
-  table: string,
-  id: string,
-  changes: unknown,
-  skipSync: boolean,
-  enqueueSync: EnqueueSync,
+type UpdateItem = {
+  (
+    db: DbLike,
+    table: "cards",
+    id: string,
+    changes: Partial<CardInput>,
+    skipSync: boolean,
+    enqueueSync: EnqueueSync,
+  ): Promise<number>;
+  (
+    db: DbLike,
+    table: "folders",
+    id: string,
+    changes: Partial<FolderInput>,
+    skipSync: boolean,
+    enqueueSync: EnqueueSync,
+  ): Promise<number>;
+  (
+    db: DbLike,
+    table: "documents",
+    id: string,
+    changes: DocumentUpdateChanges,
+    skipSync: boolean,
+    enqueueSync: EnqueueSync,
+  ): Promise<number>;
+  (
+    db: DbLike,
+    table: string,
+    id: string,
+    changes: Record<string, unknown>,
+    skipSync: boolean,
+    enqueueSync: EnqueueSync,
+  ): Promise<number>;
+};
+
+export const updateItem: UpdateItem = async (
+  db,
+  table,
+  id,
+  changes,
+  skipSync,
+  enqueueSync,
 ) => {
   if (table === "documents") {
     if (!isDocDbCtx(db)) {
@@ -321,6 +316,7 @@ export const updateItem = async (
         "[LocalDB] documentsLifecycle requires db.documents, but the provided db does not have it.",
       );
     }
+
     await cleanupBeforeDocumentUpdate(db, id, changes as DocumentUpdateChanges);
   }
 
@@ -328,16 +324,7 @@ export const updateItem = async (
     assertNoBlobUrlInCardPayload(changes, { entityType: table, entityId: id });
   }
 
-  const payload: AnyRow =
-    table === "cards"
-      ? (denormalizeCardForStorage(changes as CardInput) as CardStorageRow)
-      : table === "folders"
-        ? (denormalizeFolderForStorage(
-            changes as FolderInput,
-          ) as FolderStorageRow)
-        : isRecord(changes)
-          ? changes
-          : {};
+  const payload = toStorageRow(changes);
 
   if (table === "cards") {
     assertNoBlobUrlInCardPayload(payload, { entityType: table, entityId: id });
@@ -350,24 +337,20 @@ export const updateItem = async (
   );
 
   if (table === "cards") {
-    const qBlocksLen = Array.isArray((payload as CardStorageRow).front?.blocks)
-      ? (payload as CardStorageRow).front!.blocks!.length
+    const cardPayload = payload as CardStorageRow;
+    const questionBlocksLen = Array.isArray(cardPayload.front?.blocks)
+      ? cardPayload.front.blocks.length
       : undefined;
-    const aBlocksLen = Array.isArray((payload as CardStorageRow).back?.blocks)
-      ? (payload as CardStorageRow).back!.blocks!.length
+    const answerBlocksLen = Array.isArray(cardPayload.back?.blocks)
+      ? cardPayload.back.blocks.length
       : undefined;
+
     console.log(
-      `[LocalDB] updateItem CARD_CHANGES -> Q_Blocks=${qBlocksLen}, A_Blocks=${aBlocksLen}`,
+      `[LocalDB] updateItem CARD_CHANGES -> Q_Blocks=${questionBlocksLen}, A_Blocks=${answerBlocksLen}`,
     );
   }
 
-  const tableApi =
-    table === "cards"
-      ? db.table<CardStorageRow>(table)
-      : table === "folders"
-        ? db.table<FolderStorageRow>(table)
-        : db.table<AnyRow>(table);
-
+  const tableApi = db.table<AnyRow>(table);
   const result = await tableApi.update(id, payload);
 
   if (!skipSync) {
@@ -384,25 +367,22 @@ export const updateItem = async (
  * deleteItem
  * ----------------------------- */
 
-export async function deleteItem(
-  db: DbLike,
-  table: "documents",
-  id: string,
-): Promise<void>;
-export async function deleteItem(
-  db: DbLike,
-  table: string,
-  id: string,
-): Promise<void>;
-export const deleteItem = async (db: DbLike, table: string, id: string) => {
+type DeleteItem = {
+  (db: DbLike, table: "documents", id: string): Promise<void>;
+  (db: DbLike, table: string, id: string): Promise<void>;
+};
+
+export const deleteItem: DeleteItem = async (db, table, id) => {
   if (table === "documents") {
     if (!isDocDbCtx(db)) {
       throw new Error(
         "[LocalDB] documentsLifecycle requires db.documents, but the provided db does not have it.",
       );
     }
+
     await cleanupBeforeDocumentDelete(db, id);
   }
+
   const tableApi = db.table<AnyRow>(table);
   await tableApi.delete(id);
 };
@@ -420,8 +400,9 @@ export const softDelete = async (
     id: string,
     changes: Record<string, unknown>,
   ) => Promise<number>,
-) => {
+): Promise<number> => {
   const now = new Date();
+
   console.log(`[LocalDB] softDelete -> table=${table} id=${id}`);
 
   if (table === "documents") {
@@ -430,6 +411,7 @@ export const softDelete = async (
         "[LocalDB] documentsLifecycle requires db.documents, but the provided db does not have it.",
       );
     }
+
     await cleanupBeforeDocumentSoftDelete(db, id);
   }
 
@@ -450,46 +432,49 @@ export const softDelete = async (
  * bulkUpsert
  * ----------------------------- */
 
-export async function bulkUpsert(
-  db: DbLike,
-  table: "cards",
-  items: CardInput[],
-  skipSync: boolean,
-  enqueueSync: EnqueueSync,
-): Promise<void>;
-export async function bulkUpsert(
-  db: DbLike,
-  table: "folders",
-  items: FolderInput[],
-  skipSync: boolean,
-  enqueueSync: EnqueueSync,
-): Promise<void>;
-export async function bulkUpsert(
-  db: DbLike,
-  table: string,
-  items: Record<string, unknown>[],
-  skipSync: boolean,
-  enqueueSync: EnqueueSync,
-): Promise<void>;
-export const bulkUpsert = async (
-  db: DbLike,
-  table: string,
-  items: unknown[],
-  skipSync: boolean,
-  enqueueSync: EnqueueSync,
+type BulkUpsert = {
+  (
+    db: DbLike,
+    table: "cards",
+    items: CardInput[],
+    skipSync: boolean,
+    enqueueSync: EnqueueSync,
+  ): Promise<void>;
+  (
+    db: DbLike,
+    table: "folders",
+    items: FolderInput[],
+    skipSync: boolean,
+    enqueueSync: EnqueueSync,
+  ): Promise<void>;
+  (
+    db: DbLike,
+    table: string,
+    items: Record<string, unknown>[],
+    skipSync: boolean,
+    enqueueSync: EnqueueSync,
+  ): Promise<void>;
+};
+
+export const bulkUpsert: BulkUpsert = async (
+  db,
+  table,
+  items,
+  skipSync,
+  enqueueSync,
 ) => {
   if (items.length === 0) return;
 
-  const payload: AnyRow[] =
-    table === "cards"
-      ? (items as CardInput[]).map(
-          (x) => denormalizeCardForStorage(x) as CardStorageRow,
-        )
-      : table === "folders"
-        ? (items as FolderInput[]).map(
-            (x) => denormalizeFolderForStorage(x) as FolderStorageRow,
-          )
-        : items.filter(isRecord);
+  if (table === "cards") {
+    for (const item of items) {
+      assertNoBlobUrlInCardPayload(item, {
+        entityType: table,
+        entityId: getId(item),
+      });
+    }
+  }
+
+  const payload = items.filter(isRecord).map((item) => item as AnyRow);
 
   if (table === "cards") {
     for (const entry of payload) {
@@ -500,13 +485,7 @@ export const bulkUpsert = async (
     }
   }
 
-  const tableApi =
-    table === "cards"
-      ? db.table<CardStorageRow>(table)
-      : table === "folders"
-        ? db.table<FolderStorageRow>(table)
-        : db.table<AnyRow>(table);
-
+  const tableApi = db.table<AnyRow>(table);
   await tableApi.bulkPut(payload);
 
   if (!skipSync) {
@@ -520,33 +499,36 @@ export const bulkUpsert = async (
  * upsert
  * ----------------------------- */
 
-export async function upsert(
-  db: DbLike,
-  tableName: "cards",
-  data: CardInput,
-  skipSync: boolean,
-  enqueueSync: EnqueueSync,
-): Promise<void>;
-export async function upsert(
-  db: DbLike,
-  tableName: "folders",
-  data: FolderInput,
-  skipSync: boolean,
-  enqueueSync: EnqueueSync,
-): Promise<void>;
-export async function upsert(
-  db: DbLike,
-  tableName: string,
-  data: Record<string, unknown>,
-  skipSync: boolean,
-  enqueueSync: EnqueueSync,
-): Promise<void>;
-export const upsert = async (
-  db: DbLike,
-  tableName: string,
-  data: unknown,
-  skipSync: boolean,
-  enqueueSync: EnqueueSync,
+type Upsert = {
+  (
+    db: DbLike,
+    tableName: "cards",
+    data: CardInput,
+    skipSync: boolean,
+    enqueueSync: EnqueueSync,
+  ): Promise<void>;
+  (
+    db: DbLike,
+    tableName: "folders",
+    data: FolderInput,
+    skipSync: boolean,
+    enqueueSync: EnqueueSync,
+  ): Promise<void>;
+  (
+    db: DbLike,
+    tableName: string,
+    data: Record<string, unknown>,
+    skipSync: boolean,
+    enqueueSync: EnqueueSync,
+  ): Promise<void>;
+};
+
+export const upsert: Upsert = async (
+  db,
+  tableName,
+  data,
+  skipSync,
+  enqueueSync,
 ) => {
   if (tableName === "cards") {
     assertNoBlobUrlInCardPayload(data, {
@@ -555,14 +537,7 @@ export const upsert = async (
     });
   }
 
-  const payload: AnyRow =
-    tableName === "cards"
-      ? (denormalizeCardForStorage(data as CardInput) as CardStorageRow)
-      : tableName === "folders"
-        ? (denormalizeFolderForStorage(data as FolderInput) as FolderStorageRow)
-        : isRecord(data)
-          ? data
-          : {};
+  const payload = toStorageRow(data);
 
   if (tableName === "cards") {
     assertNoBlobUrlInCardPayload(payload, {
@@ -571,13 +546,7 @@ export const upsert = async (
     });
   }
 
-  const tableApi =
-    tableName === "cards"
-      ? db.table<CardStorageRow>(tableName)
-      : tableName === "folders"
-        ? db.table<FolderStorageRow>(tableName)
-        : db.table<AnyRow>(tableName);
-
+  const tableApi = db.table<AnyRow>(tableName);
   await tableApi.put(payload);
 
   if (!skipSync) {
