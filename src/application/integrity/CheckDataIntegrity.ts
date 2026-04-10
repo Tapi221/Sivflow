@@ -2,7 +2,10 @@ import { getCardBlocks, getCardText } from "@/domain/card/content";
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
 import { getLocalDb } from "@/infrastructure/persistence/indexeddb";
-import type { IntegrityIssue, IntegrityReport } from "@/services/dataIntegrityTypes";
+import type {
+  IntegrityIssue,
+  IntegrityReport,
+} from "@/services/dataIntegrityTypes";
 import { sanitizeForLog } from "@/utils/logSanitizer";
 
 const TIMESTAMP_KEYS = [
@@ -14,7 +17,11 @@ const TIMESTAMP_KEYS = [
 ] as const;
 
 const isMissingFolderId = (folderId: unknown): boolean => {
-  return folderId === null || folderId === undefined || String(folderId).trim() === "";
+  return (
+    folderId === null ||
+    folderId === undefined ||
+    String(folderId).trim() === ""
+  );
 };
 
 const readDeletedState = (entity: Record<string, unknown>): boolean => {
@@ -166,7 +173,8 @@ export const createCheckDataIntegrityUseCase = () => {
         totalCards: cards.filter((card) => !card.isDeleted).length,
         totalFolders: folders.filter((folder) => !folder.isDeleted).length,
         issues,
-        isHealthy: issues.filter((issue) => issue.severity === "error").length === 0,
+        isHealthy:
+          issues.filter((issue) => issue.severity === "error").length === 0,
       };
     } catch (error) {
       console.error("[Integrity] check failed", sanitizeForLog(error));

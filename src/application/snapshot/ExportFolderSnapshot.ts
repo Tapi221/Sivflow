@@ -16,13 +16,17 @@ export const createExportFolderSnapshotUseCase = ({
 }: ExportFolderSnapshotDependencies) => {
   const execute = async (userId: string, folderId: string): Promise<void> => {
     const fullSnapshot = await createSnapshotUseCase.execute(userId);
-    const folder = fullSnapshot.data.folders.find((item) => item.id === folderId);
+    const folder = fullSnapshot.data.folders.find(
+      (item) => item.id === folderId,
+    );
 
     if (!folder) {
       throw new Error("Folder not found");
     }
 
-    const cards = fullSnapshot.data.cards.filter((card) => card.folderId === folderId);
+    const cards = fullSnapshot.data.cards.filter(
+      (card) => card.folderId === folderId,
+    );
 
     const partialSnapshot: AppSnapshot = {
       metadata: fullSnapshot.metadata,

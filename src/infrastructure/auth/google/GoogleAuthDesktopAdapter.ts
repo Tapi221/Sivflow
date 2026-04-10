@@ -2,10 +2,7 @@ import type { GoogleAuthPort } from "@/application/ports/GoogleAuthPort";
 import { getDesktopOauthApi } from "@/platform/desktop/bridge";
 import type { DesktopOauthCallbackPayload } from "@/types/externals/desktop-api";
 import { auth } from "@/infrastructure/firebase/client";
-import {
-  GoogleAuthProvider,
-  signInWithCredential,
-} from "firebase/auth";
+import { GoogleAuthProvider, signInWithCredential } from "firebase/auth";
 
 const DEFAULT_DESKTOP_REDIRECT_URI =
   "http://127.0.0.1:42813/auth/google/callback";
@@ -14,7 +11,9 @@ const GOOGLE_OAUTH_AUTHORIZE_ENDPOINT =
 const CALLBACK_TIMEOUT_MS = 3 * 60 * 1000;
 
 const toBase64Url = (bytes: Uint8Array): string => {
-  const binary = Array.from(bytes, (value) => String.fromCharCode(value)).join("");
+  const binary = Array.from(bytes, (value) => String.fromCharCode(value)).join(
+    "",
+  );
   return btoa(binary)
     .replace(/\+/g, "-")
     .replace(/\//g, "_")
@@ -44,11 +43,14 @@ const getDesktopOauthClientId = (): string => {
 };
 
 const getDesktopOauthScope = (): string => {
-  return import.meta.env.VITE_DESKTOP_GOOGLE_OAUTH_SCOPE || "openid email profile";
+  return (
+    import.meta.env.VITE_DESKTOP_GOOGLE_OAUTH_SCOPE || "openid email profile"
+  );
 };
 
 const getDesktopRedirectUri = (): string => {
-  const configuredUri = import.meta.env.VITE_DESKTOP_GOOGLE_OAUTH_REDIRECT_URI?.trim();
+  const configuredUri =
+    import.meta.env.VITE_DESKTOP_GOOGLE_OAUTH_REDIRECT_URI?.trim();
   return configuredUri || DEFAULT_DESKTOP_REDIRECT_URI;
 };
 
@@ -120,7 +122,8 @@ const parseLoopbackCallback = (
     throw new Error("Unexpected callback URL");
   }
 
-  const getParam = (name: string): string | null => parsed.searchParams.get(name);
+  const getParam = (name: string): string | null =>
+    parsed.searchParams.get(name);
 
   return {
     code: payload.code ?? getParam("code"),
@@ -189,8 +192,10 @@ const exchangeCodeForIdToken = async ({
   codeVerifier: string;
   redirectUri: string;
 }): Promise<string> => {
-  const envClientId = import.meta.env.VITE_DESKTOP_GOOGLE_OAUTH_CLIENT_ID?.trim();
-  const expectedLoopbackRedirectUri = "http://127.0.0.1:42813/auth/google/callback";
+  const envClientId =
+    import.meta.env.VITE_DESKTOP_GOOGLE_OAUTH_CLIENT_ID?.trim();
+  const expectedLoopbackRedirectUri =
+    "http://127.0.0.1:42813/auth/google/callback";
 
   console.info("[auth][desktop-oauth] token exchange request", {
     client_id: clientId,

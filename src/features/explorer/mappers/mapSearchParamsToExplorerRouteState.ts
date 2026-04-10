@@ -1,5 +1,5 @@
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
-import  {
+import {
   createCardSelectedItem,
   createDocumentSelectedItem,
 } from "@/features/explorer/utils/createSelectedExplorerItem";

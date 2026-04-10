@@ -27,19 +27,29 @@ export const createCompareSnapshotUseCase = () => {
 
     const localCardIds = new Set(local.data.cards.map((card) => card.id));
     const importedCardIds = new Set(imported.data.cards.map((card) => card.id));
-    const localFolderIds = new Set(local.data.folders.map((folder) => folder.id));
-    const importedFolderIds = new Set(imported.data.folders.map((folder) => folder.id));
+    const localFolderIds = new Set(
+      local.data.folders.map((folder) => folder.id),
+    );
+    const importedFolderIds = new Set(
+      imported.data.folders.map((folder) => folder.id),
+    );
 
     return {
       newerSnapshot,
       localGeneration,
       importedGeneration,
       diff: {
-        cardsAdded: [...importedCardIds].filter((id) => !localCardIds.has(id)).length,
-        cardsRemoved: [...localCardIds].filter((id) => !importedCardIds.has(id)).length,
+        cardsAdded: [...importedCardIds].filter((id) => !localCardIds.has(id))
+          .length,
+        cardsRemoved: [...localCardIds].filter((id) => !importedCardIds.has(id))
+          .length,
         cardsModified: 0,
-        foldersAdded: [...importedFolderIds].filter((id) => !localFolderIds.has(id)).length,
-        foldersRemoved: [...localFolderIds].filter((id) => !importedFolderIds.has(id)).length,
+        foldersAdded: [...importedFolderIds].filter(
+          (id) => !localFolderIds.has(id),
+        ).length,
+        foldersRemoved: [...localFolderIds].filter(
+          (id) => !importedFolderIds.has(id),
+        ).length,
       },
     };
   };

@@ -8,7 +8,10 @@ export const createQuarantineOrphanedCardsUseCase = () => {
   const execute = async (): Promise<number> => {
     const report = await checkDataIntegrityUseCase.execute();
     const orphanedCardIds = report.issues
-      .filter((issue) => issue.code === "INVALID_FOLDER_REF" && issue.entityType === "card")
+      .filter(
+        (issue) =>
+          issue.code === "INVALID_FOLDER_REF" && issue.entityType === "card",
+      )
       .map((issue) => issue.entityId);
 
     let count = 0;

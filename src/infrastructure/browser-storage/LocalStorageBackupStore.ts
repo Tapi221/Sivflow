@@ -63,7 +63,9 @@ const saveBackups = (backups: AutoBackupRecord[]): void => {
       throw error;
     }
 
-    console.warn("[LocalStorageBackupStore] QuotaExceededError. Keeping latest only.");
+    console.warn(
+      "[LocalStorageBackupStore] QuotaExceededError. Keeping latest only.",
+    );
 
     try {
       localStorage.setItem(

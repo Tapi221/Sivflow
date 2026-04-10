@@ -58,10 +58,7 @@ export const snapshotService = {
 
   parseSnapshotFile,
 
-  compareWithLocal: async (
-    imported: AppSnapshot,
-    userId: string,
-  ) => {
+  compareWithLocal: async (imported: AppSnapshot, userId: string) => {
     return await compareSnapshotUseCase.execute(imported, userId);
   },
 

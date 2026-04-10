@@ -18,7 +18,9 @@ export const parseSnapshotFile = async (file: File): Promise<AppSnapshot> => {
   }
 
   if (parsed.metadata.schemaVersion > CURRENT_SCHEMA_VERSION) {
-    throw new Error(`Unsupported schema version: ${parsed.metadata.schemaVersion}`);
+    throw new Error(
+      `Unsupported schema version: ${parsed.metadata.schemaVersion}`,
+    );
   }
 
   return parsed as AppSnapshot;
