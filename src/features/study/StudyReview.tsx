@@ -47,6 +47,7 @@ export const StudyReview = ({
           getKey={(card) => (card as { id?: string }).id ?? ""}
           renderCard={(card, idx, isActive) => (
             <StudyCard
+              mode="review"
               card={card}
               flipTrigger={isActive ? flipTrigger : 0}
               onResult={onResult}

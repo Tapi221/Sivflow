@@ -1,4 +1,3 @@
-import type { ComponentProps } from "react";
 import {
   CARD_BASE_WIDTH,
   CARD_DISPLAY_SCALE,
@@ -10,10 +9,8 @@ import {
 } from "@/components/card/frame/Flashcard";
 import { MobileScalableCard } from "@/components/card/frame/MobileScalableCard";
 import { CardCarousel3D } from "@/features/review/presentation/web/ui/components/CardCarousel3D";
-import StudyCard from "./StudyCard";
+import StudyCard, { type StudyCardProps } from "./StudyCard";
 import type { Card } from "@/types";
-
-type StudyCardProps = ComponentProps<typeof StudyCard>;
 
 const CARD_DISPLAY_WIDTH = Math.round(CARD_BASE_WIDTH * CARD_DISPLAY_SCALE);
 
@@ -45,6 +42,7 @@ export const CardCarousel = ({
       syncIndex={sessionCurrentIndex}
       renderCenter={(card) => (
         <StudyCard
+          mode="review"
           card={card}
           onResult={onResult}
           onToggleUncertainty={onToggleUncertainty}

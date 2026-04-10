@@ -33,7 +33,7 @@ type BaseProps = {
 };
 
 type ReviewProps = BaseProps & {
-  mode?: "review";
+  mode: "review";
   onResult?: (subjectiveScore: ReviewScore, responseTime: number) => void;
 };
 
@@ -42,7 +42,7 @@ type PracticeProps = BaseProps & {
   onResult?: (subjectiveScore: PracticeScore, responseTime: number) => void;
 };
 
-type StudyCardProps = ReviewProps | PracticeProps;
+export type StudyCardProps = ReviewProps | PracticeProps;
 
 type Keyable = {
   id?: string;

@@ -17,7 +17,6 @@ import { sanitizeStreak } from "@/utils/streak";
 import { flags } from "@/features/flags";
 import { TelemetryService } from "@/services/logic/TelemetryService";
 import confetti from "canvas-confetti";
-import { StampRally } from "@/features/study/StampRally";
 import { useStudyCards } from "@/hooks/study/useStudyCards";
 import { useStudySession } from "@/hooks/study/useStudySession";
 import { usePracticeMode } from "@/hooks/study/usePracticeMode";
@@ -68,30 +67,6 @@ const StudyMode = () => {
     [location.search],
   );
   const SESSION_KEY = folderId ? `manifolmia_session_${folderId}` : null;
-
-  const isDev = useMemo(() => {
-    if (
-      typeof import.meta !== "undefined" &&
-      import.meta.env &&
-      import.meta.env.DEV
-    )
-      return true;
-    if (
-      typeof process !== "undefined" &&
-      process.env &&
-      process.env.NODE_ENV !== "production"
-    )
-      return true;
-    return false;
-  }, []);
-
-  const previewStampRally = useMemo(() => {
-    if (!isDev) return false;
-    if (typeof window === "undefined") return false;
-    return (
-      new URLSearchParams(location.search).get("previewStampRally") === "1"
-    );
-  }, [isDev, location.search]);
 
   useEffect(() => {
     // StudyMode は集中フローなので「ページスクロール」を殺す。
@@ -480,15 +455,6 @@ const StudyMode = () => {
             }}
           />
         </div>
-
-        {previewStampRally && (
-          <div className="shrink-0 mb-6 rounded-2xl border border-slate-200 bg-white/95 p-4">
-            <div className="mb-2 text-[11px] font-semibold tracking-wide text-slate-500">
-              DEV: StampRally Preview
-            </div>
-            <StampRally currentStreak={effectiveStreak} />
-          </div>
-        )}
 
         <div
           className={[
