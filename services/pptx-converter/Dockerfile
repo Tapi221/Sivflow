@@ -3,9 +3,8 @@ FROM node:20-bookworm-slim
 ENV NODE_ENV=production
 ENV PORT=8080
 
-# LibreOffice の描画品質はコンテナ内のフォントに強く依存する。
-# 日本語/CJK フォントが無いとグリフ欠落（いわゆる豆腐: □）や置換でレイアウト崩れが起きるため、
-# CJK を広くカバーするフォントを同梱する。
+# LibreOffice の PPTX→PDF 変換はコンテナ内のフォントに依存して置換・描画する。
+# 日本語/CJK・数式フォントが不足すると、欠落（豆腐）や置換により数式記号が崩れる。
 RUN apt-get update && apt-get install -y --no-install-recommends \
   ca-certificates \
   libreoffice-core \
@@ -17,6 +16,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   fontconfig \
   fonts-dejavu-core \
   fonts-noto-cjk \
+  fonts-stix \
+  fonts-lmodern \
   && fc-cache -f \
   && rm -rf /var/lib/apt/lists/*
 
