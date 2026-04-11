@@ -402,9 +402,7 @@ const TreeViewLayout = ({
   );
 
   const resolvedSidebarDisplayMode =
-    settings?.folderSidebarDisplayMode === "navigation"
-      ? "navigation"
-      : "tree";
+    settings?.folderSidebarDisplayMode === "navigation" ? "navigation" : "tree";
 
   const tabContent = (
     <TreeViewTabContent

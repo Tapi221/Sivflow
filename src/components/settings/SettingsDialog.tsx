@@ -667,8 +667,7 @@ const SettingsDialog = ({
           </div>
         );
 
-      case "display":
-      {
+      case "display": {
         const currentFolderSidebarDisplayMode: FolderSidebarDisplayMode =
           settings?.folderSidebarDisplayMode === "navigation"
             ? "navigation"
