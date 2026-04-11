@@ -5,6 +5,16 @@ import { sanitizeProfileImage } from "@/utils/profileImageSanitizer";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useCallback, useEffect, useRef } from "react";
 
+type LegacyFolderSidebarDisplayMode =
+  | UserSettings["folderSidebarDisplayMode"]
+  | "auto";
+
+const normalizeFolderSidebarDisplayMode = (
+  value: LegacyFolderSidebarDisplayMode | null | undefined,
+): NonNullable<UserSettings["folderSidebarDisplayMode"]> => {
+  return value === "navigation" ? "navigation" : "tree";
+};
+
 export const DEFAULT_SETTINGS: Partial<UserSettings> = {
   displayName: "UserName",
   profileImage: null,
@@ -25,7 +35,7 @@ export const DEFAULT_SETTINGS: Partial<UserSettings> = {
   autoVoiceAnswer: false,
   cardEditorHeightPx: null,
   questionDisplayMode: "tap_to_reveal" as const,
-  folderSidebarDisplayMode: "auto" as const,
+  folderSidebarDisplayMode: "tree" as const,
   markdownTabSize: 2,
   editorBlockSettings: [
     {
@@ -95,6 +105,13 @@ export const useUserSettings = () => {
       return {
         ...merged,
         profileImage: sanitizedProfile.profileImage,
+        folderSidebarDisplayMode: normalizeFolderSidebarDisplayMode(
+          (
+            merged as {
+              folderSidebarDisplayMode?: LegacyFolderSidebarDisplayMode;
+            }
+          ).folderSidebarDisplayMode,
+        ),
       };
     },
     [currentUser],
@@ -173,9 +190,23 @@ export const useUserSettings = () => {
         }
       }
 
+      const normalizedSettings: Partial<UserSettings> = {
+        ...newSettings,
+        ...(Object.prototype.hasOwnProperty.call(
+          newSettings,
+          "folderSidebarDisplayMode",
+        )
+          ? {
+              folderSidebarDisplayMode: normalizeFolderSidebarDisplayMode(
+                newSettings.folderSidebarDisplayMode,
+              ),
+            }
+          : {}),
+      };
+
       const updated = {
         ...current,
-        ...newSettings,
+        ...normalizedSettings,
         profileImage: sanitizedProfile,
         userId: currentUser.uid,
         updatedAt: new Date(),

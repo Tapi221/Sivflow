@@ -41,7 +41,7 @@ import React, {
 import type { NodeApi } from "react-arborist";
 
 interface FolderTreeWithCardsProps {
-  sidebarDisplayMode?: "auto" | "tree" | "navigation";
+  sidebarDisplayMode?: "tree" | "navigation";
   folders: FolderTreeNode[];
   cards: Card[];
   cardSets?: CardSet[];
@@ -108,7 +108,7 @@ interface FolderTreeWithCardsProps {
 }
 
 export const FolderTreeWithCards = ({
-  sidebarDisplayMode = "auto",
+  sidebarDisplayMode = "tree",
   folders,
   cards,
   cardSets = [],
@@ -411,13 +411,11 @@ export const FolderTreeWithCards = ({
     rootFolderPanels.length > 0 && rootItems.length === 0;
 
   const effectiveSidebarDisplayMode = useMemo(() => {
-    if (sidebarDisplayMode === "tree") return "tree";
-
-    if (sidebarDisplayMode === "navigation") {
-      return canUseNavigationMode ? "navigation" : "tree";
+    if (sidebarDisplayMode === "navigation" && canUseNavigationMode) {
+      return "navigation";
     }
 
-    return canUseNavigationMode ? "navigation" : "tree";
+    return "tree";
   }, [canUseNavigationMode, sidebarDisplayMode]);
 
   const isSectionListVisible =

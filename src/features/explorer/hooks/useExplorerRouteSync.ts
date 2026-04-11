@@ -49,6 +49,9 @@ export const useExplorerRouteSync = ({
     }
 
     const currentRouteState = route.readRouteState();
+
+    previousRouteKeyRef.current = route.routeKey;
+
     const nextRouteState: ExplorerRouteState = {
       isHomeOnlyMode,
       selectedFolderId,
@@ -68,7 +71,6 @@ export const useExplorerRouteSync = ({
     }
 
     const nextSearchParams = mapExplorerSelectionToSearchParams({
-      baseSearchParams: route.getBaseSearchParams(),
       isHomeOnlyMode,
       selectedFolderId,
       selectedItem,

@@ -15,7 +15,7 @@ type RecentPanelProps = ComponentProps<typeof RecentPanel>;
 
 interface TreeViewTabContentProps {
   explorerTab: string;
-  sidebarDisplayMode?: "auto" | "tree" | "navigation";
+  sidebarDisplayMode?: "tree" | "navigation";
   recent: RecentPanelProps["recent"];
   folders: Folder[];
   cards: Card[];
@@ -59,7 +59,7 @@ interface TreeViewTabContentProps {
 
 export const TreeViewTabContent = ({
   explorerTab,
-  sidebarDisplayMode = "auto",
+  sidebarDisplayMode = "tree",
   recent,
   folders,
   cards,

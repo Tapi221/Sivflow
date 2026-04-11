@@ -72,14 +72,20 @@ export interface PdfJsGetDocumentParams {
   enableXfa?: boolean;
   useSystemFonts?: boolean;
   cMapUrl?: string;
+  cMapPacked?: boolean;
   standardFontDataUrl?: string;
+  disableFontFace?: boolean;
+  verbosity?: number;
 }
 
 export interface PdfViewerOptions {
   enableXfa?: boolean;
   useSystemFonts?: boolean;
   cMapUrl?: string;
+  cMapPacked?: boolean;
   standardFontDataUrl?: string;
+  disableFontFace?: boolean;
+  verbosity?: number;
   opaqueCanvas?: boolean;
 }
 

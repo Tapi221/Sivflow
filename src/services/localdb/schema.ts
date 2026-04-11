@@ -1924,4 +1924,58 @@ export const defineSchema = (db: LocalDB): void => {
         `[Migration v30] tagRecords copied=${toAdd.length}, legacy=${legacyRows.length}`,
       );
     });
+
+  db.version(31)
+    .stores({
+      folders:
+        "id, userId, parentFolderId, updatedAt, cloudSyncEnabled, isDeleted, [userId+updatedAt], [userId+isDeleted]",
+      cardSets:
+        "id, userId, folderId, updatedAt, isDeleted, [userId+updatedAt], [userId+folderId]",
+      cards:
+        "id, userId, folderId, cardSetId, updatedAt, nextReviewDate, isDeleted, difficulty, reviewCount, [userId+updatedAt], [userId+isDeleted], [userId+nextReviewDate], [cardSetId+isDeleted], *tagIds",
+      documents:
+        "id, userId, folderId, updatedAt, isDeleted, [userId+updatedAt], [userId+folderId]",
+      users: "id, userId, updatedAt",
+      userSettings: "id, userId, updatedAt, isDeleted, [userId+updatedAt]",
+      userStats: "id, userId, updatedAt, isDeleted, [userId+updatedAt]",
+      syncMetadata: "userId, deviceId",
+      levelHistories: "id, userId, cardId, changedAt",
+      deviceMeta: "deviceId, userId",
+      syncErrors: "id, occurredAt, phase, retryable",
+      syncHistory: "id, finishedAt",
+      syncSettings: "id",
+      syncQueue:
+        "id, targetId, status, priority, [status+priority], [targetId+status], idempotencyKey, &migrationKey",
+      conflicts: "id, entityId",
+      tags: "[rootFolderId+name], rootFolderId, userId, updatedAt",
+      tags_v2: "[userId+name], userId, updatedAt",
+      tags_v3:
+        "id, userId, parentId, [userId+parentId], [userId+nameLower], updatedAt",
+      tagRecords:
+        "id, userId, parentId, [userId+parentId], [userId+nameLower], updatedAt",
+      studyLogs: "id, userId, cardId, studiedAt",
+      metadata: "key",
+      images: "id, userId, status, [userId+status]",
+      cardRelations:
+        "id, userId, fromCardId, toCardId, updatedAt, [userId+updatedAt]",
+      projectMaps: "id, userId, folderId, updatedAt, [userId+updatedAt]",
+    })
+    .upgrade(async (tx) => {
+      const now = new Date();
+      const userSettingsTable = tx.table("userSettings");
+
+      await userSettingsTable.toCollection().modify((raw: unknown) => {
+        const settings = raw as {
+          folderSidebarDisplayMode?: "auto" | "tree" | "navigation";
+          updatedAt?: Date;
+        };
+
+        if (settings.folderSidebarDisplayMode !== "auto") return;
+
+        settings.folderSidebarDisplayMode = "tree";
+        settings.updatedAt = now;
+      });
+
+      console.log("[Migration v31] folderSidebarDisplayMode auto -> tree");
+    });
 };

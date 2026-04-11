@@ -104,11 +104,6 @@ const voiceOptions = [
 
 const folderSidebarDisplayModeOptions = [
   {
-    id: "auto",
-    label: "自動",
-    description: "現在の構成に合わせてツリー表示と遷移表示を自動で切り替えます",
-  },
-  {
     id: "tree",
     label: "ツリー表示",
     description: "フォルダ全体を常に1本のツリーとして表示します",
@@ -673,6 +668,12 @@ const SettingsDialog = ({
         );
 
       case "display":
+      {
+        const currentFolderSidebarDisplayMode: FolderSidebarDisplayMode =
+          settings?.folderSidebarDisplayMode === "navigation"
+            ? "navigation"
+            : "tree";
+
         return (
           <div className="space-y-8 animate-in fade-in duration-300">
             <div className="space-y-6">
@@ -683,8 +684,7 @@ const SettingsDialog = ({
                 <div className="grid gap-3">
                   {folderSidebarDisplayModeOptions.map((option) => {
                     const isSelected =
-                      (settings?.folderSidebarDisplayMode ?? "auto") ===
-                      option.id;
+                      currentFolderSidebarDisplayMode === option.id;
 
                     return (
                       <button
@@ -731,6 +731,7 @@ const SettingsDialog = ({
             </div>
           </div>
         );
+      }
 
       case "sync":
         return (

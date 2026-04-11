@@ -401,10 +401,15 @@ const TreeViewLayout = ({
     [updateDocument],
   );
 
+  const resolvedSidebarDisplayMode =
+    settings?.folderSidebarDisplayMode === "navigation"
+      ? "navigation"
+      : "tree";
+
   const tabContent = (
     <TreeViewTabContent
       explorerTab={explorerTab}
-      sidebarDisplayMode={settings?.folderSidebarDisplayMode ?? "auto"}
+      sidebarDisplayMode={resolvedSidebarDisplayMode}
       recent={recent}
       folders={folders}
       cards={cards}

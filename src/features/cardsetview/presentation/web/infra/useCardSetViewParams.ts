@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useMemo } from "react";
+import { useLocation } from "react-router-dom";
 
 export type ParsedCardSetViewParams = {
   folderId: string | null;
@@ -7,17 +8,8 @@ export type ParsedCardSetViewParams = {
   targetCardId: string | null;
 };
 
-const parseCardSetViewParams = (): ParsedCardSetViewParams => {
-  if (typeof window === "undefined") {
-    return {
-      folderId: null,
-      cardSetId: null,
-      initialIndex: 0,
-      targetCardId: null,
-    };
-  }
-
-  const urlParams = new URLSearchParams(window.location.search);
+const parseCardSetViewParams = (search: string): ParsedCardSetViewParams => {
+  const urlParams = new URLSearchParams(search);
   const folderId = urlParams.get("folderId");
   const cardSetId = urlParams.get("cardSetId");
   const initialIndexRaw = Number.parseInt(urlParams.get("index") || "0", 10);
@@ -35,9 +27,7 @@ const parseCardSetViewParams = (): ParsedCardSetViewParams => {
 };
 
 export const useCardSetViewParams = () => {
-  const [params] = useState<ParsedCardSetViewParams>(() =>
-    parseCardSetViewParams(),
-  );
+  const { search } = useLocation();
 
-  return params;
+  return useMemo(() => parseCardSetViewParams(search), [search]);
 };

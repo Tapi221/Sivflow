@@ -66,7 +66,10 @@ export const usePdfDocument = ({
   const enableXfa = viewerOptions?.enableXfa ?? false;
   const useSystemFonts = viewerOptions?.useSystemFonts ?? false;
   const cMapUrl = viewerOptions?.cMapUrl;
+  const cMapPacked = viewerOptions?.cMapPacked ?? true;
   const standardFontDataUrl = viewerOptions?.standardFontDataUrl;
+  const disableFontFace = viewerOptions?.disableFontFace ?? false;
+  const verbosity = viewerOptions?.verbosity;
 
   useEffect(() => {
     onNumPagesRef.current = onNumPages;
@@ -154,7 +157,10 @@ export const usePdfDocument = ({
           enableXfa,
           useSystemFonts,
           cMapUrl,
+          cMapPacked,
           standardFontDataUrl,
+          disableFontFace,
+          verbosity,
         };
 
         if (hasData && sourceData) {
@@ -278,12 +284,15 @@ export const usePdfDocument = ({
     };
   }, [
     cMapUrl,
+    cMapPacked,
+    disableFontFace,
     enableXfa,
     sourceData,
     sourceDataLength,
     sourceUrl,
     standardFontDataUrl,
     useSystemFonts,
+    verbosity,
   ]);
 
   return {
