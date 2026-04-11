@@ -15,7 +15,7 @@
     "electron:watch": "tsc -p tsconfig.electron.json --watch --preserveWatchOutput",
     "generate:icons:stratis": "node scripts/generate-stratis-icons.mjs",
     "build": "npm run build:web",
-    "build:web": "vite build",
+    "build:web": "node scripts/copy-pdfjs-assets.mjs && vite build",
     "build:electron": "npm run build:web && npm run electron:build",
     "electron:build": "tsc -p tsconfig.electron.json && npm run electron:prepare-dist",
     "electron:start": "node scripts/electron/run-electron.cjs dist-electron/main.js",

@@ -3,6 +3,22 @@
 Cloud Run 向けの PPTX 実変換サービスです。  
 `POST /convert` で受け取った PPTX を `LibreOffice -> PDF -> PNG` へ変換し、`manifest.json` を GCS に保存します。
 
+## Fonts（日本語/CJK）
+
+LibreOffice の PPTX→PDF 変換は、コンテナにインストールされたフォントに依存してフォント置換を行います。
+日本語/CJK フォントが無い場合、出力 PDF/PNG で以下が発生し得ます。
+
+- 日本語が「□」などの欠落グリフになる（豆腐）
+- 代替フォントにより文字幅が変わり、改行・折返し・レイアウトが崩れる
+
+Dockerfile では CJK を広くカバーする `fonts-noto-cjk` を同梱しています。
+動作確認は以下で行えます。
+
+```bash
+fc-list | grep -i "Noto Sans CJK" || true
+fc-match "Noto Sans CJK JP" || true
+```
+
 ## Request
 
 `POST /convert` (or `POST /`)
