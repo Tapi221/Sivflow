@@ -16,7 +16,8 @@ const normalizeImageRefs = (raw: unknown) => {
     .map((item) => {
       if (!isRecord(item)) return null;
       const assetId = item.assetId ?? item.asset_id ?? item.id ?? null;
-      if (typeof assetId !== "string" || assetId.trim().length === 0) return null;
+      if (typeof assetId !== "string" || assetId.trim().length === 0)
+        return null;
       return {
         assetId: assetId.trim(),
         scale: typeof item.scale === "number" ? item.scale : null,
@@ -26,8 +27,13 @@ const normalizeImageRefs = (raw: unknown) => {
         layout: isRecord(item.layout)
           ? {
               baseWidthPx:
-                typeof item.layout.baseWidthPx === "number" ? item.layout.baseWidthPx : null,
-              cropX: typeof item.layout.cropX === "number" ? item.layout.cropX : null,
+                typeof item.layout.baseWidthPx === "number"
+                  ? item.layout.baseWidthPx
+                  : null,
+              cropX:
+                typeof item.layout.cropX === "number"
+                  ? item.layout.cropX
+                  : null,
             }
           : null,
       };
@@ -35,7 +41,10 @@ const normalizeImageRefs = (raw: unknown) => {
     .filter((item): item is NonNullable<typeof item> => item !== null);
 };
 
-const migrateUserCards = async (serviceAccount: Record<string, unknown>, userId: string) => {
+const migrateUserCards = async (
+  serviceAccount: Record<string, unknown>,
+  userId: string,
+) => {
   initializeApp({
     credential: cert(serviceAccount as never),
   });
@@ -62,7 +71,9 @@ const migrateUserCards = async (serviceAccount: Record<string, unknown>, userId:
       {
         front: {
           ...(isRecord(data.front) ? data.front : {}),
-          blocks: normalizeBlocks(isRecord(data.front) ? data.front.blocks : []),
+          blocks: normalizeBlocks(
+            isRecord(data.front) ? data.front.blocks : [],
+          ),
         },
         back: {
           ...(isRecord(data.back) ? data.back : {}),

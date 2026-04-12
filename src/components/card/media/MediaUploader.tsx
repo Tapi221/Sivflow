@@ -3,7 +3,10 @@ import { CANONICAL_CARD_WIDTH } from "@/components/card/common/constants";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { useAuthSession } from "@/contexts/AuthContext";
-import { getOrCreateImageBlobUrl, removeImageBlobUrl } from "@/services/imageBlobUrlSessionCache";
+import {
+  getOrCreateImageBlobUrl,
+  removeImageBlobUrl,
+} from "@/services/imageBlobUrlSessionCache";
 import { deleteImageBlob, putImageBlob } from "@/services/imageFileStore";
 import { imageDB } from "@/services/ImageDatabaseWriter";
 import { getLocalDb } from "@/services/localDB";
@@ -14,9 +17,11 @@ import { Check, RotateCcw, Upload, X } from "@/ui/icons";
 import { loadImageNaturalSize } from "@/utils/uploaded-image/naturalSize";
 import React, { useCallback, useEffect, useId, useRef, useState } from "react";
 
-const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
+const clamp = (v: number, min: number, max: number) =>
+  Math.min(max, Math.max(min, v));
 const IMAGE_BLOCK_INSET_PX = 4;
-const FIXED_IMAGE_REFERENCE_FRAME_WIDTH_PX = CANONICAL_CARD_WIDTH - IMAGE_BLOCK_INSET_PX * 2;
+const FIXED_IMAGE_REFERENCE_FRAME_WIDTH_PX =
+  CANONICAL_CARD_WIDTH - IMAGE_BLOCK_INSET_PX * 2;
 
 type ResolvedEditableImage = CardImageRef & {
   url: string | null;
@@ -32,7 +37,13 @@ type ImageItemProps = {
   onUpdate: (index: number, patch: Partial<CardImageRef>) => void;
 };
 
-const ImageItem = ({ item, index, onRemove, onRetry, onUpdate }: ImageItemProps) => {
+const ImageItem = ({
+  item,
+  index,
+  onRemove,
+  onRetry,
+  onUpdate,
+}: ImageItemProps) => {
   const [loadFailed, setLoadFailed] = useState(false);
   const persistedScale = clamp(Number(item.scale ?? 1), 0.2, 1);
   const persistedX = clamp(Number(item.x ?? 0), -1, 1);
@@ -119,7 +130,7 @@ const ImageItem = ({ item, index, onRemove, onRetry, onUpdate }: ImageItemProps)
                   const nextScale = nextScaleRaw >= 0.98 ? 1 : nextScaleRaw;
                   onUpdate(index, {
                     scale: nextScale,
-                    x: nextScale >= 0.999 ? 0 : item.x ?? 0,
+                    x: nextScale >= 0.999 ? 0 : (item.x ?? 0),
                   });
                 }}
                 className="w-full"
@@ -169,8 +180,12 @@ const MediaUploader = ({
 }: MediaUploaderProps) => {
   const { currentUser } = useAuthSession();
   const [dragOver, setDragOver] = useState(false);
-  const [statusByAssetId, setStatusByAssetId] = useState<Record<string, ResolvedEditableImage["status"]>>({});
-  const [resolvedImages, setResolvedImages] = useState<ResolvedEditableImage[]>([]);
+  const [statusByAssetId, setStatusByAssetId] = useState<
+    Record<string, ResolvedEditableImage["status"]>
+  >({});
+  const [resolvedImages, setResolvedImages] = useState<ResolvedEditableImage[]>(
+    [],
+  );
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const autoOpenedRef = useRef(false);
   const imageUrls = type === "image" ? (urls as CardImageRef[]) : [];
@@ -187,7 +202,9 @@ const MediaUploader = ({
           const resolved = await resolveCardImageUrl(image, currentUser?.uid);
           return {
             ...resolved,
-            status: statusByAssetId[image.assetId] ?? (resolved.url ? "ready" : "pending"),
+            status:
+              statusByAssetId[image.assetId] ??
+              (resolved.url ? "ready" : "pending"),
           } satisfies ResolvedEditableImage;
         }),
       );
@@ -212,87 +229,119 @@ const MediaUploader = ({
     return () => window.cancelAnimationFrame(rafId);
   }, [autoOpenPicker]);
 
-  const buildAssetRemoteKey = useCallback((uid: string, assetId: string) => `users/${uid}/assets/${assetId}`, []);
+  const buildAssetRemoteKey = useCallback(
+    (uid: string, assetId: string) => `users/${uid}/assets/${assetId}`,
+    [],
+  );
 
-  const refreshAssetStatus = useCallback(async (assetId: string) => {
-    if (!currentUser?.uid) return;
-    const db = await getLocalDb(currentUser.uid);
-    const asset = (await db.images.get(assetId)) as AssetRecord | undefined;
-    setStatusByAssetId((prev) => ({
-      ...prev,
-      [assetId]: asset?.remoteStatus === "failed" ? "failed" : asset?.remoteStatus === "ready" ? "ready" : "uploading",
-    }));
-  }, [currentUser?.uid]);
+  const refreshAssetStatus = useCallback(
+    async (assetId: string) => {
+      if (!currentUser?.uid) return;
+      const db = await getLocalDb(currentUser.uid);
+      const asset = (await db.images.get(assetId)) as AssetRecord | undefined;
+      setStatusByAssetId((prev) => ({
+        ...prev,
+        [assetId]:
+          asset?.remoteStatus === "failed"
+            ? "failed"
+            : asset?.remoteStatus === "ready"
+              ? "ready"
+              : "uploading",
+      }));
+    },
+    [currentUser?.uid],
+  );
 
-  const enqueueAsset = useCallback(async (file: File) => {
-    if (!currentUser?.uid) throw new Error("ログインが必要です");
-    const assetId = crypto.randomUUID();
-    const blobRecord = await putImageBlob(file, {
-      userId: currentUser.uid,
-      assetId,
-    });
-    const previewUrl = await getOrCreateImageBlobUrl(blobRecord.localBlobId, { userId: currentUser.uid });
-    const naturalSize = await loadImageNaturalSize(String(previewUrl ?? ""));
-    const remoteKey = buildAssetRemoteKey(currentUser.uid, assetId);
+  const enqueueAsset = useCallback(
+    async (file: File) => {
+      if (!currentUser?.uid) throw new Error("ログインが必要です");
+      const assetId = crypto.randomUUID();
+      const blobRecord = await putImageBlob(file, {
+        userId: currentUser.uid,
+        assetId,
+      });
+      const previewUrl = await getOrCreateImageBlobUrl(blobRecord.localBlobId, {
+        userId: currentUser.uid,
+      });
+      const naturalSize = await loadImageNaturalSize(String(previewUrl ?? ""));
+      const remoteKey = buildAssetRemoteKey(currentUser.uid, assetId);
 
-    const assetRecord: AssetRecord = {
-      id: assetId,
-      userId: currentUser.uid,
-      mime: blobRecord.mime,
-      size: blobRecord.size,
-      localBlobId: blobRecord.localBlobId,
-      localStatus: "present",
-      remoteKey,
-      remoteStatus: "uploading",
-      remoteUrlCache: null,
-      width: naturalSize?.naturalW ?? null,
-      height: naturalSize?.naturalH ?? null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      retryCount: 0,
-    };
+      const assetRecord: AssetRecord = {
+        id: assetId,
+        userId: currentUser.uid,
+        mime: blobRecord.mime,
+        size: blobRecord.size,
+        localBlobId: blobRecord.localBlobId,
+        localStatus: "present",
+        remoteKey,
+        remoteStatus: "uploading",
+        remoteUrlCache: null,
+        width: naturalSize?.naturalW ?? null,
+        height: naturalSize?.naturalH ?? null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        retryCount: 0,
+      };
 
-    const db = await getLocalDb(currentUser.uid);
-    await db.images.put(assetRecord);
-    await imageDB.saveAssetToFirestore(assetRecord);
-    await persistentQueue.enqueueAssetUpload({
-      assetId,
-      userId: currentUser.uid,
-      remoteKey,
-      mime: blobRecord.mime,
-      size: blobRecord.size,
-    }, file);
-    void persistentQueue.processAssetQueue();
+      const db = await getLocalDb(currentUser.uid);
+      await db.images.put(assetRecord);
+      await imageDB.saveAssetToFirestore(assetRecord);
+      await persistentQueue.enqueueAssetUpload(
+        {
+          assetId,
+          userId: currentUser.uid,
+          remoteKey,
+          mime: blobRecord.mime,
+          size: blobRecord.size,
+        },
+        file,
+      );
+      void persistentQueue.processAssetQueue();
 
-    setStatusByAssetId((prev) => ({ ...prev, [assetId]: "uploading" }));
+      setStatusByAssetId((prev) => ({ ...prev, [assetId]: "uploading" }));
 
-    return {
-      assetId,
-      naturalW: naturalSize?.naturalW ?? null,
-      naturalH: naturalSize?.naturalH ?? null,
-      scale: 1,
-      x: 0,
-      layout: null,
-    } satisfies CardImageRef;
-  }, [buildAssetRemoteKey, currentUser?.uid]);
+      return {
+        assetId,
+        naturalW: naturalSize?.naturalW ?? null,
+        naturalH: naturalSize?.naturalH ?? null,
+        scale: 1,
+        x: 0,
+        layout: null,
+      } satisfies CardImageRef;
+    },
+    [buildAssetRemoteKey, currentUser?.uid],
+  );
 
-  const handleUpload = useCallback(async (files: FileList | File[]) => {
-    if (type !== "image") return;
-    const incoming = Array.from(files ?? []);
-    if (incoming.length === 0) return;
+  const handleUpload = useCallback(
+    async (files: FileList | File[]) => {
+      if (type !== "image") return;
+      const incoming = Array.from(files ?? []);
+      if (incoming.length === 0) return;
 
-    const limit = Math.max(0, maxFiles - imageUrls.length);
-    const filesToUpload = incoming.slice(0, limit);
-    const filesExcess = incoming.slice(limit);
-    if (filesExcess.length > 0) onFilesExcess?.(filesExcess);
-    if (filesToUpload.length === 0) return;
+      const limit = Math.max(0, maxFiles - imageUrls.length);
+      const filesToUpload = incoming.slice(0, limit);
+      const filesExcess = incoming.slice(limit);
+      if (filesExcess.length > 0) onFilesExcess?.(filesExcess);
+      if (filesToUpload.length === 0) return;
 
-    const added = await Promise.all(filesToUpload.map((file) => enqueueAsset(file)));
-    onChange([...(imageUrls as CardImageRef[]), ...added]);
-    for (const image of added) {
-      void refreshAssetStatus(image.assetId);
-    }
-  }, [enqueueAsset, imageUrls, maxFiles, onChange, onFilesExcess, refreshAssetStatus, type]);
+      const added = await Promise.all(
+        filesToUpload.map((file) => enqueueAsset(file)),
+      );
+      onChange([...(imageUrls as CardImageRef[]), ...added]);
+      for (const image of added) {
+        void refreshAssetStatus(image.assetId);
+      }
+    },
+    [
+      enqueueAsset,
+      imageUrls,
+      maxFiles,
+      onChange,
+      onFilesExcess,
+      refreshAssetStatus,
+      type,
+    ],
+  );
 
   useEffect(() => {
     if (!initialFile || type !== "image") return;
@@ -300,13 +349,18 @@ const MediaUploader = ({
     onConsumeInitialFile?.();
   }, [handleUpload, initialFile, onConsumeInitialFile, type]);
 
-  const handleFileInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileInputChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
     if (type === "image") {
       void handleUpload(files);
     } else {
-      const next = [...audioUrls, ...Array.from(files).map((file) => URL.createObjectURL(file))];
+      const next = [
+        ...audioUrls,
+        ...Array.from(files).map((file) => URL.createObjectURL(file)),
+      ];
       (onChange as (urls: string[]) => void)(next);
     }
     event.target.value = "";
@@ -314,7 +368,9 @@ const MediaUploader = ({
 
   const handleRemove = async (index: number) => {
     if (type !== "image") {
-      (onChange as (urls: string[]) => void)(audioUrls.filter((_, i) => i !== index));
+      (onChange as (urls: string[]) => void)(
+        audioUrls.filter((_, i) => i !== index),
+      );
       return;
     }
 
@@ -322,7 +378,9 @@ const MediaUploader = ({
     if (!target) return;
     if (currentUser?.uid) {
       const db = await getLocalDb(currentUser.uid);
-      const asset = (await db.images.get(target.assetId)) as AssetRecord | undefined;
+      const asset = (await db.images.get(target.assetId)) as
+        | AssetRecord
+        | undefined;
       if (asset?.localBlobId) {
         removeImageBlobUrl(asset.localBlobId, { userId: currentUser.uid });
         void deleteImageBlob(asset.localBlobId, { userId: currentUser.uid });
@@ -342,11 +400,19 @@ const MediaUploader = ({
 
   const handleUpdateImage = (index: number, patch: Partial<CardImageRef>) => {
     if (type !== "image") return;
-    onChange(imageUrls.map((image, i) => (i === index ? { ...image, ...patch } : image)));
+    onChange(
+      imageUrls.map((image, i) =>
+        i === index ? { ...image, ...patch } : image,
+      ),
+    );
   };
 
-  const accept = type === "image" ? "image/png,image/jpeg,image/jpg,image/webp,image/heic,image/heif" : "audio/*";
-  const ariaLabel = type === "image" ? "画像をアップロード" : "音声をアップロード";
+  const accept =
+    type === "image"
+      ? "image/png,image/jpeg,image/jpg,image/webp,image/heic,image/heif"
+      : "audio/*";
+  const ariaLabel =
+    type === "image" ? "画像をアップロード" : "音声をアップロード";
 
   const renderUploadDropzone = (withInput: boolean) => (
     <div
@@ -378,18 +444,15 @@ const MediaUploader = ({
       <div className="text-slate-400 transition-colors select-none">
         <Upload className="w-6 h-6 mx-auto mb-2 opacity-60" />
         <p className="text-[10px] font-bold tracking-widest uppercase">
-          ドラッグ＆ドロップ、クリック、または Ctrl+V で{type === "image" ? "画像を" : "音声を"}アップロード
+          ドラッグ＆ドロップ、クリック、または Ctrl+V で
+          {type === "image" ? "画像を" : "音声を"}アップロード
         </p>
       </div>
     </div>
   );
 
   if (type === "audio") {
-    return (
-      <div className="space-y-3">
-        {renderUploadDropzone(true)}
-      </div>
-    );
+    return <div className="space-y-3">{renderUploadDropzone(true)}</div>;
   }
 
   return (

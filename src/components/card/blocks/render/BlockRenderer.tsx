@@ -20,16 +20,32 @@ export const BlockRenderer = ({
   const { settings } = useUserSettings();
   const questionDisplayMode = settings?.questionDisplayMode ?? "tap_to_reveal";
 
-  const toMediaUrl = useCallback((item: { url?: string | null; remoteUrl?: string | null; localUrl?: string | null } | string | null | undefined) => {
-    if (typeof item === "string") return item;
-    if (!item) return null;
-    return item.url ?? item.remoteUrl ?? item.localUrl ?? null;
-  }, []);
+  const toMediaUrl = useCallback(
+    (
+      item:
+        | {
+            url?: string | null;
+            remoteUrl?: string | null;
+            localUrl?: string | null;
+          }
+        | string
+        | null
+        | undefined,
+    ) => {
+      if (typeof item === "string") return item;
+      if (!item) return null;
+      return item.url ?? item.remoteUrl ?? item.localUrl ?? null;
+    },
+    [],
+  );
 
   const isRenderableBlock = useCallback((block: CardBlock) => {
     if (block.type === "text") return (block.content ?? "").trim() !== "";
     if (block.type === "question") {
-      return (block.questionTitle ?? "").trim() !== "" || (block.questionAnswer ?? "").trim() !== "";
+      return (
+        (block.questionTitle ?? "").trim() !== "" ||
+        (block.questionAnswer ?? "").trim() !== ""
+      );
     }
     if (block.type === "code") return (block.code?.code ?? "").trim() !== "";
     if (block.type === "image") return (block.images?.length ?? 0) > 0;

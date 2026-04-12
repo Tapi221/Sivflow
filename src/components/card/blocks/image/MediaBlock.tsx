@@ -85,7 +85,10 @@ const MediaBlockInner = ({
   );
 };
 
-const areMediaBlockPropsEqual = (prev: MediaBlockProps, next: MediaBlockProps) =>
+const areMediaBlockPropsEqual = (
+  prev: MediaBlockProps,
+  next: MediaBlockProps,
+) =>
   prev.data === next.data &&
   prev.dragHandleClassName === next.dragHandleClassName &&
   prev.accentColor === next.accentColor &&

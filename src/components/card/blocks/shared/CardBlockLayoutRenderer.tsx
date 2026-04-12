@@ -30,7 +30,11 @@ type ViewerProps = {
   toMediaUrl: (
     item:
       | string
-      | { url?: string | null; remoteUrl?: string | null; localUrl?: string | null }
+      | {
+          url?: string | null;
+          remoteUrl?: string | null;
+          localUrl?: string | null;
+        }
       | null
       | undefined,
   ) => string | null;
@@ -59,13 +63,29 @@ type EditorProps = {
 };
 
 type CardBlockLayoutRendererProps =
-  | { mode: "edit"; block: CardBlock; meta: BlockListRowMeta; editorProps: EditorProps }
-  | { mode: "view"; block: CardBlock; meta: BlockListRowMeta; viewerProps: ViewerProps };
+  | {
+      mode: "edit";
+      block: CardBlock;
+      meta: BlockListRowMeta;
+      editorProps: EditorProps;
+    }
+  | {
+      mode: "view";
+      block: CardBlock;
+      meta: BlockListRowMeta;
+      viewerProps: ViewerProps;
+    };
 
 const NOOP = () => {};
 
 const renderGridOffsetSpacer = (gridOffsetPx: number) =>
-  gridOffsetPx > 0 ? <div aria-hidden className="pointer-events-none" style={{ height: `${gridOffsetPx}px` }} /> : null;
+  gridOffsetPx > 0 ? (
+    <div
+      aria-hidden
+      className="pointer-events-none"
+      style={{ height: `${gridOffsetPx}px` }}
+    />
+  ) : null;
 
 const VIEWER_WRAPPER_PROPS = {
   mode: "viewer" as const,
@@ -78,7 +98,9 @@ const VIEWER_WRAPPER_PROPS = {
   onDuplicate: NOOP,
 };
 
-export const CardBlockLayoutRenderer = (props: CardBlockLayoutRendererProps) => {
+export const CardBlockLayoutRenderer = (
+  props: CardBlockLayoutRendererProps,
+) => {
   const { block, meta } = props;
 
   if (props.mode === "edit") {
@@ -133,7 +155,9 @@ export const CardBlockLayoutRenderer = (props: CardBlockLayoutRendererProps) => 
             {renderGridOffsetSpacer(meta.gridOffsetPx)}
             <CodeBlockItem
               data={block.code || { language: "javascript", code: "" }}
-              onChange={(data) => onUpdateBlock(block.id, { code: data as CodeBlockData })}
+              onChange={(data) =>
+                onUpdateBlock(block.id, { code: data as CodeBlockData })
+              }
               onDelete={onDelete}
               onDuplicate={onDuplicate}
               onMoveUp={onMoveUp}
@@ -154,7 +178,9 @@ export const CardBlockLayoutRenderer = (props: CardBlockLayoutRendererProps) => 
         return (
           <MediaBlock
             data={block.images ?? []}
-            onChange={(data) => onUpdateBlock(block.id, { images: data as CardImageRef[] })}
+            onChange={(data) =>
+              onUpdateBlock(block.id, { images: data as CardImageRef[] })
+            }
             onDelete={onDelete}
             onDuplicate={onDuplicate}
             dragHandleProps={undefined}
@@ -243,7 +269,11 @@ export const CardBlockLayoutRenderer = (props: CardBlockLayoutRendererProps) => 
   switch (block.type) {
     case "question":
       return (
-        <BlockWrapper {...VIEWER_WRAPPER_PROPS} className="bg-transparent px-0 py-0" contentClassName="px-0">
+        <BlockWrapper
+          {...VIEWER_WRAPPER_PROPS}
+          className="bg-transparent px-0 py-0"
+          contentClassName="px-0"
+        >
           <QuestionBlockContent
             mode="view"
             questionTitle={block.questionTitle}
@@ -257,22 +287,36 @@ export const CardBlockLayoutRenderer = (props: CardBlockLayoutRendererProps) => 
       return (
         <BlockWrapper
           {...VIEWER_WRAPPER_PROPS}
-          className={cn("bg-transparent px-0 py-0", (block.content ?? "").trim().length > 0 && "border-0")}
+          className={cn(
+            "bg-transparent px-0 py-0",
+            (block.content ?? "").trim().length > 0 && "border-0",
+          )}
           contentClassName="px-0"
         >
-          <TextBlockContent mode="view" content={String(block.content ?? "")} zoom={viewerProps.zoom} />
+          <TextBlockContent
+            mode="view"
+            content={String(block.content ?? "")}
+            zoom={viewerProps.zoom}
+          />
         </BlockWrapper>
       );
     case "code":
       return (
         <BlockWrapper
           {...VIEWER_WRAPPER_PROPS}
-          className={cn("bg-transparent px-0 py-0", (block.code?.code ?? "").trim().length > 0 && "border-0")}
+          className={cn(
+            "bg-transparent px-0 py-0",
+            (block.code?.code ?? "").trim().length > 0 && "border-0",
+          )}
           contentClassName="relative px-0"
         >
           <div className="w-full max-w-full overflow-visible">
             {renderGridOffsetSpacer(meta.gridOffsetPx)}
-            <CodeRenderer code={block.code?.code ?? ""} language={block.code?.language} zoom={viewerProps.zoom} />
+            <CodeRenderer
+              code={block.code?.code ?? ""}
+              language={block.code?.language}
+              zoom={viewerProps.zoom}
+            />
           </div>
         </BlockWrapper>
       );
@@ -280,7 +324,10 @@ export const CardBlockLayoutRenderer = (props: CardBlockLayoutRendererProps) => 
       return (
         <BlockWrapper
           {...VIEWER_WRAPPER_PROPS}
-          className={cn("py-0 px-0", (block.images?.length ?? 0) > 0 && "border-transparent")}
+          className={cn(
+            "py-0 px-0",
+            (block.images?.length ?? 0) > 0 && "border-transparent",
+          )}
           contentClassName="px-0"
         >
           <ImageBlockShell>
@@ -299,16 +346,28 @@ export const CardBlockLayoutRenderer = (props: CardBlockLayoutRendererProps) => 
       return (
         <div className="flex justify-center">
           <AudioPlayer
-            urls={(block.audios ?? []).map(viewerProps.toMediaUrl).filter((url): url is string => Boolean(url))}
+            urls={(block.audios ?? [])
+              .map(viewerProps.toMediaUrl)
+              .filter((url): url is string => Boolean(url))}
           />
         </div>
       );
     case "math":
       return (
-        <BlockWrapper {...VIEWER_WRAPPER_PROPS} className={cn((block.math?.latex ?? "").trim().length > 0 && "border-transparent")}>
+        <BlockWrapper
+          {...VIEWER_WRAPPER_PROPS}
+          className={cn(
+            (block.math?.latex ?? "").trim().length > 0 && "border-transparent",
+          )}
+        >
           <div className="w-full max-w-full overflow-visible space-y-1.5 px-2 py-0.5">
             {renderGridOffsetSpacer(meta.gridOffsetPx)}
-            <MathBlockPreviewPane latex={block.math?.latex || ""} displayMode={block.math?.displayMode || "block"} className="rounded-lg" zoom={viewerProps.zoom} />
+            <MathBlockPreviewPane
+              latex={block.math?.latex || ""}
+              displayMode={block.math?.displayMode || "block"}
+              className="rounded-lg"
+              zoom={viewerProps.zoom}
+            />
           </div>
         </BlockWrapper>
       );
@@ -316,10 +375,16 @@ export const CardBlockLayoutRenderer = (props: CardBlockLayoutRendererProps) => 
       return (
         <BlockWrapper
           {...VIEWER_WRAPPER_PROPS}
-          className={cn("bg-transparent px-0 py-0", (block.markdown ?? "").trim().length > 0 && "border-0")}
+          className={cn(
+            "bg-transparent px-0 py-0",
+            (block.markdown ?? "").trim().length > 0 && "border-0",
+          )}
           contentClassName="px-0"
         >
-          <MarkdownBlockDisplay markdown={block.markdown ?? ""} zoom={viewerProps.zoom} />
+          <MarkdownBlockDisplay
+            markdown={block.markdown ?? ""}
+            zoom={viewerProps.zoom}
+          />
         </BlockWrapper>
       );
     default:

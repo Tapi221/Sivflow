@@ -11,21 +11,25 @@ const migrateIndexedDbCardImages = async (userId: string) => {
   const cards = await db.cards.toArray();
 
   for (const card of cards) {
-    const nextFrontBlocks = (card.front?.blocks ?? []).map((block: Record<string, unknown>) => {
-      if (block.type !== "image") return block;
-      return {
-        ...block,
-        images: normalizeCardImageRefs(block.images ?? []),
-      };
-    });
+    const nextFrontBlocks = (card.front?.blocks ?? []).map(
+      (block: Record<string, unknown>) => {
+        if (block.type !== "image") return block;
+        return {
+          ...block,
+          images: normalizeCardImageRefs(block.images ?? []),
+        };
+      },
+    );
 
-    const nextBackBlocks = (card.back?.blocks ?? []).map((block: Record<string, unknown>) => {
-      if (block.type !== "image") return block;
-      return {
-        ...block,
-        images: normalizeCardImageRefs(block.images ?? []),
-      };
-    });
+    const nextBackBlocks = (card.back?.blocks ?? []).map(
+      (block: Record<string, unknown>) => {
+        if (block.type !== "image") return block;
+        return {
+          ...block,
+          images: normalizeCardImageRefs(block.images ?? []),
+        };
+      },
+    );
 
     await db.cards.update(card.id, {
       front: {

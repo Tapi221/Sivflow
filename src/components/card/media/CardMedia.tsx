@@ -5,7 +5,14 @@ import { Button } from "@/components/ui/button";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { webClipboardAdapter } from "@/platform/clipboard/webClipboardAdapter";
 import { resolveCardImageUrl } from "@/services/cardImageResolver";
-import { Copy, Download, Image as ImageIcon, Pause, Play, Volume2 } from "@/ui/icons";
+import {
+  Copy,
+  Download,
+  Image as ImageIcon,
+  Pause,
+  Play,
+  Volume2,
+} from "@/ui/icons";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import type { CardImageRef } from "@/types/domain/assets";
 
@@ -56,7 +63,11 @@ export const AudioPlayer = ({ urls }: AudioPlayerProps) => {
             }}
             className="gap-1"
           >
-            {playingIndex === index ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+            {playingIndex === index ? (
+              <Pause className="w-3 h-3" />
+            ) : (
+              <Play className="w-3 h-3" />
+            )}
             <Volume2 className="w-3 h-3" />
           </Button>
         </div>
@@ -83,10 +94,16 @@ type DisplayImage = {
   naturalH?: number | null;
 };
 
-export const ImageGallery = ({ items, displayMode = "fixed", zoom = 1 }: ImageGalleryProps) => {
+export const ImageGallery = ({
+  items,
+  displayMode = "fixed",
+  zoom = 1,
+}: ImageGalleryProps) => {
   const { currentUser } = useAuthSession();
   const [displayImages, setDisplayImages] = useState<DisplayImage[]>([]);
-  const [failedImages, setFailedImages] = useState<Set<number>>(() => new Set());
+  const [failedImages, setFailedImages] = useState<Set<number>>(
+    () => new Set(),
+  );
 
   const normalizedItems = useMemo(() => {
     return (items ?? []).map((entry) => {
@@ -152,7 +169,11 @@ export const ImageGallery = ({ items, displayMode = "fixed", zoom = 1 }: ImageGa
       const response = await fetch(imageUrl);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const blob = await response.blob();
-      if (navigator.clipboard?.write && typeof ClipboardItem !== "undefined" && blob.type) {
+      if (
+        navigator.clipboard?.write &&
+        typeof ClipboardItem !== "undefined" &&
+        blob.type
+      ) {
         await navigator.clipboard.write([
           new ClipboardItem({
             [blob.type]: blob,
@@ -171,7 +192,12 @@ export const ImageGallery = ({ items, displayMode = "fixed", zoom = 1 }: ImageGa
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const blob = await response.blob();
     const objectUrl = URL.createObjectURL(blob);
-    const ext = blob.type === "image/png" ? "png" : blob.type === "image/webp" ? "webp" : "jpg";
+    const ext =
+      blob.type === "image/png"
+        ? "png"
+        : blob.type === "image/webp"
+          ? "webp"
+          : "jpg";
     const a = document.createElement("a");
     a.href = objectUrl;
     a.download = `uploaded-image-${index + 1}.${ext}`;
@@ -198,7 +224,9 @@ export const ImageGallery = ({ items, displayMode = "fixed", zoom = 1 }: ImageGa
                 x={item.x ?? 0}
                 layoutBaseWidthPx={item.layout?.baseWidthPx ?? null}
                 cropX={item.layout?.cropX ?? null}
-                fixedReferenceFrameWidthPx={FIXED_IMAGE_REFERENCE_FRAME_WIDTH_PX}
+                fixedReferenceFrameWidthPx={
+                  FIXED_IMAGE_REFERENCE_FRAME_WIDTH_PX
+                }
                 naturalW={item.naturalW ?? null}
                 naturalH={item.naturalH ?? null}
                 className="bg-transparent"
