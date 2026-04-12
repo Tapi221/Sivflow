@@ -385,21 +385,21 @@ const areCardMetaCardsEqual = (
   if (cardMetaLastSubjectiveScore(prev) !== cardMetaLastSubjectiveScore(next))
     return false;
 
-  const prevLegacy = prev as Record<string, unknown>;
-  const nextLegacy = next as Record<string, unknown>;
+  const prevLegacy = asRecord(prev);
+  const nextLegacy = asRecord(next);
   const prevNextReviewDate = cardMetaDateTimeMs(
-    prev.nextReviewDate ?? prevLegacy.next_review_date,
+    prev.nextReviewDate ?? prevLegacy?.next_review_date,
   );
   const nextNextReviewDate = cardMetaDateTimeMs(
-    next.nextReviewDate ?? nextLegacy.next_review_date,
+    next.nextReviewDate ?? nextLegacy?.next_review_date,
   );
   if (prevNextReviewDate !== nextNextReviewDate) return false;
 
   const prevLastReviewAt = cardMetaDateTimeMs(
-    prev.lastReviewAt ?? prevLegacy.last_review_at,
+    prev.lastReviewAt ?? prevLegacy?.last_review_at,
   );
   const nextLastReviewAt = cardMetaDateTimeMs(
-    next.lastReviewAt ?? nextLegacy.last_review_at,
+    next.lastReviewAt ?? nextLegacy?.last_review_at,
   );
   if (prevLastReviewAt !== nextLastReviewAt) return false;
 
@@ -459,7 +459,8 @@ const CardMetaPanelInner = ({
   };
   const [period, setPeriod] = useState<Period>("30d");
   const [titleInput, setTitleInput] = useState(card?.title ?? "");
-  const draftFlag = Boolean(card?.isDraft ?? (card as unknown)?.is_draft);
+  const legacyCard = asRecord(card);
+  const draftFlag = Boolean(card?.isDraft ?? legacyCard?.is_draft);
   const [draftChecked, setDraftChecked] = useState(draftFlag);
   const [isSavingPendingReview, setIsSavingPendingReview] = useState(false);
   const [pendingReviewTimestamp, setPendingReviewTimestamp] = useState<
@@ -496,7 +497,7 @@ const CardMetaPanelInner = ({
 
   // reviewCount は snake_case で入ってくるケースがあるので両対応しておく（UI側は事故らないのが正義）
   const rawReviewCount = (card?.reviewCount ??
-    (card as unknown)?.review_count ??
+    legacyCard?.review_count ??
     0) as unknown;
   const normalizedReviewCount = Number.isFinite(Number(rawReviewCount))
     ? Math.max(0, Math.trunc(Number(rawReviewCount)))
@@ -561,11 +562,12 @@ const CardMetaPanelInner = ({
 
   const derivedResistanceScore = useMemo(() => {
     if (!card) return null;
+    const legacy = asRecord(card);
     const next = toValidDate(
-      card.nextReviewDate ?? (card as unknown).next_review_date,
+      card.nextReviewDate ?? legacy?.next_review_date,
     );
     const last = toValidDate(
-      card.lastReviewAt ?? (card as unknown).last_review_at,
+      card.lastReviewAt ?? legacy?.last_review_at,
     );
     if (!next || !last) return null;
     const intervalDays = Math.max(
@@ -596,7 +598,7 @@ const CardMetaPanelInner = ({
     if (normalized.length === 0) return normalized;
 
     const lastReviewAt = toValidDate(
-      card?.lastReviewAt ?? (card as unknown)?.last_review_at,
+      card?.lastReviewAt ?? asRecord(card)?.last_review_at,
     );
     if (!lastReviewAt || derivedResistanceScore === null) return normalized;
 
@@ -637,12 +639,12 @@ const CardMetaPanelInner = ({
     if (normalizedReviewCount <= 0) return [];
 
     const lastReviewAt = toValidDate(
-      card.lastReviewAt ?? (card as unknown).last_review_at,
+      card.lastReviewAt ?? asRecord(card)?.last_review_at,
     );
     if (!lastReviewAt) return [];
 
     const rawLastSubjectiveScore = toFiniteNumber(
-      card.lastSubjectiveScore ?? (card as unknown).last_subjective_score,
+      card.lastSubjectiveScore ?? asRecord(card)?.last_subjective_score,
     );
     const syntheticRating =
       rawLastSubjectiveScore === null
@@ -1214,7 +1216,7 @@ const CardMetaPanelInner = ({
                   if (!card) return;
                   void Promise.resolve(onToggleDraft(next)).catch(() => {
                     setDraftChecked(
-                      Boolean(card?.isDraft ?? (card as unknown)?.is_draft),
+                      Boolean(card?.isDraft ?? asRecord(card)?.is_draft),
                     );
                   });
                 }}
@@ -1226,7 +1228,7 @@ const CardMetaPanelInner = ({
             </div>
             <section>
               <div className={`${actionRowClass} justify-between`}>
-                <h3 className="h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] font-semibold tracking-wide text-[var(--sidebar-text-muted)] uppercase">
+                <h3 className="ds-editor-pane__section-title h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] font-semibold tracking-wide uppercase">
                   タグ管理
                 </h3>
                 <SurfaceButton
@@ -1239,7 +1241,7 @@ const CardMetaPanelInner = ({
                   設定で管理
                 </SurfaceButton>
               </div>
-              <div className="mt-2 rounded-md border border-[var(--surface-border)] bg-white px-2 py-1 surface-concave">
+              <div className="ds-editor-pane__surface ds-editor-pane__surface--muted mt-2 px-2 py-1">
                 <TagInput
                   tags={tags}
                   onChange={(nextTags) => {
@@ -1259,13 +1261,13 @@ const CardMetaPanelInner = ({
             <p className={infoRowClass}>
               作成日:{" "}
               {formatDateLabel(
-                card?.createdAt ?? (card as unknown)?.created_at,
+                card?.createdAt ?? asRecord(card)?.created_at,
               )}
             </p>
             <p className={infoRowClass}>
               更新日:{" "}
               {formatDateLabel(
-                card?.updatedAt ?? (card as unknown)?.updated_at,
+                card?.updatedAt ?? asRecord(card)?.updated_at,
               )}
             </p>
             <p className={infoRowClass}>
@@ -1273,13 +1275,13 @@ const CardMetaPanelInner = ({
               {latestReview
                 ? formatDateLabel(latestReview.reviewedAt)
                 : formatDateLabel(
-                    card?.lastReviewAt ?? (card as unknown)?.last_review_at,
+                    card?.lastReviewAt ?? asRecord(card)?.last_review_at,
                   )}
             </p>
             <p className={infoRowClass}>
               次回復習日 ({nextReviewAttempt}回目):{" "}
               {formatDateLabel(
-                card?.nextReviewDate ?? (card as unknown)?.next_review_date,
+                card?.nextReviewDate ?? asRecord(card)?.next_review_date,
               )}
             </p>
           </div>
@@ -1303,7 +1305,7 @@ const CardMetaPanelInner = ({
       {!isCalendarMode && (
         <section>
           {currentResistanceScore !== null && (
-            <div className="mb-3 flex min-h-[var(--meta-action-min-h)] items-center justify-between rounded border border-[var(--sidebar-border)] bg-[var(--sidebar-active-bg)] px-2">
+            <div className="ds-editor-pane__stats mb-3 flex min-h-[var(--meta-action-min-h)] items-center justify-between px-2">
               <span className="text-[length:var(--meta-font-size)] font-medium leading-[var(--meta-row-px)] text-[var(--sidebar-text-muted)]">
                 現在の耐性スコア
               </span>
@@ -1313,10 +1315,10 @@ const CardMetaPanelInner = ({
             </div>
           )}
           <div className="flex min-h-[var(--meta-action-min-h)] items-center justify-between">
-            <h3 className="h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] font-semibold tracking-wide text-[var(--sidebar-text-muted)] uppercase">
+            <h3 className="ds-editor-pane__section-title h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] font-semibold tracking-wide uppercase">
               耐性スコア推移
             </h3>
-            <div className="flex bg-white rounded border border-[var(--surface-border)] p-0.5 shadow-sm text-[length:var(--meta-font-size)]">
+            <div className="ds-editor-pane__toolbar flex p-0.5 text-[length:var(--meta-font-size)]">
               {(["7d", "30d", "all"] as const).map((p) => (
                 <SurfaceButton
                   key={p}
@@ -1330,7 +1332,7 @@ const CardMetaPanelInner = ({
               ))}
             </div>
           </div>
-          <div className="mt-3 h-40 w-full rounded border border-[var(--sidebar-border)] bg-white/70 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]">
+          <div className="ds-editor-pane__chart mt-3 h-40 w-full p-1.5">
             {chartData.length === 0 ? (
               <div className="flex h-full items-center justify-center text-sm text-[var(--sidebar-text-muted)]">
                 データなし
@@ -1402,7 +1404,7 @@ const CardMetaPanelInner = ({
       {!isCalendarMode && (
         <section>
           <div className="flex min-h-[var(--meta-action-min-h)] items-center justify-between">
-            <h3 className="h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] font-semibold tracking-wide text-[var(--sidebar-text-muted)] uppercase">
+            <h3 className="ds-editor-pane__section-title h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] font-semibold tracking-wide uppercase">
               学習記録
             </h3>
             <div className="flex items-center gap-2">
@@ -1434,14 +1436,14 @@ const CardMetaPanelInner = ({
               {latestReviewError}
             </div>
           )}
-          <div className="mt-3 overflow-hidden rounded border border-[var(--sidebar-border)] bg-[var(--sidebar-active-bg)]">
+          <div className="ds-editor-pane__history mt-3 overflow-hidden">
             {displayHistoryRows.length === 0 ? (
               <div className="flex h-24 items-center justify-center text-sm text-[var(--sidebar-text-muted)]">
                 学習記録なし
               </div>
             ) : (
               <Table className="text-[length:var(--meta-font-size)]">
-                <TableHeader className="bg-white/70">
+                <TableHeader className="ds-editor-pane__surface--muted">
                   <TableRow className="hover:bg-transparent">
                     <TableHead className="h-7 w-px px-1 whitespace-nowrap text-[var(--sidebar-text-muted)]">
                       &nbsp;
@@ -1461,7 +1463,7 @@ const CardMetaPanelInner = ({
                   {displayHistoryRows.map((row) => (
                     <TableRow
                       key={`${row.reviewIndex}-${row.reviewedAtRaw ?? row.reviewedAtLabel}`}
-                      className="bg-transparent hover:bg-white/40"
+                      className="bg-transparent"
                     >
                       <TableCell className="w-px px-1 py-0.5 whitespace-nowrap font-medium tabular-nums text-[var(--sidebar-text)]">
                         {row.reviewIndex}
@@ -1475,7 +1477,7 @@ const CardMetaPanelInner = ({
                               setLatestReviewDateInput(e.target.value)
                             }
                             disabled={isMutatingLatestReview}
-                            className="h-7 w-full min-w-[11rem] rounded border border-[var(--surface-border)] bg-white px-1.5 text-[11px] outline-none focus:border-[#cfcfcf]"
+                            className="ds-input h-7 w-full min-w-[11rem] px-1.5 text-[11px] outline-none"
                           />
                         ) : (
                           row.reviewedAtLabel
@@ -1491,7 +1493,7 @@ const CardMetaPanelInner = ({
                                   <button
                                     key={rating}
                                     type="button"
-                                    className="relative z-0 flex h-7 w-7 items-center justify-center rounded-md border border-[var(--surface-border)] bg-white transition-colors hover:bg-[var(--sidebar-active-bg)] disabled:cursor-wait disabled:opacity-50"
+                                    className="ds-surface-button ds-surface-button--concave relative z-0 flex h-7 w-7 items-center justify-center disabled:cursor-wait disabled:opacity-50"
                                     onClick={() =>
                                       handleSelectReviewRating(rating)
                                     }
@@ -1541,10 +1543,10 @@ const CardMetaPanelInner = ({
                                     <button
                                       key={rating}
                                       type="button"
-                                      className={`relative z-0 flex h-7 w-7 items-center justify-center rounded-md border bg-white transition-colors disabled:cursor-wait disabled:opacity-50 ${
+                                      className={`ds-surface-button ds-surface-button--concave relative z-0 flex h-7 w-7 items-center justify-center disabled:cursor-wait disabled:opacity-50 ${
                                         isSelected
-                                          ? "border-slate-900 ring-1 ring-slate-300"
-                                          : "border-[var(--surface-border)]"
+                                          ? "ds-surface-button--active ring-1 ring-slate-300"
+                                          : ""
                                       }`}
                                       onClick={() =>
                                         setLatestReviewRatingInput(rating)
@@ -1618,7 +1620,7 @@ const CardMetaPanelInner = ({
                               }
                               onFocus={(e) => e.currentTarget.select()}
                               disabled={isSavingPendingReview}
-                              className="h-7 rounded border border-[var(--surface-border)] bg-white px-1 text-[11px] tabular-nums outline-none focus:border-[#cfcfcf]"
+                              className="ds-input h-7 px-1 text-[11px] tabular-nums outline-none"
                               style={{
                                 width: getDurationInputWidthCh(
                                   pendingReviewDurationInput,
@@ -1644,7 +1646,7 @@ const CardMetaPanelInner = ({
                               }
                               onFocus={(e) => e.currentTarget.select()}
                               disabled={isMutatingLatestReview}
-                              className="h-7 rounded border border-[var(--surface-border)] bg-white px-1 text-[11px] tabular-nums outline-none focus:border-[#cfcfcf]"
+                              className="ds-input h-7 px-1 text-[11px] tabular-nums outline-none"
                               style={{
                                 width: getDurationInputWidthCh(
                                   latestReviewDurationInput,
@@ -1709,7 +1711,7 @@ const CardMetaPanelInner = ({
                                 isMutatingLatestReview ||
                                 durationSavingIndex === row.editableLogIndex
                               }
-                              className="h-7 rounded border border-[var(--surface-border)] bg-white px-1 text-[11px] tabular-nums outline-none focus:border-[#cfcfcf]"
+                              className="ds-input h-7 px-1 text-[11px] tabular-nums outline-none"
                               style={{
                                 width: getDurationInputWidthCh(
                                   durationDrafts[row.editableLogIndex] ??
@@ -1739,7 +1741,7 @@ const CardMetaPanelInner = ({
             )}
           </div>
           {canManageLatestReview && latestEditableReview && (
-            <div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded border border-[var(--sidebar-border)] bg-white/70 px-3 py-2">
+            <div className="ds-editor-pane__toolbar mt-2 flex flex-wrap items-center justify-between gap-2 px-3 py-2">
               <p className="text-[11px] leading-5 text-[var(--sidebar-text-muted)]">
                 {isEditingLatestReview
                   ? "最新記録を編集中"
