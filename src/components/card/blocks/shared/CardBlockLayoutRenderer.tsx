@@ -1,5 +1,4 @@
 import React from "react";
-
 import { CodeBlockItem } from "@/components/card/blocks/code/CodeBlockItem";
 import { CodeRenderer } from "@/components/card/blocks/code/CodeRenderer";
 import type { BlockListRowMeta } from "@/components/card/blocks/core/BlockList";
@@ -18,7 +17,7 @@ import { TextBlockContent } from "@/components/card/blocks/text/TextBlockContent
 import { AudioPlayer } from "@/components/card/media/CardMedia";
 import { cn } from "@/lib/utils";
 import type { CodeBlockData } from "@/types/core/code-block";
-import type { UploadedImage } from "@/types/domain/assets";
+import type { CardImageRef } from "@/types/domain/assets";
 import type { CardBlock } from "@/types/domain/card";
 
 export type CardBlockLayoutReplaceBlock =
@@ -31,7 +30,6 @@ type ViewerProps = {
   toMediaUrl: (
     item:
       | string
-      | UploadedImage
       | {
           url?: string | null;
           remoteUrl?: string | null;
@@ -151,18 +149,12 @@ export const CardBlockLayoutRenderer = (
             autoFocus={autoFocus}
           />
         );
-
       case "code":
         return (
           <div className="w-full max-w-full overflow-visible">
             {renderGridOffsetSpacer(meta.gridOffsetPx)}
             <CodeBlockItem
-              data={
-                block.code || {
-                  language: "javascript",
-                  code: "",
-                }
-              }
+              data={block.code || { language: "javascript", code: "" }}
               onChange={(data) =>
                 onUpdateBlock(block.id, { code: data as CodeBlockData })
               }
@@ -182,13 +174,12 @@ export const CardBlockLayoutRenderer = (
             />
           </div>
         );
-
       case "image":
         return (
           <MediaBlock
             data={block.images ?? []}
             onChange={(data) =>
-              onUpdateBlock(block.id, { images: data as UploadedImage[] })
+              onUpdateBlock(block.id, { images: data as CardImageRef[] })
             }
             onDelete={onDelete}
             onDuplicate={onDuplicate}
@@ -207,18 +198,12 @@ export const CardBlockLayoutRenderer = (
             canMoveDown={canMoveDown}
           />
         );
-
       case "math":
         return (
           <div className="w-full max-w-full overflow-visible">
             {renderGridOffsetSpacer(meta.gridOffsetPx)}
             <MathBlock
-              data={
-                block.math || {
-                  latex: "",
-                  displayMode: "block",
-                }
-              }
+              data={block.math || { latex: "", displayMode: "block" }}
               onChange={(data) => onUpdateBlock(block.id, { math: data })}
               onDelete={onDelete}
               onDuplicate={onDuplicate}
@@ -235,7 +220,6 @@ export const CardBlockLayoutRenderer = (
             />
           </div>
         );
-
       case "question":
         return (
           <QuestionBlock
@@ -256,7 +240,6 @@ export const CardBlockLayoutRenderer = (
             isActive={isActive}
           />
         );
-
       case "markdown":
         return (
           <MarkdownBlock
@@ -277,14 +260,12 @@ export const CardBlockLayoutRenderer = (
             onReplaceWithBlocks={onReplaceMarkdownWithBlocks}
           />
         );
-
       default:
         return null;
     }
   }
 
   const { viewerProps } = props;
-
   switch (block.type) {
     case "question":
       return (
@@ -302,7 +283,6 @@ export const CardBlockLayoutRenderer = (
           />
         </BlockWrapper>
       );
-
     case "text":
       return (
         <BlockWrapper
@@ -320,7 +300,6 @@ export const CardBlockLayoutRenderer = (
           />
         </BlockWrapper>
       );
-
     case "code":
       return (
         <BlockWrapper
@@ -341,7 +320,6 @@ export const CardBlockLayoutRenderer = (
           </div>
         </BlockWrapper>
       );
-
     case "image":
       return (
         <BlockWrapper
@@ -355,9 +333,7 @@ export const CardBlockLayoutRenderer = (
           <ImageBlockShell>
             <ImageBlockContent
               mode="view"
-              urls={(block.images ?? [])
-                .map(viewerProps.toMediaUrl)
-                .filter((url): url is string => Boolean(url))}
+              urls={[]}
               items={block.images ?? []}
               onFullscreenChange={viewerProps.onGalleryFullscreenChange}
               displayMode={viewerProps.displayMode}
@@ -366,7 +342,6 @@ export const CardBlockLayoutRenderer = (
           </ImageBlockShell>
         </BlockWrapper>
       );
-
     case "audio":
       return (
         <div className="flex justify-center">
@@ -377,7 +352,6 @@ export const CardBlockLayoutRenderer = (
           />
         </div>
       );
-
     case "math":
       return (
         <BlockWrapper
@@ -397,7 +371,6 @@ export const CardBlockLayoutRenderer = (
           </div>
         </BlockWrapper>
       );
-
     case "markdown":
       return (
         <BlockWrapper
@@ -414,7 +387,6 @@ export const CardBlockLayoutRenderer = (
           />
         </BlockWrapper>
       );
-
     default:
       return null;
   }

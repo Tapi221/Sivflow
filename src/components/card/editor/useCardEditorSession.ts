@@ -8,38 +8,30 @@ import {
   type SetStateAction,
 } from "react";
 
-import { sortBlocksByOrderIndex } from "@/components/card/blocks/core/blockOrdering";
 import {
   makeNewDraft,
-  makeEmptyCardFaceAttachments,
-  normalizeOrderIndex,
   normalizeSelectedCardId,
-  sanitizeReferences,
   shouldAutoOpenEditorForCard,
   type EditorDraft,
 } from "@/components/card/editor/cardEditorUtils";
 import {
-  LEGACY_BASE_LAYOUT_ROWS,
-  normalizeExtraRows,
-  normalizeLayoutRows,
-} from "@/domain/card/extraRows";
-import { getCardBlocks } from "@/domain/card/content";
+  AUTOSAVE_DELAY_MS,
+  NEW_SENTINEL,
+  buildCardPatchForToggle,
+  buildDraftFromCard,
+  buildSavePayload,
+  createPanelCard,
+  draftSignature,
+  extractCreatedCardId,
+  hasMeaningfulDraft,
+  snapshotDraft,
+  toDateOrNull,
+  type PersistOperation,
+  type PersistResult,
+} from "@/components/card/editor/cardEditorSessionCore";
 import { useCardEntity } from "@/hooks/card/useCardEntity";
-import { resolveCardTagNames } from "@/hooks/settings/useTags";
-import { sanitizeUploadedImages } from "@/utils/uploaded-image/sanitizer";
 
-import type { UploadedImage } from "@/types/domain/assets";
-import type {
-  Card,
-  CardBlock,
-  CardFaceAttachments,
-  CardPatch,
-} from "@/types/domain/card";
-
-const NEW_SENTINEL = "__new__" as const;
-const AUTOSAVE_DELAY_MS = 700;
-
-type TagNameLookup = Parameters<typeof resolveCardTagNames>[1];
+import type { Card, CardPatch } from "@/types/domain/card";
 
 type UseCardEditorSessionParams = {
   selectedCardId: string | null;
@@ -52,7 +44,7 @@ type UseCardEditorSessionParams = {
   updateCard: (id: string, data: CardPatch) => Promise<unknown>;
   createCard?: (data: Partial<Card>) => Promise<unknown>;
   addTag: (name: string) => Promise<{ id: string }>;
-  tagById: TagNameLookup;
+  tagById: Parameters<typeof buildDraftFromCard>[1];
   toastSuccess?: (message: string) => void;
   toastError?: (message: string) => void;
   onCardUpdated?: () => void;
@@ -72,169 +64,6 @@ type FlushDraftOptions = {
   reason?: FlushReason;
   exitEditing?: boolean;
   showSuccessToast?: boolean;
-};
-
-type PersistResult =
-  | { ok: true; operation: "created" | "updated" | "noop"; saved: boolean }
-  | { ok: false; message: string };
-
-type PersistOperation = "created" | "updated" | "noop";
-
-const cloneBlock = (block: CardBlock) => {
-  return {
-    ...block,
-    images: block.images?.map((image) => ({ ...image })),
-    audios: block.audios?.map((audio) => ({ ...audio })),
-    references: block.references?.map((reference) => ({ ...reference })),
-    code: block.code ? { ...block.code } : undefined,
-    math: block.math ? { ...block.math } : undefined,
-  };
-};
-
-const cloneAttachments = (
-  attachments: CardFaceAttachments | null | undefined,
-): CardFaceAttachments => ({
-  images: attachments?.images?.map((image) => ({ ...image })) ?? [],
-  audios: attachments?.audios?.map((audio) => ({ ...audio })) ?? [],
-  references:
-    attachments?.references?.map((reference) => ({ ...reference })) ?? [],
-});
-
-const snapshotDraft = (draft: EditorDraft) => {
-  return {
-    title: draft.title,
-    tags: [...draft.tags],
-    isDraft: draft.isDraft,
-    frontBlocks: draft.frontBlocks.map(cloneBlock),
-    backBlocks: draft.backBlocks.map(cloneBlock),
-    frontAttachments: cloneAttachments(draft.frontAttachments),
-    backAttachments: cloneAttachments(draft.backAttachments),
-    layoutRows: draft.layoutRows,
-  };
-};
-
-const draftSignature = (draft: EditorDraft | null) => {
-  if (!draft) return null;
-  return JSON.stringify({
-    title: draft.title,
-    tags: draft.tags,
-    isDraft: draft.isDraft,
-    frontBlocks: draft.frontBlocks,
-    backBlocks: draft.backBlocks,
-    frontAttachments: draft.frontAttachments,
-    backAttachments: draft.backAttachments,
-    layoutRows: normalizeLayoutRows(draft.layoutRows),
-  });
-};
-
-const sanitizeBlocksForSave = (blocks: CardBlock[]) => {
-  const next: CardBlock[] = [];
-  for (const block of blocks ?? []) {
-    if (block?.type === "image") {
-      next.push({
-        ...block,
-        images: sanitizeUploadedImages(block.images ?? []) as UploadedImage[],
-      });
-      continue;
-    }
-    if (block?.type === "reference") {
-      const cleaned = sanitizeReferences(block.references ?? []);
-      if (cleaned.length === 0) continue;
-      next.push({ ...block, references: cleaned });
-      continue;
-    }
-    next.push(block);
-  }
-  return normalizeOrderIndex(next);
-};
-
-const sanitizeAttachmentsForSave = (
-  attachments: CardFaceAttachments | null | undefined,
-): CardFaceAttachments => ({
-  images: sanitizeUploadedImages(attachments?.images ?? []) as UploadedImage[],
-  audios: (attachments?.audios ?? []).map((audio) => ({ ...audio })),
-  references: sanitizeReferences(attachments?.references ?? []),
-});
-
-const hasMeaningfulBlock = (block: CardBlock) => {
-  if (block.type === "text")
-    return String(block.content ?? "").trim().length > 0;
-  if (block.type === "markdown")
-    return String(block.markdown ?? "").trim().length > 0;
-  if (block.type === "code")
-    return String(block.code?.code ?? "").trim().length > 0;
-  if (block.type === "math")
-    return String(block.math?.latex ?? "").trim().length > 0;
-  if (block.type === "image") return (block.images?.length ?? 0) > 0;
-  if (block.type === "reference")
-    return sanitizeReferences(block.references ?? []).length > 0;
-  if (block.type === "audio") return (block.audios?.length ?? 0) > 0;
-  if (block.type === "question") {
-    return (
-      String(block.questionTitle ?? "").trim().length > 0 ||
-      String(block.questionAnswer ?? "").trim().length > 0
-    );
-  }
-  return false;
-};
-
-const hasMeaningfulAttachments = (
-  attachments: CardFaceAttachments | null | undefined,
-) => {
-  return (
-    (attachments?.images?.length ?? 0) > 0 ||
-    (attachments?.audios?.length ?? 0) > 0 ||
-    sanitizeReferences(attachments?.references ?? []).length > 0
-  );
-};
-
-const hasMeaningfulDraft = (draft: EditorDraft) => {
-  if (draft.title.trim().length > 0) return true;
-  if (draft.tags.some((tag) => tag.trim().length > 0)) return true;
-  if (draft.isDraft) return true;
-  if (draft.frontBlocks.some(hasMeaningfulBlock)) return true;
-  if (draft.backBlocks.some(hasMeaningfulBlock)) return true;
-  if (hasMeaningfulAttachments(draft.frontAttachments)) return true;
-  if (hasMeaningfulAttachments(draft.backAttachments)) return true;
-  return false;
-};
-
-const extractCreatedCardId = (created: unknown) => {
-  if (typeof created === "string" && created.trim().length > 0) return created;
-  if (!created || typeof created !== "object") return null;
-  if (
-    "id" in created &&
-    typeof (created as { id?: unknown }).id === "string" &&
-    (created as { id: string }).id.trim().length > 0
-  ) {
-    return (created as { id: string }).id;
-  }
-  if (
-    "cardId" in created &&
-    typeof (created as { cardId?: unknown }).cardId === "string" &&
-    (created as { cardId: string }).cardId.trim().length > 0
-  ) {
-    return (created as { cardId: string }).cardId;
-  }
-  return null;
-};
-
-const toDateOrNull = (value: unknown) => {
-  if (value instanceof Date && !Number.isNaN(value.getTime())) return value;
-  if (
-    typeof value === "object" &&
-    value !== null &&
-    "toDate" in value &&
-    typeof (value as { toDate?: unknown }).toDate === "function"
-  ) {
-    const date = (value as { toDate: () => Date }).toDate();
-    return Number.isNaN(date.getTime()) ? null : date;
-  }
-  if (typeof value === "string" || typeof value === "number") {
-    const date = new Date(value);
-    return Number.isNaN(date.getTime()) ? null : date;
-  }
-  return null;
 };
 
 export const useCardEditorSession = ({
@@ -267,7 +96,6 @@ export const useCardEditorSession = ({
 
   const draftRef = useRef<EditorDraft | null>(null);
   const persistedSignatureRef = useRef<string | null>(null);
-  const draftRevisionRef = useRef(0);
   const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const saveQueueRef = useRef<Promise<void>>(Promise.resolve());
   const selectionBeforeCreateRef = useRef<string | null>(null);
@@ -307,22 +135,21 @@ export const useCardEditorSession = ({
               previous,
             )
           : next;
+
       draftRef.current = resolved;
       setDraftState(resolved);
 
       if (options?.resetPersisted) {
         persistedSignatureRef.current = draftSignature(resolved);
-        draftRevisionRef.current = 0;
         setLastSavedAt(options.lastSavedAt ?? null);
         setSaveError(null);
         setIsDirty(false);
         return;
       }
 
-      if (options?.markDirty !== false && resolved !== previous) {
-        draftRevisionRef.current += 1;
+      if (options?.markDirty !== false || resolved !== previous) {
+        updateDirtyFromDraft(resolved);
       }
-      updateDirtyFromDraft(resolved);
     },
     [updateDirtyFromDraft],
   );
@@ -356,6 +183,7 @@ export const useCardEditorSession = ({
   const { effectiveCard } = useCardEntity(
     resolveCardFromEntity && !isNew ? normalizedSelectedCardId : null,
   );
+
   const selectedCard = useMemo(() => {
     if (
       selectedCardSnapshot &&
@@ -365,6 +193,7 @@ export const useCardEditorSession = ({
     ) {
       return selectedCardSnapshot;
     }
+
     if (
       effectiveCard &&
       normalizedSelectedCardId &&
@@ -372,106 +201,18 @@ export const useCardEditorSession = ({
     ) {
       return effectiveCard;
     }
+
     return null;
   }, [effectiveCard, normalizedSelectedCardId, selectedCardSnapshot]);
 
   const selectedCardRef = useRef<Card | null>(null);
   selectedCardRef.current = selectedCard ?? null;
 
-  const buildDraftFromCard = useCallback(
-    (card: Card): EditorDraft => {
-      const legacyQuestionRows = normalizeExtraRows(
-        (
-          card as unknown as {
-            questionExtraRows?: unknown;
-            question_extra_rows?: unknown;
-          }
-        ).questionExtraRows ??
-          (
-            card as unknown as {
-              questionExtraRows?: unknown;
-              question_extra_rows?: unknown;
-            }
-          ).question_extra_rows ??
-          0,
-      );
-      const legacyAnswerRows = normalizeExtraRows(
-        (
-          card as unknown as {
-            answerExtraRows?: unknown;
-            answer_extra_rows?: unknown;
-          }
-        ).answerExtraRows ??
-          (
-            card as unknown as {
-              answerExtraRows?: unknown;
-              answer_extra_rows?: unknown;
-            }
-          ).answer_extra_rows ??
-          0,
-      );
-      const migratedRows =
-        LEGACY_BASE_LAYOUT_ROWS +
-        Math.max(legacyQuestionRows, legacyAnswerRows);
-
-      return {
-        title: card.title ?? "",
-        tags: resolveCardTagNames(card.tagIds, tagById),
-        isDraft: card.isDraft ?? false,
-        frontBlocks: sortBlocksByOrderIndex(getCardBlocks(card, "question")),
-        backBlocks: sortBlocksByOrderIndex(getCardBlocks(card, "answer")),
-        frontAttachments: cloneAttachments(
-          card.front?.attachments ?? makeEmptyCardFaceAttachments(),
-        ),
-        backAttachments: cloneAttachments(
-          card.back?.attachments ?? makeEmptyCardFaceAttachments(),
-        ),
-        layoutRows: normalizeLayoutRows(
-          (card as unknown as { layoutRows?: unknown; layout_rows?: unknown })
-            .layoutRows ??
-            (card as unknown as { layoutRows?: unknown; layout_rows?: unknown })
-              .layout_rows ??
-            migratedRows,
-        ),
-      };
-    },
-    [tagById],
-  );
-
   const clearAutosaveTimer = useCallback(() => {
     if (autosaveTimerRef.current == null) return;
     clearTimeout(autosaveTimerRef.current);
     autosaveTimerRef.current = null;
   }, []);
-
-  const buildSavePayload = useCallback(
-    async (currentDraft: EditorDraft): Promise<Partial<Card>> => {
-      const normalizedTags = currentDraft.tags
-        .map((tag) => tag.trim())
-        .filter((tag) => tag.length > 0);
-      const uniqueTags = [...new Set(normalizedTags)];
-      const resolvedTags = await Promise.all(
-        uniqueTags.map((name) => addTag(name)),
-      );
-      return {
-        title: currentDraft.title,
-        tagIds: resolvedTags.map((tag) => tag.id),
-        isDraft: currentDraft.isDraft,
-        front: {
-          blocks: sanitizeBlocksForSave(currentDraft.frontBlocks),
-          attachments: sanitizeAttachmentsForSave(
-            currentDraft.frontAttachments,
-          ),
-        },
-        back: {
-          blocks: sanitizeBlocksForSave(currentDraft.backBlocks),
-          attachments: sanitizeAttachmentsForSave(currentDraft.backAttachments),
-        },
-        layoutRows: normalizeLayoutRows(currentDraft.layoutRows),
-      };
-    },
-    [addTag],
-  );
 
   const persistCurrentDraft = useCallback(async (): Promise<PersistResult> => {
     const currentDraft = draftRef.current;
@@ -499,7 +240,10 @@ export const useCardEditorSession = ({
       setIsAutosaving(true);
       setSaveError(null);
 
-      const payload = await buildSavePayload(draftSnapshotValue);
+      const payload = await buildSavePayload({
+        draft: draftSnapshotValue,
+        addTag,
+      });
 
       if (!cardId) {
         if (typeof createCard !== "function") {
@@ -552,7 +296,7 @@ export const useCardEditorSession = ({
       setIsAutosaving(false);
     }
   }, [
-    buildSavePayload,
+    addTag,
     cardSetId,
     createCard,
     folderId,
@@ -740,7 +484,7 @@ export const useCardEditorSession = ({
     if (!selectedCard) return;
     if (hydratedFromIdRef.current === targetId) return;
 
-    const nextDraft = buildDraftFromCard(selectedCard);
+    const nextDraft = buildDraftFromCard(selectedCard, tagById);
     applyDraft(nextDraft, {
       resetPersisted: true,
       lastSavedAt:
@@ -751,11 +495,11 @@ export const useCardEditorSession = ({
     hydratedFromIdRef.current = targetId;
   }, [
     applyDraft,
-    buildDraftFromCard,
     isEditing,
     isNew,
     normalizedSelectedCardId,
     selectedCard,
+    tagById,
   ]);
 
   useEffect(() => {
@@ -778,8 +522,7 @@ export const useCardEditorSession = ({
       if (!draftRef.current) return;
       void flushDraft({ reason: "switch", showSuccessToast: false });
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [normalizedSelectedCardId]);
+  }, [clearAutosaveTimer, flushDraft, normalizedSelectedCardId]);
 
   useEffect(() => {
     return () => {
@@ -790,14 +533,16 @@ export const useCardEditorSession = ({
   }, [clearAutosaveTimer, flushDraft]);
 
   useEffect(() => {
-    if (typeof document === "undefined" || typeof window === "undefined")
+    if (typeof document === "undefined" || typeof window === "undefined") {
       return;
+    }
 
     const handleVisibilityFlush = () => {
       if (document.visibilityState !== "hidden") return;
       if (!draftRef.current) return;
       void flushDraft({ reason: "visibility", showSuccessToast: false });
     };
+
     const handlePageHide = () => {
       if (!draftRef.current) return;
       void flushDraft({ reason: "visibility", showSuccessToast: false });
@@ -805,6 +550,7 @@ export const useCardEditorSession = ({
 
     document.addEventListener("visibilitychange", handleVisibilityFlush);
     window.addEventListener("pagehide", handlePageHide);
+
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityFlush);
       window.removeEventListener("pagehide", handlePageHide);
@@ -873,7 +619,10 @@ export const useCardEditorSession = ({
   const handleToggleBookmark = useCallback(
     async (card: Card) => {
       try {
-        await updateCard(card.id, { isBookmarked: !card.isBookmarked });
+        await updateCard(
+          card.id,
+          buildCardPatchForToggle(card, "isBookmarked"),
+        );
         onCardUpdated?.();
       } catch (error) {
         console.error("ブックマークの更新に失敗しました:", error);
@@ -885,7 +634,10 @@ export const useCardEditorSession = ({
   const handleToggleUncertainty = useCallback(
     async (card: Card) => {
       try {
-        await updateCard(card.id, { hasUncertainty: !card.hasUncertainty });
+        await updateCard(
+          card.id,
+          buildCardPatchForToggle(card, "hasUncertainty"),
+        );
         onCardUpdated?.();
       } catch (error) {
         console.error("不確証マークの更新に失敗しました:", error);
@@ -901,18 +653,29 @@ export const useCardEditorSession = ({
         return;
       }
       if (!selectedCard) return;
-      const normalizedTags = nextTags
-        .map((tag) => tag.trim())
-        .filter((tag) => tag.length > 0);
-      const resolved = await Promise.all(
-        normalizedTags.map((name) => addTag(name)),
-      );
-      await updateCard(selectedCard.id, {
-        tagIds: resolved.map((tag) => tag.id),
+
+      const payload = await buildSavePayload({
+        draft: {
+          ...buildDraftFromCard(selectedCard, tagById),
+          tags: nextTags,
+        },
+        addTag,
       });
+
+      await updateCard(selectedCard.id, {
+        tagIds: payload.tagIds,
+      } as CardPatch);
       onCardUpdated?.();
     },
-    [addTag, isEditing, onCardUpdated, selectedCard, setDraft, updateCard],
+    [
+      addTag,
+      isEditing,
+      onCardUpdated,
+      selectedCard,
+      setDraft,
+      tagById,
+      updateCard,
+    ],
   );
 
   const handleToggleDraft = useCallback(
@@ -950,60 +713,15 @@ export const useCardEditorSession = ({
     [isEditing, setDraft],
   );
 
-  const hasDraft = draft != null;
-  const draftTitle = draft?.title ?? "";
-  const draftTags = useMemo(() => draft?.tags ?? [], [draft?.tags]);
-  const draftIsDraft = draft?.isDraft ?? false;
-  const draftLayoutRows = draft?.layoutRows;
-
-  const panelCard = useMemo(() => {
-    if (selectedCard) {
-      if (!isEditing || !hasDraft) return selectedCard;
-      return {
-        ...selectedCard,
-        title: draftTitle,
-        tags: draftTags,
-        isDraft: draftIsDraft,
-        layoutRows: draftLayoutRows,
-      };
-    }
-    if (!hasDraft) return null;
-
-    const now = new Date();
-    return {
-      id: "__draft__",
-      userId: "",
-      deviceId: "web",
-      folderId: "",
-      cardSetId: "",
-      orderIndex: 0,
-      questionNumber: "",
-      title: draftTitle,
-      tags: draftTags,
-      isDraft: draftIsDraft,
-      isDeleted: false,
-      hasUncertainty: false,
-      isBookmarked: false,
-      isCompleted: false,
-      isSilent: false,
-      front: { blocks: [] },
-      back: { blocks: [] },
-      memoryStability: 0,
-      nextReviewDate: now,
-      createdAt: now,
-      updatedAt: now,
-      reviewLogs: [],
-      layoutRows: draftLayoutRows,
-    } as Card;
-  }, [
-    draftIsDraft,
-    draftLayoutRows,
-    draftTags,
-    draftTitle,
-    hasDraft,
-    isEditing,
-    selectedCard,
-  ]);
+  const panelCard = useMemo(
+    () =>
+      createPanelCard({
+        selectedCard,
+        draft,
+        isEditing,
+      }),
+    [draft, isEditing, selectedCard],
+  );
 
   return {
     draft,

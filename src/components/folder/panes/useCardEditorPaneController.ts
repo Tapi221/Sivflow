@@ -3,31 +3,28 @@ import React from "react";
 import { useCardEditorContentController } from "@/components/card/editor/useCardEditorContentController";
 import { useCardEditorSession } from "@/components/card/editor/useCardEditorSession";
 import { useLayoutRowsController } from "@/components/card/editor/useLayoutRowsController";
+import {
+  CARD_SET_VIEW_EDITING_DRAFT_PATCH_EVENT,
+  applyEditingDraftPatch,
+  buildCardsById,
+  createMetaPanelActions,
+  readStoredMetaPanelOpen,
+  resolveSelectedCardSnapshot,
+  writeStoredMetaPanelOpen,
+  type EditingDraftPatchDetail,
+} from "@/components/folder/panes/cardEditorPaneControllerCore";
 import { useToast } from "@/contexts/ToastContext";
 import { DEFAULT_LAYOUT_ROWS } from "@/domain/card/extraRows";
 import { useCards } from "@/hooks/card/useCards";
 import { useTags } from "@/hooks/settings/useTags";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
-import {
-  createLatestReviewLogPatch,
-  createReviewPatchFromRating,
-} from "@/services/reviewAlgorithm";
-import type { Card, UserSettings } from "@/types";
+import type { Card, CardPatch, UserSettings } from "@/types";
 
 type UseCardsResult = {
   cards: Card[];
   updateCard: (cardId: string, data: unknown) => void | Promise<void>;
   createCard: (data: unknown) => unknown;
 };
-
-type EditingDraftPatchDetail = {
-  cardId: string;
-  patch: Partial<Pick<Card, "title" | "isDraft">> & { tags?: string[] };
-};
-
-const CARD_SET_VIEW_EDITING_DRAFT_PATCH_EVENT =
-  "cardsetview:editing-draft-patch";
-const META_PANEL_OPEN_STORAGE_KEY = "card-editor.meta-panel-open";
 
 type UseCardEditorPaneControllerParams = {
   selectedCardId: string | null;
@@ -63,21 +60,20 @@ export const useCardEditorPaneController = ({
   }) as unknown as UseCardsResult;
 
   const cards = cardsOverride ?? cardsFromHook;
-  const cardsById = React.useMemo(() => {
-    const map = new Map<string, Card>();
-    for (const card of cards) {
-      map.set(card.id, card);
-    }
-    return map;
-  }, [cards]);
 
-  const selectedCardSnapshot = React.useMemo(() => {
-    if (!selectedCardId) return null;
-    return cardsById.get(selectedCardId) ?? null;
-  }, [cardsById, selectedCardId]);
+  const cardsById = React.useMemo(() => buildCardsById(cards), [cards]);
+
+  const selectedCardSnapshot = React.useMemo(
+    () =>
+      resolveSelectedCardSnapshot({
+        selectedCardId,
+        cardsById,
+      }),
+    [cardsById, selectedCardId],
+  );
 
   const updateCardAsync = React.useCallback(
-    async (id: string, data: Partial<Card>): Promise<unknown> => {
+    async (id: string, data: CardPatch): Promise<unknown> => {
       return await Promise.resolve(updateCard(id, data));
     },
     [updateCard],
@@ -90,17 +86,12 @@ export const useCardEditorPaneController = ({
     [createCard],
   );
 
-  const [isMetaOpen, setIsMetaOpen] = React.useState<boolean>(() => {
-    if (typeof window === "undefined") return true;
-    return window.localStorage.getItem(META_PANEL_OPEN_STORAGE_KEY) !== "false";
-  });
+  const [isMetaOpen, setIsMetaOpen] = React.useState<boolean>(() =>
+    readStoredMetaPanelOpen(),
+  );
 
   React.useEffect(() => {
-    if (typeof window === "undefined") return;
-    window.localStorage.setItem(
-      META_PANEL_OPEN_STORAGE_KEY,
-      String(isMetaOpen),
-    );
+    writeStoredMetaPanelOpen(isMetaOpen);
   }, [isMetaOpen]);
 
   const resetDialogsRef = React.useRef<() => void>(() => {});
@@ -139,34 +130,27 @@ export const useCardEditorPaneController = ({
 
     const handler = (event: Event) => {
       const detail = (event as CustomEvent<EditingDraftPatchDetail>)?.detail;
-      if (!detail || !sessionSelectedCard || !sessionIsEditing) return;
-      if (detail.cardId !== sessionSelectedCard.id) return;
-
-      const nextTitle =
-        typeof detail.patch.title === "string" ? detail.patch.title : undefined;
-      const nextIsDraft =
-        typeof detail.patch.isDraft === "boolean"
-          ? detail.patch.isDraft
-          : undefined;
-      const nextTags = Array.isArray(detail.patch.tags)
-        ? detail.patch.tags
-        : undefined;
-
-      if (
-        nextTitle === undefined &&
-        nextIsDraft === undefined &&
-        nextTags === undefined
-      ) {
-        return;
-      }
 
       setSessionDraft((prev) => {
-        if (!prev) return prev;
+        const nextDraft = applyEditingDraftPatch({
+          currentDraft: prev
+            ? {
+                title: prev.title,
+                isDraft: prev.isDraft,
+                tags: prev.tags,
+              }
+            : null,
+          detail,
+          selectedCardId: sessionSelectedCard?.id ?? null,
+          isEditing: sessionIsEditing,
+        });
+
+        if (!prev || !nextDraft) return prev;
         return {
           ...prev,
-          ...(nextTitle !== undefined ? { title: nextTitle } : {}),
-          ...(nextIsDraft !== undefined ? { isDraft: nextIsDraft } : {}),
-          ...(nextTags !== undefined ? { tags: nextTags } : {}),
+          title: nextDraft.title,
+          isDraft: nextDraft.isDraft,
+          tags: nextDraft.tags,
         };
       });
     };
@@ -198,132 +182,29 @@ export const useCardEditorPaneController = ({
     setIsMetaOpen((prev) => !prev);
   }, []);
 
-  const onAddReviewLog = React.useCallback(
-    ({ reviewedAt, rating, durationMinutes }) => {
-      const selectedCard = sessionSelectedCard;
-      if (!selectedCard?.id) return Promise.resolve();
-
-      const { patch } = createReviewPatchFromRating({
-        card: selectedCard,
-        rating,
-        now: new Date(reviewedAt),
-        delayBonusEnabled: settings?.delayBonusEnabled ?? false,
-        durationMinutes,
-      });
-
-      return Promise.resolve(updateCard(selectedCard.id, patch)).then(() => {
-        onCardUpdated?.();
-      });
-    },
-    [
-      onCardUpdated,
-      sessionSelectedCard,
-      settings?.delayBonusEnabled,
-      updateCard,
-    ],
-  );
-
-  const onUpdateLatestReviewLog = React.useCallback(
-    ({ reviewLogs, reviewedAt, rating, durationMinutes }) => {
-      const selectedCard = sessionSelectedCard;
-      if (!selectedCard?.id) return Promise.resolve();
-
-      const { patch } = createLatestReviewLogPatch({
-        action: "update",
-        card: selectedCard,
-        delayBonusEnabled: settings?.delayBonusEnabled ?? false,
-        rating,
-        reviewedAt: new Date(reviewedAt),
-        reviewLogs,
-        reviewStartNextDay: settings?.reviewStartNextDay ?? true,
-        durationMinutes,
-      });
-
-      return Promise.resolve(updateCard(selectedCard.id, patch)).then(() => {
-        onCardUpdated?.();
-      });
-    },
-    [
-      onCardUpdated,
-      sessionSelectedCard,
-      settings?.delayBonusEnabled,
-      settings?.reviewStartNextDay,
-      updateCard,
-    ],
-  );
-
-  const onDeleteLatestReviewLog = React.useCallback(
-    ({ reviewLogs }) => {
-      const selectedCard = sessionSelectedCard;
-      if (!selectedCard?.id) return Promise.resolve();
-
-      const { patch } = createLatestReviewLogPatch({
-        action: "delete",
-        card: selectedCard,
-        delayBonusEnabled: settings?.delayBonusEnabled ?? false,
-        reviewLogs,
-        reviewStartNextDay: settings?.reviewStartNextDay ?? true,
-      });
-
-      return Promise.resolve(updateCard(selectedCard.id, patch)).then(() => {
-        onCardUpdated?.();
-      });
-    },
-    [
-      onCardUpdated,
-      sessionSelectedCard,
-      settings?.delayBonusEnabled,
-      settings?.reviewStartNextDay,
-      updateCard,
-    ],
-  );
-
-  const onUpdateReviewLogDuration = React.useCallback(
-    ({ reviewLogs, logIndex, durationMinutes }) => {
-      const selectedCard = sessionSelectedCard;
-      if (!selectedCard?.id) return Promise.resolve();
-
-      const nextReviewLogs = reviewLogs.map((log, index) =>
-        index === logIndex ? { ...log, durationMinutes } : log,
-      );
-
-      return Promise.resolve(
-        updateCard(selectedCard.id, {
-          reviewLogs: nextReviewLogs,
-        }),
-      ).then(() => {
-        onCardUpdated?.();
-      });
-    },
-    [onCardUpdated, sessionSelectedCard, updateCard],
-  );
-
   const metaPanelActions = React.useMemo(
-    () => ({
-      onAddReviewLog,
-      onUpdateLatestReviewLog,
-      onDeleteLatestReviewLog,
-      onUpdateReviewLogDuration,
-      onFlushAutosave: () =>
-        flushDraft({
-          reason: "autosave",
-          showSuccessToast: false,
-        }),
-      onTitleInputChange: handleTitleInputChange,
-      onUpdateTags: handleUpdateTags,
-      onToggleDraft: handleToggleDraft,
-      onUpdateTitle: handleUpdateTitle,
-    }),
+    () =>
+      createMetaPanelActions({
+        selectedCard: sessionSelectedCard,
+        settings,
+        updateCard,
+        onCardUpdated,
+        flushDraft,
+        handleTitleInputChange,
+        handleUpdateTags,
+        handleToggleDraft,
+        handleUpdateTitle,
+      }),
     [
+      sessionSelectedCard,
+      settings,
+      updateCard,
+      onCardUpdated,
       flushDraft,
       handleTitleInputChange,
-      handleToggleDraft,
       handleUpdateTags,
+      handleToggleDraft,
       handleUpdateTitle,
-      onAddReviewLog,
-      onDeleteLatestReviewLog,
-      onUpdateLatestReviewLog,
-      onUpdateReviewLogDuration,
     ],
   );
 

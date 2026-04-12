@@ -3,11 +3,8 @@ import { CANONICAL_CARD_WIDTH } from "@/components/card/common/constants";
 import type { ImageGalleryItem } from "@/components/card/media/types";
 import { Button } from "@/components/ui/button";
 import { useAuthSession } from "@/contexts/AuthContext";
-import { useLocalImageBlobUrl } from "@/hooks/image/useLocalImageBlobUrl";
 import { webClipboardAdapter } from "@/platform/clipboard/webClipboardAdapter";
-import { storage } from "@/services/firebase";
-import { getCachedRemoteUrl } from "@/services/imagePreloadCache";
-import { getLocalDb } from "@/services/localDB";
+import { resolveCardImageUrl } from "@/services/cardImageResolver";
 import {
   Copy,
   Download,
@@ -16,33 +13,12 @@ import {
   Play,
   Volume2,
 } from "@/ui/icons";
-import { getDownloadURL, ref as storageRef } from "firebase/storage";
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import type { UploadedImage } from "@/types/domain/assets";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import type { CardImageRef } from "@/types/domain/assets";
 
 const IMAGE_BLOCK_INSET_PX = 4;
 const FIXED_IMAGE_REFERENCE_FRAME_WIDTH_PX =
   CANONICAL_CARD_WIDTH - IMAGE_BLOCK_INSET_PX * 2;
-
-const LocalBlobUrlResolverEffect = ({
-  localFileId,
-  userId,
-  onResolved,
-}: {
-  localFileId: string;
-  userId: string | undefined;
-  onResolved: (localFileId: string, url: string | null) => void;
-}) => {
-  const { url, loading } = useLocalImageBlobUrl(localFileId, userId);
-
-  useEffect(() => {
-    if (!loading) {
-      onResolved(localFileId, url);
-    }
-  }, [localFileId, url, loading, onResolved]);
-
-  return null;
-};
 
 interface AudioPlayerProps {
   urls: string[];
@@ -56,13 +32,13 @@ export const AudioPlayer = ({ urls }: AudioPlayerProps) => {
     if (playingIndex === index) {
       audioRefs.current[index]?.pause();
       setPlayingIndex(null);
-    } else {
-      if (playingIndex !== null) {
-        audioRefs.current[playingIndex]?.pause();
-      }
-      audioRefs.current[index]?.play();
-      setPlayingIndex(index);
+      return;
     }
+    if (playingIndex !== null) {
+      audioRefs.current[playingIndex]?.pause();
+    }
+    void audioRefs.current[index]?.play();
+    setPlayingIndex(index);
   };
 
   if (!urls || urls.length === 0) return null;
@@ -108,269 +84,91 @@ interface ImageGalleryProps {
   zoom?: number;
 }
 
+type DisplayImage = {
+  key: string;
+  url: string | null;
+  layout?: CardImageRef["layout"];
+  scale?: number | null;
+  x?: number | null;
+  naturalW?: number | null;
+  naturalH?: number | null;
+};
+
 export const ImageGallery = ({
-  urls,
   items,
   displayMode = "fixed",
   zoom = 1,
 }: ImageGalleryProps) => {
   const { currentUser } = useAuthSession();
-  const [failedImages, setFailedImages] = useState(new Set<number>());
-  const [naturalSizeMap, setNaturalSizeMap] = useState<
-    Record<number, { w: number; h: number }>
-  >({});
-  const [resolvedLocalUrlMap, setResolvedLocalUrlMap] = useState<
-    Record<string, string>
-  >({});
-  const [failedLocalFileIds, setFailedLocalFileIds] = useState<Set<string>>(
+  const [displayImages, setDisplayImages] = useState<DisplayImage[]>([]);
+  const [failedImages, setFailedImages] = useState<Set<number>>(
     () => new Set(),
   );
-  const [resolvedRemoteUrlMap, setResolvedRemoteUrlMap] = useState<
-    Record<string, string>
-  >({});
 
-  const sanitizeLegacyUrl = React.useCallback((value: unknown): string => {
-    if (typeof value !== "string") return "";
-    if (value.startsWith("blob:")) return "";
-    return value;
-  }, []);
-
-  const resolvedItems = React.useMemo(
-    () =>
-      (items && items.length > 0 ? items : urls).map((entry) => {
-        if (typeof entry === "string") {
-          const safeUrl = sanitizeLegacyUrl(entry);
-          return {
-            key: safeUrl || entry,
-            localFileId: null,
-            url: safeUrl,
-            scale: 1,
-            x: 0,
-            layout: null,
-            naturalW: null,
-            naturalH: null,
-          };
-        }
-
-        const typedEntry = entry as Partial<UploadedImage> & {
-          url?: string | null;
-        };
-        const assetId = typedEntry.assetId ?? null;
-        const localFileId = typedEntry.localFileId ?? assetId;
-
-        const fallbackLocal = localFileId
-          ? (resolvedLocalUrlMap[localFileId] ?? "")
-          : "";
-        const cachedRemoteUrl = assetId
-          ? (getCachedRemoteUrl(assetId) ?? "")
-          : "";
-        const fallbackRemote = assetId
-          ? (resolvedRemoteUrlMap[assetId] ?? "")
-          : "";
-        const legacyRemoteUrl = sanitizeLegacyUrl(typedEntry.remoteUrl);
-        const legacyLocalUrl = sanitizeLegacyUrl(typedEntry.localUrl);
-        const legacyUrl = sanitizeLegacyUrl(typedEntry.url);
-
+  const normalizedItems = useMemo(() => {
+    return (items ?? []).map((entry) => {
+      if (typeof entry === "string") {
         return {
-          key:
-            typedEntry.remoteUrl ??
-            typedEntry.localUrl ??
-            typedEntry.url ??
-            localFileId ??
-            "",
-          localFileId,
-          url:
-            fallbackLocal ||
-            legacyLocalUrl ||
-            cachedRemoteUrl ||
-            fallbackRemote ||
-            legacyRemoteUrl ||
-            legacyUrl,
-          assetId,
-          scale: typedEntry.scale ?? 1,
-          x: typedEntry.x ?? 0,
-          layout: typedEntry.layout ?? null,
-          naturalW: typedEntry.naturalW ?? null,
-          naturalH: typedEntry.naturalH ?? null,
-        };
-      }),
-    [items, urls, resolvedLocalUrlMap, resolvedRemoteUrlMap, sanitizeLegacyUrl],
-  );
-
-  const urlKey = React.useMemo(
-    () => resolvedItems.map((item) => item.url).join("\u001f"),
-    [resolvedItems],
-  );
-
-  React.useEffect(() => {
-    setNaturalSizeMap({});
-    setFailedImages(new Set());
-  }, [urlKey]);
-
-  const unresolvedLocalItems = React.useMemo(() => {
-    const source = (items && items.length > 0 ? items : urls) as Array<unknown>;
-    const result: Array<{ localFileId: string; assetId: string | null }> = [];
-
-    for (const entry of source) {
-      if (typeof entry !== "object" || !entry) continue;
-
-      const media = entry as Partial<UploadedImage> & {
-        url?: unknown;
-        remoteUrl?: unknown;
-        localUrl?: unknown;
-      };
-
-      const hasNonBlob = [media.remoteUrl, media.localUrl, media.url].some(
-        (v) =>
-          typeof v === "string" &&
-          !v.startsWith("blob:") &&
-          v.trim().length > 0,
-      );
-      if (hasNonBlob) continue;
-
-      const localFileId = media.localFileId ?? media.assetId ?? null;
-      if (!localFileId) continue;
-
-      result.push({ localFileId, assetId: media.assetId ?? null });
-    }
-
-    return result;
-  }, [items, urls]);
-
-  const handleLocalResolved = useCallback(
-    (localFileId: string, url: string | null) => {
-      if (url) {
-        setResolvedLocalUrlMap((prev) => {
-          if (prev[localFileId] === url) return prev;
-          return { ...prev, [localFileId]: url };
-        });
-      } else {
-        setFailedLocalFileIds((prev) => {
-          if (prev.has(localFileId)) return prev;
-          const next = new Set(prev);
-          next.add(localFileId);
-          return next;
-        });
+          key: entry,
+          url: entry,
+          layout: null,
+          scale: 1,
+          x: 0,
+          naturalW: null,
+          naturalH: null,
+        } satisfies DisplayImage;
       }
-    },
-    [],
-  );
 
-  const unresolvedRemoteItems = React.useMemo(() => {
-    return unresolvedLocalItems.filter(
-      ({ localFileId, assetId }) =>
-        !resolvedLocalUrlMap[localFileId] && Boolean(assetId),
-    );
-  }, [unresolvedLocalItems, resolvedLocalUrlMap]);
+      return {
+        key: entry.assetId,
+        url: null,
+        layout: entry.layout ?? null,
+        scale: entry.scale ?? 1,
+        x: entry.x ?? 0,
+        naturalW: entry.naturalW ?? null,
+        naturalH: entry.naturalH ?? null,
+        ref: entry,
+      };
+    });
+  }, [items]);
 
   useEffect(() => {
-    if (unresolvedRemoteItems.length === 0) return;
-
-    const userId = currentUser?.uid;
-    if (!userId) return;
-
-    const needsFetch: typeof unresolvedRemoteItems = [];
-
-    setResolvedRemoteUrlMap((prev) => {
-      let changed = false;
-      const next = { ...prev };
-
-      for (const item of unresolvedRemoteItems) {
-        if (!item.assetId) {
-          needsFetch.push(item);
-          continue;
-        }
-
-        const cached = getCachedRemoteUrl(item.assetId);
-        if (cached) {
-          if (next[item.assetId] !== cached) {
-            next[item.assetId] = cached;
-            changed = true;
-          }
-        } else {
-          needsFetch.push(item);
-        }
-      }
-
-      return changed ? next : prev;
-    });
-
-    if (needsFetch.length === 0) return;
-
     let cancelled = false;
 
     const run = async () => {
-      const entries = await Promise.all(
-        needsFetch.map(async ({ assetId }) => {
-          if (!assetId) return null;
-
-          try {
-            const db = await getLocalDb(userId);
-            const asset = (await db.images.get(assetId)) as
-              | { remoteKey?: string }
-              | undefined;
-            const remoteKey = asset?.remoteKey;
-            if (!remoteKey) return null;
-
-            const remoteUrl = await getDownloadURL(
-              storageRef(storage, remoteKey),
-            );
-
-            if (import.meta.env.DEV) {
-              console.info("[CardMedia] image source=remote", {
-                assetId,
-                remoteKey,
-              });
-            }
-
-            return { id: assetId, url: remoteUrl };
-          } catch {
-            return null;
-          }
+      const resolved = await Promise.all(
+        normalizedItems.map(async (item) => {
+          if (typeof item.url === "string") return item;
+          const result = await resolveCardImageUrl(item.ref, currentUser?.uid);
+          return {
+            key: item.key,
+            url: result.url,
+            layout: result.layout ?? null,
+            scale: result.scale ?? 1,
+            x: result.x ?? 0,
+            naturalW: result.naturalW ?? null,
+            naturalH: result.naturalH ?? null,
+          } satisfies DisplayImage;
         }),
       );
 
-      if (cancelled) return;
-
-      setResolvedRemoteUrlMap((prev) => {
-        let changed = false;
-        const next = { ...prev };
-
-        for (const pair of entries) {
-          if (!pair) continue;
-          if (next[pair.id] === pair.url) continue;
-          next[pair.id] = pair.url;
-          changed = true;
-        }
-
-        return changed ? next : prev;
-      });
+      if (!cancelled) {
+        setDisplayImages(resolved);
+        setFailedImages(new Set());
+      }
     };
 
     void run();
-
     return () => {
       cancelled = true;
     };
-  }, [currentUser?.uid, unresolvedRemoteItems]);
+  }, [currentUser?.uid, normalizedItems]);
 
-  const handleImageError = (index: number) => {
-    setFailedImages((prev) => new Set(prev).add(index));
-    console.error(
-      `Image load failed at index ${index}:`,
-      resolvedItems[index]?.url,
-    );
-  };
-
-  const copyImage = React.useCallback(async (imageUrl: string) => {
-    if (!imageUrl) return;
-
+  const copyImage = async (imageUrl: string) => {
     try {
       const response = await fetch(imageUrl);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
       const blob = await response.blob();
-
       if (
         navigator.clipboard?.write &&
         typeof ClipboardItem !== "undefined" &&
@@ -381,174 +179,104 @@ export const ImageGallery = ({
             [blob.type]: blob,
           }),
         ]);
-        console.log("image copied");
         return;
       }
-
       await webClipboardAdapter.writeText(imageUrl);
-      console.log("url copied");
-    } catch (error) {
-      console.error("copy failed", error);
-
-      try {
-        await webClipboardAdapter.writeText(imageUrl);
-      } catch {
-        alert("画像のコピーに失敗しました。");
-      }
+    } catch {
+      await webClipboardAdapter.writeText(imageUrl);
     }
-  }, []);
+  };
 
-  const downloadImage = React.useCallback(
-    async (imageUrl: string, index: number) => {
-      if (!imageUrl) return;
+  const downloadImage = async (imageUrl: string, index: number) => {
+    const response = await fetch(imageUrl);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const blob = await response.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    const ext =
+      blob.type === "image/png"
+        ? "png"
+        : blob.type === "image/webp"
+          ? "webp"
+          : "jpg";
+    const a = document.createElement("a");
+    a.href = objectUrl;
+    a.download = `uploaded-image-${index + 1}.${ext}`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(objectUrl);
+  };
 
-      try {
-        const response = await fetch(imageUrl);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-        const blob = await response.blob();
-        const objectUrl = URL.createObjectURL(blob);
-        const ext =
-          blob.type === "image/png"
-            ? "png"
-            : blob.type === "image/webp"
-              ? "webp"
-              : blob.type === "image/gif"
-                ? "gif"
-                : "jpg";
-
-        const a = document.createElement("a");
-        a.href = objectUrl;
-        a.download = `uploaded-image-${index + 1}.${ext}`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(objectUrl);
-      } catch (error) {
-        console.error("Failed to download image:", error);
-
-        const a = document.createElement("a");
-        a.href = imageUrl;
-        a.download = `uploaded-image-${index + 1}`;
-        a.rel = "noopener noreferrer";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-      }
-    },
-    [],
-  );
-
-  const pendingLocalFileIds = React.useMemo(() => {
-    const s = new Set<string>();
-
-    for (const { localFileId } of unresolvedLocalItems) {
-      if (
-        !resolvedLocalUrlMap[localFileId] &&
-        !failedLocalFileIds.has(localFileId)
-      ) {
-        s.add(localFileId);
-      }
-    }
-
-    return s;
-  }, [unresolvedLocalItems, resolvedLocalUrlMap, failedLocalFileIds]);
-
-  if (!resolvedItems || resolvedItems.length === 0) return null;
+  if (!displayImages || displayImages.length === 0) return null;
 
   return (
-    <>
-      {unresolvedLocalItems.map(({ localFileId }) => (
-        <LocalBlobUrlResolverEffect
-          key={localFileId}
-          localFileId={localFileId}
-          userId={currentUser?.uid}
-          onResolved={handleLocalResolved}
-        />
-      ))}
+    <div className="w-full">
+      {displayImages.map((item, index) => (
+        <div key={item.key || index} className="relative group isolate">
+          {!failedImages.has(index) && item.url ? (
+            <>
+              <ImageFrame
+                src={item.url}
+                alt={`Image ${index + 1}`}
+                displayMode={displayMode}
+                zoom={zoom}
+                scale={item.scale ?? 1}
+                x={item.x ?? 0}
+                layoutBaseWidthPx={item.layout?.baseWidthPx ?? null}
+                cropX={item.layout?.cropX ?? null}
+                fixedReferenceFrameWidthPx={
+                  FIXED_IMAGE_REFERENCE_FRAME_WIDTH_PX
+                }
+                naturalW={item.naturalW ?? null}
+                naturalH={item.naturalH ?? null}
+                className="bg-transparent"
+                imgClassName="cursor-pointer pointer-events-none"
+                onError={() => {
+                  setFailedImages((prev) => {
+                    const next = new Set(prev);
+                    next.add(index);
+                    return next;
+                  });
+                }}
+              />
 
-      <div className="w-full">
-        {resolvedItems.map((item, index) => (
-          <div key={item.key || index} className="relative group isolate">
-            {!failedImages.has(index) && item.url ? (
-              <>
-                <ImageFrame
-                  src={item.url}
-                  alt={`Image ${index + 1}`}
-                  displayMode={displayMode}
-                  zoom={zoom}
-                  scale={item.scale}
-                  x={item.x}
-                  layoutBaseWidthPx={item.layout?.baseWidthPx ?? null}
-                  cropX={item.layout?.cropX ?? null}
-                  fixedReferenceFrameWidthPx={
-                    FIXED_IMAGE_REFERENCE_FRAME_WIDTH_PX
-                  }
-                  naturalW={item.naturalW ?? naturalSizeMap[index]?.w ?? null}
-                  naturalH={item.naturalH ?? naturalSizeMap[index]?.h ?? null}
-                  className="bg-transparent"
-                  imgClassName="cursor-pointer pointer-events-none"
-                  onNaturalSize={({ naturalW, naturalH }) => {
-                    setNaturalSizeMap((prev) => {
-                      const current = prev[index];
-                      if (current?.w === naturalW && current?.h === naturalH) {
-                        return prev;
-                      }
-
-                      return { ...prev, [index]: { w: naturalW, h: naturalH } };
-                    });
+              <div className="absolute top-1 left-1 z-[999] pointer-events-auto flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 supports-[hover:none]:opacity-100">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="icon"
+                  className="h-6 w-6 bg-white/90"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    void copyImage(item.url!);
                   }}
-                  onError={() => handleImageError(index)}
-                />
-
-                <div className="absolute top-1 left-1 z-[999] pointer-events-auto flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 supports-[hover:none]:opacity-100">
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="icon"
-                    className="h-6 w-6 bg-white/90"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      void copyImage(item.url);
-                    }}
-                    aria-label="画像をコピー"
-                  >
-                    <Copy className="w-2.5 h-2.5" />
-                  </Button>
-
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="icon"
-                    className="h-6 w-6 bg-white/90"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      void downloadImage(item.url, index);
-                    }}
-                    aria-label="画像をダウンロード"
-                  >
-                    <Download className="w-2.5 h-2.5" />
-                  </Button>
-                </div>
-              </>
-            ) : item.localFileId &&
-              pendingLocalFileIds.has(item.localFileId) ? (
-              <div className="w-full h-48 bg-slate-100 flex items-center justify-center text-slate-400">
-                <div className="w-6 h-6 border-2 border-slate-300 border-t-slate-400 rounded-full animate-spin" />
+                  aria-label="画像をコピー"
+                >
+                  <Copy className="w-2.5 h-2.5" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="icon"
+                  className="h-6 w-6 bg-white/90"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    void downloadImage(item.url!, index);
+                  }}
+                  aria-label="画像をダウンロード"
+                >
+                  <Download className="w-2.5 h-2.5" />
+                </Button>
               </div>
-            ) : (
-              <div className="w-full h-48 bg-slate-100 flex items-center justify-center text-slate-400 flex-col gap-2">
-                <ImageIcon className="w-8 h-8 text-slate-300" />
-                <span className="text-xs">
-                  {item.url
-                    ? "画像の読み込みに失敗しました"
-                    : "画像が壊れているため表示できません"}
-                </span>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-    </>
+            </>
+          ) : (
+            <div className="w-full h-48 bg-slate-100 flex items-center justify-center text-slate-400 flex-col gap-2">
+              <ImageIcon className="w-8 h-8 text-slate-300" />
+              <span className="text-xs">画像を表示できません</span>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
   );
 };

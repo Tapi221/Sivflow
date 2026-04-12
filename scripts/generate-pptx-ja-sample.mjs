@@ -6,7 +6,9 @@ const parseArgs = (argv) => {
   const outIndex = argv.indexOf("--out");
   if (outIndex >= 0) {
     const value = argv[outIndex + 1];
-    return { outDir: typeof value === "string" && value.trim() ? value.trim() : "tmp" };
+    return {
+      outDir: typeof value === "string" && value.trim() ? value.trim() : "tmp",
+    };
   }
   return { outDir: "tmp" };
 };
