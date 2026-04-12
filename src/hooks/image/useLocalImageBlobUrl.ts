@@ -1,9 +1,3 @@
-/**
- * useLocalImageBlobUrl
- *
- * ローカル IndexedDB の blob URL を取得・pin・unpin する共通 hook。
- */
-
 import { useEffect, useState } from "react";
 import {
   getOrCreateImageBlobUrl,

@@ -1,4 +1,4 @@
-import "@/services/localdb";
+import "@/services/localDB";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -7,6 +7,12 @@ import "katex/dist/katex.min.css";
 import App from "./App";
 import { ErrorBoundary } from "./components/common/ErrorBoundary";
 import { startTabPresence } from "@/utils/tabPresence";
+
+declare global {
+  interface WindowEventMap {
+    "vite:preloadError": Event;
+  }
+}
 
 // Manifest検証（デバッグ用・開発環境のみ）
 if (import.meta.env.DEV && typeof window !== "undefined") {
@@ -21,14 +27,14 @@ if (import.meta.env.DEV && typeof window !== "undefined") {
       console.log("[Manifest Debug] First 100 chars:", text.substring(0, 100));
       if (!text.trim().startsWith("{")) {
         console.error(
-          "[Manifest Debug] ⚠️ Manifest is NOT JSON! Got HTML or other format.",
+          "[Manifest Debug] Manifest is NOT JSON! Got HTML or other format.",
         );
       } else {
-        console.log("[Manifest Debug] ✅ Manifest appears to be valid JSON");
+        console.log("[Manifest Debug] Manifest appears to be valid JSON");
       }
     })
     .catch((err) => {
-      console.error("[Manifest Debug] ❌ Failed to fetch manifest:", err);
+      console.error("[Manifest Debug] Failed to fetch manifest:", err);
     });
 }
 
@@ -132,8 +138,10 @@ window.addEventListener("unhandledrejection", (event) => {
   }
 });
 
-window.addEventListener("vite:preloadError" as unknown, () => {
-  logBootstrapFault("vite.preloadError", {});
+window.addEventListener("vite:preloadError", (event) => {
+  logBootstrapFault("vite.preloadError", {
+    type: event.type,
+  });
   hardReloadOnce(VITE_PRELOAD_RELOAD_KEY);
 });
 
@@ -190,12 +198,9 @@ if ("serviceWorker" in navigator && import.meta.env.PROD) {
 
         installUpdateFlow(registration);
         void registration.update();
-        window.setInterval(
-          () => {
-            void registration.update();
-          },
-          1000 * 60 * 60,
-        );
+        window.setInterval(() => {
+          void registration.update();
+        }, 1000 * 60 * 60);
       })
       .catch((registrationError) => {
         console.log("SW registration failed: ", registrationError);
@@ -227,8 +232,8 @@ if ("serviceWorker" in navigator && import.meta.env.PROD) {
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // 5分間キャッシュ
-      gcTime: 1000 * 60 * 30, // 30分間保持
+      staleTime: 1000 * 60 * 5,
+      gcTime: 1000 * 60 * 30,
     },
   },
 });
