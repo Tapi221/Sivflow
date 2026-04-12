@@ -18,7 +18,7 @@ import { DEFAULT_LAYOUT_ROWS } from "@/domain/card/extraRows";
 import { useCards } from "@/hooks/card/useCards";
 import { useTags } from "@/hooks/settings/useTags";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
-import type { Card, UserSettings } from "@/types";
+import type { Card, CardPatch, UserSettings } from "@/types";
 
 type UseCardsResult = {
   cards: Card[];
@@ -73,7 +73,7 @@ export const useCardEditorPaneController = ({
   );
 
   const updateCardAsync = React.useCallback(
-    async (id: string, data: Partial<Card>): Promise<unknown> => {
+    async (id: string, data: CardPatch): Promise<unknown> => {
       return await Promise.resolve(updateCard(id, data));
     },
     [updateCard],
