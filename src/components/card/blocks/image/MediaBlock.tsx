@@ -4,11 +4,11 @@ import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
 import { ImageBlockContent } from "@/components/card/blocks/image/ImageBlockContent";
 import { ImageBlockShell } from "@/components/card/blocks/image/ImageBlockShell";
 import { cn } from "@/lib/utils";
-import type { UploadedImage } from "@/types";
+import type { CardImageRef } from "@/types/domain/assets";
 
 interface MediaBlockProps {
-  data: UploadedImage[];
-  onChange: (data: UploadedImage[]) => void;
+  data: CardImageRef[];
+  onChange: (data: CardImageRef[]) => void;
   onDelete: () => void;
   onDuplicate: () => void;
   dragHandleProps?: unknown;
@@ -19,8 +19,6 @@ interface MediaBlockProps {
   onFilesExcess?: (files: File[]) => void;
   isActive?: boolean;
   showDelete?: boolean;
-
-  // ---- 1行移動（rowOffset）用：BlockEditor から渡す ----
   canMoveUp?: boolean;
   canMoveDown?: boolean;
   onMoveUp?: () => void;
@@ -42,8 +40,6 @@ const MediaBlockInner = ({
   onFilesExcess,
   isActive,
   showDelete,
-
-  // move props
   canMoveUp,
   canMoveDown,
   onMoveUp,
@@ -89,10 +85,7 @@ const MediaBlockInner = ({
   );
 };
 
-const areMediaBlockPropsEqual = (
-  prev: MediaBlockProps,
-  next: MediaBlockProps,
-) =>
+const areMediaBlockPropsEqual = (prev: MediaBlockProps, next: MediaBlockProps) =>
   prev.data === next.data &&
   prev.dragHandleClassName === next.dragHandleClassName &&
   prev.accentColor === next.accentColor &&

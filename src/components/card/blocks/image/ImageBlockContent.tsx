@@ -1,7 +1,7 @@
 import { ImageGallery } from "@/components/card/media/CardMedia";
 import MediaUploader from "@/components/card/media/MediaUploader";
 import type { ImageGalleryItem } from "@/components/card/media/types";
-import type { UploadedImage } from "@/types";
+import type { CardImageRef } from "@/types/domain/assets";
 
 type ImageBlockContentProps =
   | {
@@ -14,8 +14,8 @@ type ImageBlockContentProps =
     }
   | {
       mode: "edit";
-      urls: UploadedImage[];
-      onChange: (data: UploadedImage[]) => void;
+      urls: CardImageRef[];
+      onChange: (data: CardImageRef[]) => void;
       initialFile?: File;
       onConsumeInitialFile?: () => void;
       onFilesExcess?: (files: File[]) => void;
