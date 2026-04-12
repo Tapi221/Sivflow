@@ -1,12 +1,12 @@
 import { useMemo } from "react";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
-import { buildExplorerSelectedState } from "../services/buildExplorerSelectedState";
+import { buildExplorerSelectedState } from "@/features/explorer/services/buildExplorerSelectedState";
 import {
   buildCardById,
   buildDocumentById,
   buildFolderById,
-} from "../services/buildExplorerLookups";
-import { normalizeFolders } from "../services/normalizeFolders";
+} from "@/features/explorer/services/buildExplorerLookups";
+import { normalizeFolders } from "@/features/explorer/services/normalizeFolders";
 
 type Params = {
   folders: Folder[];

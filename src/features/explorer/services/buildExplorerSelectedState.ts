@@ -1,6 +1,6 @@
 import type { SelectedExplorerItem } from "@/types";
-import { getSelectedCardId } from "../utils/getSelectedCardId";
-import { getSelectedDocumentId } from "../utils/getSelectedDocumentId";
+import { getSelectedCardId } from "@/features/explorer/utils/getSelectedCardId";
+import { getSelectedDocumentId } from "@/features/explorer/utils/getSelectedDocumentId";
 
 export const buildExplorerSelectedState = (
   selectedItem: SelectedExplorerItem,

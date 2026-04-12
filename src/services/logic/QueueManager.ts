@@ -2,7 +2,7 @@ import type {
   BatchConstraint,
   IQueueManager,
   SyncTask,
-} from "../interfaces/ISyncService";
+} from "@/services/interfaces/ISyncService";
 import type { LocalDBLike } from "@/services/localDB";
 import type { SyncQueueItem } from "@/types/domain/sync";
 import { normalizeFolderWithSilent } from "@/domain/folder/normalizers/normalizeFolder";

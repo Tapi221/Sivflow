@@ -1,8 +1,8 @@
 import {
   EMPTY_EXPLORER_BREADCRUMB_CONTEXT,
   type ExplorerBreadcrumbContext,
-} from "../contracts/explorerBreadcrumbContext";
-import type { ExplorerControllerState } from "../contracts/explorerControllerState";
+} from "@/features/explorer/contracts/explorerBreadcrumbContext";
+import type { ExplorerControllerState } from "@/features/explorer/contracts/explorerControllerState";
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 
 export const createInitialExplorerState = (

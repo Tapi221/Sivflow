@@ -7,15 +7,15 @@ import { useFolders } from "@/hooks/folder/useFolders";
 import { useDocuments } from "@/hooks/platform/useDocuments";
 import { cn } from "@/lib/utils";
 import type { SelectedExplorerItem } from "@/types";
-import { notifySelectedFolderChanged } from "../adapters/web/explorerSelectionNotifier";
-import type { FoldersRouteAdapter } from "../adapters/web/useFoldersRouteAdapter";
-import { useWorkspaceScrollController } from "../adapters/web/useWorkspaceScrollController";
-import type { ExplorerRouteState } from "../contracts/explorerRouteState";
-import { useExplorerController } from "../controller/useExplorerController";
-import { useExplorerBreadcrumbSync } from "../hooks/useExplorerBreadcrumbSync";
-import { useExplorerFolderSelectionBridge } from "../hooks/useExplorerFolderSelectionBridge";
-import { useExplorerLookups } from "../hooks/useExplorerLookups";
-import { useExplorerRouteSync } from "../hooks/useExplorerRouteSync";
+import { notifySelectedFolderChanged } from "@/features/explorer/adapters/web/explorerSelectionNotifier";
+import type { FoldersRouteAdapter } from "@/features/explorer/adapters/web/useFoldersRouteAdapter";
+import { useWorkspaceScrollController } from "@/features/explorer/adapters/web/useWorkspaceScrollController";
+import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
+import { useExplorerController } from "@/features/explorer/controller/useExplorerController";
+import { useExplorerBreadcrumbSync } from "@/features/explorer/hooks/useExplorerBreadcrumbSync";
+import { useExplorerFolderSelectionBridge } from "@/features/explorer/hooks/useExplorerFolderSelectionBridge";
+import { useExplorerLookups } from "@/features/explorer/hooks/useExplorerLookups";
+import { useExplorerRouteSync } from "@/features/explorer/hooks/useExplorerRouteSync";
 
 type FoldersScreenProps = {
   route: FoldersRouteAdapter;

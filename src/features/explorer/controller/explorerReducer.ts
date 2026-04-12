@@ -1,5 +1,5 @@
-import { areExplorerBreadcrumbContextsEqual } from "../contracts/explorerBreadcrumbContext";
-import type { ExplorerControllerState } from "../contracts/explorerControllerState";
+import { areExplorerBreadcrumbContextsEqual } from "@/features/explorer/contracts/explorerBreadcrumbContext";
+import type { ExplorerControllerState } from "@/features/explorer/contracts/explorerControllerState";
 import type { ExplorerAction } from "./explorerActionTypes";
 import { resetBreadcrumbContext } from "./explorerState";
 
