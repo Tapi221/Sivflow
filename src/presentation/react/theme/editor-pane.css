@@ -1,0 +1,133 @@
+@layer components {
+  .ds-editor-pane {
+    background: var(--ds-semantic-color-background-sidebar);
+    color: var(--ds-semantic-color-text-primary);
+    border-color: var(--ds-semantic-color-border-default);
+  }
+
+  .ds-editor-pane__body {
+    background: var(--ds-semantic-color-background-sidebar);
+    color: var(--ds-semantic-color-text-primary);
+  }
+
+  .ds-editor-pane__section-title {
+    color: var(--ds-semantic-color-text-secondary);
+  }
+
+  .ds-editor-pane__surface {
+    border: 1px solid var(--ds-semantic-color-border-default);
+    background: var(--ds-semantic-color-background-app);
+    color: var(--ds-semantic-color-text-primary);
+    border-radius: var(--ds-semantic-radius-control);
+    box-shadow: var(--ds-semantic-elevation-control-inset);
+  }
+
+  .ds-editor-pane__surface--muted {
+    background: var(--ds-semantic-color-background-sidebar-active);
+  }
+
+  .ds-editor-pane__chart,
+  .ds-editor-pane__history,
+  .ds-editor-pane__toolbar,
+  .ds-editor-pane__stats {
+    border: 1px solid var(--ds-semantic-color-border-default);
+    background: color-mix(
+      in srgb,
+      var(--ds-semantic-color-background-app) 78%,
+      var(--ds-semantic-color-background-sidebar) 22%
+    );
+    border-radius: var(--ds-semantic-radius-control);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  }
+
+  .ds-surface-button {
+    border: 1px solid var(--ds-semantic-color-border-default);
+    background: var(--ds-semantic-color-background-app);
+    color: var(--ds-semantic-color-text-secondary);
+    border-radius: var(--ds-semantic-radius-control);
+    transition:
+      background-color var(--ds-semantic-motion-interactive),
+      border-color var(--ds-semantic-motion-interactive),
+      color var(--ds-semantic-motion-interactive),
+      box-shadow var(--ds-semantic-motion-interactive),
+      opacity var(--ds-semantic-motion-interactive);
+  }
+
+  .ds-surface-button--convex {
+    box-shadow: var(--ds-semantic-elevation-control-raised);
+  }
+
+  .ds-surface-button--concave {
+    box-shadow: var(--ds-semantic-elevation-control-inset);
+  }
+
+  .ds-surface-button--active,
+  .ds-surface-button--convexActive {
+    border-color: var(--ds-semantic-color-border-strong);
+    background: color-mix(
+      in srgb,
+      var(--ds-semantic-color-action-primary-soft) 50%,
+      var(--ds-semantic-color-background-app) 50%
+    );
+    color: color-mix(
+      in srgb,
+      var(--ds-semantic-color-action-primary) 78%,
+      var(--ds-semantic-color-text-strong) 22%
+    );
+    box-shadow: var(--ds-semantic-elevation-control-raised);
+  }
+
+  .ds-surface-button:hover:not(:disabled) {
+    background: color-mix(
+      in srgb,
+      var(--ds-semantic-color-background-app) 92%,
+      var(--ds-semantic-color-background-sidebar-active) 8%
+    );
+    color: var(--ds-semantic-color-text-strong);
+  }
+
+  .ds-surface-button:active:not(:disabled) {
+    background: color-mix(
+      in srgb,
+      var(--ds-semantic-color-background-app) 86%,
+      var(--ds-semantic-color-background-sidebar-active) 14%
+    );
+  }
+
+  .ds-table {
+    width: 100%;
+    color: var(--ds-semantic-color-text-primary);
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .ds-table__head {
+    color: var(--ds-semantic-color-text-secondary);
+  }
+
+  .ds-table__row {
+    transition:
+      background-color var(--ds-semantic-motion-interactive),
+      color var(--ds-semantic-motion-interactive);
+  }
+
+  .ds-table__row {
+    border-color: var(--ds-semantic-color-border-default);
+  }
+
+  .ds-table__row:hover {
+    background: color-mix(
+      in srgb,
+      var(--ds-semantic-color-background-app) 80%,
+      var(--ds-semantic-color-background-sidebar-active) 20%
+    );
+  }
+
+  .ds-table__row[data-state="selected"] {
+    background: var(--ds-semantic-color-action-primary-soft);
+  }
+
+  .ds-table__cell {
+    color: inherit;
+  }
+}

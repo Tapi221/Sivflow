@@ -16,8 +16,7 @@ export const FOLDER_ROW_HEIGHT_PX = 32;
 export const FOLDER_ROW_ICON_SIZE_CLASS = "h-4 w-4";
 export const FOLDER_ROW_TITLE_CLASS =
   "ds-list-item__title truncate text-[14px]";
-export const FOLDER_ROW_ICON_MUTED_CLASS =
-  "ds-list-item__icon";
+export const FOLDER_ROW_ICON_MUTED_CLASS = "ds-list-item__icon";
 export const FOLDER_ROW_ICON_ACTIVE_CLASS =
   "text-[var(--ds-semantic-color-text-primary)]";
 

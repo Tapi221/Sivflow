@@ -26,9 +26,9 @@ describe("form control primitives", () => {
 
     expect(screen.getByText("Name").className).toContain("ds-label");
     expect(screen.getByPlaceholderText("Name").className).toContain("ds-input");
-    expect(screen.getByRole("checkbox", { name: "Accept" }).className).toContain(
-      "ds-checkbox",
-    );
+    expect(
+      screen.getByRole("checkbox", { name: "Accept" }).className,
+    ).toContain("ds-checkbox");
     expect(screen.getByRole("switch", { name: "Enabled" }).className).toContain(
       "ds-switch",
     );

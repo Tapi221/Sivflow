@@ -1202,7 +1202,7 @@ const CardMetaPanelInner = ({
                     commitTitle(e.currentTarget.value, { flush: true });
                   }
                 }}
-                className="h-[var(--meta-row-px)] w-full rounded-md border border-[var(--surface-border)] bg-white px-2 text-[length:var(--surface-placeholder-font-size)] leading-[var(--meta-row-px)] text-[#6e6466] surface-concave outline-none placeholder:text-[var(--surface-placeholder-text)] focus:border-[#cfcfcf] focus:bg-white"
+                className="ds-input h-[var(--meta-row-px)] w-full px-2 text-[length:var(--surface-placeholder-font-size)] leading-[var(--meta-row-px)] outline-none"
                 placeholder="タイトル"
               />
             </div>

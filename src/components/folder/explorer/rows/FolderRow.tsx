@@ -258,10 +258,7 @@ export const FolderRow: React.FC<FolderRowProps> = ({
               <input
                 ref={attachEditInputRef}
                 aria-label="フォルダ名の編集"
-                className={cn(
-                  EXPLORER_ROW_INPUT_CLASS,
-                  "z-10",
-                )}
+                className={cn(EXPLORER_ROW_INPUT_CLASS, "z-10")}
                 style={{ userSelect: "text", WebkitUserSelect: "text" }}
                 defaultValue={editingName}
                 onFocus={(e) => {

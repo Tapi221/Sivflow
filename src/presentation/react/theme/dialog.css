@@ -50,11 +50,12 @@
   .ds-dialog__close:focus-visible {
     box-shadow:
       0 0 0 1px var(--ds-semantic-color-action-primary),
-      0 0 0 3px color-mix(
-        in srgb,
-        var(--ds-semantic-color-action-primary) 22%,
-        transparent
-      );
+      0 0 0 3px
+        color-mix(
+          in srgb,
+          var(--ds-semantic-color-action-primary) 22%,
+          transparent
+        );
   }
 
   .ds-dialog__title {

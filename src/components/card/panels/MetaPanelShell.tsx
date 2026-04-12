@@ -20,7 +20,7 @@ export const MetaPanelShell = ({
   return (
     <aside
       className={cn(
-        `meta-panel h-full w-80 shrink-0 border-l border-[#d7d9de] bg-sidebar font-serif text-sm text-[var(--sidebar-text)] ${UI_TYPO} ${NUMERIC_TYPO}`,
+        `meta-panel ds-editor-pane h-full w-80 shrink-0 border-l font-serif text-sm ${UI_TYPO} ${NUMERIC_TYPO}`,
         className,
       )}
       style={
@@ -28,13 +28,16 @@ export const MetaPanelShell = ({
           "--meta-row-px": "var(--app-row-px)",
           "--meta-font-size": "var(--ui-font-size-sm)",
           "--meta-action-min-h": "var(--meta-row-px)",
-          backgroundColor: "var(--sidebar-bg)",
+          backgroundColor: "var(--ds-semantic-color-background-sidebar)",
           ...style,
         } as CSSProperties
       }
     >
       <div
-        className={cn("h-full overflow-y-auto bg-sidebar p-2", bodyClassName)}
+        className={cn(
+          "ds-editor-pane__body h-full overflow-y-auto p-2",
+          bodyClassName,
+        )}
       >
         <div className={cn("space-y-6", contentClassName)}>{children}</div>
       </div>
