@@ -1,313 +1,37 @@
-import { strictValidateBeforeSave } from "@/utils/imageValidation";
-import type { AssetRecord, SyncQueueItem, UploadedImage } from "@/types";
-import { getLocalDb, isBackingStoreOpenError } from "@/services/localDB";
-import { warnOncePerSession } from "@/services/localDBRuntimeState";
-import { auth, storage } from "@/services/firebase";
-import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import { processPersistentOfflineQueue } from "@/application/usecases/processPersistentOfflineQueue";
+import {
+  createAssetQueueImage,
+  type AssetUploadRequest,
+  type QueueItem,
+} from "@/application/usecases/persistentOfflineQueueModels";
+import { IndexedDbPersistentOfflineQueueStore } from "@/infrastructure/offlineQueue/IndexedDbPersistentOfflineQueueStore";
+import {
+  handleQueuedUploadPermanentFailure,
+  handleQueuedUploadSuccess,
+  shouldSkipQueuedDocumentUpload,
+} from "@/infrastructure/offlineQueue/persistentOfflineQueueEffects";
+import { uploadQueuedAsset } from "@/infrastructure/offlineQueue/uploadQueuedAsset";
+import { bindPersistentQueueAutoProcessing } from "@/platform/web/bindPersistentQueueAutoProcessing";
+import type { UploadedImage } from "@/types";
 
-type DocumentLike = {
-  uploadStatus?: string | null;
-  remoteUrl?: string | null;
-  downloadUrl?: string | null;
-  localFileId?: string | null;
-  localUrl?: string | null;
-  blobUrl?: string | null;
-};
-
-type AssetLikeRecord = Partial<AssetRecord> & Partial<UploadedImage>;
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null;
-
-const getString = (
-  record: Record<string, unknown>,
-  key: string,
-): string | null => {
-  const value = record[key];
-  return typeof value === "string" && value.trim().length > 0
-    ? value.trim()
-    : null;
-};
-
-const getNumber = (
-  record: Record<string, unknown>,
-  key: string,
-): number | null => {
-  const value = record[key];
-  return typeof value === "number" && Number.isFinite(value) ? value : null;
-};
-
-const getDate = (record: Record<string, unknown>, key: string): Date | null => {
-  const value = record[key];
-  return value instanceof Date ? value : null;
-};
-
-const toDocumentLike = (value: unknown): DocumentLike => {
-  if (!isRecord(value)) return {};
-  return {
-    uploadStatus: getString(value, "uploadStatus"),
-    remoteUrl: getString(value, "remoteUrl"),
-    downloadUrl: getString(value, "downloadUrl"),
-    localFileId: getString(value, "localFileId"),
-    localUrl: getString(value, "localUrl"),
-    blobUrl: getString(value, "blobUrl"),
-  };
-};
-
-const toAssetLikeRecord = (value: unknown): AssetLikeRecord | null => {
-  if (!isRecord(value)) return null;
-  return {
-    id: getString(value, "id") ?? undefined,
-    userId: getString(value, "userId") ?? undefined,
-    mime: getString(value, "mime") ?? undefined,
-    size: getNumber(value, "size") ?? undefined,
-    localBlobId: getString(value, "localBlobId") ?? undefined,
-    localStatus:
-      getString(value, "localStatus") === "missing" ? "missing" : "present",
-    remoteKey: getString(value, "remoteKey") ?? undefined,
-    remoteStatus: (() => {
-      const status = getString(value, "remoteStatus");
-      return status === "none" ||
-        status === "uploading" ||
-        status === "ready" ||
-        status === "failed"
-        ? status
-        : undefined;
-    })(),
-    remoteUrlCache: getString(value, "remoteUrlCache") ?? undefined,
-    createdAt: getDate(value, "createdAt") ?? undefined,
-    retryCount: getNumber(value, "retryCount") ?? undefined,
-  };
-};
-
-const makeAssetRecord = ({
-  existing,
-  itemId,
-  userId,
-  mime,
-  size,
-  localBlobId,
-  remoteKey,
-  remoteStatus,
-  remoteUrlCache,
-  retryCount,
-}: {
-  existing: AssetLikeRecord | null;
-  itemId: string;
-  userId: string;
-  mime: string;
-  size: number;
-  localBlobId: string;
-  remoteKey: string | null;
-  remoteStatus: "uploading" | "ready" | "failed";
-  remoteUrlCache?: string | null;
-  retryCount: number;
-}): AssetRecord => {
-  const now = new Date();
-
-  return {
-    id: itemId,
-    userId: existing?.userId?.trim() || userId,
-    mime: existing?.mime?.trim() || mime || "application/octet-stream",
-    size: existing?.size ?? size,
-    localBlobId: existing?.localBlobId?.trim() || localBlobId,
-    localStatus: existing?.localStatus === "missing" ? "missing" : "present",
-    remoteKey: remoteKey ?? existing?.remoteKey ?? null,
-    remoteStatus,
-    remoteUrlCache: remoteUrlCache ?? existing?.remoteUrlCache ?? null,
-    createdAt: existing?.createdAt ?? now,
-    updatedAt: now,
-    retryCount,
-  };
-};
-
-interface QueueItem {
-  id: string;
-  image: UploadedImage;
-  fileData: ArrayBuffer;
-  fileName: string;
-  fileType: string;
-  retryCount: number;
-  enqueuedAt: number;
-}
-
-export interface AssetUploadRequest {
-  assetId: string;
-  userId: string;
-  remoteKey: string;
-  mime: string;
-  size: number;
-  fileName?: string;
-}
-
-/**
- * 永続化されたオフラインキュー
- */
 class PersistentOfflineQueue {
-  private readonly PPTX_MIME =
-    "application/vnd.openxmlformats-officedocument.presentationml.presentation";
-  private readonly DB_NAME = "offline_upload_queue";
-  private readonly STORE_NAME = "pending_uploads";
   private isProcessing = false;
-  private idbUnavailable = false;
-  private readonly memoryQueue = new Map<string, QueueItem>();
-
-  private requestToPromise<T>(request: IDBRequest<T>): Promise<T> {
-    return new Promise<T>((resolve, reject) => {
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
-  }
-
-  private isPdfQueueItem(
-    item: QueueItem | { fileType: string; fileName: string },
-  ): boolean {
-    return (
-      item.fileType === "application/pdf" ||
-      (typeof item.fileName === "string" &&
-        item.fileName.toLowerCase().endsWith(".pdf"))
-    );
-  }
-
-  private isPptxQueueItem(
-    item: QueueItem | { fileType: string; fileName: string },
-  ): boolean {
-    return (
-      item.fileType === this.PPTX_MIME ||
-      (typeof item.fileName === "string" &&
-        item.fileName.toLowerCase().endsWith(".pptx"))
-    );
-  }
-
-  private isDocumentQueueItem(
-    item: QueueItem | { fileType: string; fileName: string },
-  ): boolean {
-    return this.isPdfQueueItem(item) || this.isPptxQueueItem(item);
-  }
-
-  private getDocumentKindLabel(
-    item: QueueItem | { fileType: string; fileName: string },
-  ): "PDF" | "PPTX" | "DOC" {
-    if (this.isPdfQueueItem(item)) return "PDF";
-    if (this.isPptxQueueItem(item)) return "PPTX";
-    return "DOC";
-  }
-
-  private isDocumentUploadReady(doc: unknown): boolean {
-    const snapshot = toDocumentLike(doc);
-    if (snapshot.uploadStatus === "ready") return true;
-    if (
-      typeof snapshot.remoteUrl === "string" &&
-      snapshot.remoteUrl.length > 0
-    ) {
-      return true;
-    }
-    if (
-      typeof snapshot.downloadUrl === "string" &&
-      snapshot.downloadUrl.length > 0
-    ) {
-      return true;
-    }
-    return false;
-  }
-
-  private createAssetQueueImage = (
-    request: AssetUploadRequest,
-  ): UploadedImage => {
-    return {
-      id: request.assetId,
-      assetId: request.assetId,
-      localFileId: request.assetId,
-      status: "uploading",
-      remoteUrl: null,
-      storagePath: request.remoteKey,
-      contentType: request.mime,
-      size: request.size,
-      sizeBytes: request.size,
-      retryCount: 0,
-      updatedAt: new Date(),
-    };
-  };
-
-  private uploadQueuedFile = async (
-    file: File,
-    image: UploadedImage,
-  ): Promise<UploadedImage> => {
-    const user = auth.currentUser;
-    if (!user) {
-      throw new Error("Unauthenticated during background upload");
-    }
-
-    if (!image.storagePath) {
-      throw new Error("Queued upload is missing storagePath");
-    }
-
-    const storageRef = ref(storage, image.storagePath);
-    const uploadTask = uploadBytesResumable(storageRef, file);
-
-    return new Promise<UploadedImage>((resolve, reject) => {
-      uploadTask.on(
-        "state_changed",
-        () => {
-          // Progress hook reserved for future global UI integration.
-        },
-        (error) => {
-          reject(error);
-        },
-        async () => {
-          try {
-            const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
-            resolve({
-              ...image,
-              remoteUrl: downloadUrl as UploadedImage["remoteUrl"],
-              status: "ready",
-              updatedAt: new Date(),
-            });
-          } catch (error) {
-            reject(error);
-          }
-        },
-      );
-    });
-  };
+  private readonly store = new IndexedDbPersistentOfflineQueueStore();
 
   enqueueAssetUpload = async (
     request: AssetUploadRequest,
     file: File,
   ): Promise<void> => {
-    const queueImage = this.createAssetQueueImage(request);
+    const queueImage = createAssetQueueImage(request);
     await this.enqueue(queueImage, file);
   };
 
   processAssetQueue = async (): Promise<void> => {
-    await this.processQueue(this.uploadQueuedFile);
+    await this.processQueueItems(uploadQueuedAsset);
   };
 
-  private async getQueueItem(id: string): Promise<QueueItem | null> {
-    if (!id) return null;
-    if (this.idbUnavailable) {
-      return this.memoryQueue.get(id) ?? null;
-    }
-
-    try {
-      const db = await this.openDB();
-      const tx = db.transaction(this.STORE_NAME, "readonly");
-      const store = tx.objectStore(this.STORE_NAME);
-      const item = await this.requestToPromise(store.get(id));
-      return (item as QueueItem | undefined) ?? null;
-    } catch (error) {
-      this.activateMemoryFallback(error);
-      return this.memoryQueue.get(id) ?? null;
-    }
-  }
-
-  /**
-   * キューに追加（IndexedDB に永続化）
-   */
-  async enqueue(image: UploadedImage, file: File): Promise<void> {
-    // File を ArrayBuffer に変換して保存（tx作成前に完了させる）
+  enqueue = async (image: UploadedImage, file: File): Promise<void> => {
     const arrayBuffer = await file.arrayBuffer();
-
     const payload: QueueItem = {
       id: image.id,
       image,
@@ -318,7 +42,7 @@ class PersistentOfflineQueue {
       enqueuedAt: Date.now(),
     };
 
-    const existing = await this.getQueueItem(payload.id);
+    const existing = await this.store.getQueueItem(payload.id);
     if (existing) {
       console.info("[PersistentQueue] Deduplicating enqueue by document id", {
         id: payload.id,
@@ -327,46 +51,30 @@ class PersistentOfflineQueue {
       });
     }
 
-    if (this.idbUnavailable) {
-      this.memoryQueue.set(payload.id, payload);
-      console.log(
-        `[PersistentQueue] Enqueued in memory fallback: ${file.name}`,
-      );
-      return;
-    }
+    await this.store.enqueue(payload);
+    console.log(
+      this.store.isMemoryFallbackActive()
+        ? `[PersistentQueue] Enqueued in memory fallback: ${file.name}`
+        : `[PersistentQueue] Enqueued: ${file.name}`,
+    );
+  };
 
-    try {
-      const db = await this.openDB();
-      // tx作成〜store.putまでの間に await を挟まない
-      await new Promise<void>((resolve, reject) => {
-        const tx = db.transaction(this.STORE_NAME, "readwrite");
-        const store = tx.objectStore(this.STORE_NAME);
-        const req = store.put(payload);
-
-        req.onerror = () => reject(req.error);
-        tx.oncomplete = () => resolve();
-        tx.onerror = () => reject(tx.error ?? req.error);
-        tx.onabort = () =>
-          reject(tx.error ?? req.error ?? new Error("IDB tx aborted"));
-      });
-    } catch (error) {
-      this.activateMemoryFallback(error);
-      this.memoryQueue.set(payload.id, payload);
-      console.log(
-        `[PersistentQueue] Enqueued in memory fallback after IDB error: ${file.name}`,
-      );
-      return;
-    }
-
-    console.log(`[PersistentQueue] Enqueued: ${file.name}`);
-  }
-
-  /**
-   * キューを処理（アプリ起動時に自動実行）
-   */
-  async processQueue(
+  processQueue = async (
     uploadFn: (file: File, image: UploadedImage) => Promise<UploadedImage>,
-  ): Promise<void> {
+  ): Promise<void> => {
+    await this.processQueueItems(async (item) => {
+      const file = new File([item.fileData], item.fileName, {
+        type: item.fileType,
+      });
+      return uploadFn(file, item.image);
+    });
+  };
+
+  getQueueCount = async (): Promise<number> => this.store.getQueueCount();
+
+  private processQueueItems = async (
+    uploadItem: (item: QueueItem) => Promise<UploadedImage>,
+  ): Promise<void> => {
     if (this.isProcessing) {
       console.log("[PersistentQueue] Already processing");
       return;
@@ -375,442 +83,25 @@ class PersistentOfflineQueue {
     this.isProcessing = true;
 
     try {
-      const items = await this.getAllItems();
-
+      const items = await this.store.getAllItems();
       console.log(`[PersistentQueue] Processing ${items.length} items`);
 
-      for (const item of items) {
-        try {
-          if (this.isDocumentQueueItem(item)) {
-            try {
-              const localDb = await getLocalDb();
-              const existingDoc = await localDb.documents.get(item.id);
-              if (this.isDocumentUploadReady(existingDoc)) {
-                console.info(
-                  "[PersistentQueue] Skip queued document upload because item is already ready",
-                  {
-                    docId: item.id,
-                    fileName: item.fileName,
-                    kind: this.getDocumentKindLabel(item),
-                    uploadStatus: existingDoc?.uploadStatus ?? null,
-                  },
-                );
-                await this.dequeue(item.id);
-                continue;
-              }
-            } catch (guardErr) {
-              console.warn(
-                "[PersistentQueue] readiness guard check failed; continuing upload attempt",
-                guardErr,
-              );
-            }
-          }
-
-          // ArrayBuffer から File を復元
-          const file = new File([item.fileData], item.fileName, {
-            type: item.fileType,
-          });
-
-          // アップロード処理
-          const updatedImage = await uploadFn(file, item.image);
-          if (!updatedImage.remoteUrl) {
-            throw new Error(
-              "[PersistentQueue] Upload finished without remoteUrl",
-            );
-          }
-
-          // バリデーション
-          strictValidateBeforeSave(updatedImage);
-
-          // DB 更新
-          const { imageDB } = await import("@/services/ImageDatabaseWriter");
-          const firestoreTarget = imageDB.resolveFirestoreTarget(updatedImage);
-          if (imageDB.isFirestoreDiagnosticsEnabled()) {
-            console.info("[PersistentQueue] Firestore image write attempt", {
-              operation: "setDoc",
-              path: firestoreTarget.path,
-              uid: firestoreTarget.uid,
-              queueItemId: item.id,
-              fileName: item.fileName,
-            });
-          }
-          try {
-            await imageDB.saveToFirestore(updatedImage);
-          } catch (writeErr) {
-            if (imageDB.isFirestoreDiagnosticsEnabled()) {
-              console.error(
-                "[PersistentQueue] Firestore image write rejected",
-                {
-                  operation: "setDoc",
-                  path: firestoreTarget.path,
-                  uid: firestoreTarget.uid,
-                  queueItemId: item.id,
-                  fileName: item.fileName,
-                  error: writeErr,
-                },
-              );
-            } else {
-              console.error(
-                "[PersistentQueue] Firestore image write rejected",
-                {
-                  operation: "setDoc",
-                  queueItemId: item.id,
-                  fileName: item.fileName,
-                  error: writeErr,
-                },
-              );
-            }
-            throw writeErr;
-          }
-
-          // ドキュメント（PDF/PPTX）の場合は documents テーブルも更新（remoteUrl反映）
-          const isDocumentItem = this.isDocumentQueueItem(item);
-          const isAssetLikeImageItem =
-            !isDocumentItem && item.fileType.startsWith("image/");
-          if (isDocumentItem) {
-            const localDb = await getLocalDb();
-            const existingDoc = await localDb.documents.get(updatedImage.id);
-            if (existingDoc) {
-              await localDb.updateItem("documents", updatedImage.id, {
-                remoteUrl: updatedImage.remoteUrl,
-                downloadUrl: updatedImage.remoteUrl,
-                storagePath:
-                  updatedImage.storagePath ?? existingDoc.storagePath ?? null,
-                uploadStatus: "ready",
-                updatedAt: new Date(),
-              });
-              const refreshedDoc = await localDb.documents.get(updatedImage.id);
-              console.info(
-                "[PersistentQueue] Document sync success with local source retained",
-                {
-                  docId: updatedImage.id,
-                  kind: this.getDocumentKindLabel(item),
-                  localFileId: refreshedDoc?.localFileId ?? null,
-                  blobUrl:
-                    toDocumentLike(refreshedDoc).blobUrl ??
-                    toDocumentLike(refreshedDoc).localUrl ??
-                    null,
-                  remoteUrl: refreshedDoc?.remoteUrl ?? null,
-                  uploadStatus: refreshedDoc?.uploadStatus ?? null,
-                },
-              );
-            }
-          }
-
-          if (isAssetLikeImageItem) {
-            const localDb = await getLocalDb();
-            const existingAsset = toAssetLikeRecord(
-              await localDb.images.get(updatedImage.id),
-            );
-            await localDb.images.put(
-              makeAssetRecord({
-                existing: existingAsset,
-                itemId: updatedImage.id,
-                userId: auth.currentUser?.uid ?? existingAsset?.userId ?? "",
-                mime:
-                  item.fileType ||
-                  existingAsset?.mime ||
-                  "application/octet-stream",
-                size: item.fileData.byteLength || existingAsset?.size || 0,
-                localBlobId:
-                  existingAsset?.localBlobId ||
-                  updatedImage.localFileId ||
-                  updatedImage.id,
-                remoteKey:
-                  updatedImage.storagePath ?? existingAsset?.remoteKey ?? null,
-                remoteStatus: "ready",
-                remoteUrlCache:
-                  typeof updatedImage.remoteUrl === "string"
-                    ? updatedImage.remoteUrl
-                    : (existingAsset?.remoteUrlCache ?? null),
-                retryCount: 0,
-              }),
-            );
-
-            const pendingAssetSyncItems = (
-              await localDb.syncQueue.toArray()
-            ).filter(
-              (queueItem: SyncQueueItem) =>
-                queueItem.targetId === updatedImage.id &&
-                queueItem.entity === "asset",
-            );
-            if (pendingAssetSyncItems.length > 0) {
-              await localDb.syncQueue.bulkDelete(
-                pendingAssetSyncItems.map(
-                  (queueItem: SyncQueueItem) => queueItem.id,
-                ),
-              );
-            }
-
-            if (import.meta.env.DEV) {
-              console.info("[AssetSync] upload success", {
-                assetId: updatedImage.id,
-                remoteKey: updatedImage.storagePath ?? null,
-              });
-            }
-          }
-
-          // キューから削除
-          await this.dequeue(item.id);
-
-          console.log(`[PersistentQueue] Processed: ${item.fileName}`);
-        } catch (error) {
-          console.error(`[PersistentQueue] Failed: ${item.fileName}`, error);
-
-          // リトライカウントを増やす
-          await this.incrementRetryCount(item.id);
-
-          // 最大3回までリトライ
-          if ((item.retryCount ?? 0) + 1 >= 3) {
-            console.error(
-              `[PersistentQueue] Max retries reached: ${item.fileName}`,
-            );
-            const isDocumentItem = this.isDocumentQueueItem(item);
-            const isAssetLikeImageItem =
-              !isDocumentItem && item.fileType.startsWith("image/");
-            if (isDocumentItem) {
-              try {
-                const localDb = await getLocalDb();
-                const existingDoc = await localDb.documents.get(item.id);
-                if (existingDoc) {
-                  if (this.isDocumentUploadReady(existingDoc)) {
-                    console.info(
-                      "[PersistentQueue] Skip failed-mark because document is already ready",
-                      {
-                        docId: item.id,
-                        kind: this.getDocumentKindLabel(item),
-                        uploadStatus: existingDoc.uploadStatus ?? null,
-                      },
-                    );
-                    await this.dequeue(item.id);
-                    continue;
-                  }
-                  await localDb.updateItem("documents", item.id, {
-                    uploadStatus: "failed",
-                    updatedAt: new Date(),
-                  });
-                  const failedDoc = await localDb.documents.get(item.id);
-                  console.error(
-                    "[PersistentQueue] Document sync failed after retries; local source kept",
-                    {
-                      docId: item.id,
-                      kind: this.getDocumentKindLabel(item),
-                      localFileId: failedDoc?.localFileId ?? null,
-                      blobUrl:
-                        toDocumentLike(failedDoc).blobUrl ??
-                        toDocumentLike(failedDoc).localUrl ??
-                        null,
-                      remoteUrl: failedDoc?.remoteUrl ?? null,
-                      uploadStatus: failedDoc?.uploadStatus ?? null,
-                    },
-                  );
-                }
-              } catch (docErr) {
-                console.warn(
-                  "[PersistentQueue] Failed to mark document upload as failed",
-                  docErr,
-                );
-              }
-            }
-            if (isAssetLikeImageItem) {
-              try {
-                const localDb = await getLocalDb();
-                const existingAsset = toAssetLikeRecord(
-                  await localDb.images.get(item.id),
-                );
-                await localDb.images.put(
-                  makeAssetRecord({
-                    existing: existingAsset,
-                    itemId: item.id,
-                    userId:
-                      auth.currentUser?.uid ?? existingAsset?.userId ?? "",
-                    mime:
-                      item.fileType ||
-                      existingAsset?.mime ||
-                      "application/octet-stream",
-                    size: item.fileData.byteLength || existingAsset?.size || 0,
-                    localBlobId: existingAsset?.localBlobId || item.id,
-                    remoteKey: existingAsset?.remoteKey ?? null,
-                    remoteStatus: "failed",
-                    remoteUrlCache: existingAsset?.remoteUrlCache ?? null,
-                    retryCount: (existingAsset?.retryCount ?? 0) + 1,
-                  }),
-                );
-                if (import.meta.env.DEV) {
-                  console.warn("[AssetSync] upload failed", {
-                    assetId: item.id,
-                  });
-                }
-              } catch (assetErr) {
-                console.warn(
-                  "[PersistentQueue] Failed to update asset status",
-                  assetErr,
-                );
-              }
-            }
-            await this.dequeue(item.id);
-          }
-        }
-
-        // UI スレッド占有対策
-        await new Promise((resolve) => setTimeout(resolve, 0));
-      }
+      await processPersistentOfflineQueue(items, {
+        uploadItem,
+        shouldSkipItem: shouldSkipQueuedDocumentUpload,
+        handleSuccess: handleQueuedUploadSuccess,
+        handlePermanentFailure: handleQueuedUploadPermanentFailure,
+        dequeue: this.store.dequeue,
+        incrementRetryCount: this.store.incrementRetryCount,
+      });
     } finally {
       this.isProcessing = false;
     }
-  }
-
-  /**
-   * キューの件数を取得
-   */
-  async getQueueCount(): Promise<number> {
-    if (this.idbUnavailable) {
-      return this.memoryQueue.size;
-    }
-
-    try {
-      const db = await this.openDB();
-      const tx = db.transaction(this.STORE_NAME, "readonly");
-      const store = tx.objectStore(this.STORE_NAME);
-      return await this.requestToPromise(store.count());
-    } catch (error) {
-      this.activateMemoryFallback(error);
-      return this.memoryQueue.size;
-    }
-  }
-
-  private async openDB(): Promise<IDBDatabase> {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open(this.DB_NAME, 1);
-
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-
-      request.onupgradeneeded = (event) => {
-        const db = (event.target as IDBOpenDBRequest).result;
-        if (!db.objectStoreNames.contains(this.STORE_NAME)) {
-          db.createObjectStore(this.STORE_NAME, { keyPath: "id" });
-        }
-      };
-    });
-  }
-
-  private activateMemoryFallback(error: unknown): void {
-    if (this.idbUnavailable) return;
-    this.idbUnavailable = true;
-
-    const reason = isBackingStoreOpenError(error)
-      ? "[PersistentQueue] IndexedDB backing store error detected. Switched to in-memory queue for this session (cleared on reload)."
-      : "[PersistentQueue] IndexedDB unavailable. Switched to in-memory queue for this session (cleared on reload).";
-
-    warnOncePerSession("persistent-queue:idb-fallback", reason, error);
-  }
-
-  private async getAllItems(): Promise<QueueItem[]> {
-    if (this.idbUnavailable) {
-      return Array.from(this.memoryQueue.values());
-    }
-
-    try {
-      const db = await this.openDB();
-      const tx = db.transaction(this.STORE_NAME, "readonly");
-      const store = tx.objectStore(this.STORE_NAME);
-      const items = await this.requestToPromise(store.getAll());
-      return items as QueueItem[];
-    } catch (error) {
-      this.activateMemoryFallback(error);
-      return Array.from(this.memoryQueue.values());
-    }
-  }
-
-  private async dequeue(id: string): Promise<void> {
-    if (this.idbUnavailable) {
-      this.memoryQueue.delete(id);
-      return;
-    }
-
-    try {
-      const db = await this.openDB();
-      const tx = db.transaction(this.STORE_NAME, "readwrite");
-      const store = tx.objectStore(this.STORE_NAME);
-      await this.requestToPromise(store.delete(id));
-    } catch (error) {
-      this.activateMemoryFallback(error);
-      this.memoryQueue.delete(id);
-    }
-  }
-
-  private async incrementRetryCount(id: string): Promise<void> {
-    if (this.idbUnavailable) {
-      const item = this.memoryQueue.get(id);
-      if (item) {
-        item.retryCount = (item.retryCount || 0) + 1;
-        this.memoryQueue.set(id, item);
-      }
-      return;
-    }
-
-    try {
-      const db = await this.openDB();
-      const tx = db.transaction(this.STORE_NAME, "readwrite");
-      const store = tx.objectStore(this.STORE_NAME);
-      const item = await this.requestToPromise(store.get(id));
-
-      if (item) {
-        item.retryCount = (item.retryCount || 0) + 1;
-        await this.requestToPromise(store.put(item));
-      }
-    } catch (error) {
-      this.activateMemoryFallback(error);
-      const item = this.memoryQueue.get(id);
-      if (item) {
-        item.retryCount = (item.retryCount || 0) + 1;
-        this.memoryQueue.set(id, item);
-      }
-    }
-  }
+  };
 }
 
-/**
- * 永続化オフラインキューの統一インスタンス
- */
+export type { AssetUploadRequest };
+
 export const persistentQueue = new PersistentOfflineQueue();
 
-const AUTO_PROCESS_LISTENER_KEY =
-  "__flashcardPersistentQueueAutoProcessListenersBound";
-
-const triggerAssetQueueProcessing = (reason: "load" | "online") => {
-  console.log(`[PersistentQueue] Trigger asset queue processing: ${reason}`);
-  void persistentQueue.processAssetQueue().catch((error) => {
-    console.error("[PersistentQueue] Auto process failed", {
-      reason,
-      error,
-    });
-  });
-};
-
-if (typeof window !== "undefined") {
-  const target = window as Window & {
-    [AUTO_PROCESS_LISTENER_KEY]?: boolean;
-  };
-
-  if (!target[AUTO_PROCESS_LISTENER_KEY]) {
-    target[AUTO_PROCESS_LISTENER_KEY] = true;
-
-    window.addEventListener(
-      "load",
-      () => {
-        triggerAssetQueueProcessing("load");
-      },
-      { once: true },
-    );
-
-    window.addEventListener("online", () => {
-      triggerAssetQueueProcessing("online");
-    });
-
-    if (document.readyState === "complete") {
-      triggerAssetQueueProcessing("load");
-    }
-  }
-}
+bindPersistentQueueAutoProcessing(persistentQueue);
