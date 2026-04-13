@@ -1,5 +1,9 @@
 import { useAuthSession } from "@/contexts/AuthContext";
 import { getLocalDb } from "@/services/localDB";
+import {
+  readCachedFolderSidebarDisplayMode,
+  writeCachedFolderSidebarDisplayMode,
+} from "@/services/folderSidebarDisplayModePreference";
 import type { UserSettings } from "@/types";
 import { sanitizeProfileImage } from "@/utils/profileImageSanitizer";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -9,42 +13,9 @@ type LegacyFolderSidebarDisplayMode =
   | UserSettings["folderSidebarDisplayMode"]
   | "auto";
 
-type FolderSidebarDisplayMode = NonNullable<
-  UserSettings["folderSidebarDisplayMode"]
->;
-
-const FOLDER_SIDEBAR_DISPLAY_MODE_STORAGE_KEY =
-  "flashcard-master:folder-sidebar-display-mode";
-
-const readCachedFolderSidebarDisplayMode = (): FolderSidebarDisplayMode => {
-  if (typeof window === "undefined") return "tree";
-
-  try {
-    const raw = window.localStorage.getItem(
-      FOLDER_SIDEBAR_DISPLAY_MODE_STORAGE_KEY,
-    );
-    return raw === "navigation" ? "navigation" : "tree";
-  } catch {
-    return "tree";
-  }
-};
-
-const writeCachedFolderSidebarDisplayMode = (value: unknown): void => {
-  if (typeof window === "undefined") return;
-
-  try {
-    window.localStorage.setItem(
-      FOLDER_SIDEBAR_DISPLAY_MODE_STORAGE_KEY,
-      value === "navigation" ? "navigation" : "tree",
-    );
-  } catch {
-    // ignore storage write failures
-  }
-};
-
 const normalizeFolderSidebarDisplayMode = (
   value: LegacyFolderSidebarDisplayMode | null | undefined,
-): FolderSidebarDisplayMode => {
+): NonNullable<UserSettings["folderSidebarDisplayMode"]> => {
   return value === "navigation" ? "navigation" : "tree";
 };
 

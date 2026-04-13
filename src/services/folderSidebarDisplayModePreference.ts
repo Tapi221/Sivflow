@@ -25,7 +25,9 @@ export const readCachedFolderSidebarDisplayMode =
     }
   };
 
-export const writeCachedFolderSidebarDisplayMode = (value: unknown): void => {
+export const writeCachedFolderSidebarDisplayMode = (
+  value: unknown,
+): void => {
   if (typeof window === "undefined") return;
 
   try {

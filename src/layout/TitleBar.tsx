@@ -67,7 +67,7 @@ export const TitleBar: React.FC = () => {
   const [isMaximized, setIsMaximized] = useState(false);
   const [isCardSetViewEditing, setIsCardSetViewEditing] = useState(false);
   const navigate = useNavigate();
-  const isDesktopRuntime = useHasDesktopBridge();
+  const hasDesktopBridge = useHasDesktopBridge();
   const presentationTarget = usePresentationTarget();
   const isDesktopPresentation = presentationTarget === "desktop";
   const { pathname } = useLocation();
@@ -76,7 +76,7 @@ export const TitleBar: React.FC = () => {
   const isCardSetViewPage = pathname.toLowerCase().startsWith("/cardsetview");
 
   useEffect(() => {
-    if (!isDesktopRuntime) {
+    if (!hasDesktopBridge) {
       setIsMaximized(false);
       return;
     }
@@ -92,7 +92,7 @@ export const TitleBar: React.FC = () => {
     return () => {
       cleanup();
     };
-  }, [isDesktopRuntime]);
+  }, [hasDesktopBridge]);
 
   useEffect(() => {
     const onEditingChange = (event: Event) => {
@@ -119,10 +119,10 @@ export const TitleBar: React.FC = () => {
 
   if (!isDesktopPresentation) return null;
 
-  const dragStyle = isDesktopRuntime
+  const dragStyle = hasDesktopBridge
     ? ({ WebkitAppRegion: "drag" } as React.CSSProperties)
     : undefined;
-  const noDragStyle = isDesktopRuntime
+  const noDragStyle = hasDesktopBridge
     ? ({ WebkitAppRegion: "no-drag" } as React.CSSProperties)
     : undefined;
 
@@ -383,9 +383,9 @@ export const TitleBar: React.FC = () => {
         )}
 
         <WindowControlButton
-          title={isDesktopRuntime ? "最小化" : "ブラウザでは最小化できません"}
+          title={hasDesktopBridge ? "最小化" : "ブラウザでは最小化できません"}
           onClick={() => void windowControls.minimize()}
-          disabled={!isDesktopRuntime}
+          disabled={!hasDesktopBridge}
         >
           <svg
             width="10"
@@ -405,14 +405,14 @@ export const TitleBar: React.FC = () => {
 
         <WindowControlButton
           title={
-            isDesktopRuntime
+            hasDesktopBridge
               ? isMaximized
                 ? "元に戻す"
                 : "最大化"
               : "ブラウザではウィンドウ制御できません"
           }
           onClick={() => void windowControls.maximizeToggle()}
-          disabled={!isDesktopRuntime}
+          disabled={!hasDesktopBridge}
         >
           {isMaximized ? (
             <svg
@@ -447,10 +447,10 @@ export const TitleBar: React.FC = () => {
 
         <WindowControlButton
           title={
-            isDesktopRuntime ? "閉じる" : "ブラウザでは閉じる操作を提供しません"
+            hasDesktopBridge ? "閉じる" : "ブラウザでは閉じる操作を提供しません"
           }
           onClick={() => void windowControls.close()}
-          disabled={!isDesktopRuntime}
+          disabled={!hasDesktopBridge}
           danger
         >
           <svg
