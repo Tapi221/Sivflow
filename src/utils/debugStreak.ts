@@ -1,14 +1,6 @@
 import { sanitizeStreak } from "@/utils/streak";
 
-const isDevEnvironment = (() => {
-  if (typeof import.meta !== "undefined" && import.meta.env) {
-    return Boolean(import.meta.env.DEV);
-  }
-  if (typeof process !== "undefined" && process.env) {
-    return process.env.NODE_ENV !== "production";
-  }
-  return false;
-})();
+const isDevEnvironment = import.meta.env.DEV;
 
 const parseDebugStreakValue = (value: unknown): number | null => {
   if (value === null || value === undefined || value === "") return null;
