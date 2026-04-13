@@ -17,6 +17,5 @@ export {
   isDocumentQueueItem,
   isDocumentUploadReady,
   isPdfQueueItem,
-  isPptxQueueItem,
   toDocumentLike,
 } from "./persistentOfflineQueueDocumentGuards";
