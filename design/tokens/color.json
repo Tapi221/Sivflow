@@ -1,0 +1,43 @@
+{
+  "primary": {
+    "50": "#f5f5f5",
+    "100": "#e6f0ef",
+    "200": "#cfe0df",
+    "300": "#b8d0cf",
+    "400": "#90b8b6",
+    "500": "#7bacaa",
+    "600": "#689a98",
+    "700": "#5a8684",
+    "800": "#4d7270",
+    "900": "#324a48"
+  },
+  "neutral": {
+    "0": "#ffffff",
+    "50": "#f8fafc",
+    "100": "#f5f5f5",
+    "150": "#f7f7f8",
+    "200": "#e7ebef",
+    "300": "#d9d9d9",
+    "400": "#cfd9e8",
+    "500": "#978d90",
+    "600": "#6e6e80",
+    "700": "#334155",
+    "800": "#1e293b",
+    "900": "#202123"
+  },
+  "status": {
+    "danger": "#e11d48",
+    "dangerSoft": "#fef2f2",
+    "warning": "#f59e0b",
+    "warningSoft": "#fffbeb",
+    "success": "#10b981",
+    "successSoft": "#eefdf6",
+    "info": "#00a3ff",
+    "infoSoft": "#eff6ff"
+  },
+  "code": {
+    "background": "#f7f8f9",
+    "foreground": "#24292f",
+    "border": "rgba(0, 0, 0, 0.06)"
+  }
+}

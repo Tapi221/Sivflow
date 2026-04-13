@@ -1,0 +1,21 @@
+{
+  "durationMs": {
+    "instant": 0,
+    "fast": 75,
+    "normal": 150,
+    "moderate": 200,
+    "slow": 300,
+    "toast": 500,
+    "celebration": 700
+  },
+  "easing": {
+    "standard": "ease",
+    "emphasized": "ease-out",
+    "linear": "linear"
+  },
+  "transition": {
+    "interactive": "{motion.durationMs.normal}ms {motion.easing.standard}",
+    "screenEnter": "{motion.durationMs.slow}ms {motion.easing.emphasized}",
+    "progress": "{motion.durationMs.toast}ms {motion.easing.emphasized}"
+  }
+}

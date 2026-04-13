@@ -1,0 +1,64 @@
+{
+  "fontFamily": {
+    "ui": [
+      "Zen Kaku Gothic New",
+      "Noto Sans JP",
+      "-apple-system",
+      "BlinkMacSystemFont",
+      "Segoe UI",
+      "Roboto",
+      "sans-serif"
+    ],
+    "content": [
+      "Yu Mincho",
+      "Hiragino Mincho ProN",
+      "Hiragino Mincho Pro",
+      "Noto Serif JP",
+      "MS PMincho",
+      "serif"
+    ],
+    "numeric": [
+      "Zen Kaku Gothic New",
+      "Noto Sans JP",
+      "-apple-system",
+      "BlinkMacSystemFont",
+      "Segoe UI",
+      "Roboto",
+      "sans-serif"
+    ],
+    "code": [
+      "Fira Code",
+      "Fira Mono",
+      "ui-monospace",
+      "SFMono-Regular",
+      "Menlo",
+      "Monaco",
+      "Consolas",
+      "monospace"
+    ]
+  },
+  "fontSize": {
+    "xs": 12.8,
+    "sm": 14,
+    "smPlus": 14.4,
+    "md": 16,
+    "mdPlus": 17.6,
+    "lg": 20,
+    "2xl": 32
+  },
+  "lineHeight": {
+    "tight": 1.1,
+    "body": 1.5,
+    "comfortable": 1.625
+  },
+  "fontWeight": {
+    "medium": 500,
+    "semibold": 600,
+    "bold": 700,
+    "black": 900
+  },
+  "tracking": {
+    "caps": 0.12,
+    "wideCaps": 0.2
+  }
+}

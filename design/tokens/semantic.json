@@ -1,0 +1,70 @@
+{
+  "color": {
+    "background": {
+      "app": "{color.neutral.0}",
+      "sidebar": "{color.neutral.150}",
+      "sidebarActive": "{color.neutral.200}",
+      "floating": "rgba(255, 255, 255, 0.82)",
+      "code": "{color.code.background}"
+    },
+    "border": {
+      "default": "{color.neutral.300}",
+      "floating": "rgba(226, 232, 240, 0.8)",
+      "strong": "{color.neutral.400}"
+    },
+    "text": {
+      "primary": "{color.neutral.900}",
+      "secondary": "{color.neutral.600}",
+      "strong": "{color.neutral.800}",
+      "placeholder": "{color.neutral.500}",
+      "onPrimary": "{color.neutral.0}"
+    },
+    "action": {
+      "primary": "{color.primary.600}",
+      "primaryHover": "{color.primary.700}",
+      "primarySoft": "{color.primary.100}",
+      "accent": "{color.primary.500}"
+    },
+    "status": {
+      "danger": "{color.status.danger}",
+      "warning": "{color.status.warning}",
+      "success": "{color.status.success}",
+      "info": "{color.status.info}"
+    }
+  },
+  "spacing": {
+    "controlHeight": 36,
+    "controlHeightLarge": 40,
+    "panelWidth": 320,
+    "menuMinWidth": 128,
+    "safeTopOffsetBase": "{spacing.2}",
+    "safeBottomPaddingBase": "{spacing.20}"
+  },
+  "radius": {
+    "control": "{radius.md}",
+    "card": "{radius.xl}",
+    "dialog": "{radius.floating}",
+    "panel": "{radius.2xl}",
+    "hero": "{radius.3xl}",
+    "pill": "{radius.pill}"
+  },
+  "typography": {
+    "ui": "{typography.fontFamily.ui}",
+    "content": "{typography.fontFamily.content}",
+    "numeric": "{typography.fontFamily.numeric}",
+    "code": "{typography.fontFamily.code}"
+  },
+  "elevation": {
+    "controlInset": "{elevation.shadow.concave}",
+    "controlRaised": "{elevation.shadow.convex}",
+    "floating": "{elevation.shadow.floating}",
+    "panel": "{elevation.shadow.panel}",
+    "card": "{elevation.shadow.card}",
+    "cardHover": "{elevation.shadow.cardHover}"
+  },
+  "motion": {
+    "interactive": "{motion.transition.interactive}",
+    "screenEnter": "{motion.transition.screenEnter}",
+    "progress": "{motion.transition.progress}"
+  }
+}

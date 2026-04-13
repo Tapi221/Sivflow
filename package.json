@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "npm run dev:web",
     "dev:web": "vite",
+    "design-tokens:build": "npm exec tsx -- tools/design-tokens/build-tokens.ts",
     "dev:electron": "concurrently -k \"npm run dev:web\" \"npm run electron:watch\" \"npm run electron:dev\"",
     "electron:dev": "npm run electron:prepare-dist && wait-on tcp:5173 dist-electron/main.js dist-electron/preload.js && node scripts/electron/run-electron.cjs dist-electron/main.js --renderer-url=http://localhost:5173",
     "electron:prepare-dist": "node -e \"const fs=require('node:fs');fs.mkdirSync('dist-electron',{recursive:true});fs.writeFileSync('dist-electron/package.json', JSON.stringify({ type: 'commonjs' }, null, 2));\"",
