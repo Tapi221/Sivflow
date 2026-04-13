@@ -1,5 +1,5 @@
-import { isDesktopRuntime } from "@/platform/runtime";
+import { hasDesktopBridge } from "@/platform/runtime";
 
 export const useHasDesktopBridge = () => {
-  return isDesktopRuntime();
+  return hasDesktopBridge();
 };
