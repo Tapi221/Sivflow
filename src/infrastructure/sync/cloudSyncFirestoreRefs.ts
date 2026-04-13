@@ -47,7 +47,10 @@ export const queryEntityById = (
   collectionName: string,
   id: string,
 ): Query<DocumentData> =>
-  query(collection(firestore, `users/${userId}/${collectionName}`), where("id", "==", id));
+  query(
+    collection(firestore, `users/${userId}/${collectionName}`),
+    where("id", "==", id),
+  );
 
 export const getUserSettingsRef = (
   firestore: Firestore,

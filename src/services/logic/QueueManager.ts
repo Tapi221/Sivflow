@@ -10,12 +10,6 @@ import {
 } from "@/application/usecases/syncQueueItemFactory";
 import type { SyncQueueItem } from "@/types/domain/sync";
 
-export {
-  denormalizeCardForStorage,
-  denormalizeFolderForStorage,
-  normalizeFolderWithSilent,
-} from "@/services/localdb/transforms";
-
 export class QueueManager implements IQueueManager {
   private readonly MAX_RETRY_COUNT = 3;
 

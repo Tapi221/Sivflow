@@ -27,7 +27,9 @@ export const pushCloudSyncBatch = async (
   userId: string,
   changes: SyncChange[],
 ): Promise<{ successIds: string[]; failedIds: string[]; error?: unknown }> => {
-  console.log(`📤 [CloudSyncAdapter] pushBatch START. Count: ${changes.length}`);
+  console.log(
+    `📤 [CloudSyncAdapter] pushBatch START. Count: ${changes.length}`,
+  );
 
   const successIds: string[] = [];
   const failedIds: string[] = [];
@@ -72,7 +74,10 @@ export const pushCloudSyncBatch = async (
         await batch.commit();
         successIds.push(...chunkIds);
       } catch (error) {
-        console.error("❌ [CloudSyncAdapter] pushBatch chunk commit ERROR:", error);
+        console.error(
+          "❌ [CloudSyncAdapter] pushBatch chunk commit ERROR:",
+          error,
+        );
         failedIds.push(...chunkIds);
         if (!firstError) firstError = error;
       }
