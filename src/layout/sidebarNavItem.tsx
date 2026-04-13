@@ -11,8 +11,8 @@ export const SidebarNavIcon = ({
   className,
 }: SidebarNavIconProps) => {
   const resolvedClassName = className
-    ? `sidebar__nav-icon ${className}`
-    : "sidebar__nav-icon";
+    ? `sidebar__nav-icon ds-nav-action__icon ${className}`
+    : "sidebar__nav-icon ds-nav-action__icon";
 
   return <span className={resolvedClassName}>{children}</span>;
 };

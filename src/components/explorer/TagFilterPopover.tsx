@@ -71,28 +71,22 @@ export const TagFilterPopover = ({
       <PopoverTrigger asChild>
         <button
           className={cn(
-            "flex items-center justify-center px-2 py-1 text-xs font-medium transition-colors relative whitespace-nowrap",
-            "hover:text-primary-700",
-            isFilterActive ? "text-primary-700" : "text-slate-500",
+            "ds-filter-toggle flex items-center justify-center px-2 py-1 text-xs font-medium whitespace-nowrap",
+            isFilterActive && "ds-filter-toggle--active",
             className,
           )}
         >
           <Filter className="w-4 h-4" />
-          {isFilterActive && (
-            <div className="absolute bottom-0 left-1 right-1 h-0.5 bg-primary-500 rounded-full" />
-          )}
         </button>
       </PopoverTrigger>
       <PopoverContent
         align="center"
-        className={cn(
-          "w-64 overflow-hidden p-0 rounded-[10px] border border-slate-200/80 bg-white/82 shadow-[0_8px_24px_rgba(15,23,42,0.08)] backdrop-blur-md",
-        )}
+        className="ds-popover-surface--filter w-64 overflow-hidden p-0"
       >
-        <div className="flex flex-col max-h-[400px]">
-          <div className="border-b border-[var(--surface-border)] bg-transparent p-3">
+        <div className="ds-filter-panel flex flex-col">
+          <div className="ds-filter-section bg-transparent p-3">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-slate-800">
+              <span className="ds-filter-section__title text-xs font-semibold">
                 タグで絞り込み
               </span>
               {isFilterActive && (
@@ -108,17 +102,13 @@ export const TagFilterPopover = ({
             </div>
 
             <div className="relative">
-              <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+              <Search className="ds-filter-search-icon absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5" />
               <input
                 ref={inputRef}
                 type="text"
                 className={cn(
-                  "w-full pl-8 pr-2 py-1.5 text-xs rounded-[8px]",
-                  "border border-slate-200/70 bg-white/55 text-[#202123]",
+                  "ds-input ds-filter-search w-full",
                   "surface-concave",
-                  "focus:bg-white/70 focus:outline-none focus:ring-0 focus:border-slate-200",
-                  "placeholder:text-[var(--surface-placeholder-text)]",
-                  "transition-colors",
                 )}
                 placeholder="タグを検索..."
                 value={searchQuery}
@@ -127,9 +117,9 @@ export const TagFilterPopover = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-2 border-b border-[var(--surface-border)] bg-transparent px-3 py-2 text-[11px]">
-            <span className="text-slate-500">条件:</span>
-            <div className="flex rounded border border-[var(--surface-border)] bg-white/48 p-0.5 shadow-sm">
+          <div className="ds-filter-section flex items-center gap-2 bg-transparent px-3 py-2 text-[11px]">
+            <span className="ds-filter-section__label">条件:</span>
+            <div className="ds-filter-toggle-group flex p-0.5 shadow-sm">
               <SurfaceButton
                 onClick={() => setTagMatchMode("any")}
                 surface={tagMatchMode === "any" ? "convexActive" : "concave"}
@@ -147,10 +137,10 @@ export const TagFilterPopover = ({
             </div>
           </div>
 
-          <div className="space-y-2 border-b border-[var(--surface-border)] bg-transparent px-3 py-2">
+          <div className="ds-filter-section space-y-2 bg-transparent px-3 py-2">
             <div className="flex items-center justify-between gap-2 text-[11px]">
-              <span className="text-slate-600">表示:</span>
-              <div className="flex rounded border border-[var(--surface-border)] bg-white/48 p-0.5 shadow-sm">
+              <span className="ds-filter-section__label">表示:</span>
+              <div className="ds-filter-toggle-group flex p-0.5 shadow-sm">
                 {[
                   { label: "カード", value: "card" as const },
                   { label: "PDF", value: "pdf" as const },
@@ -192,8 +182,8 @@ export const TagFilterPopover = ({
                 key={item.label}
                 className="flex items-center justify-between gap-2 text-[11px]"
               >
-                <span className="text-slate-600">{item.label}:</span>
-                <div className="flex rounded border border-[var(--surface-border)] bg-white/48 p-0.5 shadow-sm">
+                <span className="ds-filter-section__label">{item.label}:</span>
+                <div className="ds-filter-toggle-group flex p-0.5 shadow-sm">
                   <SurfaceButton
                     onClick={() => item.onChange("any")}
                     surface={item.value === "any" ? "convexActive" : "concave"}
@@ -222,7 +212,7 @@ export const TagFilterPopover = ({
 
           <div className="min-h-[150px] flex-1 overflow-y-auto bg-transparent p-1">
             {filteredTags.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-8 text-slate-500 text-xs">
+              <div className="ds-filter-empty flex flex-col items-center justify-center py-8 text-xs">
                 <Tag className="w-8 h-8 opacity-20 mb-2" />
                 <p>タグが見つかりません</p>
               </div>
@@ -235,10 +225,8 @@ export const TagFilterPopover = ({
                       key={tag}
                       onClick={() => toggleTag(tag)}
                       className={cn(
-                        "w-full flex items-center px-2 py-1 text-xs rounded transition-colors text-left group",
-                        isSelected
-                          ? "bg-slate-100 text-slate-800"
-                          : "hover:bg-slate-100 text-slate-800",
+                        "ds-filter-row w-full flex items-center px-2 py-1 text-xs text-left group",
+                        isSelected && "ds-filter-row--active",
                       )}
                     >
                       <Switch

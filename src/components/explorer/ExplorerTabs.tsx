@@ -92,11 +92,9 @@ export const ExplorerTabs = ({
 
   return (
     <div
-      className="flex items-center justify-between px-2"
+      className="ds-nav-tabs flex items-center justify-between px-2"
       style={{
         height: 36,
-        borderBottom: "1px solid var(--pane-border, #e8e8e8)",
-        backgroundColor: "var(--sidebar-bg)",
       }}
     >
       <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
@@ -111,10 +109,10 @@ export const ExplorerTabs = ({
               className={getSidebarNavItemClassName({
                 isActive,
                 className:
-                  "relative h-8 min-w-8 justify-center gap-0 px-0 text-[var(--sidebar-text-muted,#6e6e80)]",
+                  "ds-nav-tab relative justify-center gap-0 px-0",
               })}
             >
-              <SidebarNavIcon className="opacity-100">
+              <SidebarNavIcon className="ds-nav-tab__icon opacity-100">
                 <Icon className="h-3.5 w-3.5" />
               </SidebarNavIcon>
             </button>
@@ -140,7 +138,7 @@ export const ExplorerTabs = ({
             type="button"
             title="新規フォルダを追加"
             aria-label="新規フォルダを追加"
-            className="flex items-center justify-center w-6 h-6 rounded text-[var(--text-muted,#8a8a8a)] hover:text-[var(--text-secondary,#4b4b4b)] hover:bg-[var(--hover-bg,rgba(0,0,0,0.04))] transition-colors"
+            className="ds-nav-action ds-nav-action--icon flex items-center"
             onClick={() => {
               void onCreateRootFolder?.();
             }}
@@ -163,7 +161,7 @@ export const ExplorerTabs = ({
                 type="button"
                 title="追加"
                 aria-label="追加メニューを開く"
-                className="flex items-center justify-center w-6 h-6 rounded text-[var(--text-muted,#8a8a8a)] hover:text-[var(--text-secondary,#4b4b4b)] hover:bg-[var(--hover-bg,rgba(0,0,0,0.04))] transition-colors"
+                className="ds-nav-action ds-nav-action--icon flex items-center"
               >
                 <Plus className="w-3.5 h-3.5" />
               </button>

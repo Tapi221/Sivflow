@@ -11,7 +11,9 @@ export const getSidebarNavItemClassName = ({
 }: SidebarNavItemClassNameOptions = {}) => {
   return cn(
     "sidebar__nav-item",
+    "ds-nav-action",
     isActive && "sidebar__nav-item--active",
+    isActive && "ds-nav-action--active",
     className,
   );
 };

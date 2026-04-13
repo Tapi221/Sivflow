@@ -1,0 +1,156 @@
+@layer components {
+  .ds-popover-surface {
+    border: 1px solid var(--ds-semantic-color-border-floating);
+    background: color-mix(
+      in srgb,
+      var(--ds-semantic-color-background-floating) 94%,
+      white 6%
+    );
+    color: var(--ds-semantic-color-text-primary);
+    border-radius: var(--ds-semantic-radius-dialog);
+    box-shadow: var(--ds-semantic-elevation-floating);
+    backdrop-filter: blur(var(--ds-elevation-blur-floating));
+    -webkit-backdrop-filter: blur(var(--ds-elevation-blur-floating));
+  }
+
+  .ds-popover-surface--filter {
+    min-width: 16rem;
+  }
+
+  .ds-nav-action,
+  .sidebar__nav-item.ds-nav-action,
+  .ds-nav-tab {
+    color: var(--ds-semantic-color-text-secondary);
+    border-radius: var(--ds-semantic-radius-pill);
+    transition:
+      background-color var(--ds-semantic-motion-interactive),
+      color var(--ds-semantic-motion-interactive),
+      opacity var(--ds-semantic-motion-interactive);
+  }
+
+  .ds-nav-action:hover,
+  .sidebar__nav-item.ds-nav-action:hover,
+  .ds-nav-tab:hover {
+    background: var(--ds-semantic-color-background-sidebar-active);
+    color: var(--ds-semantic-color-text-primary);
+  }
+
+  .ds-nav-action--active,
+  .sidebar__nav-item.ds-nav-action.ds-nav-action--active,
+  .ds-nav-tab.ds-nav-action--active {
+    background: var(--ds-semantic-color-background-sidebar-active);
+    color: var(--ds-semantic-color-text-strong);
+  }
+
+  .ds-nav-action__icon,
+  .sidebar__nav-icon.ds-nav-action__icon,
+  .ds-nav-tab__icon {
+    color: inherit;
+    opacity: 0.84;
+  }
+
+  .ds-nav-action:hover .ds-nav-action__icon,
+  .ds-nav-action--active .ds-nav-action__icon,
+  .ds-nav-tab:hover .ds-nav-tab__icon,
+  .ds-nav-tab.ds-nav-action--active .ds-nav-tab__icon {
+    opacity: 1;
+  }
+
+  .ds-nav-tabs {
+    border-bottom: 1px solid var(--ds-semantic-color-border-default);
+    background: var(--ds-semantic-color-background-sidebar);
+  }
+
+  .ds-nav-tab {
+    min-height: 2rem;
+    min-width: 2rem;
+  }
+
+  .ds-nav-action--icon {
+    height: 1.5rem;
+    width: 1.5rem;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .ds-filter-toggle {
+    position: relative;
+    color: var(--ds-semantic-color-text-secondary);
+    border-radius: var(--ds-semantic-radius-pill);
+    transition:
+      color var(--ds-semantic-motion-interactive),
+      background-color var(--ds-semantic-motion-interactive);
+  }
+
+  .ds-filter-toggle:hover,
+  .ds-filter-toggle--active {
+    color: var(--ds-semantic-color-action-primary-hover);
+  }
+
+  .ds-filter-toggle--active::after {
+    content: "";
+    position: absolute;
+    left: 0.25rem;
+    right: 0.25rem;
+    bottom: 0;
+    height: 2px;
+    border-radius: 999px;
+    background: var(--ds-semantic-color-action-primary);
+  }
+
+  .ds-filter-panel {
+    max-height: 25rem;
+  }
+
+  .ds-filter-section {
+    border-bottom: 1px solid var(--ds-semantic-color-border-default);
+  }
+
+  .ds-filter-section__title {
+    color: var(--ds-semantic-color-text-strong);
+  }
+
+  .ds-filter-section__label {
+    color: var(--ds-semantic-color-text-secondary);
+  }
+
+  .ds-filter-search {
+    min-height: 2rem;
+    padding-left: 2rem;
+    padding-right: 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .ds-filter-search-icon {
+    color: var(--ds-semantic-color-text-secondary);
+  }
+
+  .ds-filter-toggle-group {
+    border: 1px solid var(--ds-semantic-color-border-default);
+    border-radius: var(--ds-semantic-radius-medium);
+    background: color-mix(
+      in srgb,
+      var(--ds-semantic-color-background-elevated) 88%,
+      white 12%
+    );
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  }
+
+  .ds-filter-empty {
+    color: var(--ds-semantic-color-text-secondary);
+  }
+
+  .ds-filter-row {
+    border-radius: var(--ds-semantic-radius-medium);
+    color: var(--ds-semantic-color-text-primary);
+    transition:
+      background-color var(--ds-semantic-motion-interactive),
+      color var(--ds-semantic-motion-interactive);
+  }
+
+  .ds-filter-row:hover,
+  .ds-filter-row--active {
+    background: var(--ds-semantic-color-action-primary-soft);
+    color: var(--ds-semantic-color-text-strong);
+  }
+}
