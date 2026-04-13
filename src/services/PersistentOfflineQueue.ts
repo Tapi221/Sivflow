@@ -1,9 +1,125 @@
 import { strictValidateBeforeSave } from "@/utils/imageValidation";
-import type { UploadedImage } from "@/types";
+import type { AssetRecord, SyncQueueItem, UploadedImage } from "@/types";
 import { getLocalDb, isBackingStoreOpenError } from "@/services/localDB";
 import { warnOncePerSession } from "@/services/localDBRuntimeState";
 import { auth, storage } from "@/services/firebase";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+
+type DocumentLike = {
+  uploadStatus?: string | null;
+  remoteUrl?: string | null;
+  downloadUrl?: string | null;
+  localFileId?: string | null;
+  localUrl?: string | null;
+  blobUrl?: string | null;
+};
+
+type AssetLikeRecord = Partial<AssetRecord> & Partial<UploadedImage>;
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
+
+const getString = (
+  record: Record<string, unknown>,
+  key: string,
+): string | null => {
+  const value = record[key];
+  return typeof value === "string" && value.trim().length > 0
+    ? value.trim()
+    : null;
+};
+
+const getNumber = (
+  record: Record<string, unknown>,
+  key: string,
+): number | null => {
+  const value = record[key];
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+};
+
+const getDate = (record: Record<string, unknown>, key: string): Date | null => {
+  const value = record[key];
+  return value instanceof Date ? value : null;
+};
+
+const toDocumentLike = (value: unknown): DocumentLike => {
+  if (!isRecord(value)) return {};
+  return {
+    uploadStatus: getString(value, "uploadStatus"),
+    remoteUrl: getString(value, "remoteUrl"),
+    downloadUrl: getString(value, "downloadUrl"),
+    localFileId: getString(value, "localFileId"),
+    localUrl: getString(value, "localUrl"),
+    blobUrl: getString(value, "blobUrl"),
+  };
+};
+
+const toAssetLikeRecord = (value: unknown): AssetLikeRecord | null => {
+  if (!isRecord(value)) return null;
+  return {
+    id: getString(value, "id") ?? undefined,
+    userId: getString(value, "userId") ?? undefined,
+    mime: getString(value, "mime") ?? undefined,
+    size: getNumber(value, "size") ?? undefined,
+    localBlobId: getString(value, "localBlobId") ?? undefined,
+    localStatus:
+      getString(value, "localStatus") === "missing" ? "missing" : "present",
+    remoteKey: getString(value, "remoteKey") ?? undefined,
+    remoteStatus: (() => {
+      const status = getString(value, "remoteStatus");
+      return status === "none" ||
+        status === "uploading" ||
+        status === "ready" ||
+        status === "failed"
+        ? status
+        : undefined;
+    })(),
+    remoteUrlCache: getString(value, "remoteUrlCache") ?? undefined,
+    createdAt: getDate(value, "createdAt") ?? undefined,
+    retryCount: getNumber(value, "retryCount") ?? undefined,
+  };
+};
+
+const makeAssetRecord = ({
+  existing,
+  itemId,
+  userId,
+  mime,
+  size,
+  localBlobId,
+  remoteKey,
+  remoteStatus,
+  remoteUrlCache,
+  retryCount,
+}: {
+  existing: AssetLikeRecord | null;
+  itemId: string;
+  userId: string;
+  mime: string;
+  size: number;
+  localBlobId: string;
+  remoteKey: string | null;
+  remoteStatus: "uploading" | "ready" | "failed";
+  remoteUrlCache?: string | null;
+  retryCount: number;
+}): AssetRecord => {
+  const now = new Date();
+
+  return {
+    id: itemId,
+    userId: existing?.userId?.trim() || userId,
+    mime: existing?.mime?.trim() || mime || "application/octet-stream",
+    size: existing?.size ?? size,
+    localBlobId: existing?.localBlobId?.trim() || localBlobId,
+    localStatus: existing?.localStatus === "missing" ? "missing" : "present",
+    remoteKey: remoteKey ?? existing?.remoteKey ?? null,
+    remoteStatus,
+    remoteUrlCache: remoteUrlCache ?? existing?.remoteUrlCache ?? null,
+    createdAt: existing?.createdAt ?? now,
+    updatedAt: now,
+    retryCount,
+  };
+};
 
 interface QueueItem {
   id: string;
@@ -78,15 +194,20 @@ class PersistentOfflineQueue {
   }
 
   private isDocumentUploadReady(doc: unknown): boolean {
-    if (!doc) return false;
-    if (doc.uploadStatus === "ready") return true;
-    if (typeof doc.remoteUrl === "string" && doc.remoteUrl.trim().length > 0)
-      return true;
+    const snapshot = toDocumentLike(doc);
+    if (snapshot.uploadStatus === "ready") return true;
     if (
-      typeof doc.downloadUrl === "string" &&
-      doc.downloadUrl.trim().length > 0
-    )
+      typeof snapshot.remoteUrl === "string" &&
+      snapshot.remoteUrl.length > 0
+    ) {
       return true;
+    }
+    if (
+      typeof snapshot.downloadUrl === "string" &&
+      snapshot.downloadUrl.length > 0
+    ) {
+      return true;
+    }
     return false;
   }
 
@@ -364,8 +485,8 @@ class PersistentOfflineQueue {
                   kind: this.getDocumentKindLabel(item),
                   localFileId: refreshedDoc?.localFileId ?? null,
                   blobUrl:
-                    (refreshedDoc as unknown)?.blobUrl ??
-                    refreshedDoc?.localUrl ??
+                    toDocumentLike(refreshedDoc).blobUrl ??
+                    toDocumentLike(refreshedDoc).localUrl ??
                     null,
                   remoteUrl: refreshedDoc?.remoteUrl ?? null,
                   uploadStatus: refreshedDoc?.uploadStatus ?? null,
@@ -376,50 +497,46 @@ class PersistentOfflineQueue {
 
           if (isAssetLikeImageItem) {
             const localDb = await getLocalDb();
-            const existingAsset = await localDb.images.get(updatedImage.id);
-            const now = new Date();
-            await localDb.images.put({
-              ...((existingAsset as unknown) ?? {}),
-              id: updatedImage.id,
-              userId:
-                auth.currentUser?.uid ??
-                (existingAsset as unknown)?.userId ??
-                "",
-              mime:
-                item.fileType ||
-                (existingAsset as unknown)?.mime ||
-                "application/octet-stream",
-              size:
-                item.fileData.byteLength ??
-                (existingAsset as unknown)?.size ??
-                0,
-              localBlobId:
-                (existingAsset as unknown)?.localBlobId ??
-                updatedImage.localFileId ??
-                updatedImage.id,
-              localStatus: (existingAsset as unknown)?.localStatus ?? "present",
-              remoteKey:
-                updatedImage.storagePath ??
-                (existingAsset as unknown)?.remoteKey ??
-                null,
-              remoteStatus: "ready",
-              remoteUrlCache:
-                updatedImage.remoteUrl ??
-                (existingAsset as unknown)?.remoteUrlCache ??
-                null,
-              updatedAt: now,
-              createdAt: (existingAsset as unknown)?.createdAt ?? now,
-              retryCount: 0,
-            } as unknown);
+            const existingAsset = toAssetLikeRecord(
+              await localDb.images.get(updatedImage.id),
+            );
+            await localDb.images.put(
+              makeAssetRecord({
+                existing: existingAsset,
+                itemId: updatedImage.id,
+                userId: auth.currentUser?.uid ?? existingAsset?.userId ?? "",
+                mime:
+                  item.fileType ||
+                  existingAsset?.mime ||
+                  "application/octet-stream",
+                size: item.fileData.byteLength || existingAsset?.size || 0,
+                localBlobId:
+                  existingAsset?.localBlobId ||
+                  updatedImage.localFileId ||
+                  updatedImage.id,
+                remoteKey:
+                  updatedImage.storagePath ?? existingAsset?.remoteKey ?? null,
+                remoteStatus: "ready",
+                remoteUrlCache:
+                  typeof updatedImage.remoteUrl === "string"
+                    ? updatedImage.remoteUrl
+                    : (existingAsset?.remoteUrlCache ?? null),
+                retryCount: 0,
+              }),
+            );
 
-            const pendingAssetSyncItems = await localDb.syncQueue
-              .where("targetId")
-              .equals(updatedImage.id)
-              .filter((q: unknown) => q.entity === "asset")
-              .toArray();
+            const pendingAssetSyncItems = (
+              await localDb.syncQueue.toArray()
+            ).filter(
+              (queueItem: SyncQueueItem) =>
+                queueItem.targetId === updatedImage.id &&
+                queueItem.entity === "asset",
+            );
             if (pendingAssetSyncItems.length > 0) {
               await localDb.syncQueue.bulkDelete(
-                pendingAssetSyncItems.map((q: unknown) => q.id),
+                pendingAssetSyncItems.map(
+                  (queueItem: SyncQueueItem) => queueItem.id,
+                ),
               );
             }
 
@@ -478,8 +595,8 @@ class PersistentOfflineQueue {
                       kind: this.getDocumentKindLabel(item),
                       localFileId: failedDoc?.localFileId ?? null,
                       blobUrl:
-                        (failedDoc as unknown)?.blobUrl ??
-                        failedDoc?.localUrl ??
+                        toDocumentLike(failedDoc).blobUrl ??
+                        toDocumentLike(failedDoc).localUrl ??
                         null,
                       remoteUrl: failedDoc?.remoteUrl ?? null,
                       uploadStatus: failedDoc?.uploadStatus ?? null,
@@ -496,35 +613,27 @@ class PersistentOfflineQueue {
             if (isAssetLikeImageItem) {
               try {
                 const localDb = await getLocalDb();
-                const existingAsset = await localDb.images.get(item.id);
-                const now = new Date();
-                await localDb.images.put({
-                  ...((existingAsset as unknown) ?? {}),
-                  id: item.id,
-                  userId:
-                    auth.currentUser?.uid ??
-                    (existingAsset as unknown)?.userId ??
-                    "",
-                  mime:
-                    item.fileType ||
-                    (existingAsset as unknown)?.mime ||
-                    "application/octet-stream",
-                  size:
-                    item.fileData.byteLength ??
-                    (existingAsset as unknown)?.size ??
-                    0,
-                  localBlobId:
-                    (existingAsset as unknown)?.localBlobId ?? item.id,
-                  localStatus:
-                    (existingAsset as unknown)?.localStatus ?? "present",
-                  remoteKey: (existingAsset as unknown)?.remoteKey ?? null,
-                  remoteStatus: "failed",
-                  updatedAt: now,
-                  createdAt: (existingAsset as unknown)?.createdAt ?? now,
-                  retryCount: (existingAsset as unknown)?.retryCount
-                    ? (existingAsset as unknown).retryCount + 1
-                    : 1,
-                } as unknown);
+                const existingAsset = toAssetLikeRecord(
+                  await localDb.images.get(item.id),
+                );
+                await localDb.images.put(
+                  makeAssetRecord({
+                    existing: existingAsset,
+                    itemId: item.id,
+                    userId:
+                      auth.currentUser?.uid ?? existingAsset?.userId ?? "",
+                    mime:
+                      item.fileType ||
+                      existingAsset?.mime ||
+                      "application/octet-stream",
+                    size: item.fileData.byteLength || existingAsset?.size || 0,
+                    localBlobId: existingAsset?.localBlobId || item.id,
+                    remoteKey: existingAsset?.remoteKey ?? null,
+                    remoteStatus: "failed",
+                    remoteUrlCache: existingAsset?.remoteUrlCache ?? null,
+                    retryCount: (existingAsset?.retryCount ?? 0) + 1,
+                  }),
+                );
                 if (import.meta.env.DEV) {
                   console.warn("[AssetSync] upload failed", {
                     assetId: item.id,

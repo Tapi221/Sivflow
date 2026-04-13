@@ -78,18 +78,14 @@ type SettingsDialogProps = {
   initialTab?: SettingsTabParam;
 };
 
-const normalizeSettingsTab = (
-  tab?: SettingsTabParam,
-): SettingsTab => {
+const normalizeSettingsTab = (tab?: SettingsTabParam): SettingsTab => {
   if (tab === "theme") return "display";
   return sidebarItems.some((item) => item.id === tab)
     ? (tab as SettingsTab)
     : DEFAULT_SETTINGS_TAB;
 };
 
-const resolveSettingsTab = (
-  tab?: SettingsTabParam,
-): SettingsTab => {
+const resolveSettingsTab = (tab?: SettingsTabParam): SettingsTab => {
   const normalizedTab = normalizeSettingsTab(tab);
   return sidebarItems.some((item) => item.id === normalizedTab)
     ? normalizedTab

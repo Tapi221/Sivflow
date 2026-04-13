@@ -18,7 +18,7 @@ import {
   resolveCardImageUrl,
   type ResolvedCardImage,
 } from "@/services/cardImageResolver";
-import type { AssetRecord, CardImageRef, UploadedImage } from "@/types";
+import type { AssetRecord, CardImageRef } from "@/types";
 import { Check, RotateCcw, Upload, X } from "@/ui/icons";
 import { loadImageNaturalSize } from "@/utils/uploaded-image/naturalSize";
 import React, { useCallback, useEffect, useId, useRef, useState } from "react";
@@ -29,8 +29,34 @@ const IMAGE_BLOCK_INSET_PX = 4;
 const FIXED_IMAGE_REFERENCE_FRAME_WIDTH_PX =
   CANONICAL_CARD_WIDTH - IMAGE_BLOCK_INSET_PX * 2;
 
-type ImageRecordLike = Partial<AssetRecord & UploadedImage> | null | undefined;
-type ResolvedEditableImage = ResolvedCardImage;
+type ResolvedEditableImageStatus = "pending" | "uploading" | "ready" | "failed";
+
+type ImageRecordLike =
+  | {
+      remoteStatus?: "none" | "uploading" | "ready" | "failed" | null;
+      status?: "pending" | "uploading" | "ready" | "failed" | null;
+      remoteUrlCache?: string | null;
+      remoteUrl?: string | null;
+      localBlobId?: string | null;
+      localFileId?: string | null;
+      remoteKey?: string | null;
+      storagePath?: string | null;
+      mime?: string | null;
+      contentType?: string | null;
+      userId?: string | null;
+      width?: number | null;
+      naturalW?: number | null;
+      height?: number | null;
+      naturalH?: number | null;
+      createdAt?: Date | null;
+      retryCount?: number | null;
+    }
+  | null
+  | undefined;
+
+type ResolvedEditableImage = ResolvedCardImage & {
+  status: ResolvedEditableImageStatus;
+};
 
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === "string" && value.trim().length > 0;
@@ -40,7 +66,7 @@ const getImageStatusKey = (image: CardImageRef): string =>
 
 const getResolvedStatusFromRecord = (
   record: ImageRecordLike,
-): ResolvedEditableImage["status"] => {
+): ResolvedEditableImageStatus => {
   if (!record) return "pending";
 
   if (record.remoteStatus === "failed" || record.status === "failed") {
@@ -97,6 +123,12 @@ const getMimeFromRecord = (record: ImageRecordLike): string =>
     : isNonEmptyString(record?.contentType)
       ? record.contentType.trim()
       : "application/octet-stream";
+
+const getDefaultResolvedStatus = (
+  resolved: ResolvedCardImage,
+): ResolvedEditableImageStatus => {
+  return resolved.url ? "ready" : "pending";
+};
 
 const getRetryFileName = (assetId: string, mime: string): string => {
   const normalized = mime.trim().toLowerCase();
@@ -272,6 +304,8 @@ const MediaUploader = ({
   const autoOpenedRef = useRef(false);
   const imageUrls = type === "image" ? (urls as CardImageRef[]) : [];
   const audioUrls = type === "audio" ? (urls as string[]) : [];
+  const imageOnChange = onChange as (urls: CardImageRef[]) => void;
+  const audioOnChange = onChange as (urls: string[]) => void;
   const uniqueId = useId();
   const inputId = `file-${type}-${uniqueId}`;
 
@@ -289,7 +323,7 @@ const MediaUploader = ({
 
           return {
             ...resolved,
-            status: overrideStatus ?? resolved.status,
+            status: overrideStatus ?? getDefaultResolvedStatus(resolved),
           } satisfies ResolvedEditableImage;
         }),
       );
@@ -332,10 +366,7 @@ const MediaUploader = ({
       if (!currentUser?.uid || !assetId.trim()) return;
 
       const db = await getLocalDb(currentUser.uid);
-      const record = (await db.images.get(assetId)) as
-        | AssetRecord
-        | UploadedImage
-        | undefined;
+      const record = (await db.images.get(assetId)) as ImageRecordLike;
 
       setStatusByAssetId((prev) => ({
         ...prev,
@@ -426,8 +457,10 @@ const MediaUploader = ({
 
       if (filesToUpload.length === 0) return;
 
-      const added = await Promise.all(filesToUpload.map((file) => enqueueAsset(file)));
-      onChange([...(imageUrls as CardImageRef[]), ...added]);
+      const added = await Promise.all(
+        filesToUpload.map((file) => enqueueAsset(file)),
+      );
+      imageOnChange([...imageUrls, ...added]);
 
       for (const image of added) {
         if (image.assetId) {
@@ -466,7 +499,7 @@ const MediaUploader = ({
         ...audioUrls,
         ...Array.from(files).map((file) => URL.createObjectURL(file)),
       ];
-      (onChange as (urls: string[]) => void)(next);
+      audioOnChange(next);
     }
 
     event.target.value = "";
@@ -474,9 +507,7 @@ const MediaUploader = ({
 
   const handleRemove = async (index: number) => {
     if (type !== "image") {
-      (onChange as (urls: string[]) => void)(
-        audioUrls.filter((_, i) => i !== index),
-      );
+      audioOnChange(audioUrls.filter((_, i) => i !== index));
       return;
     }
 
@@ -485,10 +516,7 @@ const MediaUploader = ({
 
     if (currentUser?.uid && target.assetId) {
       const db = await getLocalDb(currentUser.uid);
-      const record = (await db.images.get(target.assetId)) as
-        | AssetRecord
-        | UploadedImage
-        | undefined;
+      const record = (await db.images.get(target.assetId)) as ImageRecordLike;
       const localBlobId = getLocalBlobIdFromRecord(record);
 
       if (localBlobId) {
@@ -497,7 +525,7 @@ const MediaUploader = ({
       }
     }
 
-    onChange(imageUrls.filter((_, i) => i !== index));
+    imageOnChange(imageUrls.filter((_, i) => i !== index));
   };
 
   const handleRetry = async (index: number) => {
@@ -509,10 +537,7 @@ const MediaUploader = ({
     setStatusByAssetId((prev) => ({ ...prev, [assetId]: "uploading" }));
 
     const db = await getLocalDb(currentUser.uid);
-    const record = (await db.images.get(assetId)) as
-      | AssetRecord
-      | UploadedImage
-      | undefined;
+    const record = (await db.images.get(assetId)) as ImageRecordLike;
 
     const localBlobId = getLocalBlobIdFromRecord(record);
     const blob = localBlobId
@@ -524,7 +549,8 @@ const MediaUploader = ({
       return;
     }
 
-    const mime = getMimeFromRecord(record) || blob.type || "application/octet-stream";
+    const mime =
+      getMimeFromRecord(record) || blob.type || "application/octet-stream";
     const remoteKey =
       getRemoteKeyFromRecord(record) ??
       buildAssetRemoteKey(currentUser.uid, assetId);
@@ -581,7 +607,7 @@ const MediaUploader = ({
   const handleUpdateImage = (index: number, patch: Partial<CardImageRef>) => {
     if (type !== "image") return;
 
-    onChange(
+    imageOnChange(
       imageUrls.map((image, i) =>
         i === index ? { ...image, ...patch } : image,
       ),
