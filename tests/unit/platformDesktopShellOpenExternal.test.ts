@@ -43,4 +43,3 @@ describe("platform/desktop.shell.openExternal", () => {
     );
   });
 });
-

@@ -39,7 +39,9 @@ export const MetaPanelShell = ({
           bodyClassName,
         )}
       >
-        <div className={cn("ds-editor-pane__content space-y-6", contentClassName)}>
+        <div
+          className={cn("ds-editor-pane__content space-y-6", contentClassName)}
+        >
           {children}
         </div>
       </div>

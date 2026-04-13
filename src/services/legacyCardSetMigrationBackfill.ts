@@ -144,4 +144,3 @@ export const backfillLegacyCardsToCardSets = async (
     `[AppInit:${userId}] CardSet backfill repaired ${legacyCards.length} legacy cards and ${danglingCardsBySetId.size} missing sets.`,
   );
 };
-
