@@ -11,7 +11,6 @@ import {
   shouldSkipQueuedDocumentUpload,
 } from "@/infrastructure/offlineQueue/persistentOfflineQueueEffects";
 import { uploadQueuedAsset } from "@/infrastructure/offlineQueue/uploadQueuedAsset";
-import { bindPersistentQueueAutoProcessing } from "@/platform/web/bindPersistentQueueAutoProcessing";
 import type { UploadedImage } from "@/types";
 
 class PersistentOfflineQueue {
@@ -103,5 +102,3 @@ class PersistentOfflineQueue {
 export type { AssetUploadRequest };
 
 export const persistentQueue = new PersistentOfflineQueue();
-
-bindPersistentQueueAutoProcessing(persistentQueue);

@@ -6,6 +6,7 @@ import "./styles/index.css";
 import "katex/dist/katex.min.css";
 import App from "./App";
 import { ErrorBoundary } from "./components/common/ErrorBoundary";
+import { bootstrapPersistentQueue } from "@/platform/web/bootstrapPersistentQueue";
 import { startTabPresence } from "@/utils/tabPresence";
 
 // Manifest検証（デバッグ用・開発環境のみ）
@@ -233,6 +234,8 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+bootstrapPersistentQueue();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
