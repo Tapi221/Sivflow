@@ -6,7 +6,7 @@ export const defaultPdfViewerOptions: PdfViewerOptions = {
   cMapUrl: "/pdfjs/cmaps/",
   cMapPacked: true,
   standardFontDataUrl: "/pdfjs/standard_fonts/",
-  disableFontFace: true,
+  disableFontFace: false,
   verbosity: import.meta.env.DEV ? 5 : undefined,
   opaqueCanvas: true,
 };
