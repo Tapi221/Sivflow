@@ -7,9 +7,6 @@ export type AppScreen =
   | "bookmarkMode"
   | "calendar"
   | "gallery"
-  | "oneQaMode"
-  | "pairMode"
-  | "fourChoiceMode"
   | "statistics"
   | "trash";
 
@@ -61,9 +58,6 @@ const PAGE_NAME_ALIASES: Record<string, AppScreen> = {
   calendar: "calendar",
   Gallery: "gallery",
   gallery: "gallery",
-  OneQAMode: "oneQaMode",
-  PairMode: "pairMode",
-  FourChoiceMode: "fourChoiceMode",
   Statistics: "statistics",
   Trash: "trash",
 };

@@ -13,9 +13,6 @@ const WEB_SCREEN_PATHS: Record<AppScreen, string> = {
   bookmarkMode: "/bookmark",
   calendar: "/calendar",
   gallery: "/gallery",
-  oneQaMode: "/one-qa-mode",
-  pairMode: "/pair-mode",
-  fourChoiceMode: "/four-choice-mode",
   statistics: "/statistics",
   trash: "/trash",
 };
