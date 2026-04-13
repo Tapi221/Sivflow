@@ -53,7 +53,8 @@ const hasBaseEntityShape = (value: unknown): value is { id: string } =>
   isDateLike(value.updatedAt) &&
   hasBoolean(value, "isDeleted");
 
-const isCardPayload = (value: unknown): value is Card => hasBaseEntityShape(value);
+const isCardPayload = (value: unknown): value is Card =>
+  hasBaseEntityShape(value);
 
 const isFolderPayload = (value: unknown): value is Folder => {
   if (!hasBaseEntityShape(value) || !isRecord(value)) return false;
@@ -61,9 +62,7 @@ const isFolderPayload = (value: unknown): value is Folder => {
   const folderRecord = value as Record<string, unknown>;
   const parentId = folderRecord.parentId;
   return (
-    parentId === undefined ||
-    parentId === null ||
-    typeof parentId === "string"
+    parentId === undefined || parentId === null || typeof parentId === "string"
   );
 };
 

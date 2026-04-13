@@ -137,10 +137,7 @@ export const sanitizeSyncDataFromCloud = (
     delete documentRecord.localFileId;
     delete documentRecord.blobUrl;
     const localUrl = documentRecord.localUrl;
-    if (
-      typeof localUrl === "string" &&
-      localUrl.startsWith("blob:")
-    ) {
+    if (typeof localUrl === "string" && localUrl.startsWith("blob:")) {
       documentRecord.localUrl = null;
     }
   }

@@ -40,9 +40,7 @@ type MaintenanceDb = {
   folders: {
     where: (index: string) => {
       equals: (value: string) => {
-        and: (
-          predicate: (folder: Record<string, unknown>) => boolean,
-        ) => {
+        and: (predicate: (folder: Record<string, unknown>) => boolean) => {
           toArray: () => Promise<Record<string, unknown>[]>;
         };
       };

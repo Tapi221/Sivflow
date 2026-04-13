@@ -65,8 +65,7 @@ export const denormalizeCardForStorage = (
       remoteUrl: normalizedRemoteUrl,
       storagePath: readString("storagePath"),
       status:
-        readString("status") ??
-        (normalizedRemoteUrl ? "ready" : "uploading"),
+        readString("status") ?? (normalizedRemoteUrl ? "ready" : "uploading"),
       error: readString("error") ?? undefined,
       scale: readNumber("scale") ?? 1,
       x: readNumber("x") ?? 0,
