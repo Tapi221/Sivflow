@@ -1,4 +1,10 @@
-import React, { useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
+import React, {
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { cn } from "@/lib/utils";
 import { PdfPage } from "./PdfPage";
 import {
@@ -113,7 +119,9 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       onScaleChange,
     });
 
-    const [pageMatches, setPageMatches] = useState<Record<number, PdfPageSearchMatch[]>>({});
+    const [pageMatches, setPageMatches] = useState<
+      Record<number, PdfPageSearchMatch[]>
+    >({});
     const [activeMatchIndex, setActiveMatchIndex] = useState(-1);
     const normalizedSearchQuery = searchQuery.trim();
     const lastSearchNavTokenRef = useRef(searchNavToken);
@@ -216,7 +224,10 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
     }, [doc, normalizedSearchQuery]);
 
     const flattenedMatches = useMemo(
-      () => Object.values(pageMatches).flat().sort((left, right) => left.globalIndex - right.globalIndex),
+      () =>
+        Object.values(pageMatches)
+          .flat()
+          .sort((left, right) => left.globalIndex - right.globalIndex),
       [pageMatches],
     );
 
@@ -257,7 +268,9 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       setActiveMatchIndex((previous) => {
         const baseIndex = previous < 0 ? 0 : previous;
         const delta = searchNavDirection === "prev" ? -1 : 1;
-        const nextIndex = (baseIndex + delta + flattenedMatches.length) % flattenedMatches.length;
+        const nextIndex =
+          (baseIndex + delta + flattenedMatches.length) %
+          flattenedMatches.length;
         return nextIndex;
       });
     }, [flattenedMatches.length, searchNavDirection, searchNavToken]);

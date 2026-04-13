@@ -107,7 +107,9 @@ export const PdfPaneToolbar = ({
           次
         </Button>
         <div className="min-w-[72px] text-center text-xs text-slate-600">
-          {totalMatches > 0 ? `${activeMatchIndex + 1} / ${totalMatches}` : "0 / 0"}
+          {totalMatches > 0
+            ? `${activeMatchIndex + 1} / ${totalMatches}`
+            : "0 / 0"}
         </div>
       </div>
 
@@ -127,7 +129,9 @@ export const PdfPaneToolbar = ({
           variant="outline"
           size="sm"
           onClick={onNext}
-          disabled={sourceUnavailable || numPages === 0 || currentPage >= numPages}
+          disabled={
+            sourceUnavailable || numPages === 0 || currentPage >= numPages
+          }
         >
           <ChevronRight className="h-4 w-4" />
         </Button>

@@ -1,4 +1,8 @@
-import type { PdfJsTextContent, PdfJsTextItem, PdfPageSearchMatch } from "@/components/pdf/pdfViewerTypes";
+import type {
+  PdfJsTextContent,
+  PdfJsTextItem,
+  PdfPageSearchMatch,
+} from "@/components/pdf/pdfViewerTypes";
 import { isPdfTextItem } from "@/components/pdf/pdfViewerTypes";
 
 type SearchSegment = {
@@ -65,7 +69,10 @@ export const findPageSearchMatches = ({
       }
 
       const localStart = Math.max(0, foundAt - segment.start);
-      const localEnd = Math.max(localStart, Math.min(segment.end, matchEnd) - segment.start);
+      const localEnd = Math.max(
+        localStart,
+        Math.min(segment.end, matchEnd) - segment.start,
+      );
 
       matches.push({
         pageNumber,

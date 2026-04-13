@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   PDF_PAGE_OBSERVER_ROOT_MARGIN,
   PDF_PAGE_OBSERVER_THRESHOLDS,
@@ -39,7 +39,10 @@ type RenderState = {
 type TextLayerState = {
   pageIdentity: string;
   items: PdfJsTextItem[];
-  styles: Record<string, { fontFamily?: string; ascent?: number; descent?: number }>;
+  styles: Record<
+    string,
+    { fontFamily?: string; ascent?: number; descent?: number }
+  >;
 };
 
 const buildPageIdentity = (pdf: PdfJsDocument, pageNumber: number) =>
@@ -80,7 +83,7 @@ const renderTextFragments = ({
     return text;
   }
 
-  const fragments: Array<string | JSX.Element> = [];
+  const fragments: ReactNode[] = [];
   let cursor = 0;
 
   matches
@@ -141,10 +144,12 @@ export const PdfPage = ({
     [opaqueCanvas, pageNumber, pdf, scale],
   );
 
-  const [measuredPageState, setMeasuredPageState] = useState<MeasuredPageState>({
-    pageIdentity: "",
-    size: null,
-  });
+  const [measuredPageState, setMeasuredPageState] = useState<MeasuredPageState>(
+    {
+      pageIdentity: "",
+      size: null,
+    },
+  );
 
   const [renderState, setRenderState] = useState<RenderState>({
     renderIdentity: "",
@@ -258,7 +263,10 @@ export const PdfPage = ({
 
   useEffect(() => {
     if (!shouldRender) return;
-    if (textLayerState.pageIdentity === pageIdentity && textLayerState.items.length > 0) {
+    if (
+      textLayerState.pageIdentity === pageIdentity &&
+      textLayerState.items.length > 0
+    ) {
       return;
     }
 
@@ -273,7 +281,8 @@ export const PdfPage = ({
         setTextLayerState({
           pageIdentity,
           items: textContent.items.filter(
-            (item): item is PdfJsTextItem => typeof (item as PdfJsTextItem).str === "string",
+            (item): item is PdfJsTextItem =>
+              typeof (item as PdfJsTextItem).str === "string",
           ),
           styles: textContent.styles ?? {},
         });
@@ -293,7 +302,14 @@ export const PdfPage = ({
     return () => {
       cancelled = true;
     };
-  }, [pageIdentity, pageNumber, pdf, shouldRender, textLayerState.items.length, textLayerState.pageIdentity]);
+  }, [
+    pageIdentity,
+    pageNumber,
+    pdf,
+    shouldRender,
+    textLayerState.items.length,
+    textLayerState.pageIdentity,
+  ]);
 
   useEffect(() => {
     if (!shouldRender || scale <= 0) return;
@@ -408,17 +424,33 @@ export const PdfPage = ({
                 width: (resolvedPageSize?.width ?? 1) * scale,
                 height: (resolvedPageSize?.height ?? 1) * scale,
                 scale,
-                transform: [scale, 0, 0, -scale, 0, (resolvedPageSize?.height ?? 1) * scale],
+                transform: [
+                  scale,
+                  0,
+                  0,
+                  -scale,
+                  0,
+                  (resolvedPageSize?.height ?? 1) * scale,
+                ],
               };
 
-              const transform = multiplyTransform(viewport.transform, item.transform);
+              const transform = multiplyTransform(
+                viewport.transform,
+                item.transform,
+              );
               const angle = Math.atan2(transform[1], transform[0]);
-              const fontHeight = Math.max(1, Math.hypot(transform[2], transform[3]));
+              const fontHeight = Math.max(
+                1,
+                Math.hypot(transform[2], transform[3]),
+              );
               const fontFamily =
-                textLayerState.styles[item.fontName ?? ""]?.fontFamily ?? "sans-serif";
+                textLayerState.styles[item.fontName ?? ""]?.fontFamily ??
+                "sans-serif";
               const left = transform[4];
               const top = transform[5] - fontHeight;
-              const itemMatches = searchMatches.filter((match) => match.itemIndex === itemIndex);
+              const itemMatches = searchMatches.filter(
+                (match) => match.itemIndex === itemIndex,
+              );
 
               return (
                 <span

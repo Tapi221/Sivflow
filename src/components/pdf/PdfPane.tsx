@@ -60,7 +60,9 @@ export const PdfPane = ({
   const [basePageWidth, setBasePageWidth] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchNavToken, setSearchNavToken] = useState(0);
-  const [searchNavDirection, setSearchNavDirection] = useState<"next" | "prev">("next");
+  const [searchNavDirection, setSearchNavDirection] = useState<"next" | "prev">(
+    "next",
+  );
   const [totalMatches, setTotalMatches] = useState(0);
   const [activeMatchIndex, setActiveMatchIndex] = useState(-1);
 
@@ -252,7 +254,10 @@ export const PdfPane = ({
             viewerOptions={resolvedViewerOptions}
             sourceMeta={sourceMeta}
             onSourceLoadError={handleSourceLoadError}
-            onSearchStateChange={({ totalMatches: nextTotalMatches, activeMatchIndex: nextActiveMatchIndex }) => {
+            onSearchStateChange={({
+              totalMatches: nextTotalMatches,
+              activeMatchIndex: nextActiveMatchIndex,
+            }) => {
               setTotalMatches(nextTotalMatches);
               setActiveMatchIndex(nextActiveMatchIndex);
             }}

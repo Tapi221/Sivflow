@@ -33,11 +33,11 @@ export const TitleBar: React.FC = () => {
 
     void windowControls.isMaximized().then(setIsMaximized);
 
-    const cleanup = windowControls.onMaximizedStateChange((maximized: boolean) => {
-    setIsMaximized(maximized);
-  });
-      setIsMaximized(maximized);
-    });
+    const cleanup = windowControls.onMaximizedStateChange(
+      (maximized: boolean) => {
+        setIsMaximized(maximized);
+      },
+    );
 
     return () => {
       cleanup();

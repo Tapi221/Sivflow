@@ -64,7 +64,10 @@ export interface PdfJsTextMarkedContent {
 
 export interface PdfJsTextContent {
   items: Array<PdfJsTextItem | PdfJsTextMarkedContent>;
-  styles?: Record<string, { fontFamily?: string; ascent?: number; descent?: number }>;
+  styles?: Record<
+    string,
+    { fontFamily?: string; ascent?: number; descent?: number }
+  >;
 }
 
 export interface PdfJsPage {
