@@ -45,11 +45,8 @@ export const initGlobalChunkRecovery = () => {
   });
 
   window.addEventListener("vite:preloadError", (event) => {
-    const payload =
-      "payload" in event ? (event as Event & { payload?: unknown }).payload : undefined;
     logBootstrapFault("vite.preloadError", {
       type: event.type,
-      message: toErrorText(payload),
     });
     hardReloadOnce(BOOTSTRAP_RELOAD_KEYS.vitePreload);
   });
