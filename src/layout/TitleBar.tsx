@@ -3,17 +3,14 @@ import {
   buildRouteBreadcrumbs,
   mergeTitleBarBreadcrumbs,
 } from "@/features/breadcrumbs/builders";
-import { hasDesktopBridge } from "@/platform/runtime";
-
-export const useHasDesktopBridge = () => {
-  return hasDesktopBridge();
-};
+import { useHasDesktopBridge } from "@/hooks/platform/useHasDesktopBridge";
 import { cn } from "@/lib/utils";
 import { windowControls } from "@/platform/capabilities/windowControls";
 import { APP_DESKTOP_TOP_INSET_PX } from "@/platform/presentation/shellMetrics";
 import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+
 const useBreadcrumbs = () => {
   const { pathname, search } = useLocation();
 
@@ -103,7 +100,10 @@ export const TitleBar: React.FC = () => {
     window.addEventListener("cardsetview:editing-change", onEditingChange);
 
     return () => {
-      window.removeEventListener("cardsetview:editing-change", onEditingChange);
+      window.removeEventListener(
+        "cardsetview:editing-change",
+        onEditingChange,
+      );
     };
   }, []);
 
