@@ -126,36 +126,35 @@ const waitForDesktopOAuthCode = (
       reject(new Error("Timed out waiting for desktop OAuth callback"));
     }, CALLBACK_TIMEOUT_MS);
 
-    const unsubscribe = oauthBridge.onCallback((payload) => {
-      const parsed = parseLoopbackCallback(
-        payload as DesktopOauthCallbackPayload,
-        redirectUri,
-      );
-      const isStateMatched = parsed.state === expectedState;
+    const unsubscribe = oauthBridge.onCallback(
+      (payload: DesktopOauthCallbackPayload) => {
+        const parsed = parseLoopbackCallback(payload, redirectUri);
+        const isStateMatched = parsed.state === expectedState;
 
-      if (!isStateMatched) {
-        return;
-      }
+        if (!isStateMatched) {
+          return;
+        }
 
-      window.clearTimeout(timeoutId);
-      unsubscribe();
+        window.clearTimeout(timeoutId);
+        unsubscribe();
 
-      if (parsed.error) {
-        reject(
-          new Error(
-            parsed.errorDescription || `Google OAuth failed: ${parsed.error}`,
-          ),
-        );
-        return;
-      }
+        if (parsed.error) {
+          reject(
+            new Error(
+              parsed.errorDescription || `Google OAuth failed: ${parsed.error}`,
+            ),
+          );
+          return;
+        }
 
-      if (!parsed.code) {
-        reject(new Error("Google OAuth callback does not include auth code"));
-        return;
-      }
+        if (!parsed.code) {
+          reject(new Error("Google OAuth callback does not include auth code"));
+          return;
+        }
 
-      resolve(parsed.code);
-    });
+        resolve(parsed.code);
+      },
+    );
   });
 };
 
