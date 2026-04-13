@@ -1,5 +1,5 @@
-import { getLocalDb } from "@/services/localDB";
-import { auth } from "@/services/firebase";
+import { auth } from "@/infrastructure/firebase/client";
+import { getLocalDb } from "@/infrastructure/localdb/client";
 import type { UploadedImage } from "@/types";
 
 import {

@@ -1,4 +1,4 @@
-import { getLocalDb } from "@/services/localDB";
+import { getLocalDb } from "@/infrastructure/localdb/client";
 import type { SyncQueueItem } from "@/types";
 
 export const cleanupQueuedAssetSyncItems = async (

@@ -1,4 +1,4 @@
-import { auth, storage } from "@/services/firebase";
+import { auth, storage } from "@/infrastructure/firebase/client";
 import type { UploadedImage } from "@/types";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 
