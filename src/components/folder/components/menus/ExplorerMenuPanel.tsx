@@ -17,7 +17,7 @@ interface ExplorerMenuPanelProps extends React.ComponentPropsWithoutRef<
   closeMenu?: () => void;
 }
 
-const DANGER_ITEM_CLASS = "text-red-600 focus:bg-red-50 focus:text-red-700";
+const DANGER_ITEM_CLASS = "ds-menu__item--danger";
 
 /**
  * エクスプローラーの各種メニュー（追加ボタン、コンテキストメニュー）で共有されるパネルコンポーネント
@@ -33,6 +33,7 @@ export const ExplorerMenuPanel = ({
   return (
     <DropdownMenuContent
       className={cn("w-48", glassMenuContentClass, className)}
+      surface="floating"
       {...contentProps}
     >
       {visibleActions.map((action, index) => (
