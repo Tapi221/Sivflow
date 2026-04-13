@@ -23,11 +23,16 @@ export const ExplorerRowContent = React.memo(function ExplorerRowContent({
   return (
     <>
       {left}
-      <div className={cn("sidebar-label flex-1 min-w-0", contentClassName)}>
+      <div
+        className={cn(
+          "sidebar-label ds-list-item__content flex-1 min-w-0",
+          contentClassName,
+        )}
+      >
         {title ? (
           <div
             className={cn(
-              "sidebar-title text-sm text-[var(--sidebar-text,#202123)] truncate",
+              "sidebar-title ds-list-item__title text-sm truncate",
               titleClassName,
             )}
           >
@@ -37,7 +42,7 @@ export const ExplorerRowContent = React.memo(function ExplorerRowContent({
         {subtitle ? (
           <div
             className={cn(
-              "text-[10px] text-[var(--sidebar-text-muted,#6e6e80)] truncate",
+              "ds-list-item__subtitle text-[10px] truncate",
               subtitleClassName,
             )}
           >

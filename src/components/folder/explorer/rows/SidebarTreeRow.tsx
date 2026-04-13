@@ -81,8 +81,8 @@ export const SidebarTreeRow = ({
       style={style}
       className={cn(
         "relative",
-        isDimmed && "opacity-50",
-        isDraggingOver && "rounded-sm bg-blue-50/50 ring-1 ring-blue-200/50",
+        isDimmed && "ds-list-item__dimmed",
+        isDraggingOver && "ds-list-item__drag-over rounded-sm",
         className,
       )}
       onMouseDownCapture={

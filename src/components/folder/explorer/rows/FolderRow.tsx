@@ -197,8 +197,9 @@ export const FolderRow: React.FC<FolderRowProps> = ({
           selected={isSelected}
           className={cn(
             rowBaseClassName,
-            isFileDraggingOver && "bg-blue-100 ring-1 ring-blue-300",
-            "group sidebar-row--folder",
+            isFileDraggingOver && "ds-list-item__drag-over",
+            "group sidebar-row--folder ds-list-item--interactive",
+            isSelected && "ds-list-item--selected",
             EXPLORER_ROW_MOBILE_NAV_TRAILING_PADDING_CLASS,
           )}
           onClick={(event) => {
@@ -223,20 +224,18 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                 isExpanded ? (
                   <ChevronDown
                     className={cn(
-                      "sidebar-icon",
+                      "sidebar-icon ds-list-item__icon",
                       FOLDER_ROW_ICON_SIZE_CLASS,
                       FOLDER_ROW_ICON_MUTED_CLASS,
-                      "group-hover:text-[var(--sidebar-text,#202123)]",
                       isSelected && FOLDER_ROW_ICON_ACTIVE_CLASS,
                     )}
                   />
                 ) : (
                   <ChevronRight
                     className={cn(
-                      "sidebar-icon",
+                      "sidebar-icon ds-list-item__icon",
                       FOLDER_ROW_ICON_SIZE_CLASS,
                       FOLDER_ROW_ICON_MUTED_CLASS,
-                      "group-hover:text-[var(--sidebar-text,#202123)]",
                       isSelected && FOLDER_ROW_ICON_ACTIVE_CLASS,
                     )}
                   />
@@ -247,10 +246,9 @@ export const FolderRow: React.FC<FolderRowProps> = ({
             <span className={EXPLORER_ROW_ICON_SLOT_CLASS}>
               <FolderGlyph
                 className={cn(
-                  "sidebar-icon",
+                  "sidebar-icon ds-list-item__icon",
                   FOLDER_ROW_ICON_SIZE_CLASS,
                   FOLDER_ROW_ICON_MUTED_CLASS,
-                  "group-hover:text-[var(--sidebar-text,#202123)]",
                   isSelected && FOLDER_ROW_ICON_ACTIVE_CLASS,
                 )}
               />
@@ -262,7 +260,7 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                 aria-label="フォルダ名の編集"
                 className={cn(
                   EXPLORER_ROW_INPUT_CLASS,
-                  "z-10 surface-concave placeholder:text-[#6E6E80] focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:bg-white",
+                  "z-10",
                 )}
                 style={{ userSelect: "text", WebkitUserSelect: "text" }}
                 defaultValue={editingName}
@@ -311,7 +309,7 @@ export const FolderRow: React.FC<FolderRowProps> = ({
                   )}
                   right={
                     isFiltering && matchCount === 0 ? (
-                      <span className="text-xs text-[var(--sidebar-text-muted,#6e6e80)]">
+                      <span className="ds-list-item__subtitle text-xs">
                         (0)
                       </span>
                     ) : null
@@ -326,13 +324,13 @@ export const FolderRow: React.FC<FolderRowProps> = ({
               <button
                 type="button"
                 aria-label="このフォルダを開く"
-                className="sidebar-action md:hidden h-6 w-6 p-0 grid place-items-center rounded-md hover:bg-[var(--sidebar-active-bg,#e7ebef)] text-[var(--sidebar-text-muted,#6e6e80)] hover:text-[var(--sidebar-text,#202123)] outline-none pointer-events-auto shrink-0"
+                className="sidebar-action ds-list-item__action md:hidden h-6 w-6 p-0 grid place-items-center rounded-md outline-none pointer-events-auto shrink-0"
                 onClick={(e) => {
                   e.stopPropagation();
                   (onNavigate ?? onSelect)();
                 }}
               >
-                <ChevronRight className="sidebar-icon h-4 w-4" />
+                <ChevronRight className="sidebar-icon ds-list-item__icon h-4 w-4" />
               </button>
             </div>
           )}

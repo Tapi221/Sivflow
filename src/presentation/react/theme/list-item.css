@@ -1,0 +1,107 @@
+@layer components {
+  .ds-list-item {
+    background: transparent;
+    color: var(--ds-semantic-color-text-primary);
+    transition:
+      background-color var(--ds-semantic-motion-interactive),
+      color var(--ds-semantic-motion-interactive),
+      opacity var(--ds-semantic-motion-interactive),
+      box-shadow var(--ds-semantic-motion-interactive);
+  }
+
+  .ds-list-item--interactive:hover,
+  .ds-list-item--selected {
+    background: var(--ds-semantic-color-background-sidebar-active);
+    color: var(--ds-semantic-color-text-primary);
+  }
+
+  .ds-list-item:focus-visible {
+    outline: none;
+    box-shadow: inset 0 0 0 1px
+      color-mix(
+        in srgb,
+        var(--ds-semantic-color-action-primary) 42%,
+        transparent
+      );
+  }
+
+  .ds-list-item__content {
+    color: inherit;
+  }
+
+  .ds-list-item__title {
+    color: var(--ds-semantic-color-text-primary);
+  }
+
+  .ds-list-item__subtitle {
+    color: var(--ds-semantic-color-text-secondary);
+  }
+
+  .ds-list-item__icon {
+    color: var(--ds-semantic-color-text-secondary);
+    transition: color var(--ds-semantic-motion-interactive);
+  }
+
+  .group:hover .ds-list-item__icon,
+  .ds-list-item--selected .ds-list-item__icon {
+    color: var(--ds-semantic-color-text-primary);
+  }
+
+  .ds-list-item__input {
+    border: 1px solid var(--ds-semantic-color-border-default);
+    background: var(--ds-semantic-color-background-app);
+    color: var(--ds-semantic-color-text-primary);
+    border-radius: 6px;
+    box-shadow: var(--ds-semantic-elevation-control-inset);
+    transition:
+      border-color var(--ds-semantic-motion-interactive),
+      box-shadow var(--ds-semantic-motion-interactive),
+      background-color var(--ds-semantic-motion-interactive);
+  }
+
+  .ds-list-item__input::placeholder {
+    color: var(--ds-semantic-color-text-secondary);
+  }
+
+  .ds-list-item__input:focus-visible {
+    outline: none;
+    border-color: var(--ds-semantic-color-action-primary);
+    box-shadow:
+      0 0 0 1px var(--ds-semantic-color-action-primary),
+      0 0 0 3px color-mix(
+        in srgb,
+        var(--ds-semantic-color-action-primary) 20%,
+        transparent
+      );
+  }
+
+  .ds-list-item__dimmed {
+    opacity: 0.5;
+  }
+
+  .ds-list-item__drag-over {
+    background: color-mix(
+      in srgb,
+      var(--ds-semantic-color-action-primary-soft) 72%,
+      transparent
+    );
+    box-shadow: inset 0 0 0 1px
+      color-mix(
+        in srgb,
+        var(--ds-semantic-color-action-primary) 36%,
+        transparent
+      );
+  }
+
+  .ds-list-item__action {
+    color: var(--ds-semantic-color-text-secondary);
+    transition:
+      background-color var(--ds-semantic-motion-interactive),
+      color var(--ds-semantic-motion-interactive);
+  }
+
+  .ds-list-item__action:hover {
+    background: var(--ds-semantic-color-background-sidebar-active);
+    color: var(--ds-semantic-color-text-primary);
+  }
+}

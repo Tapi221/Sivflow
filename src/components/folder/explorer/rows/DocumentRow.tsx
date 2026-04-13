@@ -144,10 +144,10 @@ export const DocumentRow = ({
         depth={depth}
         selected={isSelected}
         className={cn(
-          "cursor-pointer sidebar-row--folder",
+          "cursor-pointer sidebar-row--folder ds-list-item--interactive",
           isSelected
-            ? "bg-[var(--sidebar-active-bg,#e7ebef)] text-[var(--sidebar-text,#202123)]"
-            : "hover:bg-[var(--sidebar-active-bg,#e7ebef)] text-[var(--sidebar-text,#202123)]",
+            ? "ds-list-item--selected"
+            : "text-[var(--ds-semantic-color-text-primary)]",
         )}
         onClick={(event) => {
           if (event.defaultPrevented) return;
@@ -160,7 +160,7 @@ export const DocumentRow = ({
           <span className={EXPLORER_ROW_ICON_SLOT_CLASS}>
             <FileText
               className={cn(
-                "sidebar-icon",
+                "sidebar-icon ds-list-item__icon",
                 FOLDER_ROW_ICON_SIZE_CLASS,
                 FOLDER_ROW_ICON_MUTED_CLASS,
                 isSelected && FOLDER_ROW_ICON_ACTIVE_CLASS,

@@ -135,10 +135,10 @@ export const CardSetRow = ({
         depth={depth}
         selected={isSelected}
         className={cn(
-          "cursor-pointer sidebar-row--folder",
+          "cursor-pointer sidebar-row--folder ds-list-item--interactive",
           isSelected
-            ? "bg-[var(--sidebar-active-bg,#e7ebef)] text-[var(--sidebar-text,#202123)]"
-            : "hover:bg-[var(--sidebar-active-bg,#e7ebef)] text-[var(--sidebar-text,#202123)]",
+            ? "ds-list-item--selected"
+            : "text-[var(--ds-semantic-color-text-primary)]",
         )}
         onClick={(event) => {
           if (event.defaultPrevented) return;
@@ -161,7 +161,7 @@ export const CardSetRow = ({
               >
                 <Chevron
                   className={cn(
-                    "sidebar-icon",
+                    "sidebar-icon ds-list-item__icon",
                     FOLDER_ROW_ICON_SIZE_CLASS,
                     FOLDER_ROW_ICON_MUTED_CLASS,
                     isSelected && FOLDER_ROW_ICON_ACTIVE_CLASS,
@@ -174,7 +174,7 @@ export const CardSetRow = ({
           <span className={EXPLORER_ROW_ICON_SLOT_CLASS}>
             <Layers
               className={cn(
-                "sidebar-icon",
+                "sidebar-icon ds-list-item__icon",
                 FOLDER_ROW_ICON_SIZE_CLASS,
                 FOLDER_ROW_ICON_MUTED_CLASS,
                 isSelected && FOLDER_ROW_ICON_ACTIVE_CLASS,
@@ -236,7 +236,7 @@ export const CardSetRow = ({
                 )}
                 right={
                   hasChildren ? (
-                    <span className="ml-auto text-[10px] text-[var(--sidebar-text-muted,#6e6e80)] tabular-nums">
+                    <span className="ds-list-item__subtitle ml-auto text-[10px] tabular-nums">
                       {treeNode.children!.length}
                     </span>
                   ) : null
