@@ -6,13 +6,9 @@ import { CardSetViewMetaPanel } from "@/features/cardsetview/presentation/web/ui
 import { CardSetViewMobileContent } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewMobileContent";
 import { CardSetViewOverlayControls } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewOverlayControls";
 import type { CardSetViewContentProps } from "@/features/cardsetview/presentation/web/ui/components/cardSetViewContentProps";
-import {
-  getPresentationTarget,
-  type PresentationTarget,
-} from "@/platform/presentation/getPresentationTarget";
-import { getRuntimeKind } from "@/platform/runtimeKind";
-
-const TITLEBAR_HEIGHT_PX = 36;
+import type { PresentationTarget } from "@/platform/presentation/getPresentationTarget";
+import { getAppTopInsetPx } from "@/platform/presentation/shellMetrics";
+import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
 
 const CARD_SET_VIEW_CONTENT_COMPONENTS = {
   desktop: CardSetViewDesktopContent,
@@ -38,6 +34,8 @@ export const CardSetViewScreen = () => {
     handleSaveCurrentDisplayMode,
   } = controller;
 
+  const presentationTarget = usePresentationTarget();
+
   if (!folderId && !cardSetId) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -48,14 +46,9 @@ export const CardSetViewScreen = () => {
     );
   }
 
-  const presentationTarget = getPresentationTarget({
-    runtimeKind: getRuntimeKind(),
-  });
   const isDesktopPresentation = presentationTarget === "desktop";
   const Content = CARD_SET_VIEW_CONTENT_COMPONENTS[presentationTarget];
-  const desktopOverlayTopInsetPx = isDesktopPresentation
-    ? TITLEBAR_HEIGHT_PX
-    : 0;
+  const desktopOverlayTopInsetPx = getAppTopInsetPx({ presentationTarget });
 
   const overlayChildren = (
     <CardSetViewOverlayControls

@@ -1,11 +1,8 @@
 import { StudyReviewDesktop } from "@/features/study/presentation/desktop/StudyReviewDesktop";
 import { StudyReviewMobile } from "@/features/study/presentation/mobile/StudyReviewMobile";
 import type { StudyReviewProps } from "@/features/study/presentation/shared/studyReviewProps";
-import {
-  getPresentationTarget,
-  type PresentationTarget,
-} from "@/platform/presentation/getPresentationTarget";
-import { getRuntimeKind } from "@/platform/runtimeKind";
+import type { PresentationTarget } from "@/platform/presentation/getPresentationTarget";
+import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
 
 const STUDY_REVIEW_COMPONENTS = {
   desktop: StudyReviewDesktop,
@@ -16,9 +13,7 @@ const STUDY_REVIEW_COMPONENTS = {
 >;
 
 export const StudyReview = (props: StudyReviewProps) => {
-  const presentationTarget = getPresentationTarget({
-    runtimeKind: getRuntimeKind(),
-  });
+  const presentationTarget = usePresentationTarget();
   const Component = STUDY_REVIEW_COMPONENTS[presentationTarget];
   return <Component {...props} />;
 };

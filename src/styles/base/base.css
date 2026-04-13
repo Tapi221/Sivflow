@@ -1,4 +1,8 @@
 @layer base {
+  :root {
+    --app-top-inset: 0px;
+  }
+
   *,
   *::before,
   *::after {
@@ -31,6 +35,9 @@
     min-height: 100dvh;
     height: 100dvh;
     position: relative;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: geometricPrecision;
   }
 
   input:focus,

@@ -6,6 +6,8 @@ import {
 import { useIsDesktopRuntime } from "@/hooks/platform/useIsDesktopRuntime";
 import { cn } from "@/lib/utils";
 import { windowControls } from "@/platform/capabilities/windowControls";
+import { APP_DESKTOP_TOP_INSET_PX } from "@/platform/presentation/shellMetrics";
+import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -18,18 +20,63 @@ const useBreadcrumbs = () => {
   );
 };
 
+type WindowControlButtonProps = {
+  title: string;
+  onClick?: () => void;
+  disabled?: boolean;
+  danger?: boolean;
+  children: React.ReactNode;
+};
+
+const WindowControlButton: React.FC<WindowControlButtonProps> = ({
+  title,
+  onClick,
+  disabled = false,
+  danger = false,
+  children,
+}) => {
+  const disabledClassName = disabled
+    ? "cursor-default opacity-60 hover:bg-transparent hover:text-current"
+    : danger
+      ? "hover:bg-[#E81123] hover:text-white"
+      : "hover:bg-black/5";
+
+  return (
+    <button
+      type="button"
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
+      className={cn(
+        "flex h-full w-[46px] items-center justify-center transition-colors",
+        disabledClassName,
+      )}
+      title={title}
+      aria-label={title}
+      aria-disabled={disabled}
+      tabIndex={disabled ? undefined : -1}
+    >
+      {children}
+    </button>
+  );
+};
+
 export const TitleBar: React.FC = () => {
   const [isMaximized, setIsMaximized] = useState(false);
   const [isCardSetViewEditing, setIsCardSetViewEditing] = useState(false);
   const navigate = useNavigate();
-  const isDesktop = useIsDesktopRuntime();
+  const isDesktopRuntime = useIsDesktopRuntime();
+  const presentationTarget = usePresentationTarget();
+  const isDesktopPresentation = presentationTarget === "desktop";
   const { pathname } = useLocation();
   const crumbs = useBreadcrumbs();
   const { extraCrumbs, notifyFolderSelect } = useBreadcrumbContext();
   const isCardSetViewPage = pathname.toLowerCase().startsWith("/cardsetview");
 
   useEffect(() => {
-    if (!isDesktop) return;
+    if (!isDesktopRuntime) {
+      setIsMaximized(false);
+      return;
+    }
 
     void windowControls.isMaximized().then(setIsMaximized);
 
@@ -42,7 +89,7 @@ export const TitleBar: React.FC = () => {
     return () => {
       cleanup();
     };
-  }, [isDesktop]);
+  }, [isDesktopRuntime]);
 
   useEffect(() => {
     const onEditingChange = (event: Event) => {
@@ -67,20 +114,31 @@ export const TitleBar: React.FC = () => {
     [crumbs, extraCrumbs, pathname],
   );
 
-  if (!isDesktop) return null;
+  if (!isDesktopPresentation) return null;
+
+  const dragStyle = isDesktopRuntime
+    ? ({ WebkitAppRegion: "drag" } as React.CSSProperties)
+    : undefined;
+  const noDragStyle = isDesktopRuntime
+    ? ({ WebkitAppRegion: "no-drag" } as React.CSSProperties)
+    : undefined;
 
   return (
     <div
       className={cn(
         "surface-glass-base surface-glass-titlebar",
-        "flex h-[36px] w-full shrink-0 select-none items-center justify-between",
+        "flex w-full shrink-0 select-none items-center justify-between",
         "border-x-0 border-t-0 rounded-none text-sm text-slate-700",
       )}
-      style={{ WebkitAppRegion: "drag", zIndex: 9999 } as React.CSSProperties}
+      style={{
+        ...dragStyle,
+        zIndex: 9999,
+        height: `${APP_DESKTOP_TOP_INSET_PX}px`,
+      }}
     >
       <div
         className="flex h-full min-w-0 items-center gap-2 px-4"
-        style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
+        style={noDragStyle}
       >
         <span className="mr-2 shrink-0 text-xs font-semibold tracking-wide text-slate-600">
           Manifolia
@@ -133,9 +191,7 @@ export const TitleBar: React.FC = () => {
                   <button
                     type="button"
                     className="truncate transition-colors hover:text-slate-700"
-                    style={
-                      { WebkitAppRegion: "no-drag" } as React.CSSProperties
-                    }
+                    style={noDragStyle}
                     onMouseDown={(event) => event.stopPropagation()}
                     onClick={handleBreadcrumbClick}
                   >
@@ -154,12 +210,13 @@ export const TitleBar: React.FC = () => {
 
       <div
         className="flex h-full items-center text-slate-500"
-        style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
+        style={noDragStyle}
       >
         {isCardSetViewPage && (
           <>
             {isCardSetViewEditing && (
               <button
+                type="button"
                 onClick={() =>
                   window.dispatchEvent(
                     new CustomEvent("cardsetview:create-card-request"),
@@ -214,6 +271,7 @@ export const TitleBar: React.FC = () => {
 
             {isCardSetViewEditing && (
               <button
+                type="button"
                 onClick={() =>
                   window.dispatchEvent(
                     new CustomEvent("cardsetview:save-request"),
@@ -257,6 +315,7 @@ export const TitleBar: React.FC = () => {
             )}
 
             <button
+              type="button"
               onClick={() =>
                 window.dispatchEvent(
                   new CustomEvent("cardsetview:toggle-editing-request"),
@@ -320,11 +379,10 @@ export const TitleBar: React.FC = () => {
           </>
         )}
 
-        <button
+        <WindowControlButton
+          title={isDesktopRuntime ? "最小化" : "ブラウザでは最小化できません"}
           onClick={() => void windowControls.minimize()}
-          className="flex h-full w-[46px] items-center justify-center transition-colors hover:bg-black/5"
-          title="最小化"
-          tabIndex={-1}
+          disabled={!isDesktopRuntime}
         >
           <svg
             width="10"
@@ -340,13 +398,18 @@ export const TitleBar: React.FC = () => {
               strokeLinecap="round"
             />
           </svg>
-        </button>
+        </WindowControlButton>
 
-        <button
+        <WindowControlButton
+          title={
+            isDesktopRuntime
+              ? isMaximized
+                ? "元に戻す"
+                : "最大化"
+              : "ブラウザではウィンドウ制御できません"
+          }
           onClick={() => void windowControls.maximizeToggle()}
-          className="flex h-full w-[46px] items-center justify-center transition-colors hover:bg-black/5"
-          title={isMaximized ? "元に戻す" : "最大化"}
-          tabIndex={-1}
+          disabled={!isDesktopRuntime}
         >
           {isMaximized ? (
             <svg
@@ -377,13 +440,15 @@ export const TitleBar: React.FC = () => {
               />
             </svg>
           )}
-        </button>
+        </WindowControlButton>
 
-        <button
+        <WindowControlButton
+          title={
+            isDesktopRuntime ? "閉じる" : "ブラウザでは閉じる操作を提供しません"
+          }
           onClick={() => void windowControls.close()}
-          className="flex h-full w-[46px] items-center justify-center transition-colors hover:bg-[#E81123] hover:text-white"
-          title="閉じる"
-          tabIndex={-1}
+          disabled={!isDesktopRuntime}
+          danger
         >
           <svg
             width="10"
@@ -399,7 +464,7 @@ export const TitleBar: React.FC = () => {
               strokeLinecap="round"
             />
           </svg>
-        </button>
+        </WindowControlButton>
       </div>
     </div>
   );

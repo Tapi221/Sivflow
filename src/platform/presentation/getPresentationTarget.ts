@@ -1,19 +1,37 @@
-import type { RuntimeKind } from "@/platform/runtimeKind";
-
 export type PresentationTarget = "desktop" | "mobile";
 
+export type PresentationCapabilities = {
+  viewportWidth: number;
+  canHover: boolean;
+  hasFinePointer: boolean;
+};
+
+export const DESKTOP_PRESENTATION_MIN_WIDTH_PX = 1024;
+
 export const getPresentationTarget = ({
-  runtimeKind,
-}: {
-  runtimeKind: RuntimeKind;
-}): PresentationTarget => {
-  switch (runtimeKind) {
-    case "desktop":
-      return "desktop";
-    case "ios":
-    case "android":
-    case "web":
-    default:
-      return "mobile";
+  viewportWidth,
+  canHover,
+  hasFinePointer,
+}: PresentationCapabilities): PresentationTarget => {
+  if (
+    viewportWidth >= DESKTOP_PRESENTATION_MIN_WIDTH_PX &&
+    canHover &&
+    hasFinePointer
+  ) {
+    return "desktop";
   }
+
+  return "mobile";
+};
+
+export const getPresentationTargetFromWindow = (): PresentationTarget => {
+  if (typeof window === "undefined") {
+    return "mobile";
+  }
+
+  return getPresentationTarget({
+    viewportWidth: window.innerWidth,
+    canHover: window.matchMedia("(hover: hover)").matches,
+    hasFinePointer: window.matchMedia("(pointer: fine)").matches,
+  });
 };
