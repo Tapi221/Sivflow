@@ -1,21 +1,29 @@
 import { useCallback } from "react";
 import type { SetURLSearchParams } from "react-router-dom";
+import {
+  isSettingsTabParam,
+  type SettingsTabParam,
+} from "@/hooks/settings/settingsTabs";
 
 export const useSettingsQueryParam = (
   searchParams: URLSearchParams,
   setSearchParams: SetURLSearchParams,
 ) => {
   const isSettingsOpen = searchParams.get("settings") === "true";
-  const settingsTab = searchParams.get("settingsTab");
+  const rawSettingsTab = searchParams.get("settingsTab");
+  const settingsTab = isSettingsTabParam(rawSettingsTab)
+    ? rawSettingsTab
+    : undefined;
 
   const setIsSettingsOpen = useCallback(
-    (open: boolean, tab?: string) => {
+    (open: boolean, tab?: SettingsTabParam) => {
       if (open && typeof document !== "undefined") {
         const activeElement = document.activeElement;
         if (activeElement instanceof HTMLElement) {
           activeElement.blur();
         }
       }
+
       const newParams = new URLSearchParams(searchParams);
       if (open) {
         newParams.set("settings", "true");

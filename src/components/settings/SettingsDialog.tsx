@@ -16,6 +16,10 @@ import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/contexts/AuthContext";
 import { useFolders } from "@/hooks/folder/useFolders";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
+import type {
+  SettingsTab,
+  SettingsTabParam,
+} from "@/hooks/settings/settingsTabs";
 import { cn } from "@/lib/utils";
 import { auth } from "@/services/firebase";
 import { getLocalDb } from "@/services/localDB";
@@ -63,9 +67,7 @@ const sidebarItems = [
   { id: "sync", label: "同期設定", icon: RefreshCw },
 ] as const;
 
-const DEFAULT_SETTINGS_TAB = "study";
-
-type SettingsTab = (typeof sidebarItems)[number]["id"];
+const DEFAULT_SETTINGS_TAB: SettingsTab = "study";
 type FolderSidebarDisplayMode = NonNullable<
   UserSettings["folderSidebarDisplayMode"]
 >;
@@ -73,11 +75,11 @@ type FolderSidebarDisplayMode = NonNullable<
 type SettingsDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  initialTab?: SettingsTab | "theme";
+  initialTab?: SettingsTabParam;
 };
 
 const normalizeSettingsTab = (
-  tab?: SettingsDialogProps["initialTab"],
+  tab?: SettingsTabParam,
 ): SettingsTab => {
   if (tab === "theme") return "display";
   return sidebarItems.some((item) => item.id === tab)
@@ -86,7 +88,7 @@ const normalizeSettingsTab = (
 };
 
 const resolveSettingsTab = (
-  tab?: SettingsDialogProps["initialTab"],
+  tab?: SettingsTabParam,
 ): SettingsTab => {
   const normalizedTab = normalizeSettingsTab(tab);
   return sidebarItems.some((item) => item.id === normalizedTab)
@@ -124,7 +126,7 @@ const SettingsDialog = ({
   onOpenChange,
   initialTab,
 }: SettingsDialogProps) => {
-  const [selectedTab, setSelectedTab] = useState<string | null>(null);
+  const [selectedTab, setSelectedTab] = useState<SettingsTab | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [imgError, setImgError] = useState(false);
   const resolvedInitialTab = useMemo(
@@ -190,7 +192,7 @@ const SettingsDialog = ({
     onOpenChange(false);
   };
 
-  const handleSelectTab = (tabId: string) => {
+  const handleSelectTab = (tabId: SettingsTab) => {
     setSelectedTab(tabId);
     setIsMobileMenuOpen(false);
   };
