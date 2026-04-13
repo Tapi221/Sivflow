@@ -1,15 +1,19 @@
 import type { UploadedImage } from "@/types";
 
-import { imageDB } from "@/services/ImageDatabaseWriter";
+import {
+  isImageFirestoreDiagnosticsEnabled,
+  resolveImageFirestoreTarget,
+  saveImageToFirestore,
+} from "./imageFirestoreWriter";
 
 export const writeQueuedImageToFirestore = async (
   queueItemId: string,
   fileName: string,
   image: UploadedImage,
 ): Promise<void> => {
-  const firestoreTarget = imageDB.resolveFirestoreTarget(image);
+  const firestoreTarget = resolveImageFirestoreTarget(image);
 
-  if (imageDB.isFirestoreDiagnosticsEnabled()) {
+  if (isImageFirestoreDiagnosticsEnabled()) {
     console.info("[PersistentQueue] Firestore image write attempt", {
       operation: "setDoc",
       path: firestoreTarget.path,
@@ -20,9 +24,9 @@ export const writeQueuedImageToFirestore = async (
   }
 
   try {
-    await imageDB.saveToFirestore(image);
+    await saveImageToFirestore(image);
   } catch (writeErr) {
-    if (imageDB.isFirestoreDiagnosticsEnabled()) {
+    if (isImageFirestoreDiagnosticsEnabled()) {
       console.error("[PersistentQueue] Firestore image write rejected", {
         operation: "setDoc",
         path: firestoreTarget.path,
