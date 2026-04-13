@@ -1,0 +1,226 @@
+@layer components {
+  .ds-status-tone--neutral {
+    background: color-mix(
+      in srgb,
+      var(--ds-semantic-color-background-sidebar-active) 80%,
+      var(--ds-semantic-color-background-app) 20%
+    );
+    color: var(--ds-semantic-color-text-secondary);
+  }
+
+  .ds-status-tone--danger {
+    background: var(--ds-color-status-danger-soft);
+    color: color-mix(in srgb, var(--ds-color-status-danger) 84%, black 16%);
+  }
+
+  .ds-status-tone--warning {
+    background: var(--ds-color-status-warning-soft);
+    color: color-mix(in srgb, var(--ds-color-status-warning) 78%, black 22%);
+  }
+
+  .ds-status-tone--info {
+    background: var(--ds-color-status-info-soft);
+    color: color-mix(in srgb, var(--ds-color-status-info) 82%, black 18%);
+  }
+
+  .ds-status-tone--success {
+    background: var(--ds-color-status-success-soft);
+    color: color-mix(in srgb, var(--ds-color-status-success) 82%, black 18%);
+  }
+
+  .ds-command {
+    border: 1px solid var(--ds-semantic-color-border-floating);
+    background: color-mix(
+      in srgb,
+      var(--ds-semantic-color-background-floating) 94%,
+      white 6%
+    );
+    color: var(--ds-semantic-color-text-primary);
+    border-radius: var(--ds-semantic-radius-dialog);
+    box-shadow: var(--ds-semantic-elevation-floating);
+    backdrop-filter: blur(var(--ds-elevation-blur-floating));
+    -webkit-backdrop-filter: blur(var(--ds-elevation-blur-floating));
+  }
+
+  .ds-command__input-shell {
+    border-bottom: 1px solid
+      color-mix(
+        in srgb,
+        var(--ds-semantic-color-border-default) 30%,
+        transparent
+      );
+    color: var(--ds-semantic-color-text-secondary);
+  }
+
+  .ds-command__input {
+    color: var(--ds-semantic-color-text-primary);
+  }
+
+  .ds-command__input::placeholder {
+    color: var(--ds-semantic-color-text-placeholder);
+  }
+
+  .ds-command__group-title {
+    color: var(--ds-semantic-color-text-secondary);
+  }
+
+  .ds-command__item {
+    border: 1px solid transparent;
+    color: var(--ds-semantic-color-text-primary);
+    border-radius: var(--ds-semantic-radius-control);
+    transition:
+      background-color var(--ds-semantic-motion-interactive),
+      border-color var(--ds-semantic-motion-interactive),
+      color var(--ds-semantic-motion-interactive),
+      opacity var(--ds-semantic-motion-interactive);
+  }
+
+  .ds-command__item:hover,
+  .ds-command__item[data-selected="true"] {
+    background: var(--ds-semantic-color-action-primary-soft);
+    border-color: color-mix(
+      in srgb,
+      var(--ds-semantic-color-action-primary) 18%,
+      transparent
+    );
+    color: var(--ds-semantic-color-text-strong);
+  }
+
+  .ds-tag-badge {
+    border-radius: var(--ds-semantic-radius-pill);
+    box-shadow: var(--ds-semantic-elevation-control-raised);
+    transition:
+      transform var(--ds-semantic-motion-interactive),
+      box-shadow var(--ds-semantic-motion-interactive),
+      opacity var(--ds-semantic-motion-interactive);
+  }
+
+  .ds-tag-badge[data-selected="true"] {
+    box-shadow:
+      var(--ds-semantic-elevation-control-raised),
+      0 0 0 2px
+        color-mix(
+          in srgb,
+          var(--ds-semantic-color-action-primary) 28%,
+          transparent
+        );
+  }
+
+  .ds-tag-badge__remove {
+    color: inherit;
+    opacity: 0.72;
+    transition:
+      background-color var(--ds-semantic-motion-interactive),
+      color var(--ds-semantic-motion-interactive),
+      opacity var(--ds-semantic-motion-interactive);
+  }
+
+  .ds-tag-badge__remove:hover {
+    background: color-mix(in srgb, currentColor 8%, transparent);
+    opacity: 1;
+  }
+
+  .ds-tag-chip {
+    max-width: 100%;
+  }
+
+  .ds-tag-input {
+    min-height: 0;
+    cursor: text;
+  }
+
+  .ds-tag-input__trigger {
+    color: var(--ds-semantic-color-text-placeholder);
+    transition: color var(--ds-semantic-motion-interactive);
+  }
+
+  .ds-tag-input__trigger:hover {
+    color: var(--ds-semantic-color-text-secondary);
+  }
+
+  .ds-tag-input__panel {
+    width: 320px;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .ds-tag-input__create {
+    background: var(--ds-semantic-color-action-primary-soft);
+    color: var(--ds-semantic-color-action-primary);
+    border-radius: var(--ds-semantic-radius-dialog);
+    transition:
+      background-color var(--ds-semantic-motion-interactive),
+      color var(--ds-semantic-motion-interactive);
+  }
+
+  .ds-tag-input__create:hover {
+    background: color-mix(
+      in srgb,
+      var(--ds-semantic-color-action-primary-soft) 76%,
+      white 24%
+    );
+  }
+
+  .ds-tag-input__swatches {
+    border: 1px solid var(--ds-semantic-color-border-default);
+    background: color-mix(
+      in srgb,
+      var(--ds-semantic-color-background-sidebar-active) 70%,
+      var(--ds-semantic-color-background-app) 30%
+    );
+    border-radius: var(--ds-semantic-radius-dialog);
+  }
+
+  .ds-rating-tile {
+    border: 1px solid var(--ds-semantic-color-border-default);
+    background: var(--ds-semantic-color-background-app);
+    color: var(--ds-semantic-color-text-primary);
+    border-radius: var(--ds-semantic-radius-card);
+    transition:
+      transform var(--ds-semantic-motion-interactive),
+      box-shadow var(--ds-semantic-motion-interactive),
+      border-color var(--ds-semantic-motion-interactive);
+  }
+
+  .ds-rating-tile--convex {
+    box-shadow: var(--ds-semantic-elevation-control-raised);
+  }
+
+  .ds-rating-tile--concave {
+    box-shadow: var(--ds-semantic-elevation-control-inset);
+  }
+
+  .ds-rating-tile:hover {
+    border-color: color-mix(
+      in srgb,
+      var(--ds-semantic-color-action-primary) 18%,
+      var(--ds-semantic-color-border-default) 82%
+    );
+  }
+
+  .ds-rating-tile__icon {
+    box-shadow: var(--ds-semantic-elevation-control-raised);
+    transition: transform var(--ds-semantic-motion-interactive);
+  }
+
+  .group:hover .ds-rating-tile__icon {
+    transform: scale(1.08);
+  }
+
+  .ds-rating-tile__count {
+    color: var(--ds-semantic-color-text-strong);
+  }
+
+  .ds-rating-tile__label {
+    color: color-mix(
+      in srgb,
+      var(--ds-semantic-color-text-secondary) 70%,
+      white 30%
+    );
+    transition: color var(--ds-semantic-motion-interactive);
+  }
+
+  .group:hover .ds-rating-tile__label {
+    color: var(--ds-semantic-color-text-primary);
+  }
+}

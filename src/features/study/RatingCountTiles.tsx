@@ -14,11 +14,10 @@ type Props = {
 
 const FACE_DESIGN: Record<
   RatingKey,
-  { iconWrap: string; labelHover: string; label: string; svg: React.ReactNode }
+  { iconWrap: string; label: string; svg: React.ReactNode }
 > = {
   forgot: {
-    iconWrap: "bg-red-50 text-[#FF5A65] face-badge-convex",
-    labelHover: "group-hover:text-[#FF5A65]",
+    iconWrap: "ds-status-tone--danger ds-rating-tile__icon",
     label: "忘れた",
     svg: (
       <>
@@ -30,8 +29,7 @@ const FACE_DESIGN: Record<
     ),
   },
   vague: {
-    iconWrap: "bg-amber-50 text-[#F9A825] face-badge-convex",
-    labelHover: "group-hover:text-[#F9A825]",
+    iconWrap: "ds-status-tone--warning ds-rating-tile__icon",
     label: "あいまい",
     svg: (
       <>
@@ -42,8 +40,7 @@ const FACE_DESIGN: Record<
     ),
   },
   remembered: {
-    iconWrap: "bg-blue-50 text-[#00A3FF] face-badge-convex",
-    labelHover: "group-hover:text-[#00A3FF]",
+    iconWrap: "ds-status-tone--info ds-rating-tile__icon",
     label: "覚えた",
     svg: (
       <>
@@ -54,8 +51,7 @@ const FACE_DESIGN: Record<
     ),
   },
   easy: {
-    iconWrap: "bg-emerald-50 text-[#00B67A] face-badge-convex",
-    labelHover: "group-hover:text-[#00B67A]",
+    iconWrap: "ds-status-tone--success ds-rating-tile__icon",
     label: "余裕",
     svg: (
       <>
@@ -79,7 +75,9 @@ export const RatingCountTiles = ({
   surface = "convex",
 }: Props) => {
   const surfaceClass =
-    surface === "concave" ? "surface-concave" : "surface-convex";
+    surface === "concave"
+      ? "ds-rating-tile--concave"
+      : "ds-rating-tile--convex";
   const gridClass = singleRow
     ? "grid grid-cols-4 gap-2"
     : singleColumn
@@ -93,10 +91,10 @@ export const RatingCountTiles = ({
         return (
           <div
             key={key}
-            className={`group bg-white rounded-2xl border border-[var(--surface-border)] ${surfaceClass} ${disableHover ? "" : "transform transition-all hover:scale-105"} ${singleColumn ? "flex items-center justify-between gap-2 p-2.5" : `flex flex-col items-center ${compact ? "p-2.5" : "p-3"}`}`}
+            className={`ds-rating-tile group ${surfaceClass} ${disableHover ? "" : "transform hover:scale-105"} ${singleColumn ? "flex items-center justify-between gap-2 p-2.5" : `flex flex-col items-center ${compact ? "p-2.5" : "p-3"}`}`}
           >
             <div
-              className={`${singleColumn ? "" : "mb-1"} w-8 h-8 rounded-full flex items-center justify-center ${disableHover ? "" : "transition-transform group-hover:scale-110"} ${design.iconWrap}`}
+              className={`${singleColumn ? "" : "mb-1"} h-8 w-8 rounded-full flex items-center justify-center ${design.iconWrap}`}
             >
               <svg
                 width="18"
@@ -114,22 +112,20 @@ export const RatingCountTiles = ({
             {singleColumn ? (
               <>
                 <span
-                  className={`min-w-0 flex-1 truncate text-sm text-[#94a3b8] font-semibold ${disableHover ? "" : design.labelHover}`}
+                  className="ds-rating-tile__label min-w-0 flex-1 truncate text-sm font-semibold"
                 >
                   {design.label}
                 </span>
-                <span className="text-convex text-base font-bold text-[#1e293b] tabular-nums">
+                <span className="ds-rating-tile__count text-convex text-base font-bold tabular-nums">
                   {counts[key] ?? 0}
                 </span>
               </>
             ) : (
               <>
-                <span className="text-convex text-base font-bold text-[#1e293b] tabular-nums">
+                <span className="ds-rating-tile__count text-convex text-base font-bold tabular-nums">
                   {counts[key] ?? 0}
                 </span>
-                <span
-                  className={`text-[10px] text-[#94a3b8] font-semibold ${disableHover ? "" : design.labelHover}`}
-                >
+                <span className="ds-rating-tile__label text-[10px] font-semibold">
                   {design.label}
                 </span>
               </>

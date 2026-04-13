@@ -6,6 +6,7 @@ import {
   subscribeLocalDBRuntimeStatus,
 } from "@/services/localDB";
 import { snapshotService } from "@/services/SnapshotService";
+import { toAssetRecordFromSnapshotAsset } from "@/application/snapshot/snapshotAssetManifest";
 import type { AppSnapshot, SnapshotComparison } from "@/types/domain/snapshot";
 import {
   Dialog,
@@ -109,17 +110,33 @@ const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
     try {
       // 全データをクリアして新しいデータをインポート
       // 注意: これは危険な操作なので、事前にバックアップを推奨
-      const db = await getLocalDb();
+      const db = await getLocalDb(currentUser.uid);
+      const imagesTable = db.table("images");
+      const cardsTable = db.table("cards");
+      const foldersTable = db.table("folders");
+      const assetRows = parsedSnapshot.data.assets.map((asset) =>
+        toAssetRecordFromSnapshotAsset(asset, currentUser.uid),
+      );
 
-      // カードをインポート
-      for (const card of parsedSnapshot.data.cards) {
-        await db.table("cards").put(card);
-      }
+      await db.transaction(
+        "rw",
+        imagesTable,
+        cardsTable,
+        foldersTable,
+        async () => {
+          if (assetRows.length > 0) {
+            await imagesTable.bulkPut(assetRows);
+          }
 
-      // フォルダをインポート
-      for (const folder of parsedSnapshot.data.folders) {
-        await db.table("folders").put(folder);
-      }
+          if (parsedSnapshot.data.folders.length > 0) {
+            await foldersTable.bulkPut(parsedSnapshot.data.folders);
+          }
+
+          if (parsedSnapshot.data.cards.length > 0) {
+            await cardsTable.bulkPut(parsedSnapshot.data.cards);
+          }
+        },
+      );
 
       setStep("complete");
 

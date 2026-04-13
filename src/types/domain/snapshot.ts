@@ -45,12 +45,24 @@ export interface UserSettings {
   notificationsEnabled: boolean;
 }
 
+/** スナップショットに含める画像アセット manifest */
+export interface SnapshotAsset {
+  assetId: string;
+  storagePath: string;
+  mime: string;
+  naturalW: number | null;
+  naturalH: number | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 /** スナップショットのデータ本体 */
 export interface SnapshotData {
   cards: Card[];
   folders: Folder[];
   reviews: ReviewLog[];
   settings: UserSettings | null;
+  assets: SnapshotAsset[];
 }
 
 /** アプリケーション全体のスナップショット */
@@ -81,7 +93,7 @@ export interface SnapshotComparison {
 }
 
 /** 現在のスキーマバージョン */
-export const CURRENT_SCHEMA_VERSION = 1;
+export const CURRENT_SCHEMA_VERSION = 2;
 
 /** アプリバージョン（package.jsonから取得すべきだが、ここでは固定） */
 export const APP_VERSION = "1.0.0";

@@ -105,10 +105,10 @@ const RATING_LABELS: Record<ReviewLog["rating"], string> = {
 };
 
 const RATING_TONE_CLASS: Record<ReviewLog["rating"], string> = {
-  1: "bg-red-50 text-[#c2410c]",
-  2: "bg-amber-50 text-[#b45309]",
-  3: "bg-sky-50 text-[#0369a1]",
-  4: "bg-emerald-50 text-[#047857]",
+  1: "ds-status-tone--danger",
+  2: "ds-status-tone--warning",
+  3: "ds-status-tone--info",
+  4: "ds-status-tone--success",
 };
 
 const RATING_FACE_DESIGN: Record<
@@ -116,7 +116,7 @@ const RATING_FACE_DESIGN: Record<
   { iconWrap: string; svg: ReactElement }
 > = {
   1: {
-    iconWrap: "bg-red-50 text-[#FF5A65] face-badge-convex",
+    iconWrap: "ds-status-tone--danger ds-rating-tile__icon",
     svg: (
       <>
         <circle cx="12" cy="12" r="10" stroke="none" />
@@ -127,7 +127,7 @@ const RATING_FACE_DESIGN: Record<
     ),
   },
   2: {
-    iconWrap: "bg-amber-50 text-[#F9A825] face-badge-convex",
+    iconWrap: "ds-status-tone--warning ds-rating-tile__icon",
     svg: (
       <>
         <line x1="8" y1="15" x2="16" y2="15" />
@@ -137,7 +137,7 @@ const RATING_FACE_DESIGN: Record<
     ),
   },
   3: {
-    iconWrap: "bg-blue-50 text-[#00A3FF] face-badge-convex",
+    iconWrap: "ds-status-tone--info ds-rating-tile__icon",
     svg: (
       <>
         <path d="M8 14s1.5 2 4 2 4-2 4-2" />
@@ -147,7 +147,7 @@ const RATING_FACE_DESIGN: Record<
     ),
   },
   4: {
-    iconWrap: "bg-emerald-50 text-[#00B67A] face-badge-convex",
+    iconWrap: "ds-status-tone--success ds-rating-tile__icon",
     svg: (
       <>
         <path d="M8 13s1.5 3 4 3 4-3 4-3" />
@@ -315,7 +315,7 @@ const getRatingLabel = (rating: MetaRating) => {
 };
 
 const getRatingToneClass = (rating: MetaRating) => {
-  if (rating === null) return "bg-slate-100 text-slate-500";
+  if (rating === null) return "ds-status-tone--neutral";
   return RATING_TONE_CLASS[rating];
 };
 
@@ -1350,7 +1350,7 @@ const CardMetaPanelInner = ({
                   margin={{ top: 8, right: 10, left: 2, bottom: 4 }}
                 >
                   <CartesianGrid
-                    stroke="rgba(100,116,139,0.2)"
+                    stroke="color-mix(in srgb, var(--ds-semantic-color-text-secondary) 24%, transparent)"
                     strokeDasharray="3 5"
                     vertical={false}
                   />
@@ -1358,8 +1358,8 @@ const CardMetaPanelInner = ({
                     dataKey="reviewIndex"
                     ticks={xTicks}
                     tick={{ fontSize: 10, fill: "var(--sidebar-text-muted)" }}
-                    tickLine={{ stroke: "rgba(100,116,139,0.4)" }}
-                    axisLine={{ stroke: "rgba(100,116,139,0.4)" }}
+                    tickLine={{ stroke: "var(--ds-semantic-color-border-default)" }}
+                    axisLine={{ stroke: "var(--ds-semantic-color-border-default)" }}
                     minTickGap={12}
                   />
                   <YAxis
@@ -1368,17 +1368,17 @@ const CardMetaPanelInner = ({
                     allowDecimals={false}
                     width={36}
                     tick={{ fontSize: 10, fill: "var(--sidebar-text-muted)" }}
-                    tickLine={{ stroke: "rgba(100,116,139,0.4)" }}
-                    axisLine={{ stroke: "rgba(100,116,139,0.4)" }}
+                    tickLine={{ stroke: "var(--ds-semantic-color-border-default)" }}
+                    axisLine={{ stroke: "var(--ds-semantic-color-border-default)" }}
                   />
                   <Tooltip
-                    cursor={{ stroke: "rgba(15,23,42,0.15)", strokeWidth: 1 }}
+                    cursor={{ stroke: "var(--ds-semantic-color-border-default)", strokeWidth: 1 }}
                     formatter={(value) => [`${value}%`, "耐性スコア"]}
                     labelFormatter={(label) => `復習 ${label} 回目`}
                     contentStyle={{
                       borderRadius: 8,
-                      border: "1px solid rgba(100,116,139,0.25)",
-                      boxShadow: "0 6px 20px rgba(15, 23, 42, 0.12)",
+                      border: "1px solid var(--ds-semantic-color-border-floating)",
+                      boxShadow: "var(--ds-semantic-elevation-floating)",
                     }}
                   />
                   <Line
@@ -1432,7 +1432,7 @@ const CardMetaPanelInner = ({
             </p>
           )}
           {latestReviewError && (
-            <div className="mt-2 rounded border border-red-200 bg-red-50 px-2 py-1 text-[11px] text-red-700">
+            <div className="ds-status-tone--danger mt-2 rounded border px-2 py-1 text-[11px] [border-color:var(--ds-semantic-color-status-danger)]">
               {latestReviewError}
             </div>
           )}
@@ -1545,7 +1545,7 @@ const CardMetaPanelInner = ({
                                       type="button"
                                       className={`ds-surface-button ds-surface-button--concave relative z-0 flex h-7 w-7 items-center justify-center disabled:cursor-wait disabled:opacity-50 ${
                                         isSelected
-                                          ? "ds-surface-button--active ring-1 ring-slate-300"
+                                          ? "ds-surface-button--active ring-1 ring-[color:var(--ds-semantic-color-border-strong)]"
                                           : ""
                                       }`}
                                       onClick={() =>
@@ -1790,7 +1790,7 @@ const CardMetaPanelInner = ({
                     type="button"
                     surface="concave"
                     size="xs"
-                    className="h-7 px-2 text-red-700"
+                    className="h-7 px-2 text-[var(--ds-semantic-color-status-danger)]"
                     onClick={handleDeleteLatestReview}
                     disabled={
                       Boolean(pendingReviewTimestamp) ||

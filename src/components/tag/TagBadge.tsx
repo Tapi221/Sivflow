@@ -61,7 +61,7 @@ export const TagBadge = ({
             event.stopPropagation();
             onRemove();
           }}
-          className="ml-1 grid h-4 w-4 place-items-center rounded-full text-slate-500 transition-colors hover:bg-black/5 hover:text-slate-700"
+          className="ds-tag-badge__remove ml-1 grid h-4 w-4 place-items-center rounded-full"
         >
           <X className="h-3 w-3" />
         </button>
@@ -70,9 +70,9 @@ export const TagBadge = ({
   );
 
   const rootClassName = cn(
-    "inline-flex max-w-full items-center rounded-full border font-bold surface-convex transition-all",
+    "ds-tag-badge inline-flex max-w-full items-center border font-bold",
     sizeClassMap[size],
-    selected && "ring-2 ring-primary-500/40 scale-[1.02]",
+    selected && "scale-[1.02]",
     onClick &&
       "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/50",
     className,
@@ -83,6 +83,7 @@ export const TagBadge = ({
       <button
         type="button"
         className={rootClassName}
+        data-selected={selected}
         style={resolvedColorStyle}
         onClick={onClick}
       >
@@ -92,7 +93,7 @@ export const TagBadge = ({
   }
 
   return (
-    <span className={rootClassName} style={resolvedColorStyle}>
+    <span className={rootClassName} data-selected={selected} style={resolvedColorStyle}>
       {content}
     </span>
   );
