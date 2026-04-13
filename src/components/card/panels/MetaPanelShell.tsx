@@ -20,11 +20,7 @@ export const MetaPanelShell = ({
   return (
     <aside
       className={cn(
-<<<<<<< HEAD
-        `meta-panel ds-editor-pane h-full w-80 shrink-0 font-serif text-sm ${UI_TYPO} ${NUMERIC_TYPO}`,
-=======
         `meta-panel ds-editor-pane h-full w-80 shrink-0 border-l font-serif text-sm ${UI_TYPO} ${NUMERIC_TYPO}`,
->>>>>>> 32820bee7da7fee740ea5702917206b96c2986eb
         className,
       )}
       style={
@@ -38,14 +34,10 @@ export const MetaPanelShell = ({
       }
     >
       <div
-<<<<<<< HEAD
-        className={cn("ds-editor-pane__body h-full overflow-y-auto p-2", bodyClassName)}
-=======
         className={cn(
           "ds-editor-pane__body h-full overflow-y-auto p-2",
           bodyClassName,
         )}
->>>>>>> 32820bee7da7fee740ea5702917206b96c2986eb
       >
         <div className={cn("ds-editor-pane__content space-y-6", contentClassName)}>
           {children}

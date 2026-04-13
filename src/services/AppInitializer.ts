@@ -1,4 +1,3 @@
-import platform from "@/platform";
 import { contextService } from "./ContextService";
 import { IndexedDBMetadataService } from "./IndexedDBMetadataService";
 import { IndexedDBRebuildOrchestrator } from "./IndexedDBRebuildOrchestrator";
@@ -11,6 +10,13 @@ import { notificationService } from "./NotificationService";
 // NOTE: 初期化時のユーザー向け INFO 通知は UI 上で邪魔になるため表示しない。
 import { warnOncePerSession } from "./localDBRuntimeState";
 import type { CardSet } from "@/types";
+import {
+  notifyLocalDbFallbackMode,
+  notifyRebuildLoopDetected,
+  notifyStartupDegraded,
+} from "./appInitStartupNotifier";
+import { rebuildIndexedDb } from "./indexedDbRebuildCoordinator";
+import { backfillLegacyCardsToCardSets } from "./legacyCardSetMigrationBackfill";
 
 /**
  * アプリ起動時の初期化処理
@@ -64,14 +70,7 @@ export class AppInitializer {
         `[AppInit:${userId}] LocalDB is running in fallback mode. Skipping IndexedDB health/rebuild phases.`,
       );
 
-      notificationService.warning(
-        "ローカル保存が利用できません",
-        `このセッションではメモリ保存で継続します。再読み込みで未同期データが消える可能性があります。Chrome のサイトデータ削除で復旧できます。`,
-        {
-          details: `復旧手順: ${LOCALDB_RECOVERY_GUIDE_URL}`,
-          closeable: true,
-        },
-      );
+      notifyLocalDbFallbackMode({ recoveryGuideUrl: LOCALDB_RECOVERY_GUIDE_URL });
 
       this.initialized = true;
       return { degraded: false };
@@ -98,37 +97,16 @@ export class AppInitializer {
 
       if (rebuildCount >= 3) {
         // ERROR レベルの通知（続行不可）
-        notificationService.error(
-          "申し訳ございません。",
-          "通常は自動的に復旧しますが、\n今回は自動復旧の上限を超えたため、起動できない状態です。\n\nこの問題はユーザー操作が原因ではありません。\nシステム側の調査が必要です。",
-          {
-            details: `エラーコード: rebuild_loop\nユーザーID: ${userId}\nタイムスタンプ: ${new Date().toISOString()}`,
-            actions: [
-              {
-                label: "サポートに連絡",
-                onClick: () => {
-                  void platform.shell.openExternal(
-                    "mailto:support@example.com?subject=再構築ループエラー&body=エラーコード: rebuild_loop",
-                  );
-                },
-                primary: true,
-              },
-            ],
-          },
-        );
+        notifyRebuildLoopDetected({ userId });
         throw new Error("Rebuild loop detected");
       }
 
-      const rebuildResult = await this.rebuild(userId, reason);
+      const rebuildResult = await rebuildIndexedDb(userId, reason);
       if (rebuildResult.degraded) {
         degraded = true;
         degradedReason = "rebuild_partial_failures";
         skippedFailures = rebuildResult.failures.length;
-        notificationService.warning(
-          "一部データをスキップして起動しました",
-          "破損データを除外して継続しています。必要に応じて同期を実行してください。",
-          { closeable: true },
-        );
+        notifyStartupDegraded();
         console.warn("[AppInit] startup_degraded=true", {
           userId,
           reason: degradedReason,
@@ -157,7 +135,7 @@ export class AppInitializer {
     // 🔥 Phase 4: CardSet 移行補完（cardSetId 未設定カードの救済）
     console.log(`[AppInit:${userId}] Phase4: CardSet migration backfill...`);
     try {
-      await this.backfillLegacyCardsToCardSets(userId);
+      await backfillLegacyCardsToCardSets(userId);
       console.log(
         `[AppInit:${userId}] Phase4: CardSet migration backfill complete ✓`,
       );
