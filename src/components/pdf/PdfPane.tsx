@@ -1,14 +1,3 @@
-/**
- * PDF ビューアパネル（表示状態永続化対応版）
- *
- * orchestration 中心のコンポーネント。
- * 各責務は以下のファイルに分離している:
- *   - 表示状態の永続化・hydration: usePdfViewerPersistence
- *   - ソース解決・fallback:         usePdfSourceResolver
- *   - コンテナ幅監視:               usePdfContainerWidth
- *   - ヘッダーUI:                   PdfPaneToolbar
- *   - sessionStorage util + 定数:   pdfViewerStateStorage
- */
 import type { BlobUrl } from "@/types/core/branded";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
@@ -69,6 +58,11 @@ export const PdfPane = ({
   const viewerRef = useRef<PdfViewerHandle>(null);
   const [numPages, setNumPages] = useState(0);
   const [basePageWidth, setBasePageWidth] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchNavToken, setSearchNavToken] = useState(0);
+  const [searchNavDirection, setSearchNavDirection] = useState<"next" | "prev">("next");
+  const [totalMatches, setTotalMatches] = useState(0);
+  const [activeMatchIndex, setActiveMatchIndex] = useState(-1);
 
   const { containerRef, containerWidth } = usePdfContainerWidth();
 
@@ -128,6 +122,16 @@ export const PdfPane = ({
     const nextPage = Math.min(numPages || currentPage, currentPage + 1);
     viewerRef.current?.scrollToPage(nextPage);
   }, [currentPage, numPages]);
+
+  const handlePrevMatch = useCallback(() => {
+    setSearchNavDirection("prev");
+    setSearchNavToken((previous) => previous + 1);
+  }, []);
+
+  const handleNextMatch = useCallback(() => {
+    setSearchNavDirection("next");
+    setSearchNavToken((previous) => previous + 1);
+  }, []);
 
   const handleOpenNewTab = useCallback(async () => {
     if (effectiveRemoteUrl) {
@@ -193,7 +197,7 @@ export const PdfPane = ({
   }, []);
 
   return (
-    <div className={cn("flex flex-col h-full min-h-0 min-w-0", className)}>
+    <div className={cn("flex h-full min-h-0 min-w-0 flex-col", className)}>
       <PdfPaneToolbar
         isLocalOnly={isLocalOnly}
         uploadStatus={doc.uploadStatus}
@@ -203,6 +207,12 @@ export const PdfPane = ({
         fitMode={fitMode}
         sourceUnavailable={sourceUnavailable}
         canOpenExternal={!!effectiveRemoteUrl || !!localSourceBytes}
+        searchQuery={searchQuery}
+        totalMatches={totalMatches}
+        activeMatchIndex={activeMatchIndex}
+        onSearchQueryChange={setSearchQuery}
+        onPrevMatch={handlePrevMatch}
+        onNextMatch={handleNextMatch}
         onPrev={handlePrev}
         onNext={handleNext}
         onZoomOut={handleZoomOut}
@@ -215,10 +225,10 @@ export const PdfPane = ({
 
       <div
         ref={containerRef}
-        className="flex-1 min-h-0 min-w-0 w-full bg-slate-50 overflow-hidden"
+        className="flex-1 min-h-0 min-w-0 w-full overflow-hidden bg-slate-50"
       >
         {sourceUnavailable ? (
-          <div className="text-sm text-slate-500 p-4">
+          <div className="p-4 text-sm text-slate-500">
             {localDataStatus === "loading" && "ローカルPDFを復元中..."}
             {localDataStatus === "failed" &&
               "ローカルファイルが見つかりません。再アップロードしてください。"}
@@ -232,6 +242,9 @@ export const PdfPane = ({
             minScale={FIT_MIN_SCALE}
             maxScale={FIT_MAX_SCALE}
             zoomStep={ZOOM_STEP}
+            searchQuery={searchQuery}
+            searchNavToken={searchNavToken}
+            searchNavDirection={searchNavDirection}
             onScaleChange={handleViewerScaleChange}
             onNumPages={setNumPages}
             onPageChange={setCurrentPage}
@@ -239,6 +252,10 @@ export const PdfPane = ({
             viewerOptions={resolvedViewerOptions}
             sourceMeta={sourceMeta}
             onSourceLoadError={handleSourceLoadError}
+            onSearchStateChange={({ totalMatches: nextTotalMatches, activeMatchIndex: nextActiveMatchIndex }) => {
+              setTotalMatches(nextTotalMatches);
+              setActiveMatchIndex(nextActiveMatchIndex);
+            }}
             className="h-full w-full"
           />
         )}

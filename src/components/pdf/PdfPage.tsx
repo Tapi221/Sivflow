@@ -7,6 +7,8 @@ import type {
   PageSize,
   PdfJsDocument,
   PdfJsRenderTask,
+  PdfJsTextItem,
+  PdfPageSearchMatch,
 } from "@/components/pdf/pdfViewerTypes";
 import { getErrorMessage } from "@/components/pdf/pdfViewerTypes";
 
@@ -17,6 +19,8 @@ interface PdfPageProps {
   opaqueCanvas: boolean;
   baseSize?: PageSize;
   rootEl: HTMLDivElement | null;
+  searchMatches?: PdfPageSearchMatch[];
+  activeSearchMatchIndex?: number;
   onPageSize?: (pageNumber: number, size: PageSize) => void;
   onVisibilityChange?: (pageNumber: number, ratio: number) => void;
 }
@@ -32,6 +36,12 @@ type RenderState = {
   error: string | null;
 };
 
+type TextLayerState = {
+  pageIdentity: string;
+  items: PdfJsTextItem[];
+  styles: Record<string, { fontFamily?: string; ascent?: number; descent?: number }>;
+};
+
 const buildPageIdentity = (pdf: PdfJsDocument, pageNumber: number) =>
   `${pageNumber}::${String(pdf)}`;
 
@@ -43,6 +53,67 @@ const buildRenderIdentity = (
 ) =>
   `${pageNumber}::${scale}::${opaqueCanvas ? "opaque" : "alpha"}::${String(pdf)}`;
 
+const multiplyTransform = (left: number[], right: number[]) => {
+  const [a1, b1, c1, d1, e1, f1] = left;
+  const [a2, b2, c2, d2, e2, f2] = right;
+
+  return [
+    a1 * a2 + c1 * b2,
+    b1 * a2 + d1 * b2,
+    a1 * c2 + c1 * d2,
+    b1 * c2 + d1 * d2,
+    a1 * e2 + c1 * f2 + e1,
+    b1 * e2 + d1 * f2 + f1,
+  ];
+};
+
+const renderTextFragments = ({
+  text,
+  matches,
+  activeSearchMatchIndex,
+}: {
+  text: string;
+  matches: PdfPageSearchMatch[];
+  activeSearchMatchIndex: number | undefined;
+}) => {
+  if (matches.length === 0) {
+    return text;
+  }
+
+  const fragments: Array<string | JSX.Element> = [];
+  let cursor = 0;
+
+  matches
+    .slice()
+    .sort((left, right) => left.start - right.start)
+    .forEach((match, index) => {
+      if (match.start > cursor) {
+        fragments.push(text.slice(cursor, match.start));
+      }
+
+      fragments.push(
+        <mark
+          key={`${match.globalIndex}-${index}`}
+          className={
+            match.globalIndex === activeSearchMatchIndex
+              ? "rounded bg-amber-300/90 text-transparent"
+              : "rounded bg-yellow-200/80 text-transparent"
+          }
+        >
+          {text.slice(match.start, match.end)}
+        </mark>,
+      );
+
+      cursor = Math.max(cursor, match.end);
+    });
+
+  if (cursor < text.length) {
+    fragments.push(text.slice(cursor));
+  }
+
+  return fragments;
+};
+
 export const PdfPage = ({
   pdf,
   pageNumber,
@@ -50,6 +121,8 @@ export const PdfPage = ({
   opaqueCanvas,
   baseSize,
   rootEl,
+  searchMatches = [],
+  activeSearchMatchIndex,
   onPageSize,
   onVisibilityChange,
 }: PdfPageProps) => {
@@ -68,17 +141,21 @@ export const PdfPage = ({
     [opaqueCanvas, pageNumber, pdf, scale],
   );
 
-  const [measuredPageState, setMeasuredPageState] = useState<MeasuredPageState>(
-    {
-      pageIdentity: "",
-      size: null,
-    },
-  );
+  const [measuredPageState, setMeasuredPageState] = useState<MeasuredPageState>({
+    pageIdentity: "",
+    size: null,
+  });
 
   const [renderState, setRenderState] = useState<RenderState>({
     renderIdentity: "",
     rendered: false,
     error: null,
+  });
+
+  const [textLayerState, setTextLayerState] = useState<TextLayerState>({
+    pageIdentity: "",
+    items: [],
+    styles: {},
   });
 
   const resolvedPageSize =
@@ -180,6 +257,45 @@ export const PdfPage = ({
   }, [onVisibilityChange, pageNumber, rootEl]);
 
   useEffect(() => {
+    if (!shouldRender) return;
+    if (textLayerState.pageIdentity === pageIdentity && textLayerState.items.length > 0) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const run = async () => {
+      try {
+        const page = await pdf.getPage(pageNumber);
+        const textContent = await page.getTextContent();
+        if (cancelled) return;
+
+        setTextLayerState({
+          pageIdentity,
+          items: textContent.items.filter(
+            (item): item is PdfJsTextItem => typeof (item as PdfJsTextItem).str === "string",
+          ),
+          styles: textContent.styles ?? {},
+        });
+      } catch (errorValue) {
+        if (cancelled) return;
+        console.warn("[PdfViewer] text layer load error", errorValue);
+        setTextLayerState({
+          pageIdentity,
+          items: [],
+          styles: {},
+        });
+      }
+    };
+
+    void run();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [pageIdentity, pageNumber, pdf, shouldRender, textLayerState.items.length, textLayerState.pageIdentity]);
+
+  useEffect(() => {
     if (!shouldRender || scale <= 0) return;
 
     let cancelled = false;
@@ -271,13 +387,66 @@ export const PdfPage = ({
           : undefined
       }
     >
-      <div className="inline-block rounded-lg border border-slate-200 bg-white shadow-sm">
+      <div className="relative inline-block rounded-lg border border-slate-200 bg-white shadow-sm">
         {activeRenderState.error && !activeRenderState.rendered && (
           <div className="px-3 py-2 text-xs text-rose-500">
             {activeRenderState.error}
           </div>
         )}
         <canvas ref={canvasRef} className="block" />
+
+        {activeRenderState.rendered && textLayerState.items.length > 0 && (
+          <div
+            className="pointer-events-auto absolute inset-0 overflow-hidden select-text"
+            style={{
+              width: `${Math.floor((resolvedPageSize?.width ?? 0) * scale)}px`,
+              height: `${Math.floor((resolvedPageSize?.height ?? 0) * scale)}px`,
+            }}
+          >
+            {textLayerState.items.map((item, itemIndex) => {
+              const viewport = {
+                width: (resolvedPageSize?.width ?? 1) * scale,
+                height: (resolvedPageSize?.height ?? 1) * scale,
+                scale,
+                transform: [scale, 0, 0, -scale, 0, (resolvedPageSize?.height ?? 1) * scale],
+              };
+
+              const transform = multiplyTransform(viewport.transform, item.transform);
+              const angle = Math.atan2(transform[1], transform[0]);
+              const fontHeight = Math.max(1, Math.hypot(transform[2], transform[3]));
+              const fontFamily =
+                textLayerState.styles[item.fontName ?? ""]?.fontFamily ?? "sans-serif";
+              const left = transform[4];
+              const top = transform[5] - fontHeight;
+              const itemMatches = searchMatches.filter((match) => match.itemIndex === itemIndex);
+
+              return (
+                <span
+                  key={`${pageNumber}-${itemIndex}-${item.str.slice(0, 12)}`}
+                  className="absolute whitespace-pre"
+                  style={{
+                    left: `${left}px`,
+                    top: `${top}px`,
+                    fontSize: `${fontHeight}px`,
+                    fontFamily,
+                    transform: `rotate(${angle}rad)`,
+                    transformOrigin: "left bottom",
+                    color: "transparent",
+                    WebkitTextStroke: "0 transparent",
+                    userSelect: "text",
+                    pointerEvents: "auto",
+                  }}
+                >
+                  {renderTextFragments({
+                    text: item.str,
+                    matches: itemMatches,
+                    activeSearchMatchIndex,
+                  })}
+                </span>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

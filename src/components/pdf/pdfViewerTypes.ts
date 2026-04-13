@@ -39,6 +39,8 @@ export interface PdfViewerHandle {
 export interface PdfJsViewport {
   width: number;
   height: number;
+  scale: number;
+  transform: number[];
 }
 
 export interface PdfJsRenderTask {
@@ -46,8 +48,28 @@ export interface PdfJsRenderTask {
   cancel?: () => void;
 }
 
+export interface PdfJsTextItem {
+  str: string;
+  dir?: string;
+  width: number;
+  height: number;
+  transform: number[];
+  fontName?: string;
+  hasEOL?: boolean;
+}
+
+export interface PdfJsTextMarkedContent {
+  type: string;
+}
+
+export interface PdfJsTextContent {
+  items: Array<PdfJsTextItem | PdfJsTextMarkedContent>;
+  styles?: Record<string, { fontFamily?: string; ascent?: number; descent?: number }>;
+}
+
 export interface PdfJsPage {
   getViewport: (params: { scale: number }) => PdfJsViewport;
+  getTextContent: () => Promise<PdfJsTextContent>;
   render: (params: {
     canvasContext: CanvasRenderingContext2D;
     viewport: PdfJsViewport;
@@ -96,6 +118,14 @@ export interface PdfViewerSourceMeta {
   remoteUrl?: string | null;
 }
 
+export interface PdfPageSearchMatch {
+  pageNumber: number;
+  itemIndex: number;
+  start: number;
+  end: number;
+  globalIndex: number;
+}
+
 export const getPdfDocument = (
   params: PdfJsGetDocumentParams,
 ): PdfJsLoadingTask => pdfjsLib.getDocument(params) as PdfJsLoadingTask;
@@ -114,6 +144,10 @@ export const getErrorMessage = (error: unknown): string => {
 
   return String(error ?? "");
 };
+
+export const isPdfTextItem = (
+  item: PdfJsTextItem | PdfJsTextMarkedContent,
+): item is PdfJsTextItem => typeof (item as PdfJsTextItem).str === "string";
 
 export const destroyPdfResource = (
   resource: { destroy?: () => void | Promise<void> } | null | undefined,
