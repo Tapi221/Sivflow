@@ -1,9 +1,5 @@
 import { useAuthSession } from "@/contexts/AuthContext";
 import { getLocalDb } from "@/services/localDB";
-import {
-  readCachedFolderSidebarDisplayMode,
-  writeCachedFolderSidebarDisplayMode,
-} from "@/services/folderSidebarDisplayModePreference";
 import type { UserSettings } from "@/types";
 import { sanitizeProfileImage } from "@/utils/profileImageSanitizer";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -13,9 +9,43 @@ type LegacyFolderSidebarDisplayMode =
   | UserSettings["folderSidebarDisplayMode"]
   | "auto";
 
+type FolderSidebarDisplayMode = NonNullable<
+  UserSettings["folderSidebarDisplayMode"]
+>;
+
+const FOLDER_SIDEBAR_DISPLAY_MODE_STORAGE_KEY =
+  "flashcard-master:folder-sidebar-display-mode";
+
+const readCachedFolderSidebarDisplayMode =
+  (): FolderSidebarDisplayMode => {
+    if (typeof window === "undefined") return "tree";
+
+    try {
+      const raw = window.localStorage.getItem(
+        FOLDER_SIDEBAR_DISPLAY_MODE_STORAGE_KEY,
+      );
+      return raw === "navigation" ? "navigation" : "tree";
+    } catch {
+      return "tree";
+    }
+  };
+
+const writeCachedFolderSidebarDisplayMode = (value: unknown): void => {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.localStorage.setItem(
+      FOLDER_SIDEBAR_DISPLAY_MODE_STORAGE_KEY,
+      value === "navigation" ? "navigation" : "tree",
+    );
+  } catch {
+    // ignore storage write failures
+  }
+};
+
 const normalizeFolderSidebarDisplayMode = (
   value: LegacyFolderSidebarDisplayMode | null | undefined,
-): NonNullable<UserSettings["folderSidebarDisplayMode"]> => {
+): FolderSidebarDisplayMode => {
   return value === "navigation" ? "navigation" : "tree";
 };
 
@@ -95,6 +125,7 @@ const buildBootSettingsSnapshot = (): Partial<UserSettings> => ({
 export const useUserSettings = () => {
   const { currentUser } = useAuthSession();
   const repairedBlobRef = useRef(false);
+
   const bootSettings = useMemo(
     () => buildBootSettingsSnapshot(),
     [currentUser?.uid],
@@ -109,9 +140,7 @@ export const useUserSettings = () => {
       if (!currentUser) return bootSettings;
 
       const db = await getLocalDb(currentUser.uid);
-      const userSettings =
-        (await db.userSettings.get(currentUser.uid)) ||
-        (await db.userSettings.where("userId").equals(currentUser.uid).first());
+      const userSettings = await db.userSettings.get(currentUser.uid);
 
       const merged = { ...bootSettings, ...(userSettings || {}) };
       const sanitizedProfile = sanitizeProfileImage(merged.profileImage);
@@ -153,9 +182,7 @@ export const useUserSettings = () => {
 
     const timerId = window.setTimeout(async () => {
       const db = await getLocalDb(currentUser.uid);
-      const current =
-        (await db.userSettings.get(currentUser.uid)) ||
-        (await db.userSettings.where("userId").equals(currentUser.uid).first());
+      const current = await db.userSettings.get(currentUser.uid);
 
       const currentSanitized = sanitizeProfileImage(current?.profileImage);
       if (!currentSanitized.wasBlobRemoteUrl) return;
@@ -185,9 +212,7 @@ export const useUserSettings = () => {
       if (!currentUser) return;
 
       const db = await getLocalDb(currentUser.uid);
-      const current =
-        (await db.userSettings.get(currentUser.uid)) ||
-        (await db.userSettings.where("userId").equals(currentUser.uid).first());
+      const current = await db.userSettings.get(currentUser.uid);
 
       const hasProfileImageUpdate = Object.prototype.hasOwnProperty.call(
         newSettings,
