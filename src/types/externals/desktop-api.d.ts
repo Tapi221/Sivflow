@@ -45,9 +45,9 @@ export type DesktopOauthCallbackHandler = (
   payload: DesktopOauthCallbackPayload,
 ) => void;
 
-export interface DesktopOauthApi extends PlatformOauthApi {}
+export type DesktopOauthApi = PlatformOauthApi;
 
-export interface DesktopWindowApi extends PlatformWindowApi {}
+export type DesktopWindowApi = PlatformWindowApi;
 
 export interface DesktopBridgeApi extends PlatformApi {
   oauth: DesktopOauthApi;

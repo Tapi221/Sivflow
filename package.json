@@ -27,7 +27,7 @@
     "postinstall": "node scripts/copy-pdfjs-assets.mjs",
     "typecheck:test": "npm exec tsc -- -p tsconfig.test.json --noEmit --pretty false",
     "typecheck:all": "npm exec tsc -- -p tsconfig.app.json --noEmit --pretty false && npm exec tsc -- -p tsconfig.node.json --noEmit --pretty false && npm exec tsc -- -p tsconfig.electron.json --noEmit --pretty false",
-    "preflight": "npm run typecheck && npm run build && npx vitest run tests/unit/pdfZoomUtils.test.ts tests/unit/parseXlsxImport.test.ts tests/unit/importCardsFromPayload.test.ts tests/unit/features/import/XlsxImportDialog.test.tsx tests/functions/pptxConverterGuards.test.ts",
+    "preflight": "npm run typecheck && npm run build && npx vitest run tests/unit/pdfZoomUtils.test.ts tests/unit/parseXlsxImport.test.ts tests/unit/importCardsFromPayload.test.ts tests/unit/features/import/XlsxImportDialog.test.tsx tests/unit/platformIndex.test.ts tests/unit/platformDesktopShellOpenExternal.test.ts tests/unit/signInWithGoogleUseCase.test.ts tests/functions/pptxConverterGuards.test.ts",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",

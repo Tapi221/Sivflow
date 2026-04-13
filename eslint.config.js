@@ -18,6 +18,7 @@ export default defineConfig([
       reactRefresh.configs.vite,
     ],
     plugins: {
+      "react-hooks": reactHooks,
       "unused-imports": unusedImports,
     },
     languageOptions: {
@@ -55,6 +56,11 @@ export default defineConfig([
         },
       ],
 
+      // React Compiler / hooks: keep signal, avoid CI-stopping errors for legacy code.
+      "react-hooks/preserve-manual-memoization": "warn",
+      "react-hooks/refs": "warn",
+      "react-hooks/set-state-in-effect": "warn",
+
       // 未使用importは自動削除対象
       "no-unused-vars": "off",
       "@typescript-eslint/no-unused-vars": "off",
@@ -68,6 +74,67 @@ export default defineConfig([
           varsIgnorePattern: "^_",
           args: "after-used",
           argsIgnorePattern: "^_",
+        },
+      ],
+    },
+  },
+
+  // Guardrails: enforce stable dependency direction (UI -> application/platform, not infrastructure/electron).
+  {
+    files: [
+      "src/components/**/*.{ts,tsx}",
+      "src/layout/**/*.{ts,tsx}",
+      "src/routes/**/*.{ts,tsx}",
+      "src/ui/**/*.{ts,tsx}",
+      "src/presentation/**/*.{ts,tsx}",
+      "src/features/**/*.{ts,tsx}",
+    ],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@/infrastructure/*", "@/infrastructure/**"],
+              message:
+                "UI layer must not import infrastructure directly. Depend on application ports/use-cases or platform abstractions instead.",
+            },
+            {
+              group: ["@/platform/desktop/*", "@/platform/desktop/**"],
+              message:
+                "UI layer must not import desktop bridge details. Use '@/platform' or '@/platform/runtime' instead.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+
+  // Guardrails: application must not depend on UI (prevents reverse dependencies).
+  {
+    files: ["src/application/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: [
+                "@/components/*",
+                "@/components/**",
+                "@/layout/*",
+                "@/layout/**",
+                "@/routes/*",
+                "@/routes/**",
+                "@/ui/*",
+                "@/ui/**",
+                "@/presentation/*",
+                "@/presentation/**",
+              ],
+              message:
+                "Application layer must not import UI modules. Move UI concerns to presentation/adapters and depend on application ports/use-cases instead.",
+            },
+          ],
         },
       ],
     },

@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect, useCallback, useState } from "react";
-import type { Card, Folder } from "@/types";
+import type { Card } from "@/types";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { useCards } from "@/hooks/card/useCards";
