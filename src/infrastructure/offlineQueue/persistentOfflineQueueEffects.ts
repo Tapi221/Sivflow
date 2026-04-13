@@ -9,7 +9,6 @@ import { handleQueuedAssetUploadFailure } from "./effects/handleQueuedAssetUploa
 import { handleQueuedAssetUploadSuccess } from "./effects/handleQueuedAssetUploadSuccess";
 import { handleQueuedDocumentUploadFailure } from "./effects/handleQueuedDocumentUploadFailure";
 import { handleQueuedDocumentUploadSuccess } from "./effects/handleQueuedDocumentUploadSuccess";
-import { saveQueuedImageToFirestore } from "./effects/saveQueuedImageToFirestore";
 import { shouldSkipQueuedDocumentUpload } from "./effects/shouldSkipQueuedDocumentUpload";
 
 const isAssetLikeImageQueueItem = (item: QueueItem): boolean =>
@@ -19,8 +18,6 @@ const handleQueuedUploadSuccess = async (
   item: QueueItem,
   updatedImage: UploadedImage,
 ): Promise<void> => {
-  await saveQueuedImageToFirestore(item, updatedImage);
-
   if (isDocumentQueueItem(item)) {
     await handleQueuedDocumentUploadSuccess(item, updatedImage);
   }

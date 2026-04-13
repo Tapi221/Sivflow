@@ -29,6 +29,10 @@ export const runStartupTasks = async ({
 }: RunStartupTasksParams): Promise<void> => {
   try {
     const { initializeOperationQueue } = await import("@/utils/queueUtils");
+    const { migrateLegacyImagesToAssets } = await import(
+      "@/application/startup/MigrateLegacyImagesToAssets"
+    );
+
     await initializeOperationQueue(userId);
 
     if (isDisposed()) {
@@ -36,6 +40,14 @@ export const runStartupTasks = async ({
     }
 
     console.log("[Queue] Operation Queue initialized", { userId });
+
+    const migrationSummary = await migrateLegacyImagesToAssets({ userId });
+
+    if (isDisposed()) {
+      return;
+    }
+
+    console.log("[LegacyImageMigration] Startup migration finished", migrationSummary);
 
     const didBackup = await performAutoBackupUseCase.execute(userId);
 
