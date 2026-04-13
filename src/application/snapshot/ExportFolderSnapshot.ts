@@ -1,6 +1,7 @@
 import type { JsonFileExportPort } from "@/application/ports/JsonFileExportPort";
 import { localGenerationCounterStore } from "@/infrastructure/browser-storage/LocalGenerationCounterStore";
 import type { AppSnapshot } from "@/types/domain/snapshot";
+import type { Card } from "@/types";
 import { createCreateSnapshotUseCase } from "./CreateSnapshot";
 
 export interface ExportFolderSnapshotDependencies {
@@ -10,6 +11,46 @@ export interface ExportFolderSnapshotDependencies {
 const createSnapshotUseCase = createCreateSnapshotUseCase({
   generationCounterStore: localGenerationCounterStore,
 });
+
+const collectAssetIdsFromCards = (cards: Card[]): Set<string> => {
+  const assetIds = new Set<string>();
+
+  const collectFromBlocks = (blocks: unknown) => {
+    if (!Array.isArray(blocks)) return;
+
+    for (const block of blocks) {
+      if (!block || typeof block !== "object") continue;
+      const record = block as {
+        type?: unknown;
+        images?: Array<{
+          assetId?: string | null;
+          id?: string | null;
+        }>;
+      };
+
+      if (record.type !== "image" || !Array.isArray(record.images)) continue;
+
+      for (const image of record.images) {
+        const assetId =
+          typeof image?.assetId === "string" && image.assetId.trim().length > 0
+            ? image.assetId.trim()
+            : typeof image?.id === "string" && image.id.trim().length > 0
+              ? image.id.trim()
+              : "";
+        if (assetId) {
+          assetIds.add(assetId);
+        }
+      }
+    }
+  };
+
+  for (const card of cards) {
+    collectFromBlocks(card.front?.blocks);
+    collectFromBlocks(card.back?.blocks);
+  }
+
+  return assetIds;
+};
 
 export const createExportFolderSnapshotUseCase = ({
   fileExporter,
@@ -28,13 +69,26 @@ export const createExportFolderSnapshotUseCase = ({
       (card) => card.folderId === folderId,
     );
 
+    const cardSetIds = new Set(
+      cards
+        .map((card) => card.cardSetId)
+        .filter((id): id is string => typeof id === "string" && id.length > 0),
+    );
+    const cardSets = fullSnapshot.data.cardSets.filter((cardSet) =>
+      cardSetIds.has(cardSet.id),
+    );
+    const assetIds = collectAssetIdsFromCards(cards);
+
     const partialSnapshot: AppSnapshot = {
       metadata: fullSnapshot.metadata,
       data: {
         cards,
+        cardSets,
         folders: [folder],
         reviews: [],
-        assets: fullSnapshot.data.assets,
+        assets: fullSnapshot.data.assets.filter((asset) =>
+          assetIds.has(asset.assetId),
+        ),
         settings: null,
       },
     };

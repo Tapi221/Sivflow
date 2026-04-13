@@ -9,6 +9,7 @@ import { snapshotService } from "@/services/SnapshotService";
 import { toAssetRecordFromSnapshotAsset } from "@/application/snapshot/snapshotAssetManifest";
 import type { AppSnapshot, SnapshotComparison } from "@/types/domain/snapshot";
 import type { Card, Folder } from "@/types";
+import type { CardSet } from "@/types/domain/cardSet";
 import {
   Dialog,
   DialogContent,
@@ -39,6 +40,14 @@ const normalizeImportedCard = (card: Card, userId: string): Card => ({
 
 const normalizeImportedFolder = (folder: Folder, userId: string): Folder => ({
   ...folder,
+  userId,
+});
+
+const normalizeImportedCardSet = (
+  cardSet: CardSet,
+  userId: string,
+): CardSet => ({
+  ...cardSet,
   userId,
 });
 
@@ -128,10 +137,14 @@ const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
       // 注意: これは危険な操作なので、事前にバックアップを推奨
       const db = await getLocalDb(currentUser.uid);
       const imagesTable = db.table("images");
+      const cardSetsTable = db.table("cardSets");
       const cardsTable = db.table("cards");
       const foldersTable = db.table("folders");
       const normalizedCards = parsedSnapshot.data.cards.map((card) =>
         normalizeImportedCard(card, currentUser.uid),
+      );
+      const normalizedCardSets = parsedSnapshot.data.cardSets.map((cardSet) =>
+        normalizeImportedCardSet(cardSet, currentUser.uid),
       );
       const normalizedFolders = parsedSnapshot.data.folders.map((folder) =>
         normalizeImportedFolder(folder, currentUser.uid),
@@ -143,15 +156,21 @@ const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
       await db.transaction(
         "rw",
         imagesTable,
+        cardSetsTable,
         cardsTable,
         foldersTable,
         async () => {
           await imagesTable.clear();
+          await cardSetsTable.clear();
           await cardsTable.clear();
           await foldersTable.clear();
 
           if (assetRows.length > 0) {
             await imagesTable.bulkPut(assetRows);
+          }
+
+          if (normalizedCardSets.length > 0) {
+            await cardSetsTable.bulkPut(normalizedCardSets);
           }
 
           if (normalizedFolders.length > 0) {
@@ -262,7 +281,8 @@ const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
                   </p>
                   <p className="text-sm leading-6">
                     カード: {parsedSnapshot.data.cards.length}枚 / フォルダ:{" "}
-                    {parsedSnapshot.data.folders.length}件
+                    {parsedSnapshot.data.folders.length}件 / カードセット:{" "}
+                    {parsedSnapshot.data.cardSets.length}件
                     <br />
                     画像アセット: {parsedSnapshot.data.assets.length}件
                   </p>
@@ -301,8 +321,16 @@ const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
                 </div>
               )}
 
+              {(comparison.diff.cardSetsAdded > 0 ||
+                comparison.diff.cardSetsRemoved > 0) && (
+                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
+                  カードセット差分: +{comparison.diff.cardSetsAdded} / -
+                  {comparison.diff.cardSetsRemoved}
+                </div>
+              )}
+
               <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg text-xs text-gray-600">
-                replace は cards / folders / images を全置換します
+                replace は cards / cardSets / folders / images を全置換します
               </div>
             </div>
 

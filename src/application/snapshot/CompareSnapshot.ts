@@ -33,6 +33,12 @@ export const createCompareSnapshotUseCase = () => {
     const importedFolderIds = new Set(
       imported.data.folders.map((folder) => folder.id),
     );
+    const localCardSetIds = new Set(
+      local.data.cardSets.map((cardSet) => cardSet.id),
+    );
+    const importedCardSetIds = new Set(
+      imported.data.cardSets.map((cardSet) => cardSet.id),
+    );
     const localAssetIds = new Set(
       local.data.assets.map((asset) => asset.assetId),
     );
@@ -53,11 +59,17 @@ export const createCompareSnapshotUseCase = () => {
         foldersAdded: [...importedFolderIds].filter(
           (id) => !localFolderIds.has(id),
         ).length,
+        cardSetsAdded: [...importedCardSetIds].filter(
+          (id) => !localCardSetIds.has(id),
+        ).length,
         assetsAdded: [...importedAssetIds].filter(
           (id) => !localAssetIds.has(id),
         ).length,
         foldersRemoved: [...localFolderIds].filter(
           (id) => !importedFolderIds.has(id),
+        ).length,
+        cardSetsRemoved: [...localCardSetIds].filter(
+          (id) => !importedCardSetIds.has(id),
         ).length,
         assetsRemoved: [...localAssetIds].filter(
           (id) => !importedAssetIds.has(id),

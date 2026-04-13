@@ -23,6 +23,10 @@ export const parseSnapshotFile = async (file: File): Promise<AppSnapshot> => {
     );
   }
 
+  if (!Array.isArray(parsed.data.cardSets)) {
+    parsed.data.cardSets = [];
+  }
+
   if (!Array.isArray(parsed.data.assets)) {
     parsed.data.assets = [];
   }

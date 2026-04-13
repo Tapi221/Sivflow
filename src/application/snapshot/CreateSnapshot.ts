@@ -42,9 +42,11 @@ export const createCreateSnapshotUseCase = ({
     const db = await getLocalDb(userId);
     const allCards = await db.getAllCards();
     const allFolders = await db.getAllFolders();
+    const allCardSets = await db.listCardSetsByUser(userId);
     const imageRows = await db.images.toArray();
 
     const cards = allCards.map(normalizeCard);
+    const cardSets = allCardSets;
     const folders = allFolders.map(normalizeFolder);
     const assets = imageRows
       .map(toSnapshotAsset)
@@ -63,6 +65,7 @@ export const createCreateSnapshotUseCase = ({
 
     const data: SnapshotData = {
       cards,
+      cardSets,
       folders,
       reviews: [],
       assets,

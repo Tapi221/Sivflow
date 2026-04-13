@@ -8,6 +8,7 @@
  */
 
 import type { Card, Folder } from "@/types";
+import type { CardSet } from "@/types/domain/cardSet";
 
 /** スナップショットのメタデータ */
 export interface SnapshotMetadata {
@@ -59,6 +60,7 @@ export interface SnapshotAsset {
 /** スナップショットのデータ本体 */
 export interface SnapshotData {
   cards: Card[];
+  cardSets: CardSet[];
   folders: Folder[];
   reviews: ReviewLog[];
   settings: UserSettings | null;
@@ -89,13 +91,15 @@ export interface SnapshotComparison {
     cardsModified: number;
     foldersAdded: number;
     foldersRemoved: number;
+    cardSetsAdded: number;
+    cardSetsRemoved: number;
     assetsAdded: number;
     assetsRemoved: number;
   };
 }
 
 /** 現在のスキーマバージョン */
-export const CURRENT_SCHEMA_VERSION = 2;
+export const CURRENT_SCHEMA_VERSION = 3;
 
 /** アプリバージョン（package.jsonから取得すべきだが、ここでは固定） */
 export const APP_VERSION = "1.0.0";
