@@ -3,9 +3,9 @@ import {
   buildRouteBreadcrumbs,
   mergeTitleBarBreadcrumbs,
 } from "@/features/breadcrumbs/builders";
+import { useIsDesktopRuntime } from "@/hooks/platform/useIsDesktopRuntime";
 import { cn } from "@/lib/utils";
 import platform from "@/platform";
-import { isDesktopRuntime } from "@/platform/runtime";
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -22,7 +22,7 @@ export const TitleBar: React.FC = () => {
   const [isMaximized, setIsMaximized] = useState(false);
   const [isCardSetViewEditing, setIsCardSetViewEditing] = useState(false);
   const navigate = useNavigate();
-  const isDesktop = isDesktopRuntime();
+  const isDesktop = useIsDesktopRuntime();
   const { pathname } = useLocation();
   const crumbs = useBreadcrumbs();
   const { extraCrumbs, notifyFolderSelect } = useBreadcrumbContext();
