@@ -219,13 +219,11 @@ export const useReliableFileUpload = (): UseReliableFileUploadReturn => {
   const validateFile = useCallback(
     (file: File, context?: UploadMetadata["context"]) => {
       const type = resolveUploadType(context);
-
-      if (UNSUPPORTED_UPLOAD_TYPES.has(type)) {
-        throw new Error("このファイル形式は現在サポートしていません");
-      }
-
       const rule = getValidationRule(type);
-      if (!rule) return;
+
+      if (!rule) {
+        throw new Error("このアップロード種別は現在サポートしていません");
+      }
 
       if (file.size > rule.maxFileSize) {
         const maxMb = Math.floor(rule.maxFileSize / 1024 / 1024);
