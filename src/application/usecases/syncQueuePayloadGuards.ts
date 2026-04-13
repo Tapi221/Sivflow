@@ -49,7 +49,8 @@ const hasBaseEntityShape = (value: unknown): value is { id: string } =>
   isDateLike(value.updatedAt) &&
   hasBoolean(value, "isDeleted");
 
-const isCardPayload = (value: unknown): value is Card => hasBaseEntityShape(value);
+const isCardPayload = (value: unknown): value is Card =>
+  hasBaseEntityShape(value);
 
 const isFolderPayload = (value: unknown): value is Folder => {
   if (!hasBaseEntityShape(value) || !isRecord(value)) return false;

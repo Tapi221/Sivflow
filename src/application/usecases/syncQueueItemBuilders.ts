@@ -43,7 +43,9 @@ const createBaseQueueFields = ({
 const getTaskPayloadId = (payload: unknown): string | null => {
   if (typeof payload !== "object" || payload === null) return null;
   const record = payload as Record<string, unknown>;
-  return typeof record.id === "string" && record.id.length > 0 ? record.id : null;
+  return typeof record.id === "string" && record.id.length > 0
+    ? record.id
+    : null;
 };
 
 export const createUpsertQueueItem = <TEntity extends UpsertEntity>({
