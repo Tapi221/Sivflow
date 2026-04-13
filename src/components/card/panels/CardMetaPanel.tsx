@@ -449,9 +449,16 @@ const CardMetaPanelInner = ({
 }: CardMetaPanelProps) => {
   const isCalendarMode = mode === "calendar";
   const infoRowClass =
-    "h-[var(--meta-row-px)] leading-[var(--meta-row-px)] text-[length:var(--meta-font-size)] text-[var(--sidebar-text)]";
+    "ds-editor-pane__info-row h-[var(--meta-row-px)] leading-[var(--meta-row-px)] text-[length:var(--meta-font-size)]";
   const actionRowClass =
     "h-[var(--meta-row-px)] min-h-[var(--meta-row-px)] flex items-center";
+  const sectionTitleClass =
+    "ds-editor-pane__section-title h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] font-semibold uppercase";
+  const inlineInputClass =
+    "ds-editor-pane__inline-input h-[var(--meta-row-px)] rounded-md px-2 text-[length:var(--surface-placeholder-font-size)] leading-[var(--meta-row-px)]";
+  const compactInlineInputClass =
+    "ds-editor-pane__inline-input h-7 rounded px-1 text-[11px] outline-none";
+  const mutedTextClass = "ds-editor-pane__muted-text";
   const getDurationInputWidthCh = (value: string): string => {
     const digits = value.trim().length;
     const widthCh = Math.min(6, Math.max(1, digits));
@@ -1202,7 +1209,7 @@ const CardMetaPanelInner = ({
                     commitTitle(e.currentTarget.value, { flush: true });
                   }
                 }}
-                className="h-[var(--meta-row-px)] w-full rounded-md border border-[var(--surface-border)] bg-white px-2 text-[length:var(--surface-placeholder-font-size)] leading-[var(--meta-row-px)] text-[#6e6466] surface-concave outline-none placeholder:text-[var(--surface-placeholder-text)] focus:border-[#cfcfcf] focus:bg-white"
+                className={`w-full ${inlineInputClass}`}
                 placeholder="タイトル"
               />
             </div>
@@ -1220,13 +1227,13 @@ const CardMetaPanelInner = ({
                 }}
                 disabled={!card}
               />
-              <span className="text-[length:var(--meta-font-size)] font-medium leading-[var(--meta-row-px)] text-[var(--sidebar-text-muted)]">
+              <span className={`${mutedTextClass} text-[length:var(--meta-font-size)] font-medium leading-[var(--meta-row-px)]`}>
                 下書き
               </span>
             </div>
             <section>
               <div className={`${actionRowClass} justify-between`}>
-                <h3 className="h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] font-semibold tracking-wide text-[var(--sidebar-text-muted)] uppercase">
+                <h3 className={sectionTitleClass}>
                   タグ管理
                 </h3>
                 <SurfaceButton
@@ -1239,7 +1246,7 @@ const CardMetaPanelInner = ({
                   設定で管理
                 </SurfaceButton>
               </div>
-              <div className="mt-2 rounded-md border border-[var(--surface-border)] bg-white px-2 py-1 surface-concave">
+              <div className="ds-editor-pane__surface mt-2 px-2 py-1">
                 <TagInput
                   tags={tags}
                   onChange={(nextTags) => {
@@ -1303,20 +1310,20 @@ const CardMetaPanelInner = ({
       {!isCalendarMode && (
         <section>
           {currentResistanceScore !== null && (
-            <div className="mb-3 flex min-h-[var(--meta-action-min-h)] items-center justify-between rounded border border-[var(--sidebar-border)] bg-[var(--sidebar-active-bg)] px-2">
-              <span className="text-[length:var(--meta-font-size)] font-medium leading-[var(--meta-row-px)] text-[var(--sidebar-text-muted)]">
+            <div className="ds-editor-pane__surface ds-editor-pane__surface--muted mb-3 flex min-h-[var(--meta-action-min-h)] items-center justify-between px-2">
+              <span className={`${mutedTextClass} text-[length:var(--meta-font-size)] font-medium leading-[var(--meta-row-px)]`}>
                 現在の耐性スコア
               </span>
-              <span className="text-[length:var(--meta-font-size)] font-semibold leading-[var(--meta-row-px)] tabular-nums text-[var(--sidebar-text)]">
+              <span className="text-[length:var(--meta-font-size)] font-semibold leading-[var(--meta-row-px)] tabular-nums">
                 {currentResistanceScore}%
               </span>
             </div>
           )}
           <div className="flex min-h-[var(--meta-action-min-h)] items-center justify-between">
-            <h3 className="h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] font-semibold tracking-wide text-[var(--sidebar-text-muted)] uppercase">
+            <h3 className={sectionTitleClass}>
               耐性スコア推移
             </h3>
-            <div className="flex bg-white rounded border border-[var(--surface-border)] p-0.5 shadow-sm text-[length:var(--meta-font-size)]">
+            <div className="ds-editor-pane__toolbar flex p-0.5 text-[length:var(--meta-font-size)]">
               {(["7d", "30d", "all"] as const).map((p) => (
                 <SurfaceButton
                   key={p}
@@ -1330,9 +1337,9 @@ const CardMetaPanelInner = ({
               ))}
             </div>
           </div>
-          <div className="mt-3 h-40 w-full rounded border border-[var(--sidebar-border)] bg-white/70 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]">
+          <div className="ds-editor-pane__chart mt-3 h-40 w-full p-1.5">
             {chartData.length === 0 ? (
-              <div className="flex h-full items-center justify-center text-sm text-[var(--sidebar-text-muted)]">
+              <div className={`flex h-full items-center justify-center text-sm ${mutedTextClass}`}>
                 データなし
               </div>
             ) : (
@@ -1402,7 +1409,7 @@ const CardMetaPanelInner = ({
       {!isCalendarMode && (
         <section>
           <div className="flex min-h-[var(--meta-action-min-h)] items-center justify-between">
-            <h3 className="h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] font-semibold tracking-wide text-[var(--sidebar-text-muted)] uppercase">
+            <h3 className={sectionTitleClass}>
               学習記録
             </h3>
             <div className="flex items-center gap-2">
@@ -1425,34 +1432,34 @@ const CardMetaPanelInner = ({
             </div>
           </div>
           {canManageLatestReview && (
-            <p className="mt-2 text-[11px] text-[var(--sidebar-text-muted)]">
+            <p className={`mt-2 text-[11px] ${mutedTextClass}`}>
               所要時間は全件編集できます。日時・評価の編集と削除は最新1件のみです。
             </p>
           )}
           {latestReviewError && (
-            <div className="mt-2 rounded border border-red-200 bg-red-50 px-2 py-1 text-[11px] text-red-700">
+            <div className="ds-editor-pane__error mt-2 px-2 py-1 text-[11px]">
               {latestReviewError}
             </div>
           )}
-          <div className="mt-3 overflow-hidden rounded border border-[var(--sidebar-border)] bg-[var(--sidebar-active-bg)]">
+          <div className="ds-editor-pane__history mt-3 overflow-hidden">
             {displayHistoryRows.length === 0 ? (
-              <div className="flex h-24 items-center justify-center text-sm text-[var(--sidebar-text-muted)]">
+              <div className="ds-editor-pane__history-empty flex h-24 items-center justify-center text-sm">
                 学習記録なし
               </div>
             ) : (
               <Table className="text-[length:var(--meta-font-size)]">
-                <TableHeader className="bg-white/70">
+                <TableHeader className="ds-editor-pane__surface--muted">
                   <TableRow className="hover:bg-transparent">
-                    <TableHead className="h-7 w-px px-1 whitespace-nowrap text-[var(--sidebar-text-muted)]">
+                    <TableHead className={`h-7 w-px px-1 whitespace-nowrap ${mutedTextClass}`}>
                       &nbsp;
                     </TableHead>
-                    <TableHead className="h-7 min-w-[8.5rem] whitespace-nowrap py-0.5 text-[var(--sidebar-text-muted)]">
+                    <TableHead className={`h-7 min-w-[8.5rem] whitespace-nowrap py-0.5 ${mutedTextClass}`}>
                       日時
                     </TableHead>
-                    <TableHead className="h-7 min-w-[3.25rem] whitespace-nowrap px-1 py-0.5 text-[var(--sidebar-text-muted)]">
+                    <TableHead className={`h-7 min-w-[3.25rem] whitespace-nowrap px-1 py-0.5 ${mutedTextClass}`}>
                       評価
                     </TableHead>
-                    <TableHead className="h-7 min-w-[4.5rem] whitespace-nowrap px-1 py-0.5 text-[var(--sidebar-text-muted)]">
+                    <TableHead className={`h-7 min-w-[4.5rem] whitespace-nowrap px-1 py-0.5 ${mutedTextClass}`}>
                       所要時間
                     </TableHead>
                   </TableRow>
@@ -1461,12 +1468,12 @@ const CardMetaPanelInner = ({
                   {displayHistoryRows.map((row) => (
                     <TableRow
                       key={`${row.reviewIndex}-${row.reviewedAtRaw ?? row.reviewedAtLabel}`}
-                      className="bg-transparent hover:bg-white/40"
+                      className="bg-transparent"
                     >
-                      <TableCell className="w-px px-1 py-0.5 whitespace-nowrap font-medium tabular-nums text-[var(--sidebar-text)]">
+                      <TableCell className="w-px px-1 py-0.5 whitespace-nowrap font-medium tabular-nums">
                         {row.reviewIndex}
                       </TableCell>
-                      <TableCell className="py-0.5 whitespace-nowrap tabular-nums text-[var(--sidebar-text)]">
+                      <TableCell className="py-0.5 whitespace-nowrap tabular-nums">
                         {row.isLatestEditable && isEditingLatestReview ? (
                           <input
                             type="datetime-local"
@@ -1475,7 +1482,7 @@ const CardMetaPanelInner = ({
                               setLatestReviewDateInput(e.target.value)
                             }
                             disabled={isMutatingLatestReview}
-                            className="h-7 w-full min-w-[11rem] rounded border border-[var(--surface-border)] bg-white px-1.5 text-[11px] outline-none focus:border-[#cfcfcf]"
+                            className="ds-editor-pane__inline-input h-7 w-full min-w-[11rem] px-1.5 text-[11px]"
                           />
                         ) : (
                           row.reviewedAtLabel
@@ -1491,7 +1498,7 @@ const CardMetaPanelInner = ({
                                   <button
                                     key={rating}
                                     type="button"
-                                    className="relative z-0 flex h-7 w-7 items-center justify-center rounded-md border border-[var(--surface-border)] bg-white transition-colors hover:bg-[var(--sidebar-active-bg)] disabled:cursor-wait disabled:opacity-50"
+                                    className="ds-editor-pane__rating-button relative z-0 flex h-7 w-7 items-center justify-center disabled:cursor-wait disabled:opacity-50"
                                     onClick={() =>
                                       handleSelectReviewRating(rating)
                                     }
@@ -1521,7 +1528,7 @@ const CardMetaPanelInner = ({
                             </div>
                             <button
                               type="button"
-                              className="text-[10px] leading-none text-[var(--sidebar-text-muted)] underline-offset-2 hover:underline disabled:opacity-50"
+                              className={`text-[10px] leading-none underline-offset-2 hover:underline disabled:opacity-50 ${mutedTextClass}`}
                               onClick={handleCancelPendingReview}
                               disabled={isSavingPendingReview}
                             >
@@ -1541,10 +1548,10 @@ const CardMetaPanelInner = ({
                                     <button
                                       key={rating}
                                       type="button"
-                                      className={`relative z-0 flex h-7 w-7 items-center justify-center rounded-md border bg-white transition-colors disabled:cursor-wait disabled:opacity-50 ${
+                                      className={`ds-editor-pane__rating-button relative z-0 flex h-7 w-7 items-center justify-center disabled:cursor-wait disabled:opacity-50 ${
                                         isSelected
-                                          ? "border-slate-900 ring-1 ring-slate-300"
-                                          : "border-[var(--surface-border)]"
+                                          ? "ds-editor-pane__rating-button--selected"
+                                          : ""
                                       }`}
                                       onClick={() =>
                                         setLatestReviewRatingInput(rating)
@@ -1599,13 +1606,13 @@ const CardMetaPanelInner = ({
                                 {row.ratingLabel}
                               </span>
                             )}
-                            <span className="text-[9px] leading-none tabular-nums text-[var(--sidebar-text-muted)]">
+                            <span className={`text-[9px] leading-none tabular-nums ${mutedTextClass}`}>
                               耐性 {row.resistanceScore ?? "-"}
                             </span>
                           </div>
                         )}
                       </TableCell>
-                      <TableCell className="py-0.5 whitespace-nowrap text-[var(--sidebar-text)]">
+                      <TableCell className="py-0.5 whitespace-nowrap">
                         {"isPending" in row && row.isPending ? (
                           <div className="flex items-center gap-0">
                             <input
@@ -1618,7 +1625,7 @@ const CardMetaPanelInner = ({
                               }
                               onFocus={(e) => e.currentTarget.select()}
                               disabled={isSavingPendingReview}
-                              className="h-7 rounded border border-[var(--surface-border)] bg-white px-1 text-[11px] tabular-nums outline-none focus:border-[#cfcfcf]"
+                              className={`${compactInlineInputClass} ds-editor-pane__duration-input tabular-nums`}
                               style={{
                                 width: getDurationInputWidthCh(
                                   pendingReviewDurationInput,
@@ -1628,7 +1635,7 @@ const CardMetaPanelInner = ({
                               }}
                               placeholder="-"
                             />
-                            <span className="text-[11px] text-[var(--sidebar-text-muted)]">
+                            <span className={`text-[11px] ${mutedTextClass}`}>
                               min.
                             </span>
                           </div>
@@ -1644,7 +1651,7 @@ const CardMetaPanelInner = ({
                               }
                               onFocus={(e) => e.currentTarget.select()}
                               disabled={isMutatingLatestReview}
-                              className="h-7 rounded border border-[var(--surface-border)] bg-white px-1 text-[11px] tabular-nums outline-none focus:border-[#cfcfcf]"
+                              className={`${compactInlineInputClass} ds-editor-pane__duration-input tabular-nums`}
                               style={{
                                 width: getDurationInputWidthCh(
                                   latestReviewDurationInput,
@@ -1654,7 +1661,7 @@ const CardMetaPanelInner = ({
                               }}
                               placeholder="-"
                             />
-                            <span className="text-[11px] text-[var(--sidebar-text-muted)]">
+                            <span className={`text-[11px] ${mutedTextClass}`}>
                               min.
                             </span>
                           </div>
@@ -1709,7 +1716,7 @@ const CardMetaPanelInner = ({
                                 isMutatingLatestReview ||
                                 durationSavingIndex === row.editableLogIndex
                               }
-                              className="h-7 rounded border border-[var(--surface-border)] bg-white px-1 text-[11px] tabular-nums outline-none focus:border-[#cfcfcf]"
+                              className={`${compactInlineInputClass} ds-editor-pane__duration-input tabular-nums`}
                               style={{
                                 width: getDurationInputWidthCh(
                                   durationDrafts[row.editableLogIndex] ??
@@ -1722,7 +1729,7 @@ const CardMetaPanelInner = ({
                               }}
                               placeholder="-"
                             />
-                            <span className="text-[11px] text-[var(--sidebar-text-muted)]">
+                            <span className={`text-[11px] ${mutedTextClass}`}>
                               min.
                             </span>
                           </div>
@@ -1739,8 +1746,8 @@ const CardMetaPanelInner = ({
             )}
           </div>
           {canManageLatestReview && latestEditableReview && (
-            <div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded border border-[var(--sidebar-border)] bg-white/70 px-3 py-2">
-              <p className="text-[11px] leading-5 text-[var(--sidebar-text-muted)]">
+            <div className="ds-editor-pane__review-strip mt-2 flex flex-wrap items-center justify-between gap-2 px-3 py-2">
+              <p className={`text-[11px] leading-5 ${mutedTextClass}`}>
                 {isEditingLatestReview
                   ? "最新記録を編集中"
                   : `最新記録: ${formatDateLabel(latestEditableReview.reviewedAt)} / ${getRatingLabel(latestEditableReview.rating)}`}

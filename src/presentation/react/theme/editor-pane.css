@@ -1,0 +1,215 @@
+@layer components {
+  .ds-editor-pane {
+    border-left: 1px solid var(--ds-semantic-color-border-default);
+    background: var(--ds-semantic-color-background-sidebar);
+    color: var(--ds-semantic-color-text-primary);
+  }
+
+  .ds-editor-pane__body {
+    background: var(--ds-semantic-color-background-sidebar);
+  }
+
+  .ds-editor-pane__content {
+    gap: var(--ds-spacing-6);
+  }
+
+  .ds-editor-pane__lead {
+    margin-top: 0.5rem;
+    gap: var(--ds-spacing-2);
+    color: var(--ds-semantic-color-text-primary);
+  }
+
+  .ds-editor-pane__section {
+    color: var(--ds-semantic-color-text-primary);
+  }
+
+  .ds-editor-pane__section-title {
+    color: var(--ds-semantic-color-text-secondary);
+    letter-spacing: 0.04em;
+  }
+
+  .ds-editor-pane__info-row {
+    color: var(--ds-semantic-color-text-primary);
+  }
+
+  .ds-editor-pane__surface {
+    border: 1px solid var(--ds-semantic-color-border-default);
+    background: color-mix(
+      in srgb,
+      var(--ds-semantic-color-background-elevated) 92%,
+      white 8%
+    );
+    border-radius: var(--ds-semantic-radius-medium);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  }
+
+  .ds-editor-pane__surface--muted {
+    background: var(--ds-semantic-color-background-sidebar-active);
+  }
+
+  .ds-editor-pane__toolbar {
+    border: 1px solid var(--ds-semantic-color-border-default);
+    background: color-mix(
+      in srgb,
+      var(--ds-semantic-color-background-elevated) 88%,
+      white 12%
+    );
+    border-radius: var(--ds-semantic-radius-medium);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  }
+
+  .ds-editor-pane__chart,
+  .ds-editor-pane__history,
+  .ds-editor-pane__review-strip {
+    border: 1px solid var(--ds-semantic-color-border-default);
+    background: color-mix(
+      in srgb,
+      var(--ds-semantic-color-background-elevated) 86%,
+      white 14%
+    );
+    border-radius: var(--ds-semantic-radius-medium);
+  }
+
+  .ds-editor-pane__history-empty,
+  .ds-editor-pane__muted-text {
+    color: var(--ds-semantic-color-text-secondary);
+  }
+
+  .ds-editor-pane__error {
+    border: 1px solid color-mix(in srgb, var(--ds-color-status-danger) 32%, white 68%);
+    background: var(--ds-color-status-danger-soft);
+    color: color-mix(in srgb, var(--ds-color-status-danger) 82%, black 18%);
+    border-radius: var(--ds-semantic-radius-medium);
+  }
+
+  .ds-editor-pane__inline-input {
+    border: 1px solid var(--ds-semantic-color-border-default);
+    background: var(--ds-semantic-color-background-elevated);
+    color: var(--ds-semantic-color-text-primary);
+    border-radius: var(--ds-semantic-radius-medium);
+    transition:
+      border-color var(--ds-semantic-motion-interactive),
+      background-color var(--ds-semantic-motion-interactive);
+  }
+
+  .ds-editor-pane__inline-input::placeholder {
+    color: var(--ds-semantic-color-text-secondary);
+  }
+
+  .ds-editor-pane__inline-input:focus {
+    outline: none;
+    border-color: var(--ds-semantic-color-action-primary);
+    background: color-mix(
+      in srgb,
+      var(--ds-semantic-color-background-elevated) 96%,
+      white 4%
+    );
+  }
+
+  .ds-editor-pane__duration-input {
+    min-width: 1.65rem;
+  }
+
+  .ds-editor-pane__rating-button {
+    border: 1px solid var(--ds-semantic-color-border-default);
+    background: var(--ds-semantic-color-background-elevated);
+    border-radius: var(--ds-semantic-radius-medium);
+    transition:
+      background-color var(--ds-semantic-motion-interactive),
+      border-color var(--ds-semantic-motion-interactive),
+      box-shadow var(--ds-semantic-motion-interactive);
+  }
+
+  .ds-editor-pane__rating-button:hover {
+    background: var(--ds-semantic-color-background-sidebar-active);
+  }
+
+  .ds-editor-pane__rating-button--selected {
+    border-color: var(--ds-semantic-color-action-primary);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--ds-semantic-color-action-primary) 26%, white 74%);
+  }
+
+  .ds-surface-button {
+    border-radius: var(--ds-semantic-radius-medium);
+    border: 1px solid var(--ds-semantic-color-border-default);
+    color: var(--ds-semantic-color-text-primary);
+    transition:
+      background-color var(--ds-semantic-motion-interactive),
+      border-color var(--ds-semantic-motion-interactive),
+      color var(--ds-semantic-motion-interactive),
+      box-shadow var(--ds-semantic-motion-interactive);
+  }
+
+  .ds-surface-button--convex {
+    background: var(--ds-semantic-color-background-elevated);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.92),
+      inset 0 -1px 0 rgba(148, 163, 184, 0.16),
+      0 1px 2px rgba(15, 23, 42, 0.08);
+  }
+
+  .ds-surface-button--concave {
+    background: color-mix(
+      in srgb,
+      var(--ds-semantic-color-background-sidebar-active) 84%,
+      white 16%
+    );
+    box-shadow:
+      inset 0 1px 2px rgba(15, 23, 42, 0.08),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.58);
+  }
+
+  .ds-surface-button--active {
+    border-color: color-mix(
+      in srgb,
+      var(--ds-semantic-color-action-primary) 28%,
+      var(--ds-semantic-color-border-default) 72%
+    );
+    background: var(--ds-semantic-color-action-primary-soft);
+    color: var(--ds-semantic-color-action-primary-hover);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.92),
+      0 1px 2px rgba(15, 23, 42, 0.08);
+  }
+
+  .ds-surface-button:hover:not(:disabled) {
+    color: var(--ds-semantic-color-text-strong);
+  }
+
+  .ds-table {
+    color: var(--ds-semantic-color-text-primary);
+  }
+
+  .ds-table__head {
+    color: var(--ds-semantic-color-text-secondary);
+  }
+
+  .ds-table__footer {
+    border-top: 1px solid var(--ds-semantic-color-border-default);
+    background: var(--ds-semantic-color-background-sidebar-active);
+  }
+
+  .ds-table__row {
+    border-bottom: 1px solid var(--ds-semantic-color-border-default);
+  }
+
+  .ds-table__row:hover {
+    background: color-mix(
+      in srgb,
+      var(--ds-semantic-color-background-elevated) 82%,
+      white 18%
+    );
+  }
+
+  .ds-table__row[data-state="selected"] {
+    background: var(--ds-semantic-color-action-primary-soft);
+  }
+
+  .ds-table__cell {
+    color: inherit;
+  }
+
+  .ds-table__caption {
+    color: var(--ds-semantic-color-text-secondary);
+  }
+}

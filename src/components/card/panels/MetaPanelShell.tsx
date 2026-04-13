@@ -20,7 +20,7 @@ export const MetaPanelShell = ({
   return (
     <aside
       className={cn(
-        `meta-panel h-full w-80 shrink-0 border-l border-[#d7d9de] bg-sidebar font-serif text-sm text-[var(--sidebar-text)] ${UI_TYPO} ${NUMERIC_TYPO}`,
+        `meta-panel ds-editor-pane h-full w-80 shrink-0 font-serif text-sm ${UI_TYPO} ${NUMERIC_TYPO}`,
         className,
       )}
       style={
@@ -34,9 +34,11 @@ export const MetaPanelShell = ({
       }
     >
       <div
-        className={cn("h-full overflow-y-auto bg-sidebar p-2", bodyClassName)}
+        className={cn("ds-editor-pane__body h-full overflow-y-auto p-2", bodyClassName)}
       >
-        <div className={cn("space-y-6", contentClassName)}>{children}</div>
+        <div className={cn("ds-editor-pane__content space-y-6", contentClassName)}>
+          {children}
+        </div>
       </div>
     </aside>
   );
@@ -52,8 +54,8 @@ export const MetaPanelLeadSection = ({
   className,
 }: MetaPanelLeadSectionProps) => {
   return (
-    <section className={className}>
-      <div className="mt-2 space-y-2 text-[length:var(--meta-font-size)] text-[var(--sidebar-text)]">
+    <section className={cn("ds-editor-pane__section", className)}>
+      <div className="ds-editor-pane__lead mt-2 space-y-2 text-[length:var(--meta-font-size)]">
         {children}
       </div>
     </section>
