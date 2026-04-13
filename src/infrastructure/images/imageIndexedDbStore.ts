@@ -1,0 +1,31 @@
+import { getLocalDb } from "@/infrastructure/localdb/client";
+import type { UploadedImage } from "@/types";
+import { strictValidateBeforeSave } from "@/utils/imageValidation";
+
+export const saveImageToIndexedDb = async (
+  image: UploadedImage,
+): Promise<void> => {
+  strictValidateBeforeSave(image);
+
+  try {
+    const db = await getLocalDb();
+    await db.images.put(image);
+    console.log(`[ImageDB] Saved to IndexedDB: ${image.id}`);
+  } catch (error) {
+    console.error("[ImageDB] Failed to save to IndexedDB", error);
+    throw error;
+  }
+};
+
+export const getImageFromIndexedDb = async (
+  imageId: string,
+): Promise<UploadedImage | null> => {
+  try {
+    const db = await getLocalDb();
+    const image = await db.images.get(imageId);
+    return (image as UploadedImage | null) ?? null;
+  } catch (error) {
+    console.error("[ImageDB] Failed to get from IndexedDB", error);
+    throw error;
+  }
+};

@@ -37,7 +37,7 @@ export const isImageFirestoreDiagnosticsEnabled = (): boolean => {
   }
 };
 
-const requireFirestoreDb = (): Firestore => {
+export const requireFirestoreDb = (): Firestore => {
   if (!firestoreDb) {
     throw new Error("[ImageDB] Firestore is unavailable");
   }
@@ -45,7 +45,7 @@ const requireFirestoreDb = (): Firestore => {
   return firestoreDb;
 };
 
-const createImageDocRef = (db: Firestore, pathSegments: string[]) =>
+export const createImageDocRef = (db: Firestore, pathSegments: string[]) =>
   doc(
     db,
     pathSegments[0] ?? "",
