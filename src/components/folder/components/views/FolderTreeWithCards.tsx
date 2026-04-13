@@ -407,16 +407,9 @@ export const FolderTreeWithCards = ({
     [rootFolders, hasFolderMatches],
   );
 
-  const canUseNavigationMode =
-    rootFolderPanels.length > 0 && rootItems.length === 0;
-
   const effectiveSidebarDisplayMode = useMemo(() => {
-    if (sidebarDisplayMode === "navigation" && canUseNavigationMode) {
-      return "navigation";
-    }
-
-    return "tree";
-  }, [canUseNavigationMode, sidebarDisplayMode]);
+    return sidebarDisplayMode === "navigation" ? "navigation" : "tree";
+  }, [sidebarDisplayMode]);
 
   const isSectionListVisible =
     effectiveSidebarDisplayMode === "navigation" &&

@@ -1,9 +1,13 @@
 import { useAuthSession } from "@/contexts/AuthContext";
 import { getLocalDb } from "@/services/localDB";
+import {
+  readCachedFolderSidebarDisplayMode,
+  writeCachedFolderSidebarDisplayMode,
+} from "@/services/folderSidebarDisplayModePreference";
 import type { UserSettings } from "@/types";
 import { sanitizeProfileImage } from "@/utils/profileImageSanitizer";
 import { useLiveQuery } from "dexie-react-hooks";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 
 type LegacyFolderSidebarDisplayMode =
   | UserSettings["folderSidebarDisplayMode"]
@@ -83,9 +87,18 @@ export const DEFAULT_SETTINGS: Partial<UserSettings> = {
   ],
 };
 
+const buildBootSettingsSnapshot = (): Partial<UserSettings> => ({
+  ...DEFAULT_SETTINGS,
+  folderSidebarDisplayMode: readCachedFolderSidebarDisplayMode(),
+});
+
 export const useUserSettings = () => {
   const { currentUser } = useAuthSession();
   const repairedBlobRef = useRef(false);
+  const bootSettings = useMemo(
+    () => buildBootSettingsSnapshot(),
+    [currentUser?.uid],
+  );
 
   useEffect(() => {
     repairedBlobRef.current = false;
@@ -93,34 +106,39 @@ export const useUserSettings = () => {
 
   const settings = useLiveQuery(
     async () => {
-      if (!currentUser) return DEFAULT_SETTINGS;
+      if (!currentUser) return bootSettings;
+
       const db = await getLocalDb(currentUser.uid);
       const userSettings =
         (await db.userSettings.get(currentUser.uid)) ||
         (await db.userSettings.where("userId").equals(currentUser.uid).first());
 
-      const merged = { ...DEFAULT_SETTINGS, ...(userSettings || {}) };
+      const merged = { ...bootSettings, ...(userSettings || {}) };
       const sanitizedProfile = sanitizeProfileImage(merged.profileImage);
+      const folderSidebarDisplayMode = normalizeFolderSidebarDisplayMode(
+        (
+          merged as {
+            folderSidebarDisplayMode?: LegacyFolderSidebarDisplayMode;
+          }
+        ).folderSidebarDisplayMode,
+      );
+
+      writeCachedFolderSidebarDisplayMode(folderSidebarDisplayMode);
 
       return {
         ...merged,
         profileImage: sanitizedProfile.profileImage,
-        folderSidebarDisplayMode: normalizeFolderSidebarDisplayMode(
-          (
-            merged as {
-              folderSidebarDisplayMode?: LegacyFolderSidebarDisplayMode;
-            }
-          ).folderSidebarDisplayMode,
-        ),
+        folderSidebarDisplayMode,
       };
     },
-    [currentUser],
-    DEFAULT_SETTINGS,
+    [bootSettings, currentUser?.uid],
+    bootSettings,
   );
 
   useEffect(() => {
     if (!currentUser || !settings) return;
     if (repairedBlobRef.current) return;
+
     const sanitizedProfile = sanitizeProfileImage(settings.profileImage);
     if (!sanitizedProfile.wasBlobRemoteUrl) return;
 
@@ -132,6 +150,7 @@ export const useUserSettings = () => {
     }
 
     if (typeof window === "undefined") return;
+
     const timerId = window.setTimeout(async () => {
       const db = await getLocalDb(currentUser.uid);
       const current =
@@ -203,6 +222,17 @@ export const useUserSettings = () => {
             }
           : {}),
       };
+
+      if (
+        Object.prototype.hasOwnProperty.call(
+          normalizedSettings,
+          "folderSidebarDisplayMode",
+        )
+      ) {
+        writeCachedFolderSidebarDisplayMode(
+          normalizedSettings.folderSidebarDisplayMode,
+        );
+      }
 
       const updated = {
         ...current,
