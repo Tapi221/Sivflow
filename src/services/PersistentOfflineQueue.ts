@@ -776,14 +776,41 @@ class PersistentOfflineQueue {
  */
 export const persistentQueue = new PersistentOfflineQueue();
 
-// アプリ起動時に自動処理（uploadFn は外部から注入）
-if (typeof window !== "undefined") {
-  window.addEventListener("load", () => {
-    console.log("[PersistentQueue] App loaded, ready to process queue");
-  });
+const AUTO_PROCESS_LISTENER_KEY =
+  "__flashcardPersistentQueueAutoProcessListenersBound";
 
-  // ネットワーク復帰時にも処理
-  window.addEventListener("online", () => {
-    console.log("[PersistentQueue] Network online, ready to process queue");
+const triggerAssetQueueProcessing = (reason: "load" | "online") => {
+  console.log(`[PersistentQueue] Trigger asset queue processing: ${reason}`);
+  void persistentQueue.processAssetQueue().catch((error) => {
+    console.error("[PersistentQueue] Auto process failed", {
+      reason,
+      error,
+    });
   });
+};
+
+if (typeof window !== "undefined") {
+  const target = window as Window & {
+    [AUTO_PROCESS_LISTENER_KEY]?: boolean;
+  };
+
+  if (!target[AUTO_PROCESS_LISTENER_KEY]) {
+    target[AUTO_PROCESS_LISTENER_KEY] = true;
+
+    window.addEventListener(
+      "load",
+      () => {
+        triggerAssetQueueProcessing("load");
+      },
+      { once: true },
+    );
+
+    window.addEventListener("online", () => {
+      triggerAssetQueueProcessing("online");
+    });
+
+    if (document.readyState === "complete") {
+      triggerAssetQueueProcessing("load");
+    }
+  }
 }
