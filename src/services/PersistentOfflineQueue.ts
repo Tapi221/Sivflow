@@ -2,7 +2,8 @@ import { strictValidateBeforeSave } from "@/utils/imageValidation";
 import type { UploadedImage } from "@/types";
 import { getLocalDb, isBackingStoreOpenError } from "@/services/localDB";
 import { warnOncePerSession } from "@/services/localDBRuntimeState";
-import { auth } from "@/services/firebase";
+import { auth, storage } from "@/services/firebase";
+import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 
 interface QueueItem {
   id: string;
@@ -12,6 +13,15 @@ interface QueueItem {
   fileType: string;
   retryCount: number;
   enqueuedAt: number;
+}
+
+export interface AssetUploadRequest {
+  assetId: string;
+  userId: string;
+  remoteKey: string;
+  mime: string;
+  size: number;
+  fileName?: string;
 }
 
 /**
@@ -80,6 +90,76 @@ class PersistentOfflineQueue {
     return false;
   }
 
+  private createAssetQueueImage = (
+    request: AssetUploadRequest,
+  ): UploadedImage => {
+    return {
+      id: request.assetId,
+      status: "uploading",
+      remoteUrl: null,
+      storagePath: request.remoteKey,
+      contentType: request.mime,
+      size: request.size,
+      sizeBytes: request.size,
+      retryCount: 0,
+      updatedAt: new Date(),
+    };
+  };
+
+  private uploadQueuedFile = async (
+    file: File,
+    image: UploadedImage,
+  ): Promise<UploadedImage> => {
+    const user = auth.currentUser;
+    if (!user) {
+      throw new Error("Unauthenticated during background upload");
+    }
+
+    if (!image.storagePath) {
+      throw new Error("Queued upload is missing storagePath");
+    }
+
+    const storageRef = ref(storage, image.storagePath);
+    const uploadTask = uploadBytesResumable(storageRef, file);
+
+    return new Promise<UploadedImage>((resolve, reject) => {
+      uploadTask.on(
+        "state_changed",
+        () => {
+          // Progress hook reserved for future global UI integration.
+        },
+        (error) => {
+          reject(error);
+        },
+        async () => {
+          try {
+            const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
+            resolve({
+              ...image,
+              remoteUrl: downloadUrl as UploadedImage["remoteUrl"],
+              status: "ready",
+              updatedAt: new Date(),
+            });
+          } catch (error) {
+            reject(error);
+          }
+        },
+      );
+    });
+  };
+
+  enqueueAssetUpload = async (
+    request: AssetUploadRequest,
+    file: File,
+  ): Promise<void> => {
+    const queueImage = this.createAssetQueueImage(request);
+    await this.enqueue(queueImage, file);
+  };
+
+  processAssetQueue = async (): Promise<void> => {
+    await this.processQueue(this.uploadQueuedFile);
+  };
+
   private async getQueueItem(id: string): Promise<QueueItem | null> {
     if (!id) return null;
     if (this.idbUnavailable) {
@@ -134,7 +214,7 @@ class PersistentOfflineQueue {
 
     try {
       const db = await this.openDB();
-      // ✅ tx作成〜store.putまでの間に await を挟まない
+      // tx作成〜store.putまでの間に await を挟まない
       await new Promise<void>((resolve, reject) => {
         const tx = db.transaction(this.STORE_NAME, "readwrite");
         const store = tx.objectStore(this.STORE_NAME);
