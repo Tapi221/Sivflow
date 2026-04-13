@@ -563,12 +563,8 @@ const CardMetaPanelInner = ({
   const derivedResistanceScore = useMemo(() => {
     if (!card) return null;
     const legacy = asRecord(card);
-    const next = toValidDate(
-      card.nextReviewDate ?? legacy?.next_review_date,
-    );
-    const last = toValidDate(
-      card.lastReviewAt ?? legacy?.last_review_at,
-    );
+    const next = toValidDate(card.nextReviewDate ?? legacy?.next_review_date);
+    const last = toValidDate(card.lastReviewAt ?? legacy?.last_review_at);
     if (!next || !last) return null;
     const intervalDays = Math.max(
       0,
@@ -1260,15 +1256,11 @@ const CardMetaPanelInner = ({
           <div className="space-y-0">
             <p className={infoRowClass}>
               作成日:{" "}
-              {formatDateLabel(
-                card?.createdAt ?? asRecord(card)?.created_at,
-              )}
+              {formatDateLabel(card?.createdAt ?? asRecord(card)?.created_at)}
             </p>
             <p className={infoRowClass}>
               更新日:{" "}
-              {formatDateLabel(
-                card?.updatedAt ?? asRecord(card)?.updated_at,
-              )}
+              {formatDateLabel(card?.updatedAt ?? asRecord(card)?.updated_at)}
             </p>
             <p className={infoRowClass}>
               最終復習日:{" "}
@@ -1358,8 +1350,12 @@ const CardMetaPanelInner = ({
                     dataKey="reviewIndex"
                     ticks={xTicks}
                     tick={{ fontSize: 10, fill: "var(--sidebar-text-muted)" }}
-                    tickLine={{ stroke: "var(--ds-semantic-color-border-default)" }}
-                    axisLine={{ stroke: "var(--ds-semantic-color-border-default)" }}
+                    tickLine={{
+                      stroke: "var(--ds-semantic-color-border-default)",
+                    }}
+                    axisLine={{
+                      stroke: "var(--ds-semantic-color-border-default)",
+                    }}
                     minTickGap={12}
                   />
                   <YAxis
@@ -1368,16 +1364,24 @@ const CardMetaPanelInner = ({
                     allowDecimals={false}
                     width={36}
                     tick={{ fontSize: 10, fill: "var(--sidebar-text-muted)" }}
-                    tickLine={{ stroke: "var(--ds-semantic-color-border-default)" }}
-                    axisLine={{ stroke: "var(--ds-semantic-color-border-default)" }}
+                    tickLine={{
+                      stroke: "var(--ds-semantic-color-border-default)",
+                    }}
+                    axisLine={{
+                      stroke: "var(--ds-semantic-color-border-default)",
+                    }}
                   />
                   <Tooltip
-                    cursor={{ stroke: "var(--ds-semantic-color-border-default)", strokeWidth: 1 }}
+                    cursor={{
+                      stroke: "var(--ds-semantic-color-border-default)",
+                      strokeWidth: 1,
+                    }}
                     formatter={(value) => [`${value}%`, "耐性スコア"]}
                     labelFormatter={(label) => `復習 ${label} 回目`}
                     contentStyle={{
                       borderRadius: 8,
-                      border: "1px solid var(--ds-semantic-color-border-floating)",
+                      border:
+                        "1px solid var(--ds-semantic-color-border-floating)",
                       boxShadow: "var(--ds-semantic-elevation-floating)",
                     }}
                   />

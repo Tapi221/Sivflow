@@ -93,7 +93,11 @@ export const TagBadge = ({
   }
 
   return (
-    <span className={rootClassName} data-selected={selected} style={resolvedColorStyle}>
+    <span
+      className={rootClassName}
+      data-selected={selected}
+      style={resolvedColorStyle}
+    >
       {content}
     </span>
   );

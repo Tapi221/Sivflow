@@ -34,6 +34,7 @@ export const createExportFolderSnapshotUseCase = ({
         cards,
         folders: [folder],
         reviews: [],
+        assets: fullSnapshot.data.assets,
         settings: null,
       },
     };

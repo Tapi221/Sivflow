@@ -111,9 +111,7 @@ export const RatingCountTiles = ({
             </div>
             {singleColumn ? (
               <>
-                <span
-                  className="ds-rating-tile__label min-w-0 flex-1 truncate text-sm font-semibold"
-                >
+                <span className="ds-rating-tile__label min-w-0 flex-1 truncate text-sm font-semibold">
                   {design.label}
                 </span>
                 <span className="ds-rating-tile__count text-convex text-base font-bold tabular-nums">

@@ -89,6 +89,8 @@ export interface SnapshotComparison {
     cardsModified: number;
     foldersAdded: number;
     foldersRemoved: number;
+    assetsAdded: number;
+    assetsRemoved: number;
   };
 }
 

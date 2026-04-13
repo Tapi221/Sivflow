@@ -19,31 +19,18 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/contexts/ToastContext";
 import {
-  buildImportCardSetName,
-  importCardsFromPayload,
-} from "@/features/import/application/importCards";
+  executeXlsxImport,
+  loadXlsxImportFile,
+  type CreateCard,
+  type CreateCardSet,
+} from "@/features/import/application/xlsxImportUseCases";
 import {
   formatImportCellLabel,
   hasImportBlockingError,
   type ImportParseResult,
 } from "@/features/import/domain/importTypes";
-import { parseXlsxImport } from "@/features/import/infra/web/parseXlsxImport";
 import { downloadXlsxImportTemplate } from "@/features/import/xlsx/downloadXlsxImportTemplate";
-import type { Card, CardSet } from "@/types";
-
-type CreateCardSet = (
-  name: string,
-  targetFolderId?: string | null,
-  opts?: {
-    description?: string;
-    id?: string;
-    orderIndex?: number;
-  },
-) => Promise<CardSet>;
-
-type CreateCard = (
-  cardData: Partial<Card> & { cardSetId?: string },
-) => Promise<Card>;
+import type { CardSet } from "@/types";
 
 export type XlsxImportCompletedPayload = {
   cardSetId: string;
@@ -146,15 +133,14 @@ export const XlsxImportDialog = ({
     setIsParsing(true);
 
     try {
-      const fileBuffer = await file.arrayBuffer();
-      const result = await parseXlsxImport(fileBuffer);
+      const loaded = await loadXlsxImportFile(file);
 
       setState({
-        file,
-        result,
+        file: loaded.file,
+        result: loaded.result,
       });
       setNewCardSetName((current) => {
-        return current.trim() || buildImportCardSetName(file.name);
+        return current.trim() || loaded.suggestedCardSetName;
       });
     } catch (error) {
       console.error("[XlsxImportDialog] parse failed", error);
@@ -172,54 +158,26 @@ export const XlsxImportDialog = ({
   };
 
   const handleImport = async () => {
-    if (!folderId) {
-      toast.error("インポート先フォルダが選択されていません。");
-      return;
-    }
-
-    if (!state.file || !state.result?.payload) {
-      toast.error("先に有効な XLSX ファイルを読み込んでください。");
-      return;
-    }
-
-    if (hasImportBlockingError(state.result)) {
-      toast.error("エラーが残っているためインポートできません。");
-      return;
-    }
-
-    if (destinationMode === "new" && newCardSetName.trim() === "") {
-      toast.error("新規カードセット名を入力してください。");
-      return;
-    }
-
-    if (destinationMode === "existing" && !selectedExistingCardSet) {
-      toast.error("追加先のカードセットを選択してください。");
-      return;
-    }
-
-    const destination =
-      destinationMode === "existing" && selectedExistingCardSet
-        ? {
-            kind: "existing-card-set" as const,
-            cardSetId: selectedExistingCardSet.id,
-            cardSetName: selectedExistingCardSet.name,
-          }
-        : {
-            kind: "new-card-set" as const,
-            cardSetName: newCardSetName.trim(),
-          };
-
     setIsImporting(true);
 
     try {
-      const imported = await importCardsFromPayload({
-        payload: state.result.payload,
+      const execution = await executeXlsxImport({
         folderId,
-        fileName: state.file.name,
+        file: state.file,
+        result: state.result,
+        destinationMode,
+        newCardSetName,
+        selectedExistingCardSet,
         createCardSet,
         createCard,
-        destination,
       });
+
+      if (!execution.ok) {
+        toast.error(execution.errorMessage);
+        return;
+      }
+
+      const imported = execution.value;
 
       toast.success(
         `${imported.createdCount} 件のカードをインポートしました。`,

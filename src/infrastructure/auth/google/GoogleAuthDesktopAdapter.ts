@@ -1,5 +1,5 @@
 import type { GoogleAuthPort } from "@/application/ports/GoogleAuthPort";
-import { getDesktopOauthApi } from "@/platform/desktop/bridge";
+import platform from "@/platform";
 import type { DesktopOauthCallbackPayload } from "@/types/externals/desktop-api";
 import { auth } from "@/infrastructure/firebase/client";
 import { GoogleAuthProvider, signInWithCredential } from "firebase/auth";
@@ -120,7 +120,7 @@ const waitForDesktopOAuthCode = (
   expectedState: string,
   redirectUri: string,
 ): Promise<string> => {
-  const desktopOauth = getDesktopOauthApi();
+  const desktopOauth = platform.oauth;
 
   return new Promise<string>((resolve, reject) => {
     const timeoutId = window.setTimeout(() => {
@@ -169,7 +169,7 @@ const exchangeCodeForIdToken = async ({
   codeVerifier: string;
   redirectUri: string;
 }): Promise<string> => {
-  const desktopOauth = getDesktopOauthApi();
+  const desktopOauth = platform.oauth;
 
   return await desktopOauth.exchangeIdToken({
     clientId,
@@ -180,7 +180,7 @@ const exchangeCodeForIdToken = async ({
 };
 
 const signIn: GoogleAuthPort["signIn"] = async () => {
-  const desktopOauth = getDesktopOauthApi();
+  const desktopOauth = platform.oauth;
   const clientId = getDesktopOauthClientId();
   const redirectUri = getDesktopRedirectUri();
   const state = randomBase64Url(16);

@@ -33,6 +33,12 @@ export const createCompareSnapshotUseCase = () => {
     const importedFolderIds = new Set(
       imported.data.folders.map((folder) => folder.id),
     );
+    const localAssetIds = new Set(
+      local.data.assets.map((asset) => asset.assetId),
+    );
+    const importedAssetIds = new Set(
+      imported.data.assets.map((asset) => asset.assetId),
+    );
 
     return {
       newerSnapshot,
@@ -47,8 +53,14 @@ export const createCompareSnapshotUseCase = () => {
         foldersAdded: [...importedFolderIds].filter(
           (id) => !localFolderIds.has(id),
         ).length,
+        assetsAdded: [...importedAssetIds].filter(
+          (id) => !localAssetIds.has(id),
+        ).length,
         foldersRemoved: [...localFolderIds].filter(
           (id) => !importedFolderIds.has(id),
+        ).length,
+        assetsRemoved: [...localAssetIds].filter(
+          (id) => !importedAssetIds.has(id),
         ).length,
       },
     };
