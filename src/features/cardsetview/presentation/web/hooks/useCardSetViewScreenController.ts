@@ -15,14 +15,15 @@ import {
   resolveLastSyncedAtMs,
   resolveOverlayRight,
 } from "@/features/cardsetview/presentation/web/ui/cardSetViewViewModels";
-import { useIsDesktopRuntime } from "@/hooks/platform/useIsDesktopRuntime";
+import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
 import { useUserSettings } from "@/hooks/settings/useUserSettings";
 import { CARD_PANE_WIDTH_STEP_PX } from "@/routes/constants";
 
 export const useCardSetViewScreenController = () => {
   const { setExtraCrumbs } = useBreadcrumbContext();
   const { error: toastError } = useToast();
-  const isDesktop = useIsDesktopRuntime();
+  const presentationTarget = usePresentationTarget();
+  const isDesktop = presentationTarget === "desktop";
   const { settings } = useUserSettings();
 
   const { folderId, cardSetId, initialIndex, targetCardId } =

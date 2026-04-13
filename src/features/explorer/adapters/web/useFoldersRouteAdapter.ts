@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
-import { useIsDesktopRuntime } from "@/hooks/platform/useIsDesktopRuntime";
+import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
 export type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 import { mapSearchParamsToExplorerRouteState } from "@/features/explorer/mappers/mapSearchParamsToExplorerRouteState";
 import {
@@ -22,7 +22,8 @@ export type FoldersRouteAdapter = {
 export const useFoldersRouteAdapter = (): FoldersRouteAdapter => {
   const [searchParams, setSearchParams] = useSearchParams();
   const openSettings = useExplorerSettingsOpener();
-  const isDesktop = useIsDesktopRuntime();
+  const presentationTarget = usePresentationTarget();
+  const isDesktop = presentationTarget === "desktop";
 
   const readRouteState = useCallback(
     () =>
