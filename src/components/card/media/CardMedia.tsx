@@ -14,7 +14,7 @@ import {
   Volume2,
 } from "@/ui/icons";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import type { CardImageRef } from "@/types/domain/assets";
+import type { ResolvableImageRef } from "@/types/domain/assets";
 
 const IMAGE_BLOCK_INSET_PX = 4;
 const FIXED_IMAGE_REFERENCE_FRAME_WIDTH_PX =
@@ -87,11 +87,31 @@ interface ImageGalleryProps {
 type DisplayImage = {
   key: string;
   url: string | null;
-  layout?: CardImageRef["layout"];
+  layout?: ResolvableImageRef["layout"];
   scale?: number | null;
   x?: number | null;
   naturalW?: number | null;
   naturalH?: number | null;
+};
+
+const getDisplayImageKey = (
+  entry: ResolvableImageRef,
+  index: number,
+): string => {
+  for (const value of [
+    entry.assetId,
+    entry.id,
+    entry.localFileId,
+    entry.remoteUrl,
+    entry.localUrl,
+    entry.url,
+  ]) {
+    if (typeof value === "string" && value.trim().length > 0) {
+      return value.trim();
+    }
+  }
+
+  return `image-${index}`;
 };
 
 export const ImageGallery = ({
@@ -106,7 +126,7 @@ export const ImageGallery = ({
   );
 
   const normalizedItems = useMemo(() => {
-    return (items ?? []).map((entry) => {
+    return (items ?? []).map((entry, index) => {
       if (typeof entry === "string") {
         return {
           key: entry,
@@ -120,7 +140,7 @@ export const ImageGallery = ({
       }
 
       return {
-        key: entry.assetId,
+        key: getDisplayImageKey(entry, index),
         url: null,
         layout: entry.layout ?? null,
         scale: entry.scale ?? 1,

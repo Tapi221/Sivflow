@@ -1,3 +1,3 @@
-import type { CardImageRef } from "@/types/domain/assets";
+import type { ResolvableImageRef } from "@/types/domain/assets";
 
-export type ImageGalleryItem = string | CardImageRef;
+export type ImageGalleryItem = string | ResolvableImageRef;

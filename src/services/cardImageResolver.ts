@@ -5,7 +5,7 @@ import {
   getCachedRemoteUrl,
   setCachedRemoteUrl,
 } from "@/services/imagePreloadCache";
-import type { AssetRecord, CardImageRef, UploadedImage } from "@/types";
+import type { AssetRecord, ResolvableImageRef, UploadedImage } from "@/types";
 import { getDownloadURL, ref as storageRef } from "firebase/storage";
 
 type ImageRecordLike = Partial<AssetRecord & UploadedImage> | undefined;
@@ -78,21 +78,53 @@ const getResolvedStatusFromRecord = (
   return "pending";
 };
 
-export type ResolvedCardImage = CardImageRef & {
+export type ResolvedCardImage = ResolvableImageRef & {
   url: string | null;
   source: "local_blob" | "cache" | "storage" | "none";
   status: "pending" | "uploading" | "ready" | "failed";
 };
 
+const resolveImageAssetId = (image: ResolvableImageRef): string | null => {
+  for (const value of [image.assetId, image.id, image.localFileId]) {
+    if (isNonEmptyString(value)) {
+      return value.trim();
+    }
+  }
+
+  return null;
+};
+
+const resolveDirectUrl = (image: ResolvableImageRef): string | null => {
+  for (const value of [image.url, image.remoteUrl, image.localUrl]) {
+    if (isNonEmptyString(value)) {
+      return value.trim();
+    }
+  }
+
+  return null;
+};
+
 export const resolveCardImageUrl = async (
-  image: CardImageRef,
+  image: ResolvableImageRef,
   userId?: string | null,
 ): Promise<ResolvedCardImage> => {
-  const assetId = image.assetId?.trim();
+  const directUrl = resolveDirectUrl(image);
+  if (directUrl) {
+    return {
+      ...image,
+      assetId: resolveImageAssetId(image) ?? "",
+      url: directUrl,
+      source: "cache",
+      status: "ready",
+    };
+  }
+
+  const assetId = resolveImageAssetId(image);
 
   if (!assetId) {
     return {
       ...image,
+      assetId: "",
       url: null,
       source: "none",
       status: "pending",
@@ -103,6 +135,7 @@ export const resolveCardImageUrl = async (
   if (cachedRemoteUrl) {
     return {
       ...image,
+      assetId,
       url: cachedRemoteUrl,
       source: "cache",
       status: "ready",
@@ -125,6 +158,7 @@ export const resolveCardImageUrl = async (
     if (blobUrl) {
       return {
         ...image,
+        assetId,
         url: blobUrl,
         source: "local_blob",
         status,
@@ -137,6 +171,7 @@ export const resolveCardImageUrl = async (
     setCachedRemoteUrl(assetId, remoteUrl);
     return {
       ...image,
+      assetId,
       url: remoteUrl,
       source: "cache",
       status: "ready",
@@ -155,6 +190,7 @@ export const resolveCardImageUrl = async (
 
     return {
       ...image,
+      assetId,
       url: downloadUrl,
       source: "storage",
       status: "ready",
@@ -163,6 +199,7 @@ export const resolveCardImageUrl = async (
 
   return {
     ...image,
+    assetId,
     url: null,
     source: "none",
     status,

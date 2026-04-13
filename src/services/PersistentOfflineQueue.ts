@@ -216,6 +216,8 @@ class PersistentOfflineQueue {
   ): UploadedImage => {
     return {
       id: request.assetId,
+      assetId: request.assetId,
+      localFileId: request.assetId,
       status: "uploading",
       remoteUrl: null,
       storagePath: request.remoteKey,

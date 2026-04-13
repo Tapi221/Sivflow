@@ -18,7 +18,7 @@ import {
   resolveCardImageUrl,
   type ResolvedCardImage,
 } from "@/services/cardImageResolver";
-import type { AssetRecord, CardImageRef } from "@/types";
+import type { AssetRecord, UploadedImage } from "@/types";
 import { Check, RotateCcw, Upload, X } from "@/ui/icons";
 import { loadImageNaturalSize } from "@/utils/uploaded-image/naturalSize";
 import React, { useCallback, useEffect, useId, useRef, useState } from "react";
@@ -61,8 +61,8 @@ type ResolvedEditableImage = ResolvedCardImage & {
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === "string" && value.trim().length > 0;
 
-const getImageStatusKey = (image: CardImageRef): string =>
-  image.assetId?.trim() ?? "";
+const getImageStatusKey = (image: UploadedImage): string =>
+  image.assetId?.trim() ?? image.id.trim();
 
 const getResolvedStatusFromRecord = (
   record: ImageRecordLike,
@@ -148,7 +148,7 @@ type ImageItemProps = {
   index: number;
   onRemove: (index: number) => void;
   onRetry: (index: number) => void;
-  onUpdate: (index: number, patch: Partial<CardImageRef>) => void;
+  onUpdate: (index: number, patch: Partial<UploadedImage>) => void;
 };
 
 const ImageItem = ({
@@ -260,8 +260,8 @@ const ImageItem = ({
 
 type ImageMediaUploaderProps = {
   type?: "image";
-  urls?: CardImageRef[];
-  onChange: (urls: CardImageRef[]) => void;
+  urls?: UploadedImage[];
+  onChange: (urls: UploadedImage[]) => void;
   maxFiles?: number;
   initialFile?: File;
   onConsumeInitialFile?: () => void;
@@ -302,9 +302,9 @@ const MediaUploader = ({
   );
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const autoOpenedRef = useRef(false);
-  const imageUrls = type === "image" ? (urls as CardImageRef[]) : [];
+  const imageUrls = type === "image" ? (urls as UploadedImage[]) : [];
   const audioUrls = type === "audio" ? (urls as string[]) : [];
-  const imageOnChange = onChange as (urls: CardImageRef[]) => void;
+  const imageOnChange = onChange as (urls: UploadedImage[]) => void;
   const audioOnChange = onChange as (urls: string[]) => void;
   const uniqueId = useId();
   const inputId = `file-${type}-${uniqueId}`;
@@ -430,12 +430,22 @@ const MediaUploader = ({
 
       return {
         assetId,
+        id: assetId,
+        localFileId: blobRecord.localBlobId,
+        remoteUrl: null,
+        localUrl: null,
+        status: "uploading",
+        storagePath: remoteKey,
+        contentType: blobRecord.mime,
+        size: blobRecord.size,
+        sizeBytes: blobRecord.size,
+        source: "local_fallback",
         naturalW: naturalSize?.naturalW ?? null,
         naturalH: naturalSize?.naturalH ?? null,
         scale: 1,
         x: 0,
         layout: null,
-      } satisfies CardImageRef;
+      } satisfies UploadedImage;
     },
     [buildAssetRemoteKey, currentUser?.uid],
   );
@@ -514,9 +524,11 @@ const MediaUploader = ({
     const target = imageUrls[index];
     if (!target) return;
 
-    if (currentUser?.uid && target.assetId) {
+    const assetId = target.assetId?.trim() || target.id.trim();
+
+    if (currentUser?.uid && assetId) {
       const db = await getLocalDb(currentUser.uid);
-      const record = (await db.images.get(target.assetId)) as ImageRecordLike;
+      const record = (await db.images.get(assetId)) as ImageRecordLike;
       const localBlobId = getLocalBlobIdFromRecord(record);
 
       if (localBlobId) {
@@ -530,7 +542,7 @@ const MediaUploader = ({
 
   const handleRetry = async (index: number) => {
     const target = imageUrls[index];
-    const assetId = target?.assetId?.trim();
+    const assetId = target?.assetId?.trim() || target?.id.trim() || "";
 
     if (!assetId || !currentUser?.uid) return;
 
@@ -604,7 +616,7 @@ const MediaUploader = ({
     await refreshAssetStatus(assetId);
   };
 
-  const handleUpdateImage = (index: number, patch: Partial<CardImageRef>) => {
+  const handleUpdateImage = (index: number, patch: Partial<UploadedImage>) => {
     if (type !== "image") return;
 
     imageOnChange(

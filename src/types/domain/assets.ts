@@ -43,6 +43,21 @@ export interface CardImageRef {
   naturalH?: number | null;
 }
 
+export type ResolvableImageRef = {
+  id?: string | null;
+  assetId?: string | null;
+  localFileId?: string | null;
+  remoteUrl?: string | null;
+  localUrl?: string | null;
+  url?: string | null;
+  storagePath?: string | null;
+  scale?: number | null;
+  x?: number | null;
+  layout?: ImageBlockLayout | null;
+  naturalW?: number | null;
+  naturalH?: number | null;
+};
+
 export interface ProfileImage {
   remoteUrl: string | null;
   updatedAt: number;

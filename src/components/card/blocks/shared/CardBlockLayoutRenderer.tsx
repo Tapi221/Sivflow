@@ -17,7 +17,7 @@ import { TextBlockContent } from "@/components/card/blocks/text/TextBlockContent
 import { AudioPlayer } from "@/components/card/media/CardMedia";
 import { cn } from "@/lib/utils";
 import type { CodeBlockData } from "@/types/core/code-block";
-import type { CardImageRef } from "@/types/domain/assets";
+import type { UploadedImage } from "@/types/domain/assets";
 import type { CardBlock } from "@/types/domain/card";
 
 export type CardBlockLayoutReplaceBlock =
@@ -178,9 +178,7 @@ export const CardBlockLayoutRenderer = (
         return (
           <MediaBlock
             data={block.images ?? []}
-            onChange={(data) =>
-              onUpdateBlock(block.id, { images: data as CardImageRef[] })
-            }
+            onChange={(data) => onUpdateBlock(block.id, { images: data })}
             onDelete={onDelete}
             onDuplicate={onDuplicate}
             dragHandleProps={undefined}
@@ -334,7 +332,7 @@ export const CardBlockLayoutRenderer = (
             <ImageBlockContent
               mode="view"
               urls={[]}
-              items={block.images ?? []}
+              items={block.images as UploadedImage[]}
               onFullscreenChange={viewerProps.onGalleryFullscreenChange}
               displayMode={viewerProps.displayMode}
               zoom={viewerProps.zoom}
