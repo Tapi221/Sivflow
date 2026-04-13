@@ -1,29 +1,42 @@
 import { CardWorkspaceShell } from "@/components/card/shell/CardWorkspaceShell";
 import { useCardSetViewScreenController } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewScreenController";
-import { CardSetViewDesktop } from "@/features/cardsetview/presentation/web/ui/CardSetViewDesktop";
 import { CardZoomControl } from "@/features/cardsetview/presentation/web/ui/components/CardZoomControl";
+import { CardSetViewDesktopContent } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewDesktopContent";
 import { CardSetViewMetaPanel } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewMetaPanel";
-import { CardSetViewMobile } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewMobile";
+import { CardSetViewMobileContent } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewMobileContent";
 import { CardSetViewOverlayControls } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewOverlayControls";
+import type { CardSetViewContentProps } from "@/features/cardsetview/presentation/web/ui/components/cardSetViewContentProps";
+import {
+  getPresentationTarget,
+  type PresentationTarget,
+} from "@/platform/presentation/getPresentationTarget";
+import { getRuntimeKind } from "@/platform/runtimeKind";
 
 const TITLEBAR_HEIGHT_PX = 36;
 
+const CARD_SET_VIEW_CONTENT_COMPONENTS = {
+  desktop: CardSetViewDesktopContent,
+  mobile: CardSetViewMobileContent,
+} satisfies Record<
+  PresentationTarget,
+  (props: CardSetViewContentProps) => React.JSX.Element
+>;
+
 export const CardSetViewScreen = () => {
+  const controller = useCardSetViewScreenController();
   const {
     folderId,
     cardSetId,
-    isDesktop,
     settings,
     data,
     state,
     paneWidth,
-    zoom,
     widthControl,
     overlayRight,
     resolvedLastSyncedAtMs,
     topLeftZoomControl,
     handleSaveCurrentDisplayMode,
-  } = useCardSetViewScreenController();
+  } = controller;
 
   if (!folderId && !cardSetId) {
     return (
@@ -35,11 +48,18 @@ export const CardSetViewScreen = () => {
     );
   }
 
-  const desktopOverlayTopInsetPx = isDesktop ? TITLEBAR_HEIGHT_PX : 0;
+  const presentationTarget = getPresentationTarget({
+    runtimeKind: getRuntimeKind(),
+  });
+  const isDesktopPresentation = presentationTarget === "desktop";
+  const Content = CARD_SET_VIEW_CONTENT_COMPONENTS[presentationTarget];
+  const desktopOverlayTopInsetPx = isDesktopPresentation
+    ? TITLEBAR_HEIGHT_PX
+    : 0;
 
   const overlayChildren = (
     <CardSetViewOverlayControls
-      isDesktop={isDesktop}
+      isDesktop={isDesktopPresentation}
       overlayRight={overlayRight}
       currentDisplayMode={state.currentDisplayMode}
       cardSetId={cardSetId}
@@ -80,7 +100,9 @@ export const CardSetViewScreen = () => {
       metaToggleClassName="hidden md:grid"
       viewportRef={paneWidth.contentViewportRef}
       viewportClassName={
-        state.isGlobalEditing || isDesktop ? "px-0 py-0" : "px-4 py-0"
+        state.isGlobalEditing || isDesktopPresentation
+          ? "px-0 py-0"
+          : "px-4 py-0"
       }
       metaPanel={
         <CardSetViewMetaPanel
@@ -91,43 +113,7 @@ export const CardSetViewScreen = () => {
         />
       }
     >
-      {isDesktop ? (
-        <CardSetViewDesktop
-          isLoading={data.isLoading}
-          isGlobalEditing={state.isGlobalEditing}
-          flippedCardIds={state.flippedCardIds}
-          cardsForPager={state.cardsForPager}
-          selectedCardId={state.selectedCard?.id ?? null}
-          safeCurrentIndex={state.safeCurrentIndex}
-          settings={settings}
-          editPaneWidthPx={paneWidth.activePaneRenderWidthPx}
-          currentDisplayMode={state.currentDisplayMode}
-          folderId={folderId}
-          cardSetId={cardSetId}
-          viewZoomScale={zoom.zoomScale}
-          fixedCardWidthPx={zoom.fixedCardWidthPx}
-          fluidAvailableWidthPx={zoom.availableWidthPx}
-          onActiveIndexChange={state.handlePagerIndexChange}
-          onFlip={state.handleFlip}
-          onToggleUncertainty={state.handleToggleUncertainty}
-          onToggleBookmark={state.handleToggleBookmark}
-          onSyncStatusChange={state.handleActiveSyncStatusChange}
-        />
-      ) : (
-        <CardSetViewMobile
-          cardsForPager={state.cardsForPager}
-          selectedCardId={state.selectedCard?.id ?? null}
-          safeCurrentIndex={state.safeCurrentIndex}
-          isFlipped={state.isFlipped}
-          currentDisplayMode={state.currentDisplayMode}
-          settings={settings}
-          onIndexChange={state.setCurrentIndex}
-          onFlip={state.handleFlip}
-          onEdit={state.handleEdit}
-          onToggleUncertainty={state.handleToggleUncertainty}
-          onToggleBookmark={state.handleToggleBookmark}
-        />
-      )}
+      <Content controller={controller} />
     </CardWorkspaceShell>
   );
 };

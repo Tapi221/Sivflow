@@ -58,4 +58,3 @@ describe("createSignInWithGoogleUseCase", () => {
     expect(desktopAuth.signIn).not.toHaveBeenCalled();
   });
 });
-

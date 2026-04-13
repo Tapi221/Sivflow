@@ -60,4 +60,3 @@ describe("platform/index", () => {
     expect(bridge.oauth.start).toHaveBeenCalledWith("https://example.com");
   });
 });
-

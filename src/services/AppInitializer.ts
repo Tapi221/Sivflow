@@ -67,7 +67,9 @@ export class AppInitializer {
         `[AppInit:${userId}] LocalDB is running in fallback mode. Skipping IndexedDB health/rebuild phases.`,
       );
 
-      notifyLocalDbFallbackMode({ recoveryGuideUrl: LOCALDB_RECOVERY_GUIDE_URL });
+      notifyLocalDbFallbackMode({
+        recoveryGuideUrl: LOCALDB_RECOVERY_GUIDE_URL,
+      });
 
       this.initialized = true;
       return { degraded: false };

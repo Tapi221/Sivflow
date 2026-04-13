@@ -1225,7 +1225,9 @@ const CardMetaPanelInner = ({
                 }}
                 disabled={!card}
               />
-              <span className={`${mutedTextClass} text-[length:var(--meta-font-size)] font-medium leading-[var(--meta-row-px)]`}>
+              <span
+                className={`${mutedTextClass} text-[length:var(--meta-font-size)] font-medium leading-[var(--meta-row-px)]`}
+              >
                 下書き
               </span>
             </div>
@@ -1333,7 +1335,9 @@ const CardMetaPanelInner = ({
           </div>
           <div className="ds-editor-pane__chart mt-3 h-40 w-full p-1.5">
             {chartData.length === 0 ? (
-              <div className={`flex h-full items-center justify-center text-sm ${mutedTextClass}`}>
+              <div
+                className={`flex h-full items-center justify-center text-sm ${mutedTextClass}`}
+              >
                 データなし
               </div>
             ) : (
@@ -1456,16 +1460,24 @@ const CardMetaPanelInner = ({
               <Table className="text-[length:var(--meta-font-size)]">
                 <TableHeader className="ds-editor-pane__surface--muted">
                   <TableRow className="hover:bg-transparent">
-                    <TableHead className={`h-7 w-px px-1 whitespace-nowrap ${mutedTextClass}`}>
+                    <TableHead
+                      className={`h-7 w-px px-1 whitespace-nowrap ${mutedTextClass}`}
+                    >
                       &nbsp;
                     </TableHead>
-                    <TableHead className={`h-7 min-w-[8.5rem] whitespace-nowrap py-0.5 ${mutedTextClass}`}>
+                    <TableHead
+                      className={`h-7 min-w-[8.5rem] whitespace-nowrap py-0.5 ${mutedTextClass}`}
+                    >
                       日時
                     </TableHead>
-                    <TableHead className={`h-7 min-w-[3.25rem] whitespace-nowrap px-1 py-0.5 ${mutedTextClass}`}>
+                    <TableHead
+                      className={`h-7 min-w-[3.25rem] whitespace-nowrap px-1 py-0.5 ${mutedTextClass}`}
+                    >
                       評価
                     </TableHead>
-                    <TableHead className={`h-7 min-w-[4.5rem] whitespace-nowrap px-1 py-0.5 ${mutedTextClass}`}>
+                    <TableHead
+                      className={`h-7 min-w-[4.5rem] whitespace-nowrap px-1 py-0.5 ${mutedTextClass}`}
+                    >
                       所要時間
                     </TableHead>
                   </TableRow>
@@ -1612,7 +1624,9 @@ const CardMetaPanelInner = ({
                                 {row.ratingLabel}
                               </span>
                             )}
-                            <span className={`text-[9px] leading-none tabular-nums ${mutedTextClass}`}>
+                            <span
+                              className={`text-[9px] leading-none tabular-nums ${mutedTextClass}`}
+                            >
                               耐性 {row.resistanceScore ?? "-"}
                             </span>
                           </div>

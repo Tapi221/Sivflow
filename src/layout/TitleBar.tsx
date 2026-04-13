@@ -5,7 +5,7 @@ import {
 } from "@/features/breadcrumbs/builders";
 import { useIsDesktopRuntime } from "@/hooks/platform/useIsDesktopRuntime";
 import { cn } from "@/lib/utils";
-import platform from "@/platform";
+import { windowControls } from "@/platform/capabilities/windowControls";
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -31,9 +31,9 @@ export const TitleBar: React.FC = () => {
   useEffect(() => {
     if (!isDesktop) return;
 
-    void platform.window.isMaximized().then(setIsMaximized);
+    void windowControls.isMaximized().then(setIsMaximized);
 
-    const cleanup = platform.window.onMaximizedStateChange((maximized) => {
+    const cleanup = windowControls.onMaximizedStateChange((maximized) => {
       setIsMaximized(maximized);
     });
 
@@ -319,7 +319,7 @@ export const TitleBar: React.FC = () => {
         )}
 
         <button
-          onClick={() => void platform.window.minimize()}
+          onClick={() => void windowControls.minimize()}
           className="flex h-full w-[46px] items-center justify-center transition-colors hover:bg-black/5"
           title="最小化"
           tabIndex={-1}
@@ -341,7 +341,7 @@ export const TitleBar: React.FC = () => {
         </button>
 
         <button
-          onClick={() => void platform.window.maximizeToggle()}
+          onClick={() => void windowControls.maximizeToggle()}
           className="flex h-full w-[46px] items-center justify-center transition-colors hover:bg-black/5"
           title={isMaximized ? "元に戻す" : "最大化"}
           tabIndex={-1}
@@ -378,7 +378,7 @@ export const TitleBar: React.FC = () => {
         </button>
 
         <button
-          onClick={() => void platform.window.close()}
+          onClick={() => void windowControls.close()}
           className="flex h-full w-[46px] items-center justify-center transition-colors hover:bg-[#E81123] hover:text-white"
           title="閉じる"
           tabIndex={-1}

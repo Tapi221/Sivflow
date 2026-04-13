@@ -34,14 +34,16 @@ export const rebuildIndexedDb = async (
   await metaService.recomputeMetadataFor("post_rebuild");
   await metaService.markClean();
   if (rebuildResult.degraded) {
-    console.warn(`[AppInit:${userId}] Rebuild completed with partial failures`, {
-      count: rebuildResult.failures.length,
-      failures: rebuildResult.failures.slice(0, 20),
-    });
+    console.warn(
+      `[AppInit:${userId}] Rebuild completed with partial failures`,
+      {
+        count: rebuildResult.failures.length,
+        failures: rebuildResult.failures.slice(0, 20),
+      },
+    );
   }
   return {
     degraded: rebuildResult.degraded,
     failures: rebuildResult.failures,
   };
 };
-

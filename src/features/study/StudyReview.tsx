@@ -1,82 +1,24 @@
-import React, { useEffect, useState } from "react";
-import { CardCarousel } from "@/features/study/CardCarousel";
-import { VerticalCardPager } from "@/features/review/VerticalCardPager";
-import { useIsDesktopRuntime } from "@/hooks/platform/useIsDesktopRuntime";
-import StudyCard from "@/features/study/StudyCard";
-import type { Card } from "@/types";
+import { StudyReviewDesktop } from "@/features/study/presentation/desktop/StudyReviewDesktop";
+import { StudyReviewMobile } from "@/features/study/presentation/mobile/StudyReviewMobile";
+import type { StudyReviewProps } from "@/features/study/presentation/shared/studyReviewProps";
+import {
+  getPresentationTarget,
+  type PresentationTarget,
+} from "@/platform/presentation/getPresentationTarget";
+import { getRuntimeKind } from "@/platform/runtimeKind";
 
-type Props = {
-  cards: Card[];
-  sessionCurrentIndex: number;
-  onResult: (subjectiveScore: number, responseTime: number) => void;
-  onToggleUncertainty: (card: Card) => void;
-  onToggleBookmark: (card: Card) => void;
-  onEdit?: (card: Card) => void;
-  showHard: boolean;
-  showEasy: boolean;
-};
+const STUDY_REVIEW_COMPONENTS = {
+  desktop: StudyReviewDesktop,
+  mobile: StudyReviewMobile,
+} satisfies Record<
+  PresentationTarget,
+  (props: StudyReviewProps) => React.JSX.Element
+>;
 
-export const StudyReview = ({
-  cards,
-  sessionCurrentIndex,
-  onResult,
-  onToggleUncertainty,
-  onToggleBookmark,
-  onEdit,
-  showHard,
-  showEasy,
-}: Props) => {
-  const isDesktop = useIsDesktopRuntime();
-
-  // Space/Enter でアクティブカードをめくるためのトリガーカウンタ
-  const [flipTrigger, setFlipTrigger] = useState(0);
-  // 新しいカードに移ったらトリガーをリセット
-  useEffect(() => {
-    queueMicrotask(() => setFlipTrigger(0));
-  }, [sessionCurrentIndex]);
-
-  if (isDesktop) {
-    return (
-      <div className="reviewMain h-full w-full">
-        <VerticalCardPager
-          cards={cards}
-          activeIndex={sessionCurrentIndex}
-          // StudyMode はセッションが index を管理するため IO では変更しない
-          onActiveIndexChange={() => {}}
-          onFlip={() => setFlipTrigger((t) => t + 1)}
-          getKey={(card) => (card as { id?: string }).id ?? ""}
-          renderCard={(card, idx, isActive) => (
-            <StudyCard
-              mode="review"
-              card={card}
-              flipTrigger={isActive ? flipTrigger : 0}
-              onResult={onResult}
-              onToggleUncertainty={onToggleUncertainty}
-              onToggleBookmark={onToggleBookmark}
-              onEdit={onEdit}
-              showHard={showHard}
-              showEasy={showEasy}
-            />
-          )}
-        />
-      </div>
-    );
-  }
-
-  // モバイル: 既存の横カルーセル
-  return (
-    <div className="reviewMain h-full w-full">
-      <CardCarousel
-        cards={cards}
-        mode="review"
-        sessionCurrentIndex={sessionCurrentIndex}
-        onResult={onResult}
-        onToggleUncertainty={onToggleUncertainty}
-        onToggleBookmark={onToggleBookmark}
-        onEdit={onEdit}
-        showHard={showHard}
-        showEasy={showEasy}
-      />
-    </div>
-  );
+export const StudyReview = (props: StudyReviewProps) => {
+  const presentationTarget = getPresentationTarget({
+    runtimeKind: getRuntimeKind(),
+  });
+  const Component = STUDY_REVIEW_COMPONENTS[presentationTarget];
+  return <Component {...props} />;
 };

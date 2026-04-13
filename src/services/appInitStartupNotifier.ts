@@ -42,4 +42,3 @@ export const notifyStartupDegraded = (): void => {
     { closeable: true },
   );
 };
-

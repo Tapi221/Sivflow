@@ -262,10 +262,10 @@ describe("XlsxImportDialog", () => {
     executeXlsxImportMock.mockResolvedValue({
       ok: true,
       value: {
-      createdCardSetId: "set-created",
-      createdCardSetName: "bulk-import imported",
-      folderId: "folder-001",
-      createdCount: 2,
+        createdCardSetId: "set-created",
+        createdCardSetName: "bulk-import imported",
+        folderId: "folder-001",
+        createdCount: 2,
       },
     });
 
@@ -343,10 +343,10 @@ describe("XlsxImportDialog", () => {
     executeXlsxImportMock.mockResolvedValue({
       ok: true,
       value: {
-      createdCardSetId: "set-existing",
-      createdCardSetName: "既存セット",
-      folderId: "folder-001",
-      createdCount: 2,
+        createdCardSetId: "set-existing",
+        createdCardSetName: "既存セット",
+        folderId: "folder-001",
+        createdCount: 2,
       },
     });
 

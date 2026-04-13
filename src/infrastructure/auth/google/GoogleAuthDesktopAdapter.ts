@@ -1,5 +1,5 @@
 import type { GoogleAuthPort } from "@/application/ports/GoogleAuthPort";
-import platform from "@/platform";
+import { oauthBridge } from "@/platform/capabilities/oauthBridge";
 import type { DesktopOauthCallbackPayload } from "@/types/externals/desktop-api";
 import { auth } from "@/infrastructure/firebase/client";
 import { GoogleAuthProvider, signInWithCredential } from "firebase/auth";
@@ -120,16 +120,17 @@ const waitForDesktopOAuthCode = (
   expectedState: string,
   redirectUri: string,
 ): Promise<string> => {
-  const desktopOauth = platform.oauth;
-
   return new Promise<string>((resolve, reject) => {
     const timeoutId = window.setTimeout(() => {
       unsubscribe();
       reject(new Error("Timed out waiting for desktop OAuth callback"));
     }, CALLBACK_TIMEOUT_MS);
 
-    const unsubscribe = desktopOauth.onCallback((payload) => {
-      const parsed = parseLoopbackCallback(payload, redirectUri);
+    const unsubscribe = oauthBridge.onCallback((payload) => {
+      const parsed = parseLoopbackCallback(
+        payload as DesktopOauthCallbackPayload,
+        redirectUri,
+      );
       const isStateMatched = parsed.state === expectedState;
 
       if (!isStateMatched) {
@@ -169,9 +170,7 @@ const exchangeCodeForIdToken = async ({
   codeVerifier: string;
   redirectUri: string;
 }): Promise<string> => {
-  const desktopOauth = platform.oauth;
-
-  return await desktopOauth.exchangeIdToken({
+  return await oauthBridge.exchangeIdToken({
     clientId,
     code,
     codeVerifier,
@@ -180,7 +179,6 @@ const exchangeCodeForIdToken = async ({
 };
 
 const signIn: GoogleAuthPort["signIn"] = async () => {
-  const desktopOauth = platform.oauth;
   const clientId = getDesktopOauthClientId();
   const redirectUri = getDesktopRedirectUri();
   const state = randomBase64Url(16);
@@ -196,7 +194,7 @@ const signIn: GoogleAuthPort["signIn"] = async () => {
   const codePromise = waitForDesktopOAuthCode(state, redirectUri);
 
   try {
-    await desktopOauth.start(authorizeUrl);
+    await oauthBridge.start(authorizeUrl);
     const code = await codePromise;
 
     const idToken = await exchangeCodeForIdToken({
@@ -209,7 +207,7 @@ const signIn: GoogleAuthPort["signIn"] = async () => {
     const credential = GoogleAuthProvider.credential(idToken);
     await signInWithCredential(auth, credential);
   } catch (error) {
-    await desktopOauth.cancel().catch(() => undefined);
+    await oauthBridge.cancel().catch(() => undefined);
     throw error;
   }
 };
