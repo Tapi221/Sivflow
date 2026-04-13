@@ -9,9 +9,6 @@ type DocumentLike = {
   blobUrl?: string | null;
 };
 
-const PPTX_MIME =
-  "application/vnd.openxmlformats-officedocument.presentationml.presentation";
-
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
 
@@ -45,22 +42,23 @@ export const isPdfQueueItem = (
   (typeof item.fileName === "string" &&
     item.fileName.toLowerCase().endsWith(".pdf"));
 
+/**
+ * 互換維持用シム。
+ * 既存の再 export や参照を壊さないために残すが、
+ * PPTX は廃止済みなので常に false を返す。
+ */
 export const isPptxQueueItem = (
-  item: Pick<QueueItem, "fileType" | "fileName">,
-): boolean =>
-  item.fileType === PPTX_MIME ||
-  (typeof item.fileName === "string" &&
-    item.fileName.toLowerCase().endsWith(".pptx"));
+  _item: Pick<QueueItem, "fileType" | "fileName">,
+): boolean => false;
 
 export const isDocumentQueueItem = (
   item: Pick<QueueItem, "fileType" | "fileName">,
-): boolean => isPdfQueueItem(item) || isPptxQueueItem(item);
+): boolean => isPdfQueueItem(item);
 
 export const getDocumentKindLabel = (
   item: Pick<QueueItem, "fileType" | "fileName">,
 ): "PDF" | "PPTX" | "DOC" => {
   if (isPdfQueueItem(item)) return "PDF";
-  if (isPptxQueueItem(item)) return "PPTX";
   return "DOC";
 };
 
