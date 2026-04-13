@@ -3,7 +3,7 @@ import {
   buildRouteBreadcrumbs,
   mergeTitleBarBreadcrumbs,
 } from "@/features/breadcrumbs/builders";
-import { useIsDesktopRuntime } from "@/hooks/platform/useIsDesktopRuntime";
+import { useHasDesktopBridge } from "@/hooks/platform/useHasDesktopBridge";
 import { cn } from "@/lib/utils";
 import { windowControls } from "@/platform/capabilities/windowControls";
 import { APP_DESKTOP_TOP_INSET_PX } from "@/platform/presentation/shellMetrics";
@@ -64,7 +64,7 @@ export const TitleBar: React.FC = () => {
   const [isMaximized, setIsMaximized] = useState(false);
   const [isCardSetViewEditing, setIsCardSetViewEditing] = useState(false);
   const navigate = useNavigate();
-  const isDesktopRuntime = useIsDesktopRuntime();
+  const isDesktopRuntime = useHasDesktopBridge();
   const presentationTarget = usePresentationTarget();
   const isDesktopPresentation = presentationTarget === "desktop";
   const { pathname } = useLocation();
