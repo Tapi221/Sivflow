@@ -36,6 +36,11 @@ export interface AssetRecord {
 
 export interface CardImageRef {
   assetId: string;
+  scale?: number | null;
+  x?: number | null;
+  layout?: ImageBlockLayout | null;
+  naturalW?: number | null;
+  naturalH?: number | null;
 }
 
 export interface ProfileImage {

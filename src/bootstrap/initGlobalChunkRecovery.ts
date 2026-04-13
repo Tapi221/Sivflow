@@ -3,12 +3,6 @@ import { isChunkLoadError, toErrorText } from "./errorUtils";
 import { logBootstrapFault } from "./logBootstrapFault";
 import { hardReloadOnce } from "./reloadGuard";
 
-declare global {
-  interface WindowEventMap {
-    "vite:preloadError": Event;
-  }
-}
-
 let started = false;
 
 export const initGlobalChunkRecovery = () => {
@@ -51,8 +45,11 @@ export const initGlobalChunkRecovery = () => {
   });
 
   window.addEventListener("vite:preloadError", (event) => {
+    const payload =
+      "payload" in event ? (event as Event & { payload?: unknown }).payload : undefined;
     logBootstrapFault("vite.preloadError", {
       type: event.type,
+      message: toErrorText(payload),
     });
     hardReloadOnce(BOOTSTRAP_RELOAD_KEYS.vitePreload);
   });
