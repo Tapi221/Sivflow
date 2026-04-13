@@ -22,7 +22,6 @@ const CardEdit = lazy(() => import("./routes/CardEdit"));
 const CardSetView = lazy(() => import("./routes/CardSetView"));
 const StudyMode = lazy(() => import("./routes/StudyMode"));
 const Trash = lazy(() => import("./routes/Trash"));
-const ImageDiagnostics = lazy(() => import("./routes/ImageDiagnostics"));
 const Gallery = lazy(() => import("./routes/Gallery"));
 const Directory = lazy(() => import("./routes/Directory"));
 const Dictionary = lazy(() => import("./routes/Dictionary"));
@@ -351,14 +350,6 @@ const AppContent = () => {
             element={
               <Suspense fallback={<LoadingFallback />}>
                 <Directory />
-              </Suspense>
-            }
-          />
-          <Route
-            path="diagnostics"
-            element={
-              <Suspense fallback={<LoadingFallback />}>
-                <ImageDiagnostics />
               </Suspense>
             }
           />
