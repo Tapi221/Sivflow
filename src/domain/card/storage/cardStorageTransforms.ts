@@ -4,7 +4,10 @@ import {
   resolveExtraRowsFromCardData,
   resolveInkFromCardData,
 } from "@/domain/card/normalizers/cardShape";
-import { cloneStorageRecord, isStorageRecord } from "@/domain/shared/storage/storageRecordUtils";
+import {
+  cloneStorageRecord,
+  isStorageRecord,
+} from "@/domain/shared/storage/storageRecordUtils";
 import { cleanupLegacyCardStorageFields } from "./cardStorageFieldCleanup";
 import { sanitizeCardStorageBlockImages } from "./cardStorageImageTransforms";
 import type { Card } from "@/types";

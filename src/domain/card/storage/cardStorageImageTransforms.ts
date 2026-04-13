@@ -3,7 +3,9 @@ import { sanitizeCardStorageImageRef } from "./cardStorageImageRefTransforms";
 export { sanitizeCardStorageLayout } from "./cardStorageLayoutTransforms";
 export { sanitizeCardStorageImageRef } from "./cardStorageImageRefTransforms";
 
-export const sanitizeCardStorageBlockImages = (blocks: unknown[] | undefined) => {
+export const sanitizeCardStorageBlockImages = (
+  blocks: unknown[] | undefined,
+) => {
   if (!Array.isArray(blocks)) return blocks;
 
   return blocks.map((block) => {

@@ -1,4 +1,7 @@
-import { normalizeFolder, normalizeFolderWithSilent } from "@/domain/folder/normalizers/normalizeFolder";
+import {
+  normalizeFolder,
+  normalizeFolderWithSilent,
+} from "@/domain/folder/normalizers/normalizeFolder";
 import { cloneStorageRecord } from "@/domain/shared/storage/storageRecordUtils";
 import type { Folder } from "@/types";
 
