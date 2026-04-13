@@ -120,7 +120,6 @@ export interface UploadMetadata {
     | "profile"
     | "card_audio"
     | "pdf"
-    | "pptx"
     | { type: string; [key: string]: unknown };
   status: "pending" | "uploading" | "ready" | "failed";
   userAgent?: string;

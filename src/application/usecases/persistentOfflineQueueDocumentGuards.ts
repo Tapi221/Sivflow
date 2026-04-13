@@ -42,22 +42,13 @@ export const isPdfQueueItem = (
   (typeof item.fileName === "string" &&
     item.fileName.toLowerCase().endsWith(".pdf"));
 
-/**
- * 互換維持用シム。
- * 既存の再 export や参照を壊さないために残すが、
- * PPTX は廃止済みなので常に false を返す。
- */
-export const isPptxQueueItem = (
-  _item: Pick<QueueItem, "fileType" | "fileName">,
-): boolean => false;
-
 export const isDocumentQueueItem = (
   item: Pick<QueueItem, "fileType" | "fileName">,
 ): boolean => isPdfQueueItem(item);
 
 export const getDocumentKindLabel = (
   item: Pick<QueueItem, "fileType" | "fileName">,
-): "PDF" | "PPTX" | "DOC" => {
+): "PDF" | "DOC" => {
   if (isPdfQueueItem(item)) return "PDF";
   return "DOC";
 };

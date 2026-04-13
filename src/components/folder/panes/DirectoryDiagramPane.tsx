@@ -12,9 +12,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { getCardText } from "@/domain/card/content";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { resolveCardTagNames, useTags } from "@/hooks/settings/useTags";
-import { getCardText } from "@/domain/card/content";
 import { cn } from "@/lib/utils";
 import type { Card, DocumentItem, Folder } from "@/types";
 import { HelpCircle, Settings2, Star, Tag as TagIcon } from "@/ui/icons";
@@ -28,7 +28,7 @@ interface DirectoryDiagramPaneProps {
 
 type TreeNode = {
   id: string;
-  kind: "folder" | "card" | "pdf" | "pptx";
+  kind: "folder" | "card" | "pdf";
   name: string;
   sourceCardId?: string;
   tags: string[];
@@ -50,6 +50,7 @@ const getCardLabel = (card: Card): string => {
     .replace(/<[^>]*>/g, "")
     .replace(/\s+/g, " ")
     .trim();
+
   if (!plain) return "無題のカード";
   return plain.length > 10 ? `${plain.slice(0, 10)}...` : plain;
 };
@@ -76,6 +77,7 @@ const DirectoryTreeNode = ({
   const isFolderNode = node.kind === "folder";
   const isCardNode =
     node.kind === "card" && typeof node.sourceCardId === "string";
+
   const labelClassName = cn(
     "relative z-10 inline-flex min-h-7 items-center gap-2 font-serif text-base font-medium leading-[24px] text-[#222222]",
     isFolderNode
@@ -84,6 +86,7 @@ const DirectoryTreeNode = ({
     isCardNode &&
       "cursor-pointer transition-colors duration-150 hover:bg-slate-100 focus-visible:bg-slate-100",
   );
+
   const labelContent = (
     <>
       <span className="shrink-0">{node.name}</span>
@@ -123,6 +126,7 @@ const DirectoryTreeNode = ({
           }}
         />
       ) : null}
+
       <div className={cn("relative min-h-7", hasParent ? "pl-3" : "pl-0")}>
         {hasParent ? (
           <>
@@ -145,6 +149,7 @@ const DirectoryTreeNode = ({
             />
           </>
         ) : null}
+
         {isCardNode ? (
           <button
             type="button"
@@ -161,6 +166,7 @@ const DirectoryTreeNode = ({
           <div className={labelClassName}>{labelContent}</div>
         )}
       </div>
+
       {node.children.length > 0 ? (
         <div className="ml-4">
           {node.children.map((child, index) => (
@@ -187,6 +193,7 @@ export const DirectoryDiagramPane = ({
 }: DirectoryDiagramPaneProps) => {
   const { tagById, getTagColor } = useTags();
   const [previewCardId, setPreviewCardId] = useState<string | null>(null);
+
   const {
     tagFilter,
     tagMatchMode,
@@ -203,36 +210,48 @@ export const DirectoryDiagramPane = ({
     uncertaintyFilter !== "any" ||
     bookmarkedFilter !== "any" ||
     draftFilter !== "any" ||
-    contentTypeFilter.length < 3;
+    contentTypeFilter.length < 2;
 
   const allTags = useMemo(() => {
     const tagNames = new Set<string>();
+
     cards.forEach((card) => {
       resolveCardTagNames(card.tagIds, tagById).forEach((tag) =>
         tagNames.add(tag),
       );
     });
+
     return Array.from(tagNames).sort((a, b) => a.localeCompare(b, "ja"));
   }, [cards, tagById]);
 
   const { filteredCards, filteredDocuments } = useMemo(() => {
-    if (!isFilterActive)
-      return { filteredCards: cards, filteredDocuments: documents };
+    const visibleDocuments = documents.filter(
+      (document) => !document.isDeleted && document.kind === "pdf",
+    );
+
+    if (!isFilterActive) {
+      return {
+        filteredCards: cards,
+        filteredDocuments: visibleDocuments,
+      };
+    }
 
     const allowCards = contentTypeFilter.includes("card");
     const allowPdf = contentTypeFilter.includes("pdf");
-    const allowPptx = contentTypeFilter.includes("pptx");
 
     const nextCards = cards.filter((card) => {
       if (!allowCards) return false;
+
       if (tagFilter.length > 0) {
         const resolvedNames = resolveCardTagNames(card.tagIds, tagById);
         if (resolvedNames.length === 0) return false;
+
         const cardTagSet = new Set(resolvedNames);
         const tagMatched =
           tagMatchMode === "any"
             ? tagFilter.some((tag) => cardTagSet.has(tag))
             : tagFilter.every((tag) => cardTagSet.has(tag));
+
         if (!tagMatched) return false;
       }
 
@@ -250,20 +269,18 @@ export const DirectoryDiagramPane = ({
       return true;
     });
 
-    const nextDocuments = documents.filter((document) => {
-      if (document.isDeleted) return false;
-      if (document.kind === "pdf") return allowPdf;
-      if (document.kind === "pptx") return allowPptx;
-      return false;
-    });
+    const nextDocuments = visibleDocuments.filter(() => allowPdf);
 
-    return { filteredCards: nextCards, filteredDocuments: nextDocuments };
+    return {
+      filteredCards: nextCards,
+      filteredDocuments: nextDocuments,
+    };
   }, [
     bookmarkedFilter,
     cards,
     contentTypeFilter,
-    draftFilter,
     documents,
+    draftFilter,
     isFilterActive,
     tagById,
     tagFilter,
@@ -275,12 +292,14 @@ export const DirectoryDiagramPane = ({
     const visibleFolders = folders.filter(
       (folder) => !folder.isDeleted && !folder.isHidden,
     );
+
     const childFolderMap = new Map<string, Folder[]>();
     const itemMap = new Map<string, TreeNode[]>();
 
     for (const folder of visibleFolders) {
       const folderId = String(folder.id || folder.folderId || "");
       if (!folderId) continue;
+
       const parentId = String(folder.parentFolderId || ROOT_KEY);
       const siblings = childFolderMap.get(parentId) ?? [];
       siblings.push(folder);
@@ -289,10 +308,13 @@ export const DirectoryDiagramPane = ({
 
     for (const card of filteredCards) {
       if (card.isDeleted) continue;
+
       const folderId = String(card.folderId || "");
       if (!folderId) continue;
+
       const items = itemMap.get(folderId) ?? [];
       const cardTags = resolveCardTagNames(card.tagIds, tagById);
+
       items.push({
         id: `card:${card.id}`,
         kind: "card",
@@ -304,16 +326,18 @@ export const DirectoryDiagramPane = ({
         showTags: true,
         children: [],
       });
+
       itemMap.set(folderId, items);
     }
 
     for (const document of filteredDocuments) {
       const folderId = String(document.folderId || "");
       if (!folderId) continue;
+
       const items = itemMap.get(folderId) ?? [];
       items.push({
         id: `${document.kind}:${document.id}`,
-        kind: document.kind,
+        kind: "pdf",
         name:
           document.title?.trim() || document.fileName || "無題のドキュメント",
         tags: [],
@@ -322,6 +346,7 @@ export const DirectoryDiagramPane = ({
         showTags: false,
         children: [],
       });
+
       itemMap.set(folderId, items);
     }
 
@@ -339,10 +364,13 @@ export const DirectoryDiagramPane = ({
 
     const buildNode = (folder: Folder): TreeNode | null => {
       const id = String(folder.id || folder.folderId || "");
+
       const folderChildren = (childFolderMap.get(id) ?? [])
         .map(buildNode)
         .filter((child): child is TreeNode => child !== null);
+
       const itemChildren = itemMap.get(id) ?? [];
+
       if (
         isFilterActive &&
         folderChildren.length === 0 &&
@@ -350,6 +378,7 @@ export const DirectoryDiagramPane = ({
       ) {
         return null;
       }
+
       return {
         id,
         kind: "folder",
@@ -384,6 +413,7 @@ export const DirectoryDiagramPane = ({
               ディレクトリ
             </h2>
           </div>
+
           <div className="flex items-center gap-2">
             <Popover>
               <PopoverTrigger asChild>
@@ -395,6 +425,7 @@ export const DirectoryDiagramPane = ({
                   <Settings2 className="h-4 w-4" />
                 </button>
               </PopoverTrigger>
+
               <PopoverContent align="end" className="w-52 p-2">
                 <div className="space-y-1">
                   {[
@@ -412,6 +443,7 @@ export const DirectoryDiagramPane = ({
                   ].map((item) => {
                     const Icon = item.icon;
                     const checked = directoryBadgeVisibility[item.key];
+
                     return (
                       <button
                         key={item.key}
@@ -447,6 +479,7 @@ export const DirectoryDiagramPane = ({
                 </div>
               </PopoverContent>
             </Popover>
+
             <TagFilterPopover
               allTags={allTags}
               className="shrink-0 rounded-md border border-slate-200 bg-white hover:bg-slate-50"
@@ -454,6 +487,7 @@ export const DirectoryDiagramPane = ({
           </div>
         </div>
       </div>
+
       <div className="p-3">
         {rootNodes.length > 0 ? (
           <div className="relative">

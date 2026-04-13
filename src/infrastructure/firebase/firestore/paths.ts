@@ -58,18 +58,3 @@ export const imageDocPathSegments = (
 
   return ["users", userId, "images", imageId];
 };
-
-export const pptxConversionDocPathSegments = (
-  userId: string,
-  documentId: string,
-): string[] => {
-  if (!userId) {
-    throw new Error("userId is required for pptxConversionDocPath");
-  }
-
-  if (!documentId) {
-    throw new Error("documentId is required for pptxConversionDocPath");
-  }
-
-  return ["users", userId, "pptxConversions", documentId];
-};
