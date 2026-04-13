@@ -1,10 +1,9 @@
 import {
   extractPdfFiles,
-  extractPptxFiles,
   isFileDragEvent,
 } from "@/components/folder/explorer/model/utils";
-import { DocumentRow } from "@/components/folder/explorer/rows/DocumentRow";
 import { CardSetRow } from "@/components/folder/explorer/rows/CardSetRow";
+import { DocumentRow } from "@/components/folder/explorer/rows/DocumentRow";
 import { ExplorerRow } from "@/components/folder/explorer/rows/ExplorerRow";
 import { ExplorerRowContent } from "@/components/folder/explorer/rows/ExplorerRowContent";
 import { FolderRow } from "@/components/folder/explorer/rows/FolderRow";
@@ -38,7 +37,6 @@ interface ExplorerTreeNodeProps {
   fileDragFolderId: string | null;
   setFileDragFolderId: React.Dispatch<React.SetStateAction<string | null>>;
   handlePdfDropped: (folderId: string, files: File[]) => Promise<void>;
-  handlePptxDropped: (folderId: string, files: File[]) => Promise<void>;
   openRowMenuId: string | null;
   setOpenRowMenuId: React.Dispatch<React.SetStateAction<string | null>>;
   onFolderSelect: (folderId: string | null) => void;
@@ -75,7 +73,6 @@ export const ExplorerTreeNodeRenderer = React.memo(
     fileDragFolderId,
     setFileDragFolderId,
     handlePdfDropped,
-    handlePptxDropped,
     openRowMenuId,
     setOpenRowMenuId,
     onFolderSelect,
@@ -154,12 +151,8 @@ export const ExplorerTreeNodeRenderer = React.memo(
               setFileDragFolderId(null);
               const files = e.dataTransfer?.files ?? null;
               const pdfFiles = extractPdfFiles(files);
-              const pptxFiles = extractPptxFiles(files);
               if (pdfFiles.length > 0) {
                 void handlePdfDropped(folderId, pdfFiles);
-              }
-              if (pptxFiles.length > 0) {
-                void handlePptxDropped(folderId, pptxFiles);
               }
             }}
             hasExpandableContent={Boolean(treeNode.children?.length)}

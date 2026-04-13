@@ -37,7 +37,7 @@ export const useTreeViewFilters = ({
       uncertaintyFilter !== "any" ||
       bookmarkedFilter !== "any" ||
       draftFilter !== "any" ||
-      contentTypeFilter.length < 3);
+      contentTypeFilter.length < 2);
 
   const { filteredCards, filteredDocuments, isFiltering } = useMemo(() => {
     const active =
@@ -46,19 +46,20 @@ export const useTreeViewFilters = ({
         uncertaintyFilter !== "any" ||
         bookmarkedFilter !== "any" ||
         draftFilter !== "any" ||
-        contentTypeFilter.length < 3);
+        contentTypeFilter.length < 2);
 
     if (!active) {
       return {
         filteredCards: cards,
-        filteredDocuments: documents,
+        filteredDocuments: documents.filter(
+          (document) => document.kind === "pdf",
+        ),
         isFiltering: false,
       };
     }
 
     const allowCards = contentTypeFilter.includes("card");
     const allowPdf = contentTypeFilter.includes("pdf");
-    const allowPptx = contentTypeFilter.includes("pptx");
 
     const filtered = cards.filter((card) => {
       if (!allowCards) return false;
@@ -94,7 +95,6 @@ export const useTreeViewFilters = ({
     const nextDocuments = documents.filter((document) => {
       if (document.isDeleted) return false;
       if (document.kind === "pdf") return allowPdf;
-      if (document.kind === "pptx") return allowPptx;
       return false;
     });
 

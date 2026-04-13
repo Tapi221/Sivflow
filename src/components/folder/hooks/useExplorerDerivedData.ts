@@ -131,8 +131,9 @@ export const useExplorerDerivedData = ({
     const map = new Map<string, number>();
     for (const card of treeCards) {
       if (isSoftDeleted(withLegacy(card))) continue;
-      if (!hasValidFolderBinding(card.folderId ?? withLegacy(card).folder_id))
+      if (!hasValidFolderBinding(card.folderId ?? withLegacy(card).folder_id)) {
         continue;
+      }
       const folderId = resolveTreeFolderId(
         card.folderId ?? withLegacy(card).folder_id,
       );
@@ -155,8 +156,9 @@ export const useExplorerDerivedData = ({
 
     for (const card of treeCards) {
       if (isSoftDeleted(withLegacy(card))) continue;
-      if (!hasValidFolderBinding(card.folderId ?? withLegacy(card).folder_id))
+      if (!hasValidFolderBinding(card.folderId ?? withLegacy(card).folder_id)) {
         continue;
+      }
       pushItem(
         resolveTreeFolderId(card.folderId ?? withLegacy(card).folder_id),
         {
@@ -165,10 +167,13 @@ export const useExplorerDerivedData = ({
         },
       );
     }
+
     for (const doc of documents) {
+      if (doc.kind !== "pdf") continue;
       if (isSoftDeleted(withLegacy(doc))) continue;
-      if (!hasValidFolderBinding(doc.folderId ?? withLegacy(doc).folder_id))
+      if (!hasValidFolderBinding(doc.folderId ?? withLegacy(doc).folder_id)) {
         continue;
+      }
       pushItem(resolveTreeFolderId(doc.folderId ?? withLegacy(doc).folder_id), {
         type: "document",
         data: doc,

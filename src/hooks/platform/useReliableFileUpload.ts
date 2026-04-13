@@ -1,14 +1,14 @@
-import { useState, useCallback } from "react";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { storage, auth } from "@/services/firebase";
+import { useCallback, useState } from "react";
+import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import { auth, storage } from "@/services/firebase";
 import { imageDB } from "@/services/ImageDatabaseWriter";
 import { persistentQueue } from "@/services/PersistentOfflineQueue";
 import { useAuthSession } from "@/contexts/AuthContext";
 import { generateSafeStoragePath } from "@/utils/fileUtils";
 import type {
-  UploadSource,
   UploadFallbackReason,
   UploadMetadata,
+  UploadSource,
   UploadedImage,
 } from "@/types";
 
@@ -36,13 +36,7 @@ interface UseReliableFileUploadReturn {
   reset: () => void;
 }
 
-type UploadKind =
-  | "card_image"
-  | "card_audio"
-  | "profile"
-  | "pdf"
-  | "pptx"
-  | string;
+type UploadKind = "card_image" | "card_audio" | "profile" | "pdf" | string;
 
 type UploadValidationRule = {
   label: string;
@@ -111,17 +105,9 @@ const UPLOAD_VALIDATION_RULES: Record<string, UploadValidationRule> = {
     maxFileSize: DOCUMENT_MAX_FILE_SIZE,
     defaultMimeType: "application/pdf",
   },
-  pptx: {
-    label: "PPTX",
-    allowedMimeTypes: [
-      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-    ],
-    allowedExtensions: [".pptx"],
-    maxFileSize: DOCUMENT_MAX_FILE_SIZE,
-    defaultMimeType:
-      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-  },
 };
+
+const UNSUPPORTED_UPLOAD_TYPES = new Set(["pptx"]);
 
 const isContextObject = (
   value: UploadMetadata["context"] | undefined,
@@ -183,10 +169,6 @@ const normalizeMimeType = (file: File, type: UploadKind): string => {
   return getValidationRule(type)?.defaultMimeType ?? "application/octet-stream";
 };
 
-/**
- * 実際のFirebase Storageへのアップロードを行う関数
- * (PersistentQueueから呼ばれる)
- */
 const performFirebaseUpload = async (
   file: File,
   image: UploadedImage,
@@ -200,9 +182,7 @@ const performFirebaseUpload = async (
   return new Promise<UploadedImage>((resolve, reject) => {
     uploadTask.on(
       "state_changed",
-      () => {
-        // Progress could be reported here if we had a global event bus
-      },
+      () => {},
       (error) => {
         reject(error);
       },
@@ -239,8 +219,12 @@ export const useReliableFileUpload = (): UseReliableFileUploadReturn => {
   const validateFile = useCallback(
     (file: File, context?: UploadMetadata["context"]) => {
       const type = resolveUploadType(context);
-      const rule = getValidationRule(type);
 
+      if (UNSUPPORTED_UPLOAD_TYPES.has(type)) {
+        throw new Error("このファイル形式は現在サポートしていません");
+      }
+
+      const rule = getValidationRule(type);
       if (!rule) return;
 
       if (file.size > rule.maxFileSize) {
@@ -309,12 +293,12 @@ export const useReliableFileUpload = (): UseReliableFileUploadReturn => {
       try {
         const contextType = resolveUploadType(context);
         const forcedId = getForcedIdFromContext(context);
-        const { safeName, id: generatedId } = generateSafeStoragePath(
+        const { id: generatedId } = generateSafeStoragePath(
           file.name,
           contextType === "card_audio" ? "audio" : undefined,
         );
         const id = forcedId || generatedId;
-        const storagePath = pathGenerator(safeName);
+        const storagePath = pathGenerator(file.name);
         const normalizedMimeType = normalizeMimeType(file, contextType);
 
         const storableImage: UploadedImage = {

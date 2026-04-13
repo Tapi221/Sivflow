@@ -2,7 +2,6 @@ import { FolderDashboard } from "@/components/folder/components/views/FolderDash
 import { CardPane } from "@/components/folder/panes/CardPane";
 import { DirectoryDiagramPane } from "@/components/folder/panes/DirectoryDiagramPane";
 import { PdfPane } from "@/components/pdf/PdfPane";
-import { PowerPointPane } from "@/components/pptx/PowerPointPane";
 import Calendar from "@/routes/Calendar";
 import Gallery from "@/routes/Gallery";
 import Trash from "@/routes/Trash";
@@ -12,6 +11,7 @@ type PdfPaneUpdateHandler = NonNullable<
   React.ComponentProps<typeof PdfPane>["onDocumentUpdate"]
 >;
 type PdfPaneUpdates = Parameters<PdfPaneUpdateHandler>[0];
+
 interface RightPaneProps {
   selectedItem: SelectedExplorerItem;
   selectedCardId: string | null;
@@ -40,6 +40,22 @@ interface RightPaneProps {
   };
   folderSelectionNonce: number;
 }
+
+const UnsupportedDocumentPane = () => {
+  return (
+    <div className="flex h-full items-center justify-center bg-slate-50 p-6">
+      <div className="max-w-md rounded-xl border border-slate-200 bg-white p-5 text-sm text-slate-600 shadow-sm">
+        <div className="mb-2 text-base font-semibold text-slate-800">
+          この形式は現在サポート対象外です
+        </div>
+        <div>
+          PowerPoint の表示機能は廃止しました。必要な資料は PDF
+          に変換して再アップロードしてください。
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export const RightPane = ({
   selectedItem,
@@ -80,8 +96,8 @@ export const RightPane = ({
   }
 
   if (selectedDocument) {
-    if (selectedDocument.kind === "pptx") {
-      return <PowerPointPane doc={selectedDocument} />;
+    if (selectedDocument.kind !== "pdf") {
+      return <UnsupportedDocumentPane />;
     }
 
     return (

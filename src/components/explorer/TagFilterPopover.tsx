@@ -64,7 +64,7 @@ export const TagFilterPopover = ({
     uncertaintyFilter !== "any" ||
     bookmarkedFilter !== "any" ||
     draftFilter !== "any" ||
-    contentTypeFilter.length < 3;
+    contentTypeFilter.length < 2;
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -144,7 +144,6 @@ export const TagFilterPopover = ({
                 {[
                   { label: "カード", value: "card" as const },
                   { label: "PDF", value: "pdf" as const },
-                  { label: "PPTX", value: "pptx" as const },
                 ].map((item) => (
                   <SurfaceButton
                     key={item.value}

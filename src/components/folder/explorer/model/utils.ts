@@ -1,6 +1,6 @@
-import type { DocumentItem, Card } from "@/types";
+import type { Card, DocumentItem } from "@/types";
 
-export type { DocumentItem, Card };
+export type { Card, DocumentItem };
 
 export type FolderTreeNode = {
   id?: string;
@@ -43,8 +43,9 @@ export const isSameFolder = (
 export const getEntityTime = (value: unknown): number => {
   if (!value) return 0;
   if (value instanceof Date) return value.getTime();
-  if (typeof value?.toDate === "function")
+  if (typeof value?.toDate === "function") {
     return value.toDate()?.getTime?.() ?? 0;
+  }
   return 0;
 };
 
@@ -56,11 +57,8 @@ export const createDocumentId = () =>
     ? crypto.randomUUID()
     : `${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
 
-export const buildStoragePath = (
-  uid: string,
-  docId: string,
-  ext: "pdf" | "pptx",
-) => `users/${uid}/documents/${docId}/source.${ext}`;
+export const buildStoragePath = (uid: string, docId: string, ext: "pdf") =>
+  `users/${uid}/documents/${docId}/source.${ext}`;
 
 export const isTextInputTarget = (target: HTMLElement | null) => {
   if (!target) return false;
@@ -89,16 +87,5 @@ export const extractPdfFiles = (fileList: FileList | null): File[] => {
   return Array.from(fileList).filter((file) => {
     const name = file.name?.toLowerCase() ?? "";
     return file.type === "application/pdf" || name.endsWith(".pdf");
-  });
-};
-
-export const PPTX_MIME =
-  "application/vnd.openxmlformats-officedocument.presentationml.presentation";
-
-export const extractPptxFiles = (fileList: FileList | null): File[] => {
-  if (!fileList) return [];
-  return Array.from(fileList).filter((file) => {
-    const name = file.name?.toLowerCase() ?? "";
-    return file.type === PPTX_MIME || name.endsWith(".pptx");
   });
 };

@@ -6,33 +6,27 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-// 型定義
 export type ExplorerTab = "explorer" | "recent" | "inbox";
 
 export interface RecentItem {
   type: "folder" | "card" | "document";
   id: string;
-  ts: number; // タイムスタンプ
+  ts: number;
 }
 
 export interface ExplorerState {
-  // タブ状態
-  activeTab: ExplorerTab; // Deprecated but kept for compatibility
+  activeTab: ExplorerTab;
   explorerTab: ExplorerTab;
   setExplorerTab: (tab: ExplorerTab) => void;
-
-  // Recent
   recent: RecentItem[];
   addRecent: (item: Omit<RecentItem, "ts">) => void;
   clearRecent: () => void;
-
-  // Tag Filter State
   tagFilter: string[];
   tagMatchMode: "any" | "all";
   uncertaintyFilter: "any" | "on" | "off";
   bookmarkedFilter: "any" | "on" | "off";
   draftFilter: "any" | "on" | "off";
-  contentTypeFilter: ("card" | "pdf" | "pptx")[];
+  contentTypeFilter: ("card" | "pdf")[];
   directoryBadgeVisibility: {
     uncertainty: boolean;
     bookmarked: boolean;
@@ -46,27 +40,20 @@ export interface ExplorerState {
   setUncertaintyFilter: (mode: "any" | "on" | "off") => void;
   setBookmarkedFilter: (mode: "any" | "on" | "off") => void;
   setDraftFilter: (mode: "any" | "on" | "off") => void;
-  toggleContentType: (kind: "card" | "pdf" | "pptx") => void;
+  toggleContentType: (kind: "card" | "pdf") => void;
   toggleDirectoryBadgeVisibility: (
     key: "uncertainty" | "bookmarked" | "tags",
   ) => void;
 }
 
-// 定数
 const MAX_RECENT = 30;
 
-/**
- * Explorer状態管理フック (Zustand + Persist)
- */
 export const useExplorerStore = create<ExplorerState>()(
   persist(
     (set) => ({
-      // タブ初期値
       activeTab: "explorer",
       explorerTab: "explorer",
       setExplorerTab: (tab) => set({ explorerTab: tab }),
-
-      // Recent
       recent: [],
       addRecent: (item) =>
         set((state) => {
@@ -80,14 +67,12 @@ export const useExplorerStore = create<ExplorerState>()(
           return { recent: newRecent };
         }),
       clearRecent: () => set({ recent: [] }),
-
-      // Tag Filter
       tagFilter: [],
       tagMatchMode: "any",
       uncertaintyFilter: "any",
       bookmarkedFilter: "any",
       draftFilter: "any",
-      contentTypeFilter: ["card", "pdf", "pptx"],
+      contentTypeFilter: ["card", "pdf"],
       directoryBadgeVisibility: {
         uncertainty: true,
         bookmarked: true,
@@ -110,7 +95,7 @@ export const useExplorerStore = create<ExplorerState>()(
           uncertaintyFilter: "any",
           bookmarkedFilter: "any",
           draftFilter: "any",
-          contentTypeFilter: ["card", "pdf", "pptx"],
+          contentTypeFilter: ["card", "pdf"],
         }),
       setTagMatchMode: (mode) => set({ tagMatchMode: mode }),
       setUncertaintyFilter: (mode) => set({ uncertaintyFilter: mode }),
@@ -149,9 +134,11 @@ export const useExplorerStore = create<ExplorerState>()(
         directoryBadgeVisibility: state.directoryBadgeVisibility,
       }),
       migrate: (persistedState: unknown) => {
-        if (!persistedState || typeof persistedState !== "object")
+        if (!persistedState || typeof persistedState !== "object") {
           return persistedState;
-        const next = { ...persistedState };
+        }
+
+        const next = { ...persistedState } as Record<string, unknown>;
 
         if (next.explorerTab === "favorites") {
           next.explorerTab = "explorer";
@@ -159,6 +146,15 @@ export const useExplorerStore = create<ExplorerState>()(
 
         if (next.explorerTab === "pinned" || next.explorerTab === "views") {
           next.explorerTab = "explorer";
+        }
+
+        if (Array.isArray(next.contentTypeFilter)) {
+          next.contentTypeFilter = next.contentTypeFilter.filter(
+            (value) => value === "card" || value === "pdf",
+          );
+          if ((next.contentTypeFilter as unknown[]).length === 0) {
+            next.contentTypeFilter = ["card", "pdf"];
+          }
         }
 
         delete next.favorites;

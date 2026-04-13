@@ -3,12 +3,9 @@ import { nanoid } from "nanoid";
 const ALLOWED_EXTENSIONS: Record<string, string[]> = {
   image: ["jpg", "jpeg", "png", "gif", "webp", "heic", "heif", "avif", "svg"],
   audio: ["mp3", "wav", "ogg", "m4a", "aac", "webm"],
-  document: ["pdf", "pptx", "txt", "md"],
+  document: ["pdf", "txt", "md"],
 };
 
-/**
- * ファイル拡張子の検証と取得
- */
 const getValidatedExtension = (
   filename: string,
   expectedType?: string,
@@ -18,20 +15,15 @@ const getValidatedExtension = (
 
   const ext = parts[parts.length - 1];
 
-  // タイプ指定がある場合は検証
   if (expectedType) {
     const allowedExts = ALLOWED_EXTENSIONS[expectedType] || [];
     return allowedExts.includes(ext) ? ext : "bin";
   }
 
-  // すべての許可された拡張子をチェック
   const allAllowed = Object.values(ALLOWED_EXTENSIONS).flat();
   return allAllowed.includes(ext) ? ext : "bin";
 };
 
-/**
- * 安全なストレージパスの生成
- */
 export const generateSafeStoragePath = (
   originalName: string,
   fileType?: string,
@@ -42,9 +34,7 @@ export const generateSafeStoragePath = (
 
   return { safeName, extension, id };
 };
-/**
- * バイト数を読みやすい形式にフォーマット
- */
+
 export const formatBytes = (bytes: number, decimals = 2) => {
   if (bytes === 0) return "0 Bytes";
   const k = 1024;

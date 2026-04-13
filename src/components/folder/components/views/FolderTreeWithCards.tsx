@@ -689,7 +689,6 @@ export const FolderTreeWithCards = ({
   const {
     fileInputRef,
     handlePdfDropped,
-    handlePptxDropped,
     handleToolbarAddDocument,
     currentFileAccept,
     handleToolbarFileInputChange,
@@ -940,7 +939,6 @@ export const FolderTreeWithCards = ({
     fileDragFolderId,
     setFileDragFolderId,
     handlePdfDropped,
-    handlePptxDropped,
     openRowMenuId: dialogs.openRowMenuId,
     setOpenRowMenuId: dialogs.setOpenRowMenuId,
     onFolderSelect: handleFolderNodeSelect,
@@ -981,7 +979,6 @@ export const FolderTreeWithCards = ({
       fileDragFolderId,
       setFileDragFolderId,
       handlePdfDropped,
-      handlePptxDropped,
       handleFolderNodeSelect,
       onItemSelect,
       actions.handleCreateFolderAction,
