@@ -8,6 +8,10 @@
 @import "../presentation/react/theme/menu-surfaces.css";
 @import "../presentation/react/theme/navigation-surfaces.css";
 @import "../presentation/react/theme/editor-pane.css";
+<<<<<<< HEAD
+=======
+@import "../presentation/react/theme/tag-and-status.css";
+>>>>>>> 32820bee7da7fee740ea5702917206b96c2986eb
 @import "./tokens/tokens.css";
 @import "./base/base.css";
 @import "./components/index.css";

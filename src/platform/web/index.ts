@@ -15,4 +15,21 @@ export const webPlatform: PlatformApi = {
       window.open(url, "_blank", "noopener,noreferrer");
     },
   },
+  oauth: {
+    start: async () => {
+      throw new Error("OAuth desktop bridge is not available in web runtime");
+    },
+    cancel: async () => {},
+    exchangeIdToken: async () => {
+      throw new Error("OAuth desktop bridge is not available in web runtime");
+    },
+    onCallback: () => () => {},
+  },
+  window: {
+    minimize: async () => {},
+    maximizeToggle: async () => {},
+    close: async () => {},
+    isMaximized: async () => false,
+    onMaximizedStateChange: () => () => {},
+  },
 };

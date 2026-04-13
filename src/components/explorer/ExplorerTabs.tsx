@@ -108,8 +108,7 @@ export const ExplorerTabs = ({
               aria-label={tab.label}
               className={getSidebarNavItemClassName({
                 isActive,
-                className:
-                  "ds-nav-tab relative justify-center gap-0 px-0",
+                className: "ds-nav-tab relative justify-center gap-0 px-0",
               })}
             >
               <SidebarNavIcon className="ds-nav-tab__icon opacity-100">

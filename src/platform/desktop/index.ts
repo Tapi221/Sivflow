@@ -21,4 +21,19 @@ export const desktopPlatform: PlatformApi = {
       window.open(url, "_blank", "noopener,noreferrer");
     },
   },
+  oauth: {
+    start: (authorizeUrl: string) =>
+      getDesktopBridge().oauth.start(authorizeUrl),
+    cancel: () => getDesktopBridge().oauth.cancel(),
+    exchangeIdToken: (input) => getDesktopBridge().oauth.exchangeIdToken(input),
+    onCallback: (handler) => getDesktopBridge().oauth.onCallback(handler),
+  },
+  window: {
+    minimize: () => getDesktopBridge().window.minimize(),
+    maximizeToggle: () => getDesktopBridge().window.maximizeToggle(),
+    close: () => getDesktopBridge().window.close(),
+    isMaximized: () => getDesktopBridge().window.isMaximized(),
+    onMaximizedStateChange: (handler) =>
+      getDesktopBridge().window.onMaximizedStateChange(handler),
+  },
 };

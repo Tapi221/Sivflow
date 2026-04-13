@@ -87,7 +87,7 @@ export const TagInput = ({
     <Popover open={open} onOpenChange={setOpen}>
       <div
         className={cn(
-          "w-full flex flex-col min-h-0 py-0 px-0 bg-transparent border-none rounded-none cursor-text",
+          "ds-tag-input w-full flex flex-col py-0 px-0 bg-transparent border-none rounded-none",
           !quietHover && "transition-all",
           className,
         )}
@@ -140,8 +140,8 @@ export const TagInput = ({
           <PopoverTrigger asChild>
             <button
               className={cn(
-                "flex items-center gap-1 h-7 px-0 text-[var(--surface-placeholder-text)]",
-                quietHover ? "" : "hover:text-slate-400 transition-colors",
+                "ds-tag-input__trigger flex items-center gap-1 h-7 px-0",
+                quietHover ? "hover:text-inherit" : "transition-colors",
               )}
               onClick={() => setOpen(true)}
             >
@@ -157,11 +157,11 @@ export const TagInput = ({
       </div>
       <PopoverContent
         surface="floating"
-        className="w-[320px] p-0 overflow-hidden"
+        className="ds-tag-input__panel"
         align="start"
       >
         <Command
-          className="bg-white"
+          className="border-none bg-transparent shadow-none"
           onKeyDown={(e) => {
             if (e.key === "Enter" && inputValue.trim()) {
               // もし既存のタグに一致するものがない新規タグなら作成・追加する
@@ -175,12 +175,12 @@ export const TagInput = ({
             }
           }}
         >
-          <div className="p-3 border-b border-slate-50">
+          <div className="p-3">
             <CommandInput
               placeholder="タグを検索・作成..."
               value={inputValue}
               onValueChange={setInputValue}
-              className="h-6 rounded-lg border border-[var(--surface-border)] bg-white text-[#202123] surface-concave placeholder:text-[var(--surface-placeholder-text)] focus:ring-0 focus:border-[#cfcfcf] focus:bg-white"
+              className="ds-input h-6 focus:ring-0"
             />
           </div>
           <CommandList className="max-h-[350px]">
@@ -190,17 +190,17 @@ export const TagInput = ({
               ) && (
                 <div className="p-3 space-y-3">
                   <div
-                    className="flex items-center gap-2 p-2 rounded-xl bg-primary-50 text-primary-600 cursor-pointer text-xs font-bold transition-all hover:bg-primary-100"
+                    className="ds-tag-input__create flex items-center gap-2 p-2 cursor-pointer text-xs font-bold"
                     onClick={handleCreateTag}
                   >
                     <Plus className="w-4 h-4" />「{inputValue}」を新しく作成
                   </div>
 
                   <div className="px-1">
-                    <div className="text-xs text-slate-600 mb-2 font-bold uppercase tracking-widest flex items-center gap-1.5">
+                    <div className="ds-command__group-title mb-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest">
                       <Palette className="w-3.5 h-3.5" /> カラーを選択
                     </div>
-                    <div className="flex flex-wrap gap-2.5 rounded-xl border border-slate-200 bg-slate-50/70 p-2">
+                    <div className="ds-tag-input__swatches flex flex-wrap gap-2.5 p-2">
                       {availableColors.map((colorKey) => (
                         <button
                           type="button"
@@ -228,7 +228,7 @@ export const TagInput = ({
 
             <CommandGroup
               heading={
-                <span className="text-[10px] font-bold text-[var(--surface-placeholder-text)] uppercase tracking-widest px-2">
+                <span className="ds-command__group-title px-2 text-[10px] font-bold uppercase tracking-widest">
                   既存のタグ
                 </span>
               }
@@ -251,10 +251,8 @@ export const TagInput = ({
                       value={tag}
                       onSelect={() => handleSelect(tag)}
                       className={cn(
-                        "flex items-center justify-between px-2 py-1.5 rounded-xl cursor-pointer transition-all border border-transparent",
-                        isSelected
-                          ? "bg-primary-50/30 border-primary-100/50"
-                          : "hover:bg-slate-50",
+                        "flex items-center justify-between",
+                        isSelected ? "ds-command__item--selected" : "",
                       )}
                     >
                       <TagBadge
@@ -264,7 +262,7 @@ export const TagInput = ({
                         className="max-w-[220px]"
                       />
                       {isSelected && (
-                        <Check className="w-3.5 h-3.5 text-primary-700" />
+                        <Check className="w-3.5 h-3.5 text-[var(--ds-semantic-color-action-primary)]" />
                       )}
                     </CommandItem>
                   );

@@ -105,10 +105,10 @@ const RATING_LABELS: Record<ReviewLog["rating"], string> = {
 };
 
 const RATING_TONE_CLASS: Record<ReviewLog["rating"], string> = {
-  1: "bg-red-50 text-[#c2410c]",
-  2: "bg-amber-50 text-[#b45309]",
-  3: "bg-sky-50 text-[#0369a1]",
-  4: "bg-emerald-50 text-[#047857]",
+  1: "ds-status-tone--danger",
+  2: "ds-status-tone--warning",
+  3: "ds-status-tone--info",
+  4: "ds-status-tone--success",
 };
 
 const RATING_FACE_DESIGN: Record<
@@ -116,7 +116,7 @@ const RATING_FACE_DESIGN: Record<
   { iconWrap: string; svg: ReactElement }
 > = {
   1: {
-    iconWrap: "bg-red-50 text-[#FF5A65] face-badge-convex",
+    iconWrap: "ds-status-tone--danger ds-rating-tile__icon",
     svg: (
       <>
         <circle cx="12" cy="12" r="10" stroke="none" />
@@ -127,7 +127,7 @@ const RATING_FACE_DESIGN: Record<
     ),
   },
   2: {
-    iconWrap: "bg-amber-50 text-[#F9A825] face-badge-convex",
+    iconWrap: "ds-status-tone--warning ds-rating-tile__icon",
     svg: (
       <>
         <line x1="8" y1="15" x2="16" y2="15" />
@@ -137,7 +137,7 @@ const RATING_FACE_DESIGN: Record<
     ),
   },
   3: {
-    iconWrap: "bg-blue-50 text-[#00A3FF] face-badge-convex",
+    iconWrap: "ds-status-tone--info ds-rating-tile__icon",
     svg: (
       <>
         <path d="M8 14s1.5 2 4 2 4-2 4-2" />
@@ -147,7 +147,7 @@ const RATING_FACE_DESIGN: Record<
     ),
   },
   4: {
-    iconWrap: "bg-emerald-50 text-[#00B67A] face-badge-convex",
+    iconWrap: "ds-status-tone--success ds-rating-tile__icon",
     svg: (
       <>
         <path d="M8 13s1.5 3 4 3 4-3 4-3" />
@@ -315,7 +315,7 @@ const getRatingLabel = (rating: MetaRating) => {
 };
 
 const getRatingToneClass = (rating: MetaRating) => {
-  if (rating === null) return "bg-slate-100 text-slate-500";
+  if (rating === null) return "ds-status-tone--neutral";
   return RATING_TONE_CLASS[rating];
 };
 
@@ -385,21 +385,21 @@ const areCardMetaCardsEqual = (
   if (cardMetaLastSubjectiveScore(prev) !== cardMetaLastSubjectiveScore(next))
     return false;
 
-  const prevLegacy = prev as Record<string, unknown>;
-  const nextLegacy = next as Record<string, unknown>;
+  const prevLegacy = asRecord(prev);
+  const nextLegacy = asRecord(next);
   const prevNextReviewDate = cardMetaDateTimeMs(
-    prev.nextReviewDate ?? prevLegacy.next_review_date,
+    prev.nextReviewDate ?? prevLegacy?.next_review_date,
   );
   const nextNextReviewDate = cardMetaDateTimeMs(
-    next.nextReviewDate ?? nextLegacy.next_review_date,
+    next.nextReviewDate ?? nextLegacy?.next_review_date,
   );
   if (prevNextReviewDate !== nextNextReviewDate) return false;
 
   const prevLastReviewAt = cardMetaDateTimeMs(
-    prev.lastReviewAt ?? prevLegacy.last_review_at,
+    prev.lastReviewAt ?? prevLegacy?.last_review_at,
   );
   const nextLastReviewAt = cardMetaDateTimeMs(
-    next.lastReviewAt ?? nextLegacy.last_review_at,
+    next.lastReviewAt ?? nextLegacy?.last_review_at,
   );
   if (prevLastReviewAt !== nextLastReviewAt) return false;
 
@@ -466,7 +466,8 @@ const CardMetaPanelInner = ({
   };
   const [period, setPeriod] = useState<Period>("30d");
   const [titleInput, setTitleInput] = useState(card?.title ?? "");
-  const draftFlag = Boolean(card?.isDraft ?? (card as unknown)?.is_draft);
+  const legacyCard = asRecord(card);
+  const draftFlag = Boolean(card?.isDraft ?? legacyCard?.is_draft);
   const [draftChecked, setDraftChecked] = useState(draftFlag);
   const [isSavingPendingReview, setIsSavingPendingReview] = useState(false);
   const [pendingReviewTimestamp, setPendingReviewTimestamp] = useState<
@@ -503,7 +504,7 @@ const CardMetaPanelInner = ({
 
   // reviewCount は snake_case で入ってくるケースがあるので両対応しておく（UI側は事故らないのが正義）
   const rawReviewCount = (card?.reviewCount ??
-    (card as unknown)?.review_count ??
+    legacyCard?.review_count ??
     0) as unknown;
   const normalizedReviewCount = Number.isFinite(Number(rawReviewCount))
     ? Math.max(0, Math.trunc(Number(rawReviewCount)))
@@ -568,12 +569,9 @@ const CardMetaPanelInner = ({
 
   const derivedResistanceScore = useMemo(() => {
     if (!card) return null;
-    const next = toValidDate(
-      card.nextReviewDate ?? (card as unknown).next_review_date,
-    );
-    const last = toValidDate(
-      card.lastReviewAt ?? (card as unknown).last_review_at,
-    );
+    const legacy = asRecord(card);
+    const next = toValidDate(card.nextReviewDate ?? legacy?.next_review_date);
+    const last = toValidDate(card.lastReviewAt ?? legacy?.last_review_at);
     if (!next || !last) return null;
     const intervalDays = Math.max(
       0,
@@ -603,7 +601,7 @@ const CardMetaPanelInner = ({
     if (normalized.length === 0) return normalized;
 
     const lastReviewAt = toValidDate(
-      card?.lastReviewAt ?? (card as unknown)?.last_review_at,
+      card?.lastReviewAt ?? asRecord(card)?.last_review_at,
     );
     if (!lastReviewAt || derivedResistanceScore === null) return normalized;
 
@@ -644,12 +642,12 @@ const CardMetaPanelInner = ({
     if (normalizedReviewCount <= 0) return [];
 
     const lastReviewAt = toValidDate(
-      card.lastReviewAt ?? (card as unknown).last_review_at,
+      card.lastReviewAt ?? asRecord(card)?.last_review_at,
     );
     if (!lastReviewAt) return [];
 
     const rawLastSubjectiveScore = toFiniteNumber(
-      card.lastSubjectiveScore ?? (card as unknown).last_subjective_score,
+      card.lastSubjectiveScore ?? asRecord(card)?.last_subjective_score,
     );
     const syntheticRating =
       rawLastSubjectiveScore === null
@@ -1209,7 +1207,11 @@ const CardMetaPanelInner = ({
                     commitTitle(e.currentTarget.value, { flush: true });
                   }
                 }}
+<<<<<<< HEAD
                 className={`w-full ${inlineInputClass}`}
+=======
+                className="ds-input h-[var(--meta-row-px)] w-full px-2 text-[length:var(--surface-placeholder-font-size)] leading-[var(--meta-row-px)] outline-none"
+>>>>>>> 32820bee7da7fee740ea5702917206b96c2986eb
                 placeholder="タイトル"
               />
             </div>
@@ -1221,7 +1223,7 @@ const CardMetaPanelInner = ({
                   if (!card) return;
                   void Promise.resolve(onToggleDraft(next)).catch(() => {
                     setDraftChecked(
-                      Boolean(card?.isDraft ?? (card as unknown)?.is_draft),
+                      Boolean(card?.isDraft ?? asRecord(card)?.is_draft),
                     );
                   });
                 }}
@@ -1233,7 +1235,11 @@ const CardMetaPanelInner = ({
             </div>
             <section>
               <div className={`${actionRowClass} justify-between`}>
+<<<<<<< HEAD
                 <h3 className={sectionTitleClass}>
+=======
+                <h3 className="ds-editor-pane__section-title h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] font-semibold tracking-wide uppercase">
+>>>>>>> 32820bee7da7fee740ea5702917206b96c2986eb
                   タグ管理
                 </h3>
                 <SurfaceButton
@@ -1246,7 +1252,11 @@ const CardMetaPanelInner = ({
                   設定で管理
                 </SurfaceButton>
               </div>
+<<<<<<< HEAD
               <div className="ds-editor-pane__surface mt-2 px-2 py-1">
+=======
+              <div className="ds-editor-pane__surface ds-editor-pane__surface--muted mt-2 px-2 py-1">
+>>>>>>> 32820bee7da7fee740ea5702917206b96c2986eb
                 <TagInput
                   tags={tags}
                   onChange={(nextTags) => {
@@ -1265,28 +1275,24 @@ const CardMetaPanelInner = ({
           <div className="space-y-0">
             <p className={infoRowClass}>
               作成日:{" "}
-              {formatDateLabel(
-                card?.createdAt ?? (card as unknown)?.created_at,
-              )}
+              {formatDateLabel(card?.createdAt ?? asRecord(card)?.created_at)}
             </p>
             <p className={infoRowClass}>
               更新日:{" "}
-              {formatDateLabel(
-                card?.updatedAt ?? (card as unknown)?.updated_at,
-              )}
+              {formatDateLabel(card?.updatedAt ?? asRecord(card)?.updated_at)}
             </p>
             <p className={infoRowClass}>
               最終復習日:{" "}
               {latestReview
                 ? formatDateLabel(latestReview.reviewedAt)
                 : formatDateLabel(
-                    card?.lastReviewAt ?? (card as unknown)?.last_review_at,
+                    card?.lastReviewAt ?? asRecord(card)?.last_review_at,
                   )}
             </p>
             <p className={infoRowClass}>
               次回復習日 ({nextReviewAttempt}回目):{" "}
               {formatDateLabel(
-                card?.nextReviewDate ?? (card as unknown)?.next_review_date,
+                card?.nextReviewDate ?? asRecord(card)?.next_review_date,
               )}
             </p>
           </div>
@@ -1310,8 +1316,13 @@ const CardMetaPanelInner = ({
       {!isCalendarMode && (
         <section>
           {currentResistanceScore !== null && (
+<<<<<<< HEAD
             <div className="ds-editor-pane__surface ds-editor-pane__surface--muted mb-3 flex min-h-[var(--meta-action-min-h)] items-center justify-between px-2">
               <span className={`${mutedTextClass} text-[length:var(--meta-font-size)] font-medium leading-[var(--meta-row-px)]`}>
+=======
+            <div className="ds-editor-pane__stats mb-3 flex min-h-[var(--meta-action-min-h)] items-center justify-between px-2">
+              <span className="text-[length:var(--meta-font-size)] font-medium leading-[var(--meta-row-px)] text-[var(--sidebar-text-muted)]">
+>>>>>>> 32820bee7da7fee740ea5702917206b96c2986eb
                 現在の耐性スコア
               </span>
               <span className="text-[length:var(--meta-font-size)] font-semibold leading-[var(--meta-row-px)] tabular-nums">
@@ -1320,7 +1331,11 @@ const CardMetaPanelInner = ({
             </div>
           )}
           <div className="flex min-h-[var(--meta-action-min-h)] items-center justify-between">
+<<<<<<< HEAD
             <h3 className={sectionTitleClass}>
+=======
+            <h3 className="ds-editor-pane__section-title h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] font-semibold tracking-wide uppercase">
+>>>>>>> 32820bee7da7fee740ea5702917206b96c2986eb
               耐性スコア推移
             </h3>
             <div className="ds-editor-pane__toolbar flex p-0.5 text-[length:var(--meta-font-size)]">
@@ -1355,7 +1370,7 @@ const CardMetaPanelInner = ({
                   margin={{ top: 8, right: 10, left: 2, bottom: 4 }}
                 >
                   <CartesianGrid
-                    stroke="rgba(100,116,139,0.2)"
+                    stroke="color-mix(in srgb, var(--ds-semantic-color-text-secondary) 24%, transparent)"
                     strokeDasharray="3 5"
                     vertical={false}
                   />
@@ -1363,8 +1378,12 @@ const CardMetaPanelInner = ({
                     dataKey="reviewIndex"
                     ticks={xTicks}
                     tick={{ fontSize: 10, fill: "var(--sidebar-text-muted)" }}
-                    tickLine={{ stroke: "rgba(100,116,139,0.4)" }}
-                    axisLine={{ stroke: "rgba(100,116,139,0.4)" }}
+                    tickLine={{
+                      stroke: "var(--ds-semantic-color-border-default)",
+                    }}
+                    axisLine={{
+                      stroke: "var(--ds-semantic-color-border-default)",
+                    }}
                     minTickGap={12}
                   />
                   <YAxis
@@ -1373,17 +1392,25 @@ const CardMetaPanelInner = ({
                     allowDecimals={false}
                     width={36}
                     tick={{ fontSize: 10, fill: "var(--sidebar-text-muted)" }}
-                    tickLine={{ stroke: "rgba(100,116,139,0.4)" }}
-                    axisLine={{ stroke: "rgba(100,116,139,0.4)" }}
+                    tickLine={{
+                      stroke: "var(--ds-semantic-color-border-default)",
+                    }}
+                    axisLine={{
+                      stroke: "var(--ds-semantic-color-border-default)",
+                    }}
                   />
                   <Tooltip
-                    cursor={{ stroke: "rgba(15,23,42,0.15)", strokeWidth: 1 }}
+                    cursor={{
+                      stroke: "var(--ds-semantic-color-border-default)",
+                      strokeWidth: 1,
+                    }}
                     formatter={(value) => [`${value}%`, "耐性スコア"]}
                     labelFormatter={(label) => `復習 ${label} 回目`}
                     contentStyle={{
                       borderRadius: 8,
-                      border: "1px solid rgba(100,116,139,0.25)",
-                      boxShadow: "0 6px 20px rgba(15, 23, 42, 0.12)",
+                      border:
+                        "1px solid var(--ds-semantic-color-border-floating)",
+                      boxShadow: "var(--ds-semantic-elevation-floating)",
                     }}
                   />
                   <Line
@@ -1409,7 +1436,11 @@ const CardMetaPanelInner = ({
       {!isCalendarMode && (
         <section>
           <div className="flex min-h-[var(--meta-action-min-h)] items-center justify-between">
+<<<<<<< HEAD
             <h3 className={sectionTitleClass}>
+=======
+            <h3 className="ds-editor-pane__section-title h-[var(--meta-row-px)] text-[length:var(--meta-font-size)] leading-[var(--meta-row-px)] font-semibold tracking-wide uppercase">
+>>>>>>> 32820bee7da7fee740ea5702917206b96c2986eb
               学習記録
             </h3>
             <div className="flex items-center gap-2">
@@ -1437,7 +1468,11 @@ const CardMetaPanelInner = ({
             </p>
           )}
           {latestReviewError && (
+<<<<<<< HEAD
             <div className="ds-editor-pane__error mt-2 px-2 py-1 text-[11px]">
+=======
+            <div className="ds-status-tone--danger mt-2 rounded border px-2 py-1 text-[11px] [border-color:var(--ds-semantic-color-status-danger)]">
+>>>>>>> 32820bee7da7fee740ea5702917206b96c2986eb
               {latestReviewError}
             </div>
           )}
@@ -1482,7 +1517,11 @@ const CardMetaPanelInner = ({
                               setLatestReviewDateInput(e.target.value)
                             }
                             disabled={isMutatingLatestReview}
+<<<<<<< HEAD
                             className="ds-editor-pane__inline-input h-7 w-full min-w-[11rem] px-1.5 text-[11px]"
+=======
+                            className="ds-input h-7 w-full min-w-[11rem] px-1.5 text-[11px] outline-none"
+>>>>>>> 32820bee7da7fee740ea5702917206b96c2986eb
                           />
                         ) : (
                           row.reviewedAtLabel
@@ -1498,7 +1537,11 @@ const CardMetaPanelInner = ({
                                   <button
                                     key={rating}
                                     type="button"
+<<<<<<< HEAD
                                     className="ds-editor-pane__rating-button relative z-0 flex h-7 w-7 items-center justify-center disabled:cursor-wait disabled:opacity-50"
+=======
+                                    className="ds-surface-button ds-surface-button--concave relative z-0 flex h-7 w-7 items-center justify-center disabled:cursor-wait disabled:opacity-50"
+>>>>>>> 32820bee7da7fee740ea5702917206b96c2986eb
                                     onClick={() =>
                                       handleSelectReviewRating(rating)
                                     }
@@ -1548,9 +1591,15 @@ const CardMetaPanelInner = ({
                                     <button
                                       key={rating}
                                       type="button"
+<<<<<<< HEAD
                                       className={`ds-editor-pane__rating-button relative z-0 flex h-7 w-7 items-center justify-center disabled:cursor-wait disabled:opacity-50 ${
                                         isSelected
                                           ? "ds-editor-pane__rating-button--selected"
+=======
+                                      className={`ds-surface-button ds-surface-button--concave relative z-0 flex h-7 w-7 items-center justify-center disabled:cursor-wait disabled:opacity-50 ${
+                                        isSelected
+                                          ? "ds-surface-button--active ring-1 ring-[color:var(--ds-semantic-color-border-strong)]"
+>>>>>>> 32820bee7da7fee740ea5702917206b96c2986eb
                                           : ""
                                       }`}
                                       onClick={() =>
@@ -1625,7 +1674,11 @@ const CardMetaPanelInner = ({
                               }
                               onFocus={(e) => e.currentTarget.select()}
                               disabled={isSavingPendingReview}
+<<<<<<< HEAD
                               className={`${compactInlineInputClass} ds-editor-pane__duration-input tabular-nums`}
+=======
+                              className="ds-input h-7 px-1 text-[11px] tabular-nums outline-none"
+>>>>>>> 32820bee7da7fee740ea5702917206b96c2986eb
                               style={{
                                 width: getDurationInputWidthCh(
                                   pendingReviewDurationInput,
@@ -1651,7 +1704,11 @@ const CardMetaPanelInner = ({
                               }
                               onFocus={(e) => e.currentTarget.select()}
                               disabled={isMutatingLatestReview}
+<<<<<<< HEAD
                               className={`${compactInlineInputClass} ds-editor-pane__duration-input tabular-nums`}
+=======
+                              className="ds-input h-7 px-1 text-[11px] tabular-nums outline-none"
+>>>>>>> 32820bee7da7fee740ea5702917206b96c2986eb
                               style={{
                                 width: getDurationInputWidthCh(
                                   latestReviewDurationInput,
@@ -1716,7 +1773,11 @@ const CardMetaPanelInner = ({
                                 isMutatingLatestReview ||
                                 durationSavingIndex === row.editableLogIndex
                               }
+<<<<<<< HEAD
                               className={`${compactInlineInputClass} ds-editor-pane__duration-input tabular-nums`}
+=======
+                              className="ds-input h-7 px-1 text-[11px] tabular-nums outline-none"
+>>>>>>> 32820bee7da7fee740ea5702917206b96c2986eb
                               style={{
                                 width: getDurationInputWidthCh(
                                   durationDrafts[row.editableLogIndex] ??
@@ -1746,8 +1807,13 @@ const CardMetaPanelInner = ({
             )}
           </div>
           {canManageLatestReview && latestEditableReview && (
+<<<<<<< HEAD
             <div className="ds-editor-pane__review-strip mt-2 flex flex-wrap items-center justify-between gap-2 px-3 py-2">
               <p className={`text-[11px] leading-5 ${mutedTextClass}`}>
+=======
+            <div className="ds-editor-pane__toolbar mt-2 flex flex-wrap items-center justify-between gap-2 px-3 py-2">
+              <p className="text-[11px] leading-5 text-[var(--sidebar-text-muted)]">
+>>>>>>> 32820bee7da7fee740ea5702917206b96c2986eb
                 {isEditingLatestReview
                   ? "最新記録を編集中"
                   : `最新記録: ${formatDateLabel(latestEditableReview.reviewedAt)} / ${getRatingLabel(latestEditableReview.rating)}`}
@@ -1795,7 +1861,7 @@ const CardMetaPanelInner = ({
                     type="button"
                     surface="concave"
                     size="xs"
-                    className="h-7 px-2 text-red-700"
+                    className="h-7 px-2 text-[var(--ds-semantic-color-status-danger)]"
                     onClick={handleDeleteLatestReview}
                     disabled={
                       Boolean(pendingReviewTimestamp) ||

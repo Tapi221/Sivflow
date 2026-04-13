@@ -25,19 +25,14 @@ import { XlsxImportDialog } from "@/features/import/presentation/web/XlsxImportD
 import type { CardSet } from "@/types";
 
 const {
-  parseXlsxImportMock,
-  importCardsFromPayloadMock,
+  loadXlsxImportFileMock,
+  executeXlsxImportMock,
   downloadXlsxImportTemplateMock,
-  buildImportCardSetNameMock,
   toastMock,
 } = vi.hoisted(() => ({
-  parseXlsxImportMock: vi.fn(),
-  importCardsFromPayloadMock: vi.fn(),
+  loadXlsxImportFileMock: vi.fn(),
+  executeXlsxImportMock: vi.fn(),
   downloadXlsxImportTemplateMock: vi.fn(),
-  buildImportCardSetNameMock: vi.fn((fileName: string) => {
-    const baseName = fileName.replace(/\.xlsx$/i, "").trim();
-    return baseName ? `${baseName} imported` : "一括インポート imported";
-  }),
   toastMock: {
     toasts: [],
     addToast: vi.fn(),
@@ -122,17 +117,13 @@ vi.mock("@/contexts/ToastContext", () => ({
   useToast: () => toastMock,
 }));
 
-vi.mock("@/features/import/infra/web/parseXlsxImport", () => ({
-  parseXlsxImport: parseXlsxImportMock,
-}));
-
 vi.mock("@/features/import/xlsx/downloadXlsxImportTemplate", () => ({
   downloadXlsxImportTemplate: downloadXlsxImportTemplateMock,
 }));
 
-vi.mock("@/features/import/application/importCards", () => ({
-  buildImportCardSetName: buildImportCardSetNameMock,
-  importCardsFromPayload: importCardsFromPayloadMock,
+vi.mock("@/features/import/application/xlsxImportUseCases", () => ({
+  loadXlsxImportFile: loadXlsxImportFileMock,
+  executeXlsxImport: executeXlsxImportMock,
 }));
 
 afterEach(() => {
@@ -260,20 +251,22 @@ const renderDialog = (overrides?: {
 describe("XlsxImportDialog", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-
-    buildImportCardSetNameMock.mockImplementation((fileName: string) => {
-      const baseName = fileName.replace(/\.xlsx$/i, "").trim();
-      return baseName ? `${baseName} imported` : "一括インポート imported";
-    });
   });
 
   it("有効なXLSXを読み込むとプレビュー表示後に新規カードセットとしてインポートできる", async () => {
-    parseXlsxImportMock.mockResolvedValue(validParseResult);
-    importCardsFromPayloadMock.mockResolvedValue({
+    loadXlsxImportFileMock.mockImplementation(async (file: File) => ({
+      file,
+      result: validParseResult,
+      suggestedCardSetName: "bulk-import imported",
+    }));
+    executeXlsxImportMock.mockResolvedValue({
+      ok: true,
+      value: {
       createdCardSetId: "set-created",
       createdCardSetName: "bulk-import imported",
       folderId: "folder-001",
       createdCount: 2,
+      },
     });
 
     const onImported = vi.fn();
@@ -296,20 +289,16 @@ describe("XlsxImportDialog", () => {
     await user.click(importButton);
 
     await waitFor(() => {
-      expect(importCardsFromPayloadMock).toHaveBeenCalledTimes(1);
+      expect(executeXlsxImportMock).toHaveBeenCalledTimes(1);
     });
 
-    expect(buildImportCardSetNameMock).toHaveBeenCalledWith("bulk-import.xlsx");
-
-    expect(importCardsFromPayloadMock).toHaveBeenCalledWith(
+    expect(executeXlsxImportMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        payload: validPayload,
         folderId: "folder-001",
-        fileName: "bulk-import.xlsx",
-        destination: {
-          kind: "new-card-set",
-          cardSetName: "bulk-import imported",
-        },
+        file: expect.objectContaining({ name: "bulk-import.xlsx" }),
+        result: validParseResult,
+        destinationMode: "new",
+        newCardSetName: "bulk-import imported",
       }),
     );
 
@@ -326,7 +315,11 @@ describe("XlsxImportDialog", () => {
   });
 
   it("blocking error があると issue を表示し、インポートボタンを無効化する", async () => {
-    parseXlsxImportMock.mockResolvedValue(blockingParseResult);
+    loadXlsxImportFileMock.mockImplementation(async (file: File) => ({
+      file,
+      result: blockingParseResult,
+      suggestedCardSetName: "invalid imported",
+    }));
     const { container } = renderDialog();
 
     await uploadFile(container, createSpreadsheetFile("invalid.xlsx"));
@@ -338,16 +331,23 @@ describe("XlsxImportDialog", () => {
     }) as HTMLButtonElement;
 
     expect(importButton.disabled).toBe(true);
-    expect(importCardsFromPayloadMock).not.toHaveBeenCalled();
+    expect(executeXlsxImportMock).not.toHaveBeenCalled();
   });
 
   it("既存カードセット追加モードでは existing-card-set 宛先でインポートする", async () => {
-    parseXlsxImportMock.mockResolvedValue(validParseResult);
-    importCardsFromPayloadMock.mockResolvedValue({
+    loadXlsxImportFileMock.mockImplementation(async (file: File) => ({
+      file,
+      result: validParseResult,
+      suggestedCardSetName: "existing-target imported",
+    }));
+    executeXlsxImportMock.mockResolvedValue({
+      ok: true,
+      value: {
       createdCardSetId: "set-existing",
       createdCardSetName: "既存セット",
       folderId: "folder-001",
       createdCount: 2,
+      },
     });
 
     const cardSets: CardSet[] = [
@@ -396,19 +396,20 @@ describe("XlsxImportDialog", () => {
     await user.click(importButton);
 
     await waitFor(() => {
-      expect(importCardsFromPayloadMock).toHaveBeenCalledTimes(1);
+      expect(executeXlsxImportMock).toHaveBeenCalledTimes(1);
     });
 
-    expect(importCardsFromPayloadMock).toHaveBeenCalledWith(
+    expect(executeXlsxImportMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        payload: validPayload,
         folderId: "folder-001",
-        fileName: "existing-target.xlsx",
-        destination: {
-          kind: "existing-card-set",
-          cardSetId: "set-existing",
-          cardSetName: "既存セット",
-        },
+        file: expect.objectContaining({ name: "existing-target.xlsx" }),
+        result: validParseResult,
+        destinationMode: "existing",
+        newCardSetName: "existing-target imported",
+        selectedExistingCardSet: expect.objectContaining({
+          id: "set-existing",
+          name: "既存セット",
+        }),
       }),
     );
   });
@@ -425,7 +426,15 @@ describe("XlsxImportDialog", () => {
   });
 
   it("folderId が無いときはインポートせずエラートーストを出す", async () => {
-    parseXlsxImportMock.mockResolvedValue(validParseResult);
+    loadXlsxImportFileMock.mockImplementation(async (file: File) => ({
+      file,
+      result: validParseResult,
+      suggestedCardSetName: "no-folder imported",
+    }));
+    executeXlsxImportMock.mockResolvedValue({
+      ok: false,
+      errorMessage: "インポート先フォルダが選択されていません。",
+    });
 
     const { container } = renderDialog({ folderId: null });
 
@@ -439,25 +448,29 @@ describe("XlsxImportDialog", () => {
     const user = userEvent.setup();
     await user.click(importButton);
 
-    expect(importCardsFromPayloadMock).not.toHaveBeenCalled();
+    expect(executeXlsxImportMock).toHaveBeenCalledTimes(1);
     expect(toastMock.error).toHaveBeenCalledWith(
       "インポート先フォルダが選択されていません。",
     );
   });
 
   it("issues 一覧にエラー内容を表示する", async () => {
-    parseXlsxImportMock.mockResolvedValue({
-      payload: null,
-      issues: [
-        {
-          level: "error",
-          code: "missing_required_header",
-          sheetName: "blocks",
-          columnKey: "blockOrder",
-          message: '必須ヘッダー "blockOrder" が見つかりません。',
-        },
-      ],
-    } satisfies ImportParseResult);
+    loadXlsxImportFileMock.mockImplementation(async (file: File) => ({
+      file,
+      result: {
+        payload: null,
+        issues: [
+          {
+            level: "error",
+            code: "missing_required_header",
+            sheetName: "blocks",
+            columnKey: "blockOrder",
+            message: '必須ヘッダー "blockOrder" が見つかりません。',
+          },
+        ],
+      } satisfies ImportParseResult,
+      suggestedCardSetName: "missing-header imported",
+    }));
 
     const { container } = renderDialog();
 

@@ -6,7 +6,10 @@ import {
   subscribeLocalDBRuntimeStatus,
 } from "@/services/localDB";
 import { snapshotService } from "@/services/SnapshotService";
+import { toAssetRecordFromSnapshotAsset } from "@/application/snapshot/snapshotAssetManifest";
 import type { AppSnapshot, SnapshotComparison } from "@/types/domain/snapshot";
+import type { Card, Folder } from "@/types";
+import type { CardSet } from "@/types/domain/cardSet";
 import {
   Dialog,
   DialogContent,
@@ -30,6 +33,24 @@ interface ImportDialogProps {
 type ImportStep = "select" | "preview" | "confirm" | "processing" | "complete";
 type ImportAction = "replace" | "keep" | "cancel";
 
+const normalizeImportedCard = (card: Card, userId: string): Card => ({
+  ...card,
+  userId,
+});
+
+const normalizeImportedFolder = (folder: Folder, userId: string): Folder => ({
+  ...folder,
+  userId,
+});
+
+const normalizeImportedCardSet = (
+  cardSet: CardSet,
+  userId: string,
+): CardSet => ({
+  ...cardSet,
+  userId,
+});
+
 const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
   const { currentUser } = useAuthSession();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -45,7 +66,10 @@ const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
   const [runtimeStatus, setRuntimeStatus] = useState(getLocalDBRuntimeStatus());
 
   useEffect(() => {
-    return subscribeLocalDBRuntimeStatus(setRuntimeStatus);
+    const unsubscribe = subscribeLocalDBRuntimeStatus(setRuntimeStatus);
+    return () => {
+      void unsubscribe();
+    };
   }, []);
 
   const isFallbackMode = runtimeStatus.mode === "fallback";
@@ -81,7 +105,9 @@ const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
 
       setStep("preview");
     } catch (err: unknown) {
-      setError(err.message || "ファイルの読み込みに失敗しました");
+      const message =
+        err instanceof Error ? err.message : "ファイルの読み込みに失敗しました";
+      setError(message);
     }
   };
 
@@ -109,17 +135,53 @@ const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
     try {
       // 全データをクリアして新しいデータをインポート
       // 注意: これは危険な操作なので、事前にバックアップを推奨
-      const db = await getLocalDb();
+      const db = await getLocalDb(currentUser.uid);
+      const imagesTable = db.table("images");
+      const cardSetsTable = db.table("cardSets");
+      const cardsTable = db.table("cards");
+      const foldersTable = db.table("folders");
+      const normalizedCards = parsedSnapshot.data.cards.map((card) =>
+        normalizeImportedCard(card, currentUser.uid),
+      );
+      const normalizedCardSets = parsedSnapshot.data.cardSets.map((cardSet) =>
+        normalizeImportedCardSet(cardSet, currentUser.uid),
+      );
+      const normalizedFolders = parsedSnapshot.data.folders.map((folder) =>
+        normalizeImportedFolder(folder, currentUser.uid),
+      );
+      const assetRows = parsedSnapshot.data.assets.map((asset) =>
+        toAssetRecordFromSnapshotAsset(asset, currentUser.uid),
+      );
 
-      // カードをインポート
-      for (const card of parsedSnapshot.data.cards) {
-        await db.table("cards").put(card);
-      }
+      await db.transaction(
+        "rw",
+        imagesTable,
+        cardSetsTable,
+        cardsTable,
+        foldersTable,
+        async () => {
+          await imagesTable.clear();
+          await cardSetsTable.clear();
+          await cardsTable.clear();
+          await foldersTable.clear();
 
-      // フォルダをインポート
-      for (const folder of parsedSnapshot.data.folders) {
-        await db.table("folders").put(folder);
-      }
+          if (assetRows.length > 0) {
+            await imagesTable.bulkPut(assetRows);
+          }
+
+          if (normalizedCardSets.length > 0) {
+            await cardSetsTable.bulkPut(normalizedCardSets);
+          }
+
+          if (normalizedFolders.length > 0) {
+            await foldersTable.bulkPut(normalizedFolders);
+          }
+
+          if (normalizedCards.length > 0) {
+            await cardsTable.bulkPut(normalizedCards);
+          }
+        },
+      );
 
       setStep("complete");
 
@@ -129,7 +191,9 @@ const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
         window.location.reload(); // データを反映するためにリロード
       }, 2000);
     } catch (err: unknown) {
-      setError(err.message || "インポートに失敗しました");
+      const message =
+        err instanceof Error ? err.message : "インポートに失敗しました";
+      setError(message);
       setStep("preview");
     }
   };
@@ -215,11 +279,14 @@ const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
                   <p className="text-xs text-blue-600 font-medium">
                     インポートファイル
                   </p>
-                  <p className="text-sm">
+                  <p className="text-sm leading-6">
                     カード: {parsedSnapshot.data.cards.length}枚 / フォルダ:{" "}
-                    {parsedSnapshot.data.folders.length}件
+                    {parsedSnapshot.data.folders.length}件 / カードセット:{" "}
+                    {parsedSnapshot.data.cardSets.length}件
+                    <br />
+                    画像アセット: {parsedSnapshot.data.assets.length}件
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-500 leading-5">
                     世代: {comparison.importedGeneration}
                   </p>
                 </div>
@@ -245,6 +312,26 @@ const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
                   現在のデータの方が新しいです
                 </div>
               )}
+
+              {(comparison.diff.assetsAdded > 0 ||
+                comparison.diff.assetsRemoved > 0) && (
+                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
+                  画像差分: +{comparison.diff.assetsAdded} / -
+                  {comparison.diff.assetsRemoved}
+                </div>
+              )}
+
+              {(comparison.diff.cardSetsAdded > 0 ||
+                comparison.diff.cardSetsRemoved > 0) && (
+                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
+                  カードセット差分: +{comparison.diff.cardSetsAdded} / -
+                  {comparison.diff.cardSetsRemoved}
+                </div>
+              )}
+
+              <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg text-xs text-gray-600">
+                replace は cards / cardSets / folders / images を全置換します
+              </div>
             </div>
 
             {/* アクション選択 */}

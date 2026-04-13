@@ -7,10 +7,12 @@ import {
 import type { GenerationCounterStorePort } from "@/application/ports/GenerationCounterStorePort";
 import type {
   AppSnapshot,
+  SnapshotAsset,
   SnapshotData,
   SnapshotMetadata,
 } from "@/types/domain/snapshot";
 import { APP_VERSION, CURRENT_SCHEMA_VERSION } from "@/types/domain/snapshot";
+import { toSnapshotAsset } from "./snapshotAssetManifest";
 
 export interface CreateSnapshotDependencies {
   generationCounterStore: GenerationCounterStorePort;
@@ -40,9 +42,15 @@ export const createCreateSnapshotUseCase = ({
     const db = await getLocalDb(userId);
     const allCards = await db.getAllCards();
     const allFolders = await db.getAllFolders();
+    const allCardSets = await db.listCardSetsByUser(userId);
+    const imageRows = await db.images.toArray();
 
     const cards = allCards.map(normalizeCard);
+    const cardSets = allCardSets;
     const folders = allFolders.map(normalizeFolder);
+    const assets = imageRows
+      .map(toSnapshotAsset)
+      .filter((asset): asset is SnapshotAsset => asset !== null);
 
     const metadata: SnapshotMetadata = {
       schemaVersion: CURRENT_SCHEMA_VERSION,
@@ -57,8 +65,10 @@ export const createCreateSnapshotUseCase = ({
 
     const data: SnapshotData = {
       cards,
+      cardSets,
       folders,
       reviews: [],
+      assets,
       settings: null,
     };
 

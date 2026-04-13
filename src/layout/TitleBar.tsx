@@ -4,6 +4,7 @@ import {
   mergeTitleBarBreadcrumbs,
 } from "@/features/breadcrumbs/builders";
 import { cn } from "@/lib/utils";
+import platform from "@/platform";
 import { isDesktopRuntime } from "@/platform/runtime";
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -30,16 +31,14 @@ export const TitleBar: React.FC = () => {
   useEffect(() => {
     if (!isDesktop) return;
 
-    window.desktop?.window.isMaximized().then(setIsMaximized);
+    void platform.window.isMaximized().then(setIsMaximized);
 
-    const cleanup = window.desktop?.window.onMaximizedStateChange(
-      (maximized) => {
-        setIsMaximized(maximized);
-      },
-    );
+    const cleanup = platform.window.onMaximizedStateChange((maximized) => {
+      setIsMaximized(maximized);
+    });
 
     return () => {
-      if (cleanup) cleanup();
+      cleanup();
     };
   }, [isDesktop]);
 
@@ -320,7 +319,7 @@ export const TitleBar: React.FC = () => {
         )}
 
         <button
-          onClick={() => window.desktop?.window.minimize()}
+          onClick={() => void platform.window.minimize()}
           className="flex h-full w-[46px] items-center justify-center transition-colors hover:bg-black/5"
           title="最小化"
           tabIndex={-1}
@@ -342,7 +341,7 @@ export const TitleBar: React.FC = () => {
         </button>
 
         <button
-          onClick={() => window.desktop?.window.maximizeToggle()}
+          onClick={() => void platform.window.maximizeToggle()}
           className="flex h-full w-[46px] items-center justify-center transition-colors hover:bg-black/5"
           title={isMaximized ? "元に戻す" : "最大化"}
           tabIndex={-1}
@@ -379,7 +378,7 @@ export const TitleBar: React.FC = () => {
         </button>
 
         <button
-          onClick={() => window.desktop?.window.close()}
+          onClick={() => void platform.window.close()}
           className="flex h-full w-[46px] items-center justify-center transition-colors hover:bg-[#E81123] hover:text-white"
           title="閉じる"
           tabIndex={-1}

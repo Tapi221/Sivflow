@@ -9,7 +9,11 @@ const Table = React.forwardRef<
   <div className="relative w-full overflow-auto">
     <table
       ref={ref}
+<<<<<<< HEAD
       className={cn("ds-table w-full caption-bottom text-sm", className)}
+=======
+      className={cn("ds-table caption-bottom text-sm", className)}
+>>>>>>> 32820bee7da7fee740ea5702917206b96c2986eb
       {...props}
     />
   </div>
@@ -46,10 +50,14 @@ const TableFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <tfoot
     ref={ref}
+<<<<<<< HEAD
     className={cn(
       "ds-table__footer font-medium [&>tr]:last:border-b-0",
       className,
     )}
+=======
+    className={cn("border-t font-medium [&>tr]:last:border-b-0", className)}
+>>>>>>> 32820bee7da7fee740ea5702917206b96c2986eb
     {...props}
   />
 ));
@@ -61,10 +69,14 @@ const TableRow = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <tr
     ref={ref}
+<<<<<<< HEAD
     className={cn(
       "ds-table__row transition-colors",
       className,
     )}
+=======
+    className={cn("ds-table__row border-b", className)}
+>>>>>>> 32820bee7da7fee740ea5702917206b96c2986eb
     {...props}
   />
 ));
@@ -106,7 +118,14 @@ const TableCaption = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <caption
     ref={ref}
+<<<<<<< HEAD
     className={cn("ds-table__caption mt-4 text-sm", className)}
+=======
+    className={cn(
+      "mt-4 text-sm text-[var(--ds-semantic-color-text-secondary)]",
+      className,
+    )}
+>>>>>>> 32820bee7da7fee740ea5702917206b96c2986eb
     {...props}
   />
 ));
