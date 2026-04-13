@@ -192,9 +192,12 @@ if ("serviceWorker" in navigator && import.meta.env.PROD) {
 
         installUpdateFlow(registration);
         void registration.update();
-        window.setInterval(() => {
-          void registration.update();
-        }, 1000 * 60 * 60);
+        window.setInterval(
+          () => {
+            void registration.update();
+          },
+          1000 * 60 * 60,
+        );
       })
       .catch((registrationError) => {
         console.log("SW registration failed: ", registrationError);

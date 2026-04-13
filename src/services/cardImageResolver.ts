@@ -62,7 +62,9 @@ export const resolveCardImageUrl = async (
   }
 
   if (asset?.remoteKey && asset.remoteStatus !== "failed") {
-    const remoteUrl = await getDownloadURL(storageRef(storage, asset.remoteKey));
+    const remoteUrl = await getDownloadURL(
+      storageRef(storage, asset.remoteKey),
+    );
     setCachedRemoteUrl(assetId, remoteUrl);
     void db.images.update(assetId, {
       remoteUrlCache: remoteUrl,
