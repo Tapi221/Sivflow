@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { pdfjsLib } from "@/lib/pdfjs";
 import {
   PDF_PAGE_OBSERVER_ROOT_MARGIN,
   PDF_PAGE_OBSERVER_THRESHOLDS,
@@ -7,7 +8,6 @@ import type {
   PageSize,
   PdfJsDocument,
   PdfJsRenderTask,
-  PdfJsTextItem,
   PdfPageSearchMatch,
 } from "@/components/pdf/pdfViewerTypes";
 import { getErrorMessage } from "@/components/pdf/pdfViewerTypes";
@@ -36,13 +36,18 @@ type RenderState = {
   error: string | null;
 };
 
-type TextLayerState = {
-  pageIdentity: string;
-  items: PdfJsTextItem[];
-  styles: Record<
-    string,
-    { fontFamily?: string; ascent?: number; descent?: number }
-  >;
+type PdfJsTextLayerInstance = {
+  render: () => Promise<void>;
+};
+
+type PdfJsTextLayerCtor = new (args: {
+  container: HTMLDivElement;
+  textContentSource: unknown;
+  viewport: unknown;
+}) => PdfJsTextLayerInstance;
+
+type PdfJsLibWithTextLayer = {
+  TextLayer?: PdfJsTextLayerCtor;
 };
 
 const buildPageIdentity = (pdf: PdfJsDocument, pageNumber: number) =>
@@ -56,65 +61,91 @@ const buildRenderIdentity = (
 ) =>
   `${pageNumber}::${scale}::${opaqueCanvas ? "opaque" : "alpha"}::${String(pdf)}`;
 
-const multiplyTransform = (left: number[], right: number[]) => {
-  const [a1, b1, c1, d1, e1, f1] = left;
-  const [a2, b2, c2, d2, e2, f2] = right;
+const getTextLayerCtor = () => {
+  const ctor = (pdfjsLib as unknown as PdfJsLibWithTextLayer).TextLayer;
 
-  return [
-    a1 * a2 + c1 * b2,
-    b1 * a2 + d1 * b2,
-    a1 * c2 + c1 * d2,
-    b1 * c2 + d1 * d2,
-    a1 * e2 + c1 * f2 + e1,
-    b1 * e2 + d1 * f2 + f1,
-  ];
+  if (!ctor) {
+    throw new Error("PDF.js TextLayer API が利用できません");
+  }
+
+  return ctor;
 };
 
-const renderTextFragments = ({
-  text,
+const clearElement = (element: HTMLElement | null) => {
+  element?.replaceChildren();
+};
+
+const renderSearchHighlights = ({
+  textLayerEl,
+  overlayEl,
   matches,
   activeSearchMatchIndex,
 }: {
-  text: string;
+  textLayerEl: HTMLDivElement;
+  overlayEl: HTMLDivElement;
   matches: PdfPageSearchMatch[];
   activeSearchMatchIndex: number | undefined;
 }) => {
+  overlayEl.replaceChildren();
+
   if (matches.length === 0) {
-    return text;
+    return;
   }
 
-  const fragments: ReactNode[] = [];
-  let cursor = 0;
+  const explicitTextSpans = Array.from(
+    textLayerEl.querySelectorAll<HTMLSpanElement>("span[role='presentation']"),
+  );
+  const textSpans =
+    explicitTextSpans.length > 0
+      ? explicitTextSpans
+      : Array.from(textLayerEl.querySelectorAll<HTMLSpanElement>("span"));
 
-  matches
-    .slice()
-    .sort((left, right) => left.start - right.start)
-    .forEach((match, index) => {
-      if (match.start > cursor) {
-        fragments.push(text.slice(cursor, match.start));
+  if (textSpans.length === 0) {
+    return;
+  }
+
+  const layerRect = textLayerEl.getBoundingClientRect();
+
+  matches.forEach((match) => {
+    const span = textSpans[match.itemIndex];
+    const textNode = Array.from(span?.childNodes ?? []).find(
+      (node) => node.nodeType === Node.TEXT_NODE,
+    );
+
+    if (!span || !textNode) {
+      return;
+    }
+
+    const text = textNode.textContent ?? "";
+    const start = Math.max(0, Math.min(match.start, text.length));
+    const end = Math.max(start, Math.min(match.end, text.length));
+
+    if (end <= start) {
+      return;
+    }
+
+    const range = document.createRange();
+    range.setStart(textNode, start);
+    range.setEnd(textNode, end);
+
+    Array.from(range.getClientRects()).forEach((rect) => {
+      if (rect.width <= 0 || rect.height <= 0) {
+        return;
       }
 
-      fragments.push(
-        <mark
-          key={`${match.globalIndex}-${index}`}
-          className={
-            match.globalIndex === activeSearchMatchIndex
-              ? "rounded bg-amber-300/90 text-transparent"
-              : "rounded bg-yellow-200/80 text-transparent"
-          }
-        >
-          {text.slice(match.start, match.end)}
-        </mark>,
-      );
+      const highlightEl = document.createElement("div");
+      highlightEl.className =
+        match.globalIndex === activeSearchMatchIndex
+          ? "pdf-search-highlight is-active"
+          : "pdf-search-highlight";
+      highlightEl.style.left = `${rect.left - layerRect.left}px`;
+      highlightEl.style.top = `${rect.top - layerRect.top}px`;
+      highlightEl.style.width = `${rect.width}px`;
+      highlightEl.style.height = `${rect.height}px`;
 
-      cursor = Math.max(cursor, match.end);
+      overlayEl.append(highlightEl);
     });
-
-  if (cursor < text.length) {
-    fragments.push(text.slice(cursor));
-  }
-
-  return fragments;
+  });
 };
 
 export const PdfPage = ({
@@ -131,6 +162,8 @@ export const PdfPage = ({
 }: PdfPageProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const textLayerRef = useRef<HTMLDivElement>(null);
+  const searchLayerRef = useRef<HTMLDivElement>(null);
 
   const [shouldRender, setShouldRender] = useState(false);
 
@@ -144,23 +177,15 @@ export const PdfPage = ({
     [opaqueCanvas, pageNumber, pdf, scale],
   );
 
-  const [measuredPageState, setMeasuredPageState] = useState<MeasuredPageState>(
-    {
-      pageIdentity: "",
-      size: null,
-    },
-  );
+  const [measuredPageState, setMeasuredPageState] = useState<MeasuredPageState>({
+    pageIdentity: "",
+    size: null,
+  });
 
   const [renderState, setRenderState] = useState<RenderState>({
     renderIdentity: "",
     rendered: false,
     error: null,
-  });
-
-  const [textLayerState, setTextLayerState] = useState<TextLayerState>({
-    pageIdentity: "",
-    items: [],
-    styles: {},
   });
 
   const resolvedPageSize =
@@ -262,56 +287,6 @@ export const PdfPage = ({
   }, [onVisibilityChange, pageNumber, rootEl]);
 
   useEffect(() => {
-    if (!shouldRender) return;
-    if (
-      textLayerState.pageIdentity === pageIdentity &&
-      textLayerState.items.length > 0
-    ) {
-      return;
-    }
-
-    let cancelled = false;
-
-    const run = async () => {
-      try {
-        const page = await pdf.getPage(pageNumber);
-        const textContent = await page.getTextContent();
-        if (cancelled) return;
-
-        setTextLayerState({
-          pageIdentity,
-          items: textContent.items.filter(
-            (item): item is PdfJsTextItem =>
-              typeof (item as PdfJsTextItem).str === "string",
-          ),
-          styles: textContent.styles ?? {},
-        });
-      } catch (errorValue) {
-        if (cancelled) return;
-        console.warn("[PdfViewer] text layer load error", errorValue);
-        setTextLayerState({
-          pageIdentity,
-          items: [],
-          styles: {},
-        });
-      }
-    };
-
-    void run();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [
-    pageIdentity,
-    pageNumber,
-    pdf,
-    shouldRender,
-    textLayerState.items.length,
-    textLayerState.pageIdentity,
-  ]);
-
-  useEffect(() => {
     if (!shouldRender || scale <= 0) return;
 
     let cancelled = false;
@@ -324,22 +299,41 @@ export const PdfPage = ({
 
         const viewport = page.getViewport({ scale });
         const canvas = canvasRef.current;
-        if (!canvas) return;
+        const textLayerEl = textLayerRef.current;
+        const searchLayerEl = searchLayerRef.current;
+
+        if (!canvas || !textLayerEl || !searchLayerEl) {
+          return;
+        }
 
         const context = opaqueCanvas
           ? canvas.getContext("2d", { alpha: false })
           : canvas.getContext("2d");
 
-        if (!context) return;
+        if (!context) {
+          return;
+        }
 
         const dpr = window.devicePixelRatio || 1;
 
         canvas.width = Math.max(1, Math.floor(viewport.width * dpr));
         canvas.height = Math.max(1, Math.floor(viewport.height * dpr));
-        canvas.style.width = `${Math.floor(viewport.width)}px`;
-        canvas.style.height = `${Math.floor(viewport.height)}px`;
+        canvas.style.width = `${viewport.width}px`;
+        canvas.style.height = `${viewport.height}px`;
 
         context.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        textLayerEl.replaceChildren();
+        searchLayerEl.replaceChildren();
+
+        textLayerEl.style.width = `${viewport.width}px`;
+        textLayerEl.style.height = `${viewport.height}px`;
+        textLayerEl.style.setProperty("--scale-factor", String(viewport.scale));
+
+        searchLayerEl.style.width = `${viewport.width}px`;
+        searchLayerEl.style.height = `${viewport.height}px`;
+
+        const textContentPromise = page.getTextContent();
 
         renderTask = page.render({
           canvasContext: context,
@@ -348,6 +342,19 @@ export const PdfPage = ({
         });
 
         await renderTask.promise;
+        if (cancelled) return;
+
+        const textContent = await textContentPromise;
+        if (cancelled) return;
+
+        const TextLayerCtor = getTextLayerCtor();
+        const textLayer = new TextLayerCtor({
+          container: textLayerEl,
+          textContentSource: textContent,
+          viewport,
+        });
+
+        await textLayer.render();
         if (cancelled) return;
 
         setRenderState({
@@ -367,6 +374,9 @@ export const PdfPage = ({
         }
 
         console.error("[PdfViewer] render error", errorValue);
+        clearElement(textLayerRef.current);
+        clearElement(searchLayerRef.current);
+
         setRenderState({
           renderIdentity,
           rendered: false,
@@ -385,8 +395,48 @@ export const PdfPage = ({
       } catch {
         // noop
       }
+
+      clearElement(textLayerRef.current);
+      clearElement(searchLayerRef.current);
     };
   }, [opaqueCanvas, pageNumber, pdf, renderIdentity, scale, shouldRender]);
+
+  useEffect(() => {
+    const searchLayerEl = searchLayerRef.current;
+
+    if (!searchLayerEl) {
+      return;
+    }
+
+    if (!activeRenderState.rendered) {
+      clearElement(searchLayerEl);
+      return;
+    }
+
+    const textLayerEl = textLayerRef.current;
+    if (!textLayerEl) {
+      clearElement(searchLayerEl);
+      return;
+    }
+
+    const rafId = window.requestAnimationFrame(() => {
+      renderSearchHighlights({
+        textLayerEl,
+        overlayEl: searchLayerEl,
+        matches: searchMatches,
+        activeSearchMatchIndex,
+      });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(rafId);
+    };
+  }, [
+    activeRenderState.rendered,
+    activeSearchMatchIndex,
+    renderIdentity,
+    searchMatches,
+  ]);
 
   const placeholderHeight =
     resolvedPageSize && resolvedPageSize.height > 0
@@ -409,76 +459,19 @@ export const PdfPage = ({
             {activeRenderState.error}
           </div>
         )}
+
         <canvas ref={canvasRef} className="block" />
 
-        {activeRenderState.rendered && textLayerState.items.length > 0 && (
-          <div
-            className="pointer-events-auto absolute inset-0 overflow-hidden select-text"
-            style={{
-              width: `${Math.floor((resolvedPageSize?.width ?? 0) * scale)}px`,
-              height: `${Math.floor((resolvedPageSize?.height ?? 0) * scale)}px`,
-            }}
-          >
-            {textLayerState.items.map((item, itemIndex) => {
-              const viewport = {
-                width: (resolvedPageSize?.width ?? 1) * scale,
-                height: (resolvedPageSize?.height ?? 1) * scale,
-                scale,
-                transform: [
-                  scale,
-                  0,
-                  0,
-                  -scale,
-                  0,
-                  (resolvedPageSize?.height ?? 1) * scale,
-                ],
-              };
+        <div
+          ref={textLayerRef}
+          className="pdf-text-layer pointer-events-auto absolute inset-0 overflow-hidden select-text"
+        />
 
-              const transform = multiplyTransform(
-                viewport.transform,
-                item.transform,
-              );
-              const angle = Math.atan2(transform[1], transform[0]);
-              const fontHeight = Math.max(
-                1,
-                Math.hypot(transform[2], transform[3]),
-              );
-              const fontFamily =
-                textLayerState.styles[item.fontName ?? ""]?.fontFamily ??
-                "sans-serif";
-              const left = transform[4];
-              const top = transform[5] - fontHeight;
-              const itemMatches = searchMatches.filter(
-                (match) => match.itemIndex === itemIndex,
-              );
-
-              return (
-                <span
-                  key={`${pageNumber}-${itemIndex}-${item.str.slice(0, 12)}`}
-                  className="absolute whitespace-pre"
-                  style={{
-                    left: `${left}px`,
-                    top: `${top}px`,
-                    fontSize: `${fontHeight}px`,
-                    fontFamily,
-                    transform: `rotate(${angle}rad)`,
-                    transformOrigin: "left bottom",
-                    color: "transparent",
-                    WebkitTextStroke: "0 transparent",
-                    userSelect: "text",
-                    pointerEvents: "auto",
-                  }}
-                >
-                  {renderTextFragments({
-                    text: item.str,
-                    matches: itemMatches,
-                    activeSearchMatchIndex,
-                  })}
-                </span>
-              );
-            })}
-          </div>
-        )}
+        <div
+          ref={searchLayerRef}
+          aria-hidden="true"
+          className="pdf-search-layer absolute inset-0 overflow-hidden"
+        />
       </div>
     </div>
   );

@@ -6,3 +6,4 @@
 @import "./common.css";
 @import "./block-inset.css";
 @import "../features/markdown.css";
+@import "../features/pdf-viewer.css";
