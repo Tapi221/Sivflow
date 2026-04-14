@@ -54,6 +54,8 @@ type PdfJsLibWithTextLayer = {
   TextLayer?: PdfJsTextLayerCtor;
 };
 
+const MAX_RENDER_DEVICE_PIXEL_RATIO = 2;
+
 const buildPageIdentity = (pdf: PdfJsDocument, pageNumber: number) =>
   `${pageNumber}::${String(pdf)}`;
 
@@ -63,7 +65,7 @@ const buildRenderIdentity = (
   scale: number,
   opaqueCanvas: boolean,
 ) =>
-  `${pageNumber}::${scale}::${opaqueCanvas ? "opaque" : "alpha"}::${String(pdf)}`;
+  `${pageNumber}::${scale}::${opaqueCanvas ? "opaque" : "alpha"}::${MAX_RENDER_DEVICE_PIXEL_RATIO}::${String(pdf)}`;
 
 const getTextLayerCtor = () => {
   const ctor = (pdfjsLib as unknown as PdfJsLibWithTextLayer).TextLayer;
@@ -339,14 +341,31 @@ const PdfPageComponent = ({
           return;
         }
 
-        const dpr = window.devicePixelRatio || 1;
+        const rawDevicePixelRatio = window.devicePixelRatio || 1;
+        const cappedDevicePixelRatio = Math.max(
+          1,
+          Math.min(rawDevicePixelRatio, MAX_RENDER_DEVICE_PIXEL_RATIO),
+        );
 
-        canvas.width = Math.max(1, Math.floor(viewport.width * dpr));
-        canvas.height = Math.max(1, Math.floor(viewport.height * dpr));
+        canvas.width = Math.max(
+          1,
+          Math.floor(viewport.width * cappedDevicePixelRatio),
+        );
+        canvas.height = Math.max(
+          1,
+          Math.floor(viewport.height * cappedDevicePixelRatio),
+        );
         canvas.style.width = `${viewport.width}px`;
         canvas.style.height = `${viewport.height}px`;
 
-        context.setTransform(dpr, 0, 0, dpr, 0, 0);
+        context.setTransform(
+          cappedDevicePixelRatio,
+          0,
+          0,
+          cappedDevicePixelRatio,
+          0,
+          0,
+        );
 
         textLayerEl.replaceChildren();
         searchLayerEl.replaceChildren();
