@@ -110,6 +110,7 @@ const buildVerticalCardPagerItemStyle = (
     return {
       width: "100%",
       maxWidth: "100%",
+      minWidth: 0,
       alignSelf: "stretch",
     };
   }
@@ -117,6 +118,7 @@ const buildVerticalCardPagerItemStyle = (
   return {
     width: widthSpec.widthPx,
     maxWidth: "100%",
+    minWidth: 0,
     alignSelf: "center",
   };
 };
@@ -482,9 +484,11 @@ const VerticalCardPagerFn = <T,>({
       ref={containerRef}
       style={{
         overflowY: "auto",
+        overflowX: "hidden",
         scrollbarGutter: "stable",
         height: "100%",
         position: "relative",
+        minWidth: 0,
       }}
     >
       <div
@@ -495,6 +499,7 @@ const VerticalCardPagerFn = <T,>({
           gap: CARD_GAP,
           paddingBlock,
           paddingInline: paddingInlinePx,
+          minWidth: 0,
         }}
       >
         {cards.map((card, idx) => {
@@ -571,3 +576,8 @@ const VerticalCardPagerFn = <T,>({
 export const VerticalCardPager = React.memo(
   VerticalCardPagerFn,
 ) as typeof VerticalCardPagerFn;
+
+export {
+  buildVerticalCardPagerItemStyle,
+  resolveVerticalCardPagerItemWidthSpec,
+};

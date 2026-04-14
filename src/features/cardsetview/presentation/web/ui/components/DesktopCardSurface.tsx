@@ -100,7 +100,7 @@ const DesktopCardSurfaceInner = ({
   if (isGlobalEditing) {
     return (
       <div
-        className="w-full overflow-visible"
+        className="w-full min-w-0 overflow-visible"
         onFocusCapture={handleEditorFocusCapture}
         onBlurCapture={handleEditorBlurCapture}
         style={
@@ -135,7 +135,7 @@ const DesktopCardSurfaceInner = ({
   }
 
   return (
-    <div className="w-full overflow-visible">
+    <div className="w-full min-w-0 max-w-full overflow-visible">
       <Flashcard
         card={flashcardCard}
         isFlipped={isFlipped}

@@ -222,7 +222,7 @@ const FlashcardInner = ({
     <div
       ref={contentRef}
       className={cn(
-        "w-full max-w-full",
+        "w-full min-w-0 max-w-full",
         isFixedDisplay ? "flex min-h-0 flex-1" : "min-h-0",
       )}
     >
@@ -239,11 +239,11 @@ const FlashcardInner = ({
   return (
     <div
       className={cn(
-        "flex w-full flex-col select-none overflow-visible",
+        "flex w-full min-w-0 max-w-full flex-col select-none overflow-visible",
         className,
       )}
     >
-      <div className="relative">
+      <div className="relative min-w-0 max-w-full">
         <CardFrame
           baseWidth={CANONICAL_CARD_WIDTH}
           contentPaddingPx={contentPaddingPx ?? 0}

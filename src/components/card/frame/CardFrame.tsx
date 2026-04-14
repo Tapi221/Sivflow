@@ -141,9 +141,11 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
       >
         {/* スケール後のカードを中央寄せしたいので mx-auto ラッパー */}
         <div
-          className="mx-auto"
+          className={cn("mx-auto", stretchWidth && "min-w-0")}
           style={{
             width: stretchWidth ? "100%" : `${Math.max(1, baseWidth)}px`,
+            maxWidth: stretchWidth ? "100%" : undefined,
+            minWidth: stretchWidth ? 0 : undefined,
           }}
         >
           {topAttachment ? (
@@ -161,6 +163,7 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
                 ? {
                     width: "100%",
                     maxWidth: "100%",
+                    minWidth: 0,
                   }
                 : {}),
               "--card-base-width": `${Math.max(1, baseWidth)}px`,
@@ -172,6 +175,7 @@ export const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
                 className={cn(
                   // 標準スタイル: 中央寄せ、ボーダー無し、角丸をデバイス幅で変える
                   "mx-auto border-none rounded-[24px] md:rounded-[28px]",
+                  stretchWidth && "min-w-0 max-w-full",
                   className,
                 )}
                 style={shellStyle}

@@ -227,7 +227,11 @@ export const CardSetViewDesktop = ({
           : CARD_SET_VIEW_NATURAL_INDEX_COMMIT_DELAY_VIEW_MS
       }
       disableItemChrome={isGlobalEditing}
-      getCardWidth={() => effectiveCardWidthPx}
+      getCardWidthSpec={() =>
+        currentDisplayMode === "fluid"
+          ? { mode: "stretch" as const }
+          : { mode: "fixed" as const, widthPx: effectiveCardWidthPx }
+      }
       getKey={(card) => card.id}
       disableVirtualization={false}
       onRenderRangeChange={setRenderRange}
