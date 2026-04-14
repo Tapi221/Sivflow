@@ -46,6 +46,10 @@ export type TagRecord = {
   color: string;
   userId: string;
   updatedAt: Date;
+  createdAt?: Date;
+  deviceId?: string;
+  isDeleted?: boolean;
+  deletedAt?: Date | null;
   categoryId?: string;
   parentId?: string;
 };

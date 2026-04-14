@@ -72,8 +72,26 @@ const isDocumentPayload = (value: unknown): value is Document => {
   return hasString(value, "title") || hasString(value, "name");
 };
 
-const isTagPayload = (value: unknown): value is TagSyncPayload =>
-  hasBaseEntityShape(value);
+const isTagPayload = (value: unknown): value is TagSyncPayload => {
+  if (!isRecord(value)) return false;
+
+  return (
+    hasString(value, "id") &&
+    hasString(value, "userId") &&
+    hasString(value, "name") &&
+    hasString(value, "nameLower") &&
+    typeof value.color === "string" &&
+    isDateLike(value.updatedAt) &&
+    (value.createdAt === undefined || isDateLike(value.createdAt)) &&
+    (value.deviceId === undefined || typeof value.deviceId === "string") &&
+    (value.isDeleted === undefined || typeof value.isDeleted === "boolean") &&
+    (value.deletedAt === undefined ||
+      value.deletedAt === null ||
+      isDateLike(value.deletedAt)) &&
+    (value.categoryId === undefined || typeof value.categoryId === "string") &&
+    (value.parentId === undefined || typeof value.parentId === "string")
+  );
+};
 
 const isUserSettingPayload = (value: unknown): value is UserSettings =>
   hasBaseEntityShape(value);

@@ -15,10 +15,15 @@ export type TagCategory = string;
 export type Tag = TagRecord;
 
 type CardTagFields = {
+  id?: string;
   userId?: string;
+  folderId?: string | null;
   tagIds?: unknown;
   updatedAt?: Date;
+  isDeleted?: boolean;
 };
+
+type LocalDbInstance = Awaited<ReturnType<typeof getLocalDb>>;
 
 export const DEFAULT_TAG_COLOR_KEYS: TagColorKey[] = [...TAG_COLOR_KEYS];
 
@@ -74,6 +79,68 @@ export const resolveCardTagNames = (
   return ids.map((id) => tagById.get(id)?.name ?? "").filter((name) => name);
 };
 
+const matchesParent = (
+  tag: Pick<TagRecord, "parentId">,
+  parentId: string | undefined,
+): boolean => {
+  return parentId === undefined ? !tag.parentId : tag.parentId === parentId;
+};
+
+const queueTagUpsert = async (
+  db: LocalDbInstance,
+  tagId: string,
+  operationType: "create" | "update",
+): Promise<void> => {
+  const tag = await db.tagRecords.get(tagId);
+  if (!tag) return;
+
+  await db.queueUpsertSync({
+    entity: "tag",
+    operationType,
+    payload: tag,
+  });
+};
+
+const queueCardUpserts = async (
+  db: LocalDbInstance,
+  cardIds: Iterable<string>,
+): Promise<void> => {
+  for (const cardId of new Set(cardIds)) {
+    const card = await db.cards.get(cardId);
+    if (!card || card.isDeleted) continue;
+
+    await db.queueUpsertSync({
+      entity: "card",
+      operationType: "update",
+      payload: card,
+    });
+  }
+};
+
+const queueTagUpserts = async (
+  db: LocalDbInstance,
+  tagIds: Iterable<string>,
+  operationType: "create" | "update" = "update",
+): Promise<void> => {
+  for (const tagId of new Set(tagIds)) {
+    await queueTagUpsert(db, tagId, operationType);
+  }
+};
+
+const findPathCandidate = (
+  candidates: TagRecord[],
+  parentId: string | undefined,
+): TagRecord | undefined => {
+  const active = candidates.find(
+    (tag) => !tag.isDeleted && matchesParent(tag, parentId),
+  );
+  if (active) return active;
+
+  return candidates.find(
+    (tag) => Boolean(tag.isDeleted) && matchesParent(tag, parentId),
+  );
+};
+
 export const auditAndRepairTags = async (
   userId: string,
 ): Promise<TagRepairSummary> => {
@@ -92,6 +159,7 @@ export const auditAndRepairTags = async (
           id?: unknown;
           userId?: unknown;
           nameLower?: unknown;
+          isDeleted?: unknown;
         };
 
         if (
@@ -99,6 +167,10 @@ export const auditAndRepairTags = async (
           typeof tag.userId !== "string" ||
           typeof tag.nameLower !== "string"
         ) {
+          return;
+        }
+
+        if (tag.isDeleted === true) {
           return;
         }
 
@@ -179,10 +251,12 @@ export const useTags = () => {
     [] as Tag[],
   );
 
-  const tags = (rawTags ?? []).map((tag) => ({
-    ...tag,
-    color: normalizeTagColorKey(tag.color),
-  }));
+  const tags = (rawTags ?? [])
+    .filter((tag) => !tag.isDeleted)
+    .map((tag) => ({
+      ...tag,
+      color: normalizeTagColorKey(tag.color),
+    }));
 
   const tagByName = useMemo(() => {
     const map = new Map<string, Tag>();
@@ -313,6 +387,8 @@ export const useTags = () => {
         updatedAt: new Date(),
       });
     });
+
+    await queueTagUpsert(db, tagId, "update");
   };
 
   const setTagParent = async (
@@ -348,6 +424,8 @@ export const useTags = () => {
       parentId: normalizedParentId,
       updatedAt: new Date(),
     });
+
+    await queueTagUpsert(db, tagId, "update");
   };
 
   const listCategoryIdsInUse = (): string[] => categoryIdsInUse;
@@ -394,14 +472,24 @@ export const useTags = () => {
     const nameLower = name.toLowerCase();
     const normalizedColor = normalizeTagColorKey(color);
 
-    const existing = await db.tagRecords
+    const existingCandidates = await db.tagRecords
       .where("[userId+nameLower]")
       .equals([currentUser.uid, nameLower])
-      .first();
+      .toArray();
+
+    const existing = existingCandidates
+      .slice()
+      .sort((left, right) => {
+        if (Boolean(left.isDeleted) !== Boolean(right.isDeleted)) {
+          return Number(Boolean(left.isDeleted)) - Number(Boolean(right.isDeleted));
+        }
+        return new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime();
+      })[0];
 
     if (existing) {
       const patch: Partial<Tag> = {};
 
+      if (existing.name !== name) patch.name = name;
       if (existing.color !== normalizedColor) patch.color = normalizedColor;
       if (categoryId && existing.categoryId !== categoryId) {
         patch.categoryId = categoryId;
@@ -409,28 +497,44 @@ export const useTags = () => {
       if (parentId && existing.parentId !== parentId) {
         patch.parentId = parentId;
       }
+      if (existing.isDeleted) {
+        patch.isDeleted = false;
+        patch.deletedAt = null;
+      }
 
       if (Object.keys(patch).length > 0) {
         patch.updatedAt = new Date();
         await db.tagRecords.update(existing.id, patch);
-        return { ...existing, ...patch };
+        await queueTagUpsert(db, existing.id, "update");
+        return {
+          ...existing,
+          ...patch,
+        };
       }
 
-      return existing;
+      return {
+        ...existing,
+        color: normalizeTagColorKey(existing.color),
+      };
     }
 
+    const now = new Date();
     const newTag: Tag = {
       id: genId(),
       name,
       nameLower,
       color: normalizedColor,
       userId: currentUser.uid,
-      updatedAt: new Date(),
+      createdAt: now,
+      updatedAt: now,
+      isDeleted: false,
+      deletedAt: null,
       ...(categoryId ? { categoryId } : {}),
       ...(parentId ? { parentId } : {}),
     };
 
     await db.tagRecords.add(newTag);
+    await queueTagUpsert(db, newTag.id, "create");
     return newTag;
   };
 
@@ -453,28 +557,48 @@ export const useTags = () => {
         .equals([currentUser.uid, nameLower])
         .toArray();
 
-      const existing = candidates.find((tag) =>
-        parentId === undefined ? !tag.parentId : tag.parentId === parentId,
-      );
+      const existing = findPathCandidate(candidates, parentId);
 
-      if (existing) {
+      if (existing && !existing.isDeleted) {
         lastTagId = existing.id;
         parentId = existing.id;
-      } else {
-        const newTag: Tag = {
-          id: genId(),
-          name: segment,
-          nameLower,
-          color: DEFAULT_TAG_COLOR_KEYS[0],
-          userId: currentUser.uid,
-          updatedAt: new Date(),
-          ...(parentId ? { parentId } : {}),
-        };
-
-        await db.tagRecords.add(newTag);
-        lastTagId = newTag.id;
-        parentId = newTag.id;
+        continue;
       }
+
+      if (existing && existing.isDeleted) {
+        await db.tagRecords.update(existing.id, {
+          name: segment,
+          color: normalizeTagColorKey(existing.color),
+          parentId,
+          isDeleted: false,
+          deletedAt: null,
+          updatedAt: new Date(),
+        });
+
+        await queueTagUpsert(db, existing.id, "update");
+        lastTagId = existing.id;
+        parentId = existing.id;
+        continue;
+      }
+
+      const now = new Date();
+      const newTag: Tag = {
+        id: genId(),
+        name: segment,
+        nameLower,
+        color: DEFAULT_TAG_COLOR_KEYS[0],
+        userId: currentUser.uid,
+        createdAt: now,
+        updatedAt: now,
+        isDeleted: false,
+        deletedAt: null,
+        ...(parentId ? { parentId } : {}),
+      };
+
+      await db.tagRecords.add(newTag);
+      await queueTagUpsert(db, newTag.id, "create");
+      lastTagId = newTag.id;
+      parentId = newTag.id;
     }
 
     if (!lastTagId) return { error: "パスが解決できませんでした。" };
@@ -506,28 +630,47 @@ export const useTags = () => {
         .equals([currentUser.uid, nameLower])
         .toArray();
 
-      const existing = candidates.find((tag) =>
-        parentId === undefined ? !tag.parentId : tag.parentId === parentId,
-      );
+      const existing = findPathCandidate(candidates, parentId);
 
-      if (existing) {
+      if (existing && !existing.isDeleted) {
         localMap.set(existing.id, existing);
         parentId = existing.id;
-      } else {
-        const newTag: Tag = {
-          id: genId(),
-          name: segment,
-          nameLower,
-          color: DEFAULT_TAG_COLOR_KEYS[0],
-          userId: currentUser.uid,
-          updatedAt: new Date(),
-          ...(parentId ? { parentId } : {}),
-        };
-
-        await db.tagRecords.add(newTag);
-        localMap.set(newTag.id, newTag);
-        parentId = newTag.id;
+        continue;
       }
+
+      if (existing && existing.isDeleted) {
+        await db.tagRecords.update(existing.id, {
+          name: segment,
+          parentId,
+          isDeleted: false,
+          deletedAt: null,
+          updatedAt: new Date(),
+        });
+
+        await queueTagUpsert(db, existing.id, "update");
+        localMap.set(existing.id, { ...existing, parentId });
+        parentId = existing.id;
+        continue;
+      }
+
+      const now = new Date();
+      const newTag: Tag = {
+        id: genId(),
+        name: segment,
+        nameLower,
+        color: DEFAULT_TAG_COLOR_KEYS[0],
+        userId: currentUser.uid,
+        createdAt: now,
+        updatedAt: now,
+        isDeleted: false,
+        deletedAt: null,
+        ...(parentId ? { parentId } : {}),
+      };
+
+      await db.tagRecords.add(newTag);
+      await queueTagUpsert(db, newTag.id, "create");
+      localMap.set(newTag.id, newTag);
+      parentId = newTag.id;
     }
 
     const finalParentId = parentId;
@@ -550,6 +693,8 @@ export const useTags = () => {
       parentId: finalParentId,
       updatedAt: new Date(),
     });
+
+    await queueTagUpsert(db, tagId, "update");
   };
 
   const getTagPathString = (tagId: string): string => {
@@ -589,7 +734,7 @@ export const useTags = () => {
         .equals([currentUser.uid, newNameLower])
         .first();
 
-      if (existing && existing.id !== tagId) {
+      if (existing && existing.id !== tagId && !existing.isDeleted) {
         return { error: `「${trimmedName}」はすでに存在します。` };
       }
     }
@@ -599,6 +744,8 @@ export const useTags = () => {
       nameLower: newNameLower,
       updatedAt: new Date(),
     });
+
+    await queueTagUpsert(db, tagId, "update");
   };
 
   const mergeTags = async (
@@ -619,6 +766,9 @@ export const useTags = () => {
     }
 
     let updatedCards = 0;
+    const updatedCardIds = new Set<string>();
+    const reparentedTagIds = new Set<string>();
+    const now = new Date();
 
     await db.transaction("rw", db.tagRecords, db.cards, async () => {
       await db.cards
@@ -632,7 +782,12 @@ export const useTags = () => {
           card.tagIds = Array.from(
             new Set(ids.map((id) => (id === fromTagId ? intoTagId : id))),
           );
-          card.updatedAt = new Date();
+          card.updatedAt = now;
+
+          if (typeof card.id === "string") {
+            updatedCardIds.add(card.id);
+          }
+
           updatedCards += 1;
         });
 
@@ -640,13 +795,29 @@ export const useTags = () => {
         .where("[userId+parentId]")
         .equals([currentUser.uid, fromTagId])
         .modify((raw: unknown) => {
-          const childTag = raw as { parentId?: string; updatedAt?: Date };
+          const childTag = raw as {
+            id?: string;
+            parentId?: string;
+            updatedAt?: Date;
+          };
           childTag.parentId = intoTagId;
-          childTag.updatedAt = new Date();
+          childTag.updatedAt = now;
+
+          if (typeof childTag.id === "string") {
+            reparentedTagIds.add(childTag.id);
+          }
         });
 
-      await db.tagRecords.delete(fromTagId);
+      await db.tagRecords.update(fromTagId, {
+        isDeleted: true,
+        deletedAt: now,
+        updatedAt: now,
+      });
     });
+
+    await queueCardUpserts(db, updatedCardIds);
+    await queueTagUpserts(db, reparentedTagIds, "update");
+    await queueTagUpsert(db, fromTagId, "update");
 
     return { updatedCards };
   };
@@ -669,6 +840,8 @@ export const useTags = () => {
       color: normalizeTagColorKey(color),
       updatedAt: new Date(),
     });
+
+    await queueTagUpsert(db, tag.id, "update");
   };
 
   const deleteTag = async (nameOrId: string): Promise<number> => {
@@ -684,18 +857,29 @@ export const useTags = () => {
     const { id: tagId } = tag;
     const db = await getLocalDb(currentUser.uid);
     let removedFromCards = 0;
+    const updatedCardIds = new Set<string>();
+    const childTagIds = new Set<string>();
+    const now = new Date();
 
     await db.transaction("rw", db.tagRecords, db.cards, async () => {
       await db.tagRecords
         .where("[userId+parentId]")
         .equals([currentUser.uid, tagId])
         .modify((raw: unknown) => {
-          const childTag = raw as { parentId?: string; updatedAt?: Date };
+          const childTag = raw as { id?: string; parentId?: string; updatedAt?: Date };
           childTag.parentId = undefined;
-          childTag.updatedAt = new Date();
+          childTag.updatedAt = now;
+
+          if (typeof childTag.id === "string") {
+            childTagIds.add(childTag.id);
+          }
         });
 
-      await db.tagRecords.delete(tagId);
+      await db.tagRecords.update(tagId, {
+        isDeleted: true,
+        deletedAt: now,
+        updatedAt: now,
+      });
 
       await db.cards
         .where("userId")
@@ -707,10 +891,19 @@ export const useTags = () => {
           if (!idTags.includes(tagId)) return;
 
           card.tagIds = idTags.filter((id) => id !== tagId);
-          card.updatedAt = new Date();
+          card.updatedAt = now;
+
+          if (typeof card.id === "string") {
+            updatedCardIds.add(card.id);
+          }
+
           removedFromCards += 1;
         });
     });
+
+    await queueTagUpserts(db, childTagIds, "update");
+    await queueTagUpsert(db, tagId, "update");
+    await queueCardUpserts(db, updatedCardIds);
 
     return removedFromCards;
   };
@@ -747,6 +940,7 @@ export const useTags = () => {
 
     const CHUNK = 100;
     let modified = 0;
+    const updatedCardIds = new Set<string>();
 
     for (const targetId of targetFolderIds) {
       const ids = (await db.cards
@@ -763,7 +957,7 @@ export const useTags = () => {
           await Promise.all(
             chunk.map(async (cardId) => {
               const card = await db.cards.get(cardId);
-              if (!card) return;
+              if (!card || card.isDeleted) return;
 
               const existing = getCardTagIds(card);
               if (existing.includes(tagId)) return;
@@ -773,12 +967,15 @@ export const useTags = () => {
                 updatedAt: new Date(),
               });
 
+              updatedCardIds.add(cardId);
               modified += 1;
             }),
           );
         });
       }
     }
+
+    await queueCardUpserts(db, updatedCardIds);
 
     return modified;
   };
@@ -815,6 +1012,7 @@ export const useTags = () => {
 
     const CHUNK = 100;
     let modified = 0;
+    const updatedCardIds = new Set<string>();
 
     for (const targetId of targetFolderIds) {
       const ids = (await db.cards
@@ -831,7 +1029,7 @@ export const useTags = () => {
           await Promise.all(
             chunk.map(async (cardId) => {
               const card = await db.cards.get(cardId);
-              if (!card) return;
+              if (!card || card.isDeleted) return;
 
               const existing = getCardTagIds(card);
               if (!existing.includes(tagId)) return;
@@ -841,12 +1039,15 @@ export const useTags = () => {
                 updatedAt: new Date(),
               });
 
+              updatedCardIds.add(cardId);
               modified += 1;
             }),
           );
         });
       }
     }
+
+    await queueCardUpserts(db, updatedCardIds);
 
     return modified;
   };

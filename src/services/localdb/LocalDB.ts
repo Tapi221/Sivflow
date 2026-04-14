@@ -22,6 +22,18 @@ import type {
   UserSettings,
   UserStats,
 } from "@/types";
+import {
+  createDeleteQueueItem,
+  createUpsertQueueItem,
+} from "@/application/usecases/syncQueueItemFactory";
+import type {
+  DeleteEntity,
+  UpsertEntity,
+} from "@/application/usecases/syncQueuePayloadGuards";
+import type {
+  SyncPayloadByEntity,
+  SyncPriority,
+} from "@/types/domain/sync";
 import { Dexie } from "dexie";
 import { nanoid } from "nanoid";
 import * as crud from "./crud";
@@ -581,6 +593,57 @@ export class LocalDB extends Dexie {
   ): Promise<void> {
     await this.table(table).put(data as never);
   }
+
+  public queueUpsertSync = async <TEntity extends UpsertEntity>({
+    entity,
+    operationType,
+    payload,
+    priority = "high",
+  }: {
+    entity: TEntity;
+    operationType: "create" | "update";
+    payload: SyncPayloadByEntity[TEntity];
+    priority?: SyncPriority;
+  }): Promise<void> => {
+    const item = createUpsertQueueItem({
+      entity,
+      operationType,
+      payload,
+      priority,
+    });
+
+    await this.syncQueue.put(item);
+
+    if (this.syncTrigger) {
+      setTimeout(() => {
+        this.syncTrigger?.();
+      }, 0);
+    }
+  };
+
+  public queueDeleteSync = async ({
+    entity,
+    targetId,
+    priority = "high",
+  }: {
+    entity: DeleteEntity;
+    targetId: string;
+    priority?: SyncPriority;
+  }): Promise<void> => {
+    const item = createDeleteQueueItem({
+      entity,
+      targetId,
+      priority,
+    });
+
+    await this.syncQueue.put(item);
+
+    if (this.syncTrigger) {
+      setTimeout(() => {
+        this.syncTrigger?.();
+      }, 0);
+    }
+  };
 
   private async enqueueSync(
     tableName: string,
