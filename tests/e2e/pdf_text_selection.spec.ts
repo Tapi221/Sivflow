@@ -10,6 +10,10 @@ test.describe("PDF text selection", () => {
       waitUntil: "domcontentloaded",
     });
 
+    const textLayer = page.locator(".pdf-text-layer").first();
+    await expect(textLayer).toHaveAttribute("data-text-layer-expected-text", "true");
+    await expect(textLayer).toHaveAttribute("data-text-layer-ready", "true");
+
     const textSpan = page
       .locator(".pdf-text-layer span")
       .filter({ hasText: "PDF E2E Scroll Page 1" })

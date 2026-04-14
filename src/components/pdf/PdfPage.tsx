@@ -12,7 +12,10 @@ import type {
   PdfJsTextContent,
   PdfPageSearchMatch,
 } from "@/components/pdf/pdfViewerTypes";
-import { getErrorMessage } from "@/components/pdf/pdfViewerTypes";
+import {
+  getErrorMessage,
+  isPdfTextItem,
+} from "@/components/pdf/pdfViewerTypes";
 
 interface PdfPageProps {
   pdf: PdfJsDocument;
@@ -38,6 +41,7 @@ type RenderState = {
   renderIdentity: string;
   rendered: boolean;
   error: string | null;
+  warning: string | null;
 };
 
 type PdfJsTextLayerInstance = {
@@ -211,6 +215,7 @@ const PdfPageComponent = ({
     renderIdentity: "",
     rendered: false,
     error: null,
+    warning: null,
   });
 
   const resolvedPageSize =
@@ -226,6 +231,7 @@ const PdfPageComponent = ({
           renderIdentity,
           rendered: false,
           error: null,
+          warning: null,
         };
 
   useEffect(() => {
@@ -369,6 +375,8 @@ const PdfPageComponent = ({
 
         textLayerEl.replaceChildren();
         searchLayerEl.replaceChildren();
+        textLayerEl.dataset.textLayerReady = "pending";
+        textLayerEl.dataset.textLayerExpectedText = "false";
 
         textLayerEl.style.width = `${viewport.width}px`;
         textLayerEl.style.height = `${viewport.height}px`;
@@ -396,10 +404,32 @@ const PdfPageComponent = ({
         await textLayer.render();
         if (cancelled) return;
 
+        const textItemCount = textContent.items.filter(
+          (item) => isPdfTextItem(item) && item.str.trim().length > 0,
+        ).length;
+        const textSpanCount = textLayerEl.querySelectorAll("span").length;
+        const textLayerReady = textItemCount === 0 || textSpanCount > 0;
+        const warning = textLayerReady
+          ? null
+          : "PDFテキストレイヤーの構築に失敗した可能性があります";
+
+        textLayerEl.dataset.textLayerReady = textLayerReady ? "true" : "false";
+        textLayerEl.dataset.textLayerExpectedText =
+          textItemCount > 0 ? "true" : "false";
+
+        if (!textLayerReady) {
+          console.warn("[PdfViewer] text layer rendered without selectable text", {
+            pageNumber,
+            textItemCount,
+            textSpanCount,
+          });
+        }
+
         setRenderState({
           renderIdentity,
           rendered: true,
           error: null,
+          warning,
         });
       } catch (errorValue: unknown) {
         if (cancelled) return;
@@ -420,6 +450,7 @@ const PdfPageComponent = ({
           renderIdentity,
           rendered: false,
           error: "PDFの描画に失敗しました",
+          warning: null,
         });
       }
     };
@@ -504,6 +535,12 @@ const PdfPageComponent = ({
         {activeRenderState.error && !activeRenderState.rendered && (
           <div className="px-3 py-2 text-xs text-rose-500">
             {activeRenderState.error}
+          </div>
+        )}
+
+        {activeRenderState.warning && activeRenderState.rendered && (
+          <div className="px-3 py-2 text-xs text-amber-600">
+            {activeRenderState.warning}
           </div>
         )}
 
