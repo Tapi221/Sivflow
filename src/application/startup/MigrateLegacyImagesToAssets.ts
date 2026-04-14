@@ -113,6 +113,22 @@ const parseAssetIdFromStoragePath = (
 const buildAssetRemoteKey = (userId: string, assetId: string): string =>
   `users/${userId}/assets/${assetId}`;
 
+const getErrorDetails = (error: unknown): {
+  message: string;
+  stack?: string;
+} => {
+  if (error instanceof Error) {
+    return {
+      message: error.message,
+      stack: error.stack,
+    };
+  }
+
+  return {
+    message: String(error),
+  };
+};
+
 const getRetryFileName = (assetId: string, mime: string): string => {
   const normalized = mime.trim().toLowerCase();
 
@@ -147,6 +163,21 @@ const resolveAssetId = (
     image.id,
     source?.id,
     image.localFileId,
+    source?.localBlobId,
+    source?.localFileId,
+    parseAssetIdFromStoragePath(getStorageValue(image, source)),
+  );
+
+const resolveLegacyImageLookupKey = (
+  image: UploadedImage,
+  source: ImageRecordLike | null | undefined,
+): string | null =>
+  readFirstString(
+    image.assetId,
+    image.id,
+    image.localFileId,
+    source?.assetId,
+    source?.id,
     source?.localBlobId,
     source?.localFileId,
     parseAssetIdFromStoragePath(getStorageValue(image, source)),
@@ -286,7 +317,7 @@ const buildCanonicalImageRef = ({
 }): UploadedImage => ({
   id: assetId,
   assetId,
-  localFileId: source.localFileId?.trim() || assetId,
+  localFileId: readFirstString(source.localFileId, source.id, assetId) ?? assetId,
   remoteUrl: remoteUrl as UploadedImage["remoteUrl"],
   localUrl: null,
   status: remoteUrl
@@ -365,20 +396,31 @@ const migrateSingleImageRef = async ({
   image,
   summary,
   migratedAssetIds,
+  cardId,
 }: {
   userId: string;
   image: UploadedImage;
   summary: MigrationSummary;
   migratedAssetIds: Set<string>;
+  cardId?: string;
 }): Promise<UploadedImage> => {
   const db = await getLocalDb(userId);
-  const existing = (await db.images.get(
-    image.assetId?.trim() || image.id.trim(),
-  )) as ImageRecordLike | undefined;
+  const lookupKey = resolveLegacyImageLookupKey(image, null);
+  const existing = lookupKey
+    ? ((await db.images.get(lookupKey)) as ImageRecordLike | undefined)
+    : undefined;
 
   const provisionalAssetId =
     resolveAssetId(image, existing) ?? crypto.randomUUID();
   migratedAssetIds.add(provisionalAssetId);
+
+  if (!lookupKey) {
+    console.warn("[LegacyImageMigration] Invalid legacy image ref; continuing", {
+      cardId,
+      imageIdentifier: provisionalAssetId,
+      imageRef: image,
+    });
+  }
 
   let firestoreImage: UploadedImage | null = null;
   try {
@@ -451,11 +493,13 @@ const migrateImageArray = async ({
   images,
   summary,
   migratedAssetIds,
+  cardId,
 }: {
   userId: string;
   images: UploadedImage[];
   summary: MigrationSummary;
   migratedAssetIds: Set<string>;
+  cardId?: string;
 }): Promise<UploadedImage[]> => {
   const nextImages: UploadedImage[] = [];
 
@@ -468,13 +512,20 @@ const migrateImageArray = async ({
         image,
         summary,
         migratedAssetIds,
+        cardId,
       });
       nextImages.push(migrated);
     } catch (error) {
       summary.failedImages += 1;
+      const details = getErrorDetails(error);
       console.error("[LegacyImageMigration] Failed to migrate image ref", {
-        imageId: image.assetId ?? image.id,
-        error,
+        cardId,
+        imageIdentifier:
+          resolveLegacyImageLookupKey(image, null) ??
+          parseAssetIdFromStoragePath(getStorageValue(image, null)),
+        errorMessage: details.message,
+        errorStack: details.stack,
+        imageRef: image,
       });
       nextImages.push(image);
     }
@@ -488,11 +539,13 @@ const migrateBlocks = async ({
   blocks,
   summary,
   migratedAssetIds,
+  cardId,
 }: {
   userId: string;
   blocks: CardBlock[];
   summary: MigrationSummary;
   migratedAssetIds: Set<string>;
+  cardId?: string;
 }): Promise<CardBlock[]> => {
   const nextBlocks: CardBlock[] = [];
 
@@ -507,6 +560,7 @@ const migrateBlocks = async ({
       images: block.images,
       summary,
       migratedAssetIds,
+      cardId,
     });
 
     nextBlocks.push({
@@ -523,17 +577,20 @@ const migrateFace = async ({
   face,
   summary,
   migratedAssetIds,
+  cardId,
 }: {
   userId: string;
   face: CardFace;
   summary: MigrationSummary;
   migratedAssetIds: Set<string>;
+  cardId?: string;
 }): Promise<CardFace> => {
   const nextBlocks = await migrateBlocks({
     userId,
     blocks: Array.isArray(face.blocks) ? face.blocks : [],
     summary,
     migratedAssetIds,
+    cardId,
   });
 
   const nextAttachmentImages =
@@ -544,6 +601,7 @@ const migrateFace = async ({
           images: face.attachments.images,
           summary,
           migratedAssetIds,
+          cardId,
         })
       : face.attachments?.images;
 
@@ -575,12 +633,14 @@ const migrateCard = async ({
     face: card.front,
     summary,
     migratedAssetIds,
+    cardId: card.id,
   });
   const nextBack = await migrateFace({
     userId,
     face: card.back,
     summary,
     migratedAssetIds,
+    cardId: card.id,
   });
 
   return {
@@ -740,18 +800,20 @@ export const migrateLegacyImagesToAssets = async ({
 
     return summary;
   } catch (error) {
+    const details = getErrorDetails(error);
     writeMigrationState(userId, {
       status: "failed",
       migratedAt: new Date().toISOString(),
       summary,
-      error: error instanceof Error ? error.message : String(error),
+      error: details.message,
       unresolvedAssetIds: previousState?.unresolvedAssetIds ?? [],
     });
 
     console.error("[LegacyImageMigration] failed", {
       userId,
       summary,
-      error,
+      errorMessage: details.message,
+      errorStack: details.stack,
     });
 
     throw error;
