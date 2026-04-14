@@ -2,6 +2,7 @@ import { getImageFromFirestore } from "@/infrastructure/images/imageFirestoreRea
 import { getLocalDb } from "@/infrastructure/localdb/client";
 import { persistentQueue } from "@/services/PersistentOfflineQueue";
 import { getImageBlob } from "@/services/imageFileStore";
+import { scrubBlobUrlsDeep } from "@/services/localdb/blobUrl";
 import type {
   AssetRecord,
   AssetRemoteStatus,
@@ -113,9 +114,7 @@ const parseAssetIdFromStoragePath = (
 const buildAssetRemoteKey = (userId: string, assetId: string): string =>
   `users/${userId}/assets/${assetId}`;
 
-const getErrorDetails = (
-  error: unknown,
-): {
+const getErrorDetails = (error: unknown): {
   message: string;
   stack?: string;
 } => {
@@ -319,8 +318,7 @@ const buildCanonicalImageRef = ({
 }): UploadedImage => ({
   id: assetId,
   assetId,
-  localFileId:
-    readFirstString(source.localFileId, source.id, assetId) ?? assetId,
+  localFileId: readFirstString(source.localFileId, source.id, assetId) ?? assetId,
   remoteUrl: remoteUrl as UploadedImage["remoteUrl"],
   localUrl: null,
   status: remoteUrl
@@ -418,14 +416,11 @@ const migrateSingleImageRef = async ({
   migratedAssetIds.add(provisionalAssetId);
 
   if (!lookupKey) {
-    console.warn(
-      "[LegacyImageMigration] Invalid legacy image ref; continuing",
-      {
-        cardId,
-        imageIdentifier: provisionalAssetId,
-        imageRef: image,
-      },
-    );
+    console.warn("[LegacyImageMigration] Invalid legacy image ref; continuing", {
+      cardId,
+      imageIdentifier: provisionalAssetId,
+      imageRef: image,
+    });
   }
 
   let firestoreImage: UploadedImage | null = null;
@@ -759,11 +754,7 @@ export const migrateLegacyImagesToAssets = async ({
         JSON.stringify(card.front) !== JSON.stringify(migratedCard.front) ||
         JSON.stringify(card.back) !== JSON.stringify(migratedCard.back)
       ) {
-        await db.updateItem("cards", card.id, {
-          front: migratedCard.front,
-          back: migratedCard.back,
-          updatedAt: new Date(),
-        });
+        await db.upsert("cards", scrubBlobUrlsDeep(migratedCard) as Card);
       }
     }
 
