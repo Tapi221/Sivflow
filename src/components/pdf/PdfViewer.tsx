@@ -64,6 +64,12 @@ interface PdfViewerProps {
   viewerOptions?: PdfViewerOptions;
 }
 
+type PageLayoutMetrics = {
+  pageTopOffsets: number[];
+  pageHeights: number[];
+  totalContentHeight: number;
+};
+
 const EMPTY_SEARCH_MATCHES: PdfPageSearchMatch[] = [];
 const SEARCH_INDEX_CONCURRENCY = 6;
 
@@ -103,6 +109,82 @@ const buildSearchIndexMap = async ({
   );
 
   return searchIndexMap;
+};
+
+const buildPageLayoutMetrics = ({
+  numPages,
+  pageSizes,
+  scale,
+  pageGap,
+}: {
+  numPages: number;
+  pageSizes: Record<number, PageSize>;
+  scale: number;
+  pageGap: number;
+}): PageLayoutMetrics => {
+  const pageTopOffsets: number[] = [];
+  const pageHeights: number[] = [];
+  let runningTop = 0;
+
+  for (let index = 0; index < numPages; index += 1) {
+    const pageNumber = index + 1;
+    const baseSize = pageSizes[pageNumber] ?? pageSizes[1];
+    const pageHeight =
+      baseSize && baseSize.height > 0
+        ? Math.max(1, Math.floor(baseSize.height * scale))
+        : PDF_PAGE_PLACEHOLDER_FALLBACK_HEIGHT;
+
+    pageTopOffsets.push(runningTop);
+    pageHeights.push(pageHeight);
+
+    runningTop += pageHeight;
+
+    if (index < numPages - 1) {
+      runningTop += pageGap;
+    }
+  }
+
+  return {
+    pageTopOffsets,
+    pageHeights,
+    totalContentHeight: Math.max(runningTop, 1),
+  };
+};
+
+const buildRenderedPageNumbers = ({
+  currentPage,
+  activeMatchPageNumber,
+  numPages,
+}: {
+  currentPage: number;
+  activeMatchPageNumber: number | null;
+  numPages: number;
+}) => {
+  if (numPages <= 0) {
+    return [];
+  }
+
+  const renderedPageSet = new Set<number>();
+
+  for (
+    let pageNumber = Math.max(1, currentPage - PDF_PAGE_WINDOW_SIZE);
+    pageNumber <= Math.min(numPages, currentPage + PDF_PAGE_WINDOW_SIZE);
+    pageNumber += 1
+  ) {
+    renderedPageSet.add(pageNumber);
+  }
+
+  if (typeof activeMatchPageNumber === "number") {
+    for (
+      let pageNumber = Math.max(1, activeMatchPageNumber - 1);
+      pageNumber <= Math.min(numPages, activeMatchPageNumber + 1);
+      pageNumber += 1
+    ) {
+      renderedPageSet.add(pageNumber);
+    }
+  }
+
+  return Array.from(renderedPageSet).sort((left, right) => left - right);
 };
 
 export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
@@ -147,13 +229,23 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       onSourceLoadError,
     });
 
+    const pageLayoutMetrics = useMemo(
+      () =>
+        buildPageLayoutMetrics({
+          numPages,
+          pageSizes,
+          scale,
+          pageGap,
+        }),
+      [numPages, pageGap, pageSizes, scale],
+    );
+
     const {
       containerRef,
       scrollContainerEl,
       currentPage,
       handleScroll,
       handleVisibilityChange,
-      registerPageRef,
       notifyLayoutChanged,
       resetNavigation,
       scrollToPage,
@@ -161,6 +253,7 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       logScrollDiagnostics,
     } = usePdfCurrentPage({
       numPages,
+      pageTopOffsets: pageLayoutMetrics.pageTopOffsets,
       onPageChange,
     });
 
@@ -173,9 +266,7 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       onScaleChange,
     });
 
-    const [pageMatches, setPageMatches] = useState<
-      Record<number, PdfPageSearchMatch[]>
-    >({});
+    const [pageMatches, setPageMatches] = useState<Record<number, PdfPageSearchMatch[]>>({});
     const [flattenedMatches, setFlattenedMatches] = useState<
       PdfPageSearchMatch[]
     >([]);
@@ -333,7 +424,13 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       return () => {
         cancelled = true;
       };
-    }, [doc, getPageSearchIndex, normalizedSearchQuery, pageNumbers, resetSearchIndexCache]);
+    }, [
+      doc,
+      getPageSearchIndex,
+      normalizedSearchQuery,
+      pageNumbers,
+      resetSearchIndexCache,
+    ]);
 
     const activeMatchPageNumber = useMemo(() => {
       if (activeMatchIndex < 0 || activeMatchIndex >= flattenedMatches.length) {
@@ -342,6 +439,16 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
 
       return flattenedMatches[activeMatchIndex]?.pageNumber ?? null;
     }, [activeMatchIndex, flattenedMatches]);
+
+    const renderedPageNumbers = useMemo(
+      () =>
+        buildRenderedPageNumbers({
+          currentPage,
+          activeMatchPageNumber,
+          numPages,
+        }),
+      [activeMatchPageNumber, currentPage, numPages],
+    );
 
     useEffect(() => {
       if (flattenedMatches.length === 0) {
@@ -390,7 +497,7 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
     useEffect(() => {
       if (!doc) return;
       notifyLayoutChanged();
-    }, [doc, notifyLayoutChanged, scale]);
+    }, [doc, notifyLayoutChanged, pageLayoutMetrics.pageTopOffsets, scale]);
 
     useEffect(() => {
       if (activeMatchIndex < 0 || activeMatchIndex >= flattenedMatches.length) {
@@ -426,25 +533,22 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       >
         <div className="min-w-0 p-2">
           {loading && (
-            <div className="mb-2 text-xs text-slate-400">読み込み中...</div>
+            <div className="mb-2 text-xs text-slate-400">試み込み中...</div>
           )}
 
           {error && <div className="text-sm text-rose-500">{error}</div>}
 
           {!error && doc && (
             <div
-              className="flex flex-col items-center"
-              style={{ gap: `${pageGap}px` }}
+              className="relative w-full"
+              style={{ height: `${pageLayoutMetrics.totalContentHeight}px` }}
             >
-              {pageNumbers.map((pageNumber) => {
-                const inWindow =
-                  Math.abs(pageNumber - currentPage) <= PDF_PAGE_WINDOW_SIZE;
-
-                const baseSize = pageSizes[pageNumber] ?? pageSizes[1];
+              {renderedPageNumbers.map((pageNumber) => {
+                const pageTop =
+                  pageLayoutMetrics.pageTopOffsets[pageNumber - 1] ?? 0;
                 const placeholderHeight =
-                  baseSize && baseSize.height > 0
-                    ? Math.max(1, Math.floor(baseSize.height * scale))
-                    : PDF_PAGE_PLACEHOLDER_FALLBACK_HEIGHT;
+                  pageLayoutMetrics.pageHeights[pageNumber - 1] ??
+                  PDF_PAGE_PLACEHOLDER_FALLBACK_HEIGHT;
                 const pageSearchMatches =
                   pageMatches[pageNumber] ?? EMPTY_SEARCH_MATCHES;
                 const activeSearchMatchIndexForPage =
@@ -455,30 +559,26 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
                 return (
                   <div
                     key={`pdf-row-${pageNumber}`}
-                    ref={(el) => {
-                      registerPageRef(pageNumber, el);
+                    className="absolute left-0 right-0 flex justify-center"
+                    style={{
+                      top: `${pageTop}px`,
+                      minHeight: `${placeholderHeight}px`,
                     }}
-                    className="flex w-full justify-center"
-                    style={{ minHeight: `${placeholderHeight}px` }}
                   >
-                    {inWindow ? (
-                      <PdfPage
-                        pdf={doc}
-                        pageNumber={pageNumber}
-                        scale={scale}
-                        baseSize={pageSizes[pageNumber]}
-                        rootEl={scrollContainerEl}
-                        opaqueCanvas={resolvedOpaqueCanvas}
-                        searchMatches={pageSearchMatches}
-                        activeSearchMatchIndex={activeSearchMatchIndexForPage}
-                        getPage={getPage}
-                        getPageTextContent={getPageTextContent}
-                        onPageSize={setPageSize}
-                        onVisibilityChange={handleVisibilityChange}
-                      />
-                    ) : (
-                      <div className="w-full" />
-                    )}
+                    <PdfPage
+                      pdf={doc}
+                      pageNumber={pageNumber}
+                      scale={scale}
+                      baseSize={pageSizes[pageNumber]}
+                      rootEl={scrollContainerEl}
+                      opaqueCanvas={resolvedOpaqueCanvas}
+                      searchMatches={pageSearchMatches}
+                      activeSearchMatchIndex={activeSearchMatchIndexForPage}
+                      getPage={getPage}
+                      getPageTextContent={getPageTextContent}
+                      onPageSize={setPageSize}
+                      onVisibilityChange={handleVisibilityChange}
+                    />
                   </div>
                 );
               })}
