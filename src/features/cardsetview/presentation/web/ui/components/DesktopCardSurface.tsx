@@ -4,6 +4,11 @@ import {
   type FlashcardCardLike,
 } from "@/components/card/frame/Flashcard";
 import { CardEditorPane } from "@/components/folder/panes/CardEditorPane";
+import {
+  buildCardRenderSpec,
+  resolveCardContentZoom,
+  resolveCardSurfaceScale,
+} from "@/features/cardrender/domain/cardRenderSpec";
 import type { Card, UserSettings } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 import React from "react";
@@ -62,6 +67,17 @@ const DesktopCardSurfaceInner = ({
   const flashcardCard = React.useMemo(() => {
     return toFlashcardCardLike(card);
   }, [card]);
+
+  const viewRenderSpec = React.useMemo(
+    () =>
+      buildCardRenderSpec({
+        displayMode: currentDisplayMode,
+        interactionMode: "view",
+        zoomScale: viewZoomScale,
+        showInk: currentDisplayMode === "fixed",
+      }),
+    [currentDisplayMode, viewZoomScale],
+  );
 
   const handleEditorFocusCapture = React.useCallback(() => {
     setHasFocusWithin(true);
@@ -135,10 +151,10 @@ const DesktopCardSurfaceInner = ({
   }
 
   const headerIconVisualScale =
-    currentDisplayMode === "fixed" &&
-    Number.isFinite(viewZoomScale) &&
-    viewZoomScale > 0
-      ? viewZoomScale
+    viewRenderSpec.surfaceMode === "card" &&
+    Number.isFinite(viewRenderSpec.zoomScale) &&
+    viewRenderSpec.zoomScale > 0
+      ? viewRenderSpec.zoomScale
       : 1;
 
   return (
@@ -148,8 +164,8 @@ const DesktopCardSurfaceInner = ({
         isFlipped={isFlipped}
         previewMode={!isActive}
         displayMode={currentDisplayMode}
-        showInkLayer={currentDisplayMode === "fixed"}
-        inkEditingEnabled={currentDisplayMode === "fixed" && isActive}
+        showInkLayer={viewRenderSpec.showInk}
+        inkEditingEnabled={viewRenderSpec.showInk && isActive}
         onFlip={isActive ? onFlip : undefined}
         onToggleUncertainty={
           isActive
@@ -167,8 +183,8 @@ const DesktopCardSurfaceInner = ({
         }
         allowUpscale={false}
         scaleMultiplier={1}
-        fixedScale={currentDisplayMode === "fixed" ? viewZoomScale : undefined}
-        contentZoom={currentDisplayMode === "fluid" ? viewZoomScale : 1}
+        fixedScale={resolveCardSurfaceScale(viewRenderSpec)}
+        contentZoom={resolveCardContentZoom(viewRenderSpec)}
         headerIconVisualScale={headerIconVisualScale}
         cardShellClassName={
           currentDisplayMode === "fluid"
