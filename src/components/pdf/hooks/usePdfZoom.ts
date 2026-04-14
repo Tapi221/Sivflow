@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useRef } from "react";
 import type { PdfScaleChangeSource } from "@/components/pdf/pdfViewerTypes";
 import {
-  clampScale,
   computeNextScaleFromGesture,
   computeNextScaleFromWheel,
-  normalizeScale,
 } from "@/components/pdf/pdfZoomUtils";
+
 interface UsePdfZoomOptions {
   container: HTMLDivElement | null;
+  previewTarget: HTMLDivElement | null;
   scale: number;
   minScale: number;
   maxScale: number;
@@ -15,8 +15,11 @@ interface UsePdfZoomOptions {
   onScaleChange?: (nextScale: number, source: PdfScaleChangeSource) => void;
 }
 
+const WHEEL_COMMIT_DELAY_MS = 90;
+
 export const usePdfZoom = ({
   container,
+  previewTarget,
   scale,
   minScale,
   maxScale,
@@ -31,10 +34,46 @@ export const usePdfZoom = ({
   const gestureStartScaleRef = useRef<number | null>(null);
   const wheelDeltaRef = useRef(0);
   const wheelZoomRafRef = useRef<number | null>(null);
+  const commitTimerRef = useRef<number | null>(null);
+  const previewScaleRef = useRef<number | null>(null);
+  const awaitingCommittedScaleRef = useRef(false);
 
   useEffect(() => {
     scaleRef.current = scale;
-  }, [scale]);
+
+    const previewScale = previewScaleRef.current;
+    if (previewScale === null) {
+      return;
+    }
+
+    if (awaitingCommittedScaleRef.current) {
+      if (Math.abs(previewScale - scale) < 0.0005) {
+        if (previewTarget) {
+          previewTarget.style.transform = "";
+          previewTarget.style.transformOrigin = "";
+          previewTarget.style.willChange = "";
+        }
+        previewScaleRef.current = null;
+        awaitingCommittedScaleRef.current = false;
+        return;
+      }
+
+      if (previewTarget && Number.isFinite(scale) && scale > 0) {
+        const ratio = previewScale / scale;
+        previewTarget.style.transformOrigin = "top center";
+        previewTarget.style.transform = `scale(${ratio})`;
+        previewTarget.style.willChange = "transform";
+      }
+      return;
+    }
+
+    if (previewTarget) {
+      previewTarget.style.transform = "";
+      previewTarget.style.transformOrigin = "";
+      previewTarget.style.willChange = "";
+    }
+    previewScaleRef.current = null;
+  }, [previewTarget, scale]);
 
   useEffect(() => {
     minScaleRef.current = minScale;
@@ -49,21 +88,80 @@ export const usePdfZoom = ({
     onScaleChangeRef.current = onScaleChange;
   }, [onScaleChange]);
 
-  const requestScaleChange = useCallback(
-    (nextScale: number, sourceType: PdfScaleChangeSource) => {
-      const handler = onScaleChangeRef.current;
-      if (!handler || !Number.isFinite(nextScale)) return;
+  const clearPreviewTransform = useCallback(() => {
+    if (previewTarget) {
+      previewTarget.style.transform = "";
+      previewTarget.style.transformOrigin = "";
+      previewTarget.style.willChange = "";
+    }
 
-      const clamped = normalizeScale(
-        clampScale(nextScale, minScaleRef.current, maxScaleRef.current),
-      );
+    previewScaleRef.current = null;
+    awaitingCommittedScaleRef.current = false;
+  }, [previewTarget]);
 
-      if (!Number.isFinite(clamped)) return;
-      if (Math.abs(clamped - scaleRef.current) < 0.0005) return;
+  const cancelScheduledCommit = useCallback(() => {
+    if (commitTimerRef.current !== null) {
+      window.clearTimeout(commitTimerRef.current);
+      commitTimerRef.current = null;
+    }
+  }, []);
 
-      handler(clamped, sourceType);
+  const applyPreviewScale = useCallback(
+    (nextScale: number | null) => {
+      if (nextScale === null || !Number.isFinite(nextScale)) {
+        clearPreviewTransform();
+        return;
+      }
+
+      previewScaleRef.current = nextScale;
+
+      if (!previewTarget || !Number.isFinite(scaleRef.current) || scaleRef.current <= 0) {
+        return;
+      }
+
+      const ratio = nextScale / scaleRef.current;
+      if (!Number.isFinite(ratio) || Math.abs(ratio - 1) < 0.0005) {
+        if (!awaitingCommittedScaleRef.current) {
+          clearPreviewTransform();
+        }
+        return;
+      }
+
+      previewTarget.style.transformOrigin = "top center";
+      previewTarget.style.transform = `scale(${ratio})`;
+      previewTarget.style.willChange = "transform";
     },
-    [],
+    [clearPreviewTransform, previewTarget],
+  );
+
+  const commitPreviewScale = useCallback(
+    (sourceType: PdfScaleChangeSource) => {
+      cancelScheduledCommit();
+
+      const handler = onScaleChangeRef.current;
+      const previewScale = previewScaleRef.current;
+
+      if (!handler || previewScale === null || !Number.isFinite(previewScale)) {
+        clearPreviewTransform();
+        return;
+      }
+
+      awaitingCommittedScaleRef.current = true;
+      handler(previewScale, sourceType);
+    },
+    [cancelScheduledCommit, clearPreviewTransform],
+  );
+
+  const scheduleCommit = useCallback(
+    (sourceType: PdfScaleChangeSource) => {
+      cancelScheduledCommit();
+
+      commitTimerRef.current = window.setTimeout(() => {
+        commitTimerRef.current = null;
+        commitPreviewScale(sourceType);
+      }, WHEEL_COMMIT_DELAY_MS);
+    },
+    [cancelScheduledCommit, commitPreviewScale],
   );
 
   useEffect(() => {
@@ -74,6 +172,7 @@ export const usePdfZoom = ({
       deltaY: number | null;
       direction: number;
       nextScale: number;
+      preview: boolean;
     }) => {
       if (!import.meta.env.DEV) return;
       console.debug("[PdfViewer] zoom input", payload);
@@ -109,8 +208,9 @@ export const usePdfZoom = ({
         const delta = wheelDeltaRef.current;
         wheelDeltaRef.current = 0;
 
+        const baseScale = previewScaleRef.current ?? scaleRef.current;
         const normalizedNextScale = computeNextScaleFromWheel({
-          currentScale: scaleRef.current,
+          currentScale: baseScale,
           deltaY: delta,
           zoomStep: zoomStepRef.current,
           minScale: minScaleRef.current,
@@ -124,15 +224,19 @@ export const usePdfZoom = ({
           deltaY: delta,
           direction: Math.sign(delta),
           nextScale: normalizedNextScale,
+          preview: true,
         });
 
-        requestScaleChange(normalizedNextScale, "wheel");
+        applyPreviewScale(normalizedNextScale);
+        scheduleCommit("wheel");
       });
     };
 
     const handleGestureStart = (event: Event) => {
       stopNativeEvent(event);
+      cancelScheduledCommit();
       gestureStartScaleRef.current = scaleRef.current;
+      previewScaleRef.current = scaleRef.current;
     };
 
     const handleGestureChange = (event: Event) => {
@@ -144,7 +248,7 @@ export const usePdfZoom = ({
       }
 
       const normalizedNextScale = computeNextScaleFromGesture({
-        currentScale: scaleRef.current,
+        currentScale: previewScaleRef.current ?? scaleRef.current,
         baseScale: gestureStartScaleRef.current ?? scaleRef.current,
         gestureScale,
         minScale: minScaleRef.current,
@@ -158,14 +262,27 @@ export const usePdfZoom = ({
         deltaY: null,
         direction: Math.sign(normalizedNextScale - scaleRef.current),
         nextScale: normalizedNextScale,
+        preview: true,
       });
 
-      requestScaleChange(normalizedNextScale, "gesture");
+      applyPreviewScale(normalizedNextScale);
     };
 
     const handleGestureEnd = (event: Event) => {
       stopNativeEvent(event);
       gestureStartScaleRef.current = null;
+
+      const previewScale = previewScaleRef.current;
+      if (
+        previewScale !== null &&
+        Number.isFinite(previewScale) &&
+        Math.abs(previewScale - scaleRef.current) >= 0.0005
+      ) {
+        commitPreviewScale("gesture");
+        return;
+      }
+
+      clearPreviewTransform();
     };
 
     const supportsGestureEvents = "ongesturestart" in window;
@@ -198,8 +315,17 @@ export const usePdfZoom = ({
         wheelZoomRafRef.current = null;
       }
 
+      cancelScheduledCommit();
       wheelDeltaRef.current = 0;
       gestureStartScaleRef.current = null;
+      clearPreviewTransform();
     };
-  }, [container, requestScaleChange]);
+  }, [
+    applyPreviewScale,
+    cancelScheduledCommit,
+    clearPreviewTransform,
+    commitPreviewScale,
+    container,
+    scheduleCommit,
+  ]);
 };
