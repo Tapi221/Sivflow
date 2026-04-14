@@ -1,0 +1,41 @@
+import { expect, test } from "@playwright/test";
+
+test.describe("PDF text selection", () => {
+  test("text layer should produce a non-empty selection", async ({ page }) => {
+    test.setTimeout(120000);
+    const baseUrl = process.env.E2E_BASE_URL ?? "http://localhost:5173";
+
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto(`${baseUrl}/pdf-scroll-test?test_bypass=true`, {
+      waitUntil: "domcontentloaded",
+    });
+
+    const textSpan = page
+      .locator(".pdf-text-layer span")
+      .filter({ hasText: "PDF E2E Scroll Page 1" })
+      .first();
+
+    await expect(textSpan).toBeVisible();
+
+    const box = await textSpan.boundingBox();
+    expect(box).not.toBeNull();
+
+    if (!box) {
+      throw new Error("PDF text span bounding box is not available");
+    }
+
+    await page.mouse.move(box.x + 4, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + Math.max(24, box.width - 4), box.y + box.height / 2, {
+      steps: 12,
+    });
+    await page.mouse.up();
+
+    const selectedText = await page.evaluate(() => {
+      return window.getSelection()?.toString().trim() ?? "";
+    });
+
+    expect(selectedText.length).toBeGreaterThan(0);
+    expect(selectedText).toContain("PDF E2E Scroll Page 1");
+  });
+});
