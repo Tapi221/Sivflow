@@ -16,19 +16,18 @@ type FolderSidebarDisplayMode = NonNullable<
 const FOLDER_SIDEBAR_DISPLAY_MODE_STORAGE_KEY =
   "flashcard-master:folder-sidebar-display-mode";
 
-const readCachedFolderSidebarDisplayMode =
-  (): FolderSidebarDisplayMode => {
-    if (typeof window === "undefined") return "tree";
+const readCachedFolderSidebarDisplayMode = (): FolderSidebarDisplayMode => {
+  if (typeof window === "undefined") return "tree";
 
-    try {
-      const raw = window.localStorage.getItem(
-        FOLDER_SIDEBAR_DISPLAY_MODE_STORAGE_KEY,
-      );
-      return raw === "navigation" ? "navigation" : "tree";
-    } catch {
-      return "tree";
-    }
-  };
+  try {
+    const raw = window.localStorage.getItem(
+      FOLDER_SIDEBAR_DISPLAY_MODE_STORAGE_KEY,
+    );
+    return raw === "navigation" ? "navigation" : "tree";
+  } catch {
+    return "tree";
+  }
+};
 
 const writeCachedFolderSidebarDisplayMode = (value: unknown): void => {
   if (typeof window === "undefined") return;
