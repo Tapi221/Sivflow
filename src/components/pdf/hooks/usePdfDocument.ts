@@ -56,7 +56,9 @@ export const usePdfDocument = ({
   const onFirstPageSizeRef = useRef(onFirstPageSize);
   const onSourceLoadErrorRef = useRef(onSourceLoadError);
   const sourceMetaRef = useRef(sourceMeta);
-  const pagePromiseCacheRef = useRef<Map<number, Promise<PdfJsPage>>>(new Map());
+  const pagePromiseCacheRef = useRef<Map<number, Promise<PdfJsPage>>>(
+    new Map(),
+  );
   const textContentPromiseCacheRef = useRef<
     Map<number, Promise<PdfJsTextContent>>
   >(new Map());

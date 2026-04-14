@@ -1,9 +1,6 @@
 import { useAuthSession } from "@/contexts/AuthContext";
 import { useTags, type Tag } from "@/hooks/settings/useTags";
-import {
-  getTagColorStyle,
-  getTagColorSwatchStyle,
-} from "@/lib/tags/tagColor";
+import { getTagColorStyle, getTagColorSwatchStyle } from "@/lib/tags/tagColor";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type Point = {
@@ -63,7 +60,9 @@ const parseStoredLayout = (raw: string | null): LayoutMap => {
 };
 
 const sortTagsByName = (tags: Tag[]): Tag[] => {
-  return [...tags].sort((left, right) => left.name.localeCompare(right.name, "ja"));
+  return [...tags].sort((left, right) =>
+    left.name.localeCompare(right.name, "ja"),
+  );
 };
 
 const buildChildrenMap = (tags: Tag[]): Map<string | null, Tag[]> => {
@@ -106,8 +105,11 @@ const buildAutoLayout = (tags: Tag[]): LayoutMap => {
       return top + NODE_HEIGHT / 2;
     }
 
-    const childCenters = children.map((child) => placeSubtree(child, depth + 1));
-    const centerY = (childCenters[0] + childCenters[childCenters.length - 1]) / 2;
+    const childCenters = children.map((child) =>
+      placeSubtree(child, depth + 1),
+    );
+    const centerY =
+      (childCenters[0] + childCenters[childCenters.length - 1]) / 2;
 
     layout[tag.id] = {
       x: CANVAS_PADDING_X + depth * (NODE_WIDTH + HORIZONTAL_GAP),
@@ -184,7 +186,9 @@ const TagMap = () => {
     });
   }, [effectiveLayout, selectedTagId, tags]);
 
-  const selectedTag = selectedTagId ? tagById.get(selectedTagId) ?? null : null;
+  const selectedTag = selectedTagId
+    ? (tagById.get(selectedTagId) ?? null)
+    : null;
   const categoryIds = listCategoryIdsInUse();
 
   const selectedDescendantIds = useMemo(() => {
@@ -208,7 +212,8 @@ const TagMap = () => {
     if (!selectedTag) return sortTagsByName(tags);
     return sortTagsByName(
       tags.filter(
-        (tag) => tag.id !== selectedTag.id && !selectedDescendantIds.has(tag.id),
+        (tag) =>
+          tag.id !== selectedTag.id && !selectedDescendantIds.has(tag.id),
       ),
     );
   }, [selectedDescendantIds, selectedTag, tags]);
@@ -338,7 +343,12 @@ const TagMap = () => {
   const handleAddChild = async () => {
     if (!selectedTag) return;
     const name = childDraft.trim() || "新しいタグ";
-    const created = await addTag(name, selectedTag.color, selectedTag.categoryId, selectedTag.id);
+    const created = await addTag(
+      name,
+      selectedTag.color,
+      selectedTag.categoryId,
+      selectedTag.id,
+    );
     setChildDraft("");
     setSelectedTagId(created.id);
     setStatusMessage(`「${created.name}」を追加しました。`);
@@ -382,7 +392,9 @@ const TagMap = () => {
 
   const handleCreateCategory = async () => {
     if (!selectedTag) return;
-    const categoryId = await ensureCategory(newCategoryDraft.trim() || undefined);
+    const categoryId = await ensureCategory(
+      newCategoryDraft.trim() || undefined,
+    );
     await setTagCategory(selectedTag.id, categoryId);
     setNewCategoryDraft("");
     setStatusMessage("カテゴリを作成しました。");
@@ -524,7 +536,10 @@ const TagMap = () => {
                   aria-hidden="true"
                 >
                   {edges.map((edge) => {
-                    const controlOffset = Math.max(48, (edge.endX - edge.startX) / 2);
+                    const controlOffset = Math.max(
+                      48,
+                      (edge.endX - edge.startX) / 2,
+                    );
                     const path = [
                       `M ${edge.startX} ${edge.startY}`,
                       `C ${edge.startX + controlOffset} ${edge.startY}, ${edge.endX - controlOffset} ${edge.endY}, ${edge.endX} ${edge.endY}`,
@@ -553,7 +568,9 @@ const TagMap = () => {
                     <button
                       key={tag.id}
                       type="button"
-                      onPointerDown={(event) => handleNodePointerDown(tag.id, event)}
+                      onPointerDown={(event) =>
+                        handleNodePointerDown(tag.id, event)
+                      }
                       onClick={() => setSelectedTagId(tag.id)}
                       className={[
                         "absolute rounded-[20px] border px-4 py-3 text-left shadow-sm transition duration-150",
@@ -577,7 +594,9 @@ const TagMap = () => {
                             {tag.name}
                           </div>
                           <div className="mt-1 text-[11px] opacity-70">
-                            {tag.categoryId ? getCategoryName(tag.categoryId) : "カテゴリなし"}
+                            {tag.categoryId
+                              ? getCategoryName(tag.categoryId)
+                              : "カテゴリなし"}
                           </div>
                         </div>
                         <span
@@ -662,7 +681,9 @@ const TagMap = () => {
                   </label>
                   <select
                     value={selectedTag.parentId ?? "__root__"}
-                    onChange={(event) => void handleParentChange(event.target.value)}
+                    onChange={(event) =>
+                      void handleParentChange(event.target.value)
+                    }
                     className="h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-slate-300"
                   >
                     <option value="__root__">ルート</option>
@@ -680,7 +701,9 @@ const TagMap = () => {
                   </label>
                   <select
                     value={selectedTag.categoryId ?? "__none__"}
-                    onChange={(event) => void handleCategoryChange(event.target.value)}
+                    onChange={(event) =>
+                      void handleCategoryChange(event.target.value)
+                    }
                     className="h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-slate-300"
                   >
                     <option value="__none__">未設定</option>
@@ -694,7 +717,9 @@ const TagMap = () => {
                   <div className="mt-2 flex items-center gap-2">
                     <input
                       value={newCategoryDraft}
-                      onChange={(event) => setNewCategoryDraft(event.target.value)}
+                      onChange={(event) =>
+                        setNewCategoryDraft(event.target.value)
+                      }
                       placeholder="新しいカテゴリ名"
                       className="h-11 flex-1 rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-slate-300"
                     />
@@ -719,10 +744,14 @@ const TagMap = () => {
                         <button
                           key={colorKey}
                           type="button"
-                          onClick={() => void updateTagColor(selectedTag.id, colorKey)}
+                          onClick={() =>
+                            void updateTagColor(selectedTag.id, colorKey)
+                          }
                           className={[
                             "flex h-11 items-center justify-center rounded-2xl border transition",
-                            isActive ? "ring-2 ring-slate-900/15" : "hover:scale-[1.02]",
+                            isActive
+                              ? "ring-2 ring-slate-900/15"
+                              : "hover:scale-[1.02]",
                           ].join(" ")}
                           style={getTagColorSwatchStyle(colorKey)}
                           title={colorKey}

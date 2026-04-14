@@ -114,7 +114,9 @@ const parseAssetIdFromStoragePath = (
 const buildAssetRemoteKey = (userId: string, assetId: string): string =>
   `users/${userId}/assets/${assetId}`;
 
-const getErrorDetails = (error: unknown): {
+const getErrorDetails = (
+  error: unknown,
+): {
   message: string;
   stack?: string;
 } => {
@@ -318,7 +320,8 @@ const buildCanonicalImageRef = ({
 }): UploadedImage => ({
   id: assetId,
   assetId,
-  localFileId: readFirstString(source.localFileId, source.id, assetId) ?? assetId,
+  localFileId:
+    readFirstString(source.localFileId, source.id, assetId) ?? assetId,
   remoteUrl: remoteUrl as UploadedImage["remoteUrl"],
   localUrl: null,
   status: remoteUrl
@@ -416,11 +419,14 @@ const migrateSingleImageRef = async ({
   migratedAssetIds.add(provisionalAssetId);
 
   if (!lookupKey) {
-    console.warn("[LegacyImageMigration] Invalid legacy image ref; continuing", {
-      cardId,
-      imageIdentifier: provisionalAssetId,
-      imageRef: image,
-    });
+    console.warn(
+      "[LegacyImageMigration] Invalid legacy image ref; continuing",
+      {
+        cardId,
+        imageIdentifier: provisionalAssetId,
+        imageRef: image,
+      },
+    );
   }
 
   let firestoreImage: UploadedImage | null = null;

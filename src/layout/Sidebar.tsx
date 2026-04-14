@@ -42,10 +42,34 @@ const TagMapIcon = () => (
       strokeLinecap="round"
       strokeLinejoin="round"
     />
-    <circle cx="4.25" cy="4.25" r="1.75" stroke="currentColor" strokeWidth="1.2" />
-    <circle cx="11.75" cy="2.75" r="1.75" stroke="currentColor" strokeWidth="1.2" />
-    <circle cx="11.75" cy="7.25" r="1.75" stroke="currentColor" strokeWidth="1.2" />
-    <circle cx="4.25" cy="11.75" r="1.75" stroke="currentColor" strokeWidth="1.2" />
+    <circle
+      cx="4.25"
+      cy="4.25"
+      r="1.75"
+      stroke="currentColor"
+      strokeWidth="1.2"
+    />
+    <circle
+      cx="11.75"
+      cy="2.75"
+      r="1.75"
+      stroke="currentColor"
+      strokeWidth="1.2"
+    />
+    <circle
+      cx="11.75"
+      cy="7.25"
+      r="1.75"
+      stroke="currentColor"
+      strokeWidth="1.2"
+    />
+    <circle
+      cx="4.25"
+      cy="11.75"
+      r="1.75"
+      stroke="currentColor"
+      strokeWidth="1.2"
+    />
   </svg>
 );
 

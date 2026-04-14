@@ -104,9 +104,7 @@ const buildSearchIndexMap = async ({
     }
   };
 
-  await Promise.all(
-    Array.from({ length: limitedConcurrency }, () => worker()),
-  );
+  await Promise.all(Array.from({ length: limitedConcurrency }, () => worker()));
 
   return searchIndexMap;
 };
@@ -266,7 +264,9 @@ export const PdfViewer = React.forwardRef<PdfViewerHandle, PdfViewerProps>(
       onScaleChange,
     });
 
-    const [pageMatches, setPageMatches] = useState<Record<number, PdfPageSearchMatch[]>>({});
+    const [pageMatches, setPageMatches] = useState<
+      Record<number, PdfPageSearchMatch[]>
+    >({});
     const [flattenedMatches, setFlattenedMatches] = useState<
       PdfPageSearchMatch[]
     >([]);
