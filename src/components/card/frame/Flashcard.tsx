@@ -53,6 +53,7 @@ interface FlashcardProps {
   contentPaddingPx?: number;
   cardShellClassName?: string;
   contentZoom?: number;
+  headerIconVisualScale?: number;
 }
 
 const TAP_MOVE_CANCEL_THRESHOLD_PX = 8;
@@ -97,6 +98,7 @@ const FlashcardInner = ({
   contentPaddingPx,
   cardShellClassName,
   contentZoom = 1,
+  headerIconVisualScale = 1,
 }: FlashcardProps) => {
   const contentRef = useRef<HTMLDivElement | null>(null);
   const flipSuppressedUntilRef = useRef(0);
@@ -186,6 +188,7 @@ const FlashcardInner = ({
     onOpenImagePopup: () => media.setIsImagePopupOpen(true),
     onOpenAudioPopup: () => media.setIsAudioPopupOpen(true),
     onOpenReferencePopup: () => media.setIsReferencePopupOpen(true),
+    headerIconVisualScale,
   });
 
   const resetPointerGesture = () => {
@@ -395,7 +398,8 @@ const areFlashcardPropsEqual = (prev: FlashcardProps, next: FlashcardProps) => {
       prev.fixedScale === next.fixedScale &&
       prev.contentPaddingPx === next.contentPaddingPx &&
       prev.cardShellClassName === next.cardShellClassName &&
-      prev.contentZoom === next.contentZoom
+      prev.contentZoom === next.contentZoom &&
+      prev.headerIconVisualScale === next.headerIconVisualScale
     );
   }
 
@@ -425,7 +429,8 @@ const areFlashcardPropsEqual = (prev: FlashcardProps, next: FlashcardProps) => {
     prev.fixedScale === next.fixedScale &&
     prev.contentPaddingPx === next.contentPaddingPx &&
     prev.cardShellClassName === next.cardShellClassName &&
-    prev.contentZoom === next.contentZoom
+    prev.contentZoom === next.contentZoom &&
+    prev.headerIconVisualScale === next.headerIconVisualScale
   );
 };
 

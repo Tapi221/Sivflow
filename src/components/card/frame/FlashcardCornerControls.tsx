@@ -29,6 +29,7 @@ interface FlashcardCornerControlsProps {
   onOpenImagePopup: () => void;
   onOpenAudioPopup: () => void;
   onOpenReferencePopup: () => void;
+  headerIconVisualScale?: number;
 }
 
 export interface FlashcardCornerControlsResult {
@@ -49,6 +50,7 @@ export const useFlashcardCornerControls = ({
   onOpenImagePopup,
   onOpenAudioPopup,
   onOpenReferencePopup,
+  headerIconVisualScale = 1,
 }: FlashcardCornerControlsProps) => {
   return React.useMemo(() => {
     const actionsTopLeft: React.ReactNode[] = [];
@@ -60,6 +62,14 @@ export const useFlashcardCornerControls = ({
       CARD_ACTION_BG_CLASS,
       CARD_ACTION_COLOR_IDLE_CLASS,
     );
+
+    const safeHeaderIconVisualScale =
+      typeof headerIconVisualScale === "number" &&
+      Number.isFinite(headerIconVisualScale) &&
+      headerIconVisualScale > 0
+        ? headerIconVisualScale
+        : 1;
+    const resolvedIconPx = 14 / safeHeaderIconVisualScale;
 
     const mediaCountLabel = (count: number) =>
       count > 9 ? "9+" : String(count);
@@ -102,6 +112,7 @@ export const useFlashcardCornerControls = ({
           helpActive={hasUncertainty}
           starActive={isBookmarked}
           disabled={!onToggleUncertainty && !onToggleBookmark}
+          iconPx={resolvedIconPx}
         />,
       );
     }
@@ -117,7 +128,13 @@ export const useFlashcardCornerControls = ({
           className={mediaButtonClass}
           aria-label={`画像 ${activeImageItems.length} 件`}
         >
-          <ImageIcon className={CARD_ACTION_ICON_CLASS} />
+          <ImageIcon
+            className={CARD_ACTION_ICON_CLASS}
+            style={{
+              width: `${resolvedIconPx}px`,
+              height: `${resolvedIconPx}px`,
+            }}
+          />
           <span className="pointer-events-none absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full border border-white bg-slate-100 px-1 text-[9px] font-semibold leading-none text-slate-500">
             {mediaCountLabel(activeImageItems.length)}
           </span>
@@ -136,7 +153,13 @@ export const useFlashcardCornerControls = ({
           className={mediaButtonClass}
           aria-label={`音声 ${activeAudioUrls.length} 件`}
         >
-          <Volume2 className={CARD_ACTION_ICON_CLASS} />
+          <Volume2
+            className={CARD_ACTION_ICON_CLASS}
+            style={{
+              width: `${resolvedIconPx}px`,
+              height: `${resolvedIconPx}px`,
+            }}
+          />
           <span className="pointer-events-none absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full border border-white bg-slate-100 px-1 text-[9px] font-semibold leading-none text-slate-500">
             {mediaCountLabel(activeAudioUrls.length)}
           </span>
@@ -155,7 +178,13 @@ export const useFlashcardCornerControls = ({
           className={mediaButtonClass}
           aria-label={`リンク ${activeReferences.length} 件`}
         >
-          <Link className={CARD_ACTION_ICON_CLASS} />
+          <Link
+            className={CARD_ACTION_ICON_CLASS}
+            style={{
+              width: `${resolvedIconPx}px`,
+              height: `${resolvedIconPx}px`,
+            }}
+          />
           <span className="pointer-events-none absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full border border-white bg-slate-100 px-1 text-[9px] font-semibold leading-none text-slate-500">
             {mediaCountLabel(activeReferences.length)}
           </span>
@@ -186,6 +215,7 @@ export const useFlashcardCornerControls = ({
     card,
     extraHeaderLeft,
     hasUncertainty,
+    headerIconVisualScale,
     isBookmarked,
     onOpenAudioPopup,
     onOpenImagePopup,

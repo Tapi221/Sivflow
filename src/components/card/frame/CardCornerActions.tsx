@@ -16,6 +16,7 @@ interface CardCornerActionsProps {
   starActive?: boolean;
   disabled?: boolean;
   className?: string;
+  iconPx?: number;
 }
 
 export const CardCornerActions = ({
@@ -25,6 +26,7 @@ export const CardCornerActions = ({
   starActive = false,
   disabled = false,
   className,
+  iconPx = 14,
 }: CardCornerActionsProps) => {
   const stop = useCallback((e: React.SyntheticEvent) => {
     e.stopPropagation();
@@ -35,6 +37,10 @@ export const CardCornerActions = ({
     "rounded-full h-7 w-7 min-h-0 min-w-0 flex items-center justify-center bg-transparent hover:bg-transparent " +
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40";
   const disabledClass = disabled ? "opacity-50 pointer-events-none" : "";
+  const resolvedIconPx =
+    typeof iconPx === "number" && Number.isFinite(iconPx) && iconPx > 0
+      ? iconPx
+      : 14;
 
   return (
     <div className={cn("flex items-center gap-0", className)}>
@@ -63,11 +69,11 @@ export const CardCornerActions = ({
           <CircleHelp
             size={14}
             strokeWidth={1.2}
-            className={cn(
-              CARD_ACTION_ICON_CLASS,
-              "!h-[14px] !w-[14px] md:!h-[14px] md:!w-[14px]",
-              helpActive && "opacity-90",
-            )}
+            className={cn(CARD_ACTION_ICON_CLASS, helpActive && "opacity-90")}
+            style={{
+              width: `${resolvedIconPx}px`,
+              height: `${resolvedIconPx}px`,
+            }}
           />
         </button>
       ) : null}
@@ -97,11 +103,11 @@ export const CardCornerActions = ({
           <Star
             size={14}
             strokeWidth={1.2}
-            className={cn(
-              CARD_ACTION_ICON_CLASS,
-              "!h-[14px] !w-[14px] md:!h-[14px] md:!w-[14px]",
-              starActive && "fill-none",
-            )}
+            className={cn(CARD_ACTION_ICON_CLASS, starActive && "fill-none")}
+            style={{
+              width: `${resolvedIconPx}px`,
+              height: `${resolvedIconPx}px`,
+            }}
           />
         </button>
       ) : null}
