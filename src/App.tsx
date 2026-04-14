@@ -26,6 +26,7 @@ const Gallery = lazy(() => import("./routes/Gallery"));
 const Directory = lazy(() => import("./routes/Directory"));
 const Dictionary = lazy(() => import("./routes/Dictionary"));
 const Questions = lazy(() => import("./routes/Questions"));
+const TagMap = lazy(() => import("./routes/TagMap"));
 
 const PdfScrollTest = DEV_MODE
   ? lazy(() => import("./routes/PdfScrollTest"))
@@ -304,6 +305,15 @@ const AppContent = () => {
             element={
               <Suspense fallback={<LoadingFallback />}>
                 <Folders />
+              </Suspense>
+            }
+          />
+
+          <Route
+            path="tag-map"
+            element={
+              <Suspense fallback={<LoadingFallback />}>
+                <TagMap />
               </Suspense>
             }
           />
