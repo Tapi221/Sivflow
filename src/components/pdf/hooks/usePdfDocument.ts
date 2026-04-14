@@ -60,6 +60,8 @@ export const usePdfDocument = ({
   const textContentPromiseCacheRef = useRef<
     Map<number, Promise<PdfJsTextContent>>
   >(new Map());
+  const pendingPageSizesRef = useRef<Map<number, PageSize>>(new Map());
+  const pageSizeFlushRafRef = useRef<number | null>(null);
 
   const [doc, setDoc] = useState<PdfJsDocument | null>(null);
   const [numPages, setNumPages] = useState(0);
@@ -95,10 +97,62 @@ export const usePdfDocument = ({
     sourceMetaRef.current = sourceMeta;
   }, [sourceMeta]);
 
+  const cancelScheduledPageSizeFlush = useCallback(() => {
+    if (pageSizeFlushRafRef.current !== null) {
+      cancelAnimationFrame(pageSizeFlushRafRef.current);
+      pageSizeFlushRafRef.current = null;
+    }
+  }, []);
+
+  const flushPendingPageSizes = useCallback(() => {
+    cancelScheduledPageSizeFlush();
+
+    if (pendingPageSizesRef.current.size === 0) {
+      return;
+    }
+
+    const nextEntries = Array.from(pendingPageSizesRef.current.entries());
+    pendingPageSizesRef.current.clear();
+
+    setPageSizes((previous) => {
+      let changed = false;
+      const nextState = { ...previous };
+
+      nextEntries.forEach(([pageNumber, size]) => {
+        const existing = nextState[pageNumber];
+        if (
+          existing &&
+          existing.width === size.width &&
+          existing.height === size.height
+        ) {
+          return;
+        }
+
+        nextState[pageNumber] = size;
+        changed = true;
+      });
+
+      return changed ? nextState : previous;
+    });
+  }, [cancelScheduledPageSizeFlush]);
+
+  const schedulePageSizeFlush = useCallback(() => {
+    if (pageSizeFlushRafRef.current !== null) {
+      return;
+    }
+
+    pageSizeFlushRafRef.current = window.requestAnimationFrame(() => {
+      pageSizeFlushRafRef.current = null;
+      flushPendingPageSizes();
+    });
+  }, [flushPendingPageSizes]);
+
   const resetResourceCaches = useCallback(() => {
     pagePromiseCacheRef.current.clear();
     textContentPromiseCacheRef.current.clear();
-  }, []);
+    pendingPageSizesRef.current.clear();
+    cancelScheduledPageSizeFlush();
+  }, [cancelScheduledPageSizeFlush]);
 
   const getPage = useCallback((pageNumber: number): Promise<PdfJsPage> => {
     const pdf = docRef.current;
@@ -144,20 +198,23 @@ export const usePdfDocument = ({
     [getPage],
   );
 
-  const setPageSize = useCallback((pageNumber: number, size: PageSize) => {
-    setPageSizes((prev) => {
-      const existing = prev[pageNumber];
+  const setPageSize = useCallback(
+    (pageNumber: number, size: PageSize) => {
+      const safePageNumber = Math.max(1, Math.floor(pageNumber));
+      const pendingSize = pendingPageSizesRef.current.get(safePageNumber);
       if (
-        existing &&
-        existing.width === size.width &&
-        existing.height === size.height
+        pendingSize &&
+        pendingSize.width === size.width &&
+        pendingSize.height === size.height
       ) {
-        return prev;
+        return;
       }
 
-      return { ...prev, [pageNumber]: size };
-    });
-  }, []);
+      pendingPageSizesRef.current.set(safePageNumber, size);
+      schedulePageSizeFlush();
+    },
+    [schedulePageSizeFlush],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -198,13 +255,15 @@ export const usePdfDocument = ({
 
         const viewport = firstPage.getViewport({ scale: 1 });
         const size = { width: viewport.width, height: viewport.height };
-        setPageSizes({ 1: size });
+        pendingPageSizesRef.current.set(1, size);
+        flushPendingPageSizes();
         onFirstPageSizeRef.current?.(size);
       } catch {
         if (cancelled) return;
 
         const fallback = { width: 1, height: 1 };
-        setPageSizes({ 1: fallback });
+        pendingPageSizesRef.current.set(1, fallback);
+        flushPendingPageSizes();
         onFirstPageSizeRef.current?.(fallback);
       }
     };
@@ -347,6 +406,7 @@ export const usePdfDocument = ({
     cMapPacked,
     disableFontFace,
     enableXfa,
+    flushPendingPageSizes,
     getPage,
     resetResourceCaches,
     sourceData,
@@ -356,6 +416,12 @@ export const usePdfDocument = ({
     useSystemFonts,
     verbosity,
   ]);
+
+  useEffect(() => {
+    return () => {
+      cancelScheduledPageSizeFlush();
+    };
+  }, [cancelScheduledPageSizeFlush]);
 
   return {
     doc,
