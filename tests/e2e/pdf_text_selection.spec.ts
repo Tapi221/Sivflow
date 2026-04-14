@@ -26,9 +26,13 @@ test.describe("PDF text selection", () => {
 
     await page.mouse.move(box.x + 4, box.y + box.height / 2);
     await page.mouse.down();
-    await page.mouse.move(box.x + Math.max(24, box.width - 4), box.y + box.height / 2, {
-      steps: 12,
-    });
+    await page.mouse.move(
+      box.x + Math.max(24, box.width - 4),
+      box.y + box.height / 2,
+      {
+        steps: 12,
+      },
+    );
     await page.mouse.up();
 
     const selectedText = await page.evaluate(() => {
