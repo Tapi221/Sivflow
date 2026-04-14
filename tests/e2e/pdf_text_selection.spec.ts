@@ -10,6 +10,10 @@ test.describe("PDF text selection", () => {
       waitUntil: "domcontentloaded",
     });
 
+    const textLayer = page.locator(".pdf-text-layer").first();
+    await expect(textLayer).toHaveAttribute("data-text-layer-expected-text", "true");
+    await expect(textLayer).toHaveAttribute("data-text-layer-ready", "true");
+
     const textSpan = page
       .locator(".pdf-text-layer span")
       .filter({ hasText: "PDF E2E Scroll Page 1" })
@@ -26,9 +30,13 @@ test.describe("PDF text selection", () => {
 
     await page.mouse.move(box.x + 4, box.y + box.height / 2);
     await page.mouse.down();
-    await page.mouse.move(box.x + Math.max(24, box.width - 4), box.y + box.height / 2, {
-      steps: 12,
-    });
+    await page.mouse.move(
+      box.x + Math.max(24, box.width - 4),
+      box.y + box.height / 2,
+      {
+        steps: 12,
+      },
+    );
     await page.mouse.up();
 
     const selectedText = await page.evaluate(() => {
