@@ -35,20 +35,22 @@ type MigrationSummary = {
   hydratedAssets: number;
   enqueuedUploads: number;
   failedImages: number;
+  unresolvedImages: number;
 };
 
 type MigrationState = {
-  status: "done" | "failed";
+  status: "done" | "pending" | "failed";
   migratedAt: string;
   summary?: MigrationSummary;
   error?: string;
+  unresolvedAssetIds?: string[];
 };
 
 type MigrateLegacyImagesToAssetsParams = {
   userId: string;
 };
 
-const MIGRATION_VERSION = "v1";
+const MIGRATION_VERSION = "v2";
 const MIGRATION_STORAGE_KEY_PREFIX = "legacy-image-asset-migration";
 const inFlightTouchMigrations = new Set<string>();
 
@@ -78,6 +80,12 @@ const readRemoteUrl = (...values: unknown[]): string | null => {
   }
 
   return null;
+};
+
+const isReadyRemoteStatus = (value: unknown): boolean => {
+  if (typeof value !== "string") return false;
+  const normalized = value.trim().toLowerCase();
+  return normalized === "ready" || normalized === "completed";
 };
 
 const readFirstNumber = (...values: unknown[]): number | null => {
@@ -356,10 +364,12 @@ const migrateSingleImageRef = async ({
   userId,
   image,
   summary,
+  migratedAssetIds,
 }: {
   userId: string;
   image: UploadedImage;
   summary: MigrationSummary;
+  migratedAssetIds: Set<string>;
 }): Promise<UploadedImage> => {
   const db = await getLocalDb(userId);
   const existing = (await db.images.get(
@@ -368,6 +378,7 @@ const migrateSingleImageRef = async ({
 
   const provisionalAssetId =
     resolveAssetId(image, existing) ?? crypto.randomUUID();
+  migratedAssetIds.add(provisionalAssetId);
 
   let firestoreImage: UploadedImage | null = null;
   try {
@@ -439,10 +450,12 @@ const migrateImageArray = async ({
   userId,
   images,
   summary,
+  migratedAssetIds,
 }: {
   userId: string;
   images: UploadedImage[];
   summary: MigrationSummary;
+  migratedAssetIds: Set<string>;
 }): Promise<UploadedImage[]> => {
   const nextImages: UploadedImage[] = [];
 
@@ -454,6 +467,7 @@ const migrateImageArray = async ({
         userId,
         image,
         summary,
+        migratedAssetIds,
       });
       nextImages.push(migrated);
     } catch (error) {
@@ -473,10 +487,12 @@ const migrateBlocks = async ({
   userId,
   blocks,
   summary,
+  migratedAssetIds,
 }: {
   userId: string;
   blocks: CardBlock[];
   summary: MigrationSummary;
+  migratedAssetIds: Set<string>;
 }): Promise<CardBlock[]> => {
   const nextBlocks: CardBlock[] = [];
 
@@ -490,6 +506,7 @@ const migrateBlocks = async ({
       userId,
       images: block.images,
       summary,
+      migratedAssetIds,
     });
 
     nextBlocks.push({
@@ -505,15 +522,18 @@ const migrateFace = async ({
   userId,
   face,
   summary,
+  migratedAssetIds,
 }: {
   userId: string;
   face: CardFace;
   summary: MigrationSummary;
+  migratedAssetIds: Set<string>;
 }): Promise<CardFace> => {
   const nextBlocks = await migrateBlocks({
     userId,
     blocks: Array.isArray(face.blocks) ? face.blocks : [],
     summary,
+    migratedAssetIds,
   });
 
   const nextAttachmentImages =
@@ -523,6 +543,7 @@ const migrateFace = async ({
           userId,
           images: face.attachments.images,
           summary,
+          migratedAssetIds,
         })
       : face.attachments?.images;
 
@@ -542,20 +563,24 @@ const migrateCard = async ({
   userId,
   card,
   summary,
+  migratedAssetIds,
 }: {
   userId: string;
   card: Card;
   summary: MigrationSummary;
+  migratedAssetIds: Set<string>;
 }): Promise<Card> => {
   const nextFront = await migrateFace({
     userId,
     face: card.front,
     summary,
+    migratedAssetIds,
   });
   const nextBack = await migrateFace({
     userId,
     face: card.back,
     summary,
+    migratedAssetIds,
   });
 
   return {
@@ -593,9 +618,37 @@ const writeMigrationState = (userId: string, state: MigrationState): void => {
   }
 };
 
+const collectUnresolvedAssetIds = async ({
+  userId,
+  assetIds,
+}: {
+  userId: string;
+  assetIds: Iterable<string>;
+}): Promise<string[]> => {
+  const db = await getLocalDb(userId);
+  const unresolvedAssetIds: string[] = [];
+
+  for (const assetId of assetIds) {
+    const record = (await db.images.get(assetId)) as ImageRecordLike | undefined;
+    const remoteUrl = readRemoteUrl(record?.remoteUrlCache, record?.remoteUrl);
+    const remoteKey = readFirstString(record?.remoteKey, record?.storagePath);
+    const remoteReady =
+      remoteUrl !== null ||
+      (isReadyRemoteStatus(record?.remoteStatus ?? record?.status) &&
+        remoteKey !== null);
+
+    if (!remoteReady) {
+      unresolvedAssetIds.push(assetId);
+    }
+  }
+
+  return unresolvedAssetIds;
+};
+
 export const migrateLegacyImagesToAssets = async ({
   userId,
 }: MigrateLegacyImagesToAssetsParams): Promise<MigrationSummary> => {
+  const migratedAssetIds = new Set<string>();
   const previousState = readMigrationState(userId);
   if (previousState?.status === "done") {
     return (
@@ -606,6 +659,7 @@ export const migrateLegacyImagesToAssets = async ({
         hydratedAssets: 0,
         enqueuedUploads: 0,
         failedImages: 0,
+        unresolvedImages: 0,
       }
     );
   }
@@ -617,6 +671,7 @@ export const migrateLegacyImagesToAssets = async ({
     hydratedAssets: 0,
     enqueuedUploads: 0,
     failedImages: 0,
+    unresolvedImages: 0,
   };
 
   try {
@@ -629,6 +684,7 @@ export const migrateLegacyImagesToAssets = async ({
         userId,
         card,
         summary,
+        migratedAssetIds,
       });
 
       if (
@@ -647,10 +703,37 @@ export const migrateLegacyImagesToAssets = async ({
       await persistentQueue.processAssetQueue();
     }
 
+    const unresolvedAssetIds = await collectUnresolvedAssetIds({
+      userId,
+      assetIds: migratedAssetIds,
+    });
+    summary.unresolvedImages = unresolvedAssetIds.length;
+
+    if (unresolvedAssetIds.length > 0) {
+      writeMigrationState(userId, {
+        status: "pending",
+        migratedAt: new Date().toISOString(),
+        summary,
+        unresolvedAssetIds,
+      });
+
+      console.warn(
+        "[LegacyImageMigration] unresolved assets remain; will retry on next startup",
+        {
+          userId,
+          unresolvedAssetIds,
+          summary,
+        },
+      );
+
+      return summary;
+    }
+
     writeMigrationState(userId, {
       status: "done",
       migratedAt: new Date().toISOString(),
       summary,
+      unresolvedAssetIds: [],
     });
 
     console.info("[LegacyImageMigration] completed", summary);
@@ -662,6 +745,7 @@ export const migrateLegacyImagesToAssets = async ({
       migratedAt: new Date().toISOString(),
       summary,
       error: error instanceof Error ? error.message : String(error),
+      unresolvedAssetIds: previousState?.unresolvedAssetIds ?? [],
     });
 
     console.error("[LegacyImageMigration] failed", {
